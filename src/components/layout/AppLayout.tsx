@@ -59,12 +59,22 @@ export function AppLayout({ children }: AppLayoutProps) {
           collapsed ? 'w-14' : 'w-60'
         )}
       >
-        {/* Logo */}
-        <div className={cn('flex items-center gap-2.5 px-3 py-4 border-b border-border', collapsed && 'justify-center px-0')}>
-          <img src={brainLogo} alt="Brain" className="h-7 w-auto shrink-0" />
-          {!collapsed && (
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">API Studio</span>
-          )}
+        {/* Logo + collapse toggle */}
+        <div className={cn('flex items-center gap-2 px-3 py-3 border-b border-border', collapsed ? 'justify-center px-2' : 'justify-between')}>
+          <div className="flex items-center gap-2 min-w-0">
+            <img src={brainLogo} alt="Brain" className="h-7 w-auto shrink-0" />
+            {!collapsed && (
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest truncate">API Studio</span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => setCollapsed((v) => !v)}
+            className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+          >
+            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </button>
         </div>
 
         {/* Nav */}
@@ -108,11 +118,8 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         )}
 
-        {/* Footer: collapse + dark mode */}
-        <div className={cn(
-          'flex items-center border-t border-border p-2',
-          collapsed ? 'flex-col gap-2' : 'justify-between'
-        )}>
+        {/* Footer: dark mode only */}
+        <div className="flex items-center justify-center border-t border-border p-2">
           <button
             type="button"
             onClick={toggle}
@@ -120,14 +127,6 @@ export function AppLayout({ children }: AppLayoutProps) {
             title={dark ? 'Modo claro' : 'Modo escuro'}
           >
             {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
-          <button
-            type="button"
-            onClick={() => setCollapsed((v) => !v)}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-            title={collapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
-          >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
         </div>
       </aside>

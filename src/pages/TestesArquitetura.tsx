@@ -456,7 +456,8 @@ export default function TestesArquitetura() {
     return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
   }
 
-  const CHART_COLORS = ['#4ade80', '#60a5fa', '#f59e0b', '#f87171', '#a78bfa', '#34d399'];
+  // Brain brand: greens → blues → yellows
+  const CHART_COLORS = ['#4d7c0f', '#2563eb', '#ca8a04', '#65a30d', '#1d4ed8', '#eab308', '#84cc16', '#3b82f6'];
 
   return (
     <div className="flex flex-col h-full">
@@ -557,25 +558,29 @@ export default function TestesArquitetura() {
           </div>
         )}
 
-        {/* Preview card */}
-        {preview && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: 'Total na cidade', value: preview.totalCity },
-              { label: 'Com histórico', value: preview.eligibleTotal },
-              { label: 'Ativos', value: preview.eligibleActive },
-              { label: 'Esgotados', value: preview.eligibleInactive },
-            ].map(({ label, value }) => (
-              <div key={label} className="rounded-lg border border-border bg-card p-3">
-                <p className="text-[10px] text-muted-foreground">{label}</p>
-                <p className="text-xl font-bold mt-0.5">{value.toLocaleString('pt-BR')}</p>
-              </div>
-            ))}
+        {/* Preview stats — hidden once result is available */}
+        {preview && !result && (
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
+              {[
+                { label: 'Total na cidade', value: preview.totalCity },
+                { label: 'Com histórico', value: preview.eligibleTotal },
+                { label: 'Ativos', value: preview.eligibleActive },
+                { label: 'Esgotados', value: preview.eligibleInactive },
+              ].map(({ label, value }) => (
+                <div key={label}>
+                  <p className="text-[10px] text-muted-foreground leading-none mb-0.5">{label}</p>
+                  <p className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 leading-none">
+                    {value.toLocaleString('pt-BR')}
+                  </p>
+                </div>
+              ))}
+            </div>
             {preview.etaSeconds > 0 && (
-              <div className="col-span-2 sm:col-span-4 text-xs text-muted-foreground">
-                Tempo estimado de coleta: ~{Math.ceil(preview.etaSeconds)}s com concorrência {DETAIL_CONCURRENCY}×
+              <p className="text-[11px] text-muted-foreground">
+                ETA coleta: ~{Math.ceil(preview.etaSeconds)}s · concorrência {DETAIL_CONCURRENCY}×
                 {preview.failedCalls > 0 && <span className="text-amber-500 ml-2">— {preview.failedCalls} chamada(s) de prévia falharam</span>}
-              </div>
+              </p>
             )}
           </div>
         )}
@@ -583,23 +588,27 @@ export default function TestesArquitetura() {
         {/* Results */}
         {result && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { label: 'Empreendimentos', value: result.nBuildings },
-                { label: 'Linhas CONSOLIDADA', value: result.activeRows.length },
-                { label: 'Linhas ESGOTADOS', value: result.inactiveRows.length },
-                { label: 'Trimestres', value: result.quarterCols.length },
-              ].map(({ label, value }) => (
-                <div key={label} className="rounded-lg border border-border bg-card p-3">
-                  <p className="text-[10px] text-muted-foreground">{label}</p>
-                  <p className="text-xl font-bold mt-0.5">{value.toLocaleString('pt-BR')}</p>
-                </div>
-              ))}
+            {/* Compact stat bar — replaces both preview and result cards */}
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
+                {[
+                  { label: 'Empreendimentos', value: result.nBuildings },
+                  { label: 'Ativos (CONSOLIDADA)', value: result.activeRows.length },
+                  { label: 'Esgotados', value: result.inactiveRows.length },
+                  { label: 'Trimestres', value: result.quarterCols.length },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <p className="text-[10px] text-muted-foreground leading-none mb-0.5">{label}</p>
+                    <p className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 leading-none">
+                      {value.toLocaleString('pt-BR')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {result.city.toUpperCase()} · {qLabel(result.startQ)} → {qLabel(result.lastQ)}
+              </p>
             </div>
-
-            <p className="text-xs text-muted-foreground">
-              {result.city.toUpperCase()} · {qLabel(result.startQ)} → {qLabel(result.lastQ)}
-            </p>
 
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
