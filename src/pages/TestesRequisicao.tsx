@@ -143,15 +143,16 @@ function ParamField({
   }
 
   if (enums.length > 0) {
+    const NONE = '__none__';
     return (
       <div>
         {label}
-        <Select value={value} onValueChange={onChange}>
+        <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? '' : v)}>
           <SelectTrigger className="h-8 text-xs">
             <SelectValue placeholder="Selecione…" />
           </SelectTrigger>
           <SelectContent>
-            {!param.required && <SelectItem value="">— vazio —</SelectItem>}
+            {!param.required && <SelectItem value={NONE}>— vazio —</SelectItem>}
             {enums.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -174,16 +175,17 @@ function ParamField({
   }
 
   if (candidates.length > 0) {
+    const NONE = '__none__';
     return (
       <div>
         {label}
         <div className="flex gap-1.5">
-          <Select value={value} onValueChange={onChange}>
+          <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? '' : v)}>
             <SelectTrigger className="h-8 text-xs flex-1">
               <SelectValue placeholder="Sugestão ou manual…" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">— vazio —</SelectItem>
+              <SelectItem value={NONE}>— vazio —</SelectItem>
               {candidates.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
             </SelectContent>
           </Select>
