@@ -337,13 +337,26 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
       }
 
       const pctDisp = qty ? stock / qty : null;
-      const r_m2_estoque = stock > 0 ? toNum(last.price_private_area) : null;
       const vgvLancado = qty && launchPrice ? Math.round(qty * launchPrice * 100) / 100 : null;
       const m2Lancado = privArea && qty ? Math.round(privArea * qty * 100) / 100 : null;
       const r_m2_lancado = launchPrice && privArea ? Math.round((launchPrice / privArea) * 10000) / 10000 : null;
+      const vgvEstoque = toNum(last.vgv_stock);
+      const m2Estoque = privArea > 0 ? Math.round(privArea * stock * 100) / 100 : 0;
+      // BM = BK / BL
+      const r_m2_estoque = (vgvEstoque !== null && m2Estoque > 0)
+        ? Math.round((vgvEstoque / m2Estoque) * 100) / 100
+        : null;
       const latestSold = toNum(last.sold_in_period) ?? 0;
       const currentPrice = toNum(last.price) ?? 0;
-      const vendasLiqVgv = latestSold ? Math.round(latestSold * currentPrice * 100) / 100 : 0;
+      // BQ = O × S
+      const vgvVendasBrutas = latestSold && currentPrice
+        ? Math.round(latestSold * currentPrice * 100) / 100
+        : null;
+      // BR = O × T — Distratos indisponível na API
+      const vgvDistratos: number | null = null;
+      const vendasLiqVgv = vgvVendasBrutas !== null
+        ? Math.round((vgvVendasBrutas - (vgvDistratos ?? 0)) * 100) / 100
+        : 0;
 
       const row: Row = {
         'Tipo': b.building_type as string ?? '',
@@ -375,14 +388,14 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
         '% Dispon.': pctDisp,
         'Vagas de Garagem': toNum(last.garage),
         '_blank_': null,
-        'VGV Estoque': toNum(last.vgv_stock),
-        'm² Estoque': privArea !== null ? Math.round(privArea * stock * 100) / 100 : 0,
+        'VGV Estoque': vgvEstoque,
+        'm² Estoque': m2Estoque,
         'R$/m²\nEstoque': r_m2_estoque,
         'VGV Lançado': vgvLancado,
         'm² Lançado': m2Lancado,
         'R$/m² Lançado': r_m2_lancado,
-        'VGV Vendas Brutas': null,
-        'VGV Distratos': null,
+        'VGV Vendas Brutas': vgvVendasBrutas,
+        'VGV Distratos': vgvDistratos,
         'Vendas Líquidas': vendasLiqVgv,
       });
 
@@ -951,7 +964,7 @@ export default function TestesArquitetura() {
 
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-600 dark:text-amber-400">
-          <strong>Limitação da API:</strong> Distratos e vendas brutas não são fornecidos. As colunas <code>*Distratos</code>, <code>VGV Vendas Brutas</code> e <code>VGV Distratos</code> ficam em branco.
+          <strong>Limitação da API:</strong> Distratos não são fornecidos. As colunas <code>*Distratos no trimestre</code> e <code>VGV Distratos</code> ficam em branco.
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
