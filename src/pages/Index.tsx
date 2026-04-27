@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
-import { ChevronLeft, ChevronRight, Palette } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Palette, X, FlaskConical } from 'lucide-react';
 import type { Feature, FeatureCollection, Point } from 'geojson';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -554,6 +554,30 @@ function computeSocioSummary(
     alimentDentro,
     alimentFora,
   };
+}
+
+function MapNoticeBanner() {
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
+  return (
+    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 flex items-start gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 backdrop-blur-sm px-4 py-2.5 shadow-lg max-w-[520px] w-[calc(100%-2rem)]">
+      <FlaskConical className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">Página de testes — API × Mapas</p>
+        <p className="text-[11px] text-amber-600/90 dark:text-amber-400/80 mt-0.5 leading-relaxed">
+          Esta visualização usa uma base de dados estática local. O objetivo futuro é substituí-la por dados ao vivo das APIs, integrando os fluxos de Análise de Mercado com a setorização e os filtros do mapa.
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={() => setDismissed(true)}
+        className="shrink-0 text-amber-500 hover:text-amber-700 dark:hover:text-amber-300 transition-colors mt-0.5"
+        aria-label="Fechar aviso"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
 }
 
 export default function Index() {
@@ -1406,6 +1430,7 @@ export default function Index() {
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-background">
+      <MapNoticeBanner />
       <StudyMap
         points={coloredPointCollection}
         area={activeArea}

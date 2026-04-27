@@ -20,14 +20,15 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   standby?: boolean;
+  standbyLabel?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/', label: 'Mapa', icon: <Map className="h-4 w-4" /> },
   { path: '/documentacao', label: 'Documentação', icon: <FileText className="h-4 w-4" /> },
   { path: '/testes-requisicao', label: 'Testes de Requisição', icon: <FlaskConical className="h-4 w-4" /> },
   { path: '/testes-arquitetura', label: 'Testes de Arquitetura', icon: <Building2 className="h-4 w-4" /> },
   { path: '/assistente', label: 'Assistente', icon: <Bot className="h-4 w-4" />, standby: true },
+  { path: '/mapa', label: 'Mapa', icon: <Map className="h-4 w-4" />, standby: true, standbyLabel: '(testes)' },
 ];
 
 function useDarkMode() {
@@ -69,9 +70,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-3 space-y-0.5 px-2">
           {NAV_ITEMS.map((item) => {
-            const isActive = item.path === '/'
-              ? location.pathname === '/'
-              : location.pathname.startsWith(item.path);
+            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
 
             return (
               <NavLink
@@ -91,7 +90,9 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <span className="truncate">
                     {item.label}
                     {item.standby && (
-                      <span className="ml-1.5 text-[10px] text-muted-foreground font-normal">(stand-by)</span>
+                      <span className="ml-1.5 text-[10px] text-muted-foreground font-normal">
+                        {item.standbyLabel ?? '(stand-by)'}
+                      </span>
                     )}
                   </span>
                 )}
