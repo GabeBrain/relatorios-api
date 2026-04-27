@@ -739,8 +739,27 @@ function TimeseriesChart({ buildings, quarterCols }: {
   );
 }
 
+function formatCell(col: string, val: unknown): string {
+  if (val === null || val === undefined || val === '') return '';
+  if (col === '% Dispon.') return `${((val as number) * 100).toFixed(1)}%`;
+  if (typeof val === 'number') {
+    if (col.startsWith('VGV') || col === 'Vendas Líquidas') {
+      return val >= 1_000_000
+        ? `R$ ${(val / 1_000_000).toFixed(2)}M`
+        : `R$ ${val.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
+    }
+    if (col === 'R$/m²\nEstoque' || col === 'R$/m² Lançado' || col === 'Valor m2 Priv.')
+      return `R$ ${val.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
+  }
+  return String(val);
+}
+
 function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }) {
-  const allCols = [...HEADER_COLS.slice(0, 12), ...quarterCols.map((q) => `Vendas líquidas ${q}`), 'Estoque por Tipologia', '% Dispon.'];
+  const allCols = [
+    ...HEADER_COLS,
+    ...quarterCols.map((q) => `Vendas líquidas ${q}`),
+    ...FOOTER_COLS.filter((c) => c !== '_blank_'),
+  ];
   if (rows.length === 0) return <p className="text-xs text-muted-foreground py-4">Nenhum dado.</p>;
   return (
     <div className="overflow-auto max-h-[50vh]">
@@ -757,7 +776,7 @@ function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }
             <tr key={i} className="hover:bg-accent/20">
               {allCols.map((c) => (
                 <td key={c} className="px-2 py-1 whitespace-nowrap">
-                  {c === '% Dispon.' && row[c] !== null ? `${((row[c] as number) * 100).toFixed(1)}%` : String(row[c] ?? '')}
+                  {formatCell(c, row[c])}
                 </td>
               ))}
             </tr>
