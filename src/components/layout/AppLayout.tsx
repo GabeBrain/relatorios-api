@@ -26,7 +26,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { path: '/documentacao', label: 'Documentação', icon: <FileText className="h-4 w-4" /> },
   { path: '/testes-requisicao', label: 'Testes de Requisição', icon: <FlaskConical className="h-4 w-4" /> },
-  { path: '/testes-arquitetura', label: 'Testes de Arquitetura', icon: <Building2 className="h-4 w-4" /> },
+  { path: '/testes-arquitetura', label: 'Relatórios Secovi', icon: <Building2 className="h-4 w-4" /> },
   { path: '/assistente', label: 'Assistente', icon: <Bot className="h-4 w-4" />, standby: true },
   { path: '/mapa', label: 'Mapa', icon: <Map className="h-4 w-4" />, standby: true, standbyLabel: '(testes)' },
 ];

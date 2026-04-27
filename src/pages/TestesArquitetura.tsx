@@ -462,7 +462,7 @@ export default function TestesArquitetura() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="border-b border-border px-6 py-4 bg-card">
-        <h1 className="text-lg font-semibold">Testes de Arquitetura</h1>
+        <h1 className="text-lg font-semibold">Relatórios Secovi</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Gerador de relatório Geobrain — coleta paralela de empreendimentos por cidade.</p>
       </div>
 
