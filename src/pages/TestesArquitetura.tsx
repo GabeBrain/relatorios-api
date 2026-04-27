@@ -1,12 +1,14 @@
-import { useState, useCallback, useRef } from 'react';
-import { Download, Play, Building2, BarChart3, X } from 'lucide-react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Download, Play, Building2, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
+  LineChart, Line, CartesianGrid,
+} from 'recharts';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -130,10 +132,10 @@ interface LaneResult {
 }
 
 interface LiveStats {
-  pagesTotal: number;    // sum of last_page across all known lanes
-  pagesDone: number;     // pages successfully processed
-  totalFound: number;    // unique building IDs in city
-  eligibleFound: number; // with history in period
+  pagesTotal: number;
+  pagesDone: number;
+  totalFound: number;
+  eligibleFound: number;
   activeFound: number;
   inactiveFound: number;
   failedCalls: number;
@@ -255,7 +257,6 @@ async function collectPreview(
     pairs.map(({ status, type }) => fetchLane(status, type, city, uf, startQ, token, signal, applyDelta))
   );
 
-  // Merge lane results, deduplicating across lanes
   const allSeen = new Set<number>();
   const eligibleSeen = new Set<number>();
   const activeSeen = new Set<number>();
@@ -272,16 +273,11 @@ async function collectPreview(
     failedCalls += lane.failedCalls;
     for (const id of lane.allIds) { if (!allSeen.has(id)) { allSeen.add(id); allIds.push(id); } }
     for (const id of lane.eligibleIds) {
-      if (!eligibleSeen.has(id)) {
-        eligibleSeen.add(id);
-        eligibleIds.push(id);
-      }
+      if (!eligibleSeen.has(id)) { eligibleSeen.add(id); eligibleIds.push(id); }
     }
     for (const id of lane.eligibleActiveIds) { if (!activeSeen.has(id)) { activeSeen.add(id); activeIds.push(id); } }
     for (const id of lane.eligibleInactiveIds) { if (!inactiveSeen.has(id)) { inactiveSeen.add(id); inactiveIds.push(id); } }
   }
-
-  const etaSeconds = eligibleIds.length * ESTIMATED_SECONDS_PER_DETAIL / DETAIL_CONCURRENCY;
 
   return {
     totalCity: allIds.length,
@@ -292,7 +288,7 @@ async function collectPreview(
     activeIds,
     inactiveIds,
     failedCalls,
-    etaSeconds,
+    etaSeconds: eligibleIds.length * ESTIMATED_SECONDS_PER_DETAIL / DETAIL_CONCURRENCY,
   };
 }
 
@@ -450,6 +446,82 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
   writeFile(wb, `Relatorio_${city.trim()}_${sfx}.xlsx`);
 }
 
+// ── timeseries ────────────────────────────────────────────────────────────────
+
+type TimeMetric = 'sold_in_period' | 'typology_stock' | 'pct_avail' | 'price' | 'price_private_area' | 'vgv_stock';
+
+const TIME_METRICS: { key: TimeMetric; label: string; agg: 'sum' | 'avg'; description: string; format: (v: number) => string }[] = [
+  {
+    key: 'sold_in_period', label: 'Vendas (unidades)', agg: 'sum',
+    description: 'Total de unidades vendidas por trimestre',
+    format: (v) => v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
+  },
+  {
+    key: 'typology_stock', label: 'Estoque (unidades)', agg: 'sum',
+    description: 'Total de unidades em estoque por trimestre',
+    format: (v) => v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
+  },
+  {
+    key: 'pct_avail', label: '% Disponibilidade', agg: 'avg',
+    description: 'Percentual médio de unidades disponíveis',
+    format: (v) => `${(v * 100).toFixed(1)}%`,
+  },
+  {
+    key: 'price', label: 'Preço médio (R$)', agg: 'avg',
+    description: 'Preço médio por unidade entre todas as tipologias',
+    format: (v) => v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(2)}M` : `R$ ${(v / 1_000).toFixed(0)}k`,
+  },
+  {
+    key: 'price_private_area', label: 'R$/m² médio', agg: 'avg',
+    description: 'Preço médio por metro quadrado privativo',
+    format: (v) => `R$ ${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`,
+  },
+  {
+    key: 'vgv_stock', label: 'VGV Estoque', agg: 'sum',
+    description: 'Valor Geral de Vendas do estoque disponível por trimestre',
+    format: (v) => v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1)}M` : `R$ ${(v / 1_000).toFixed(0)}k`,
+  },
+];
+
+function buildTimeseriesData(
+  buildings: Record<string, unknown>[],
+  quarterCols: string[],
+  metric: TimeMetric,
+): { quarter: string; value: number | null }[] {
+  const qSet = new Set(quarterCols);
+  const byQuarter = new Map<string, number[]>();
+  for (const q of quarterCols) byQuarter.set(q, []);
+
+  for (const b of buildings) {
+    for (const e of ((b.typologies_history as unknown[]) ?? [])) {
+      const entry = e as Record<string, unknown>;
+      const q = periodToQuarter(String(entry.period ?? ''));
+      if (!q || !qSet.has(q)) continue;
+
+      let v: number | null = null;
+      if (metric === 'pct_avail') {
+        const stock = toNum(entry.typology_stock);
+        const qty = toNum(entry.qty);
+        v = stock !== null && qty ? stock / qty : null;
+      } else {
+        v = toNum(entry[metric]);
+      }
+
+      if (v !== null) byQuarter.get(q)!.push(v);
+    }
+  }
+
+  const def = TIME_METRICS.find((m) => m.key === metric)!;
+  return quarterCols.map((q) => {
+    const vals = byQuarter.get(q) ?? [];
+    if (vals.length === 0) return { quarter: qLabel(q), value: null };
+    const value = def.agg === 'sum'
+      ? vals.reduce((a, b) => a + b, 0)
+      : vals.reduce((a, b) => a + b, 0) / vals.length;
+    return { quarter: qLabel(q), value };
+  });
+}
+
 // ── sub-components ────────────────────────────────────────────────────────────
 
 function BrainLogoProgress({ pct, label }: { pct: number; label?: string }) {
@@ -457,17 +529,175 @@ function BrainLogoProgress({ pct, label }: { pct: number; label?: string }) {
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="relative w-20 h-10">
-        {/* ghost */}
         <img src={brainLogo} alt="" className="absolute inset-0 w-full h-full object-contain opacity-10" />
-        {/* filled — reveals left to right */}
         <img
           src={brainLogo}
           alt=""
-          className="absolute inset-0 w-full h-full object-contain transition-all duration-300"
+          className="absolute inset-0 w-full h-full object-contain"
           style={{ clipPath: `inset(0 ${100 - clipped}% 0 0)` }}
         />
       </div>
       {label && <p className="text-[11px] text-muted-foreground">{label}</p>}
+    </div>
+  );
+}
+
+// Large centered overlay for the detail-fetch phase
+function FetchingOverlay({
+  pct,
+  done,
+  total,
+  failed,
+  onAbort,
+}: {
+  pct: number;
+  done: number;
+  total: number;
+  failed: number;
+  onAbort: () => void;
+}) {
+  const clipped = Math.max(0, Math.min(100, pct));
+  return (
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-background/90 backdrop-blur-sm">
+      <div className="relative w-64 h-32 mb-6">
+        <img src={brainLogo} alt="" className="absolute inset-0 w-full h-full object-contain opacity-10" />
+        <img
+          src={brainLogo}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ clipPath: `inset(0 ${100 - clipped}% 0 0)` }}
+        />
+      </div>
+
+      <p className="text-sm font-medium text-foreground animate-pulse">Carregando...</p>
+
+      {total > 0 && (
+        <p className="text-xs text-muted-foreground mt-2">
+          {done.toLocaleString('pt-BR')} / {total.toLocaleString('pt-BR')} empreendimentos
+          {failed > 0 && <span className="text-amber-500 ml-2">· {failed} falha(s)</span>}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={onAbort}
+        className="mt-6 flex items-center gap-1.5 text-xs text-red-500 hover:text-red-400 transition-colors"
+      >
+        <X className="h-3.5 w-3.5" />
+        Cancelar coleta
+      </button>
+    </div>
+  );
+}
+
+function TimeseriesChart({
+  buildings,
+  quarterCols,
+}: {
+  buildings: Record<string, unknown>[];
+  quarterCols: string[];
+}) {
+  const [metric, setMetric] = useState<TimeMetric>('sold_in_period');
+  const def = TIME_METRICS.find((m) => m.key === metric)!;
+  const data = buildTimeseriesData(buildings, quarterCols, metric);
+
+  // abbreviated Y-axis tick
+  function tickFmt(v: number) {
+    if (metric === 'pct_avail') return `${(v * 100).toFixed(0)}%`;
+    if (metric === 'vgv_stock' || metric === 'price') {
+      if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
+      if (v >= 1_000) return `${(v / 1_000).toFixed(0)}k`;
+    }
+    if (metric === 'price_private_area') {
+      if (v >= 1_000) return `${(v / 1_000).toFixed(0)}k`;
+    }
+    return v.toFixed(0);
+  }
+
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ background: '#07070f', border: '1px solid #1a1a2e' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid #1a1a2e' }}>
+        <div>
+          <p className="text-sm font-semibold text-white">Série Histórica</p>
+          <p className="text-xs mt-0.5" style={{ color: '#4b5563' }}>{def.description}</p>
+        </div>
+        <Select value={metric} onValueChange={(v) => setMetric(v as TimeMetric)}>
+          <SelectTrigger
+            className="h-7 text-xs w-48"
+            style={{ background: '#0f0f1e', borderColor: '#1a1a2e', color: '#9ca3af' }}
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TIME_METRICS.map((m) => (
+              <SelectItem key={m.key} value={m.key}>{m.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Chart */}
+      <div className="px-2 pt-4 pb-3">
+        <ResponsiveContainer width="100%" height={220}>
+          <LineChart data={data} margin={{ top: 4, right: 24, left: 0, bottom: 4 }}>
+            <CartesianGrid stroke="#111122" strokeDasharray="4 4" vertical={false} />
+            <XAxis
+              dataKey="quarter"
+              tick={{ fill: '#4b5563', fontSize: 9 }}
+              axisLine={{ stroke: '#1a1a2e' }}
+              tickLine={false}
+              interval="preserveStartEnd"
+            />
+            <YAxis
+              tick={{ fill: '#4b5563', fontSize: 9 }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={tickFmt}
+              width={56}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#0f0f1e',
+                border: '1px solid #1a1a2e',
+                borderRadius: '8px',
+                fontSize: 11,
+              }}
+              labelStyle={{ color: '#d1d5db', marginBottom: 4 }}
+              itemStyle={{ color: '#a855f7' }}
+              formatter={(v: number) => [def.format(v), def.label]}
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#a855f7"
+              strokeWidth={2}
+              dot={{ fill: '#a855f7', r: 3, strokeWidth: 0 }}
+              activeDot={{ r: 5, fill: '#c084fc', strokeWidth: 0 }}
+              connectNulls={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Variable legend */}
+      <div className="flex flex-wrap gap-2 px-4 pb-3">
+        {TIME_METRICS.map((m) => (
+          <button
+            key={m.key}
+            type="button"
+            onClick={() => setMetric(m.key)}
+            className="flex items-center gap-1.5 text-[10px] transition-colors"
+            style={{ color: m.key === metric ? '#a855f7' : '#374151' }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full inline-block"
+              style={{ background: m.key === metric ? '#a855f7' : '#374151' }}
+            />
+            {m.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -525,7 +755,43 @@ export default function TestesArquitetura() {
   const [result, setResult] = useState<{
     activeRows: Row[]; inactiveRows: Row[]; quarterCols: string[];
     city: string; lastQ: string; startQ: string; nBuildings: number;
+    allBuildings: Record<string, unknown>[];
   } | null>(null);
+
+  // Smooth animated display percentages
+  const [displayPreviewPct, setDisplayPreviewPct] = useState(0);
+  const [displayFetchPct, setDisplayFetchPct] = useState(0);
+  const targetPreviewRef = useRef(0);
+  const targetFetchRef = useRef(0);
+
+  targetPreviewRef.current = previewPct;
+  targetFetchRef.current = progressTotal > 0 ? (progressDone / progressTotal) * 100 : 0;
+
+  useEffect(() => {
+    if (phase !== 'preview') { setDisplayPreviewPct(0); return; }
+    const id = setInterval(() => {
+      setDisplayPreviewPct((prev) => {
+        const target = targetPreviewRef.current;
+        const diff = target - prev;
+        if (Math.abs(diff) < 0.1) return target;
+        return prev + Math.max(0.15, diff * 0.07);
+      });
+    }, 40);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'fetching') { setDisplayFetchPct(0); return; }
+    const id = setInterval(() => {
+      setDisplayFetchPct((prev) => {
+        const target = targetFetchRef.current;
+        const diff = target - prev;
+        if (Math.abs(diff) < 0.1) return target;
+        return prev + Math.max(0.15, diff * 0.07);
+      });
+    }, 40);
+    return () => clearInterval(id);
+  }, [phase]);
 
   const previewAbortRef = useRef<AbortController | null>(null);
   const fetchAbortRef = useRef<AbortController | null>(null);
@@ -558,7 +824,6 @@ export default function TestesArquitetura() {
         startQ, getToken(), ctrl.signal,
         (stats) => {
           setLiveStats({ ...stats });
-          // progress = pagesDone / max(pagesTotal, 1)
           const pct = stats.pagesTotal > 0 ? Math.min(99, (stats.pagesDone / stats.pagesTotal) * 100) : 0;
           setPreviewPct(pct);
         },
@@ -619,7 +884,7 @@ export default function TestesArquitetura() {
       const activeRows = buildRows(activeBuildings, filteredQs);
       const inactiveRows = buildRows(inactiveBuildings, filteredQs);
 
-      setResult({ activeRows, inactiveRows, quarterCols: filteredQs, city: city.trim(), lastQ, startQ, nBuildings: details.size });
+      setResult({ activeRows, inactiveRows, quarterCols: filteredQs, city: city.trim(), lastQ, startQ, nBuildings: details.size, allBuildings });
       const warn = failed > 0 ? ` — ${failed} falha(s)` : '';
       toast.success(`Concluído: ${details.size} empreendimentos | ${qLabel(startQ)} → ${qLabel(lastQ)}${warn}`);
     } catch (err) {
@@ -648,6 +913,17 @@ export default function TestesArquitetura() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Fetching overlay — full-page centered logo */}
+      {phase === 'fetching' && (
+        <FetchingOverlay
+          pct={displayFetchPct}
+          done={progressDone}
+          total={progressTotal}
+          failed={progressFailed}
+          onAbort={handleAbortFetch}
+        />
+      )}
+
       {/* Header */}
       <div className="border-b border-border px-6 py-4 bg-card">
         <h1 className="text-lg font-semibold">Relatórios Secovi</h1>
@@ -724,12 +1000,7 @@ export default function TestesArquitetura() {
               <Play className="h-3.5 w-3.5" />
               Buscar empreendimentos
             </Button>
-          ) : (
-            <Button onClick={handleAbortFetch} variant="outline" className="gap-2 text-xs h-8 border-red-500/40 text-red-500 hover:bg-red-500/10">
-              <X className="h-3.5 w-3.5" />
-              Cancelar coleta
-            </Button>
-          )}
+          ) : null}
 
           {result && (
             <Button variant="outline" className="gap-2 text-xs h-8"
@@ -740,11 +1011,11 @@ export default function TestesArquitetura() {
           )}
         </div>
 
-        {/* Preview loading — Brain logo animation */}
+        {/* Preview loading — Brain logo inline */}
         {phase === 'preview' && (
           <div className="flex items-center gap-6 rounded-lg border border-border bg-card/60 p-4">
             <BrainLogoProgress
-              pct={previewPct}
+              pct={displayPreviewPct}
               label={liveStats ? `${liveStats.pagesDone}/${Math.max(liveStats.pagesTotal, liveStats.pagesDone)} pág.` : 'iniciando…'}
             />
             {liveStats && (
@@ -766,18 +1037,7 @@ export default function TestesArquitetura() {
           </div>
         )}
 
-        {/* Detail fetch progress */}
-        {phase === 'fetching' && progressTotal > 0 && (
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Coletando detalhes… {progressDone}/{progressTotal} ({DETAIL_CONCURRENCY}× paralelo)</span>
-              {progressFailed > 0 && <span className="text-amber-500">{progressFailed} falha(s)</span>}
-            </div>
-            <Progress value={(progressDone / progressTotal) * 100} className="h-2" />
-          </div>
-        )}
-
-        {/* Preview stats — only visible before result */}
+        {/* Preview stats — only while waiting to fetch */}
         {preview && !result && phase === 'idle' && (
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
@@ -805,6 +1065,7 @@ export default function TestesArquitetura() {
         {/* Results */}
         {result && (
           <div className="space-y-4">
+            {/* Summary stats */}
             <div className="space-y-1">
               <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
                 {[
@@ -822,7 +1083,7 @@ export default function TestesArquitetura() {
               <p className="text-[11px] text-muted-foreground">{result.city.toUpperCase()} · {qLabel(result.startQ)} → {qLabel(result.lastQ)}</p>
             </div>
 
-            {/* Charts */}
+            {/* Categorical bar charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {[
                 { title: 'Tipo de empreendimento', field: 'Tipo' },
@@ -831,10 +1092,7 @@ export default function TestesArquitetura() {
                 const chartData = buildChartData([...result.activeRows, ...result.inactiveRows], field);
                 return (
                   <div key={field} className="rounded-lg border border-border bg-card p-3">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <BarChart3 className="h-3.5 w-3.5 text-muted-foreground" />
-                      <p className="text-xs font-semibold">{title}</p>
-                    </div>
+                    <p className="text-xs font-semibold mb-2">{title}</p>
                     <ResponsiveContainer width="100%" height={140}>
                       <BarChart data={chartData} margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
                         <XAxis dataKey="name" tick={{ fontSize: 10 }} />
@@ -849,6 +1107,9 @@ export default function TestesArquitetura() {
                 );
               })}
             </div>
+
+            {/* Historical series chart — above the table */}
+            <TimeseriesChart buildings={result.allBuildings} quarterCols={result.quarterCols} />
 
             {/* Tables */}
             <Tabs defaultValue="consolidada">
