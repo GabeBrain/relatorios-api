@@ -28,7 +28,7 @@ const App = () => (
             <Route path="/" element={<Navigate to="/documentacao" replace />} />
             <Route path="/documentacao" element={<Documentacao />} />
             <Route path="/testes-requisicao" element={<TestesRequisicao />} />
-            <Route path="/testes-arquitetura" element={<TestesArquitetura />} />
+            <Route path="/relatorios-secovi" element={<TestesArquitetura />} />
             <Route path="/assistente" element={<Assistente />} />
             <Route path="/mapa" element={<Index />} />
             <Route path="*" element={<NotFound />} />
