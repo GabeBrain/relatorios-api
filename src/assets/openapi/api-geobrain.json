@@ -1,0 +1,3178 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Geobrain",
+    "version": "0.0.1",
+    "description": "API para consulta de empreendimentos imobiliários do Geobrain."
+  },
+  "servers": [
+    {
+      "url": "https://geobrain.com.br/public-api",
+      "description": "Live"
+    }
+  ],
+  "security": [
+    {
+      "http": []
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "auth.auth",
+        "description": "Retorna token para utilização nos endpoints protegidos. O tempo de validade do token é de 180 minutos.",
+        "summary": "Obter token de autenticação",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "token"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "Unauthorized"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationException"
+          }
+        },
+        "security": []
+      }
+    },
+    "/building": {
+      "get": {
+        "operationId": "public_api.building.index",
+        "description": "Lista os empreendimentos ativos usando os filtros passados na requisição.",
+        "summary": "Lista de Empreendimentos",
+        "tags": [
+          "Building"
+        ],
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "description": "Nome da Cidade",
+            "schema": {
+              "type": "string"
+            },
+            "example": "São Paulo"
+          },
+          {
+            "name": "uf",
+            "in": "query",
+            "description": "Sigla do Estado",
+            "schema": {
+              "type": "string"
+            },
+            "example": "SP"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "description": "Tipo do Empreendimento",
+            "schema": {
+              "$ref": "#/components/schemas/BuildingTypes"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "last_update_gt",
+            "in": "query",
+            "description": "Data de Atualização Maior que",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-01-01"
+          },
+          {
+            "name": "last_update_lt",
+            "in": "query",
+            "description": "Data de Atualização Menor que",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-01-01"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Número de Itens por Página",
+            "schema": {
+              "type": "integer",
+              "default": 30
+            },
+            "example": 30
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated set of `BuildingResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BuildingResource"
+                      }
+                    },
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "last": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "first",
+                        "last",
+                        "prev",
+                        "next"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Generated paginator links.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "label",
+                              "active"
+                            ]
+                          }
+                        },
+                        "path": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Base path for paginator generated URLs."
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "description": "Number of items shown per page."
+                        },
+                        "to": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Number of the last item in the slice."
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "Total number of items being paginated."
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "from",
+                        "last_page",
+                        "links",
+                        "path",
+                        "per_page",
+                        "to",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "links",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "description": "An error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Error overview.",
+                      "example": ""
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationException"
+          }
+        }
+      }
+    },
+    "/building-with-history": {
+      "get": {
+        "operationId": "public_api.building_with_history.index",
+        "description": "Lista os empreendimentos ativos usando os filtros passados na requisição.",
+        "summary": "Lista de Empreendimentos com Histórico e Áreas",
+        "tags": [
+          "Building"
+        ],
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "description": "Nome da Cidade",
+            "schema": {
+              "type": "string"
+            },
+            "example": "São Paulo"
+          },
+          {
+            "name": "uf",
+            "in": "query",
+            "description": "Sigla do Estado",
+            "schema": {
+              "type": "string"
+            },
+            "example": "SP"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "description": "Tipo do Empreendimento",
+            "schema": {
+              "$ref": "#/components/schemas/BuildingTypes"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "last_update_gt",
+            "in": "query",
+            "description": "Data de Atualização Maior que",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-01-01"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Status Atual do Empreendimento",
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "Ativo",
+                "Esgotado"
+              ]
+            }
+          },
+          {
+            "name": "last_update_lt",
+            "in": "query",
+            "description": "Data de Atualização Menor que",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-01-01"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Número de Itens por Página",
+            "schema": {
+              "type": "integer",
+              "default": 30
+            },
+            "example": 30
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated set of `BuildingWithHistoricResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BuildingWithHistoricResource"
+                      }
+                    },
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "last": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "first",
+                        "last",
+                        "prev",
+                        "next"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Generated paginator links.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "label",
+                              "active"
+                            ]
+                          }
+                        },
+                        "path": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Base path for paginator generated URLs."
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "description": "Number of items shown per page."
+                        },
+                        "to": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Number of the last item in the slice."
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "Total number of items being paginated."
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "from",
+                        "last_page",
+                        "links",
+                        "path",
+                        "per_page",
+                        "to",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "links",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "description": "An error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Error overview.",
+                      "example": ""
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationException"
+          }
+        }
+      }
+    },
+    "/building/{id}": {
+      "get": {
+        "operationId": "public_api.building.find",
+        "description": "Retorna o registro de empreendimento com o ID fornecido",
+        "summary": "Registro individual de Empreendimento",
+        "tags": [
+          "Building"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "`BuildingResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/BuildingResource"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "description": "An error\n\nAn error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "Error overview.",
+                          "example": ""
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "Error overview.",
+                          "example": "Você não tem permissão para acessar este empreendimento."
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/building-with-history/{id}": {
+      "get": {
+        "operationId": "public_api.building_with_history.find",
+        "description": "Retorna o registro de empreendimento com o ID fornecido",
+        "summary": "Registro individual de Empreendimento com Histórico e Áreas",
+        "tags": [
+          "Building"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "`BuildingWithHistoricResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/BuildingWithHistoricResource"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "description": "An error\n\nAn error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "Error overview.",
+                          "example": ""
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "Error overview.",
+                          "example": "Você não tem permissão para acessar este empreendimento."
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monitored-cities": {
+      "get": {
+        "operationId": "public_api.cities.index",
+        "description": "Retorna todas as cidades monitoradas com a data do último período finalizado.",
+        "summary": "Lista de cidades monitoradas",
+        "tags": [
+          "City"
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated set of `CityResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CityResource"
+                      }
+                    },
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "last": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "first",
+                        "last",
+                        "prev",
+                        "next"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Generated paginator links.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "label",
+                              "active"
+                            ]
+                          }
+                        },
+                        "path": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Base path for paginator generated URLs."
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "description": "Number of items shown per page."
+                        },
+                        "to": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Number of the last item in the slice."
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "Total number of items being paginated."
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "from",
+                        "last_page",
+                        "links",
+                        "path",
+                        "per_page",
+                        "to",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "links",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "description": "An error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Error overview.",
+                      "example": ""
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/temporal-analysis-city/releases": {
+      "get": {
+        "operationId": "public_api.temporal_analysis.releases",
+        "description": "Retorna a análise temporal de lançamentos por período para uma cidade específica,\npermitindo filtrar por tipo de empreendimento e agrupar os resultados por Padrão ou Tipologia.\n\nObservação: Caso o agrupamento selecionado seja por tipologia, serão retornados apenas os dados referentes á os empreendimentos do tipo Vertical.",
+        "summary": "Análise temporal cidades - Lançamentos por período",
+        "tags": [
+          "TemporalAnalysis"
+        ],
+        "parameters": [
+          {
+            "name": "start_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Inicial",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-01-01"
+          },
+          {
+            "name": "end_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Final",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-06-30"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": true,
+            "description": "Nome da Cidade",
+            "schema": {
+              "type": "string"
+            },
+            "example": "São Paulo"
+          },
+          {
+            "name": "uf",
+            "in": "query",
+            "required": true,
+            "description": "Sigla do Estado",
+            "schema": {
+              "type": "string"
+            },
+            "example": "SP"
+          },
+          {
+            "name": "type[]",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "example": null,
+              "default": null,
+              "items": {
+                "$ref": "#/components/schemas/BuildingTypes"
+              }
+            }
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Padrão",
+                "Tipologia"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Número de Itens por Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated set of `ReleasesResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ReleasesResource"
+                      }
+                    },
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "last": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "first",
+                        "last",
+                        "prev",
+                        "next"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Generated paginator links.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "label",
+                              "active"
+                            ]
+                          }
+                        },
+                        "path": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Base path for paginator generated URLs."
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "description": "Number of items shown per page."
+                        },
+                        "to": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Number of the last item in the slice."
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "Total number of items being paginated."
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "from",
+                        "last_page",
+                        "links",
+                        "path",
+                        "per_page",
+                        "to",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "links",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthorizationException"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationException"
+          }
+        }
+      }
+    },
+    "/temporal-analysis-city/stock": {
+      "get": {
+        "operationId": "public_api.temporal_analysis.stock",
+        "description": "Retorna a análise temporal de estoque por período para uma cidade específica,\npermitindo filtrar por tipo de empreendimento e agrupar os resultados por Padrão ou Tipologia.\n\nObservação: Caso o agrupamento selecionado seja por tipologia, serão retornados apenas os dados referentes á os empreendimentos do tipo Vertical.",
+        "summary": "Análise temporal cidades - Estoque por período",
+        "tags": [
+          "TemporalAnalysis"
+        ],
+        "parameters": [
+          {
+            "name": "start_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Inicial",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-01-01"
+          },
+          {
+            "name": "end_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Final",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-06-30"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": true,
+            "description": "Nome da Cidade",
+            "schema": {
+              "type": "string"
+            },
+            "example": "São Paulo"
+          },
+          {
+            "name": "uf",
+            "in": "query",
+            "required": true,
+            "description": "Sigla do Estado",
+            "schema": {
+              "type": "string"
+            },
+            "example": "SP"
+          },
+          {
+            "name": "type[]",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "example": null,
+              "default": null,
+              "items": {
+                "$ref": "#/components/schemas/BuildingTypes"
+              }
+            }
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Padrão",
+                "Tipologia"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Número de Itens por Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated set of `StockResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/StockResource"
+                      }
+                    },
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "last": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "first",
+                        "last",
+                        "prev",
+                        "next"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Generated paginator links.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "label",
+                              "active"
+                            ]
+                          }
+                        },
+                        "path": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Base path for paginator generated URLs."
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "description": "Number of items shown per page."
+                        },
+                        "to": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Number of the last item in the slice."
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "Total number of items being paginated."
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "from",
+                        "last_page",
+                        "links",
+                        "path",
+                        "per_page",
+                        "to",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "links",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthorizationException"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationException"
+          }
+        }
+      }
+    },
+    "/temporal-analysis-city/sales": {
+      "get": {
+        "operationId": "public_api.temporal_analysis.sales",
+        "description": "Retorna a análise temporal de vendas líquidas por período para uma cidade específica,\npermitindo filtrar por tipo de empreendimento e agrupar os resultados por Padrão ou Tipologia.\n\nObservação: Caso o agrupamento selecionado seja por tipologia, serão retornados apenas os dados referentes á os empreendimentos do tipo Vertical.",
+        "summary": "Análise temporal cidades - Vendas líquidas por período",
+        "tags": [
+          "TemporalAnalysis"
+        ],
+        "parameters": [
+          {
+            "name": "start_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Inicial",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-01-01"
+          },
+          {
+            "name": "end_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Final",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-06-30"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": true,
+            "description": "Nome da Cidade",
+            "schema": {
+              "type": "string"
+            },
+            "example": "São Paulo"
+          },
+          {
+            "name": "uf",
+            "in": "query",
+            "required": true,
+            "description": "Sigla do Estado",
+            "schema": {
+              "type": "string"
+            },
+            "example": "SP"
+          },
+          {
+            "name": "type[]",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "example": null,
+              "default": null,
+              "items": {
+                "$ref": "#/components/schemas/BuildingTypes"
+              }
+            }
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Padrão",
+                "Tipologia"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Número de Itens por Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated set of `SalesResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SalesResource"
+                      }
+                    },
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "last": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "first",
+                        "last",
+                        "prev",
+                        "next"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Generated paginator links.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "label",
+                              "active"
+                            ]
+                          }
+                        },
+                        "path": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Base path for paginator generated URLs."
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "description": "Number of items shown per page."
+                        },
+                        "to": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Number of the last item in the slice."
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "Total number of items being paginated."
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "from",
+                        "last_page",
+                        "links",
+                        "path",
+                        "per_page",
+                        "to",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "links",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthorizationException"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationException"
+          }
+        }
+      }
+    },
+    "/temporal-analysis-city/medium-prices": {
+      "get": {
+        "operationId": "public_api.temporal_analysis.mediumPrices",
+        "description": "Retorna a análise temporal de preço médio por período para uma cidade específica,\npermitindo filtrar por tipo de empreendimento e agrupar os resultados por Padrão ou Tipologia.\n\nObservação: Caso o agrupamento selecionado seja por tipologia, serão retornados apenas os dados referentes á os empreendimentos do tipo Vertical.",
+        "summary": "Análise temporal cidades - Preço médio por período",
+        "tags": [
+          "TemporalAnalysis"
+        ],
+        "parameters": [
+          {
+            "name": "start_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Inicial",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-01-01"
+          },
+          {
+            "name": "end_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Final",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-06-30"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": true,
+            "description": "Nome da Cidade",
+            "schema": {
+              "type": "string"
+            },
+            "example": "São Paulo"
+          },
+          {
+            "name": "uf",
+            "in": "query",
+            "required": true,
+            "description": "Sigla do Estado",
+            "schema": {
+              "type": "string"
+            },
+            "example": "SP"
+          },
+          {
+            "name": "type[]",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "example": null,
+              "default": null,
+              "items": {
+                "$ref": "#/components/schemas/BuildingTypes"
+              }
+            }
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Padrão",
+                "Tipologia"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Número de Itens por Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated set of `MediumPricesResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MediumPricesResource"
+                      }
+                    },
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "last": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "first",
+                        "last",
+                        "prev",
+                        "next"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Generated paginator links.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "label",
+                              "active"
+                            ]
+                          }
+                        },
+                        "path": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Base path for paginator generated URLs."
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "description": "Number of items shown per page."
+                        },
+                        "to": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Number of the last item in the slice."
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "Total number of items being paginated."
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "from",
+                        "last_page",
+                        "links",
+                        "path",
+                        "per_page",
+                        "to",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "links",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthorizationException"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationException"
+          }
+        }
+      }
+    },
+    "/temporal-analysis-city/medium-prices-meter": {
+      "get": {
+        "operationId": "public_api.temporal_analysis.mediumPricesMeter",
+        "description": "Retorna a análise temporal de preço médio por metro quadrado por período para uma cidade específica,\npermitindo filtrar por tipo de empreendimento e agrupar os resultados por Padrão ou Tipologia.\n\nObservação: Caso o agrupamento selecionado seja por tipologia, serão retornados apenas os dados referentes á os empreendimentos do tipo Vertical.",
+        "summary": "Análise temporal cidades - Preço médio por metro quadrado por período",
+        "tags": [
+          "TemporalAnalysis"
+        ],
+        "parameters": [
+          {
+            "name": "start_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Inicial",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-01-01"
+          },
+          {
+            "name": "end_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Final",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-06-30"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": true,
+            "description": "Nome da Cidade",
+            "schema": {
+              "type": "string"
+            },
+            "example": "São Paulo"
+          },
+          {
+            "name": "uf",
+            "in": "query",
+            "required": true,
+            "description": "Sigla do Estado",
+            "schema": {
+              "type": "string"
+            },
+            "example": "SP"
+          },
+          {
+            "name": "type[]",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "example": null,
+              "default": null,
+              "items": {
+                "$ref": "#/components/schemas/BuildingTypes"
+              }
+            }
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Padrão",
+                "Tipologia"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Número de Itens por Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated set of `MediumPricesMeterResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MediumPricesMeterResource"
+                      }
+                    },
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "last": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "first",
+                        "last",
+                        "prev",
+                        "next"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Generated paginator links.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "label",
+                              "active"
+                            ]
+                          }
+                        },
+                        "path": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Base path for paginator generated URLs."
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "description": "Number of items shown per page."
+                        },
+                        "to": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Number of the last item in the slice."
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "Total number of items being paginated."
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "from",
+                        "last_page",
+                        "links",
+                        "path",
+                        "per_page",
+                        "to",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "links",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthorizationException"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationException"
+          }
+        }
+      }
+    },
+    "/temporal-analysis-city/ivv": {
+      "get": {
+        "operationId": "public_api.temporal_analysis.ivv",
+        "description": "Retorna a análise temporal de IVV por período para uma cidade específica,\npermitindo filtrar por tipo de empreendimento e agrupar os resultados por Padrão ou Tipologia.\n\nObservação: Caso o agrupamento selecionado seja por tipologia, serão retornados apenas os dados referentes á os empreendimentos do tipo Vertical.",
+        "summary": "Análise temporal cidades - IVV por período",
+        "tags": [
+          "TemporalAnalysis"
+        ],
+        "parameters": [
+          {
+            "name": "start_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Inicial",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-01-01"
+          },
+          {
+            "name": "end_period",
+            "in": "query",
+            "required": true,
+            "description": "Período Final",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2023-06-30"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": true,
+            "description": "Nome da Cidade",
+            "schema": {
+              "type": "string"
+            },
+            "example": "São Paulo"
+          },
+          {
+            "name": "uf",
+            "in": "query",
+            "required": true,
+            "description": "Sigla do Estado",
+            "schema": {
+              "type": "string"
+            },
+            "example": "SP"
+          },
+          {
+            "name": "type[]",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "example": null,
+              "default": null,
+              "items": {
+                "$ref": "#/components/schemas/BuildingTypes"
+              }
+            }
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Padrão",
+                "Tipologia"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Número de Itens por Página",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated set of `IVVResource`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/IVVResource"
+                      }
+                    },
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "last": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "prev": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "first",
+                        "last",
+                        "prev",
+                        "next"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "links": {
+                          "type": "array",
+                          "description": "Generated paginator links.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "url",
+                              "label",
+                              "active"
+                            ]
+                          }
+                        },
+                        "path": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Base path for paginator generated URLs."
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "description": "Number of items shown per page."
+                        },
+                        "to": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Number of the last item in the slice."
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "Total number of items being paginated."
+                        }
+                      },
+                      "required": [
+                        "current_page",
+                        "from",
+                        "last_page",
+                        "links",
+                        "path",
+                        "per_page",
+                        "to",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "links",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationException"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthorizationException"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationException"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "http": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "jwt"
+      }
+    },
+    "schemas": {
+      "AreaResource": {
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "area",
+          "type"
+        ],
+        "title": "AreaResource"
+      },
+      "BuildingResource": {
+        "type": "object",
+        "properties": {
+          "building_id": {
+            "type": "string",
+            "description": "Identificador (id) do empreendimento"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome do empreendimento"
+          },
+          "release_date": {
+            "type": "string",
+            "description": "Data de lançamento do empreendimento"
+          },
+          "building_type": {
+            "type": "string",
+            "description": "Tipo do empreendimento"
+          },
+          "zipcode": {
+            "type": "string",
+            "description": "CEP do empreendimento"
+          },
+          "address": {
+            "type": "string",
+            "description": "Endereço do empreendimento"
+          },
+          "address_number": {
+            "type": "string",
+            "description": "Número do endereço do empreendimento"
+          },
+          "neighborhood": {
+            "type": "string",
+            "description": "Bairro do endereço do empreendimento"
+          },
+          "city_id": {
+            "type": "string",
+            "description": "Identificador (id) da cidade do empreendimento"
+          },
+          "city": {
+            "type": "string",
+            "description": "Nome da cidade do empreendimento"
+          },
+          "state": {
+            "type": "string",
+            "description": "Sigla da unidade federativa (UF) da cidade do empreendimento"
+          },
+          "latitude": {
+            "type": "string",
+            "description": "Latitude do empreendimento"
+          },
+          "longitude": {
+            "type": "string",
+            "description": "Longitude do empreendimento"
+          },
+          "towers": {
+            "type": "string",
+            "description": "Número de torres do empreendimento"
+          },
+          "floors": {
+            "type": "string",
+            "description": "Número de andares do empreendimento"
+          },
+          "period": {
+            "type": "string",
+            "description": "Período do empreendimento"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status do empreendimento"
+          },
+          "stock": {
+            "type": "string",
+            "description": "Estoque do empreendimento"
+          },
+          "total_units": {
+            "type": "string",
+            "description": "Quantidade total de unidades do empreendimento"
+          },
+          "builder_name": {
+            "type": "string",
+            "description": "Nome da construtora do empreendimento"
+          },
+          "standard": {
+            "type": "string",
+            "description": "Padrão do Empreendimento"
+          },
+          "last_update": {
+            "type": "string",
+            "description": "Data da última atualização do empreendimento"
+          },
+          "incorporators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncorporatorResource"
+            }
+          },
+          "typologies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TypologyResource"
+            }
+          }
+        },
+        "required": [
+          "building_id",
+          "name",
+          "release_date",
+          "building_type",
+          "zipcode",
+          "address",
+          "address_number",
+          "neighborhood",
+          "city_id",
+          "city",
+          "state",
+          "latitude",
+          "longitude",
+          "towers",
+          "floors",
+          "period",
+          "status",
+          "stock",
+          "total_units",
+          "builder_name",
+          "standard",
+          "last_update"
+        ],
+        "title": "BuildingResource"
+      },
+      "BuildingTypes": {
+        "type": "string",
+        "enum": [
+          "Vertical",
+          "Horizontal",
+          "Comercial",
+          "Hotel"
+        ],
+        "title": "BuildingTypes"
+      },
+      "BuildingWithHistoricResource": {
+        "type": "object",
+        "properties": {
+          "building_id": {
+            "type": "string",
+            "description": "Identificador (id) do empreendimento"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome do empreendimento"
+          },
+          "release_date": {
+            "type": "string",
+            "description": "Data de lançamento do empreendimento"
+          },
+          "delivery_date": {
+            "type": "string",
+            "description": "Data de entrega do Empreendimento"
+          },
+          "building_type": {
+            "type": "string",
+            "description": "Tipo do empreendimento"
+          },
+          "zipcode": {
+            "type": "string",
+            "description": "CEP do empreendimento"
+          },
+          "address": {
+            "type": "string",
+            "description": "Endereço do empreendimento"
+          },
+          "address_number": {
+            "type": "string",
+            "description": "Número do endereço do empreendimento"
+          },
+          "neighborhood": {
+            "type": "string",
+            "description": "Bairro do endereço do empreendimento"
+          },
+          "city_id": {
+            "type": "string",
+            "description": "Identificador (id) da cidade do empreendimento"
+          },
+          "city": {
+            "type": "string",
+            "description": "Nome da cidade do empreendimento"
+          },
+          "state": {
+            "type": "string",
+            "description": "Sigla da unidade federativa (UF) da cidade do empreendimento"
+          },
+          "latitude": {
+            "type": "string",
+            "description": "Latitude do empreendimento"
+          },
+          "longitude": {
+            "type": "string",
+            "description": "Longitude do empreendimento"
+          },
+          "towers": {
+            "type": "string",
+            "description": "Número de torres do empreendimento"
+          },
+          "floors": {
+            "type": "string",
+            "description": "Número de andares do empreendimento"
+          },
+          "elevators": {
+            "type": "string",
+            "description": "Número Elevadores do empreendimento"
+          },
+          "period": {
+            "type": "string",
+            "description": "Último Período do empreendimento"
+          },
+          "time_on_sale": {
+            "type": "string",
+            "description": "Tempo de venda do Empreendimento (Número de meses passados desde o lançamento até o último período do empreendimento)"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status Atual do empreendimento"
+          },
+          "total_stock": {
+            "type": "string",
+            "description": "Estoque Atual do empreendimento"
+          },
+          "total_units": {
+            "type": "string",
+            "description": "Quantidade total de unidades do empreendimento"
+          },
+          "builder_name": {
+            "type": "string",
+            "description": "Nome da construtora do empreendimento"
+          },
+          "standard": {
+            "type": "string",
+            "description": "Padrão do Empreendimento"
+          },
+          "interest_rate_index": {
+            "type": "string",
+            "description": "Indíce de juros"
+          },
+          "interest_rate_tax": {
+            "type": "string",
+            "description": "Taxa de juros"
+          },
+          "bank_financing": {
+            "type": "string",
+            "description": "Financiamento Bancário"
+          },
+          "own_financing": {
+            "type": "string",
+            "description": "Financiamento Próprio"
+          },
+          "fiduciary_ownership": {
+            "type": "string",
+            "description": "Alienação Fiduciária"
+          },
+          "down_payment_percentage": {
+            "type": "string",
+            "description": "Porcentagem de entrada"
+          },
+          "discount_percentage": {
+            "type": "string",
+            "description": "Percentual de desconto para compra à vista"
+          },
+          "number_of_installments": {
+            "type": "string",
+            "description": "Número de parcelas"
+          },
+          "last_update": {
+            "type": "string",
+            "description": "Data da última atualização do empreendimento"
+          },
+          "incorporators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncorporatorResource"
+            }
+          },
+          "typologies_history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TypologyHistoryResource"
+            }
+          },
+          "areas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AreaResource"
+            }
+          }
+        },
+        "required": [
+          "building_id",
+          "name",
+          "release_date",
+          "delivery_date",
+          "building_type",
+          "zipcode",
+          "address",
+          "address_number",
+          "neighborhood",
+          "city_id",
+          "city",
+          "state",
+          "latitude",
+          "longitude",
+          "towers",
+          "floors",
+          "elevators",
+          "period",
+          "time_on_sale",
+          "status",
+          "total_stock",
+          "total_units",
+          "builder_name",
+          "standard",
+          "interest_rate_index",
+          "interest_rate_tax",
+          "bank_financing",
+          "own_financing",
+          "fiduciary_ownership",
+          "down_payment_percentage",
+          "discount_percentage",
+          "number_of_installments",
+          "last_update"
+        ],
+        "title": "BuildingWithHistoricResource"
+      },
+      "CityResource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID da cidade"
+          },
+          "city": {
+            "type": "string",
+            "description": "Nome da cidade"
+          },
+          "state": {
+            "type": "string",
+            "description": "Sigla da unidade federativa"
+          },
+          "region": {
+            "type": "string",
+            "description": "Região da cidade"
+          },
+          "last_period": {
+            "type": "string",
+            "description": "último período de monitoramento"
+          }
+        },
+        "required": [
+          "id",
+          "city",
+          "state",
+          "region",
+          "last_period"
+        ],
+        "title": "CityResource"
+      },
+      "IVVResource": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "description": "Período"
+          },
+          "group": {
+            "type": "string",
+            "description": "Padrão ou tipologia (número de dormitórios), dependendo do que foi solicitado no parâmetro 'group_by'"
+          },
+          "building_type": {
+            "type": "string",
+            "description": "Tipo de empreendimento"
+          },
+          "ivv": {
+            "type": "string",
+            "description": "IVV - Índice de Velocidade de Vendas no período"
+          }
+        },
+        "required": [
+          "period",
+          "group",
+          "building_type",
+          "ivv"
+        ],
+        "title": "IVVResource"
+      },
+      "IncorporatorResource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificador (id) da incorporadora"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome da incorporadora"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "IncorporatorResource"
+      },
+      "MediumPricesMeterResource": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "description": "Período"
+          },
+          "group": {
+            "type": "string",
+            "description": "Padrão ou tipologia (número de dormitórios), dependendo do que foi solicitado no parâmetro 'group_by'"
+          },
+          "building_type": {
+            "type": "string",
+            "description": "Tipo de empreendimento"
+          },
+          "average_price_per_meter": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Preço médio por metro quadrado"
+          }
+        },
+        "required": [
+          "period",
+          "group",
+          "building_type",
+          "average_price_per_meter"
+        ],
+        "title": "MediumPricesMeterResource"
+      },
+      "MediumPricesResource": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "description": "Período"
+          },
+          "group": {
+            "type": "string",
+            "description": "Padrão ou tipologia (número de dormitórios), dependendo do que foi solicitado no parâmetro 'group_by'"
+          },
+          "building_type": {
+            "type": "string",
+            "description": "Tipo de empreendimento"
+          },
+          "average_price": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Preço médio das unidades"
+          }
+        },
+        "required": [
+          "period",
+          "group",
+          "building_type",
+          "average_price"
+        ],
+        "title": "MediumPricesResource"
+      },
+      "ReleasesResource": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "description": "Período"
+          },
+          "group": {
+            "type": "string",
+            "description": "Padrão ou tipologia (número de dormitórios), dependendo do que foi solicitado no parâmetro 'group_by'"
+          },
+          "building_type": {
+            "type": "string",
+            "description": "Tipo de empreendimento"
+          },
+          "releases_in_period": {
+            "type": "integer",
+            "description": "Número de unidades Lançadas no período"
+          }
+        },
+        "required": [
+          "period",
+          "group",
+          "building_type",
+          "releases_in_period"
+        ],
+        "title": "ReleasesResource"
+      },
+      "SalesResource": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "description": "Período"
+          },
+          "group": {
+            "type": "string",
+            "description": "Padrão ou tipologia (número de dormitórios), dependendo do que foi solicitado no parâmetro 'group_by'"
+          },
+          "building_type": {
+            "type": "string",
+            "description": "Tipo de empreendimento"
+          },
+          "liquid_sales": {
+            "type": "integer",
+            "description": "Vendas Líquidas de unidades no período"
+          },
+          "vgv_liquid_sales": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Valor Geral de Vendas (VGV) das Vendas Líquidas de unidades no período"
+          }
+        },
+        "required": [
+          "period",
+          "group",
+          "building_type",
+          "liquid_sales",
+          "vgv_liquid_sales"
+        ],
+        "title": "SalesResource"
+      },
+      "StockResource": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "description": "Período"
+          },
+          "group": {
+            "type": "string",
+            "description": "Padrão ou tipologia (número de dormitórios), dependendo do que foi solicitado no parâmetro 'group_by'"
+          },
+          "building_type": {
+            "type": "string",
+            "description": "Tipo de empreendimento"
+          },
+          "stock": {
+            "type": "integer",
+            "description": "Estoque de unidades disponíveis no período"
+          },
+          "vgv_stock": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Valor Geral de Vendas (VGV) do estoque de unidades disponíveis no período"
+          }
+        },
+        "required": [
+          "period",
+          "group",
+          "building_type",
+          "stock",
+          "vgv_stock"
+        ],
+        "title": "StockResource"
+      },
+      "TypologyHistoryResource": {
+        "type": "object",
+        "properties": {
+          "typology_id": {
+            "type": "string",
+            "description": "Identificador (id) da tipologia"
+          },
+          "building_status": {
+            "type": "string",
+            "description": "Status do Empreendimento no Período"
+          },
+          "time_on_sale": {
+            "type": "string",
+            "description": "Tempo de venda (Número de meses passados desde o lançamento até o período)"
+          },
+          "type_of_typology": {
+            "type": "string",
+            "description": "Tipo da tipologia"
+          },
+          "garage": {
+            "type": "string",
+            "description": "Número de vagas de garagem da tipologia"
+          },
+          "qty": {
+            "type": "string",
+            "description": "Oferta inicial da tipologia"
+          },
+          "number_bedroom": {
+            "type": "string",
+            "description": "Número de dormitórios da tipologia"
+          },
+          "private_area": {
+            "type": "number",
+            "description": "Área privativa da tipologia"
+          },
+          "public_area": {
+            "type": "number",
+            "description": "Área pública da tipologia"
+          },
+          "release_price": {
+            "type": "number",
+            "description": "Preço de Lançamento da tipologia"
+          },
+          "period": {
+            "type": "string",
+            "description": "Período do Histórico"
+          },
+          "price": {
+            "type": "number",
+            "description": "Preço da tipologia no período"
+          },
+          "price_private_area": {
+            "type": "number",
+            "description": "Preço por m² da tipologia"
+          },
+          "price_public_area": {
+            "type": "number",
+            "description": "Preço por m² da área pública da tipologia"
+          },
+          "vgv_total": {
+            "type": "number",
+            "description": "VGV Total da tipologia (qtyprice)"
+          },
+          "vgv_stock": {
+            "type": "number",
+            "description": "VGV Estoque da tipologia (stockprice)"
+          },
+          "typology_stock": {
+            "type": "string",
+            "description": "Estoque da tipologia no período"
+          },
+          "sold": {
+            "type": "string",
+            "description": "Quantidade de unidades vendidas até o período"
+          },
+          "sold_in_period": {
+            "type": "string",
+            "description": "Quantidade de unidades vendidas no período"
+          }
+        },
+        "required": [
+          "typology_id",
+          "building_status",
+          "time_on_sale",
+          "type_of_typology",
+          "garage",
+          "qty",
+          "number_bedroom",
+          "private_area",
+          "public_area",
+          "release_price",
+          "period",
+          "price",
+          "price_private_area",
+          "price_public_area",
+          "vgv_total",
+          "vgv_stock",
+          "typology_stock",
+          "sold",
+          "sold_in_period"
+        ],
+        "title": "TypologyHistoryResource"
+      },
+      "TypologyResource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificador (id) da tipologia"
+          },
+          "private_area": {
+            "type": "number",
+            "description": "Área privativa da tipologia"
+          },
+          "public_area": {
+            "type": "number",
+            "description": "Área pública da tipologia"
+          },
+          "price": {
+            "type": "number",
+            "description": "Preço da tipologia"
+          },
+          "price_private_area": {
+            "type": "number",
+            "description": "Preço por m² da tipologia"
+          },
+          "price_public_area": {
+            "type": "number",
+            "description": "Preço por m² da área pública da tipologia"
+          },
+          "type_of_typology": {
+            "type": "string",
+            "description": "Tipo da tipologia"
+          },
+          "stock": {
+            "type": "string",
+            "description": "Estoque da tipologia"
+          },
+          "sold": {
+            "type": "string",
+            "description": "Quantidade de unidades vendidas"
+          },
+          "number_bedroom": {
+            "type": "string",
+            "description": "Número de dormitórios da tipologia"
+          },
+          "garage": {
+            "type": "string",
+            "description": "Número de vagas de garagem da tipologia"
+          },
+          "qty": {
+            "type": "string",
+            "description": "Oferta inicial da tipologia"
+          }
+        },
+        "required": [
+          "id",
+          "private_area",
+          "public_area",
+          "price",
+          "price_private_area",
+          "price_public_area",
+          "type_of_typology",
+          "stock",
+          "sold",
+          "number_bedroom",
+          "garage",
+          "qty"
+        ],
+        "title": "TypologyResource"
+      }
+    },
+    "responses": {
+      "ValidationException": {
+        "description": "Validation error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "description": "Errors overview."
+                },
+                "errors": {
+                  "type": "object",
+                  "description": "A detailed description of each field that failed validation.",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "message",
+                "errors"
+              ]
+            }
+          }
+        }
+      },
+      "AuthenticationException": {
+        "description": "Unauthenticated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "description": "Error overview."
+                }
+              },
+              "required": [
+                "message"
+              ]
+            }
+          }
+        }
+      },
+      "AuthorizationException": {
+        "description": "Authorization error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "description": "Error overview."
+                }
+              },
+              "required": [
+                "message"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

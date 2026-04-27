@@ -1389,7 +1389,7 @@ export default function Index() {
 
   if (studyQuery.isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background text-sm text-muted-foreground">
+      <div className="flex h-full w-full items-center justify-center bg-background text-sm text-muted-foreground">
         Carregando pacote do estudo...
       </div>
     );
@@ -1398,14 +1398,14 @@ export default function Index() {
   if (studyQuery.isError || !empreendimentos) {
     const msg = studyQuery.error instanceof Error ? studyQuery.error.message : 'erro desconhecido';
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background p-8 text-center text-sm text-destructive">
+      <div className="flex h-full w-full items-center justify-center bg-background p-8 text-center text-sm text-destructive">
         Falha ao iniciar modo estudo: {msg}
       </div>
     );
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-background">
+    <div className="relative h-full w-full overflow-hidden bg-background">
       <StudyMap
         points={coloredPointCollection}
         area={activeArea}
