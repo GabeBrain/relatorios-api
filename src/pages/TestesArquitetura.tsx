@@ -34,7 +34,7 @@ const HEADER_COLS = [
 ];
 
 const FOOTER_COLS = [
-  'Estoque por Tipologia', '% Dispon.', 'Vagas de Garagem', '_blank_',
+  'Estoque por Tipologia', '% Dispon.', 'Vagas de Garagem',
   'VGV Estoque', 'm² Estoque', 'R$/m²\nEstoque',
   'VGV Lançado', 'm² Lançado', 'R$/m² Lançado',
   'VGV Vendas Brutas', 'VGV Distratos', 'Vendas Líquidas',
@@ -345,7 +345,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
       // BM = BK / BL
       const r_m2_estoque = (vgvEstoque !== null && m2Estoque > 0)
         ? Math.round((vgvEstoque / m2Estoque) * 100) / 100
-        : null;
+        : 0;
       const latestSold = toNum(last.sold_in_period) ?? 0;
       const currentPrice = toNum(last.price) ?? 0;
       // BQ = O × S
@@ -387,7 +387,6 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
         'Estoque por Tipologia': stock,
         '% Dispon.': pctDisp,
         'Vagas de Garagem': toNum(last.garage),
-        '_blank_': null,
         'VGV Estoque': vgvEstoque,
         'm² Estoque': m2Estoque,
         'R$/m²\nEstoque': r_m2_estoque,
@@ -415,9 +414,8 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
 async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: string[], city: string, lastQ: string): Promise<void> {
   const { utils, writeFile } = await import('xlsx');
   const allCols = [...HEADER_COLS, ...quarterCols.map((q) => `Vendas líquidas ${q}`), ...FOOTER_COLS];
-  const displayCols = allCols.map((c) => c === '_blank_' ? '' : c);
   const sheetRows = (rows: Row[]) =>
-    [displayCols, ...rows.map((row) => allCols.map((c) => c === '_blank_' ? null : row[c] ?? null))];
+    [allCols, ...rows.map((row) => allCols.map((c) => row[c] ?? null))];
   const sfx = qSheet(lastQ);
   const wb = utils.book_new();
   utils.book_append_sheet(wb, utils.aoa_to_sheet(sheetRows(activeRows)), `CONSOLIDADA ${sfx}`);
@@ -758,7 +756,7 @@ function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }
   const allCols = [
     ...HEADER_COLS,
     ...quarterCols.map((q) => `Vendas líquidas ${q}`),
-    ...FOOTER_COLS.filter((c) => c !== '_blank_'),
+    ...FOOTER_COLS,
   ];
   if (rows.length === 0) return <p className="text-xs text-muted-foreground py-4">Nenhum dado.</p>;
   return (
