@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
@@ -180,10 +181,7 @@ async function fetchLane(
     const meta = (d.meta as Record<string, unknown>) ?? {};
     const lastPage = (meta.last_page as number) ?? 1;
 
-    let newAllIds = 0;
-    let newEligible = 0;
-    let newActive = 0;
-    let newInactive = 0;
+    let newAllIds = 0; let newEligible = 0; let newActive = 0; let newInactive = 0;
 
     for (const item of items) {
       const it = item as Record<string, unknown>;
@@ -197,21 +195,13 @@ async function fetchLane(
         eligibleSeen.add(bid);
         eligibleIds.push(bid);
         newEligible++;
-
         const itStatus = ((it.status as string) ?? status).trim();
         if (itStatus === 'Ativo') { eligibleActiveIds.push(bid); newActive++; }
         else { eligibleInactiveIds.push(bid); newInactive++; }
       }
     }
 
-    onPage({
-      pagesTotal: page === 1 ? lastPage : 0,
-      pagesDone: 1,
-      totalFound: newAllIds,
-      eligibleFound: newEligible,
-      activeFound: newActive,
-      inactiveFound: newInactive,
-    });
+    onPage({ pagesTotal: page === 1 ? lastPage : 0, pagesDone: 1, totalFound: newAllIds, eligibleFound: newEligible, activeFound: newActive, inactiveFound: newInactive });
 
     if (page >= lastPage) break;
     page++;
@@ -221,29 +211,16 @@ async function fetchLane(
 }
 
 interface PreviewResult {
-  totalCity: number;
-  eligibleTotal: number;
-  eligibleActive: number;
-  eligibleInactive: number;
-  eligibleIds: number[];
-  activeIds: number[];
-  inactiveIds: number[];
-  failedCalls: number;
-  etaSeconds: number;
+  totalCity: number; eligibleTotal: number; eligibleActive: number; eligibleInactive: number;
+  eligibleIds: number[]; activeIds: number[]; inactiveIds: number[];
+  failedCalls: number; etaSeconds: number;
 }
 
 async function collectPreview(
-  city: string,
-  uf: string,
-  types: string[],
-  statuses: string[],
-  startQ: string,
-  token: string,
-  signal: AbortSignal,
-  onLiveStats: (stats: LiveStats) => void,
+  city: string, uf: string, types: string[], statuses: string[], startQ: string,
+  token: string, signal: AbortSignal, onLiveStats: (stats: LiveStats) => void,
 ): Promise<PreviewResult> {
   const pairs = statuses.flatMap((s) => types.map((t) => ({ status: s, type: t })));
-
   const live: LiveStats = { pagesTotal: 0, pagesDone: 0, totalFound: 0, eligibleFound: 0, activeFound: 0, inactiveFound: 0, failedCalls: 0 };
 
   function applyDelta(delta: Partial<LiveStats>) {
@@ -257,14 +234,10 @@ async function collectPreview(
     pairs.map(({ status, type }) => fetchLane(status, type, city, uf, startQ, token, signal, applyDelta))
   );
 
-  const allSeen = new Set<number>();
-  const eligibleSeen = new Set<number>();
-  const activeSeen = new Set<number>();
-  const inactiveSeen = new Set<number>();
-  const allIds: number[] = [];
-  const eligibleIds: number[] = [];
-  const activeIds: number[] = [];
-  const inactiveIds: number[] = [];
+  const allSeen = new Set<number>(); const eligibleSeen = new Set<number>();
+  const activeSeen = new Set<number>(); const inactiveSeen = new Set<number>();
+  const allIds: number[] = []; const eligibleIds: number[] = [];
+  const activeIds: number[] = []; const inactiveIds: number[] = [];
   let failedCalls = 0;
 
   for (const r of settled) {
@@ -272,22 +245,15 @@ async function collectPreview(
     const lane = r.value;
     failedCalls += lane.failedCalls;
     for (const id of lane.allIds) { if (!allSeen.has(id)) { allSeen.add(id); allIds.push(id); } }
-    for (const id of lane.eligibleIds) {
-      if (!eligibleSeen.has(id)) { eligibleSeen.add(id); eligibleIds.push(id); }
-    }
+    for (const id of lane.eligibleIds) { if (!eligibleSeen.has(id)) { eligibleSeen.add(id); eligibleIds.push(id); } }
     for (const id of lane.eligibleActiveIds) { if (!activeSeen.has(id)) { activeSeen.add(id); activeIds.push(id); } }
     for (const id of lane.eligibleInactiveIds) { if (!inactiveSeen.has(id)) { inactiveSeen.add(id); inactiveIds.push(id); } }
   }
 
   return {
-    totalCity: allIds.length,
-    eligibleTotal: eligibleIds.length,
-    eligibleActive: activeIds.length,
-    eligibleInactive: inactiveIds.length,
-    eligibleIds,
-    activeIds,
-    inactiveIds,
-    failedCalls,
+    totalCity: allIds.length, eligibleTotal: eligibleIds.length,
+    eligibleActive: activeIds.length, eligibleInactive: inactiveIds.length,
+    eligibleIds, activeIds, inactiveIds, failedCalls,
     etaSeconds: eligibleIds.length * ESTIMATED_SECONDS_PER_DETAIL / DETAIL_CONCURRENCY,
   };
 }
@@ -450,38 +416,58 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
 
 type TimeMetric = 'sold_in_period' | 'typology_stock' | 'pct_avail' | 'price' | 'price_private_area' | 'vgv_stock';
 
-const TIME_METRICS: { key: TimeMetric; label: string; agg: 'sum' | 'avg'; description: string; format: (v: number) => string }[] = [
+const TIME_METRICS: {
+  key: TimeMetric; label: string; agg: 'sum' | 'avg';
+  description: string; format: (v: number) => string; axis: 'left' | 'right';
+}[] = [
   {
-    key: 'sold_in_period', label: 'Vendas (unidades)', agg: 'sum',
+    key: 'sold_in_period', label: 'Vendas (unidades)', agg: 'sum', axis: 'left',
     description: 'Total de unidades vendidas por trimestre',
     format: (v) => v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
   },
   {
-    key: 'typology_stock', label: 'Estoque (unidades)', agg: 'sum',
+    key: 'typology_stock', label: 'Estoque (unidades)', agg: 'sum', axis: 'left',
     description: 'Total de unidades em estoque por trimestre',
     format: (v) => v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
   },
   {
-    key: 'pct_avail', label: '% Disponibilidade', agg: 'avg',
+    key: 'pct_avail', label: '% Disponibilidade', agg: 'avg', axis: 'left',
     description: 'Percentual médio de unidades disponíveis',
     format: (v) => `${(v * 100).toFixed(1)}%`,
   },
   {
-    key: 'price', label: 'Preço médio (R$)', agg: 'avg',
+    key: 'price', label: 'Preço médio (R$)', agg: 'avg', axis: 'right',
     description: 'Preço médio por unidade entre todas as tipologias',
-    format: (v) => v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(2)}M` : `R$ ${(v / 1_000).toFixed(0)}k`,
+    format: (v) => v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(2)}M` : `R$ ${(v / 1_000).toFixed(0)}k`,
   },
   {
-    key: 'price_private_area', label: 'R$/m² médio', agg: 'avg',
+    key: 'price_private_area', label: 'R$/m² médio', agg: 'avg', axis: 'right',
     description: 'Preço médio por metro quadrado privativo',
-    format: (v) => `R$ ${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`,
+    format: (v) => `R$ ${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`,
   },
   {
-    key: 'vgv_stock', label: 'VGV Estoque', agg: 'sum',
+    key: 'vgv_stock', label: 'VGV Estoque', agg: 'sum', axis: 'right',
     description: 'Valor Geral de Vendas do estoque disponível por trimestre',
-    format: (v) => v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1)}M` : `R$ ${(v / 1_000).toFixed(0)}k`,
+    format: (v) => v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1)}M` : `R$ ${(v / 1_000).toFixed(0)}k`,
   },
 ];
+
+// Brand colors per metric: greens for left-axis (units), blues for right-axis (prices)
+const LINE_COLORS: Record<TimeMetric, string> = {
+  sold_in_period:     '#4d7c0f',
+  typology_stock:     '#2563eb',
+  pct_avail:          '#65a30d',
+  price:              '#1d4ed8',
+  price_private_area: '#84cc16',
+  vgv_stock:          '#3b82f6',
+};
+
+// Bar chart: single green family, darkest → lightest (bars sorted desc)
+const BAR_GREEN_SHADES = ['#3f6212', '#4d7c0f', '#65a30d', '#84cc16', '#a3e635', '#bef264', '#d9f99d', '#ecfccb'];
+function barGreen(i: number, total: number): string {
+  const idx = Math.round((i / Math.max(total - 1, 1)) * (BAR_GREEN_SHADES.length - 1));
+  return BAR_GREEN_SHADES[Math.min(idx, BAR_GREEN_SHADES.length - 1)];
+}
 
 function buildTimeseriesData(
   buildings: Record<string, unknown>[],
@@ -522,6 +508,23 @@ function buildTimeseriesData(
   });
 }
 
+// Multi-metric timeseries: returns rows with one key per selected metric
+function buildMultiTimeseriesData(
+  buildings: Record<string, unknown>[],
+  quarterCols: string[],
+  metrics: TimeMetric[],
+): Record<string, number | string | null>[] {
+  const seriesMap = new Map<TimeMetric, (number | null)[]>();
+  for (const metric of metrics) {
+    seriesMap.set(metric, buildTimeseriesData(buildings, quarterCols, metric).map((d) => d.value));
+  }
+  return quarterCols.map((q, i) => {
+    const row: Record<string, number | string | null> = { quarter: qLabel(q) };
+    for (const metric of metrics) row[metric] = seriesMap.get(metric)?.[i] ?? null;
+    return row;
+  });
+}
+
 // ── sub-components ────────────────────────────────────────────────────────────
 
 function BrainLogoProgress({ pct, label }: { pct: number; label?: string }) {
@@ -542,19 +545,8 @@ function BrainLogoProgress({ pct, label }: { pct: number; label?: string }) {
   );
 }
 
-// Large centered overlay for the detail-fetch phase
-function FetchingOverlay({
-  pct,
-  done,
-  total,
-  failed,
-  onAbort,
-}: {
-  pct: number;
-  done: number;
-  total: number;
-  failed: number;
-  onAbort: () => void;
+function FetchingOverlay({ pct, done, total, failed, onAbort }: {
+  pct: number; done: number; total: number; failed: number; onAbort: () => void;
 }) {
   const clipped = Math.max(0, Math.min(100, pct));
   return (
@@ -562,25 +554,20 @@ function FetchingOverlay({
       <div className="relative w-64 h-32 mb-6">
         <img src={brainLogo} alt="" className="absolute inset-0 w-full h-full object-contain opacity-10" />
         <img
-          src={brainLogo}
-          alt=""
+          src={brainLogo} alt=""
           className="absolute inset-0 w-full h-full object-contain"
           style={{ clipPath: `inset(0 ${100 - clipped}% 0 0)` }}
         />
       </div>
-
       <p className="text-sm font-medium text-foreground animate-pulse">Carregando...</p>
-
       {total > 0 && (
         <p className="text-xs text-muted-foreground mt-2">
           {done.toLocaleString('pt-BR')} / {total.toLocaleString('pt-BR')} empreendimentos
           {failed > 0 && <span className="text-amber-500 ml-2">· {failed} falha(s)</span>}
         </p>
       )}
-
       <button
-        type="button"
-        onClick={onAbort}
+        type="button" onClick={onAbort}
         className="mt-6 flex items-center gap-1.5 text-xs text-red-500 hover:text-red-400 transition-colors"
       >
         <X className="h-3.5 w-3.5" />
@@ -590,113 +577,150 @@ function FetchingOverlay({
   );
 }
 
-function TimeseriesChart({
-  buildings,
-  quarterCols,
-}: {
+function TimeseriesChart({ buildings, quarterCols }: {
   buildings: Record<string, unknown>[];
   quarterCols: string[];
 }) {
-  const [metric, setMetric] = useState<TimeMetric>('sold_in_period');
-  const def = TIME_METRICS.find((m) => m.key === metric)!;
-  const data = buildTimeseriesData(buildings, quarterCols, metric);
+  const [selectedMetrics, setSelectedMetrics] = useState<TimeMetric[]>(['sold_in_period']);
 
-  // abbreviated Y-axis tick
-  function tickFmt(v: number) {
-    if (metric === 'pct_avail') return `${(v * 100).toFixed(0)}%`;
-    if (metric === 'vgv_stock' || metric === 'price') {
-      if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
-      if (v >= 1_000) return `${(v / 1_000).toFixed(0)}k`;
-    }
-    if (metric === 'price_private_area') {
-      if (v >= 1_000) return `${(v / 1_000).toFixed(0)}k`;
-    }
+  function toggleMetric(key: TimeMetric) {
+    setSelectedMetrics((prev) => {
+      if (prev.includes(key)) return prev.length > 1 ? prev.filter((k) => k !== key) : prev;
+      return [...prev, key];
+    });
+  }
+
+  const data = buildMultiTimeseriesData(buildings, quarterCols, selectedMetrics);
+
+  const leftMetrics = selectedMetrics.filter((k) => TIME_METRICS.find((m) => m.key === k)?.axis === 'left');
+  const rightMetrics = selectedMetrics.filter((k) => TIME_METRICS.find((m) => m.key === k)?.axis === 'right');
+  const hasLeft = leftMetrics.length > 0;
+  const hasRight = rightMetrics.length > 0;
+
+  const firstLeftDef = TIME_METRICS.find((m) => leftMetrics.includes(m.key));
+  const firstRightDef = TIME_METRICS.find((m) => rightMetrics.includes(m.key));
+
+  function leftTickFmt(v: number) {
+    if (!firstLeftDef) return String(v);
+    if (firstLeftDef.key === 'pct_avail') return `${(v * 100).toFixed(0)}%`;
+    if (v >= 1_000) return `${(v / 1_000).toFixed(0)}k`;
     return v.toFixed(0);
   }
 
+  function rightTickFmt(v: number) {
+    if (!firstRightDef) return String(v);
+    if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
+    if (v >= 1_000) return `${(v / 1_000).toFixed(0)}k`;
+    return v.toFixed(0);
+  }
+
+  const activeDef = selectedMetrics.length === 1
+    ? TIME_METRICS.find((m) => m.key === selectedMetrics[0])
+    : undefined;
+
   return (
-    <div className="rounded-xl overflow-hidden" style={{ background: '#07070f', border: '1px solid #1a1a2e' }}>
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid #1a1a2e' }}>
+      <div className="flex items-start justify-between px-4 py-3 border-b border-border">
         <div>
-          <p className="text-sm font-semibold text-white">Série Histórica</p>
-          <p className="text-xs mt-0.5" style={{ color: '#4b5563' }}>{def.description}</p>
+          <p className="text-sm font-semibold">Série Histórica</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {activeDef ? activeDef.description : 'Múltiplas variáveis — eixo esquerdo: unidades, direito: valores (R$)'}
+          </p>
         </div>
-        <Select value={metric} onValueChange={(v) => setMetric(v as TimeMetric)}>
-          <SelectTrigger
-            className="h-7 text-xs w-48"
-            style={{ background: '#0f0f1e', borderColor: '#1a1a2e', color: '#9ca3af' }}
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {TIME_METRICS.map((m) => (
-              <SelectItem key={m.key} value={m.key}>{m.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      </div>
+
+      {/* Metric selector pills */}
+      <div className="flex flex-wrap gap-2 px-4 pt-3 pb-1">
+        {TIME_METRICS.map((m) => {
+          const isSelected = selectedMetrics.includes(m.key);
+          const color = LINE_COLORS[m.key];
+          return (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => toggleMetric(m.key)}
+              className={cn(
+                'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border transition-all font-medium',
+                isSelected ? 'text-foreground' : 'text-muted-foreground border-border/60 hover:border-border'
+              )}
+              style={isSelected ? { borderColor: color, backgroundColor: color + '18', color } : {}}
+            >
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ background: isSelected ? color : 'currentColor', opacity: isSelected ? 1 : 0.35 }}
+              />
+              {m.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Chart */}
-      <div className="px-2 pt-4 pb-3">
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={data} margin={{ top: 4, right: 24, left: 0, bottom: 4 }}>
-            <CartesianGrid stroke="#111122" strokeDasharray="4 4" vertical={false} />
+      <div className="px-2 pt-2 pb-3">
+        <ResponsiveContainer width="100%" height={230}>
+          <LineChart data={data} margin={{ top: 8, right: hasRight ? 16 : 24, left: 0, bottom: 4 }}>
+            <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="4 4" vertical={false} />
             <XAxis
               dataKey="quarter"
-              tick={{ fill: '#4b5563', fontSize: 9 }}
-              axisLine={{ stroke: '#1a1a2e' }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 9 }}
+              axisLine={{ stroke: 'hsl(var(--border))' }}
               tickLine={false}
               interval="preserveStartEnd"
             />
-            <YAxis
-              tick={{ fill: '#4b5563', fontSize: 9 }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={tickFmt}
-              width={56}
-            />
+            {hasLeft && (
+              <YAxis
+                yAxisId="left"
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={leftTickFmt}
+                width={52}
+              />
+            )}
+            {hasRight && (
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={rightTickFmt}
+                width={60}
+              />
+            )}
             <Tooltip
               contentStyle={{
-                backgroundColor: '#0f0f1e',
-                border: '1px solid #1a1a2e',
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
                 borderRadius: '8px',
                 fontSize: 11,
               }}
-              labelStyle={{ color: '#d1d5db', marginBottom: 4 }}
-              itemStyle={{ color: '#a855f7' }}
-              formatter={(v: number) => [def.format(v), def.label]}
+              labelStyle={{ color: 'hsl(var(--foreground))', marginBottom: 4 }}
+              formatter={(value: number, name: string) => {
+                const def = TIME_METRICS.find((m) => m.key === name);
+                return [def ? def.format(value) : value, def?.label ?? name];
+              }}
             />
-            <Line
-              type="monotone"
-              dataKey="value"
-              stroke="#a855f7"
-              strokeWidth={2}
-              dot={{ fill: '#a855f7', r: 3, strokeWidth: 0 }}
-              activeDot={{ r: 5, fill: '#c084fc', strokeWidth: 0 }}
-              connectNulls={false}
-            />
+            {selectedMetrics.map((key) => {
+              const def = TIME_METRICS.find((m) => m.key === key)!;
+              const color = LINE_COLORS[key];
+              return (
+                <Line
+                  key={key}
+                  type="monotone"
+                  dataKey={key}
+                  yAxisId={def.axis}
+                  stroke={color}
+                  strokeWidth={2}
+                  dot={{ fill: color, r: 3, strokeWidth: 0 }}
+                  activeDot={{ r: 5, fill: color, strokeWidth: 0 }}
+                  connectNulls={false}
+                />
+              );
+            })}
           </LineChart>
         </ResponsiveContainer>
-      </div>
-
-      {/* Variable legend */}
-      <div className="flex flex-wrap gap-2 px-4 pb-3">
-        {TIME_METRICS.map((m) => (
-          <button
-            key={m.key}
-            type="button"
-            onClick={() => setMetric(m.key)}
-            className="flex items-center gap-1.5 text-[10px] transition-colors"
-            style={{ color: m.key === metric ? '#a855f7' : '#374151' }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full inline-block"
-              style={{ background: m.key === metric ? '#a855f7' : '#374151' }}
-            />
-            {m.label}
-          </button>
-        ))}
       </div>
     </div>
   );
@@ -733,8 +757,6 @@ function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }
 
 // ── main component ────────────────────────────────────────────────────────────
 
-const CHART_COLORS = ['#4d7c0f', '#2563eb', '#ca8a04', '#65a30d', '#1d4ed8', '#eab308', '#84cc16', '#3b82f6'];
-
 export default function TestesArquitetura() {
   const { getToken, hasValidToken } = useAuthStore();
 
@@ -758,7 +780,6 @@ export default function TestesArquitetura() {
     allBuildings: Record<string, unknown>[];
   } | null>(null);
 
-  // Smooth animated display percentages
   const [displayPreviewPct, setDisplayPreviewPct] = useState(0);
   const [displayFetchPct, setDisplayFetchPct] = useState(0);
   const targetPreviewRef = useRef(0);
@@ -913,7 +934,6 @@ export default function TestesArquitetura() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Fetching overlay — full-page centered logo */}
       {phase === 'fetching' && (
         <FetchingOverlay
           pct={displayFetchPct}
@@ -924,19 +944,16 @@ export default function TestesArquitetura() {
         />
       )}
 
-      {/* Header */}
       <div className="border-b border-border px-6 py-4 bg-card">
         <h1 className="text-lg font-semibold">Relatórios Secovi</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Gerador de relatório Geobrain — coleta paralela de empreendimentos por cidade.</p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
-        {/* Warning */}
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-600 dark:text-amber-400">
           <strong>Limitação da API:</strong> Distratos e vendas brutas não são fornecidos. As colunas <code>*Distratos</code>, <code>VGV Vendas Brutas</code> e <code>VGV Distratos</code> ficam em branco.
         </div>
 
-        {/* Inputs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="space-y-1">
             <Label className="text-xs">Cidade *</Label>
@@ -955,7 +972,6 @@ export default function TestesArquitetura() {
           </div>
         </div>
 
-        {/* Filters row */}
         <div className="flex flex-wrap gap-x-8 gap-y-3">
           <div className="space-y-1.5">
             <Label className="text-xs">Tipos de empreendimento</Label>
@@ -981,7 +997,6 @@ export default function TestesArquitetura() {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex flex-wrap gap-2">
           {phase !== 'preview' ? (
             <Button onClick={handlePreview} disabled={loading || !city.trim() || selectedTypes.length === 0 || selectedStatuses.length === 0} variant="outline" className="gap-2 text-xs h-8">
@@ -995,12 +1010,12 @@ export default function TestesArquitetura() {
             </Button>
           )}
 
-          {phase !== 'fetching' ? (
+          {phase !== 'fetching' && (
             <Button onClick={handleFetch} disabled={loading || !preview || preview.eligibleTotal === 0} className="gap-2 text-xs h-8">
               <Play className="h-3.5 w-3.5" />
               Buscar empreendimentos
             </Button>
-          ) : null}
+          )}
 
           {result && (
             <Button variant="outline" className="gap-2 text-xs h-8"
@@ -1011,7 +1026,7 @@ export default function TestesArquitetura() {
           )}
         </div>
 
-        {/* Preview loading — Brain logo inline */}
+        {/* Preview loading */}
         {phase === 'preview' && (
           <div className="flex items-center gap-6 rounded-lg border border-border bg-card/60 p-4">
             <BrainLogoProgress
@@ -1037,7 +1052,7 @@ export default function TestesArquitetura() {
           </div>
         )}
 
-        {/* Preview stats — only while waiting to fetch */}
+        {/* Preview stats */}
         {preview && !result && phase === 'idle' && (
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
@@ -1065,7 +1080,6 @@ export default function TestesArquitetura() {
         {/* Results */}
         {result && (
           <div className="space-y-4">
-            {/* Summary stats */}
             <div className="space-y-1">
               <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
                 {[
@@ -1083,7 +1097,7 @@ export default function TestesArquitetura() {
               <p className="text-[11px] text-muted-foreground">{result.city.toUpperCase()} · {qLabel(result.startQ)} → {qLabel(result.lastQ)}</p>
             </div>
 
-            {/* Categorical bar charts */}
+            {/* Categorical bar charts — single green gradient */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {[
                 { title: 'Tipo de empreendimento', field: 'Tipo' },
@@ -1099,7 +1113,9 @@ export default function TestesArquitetura() {
                         <YAxis tick={{ fontSize: 10 }} />
                         <Tooltip contentStyle={{ fontSize: 11 }} />
                         <Bar dataKey="count" radius={[3, 3, 0, 0]}>
-                          {chartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                          {chartData.map((_, i) => (
+                            <Cell key={i} fill={barGreen(i, chartData.length)} />
+                          ))}
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
