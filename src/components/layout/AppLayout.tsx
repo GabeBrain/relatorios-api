@@ -8,8 +8,11 @@ import {
   Bot,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Moon,
   Sun,
+  BarChart2,
+  Wrench,
 } from 'lucide-react';
 import { AuthBlock } from './AuthBlock';
 import brainLogo from '../../../assets/logoBrain.png';
@@ -23,12 +26,36 @@ interface NavItem {
   standbyLabel?: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
+interface NavGroup {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  items: NavItem[];
+}
+
+const TOP_ITEMS: NavItem[] = [
   { path: '/documentacao', label: 'Documentação', icon: <FileText className="h-4 w-4" /> },
   { path: '/testes-requisicao', label: 'Testes de Requisição', icon: <FlaskConical className="h-4 w-4" /> },
-  { path: '/relatorios-secovi', label: 'Relatórios Secovi', icon: <Building2 className="h-4 w-4" /> },
-  { path: '/assistente', label: 'Assistente', icon: <Bot className="h-4 w-4" />, standby: true },
-  { path: '/mapa', label: 'Mapa', icon: <Map className="h-4 w-4" />, standby: true, standbyLabel: '(testes)' },
+];
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    id: 'relatorios',
+    label: 'Relatórios',
+    icon: <BarChart2 className="h-4 w-4" />,
+    items: [
+      { path: '/relatorios-secovi', label: 'Relatório Secovi', icon: <Building2 className="h-4 w-4" /> },
+    ],
+  },
+  {
+    id: 'em-implementacao',
+    label: 'Em implementação',
+    icon: <Wrench className="h-4 w-4" />,
+    items: [
+      { path: '/assistente', label: 'Assistente', icon: <Bot className="h-4 w-4" /> },
+      { path: '/mapa', label: 'Mapa', icon: <Map className="h-4 w-4" />, standbyLabel: '(testes)' },
+    ],
+  },
 ];
 
 function useDarkMode() {
@@ -47,8 +74,45 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(NAV_GROUPS.map((g) => [g.id, true]))
+  );
   const { dark, toggle } = useDarkMode();
   const location = useLocation();
+
+  function toggleGroup(id: string) {
+    setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  function renderNavItem(item: NavItem) {
+    const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+    return (
+      <NavLink
+        key={item.path}
+        to={item.path}
+        className={cn(
+          'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors',
+          isActive
+            ? 'bg-primary/10 text-primary font-medium'
+            : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+          collapsed && 'justify-center px-0 py-2.5'
+        )}
+        title={collapsed ? item.label : undefined}
+      >
+        <span className="shrink-0">{item.icon}</span>
+        {!collapsed && (
+          <span className="truncate">
+            {item.label}
+            {item.standbyLabel && (
+              <span className="ml-1.5 text-[10px] text-muted-foreground font-normal">
+                {item.standbyLabel}
+              </span>
+            )}
+          </span>
+        )}
+      </NavLink>
+    );
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
@@ -78,35 +142,50 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-3 space-y-0.5 px-2">
-          {NAV_ITEMS.map((item) => {
-            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+          {/* Top-level items (sem categoria) */}
+          {TOP_ITEMS.map(renderNavItem)}
+
+          {/* Grupos com categoria */}
+          {NAV_GROUPS.map((group) => {
+            const isOpen = openGroups[group.id] ?? true;
+            const hasActiveChild = group.items.some(
+              (item) => location.pathname === item.path || location.pathname.startsWith(item.path + '/')
+            );
 
             return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors',
-                  isActive
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-                  collapsed && 'justify-center px-0 py-2.5'
-                )}
-                title={collapsed ? item.label : undefined}
-              >
-                <span className="shrink-0">{item.icon}</span>
-                {!collapsed && (
-                  <span className="truncate">
-                    {item.label}
-                    {item.standby && (
-                      <span className="ml-1.5 text-[10px] text-muted-foreground font-normal">
-                        {item.standbyLabel ?? '(stand-by)'}
+              <div key={group.id} className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => !collapsed && toggleGroup(group.id)}
+                  className={cn(
+                    'w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors',
+                    hasActiveChild
+                      ? 'text-primary font-medium'
+                      : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                    collapsed && 'justify-center px-0 py-2.5'
+                  )}
+                  title={collapsed ? group.label : undefined}
+                >
+                  <span className="shrink-0">{group.icon}</span>
+                  {!collapsed && (
+                    <>
+                      <span className="flex-1 text-left truncate text-xs font-semibold uppercase tracking-wider">
+                        {group.label}
                       </span>
-                    )}
-                  </span>
+                      <ChevronDown
+                        className={cn('h-3.5 w-3.5 shrink-0 transition-transform', isOpen && 'rotate-180')}
+                      />
+                    </>
+                  )}
+                </button>
+
+                {!collapsed && isOpen && (
+                  <div className="mt-0.5 ml-3 pl-2 border-l border-border space-y-0.5">
+                    {group.items.map(renderNavItem)}
+                  </div>
                 )}
-              </NavLink>
+              </div>
             );
           })}
         </nav>
