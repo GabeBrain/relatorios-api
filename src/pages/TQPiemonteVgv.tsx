@@ -385,6 +385,83 @@ function FormulaComparison({ salesRows, pricesRows }: { salesRows: SalesRow[]; p
   );
 }
 
+// ─── Diagrama: caminho para VGV por empreendimento ───────────────────────────
+
+function VgvFlowDiagram() {
+  const steps = [
+    {
+      endpoint: 'GET /building',
+      params: 'city=Curitiba  uf=PR  type[]=Vertical',
+      description: 'Lista os empreendimentos com seus IDs.',
+      sample: '{ "id": 1423, "name": "Residencial X", "building_type": "Vertical" }\n{ "id": 1891, "name": "Empreendimento Y", "building_type": "Vertical" }\n...',
+    },
+    {
+      endpoint: 'GET /building-with-history/{id}',
+      params: 'ex: id = 1423',
+      description: 'Uma requisição por empreendimento — retorna histórico de vendas e preços por tipologia e período.',
+      sample: '{ "period": "2024-01-01", "typology": "2 dorms 65m²",\n  "sold_units": 12, "price_private_area": 8500.00 }\n{ "period": "2024-01-01", "typology": "3 dorms 90m²",\n  "sold_units": 5,  "price_private_area": 9200.00 }\n...',
+    },
+  ];
+
+  return (
+    <div className="mt-4 rounded-lg border border-border bg-muted/20 overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-border bg-muted/40">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Diagrama — Caminho para VGV por empreendimento
+        </p>
+      </div>
+      <div className="p-4 space-y-0">
+        {steps.map((step, i) => (
+          <div key={i} className="flex gap-3">
+            {/* Timeline */}
+            <div className="flex flex-col items-center shrink-0">
+              <div className="w-6 h-6 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold flex items-center justify-center">
+                {i + 1}
+              </div>
+              {i < steps.length - 1 && (
+                <div className="w-px flex-1 min-h-[2rem] bg-border my-1" />
+              )}
+            </div>
+            {/* Content */}
+            <div className={i < steps.length - 1 ? 'pb-4 flex-1' : 'flex-1'}>
+              <div className="flex flex-wrap items-baseline gap-2">
+                <code className="text-xs font-mono font-semibold text-primary bg-primary/5 border border-primary/20 px-2 py-0.5 rounded">
+                  {step.endpoint}
+                </code>
+                <span className="text-xs text-muted-foreground font-mono">{step.params}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{step.description}</p>
+              <pre className="mt-2 rounded border border-border bg-background px-3 py-2 text-xs font-mono text-muted-foreground leading-relaxed overflow-x-auto">
+                {step.sample}
+              </pre>
+            </div>
+          </div>
+        ))}
+
+        {/* Formula */}
+        <div className="flex gap-3 mt-1">
+          <div className="flex flex-col items-center shrink-0">
+            <div className="w-6 h-6 rounded-full bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400 text-xs font-bold flex items-center justify-center">
+              3
+            </div>
+          </div>
+          <div className="flex-1">
+            <p className="text-xs text-muted-foreground">
+              Calcule o VGV somando todas as tipologias e períodos do empreendimento:
+            </p>
+            <div className="mt-2 rounded border border-green-500/20 bg-green-500/5 px-3 py-2 font-mono text-xs text-green-700 dark:text-green-400">
+              VGV = Σ ( sold_units × price_private_area × area_privativa_m² )
+            </div>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Sem dependência de agregados de cidade — dados diretos do empreendimento.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function TQPiemonteVgv() {
@@ -395,28 +472,22 @@ export default function TQPiemonteVgv() {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [draft, setDraft] = useState(`Olá Wesley,
 
-Testamos o endpoint com os mesmos parâmetros e conseguimos mapear o que está acontecendo. Vamos por partes:
+Obrigado pelo detalhamento — ficou bem claro o que você está tentando resolver. Seguem nossas respostas em ordem:
 
-[1 e 2 — City-level e segmentação interna com group: null]
-Confirmado em ambos os pontos. O endpoint /temporal-analysis-city/sales retorna exclusivamente dados agregados por cidade — sem building_id, por design. Identificamos 8 linhas para Horizontal e 7 para Vertical por período, todas com group: null. O campo group deveria identificar cada segmento interno (provavelmente faixas de padrão ou tipologias), mas está retornando nulo. Vamos verificar internamente o motivo — é possível que um ajuste na API torne essa granularidade visível.
+Sobre os dados por cidade e as múltiplas linhas com group: null
+O endpoint /temporal-analysis-city/sales foi desenhado para análises de mercado a nível municipal — a ausência de building_id é intencional. Identificamos 8 grupos para Horizontal e 7 para Vertical por período, todos com group: null. Esses grupos refletem uma segmentação interna (provavelmente faixas de padrão) cujo label não está sendo exposto. Estamos verificando internamente e, se possível, vamos expor esse discriminador em uma próxima atualização.
 
-Os campos liquid_sales e vgv_liquid_sales são confiáveis como totais city-level, mas somente somando TODAS as linhas do mesmo período+building_type. Usar uma linha isolada dá um parcial dos segmentos internos, não o total.
+Os campos liquid_sales e vgv_liquid_sales são precisos como totais city-level, desde que você some todas as linhas do mesmo período+building_type — cada linha representa apenas um segmento interno, não o total. Isso também explica por que Horizontal "ainda retorna algo": vários meses têm 0 vendas, e qualquer cálculo sobre 0 não gera distorção; com volume, o comportamento é o mesmo dos Verticais.
 
-Sobre Horizontal "ainda retornar algo": é um sintoma da segmentação. Muitos meses têm 0 vendas Horizontal — e 0 × qualquer_valor = 0, então a fórmula não distorce nesses casos. Quando há volume, o desvio em Horizontal também aparece.
+Sobre a fórmula vendasNoPeriodo × precoPeriodo
+Consegue confirmar quais endpoints e campos você usa para essas variáveis? Vai nos ajudar a fechar o diagnóstico com exatidão.
 
-[3 — Fórmula vendasNoPeriodo × precoPeriodo]
-Para fecharmos o diagnóstico com precisão: consegue nos confirmar quais endpoints e campos você está usando para vendasNoPeriodo e precoPeriodo? Isso vai nos ajudar a reproduzir o cálculo exato.
+Enquanto isso: simulamos com liquid_sales e average_price de /temporal-analysis-city/medium-prices e encontramos desvios de +119% a +248%. O motivo: vgv_liquid_sales já é o VGV city-level calculado pela API — somar esse campo para todas as linhas do período+building_type dá o resultado correto diretamente, sem multiplicação.
 
-Enquanto isso, simulamos assumindo vendasNoPeriodo = liquid_sales e precoPeriodo = average_price de /temporal-analysis-city/medium-prices (o endpoint mais natural para "preço no período"). Encontramos desvios de +119% a +248% em relação ao VGV real.
+VGV por empreendimento
+O endpoint /temporal-analysis-city/sales foca nos resultados agregados de cidades, por design. Para o histórico por empreendimento individual, o caminho é o endpoint /building-with-history/{id} — cada ID é uma requisição que retorna o histórico detalhado por tipologia e período, com os campos necessários para calcular o VGV com precisão (ver diagrama abaixo).
 
-O ponto principal: o campo vgv_liquid_sales já é o VGV city-level calculado pela API. Somar esse campo para todas as linhas do período+building_type dá o total correto — a multiplicação por average_price é desnecessária e inflaciona o resultado em 2–3×.
-
-[Caminho para VGV por empreendimento]
-Se o objetivo for VGV por empreendimento individual (não por cidade), o endpoint /temporal-analysis-city/sales não atende por design. O fluxo correto é:
-1. /building — lista os empreendimentos filtrando por city, uf e type
-2. /building-with-history/{id} — retorna histórico por tipologia com price_private_area e sold_units, os dados corretos para calcular VGV por empreendimento sem depender de agregados de cidade
-
-Aguardamos sua confirmação sobre os endpoints da fórmula para fechar o diagnóstico.`);
+Qualquer dúvida, estamos à disposição.`);
 
   const [salesRows, setSalesRows] = useState<SalesRow[] | null>(null);
   const [salesLoading, setSalesLoading] = useState(false);
@@ -866,6 +937,7 @@ Aguardamos sua confirmação sobre os endpoints da fórmula para fechar o diagn�
             className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm resize-none overflow-hidden placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             rows={1}
           />
+          <VgvFlowDiagram />
         </Collapsible>
 
       </div>
