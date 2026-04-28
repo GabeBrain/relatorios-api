@@ -84,7 +84,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(NAV_GROUPS.map((g) => [g.id, true]))
+    Object.fromEntries(NAV_GROUPS.map((g) => [g.id, false]))
   );
   const { dark, toggle } = useDarkMode();
   const location = useLocation();
