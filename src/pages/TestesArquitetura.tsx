@@ -351,12 +351,10 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
       // BQ = O × S
       const vgvVendasBrutas = latestSold && currentPrice
         ? Math.round(latestSold * currentPrice * 100) / 100
-        : null;
-      // BR = O × T — Distratos indisponível na API
-      const vgvDistratos: number | null = null;
-      const vendasLiqVgv = vgvVendasBrutas !== null
-        ? Math.round((vgvVendasBrutas - (vgvDistratos ?? 0)) * 100) / 100
         : 0;
+      // BR = O × T — Distratos indisponível na API
+      const vgvDistratos = 0;
+      const vendasLiqVgv = Math.round((vgvVendasBrutas - vgvDistratos) * 100) / 100;
 
       const row: Row = {
         'Tipo': b.building_type as string ?? '',
@@ -746,8 +744,10 @@ function formatCell(col: string, val: unknown): string {
         ? `R$ ${(val / 1_000_000).toFixed(2)}M`
         : `R$ ${val.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
     }
-    if (col === 'R$/m²\nEstoque' || col === 'R$/m² Lançado' || col === 'Valor m2 Priv.')
-      return `R$ ${val.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
+    if (
+      col === 'Preço de lançamento' || col === 'Preço atual' ||
+      col === 'Valor m2 Priv.' || col === 'R$/m²\nEstoque' || col === 'R$/m² Lançado'
+    ) return `R$ ${val.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
   }
   return String(val);
 }
