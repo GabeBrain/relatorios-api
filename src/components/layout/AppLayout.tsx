@@ -13,6 +13,7 @@ import {
   Sun,
   BarChart2,
   Wrench,
+  ClipboardList,
 } from 'lucide-react';
 import { AuthBlock } from './AuthBlock';
 import brainLogo from '../../../assets/logoBrain.png';
@@ -45,6 +46,14 @@ const NAV_GROUPS: NavGroup[] = [
     icon: <BarChart2 className="h-4 w-4" />,
     items: [
       { path: '/relatorios-secovi', label: 'Relatório Secovi', icon: <Building2 className="h-4 w-4" /> },
+    ],
+  },
+  {
+    id: 'testes-qualidade',
+    label: 'Testes de Qualidade',
+    icon: <ClipboardList className="h-4 w-4" />,
+    items: [
+      { path: '/testes-qualidade/piemonte-vgv', label: 'Piemonte | VGV Verticais', icon: <ClipboardList className="h-4 w-4" /> },
     ],
   },
   {

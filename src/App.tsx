@@ -10,6 +10,7 @@ import Documentacao from './pages/Documentacao.tsx';
 import TestesRequisicao from './pages/TestesRequisicao.tsx';
 import TestesArquitetura from './pages/TestesArquitetura.tsx';
 import Assistente from './pages/Assistente.tsx';
+import TQPiemonteVgv from './pages/TQPiemonteVgv.tsx';
 import NotFound from './pages/NotFound.tsx';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="/relatorios-secovi" element={<TestesArquitetura />} />
               <Route path="/assistente" element={<Assistente />} />
               <Route path="/mapa" element={<Index />} />
+              <Route path="/testes-qualidade/piemonte-vgv" element={<TQPiemonteVgv />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </ErrorBoundary>
