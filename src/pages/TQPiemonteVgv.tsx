@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ChevronDown, Mail, Lightbulb, FlaskConical, MessageSquare,
   CheckSquare, Square, Clock, User, Building2, Play, Loader2,
@@ -43,27 +43,17 @@ const INITIAL_HYPOTHESES = [
   {
     id: 'h1',
     text: 'O endpoint retorna apenas dados city-level — sem identificador por empreendimento',
-    detail: '✅ Confirmada — Nenhum building_id na resposta. É um comportamento de design: este endpoint agrega por cidade. Para VGV por empreendimento o caminho é /building-with-history/{id}.',
+    detail: '✅ Confirmada — Nenhum building_id na resposta. É comportamento de design: este endpoint agrega exclusivamente por cidade. Para VGV por empreendimento, o caminho correto é /building-with-history/{id}.',
   },
   {
     id: 'h2',
-    text: 'Múltiplas linhas por período+tipo com group: null — segmentação interna oculta',
-    detail: '✅ Confirmada — 8 linhas para Horizontal e 7 para Vertical por período, todas com group: null. Suspeita do agrupamento: faixas de padrão (Econômico, Médio, Alto, Altíssimo Padrão, MCMV) ou tipologias por dormitórios. O campo group deveria expor esse discriminador — investigar internamente.',
+    text: 'Múltiplas linhas com group: null — totais são confiáveis agregando tudo, mas a segmentação interna não está exposta',
+    detail: '✅ Confirmada — 8 linhas Horizontal e 7 Vertical por período, todas com group: null. liquid_sales e vgv_liquid_sales são ground truth city-level corretos ao somar todas as linhas do período+tipo — não usando uma linha isolada. A segmentação (provavelmente faixas de padrão ou tipologias) existe internamente; o campo group deveria expor o discriminador mas está nulo — ponto a esclarecer internamente. Isso também explica o sintoma do email: Horizontal "ainda retorna algo" porque muitos meses têm 0 vendas; 0 × qualquer_valor = 0 mascara o erro. Quando há volume, o desvio aparece em ambos os tipos.',
   },
   {
     id: 'h3',
-    text: 'liquid_sales e vgv_liquid_sales são ground truth confiável — mas somente somando todas as linhas do período',
-    detail: '✅ Confirmada com ressalva — Os campos são precisos como totais city-level. A armadilha está em usar uma linha isolada: cada linha representa apenas um dos 7–8 segmentos internos, não o total da cidade.',
-  },
-  {
-    id: 'h4',
-    text: 'Verticais teriam mais segmentos que Horizontais, amplificando o erro',
-    detail: '⚠️ Parcialmente refutada — Os dados mostram Horizontal com 8 segmentos e Vertical com 7. Horizontal "parece funcionar" porque vários meses têm 0 vendas (0 × qualquer_valor = 0, sem erro visível). Nos meses com volume, Horizontal também erra: +41% a +211%.',
-  },
-  {
-    id: 'h5',
-    text: 'vendasNoPeriodo × precoPeriodo resulta em VGV inflado — fórmula fundamentalmente errada',
-    detail: '✅ Confirmada — Testamos contra /medium-prices e encontramos desvios de +119% a +248% em relação ao vgv_liquid_sales real. O campo vgv_liquid_sales já é o VGV calculado; multiplicá-lo por outra variável duplica ou triplica o resultado.',
+    text: 'A fórmula vendasNoPeriodo × precoPeriodo produz VGV incorreto — vgv_liquid_sales já é o VGV calculado',
+    detail: '✅ Confirmada (com premissas a validar com o Wesley) — Assumindo vendasNoPeriodo = liquid_sales e precoPeriodo = average_price de /medium-prices, simulamos a fórmula e encontramos desvios de +119% a +248% em relação ao VGV real. O campo vgv_liquid_sales já é o VGV city-level calculado — somar esse campo para o período+tipo é suficiente, sem multiplicação. Para VGV por empreendimento: /building-with-history/{id} com price_private_area e sold_units por tipologia é o caminho correto.',
   },
 ];
 
@@ -405,30 +395,28 @@ export default function TQPiemonteVgv() {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [draft, setDraft] = useState(`Olá Wesley,
 
-Obrigado pelo detalhamento — conseguimos replicar exatamente o que você testou e confirmar cada ponto do seu email. Vamos por partes:
+Testamos o endpoint com os mesmos parâmetros e conseguimos mapear o que está acontecendo. Vamos por partes:
 
-[1] Dados city-level — sem building_id
-Correto. O endpoint /temporal-analysis-city/sales retorna exclusivamente agregados por cidade. A ausência de building_id é um comportamento de design, não um bug. Para VGV por empreendimento individual, o caminho correto é outro (detalhamos no item 5).
+[1 e 2 — City-level e segmentação interna com group: null]
+Confirmado em ambos os pontos. O endpoint /temporal-analysis-city/sales retorna exclusivamente dados agregados por cidade — sem building_id, por design. Identificamos 8 linhas para Horizontal e 7 para Vertical por período, todas com group: null. O campo group deveria identificar cada segmento interno (provavelmente faixas de padrão ou tipologias), mas está retornando nulo. Vamos verificar internamente o motivo — é possível que um ajuste na API torne essa granularidade visível.
 
-[2] Múltiplas linhas por período+building_type com group: null
-Confirmado e aprofundado: identificamos 8 linhas para Horizontal e 7 para Vertical por período, todas com group: null. Existe uma segmentação interna ativa — nossa hipótese é que são faixas de padrão (Econômico, Médio, Alto, Altíssimo Padrão, MCMV etc.) ou agrupamentos por tipologia. O campo group deveria expor esse discriminador, mas está retornando nulo. Estamos verificando internamente a origem desse comportamento — é possível que um ajuste na API torne essa granularidade visível.
+Os campos liquid_sales e vgv_liquid_sales são confiáveis como totais city-level, mas somente somando TODAS as linhas do mesmo período+building_type. Usar uma linha isolada dá um parcial dos segmentos internos, não o total.
 
-[3] liquid_sales e vgv_liquid_sales como ground truth city-level
-Correto, com uma ressalva importante: os campos são confiáveis como totais de cidade, mas somente quando você soma TODAS as linhas do mesmo período+building_type. Cada linha representa um dos 7–8 segmentos internos — usar uma linha isolada dá um parcial, não o total da cidade.
+Sobre Horizontal "ainda retornar algo": é um sintoma da segmentação. Muitos meses têm 0 vendas Horizontal — e 0 × qualquer_valor = 0, então a fórmula não distorce nesses casos. Quando há volume, o desvio em Horizontal também aparece.
 
-[4] Erro maior nos Verticais do que nos Horizontais
-Os dados mostram algo diferente do esperado: Horizontal tem 8 segmentos internos e Vertical tem 7 — então Horizontal tem mais fragmentação, não menos. A razão de Horizontal "retornar algo razoável" é que vários meses têm 0 vendas Horizontal, e 0 × qualquer_valor = 0 (sem erro aparente). Nos meses em que Horizontal tem volume, o desvio também é grande: entre +41% e +211%.
+[3 — Fórmula vendasNoPeriodo × precoPeriodo]
+Para fecharmos o diagnóstico com precisão: consegue nos confirmar quais endpoints e campos você está usando para vendasNoPeriodo e precoPeriodo? Isso vai nos ajudar a reproduzir o cálculo exato.
 
-[5] Fórmula vendasNoPeriodo × precoPeriodo — aqui está o problema raiz
-Testamos usando /temporal-analysis-city/medium-prices como fonte do precoPeriodo (average_price, ticket médio por unidade) e encontramos desvios de +119% a +248% em relação ao vgv_liquid_sales real da API.
+Enquanto isso, simulamos assumindo vendasNoPeriodo = liquid_sales e precoPeriodo = average_price de /temporal-analysis-city/medium-prices (o endpoint mais natural para "preço no período"). Encontramos desvios de +119% a +248% em relação ao VGV real.
 
-O motivo: o campo vgv_liquid_sales já é o VGV calculado pela API. Multiplicar liquid_sales × average_price aplica um preço médio calculado sobre múltiplos segmentos ocultos sobre um total de vendas que já inclui todos esses segmentos — duplicando ou triplicando o resultado.
+O ponto principal: o campo vgv_liquid_sales já é o VGV city-level calculado pela API. Somar esse campo para todas as linhas do período+building_type dá o total correto — a multiplicação por average_price é desnecessária e inflaciona o resultado em 2–3×.
 
-Como corrigir:
-• Para VGV city-level: some o campo vgv_liquid_sales de todas as linhas do mesmo período+building_type. Não multiplique. O resultado será o VGV agregado correto para a cidade.
-• Para VGV por empreendimento: use /building para listar os empreendimentos (filtrando por cidade e tipo), identifique o ID relevante, e consulte /building-with-history/{id}. Esse endpoint retorna histórico por tipologia com price_private_area e sold_units — os dados brutos para calcular VGV empreendimento a empreendimento sem depender de agregados de cidade.
+[Caminho para VGV por empreendimento]
+Se o objetivo for VGV por empreendimento individual (não por cidade), o endpoint /temporal-analysis-city/sales não atende por design. O fluxo correto é:
+1. /building — lista os empreendimentos filtrando por city, uf e type
+2. /building-with-history/{id} — retorna histórico por tipologia com price_private_area e sold_units, os dados corretos para calcular VGV por empreendimento sem depender de agregados de cidade
 
-Ficamos à disposição para qualquer dúvida sobre a implementação.`);
+Aguardamos sua confirmação sobre os endpoints da fórmula para fechar o diagnóstico.`);
 
   const [salesRows, setSalesRows] = useState<SalesRow[] | null>(null);
   const [salesLoading, setSalesLoading] = useState(false);
@@ -510,6 +498,14 @@ Ficamos à disposição para qualquer dúvida sobre a implementação.`);
         ),
       )
     : false;
+
+  const draftRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (draftRef.current) {
+      draftRef.current.style.height = 'auto';
+      draftRef.current.style.height = `${draftRef.current.scrollHeight}px`;
+    }
+  }, [draft]);
 
   return (
     <div className="h-full overflow-y-auto">
@@ -607,17 +603,16 @@ Ficamos à disposição para qualquer dúvida sobre a implementação.`);
             {/* PASSO 1 */}
             <StepCard
               step={1}
-              title="H1 + H2 + H3 + H4 — Mapeando a estrutura real da resposta"
+              title="H1 + H2 — Estrutura city-level e segmentação interna"
               narrative={
                 <>
                   <p>
-                    Primeiro verificamos se há <code className="bg-muted px-1 rounded">building_id</code> na resposta{' '}
-                    <strong>(H1)</strong>, quantas linhas existem por período+tipo <strong>(H2)</strong>, se os totais somados
-                    batem com o esperado <strong>(H3)</strong>, e se Vertical ou Horizontal tem mais segmentos <strong>(H4)</strong>.
+                    Verificamos se há <code className="bg-muted px-1 rounded">building_id</code> na resposta <strong>(H1)</strong> e
+                    contamos quantas linhas existem por período+tipo <strong>(H2)</strong>. Se houver mais de 1 linha,
+                    confirma que os totais só são corretos somando tudo — e explica o sintoma do Horizontal.
                   </p>
                   <p>
-                    Buscamos todas as páginas de uma vez. A contagem de linhas por período+tipo é o indicador central: se for
-                    maior que 1, confirma H2 e explica por que qualquer cálculo sem somar todas as linhas erra o total.
+                    Buscamos todas as páginas de uma vez para ter o quadro anual completo.
                   </p>
                 </>
               }
@@ -659,11 +654,9 @@ Ficamos à disposição para qualquer dúvida sobre a implementação.`);
 
                   {hasDuplicates && (
                     <Callout type="warning">
-                      <strong>H1, H2, H3 e H4 verificadas.</strong> Sem <code className="bg-yellow-500/10 px-1 rounded">building_id</code> (H1 ✅).{' '}
-                      Múltiplas linhas por período+tipo com <code className="bg-yellow-500/10 px-1 rounded">group: null</code> (H2 ✅).{' '}
-                      Os totais de <code className="bg-yellow-500/10 px-1 rounded">vgv_liquid_sales</code> são corretos
-                      quando somados (H3 ✅). Horizontal tem <strong>mais</strong> segmentos que Vertical — H4 ⚠️ parcialmente refutada
-                      (Horizontal "funciona" pois muitos meses têm 0 vendas, não por ter menos fragmentação).
+                      <strong>H1 e H2 confirmadas.</strong> Sem <code className="bg-yellow-500/10 px-1 rounded">building_id</code> na resposta — dados exclusivamente city-level.{' '}
+                      Múltiplas linhas com <code className="bg-yellow-500/10 px-1 rounded">group: null</code>: somar todas as linhas do período+tipo é obrigatório para obter o total correto.{' '}
+                      Horizontal "retorna algo" pois muitos meses têm 0 vendas — 0 × qualquer_valor = 0, mascarando o desvio; o problema aparece nos meses com volume.
                     </Callout>
                   )}
 
@@ -714,20 +707,19 @@ Ficamos à disposição para qualquer dúvida sobre a implementação.`);
             {/* PASSO 2 */}
             <StepCard
               step={2}
-              title="H5 — Quantificando o erro da fórmula vendasNoPeriodo × precoPeriodo"
+              title="H3 — Quantificando o erro da fórmula vendasNoPeriodo × precoPeriodo"
               narrative={
                 <>
                   <p>
-                    <strong>(H5)</strong> O endpoint natural para <em>precoPeriodo</em> é{' '}
-                    <code className="bg-muted px-1 rounded">/temporal-analysis-city/medium-prices</code>, que retorna{' '}
-                    <code className="bg-muted px-1 rounded">average_price</code> (ticket médio por unidade por período).
-                    É a fonte mais provável do valor que Wesley está usando na fórmula.
+                    <strong>(H3)</strong> Não sabemos ainda exatamente quais chamadas Wesley usa para montar a fórmula — vamos perguntar na resposta.
+                    Enquanto isso, assumimos <em>vendasNoPeriodo</em> = <code className="bg-muted px-1 rounded">liquid_sales</code> e{' '}
+                    <em>precoPeriodo</em> = <code className="bg-muted px-1 rounded">average_price</code> de{' '}
+                    <code className="bg-muted px-1 rounded">/temporal-analysis-city/medium-prices</code> — o endpoint mais natural para "preço no período".
                   </p>
                   <p>
                     Calculamos <code className="bg-muted px-1 rounded">Σ liquid_sales × average_price</code> e
-                    comparamos com <code className="bg-muted px-1 rounded">Σ vgv_liquid_sales</code>. O desvio vai
-                    mostrar que o <code className="bg-muted px-1 rounded">vgv_liquid_sales</code> já <em>é</em> o VGV —
-                    a multiplicação é redundante e amplifica o resultado em 2–3×.
+                    comparamos com <code className="bg-muted px-1 rounded">Σ vgv_liquid_sales</code>. Se houver desvio alto,
+                    confirma que <code className="bg-muted px-1 rounded">vgv_liquid_sales</code> já <em>é</em> o VGV calculado — multiplicar é desnecessário.
                     {!salesRows && (
                       <span className="text-yellow-600 dark:text-yellow-400"> Execute o Passo 1 primeiro para a comparação completa.</span>
                     )}
@@ -793,7 +785,7 @@ Ficamos à disposição para qualquer dúvida sobre a implementação.`);
             {/* PASSO 3 */}
             <StepCard
               step={3}
-              title="H1 (solução) — O caminho correto para VGV por empreendimento"
+              title="H1 + H3 (solução) — Caminho correto para VGV por empreendimento"
               narrative={
                 <>
                   <p>
@@ -867,10 +859,12 @@ Ficamos à disposição para qualquer dúvida sobre a implementação.`);
         {/* Rascunho */}
         <Collapsible title="Rascunho de resposta" icon={<MessageSquare className="h-4 w-4" />}>
           <textarea
+            ref={draftRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Escreva aqui a resposta para o cliente..."
-            className="w-full min-h-[140px] rounded-md border border-border bg-background px-3 py-2.5 text-sm resize-y placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm resize-none overflow-hidden placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            rows={1}
           />
         </Collapsible>
 
