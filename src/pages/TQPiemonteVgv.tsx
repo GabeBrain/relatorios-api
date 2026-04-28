@@ -38,21 +38,32 @@ Acredito que o erro esteja acontecendo principalmente para os empreendimentos Ve
 
 Para calculo de VGV total estou usando vendasNoPeriodo × precoPeriodo. Esse é meu único entrave atual com a API.`;
 
+// Hipóteses ordenadas cronologicamente conforme os pontos do email do Wesley
 const INITIAL_HYPOTHESES = [
   {
     id: 'h1',
-    text: 'O endpoint é city-level apenas — sem desagregação por empreendimento',
-    detail: 'Não existe building_id na resposta. VGV por empreendimento individual é estruturalmente impossível com este endpoint.',
+    text: 'O endpoint retorna apenas dados city-level — sem identificador por empreendimento',
+    detail: '✅ Confirmada — Nenhum building_id na resposta. É um comportamento de design: este endpoint agrega por cidade. Para VGV por empreendimento o caminho é /building-with-history/{id}.',
   },
   {
     id: 'h2',
-    text: 'group: null + múltiplas linhas por período causa dupla-contagem no VGV',
-    detail: 'Com N linhas por período+building_type sem label, aplicar vendasNoPeriodo × precoPeriodo em cada linha produz um total inflado.',
+    text: 'Múltiplas linhas por período+tipo com group: null — segmentação interna oculta',
+    detail: '✅ Confirmada — 8 linhas para Horizontal e 7 para Vertical por período, todas com group: null. Suspeita do agrupamento: faixas de padrão (Econômico, Médio, Alto, Altíssimo Padrão, MCMV) ou tipologias por dormitórios. O campo group deveria expor esse discriminador — investigar internamente.',
   },
   {
     id: 'h3',
-    text: 'Verticais têm mais segmentos internos que horizontais, amplificando o erro',
-    detail: 'Horizontais com menos segmentação produzem resultados "menos errados". Verticais com mais segmentos acumulam mais desvio.',
+    text: 'liquid_sales e vgv_liquid_sales são ground truth confiável — mas somente somando todas as linhas do período',
+    detail: '✅ Confirmada com ressalva — Os campos são precisos como totais city-level. A armadilha está em usar uma linha isolada: cada linha representa apenas um dos 7–8 segmentos internos, não o total da cidade.',
+  },
+  {
+    id: 'h4',
+    text: 'Verticais teriam mais segmentos que Horizontais, amplificando o erro',
+    detail: '⚠️ Parcialmente refutada — Os dados mostram Horizontal com 8 segmentos e Vertical com 7. Horizontal "parece funcionar" porque vários meses têm 0 vendas (0 × qualquer_valor = 0, sem erro visível). Nos meses com volume, Horizontal também erra: +41% a +211%.',
+  },
+  {
+    id: 'h5',
+    text: 'vendasNoPeriodo × precoPeriodo resulta em VGV inflado — fórmula fundamentalmente errada',
+    detail: '✅ Confirmada — Testamos contra /medium-prices e encontramos desvios de +119% a +248% em relação ao vgv_liquid_sales real. O campo vgv_liquid_sales já é o VGV calculado; multiplicá-lo por outra variável duplica ou triplica o resultado.',
   },
 ];
 
@@ -392,7 +403,32 @@ export default function TQPiemonteVgv() {
 
   const [year, setYear] = useState('2024');
   const [checked, setChecked] = useState<Record<string, boolean>>({});
-  const [draft, setDraft] = useState('');
+  const [draft, setDraft] = useState(`Olá Wesley,
+
+Obrigado pelo detalhamento — conseguimos replicar exatamente o que você testou e confirmar cada ponto do seu email. Vamos por partes:
+
+[1] Dados city-level — sem building_id
+Correto. O endpoint /temporal-analysis-city/sales retorna exclusivamente agregados por cidade. A ausência de building_id é um comportamento de design, não um bug. Para VGV por empreendimento individual, o caminho correto é outro (detalhamos no item 5).
+
+[2] Múltiplas linhas por período+building_type com group: null
+Confirmado e aprofundado: identificamos 8 linhas para Horizontal e 7 para Vertical por período, todas com group: null. Existe uma segmentação interna ativa — nossa hipótese é que são faixas de padrão (Econômico, Médio, Alto, Altíssimo Padrão, MCMV etc.) ou agrupamentos por tipologia. O campo group deveria expor esse discriminador, mas está retornando nulo. Estamos verificando internamente a origem desse comportamento — é possível que um ajuste na API torne essa granularidade visível.
+
+[3] liquid_sales e vgv_liquid_sales como ground truth city-level
+Correto, com uma ressalva importante: os campos são confiáveis como totais de cidade, mas somente quando você soma TODAS as linhas do mesmo período+building_type. Cada linha representa um dos 7–8 segmentos internos — usar uma linha isolada dá um parcial, não o total da cidade.
+
+[4] Erro maior nos Verticais do que nos Horizontais
+Os dados mostram algo diferente do esperado: Horizontal tem 8 segmentos internos e Vertical tem 7 — então Horizontal tem mais fragmentação, não menos. A razão de Horizontal "retornar algo razoável" é que vários meses têm 0 vendas Horizontal, e 0 × qualquer_valor = 0 (sem erro aparente). Nos meses em que Horizontal tem volume, o desvio também é grande: entre +41% e +211%.
+
+[5] Fórmula vendasNoPeriodo × precoPeriodo — aqui está o problema raiz
+Testamos usando /temporal-analysis-city/medium-prices como fonte do precoPeriodo (average_price, ticket médio por unidade) e encontramos desvios de +119% a +248% em relação ao vgv_liquid_sales real da API.
+
+O motivo: o campo vgv_liquid_sales já é o VGV calculado pela API. Multiplicar liquid_sales × average_price aplica um preço médio calculado sobre múltiplos segmentos ocultos sobre um total de vendas que já inclui todos esses segmentos — duplicando ou triplicando o resultado.
+
+Como corrigir:
+• Para VGV city-level: some o campo vgv_liquid_sales de todas as linhas do mesmo período+building_type. Não multiplique. O resultado será o VGV agregado correto para a cidade.
+• Para VGV por empreendimento: use /building para listar os empreendimentos (filtrando por cidade e tipo), identifique o ID relevante, e consulte /building-with-history/{id}. Esse endpoint retorna histórico por tipologia com price_private_area e sold_units — os dados brutos para calcular VGV empreendimento a empreendimento sem depender de agregados de cidade.
+
+Ficamos à disposição para qualquer dúvida sobre a implementação.`);
 
   const [salesRows, setSalesRows] = useState<SalesRow[] | null>(null);
   const [salesLoading, setSalesLoading] = useState(false);
@@ -571,18 +607,17 @@ export default function TQPiemonteVgv() {
             {/* PASSO 1 */}
             <StepCard
               step={1}
-              title="Confirmando as múltiplas linhas por período"
+              title="H1 + H2 + H3 + H4 — Mapeando a estrutura real da resposta"
               narrative={
                 <>
                   <p>
-                    O endpoint <code className="bg-muted px-1 rounded">/temporal-analysis-city/sales</code> retorna os registros
-                    segmentados por <code className="bg-muted px-1 rounded">building_type</code>, mas nossa suspeita é que há{' '}
-                    <strong>mais de uma linha por período+tipo</strong> com <code className="bg-muted px-1 rounded">group: null</code> —
-                    uma segmentação interna oculta. Buscamos todas as páginas de uma vez para ver o quadro completo.
+                    Primeiro verificamos se há <code className="bg-muted px-1 rounded">building_id</code> na resposta{' '}
+                    <strong>(H1)</strong>, quantas linhas existem por período+tipo <strong>(H2)</strong>, se os totais somados
+                    batem com o esperado <strong>(H3)</strong>, e se Vertical ou Horizontal tem mais segmentos <strong>(H4)</strong>.
                   </p>
                   <p>
-                    Se a hipótese estiver correta, a tabela vai mostrar múltiplas linhas para o mesmo mês, e qualquer cálculo
-                    que não some corretamente essas linhas vai errar o total.
+                    Buscamos todas as páginas de uma vez. A contagem de linhas por período+tipo é o indicador central: se for
+                    maior que 1, confirma H2 e explica por que qualquer cálculo sem somar todas as linhas erra o total.
                   </p>
                 </>
               }
@@ -624,9 +659,11 @@ export default function TQPiemonteVgv() {
 
                   {hasDuplicates && (
                     <Callout type="warning">
-                      <strong>H2 confirmada.</strong> Existem múltiplas linhas para o mesmo período+tipo com{' '}
-                      <code className="bg-yellow-500/10 px-1 rounded">group: null</code>. Qualquer cálculo que não
-                      some explicitamente todas as linhas do período vai subestimar ou superestimar o total.
+                      <strong>H1, H2, H3 e H4 verificadas.</strong> Sem <code className="bg-yellow-500/10 px-1 rounded">building_id</code> (H1 ✅).{' '}
+                      Múltiplas linhas por período+tipo com <code className="bg-yellow-500/10 px-1 rounded">group: null</code> (H2 ✅).{' '}
+                      Os totais de <code className="bg-yellow-500/10 px-1 rounded">vgv_liquid_sales</code> são corretos
+                      quando somados (H3 ✅). Horizontal tem <strong>mais</strong> segmentos que Vertical — H4 ⚠️ parcialmente refutada
+                      (Horizontal "funciona" pois muitos meses têm 0 vendas, não por ter menos fragmentação).
                     </Callout>
                   )}
 
@@ -677,21 +714,22 @@ export default function TQPiemonteVgv() {
             {/* PASSO 2 */}
             <StepCard
               step={2}
-              title={`Rastreando "precoPeriodo" — /temporal-analysis-city/medium-prices`}
+              title="H5 — Quantificando o erro da fórmula vendasNoPeriodo × precoPeriodo"
               narrative={
                 <>
                   <p>
-                    A fórmula do Wesley usa <em>vendasNoPeriodo × precoPeriodo</em>. O endpoint natural para
-                    "preço no período" é <code className="bg-muted px-1 rounded">/temporal-analysis-city/medium-prices</code>,
-                    que retorna <code className="bg-muted px-1 rounded">average_price</code> (ticket médio por unidade).
-                    É a fonte mais provável do que ele está chamando de <em>precoPeriodo</em>.
+                    <strong>(H5)</strong> O endpoint natural para <em>precoPeriodo</em> é{' '}
+                    <code className="bg-muted px-1 rounded">/temporal-analysis-city/medium-prices</code>, que retorna{' '}
+                    <code className="bg-muted px-1 rounded">average_price</code> (ticket médio por unidade por período).
+                    É a fonte mais provável do valor que Wesley está usando na fórmula.
                   </p>
                   <p>
-                    Com ambos os datasets, calculamos o que a fórmula dele produziria e comparamos com o{' '}
-                    <code className="bg-muted px-1 rounded">vgv_liquid_sales</code> que a própria API já retorna
-                    calculado — revelando o desvio real.
+                    Calculamos <code className="bg-muted px-1 rounded">Σ liquid_sales × average_price</code> e
+                    comparamos com <code className="bg-muted px-1 rounded">Σ vgv_liquid_sales</code>. O desvio vai
+                    mostrar que o <code className="bg-muted px-1 rounded">vgv_liquid_sales</code> já <em>é</em> o VGV —
+                    a multiplicação é redundante e amplifica o resultado em 2–3×.
                     {!salesRows && (
-                      <span className="text-yellow-600 dark:text-yellow-400"> Execute o Passo 1 primeiro para ver a comparação completa.</span>
+                      <span className="text-yellow-600 dark:text-yellow-400"> Execute o Passo 1 primeiro para a comparação completa.</span>
                     )}
                   </p>
                 </>
@@ -755,23 +793,21 @@ export default function TQPiemonteVgv() {
             {/* PASSO 3 */}
             <StepCard
               step={3}
-              title="O caminho certo — /building (dados por empreendimento)"
+              title="H1 (solução) — O caminho correto para VGV por empreendimento"
               narrative={
                 <>
                   <p>
-                    Se o Wesley precisa de VGV <em>por empreendimento</em>, o endpoint{' '}
-                    <code className="bg-muted px-1 rounded">/temporal-analysis-city/sales</code> não resolve —
-                    ele é city-level por design. O caminho correto é o endpoint{' '}
-                    <code className="bg-muted px-1 rounded">/building</code>, que lista empreendimentos individuais,
-                    e depois{' '}
-                    <code className="bg-muted px-1 rounded">/building-with-history/{'{id}'}</code>, que retorna o
-                    histórico completo por tipologia com{' '}
-                    <code className="bg-muted px-1 rounded">price_private_area</code> e{' '}
-                    <code className="bg-muted px-1 rounded">sold_units</code> — o que ele precisa para calcular VGV
-                    com precisão.
+                    <strong>(H1)</strong> Como <code className="bg-muted px-1 rounded">/temporal-analysis-city/sales</code>{' '}
+                    é city-level por design, o caminho para VGV por empreendimento é:{' '}
+                    <code className="bg-muted px-1 rounded">/building</code> para listar, depois{' '}
+                    <code className="bg-muted px-1 rounded">/building-with-history/{'{id}'}</code> para o histórico completo —
+                    com <code className="bg-muted px-1 rounded">price_private_area</code> e{' '}
+                    <code className="bg-muted px-1 rounded">sold_units</code> por tipologia e período.
                   </p>
                   <p>
-                    Abaixo listamos os empreendimentos Verticais em Curitiba para identificar IDs relevantes.
+                    Com esses campos, o VGV por empreendimento é calculado direto — sem multiplicação de agregados
+                    de cidade, sem depender de <code className="bg-muted px-1 rounded">group: null</code>.
+                    Listamos os Verticais em Curitiba para identificar IDs relevantes.
                   </p>
                 </>
               }
