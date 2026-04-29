@@ -1,0 +1,421 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "city": "Jaraguá do Sul",
+      "state": "SC",
+      "region": "Sul",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 2,
+      "city": "Itapema",
+      "state": "SC",
+      "region": "Sul",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 3,
+      "city": "Camboriú",
+      "state": "SC",
+      "region": "Sul",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 4,
+      "city": "Porto Alegre",
+      "state": "RS",
+      "region": "Sul",
+      "last_period": "2026-02-01"
+    },
+    {
+      "id": 5,
+      "city": "Taquaritinga",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 6,
+      "city": "Maracanaú",
+      "state": "CE",
+      "region": "Nordeste",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 7,
+      "city": "Conde",
+      "state": "PB",
+      "region": "Nordeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 8,
+      "city": "São João da Boa Vista",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 9,
+      "city": "Itu",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 10,
+      "city": "Itajaí",
+      "state": "SC",
+      "region": "Sul",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 11,
+      "city": "Joinville",
+      "state": "SC",
+      "region": "Sul",
+      "last_period": "2026-02-01"
+    },
+    {
+      "id": 12,
+      "city": "Sorocaba",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2026-02-01"
+    },
+    {
+      "id": 13,
+      "city": "Mococa",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 14,
+      "city": "Votuporanga",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 15,
+      "city": "Aparecida de Goiânia",
+      "state": "GO",
+      "region": "Centro-Oeste",
+      "last_period": "2026-02-01"
+    },
+    {
+      "id": 16,
+      "city": "Mogi Guaçu",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 18,
+      "city": "Esteio",
+      "state": "RS",
+      "region": "Sul",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 19,
+      "city": "Jundiaí",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 20,
+      "city": "Bauru",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 21,
+      "city": "Rio Grande",
+      "state": "RS",
+      "region": "Sul",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 22,
+      "city": "Penápolis",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 23,
+      "city": "Pinhais",
+      "state": "PR",
+      "region": "Sul",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 24,
+      "city": "Boituva",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 25,
+      "city": "Contagem",
+      "state": "MG",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 26,
+      "city": "São José do Rio Preto",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 27,
+      "city": "Mogi Mirim",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 28,
+      "city": "Anápolis",
+      "state": "GO",
+      "region": "Centro-Oeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 29,
+      "city": "Taubaté",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 30,
+      "city": "Barra Velha",
+      "state": "SC",
+      "region": "Sul",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 32,
+      "city": "Itapetininga",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 33,
+      "city": "São Carlos",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 34,
+      "city": "Cotia",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 35,
+      "city": "Fernandópolis",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 36,
+      "city": "Viana",
+      "state": "ES",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 37,
+      "city": "Bragança Paulista",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 38,
+      "city": "Santa Fé do Sul",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 39,
+      "city": "Catanduva",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 40,
+      "city": "Bayeux",
+      "state": "PB",
+      "region": "Nordeste",
+      "last_period": "2025-06-01"
+    },
+    {
+      "id": 41,
+      "city": "Aquiraz",
+      "state": "CE",
+      "region": "Nordeste",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 42,
+      "city": "Caçapava",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 43,
+      "city": "Rio de Janeiro",
+      "state": "RJ",
+      "region": "Sudeste",
+      "last_period": "2026-02-01"
+    },
+    {
+      "id": 44,
+      "city": "Duque de Caxias",
+      "state": "RJ",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 45,
+      "city": "Ibitinga",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 46,
+      "city": "Araçatuba",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 47,
+      "city": "Guaíra",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 48,
+      "city": "Santa Maria",
+      "state": "RS",
+      "region": "Sul",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 49,
+      "city": "Sertãozinho",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 50,
+      "city": "Assis",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    },
+    {
+      "id": 51,
+      "city": "Araraquara",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2026-03-01"
+    },
+    {
+      "id": 52,
+      "city": "Jaú",
+      "state": "SP",
+      "region": "Sudeste",
+      "last_period": "2025-12-01"
+    }
+  ],
+  "links": {
+    "first": "https://geobrain.com.br/public-api/monitored-cities?page=1",
+    "last": "https://geobrain.com.br/public-api/monitored-cities?page=8",
+    "prev": null,
+    "next": "https://geobrain.com.br/public-api/monitored-cities?page=2"
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 8,
+    "links": [
+      {
+        "url": null,
+        "label": "&laquo; Anterior",
+        "active": false
+      },
+      {
+        "url": "https://geobrain.com.br/public-api/monitored-cities?page=1",
+        "label": "1",
+        "active": true
+      },
+      {
+        "url": "https://geobrain.com.br/public-api/monitored-cities?page=2",
+        "label": "2",
+        "active": false
+      },
+      {
+        "url": "https://geobrain.com.br/public-api/monitored-cities?page=3",
+        "label": "3",
+        "active": false
+      },
+      {
+        "url": "https://geobrain.com.br/public-api/monitored-cities?page=4",
+        "label": "4",
+        "active": false
+      },
+      {
+        "url": "https://geobrain.com.br/public-api/monitored-cities?page=5",
+        "label": "5",
+        "active": false
+      },
+      {
+        "url": "https://geobrain.com.br/public-api/monitored-cities?page=6",
+        "label": "6",
+        "active": false
+      },
+      {
+        "url": "https://geobrain.com.br/public-api/monitored-cities?page=7",
+        "label": "7",
+        "active": false
+      },
+      {
+        "url": "https://geobrain.com.br/public-api/monitored-cities?page=8",
+        "label": "8",
+        "active": false
+      },
+      {
+        "url": "https://geobrain.com.br/public-api/monitored-cities?page=2",
+        "label": "Próxima &raquo;",
+        "active": false
+      }
+    ],
+    "path": "https://geobrain.com.br/public-api/monitored-cities",
+    "per_page": 50,
+    "to": 50,
+    "total": 354
+  }
+}
