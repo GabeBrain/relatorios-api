@@ -84,6 +84,7 @@ interface TypologySummary {
   currentLatestPeriod: string;
   currentPrivateAreaPrice: number | null;
   releasePrivateAreaPrice: number | null;
+  deltaM2Pct: number | null;
   changed: boolean;
 }
 
@@ -127,6 +128,16 @@ function fmtBRL(value: number | null | undefined) {
     currency: 'BRL',
     maximumFractionDigits: 0,
   });
+}
+
+function fmtBRLPerM2(value: number | null | undefined) {
+  if (value === null || value === undefined) return 'N/D';
+  return `${fmtBRL(value)}/m²`;
+}
+
+function fmtPct(value: number | null | undefined) {
+  if (value === null || value === undefined) return 'N/D';
+  return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
 }
 
 function typologyKey(row: TypologyHistoryRow) {
@@ -175,6 +186,12 @@ function summarizeTypologies(rows: TypologyHistoryRow[]): TypologySummary[] {
       const releaseMin = releaseValues[0] ?? null;
       const releaseMax = releaseValues[releaseValues.length - 1] ?? null;
       const releaseOldest = toNum(releaseOldestRow?.release_price);
+      const releasePrivateAreaPrice = releaseOldest && privateArea ? releaseOldest / privateArea : null;
+      const currentPrivateAreaPrice = toNum(currentLatestRow?.price_private_area);
+      const deltaM2Pct =
+        releasePrivateAreaPrice && currentPrivateAreaPrice
+          ? ((currentPrivateAreaPrice - releasePrivateAreaPrice) / releasePrivateAreaPrice) * 100
+          : null;
 
       return {
         key,
@@ -188,8 +205,9 @@ function summarizeTypologies(rows: TypologyHistoryRow[]): TypologySummary[] {
         releaseMax,
         currentLatest: toNum(currentLatestRow?.price),
         currentLatestPeriod: String(currentLatestRow?.period ?? 'N/D'),
-        currentPrivateAreaPrice: toNum(currentLatestRow?.price_private_area),
-        releasePrivateAreaPrice: releaseOldest && privateArea ? releaseOldest / privateArea : null,
+        currentPrivateAreaPrice,
+        releasePrivateAreaPrice,
+        deltaM2Pct,
         changed: releaseValues.length > 1,
       };
     })
@@ -332,6 +350,13 @@ function formatReleaseCell(row: TypologySummary) {
   return fmtBRL(row.releaseOldest);
 }
 
+function deltaClass(value: number | null) {
+  if (value === null) return 'text-muted-foreground bg-muted';
+  if (value > 0) return 'text-green-700 bg-green-500/10 dark:text-green-400';
+  if (value < 0) return 'text-red-700 bg-red-500/10 dark:text-red-400';
+  return 'text-muted-foreground bg-muted';
+}
+
 function ReleasePriceDiagram() {
   const steps = [
     {
@@ -453,17 +478,33 @@ function ReleasePriceSummary({ building }: { building: BuildingWithHistory }) {
         </Callout>
       )}
 
-      <div className="overflow-x-auto rounded border border-border">
-        <table className="w-full text-xs">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="px-3 py-2 text-left font-medium">Tipologia</th>
-              <th className="px-3 py-2 text-right font-medium">Release price</th>
-              <th className="px-3 py-2 text-left font-medium">Data release</th>
-              <th className="px-3 py-2 text-right font-medium">m² lançado</th>
-              <th className="px-3 py-2 text-right font-medium">Current price</th>
-              <th className="px-3 py-2 text-left font-medium">Data current</th>
-              <th className="px-3 py-2 text-right font-medium">m² atual</th>
+      <div className="overflow-x-auto rounded-lg border border-border">
+        <table className="w-full min-w-[980px] text-xs">
+          <thead>
+            <tr className="border-b border-border bg-muted/40 text-[10px] uppercase tracking-wider text-muted-foreground">
+              <th rowSpan={2} className="w-[230px] px-3 py-2 text-left font-semibold">
+                Tipologia
+              </th>
+              <th colSpan={2} className="border-l border-border bg-slate-500/5 px-3 py-1.5 text-center font-semibold">
+                Datas
+              </th>
+              <th colSpan={2} className="border-l border-border bg-blue-500/5 px-3 py-1.5 text-center font-semibold">
+                R$/m²
+              </th>
+              <th colSpan={2} className="border-l border-border bg-amber-500/5 px-3 py-1.5 text-center font-semibold">
+                Preço
+              </th>
+              <th rowSpan={2} className="border-l border-border bg-green-500/5 px-3 py-2 text-right font-semibold">
+                Delta m²
+              </th>
+            </tr>
+            <tr className="border-b border-border bg-muted/30">
+              <th className="border-l border-border px-3 py-2 text-left font-medium">Release</th>
+              <th className="px-3 py-2 text-left font-medium">Atual</th>
+              <th className="border-l border-border px-3 py-2 text-right font-medium">Release</th>
+              <th className="px-3 py-2 text-right font-medium">Atual</th>
+              <th className="border-l border-border px-3 py-2 text-right font-medium">Release</th>
+              <th className="px-3 py-2 text-right font-medium">Atual</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -475,14 +516,29 @@ function ReleasePriceSummary({ building }: { building: BuildingWithHistory }) {
                     ID {row.typologyId} · {row.periods} períodos
                   </div>
                 </td>
-                <td className={cn('px-3 py-1.5 text-right', row.changed && 'font-medium text-red-500')}>
+                <td className="border-l border-border bg-slate-500/[0.03] px-3 py-1.5 text-muted-foreground">
+                  {row.releaseOldestPeriod}
+                </td>
+                <td className="bg-slate-500/[0.03] px-3 py-1.5 text-muted-foreground">
+                  {row.currentLatestPeriod}
+                </td>
+                <td className="border-l border-border bg-blue-500/[0.03] px-3 py-1.5 text-right">
+                  {fmtBRLPerM2(row.releasePrivateAreaPrice)}
+                </td>
+                <td className="bg-blue-500/[0.03] px-3 py-1.5 text-right">
+                  {fmtBRLPerM2(row.currentPrivateAreaPrice)}
+                </td>
+                <td className={cn('border-l border-border bg-amber-500/[0.03] px-3 py-1.5 text-right', row.changed && 'font-medium text-red-500')}>
                   {formatReleaseCell(row)}
                 </td>
-                <td className="px-3 py-1.5 text-muted-foreground">{row.releaseOldestPeriod}</td>
-                <td className="px-3 py-1.5 text-right">{fmtBRL(row.releasePrivateAreaPrice)}</td>
-                <td className="px-3 py-1.5 text-right">{fmtBRL(row.currentLatest)}</td>
-                <td className="px-3 py-1.5 text-muted-foreground">{row.currentLatestPeriod}</td>
-                <td className="px-3 py-1.5 text-right">{fmtBRL(row.currentPrivateAreaPrice)}</td>
+                <td className="bg-amber-500/[0.03] px-3 py-1.5 text-right">
+                  {fmtBRL(row.currentLatest)}
+                </td>
+                <td className="border-l border-border bg-green-500/[0.03] px-3 py-1.5 text-right">
+                  <span className={cn('inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold', deltaClass(row.deltaM2Pct))}>
+                    {fmtPct(row.deltaM2Pct)}
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>
