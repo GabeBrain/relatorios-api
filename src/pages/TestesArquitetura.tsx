@@ -7,7 +7,6 @@ import {
 } from 'recharts';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,6 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
+import MUNICIPIOS_BR from '@/assets/municipios-br.json';
+
+const UF_LIST = Object.keys(MUNICIPIOS_BR as Record<string, string[]>).sort();
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const ALL_BUILDING_TYPES = ['Vertical', 'Horizontal', 'Comercial', 'Hotel'];
@@ -986,12 +988,18 @@ export default function TestesArquitetura() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="space-y-1">
-            <Label className="text-xs">Cidade *</Label>
-            <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Ex: Barretos" className="h-8 text-xs" disabled={loading} />
+            <Label className="text-xs">UF *</Label>
+            <Select value={uf} onValueChange={(v) => { setUf(v); setCity(''); }} disabled={loading}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>{UF_LIST.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">UF (opcional)</Label>
-            <Input value={uf} onChange={(e) => setUf(e.target.value.toUpperCase())} placeholder="SP" maxLength={2} className="h-8 text-xs" disabled={loading} />
+            <Label className="text-xs">Município *</Label>
+            <Select value={city} onValueChange={setCity} disabled={loading || !uf}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={uf ? 'Selecione' : 'Selecione a UF primeiro'} /></SelectTrigger>
+              <SelectContent>{((MUNICIPIOS_BR as Record<string, string[]>)[uf] ?? []).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
           <div className="space-y-1 sm:col-span-2">
             <Label className="text-xs">Análise temporal desde</Label>
