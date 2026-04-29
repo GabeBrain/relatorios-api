@@ -20,6 +20,7 @@ import brainLogo from '../../../assets/logoBrain.png';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
+  type?: 'item';
   path: string;
   label: string;
   icon: React.ReactNode;
@@ -27,11 +28,21 @@ interface NavItem {
   standbyLabel?: string;
 }
 
+interface NavFolder {
+  type: 'folder';
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  children: NavItem[];
+}
+
+type NavEntry = NavItem | NavFolder;
+
 interface NavGroup {
   id: string;
   label: string;
   icon: React.ReactNode;
-  items: NavItem[];
+  items: NavEntry[];
 }
 
 const TOP_ITEMS: NavItem[] = [
@@ -53,7 +64,16 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Testes de Qualidade',
     icon: <ClipboardList className="h-4 w-4" />,
     items: [
-      { path: '/testes-qualidade/piemonte-vgv', label: 'Piemonte | VGV Verticais', icon: <ClipboardList className="h-4 w-4" /> },
+      {
+        type: 'folder',
+        id: 'cliente-piemonte',
+        label: 'Piemonte',
+        icon: <Building2 className="h-4 w-4" />,
+        children: [
+          { path: '/testes-qualidade/piemonte-vgv', label: 'VGV Verticais', icon: <ClipboardList className="h-4 w-4" /> },
+          { path: '/testes-qualidade/piemonte-release-price', label: 'Release price', icon: <ClipboardList className="h-4 w-4" /> },
+        ],
+      },
     ],
   },
   {
@@ -86,6 +106,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(NAV_GROUPS.map((g) => [g.id, false]))
   );
+  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const { dark, toggle } = useDarkMode();
   const location = useLocation();
 
@@ -93,8 +114,24 @@ export function AppLayout({ children }: AppLayoutProps) {
     setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
+  function toggleFolder(id: string) {
+    setOpenFolders((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  function isFolder(entry: NavEntry): entry is NavFolder {
+    return entry.type === 'folder';
+  }
+
+  function isActiveItem(item: NavItem) {
+    return location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+  }
+
+  function isActiveEntry(entry: NavEntry): boolean {
+    return isFolder(entry) ? entry.children.some(isActiveItem) : isActiveItem(entry);
+  }
+
   function renderNavItem(item: NavItem) {
-    const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+    const isActive = isActiveItem(item);
     return (
       <NavLink
         key={item.path}
@@ -123,13 +160,53 @@ export function AppLayout({ children }: AppLayoutProps) {
     );
   }
 
+  function renderNavEntry(entry: NavEntry) {
+    if (!isFolder(entry)) return renderNavItem(entry);
+
+    const hasActiveChild = entry.children.some(isActiveItem);
+    const isOpen = (openFolders[entry.id] ?? false) || hasActiveChild;
+
+    return (
+      <div key={entry.id} className="space-y-0.5">
+        <button
+          type="button"
+          onClick={() => !collapsed && toggleFolder(entry.id)}
+          className={cn(
+            'w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors',
+            hasActiveChild
+              ? 'text-primary font-medium'
+              : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+            collapsed && 'justify-center px-0 py-2.5'
+          )}
+          title={collapsed ? entry.label : undefined}
+        >
+          <span className="shrink-0">{entry.icon}</span>
+          {!collapsed && (
+            <>
+              <span className="flex-1 text-left truncate">{entry.label}</span>
+              <ChevronDown
+                className={cn('h-3.5 w-3.5 shrink-0 transition-transform', isOpen && 'rotate-180')}
+              />
+            </>
+          )}
+        </button>
+
+        {!collapsed && isOpen && (
+          <div className="ml-3 pl-2 border-l border-border space-y-0.5">
+            {entry.children.map(renderNavItem)}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
       {/* Sidebar */}
       <aside
         className={cn(
           'flex flex-col h-full border-r border-border bg-card transition-all duration-200 shrink-0',
-          collapsed ? 'w-14' : 'w-60'
+          collapsed ? 'w-14' : 'w-64'
         )}
       >
         {/* Logo + collapse toggle */}
@@ -157,10 +234,8 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Grupos com categoria */}
           {NAV_GROUPS.map((group) => {
-            const isOpen = openGroups[group.id] ?? true;
-            const hasActiveChild = group.items.some(
-              (item) => location.pathname === item.path || location.pathname.startsWith(item.path + '/')
-            );
+            const hasActiveChild = group.items.some(isActiveEntry);
+            const isOpen = (openGroups[group.id] ?? false) || hasActiveChild;
 
             return (
               <div key={group.id} className="mt-2">
@@ -191,7 +266,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
                 {!collapsed && isOpen && (
                   <div className="mt-0.5 ml-3 pl-2 border-l border-border space-y-0.5">
-                    {group.items.map(renderNavItem)}
+                    {group.items.map(renderNavEntry)}
                   </div>
                 )}
               </div>
