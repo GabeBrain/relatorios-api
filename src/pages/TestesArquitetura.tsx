@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Download, Play, Building2, X, HelpCircle } from 'lucide-react';
+import { Download, Play, Building2, X, HelpCircle, ChevronsUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import {
   Tooltip as UITooltip,
   TooltipContent as UITooltipContent,
@@ -102,9 +104,10 @@ const COLUMN_NOTES: Record<string, string> = {
     'Pode apresentar valores inconsistentes em períodos com adição de novas unidades à tipologia (lançamentos parciais). ' +
     'Dado não disponível diretamente na API Geobrain.',
 };
-const NOTE_VENDAS_BRUTAS =
-  'Fonte: campo "sold_in_period" da API Geobrain — unidades vendidas no período. ' +
-  'Representa vendas brutas. Renomeado de "Vendas líquidas" para refletir o dado corretamente.';
+const NOTE_VENDAS_LIQUIDAS =
+  'Fonte: campo "sold_in_period" da API Geobrain — unidades vendidas no período (vendas brutas). ' +
+  'O dado de distratos não está disponível na API, portanto não é possível calcular vendas líquidas reais. ' +
+  'A coluna de distratos é preenchida por estimativa via variação de estoque.';
 
 function compareTuple(a: [number, number], b: [number, number]): number {
   return a[0] !== b[0] ? a[0] - b[0] : a[1] - b[1];
@@ -379,7 +382,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
       const lastPeriodQ = periodToQuarter(String(last.period ?? ''));
       const distratosUltimoT = lastPeriodQ ? (qDistratos[lastPeriodQ] ?? null) : null;
 
-      const pctDisp = qty ? stock / qty : null;
+      const pctDisp = qty ? Math.round((stock / qty) * 1000) / 10 : null;
       const vgvLancado = qty && launchPrice ? Math.round(qty * launchPrice * 100) / 100 : null;
       const m2Lancado = privArea && qty ? Math.round(privArea * qty * 100) / 100 : null;
       const r_m2_lancado = launchPrice && privArea ? Math.round((launchPrice / privArea) * 10000) / 10000 : null;
@@ -422,7 +425,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
         '*Distratos no trimestre': distratosUltimoT,
       };
 
-      for (const q of quarterCols) row[`Vendas brutas ${q}`] = qSales[q] ?? 0;
+      for (const q of quarterCols) row[`Vendas líquidas ${q}`] = qSales[q] ?? 0;
 
       Object.assign(row, {
         'Estoque por Tipologia': stock,
@@ -460,7 +463,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
 
 async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: string[], city: string, lastQ: string): Promise<void> {
   const { utils, writeFile } = await import('xlsx');
-  const allCols = [...HEADER_COLS, ...quarterCols.map((q) => `Vendas brutas ${q}`), ...FOOTER_COLS];
+  const allCols = [...HEADER_COLS, ...quarterCols.map((q) => `Vendas líquidas ${q}`), ...FOOTER_COLS];
   const sheetRows = (rows: Row[]) =>
     [allCols, ...rows.map((row) => allCols.map((c) => row[c] ?? null))];
   const sfx = qSheet(lastQ);
@@ -786,7 +789,7 @@ function TimeseriesChart({ buildings, quarterCols }: {
 
 function formatCell(col: string, val: unknown): string {
   if (val === null || val === undefined || val === '') return '';
-  if (col === '% Dispon.') return `${((val as number) * 100).toFixed(1)}%`;
+  if (col === '% Dispon.') return `${(val as number).toFixed(1)}%`;
   if (typeof val === 'number') {
     if (col.startsWith('VGV') || col === 'Vendas Líquidas') {
       return val >= 1_000_000
@@ -804,7 +807,7 @@ function formatCell(col: string, val: unknown): string {
 function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }) {
   const allCols = [
     ...HEADER_COLS,
-    ...quarterCols.map((q) => `Vendas brutas ${q}`),
+    ...quarterCols.map((q) => `Vendas líquidas ${q}`),
     ...FOOTER_COLS,
   ];
   if (rows.length === 0) return <p className="text-xs text-muted-foreground py-4">Nenhum dado.</p>;
@@ -815,7 +818,7 @@ function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }
           <thead className="sticky top-0 bg-muted">
             <tr>
               {allCols.map((c) => {
-                const note = COLUMN_NOTES[c] ?? (c.startsWith('Vendas brutas ') ? NOTE_VENDAS_BRUTAS : undefined);
+                const note = COLUMN_NOTES[c] ?? (c.startsWith('Vendas líquidas ') ? NOTE_VENDAS_LIQUIDAS : undefined);
                 return (
                   <th key={c} className="text-left px-2 py-1.5 font-medium text-muted-foreground whitespace-nowrap border-b border-border">
                     {note ? (
@@ -825,7 +828,7 @@ function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }
                           <UITooltipTrigger asChild>
                             <HelpCircle className="h-3 w-3 cursor-help flex-shrink-0 opacity-60 hover:opacity-100" />
                           </UITooltipTrigger>
-                          <UITooltipContent className="max-w-72 text-xs leading-relaxed">{note}</UITooltipContent>
+                          <UITooltipContent className="max-w-sm text-xs leading-relaxed whitespace-normal break-words">{note}</UITooltipContent>
                         </UITooltip>
                       </span>
                     ) : c}
@@ -858,6 +861,7 @@ export default function TestesArquitetura() {
 
   const [city, setCity] = useState('');
   const [uf, setUf] = useState('');
+  const [cityOpen, setCityOpen] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<string[]>(['Vertical']);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(['Ativo', 'Esgotado']);
   const [startQ, setStartQ] = useState('1T2021');
@@ -909,6 +913,45 @@ export default function TestesArquitetura() {
     }, 40);
     return () => clearInterval(id);
   }, [phase]);
+
+  const [monitoredCities, setMonitoredCities] = useState<Record<string, string[]> | null>(null);
+
+  useEffect(() => {
+    if (!hasValidToken()) return;
+    const token = getToken();
+    let cancelled = false;
+
+    async function fetchMonitored() {
+      const byUf: Record<string, Set<string>> = {};
+      let nextUrl: string | null = `${BASE_URL}/monitored-cities`;
+      while (nextUrl) {
+        const res = await fetch(nextUrl, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        for (const item of (data.data ?? [])) {
+          const uf = String(item.state ?? '').toUpperCase();
+          const city = String(item.city ?? '');
+          if (!uf || !city) continue;
+          if (!byUf[uf]) byUf[uf] = new Set();
+          byUf[uf].add(city);
+        }
+        nextUrl = data.links?.next ?? null;
+      }
+      if (cancelled) return;
+      const result: Record<string, string[]> = {};
+      for (const [uf, cities] of Object.entries(byUf)) result[uf] = [...cities].sort();
+      setMonitoredCities(result);
+    }
+
+    fetchMonitored().catch(() => { /* silently fall back to IBGE list */ });
+    return () => { cancelled = true; };
+  }, [getToken, hasValidToken]);
+
+  const availableUFs = monitoredCities ? UF_LIST.filter((u) => u in monitoredCities) : UF_LIST;
+
+  const ibgeCities = (MUNICIPIOS_BR as Record<string, string[]>)[uf] ?? [];
+  const geobCitySet = monitoredCities ? new Set(monitoredCities[uf] ?? []) : null;
+  const availableCities = geobCitySet ? ibgeCities.filter((c) => geobCitySet.has(c)) : ibgeCities;
 
   const previewAbortRef = useRef<AbortController | null>(null);
   const fetchAbortRef = useRef<AbortController | null>(null);
@@ -1047,23 +1090,47 @@ export default function TestesArquitetura() {
 
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-600 dark:text-amber-400">
-          <strong>Limitação da API:</strong> Distratos não são fornecidos. As colunas <code>*Distratos no trimestre</code> e <code>VGV Distratos</code> ficam em branco.
+          <strong>Limitação da API:</strong> Distratos não são fornecidos diretamente. <code>*Distratos no trimestre</code> é uma estimativa via variação de estoque; <code>VGV Distratos</code> permanece em branco.
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="space-y-1">
             <Label className="text-xs">UF *</Label>
             <Select value={uf} onValueChange={(v) => { setUf(v); setCity(''); }} disabled={loading}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Selecione" /></SelectTrigger>
-              <SelectContent>{UF_LIST.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={monitoredCities ? 'Selecione' : 'Carregando…'} /></SelectTrigger>
+              <SelectContent>{availableUFs.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
             <Label className="text-xs">Município *</Label>
-            <Select value={city} onValueChange={setCity} disabled={loading || !uf}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={uf ? 'Selecione' : 'Selecione a UF primeiro'} /></SelectTrigger>
-              <SelectContent>{((MUNICIPIOS_BR as Record<string, string[]>)[uf] ?? []).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-            </Select>
+            <Popover open={cityOpen} onOpenChange={setCityOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  disabled={loading || !uf}
+                  className="h-8 w-full justify-between text-xs font-normal px-3"
+                >
+                  <span className="truncate">{city || (uf ? 'Selecione' : 'Selecione a UF primeiro')}</span>
+                  <ChevronsUpDown className="h-3 w-3 opacity-50 flex-shrink-0 ml-1" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[220px] p-0">
+                <Command>
+                  <CommandInput placeholder="Buscar município..." className="h-8 text-xs" />
+                  <CommandList>
+                    <CommandEmpty className="py-3 text-center text-xs text-muted-foreground">Nenhum município encontrado.</CommandEmpty>
+                    <CommandGroup>
+                      {availableCities.map((c) => (
+                        <CommandItem key={c} value={c} onSelect={() => { setCity(c); setCityOpen(false); }} className="text-xs">
+                          {c}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="space-y-1 sm:col-span-2">
             <Label className="text-xs">Análise temporal desde</Label>
