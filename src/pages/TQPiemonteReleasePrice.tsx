@@ -535,7 +535,13 @@ export default function TQPiemonteReleasePrice() {
   const token = useAuthStore((state) => state.getToken()) ?? '';
   const hasToken = !!token;
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(`Gabriel, obrigado pelo retorno, consegui resolver a questão dos períodos e os seus lançamentos, testei para Curitiba, O fetch inicial agora baixa 13k+ prédios com histórico.
+
+Outro ponto que estou tendo um pouco de dificuldade é na questão de valor do m² atual e lançado,
+
+Como /building não retorna release_price (só price), onde consigo essas duas métricas?
+
+Sempre que tento buscar em BuildingWithHistoricResource/release_price, não consigo retornar os valores.`);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [draft, setDraft] = useState(`Olá Wesley,
 
@@ -657,7 +663,7 @@ Resultado da investigação
           <textarea
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="Cole aqui o email do Wesley quando estiver pronto. Este espaço fica dedicado ao contexto original da solicitação."
+            placeholder="Email original do cliente"
             className="min-h-44 w-full resize-y rounded-md border border-border bg-background px-3 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </Collapsible>
