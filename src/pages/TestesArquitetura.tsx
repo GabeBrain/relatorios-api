@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Download, Play, Building2, X } from 'lucide-react';
+import { Download, Play, Building2, X, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
@@ -12,6 +12,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip as UITooltip,
+  TooltipContent as UITooltipContent,
+  TooltipProvider as UITooltipProvider,
+  TooltipTrigger as UITooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
 import MUNICIPIOS_BR from '@/assets/municipios-br.json';
@@ -89,6 +95,16 @@ function sortableDate(dateStr: string): string {
 }
 
 const TYPE_ORDER: Record<string, number> = { Vertical: 0, Horizontal: 1, Comercial: 2, Hotel: 3 };
+
+const COLUMN_NOTES: Record<string, string> = {
+  '*Distratos no trimestre':
+    'Estimativa calculada via equação de estoque: Distratos(t) = Estoque(t) − Estoque(t−1) + Vendas brutas(t). ' +
+    'Pode apresentar valores inconsistentes em períodos com adição de novas unidades à tipologia (lançamentos parciais). ' +
+    'Dado não disponível diretamente na API Geobrain.',
+};
+const NOTE_VENDAS_BRUTAS =
+  'Fonte: campo "sold_in_period" da API Geobrain — unidades vendidas no período. ' +
+  'Representa vendas brutas. Renomeado de "Vendas líquidas" para refletir o dado corretamente.';
 
 function compareTuple(a: [number, number], b: [number, number]): number {
   return a[0] !== b[0] ? a[0] - b[0] : a[1] - b[1];
@@ -343,10 +359,25 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
       const stock = stockRaw !== null ? stockRaw : 0;
 
       const qSales: Record<string, number | null> = {};
+      const qDistratos: Record<string, number | null> = {};
+      let prevStock: number | null = null;
       for (const e of entries) {
         const q = periodToQuarter(String(e.period ?? ''));
-        if (q && qSet.has(q)) qSales[q] = toNum(e.sold_in_period);
+        const curStock = toNum(e.typology_stock);
+        const sold = toNum(e.sold_in_period) ?? 0;
+        if (q && qSet.has(q)) {
+          qSales[q] = toNum(e.sold_in_period);
+          if (prevStock !== null && curStock !== null) {
+            const est = curStock - prevStock + sold;
+            qDistratos[q] = est >= 0 ? est : null;
+          } else {
+            qDistratos[q] = null;
+          }
+        }
+        if (curStock !== null) prevStock = curStock;
       }
+      const lastPeriodQ = periodToQuarter(String(last.period ?? ''));
+      const distratosUltimoT = lastPeriodQ ? (qDistratos[lastPeriodQ] ?? null) : null;
 
       const pctDisp = qty ? stock / qty : null;
       const vgvLancado = qty && launchPrice ? Math.round(qty * launchPrice * 100) / 100 : null;
@@ -388,10 +419,10 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
         'Valor m2 Priv.': toNum(last.price_private_area),
         'Unidades por Tipologia': qty || null,
         '*Vendidos no trimestre': toNum(last.sold_in_period),
-        '*Distratos no trimestre': null,
+        '*Distratos no trimestre': distratosUltimoT,
       };
 
-      for (const q of quarterCols) row[`Vendas líquidas ${q}`] = qSales[q] ?? 0;
+      for (const q of quarterCols) row[`Vendas brutas ${q}`] = qSales[q] ?? 0;
 
       Object.assign(row, {
         'Estoque por Tipologia': stock,
@@ -429,7 +460,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
 
 async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: string[], city: string, lastQ: string): Promise<void> {
   const { utils, writeFile } = await import('xlsx');
-  const allCols = [...HEADER_COLS, ...quarterCols.map((q) => `Vendas líquidas ${q}`), ...FOOTER_COLS];
+  const allCols = [...HEADER_COLS, ...quarterCols.map((q) => `Vendas brutas ${q}`), ...FOOTER_COLS];
   const sheetRows = (rows: Row[]) =>
     [allCols, ...rows.map((row) => allCols.map((c) => row[c] ?? null))];
   const sfx = qSheet(lastQ);
@@ -773,33 +804,50 @@ function formatCell(col: string, val: unknown): string {
 function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }) {
   const allCols = [
     ...HEADER_COLS,
-    ...quarterCols.map((q) => `Vendas líquidas ${q}`),
+    ...quarterCols.map((q) => `Vendas brutas ${q}`),
     ...FOOTER_COLS,
   ];
   if (rows.length === 0) return <p className="text-xs text-muted-foreground py-4">Nenhum dado.</p>;
   return (
-    <div className="overflow-auto max-h-[50vh]">
-      <table className="w-full text-[11px] border-collapse">
-        <thead className="sticky top-0 bg-muted">
-          <tr>
-            {allCols.map((c) => (
-              <th key={c} className="text-left px-2 py-1.5 font-medium text-muted-foreground whitespace-nowrap border-b border-border">{c}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
-          {rows.map((row, i) => (
-            <tr key={i} className="hover:bg-accent/20">
-              {allCols.map((c) => (
-                <td key={c} className="px-2 py-1 whitespace-nowrap">
-                  {formatCell(c, row[c])}
-                </td>
-              ))}
+    <UITooltipProvider delayDuration={200}>
+      <div className="overflow-auto max-h-[50vh]">
+        <table className="w-full text-[11px] border-collapse">
+          <thead className="sticky top-0 bg-muted">
+            <tr>
+              {allCols.map((c) => {
+                const note = COLUMN_NOTES[c] ?? (c.startsWith('Vendas brutas ') ? NOTE_VENDAS_BRUTAS : undefined);
+                return (
+                  <th key={c} className="text-left px-2 py-1.5 font-medium text-muted-foreground whitespace-nowrap border-b border-border">
+                    {note ? (
+                      <span className="flex items-center gap-1">
+                        {c}
+                        <UITooltip>
+                          <UITooltipTrigger asChild>
+                            <HelpCircle className="h-3 w-3 cursor-help flex-shrink-0 opacity-60 hover:opacity-100" />
+                          </UITooltipTrigger>
+                          <UITooltipContent className="max-w-72 text-xs leading-relaxed">{note}</UITooltipContent>
+                        </UITooltip>
+                      </span>
+                    ) : c}
+                  </th>
+                );
+              })}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {rows.map((row, i) => (
+              <tr key={i} className="hover:bg-accent/20">
+                {allCols.map((c) => (
+                  <td key={c} className="px-2 py-1 whitespace-nowrap">
+                    {formatCell(c, row[c])}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </UITooltipProvider>
   );
 }
 
