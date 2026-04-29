@@ -80,6 +80,16 @@ function extractYear(dateStr: string): string | null {
   return parts.find((p) => p.length === 4 && /^\d+$/.test(p)) ?? null;
 }
 
+function sortableDate(dateStr: string): string {
+  const s = String(dateStr ?? '').trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+  return s;
+}
+
+const TYPE_ORDER: Record<string, number> = { Vertical: 0, Horizontal: 1, Comercial: 2, Hotel: 3 };
+
 function compareTuple(a: [number, number], b: [number, number]): number {
   return a[0] !== b[0] ? a[0] - b[0] : a[1] - b[1];
 }
@@ -403,6 +413,12 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
   }
 
   rows.sort((a, b) => {
+    const ta = TYPE_ORDER[String(a['Tipo'] ?? '')] ?? 99;
+    const tb = TYPE_ORDER[String(b['Tipo'] ?? '')] ?? 99;
+    if (ta !== tb) return ta - tb;
+    const da = sortableDate(String(a['Lançamento'] ?? ''));
+    const db = sortableDate(String(b['Lançamento'] ?? ''));
+    if (da !== db) return da.localeCompare(db);
     const na = String(a['Empreendimentos'] ?? ''); const nb = String(b['Empreendimentos'] ?? '');
     if (na !== nb) return na.localeCompare(nb);
     return (toNum(a['Dorm.']) ?? 0) - (toNum(b['Dorm.']) ?? 0);
