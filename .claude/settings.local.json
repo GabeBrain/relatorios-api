@@ -4,6 +4,9 @@
       "WebFetch(domain:servicodados.ibge.gov.br)",
       "Bash(node -e ' *)",
       "Bash(npx tsc *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\GaloD\\Desktop\\SE\\Relatorios API\\relat-rios-api\\docs"
     ]
   }
 }

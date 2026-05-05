@@ -14,6 +14,8 @@ import {
   BarChart2,
   Wrench,
   ClipboardList,
+  Users,
+  Database,
 } from 'lucide-react';
 import { AuthBlock } from './AuthBlock';
 import brainLogo from '../../../assets/logoBrain.png';
@@ -60,9 +62,9 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    id: 'testes-qualidade',
-    label: 'Testes de Qualidade',
-    icon: <ClipboardList className="h-4 w-4" />,
+    id: 'suporte-clientes',
+    label: 'Suporte Clientes',
+    icon: <Users className="h-4 w-4" />,
     items: [
       {
         type: 'folder',
@@ -72,6 +74,22 @@ const NAV_GROUPS: NavGroup[] = [
         children: [
           { path: '/testes-qualidade/piemonte-vgv', label: 'VGV Verticais', icon: <ClipboardList className="h-4 w-4" /> },
           { path: '/testes-qualidade/piemonte-release-price', label: 'Release price', icon: <ClipboardList className="h-4 w-4" /> },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'testes-qualidade',
+    label: 'Testes de Qualidade',
+    icon: <ClipboardList className="h-4 w-4" />,
+    items: [
+      {
+        type: 'folder',
+        id: 'cid',
+        label: 'CID',
+        icon: <Database className="h-4 w-4" />,
+        children: [
+          { path: '/testes-qualidade/cid-validacao-base', label: 'Validação de Base', icon: <ClipboardList className="h-4 w-4" /> },
         ],
       },
     ],

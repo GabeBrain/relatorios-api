@@ -12,6 +12,7 @@ import TestesArquitetura from './pages/TestesArquitetura.tsx';
 import Assistente from './pages/Assistente.tsx';
 import TQPiemonteVgv from './pages/TQPiemonteVgv.tsx';
 import TQPiemonteReleasePrice from './pages/TQPiemonteReleasePrice.tsx';
+import TQCidValidacaoBase from './pages/TQCidValidacaoBase.tsx';
 import NotFound from './pages/NotFound.tsx';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="/mapa" element={<Index />} />
               <Route path="/testes-qualidade/piemonte-vgv" element={<TQPiemonteVgv />} />
               <Route path="/testes-qualidade/piemonte-release-price" element={<TQPiemonteReleasePrice />} />
+              <Route path="/testes-qualidade/cid-validacao-base" element={<TQCidValidacaoBase />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </ErrorBoundary>
