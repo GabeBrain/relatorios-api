@@ -223,7 +223,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'flex flex-col h-full border-r border-border bg-card transition-all duration-200 shrink-0',
+          'flex flex-col h-full border-r border-border bg-card transition-all duration-200 shrink-0 print:hidden',
           collapsed ? 'w-14' : 'w-64'
         )}
       >
