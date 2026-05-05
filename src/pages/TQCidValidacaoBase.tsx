@@ -5,12 +5,17 @@ import {
   Calendar,
   CheckCircle2,
   ChevronDown,
+  ChevronsUpDown,
   Database,
   Loader2,
   MapPin,
   Play,
   X,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import {
   BarChart,
   Bar,
@@ -268,8 +273,11 @@ export default function TQCidValidacaoBase() {
   const token = useAuthStore((s) => s.getToken());
   const hasToken = !!token;
 
-  const [cities, setCities] = useState<{ label: string; city: string; uf: string }[]>([]);
-  const [selectedKey, setSelectedKey] = useState('');
+  // Record<UF, city[]> — populado paginando /monitored-cities
+  const [citiesByUf, setCitiesByUf] = useState<Record<string, string[]> | null>(null);
+  const [selectedUf, setSelectedUf] = useState('');
+  const [selectedCityName, setSelectedCityName] = useState('');
+  const [cityOpen, setCityOpen] = useState(false);
 
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState('');
@@ -280,31 +288,47 @@ export default function TQCidValidacaoBase() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [ran, setRan] = useState(false);
 
-  // Carrega cidades monitoradas ao montar
+  // Carrega todas as páginas de /monitored-cities seguindo links.next
   useEffect(() => {
     if (!token) return;
-    apiGet('/monitored-cities', {}, token).then(({ data }) => {
-      const raw = Array.isArray(data)
-        ? (data as MonitoredCity[])
-        : Array.isArray((data as Record<string, unknown>)?.data)
-          ? ((data as Record<string, unknown>).data as MonitoredCity[])
-          : [];
-      const mapped = raw
-        .map((c) => ({
-          city: c.city ?? c.city_name ?? '',
-          uf: c.uf ?? c.state ?? '',
-          label: `${c.city ?? c.city_name ?? ''} — ${c.uf ?? c.state ?? ''}`,
-        }))
-        .filter((c) => c.city)
-        .sort((a, b) => a.city.localeCompare(b.city, 'pt-BR'));
-      setCities(mapped);
-    });
+    let cancelled = false;
+
+    async function fetchAll() {
+      const byUf: Record<string, Set<string>> = {};
+      let nextUrl: string | null = `${BASE_URL}/monitored-cities`;
+
+      while (nextUrl) {
+        const res = await fetch(nextUrl, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        });
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        for (const item of (data.data ?? []) as MonitoredCity[]) {
+          const uf = String(item.state ?? '').toUpperCase();
+          const city = String(item.city ?? '');
+          if (!uf || !city) continue;
+          if (!byUf[uf]) byUf[uf] = new Set();
+          byUf[uf].add(city);
+        }
+        nextUrl = (data.links?.next as string | null) ?? null;
+      }
+
+      if (cancelled) return;
+      const result: Record<string, string[]> = {};
+      for (const [uf, set] of Object.entries(byUf)) result[uf] = [...set].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      setCitiesByUf(result);
+    }
+
+    fetchAll().catch(() => {});
+    return () => { cancelled = true; };
   }, [token]);
 
-  const selectedCity = cities.find((c) => `${c.city}|${c.uf}` === selectedKey);
+  const availableUfs = citiesByUf ? Object.keys(citiesByUf).sort() : [];
+  const availableCities = (citiesByUf && selectedUf) ? (citiesByUf[selectedUf] ?? []) : [];
+  const canRun = !!selectedUf && !!selectedCityName;
 
   const run = useCallback(async () => {
-    if (!token || !selectedCity) return;
+    if (!token || !selectedUf || !selectedCityName) return;
     abortRef.current?.abort();
     const ctrl = new AbortController();
     abortRef.current = ctrl;
@@ -325,7 +349,7 @@ export default function TQCidValidacaoBase() {
         setPhase(`Buscando empreendimentos… página ${page}${lastPage > 1 ? `/${lastPage}` : ''}`);
         const { data, error: err } = await apiGet(
           '/building-with-history',
-          { city: selectedCity.city, uf: selectedCity.uf, per_page: 100, page },
+          { city: selectedCityName, uf: selectedUf, per_page: 100, page },
           token,
           ctrl.signal,
         );
@@ -437,7 +461,7 @@ export default function TQCidValidacaoBase() {
 
       // ── 5. Validação geográfica ───────────────────────────────────────────
       setPhase('Validando localização…');
-      const bbox = CITY_BBOX[selectedCity.city];
+      const bbox = CITY_BBOX[selectedCityName];
       const seenGeo = new Set<string>();
 
       for (const row of flat) {
@@ -466,7 +490,7 @@ export default function TQCidValidacaoBase() {
               building_id: row.building_id,
               name: row.name,
               standard: row.standard,
-              detail: `Lat ${row.latitude.toFixed(4)}, Lon ${row.longitude.toFixed(4)} fora do limite de ${selectedCity.city}`,
+              detail: `Lat ${row.latitude.toFixed(4)}, Lon ${row.longitude.toFixed(4)} fora do limite de ${selectedCityName}`,
             });
           }
         }
@@ -481,7 +505,7 @@ export default function TQCidValidacaoBase() {
     } finally {
       setRunning(false);
     }
-  }, [token, selectedCity]);
+  }, [token, selectedUf, selectedCityName]);
 
   // ── Métricas derivadas ────────────────────────────────────────────────────
 
@@ -509,7 +533,7 @@ export default function TQCidValidacaoBase() {
     outlierPrice: alerts.filter((a) => a.type === 'Outlier Preço'),
   };
 
-  const bboxAvailable = selectedCity ? !!CITY_BBOX[selectedCity.city] : false;
+  const bboxAvailable = !!CITY_BBOX[selectedCityName];
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -541,40 +565,82 @@ export default function TQCidValidacaoBase() {
           </div>
         )}
 
-        {/* Seletor de cidade + botão */}
+        {/* Seletor UF + cidade + botão */}
         {hasToken && (
-          <div className="flex items-end gap-3">
-            <div className="flex-1 space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Cidade monitorada
-              </label>
-              <select
-                value={selectedKey}
-                onChange={(e) => { setSelectedKey(e.target.value); setRan(false); }}
-                disabled={running || cities.length === 0}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 cursor-pointer"
+          <div className="flex items-end gap-3 flex-wrap">
+            {/* UF */}
+            <div className="space-y-1.5 w-24 shrink-0">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">UF</label>
+              <Select
+                value={selectedUf}
+                onValueChange={(v) => { setSelectedUf(v); setSelectedCityName(''); setRan(false); }}
+                disabled={running || !citiesByUf}
               >
-                <option value="">
-                  {cities.length === 0 ? 'Carregando cidades…' : 'Selecione uma cidade'}
-                </option>
-                {cities.map((c) => (
-                  <option key={`${c.city}|${c.uf}`} value={`${c.city}|${c.uf}`}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder={citiesByUf ? 'UF' : '…'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableUfs.map((u) => (
+                    <SelectItem key={u} value={u}>{u}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+
+            {/* Município com busca */}
+            <div className="flex-1 min-w-[180px] space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Município</label>
+              <Popover open={cityOpen} onOpenChange={setCityOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    disabled={running || !selectedUf}
+                    className="h-9 w-full justify-between text-sm font-normal px-3"
+                  >
+                    <span className="truncate">
+                      {selectedCityName || (selectedUf ? 'Selecione o município' : 'Selecione a UF primeiro')}
+                    </span>
+                    <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0 ml-1" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[260px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Buscar município…" className="h-9 text-sm" />
+                    <CommandList>
+                      <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
+                        Nenhum município encontrado.
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {availableCities.map((c) => (
+                          <CommandItem
+                            key={c}
+                            value={c}
+                            onSelect={() => { setSelectedCityName(c); setCityOpen(false); setRan(false); }}
+                            className="text-sm"
+                          >
+                            {c}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Botão */}
             <button
               type="button"
               onClick={run}
-              disabled={running || !selectedKey}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:bg-primary/90 transition-colors"
+              disabled={running || !canRun}
+              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:bg-primary/90 transition-colors h-9 shrink-0"
             >
               {running
                 ? <Loader2 className="h-4 w-4 animate-spin" />
                 : <Play className="h-4 w-4" />
               }
-              {running ? 'Validando…' : 'Executar Validação'}
+              {running ? 'Validando…' : 'Executar'}
             </button>
           </div>
         )}
@@ -674,16 +740,16 @@ export default function TQCidValidacaoBase() {
             >
               {bboxAvailable ? (
                 <p className="text-xs text-muted-foreground">
-                  Bounding box cadastrado para {selectedCity?.city}:{' '}
-                  lat [{CITY_BBOX[selectedCity!.city].LAT_MIN}, {CITY_BBOX[selectedCity!.city].LAT_MAX}] ·
-                  lon [{CITY_BBOX[selectedCity!.city].LON_MIN}, {CITY_BBOX[selectedCity!.city].LON_MAX}].
+                  Bounding box cadastrado para {selectedCityName}:{' '}
+                  lat [{CITY_BBOX[selectedCityName].LAT_MIN}, {CITY_BBOX[selectedCityName].LAT_MAX}] ·
+                  lon [{CITY_BBOX[selectedCityName].LON_MIN}, {CITY_BBOX[selectedCityName].LON_MAX}].
                   Empreendimentos fora desse intervalo são sinalizados como Alta severidade.
                 </p>
               ) : (
                 <div className="flex items-start gap-2 text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-500/5 rounded-lg px-3 py-2">
                   <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                   <span>
-                    Bounding box não cadastrado para <strong>{selectedCity?.city}</strong>.
+                    Bounding box não cadastrado para <strong>{selectedCityName}</strong>.
                     Apenas nulidade de lat/lon é verificada. Para adicionar o limite geográfico,
                     inclua a cidade no dicionário <code>CITY_BBOX</code> em <code>TQCidValidacaoBase.tsx</code>.
                   </span>
@@ -719,7 +785,7 @@ export default function TQCidValidacaoBase() {
                 {alerts.length === 0 ? (
                   <div className="flex items-center justify-center gap-2 text-sm text-green-700 dark:text-green-400 py-6">
                     <CheckCircle2 className="h-5 w-5" />
-                    <span>Nenhum alerta encontrado. Base consistente para {selectedCity?.city}.</span>
+                    <span>Nenhum alerta encontrado. Base consistente para {selectedCityName}.</span>
                   </div>
                 ) : (
                   <>
