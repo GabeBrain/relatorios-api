@@ -28,6 +28,8 @@ import { useAuthStore } from '@/store/auth-store';
 import { cn } from '@/lib/utils';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
+const ALL_BUILDING_TYPES = ['Vertical', 'Horizontal', 'Comercial', 'Hotel'] as const;
+type BuildingType = typeof ALL_BUILDING_TYPES[number];
 
 // Bounding boxes para cidades monitoradas — expandir conforme necessário.
 // Fonte: notebook "Validação Dados CID". Lat/lon em graus decimais.
@@ -278,6 +280,7 @@ export default function TQCidValidacaoBase() {
   const [selectedUf, setSelectedUf] = useState('');
   const [selectedCityName, setSelectedCityName] = useState('');
   const [cityOpen, setCityOpen] = useState(false);
+  const [selectedTypes, setSelectedTypes] = useState<BuildingType[]>([...ALL_BUILDING_TYPES]);
 
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState('');
@@ -325,10 +328,16 @@ export default function TQCidValidacaoBase() {
 
   const availableUfs = citiesByUf ? Object.keys(citiesByUf).sort() : [];
   const availableCities = (citiesByUf && selectedUf) ? (citiesByUf[selectedUf] ?? []) : [];
-  const canRun = !!selectedUf && !!selectedCityName;
+  const canRun = !!selectedUf && !!selectedCityName && selectedTypes.length > 0;
+
+  function toggleType(t: BuildingType) {
+    setSelectedTypes((prev) =>
+      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+    );
+  }
 
   const run = useCallback(async () => {
-    if (!token || !selectedUf || !selectedCityName) return;
+    if (!token || !selectedUf || !selectedCityName || selectedTypes.length === 0) return;
     abortRef.current?.abort();
     const ctrl = new AbortController();
     abortRef.current = ctrl;
@@ -340,28 +349,35 @@ export default function TQCidValidacaoBase() {
     setAlerts([]);
 
     try {
-      // ── 1. Fetch paginado ─────────────────────────────────────────────────
+      // ── 1. Fetch paginado por tipo (type é required na API) ───────────────
       const allBuildings: RawBuilding[] = [];
-      let page = 1;
-      let lastPage = 1;
+      const seenIds = new Set<string>();
 
-      do {
-        setPhase(`Buscando empreendimentos… página ${page}${lastPage > 1 ? `/${lastPage}` : ''}`);
-        const { data, error: err } = await apiGet(
-          '/building-with-history',
-          { city: selectedCityName, uf: selectedUf, per_page: 100, page },
-          token,
-          ctrl.signal,
-        );
-        if (ctrl.signal.aborted) return;
-        if (err || !data) { setError(`Erro na API: ${err}`); return; }
-        const d = data as Record<string, unknown>;
-        const items = (d.data as RawBuilding[]) ?? [];
-        const meta = (d.meta as Record<string, unknown>) ?? {};
-        lastPage = (meta.last_page as number) ?? 1;
-        allBuildings.push(...items);
-        page++;
-      } while (page <= lastPage);
+      for (const btype of selectedTypes) {
+        let page = 1;
+        let lastPage = 1;
+
+        do {
+          setPhase(`Buscando ${btype}… página ${page}${lastPage > 1 ? `/${lastPage}` : ''}`);
+          const { data, error: err } = await apiGet(
+            '/building-with-history',
+            { city: selectedCityName, uf: selectedUf, type: btype, per_page: 100, page },
+            token,
+            ctrl.signal,
+          );
+          if (ctrl.signal.aborted) return;
+          if (err || !data) { setError(`Erro na API (${btype}): ${err}`); return; }
+          const d = data as Record<string, unknown>;
+          const items = (d.data as RawBuilding[]) ?? [];
+          const meta = (d.meta as Record<string, unknown>) ?? {};
+          lastPage = (meta.last_page as number) ?? 1;
+          for (const item of items) {
+            const id = String(item.building_id ?? '');
+            if (id && !seenIds.has(id)) { seenIds.add(id); allBuildings.push(item); }
+          }
+          page++;
+        } while (page <= lastPage);
+      }
 
       // ── 2. Flatten tipologias ─────────────────────────────────────────────
       setPhase('Processando tipologias…');
@@ -505,7 +521,7 @@ export default function TQCidValidacaoBase() {
     } finally {
       setRunning(false);
     }
-  }, [token, selectedUf, selectedCityName]);
+  }, [token, selectedUf, selectedCityName, selectedTypes]);
 
   // ── Métricas derivadas ────────────────────────────────────────────────────
 
@@ -642,6 +658,25 @@ export default function TQCidValidacaoBase() {
               }
               {running ? 'Validando…' : 'Executar'}
             </button>
+          </div>
+        )}
+
+        {/* Tipos de empreendimento */}
+        {hasToken && (
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide shrink-0">Tipos</span>
+            {ALL_BUILDING_TYPES.map((t) => (
+              <label key={t} className="flex items-center gap-1.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={selectedTypes.includes(t)}
+                  onChange={() => toggleType(t)}
+                  disabled={running}
+                  className="accent-primary h-3.5 w-3.5"
+                />
+                <span className="text-sm text-muted-foreground">{t}</span>
+              </label>
+            ))}
           </div>
         )}
 
