@@ -26,9 +26,11 @@ import {
 } from 'recharts';
 import { useAuthStore } from '@/store/auth-store';
 import { cn } from '@/lib/utils';
+import brainLogo from '../../assets/logoBrain.png';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const ALL_BUILDING_TYPES = ['Vertical', 'Horizontal', 'Comercial', 'Hotel'] as const;
+const FETCH_CONCURRENCY = 8;
 type BuildingType = typeof ALL_BUILDING_TYPES[number];
 
 // Bounding boxes para cidades monitoradas — expandir conforme necessário.
@@ -174,6 +176,43 @@ function calcIQR(values: number[]): { lo: number; hi: number } | null {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
+function FetchingOverlay({
+  pct, done, total, failed, phase, onAbort,
+}: {
+  pct: number; done: number; total: number; failed: number; phase: string; onAbort: () => void;
+}) {
+  const clipped = Math.max(0, Math.min(100, pct));
+  return (
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-background/90 backdrop-blur-sm">
+      <div className="relative w-56 h-28 mb-5">
+        <img src={brainLogo} alt="" className="absolute inset-0 w-full h-full object-contain opacity-10" />
+        <img
+          src={brainLogo} alt=""
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ clipPath: `inset(0 ${100 - clipped}% 0 0)` }}
+        />
+      </div>
+      <p className="text-sm font-medium text-foreground animate-pulse">Coletando dados…</p>
+      {phase && <p className="text-xs text-muted-foreground mt-1">{phase}</p>}
+      {total > 0 && (
+        <p className="text-xs text-muted-foreground mt-2 tabular-nums">
+          {done.toLocaleString('pt-BR')} / {total.toLocaleString('pt-BR')} páginas
+          <span className="ml-2 text-muted-foreground/60">· {FETCH_CONCURRENCY}× paralelo</span>
+          {failed > 0 && <span className="text-amber-500 ml-2">· {failed} falha(s)</span>}
+        </p>
+      )}
+      <button
+        type="button"
+        onClick={onAbort}
+        className="mt-6 flex items-center gap-1.5 text-xs text-red-500 hover:text-red-400 transition-colors"
+      >
+        <X className="h-3.5 w-3.5" />
+        Cancelar coleta
+      </button>
+    </div>
+  );
+}
+
 function SectionCard({
   title,
   icon,
@@ -285,6 +324,7 @@ export default function TQCidValidacaoBase() {
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState('');
   const [error, setError] = useState('');
+  const [fetchProg, setFetchProg] = useState({ done: 0, total: 0, failed: 0, pct: 0 });
   const abortRef = useRef<AbortController | null>(null);
 
   const [rows, setRows] = useState<FlatRow[]>([]);
@@ -347,36 +387,79 @@ export default function TQCidValidacaoBase() {
     setRan(false);
     setRows([]);
     setAlerts([]);
+    setFetchProg({ done: 0, total: 0, failed: 0, pct: 0 });
 
     try {
-      // ── 1. Fetch paginado por tipo (type é required na API) ───────────────
+      // ── 1. Fase de descoberta: página 1 de cada tipo em paralelo ──────────
+      setPhase('Descobrindo volume por tipo…');
+
+      const firstPages = await Promise.allSettled(
+        selectedTypes.map((btype) =>
+          apiGet('/building-with-history',
+            { city: selectedCityName, uf: selectedUf, type: btype, per_page: 100, page: 1 },
+            token, ctrl.signal,
+          ).then((r) => ({ ...r, btype }))
+        )
+      );
+
+      if (ctrl.signal.aborted) return;
+
+      // Coleta resultados da página 1 e monta lista de páginas restantes
       const allBuildings: RawBuilding[] = [];
       const seenIds = new Set<string>();
+      const remainingTasks: { btype: string; page: number }[] = [];
+      let initFailed = 0;
 
-      for (const btype of selectedTypes) {
-        let page = 1;
-        let lastPage = 1;
+      for (const result of firstPages) {
+        if (result.status === 'rejected') { initFailed++; continue; }
+        const { data, error: err, btype } = result.value;
+        if (err || !data) { initFailed++; continue; }
+        const d = data as Record<string, unknown>;
+        const items = (d.data as RawBuilding[]) ?? [];
+        const meta = (d.meta as Record<string, unknown>) ?? {};
+        const lastPage = (meta.last_page as number) ?? 1;
+        for (const item of items) {
+          const id = String(item.building_id ?? '');
+          if (id && !seenIds.has(id)) { seenIds.add(id); allBuildings.push(item); }
+        }
+        for (let p = 2; p <= lastPage; p++) remainingTasks.push({ btype, page: p });
+      }
 
-        do {
-          setPhase(`Buscando ${btype}… página ${page}${lastPage > 1 ? `/${lastPage}` : ''}`);
-          const { data, error: err } = await apiGet(
-            '/building-with-history',
-            { city: selectedCityName, uf: selectedUf, type: btype, per_page: 100, page },
-            token,
-            ctrl.signal,
-          );
-          if (ctrl.signal.aborted) return;
-          if (err || !data) { setError(`Erro na API (${btype}): ${err}`); return; }
-          const d = data as Record<string, unknown>;
-          const items = (d.data as RawBuilding[]) ?? [];
-          const meta = (d.meta as Record<string, unknown>) ?? {};
-          lastPage = (meta.last_page as number) ?? 1;
-          for (const item of items) {
-            const id = String(item.building_id ?? '');
-            if (id && !seenIds.has(id)) { seenIds.add(id); allBuildings.push(item); }
+      const totalPages = selectedTypes.length + remainingTasks.length;
+      let donePages = selectedTypes.length;
+      let failedPages = initFailed;
+
+      setFetchProg({ done: donePages, total: totalPages, failed: failedPages, pct: (donePages / totalPages) * 100 });
+
+      // ── 2. Fase paralela: páginas restantes em batches de FETCH_CONCURRENCY ─
+      for (let i = 0; i < remainingTasks.length; i += FETCH_CONCURRENCY) {
+        if (ctrl.signal.aborted) return;
+        const batch = remainingTasks.slice(i, i + FETCH_CONCURRENCY);
+        setPhase(`Coletando páginas ${donePages + 1}–${Math.min(donePages + batch.length, totalPages)} de ${totalPages}…`);
+
+        const results = await Promise.allSettled(
+          batch.map(({ btype, page }) =>
+            apiGet('/building-with-history',
+              { city: selectedCityName, uf: selectedUf, type: btype, per_page: 100, page },
+              token, ctrl.signal,
+            )
+          )
+        );
+
+        for (const r of results) {
+          if (r.status === 'fulfilled' && r.value.data) {
+            const items = ((r.value.data as Record<string, unknown>).data as RawBuilding[]) ?? [];
+            for (const item of items) {
+              const id = String(item.building_id ?? '');
+              if (id && !seenIds.has(id)) { seenIds.add(id); allBuildings.push(item); }
+            }
+          } else {
+            failedPages++;
           }
-          page++;
-        } while (page <= lastPage);
+          donePages++;
+        }
+
+        setFetchProg({ done: donePages, total: totalPages, failed: failedPages, pct: (donePages / totalPages) * 100 });
       }
 
       // ── 2. Flatten tipologias ─────────────────────────────────────────────
@@ -555,6 +638,18 @@ export default function TQCidValidacaoBase() {
 
   return (
     <div className="h-full overflow-y-auto">
+      {/* Overlay de carregamento */}
+      {running && (
+        <FetchingOverlay
+          pct={fetchProg.pct}
+          done={fetchProg.done}
+          total={fetchProg.total}
+          failed={fetchProg.failed}
+          phase={phase}
+          onAbort={() => { abortRef.current?.abort(); setRunning(false); setPhase(''); }}
+        />
+      )}
+
       <div className="max-w-3xl mx-auto px-6 py-8 space-y-5">
 
         {/* Cabeçalho */}
@@ -677,14 +772,6 @@ export default function TQCidValidacaoBase() {
                 <span className="text-sm text-muted-foreground">{t}</span>
               </label>
             ))}
-          </div>
-        )}
-
-        {/* Progresso */}
-        {running && phase && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            <span>{phase}</span>
           </div>
         )}
 
