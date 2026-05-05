@@ -62,16 +62,6 @@ interface MonitoredCity {
   state?: string;
 }
 
-interface RawTypology {
-  id?: string | number;
-  number_bedroom?: string | number | null;
-  private_area?: number | string | null;
-  price?: number | string | null;
-  stock?: number | string | null;
-  sold?: number | string | null;
-  [key: string]: unknown;
-}
-
 interface TypologyHistory {
   typology_id?: string | number;
   release_price?: number | string | null;
@@ -89,7 +79,6 @@ interface RawBuilding {
   longitude?: string | number | null;
   release_date?: string | null;
   delivery_date?: string | null;
-  typologies?: RawTypology[];
   typologies_history?: TypologyHistory[];
   [key: string]: unknown;
 }
@@ -462,21 +451,28 @@ export default function TQCidValidacaoBase() {
         setFetchProg({ done: donePages, total: totalPages, failed: failedPages, pct: (donePages / totalPages) * 100 });
       }
 
-      // ── 2. Flatten tipologias ─────────────────────────────────────────────
+      // ── 2. Flatten via typologies_history ────────────────────────────────
+      // BuildingWithHistoricResource não expõe typologies[] — os dados de
+      // tipologia estão em typologies_history[]. Agrupamos por typology_id,
+      // usamos o período mais recente para preço/estoque atual e o mais
+      // antigo para release_price.
       setPhase('Processando tipologias…');
       const flat: FlatRow[] = [];
 
       for (const b of allBuildings) {
-        // release_price: pegar do período mais antigo no histórico por typology_id
-        const rpMap: Record<string, number | null> = {};
+        const typoMap = new Map<string, TypologyHistory[]>();
         for (const h of b.typologies_history ?? []) {
           const tid = String(h.typology_id ?? '');
-          const rp = toNum(h.release_price);
-          if (tid && rp !== null && !(tid in rpMap)) rpMap[tid] = rp;
+          if (!tid) continue;
+          if (!typoMap.has(tid)) typoMap.set(tid, []);
+          typoMap.get(tid)!.push(h);
         }
 
-        for (const t of b.typologies ?? []) {
-          const tid = String(t.id ?? '');
+        for (const [tid, entries] of typoMap) {
+          entries.sort((a, b) => String(a.period ?? '').localeCompare(String(b.period ?? '')));
+          const first = entries[0];
+          const last = entries[entries.length - 1];
+
           flat.push({
             building_id: String(b.building_id ?? ''),
             name: b.name ?? '—',
@@ -486,9 +482,9 @@ export default function TQCidValidacaoBase() {
             release_date: b.release_date ?? null,
             delivery_date: b.delivery_date ?? null,
             typology_id: tid,
-            private_area: toNum(t.private_area),
-            price: toNum(t.price),
-            release_price: rpMap[tid] ?? null,
+            private_area: toNum(last.private_area),
+            price: toNum(last.price),
+            release_price: toNum(first.release_price),
           });
         }
       }
