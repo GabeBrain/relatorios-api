@@ -14,6 +14,8 @@ import TQPiemonteVgv from './pages/TQPiemonteVgv.tsx';
 import TQPiemonteReleasePrice from './pages/TQPiemonteReleasePrice.tsx';
 import TQCidValidacaoBase from './pages/TQCidValidacaoBase.tsx';
 import NotFound from './pages/NotFound.tsx';
+import CorretorPage from './features/corretor/pages/CorretorPage.tsx';
+import CorretorAnalysisPage from './features/corretor/pages/CorretorAnalysisPage.tsx';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -63,6 +65,8 @@ const App = () => (
               <Route path="/testes-qualidade/piemonte-vgv" element={<TQPiemonteVgv />} />
               <Route path="/testes-qualidade/piemonte-release-price" element={<TQPiemonteReleasePrice />} />
               <Route path="/testes-qualidade/cid-validacao-base" element={<TQCidValidacaoBase />} />
+              <Route path="/relatorios/corretor" element={<CorretorPage />} />
+              <Route path="/relatorios/corretor/analise" element={<CorretorAnalysisPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </ErrorBoundary>
