@@ -3,7 +3,9 @@
     "allow": [
       "WebFetch(domain:servicodados.ibge.gov.br)",
       "Bash(node -e ' *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\GaloD\\\\Desktop\\\\SE\\\\Relatorios API\\\\relatorios-api\" -Recurse -Name)",
+      "Bash(Select-Object -First 50)"
     ],
     "additionalDirectories": [
       "c:\\Users\\GaloD\\Desktop\\SE\\Relatorios API\\relat-rios-api\\docs"
