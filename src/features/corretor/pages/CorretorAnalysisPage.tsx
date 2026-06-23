@@ -246,7 +246,7 @@ function FilterBar({ active, onChange, counts }: {
 
 export default function CorretorAnalysisPage() {
   const navigate = useNavigate();
-  const { file, apiKey, config, slides, status, currentSlide, initSlides, updateSlide, setStatus, setCurrentSlide } =
+  const { file, config, slides, status, currentSlide, initSlides, updateSlide, setStatus, setCurrentSlide } =
     useAnalysisStore();
   const { addProject } = useArchiveStore();
 
@@ -290,8 +290,7 @@ export default function CorretorAnalysisPage() {
           total,
           config!.cityName,
           config!.radii,
-          config!.model,
-          apiKey
+          config!.model
         );
 
         updateSlide(slideNum, {

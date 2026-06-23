@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, FileText, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Upload, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,7 +23,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 
 export default function NewProjectForm({ compact = false }: { compact?: boolean }) {
   const navigate = useNavigate();
-  const { setFile, setConfig, setApiKey, reset, apiKey: storedKey } = useAnalysisStore();
+  const { setFile, setConfig, reset } = useAnalysisStore();
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pageCount, setPageCount] = useState<number | null>(null);
@@ -34,8 +34,6 @@ export default function NewProjectForm({ compact = false }: { compact?: boolean 
   const [cityName, setCityName] = useState('');
   const [radii, setRadii] = useState('5min, 10min, 15min');
   const [model, setModel] = useState<ModelId>('gpt-4o');
-  const [apiKeyInput, setApiKeyInput] = useState(storedKey);
-  const [showKey, setShowKey] = useState(false);
 
   const inputId = useRef(`pdf-input-${Math.random().toString(36).slice(2)}`).current;
 
@@ -80,14 +78,12 @@ export default function NewProjectForm({ compact = false }: { compact?: boolean 
     projectName.trim() &&
     cityName.trim() &&
     radii.trim() &&
-    apiKeyInput.trim().startsWith('sk-') &&
     !loadingPdf;
 
   function handleStart() {
     if (!canSubmit || !pdfFile) return;
     reset();
     setFile(pdfFile);
-    setApiKey(apiKeyInput.trim());
     setConfig({
       projectName: projectName.trim(),
       cityName: cityName.trim(),
@@ -197,28 +193,6 @@ export default function NewProjectForm({ compact = false }: { compact?: boolean 
               )}
             </SelectContent>
           </Select>
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="np-key" className="text-xs">
-            Chave OpenAI
-          </Label>
-          <div className="relative">
-            <Input
-              id="np-key"
-              type={showKey ? 'text' : 'password'}
-              placeholder="sk-..."
-              value={apiKeyInput}
-              onChange={(e) => setApiKeyInput(e.target.value)}
-              className="pr-8 h-8 font-mono text-xs"
-            />
-            <button
-              type="button"
-              onClick={() => setShowKey((v) => !v)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-            </button>
-          </div>
         </div>
       </div>
 

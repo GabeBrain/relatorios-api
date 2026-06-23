@@ -46,14 +46,12 @@ export interface CostSummary {
 
 interface AnalysisStore {
   file: File | null;
-  apiKey: string;
   config: ProjectConfig | null;
   slides: SlideResult[];
   status: AnalysisStatus;
   currentSlide: number;
 
   setFile: (file: File) => void;
-  setApiKey: (key: string) => void;
   setConfig: (config: ProjectConfig) => void;
   initSlides: (count: number) => void;
   updateSlide: (slideNumber: number, update: Partial<SlideResult>) => void;
@@ -65,14 +63,12 @@ interface AnalysisStore {
 
 export const useAnalysisStore = create<AnalysisStore>((set, get) => ({
   file: null,
-  apiKey: '',
   config: null,
   slides: [],
   status: 'idle',
   currentSlide: 0,
 
   setFile: (file) => set({ file }),
-  setApiKey: (apiKey) => set({ apiKey }),
   setConfig: (config) => set({ config }),
 
   initSlides: (count) =>
@@ -107,7 +103,6 @@ export const useAnalysisStore = create<AnalysisStore>((set, get) => ({
       status: 'idle',
       currentSlide: 0,
     }),
-  // apiKey preservado no reset para não forçar re-digitação
 
   getCostSummary: () => {
     const { slides } = get();
