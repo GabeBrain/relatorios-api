@@ -16,132 +16,85 @@ export type Database = {
     Tables: {
       projects: {
         Row: {
-          id: string
-          saved_at: string
-          project_name: string
           city_name: string
-          radii: string
+          id: string
           model: string
-          total_slides: number
-          slides_ok: number
-          slides_with_errors: number
-          slides_skipped: number
+          project_name: string
+          radii: string
+          report_text: string
+          saved_at: string
           slides_error: number
-          total_errors: number
+          slides_ok: number
+          slides_skipped: number
+          slides_with_errors: number
           total_cost: number
+          total_errors: number
           total_input_tokens: number
           total_output_tokens: number
-          report_text: string
+          total_slides: number
         }
         Insert: {
-          id?: string
-          saved_at?: string
-          project_name: string
           city_name: string
-          radii: string
+          id?: string
           model: string
-          total_slides?: number
-          slides_ok?: number
-          slides_with_errors?: number
-          slides_skipped?: number
+          project_name: string
+          radii: string
+          report_text?: string
+          saved_at?: string
           slides_error?: number
-          total_errors?: number
+          slides_ok?: number
+          slides_skipped?: number
+          slides_with_errors?: number
           total_cost?: number
+          total_errors?: number
           total_input_tokens?: number
           total_output_tokens?: number
-          report_text?: string
+          total_slides?: number
         }
         Update: {
-          id?: string
-          saved_at?: string
-          project_name?: string
           city_name?: string
-          radii?: string
+          id?: string
           model?: string
-          total_slides?: number
-          slides_ok?: number
-          slides_with_errors?: number
-          slides_skipped?: number
+          project_name?: string
+          radii?: string
+          report_text?: string
+          saved_at?: string
           slides_error?: number
-          total_errors?: number
+          slides_ok?: number
+          slides_skipped?: number
+          slides_with_errors?: number
           total_cost?: number
+          total_errors?: number
           total_input_tokens?: number
           total_output_tokens?: number
-          report_text?: string
+          total_slides?: number
         }
         Relationships: []
       }
-      slides: {
-        Row: {
-          id: string
-          project_id: string
-          slide_number: number
-          status: string
-          has_data: boolean
-          summary: string
-          input_tokens: number
-          output_tokens: number
-          cost: number
-          image_path: string | null
-        }
-        Insert: {
-          id?: string
-          project_id: string
-          slide_number: number
-          status: string
-          has_data?: boolean
-          summary?: string
-          input_tokens?: number
-          output_tokens?: number
-          cost?: number
-          image_path?: string | null
-        }
-        Update: {
-          id?: string
-          project_id?: string
-          slide_number?: number
-          status?: string
-          has_data?: boolean
-          summary?: string
-          input_tokens?: number
-          output_tokens?: number
-          cost?: number
-          image_path?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "slides_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       slide_errors: {
         Row: {
+          description: string
           id: string
+          location: string
+          severity: string
           slide_id: string
           type: string
-          severity: string
-          description: string
-          location: string
         }
         Insert: {
+          description: string
           id?: string
+          location?: string
+          severity: string
           slide_id: string
           type: string
-          severity: string
-          description: string
-          location?: string
         }
         Update: {
+          description?: string
           id?: string
+          location?: string
+          severity?: string
           slide_id?: string
           type?: string
-          severity?: string
-          description?: string
-          location?: string
         }
         Relationships: [
           {
@@ -150,7 +103,54 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "slides"
             referencedColumns: ["id"]
-          }
+          },
+        ]
+      }
+      slides: {
+        Row: {
+          cost: number
+          has_data: boolean
+          id: string
+          image_path: string | null
+          input_tokens: number
+          output_tokens: number
+          project_id: string
+          slide_number: number
+          status: string
+          summary: string
+        }
+        Insert: {
+          cost?: number
+          has_data?: boolean
+          id?: string
+          image_path?: string | null
+          input_tokens?: number
+          output_tokens?: number
+          project_id: string
+          slide_number: number
+          status: string
+          summary?: string
+        }
+        Update: {
+          cost?: number
+          has_data?: boolean
+          id?: string
+          image_path?: string | null
+          input_tokens?: number
+          output_tokens?: number
+          project_id?: string
+          slide_number?: number
+          status?: string
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slides_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
