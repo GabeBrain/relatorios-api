@@ -4,12 +4,21 @@ export const brl = new Intl.NumberFormat('pt-BR', {
   maximumFractionDigits: 0,
 });
 
+export function numCompact(v: number | null | undefined, digits = 1): string {
+  if (v == null || !Number.isFinite(v)) return '—';
+  const abs = Math.abs(v);
+  if (abs >= 1e9) return `${(v / 1e9).toFixed(digits).replace('.', ',')} Bi`;
+  if (abs >= 1e6) return `${(v / 1e6).toFixed(digits).replace('.', ',')} Mi`;
+  if (abs >= 1e3) return `${(v / 1e3).toFixed(digits).replace('.', ',')}k`;
+  return new Intl.NumberFormat('pt-BR').format(Math.round(v));
+}
+
 export function brlCompact(v: number | null | undefined): string {
   if (v == null || !Number.isFinite(v)) return '—';
   const abs = Math.abs(v);
-  if (abs >= 1e9) return `R$ ${(v / 1e9).toFixed(2).replace('.', ',')} bi`;
-  if (abs >= 1e6) return `R$ ${(v / 1e6).toFixed(1).replace('.', ',')} mi`;
-  if (abs >= 1e3) return `R$ ${(v / 1e3).toFixed(0)} mil`;
+  if (abs >= 1e9) return `R$ ${(v / 1e9).toFixed(2).replace('.', ',')} Bi`;
+  if (abs >= 1e6) return `R$ ${(v / 1e6).toFixed(1).replace('.', ',')} Mi`;
+  if (abs >= 1e3) return `R$ ${(v / 1e3).toFixed(1).replace('.', ',')}k`;
   return brl.format(v);
 }
 
