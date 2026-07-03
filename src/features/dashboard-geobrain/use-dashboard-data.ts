@@ -8,10 +8,7 @@ type Status = 'idle' | 'loading' | 'ready' | 'error';
 export function useDashboardData() {
   const token = useAuthStore((s) => s.getToken());
   const [status, setStatus] = useState<Status>('idle');
-  const [buildings, setBuildings] = useState<Build ing[] | null>(null) as unknown as [
-    Building[] | null,
-    React.Dispatch<React.SetStateAction<Building[] | null>>,
-  ];
+  const [buildings, setBuildings] = useState<Building[] | null>(null);
   const [error, setError] = useState<string>('');
   const [progress, setProgress] = useState<FetchProgress | null>(null);
   const abortRef = useRef<AbortController | null>(null);
