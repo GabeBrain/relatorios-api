@@ -4,7 +4,8 @@ import {
 } from 'recharts';
 import { brlCompact, numCompact, pctRaw } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import type { SeriesPoint, Granularity } from './types';
+import type { Granularity } from './types';
+import type { SeriesPoint } from './aggregate';
 
 interface ChartCardProps {
   title: string;
