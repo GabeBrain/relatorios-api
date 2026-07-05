@@ -1,4 +1,4 @@
-import { Component, type ReactNode } from 'react';
+import { Component, lazy, Suspense, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster as Sonner } from '@/components/ui/sonner';
@@ -14,9 +14,10 @@ import TQPiemonteVgv from './pages/TQPiemonteVgv.tsx';
 import TQPiemonteReleasePrice from './pages/TQPiemonteReleasePrice.tsx';
 import TQCidValidacaoBase from './pages/TQCidValidacaoBase.tsx';
 import NotFound from './pages/NotFound.tsx';
-import CorretorPage from './features/corretor/pages/CorretorPage.tsx';
-import CorretorAnalysisPage from './features/corretor/pages/CorretorAnalysisPage.tsx';
 import DashboardGeobrain from './pages/DashboardGeobrain.tsx';
+
+const CorretorPage = lazy(() => import('./features/corretor/pages/CorretorPage.tsx'));
+const CorretorAnalysisPage = lazy(() => import('./features/corretor/pages/CorretorAnalysisPage.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -56,21 +57,23 @@ const App = () => (
       <BrowserRouter>
         <AppLayout>
           <ErrorBoundary>
-            <Routes>
-              <Route path="/" element={<Navigate to="/documentacao" replace />} />
-              <Route path="/documentacao" element={<Documentacao />} />
-              <Route path="/testes-requisicao" element={<TestesRequisicao />} />
-              <Route path="/relatorios-secovi" element={<TestesArquitetura />} />
-              <Route path="/assistente" element={<Assistente />} />
-              <Route path="/mapa" element={<MapaLegado />} />
-              <Route path="/testes-qualidade/piemonte-vgv" element={<TQPiemonteVgv />} />
-              <Route path="/testes-qualidade/piemonte-release-price" element={<TQPiemonteReleasePrice />} />
-              <Route path="/testes-qualidade/cid-validacao-base" element={<TQCidValidacaoBase />} />
-              <Route path="/relatorios/corretor" element={<CorretorPage />} />
-              <Route path="/relatorios/corretor/analise" element={<CorretorAnalysisPage />} />
-              <Route path="/dashboard-geobrain" element={<DashboardGeobrain />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando...</div>}>
+              <Routes>
+                <Route path="/" element={<Navigate to="/documentacao" replace />} />
+                <Route path="/documentacao" element={<Documentacao />} />
+                <Route path="/testes-requisicao" element={<TestesRequisicao />} />
+                <Route path="/relatorios-secovi" element={<TestesArquitetura />} />
+                <Route path="/assistente" element={<Assistente />} />
+                <Route path="/mapa" element={<MapaLegado />} />
+                <Route path="/testes-qualidade/piemonte-vgv" element={<TQPiemonteVgv />} />
+                <Route path="/testes-qualidade/piemonte-release-price" element={<TQPiemonteReleasePrice />} />
+                <Route path="/testes-qualidade/cid-validacao-base" element={<TQCidValidacaoBase />} />
+                <Route path="/relatorios/corretor" element={<CorretorPage />} />
+                <Route path="/relatorios/corretor/analise" element={<CorretorAnalysisPage />} />
+                <Route path="/dashboard-geobrain" element={<DashboardGeobrain />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </ErrorBoundary>
         </AppLayout>
       </BrowserRouter>
