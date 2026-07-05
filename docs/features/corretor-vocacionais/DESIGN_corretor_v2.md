@@ -169,3 +169,59 @@ Extrator determinístico (só stdlib) rodado sobre o estudo GO:
 Com o par **ata ↔ estudo** (2ª feira), fechar o `ATA_COVERAGE`. Enquanto isso, o motor
 determinístico sobre PPTX (tabelas + gráficos) já pode ser evoluído e testado nas amostras
 atuais para levantar sintomas.
+
+## Resultado do POC v2 (`poc_extractor.py`) nas amostras
+
+Extrator determinístico (stdlib), com índice **gráfico→slide→título** e filtro de resposta
+múltipla. Achados por estudo:
+
+| Estudo | Slides | Tabelas nativas | Gráficos | `PERCENTAGE_SUM` (candidatos a bug) | `LEFTOVER_NOTE` |
+|---|---|---|---|---|---|
+| GO (Construtora Regional) | 203 | 7 | 77 | **9** (ex.: slide 143 «Tabelas de preço» = 112%; slide 130 = 106%) + 1 explicado por resposta múltipla | 4 (ex.: "Agrupar aqui nas 3 rendas", "Corrigir para cor") |
+| Masterplan | 333 | 100 | 9 | 0 | 1 (falso positivo) |
+
+Sintomas descobertos (guiam o design):
+- **Resposta múltipla**: alguns gráficos passam de 100% de propósito (slide anotado
+  "RESPOSTA MÚLTIPLA, TOTAL SUPERIOR A 100%") → a regra deve ignorá-los. Já implementado.
+- **Notas de edição esquecidas** no deck entregue → nova regra `LEFTOVER_NOTE` (determinística,
+  alto valor, nem estava na rubrica).
+- **Fonte/elaboração** frequentemente está em **imagem**, não em texto (só 42/203 slides do GO
+  têm "fonte" como texto) → checagem determinística tem alcance limitado aqui; validar com a
+  analista se a exigência é textual.
+- Detecção de **título de slide** precisa de heurística (o 1º run às vezes é um número-destaque).
+
+## Plano de próximos passos (recomendado)
+
+**Ordem: 1 → 2 → 3 → 4.** IA só entra depois do esqueleto determinístico calibrado.
+
+1. **IR (Representação Intermediária)** — extrair cada estudo para um JSON normalizado
+   (`slides[] → {n, titulo, secao_canonica, fontes[], notas[], tabelas[], graficos[]}`). É a
+   fundação: as regras cruzadas da rubrica só existem sobre um IR (não dá para checar
+   consistência entre slides lendo um XML por vez). **Próximo entregável concreto sugerido.**
+2. **Segmentação canônica de seções** — dicionário de títulos/sinônimos → seção da rubrica
+   (ex.: "DADOS SOCIODEMOGRÁFICOS"/"PERFIL SOCIODEMOGRÁFICO" → `SOCIO`). Habilita completude de
+   estrutura e roteia cada regra ao slide certo. (Estudos NÃO usam a numeração da rubrica.)
+3. **Catálogo de regras executável** — cada item da rubrica vira uma função pura sobre o IR:
+   `{id, secao, entrada, motor: DET|IA, confiança, status}`. Começar pelas DET de alta
+   confiança: `PERCENTAGE_SUM`, `ABSOLUTE_SUM`, `TOTALS_EQUALITY`, `LEFTOVER_NOTE`,
+   `TEMPORAL_WINDOW`, `REQUIRED_NOTE`.
+4. **Loop de calibração com a analista** — rodar nos 3 estudos → relatório por slide → analista
+   marca bug real × falso positivo → ajustar tolerâncias e o mapa de seções. É o ciclo
+   "gerar bugs e verificar sintomas".
+
+### Dependências externas (buscar 2ª feira)
+| Item | Destrava | Fonte |
+|---|---|---|
+| Par **ata ↔ estudo** do mesmo projeto | `ATA_COVERAGE` | cliente |
+| **Fórmula da projeção de 6 anos** | `TEMPORAL_WINDOW` / `PROJECTION_FORMULA` | analista (se ofereceu) |
+| **Fonte IBGE** (Censo 2022 por município) | `IBGE_MISMATCH` | definir API/CSV |
+
+## Log de avanços
+
+- **05/jul/2026** — Fase 4 iniciada (conceitual). Mapeados os 2 docs de contexto (rubrica +
+  ata). Definida filosofia "mínimo de IA" e arquitetura em 3 camadas. Catálogo regra→erro→motor.
+- **05/jul/2026** — 3 amostras recebidas (locais, gitignored). Achado decisivo: **ingerir PPTX,
+  não PDF** (no PPTX os números são dados estruturados → consistência determinística).
+- **05/jul/2026** — `poc_extractor.py` v1→v2: extrai tabelas/gráficos, mapeia anomalias a
+  slide/título, filtra resposta múltipla, acha notas esquecidas. Rodado nos 2 PPTX com achados
+  reais. **Parada combinada aqui**; retomar com material completo (ata + fórmula + IBGE).
