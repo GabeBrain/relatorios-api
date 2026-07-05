@@ -16,6 +16,7 @@ import TQCidValidacaoBase from './pages/TQCidValidacaoBase.tsx';
 import NotFound from './pages/NotFound.tsx';
 import CorretorPage from './features/corretor/pages/CorretorPage.tsx';
 import CorretorAnalysisPage from './features/corretor/pages/CorretorAnalysisPage.tsx';
+import DashboardGeobrain from './pages/DashboardGeobrain.tsx';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="/testes-qualidade/cid-validacao-base" element={<TQCidValidacaoBase />} />
               <Route path="/relatorios/corretor" element={<CorretorPage />} />
               <Route path="/relatorios/corretor/analise" element={<CorretorAnalysisPage />} />
+              <Route path="/dashboard-geobrain" element={<DashboardGeobrain />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </ErrorBoundary>

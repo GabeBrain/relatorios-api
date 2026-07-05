@@ -60,6 +60,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { path: '/relatorios-secovi', label: 'Relatório Secovi', icon: <Building2 className="h-4 w-4" /> },
       { path: '/relatorios/corretor', label: 'Corretor | Estudos Vocacionais', icon: <ClipboardList className="h-4 w-4" /> },
+      { path: '/dashboard-geobrain', label: 'Dashboard Geobrain', icon: <BarChart2 className="h-4 w-4" /> },
     ],
   },
   {
