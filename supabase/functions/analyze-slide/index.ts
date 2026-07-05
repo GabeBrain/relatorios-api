@@ -2,14 +2,55 @@
 // Proxia a análise de um slide para a OpenAI usando o secret OPENAI_API_KEY.
 // A chave nunca é exposta ao frontend.
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+// --- CORS ---------------------------------------------------------------
+// Origens permitidas: localhost de dev + as configuradas no secret ALLOWED_ORIGINS
+// (lista separada por vírgula, ex.: "https://app.brain.srv.br,https://studio.brain.srv.br").
+// Se ALLOWED_ORIGINS não estiver setado, apenas as origens de dev são liberadas.
+const DEV_ORIGINS = ['http://localhost:8080', 'http://localhost:5173'];
 
-type ModelId = 'gpt-4o' | 'gpt-4o-mini';
+function allowedOrigins(): string[] {
+  const env = Deno.env.get('ALLOWED_ORIGINS') ?? '';
+  const fromEnv = env.split(',').map((o) => o.trim()).filter(Boolean);
+  return [...DEV_ORIGINS, ...fromEnv];
+}
+
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? '';
+  const list = allowedOrigins();
+  const allow = list.includes(origin) ? origin : list[0];
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Vary': 'Origin',
+    'Access-Control-Allow-Headers':
+      'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
+
+// --- Rate limiting (best-effort, em memória) ----------------------------
+// Mitigação parcial: instâncias da edge function são efêmeras e podem ser
+// múltiplas, então este limite não é garantia forte. Freia abuso trivial.
+const RATE_LIMIT = 30; // req por janela
+const RATE_WINDOW_MS = 60_000;
+const hits = new Map<string, { count: number; resetAt: number }>();
+
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = hits.get(ip);
+  if (!entry || now > entry.resetAt) {
+    hits.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return false;
+  }
+  entry.count += 1;
+  return entry.count > RATE_LIMIT;
+}
+
+// --- Validação ----------------------------------------------------------
+const MODELS = ['gpt-4o', 'gpt-4o-mini'] as const;
+type ModelId = (typeof MODELS)[number];
+
+// Limite do payload da imagem: ~5MB decodificados (base64 ≈ 4/3 do tamanho bruto).
+const MAX_BASE64_CHARS = 7_000_000;
 
 interface RequestBody {
   base64: string;
@@ -18,6 +59,40 @@ interface RequestBody {
   city: string;
   radii: string;
   model: ModelId;
+}
+
+function validate(body: unknown): { ok: true; value: RequestBody } | { ok: false; error: string; status: number } {
+  if (!body || typeof body !== 'object') return { ok: false, error: 'Corpo inválido.', status: 400 };
+  const b = body as Record<string, unknown>;
+
+  if (typeof b.base64 !== 'string' || b.base64.length === 0) {
+    return { ok: false, error: 'base64 do slide é obrigatório.', status: 400 };
+  }
+  if (b.base64.length > MAX_BASE64_CHARS) {
+    return { ok: false, error: 'Imagem excede o tamanho máximo permitido.', status: 413 };
+  }
+  if (typeof b.slideNumber !== 'number' || !Number.isFinite(b.slideNumber)) {
+    return { ok: false, error: 'slideNumber inválido.', status: 400 };
+  }
+  if (typeof b.total !== 'number' || !Number.isFinite(b.total)) {
+    return { ok: false, error: 'total inválido.', status: 400 };
+  }
+  const model = b.model as ModelId;
+  if (!MODELS.includes(model)) {
+    return { ok: false, error: 'model não suportado.', status: 400 };
+  }
+
+  return {
+    ok: true,
+    value: {
+      base64: b.base64,
+      slideNumber: b.slideNumber,
+      total: b.total,
+      city: typeof b.city === 'string' ? b.city : '',
+      radii: typeof b.radii === 'string' ? b.radii : '',
+      model,
+    },
+  };
 }
 
 function buildPrompt(
@@ -111,59 +186,71 @@ async function callOpenAI(apiKey: string, body: RequestBody, retries = 3) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
+  const json = (data: unknown, status = 200) =>
+    new Response(JSON.stringify(data), {
+      status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  if (req.method !== 'POST') {
+    return json({ error: 'Método não permitido.' }, 405);
+  }
+
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  if (rateLimited(ip)) {
+    return json({ error: 'Limite de requisições excedido. Tente novamente em instantes.' }, 429);
   }
 
   try {
     const apiKey = Deno.env.get('OPENAI_API_KEY');
     if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: 'OPENAI_API_KEY não configurada nos secrets.' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return json({ error: 'OPENAI_API_KEY não configurada nos secrets.' }, 500);
     }
 
-    const body = (await req.json()) as RequestBody;
-    if (!body?.base64) {
-      return new Response(
-        JSON.stringify({ error: 'base64 do slide é obrigatório.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      return json({ error: 'JSON inválido.' }, 400);
     }
 
-    const response = await callOpenAI(apiKey, body);
+    const parsed = validate(raw);
+    if (!parsed.ok) {
+      return json({ error: parsed.error }, parsed.status);
+    }
+
+    const response = await callOpenAI(apiKey, parsed.value);
 
     const inputTokens = response.usage?.prompt_tokens ?? 0;
     const outputTokens = response.usage?.completion_tokens ?? 0;
 
-    let parsed: Record<string, unknown> = {};
+    let content: Record<string, unknown> = {};
     try {
-      parsed = JSON.parse(response.choices?.[0]?.message?.content ?? '{}');
+      content = JSON.parse(response.choices?.[0]?.message?.content ?? '{}');
     } catch {
-      parsed = { errors: [], hasData: false, summary: 'Erro ao processar resposta da IA' };
+      content = { errors: [], hasData: false, summary: 'Erro ao processar resposta da IA' };
     }
 
-    const skipped = parsed.noReview === true;
+    const skipped = content.noReview === true;
 
     const result = {
-      errors: skipped ? [] : (parsed.errors ?? []),
-      hasData: skipped ? false : (parsed.hasData ?? true),
+      errors: skipped ? [] : (content.errors ?? []),
+      hasData: skipped ? false : (content.hasData ?? true),
       summary: skipped
-        ? (parsed.reason ?? 'Slide ignorado')
-        : (parsed.summary ?? ''),
+        ? (content.reason ?? 'Slide ignorado')
+        : (content.summary ?? ''),
       inputTokens,
       outputTokens,
       skipped,
     };
 
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return json(result);
   } catch (err) {
-    return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : 'Erro desconhecido' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return json({ error: err instanceof Error ? err.message : 'Erro desconhecido' }, 500);
   }
 });
