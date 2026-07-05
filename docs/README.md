@@ -6,7 +6,7 @@
 
 | Pasta | Conteúdo |
 |---|---|
-| [`architecture/`](./architecture/) | Referências transversais de arquitetura e design: **DESIGN_SYSTEM.md** (design system da plataforma) e **migration-paridade-v1.md** (histórico da migração Streamlit → React). |
+| [`architecture/`](./architecture/) | Referências transversais de arquitetura e design: **DESIGN_SYSTEM.md** (design system da plataforma), **migration-paridade-v1.md** (histórico da migração Streamlit → React) e **SECURITY_NOTES.md** (dívidas de segurança conhecidas). |
 | [`features/corretor-vocacionais/`](./features/corretor-vocacionais/) | Contexto da feature **Corretor \| Estudos Vocacionais**: ata de briefing (Grupo Impper) e PPTX com os parâmetros de correção. Base para evoluir o prompt de análise em `supabase/functions/analyze-slide`. |
 | [`features/relatorios-secovi/`](./features/relatorios-secovi/) | Planilhas de referência dos **Relatórios SECOVI** (Barretos) usadas na construção da página `TestesArquitetura`. |
 | [`features/cid-validacao/`](./features/cid-validacao/) | Notebook de validação de dados **CID**, base da página de Validação de Base. |
