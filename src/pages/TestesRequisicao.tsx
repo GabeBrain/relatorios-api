@@ -18,6 +18,7 @@ import {
   getEnumValues,
 } from '@/lib/openapi-engine';
 import { useAuthStore } from '@/store/auth-store';
+import { logActivity } from '@/lib/activity-log';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -213,7 +214,19 @@ function ParamField({
   );
 }
 
-export default function TestesRequisicao() {
+export interface Preselect {
+  docId?: string;
+  opId?: string;
+}
+
+interface TestesRequisicaoProps {
+  /** Preseleção vinda do API Explorer (aba Documentação → "Testar endpoint"). */
+  preselect?: Preselect | null;
+  /** Montado dentro do API Explorer — oculta o cabeçalho próprio da página. */
+  embedded?: boolean;
+}
+
+export default function TestesRequisicao({ preselect: preselectProp, embedded }: TestesRequisicaoProps = {}) {
   const { data: docs, isLoading } = useOpenAPIDocs();
   const location = useLocation();
   const { getToken, hasValidToken } = useAuthStore();
@@ -242,7 +255,8 @@ export default function TestesRequisicao() {
   // Set first doc/op on load
   useEffect(() => {
     if (!docs || docs.length === 0) return;
-    const preselect = location.state?.preselect as { docId?: string; opId?: string } | undefined;
+    const preselect =
+      preselectProp ?? (location.state?.preselect as Preselect | undefined);
 
     if (preselect?.docId) {
       const doc = docs.find((d) => d.documentId === preselect.docId);
@@ -257,7 +271,7 @@ export default function TestesRequisicao() {
     }
 
     if (!selectedDocId) setSelectedDocId(docs[0].documentId);
-  }, [docs, location.state]);
+  }, [docs, location.state, preselectProp]);
 
   // Reset inputs when operation changes
   useEffect(() => {
@@ -308,6 +322,7 @@ export default function TestesRequisicao() {
       });
       setResult(res);
       updatePathCandidates(res.responseJson, pathInputs);
+      logActivity('Requisição API', `${selectedOp.method} ${selectedOp.path} → ${res.statusCode ?? 'erro'}`);
 
       const entry: HistoryEntry = {
         id: crypto.randomUUID(),
@@ -390,9 +405,9 @@ export default function TestesRequisicao() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="border-b border-border px-6 py-4 bg-card flex items-center justify-between">
+      <div className={cn('border-b border-border px-6 bg-card flex items-center justify-between', embedded ? 'py-2' : 'py-4')}>
         <div>
-          <h1 className="text-lg font-semibold">Testes de Requisição</h1>
+          {!embedded && <h1 className="text-lg font-semibold">Testes de Requisição</h1>}
           <p className="text-xs text-muted-foreground mt-0.5">
             Playground de chamadas HTTP. <kbd className="text-[10px] bg-muted px-1 py-0.5 rounded">Ctrl+Enter</kbd> para executar · <kbd className="text-[10px] bg-muted px-1 py-0.5 rounded">Esc</kbd> para cancelar
           </p>

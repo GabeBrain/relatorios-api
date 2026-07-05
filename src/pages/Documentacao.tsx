@@ -150,7 +150,12 @@ function OperationCard({ op, onTest }: { op: OperationSpec; onTest: (op: Operati
   );
 }
 
-export default function Documentacao() {
+interface DocumentacaoProps {
+  /** Quando montado dentro do API Explorer, troca de aba em vez de navegar. */
+  onTest?: (op: OperationSpec) => void;
+}
+
+export default function Documentacao({ onTest }: DocumentacaoProps = {}) {
   const { data: docs, isLoading, error } = useOpenAPIDocs();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
@@ -182,16 +187,22 @@ export default function Documentacao() {
   }
 
   function handleTest(op: OperationSpec) {
-    navigate('/testes-requisicao', { state: { preselect: { docId: op.documentId, opId: op.operationId } } });
+    if (onTest) {
+      onTest(op);
+      return;
+    }
+    navigate('/apis/explorer', { state: { preselect: { docId: op.documentId, opId: op.operationId } } });
   }
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="border-b border-border px-6 py-4 bg-card">
-        <h1 className="text-lg font-semibold">Documentação</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Referência das APIs disponíveis. Clique em um endpoint para ver detalhes.</p>
-      </div>
+      {/* Header (oculto quando embutido no API Explorer) */}
+      {!onTest && (
+        <div className="border-b border-border px-6 py-4 bg-card">
+          <h1 className="text-lg font-semibold">Documentação</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Referência das APIs disponíveis. Clique em um endpoint para ver detalhes.</p>
+        </div>
+      )}
 
       {/* Search */}
       <div className="px-6 py-3 border-b border-border bg-background">
