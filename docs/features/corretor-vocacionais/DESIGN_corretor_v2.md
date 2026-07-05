@@ -1,0 +1,122 @@
+# Corretor de Vocacionais v2 — Documento de Design (em construção)
+
+> Status: **conceitual / pré-implementação**. Registro das decisões e do entendimento
+> até aqui (Fase 4). Ainda não há código novo. Autor da rubrica de correção: analista da
+> Brain (A&R). Interlocutor técnico do cliente interno: Diego.
+
+## Documentos de origem
+
+| Documento | Papel |
+|---|---|
+| [`Vocacionais_parametros_de_correcao.pptx`](./Vocacionais_parametros_de_correcao.pptx) | **Rubrica de correção** (12 slides). Fonte de verdade das regras de auditoria de um Estudo Vocacional. |
+| [`Ata_Reuniao_Briefing_..._Impper_....docx`](./Ata_Reuniao_Briefing_Grupo_Impper_Sao_Jose_do_Rio_Preto.docx) | **Exemplo de ata de abertura** (insumo de entrada de um estudo). Não é regra — é o "contrato" que o estudo deve cumprir. |
+
+## Pedido da analista (resumo)
+
+1. Programar a IA para aplicar os **parâmetros de correção** (a rubrica).
+2. **Ideia adicional (alto valor):** ensinar a ferramenta a ler a **ata de abertura** do estudo
+   e **cruzá-la com o estudo entregue** — ao menos no nível de tópicos/seções — para garantir
+   que tudo que foi pedido na ata está contemplado. A ata traz: endereço/coordenadas, metragem
+   do terreno, tipo do estudo, produto pretendido, dúvidas do cliente, orientações gerais ao
+   analista e, principalmente, **instruções para análises extras**.
+3. Após a programação, a analista inicia os **testes**.
+
+## Filosofia central: **mínimo de IA**
+
+Decisão do Gabriel: quanto menos IA, melhor — buscar o máximo de **consistência** e
+**eficiência**. Fundamento: uma regra **determinística** é simultaneamente mais barata e mais
+consistente que a IA. A IA só é usada onde o problema é genuinamente **semântico** (ler texto
+livre) ou **visual** (comparar mapa × gráfico). Toda verificação numérica/estrutural é empurrada
+para código auditável.
+
+## O gargalo real não é "IA vs regra" — é a EXTRAÇÃO
+
+As regras determinísticas só funcionam se números, títulos, legendas e notas forem extraídos com
+fidelidade do PDF do estudo. A pergunta que define ~80% da arquitetura:
+
+**O PDF do estudo tem camada de texto ou é imagem achatada?**
+- **Com texto** (export normal PPTX→PDF): extração determinística via `pdfjs` (já no projeto),
+  quase sem IA. Implementação atual hoje **rasteriza** e manda à visão da OpenAI — caro e menos
+  confiável; substituível.
+- **Só imagem**: exige OCR/visão (caminho caro). Manter como fallback.
+
+## Arquitetura proposta (3 camadas)
+
+```
+CAMADA 1 · EXTRAÇÃO
+  Estudo (PDF) → texto / tabelas / títulos / legendas / notas
+  Ata (PDF/DOCX) → requisitos estruturados (checklist)
+  Determinístico onde há texto; IA só como fallback/semântica
+
+CAMADA 2 · MOTOR DE REGRAS (100% determinístico)
+  somas de coluna · totais iguais · janela de 6 anos ·
+  consistência entre tabelas · batimento IBGE · regras de exclusão ·
+  presença de fonte/notas · completude de estrutura · cobertura da ata
+
+CAMADA 3 · SEMÂNTICA (IA mínima e cirúrgica)
+  ortografia · leitura da ata → requisitos · mapa × gráfico (visual) ·
+  casamento fuzzy de "análises extras"
+```
+
+## Catálogo de regras (rubrica → tipo de erro → motor)
+
+Legenda motor: **DET** = determinístico · **IA** = precisa de IA · **DET+extração** = det. desde
+que a extração entregue o dado.
+
+| # Rubrica (slide) | Regra | Tipo de erro proposto | Motor |
+|---|---|---|---|
+| Estrutura (s1-2) | Todas as seções 1→8 presentes (índice numerado). Comum faltar 1.6 entorno revendas e 1.7 mapeamento físico | `STRUCTURE_MISSING` | DET (match de títulos numerados) |
+| Socio (s3) | Cidade **e Estado** são os do estudo | `CITY_STATE` | DET+extração |
+| Socio (s3) | Projeção deve ser de **6 anos (2027–2032)** | `TEMPORAL_WINDOW` | DET |
+| Socio (s3) | Correção da fórmula de projeção | `PROJECTION_FORMULA` | DET (pegar fórmula com a analista) |
+| Socio (todas) | **Fonte e elaboração** indicadas no slide | `SOURCE_MISSING` | DET (busca textual) |
+| Socio (s4) | População/domicílios batem entre **TODAS** as tabelas da socio | `CROSS_TABLE_MISMATCH` | DET+extração |
+| Socio (s5) | Cada coluna de **valor absoluto** fecha no total (todas as tabelas) | `ABSOLUTE_SUM` | DET+extração |
+| Socio (s5) | Colunas de **%** fecham 100% no total (existente hoje) | `PERCENTAGE_SUM` | DET+extração |
+| Socio (s6-7) | % domicílios por tipo / condição de ocupação batem com **IBGE Censo 2022** | `IBGE_MISMATCH` | DET (definir fonte IBGE) |
+| Socio (s6-7) | Dados do **mapa** batem com o **gráfico** correspondente | `MAP_CHART_MISMATCH` | IA/visual (ou DET se ambos extraídos) |
+| Absorção (s8) | Fonte/elaboração + nota "desconsidera absorção de 2ª moradia" | `REQUIRED_NOTE` | DET (busca textual) |
+| Absorção (s8) | Faixas de renda = as mesmas de "Domicílios por faixa de renda" (socio) | `CROSS_TABLE_MISMATCH` | DET+extração |
+| Mercado (s9) | Total de oferta lançada = total de unidades por tipologia | `TOTALS_EQUALITY` | DET+extração |
+| Mercado (s10) | Oferta lançada/atual batem com o total da **consolidada** (todas as análises) | `CROSS_TABLE_MISMATCH` | DET+extração |
+| Lacunas (s11) | Fonte/elaboração + nota explicativa | `REQUIRED_NOTE` | DET |
+| Lacunas (s11-12) | Excluir Gardens, Duplex, Coberturas (e esgotados no s12) | `EXCLUSION_RULE` | DET+extração |
+| Lacunas (s12) | Oferta final igual nas 3 análises; regra específica de esgotadas variando entre as análises | `EXCLUSION_RULE` | DET (lógica) |
+| Global | Ortografia (PT-BR) | `SPELLING` | IA |
+| Ata | Cobertura: tudo que a ata pediu está no estudo (tópicos + análises extras) | `ATA_COVERAGE` | IA (extrai ata) + DET (casa com estrutura) |
+
+> Tipos atuais no código (`src/features/corretor/store/analysis-store.ts`):
+> `PERCENTAGE_SUM | CITY_NAME | RADII | SPELLING | COHERENCE`. O enum precisa crescer para os
+> tipos acima. `RADII` (5/10/15 min) dá lugar ao conceito de **Z.I. primária / Z.I. total /
+> múltiplas Z.I.s** da rubrica.
+
+## Mudança de paradigma vs implementação atual
+
+- **Hoje:** revisão **visual, slide-a-slide, isolada** (1 chamada de visão OpenAI por slide, sem
+  memória entre slides). Ver `supabase/functions/analyze-slide/index.ts` (prompt hardcoded).
+- **v2:** **auditoria do estudo inteiro** — várias regras comparam tabelas de slides diferentes
+  e exigem visão de completude. Não cabe no modelo "1 slide por vez".
+
+## Perguntas que destravam a arquitetura (antes de codar)
+
+1. **Os PDFs de estudo têm camada de texto?** → define visão vs extração de texto.
+2. **Os estudos seguem o template numerado da rubrica** (`2.4)`, `4.5)` etc.)? → se sim, detecção
+   de seção vira match de strings (trivial e determinística).
+3. **As atas de abertura têm formato padronizado?** → schema fixo (alta confiança) vs IA de
+   extração para texto livre.
+4. **Fórmula da projeção de 6 anos** — pegar com a analista (ela se ofereceu no slide 3).
+5. **Fonte de dados IBGE** para o batimento automático (API/CSV do Censo 2022, por município).
+
+## Próximos passos
+
+- [ ] **Coletar amostras reais**: 3-5 PDFs de estudos vocacionais + 3-5 atas de abertura.
+      (No repo não há nenhum — buscar em outra pasta/drive.)
+- [ ] Responder as 5 perguntas acima com base nas amostras.
+- [ ] Obter com a analista: fórmula da projeção de 6 anos e a fonte IBGE de referência.
+- [ ] Só então: propor o schema de extração da ata + o desenho detalhado do motor de regras.
+
+## Achados do repo (busca por estudos de referência)
+
+Nenhum estudo vocacional de referência foi encontrado no working tree nem no histórico git.
+Presentes apenas: os dois docs de contexto acima e planilhas do Relatório SECOVI/Barretos
+(feature distinta). As amostras virão de fora do repositório.
