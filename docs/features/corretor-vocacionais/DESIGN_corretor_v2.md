@@ -115,8 +115,57 @@ que a extração entregue o dado.
 - [ ] Obter com a analista: fórmula da projeção de 6 anos e a fonte IBGE de referência.
 - [ ] Só então: propor o schema de extração da ata + o desenho detalhado do motor de regras.
 
-## Achados do repo (busca por estudos de referência)
+## 🔑 Achados das amostras reais (05/jul/2026) — decisivos
 
-Nenhum estudo vocacional de referência foi encontrado no working tree nem no histórico git.
-Presentes apenas: os dois docs de contexto acima e planilhas do Relatório SECOVI/Barretos
-(feature distinta). As amostras virão de fora do repositório.
+Chegaram 3 amostras (locais, **não versionadas** — ver `.gitignore`):
+
+| Amostra | Formato | Tamanho | Slides/Págs |
+|---|---|---|---|
+| Estudo Parque Anhanguera e Jardim Atlântico | PDF | 22 MB | 178 págs |
+| Teste IA Masterplan | PPTX | 261 MB | 333 slides |
+| Vocacional+Quanti Construtora Regional GO (V3) | PPTX | 141 MB | 203 slides |
+
+### Achado 1 — No PDF, as tabelas numéricas são IMAGEM
+159/178 páginas têm texto, mas as **tabelas/gráficos de dados são renderizados como imagem**
+(páginas de sociodemografia têm 0 dígitos como texto). Do PDF extraímos de forma confiável:
+títulos, legendas `FONTE: … | ELABORAÇÃO: …`, notas e a **prosa descritiva** (que repete alguns
+números). Os números tabulares, **não**. → No PDF, consistência numérica exigiria visão/OCR.
+
+### Achado 2 — No PPTX, os números são DADOS ESTRUTURADOS (jackpot)
+- **Masterplan:** 66 slides com **tabelas nativas** (`<a:tbl>`, 100 tabelas). Ex.: identificação
+  do terreno como tabela real (endereço, lat/long, área).
+- **GO:** **77 gráficos** com cache numérico (`<c:ser>/<c:cat>/<c:val>`). Ex.: faixas de renda
+  `[0.82, 0.14, 0.04]` (fecham 100%).
+
+**→ Decisão arquitetural: ingerir o PPTX, não o PDF.** No PPTX a família de consistência
+numérica (somas, totais, cruzamentos, exclusões) volta a ser **100% determinística**. A IA cai
+para quase zero (ortografia + leitura da ata + eventual mapa×gráfico visual). Isso responde a
+Pergunta #1 de forma muito melhor do que "camada de texto do PDF".
+
+### Achado 3 — A estrutura varia MUITO entre estudos
+Nenhuma amostra usa a numeração da rubrica (`2.4)`, `4.5)`). Títulos são descritivos
+("DADOS SOCIODEMOGRÁFICOS", "PROJEÇÃO DE DEMANDA VEGETATIVA"), a janela de projeção varia
+(o estudo Anhanguera usa **2025–2030**, a rubrica cita 2027–2032 → a regra é "**6 anos de
+span**", não anos fixos), e o escopo difere (Masterplan ≠ vocacional puro; GO é unificado
+vocacional+quanti). → Detecção de seção deve ser **semântica/flexível por título**, nunca por
+número fixo.
+
+### POC rodando (`poc_extractor.py`) — já gera achados
+Extrator determinístico (só stdlib) rodado sobre o estudo GO:
+- **77 gráficos**: 54 séries fecham 100%; **7 candidatos a `PERCENTAGE_SUM`** (ex.: 60+25+20=
+  **105%**; outro **106%**). Erros reais de soma, detectados **sem IA**.
+- `SOURCE_MISSING`: heurístico ainda cru (marcou 49/49 = falso positivo; runs de texto
+  fragmentam "FONTE"). Sintoma útil: a detecção de legenda de fonte precisa juntar runs por
+  shape antes de buscar.
+
+### Perguntas — status atualizado
+1. ~~PDF tem texto?~~ → **Superada:** ingerir PPTX (dados estruturados). PDF vira fallback visual.
+2. Template numerado? → **NÃO.** Detecção de seção por título/semântica.
+3. Atas padronizadas? → **em aberto** (sem atas ainda; conseguir 2ª feira).
+4. Fórmula da projeção de 6 anos → pegar com a analista.
+5. Fonte IBGE para batimento → definir.
+
+### Próximo marco
+Com o par **ata ↔ estudo** (2ª feira), fechar o `ATA_COVERAGE`. Enquanto isso, o motor
+determinístico sobre PPTX (tabelas + gráficos) já pode ser evoluído e testado nas amostras
+atuais para levantar sintomas.

@@ -45,3 +45,9 @@ __pycache__/
 
 # Local API support (temporarily disabled in frontend)
 .local_api_support/
+
+# Amostras de estudos vocacionais (locais, pesadas — NÃO versionar)
+docs/features/corretor-vocacionais/*.pdf
+docs/features/corretor-vocacionais/Teste IA Masterplan.pptx
+docs/features/corretor-vocacionais/Vocacional_e_Quanti_*.pptx
+docs/features/**/desktop.ini
