@@ -12,7 +12,7 @@ import {
   Moon,
   Sun,
   BarChart2,
-  Wrench,
+  Archive,
   ClipboardList,
   Users,
   Database,
@@ -96,12 +96,12 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    id: 'em-implementacao',
-    label: 'Em implementação',
-    icon: <Wrench className="h-4 w-4" />,
+    id: 'legado',
+    label: 'Legado',
+    icon: <Archive className="h-4 w-4" />,
     items: [
-      { path: '/assistente', label: 'Assistente', icon: <Bot className="h-4 w-4" /> },
-      { path: '/mapa', label: 'Mapa', icon: <Map className="h-4 w-4" />, standbyLabel: '(testes)' },
+      { path: '/assistente', label: 'Assistente', icon: <Bot className="h-4 w-4" />, standbyLabel: '(legado)' },
+      { path: '/mapa', label: 'Mapa', icon: <Map className="h-4 w-4" />, standbyLabel: '(legado)' },
     ],
   },
 ];

@@ -5,7 +5,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppLayout } from '@/components/layout/AppLayout';
-import Index from './pages/Index.tsx';
+import MapaLegado from './pages/MapaLegado.tsx';
 import Documentacao from './pages/Documentacao.tsx';
 import TestesRequisicao from './pages/TestesRequisicao.tsx';
 import TestesArquitetura from './pages/TestesArquitetura.tsx';
@@ -61,7 +61,7 @@ const App = () => (
               <Route path="/testes-requisicao" element={<TestesRequisicao />} />
               <Route path="/relatorios-secovi" element={<TestesArquitetura />} />
               <Route path="/assistente" element={<Assistente />} />
-              <Route path="/mapa" element={<Index />} />
+              <Route path="/mapa" element={<MapaLegado />} />
               <Route path="/testes-qualidade/piemonte-vgv" element={<TQPiemonteVgv />} />
               <Route path="/testes-qualidade/piemonte-release-price" element={<TQPiemonteReleasePrice />} />
               <Route path="/testes-qualidade/cid-validacao-base" element={<TQCidValidacaoBase />} />

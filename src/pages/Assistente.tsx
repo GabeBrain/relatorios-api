@@ -13,12 +13,13 @@ export default function Assistente() {
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">Assistente AI</h1>
           <p className="text-sm text-muted-foreground">
-            Esta funcionalidade está em stand-by por decisão de escopo V1.
+            A versão ativa desta funcionalidade está sendo desenvolvida em paralelo
+            por outro time, fora do escopo deste repositório.
           </p>
         </div>
 
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-left space-y-3">
-          <p className="text-sm font-medium text-amber-600 dark:text-amber-400">Dependências pendentes para ativação:</p>
+        <div className="rounded-lg border border-border bg-muted/40 p-4 text-left space-y-3">
+          <p className="text-sm font-medium">Escopo previsto para a funcionalidade:</p>
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li className="flex items-start gap-2">
               <Database className="h-3.5 w-3.5 shrink-0 mt-0.5 text-muted-foreground" />
@@ -30,14 +31,14 @@ export default function Assistente() {
             </li>
             <li className="flex items-start gap-2">
               <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5 text-muted-foreground" />
-              Decisões de fluxo de embeddings e retrieval sobre a documentação OpenAPI
+              Fluxo de embeddings e retrieval sobre a documentação OpenAPI
             </li>
           </ul>
         </div>
 
         <p className="text-xs text-muted-foreground">
-          A rota <code className="bg-muted px-1 py-0.5 rounded">/assistente</code> está preservada no menu para manter a estrutura de navegação planejada.
-          Será ativada em V2 após as decisões de backend.
+          A rota <code className="bg-muted px-1 py-0.5 rounded">/assistente</code> é mantida como legado
+          para preservar a estrutura de navegação planejada.
         </p>
       </div>
     </div>
