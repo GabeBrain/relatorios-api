@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppLayout } from '@/components/layout/AppLayout';
 import MapaLegado from './pages/MapaLegado.tsx';
-import Documentacao from './pages/Documentacao.tsx';
-import TestesRequisicao from './pages/TestesRequisicao.tsx';
+import Home from './pages/Home.tsx';
+import ApiExplorer from './pages/ApiExplorer.tsx';
 import TestesArquitetura from './pages/TestesArquitetura.tsx';
 import Assistente from './pages/Assistente.tsx';
 import TQPiemonteVgv from './pages/TQPiemonteVgv.tsx';
@@ -59,18 +59,40 @@ const App = () => (
           <ErrorBoundary>
             <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando...</div>}>
               <Routes>
-                <Route path="/" element={<Navigate to="/documentacao" replace />} />
-                <Route path="/documentacao" element={<Documentacao />} />
-                <Route path="/testes-requisicao" element={<TestesRequisicao />} />
-                <Route path="/relatorios-secovi" element={<TestesArquitetura />} />
+                <Route path="/" element={<Navigate to="/inicio" replace />} />
+                <Route path="/inicio" element={<Home />} />
+
+                {/* Relatórios */}
+                <Route path="/relatorios/secovi" element={<TestesArquitetura />} />
+                <Route path="/relatorios/dashboard-geobrain" element={<DashboardGeobrain />} />
+
+                {/* Auditoria de Estudos (Corretor) */}
+                <Route path="/auditoria" element={<CorretorPage />} />
+                <Route path="/auditoria/analise" element={<CorretorAnalysisPage />} />
+
+                {/* Qualidade de Dados (por cliente) */}
+                <Route path="/qualidade/piemonte/vgv" element={<TQPiemonteVgv />} />
+                <Route path="/qualidade/piemonte/release-price" element={<TQPiemonteReleasePrice />} />
+                <Route path="/qualidade/cid/validacao-base" element={<TQCidValidacaoBase />} />
+
+                {/* APIs */}
+                <Route path="/apis/explorer" element={<ApiExplorer />} />
+
+                {/* Legado (cascas informativas) */}
                 <Route path="/assistente" element={<Assistente />} />
                 <Route path="/mapa" element={<MapaLegado />} />
-                <Route path="/testes-qualidade/piemonte-vgv" element={<TQPiemonteVgv />} />
-                <Route path="/testes-qualidade/piemonte-release-price" element={<TQPiemonteReleasePrice />} />
-                <Route path="/testes-qualidade/cid-validacao-base" element={<TQCidValidacaoBase />} />
-                <Route path="/relatorios/corretor" element={<CorretorPage />} />
-                <Route path="/relatorios/corretor/analise" element={<CorretorAnalysisPage />} />
-                <Route path="/dashboard-geobrain" element={<DashboardGeobrain />} />
+
+                {/* Redirects das rotas antigas (bookmarks/links) */}
+                <Route path="/documentacao" element={<Navigate to="/apis/explorer" replace />} />
+                <Route path="/testes-requisicao" element={<Navigate to="/apis/explorer" replace />} />
+                <Route path="/relatorios-secovi" element={<Navigate to="/relatorios/secovi" replace />} />
+                <Route path="/dashboard-geobrain" element={<Navigate to="/relatorios/dashboard-geobrain" replace />} />
+                <Route path="/relatorios/corretor" element={<Navigate to="/auditoria" replace />} />
+                <Route path="/relatorios/corretor/analise" element={<Navigate to="/auditoria/analise" replace />} />
+                <Route path="/testes-qualidade/piemonte-vgv" element={<Navigate to="/qualidade/piemonte/vgv" replace />} />
+                <Route path="/testes-qualidade/piemonte-release-price" element={<Navigate to="/qualidade/piemonte/release-price" replace />} />
+                <Route path="/testes-qualidade/cid-validacao-base" element={<Navigate to="/qualidade/cid/validacao-base" replace />} />
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

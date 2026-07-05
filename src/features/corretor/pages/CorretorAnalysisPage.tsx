@@ -258,7 +258,7 @@ export default function CorretorAnalysisPage() {
   const startTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
-    if (!file || !config) navigate('/relatorios/corretor');
+    if (!file || !config) navigate('/auditoria');
   }, [file, config, navigate]);
 
   useEffect(() => {
@@ -426,7 +426,7 @@ export default function CorretorAnalysisPage() {
       <header className="border-b bg-card px-6 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <button
-            onClick={() => { handleCancel(); navigate('/relatorios/corretor'); }}
+            onClick={() => { handleCancel(); navigate('/auditoria'); }}
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />

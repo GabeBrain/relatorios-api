@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Map,
-  FileText,
   FlaskConical,
   Building2,
   Bot,
@@ -12,12 +11,14 @@ import {
   Moon,
   Sun,
   BarChart2,
-  Archive,
   ClipboardList,
-  Users,
   Database,
+  Home,
+  Plug,
+  Search,
 } from 'lucide-react';
 import { AuthBlock } from './AuthBlock';
+import { CommandPalette } from './CommandPalette';
 import brainLogo from '../../../assets/logoBrain.png';
 import { cn } from '@/lib/utils';
 
@@ -48,8 +49,7 @@ interface NavGroup {
 }
 
 const TOP_ITEMS: NavItem[] = [
-  { path: '/documentacao', label: 'Documentação', icon: <FileText className="h-4 w-4" /> },
-  { path: '/testes-requisicao', label: 'Testes de Requisição', icon: <FlaskConical className="h-4 w-4" /> },
+  { path: '/inicio', label: 'Início', icon: <Home className="h-4 w-4" /> },
 ];
 
 const NAV_GROUPS: NavGroup[] = [
@@ -58,15 +58,22 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Relatórios',
     icon: <BarChart2 className="h-4 w-4" />,
     items: [
-      { path: '/relatorios-secovi', label: 'Relatório Secovi', icon: <Building2 className="h-4 w-4" /> },
-      { path: '/relatorios/corretor', label: 'Corretor | Estudos Vocacionais', icon: <ClipboardList className="h-4 w-4" /> },
-      { path: '/dashboard-geobrain', label: 'Dashboard Geobrain', icon: <BarChart2 className="h-4 w-4" /> },
+      { path: '/relatorios/secovi', label: 'Secovi', icon: <Building2 className="h-4 w-4" /> },
+      { path: '/relatorios/dashboard-geobrain', label: 'Dashboard Geobrain', icon: <BarChart2 className="h-4 w-4" /> },
     ],
   },
   {
-    id: 'suporte-clientes',
-    label: 'Suporte Clientes',
-    icon: <Users className="h-4 w-4" />,
+    id: 'auditoria',
+    label: 'Auditoria de Estudos',
+    icon: <ClipboardList className="h-4 w-4" />,
+    items: [
+      { path: '/auditoria', label: 'Corretor | Vocacionais', icon: <ClipboardList className="h-4 w-4" /> },
+    ],
+  },
+  {
+    id: 'qualidade',
+    label: 'Qualidade de Dados',
+    icon: <Database className="h-4 w-4" />,
     items: [
       {
         type: 'folder',
@@ -74,38 +81,37 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Piemonte',
         icon: <Building2 className="h-4 w-4" />,
         children: [
-          { path: '/testes-qualidade/piemonte-vgv', label: 'VGV Verticais', icon: <ClipboardList className="h-4 w-4" /> },
-          { path: '/testes-qualidade/piemonte-release-price', label: 'Release price', icon: <ClipboardList className="h-4 w-4" /> },
+          { path: '/qualidade/piemonte/vgv', label: 'VGV Verticais', icon: <FlaskConical className="h-4 w-4" /> },
+          { path: '/qualidade/piemonte/release-price', label: 'Release price', icon: <FlaskConical className="h-4 w-4" /> },
         ],
       },
-    ],
-  },
-  {
-    id: 'testes-qualidade',
-    label: 'Testes de Qualidade',
-    icon: <ClipboardList className="h-4 w-4" />,
-    items: [
       {
         type: 'folder',
-        id: 'cid',
+        id: 'cliente-cid',
         label: 'CID',
         icon: <Database className="h-4 w-4" />,
         children: [
-          { path: '/testes-qualidade/cid-validacao-base', label: 'Validação de Base', icon: <ClipboardList className="h-4 w-4" /> },
+          { path: '/qualidade/cid/validacao-base', label: 'Validação de Base', icon: <FlaskConical className="h-4 w-4" /> },
         ],
       },
     ],
   },
   {
-    id: 'legado',
-    label: 'Legado',
-    icon: <Archive className="h-4 w-4" />,
+    id: 'apis',
+    label: 'APIs',
+    icon: <Plug className="h-4 w-4" />,
     items: [
-      { path: '/assistente', label: 'Assistente', icon: <Bot className="h-4 w-4" />, standbyLabel: '(legado)' },
-      { path: '/mapa', label: 'Mapa', icon: <Map className="h-4 w-4" />, standbyLabel: '(legado)' },
+      { path: '/apis/explorer', label: 'Explorer', icon: <Plug className="h-4 w-4" /> },
     ],
   },
 ];
+
+const LEGACY_ITEMS: NavItem[] = [
+  { path: '/assistente', label: 'Assistente', icon: <Bot className="h-3.5 w-3.5" /> },
+  { path: '/mapa', label: 'Mapa', icon: <Map className="h-3.5 w-3.5" /> },
+];
+
+const SIDEBAR_STATE_KEY = 'brain-sidebar-state';
 
 function useDarkMode() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
@@ -117,25 +123,59 @@ function useDarkMode() {
   return { dark, toggle };
 }
 
+interface SidebarState {
+  collapsed: boolean;
+  openGroups: Record<string, boolean>;
+  openFolders: Record<string, boolean>;
+}
+
+function loadSidebarState(): SidebarState {
+  try {
+    const raw = localStorage.getItem(SIDEBAR_STATE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* estado corrompido → default */ }
+  return {
+    collapsed: false,
+    openGroups: Object.fromEntries(NAV_GROUPS.map((g) => [g.id, true])),
+    openFolders: {},
+  };
+}
+
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [collapsed, setCollapsed] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(NAV_GROUPS.map((g) => [g.id, false]))
-  );
-  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
+  const [{ collapsed, openGroups, openFolders }, setSidebar] = useState<SidebarState>(loadSidebarState);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const { dark, toggle } = useDarkMode();
   const location = useLocation();
 
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify({ collapsed, openGroups, openFolders }));
+  }, [collapsed, openGroups, openFolders]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPaletteOpen((v) => !v);
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  function setCollapsed(fn: (v: boolean) => boolean) {
+    setSidebar((s) => ({ ...s, collapsed: fn(s.collapsed) }));
+  }
+
   function toggleGroup(id: string) {
-    setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }));
+    setSidebar((s) => ({ ...s, openGroups: { ...s.openGroups, [id]: !s.openGroups[id] } }));
   }
 
   function toggleFolder(id: string) {
-    setOpenFolders((prev) => ({ ...prev, [id]: !prev[id] }));
+    setSidebar((s) => ({ ...s, openFolders: { ...s.openFolders, [id]: !s.openFolders[id] } }));
   }
 
   function isFolder(entry: NavEntry): entry is NavFolder {
@@ -222,6 +262,8 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+
       {/* Sidebar */}
       <aside
         className={cn(
@@ -247,15 +289,34 @@ export function AppLayout({ children }: AppLayoutProps) {
           </button>
         </div>
 
+        {/* Busca global (Ctrl+K) */}
+        <div className={cn('px-2 pt-2', collapsed && 'px-1')}>
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            className={cn(
+              'w-full flex items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors',
+              collapsed && 'justify-center px-0'
+            )}
+            title="Buscar (Ctrl+K)"
+          >
+            <Search className="h-3.5 w-3.5 shrink-0" />
+            {!collapsed && (
+              <>
+                <span className="flex-1 text-left text-xs">Buscar…</span>
+                <kbd className="rounded border border-border bg-card px-1.5 text-[10px] font-medium">Ctrl K</kbd>
+              </>
+            )}
+          </button>
+        </div>
+
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-          {/* Top-level items (sem categoria) */}
           {TOP_ITEMS.map(renderNavItem)}
 
-          {/* Grupos com categoria */}
           {NAV_GROUPS.map((group) => {
             const hasActiveChild = group.items.some(isActiveEntry);
-            const isOpen = (openGroups[group.id] ?? false) || hasActiveChild;
+            const isOpen = (openGroups[group.id] ?? true) || hasActiveChild;
 
             return (
               <div key={group.id} className="mt-2">
@@ -301,8 +362,28 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         )}
 
-        {/* Footer: dark mode only */}
-        <div className="flex items-center justify-center border-t border-border p-2">
+        {/* Footer: legado + dark mode */}
+        <div className="flex items-center justify-between border-t border-border px-3 py-2">
+          {!collapsed ? (
+            <div className="flex items-center gap-2">
+              {LEGACY_ITEMS.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    'flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] transition-colors',
+                    isActiveItem(item)
+                      ? 'text-primary'
+                      : 'text-muted-foreground/70 hover:text-foreground'
+                  )}
+                  title={`${item.label} (legado)`}
+                >
+                  {item.icon}
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+          ) : <span />}
           <button
             type="button"
             onClick={toggle}

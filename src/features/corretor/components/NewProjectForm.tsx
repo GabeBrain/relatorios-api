@@ -90,7 +90,7 @@ export default function NewProjectForm({ compact = false }: { compact?: boolean 
       radii: radii.trim(),
       model,
     });
-    navigate('/relatorios/corretor/analise');
+    navigate('/auditoria/analise');
   }
 
   const padding = compact ? 'p-3' : 'p-4';
