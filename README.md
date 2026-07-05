@@ -12,15 +12,19 @@ socioeconômicas, geração de relatórios e ferramentas de QA sobre bases de cl
 
 ## Funcionalidades ativas
 
+Navegação organizada por área de trabalho (reorganização de 05/jul/2026). Rotas antigas
+redirecionam para as novas. Busca global com **Ctrl+K**.
+
 | Área | Rota | Descrição |
 |---|---|---|
-| Documentação API | `/documentacao` | Explorador OpenAPI (GeoBrain + Sócio) com playground |
-| Testes de Requisição | `/testes-requisicao` | Console de requisições autenticadas às APIs |
-| Relatório SECOVI | `/relatorios-secovi` | Geração de relatórios de mercado (export Excel) |
-| Corretor \| Estudos Vocacionais | `/relatorios/corretor` | Análise automática de slides de PDF via OpenAI (revisão de estudos vocacionais) |
-| TQ Piemonte — VGV Verticais | `/testes-qualidade/piemonte-vgv` | Validação de qualidade de dados VGV |
-| TQ Piemonte — Release Price | `/testes-qualidade/piemonte-release-price` | Validação de release price |
-| TQ CID — Validação de Base | `/testes-qualidade/cid-validacao-base` | Validação de base de dados CID |
+| Início | `/inicio` | Home do Studio: KPIs, acesso rápido e atividade recente |
+| Relatórios — Secovi | `/relatorios/secovi` | Geração de relatórios de mercado (export Excel) |
+| Relatórios — Dashboard Geobrain | `/relatorios/dashboard-geobrain` | KPIs e filtros sobre a base Geobrain |
+| Auditoria de Estudos (Corretor) | `/auditoria` | Análise de estudos vocacionais + revisão com veredito (bug real × falso positivo) |
+| Qualidade — Piemonte VGV | `/qualidade/piemonte/vgv` | Validação de qualidade de dados VGV |
+| Qualidade — Piemonte Release Price | `/qualidade/piemonte/release-price` | Validação de release price |
+| Qualidade — CID Validação de Base | `/qualidade/cid/validacao-base` | Validação de base de dados CID |
+| API Explorer | `/apis/explorer` | Documentação OpenAPI + console de requisições unificados (abas) |
 
 ## Legado
 
@@ -44,7 +48,9 @@ Outros scripts: `npm run build` (produção), `npm test` (Vitest), `npm run lint
 ### Variáveis de ambiente
 
 Ver [`.env.example`](./.env.example). A `VITE_SUPABASE_PUBLISHABLE_KEY` é a chave **anon**
-(pública por design), mas o `.env` **não** é versionado. Segredos de backend (ex.:
+(pública por design). O `.env` **é versionado de propósito** — o Lovable builda a partir do
+repositório e lê as `VITE_SUPABASE_*` dele (ver `docs/architecture/SECURITY_NOTES.md`, item 3).
+Segredos de backend (ex.:
 `OPENAI_API_KEY` da edge function `analyze-slide`) ficam nos secrets do Supabase, nunca no
 frontend.
 

@@ -64,3 +64,30 @@ permitidos.
 
 `src/store/auth-store.ts` guarda o token (TTL 180min) em localStorage — vulnerável a
 exfiltração via XSS. Aceitável para ferramenta interna; a CSP (item 4) reduziria o risco.
+
+## 6. Vulnerabilidades npm (parcialmente corrigidas — 05/jul/2026)
+
+`npm audit fix` aplicado: corrigiu 9 de 12 (incluindo o XSS via open redirect do
+react-router-dom ≤6.30.2, lodash, ws, glob, minimatch, picomatch, postcss, yaml). Restam:
+
+- **esbuild/vite** (moderate): afeta só o dev server; fix exige upgrade breaking do Vite
+  (5 → 8). Fazer numa janela própria, com testes.
+- **xlsx (SheetJS)** (high, sem fix no npm): prototype pollution + ReDoS. Caminhos:
+  migrar para `exceljs` ou usar o build do fork oficial (cdn.sheetjs.com). Risco real
+  moderado — o app usa a lib majoritariamente para *gerar* planilhas, não parsear
+  arquivos não confiáveis.
+
+## 7. Log de atividade por IP + veredito de revisão (05/jul/2026)
+
+Sem login por decisão de fase de testes (analistas perdem senha; auth vira atrito).
+Rastreabilidade mínima via `activity_log`:
+
+- Tabela `activity_log` (migration `20260705000000`): anon **só lê**; INSERT apenas via
+  service role na edge function **`log-activity`**, que captura o IP (`x-forwarded-for`)
+  no servidor. Não confiar no log como controle de segurança — é trilha de auditoria leve.
+- A mesma migration adiciona `slide_errors.verdict` + policy `anon_update_errors`
+  (UPDATE aberto a anon, coerente com o modelo do item 1 e coberto pelo mesmo fix futuro
+  via Supabase Auth).
+
+**Pendências de deploy:** aplicar a migration (`supabase db push` ou SQL editor) e
+`supabase functions deploy log-activity`.
