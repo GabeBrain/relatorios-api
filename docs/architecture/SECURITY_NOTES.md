@@ -32,10 +32,26 @@ best-effort (30 req/min por IP). O rate limit é mitigação parcial (instância
 **Pendências:** definir o(s) domínio(s) de produção no secret `ALLOWED_ORIGINS` do Supabase
 antes de confiar no CORS em produção. Considerar exigir o token de auth (item 1) na função.
 
-## 3. `.env` (resolvido)
+## 3. `.env` — VERSIONADO de propósito (não mexer)
 
-`.env` deixou de ser versionado; `.env.example` documenta as chaves. A anon key é pública por
-design, mas o `.env` não deve ir para o git.
+O `.env` **é versionado neste projeto** porque o **Lovable builda a partir do repositório** e
+lê as `VITE_SUPABASE_*` diretamente do `.env` commitado. Removê-lo do git quebra o build de
+produção com `supabaseUrl is required` (só a Dashboard Geobrain, que usa API HTTP, sobrevive).
+
+A anon key é pública por design, então versioná-la não expõe segredo real. Segredos de
+backend (ex.: `OPENAI_API_KEY`, `ALLOWED_ORIGINS`) NUNCA ficam no `.env` — vão nos **Secrets do
+Supabase**. O `.env.example` permanece como documentação das chaves.
+
+> Melhoria futura (opcional): mover as `VITE_SUPABASE_*` para as variáveis de ambiente do
+> Lovable (painel do projeto) e então voltar a remover o `.env` do git. Só fazer isso depois de
+> confirmar que o build do Lovable enxerga as variáveis pelo painel.
+
+## 3b. CORS da edge function — produção configurada
+
+`ALLOWED_ORIGINS` (Secret do Supabase) = `https://geobrain-relatorios.lovable.app` (domínio
+publicado). Localhost de dev já é liberado pela própria função. O preview interno do Lovable
+usa subdomínios dinâmicos `id-preview-*.lovable.app` — se for testar de lá, ou usa a URL
+publicada, ou relaxa o CORS para `*.lovable.app`.
 
 ## 4. CSP (pendente)
 

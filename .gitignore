@@ -12,10 +12,13 @@ dist
 dist-ssr
 *.local
 
-# Env (a anon key é pública, mas .env não deve ser versionado)
-.env
-.env.*
-!.env.example
+# Env
+# NOTA: o .env É versionado neste projeto de propósito — o Lovable builda a
+# partir do repositório e lê as VITE_SUPABASE_* daqui. A anon key é pública
+# por design. Segredos de backend (ex.: OPENAI_API_KEY) NUNCA ficam aqui —
+# vão nos Secrets do Supabase. Ver docs/architecture/SECURITY_NOTES.md.
+.env.local
+.env.*.local
 
 # Editor directories and files
 .vscode/*
