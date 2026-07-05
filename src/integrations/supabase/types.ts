@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          detail: string
+          id: string
+          ip: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          detail?: string
+          id?: string
+          ip?: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          detail?: string
+          id?: string
+          ip?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           city_name: string
@@ -79,6 +103,7 @@ export type Database = {
           severity: string
           slide_id: string
           type: string
+          verdict: string | null
         }
         Insert: {
           description: string
@@ -87,6 +112,7 @@ export type Database = {
           severity: string
           slide_id: string
           type: string
+          verdict?: string | null
         }
         Update: {
           description?: string
@@ -95,6 +121,7 @@ export type Database = {
           severity?: string
           slide_id?: string
           type?: string
+          verdict?: string | null
         }
         Relationships: [
           {
