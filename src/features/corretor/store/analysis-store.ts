@@ -6,11 +6,17 @@ export type SlideStatus = 'pending' | 'processing' | 'done' | 'skipped' | 'error
 export type AnalysisStatus = 'idle' | 'processing' | 'done' | 'cancelled';
 export type ModelId = 'gpt-4o' | 'gpt-4o-mini';
 
+/** Veredito da analista na revisão: bug real ou falso positivo. */
+export type Verdict = 'bug' | 'fp';
+
 export interface SlideError {
   type: ErrorType;
   severity: Severity;
   description: string;
   location: string;
+  /** Presente apenas em erros carregados do histórico (id da linha em slide_errors). */
+  id?: string;
+  verdict?: Verdict | null;
 }
 
 export interface SlideResult {

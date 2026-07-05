@@ -117,10 +117,12 @@ export async function loadProjectsFromDb(): Promise<ArchivedProject[]> {
         cost: s.cost,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         errors: (s.slide_errors ?? []).map((e: any) => ({
+          id: e.id,
           type: e.type,
           severity: e.severity,
           description: e.description,
           location: e.location,
+          verdict: e.verdict ?? null,
         })),
       }));
 
@@ -147,6 +149,18 @@ export async function loadProjectsFromDb(): Promise<ArchivedProject[]> {
   );
 
   return projects;
+}
+
+/**
+ * Atualiza o veredito de um erro (bug real × falso positivo).
+ * Requer a migration 20260705 (coluna verdict + policy de UPDATE).
+ */
+export async function updateErrorVerdictInDb(
+  errorId: string,
+  verdict: 'bug' | 'fp' | null
+): Promise<void> {
+  const { error } = await db.from('slide_errors').update({ verdict }).eq('id', errorId);
+  if (error) throw new Error(error.message);
 }
 
 export async function deleteProjectFromDb(projectId: string): Promise<void> {

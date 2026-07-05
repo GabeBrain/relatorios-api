@@ -32,10 +32,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 import { useArchiveStore, type ArchivedProject, type ArchivedSlide } from '../store/archive-store';
 import { downloadReport } from '../lib/report-generator';
 import { formatUSDTotal, formatUSD } from '../lib/cost-calculator';
-import type { ErrorType, Severity } from '../store/analysis-store';
+import type { ErrorType, Severity, Verdict } from '../store/analysis-store';
 import { cn } from '@/lib/utils';
 import NewProjectForm from '../components/NewProjectForm';
 
@@ -63,9 +64,63 @@ const SEVERITY_LABELS: Record<Severity, string> = {
 
 type Filter = 'all' | ErrorType;
 
+// ─── Veredito (bug real × falso positivo) ─────────────────────────────────────
+
+function VerdictButtons({
+  projectId,
+  errorId,
+  verdict,
+}: {
+  projectId: string;
+  errorId?: string;
+  verdict?: Verdict | null;
+}) {
+  const { setErrorVerdict } = useArchiveStore();
+  if (!errorId) return null;
+
+  async function handle(next: Verdict) {
+    try {
+      await setErrorVerdict(projectId, errorId!, verdict === next ? null : next);
+    } catch {
+      toast.error('Falha ao salvar o veredito. A migration do banco já foi aplicada?');
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 shrink-0">
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); handle('bug'); }}
+        className={cn(
+          'px-2 py-0.5 rounded-md text-[11px] font-medium border transition-colors',
+          verdict === 'bug'
+            ? 'bg-destructive text-destructive-foreground border-destructive'
+            : 'border-border text-muted-foreground hover:border-destructive/60 hover:text-destructive'
+        )}
+        title="Confirmar como erro real do estudo"
+      >
+        Bug real
+      </button>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); handle('fp'); }}
+        className={cn(
+          'px-2 py-0.5 rounded-md text-[11px] font-medium border transition-colors',
+          verdict === 'fp'
+            ? 'bg-muted-foreground text-background border-muted-foreground'
+            : 'border-border text-muted-foreground hover:text-foreground'
+        )}
+        title="Marcar como falso positivo da análise"
+      >
+        Falso positivo
+      </button>
+    </div>
+  );
+}
+
 // ─── Slide Error Card ─────────────────────────────────────────────────────────
 
-function SlideErrorCard({ slide }: { slide: ArchivedSlide }) {
+function SlideErrorCard({ slide, projectId }: { slide: ArchivedSlide; projectId: string }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="border rounded-lg overflow-hidden">
@@ -95,12 +150,16 @@ function SlideErrorCard({ slide }: { slide: ArchivedSlide }) {
       {open && (
         <div className="border-t bg-muted/20 divide-y divide-border">
           {slide.errors.map((err, i) => (
-            <div key={i} className="px-4 py-3 space-y-1">
+            <div
+              key={err.id ?? i}
+              className={cn('px-4 py-3 space-y-1', err.verdict === 'fp' && 'opacity-50')}
+            >
               <div className="flex items-center gap-2">
                 <Badge variant={SEVERITY_COLORS[err.severity]} className="text-[10px] h-5">
                   {SEVERITY_LABELS[err.severity]}
                 </Badge>
-                <span className="text-xs font-medium">{ERROR_TYPE_LABELS[err.type]}</span>
+                <span className="text-xs font-medium flex-1">{ERROR_TYPE_LABELS[err.type]}</span>
+                <VerdictButtons projectId={projectId} errorId={err.id} verdict={err.verdict} />
               </div>
               <p className="text-sm">{err.description}</p>
               {err.location && (
@@ -188,6 +247,12 @@ function ProjectDetail({ project }: { project: ArchivedProject }) {
   const savedDate = new Date(project.savedAt);
   const fullDate = format(savedDate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
 
+  // Calibração: contagem de vereditos sobre todos os erros do projeto
+  const allErrors = slides.flatMap((s) => s.errors);
+  const bugCount = allErrors.filter((e) => e.verdict === 'bug').length;
+  const fpCount = allErrors.filter((e) => e.verdict === 'fp').length;
+  const pendingCount = allErrors.length - bugCount - fpCount;
+
   return (
     <div className="flex-1 flex flex-col min-w-0">
       {/* Header */}
@@ -251,6 +316,19 @@ function ProjectDetail({ project }: { project: ArchivedProject }) {
               ? 'Análise concluída — nenhum erro encontrado'
               : `Análise concluída — ${withErrors.length} slide(s) com erros`}
           </span>
+          {allErrors.length > 0 && (
+            <span className="flex items-center gap-2">
+              <span className="inline-flex items-center rounded-md bg-destructive/10 text-destructive px-2 py-0.5 text-[11px] font-medium">
+                {bugCount} bug{bugCount !== 1 ? 's' : ''} real{bugCount !== 1 ? 'is' : ''}
+              </span>
+              <span className="inline-flex items-center rounded-md bg-muted text-muted-foreground px-2 py-0.5 text-[11px] font-medium">
+                {fpCount} falso{fpCount !== 1 ? 's' : ''} positivo{fpCount !== 1 ? 's' : ''}
+              </span>
+              <span className="inline-flex items-center rounded-md bg-warning/10 text-warning px-2 py-0.5 text-[11px] font-medium">
+                {pendingCount} pendente{pendingCount !== 1 ? 's' : ''}
+              </span>
+            </span>
+          )}
           <span className="flex items-center gap-3 font-mono">
             <span>{formatUSDTotal(project.totalCost)}</span>
             <span>
@@ -293,7 +371,7 @@ function ProjectDetail({ project }: { project: ArchivedProject }) {
                 </div>
               ) : (
                 filteredSlides.map((slide) => (
-                  <SlideErrorCard key={slide.slideNumber} slide={slide} />
+                  <SlideErrorCard key={slide.slideNumber} slide={slide} projectId={project.id} />
                 ))
               )}
             </div>

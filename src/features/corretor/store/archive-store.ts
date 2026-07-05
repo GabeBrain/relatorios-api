@@ -1,11 +1,13 @@
 import { create } from 'zustand';
-import type { SlideResult } from './analysis-store';
+import type { SlideResult, Verdict } from './analysis-store';
 import {
   saveProjectToDb,
   loadProjectsFromDb,
   deleteProjectFromDb,
   clearAllProjectsFromDb,
+  updateErrorVerdictInDb,
 } from '../lib/archive-db';
+import { logActivity } from '@/lib/activity-log';
 
 export type ArchivedSlide = Omit<SlideResult, 'imageDataUrl'>;
 
@@ -39,6 +41,7 @@ interface ArchiveStore {
   ) => Promise<void>;
   removeProject: (id: string) => Promise<void>;
   clearAll: () => Promise<void>;
+  setErrorVerdict: (projectId: string, errorId: string, verdict: Verdict | null) => Promise<void>;
 }
 
 export const useArchiveStore = create<ArchiveStore>((set) => ({
@@ -60,6 +63,7 @@ export const useArchiveStore = create<ArchiveStore>((set) => ({
   addProject: async (meta, slides) => {
     try {
       await saveProjectToDb(meta, slides);
+      logActivity('Auditoria salva', `${meta.projectName} (${meta.totalErrors} erros)`);
       const projects = await loadProjectsFromDb();
       set({ projects });
     } catch (err) {
@@ -82,6 +86,37 @@ export const useArchiveStore = create<ArchiveStore>((set) => ({
       await clearAllProjectsFromDb();
     } catch (err) {
       console.error('Falha ao limpar histórico:', err);
+    }
+  },
+
+  setErrorVerdict: async (projectId, errorId, verdict) => {
+    const apply = (v: Verdict | null) =>
+      set((state) => ({
+        projects: state.projects.map((p) =>
+          p.id !== projectId
+            ? p
+            : {
+                ...p,
+                slides: p.slides?.map((s) => ({
+                  ...s,
+                  errors: s.errors.map((e) => (e.id === errorId ? { ...e, verdict: v } : e)),
+                })),
+              }
+        ),
+      }));
+
+    const previous = useArchiveStore
+      .getState()
+      .projects.find((p) => p.id === projectId)
+      ?.slides?.flatMap((s) => s.errors)
+      .find((e) => e.id === errorId)?.verdict ?? null;
+
+    apply(verdict); // otimista
+    try {
+      await updateErrorVerdictInDb(errorId, verdict);
+    } catch (err) {
+      apply(previous); // reverte
+      throw err;
     }
   },
 }));
