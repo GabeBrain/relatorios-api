@@ -10,9 +10,7 @@ import Home from './pages/Home.tsx';
 import ApiExplorer from './pages/ApiExplorer.tsx';
 import TestesArquitetura from './pages/TestesArquitetura.tsx';
 import Assistente from './pages/Assistente.tsx';
-import TQPiemonteVgv from './pages/TQPiemonteVgv.tsx';
-import TQPiemonteReleasePrice from './pages/TQPiemonteReleasePrice.tsx';
-import TQCidValidacaoBase from './pages/TQCidValidacaoBase.tsx';
+import AreaQuanti from './pages/AreaQuanti.tsx';
 import NotFound from './pages/NotFound.tsx';
 import DashboardGeobrain from './pages/DashboardGeobrain.tsx';
 
@@ -62,18 +60,16 @@ const App = () => (
                 <Route path="/" element={<Navigate to="/inicio" replace />} />
                 <Route path="/inicio" element={<Home />} />
 
-                {/* Relatórios */}
-                <Route path="/relatorios/secovi" element={<TestesArquitetura />} />
-                <Route path="/relatorios/dashboard-geobrain" element={<DashboardGeobrain />} />
-
-                {/* Auditoria de Estudos (Corretor) */}
+                {/* Rebrain */}
+                <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
                 <Route path="/auditoria" element={<CorretorPage />} />
                 <Route path="/auditoria/analise" element={<CorretorAnalysisPage />} />
 
-                {/* Qualidade de Dados (por cliente) */}
-                <Route path="/qualidade/piemonte/vgv" element={<TQPiemonteVgv />} />
-                <Route path="/qualidade/piemonte/release-price" element={<TQPiemonteReleasePrice />} />
-                <Route path="/qualidade/cid/validacao-base" element={<TQCidValidacaoBase />} />
+                {/* Dash Geobrain */}
+                <Route path="/dash-geobrain" element={<DashboardGeobrain />} />
+
+                {/* Área Quanti (em implementação) */}
+                <Route path="/quanti" element={<AreaQuanti />} />
 
                 {/* APIs */}
                 <Route path="/apis/explorer" element={<ApiExplorer />} />
@@ -85,13 +81,12 @@ const App = () => (
                 {/* Redirects das rotas antigas (bookmarks/links) */}
                 <Route path="/documentacao" element={<Navigate to="/apis/explorer" replace />} />
                 <Route path="/testes-requisicao" element={<Navigate to="/apis/explorer" replace />} />
-                <Route path="/relatorios-secovi" element={<Navigate to="/relatorios/secovi" replace />} />
-                <Route path="/dashboard-geobrain" element={<Navigate to="/relatorios/dashboard-geobrain" replace />} />
+                <Route path="/relatorios-secovi" element={<Navigate to="/rebrain/secovi" replace />} />
+                <Route path="/relatorios/secovi" element={<Navigate to="/rebrain/secovi" replace />} />
+                <Route path="/relatorios/dashboard-geobrain" element={<Navigate to="/dash-geobrain" replace />} />
+                <Route path="/dashboard-geobrain" element={<Navigate to="/dash-geobrain" replace />} />
                 <Route path="/relatorios/corretor" element={<Navigate to="/auditoria" replace />} />
                 <Route path="/relatorios/corretor/analise" element={<Navigate to="/auditoria/analise" replace />} />
-                <Route path="/testes-qualidade/piemonte-vgv" element={<Navigate to="/qualidade/piemonte/vgv" replace />} />
-                <Route path="/testes-qualidade/piemonte-release-price" element={<Navigate to="/qualidade/piemonte/release-price" replace />} />
-                <Route path="/testes-qualidade/cid-validacao-base" element={<Navigate to="/qualidade/cid/validacao-base" replace />} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

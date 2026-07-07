@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Map,
-  FlaskConical,
   Building2,
   Bot,
   ChevronLeft,
@@ -54,46 +53,28 @@ const TOP_ITEMS: NavItem[] = [
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    id: 'relatorios',
-    label: 'Relatórios',
+    id: 'rebrain',
+    label: 'Rebrain',
     icon: <BarChart2 className="h-4 w-4" />,
     items: [
-      { path: '/relatorios/secovi', label: 'Secovi', icon: <Building2 className="h-4 w-4" /> },
-      { path: '/relatorios/dashboard-geobrain', label: 'Dashboard Geobrain', icon: <BarChart2 className="h-4 w-4" /> },
-    ],
-  },
-  {
-    id: 'auditoria',
-    label: 'Auditoria de Estudos',
-    icon: <ClipboardList className="h-4 w-4" />,
-    items: [
+      { path: '/rebrain/secovi', label: 'Secovi', icon: <Building2 className="h-4 w-4" /> },
       { path: '/auditoria', label: 'Corretor | Vocacionais', icon: <ClipboardList className="h-4 w-4" /> },
     ],
   },
   {
-    id: 'qualidade',
-    label: 'Qualidade de Dados',
+    id: 'dash-geobrain',
+    label: 'Dash Geobrain',
+    icon: <BarChart2 className="h-4 w-4" />,
+    items: [
+      { path: '/dash-geobrain', label: 'Dashboard', icon: <BarChart2 className="h-4 w-4" /> },
+    ],
+  },
+  {
+    id: 'quanti',
+    label: 'Área Quanti',
     icon: <Database className="h-4 w-4" />,
     items: [
-      {
-        type: 'folder',
-        id: 'cliente-piemonte',
-        label: 'Piemonte',
-        icon: <Building2 className="h-4 w-4" />,
-        children: [
-          { path: '/qualidade/piemonte/vgv', label: 'VGV Verticais', icon: <FlaskConical className="h-4 w-4" /> },
-          { path: '/qualidade/piemonte/release-price', label: 'Release price', icon: <FlaskConical className="h-4 w-4" /> },
-        ],
-      },
-      {
-        type: 'folder',
-        id: 'cliente-cid',
-        label: 'CID',
-        icon: <Database className="h-4 w-4" />,
-        children: [
-          { path: '/qualidade/cid/validacao-base', label: 'Validação de Base', icon: <FlaskConical className="h-4 w-4" /> },
-        ],
-      },
+      { path: '/quanti', label: 'Banco Quanti', icon: <Database className="h-4 w-4" />, standbyLabel: '(em implementação)' },
     ],
   },
   {
@@ -276,7 +257,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           <div className="flex items-center gap-2 min-w-0">
             <img src={brainLogo} alt="Brain" className="h-7 w-auto shrink-0" />
             {!collapsed && (
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest truncate">API Studio</span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest truncate">Rebrain</span>
             )}
           </div>
           <button

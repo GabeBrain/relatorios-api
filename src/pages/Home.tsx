@@ -5,7 +5,6 @@ import {
   ClipboardList,
   BarChart2,
   Plug,
-  Database,
   ArrowRight,
   Activity,
 } from 'lucide-react';
@@ -24,22 +23,22 @@ const QUICK_LINKS = [
     desc: 'Analisar um estudo vocacional no Corretor',
   },
   {
-    to: '/relatorios/secovi',
+    to: '/rebrain/secovi',
     icon: <BarChart2 className="h-5 w-5" />,
     title: 'Relatório Secovi',
     desc: 'Gerar relatório de mercado com export Excel',
+  },
+  {
+    to: '/dash-geobrain',
+    icon: <BarChart2 className="h-5 w-5" />,
+    title: 'Dash Geobrain',
+    desc: 'Dashboard dos dados da plataforma Geobrain',
   },
   {
     to: '/apis/explorer',
     icon: <Plug className="h-5 w-5" />,
     title: 'API Explorer',
     desc: 'Documentação + console das APIs GeoBrain e Sócio',
-  },
-  {
-    to: '/qualidade/cid/validacao-base',
-    icon: <Database className="h-5 w-5" />,
-    title: 'Qualidade de dados',
-    desc: 'Validações por cliente: Piemonte e CID',
   },
 ];
 
@@ -76,9 +75,9 @@ export default function Home() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold">Brain API Studio</h1>
+          <h1 className="text-2xl font-semibold">Rebrain</h1>
           <p className="text-sm text-muted-foreground">
-            Visão geral do Studio — o que aconteceu e o que precisa de você.
+            Visão geral do Rebrain — o que aconteceu e o que precisa de você.
           </p>
         </div>
         <span
@@ -92,7 +91,7 @@ export default function Home() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <KpiCard
           label="Auditorias salvas"
           value={loading ? '…' : String(projects.length)}
@@ -107,11 +106,6 @@ export default function Home() {
           label="Custo IA acumulado"
           value={loading ? '…' : `US$ ${totalCost.toFixed(2)}`}
           sub="análises de slides (OpenAI)"
-        />
-        <KpiCard
-          label="Testes de qualidade"
-          value="3"
-          sub="Piemonte ×2 · CID ×1"
         />
       </div>
 
