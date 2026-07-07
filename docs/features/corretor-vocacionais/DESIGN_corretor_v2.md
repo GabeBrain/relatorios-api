@@ -225,3 +225,11 @@ Sintomas descobertos (guiam o design):
 - **05/jul/2026** — `poc_extractor.py` v1→v2: extrai tabelas/gráficos, mapeia anomalias a
   slide/título, filtra resposta múltipla, acha notas esquecidas. Rodado nos 2 PPTX com achados
   reais. **Parada combinada aqui**; retomar com material completo (ata + fórmula + IBGE).
+- **07/jul/2026** — **Entregável 1 (IR) concluído**: `ir_extractor.py` gera o JSON normalizado
+  (`ir_version: 1`) por estudo — parser XML de verdade, texto agrupado por shape (corrige a
+  fragmentação do FONTE), gráficos com nome/categorias/valores, números pt-BR parseados,
+  seção canônica v0 por dicionário. Validado nas 2 amostras; `PERCENTAGE_SUM` rodando **só
+  sobre o IR** reproduz os 9 achados do POC no estudo GO. Detalhes e schema na
+  **Versão 0.2** do [`LIVE_regras_corretor_vocacionais.md`](./LIVE_regras_corretor_vocacionais.md).
+  Saídas em `ir/` (gitignored). Material da analista (ata + fórmula + IBGE) previsto para
+  08/jul — destrava itens 2-4 do plano.
