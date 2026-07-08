@@ -16,6 +16,35 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.3 — 2026-07-08 — Amostras reais + ata como imagem
+
+Chegaram **2 estudos vocacionais reais e completos** (muito maiores que as 2 amostras de
+teste anteriores), que passam a ser a base de calibração do plano v2.
+
+### Amostras (locais, gitignored — pesadas)
+
+| Estudo | Tipo | Slides | Tabelas | Fonte-em-texto | Notas edição |
+|---|---|---|---|---|---|
+| Itajaí/SC — Élio Winter (Av. Itaipava) | Horizontal (lotes) | 143 | 47 | 56 | 22 |
+| Marka Prime / Tancredo — Guarulhos/SP | Vertical (8 torres, 1.912 un.) | 165 | 36 | 77 | 14 |
+
+> Arquivos `*_estudo exemplo.pptx` adicionados ao `.gitignore` (157 MB e 93 MB — acima do
+> limite do GitHub). Vivem locais; o IR é regenerável via `ir_extractor.py`.
+
+### Achados
+
+| Achado | Status | Detalhe |
+|---|---|---|
+| **Ata no slide 1 é IMAGEM, não texto** | `LACUNA` | Em ambos os estudos a ata está no slide 1, mas como print (`pic`/`blip`), não como texto. O IR v1 extrai do slide 1 só o título ("Vocacional Horizontal/Vertical"). Todo o conteúdo da ata (produto pretendido, dúvidas do cliente, instruções ao analista) é invisível ao extrator atual. |
+| **Regressão da seção canônica v0** | `POC` | Em estudos reais o dicionário v0 deixa muitos slides sem seção: **64/143 (Itajaí)** e **48/165 (Marka)** como `(sem seção)`. Reforça a urgência da calibração (item 2 do plano) — agora com material real. |
+| **Ata como contrato de auditoria** | `PLANEJADA` | A ata traz o "pedido do cliente" (ex.: Itajaí — "slide separado com previsão de entrega checada na conferência da base"). É a fonte natural das **regras cruzadas ata × estudo**. Decisão de formato de ingestão em aberto (ver abaixo). |
+
+### Decisão em aberto — formato de ingestão da ata
+
+A ata não deve depender de OCR/visão sobre um print. Alinhar com o time para que a ata venha
+como **documento textual separado e leve** (`.docx`/`.txt`/`.md`) por estudo — versionável e
+parseável direto, sem passo de imagem. Ver proposta de convenção de artefatos por estudo.
+
 ## Versão 0.2 — 2026-07-07 — IR versionado e validado
 
 Entregável 1 do plano v2 (DESIGN_corretor_v2.md): a **Representação Intermediária (IR)**
