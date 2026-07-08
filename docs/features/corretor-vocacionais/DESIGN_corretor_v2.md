@@ -218,22 +218,31 @@ Sintomas descobertos (guiam o design):
 
 ## Estratégia de testes com material real — economia de créditos (08/jul/2026)
 
-**Contexto:** chegaram 2 estudos reais e completos (Itajaí 143 slides / Marka Prime 165 slides,
-locais, gitignored). Objetivo: tornar o corretor funcional testando com esse material, expandindo
-os tipos de erro e reorganizando a interface — **sem gastar créditos de IA à toa**.
+> **REVISÃO 08/jul (v2 da estratégia):** as notas de revisão nos 2 estudos **não são o alvo do
+> corretor** — são as **instruções do analista humano**, que o corretor vem substituir. Nos
+> estudos reais elas não virão. Portanto as notas são **especificação do catálogo** + **gabarito
+> de validação**, não saída. Ver [`taxonomia_notas.md`](./taxonomia_notas.md). Isso reordena as
+> fases: mineração da taxonomia entra na frente e a **extração de visão dos números (Fase C)
+> vira caminho crítico** — a maioria das correções humanas depende de números presos em imagem.
+
+**Contexto:** 2 estudos reais completos (Itajaí 143 / Marka Prime 165, locais, gitignored),
+**anotados pelo analista**. Objetivo: tornar o corretor funcional, expandindo os tipos de erro
+(derivados das notas) e reorganizando a interface — **sem gastar créditos de IA à toa**.
 
 **Princípio:** o IR é local e custa zero. IA só onde é insubstituível, na **menor porção
-possível**, com **cache** para nunca pagar duas vezes pela mesma análise.
+possível**, com **cache**. **As notas dos 2 estudos são o gabarito**: o corretor deve reproduzir
+os achados do humano a partir do dado cru — métrica = recall/precisão.
 
-### Fases (ordem de execução)
+### Fases (ordem revisada)
 
 | Fase | O quê | Custo IA |
 |---|---|---|
-| **A — DET sobre o IR** | Rodar as regras determinísticas puras sobre os IR dos 2 estudos: `PERCENTAGE_SUM` (validada), depois `ABSOLUTE_SUM`, `TOTALS_EQUALITY`, `SOURCE_MISSING`, `REQUIRED_NOTE`, `LEFTOVER_NOTE`, `TEMPORAL_WINDOW`. Gera o 1º relatório de achados reais. | **Zero** |
-| **B — Calibração de seção** | Tabela `título → seção detectada → seção correta` dos 2 estudos para a analista corrigir; atualizar o dicionário `SECOES`. Habilita `STRUCTURE_MISSING` e o roteamento de regras por seção. | **Zero** |
-| **C — Ata one-shot** | Para ESTES 2 estudos a ata é imagem no slide 1 (exceção): extrair com **1 chamada de visão por imagem** (~6 imagens no total) e salvar o resultado como `ata_extraida.md` versionado — **nunca reprocessar** (cache por sha1). Estudos futuros: ata em **DOCX** (combinar com o time) → parse determinístico, custo zero. | ~6 chamadas, 1x só |
-| **D — Regras IA em porções** | `SPELLING`, `ATA_COVERAGE` e semântica: mandar **texto do IR, nunca imagem** (visão custa ~10×); agrupar N slides por chamada (batch); **amostragem progressiva** — calibrar a regra em ~10% dos slides antes de rodar o estudo inteiro; rodar só nas seções relevantes à regra. | Controlado |
-| **E — Interface v2** | Reorganizar `/auditoria` para o paradigma "auditoria do estudo" (não slide-a-slide): relatório agrupado por **seção canônica → regra → achado**, veredito (bug real × falso positivo) mantido, **painel de custo estimado antes de rodar IA** e execução por porção ("rodar só a seção Socio"). | Zero (UI) |
+| **0 — Mineração da taxonomia** ✅ | Categorizar as 36 notas → catálogo de tipos de erro (`CROSS_TABLE_MISMATCH`, `PROJECTION_FORMULA`, `VALUE_PLAUSIBILITY`, `WRONG_CONTEXT`, `BINNING_RULE`; layout fora de escopo) e congelar como **labels de validação**. Ver `taxonomia_notas.md`. | **Zero** |
+| **A — DET sobre o IR** ✅ | Regras puras sobre o IR (`LEFTOVER_NOTE` como rede de segurança, `SOURCE_MISSING`, `PERCENTAGE_SUM`, `TEMPORAL_WINDOW`). Feito: `rules_ir.py` / `achados_fase_a.md`. **Achado:** números presos em imagem → regras numéricas sem material. | **Zero** |
+| **B — Calibração de seção** | Analista preenche `calibracao/*.secao.csv` → atualizar dicionário `SECOES`. Habilita roteamento por seção e `STRUCTURE_MISSING`. | **Zero** |
+| **C — Extração de visão dos NÚMEROS (caminho crítico)** | Destrava a maioria das correções: extrair com visão **só as imagens de tabela numérica** (renda, absorção, mercado, lacunas), **1 chamada por imagem única**, salvar como IR-complemento versionado, **cache por sha1** — nunca reprocessar. Sem isso, `CROSS_TABLE_MISMATCH`/`PROJECTION_FORMULA`/`VALUE_PLAUSIBILITY` não têm dado. Também a ata (slide 1) neste mesmo passo. | Pontual, 1× por imagem |
+| **D — Catálogo de regras derivado das notas** | Implementar os tipos da taxonomia sobre o IR + números da Fase C. DET: `WRONG_CONTEXT` (cidade/estado), `BINNING_RULE`, `PROJECTION_FORMULA` (c/ fórmula da analista), monotonicidade. IA cirúrgica: plausibilidade semântica ("está estranho"). **Validar contra as notas-gabarito** (recall/precisão) em porções, com amostragem progressiva. | Controlado |
+| **E — Interface v2** | `/auditoria` no paradigma "auditoria do estudo": relatório por **seção → tipo de erro → achado**, veredito (bug real × falso positivo), **custo estimado antes de rodar IA**, execução por porção. | Zero (UI) |
 
 ### Táticas de economia (transversais)
 
@@ -246,13 +255,14 @@ possível**, com **cache** para nunca pagar duas vezes pela mesma análise.
    → só então roda no estudo inteiro.
 6. **Escalonamento de modelo**: modelo barato faz triagem; o caro só confirma casos ambíguos.
 
-### Expansão dos tipos de erro
+### Expansão dos tipos de erro (agora derivada das notas)
 
 O enum atual (`analysis-store.ts`: `PERCENTAGE_SUM | CITY_NAME | RADII | SPELLING | COHERENCE`)
-cresce para o catálogo da rubrica (ver tabela regra→erro→motor acima) **e** para os tipos que
-as atas reais evidenciam — ex. Itajaí: "slide separado com previsão de entrega **checada na
-conferência da base**" → `ATA_COVERAGE` com sub-itens verificáveis. Cada ata nova que chegar
-alimenta exemplos e novos tipos; registrar no LIVE doc a cada expansão.
+cresce a partir de **duas fontes**: (1) o catálogo da rubrica (tabela regra→erro→motor acima) e
+(2) **a taxonomia minerada das notas reais** (`taxonomia_notas.md`) — o que o analista de fato
+corrige: `CROSS_TABLE_MISMATCH`, `PROJECTION_FORMULA`, `VALUE_PLAUSIBILITY`, `WRONG_CONTEXT`,
+`BINNING_RULE`. Cada estudo anotado novo enriquece a taxonomia e o gabarito. Layout/cosmético
+fica **fora de escopo**. Registrar no LIVE doc a cada expansão.
 
 ## Log de avanços
 

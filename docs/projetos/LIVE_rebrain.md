@@ -49,6 +49,18 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-08 — Corretor v2: virada conceitual — notas = especificação + gabarito — Gabriel
+- **O quê:** reinterpretação das notas de revisão. Elas **não são bugs**: são as instruções do
+  analista humano, que o corretor substitui — e não virão nos estudos reais. Passam a ser
+  (1) **especificação do catálogo de regras** (36 notas mineradas em `taxonomia_notas.md` →
+  tipos `CROSS_TABLE_MISMATCH`, `PROJECTION_FORMULA`, `VALUE_PLAUSIBILITY`, `WRONG_CONTEXT`,
+  `BINNING_RULE`; layout fora de escopo) e (2) **gabarito de validação** (recall/precisão).
+- **Impacto:** a maioria das correções humanas depende de **números presos em imagem** → a
+  **extração de visão dos números (Fase C) vira caminho crítico**. `LEFTOVER_NOTE` rebaixada a
+  rede de segurança. Estratégia reordenada (Fase 0→E) no `DESIGN_corretor_v2.md`.
+- **Arquivos:** `docs/features/corretor-vocacionais/{taxonomia_notas.md, DESIGN_corretor_v2.md}`,
+  LIVE do Corretor (v0.5).
+
 ### 2026-07-08 — Corretor v2 Fase A: motor DET rodando nos estudos reais — Gabriel
 - **O quê:** `rules_ir.py` (motor de regras determinísticas puro sobre o IR, zero IA) rodado
   nos 2 estudos reais. **81 achados a custo zero**: Itajaí 48 (22 notas de edição vazadas,
@@ -94,11 +106,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 4 | Log de atividade (front + Edge Function) | ✅ |
 | 5 | Corretor Vocacionais em runtime (auditoria + veredito) | ✅ |
 | 6 | Corretor v2 — IR versionado/validado | ✅ (entregável 1; validado também nos 2 estudos reais) |
+| 6.0 | Corretor v2 — Fase 0: mineração da taxonomia das notas (catálogo + gabarito) | ✅ (`taxonomia_notas.md`) |
 | 6a | Corretor v2 — Fase A: regras DET sobre o IR dos estudos reais (custo zero) | ✅ (81 achados; `rules_ir.py` + `achados_fase_a.md`) |
 | 6b | Corretor v2 — Fase B: calibração da seção canônica com a analista | 🔲 |
-| 6c | Corretor v2 — Fase C: extração one-shot das atas (imagem → `ata_extraida.md`, com cache) | 🔲 |
-| 6d | Corretor v2 — Fase D: regras IA em porções (batch + amostragem + texto do IR) | 🔲 |
-| 6e | Corretor v2 — Fase E: interface v2 (relatório por seção→regra→achado, custo estimado, execução por porção) | 🔲 |
+| 6c | Corretor v2 — Fase C: **extração de visão dos números** presos em imagem (caminho crítico) + ata, com cache | 🔲 |
+| 6d | Corretor v2 — Fase D: catálogo de regras derivado das notas, validado contra o gabarito (recall/precisão) | 🔲 |
+| 6e | Corretor v2 — Fase E: interface v2 (relatório por seção→tipo de erro→achado, custo estimado, execução por porção) | 🔲 |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |

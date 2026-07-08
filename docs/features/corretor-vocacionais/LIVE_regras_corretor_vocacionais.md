@@ -16,6 +16,33 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.5 — 2026-07-08 — Virada: notas = especificação + gabarito
+
+**Reinterpretação decisiva.** As notas em balão dos estudos ("Ajustar o erro da fórmula",
+"verificar essa taxa") **não são bugs a sinalizar** — são as **instruções do analista humano**,
+que o corretor vem **substituir**. Nos estudos reais elas não virão. Logo:
+
+- **`LEFTOVER_NOTE` rebaixada** de tipo principal para **rede de segurança**.
+- As 36 notas viram **catálogo de tipos de erro** (engenharia reversa) + **gabarito de validação**
+  (recall/precisão). Taxonomia minerada em [`taxonomia_notas.md`](./taxonomia_notas.md).
+
+### Tipos de erro derivados das notas reais
+
+| Tipo | Motor | Origem |
+|---|---|---|
+| `CROSS_TABLE_MISMATCH` | DET (se houver dado) | "mesmas rendas do slide", "valores da tabela de lacunas geral", pop./domicílios |
+| `PROJECTION_FORMULA` | DET c/ fórmula da analista | "erro da fórmula", "taxa do Brasil" |
+| `VALUE_PLAUSIBILITY` | DET (faixa/monotonic.) + IA | "está estranho", "60% é muita coisa", "unidade maior + 2 vagas + m² menor" |
+| `WRONG_CONTEXT` | DET (cidade/estado) + IA | "informações do estudo do Brooklin, corrigir" |
+| `BINNING_RULE` | DET | "agrupar acima de R$34.360" |
+| `LAYOUT` | **fora de escopo** | "ajustar largura da coluna" |
+
+### Impacto na arquitetura
+
+A maioria das correções humanas depende de **números presos em imagem** → a **extração de
+visão dos números (Fase C) vira caminho crítico**, não opcional. Sem ela, o corretor não
+reproduz o que o humano faz. Estratégia reordenada no `DESIGN_corretor_v2.md` (Fase 0→E).
+
 ## Versão 0.4 — 2026-07-08 — Fase A: motor de regras DET sobre o IR
 
 `rules_ir.py` — motor de regras determinísticas **puro sobre o IR JSON** (zero IA). Rodado nos
