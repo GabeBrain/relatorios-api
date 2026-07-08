@@ -15,6 +15,19 @@ do push**. Após `pull`/merge, leia as entradas novas para se situar. Convençã
 - Área Quanti → `docs/projetos/LIVE_area-quanti.md`
 - Rebrain → `docs/projetos/LIVE_rebrain.md`
 
+### Ritual de saudação (revisão de status)
+
+Quando a interação começar com uma **saudação** ("oi", "olá", "bom dia", "boa tarde",
+"boa noite" e variações), antes de responder ao pedido:
+
+1. Verifique o que mudou desde o último sync (`git log`/`git status` + diff dos docs) e
+   **reconcilie os documentos vivos** dos projetos afetados: atualize **Etapas** (✅/🟡) e
+   **Pendências** (remova o resolvido, registre o que surgiu). Se nada mudou, confirme que os
+   docs seguem fiéis ao estado atual.
+2. Ao final da resposta, **pergunte se há algum bug específico mais urgente** a tratar.
+3. Se não houver, sugira **um próximo passo natural** — derivado das *Etapas* em andamento (🟡)
+   ou das *Pendências* prioritárias do doc vivo do projeto ativo.
+
 ## Corretor de Vocacionais
 
 Ao modificar qualquer parte do **Corretor | Estudos Vocacionais** (`src/features/corretor/`, `supabase/functions/analyze-slide/`, migrations relacionadas ou documentação da feature), atualize o documento vivo:

@@ -16,6 +16,19 @@ Ver a convenção completa em [`docs/projetos/README.md`](docs/projetos/README.m
 - Área Quanti → `docs/projetos/LIVE_area-quanti.md`
 - Rebrain → `docs/projetos/LIVE_rebrain.md`
 
+### Ritual de saudação (revisão de status)
+
+Quando a interação começar com uma **saudação** ("oi", "olá", "bom dia", "boa tarde",
+"boa noite" e variações), antes de responder ao pedido:
+
+1. Verifique o que mudou desde o último sync (`git log`/`git status` e o diff dos docs) e
+   **reconcilie os documentos vivos** dos projetos afetados: atualize **Etapas** (marque o que
+   virou ✅/🟡) e **Pendências** (remova o resolvido, registre o que surgiu). Se nada mudou,
+   apenas confirme que os docs continuam fiéis ao estado atual.
+2. Ao final da resposta, **pergunte se há algum bug específico mais urgente** a tratar.
+3. Se não houver, ofereça **uma sugestão de próximo passo natural** — derivada das *Etapas*
+   em andamento (🟡) ou das *Pendências* de maior prioridade no doc vivo do projeto ativo.
+
 ## Corretor de Vocacionais
 
 Sempre que alterar qualquer comportamento, regra, prompt, schema, migração, extração ou fluxo relacionado ao **Corretor | Estudos Vocacionais**, atualize também:
