@@ -49,6 +49,20 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-08 — Corretor v2: estudos reais + estratégia de testes — Gabriel
+- **O quê:** recebidos 2 estudos vocacionais reais e completos (Itajaí/SC 143 slides;
+  Marka Prime/Guarulhos 165 slides). IR extraído de ambos sem erro. Achados: as **atas estão
+  no slide 1 como imagem** (invisíveis ao IR v1) e a seção canônica v0 regrediu em estudos
+  reais (64/143 e 48/165 slides sem seção). Definida a **estratégia de testes com economia de
+  créditos** (fases A-E: DET-first → calibração de seção → ata one-shot com cache → IA em
+  porções/batch/amostragem → interface v2) — ver `DESIGN_corretor_v2.md`.
+- **Por quê:** tornar o corretor funcional testando com material real, expandindo tipos de
+  erro e reorganizando a interface, sem estourar créditos de IA.
+- **Decisões:** estudos = **PPTX** (não PDF); atas futuras = **DOCX separado** (alinhar com o
+  time); PPTX pesados ficam **locais/gitignored** (157/93 MB — acima do limite do GitHub).
+- **Arquivos:** `.gitignore`, `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`
+  (v0.3), `docs/features/corretor-vocacionais/DESIGN_corretor_v2.md` (estratégia + log).
+
 ### 2026-07-08 — Base zero documentada — Gabriel
 - **O quê:** criação deste doc vivo consolidando plataforma + features do Rebrain.
 - **Por quê:** estabelecer a linha de base de desenvolvimento para colaboração via git.
@@ -67,7 +81,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 3 | Auth global + shell + busca Ctrl+K | ✅ |
 | 4 | Log de atividade (front + Edge Function) | ✅ |
 | 5 | Corretor Vocacionais em runtime (auditoria + veredito) | ✅ |
-| 6 | Corretor v2 — IR versionado/validado | 🟡 (entregável 1 ✅; calibrar seção canônica com analista) |
+| 6 | Corretor v2 — IR versionado/validado | ✅ (entregável 1; validado também nos 2 estudos reais) |
+| 6a | Corretor v2 — Fase A: regras DET sobre o IR dos estudos reais (custo zero) | 🔲 |
+| 6b | Corretor v2 — Fase B: calibração da seção canônica com a analista | 🔲 |
+| 6c | Corretor v2 — Fase C: extração one-shot das atas (imagem → `ata_extraida.md`, com cache) | 🔲 |
+| 6d | Corretor v2 — Fase D: regras IA em porções (batch + amostragem + texto do IR) | 🔲 |
+| 6e | Corretor v2 — Fase E: interface v2 (relatório por seção→regra→achado, custo estimado, execução por porção) | 🔲 |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
@@ -76,7 +95,10 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] Corretor v2: calibrar dicionário de seção canônica com a analista (item 2 do plano) — ver doc vivo do Corretor.
+- [ ] Corretor v2: executar as fases A→E da estratégia de testes (ver `DESIGN_corretor_v2.md`) — próxima ação: Fase A (regras DET sobre o IR, custo zero) + gerar tabela de calibração da Fase B.
+- [ ] Corretor v2: calibrar dicionário de seção canônica com a analista (item 2 do plano; agora com os 2 estudos reais como base) — ver doc vivo do Corretor.
+- [ ] Alinhar com o time o formato dos artefatos por estudo: slides sempre em **PPTX** (não PDF) e ata sempre em **DOCX separado** (nunca print no slide 1). Vale a partir dos próximos estudos; os 2 atuais seguem com ata em imagem (Fase C).
+- [ ] Expandir o enum de tipos de erro (`analysis-store.ts`) para o catálogo da rubrica + tipos evidenciados pelas atas reais (`ATA_COVERAGE` etc.).
 - [ ] CID: retomar validação de base quando sair do standby.
 - [ ] Dívidas de segurança conhecidas — ver [`../architecture/SECURITY_NOTES.md`](../architecture/SECURITY_NOTES.md) (vulns npm, log por IP, `.env` versionado por design).
 - [ ] Apontamentos Juliana: etapas 4–6 pendentes (ver memória do projeto).

@@ -216,6 +216,44 @@ Sintomas descobertos (guiam o design):
 | **Fórmula da projeção de 6 anos** | `TEMPORAL_WINDOW` / `PROJECTION_FORMULA` | analista (se ofereceu) |
 | **Fonte IBGE** (Censo 2022 por município) | `IBGE_MISMATCH` | definir API/CSV |
 
+## Estratégia de testes com material real — economia de créditos (08/jul/2026)
+
+**Contexto:** chegaram 2 estudos reais e completos (Itajaí 143 slides / Marka Prime 165 slides,
+locais, gitignored). Objetivo: tornar o corretor funcional testando com esse material, expandindo
+os tipos de erro e reorganizando a interface — **sem gastar créditos de IA à toa**.
+
+**Princípio:** o IR é local e custa zero. IA só onde é insubstituível, na **menor porção
+possível**, com **cache** para nunca pagar duas vezes pela mesma análise.
+
+### Fases (ordem de execução)
+
+| Fase | O quê | Custo IA |
+|---|---|---|
+| **A — DET sobre o IR** | Rodar as regras determinísticas puras sobre os IR dos 2 estudos: `PERCENTAGE_SUM` (validada), depois `ABSOLUTE_SUM`, `TOTALS_EQUALITY`, `SOURCE_MISSING`, `REQUIRED_NOTE`, `LEFTOVER_NOTE`, `TEMPORAL_WINDOW`. Gera o 1º relatório de achados reais. | **Zero** |
+| **B — Calibração de seção** | Tabela `título → seção detectada → seção correta` dos 2 estudos para a analista corrigir; atualizar o dicionário `SECOES`. Habilita `STRUCTURE_MISSING` e o roteamento de regras por seção. | **Zero** |
+| **C — Ata one-shot** | Para ESTES 2 estudos a ata é imagem no slide 1 (exceção): extrair com **1 chamada de visão por imagem** (~6 imagens no total) e salvar o resultado como `ata_extraida.md` versionado — **nunca reprocessar** (cache por sha1). Estudos futuros: ata em **DOCX** (combinar com o time) → parse determinístico, custo zero. | ~6 chamadas, 1x só |
+| **D — Regras IA em porções** | `SPELLING`, `ATA_COVERAGE` e semântica: mandar **texto do IR, nunca imagem** (visão custa ~10×); agrupar N slides por chamada (batch); **amostragem progressiva** — calibrar a regra em ~10% dos slides antes de rodar o estudo inteiro; rodar só nas seções relevantes à regra. | Controlado |
+| **E — Interface v2** | Reorganizar `/auditoria` para o paradigma "auditoria do estudo" (não slide-a-slide): relatório agrupado por **seção canônica → regra → achado**, veredito (bug real × falso positivo) mantido, **painel de custo estimado antes de rodar IA** e execução por porção ("rodar só a seção Socio"). | Zero (UI) |
+
+### Táticas de economia (transversais)
+
+1. **DET-first**: tudo que vira regra pura roda local; IA é último recurso.
+2. **Texto > imagem**: a visão da v1 (screenshot por slide) dá lugar a texto do IR — só a ata
+   destes 2 estudos justifica visão, uma única vez.
+3. **Cache por sha1** (estudo + slide): slide inalterado nunca é reanalisado.
+4. **Batching**: vários slides por chamada em vez de 1 chamada/slide.
+5. **Amostragem progressiva**: regra nova roda numa fatia pequena → mede taxa de falso positivo
+   → só então roda no estudo inteiro.
+6. **Escalonamento de modelo**: modelo barato faz triagem; o caro só confirma casos ambíguos.
+
+### Expansão dos tipos de erro
+
+O enum atual (`analysis-store.ts`: `PERCENTAGE_SUM | CITY_NAME | RADII | SPELLING | COHERENCE`)
+cresce para o catálogo da rubrica (ver tabela regra→erro→motor acima) **e** para os tipos que
+as atas reais evidenciam — ex. Itajaí: "slide separado com previsão de entrega **checada na
+conferência da base**" → `ATA_COVERAGE` com sub-itens verificáveis. Cada ata nova que chegar
+alimenta exemplos e novos tipos; registrar no LIVE doc a cada expansão.
+
 ## Log de avanços
 
 - **05/jul/2026** — Fase 4 iniciada (conceitual). Mapeados os 2 docs de contexto (rubrica +
@@ -233,3 +271,8 @@ Sintomas descobertos (guiam o design):
   **Versão 0.2** do [`LIVE_regras_corretor_vocacionais.md`](./LIVE_regras_corretor_vocacionais.md).
   Saídas em `ir/` (gitignored). Material da analista (ata + fórmula + IBGE) previsto para
   08/jul — destrava itens 2-4 do plano.
+- **08/jul/2026** — **2 estudos reais completos recebidos** (Itajaí 143 slides + Marka Prime
+  165 slides; locais, gitignored — detalhes na Versão 0.3 do LIVE doc). Atas estão no slide 1
+  **como imagem** → decisão: para estes 2, extração de visão one-shot com cache; futuras atas
+  em **DOCX** (alinhar com o time). Definida a **Estratégia de testes com material real**
+  (seção acima): fases A-E, DET-first, porções pequenas, cache, amostragem progressiva.
