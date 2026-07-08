@@ -16,6 +16,35 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.4 — 2026-07-08 — Fase A: motor de regras DET sobre o IR
+
+`rules_ir.py` — motor de regras determinísticas **puro sobre o IR JSON** (zero IA). Rodado nos
+2 estudos reais. Relatório completo em [`achados_fase_a.md`](./achados_fase_a.md).
+
+### Regras implementadas (todas `RUNTIME` como POC executável, motor DET)
+
+| Regra | Itajaí | Marka | O que faz |
+|---|---|---|---|
+| `LEFTOVER_NOTE` | 22 | 14 | Notas internas de edição esquecidas no deck (de `notas_edicao` do IR). |
+| `SOURCE_MISSING` | 23 | 19 | Slide com tabela/gráfico sem "fonte/elaboração" **em texto**. Falsos positivos quando a fonte está em imagem. |
+| `PERCENTAGE_SUM` | 0 | 0 | Séries/colunas proporcionais que não fecham 100% (ignora resposta múltipla). Sem material aqui. |
+| `TEMPORAL_WINDOW` | 3 | 0 | Janela de projeção SOCIO ≠ 2027–2032. Confirmar janela canônica com a analista. |
+
+### Achado estrutural decisivo
+
+Nos 2 estudos, **os números estão presos em imagem** (tabelas c/ número parseado = **0/47** e
+**0/36**; imagens = 264 e 225). As tabelas nativas são legendas de mapa. As regras numéricas de
+consistência ficam **sem material** → destrava só na **Fase C** (visão pontual sobre as imagens
+de tabela, com cache) ou com estudos que tragam tabelas nativas.
+
+### Artefatos
+
+| Item | Status | Detalhe |
+|---|---|---|
+| `rules_ir.py` | `POC` (versionado) | Motor DET puro sobre IR. `python rules_ir.py` roda em `ir/*estudo exemplo.ir.json`. |
+| `calibracao/*.secao.csv` | versionado | Tabela `slide, titulo, secao_detectada, secao_correta` p/ a analista preencher (**Fase B**). |
+| `achados_fase_a.md` | versionado | Relatório de achados (snapshot reproduzível). |
+
 ## Versão 0.3 — 2026-07-08 — Amostras reais + ata como imagem
 
 Chegaram **2 estudos vocacionais reais e completos** (muito maiores que as 2 amostras de

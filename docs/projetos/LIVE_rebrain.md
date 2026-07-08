@@ -49,6 +49,18 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-08 — Corretor v2 Fase A: motor DET rodando nos estudos reais — Gabriel
+- **O quê:** `rules_ir.py` (motor de regras determinísticas puro sobre o IR, zero IA) rodado
+  nos 2 estudos reais. **81 achados a custo zero**: Itajaí 48 (22 notas de edição vazadas,
+  23 fonte-ausente, 3 janela de projeção fora de 2027–2032), Marka 33. Ouro: notas internas
+  esquecidas no deck ("dados do estudo do Brooklin, corrigir"; "verificar, está estranho").
+- **Achado estrutural:** números presos em imagem (0 tabelas com número parseado; 264/225
+  imagens) → regras numéricas sem material nestes 2 estudos; destrava na Fase C (visão pontual).
+- **Entregáveis:** `rules_ir.py`, `achados_fase_a.md` (relatório), `calibracao/*.secao.csv`
+  (tabela para a analista da Fase B).
+- **Arquivos:** `docs/features/corretor-vocacionais/{rules_ir.py, achados_fase_a.md, calibracao/}`,
+  LIVE do Corretor (v0.4).
+
 ### 2026-07-08 — Corretor v2: estudos reais + estratégia de testes — Gabriel
 - **O quê:** recebidos 2 estudos vocacionais reais e completos (Itajaí/SC 143 slides;
   Marka Prime/Guarulhos 165 slides). IR extraído de ambos sem erro. Achados: as **atas estão
@@ -82,7 +94,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 4 | Log de atividade (front + Edge Function) | ✅ |
 | 5 | Corretor Vocacionais em runtime (auditoria + veredito) | ✅ |
 | 6 | Corretor v2 — IR versionado/validado | ✅ (entregável 1; validado também nos 2 estudos reais) |
-| 6a | Corretor v2 — Fase A: regras DET sobre o IR dos estudos reais (custo zero) | 🔲 |
+| 6a | Corretor v2 — Fase A: regras DET sobre o IR dos estudos reais (custo zero) | ✅ (81 achados; `rules_ir.py` + `achados_fase_a.md`) |
 | 6b | Corretor v2 — Fase B: calibração da seção canônica com a analista | 🔲 |
 | 6c | Corretor v2 — Fase C: extração one-shot das atas (imagem → `ata_extraida.md`, com cache) | 🔲 |
 | 6d | Corretor v2 — Fase D: regras IA em porções (batch + amostragem + texto do IR) | 🔲 |
