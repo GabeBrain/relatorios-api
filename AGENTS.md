@@ -16,6 +16,22 @@ Ver a convenção completa em [`docs/projetos/README.md`](docs/projetos/README.m
 - Área Quanti → `docs/projetos/LIVE_area-quanti.md`
 - Rebrain → `docs/projetos/LIVE_rebrain.md`
 
+### Identificação do colaborador (foco por projeto)
+
+Para personalizar as sugestões, descubra **quem é o colaborador ativo** rodando
+`git config user.name` e `git config user.email` e cruze com o mapa abaixo. O **projeto foco**
+dessa pessoa determina qual doc vivo priorizar nas sugestões de próximo passo.
+
+| Colaborador | git user.email | Projeto foco | Doc vivo |
+|---|---|---|---|
+| Gabriel | `gabriel.gomes@brain.srv.br` | Rebrain (plataforma) | `docs/projetos/LIVE_rebrain.md` |
+| Edgar | _(a confirmar)_ | Dashboard GeoBrain | `docs/projetos/LIVE_dashboard-geobrain.md` |
+| Lucas | _(a confirmar)_ | Área Quanti | `docs/projetos/LIVE_area-quanti.md` |
+
+Se a identidade não bater com ninguém do mapa, **pergunte em qual projeto a pessoa está focando**
+antes de sugerir próximos passos. O foco é um padrão, não uma trava: se a pessoa pedir algo de
+outro projeto, atenda normalmente.
+
 ### Ritual de saudação (revisão de status)
 
 Quando a interação começar com uma **saudação** ("oi", "olá", "bom dia", "boa tarde",
@@ -26,8 +42,10 @@ Quando a interação começar com uma **saudação** ("oi", "olá", "bom dia", "
    virou ✅/🟡) e **Pendências** (remova o resolvido, registre o que surgiu). Se nada mudou,
    apenas confirme que os docs continuam fiéis ao estado atual.
 2. Ao final da resposta, **pergunte se há algum bug específico mais urgente** a tratar.
-3. Se não houver, ofereça **uma sugestão de próximo passo natural** — derivada das *Etapas*
-   em andamento (🟡) ou das *Pendências* de maior prioridade no doc vivo do projeto ativo.
+3. Se não houver, ofereça **uma sugestão de próximo passo natural focada no projeto do
+   colaborador ativo** (ver o mapa acima) — derivada das *Etapas* em andamento (🟡) ou das
+   *Pendências* de maior prioridade no doc vivo daquele projeto. Assim o Edgar vê sugestões do
+   Dashboard GeoBrain, o Lucas da Área Quanti e o Gabriel do Rebrain.
 
 ## Corretor de Vocacionais
 

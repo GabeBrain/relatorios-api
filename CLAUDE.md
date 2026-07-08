@@ -15,6 +15,21 @@ do push**. Após `pull`/merge, leia as entradas novas para se situar. Convençã
 - Área Quanti → `docs/projetos/LIVE_area-quanti.md`
 - Rebrain → `docs/projetos/LIVE_rebrain.md`
 
+### Identificação do colaborador (foco por projeto)
+
+Descubra **quem é o colaborador ativo** rodando `git config user.name` e `git config user.email`
+e cruze com o mapa abaixo. O **projeto foco** dessa pessoa determina qual doc vivo priorizar nas
+sugestões de próximo passo.
+
+| Colaborador | git user.email | Projeto foco | Doc vivo |
+|---|---|---|---|
+| Gabriel | `gabriel.gomes@brain.srv.br` | Rebrain (plataforma) | `docs/projetos/LIVE_rebrain.md` |
+| Edgar | _(a confirmar)_ | Dashboard GeoBrain | `docs/projetos/LIVE_dashboard-geobrain.md` |
+| Lucas | _(a confirmar)_ | Área Quanti | `docs/projetos/LIVE_area-quanti.md` |
+
+Se a identidade não bater com ninguém, **pergunte em qual projeto a pessoa está focando**. O foco
+é um padrão, não uma trava: se pedirem algo de outro projeto, atenda normalmente.
+
 ### Ritual de saudação (revisão de status)
 
 Quando a interação começar com uma **saudação** ("oi", "olá", "bom dia", "boa tarde",
@@ -25,8 +40,10 @@ Quando a interação começar com uma **saudação** ("oi", "olá", "bom dia", "
    **Pendências** (remova o resolvido, registre o que surgiu). Se nada mudou, confirme que os
    docs seguem fiéis ao estado atual.
 2. Ao final da resposta, **pergunte se há algum bug específico mais urgente** a tratar.
-3. Se não houver, sugira **um próximo passo natural** — derivado das *Etapas* em andamento (🟡)
-   ou das *Pendências* prioritárias do doc vivo do projeto ativo.
+3. Se não houver, sugira **um próximo passo natural focado no projeto do colaborador ativo**
+   (ver mapa acima) — derivado das *Etapas* em andamento (🟡) ou das *Pendências* prioritárias
+   do doc vivo daquele projeto. Assim Edgar vê sugestões do GeoBrain, Lucas da Quanti e Gabriel
+   do Rebrain.
 
 ## Corretor de Vocacionais
 
