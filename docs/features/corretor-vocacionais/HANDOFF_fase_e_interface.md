@@ -1,8 +1,15 @@
 # HANDOFF — Fase E: Interface v2 do Corretor + máximo de tipos de erro reconhecíveis
 
 **Para a próxima sessão de trabalho (ops).** Este doc contém todo o contexto e as instruções
-para continuar sem depender da conversa anterior. **Nenhum código foi escrito ainda** — este é
-o plano aprovado pelo Gabriel em 09/jul/2026.
+para continuar sem depender da conversa anterior.
+
+> **PROGRESSO (09/jul/2026) — 1ª iteração implementada** em `/auditoria/v2`:
+> catálogo dos 21 tipos (`lib/error-catalog.ts`), motor DET em TS (`lib/audit/engine.ts`),
+> fixtures do piloto (`lib/audit/fixtures.ts`), 4 visualizações (`components/audit/FindingCard.tsx`)
+> e a página (`pages/AuditoriaV2Page.tsx`). Roda sobre fixtures reais, custo de IA R$ 0,
+> build/typecheck/lint limpos. **Falta** (próxima sessão): §5 persistência de thumbnails
+> (todas até o veredito → poda), §6 mapas nível 1-2, ingestão de PPTX/IR no browser (hoje as
+> tabelas vêm das fixtures), migração `slide_errors.type`, e overlay real com bounding box.
 
 ## 0. Contexto mínimo (ler antes)
 

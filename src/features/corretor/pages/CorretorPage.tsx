@@ -15,6 +15,7 @@ import {
   PanelLeftOpen,
   SkipForward,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
@@ -37,12 +38,14 @@ import { useArchiveStore, type ArchivedProject, type ArchivedSlide } from '../st
 import { downloadReport } from '../lib/report-generator';
 import { formatUSDTotal, formatUSD } from '../lib/cost-calculator';
 import type { ErrorType, Severity, Verdict } from '../store/analysis-store';
+import { errorLabel } from '../lib/error-catalog';
 import { cn } from '@/lib/utils';
 import NewProjectForm from '../components/NewProjectForm';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const ERROR_TYPE_LABELS: Record<ErrorType, string> = {
+// Legenda v1 (subconjunto). Rótulos completos vêm do catálogo via errorLabel().
+const ERROR_TYPE_LABELS: Partial<Record<ErrorType, string>> = {
   PERCENTAGE_SUM: 'Soma %',
   CITY_NAME: 'Nome Cidade',
   RADII: 'Raios',
@@ -134,7 +137,7 @@ function SlideErrorCard({ slide, projectId }: { slide: ArchivedSlide; projectId:
         <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
           {slide.errors.map((err, i) => (
             <Badge key={i} variant={SEVERITY_COLORS[err.severity]} className="text-[10px] h-5">
-              {ERROR_TYPE_LABELS[err.type]}
+              {errorLabel(err.type)}
             </Badge>
           ))}
         </div>
@@ -158,7 +161,7 @@ function SlideErrorCard({ slide, projectId }: { slide: ArchivedSlide; projectId:
                 <Badge variant={SEVERITY_COLORS[err.severity]} className="text-[10px] h-5">
                   {SEVERITY_LABELS[err.severity]}
                 </Badge>
-                <span className="text-xs font-medium flex-1">{ERROR_TYPE_LABELS[err.type]}</span>
+                <span className="text-xs font-medium flex-1">{errorLabel(err.type)}</span>
                 <VerdictButtons projectId={projectId} errorId={err.id} verdict={err.verdict} />
               </div>
               <p className="text-sm">{err.description}</p>
@@ -741,6 +744,13 @@ export default function CorretorPage() {
               <p className="text-sm text-muted-foreground mt-1">
                 Faça upload do estudo em PDF e configure os parâmetros de revisão.
               </p>
+              <Link
+                to="/auditoria/v2"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs rounded-md border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-primary hover:bg-primary/10 transition-colors"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                Ver a Auditoria v2 (demo com estudos reais, sem custo de IA)
+              </Link>
             </div>
             {loading ? (
               <div className="flex items-center gap-2 text-muted-foreground py-4">

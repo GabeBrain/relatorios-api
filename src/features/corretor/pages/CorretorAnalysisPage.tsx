@@ -23,6 +23,7 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useAnalysisStore, type SlideResult, type ErrorType } from '../store/analysis-store';
+import { errorLabel } from '../lib/error-catalog';
 import { useArchiveStore } from '../store/archive-store';
 import { analyzeSlide } from '../lib/openai-analyzer';
 import { formatUSD, formatUSDTotal } from '../lib/cost-calculator';
@@ -35,7 +36,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 
 const CONCURRENCY = 4;
 
-const ERROR_TYPE_LABELS: Record<ErrorType, string> = {
+// Legenda v1 (5 tipos usados na análise IA por slide). Rótulos completos vêm
+// do catálogo via errorLabel(); este mapa serve só à legenda lateral.
+const ERROR_TYPE_LABELS: Partial<Record<ErrorType, string>> = {
   PERCENTAGE_SUM: 'Soma %',
   CITY_NAME: 'Nome Cidade',
   RADII: 'Raios',
@@ -146,7 +149,7 @@ function SlideErrorCard({ slide }: { slide: SlideResult }) {
         <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
           {slide.errors.map((err, i) => (
             <Badge key={i} variant={SEVERITY_COLORS[err.severity]} className="text-[10px] h-5">
-              {ERROR_TYPE_LABELS[err.type]}
+              {errorLabel(err.type)}
             </Badge>
           ))}
         </div>
@@ -168,7 +171,7 @@ function SlideErrorCard({ slide }: { slide: SlideResult }) {
                 <Badge variant={SEVERITY_COLORS[err.severity]} className="text-[10px] h-5">
                   {SEVERITY_LABELS[err.severity]}
                 </Badge>
-                <span className="text-xs font-medium">{ERROR_TYPE_LABELS[err.type]}</span>
+                <span className="text-xs font-medium">{errorLabel(err.type)}</span>
               </div>
               <p className="text-sm">{err.description}</p>
               {err.location && (

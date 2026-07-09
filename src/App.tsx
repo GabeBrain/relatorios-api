@@ -16,6 +16,7 @@ import DashboardGeobrain from './pages/DashboardGeobrain.tsx';
 
 const CorretorPage = lazy(() => import('./features/corretor/pages/CorretorPage.tsx'));
 const CorretorAnalysisPage = lazy(() => import('./features/corretor/pages/CorretorAnalysisPage.tsx'));
+const AuditoriaV2Page = lazy(() => import('./features/corretor/pages/AuditoriaV2Page.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
                 <Route path="/auditoria" element={<CorretorPage />} />
                 <Route path="/auditoria/analise" element={<CorretorAnalysisPage />} />
+                <Route path="/auditoria/v2" element={<AuditoriaV2Page />} />
 
                 {/* Dash Geobrain */}
                 <Route path="/dash-geobrain" element={<DashboardGeobrain />} />

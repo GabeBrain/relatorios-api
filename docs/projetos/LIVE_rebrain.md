@@ -49,6 +49,19 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Fase E 1ª iteração: Auditoria v2 no app (`/auditoria/v2`) — Gabriel
+- **O quê:** interface v2 do corretor implementada e funcional sobre **fixtures reais do
+  piloto** (custo de IA R$ 0). Catálogo central de 21 tipos de erro (retrocompatível com a v1),
+  motor DET portado para TS (verificado: reproduz o piloto Python), 4 visualizações (tabela com
+  células marcadas, lado-a-lado, régua de faixas, texto/checklist), página com sumário +
+  cobertura dos 21 tipos + veredito por achado. Cada achado mostra seu modo (pleno/β/demo).
+- **Verificação:** `tsc --noEmit` ok, eslint ok, `npm run build` ok; engine rodado via tsx
+  reproduz os achados (s41/s121 fecham; faixas/janelas/binning disparam com as notas-gabarito).
+- **Falta (próxima sessão):** persistência de thumbnails (todas até veredito→poda), mapas
+  nível 1-2, ingestão de PPTX/IR no browser, migração `slide_errors.type`.
+- **Arquivos:** `src/features/corretor/lib/error-catalog.ts`, `lib/audit/*`,
+  `components/audit/FindingCard.tsx`, `pages/AuditoriaV2Page.tsx`, rota em `App.tsx`, LIVE v0.9.
+
 ### 2026-07-09 — Handoff da Fase E pronto (interface + 20 tipos de erro) — Gabriel
 - **O quê:** criado `HANDOFF_fase_e_interface.md` — plano completo para a próxima sessão
   implementar a interface v2 **sem depender desta conversa**: enum de 20 tipos com modos
@@ -153,7 +166,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6b | Corretor v2 — Fase B: calibração da seção canônica com a analista | 🔲 |
 | 6c | Corretor v2 — Fase C: **extração de visão dos números** presos em imagem (caminho crítico) + ata, com cache | 🟡 (piloto validado: 48 checagens OK; falta edge function + 28 imagens do gabarito) |
 | 6d | Corretor v2 — Fase D: catálogo de regras derivado das notas, validado contra o gabarito (recall/precisão) | 🔲 |
-| 6e | Corretor v2 — Fase E: interface v2 (20 tipos de erro na tela, 6 padrões de visualização, thumbnails até o veredito) | 🟡 (handoff pronto: `HANDOFF_fase_e_interface.md`; implementação na próxima sessão) |
+| 6e | Corretor v2 — Fase E: interface v2 (21 tipos na tela, visualizações por tipo, veredito) | 🟡 (1ª iteração no ar em `/auditoria/v2` com fixtures; falta persistência de thumbnails, mapas e ingestão PPTX) |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |

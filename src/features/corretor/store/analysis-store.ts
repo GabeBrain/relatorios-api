@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 
-export type ErrorType = 'PERCENTAGE_SUM' | 'CITY_NAME' | 'RADII' | 'SPELLING' | 'COHERENCE';
+// ErrorType agora vive no catálogo central (20 tipos). Reexportado aqui para
+// compatibilidade com o código v1 que importa de '../store/analysis-store'.
+export type { ErrorType } from '../lib/error-catalog';
 export type Severity = 'HIGH' | 'MEDIUM' | 'LOW';
 export type SlideStatus = 'pending' | 'processing' | 'done' | 'skipped' | 'error';
 export type AnalysisStatus = 'idle' | 'processing' | 'done' | 'cancelled';

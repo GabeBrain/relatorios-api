@@ -16,6 +16,27 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.9 — 2026-07-09 — Fase E: Auditoria v2 no app (demo com fixtures)
+
+Interface v2 implementada no app (`/auditoria/v2`), rodando sobre as **fixtures reais do
+piloto** — custo de IA **R$ 0**. Segue o `HANDOFF_fase_e_interface.md`.
+
+### O que entrou no código
+
+| Item | Arquivo | Detalhe |
+|---|---|---|
+| Catálogo central de erros | `src/features/corretor/lib/error-catalog.ts` | 21 tipos com metadados (modo PLENO/β/MOCK, padrão de visualização, motor). `ErrorType` da v1 agora vem daqui (retrocompatível). |
+| Motor DET em TS | `lib/audit/engine.ts` | Porte de `valida_complemento.py`/`crosscheck_piloto.py`: soma linha/coluna/total, faixas cruzadas, furo de bin. Verificado: s41 e s121 fecham (igual ao piloto Python). |
+| Fixtures do piloto | `lib/audit/fixtures.ts` | 22 achados (Itajaí 10 + Marka 12) a partir das tabelas reais + notas-gabarito. Reproduz as notas do analista via engine. |
+| Visualizações | `components/audit/FindingCard.tsx` | 4 renderizadores: tabela com células marcadas, comparação lado-a-lado, régua de faixas, texto/checklist. |
+| Página | `pages/AuditoriaV2Page.tsx` | Sumário + cobertura dos 21 tipos + achados por seção + veredito (bug/fp/não sei) por achado. |
+
+### Modos (honestidade na UI)
+
+Cada achado exibe seu modo: **PLENO** (regra completa), **β** (aproximação, validar), **demo/MOCK**
+(visualização com fixture, motor pendente). Os 21 tipos aparecem entre os 2 estudos.
+Build/typecheck/lint limpos.
+
 ## Versão 0.8 — 2026-07-09 — Decisão do gestor + inventário de regras
 
 - **Decisão (gestor da área):** tabelas em **imagem seguem como padrão** por enquanto — testes
