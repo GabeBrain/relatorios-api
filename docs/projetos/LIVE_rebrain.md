@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Auditoria v2 vira instrumento de validação (vereditos + export + recall) — Gabriel
+- **O quê:** a demo `/auditoria/v2` ganhou persistência de vereditos (localStorage), botão
+  **Exportar revisão (CSV)** com o dataset rotulado (achados + veredito + nota-gabarito) e um
+  painel de **calibração ao vivo** (recall vs gabarito + falsos positivos). Fecha o loop:
+  analista revê → dá veredito → exporta → medimos o corretor contra o trabalho humano.
+- **Verificação:** tsc/eslint/build ok; calibração checada via tsx (3/3 gabarito → recall 100%).
+- **Arquivos:** `src/features/corretor/lib/audit/session.ts`, `pages/AuditoriaV2Page.tsx`; LIVE v0.10.
+
 ### 2026-07-09 — Fase E 1ª iteração: Auditoria v2 no app (`/auditoria/v2`) — Gabriel
 - **O quê:** interface v2 do corretor implementada e funcional sobre **fixtures reais do
   piloto** (custo de IA R$ 0). Catálogo central de 21 tipos de erro (retrocompatível com a v1),

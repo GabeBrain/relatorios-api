@@ -16,6 +16,19 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.10 — 2026-07-09 — Auditoria v2 vira instrumento de validação
+
+A demo `/auditoria/v2` passou de "visualização" a **ferramenta de teste com o analista**:
+
+| Item | Arquivo | Detalhe |
+|---|---|---|
+| Persistência de vereditos | `lib/audit/session.ts` | Vereditos (bug/fp/não sei) salvos em localStorage — sessão sobrevive a reload. |
+| Export do dataset rotulado | `session.ts → exportReviewCsv` | Botão "Exportar revisão": CSV (estudo, seção, tipo, modo, motor, slide, título, checagem, **nota-gabarito**, veredito) — é o dado de recall/precisão. |
+| Calibração ao vivo | `AuditoriaV2Page` painel | Recall = confirmados/gabarito; conta falsos positivos. Verificado via tsx: 3/3 gabarito → recall 100%. |
+
+Fecha o loop da estratégia: o analista revê os achados, dá veredito, exporta → **conjunto
+rotulado** para medir o corretor contra o trabalho humano. Build/typecheck/lint limpos.
+
 ## Versão 0.9 — 2026-07-09 — Fase E: Auditoria v2 no app (demo com fixtures)
 
 Interface v2 implementada no app (`/auditoria/v2`), rodando sobre as **fixtures reais do

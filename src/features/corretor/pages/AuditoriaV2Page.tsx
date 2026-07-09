@@ -1,14 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, FlaskConical, AlertTriangle, CheckCircle2, Layers } from 'lucide-react';
+import { ArrowLeft, FlaskConical, AlertTriangle, CheckCircle2, Layers, Download, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   ERROR_CATALOG, MODE_META, SECTION_LABELS, errorLabel,
   type ErrorType, type AuditSection, type ErrorMode,
 } from '../lib/error-catalog';
 import { STUDIES } from '../lib/audit/fixtures';
-import type { Verdict } from '../lib/audit/model';
 import { FindingCard } from '../components/audit/FindingCard';
+import {
+  loadVerdicts, saveVerdicts, calibrationFor, exportReviewCsv, type VerdictMap,
+} from '../lib/audit/session';
 
 const SECTION_ORDER: AuditSection[] = [
   'ESTRUTURA', 'SOCIO', 'MERCADO', 'LACUNAS', 'ABSORCAO', 'ENTORNO', 'ATA', 'GLOBAL',
@@ -18,8 +20,12 @@ const ALL_TYPES = Object.keys(ERROR_CATALOG) as ErrorType[];
 export default function AuditoriaV2Page() {
   const navigate = useNavigate();
   const [studyId, setStudyId] = useState(STUDIES[0].id);
-  const [verdicts, setVerdicts] = useState<Record<string, Verdict>>({});
+  const [verdicts, setVerdicts] = useState<VerdictMap>(() => loadVerdicts());
   const study = STUDIES.find((s) => s.id === studyId)!;
+
+  useEffect(() => { saveVerdicts(verdicts); }, [verdicts]);
+
+  const calib = useMemo(() => calibrationFor(study.findings, verdicts), [study, verdicts]);
 
   const stats = useMemo(() => {
     const issues = study.findings.filter((f) => !f.ok).length;
@@ -41,8 +47,6 @@ export default function AuditoriaV2Page() {
     }
     return SECTION_ORDER.filter((s) => map.has(s)).map((s) => [s, map.get(s)!] as const);
   }, [study]);
-
-  const reviewed = Object.keys(verdicts).length;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -74,6 +78,13 @@ export default function AuditoriaV2Page() {
               {s.label}
             </button>
           ))}
+          <button
+            onClick={() => exportReviewCsv(study, verdicts)}
+            className="text-xs rounded-md px-2.5 py-1 border border-border bg-background hover:border-primary/50 transition-colors inline-flex items-center gap-1.5"
+            title="Exportar a revisão (achados + veredito + gabarito) em CSV"
+          >
+            <Download className="w-3.5 h-3.5" /> Exportar revisão
+          </button>
         </div>
       </header>
 
@@ -91,7 +102,34 @@ export default function AuditoriaV2Page() {
             <StatCard icon={<AlertTriangle className="w-4 h-4 text-amber-500" />} value={stats.issues} label="Achados a revisar" />
             <StatCard icon={<CheckCircle2 className="w-4 h-4 text-emerald-500" />} value={stats.checks} label="Checagens OK" />
             <StatCard icon={<Layers className="w-4 h-4 text-muted-foreground" />} value={stats.typesPresent.size} label="Tipos acionados" />
-            <StatCard icon={<CheckCircle2 className="w-4 h-4 text-primary" />} value={`${reviewed}/${study.findings.length}`} label="Com veredito" />
+            <StatCard icon={<CheckCircle2 className="w-4 h-4 text-primary" />} value={`${calib.reviewed}/${study.findings.length}`} label="Com veredito" />
+          </div>
+
+          {/* Calibração ao vivo — recall vs o gabarito das notas do analista */}
+          <div className="rounded-lg border border-border bg-card px-4 py-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-semibold">Calibração da rodada</h2>
+              <span className="text-[10px] text-muted-foreground">
+                gabarito = achados que reproduzem uma nota real do analista
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <CalibStat label="No gabarito" value={String(calib.gabaritoTotal)} hint="notas reais reproduzidas" />
+              <CalibStat label="Confirmados (bug)" value={String(calib.gabaritoConfirmed)} hint="do gabarito, marcados bug" tone="good" />
+              <CalibStat
+                label="Recall"
+                value={calib.recallPct === null ? '—' : `${calib.recallPct}%`}
+                hint="confirmados / gabarito"
+                tone={calib.recallPct !== null && calib.recallPct >= 80 ? 'good' : 'warn'}
+              />
+              <CalibStat label="Falsos positivos" value={String(calib.fpMarked)} hint="marcados fp na rodada" tone={calib.fpMarked > 0 ? 'warn' : undefined} />
+            </div>
+            {calib.reviewed < study.findings.length && (
+              <p className="text-[11px] text-muted-foreground mt-2">
+                Dê veredito em todos os achados para fechar recall/precisão. Faltam {study.findings.length - calib.reviewed}.
+              </p>
+            )}
           </div>
 
           {/* Distribuição por modo */}
@@ -153,6 +191,22 @@ function StatCard({ icon, value, label }: { icon: React.ReactNode; value: React.
     <div className="rounded-lg border border-border bg-card px-3 py-2.5">
       <div className="flex items-center gap-1.5">{icon}<span className="text-lg font-semibold tabular-nums">{value}</span></div>
       <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
+    </div>
+  );
+}
+
+function CalibStat({ label, value, hint, tone }: {
+  label: string; value: string; hint: string; tone?: 'good' | 'warn';
+}) {
+  return (
+    <div>
+      <p className="text-[11px] text-muted-foreground">{label}</p>
+      <p className={cn(
+        'text-base font-semibold tabular-nums',
+        tone === 'good' && 'text-emerald-600 dark:text-emerald-400',
+        tone === 'warn' && 'text-amber-600 dark:text-amber-400'
+      )}>{value}</p>
+      <p className="text-[10px] text-muted-foreground">{hint}</p>
     </div>
   );
 }
