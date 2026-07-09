@@ -37,6 +37,7 @@ export interface Filters {
   from: Date | null;
   to: Date | null;
   years: string[];
+  periods: string[]; // 'YYYY-MM'
   status: string[];
   cities: string[];
   neighborhoods: string[];

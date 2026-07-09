@@ -9,7 +9,7 @@ export function numCompact(v: number | null | undefined, digits = 1): string {
   const abs = Math.abs(v);
   if (abs >= 1e9) return `${(v / 1e9).toFixed(digits).replace('.', ',')} Bi`;
   if (abs >= 1e6) return `${(v / 1e6).toFixed(digits).replace('.', ',')} Mi`;
-  if (abs >= 1e3) return `${(v / 1e3).toFixed(digits).replace('.', ',')}k`;
+  if (abs >= 1e3) return `${(v / 1e3).toFixed(digits).replace('.', ',')} mil`;
   return new Intl.NumberFormat('pt-BR').format(Math.round(v));
 }
 
@@ -29,7 +29,7 @@ export function brlCompact(v: number | null | undefined): string {
   const abs = Math.abs(v);
   if (abs >= 1e9) return `R$ ${(v / 1e9).toFixed(2).replace('.', ',')} Bi`;
   if (abs >= 1e6) return `R$ ${(v / 1e6).toFixed(1).replace('.', ',')} Mi`;
-  if (abs >= 1e3) return `R$ ${(v / 1e3).toFixed(1).replace('.', ',')}k`;
+  if (abs >= 1e3) return `R$ ${(v / 1e3).toFixed(1).replace('.', ',')} mil`;
   return brl.format(v);
 }
 

@@ -30,6 +30,10 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Ajustes finos de UX e correção de filtros temporais — Edgar
+- **O quê:** (1) gráficos temporais agora exibem os 12 períodos mais recentes com scroll horizontal alinhado à direita; (2) rótulos em todos os pontos da linha de tempo de estoque nos combos; (3) eixos Y ocultos em todos os gráficos; (4) linha de referência `y=1` no IPC; (5) KPIs centralizados; (6) `k` → `mil` em `numCompact`/`brlCompact`; (7) mapa de oportunidades invertido (verde=alto, amarelo=baixo); (8) novo segmentador **Períodos (mês)** na sidebar; (9) filtros Ano/Período/Dormitório/Garagem/Tipologia agora se aplicam **dentro** das entradas de histórico via helper `historyMatches`/`lastHistoryMatching`, corrigindo o bug em que categorias fora do filtro apareciam no eixo X.
+- **Arquivos:** `Charts.tsx`, `Sidebar.tsx`, `KpiRow.tsx`, `OpportunityMap.tsx`, `dashboard.css`, `aggregate.ts`, `types.ts`, `src/lib/format.ts`, `src/pages/DashboardGeobrain.tsx`.
+
 ### 2026-07-08 — Base zero documentada — Gabriel
 - **O quê:** criação deste doc vivo consolidando o estado atual do Dashboard GeoBrain.
 - **Por quê:** estabelecer a linha de base de desenvolvimento para colaboração via git.

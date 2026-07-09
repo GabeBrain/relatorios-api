@@ -19,7 +19,7 @@ import { useAuthStore } from '@/store/auth-store';
 import '@/features/dashboard-geobrain/dashboard.css';
 
 const EMPTY_FILTERS: Filters = {
-  from: null, to: null, years: [], status: [], cities: [], neighborhoods: [],
+  from: null, to: null, years: [], periods: [], status: [], cities: [], neighborhoods: [],
   types: [], typologies: [], standards: [], bedrooms: [], garages: [], buildings: [],
 };
 

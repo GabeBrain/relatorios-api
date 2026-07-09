@@ -60,6 +60,7 @@ export function Sidebar({ open, onClose, filters, onFiltersChange, options, onRe
         </div>
         <div className="flex-1 space-y-3 overflow-y-auto p-3">
           <MultiSelect label="Ano" options={toOpts(options.years)} value={filters.years} onChange={(v) => set('years', v)} />
+          <MultiSelect label="Períodos (mês)" options={options.months} value={filters.periods} onChange={(v) => set('periods', v)} />
           <MultiSelect label="Situação" options={statusOpts} value={filters.status} onChange={(v) => set('status', v)} />
           <MultiSelect label="Tipologia" options={toOpts(options.typologies)} value={filters.typologies} onChange={(v) => set('typologies', v)} />
           <MultiSelect label="Padrão" options={toOpts(options.standards)} value={filters.standards} onChange={(v) => set('standards', v)} />

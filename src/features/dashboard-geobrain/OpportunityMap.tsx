@@ -4,12 +4,13 @@ import { pctRaw } from '@/lib/format';
 import type { OpportunityMatrix } from './aggregate';
 
 function heatClass(v: number): string {
+  // Invertido: verde = IVV alto (bom), amarelo = IVV baixo (fraco).
   if (v <= 0) return 'dg-heat-0';
-  if (v < 0.05) return 'dg-heat-1';
-  if (v < 0.10) return 'dg-heat-2';
+  if (v < 0.05) return 'dg-heat-5';
+  if (v < 0.10) return 'dg-heat-4';
   if (v < 0.15) return 'dg-heat-3';
-  if (v < 0.25) return 'dg-heat-4';
-  return 'dg-heat-5';
+  if (v < 0.25) return 'dg-heat-2';
+  return 'dg-heat-1';
 }
 
 export function OpportunityMap({ matrix }: { matrix: OpportunityMatrix }) {
@@ -25,7 +26,7 @@ export function OpportunityMap({ matrix }: { matrix: OpportunityMatrix }) {
       <header className="mb-2 flex items-center justify-between gap-2">
         <div>
           <h2 className="dg-title">Mapa de oportunidades</h2>
-          <p className="dg-subtle">IVV por bairro × dormitórios — verde (baixo) → amarelo (alto)</p>
+          <p className="dg-subtle">IVV por bairro × dormitórios — amarelo (baixo) → verde (alto)</p>
         </div>
         <div className="relative">
           <Search className="pointer-events-none absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[hsl(var(--dg-muted))]" />
