@@ -473,61 +473,12 @@ export default function TQCidValidacaoBase() {
   const token = useAuthStore((s) => s.getToken());
   const hasToken = !!token;
 
-  // Record<UF, city[]> — populado paginando /monitored-cities
-  const [citiesByUf, setCitiesByUf] = useState<Record<string, string[]> | null>(null);
-  const [selectedUf, setSelectedUf] = useState('');
-  const [selectedCityName, setSelectedCityName] = useState('');
-  const [cityOpen, setCityOpen] = useState(false);
+  // Escopo UF/cidade agora vem do padrão compartilhado GeoApiScopeEngine.
+  // Ver AGENTS.md / CLAUDE.md, seção "GeoApiScopeEngine".
+  const [scope, setScope] = useState<{ uf: string; city: string }>({ uf: '', city: '' });
+  const selectedUf = scope.uf;
+  const selectedCityName = scope.city;
   const [selectedTypes, setSelectedTypes] = useState<BuildingType[]>([...ALL_BUILDING_TYPES]);
-
-  const [running, setRunning] = useState(false);
-  const [phase, setPhase] = useState('');
-  const [error, setError] = useState('');
-  const [fetchProg, setFetchProg] = useState({ done: 0, total: 0, failed: 0, pct: 0 });
-  const abortRef = useRef<AbortController | null>(null);
-
-  const [rows, setRows] = useState<FlatRow[]>([]);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [outlierStats, setOutlierStats] = useState<OutlierStats[]>([]);
-  const [ran, setRan] = useState(false);
-
-  const [displayPct, setDisplayPct] = useState(0);
-  const displayPctRef = useRef(0);
-
-  // Carrega todas as páginas de /monitored-cities seguindo links.next
-  useEffect(() => {
-    if (!token) return;
-    let cancelled = false;
-
-    async function fetchAll() {
-      const byUf: Record<string, Set<string>> = {};
-      let nextUrl: string | null = `${BASE_URL}/monitored-cities`;
-
-      while (nextUrl) {
-        const res = await fetch(nextUrl, {
-          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-        });
-        if (!res.ok || cancelled) return;
-        const data = await res.json();
-        for (const item of (data.data ?? []) as MonitoredCity[]) {
-          const uf = String(item.state ?? '').toUpperCase();
-          const city = String(item.city ?? '');
-          if (!uf || !city) continue;
-          if (!byUf[uf]) byUf[uf] = new Set();
-          byUf[uf].add(city);
-        }
-        nextUrl = (data.links?.next as string | null) ?? null;
-      }
-
-      if (cancelled) return;
-      const result: Record<string, string[]> = {};
-      for (const [uf, set] of Object.entries(byUf)) result[uf] = [...set].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-      setCitiesByUf(result);
-    }
-
-    fetchAll().catch(() => {});
-    return () => { cancelled = true; };
-  }, [token]);
 
   // Interpolação suave do progresso da logo
   useEffect(() => {
