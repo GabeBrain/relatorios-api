@@ -1,4 +1,5 @@
 import type { ModelId } from '../store/analysis-store';
+export type { ModelId };
 
 export const MODEL_PRICING: Record<ModelId, { inputPer1M: number; outputPer1M: number; label: string }> = {
   'gpt-4o': {
