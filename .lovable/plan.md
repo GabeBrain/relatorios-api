@@ -1,116 +1,58 @@
-## Objetivo
+## Ajustes no Dashboard GeoBrain (revisão final)
 
-Redesenhar `/dash-geobrain` espelhando o layout do PDF (Joinville) com novo design system verde/amarelo, header (UF + Cidade + segmentador de tipo), sidebar retrátil, 8 KPIs, gráficos temporais com mini-KPIs de variação embutidos, rankings e Mapa de Oportunidades.
+### 1. Gráficos temporais — janela de 12 períodos, scroll para a esquerda
+- Em `Charts.tsx`, envolver cada `ResponsiveContainer` num wrapper `overflow-x-auto`.
+- Quando `data.length > 12`, aplicar largura interna proporcional (`(data.length/12)*100%`) para manter 12 rótulos visíveis por vez.
+- Via `useEffect` + `ref`, no primeiro render/mudança de dataset, setar `scrollLeft = scrollWidth` (períodos mais recentes visíveis; usuário rola para a esquerda para ver os antigos).
+- Aplica a: Evolução, IVV, VGV, Oferta combos, IPC.
 
-## 1. Design system (scoped ao dashboard)
+### 2. Rótulos nos gráficos de Oferta final (combos)
+- Em `OfertaComboChart`: adicionar `<LabelList>` na linha `tempoEstoque` (formato meses, ex.: `12m`) exibindo o valor em **todos** os pontos, não apenas alguns.
+- Manter o `LabelList` já existente sobre as barras de estoque.
 
-- Wrapper `.dash-geobrain` com CSS scoped em `src/features/dashboard-geobrain/dashboard.css`:
-  - `--dg-primary: #71984a`, `--dg-accent: #f4d83f`, `--dg-muted: #6e6e6e`, `--dg-bg`, `--dg-card`.
-  - `font-family: 'Archivo', Tahoma, sans-serif; font-size: 10px;` como base.
-- Carregar Archivo (400/600/700) via Google Fonts em `index.html`, fallback Tahoma.
-- Componentes internos usam essas variáveis — não altera tokens globais do app.
+### 3. Remover rótulos do eixo Y
+- Em todos os gráficos (`EvolucaoChart`, `IvvChart`, `VgvChart`, `OfertaComboChart` — os dois eixos, `IpcChart`): trocar `<YAxis .../>` por `<YAxis hide />`. Eixo continua ativo para escalar, mas sem ticks.
 
-## 2. Header
+### 4. IPC — linha de corte em 1
+- Em `IpcChart`: adicionar `<ReferenceLine y={1} stroke strokeDasharray="4 4">` e garantir domínio Y incluindo 1.
 
-```
-[UF ▼]  [Cidade ▼ obrigatório]   [Comercial | Horizontal | Vertical | Hotel]   [Ano | Trim | Mês]
-```
+### 5. KPIs centralizados
+- `.dg-kpi` em `dashboard.css`: `text-align:center`; label + valor + hint centralizados.
+- Ajustar `KpiRow.tsx` para layout coluna centralizada.
 
-- **UF**: seletor auxiliar apenas para filtrar a lista de cidades exibidas no combobox. Não é obrigatório e não é enviado à API.
-- **Cidade** (obrigatório): dispara o fetch `/building-with-history`.
-- **Building Type**: chips exclusivos (default Vertical). Aplica como filtro `types` client-side.
-- **Granularidade global** (Ano/Trim/Mês, default Trim): aplicada a todos os gráficos temporais.
+### 6. "k" → "mil"
+- `src/lib/format.ts`: `numCompact` e `currencyCompactNoPrefix` trocam sufixo `k` por ` mil`. `numCompactBR` já está correto.
 
-## 3. Sidebar retrátil (filtros)
+### 7. Mapa de oportunidades — inverter escala
+- `OpportunityMap.tsx`: **verde = IVV alto**, **amarelo = IVV baixo**. Inverter a função `heatClass` (buckets `dg-heat-*`) e ajustar legenda.
 
-Painel colapsável à esquerda com toggle fixo. Multi-selects com "Selecionar todos"/"Limpar":
+### 8. Segmentador de períodos — apenas na Sidebar, sempre em meses
+- **Não mexer no Header** nem no filtro "Ano" existente.
+- Adicionar em `Sidebar.tsx` um novo `MultiSelect` **"Períodos (mês)"** com opções no formato `jan/25`, `fev/25`… derivadas de todos os `HistoryEntry.periodDate` do dataset carregado (independente da granularidade escolhida no header).
+- Novo campo `periods: string[]` (chave = `YYYY-MM`) em `Filters` (`types.ts`) + `EMPTY_FILTERS`.
+- Opções expostas via `extractOptions(allBuildings).months = [{ value:'2025-01', label:'jan/25' }, …]` ordenadas desc.
 
-1. Ano — de `typologies_history[].period`.
-2. Situação — `status` (relabel `Ativo → Comercialização`).
-3. Tipologia — `type_of_typology`.
-4. Padrão — `standard`.
-5. Dormitórios — normalizado `0,1,2,3,4+`.
-6. Vagas — normalizado `0,1,2,3,4+`.
-7. Bairros.
-8. Empreendimentos.
+### 9. Aplicação correta dos filtros nas séries e agregações (bug de eixo X)
+Sintoma reportado: ao filtrar `Garagem = 4+` (ou `Ano`), aparece o valor `3` no eixo X / séries. Causa: `applyFilters` filtra buildings, mas gráficos e agregações iteram sobre **typologies/history dentro do building** sem aplicar os mesmos predicados. Um building com garagens 3 e 4+ é mantido inteiro, então tipologias com garagem 3 continuam contribuindo.
 
-## 4. Camada de dados
+Correções em `aggregate.ts`:
+- Introduzir helper `matchesTypology(typology, filters)` e `matchesHistoryEntry(entry, filters)` que testam:
+  - `bedrooms` (0/1/2/3/4+) → `typology.number_bedroom`
+  - `garages` (0/1/2/3/4+) → `typology.garage`
+  - `typologies` → `typology.type_of_typology`
+  - `years` → `entry.periodDate.getFullYear()`
+  - `periods` (novo, YYYY-MM) → `entry.periodDate`
+- Aplicar esses predicados em **todas** as funções que percorrem tipologias/histórico: `computeKpis`, `computeSeries`, `computeOfertaPorDormitorio`, `computeOfertaPorPadrao`, `rankBairros*`, `precoM2PorPadrao`, `precoMedioPorPadrao`, `computeOpportunityMap`, `computeIpcByStandard` (no numerador — o denominador `ALL` continua sobre o dataset bruto conforme DAX).
+- `applyFilters` continua fazendo filtragem em nível de building (status/cidade/bairro/type/standard/building_id) para reduzir o universo antes das agregações.
 
-- Fetch chaveado por `city` (UF interno derivado via `MUNICIPIOS_BR` só se a API exigir).
-- Segmentador de tipo e sidebar são filtros client-side reativos sobre o dataset já carregado.
-
-## 5. Formatação (`src/lib/format.ts`)
-
-Adicionar: `numCompactBR` (1,5 mil / 1,5 mi / 1,5 bi), `pct1`, `currencyCompactNoPrefix`. Títulos de gráficos monetários recebem sufixo "(valores em R$)".
-
-## 6. KPIs principais (8 cartões — linha superior)
-
-Reaproveita `computeKpis()`: Empreendimentos, Ativos, Oferta Lançada, VGV Lançado, Oferta Final, VGV Estoque, IVV, Tempo de Estoque.
-
-## 7. Mini-KPIs de variação por gráfico temporal
-
-Cada gráfico com eixo temporal (Evolução, IVV, VGV, Performance Comercial) recebe no seu **próprio header** uma barra de mini-cartões:
-
-```
-[Desde início] [10a] [5a] [3a] [1a]
-   +446%       +82%  +47% +33% +13,8%
-```
-
-- Métrica é a do próprio gráfico (unidades vendidas, IVV, VGV, IPC).
-- Cálculo: `(valor_último_período − valor_período_âncora) / valor_período_âncora`.
-- Âncoras derivadas do array de períodos já agregado — se não houver período correspondente, o cartão exibe `—`.
-
-## 8. Gráficos
-
-| Gráfico | Tipo | Cálculo |
-|---|---|---|
-| Evolução do mercado | Área (Lançadas × Vendidas) | Σ `qty` no período de lançamento vs Σ `sold_in_period` |
-| IVV | Linha | `sold / (stock_final + sold)` |
-| VGV lançado × VGV oferta final | Barras agrupadas | Σ `qty*release_price` vs Σ `vgv_stock` final |
-| **Oferta final por dormitórios** | **Combo (barra + linha)** | Barra = Σ `typology_stock` (último período) por dormitório; Linha = tempo de estoque (meses) |
-| **Oferta final por padrão** | **Combo (barra + linha)** | idem por `standard` |
-| Top 10 bairros — maior IVV | Barras h | IVV agregado por bairro |
-| Top 10 bairros — menor tempo estoque | Barras h | ordenado asc |
-| Top 10 bairros — menor preço m² | Barras h | média `price_private_area` |
-| Top 10 bairros — menor preço médio | Barras h | média `price` |
-| Preço m² por padrão | Barras h | média `price_private_area` por standard |
-| Preço médio por padrão | Barras h | média `price` por standard |
-| Índice de Performance Comercial (IPC) | Área empilhada por padrão | ver §9 |
-| Mapa de oportunidades | Heatmap tabela | matriz `bairro × dormitórios(1..4)` com IVV, gradiente verde→amarelo |
-
-### Rankings — funcionalidades adicionais
-- Busca por bairro embutida no header do card.
-- Toggle **Top 10 apenas** (on/off) — quando off, lista completa rolável.
-
-## 9. Índice de Performance Comercial (IPC) — DAX fiel
-
-Para cada building `b` (dentro dos filtros ativos) e cada período `p` da granularidade escolhida:
-
-```text
-PercVendas(b, p) = UnidadesVendidas(b, p) / UnidadesVendidas(TODOS_BUILDINGS_DO_UNIVERSO, p)
-PercEstoque(b, p) = EstoqueFinal(b, p)  / EstoqueFinal(TODOS_BUILDINGS_DO_UNIVERSO, p)
-
-IPC(b, p) = EstoqueFinal(b, p) > 0
-              ? PercVendas(b, p) / PercEstoque(b, p)
-              : null   // BLANK()
-```
-
-Semântica do `ALL(dados)` no DAX: o denominador ignora **todos** os filtros de linha (equivale ao dataset inteiro carregado da API, antes de qualquer filtro do sidebar/header). Portanto, `PercVendas`/`PercEstoque` são calculados sobre o dataset bruto — apenas a linha `b` respeita filtros para escolher o numerador.
-
-- No gráfico agrego por **padrão** (uma série por `standard`), calculando médias/somatórios de IPC dentro do grupo — replicando o comportamento do PDF (`Alto, Compacto, Econômico, Luxo, Médio, Standard, Super Luxo`).
-- Cores das séries seguem paleta scoped (verdes/amarelo/cinza).
-
-## 10. Arquivos
-
-**Alterar:** `src/pages/DashboardGeobrain.tsx`, `src/features/dashboard-geobrain/aggregate.ts` (novas agregações + IPC preservando dataset "ALL"), `Charts.tsx`, `FiltersPanel.tsx` (vira sidebar), `use-dashboard-data.ts` (chave city), `src/lib/format.ts`, `index.html`.
-
-**Criar:** `src/features/dashboard-geobrain/dashboard.css`, `Header.tsx` (UF+Cidade+chips+granularidade), `Sidebar.tsx`, `KpiRow.tsx`, `VariationStrip.tsx` (mini-KPIs de variação reutilizado por cada ChartCard), `Rankings.tsx`, `OpportunityMap.tsx`, `PerformanceIndex.tsx`.
-
-**Doc vivo:** atualizar `docs/projetos/LIVE_dashboard-geobrain.md`.
-
-## 11. Fora deste plano
-
-- Top 10 Construtoras (a API não expõe construtora hoje) — substituído por Top 10 Empreendimentos por VGV.
-- Persistência de estado de filtros na URL.
-
-Confirma que posso seguir?
+### Arquivos afetados
+- `src/features/dashboard-geobrain/Charts.tsx`
+- `src/features/dashboard-geobrain/KpiRow.tsx`
+- `src/features/dashboard-geobrain/Sidebar.tsx`
+- `src/features/dashboard-geobrain/OpportunityMap.tsx`
+- `src/features/dashboard-geobrain/dashboard.css`
+- `src/features/dashboard-geobrain/types.ts` (novo `periods`)
+- `src/features/dashboard-geobrain/aggregate.ts` (predicados typology/history + `months` em `extractOptions`)
+- `src/lib/format.ts`
+- `src/pages/DashboardGeobrain.tsx`
+- `docs/projetos/LIVE_dashboard-geobrain.md`
