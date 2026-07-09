@@ -351,6 +351,30 @@ export type Database = {
           },
         ]
       }
+      vision_cache: {
+        Row: {
+          created_at: string
+          input_tokens: number
+          output_tokens: number
+          payload: Json
+          sha1: string
+        }
+        Insert: {
+          created_at?: string
+          input_tokens?: number
+          output_tokens?: number
+          payload: Json
+          sha1: string
+        }
+        Update: {
+          created_at?: string
+          input_tokens?: number
+          output_tokens?: number
+          payload?: Json
+          sha1?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
