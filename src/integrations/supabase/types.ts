@@ -46,6 +46,7 @@ export type Database = {
           project_name: string
           radii: string
           report_text: string
+          reviewed_at: string | null
           saved_at: string
           slides_error: number
           slides_ok: number
@@ -64,6 +65,7 @@ export type Database = {
           project_name: string
           radii: string
           report_text?: string
+          reviewed_at?: string | null
           saved_at?: string
           slides_error?: number
           slides_ok?: number
@@ -82,6 +84,7 @@ export type Database = {
           project_name?: string
           radii?: string
           report_text?: string
+          reviewed_at?: string | null
           saved_at?: string
           slides_error?: number
           slides_ok?: number
