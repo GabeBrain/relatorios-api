@@ -1,135 +1,157 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, Building2, DollarSign, Layers, Package, Timer, TrendingUp, BarChart2, Loader2, AlertCircle } from 'lucide-react';
-import MUNICIPIOS_BR from '@/assets/municipios-br.json';
-import { brlCompact, intFmt, months, numCompact, pctRaw } from '@/lib/format';
+import { Activity, AlertCircle, Loader2, BarChart2 } from 'lucide-react';
+import { intFmt, numCompact, months as monthsFmt, currencyCompactNoPrefix, pctRaw } from '@/lib/format';
 import { useDashboardData } from '@/features/dashboard-geobrain/use-dashboard-data';
-import { applyFilters, computeKpis, computeSeries, extractOptions } from '@/features/dashboard-geobrain/aggregate';
-import { FiltersPanel } from '@/features/dashboard-geobrain/FiltersPanel';
-import { EvolucaoChart, IvvChart, VgvChart } from '@/features/dashboard-geobrain/Charts';
+import {
+  applyFilters, computeKpis, computeSeries, extractOptions,
+  computeOfertaPorDormitorio, computeOfertaPorPadrao,
+  rankBairrosPorIvv, rankBairrosPorTempoEstoque, rankBairrosPorPrecoM2, rankBairrosPorPrecoMedio,
+  precoM2PorPadrao, precoMedioPorPadrao, computeOpportunityMap, computeIpcByStandard,
+} from '@/features/dashboard-geobrain/aggregate';
+import { Header, type BuildingType } from '@/features/dashboard-geobrain/Header';
+import { Sidebar } from '@/features/dashboard-geobrain/Sidebar';
+import { KpiRow } from '@/features/dashboard-geobrain/KpiRow';
+import { EvolucaoChart, IvvChart, VgvChart, OfertaComboChart, IpcChart } from '@/features/dashboard-geobrain/Charts';
+import { RankingCard } from '@/features/dashboard-geobrain/Rankings';
+import { OpportunityMap } from '@/features/dashboard-geobrain/OpportunityMap';
 import type { Filters, Granularity } from '@/features/dashboard-geobrain/types';
 import { useAuthStore } from '@/store/auth-store';
-
-const UF_LIST = Object.keys(MUNICIPIOS_BR as Record<string, string[]>).sort();
+import '@/features/dashboard-geobrain/dashboard.css';
 
 const EMPTY_FILTERS: Filters = {
   from: null, to: null, years: [], status: [], cities: [], neighborhoods: [],
   types: [], typologies: [], standards: [], bedrooms: [], garages: [], buildings: [],
 };
 
-function Kpi({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: string; hint?: string }) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-      <div className="flex items-center justify-between text-muted-foreground">
-        <span className="text-[11px] font-semibold uppercase tracking-wider">{label}</span>
-        <span className="text-primary/70">{icon}</span>
-      </div>
-      <div className="mt-2 font-heading text-xl font-semibold text-foreground">{value}</div>
-      {hint && <div className="mt-0.5 text-[11px] text-muted-foreground">{hint}</div>}
-    </div>
-  );
-}
-
 export default function DashboardGeobrain() {
   const hasToken = useAuthStore((s) => s.hasValidToken());
   const [uf, setUf] = useState('');
+  const [city, setCity] = useState('');
+  const [buildingType, setBuildingType] = useState<BuildingType>('Vertical');
+  const [granularity, setGranularity] = useState<Granularity>('quarter');
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
-  const [gEvo, setGEvo] = useState<Granularity>('quarter');
-  const [gIvv, setGIvv] = useState<Granularity>('quarter');
-  const [gVgv, setGVgv] = useState<Granularity>('quarter');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { status, buildings, error, progress, load } = useDashboardData();
 
-  // fetch when uf changes (city é filtro local, não dispara refetch)
   useEffect(() => {
-    if (uf) load(uf);
-    else setFilters(EMPTY_FILTERS);
-  }, [uf, load]);
+    if (city) load(city);
+  }, [city, load]);
 
-  const options = useMemo(() => extractOptions(buildings ?? []), [buildings]);
-  const filtered = useMemo(() => applyFilters(buildings ?? [], filters), [buildings, filters]);
-  const kpis = useMemo(() => computeKpis(filtered, filters), [filtered, filters]);
-  const seriesEvo = useMemo(() => computeSeries(filtered, filters, gEvo), [filtered, filters, gEvo]);
-  const seriesIvv = useMemo(() => computeSeries(filtered, filters, gIvv), [filtered, filters, gIvv]);
-  const seriesVgv = useMemo(() => computeSeries(filtered, filters, gVgv), [filtered, filters, gVgv]);
+  const allBuildings = buildings ?? [];
+  const options = useMemo(() => extractOptions(allBuildings), [allBuildings]);
+
+  const filtersWithType = useMemo<Filters>(() => ({ ...filters, types: [buildingType] }), [filters, buildingType]);
+  const filtered = useMemo(() => applyFilters(allBuildings, filtersWithType), [allBuildings, filtersWithType]);
+
+  const kpis = useMemo(() => computeKpis(filtered, filtersWithType), [filtered, filtersWithType]);
+  const series = useMemo(() => computeSeries(filtered, filtersWithType, granularity), [filtered, filtersWithType, granularity]);
+
+  const ofertaDorm = useMemo(() => computeOfertaPorDormitorio(filtered, filtersWithType), [filtered, filtersWithType]);
+  const ofertaPadrao = useMemo(() => computeOfertaPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
+
+  const rankIvv = useMemo(() => rankBairrosPorIvv(filtered, filtersWithType), [filtered, filtersWithType]);
+  const rankTempo = useMemo(() => rankBairrosPorTempoEstoque(filtered, filtersWithType), [filtered, filtersWithType]);
+  const rankM2 = useMemo(() => rankBairrosPorPrecoM2(filtered, filtersWithType), [filtered, filtersWithType]);
+  const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType), [filtered, filtersWithType]);
+  const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
+  const precoMedioStd = useMemo(() => precoMedioPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
+  const oppMap = useMemo(() => computeOpportunityMap(filtered, filtersWithType), [filtered, filtersWithType]);
+  const ipc = useMemo(() => computeIpcByStandard(allBuildings, filtered, filtersWithType, granularity), [allBuildings, filtered, filtersWithType, granularity]);
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 p-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">Dashboard Geobrain</h1>
-          <p className="text-sm text-muted-foreground">
-            KPIs e séries temporais a partir de <code className="rounded bg-muted px-1">/building-with-history</code>.
-          </p>
-        </div>
-        <div className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary">
-          <Activity className="h-3 w-3" />
-          {status === 'ready'
-            ? `${intFmt(buildings?.length ?? 0)} empreendimentos carregados`
-            : status === 'loading'
-              ? 'Carregando dados…'
-              : 'Selecione UF para começar'}
-        </div>
-      </header>
-
-      {!hasToken && (
-        <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-700">
-          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-          <div>Faça login no bloco de autenticação do menu lateral para consultar a API Geobrain.</div>
-        </div>
-      )}
-
-      <FiltersPanel
-        uf={uf}
-        onUfChange={setUf}
-        ufOptions={UF_LIST}
+    <div className="dash-geobrain min-h-screen">
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
         filters={filters}
         onFiltersChange={setFilters}
         options={options}
         onReset={() => setFilters(EMPTY_FILTERS)}
-        disabled={status === 'loading'}
       />
 
-      {status === 'loading' && (
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-sm">
-          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-          <span>
-            Carregando… {progress?.buildingsFound ?? 0} empreendimentos ·{' '}
-            {progress?.lanesDone ?? 0}/{progress?.lanesTotal ?? 8} lanes ·{' '}
-            {progress?.pagesDone ?? 0} páginas
-          </span>
+      <Header
+        uf={uf}
+        onUfChange={setUf}
+        city={city}
+        onCityChange={setCity}
+        buildingType={buildingType}
+        onBuildingTypeChange={setBuildingType}
+        granularity={granularity}
+        onGranularityChange={setGranularity}
+        onOpenSidebar={() => setSidebarOpen(true)}
+      />
+
+      <main className="mx-auto max-w-[1600px] space-y-4 p-4">
+        {/* Status */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex items-center gap-1 rounded border border-[hsl(var(--dg-primary))] bg-[hsl(var(--dg-primary-soft))] px-2 py-1 text-[10px] font-medium text-[hsl(var(--dg-primary-strong))]">
+            <Activity className="h-3 w-3" />
+            {status === 'ready'
+              ? `${intFmt(filtered.length)} de ${intFmt(allBuildings.length)} empreendimentos`
+              : status === 'loading' ? 'Carregando dados…' : 'Escolha uma cidade e clique em Carregar'}
+          </div>
         </div>
-      )}
 
-      {status === 'error' && (
-        <div className="flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
-          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-          <div>{error || 'Erro ao consultar a API.'}</div>
+        {!hasToken && (
+          <div className="flex items-start gap-2 rounded border border-[hsl(var(--dg-accent))] bg-[hsl(var(--dg-accent-soft))] p-2 text-[10px]">
+            <AlertCircle className="mt-0.5 h-3 w-3 flex-shrink-0" />
+            <div>Faça login no bloco de autenticação para consultar a API Geobrain.</div>
+          </div>
+        )}
+
+        {status === 'loading' && (
+          <div className="flex items-center gap-2 rounded border border-[hsl(var(--dg-border))] bg-[hsl(var(--dg-card))] p-2 text-[10px] text-[hsl(var(--dg-muted))]">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Carregando… {progress?.buildingsFound ?? 0} empreendimentos · {progress?.lanesDone ?? 0}/{progress?.lanesTotal ?? 8} lanes · {progress?.pagesDone ?? 0} páginas
+          </div>
+        )}
+
+        {status === 'error' && (
+          <div className="flex items-start gap-2 rounded border border-red-400 bg-red-50 p-2 text-[10px] text-red-700">
+            <AlertCircle className="mt-0.5 h-3 w-3 flex-shrink-0" />
+            <div>{error || 'Erro ao consultar a API.'}</div>
+          </div>
+        )}
+
+        {/* KPIs */}
+        <KpiRow k={kpis} />
+
+        {/* Temporal charts */}
+        <EvolucaoChart data={series} />
+        <IvvChart data={series} />
+        <VgvChart data={series} />
+
+        {/* Combos */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <OfertaComboChart title="Oferta final por dormitórios" data={ofertaDorm} />
+          <OfertaComboChart title="Oferta final por padrão" data={ofertaPadrao} />
         </div>
-      )}
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
-        <Kpi icon={<Building2 className="h-4 w-4" />} label="Empreendimentos" value={intFmt(kpis.empreendimentos)} />
-        <Kpi icon={<Building2 className="h-4 w-4" />} label="Empreend. ativos" value={intFmt(kpis.empreendimentosAtivos)} />
-        <Kpi icon={<Layers className="h-4 w-4" />} label="Oferta lançada" value={numCompact(kpis.ofertaLancada, 0)} hint="unidades" />
-        <Kpi icon={<DollarSign className="h-4 w-4" />} label="VGV lançado" value={brlCompact(kpis.vgvLancado)} />
-        <Kpi icon={<Package className="h-4 w-4" />} label="Oferta final" value={numCompact(kpis.ofertaFinal, 0)} hint="estoque disponível" />
-        <Kpi icon={<DollarSign className="h-4 w-4" />} label="VGV estoque" value={brlCompact(kpis.vgvEstoque)} />
-        <Kpi icon={<TrendingUp className="h-4 w-4" />} label="IVV" value={pctRaw(kpis.ivv * 100)} />
-        <Kpi icon={<Timer className="h-4 w-4" />} label="Tempo de estoque" value={months(kpis.tempoEstoque)} />
-      </div>
+        {/* Rankings */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <RankingCard title="Top 10 bairros — maior IVV" rows={rankIvv} formatValue={(v) => pctRaw(v * 100, 1)} />
+          <RankingCard title="Top 10 bairros — menor tempo de estoque" rows={rankTempo} formatValue={(v) => monthsFmt(v)} />
+          <RankingCard title="Top 10 bairros — menor preço m²" rows={rankM2} formatValue={(v) => currencyCompactNoPrefix(v)} />
+          <RankingCard title="Top 10 bairros — menor preço médio" rows={rankMedio} formatValue={(v) => currencyCompactNoPrefix(v)} />
+        </div>
 
-      {/* Charts */}
-      <div className="space-y-6">
-        <EvolucaoChart data={seriesEvo} granularity={gEvo} onGranularityChange={setGEvo} />
-        <IvvChart data={seriesIvv} granularity={gIvv} onGranularityChange={setGIvv} />
-        <VgvChart data={seriesVgv} granularity={gVgv} onGranularityChange={setGVgv} />
-      </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <RankingCard title="Preço m² por padrão" rows={precoM2Std} formatValue={(v) => currencyCompactNoPrefix(v)} searchable={false} topDefault={false} />
+          <RankingCard title="Preço médio por padrão" rows={precoMedioStd} formatValue={(v) => currencyCompactNoPrefix(v)} searchable={false} topDefault={false} />
+        </div>
 
-      <footer className="flex items-center gap-2 text-[11px] text-muted-foreground">
-        <BarChart2 className="h-3 w-3" />
-        Fonte: API Geobrain <code>/building-with-history</code> — agregações client-side reproduzem os cálculos DAX do relatório original.
-      </footer>
+        {/* IPC */}
+        <IpcChart series={ipc.series} standards={ipc.standards} />
+
+        {/* Opportunity heatmap */}
+        <OpportunityMap matrix={oppMap} />
+
+        <footer className="flex items-center gap-2 pt-4 text-[9px] text-[hsl(var(--dg-muted))]">
+          <BarChart2 className="h-3 w-3" />
+          Fonte: API Geobrain <code>/building-with-history</code> — agregações client-side reproduzem os cálculos DAX do relatório original.
+        </footer>
+      </main>
     </div>
   );
 }

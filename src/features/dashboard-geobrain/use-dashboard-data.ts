@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchBuildings, type FetchProgress } from './api';
 import type { Building } from './types';
 import { useAuthStore } from '@/store/auth-store';
+import { ufFromCity } from './geo-utils';
 
 type Status = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -15,9 +16,15 @@ export function useDashboardData() {
   const lastKey = useRef<string>('');
 
   const load = useCallback(
-    async (uf: string, city?: string) => {
-      const key = `${uf}|${city ?? ''}`;
-      if (!uf) return;
+    async (city: string) => {
+      if (!city) return;
+      const uf = ufFromCity(city);
+      if (!uf) {
+        setError(`Não foi possível identificar a UF da cidade "${city}".`);
+        setStatus('error');
+        return;
+      }
+      const key = `${uf}|${city}`;
       if (!token) {
         setError('Sessão sem token — faça login no cabeçalho.');
         setStatus('error');
@@ -32,10 +39,7 @@ export function useDashboardData() {
       setProgress({ lanesTotal: 8, lanesDone: 0, pagesDone: 0, buildingsFound: 0 });
       try {
         const data = await fetchBuildings({
-          uf,
-          city,
-          token,
-          signal: controller.signal,
+          uf, city, token, signal: controller.signal,
           onProgress: (p) => setProgress({ ...p }),
         });
         if (lastKey.current !== key) return;
