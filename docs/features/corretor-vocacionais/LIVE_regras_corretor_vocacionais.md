@@ -16,6 +16,18 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.6 — 2026-07-09 — Fase C iniciada: piloto de visão validado
+
+Piloto da extração de números presos em imagem — **provado de ponta a ponta**
+(design completo em [`fase_c_visao.md`](./fase_c_visao.md)):
+
+| Item | Status | Detalhe |
+|---|---|---|
+| `scan_imagens.py` | `POC` (versionado) | Manifest de imagens por slide com sha1 (chave do cache): 487 refs → 334 únicas → **154 únicas em seções numéricas** → 28 no gabarito. |
+| `visao/piloto/*.complemento.json` | versionado | 2 extrações-piloto (Ita s41 renda, Mrk s121 lacunas) no schema `ir_complemento_visao/v0` — espelha `linhas_num` do IR. |
+| `valida_complemento.py` | `POC` (versionado) | Checagens DET sobre os complementos: **48 OK, 0 inconsistências**. Redundância linha×coluna×total **auto-valida a extração** (dígito errado quebra soma). |
+| Argumento econômico p/ analistas | documentado | Tabela nativa no PPT = 0 chamadas de visão para sempre + exatidão por construção; transição sugerida começando por lacunas/renda/absorção. Ver `fase_c_visao.md`. |
+
 ## Versão 0.5 — 2026-07-08 — Virada: notas = especificação + gabarito
 
 **Reinterpretação decisiva.** As notas em balão dos estudos ("Ajustar o erro da fórmula",

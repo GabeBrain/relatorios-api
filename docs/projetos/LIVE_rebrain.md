@@ -49,6 +49,18 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Corretor v2 Fase C: piloto de visão validado de ponta a ponta — Gabriel
+- **O quê:** pipeline da extração de números em imagem desenhado e pilotado. `scan_imagens.py`
+  gera o manifest com sha1 (cache): 487 refs → 334 únicas → **154 únicas em seções numéricas**.
+  2 extrações-piloto (Ita s41 renda; Mrk s121 lacunas — ambas de slides com nota-gabarito) no
+  schema `ir_complemento_visao/v0`, validadas por `valida_complemento.py`: **48 checagens DET
+  OK, 0 inconsistências**. Redundância linha×coluna×total auto-valida a extração.
+- **Argumento econômico documentado** (`fase_c_visao.md`) para o time de analistas migrar a
+  tabelas nativas no PPT: ~75–115 chamadas de visão/estudo → 0 para sempre, exatidão por
+  construção; transição gradual começando por lacunas/renda/absorção (mapas continuam imagem).
+- **Arquivos:** `docs/features/corretor-vocacionais/{scan_imagens.py, valida_complemento.py,
+  fase_c_visao.md, visao/piloto/*.json}`, LIVE do Corretor (v0.6).
+
 ### 2026-07-08 — Corretor v2: virada conceitual — notas = especificação + gabarito — Gabriel
 - **O quê:** reinterpretação das notas de revisão. Elas **não são bugs**: são as instruções do
   analista humano, que o corretor substitui — e não virão nos estudos reais. Passam a ser
@@ -109,7 +121,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6.0 | Corretor v2 — Fase 0: mineração da taxonomia das notas (catálogo + gabarito) | ✅ (`taxonomia_notas.md`) |
 | 6a | Corretor v2 — Fase A: regras DET sobre o IR dos estudos reais (custo zero) | ✅ (81 achados; `rules_ir.py` + `achados_fase_a.md`) |
 | 6b | Corretor v2 — Fase B: calibração da seção canônica com a analista | 🔲 |
-| 6c | Corretor v2 — Fase C: **extração de visão dos números** presos em imagem (caminho crítico) + ata, com cache | 🔲 |
+| 6c | Corretor v2 — Fase C: **extração de visão dos números** presos em imagem (caminho crítico) + ata, com cache | 🟡 (piloto validado: 48 checagens OK; falta edge function + 28 imagens do gabarito) |
 | 6d | Corretor v2 — Fase D: catálogo de regras derivado das notas, validado contra o gabarito (recall/precisão) | 🔲 |
 | 6e | Corretor v2 — Fase E: interface v2 (relatório por seção→tipo de erro→achado, custo estimado, execução por porção) | 🔲 |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
@@ -123,6 +135,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] Corretor v2: executar as fases A→E da estratégia de testes (ver `DESIGN_corretor_v2.md`) — próxima ação: Fase A (regras DET sobre o IR, custo zero) + gerar tabela de calibração da Fase B.
 - [ ] Corretor v2: calibrar dicionário de seção canônica com a analista (item 2 do plano; agora com os 2 estudos reais como base) — ver doc vivo do Corretor.
 - [ ] Alinhar com o time o formato dos artefatos por estudo: slides sempre em **PPTX** (não PDF) e ata sempre em **DOCX separado** (nunca print no slide 1). Vale a partir dos próximos estudos; os 2 atuais seguem com ata em imagem (Fase C).
+- [ ] **Gabriel → time de analistas:** propor tabelas nativas no PPT (em vez de prints), com o argumento econômico de `fase_c_visao.md` — começar por lacunas/renda/absorção, gradual; mapas continuam imagem.
 - [ ] Expandir o enum de tipos de erro (`analysis-store.ts`) para o catálogo da rubrica + tipos evidenciados pelas atas reais (`ATA_COVERAGE` etc.).
 - [ ] CID: retomar validação de base quando sair do standby.
 - [ ] Dívidas de segurança conhecidas — ver [`../architecture/SECURITY_NOTES.md`](../architecture/SECURITY_NOTES.md) (vulns npm, log por IP, `.env` versionado por design).
