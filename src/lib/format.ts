@@ -13,6 +13,17 @@ export function numCompact(v: number | null | undefined, digits = 1): string {
   return new Intl.NumberFormat('pt-BR').format(Math.round(v));
 }
 
+/** BR compact — "1,5 mil / 1,5 mi / 1,5 bi" — usado no dashboard. */
+export function numCompactBR(v: number | null | undefined, digits = 1): string {
+  if (v == null || !Number.isFinite(v)) return '—';
+  const abs = Math.abs(v);
+  const fmt = (n: number, d = digits) => n.toFixed(d).replace('.', ',');
+  if (abs >= 1e9) return `${fmt(v / 1e9)} bi`;
+  if (abs >= 1e6) return `${fmt(v / 1e6)} mi`;
+  if (abs >= 1e3) return `${fmt(v / 1e3)} mil`;
+  return new Intl.NumberFormat('pt-BR').format(Math.round(v));
+}
+
 export function brlCompact(v: number | null | undefined): string {
   if (v == null || !Number.isFinite(v)) return '—';
   const abs = Math.abs(v);
@@ -20,6 +31,12 @@ export function brlCompact(v: number | null | undefined): string {
   if (abs >= 1e6) return `R$ ${(v / 1e6).toFixed(1).replace('.', ',')} Mi`;
   if (abs >= 1e3) return `R$ ${(v / 1e3).toFixed(1).replace('.', ',')}k`;
   return brl.format(v);
+}
+
+/** Como brlCompact mas sem o prefixo "R$" — para eixos e labels compactos. */
+export function currencyCompactNoPrefix(v: number | null | undefined): string {
+  const s = brlCompact(v);
+  return s.replace(/^R\$\s*/, '');
 }
 
 export function intFmt(v: number | null | undefined): string {
@@ -35,6 +52,13 @@ export function pct(v: number | null | undefined, digits = 1): string {
 export function pctRaw(v: number | null | undefined, digits = 1): string {
   if (v == null || !Number.isFinite(v)) return '—';
   return `${v.toFixed(digits).replace('.', ',')}%`;
+}
+
+/** Percentual com 1 casa e sinal (+/-) — usado em cartões de variação. */
+export function pctSigned(v: number | null | undefined, digits = 1): string {
+  if (v == null || !Number.isFinite(v)) return '—';
+  const s = (v * 100).toFixed(digits).replace('.', ',');
+  return v > 0 ? `+${s}%` : `${s}%`;
 }
 
 export function m2(v: number | null | undefined, digits = 0): string {
@@ -55,8 +79,7 @@ export function ivvColorStyle(v: number | null | undefined): { background: strin
   if (v == null || !Number.isFinite(v)) {
     return { background: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' };
   }
-  const clamped = Math.max(0, Math.min(0.2, v)) / 0.2; // 0..1
-  // green (140) → yellow (55) → red (5)
+  const clamped = Math.max(0, Math.min(0.2, v)) / 0.2;
   const hue = 140 - clamped * 135;
   const light = 78 - clamped * 28;
   return {
