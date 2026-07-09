@@ -25,18 +25,21 @@ const EMPTY_FILTERS: Filters = {
 
 export default function DashboardGeobrain() {
   const hasToken = useAuthStore((s) => s.hasValidToken());
-  const [uf, setUf] = useState('');
-  const [city, setCity] = useState('');
+  const [scope, setScope] = useState<{ uf: string; city: string }>({ uf: '', city: '' });
   const [buildingType, setBuildingType] = useState<BuildingType>('Vertical');
   const [granularity, setGranularity] = useState<Granularity>('quarter');
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const { status, buildings, error, progress, load } = useDashboardData();
+  const { status, buildings, error, progress, load, reset } = useDashboardData();
 
   useEffect(() => {
-    if (city) load(city);
-  }, [city, load]);
+    if (scope.uf && scope.city) {
+      load({ uf: scope.uf, city: scope.city });
+    } else {
+      reset();
+    }
+  }, [scope.uf, scope.city, load, reset]);
 
   const allBuildings = buildings ?? [];
   const options = useMemo(() => extractOptions(allBuildings), [allBuildings]);
