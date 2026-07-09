@@ -38,6 +38,106 @@ export type Database = {
         }
         Relationships: []
       }
+      findings_v3: {
+        Row: {
+          created_at: string
+          detalhe: string
+          familia: string
+          id: string
+          origem: string
+          payload: Json | null
+          primeira_versao: number
+          resolvido_na_versao: number | null
+          rule_id: string
+          slide_ref: string
+          status: string
+          study_id: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          created_at?: string
+          detalhe?: string
+          familia: string
+          id?: string
+          origem?: string
+          payload?: Json | null
+          primeira_versao?: number
+          resolvido_na_versao?: number | null
+          rule_id: string
+          slide_ref: string
+          status?: string
+          study_id: string
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          created_at?: string
+          detalhe?: string
+          familia?: string
+          id?: string
+          origem?: string
+          payload?: Json | null
+          primeira_versao?: number
+          resolvido_na_versao?: number | null
+          rule_id?: string
+          slide_ref?: string
+          status?: string
+          study_id?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "findings_v3_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ia_passes: {
+        Row: {
+          created_at: string
+          custo_usd: number
+          escopo: string | null
+          id: string
+          input_tokens: number
+          output_tokens: number
+          study_id: string
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          custo_usd?: number
+          escopo?: string | null
+          id?: string
+          input_tokens?: number
+          output_tokens?: number
+          study_id: string
+          tipo: string
+        }
+        Update: {
+          created_at?: string
+          custo_usd?: number
+          escopo?: string | null
+          id?: string
+          input_tokens?: number
+          output_tokens?: number
+          study_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ia_passes_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           city_name: string
@@ -179,6 +279,74 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studies_v3: {
+        Row: {
+          cidade: string | null
+          concluded_at: string | null
+          created_at: string
+          custo_total: number
+          id: string
+          nome: string
+          status: string
+        }
+        Insert: {
+          cidade?: string | null
+          concluded_at?: string | null
+          created_at?: string
+          custo_total?: number
+          id?: string
+          nome: string
+          status?: string
+        }
+        Update: {
+          cidade?: string | null
+          concluded_at?: string | null
+          created_at?: string
+          custo_total?: number
+          id?: string
+          nome?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      study_versions: {
+        Row: {
+          arquivo: string | null
+          created_at: string
+          id: string
+          n: number
+          n_slides: number
+          sha1: string | null
+          study_id: string
+        }
+        Insert: {
+          arquivo?: string | null
+          created_at?: string
+          id?: string
+          n: number
+          n_slides?: number
+          sha1?: string | null
+          study_id: string
+        }
+        Update: {
+          arquivo?: string | null
+          created_at?: string
+          id?: string
+          n?: number
+          n_slides?: number
+          sha1?: string | null
+          study_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_versions_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
             referencedColumns: ["id"]
           },
         ]
