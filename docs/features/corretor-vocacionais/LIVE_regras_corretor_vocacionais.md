@@ -31,8 +31,8 @@ slides OK** ao concluir a revisão. UI (`CorretorPage`): thumbnail no card de er
 "Concluir revisão" + selo "Revisão concluída". Racional: auditar **falso negativo** (o corretor
 disse OK e tinha bug) — evidência que antes não guardávamos.
 
-> ⚠ Migration `20260709` precisa ser aplicada no Supabase. O fluxo de storage/DB foi verificado
-> por tsc/eslint/build; não foi exercido em runtime contra o Supabase nesta sessão.
+> ✅ Migration `20260709` **aplicada no Supabase em 2026-07-09** (Gabriel). Persistência de
+> thumbnails + poda na conclusão da revisão ativas em produção.
 
 ## Versão 0.11 — 2026-07-09 — Ingestão de IR no navegador (estudos reais)
 
