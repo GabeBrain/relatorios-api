@@ -23,6 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
 import MUNICIPIOS_BR from '@/assets/municipios-br.json';
+import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
 
 const UF_LIST = Object.keys(MUNICIPIOS_BR as Record<string, string[]>).sort();
 
