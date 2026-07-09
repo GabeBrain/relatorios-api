@@ -26,7 +26,7 @@ export function OpportunityMap({ matrix }: { matrix: OpportunityMatrix }) {
       <header className="mb-2 flex items-center justify-between gap-2">
         <div>
           <h2 className="dg-title">Mapa de oportunidades</h2>
-          <p className="dg-subtle">IVV por bairro × dormitórios — verde (baixo) → amarelo (alto)</p>
+          <p className="dg-subtle">IVV por bairro × dormitórios — amarelo (baixo) → verde (alto)</p>
         </div>
         <div className="relative">
           <Search className="pointer-events-none absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[hsl(var(--dg-muted))]" />
