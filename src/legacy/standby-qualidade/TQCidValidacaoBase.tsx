@@ -27,6 +27,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { useAuthStore } from '@/store/auth-store';
+import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
 import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
 
