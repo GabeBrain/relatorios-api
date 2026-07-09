@@ -6,9 +6,9 @@ import type { KPIValues } from './aggregate';
 function Kpi({ icon, label, value, hint }: { icon: ReactNode; label: string; value: string; hint?: string }) {
   return (
     <div className="dg-kpi">
-      <div className="flex items-center justify-between">
-        <span className="dg-kpi-label">{label}</span>
+      <div className="dg-kpi-label-row">
         <span className="text-[hsl(var(--dg-primary))]">{icon}</span>
+        <span className="dg-kpi-label">{label}</span>
       </div>
       <div className="dg-kpi-value">{value}</div>
       {hint && <div className="dg-kpi-hint">{hint}</div>}
