@@ -1,12 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, FlaskConical, AlertTriangle, CheckCircle2, Layers, Download, Target } from 'lucide-react';
+import { toast } from 'sonner';
+import { ArrowLeft, FlaskConical, AlertTriangle, CheckCircle2, Layers, Download, Target, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   ERROR_CATALOG, MODE_META, SECTION_LABELS, errorLabel,
   type ErrorType, type AuditSection, type ErrorMode,
 } from '../lib/error-catalog';
 import { STUDIES } from '../lib/audit/fixtures';
+import type { StudyFixture } from '../lib/audit/model';
+import { isIr } from '../lib/audit/ir';
+import { parseIrToStudy } from '../lib/audit/ir-rules';
 import { FindingCard } from '../components/audit/FindingCard';
 import {
   loadVerdicts, saveVerdicts, calibrationFor, exportReviewCsv, type VerdictMap,
@@ -19,11 +23,33 @@ const ALL_TYPES = Object.keys(ERROR_CATALOG) as ErrorType[];
 
 export default function AuditoriaV2Page() {
   const navigate = useNavigate();
+  const [loaded, setLoaded] = useState<StudyFixture[]>([]);
   const [studyId, setStudyId] = useState(STUDIES[0].id);
   const [verdicts, setVerdicts] = useState<VerdictMap>(() => loadVerdicts());
-  const study = STUDIES.find((s) => s.id === studyId)!;
+  const fileRef = useRef<HTMLInputElement>(null);
+  const allStudies = useMemo(() => [...STUDIES, ...loaded], [loaded]);
+  const study = allStudies.find((s) => s.id === studyId) ?? allStudies[0];
 
   useEffect(() => { saveVerdicts(verdicts); }, [verdicts]);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      e.target.value = '';
+      try {
+        const ir = JSON.parse(await file.text());
+        if (!isIr(ir)) throw new Error('Arquivo não parece um .ir.json (falta slides/n_slides).');
+        const parsed = parseIrToStudy(ir, file.name);
+        setLoaded((prev) => [...prev.filter((s) => s.id !== parsed.id), parsed]);
+        setStudyId(parsed.id);
+        toast.success(`Estudo carregado: ${parsed.label}`, {
+          description: `${parsed.slides} slides · ${parsed.findings.length} achados determinísticos (custo de IA: R$ 0)`,
+        });
+      } catch (err) {
+        toast.error('Falha ao ler o IR', { description: err instanceof Error ? err.message : String(err) });
+      }
+    }
+  }
 
   const calib = useMemo(() => calibrationFor(study.findings, verdicts), [study, verdicts]);
 
@@ -66,18 +92,27 @@ export default function AuditoriaV2Page() {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {STUDIES.map((s) => (
+          {allStudies.map((s) => (
             <button
               key={s.id}
               onClick={() => setStudyId(s.id)}
               className={cn(
-                'text-xs rounded-md px-2.5 py-1 border transition-colors',
-                s.id === studyId ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border hover:border-primary/50'
+                'text-xs rounded-md px-2.5 py-1 border transition-colors max-w-[220px] truncate',
+                s.id === study.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border hover:border-primary/50'
               )}
+              title={s.label}
             >
               {s.label}
             </button>
           ))}
+          <input ref={fileRef} type="file" accept=".json,application/json" className="hidden" onChange={handleUpload} />
+          <button
+            onClick={() => fileRef.current?.click()}
+            className="text-xs rounded-md px-2.5 py-1 border border-border bg-background hover:border-primary/50 transition-colors inline-flex items-center gap-1.5"
+            title="Carregar o .ir.json de um estudo real (gerado por ir_extractor.py)"
+          >
+            <Upload className="w-3.5 h-3.5" /> Carregar .ir.json
+          </button>
           <button
             onClick={() => exportReviewCsv(study, verdicts)}
             className="text-xs rounded-md px-2.5 py-1 border border-border bg-background hover:border-primary/50 transition-colors inline-flex items-center gap-1.5"
@@ -91,8 +126,14 @@ export default function AuditoriaV2Page() {
       {/* Faixa de demo / custo */}
       <div className="border-b bg-sky-500/5 px-6 py-2 flex items-center gap-2 text-xs text-muted-foreground">
         <FlaskConical className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-        Rodada sobre <strong className="font-medium text-foreground">fixtures reais do piloto</strong> (Fase C) —
-        custo de IA desta rodada: <strong className="font-medium text-foreground">R$ 0,00</strong>. Cada achado exibe seu modo (pleno / β / demo).
+        {study.type === 'IR carregado' ? (
+          <>Rodada sobre o <strong className="font-medium text-foreground">IR carregado</strong> (motor determinístico no navegador) —
+          custo de IA: <strong className="font-medium text-foreground">R$ 0,00</strong>.</>
+        ) : (
+          <>Rodada sobre <strong className="font-medium text-foreground">fixtures reais do piloto</strong> (Fase C) —
+          custo de IA: <strong className="font-medium text-foreground">R$ 0,00</strong>. Carregue um <code className="text-[11px]">.ir.json</code> para auditar outro estudo.</>
+        )}
+        {' '}Cada achado exibe seu modo (pleno / β / demo).
       </div>
 
       <div className="flex-1 overflow-y-auto">

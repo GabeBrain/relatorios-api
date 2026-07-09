@@ -16,6 +16,22 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.11 — 2026-07-09 — Ingestão de IR no navegador (estudos reais)
+
+A Auditoria v2 deixou de depender das fixtures: agora carrega o **`.ir.json` de qualquer
+estudo** (o mesmo artefato do `ir_extractor.py`) e roda o motor DET no browser.
+
+| Item | Arquivo | Detalhe |
+|---|---|---|
+| Tipos do IR | `lib/audit/ir.ts` | Espelho do schema `ir_version 1` + mapa seção canônica → seção de auditoria. |
+| Motor DET sobre o IR | `lib/audit/ir-rules.ts` | Porte TS do `rules_ir.py`: LEFTOVER_NOTE, SOURCE_MISSING, soma de tabelas nativas (ABSOLUTE_SUM), cobertura de seções, diagnóstico de números-em-imagem. |
+| Upload na UI | `AuditoriaV2Page` | Botão "Carregar .ir.json" → vira um estudo no seletor, com veredito e export próprios. |
+
+**Verificação decisiva:** o parser TS rodado sobre os 2 IR reais **reproduz a Fase A**
+(Itajaí 22 notas + 23 fonte; Marka 14 + 19) e o diagnóstico de números-em-imagem dispara (0
+tabelas numéricas). Se o estudo trouxer **tabelas nativas**, a soma determinística acende
+sozinha — a prova viva do argumento de `custos_visao_reais.md`. Build/typecheck/lint limpos.
+
 ## Versão 0.10 — 2026-07-09 — Auditoria v2 vira instrumento de validação
 
 A demo `/auditoria/v2` passou de "visualização" a **ferramenta de teste com o analista**:

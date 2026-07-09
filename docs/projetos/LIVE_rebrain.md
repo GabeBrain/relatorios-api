@@ -49,6 +49,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Auditoria v2: ingestão de IR real no navegador — Gabriel
+- **O quê:** a v2 agora carrega o `.ir.json` de qualquer estudo (botão "Carregar .ir.json") e
+  roda o motor DET no browser (`lib/audit/ir.ts` + `ir-rules.ts`, porte do `rules_ir.py`):
+  notas de edição, fonte ausente, soma de tabelas nativas, cobertura de seções, diagnóstico de
+  números-em-imagem. Estudo carregado entra no seletor com veredito/export próprios.
+- **Verificação:** parser TS sobre os 2 IR reais **reproduz a Fase A** (Itajaí 22+23; Marka
+  14+19); se houver tabela nativa, a soma DET acende sozinha. tsc/eslint/build ok.
+- **Arquivos:** `src/features/corretor/lib/audit/{ir.ts, ir-rules.ts}`, `pages/AuditoriaV2Page.tsx`; LIVE v0.11.
+
 ### 2026-07-09 — Auditoria v2 vira instrumento de validação (vereditos + export + recall) — Gabriel
 - **O quê:** a demo `/auditoria/v2` ganhou persistência de vereditos (localStorage), botão
   **Exportar revisão (CSV)** com o dataset rotulado (achados + veredito + nota-gabarito) e um
@@ -174,7 +183,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6b | Corretor v2 — Fase B: calibração da seção canônica com a analista | 🔲 |
 | 6c | Corretor v2 — Fase C: **extração de visão dos números** presos em imagem (caminho crítico) + ata, com cache | 🟡 (piloto validado: 48 checagens OK; falta edge function + 28 imagens do gabarito) |
 | 6d | Corretor v2 — Fase D: catálogo de regras derivado das notas, validado contra o gabarito (recall/precisão) | 🔲 |
-| 6e | Corretor v2 — Fase E: interface v2 (21 tipos na tela, visualizações por tipo, veredito) | 🟡 (1ª iteração no ar em `/auditoria/v2` com fixtures; falta persistência de thumbnails, mapas e ingestão PPTX) |
+| 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, ingestão de IR) | 🟡 (no ar em `/auditoria/v2`: fixtures + upload de `.ir.json` real + recall/export; falta persistência de thumbnails, mapas nível 1-2, TEMPORAL_WINDOW sobre IR, ingestão direta de PPTX) |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
