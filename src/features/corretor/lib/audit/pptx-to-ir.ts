@@ -158,7 +158,7 @@ export async function pptxToIr(
   } else if (input instanceof ArrayBuffer) {
     bytes = new Uint8Array(input);
   } else {
-    bytes = input;
+    bytes = input as Uint8Array;
   }
 
   // decompacta só os XMLs de slide/rels (ignora as imagens pesadas)
