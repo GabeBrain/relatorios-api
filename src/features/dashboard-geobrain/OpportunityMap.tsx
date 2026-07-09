@@ -4,12 +4,13 @@ import { pctRaw } from '@/lib/format';
 import type { OpportunityMatrix } from './aggregate';
 
 function heatClass(v: number): string {
+  // Invertido: verde = IVV alto (bom), amarelo = IVV baixo (fraco).
   if (v <= 0) return 'dg-heat-0';
-  if (v < 0.05) return 'dg-heat-1';
-  if (v < 0.10) return 'dg-heat-2';
+  if (v < 0.05) return 'dg-heat-5';
+  if (v < 0.10) return 'dg-heat-4';
   if (v < 0.15) return 'dg-heat-3';
-  if (v < 0.25) return 'dg-heat-4';
-  return 'dg-heat-5';
+  if (v < 0.25) return 'dg-heat-2';
+  return 'dg-heat-1';
 }
 
 export function OpportunityMap({ matrix }: { matrix: OpportunityMatrix }) {
