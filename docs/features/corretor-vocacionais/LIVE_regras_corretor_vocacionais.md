@@ -16,6 +16,20 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.14 — 2026-07-09 — v3.0: fluxo unificado no ar (`/corretor`)
+
+Primeira fatia da v3 (`DESIGN_corretor_v3.md`) implementada — o fluxo completo sem IA:
+
+| Item | Arquivo | Detalhe |
+|---|---|---|
+| Migration | `supabase/migrations/20260709100000_corretor_v3.sql` | `studies_v3`, `study_versions`, `findings_v3` (rule_id estável, status pendente/corrigido/ignorado, familia local/relacional, resolvido_na_versao). **⚠ Aplicar no Supabase.** |
+| Persistência | `lib/v3/db.ts` | criar estudo, listar/retomar sessões, status por achado, `recheck()` com diff por rule_id (sumiu→corrigido; persiste e estava corrigido→volta a pendente; novo→insere), concluir. |
+| Página | `pages/CorretorV3Page.tsx` (rota **`/corretor`**) | Rail de estudos (retomar sessão) → upload .pptx → triagem DET (R$0) → worklist (por slide + entre-slides) com status → barra de progresso rumo a zero → **Reconferir** (sobe versão corrigida, banner resolvidos/persistem/novos) → **Entregar** (só com 0 pendentes). |
+| Navegação | `AppLayout` | "Corretor (v3)" no menu; v1 renomeada "Auditoria (v1)" até a aposentadoria (v3.3). |
+
+Decisões desta rodada (Gabriel): rota `/corretor`; analista dispara IA livremente (v3.1+);
+calibração bug/fp segue camada separada (analista-calibradora) do status de correção.
+
 ## Versão 0.13 — 2026-07-09 — PPTX → IR no navegador (upload direto do estudo)
 
 O extrator saiu do Python e passou a rodar **no navegador**: o analista sobe o **`.pptx`**

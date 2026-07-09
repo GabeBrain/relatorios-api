@@ -199,7 +199,7 @@ function MapVizView({ viz }: { viz: MapViz }) {
   );
 }
 
-function VizSwitch({ finding }: { finding: Finding }) {
+export function VizSwitch({ finding }: { finding: Finding }) {
   const v = finding.viz;
   if (!v) return null;
   switch (v.kind) {

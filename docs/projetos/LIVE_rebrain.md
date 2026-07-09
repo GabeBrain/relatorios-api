@@ -49,6 +49,19 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Corretor v3.0 no ar em `/corretor` (fluxo completo, R$ 0) — Gabriel
+- **O quê:** primeira fatia da v3 implementada: rail de estudos (sessões retomáveis via
+  Supabase) → upload .pptx → triagem DET instantânea → worklist com status
+  pendente/corrigido/ignorado e progresso rumo a zero → **Reconferir** (sobe a versão
+  corrigida; diff por rule_id: resolvidos/persistem/novos; correção manual que não pegou
+  volta a pendente) → **Entregar** (só com 0 pendentes; selo "pronto p/ A&R").
+- **Decisões:** rota `/corretor`; IA liberada p/ analista (v3.1+); calibração bug/fp separada.
+- **⚠ Pendência:** aplicar a migration `20260709100000_corretor_v3.sql` no Supabase.
+- **Verificação:** tsc/eslint/build ok. Fluxo contra Supabase real não exercido nesta sessão
+  (depende da migration) — validar no navegador após aplicar.
+- **Arquivos:** `supabase/migrations/20260709100000_corretor_v3.sql`, `lib/v3/db.ts`,
+  `pages/CorretorV3Page.tsx`, `App.tsx`, `AppLayout.tsx`; LIVE v0.14.
+
 ### 2026-07-09 — Corretor v3: design da unificação (v1+v2 → um fluxo) — Gabriel
 - **O quê:** decidida a v3, que absorve v1 (IA/custo/persistência/arquivo) e v2 (PPTX→IR,
   motor DET, worklist) num fluxo único de 5 estágios: Triagem (DET, R$0) → Aprofundar (IA por
@@ -223,7 +236,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, PPTX→IR, mapas, thumbnails) | 🟡 (no ar: **upload de .pptx** + fixtures + recall/export + RADII/mapa + thumbnails c/ poda; falta gráficos no extrator, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
 | 6f | Corretor v2 — estratégia de testes do fluxo do analista | 🟡 (design ✅ + slice 1 worklist ✅; slices 2-4 absorvidos pela v3) |
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
-| 6h | **Corretor v3** — unificação v1+v2 num fluxo único (5 estágios) | 🔲 v3.0 esqueleto → v3.1 IA texto → v3.2 números das imagens (Fase C produtizada) → v3.3 mapas + aposentar v1 |
+| 6h | **Corretor v3** — unificação v1+v2 num fluxo único (5 estágios) | 🟡 **v3.0 ✅ no ar em `/corretor`** (migration a aplicar) → v3.1 IA texto 🔲 → v3.2 números das imagens 🔲 → v3.3 mapas + aposentar v1 🔲 |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
