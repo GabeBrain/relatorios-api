@@ -30,6 +30,12 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — GeoApiScopeEngine: motor compartilhado de escopo geográfico — Edgar
+- **O quê:** criado o padrão **GeoApiScopeEngine** (`src/features/shared/geo-api-scope-engine/`) — fetch paginado de `/public-api/monitored-cities`, cache por token, hook `useGeoApiScope` e componente `GeoApiScopeSelector` (UF + Combobox de cidades). Substitui a lista IBGE offline (`municipios-br.json`) pela lista real disponível no token. Dashboard GeoBrain, Relatórios Secovi e CID legado agora consomem o mesmo motor. Regra registrada em `AGENTS.md` e `CLAUDE.md` como padrão obrigatório para novas telas que dependam da API GeoBrain.
+- **Arquivos:** `src/features/shared/geo-api-scope-engine/{types.ts,fetch-monitored-cities.ts,use-geo-api-scope.ts,GeoApiScopeSelector.tsx,index.ts}`, `src/features/dashboard-geobrain/{Header.tsx,use-dashboard-data.ts}`, `src/pages/{DashboardGeobrain.tsx,TestesArquitetura.tsx}`, `src/legacy/standby-qualidade/TQCidValidacaoBase.tsx`, `AGENTS.md`, `CLAUDE.md`.
+
+
+
 ### 2026-07-09 — Ajustes finos de UX e correção de filtros temporais — Edgar
 - **O quê:** (1) gráficos temporais agora exibem os 12 períodos mais recentes com scroll horizontal alinhado à direita; (2) rótulos em todos os pontos da linha de tempo de estoque nos combos; (3) eixos Y ocultos em todos os gráficos; (4) linha de referência `y=1` no IPC; (5) KPIs centralizados; (6) `k` → `mil` em `numCompact`/`brlCompact`; (7) mapa de oportunidades invertido (verde=alto, amarelo=baixo); (8) novo segmentador **Períodos (mês)** na sidebar; (9) filtros Ano/Período/Dormitório/Garagem/Tipologia agora se aplicam **dentro** das entradas de histórico via helper `historyMatches`/`lastHistoryMatching`, corrigindo o bug em que categorias fora do filtro apareciam no eixo X.
 - **Arquivos:** `Charts.tsx`, `Sidebar.tsx`, `KpiRow.tsx`, `OpportunityMap.tsx`, `dashboard.css`, `aggregate.ts`, `types.ts`, `src/lib/format.ts`, `src/pages/DashboardGeobrain.tsx`.
