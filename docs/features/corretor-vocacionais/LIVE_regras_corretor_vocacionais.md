@@ -16,6 +16,20 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.16 — 2026-07-09 — v3.2: números das imagens (Fase C produtizada)
+
+O reconhecimento numérico a partir das imagens saiu do piloto manual e entrou no app:
+
+| Item | Arquivo | Detalhe |
+|---|---|---|
+| Edge de visão | `supabase/functions/analyze-table-image/` | 1 imagem → JSON `{tables:[{title,columns,rows,totals}]}`; números pt-BR convertidos; dígito ilegível = null (nunca inventa); legendas de mapa ignoradas. **Deploy:** `supabase functions deploy analyze-table-image`. |
+| `vision_cache` | migration `20260709120000` | sha1 da imagem → payload. Cada imagem é paga **1× para sempre** (compartilhado entre estudos/versões). **Aplicar.** |
+| Localizador | `lib/v3/table-images.ts` | Porte do `scan_imagens.py` p/ o navegador: rels→slides de seções numéricas, dims via header PNG/JPEG, heurística de tabela (15-500KB, ≥700px larg., aspecto ≥1.2), dedupe sha1. Verificado nos PPTX reais: **Marka 46 / Itajaí 32 candidatas** (inclui as do piloto: s41/s59/s60). |
+| Passe de visão | `lib/v3/ia-vision.ts` | cache-first → edge → **auto-validação** `checkTableSums` (linha×coluna×total; tolerância ±n/2) → achados `ABSOLUTE_SUM` (com aviso "pode ser dígito mal lido — confira na imagem") e `BINNING_RULE` (furo de faixa via cabeçalhos). |
+| Painel | `CorretorV3Page` | "Números das tabelas (imagem)": localiza candidatas, mostra quantas já estão no cache, custo estimado antes, progresso por imagem; achados com selo IA. |
+
+Custo estimado: ~R$ 0,02/img (mini) → estudo completo ~R$ 0,7–1,0 na 1ª vez, ~R$ 0 nas seguintes (cache).
+
 ## Versão 0.15 — 2026-07-09 — v3.1 (IA de texto) + navegação sem rail + SOURCE_MISSING off
 
 **Feedback do 1º teste do Gabriel aplicado:**

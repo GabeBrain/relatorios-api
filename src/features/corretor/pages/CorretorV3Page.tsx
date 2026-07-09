@@ -19,6 +19,8 @@ import { irToFindings } from '../lib/audit/ir-rules';
 import { VizSwitch } from '../components/audit/FindingCard';
 import { MODEL_PRICING, formatUSD, type ModelId } from '../lib/cost-calculator';
 import { estimateTextPass, runTextPass } from '../lib/v3/ia-text';
+import { findTableImages, type TableImageCandidate } from '../lib/v3/table-images';
+import { estimateVisionPass, runVisionPass, type VisionEstimate } from '../lib/v3/ia-vision';
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass,
@@ -205,6 +207,119 @@ function IaPanel({ study, ir, onNeedFile, onRan }: {
   );
 }
 
+// ─── Painel Números das tabelas-imagem (v3.2 — visão com cache) ──────────────
+
+function VisionPanel({ study, ir, bytes, onNeedFile, onRan }: {
+  study: StudyV3;
+  ir: Ir | null;
+  bytes: Uint8Array | null;
+  onNeedFile: () => void;
+  onRan: () => Promise<void>;
+}) {
+  const [model, setModel] = useState<ModelId>('gpt-4o-mini');
+  const [candidates, setCandidates] = useState<TableImageCandidate[] | null>(null);
+  const [estimate, setEstimate] = useState<VisionEstimate | null>(null);
+  const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState<[number, number] | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setCandidates(null);
+    setEstimate(null);
+    if (ir && bytes) {
+      findTableImages(bytes, ir)
+        .then(async (cands) => {
+          if (!active) return;
+          setCandidates(cands);
+          setEstimate(await estimateVisionPass(cands, model));
+        })
+        .catch(() => { if (active) setCandidates([]); });
+    }
+    return () => { active = false; };
+  }, [ir, bytes, model]);
+
+  async function run() {
+    if (!candidates?.length) return;
+    setRunning(true);
+    setProgress([0, candidates.length]);
+    try {
+      const res = await runVisionPass(candidates, model, (d, t) => setProgress([d, t]));
+      const inserted = await insertIaFindings(study.id, res.findings, 'IA_visao', study.lastVersion);
+      await registerIaPass(
+        study.id, 'visao_tabela',
+        `${candidates.length} imagens (${res.fromCache} do cache) · ${model}`,
+        res.costUsd, res.inputTokens, res.outputTokens
+      );
+      toast.success(`Extração concluída — ${formatUSD(res.costUsd)}`, {
+        description: `${res.tablesExtracted} tabela(s) extraída(s) · ${res.tablesVerified} auto-validadas · ${inserted} achado(s) novos · ${res.fromCache} imagens do cache`,
+      });
+      await onRan();
+    } catch (err) {
+      toast.error('Falha na extração de visão', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setRunning(false);
+      setProgress(null);
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-sky-500/30 bg-sky-500/5 px-4 py-3 space-y-2">
+      <div className="flex items-center gap-2">
+        <Sparkles className="w-4 h-4 text-sky-500" />
+        <h3 className="text-sm font-semibold">Aprofundar com IA — números das tabelas (imagem)</h3>
+        <span className="text-[10px] text-muted-foreground">somas · totais · faixas — cache por imagem (paga 1×)</span>
+      </div>
+      {!ir || !bytes ? (
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Selecione o .pptx da versão atual (v{study.lastVersion}) para localizar as tabelas em imagem.
+          </p>
+          <button
+            onClick={onNeedFile}
+            className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-sky-500/50 inline-flex items-center gap-1.5 shrink-0"
+          >
+            <FileUp className="w-3.5 h-3.5" /> Selecionar .pptx
+          </button>
+        </div>
+      ) : candidates === null ? (
+        <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Localizando imagens de tabela…
+        </p>
+      ) : candidates.length === 0 ? (
+        <p className="text-xs text-muted-foreground">Nenhuma imagem candidata a tabela numérica nas seções Socio/Mercado/Lacunas/Absorção.</p>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={model}
+            onChange={(e) => setModel(e.target.value as ModelId)}
+            disabled={running}
+            className="text-xs rounded-md border border-border bg-background px-2 py-1.5"
+          >
+            {(Object.keys(MODEL_PRICING) as ModelId[]).map((m) => (
+              <option key={m} value={m}>{MODEL_PRICING[m].label}</option>
+            ))}
+          </select>
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <DollarSign className="w-3 h-3" />
+            {candidates.length} imagem(ns)
+            {estimate && estimate.cached > 0 && <> · {estimate.cached} já no cache</>}
+            {estimate && <> · custo estimado <strong className="text-foreground">{formatUSD(estimate.costUsd)}</strong></>}
+          </span>
+          <button
+            onClick={run}
+            disabled={running}
+            className="text-xs rounded-md px-3 py-1.5 bg-sky-600 text-white hover:bg-sky-700 inline-flex items-center gap-1.5 disabled:opacity-60"
+          >
+            {running
+              ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> {progress ? `${progress[0]}/${progress[1]}` : 'extraindo…'}</>
+              : <><Sparkles className="w-3.5 h-3.5" /> Extrair números</>}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function CorretorV3Page() {
@@ -218,11 +333,12 @@ export default function CorretorV3Page() {
   const newRef = useRef<HTMLInputElement>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
   const iaFileRef = useRef<HTMLInputElement>(null);
-  // IR em memória por estudo (não persiste; usado p/ passes de IA e recheck)
-  const irCache = useRef<Map<string, Ir>>(new Map());
+  // IR + bytes do .pptx em memória por estudo (não persiste; usado p/ passes de IA)
+  const irCache = useRef<Map<string, { ir: Ir; bytes: Uint8Array }>>(new Map());
 
   const selected = studies.find((s) => s.id === selectedId) ?? null;
-  const selectedIr = selected ? (irCache.current.get(selected.id) ?? null) : null;
+  const selectedIr = selected ? (irCache.current.get(selected.id)?.ir ?? null) : null;
+  const selectedBytes = selected ? (irCache.current.get(selected.id)?.bytes ?? null) : null;
 
   const refreshList = useCallback(async () => {
     setLoadingList(true);
@@ -243,14 +359,16 @@ export default function CorretorV3Page() {
     e.target.value = '';
     setBusy('upload');
     try {
-      const ir = await pptxToIr(file);
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const ir = await pptxToIr(bytes, file.name);
       const findings = irToFindings(ir).filter((f) => !f.ok);
       const id = await createStudy(
         file.name.replace(/\.pptx$/i, ''),
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name },
         findings
       );
-      irCache.current.set(id, ir);
+      irCache.current.clear();
+      irCache.current.set(id, { ir, bytes });
       toast.success('Triagem concluída (R$ 0)', {
         description: `${ir.n_slides} slides · ${findings.length} pendências determinísticas`,
       });
@@ -269,7 +387,8 @@ export default function CorretorV3Page() {
     e.target.value = '';
     setBusy('recheck');
     try {
-      const ir = await pptxToIr(file);
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const ir = await pptxToIr(bytes, file.name);
       const findings = irToFindings(ir).filter((f) => !f.ok);
       const diff = await recheck(
         selected.id,
@@ -277,7 +396,8 @@ export default function CorretorV3Page() {
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name },
         findings
       );
-      irCache.current.set(selected.id, ir);
+      irCache.current.clear();
+      irCache.current.set(selected.id, { ir, bytes });
       setLastDiff(diff);
       toast.success(`Reconferido (v${selected.lastVersion + 1})`, {
         description: `${diff.resolved.length} resolvido(s) · ${diff.persistent.length} persistem · ${diff.fresh.length} novo(s)`,
@@ -298,14 +418,16 @@ export default function CorretorV3Page() {
     e.target.value = '';
     setBusy('iafile');
     try {
-      const ir = await pptxToIr(file);
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const ir = await pptxToIr(bytes, file.name);
       if (selected.lastSha1 && ir.sha1 && ir.sha1 !== selected.lastSha1) {
         toast.error('Arquivo diferente da versão atual', {
           description: `Este .pptx não corresponde à v${selected.lastVersion}. Se você corrigiu o arquivo, use "Reconferir" primeiro.`,
         });
         return;
       }
-      irCache.current.set(selected.id, ir);
+      irCache.current.clear();
+      irCache.current.set(selected.id, { ir, bytes });
       setStudies((prev) => [...prev]); // re-render
       toast.success('Arquivo carregado — IA habilitada');
     } catch (err) {
@@ -506,12 +628,21 @@ export default function CorretorV3Page() {
           {/* Aprofundar com IA (v3.1) */}
           <input ref={iaFileRef} type="file" accept=".pptx" className="hidden" onChange={handleIaFile} />
           {selected.status !== 'pronto' && (
-            <IaPanel
-              study={selected}
-              ir={selectedIr}
-              onNeedFile={() => iaFileRef.current?.click()}
-              onRan={async () => { setItems(await loadFindings(selected.id)); await refreshList(); }}
-            />
+            <>
+              <IaPanel
+                study={selected}
+                ir={selectedIr}
+                onNeedFile={() => iaFileRef.current?.click()}
+                onRan={async () => { setItems(await loadFindings(selected.id)); await refreshList(); }}
+              />
+              <VisionPanel
+                study={selected}
+                ir={selectedIr}
+                bytes={selectedBytes}
+                onNeedFile={() => iaFileRef.current?.click()}
+                onRan={async () => { setItems(await loadFindings(selected.id)); await refreshList(); }}
+              />
+            </>
           )}
 
           {loadingStudy ? (
