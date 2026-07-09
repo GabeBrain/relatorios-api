@@ -49,6 +49,18 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Corretor v3: design da unificação (v1+v2 → um fluxo) — Gabriel
+- **O quê:** decidida a v3, que absorve v1 (IA/custo/persistência/arquivo) e v2 (PPTX→IR,
+  motor DET, worklist) num fluxo único de 5 estágios: Triagem (DET, R$0) → Aprofundar (IA por
+  demanda com orçamento: texto-batch + visão cirúrgica) → Corrigir (worklist) → Reconferir
+  (re-upload/diff) → Entregar (0 pendentes = pronto p/ A&R). Decisões: **só PPTX**, IA por
+  demanda, **Supabase desde o início** (schema `*_v3`), **v3 substitui v1**.
+- **Insight:** com o IR entregando o texto, ortografia/cidade/coerência viram IA de TEXTO
+  (~10× mais barata) e a visão fica só para tabelas-imagem/mapas (mídia do zip, sem render).
+- **Status Fase C registrado:** pilotada e validada; extração numérica automática ainda NÃO
+  está no app — produtiza na v3.2 (edge + vision_cache).
+- **Arquivos:** `docs/features/corretor-vocacionais/DESIGN_corretor_v3.md`.
+
 ### 2026-07-09 — PPTX → IR no navegador (upload direto do estudo na v2) — Gabriel
 - **O quê:** extrator portado do Python para TS (`lib/audit/pptx-to-ir.ts`, zip via `fflate` +
   `DOMParser`). A Auditoria v2 agora aceita o **`.pptx` padrão do estudo** (além do `.ir.json`):
@@ -209,8 +221,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6c | Corretor v2 — Fase C: **extração de visão dos números** presos em imagem (caminho crítico) + ata, com cache | 🟡 (piloto validado: 48 checagens OK; falta edge function + 28 imagens do gabarito) |
 | 6d | Corretor v2 — Fase D: catálogo de regras derivado das notas, validado contra o gabarito (recall/precisão) | 🔲 |
 | 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, PPTX→IR, mapas, thumbnails) | 🟡 (no ar: **upload de .pptx** + fixtures + recall/export + RADII/mapa + thumbnails c/ poda; falta gráficos no extrator, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
-| 6f | Corretor v2 — estratégia de testes do fluxo do analista (melhor que "avaliar arquivo todo") | 🔲 (próxima frente) |
-| 6g | Corretor v2 — repensar a interface de ponta a ponta (aba de projetos → comunicação de erros) | 🔲 (próxima frente) |
+| 6f | Corretor v2 — estratégia de testes do fluxo do analista | 🟡 (design ✅ + slice 1 worklist ✅; slices 2-4 absorvidos pela v3) |
+| 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
+| 6h | **Corretor v3** — unificação v1+v2 num fluxo único (5 estágios) | 🔲 v3.0 esqueleto → v3.1 IA texto → v3.2 números das imagens (Fase C produtizada) → v3.3 mapas + aposentar v1 |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
