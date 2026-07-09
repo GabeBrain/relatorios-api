@@ -49,6 +49,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Handoff da Fase E pronto (interface + 20 tipos de erro) — Gabriel
+- **O quê:** criado `HANDOFF_fase_e_interface.md` — plano completo para a próxima sessão
+  implementar a interface v2 **sem depender desta conversa**: enum de 20 tipos com modos
+  PLENO/β(degradado)/mock, 6 padrões de visualização por tipo de erro, persistência de
+  thumbnails "todas até o veredito, depois poda", mapas/raios em 3 níveis (DET textual →
+  visão pontual β → MAP_CHART_MISMATCH), ordem de implementação e critério de pronto
+  (analista vê os 20 tipos na tela com fixtures reais do piloto, sem custo de IA novo).
+  **Sem código ainda — só o plano.**
+- **Arquivos:** `docs/features/corretor-vocacionais/HANDOFF_fase_e_interface.md`.
+
 ### 2026-07-09 — Decisão do gestor: imagem é o padrão; foco vira UI — Gabriel
 - **O quê:** gestor orientou seguir os testes **com tabelas em imagem** (padrão por enquanto).
   Médio prazo: conversas com a área de elaboração (tabelas nativas ou, alternativa, pré-análise
@@ -143,7 +153,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6b | Corretor v2 — Fase B: calibração da seção canônica com a analista | 🔲 |
 | 6c | Corretor v2 — Fase C: **extração de visão dos números** presos em imagem (caminho crítico) + ata, com cache | 🟡 (piloto validado: 48 checagens OK; falta edge function + 28 imagens do gabarito) |
 | 6d | Corretor v2 — Fase D: catálogo de regras derivado das notas, validado contra o gabarito (recall/precisão) | 🔲 |
-| 6e | Corretor v2 — Fase E: interface v2 (relatório por seção→tipo de erro→achado, custo estimado, execução por porção) | 🔲 |
+| 6e | Corretor v2 — Fase E: interface v2 (20 tipos de erro na tela, 6 padrões de visualização, thumbnails até o veredito) | 🟡 (handoff pronto: `HANDOFF_fase_e_interface.md`; implementação na próxima sessão) |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
