@@ -502,8 +502,6 @@ export default function TQCidValidacaoBase() {
     return () => clearInterval(id);
   }, [fetchProg.pct, running]);
 
-  const availableUfs = citiesByUf ? Object.keys(citiesByUf).sort() : [];
-  const availableCities = (citiesByUf && selectedUf) ? (citiesByUf[selectedUf] ?? []) : [];
   const canRun = !!selectedUf && !!selectedCityName && selectedTypes.length > 0;
 
   function toggleType(t: BuildingType) {
