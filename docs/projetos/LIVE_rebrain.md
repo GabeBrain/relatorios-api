@@ -49,6 +49,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Decisão do gestor: imagem é o padrão; foco vira UI — Gabriel
+- **O quê:** gestor orientou seguir os testes **com tabelas em imagem** (padrão por enquanto).
+  Médio prazo: conversas com a área de elaboração (tabelas nativas ou, alternativa, pré-análise
+  dos **Excels de trabalho** antes dos prints). Próximos passos focam **aparência do app e
+  visualização de erros (Fase E)**. Criado o inventário completo de regras em linguagem
+  natural (`regras_em_linguagem_natural.md`): 24 regras + 11 bases de conhecimento.
+- **Arquivos:** `docs/features/corretor-vocacionais/regras_em_linguagem_natural.md`,
+  LIVE do Corretor (v0.8).
+
 ### 2026-07-09 — Corretor v2: piloto reproduz as notas da analista + custos em R$ — Gabriel
 - **O quê:** piloto expandido para 6 complementos (pares cruzados). `crosscheck_piloto.py`
   **reproduziu as notas da analista a partir dos números crus**: faixa de renda divergente
@@ -146,7 +155,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] Corretor v2: executar as fases A→E da estratégia de testes (ver `DESIGN_corretor_v2.md`) — próxima ação: Fase A (regras DET sobre o IR, custo zero) + gerar tabela de calibração da Fase B.
 - [ ] Corretor v2: calibrar dicionário de seção canônica com a analista (item 2 do plano; agora com os 2 estudos reais como base) — ver doc vivo do Corretor.
 - [ ] Alinhar com o time o formato dos artefatos por estudo: slides sempre em **PPTX** (não PDF) e ata sempre em **DOCX separado** (nunca print no slide 1). Vale a partir dos próximos estudos; os 2 atuais seguem com ata em imagem (Fase C).
-- [ ] **Gabriel → time de analistas:** propor tabelas nativas no PPT (em vez de prints), com o argumento econômico de `fase_c_visao.md` — começar por lacunas/renda/absorção, gradual; mapas continuam imagem.
+- [ ] **Gabriel → time de analistas (médio prazo, semanas):** propor tabelas nativas no PPT com os argumentos de `fase_c_visao.md`/`custos_visao_reais.md`; **plano B**: pré-análise dos Excels de trabalho (origem dos prints) — bater os números direto na fonte antes da colagem no PPT. Decisão do gestor (09/jul): até lá, **imagem é o padrão**.
+- [ ] Fase E (foco atual): reorganizar a interface do corretor — relatório por seção→tipo de erro→achado, visualização de erros sobre a thumbnail, custo estimado antes de rodar IA.
 - [ ] Expandir o enum de tipos de erro (`analysis-store.ts`) para o catálogo da rubrica + tipos evidenciados pelas atas reais (`ATA_COVERAGE` etc.).
 - [ ] CID: retomar validação de base quando sair do standby.
 - [ ] Dívidas de segurança conhecidas — ver [`../architecture/SECURITY_NOTES.md`](../architecture/SECURITY_NOTES.md) (vulns npm, log por IP, `.env` versionado por design).

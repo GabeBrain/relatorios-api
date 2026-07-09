@@ -16,6 +16,18 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.8 — 2026-07-09 — Decisão do gestor + inventário de regras
+
+- **Decisão (gestor da área):** tabelas em **imagem seguem como padrão** por enquanto — testes
+  avançam sobre esse formato. Médio prazo (semanas): conversas com a área de elaboração sobre
+  tabelas nativas; alternativa a explorar depois: **pré-análise dos Excels de trabalho**
+  (antes dos prints), batendo os números direto na origem.
+- **Inventário completo de regras em linguagem natural:**
+  [`regras_em_linguagem_natural.md`](./regras_em_linguagem_natural.md) — 24 regras (6 RUNTIME
+  no app v1, 8 POC validadas em script, 10 planejadas) + as 11 bases de conhecimento que as
+  sustentam (3 pendentes: fórmula de projeção, fonte IBGE, extração de atas).
+- **Próximo foco:** aparência do app de correção e visualização de erros (Fase E).
+
 ## Versão 0.7 — 2026-07-09 — Piloto expandido: notas reproduzidas + custos em R$
 
 Piloto expandido para **6 complementos** (pares de validação cruzada). Resultado central:
