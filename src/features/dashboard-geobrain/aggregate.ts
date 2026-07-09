@@ -38,6 +38,30 @@ function inRange(d: Date, from: Date | null, to: Date | null): boolean {
   return true;
 }
 
+function monthKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/** Filtro dos períodos históricos por Ano (release) e Períodos (mês YYYY-MM). */
+function historyMatches(h: HistoryEntry, f: Filters): boolean {
+  if (!inRange(h.periodDate, f.from, f.to)) return false;
+  if (f.years.length && !f.years.includes(String(h.periodDate.getFullYear()))) return false;
+  if (f.periods.length && !f.periods.includes(monthKey(h.periodDate))) return false;
+  return true;
+}
+
+/** Última entrada de histórico respeitando f.to E os filtros temporais (years/periods) — se houver. */
+function lastHistoryMatching(t: Typology, f: Filters): HistoryEntry | null {
+  let last: HistoryEntry | null = null;
+  for (const h of t.history) {
+    if (f.to && h.periodDate > f.to) continue;
+    if (f.years.length && !f.years.includes(String(h.periodDate.getFullYear()))) continue;
+    if (f.periods.length && !f.periods.includes(monthKey(h.periodDate))) continue;
+    if (!last || h.periodDate > last.periodDate) last = h;
+  }
+  return last;
+}
+
 export interface KPIValues {
   empreendimentos: number;
   empreendimentosAtivos: number;
