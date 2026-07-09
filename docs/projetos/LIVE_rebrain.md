@@ -197,7 +197,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6b | Corretor v2 — Fase B: calibração da seção canônica com a analista | 🔲 |
 | 6c | Corretor v2 — Fase C: **extração de visão dos números** presos em imagem (caminho crítico) + ata, com cache | 🟡 (piloto validado: 48 checagens OK; falta edge function + 28 imagens do gabarito) |
 | 6d | Corretor v2 — Fase D: catálogo de regras derivado das notas, validado contra o gabarito (recall/precisão) | 🔲 |
-| 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, ingestão de IR) | 🟡 (no ar em `/auditoria/v2`: fixtures + upload de `.ir.json` real + recall/export; falta persistência de thumbnails, mapas nível 1-2, TEMPORAL_WINDOW sobre IR, ingestão direta de PPTX) |
+| 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, IR, mapas, thumbnails) | 🟡 (no ar: fixtures + upload `.ir.json` + recall/export + RADII/mapa + persistência de thumbnails c/ poda; falta aplicar migration 20260709, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR, ingestão direta de PPTX) |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
