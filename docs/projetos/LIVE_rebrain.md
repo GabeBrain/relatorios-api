@@ -49,6 +49,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — PPTX → IR no navegador (upload direto do estudo na v2) — Gabriel
+- **O quê:** extrator portado do Python para TS (`lib/audit/pptx-to-ir.ts`, zip via `fflate` +
+  `DOMParser`). A Auditoria v2 agora aceita o **`.pptx` padrão do estudo** (além do `.ir.json`):
+  o IR é gerado no navegador, sem servidor, custo zero. Gráficos ficam p/ 2ª rodada.
+- **Verificação:** IR do TS **idêntico ao do `ir_extractor.py`** nos 2 estudos reais (slides,
+  tabelas, notas de edição, fontes e distribuição de seções batem exatamente). tsc/eslint/build ok.
+- **Próximas frentes (a pedido do Gabriel):** (1) estratégia de testes reproduzindo o fluxo de
+  trabalho do analista na plataforma (melhor que "avaliar o arquivo todo"); (2) repensar a
+  interface do Corretor de ponta a ponta (2ª aba lateral de projetos → forma de comunicar erros).
+- **Arquivos:** `lib/audit/pptx-to-ir.ts`, `pages/AuditoriaV2Page.tsx`, `package.json` (fflate); LIVE v0.13.
+
 ### 2026-07-09 — Mapas/raios (nível 1) + persistência de thumbnails — Gabriel
 - **Item 1 (mapas/raios):** regra `RADII` DET sobre o IR (raio estranho ao conjunto canônico;
   subconjuntos passam) + padrão de visualização "mapa" (chips esperado×detectado). No IR real:
@@ -197,7 +208,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6b | Corretor v2 — Fase B: calibração da seção canônica com a analista | 🔲 |
 | 6c | Corretor v2 — Fase C: **extração de visão dos números** presos em imagem (caminho crítico) + ata, com cache | 🟡 (piloto validado: 48 checagens OK; falta edge function + 28 imagens do gabarito) |
 | 6d | Corretor v2 — Fase D: catálogo de regras derivado das notas, validado contra o gabarito (recall/precisão) | 🔲 |
-| 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, IR, mapas, thumbnails) | 🟡 (no ar: fixtures + upload `.ir.json` + recall/export + RADII/mapa + persistência de thumbnails c/ poda — migration 20260709 **aplicada**; falta ingestão direta de PPTX, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
+| 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, PPTX→IR, mapas, thumbnails) | 🟡 (no ar: **upload de .pptx** + fixtures + recall/export + RADII/mapa + thumbnails c/ poda; falta gráficos no extrator, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
+| 6f | Corretor v2 — estratégia de testes do fluxo do analista (melhor que "avaliar arquivo todo") | 🔲 (próxima frente) |
+| 6g | Corretor v2 — repensar a interface de ponta a ponta (aba de projetos → comunicação de erros) | 🔲 (próxima frente) |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |

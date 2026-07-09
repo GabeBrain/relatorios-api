@@ -16,6 +16,22 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.13 — 2026-07-09 — PPTX → IR no navegador (upload direto do estudo)
+
+O extrator saiu do Python e passou a rodar **no navegador**: o analista sobe o **`.pptx`**
+padrão na Auditoria v2 e o IR é gerado na hora, sem servidor e sem custo.
+
+| Item | Arquivo | Detalhe |
+|---|---|---|
+| Extrator TS | `lib/audit/pptx-to-ir.ts` | Porte fiel do `ir_extractor.py`: zip via `fflate` (decompacta só os XMLs de slide), XML via `DOMParser`. Texto por shape, seção canônica, tabelas (números pt-BR), fontes, notas de edição, imagens, flag resposta-múltipla. Gráficos ficam para a 2ª rodada. |
+| Upload | `AuditoriaV2Page` | Botão "Carregar estudo (.pptx)" aceita `.pptx` **e** `.ir.json`; extração no cliente. |
+| Dep | `fflate` | Lib de zip (~8 KB). |
+
+**Verificação decisiva:** o extrator TS produz IR **idêntico ao Python** nos 2 estudos reais —
+slides (143/165), tabelas (47/36), notas de edição (22/14), fontes (58/77) e a **distribuição
+completa de seções** batem exatamente. tsc/eslint/build limpos. Responde à dúvida do Gabriel:
+agora sobe-se o PowerPoint direto, o `.ir.json` deixa de ser pré-requisito.
+
 ## Versão 0.12 — 2026-07-09 — Mapas/raios (nível 1) + persistência de thumbnails
 
 **Item 1 — Mapas/raios (nível 1 DET).** Regra `RADII` sobre o IR (`ir-rules.ts`): raios

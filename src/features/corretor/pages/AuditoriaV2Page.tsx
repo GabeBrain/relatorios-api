@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft, FlaskConical, AlertTriangle, CheckCircle2, Layers, Download, Target, Upload } from 'lucide-react';
+import { ArrowLeft, FlaskConical, AlertTriangle, CheckCircle2, Layers, Download, Target, Upload, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   ERROR_CATALOG, MODE_META, SECTION_LABELS, errorLabel,
@@ -11,6 +11,7 @@ import { STUDIES } from '../lib/audit/fixtures';
 import type { StudyFixture } from '../lib/audit/model';
 import { isIr } from '../lib/audit/ir';
 import { parseIrToStudy } from '../lib/audit/ir-rules';
+import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import { FindingCard } from '../components/audit/FindingCard';
 import {
   loadVerdicts, saveVerdicts, calibrationFor, exportReviewCsv, type VerdictMap,
@@ -27,6 +28,7 @@ export default function AuditoriaV2Page() {
   const [studyId, setStudyId] = useState(STUDIES[0].id);
   const [verdicts, setVerdicts] = useState<VerdictMap>(() => loadVerdicts());
   const fileRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
   const allStudies = useMemo(() => [...STUDIES, ...loaded], [loaded]);
   const study = allStudies.find((s) => s.id === studyId) ?? allStudies[0];
 
@@ -34,20 +36,23 @@ export default function AuditoriaV2Page() {
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file) {
-      e.target.value = '';
-      try {
-        const ir = JSON.parse(await file.text());
-        if (!isIr(ir)) throw new Error('Arquivo não parece um .ir.json (falta slides/n_slides).');
-        const parsed = parseIrToStudy(ir, file.name);
-        setLoaded((prev) => [...prev.filter((s) => s.id !== parsed.id), parsed]);
-        setStudyId(parsed.id);
-        toast.success(`Estudo carregado: ${parsed.label}`, {
-          description: `${parsed.slides} slides · ${parsed.findings.length} achados determinísticos (custo de IA: R$ 0)`,
-        });
-      } catch (err) {
-        toast.error('Falha ao ler o IR', { description: err instanceof Error ? err.message : String(err) });
-      }
+    if (!file) return;
+    e.target.value = '';
+    const isPptx = /\.pptx$/i.test(file.name);
+    setImporting(true);
+    try {
+      const ir = isPptx ? await pptxToIr(file) : JSON.parse(await file.text());
+      if (!isIr(ir)) throw new Error('Arquivo inválido: esperado um .pptx de estudo ou um .ir.json.');
+      const parsed = parseIrToStudy(ir, file.name);
+      setLoaded((prev) => [...prev.filter((s) => s.id !== parsed.id), parsed]);
+      setStudyId(parsed.id);
+      toast.success(`Estudo carregado: ${parsed.label}`, {
+        description: `${parsed.slides} slides · ${parsed.findings.length} achados determinísticos (custo de IA: R$ 0)`,
+      });
+    } catch (err) {
+      toast.error('Falha ao importar o estudo', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setImporting(false);
     }
   }
 
@@ -105,13 +110,15 @@ export default function AuditoriaV2Page() {
               {s.label}
             </button>
           ))}
-          <input ref={fileRef} type="file" accept=".json,application/json" className="hidden" onChange={handleUpload} />
+          <input ref={fileRef} type="file" accept=".pptx,.json,application/json" className="hidden" onChange={handleUpload} />
           <button
             onClick={() => fileRef.current?.click()}
-            className="text-xs rounded-md px-2.5 py-1 border border-border bg-background hover:border-primary/50 transition-colors inline-flex items-center gap-1.5"
-            title="Carregar o .ir.json de um estudo real (gerado por ir_extractor.py)"
+            disabled={importing}
+            className="text-xs rounded-md px-2.5 py-1 border border-border bg-background hover:border-primary/50 transition-colors inline-flex items-center gap-1.5 disabled:opacity-60"
+            title="Carregar um estudo em .pptx (extração no navegador) ou um .ir.json já gerado"
           >
-            <Upload className="w-3.5 h-3.5" /> Carregar .ir.json
+            {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            {importing ? 'Extraindo…' : 'Carregar estudo (.pptx)'}
           </button>
           <button
             onClick={() => exportReviewCsv(study, verdicts)}
@@ -131,7 +138,7 @@ export default function AuditoriaV2Page() {
           custo de IA: <strong className="font-medium text-foreground">R$ 0,00</strong>.</>
         ) : (
           <>Rodada sobre <strong className="font-medium text-foreground">fixtures reais do piloto</strong> (Fase C) —
-          custo de IA: <strong className="font-medium text-foreground">R$ 0,00</strong>. Carregue um <code className="text-[11px]">.ir.json</code> para auditar outro estudo.</>
+          custo de IA: <strong className="font-medium text-foreground">R$ 0,00</strong>. Carregue um <code className="text-[11px]">.pptx</code> para auditar outro estudo.</>
         )}
         {' '}Cada achado exibe seu modo (pleno / β / demo).
       </div>
