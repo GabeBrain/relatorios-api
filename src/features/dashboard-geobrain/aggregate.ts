@@ -80,17 +80,13 @@ export function computeKpis(buildings: Building[], f: Filters): KPIValues {
     for (const t of b.typologies) {
       ofertaLancada += t.qty;
       vgvLancado += t.qty * (t.release_price ?? 0);
-      let last: HistoryEntry | null = null;
-      for (const h of t.history) {
-        if (f.to && h.periodDate > f.to) continue;
-        if (!last || h.periodDate > last.periodDate) last = h;
-      }
+      const last = lastHistoryMatching(t, f);
       if (last) {
         ofertaFinal += last.typology_stock;
         vgvEstoque += last.vgv_stock ?? 0;
       }
       for (const h of t.history) {
-        if (!inRange(h.periodDate, f.from, f.to)) continue;
+        if (!historyMatches(h, f)) continue;
         vendasLiquidas += h.sold_in_period;
       }
     }
@@ -148,7 +144,7 @@ export function computeSeries(buildings: Building[], f: Filters, g: Granularity)
         map.set(key, p);
       }
       for (const h of t.history) {
-        if (!inRange(h.periodDate, f.from, f.to)) continue;
+        if (!historyMatches(h, f)) continue;
         const key = periodKey(h.periodDate, g);
         const p = map.get(key) ?? emptyPoint(key, periodSortKey(h.periodDate, g));
         p.vendaLiquida += h.sold_in_period;
@@ -195,14 +191,10 @@ export function computeOfertaPorDormitorio(buildings: Building[], f: Filters): C
   for (const b of buildings) {
     for (const t of b.typologies) {
       const k = bedroomBucket(t.number_bedroom);
-      let last: HistoryEntry | null = null;
-      for (const h of t.history) {
-        if (f.to && h.periodDate > f.to) continue;
-        if (!last || h.periodDate > last.periodDate) last = h;
-      }
+      const last = lastHistoryMatching(t, f);
       if (last) est.set(k, (est.get(k) ?? 0) + last.typology_stock);
       for (const h of t.history) {
-        if (!inRange(h.periodDate, f.from, f.to)) continue;
+        if (!historyMatches(h, f)) continue;
         vnd.set(k, (vnd.get(k) ?? 0) + h.sold_in_period);
       }
     }
@@ -218,14 +210,10 @@ export function computeOfertaPorPadrao(buildings: Building[], f: Filters): Combo
   for (const b of buildings) {
     const k = b.standard || 'Sem classificação';
     for (const t of b.typologies) {
-      let last: HistoryEntry | null = null;
-      for (const h of t.history) {
-        if (f.to && h.periodDate > f.to) continue;
-        if (!last || h.periodDate > last.periodDate) last = h;
-      }
+      const last = lastHistoryMatching(t, f);
       if (last) est.set(k, (est.get(k) ?? 0) + last.typology_stock);
       for (const h of t.history) {
-        if (!inRange(h.periodDate, f.from, f.to)) continue;
+        if (!historyMatches(h, f)) continue;
         vnd.set(k, (vnd.get(k) ?? 0) + h.sold_in_period);
       }
     }
@@ -245,14 +233,10 @@ export function rankBairrosPorIvv(buildings: Building[], f: Filters): RankRow[] 
     const k = b.neighborhood;
     if (!k) continue;
     for (const t of b.typologies) {
-      let last: HistoryEntry | null = null;
-      for (const h of t.history) {
-        if (f.to && h.periodDate > f.to) continue;
-        if (!last || h.periodDate > last.periodDate) last = h;
-      }
+      const last = lastHistoryMatching(t, f);
       if (last) est.set(k, (est.get(k) ?? 0) + last.typology_stock);
       for (const h of t.history) {
-        if (!inRange(h.periodDate, f.from, f.to)) continue;
+        if (!historyMatches(h, f)) continue;
         vnd.set(k, (vnd.get(k) ?? 0) + h.sold_in_period);
       }
     }
@@ -274,14 +258,10 @@ export function rankBairrosPorTempoEstoque(buildings: Building[], f: Filters): R
     const k = b.neighborhood;
     if (!k) continue;
     for (const t of b.typologies) {
-      let last: HistoryEntry | null = null;
-      for (const h of t.history) {
-        if (f.to && h.periodDate > f.to) continue;
-        if (!last || h.periodDate > last.periodDate) last = h;
-      }
+      const last = lastHistoryMatching(t, f);
       if (last) est.set(k, (est.get(k) ?? 0) + last.typology_stock);
       for (const h of t.history) {
-        if (!inRange(h.periodDate, f.from, f.to)) continue;
+        if (!historyMatches(h, f)) continue;
         vnd.set(k, (vnd.get(k) ?? 0) + h.sold_in_period);
       }
     }
@@ -300,11 +280,7 @@ function avgLastPrice(buildings: Building[], f: Filters, field: 'price' | 'price
     const k = groupBy(b);
     if (!k) continue;
     for (const t of b.typologies) {
-      let last: HistoryEntry | null = null;
-      for (const h of t.history) {
-        if (f.to && h.periodDate > f.to) continue;
-        if (!last || h.periodDate > last.periodDate) last = h;
-      }
+      const last = lastHistoryMatching(t, f);
       if (!last) continue;
       const val = last[field];
       if (val == null || !Number.isFinite(val)) continue;
@@ -354,17 +330,13 @@ export function computeOpportunityMap(buildings: Building[], f: Filters): Opport
     for (const t of b.typologies) {
       const col = bedroomBucket(t.number_bedroom);
       if (!cols.includes(col)) continue;
-      let last: HistoryEntry | null = null;
-      for (const h of t.history) {
-        if (f.to && h.periodDate > f.to) continue;
-        if (!last || h.periodDate > last.periodDate) last = h;
-      }
+      const last = lastHistoryMatching(t, f);
       if (last) {
         const inner = ensure(est, nb);
         inner.set(col, (inner.get(col) ?? 0) + last.typology_stock);
       }
       for (const h of t.history) {
-        if (!inRange(h.periodDate, f.from, f.to)) continue;
+        if (!historyMatches(h, f)) continue;
         const inner = ensure(vnd, nb);
         inner.set(col, (inner.get(col) ?? 0) + h.sold_in_period);
       }
@@ -431,7 +403,7 @@ export function computeIpcByStandard(
     standardsSet.add(std);
     for (const t of b.typologies) {
       for (const h of t.history) {
-        if (!inRange(h.periodDate, f.from, f.to)) continue;
+        if (!historyMatches(h, f)) continue;
         const key = periodKey(h.periodDate, g);
         addSort.set(key, periodSortKey(h.periodDate, g));
         ensure(stdVendas, std).set(key, (ensure(stdVendas, std).get(key) ?? 0) + h.sold_in_period);
