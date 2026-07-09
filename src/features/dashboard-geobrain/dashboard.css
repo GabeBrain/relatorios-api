@@ -78,7 +78,13 @@
   border-top: 1px solid hsl(var(--dg-border));
   border-right: 1px solid hsl(var(--dg-border));
   border-bottom: 1px solid hsl(var(--dg-border));
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
+.dash-geobrain .dg-kpi-label-row { display: inline-flex; align-items: center; gap: 4px; justify-content: center; }
 .dash-geobrain .dg-kpi-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: hsl(var(--dg-muted)); }
 .dash-geobrain .dg-kpi-value { font-size: 16px; font-weight: 700; margin-top: 4px; color: hsl(var(--dg-text)); }
 .dash-geobrain .dg-kpi-hint { font-size: 9px; color: hsl(var(--dg-muted)); margin-top: 2px; }
