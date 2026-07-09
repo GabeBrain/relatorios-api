@@ -6,6 +6,14 @@ import { checkTableSums } from './engine';
 import { toAuditSection, type Ir, type IrSlide, type IrTable } from './ir';
 import type { Cell, ExtractedTable, Finding, StudyFixture } from './model';
 
+// Regras desativáveis por decisão de produto. SOURCE_MISSING desligada em
+// 09/jul/2026 (Gabriel): veio do doc de parâmetros mais recente, mas na prática
+// o time não preenche fonte/elaboração — gerava dezenas de achados sem ação.
+// Reativar aqui quando a convenção mudar.
+const RULES_ENABLED = {
+  SOURCE_MISSING: false,
+} as const;
+
 const LEFTOVER = /\b(agrupar|ajustar|revisar|conferir|confirmar|checar|verificar|inserir|colocar|preencher|refazer|corrigir|pendente|trazer|falar com|fale comigo|todo|xxx)\b/i;
 const TOTAL_ROW = /^\s*total/i;
 const CANONICAS = ['IDENTIFICACAO', 'SOCIO', 'MERCADO', 'ABSORCAO', 'LACUNAS', 'ENTORNO', 'CONCLUSAO'];
@@ -217,7 +225,7 @@ export function irToFindings(ir: Ir): Finding[] {
   const num = numericFindings(ir);
   const findings: Finding[] = [
     ...noteFindings(ir),
-    ...sourceFindings(ir),
+    ...(RULES_ENABLED.SOURCE_MISSING ? sourceFindings(ir) : []),
     ...radiiFindings(ir),
     ...num.findings,
   ];

@@ -1,23 +1,27 @@
 // Corretor v3 — fluxo unificado de correção (DESIGN_corretor_v3.md).
-// v3.0: Triagem DET (R$ 0) → Corrigir (worklist c/ status) → Reconferir (diff) → Entregar.
-// IA por demanda (v3.1/v3.2) entra como estágio "Aprofundar" nas próximas fatias.
+// v3.0: Triagem DET (R$ 0) → Corrigir → Reconferir (diff) → Entregar.
+// v3.1: estágio "Aprofundar com IA" (texto em batch, custo estimado antes).
+// Navegação sem rail duplo: landing com cards de estudos → workspace com voltar.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
-  Trash2, FileUp, ChevronRight, Quote,
+  Trash2, FileUp, ArrowLeft, Quote, Sparkles, DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { errorLabel, ERROR_CATALOG, MODE_META, type ErrorType } from '../lib/error-catalog';
 import type { Finding } from '../lib/audit/model';
+import type { Ir } from '../lib/audit/ir';
 import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import { irToFindings } from '../lib/audit/ir-rules';
 import { VizSwitch } from '../components/audit/FindingCard';
+import { MODEL_PRICING, formatUSD, type ModelId } from '../lib/cost-calculator';
+import { estimateTextPass, runTextPass } from '../lib/v3/ia-text';
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
-  concludeStudy, deleteStudy,
+  concludeStudy, deleteStudy, insertIaFindings, registerIaPass,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 
@@ -50,9 +54,7 @@ function V3FindingCard({ item, onStatus }: {
         <div className="mt-0.5 shrink-0">
           {item.status === 'corrigido'
             ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            : f.ok
-              ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              : <AlertTriangle className="w-4 h-4 text-amber-500" />}
+            : <AlertTriangle className="w-4 h-4 text-amber-500" />}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
@@ -63,7 +65,12 @@ function V3FindingCard({ item, onStatus }: {
             <span className="text-[10px] rounded px-1.5 py-0.5 border bg-muted/50 text-muted-foreground">
               {errorLabel(f.type as ErrorType)}
             </span>
-            {mode && (
+            {item.origem !== 'DET' && (
+              <span className="text-[10px] rounded px-1.5 py-0.5 border bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/30">
+                IA
+              </span>
+            )}
+            {mode && item.origem === 'DET' && (
               <span className={cn('text-[10px] rounded px-1.5 py-0.5 border', mode.className)} title={mode.hint}>
                 {mode.label}
               </span>
@@ -107,6 +114,97 @@ function V3FindingCard({ item, onStatus }: {
   );
 }
 
+// ─── Painel Aprofundar com IA (v3.1 — texto) ─────────────────────────────────
+
+function IaPanel({ study, ir, onNeedFile, onRan }: {
+  study: StudyV3;
+  ir: Ir | null;
+  onNeedFile: () => void;
+  onRan: () => Promise<void>;
+}) {
+  const [model, setModel] = useState<ModelId>('gpt-4o-mini');
+  const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState<[number, number] | null>(null);
+
+  const estimate = ir ? estimateTextPass(ir, model) : null;
+
+  async function run() {
+    if (!ir) return;
+    setRunning(true);
+    setProgress([0, estimate?.batches ?? 0]);
+    try {
+      const res = await runTextPass(ir, study.cidade ?? '', model, (d, t) => setProgress([d, t]));
+      const inserted = await insertIaFindings(study.id, res.findings, 'IA_texto', study.lastVersion);
+      await registerIaPass(
+        study.id, 'texto',
+        `${estimate?.slides ?? 0} slides · ${res.batches} batches · ${model}`,
+        res.costUsd, res.inputTokens, res.outputTokens
+      );
+      toast.success(`IA de texto concluída — ${formatUSD(res.costUsd)}`, {
+        description: `${res.findings.length} achado(s) da IA · ${inserted} novo(s) na worklist`,
+      });
+      await onRan();
+    } catch (err) {
+      toast.error('Falha no passe de IA', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setRunning(false);
+      setProgress(null);
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 px-4 py-3 space-y-2">
+      <div className="flex items-center gap-2">
+        <Sparkles className="w-4 h-4 text-violet-500" />
+        <h3 className="text-sm font-semibold">Aprofundar com IA — revisão de texto</h3>
+        <span className="text-[10px] text-muted-foreground">ortografia · cidade/contexto · coerência texto×tabela</span>
+      </div>
+      {!ir ? (
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Para rodar a IA, selecione o .pptx da versão atual (v{study.lastVersion}) — o arquivo não fica salvo no servidor.
+          </p>
+          <button
+            onClick={onNeedFile}
+            className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-violet-500/50 inline-flex items-center gap-1.5 shrink-0"
+          >
+            <FileUp className="w-3.5 h-3.5" /> Selecionar .pptx
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={model}
+            onChange={(e) => setModel(e.target.value as ModelId)}
+            disabled={running}
+            className="text-xs rounded-md border border-border bg-background px-2 py-1.5"
+          >
+            {(Object.keys(MODEL_PRICING) as ModelId[]).map((m) => (
+              <option key={m} value={m}>{MODEL_PRICING[m].label}</option>
+            ))}
+          </select>
+          {estimate && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <DollarSign className="w-3 h-3" />
+              {estimate.slides} slides · {estimate.batches} chamada(s) · custo estimado{' '}
+              <strong className="text-foreground">{formatUSD(estimate.costUsd)}</strong>
+            </span>
+          )}
+          <button
+            onClick={run}
+            disabled={running}
+            className="text-xs rounded-md px-3 py-1.5 bg-violet-600 text-white hover:bg-violet-700 inline-flex items-center gap-1.5 disabled:opacity-60"
+          >
+            {running
+              ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> {progress ? `lote ${progress[0]}/${progress[1]}` : 'rodando…'}</>
+              : <><Sparkles className="w-3.5 h-3.5" /> Rodar IA de texto</>}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function CorretorV3Page() {
@@ -115,12 +213,16 @@ export default function CorretorV3Page() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [items, setItems] = useState<FindingV3[]>([]);
   const [loadingStudy, setLoadingStudy] = useState(false);
-  const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
+  const [busy, setBusy] = useState<'upload' | 'recheck' | 'iafile' | null>(null);
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
   const newRef = useRef<HTMLInputElement>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
+  const iaFileRef = useRef<HTMLInputElement>(null);
+  // IR em memória por estudo (não persiste; usado p/ passes de IA e recheck)
+  const irCache = useRef<Map<string, Ir>>(new Map());
 
   const selected = studies.find((s) => s.id === selectedId) ?? null;
+  const selectedIr = selected ? (irCache.current.get(selected.id) ?? null) : null;
 
   const refreshList = useCallback(async () => {
     setLoadingList(true);
@@ -135,7 +237,6 @@ export default function CorretorV3Page() {
     try { setItems(await loadFindings(id)); } finally { setLoadingStudy(false); }
   }, []);
 
-  // ── upload novo estudo ──
   async function handleNew(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -143,12 +244,13 @@ export default function CorretorV3Page() {
     setBusy('upload');
     try {
       const ir = await pptxToIr(file);
-      const findings = irToFindings(ir).filter((f) => !f.ok); // worklist = só problemas
+      const findings = irToFindings(ir).filter((f) => !f.ok);
       const id = await createStudy(
         file.name.replace(/\.pptx$/i, ''),
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name },
         findings
       );
+      irCache.current.set(id, ir);
       toast.success('Triagem concluída (R$ 0)', {
         description: `${ir.n_slides} slides · ${findings.length} pendências determinísticas`,
       });
@@ -161,7 +263,6 @@ export default function CorretorV3Page() {
     }
   }
 
-  // ── reconferir (versão corrigida) ──
   async function handleRecheck(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !selected) return;
@@ -176,6 +277,7 @@ export default function CorretorV3Page() {
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name },
         findings
       );
+      irCache.current.set(selected.id, ir);
       setLastDiff(diff);
       toast.success(`Reconferido (v${selected.lastVersion + 1})`, {
         description: `${diff.resolved.length} resolvido(s) · ${diff.persistent.length} persistem · ${diff.fresh.length} novo(s)`,
@@ -184,6 +286,30 @@ export default function CorretorV3Page() {
       setItems(await loadFindings(selected.id));
     } catch (err) {
       toast.error('Falha ao reconferir', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  /** Carrega o .pptx da versão ATUAL só para habilitar a IA (valida por sha1). */
+  async function handleIaFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !selected) return;
+    e.target.value = '';
+    setBusy('iafile');
+    try {
+      const ir = await pptxToIr(file);
+      if (selected.lastSha1 && ir.sha1 && ir.sha1 !== selected.lastSha1) {
+        toast.error('Arquivo diferente da versão atual', {
+          description: `Este .pptx não corresponde à v${selected.lastVersion}. Se você corrigiu o arquivo, use "Reconferir" primeiro.`,
+        });
+        return;
+      }
+      irCache.current.set(selected.id, ir);
+      setStudies((prev) => [...prev]); // re-render
+      toast.success('Arquivo carregado — IA habilitada');
+    } catch (err) {
+      toast.error('Falha ao ler o arquivo', { description: err instanceof Error ? err.message : String(err) });
     } finally {
       setBusy(null);
     }
@@ -211,7 +337,6 @@ export default function CorretorV3Page() {
     }
   }
 
-  // ── worklist derivada ──
   const wl = useMemo(() => {
     const active = items.filter((i) => i.resolvidoNaVersao === null || i.status === 'pendente');
     const pend = items.filter((i) => i.status === 'pendente').length;
@@ -233,194 +358,210 @@ export default function CorretorV3Page() {
 
   const progressPct = wl.total > 0 ? Math.round(((wl.total - wl.pend) / wl.total) * 100) : 0;
 
-  return (
-    <div className="min-h-screen bg-background flex">
-      {/* Rail: estudos */}
-      <aside className="w-64 shrink-0 border-r flex flex-col">
-        <div className="px-4 py-3 border-b flex items-center justify-between">
+  // ─── LANDING (sem rail: cards de estudos) ───────────────────────────────────
+  if (!selected) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="border-b bg-card px-6 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-sm font-semibold">Corretor</h1>
-            <p className="text-[10px] text-muted-foreground">v3 · fluxo de correção</p>
+            <h1 className="text-base font-semibold">Corretor</h1>
+            <p className="text-xs text-muted-foreground">
+              Suba o estudo (.pptx) → corrija a worklist → entregue ao A&R com 0 pendentes
+            </p>
           </div>
           <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
           <button
             onClick={() => newRef.current?.click()}
             disabled={busy !== null}
-            className="text-xs rounded-md px-2 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-1.5 disabled:opacity-60"
+            className="text-sm rounded-md px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 disabled:opacity-60"
           >
-            {busy === 'upload' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileUp className="w-3.5 h-3.5" />}
-            Novo
+            {busy === 'upload' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
+            Novo estudo
           </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        </header>
+
+        <div className="max-w-4xl mx-auto px-6 py-6">
           {loadingList ? (
-            <div className="flex items-center justify-center py-10 text-muted-foreground gap-2 text-xs">
-              <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
+            <div className="flex items-center justify-center py-16 text-muted-foreground gap-2 text-sm">
+              <Loader2 className="w-4 h-4 animate-spin" /> Carregando estudos…
             </div>
           ) : studies.length === 0 ? (
-            <p className="text-xs text-muted-foreground px-2 py-6 text-center">
-              Suba o .pptx de um estudo para começar. Triagem determinística em segundos, sem custo de IA.
-            </p>
-          ) : (
-            studies.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => openStudy(s.id)}
-                className={cn(
-                  'w-full text-left rounded-md px-2.5 py-2 border transition-colors',
-                  s.id === selectedId ? 'border-primary bg-primary/5' : 'border-transparent hover:bg-muted/50'
-                )}
-              >
-                <div className="flex items-center gap-1.5">
-                  {s.status === 'pronto'
-                    ? <PackageCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                    : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
-                  <span className="text-xs font-medium truncate">{s.nome}</span>
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-0.5 ml-5">
-                  v{s.lastVersion} · {s.nSlides} slides · {s.status === 'pronto' ? 'pronto p/ A&R' : `${s.pendentes} pendente(s)`}
-                </p>
-              </button>
-            ))
-          )}
-        </div>
-      </aside>
-
-      {/* Workspace */}
-      <main className="flex-1 min-w-0 flex flex-col">
-        {!selected ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center max-w-sm space-y-2">
+            <div className="text-center py-16 space-y-3">
               <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
-              <h2 className="text-sm font-semibold">Suba o estudo (.pptx)</h2>
-              <p className="text-xs text-muted-foreground">
-                Triagem determinística instantânea → worklist de correção → reconferir a versão
-                corrigida → entregar ao A&R com 0 pendentes.
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                Nenhum estudo ainda. Suba um .pptx — a triagem determinística roda em segundos, sem custo de IA.
               </p>
             </div>
-          </div>
-        ) : (
-          <>
-            {/* Header do estudo */}
-            <header className="border-b bg-card px-6 py-3 flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <h2 className="text-sm font-semibold truncate">{selected.nome}</h2>
-                <p className="text-xs text-muted-foreground">
-                  versão {selected.lastVersion} · {selected.nSlides} slides · triagem DET (R$ 0)
-                </p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <input ref={recheckRef} type="file" accept=".pptx" className="hidden" onChange={handleRecheck} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {studies.map((s) => (
                 <button
-                  onClick={() => recheckRef.current?.click()}
-                  disabled={busy !== null || selected.status === 'pronto'}
-                  className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 disabled:opacity-50"
-                  title="Subir a versão corrigida do PPTX e comparar"
+                  key={s.id}
+                  onClick={() => openStudy(s.id)}
+                  className="text-left rounded-lg border border-border bg-card px-4 py-3 hover:border-primary/50 transition-colors space-y-1.5"
                 >
-                  {busy === 'recheck' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-                  Reconferir
-                </button>
-                {selected.status === 'pronto' ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1.5 text-xs font-medium">
-                    <PackageCheck className="w-3.5 h-3.5" /> Pronto para o A&R
-                  </span>
-                ) : (
-                  <button
-                    onClick={handleConclude}
-                    disabled={wl.pend > 0}
-                    className="text-xs rounded-md px-2.5 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1.5 disabled:opacity-40"
-                    title={wl.pend > 0 ? `Ainda há ${wl.pend} pendente(s)` : 'Marcar como pronto para o A&R'}
-                  >
-                    <PackageCheck className="w-3.5 h-3.5" /> Entregar
-                  </button>
-                )}
-                <button
-                  onClick={async () => { await deleteStudy(selected.id); setSelectedId(null); refreshList(); }}
-                  className="text-muted-foreground hover:text-destructive p-1.5"
-                  title="Excluir estudo"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </header>
-
-            {/* Progresso rumo a zero */}
-            <div className="border-b bg-card px-6 py-3 space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className={cn('font-medium', wl.pend === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground')}>
-                  {wl.pend === 0
-                    ? '0 pendentes — pronto para entregar 🎉'
-                    : `${wl.pend} pendente(s) de ${wl.total}`}
-                </span>
-                <span className="text-muted-foreground font-mono">{progressPct}%</span>
-              </div>
-              <Progress value={progressPct} className="h-1.5" />
-            </div>
-
-            {/* Diff do último recheck */}
-            {lastDiff && (
-              <div className="border-b bg-sky-500/5 px-6 py-2 text-xs text-muted-foreground flex items-center gap-3">
-                <RefreshCw className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-                <span><strong className="text-emerald-600 dark:text-emerald-400">{lastDiff.resolved.length} resolvido(s)</strong> na versão nova</span>
-                <span>· {lastDiff.persistent.length} persistem</span>
-                <span>· {lastDiff.fresh.length} novo(s)</span>
-              </div>
-            )}
-
-            {/* Worklist */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="max-w-3xl mx-auto px-6 py-5 space-y-5">
-                {loadingStudy ? (
-                  <div className="flex items-center justify-center py-16 text-muted-foreground gap-2 text-sm">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Carregando achados…
+                  <div className="flex items-center gap-2">
+                    {s.status === 'pronto'
+                      ? <PackageCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                      : <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />}
+                    <span className="text-sm font-medium truncate">{s.nome}</span>
                   </div>
-                ) : (
-                  <>
-                    <section className="space-y-3">
-                      <WlHead title="Por slide (ordem do deck)" count={wl.slides.reduce((a, [, fs]) => a + fs.length, 0)} />
-                      {wl.slides.length === 0 && (
-                        <p className="text-xs text-muted-foreground">Nenhum erro local ativo.</p>
-                      )}
-                      {wl.slides.map(([n, fs]) => (
-                        <div key={n} className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold rounded bg-muted px-2 py-0.5">Slide {n}</span>
-                            <span className="text-[10px] text-muted-foreground">{fs.length} {fs.length === 1 ? 'erro' : 'erros'}</span>
-                          </div>
-                          {fs.map((i) => (
-                            <V3FindingCard key={i.ruleId} item={i} onStatus={(s) => handleStatus(i.ruleId, s)} />
-                          ))}
-                        </div>
-                      ))}
-                    </section>
-
-                    {wl.relational.length > 0 && (
-                      <section className="space-y-3">
-                        <WlHead
-                          title="Erros entre slides"
-                          count={wl.relational.reduce((a, [, fs]) => a + fs.length, 0)}
-                          hint="não pertencem a um slide só — decida qual lado corrigir"
-                        />
-                        {wl.relational.map(([type, fs]) => (
-                          <div key={type} className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium">{errorLabel(type as ErrorType)}</span>
-                              <span className="text-[10px] text-muted-foreground">{fs.length}</span>
-                            </div>
-                            {fs.map((i) => (
-                              <V3FindingCard key={i.ruleId} item={i} onStatus={(s) => handleStatus(i.ruleId, s)} />
-                            ))}
-                          </div>
-                        ))}
-                      </section>
-                    )}
-                  </>
-                )}
-              </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    v{s.lastVersion} · {s.nSlides} slides
+                    {s.custoTotal > 0 && <> · IA {formatUSD(s.custoTotal)}</>}
+                  </p>
+                  <p className={cn(
+                    'text-[11px] font-medium',
+                    s.status === 'pronto' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+                  )}>
+                    {s.status === 'pronto' ? 'Pronto para o A&R' : `${s.pendentes} pendente(s)`}
+                  </p>
+                </button>
+              ))}
             </div>
-          </>
-        )}
-      </main>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── WORKSPACE ───────────────────────────────────────────────────────────────
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="border-b bg-card px-6 py-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            onClick={() => { setSelectedId(null); refreshList(); }}
+            className="text-muted-foreground hover:text-foreground"
+            title="Voltar aos estudos"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold truncate">{selected.nome}</h2>
+            <p className="text-xs text-muted-foreground">
+              versão {selected.lastVersion} · {selected.nSlides} slides
+              {selected.custoTotal > 0 && <> · IA acumulada {formatUSD(selected.custoTotal)}</>}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <input ref={recheckRef} type="file" accept=".pptx" className="hidden" onChange={handleRecheck} />
+          <button
+            onClick={() => recheckRef.current?.click()}
+            disabled={busy !== null || selected.status === 'pronto'}
+            className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 disabled:opacity-50"
+            title="Subir a versão corrigida do PPTX e comparar"
+          >
+            {busy === 'recheck' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+            Reconferir
+          </button>
+          {selected.status === 'pronto' ? (
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1.5 text-xs font-medium">
+              <PackageCheck className="w-3.5 h-3.5" /> Pronto para o A&R
+            </span>
+          ) : (
+            <button
+              onClick={handleConclude}
+              disabled={wl.pend > 0}
+              className="text-xs rounded-md px-2.5 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1.5 disabled:opacity-40"
+              title={wl.pend > 0 ? `Ainda há ${wl.pend} pendente(s)` : 'Marcar como pronto para o A&R'}
+            >
+              <PackageCheck className="w-3.5 h-3.5" /> Entregar
+            </button>
+          )}
+          <button
+            onClick={async () => { await deleteStudy(selected.id); setSelectedId(null); refreshList(); }}
+            className="text-muted-foreground hover:text-destructive p-1.5"
+            title="Excluir estudo"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </header>
+
+      <div className="border-b bg-card px-6 py-3 space-y-1.5">
+        <div className="flex items-center justify-between text-xs">
+          <span className={cn('font-medium', wl.pend === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground')}>
+            {wl.pend === 0
+              ? '0 pendentes — pronto para entregar 🎉'
+              : `${wl.pend} pendente(s) de ${wl.total}`}
+          </span>
+          <span className="text-muted-foreground font-mono">{progressPct}%</span>
+        </div>
+        <Progress value={progressPct} className="h-1.5" />
+      </div>
+
+      {lastDiff && (
+        <div className="border-b bg-sky-500/5 px-6 py-2 text-xs text-muted-foreground flex items-center gap-3">
+          <RefreshCw className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+          <span><strong className="text-emerald-600 dark:text-emerald-400">{lastDiff.resolved.length} resolvido(s)</strong> na versão nova</span>
+          <span>· {lastDiff.persistent.length} persistem</span>
+          <span>· {lastDiff.fresh.length} novo(s)</span>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-6 py-5 space-y-5">
+          {/* Aprofundar com IA (v3.1) */}
+          <input ref={iaFileRef} type="file" accept=".pptx" className="hidden" onChange={handleIaFile} />
+          {selected.status !== 'pronto' && (
+            <IaPanel
+              study={selected}
+              ir={selectedIr}
+              onNeedFile={() => iaFileRef.current?.click()}
+              onRan={async () => { setItems(await loadFindings(selected.id)); await refreshList(); }}
+            />
+          )}
+
+          {loadingStudy ? (
+            <div className="flex items-center justify-center py-16 text-muted-foreground gap-2 text-sm">
+              <Loader2 className="w-4 h-4 animate-spin" /> Carregando achados…
+            </div>
+          ) : (
+            <>
+              <section className="space-y-3">
+                <WlHead title="Por slide (ordem do deck)" count={wl.slides.reduce((a, [, fs]) => a + fs.length, 0)} />
+                {wl.slides.length === 0 && (
+                  <p className="text-xs text-muted-foreground">Nenhum erro local ativo.</p>
+                )}
+                {wl.slides.map(([n, fs]) => (
+                  <div key={n} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold rounded bg-muted px-2 py-0.5">Slide {n}</span>
+                      <span className="text-[10px] text-muted-foreground">{fs.length} {fs.length === 1 ? 'erro' : 'erros'}</span>
+                    </div>
+                    {fs.map((i) => (
+                      <V3FindingCard key={i.ruleId} item={i} onStatus={(s) => handleStatus(i.ruleId, s)} />
+                    ))}
+                  </div>
+                ))}
+              </section>
+
+              {wl.relational.length > 0 && (
+                <section className="space-y-3">
+                  <WlHead
+                    title="Erros entre slides"
+                    count={wl.relational.reduce((a, [, fs]) => a + fs.length, 0)}
+                    hint="não pertencem a um slide só — decida qual lado corrigir"
+                  />
+                  {wl.relational.map(([type, fs]) => (
+                    <div key={type} className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium">{errorLabel(type as ErrorType)}</span>
+                        <span className="text-[10px] text-muted-foreground">{fs.length}</span>
+                      </div>
+                      {fs.map((i) => (
+                        <V3FindingCard key={i.ruleId} item={i} onStatus={(s) => handleStatus(i.ruleId, s)} />
+                      ))}
+                    </div>
+                  ))}
+                </section>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

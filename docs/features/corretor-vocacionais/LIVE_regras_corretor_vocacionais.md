@@ -16,6 +16,30 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.15 — 2026-07-09 — v3.1 (IA de texto) + navegação sem rail + SOURCE_MISSING off
+
+**Feedback do 1º teste do Gabriel aplicado:**
+
+1. **Navegação sem menu duplo** — `/corretor` perdeu o rail lateral: agora é **landing com
+   cards** dos estudos (status, pendentes, custo de IA) → clica → workspace com "← voltar".
+   Só o menu global da plataforma permanece.
+2. **`SOURCE_MISSING` desativada** — regra determinística desligada por flag
+   (`RULES_ENABLED` em `ir-rules.ts`): veio do doc de parâmetros recente, mas na prática o
+   time não preenche fonte/elaboração. Reativável na flag. (Marka: 35→17 achados.)
+3. **v3.1 — Aprofundar com IA (texto)**:
+   - Edge function `analyze-text-batch` (deploy pendente: `supabase functions deploy analyze-text-batch`):
+     SPELLING/CITY_NAME/COHERENCE sobre o **texto do IR**, até 20 slides/chamada, prompt
+     conservador, JSON estrito. Mesmo modelo de CORS/rate-limit do analyze-slide.
+   - Cliente `lib/v3/ia-text.ts`: batches de 12, **custo estimado antes de rodar**
+     (Marka completo: ~US$ 0,004 no mini ≈ **R$ 0,02/estudo** — vs ~R$ 6 da visão v1),
+     IDs estáveis por conteúdo (`iatxt-<slide>-<tipo>-<hash>`).
+   - Painel roxo "Aprofundar com IA" no workspace: seletor de modelo, estimativa, progresso
+     por lote; achados entram na worklist com selo **IA**; custo acumula em
+     `studies_v3.custo_total` + linha em `ia_passes` (migration `20260709110000` — **aplicar**).
+   - Integridade: rodar IA exige o .pptx da versão atual (sha1 validado; arquivo ≠ vN → orienta Reconferir).
+4. **Fix no diff**: `recheck()` agora compara só achados **DET** — achados de IA não são mais
+   dados como resolvidos indevidamente no re-upload (só um novo passe de IA os resolve).
+
 ## Versão 0.14 — 2026-07-09 — v3.0: fluxo unificado no ar (`/corretor`)
 
 Primeira fatia da v3 (`DESIGN_corretor_v3.md`) implementada — o fluxo completo sem IA:

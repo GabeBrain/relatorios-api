@@ -19,6 +19,8 @@ export interface StudyV3 {
   lastVersion: number;
   nSlides: number;
   pendentes?: number;
+  custoTotal: number;
+  lastSha1: string | null;
 }
 
 export interface FindingV3 {
@@ -79,7 +81,7 @@ export async function createStudy(
 export async function listStudies(): Promise<StudyV3[]> {
   const { data, error } = await db
     .from('studies_v3')
-    .select('*, study_versions(n, n_slides), findings_v3(status)')
+    .select('*, study_versions(n, n_slides, sha1), findings_v3(status)')
     .order('created_at', { ascending: false });
   if (error || !data) return [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,6 +97,8 @@ export async function listStudies(): Promise<StudyV3[]> {
       concludedAt: s.concluded_at,
       lastVersion: versions[0]?.n ?? 1,
       nSlides: versions[0]?.n_slides ?? 0,
+      custoTotal: Number(s.custo_total ?? 0),
+      lastSha1: versions[0]?.sha1 ?? null,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       pendentes: (s.findings_v3 ?? []).filter((f: any) => f.status === 'pendente').length,
     };
@@ -144,7 +148,12 @@ export async function recheck(
   newFindings: Finding[]
 ): Promise<DiffResult> {
   const current = await loadFindings(studyId);
-  const activeIds = new Set(current.filter((c) => c.resolvidoNaVersao === null).map((c) => c.ruleId));
+  // Diff comparado só com achados DET: newFindings vêm do motor determinístico,
+  // então achados de IA (origem IA_*) não podem ser dados como resolvidos aqui —
+  // eles só se resolvem quando um novo passe de IA rodar sobre a versão nova.
+  const activeIds = new Set(
+    current.filter((c) => c.resolvidoNaVersao === null && c.origem === 'DET').map((c) => c.ruleId)
+  );
   const newIds = new Set(newFindings.map((f) => f.id));
 
   const resolved = [...activeIds].filter((id) => !newIds.has(id));
@@ -190,6 +199,52 @@ export async function recheck(
   }
 
   return { resolved, persistent, fresh: fresh.map((f) => f.id) };
+}
+
+/** Insere achados de um passe de IA (upsert por rule_id; duplicados ignorados). */
+export async function insertIaFindings(
+  studyId: string,
+  findings: Finding[],
+  origem: 'IA_texto' | 'IA_visao',
+  versionN: number
+): Promise<number> {
+  if (!findings.length) return 0;
+  const { error, count } = await db.from('findings_v3').upsert(
+    findings.map((f) => ({
+      study_id: studyId,
+      rule_id: f.id,
+      tipo: f.type,
+      familia: isLocal(f) ? 'local' : 'relacional',
+      slide_ref: f.slideRef,
+      titulo: f.title,
+      detalhe: f.detail,
+      payload: f,
+      status: 'pendente',
+      origem,
+      primeira_versao: versionN,
+    })),
+    { onConflict: 'study_id,rule_id', ignoreDuplicates: true, count: 'exact' }
+  );
+  if (error) throw new Error(error.message);
+  return count ?? findings.length;
+}
+
+/** Registra um passe de IA e acumula o custo no estudo. */
+export async function registerIaPass(
+  studyId: string,
+  tipo: 'texto' | 'visao_tabela' | 'visao_mapa',
+  escopo: string,
+  custoUsd: number,
+  inputTokens: number,
+  outputTokens: number
+): Promise<void> {
+  await db.from('ia_passes').insert({
+    study_id: studyId, tipo, escopo,
+    custo_usd: custoUsd, input_tokens: inputTokens, output_tokens: outputTokens,
+  });
+  const { data } = await db.from('studies_v3').select('custo_total').eq('id', studyId).single();
+  const total = Number(data?.custo_total ?? 0) + custoUsd;
+  await db.from('studies_v3').update({ custo_total: total }).eq('id', studyId);
 }
 
 export async function concludeStudy(studyId: string): Promise<void> {

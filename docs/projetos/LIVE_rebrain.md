@@ -49,6 +49,18 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Corretor v3.1: IA de texto + feedback do 1º teste — Gabriel
+- **Feedback aplicado:** (1) `/corretor` sem rail duplo — landing com cards → workspace com
+  voltar; (2) `SOURCE_MISSING` desativada por flag (na prática ninguém preenche fonte;
+  Marka 35→17 achados).
+- **v3.1:** edge `analyze-text-batch` (texto do IR, batch, JSON estrito) + painel "Aprofundar
+  com IA" com custo estimado antes (Marka: ~R$ 0,02 no mini vs ~R$ 6 da visão v1), achados IA
+  na worklist com selo, custo acumulado (`ia_passes`). Fix: diff do recheck escopo DET.
+- **Pendências:** aplicar migration `20260709110000_corretor_v3_ia.sql` + deploy
+  `supabase functions deploy analyze-text-batch`.
+- **Arquivos:** `supabase/functions/analyze-text-batch/`, `lib/v3/{ia-text.ts,db.ts}`,
+  `pages/CorretorV3Page.tsx`, `lib/audit/ir-rules.ts`, migration; LIVE v0.15.
+
 ### 2026-07-09 — Corretor v3.0 no ar em `/corretor` (fluxo completo, R$ 0) — Gabriel
 - **O quê:** primeira fatia da v3 implementada: rail de estudos (sessões retomáveis via
   Supabase) → upload .pptx → triagem DET instantânea → worklist com status
@@ -236,7 +248,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, PPTX→IR, mapas, thumbnails) | 🟡 (no ar: **upload de .pptx** + fixtures + recall/export + RADII/mapa + thumbnails c/ poda; falta gráficos no extrator, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
 | 6f | Corretor v2 — estratégia de testes do fluxo do analista | 🟡 (design ✅ + slice 1 worklist ✅; slices 2-4 absorvidos pela v3) |
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
-| 6h | **Corretor v3** — unificação v1+v2 num fluxo único (5 estágios) | 🟡 **v3.0 ✅ no ar em `/corretor`** (migration a aplicar) → v3.1 IA texto 🔲 → v3.2 números das imagens 🔲 → v3.3 mapas + aposentar v1 🔲 |
+| 6h | **Corretor v3** — unificação v1+v2 num fluxo único (5 estágios) | 🟡 v3.0 ✅ + **v3.1 ✅ (IA texto)** — pendente: migration `…v3_ia.sql` + deploy `analyze-text-batch` → v3.2 números das imagens 🔲 → v3.3 mapas + aposentar v1 🔲 |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
