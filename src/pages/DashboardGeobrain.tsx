@@ -74,10 +74,8 @@ export default function DashboardGeobrain() {
       />
 
       <Header
-        uf={uf}
-        onUfChange={setUf}
-        city={city}
-        onCityChange={setCity}
+        scope={scope}
+        onScopeChange={setScope}
         buildingType={buildingType}
         onBuildingTypeChange={setBuildingType}
         granularity={granularity}
