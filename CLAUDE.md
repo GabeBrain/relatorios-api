@@ -15,6 +15,22 @@ do push**. Após `pull`/merge, leia as entradas novas para se situar. Convençã
 - Área Quanti → `docs/projetos/LIVE_area-quanti.md`
 - Rebrain → `docs/projetos/LIVE_rebrain.md`
 
+## Padrão obrigatório: GeoApiScopeEngine
+
+Para qualquer tela que use filtros geográficos e chamadas à API GeoBrain, usar o padrão
+`GeoApiScopeEngine` (`src/features/shared/geo-api-scope-engine/`). Fluxo obrigatório:
+
+1. Carregar `/public-api/monitored-cities` (paginando `links.next`).
+2. Limitar UF/município às cidades disponíveis para o token.
+3. Exigir UF antes de município; ao trocar UF, limpar município.
+4. Bloquear chamadas pesadas de histórico até escopo válido.
+5. Sem fallback silencioso para `municipios-br.json` (IBGE) — em erro, exibir a falha
+   ao usuário e não carregar dashboard/relatório.
+
+Referência funcional original: Relatórios Secovi (`src/pages/TestesArquitetura.tsx`).
+Dashboard GeoBrain e CID legado usam o mesmo padrão. Consuma via
+`GeoApiScopeSelector` + `useGeoApiScope` do módulo compartilhado.
+
 ### Identificação do colaborador (foco por projeto)
 
 Descubra **quem é o colaborador ativo** rodando `git config user.name` e `git config user.email`
