@@ -133,8 +133,8 @@ itaFindings.push(
   {
     id: 'ita-radii', type: 'RADII', section: 'SOCIO', slideRef: 's30',
     title: 'Raios do mapa conferem com o contratado', ok: true,
-    detail: 'Os rótulos de raio detectados (10/20/30 min) batem com os raios do projeto.',
-    viz: { kind: 'text', location: 'Legenda do mapa', evidence: '10 min · 20 min · 30 min' },
+    detail: 'Os rótulos de raio detectados batem com os raios contratados do projeto.',
+    viz: { kind: 'map', expected: ['10 min', '20 min', '30 min'], detected: ['10 min', '20 min', '30 min'] },
   },
   {
     id: 'ita-structure', type: 'STRUCTURE_MISSING', section: 'ESTRUTURA', slideRef: '—',

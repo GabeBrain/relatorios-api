@@ -49,6 +49,20 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Mapas/raios (nível 1) + persistência de thumbnails — Gabriel
+- **Item 1 (mapas/raios):** regra `RADII` DET sobre o IR (raio estranho ao conjunto canônico;
+  subconjuntos passam) + padrão de visualização "mapa" (chips esperado×detectado). No IR real:
+  Itajaí acha 3 slides "15 min" num estudo 10/20/30; Marka consistente.
+- **Item 2 (thumbnails):** migration `20260709` (`projects.reviewed_at`); persistência da
+  thumbnail de **todos** os slides; `getThumbnailUrl` (URL assinada); `markProjectReviewedInDb`
+  **poda as imagens dos slides OK** ao concluir a revisão. UI: thumbnail no card de erro +
+  botão "Concluir revisão" + selo. Serve para auditar **falso negativo**.
+- **Atenção:** migration `20260709` precisa ser aplicada no Supabase; o caminho DB/storage foi
+  verificado por tsc/eslint/build, não em runtime contra o Supabase.
+- **Arquivos:** `lib/audit/{model.ts,ir-rules.ts,fixtures.ts}`, `components/audit/FindingCard.tsx`,
+  `lib/archive-db.ts`, `store/archive-store.ts`, `pages/{CorretorPage,CorretorAnalysisPage}.tsx`,
+  `supabase/migrations/20260709000000_project_reviewed.sql`; LIVE v0.12.
+
 ### 2026-07-09 — Auditoria v2: ingestão de IR real no navegador — Gabriel
 - **O quê:** a v2 agora carrega o `.ir.json` de qualquer estudo (botão "Carregar .ir.json") e
   roda o motor DET no browser (`lib/audit/ir.ts` + `ir-rules.ts`, porte do `rules_ir.py`):

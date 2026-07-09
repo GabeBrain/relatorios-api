@@ -65,7 +65,15 @@ export interface TextViz {
   checklist?: { label: string; status: 'ok' | 'missing' | 'na' }[];
 }
 
-export type Viz = TableViz | SideBySideViz | BinRangeViz | TextViz;
+/** Mapa + métricas: raios esperados × detectados (padrão 5 do handoff). */
+export interface MapViz {
+  kind: 'map';
+  expected: string[];  // raios contratados / modais
+  detected: string[];  // raios encontrados no slide
+  note?: string;
+}
+
+export type Viz = TableViz | SideBySideViz | BinRangeViz | TextViz | MapViz;
 
 export interface Finding {
   id: string;

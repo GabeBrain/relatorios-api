@@ -304,7 +304,9 @@ export default function CorretorAnalysisPage() {
           inputTokens: result.inputTokens,
           outputTokens: result.outputTokens,
           cost: result.cost,
-          imageDataUrl: result.errors.length > 0 ? dataUrl : undefined,
+          // persiste a thumbnail de todos os slides (auditoria de falso negativo);
+          // as dos slides OK são podadas ao concluir a revisão.
+          imageDataUrl: result.skipped ? undefined : dataUrl,
         });
       } catch (err) {
         updateSlide(slideNum, {

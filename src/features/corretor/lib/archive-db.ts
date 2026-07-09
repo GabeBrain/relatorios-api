@@ -46,7 +46,10 @@ export async function saveProjectToDb(
   for (const slide of slides) {
     let imagePath: string | null = null;
 
-    if (slide.errors.length > 0 && slide.imageDataUrl) {
+    // Persiste a thumbnail de TODOS os slides que a têm (não só os com erro):
+    // permite auditar falsos negativos. As imagens dos slides OK são podadas
+    // depois, ao concluir a revisão (markProjectReviewedInDb).
+    if (slide.imageDataUrl) {
       const path = `${projectId}/${slide.slideNumber}.jpg`;
       const blob = dataUrlToBlob(slide.imageDataUrl);
       const { error: uploadErr } = await db.storage
@@ -115,6 +118,7 @@ export async function loadProjectsFromDb(): Promise<ArchivedProject[]> {
         inputTokens: s.input_tokens,
         outputTokens: s.output_tokens,
         cost: s.cost,
+        imagePath: s.image_path ?? null,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         errors: (s.slide_errors ?? []).map((e: any) => ({
           id: e.id,
@@ -129,6 +133,7 @@ export async function loadProjectsFromDb(): Promise<ArchivedProject[]> {
       return {
         id: p.id,
         savedAt: p.saved_at,
+        reviewedAt: p.reviewed_at ?? null,
         projectName: p.project_name,
         cityName: p.city_name,
         radii: p.radii,
@@ -160,6 +165,41 @@ export async function updateErrorVerdictInDb(
   verdict: 'bug' | 'fp' | null
 ): Promise<void> {
   const { error } = await db.from('slide_errors').update({ verdict }).eq('id', errorId);
+  if (error) throw new Error(error.message);
+}
+
+/** URL assinada (bucket privado) para exibir a thumbnail de um slide. */
+export async function getThumbnailUrl(imagePath: string, expiresInSec = 3600): Promise<string | null> {
+  const { data, error } = await db.storage
+    .from('slide-thumbnails')
+    .createSignedUrl(imagePath, expiresInSec);
+  if (error || !data) return null;
+  return data.signedUrl as string;
+}
+
+/**
+ * Conclui a revisão de um projeto: carimba reviewed_at e **poda as thumbnails
+ * dos slides sem erro** (mantém as dos slides com erro). Requer a migration
+ * 20260709 (coluna reviewed_at + policy anon_update_projects).
+ */
+export async function markProjectReviewedInDb(projectId: string): Promise<void> {
+  const { data: slideRows } = await db
+    .from('slides')
+    .select('slide_number, image_path, slide_errors(id)')
+    .eq('project_id', projectId);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const okSlides = (slideRows ?? []).filter((s: any) => (s.slide_errors?.length ?? 0) === 0 && s.image_path);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const paths = okSlides.map((s: any) => s.image_path as string);
+  if (paths.length > 0) {
+    await db.storage.from('slide-thumbnails').remove(paths);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const okNumbers = okSlides.map((s: any) => s.slide_number);
+    await db.from('slides').update({ image_path: null }).eq('project_id', projectId).in('slide_number', okNumbers);
+  }
+
+  const { error } = await db.from('projects').update({ reviewed_at: new Date().toISOString() }).eq('id', projectId);
   if (error) throw new Error(error.message);
 }
 

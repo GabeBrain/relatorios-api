@@ -6,14 +6,20 @@ import {
   deleteProjectFromDb,
   clearAllProjectsFromDb,
   updateErrorVerdictInDb,
+  markProjectReviewedInDb,
 } from '../lib/archive-db';
 import { logActivity } from '@/lib/activity-log';
 
-export type ArchivedSlide = Omit<SlideResult, 'imageDataUrl'>;
+export type ArchivedSlide = Omit<SlideResult, 'imageDataUrl'> & {
+  /** Caminho da thumbnail no bucket (null após poda dos slides OK). */
+  imagePath?: string | null;
+};
 
 export interface ArchivedProject {
   id: string;
   savedAt: string;
+  /** Carimbo de revisão concluída (null = em revisão). */
+  reviewedAt?: string | null;
   projectName: string;
   cityName: string;
   radii: string;
@@ -42,6 +48,7 @@ interface ArchiveStore {
   removeProject: (id: string) => Promise<void>;
   clearAll: () => Promise<void>;
   setErrorVerdict: (projectId: string, errorId: string, verdict: Verdict | null) => Promise<void>;
+  markReviewed: (projectId: string) => Promise<void>;
 }
 
 export const useArchiveStore = create<ArchiveStore>((set) => ({
@@ -118,5 +125,21 @@ export const useArchiveStore = create<ArchiveStore>((set) => ({
       apply(previous); // reverte
       throw err;
     }
+  },
+
+  markReviewed: async (projectId) => {
+    await markProjectReviewedInDb(projectId);
+    logActivity('Revisão concluída', `projeto ${projectId} (imagens OK podadas)`);
+    set((state) => ({
+      projects: state.projects.map((p) =>
+        p.id === projectId
+          ? {
+              ...p,
+              reviewedAt: new Date().toISOString(),
+              slides: p.slides?.map((s) => (s.errors.length === 0 ? { ...s, imagePath: null } : s)),
+            }
+          : p
+      ),
+    }));
   },
 }));

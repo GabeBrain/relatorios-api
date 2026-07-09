@@ -109,6 +109,72 @@ function numericFindings(ir: Ir): { findings: Finding[]; verified: number; numer
   return { findings, verified, numericTables };
 }
 
+// ── RADII (nível 1 DET) — consistência dos raios/zonas de tempo ──────────────
+const MIN_TOKEN = /\b(\d{1,3})\s*min\b/gi;
+
+function radiiOf(s: IrSlide): string[] {
+  const text = [s.titulo ?? '', ...(s.textos ?? [])].join(' ');
+  const found = new Set<number>();
+  let m: RegExpExecArray | null;
+  MIN_TOKEN.lastIndex = 0;
+  while ((m = MIN_TOKEN.exec(text)) !== null) {
+    const n = parseInt(m[1], 10);
+    if (n >= 1 && n <= 180) found.add(n);
+  }
+  return [...found].sort((a, b) => a - b).map((n) => `${n} min`);
+}
+
+function radiiFindings(ir: Ir): Finding[] {
+  // considera só slides com >=2 raios (legendas de mapa), evita prosa solta
+  const perSlide = ir.slides
+    .map((s) => ({ n: s.n, sec: toAuditSection(s.secao_canonica), set: radiiOf(s) }))
+    .filter((p) => p.set.length >= 2);
+  if (perSlide.length === 0) return [];
+
+  // canônico = a legenda COMPLETA (maior cardinalidade) mais frequente do estudo.
+  // Subconjuntos dela são legítimos; só sinalizamos raio ESTRANHO ao canônico.
+  const maxLen = Math.max(...perSlide.map((p) => p.set.length));
+  const fullCounts = new Map<string, number>();
+  for (const p of perSlide) {
+    if (p.set.length === maxLen) {
+      const k = p.set.join('|');
+      fullCounts.set(k, (fullCounts.get(k) ?? 0) + 1);
+    }
+  }
+  const canonical = [...fullCounts.entries()].sort((a, b) => b[1] - a[1])[0][0].split('|');
+  const canonSet = new Set(canonical.map((r) => r.toLowerCase()));
+
+  const out: Finding[] = [];
+  for (const p of perSlide) {
+    const foreign = p.set.filter((r) => !canonSet.has(r.toLowerCase()));
+    if (foreign.length > 0) {
+      out.push({
+        id: `radii-${p.n}`,
+        type: 'RADII',
+        section: p.sec,
+        slideRef: slideRef(p.n),
+        title: 'Raio estranho ao padrão do estudo',
+        detail: `Raio(s) ${foreign.join(', ')} não fazem parte do conjunto canônico do estudo (${canonical.join(', ')}). Possível slide de outro estudo.`,
+        ok: false,
+        viz: { kind: 'map', expected: canonical, detected: p.set },
+      });
+    }
+  }
+  if (out.length === 0) {
+    out.push({
+      id: 'radii-ok',
+      type: 'RADII',
+      section: 'GLOBAL',
+      slideRef: '—',
+      title: 'Raios consistentes em todo o estudo',
+      detail: `Todos os ${perSlide.length} slides com legenda de raio são coerentes com o conjunto canônico.`,
+      ok: true,
+      viz: { kind: 'map', expected: canonical, detected: canonical },
+    });
+  }
+  return out;
+}
+
 // ── Cobertura de seções (STRUCTURE_MISSING) ──────────────────────────────────
 function structureFinding(ir: Ir): Finding {
   const present = new Set(ir.slides.map((s) => (s.secao_canonica ?? '').toUpperCase()));
@@ -152,6 +218,7 @@ export function irToFindings(ir: Ir): Finding[] {
   const findings: Finding[] = [
     ...noteFindings(ir),
     ...sourceFindings(ir),
+    ...radiiFindings(ir),
     ...num.findings,
   ];
   if (num.verified > 0) {

@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { useArchiveStore, type ArchivedProject, type ArchivedSlide } from '../store/archive-store';
+import { getThumbnailUrl } from '../lib/archive-db';
 import { downloadReport } from '../lib/report-generator';
 import { formatUSDTotal, formatUSD } from '../lib/cost-calculator';
 import type { ErrorType, Severity, Verdict } from '../store/analysis-store';
@@ -121,6 +122,35 @@ function VerdictButtons({
   );
 }
 
+// ─── Slide Thumbnail (URL assinada, bucket privado) ───────────────────────────
+
+function SlideThumb({ imagePath, slideNumber }: { imagePath?: string | null; slideNumber: number }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    if (imagePath) getThumbnailUrl(imagePath).then((u) => { if (active) setUrl(u); });
+    return () => { active = false; };
+  }, [imagePath]);
+
+  if (!imagePath) return null;
+  return (
+    <div className="px-4 py-3">
+      {url ? (
+        <img
+          src={url}
+          alt={`Slide ${slideNumber}`}
+          className="rounded border max-h-56 w-full object-contain bg-white"
+          loading="lazy"
+        />
+      ) : (
+        <div className="h-24 rounded border bg-muted/30 flex items-center justify-center text-[11px] text-muted-foreground">
+          <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> carregando imagem…
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Slide Error Card ─────────────────────────────────────────────────────────
 
 function SlideErrorCard({ slide, projectId }: { slide: ArchivedSlide; projectId: string }) {
@@ -170,6 +200,7 @@ function SlideErrorCard({ slide, projectId }: { slide: ArchivedSlide; projectId:
               )}
             </div>
           ))}
+          <SlideThumb imagePath={slide.imagePath} slideNumber={slide.slideNumber} />
           <div className="px-4 py-2">
             <p className="text-[10px] text-muted-foreground font-mono">
               {slide.inputTokens} in · {slide.outputTokens} out · {formatUSD(slide.cost)}
@@ -227,8 +258,21 @@ function FilterBar({
 // ─── Project Detail ───────────────────────────────────────────────────────────
 
 function ProjectDetail({ project }: { project: ArchivedProject }) {
-  const { removeProject } = useArchiveStore();
+  const { removeProject, markReviewed } = useArchiveStore();
   const [filter, setFilter] = useState<Filter>('all');
+  const [reviewing, setReviewing] = useState(false);
+
+  async function handleConcludeReview() {
+    setReviewing(true);
+    try {
+      await markReviewed(project.id);
+      toast.success('Revisão concluída', { description: 'Imagens dos slides sem erro foram podadas do armazenamento.' });
+    } catch (err) {
+      toast.error('Falha ao concluir revisão', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setReviewing(false);
+    }
+  }
 
   const slides = project.slides ?? [];
   const withErrors = slides.filter((s) => s.errors.length > 0);
@@ -267,6 +311,16 @@ function ProjectDetail({ project }: { project: ArchivedProject }) {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {project.reviewedAt ? (
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 px-2.5 py-1 text-[11px] font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Revisão concluída
+            </span>
+          ) : (
+            <Button size="sm" variant="outline" onClick={handleConcludeReview} disabled={reviewing}>
+              {reviewing ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />}
+              Concluir revisão
+            </Button>
+          )}
           <Button
             size="sm"
             variant="outline"

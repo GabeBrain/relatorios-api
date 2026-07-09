@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import {
-  CheckCircle2, AlertTriangle, ArrowRight, MinusCircle, XCircle, MapPin, Quote,
+  CheckCircle2, AlertTriangle, ArrowRight, MinusCircle, XCircle, MapPin, Quote, Radius,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   ERROR_CATALOG, MODE_META, errorLabel,
 } from '../../lib/error-catalog';
 import type {
-  Finding, Verdict, TableViz, SideBySideViz, BinRangeViz, TextViz, Cell,
+  Finding, Verdict, TableViz, SideBySideViz, BinRangeViz, TextViz, MapViz, Cell,
 } from '../../lib/audit/model';
 
 // ─── Viz: tabela com células marcadas ───────────────────────────────────────
@@ -170,6 +170,35 @@ function TextVizView({ viz }: { viz: TextViz }) {
   );
 }
 
+function MapVizView({ viz }: { viz: MapViz }) {
+  const exp = new Set(viz.expected.map((s) => s.toLowerCase()));
+  const det = new Set(viz.detected.map((s) => s.toLowerCase()));
+  const chip = (label: string, tone: 'ok' | 'bad' | 'muted') => (
+    <span key={label} className={cn(
+      'text-[11px] rounded-full px-2 py-0.5 border',
+      tone === 'ok' && 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+      tone === 'bad' && 'bg-destructive/15 text-destructive border-destructive/30',
+      tone === 'muted' && 'bg-muted/50 text-muted-foreground border-border',
+    )}>{label}</span>
+  );
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-[11px] text-muted-foreground flex items-center gap-1"><Radius className="w-3 h-3" />Esperado:</span>
+        {viz.expected.map((r) => chip(r, 'muted'))}
+      </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-[11px] text-muted-foreground flex items-center gap-1"><Radius className="w-3 h-3" />Detectado:</span>
+        {viz.detected.length === 0
+          ? <span className="text-[11px] text-muted-foreground">nenhum raio em texto</span>
+          : viz.detected.map((r) => chip(r, exp.has(r.toLowerCase()) ? 'ok' : 'bad'))}
+        {viz.expected.filter((r) => !det.has(r.toLowerCase())).map((r) => chip(`${r} (faltando)`, 'bad'))}
+      </div>
+      {viz.note && <p className="text-[11px] text-muted-foreground">{viz.note}</p>}
+    </div>
+  );
+}
+
 function VizSwitch({ finding }: { finding: Finding }) {
   const v = finding.viz;
   if (!v) return null;
@@ -177,6 +206,7 @@ function VizSwitch({ finding }: { finding: Finding }) {
     case 'table': return <TableVizView viz={v} />;
     case 'sidebyside': return <SideBySideVizView viz={v} />;
     case 'binrange': return <BinRangeVizView viz={v} />;
+    case 'map': return <MapVizView viz={v} />;
     case 'text': return <TextVizView viz={v} />;
   }
 }

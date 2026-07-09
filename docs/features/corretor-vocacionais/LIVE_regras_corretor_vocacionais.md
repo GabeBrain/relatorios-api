@@ -16,6 +16,24 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.12 — 2026-07-09 — Mapas/raios (nível 1) + persistência de thumbnails
+
+**Item 1 — Mapas/raios (nível 1 DET).** Regra `RADII` sobre o IR (`ir-rules.ts`): raios
+canônicos = maior legenda modal; sinaliza slide com raio **estranho** ao canônico (subconjuntos
+passam). Novo padrão de visualização **mapa** (`MapViz`): chips esperado × detectado.
+Verificado no IR real: Itajaí acha 3 slides com "15 min" num estudo 10/20/30 (s91/s92/s101);
+Marka consistente. Nível 2 (visão sobre a imagem do mapa) segue planejado.
+
+**Item 2 — Persistência de thumbnails (§5 do handoff).** Migration `20260709` (`projects.reviewed_at`
++ policy). `archive-db.ts`: passa a **persistir a thumbnail de TODOS os slides** (não só com erro);
+`getThumbnailUrl` (URL assinada, bucket privado); `markProjectReviewedInDb` **poda as imagens dos
+slides OK** ao concluir a revisão. UI (`CorretorPage`): thumbnail no card de erro + botão
+"Concluir revisão" + selo "Revisão concluída". Racional: auditar **falso negativo** (o corretor
+disse OK e tinha bug) — evidência que antes não guardávamos.
+
+> ⚠ Migration `20260709` precisa ser aplicada no Supabase. O fluxo de storage/DB foi verificado
+> por tsc/eslint/build; não foi exercido em runtime contra o Supabase nesta sessão.
+
 ## Versão 0.11 — 2026-07-09 — Ingestão de IR no navegador (estudos reais)
 
 A Auditoria v2 deixou de depender das fixtures: agora carrega o **`.ir.json` de qualquer
