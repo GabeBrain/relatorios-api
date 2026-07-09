@@ -1062,46 +1062,12 @@ export default function TestesArquitetura() {
           <strong>Limitação da API:</strong> Distratos não são fornecidos diretamente. <code>*Distratos no trimestre</code> é uma estimativa via variação de estoque; <code>VGV Distratos</code> permanece em branco.
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label className="text-xs">UF *</Label>
-            <Select value={uf} onValueChange={(v) => { setUf(v); setCity(''); }} disabled={loading}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={monitoredCities ? 'Selecione' : 'Carregando…'} /></SelectTrigger>
-              <SelectContent>{availableUFs.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-            </Select>
+            <Label className="text-xs">Escopo geográfico *</Label>
+            <GeoApiScopeSelector value={scope} onChange={handleScopeChange} disabled={loading} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Município *</Label>
-            <Popover open={cityOpen} onOpenChange={setCityOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  disabled={loading || !uf}
-                  className="h-8 w-full justify-between text-xs font-normal px-3"
-                >
-                  <span className="truncate">{city || (uf ? 'Selecione' : 'Selecione a UF primeiro')}</span>
-                  <ChevronsUpDown className="h-3 w-3 opacity-50 flex-shrink-0 ml-1" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[220px] p-0">
-                <Command>
-                  <CommandInput placeholder="Buscar município..." className="h-8 text-xs" />
-                  <CommandList>
-                    <CommandEmpty className="py-3 text-center text-xs text-muted-foreground">Nenhum município encontrado.</CommandEmpty>
-                    <CommandGroup>
-                      {availableCities.map((c) => (
-                        <CommandItem key={c} value={c} onSelect={() => { setCity(c); setCityOpen(false); }} className="text-xs">
-                          {c}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="space-y-1 sm:col-span-2">
             <Label className="text-xs">Análise temporal desde</Label>
             <Select value={startQ} onValueChange={setStartQ} disabled={loading}>
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
