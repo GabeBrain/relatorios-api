@@ -22,7 +22,6 @@ export function applyFilters(buildings: Building[], f: Filters): Building[] {
     if (f.neighborhoods.length && !f.neighborhoods.includes(b.neighborhood)) continue;
     if (f.types.length && !f.types.includes(b.building_type)) continue;
     if (f.standards.length && !f.standards.includes(b.standard)) continue;
-    if (f.years.length && (!b.releaseYear || !f.years.includes(String(b.releaseYear)))) continue;
     if (f.buildings.length && !f.buildings.includes(b.building_id)) continue;
 
     const typologies = b.typologies.filter((t) => typologyMatchesFilters(t, f));
