@@ -27,6 +27,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { useAuthStore } from '@/store/auth-store';
+import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
 import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
 
@@ -473,61 +474,12 @@ export default function TQCidValidacaoBase() {
   const token = useAuthStore((s) => s.getToken());
   const hasToken = !!token;
 
-  // Record<UF, city[]> — populado paginando /monitored-cities
-  const [citiesByUf, setCitiesByUf] = useState<Record<string, string[]> | null>(null);
-  const [selectedUf, setSelectedUf] = useState('');
-  const [selectedCityName, setSelectedCityName] = useState('');
-  const [cityOpen, setCityOpen] = useState(false);
+  // Escopo UF/cidade agora vem do padrão compartilhado GeoApiScopeEngine.
+  // Ver AGENTS.md / CLAUDE.md, seção "GeoApiScopeEngine".
+  const [scope, setScope] = useState<{ uf: string; city: string }>({ uf: '', city: '' });
+  const selectedUf = scope.uf;
+  const selectedCityName = scope.city;
   const [selectedTypes, setSelectedTypes] = useState<BuildingType[]>([...ALL_BUILDING_TYPES]);
-
-  const [running, setRunning] = useState(false);
-  const [phase, setPhase] = useState('');
-  const [error, setError] = useState('');
-  const [fetchProg, setFetchProg] = useState({ done: 0, total: 0, failed: 0, pct: 0 });
-  const abortRef = useRef<AbortController | null>(null);
-
-  const [rows, setRows] = useState<FlatRow[]>([]);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [outlierStats, setOutlierStats] = useState<OutlierStats[]>([]);
-  const [ran, setRan] = useState(false);
-
-  const [displayPct, setDisplayPct] = useState(0);
-  const displayPctRef = useRef(0);
-
-  // Carrega todas as páginas de /monitored-cities seguindo links.next
-  useEffect(() => {
-    if (!token) return;
-    let cancelled = false;
-
-    async function fetchAll() {
-      const byUf: Record<string, Set<string>> = {};
-      let nextUrl: string | null = `${BASE_URL}/monitored-cities`;
-
-      while (nextUrl) {
-        const res = await fetch(nextUrl, {
-          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-        });
-        if (!res.ok || cancelled) return;
-        const data = await res.json();
-        for (const item of (data.data ?? []) as MonitoredCity[]) {
-          const uf = String(item.state ?? '').toUpperCase();
-          const city = String(item.city ?? '');
-          if (!uf || !city) continue;
-          if (!byUf[uf]) byUf[uf] = new Set();
-          byUf[uf].add(city);
-        }
-        nextUrl = (data.links?.next as string | null) ?? null;
-      }
-
-      if (cancelled) return;
-      const result: Record<string, string[]> = {};
-      for (const [uf, set] of Object.entries(byUf)) result[uf] = [...set].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-      setCitiesByUf(result);
-    }
-
-    fetchAll().catch(() => {});
-    return () => { cancelled = true; };
-  }, [token]);
 
   // Interpolação suave do progresso da logo
   useEffect(() => {
@@ -551,8 +503,6 @@ export default function TQCidValidacaoBase() {
     return () => clearInterval(id);
   }, [fetchProg.pct, running]);
 
-  const availableUfs = citiesByUf ? Object.keys(citiesByUf).sort() : [];
-  const availableCities = (citiesByUf && selectedUf) ? (citiesByUf[selectedUf] ?? []) : [];
   const canRun = !!selectedUf && !!selectedCityName && selectedTypes.length > 0;
 
   function toggleType(t: BuildingType) {
@@ -868,68 +818,13 @@ export default function TQCidValidacaoBase() {
         {/* Seletor UF + cidade + botão */}
         {hasToken && (
           <div className="flex items-end gap-3 flex-wrap">
-            {/* UF */}
-            <div className="space-y-1.5 w-24 shrink-0">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">UF</label>
-              <Select
-                value={selectedUf}
-                onValueChange={(v) => { setSelectedUf(v); setSelectedCityName(''); setRan(false); }}
-                disabled={running || !citiesByUf}
-              >
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder={citiesByUf ? 'UF' : '…'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableUfs.map((u) => (
-                    <SelectItem key={u} value={u}>{u}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <GeoApiScopeSelector
+              value={scope}
+              onChange={(next) => { setScope(next); setRan(false); }}
+              disabled={running}
+              className="flex-1 min-w-[280px]"
+            />
 
-            {/* Município com busca */}
-            <div className="flex-1 min-w-[180px] space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Município</label>
-              <Popover open={cityOpen} onOpenChange={setCityOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    disabled={running || !selectedUf}
-                    className="h-9 w-full justify-between text-sm font-normal px-3"
-                  >
-                    <span className="truncate">
-                      {selectedCityName || (selectedUf ? 'Selecione o município' : 'Selecione a UF primeiro')}
-                    </span>
-                    <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0 ml-1" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[260px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Buscar município…" className="h-9 text-sm" />
-                    <CommandList>
-                      <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
-                        Nenhum município encontrado.
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {availableCities.map((c) => (
-                          <CommandItem
-                            key={c}
-                            value={c}
-                            onSelect={() => { setSelectedCityName(c); setCityOpen(false); setRan(false); }}
-                            className="text-sm"
-                          >
-                            {c}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Botão */}
             <button
               type="button"
               onClick={run}

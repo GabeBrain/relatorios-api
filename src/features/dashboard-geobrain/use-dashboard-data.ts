@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchBuildings, type FetchProgress } from './api';
 import type { Building } from './types';
 import { useAuthStore } from '@/store/auth-store';
-import { ufFromCity } from './geo-utils';
 
 type Status = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -16,20 +15,14 @@ export function useDashboardData() {
   const lastKey = useRef<string>('');
 
   const load = useCallback(
-    async (city: string) => {
-      if (!city) return;
-      const uf = ufFromCity(city);
-      if (!uf) {
-        setError(`Não foi possível identificar a UF da cidade "${city}".`);
-        setStatus('error');
-        return;
-      }
-      const key = `${uf}|${city}`;
+    async ({ uf, city }: { uf: string; city: string }) => {
+      if (!uf || !city) return;
       if (!token) {
         setError('Sessão sem token — faça login no cabeçalho.');
         setStatus('error');
         return;
       }
+      const key = `${uf}|${city}`;
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
@@ -54,7 +47,16 @@ export function useDashboardData() {
     [token],
   );
 
+  const reset = useCallback(() => {
+    abortRef.current?.abort();
+    lastKey.current = '';
+    setBuildings(null);
+    setStatus('idle');
+    setError('');
+    setProgress(null);
+  }, []);
+
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  return { status, buildings, error, progress, load };
+  return { status, buildings, error, progress, load, reset };
 }

@@ -137,7 +137,7 @@ function parseSlide(xml: string, num: number, parser: DOMParser): IrSlide {
 
 async function sha1Hex(bytes: Uint8Array): Promise<string> {
   try {
-    const buf = await crypto.subtle.digest('SHA-1', bytes);
+    const buf = await crypto.subtle.digest('SHA-1', bytes as unknown as ArrayBuffer);
     return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
   } catch {
     return '';
@@ -158,7 +158,7 @@ export async function pptxToIr(
   } else if (input instanceof ArrayBuffer) {
     bytes = new Uint8Array(input);
   } else {
-    bytes = input;
+    bytes = input as Uint8Array;
   }
 
   // decompacta só os XMLs de slide/rels (ignora as imagens pesadas)

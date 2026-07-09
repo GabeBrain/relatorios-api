@@ -23,6 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
 import MUNICIPIOS_BR from '@/assets/municipios-br.json';
+import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
 
 const UF_LIST = Object.keys(MUNICIPIOS_BR as Record<string, string[]>).sort();
 
@@ -914,44 +915,13 @@ export default function TestesArquitetura() {
     return () => clearInterval(id);
   }, [phase]);
 
-  const [monitoredCities, setMonitoredCities] = useState<Record<string, string[]> | null>(null);
-
-  useEffect(() => {
-    if (!hasValidToken()) return;
-    const token = getToken();
-    let cancelled = false;
-
-    async function fetchMonitored() {
-      const byUf: Record<string, Set<string>> = {};
-      let nextUrl: string | null = `${BASE_URL}/monitored-cities`;
-      while (nextUrl) {
-        const res = await fetch(nextUrl, { headers: { Authorization: `Bearer ${token}` } });
-        if (!res.ok || cancelled) return;
-        const data = await res.json();
-        for (const item of (data.data ?? [])) {
-          const uf = String(item.state ?? '').toUpperCase();
-          const city = String(item.city ?? '');
-          if (!uf || !city) continue;
-          if (!byUf[uf]) byUf[uf] = new Set();
-          byUf[uf].add(city);
-        }
-        nextUrl = data.links?.next ?? null;
-      }
-      if (cancelled) return;
-      const result: Record<string, string[]> = {};
-      for (const [uf, cities] of Object.entries(byUf)) result[uf] = [...cities].sort();
-      setMonitoredCities(result);
-    }
-
-    fetchMonitored().catch(() => { /* silently fall back to IBGE list */ });
-    return () => { cancelled = true; };
-  }, [getToken, hasValidToken]);
-
-  const availableUFs = monitoredCities ? UF_LIST.filter((u) => u in monitoredCities) : UF_LIST;
-
-  const ibgeCities = (MUNICIPIOS_BR as Record<string, string[]>)[uf] ?? [];
-  const geobCitySet = monitoredCities ? new Set(monitoredCities[uf] ?? []) : null;
-  const availableCities = geobCitySet ? ibgeCities.filter((c) => geobCitySet.has(c)) : ibgeCities;
+  // Escopo UF/cidade agora vem do padrão compartilhado GeoApiScopeEngine.
+  // Ver AGENTS.md / CLAUDE.md, seção "GeoApiScopeEngine".
+  const scope = { uf, city };
+  const handleScopeChange = (next: { uf: string; city: string }) => {
+    setUf(next.uf);
+    setCity(next.city);
+  };
 
   const previewAbortRef = useRef<AbortController | null>(null);
   const fetchAbortRef = useRef<AbortController | null>(null);
@@ -1093,46 +1063,12 @@ export default function TestesArquitetura() {
           <strong>Limitação da API:</strong> Distratos não são fornecidos diretamente. <code>*Distratos no trimestre</code> é uma estimativa via variação de estoque; <code>VGV Distratos</code> permanece em branco.
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label className="text-xs">UF *</Label>
-            <Select value={uf} onValueChange={(v) => { setUf(v); setCity(''); }} disabled={loading}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={monitoredCities ? 'Selecione' : 'Carregando…'} /></SelectTrigger>
-              <SelectContent>{availableUFs.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-            </Select>
+            <Label className="text-xs">Escopo geográfico *</Label>
+            <GeoApiScopeSelector value={scope} onChange={handleScopeChange} disabled={loading} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Município *</Label>
-            <Popover open={cityOpen} onOpenChange={setCityOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  disabled={loading || !uf}
-                  className="h-8 w-full justify-between text-xs font-normal px-3"
-                >
-                  <span className="truncate">{city || (uf ? 'Selecione' : 'Selecione a UF primeiro')}</span>
-                  <ChevronsUpDown className="h-3 w-3 opacity-50 flex-shrink-0 ml-1" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[220px] p-0">
-                <Command>
-                  <CommandInput placeholder="Buscar município..." className="h-8 text-xs" />
-                  <CommandList>
-                    <CommandEmpty className="py-3 text-center text-xs text-muted-foreground">Nenhum município encontrado.</CommandEmpty>
-                    <CommandGroup>
-                      {availableCities.map((c) => (
-                        <CommandItem key={c} value={c} onSelect={() => { setCity(c); setCityOpen(false); }} className="text-xs">
-                          {c}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="space-y-1 sm:col-span-2">
             <Label className="text-xs">Análise temporal desde</Label>
             <Select value={startQ} onValueChange={setStartQ} disabled={loading}>
               <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
