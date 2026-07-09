@@ -817,68 +817,13 @@ export default function TQCidValidacaoBase() {
         {/* Seletor UF + cidade + botão */}
         {hasToken && (
           <div className="flex items-end gap-3 flex-wrap">
-            {/* UF */}
-            <div className="space-y-1.5 w-24 shrink-0">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">UF</label>
-              <Select
-                value={selectedUf}
-                onValueChange={(v) => { setSelectedUf(v); setSelectedCityName(''); setRan(false); }}
-                disabled={running || !citiesByUf}
-              >
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder={citiesByUf ? 'UF' : '…'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableUfs.map((u) => (
-                    <SelectItem key={u} value={u}>{u}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <GeoApiScopeSelector
+              value={scope}
+              onChange={(next) => { setScope(next); setRan(false); }}
+              disabled={running}
+              className="flex-1 min-w-[280px]"
+            />
 
-            {/* Município com busca */}
-            <div className="flex-1 min-w-[180px] space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Município</label>
-              <Popover open={cityOpen} onOpenChange={setCityOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    disabled={running || !selectedUf}
-                    className="h-9 w-full justify-between text-sm font-normal px-3"
-                  >
-                    <span className="truncate">
-                      {selectedCityName || (selectedUf ? 'Selecione o município' : 'Selecione a UF primeiro')}
-                    </span>
-                    <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0 ml-1" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[260px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Buscar município…" className="h-9 text-sm" />
-                    <CommandList>
-                      <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
-                        Nenhum município encontrado.
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {availableCities.map((c) => (
-                          <CommandItem
-                            key={c}
-                            value={c}
-                            onSelect={() => { setSelectedCityName(c); setCityOpen(false); setRan(false); }}
-                            className="text-sm"
-                          >
-                            {c}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Botão */}
             <button
               type="button"
               onClick={run}
