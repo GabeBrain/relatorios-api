@@ -443,15 +443,20 @@ export function extractOptions(buildings: Building[]) {
   const standards = s<string>();
   const bedrooms = s<string>();
   const garages = s<string>();
+  const monthsSet = new Map<string, Date>(); // YYYY-MM → date
   const names = new Map<string, string>();
 
   for (const b of buildings) {
     if (b.releaseYear) years.add(String(b.releaseYear));
-    // extract years also from history
+    // extract years/months also from history
     for (const t of b.typologies) {
       for (const h of t.history) {
         const y = h.periodDate.getFullYear();
-        if (y > 1990) years.add(String(y));
+        if (y > 1990) {
+          years.add(String(y));
+          const mk = monthKey(h.periodDate);
+          if (!monthsSet.has(mk)) monthsSet.set(mk, h.periodDate);
+        }
       }
     }
     if (b.status) status.add(b.status);
@@ -469,8 +474,18 @@ export function extractOptions(buildings: Building[]) {
 
   const sortStr = (arr: string[]) => arr.sort((a, b) => a.localeCompare(b, 'pt-BR'));
   const sortBucket = (arr: string[]) => arr.sort((a, b) => (a === '4+' ? 99 : parseInt(a)) - (b === '4+' ? 99 : parseInt(b)));
+
+  const MONTH_LABELS_BR = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  const months = Array.from(monthsSet.entries())
+    .sort(([a], [b]) => b.localeCompare(a)) // desc: mais recente primeiro
+    .map(([value, d]) => ({
+      value,
+      label: `${MONTH_LABELS_BR[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`,
+    }));
+
   return {
     years: sortStr(Array.from(years)).reverse(),
+    months,
     status: sortStr(Array.from(status)),
     cities: sortStr(Array.from(cities)),
     neighborhoods: sortStr(Array.from(neighborhoods)),
