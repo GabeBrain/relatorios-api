@@ -49,6 +49,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-09 — Corretor v2: piloto reproduz as notas da analista + custos em R$ — Gabriel
+- **O quê:** piloto expandido para 6 complementos (pares cruzados). `crosscheck_piloto.py`
+  **reproduziu as notas da analista a partir dos números crus**: faixa de renda divergente
+  (s59×s41/s60), lacunas 12.143≠5.478 (s121×s122), janelas 2026-31×2025-30 — **+ 1 bug bônus
+  não anotado** (furo de faixa 9501-10000). Calibração aprendida: arredondamento de exibição
+  pede tolerância ±n/2 em projeções.
+- **Custos em R$** (`custos_visao_reais.md`): visão ≈ R$ 0,02–0,08/imagem → R$ 1,50–6,80/estudo
+  → R$ 380–4.100/ano; tabela nativa = R$ 0. Argumento decisivo: exatidão + pipeline zero.
+- **Arquivos:** `docs/features/corretor-vocacionais/{crosscheck_piloto.py, custos_visao_reais.md,
+  visao/piloto/*(6)}`, LIVE do Corretor (v0.7).
+
 ### 2026-07-09 — Corretor v2 Fase C: piloto de visão validado de ponta a ponta — Gabriel
 - **O quê:** pipeline da extração de números em imagem desenhado e pilotado. `scan_imagens.py`
   gera o manifest com sha1 (cache): 487 refs → 334 únicas → **154 únicas em seções numéricas**.

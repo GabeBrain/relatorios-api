@@ -16,6 +16,33 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.7 — 2026-07-09 — Piloto expandido: notas reproduzidas + custos em R$
+
+Piloto expandido para **6 complementos** (pares de validação cruzada). Resultado central:
+**o corretor reproduziu as notas da analista a partir dos números crus** — recall total no
+escopo pilotado, mais um bug bônus que ela não anotou.
+
+### Achados do cross-check (`crosscheck_piloto.py`)
+
+| Regra | Achado | Nota-gabarito reproduzida |
+|---|---|---|
+| `CROSS_TABLE_MISMATCH` | Ita s59 faixa 4 «21.831–30.572» ≠ s41/s60 «25.710–34.360» | "Ajustar com as mesmas rendas do slide" |
+| `CROSS_TABLE_MISMATCH` | Mrk s121×s122 Oferta Lançada 12.143 ≠ 5.478 (mesma Z.I.) | "Ajustar com os valores…tabela de lacunas geral" |
+| `TEMPORAL_WINDOW` | Ita s59 projeta 2026-2031, s60 projeta 2025-2030 (irmãos) | "verificar essa taxa…" / rubrica 6 anos |
+| `BINNING_RULE` | Mrk s122: furo de faixa R$/m² (9501–10000 inexistente) | **bônus — não anotado pela analista** |
+
+### Calibração aprendida
+
+- `valida_complemento.py`: 107 OK, 13 "inconsistências" — todas off-by-1/2 em projeções =
+  **arredondamento de exibição** (células arredondadas individualmente). Política: tolerância
+  ±n/2 unidades em tabelas de projeção (não ±0.5).
+
+### Custos em R$ (para a conversa com os analistas)
+
+[`custos_visao_reais.md`](./custos_visao_reais.md): extração por imagem ≈ **R$ 0,02–0,08/img**
+→ **R$ 1,50–6,80/estudo** → R$ 380–4.100/ano conforme volume/modelo. Tabela nativa: **R$ 0**.
+Argumento decisivo não é a API: é **exatidão por construção + pipeline zero**.
+
 ## Versão 0.6 — 2026-07-09 — Fase C iniciada: piloto de visão validado
 
 Piloto da extração de números presos em imagem — **provado de ponta a ponta**

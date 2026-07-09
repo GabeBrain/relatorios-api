@@ -1,0 +1,38 @@
+{
+  "schema": "ir_complemento_visao/v0",
+  "estudo": "Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_estudo exemplo.pptx",
+  "slide": 137,
+  "secao": "LACUNAS",
+  "titulo_slide": "TABELA DE LACUNAS- TIPOLOGIA POR R$/M²",
+  "imagem": "ppt/media/image169.png",
+  "extraido_por": "piloto-manual (Claude, referência de qualidade — produção usará edge function)",
+  "nota_gabarito": "Ajustar com os valores que pedi na tabela de lacunas geral",
+  "observacao_extracao": "Z.I. distinta do s122. Faixas de R$/m² diferentes do s122 (começam em 'Até R$8000' e vão até 'Acima de 18000').",
+  "tabelas": [
+    {
+      "titulo": "Oferta Lançada — tipologia × faixa R$/m²",
+      "colunas": ["Tipologia", "Até R$8000", "8001-8500", "8501-9000", "9001-10000", "10001-12000", "12001-14000", "14001-16000", "16001-18000", "Acima de 18000", "Total", "Part.%"],
+      "linhas_num": [
+        ["1 Dormitório", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ["2 Dormitórios", 786, 770, 152, 112, 0, 0, 0, 0, 0, 1820, 100],
+        ["3 Dormitórios", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ["4 Dormitórios", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      "totais_declarados": ["Total", 786, 770, 152, 112, 0, 0, 0, 0, 0, 1820, 100]
+    },
+    {
+      "titulo": "Oferta Final — tipologia × faixa R$/m²",
+      "colunas": ["Tipologia", "Até R$8000", "8001-8500", "8501-9000", "9001-10000", "10001-12000", "12001-14000", "14001-16000", "16001-18000", "Acima de 18000", "Total", "Part.%"],
+      "linhas_num": [
+        ["1 Dormitório", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ["2 Dormitórios", 132, 48, 25, 22, 0, 0, 0, 0, 0, 227, 100],
+        ["3 Dormitórios", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ["4 Dormitórios", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      "totais_declarados": ["Total", 132, 48, 25, 22, 0, 0, 0, 0, 0, 227, 100]
+    }
+  ],
+  "bugs_evidenciados": [
+    "CROSS_TABLE_MISMATCH (candidato): faixas de R$/m² diferentes das do s122 — se a rubrica exigir faixas iguais entre Z.I.s, é bug; senão, calibrar com a analista."
+  ]
+}
