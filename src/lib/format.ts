@@ -29,7 +29,7 @@ export function brlCompact(v: number | null | undefined): string {
   const abs = Math.abs(v);
   if (abs >= 1e9) return `R$ ${(v / 1e9).toFixed(2).replace('.', ',')} Bi`;
   if (abs >= 1e6) return `R$ ${(v / 1e6).toFixed(1).replace('.', ',')} Mi`;
-  if (abs >= 1e3) return `R$ ${(v / 1e3).toFixed(1).replace('.', ',')}k`;
+  if (abs >= 1e3) return `R$ ${(v / 1e3).toFixed(1).replace('.', ',')} mil`;
   return brl.format(v);
 }
 
