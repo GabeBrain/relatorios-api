@@ -1,7 +1,7 @@
 import type { SlideResult, ProjectConfig, CostSummary, ErrorType } from '../store/analysis-store';
 import { formatUSD, formatUSDTotal } from './cost-calculator';
 
-const ERROR_TYPE_LABELS: Record<ErrorType, string> = {
+const ERROR_TYPE_LABELS: Partial<Record<ErrorType, string>> = {
   PERCENTAGE_SUM: 'Soma %',
   CITY_NAME: 'Nome Cidade',
   RADII: 'Raios',
