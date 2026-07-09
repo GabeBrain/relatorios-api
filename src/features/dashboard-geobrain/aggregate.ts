@@ -136,7 +136,7 @@ export function computeSeries(buildings: Building[], f: Filters, g: Granularity)
     for (const t of b.typologies) {
       if (!t.history.length) continue;
       const launchEntry = t.history[0];
-      if (inRange(launchEntry.periodDate, f.from, f.to)) {
+      if (historyMatches(launchEntry, f)) {
         const key = periodKey(launchEntry.periodDate, g);
         const p = map.get(key) ?? emptyPoint(key, periodSortKey(launchEntry.periodDate, g));
         p.ofertaLancada += t.qty;
