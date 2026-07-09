@@ -86,6 +86,14 @@ Reproduzir a **sessão de correção**, não a avaliação única:
 
 Ordem por dependência: 1 → 2 → 3 → 4. Slice 1 já vale sozinho (deixa a tela no formato do fluxo).
 
+### Slice 1 — feito (2026-07-09)
+
+`AuditoriaV2Page` reorganizada em worklist: **espinha sequencial por slide** (erros locais,
+ordem numérica, agrupados por slide) + **seção "Erros entre slides"** (relacionais, por tipo) +
+**filtro** (Sequencial ↔ por tipo). Split local/relacional via `isLocal` (slideRef `sNN` = local;
+`×`/`—`/`ata` = relacional). Validado nos dados reais: Itajaí 6 locais (5 slides) + 4 relacionais;
+Marka 11 locais + 1 relacional. Próximo: Slice 2 (status híbrido + progresso a zero).
+
 ## Relação com 6g (repensar a interface)
 
 Este doc é o **lente de workflow** que informa o 6g (redesenho de ponta a ponta: 2ª aba lateral

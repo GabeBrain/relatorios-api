@@ -4,8 +4,8 @@ import { toast } from 'sonner';
 import { ArrowLeft, FlaskConical, AlertTriangle, CheckCircle2, Layers, Download, Target, Upload, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  ERROR_CATALOG, MODE_META, SECTION_LABELS, errorLabel,
-  type ErrorType, type AuditSection, type ErrorMode,
+  ERROR_CATALOG, MODE_META, errorLabel,
+  type ErrorType, type ErrorMode,
 } from '../lib/error-catalog';
 import { STUDIES } from '../lib/audit/fixtures';
 import type { StudyFixture } from '../lib/audit/model';
@@ -17,16 +17,22 @@ import {
   loadVerdicts, saveVerdicts, calibrationFor, exportReviewCsv, type VerdictMap,
 } from '../lib/audit/session';
 
-const SECTION_ORDER: AuditSection[] = [
-  'ESTRUTURA', 'SOCIO', 'MERCADO', 'LACUNAS', 'ABSORCAO', 'ENTORNO', 'ATA', 'GLOBAL',
-];
 const ALL_TYPES = Object.keys(ERROR_CATALOG) as ErrorType[];
+
+/** Erro LOCAL = mora num único slide (slideRef "sNN"). Relacional/global = resto. */
+function isLocal(f: { slideRef: string }): boolean {
+  return /^s\d+$/.test(f.slideRef.trim());
+}
+function slideNumOf(f: { slideRef: string }): number {
+  return parseInt(f.slideRef.replace(/\D/g, ''), 10) || 0;
+}
 
 export default function AuditoriaV2Page() {
   const navigate = useNavigate();
   const [loaded, setLoaded] = useState<StudyFixture[]>([]);
   const [studyId, setStudyId] = useState(STUDIES[0].id);
   const [verdicts, setVerdicts] = useState<VerdictMap>(() => loadVerdicts());
+  const [typeFilter, setTypeFilter] = useState<ErrorType | 'all'>('all');
   const fileRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
   const allStudies = useMemo(() => [...STUDIES, ...loaded], [loaded]);
@@ -70,14 +76,31 @@ export default function AuditoriaV2Page() {
     return { issues, checks, byMode, typesPresent };
   }, [study]);
 
-  const bySection = useMemo(() => {
-    const map = new Map<AuditSection, typeof study.findings>();
-    for (const f of study.findings) {
-      if (!map.has(f.section)) map.set(f.section, []);
-      map.get(f.section)!.push(f);
+  // Worklist: erros LOCAIS (um slide) na espinha sequencial por slide;
+  // erros RELACIONAIS/globais (entre slides) numa seção à parte, por tipo.
+  const worklist = useMemo(() => {
+    const local = study.findings.filter((f) => isLocal(f));
+    const relational = study.findings.filter((f) => !isLocal(f));
+    const bySlide = new Map<number, typeof study.findings>();
+    for (const f of local) {
+      const n = slideNumOf(f);
+      if (!bySlide.has(n)) bySlide.set(n, []);
+      bySlide.get(n)!.push(f);
     }
-    return SECTION_ORDER.filter((s) => map.has(s)).map((s) => [s, map.get(s)!] as const);
+    const byType = new Map<ErrorType, typeof study.findings>();
+    for (const f of relational) {
+      if (!byType.has(f.type)) byType.set(f.type, []);
+      byType.get(f.type)!.push(f);
+    }
+    return {
+      slides: [...bySlide.entries()].sort((a, b) => a[0] - b[0]),
+      relational: [...byType.entries()],
+    };
   }, [study]);
+
+  useEffect(() => { setTypeFilter('all'); }, [studyId]);
+
+  const filtered = typeFilter === 'all' ? [] : study.findings.filter((f) => f.type === typeFilter);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -210,26 +233,117 @@ export default function AuditoriaV2Page() {
             </div>
           </details>
 
-          {/* Achados por seção */}
-          {bySection.map(([section, findings]) => (
-            <section key={section} className="space-y-2">
-              <div className="flex items-center gap-2 pt-1">
-                <h2 className="text-sm font-semibold">{SECTION_LABELS[section]}</h2>
-                <span className="text-[10px] text-muted-foreground">{findings.length} achado(s)</span>
-                <div className="flex-1 border-t border-border" />
+          {/* Worklist de correção */}
+          {(() => {
+            const card = (f: (typeof study.findings)[number]) => (
+              <FindingCard
+                key={f.id}
+                finding={f}
+                verdict={verdicts[f.id]}
+                onVerdict={(v) => setVerdicts((prev) => ({ ...prev, [f.id]: v }))}
+              />
+            );
+
+            // Barra de filtro por tipo (lente alternativa)
+            const chips = [...stats.typesPresent].sort((a, b) => errorLabel(a).localeCompare(errorLabel(b)));
+            const filterBar = (
+              <div className="flex flex-wrap gap-1.5 items-center">
+                <span className="text-[11px] text-muted-foreground mr-1">Corrigir por slide</span>
+                <FilterChip active={typeFilter === 'all'} onClick={() => setTypeFilter('all')} label="Sequencial" />
+                <span className="text-[11px] text-muted-foreground mx-1">ou por tipo:</span>
+                {chips.map((t) => (
+                  <FilterChip
+                    key={t}
+                    active={typeFilter === t}
+                    onClick={() => setTypeFilter(t)}
+                    label={`${errorLabel(t)} ${study.findings.filter((f) => f.type === t).length}`}
+                  />
+                ))}
               </div>
-              {findings.map((f) => (
-                <FindingCard
-                  key={f.id}
-                  finding={f}
-                  verdict={verdicts[f.id]}
-                  onVerdict={(v) => setVerdicts((prev) => ({ ...prev, [f.id]: v }))}
-                />
-              ))}
-            </section>
-          ))}
+            );
+
+            return (
+              <div className="space-y-4">
+                {filterBar}
+
+                {typeFilter !== 'all' ? (
+                  // Lente por tipo: lista plana
+                  <section className="space-y-2">
+                    <SectionHead title={errorLabel(typeFilter)} count={filtered.length} />
+                    {filtered.map(card)}
+                  </section>
+                ) : (
+                  <>
+                    {/* Espinha: sequencial por slide (erros locais) */}
+                    <section className="space-y-3">
+                      <SectionHead title="Por slide (ordem do deck)" count={worklist.slides.reduce((a, [, fs]) => a + fs.length, 0)} />
+                      {worklist.slides.length === 0 && (
+                        <p className="text-xs text-muted-foreground">Nenhum erro local neste estudo.</p>
+                      )}
+                      {worklist.slides.map(([n, fs]) => (
+                        <div key={n} className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold rounded bg-muted px-2 py-0.5">Slide {n}</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {fs.length} {fs.length === 1 ? 'erro' : 'erros'}
+                            </span>
+                          </div>
+                          {fs.map(card)}
+                        </div>
+                      ))}
+                    </section>
+
+                    {/* Seção relacional: erros entre slides, por tipo */}
+                    {worklist.relational.length > 0 && (
+                      <section className="space-y-3">
+                        <SectionHead
+                          title="Erros entre slides"
+                          count={worklist.relational.reduce((a, [, fs]) => a + fs.length, 0)}
+                          hint="não pertencem a um slide só — decida qual lado corrigir"
+                        />
+                        {worklist.relational.map(([type, fs]) => (
+                          <div key={type} className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium">{errorLabel(type)}</span>
+                              <span className="text-[10px] text-muted-foreground">{fs.length}</span>
+                            </div>
+                            {fs.map(card)}
+                          </div>
+                        ))}
+                      </section>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
+    </div>
+  );
+}
+
+function FilterChip({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'px-2.5 py-1 rounded-full text-xs font-medium transition-colors border',
+        active ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border hover:border-primary/50'
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
+function SectionHead({ title, count, hint }: { title: string; count: number; hint?: string }) {
+  return (
+    <div className="flex items-center gap-2 pt-1">
+      <h2 className="text-sm font-semibold">{title}</h2>
+      <span className="text-[10px] text-muted-foreground">{count} achado(s)</span>
+      {hint && <span className="text-[10px] text-muted-foreground italic">· {hint}</span>}
+      <div className="flex-1 border-t border-border" />
     </div>
   );
 }
