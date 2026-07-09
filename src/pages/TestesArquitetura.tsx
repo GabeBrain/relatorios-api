@@ -914,44 +914,13 @@ export default function TestesArquitetura() {
     return () => clearInterval(id);
   }, [phase]);
 
-  const [monitoredCities, setMonitoredCities] = useState<Record<string, string[]> | null>(null);
-
-  useEffect(() => {
-    if (!hasValidToken()) return;
-    const token = getToken();
-    let cancelled = false;
-
-    async function fetchMonitored() {
-      const byUf: Record<string, Set<string>> = {};
-      let nextUrl: string | null = `${BASE_URL}/monitored-cities`;
-      while (nextUrl) {
-        const res = await fetch(nextUrl, { headers: { Authorization: `Bearer ${token}` } });
-        if (!res.ok || cancelled) return;
-        const data = await res.json();
-        for (const item of (data.data ?? [])) {
-          const uf = String(item.state ?? '').toUpperCase();
-          const city = String(item.city ?? '');
-          if (!uf || !city) continue;
-          if (!byUf[uf]) byUf[uf] = new Set();
-          byUf[uf].add(city);
-        }
-        nextUrl = data.links?.next ?? null;
-      }
-      if (cancelled) return;
-      const result: Record<string, string[]> = {};
-      for (const [uf, cities] of Object.entries(byUf)) result[uf] = [...cities].sort();
-      setMonitoredCities(result);
-    }
-
-    fetchMonitored().catch(() => { /* silently fall back to IBGE list */ });
-    return () => { cancelled = true; };
-  }, [getToken, hasValidToken]);
-
-  const availableUFs = monitoredCities ? UF_LIST.filter((u) => u in monitoredCities) : UF_LIST;
-
-  const ibgeCities = (MUNICIPIOS_BR as Record<string, string[]>)[uf] ?? [];
-  const geobCitySet = monitoredCities ? new Set(monitoredCities[uf] ?? []) : null;
-  const availableCities = geobCitySet ? ibgeCities.filter((c) => geobCitySet.has(c)) : ibgeCities;
+  // Escopo UF/cidade agora vem do padrão compartilhado GeoApiScopeEngine.
+  // Ver AGENTS.md / CLAUDE.md, seção "GeoApiScopeEngine".
+  const scope = { uf, city };
+  const handleScopeChange = (next: { uf: string; city: string }) => {
+    setUf(next.uf);
+    setCity(next.city);
+  };
 
   const previewAbortRef = useRef<AbortController | null>(null);
   const fetchAbortRef = useRef<AbortController | null>(null);
