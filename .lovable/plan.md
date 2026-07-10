@@ -1,141 +1,44 @@
-# Nova página: Rebrain → Validação do Fechamento
+## Correções na página "Validação do Fechamento"
 
-Página nova em `/rebrain/validacao-fechamento` que reutiliza a mesma consulta da API do Dash Geobrain (GeoApiScopeEngine + `useDashboardData`) e apresenta a tabela de validação de fechamento (Resumo) e um DataGrid com registros individuais (Detalhamento).
+### 1. Corrigir deslocamento de mês (mar/26 → fev/26)
 
-## Estrutura de arquivos
+**Causa:** `h.periodDate` é criado via `new Date("2026-03-01")`, que o JS interpreta em UTC. Em fusos negativos (BRT −3), `getMonth()` devolve o mês anterior — por isso `mar/26` aparece como `fev/26`.
 
-Novo módulo em `src/features/validacao-fechamento/`:
+**Correção em `src/features/validacao-fechamento/aggregate.ts`, dentro de `flattenBuildings`:** derivar `periodKey`, `bucketYear`, `bucketQuarter`, `bucketMonth` diretamente da string `h.period` (formato `YYYY-MM-DD`), sem passar por `Date`.
 
-```text
-src/features/validacao-fechamento/
-  types.ts                 // ClosureRow, ClosureMetric, Granularity, Filters
-  aggregate.ts             // agrupa typologies_history em anos/trimestres/meses e calcula métricas + variações
-  useClosureData.ts        // reaproveita useDashboardData (mesma API) + memoiza flatten + aggregation
-  Header.tsx               // reutiliza estilos do dash-geobrain (chips Anual/Trimestral/Mensal, botão sidebar, escopo)
-  Sidebar.tsx              // filtros retráteis multi-select (Ano, Trimestre, Período, Padrão, Tipo, Empreendimentos)
-  ResumoTable.tsx          // tabela dinâmica principal
-  DetalhamentoGrid.tsx     // DataGrid moderno (TanStack Table) com ordenação/paginação/export/etc.
-  fechamento.css           // tokens escopados (paleta obrigatória) + suporte dark
-src/pages/ValidacaoFechamento.tsx  // orquestra: scope + tabs Resumo/Detalhamento
+Helpers novos, string-based:
+
+```ts
+function parsePeriodParts(s: string): { y: number; m: number } {
+  const [y, m] = s.replaceAll('/', '-').split('-').map((p) => parseInt(p, 10));
+  return { y, m };
+}
+const periodKeyFromStr   = (s: string) => { const {y,m}=parsePeriodParts(s); return `${y}-${String(m).padStart(2,'0')}`; };
+const bucketYearFromStr  = (s: string) => String(parsePeriodParts(s).y);
+const bucketQuarterFromStr = (s: string) => { const {y,m}=parsePeriodParts(s); return `${String(Math.floor((m-1)/3)+1).padStart(2,'0')}T/${String(y).slice(-2)}`; };
+const bucketMonthFromStr = (s: string) => { const {y,m}=parsePeriodParts(s); return `${MONTH_LABEL[m-1]}/${String(y).slice(-2)}`; };
 ```
 
-Rota registrada em `src/App.tsx`; entrada no menu **Rebrain** (`AppLayout.tsx`) chamada "Validação do Fechamento".
+Substituir no push da row (e aplicar o mesmo tratamento a `b.release_date` para relKey/relY/relQ/relM). `periodDate` continua no tipo apenas como referência opcional.
 
-## Design system (escopo `.validacao-fechamento`)
+### 2. Cabeçalho verde na coluna "% Var. Total"
 
-CSS scoped tokens (não vazam globalmente, seguindo o padrão do `dashboard.css`):
+Em `src/features/validacao-fechamento/fechamento.css`, o seletor `.vf-total` está pintando também o `<th>` do cabeçalho de amarelo. Escopar o amarelo somente ao corpo e forçar o header em verde primário:
 
-- `--vf-primary: #71984a` / `--vf-accent: #f4d83f` / `--vf-muted: #6e6e6e`
-- `--vf-text: #212529` / `--vf-neg: #f93f16` / `--vf-pos: #2f982f`
-- Fonte: `Archivo, Tahoma, sans-serif`, base 10pt
-- Tema claro/escuro: variantes `.dark .validacao-fechamento { … }` — ajusta apenas surfaces/bordas; verde/amarelo/vermelho/positivo permanecem constantes.
-
-Archivo já é carregado no `index.html` (dash-geobrain), portanto não requer import adicional.
-
-## Header (topbar)
-
-Idêntico visualmente ao Dash Geobrain:
-
-- Botão "☰ Filtros" (abre sidebar retrátil)
-- `GeoApiScopeSelector` (UF + Cidade, via GeoApiScopeEngine — padrão obrigatório do repo)
-- Legenda: `Cidade: X - Fechamento: DD/MM/AAAA - Exibindo: Anual|Trimestral|Mensal`
-- Chip-group Anual / Trimestral / Mensal (granularidade)
-- Botões rápidos "Atualizar" e "Limpar"
-- Toggle tema claro/escuro (persistido em `localStorage`)
-
-## Consulta à API
-
-Reaproveita `fetchBuildings` de `src/features/dashboard-geobrain/api.ts` via um hook fino `useClosureData(scope)` que delega a `useDashboardData`. Sem duplicação de rede — mesmo cache de resposta por escopo.
-
-## Filtros (Sidebar retrátil, multi-select)
-
-Todos com botões "Selecionar Todos" e "Limpar Seleção" (reaproveita `MultiSelect` do dash-geobrain). Ordem:
-
-1. **Ano** — derivado de `typologies_history.period` (`YYYY`)
-2. **Trimestre** — formato `01T/26`, `02T/26`, …
-3. **Período (mês)** — formato `jan/26`, ordenado do mais recente para o mais antigo
-4. **Padrão** — `building.standard`
-5. **Tipo Empreendimento** — `building.building_type`
-6. **Empreendimentos** — `building.name`
-
-Persistência: `sessionStorage` com chave `vf-filters` enquanto o usuário navega. Atualização automática (sem botão "Aplicar"), com `useDeferredValue` para suavizar recomputações.
-
-## Aba Resumo (tabela dinâmica)
-
-Colunas dinâmicas conforme granularidade:
-
-- **Anual** → uma coluna por ano selecionado + `% Var. Total`
-- **Trimestral** → uma coluna por trimestre (`01T/26`) + `% Var. Total`
-- **Mensal** → uma coluna por mês (`jan/26`) + `% Var. Total`
-
-Linhas por métrica (o rótulo da linha de variação **troca conforme a granularidade** — `% Var. Anual`, `% Var. Trimestral` ou `% Var. Mensal`; a linha "Var. Ano" mantém sempre esse nome, pois compara com o mesmo período do **ano anterior**):
-
-```text
-Empreendimentos lançados (período anter)
-Empreendimentos lançados (período atual)
-% Var. Anual | Trimestral | Mensal    ← troca conforme granularidade
-% Var. Ano                            ← fixo: vs mesmo período do ano anterior
-Unidades lançadas (período anter)
-Unidades lançadas (período atual)
-% Var. Anual | Trimestral | Mensal
-% Var. Ano
-Unidades vendidas (…)
-Oferta final (…)
-Preço médio (…)
-Preço M2 (…)
+```css
+.validacao-fechamento table.vf-resumo tbody tr.vf-total { background: var(--vf-accent-soft); font-weight: 700; }
+.validacao-fechamento table.vf-resumo thead th.vf-total { background: var(--vf-primary); color: #fff; }
 ```
 
-### Métricas (fiéis ao DAX do PDF)
+### 3. Linha de filtros ativos abaixo do Top Header
 
-Sobre o dataset achatado `{ building_id, release_date, period, standard, building_type, qty, sold_in_period, typology_stock, price, private_area, type_of_typology }`:
+Adicionar uma barra fina imediatamente abaixo do `VFHeader` mostrando, em linha única, os filtros aplicados pelo usuário.
 
-- `EmpreendimentosLancados` = `DISTINCTCOUNT(building_id WHERE release_date_period == period_bucket)`
-- `UnidadesLancadas` = `SUM(qty WHERE release_date_period == period_bucket)`
-- `UnidadesVendidas` = `SUM(sold_in_period)`
-- `OfertaFinal` = `SUM(typology_stock)` do **último período** dentro do bucket
-- `PrecoMedio` = `SUM(qty*price) / SUM(qty)` filtrando `type_of_typology='Padrão'` e `typology_stock<>0`
-- `PrecoM2` = `SUM(qty*price) / SUM(qty*private_area)` com os mesmos filtros
+- Novo componente `src/features/validacao-fechamento/ActiveFiltersBar.tsx`, sticky, altura ~28px, fonte 10pt, cor `var(--vf-muted)`, borda inferior `var(--vf-border)`, fundo `var(--vf-card)`, com `overflow-x:auto` e `white-space:nowrap` para caber em uma única linha.
+- Formato: `Cidade: Joinville/SC · Granularidade: Anual · Ano: 2024, 2025 · Trimestre: — · Período: jan/26, fev/26 · Padrão: Alto · Tipo: Vertical · Empreendimentos: 3 selecionados`.
+  - Omitir chaves sem seleção OU renderizar `—` para deixar claro (usar `—` para as chaves obrigatórias: Cidade, Granularidade; omitir as demais quando vazias).
+  - Quando `buildings` tiver mais de 3 seleções, mostrar `N selecionados`; até 3, listar por nome.
+  - Botão discreto "Limpar filtros" à direita (só aparece se houver algum filtro dimensional/temporal ativo) chamando `setFilters(EMPTY_VF_FILTERS)`.
+- Integrar em `src/pages/ValidacaoFechamento.tsx` logo após `<VFHeader … />`, recebendo `scope`, `granularity`, `filters` e `options` (para mapear `building_id → nome`).
 
-### Variações
-
-- **Linha `% Var. Anual|Trimestral|Mensal`**: variação vs período imediatamente anterior segundo a granularidade ativa — DAX `VarXxxPA` com `SWITCH` por `PREVIOUSYEAR/QUARTER/MONTH`. Rótulo troca com a granularidade.
-- **Linha `% Var. Ano`**: variação vs mesmo período do **ano anterior** (SAMEPERIODLASTYEAR) — DAX `VarXxxAA`. Rótulo fixo. Caso especial "AA=0 e atual>0 → 100%".
-- **Coluna `% Var. Total`** (última coluna): `(valorFinal - valorInicial) / valorInicial` sobre **todo o intervalo atualmente selecionado** pelo usuário (respeita filtros Ano/Trimestre/Período). Aplicada em cada linha.
-
-Valores negativos em `#f93f16`, positivos em `#2f982f`, zeros em `#6e6e6e`. Animações suaves em mudança de valor (`transition: color/opacity 200ms`).
-
-## Aba Detalhamento (DataGrid)
-
-Uma linha por **typology-period** dentro do intervalo/filtros ativos. Colunas:
-
-`Ano | Trimestre | Período | Empreendimento | Tipo | Padrão | Tipologia | Dorm | Vagas | Qty | Vendidas | Estoque | Preço | Preço/m² | VGV`
-
-Implementação com **TanStack Table v8** (adicionar `@tanstack/react-table` + `@tanstack/react-virtual`):
-
-- Ordenação, filtro por coluna, pesquisa global, paginação
-- Toggle de colunas, redimensionamento, cabeçalho fixo, rolagem virtual
-- Copiar linhas selecionadas (TSV)
-- Exportar CSV (util local) e XLSX (via `xlsx` / SheetJS)
-
-Alterações de filtro/granularidade no Header/Sidebar refletem em ambas as abas via estado central em `ValidacaoFechamento.tsx`.
-
-## AppLayout / rotas
-
-- `NAV_GROUPS.rebrain.items` em `src/components/layout/AppLayout.tsx`: adicionar `{ path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList/> }`.
-- `src/App.tsx`: `<Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento/>} />`.
-
-## Persistência e responsividade
-
-- Filtros e granularidade em `sessionStorage` (`vf-state`).
-- Sidebar drawer retrátil (mesma mecânica do `Sidebar.tsx` do dash-geobrain).
-- Responsivo: Header quebra em linhas <900px; Resumo com rolagem horizontal; DataGrid com rolagem virtual.
-- Transições em filtro/sort/troca de aba via CSS `transition` (framer-motion opcional).
-
-## Não incluso neste plano
-
-- Sem alteração no `/dash-geobrain` nem no GeoApiScopeEngine (só consumo).
-- Sem backend/Cloud — dados vêm da API GeoBrain existente.
-
-## Documento vivo
-
-Ao final, adicionar entrada em `docs/projetos/LIVE_rebrain.md` (Desenvolvimentos + Etapas 🟡 → ✅), seguindo AGENTS.md/CLAUDE.md.
+Nenhuma outra alteração de comportamento.

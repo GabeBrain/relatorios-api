@@ -7,6 +7,7 @@ import { VFHeader } from '@/features/validacao-fechamento/VFHeader';
 import { VFSidebar } from '@/features/validacao-fechamento/VFSidebar';
 import { ResumoTable } from '@/features/validacao-fechamento/ResumoTable';
 import { DetalhamentoGrid } from '@/features/validacao-fechamento/DetalhamentoGrid';
+import { ActiveFiltersBar } from '@/features/validacao-fechamento/ActiveFiltersBar';
 import {
   EMPTY_VF_FILTERS, applyVFFilters, computeResumo, extractVFOptions, flattenBuildings,
   type Granularity, type VFFilters,
@@ -83,6 +84,16 @@ export default function ValidacaoFechamento() {
         onGranularityChange={setGranularity}
         onOpenSidebar={() => setSidebarOpen(true)}
       />
+
+      <ActiveFiltersBar
+        scope={scope}
+        granularity={granularity}
+        filters={filters}
+        options={options}
+        onReset={() => setFilters(EMPTY_VF_FILTERS)}
+      />
+
+
 
       <main className="mx-auto max-w-[1600px] space-y-4 p-4">
         <div className="flex flex-wrap items-center gap-3">

@@ -93,8 +93,11 @@
   position: sticky; left: 0; z-index: 2;
 }
 .validacao-fechamento table.vf-resumo thead th.vf-label { z-index: 3; }
-.validacao-fechamento table.vf-resumo .vf-total {
+.validacao-fechamento table.vf-resumo tbody tr.vf-total {
   background: var(--vf-accent-soft); font-weight: 700;
+}
+.validacao-fechamento table.vf-resumo thead th.vf-total {
+  background: var(--vf-primary); color: #fff;
 }
 .validacao-fechamento table.vf-resumo .vf-var td { font-weight: 600; }
 .validacao-fechamento .vf-pos { color: var(--vf-pos); }

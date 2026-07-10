@@ -47,33 +47,49 @@ export interface ClosureRow {
 
 const MONTH_LABEL = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 
-export function toBucketYear(d: Date): string { return String(d.getFullYear()); }
-export function toBucketQuarter(d: Date): string {
-  const q = Math.floor(d.getMonth() / 3) + 1;
-  return `${String(q).padStart(2,'0')}T/${String(d.getFullYear()).slice(-2)}`;
+/** Parse 'YYYY-MM-DD' / 'YYYY-MM' / 'YYYY/MM/DD' sem depender de Date (evita bug UTC). */
+function parsePeriodParts(s: string): { y: number; m: number } {
+  const clean = String(s ?? '').split('/').join('-');
+  const [ys, ms] = clean.split('-');
+  const y = parseInt(ys ?? '', 10);
+  const m = parseInt(ms ?? '', 10);
+  return { y: Number.isFinite(y) ? y : 0, m: Number.isFinite(m) && m >= 1 && m <= 12 ? m : 0 };
 }
-export function toBucketMonth(d: Date): string {
-  return `${MONTH_LABEL[d.getMonth()]}/${String(d.getFullYear()).slice(-2)}`;
+export function periodKeyFromStr(s: string): string {
+  const { y, m } = parsePeriodParts(s);
+  if (!y || !m) return '';
+  return `${y}-${String(m).padStart(2,'0')}`;
 }
-export function periodKey(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+export function bucketYearFromStr(s: string): string {
+  const { y } = parsePeriodParts(s);
+  return y ? String(y) : '';
 }
-
-export function bucketOf(d: Date, g: Granularity): string {
-  if (g === 'year') return toBucketYear(d);
-  if (g === 'quarter') return toBucketQuarter(d);
-  return toBucketMonth(d);
+export function bucketQuarterFromStr(s: string): string {
+  const { y, m } = parsePeriodParts(s);
+  if (!y || !m) return '';
+  const q = Math.floor((m - 1) / 3) + 1;
+  return `${String(q).padStart(2,'0')}T/${String(y).slice(-2)}`;
+}
+export function bucketMonthFromStr(s: string): string {
+  const { y, m } = parsePeriodParts(s);
+  if (!y || !m) return '';
+  return `${MONTH_LABEL[m - 1]}/${String(y).slice(-2)}`;
+}
+export function bucketOfStr(s: string, g: Granularity): string {
+  if (g === 'year') return bucketYearFromStr(s);
+  if (g === 'quarter') return bucketQuarterFromStr(s);
+  return bucketMonthFromStr(s);
 }
 
 /** Achata Building[] em ClosureRow[]. */
 export function flattenBuildings(buildings: Building[]): ClosureRow[] {
   const out: ClosureRow[] = [];
   for (const b of buildings) {
-    const rel = new Date(b.release_date || '1970-01-01');
-    const relKey = isNaN(rel.getTime()) ? '' : periodKey(rel);
-    const relY = isNaN(rel.getTime()) ? '' : toBucketYear(rel);
-    const relQ = isNaN(rel.getTime()) ? '' : toBucketQuarter(rel);
-    const relM = isNaN(rel.getTime()) ? '' : toBucketMonth(rel);
+    const relSrc = b.release_date || '';
+    const relKey = periodKeyFromStr(relSrc);
+    const relY = bucketYearFromStr(relSrc);
+    const relQ = bucketQuarterFromStr(relSrc);
+    const relM = bucketMonthFromStr(relSrc);
     for (const t of b.typologies) {
       for (const h of t.history) {
         const price = h.price;
@@ -96,10 +112,10 @@ export function flattenBuildings(buildings: Building[]): ClosureRow[] {
           private_area: t.private_area,
           period: h.period,
           periodDate: h.periodDate,
-          periodKey: periodKey(h.periodDate),
-          bucketYear: toBucketYear(h.periodDate),
-          bucketQuarter: toBucketQuarter(h.periodDate),
-          bucketMonth: toBucketMonth(h.periodDate),
+          periodKey: periodKeyFromStr(h.period),
+          bucketYear: bucketYearFromStr(h.period),
+          bucketQuarter: bucketQuarterFromStr(h.period),
+          bucketMonth: bucketMonthFromStr(h.period),
           price,
           sold_in_period: h.sold_in_period,
           typology_stock: h.typology_stock,
