@@ -1,97 +1,141 @@
-# Plano — GeoApiScopeEngine
+# Nova página: Rebrain → Validação do Fechamento
 
-Criar uma camada compartilhada única para descoberta de escopo geográfico (UF/cidade) via `GET /public-api/monitored-cities`, reutilizável por Secovi, CID legado, Dashboard GeoBrain e futuras telas.
+Página nova em `/rebrain/validacao-fechamento` que reutiliza a mesma consulta da API do Dash Geobrain (GeoApiScopeEngine + `useDashboardData`) e apresenta a tabela de validação de fechamento (Resumo) e um DataGrid com registros individuais (Detalhamento).
 
-## 1. Novo módulo compartilhado
+## Estrutura de arquivos
 
-**`src/features/shared/geo-api-scope-engine/`**
+Novo módulo em `src/features/validacao-fechamento/`:
 
-- `index.ts` — reexports
-- `fetch-monitored-cities.ts` — `fetchMonitoredCities(token, signal?): Promise<Record<UF, string[]>>`
-  - Pagina `links.next` a partir de `https://geobrain.com.br/public-api/monitored-cities`.
-  - Normaliza `state`→UF maiúsculo, ordena cidades pt-BR.
-  - Lança `GeoApiScopeError` com códigos: `no_token`, `unauthorized` (401/403), `network`, `bad_response`.
-- `use-geo-api-scope.ts` — hook `useGeoApiScope()`
-  - Lê token do `useAuthStore`.
-  - Cache em módulo (`Map<token, Promise<citiesByUf>>`) para reuso durante a sessão; invalida quando token muda.
-  - Estado: `citiesByUf`, `availableUfs`, `availableCities`, `uf`, `city`, `isLoading`, `error`, `strictReady` (true só quando `/monitored-cities` retornou com sucesso e `uf`+`city` estão dentro do mapa).
-  - Ações: `setUf(uf)` (limpa `city` e aborta requests em andamento nos consumidores via `scopeVersion`), `setCity(city)`, `reload()`.
-  - Expõe `scopeVersion: number` incrementado a cada troca de UF/cidade — consumidores usam para invalidar/abortar carregamentos anteriores.
-- `GeoApiScopeSelector.tsx` — componente controlado
-  - Props: `value: { uf, city }`, `onChange`, `disabled?`, `layout?: 'inline' | 'stacked'`, `ufLabel?`, `cityLabel?`.
-  - Internamente consome `useGeoApiScope`.
-  - UF: `<Select>` populado apenas com `availableUfs` (nunca IBGE).
-  - Cidade: combobox (Popover + Command) desabilitado até UF selecionada; opções vêm de `availableCities`.
-  - Estados visuais: loading (skeleton nos selects), erro (mensagem inline com botão "Tentar novamente" chamando `reload()`), token ausente (aviso "Faça login…").
-- `types.ts` — `GeoScope`, `GeoApiScopeError`, `MonitoredCity`.
-
-**Regras do motor (modo estrito, único suportado):**
-- Se `/monitored-cities` falhar → estado `error`, `strictReady=false`, botões de carregar/consultar do consumidor ficam desabilitados.
-- Sem fallback silencioso para `municipios-br.json`. `MUNICIPIOS_BR` fica disponível apenas como recurso técnico não exposto por padrão (não importado pelo motor).
-- Trocar UF limpa `city`. Trocar UF/cidade incrementa `scopeVersion`.
-
-## 2. Migração — Dashboard GeoBrain
-
-- `src/features/dashboard-geobrain/Header.tsx`
-  - Remover `UF_LIST` do IBGE, `datalist`, `query`, botão "Carregar" manual.
-  - Substituir bloco UF+Cidade por `<GeoApiScopeSelector value={{uf, city}} onChange={...} />`.
-  - Mantém chips Building Type e Granularity intactos.
-- `src/pages/DashboardGeobrain.tsx`
-  - `uf`/`city` continuam como estado local, alimentados pelo selector.
-  - `useEffect` que chama `load(city)` passa a exigir `scopeReady` (uf presente + city ∈ `availableCities`); antes disso não dispara nada.
-  - Ao trocar UF, `city` é limpo pelo motor → `useEffect` não dispara load.
-- `src/features/dashboard-geobrain/use-dashboard-data.ts`
-  - Assinatura passa a `load({ uf, city })` — remove uso de `ufFromCity`.
-  - Aborta request anterior via `AbortController` (já feito) e ignora resultados de escopo obsoleto (checa `scopeVersion`/key).
-- `src/features/dashboard-geobrain/geo-utils.ts`
-  - Manter arquivo, mas `ufFromCity` deixa de ser usado no dashboard. Fica disponível apenas para código legado que ainda depende dele (não removo para não quebrar consumidores atuais).
-
-## 3. Migração — Secovi (`src/pages/TestesArquitetura.tsx`)
-
-- Substituir o `useEffect` local de `fetchMonitored` + estado `monitoredCities` + `availableUFs` + `availableCities` pelo hook `useGeoApiScope`.
-- UF/cidade passam a vir do motor; remover a lógica que interseca IBGE ∩ Geobrain (o motor já entrega apenas cidades da API).
-- `handlePreview` e `handleFetch` só habilitam quando `strictReady=true`.
-- Mantém toda a lógica pesada de preview/detail intacta.
-
-## 4. Migração — CID legado (`src/legacy/standby-qualidade/TQCidValidacaoBase.tsx`)
-
-- Substituir o `useEffect` de `fetchAll` + `citiesByUf` + `availableUfs`/`availableCities` pelo hook.
-- Botão "Rodar" continua exigindo `selectedUf`+`selectedCityName`.
-
-## 5. Documentação (AGENTS.md e CLAUDE.md)
-
-Adicionar em ambos, próximo ao topo (após "Documentos vivos por projeto"), uma nova seção:
-
-```
-## Padrão obrigatório: GeoApiScopeEngine
-
-Para qualquer tela que use filtros geográficos e chamadas à API GeoBrain, usar o
-padrão `GeoApiScopeEngine` (`src/features/shared/geo-api-scope-engine/`). Fluxo
-obrigatório:
-1. Carregar `/public-api/monitored-cities` (paginando `links.next`).
-2. Limitar UF/município às cidades disponíveis para o token.
-3. Exigir UF antes de município; ao trocar UF, limpar município.
-4. Bloquear chamadas pesadas de histórico até escopo válido.
-5. Sem fallback silencioso para `municipios-br.json` (IBGE).
-Referência funcional original: Relatórios Secovi (`src/pages/TestesArquitetura.tsx`).
-Dashboard GeoBrain usa o mesmo padrão.
+```text
+src/features/validacao-fechamento/
+  types.ts                 // ClosureRow, ClosureMetric, Granularity, Filters
+  aggregate.ts             // agrupa typologies_history em anos/trimestres/meses e calcula métricas + variações
+  useClosureData.ts        // reaproveita useDashboardData (mesma API) + memoiza flatten + aggregation
+  Header.tsx               // reutiliza estilos do dash-geobrain (chips Anual/Trimestral/Mensal, botão sidebar, escopo)
+  Sidebar.tsx              // filtros retráteis multi-select (Ano, Trimestre, Período, Padrão, Tipo, Empreendimentos)
+  ResumoTable.tsx          // tabela dinâmica principal
+  DetalhamentoGrid.tsx     // DataGrid moderno (TanStack Table) com ordenação/paginação/export/etc.
+  fechamento.css           // tokens escopados (paleta obrigatória) + suporte dark
+src/pages/ValidacaoFechamento.tsx  // orquestra: scope + tabs Resumo/Detalhamento
 ```
 
-Atualizar também `docs/projetos/LIVE_dashboard-geobrain.md` (entrada em *Desenvolvimentos* + ajuste em *Etapas*/*Pendências*).
+Rota registrada em `src/App.tsx`; entrada no menu **Rebrain** (`AppLayout.tsx`) chamada "Validação do Fechamento".
 
-## 6. Critérios de aceite
+## Design system (escopo `.validacao-fechamento`)
 
-- Módulo `GeoApiScopeEngine` existe e exporta `fetchMonitoredCities`, `useGeoApiScope`, `GeoApiScopeSelector`.
-- Dashboard GeoBrain: header sem `datalist`/IBGE; UF só mostra UFs monitoradas; cidade travada até UF; `load` não dispara sem cidade monitorada.
-- Secovi e CID legado consomem o mesmo hook e não duplicam lógica de `/monitored-cities`.
-- Erros de token/rede aparecem claramente e não caem para IBGE.
-- `AbortController` e `scopeVersion` invalidam resultados de escopos anteriores.
-- Cache por sessão (token) evita refetch entre navegações.
-- Regra documentada em AGENTS.md e CLAUDE.md com o nome exato `GeoApiScopeEngine`.
+CSS scoped tokens (não vazam globalmente, seguindo o padrão do `dashboard.css`):
 
-## Detalhes técnicos
+- `--vf-primary: #71984a` / `--vf-accent: #f4d83f` / `--vf-muted: #6e6e6e`
+- `--vf-text: #212529` / `--vf-neg: #f93f16` / `--vf-pos: #2f982f`
+- Fonte: `Archivo, Tahoma, sans-serif`, base 10pt
+- Tema claro/escuro: variantes `.dark .validacao-fechamento { … }` — ajusta apenas surfaces/bordas; verde/amarelo/vermelho/positivo permanecem constantes.
 
-- Cache: `const cache = new Map<string, Promise<Record<string,string[]>>>()` chaveado pelo token; limpo em `reload()`.
-- `GeoApiScopeError extends Error` com `code` para o selector renderizar mensagens específicas.
-- Selector usa shadcn `Select` (UF) + `Popover`+`Command` (cidade), consistente com o padrão do Secovi.
-- Nenhuma mudança em `api.ts` do dashboard além da assinatura de `load`.
+Archivo já é carregado no `index.html` (dash-geobrain), portanto não requer import adicional.
+
+## Header (topbar)
+
+Idêntico visualmente ao Dash Geobrain:
+
+- Botão "☰ Filtros" (abre sidebar retrátil)
+- `GeoApiScopeSelector` (UF + Cidade, via GeoApiScopeEngine — padrão obrigatório do repo)
+- Legenda: `Cidade: X - Fechamento: DD/MM/AAAA - Exibindo: Anual|Trimestral|Mensal`
+- Chip-group Anual / Trimestral / Mensal (granularidade)
+- Botões rápidos "Atualizar" e "Limpar"
+- Toggle tema claro/escuro (persistido em `localStorage`)
+
+## Consulta à API
+
+Reaproveita `fetchBuildings` de `src/features/dashboard-geobrain/api.ts` via um hook fino `useClosureData(scope)` que delega a `useDashboardData`. Sem duplicação de rede — mesmo cache de resposta por escopo.
+
+## Filtros (Sidebar retrátil, multi-select)
+
+Todos com botões "Selecionar Todos" e "Limpar Seleção" (reaproveita `MultiSelect` do dash-geobrain). Ordem:
+
+1. **Ano** — derivado de `typologies_history.period` (`YYYY`)
+2. **Trimestre** — formato `01T/26`, `02T/26`, …
+3. **Período (mês)** — formato `jan/26`, ordenado do mais recente para o mais antigo
+4. **Padrão** — `building.standard`
+5. **Tipo Empreendimento** — `building.building_type`
+6. **Empreendimentos** — `building.name`
+
+Persistência: `sessionStorage` com chave `vf-filters` enquanto o usuário navega. Atualização automática (sem botão "Aplicar"), com `useDeferredValue` para suavizar recomputações.
+
+## Aba Resumo (tabela dinâmica)
+
+Colunas dinâmicas conforme granularidade:
+
+- **Anual** → uma coluna por ano selecionado + `% Var. Total`
+- **Trimestral** → uma coluna por trimestre (`01T/26`) + `% Var. Total`
+- **Mensal** → uma coluna por mês (`jan/26`) + `% Var. Total`
+
+Linhas por métrica (o rótulo da linha de variação **troca conforme a granularidade** — `% Var. Anual`, `% Var. Trimestral` ou `% Var. Mensal`; a linha "Var. Ano" mantém sempre esse nome, pois compara com o mesmo período do **ano anterior**):
+
+```text
+Empreendimentos lançados (período anter)
+Empreendimentos lançados (período atual)
+% Var. Anual | Trimestral | Mensal    ← troca conforme granularidade
+% Var. Ano                            ← fixo: vs mesmo período do ano anterior
+Unidades lançadas (período anter)
+Unidades lançadas (período atual)
+% Var. Anual | Trimestral | Mensal
+% Var. Ano
+Unidades vendidas (…)
+Oferta final (…)
+Preço médio (…)
+Preço M2 (…)
+```
+
+### Métricas (fiéis ao DAX do PDF)
+
+Sobre o dataset achatado `{ building_id, release_date, period, standard, building_type, qty, sold_in_period, typology_stock, price, private_area, type_of_typology }`:
+
+- `EmpreendimentosLancados` = `DISTINCTCOUNT(building_id WHERE release_date_period == period_bucket)`
+- `UnidadesLancadas` = `SUM(qty WHERE release_date_period == period_bucket)`
+- `UnidadesVendidas` = `SUM(sold_in_period)`
+- `OfertaFinal` = `SUM(typology_stock)` do **último período** dentro do bucket
+- `PrecoMedio` = `SUM(qty*price) / SUM(qty)` filtrando `type_of_typology='Padrão'` e `typology_stock<>0`
+- `PrecoM2` = `SUM(qty*price) / SUM(qty*private_area)` com os mesmos filtros
+
+### Variações
+
+- **Linha `% Var. Anual|Trimestral|Mensal`**: variação vs período imediatamente anterior segundo a granularidade ativa — DAX `VarXxxPA` com `SWITCH` por `PREVIOUSYEAR/QUARTER/MONTH`. Rótulo troca com a granularidade.
+- **Linha `% Var. Ano`**: variação vs mesmo período do **ano anterior** (SAMEPERIODLASTYEAR) — DAX `VarXxxAA`. Rótulo fixo. Caso especial "AA=0 e atual>0 → 100%".
+- **Coluna `% Var. Total`** (última coluna): `(valorFinal - valorInicial) / valorInicial` sobre **todo o intervalo atualmente selecionado** pelo usuário (respeita filtros Ano/Trimestre/Período). Aplicada em cada linha.
+
+Valores negativos em `#f93f16`, positivos em `#2f982f`, zeros em `#6e6e6e`. Animações suaves em mudança de valor (`transition: color/opacity 200ms`).
+
+## Aba Detalhamento (DataGrid)
+
+Uma linha por **typology-period** dentro do intervalo/filtros ativos. Colunas:
+
+`Ano | Trimestre | Período | Empreendimento | Tipo | Padrão | Tipologia | Dorm | Vagas | Qty | Vendidas | Estoque | Preço | Preço/m² | VGV`
+
+Implementação com **TanStack Table v8** (adicionar `@tanstack/react-table` + `@tanstack/react-virtual`):
+
+- Ordenação, filtro por coluna, pesquisa global, paginação
+- Toggle de colunas, redimensionamento, cabeçalho fixo, rolagem virtual
+- Copiar linhas selecionadas (TSV)
+- Exportar CSV (util local) e XLSX (via `xlsx` / SheetJS)
+
+Alterações de filtro/granularidade no Header/Sidebar refletem em ambas as abas via estado central em `ValidacaoFechamento.tsx`.
+
+## AppLayout / rotas
+
+- `NAV_GROUPS.rebrain.items` em `src/components/layout/AppLayout.tsx`: adicionar `{ path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList/> }`.
+- `src/App.tsx`: `<Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento/>} />`.
+
+## Persistência e responsividade
+
+- Filtros e granularidade em `sessionStorage` (`vf-state`).
+- Sidebar drawer retrátil (mesma mecânica do `Sidebar.tsx` do dash-geobrain).
+- Responsivo: Header quebra em linhas <900px; Resumo com rolagem horizontal; DataGrid com rolagem virtual.
+- Transições em filtro/sort/troca de aba via CSS `transition` (framer-motion opcional).
+
+## Não incluso neste plano
+
+- Sem alteração no `/dash-geobrain` nem no GeoApiScopeEngine (só consumo).
+- Sem backend/Cloud — dados vêm da API GeoBrain existente.
+
+## Documento vivo
+
+Ao final, adicionar entrada em `docs/projetos/LIVE_rebrain.md` (Desenvolvimentos + Etapas 🟡 → ✅), seguindo AGENTS.md/CLAUDE.md.

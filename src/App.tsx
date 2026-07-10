@@ -13,6 +13,7 @@ import Assistente from './pages/Assistente.tsx';
 import AreaQuanti from './pages/AreaQuanti.tsx';
 import NotFound from './pages/NotFound.tsx';
 import DashboardGeobrain from './pages/DashboardGeobrain.tsx';
+import ValidacaoFechamento from './pages/ValidacaoFechamento.tsx';
 
 const CorretorPage = lazy(() => import('./features/corretor/pages/CorretorPage.tsx'));
 const CorretorAnalysisPage = lazy(() => import('./features/corretor/pages/CorretorAnalysisPage.tsx'));
@@ -64,6 +65,7 @@ const App = () => (
 
                 {/* Rebrain */}
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
+                <Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento />} />
                 <Route path="/auditoria" element={<CorretorPage />} />
                 <Route path="/auditoria/analise" element={<CorretorAnalysisPage />} />
                 <Route path="/auditoria/v2" element={<AuditoriaV2Page />} />
