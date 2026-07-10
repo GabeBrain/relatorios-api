@@ -85,6 +85,16 @@ export default function ValidacaoFechamento() {
         onOpenSidebar={() => setSidebarOpen(true)}
       />
 
+      <ActiveFiltersBar
+        scope={scope}
+        granularity={granularity}
+        filters={filters}
+        options={options}
+        onReset={() => setFilters(EMPTY_VF_FILTERS)}
+      />
+
+
+
       <main className="mx-auto max-w-[1600px] space-y-4 p-4">
         <div className="flex flex-wrap items-center gap-3">
           <div
