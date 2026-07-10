@@ -49,7 +49,7 @@ const MONTH_LABEL = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out'
 
 /** Parse 'YYYY-MM-DD' / 'YYYY-MM' / 'YYYY/MM/DD' sem depender de Date (evita bug UTC). */
 function parsePeriodParts(s: string): { y: number; m: number } {
-  const clean = String(s ?? '').replaceAll('/', '-');
+  const clean = String(s ?? '').split('/').join('-');
   const [ys, ms] = clean.split('-');
   const y = parseInt(ys ?? '', 10);
   const m = parseInt(ms ?? '', 10);
