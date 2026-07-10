@@ -7,6 +7,7 @@ import { VFHeader } from '@/features/validacao-fechamento/VFHeader';
 import { VFSidebar } from '@/features/validacao-fechamento/VFSidebar';
 import { ResumoTable } from '@/features/validacao-fechamento/ResumoTable';
 import { DetalhamentoGrid } from '@/features/validacao-fechamento/DetalhamentoGrid';
+import { ActiveFiltersBar } from '@/features/validacao-fechamento/ActiveFiltersBar';
 import {
   EMPTY_VF_FILTERS, applyVFFilters, computeResumo, extractVFOptions, flattenBuildings,
   type Granularity, type VFFilters,
