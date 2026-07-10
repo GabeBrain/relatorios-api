@@ -47,22 +47,38 @@ export interface ClosureRow {
 
 const MONTH_LABEL = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 
-export function toBucketYear(d: Date): string { return String(d.getFullYear()); }
-export function toBucketQuarter(d: Date): string {
-  const q = Math.floor(d.getMonth() / 3) + 1;
-  return `${String(q).padStart(2,'0')}T/${String(d.getFullYear()).slice(-2)}`;
+/** Parse 'YYYY-MM-DD' / 'YYYY-MM' / 'YYYY/MM/DD' sem depender de Date (evita bug UTC). */
+function parsePeriodParts(s: string): { y: number; m: number } {
+  const clean = String(s ?? '').replaceAll('/', '-');
+  const [ys, ms] = clean.split('-');
+  const y = parseInt(ys ?? '', 10);
+  const m = parseInt(ms ?? '', 10);
+  return { y: Number.isFinite(y) ? y : 0, m: Number.isFinite(m) && m >= 1 && m <= 12 ? m : 0 };
 }
-export function toBucketMonth(d: Date): string {
-  return `${MONTH_LABEL[d.getMonth()]}/${String(d.getFullYear()).slice(-2)}`;
+export function periodKeyFromStr(s: string): string {
+  const { y, m } = parsePeriodParts(s);
+  if (!y || !m) return '';
+  return `${y}-${String(m).padStart(2,'0')}`;
 }
-export function periodKey(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+export function bucketYearFromStr(s: string): string {
+  const { y } = parsePeriodParts(s);
+  return y ? String(y) : '';
 }
-
-export function bucketOf(d: Date, g: Granularity): string {
-  if (g === 'year') return toBucketYear(d);
-  if (g === 'quarter') return toBucketQuarter(d);
-  return toBucketMonth(d);
+export function bucketQuarterFromStr(s: string): string {
+  const { y, m } = parsePeriodParts(s);
+  if (!y || !m) return '';
+  const q = Math.floor((m - 1) / 3) + 1;
+  return `${String(q).padStart(2,'0')}T/${String(y).slice(-2)}`;
+}
+export function bucketMonthFromStr(s: string): string {
+  const { y, m } = parsePeriodParts(s);
+  if (!y || !m) return '';
+  return `${MONTH_LABEL[m - 1]}/${String(y).slice(-2)}`;
+}
+export function bucketOfStr(s: string, g: Granularity): string {
+  if (g === 'year') return bucketYearFromStr(s);
+  if (g === 'quarter') return bucketQuarterFromStr(s);
+  return bucketMonthFromStr(s);
 }
 
 /** Achata Building[] em ClosureRow[]. */
