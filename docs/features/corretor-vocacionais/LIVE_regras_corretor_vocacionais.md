@@ -16,6 +16,20 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.20 — 2026-07-11 — Feedback do teste real: médias ≠ somas, pareamento do %, zoom no retry
+
+Ajustes após o 1º teste do Gabriel com estudo real (3 problemas reportados):
+
+| Problema observado | Correção | Arquivo |
+|---|---|---|
+| **Falso positivo em linha de MÉDIA**: "Vendas s/ O.L.: soma 387,8 ≠ total 82,2" — a linha final era média, não soma (idem "Média Geral" em tabelas de m²/R$/m²) | Heurística em `checkTableSums`: se o valor declarado cai **entre o mínimo e o máximo** da coluna, é média (soma de 2+ positivos nunca fica nesse intervalo) → não é achado | `engine.ts` |
+| **Falso positivo em massa no cross-check %**: o % da Oferta Final era pareado com a 1ª coluna numérica da tabela (m² Mínimo) → "24 seria 10,4%…" ×4 | Pareamento novo: % valida **só contra a coluna imediatamente à esquerda** (arranjo padrão dos estudos: "Oferta Lançada \| % \| Oferta Final \| %"); tabelas com vários % validam cada par; denominador que é média não vale | `engine.ts` (`checkPercentConsistency`) |
+| **Dígito trocado persistiu** (34.090 lido como 34.909, coluna única sem % → só a soma flagra, e a re-leitura no 4o repetiu o erro) | Re-leitura do escalonamento agora vai com a **imagem ampliada 2×** (OffscreenCanvas, cap 2048px) — mais pixels por dígito na leitura decisiva. `CACHE_SCHEMA` 2→3: reprocessa leituras cacheadas (inclusive a do 34.909) | `ia-vision.ts` (`upscaleForRetry`) |
+| **Card obsoleto** "Números presos em imagem — depende da Fase C" aparecia mesmo com a visão rodando automática | `coverageFinding` removido do motor (a Fase C está produtizada; números em imagem SÃO auditados). Achados antigos desse tipo já salvos podem ser marcados "ignorado" | `ir-rules.ts` |
+
+Testes de regressão com as tabelas **reais** das capturas (tipologias s47, padrões s37):
+16/16 verdes. Sem migration nova (o schema bump reusa a coluna `schema_version` da v0.19).
+
 ## Versão 0.19 — 2026-07-11 — Exatidão da visão: cross-check %↔absoluto + escalonamento p/ 4o
 
 Reação ao bug real do Gabriel (visão leu 100.198 como 116.817). Três reforços contra dígito mal lido:

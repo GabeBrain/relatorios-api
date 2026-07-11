@@ -204,22 +204,9 @@ function structureFinding(ir: Ir): Finding {
   };
 }
 
-// ── Diagnóstico de cobertura numérica (números em imagem) ────────────────────
-function coverageFinding(ir: Ir, numericTables: number): Finding | null {
-  const imgs = ir.slides.reduce((a, s) => a + (s.n_imagens ?? 0), 0);
-  const tabelas = ir.slides.reduce((a, s) => a + (s.tabelas?.length ?? 0), 0);
-  if (numericTables > 0) return null;
-  return {
-    id: 'coverage',
-    type: 'MAP_CHART_MISMATCH',
-    section: 'GLOBAL',
-    slideRef: '—',
-    title: 'Números presos em imagem (auditoria numérica limitada)',
-    detail: `Este estudo tem ${tabelas} tabela(s) nativa(s), nenhuma com número parseável, e ${imgs} imagens. As regras de soma/consistência dependem da Fase C (visão) ou de tabelas nativas no PPT.`,
-    ok: false,
-    viz: { kind: 'text', evidence: `tabelas nativas: ${tabelas} · numéricas: 0 · imagens: ${imgs}` },
-  };
-}
+// Removido em v3.3 (11/jul): o antigo "coverageFinding" ("Números presos em
+// imagem — auditoria limitada, depende da Fase C") ficou obsoleto — a visão agora
+// roda automaticamente no passo único, então números em imagem SÃO auditados.
 
 export function irToFindings(ir: Ir): Finding[] {
   const num = numericFindings(ir);
@@ -242,8 +229,6 @@ export function irToFindings(ir: Ir): Finding[] {
     });
   }
   findings.push(structureFinding(ir));
-  const cov = coverageFinding(ir, num.numericTables);
-  if (cov) findings.push(cov);
   return findings;
 }
 

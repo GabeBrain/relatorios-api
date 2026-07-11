@@ -14,7 +14,8 @@ const db = supabase as any;
 
 // Versão da lógica de extração/validação. Ao subir (novas checagens, escalonamento),
 // o cache antigo (schema menor) é reprocessado — extração ruim não fica presa pra sempre.
-const CACHE_SCHEMA = 2;
+// v3: re-leitura do 4o com imagem ampliada 2× + pareamento %↔coluna-à-esquerda + médias.
+const CACHE_SCHEMA = 3;
 
 interface RawTable {
   title?: string;
@@ -121,16 +122,46 @@ export interface VisionPassOpts {
   signal?: AbortSignal;
 }
 
+/**
+ * Amplia a imagem 2× (limitada a 2048px no lado maior) para a RE-leitura: mais
+ * pixels por dígito = OCR melhor exatamente onde a 1ª leitura divergiu. Dígito
+ * pequeno com separador de milhar (34.090 → 34.909) é o erro típico que isso
+ * mitiga. Best-effort: sem OffscreenCanvas (testes/node), devolve null e a
+ * re-leitura usa a imagem original.
+ */
+async function upscaleForRetry(c: TableImageCandidate): Promise<{ base64: string; mime: string } | null> {
+  try {
+    if (typeof createImageBitmap === 'undefined' || typeof OffscreenCanvas === 'undefined') return null;
+    const bmp = await createImageBitmap(new Blob([c.bytes as BlobPart], { type: c.mime }));
+    const scale = Math.min(2, 2048 / Math.max(bmp.width, bmp.height));
+    if (scale <= 1.1) return null; // já é grande — ampliar não acrescenta
+    const canvas = new OffscreenCanvas(Math.round(bmp.width * scale), Math.round(bmp.height * scale));
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    return { base64: toBase64(new Uint8Array(await blob.arrayBuffer())), mime: 'image/png' };
+  } catch {
+    return null;
+  }
+}
+
 /** Chama a edge de visão para UMA imagem com um modelo específico (sem cache). */
-async function extractWithModel(c: TableImageCandidate, model: ModelId): Promise<{
+async function extractWithModel(
+  c: TableImageCandidate,
+  model: ModelId,
+  imageOverride?: { base64: string; mime: string } | null
+): Promise<{
   payload: CachePayload; inputTokens: number; outputTokens: number;
 }> {
   const { data, error } = await supabase.functions.invoke<{
     tables: RawTable[]; inputTokens: number; outputTokens: number; error?: string;
   }>('analyze-table-image', {
     body: {
-      base64: toBase64(c.bytes),
-      mime: c.mime,
+      base64: imageOverride?.base64 ?? toBase64(c.bytes),
+      mime: imageOverride?.mime ?? c.mime,
       model,
       contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
     },
@@ -189,9 +220,10 @@ async function processImage(
     costUsd += calculateCost(first.inputTokens, first.outputTokens, model);
     payload = first.payload;
 
-    // escalonamento: extração barata que não fecha → confirma no 4o (preço próprio)
+    // escalonamento: extração barata que não fecha → confirma no 4o (preço próprio),
+    // com a imagem AMPLIADA 2× (mais pixels por dígito na leitura decisiva)
     if (model === 'gpt-4o-mini' && !payloadIsClean(first.payload)) {
-      const second = await extractWithModel(c, 'gpt-4o');
+      const second = await extractWithModel(c, 'gpt-4o', await upscaleForRetry(c));
       inputTokens += second.inputTokens;
       outputTokens += second.outputTokens;
       costUsd += calculateCost(second.inputTokens, second.outputTokens, 'gpt-4o');

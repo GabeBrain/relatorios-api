@@ -42,6 +42,13 @@ export function checkTableSums(
       const isPct = vals.every((v) => v >= 0 && v <= 100) && decl >= 85 && decl <= 115;
       const tol = isPct && Math.round(decl) === 100 ? pctTol : absTol;
       if (Math.abs(soma - decl) > tol) {
+        // Nem toda linha final é SOMA: tabelas de m²/preço/taxa fecham em MÉDIA
+        // ("Média Geral", "Vendas s/ O.L." etc.). Heurística: se o declarado cai
+        // ENTRE o mínimo e o máximo dos valores, é média — soma nunca fica nesse
+        // intervalo com 2+ valores positivos. Não é somável → não é achado.
+        const mn = Math.min(...vals);
+        const mx = Math.max(...vals);
+        if (decl >= mn && decl <= mx) continue;
         badColumns.push(c);
         notes.push(`Coluna «${table.columns[c] ?? c}»: soma ${round(soma)} ≠ total ${decl}`);
       }
@@ -67,12 +74,18 @@ export function checkTableSums(
 }
 
 /**
- * Cross-check %↔absoluto — numa tabela com uma coluna de valor ABSOLUTO e uma de
- * PERCENTUAL, cada % deve bater com `100 · abs_linha / total_abs`. Diferente de
+ * Cross-check %↔absoluto — cada coluna de PERCENTUAL deve bater com
+ * `100 · abs_linha / total_abs` da coluna de valor que ela descreve. Diferente de
  * checkTableSums (que confere a coluna contra o total), este pega **dígito mal
  * lido pela visão mesmo quando a soma fecha** e aponta a LINHA exata: se a visão
  * leu 100.198 como 116.817, o % declarado (14,7%) não corresponde (≈17,2%).
- * Retorna null quando não há par absoluto+% detectável.
+ *
+ * Pareamento: o % valida SÓ contra a coluna imediatamente à ESQUERDA (é assim que
+ * as tabelas dos estudos arranjam: "Oferta Lançada | (%) | Oferta Final | (%)").
+ * Parear com "a primeira coluna numérica da tabela" gerava falso positivo em massa
+ * quando o % do fim se referia a outra coluna (caso real: % da Oferta Final pareado
+ * com m² Mínimo). Tabelas com várias colunas de % validam CADA par.
+ * Retorna null quando não há nenhum par %+coluna-à-esquerda detectável.
  */
 export function checkPercentConsistency(
   table: ExtractedTable,
@@ -87,36 +100,39 @@ export function checkPercentConsistency(
     if (isNum(decl)) return decl;
     return columnSum(table.rows, c);
   };
+  const isPctCol = (i: number) =>
+    i >= 1 && isNumericCol(i) &&
+    (/%|percent/i.test(cols[i] ?? '') || Math.abs(colTotal(i) - 100) <= 1);
 
-  // coluna de %: header com "%"/percent, ou coluna numérica cujo total ≈ 100
-  let pctCol = cols.findIndex((c, i) => i >= 1 && /%|percent/i.test(c) && isNumericCol(i));
-  if (pctCol < 1) {
-    pctCol = cols.findIndex((c, i) => i >= 1 && isNumericCol(i) && Math.abs(colTotal(i) - 100) <= 1);
-  }
-  if (pctCol < 1) return null;
-
-  // coluna absoluta: 1ª numérica ≠ pctCol cujo total NÃO é ~100 (não é outro %)
-  const absCol = cols.findIndex((c, i) =>
-    i >= 1 && i !== pctCol && isNumericCol(i) && Math.abs(colTotal(i) - 100) > 1);
-  if (absCol < 1) return null;
-
-  const totalAbs = colTotal(absCol);
-  if (!(totalAbs > 0)) return null;
-
-  const badRows: number[] = [];
+  const badSet = new Set<number>();
   const notes: string[] = [];
-  table.rows.forEach((r, i) => {
-    const abs = r[absCol];
-    const pct = r[pctCol];
-    if (!isNum(abs) || !isNum(pct)) return;
-    const expected = (100 * abs) / totalAbs;
-    if (Math.abs(pct - expected) > tolPp) {
-      badRows.push(i);
-      notes.push(`Linha «${r[0]}»: ${abs} seria ${round(expected)}% do total, mas a tabela diz ${pct}% (possível dígito mal lido na visão).`);
-    }
-  });
+  let pairs = 0;
 
-  return { kind: 'table', table, badColumns: [], badRows, notes };
+  for (let p = 1; p < cols.length; p++) {
+    if (!isPctCol(p)) continue;
+    const a = p - 1; // par: a coluna de valor imediatamente à esquerda
+    if (a < 1 || !isNumericCol(a) || isPctCol(a)) continue;
+    const totalAbs = colTotal(a);
+    if (!(totalAbs > 0)) continue;
+    // total declarado que é MÉDIA (cai entre min e max) não serve de denominador
+    const vals = table.rows.map((r) => r[a]).filter(isNum);
+    if (vals.length >= 2 && totalAbs >= Math.min(...vals) && totalAbs <= Math.max(...vals)) continue;
+    pairs++;
+
+    table.rows.forEach((r, i) => {
+      const abs = r[a];
+      const pct = r[p];
+      if (!isNum(abs) || !isNum(pct)) return;
+      const expected = (100 * abs) / totalAbs;
+      if (Math.abs(pct - expected) > tolPp) {
+        badSet.add(i);
+        notes.push(`Linha «${r[0]}» (${cols[a]}): ${abs} seria ${round(expected)}% do total, mas a tabela diz ${pct}% (possível dígito mal lido na visão).`);
+      }
+    });
+  }
+
+  if (pairs === 0) return null;
+  return { kind: 'table', table, badColumns: [], badRows: [...badSet].sort((x, y) => x - y), notes };
 }
 
 /** Rótulos da 1ª coluna (faixas de renda etc.) de uma tabela. */
