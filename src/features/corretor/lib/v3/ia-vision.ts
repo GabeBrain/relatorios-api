@@ -4,13 +4,17 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, calculateImageTokens, type ModelId } from '../cost-calculator';
-import { checkTableSums, detectBinGap } from '../audit/engine';
+import { checkTableSums, checkPercentConsistency, detectBinGap } from '../audit/engine';
 import { toAuditSection } from '../audit/ir';
 import type { Cell, ExtractedTable, Finding, Bin } from '../audit/model';
 import type { TableImageCandidate } from './table-images';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
+
+// Versão da lógica de extração/validação. Ao subir (novas checagens, escalonamento),
+// o cache antigo (schema menor) é reprocessado — extração ruim não fica presa pra sempre.
+const CACHE_SCHEMA = 2;
 
 interface RawTable {
   title?: string;
@@ -36,9 +40,12 @@ export async function estimateVisionPass(
   model: ModelId
 ): Promise<VisionEstimate> {
   const shas = candidates.map((c) => c.sha1);
-  const { data } = await db.from('vision_cache').select('sha1').in('sha1', shas);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cachedSet = new Set((data ?? []).map((r: any) => r.sha1 as string));
+  const { data } = await db.from('vision_cache').select('sha1, schema_version').in('sha1', shas);
+  // só conta como cache o que foi gerado pela versão ATUAL da lógica (senão reprocessa)
+  const cachedSet = new Set(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (data ?? []).filter((r: any) => (r.schema_version ?? 1) >= CACHE_SCHEMA).map((r: any) => r.sha1 as string)
+  );
   const toRun = candidates.filter((c) => !cachedSet.has(c.sha1));
   const inputTokens = toRun.reduce((a, c) => a + calculateImageTokens(c.w, c.h, model) + 450, 0);
   const outputTokens = toRun.length * 700;
@@ -99,6 +106,8 @@ export interface VisionPassResult {
   tablesExtracted: number;
   tablesVerified: number;
   fromCache: number;
+  /** quantas imagens precisaram escalar do mini p/ o 4o (leitura divergiu) */
+  escalated: number;
   inputTokens: number;
   outputTokens: number;
   costUsd: number;
@@ -112,73 +121,148 @@ export interface VisionPassOpts {
   signal?: AbortSignal;
 }
 
-/** Extrai + auto-valida UMA imagem. Atualiza o cache; retorna achados + tokens. */
+/** Chama a edge de visão para UMA imagem com um modelo específico (sem cache). */
+async function extractWithModel(c: TableImageCandidate, model: ModelId): Promise<{
+  payload: CachePayload; inputTokens: number; outputTokens: number;
+}> {
+  const { data, error } = await supabase.functions.invoke<{
+    tables: RawTable[]; inputTokens: number; outputTokens: number; error?: string;
+  }>('analyze-table-image', {
+    body: {
+      base64: toBase64(c.bytes),
+      mime: c.mime,
+      model,
+      contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
+    },
+  });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+  return {
+    payload: { tables: data?.tables ?? [] },
+    inputTokens: data?.inputTokens ?? 0,
+    outputTokens: data?.outputTokens ?? 0,
+  };
+}
+
+/** true se TODAS as tabelas do payload passam nas auto-validações (soma + %↔abs). */
+function payloadIsClean(payload: CachePayload): boolean {
+  for (const raw of payload.tables ?? []) {
+    const ext = toExtracted(raw);
+    if (!ext) continue;
+    if (ext.totals) {
+      const v = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
+      if ((v.badColumns?.length ?? 0) + (v.badRows?.length ?? 0) > 0) return false;
+    }
+    const pc = checkPercentConsistency(ext);
+    if (pc && (pc.badRows?.length ?? 0) > 0) return false;
+  }
+  return true;
+}
+
+/**
+ * Extrai + auto-valida UMA imagem, com ESCALONAMENTO: se o modelo econômico (mini)
+ * produz uma extração que não fecha (soma OU %↔absoluto), re-lê a MESMA imagem no
+ * gpt-4o (OCR melhor) antes de incomodar o analista. Cacheia a melhor leitura com
+ * schema_version + modelo. Cache antigo (schema < atual) é reprocessado.
+ */
 async function processImage(
   c: TableImageCandidate,
   model: ModelId
-): Promise<{ findings: Finding[]; tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number; outputTokens: number }> {
+): Promise<{ findings: Finding[]; tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number; outputTokens: number; costUsd: number; escalated: boolean }> {
   const findings: Finding[] = [];
-  let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0;
+  let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0, costUsd = 0;
+  let escalated = false;
+  let usedModel = model;
 
-  // cache primeiro — imagem já extraída não é paga de novo
+  // cache primeiro — só vale se foi gerado pela versão ATUAL da lógica
   let payload: CachePayload | null = null;
-  const { data: hit } = await db.from('vision_cache').select('payload').eq('sha1', c.sha1).maybeSingle();
-  if (hit?.payload) {
+  const { data: hit } = await db.from('vision_cache')
+    .select('payload, schema_version, model').eq('sha1', c.sha1).maybeSingle();
+  if (hit?.payload && (hit.schema_version ?? 1) >= CACHE_SCHEMA) {
     payload = hit.payload as CachePayload;
+    usedModel = (hit.model as ModelId) ?? model;
     fromCache = 1;
   } else {
-    const { data, error } = await supabase.functions.invoke<{
-      tables: RawTable[]; inputTokens: number; outputTokens: number; error?: string;
-    }>('analyze-table-image', {
-      body: {
-        base64: toBase64(c.bytes),
-        mime: c.mime,
-        model,
-        contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
-      },
-    });
-    if (error) throw new Error(error.message);
-    if (data?.error) throw new Error(data.error);
-    inputTokens += data?.inputTokens ?? 0;
-    outputTokens += data?.outputTokens ?? 0;
-    payload = { tables: data?.tables ?? [] };
+    const first = await extractWithModel(c, model);
+    inputTokens += first.inputTokens;
+    outputTokens += first.outputTokens;
+    costUsd += calculateCost(first.inputTokens, first.outputTokens, model);
+    payload = first.payload;
+
+    // escalonamento: extração barata que não fecha → confirma no 4o (preço próprio)
+    if (model === 'gpt-4o-mini' && !payloadIsClean(first.payload)) {
+      const second = await extractWithModel(c, 'gpt-4o');
+      inputTokens += second.inputTokens;
+      outputTokens += second.outputTokens;
+      costUsd += calculateCost(second.inputTokens, second.outputTokens, 'gpt-4o');
+      escalated = true;
+      usedModel = 'gpt-4o';
+      // fica com a leitura que fecha; se ambas falham, fica com a do 4o (OCR melhor)
+      payload = payloadIsClean(second.payload) || !payloadIsClean(first.payload)
+        ? second.payload : first.payload;
+    }
+
     await db.from('vision_cache').upsert({
       sha1: c.sha1, payload,
-      input_tokens: data?.inputTokens ?? 0, output_tokens: data?.outputTokens ?? 0,
+      input_tokens: inputTokens, output_tokens: outputTokens,
+      schema_version: CACHE_SCHEMA, model: usedModel,
     });
   }
 
-  // checagens DET sobre o extraído
+  // fonte da leitura, para o analista saber a confiança
+  const origemLeitura = escalated
+    ? 'confirmado no gpt-4o (após divergência no modelo econômico)'
+    : `lido pelo modelo ${usedModel}`;
+
   const secao = toAuditSection(c.secao);
   (payload?.tables ?? []).forEach((raw, ti) => {
     const ext = toExtracted(raw);
     if (!ext) return;
     tablesExtracted++;
+    let flagged = false;
 
+    // 1) soma de coluna/linha × total declarado
     if (ext.totals) {
       const viz = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
-      const bad = (viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0);
-      if (bad > 0) {
+      if ((viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0) > 0) {
+        flagged = true;
         findings.push({
           id: `iavis-sum-${c.sha1.slice(0, 10)}-${ti}`,
           type: 'ABSOLUTE_SUM',
           section: secao,
           slideRef: `s${c.slide}`,
           title: `Tabela não fecha no total (${ext.title.slice(0, 50)})`,
-          detail: `Números extraídos da imagem do slide ${c.slide} por visão (auto-validados por linha×coluna×total). Pode ser bug do estudo OU dígito mal lido — confira na imagem.`,
+          detail: `Números da imagem do slide ${c.slide} (${origemLeitura}). ${escalated ? 'Como o 4o confirmou, é provável bug real do estudo.' : 'Pode ser bug do estudo OU dígito mal lido — confira na imagem.'}`,
           ok: false,
           viz,
           evidenceSha1: c.sha1,
         });
-      } else {
-        tablesVerified++;
       }
     }
 
+    // 2) cross-check %↔absoluto (pega dígito mal lido mesmo com soma fechando)
+    const pc = checkPercentConsistency(ext);
+    if (pc && (pc.badRows?.length ?? 0) > 0) {
+      flagged = true;
+      findings.push({
+        id: `iavis-pct-${c.sha1.slice(0, 10)}-${ti}`,
+        type: 'PERCENTAGE_SUM',
+        section: secao,
+        slideRef: `s${c.slide}`,
+        title: `Coluna % não bate com a absoluta (${ext.title.slice(0, 40)})`,
+        detail: `${pc.notes?.[0] ?? 'Percentual inconsistente com o valor absoluto.'} (${origemLeitura})`,
+        ok: false,
+        viz: pc,
+        evidenceSha1: c.sha1,
+      });
+    }
+
+    // 3) furo de faixa
     const bins = binsFromColumns(ext.columns);
     if (bins.length >= 3) {
       const gap = detectBinGap(bins);
       if (gap.gapAfterIndex !== undefined) {
+        flagged = true;
         findings.push({
           id: `iavis-bin-${c.sha1.slice(0, 10)}-${ti}`,
           type: 'BINNING_RULE',
@@ -192,9 +276,11 @@ async function processImage(
         });
       }
     }
+
+    if (!flagged) tablesVerified++;
   });
 
-  return { findings, tablesExtracted, tablesVerified, fromCache, inputTokens, outputTokens };
+  return { findings, tablesExtracted, tablesVerified, fromCache, inputTokens, outputTokens, costUsd, escalated };
 }
 
 export async function runVisionPass(
@@ -207,7 +293,8 @@ export async function runVisionPass(
   const concurrency = Math.max(1, o.concurrency ?? 1);
 
   const findings: Finding[] = [];
-  let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0, done = 0;
+  let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0;
+  let costUsd = 0, escalated = 0, done = 0;
 
   let next = 0;
   async function worker() {
@@ -221,6 +308,8 @@ export async function runVisionPass(
       fromCache += r.fromCache;
       inputTokens += r.inputTokens;
       outputTokens += r.outputTokens;
+      costUsd += r.costUsd;
+      if (r.escalated) escalated += 1;
       o.onProgress?.(++done, candidates.length);
     }
   }
@@ -228,7 +317,7 @@ export async function runVisionPass(
 
   return {
     findings, tablesExtracted, tablesVerified, fromCache,
-    inputTokens, outputTokens,
-    costUsd: calculateCost(inputTokens, outputTokens, model),
+    inputTokens, outputTokens, escalated,
+    costUsd,
   };
 }

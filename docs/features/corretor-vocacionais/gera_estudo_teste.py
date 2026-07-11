@@ -184,15 +184,16 @@ def build(cidade, sem_secao):
     gab.append(dict(slide=5, type="SPELLING", layer="IA",
                     detail="Erros: 'empreedimento', 'demandda', 'moradya'"))
 
-    # 6 — SOCIO (CONTROLE: tabela-imagem CORRETA, não deve gerar ABSOLUTE_SUM)
+    # 6 — SOCIO (CONTROLE: tabela-imagem CORRETA com Absoluto + % — exercita o
+    # cross-check %↔absoluto e o escalonamento p/ 4o se a visão ler algum dígito errado)
     s = add_slide(prs, "Sociodemográfico — Domicílios por Faixa")
     add_table_image(
         s,
-        ["Faixa", "Domicílios"],
-        [["Até 3 SM", "150"], ["3 a 6 SM", "300"], ["6 a 10 SM", "250"]],
-        total_row=["Total", "700"],  # 150+300+250 = 700 OK
+        ["Faixa", "Absoluto", "%"],
+        [["Até 3 SM", "150", "21,4%"], ["3 a 6 SM", "300", "42,9%"], ["6 a 10 SM", "250", "35,7%"]],
+        total_row=["Total", "700", "100%"],  # 150+300+250 = 700; %s batem com absoluto/total
     )
-    ctrl.append(dict(slide=6, nota="tabela-imagem correta — visão não deve acusar ABSOLUTE_SUM"))
+    ctrl.append(dict(slide=6, nota="tabela-imagem Absoluto+% correta — não deve gerar ABSOLUTE_SUM nem PERCENTAGE_SUM; se a visão errar um dígito, o cross-check %↔abs pega e escala p/ 4o"))
 
     # 7 — SOCIO (ERRO ABSOLUTE_SUM em imagem: coluna 2030 não fecha)
     s = add_slide(prs, "Projeção de Demanda — Renda por Ano")

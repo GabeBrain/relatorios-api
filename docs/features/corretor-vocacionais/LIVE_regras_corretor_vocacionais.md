@@ -16,6 +16,26 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.19 — 2026-07-11 — Exatidão da visão: cross-check %↔absoluto + escalonamento p/ 4o
+
+Reação ao bug real do Gabriel (visão leu 100.198 como 116.817). Três reforços contra dígito mal lido:
+
+| Reforço | O que faz | Arquivo |
+|---|---|---|
+| **Cross-check %↔absoluto** (regra DET nova) | Em tabela com coluna Absoluto + %, cada % tem de bater com `abs_linha/total`. Pega dígito mal lido **mesmo quando a soma fecha** e aponta a **linha exata**. No caso do Gabriel: linha 3 extraída = 17,2% do total, mas a tabela diz 14,7% → flag cirúrgico. Erros minúsculos (linha 6, 45 unidades) ficam no ruído do arredondamento. | `lib/audit/engine.ts` (`checkPercentConsistency`), achado tipo `PERCENTAGE_SUM` |
+| **Escalonamento mini→4o** | Se a leitura do modelo econômico **não fecha** (soma ou %↔abs), a MESMA imagem é re-lida no `gpt-4o` (OCR melhor) antes de incomodar o analista. Fica com a leitura que fecha; se ambas falham, mantém a do 4o e marca "provável bug real". Custo sobe só nas tabelas que falham (preço por-modelo correto). | `lib/v3/ia-vision.ts` (`processImage`, `payloadIsClean`) |
+| **Versionamento do `vision_cache`** | `schema_version` + `model`: extração antiga (schema < atual) é **reprocessada** — leitura ruim não fica presa por sha1 para sempre. | migration `20260711110000_vision_cache_schema.sql` |
+
+Teste de regressão com os números **reais** do bug: `lib/audit/__tests__/percent-consistency.test.ts`
+(aponta a linha 3, ignora a linha 6, null sem par abs+%). Gerador ganhou tabela Absoluto+% (slide 6)
+para exercitar o cross-check e o escalonamento ao vivo. **⚠ Aplicar:** migration `20260711110000`
+(além da `20260711100000` de evidências). Na 1ª análise após aplicar, as imagens já cacheadas
+reprocessam (schema subiu p/ 2).
+
+Fragilidades ainda em aberto (documentadas p/ decisão): tabela **sem** total nem % → sem
+auto-validação; recorte/zoom na imagem antes de enviar (mais resolução/dígito); OCR determinístico
+(Textract/Document AI) como 2ª opinião; e a garantia estrutural real = **tabela nativa no PPT**.
+
 ## Versão 0.18 — 2026-07-11 — v3.3 IMPLEMENTADA: passo único + homepage + evidência + legado v1
 
 Plano de `PLAN_corretor_v3_passo_unico.md` executado (build/typecheck/lint/testes limpos):

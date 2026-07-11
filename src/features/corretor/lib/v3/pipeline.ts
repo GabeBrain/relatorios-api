@@ -73,6 +73,8 @@ export interface FullAnalysisResult {
   visionCostUsd: number;
   textTokens: { input: number; output: number };
   visionTokens: { input: number; output: number };
+  /** imagens que precisaram escalar do mini p/ o 4o (leitura divergiu) */
+  visionEscalated: number;
   aborted: boolean;
 }
 
@@ -135,6 +137,7 @@ export async function runFullAnalysis(
     visionCostUsd: vision.costUsd,
     textTokens: { input: text.inputTokens, output: text.outputTokens },
     visionTokens: { input: vision.inputTokens, output: vision.outputTokens },
+    visionEscalated: vision.escalated,
     aborted: signal?.aborted ?? false,
   };
 }

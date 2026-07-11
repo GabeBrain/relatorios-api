@@ -66,6 +66,59 @@ export function checkTableSums(
   return { kind: 'table', table, badColumns, badRows, notes };
 }
 
+/**
+ * Cross-check %↔absoluto — numa tabela com uma coluna de valor ABSOLUTO e uma de
+ * PERCENTUAL, cada % deve bater com `100 · abs_linha / total_abs`. Diferente de
+ * checkTableSums (que confere a coluna contra o total), este pega **dígito mal
+ * lido pela visão mesmo quando a soma fecha** e aponta a LINHA exata: se a visão
+ * leu 100.198 como 116.817, o % declarado (14,7%) não corresponde (≈17,2%).
+ * Retorna null quando não há par absoluto+% detectável.
+ */
+export function checkPercentConsistency(
+  table: ExtractedTable,
+  opts: { tolPp?: number } = {}
+): TableViz | null {
+  const tolPp = opts.tolPp ?? 0.5; // pontos percentuais de tolerância (arredondamento)
+  const cols = table.columns;
+
+  const isNumericCol = (c: number) => table.rows.filter((r) => isNum(r[c])).length >= 2;
+  const colTotal = (c: number): number => {
+    const decl = table.totals?.[c];
+    if (isNum(decl)) return decl;
+    return columnSum(table.rows, c);
+  };
+
+  // coluna de %: header com "%"/percent, ou coluna numérica cujo total ≈ 100
+  let pctCol = cols.findIndex((c, i) => i >= 1 && /%|percent/i.test(c) && isNumericCol(i));
+  if (pctCol < 1) {
+    pctCol = cols.findIndex((c, i) => i >= 1 && isNumericCol(i) && Math.abs(colTotal(i) - 100) <= 1);
+  }
+  if (pctCol < 1) return null;
+
+  // coluna absoluta: 1ª numérica ≠ pctCol cujo total NÃO é ~100 (não é outro %)
+  const absCol = cols.findIndex((c, i) =>
+    i >= 1 && i !== pctCol && isNumericCol(i) && Math.abs(colTotal(i) - 100) > 1);
+  if (absCol < 1) return null;
+
+  const totalAbs = colTotal(absCol);
+  if (!(totalAbs > 0)) return null;
+
+  const badRows: number[] = [];
+  const notes: string[] = [];
+  table.rows.forEach((r, i) => {
+    const abs = r[absCol];
+    const pct = r[pctCol];
+    if (!isNum(abs) || !isNum(pct)) return;
+    const expected = (100 * abs) / totalAbs;
+    if (Math.abs(pct - expected) > tolPp) {
+      badRows.push(i);
+      notes.push(`Linha «${r[0]}»: ${abs} seria ${round(expected)}% do total, mas a tabela diz ${pct}% (possível dígito mal lido na visão).`);
+    }
+  });
+
+  return { kind: 'table', table, badColumns: [], badRows, notes };
+}
+
 /** Rótulos da 1ª coluna (faixas de renda etc.) de uma tabela. */
 export function rowLabels(table: ExtractedTable): string[] {
   return table.rows.map((r) => (typeof r[0] === 'string' ? r[0] : '')).filter(Boolean);

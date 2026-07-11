@@ -53,7 +53,7 @@
   "controles_negativos": [
     {
       "slide": 6,
-      "nota": "tabela-imagem correta — visão não deve acusar ABSOLUTE_SUM"
+      "nota": "tabela-imagem Absoluto+% correta — não deve gerar ABSOLUTE_SUM nem PERCENTAGE_SUM; se a visão errar um dígito, o cross-check %↔abs pega e escala p/ 4o"
     },
     {
       "slide": 8,

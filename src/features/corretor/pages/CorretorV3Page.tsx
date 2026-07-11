@@ -355,7 +355,10 @@ export default function CorretorV3Page() {
       if (res.aborted) {
         toast.warning('Análise pausada', { description: `${nIa} achado(s) de IA até aqui · ${formatBRL(custo)} — o que foi extraído ficou salvo (cache).` });
       } else {
-        toast.success(`Análise completa — ${formatBRL(custo)}`, { description: `${nIa} achado(s) de IA na worklist` });
+        toast.success(`Análise completa — ${formatBRL(custo)}`, {
+          description: `${nIa} achado(s) de IA na worklist` +
+            (res.visionEscalated > 0 ? ` · ${res.visionEscalated} tabela(s) reconferida(s) no gpt-4o` : ''),
+        });
       }
       await refreshList();
       setItems(await loadFindings(study.id));
