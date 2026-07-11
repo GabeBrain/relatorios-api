@@ -40,7 +40,7 @@ export async function estimateVisionPass(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cachedSet = new Set((data ?? []).map((r: any) => r.sha1 as string));
   const toRun = candidates.filter((c) => !cachedSet.has(c.sha1));
-  const inputTokens = toRun.reduce((a, c) => a + calculateImageTokens(c.w, c.h) + 450, 0);
+  const inputTokens = toRun.reduce((a, c) => a + calculateImageTokens(c.w, c.h, model) + 450, 0);
   const outputTokens = toRun.length * 700;
   return {
     candidates: candidates.length,
@@ -104,92 +104,127 @@ export interface VisionPassResult {
   costUsd: number;
 }
 
+export interface VisionPassOpts {
+  onProgress?: (done: number, total: number) => void;
+  /** Imagens processadas simultaneamente (default 1 = sequencial). */
+  concurrency?: number;
+  /** Pausar/cancelar o passe — o que já foi extraído fica no cache. */
+  signal?: AbortSignal;
+}
+
+/** Extrai + auto-valida UMA imagem. Atualiza o cache; retorna achados + tokens. */
+async function processImage(
+  c: TableImageCandidate,
+  model: ModelId
+): Promise<{ findings: Finding[]; tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number; outputTokens: number }> {
+  const findings: Finding[] = [];
+  let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0;
+
+  // cache primeiro — imagem já extraída não é paga de novo
+  let payload: CachePayload | null = null;
+  const { data: hit } = await db.from('vision_cache').select('payload').eq('sha1', c.sha1).maybeSingle();
+  if (hit?.payload) {
+    payload = hit.payload as CachePayload;
+    fromCache = 1;
+  } else {
+    const { data, error } = await supabase.functions.invoke<{
+      tables: RawTable[]; inputTokens: number; outputTokens: number; error?: string;
+    }>('analyze-table-image', {
+      body: {
+        base64: toBase64(c.bytes),
+        mime: c.mime,
+        model,
+        contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
+      },
+    });
+    if (error) throw new Error(error.message);
+    if (data?.error) throw new Error(data.error);
+    inputTokens += data?.inputTokens ?? 0;
+    outputTokens += data?.outputTokens ?? 0;
+    payload = { tables: data?.tables ?? [] };
+    await db.from('vision_cache').upsert({
+      sha1: c.sha1, payload,
+      input_tokens: data?.inputTokens ?? 0, output_tokens: data?.outputTokens ?? 0,
+    });
+  }
+
+  // checagens DET sobre o extraído
+  const secao = toAuditSection(c.secao);
+  (payload?.tables ?? []).forEach((raw, ti) => {
+    const ext = toExtracted(raw);
+    if (!ext) return;
+    tablesExtracted++;
+
+    if (ext.totals) {
+      const viz = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
+      const bad = (viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0);
+      if (bad > 0) {
+        findings.push({
+          id: `iavis-sum-${c.sha1.slice(0, 10)}-${ti}`,
+          type: 'ABSOLUTE_SUM',
+          section: secao,
+          slideRef: `s${c.slide}`,
+          title: `Tabela não fecha no total (${ext.title.slice(0, 50)})`,
+          detail: `Números extraídos da imagem do slide ${c.slide} por visão (auto-validados por linha×coluna×total). Pode ser bug do estudo OU dígito mal lido — confira na imagem.`,
+          ok: false,
+          viz,
+          evidenceSha1: c.sha1,
+        });
+      } else {
+        tablesVerified++;
+      }
+    }
+
+    const bins = binsFromColumns(ext.columns);
+    if (bins.length >= 3) {
+      const gap = detectBinGap(bins);
+      if (gap.gapAfterIndex !== undefined) {
+        findings.push({
+          id: `iavis-bin-${c.sha1.slice(0, 10)}-${ti}`,
+          type: 'BINNING_RULE',
+          section: secao,
+          slideRef: `s${c.slide}`,
+          title: 'Furo/sobreposição nas faixas da tabela',
+          detail: gap.description ?? 'Sequência de faixas inconsistente.',
+          ok: false,
+          viz: { kind: 'binrange', unit: '', bins, gapAfterIndex: gap.gapAfterIndex, gapDescription: gap.description },
+          evidenceSha1: c.sha1,
+        });
+      }
+    }
+  });
+
+  return { findings, tablesExtracted, tablesVerified, fromCache, inputTokens, outputTokens };
+}
+
 export async function runVisionPass(
   candidates: TableImageCandidate[],
   model: ModelId,
-  onProgress?: (done: number, total: number) => void
+  opts: VisionPassOpts | ((done: number, total: number) => void) = {}
 ): Promise<VisionPassResult> {
+  // compat: aceitava um callback de progresso posicional
+  const o: VisionPassOpts = typeof opts === 'function' ? { onProgress: opts } : opts;
+  const concurrency = Math.max(1, o.concurrency ?? 1);
+
   const findings: Finding[] = [];
-  let tablesExtracted = 0, tablesVerified = 0, fromCache = 0;
-  let inputTokens = 0, outputTokens = 0;
+  let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0, done = 0;
 
-  for (let i = 0; i < candidates.length; i++) {
-    const c = candidates[i];
-
-    // cache primeiro — imagem já extraída não é paga de novo
-    let payload: CachePayload | null = null;
-    const { data: hit } = await db.from('vision_cache').select('payload').eq('sha1', c.sha1).maybeSingle();
-    if (hit?.payload) {
-      payload = hit.payload as CachePayload;
-      fromCache++;
-    } else {
-      const { data, error } = await supabase.functions.invoke<{
-        tables: RawTable[]; inputTokens: number; outputTokens: number; error?: string;
-      }>('analyze-table-image', {
-        body: {
-          base64: toBase64(c.bytes),
-          mime: c.mime,
-          model,
-          contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
-        },
-      });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
-      inputTokens += data?.inputTokens ?? 0;
-      outputTokens += data?.outputTokens ?? 0;
-      payload = { tables: data?.tables ?? [] };
-      await db.from('vision_cache').upsert({
-        sha1: c.sha1, payload,
-        input_tokens: data?.inputTokens ?? 0, output_tokens: data?.outputTokens ?? 0,
-      });
+  let next = 0;
+  async function worker() {
+    while (next < candidates.length) {
+      if (o.signal?.aborted) return;
+      const i = next++;
+      const r = await processImage(candidates[i], model);
+      findings.push(...r.findings);
+      tablesExtracted += r.tablesExtracted;
+      tablesVerified += r.tablesVerified;
+      fromCache += r.fromCache;
+      inputTokens += r.inputTokens;
+      outputTokens += r.outputTokens;
+      o.onProgress?.(++done, candidates.length);
     }
-
-    // checagens DET sobre o extraído
-    const secao = toAuditSection(c.secao);
-    (payload?.tables ?? []).forEach((raw, ti) => {
-      const ext = toExtracted(raw);
-      if (!ext) return;
-      tablesExtracted++;
-
-      if (ext.totals) {
-        const viz = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
-        const bad = (viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0);
-        if (bad > 0) {
-          findings.push({
-            id: `iavis-sum-${c.sha1.slice(0, 10)}-${ti}`,
-            type: 'ABSOLUTE_SUM',
-            section: secao,
-            slideRef: `s${c.slide}`,
-            title: `Tabela não fecha no total (${ext.title.slice(0, 50)})`,
-            detail: `Números extraídos da imagem do slide ${c.slide} por visão (auto-validados por linha×coluna×total). Pode ser bug do estudo OU dígito mal lido — confira na imagem.`,
-            ok: false,
-            viz,
-          });
-        } else {
-          tablesVerified++;
-        }
-      }
-
-      const bins = binsFromColumns(ext.columns);
-      if (bins.length >= 3) {
-        const gap = detectBinGap(bins);
-        if (gap.gapAfterIndex !== undefined) {
-          findings.push({
-            id: `iavis-bin-${c.sha1.slice(0, 10)}-${ti}`,
-            type: 'BINNING_RULE',
-            section: secao,
-            slideRef: `s${c.slide}`,
-            title: 'Furo/sobreposição nas faixas da tabela',
-            detail: gap.description ?? 'Sequência de faixas inconsistente.',
-            ok: false,
-            viz: { kind: 'binrange', unit: '', bins, gapAfterIndex: gap.gapAfterIndex, gapDescription: gap.description },
-          });
-        }
-      }
-    });
-
-    onProgress?.(i + 1, candidates.length);
   }
+  await Promise.all(Array.from({ length: Math.min(concurrency, candidates.length) }, worker));
 
   return {
     findings, tablesExtracted, tablesVerified, fromCache,

@@ -88,6 +88,10 @@ export interface Finding {
   /** Quando existe, reproduz a nota real do analista (gabarito). */
   gabarito?: string;
   viz?: Viz;
+  /** sha1 da imagem de tabela que originou o achado (visão) → evidência visual (v3.3). */
+  evidenceSha1?: string;
+  /** path no Storage da imagem-evidência, depois de persistida (v3.3). */
+  evidenceImage?: string;
 }
 
 export interface StudyFixture {

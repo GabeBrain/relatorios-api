@@ -59,8 +59,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { path: '/rebrain/secovi', label: 'Secovi', icon: <Building2 className="h-4 w-4" /> },
       { path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList className="h-4 w-4" /> },
-      { path: '/corretor', label: 'Corretor (v3)', icon: <ClipboardList className="h-4 w-4" /> },
-      { path: '/auditoria', label: 'Auditoria (v1)', icon: <ClipboardList className="h-4 w-4" /> },
+      { path: '/corretor', label: 'Corretor', icon: <ClipboardList className="h-4 w-4" /> },
     ],
   },
   {

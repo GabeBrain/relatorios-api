@@ -74,7 +74,8 @@ export async function runTextPass(
   ir: Ir,
   city: string,
   model: ModelId,
-  onProgress?: (done: number, total: number) => void
+  onProgress?: (done: number, total: number) => void,
+  signal?: AbortSignal
 ): Promise<TextPassResult> {
   const slides = reviewableSlides(ir);
   const secao = new Map(ir.slides.map((s) => [s.n, toAuditSection(s.secao_canonica)]));
@@ -85,6 +86,7 @@ export async function runTextPass(
   let inputTokens = 0, outputTokens = 0;
 
   for (let bi = 0; bi < batches.length; bi++) {
+    if (signal?.aborted) break;
     const batch = batches[bi];
     const { data, error } = await supabase.functions.invoke<{
       findings: RawIaFinding[]; inputTokens: number; outputTokens: number; error?: string;

@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
-  Trash2, FileUp, ArrowLeft, Quote, Sparkles, DollarSign, ChevronDown, BookOpen,
+  Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -18,15 +18,24 @@ import type { Ir } from '../lib/audit/ir';
 import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import { irToFindings } from '../lib/audit/ir-rules';
 import { VizSwitch } from '../components/audit/FindingCard';
-import { MODEL_PRICING, formatUSD, type ModelId } from '../lib/cost-calculator';
-import { estimateTextPass, runTextPass } from '../lib/v3/ia-text';
-import { findTableImages, type TableImageCandidate } from '../lib/v3/table-images';
-import { estimateVisionPass, runVisionPass, type VisionEstimate } from '../lib/v3/ia-vision';
+import LegacyV1Panel from '../components/LegacyV1Panel';
+import { formatUSD, type ModelId } from '../lib/cost-calculator';
+import { runFullAnalysis, estimateFullAnalysis, type StageProgress, type FullEstimate } from '../lib/v3/pipeline';
+import { BUDGET_STUDY_BRL, formatBRL } from '../lib/v3/config';
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
+
+const MODEL: ModelId = 'gpt-4o-mini'; // econômico por padrão; visão cai p/ R$ 0 após cache
+
+// Rótulo humano de cada etapa do pipeline de passo único
+const STAGE_LABEL: Record<StageProgress['stage'], string> = {
+  det: 'Triagem determinística',
+  texto: 'Revisão de texto (IA)',
+  visao: 'Números das tabelas (visão)',
+};
 
 const isLocal = (f: Finding) => /^s\d+$/.test(f.slideRef.trim());
 const slideNumOf = (f: Finding) => parseInt(f.slideRef.replace(/\D/g, ''), 10) || 0;
@@ -93,6 +102,21 @@ function V3FindingCard({ item, onStatus }: {
           )}
         </div>
       </div>
+      {f.evidenceImage && !done && (
+        <div className="px-4 pb-2 space-y-1">
+          <a href={f.evidenceImage} target="_blank" rel="noreferrer" className="block">
+            <img
+              src={f.evidenceImage}
+              alt={`Tabela original do slide ${f.slideRef}`}
+              loading="lazy"
+              className="w-full max-h-[440px] object-contain rounded-md border border-border bg-white"
+            />
+          </a>
+          <p className="text-[10px] text-muted-foreground">
+            Imagem original do {f.slideRef} — clique para ampliar. A prova abaixo mostra qual número não fecha.
+          </p>
+        </div>
+      )}
       {f.viz && !done && (
         <div className="px-4 pb-3"><VizSwitch finding={f} /></div>
       )}
@@ -117,207 +141,135 @@ function V3FindingCard({ item, onStatus }: {
   );
 }
 
-// ─── Painel Aprofundar com IA (v3.1 — texto) ─────────────────────────────────
+// ─── Banner de análise vivo (passo único) ────────────────────────────────────
 
-function IaPanel({ study, ir, onNeedFile, onRan }: {
-  study: StudyV3;
-  ir: Ir | null;
-  onNeedFile: () => void;
-  onRan: () => Promise<void>;
-}) {
-  const [model, setModel] = useState<ModelId>('gpt-4o-mini');
-  const [running, setRunning] = useState(false);
-  const [progress, setProgress] = useState<[number, number] | null>(null);
+interface AnalysisState {
+  running: boolean;
+  stages: Partial<Record<StageProgress['stage'], { done: number; total: number }>>;
+  spentUsd: number;
+  estimateUsd: number;
+}
 
-  const estimate = ir ? estimateTextPass(ir, model) : null;
-
-  async function run() {
-    if (!ir) return;
-    setRunning(true);
-    setProgress([0, estimate?.batches ?? 0]);
-    try {
-      const res = await runTextPass(ir, study.cidade ?? '', model, (d, t) => setProgress([d, t]));
-      const inserted = await insertIaFindings(study.id, res.findings, 'IA_texto', study.lastVersion);
-      await registerIaPass(
-        study.id, 'texto',
-        `${estimate?.slides ?? 0} slides · ${res.batches} batches · ${model}`,
-        res.costUsd, res.inputTokens, res.outputTokens
-      );
-      toast.success(`IA de texto concluída — ${formatUSD(res.costUsd)}`, {
-        description: `${res.findings.length} achado(s) da IA · ${inserted} novo(s) na worklist`,
-      });
-      await onRan();
-    } catch (err) {
-      toast.error('Falha no passe de IA', { description: err instanceof Error ? err.message : String(err) });
-    } finally {
-      setRunning(false);
-      setProgress(null);
-    }
-  }
-
+function AnalysisBanner({ state, onPause }: { state: AnalysisState; onPause: () => void }) {
+  const order: StageProgress['stage'][] = ['det', 'texto', 'visao'];
   return (
     <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 px-4 py-3 space-y-2">
-      <div className="flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-violet-500" />
-        <h3 className="text-sm font-semibold">Aprofundar com IA — revisão de texto</h3>
-        <span className="text-[10px] text-muted-foreground">ortografia · cidade/contexto · coerência texto×tabela</span>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <Sparkles className="w-4 h-4 text-violet-500 shrink-0 animate-pulse" />
+          <h3 className="text-sm font-semibold truncate">Analisando o estudo…</h3>
+          <span className="text-xs text-muted-foreground">
+            ~{formatBRL(state.estimateUsd)} estimado · {formatBRL(state.spentUsd)} gasto
+          </span>
+        </div>
+        <button
+          onClick={onPause}
+          className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-destructive/50 inline-flex items-center gap-1.5 shrink-0"
+        >
+          <Pause className="w-3.5 h-3.5" /> Pausar IA
+        </button>
       </div>
-      {!ir ? (
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">
-            Para rodar a IA, selecione o .pptx da versão atual (v{study.lastVersion}) — o arquivo não fica salvo no servidor.
-          </p>
-          <button
-            onClick={onNeedFile}
-            className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-violet-500/50 inline-flex items-center gap-1.5 shrink-0"
-          >
-            <FileUp className="w-3.5 h-3.5" /> Selecionar .pptx
-          </button>
-        </div>
-      ) : (
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            value={model}
-            onChange={(e) => setModel(e.target.value as ModelId)}
-            disabled={running}
-            className="text-xs rounded-md border border-border bg-background px-2 py-1.5"
-          >
-            {(Object.keys(MODEL_PRICING) as ModelId[]).map((m) => (
-              <option key={m} value={m}>{MODEL_PRICING[m].label}</option>
-            ))}
-          </select>
-          {estimate && (
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <DollarSign className="w-3 h-3" />
-              {estimate.slides} slides · {estimate.batches} chamada(s) · custo estimado{' '}
-              <strong className="text-foreground">{formatUSD(estimate.costUsd)}</strong>
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
+        {order.map((st) => {
+          const p = state.stages[st];
+          if (!p) return null;
+          const pct = p.total > 0 ? Math.round((p.done / p.total) * 100) : 0;
+          return (
+            <span key={st} className="text-[11px] text-muted-foreground inline-flex items-center gap-1.5">
+              {pct >= 100 ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <Loader2 className="w-3 h-3 animate-spin" />}
+              {STAGE_LABEL[st]} <span className="font-mono">{p.done}/{p.total}</span>
             </span>
-          )}
-          <button
-            onClick={run}
-            disabled={running}
-            className="text-xs rounded-md px-3 py-1.5 bg-violet-600 text-white hover:bg-violet-700 inline-flex items-center gap-1.5 disabled:opacity-60"
-          >
-            {running
-              ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> {progress ? `lote ${progress[0]}/${progress[1]}` : 'rodando…'}</>
-              : <><Sparkles className="w-3.5 h-3.5" /> Rodar IA de texto</>}
-          </button>
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-// ─── Painel Números das tabelas-imagem (v3.2 — visão com cache) ──────────────
+// ─── Modal de confirmação de orçamento (estimativa acima do teto) ────────────
 
-function VisionPanel({ study, ir, bytes, onNeedFile, onRan }: {
-  study: StudyV3;
-  ir: Ir | null;
-  bytes: Uint8Array | null;
-  onNeedFile: () => void;
-  onRan: () => Promise<void>;
+function BudgetModal({ estimate, onConfirm, onCancel }: {
+  estimate: FullEstimate;
+  onConfirm: () => void;
+  onCancel: () => void;
 }) {
-  const [model, setModel] = useState<ModelId>('gpt-4o-mini');
-  const [candidates, setCandidates] = useState<TableImageCandidate[] | null>(null);
-  const [estimate, setEstimate] = useState<VisionEstimate | null>(null);
-  const [running, setRunning] = useState(false);
-  const [progress, setProgress] = useState<[number, number] | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    setCandidates(null);
-    setEstimate(null);
-    if (ir && bytes) {
-      findTableImages(bytes, ir)
-        .then(async (cands) => {
-          if (!active) return;
-          setCandidates(cands);
-          setEstimate(await estimateVisionPass(cands, model));
-        })
-        .catch(() => { if (active) setCandidates([]); });
-    }
-    return () => { active = false; };
-  }, [ir, bytes, model]);
-
-  async function run() {
-    if (!candidates?.length) return;
-    setRunning(true);
-    setProgress([0, candidates.length]);
-    try {
-      const res = await runVisionPass(candidates, model, (d, t) => setProgress([d, t]));
-      const inserted = await insertIaFindings(study.id, res.findings, 'IA_visao', study.lastVersion);
-      await registerIaPass(
-        study.id, 'visao_tabela',
-        `${candidates.length} imagens (${res.fromCache} do cache) · ${model}`,
-        res.costUsd, res.inputTokens, res.outputTokens
-      );
-      toast.success(`Extração concluída — ${formatUSD(res.costUsd)}`, {
-        description: `${res.tablesExtracted} tabela(s) extraída(s) · ${res.tablesVerified} auto-validadas · ${inserted} achado(s) novos · ${res.fromCache} imagens do cache`,
-      });
-      await onRan();
-    } catch (err) {
-      toast.error('Falha na extração de visão', { description: err instanceof Error ? err.message : String(err) });
-    } finally {
-      setRunning(false);
-      setProgress(null);
-    }
-  }
-
   return (
-    <div className="rounded-lg border border-sky-500/30 bg-sky-500/5 px-4 py-3 space-y-2">
-      <div className="flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-sky-500" />
-        <h3 className="text-sm font-semibold">Aprofundar com IA — números das tabelas (imagem)</h3>
-        <span className="text-[10px] text-muted-foreground">somas · totais · faixas — cache por imagem (paga 1×)</span>
-      </div>
-      {!ir || !bytes ? (
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">
-            Selecione o .pptx da versão atual (v{study.lastVersion}) para localizar as tabelas em imagem.
-          </p>
-          <button
-            onClick={onNeedFile}
-            className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-sky-500/50 inline-flex items-center gap-1.5 shrink-0"
-          >
-            <FileUp className="w-3.5 h-3.5" /> Selecionar .pptx
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onCancel}>
+      <div
+        className="w-full max-w-md rounded-lg border bg-card p-5 space-y-3 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 text-amber-500" />
+          <h3 className="text-sm font-semibold">Estimativa acima do teto</h3>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          A análise completa deste estudo custa cerca de{' '}
+          <strong className="text-foreground">{formatBRL(estimate.costUsd)}</strong>, acima do teto de{' '}
+          <strong className="text-foreground">R$ {BUDGET_STUDY_BRL.toFixed(2).replace('.', ',')}</strong>{' '}
+          da fase de testes. São {estimate.textSlides} slides de texto e {estimate.visionToRun} imagem(ns) de
+          tabela a extrair{estimate.visionCached > 0 && ` (${estimate.visionCached} já no cache)`}.
+        </p>
+        <div className="flex items-center justify-end gap-2 pt-1">
+          <button onClick={onCancel} className="text-xs rounded-md px-3 py-1.5 border border-border hover:bg-muted">
+            Cancelar (fica só a triagem grátis)
+          </button>
+          <button onClick={onConfirm} className="text-xs rounded-md px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+            Analisar mesmo assim
           </button>
         </div>
-      ) : candidates === null ? (
-        <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Localizando imagens de tabela…
-        </p>
-      ) : candidates.length === 0 ? (
-        <p className="text-xs text-muted-foreground">Nenhuma imagem candidata a tabela numérica nas seções Socio/Mercado/Lacunas/Absorção.</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Seção + card de estudo (homepage) ───────────────────────────────────────
+
+function StudySection({ title, studies, onOpen, empty }: {
+  title: string;
+  studies: StudyV3[];
+  onOpen: (id: string) => void;
+  empty?: string;
+}) {
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center gap-2">
+        <h2 className="text-sm font-semibold">{title}</h2>
+        <span className="text-[10px] text-muted-foreground">{studies.length}</span>
+        <div className="flex-1 border-t border-border" />
+      </div>
+      {studies.length === 0 ? (
+        empty && <p className="text-xs text-muted-foreground">{empty}</p>
       ) : (
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            value={model}
-            onChange={(e) => setModel(e.target.value as ModelId)}
-            disabled={running}
-            className="text-xs rounded-md border border-border bg-background px-2 py-1.5"
-          >
-            {(Object.keys(MODEL_PRICING) as ModelId[]).map((m) => (
-              <option key={m} value={m}>{MODEL_PRICING[m].label}</option>
-            ))}
-          </select>
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <DollarSign className="w-3 h-3" />
-            {candidates.length} imagem(ns)
-            {estimate && estimate.cached > 0 && <> · {estimate.cached} já no cache</>}
-            {estimate && <> · custo estimado <strong className="text-foreground">{formatUSD(estimate.costUsd)}</strong></>}
-          </span>
-          <button
-            onClick={run}
-            disabled={running}
-            className="text-xs rounded-md px-3 py-1.5 bg-sky-600 text-white hover:bg-sky-700 inline-flex items-center gap-1.5 disabled:opacity-60"
-          >
-            {running
-              ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> {progress ? `${progress[0]}/${progress[1]}` : 'extraindo…'}</>
-              : <><Sparkles className="w-3.5 h-3.5" /> Extrair números</>}
-          </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {studies.map((s) => <StudyCard key={s.id} s={s} onOpen={onOpen} />)}
         </div>
       )}
-    </div>
+    </section>
+  );
+}
+
+function StudyCard({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
+  const pronto = s.status === 'pronto';
+  return (
+    <button
+      onClick={() => onOpen(s.id)}
+      className="text-left rounded-lg border border-border bg-card px-4 py-3 hover:border-primary/50 transition-colors space-y-1.5"
+    >
+      <div className="flex items-center gap-2">
+        {pronto
+          ? <PackageCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+          : <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />}
+        <span className="text-sm font-medium truncate">{s.nome}</span>
+      </div>
+      <p className="text-[11px] text-muted-foreground">
+        v{s.lastVersion} · {s.nSlides} slides
+        {s.custoTotal > 0 && <> · IA {formatUSD(s.custoTotal)}</>}
+      </p>
+      <p className={cn('text-[11px] font-medium', pronto ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400')}>
+        {pronto ? 'Pronto para o A&R' : `${s.pendentes} pendente(s)`}
+      </p>
+    </button>
   );
 }
 
@@ -329,17 +281,16 @@ export default function CorretorV3Page() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [items, setItems] = useState<FindingV3[]>([]);
   const [loadingStudy, setLoadingStudy] = useState(false);
-  const [busy, setBusy] = useState<'upload' | 'recheck' | 'iafile' | null>(null);
+  const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
+  const [analysis, setAnalysis] = useState<AnalysisState | null>(null);
+  const [budgetPrompt, setBudgetPrompt] = useState<{ estimate: FullEstimate; run: () => void } | null>(null);
+  const [dragging, setDragging] = useState(false);
   const newRef = useRef<HTMLInputElement>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
-  const iaFileRef = useRef<HTMLInputElement>(null);
-  // IR + bytes do .pptx em memória por estudo (não persiste; usado p/ passes de IA)
-  const irCache = useRef<Map<string, { ir: Ir; bytes: Uint8Array }>>(new Map());
+  const abortRef = useRef<AbortController | null>(null);
 
   const selected = studies.find((s) => s.id === selectedId) ?? null;
-  const selectedIr = selected ? (irCache.current.get(selected.id)?.ir ?? null) : null;
-  const selectedBytes = selected ? (irCache.current.get(selected.id)?.bytes ?? null) : null;
 
   const refreshList = useCallback(async () => {
     setLoadingList(true);
@@ -354,10 +305,87 @@ export default function CorretorV3Page() {
     try { setItems(await loadFindings(id)); } finally { setLoadingStudy(false); }
   }, []);
 
-  async function handleNew(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = '';
+  /** Executa a análise completa (texto + visão em paralelo) já autorizada. */
+  const startAnalysis = useCallback(async (
+    study: { id: string; cidade: string | null; version: number },
+    ir: Ir,
+    bytes: Uint8Array,
+    estimate: FullEstimate,
+  ) => {
+    const ac = new AbortController();
+    abortRef.current = ac;
+    setAnalysis({
+      running: true,
+      stages: { det: { done: 1, total: 1 } },
+      spentUsd: 0,
+      estimateUsd: estimate.costUsd,
+    });
+    try {
+      const res = await runFullAnalysis(ir, bytes, {
+        city: study.cidade ?? '',
+        model: MODEL,
+        candidates: estimate.candidates,
+        signal: ac.signal,
+        onStage: async (p) => {
+          setAnalysis((prev) => prev && {
+            ...prev,
+            stages: { ...prev.stages, [p.stage]: { done: p.done, total: p.total } },
+            spentUsd: prev.spentUsd + (p.spentUsd ?? 0),
+          });
+          // achados de IA pingam na worklist assim que a etapa termina
+          if (p.findings?.length && (p.stage === 'texto' || p.stage === 'visao')) {
+            await insertIaFindings(study.id, p.findings, p.stage === 'texto' ? 'IA_texto' : 'IA_visao', study.version);
+            setItems(await loadFindings(study.id));
+          }
+        },
+      });
+
+      // registra os passes com custo/tokens reais (acumula em studies_v3.custo_total)
+      if (res.textCostUsd > 0 || res.textFindings.length) {
+        await registerIaPass(study.id, 'texto', `${estimate.textSlides} slides · ${MODEL}`,
+          res.textCostUsd, res.textTokens.input, res.textTokens.output);
+      }
+      if (res.visionCostUsd > 0 || res.visionFindings.length) {
+        await registerIaPass(study.id, 'visao_tabela', `${estimate.candidates.length} imagens · ${MODEL}`,
+          res.visionCostUsd, res.visionTokens.input, res.visionTokens.output);
+      }
+
+      const nIa = res.textFindings.length + res.visionFindings.length;
+      const custo = res.textCostUsd + res.visionCostUsd;
+      if (res.aborted) {
+        toast.warning('Análise pausada', { description: `${nIa} achado(s) de IA até aqui · ${formatBRL(custo)} — o que foi extraído ficou salvo (cache).` });
+      } else {
+        toast.success(`Análise completa — ${formatBRL(custo)}`, { description: `${nIa} achado(s) de IA na worklist` });
+      }
+      await refreshList();
+      setItems(await loadFindings(study.id));
+    } catch (err) {
+      toast.error('Falha na análise', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      abortRef.current = null;
+      setAnalysis(null);
+    }
+  }, [refreshList]);
+
+  /** Decide entre rodar direto ou pedir confirmação (estimativa acima do teto). */
+  const analyzeStudy = useCallback(async (
+    study: { id: string; cidade: string | null; version: number },
+    ir: Ir,
+    bytes: Uint8Array,
+  ) => {
+    const estimate = await estimateFullAnalysis(ir, bytes, MODEL);
+    if (estimate.costBrl > BUDGET_STUDY_BRL) {
+      setBudgetPrompt({ estimate, run: () => { setBudgetPrompt(null); void startAnalysis(study, ir, bytes, estimate); } });
+      return;
+    }
+    await startAnalysis(study, ir, bytes, estimate);
+  }, [startAnalysis]);
+
+  async function ingestNew(file: File) {
+    if (!/\.pptx$/i.test(file.name)) {
+      toast.error('Formato não suportado', { description: 'O corretor recebe estudos em .pptx.' });
+      return;
+    }
     setBusy('upload');
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
@@ -368,24 +396,32 @@ export default function CorretorV3Page() {
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name },
         findings
       );
-      irCache.current.clear();
-      irCache.current.set(id, { ir, bytes });
       toast.success('Triagem concluída (R$ 0)', {
         description: `${ir.n_slides} slides · ${findings.length} pendências determinísticas`,
       });
       await refreshList();
       await openStudy(id);
+      setBusy(null);
+      // passo único: dispara a análise completa automaticamente
+      await analyzeStudy({ id, cidade: null, version: 1 }, ir, bytes);
     } catch (err) {
       toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
-    } finally {
       setBusy(null);
     }
+  }
+
+  function handleNew(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    void ingestNew(file);
   }
 
   async function handleRecheck(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !selected) return;
     e.target.value = '';
+    const newVersion = selected.lastVersion + 1;
     setBusy('recheck');
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
@@ -393,47 +429,21 @@ export default function CorretorV3Page() {
       const findings = irToFindings(ir).filter((f) => !f.ok);
       const diff = await recheck(
         selected.id,
-        selected.lastVersion + 1,
+        newVersion,
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name },
         findings
       );
-      irCache.current.clear();
-      irCache.current.set(selected.id, { ir, bytes });
       setLastDiff(diff);
-      toast.success(`Reconferido (v${selected.lastVersion + 1})`, {
+      toast.success(`Reconferido (v${newVersion})`, {
         description: `${diff.resolved.length} resolvido(s) · ${diff.persistent.length} persistem · ${diff.fresh.length} novo(s)`,
       });
       await refreshList();
       setItems(await loadFindings(selected.id));
+      setBusy(null);
+      // re-roda a IA sobre a versão nova (visão puxa do cache → barato)
+      await analyzeStudy({ id: selected.id, cidade: selected.cidade, version: newVersion }, ir, bytes);
     } catch (err) {
       toast.error('Falha ao reconferir', { description: err instanceof Error ? err.message : String(err) });
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  /** Carrega o .pptx da versão ATUAL só para habilitar a IA (valida por sha1). */
-  async function handleIaFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !selected) return;
-    e.target.value = '';
-    setBusy('iafile');
-    try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const ir = await pptxToIr(bytes, file.name);
-      if (selected.lastSha1 && ir.sha1 && ir.sha1 !== selected.lastSha1) {
-        toast.error('Arquivo diferente da versão atual', {
-          description: `Este .pptx não corresponde à v${selected.lastVersion}. Se você corrigiu o arquivo, use "Reconferir" primeiro.`,
-        });
-        return;
-      }
-      irCache.current.clear();
-      irCache.current.set(selected.id, { ir, bytes });
-      setStudies((prev) => [...prev]); // re-render
-      toast.success('Arquivo carregado — IA habilitada');
-    } catch (err) {
-      toast.error('Falha ao ler o arquivo', { description: err instanceof Error ? err.message : String(err) });
-    } finally {
       setBusy(null);
     }
   }
@@ -481,67 +491,71 @@ export default function CorretorV3Page() {
 
   const progressPct = wl.total > 0 ? Math.round(((wl.total - wl.pend) / wl.total) * 100) : 0;
 
-  // ─── LANDING (sem rail: cards de estudos) ───────────────────────────────────
+  // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
   if (!selected) {
+    const emCorrecao = studies.filter((s) => s.status !== 'pronto');
+    const prontos = studies.filter((s) => s.status === 'pronto');
     return (
       <div className="min-h-screen bg-background">
-        <header className="border-b bg-card px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-base font-semibold">Corretor</h1>
-            <p className="text-xs text-muted-foreground">
-              Suba o estudo (.pptx) → corrija a worklist → entregue ao A&R com 0 pendentes
-            </p>
-          </div>
-          <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
-          <button
-            onClick={() => newRef.current?.click()}
-            disabled={busy !== null}
-            className="text-sm rounded-md px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 disabled:opacity-60"
-          >
-            {busy === 'upload' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
-            Novo estudo
-          </button>
+        <header className="border-b bg-card px-6 py-4">
+          <h1 className="text-base font-semibold">Corretor de Estudos</h1>
+          <p className="text-xs text-muted-foreground">
+            Suba o .pptx → análise completa automática (texto + números) → corrija a worklist → entregue ao A&R com 0 pendentes
+          </p>
         </header>
 
-        <div className="max-w-4xl mx-auto px-6 py-6">
-          {loadingList ? (
-            <div className="flex items-center justify-center py-16 text-muted-foreground gap-2 text-sm">
-              <Loader2 className="w-4 h-4 animate-spin" /> Carregando estudos…
-            </div>
-          ) : studies.length === 0 ? (
-            <div className="text-center py-16 space-y-3">
-              <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
-              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Nenhum estudo ainda. Suba um .pptx — a triagem determinística roda em segundos, sem custo de IA.
+        <div className="max-w-5xl mx-auto px-6 py-6 space-y-8">
+          {/* Dropzone herói */}
+          <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
+          <button
+            type="button"
+            onClick={() => busy === null && newRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              const f = e.dataTransfer.files?.[0];
+              if (f) void ingestNew(f);
+            }}
+            disabled={busy !== null}
+            className={cn(
+              'w-full rounded-xl border-2 border-dashed px-6 py-10 flex flex-col items-center justify-center gap-3 text-center transition-colors',
+              dragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 bg-card',
+              busy !== null && 'opacity-70 cursor-wait'
+            )}
+          >
+            {busy === 'upload'
+              ? <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              : <Upload className={cn('w-8 h-8', dragging ? 'text-primary' : 'text-muted-foreground')} />}
+            <div>
+              <p className="text-sm font-medium">
+                {busy === 'upload' ? 'Lendo o estudo…' : 'Arraste o .pptx aqui ou clique para escolher'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                A triagem determinística roda em segundos (R$ 0); a IA de texto e números segue automática, com teto de{' '}
+                R$ {BUDGET_STUDY_BRL.toFixed(2).replace('.', ',')} por estudo.
               </p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {studies.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => openStudy(s.id)}
-                  className="text-left rounded-lg border border-border bg-card px-4 py-3 hover:border-primary/50 transition-colors space-y-1.5"
-                >
-                  <div className="flex items-center gap-2">
-                    {s.status === 'pronto'
-                      ? <PackageCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                      : <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />}
-                    <span className="text-sm font-medium truncate">{s.nome}</span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    v{s.lastVersion} · {s.nSlides} slides
-                    {s.custoTotal > 0 && <> · IA {formatUSD(s.custoTotal)}</>}
-                  </p>
-                  <p className={cn(
-                    'text-[11px] font-medium',
-                    s.status === 'pronto' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
-                  )}>
-                    {s.status === 'pronto' ? 'Pronto para o A&R' : `${s.pendentes} pendente(s)`}
-                  </p>
-                </button>
-              ))}
+          </button>
+
+          {loadingList ? (
+            <div className="flex items-center justify-center py-12 text-muted-foreground gap-2 text-sm">
+              <Loader2 className="w-4 h-4 animate-spin" /> Carregando estudos…
             </div>
+          ) : (
+            <>
+              <StudySection
+                title="Em correção"
+                empty="Nenhum estudo em correção — suba um .pptx acima."
+                studies={emCorrecao}
+                onOpen={openStudy}
+              />
+              {prontos.length > 0 && (
+                <StudySection title="Prontos para o A&R" studies={prontos} onOpen={openStudy} />
+              )}
+              <LegacyV1Panel />
+            </>
           )}
         </div>
       </div>
@@ -572,7 +586,7 @@ export default function CorretorV3Page() {
           <input ref={recheckRef} type="file" accept=".pptx" className="hidden" onChange={handleRecheck} />
           <button
             onClick={() => recheckRef.current?.click()}
-            disabled={busy !== null || selected.status === 'pronto'}
+            disabled={busy !== null || analysis?.running || selected.status === 'pronto'}
             className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 disabled:opacity-50"
             title="Subir a versão corrigida do PPTX e comparar"
           >
@@ -586,7 +600,7 @@ export default function CorretorV3Page() {
           ) : (
             <button
               onClick={handleConclude}
-              disabled={wl.pend > 0}
+              disabled={wl.pend > 0 || analysis?.running}
               className="text-xs rounded-md px-2.5 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1.5 disabled:opacity-40"
               title={wl.pend > 0 ? `Ainda há ${wl.pend} pendente(s)` : 'Marcar como pronto para o A&R'}
             >
@@ -626,24 +640,9 @@ export default function CorretorV3Page() {
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-6 py-5 space-y-5">
-          {/* Aprofundar com IA (v3.1) */}
-          <input ref={iaFileRef} type="file" accept=".pptx" className="hidden" onChange={handleIaFile} />
-          {selected.status !== 'pronto' && (
-            <>
-              <IaPanel
-                study={selected}
-                ir={selectedIr}
-                onNeedFile={() => iaFileRef.current?.click()}
-                onRan={async () => { setItems(await loadFindings(selected.id)); await refreshList(); }}
-              />
-              <VisionPanel
-                study={selected}
-                ir={selectedIr}
-                bytes={selectedBytes}
-                onNeedFile={() => iaFileRef.current?.click()}
-                onRan={async () => { setItems(await loadFindings(selected.id)); await refreshList(); }}
-              />
-            </>
+          {/* Passo único: análise completa dispara sozinha no upload/reconferir */}
+          {analysis?.running && (
+            <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} />
           )}
 
           {loadingStudy ? (
@@ -699,6 +698,14 @@ export default function CorretorV3Page() {
           )}
         </div>
       </div>
+
+      {budgetPrompt && (
+        <BudgetModal
+          estimate={budgetPrompt.estimate}
+          onConfirm={budgetPrompt.run}
+          onCancel={() => setBudgetPrompt(null)}
+        />
+      )}
     </div>
   );
 }

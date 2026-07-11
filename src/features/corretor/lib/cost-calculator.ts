@@ -14,14 +14,25 @@ export const MODEL_PRICING: Record<ModelId, { inputPer1M: number; outputPer1M: n
   },
 };
 
-// OpenAI high-detail image token calculation
-// Scales image to fit constraints, then counts 512x512 tiles × 170 + 85 base tokens
+// OpenAI high-detail image token calculation.
+// Conta os tiles de 512px, depois aplica base + custo/tile do MODELO. O gpt-4o-mini
+// cobra imagem com um multiplicador próprio (~33×): base 2.833 + 5.667/tile, enquanto
+// o gpt-4o usa base 85 + 170/tile. Ignorar isso subestimava o custo de visão do mini
+// em ~7× no painel de estimativa (o custo cobrado, via `usage`, sempre esteve certo).
+// Fonte: OpenAI pricing (jul/2026) + docs/features/corretor-vocacionais/custos_visao_reais.md
+const IMAGE_TOKEN_RATES: Record<ModelId, { base: number; perTile: number }> = {
+  'gpt-4o': { base: 85, perTile: 170 },
+  'gpt-4o-mini': { base: 2833, perTile: 5667 },
+};
+
 export function calculateImageTokens(
   widthPx: number,
   heightPx: number,
+  model: ModelId = 'gpt-4o',
   detail: 'low' | 'high' = 'high'
 ): number {
-  if (detail === 'low') return 85;
+  const rate = IMAGE_TOKEN_RATES[model];
+  if (detail === 'low') return rate.base;
 
   let w = widthPx;
   let h = heightPx;
@@ -40,7 +51,7 @@ export function calculateImageTokens(
 
   const tilesX = Math.ceil(w / 512);
   const tilesY = Math.ceil(h / 512);
-  return tilesX * tilesY * 170 + 85;
+  return tilesX * tilesY * rate.perTile + rate.base;
 }
 
 export function calculateCost(
@@ -58,7 +69,7 @@ const AVG_PROMPT_TOKENS = 480;
 const AVG_OUTPUT_TOKENS = 320;
 
 export function estimateProjectCost(slideCount: number, model: ModelId) {
-  const imageTokens = calculateImageTokens(SLIDE_W, SLIDE_H);
+  const imageTokens = calculateImageTokens(SLIDE_W, SLIDE_H, model);
   const totalInputPerSlide = imageTokens + AVG_PROMPT_TOKENS;
   const perSlide = calculateCost(totalInputPerSlide, AVG_OUTPUT_TOKENS, model);
   return {

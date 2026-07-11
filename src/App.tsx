@@ -15,9 +15,9 @@ import NotFound from './pages/NotFound.tsx';
 import DashboardGeobrain from './pages/DashboardGeobrain.tsx';
 import ValidacaoFechamento from './pages/ValidacaoFechamento.tsx';
 
-const CorretorPage = lazy(() => import('./features/corretor/pages/CorretorPage.tsx'));
-const CorretorAnalysisPage = lazy(() => import('./features/corretor/pages/CorretorAnalysisPage.tsx'));
-const AuditoriaV2Page = lazy(() => import('./features/corretor/pages/AuditoriaV2Page.tsx'));
+// v1/v2 do corretor aposentadas (v3.3): rotas antigas redirecionam p/ /corretor.
+// O histórico da v1 é lido em modo somente-leitura dentro da própria /corretor
+// (LegacyV1Panel). Componentes v1 preservados no repo, fora do grafo do bundle.
 const CorretorV3Page = lazy(() => import('./features/corretor/pages/CorretorV3Page.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -66,10 +66,11 @@ const App = () => (
                 {/* Rebrain */}
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
                 <Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento />} />
-                <Route path="/auditoria" element={<CorretorPage />} />
-                <Route path="/auditoria/analise" element={<CorretorAnalysisPage />} />
-                <Route path="/auditoria/v2" element={<AuditoriaV2Page />} />
                 <Route path="/corretor" element={<CorretorV3Page />} />
+                {/* v1/v2 aposentadas → tudo cai no corretor v3 (histórico v1 = leitura lá dentro) */}
+                <Route path="/auditoria" element={<Navigate to="/corretor" replace />} />
+                <Route path="/auditoria/analise" element={<Navigate to="/corretor" replace />} />
+                <Route path="/auditoria/v2" element={<Navigate to="/corretor" replace />} />
 
                 {/* Dash Geobrain */}
                 <Route path="/dash-geobrain" element={<DashboardGeobrain />} />
@@ -91,8 +92,8 @@ const App = () => (
                 <Route path="/relatorios/secovi" element={<Navigate to="/rebrain/secovi" replace />} />
                 <Route path="/relatorios/dashboard-geobrain" element={<Navigate to="/dash-geobrain" replace />} />
                 <Route path="/dashboard-geobrain" element={<Navigate to="/dash-geobrain" replace />} />
-                <Route path="/relatorios/corretor" element={<Navigate to="/auditoria" replace />} />
-                <Route path="/relatorios/corretor/analise" element={<Navigate to="/auditoria/analise" replace />} />
+                <Route path="/relatorios/corretor" element={<Navigate to="/corretor" replace />} />
+                <Route path="/relatorios/corretor/analise" element={<Navigate to="/corretor" replace />} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

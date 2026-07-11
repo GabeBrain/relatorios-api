@@ -16,6 +16,43 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.18 — 2026-07-11 — v3.3 IMPLEMENTADA: passo único + homepage + evidência + legado v1
+
+Plano de `PLAN_corretor_v3_passo_unico.md` executado (build/typecheck/lint/testes limpos):
+
+| Fase | Entrega | Arquivos |
+|---|---|---|
+| **0** | Fix do estimador: `calculateImageTokens(w,h,model)` aplica multiplicador do mini (2.833+5.667/tile). Estimativa de 84 tabelas passa de ~R$ 0,26 → ~R$ 1,5-2,1 (bate com o real). | `lib/cost-calculator.ts`, teste `lib/__tests__/cost-calculator.test.ts` |
+| **1** | **Passo único**: upload dispara DET + texto + visão automático (fim dos botões "Aprofundar"/"Números"). Teto R$ 4 (`lib/v3/config.ts`) → acima pede confirmação (`BudgetModal`), abaixo roda direto. Banner vivo com custo + **Pausar** (AbortSignal). Visão paralela (5 simultâneas → ~10min vira ~2-3min). | `lib/v3/pipeline.ts`, `lib/v3/config.ts`, `lib/v3/ia-vision.ts` (concorrência+abort), `lib/v3/ia-text.ts` (abort) |
+| **2** | Homepage nova: dropzone herói (drag-and-drop) + seções Em correção / Prontos / Legado v1. | `pages/CorretorV3Page.tsx` (`StudySection`/`StudyCard`) |
+| **3** | Evidência visual: imagem de tabela com achado sobe p/ bucket `corretor-evidencias` (best-effort, dedup sha1) e aparece **grande no card** ao lado da prova (soma calc×decl). Campos `evidenceSha1`/`evidenceImage` no Finding. **Overlay/bbox por célula fica p/ próxima rodada** (exige mudar a edge + `schema_version` no cache). | `lib/v3/evidence.ts`, `lib/audit/model.ts`, migration `20260711100000_corretor_v3_evidencias.sql` |
+| **4** | Legado v1 **somente leitura** (`LegacyV1Panel`, lê `projects/slides/slide_errors` + thumbnails). `/auditoria*` → redirect `/corretor`. Menu perde "Auditoria (v1)". **pdfjs removido do bundle** (−474 KB): motores v1 fora do grafo (arquivos preservados no repo). | `components/LegacyV1Panel.tsx`, `App.tsx`, `AppLayout.tsx` |
+| **5** | Gerador de estudo sintético + gabarito + teste de regressão DET (recall 100%, FP 0). | `docs/.../gera_estudo_teste.py`, `lib/v3/__tests__/pipeline-det.test.ts` |
+
+**⚠ Aplicar no Supabase:** migration `20260711100000_corretor_v3_evidencias.sql` (cria o bucket
+`corretor-evidencias`). Sem ela, a análise roda normal, só a imagem-evidência não aparece
+(upload é best-effort). As edges `analyze-text-batch`/`analyze-table-image` já estavam deployadas.
+
+## Versão 0.17 — 2026-07-11 — Plano aprovado: passo único + homepage + evidência visual + aposentadoria v1
+
+Decisões de Gabriel (11/jul), plano completo em [`PLAN_corretor_v3_passo_unico.md`](./PLAN_corretor_v3_passo_unico.md):
+
+1. **Auto-run total**: IA de texto + visão disparam sozinhas no upload (fim dos botões
+   "Aprofundar"/"Números"); teto de **R$ 4/estudo** na fase de testes (acima → confirma).
+2. **Bug de estimativa mapeado**: `calculateImageTokens` ignora o multiplicador de imagem
+   do gpt-4o-mini (~2.833 base + 5.667/tile) → painel subestima visão ~7× (R$ 0,26 vs
+   R$ 1,80 reais em 84 imagens). Fix é a Fase 0 do plano. O custo cobrado (via `usage`)
+   sempre esteve correto.
+3. **Evidência visual**: imagens de tabela com achado passam a ser persistidas
+   (bucket `corretor-evidencias`) e exibidas grandes com overlay na região do erro +
+   cartão-prova ao lado (híbrido).
+4. **Legado v1 somente leitura**; motores v1 (analyze-slide, pdfjs, análise slide-a-slide)
+   serão aposentados; `/auditoria` → redirect `/corretor`.
+5. **Gerador de estudo sintético** (`gera_estudo_teste.py`, a criar) com erros injetados +
+   gabarito JSON, para testar o pipeline por ~R$ 0,20/rodada.
+
+Nenhuma regra mudou nesta versão (só decisões de produto/fluxo).
+
 ## Versão 0.16 — 2026-07-09 — v3.2: números das imagens (Fase C produtizada)
 
 O reconhecimento numérico a partir das imagens saiu do piloto manual e entrou no app:

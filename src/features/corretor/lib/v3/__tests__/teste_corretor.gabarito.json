@@ -1,0 +1,64 @@
+{
+  "cidade": "Itajaí",
+  "erros": [
+    {
+      "slide": 4,
+      "type": "RADII",
+      "layer": "DET",
+      "detail": "Raio '45 min' estranho ao conjunto canônico {10,20,30} min"
+    },
+    {
+      "slide": 5,
+      "type": "ABSOLUTE_SUM",
+      "layer": "DET",
+      "detail": "Tabela nativa: coluna 'Domicilios' soma 670 != Total 700"
+    },
+    {
+      "slide": 5,
+      "type": "SPELLING",
+      "layer": "IA",
+      "detail": "Erros: 'empreedimento', 'demandda', 'moradya'"
+    },
+    {
+      "slide": 7,
+      "type": "ABSOLUTE_SUM",
+      "layer": "VISION",
+      "detail": "Tabela-imagem: coluna '2030' soma 550 != Total 600"
+    },
+    {
+      "slide": 8,
+      "type": "CITY_NAME",
+      "layer": "IA",
+      "detail": "Menção a 'Florianópolis' em estudo de Itajaí"
+    },
+    {
+      "slide": 9,
+      "type": "BINNING_RULE",
+      "layer": "VISION",
+      "detail": "Faixas de R$/m² pulam 6001-9000 (furo entre 6000 e 9001)"
+    },
+    {
+      "slide": 10,
+      "type": "COHERENCE",
+      "layer": "IA",
+      "detail": "Texto diz 35% mas a tabela do slide mostra 53% na renda alta"
+    },
+    {
+      "slide": 12,
+      "type": "LEFTOVER_NOTE",
+      "layer": "DET",
+      "detail": "Nota interna 'conferir dados de infraestrutura com a equipe'"
+    }
+  ],
+  "controles_negativos": [
+    {
+      "slide": 6,
+      "nota": "tabela-imagem correta — visão não deve acusar ABSOLUTE_SUM"
+    },
+    {
+      "slide": 8,
+      "nota": "tabela nativa correta — deve entrar em 'tabelas que fecham'"
+    }
+  ],
+  "arquivo": "teste_corretor.pptx"
+}
