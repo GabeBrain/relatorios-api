@@ -13,9 +13,12 @@ insert into storage.buckets (id, name, public)
 values ('corretor-evidencias', 'corretor-evidencias', true)
 on conflict (id) do nothing;
 
--- leitura pública (imagens não sensíveis) + escrita liberada (mesmo modelo anon do resto do corretor)
+-- leitura pública (imagens não sensíveis) + escrita liberada (mesmo modelo anon do resto do corretor).
+-- Postgres não tem "create policy if not exists": dropamos antes p/ a migration ser reaplicável.
+drop policy if exists "corretor_evidencias_read" on storage.objects;
 create policy "corretor_evidencias_read" on storage.objects
   for select using (bucket_id = 'corretor-evidencias');
 
+drop policy if exists "corretor_evidencias_write" on storage.objects;
 create policy "corretor_evidencias_write" on storage.objects
   for insert with check (bucket_id = 'corretor-evidencias');
