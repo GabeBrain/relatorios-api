@@ -16,6 +16,26 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.23 — 2026-07-11 — Plano aprovado: Ata como estrela-guia (extração → parâmetros → cobertura)
+
+Decisão do Gabriel (11/jul): motores de imagem considerados confiáveis o suficiente; próximo
+foco é a **ata de abertura** (hoje imagem colada nos slides iniciais; futuro DOCX). Plano
+completo com **pausas obrigatórias de teste** em
+[`PLAN_ata_estrela_guia.md`](./PLAN_ata_estrela_guia.md):
+
+- **Fase A** — provar a extração (localizador da ata-imagem + edge `analyze-ata-image` com
+  JSON fechado + painel de teste imagem×JSON + bônus DOCX grátis). **⏸ Pausa A**: Gabriel
+  valida campo a campo em 2–3 estudos reais (aceite: cidade/UF e pedidos_analista 100%).
+- **Fase B** — ata alimenta o passo único: cidade extraída vai para a IA de texto (conserta
+  o **bug latente do CITY_NAME rodando com `cidade: null`**), `studies_v3.ata jsonb`,
+  card editável (hipótese verificada pelo analista). **⏸ Pausa B**.
+- **Fase C** — `ATA_COVERAGE` sai de MOCK: pedidos/dúvidas → checklist DET (keywords,
+  grátis) + IA só no julgamento semântico; aceite = zero falso-✅. Gerador ganha ata
+  sintética com pedido ausente proposital. **⏸ Pausa C**.
+
+Nenhuma regra mudou nesta versão (registro de plano). Migrations previstas: check de
+`ia_passes.tipo` + `visao_ata` (fase A) e `studies_v3.ata jsonb` (fase B).
+
 ## Versão 0.22 — 2026-07-11 — Generalização: semântica declarada + verificada (fim do whack-a-mole)
 
 Resposta à pergunta do Gabriel ("não vou poder atualizar o código a cada estudo"). Duas mudanças
