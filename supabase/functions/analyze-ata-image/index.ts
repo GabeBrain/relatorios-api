@@ -87,6 +87,9 @@ Regras:
   não resuma) — eles viram um checklist do que o estudo tem de responder/entregar.
 - Pedidos destacados/realçados (ex.: bloco "Analista da Rebrain") entram em "pedidos_analista".
 - "dorms" é a lista de números de dormitórios (ex.: [2] ou [1,2,3]).
+- A imagem pode ser um slide com fundo decorativo e uma ata/cartão branco inserido no centro.
+  Leia o documento inserido: se contiver "Produto pretendido", "Terreno e localização",
+  "Dúvida do cliente" ou "Analista da Rebrain", ele É uma ata, mesmo com capa/fundo ao redor.
 
 Responda EXATAMENTE este JSON (sem markdown):
 {"ata": {

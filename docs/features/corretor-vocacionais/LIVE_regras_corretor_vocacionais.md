@@ -16,6 +16,23 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.26 — 2026-07-12 — Correção da seleção da ata no slide de capa (Marka/Tancredo)
+
+O teste real `Vocacional_Marka Prime_Reduzido` revelou um falso-negativo da Fase B: a ata é
+um cartão/imagem inserido no slide 1, sobre uma imagem de fundo. O localizador antigo usava
+apenas tamanho intrínseco e enviava o fundo grande para a edge; a edge respondia corretamente
+`ata: null`.
+
+| Ajuste | Arquivo | Resultado |
+|---|---|---|
+| Localizador por layout | `lib/v3/ata-image.ts`, `pptx-media.ts` | Cruza `rId` da imagem com posição/tamanho no slide, prioriza imagem inserida e usa fundo full-slide apenas como fallback. Aceita cartão ≥400×300 / 20 KB. |
+| Cache de nulo | `lib/v3/ia-ata.ts` | `ata: null` não é mais reutilizada nem gravada: tentativa antiga errada não bloqueia a nova seleção. |
+| Prompt | `analyze-ata-image` | Declara explicitamente o padrão slide decorativo + cartão branco de briefing. |
+| Regressão | `ata-image.test.ts` | PPTX real do Marka seleciona `ppt/media/image30.png`, o cartão da ata. |
+
+Verificação local: 5/5 testes do localizador e build de produção limpos. **Requer redeploy** de
+`analyze-ata-image`; depois, reenviar/reconferir o PPTX para executar a nova extração.
+
 ## Versão 0.25 — 2026-07-11 — Ata Fase B: extração no passo único + cidade alimenta o CITY_NAME
 
 Gabriel (11/jul): "as atas sempre estarão no 1º slide → localizar e extrair já no upload".

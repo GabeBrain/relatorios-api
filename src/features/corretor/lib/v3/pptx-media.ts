@@ -2,6 +2,9 @@
 // Extraídas de table-images.ts para o localizador da ata reusar sem duplicar.
 
 export const NS_REL = 'http://schemas.openxmlformats.org/package/2006/relationships';
+export const NS_DRAW = 'http://schemas.openxmlformats.org/drawingml/2006/main';
+export const NS_DOC_REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+export const NS_PRESENTATION = 'http://schemas.openxmlformats.org/presentationml/2006/main';
 
 /** [largura, altura] de um PNG pelo header IHDR, ou null se não for PNG. */
 export function pngDims(d: Uint8Array): [number, number] | null {
@@ -42,12 +45,21 @@ export function mimeOf(target: string): string {
 
 /** Alvos de imagem (ppt/media/...) referenciados por um slide, via seu .rels. */
 export function imageTargetsOfRels(relsXml: string, parser: DOMParser): string[] {
+  return imageRelationsOfRels(relsXml, parser).map((rel) => rel.target);
+}
+
+/** Relações de imagem de um slide, preservando o rId para cruzar com o layout. */
+export function imageRelationsOfRels(
+  relsXml: string,
+  parser: DOMParser,
+): { id: string; target: string }[] {
   const root = parser.parseFromString(relsXml, 'application/xml');
-  const out: string[] = [];
+  const out: { id: string; target: string }[] = [];
   for (const rel of Array.from(root.getElementsByTagNameNS(NS_REL, 'Relationship'))) {
     if ((rel.getAttribute('Type') ?? '').endsWith('/image')) {
       const target = (rel.getAttribute('Target') ?? '').replace(/^\.\.\//, 'ppt/');
-      if (/^ppt\/media\//.test(target)) out.push(target);
+      const id = rel.getAttribute('Id');
+      if (id && /^ppt\/media\//.test(target)) out.push({ id, target });
     }
   }
   return out;

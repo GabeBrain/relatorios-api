@@ -15,6 +15,16 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const bytes = new Uint8Array(readFileSync(join(HERE, 'teste_ata.pptx')));
 
 describe('findAtaImage', () => {
+  it('prefere o cartão da ata ao fundo de capa no PPTX real do Marka', async () => {
+    const real = new Uint8Array(readFileSync(join(HERE, '..', '..', '..', '..', '..', '..',
+      'docs', 'features', 'corretor-vocacionais', 'Vocacional_Marka Prime_Reduzido.pptx')));
+    const ir = await pptxToIr(real, 'Vocacional_Marka Prime_Reduzido.pptx');
+    const cand = await findAtaImage(real, ir);
+    expect(cand).not.toBeNull();
+    expect(cand!.slide).toBe(1);
+    expect(cand!.name).toBe('ppt/media/image30.png');
+  });
+
   it('acha a ata-imagem no slide 2', async () => {
     const ir = await pptxToIr(bytes, 'teste_ata.pptx');
     const cand = await findAtaImage(bytes, ir);
