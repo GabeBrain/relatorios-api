@@ -16,6 +16,26 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.25 — 2026-07-11 — Ata Fase B: extração no passo único + cidade alimenta o CITY_NAME
+
+Gabriel (11/jul): "as atas sempre estarão no 1º slide → localizar e extrair já no upload".
+Fase B do `PLAN_ata_estrela_guia.md` implementada (antecipada):
+
+| Item | Arquivo | Detalhe |
+|---|---|---|
+| Estágio `ata` no passo único | `lib/v3/pipeline.ts` | Roda ANTES do texto: `findAtaImage` → `extractAtaFromImage` → a **cidade extraída vira a régua do CITY_NAME** (antes o passo único passava `cidade: null` → CITY_NAME rodava cego). Best-effort: falha na ata nunca bloqueia o resto (cidade cai no fallback). Novo estágio no banner + estimativa (`estimateAtaPass`) + teto |
+| Persistência | `lib/v3/db.ts` (`saveAta`), migration `20260711130000_studies_v3_ata.sql` | `studies_v3.ata jsonb` + copia `cidade`. **⚠ Aplicar.** |
+| Card no workspace | `components/AtaCard.tsx` (novo) | ata extraída vira card permanente (cliente, cidade/UF, produto, pedidos, dúvidas). Sem ata → cai no painel de teste manual (`AtaTestPanel`, fase A). Read-only nesta fatia (edição fica p/ depois) |
+| Card da homepage | `pages/CorretorV3Page.tsx` | mostra a cidade do estudo |
+| Passe de custo | — | registra `visao_ata` em `ia_passes` (custo acumula no estudo) |
+
+Fluxo: upload → DET → **ata** (cidade) → texto (com cidade) + visão em paralelo, tudo automático.
+29/29 testes verdes, build limpo. **⚠ Aplicar:** migration `20260711130000` (+ a `20260711120000`
+de `visao_ata` e o deploy de `analyze-ata-image` da v0.24).
+
+Próximo (Fase C, após teste real): `ATA_COVERAGE` — pedidos/dúvidas viram checklist verificado
+contra o estudo (DET keywords + IA no julgamento). Edição da ata pelo analista também entra aí.
+
 ## Versão 0.24 — 2026-07-11 — Ata Fase A IMPLEMENTADA: extração (imagem + DOCX) + painel de teste
 
 Fase A do `PLAN_ata_estrela_guia.md` no ar — **provar que a LLM lê a ata**. Nenhuma regra nova

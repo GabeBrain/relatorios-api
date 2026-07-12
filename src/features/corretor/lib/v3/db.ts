@@ -3,6 +3,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import type { Finding } from '../audit/model';
+import type { AtaData } from './ia-ata';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -21,6 +22,7 @@ export interface StudyV3 {
   pendentes?: number;
   custoTotal: number;
   lastSha1: string | null;
+  ata?: AtaData | null;
 }
 
 export interface FindingV3 {
@@ -99,10 +101,20 @@ export async function listStudies(): Promise<StudyV3[]> {
       nSlides: versions[0]?.n_slides ?? 0,
       custoTotal: Number(s.custo_total ?? 0),
       lastSha1: versions[0]?.sha1 ?? null,
+      ata: (s.ata ?? null) as AtaData | null,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       pendentes: (s.findings_v3 ?? []).filter((f: any) => f.status === 'pendente').length,
     };
   });
+}
+
+/** Persiste a ata extraída no estudo + copia a cidade (CITY_NAME / card). */
+export async function saveAta(studyId: string, ata: AtaData | null): Promise<void> {
+  const patch: Record<string, unknown> = { ata };
+  const cidade = ata?.cidade?.trim();
+  if (cidade) patch.cidade = cidade;
+  const { error } = await db.from('studies_v3').update(patch).eq('id', studyId);
+  if (error) throw new Error(error.message);
 }
 
 export async function loadFindings(studyId: string): Promise<FindingV3[]> {

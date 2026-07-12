@@ -3,7 +3,7 @@
 // paga uma vez. Extração da LLM é HIPÓTESE — o analista revisa (fases B/C).
 
 import { supabase } from '@/integrations/supabase/client';
-import { calculateCost, type ModelId } from '../cost-calculator';
+import { calculateCost, calculateImageTokens, type ModelId } from '../cost-calculator';
 import type { AtaImageCandidate } from './ata-image';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,6 +39,29 @@ export interface AtaExtractResult {
   inputTokens: number;
   outputTokens: number;
   costUsd: number;
+}
+
+// ── estimativa (antes de gastar) ──────────────────────────────────────────────
+
+export interface AtaEstimate {
+  hasAta: boolean;
+  cached: boolean;
+  inputTokens: number;
+  outputTokens: number;
+  costUsd: number;
+}
+
+/** Estimativa do passe da ata: 0 se não há candidata ou já está no cache. */
+export async function estimateAtaPass(
+  candidate: AtaImageCandidate | null,
+  model: ModelId
+): Promise<AtaEstimate> {
+  if (!candidate) return { hasAta: false, cached: false, inputTokens: 0, outputTokens: 0, costUsd: 0 };
+  const { data } = await db.from('vision_cache').select('sha1').eq('sha1', `ata:${candidate.sha1}`).maybeSingle();
+  if (data) return { hasAta: true, cached: true, inputTokens: 0, outputTokens: 0, costUsd: 0 };
+  const inputTokens = calculateImageTokens(candidate.w, candidate.h, model) + 600;
+  const outputTokens = 400;
+  return { hasAta: true, cached: false, inputTokens, outputTokens, costUsd: calculateCost(inputTokens, outputTokens, model) };
 }
 
 function toBase64(bytes: Uint8Array): string {

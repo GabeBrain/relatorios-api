@@ -14,6 +14,8 @@ import {
 } from './table-images';
 import { estimateVisionPass, runVisionPass, type VisionEstimate } from './ia-vision';
 import { attachEvidenceImages } from './evidence';
+import { findAtaImage, type AtaImageCandidate } from './ata-image';
+import { estimateAtaPass, extractAtaFromImage, type AtaData } from './ia-ata';
 import { usdToBrl, VISION_CONCURRENCY } from './config';
 
 // ── estimativa combinada (antes de gastar) ────────────────────────────────────
@@ -23,10 +25,12 @@ export interface FullEstimate {
   visionCandidates: number;
   visionCached: number;
   visionToRun: number;
+  hasAta: boolean;
   costUsd: number;
   costBrl: number;
   vision: VisionEstimate;
   candidates: TableImageCandidate[];
+  ataCandidate: AtaImageCandidate | null;
 }
 
 export async function estimateFullAnalysis(
@@ -34,27 +38,33 @@ export async function estimateFullAnalysis(
   bytes: Uint8Array,
   model: ModelId
 ): Promise<FullEstimate> {
-  const candidates = await findTableImages(bytes, ir);
-  const [text, vision] = await Promise.all([
+  const [candidates, ataCandidate] = await Promise.all([
+    findTableImages(bytes, ir),
+    findAtaImage(bytes, ir),
+  ]);
+  const [text, vision, ata] = await Promise.all([
     Promise.resolve(estimateTextPass(ir, model)),
     estimateVisionPass(candidates, model),
+    estimateAtaPass(ataCandidate, model),
   ]);
-  const costUsd = text.costUsd + vision.costUsd;
+  const costUsd = text.costUsd + vision.costUsd + ata.costUsd;
   return {
     textSlides: text.slides,
     visionCandidates: candidates.length,
     visionCached: vision.cached,
     visionToRun: vision.toRun,
+    hasAta: ata.hasAta,
     costUsd,
     costBrl: usdToBrl(costUsd),
     vision,
     candidates,
+    ataCandidate,
   };
 }
 
 // ── execução do passo único ───────────────────────────────────────────────────
 
-export type Stage = 'det' | 'texto' | 'visao';
+export type Stage = 'det' | 'ata' | 'texto' | 'visao';
 
 export interface StageProgress {
   stage: Stage;
@@ -69,6 +79,11 @@ export interface FullAnalysisResult {
   detFindings: Finding[];
   textFindings: Finding[];
   visionFindings: Finding[];
+  /** ata extraída (null se não localizada) + cidade usada na revisão de texto */
+  ata: AtaData | null;
+  cityUsed: string;
+  ataCostUsd: number;
+  ataTokens: { input: number; output: number };
   textCostUsd: number;
   visionCostUsd: number;
   textTokens: { input: number; output: number };
@@ -83,6 +98,8 @@ export interface RunFullOpts {
   model: ModelId;
   /** candidatas já localizadas na estimativa (evita re-scan) */
   candidates?: TableImageCandidate[];
+  /** candidata da ata já localizada na estimativa */
+  ataCandidate?: AtaImageCandidate | null;
   signal?: AbortSignal;
   onStage?: (p: StageProgress) => void;
 }
@@ -106,9 +123,25 @@ export async function runFullAnalysis(
 
   const candidates = opts.candidates ?? (await findTableImages(bytes, ir));
 
-  // 2. texto + visão em paralelo
+  // 2. ATA — roda ANTES do texto: a cidade extraída vira a régua do CITY_NAME.
+  // Best-effort: falha na ata nunca bloqueia o resto (a cidade cai no fallback).
+  const ataCand = opts.ataCandidate !== undefined ? opts.ataCandidate : await findAtaImage(bytes, ir);
+  let ata: AtaData | null = null;
+  let ataCostUsd = 0, ataIn = 0, ataOut = 0;
+  if (ataCand && !signal?.aborted) {
+    onStage?.({ stage: 'ata', done: 0, total: 1 });
+    try {
+      const res = await extractAtaFromImage(ataCand, model);
+      ata = res.ata;
+      ataCostUsd = res.costUsd; ataIn = res.inputTokens; ataOut = res.outputTokens;
+    } catch { /* segue sem ata */ }
+    onStage?.({ stage: 'ata', done: 1, total: 1, spentUsd: ataCostUsd });
+  }
+  const cityUsed = ata?.cidade?.trim() || city;
+
+  // 3. texto (com a cidade da ata) + visão em paralelo
   const textPromise = runTextPass(
-    ir, city, model,
+    ir, cityUsed, model,
     (done, total) => onStage?.({ stage: 'texto', done, total }),
     signal
   ).then((res) => {
@@ -133,6 +166,10 @@ export async function runFullAnalysis(
     detFindings,
     textFindings: text.findings,
     visionFindings: vision.findings,
+    ata,
+    cityUsed,
+    ataCostUsd,
+    ataTokens: { input: ataIn, output: ataOut },
     textCostUsd: text.costUsd,
     visionCostUsd: vision.costUsd,
     textTokens: { input: text.inputTokens, output: text.outputTokens },

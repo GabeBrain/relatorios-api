@@ -20,12 +20,13 @@ import { irToFindings } from '../lib/audit/ir-rules';
 import { VizSwitch } from '../components/audit/FindingCard';
 import LegacyV1Panel from '../components/LegacyV1Panel';
 import AtaTestPanel from '../components/AtaTestPanel';
+import AtaCard from '../components/AtaCard';
 import { formatUSD, type ModelId } from '../lib/cost-calculator';
 import { runFullAnalysis, estimateFullAnalysis, type StageProgress, type FullEstimate } from '../lib/v3/pipeline';
 import { BUDGET_STUDY_BRL, formatBRL } from '../lib/v3/config';
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
-  concludeStudy, deleteStudy, insertIaFindings, registerIaPass,
+  concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 
@@ -34,9 +35,13 @@ const MODEL: ModelId = 'gpt-4o-mini'; // econômico por padrão; visão cai p/ R
 // Rótulo humano de cada etapa do pipeline de passo único
 const STAGE_LABEL: Record<StageProgress['stage'], string> = {
   det: 'Triagem determinística',
+  ata: 'Ata do projeto',
   texto: 'Revisão de texto (IA)',
   visao: 'Números das tabelas (visão)',
 };
+
+// ordem de exibição das etapas no banner
+const STAGE_ORDER: StageProgress['stage'][] = ['det', 'ata', 'texto', 'visao'];
 
 const isLocal = (f: Finding) => /^s\d+$/.test(f.slideRef.trim());
 const slideNumOf = (f: Finding) => parseInt(f.slideRef.replace(/\D/g, ''), 10) || 0;
@@ -152,7 +157,7 @@ interface AnalysisState {
 }
 
 function AnalysisBanner({ state, onPause }: { state: AnalysisState; onPause: () => void }) {
-  const order: StageProgress['stage'][] = ['det', 'texto', 'visao'];
+  const order = STAGE_ORDER;
   return (
     <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 px-4 py-3 space-y-2">
       <div className="flex items-center justify-between gap-3">
@@ -264,7 +269,7 @@ function StudyCard({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) 
         <span className="text-sm font-medium truncate">{s.nome}</span>
       </div>
       <p className="text-[11px] text-muted-foreground">
-        v{s.lastVersion} · {s.nSlides} slides
+        {s.cidade && <>{s.cidade} · </>}v{s.lastVersion} · {s.nSlides} slides
         {s.custoTotal > 0 && <> · IA {formatUSD(s.custoTotal)}</>}
       </p>
       <p className={cn('text-[11px] font-medium', pronto ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400')}>
@@ -326,6 +331,7 @@ export default function CorretorV3Page() {
         city: study.cidade ?? '',
         model: MODEL,
         candidates: estimate.candidates,
+        ataCandidate: estimate.ataCandidate,
         signal: ac.signal,
         onStage: async (p) => {
           setAnalysis((prev) => prev && {
@@ -341,7 +347,16 @@ export default function CorretorV3Page() {
         },
       });
 
+      // persiste a ata (+ copia a cidade p/ card e próximas revisões)
+      if (res.ata !== null || estimate.ataCandidate) {
+        await saveAta(study.id, res.ata);
+      }
+
       // registra os passes com custo/tokens reais (acumula em studies_v3.custo_total)
+      if (res.ataCostUsd > 0) {
+        await registerIaPass(study.id, 'visao_ata', `ata · ${MODEL}`,
+          res.ataCostUsd, res.ataTokens.input, res.ataTokens.output);
+      }
       if (res.textCostUsd > 0 || res.textFindings.length) {
         await registerIaPass(study.id, 'texto', `${estimate.textSlides} slides · ${MODEL}`,
           res.textCostUsd, res.textTokens.input, res.textTokens.output);
@@ -649,8 +664,10 @@ export default function CorretorV3Page() {
             <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} />
           )}
 
-          {/* Fase A da ata: painel de teste da extração (manual, valida no olho) */}
-          {selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
+          {/* Ata: extraída no passo único vira o card permanente; senão, teste manual */}
+          {selected.ata
+            ? <AtaCard ata={selected.ata} />
+            : selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
 
           {loadingStudy ? (
             <div className="flex items-center justify-center py-16 text-muted-foreground gap-2 text-sm">
