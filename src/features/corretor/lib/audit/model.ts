@@ -9,12 +9,22 @@ export type Verdict = 'bug' | 'fp' | 'unsure';
 /** Célula numérica ou textual de tabela extraída (IR ou complemento de visão). */
 export type Cell = string | number | null;
 
+/** Semântica de coluna declarada pela visão (hipótese; o verificador confere a aritmética). */
+export type ColKind = 'label' | 'count' | 'share' | 'rate' | 'measure' | 'other';
+
 export interface ExtractedTable {
   title: string;
   columns: string[];
   rows: Cell[][];
   /** Linha de totais declarada na tabela (para checagem de soma). */
   totals?: Cell[];
+  /** Semântica por coluna (v3.3). count=soma no total; share=% que soma 100;
+   *  rate=taxa/variação que NÃO soma 100; measure=fecha em média. */
+  colKinds?: ColKind[];
+  /** Como a linha de totais fecha: sum | mean | mixed | none. */
+  totalKind?: 'sum' | 'mean' | 'mixed' | 'none';
+  /** Para cada coluna share (índice), o índice da coluna absoluta que ela percentua. */
+  shareOf?: Record<number, number>;
 }
 
 // ─── Payloads de visualização (discriminados por padrão) ────────────────────

@@ -16,6 +16,38 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.22 — 2026-07-11 — Generalização: semântica declarada + verificada (fim do whack-a-mole)
+
+Resposta à pergunta do Gabriel ("não vou poder atualizar o código a cada estudo"). Duas mudanças
+que trocam heurística curativa por **invariante generalizante**:
+
+**#1 — % só é validado se for PARTICIPAÇÃO** (`engine.ts`, `checkPercentConsistency`). A coluna de
+% só entra no cross-check se ela mesma **soma ≈100**. Isso mata a classe inteira "coluna com % no
+cabeçalho que não é participação" — Var.%, Cresc.%, taxa YoY, "Vendas s/ O.L." — sem lista de
+nomes. Estrutural: participação soma 100, taxa não.
+
+**#2 — Semântica declarada + verificada** (edge + motor). A visão agora **classifica** cada tabela
+e a validação usa isso como **hipótese, sempre conferida pela aritmética** (classificar errado é
+pego):
+- Edge (`analyze-table-image`): pede `col_kinds` (label/count/**share**/**rate**/**measure**/other),
+  `total_kind` (sum/mean/mixed/none) e `share_of` (qual coluna cada % percentua). **⚠ Redeploy.**
+- `checkTableSums`: coluna `measure`/`rate`/`share` não é somável → suprime o falso positivo de
+  soma **mesmo quando a heurística min/max não pegaria** (ex.: média ponderada fora do intervalo).
+  Duas pistas independentes (aritmética OU semântica), basta uma — mantém FP baixo sem esconder
+  erro de soma real (uma `count` continua checada).
+- `checkPercentConsistency`: `rate` nunca vira participação; `share_of` dá o pareamento exato
+  (não depende de "coluna à esquerda"). A aritmética continua sendo o juiz (share ainda tem de
+  somar 100; % tem de bater com abs/total).
+
+Por que generaliza: quem conhece o contexto de cada tabela é o modelo que a leu; quem dá a
+garantia é a aritmética. Cobre layouts nunca vistos sem código novo por estudo. Limite honesto
+mantido (`custos_visao_reais.md`): tabela **sem** total nem % = zero redundância = nenhuma
+validação possível; garantia definitiva = tabela nativa no PPT.
+
+`CACHE_SCHEMA` 3→4 (semântica só é populada em nova extração → reprocessa uma vez, dentro do teto).
+**⚠ Redeploy** `analyze-table-image`. Regressão: 25/25 testes (Var.%, measure suprimindo FP,
+share_of pareando, e o dígito mal lido ainda sendo pego).
+
 ## Versão 0.21 — 2026-07-11 — 2ª rodada de feedback: totais deslocados + subtotal no meio
 
 Mais dois falsos positivos do teste real do Gabriel, ambos corrigidos no lado da **validação**

@@ -84,8 +84,22 @@ Transcreva TODAS as tabelas numéricas da imagem, fielmente:
 - NÃO invente valores: se um dígito estiver ilegível, use null.
 - Legendas de mapa (só cores/faixas, sem valores) NÃO são tabelas: ignore.
 
+CLASSIFIQUE a semântica (o verificador confere a aritmética; classificar errado é pego):
+- "col_kinds": um rótulo por coluna, na ordem —
+    "label"   (1ª coluna de rótulos),
+    "count"   (contagem/quantidade absoluta que SOMA no total: nº empreend., domicílios, unidades),
+    "share"   (PARTICIPAÇÃO % que soma 100 na coluna),
+    "rate"    (taxa/variação % que NÃO soma 100: Var.%, Cresc.%, Vendas s/ O.L., Disp. s/ O.L.),
+    "measure" (grandeza que fecha em MÉDIA, não em soma: m², R$/m², preço, idade),
+    "other".
+- "total_kind": como a linha "totals" fecha cada coluna — "sum" (conta), "mean" (média/measure),
+   "mixed" (colunas diferentes fecham de jeitos diferentes) ou "none".
+- "share_of": para cada coluna "share", o ÍNDICE da coluna de valor absoluto que ela percentua
+   (geralmente a coluna imediatamente à esquerda). Objeto {"índice_do_share": índice_do_absoluto}.
+
 Responda EXATAMENTE este JSON (sem markdown):
-{"tables": [{"title": "…", "columns": ["…"], "rows": [["rótulo", 123, null]], "totals": ["Total", 456]}]}
+{"tables": [{"title": "…", "columns": ["…"], "rows": [["rótulo", 123, null]], "totals": ["Total", 456],
+  "col_kinds": ["label","count","share"], "total_kind": "sum", "share_of": {"2": 1}}]}
 Se não houver tabela numérica: {"tables": []}`;
 
 async function callOpenAI(apiKey: string, body: RequestBody, retries = 3) {

@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, calculateImageTokens, type ModelId } from '../cost-calculator';
 import { checkTableSums, checkPercentConsistency, detectBinGap } from '../audit/engine';
 import { toAuditSection } from '../audit/ir';
-import type { Cell, ExtractedTable, Finding, Bin } from '../audit/model';
+import type { Cell, ColKind, ExtractedTable, Finding, Bin } from '../audit/model';
 import type { TableImageCandidate } from './table-images';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,14 +14,18 @@ const db = supabase as any;
 
 // Versão da lógica de extração/validação. Ao subir (novas checagens, escalonamento),
 // o cache antigo (schema menor) é reprocessado — extração ruim não fica presa pra sempre.
-// v3: re-leitura do 4o com imagem ampliada 2× + pareamento %↔coluna-à-esquerda + médias.
-const CACHE_SCHEMA = 3;
+// v4: semântica declarada (col_kinds/total_kind/share_of) capturada na extração e usada
+//     como hipótese verificada pela aritmética (participação vs taxa vs média).
+const CACHE_SCHEMA = 4;
 
 interface RawTable {
   title?: string;
   columns?: unknown[];
   rows?: unknown[][];
   totals?: unknown[];
+  col_kinds?: unknown[];
+  total_kind?: unknown;
+  share_of?: Record<string, unknown>;
 }
 interface CachePayload { tables: RawTable[] }
 
@@ -88,8 +92,25 @@ export function toExtracted(raw: RawTable): ExtractedTable | null {
   // escorregam uma célula à esquerda (caso real s28: 16.848.551 caiu na coluna
   // de rótulos e cada total foi comparado com a coluna errada). Sinal: a 1ª
   // célula dos totais é NÚMERO enquanto as linhas têm rótulo de texto.
+  let shifted = false;
   if (totals && typeof totals[0] === 'number' && typeof rows[0]?.[0] === 'string') {
     totals = ['Total', ...totals];
+    shifted = true;
+  }
+
+  const KINDS = new Set<ColKind>(['label', 'count', 'share', 'rate', 'measure', 'other']);
+  const colKinds = Array.isArray(raw.col_kinds)
+    ? raw.col_kinds.map((k) => (KINDS.has(String(k) as ColKind) ? (String(k) as ColKind) : 'other'))
+    : undefined;
+  const tk = String(raw.total_kind ?? '');
+  const totalKind = (['sum', 'mean', 'mixed', 'none'] as const).find((v) => v === tk);
+  let shareOf: Record<number, number> | undefined;
+  if (raw.share_of && typeof raw.share_of === 'object') {
+    shareOf = {};
+    for (const [k, v] of Object.entries(raw.share_of)) {
+      const ki = Number(k), vi = Number(v);
+      if (Number.isInteger(ki) && Number.isInteger(vi)) shareOf[ki] = vi;
+    }
   }
 
   return {
@@ -97,6 +118,11 @@ export function toExtracted(raw: RawTable): ExtractedTable | null {
     columns,
     rows,
     totals,
+    // se os totais foram deslocados, os índices de col_kinds/share_of continuam
+    // válidos (a inserção do rótulo restaura o alinhamento coluna↔índice)
+    colKinds: colKinds && colKinds.length === columns.length ? colKinds : undefined,
+    totalKind,
+    shareOf: shifted ? undefined : shareOf, // em caso de desalinhamento, não confia nos índices
   };
 }
 

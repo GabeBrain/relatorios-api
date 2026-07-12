@@ -31,6 +31,13 @@ export function checkTableSums(
   const notes: string[] = [];
   const totals = table.totals;
 
+  // Semântica declarada pela visão (hipótese): colunas que NÃO fecham em soma.
+  // É só uma DAS pistas — a aritmética continua decidindo (ver abaixo).
+  const notSummable = (c: number) => {
+    const k = table.colKinds?.[c];
+    return k === 'measure' || k === 'rate' || k === 'share';
+  };
+
   if (totals) {
     const ncols = Math.max(...table.rows.map((r) => r.length));
 
@@ -48,12 +55,13 @@ export function checkTableSums(
       const ok = Math.abs(soma - decl) <= tol;
       if (!ok) {
         // Nem toda linha final é SOMA: tabelas de m²/preço/taxa fecham em MÉDIA
-        // ("Média Geral", "Vendas s/ O.L." etc.). Heurística: se o declarado cai
-        // ENTRE o mínimo e o máximo dos valores, é média — soma nunca fica nesse
-        // intervalo com 2+ valores positivos. Não é somável → fora da checagem.
+        // ("Média Geral", "Vendas s/ O.L." etc.). Duas pistas independentes, e
+        // basta UMA para não acusar (mantém FP baixo sem esconder erro de soma):
+        //  (a) aritmética: declarado cai ENTRE min e max (soma nunca fica aí);
+        //  (b) semântica: a visão classificou a coluna como measure/rate/share.
         const mn = Math.min(...vals);
         const mx = Math.max(...vals);
-        if (decl >= mn && decl <= mx) continue;
+        if ((decl >= mn && decl <= mx) || notSummable(c)) continue;
       }
       checks.push({ c, decl, tol, soma, ok });
     }
@@ -103,18 +111,21 @@ export function checkTableSums(
 }
 
 /**
- * Cross-check %↔absoluto — cada coluna de PERCENTUAL deve bater com
+ * Cross-check %↔absoluto — cada coluna de PARTICIPAÇÃO percentual deve bater com
  * `100 · abs_linha / total_abs` da coluna de valor que ela descreve. Diferente de
  * checkTableSums (que confere a coluna contra o total), este pega **dígito mal
  * lido pela visão mesmo quando a soma fecha** e aponta a LINHA exata: se a visão
  * leu 100.198 como 116.817, o % declarado (14,7%) não corresponde (≈17,2%).
  *
- * Pareamento: o % valida SÓ contra a coluna imediatamente à ESQUERDA (é assim que
- * as tabelas dos estudos arranjam: "Oferta Lançada | (%) | Oferta Final | (%)").
- * Parear com "a primeira coluna numérica da tabela" gerava falso positivo em massa
- * quando o % do fim se referia a outra coluna (caso real: % da Oferta Final pareado
- * com m² Mínimo). Tabelas com várias colunas de % validam CADA par.
- * Retorna null quando não há nenhum par %+coluna-à-esquerda detectável.
+ * Salvaguardas (para não virar whack-a-mole por estudo):
+ * - **Só valida coluna de % que é PARTICIPAÇÃO** — a própria coluna de % tem de
+ *   somar ≈100 (ou ter total declarado ≈100). Assim "Var. %", "Crescimento %",
+ *   taxa YoY etc. — que têm "%" no cabeçalho mas NÃO somam 100 — nunca entram e
+ *   não geram falso positivo. É a diferença estrutural entre participação e taxa.
+ * - **Par com a coluna imediatamente à ESQUERDA** (arranjo padrão dos estudos:
+ *   "Oferta Lançada | % | Oferta Final | %"); tabelas com vários % validam cada par.
+ * - **Denominador que é MÉDIA** (cai entre min e max) não serve — pula o par.
+ * Retorna null quando não há nenhum par participação+valor detectável.
  */
 export function checkPercentConsistency(
   table: ExtractedTable,
@@ -129,18 +140,32 @@ export function checkPercentConsistency(
     if (isNum(decl)) return decl;
     return columnSum(table.rows, c);
   };
-  const isPctCol = (i: number) =>
-    i >= 1 && isNumericCol(i) &&
-    (/%|percent/i.test(cols[i] ?? '') || Math.abs(colTotal(i) - 100) <= 1);
+  // PARTICIPAÇÃO: valores em [0,100] E somam ~100 (declarado ou pela soma das linhas).
+  // Uma taxa de variação ("+39,9%", "-11%") não soma 100 → não é participação.
+  // A semântica declarada (colKinds) só REFORÇA a decisão aritmética, nunca a substitui:
+  // se a visão marcou "rate", nem consideramos; se marcou "share", ainda exigimos somar 100.
+  const isShareCol = (i: number): boolean => {
+    if (i < 1 || !isNumericCol(i)) return false;
+    if (table.colKinds?.[i] === 'rate') return false; // taxa nunca é participação
+    const vals = table.rows.map((r) => r[i]).filter(isNum);
+    if (vals.length < 2 || !vals.every((v) => v >= 0 && v <= 100)) return false;
+    const decl = table.totals?.[i];
+    if (isNum(decl) && Math.abs(decl - 100) <= 1) return true;
+    return Math.abs(vals.reduce((a, b) => a + b, 0) - 100) <= 1.5;
+  };
 
   const badSet = new Set<number>();
   const notes: string[] = [];
   let pairs = 0;
 
   for (let p = 1; p < cols.length; p++) {
-    if (!isPctCol(p)) continue;
-    const a = p - 1; // par: a coluna de valor imediatamente à esquerda
-    if (a < 1 || !isNumericCol(a) || isPctCol(a)) continue;
+    if (!isShareCol(p)) continue;
+    // pareamento: usa share_of declarado (índice exato) se válido; senão, a coluna
+    // de valor imediatamente à esquerda (arranjo padrão dos estudos)
+    const declaredPair = table.shareOf?.[p];
+    const a = (typeof declaredPair === 'number' && declaredPair >= 1 && declaredPair < cols.length && declaredPair !== p)
+      ? declaredPair : p - 1;
+    if (a < 1 || !isNumericCol(a) || isShareCol(a)) continue;
     const totalAbs = colTotal(a);
     if (!(totalAbs > 0)) continue;
     // total declarado que é MÉDIA (cai entre min e max) não serve de denominador

@@ -64,6 +64,37 @@ describe('checkPercentConsistency', () => {
     };
     expect(checkPercentConsistency(semPct)).toBeNull();
   });
+
+  // Classe #1: coluna com "%" no cabeçalho que NÃO é participação (não soma 100).
+  it('ignora coluna de % que é TAXA (Var.%/Cresc.%) — não soma 100', () => {
+    const comVariacao: ExtractedTable = {
+      title: 'Oferta por ano',
+      columns: ['Ano', 'Unidades', 'Var. %'],
+      totals: ['Total', 300, null],
+      rows: [
+        ['2023', 100, 0],     // base
+        ['2024', 150, 50],    // +50% vs ano anterior
+        ['2025', 50, -66.7],  // -66,7% — soma dos % = -16,7, não 100
+      ],
+    };
+    // sem coluna de participação → nada a validar (Var.% não é pareado)
+    expect(checkPercentConsistency(comVariacao)).toBeNull();
+  });
+
+  it('ainda valida participação real (soma 100) na presença de uma taxa', () => {
+    const misto: ExtractedTable = {
+      title: 'Oferta',
+      columns: ['Padrão', 'Unidades', '%', 'Var. %'],
+      totals: ['Total', 200, 100, null],
+      rows: [
+        ['Econômico', 150, 75, 10],   // 150/200 = 75% ✓ ; Var.% ignorado
+        ['Alto', 50, 25, -5],         // 50/200 = 25% ✓
+      ],
+    };
+    const viz = checkPercentConsistency(misto);
+    expect(viz).not.toBeNull();
+    expect(viz!.badRows).toEqual([]);
+  });
 });
 
 // ── caso real: tabela de tipologias (imagem s47 do teste do Gabriel) ─────────
@@ -128,6 +159,51 @@ describe('linha final que é média (Vendas s/ O.L. = 82,2%)', () => {
     };
     const viz = checkPercentConsistency(adulterada, { tolPp: 0.6 });
     expect(viz!.badRows).toContain(1); // Standard: 4.888 seria 37,8%, tabela diz 33,2%
+  });
+});
+
+// ── #2 semântica declarada pela visão (hipótese verificada) ──────────────────
+describe('semântica declarada (col_kinds / total_kind / share_of)', () => {
+  it('col_kind "measure" suprime FP de soma que a aritmética não pegaria', () => {
+    // preço médio cujo "total" (média) NÃO cai entre min e max → a aritmética
+    // sozinha acusaria; a semântica measure salva.
+    const precos: ExtractedTable = {
+      title: 'Preço',
+      columns: ['Tipologia', 'R$/m²'],
+      colKinds: ['label', 'measure'],
+      totalKind: 'mean',
+      totals: ['Média', 9000],       // média ponderada, cai fora do [min,max] simples? forço:
+      rows: [['A', 8000], ['B', 8200], ['C', 8500]], // min 8000, max 8500; média decl 9000 fora
+    };
+    const viz = checkTableSums(precos, { absTol: 2 });
+    expect(viz.badColumns).toEqual([]); // measure → não somável
+  });
+
+  it('col_kind "rate" impede que a coluna vire participação', () => {
+    const comRate: ExtractedTable = {
+      title: 'Oferta',
+      columns: ['Padrão', 'Unidades', 'Vendas s/ O.L.'],
+      colKinds: ['label', 'count', 'rate'],
+      totals: ['Total', 300, 82.2],
+      rows: [['Econ', 200, 81.3], ['Alto', 100, 80.6]],
+    };
+    // "Vendas s/ O.L." tem valores 0-100 mas é taxa → não pareia como participação
+    expect(checkPercentConsistency(comRate)).toBeNull();
+  });
+
+  it('share_of pareia o % com a coluna absoluta certa (não a vizinha)', () => {
+    // layout incomum: % no fim referencia a 1ª coluna de valor (não a da esquerda)
+    const t: ExtractedTable = {
+      title: 'x',
+      columns: ['Cat', 'Qtd', 'Preço médio', '% da Qtd'],
+      colKinds: ['label', 'count', 'measure', 'share'],
+      shareOf: { 3: 1 },                     // % (col 3) percentua Qtd (col 1)
+      totals: ['Total', 200, 100, 100],
+      rows: [['A', 150, 90, 75], ['B', 50, 110, 25]], // 150/200=75, 50/200=25 ✓
+    };
+    const viz = checkPercentConsistency(t);
+    expect(viz).not.toBeNull();
+    expect(viz!.badRows).toEqual([]); // pareado com Qtd (via share_of), não com Preço
   });
 });
 
