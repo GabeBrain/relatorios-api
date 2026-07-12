@@ -285,6 +285,7 @@ export type Database = {
       }
       studies_v3: {
         Row: {
+          ata: Json | null
           cidade: string | null
           concluded_at: string | null
           created_at: string
@@ -294,6 +295,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          ata?: Json | null
           cidade?: string | null
           concluded_at?: string | null
           created_at?: string
@@ -303,6 +305,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          ata?: Json | null
           cidade?: string | null
           concluded_at?: string | null
           created_at?: string
