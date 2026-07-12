@@ -355,22 +355,28 @@ export type Database = {
         Row: {
           created_at: string
           input_tokens: number
+          model: string | null
           output_tokens: number
           payload: Json
+          schema_version: number
           sha1: string
         }
         Insert: {
           created_at?: string
           input_tokens?: number
+          model?: string | null
           output_tokens?: number
           payload: Json
+          schema_version?: number
           sha1: string
         }
         Update: {
           created_at?: string
           input_tokens?: number
+          model?: string | null
           output_tokens?: number
           payload?: Json
+          schema_version?: number
           sha1?: string
         }
         Relationships: []
