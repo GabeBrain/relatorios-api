@@ -76,7 +76,11 @@ Contexto: ${contexto}.
 Transcreva TODAS as tabelas numéricas da imagem, fielmente:
 - Números em convenção pt-BR viram números JSON: "1.234" → 1234, "12,5%" → 12.5, "R$ 8.500" → 8500.
 - Células vazias ou "-" viram null. Rótulos de linha ficam como texto na 1ª coluna.
-- Se houver linha de Total/TOTAL, coloque-a em "totals" (mesma ordem das colunas), não em "rows".
+- Se houver linha de Total/TOTAL (a ÚLTIMA linha da tabela), coloque-a em "totals", não em "rows".
+- "totals" COMEÇA com o rótulo em texto (ex.: "Total") e tem EXATAMENTE um item por coluna,
+  na mesma ordem — nunca omita o rótulo, senão os valores desalinham das colunas.
+- Linhas de agregação intermediária (ex.: "A partir de 2022", "Subtotal", "Acumulado")
+  são linhas normais: ficam em "rows", NUNCA em "totals".
 - NÃO invente valores: se um dígito estiver ilegível, use null.
 - Legendas de mapa (só cores/faixas, sem valores) NÃO são tabelas: ignore.
 

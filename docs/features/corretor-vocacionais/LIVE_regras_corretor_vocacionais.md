@@ -16,6 +16,21 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.21 — 2026-07-11 — 2ª rodada de feedback: totais deslocados + subtotal no meio
+
+Mais dois falsos positivos do teste real do Gabriel, ambos corrigidos no lado da **validação**
+(rodam sobre o cache existente, sem custo novo):
+
+| Problema observado | Correção | Arquivo |
+|---|---|---|
+| **s28 — totais deslocados**: a visão derrubou o rótulo "Total" e os valores escorregaram uma célula à esquerda (16.848.551 caiu na coluna de rótulos, 100 sob "SP Absoluto") → toda coluna comparava com o total errado | `toExtracted` realinha: 1ª célula dos totais é **número** enquanto as linhas têm rótulo de texto → reinsere "Total" no início | `ia-vision.ts` |
+| **s39 — subtotal no meio**: "A partir de 2022" re-agrega 2022+ → somar todas as linhas conta os anos 2× (Nº: 90 ≠ 49) | Detecção data-driven em `checkTableSums`: se colunas falham e **excluir uma mesma linha** deixa TODAS as colunas somáveis consistentes, a linha é subtotal (dígito mal lido não passa no teste — excluir a linha errada quebra as colunas certas) | `engine.ts` |
+| Prompt da edge endurecido: "totals começa com o rótulo e tem exatamente um item por coluna"; "linhas de agregação intermediária ficam em rows" | Reduz os dois modos de falha na origem. **⚠ Redeploy:** `supabase functions deploy analyze-table-image` | `analyze-table-image/index.ts` |
+
+Regressão com as tabelas reais (s28 deslocada, s39 com subtotal + variante adulterada que NÃO
+pode se esconder atrás do subtotal): 20/20 testes verdes. Sem migration nova; achados falsos já
+salvos podem ser marcados "ignorado".
+
 ## Versão 0.20 — 2026-07-11 — Feedback do teste real: médias ≠ somas, pareamento do %, zoom no retry
 
 Ajustes após o 1º teste do Gabriel com estudo real (3 problemas reportados):

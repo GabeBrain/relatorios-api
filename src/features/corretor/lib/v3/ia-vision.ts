@@ -77,15 +77,26 @@ function normCell(v: unknown): Cell {
   return String(v);
 }
 
-function toExtracted(raw: RawTable): ExtractedTable | null {
+/** Exportada para teste (regressão do realinhamento de totais — caso s28). */
+export function toExtracted(raw: RawTable): ExtractedTable | null {
   const columns = (raw.columns ?? []).map((c) => String(c ?? ''));
   const rows = (raw.rows ?? []).map((r) => (r ?? []).map(normCell));
   if (!columns.length || rows.length < 2) return null;
+
+  let totals = raw.totals ? raw.totals.map(normCell) : undefined;
+  // Realinha os totais quando a visão derruba o rótulo ("Total") e os valores
+  // escorregam uma célula à esquerda (caso real s28: 16.848.551 caiu na coluna
+  // de rótulos e cada total foi comparado com a coluna errada). Sinal: a 1ª
+  // célula dos totais é NÚMERO enquanto as linhas têm rótulo de texto.
+  if (totals && typeof totals[0] === 'number' && typeof rows[0]?.[0] === 'string') {
+    totals = ['Total', ...totals];
+  }
+
   return {
     title: String(raw.title ?? 'Tabela'),
     columns,
     rows,
-    totals: raw.totals ? raw.totals.map(normCell) : undefined,
+    totals,
   };
 }
 

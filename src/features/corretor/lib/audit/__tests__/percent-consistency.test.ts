@@ -8,6 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { checkPercentConsistency, checkTableSums } from '../engine';
+import { toExtracted } from '../../v3/ia-vision';
 import type { ExtractedTable } from '../model';
 
 const cols = ['De 10 a 15 min', 'Absoluto', '%'];
@@ -127,5 +128,69 @@ describe('linha final que é média (Vendas s/ O.L. = 82,2%)', () => {
     };
     const viz = checkPercentConsistency(adulterada, { tolPp: 0.6 });
     expect(viz!.badRows).toContain(1); // Standard: 4.888 seria 37,8%, tabela diz 33,2%
+  });
+});
+
+// ── caso real s28: a visão derrubou o rótulo "Total" e os totais escorregaram ──
+// uma célula à esquerda (16.848.551 caiu na coluna de rótulos, 100 sob "SP Abs."…)
+// → toda coluna comparava com o total errado. toExtracted realinha.
+describe('realinhamento de totais deslocados (s28)', () => {
+  const rawS28 = {
+    title: 'Domicílios por número de moradores',
+    columns: ['MORADORES', 'SP Abs.', 'SP %', 'São Paulo Abs.', 'São Paulo %', 'Até 10 Abs.', 'Até 10 %'],
+    rows: [
+      ['1 morador', 2143822, 12.7, 612693, 13.8, 4280, 10.8],
+      ['2 moradores', 4107806, 24.4, 1098442, 24.8, 8767, 22.1],
+      ['3 moradores', 4451380, 26.4, 1129626, 25.5, 10733, 27.0],
+      ['4 moradores', 3492130, 20.7, 908485, 20.5, 8772, 22.1],
+      ['5 ou mais', 2653414, 15.7, 687524, 15.5, 7187, 18.1],
+    ],
+    // SEM o rótulo "Total" — deslocado, como a visão devolveu
+    totals: [16848551, 100, 4436770, 100, 39739, 100],
+  };
+
+  it('reinsere o rótulo e realinha os totais às colunas', () => {
+    const ext = toExtracted(rawS28)!;
+    expect(ext.totals?.[0]).toBe('Total');
+    expect(ext.totals?.[1]).toBe(16848551); // sob "SP Abs.", não sob rótulos
+  });
+
+  it('após realinhar, checkTableSums verifica a tabela sem achado', () => {
+    const ext = toExtracted(rawS28)!;
+    const viz = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
+    expect(viz.badColumns).toEqual([]); // somas fecham (diferenças de 1 = arredondamento)
+  });
+});
+
+// ── caso real s39: linha "A partir de 2022" é SUBTOTAL (re-agrega 2022+) ──────
+// Somar todas as linhas conta os anos duas vezes (Nº: 8+10+5+15+11+41=90 ≠ 49).
+describe('subtotal no meio da tabela (s39)', () => {
+  const s39: ExtractedTable = {
+    title: 'Oferta lançada e final por ano de lançamento',
+    columns: ['Ano Lançamento', 'Nº de Empreend.', 'Em %', 'Oferta Lançada', 'Em %', 'Oferta Final', 'Em %'],
+    totals: ['Total', 49, 100, 12924, 100, 2301, 100],
+    rows: [
+      ['Até 2021', 8, 16.3, 1971, 15.3, 80, 3.5],
+      ['2022', 10, 20.4, 1807, 14.0, 168, 7.3],
+      ['2023', 5, 10.2, 776, 6.0, 85, 3.7],
+      ['2024', 15, 30.6, 5151, 39.9, 543, 23.6],
+      ['2025', 11, 22.4, 3219, 24.9, 1425, 61.9],
+      ['2026*', null, null, null, null, null, null],
+      ['A partir de 2022', 41, 84, 10953, 85, 2221, 97],
+    ],
+  };
+
+  it('reconhece o subtotal e não gera achado', () => {
+    const viz = checkTableSums(s39, { absTol: Math.max(0.5, s39.rows.length / 2) });
+    expect(viz.badColumns).toEqual([]); // excluindo "A partir de 2022", tudo fecha
+  });
+
+  it('dígito mal lido NÃO se esconde atrás do subtotal', () => {
+    const adulterada: ExtractedTable = {
+      ...s39,
+      rows: s39.rows.map((r, i) => (i === 2 ? [r[0], r[1], r[2], 876, r[4], r[5], r[6]] : r)), // 776 → 876
+    };
+    const viz = checkTableSums(adulterada, { absTol: Math.max(0.5, s39.rows.length / 2) });
+    expect(viz.badColumns.length).toBeGreaterThan(0); // nenhuma exclusão única conserta tudo
   });
 });

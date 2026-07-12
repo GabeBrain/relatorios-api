@@ -33,6 +33,10 @@ export function checkTableSums(
 
   if (totals) {
     const ncols = Math.max(...table.rows.map((r) => r.length));
+
+    // 1ª passada: status de cada coluna somável (média-final não é somável)
+    interface ColCheck { c: number; decl: number; tol: number; soma: number; ok: boolean }
+    const checks: ColCheck[] = [];
     for (let c = 1; c < ncols; c++) {
       const decl = totals[c];
       if (!isNum(decl)) continue;
@@ -41,14 +45,39 @@ export function checkTableSums(
       const soma = vals.reduce((a, b) => a + b, 0);
       const isPct = vals.every((v) => v >= 0 && v <= 100) && decl >= 85 && decl <= 115;
       const tol = isPct && Math.round(decl) === 100 ? pctTol : absTol;
-      if (Math.abs(soma - decl) > tol) {
+      const ok = Math.abs(soma - decl) <= tol;
+      if (!ok) {
         // Nem toda linha final é SOMA: tabelas de m²/preço/taxa fecham em MÉDIA
         // ("Média Geral", "Vendas s/ O.L." etc.). Heurística: se o declarado cai
         // ENTRE o mínimo e o máximo dos valores, é média — soma nunca fica nesse
-        // intervalo com 2+ valores positivos. Não é somável → não é achado.
+        // intervalo com 2+ valores positivos. Não é somável → fora da checagem.
         const mn = Math.min(...vals);
         const mx = Math.max(...vals);
         if (decl >= mn && decl <= mx) continue;
+      }
+      checks.push({ c, decl, tol, soma, ok });
+    }
+
+    // Detecção de SUBTOTAL no meio da tabela (caso real s39: "A partir de 2022"
+    // re-agrega 2022+, então somar tudo conta os anos duas vezes). Se alguma
+    // coluna falha e excluir UMA MESMA linha deixa TODAS as colunas somáveis
+    // consistentes, a linha é subtotal — não é erro. Um dígito mal lido não passa
+    // neste teste: excluir a linha errada quebra as colunas que estavam certas.
+    let subtotalRow = -1;
+    if (checks.some((k) => !k.ok)) {
+      for (let k = 0; k < table.rows.length && subtotalRow < 0; k++) {
+        const fixesAll = checks.every(({ c, decl, tol }) => {
+          const vals = table.rows.filter((_, i) => i !== k).map((r) => r[c]).filter(isNum);
+          if (vals.length < 2) return false;
+          return Math.abs(vals.reduce((a, b) => a + b, 0) - decl) <= tol;
+        });
+        if (fixesAll) subtotalRow = k;
+      }
+    }
+
+    if (subtotalRow < 0) {
+      for (const { c, decl, soma, ok } of checks) {
+        if (ok) continue;
         badColumns.push(c);
         notes.push(`Coluna «${table.columns[c] ?? c}»: soma ${round(soma)} ≠ total ${decl}`);
       }
