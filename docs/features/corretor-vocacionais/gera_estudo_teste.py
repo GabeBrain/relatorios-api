@@ -277,13 +277,79 @@ def build(cidade, sem_secao):
     return prs, dict(cidade=cidade, erros=gab, controles_negativos=ctrl)
 
 
+# ---------------------------------------------------------------- fixture da ata
+def render_ata_png(cidade):
+    """Print de página inteira da ata (>= 900x600, >= 60 KB) p/ testar o localizador."""
+    W, H = 1000, 1400
+    img = Image.new("RGB", (W, H), "white")
+    d = ImageDraw.Draw(img)
+    ft = _load_font(30)
+    fb = _load_font(22)
+    fh = _load_font(24)
+    y = 40
+    d.text((40, y), f"3. Tancredo @Kenuy / Brain", fill=(20, 40, 120), font=ft); y += 60
+    blocos = [
+        ("Produto pretendido:", [
+            "Empreendimento com 8 torres, 1.912 unidades",
+            "Todas as unidades de 2 dorm com e sem sacada.",
+            "Unidades de 36m² a 41m²",
+            "50% das unidades com vaga",
+            "Empreendimento com características mais próximas do MCMV",
+        ]),
+        ("Terreno e localização:", [
+            f"Av. Presidente Tancredo de Almeida Neves, bairro São Roque | {cidade}/SP",
+            "Área com 25.000m² privativos",
+        ]),
+        ("Preço aproximado de viabilidade R$ 8.500/m²", []),
+        ("Dúvida do cliente:", [
+            "Qual o mix ideal de metragens.",
+            "A necessidade de mais vagas",
+            "Se necessário é possível fasear",
+        ]),
+        ("Analista da Rebrain:", [
+            "Trazer tabela de lacunas de vagas de garagem",
+            "Trazer análise de áreas de lazer da concorrência",
+        ]),
+    ]
+    for titulo, itens in blocos:
+        d.text((40, y), titulo, fill=(0, 0, 0), font=fh); y += 40
+        for it in itens:
+            d.text((70, y), f"• {it}", fill=(30, 30, 30), font=fb); y += 34
+        y += 20
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
+
+
+def build_ata_fixture(cidade):
+    """Deck mínimo (capa + ATA-imagem no slide 2 + filler) p/ testar findAtaImage."""
+    prs = Presentation()
+    prs.slide_width = Inches(13.333)
+    prs.slide_height = Inches(7.5)
+    add_slide(prs, f"Estudo Vocacional — {cidade}")
+    s = add_slide(prs, "Ata de Abertura — Briefing")
+    s.shapes.add_picture(render_ata_png(cidade), Inches(0.4), Inches(0.4), height=Inches(6.8))
+    s = add_slide(prs, "Metodologia")
+    add_text(s, "Conteúdo de apoio.")
+    return prs
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cidade", default="Itajaí")
     ap.add_argument("--out", default="teste_corretor.pptx")
     ap.add_argument("--sem-secao", default=None,
                     help="omite uma seção canônica (ex.: entorno) p/ testar STRUCTURE_MISSING")
+    ap.add_argument("--fixture", default=None, choices=["ata"],
+                    help="gera um fixture específico (ata = deck mínimo com ata-imagem)")
     args = ap.parse_args()
+
+    if args.fixture == "ata":
+        prs = build_ata_fixture(args.cidade)
+        prs.save(args.out)
+        print(f"OK  {args.out}  ({os.path.getsize(args.out)/1e6:.2f} MB, {len(prs.slides)} slides) — fixture ata")
+        return
 
     prs, gabarito = build(args.cidade, args.sem_secao)
     out = args.out

@@ -19,6 +19,7 @@ import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import { irToFindings } from '../lib/audit/ir-rules';
 import { VizSwitch } from '../components/audit/FindingCard';
 import LegacyV1Panel from '../components/LegacyV1Panel';
+import AtaTestPanel from '../components/AtaTestPanel';
 import { formatUSD, type ModelId } from '../lib/cost-calculator';
 import { runFullAnalysis, estimateFullAnalysis, type StageProgress, type FullEstimate } from '../lib/v3/pipeline';
 import { BUDGET_STUDY_BRL, formatBRL } from '../lib/v3/config';
@@ -647,6 +648,9 @@ export default function CorretorV3Page() {
           {analysis?.running && (
             <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} />
           )}
+
+          {/* Fase A da ata: painel de teste da extração (manual, valida no olho) */}
+          {selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
 
           {loadingStudy ? (
             <div className="flex items-center justify-center py-16 text-muted-foreground gap-2 text-sm">

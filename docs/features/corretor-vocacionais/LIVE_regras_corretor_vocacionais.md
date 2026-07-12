@@ -16,6 +16,29 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.24 — 2026-07-11 — Ata Fase A IMPLEMENTADA: extração (imagem + DOCX) + painel de teste
+
+Fase A do `PLAN_ata_estrela_guia.md` no ar — **provar que a LLM lê a ata**. Nenhuma regra nova
+ainda; só extrai e mostra para o Gabriel validar no olho (⏸ Pausa A).
+
+| Peça | Arquivo | Detalhe |
+|---|---|---|
+| Utilidades de mídia compartilhadas | `lib/v3/pptx-media.ts` (novo) | dims PNG/JPEG, sha1, parse de rels — extraídas de `table-images.ts` sem mudar comportamento (regressão do localizador de tabelas segue verde) |
+| Localizador da ata | `lib/v3/ata-image.ts` (novo) | imagem GRANDE (≥60 KB, ≥900×600) nos slides 1–4, melhor = menor slide/maior área. Lógica própria (o localizador de tabelas a descarta) |
+| Edge de extração | `supabase/functions/analyze-ata-image/` (novo) | 1 ata (imagem OU texto) → JSON fechado `{cliente,cidade,uf,produto{…},preco,duvidas_cliente[],pedidos_analista[]}`; transcrição fiel dos bullets; campo ausente = null. **Deploy:** `supabase functions deploy analyze-ata-image` |
+| Cliente + cache | `lib/v3/ia-ata.ts` (novo) | cache-first no `vision_cache` (chave `ata:<sha1>`); `extractAtaFromImage` / `extractAtaFromText`; registra passe `visao_ata` |
+| DOCX (formato futuro) | `lib/v3/ata-docx.ts` (novo) | `word/document.xml` → texto (fflate+DOMParser); vai ao ramo texto da edge (~10× mais barato, sem visão) |
+| Painel de teste | `components/AtaTestPanel.tsx` (novo) | card β no workspace: sobe .pptx/.docx → **imagem × JSON lado a lado** p/ validação campo a campo; mostra custo. Manual (não ligado ao passo único ainda) |
+| Migration | `20260711120000_ia_passes_visao_ata.sql` | amplia check de `ia_passes.tipo` p/ incluir `visao_ata`. **⚠ Aplicar.** |
+
+Testes: localizador acha a ata no slide 2 do fixture, ignora tabelas, devolve null sem ata;
+DOCX real (Grupo Impper) extrai texto + sha1. Gerador ganhou `--fixture ata`. 29/29 verdes.
+
+**⏸ PAUSA A (próximo passo do Gabriel):** subir 2–3 estudos reais no painel β, conferir campo a
+campo (cidade/UF e pedidos_analista 100%; resto ≥90%), testar o DOCX real, registrar acerto por
+campo + modelo + custo. Só então parte a Fase B (ata alimenta o passo único). **Deploy** da edge
+e **migration** antes de testar.
+
 ## Versão 0.23 — 2026-07-11 — Plano aprovado: Ata como estrela-guia (extração → parâmetros → cobertura)
 
 Decisão do Gabriel (11/jul): motores de imagem considerados confiáveis o suficiente; próximo
