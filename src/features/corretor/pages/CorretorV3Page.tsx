@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
-  Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause,
+  Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -33,7 +33,7 @@ import { confidenceOf, CONFIDENCE_META, type Confidence } from '../lib/v3/confid
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
-  setFindingVerdict, type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
+  saveReport, setFindingVerdict, type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 
 const MODEL: ModelId = 'gpt-4o-mini'; // econômico por padrão; visão cai p/ R$ 0 após cache
@@ -379,6 +379,8 @@ export default function CorretorV3Page() {
 
       // DET pós-ata (UF + cobertura) por upsert — IDs estáveis evitam duplicata.
       await insertIaFindings(ctx.studyId, res.detFindings, 'DET', ctx.version);
+      // snapshot do que foi verificado (attestation / WS-2)
+      await saveReport(ctx.studyId, res.report);
 
       if (res.textCostUsd > 0 || res.textFindings.length) {
         await registerIaPass(ctx.studyId, 'texto', `${ctx.estimate.textSlides} slides · ${MODEL}`,
@@ -730,9 +732,18 @@ export default function CorretorV3Page() {
             Reconferir
           </button>
           {selected.status === 'pronto' ? (
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1.5 text-xs font-medium">
-              <PackageCheck className="w-3.5 h-3.5" /> Pronto para o A&R
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1.5 text-xs font-medium">
+                <PackageCheck className="w-3.5 h-3.5" /> Pronto para o A&R
+              </span>
+              <a
+                href={`/corretor/${selected.id}/relatorio`}
+                target="_blank" rel="noreferrer"
+                className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5"
+              >
+                <FileText className="w-3.5 h-3.5" /> Relatório
+              </a>
+            </div>
           ) : (
             <button
               onClick={handleConclude}

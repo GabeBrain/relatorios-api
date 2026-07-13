@@ -16,6 +16,17 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.36 — 2026-07-13 — Corretor v5 WS-2: relatório de entrega (attestation, RUNTIME)
+
+Os findings `ok:true` (tabelas que fecham, cruzamentos consistentes) eram descartados — o
+corretor só mostrava problemas. WS-2 guarda o trabalho POSITIVO: `runPhase2` monta um
+`AnalysisReport` (tabelas extraídas/verificadas, imagens analisadas, tabelas nativas) salvo em
+`studies_v3.relatorio`. Nova rota read-only imprimível **`/corretor/:id/relatorio`**
+(`CorretorReportPage`): "Verificado ✓" (contadores), apontamentos por tipo (corrigidos/
+pendentes/total), decisões do analista (assumidos/ignorados/FP) e rodapé de geração. Link
+"Relatório" aparece no selo de entregue. `loadDeliveryReport` combina o snapshot + contagens
+vivas de `findings_v3`. Migration `20260713170000_corretor_v5_relatorio.sql`. Suíte 47 verdes.
+
 ## Versão 0.35 — 2026-07-13 — Corretor v5 WS-0 + WS-1: higiene + portão da ata (RUNTIME)
 
 Execução do `PLAN_corretor_v5_fluxo.md` pelo Opus (branch `feat/corretor-v5-fluxo`).

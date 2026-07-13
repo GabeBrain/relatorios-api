@@ -4,6 +4,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Finding } from '../audit/model';
 import type { AtaData } from './ia-ata';
+import type { AnalysisReport } from './pipeline';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -111,6 +112,12 @@ export async function listStudies(): Promise<StudyV3[]> {
       pendentes: (s.findings_v3 ?? []).filter((f: any) => f.status === 'pendente').length,
     };
   });
+}
+
+/** WS-2: guarda o snapshot do que foi verificado (attestation) para o relatório. */
+export async function saveReport(studyId: string, report: AnalysisReport): Promise<void> {
+  const { error } = await db.from('studies_v3').update({ relatorio: report }).eq('id', studyId);
+  if (error) throw new Error(error.message);
 }
 
 /** Persiste a ata extraída no estudo + copia a cidade (CITY_NAME / card). */
@@ -312,4 +319,59 @@ export async function concludeStudy(studyId: string): Promise<void> {
 
 export async function deleteStudy(studyId: string): Promise<void> {
   await db.from('studies_v3').delete().eq('id', studyId);
+}
+
+// ── WS-2: relatório de entrega ────────────────────────────────────────────────
+
+export interface DeliveryReport {
+  study: StudyV3;
+  snapshot: AnalysisReport | null;
+  /** contagens vivas dos achados (por status/veredito/tipo) */
+  corrigidos: number;
+  ignorados: number;
+  fps: number;
+  verificarAssumidos: number;   // nível 3 entregues ainda pendentes
+  porTipo: { tipo: string; corrigidos: number; pendentes: number; total: number }[];
+  findings: FindingV3[];
+}
+
+/** Monta o relatório de verificação de um estudo (snapshot + contagens vivas). */
+export async function loadDeliveryReport(studyId: string): Promise<DeliveryReport | null> {
+  const { data: s } = await db
+    .from('studies_v3')
+    .select('*, study_versions(n, n_slides, sha1)')
+    .eq('id', studyId)
+    .maybeSingle();
+  if (!s) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const versions = (s.study_versions ?? []).sort((a: any, b: any) => b.n - a.n);
+  const study: StudyV3 = {
+    id: s.id, nome: s.nome, cidade: s.cidade, uf: s.uf ?? null,
+    ataConfirmada: s.ata_confirmada === true, status: s.status,
+    createdAt: s.created_at, concludedAt: s.concluded_at,
+    lastVersion: versions[0]?.n ?? 1, nSlides: versions[0]?.n_slides ?? 0,
+    custoTotal: Number(s.custo_total ?? 0), lastSha1: versions[0]?.sha1 ?? null,
+    ata: (s.ata ?? null) as AtaData | null,
+  };
+
+  const findings = await loadFindings(studyId);
+  const corrigidos = findings.filter((f) => f.status === 'corrigido').length;
+  const ignorados = findings.filter((f) => f.status === 'ignorado' && f.verdict !== 'fp').length;
+  const fps = findings.filter((f) => f.verdict === 'fp').length;
+  const verificarAssumidos = findings.filter((f) => f.status === 'pendente').length;
+
+  const byType = new Map<string, { corrigidos: number; pendentes: number; total: number }>();
+  for (const f of findings) {
+    const t = byType.get(f.finding.type) ?? { corrigidos: 0, pendentes: 0, total: 0 };
+    t.total++;
+    if (f.status === 'corrigido') t.corrigidos++;
+    if (f.status === 'pendente') t.pendentes++;
+    byType.set(f.finding.type, t);
+  }
+  const porTipo = [...byType.entries()].map(([tipo, v]) => ({ tipo, ...v })).sort((a, b) => b.total - a.total);
+
+  return {
+    study, snapshot: (s.relatorio ?? null) as AnalysisReport | null,
+    corrigidos, ignorados, fps, verificarAssumidos, porTipo, findings,
+  };
 }

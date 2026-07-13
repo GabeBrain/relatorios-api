@@ -19,6 +19,7 @@ import ValidacaoFechamento from './pages/ValidacaoFechamento.tsx';
 // O histórico da v1 é lido em modo somente-leitura dentro da própria /corretor
 // (LegacyV1Panel). Componentes v1 preservados no repo, fora do grafo do bundle.
 const CorretorV3Page = lazy(() => import('./features/corretor/pages/CorretorV3Page.tsx'));
+const CorretorReportPage = lazy(() => import('./features/corretor/pages/CorretorReportPage.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -67,6 +68,7 @@ const App = () => (
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
                 <Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento />} />
                 <Route path="/corretor" element={<CorretorV3Page />} />
+                <Route path="/corretor/:id/relatorio" element={<CorretorReportPage />} />
                 {/* v1/v2 aposentadas → tudo cai no corretor v3 (histórico v1 = leitura lá dentro) */}
                 <Route path="/auditoria" element={<Navigate to="/corretor" replace />} />
                 <Route path="/auditoria/analise" element={<Navigate to="/corretor" replace />} />

@@ -164,11 +164,25 @@ export async function runPhase1(
 
 // ── FASE 2 — texto + visão + cruzamentos (paga; roda após a confirmação) ──────
 
+/**
+ * Snapshot do trabalho POSITIVO da análise (attestation / WS-2). O que fechou é
+ * descartado dos findings (só problemas persistem), então guardamos as contagens
+ * aqui para o relatório de entrega mostrar "o que foi verificado".
+ */
+export interface AnalysisReport {
+  tabelasExtraidas: number;
+  tabelasVerificadas: number;   // extraídas sem achado de soma/%/faixa
+  imagensAnalisadas: number;
+  tabelasNativas: number;       // tabelas nativas do PPTX conferidas por DET
+  geradoEm: string;
+}
+
 export interface Phase2Result {
   detFindings: Finding[];
   textFindings: Finding[];
   visionFindings: Finding[];
   cityUsed: string;
+  report: AnalysisReport;
   textCostUsd: number;
   visionCostUsd: number;
   textTokens: { input: number; output: number };
@@ -239,8 +253,16 @@ export async function runPhase2(
   await attachEvidenceImages(crossFindings, candidates);
   onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: crossFindings });
 
+  const report: AnalysisReport = {
+    tabelasExtraidas: vision.tablesExtracted,
+    tabelasVerificadas: vision.tablesVerified,
+    imagensAnalisadas: vision.analyzedSlides.length,
+    tabelasNativas: nativeTableRefs(ir).length,
+    geradoEm: new Date().toISOString(),
+  };
+
   return {
-    detFindings, textFindings: text.findings, visionFindings, cityUsed,
+    detFindings, textFindings: text.findings, visionFindings, cityUsed, report,
     textCostUsd: text.costUsd, visionCostUsd: vision.costUsd,
     textTokens: { input: text.inputTokens, output: text.outputTokens },
     visionTokens: { input: vision.inputTokens, output: vision.outputTokens },
