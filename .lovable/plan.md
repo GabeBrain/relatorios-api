@@ -1,137 +1,69 @@
 
-# Refatoração — Dashboard Geobrain
+# Dashboard Banco Quanti — Base Unificada 2020
 
-Escopo restrito ao módulo `src/features/dashboard-geobrain/` + `src/pages/DashboardGeobrain.tsx`. Layout preservado.
+Ferramenta de análise exploratória interativa para a página `/quanti`, aba **Banco Quanti**, usando `Base_Unificada_2020.xlsx` (11.737 registros × 92 colunas) como fonte inicial, e desenhada para receber bases futuras (2019, 2021, 2022…) sem alterar componentes.
 
-## 1. Dimensão de período — usar `h.period` (string)
+## Estratégia de dados
 
-`aggregate.ts`: substituir todo uso de `h.periodDate` por parsing direto de `h.period` (string `YYYY-MM` ou `YYYY-MM-DD`). Criar helpers:
+Como a base tem ~11k linhas (leve para o navegador), o dashboard usa **processamento 100% client-side** — sem migration, sem dependência de rede a cada filtro, resposta instantânea.
 
-- `periodKeyFromStr(period, granularity)` — string → rótulo (`26T1`, `03/26`, `2026`).
-- `periodSortFromStr(period, granularity)` — número monotônico.
-- `yearFromPeriod(period)`, `monthKeyFromPeriod(period)`.
+1. **Conversão única** (script Node em `scripts/`): lê o `.xlsx`, seleciona só os campos usados (research_name, data_pesquisa, regiao, localidade, Estado, Cidade, genero, faixa_etaria, geracao, renda_macro_faixa, renda_faixa_padronizada, renda_classe_agregada, renda_classe_detalhada, renda_valor_estimado, intencao_compra_padronizada, tempo_intencao_padronizado, idade), normaliza null/"" → `"Não informado"`, e emite `public/data/quanti/base-2020.json` (gzip friendly, ~1–2 MB).
+2. **Registro de bases** em `src/features/area-quanti/dashboard/datasets.ts`: `{ id: "2020", label: "Base 2020", url: "/data/quanti/base-2020.json" }`. Adicionar novas bases é só um item nessa lista + rodar o script na nova planilha.
+3. **Hook `useQuantiDataset(id)`**: fetch + cache em memória, retorna registros normalizados tipados.
 
-Nenhum bucket usará `Date` local (fim do drift Mar→Fev). Manter `HistoryEntry.periodDate` só para range `from/to` do sidebar, ou substituir também por comparação lexical `YYYY-MM`.
+## Arquitetura de UI
 
-## 2. Barra de filtros ativos
+Rota já existe (`/quanti`). Substituir o placeholder por um layout com **tabs**: `Banco Quanti` (este dashboard) — futura extensão para outras abas. O dashboard vive em `src/features/area-quanti/dashboard/`.
 
-Novo componente `ActiveFiltersBar.tsx` (padrão de `validacao-fechamento/ActiveFiltersBar.tsx`), linha única abaixo do `Header`, mostrando: Estado, Cidade, Tipo, Bairros, Padrão, Dormitórios, Garagens, Tipologia, Anos, Períodos, Status, Empreendimentos. Renderizada em `DashboardGeobrain.tsx` entre `<Header/>` e `<main>`.
-
-## 3. Filtros aplicam a tudo
-
-Revisar cada compute (`computeKpis`, `computeSeries`, `computeOfertaPor*`, `rank*`, `computeIpcByStandard`, `computeOpportunityMap`) para garantir que **todos** aplicam `historyMatches(h, f)` e `typologyMatchesFilters`. Hoje IPC/rankings já aplicam — reforçar auditoria.
-
-## 4. Segmentadores do topo
-
-`Header.tsx`:
-- `BUILDING_TYPES = ['Vertical', 'Horizontal', 'Comercial']` (remove Hotel, ordem decrescente).
-- Alinhar altura/estilo dos chips à altura do `GeoApiScopeSelector` via `dashboard.css` (`min-height`, `align-items: center`).
-
-## 5. Renomear "Oferta Final" → "Estoque"
-
-Substituir em `KpiRow.tsx`, `Charts.tsx` (títulos, tooltips, legendas), `Rankings.tsx`, `OpportunityMap.tsx` e `DashboardGeobrain.tsx`. Chaves internas (`ofertaFinal`, `estoqueFinal`) podem permanecer; alterar apenas labels visíveis.
-
-## 6. KPIs sempre no período mais recente
-
-Novo helper `latestPeriodInScope(buildings, f)` retorna a maior string `period` presente após filtros; se `f.periods`/`f.years` estiverem vazios, usa o maior período da base filtrada.
-
-Reescrever `computeKpis`:
-- `estoque`, `vgvEstoque` = soma do `typology_stock`/`vgv_stock` das entradas cujo `period == latest`.
-- `vendasLiquidas` = `sold_in_period` no `latest`.
-- `ivv` e `tempoEstoque` = ver §15.
-- `unidadesLancadas`, `vgvLancado` = soma somente das tipologias com `release_date == latest` (via `is_release`).
-- Não usar `monthsRange` acumulado.
-
-Ampliar `KPIValues` para incluir os campos listados em §14 (empreendimentos ativos, status atualização, empreendimentos lançados, unidades lançadas, VGV lançado, unidades vendidas, VGV vendido, estoque final, VGV estoque, estoque inicial, preço médio, preço médio m², IVV, tempo de estoque, IPC).
-
-## 7. Cartões sobre os gráficos
-
-`Charts.tsx`: para cada gráfico que hoje mostra cartões, manter apenas **Desde o início / 3 anos / 1 ano** com a medida do gráfico.
-- Gráficos com múltiplas medidas: remover totalmente os cartões.
-- IVV: cartão usa **média** dos períodos da janela, não soma.
-
-## 8. Tooltips
-
-Componente `DGTooltip` compartilhado em `Charts.tsx`:
-- Valores com 1 casa decimal (`nf1`, `pct1`).
-- Cor destaque `#917C09` (ou `#D9BA0D`) via CSS var `--dg-tooltip-hl`.
-- Tempo de Estoque usa o mesmo componente (elimina divergência atual).
-
-## 9. Ordenação em barras horizontais
-
-Nos `RankingCard`, `OfertaComboChart` (barras horizontais): dois botões — "Ordenar por valor" / "Ordenar por rótulo" (com toggle asc/desc). Estado local no card.
-
-## 10. Gráfico de Padrões — sem Top 10
-
-`OfertaComboChart` do padrão: remover `slice(0, 10)`; exibir todos os padrões filtrados.
-
-## 11. IPC
-
-`Charts.tsx > IpcChart`:
-- `YAxis` com `domain` que inclua 1 (já existe `ReferenceLine y=1`, garantir cruzamento).
-- Botão `(i)` no header do card abre popover (shadcn `Popover`) com o texto explicativo definido no ticket.
-
-## 12. Mapa de Oportunidades
-
-- `OpportunityMap.tsx`: corrigir input de busca — `padding-left` para acomodar a lupa (ou reposicionar ícone `left-2` + `pl-8`).
-- Adicionar variante `groupBy: 'neighborhood' | 'building_type'` em `computeOpportunityMap` e renderizar **dois mapas** empilhados na página: um por bairro (atual) e outro por `building_type`.
-
-## 13. Campos calculados
-
-Introduzir helpers puros em `aggregate.ts` (aplicados por linha `HistoryEntry` + typology + building):
-
-```ts
-isRelease(building, h)      = building.release_date === h.period
-vgvSold(h, price)           = h.sold_in_period * price
-vgvStock(h, price)          = h.typology_stock * price
-initialStock(h)             = h.typology_stock + h.sold_in_period
-typologyArea(t)             = t.qty * t.private_area
-vgvPeriod(t, price)         = t.qty * price
-qtyRelease(building, h, t)  = isRelease ? t.qty : 0
-vgvRelease(building, h, t)  = isRelease ? t.qty * price : 0
+```text
+AreaQuanti (page)
+└── Tabs [Banco Quanti | (futuras abas)]
+    └── QuantiDashboard
+        ├── DatasetSwitcher  (seletor de base — 2020, 2021, …)
+        ├── FiltersSidebar   (retrátil, multi-select por campo)
+        ├── ActiveFiltersBar (breadcrumbs + limpar tudo)
+        ├── KpiRow           (7 KPIs)
+        ├── Section "Perfil Demográfico"  (Gênero donut · Faixa etária bar · Geração bar)
+        ├── Section "Perfil de Renda"     (Macro · Padronizada · Classe agregada · Classe detalhada · Histograma renda_valor_estimado)
+        ├── Section "Distribuição Geográfica" (Mapa Brasil coroplético + Top cidades)
+        ├── Section "Intenção de Compra"  (Intenção · Tempo · Cruz. por gênero/faixa/classe)
+        ├── Section "Cruzamentos" (heatmaps prontos: FE×Classe, Gênero×Classe, Estado×Classe, Região×Classe, Geração×Intenção, Cidade×Intenção)
+        ├── Section "Ranking" (Top 10 cidades · Top 10 estados · Regiões)
+        └── Section "Análise Cruzada" (pivot dinâmico com exportação CSV/XLSX)
 ```
 
-## 14–15. Medidas revisadas
+## Componentes principais
 
-Todas as medidas passam por `latestPeriodInScope` quando aplicável:
+- `dashboard.css` — paleta azul (`#1E3A8A` primário, `#3B82F6` accent) / branco / cinza; cartões `rounded-2xl` com sombra suave.
+- `FiltersSidebar.tsx` — reutiliza `MultiSelect` já existente; filtros: research_name, Estado, Cidade (dependente do Estado), regiao, genero, faixa_etaria, geracao, renda_faixa_padronizada, renda_classe_agregada, renda_classe_detalhada, intencao_compra_padronizada, tempo_intencao_padronizado, data_pesquisa (range).
+- `useFilters.ts` — estado global (Zustand — já no projeto), com `toggleFilter(field, value)` para cross-filter de gráficos.
+- `aggregate.ts` — funções puras: `countBy`, `distinct`, `mean`, `percentile`, `histogram(bins)`, `crosstab(rows, cols, metric)`. Todos aplicam o filtro corrente.
+- `KpiRow.tsx` — Total entrevistas, # cidades, # estados, Renda média estimada, Idade média, % Homens, % Mulheres.
+- `Charts.tsx` (Recharts, já no projeto) — `DonutChart`, `BarChart` horizontal/vertical, `Histogram`, `StackedBar`, `Heatmap` (SVG custom leve).
+- `BrazilMap.tsx` — coroplético por Estado usando `react-simple-maps` + topojson BR (arquivo estático em `public/data/br-states.json`). Clique em UF → toggle filtro Estado.
+- `RankingList.tsx` — top-N configurável.
+- `CrossAnalysis.tsx` — pivot: 2 selects (linhas/colunas de qualquer campo categórico), select de métrica (Quantidade, %, Média de renda estimada), 4 modos de exibição (Tabela, Barras agrupadas, Barras empilhadas, Heatmap), botões **Exportar CSV** e **Exportar XLSX** (usa `xlsx` já instalada).
+- `ActiveFiltersBar.tsx` — chips por filtro ativo, "Limpar tudo".
+- Todos os gráficos: hover tooltip padronizado e clique em série → aplica/remove filtro correspondente (cross-filter).
 
-- **Empreendimentos Ativos**: `count(status === 'Ativo')` após filtros de dimensão.
-- **Status Atualização**: max `period` observado por empreendimento.
-- **Empreendimentos Lançados**: distinct buildings com `release_date == latest`.
-- **Unidades / VGV Lançado**: soma `qtyRelease` / `vgvRelease` no `latest`.
-- **Unidades / VGV Vendido**: soma `sold_in_period` / `vgv_sold` no `latest`.
-- **Estoque Final / VGV Estoque**: `typology_stock` / `vgv_stock` no `latest`.
-- **Estoque Inicial**: `initialStock` no `latest`.
-- **Preço Médio / m²**: média ponderada dos preços no `latest`.
-- **IVV**: `sold_in_period / (typology_stock + sold_in_period)` **exclusivamente no período mais recente**. Nunca acumulado.
-- **Tempo de Estoque**: `1 / IVV` do período mais recente (fim do cálculo por meses).
-- **IPC**: `(vendas_grupo/vendas_total) / (estoque_grupo/estoque_total)`; se `estoque_grupo <= 0` → `null` (BLANK, ponto omitido). Aplicado no gráfico temporal e KPI (latest).
+## Fluxo cross-filter
 
-## Notas técnicas
+Clique em uma barra "Homem" no gráfico Gênero → `toggleFilter('genero', 'Homem')` → todos os agregados recomputam via `useMemo(filteredRows)` → breadcrumb aparece com chip "Gênero: Homem × remover".
 
-- Preservar assinaturas públicas de `applyFilters`, `extractOptions`.
-- `HistoryEntry` já traz `period` (string) — se não trouxer nas normalizações antigas, adicionar no `api.ts`.
-- Ajustar `types.ts` com `KPIValues` estendido; atualizar `KpiRow.tsx` (mesmo layout de cards, só novos rótulos/valores).
-- Sem novos endpoints; consumo de API inalterado.
-- Nenhuma mudança em `dashboard.css` além de: altura dos chips do header, `--dg-tooltip-hl`, padding da busca do mapa.
+## Nulos e futuras bases
 
-## Arquivos alterados
+- Normalização única no loader: `""`, `null`, `undefined`, `"—"` → `"Não informado"`.
+- Loader ignora silenciosamente campos ausentes (novas bases podem ter subconjunto). Cada gráfico degrada — se o campo não existe no dataset atual, o cartão mostra "Campo indisponível nesta base".
 
-- `src/features/dashboard-geobrain/aggregate.ts` (grande refatoração)
-- `src/features/dashboard-geobrain/Header.tsx`
-- `src/features/dashboard-geobrain/KpiRow.tsx`
-- `src/features/dashboard-geobrain/Charts.tsx`
-- `src/features/dashboard-geobrain/Rankings.tsx`
-- `src/features/dashboard-geobrain/OpportunityMap.tsx`
-- `src/features/dashboard-geobrain/dashboard.css`
-- `src/features/dashboard-geobrain/types.ts`
-- `src/features/dashboard-geobrain/api.ts` (garantir `period` string na normalização)
-- `src/features/dashboard-geobrain/ActiveFiltersBar.tsx` (novo)
-- `src/pages/DashboardGeobrain.tsx`
-- `docs/projetos/LIVE_dashboard-geobrain.md` (entrada de Desenvolvimentos)
+## Entregáveis (ordem)
 
-## Fora do escopo
+1. Script `scripts/build-quanti-dataset.mjs` + rodar sobre `Base_Unificada_2020.xlsx` → `public/data/quanti/base-2020.json` + `br-states.json`.
+2. `src/features/area-quanti/dashboard/` (types, datasets, hooks, aggregate, filtros, componentes).
+3. Refatorar `src/pages/AreaQuanti.tsx` para tabs + montar o dashboard na aba "Banco Quanti".
+4. Atualizar `docs/projetos/LIVE_area-quanti.md`.
 
-- Layout geral, novos gráficos além do 2º mapa de oportunidades.
-- Alterações em endpoints ou no `GeoApiScopeEngine`.
-- Renomear chaves internas (`ofertaFinal` no código).
+## Fora do escopo (pode virar próximo passo)
+
+- Persistência de filtros salvos por usuário.
+- Ingestão dinâmica de novas bases via upload no app (por ora, novas bases são adicionadas rodando o script e commitando o JSON).
+- Migration para Lovable Cloud (o volume atual não justifica; se as bases somadas passarem de ~100k linhas migramos para tabela + agregação server-side).
