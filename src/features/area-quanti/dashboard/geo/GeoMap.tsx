@@ -15,12 +15,28 @@ const YELLOW_HL = '#5B7537';   // selected → Brain green so it stands out on y
 const STROKE = '#4d4d4d';      // visible state/city borders
 const STROKE_ACTIVE = '#1f2a12';
 
-function color(v: number, max: number): string {
-  if (!v || !max) return NO_DATA;
-  const t = Math.min(1, v / max);
-  // Floor at ramp[1] so states with a few records are already clearly above "no data"
-  const idx = Math.max(1, Math.min(RAMP.length - 1, Math.floor(t * RAMP.length)));
-  return RAMP[idx];
+/**
+ * Build a rank/quantile → color map from the observed non-zero values.
+ * Progressive contrast: each region gets a color based on where it ranks
+ * among the populated regions, so a state at 8% and one at 1% don't share
+ * the same bucket when the max is 10%.
+ */
+function buildColorScale(values: number[]): (v: number) => string {
+  const nonZero = values.filter((v) => v > 0).sort((a, b) => a - b);
+  if (!nonZero.length) return () => NO_DATA;
+  const buckets = RAMP.length - 1; // reserve RAMP[0] as "very low but present"
+  return (v: number) => {
+    if (!v) return NO_DATA;
+    // rank position (0..1) among populated regions
+    let lo = 0, hi = nonZero.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (nonZero[mid] < v) lo = mid + 1; else hi = mid;
+    }
+    const rank = lo / Math.max(1, nonZero.length - 1);
+    const idx = Math.min(RAMP.length - 1, Math.max(1, 1 + Math.floor(rank * buckets)));
+    return RAMP[idx];
+  };
 }
 
 const munCache = new Map<string, any>();
@@ -166,6 +182,10 @@ function BrazilLevel({
   onClickUF: (uf: string) => void;
 }) {
   const [hover, setHover] = useState<{ uf: string; x: number; y: number } | null>(null);
+  const colorFor = useMemo(
+    () => buildColorScale(Array.from(byUF.values()).map((x) => x.count)),
+    [byUF],
+  );
 
   if (!geo) {
     return <div className="flex h-[420px] items-center justify-center text-xs text-[var(--qd-text-muted)]"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Carregando mapa…</div>;
@@ -185,7 +205,7 @@ function BrazilLevel({
                 <Geography
                   key={g.rsmKey}
                   geography={g}
-                  fill={active ? YELLOW_HL : color(n, max)}
+                  fill={active ? YELLOW_HL : colorFor(n)}
                   stroke={active ? STROKE_ACTIVE : STROKE}
                   strokeWidth={active ? 1.8 : 0.9}
                   onClick={() => onClickUF(uf)}
@@ -234,6 +254,10 @@ function UFLevel({
   const [geo, setGeo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [hover, setHover] = useState<{ name: string; x: number; y: number } | null>(null);
+  const colorFor = useMemo(
+    () => buildColorScale(Array.from(byCity.values()).map((x) => x.count)),
+    [byCity],
+  );
 
   useEffect(() => {
     setError(null);
@@ -274,7 +298,7 @@ function UFLevel({
             <path
               key={i}
               d={d}
-              fill={active ? YELLOW_HL : color(n, max)}
+              fill={active ? YELLOW_HL : colorFor(n)}
               stroke={active ? STROKE_ACTIVE : STROKE}
               strokeWidth={active ? 1.6 : 0.6}
               style={{ cursor: entry ? 'pointer' : 'default', transition: 'fill .12s' }}

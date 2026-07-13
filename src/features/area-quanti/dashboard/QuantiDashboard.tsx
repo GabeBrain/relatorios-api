@@ -30,11 +30,11 @@ export function QuantiDashboard() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <div className="flex items-center justify-between gap-3 border-b border-[var(--qd-border)] bg-white px-4 py-2.5">
+        <div className="qd-topbar flex items-center justify-between gap-3 px-4 py-2.5">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSidebarOpen((v) => !v)}
-              className="rounded p-1.5 text-[var(--qd-text-muted)] hover:bg-slate-100"
+              className="rounded p-1.5 text-[var(--qd-text-muted)] hover:bg-[var(--qd-light)]"
               title={sidebarOpen ? 'Recolher filtros' : 'Expandir filtros'}
             >
               {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
@@ -49,7 +49,7 @@ export function QuantiDashboard() {
             <select
               value={datasetId}
               onChange={(e) => setDatasetId(e.target.value)}
-              className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs"
+              className="qd-select h-8 rounded-md px-2 text-xs"
             >
               {DATASETS.map((d) => (
                 <option key={d.id} value={d.id}>{d.label}</option>
@@ -121,9 +121,14 @@ export function QuantiDashboard() {
                 <ChartCard title="Brasil por estado" subtitle="Clique num estado para fazer drill-down · clique nos municípios para filtrar">
                   <GeoMap rows={filtered} />
                 </ChartCard>
-                <ChartCard title="Top cidades">
-                  <BarField rows={filtered} field="cidade" topN={15} />
-                </ChartCard>
+                <div className="grid grid-cols-1 gap-3">
+                  <ChartCard title="Top Cidades — Empreendimentos" subtitle="Cidade de origem do projeto/estudo (cidade_original)">
+                    <BarField rows={filtered} field="cidade_original" topN={10} />
+                  </ChartCard>
+                  <ChartCard title="Top Cidades — Coleta" subtitle="Cidade onde a entrevista foi coletada (cidade)">
+                    <BarField rows={filtered} field="cidade" topN={10} />
+                  </ChartCard>
+                </div>
               </div>
             </section>
 

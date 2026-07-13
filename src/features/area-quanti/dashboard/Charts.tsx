@@ -55,6 +55,22 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
   const toggle = useQuantiStore((s) => s.toggleValue);
   const filters = useQuantiStore((s) => s.filters);
   const data = useMemo(() => countBy(rows, field), [rows, field]);
+  const total = rows.length || 1;
+  const renderLabel = (props: any) => {
+    const RAD = Math.PI / 180;
+    const { cx, cy, midAngle, innerRadius, outerRadius, value, name } = props;
+    const r = innerRadius + (outerRadius - innerRadius) * 0.55;
+    const x = cx + r * Math.cos(-midAngle * RAD);
+    const y = cy + r * Math.sin(-midAngle * RAD);
+    const pct = ((value / total) * 100).toFixed(1);
+    if (Number(pct) < 4) return null; // avoid clutter on tiny slices
+    return (
+      <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" style={{ fontSize: 11, fontWeight: 700, pointerEvents: 'none' }}>
+        <tspan x={x} dy="-0.4em">{name}</tspan>
+        <tspan x={x} dy="1.1em">{pct}%</tspan>
+      </text>
+    );
+  };
   return (
     <ResponsiveContainer width="100%" height={height}>
       <PieChart>
@@ -65,6 +81,8 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
           innerRadius="55%"
           outerRadius="85%"
           paddingAngle={2}
+          labelLine={false}
+          label={renderLabel}
           onClick={(d: any) => toggle(field, d.key)}
         >
           {data.map((d, i) => {
@@ -73,7 +91,7 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
               <Cell
                 key={d.key}
                 fill={PALETTE[i % PALETTE.length]}
-                stroke={active ? ACTIVE_STROKE : '#fff'}
+                stroke={active ? ACTIVE_STROKE : 'var(--qd-surface, #fff)'}
                 strokeWidth={active ? 2 : 1}
                 style={{ cursor: 'pointer' }}
               />
@@ -82,7 +100,7 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
         </Pie>
         <Tooltip
           formatter={(v: number, _n, p: any) => [
-            `${v.toLocaleString('pt-BR')} (${((v / rows.length) * 100).toFixed(1)}%)`,
+            `${v.toLocaleString('pt-BR')} (${((v / total) * 100).toFixed(1)}%)`,
             p.payload.key,
           ]}
         />
@@ -150,11 +168,25 @@ interface HistProps { rows: QuantiRecord[]; field: 'idade' | 'renda_valor_estima
 export function HistogramChart({ rows, field, bins = 20, height = 260 }: HistProps) {
   const data = useMemo(() => histogram(rows, field, bins), [rows, field, bins]);
   const isMoney = field === 'renda_valor_estimado';
+  // Show only ~10 tick labels to avoid overcrowded legend
+  const step = Math.max(1, Math.ceil(data.length / 10));
+  const fmtTick = (v: any) => {
+    const n = Number(String(v).split(/[–-]/)[0]);
+    if (!Number.isFinite(n)) return String(v);
+    if (isMoney) return n >= 1000 ? `R$ ${(n / 1000).toFixed(0)}k` : `R$ ${n}`;
+    return String(Math.round(n));
+  };
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} margin={{ top: 6, right: 12, left: 4, bottom: 40 }}>
+      <BarChart data={data} margin={{ top: 6, right: 12, left: 4, bottom: 30 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-        <XAxis dataKey="bin" tick={{ fontSize: 9 }} interval={0} angle={-40} textAnchor="end" height={60} />
+        <XAxis
+          dataKey="bin"
+          tick={{ fontSize: 11 }}
+          interval={step - 1}
+          tickFormatter={fmtTick}
+          height={40}
+        />
         <YAxis tick={{ fontSize: 10 }} />
         <Tooltip
           formatter={(v: number) => [`${v.toLocaleString('pt-BR')}`, 'Entrevistas']}
@@ -176,7 +208,7 @@ export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
       <table className="min-w-full border-collapse text-[11px]">
         <thead>
           <tr>
-            <th className="sticky left-0 z-10 bg-white p-1 text-left font-medium text-[var(--qd-text-muted)]">
+            <th className="sticky left-0 z-10 p-1 text-left font-medium text-[var(--qd-text-muted)]" style={{ background: 'var(--qd-surface)' }}>
               {metricLabel ?? ''}
             </th>
             {ct.cols.map((c) => (
@@ -189,7 +221,7 @@ export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
         <tbody>
           {ct.rows.map((r, i) => (
             <tr key={r}>
-              <th className="sticky left-0 z-10 max-w-[160px] truncate whitespace-nowrap bg-white p-1 pr-2 text-left font-medium" title={r}>
+              <th className="sticky left-0 z-10 max-w-[160px] truncate whitespace-nowrap p-1 pr-2 text-left font-medium" style={{ background: 'var(--qd-surface)' }} title={r}>
                 {r}
               </th>
               {ct.cols.map((c, j) => {
