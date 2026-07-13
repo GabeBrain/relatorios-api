@@ -39,6 +39,9 @@
   --qd-scroll-thumb: #4a4a48;
   --qd-topbar-bg: #1B1E28;
   --qd-area-topbar-bg: #1B1E28;
+  --qd-tab-active: #F8D000;
+  --qd-tab-inactive: #d7dae6;
+  --qd-tab-inactive-hover: #ffffff;
   --qd-side-bg: #1B1E28;
   --qd-btn-bg: #2F2F2E;
   --qd-btn-hover: #3a3a38;
