@@ -5,19 +5,54 @@ import type { QuantiDataset } from './types';
 
 const cache = new Map<string, Promise<QuantiDataset>>();
 
+function toNumber(v: unknown): number | null {
+  if (v == null || v === '') return null;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (typeof v === 'string') {
+    // Aceita "12000", "12.000", "12000,50" etc.
+    const cleaned = v.trim().replace(/\s/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.');
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+/**
+ * Reconcilia campos que a extração da Base Unificada 2020 grava com nomes
+ * alternativos ou como string, para que os componentes do dashboard (KPIs,
+ * histograma, gráficos) continuem lendo pelas chaves canônicas.
+ */
+function normalizeRecords(ds: QuantiDataset): QuantiDataset {
+  const recs = (ds as any).records as any[] | undefined;
+  if (!Array.isArray(recs)) return ds;
+  for (const r of recs) {
+    if (r.idade == null && r.idade_numerica != null) {
+      const n = toNumber(r.idade_numerica);
+      if (n != null) r.idade = n;
+    } else if (typeof r.idade === 'string') {
+      r.idade = toNumber(r.idade);
+    }
+    if (typeof r.renda_valor_estimado === 'string') {
+      r.renda_valor_estimado = toNumber(r.renda_valor_estimado);
+    }
+  }
+  return ds;
+}
+
 function parseDataset(text: string, label: string): QuantiDataset {
+  const sanitize = (s: string) =>
+    s.replace(/(:|\[|,)\s*(NaN|Infinity|-Infinity)(?=\s*[,}\]])/g, '$1 null');
   try {
-    return JSON.parse(text) as QuantiDataset;
+    return normalizeRecords(JSON.parse(text) as QuantiDataset);
   } catch (originalError) {
-    const sanitized = text.replace(/(:|\[|,)\s*(NaN|Infinity|-Infinity)(?=\s*[,}\]])/g, '$1 null');
+    const sanitized = sanitize(text);
     if (sanitized === text) {
       throw new Error(
         `Dataset "${label}" inválido: ${(originalError as Error).message}`,
       );
     }
-
     try {
-      return JSON.parse(sanitized) as QuantiDataset;
+      return normalizeRecords(JSON.parse(sanitized) as QuantiDataset);
     } catch (sanitizedError) {
       throw new Error(
         `Dataset "${label}" inválido mesmo após normalização: ${(sanitizedError as Error).message}`,
