@@ -15,6 +15,7 @@ interface Props {
   className?: string;
   ufLabel?: string;
   cityLabel?: string;
+  cityContainerClassName?: string;
 }
 
 export function GeoApiScopeSelector({
