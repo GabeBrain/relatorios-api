@@ -158,21 +158,31 @@ export interface FieldMeta {
   cardinality: number;
 }
 
-const TECHNICAL_PATTERNS = /(^|_)(id|uuid|hash|_raw|timestamp|created_at|updated_at|lat|lng|lon|longitude|latitude)($|_)/i;
-const TECHNICAL_EXACT = new Set(['data_pesquisa', 'localidade']); // treated as technical/free-text for the cross explorer
+/** Fields never useful as a grouping/comparison axis. */
+const TECHNICAL_EXACT = new Set<string>([
+  // Row-level identifiers
+  'respondent_id', 'survey_id', 'Código', 'codigo', 'id', 'uuid',
+  // Coordinates
+  'lat', 'lng', 'latitude', 'longitude', 'Latitude', 'Longitude',
+  // Duplicate raw aliases — normalized versions are kept
+  'Cidade', 'Estado', 'idade_numerica', 'Data', 'Status',
+]);
+/** Suffixes / substrings that mark technical or free-text raw columns. */
+const TECHNICAL_PATTERNS = /(_original$|_texto_original$|_raw$|_hash$|(^|_)timestamp($|_)|created_at|updated_at)/i;
 
 function titleCase(s: string): string {
   return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /**
- * Scan the first N records and return the set of fields eligible for the
- * cross-analysis explorer. New columns are picked up automatically.
+ * Scan the records and return the full set of fields eligible for the
+ * cross-analysis explorer. Includes every column of the loaded dataset —
+ * only pure identifiers, coordinates and free-text raw columns are dropped.
  */
 export function detectFieldSchema(
   records: any[],
   labels: Record<string, string> = {},
-  sampleSize = 3000,
+  sampleSize = 5000,
 ): FieldMeta[] {
   if (!records.length) return [];
   const sample = records.slice(0, Math.min(records.length, sampleSize));
@@ -181,8 +191,8 @@ export function detectFieldSchema(
 
   const out: FieldMeta[] = [];
   for (const key of keys) {
-    if (TECHNICAL_PATTERNS.test(key)) continue;
     if (TECHNICAL_EXACT.has(key)) continue;
+    if (TECHNICAL_PATTERNS.test(key)) continue;
 
     const values = new Set<string>();
     let numericCount = 0;
@@ -192,8 +202,7 @@ export function detectFieldSchema(
       if (v == null || v === '') continue;
       nonNullCount++;
       if (typeof v === 'number' && Number.isFinite(v)) numericCount++;
-      values.add(String(v));
-      if (values.size > 800) break;
+      if (values.size < 5000) values.add(String(v));
     }
     if (!nonNullCount) continue;
 
@@ -201,13 +210,15 @@ export function detectFieldSchema(
     const numericRatio = numericCount / Math.max(1, nonNullCount);
     const uniqueRatio = cardinality / Math.max(1, nonNullCount);
 
+    // Truly free-text open answers: nearly every response distinct AND cardinality huge.
+    if (uniqueRatio > 0.9 && cardinality > 500) continue;
+
     let kind: FieldKind;
     if (numericRatio > 0.9 && cardinality > 30) kind = 'numeric';
-    else if (cardinality > 500 && uniqueRatio > 0.85) continue; // free text
-    else if (cardinality > 200 && numericRatio < 0.5) continue; // long tail label
     else kind = 'categorical';
 
-    out.push({ key, label: labels[key] ?? titleCase(key), kind, cardinality });
+    const label = labels[key] && labels[key] !== key ? labels[key] : titleCase(key);
+    out.push({ key, label, kind, cardinality });
   }
 
   // Stable, human-friendly order: categorical first, then alphabetical by label.
