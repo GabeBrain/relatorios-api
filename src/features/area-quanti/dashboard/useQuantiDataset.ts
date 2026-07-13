@@ -1,22 +1,29 @@
 import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { DatasetRef } from './datasets';
 import type { QuantiDataset } from './types';
 
 const cache = new Map<string, Promise<QuantiDataset>>();
 
-async function fetchDataset(url: string): Promise<QuantiDataset> {
-  if (!cache.has(url)) {
+async function fetchDataset(ref: DatasetRef): Promise<QuantiDataset> {
+  const key = `${ref.bucket}/${ref.path}`;
+  if (!cache.has(key)) {
     cache.set(
-      url,
-      fetch(url).then((r) => {
-        if (!r.ok) throw new Error(`Falha ao carregar dataset (${r.status})`);
-        return r.json();
-      }),
+      key,
+      (async () => {
+        const { data, error } = await supabase.storage.from(ref.bucket).download(ref.path);
+        if (error || !data) {
+          throw new Error(`Falha ao carregar dataset "${ref.label}": ${error?.message ?? 'sem dados'}`);
+        }
+        const text = await data.text();
+        return JSON.parse(text) as QuantiDataset;
+      })(),
     );
   }
-  return cache.get(url)!;
+  return cache.get(key)!;
 }
 
-export function useQuantiDataset(url: string) {
+export function useQuantiDataset(ref: DatasetRef) {
   const [data, setData] = useState<QuantiDataset | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,12 +32,12 @@ export function useQuantiDataset(url: string) {
     let alive = true;
     setLoading(true);
     setError(null);
-    fetchDataset(url)
+    fetchDataset(ref)
       .then((d) => { if (alive) setData(d); })
       .catch((e) => { if (alive) setError(e); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
-  }, [url]);
+  }, [ref.bucket, ref.path]);
 
   return { data, error, loading };
 }
