@@ -201,7 +201,7 @@ export function QuantiDashboard() {
             {/* Análise Cruzada */}
             <section className="space-y-2">
               <h2 className="qd-section-title">Análise Cruzada (pivot dinâmico)</h2>
-              <CrossAnalysis rows={filtered} />
+              <CrossAnalysis rows={filtered} questions={data.questions} />
             </section>
 
             <div className="pt-2 text-[11px] text-[var(--qd-text-muted)]">

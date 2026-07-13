@@ -4,6 +4,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Legend,
   Pie,
   PieChart,
@@ -70,8 +71,9 @@ function compatibleViews(rowField: string, colField: string | null, metric: Univ
   return views;
 }
 
-export function CrossAnalysis({ rows }: { rows: QuantiRecord[] }) {
-  const schema = useMemo(() => detectFieldSchema(rows, FIELD_LABELS as any), [rows]);
+export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; questions?: Record<string, string> }) {
+  const labels = useMemo(() => ({ ...(FIELD_LABELS as Record<string, string>), ...(questions ?? {}) }), [questions]);
+  const schema = useMemo(() => detectFieldSchema(rows, labels), [rows, labels]);
   const catFields = schema.filter((f) => f.kind === 'categorical');
   const numFields = schema.filter((f) => f.kind === 'numeric');
 
@@ -362,7 +364,19 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
               if (colField) toggle(colField as any, k);
             }}
             cursor="pointer"
-          />
+          >
+            {!stackId && (
+              <LabelList
+                dataKey={k}
+                position="insideLeft"
+                offset={8}
+                fill="#1f2a12"
+                fontSize={11}
+                fontWeight={600}
+                formatter={(v: any) => (v ? fmt(Number(v), metric) : '')}
+              />
+            )}
+          </Bar>
         ))}
       </BarChart>
     </ResponsiveContainer>

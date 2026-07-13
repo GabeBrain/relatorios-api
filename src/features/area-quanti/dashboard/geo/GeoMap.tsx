@@ -8,15 +8,18 @@ import { municipalitiesUrl, strip, toUF, ufInfo, UF_LIST } from './geo-utils';
 
 const STATES_URL = '/geo/br-states.json';
 
-// Brain green ramp
-const RAMP = ['#f6f8f1', '#e0ecc4', '#c4dc95', '#a3c96b', '#71984a', '#5B7537', '#3d5024'];
-const YELLOW_HL = '#F8D000';
-const STROKE_ACTIVE = '#3d5024';
+// Yellow heat ramp for choropleth (light → dark yellow/gold → deep amber)
+const RAMP = ['#fff8d6', '#fdec9c', '#f9d451', '#F8D000', '#d9a900', '#a87c00', '#6e5100'];
+const NO_DATA = '#c8c8c8';     // darker gray for UFs/municipalities with 0 records
+const YELLOW_HL = '#5B7537';   // selected → Brain green so it stands out on yellow
+const STROKE = '#4d4d4d';      // visible state/city borders
+const STROKE_ACTIVE = '#1f2a12';
 
 function color(v: number, max: number): string {
-  if (!v || !max) return '#f1f5f9';
+  if (!v || !max) return NO_DATA;
   const t = Math.min(1, v / max);
-  const idx = Math.min(RAMP.length - 1, Math.floor(t * RAMP.length));
+  // Floor at ramp[1] so states with a few records are already clearly above "no data"
+  const idx = Math.max(1, Math.min(RAMP.length - 1, Math.floor(t * RAMP.length)));
   return RAMP[idx];
 }
 
@@ -183,15 +186,15 @@ function BrazilLevel({
                   key={g.rsmKey}
                   geography={g}
                   fill={active ? YELLOW_HL : color(n, max)}
-                  stroke={active ? STROKE_ACTIVE : '#ffffff'}
-                  strokeWidth={active ? 1.6 : 0.5}
+                  stroke={active ? STROKE_ACTIVE : STROKE}
+                  strokeWidth={active ? 1.8 : 0.9}
                   onClick={() => onClickUF(uf)}
                   onMouseEnter={(e) => setHover({ uf, x: e.clientX, y: e.clientY })}
                   onMouseMove={(e) => setHover({ uf, x: e.clientX, y: e.clientY })}
                   onMouseLeave={() => setHover(null)}
                   style={{
                     default: { outline: 'none', cursor: 'pointer', transition: 'fill .15s' },
-                    hover: { outline: 'none', fill: active ? YELLOW_HL : '#8fb85f', cursor: 'pointer' },
+                    hover: { outline: 'none', fill: active ? YELLOW_HL : '#d9a900', cursor: 'pointer' },
                     pressed: { outline: 'none' },
                   }}
                 />
@@ -272,8 +275,8 @@ function UFLevel({
               key={i}
               d={d}
               fill={active ? YELLOW_HL : color(n, max)}
-              stroke={active ? STROKE_ACTIVE : '#ffffff'}
-              strokeWidth={active ? 1.4 : 0.35}
+              stroke={active ? STROKE_ACTIVE : STROKE}
+              strokeWidth={active ? 1.6 : 0.6}
               style={{ cursor: entry ? 'pointer' : 'default', transition: 'fill .12s' }}
               onClick={() => entry && onClickCity(entry.raw)}
               onMouseEnter={(e) => setHover({ name, x: e.clientX, y: e.clientY })}
@@ -314,9 +317,13 @@ function Tooltip({ x, y, children }: { x: number; y: number; children: React.Rea
 function Legend({ max, label }: { max: number; label: string }) {
   return (
     <div className="mt-2 flex items-center gap-2 text-[10px] text-[var(--qd-text-muted)]">
-      <span>0</span>
+      <div className="flex items-center gap-1">
+        <span className="inline-block h-2 w-3 rounded-sm border border-slate-300" style={{ background: NO_DATA }} />
+        <span>sem dados</span>
+      </div>
+      <span className="ml-2">0</span>
       <div className="flex h-2 flex-1 overflow-hidden rounded">
-        {RAMP.map((c) => <div key={c} className="flex-1" style={{ background: c }} />)}
+        {RAMP.slice(1).map((c) => <div key={c} className="flex-1" style={{ background: c }} />)}
       </div>
       <span>{max.toLocaleString('pt-BR')} {label}</span>
     </div>

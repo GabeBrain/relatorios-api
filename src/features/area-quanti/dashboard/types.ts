@@ -25,6 +25,8 @@ export interface QuantiDataset {
   label: string;
   count: number;
   generated_at: string;
+  /** Optional variable → question text map (row 2 of the source spreadsheet). */
+  questions?: Record<string, string>;
   records: QuantiRecord[];
 }
 
