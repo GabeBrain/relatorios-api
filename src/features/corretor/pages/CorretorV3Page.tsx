@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
-  Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText,
+  Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -322,6 +322,7 @@ export default function CorretorV3Page() {
   const [dragging, setDragging] = useState(false);
   const [workspaceTab, setWorkspaceTab] = useState<'completude' | 'problemas' | 'slides'>('completude');
   const [confidenceFilter, setConfidenceFilter] = useState<Confidence[]>([1, 2, 3]);
+  const [triaging, setTriaging] = useState(false);
   const newRef = useRef<HTMLInputElement>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -623,7 +624,13 @@ export default function CorretorV3Page() {
       if (!grouped.has(item.finding.type)) grouped.set(item.finding.type, []);
       grouped.get(item.finding.type)!.push(item);
     }
-    return { pend, total: items.length, slides: [...bySlide.entries()], relational: [...byType.entries()], confidence, completude, grouped: [...grouped.entries()] };
+    // fila de triagem: todos os pendentes por confiança (1→3), depois por slide
+    const triageQueue = active
+      .filter((item) => item.status === 'pendente')
+      .sort((a, b) =>
+        confidenceOf(a.finding, a.origem) - confidenceOf(b.finding, b.origem) ||
+        slideNumOf(a.finding) - slideNumOf(b.finding));
+    return { pend, total: items.length, slides: [...bySlide.entries()], relational: [...byType.entries()], confidence, completude, grouped: [...grouped.entries()], triageQueue };
   }, [items]);
 
   const progressPct = wl.total > 0 ? Math.round(((wl.total - wl.pend) / wl.total) * 100) : 0;
@@ -777,10 +784,20 @@ export default function CorretorV3Page() {
           </span>
         </div>
         <Progress value={progressPct} className="h-1.5" />
-        <div className="flex gap-1 pt-0.5">
+        <div className="flex gap-1 pt-0.5 items-center">
           {([
             ['completude', 'Completude'], ['problemas', 'Problemas'], ['slides', 'Por slide'],
           ] as const).map(([tab, label]) => <button key={tab} onClick={() => setWorkspaceTab(tab)} className={cn('text-xs rounded-md px-3 py-1.5 border', workspaceTab === tab ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50')}>{label}</button>)}
+          <div className="flex-1" />
+          {wl.pend > 0 && (
+            <button
+              onClick={() => setTriaging(true)}
+              className="text-xs rounded-md px-3 py-1.5 border border-primary/40 text-primary hover:bg-primary/5 inline-flex items-center gap-1.5"
+              title="Passar pelos pendentes rapidamente com o teclado"
+            >
+              <Zap className="w-3.5 h-3.5" /> Triar {wl.pend}
+            </button>
+          )}
         </div>
       </div>
 
@@ -856,6 +873,16 @@ export default function CorretorV3Page() {
           estimate={budgetPrompt.estimate}
           onConfirm={budgetPrompt.run}
           onCancel={() => setBudgetPrompt(null)}
+        />
+      )}
+
+      {triaging && wl.triageQueue.length > 0 && (
+        <TriageOverlay
+          queue={wl.triageQueue}
+          onStatus={handleStatus}
+          onVerdict={handleVerdict}
+          groupOf={(type) => items.filter((i) => i.status === 'pendente' && i.finding.type === type)}
+          onClose={() => { setTriaging(false); setWorkspaceTab('slides'); setConfidenceFilter([1, 2, 3]); }}
         />
       )}
     </div>
@@ -995,5 +1022,132 @@ function WlHead({ title, count, hint }: { title: string; count: number; hint?: s
       {hint && <span className="text-[10px] text-muted-foreground italic">· {hint}</span>}
       <div className="flex-1 border-t border-border" />
     </div>
+  );
+}
+
+// ─── WS-3: modo triage por teclado ────────────────────────────────────────────
+// Um card por vez, decisão rápida com o teclado. A fila é congelada na abertura para
+// não reembaralhar a cada decisão; o resumo aparece ao fim.
+
+function TriageOverlay({ queue, onStatus, onVerdict, groupOf, onClose }: {
+  queue: FindingV3[];
+  onStatus: (ruleId: string, status: FindingStatus) => void;
+  onVerdict: (ruleId: string, verdict: 'bug' | 'fp') => void;
+  groupOf: (type: string) => FindingV3[];
+  onClose: () => void;
+}) {
+  // A fila nasce congelada. Aceitar grupo remove as ocorrências futuras apenas
+  // desta sessão; os achados continuam pendentes para a correção de verdade.
+  const [frozen, setFrozen] = useState(queue);
+  const [total] = useState(queue.length);
+  const [i, setI] = useState(0);
+  const [tally, setTally] = useState({ aceitos: 0, corrigidos: 0, fp: 0, ignorados: 0 });
+
+  const advance = useCallback(() => setI((n) => n + 1), []);
+  const item = frozen[i];
+
+  const act = useCallback((kind: 'aceitar' | 'corrigido' | 'fp' | 'ignorar' | 'grupo') => {
+    if (!item) return;
+    if (kind === 'aceitar') { setTally((t) => ({ ...t, aceitos: t.aceitos + 1 })); advance(); return; }
+    if (kind === 'corrigido') { onStatus(item.ruleId, 'corrigido'); setTally((t) => ({ ...t, corrigidos: t.corrigidos + 1 })); advance(); return; }
+    if (kind === 'ignorar') { onStatus(item.ruleId, 'ignorado'); setTally((t) => ({ ...t, ignorados: t.ignorados + 1 })); advance(); return; }
+    if (kind === 'fp') { onVerdict(item.ruleId, 'fp'); setTally((t) => ({ ...t, fp: t.fp + 1 })); advance(); return; }
+    if (kind === 'grupo') {
+      const remaining = frozen.slice(i).filter((candidate) => candidate.finding.type === item.finding.type).length;
+      setTally((t) => ({ ...t, aceitos: t.aceitos + remaining }));
+      setFrozen((current) => current.filter((candidate, index) => index <= i || candidate.finding.type !== item.finding.type));
+      advance();
+    }
+  }, [item, advance, onStatus, onVerdict, groupOf, frozen, i]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable)) return;
+      switch (e.key) {
+        case 'Enter': case 'ArrowRight': e.preventDefault(); act('aceitar'); break;
+        case 'c': case 'C': act('corrigido'); break;
+        case 'f': case 'F': act('fp'); break;
+        case 'i': case 'I': act('ignorar'); break;
+        case 'g': case 'G': act('grupo'); break;
+        case 'ArrowLeft': setI((n) => Math.max(0, n - 1)); break;
+        case 'Escape': onClose(); break;
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [act, onClose]);
+
+  const done = i >= frozen.length;
+  const groupSize = item ? groupOf(item.finding.type).length : 0;
+  const conf = item ? confidenceOf(item.finding, item.origem) : 1;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur flex flex-col">
+      <div className="border-b bg-card px-6 py-3 flex items-center gap-4">
+        <Zap className="w-4 h-4 text-primary" />
+        <h2 className="text-sm font-semibold">Triagem rápida</h2>
+        <span className="text-xs text-muted-foreground">{done ? 'concluída' : `${Math.min(tally.aceitos + tally.corrigidos + tally.fp + tally.ignorados + 1, total)} de ${total}`}</span>
+        <div className="flex-1"><Progress value={total ? ((tally.aceitos + tally.corrigidos + tally.fp + tally.ignorados) / total) * 100 : 100} className="h-1.5 max-w-md" /></div>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1"><X className="w-4 h-4" /></button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-6 py-8">
+          {done ? (
+            <div className="text-center space-y-4 py-12">
+              <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+              <div>
+                <p className="text-lg font-semibold">Triagem concluída</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {tally.aceitos} aceito(s) · {tally.corrigidos} corrigido(s) · {tally.fp} FP · {tally.ignorados} ignorado(s)
+                </p>
+              </div>
+              <button onClick={onClose} className="text-sm rounded-md px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90">Voltar à worklist</button>
+            </div>
+          ) : item ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <span className={cn('text-[11px] rounded px-2 py-0.5 border font-medium', CONFIDENCE_META[conf].className)}>{CONFIDENCE_META[conf].icon} {CONFIDENCE_META[conf].label}</span>
+                <span className="text-xs font-medium">{errorLabel(item.finding.type as ErrorType)}</span>
+                {item.finding.slideRef.split('×').map((ref) => <span key={ref} className="text-[10px] font-mono rounded border border-border px-1 text-muted-foreground">{ref.trim()}</span>)}
+              </div>
+              <div className="rounded-lg border bg-card p-4 space-y-3">
+                <p className="text-sm font-medium">{item.finding.title}</p>
+                <p className="text-xs text-muted-foreground">{item.finding.detail}</p>
+                {item.finding.evidenceImage && (
+                  <a href={item.finding.evidenceImage} target="_blank" rel="noreferrer" className="block">
+                    <img src={item.finding.evidenceImage} alt={`Evidência do ${item.finding.slideRef}`} className="max-h-64 rounded border border-border object-contain" />
+                  </a>
+                )}
+                {item.finding.viz && <VizSwitch finding={item.finding} />}
+              </div>
+              {groupSize > 1 && (
+                <p className="text-[11px] text-amber-600">
+                  Há {groupSize} itens do tipo “{errorLabel(item.finding.type as ErrorType)}”. <kbd className="rounded border px-1">G</kbd> decide todos de uma vez.
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <TriageKey k="Enter" label="Aceitar" onClick={() => act('aceitar')} />
+                <TriageKey k="C" label="Já corrigi" onClick={() => act('corrigido')} />
+                <TriageKey k="F" label="Não é erro" onClick={() => act('fp')} />
+                <TriageKey k="I" label="Ignorar" onClick={() => act('ignorar')} />
+                {groupSize > 1 && <TriageKey k="G" label={`Aceitar grupo (${groupSize})`} onClick={() => act('grupo')} />}
+                <div className="flex-1" />
+                <button onClick={() => setI((n) => Math.max(0, n - 1))} disabled={i === 0} className="text-[11px] text-muted-foreground hover:text-foreground disabled:opacity-40">← anterior</button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TriageKey({ k, label, onClick }: { k: string; label: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="inline-flex items-center gap-1.5 text-xs rounded-md border border-border px-3 py-1.5 hover:border-primary/50">
+      <kbd className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono">{k}</kbd> {label}
+    </button>
   );
 }

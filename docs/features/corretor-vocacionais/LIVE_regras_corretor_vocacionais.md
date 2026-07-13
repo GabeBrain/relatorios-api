@@ -16,6 +16,16 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.37 — 2026-07-13 — Corretor v5 WS-3: triagem por teclado (RUNTIME)
+
+A worklist ganhou o modo **Triagem rápida**, com uma fila congelada de achados pendentes
+ordenada por confiança e slide. O analista percorre um card por vez e decide por teclado ou
+mouse: `Enter`/`→` aceita para esta sessão, `C` marca como corrigido, `F` registra falso
+positivo, `I` ignora, `G` aceita as ocorrências restantes do mesmo tipo e `Esc` encerra.
+Campos editáveis não capturam esses atalhos. O encerramento apresenta o resumo das decisões e
+retorna à aba **Por slide**. As decisões persistentes continuam usando `status`/`verdict` de
+`findings_v3`; “aceitar” é deliberadamente local e não altera o estado do achado.
+
 ## Versão 0.36 — 2026-07-13 — Corretor v5 WS-2: relatório de entrega (attestation, RUNTIME)
 
 Os findings `ok:true` (tabelas que fecham, cruzamentos consistentes) eram descartados — o
