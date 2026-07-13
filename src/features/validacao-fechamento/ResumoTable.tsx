@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 import { intFmt } from '@/lib/format';
 import type { Granularity, MetricKey, ResumoResult } from './aggregate';
 import { METRICS, varPct } from './aggregate';
