@@ -60,7 +60,8 @@ export default function DashboardGeobrain() {
   const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoMedioStd = useMemo(() => precoMedioPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
-  const oppMap = useMemo(() => computeOpportunityMap(filtered, filtersWithType), [filtered, filtersWithType]);
+  const oppMap = useMemo(() => computeOpportunityMap(filtered, filtersWithType, 'neighborhood'), [filtered, filtersWithType]);
+  const oppMapType = useMemo(() => computeOpportunityMap(filtered, filtersWithType, 'building_type'), [filtered, filtersWithType]);
   const ipc = useMemo(() => computeIpcByStandard(allBuildings, filtered, filtersWithType, granularity), [allBuildings, filtered, filtersWithType, granularity]);
 
   return (
@@ -82,6 +83,14 @@ export default function DashboardGeobrain() {
         granularity={granularity}
         onGranularityChange={setGranularity}
         onOpenSidebar={() => setSidebarOpen(true)}
+      />
+
+      <ActiveFiltersBar
+        scope={scope}
+        buildingType={buildingType}
+        filters={filters}
+        options={options}
+        onReset={() => setFilters(EMPTY_FILTERS)}
       />
 
       <main className="mx-auto max-w-[1600px] space-y-4 p-4">
@@ -120,14 +129,14 @@ export default function DashboardGeobrain() {
         <KpiRow k={kpis} />
 
         {/* Temporal charts */}
-        <EvolucaoChart data={series} />
-        <IvvChart data={series} />
-        <VgvChart data={series} />
+        <EvolucaoChart data={series} granularity={granularity} />
+        <IvvChart data={series} granularity={granularity} />
+        <VgvChart data={series} granularity={granularity} />
 
         {/* Combos */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <OfertaComboChart title="Oferta final por dormitórios" data={ofertaDorm} />
-          <OfertaComboChart title="Oferta final por padrão" data={ofertaPadrao} />
+          <OfertaComboChart title="Estoque por dormitórios" data={ofertaDorm} />
+          <OfertaComboChart title="Estoque por padrão" data={ofertaPadrao} />
         </div>
 
         {/* Rankings */}
@@ -144,10 +153,13 @@ export default function DashboardGeobrain() {
         </div>
 
         {/* IPC */}
-        <IpcChart series={ipc.series} standards={ipc.standards} />
+        <IpcChart series={ipc.series} standards={ipc.standards} granularity={granularity} />
 
-        {/* Opportunity heatmap */}
-        <OpportunityMap matrix={oppMap} />
+        {/* Opportunity heatmaps — Bairro + Tipo */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <OpportunityMap matrix={oppMap} title="Mapa de oportunidades — Bairro" />
+          <OpportunityMap matrix={oppMapType} title="Mapa de oportunidades — Tipo" />
+        </div>
 
         <footer className="flex items-center gap-2 pt-4 text-[9px] text-[hsl(var(--dg-muted))]">
           <BarChart2 className="h-3 w-3" />
