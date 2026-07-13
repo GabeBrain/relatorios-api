@@ -3,6 +3,7 @@ import {
   Bar,
   BarChart,
   Cell,
+  LabelList,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -16,7 +17,21 @@ import type { CategoricalField, QuantiRecord } from './types';
 import { countBy, histogram, orderedValues, crosstab, type Crosstab } from './aggregate';
 import { useQuantiStore } from './store';
 
-const PALETTE = ['#1e3a8a', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#64748b', '#94a3b8', '#0ea5e9', '#38bdf8'];
+// Brain palette — tons de verde e amarelo
+const PALETTE = [
+  '#5B7537', // brain verde primário
+  '#71984a', // verde médio
+  '#8fb85f', // verde claro
+  '#b5cf7d', // verde suave
+  '#d7e3a8', // verde muito claro
+  '#F8D000', // amarelo destaque
+  '#f4d83f', // amarelo médio
+  '#ffe173', // amarelo claro
+  '#c7a300', // mostarda
+  '#6e6e6e', // neutro
+];
+const HEATMAP_RGB = '91, 117, 55'; // #5B7537
+const ACTIVE_STROKE = '#3d5024';
 
 interface CardProps { title: string; subtitle?: string; children: React.ReactNode; className?: string; action?: React.ReactNode }
 export function ChartCard({ title, subtitle, children, className, action }: CardProps) {
@@ -58,7 +73,7 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
               <Cell
                 key={d.key}
                 fill={PALETTE[i % PALETTE.length]}
-                stroke={active ? '#0f172a' : '#fff'}
+                stroke={active ? ACTIVE_STROKE : '#fff'}
                 strokeWidth={active ? 2 : 1}
                 style={{ cursor: 'pointer' }}
               />
@@ -77,7 +92,7 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
   );
 }
 
-export function BarField({ rows, field, height = 260, topN }: FieldChartProps) {
+export function BarField({ rows, field, height, topN }: FieldChartProps) {
   const toggle = useQuantiStore((s) => s.toggleValue);
   const filters = useQuantiStore((s) => s.filters);
   const data = useMemo(() => {
@@ -89,20 +104,42 @@ export function BarField({ rows, field, height = 260, topN }: FieldChartProps) {
     return out;
   }, [rows, field, topN]);
 
+  const total = rows.length || 1;
+  // Larger bars: ~36px per row, min 220
+  const h = height ?? Math.max(220, data.length * 36 + 24);
+  const maxLabel = Math.max(0, ...data.map((d) => d.key.length));
+  const yWidth = Math.min(180, Math.max(80, maxLabel * 6.2));
+
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} margin={{ top: 6, right: 12, left: 4, bottom: 40 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-        <XAxis dataKey="key" tick={{ fontSize: 10 }} interval={0} angle={-30} textAnchor="end" height={50} />
-        <YAxis tick={{ fontSize: 10 }} />
+    <ResponsiveContainer width="100%" height={h}>
+      <BarChart data={data} layout="vertical" margin={{ top: 6, right: 56, left: 6, bottom: 6 }} barCategoryGap={6}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+        <XAxis type="number" tick={{ fontSize: 10 }} />
+        <YAxis dataKey="key" type="category" tick={{ fontSize: 11 }} width={yWidth} interval={0} />
         <Tooltip
-          formatter={(v: number) => [`${v.toLocaleString('pt-BR')} (${((v / rows.length) * 100).toFixed(1)}%)`, 'Entrevistas']}
+          cursor={{ fill: 'rgba(91,117,55,0.08)' }}
+          formatter={(v: number) => [`${v.toLocaleString('pt-BR')} (${((v / total) * 100).toFixed(1)}%)`, 'Entrevistas']}
         />
-        <Bar dataKey="count" onClick={(d: any) => toggle(field, d.key)} cursor="pointer">
+        <Bar dataKey="count" onClick={(d: any) => toggle(field, d.key)} cursor="pointer" radius={[0, 4, 4, 0]}>
           {data.map((d, i) => {
             const active = filters[field]?.includes(d.key);
-            return <Cell key={d.key} fill={active ? '#0f172a' : PALETTE[i % PALETTE.length]} />;
+            return (
+              <Cell
+                key={d.key}
+                fill={PALETTE[i % PALETTE.length]}
+                stroke={active ? ACTIVE_STROKE : 'transparent'}
+                strokeWidth={active ? 2 : 0}
+              />
+            );
           })}
+          <LabelList
+            dataKey="count"
+            position="right"
+            style={{ fontSize: 11, fill: '#3d5024', fontWeight: 600 }}
+            formatter={(v: number) =>
+              `${v.toLocaleString('pt-BR')} (${((v / total) * 100).toFixed(1)}%)`
+            }
+          />
         </Bar>
       </BarChart>
     </ResponsiveContainer>
@@ -123,7 +160,7 @@ export function HistogramChart({ rows, field, bins = 20, height = 260 }: HistPro
           formatter={(v: number) => [`${v.toLocaleString('pt-BR')}`, 'Entrevistas']}
           labelFormatter={(l) => (isMoney ? `R$ ${l}` : `${l}`)}
         />
-        <Bar dataKey="count" fill="#3b82f6" />
+        <Bar dataKey="count" fill={PALETTE[0]} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -163,7 +200,7 @@ export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
                     key={c}
                     className="qd-hm-cell whitespace-nowrap p-1 text-center"
                     style={{
-                      background: `rgba(37, 99, 235, ${0.08 + alpha * 0.72})`,
+                      background: `rgba(${HEATMAP_RGB}, ${0.08 + alpha * 0.72})`,
                       color: alpha > 0.55 ? '#fff' : '#0f172a',
                       minWidth: 60,
                     }}

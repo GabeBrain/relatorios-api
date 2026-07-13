@@ -23,7 +23,7 @@ function List({ title, data, field, total }: { title: string; data: { key: strin
             >
               <span className="w-32 truncate text-xs font-medium" title={d.key}>{d.key}</span>
               <div className="relative h-4 flex-1 overflow-hidden rounded bg-slate-100">
-                <div className="absolute inset-y-0 left-0 rounded" style={{ width: `${(d.count / max) * 100}%`, background: '#3b82f6' }} />
+                <div className="absolute inset-y-0 left-0 rounded" style={{ width: `${(d.count / max) * 100}%`, background: '#5B7537' }} />
               </div>
               <span className="w-24 text-right text-[11px] tabular-nums text-[var(--qd-text-muted)]">
                 {d.count.toLocaleString('pt-BR')} · {pct.toFixed(1)}%
