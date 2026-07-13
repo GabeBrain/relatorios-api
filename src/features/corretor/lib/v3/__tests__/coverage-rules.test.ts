@@ -48,8 +48,8 @@ describe('Coverage 90 — regras puras finais', () => {
   it('não compara total de participação como total de população', () => {
     const study = ir([slide(10, 'SOCIO', 'População por renda'), slide(11, 'SOCIO', 'População por idade')]);
     const refs = [
-      { slide: 10, secao: 'SOCIO', titulo: 'População', sha1: 'a', table: { title: 'População', columns: ['Faixa', 'População', '%'], colKinds: ['label', 'count', 'share'], rows: [['A', 1000, 50], ['B', 1000, 50]], totals: ['Total', 2000, 100] } },
-      { slide: 11, secao: 'SOCIO', titulo: 'População', sha1: 'b', table: { title: 'População', columns: ['Faixa', 'População', '%'], colKinds: ['label', 'count', 'share'], rows: [['A', 1000, 50], ['B', 1000, 50]], totals: ['Total', 2000, 100] } },
+      { slide: 10, secao: 'SOCIO', titulo: 'População', sha1: 'a', table: { title: 'População', columns: ['Faixa', 'População', '%'], colKinds: ['label', 'count', 'share'] as const, rows: [['A', 1000, 50], ['B', 1000, 50]], totals: ['Total', 2000, 100] } },
+      { slide: 11, secao: 'SOCIO', titulo: 'População', sha1: 'b', table: { title: 'População', columns: ['Faixa', 'População', '%'], colKinds: ['label', 'count', 'share'] as const, rows: [['A', 1000, 50], ['B', 1000, 50]], totals: ['Total', 2000, 100] } },
     ];
     expect(crossTableFindings(study, refs).filter((f) => f.type === 'CROSS_TABLE_MISMATCH')).toEqual([]);
   });
