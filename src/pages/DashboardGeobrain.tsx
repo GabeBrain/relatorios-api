@@ -75,7 +75,7 @@ export default function DashboardGeobrain() {
   const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoMedioStd = useMemo(() => precoMedioPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const oppMap = useMemo(() => computeOpportunityMap(filtered, filtersWithType, 'neighborhood'), [filtered, filtersWithType]);
-  const oppMapStd = useMemo(() => computeOpportunityMap(filtered, filtersWithType, 'standard'), [filtered, filtersWithType]);
+  const oppMapStd = useMemo(() => computeOpportunityMap(filtered, filtersWithType, { rowBy: 'neighborhood', colBy: 'standard' }), [filtered, filtersWithType]);
   const ipc = useMemo(() => computeIpcByStandard(allBuildings, filtered, filtersWithType, granularity), [allBuildings, filtered, filtersWithType, granularity]);
 
   const infoPrecoMedio = (

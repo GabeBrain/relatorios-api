@@ -59,10 +59,9 @@ export function OpportunityMap({ matrix, title = 'Mapa de oportunidades', subtit
             {filtered.map((nb) => (
               <tr key={nb}>
                 <td>{nb}</td>
-                {matrix.cols.map((_, i) => {
-                  const colKey = ['1', '2', '3', '4+'][i];
-                  const v = matrix.data[nb]?.[colKey] ?? 0;
-                  return <td key={colKey} className={heatClass(v)}>{pctRaw(v * 100, 1)}</td>;
+                {matrix.cols.map((c) => {
+                  const v = matrix.data[nb]?.[c] ?? 0;
+                  return <td key={c} className={heatClass(v)}>{pctRaw(v * 100, 1)}</td>;
                 })}
               </tr>
             ))}
