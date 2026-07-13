@@ -75,7 +75,7 @@ export function GeoApiScopeSelector({
         </Select>
       </div>
 
-      <div className="min-w-[200px] flex-1 space-y-1.5">
+      <div className={cn('min-w-[200px] flex-1 space-y-1.5', cityContainerClassName)}>
         <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{cityLabel}</label>
         <Popover open={cityOpen} onOpenChange={setCityOpen}>
           <PopoverTrigger asChild>
