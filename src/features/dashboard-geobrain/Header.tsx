@@ -2,7 +2,7 @@ import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
 import type { GeoScope } from '@/features/shared/geo-api-scope-engine';
 import type { Granularity } from './types';
 
-const BUILDING_TYPES = ['Comercial', 'Horizontal', 'Vertical', 'Hotel'] as const;
+const BUILDING_TYPES = ['Vertical', 'Horizontal', 'Comercial'] as const;
 export type BuildingType = typeof BUILDING_TYPES[number];
 
 const GRANS: { value: Granularity; label: string }[] = [
@@ -31,12 +31,13 @@ export function Header({
   onOpenSidebar,
 }: Props) {
   return (
-    <header className="flex flex-wrap items-center gap-3 border-b border-[hsl(var(--dg-border))] bg-[hsl(var(--dg-card))] px-4 py-3">
+    <header className="dg-header flex flex-wrap items-center gap-3 border-b border-[hsl(var(--dg-border))] bg-[hsl(var(--dg-card))] px-4 py-3">
       <button
         type="button"
         onClick={onOpenSidebar}
-        className="dg-select flex items-center gap-1 font-semibold"
+        className="dg-chip"
         aria-label="Abrir filtros"
+        data-active="false"
       >
         ☰ Filtros
       </button>
