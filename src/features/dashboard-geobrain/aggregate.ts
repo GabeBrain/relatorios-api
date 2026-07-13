@@ -373,7 +373,7 @@ export interface OpportunityMatrix {
   rowLabel: string;
 }
 
-export type OpportunityGroupBy = 'neighborhood' | 'building_type';
+export type OpportunityGroupBy = 'neighborhood' | 'building_type' | 'standard';
 
 export function computeOpportunityMap(
   buildings: Building[],
@@ -389,7 +389,11 @@ export function computeOpportunityMap(
     return inner;
   };
   const latest = latestPeriodInScope(buildings, f);
-  const keyFn = (b: Building) => (groupBy === 'building_type' ? b.building_type : b.neighborhood);
+  const keyFn = (b: Building) => {
+    if (groupBy === 'building_type') return b.building_type;
+    if (groupBy === 'standard') return b.standard || 'Sem classificação';
+    return b.neighborhood;
+  };
   if (latest) {
     for (const b of buildings) {
       const row = keyFn(b);
@@ -414,11 +418,12 @@ export function computeOpportunityMap(
       data[r][col] = e + v > 0 ? v / (e + v) : 0;
     }
   }
+  const rowLabel = groupBy === 'building_type' ? 'Tipo' : groupBy === 'standard' ? 'Padrão' : 'Bairro';
   return {
     rows,
     cols: colKeys.map((c) => (c === '4+' ? '4 dorms' : c === '1' ? '1 dorm' : `${c} dorms`)),
     data,
-    rowLabel: groupBy === 'building_type' ? 'Tipo' : 'Bairro',
+    rowLabel,
   };
 }
 
