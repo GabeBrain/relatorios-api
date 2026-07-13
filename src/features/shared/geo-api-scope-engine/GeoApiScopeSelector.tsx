@@ -25,6 +25,7 @@ export function GeoApiScopeSelector({
   className,
   ufLabel = 'UF',
   cityLabel = 'Município',
+  cityContainerClassName,
 }: Props) {
   const {
     availableUfs, availableCities, setUf, setCity,
