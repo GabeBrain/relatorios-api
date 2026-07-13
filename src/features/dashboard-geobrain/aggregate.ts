@@ -373,14 +373,39 @@ export interface OpportunityMatrix {
   rowLabel: string;
 }
 
-export type OpportunityGroupBy = 'neighborhood' | 'building_type' | 'standard';
+export type OpportunityRowBy = 'neighborhood' | 'building_type' | 'standard';
+export type OpportunityColBy = 'bedroom' | 'standard';
+export type OpportunityGroupBy = OpportunityRowBy;
+
+interface OpportunityOptions {
+  rowBy?: OpportunityRowBy;
+  colBy?: OpportunityColBy;
+}
+
+const ROW_LABEL: Record<OpportunityRowBy, string> = {
+  neighborhood: 'Bairro',
+  building_type: 'Tipo',
+  standard: 'Padrão',
+};
 
 export function computeOpportunityMap(
   buildings: Building[],
   f: Filters,
-  groupBy: OpportunityGroupBy = 'neighborhood',
+  opts: OpportunityRowBy | OpportunityOptions = 'neighborhood',
 ): OpportunityMatrix {
-  const colKeys = ['1', '2', '3', '4+'];
+  const { rowBy, colBy }: Required<OpportunityOptions> = typeof opts === 'string'
+    ? { rowBy: opts, colBy: 'bedroom' }
+    : { rowBy: opts.rowBy ?? 'neighborhood', colBy: opts.colBy ?? 'bedroom' };
+
+  const bedroomKeys = ['1', '2', '3', '4+'];
+  const bedroomLabel = (k: string) => (k === '4+' ? '4 dorms' : k === '1' ? '1 dorm' : `${k} dorms`);
+
+  const rowKeyFn = (b: Building) => {
+    if (rowBy === 'building_type') return b.building_type;
+    if (rowBy === 'standard') return b.standard || 'Sem classificação';
+    return b.neighborhood;
+  };
+
   const est = new Map<string, Map<string, number>>();
   const vnd = new Map<string, Map<string, number>>();
   const ensure = (m: Map<string, Map<string, number>>, k: string) => {
@@ -388,44 +413,53 @@ export function computeOpportunityMap(
     if (!inner) { inner = new Map(); m.set(k, inner); }
     return inner;
   };
+  const colSet = new Set<string>();
   const latest = latestPeriodInScope(buildings, f);
-  const keyFn = (b: Building) => {
-    if (groupBy === 'building_type') return b.building_type;
-    if (groupBy === 'standard') return b.standard || 'Sem classificação';
-    return b.neighborhood;
-  };
+
   if (latest) {
     for (const b of buildings) {
-      const row = keyFn(b);
+      const row = rowKeyFn(b);
       if (!row) continue;
+      const bStandard = b.standard || 'Sem classificação';
       for (const t of b.typologies) {
-        const col = bedroomBucket(t.number_bedroom);
-        if (!colKeys.includes(col)) continue;
         const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
         if (!h) continue;
+
+        let col: string;
+        if (colBy === 'standard') {
+          col = bStandard;
+        } else {
+          const bk = bedroomBucket(t.number_bedroom);
+          if (!bedroomKeys.includes(bk)) continue;
+          col = bk;
+        }
+        colSet.add(col);
         ensure(est, row).set(col, (ensure(est, row).get(col) ?? 0) + h.typology_stock);
         ensure(vnd, row).set(col, (ensure(vnd, row).get(col) ?? 0) + h.sold_in_period);
       }
     }
   }
+
+  const colKeys = colBy === 'bedroom'
+    ? bedroomKeys.filter((k) => colSet.has(k))
+    : Array.from(colSet).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const colLabels = colBy === 'bedroom' ? colKeys.map(bedroomLabel) : colKeys.slice();
+
   const rows = Array.from(est.keys()).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   const data: Record<string, Record<string, number>> = {};
   for (const r of rows) {
     data[r] = {};
-    for (const col of colKeys) {
-      const e = est.get(r)?.get(col) ?? 0;
-      const v = vnd.get(r)?.get(col) ?? 0;
-      data[r][col] = e + v > 0 ? v / (e + v) : 0;
+    for (let i = 0; i < colKeys.length; i++) {
+      const key = colKeys[i];
+      const label = colLabels[i];
+      const e = est.get(r)?.get(key) ?? 0;
+      const v = vnd.get(r)?.get(key) ?? 0;
+      data[r][label] = e + v > 0 ? v / (e + v) : 0;
     }
   }
-  const rowLabel = groupBy === 'building_type' ? 'Tipo' : groupBy === 'standard' ? 'Padrão' : 'Bairro';
-  return {
-    rows,
-    cols: colKeys.map((c) => (c === '4+' ? '4 dorms' : c === '1' ? '1 dorm' : `${c} dorms`)),
-    data,
-    rowLabel,
-  };
+  return { rows, cols: colLabels, data, rowLabel: ROW_LABEL[rowBy] };
 }
+
 
 // ============ IPC — Índice de Performance Comercial ============
 
