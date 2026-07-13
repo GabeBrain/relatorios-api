@@ -17,6 +17,8 @@ export interface AtaProduto {
   m2_max: number | null;
   vagas_pct: number | null;
   programa: string | null;
+  /** Texto literal do produto que não cabe nos campos numéricos, ex.: "com e sem sacada". */
+  observacoes: string[];
 }
 
 export interface AtaData {
@@ -24,14 +26,21 @@ export interface AtaData {
   projeto: string | null;
   cidade: string | null;
   uf: string | null;
+  /** Trecho literal da ata que sustenta cidade/UF; torna a leitura auditável. */
+  localizacao_fonte: string | null;
   endereco: string | null;
   bairro: string | null;
   area_terreno_m2: number | null;
   produto: AtaProduto | null;
   preco_m2_viabilidade: number | null;
+  /** Características/fatos de localização transcritos da ata. */
+  observacoes_localizacao: string[];
   duvidas_cliente: string[];
   pedidos_analista: string[];
 }
+
+// A v6 acrescenta evidência literal para cidade/UF e força a releitura de extrações anteriores.
+const ATA_CACHE_SCHEMA = 6;
 
 export interface AtaExtractResult {
   ata: AtaData | null;
@@ -57,8 +66,10 @@ export async function estimateAtaPass(
   model: ModelId
 ): Promise<AtaEstimate> {
   if (!candidate) return { hasAta: false, cached: false, inputTokens: 0, outputTokens: 0, costUsd: 0 };
-  const { data } = await db.from('vision_cache').select('sha1').eq('sha1', `ata:${candidate.sha1}`).maybeSingle();
-  if (data) return { hasAta: true, cached: true, inputTokens: 0, outputTokens: 0, costUsd: 0 };
+  const { data } = await db.from('vision_cache').select('sha1, schema_version').eq('sha1', `ata:${candidate.sha1}`).maybeSingle();
+  if (data && (data.schema_version ?? 1) >= ATA_CACHE_SCHEMA) {
+    return { hasAta: true, cached: true, inputTokens: 0, outputTokens: 0, costUsd: 0 };
+  }
   const inputTokens = calculateImageTokens(candidate.w, candidate.h, model) + 600;
   const outputTokens = 400;
   return { hasAta: true, cached: false, inputTokens, outputTokens, costUsd: calculateCost(inputTokens, outputTokens, model) };
@@ -85,9 +96,9 @@ async function callEdge(body: Record<string, unknown>): Promise<{ ata: AtaData |
 /** Extrai a ata de uma IMAGEM (print colado no slide). Cache por sha1. */
 export async function extractAtaFromImage(c: AtaImageCandidate, model: ModelId): Promise<AtaExtractResult> {
   const cacheKey = `ata:${c.sha1}`;
-  const { data: hit } = await db.from('vision_cache').select('payload').eq('sha1', cacheKey).maybeSingle();
+  const { data: hit } = await db.from('vision_cache').select('payload, schema_version').eq('sha1', cacheKey).maybeSingle();
   // Uma resposta nula pode ter vindo de uma candidata errada; nunca a reutilize.
-  if (hit?.payload?.ata) {
+  if (hit?.payload?.ata && (hit.schema_version ?? 1) >= ATA_CACHE_SCHEMA) {
     return { ata: hit.payload.ata as AtaData | null, fromCache: true, inputTokens: 0, outputTokens: 0, costUsd: 0 };
   }
   const res = await callEdge({ base64: toBase64(c.bytes), mime: c.mime, model });
@@ -95,7 +106,7 @@ export async function extractAtaFromImage(c: AtaImageCandidate, model: ModelId):
     await db.from('vision_cache').upsert({
       sha1: cacheKey, payload: { ata: res.ata },
       input_tokens: res.inputTokens, output_tokens: res.outputTokens,
-      schema_version: 4, model,
+      schema_version: ATA_CACHE_SCHEMA, model,
     });
   }
   return { ata: res.ata, fromCache: false, inputTokens: res.inputTokens, outputTokens: res.outputTokens, costUsd: calculateCost(res.inputTokens, res.outputTokens, model) };
@@ -104,8 +115,8 @@ export async function extractAtaFromImage(c: AtaImageCandidate, model: ModelId):
 /** Extrai a ata de um TEXTO (DOCX) — ~10× mais barato, sem visão. Cache por sha1 do texto. */
 export async function extractAtaFromText(texto: string, sha1: string, model: ModelId): Promise<AtaExtractResult> {
   const cacheKey = `ata:${sha1}`;
-  const { data: hit } = await db.from('vision_cache').select('payload').eq('sha1', cacheKey).maybeSingle();
-  if (hit?.payload?.ata) {
+  const { data: hit } = await db.from('vision_cache').select('payload, schema_version').eq('sha1', cacheKey).maybeSingle();
+  if (hit?.payload?.ata && (hit.schema_version ?? 1) >= ATA_CACHE_SCHEMA) {
     return { ata: hit.payload.ata as AtaData | null, fromCache: true, inputTokens: 0, outputTokens: 0, costUsd: 0 };
   }
   const res = await callEdge({ texto, model });
@@ -113,7 +124,7 @@ export async function extractAtaFromText(texto: string, sha1: string, model: Mod
     await db.from('vision_cache').upsert({
       sha1: cacheKey, payload: { ata: res.ata },
       input_tokens: res.inputTokens, output_tokens: res.outputTokens,
-      schema_version: 4, model,
+      schema_version: ATA_CACHE_SCHEMA, model,
     });
   }
   return { ata: res.ata, fromCache: false, inputTokens: res.inputTokens, outputTokens: res.outputTokens, costUsd: calculateCost(res.inputTokens, res.outputTokens, model) };

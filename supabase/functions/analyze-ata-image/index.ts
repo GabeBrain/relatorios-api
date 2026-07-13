@@ -54,6 +54,22 @@ interface RequestBody {
   texto?: string;  // ata como texto (DOCX)
 }
 
+/**
+ * Cidade/UF é dado de alto impacto. Quando a LLM devolve a citação literal da ata,
+ * a aplicação deriva esses dois campos dela em vez de confiar numa interpretação solta.
+ */
+function normalizeAtaLocation(ata: unknown): unknown {
+  if (!ata || typeof ata !== 'object') return ata;
+  const data = ata as Record<string, unknown>;
+  const source = typeof data.localizacao_fonte === 'string' ? data.localizacao_fonte.trim() : '';
+  if (!source) return ata;
+  const match = source.match(/([^|,/\n]+?)\s*\/\s*([a-z]{2})\b/i);
+  if (!match) return ata;
+  const city = match[1].trim().replace(/^[|,\-–—\s]+/, '');
+  if (!city) return ata;
+  return { ...data, cidade: city, uf: match[2].toUpperCase() };
+}
+
 function validate(body: unknown): { ok: true; value: RequestBody } | { ok: false; error: string; status: number } {
   if (!body || typeof body !== 'object') return { ok: false, error: 'Corpo inválido.', status: 400 };
   const b = body as Record<string, unknown>;
@@ -83,10 +99,17 @@ do cliente e PEDIDOS ao analista. Extraia FIELMENTE para JSON fechado.
 Regras:
 - Números em convenção pt-BR viram números JSON: "1.912" → 1912, "R$ 8.500" → 8500, "36" → 36.
 - Campo que NÃO aparece na ata = null. NUNCA invente.
+- "localizacao_fonte" é a TRANSCRIÇÃO LITERAL do trecho que prova cidade/UF (normalmente
+  o bullet do endereço, por exemplo "... bairro São Roque | Guarulhos/SP"). Extraia
+  "cidade" e "uf" SOMENTE desse trecho. Se não existir cidade/UF explícita, ambos são null.
 - "duvidas_cliente" e "pedidos_analista" são TRANSCRIÇÃO FIEL dos bullets (não parafraseie,
-  não resuma) — eles viram um checklist do que o estudo tem de responder/entregar.
+  não resuma, não complete e não omita a última palavra) — eles viram um checklist do que o estudo tem de responder/entregar.
 - Pedidos destacados/realçados (ex.: bloco "Analista da Rebrain") entram em "pedidos_analista".
 - "dorms" é a lista de números de dormitórios (ex.: [2] ou [1,2,3]).
+- "produto.observacoes" recebe literalmente qualquer detalhe do produto que não caiba nos
+  campos estruturados (ex.: "Todas as unidades de 2 dorm com e sem sacada").
+- "observacoes_localizacao" recebe literalmente os bullets de terreno/localização que não sejam
+  endereço, bairro, cidade/UF ou área. Não descarte fatos como Via Dutra, aeroporto ou Parque CECAP.
 - A imagem pode ser um slide com fundo decorativo e uma ata/cartão branco inserido no centro.
   Leia o documento inserido: se contiver "Produto pretendido", "Terreno e localização",
   "Dúvida do cliente" ou "Analista da Rebrain", ele É uma ata, mesmo com capa/fundo ao redor.
@@ -94,11 +117,12 @@ Regras:
 Responda EXATAMENTE este JSON (sem markdown):
 {"ata": {
   "cliente": "…", "projeto": "…",
-  "cidade": "…", "uf": "…", "endereco": "…", "bairro": "…",
+  "cidade": "…", "uf": "…", "localizacao_fonte": "…", "endereco": "…", "bairro": "…",
   "area_terreno_m2": 25000,
   "produto": {"torres": 8, "unidades": 1912, "dorms": [2], "m2_min": 36, "m2_max": 41,
-              "vagas_pct": 50, "programa": "MCMV"},
+              "vagas_pct": 50, "programa": "MCMV", "observacoes": ["Todas as unidades de 2 dorm com e sem sacada."]},
   "preco_m2_viabilidade": 8500,
+  "observacoes_localizacao": ["Excelente localização colado na Via Dutra"],
   "duvidas_cliente": ["…"],
   "pedidos_analista": ["…"]
 }}
@@ -161,7 +185,7 @@ Deno.serve(async (req) => {
     try { content = JSON.parse(response.choices?.[0]?.message?.content ?? '{}'); } catch { content = { ata: null }; }
 
     return json({
-      ata: content.ata ?? null,
+      ata: normalizeAtaLocation(content.ata ?? null),
       inputTokens: response.usage?.prompt_tokens ?? 0,
       outputTokens: response.usage?.completion_tokens ?? 0,
     });

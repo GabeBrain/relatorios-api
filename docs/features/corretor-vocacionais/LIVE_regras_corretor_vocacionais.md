@@ -16,6 +16,33 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.28 — 2026-07-13 — Cidade/UF da ata passa a ter evidência literal
+
+Cidade é parâmetro crítico do `CITY_NAME`; não pode depender de uma inferência opaca da visão.
+A extração agora pede `localizacao_fonte`: transcrição literal do trecho da ata que contém a
+cidade/UF. A edge deriva e normaliza `cidade`/`uf` a partir desse trecho antes de persistir;
+sem trecho explícito, ambos ficam nulos. O card expõe a fonte para conferência humana.
+
+`ATA_CACHE_SCHEMA` 5→6 força a nova leitura dos registros já cacheados. Requer redeploy de
+`analyze-ata-image` e reconferência do estudo.
+
+## Versão 0.27 — 2026-07-13 — Ata preserva detalhes literais de produto e localização
+
+Validação visual da ata real Tancredo/Marka: os campos estruturados vieram corretos, mas a
+síntese perdia informação contratada relevante. Exemplo: “2 dorm **com e sem sacada**” virava
+somente `dorms: [2]`; e a dúvida “Se necessário é possível **fasear**” saiu truncada.
+
+| Ajuste | Resultado |
+|---|---|
+| `produto.observacoes[]` | Preserva detalhes literais que não cabem na régua numérica, como sacada. |
+| `observacoes_localizacao[]` | Preserva Via Dutra, aeroporto, Parque CECAP e demais fatos de localização. |
+| Prompt | Proíbe parafrasear/truncar dúvidas e pedidos, incluindo a última palavra do bullet. |
+| Cache da ata v5 | Reprocessa extrações anteriores para carregar os novos campos; `ata: null` continua não-cacheável. |
+| Card | Mostra os novos detalhes, sem esconder o dado original da ata. |
+
+Verificação local: 5/5 testes do localizador e build de produção limpos. Requer redeploy de
+`analyze-ata-image` e uma reconferência para atualizar a ata persistida.
+
 ## Versão 0.26 — 2026-07-12 — Correção da seleção da ata no slide de capa (Marka/Tancredo)
 
 O teste real `Vocacional_Marka Prime_Reduzido` revelou um falso-negativo da Fase B: a ata é

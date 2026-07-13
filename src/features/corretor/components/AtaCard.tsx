@@ -65,6 +65,7 @@ export default function AtaCard({ ata }: { ata: AtaData }) {
             <Field label="Cliente" value={ata.cliente} />
             <Field label="Projeto" value={ata.projeto} />
             <Field label="Cidade / UF" value={local} />
+            <Field label="Fonte cidade/UF" value={ata.localizacao_fonte} />
             <Field label="Bairro" value={ata.bairro} />
             <Field label="Endereço" value={ata.endereco} />
             <Field label="Área terreno (m²)" value={ata.area_terreno_m2} />
@@ -78,12 +79,14 @@ export default function AtaCard({ ata }: { ata: AtaData }) {
                 <Field label="m² (min–máx)" value={[p.m2_min, p.m2_max].filter((x) => x != null).join('–')} />
                 <Field label="Vagas (%)" value={p.vagas_pct} />
                 <Field label="Programa" value={p.programa} />
+                <List title="Detalhes do produto" items={p.observacoes ?? []} />
               </>
             )}
           </div>
           <div>
             <List title="Pedidos ao analista" items={ata.pedidos_analista} />
             <List title="Dúvidas do cliente" items={ata.duvidas_cliente} />
+            <List title="Observações de localização" items={ata.observacoes_localizacao ?? []} />
           </div>
         </CollapsibleContent>
       </div>
