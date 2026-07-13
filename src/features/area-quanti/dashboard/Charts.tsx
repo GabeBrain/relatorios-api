@@ -168,11 +168,25 @@ interface HistProps { rows: QuantiRecord[]; field: 'idade' | 'renda_valor_estima
 export function HistogramChart({ rows, field, bins = 20, height = 260 }: HistProps) {
   const data = useMemo(() => histogram(rows, field, bins), [rows, field, bins]);
   const isMoney = field === 'renda_valor_estimado';
+  // Show only ~10 tick labels to avoid overcrowded legend
+  const step = Math.max(1, Math.ceil(data.length / 10));
+  const fmtTick = (v: any) => {
+    const n = Number(String(v).split(/[–-]/)[0]);
+    if (!Number.isFinite(n)) return String(v);
+    if (isMoney) return n >= 1000 ? `R$ ${(n / 1000).toFixed(0)}k` : `R$ ${n}`;
+    return String(Math.round(n));
+  };
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} margin={{ top: 6, right: 12, left: 4, bottom: 40 }}>
+      <BarChart data={data} margin={{ top: 6, right: 12, left: 4, bottom: 30 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-        <XAxis dataKey="bin" tick={{ fontSize: 9 }} interval={0} angle={-40} textAnchor="end" height={60} />
+        <XAxis
+          dataKey="bin"
+          tick={{ fontSize: 11 }}
+          interval={step - 1}
+          tickFormatter={fmtTick}
+          height={40}
+        />
         <YAxis tick={{ fontSize: 10 }} />
         <Tooltip
           formatter={(v: number) => [`${v.toLocaleString('pt-BR')}`, 'Entrevistas']}
