@@ -55,6 +55,22 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
   const toggle = useQuantiStore((s) => s.toggleValue);
   const filters = useQuantiStore((s) => s.filters);
   const data = useMemo(() => countBy(rows, field), [rows, field]);
+  const total = rows.length || 1;
+  const renderLabel = (props: any) => {
+    const RAD = Math.PI / 180;
+    const { cx, cy, midAngle, innerRadius, outerRadius, value, name } = props;
+    const r = innerRadius + (outerRadius - innerRadius) * 0.55;
+    const x = cx + r * Math.cos(-midAngle * RAD);
+    const y = cy + r * Math.sin(-midAngle * RAD);
+    const pct = ((value / total) * 100).toFixed(1);
+    if (Number(pct) < 4) return null; // avoid clutter on tiny slices
+    return (
+      <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" style={{ fontSize: 11, fontWeight: 700, pointerEvents: 'none' }}>
+        <tspan x={x} dy="-0.4em">{name}</tspan>
+        <tspan x={x} dy="1.1em">{pct}%</tspan>
+      </text>
+    );
+  };
   return (
     <ResponsiveContainer width="100%" height={height}>
       <PieChart>
@@ -65,6 +81,8 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
           innerRadius="55%"
           outerRadius="85%"
           paddingAngle={2}
+          labelLine={false}
+          label={renderLabel}
           onClick={(d: any) => toggle(field, d.key)}
         >
           {data.map((d, i) => {
@@ -73,7 +91,7 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
               <Cell
                 key={d.key}
                 fill={PALETTE[i % PALETTE.length]}
-                stroke={active ? ACTIVE_STROKE : '#fff'}
+                stroke={active ? ACTIVE_STROKE : 'var(--qd-surface, #fff)'}
                 strokeWidth={active ? 2 : 1}
                 style={{ cursor: 'pointer' }}
               />
@@ -82,7 +100,7 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
         </Pie>
         <Tooltip
           formatter={(v: number, _n, p: any) => [
-            `${v.toLocaleString('pt-BR')} (${((v / rows.length) * 100).toFixed(1)}%)`,
+            `${v.toLocaleString('pt-BR')} (${((v / total) * 100).toFixed(1)}%)`,
             p.payload.key,
           ]}
         />
