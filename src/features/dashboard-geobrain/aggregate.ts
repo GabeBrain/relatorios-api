@@ -1,11 +1,39 @@
 import type { Building, Filters, Granularity, HistoryEntry, Typology } from './types';
 
-function garageBucket(g: number): string {
-  return g >= 4 ? '4+' : String(g);
+// ============ period helpers (string-based) ============
+// h.period vem como "YYYY-MM-DD" ou "YYYY-MM". Comparações lexicais funcionam.
+
+export function yearFromPeriod(p: string): number {
+  return parseInt(p.slice(0, 4), 10) || 0;
 }
-function bedroomBucket(n: number): string {
-  return n >= 4 ? '4+' : String(n);
+export function monthFromPeriod(p: string): number {
+  return parseInt(p.slice(5, 7), 10) || 0;
 }
+export function monthKeyFromPeriod(p: string): string {
+  return p.slice(0, 7);
+}
+function periodSortNum(p: string): number {
+  return yearFromPeriod(p) * 12 + (monthFromPeriod(p) - 1);
+}
+function periodKey(p: string, g: Granularity): string {
+  const y = p.slice(0, 4);
+  const m = monthFromPeriod(p);
+  if (g === 'year') return y;
+  if (g === 'quarter') return `${y.slice(2)}T${Math.floor((m - 1) / 3) + 1}`;
+  return `${String(m).padStart(2, '0')}/${y.slice(2)}`;
+}
+function periodSortKey(p: string, g: Granularity): number {
+  const y = yearFromPeriod(p);
+  const m = monthFromPeriod(p) - 1;
+  if (g === 'year') return y * 12;
+  if (g === 'quarter') return y * 12 + Math.floor(m / 3) * 3;
+  return y * 12 + m;
+}
+
+// ============ filter helpers ============
+
+function garageBucket(g: number): string { return g >= 4 ? '4+' : String(g); }
+function bedroomBucket(n: number): string { return n >= 4 ? '4+' : String(n); }
 
 function typologyMatchesFilters(t: Typology, f: Filters): boolean {
   if (f.typologies.length && !f.typologies.includes(t.type_of_typology)) return false;
@@ -23,7 +51,6 @@ export function applyFilters(buildings: Building[], f: Filters): Building[] {
     if (f.types.length && !f.types.includes(b.building_type)) continue;
     if (f.standards.length && !f.standards.includes(b.standard)) continue;
     if (f.buildings.length && !f.buildings.includes(b.building_id)) continue;
-
     const typologies = b.typologies.filter((t) => typologyMatchesFilters(t, f));
     if (!typologies.length) continue;
     out.push({ ...b, typologies });
@@ -31,93 +58,140 @@ export function applyFilters(buildings: Building[], f: Filters): Building[] {
   return out;
 }
 
-function inRange(d: Date, from: Date | null, to: Date | null): boolean {
-  if (from && d < from) return false;
-  if (to && d > to) return false;
-  return true;
-}
-
-function monthKey(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
-/** Filtro dos períodos históricos por Ano (release) e Períodos (mês YYYY-MM). */
 function historyMatches(h: HistoryEntry, f: Filters): boolean {
-  if (!inRange(h.periodDate, f.from, f.to)) return false;
-  if (f.years.length && !f.years.includes(String(h.periodDate.getFullYear()))) return false;
-  if (f.periods.length && !f.periods.includes(monthKey(h.periodDate))) return false;
+  const p = h.period;
+  if (!p) return false;
+  const pk = periodSortNum(p);
+  if (f.from) {
+    const fk = f.from.getFullYear() * 12 + f.from.getMonth();
+    if (pk < fk) return false;
+  }
+  if (f.to) {
+    const tk = f.to.getFullYear() * 12 + f.to.getMonth();
+    if (pk > tk) return false;
+  }
+  if (f.years.length && !f.years.includes(p.slice(0, 4))) return false;
+  if (f.periods.length && !f.periods.includes(p.slice(0, 7))) return false;
   return true;
 }
 
-/** Última entrada de histórico respeitando f.to E os filtros temporais (years/periods) — se houver. */
-function lastHistoryMatching(t: Typology, f: Filters): HistoryEntry | null {
-  let last: HistoryEntry | null = null;
-  for (const h of t.history) {
-    if (f.to && h.periodDate > f.to) continue;
-    if (f.years.length && !f.years.includes(String(h.periodDate.getFullYear()))) continue;
-    if (f.periods.length && !f.periods.includes(monthKey(h.periodDate))) continue;
-    if (!last || h.periodDate > last.periodDate) last = h;
+/** Maior período (string) presente entre entradas que passam pelos filtros temporais. */
+export function latestPeriodInScope(buildings: Building[], f: Filters): string | null {
+  let best: string | null = null;
+  for (const b of buildings) {
+    for (const t of b.typologies) {
+      for (const h of t.history) {
+        if (!historyMatches(h, f)) continue;
+        if (!best || h.period > best) best = h.period;
+      }
+    }
   }
-  return last;
+  return best;
 }
+
+// ============ campos calculados por linha (§13) ============
+export const isRelease = (b: Building, h: HistoryEntry) =>
+  Boolean(b.release_date) && b.release_date.slice(0, 7) === h.period.slice(0, 7);
+export const vgvSold = (h: HistoryEntry, price: number) => h.sold_in_period * price;
+export const vgvStock = (h: HistoryEntry, price: number) => h.typology_stock * price;
+export const initialStock = (h: HistoryEntry) => h.typology_stock + h.sold_in_period;
+export const qtyRelease = (b: Building, h: HistoryEntry, t: Typology) => (isRelease(b, h) ? t.qty : 0);
+export const vgvRelease = (b: Building, h: HistoryEntry, t: Typology, price: number) => (isRelease(b, h) ? t.qty * price : 0);
+
+// ============ KPIs (sempre no período mais recente do escopo) ============
 
 export interface KPIValues {
   empreendimentos: number;
   empreendimentosAtivos: number;
-  ofertaLancada: number;
+  empreendimentosLancados: number;
+  unidadesLancadas: number;
   vgvLancado: number;
-  ofertaFinal: number;
+  unidadesVendidas: number;
+  vgvVendido: number;
+  estoqueFinal: number;
   vgvEstoque: number;
+  estoqueInicial: number;
+  precoMedio: number;
+  precoMedioM2: number;
   ivv: number;
   tempoEstoque: number;
+  ipc: number;
+  latestPeriod: string | null;
+  statusAtualizacao: string | null;
+  /** Aliases de compatibilidade (legado) */
+  ofertaLancada: number;
+  ofertaFinal: number;
+}
+
+function emptyKpis(nBuildings: number): KPIValues {
+  return {
+    empreendimentos: nBuildings, empreendimentosAtivos: 0, empreendimentosLancados: 0,
+    unidadesLancadas: 0, vgvLancado: 0, unidadesVendidas: 0, vgvVendido: 0,
+    estoqueFinal: 0, vgvEstoque: 0, estoqueInicial: 0,
+    precoMedio: 0, precoMedioM2: 0, ivv: 0, tempoEstoque: 0, ipc: 0,
+    latestPeriod: null, statusAtualizacao: null,
+    ofertaLancada: 0, ofertaFinal: 0,
+  };
 }
 
 export function computeKpis(buildings: Building[], f: Filters): KPIValues {
-  let ofertaLancada = 0, vgvLancado = 0, ofertaFinal = 0, vgvEstoque = 0, vendasLiquidas = 0, ativos = 0;
+  const latest = latestPeriodInScope(buildings, f);
+  if (!latest) return emptyKpis(buildings.length);
+
+  let unidadesLancadas = 0, vgvLancado = 0;
+  let unidadesVendidas = 0, vgvVendido = 0;
+  let estoqueFinal = 0, vgvEstoqueSum = 0, estoqueInicial = 0;
+  let sumPrice = 0, priceQty = 0, sumPm2 = 0, pm2Qty = 0;
+  const activeIds = new Set<string>();
+  const lancadosIds = new Set<string>();
 
   for (const b of buildings) {
-    if (b.status === 'Ativo') ativos++;
+    if (b.status === 'Ativo') activeIds.add(b.building_id);
     for (const t of b.typologies) {
-      ofertaLancada += t.qty;
-      vgvLancado += t.qty * (t.release_price ?? 0);
-      const last = lastHistoryMatching(t, f);
-      if (last) {
-        ofertaFinal += last.typology_stock;
-        vgvEstoque += last.vgv_stock ?? 0;
+      // entrada do período mais recente para esta tipologia
+      const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
+      if (!h) continue;
+      const price = h.price ?? 0;
+      if (isRelease(b, h)) {
+        unidadesLancadas += qtyRelease(b, h, t);
+        vgvLancado += vgvRelease(b, h, t, price);
+        lancadosIds.add(b.building_id);
       }
-      for (const h of t.history) {
-        if (!historyMatches(h, f)) continue;
-        vendasLiquidas += h.sold_in_period;
-      }
+      unidadesVendidas += h.sold_in_period;
+      vgvVendido += vgvSold(h, price);
+      estoqueFinal += h.typology_stock;
+      vgvEstoqueSum += h.vgv_stock ?? vgvStock(h, price);
+      estoqueInicial += initialStock(h);
+      if (price > 0) { sumPrice += price * t.qty; priceQty += t.qty; }
+      const pm2 = h.price_private_area;
+      if (pm2 && pm2 > 0) { sumPm2 += pm2 * t.qty; pm2Qty += t.qty; }
     }
   }
 
-  const ivv = ofertaFinal + vendasLiquidas > 0 ? vendasLiquidas / (ofertaFinal + vendasLiquidas) : 0;
-  let monthsRange = 12;
-  if (f.from && f.to) {
-    monthsRange = (f.to.getFullYear() - f.from.getFullYear()) * 12 + (f.to.getMonth() - f.from.getMonth()) + 1;
-    if (monthsRange < 1) monthsRange = 1;
-  }
-  const salesPerMonth = vendasLiquidas / monthsRange;
-  const tempoEstoque = salesPerMonth > 0 ? ofertaFinal / salesPerMonth : 0;
+  const denom = estoqueFinal + unidadesVendidas;
+  const ivv = denom > 0 ? unidadesVendidas / denom : 0;
+  const tempoEstoque = ivv > 0 ? 1 / ivv : 0;
+  const precoMedio = priceQty > 0 ? sumPrice / priceQty : 0;
+  const precoMedioM2 = pm2Qty > 0 ? sumPm2 / pm2Qty : 0;
 
-  return { empreendimentos: buildings.length, empreendimentosAtivos: ativos, ofertaLancada, vgvLancado, ofertaFinal, vgvEstoque, ivv, tempoEstoque };
+  return {
+    empreendimentos: buildings.length,
+    empreendimentosAtivos: activeIds.size,
+    empreendimentosLancados: lancadosIds.size,
+    unidadesLancadas, vgvLancado,
+    unidadesVendidas, vgvVendido,
+    estoqueFinal, vgvEstoque: vgvEstoqueSum, estoqueInicial,
+    precoMedio, precoMedioM2,
+    ivv, tempoEstoque,
+    ipc: 0, // média global = 1; deixado como 0 (BLANK) — o gráfico IPC mostra por padrão.
+    latestPeriod: latest,
+    statusAtualizacao: latest,
+    ofertaLancada: unidadesLancadas,
+    ofertaFinal: estoqueFinal,
+  };
 }
 
-function periodKey(d: Date, g: Granularity): string {
-  const y = d.getFullYear();
-  const m = d.getMonth() + 1;
-  if (g === 'year') return String(y);
-  if (g === 'quarter') return `${String(y).slice(2)}T${Math.floor((m - 1) / 3) + 1}`;
-  return `${String(m).padStart(2, '0')}/${String(y).slice(2)}`;
-}
-function periodSortKey(d: Date, g: Granularity): number {
-  const y = d.getFullYear();
-  const m = d.getMonth();
-  if (g === 'year') return y * 12;
-  if (g === 'quarter') return y * 12 + Math.floor(m / 3) * 3;
-  return y * 12 + m;
-}
+// ============ séries temporais ============
 
 export interface SeriesPoint {
   period: string;
@@ -126,8 +200,12 @@ export interface SeriesPoint {
   vgvLancamento: number;
   vgvEstoque: number;
   estoqueFinal: number;
+  estoqueInicial: number;
   ivv: number;
   _sort: number;
+}
+function emptyPoint(period: string, sort: number): SeriesPoint {
+  return { period, ofertaLancada: 0, vendaLiquida: 0, vgvLancamento: 0, vgvEstoque: 0, estoqueFinal: 0, estoqueInicial: 0, ivv: 0, _sort: sort };
 }
 
 export function computeSeries(buildings: Building[], f: Filters, g: Granularity): SeriesPoint[] {
@@ -135,21 +213,19 @@ export function computeSeries(buildings: Building[], f: Filters, g: Granularity)
   for (const b of buildings) {
     for (const t of b.typologies) {
       if (!t.history.length) continue;
-      const launchEntry = t.history[0];
-      if (historyMatches(launchEntry, f)) {
-        const key = periodKey(launchEntry.periodDate, g);
-        const p = map.get(key) ?? emptyPoint(key, periodSortKey(launchEntry.periodDate, g));
-        p.ofertaLancada += t.qty;
-        p.vgvLancamento += t.qty * (t.release_price ?? 0);
-        map.set(key, p);
-      }
       for (const h of t.history) {
         if (!historyMatches(h, f)) continue;
-        const key = periodKey(h.periodDate, g);
-        const p = map.get(key) ?? emptyPoint(key, periodSortKey(h.periodDate, g));
+        const key = periodKey(h.period, g);
+        const p = map.get(key) ?? emptyPoint(key, periodSortKey(h.period, g));
+        const price = h.price ?? 0;
+        if (isRelease(b, h)) {
+          p.ofertaLancada += t.qty;
+          p.vgvLancamento += t.qty * price;
+        }
         p.vendaLiquida += h.sold_in_period;
-        p.vgvEstoque += h.vgv_stock ?? 0;
+        p.vgvEstoque += h.vgv_stock ?? vgvStock(h, price);
         p.estoqueFinal += h.typology_stock;
+        p.estoqueInicial += initialStock(h);
         map.set(key, p);
       }
     }
@@ -161,128 +237,87 @@ export function computeSeries(buildings: Building[], f: Filters, g: Granularity)
   }
   return arr;
 }
-function emptyPoint(period: string, sort: number): SeriesPoint {
-  return { period, ofertaLancada: 0, vendaLiquida: 0, vgvLancamento: 0, vgvEstoque: 0, estoqueFinal: 0, ivv: 0, _sort: sort };
-}
 
 // ============ Rankings & combos ============
 
 export interface ComboBucket { key: string; estoque: number; tempoEstoque: number; }
 
-function tempoEstoqueFor(estoque: number, vendas: number, months: number): number {
-  const perMonth = vendas / Math.max(1, months);
-  return perMonth > 0 ? estoque / perMonth : 0;
-}
-
-function monthsRangeOf(f: Filters, buildings: Building[]): number {
-  if (f.from && f.to) {
-    const m = (f.to.getFullYear() - f.from.getFullYear()) * 12 + (f.to.getMonth() - f.from.getMonth()) + 1;
-    return Math.max(1, m);
-  }
-  // fallback: 12 meses
-  return 12;
-}
-
-/** Oferta final + tempo de estoque agrupado por dormitório (0..4+). */
-export function computeOfertaPorDormitorio(buildings: Building[], f: Filters): ComboBucket[] {
-  const months = monthsRangeOf(f, buildings);
-  const est = new Map<string, number>();
-  const vnd = new Map<string, number>();
+/** Tempo de estoque no período mais recente = 1 / IVV(latest). */
+function tempoEstoqueByLatest(buildings: Building[], f: Filters, groupKey: (b: Building, t: Typology) => string): Map<string, { est: number; vnd: number }> {
+  const latest = latestPeriodInScope(buildings, f);
+  const acc = new Map<string, { est: number; vnd: number }>();
+  if (!latest) return acc;
   for (const b of buildings) {
     for (const t of b.typologies) {
-      const k = bedroomBucket(t.number_bedroom);
-      const last = lastHistoryMatching(t, f);
-      if (last) est.set(k, (est.get(k) ?? 0) + last.typology_stock);
-      for (const h of t.history) {
-        if (!historyMatches(h, f)) continue;
-        vnd.set(k, (vnd.get(k) ?? 0) + h.sold_in_period);
-      }
+      const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
+      if (!h) continue;
+      const k = groupKey(b, t);
+      if (!k) continue;
+      const cur = acc.get(k) ?? { est: 0, vnd: 0 };
+      cur.est += h.typology_stock;
+      cur.vnd += h.sold_in_period;
+      acc.set(k, cur);
     }
   }
-  const keys = Array.from(est.keys()).sort();
-  return keys.map((k) => ({ key: `${k} dorm${k === '1' ? '' : 's'}`, estoque: est.get(k) ?? 0, tempoEstoque: tempoEstoqueFor(est.get(k) ?? 0, vnd.get(k) ?? 0, months) }));
+  return acc;
+}
+
+function tempoFromIvv(est: number, vnd: number): number {
+  const denom = est + vnd;
+  const ivv = denom > 0 ? vnd / denom : 0;
+  return ivv > 0 ? 1 / ivv : 0;
+}
+
+export function computeOfertaPorDormitorio(buildings: Building[], f: Filters): ComboBucket[] {
+  const acc = tempoEstoqueByLatest(buildings, f, (_b, t) => bedroomBucket(t.number_bedroom));
+  const keys = Array.from(acc.keys()).sort();
+  return keys.map((k) => {
+    const { est, vnd } = acc.get(k)!;
+    return { key: `${k} dorm${k === '1' ? '' : 's'}`, estoque: est, tempoEstoque: tempoFromIvv(est, vnd) };
+  });
 }
 
 export function computeOfertaPorPadrao(buildings: Building[], f: Filters): ComboBucket[] {
-  const months = monthsRangeOf(f, buildings);
-  const est = new Map<string, number>();
-  const vnd = new Map<string, number>();
-  for (const b of buildings) {
-    const k = b.standard || 'Sem classificação';
-    for (const t of b.typologies) {
-      const last = lastHistoryMatching(t, f);
-      if (last) est.set(k, (est.get(k) ?? 0) + last.typology_stock);
-      for (const h of t.history) {
-        if (!historyMatches(h, f)) continue;
-        vnd.set(k, (vnd.get(k) ?? 0) + h.sold_in_period);
-      }
-    }
-  }
-  return Array.from(est.keys())
-    .map((k) => ({ key: k, estoque: est.get(k) ?? 0, tempoEstoque: tempoEstoqueFor(est.get(k) ?? 0, vnd.get(k) ?? 0, months) }))
+  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.standard || 'Sem classificação');
+  // §10 — sem limitação de Top 10
+  return Array.from(acc.entries())
+    .map(([key, { est, vnd }]) => ({ key, estoque: est, tempoEstoque: tempoFromIvv(est, vnd) }))
     .sort((a, b) => a.tempoEstoque - b.tempoEstoque);
 }
 
 export interface RankRow { key: string; value: number; }
 
-/** IVV por bairro (soma vendas / (soma estoque final + soma vendas)) */
 export function rankBairrosPorIvv(buildings: Building[], f: Filters): RankRow[] {
-  const est = new Map<string, number>();
-  const vnd = new Map<string, number>();
-  for (const b of buildings) {
-    const k = b.neighborhood;
-    if (!k) continue;
-    for (const t of b.typologies) {
-      const last = lastHistoryMatching(t, f);
-      if (last) est.set(k, (est.get(k) ?? 0) + last.typology_stock);
-      for (const h of t.history) {
-        if (!historyMatches(h, f)) continue;
-        vnd.set(k, (vnd.get(k) ?? 0) + h.sold_in_period);
-      }
-    }
-  }
+  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.neighborhood);
   const rows: RankRow[] = [];
-  for (const k of est.keys()) {
-    const e = est.get(k) ?? 0;
-    const v = vnd.get(k) ?? 0;
-    if (e + v > 0) rows.push({ key: k, value: v / (e + v) });
+  for (const [k, { est, vnd }] of acc) {
+    const denom = est + vnd;
+    if (denom > 0) rows.push({ key: k, value: vnd / denom });
   }
   return rows.sort((a, b) => b.value - a.value);
 }
 
 export function rankBairrosPorTempoEstoque(buildings: Building[], f: Filters): RankRow[] {
-  const months = monthsRangeOf(f, buildings);
-  const est = new Map<string, number>();
-  const vnd = new Map<string, number>();
-  for (const b of buildings) {
-    const k = b.neighborhood;
-    if (!k) continue;
-    for (const t of b.typologies) {
-      const last = lastHistoryMatching(t, f);
-      if (last) est.set(k, (est.get(k) ?? 0) + last.typology_stock);
-      for (const h of t.history) {
-        if (!historyMatches(h, f)) continue;
-        vnd.set(k, (vnd.get(k) ?? 0) + h.sold_in_period);
-      }
-    }
-  }
+  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.neighborhood);
   const rows: RankRow[] = [];
-  for (const k of est.keys()) {
-    const t = tempoEstoqueFor(est.get(k) ?? 0, vnd.get(k) ?? 0, months);
+  for (const [k, { est, vnd }] of acc) {
+    const t = tempoFromIvv(est, vnd);
     if (t > 0) rows.push({ key: k, value: t });
   }
   return rows.sort((a, b) => a.value - b.value);
 }
 
 function avgLastPrice(buildings: Building[], f: Filters, field: 'price' | 'price_private_area', groupBy: (b: Building) => string): RankRow[] {
+  const latest = latestPeriodInScope(buildings, f);
   const sum = new Map<string, { s: number; c: number }>();
+  if (!latest) return [];
   for (const b of buildings) {
     const k = groupBy(b);
     if (!k) continue;
     for (const t of b.typologies) {
-      const last = lastHistoryMatching(t, f);
-      if (!last) continue;
-      const val = last[field];
+      const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
+      if (!h) continue;
+      const val = h[field];
       if (val == null || !Number.isFinite(val)) continue;
       const cur = sum.get(k) ?? { s: 0, c: 0 };
       cur.s += val; cur.c += 1;
@@ -310,13 +345,20 @@ export function precoMedioPorPadrao(buildings: Building[], f: Filters): RankRow[
 // ============ Mapa de oportunidades ============
 
 export interface OpportunityMatrix {
-  bairros: string[];
-  cols: string[]; // ['1 dorm', '2 dorms', ...]
-  data: Record<string, Record<string, number>>; // bairro → col → ivv (0..1)
+  rows: string[];
+  cols: string[];
+  data: Record<string, Record<string, number>>;
+  rowLabel: string;
 }
 
-export function computeOpportunityMap(buildings: Building[], f: Filters): OpportunityMatrix {
-  const cols = ['1', '2', '3', '4+'];
+export type OpportunityGroupBy = 'neighborhood' | 'building_type';
+
+export function computeOpportunityMap(
+  buildings: Building[],
+  f: Filters,
+  groupBy: OpportunityGroupBy = 'neighborhood',
+): OpportunityMatrix {
+  const colKeys = ['1', '2', '3', '4+'];
   const est = new Map<string, Map<string, number>>();
   const vnd = new Map<string, Map<string, number>>();
   const ensure = (m: Map<string, Map<string, number>>, k: string) => {
@@ -324,49 +366,47 @@ export function computeOpportunityMap(buildings: Building[], f: Filters): Opport
     if (!inner) { inner = new Map(); m.set(k, inner); }
     return inner;
   };
-  for (const b of buildings) {
-    const nb = b.neighborhood;
-    if (!nb) continue;
-    for (const t of b.typologies) {
-      const col = bedroomBucket(t.number_bedroom);
-      if (!cols.includes(col)) continue;
-      const last = lastHistoryMatching(t, f);
-      if (last) {
-        const inner = ensure(est, nb);
-        inner.set(col, (inner.get(col) ?? 0) + last.typology_stock);
-      }
-      for (const h of t.history) {
-        if (!historyMatches(h, f)) continue;
-        const inner = ensure(vnd, nb);
-        inner.set(col, (inner.get(col) ?? 0) + h.sold_in_period);
+  const latest = latestPeriodInScope(buildings, f);
+  const keyFn = (b: Building) => (groupBy === 'building_type' ? b.building_type : b.neighborhood);
+  if (latest) {
+    for (const b of buildings) {
+      const row = keyFn(b);
+      if (!row) continue;
+      for (const t of b.typologies) {
+        const col = bedroomBucket(t.number_bedroom);
+        if (!colKeys.includes(col)) continue;
+        const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
+        if (!h) continue;
+        ensure(est, row).set(col, (ensure(est, row).get(col) ?? 0) + h.typology_stock);
+        ensure(vnd, row).set(col, (ensure(vnd, row).get(col) ?? 0) + h.sold_in_period);
       }
     }
   }
-  const bairros = Array.from(est.keys()).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const rows = Array.from(est.keys()).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   const data: Record<string, Record<string, number>> = {};
-  for (const nb of bairros) {
-    data[nb] = {};
-    for (const col of cols) {
-      const e = est.get(nb)?.get(col) ?? 0;
-      const v = vnd.get(nb)?.get(col) ?? 0;
-      data[nb][col] = e + v > 0 ? v / (e + v) : 0;
+  for (const r of rows) {
+    data[r] = {};
+    for (const col of colKeys) {
+      const e = est.get(r)?.get(col) ?? 0;
+      const v = vnd.get(r)?.get(col) ?? 0;
+      data[r][col] = e + v > 0 ? v / (e + v) : 0;
     }
   }
   return {
-    bairros,
-    cols: cols.map((c) => (c === '4+' ? '4 dorms' : c === '1' ? '1 dorm' : `${c} dorms`)),
+    rows,
+    cols: colKeys.map((c) => (c === '4+' ? '4 dorms' : c === '1' ? '1 dorm' : `${c} dorms`)),
     data,
+    rowLabel: groupBy === 'building_type' ? 'Tipo' : 'Bairro',
   };
 }
 
 // ============ IPC — Índice de Performance Comercial ============
 
-export interface IpcSeriesPoint { period: string; _sort: number; [standard: string]: number | string; }
+export interface IpcSeriesPoint { period: string; _sort: number; [standard: string]: number | string | null; }
 
 /**
  * IPC(b, p) = (Vendas(b,p)/Vendas(ALL,p)) / (Estoque(b,p)/Estoque(ALL,p))
- * `allBuildings` = universo bruto (antes de qualquer filtro do sidebar).
- * `filtered` = após filtros; agrupamos por `standard` e agregamos IPC via média ponderada por vendas.
+ * Estoque(b,p) <= 0 → BLANK (null).
  */
 export function computeIpcByStandard(
   allBuildings: Building[],
@@ -374,22 +414,20 @@ export function computeIpcByStandard(
   f: Filters,
   g: Granularity,
 ): { series: IpcSeriesPoint[]; standards: string[] } {
-  // ALL totals per period
   const allVendas = new Map<string, number>();
   const allEstoque = new Map<string, number>();
   const addSort = new Map<string, number>();
   for (const b of allBuildings) {
     for (const t of b.typologies) {
       for (const h of t.history) {
-        const key = periodKey(h.periodDate, g);
-        addSort.set(key, periodSortKey(h.periodDate, g));
+        const key = periodKey(h.period, g);
+        addSort.set(key, periodSortKey(h.period, g));
         allVendas.set(key, (allVendas.get(key) ?? 0) + h.sold_in_period);
         allEstoque.set(key, (allEstoque.get(key) ?? 0) + h.typology_stock);
       }
     }
   }
 
-  // per (standard, period) vendas / estoque within filtered
   const stdVendas = new Map<string, Map<string, number>>();
   const stdEstoque = new Map<string, Map<string, number>>();
   const standardsSet = new Set<string>();
@@ -404,8 +442,8 @@ export function computeIpcByStandard(
     for (const t of b.typologies) {
       for (const h of t.history) {
         if (!historyMatches(h, f)) continue;
-        const key = periodKey(h.periodDate, g);
-        addSort.set(key, periodSortKey(h.periodDate, g));
+        const key = periodKey(h.period, g);
+        addSort.set(key, periodSortKey(h.period, g));
         ensure(stdVendas, std).set(key, (ensure(stdVendas, std).get(key) ?? 0) + h.sold_in_period);
         ensure(stdEstoque, std).set(key, (ensure(stdEstoque, std).get(key) ?? 0) + h.typology_stock);
       }
@@ -421,9 +459,10 @@ export function computeIpcByStandard(
       const ee = stdEstoque.get(std)?.get(p) ?? 0;
       const av = allVendas.get(p) ?? 0;
       const ae = allEstoque.get(p) ?? 0;
+      if (ee <= 0) { row[std] = null; continue; }
       const percV = av > 0 ? ve / av : 0;
       const percE = ae > 0 ? ee / ae : 0;
-      row[std] = ee > 0 && percE > 0 ? percV / percE : 0;
+      row[std] = percE > 0 ? percV / percE : null;
     }
     return row;
   });
@@ -443,19 +482,18 @@ export function extractOptions(buildings: Building[]) {
   const standards = s<string>();
   const bedrooms = s<string>();
   const garages = s<string>();
-  const monthsSet = new Map<string, Date>(); // YYYY-MM → date
+  const monthsMap = new Map<string, { year: number; month: number }>();
   const names = new Map<string, string>();
 
   for (const b of buildings) {
     if (b.releaseYear) years.add(String(b.releaseYear));
-    // extract years/months also from history
     for (const t of b.typologies) {
       for (const h of t.history) {
-        const y = h.periodDate.getFullYear();
+        const y = yearFromPeriod(h.period);
         if (y > 1990) {
           years.add(String(y));
-          const mk = monthKey(h.periodDate);
-          if (!monthsSet.has(mk)) monthsSet.set(mk, h.periodDate);
+          const mk = monthKeyFromPeriod(h.period);
+          if (!monthsMap.has(mk)) monthsMap.set(mk, { year: y, month: monthFromPeriod(h.period) });
         }
       }
     }
@@ -476,11 +514,11 @@ export function extractOptions(buildings: Building[]) {
   const sortBucket = (arr: string[]) => arr.sort((a, b) => (a === '4+' ? 99 : parseInt(a)) - (b === '4+' ? 99 : parseInt(b)));
 
   const MONTH_LABELS_BR = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-  const months = Array.from(monthsSet.entries())
-    .sort(([a], [b]) => b.localeCompare(a)) // desc: mais recente primeiro
-    .map(([value, d]) => ({
+  const months = Array.from(monthsMap.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([value, { year, month }]) => ({
       value,
-      label: `${MONTH_LABELS_BR[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`,
+      label: `${MONTH_LABELS_BR[month - 1] ?? '??'}/${String(year).slice(2)}`,
     }));
 
   return {
