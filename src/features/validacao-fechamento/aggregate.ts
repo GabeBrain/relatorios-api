@@ -167,11 +167,13 @@ export function extractVFOptions(rows: ClosureRow[]): VFOptions {
     .sort((a, b) => (a[0] < b[0] ? 1 : -1))     // desc
     .map(([value, label]) => ({ value, label }));
   return {
-    years: Array.from(years).sort(),
-    quarters: Array.from(quarters).sort((a,b) => {
-      // '01T/24' → compare (yy, q)
+    years: Array.from(years).sort((a, b) => b.localeCompare(a, undefined, { numeric: true })),
+    quarters: Array.from(quarters).sort((a, b) => {
+      // '01T/24' → compare (yy, q) descending
       const [qa, ya] = a.split('T/'); const [qb, yb] = b.split('T/');
-      return ya === yb ? qa.localeCompare(qb) : ya.localeCompare(yb);
+      const yCmp = String(yb).localeCompare(ya, undefined, { numeric: true });
+      if (yCmp !== 0) return yCmp;
+      return String(qb).localeCompare(qa, undefined, { numeric: true });
     }),
     periods,
     standards: Array.from(standards).sort(),

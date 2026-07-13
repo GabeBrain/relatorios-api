@@ -26,18 +26,21 @@ export function VFHeader({ scope, onScopeChange, granularity, onGranularityChang
         ☰ Filtros
       </button>
       <GeoApiScopeSelector value={scope} onChange={onScopeChange} className="flex-1 min-w-[320px]" />
-      <div className="vf-chip-group ml-auto">
-        {GRANS.map((g) => (
-          <button
-            key={g.value}
-            type="button"
-            className="vf-chip"
-            data-active={g.value === granularity}
-            onClick={() => onGranularityChange(g.value)}
-          >
-            {g.label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-end gap-3 flex-1 min-w-[320px]">
+        <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Visualização</label>
+        <div className="vf-chip-group">
+          {GRANS.map((g) => (
+            <button
+              key={g.value}
+              type="button"
+              className="vf-chip"
+              data-active={g.value === granularity}
+              onClick={() => onGranularityChange(g.value)}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
       </div>
     </header>
   );
