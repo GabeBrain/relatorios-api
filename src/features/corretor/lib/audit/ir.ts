@@ -32,6 +32,8 @@ export interface IrSlide {
   fontes: string[];
   notas: string[];
   notas_edicao: string[];
+  /** Balões amarelos com texto vermelho da revisão A&R. Não entram em `textos`. */
+  notas_revisao: string[];
   tabelas: IrTable[];
   graficos: IrGrafico[];
   n_imagens: number;

@@ -352,6 +352,10 @@ export default function CorretorV3Page() {
         await saveAta(study.id, res.ata);
       }
 
+      // Reinsere DET por upsert: após a ata, a regra de UF ganha contexto e pode
+      // criar WRONG_CONTEXT que não existia na triagem inicial.
+      await insertIaFindings(study.id, res.detFindings, 'DET', study.version);
+
       // registra os passes com custo/tokens reais (acumula em studies_v3.custo_total)
       if (res.ataCostUsd > 0) {
         await registerIaPass(study.id, 'visao_ata', `ata · ${MODEL}`,

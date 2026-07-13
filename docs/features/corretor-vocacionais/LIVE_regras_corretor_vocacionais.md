@@ -16,6 +16,30 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.30 — 2026-07-13 — Coverage 90: WS1 cidade/UF em imagens (BETA, aguarda calibração real)
+
+Implementada a primeira regra de alto recall do `PLAN_coverage_90.md`:
+
+| Camada | Mudança |
+|---|---|
+| IA/visão | `analyze-table-image` transcreve `locais_visiveis[]` (cidade/UF/bairro) e marca se o local é protagonista de título/legenda. |
+| DET pós-ata | `wrongUfFindings` detecta uma UF brasileira divergente no texto/título (ex.: `São Paulo – MS` quando a ata diz `SP`). |
+| Comparação | `wrongContextFromVisibleLocales` emite `WRONG_CONTEXT` só para cidade protagonista diferente da cidade da ata; ignora Brasil e títulos comparativos Estado/Brasil. |
+| Cache | `vision_cache` v4→v5: todas as imagens são relidas uma vez para trazer locais visíveis. |
+
+Testes unitários: cidade divergente, controles sem FP e UF divergente. Build limpo. **Pendente de
+calibração:** deploy de `analyze-table-image` + Marka/Itajaí para medir o aceite (≥13/15 e zero FP).
+
+## Versão 0.29 — 2026-07-13 — Coverage 90: WS0 harness e isolamento das notas A&R
+
+O IR agora classifica formas com preenchimento amarelo e texto vermelho como `notas_revisao`,
+retirando-as de `textos` antes dos passes de IA. `LEFTOVER_NOTE` mantém a rede de segurança em
+produção, mas o harness ignora esse tipo para não contar a própria instrução humana como acerto.
+
+Novo harness `recall-marka.test.ts`: carrega as 96 formas do gabarito, fixa 57 labels ancoradas
+nota→regra e mede o recall DET quando `CORRETOR_CALIBRATION_IR` aponta para o IR local gitignored.
+Sem o artefato, informa explicitamente que a métrica ainda não é mensurável. Testes e build limpos.
+
 ## Versão 0.28 — 2026-07-13 — Cidade/UF da ata passa a ter evidência literal
 
 Cidade é parâmetro crítico do `CITY_NAME`; não pode depender de uma inferência opaca da visão.

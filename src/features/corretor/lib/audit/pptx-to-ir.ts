@@ -27,6 +27,27 @@ function txbodyParagraphs(txBody: Element): string[] {
   return els(txBody, NS.a, 'p').map(paragraphText).filter(Boolean);
 }
 
+function hexNear(value: string | null, target: string, tolerance = 24): boolean {
+  if (!value || !/^[0-9a-f]{6}$/i.test(value)) return false;
+  const n = parseInt(value, 16);
+  const t = parseInt(target, 16);
+  return [16, 8, 0].every((shift) => Math.abs(((n >> shift) & 0xff) - ((t >> shift) & 0xff)) <= tolerance);
+}
+
+/** Nota da analista: preenchimento amarelo + pelo menos uma run de texto vermelho. */
+function isReviewNoteShape(shape: Element): boolean {
+  const spPr = els(shape, NS.p, 'spPr')[0];
+  const yellowFill = !!spPr && els(spPr, NS.a, 'srgbClr')
+    .some((color) => hexNear(color.getAttribute('val'), 'FFFF00'));
+  if (!yellowFill) return false;
+
+  return els(shape, NS.a, 'r').some((run) => {
+    const rPr = els(run, NS.a, 'rPr')[0];
+    return !!rPr && els(rPr, NS.a, 'srgbClr')
+      .some((color) => hexNear(color.getAttribute('val'), 'FF0000'));
+  });
+}
+
 export function parseNumPtbr(raw: string): number | null {
   let s = raw.trim();
   if (!s) return null;
@@ -108,11 +129,14 @@ function parseSlide(xml: string, num: number, parser: DOMParser): IrSlide {
   const root = parser.parseFromString(xml, 'application/xml');
 
   const shapesParas: string[][] = [];
+  const notasRevisao: string[] = [];
   for (const sp of els(root, NS.p, 'sp')) {
     const tx = els(sp, NS.p, 'txBody')[0];
     if (tx) {
       const paras = txbodyParagraphs(tx);
-      if (paras.length) shapesParas.push(paras);
+      if (!paras.length) continue;
+      if (isReviewNoteShape(sp)) notasRevisao.push(paras.join('\n'));
+      else shapesParas.push(paras);
     }
   }
   const allParas = shapesParas.flat();
@@ -126,6 +150,7 @@ function parseSlide(xml: string, num: number, parser: DOMParser): IrSlide {
     fontes: allParas.filter((p) => FONTE_RX.test(p)),
     notas: allParas.filter((p) => NOTA_RX.test(p) && !FONTE_RX.test(p)),
     notas_edicao: allParas.filter((p) => p.length > 3 && p.length < 80 && LEFTOVER_RX.test(p)),
+    notas_revisao: notasRevisao,
     tabelas: els(root, NS.a, 'tbl').map(parseTable),
     graficos: [], // 2ª rodada
     n_imagens: els(root, NS.p, 'pic').length,

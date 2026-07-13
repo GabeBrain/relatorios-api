@@ -49,6 +49,20 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-13 — Corretor Coverage 90: WS0+WS1 (recall e contexto) — Gabriel
+- **WS0:** o extrator PPTX→IR agora separa notas internas de revisão (forma com fundo amarelo e
+  texto vermelho) em `notas_revisao`, fora do texto auditável, e continua apontando-as como
+  `LEFTOVER_NOTE`. Entraram o gabarito Marca/Tancredo (96 labels) e o harness com 57 alvos
+  ancorados para medir recall DET assim que o IR real local for informado.
+- **WS1:** a visão de tabelas passou a devolver localidades visíveis (`locais_visiveis`), com
+  cache v5, e compara cidade/UF contra a Ata; o motor também detecta UF divergente em títulos
+  textuais. Isso cobre erros de contexto sem inferir localidade a partir de números.
+- **Validação:** testes de nota, contexto e harness passaram; build passou. A aferição real de
+  recall ainda depende de rodar o harness com o IR do Marka e, depois do deploy, calibrar
+  Marka/Itajaí (meta: >=90% recall e <=15% FP).
+- **Próximo:** deploy de `analyze-table-image` e WS2 (`CROSS_TABLE_MISMATCH`) somente após a
+  medição-base. Detalhes e regras: doc vivo do Corretor v0.29/v0.30.
+
 ### 2026-07-09 — Corretor v3.2: números das imagens no app (Fase C produtizada) — Gabriel
 - **O quê:** o reconhecimento numérico das tabelas-imagem saiu do piloto e entrou no fluxo:
   localizador de candidatas no navegador (porte do scan_imagens.py; Marka 46/Itajaí 32,
@@ -260,7 +274,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, PPTX→IR, mapas, thumbnails) | 🟡 (no ar: **upload de .pptx** + fixtures + recall/export + RADII/mapa + thumbnails c/ poda; falta gráficos no extrator, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
 | 6f | Corretor v2 — estratégia de testes do fluxo do analista | 🟡 (design ✅ + slice 1 worklist ✅; slices 2-4 absorvidos pela v3) |
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
-| 6h | **Corretor v3** — unificação v1+v2 num fluxo único (5 estágios) | 🟡 v3.0 ✅ + v3.1 ✅ + **v3.2 ✅ (números das imagens)** — pendências: migrations `…v3_ia.sql`/`…v3_vision.sql` + deploys `analyze-text-batch`/`analyze-table-image` → v3.3 mapas + aposentar v1 🔲 |
+| 6h | **Corretor v3** — unificação v1+v2 num fluxo único (5 estágios) | 🟡 v3.0 ✅ + v3.1 ✅ + v3.2 ✅ (números das imagens) + Coverage 90 WS0/WS1 ✅ (harness, notas, cidade/UF). Migrations Ata/visão aplicadas; falta deploy da nova `analyze-table-image` (cache v5), calibração real Marka/Itajaí e WS2 (`CROSS_TABLE_MISMATCH`) → v3.3 mapas + aposentar v1 🔲 |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
@@ -275,6 +289,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] **Gabriel → time de analistas (médio prazo, semanas):** propor tabelas nativas no PPT com os argumentos de `fase_c_visao.md`/`custos_visao_reais.md`; **plano B**: pré-análise dos Excels de trabalho (origem dos prints) — bater os números direto na fonte antes da colagem no PPT. Decisão do gestor (09/jul): até lá, **imagem é o padrão**.
 - [ ] Fase E (foco atual): reorganizar a interface do corretor — relatório por seção→tipo de erro→achado, visualização de erros sobre a thumbnail, custo estimado antes de rodar IA.
 - [ ] Expandir o enum de tipos de erro (`analysis-store.ts`) para o catálogo da rubrica + tipos evidenciados pelas atas reais (`ATA_COVERAGE` etc.).
+- [ ] Coverage 90: fazer deploy de `analyze-table-image` com `locais_visiveis`/cache v5 e medir o
+  baseline no IR real do Marka (`CORRETOR_CALIBRATION_IR`); calibrar também Itajaí antes do WS2.
 - [ ] CID: retomar validação de base quando sair do standby.
 - [ ] Dívidas de segurança conhecidas — ver [`../architecture/SECURITY_NOTES.md`](../architecture/SECURITY_NOTES.md) (vulns npm, log por IP, `.env` versionado por design).
 - [ ] Apontamentos Juliana: etapas 4–6 pendentes (ver memória do projeto).

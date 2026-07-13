@@ -118,7 +118,7 @@ export async function runFullAnalysis(
   const { city, model, signal, onStage } = opts;
 
   // 1. DET — instantâneo
-  const detFindings = irToFindings(ir).filter((f) => !f.ok);
+  let detFindings = irToFindings(ir).filter((f) => !f.ok);
   onStage?.({ stage: 'det', done: 1, total: 1, findings: detFindings });
 
   const candidates = opts.candidates ?? (await findTableImages(bytes, ir));
@@ -138,6 +138,9 @@ export async function runFullAnalysis(
     onStage?.({ stage: 'ata', done: 1, total: 1, spentUsd: ataCostUsd });
   }
   const cityUsed = ata?.cidade?.trim() || city;
+  // A UF vem da ata e só está disponível após a primeira triagem. Reexecutar a
+  // camada DET é barato; IDs estáveis evitam duplicidade na persistência.
+  if (ata?.uf) detFindings = irToFindings(ir, { uf: ata.uf }).filter((f) => !f.ok);
 
   // 3. texto (com a cidade da ata) + visão em paralelo
   const textPromise = runTextPass(
@@ -152,6 +155,7 @@ export async function runFullAnalysis(
   const visionPromise = runVisionPass(candidates, model, {
     concurrency: VISION_CONCURRENCY,
     signal,
+    expected: { cidade: cityUsed, uf: ata?.uf },
     onProgress: (done, total) => onStage?.({ stage: 'visao', done, total }),
   }).then(async (res) => {
     // persiste a imagem original de cada achado → evidência visual na correção

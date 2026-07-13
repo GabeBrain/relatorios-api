@@ -17,6 +17,7 @@ const RULES_ENABLED = {
 const LEFTOVER = /\b(agrupar|ajustar|revisar|conferir|confirmar|checar|verificar|inserir|colocar|preencher|refazer|corrigir|pendente|trazer|falar com|fale comigo|todo|xxx)\b/i;
 const TOTAL_ROW = /^\s*total/i;
 const CANONICAS = ['IDENTIFICACAO', 'SOCIO', 'MERCADO', 'ABSORCAO', 'LACUNAS', 'ENTORNO', 'CONCLUSAO'];
+const UFS = new Set(['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']);
 
 function slideRef(n: number) { return `s${n}`; }
 
@@ -24,14 +25,16 @@ function slideRef(n: number) { return `s${n}`; }
 function noteFindings(ir: Ir): Finding[] {
   const out: Finding[] = [];
   for (const s of ir.slides) {
-    const notes = (s.notas_edicao ?? []).filter((t) => t && LEFTOVER.test(t));
+    const revisionNotes = (s.notas_revisao ?? []).filter(Boolean);
+    const editionNotes = (s.notas_edicao ?? []).filter((t) => t && LEFTOVER.test(t));
+    const notes = [...revisionNotes, ...editionNotes];
     notes.forEach((t, i) => {
       out.push({
         id: `note-${s.n}-${i}`,
         type: 'LEFTOVER_NOTE',
         section: toAuditSection(s.secao_canonica),
         slideRef: slideRef(s.n),
-        title: 'Nota interna de edição no slide',
+        title: 'Nota interna de revisão no slide',
         detail: 'Comentário de revisão deixado no deck (rede de segurança — estudos entregues não devem conter notas).',
         ok: false,
         viz: { kind: 'text', location: s.titulo ?? undefined, evidence: `“${t.trim()}”` },
@@ -204,17 +207,49 @@ function structureFinding(ir: Ir): Finding {
   };
 }
 
+/**
+ * DET gratuito para o caso explícito "Cidade – UF" em capa/título. Só aceita UFs
+ * brasileiras para não confundir siglas como Z.I. e A&R com estado.
+ */
+export function wrongUfFindings(ir: Ir, uf?: string): Finding[] {
+  const expected = uf?.trim().toUpperCase();
+  if (!expected || !UFS.has(expected)) return [];
+  const out: Finding[] = [];
+  const rx = /(?:–|-|\/)\s*([A-Z]{2})\b/g;
+  for (const s of ir.slides) {
+    const source = [s.titulo ?? '', ...(s.textos ?? [])].join('\n');
+    let match: RegExpExecArray | null;
+    rx.lastIndex = 0;
+    while ((match = rx.exec(source)) !== null) {
+      const found = match[1];
+      if (!UFS.has(found) || found === expected) continue;
+      out.push({
+        id: `wrong-uf-${s.n}-${found.toLowerCase()}`,
+        type: 'WRONG_CONTEXT',
+        section: toAuditSection(s.secao_canonica),
+        slideRef: slideRef(s.n),
+        title: `UF divergente do estudo (${found} ≠ ${expected})`,
+        detail: `O slide declara a UF ${found}, mas a ata identifica o estudo como ${expected}. Confira possível conteúdo de outro estudo.`,
+        ok: false,
+        viz: { kind: 'text', location: s.titulo ?? undefined, evidence: match[0].trim() },
+      });
+    }
+  }
+  return out;
+}
+
 // Removido em v3.3 (11/jul): o antigo "coverageFinding" ("Números presos em
 // imagem — auditoria limitada, depende da Fase C") ficou obsoleto — a visão agora
 // roda automaticamente no passo único, então números em imagem SÃO auditados.
 
-export function irToFindings(ir: Ir): Finding[] {
+export function irToFindings(ir: Ir, ctx?: { uf?: string }): Finding[] {
   const num = numericFindings(ir);
   const findings: Finding[] = [
     ...noteFindings(ir),
     ...(RULES_ENABLED.SOURCE_MISSING ? sourceFindings(ir) : []),
     ...radiiFindings(ir),
     ...num.findings,
+    ...wrongUfFindings(ir, ctx?.uf),
   ];
   if (num.verified > 0) {
     findings.push({

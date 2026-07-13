@@ -84,6 +84,11 @@ Transcreva TODAS as tabelas numéricas da imagem, fielmente:
 - NÃO invente valores: se um dígito estiver ilegível, use null.
 - Legendas de mapa (só cores/faixas, sem valores) NÃO são tabelas: ignore.
 
+Além das tabelas, transcreva qualquer cidade, UF ou bairro visível no título, legenda,
+rodapé, barra de busca ou cabeçalho da imagem. Não deduza: transcreva literalmente.
+Para cada local, marque "principal": true SOMENTE se estiver no título ou na legenda principal
+da tabela/gráfico (não em uma referência comparativa secundária).
+
 CLASSIFIQUE a semântica (o verificador confere a aritmética; classificar errado é pego):
 - "col_kinds": um rótulo por coluna, na ordem —
     "label"   (1ª coluna de rótulos),
@@ -99,8 +104,9 @@ CLASSIFIQUE a semântica (o verificador confere a aritmética; classificar errad
 
 Responda EXATAMENTE este JSON (sem markdown):
 {"tables": [{"title": "…", "columns": ["…"], "rows": [["rótulo", 123, null]], "totals": ["Total", 456],
-  "col_kinds": ["label","count","share"], "total_kind": "sum", "share_of": {"2": 1}}]}
-Se não houver tabela numérica: {"tables": []}`;
+  "col_kinds": ["label","count","share"], "total_kind": "sum", "share_of": {"2": 1}}],
+ "locais_visiveis": [{"texto": "São Paulo", "tipo": "cidade", "principal": true}]}
+Se não houver tabela numérica: {"tables": [], "locais_visiveis": []}`;
 
 async function callOpenAI(apiKey: string, body: RequestBody, retries = 3) {
   const payload = {
@@ -155,11 +161,12 @@ Deno.serve(async (req) => {
     if (!parsed.ok) return json({ error: parsed.error }, parsed.status);
 
     const response = await callOpenAI(apiKey, parsed.value);
-    let content: { tables?: unknown[] } = {};
-    try { content = JSON.parse(response.choices?.[0]?.message?.content ?? '{}'); } catch { content = { tables: [] }; }
+    let content: { tables?: unknown[]; locais_visiveis?: unknown[] } = {};
+    try { content = JSON.parse(response.choices?.[0]?.message?.content ?? '{}'); } catch { content = { tables: [], locais_visiveis: [] }; }
 
     return json({
       tables: Array.isArray(content.tables) ? content.tables : [],
+      locais_visiveis: Array.isArray(content.locais_visiveis) ? content.locais_visiveis : [],
       inputTokens: response.usage?.prompt_tokens ?? 0,
       outputTokens: response.usage?.completion_tokens ?? 0,
     });

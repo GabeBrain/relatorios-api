@@ -16,7 +16,8 @@ const db = supabase as any;
 // o cache antigo (schema menor) é reprocessado — extração ruim não fica presa pra sempre.
 // v4: semântica declarada (col_kinds/total_kind/share_of) capturada na extração e usada
 //     como hipótese verificada pela aritmética (participação vs taxa vs média).
-const CACHE_SCHEMA = 4;
+// v5: locais visíveis em título/legenda principal para detectar cidade/UF de outro estudo.
+const CACHE_SCHEMA = 5;
 
 interface RawTable {
   title?: string;
@@ -27,7 +28,10 @@ interface RawTable {
   total_kind?: unknown;
   share_of?: Record<string, unknown>;
 }
-interface CachePayload { tables: RawTable[] }
+export interface RawLocale { texto?: unknown; tipo?: unknown; principal?: unknown }
+interface CachePayload { tables: RawTable[]; locais_visiveis?: RawLocale[] }
+
+export interface ExpectedLocation { cidade: string; uf?: string | null }
 
 // ── estimativa (antes de rodar) ───────────────────────────────────────────────
 
@@ -157,6 +161,48 @@ export interface VisionPassOpts {
   concurrency?: number;
   /** Pausar/cancelar o passe — o que já foi extraído fica no cache. */
   signal?: AbortSignal;
+  /** Cidade/UF extraídas da ata, usadas para detectar vazamento de contexto nas imagens. */
+  expected?: ExpectedLocation;
+}
+
+function normalized(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+/** Comparação conservadora: só usa cidade marcada como protagonista da imagem pela visão. */
+export function wrongContextFromVisibleLocales(
+  rawLocales: RawLocale[] | undefined,
+  expected: ExpectedLocation | undefined,
+  candidate: Pick<TableImageCandidate, 'slide' | 'secao' | 'titulo' | 'sha1'>,
+): Finding[] {
+  const city = expected?.cidade?.trim();
+  if (!city) return [];
+  const expectedCity = normalized(city);
+  const title = normalized(candidate.titulo ?? '');
+  const comparative = /\bbrasil\b|\bestado\b/.test(title);
+  const seen = new Set<string>();
+  const findings: Finding[] = [];
+
+  for (const raw of rawLocales ?? []) {
+    const text = typeof raw.texto === 'string' ? raw.texto.trim() : '';
+    const kind = typeof raw.tipo === 'string' ? normalized(raw.tipo) : '';
+    if (!text || kind !== 'cidade' || raw.principal !== true) continue;
+    const found = normalized(text);
+    if (!found || found === expectedCity || found === 'brasil' || comparative || seen.has(found)) continue;
+    seen.add(found);
+    findings.push({
+      id: `iavis-context-${candidate.sha1.slice(0, 10)}-${found.replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`,
+      type: 'WRONG_CONTEXT',
+      section: toAuditSection(candidate.secao),
+      slideRef: `s${candidate.slide}`,
+      title: `Cidade divergente na imagem (${text} ≠ ${city})`,
+      detail: `A cidade “${text}” aparece no título/legenda principal da imagem; a ata define o estudo como ${city}${expected?.uf ? `/${expected.uf}` : ''}. Verifique possível dado de outro estudo.`,
+      ok: false,
+      viz: { kind: 'text', location: candidate.titulo ?? undefined, evidence: text },
+      evidenceSha1: candidate.sha1,
+    });
+  }
+  return findings;
 }
 
 /**
@@ -194,7 +240,7 @@ async function extractWithModel(
   payload: CachePayload; inputTokens: number; outputTokens: number;
 }> {
   const { data, error } = await supabase.functions.invoke<{
-    tables: RawTable[]; inputTokens: number; outputTokens: number; error?: string;
+    tables: RawTable[]; locais_visiveis?: RawLocale[]; inputTokens: number; outputTokens: number; error?: string;
   }>('analyze-table-image', {
     body: {
       base64: imageOverride?.base64 ?? toBase64(c.bytes),
@@ -206,7 +252,7 @@ async function extractWithModel(
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
   return {
-    payload: { tables: data?.tables ?? [] },
+    payload: { tables: data?.tables ?? [], locais_visiveis: data?.locais_visiveis ?? [] },
     inputTokens: data?.inputTokens ?? 0,
     outputTokens: data?.outputTokens ?? 0,
   };
@@ -235,7 +281,8 @@ function payloadIsClean(payload: CachePayload): boolean {
  */
 async function processImage(
   c: TableImageCandidate,
-  model: ModelId
+  model: ModelId,
+  expected?: ExpectedLocation,
 ): Promise<{ findings: Finding[]; tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number; outputTokens: number; costUsd: number; escalated: boolean }> {
   const findings: Finding[] = [];
   let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0, costUsd = 0;
@@ -284,6 +331,7 @@ async function processImage(
     : `lido pelo modelo ${usedModel}`;
 
   const secao = toAuditSection(c.secao);
+  findings.push(...wrongContextFromVisibleLocales(payload?.locais_visiveis, expected, c));
   (payload?.tables ?? []).forEach((raw, ti) => {
     const ext = toExtracted(raw);
     if (!ext) return;
@@ -370,7 +418,7 @@ export async function runVisionPass(
     while (next < candidates.length) {
       if (o.signal?.aborted) return;
       const i = next++;
-      const r = await processImage(candidates[i], model);
+      const r = await processImage(candidates[i], model, o.expected);
       findings.push(...r.findings);
       tablesExtracted += r.tablesExtracted;
       tablesVerified += r.tablesVerified;

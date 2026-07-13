@@ -217,7 +217,7 @@ export async function recheck(
 export async function insertIaFindings(
   studyId: string,
   findings: Finding[],
-  origem: 'IA_texto' | 'IA_visao',
+  origem: 'DET' | 'IA_texto' | 'IA_visao',
   versionN: number
 ): Promise<number> {
   if (!findings.length) return 0;
