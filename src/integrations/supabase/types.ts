@@ -54,6 +54,8 @@ export type Database = {
           study_id: string
           tipo: string
           titulo: string
+          verdict: string | null
+          verdict_revisado: boolean
         }
         Insert: {
           created_at?: string
@@ -70,6 +72,8 @@ export type Database = {
           study_id: string
           tipo: string
           titulo: string
+          verdict?: string | null
+          verdict_revisado?: boolean
         }
         Update: {
           created_at?: string
@@ -86,6 +90,8 @@ export type Database = {
           study_id?: string
           tipo?: string
           titulo?: string
+          verdict?: string | null
+          verdict_revisado?: boolean
         }
         Relationships: [
           {
@@ -286,6 +292,7 @@ export type Database = {
       studies_v3: {
         Row: {
           ata: Json | null
+          ata_confirmada: boolean
           cidade: string | null
           concluded_at: string | null
           created_at: string
@@ -293,9 +300,11 @@ export type Database = {
           id: string
           nome: string
           status: string
+          uf: string | null
         }
         Insert: {
           ata?: Json | null
+          ata_confirmada?: boolean
           cidade?: string | null
           concluded_at?: string | null
           created_at?: string
@@ -303,9 +312,11 @@ export type Database = {
           id?: string
           nome: string
           status?: string
+          uf?: string | null
         }
         Update: {
           ata?: Json | null
+          ata_confirmada?: boolean
           cidade?: string | null
           concluded_at?: string | null
           created_at?: string
@@ -313,6 +324,7 @@ export type Database = {
           id?: string
           nome?: string
           status?: string
+          uf?: string | null
         }
         Relationships: []
       }
