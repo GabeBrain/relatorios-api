@@ -54,7 +54,7 @@ export function CrossAnalysis({ rows }: { rows: QuantiRecord[] }) {
   }
 
   function exportCSV() {
-    const s = buildSheet().map((r) => r.map((c) => `"${String(c).replaceAll('"', '""')}"`).join(',')).join('\n');
+    const s = buildSheet().map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([s], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
