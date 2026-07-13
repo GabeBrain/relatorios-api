@@ -20,8 +20,10 @@
 }
 
 .dash-geobrain .dg-header .dg-chip,
-.dash-geobrain .dg-header .dg-select { height: 32px; }
+.dash-geobrain .dg-header .dg-select { height: 36px; }
 .dash-geobrain .dg-header .dg-chip { padding: 0 12px; }
+.dash-geobrain .dg-header-group { display: inline-flex; flex-direction: column; gap: 6px; }
+.dash-geobrain .dg-header-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: hsl(var(--dg-muted)); }
 
 .dash-geobrain .dg-card {
   background: hsl(var(--dg-card));
