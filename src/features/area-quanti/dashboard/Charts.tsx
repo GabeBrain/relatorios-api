@@ -208,7 +208,7 @@ export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
       <table className="min-w-full border-collapse text-[11px]">
         <thead>
           <tr>
-            <th className="sticky left-0 z-10 bg-white p-1 text-left font-medium text-[var(--qd-text-muted)]">
+            <th className="sticky left-0 z-10 p-1 text-left font-medium text-[var(--qd-text-muted)]" style={{ background: 'var(--qd-surface)' }}>
               {metricLabel ?? ''}
             </th>
             {ct.cols.map((c) => (
