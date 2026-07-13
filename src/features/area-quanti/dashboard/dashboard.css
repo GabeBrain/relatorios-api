@@ -6,19 +6,38 @@
   --qd-light: #eaf2d8;
   --qd-bg: #f6f8f1;
   --qd-surface: #ffffff;
+  --qd-surface-2: #ffffff;
   --qd-border: #e2e8d5;
   --qd-text: #1f2a12;
   --qd-text-muted: #6e7b55;
   --qd-warn: #F8D000;
+  --qd-scroll-thumb: #cbd5e1;
   background: var(--qd-bg);
   color: var(--qd-text);
   font-family: 'Archivo', 'Inter', system-ui, sans-serif;
+}
+.dark .qd-root {
+  --qd-primary: #a8cf7a;
+  --qd-primary-2: #8fb85f;
+  --qd-accent: #b5cf7d;
+  --qd-light: #3a3d34;
+  --qd-bg: #272726;
+  --qd-surface: #2f2f2e;
+  --qd-surface-2: #363634;
+  --qd-border: #3f3f3d;
+  --qd-text: #eef1e5;
+  --qd-text-muted: #a8ad9a;
+  --qd-scroll-thumb: #4a4a48;
 }
 .qd-card {
   background: var(--qd-surface);
   border: 1px solid var(--qd-border);
   border-radius: 16px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.04);
+  color: var(--qd-text);
+}
+.dark .qd-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 .qd-card-title {
   font-size: 12px;
@@ -31,6 +50,7 @@
 .qd-kpi-label { font-size: 11px; color: var(--qd-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .qd-section-title { font-size: 15px; font-weight: 700; color: var(--qd-text); }
 .qd-section-sub { font-size: 12px; color: var(--qd-text-muted); }
+.qd-topbar { background: var(--qd-surface); border-bottom: 1px solid var(--qd-border); }
 .qd-chip {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 3px 8px; border-radius: 999px;
@@ -41,6 +61,11 @@
 .qd-chip button:hover { opacity: 1; }
 .qd-hm-cell { transition: transform .12s ease; }
 .qd-hm-cell:hover { transform: scale(1.04); outline: 2px solid var(--qd-primary); outline-offset: -1px; }
-.qd-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+.qd-scroll { scrollbar-width: thin; scrollbar-color: var(--qd-scroll-thumb) transparent; }
 .qd-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
-.qd-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.qd-scroll::-webkit-scrollbar-thumb { background: var(--qd-scroll-thumb); border-radius: 4px; }
+.qd-select {
+  background: var(--qd-surface);
+  color: var(--qd-text);
+  border: 1px solid var(--qd-border);
+}
