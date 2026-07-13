@@ -21,13 +21,18 @@ import { VizSwitch } from '../components/audit/FindingCard';
 import LegacyV1Panel from '../components/LegacyV1Panel';
 import AtaTestPanel from '../components/AtaTestPanel';
 import AtaCard from '../components/AtaCard';
+import AtaGateCard, { type AtaGateValue } from '../components/AtaGateCard';
 import { formatUSD, type ModelId } from '../lib/cost-calculator';
-import { runFullAnalysis, estimateFullAnalysis, type StageProgress, type FullEstimate } from '../lib/v3/pipeline';
-import { BUDGET_STUDY_BRL, formatBRL } from '../lib/v3/config';
+import {
+  runPhase1, runPhase2, estimateFullAnalysis,
+  type StageProgress, type FullEstimate, type Phase1Result,
+} from '../lib/v3/pipeline';
+import type { AtaData } from '../lib/v3/ia-ata';
+import { BUDGET_STUDY_BRL, formatBRL, usdToBrl } from '../lib/v3/config';
 import { confidenceOf, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
-  concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta,
+  concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
   setFindingVerdict, type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 
@@ -309,6 +314,11 @@ export default function CorretorV3Page() {
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisState | null>(null);
   const [budgetPrompt, setBudgetPrompt] = useState<{ estimate: FullEstimate; run: () => void } | null>(null);
+  // WS-1: portão da ata — fase 1 pronta, aguardando o analista confirmar cidade/UF.
+  const [gate, setGate] = useState<{
+    studyId: string; version: number; ir: Ir; bytes: Uint8Array;
+    ata: AtaData | null; estimate: FullEstimate; phase2Brl: string;
+  } | null>(null);
   const [dragging, setDragging] = useState(false);
   const [workspaceTab, setWorkspaceTab] = useState<'completude' | 'problemas' | 'slides'>('completude');
   const [confidenceFilter, setConfidenceFilter] = useState<Confidence[]>([1, 2, 3]);
@@ -331,27 +341,28 @@ export default function CorretorV3Page() {
     try { setItems(await loadFindings(id)); } finally { setLoadingStudy(false); }
   }, []);
 
-  /** Executa a análise completa (texto + visão em paralelo) já autorizada. */
-  const startAnalysis = useCallback(async (
-    study: { id: string; cidade: string | null; version: number },
-    ir: Ir,
-    bytes: Uint8Array,
-    estimate: FullEstimate,
+  /**
+   * FASE 2 (paga): texto + visão + cruzamentos, com a cidade/UF JÁ confirmadas no
+   * portão. Persiste a ata confirmada, os DET pós-ata e registra os passes/custos.
+   */
+  const runPaidAnalysis = useCallback(async (
+    ctx: { studyId: string; version: number; ir: Ir; bytes: Uint8Array; estimate: FullEstimate },
+    confirmed: AtaGateValue,
+    phase2Usd: number,
   ) => {
     const ac = new AbortController();
     abortRef.current = ac;
-    setAnalysis({
-      running: true,
-      stages: { det: { done: 1, total: 1 } },
-      spentUsd: 0,
-      estimateUsd: estimate.costUsd,
-    });
+    setAnalysis({ running: true, stages: { det: { done: 1, total: 1 }, ata: { done: 1, total: 1 } }, spentUsd: 0, estimateUsd: phase2Usd });
     try {
-      const res = await runFullAnalysis(ir, bytes, {
-        city: study.cidade ?? '',
+      // grava a ata confirmada + cidade/UF validadas (a régua da revisão)
+      await confirmAta(ctx.studyId, confirmed.ata, confirmed.cidade, confirmed.uf);
+
+      const res = await runPhase2(ctx.ir, {
+        city: confirmed.cidade,
+        uf: confirmed.uf,
+        ata: confirmed.ata,
         model: MODEL,
-        candidates: estimate.candidates,
-        ataCandidate: estimate.ataCandidate,
+        candidates: ctx.estimate.candidates,
         signal: ac.signal,
         onStage: async (p) => {
           setAnalysis((prev) => prev && {
@@ -359,34 +370,22 @@ export default function CorretorV3Page() {
             stages: { ...prev.stages, [p.stage]: { done: p.done, total: p.total } },
             spentUsd: prev.spentUsd + (p.spentUsd ?? 0),
           });
-          // achados de IA pingam na worklist assim que a etapa termina
           if (p.findings?.length && (p.stage === 'texto' || p.stage === 'visao' || p.stage === 'cruzamento')) {
-            await insertIaFindings(study.id, p.findings, p.stage === 'texto' ? 'IA_texto' : 'IA_visao', study.version);
-            setItems(await loadFindings(study.id));
+            await insertIaFindings(ctx.studyId, p.findings, p.stage === 'texto' ? 'IA_texto' : 'IA_visao', ctx.version);
+            setItems(await loadFindings(ctx.studyId));
           }
         },
       });
 
-      // persiste a ata (+ copia a cidade p/ card e próximas revisões)
-      if (res.ata !== null || estimate.ataCandidate) {
-        await saveAta(study.id, res.ata);
-      }
+      // DET pós-ata (UF + cobertura) por upsert — IDs estáveis evitam duplicata.
+      await insertIaFindings(ctx.studyId, res.detFindings, 'DET', ctx.version);
 
-      // Reinsere DET por upsert: após a ata, a regra de UF ganha contexto e pode
-      // criar WRONG_CONTEXT que não existia na triagem inicial.
-      await insertIaFindings(study.id, res.detFindings, 'DET', study.version);
-
-      // registra os passes com custo/tokens reais (acumula em studies_v3.custo_total)
-      if (res.ataCostUsd > 0) {
-        await registerIaPass(study.id, 'visao_ata', `ata · ${MODEL}`,
-          res.ataCostUsd, res.ataTokens.input, res.ataTokens.output);
-      }
       if (res.textCostUsd > 0 || res.textFindings.length) {
-        await registerIaPass(study.id, 'texto', `${estimate.textSlides} slides · ${MODEL}`,
+        await registerIaPass(ctx.studyId, 'texto', `${ctx.estimate.textSlides} slides · ${MODEL}`,
           res.textCostUsd, res.textTokens.input, res.textTokens.output);
       }
       if (res.visionCostUsd > 0 || res.visionFindings.length) {
-        await registerIaPass(study.id, 'visao_tabela', `${estimate.candidates.length} imagens · ${MODEL}`,
+        await registerIaPass(ctx.studyId, 'visao_tabela', `${ctx.estimate.candidates.length} imagens · ${MODEL}`,
           res.visionCostUsd, res.visionTokens.input, res.visionTokens.output);
       }
 
@@ -401,7 +400,7 @@ export default function CorretorV3Page() {
         });
       }
       await refreshList();
-      setItems(await loadFindings(study.id));
+      setItems(await loadFindings(ctx.studyId));
     } catch (err) {
       toast.error('Falha na análise', { description: err instanceof Error ? err.message : String(err) });
     } finally {
@@ -410,19 +409,68 @@ export default function CorretorV3Page() {
     }
   }, [refreshList]);
 
-  /** Decide entre rodar direto ou pedir confirmação (estimativa acima do teto). */
-  const analyzeStudy = useCallback(async (
-    study: { id: string; cidade: string | null; version: number },
-    ir: Ir,
-    bytes: Uint8Array,
+  /**
+   * FASE 1 (barata): DET + ata. Persiste a ata bruta e os DET, depois ABRE O PORTÃO
+   * (setGate) — nada de texto/visão paga roda antes da confirmação do analista.
+   */
+  const startPhase1AndGate = useCallback(async (
+    study: { id: string; version: number }, ir: Ir, bytes: Uint8Array,
   ) => {
-    const estimate = await estimateFullAnalysis(ir, bytes, MODEL);
-    if (estimate.costBrl > BUDGET_STUDY_BRL) {
-      setBudgetPrompt({ estimate, run: () => { setBudgetPrompt(null); void startAnalysis(study, ir, bytes, estimate); } });
+    const ac = new AbortController();
+    abortRef.current = ac;
+    setAnalysis({ running: true, stages: { det: { done: 1, total: 1 } }, spentUsd: 0, estimateUsd: 0 });
+    try {
+      const estimate = await estimateFullAnalysis(ir, bytes, MODEL);
+      const p1: Phase1Result = await runPhase1(ir, bytes, {
+        model: MODEL,
+        candidates: estimate.candidates,
+        ataCandidate: estimate.ataCandidate,
+        signal: ac.signal,
+        onStage: async (p) => {
+          setAnalysis((prev) => prev && {
+            ...prev,
+            stages: { ...prev.stages, [p.stage]: { done: p.done, total: p.total } },
+            spentUsd: prev.spentUsd + (p.spentUsd ?? 0),
+          });
+        },
+      });
+
+      // persiste a ata bruta (card) e o custo da ata; DET já entrou no createStudy
+      if (p1.ata !== null || p1.ataCandidate) await saveAta(study.id, p1.ata);
+      if (p1.ataCostUsd > 0) {
+        await registerIaPass(study.id, 'visao_ata', `ata · ${MODEL}`, p1.ataCostUsd, p1.ataTokens.input, p1.ataTokens.output);
+      }
+      await insertIaFindings(study.id, p1.detFindings, 'DET', study.version);
+      await refreshList();
+      setItems(await loadFindings(study.id));
+
+      const phase2Usd = Math.max(0, estimate.costUsd - p1.ataCostUsd);
+      setGate({
+        studyId: study.id, version: study.version, ir, bytes,
+        ata: p1.ata, estimate, phase2Brl: formatBRL(phase2Usd),
+      });
+    } catch (err) {
+      toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      abortRef.current = null;
+      setAnalysis(null);
+    }
+  }, [refreshList]);
+
+  /** Portão confirmado: valida orçamento da fase 2 e a executa. */
+  const confirmGate = useCallback((value: AtaGateValue) => {
+    if (!gate) return;
+    const ctx = { studyId: gate.studyId, version: gate.version, ir: gate.ir, bytes: gate.bytes, estimate: gate.estimate };
+    // A ata já foi paga na fase 1; o orçamento restante é texto + visão.
+    const phase2Usd = Math.max(0, gate.estimate.costUsd - gate.estimate.vision.costUsd) + gate.estimate.vision.costUsd;
+    setGate(null);
+    const run = () => void runPaidAnalysis(ctx, value, gate.estimate.costUsd);
+    if (usdToBrl(phase2Usd) > BUDGET_STUDY_BRL) {
+      setBudgetPrompt({ estimate: gate.estimate, run: () => { setBudgetPrompt(null); run(); } });
       return;
     }
-    await startAnalysis(study, ir, bytes, estimate);
-  }, [startAnalysis]);
+    run();
+  }, [gate, runPaidAnalysis]);
 
   async function ingestNew(file: File) {
     if (!/\.pptx$/i.test(file.name)) {
@@ -445,8 +493,8 @@ export default function CorretorV3Page() {
       await refreshList();
       await openStudy(id);
       setBusy(null);
-      // passo único: dispara a análise completa automaticamente
-      await analyzeStudy({ id, cidade: null, version: 1 }, ir, bytes);
+      // fase 1 (DET + ata) → portão de confirmação → fase 2 (paga)
+      await startPhase1AndGate({ id, version: 1 }, ir, bytes);
     } catch (err) {
       toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
       setBusy(null);
@@ -464,16 +512,24 @@ export default function CorretorV3Page() {
     const file = e.target.files?.[0];
     if (!file || !selected) return;
     e.target.value = '';
+    await recheckFromBytes(new Uint8Array(await file.arrayBuffer()), file.name);
+  }
+
+  /**
+   * Reconferência a partir dos bytes (input, drop, futuro file-watch WS-F). Diff DET
+   * grátis; a fase 2 re-roda com a cidade/UF já confirmadas (visão vem do cache).
+   */
+  async function recheckFromBytes(bytes: Uint8Array, filename: string) {
+    if (!selected) return;
     const newVersion = selected.lastVersion + 1;
     setBusy('recheck');
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const ir = await pptxToIr(bytes, file.name);
-      const findings = irToFindings(ir).filter((f) => !f.ok);
+      const ir = await pptxToIr(bytes, filename);
+      const findings = irToFindings(ir, selected.uf ? { uf: selected.uf } : undefined).filter((f) => !f.ok);
       const diff = await recheck(
         selected.id,
         newVersion,
-        { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name },
+        { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: filename },
         findings
       );
       setLastDiff(diff);
@@ -483,8 +539,13 @@ export default function CorretorV3Page() {
       await refreshList();
       setItems(await loadFindings(selected.id));
       setBusy(null);
-      // re-roda a IA sobre a versão nova (visão puxa do cache → barato)
-      await analyzeStudy({ id: selected.id, cidade: selected.cidade, version: newVersion }, ir, bytes);
+      // re-roda a fase paga direto (cidade/UF já confirmadas; visão puxa do cache → barato)
+      const estimate = await estimateFullAnalysis(ir, bytes, MODEL);
+      await runPaidAnalysis(
+        { studyId: selected.id, version: newVersion, ir, bytes, estimate },
+        { cidade: selected.cidade ?? '', uf: selected.uf ?? '', ata: selected.ata ?? null },
+        estimate.costUsd,
+      );
     } catch (err) {
       toast.error('Falha ao reconferir', { description: err instanceof Error ? err.message : String(err) });
       setBusy(null);
@@ -726,6 +787,16 @@ export default function CorretorV3Page() {
           {/* Passo único: análise completa dispara sozinha no upload/reconferir */}
           {analysis?.running && (
             <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} />
+          )}
+
+          {/* WS-1: portão da ata — bloqueia os passes pagos até a confirmação da cidade/UF */}
+          {gate && gate.studyId === selected.id && !analysis?.running && (
+            <AtaGateCard
+              ata={gate.ata}
+              costBrl={gate.phase2Brl}
+              running={false}
+              onConfirm={confirmGate}
+            />
           )}
 
           {loadingStudy ? (

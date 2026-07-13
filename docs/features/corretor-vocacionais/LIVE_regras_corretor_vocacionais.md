@@ -16,6 +16,28 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.35 — 2026-07-13 — Corretor v5 WS-0 + WS-1: higiene + portão da ata (RUNTIME)
+
+Execução do `PLAN_corretor_v5_fluxo.md` pelo Opus (branch `feat/corretor-v5-fluxo`).
+
+**WS-0 — higiene:** `build` roda `tsc --noEmit` (o crash da v0.33 seria pego); fix
+`wl.completeness→completude`; `projectionFindings` usa `maxYear >= ano+3` (fim do falso
+negativo); checklist estrutural exclui capa/sumário por seção (não por índice fixo);
+`confidenceOf` rebaixa `WRONG_CONTEXT` de visão não confirmada para nível 2; cruzamento de
+tabelas nativas carrega `origem: 'DET'` (novo campo opcional em `Finding`); `DeckRuler` usa
+grid `auto-fill` (as classes `grid-cols-16/20` não existiam).
+
+**WS-1 — portão da ata (mudança de maior alavancagem):** `runFullAnalysis` dividida em
+`runPhase1` (DET + ata, barata) e `runPhase2` (texto + visão + cruzamentos, paga). Entre elas,
+o novo `AtaGateCard` bloqueia os passes pagos: o analista **confirma/edita cidade, UF e os
+pedidos da ata** antes de gastar. Sem ata detectada, vira formulário obrigatório de cidade/UF
+— fecha o buraco do `cidade: null` no upload (o CITY_NAME rodava cego). `confirmAta` persiste a
+régua validada + `ata_confirmada`. `runFullAnalysis` mantida como composição (testes verdes).
+
+**Migration:** `20260713160000_corretor_v5_ata_gate.sql` — colunas `ata_confirmada` e `uf` em
+`studies_v3`. **DET-only:** as fases pagas dependem das edges (visão/texto), então o teste novo
+cobre `confidenceOf` (UF texto=1, visão não confirmada=2, escalonada=1). Suíte: 47 verdes.
+
 ## Versão 0.34 — 2026-07-13 — Revisão da v0.33 (1 fix aplicado) + plano do Corretor v5 (docs)
 
 Revisão do commit `561f7f9` (Claude): A1–A4/B1–B6 conferidos como corretos. **1 bug corrigido

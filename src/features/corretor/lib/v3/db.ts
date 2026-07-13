@@ -14,6 +14,8 @@ export interface StudyV3 {
   id: string;
   nome: string;
   cidade: string | null;
+  uf: string | null;
+  ataConfirmada: boolean;
   status: 'em_correcao' | 'pronto';
   createdAt: string;
   concludedAt: string | null;
@@ -95,6 +97,8 @@ export async function listStudies(): Promise<StudyV3[]> {
       id: s.id,
       nome: s.nome,
       cidade: s.cidade,
+      uf: s.uf ?? null,
+      ataConfirmada: s.ata_confirmada === true,
       status: s.status,
       createdAt: s.created_at,
       concludedAt: s.concluded_at,
@@ -113,7 +117,30 @@ export async function listStudies(): Promise<StudyV3[]> {
 export async function saveAta(studyId: string, ata: AtaData | null): Promise<void> {
   const patch: Record<string, unknown> = { ata };
   const cidade = ata?.cidade?.trim();
+  const uf = ata?.uf?.trim();
   if (cidade) patch.cidade = cidade;
+  if (uf) patch.uf = uf;
+  const { error } = await db.from('studies_v3').update(patch).eq('id', studyId);
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * WS-1 (portão da ata): grava a ata CONFIRMADA/EDITADA pelo analista com a cidade/UF
+ * que ele validou (a régua do CITY_NAME/WRONG_CONTEXT) e marca `ata_confirmada`.
+ * Aceita cidade/UF explícitas mesmo sem ata (caminho "sem ata": formulário manual).
+ */
+export async function confirmAta(
+  studyId: string,
+  ata: AtaData | null,
+  cidade: string,
+  uf: string | null
+): Promise<void> {
+  const patch: Record<string, unknown> = {
+    ata,
+    cidade: cidade.trim() || null,
+    uf: uf?.trim() || null,
+    ata_confirmada: true,
+  };
   const { error } = await db.from('studies_v3').update(patch).eq('id', studyId);
   if (error) throw new Error(error.message);
 }
