@@ -14,6 +14,7 @@ import { KpiRow } from '@/features/dashboard-geobrain/KpiRow';
 import { EvolucaoChart, IvvChart, VgvChart, OfertaComboChart, IpcChart } from '@/features/dashboard-geobrain/Charts';
 import { RankingCard } from '@/features/dashboard-geobrain/Rankings';
 import { OpportunityMap } from '@/features/dashboard-geobrain/OpportunityMap';
+import { ActiveFiltersBar } from '@/features/dashboard-geobrain/ActiveFiltersBar';
 import type { Filters, Granularity } from '@/features/dashboard-geobrain/types';
 import { useAuthStore } from '@/store/auth-store';
 import '@/features/dashboard-geobrain/dashboard.css';
