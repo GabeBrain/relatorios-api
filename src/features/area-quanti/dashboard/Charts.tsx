@@ -73,7 +73,7 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
               <Cell
                 key={d.key}
                 fill={PALETTE[i % PALETTE.length]}
-                stroke={active ? '#0f172a' : '#fff'}
+                stroke={active ? ACTIVE_STROKE : '#fff'}
                 strokeWidth={active ? 2 : 1}
                 style={{ cursor: 'pointer' }}
               />
@@ -92,7 +92,7 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
   );
 }
 
-export function BarField({ rows, field, height = 260, topN }: FieldChartProps) {
+export function BarField({ rows, field, height, topN }: FieldChartProps) {
   const toggle = useQuantiStore((s) => s.toggleValue);
   const filters = useQuantiStore((s) => s.filters);
   const data = useMemo(() => {
@@ -104,20 +104,42 @@ export function BarField({ rows, field, height = 260, topN }: FieldChartProps) {
     return out;
   }, [rows, field, topN]);
 
+  const total = rows.length || 1;
+  // Larger bars: ~36px per row, min 220
+  const h = height ?? Math.max(220, data.length * 36 + 24);
+  const maxLabel = Math.max(0, ...data.map((d) => d.key.length));
+  const yWidth = Math.min(180, Math.max(80, maxLabel * 6.2));
+
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} margin={{ top: 6, right: 12, left: 4, bottom: 40 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-        <XAxis dataKey="key" tick={{ fontSize: 10 }} interval={0} angle={-30} textAnchor="end" height={50} />
-        <YAxis tick={{ fontSize: 10 }} />
+    <ResponsiveContainer width="100%" height={h}>
+      <BarChart data={data} layout="vertical" margin={{ top: 6, right: 56, left: 6, bottom: 6 }} barCategoryGap={6}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+        <XAxis type="number" tick={{ fontSize: 10 }} />
+        <YAxis dataKey="key" type="category" tick={{ fontSize: 11 }} width={yWidth} interval={0} />
         <Tooltip
-          formatter={(v: number) => [`${v.toLocaleString('pt-BR')} (${((v / rows.length) * 100).toFixed(1)}%)`, 'Entrevistas']}
+          cursor={{ fill: 'rgba(91,117,55,0.08)' }}
+          formatter={(v: number) => [`${v.toLocaleString('pt-BR')} (${((v / total) * 100).toFixed(1)}%)`, 'Entrevistas']}
         />
-        <Bar dataKey="count" onClick={(d: any) => toggle(field, d.key)} cursor="pointer">
+        <Bar dataKey="count" onClick={(d: any) => toggle(field, d.key)} cursor="pointer" radius={[0, 4, 4, 0]}>
           {data.map((d, i) => {
             const active = filters[field]?.includes(d.key);
-            return <Cell key={d.key} fill={active ? '#0f172a' : PALETTE[i % PALETTE.length]} />;
+            return (
+              <Cell
+                key={d.key}
+                fill={PALETTE[i % PALETTE.length]}
+                stroke={active ? ACTIVE_STROKE : 'transparent'}
+                strokeWidth={active ? 2 : 0}
+              />
+            );
           })}
+          <LabelList
+            dataKey="count"
+            position="right"
+            style={{ fontSize: 11, fill: '#3d5024', fontWeight: 600 }}
+            formatter={(v: number) =>
+              `${v.toLocaleString('pt-BR')} (${((v / total) * 100).toFixed(1)}%)`
+            }
+          />
         </Bar>
       </BarChart>
     </ResponsiveContainer>
@@ -138,7 +160,7 @@ export function HistogramChart({ rows, field, bins = 20, height = 260 }: HistPro
           formatter={(v: number) => [`${v.toLocaleString('pt-BR')}`, 'Entrevistas']}
           labelFormatter={(l) => (isMoney ? `R$ ${l}` : `${l}`)}
         />
-        <Bar dataKey="count" fill="#3b82f6" />
+        <Bar dataKey="count" fill={PALETTE[0]} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
