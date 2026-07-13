@@ -49,6 +49,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-13 — Corretor: contexto de cidade e resiliência da visão — Gabriel
+- **Contexto:** regra DET pós-Ata passou a identificar município IBGE no padrão explícito
+  `Cidade – UF`; cobre vazamento como `Curitiba – MG` em estudo de Brumadinho/MG, que a regra
+  anterior de UF não podia detectar.
+- **Visão:** cache v7 valida profundamente payloads antes de reutilizar e não deixa formato
+  inválido causar `.map is not a function`; cabeçalhos de tabela entram na leitura de locais e
+  o localizador deixa de excluir tabelas somente por seção.
+- **Operação:** publicar `analyze-table-image`, pois o prompt mudou e o cache será relido uma
+  vez. Testes locais: 50 verdes e build tipado aprovado.
+
 ### 2026-07-13 — Corretor v5: fluxo operacional WS-0–WS-5 — Gabriel
 - **Confiabilidade e portão:** build agora inclui typecheck; análise foi dividida em DET/Ata e
   passes pagos, com confirmação obrigatória de cidade, UF e pedidos antes do gasto.
@@ -321,7 +331,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] Fase E (foco atual): reorganizar a interface do corretor — relatório por seção→tipo de erro→achado, visualização de erros sobre a thumbnail, custo estimado antes de rodar IA.
 - [ ] Expandir o enum de tipos de erro (`analysis-store.ts`) para o catálogo da rubrica + tipos evidenciados pelas atas reais (`ATA_COVERAGE` etc.).
 - [ ] Coverage 90: publicar `analyze-table-image` (contrato `locais_visiveis`/`unidades`/`tem_fonte`, cache v6), medir o
-  harness no IR real do Marka (`CORRETOR_CALIBRATION_IR`) e calibrar Marka, Itajaí e GO (meta: >=90% recall, <=15% FP).
+  harness no IR real do Marka (`CORRETOR_CALIBRATION_IR`) e calibrar Marka, Itajaí e GO (meta: >=90% recall, <=15% FP). A versão atual usa cache v7 e inclui teste Brumadinho/Curitiba.
 - [ ] Corretor v5: aplicar/verificar migrations `20260713160000`, `20260713170000` e
   `20260713180000`; homologar portão da Ata, relatório, triagem, drop/cache e calibradora no Supabase real.
 - [ ] Definir se `/corretor/calibracao` permanece visível a todos os usuários internos ou exige papel específico.

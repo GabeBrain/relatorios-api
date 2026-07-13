@@ -18,7 +18,9 @@ const db = supabase as any;
 //     como hipótese verificada pela aritmética (participação vs taxa vs média).
 // v5: locais visíveis em título/legenda principal para detectar cidade/UF de outro estudo.
 // v6: fonte visível e unidades de fichas técnicas; um único bump para WS6/WS7.
-const CACHE_SCHEMA = 6;
+// v7: valida o formato profundo antes de confiar no cache; uma resposta de modelo
+// malformada nunca pode derrubar a análise inteira via `.map()`.
+const CACHE_SCHEMA = 7;
 
 interface RawTable {
   title?: string;
@@ -36,6 +38,32 @@ interface CachePayload {
   locais_visiveis?: RawLocale[];
   unidades?: RawUnit[];
   tem_fonte?: boolean;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isRawTable(value: unknown): value is RawTable {
+  if (!isRecord(value)) return false;
+  if (!Array.isArray(value.columns) || !Array.isArray(value.rows)) return false;
+  if (!value.rows.every(Array.isArray)) return false;
+  return value.totals === undefined || value.totals === null || Array.isArray(value.totals);
+}
+
+/** Normaliza resposta da Edge/cache para o contrato que o motor realmente consome. */
+export function sanitizeVisionPayload(value: unknown): CachePayload {
+  const raw = isRecord(value) ? value : {};
+  const tables = Array.isArray(raw.tables) ? raw.tables.filter(isRawTable) : [];
+  const locais = Array.isArray(raw.locais_visiveis) ? raw.locais_visiveis.filter(isRecord) as RawLocale[] : [];
+  const unidades = Array.isArray(raw.unidades) ? raw.unidades.filter(isRecord) as RawUnit[] : [];
+  return { tables, locais_visiveis: locais, unidades, tem_fonte: raw.tem_fonte === true };
+}
+
+/** Cache só é reaproveitável se todos os campos que podem ser iterados forem listas válidas. */
+function isUsableCachePayload(value: unknown): boolean {
+  if (!isRecord(value) || !Array.isArray(value.tables) || !Array.isArray(value.locais_visiveis) || !Array.isArray(value.unidades)) return false;
+  return value.tables.every(isRawTable);
 }
 
 /** Tabela já extraída, com origem para cruzamentos e evidência visual. */
@@ -104,11 +132,12 @@ function normCell(v: unknown): Cell {
 
 /** Exportada para teste (regressão do realinhamento de totais — caso s28). */
 export function toExtracted(raw: RawTable): ExtractedTable | null {
-  const columns = (raw.columns ?? []).map((c) => String(c ?? ''));
-  const rows = (raw.rows ?? []).map((r) => (r ?? []).map(normCell));
+  if (!isRawTable(raw)) return null;
+  const columns = raw.columns.map((c) => String(c ?? ''));
+  const rows = raw.rows.map((r) => r.map(normCell));
   if (!columns.length || rows.length < 2) return null;
 
-  let totals = raw.totals ? raw.totals.map(normCell) : undefined;
+  let totals = Array.isArray(raw.totals) ? raw.totals.map(normCell) : undefined;
   // Realinha os totais quando a visão derruba o rótulo ("Total") e os valores
   // escorregam uma célula à esquerda (caso real s28: 16.848.551 caiu na coluna
   // de rótulos e cada total foi comparado com a coluna errada). Sinal: a 1ª
@@ -192,11 +221,14 @@ export function wrongContextFromVisibleLocales(
   const seen = new Set<string>();
   const findings: Finding[] = [];
 
-  for (const raw of rawLocales ?? []) {
+  for (const raw of Array.isArray(rawLocales) ? rawLocales : []) {
     const text = typeof raw.texto === 'string' ? raw.texto.trim() : '';
     const kind = typeof raw.tipo === 'string' ? normalized(raw.tipo) : '';
-    if (!text || kind !== 'cidade' || raw.principal !== true) continue;
+    if (!text || kind !== 'cidade') continue;
     const found = normalized(text);
+    // Localidade de cabeçalho de tabela também importa: em uma tabela não marcada
+    // como comparação Estado/Brasil, Curitiba em estudo de Brumadinho é sinal de
+    // copy-paste mesmo quando a visão não a chama de "principal".
     if (!found || found === expectedCity || found === 'brasil' || comparative || seen.has(found)) continue;
     seen.add(found);
     findings.push({
@@ -205,7 +237,7 @@ export function wrongContextFromVisibleLocales(
       section: toAuditSection(candidate.secao),
       slideRef: `s${candidate.slide}`,
       title: `Cidade divergente na imagem (${text} ≠ ${city})`,
-      detail: `A cidade “${text}” aparece no título/legenda principal da imagem; a ata define o estudo como ${city}${expected?.uf ? `/${expected.uf}` : ''}. Verifique possível dado de outro estudo.`,
+      detail: `A cidade “${text}” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como ${city}${expected?.uf ? `/${expected.uf}` : ''}. Verifique possível dado de outro estudo.`,
       ok: false,
       viz: { kind: 'text', location: candidate.titulo ?? undefined, evidence: text },
       evidenceSha1: candidate.sha1,
@@ -262,10 +294,7 @@ async function extractWithModel(
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
   return {
-    payload: {
-      tables: data?.tables ?? [], locais_visiveis: data?.locais_visiveis ?? [],
-      unidades: data?.unidades ?? [], tem_fonte: data?.tem_fonte === true,
-    },
+    payload: sanitizeVisionPayload(data),
     inputTokens: data?.inputTokens ?? 0,
     outputTokens: data?.outputTokens ?? 0,
   };
@@ -311,8 +340,8 @@ async function processImage(
   let payload: CachePayload | null = null;
   const { data: hit } = await db.from('vision_cache')
     .select('payload, schema_version, model').eq('sha1', c.sha1).maybeSingle();
-  if (hit?.payload && (hit.schema_version ?? 1) >= CACHE_SCHEMA) {
-    payload = hit.payload as CachePayload;
+  if (hit?.payload && (hit.schema_version ?? 1) >= CACHE_SCHEMA && isUsableCachePayload(hit.payload)) {
+    payload = sanitizeVisionPayload(hit.payload);
     usedModel = (hit.model as ModelId) ?? model;
     fromCache = 1;
   } else {

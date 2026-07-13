@@ -8,7 +8,7 @@ Este roteiro separa o que é necessário publicar do que precisa de confirmaçã
 
 | Prioridade | Function | Ação | Motivo / verificação após deploy |
 |---|---|---|---|
-| Obrigatória | `analyze-table-image` | `supabase functions deploy analyze-table-image` | Contrato novo da visão: `locais_visiveis`, `unidades`, `tem_fonte`; cache `vision_cache` v6 força releitura uma vez por imagem. Fazer um estudo de teste e confirmar os três campos no payload/cache. |
+| Obrigatória | `analyze-table-image` | `supabase functions deploy analyze-table-image` | Contrato de visão reforçado: localidades em cabeçalho, `locais_visiveis`, `unidades`, `tem_fonte`; cache `vision_cache` v7 força releitura uma vez por imagem. Fazer um estudo de teste e confirmar os campos e `Curitiba`/outra cidade em cabeçalho no payload/cache. |
 | Conferir versão | `analyze-ata-image` | Não foi alterada nesta release; publicar somente se as versões 0.26–0.28 ainda não estiverem em produção. | A ata precisa retornar `localizacao_fonte`, observações do produto/localização e cidade/UF corretas. |
 | Conferir versão | `analyze-text-batch` | Não foi alterada nesta release; não precisa redeploy se já está em produção. | Mantém ortografia/cidade/coerência; não participa do checklist DET da Ata nesta versão. |
 
@@ -71,6 +71,10 @@ select
    - Salvar uma correção no PowerPoint e soltar o `.pptx` no workspace; conferir diff, scroll e **R$ 0** quando todas as imagens estiverem no cache.
    - Entregar o estudo e conferir o relatório read-only/impressão.
    - Abrir a calibradora, reconhecer item e grupo, recarregar a página, abrir o link do estudo e exportar CSV.
+8. **Regressão de contexto / Brumadinho**
+   - Confirmar Brumadinho/MG no portão da Ata e verificar que o texto `Curitiba – MG` gera `WRONG_CONTEXT` no slide de objetivos, mesmo com UF `MG`.
+   - Após publicar `analyze-table-image`, reconferir tabelas com cabeçalho Curitiba e confirmar `locais_visiveis` no cache e o respectivo alerta quando não for comparação Estado/Brasil.
+   - Forçar/reusar um payload de visão inválido somente em ambiente de teste e confirmar que ele é reprocessado, sem toast `.map is not a function`.
 
 ## Pendências humanas que não devem ser mascaradas pelo motor
 

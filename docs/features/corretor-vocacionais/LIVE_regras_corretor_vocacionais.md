@@ -16,6 +16,21 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.40 — 2026-07-13 — Contexto Brumadinho + contrato defensivo de visão (RUNTIME)
+
+Correção disparada pelo estudo de Brumadinho: `wrongCityFindings` é uma regra **DET pós-Ata**
+que reconhece município IBGE no padrão literal `Cidade – UF` em qualquer texto do IR. Ela agora
+pega `Curitiba – MG` quando a cidade confirmada é Brumadinho, inclusive se a UF ainda coincide;
+não infere cidade por capitalização nem acusa menções sem UF. A IA de visão deixa de ignorar
+cidades de cabeçalhos de tabela só por não serem `principal`, e o localizador de imagens aplica
+a heurística de dimensão/peso em todas as seções, não somente nas numéricas. O prompt de
+`analyze-table-image` reforça a transcrição de localidades em cabeçalhos.
+
+`CACHE_SCHEMA` subiu para **7**: payloads de visão são validados profundamente antes de cachear
+ou reutilizar. `tables`, `columns`, `rows`, `totals`, localidades e unidades malformados são
+descartados/reprocessados, e `toExtracted` não chama mais `.map()` em valor que não seja lista.
+Requer publicar `analyze-table-image`; o primeiro uso reprocessa as imagens do cache v6.
+
 ## Versão 0.39 — 2026-07-13 — Corretor v5 WS-5: vista da calibradora (RUNTIME)
 
 Nova rota **`/corretor/calibracao`**, acessível pelo cabeçalho do Corretor, fecha o loop do

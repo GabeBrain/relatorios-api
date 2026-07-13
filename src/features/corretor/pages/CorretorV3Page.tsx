@@ -537,7 +537,7 @@ export default function CorretorV3Page() {
     setBusy('recheck');
     try {
       const ir = await pptxToIr(bytes, filename);
-      const findings = irToFindings(ir, selected.uf ? { uf: selected.uf } : undefined).filter((f) => !f.ok);
+      const findings = irToFindings(ir, { city: selected.cidade ?? undefined, uf: selected.uf }).filter((f) => !f.ok);
       const diff = await recheck(
         selected.id,
         newVersion,

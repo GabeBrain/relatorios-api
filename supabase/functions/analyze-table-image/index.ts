@@ -90,6 +90,8 @@ Além das tabelas, transcreva qualquer cidade, UF ou bairro visível no título,
 rodapé, barra de busca ou cabeçalho da imagem. Não deduza: transcreva literalmente.
 Para cada local, marque "principal": true SOMENTE se estiver no título ou na legenda principal
 da tabela/gráfico (não em uma referência comparativa secundária).
+Mesmo quando não for principal, inclua cidades que apareçam no cabeçalho de colunas; não omita
+uma localidade só porque a tabela compara mais de uma praça.
 
 Também informe "tem_fonte": true somente se for possível ler FONTE:, Fonte:, Elaboração:
 ou equivalente na imagem; caso contrário false. Não deduza.

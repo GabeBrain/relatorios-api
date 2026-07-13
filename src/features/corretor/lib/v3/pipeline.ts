@@ -217,7 +217,7 @@ export async function runPhase2(
   const cityUsed = city.trim() || ata?.cidade?.trim() || '';
 
   // DET com a UF confirmada + cobertura da ata editada.
-  let detFindings = irToFindings(ir, uf ? { uf } : undefined).filter((f) => !f.ok);
+  let detFindings = irToFindings(ir, { city: cityUsed, uf }).filter((f) => !f.ok);
   detFindings = detFindings.concat(ataCoverageFindings(ir, ata).filter((f) => !f.ok));
 
   const textPromise = runTextPass(

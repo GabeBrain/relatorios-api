@@ -6,6 +6,7 @@ import { checkTableSums } from './engine';
 import { toAuditSection, type Ir, type IrSlide, type IrTable } from './ir';
 import type { Cell, ExtractedTable, Finding, StudyFixture } from './model';
 import { structureChecklistFinding } from './structure-checklist';
+import municipiosPorUf from '@/assets/municipios-br.json';
 
 // Regras desativáveis por decisão de produto. SOURCE_MISSING desligada em
 // 09/jul/2026 (Gabriel): veio do doc de parâmetros mais recente, mas na prática
@@ -18,6 +19,14 @@ const RULES_ENABLED = {
 const LEFTOVER = /\b(agrupar|ajustar|revisar|conferir|confirmar|checar|verificar|inserir|colocar|preencher|refazer|corrigir|pendente|trazer|falar com|fale comigo|todo|xxx)\b/i;
 const TOTAL_ROW = /^\s*total/i;
 const UFS = new Set(['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']);
+
+function normalized(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+const MUNICIPIO_BY_NORMALIZED = new Map([...new Set(
+  Object.values(municipiosPorUf as Record<string, string[]>).flat().map((city) => city.trim()).filter(Boolean)
+)].map((city) => [normalized(city), city]));
 
 function slideRef(n: number) { return `s${n}`; }
 
@@ -226,17 +235,60 @@ export function wrongUfFindings(ir: Ir, uf?: string): Finding[] {
   return out;
 }
 
+/**
+ * DET pós-Ata para vazamento explícito "Cidade – UF". Cobre o caso em que a
+ * UF ainda é a correta, como Curitiba–MG num estudo de Brumadinho/MG. A regra
+ * exige município IBGE + UF literal para não inferir cidade por capitalização.
+ */
+export function wrongCityFindings(ir: Ir, city?: string): Finding[] {
+  const expected = city?.trim();
+  if (!expected) return [];
+  const expectedNormalized = normalized(expected);
+  const out: Finding[] = [];
+
+  for (const slide of ir.slides) {
+    const source = normalized([slide.titulo ?? '', ...(slide.textos ?? [])].join('\n'));
+    // Primeiro reconhece o padrão literal "<até 7 palavras> – UF"; só depois
+    // consulta o dicionário IBGE. Assim não percorremos ~5.500 municípios por slide.
+    const cityUf = /([a-z']+(?:\s+[a-z']+){0,6})\s*(?:-|–|\/)\s*([a-z]{2})\b/gi;
+    let match: RegExpExecArray | null;
+    while ((match = cityUf.exec(source)) !== null) {
+      const words = match[1].trim().split(/\s+/);
+      let found: string | undefined;
+      for (let size = Math.min(7, words.length); size >= 1; size--) {
+        found = MUNICIPIO_BY_NORMALIZED.get(words.slice(-size).join(' '));
+        if (found) break;
+      }
+      if (!found || normalized(found) === expectedNormalized) continue;
+      out.push({
+        id: `wrong-city-${slide.n}-${normalized(found).replace(/[^a-z0-9]+/g, '-').slice(0, 36)}`,
+        type: 'WRONG_CONTEXT',
+        section: toAuditSection(slide.secao_canonica),
+        slideRef: slideRef(slide.n),
+        title: `Cidade divergente do estudo (${found} ≠ ${expected})`,
+        detail: `O slide declara “${found} – ${match[2].toUpperCase()}”, mas a Ata confirmada define o estudo como ${expected}. Possível conteúdo de outro estudo.`,
+        ok: false,
+        viz: { kind: 'text', location: slide.titulo ?? undefined, evidence: `${found} – ${match[2].toUpperCase()}` },
+      });
+      // Uma ocorrência literal por slide é suficiente e evita cascata de alertas.
+      break;
+    }
+  }
+  return out;
+}
+
 // Removido em v3.3 (11/jul): o antigo "coverageFinding" ("Números presos em
 // imagem — auditoria limitada, depende da Fase C") ficou obsoleto — a visão agora
 // roda automaticamente no passo único, então números em imagem SÃO auditados.
 
-export function irToFindings(ir: Ir, ctx?: { uf?: string }): Finding[] {
+export function irToFindings(ir: Ir, ctx?: { city?: string; uf?: string }): Finding[] {
   const num = numericFindings(ir);
   const findings: Finding[] = [
     ...noteFindings(ir),
     ...(RULES_ENABLED.SOURCE_MISSING ? sourceFindings(ir) : []),
     ...radiiFindings(ir),
     ...num.findings,
+    ...wrongCityFindings(ir, ctx?.city),
     ...wrongUfFindings(ir, ctx?.uf),
   ];
   if (num.verified > 0) {
