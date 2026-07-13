@@ -317,9 +317,13 @@ function Tooltip({ x, y, children }: { x: number; y: number; children: React.Rea
 function Legend({ max, label }: { max: number; label: string }) {
   return (
     <div className="mt-2 flex items-center gap-2 text-[10px] text-[var(--qd-text-muted)]">
-      <span>0</span>
+      <div className="flex items-center gap-1">
+        <span className="inline-block h-2 w-3 rounded-sm border border-slate-300" style={{ background: NO_DATA }} />
+        <span>sem dados</span>
+      </div>
+      <span className="ml-2">0</span>
       <div className="flex h-2 flex-1 overflow-hidden rounded">
-        {RAMP.map((c) => <div key={c} className="flex-1" style={{ background: c }} />)}
+        {RAMP.slice(1).map((c) => <div key={c} className="flex-1" style={{ background: c }} />)}
       </div>
       <span>{max.toLocaleString('pt-BR')} {label}</span>
     </div>
