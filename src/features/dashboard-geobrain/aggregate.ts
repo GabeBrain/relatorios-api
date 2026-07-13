@@ -134,11 +134,32 @@ function emptyKpis(nBuildings: number): KPIValues {
   };
 }
 
+/**
+ * §7 — Unidades Lançadas / VGV Lançado somam sobre TODO o período filtrado,
+ * aplicando KEEPFILTERS(status = "Ativo"). Se sem filtros temporais, soma total.
+ */
+export function computeReleaseTotals(buildings: Building[], f: Filters): { unidadesLancadas: number; vgvLancado: number } {
+  let unidadesLancadas = 0;
+  let vgvLancado = 0;
+  for (const b of buildings) {
+    if (b.status !== 'Ativo') continue;
+    for (const t of b.typologies) {
+      for (const h of t.history) {
+        if (!historyMatches(h, f)) continue;
+        if (!isRelease(b, h)) continue;
+        const price = h.price ?? 0;
+        unidadesLancadas += t.qty;
+        vgvLancado += t.qty * price;
+      }
+    }
+  }
+  return { unidadesLancadas, vgvLancado };
+}
+
 export function computeKpis(buildings: Building[], f: Filters): KPIValues {
   const latest = latestPeriodInScope(buildings, f);
   if (!latest) return emptyKpis(buildings.length);
 
-  let unidadesLancadas = 0, vgvLancado = 0;
   let unidadesVendidas = 0, vgvVendido = 0;
   let estoqueFinal = 0, vgvEstoqueSum = 0, estoqueInicial = 0;
   let sumPrice = 0, priceQty = 0, sumPm2 = 0, pm2Qty = 0;
@@ -152,9 +173,7 @@ export function computeKpis(buildings: Building[], f: Filters): KPIValues {
       const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
       if (!h) continue;
       const price = h.price ?? 0;
-      if (isRelease(b, h)) {
-        unidadesLancadas += qtyRelease(b, h, t);
-        vgvLancado += vgvRelease(b, h, t, price);
+      if (isRelease(b, h) && b.status === 'Ativo') {
         lancadosIds.add(b.building_id);
       }
       unidadesVendidas += h.sold_in_period;
@@ -174,6 +193,9 @@ export function computeKpis(buildings: Building[], f: Filters): KPIValues {
   const precoMedio = priceQty > 0 ? sumPrice / priceQty : 0;
   const precoMedioM2 = pm2Qty > 0 ? sumPm2 / pm2Qty : 0;
 
+  // §3/§7 — Unidades Lançadas / VGV Lançado sobre TODO período filtrado, Ativo apenas.
+  const { unidadesLancadas, vgvLancado } = computeReleaseTotals(buildings, f);
+
   return {
     empreendimentos: buildings.length,
     empreendimentosAtivos: activeIds.size,
@@ -183,7 +205,7 @@ export function computeKpis(buildings: Building[], f: Filters): KPIValues {
     estoqueFinal, vgvEstoque: vgvEstoqueSum, estoqueInicial,
     precoMedio, precoMedioM2,
     ivv, tempoEstoque,
-    ipc: 0, // média global = 1; deixado como 0 (BLANK) — o gráfico IPC mostra por padrão.
+    ipc: 0,
     latestPeriod: latest,
     statusAtualizacao: latest,
     ofertaLancada: unidadesLancadas,
@@ -218,7 +240,7 @@ export function computeSeries(buildings: Building[], f: Filters, g: Granularity)
         const key = periodKey(h.period, g);
         const p = map.get(key) ?? emptyPoint(key, periodSortKey(h.period, g));
         const price = h.price ?? 0;
-        if (isRelease(b, h)) {
+        if (isRelease(b, h) && b.status === 'Ativo') {
           p.ofertaLancada += t.qty;
           p.vgvLancamento += t.qty * price;
         }
@@ -351,7 +373,7 @@ export interface OpportunityMatrix {
   rowLabel: string;
 }
 
-export type OpportunityGroupBy = 'neighborhood' | 'building_type';
+export type OpportunityGroupBy = 'neighborhood' | 'building_type' | 'standard';
 
 export function computeOpportunityMap(
   buildings: Building[],
@@ -367,7 +389,11 @@ export function computeOpportunityMap(
     return inner;
   };
   const latest = latestPeriodInScope(buildings, f);
-  const keyFn = (b: Building) => (groupBy === 'building_type' ? b.building_type : b.neighborhood);
+  const keyFn = (b: Building) => {
+    if (groupBy === 'building_type') return b.building_type;
+    if (groupBy === 'standard') return b.standard || 'Sem classificação';
+    return b.neighborhood;
+  };
   if (latest) {
     for (const b of buildings) {
       const row = keyFn(b);
@@ -392,11 +418,12 @@ export function computeOpportunityMap(
       data[r][col] = e + v > 0 ? v / (e + v) : 0;
     }
   }
+  const rowLabel = groupBy === 'building_type' ? 'Tipo' : groupBy === 'standard' ? 'Padrão' : 'Bairro';
   return {
     rows,
     cols: colKeys.map((c) => (c === '4+' ? '4 dorms' : c === '1' ? '1 dorm' : `${c} dorms`)),
     data,
-    rowLabel: groupBy === 'building_type' ? 'Tipo' : 'Bairro',
+    rowLabel,
   };
 }
 

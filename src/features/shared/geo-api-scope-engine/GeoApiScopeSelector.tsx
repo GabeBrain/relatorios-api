@@ -15,6 +15,7 @@ interface Props {
   className?: string;
   ufLabel?: string;
   cityLabel?: string;
+  cityContainerClassName?: string;
 }
 
 export function GeoApiScopeSelector({
@@ -24,6 +25,7 @@ export function GeoApiScopeSelector({
   className,
   ufLabel = 'UF',
   cityLabel = 'Município',
+  cityContainerClassName,
 }: Props) {
   const {
     availableUfs, availableCities, setUf, setCity,
@@ -73,7 +75,7 @@ export function GeoApiScopeSelector({
         </Select>
       </div>
 
-      <div className="min-w-[200px] flex-1 space-y-1.5">
+      <div className={cityContainerClassName ?? 'min-w-[200px] flex-1 space-y-1.5'}>
         <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{cityLabel}</label>
         <Popover open={cityOpen} onOpenChange={setCityOpen}>
           <PopoverTrigger asChild>

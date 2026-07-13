@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
-import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Search } from 'lucide-react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Info, Search } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { RankRow } from './aggregate';
 
 interface Props {
@@ -9,12 +10,13 @@ interface Props {
   searchable?: boolean;
   /** Se true, defaults to Top 10; toggle to show all. */
   topDefault?: boolean;
+  info?: ReactNode;
 }
 
 type SortBy = 'value' | 'label';
 type Dir = 'asc' | 'desc';
 
-export function RankingCard({ title, rows, formatValue, searchable = true, topDefault = true }: Props) {
+export function RankingCard({ title, rows, formatValue, searchable = true, topDefault = true, info }: Props) {
   const [query, setQuery] = useState('');
   const [topOnly, setTopOnly] = useState(topDefault);
   const [sortBy, setSortBy] = useState<SortBy>('value');
@@ -40,7 +42,19 @@ export function RankingCard({ title, rows, formatValue, searchable = true, topDe
   return (
     <section className="dg-card w-full">
       <header className="mb-2 flex items-center justify-between gap-2">
-        <h2 className="dg-title">{title}</h2>
+        <div className="flex items-center gap-1.5">
+          <h2 className="dg-title">{title}</h2>
+          {info && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button type="button" className="text-[hsl(var(--dg-muted))] hover:text-[hsl(var(--dg-text))]" aria-label="Info">
+                  <Info className="h-3 w-3" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 text-[11px] leading-snug">{info}</PopoverContent>
+            </Popover>
+          )}
+        </div>
         <div className="flex items-center gap-1">
           {searchable && (
             <div className="relative">

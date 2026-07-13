@@ -15,8 +15,8 @@ const A = 'hsl(var(--dg-accent))';
 const M = 'hsl(var(--dg-muted))';
 const WINDOW = 12;
 
-// ============ Tooltip padrão (§8) ============
-const HL = 'var(--dg-tooltip-hl)';
+// ============ Tooltip padrão (§2) — cor #212529 no texto ============
+const HL = '#212529';
 
 interface TooltipEntry { name?: string | number; value?: number | string | null; color?: string; dataKey?: string | number }
 interface DGTooltipProps { active?: boolean; label?: string | number; payload?: TooltipEntry[]; format?: (v: number) => string }
@@ -150,6 +150,28 @@ export function IvvChart({ data, granularity }: { data: SeriesPoint[]; granulari
             <LabelList dataKey="ivv" position="top" formatter={(v: number) => (v > 0 ? pctRaw(v * 100, 1) : '')} className="fill-[hsl(var(--dg-text))] text-[9px]" />
           </Line>
         </LineChart>
+      </ScrollableChart>
+    </ChartCard>
+  );
+}
+
+export function UnidadesVsEstoqueChart({ data }: { data: SeriesPoint[]; granularity: Granularity }) {
+  return (
+    <ChartCard title="Unidades Lançadas × Estoque" subtitle="Lançamentos vs Estoque por período (unidades)">
+      <ScrollableChart height={260} count={data.length}>
+        <BarChart data={data} margin={{ top: 20, right: 24, left: 8, bottom: 8 }}>
+          <CartesianGrid stroke="hsl(var(--dg-border))" strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="period" tick={{ fontSize: 10 }} interval={0} />
+          <YAxis hide />
+          <Tooltip content={<DGTooltip format={(v) => numCompactBR(v, 1)} />} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="ofertaLancada" name="Unidades Lançadas" fill={P} radius={[2, 2, 0, 0]}>
+            <LabelList dataKey="ofertaLancada" position="top" formatter={(v: number) => (v > 0 ? numCompactBR(v, 1) : '')} className="fill-[hsl(var(--dg-text))] text-[9px]" />
+          </Bar>
+          <Bar dataKey="estoqueFinal" name="Estoque" fill={A} radius={[2, 2, 0, 0]}>
+            <LabelList dataKey="estoqueFinal" position="top" formatter={(v: number) => (v > 0 ? numCompactBR(v, 1) : '')} className="fill-[hsl(var(--dg-text))] text-[9px]" />
+          </Bar>
+        </BarChart>
       </ScrollableChart>
     </ChartCard>
   );
