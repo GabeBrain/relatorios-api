@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-13 — Mapa BR político com drill-down + Análise Cruzada Universal — Lovable
+- **O quê:** (1) substituído o choropleth de grade por um mapa político do Brasil (react-simple-maps) com drill-down UF → município, breadcrumb `Brasil › UF › Cidade`, tooltip com N e % da base, cor Brain verde e seleção destacada em amarelo `#F8D000`. Municípios carregados sob demanda via CDN (`tbrugz/geodata-br`) e cacheados em memória. Sincronizado com o store (`estado`/`cidade`). (2) Análise Cruzada agora é universal: detecta automaticamente as variáveis analíticas da base (categóricas e numéricas), oferece 7 métricas (`count`, `% total`, `% linha`, `% coluna`, `média`, `soma`, `mediana`) e 8 visualizações (tabela, barras agrupadas/empilhadas/100%, heatmap, pizza, rosca, treemap) — o app habilita só as compatíveis com a combinação. Toggle Tabela / Gráfico / Ambos, clique em barras/células filtra o dashboard inteiro.
+- **Por quê:** navegação geográfica mais intuitiva e ferramenta de exploração agnóstica ao schema (funciona para futuras Bases Unificadas sem alteração de código).
+- **Arquivos:** `src/features/area-quanti/dashboard/geo/{GeoMap.tsx,geo-utils.ts}`, `src/features/area-quanti/dashboard/CrossAnalysis.tsx` (reescrito), `src/features/area-quanti/dashboard/aggregate.ts` (`detectFieldSchema`, `crosstabUniversal`), `src/features/area-quanti/dashboard/QuantiDashboard.tsx`, `public/geo/br-states.json`.
+
 ### 2026-07-13 — Correção do JSON da Base Unificada 2020 — Lovable
 - **O quê:** regeneração do `base-2020.json` ignorando a linha 2 da planilha e convertendo valores
   inválidos (`NaN`/infinitos) para `null`, garantindo JSON válido para o carregamento no dashboard.
