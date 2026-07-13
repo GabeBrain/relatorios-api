@@ -19,15 +19,17 @@ interface Props {
 export function VFHeader({ scope, onScopeChange, granularity, onGranularityChange, onOpenSidebar }: Props) {
   return (
     <header
-      className="flex flex-wrap items-center gap-3 px-4 py-3"
+      className="flex flex-wrap items-end gap-3 px-4 py-3"
       style={{ background: 'var(--vf-card)', borderBottom: '1px solid var(--vf-border)' }}
     >
       <button type="button" className="vf-btn" onClick={onOpenSidebar} aria-label="Abrir filtros">
         ☰ Filtros
       </button>
       <GeoApiScopeSelector value={scope} onChange={onScopeChange} className="flex-1 min-w-[320px]" />
-      <div className="flex flex-wrap items-end gap-3 flex-1 min-w-[320px]">
-        <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Visualização</label>
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+          Visualização
+        </label>
         <div className="vf-chip-group">
           {GRANS.map((g) => (
             <button
