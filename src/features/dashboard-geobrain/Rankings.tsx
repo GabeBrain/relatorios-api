@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
-import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Search } from 'lucide-react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Info, Search } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { RankRow } from './aggregate';
 
 interface Props {
