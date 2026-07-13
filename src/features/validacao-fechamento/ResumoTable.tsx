@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 import { intFmt } from '@/lib/format';
 import type { Granularity, MetricKey, ResumoResult } from './aggregate';
 import { METRICS, varPct } from './aggregate';
@@ -32,18 +32,26 @@ function formatPct(v: number | null): { label: string; cls: string } {
 export function ResumoTable({ resumo, granularity }: Props) {
   const { buckets, yearAgo, prevBucket } = resumo;
   const labels = GRAN_LABEL[granularity];
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const totalRange = useMemo(() => {
     if (buckets.length === 0) return { first: null as null | typeof buckets[number], last: null as null | typeof buckets[number] };
     return { first: buckets[0], last: buckets[buckets.length - 1] };
   }, [buckets]);
 
+  // Inicia a rolagem da tabela resumo no máximo à direita, exibindo "% Var. Total" por padrão.
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ left: el.scrollWidth, behavior: 'auto' });
+  }, [buckets, granularity]);
+
   if (buckets.length === 0) {
     return <div className="vf-card p-6 text-center text-sm text-[var(--vf-muted)]">Nenhum dado no filtro selecionado.</div>;
   }
 
   return (
-    <div className="vf-card overflow-auto">
+    <div ref={scrollRef} className="vf-card overflow-auto">
       <table className="vf-resumo">
         <thead>
           <tr>

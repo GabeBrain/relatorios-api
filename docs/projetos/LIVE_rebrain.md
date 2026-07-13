@@ -49,6 +49,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-13 — Validação do Fechamento: ajustes de UX no segmentador, filtros e tabela resumo — Rebrain
+- **Segmentador:** adicionada a label `Visualização` acima do grupo de chips de granularidade
+  (Ano / Trimestre / Mês/Ano), envolvida no container `flex flex-wrap items-end gap-3 flex-1 min-w-[320px]`.
+- **Filtros temporais:** opções de ano, trimestre e período agora são exibidas do mais recente para
+  o mais antigo (ordem decrescente), facilitando a seleção dos dados atuais.
+- **Tabela resumo:** a barra de rolagem inicia no máximo à direita, exibindo a coluna **% Var. Total**
+  por padrão ao carregar ou trocar a granularidade.
+- **Arquivos:** `src/features/validacao-fechamento/{VFHeader.tsx,aggregate.ts,ResumoTable.tsx}`.
+- **Verificação:** build (`tsc --noEmit && vite build`) aprovado.
+
 ### 2026-07-13 — Corretor: guardrail contra falsos positivos de faixas — Gabriel
 - **Correção:** `BINNING_RULE` não confunde mais raios cumulativos (`Até 5/10/15 min`) com
   faixas exclusivas; sequências ambíguas com múltiplos intervalos partindo de zero são
