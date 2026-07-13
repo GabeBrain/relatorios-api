@@ -202,6 +202,9 @@ export function wrongUfFindings(ir: Ir, uf?: string): Finding[] {
   const out: Finding[] = [];
   const rx = /(?:–|-|\/)\s*([A-Z]{2})\b/g;
   for (const s of ir.slides) {
+    // Listas de comparáveis em Mercado costumam citar várias praças legítimas.
+    // Contexto de cidade/UF contratado é mais confiável em capa, socio e absorção.
+    if (!['CAPA', 'IDENTIFICACAO', 'SOCIO', 'ABSORCAO'].includes((s.secao_canonica ?? '').toUpperCase())) continue;
     const source = [s.titulo ?? '', ...(s.textos ?? [])].join('\n');
     let match: RegExpExecArray | null;
     rx.lastIndex = 0;

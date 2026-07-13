@@ -49,23 +49,25 @@ export async function findTableImages(
   });
   const dec = new TextDecoder('utf-8');
 
-  const meta = new Map(ir.slides.map((s) => [s.n, { secao: s.secao_canonica, titulo: s.titulo }]));
+  const meta = new Map(ir.slides.map((s) => [s.n, {
+    secao: s.secao_canonica, titulo: s.titulo,
+    ficha: FICHA_TITLE.test(`${s.titulo ?? ''}\n${(s.textos ?? []).join('\n')}`),
+  }]));
 
   // slide → imagens (via rels)
-  const bySlide: { slide: number; target: string }[] = [];
+  const bySlide: { slide: number; target: string; ficha: boolean }[] = [];
   for (const name of Object.keys(files)) {
     const m = name.match(/^ppt\/slides\/_rels\/slide(\d+)\.xml\.rels$/);
     if (!m) continue;
     const slide = parseInt(m[1], 10);
     const secao = meta.get(slide)?.secao ?? null;
-    const titulo = meta.get(slide)?.titulo ?? '';
-    const ficha = FICHA_TITLE.test(titulo);
+    const ficha = meta.get(slide)?.ficha ?? false;
     if ((!secao || !SECOES_NUMERICAS.has(secao.toUpperCase())) && !ficha) continue;
     const root = parser.parseFromString(dec.decode(files[name]), 'application/xml');
     for (const rel of Array.from(root.getElementsByTagNameNS(NS_REL, 'Relationship'))) {
       if ((rel.getAttribute('Type') ?? '').endsWith('/image')) {
         const target = (rel.getAttribute('Target') ?? '').replace(/^\.\.\//, 'ppt/');
-        if (/^ppt\/media\//.test(target)) bySlide.push({ slide, target });
+        if (/^ppt\/media\//.test(target)) bySlide.push({ slide, target, ficha });
       }
     }
   }
@@ -73,15 +75,15 @@ export async function findTableImages(
   // únicas por sha1, com heurística de tabela
   const seen = new Set<string>();
   const out: TableImageCandidate[] = [];
-  for (const { slide, target } of bySlide) {
+  for (const { slide, target, ficha } of bySlide) {
     const data = files[target];
     if (!data) continue;
     const kb = Math.round(data.length / 1024);
-    if (kb < MIN_KB || kb > MAX_KB) continue;
+    if (kb < MIN_KB || kb > (ficha ? 1_500 : MAX_KB)) continue;
     const dims = pngDims(data) ?? jpegDims(data);
     if (!dims) continue;
     const [w, h] = dims;
-    if (w < MIN_W || h < MIN_H || h > MAX_H || w / h < MIN_ASPECT) continue;
+    if (w < MIN_W || h < MIN_H || h > (ficha ? 2_000 : MAX_H) || w / h < (ficha ? 0.7 : MIN_ASPECT)) continue;
     const sha1 = await sha1Hex(data);
     if (seen.has(sha1)) continue;
     seen.add(sha1);
@@ -91,7 +93,7 @@ export async function findTableImages(
       titulo: meta.get(slide)?.titulo ?? null,
       name: target,
       mime: target.endsWith('.jpg') || target.endsWith('.jpeg') ? 'image/jpeg' : 'image/png',
-      sha1, bytes: data, w, h, kb, tipo: FICHA_TITLE.test(meta.get(slide)?.titulo ?? '') ? 'ficha' : 'tabela',
+      sha1, bytes: data, w, h, kb, tipo: ficha ? 'ficha' : 'tabela',
     });
   }
   return out.sort((a, b) => a.slide - b.slide);

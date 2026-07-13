@@ -31,6 +31,7 @@ export interface FindingV3 {
   origem: string;
   primeiraVersao: number;
   resolvidoNaVersao: number | null;
+  verdict: 'bug' | 'fp' | null;
   finding: Finding;
 }
 
@@ -130,6 +131,7 @@ export async function loadFindings(studyId: string): Promise<FindingV3[]> {
     origem: r.origem,
     primeiraVersao: r.primeira_versao,
     resolvidoNaVersao: r.resolvido_na_versao,
+    verdict: r.verdict === 'bug' || r.verdict === 'fp' ? r.verdict : null,
     finding: r.payload as Finding,
   }));
 }
@@ -139,11 +141,24 @@ export async function loadFindings(studyId: string): Promise<FindingV3[]> {
 export async function setFindingStatus(
   studyId: string, ruleId: string, status: FindingStatus
 ): Promise<void> {
+  const patch: Record<string, unknown> = { status };
+  if (status === 'corrigido' || status === 'pendente') patch.verdict = null;
   const { error } = await db
     .from('findings_v3')
-    .update({ status })
+    .update(patch)
     .eq('study_id', studyId)
     .eq('rule_id', ruleId);
+  if (error) throw new Error(error.message);
+}
+
+/** Loop de calibração v4: FP continua visível, mas fica cinza e não bloqueia entrega. */
+export async function setFindingVerdict(
+  studyId: string, ruleId: string, verdict: 'bug' | 'fp' | null
+): Promise<void> {
+  const patch: Record<string, unknown> = { verdict };
+  if (verdict === 'fp') patch.status = 'ignorado';
+  if (verdict === 'bug') patch.status = 'pendente';
+  const { error } = await db.from('findings_v3').update(patch).eq('study_id', studyId).eq('rule_id', ruleId);
   if (error) throw new Error(error.message);
 }
 
@@ -244,7 +259,7 @@ export async function insertIaFindings(
 /** Registra um passe de IA e acumula o custo no estudo. */
 export async function registerIaPass(
   studyId: string,
-  tipo: 'texto' | 'visao_tabela' | 'visao_mapa',
+  tipo: 'texto' | 'visao_tabela' | 'visao_mapa' | 'visao_ata',
   escopo: string,
   custoUsd: number,
   inputTokens: number,

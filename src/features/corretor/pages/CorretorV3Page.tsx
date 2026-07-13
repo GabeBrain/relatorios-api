@@ -24,10 +24,11 @@ import AtaCard from '../components/AtaCard';
 import { formatUSD, type ModelId } from '../lib/cost-calculator';
 import { runFullAnalysis, estimateFullAnalysis, type StageProgress, type FullEstimate } from '../lib/v3/pipeline';
 import { BUDGET_STUDY_BRL, formatBRL } from '../lib/v3/config';
+import { confidenceOf, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta,
-  type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
+  setFindingVerdict, type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 
 const MODEL: ModelId = 'gpt-4o-mini'; // econômico por padrão; visão cai p/ R$ 0 após cache
@@ -38,10 +39,11 @@ const STAGE_LABEL: Record<StageProgress['stage'], string> = {
   ata: 'Ata do projeto',
   texto: 'Revisão de texto (IA)',
   visao: 'Números das tabelas (visão)',
+  cruzamento: 'Cruzamentos e completude',
 };
 
 // ordem de exibição das etapas no banner
-const STAGE_ORDER: StageProgress['stage'][] = ['det', 'ata', 'texto', 'visao'];
+const STAGE_ORDER: StageProgress['stage'][] = ['det', 'ata', 'texto', 'visao', 'cruzamento'];
 
 const isLocal = (f: Finding) => /^s\d+$/.test(f.slideRef.trim());
 const slideNumOf = (f: Finding) => parseInt(f.slideRef.replace(/\D/g, ''), 10) || 0;
@@ -54,19 +56,23 @@ const STATUS_META: Record<FindingStatus, { label: string; className: string }> =
   ignorado: { label: 'Ignorado', className: 'bg-muted text-muted-foreground border-border' },
 };
 
-function V3FindingCard({ item, onStatus }: {
+function V3FindingCard({ item, onStatus, onVerdict }: {
   item: FindingV3;
   onStatus: (s: FindingStatus) => void;
+  onVerdict: (v: 'bug' | 'fp') => void;
 }) {
   const f = item.finding;
   const meta = ERROR_CATALOG[f.type as ErrorType];
   const mode = meta ? MODE_META[meta.mode] : null;
   const done = item.status !== 'pendente';
+  const confidence = confidenceOf(f, item.origem);
+  const confidenceMeta = CONFIDENCE_META[confidence];
+  const [evidenceOpen, setEvidenceOpen] = useState(confidence === 1);
 
   return (
     <div className={cn(
-      'rounded-lg border bg-card transition-opacity',
-      done ? 'border-border opacity-60' : f.ok ? 'border-border' : 'border-destructive/30'
+      'rounded-lg border border-l-4 bg-card transition-opacity',
+      done ? 'border-border opacity-60' : confidence === 1 ? 'border-l-red-500 border-red-500/30' : confidence === 2 ? 'border-l-orange-500 border-orange-500/30' : 'border-l-amber-500 border-amber-500/30'
     )}>
       <div className="flex items-start gap-3 px-4 py-3">
         <div className="mt-0.5 shrink-0">
@@ -76,8 +82,9 @@ function V3FindingCard({ item, onStatus }: {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+            <span className={cn('text-[10px] rounded px-1.5 py-0.5 border font-medium', confidenceMeta.className)}>{confidenceMeta.icon} {confidenceMeta.label}</span>
             <span className="text-sm font-medium">{f.title}</span>
-            <span className="text-[10px] font-mono text-muted-foreground">· {f.slideRef}</span>
+            {f.slideRef.split('×').map((ref) => <span key={ref} className="text-[10px] font-mono rounded border border-border px-1 text-muted-foreground">{ref.trim()}</span>)}
           </div>
           <div className="flex flex-wrap items-center gap-1.5 mb-1">
             <span className="text-[10px] rounded px-1.5 py-0.5 border bg-muted/50 text-muted-foreground">
@@ -108,8 +115,13 @@ function V3FindingCard({ item, onStatus }: {
           )}
         </div>
       </div>
-      {f.evidenceImage && !done && (
-        <div className="px-4 pb-2 space-y-1">
+      {(f.evidenceImage || f.viz) && !done && (
+        <div className="px-4 pb-2">
+          <button onClick={() => setEvidenceOpen((open) => !open)} className="text-[11px] text-primary hover:underline mb-2">
+            {evidenceOpen ? 'Ocultar evidência' : 'Ver evidência'}
+          </button>
+          {evidenceOpen && <div className="space-y-2">
+          {f.evidenceImage && <>
           <a href={f.evidenceImage} target="_blank" rel="noreferrer" className="block">
             <img
               src={f.evidenceImage}
@@ -121,10 +133,10 @@ function V3FindingCard({ item, onStatus }: {
           <p className="text-[10px] text-muted-foreground">
             Imagem original do {f.slideRef} — clique para ampliar. A prova abaixo mostra qual número não fecha.
           </p>
+          </>}
+          {f.viz && <VizSwitch finding={f} />}
+          </div>}
         </div>
-      )}
-      {f.viz && !done && (
-        <div className="px-4 pb-3"><VizSwitch finding={f} /></div>
       )}
       <div className="flex items-center gap-1.5 border-t border-border px-4 py-2">
         <span className="text-[10px] text-muted-foreground mr-1">Marcar:</span>
@@ -142,6 +154,12 @@ function V3FindingCard({ item, onStatus }: {
             {STATUS_META[s].label}
           </button>
         ))}
+        <button
+          onClick={() => onVerdict('fp')}
+          className={cn('text-[11px] rounded-full px-2.5 py-0.5 border transition-colors', item.verdict === 'fp' ? 'bg-slate-500/15 text-slate-600 border-slate-500/30' : 'bg-background border-border hover:border-slate-500/50 text-muted-foreground')}
+        >
+          Não é erro (FP)
+        </button>
       </div>
     </div>
   );
@@ -292,6 +310,8 @@ export default function CorretorV3Page() {
   const [analysis, setAnalysis] = useState<AnalysisState | null>(null);
   const [budgetPrompt, setBudgetPrompt] = useState<{ estimate: FullEstimate; run: () => void } | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [workspaceTab, setWorkspaceTab] = useState<'completude' | 'problemas' | 'slides'>('completude');
+  const [confidenceFilter, setConfidenceFilter] = useState<Confidence[]>([1, 2, 3]);
   const newRef = useRef<HTMLInputElement>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -340,7 +360,7 @@ export default function CorretorV3Page() {
             spentUsd: prev.spentUsd + (p.spentUsd ?? 0),
           });
           // achados de IA pingam na worklist assim que a etapa termina
-          if (p.findings?.length && (p.stage === 'texto' || p.stage === 'visao')) {
+          if (p.findings?.length && (p.stage === 'texto' || p.stage === 'visao' || p.stage === 'cruzamento')) {
             await insertIaFindings(study.id, p.findings, p.stage === 'texto' ? 'IA_texto' : 'IA_visao', study.version);
             setItems(await loadFindings(study.id));
           }
@@ -473,7 +493,7 @@ export default function CorretorV3Page() {
 
   async function handleStatus(ruleId: string, s: FindingStatus) {
     if (!selected) return;
-    setItems((prev) => prev.map((i) => (i.ruleId === ruleId ? { ...i, status: s } : i)));
+    setItems((prev) => prev.map((i) => (i.ruleId === ruleId ? { ...i, status: s, verdict: s === 'corrigido' || s === 'pendente' ? null : i.verdict } : i)));
     try {
       await setFindingStatus(selected.id, ruleId, s);
     } catch (err) {
@@ -482,8 +502,31 @@ export default function CorretorV3Page() {
     }
   }
 
+  async function handleVerdict(ruleId: string, verdict: 'bug' | 'fp') {
+    if (!selected) return;
+    const status: FindingStatus = verdict === 'fp' ? 'ignorado' : 'pendente';
+    setItems((prev) => prev.map((item) => item.ruleId === ruleId ? { ...item, status, verdict } : item));
+    try {
+      await setFindingVerdict(selected.id, ruleId, verdict);
+    } catch (err) {
+      toast.error('Falha ao registrar falso positivo', { description: err instanceof Error ? err.message : String(err) });
+      setItems(await loadFindings(selected.id));
+    }
+  }
+
+  async function handleGroupStatus(group: FindingV3[], status: FindingStatus) {
+    await Promise.all(group.map((item) => handleStatus(item.ruleId, status)));
+  }
+
   async function handleConclude() {
     if (!selected) return;
+    const blocking = items.filter((item) => item.status === 'pendente' && confidenceOf(item.finding, item.origem) <= 2);
+    const verify = items.filter((item) => item.status === 'pendente' && confidenceOf(item.finding, item.origem) === 3);
+    if (blocking.length) {
+      toast.error('Ainda há erros ou prováveis pendentes', { description: `${blocking.length} item(ns) de nível 1–2 bloqueiam a entrega.` });
+      return;
+    }
+    if (verify.length && !window.confirm(`Entregar com ${verify.length} item(ns) “Verificar” ainda abertos?`)) return;
     try {
       await concludeStudy(selected.id);
       toast.success('Estudo pronto para o A&R 🎉');
@@ -509,10 +552,19 @@ export default function CorretorV3Page() {
       if (!byType.has(i.finding.type)) byType.set(i.finding.type, []);
       byType.get(i.finding.type)!.push(i);
     }
-    return { pend, total: items.length, slides: [...bySlide.entries()], relational: [...byType.entries()] };
+    const confidence = ([1, 2, 3] as Confidence[]).map((level) => [level, active.filter((item) => item.status === 'pendente' && confidenceOf(item.finding, item.origem) === level)] as const);
+    const completeness = active.filter((item) => ['ATA_COVERAGE', 'STRUCTURE_MISSING'].includes(item.finding.type));
+    const problems = active.filter((item) => !['ATA_COVERAGE', 'STRUCTURE_MISSING'].includes(item.finding.type));
+    const grouped = new Map<string, FindingV3[]>();
+    for (const item of problems) {
+      if (!grouped.has(item.finding.type)) grouped.set(item.finding.type, []);
+      grouped.get(item.finding.type)!.push(item);
+    }
+    return { pend, total: items.length, slides: [...bySlide.entries()], relational: [...byType.entries()], confidence, completeness, grouped: [...grouped.entries()] };
   }, [items]);
 
   const progressPct = wl.total > 0 ? Math.round(((wl.total - wl.pend) / wl.total) * 100) : 0;
+  const blockingPend = wl.confidence.filter(([level]) => level <= 2).reduce((total, [, findings]) => total + findings.length, 0);
 
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
   if (!selected) {
@@ -623,9 +675,9 @@ export default function CorretorV3Page() {
           ) : (
             <button
               onClick={handleConclude}
-              disabled={wl.pend > 0 || analysis?.running}
+              disabled={blockingPend > 0 || analysis?.running}
               className="text-xs rounded-md px-2.5 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1.5 disabled:opacity-40"
-              title={wl.pend > 0 ? `Ainda há ${wl.pend} pendente(s)` : 'Marcar como pronto para o A&R'}
+              title={blockingPend > 0 ? `Ainda há ${blockingPend} erro(s)/provável(is) pendente(s)` : 'Marcar como pronto para o A&R'}
             >
               <PackageCheck className="w-3.5 h-3.5" /> Entregar
             </button>
@@ -640,16 +692,24 @@ export default function CorretorV3Page() {
         </div>
       </header>
 
-      <div className="border-b bg-card px-6 py-3 space-y-1.5">
-        <div className="flex items-center justify-between text-xs">
-          <span className={cn('font-medium', wl.pend === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground')}>
-            {wl.pend === 0
-              ? '0 pendentes — pronto para entregar 🎉'
-              : `${wl.pend} pendente(s) de ${wl.total}`}
+      <div className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur px-6 py-3 space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex flex-wrap gap-2">
+            {wl.confidence.map(([level, findings]) => {
+              const meta = CONFIDENCE_META[level];
+              return <span key={level} className={cn('rounded border px-2 py-0.5 font-medium', meta.className)}>{meta.icon} {findings.length} {meta.label.toLowerCase()}{findings.length === 1 ? '' : 's'}</span>;
+            })}
+          </div>
+          <span className={cn('font-medium', blockingPend === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground')}>
+            {blockingPend === 0 ? (wl.pend ? `${wl.pend} item(ns) para verificar` : '0 pendentes — pronto para entregar 🎉') : `${blockingPend} bloqueia(m) a entrega`}
           </span>
-          <span className="text-muted-foreground font-mono">{progressPct}%</span>
         </div>
         <Progress value={progressPct} className="h-1.5" />
+        <div className="flex gap-1 pt-0.5">
+          {([
+            ['completude', 'Completude'], ['problemas', 'Problemas'], ['slides', 'Por slide'],
+          ] as const).map(([tab, label]) => <button key={tab} onClick={() => setWorkspaceTab(tab)} className={cn('text-xs rounded-md px-3 py-1.5 border', workspaceTab === tab ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50')}>{label}</button>)}
+        </div>
       </div>
 
       {lastDiff && (
@@ -668,55 +728,37 @@ export default function CorretorV3Page() {
             <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} />
           )}
 
-          {/* Ata: extraída no passo único vira o card permanente; senão, teste manual */}
-          {selected.ata
-            ? <AtaCard ata={selected.ata} />
-            : selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
-
           {loadingStudy ? (
             <div className="flex items-center justify-center py-16 text-muted-foreground gap-2 text-sm">
               <Loader2 className="w-4 h-4 animate-spin" /> Carregando achados…
             </div>
           ) : (
             <>
-              <section className="space-y-3">
-                <WlHead title="Por slide (ordem do deck)" count={wl.slides.reduce((a, [, fs]) => a + fs.length, 0)} />
-                {wl.slides.length === 0 && (
-                  <p className="text-xs text-muted-foreground">Nenhum erro local ativo.</p>
-                )}
-                {wl.slides.map(([n, fs]) => (
-                  <div key={n} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold rounded bg-muted px-2 py-0.5">Slide {n}</span>
-                      <span className="text-[10px] text-muted-foreground">{fs.length} {fs.length === 1 ? 'erro' : 'erros'}</span>
-                    </div>
-                    {fs.map((i) => (
-                      <V3FindingCard key={i.ruleId} item={i} onStatus={(s) => handleStatus(i.ruleId, s)} />
-                    ))}
-                  </div>
-                ))}
-              </section>
+              {workspaceTab === 'completude' && <section className="space-y-4">
+                {selected.ata
+                  ? <AtaCard ata={selected.ata} />
+                  : selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
+                <WlHead title="Cobertura da ata e estrutura" count={wl.completude.length} hint="corrija o que falta produzir antes da varredura fina" />
+                {wl.completude.length === 0 ? <p className="text-xs text-muted-foreground">Nenhum item estrutural pendente.</p> : wl.completude.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
+                <DeckRuler slides={selected.nSlides} items={items} onSlide={(slide) => { setWorkspaceTab('slides'); setConfidenceFilter([1, 2, 3]); requestAnimationFrame(() => document.getElementById(`slide-${slide}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }} />
+              </section>}
 
-              {wl.relational.length > 0 && (
-                <section className="space-y-3">
-                  <WlHead
-                    title="Erros entre slides"
-                    count={wl.relational.reduce((a, [, fs]) => a + fs.length, 0)}
-                    hint="não pertencem a um slide só — decida qual lado corrigir"
-                  />
-                  {wl.relational.map(([type, fs]) => (
-                    <div key={type} className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium">{errorLabel(type as ErrorType)}</span>
-                        <span className="text-[10px] text-muted-foreground">{fs.length}</span>
-                      </div>
-                      {fs.map((i) => (
-                        <V3FindingCard key={i.ruleId} item={i} onStatus={(s) => handleStatus(i.ruleId, s)} />
-                      ))}
-                    </div>
-                  ))}
-                </section>
-              )}
+              {workspaceTab === 'problemas' && <section className="space-y-3">
+                <WlHead title="Problemas por causa raiz" count={wl.grouped.reduce((total, [, group]) => total + group.length, 0)} hint="grupos de “Verificar” ficam recolhidos" />
+                {wl.grouped.sort(([, a], [, b]) => confidenceOf(a[0].finding, a[0].origem) - confidenceOf(b[0].finding, b[0].origem) || b.length - a.length).map(([type, group]) => <ProblemGroup key={type} type={type as ErrorType} items={group} onStatus={handleStatus} onVerdict={handleVerdict} onGroupStatus={handleGroupStatus} />)}
+              </section>}
+
+              {workspaceTab === 'slides' && <section className="space-y-3">
+                <div className="flex flex-wrap gap-1.5">
+                  {([1, 2, 3] as Confidence[]).map((level) => <button key={level} onClick={() => setConfidenceFilter((current) => current.includes(level) ? current.filter((item) => item !== level) : [...current, level])} className={cn('text-[11px] rounded-full border px-2.5 py-1', confidenceFilter.includes(level) ? CONFIDENCE_META[level].className : 'border-border text-muted-foreground')}>{CONFIDENCE_META[level].icon} {CONFIDENCE_META[level].label}</button>)}
+                </div>
+                <WlHead title="Por slide (ordem do deck)" count={wl.slides.reduce((total, [, findings]) => total + findings.length, 0)} />
+                {wl.slides.map(([n, findings]) => {
+                  const visible = findings.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem)));
+                  if (!visible.length) return null;
+                  return <div id={`slide-${n}`} key={n} className="space-y-2 scroll-mt-32"><div className="flex items-center gap-2"><span className="text-xs font-semibold rounded bg-muted px-2 py-0.5">Slide {n}</span><span className="text-[10px] text-muted-foreground">{visible.length} item(ns)</span></div>{visible.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}</div>;
+                })}
+              </section>}
 
               {/* Card de regras */}
               <section className="pt-4">
@@ -817,6 +859,46 @@ function RulesCard() {
               ))}
             </div>
           </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  );
+}
+
+function DeckRuler({ slides, items, onSlide }: { slides: number; items: FindingV3[]; onSlide: (slide: number) => void }) {
+  const pinned = new Set<number>();
+  for (const item of items.filter((item) => item.status === 'pendente')) {
+    for (const match of item.finding.slideRef.matchAll(/s(\d+)/g)) pinned.add(Number(match[1]));
+  }
+  return (
+    <div className="rounded-lg border bg-card p-3 space-y-2">
+      <div className="text-xs font-semibold">Vista geral do deck</div>
+      <div className="grid grid-cols-12 sm:grid-cols-16 md:grid-cols-20 gap-1">
+        {Array.from({ length: slides }, (_, index) => index + 1).map((slide) => <button key={slide} onClick={() => onSlide(slide)} title={`Slide ${slide}${pinned.has(slide) ? ' — possui pendência' : ''}`} className={cn('h-5 rounded text-[9px] font-mono border', pinned.has(slide) ? 'bg-amber-500/20 border-amber-500/50 text-amber-700 dark:text-amber-300' : 'bg-muted/40 border-border text-muted-foreground hover:border-primary/50')}>{slide}</button>)}
+      </div>
+      <p className="text-[10px] text-muted-foreground">Pinos âmbar indicam slides com pendência; clique para abrir a varredura daquele ponto.</p>
+    </div>
+  );
+}
+
+function ProblemGroup({ type, items, onStatus, onVerdict, onGroupStatus }: {
+  type: ErrorType; items: FindingV3[];
+  onStatus: (ruleId: string, status: FindingStatus) => void;
+  onVerdict: (ruleId: string, verdict: 'bug' | 'fp') => void;
+  onGroupStatus: (items: FindingV3[], status: FindingStatus) => void;
+}) {
+  const level = confidenceOf(items[0].finding, items[0].origem);
+  const [open, setOpen] = useState(level !== 3);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div className={cn('rounded-lg border', CONFIDENCE_META[level].className)}>
+        <div className="flex items-center gap-2 px-3 py-2">
+          <CollapsibleTrigger className="text-left flex-1 min-w-0"><span className="text-xs font-semibold">{CONFIDENCE_META[level].icon} {errorLabel(type)} ({items.length})</span><span className="ml-2 text-[10px] opacity-70">{open ? 'ocultar' : 'ver grupo'}</span></CollapsibleTrigger>
+          <button onClick={() => void onGroupStatus(items, 'corrigido')} className="text-[10px] rounded border border-current/30 px-2 py-1 hover:bg-background/40">Corrigir grupo</button>
+          <button onClick={() => void onGroupStatus(items, 'ignorado')} className="text-[10px] rounded border border-current/30 px-2 py-1 hover:bg-background/40">Ignorar grupo</button>
+        </div>
+        <CollapsibleContent className="border-t border-current/15 p-2 space-y-2">
+          {items.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => onStatus(item.ruleId, status)} onVerdict={(verdict) => onVerdict(item.ruleId, verdict)} />)}
         </CollapsibleContent>
       </div>
     </Collapsible>

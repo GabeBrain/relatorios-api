@@ -66,7 +66,7 @@ export async function estimateFullAnalysis(
 
 // ── execução do passo único ───────────────────────────────────────────────────
 
-export type Stage = 'det' | 'ata' | 'texto' | 'visao';
+export type Stage = 'det' | 'ata' | 'texto' | 'visao' | 'cruzamento';
 
 export interface StageProgress {
   stage: Stage;
@@ -162,6 +162,12 @@ export async function runFullAnalysis(
     signal,
     expected: { cidade: cityUsed, uf: ata?.uf },
     onProgress: (done, total) => onStage?.({ stage: 'visao', done, total }),
+  }).then(async (res) => {
+    // A visão continua pingando a worklist assim que termina, sem esperar a IA
+    // de texto. Cruzamentos aparecem na etapa seguinte, explicitamente.
+    await attachEvidenceImages(res.findings, candidates);
+    onStage?.({ stage: 'visao', done: candidates.length, total: candidates.length, findings: res.findings, spentUsd: res.costUsd });
+    return res;
   });
 
   const [text, vision] = await Promise.all([textPromise, visionPromise]);
@@ -169,13 +175,14 @@ export async function runFullAnalysis(
   const cross = crossTableFindings(ir, vision.tables);
   const projection = projectionFindings(refs);
   const coverage = [
-    ...sourceFindingsFromVision(ir, vision.sourceSlides),
+    ...sourceFindingsFromVision(ir, vision.sourceSlides, vision.analyzedSlides),
     ...requiredAndExclusionFindings(ir, refs),
   ];
   const visionFindings = [...vision.findings, ...cross, ...projection, ...coverage].filter((f) => !f.ok);
-  // Persiste a imagem original de cada achado → evidência visual na correção.
-  await attachEvidenceImages(visionFindings, candidates);
-  onStage?.({ stage: 'visao', done: candidates.length, total: candidates.length, findings: visionFindings, spentUsd: vision.costUsd });
+  const crossFindings = [...cross, ...projection, ...coverage].filter((f) => !f.ok);
+  // Cruzamentos que apontam para imagem recebem evidência; os demais usam o viz.
+  await attachEvidenceImages(crossFindings, candidates);
+  onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: crossFindings });
 
   return {
     detFindings,

@@ -1,7 +1,7 @@
 // Cruzamentos WS2/WS5 do Corretor v3. Todas as funções são puras: recebem as
 // tabelas já extraídas (nativas ou visão), sem nova chamada/custo de IA.
 
-import { checkProjectionSeries, crossBands, rowLabels } from '../audit/engine';
+import { binsFromColumns, checkProjectionSeries, crossBands, rowLabels } from '../audit/engine';
 import { irTableToExtracted } from '../audit/ir-rules';
 import { toAuditSection, type Ir } from '../audit/ir';
 import type { Cell, ExtractedTable, Finding } from '../audit/model';
@@ -53,16 +53,47 @@ function totalRows(left: CrossTableRef, right: CrossTableRef, matcher: RegExp, l
   return [{ label, left: a, right: b, mismatch: Math.abs(a - b) > 0.5 }];
 }
 
-function grandTotal(table: ExtractedTable): number | null {
-  const declared = (table.totals ?? []).find(numeric);
-  if (declared !== undefined) return declared;
-  const total = table.rows.find((row) => /^total/i.test(String(row[0] ?? '')))?.find(numeric);
-  if (total !== undefined) return total;
-  for (let col = 1; col < table.columns.length; col++) {
-    const values = table.rows.map((row) => row[col]).filter(numeric);
-    if (values.length >= 2) return values.reduce((sum, value) => sum + value, 0);
-  }
+function grandTotal(table: ExtractedTable, measure: RegExp): number | null {
+  // Nunca pega o “primeiro número”: numa tabela de população ele pode ser o 100%
+  // da participação. A ausência de coluna identificável é preferível a um FP.
+  const col = table.colKinds?.findIndex((kind) => kind === 'count') ?? -1;
+  const measureCol = table.columns.findIndex((column) => measure.test(norm(column)));
+  const target = col >= 1 ? col : measureCol >= 1 ? measureCol : -1;
+  if (target < 1) return null;
+  const declared = table.totals?.[target];
+  if (numeric(declared)) return declared;
+  const total = table.rows.find((row) => /^total/i.test(String(row[0] ?? '')))?.[target];
+  if (numeric(total)) return total;
   return null;
+}
+
+function sameMagnitude(left: number, right: number): boolean {
+  if (left === 0 || right === 0) return left === right;
+  const ratio = Math.max(Math.abs(left), Math.abs(right)) / Math.min(Math.abs(left), Math.abs(right));
+  // milhares × unidades são a mesma grandeza exibida em escalas distintas.
+  return ratio >= 900 && ratio <= 1100;
+}
+
+type RowAxis = 'tipologia' | 'preco' | 'metragem' | 'outro';
+export function rowAxis(labels: string[]): RowAxis {
+  const text = norm(labels.join(' | '));
+  const scores: Record<Exclude<RowAxis, 'outro'>, number> = {
+    tipologia: (text.match(/dorm|tipolog|studio|loft|quarto/g) ?? []).length,
+    preco: (text.match(/r\$|preco|valor/g) ?? []).length,
+    metragem: (text.match(/m²|m2|metragem|area/g) ?? []).length,
+  };
+  const best = (Object.entries(scores) as [Exclude<RowAxis, 'outro'>, number][]).sort((a, b) => b[1] - a[1])[0];
+  return best && best[1] > 0 ? best[0] : 'outro';
+}
+
+function binRows(left: CrossTableRef, right: CrossTableRef) {
+  const a = binsFromColumns(left.table.columns), b = binsFromColumns(right.table.columns);
+  if (a.length < 2 || b.length < 2) return [];
+  const n = Math.max(a.length, b.length);
+  return Array.from({ length: n }, (_, i) => ({
+    label: `Faixa ${i + 1}`, left: a[i]?.label ?? '—', right: b[i]?.label ?? '—',
+    mismatch: a[i]?.from !== b[i]?.from || a[i]?.to !== b[i]?.to,
+  }));
 }
 
 /**
@@ -92,9 +123,9 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
     for (let i = 0; i < tables.length; i++) for (let j = i + 1; j < tables.length; j++) {
       const left = tables[i], right = tables[j];
       if (Math.abs(left.slide - right.slide) > 10) continue;
-      const a = grandTotal(left.table), b = grandTotal(right.table);
+      const a = grandTotal(left.table, measure.pattern), b = grandTotal(right.table, measure.pattern);
       if (a === null || b === null) continue;
-      const rows = [{ label: `Total de ${measure.label.toLowerCase()}`, left: a, right: b, mismatch: Math.abs(a - b) > 0.5 }];
+      const rows = [{ label: `Total de ${measure.label.toLowerCase()}`, left: a, right: b, mismatch: Math.abs(a - b) > 0.5 && !sameMagnitude(a, b) }];
       const f = mismatch(`cross-${measure.key}-${left.slide}-${right.slide}`, 'CROSS_TABLE_MISMATCH', 'SOCIO', left, right,
         `${measure.label} diverge entre tabelas sociodemográficas`,
         `O total de ${measure.label.toLowerCase()} deve ser o mesmo nas tabelas da mesma Z.I.; confira escala e origem.`, rows);
@@ -107,7 +138,13 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
     const left = lacunas[i], right = lacunas[j];
     // Só compara tabelas próximas ou da mesma referência textual; evita cruzar Z.I.s diferentes.
     if (Math.abs(left.slide - right.slide) > 5) continue;
-    const rows = crossBands(rowLabels(left.table), rowLabels(right.table), refLabel(left), refLabel(right));
+    const axisLeft = rowAxis(rowLabels(left.table)), axisRight = rowAxis(rowLabels(right.table));
+    // 5.1–5.3 têm eixos de linha diferentes por desenho. Quando os eixos batem,
+    // comparamos linhas; entre eixos, só faz sentido comparar as faixas de coluna.
+    const rows = axisLeft === axisRight && axisLeft !== 'outro'
+      ? crossBands(rowLabels(left.table), rowLabels(right.table), refLabel(left), refLabel(right))
+      : binRows(left, right);
+    if (!rows.length) continue;
     const f = mismatch(`cross-lacunas-bins-${left.slide}-${right.slide}`, 'CROSS_TABLE_MISMATCH', 'LACUNAS', left, right,
       'Faixas de lacunas divergem entre as análises',
       'A tabela geral e suas quebras devem usar o mesmo conjunto de faixas. Confira a lacuna indicada.', rows);
@@ -134,8 +171,11 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
 export function projectionFindings(refs: CrossTableRef[], currentYear = new Date().getFullYear()): Finding[] {
   const out: Finding[] = [];
   for (const ref of refs) {
-    if (!/projec|varia/.test(titleOf(ref))) continue;
+    const section = (ref.secao ?? '').toUpperCase();
+    const projectionTitle = norm(`${ref.titulo ?? ''} ${ref.table.title}`);
+    if (!['SOCIO', 'ABSORCAO'].includes(section) || !/projec[aã]o|projecoes/.test(projectionTitle)) continue;
     const years = ref.table.columns.map((c) => Number(c.match(/\b(20\d{2})\b/)?.[1])).filter(Number.isFinite);
+    if (!years.length || years.filter((year) => year >= currentYear).length <= years.length / 2) continue;
     if (years.length >= 2) {
       const expected = Array.from({ length: 6 }, (_, i) => currentYear + 1 + i);
       const found = [...new Set(years)].sort((a, b) => a - b);

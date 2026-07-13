@@ -206,14 +206,37 @@ export function crossBands(
   for (let i = 0; i < n; i++) {
     const a = labelsA[i] ?? '';
     const b = labelsB[i] ?? '';
+    const binA = binFromLabel(a);
+    const binB = binFromLabel(b);
     rows.push({
       label: `Faixa ${i + 1}`,
       left: a,
       right: b,
-      mismatch: norm(a) !== norm(b),
+      // “Até R$ 2.000” e “De R$ 0 a R$ 2.000” são a mesma faixa.
+      mismatch: binA && binB ? binA.from !== binB.from || binA.to !== binB.to : norm(a) !== norm(b),
     });
   }
   return rows;
+}
+
+/** Extrai faixas numéricas de títulos/rótulos em formatos usuais pt-BR. */
+export function binFromLabel(label: string): Bin | null {
+  const raw = label.trim();
+  const compact = raw.toLowerCase().replace(/\s+/g, ' ');
+  const number = (value: string) => Number(value.replace(/\./g, '').replace(',', '.'));
+  const token = 'r?\\$?\\s*([0-9][0-9.,]*)';
+  let match = compact.match(new RegExp(`^at[eé]\\s*(?:de\\s*)?${token}`, 'i'));
+  if (match) return { label: raw, from: 0, to: number(match[1]) };
+  match = compact.match(new RegExp(`^acima\\s*(?:de\\s*)?${token}`, 'i'));
+  if (match) return { label: raw, from: number(match[1]), to: null };
+  match = compact.match(new RegExp(`(?:de\\s*)?${token}\\s*(?:a|at[eé]|[-–])\\s*(?:r?\\$?\\s*)?([0-9][0-9.,]*)`, 'i'));
+  if (match) return { label: raw, from: number(match[1]), to: number(match[2]) };
+  return null;
+}
+
+/** Faixas presentes nos cabeçalhos, reutilizável entre visão e cruzamentos. */
+export function binsFromColumns(columns: string[]): Bin[] {
+  return columns.map(binFromLabel).filter((bin): bin is Bin => bin !== null);
 }
 
 export interface UnitRecord {

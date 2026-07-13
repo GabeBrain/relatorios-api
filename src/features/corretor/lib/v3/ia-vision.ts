@@ -4,9 +4,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, calculateImageTokens, type ModelId } from '../cost-calculator';
-import { checkTableSums, checkPercentConsistency, checkUnitPlausibility, detectBinGap } from '../audit/engine';
+import { binsFromColumns, checkTableSums, checkPercentConsistency, checkUnitPlausibility, detectBinGap } from '../audit/engine';
 import { toAuditSection } from '../audit/ir';
-import type { Cell, ColKind, ExtractedTable, Finding, Bin } from '../audit/model';
+import type { Cell, ColKind, ExtractedTable, Finding } from '../audit/model';
 import type { TableImageCandidate } from './table-images';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,7 +73,8 @@ export async function estimateVisionPass(
   );
   const toRun = candidates.filter((c) => !cachedSet.has(c.sha1));
   const inputTokens = toRun.reduce((a, c) => a + calculateImageTokens(c.w, c.h, model) + 450, 0);
-  const outputTokens = toRun.length * 700;
+  // Fichas carregam uma lista de unidades; tabela comum agora inclui local/fonte.
+  const outputTokens = toRun.reduce((a, c) => a + (c.tipo === 'ficha' ? 2000 : 900), 0);
   return {
     candidates: candidates.length,
     cached: cachedSet.size,
@@ -146,24 +147,13 @@ export function toExtracted(raw: RawTable): ExtractedTable | null {
   };
 }
 
-/** Faixas "9001-9500" / "Acima de 10000" nos cabeçalhos → Bin[] p/ checar furo. */
-function binsFromColumns(columns: string[]): Bin[] {
-  const bins: Bin[] = [];
-  for (const c of columns) {
-    const clean = c.replace(/[R$\s.]/g, '');
-    let m = clean.match(/^(?:até)?(\d+)-(\d+)/i) ?? clean.match(/^de(\d+)a(\d+)/i);
-    if (m) { bins.push({ label: c, from: parseInt(m[1], 10), to: parseInt(m[2], 10) }); continue; }
-    m = clean.match(/^acimade(\d+)/i);
-    if (m) bins.push({ label: c, from: parseInt(m[1], 10), to: null });
-  }
-  return bins;
-}
-
 export interface VisionPassResult {
   findings: Finding[];
   tables: ExtractedTableRef[];
   /** Slides com fonte/elaboração detectada na própria imagem. */
   sourceSlides: number[];
+  /** Slides que de fato tiveram uma candidata processada (inclusive sem fonte). */
+  analyzedSlides: number[];
   tablesExtracted: number;
   tablesVerified: number;
   fromCache: number;
@@ -382,6 +372,7 @@ async function processImage(
           ok: false,
           viz,
           evidenceSha1: c.sha1,
+          escalated,
         });
       }
     }
@@ -400,6 +391,7 @@ async function processImage(
         ok: false,
         viz: pc,
         evidenceSha1: c.sha1,
+        escalated,
       });
     }
 
@@ -419,6 +411,7 @@ async function processImage(
           ok: false,
           viz: { kind: 'binrange', unit: '', bins, gapAfterIndex: gap.gapAfterIndex, gapDescription: gap.description },
           evidenceSha1: c.sha1,
+          escalated,
         });
       }
     }
@@ -433,7 +426,7 @@ async function processImage(
       type: 'VALUE_PLAUSIBILITY', section: secao, slideRef: `s${c.slide}`,
       title: 'Valores a conferir na ficha técnica',
       detail: `Plausibilidade das unidades extraídas da ficha: ${unitViz.notes?.[0] ?? 'verifique os valores marcados.'}`,
-      ok: false, viz: unitViz, evidenceSha1: c.sha1,
+      ok: false, viz: unitViz, evidenceSha1: c.sha1, escalated,
     });
   }
 
@@ -453,7 +446,7 @@ export async function runVisionPass(
   const concurrency = Math.max(1, o.concurrency ?? 1);
 
   const findings: Finding[] = [], tables: ExtractedTableRef[] = [];
-  const sourceSlides = new Set<number>();
+  const sourceSlides = new Set<number>(), analyzedSlides = new Set<number>();
   let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0;
   let costUsd = 0, escalated = 0, done = 0;
 
@@ -465,6 +458,7 @@ export async function runVisionPass(
       const r = await processImage(candidates[i], model, o.expected);
       findings.push(...r.findings);
       tables.push(...r.tables);
+      analyzedSlides.add(candidates[i].slide);
       if (r.hasVisibleSource) sourceSlides.add(candidates[i].slide);
       tablesExtracted += r.tablesExtracted;
       tablesVerified += r.tablesVerified;
@@ -479,7 +473,7 @@ export async function runVisionPass(
   await Promise.all(Array.from({ length: Math.min(concurrency, candidates.length) }, worker));
 
   return {
-    findings, tables, sourceSlides: [...sourceSlides].sort((a, b) => a - b), tablesExtracted, tablesVerified, fromCache,
+    findings, tables, sourceSlides: [...sourceSlides].sort((a, b) => a - b), analyzedSlides: [...analyzedSlides].sort((a, b) => a - b), tablesExtracted, tablesVerified, fromCache,
     inputTokens, outputTokens, escalated,
     costUsd,
   };

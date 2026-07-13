@@ -49,6 +49,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-13 — Corretor v4: precisão antes da homologação + UI por confiança — Gabriel
+- **Precisão:** corrigidos os quatro geradores de falso positivo apontados na revisão do
+  Coverage 90 (projeção histórica, eixos de lacunas, totais de participação e mapas não
+  analisados), além de faixas numéricas, fichas, checklist e custo/progresso da visão.
+- **Interface:** o workspace agora diferencia **Erro / Provável / Verificar**, organiza a
+  correção em Completude, Problemas e Por slide, permite ação em lote e registra “Não é erro
+  (FP)” para calibrar o motor. Entrega bloqueia níveis 1–2; nível 3 pede confirmação.
+- **Banco:** nova migration `20260713150000_corretor_v4_verdict.sql` adiciona o veredito aos
+  achados v3. Roteiro de deploy/homologação atualizado no doc operacional do Corretor.
+
 ### 2026-07-13 — Corretor Coverage 90: WS2–WS8 concluídos em BETA — Gabriel
 - **Motor:** cruzamentos entre tabelas, checklist de cobertura da Ata, estrutura granular,
   projeções, fichas técnicas, fonte/notas/exclusões e regras de consolidada/VSO entraram no
@@ -284,7 +294,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, PPTX→IR, mapas, thumbnails) | 🟡 (no ar: **upload de .pptx** + fixtures + recall/export + RADII/mapa + thumbnails c/ poda; falta gráficos no extrator, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
 | 6f | Corretor v2 — estratégia de testes do fluxo do analista | 🟡 (design ✅ + slice 1 worklist ✅; slices 2-4 absorvidos pela v3) |
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
-| 6h | **Corretor v3** — unificação v1+v2 num fluxo único (5 estágios) | 🟡 v3.0 ✅ + v3.1 ✅ + v3.2 ✅ + Coverage 90 WS0–WS8 ✅ em BETA. Migrations Ata/visão aplicadas; falta deploy da `analyze-table-image` (cache v6), calibração Marka/Itajaí/GO e recall real >=90% → v3.3 mapas + aposentar v1 🔲 |
+| 6h | **Corretor v4** — unificação v1+v2 num fluxo único (5 estágios) | 🟡 Coverage 90 WS0–WS8 ✅ em BETA + v4.0–v4.3 ✅ (confiança, abas, grupos, FP). Migration v4 aplicada; falta deploy da `analyze-table-image` (cache v6), calibração Marka/Itajaí/GO e recall real >=90% → v3.3 mapas + aposentar v1 🔲 |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |

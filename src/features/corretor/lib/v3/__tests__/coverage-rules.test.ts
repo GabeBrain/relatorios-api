@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Ir } from '../../audit/ir';
 import { checkProjectionSeries, checkUnitPlausibility } from '../../audit/engine';
-import { ataCoverageFindings, requiredAndExclusionFindings } from '../coverage-rules';
-import { crossTableFindings } from '../cross-table';
+import { ataCoverageFindings, requiredAndExclusionFindings, sourceFindingsFromVision } from '../coverage-rules';
+import { crossTableFindings, projectionFindings } from '../cross-table';
 
 const ir = (slides: Ir['slides']): Ir => ({ ir_version: 1, arquivo: 'teste', n_slides: slides.length, slides });
 const slide = (n: number, secao_canonica: string, titulo: string, textos: string[] = []) => ({
@@ -17,6 +17,46 @@ describe('Coverage 90 — regras puras finais', () => {
       { slide: 20, secao: 'ABSORCAO', titulo: 'Absorção por renda', sha1: 'b', table: { title: 'Renda', columns: ['Faixa', 'Qtd'], rows: [['Até 15 mil', 1], ['Acima de 15 mil', 2]] } },
     ];
     expect(crossTableFindings(study, refs).some((f) => f.type === 'CROSS_TABLE_MISMATCH')).toBe(true);
+  });
+
+  it('aceita faixas equivalentes com formatação diferente', () => {
+    const study = ir([slide(10, 'SOCIO', 'Domicílios por faixa de renda'), slide(20, 'ABSORCAO', 'Absorção por renda')]);
+    const refs = [
+      { slide: 10, secao: 'SOCIO', titulo: 'Domicílios por faixa de renda', sha1: 'a', table: { title: 'Domicílios por renda', columns: ['Faixa', 'Qtd'], rows: [['Até R$ 2.000', 1], ['Acima de R$ 2.000', 2]] } },
+      { slide: 20, secao: 'ABSORCAO', titulo: 'Absorção por renda', sha1: 'b', table: { title: 'Renda', columns: ['Faixa', 'Qtd'], rows: [['De R$ 0 a R$ 2.000', 1], ['Acima de R$ 2.000', 2]] } },
+    ];
+    expect(crossTableFindings(study, refs).filter((f) => f.type === 'CROSS_TABLE_MISMATCH')).toEqual([]);
+  });
+
+  it('não trata oferta histórica por ano como projeção', () => {
+    const refs = [{
+      slide: 50, secao: 'MERCADO', titulo: 'Oferta lançada por ano de lançamento', sha1: 'a', source: 'vision' as const,
+      table: { title: 'Oferta', columns: ['Padrão', 'Var. %', '2018', '2019', '2020'], rows: [['Médio', 2, 10, 4, 18]] },
+    }];
+    expect(projectionFindings(refs, 2026)).toEqual([]);
+  });
+
+  it('não cruza linhas de lacunas com eixos diferentes sem bins comparáveis', () => {
+    const study = ir([slide(120, 'LACUNAS', 'Lacunas por tipologia e metragem'), slide(121, 'LACUNAS', 'Lacunas por preço e metragem')]);
+    const refs = [
+      { slide: 120, secao: 'LACUNAS', titulo: 'Lacunas', sha1: 'a', table: { title: 'Tipologia x metragem', columns: ['Tipo', 'Oferta'], rows: [['2 dorms', 1], ['3 dorms', 2]] } },
+      { slide: 121, secao: 'LACUNAS', titulo: 'Lacunas', sha1: 'b', table: { title: 'Preço x metragem', columns: ['Preço', 'Oferta'], rows: [['R$ 200 mil', 1], ['R$ 300 mil', 2]] } },
+    ];
+    expect(crossTableFindings(study, refs).filter((f) => f.slideRef.includes('120') && f.slideRef.includes('121'))).toEqual([]);
+  });
+
+  it('não compara total de participação como total de população', () => {
+    const study = ir([slide(10, 'SOCIO', 'População por renda'), slide(11, 'SOCIO', 'População por idade')]);
+    const refs = [
+      { slide: 10, secao: 'SOCIO', titulo: 'População', sha1: 'a', table: { title: 'População', columns: ['Faixa', 'População', '%'], colKinds: ['label', 'count', 'share'], rows: [['A', 1000, 50], ['B', 1000, 50]], totals: ['Total', 2000, 100] } },
+      { slide: 11, secao: 'SOCIO', titulo: 'População', sha1: 'b', table: { title: 'População', columns: ['Faixa', 'População', '%'], colKinds: ['label', 'count', 'share'], rows: [['A', 1000, 50], ['B', 1000, 50]], totals: ['Total', 2000, 100] } },
+    ];
+    expect(crossTableFindings(study, refs).filter((f) => f.type === 'CROSS_TABLE_MISMATCH')).toEqual([]);
+  });
+
+  it('não acusa fonte em imagem que não foi analisada', () => {
+    const study = ir([{ ...slide(8, 'SOCIO', 'Mapa de renda'), n_imagens: 1 }]);
+    expect(sourceFindingsFromVision(study, [], [])).toEqual([]);
   });
 
   it('marca pedido da ata quando não encontra evidência e aceita produto proposto', () => {

@@ -100,6 +100,8 @@ export interface Finding {
   viz?: Viz;
   /** sha1 da imagem de tabela que originou o achado (visão) → evidência visual (v3.3). */
   evidenceSha1?: string;
+  /** A leitura da visão foi reconfirmada no modelo maior após divergência. */
+  escalated?: boolean;
   /** path no Storage da imagem-evidência, depois de persistida (v3.3). */
   evidenceImage?: string;
 }

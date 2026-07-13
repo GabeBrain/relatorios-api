@@ -2,8 +2,7 @@
 
 **Release:** Coverage 90 WS0–WS8 · **Atualizado:** 2026-07-13
 
-Este roteiro separa o que é necessário publicar do que precisa de confirmação humana. Não há
-nova migration nesta release: a mudança é de front/motor e do contrato da Edge Function.
+Este roteiro separa o que é necessário publicar do que precisa de confirmação humana.
 
 ## Functions a publicar
 
@@ -15,7 +14,13 @@ nova migration nesta release: a mudança é de front/motor e do contrato da Edge
 
 Antes do deploy, confirme que `OPENAI_API_KEY` e `ALLOWED_ORIGINS` já existem no projeto
 Supabase. Depois, execute upload/reconferência: o cache v6 deliberadamente reprocessa as
-imagens antigas uma única vez. Não há SQL pendente para este bloco.
+imagens antigas uma única vez.
+
+## Migration v4 — aplicada
+
+`supabase/migrations/20260713150000_corretor_v4_verdict.sql` foi aplicada em 13/jul/2026.
+Ela adiciona `findings_v3.verdict` (`bug`/`fp`), não altera os achados existentes e não requer
+Edge Function nova.
 
 ## Etapas de teste final
 

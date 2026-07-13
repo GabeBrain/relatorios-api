@@ -16,6 +16,36 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.33 — 2026-07-13 — Precisão Coverage 90 + Corretor v4 (RUNTIME)
+
+Implementados os ajustes obrigatórios da revisão e as fatias v4.0–v4.3 da interface.
+
+| Área | Mudança runtime |
+|---|---|
+| Precisão A1–A4 | Projeção só roda em SOCIO/ABSORÇÃO com título explícito e maioria de anos futuros; lacunas classificam eixo antes de cruzar; população/domicílios só usam coluna `count`/grandeza; fonte só é cobrada em dado nativo ou imagem analisada. |
+| Precisão B1–B6 | Faixas equivalentes são comparadas numericamente; fichas podem ser encontradas por texto e têm limite visual próprio; checklist ignora capa/sumário e completa 1.1–8.4; UF se limita a contexto contratado; visão volta a pingar antes do texto e a estimativa distingue ficha. |
+| v4.0 | `confidenceOf` classifica cada achado como **Erro**, **Provável** ou **Verificar**; header e filtro não chamam todos de erro. |
+| v4.1–v4.2 | Área de trabalho em abas Completude, Problemas e Por slide; régua do deck; grupos por causa raiz e ação em lote. |
+| v4.3 | Botão **Não é erro (FP)** persiste veredito em `findings_v3.verdict`; nível 3 pode ser entregue só após confirmação, níveis 1–2 bloqueiam. |
+
+**Migration aplicada:** `20260713150000_corretor_v4_verdict.sql` (Gabriel, 13/jul). Não há Edge Function alterada
+nesta rodada. Testes unitários de precisão/confiança e build foram atualizados; falta a
+calibração real Marka/Itajaí/GO para declarar a meta quantitativa.
+
+## Versão 0.32 — 2026-07-13 — Revisão do Coverage 90 + design UI/UX v4 (docs, sem mudança de regra)
+
+Revisão de código dos commits `aae1be3`/`dfe6bbb` (Claude, a pedido do Gabriel). Nenhuma regra
+mudou nesta versão — dois documentos novos orientam as próximas:
+
+- `REVIEW_coverage_90_ajustes.md` — 4 geradores de falso positivo a corrigir **antes** da
+  homologação (A1 projeção disparando em "oferta por ano"; A2 lacunas cruzando eixos
+  diferentes; A3 `grandTotal` comparando grandeza errada; A4 SOURCE_MISSING em mapa não
+  analisado) + melhorias B1–B6 e observações. Ordem de execução no próprio doc.
+- `DESIGN_uiux_corretor_v4.md` — redesign da interface para o volume/natureza novos dos
+  achados: hierarquia de confiança em 3 níveis (Erro/Provável/Verificar), área de trabalho em
+  3 abas (Completude, Problemas, Por slide), evolução do card com botão "Não é erro" (loop de
+  calibração) e fatias v4.0–v4.3.
+
 ## Versão 0.31 — 2026-07-13 — Coverage 90: WS2–WS8 conectados ao passo único (BETA, validação real pendente)
 
 Os workstreams restantes do `PLAN_coverage_90.md` agora rodam no fluxo v3, sem chamada de IA

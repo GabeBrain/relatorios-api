@@ -40,12 +40,13 @@ export function ataCoverageFindings(ir: Ir, ata: AtaData | null): Finding[] {
   }];
 }
 
-/** WS7: fonte só falta quando há dado no slide e nem IR nem imagem confirmou-a. */
-export function sourceFindingsFromVision(ir: Ir, sourceSlides: number[]): Finding[] {
+/** WS7: fonte só falta quando há dado nativo ou imagem que a visão realmente analisou. */
+export function sourceFindingsFromVision(ir: Ir, sourceSlides: number[], analyzedSlides: number[]): Finding[] {
   const visible = new Set(sourceSlides);
+  const analyzed = new Set(analyzedSlides);
   return ir.slides.filter((slide) => {
     const numericSection = ['SOCIO', 'ABSORCAO', 'LACUNAS'].includes((slide.secao_canonica ?? '').toUpperCase());
-    const hasData = (slide.tabelas?.length ?? 0) > 0 || (slide.graficos?.length ?? 0) > 0 || (slide.n_imagens ?? 0) > 0;
+    const hasData = (slide.tabelas?.length ?? 0) > 0 || (slide.graficos?.length ?? 0) > 0 || analyzed.has(slide.n);
     return numericSection && hasData && (slide.fontes?.length ?? 0) === 0 && !visible.has(slide.n);
   }).slice(0, 25).map((slide) => ({
     id: `src-${slide.n}`, type: 'SOURCE_MISSING' as const, section: toAuditSection(slide.secao_canonica), slideRef: `s${slide.n}`,
