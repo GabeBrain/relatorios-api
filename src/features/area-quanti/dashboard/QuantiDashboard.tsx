@@ -8,7 +8,7 @@ import { FiltersSidebar } from './FiltersSidebar';
 import { ActiveFiltersBar } from './ActiveFiltersBar';
 import { KpiRow } from './KpiRow';
 import { BarField, ChartCard, DonutField, Heatmap, HistogramChart } from './Charts';
-import { BrazilMap } from './BrazilMap';
+import { GeoMap } from './geo/GeoMap';
 import { Rankings } from './Rankings';
 import { CrossAnalysis } from './CrossAnalysis';
 import './dashboard.css';
@@ -118,8 +118,8 @@ export function QuantiDashboard() {
             <section className="space-y-2">
               <h2 className="qd-section-title">Distribuição Geográfica</h2>
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                <ChartCard title="Brasil por estado" subtitle="Intensidade = volume de entrevistas · clique para filtrar">
-                  <BrazilMap rows={filtered} />
+                <ChartCard title="Brasil por estado" subtitle="Clique num estado para fazer drill-down · clique nos municípios para filtrar">
+                  <GeoMap rows={filtered} />
                 </ChartCard>
                 <ChartCard title="Top cidades">
                   <BarField rows={filtered} field="cidade" topN={15} />

@@ -1,92 +1,141 @@
 import { useMemo, useState } from 'react';
-import { Download, FileSpreadsheet } from 'lucide-react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip as RTooltip,
+  Treemap,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import * as XLSX from 'xlsx';
-import type { CategoricalField, QuantiRecord } from './types';
+import { Download, FileSpreadsheet, LayoutGrid, Table2, BarChart3 } from 'lucide-react';
+import type { QuantiRecord } from './types';
 import { FIELD_LABELS } from './types';
-import { crosstab } from './aggregate';
-import { ChartCard, Heatmap, StackedCrosstab } from './Charts';
+import {
+  crosstabUniversal,
+  detectFieldSchema,
+  type FieldMeta,
+  type UniversalCrosstab,
+  type UniversalMetric,
+} from './aggregate';
+import { ChartCard, Heatmap } from './Charts';
+import { useQuantiStore } from './store';
 
-type Metric = 'count' | 'pct' | 'avg_renda';
-type View = 'table' | 'grouped' | 'stacked' | 'heatmap';
+type ViewKind = 'table' | 'grouped' | 'stacked' | 'stacked100' | 'heatmap' | 'pie' | 'donut' | 'treemap';
+type Mode = 'both' | 'table' | 'chart';
 
-const FIELDS: CategoricalField[] = [
-  'research_name',
-  'estado',
-  'cidade',
-  'regiao',
-  'genero',
-  'faixa_etaria',
-  'geracao',
-  'renda_macro_faixa',
-  'renda_faixa_padronizada',
-  'renda_classe_agregada',
-  'renda_classe_detalhada',
-  'intencao_compra_padronizada',
-  'tempo_intencao_padronizado',
+const PALETTE = [
+  '#5B7537', '#71984a', '#8fb85f', '#b5cf7d', '#d7e3a8',
+  '#F8D000', '#f4d83f', '#ffe173', '#c7a300', '#6e6e6e',
 ];
 
-const BRL = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+const METRIC_LABEL: Record<UniversalMetric, string> = {
+  count: 'Quantidade',
+  pct_total: '% do total',
+  pct_row: '% por linha',
+  pct_col: '% por coluna',
+  avg: 'Média',
+  sum: 'Soma',
+  median: 'Mediana',
+};
+
+const BRL = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+
+function fmt(v: number, metric: UniversalMetric): string {
+  if (!v && v !== 0) return '';
+  if (metric.startsWith('pct')) return `${v.toFixed(1)}%`;
+  return BRL(v);
+}
+
+/** Which visualizations are compatible with the current selection. */
+function compatibleViews(rowField: string, colField: string | null, metric: UniversalMetric, ct: UniversalCrosstab): ViewKind[] {
+  const has2D = !!colField;
+  const nRows = ct.rows.length;
+  const nCols = ct.cols.length;
+  const views: ViewKind[] = ['table'];
+  if (has2D) {
+    views.push('grouped', 'stacked', 'stacked100', 'heatmap');
+    if (nRows <= 12 && nCols <= 12) views.push('treemap');
+  } else {
+    if (nRows <= 12) views.push('pie', 'donut');
+    views.push('grouped', 'treemap');
+  }
+  // Percent by row/col requires 2D; already implicit.
+  return views;
+}
 
 export function CrossAnalysis({ rows }: { rows: QuantiRecord[] }) {
-  const [rowField, setRowField] = useState<CategoricalField>('faixa_etaria');
-  const [colField, setColField] = useState<CategoricalField>('renda_classe_agregada');
-  const [metric, setMetric] = useState<Metric>('count');
-  const [view, setView] = useState<View>('table');
+  const schema = useMemo(() => detectFieldSchema(rows, FIELD_LABELS as any), [rows]);
+  const catFields = schema.filter((f) => f.kind === 'categorical');
+  const numFields = schema.filter((f) => f.kind === 'numeric');
 
-  const ct = useMemo(() => crosstab(rows, rowField, colField, metric), [rows, rowField, colField, metric]);
+  const [rowField, setRowField] = useState<string>(() => catFields[0]?.key ?? '');
+  const [colField, setColField] = useState<string | null>(() => catFields[1]?.key ?? null);
+  const [metric, setMetric] = useState<UniversalMetric>('count');
+  const [valueField, setValueField] = useState<string | null>(() => numFields[0]?.key ?? null);
+  const [view, setView] = useState<ViewKind>('table');
+  const [mode, setMode] = useState<Mode>('both');
 
-  const fmt = (n: number) =>
-    metric === 'avg_renda'
-      ? n
-        ? BRL(n)
-        : ''
-      : metric === 'pct'
-        ? `${n.toFixed(1)}%`
-        : n
-          ? n.toLocaleString('pt-BR')
-          : '';
+  const needsValueField = metric === 'avg' || metric === 'sum' || metric === 'median';
+
+  const ct = useMemo(
+    () => (rowField
+      ? crosstabUniversal(rows, rowField, colField, metric, needsValueField ? valueField : null)
+      : null),
+    [rows, rowField, colField, metric, valueField, needsValueField],
+  );
+
+  const rowLabel = schema.find((f) => f.key === rowField)?.label ?? rowField;
+  const colLabel = colField ? (schema.find((f) => f.key === colField)?.label ?? colField) : null;
+
+  const availableViews: ViewKind[] = ct ? compatibleViews(rowField, colField, metric, ct) : ['table'];
+  const effectiveView = availableViews.includes(view) ? view : availableViews[0];
 
   function buildSheet() {
-    const header = [FIELD_LABELS[rowField], ...ct.cols, 'Total'];
-    const body = ct.rows.map((r, i) => [r, ...ct.matrix[i].map((v) => (metric === 'pct' ? +v.toFixed(2) : Math.round(v * 100) / 100)), ct.rowTotals[i]]);
-    const totals = ['Total', ...ct.colTotals, ct.total];
+    if (!ct) return [];
+    const header = [rowLabel, ...(colField ? ct.cols : ['Valor']), 'Total'];
+    const body = ct.rows.map((r, i) => [
+      r,
+      ...(colField ? ct.matrix[i] : [ct.matrix[i][0]]),
+      ct.rowTotals[i],
+    ]);
+    const totals = ['Total', ...(colField ? ct.colTotals : [ct.colTotals[0]]), ct.total];
     return [header, ...body, totals];
   }
-
   function exportCSV() {
     const s = buildSheet().map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([s], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `cruzamento_${rowField}_x_${colField}.csv`;
-    a.click();
+    a.href = URL.createObjectURL(blob); a.download = `cruzamento_${rowField}_x_${colField ?? 'total'}.csv`; a.click();
   }
-
   function exportXLSX() {
     const ws = XLSX.utils.aoa_to_sheet(buildSheet());
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Cruzamento');
-    XLSX.writeFile(wb, `cruzamento_${rowField}_x_${colField}.xlsx`);
+    XLSX.writeFile(wb, `cruzamento_${rowField}_x_${colField ?? 'total'}.xlsx`);
   }
 
-  const Select = ({ value, onChange, exclude }: { value: CategoricalField; onChange: (f: CategoricalField) => void; exclude?: CategoricalField }) => (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value as CategoricalField)}
-      className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs"
-    >
-      {FIELDS.filter((f) => f !== exclude).map((f) => (
-        <option key={f} value={f}>{FIELD_LABELS[f]}</option>
-      ))}
-    </select>
-  );
+  if (!rowField || !ct) {
+    return <ChartCard title="Análise Cruzada Universal"><div className="p-4 text-xs text-[var(--qd-text-muted)]">Sem campos categóricos detectados na base.</div></ChartCard>;
+  }
 
   return (
     <ChartCard
-      title="Análise Cruzada"
-      subtitle="Combine duas variáveis quaisquer e escolha a métrica e a visualização."
+      title="Análise Cruzada Universal"
+      subtitle="Cruze qualquer variável analítica da base. Novas colunas aparecem automaticamente."
       action={
         <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex items-center rounded-md border border-slate-200 bg-white">
+            <ModeBtn active={mode === 'both'} onClick={() => setMode('both')} icon={<LayoutGrid className="h-3 w-3" />}>Tabela + Gráfico</ModeBtn>
+            <ModeBtn active={mode === 'table'} onClick={() => setMode('table')} icon={<Table2 className="h-3 w-3" />}>Só tabela</ModeBtn>
+            <ModeBtn active={mode === 'chart'} onClick={() => setMode('chart')} icon={<BarChart3 className="h-3 w-3" />}>Só gráfico</ModeBtn>
+          </div>
           <button onClick={exportCSV} className="flex items-center gap-1 rounded border border-slate-200 px-2 py-1 text-[11px] hover:bg-slate-50">
             <Download className="h-3 w-3" /> CSV
           </button>
@@ -96,63 +145,226 @@ export function CrossAnalysis({ rows }: { rows: QuantiRecord[] }) {
         </div>
       }
     >
-      <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px] text-[var(--qd-text-muted)]">
-        <span>Linhas:</span>
-        <Select value={rowField} onChange={setRowField} exclude={colField} />
-        <span>Colunas:</span>
-        <Select value={colField} onChange={setColField} exclude={rowField} />
-        <span>Métrica:</span>
-        <select value={metric} onChange={(e) => setMetric(e.target.value as Metric)} className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs">
-          <option value="count">Quantidade</option>
-          <option value="pct">% do total</option>
-          <option value="avg_renda">Média de renda estimada</option>
-        </select>
-        <span>Visualização:</span>
-        <select value={view} onChange={(e) => setView(e.target.value as View)} className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs">
-          <option value="table">Tabela dinâmica</option>
-          <option value="heatmap">Heatmap</option>
-          <option value="stacked">Barras empilhadas</option>
-          <option value="grouped">Barras agrupadas</option>
-        </select>
+      {/* Controls */}
+      <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <SelectBox label="Agrupar por">
+          <select value={rowField} onChange={(e) => setRowField(e.target.value)} className="w-full">
+            {catFields.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+          </select>
+        </SelectBox>
+        <SelectBox label="Comparar com">
+          <select value={colField ?? ''} onChange={(e) => setColField(e.target.value || null)} className="w-full">
+            <option value="">— (nenhum · 1D)</option>
+            {catFields.filter((f) => f.key !== rowField).map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+          </select>
+        </SelectBox>
+        <SelectBox label="Métrica">
+          <select value={metric} onChange={(e) => setMetric(e.target.value as UniversalMetric)} className="w-full">
+            <option value="count">Quantidade</option>
+            <option value="pct_total">% do total</option>
+            <option value="pct_row" disabled={!colField}>% por linha</option>
+            <option value="pct_col" disabled={!colField}>% por coluna</option>
+            <option value="avg" disabled={!numFields.length}>Média</option>
+            <option value="sum" disabled={!numFields.length}>Soma</option>
+            <option value="median" disabled={!numFields.length}>Mediana</option>
+          </select>
+        </SelectBox>
+        {needsValueField && (
+          <SelectBox label="Métrica sobre…">
+            <select value={valueField ?? ''} onChange={(e) => setValueField(e.target.value || null)} className="w-full">
+              {numFields.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+            </select>
+          </SelectBox>
+        )}
+        <SelectBox label="Visualização">
+          <select value={effectiveView} onChange={(e) => setView(e.target.value as ViewKind)} className="w-full">
+            {viewOptions(availableViews)}
+          </select>
+        </SelectBox>
       </div>
 
-      {view === 'table' && (
-        <div className="qd-scroll max-h-[520px] overflow-auto rounded-md border border-slate-100">
-          <table className="min-w-full text-[11px]">
-            <thead className="sticky top-0 bg-slate-50">
-              <tr>
-                <th className="sticky left-0 z-10 bg-slate-50 p-2 text-left font-semibold">{FIELD_LABELS[rowField]}</th>
-                {ct.cols.map((c) => (
-                  <th key={c} className="p-2 text-right font-semibold" title={c}>{c}</th>
-                ))}
-                <th className="p-2 text-right font-semibold">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ct.rows.map((r, i) => (
-                <tr key={r} className="odd:bg-white even:bg-slate-50/40">
-                  <th className="sticky left-0 z-10 bg-inherit p-2 text-left font-medium" title={r}>{r}</th>
-                  {ct.matrix[i].map((v, j) => (
-                    <td key={j} className="p-2 text-right tabular-nums">{fmt(v)}</td>
-                  ))}
-                  <td className="p-2 text-right font-semibold tabular-nums">{metric === 'avg_renda' ? '' : ct.rowTotals[i].toLocaleString('pt-BR')}</td>
-                </tr>
-              ))}
-              <tr className="border-t border-slate-200 bg-slate-100 font-semibold">
-                <td className="p-2 text-left">Total</td>
-                {ct.colTotals.map((v, j) => (
-                  <td key={j} className="p-2 text-right tabular-nums">{metric === 'avg_renda' ? '' : v.toLocaleString('pt-BR')}</td>
-                ))}
-                <td className="p-2 text-right tabular-nums">{metric === 'avg_renda' ? '' : ct.total.toLocaleString('pt-BR')}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      {/* Table */}
+      {(mode === 'both' || mode === 'table') && (
+        <PivotTable ct={ct} rowLabel={rowLabel} colLabel={colLabel} rowField={rowField} colField={colField} />
       )}
 
-      {view === 'heatmap' && <Heatmap ct={ct} metricLabel={FIELD_LABELS[rowField]} format={fmt} />}
-      {view === 'stacked' && <StackedCrosstab ct={ct} mode="stacked" />}
-      {view === 'grouped' && <StackedCrosstab ct={ct} mode="grouped" />}
+      {/* Chart */}
+      {(mode === 'both' || mode === 'chart') && (
+        <div className={mode === 'both' ? 'mt-4' : ''}>
+          <UniversalChart
+            view={effectiveView}
+            ct={ct}
+            metric={metric}
+            rowField={rowField}
+            colField={colField}
+          />
+        </div>
+      )}
     </ChartCard>
+  );
+}
+
+/* ── UI atoms ── */
+function SelectBox({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block text-[11px] font-semibold text-[var(--qd-text-muted)]">
+      <div className="mb-0.5">{label}</div>
+      <div className="[&_select]:h-8 [&_select]:rounded-md [&_select]:border [&_select]:border-slate-200 [&_select]:bg-white [&_select]:px-2 [&_select]:text-xs">
+        {children}
+      </div>
+    </label>
+  );
+}
+
+function ModeBtn({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1 px-2 py-1 text-[11px] ${active ? 'bg-[var(--qd-light)] text-[var(--qd-primary)] font-semibold' : 'text-[var(--qd-text-muted)] hover:bg-slate-50'}`}
+    >
+      {icon}{children}
+    </button>
+  );
+}
+
+function viewOptions(list: ViewKind[]) {
+  const labels: Record<ViewKind, string> = {
+    table: 'Tabela dinâmica',
+    grouped: 'Barras agrupadas',
+    stacked: 'Barras empilhadas',
+    stacked100: 'Barras 100%',
+    heatmap: 'Heatmap',
+    pie: 'Pizza',
+    donut: 'Rosca',
+    treemap: 'Treemap',
+  };
+  return list.map((v) => <option key={v} value={v}>{labels[v]}</option>);
+}
+
+/* ── Table ── */
+function PivotTable({ ct, rowLabel, colLabel, rowField, colField }: {
+  ct: UniversalCrosstab; rowLabel: string; colLabel: string | null; rowField: string; colField: string | null;
+}) {
+  const toggle = useQuantiStore((s) => s.toggleValue);
+  const showColTotals = ct.metric === 'count' || ct.metric === 'sum';
+
+  return (
+    <div className="qd-scroll max-h-[520px] overflow-auto rounded-md border border-slate-100">
+      <table className="min-w-full text-[11px]">
+        <thead className="sticky top-0 bg-slate-50">
+          <tr>
+            <th className="sticky left-0 z-10 bg-slate-50 p-2 text-left font-semibold">{rowLabel}</th>
+            {colField ? ct.cols.map((c) => (
+              <th key={c} className="cursor-pointer p-2 text-right font-semibold hover:text-[var(--qd-primary)]" title={`Filtrar ${colLabel}: ${c}`} onClick={() => toggle(colField as any, c)}>{c}</th>
+            )) : (
+              <th className="p-2 text-right font-semibold">{METRIC_LABEL[ct.metric]}</th>
+            )}
+            <th className="p-2 text-right font-semibold">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ct.rows.map((r, i) => (
+            <tr key={r} className="odd:bg-white even:bg-slate-50/40">
+              <th className="sticky left-0 z-10 cursor-pointer bg-inherit p-2 text-left font-medium hover:text-[var(--qd-primary)]" title={`Filtrar ${rowLabel}: ${r}`} onClick={() => toggle(rowField as any, r)}>{r}</th>
+              {ct.matrix[i].map((v, j) => (
+                <td key={j} className="p-2 text-right tabular-nums">{fmt(v, ct.metric)}</td>
+              ))}
+              <td className="p-2 text-right font-semibold tabular-nums">{showColTotals ? fmt(ct.rowTotals[i], ct.metric === 'sum' ? 'sum' : 'count') : ''}</td>
+            </tr>
+          ))}
+          <tr className="border-t border-slate-200 bg-slate-100 font-semibold">
+            <td className="p-2 text-left">Total</td>
+            {ct.matrix[0]?.map((_, j) => (
+              <td key={j} className="p-2 text-right tabular-nums">{showColTotals ? fmt(ct.colTotals[j], ct.metric === 'sum' ? 'sum' : 'count') : ''}</td>
+            ))}
+            <td className="p-2 text-right tabular-nums">{showColTotals ? fmt(ct.total, 'count') : ''}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/* ── Charts ── */
+function UniversalChart({ view, ct, metric, rowField, colField }: {
+  view: ViewKind; ct: UniversalCrosstab; metric: UniversalMetric; rowField: string; colField: string | null;
+}) {
+  const toggle = useQuantiStore((s) => s.toggleValue);
+  const height = Math.max(320, ct.rows.length * 26 + 60);
+
+  if (view === 'heatmap') {
+    return <Heatmap ct={ct as any} metricLabel={rowField} format={(n) => fmt(n, metric)} />;
+  }
+
+  if (view === 'pie' || view === 'donut') {
+    // 1D: sum across cols
+    const data = ct.rows.map((r, i) => ({ name: r, value: ct.rowTotals[i] || ct.matrix[i][0] || 0 }));
+    return (
+      <ResponsiveContainer width="100%" height={380}>
+        <PieChart>
+          <Pie
+            data={data} dataKey="value" nameKey="name"
+            innerRadius={view === 'donut' ? '55%' : 0} outerRadius="85%"
+            paddingAngle={1}
+            onClick={(d: any) => toggle(rowField as any, d.name)}
+          >
+            {data.map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} style={{ cursor: 'pointer' }} />)}
+          </Pie>
+          <RTooltip formatter={(v: any) => fmt(Number(v), metric)} />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
+        </PieChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  if (view === 'treemap') {
+    const leaves: any[] = [];
+    if (colField) {
+      ct.rows.forEach((r, i) => ct.cols.forEach((c, j) => {
+        if (ct.matrix[i][j]) leaves.push({ name: `${r} · ${c}`, value: ct.matrix[i][j] });
+      }));
+    } else {
+      ct.rows.forEach((r, i) => leaves.push({ name: r, value: ct.rowTotals[i] || ct.matrix[i][0] || 0 }));
+    }
+    return (
+      <ResponsiveContainer width="100%" height={420}>
+        <Treemap data={leaves} dataKey="value" stroke="#fff" fill={PALETTE[0]} content={undefined as any}>
+          <RTooltip formatter={(v: any) => fmt(Number(v), metric)} />
+        </Treemap>
+      </ResponsiveContainer>
+    );
+  }
+
+  // Bar variants
+  const data = ct.rows.map((r, i) => {
+    const obj: any = { name: r };
+    if (colField) ct.cols.forEach((c, j) => (obj[c] = ct.matrix[i][j]));
+    else obj[METRIC_LABEL[metric]] = ct.matrix[i][0];
+    return obj;
+  });
+  const keys = colField ? ct.cols : [METRIC_LABEL[metric]];
+  const stackId = view === 'stacked' || view === 'stacked100' ? 's' : undefined;
+  const stackOffset = view === 'stacked100' ? 'expand' : 'none';
+
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <BarChart data={data} layout="vertical" margin={{ top: 6, right: 24, left: 8, bottom: 6 }} stackOffset={stackOffset as any}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+        <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={view === 'stacked100' ? (v) => `${Math.round(v * 100)}%` : undefined} />
+        <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={160} interval={0} />
+        <RTooltip formatter={(v: any) => fmt(Number(v), metric)} />
+        <Legend wrapperStyle={{ fontSize: 10 }} />
+        {keys.map((k, i) => (
+          <Bar
+            key={k} dataKey={k} stackId={stackId} fill={PALETTE[i % PALETTE.length]}
+            onClick={(d: any) => {
+              toggle(rowField as any, d.name);
+              if (colField) toggle(colField as any, k);
+            }}
+            cursor="pointer"
+          />
+        ))}
+      </BarChart>
+    </ResponsiveContainer>
   );
 }
