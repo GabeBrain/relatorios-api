@@ -41,8 +41,8 @@ function TabButton({ active, onClick, icon, children }: { active: boolean; onCli
       onClick={onClick}
       className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-semibold transition-colors ${
         active
-          ? 'border-[#F8D000] text-[#F8D000]'
-          : 'border-transparent text-[var(--qd-text-muted)] hover:text-[var(--qd-text)]'
+          ? 'border-[var(--qd-tab-active)] text-[var(--qd-tab-active)]'
+          : 'border-transparent text-[var(--qd-tab-inactive)] hover:text-[var(--qd-tab-inactive-hover)]'
       }`}
     >
       {icon}

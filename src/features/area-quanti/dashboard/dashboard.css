@@ -12,8 +12,11 @@
   --qd-text-muted: #6e7b55;
   --qd-warn: #F8D000;
   --qd-scroll-thumb: #cbd5e1;
-  --qd-topbar-bg: #1B1E28;
-  --qd-area-topbar-bg: #1B1E28;
+  --qd-topbar-bg: #ffffff;
+  --qd-area-topbar-bg: var(--qd-surface);
+  --qd-tab-active: #2563EB;
+  --qd-tab-inactive: var(--qd-text-muted);
+  --qd-tab-inactive-hover: var(--qd-text);
   --qd-side-bg: #ffffff;
   --qd-btn-bg: #ffffff;
   --qd-btn-hover: #f1f4e8;
@@ -36,6 +39,9 @@
   --qd-scroll-thumb: #4a4a48;
   --qd-topbar-bg: #1B1E28;
   --qd-area-topbar-bg: #1B1E28;
+  --qd-tab-active: #F8D000;
+  --qd-tab-inactive: #d7dae6;
+  --qd-tab-inactive-hover: #ffffff;
   --qd-side-bg: #1B1E28;
   --qd-btn-bg: #2F2F2E;
   --qd-btn-hover: #3a3a38;
