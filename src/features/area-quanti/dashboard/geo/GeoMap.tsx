@@ -205,7 +205,7 @@ function BrazilLevel({
                 <Geography
                   key={g.rsmKey}
                   geography={g}
-                  fill={active ? YELLOW_HL : color(n, max)}
+                  fill={active ? YELLOW_HL : colorFor(n)}
                   stroke={active ? STROKE_ACTIVE : STROKE}
                   strokeWidth={active ? 1.8 : 0.9}
                   onClick={() => onClickUF(uf)}
