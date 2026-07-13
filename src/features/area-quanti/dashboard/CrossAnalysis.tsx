@@ -70,8 +70,9 @@ function compatibleViews(rowField: string, colField: string | null, metric: Univ
   return views;
 }
 
-export function CrossAnalysis({ rows }: { rows: QuantiRecord[] }) {
-  const schema = useMemo(() => detectFieldSchema(rows, FIELD_LABELS as any), [rows]);
+export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; questions?: Record<string, string> }) {
+  const labels = useMemo(() => ({ ...(FIELD_LABELS as Record<string, string>), ...(questions ?? {}) }), [questions]);
+  const schema = useMemo(() => detectFieldSchema(rows, labels), [rows, labels]);
   const catFields = schema.filter((f) => f.kind === 'categorical');
   const numFields = schema.filter((f) => f.kind === 'numeric');
 
