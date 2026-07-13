@@ -5,6 +5,7 @@ export interface QuantiRecord {
   localidade: string;
   estado: string;
   cidade: string;
+  cidade_original?: string;
   genero: string;
   faixa_etaria: string;
   geracao: string;
