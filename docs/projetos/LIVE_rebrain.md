@@ -49,6 +49,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-13 — Corretor v5: fluxo operacional WS-0–WS-5 — Gabriel
+- **Confiabilidade e portão:** build agora inclui typecheck; análise foi dividida em DET/Ata e
+  passes pagos, com confirmação obrigatória de cidade, UF e pedidos antes do gasto.
+- **Entrega e correção:** relatório read-only registra o trabalho positivo; triagem por teclado
+  acelera a worklist; drop no workspace reconfere a versão e encerra em R$ 0 quando não há
+  imagem nova fora do cache.
+- **Calibração:** `/corretor/calibracao` consolida FPs, saúde por regra, reconhecimento de
+  item/grupo e CSV. Migrations v5: `20260713160000`, `20260713170000` e `20260713180000`.
+- **Validação local:** 48 testes verdes e `tsc --noEmit && vite build` aprovado. File watch
+  permanece explicitamente futuro; falta aplicar/verificar migrations e homologar no navegador.
+
 ### 2026-07-13 — Corretor v4: precisão antes da homologação + UI por confiança — Gabriel
 - **Precisão:** corrigidos os quatro geradores de falso positivo apontados na revisão do
   Coverage 90 (projeção histórica, eixos de lacunas, totais de participação e mapas não
@@ -294,7 +305,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, PPTX→IR, mapas, thumbnails) | 🟡 (no ar: **upload de .pptx** + fixtures + recall/export + RADII/mapa + thumbnails c/ poda; falta gráficos no extrator, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
 | 6f | Corretor v2 — estratégia de testes do fluxo do analista | 🟡 (design ✅ + slice 1 worklist ✅; slices 2-4 absorvidos pela v3) |
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
-| 6h | **Corretor v4** — unificação v1+v2 num fluxo único (5 estágios) | 🟡 Coverage 90 WS0–WS8 ✅ em BETA + v4.0–v4.3 ✅ (confiança, abas, grupos, FP). Migration v4 aplicada; falta deploy da `analyze-table-image` (cache v6), calibração Marka/Itajaí/GO e recall real >=90% → v3.3 mapas + aposentar v1 🔲 |
+| 6h | **Corretor v5** — fluxo operacional unificado | 🟡 WS0–WS5 ✅ no código (portão da Ata, relatório, triagem, recheck cache-first, calibradora). Build + 48 testes ✅; falta aplicar/verificar migrations v5, deploy da `analyze-table-image` (cache v6), homologação real e recall >=90%. |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
@@ -311,6 +322,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] Expandir o enum de tipos de erro (`analysis-store.ts`) para o catálogo da rubrica + tipos evidenciados pelas atas reais (`ATA_COVERAGE` etc.).
 - [ ] Coverage 90: publicar `analyze-table-image` (contrato `locais_visiveis`/`unidades`/`tem_fonte`, cache v6), medir o
   harness no IR real do Marka (`CORRETOR_CALIBRATION_IR`) e calibrar Marka, Itajaí e GO (meta: >=90% recall, <=15% FP).
+- [ ] Corretor v5: aplicar/verificar migrations `20260713160000`, `20260713170000` e
+  `20260713180000`; homologar portão da Ata, relatório, triagem, drop/cache e calibradora no Supabase real.
+- [ ] Definir se `/corretor/calibracao` permanece visível a todos os usuários internos ou exige papel específico.
 - [ ] Gabriel → analista A&R: obter fórmula oficial de projeção e validar falsos positivos do checklist estrutural/fonte.
 - [ ] CID: retomar validação de base quando sair do standby.
 - [ ] Dívidas de segurança conhecidas — ver [`../architecture/SECURITY_NOTES.md`](../architecture/SECURITY_NOTES.md) (vulns npm, log por IP, `.env` versionado por design).

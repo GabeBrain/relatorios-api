@@ -22,6 +22,27 @@ imagens antigas uma única vez.
 Ela adiciona `findings_v3.verdict` (`bug`/`fp`), não altera os achados existentes e não requer
 Edge Function nova.
 
+## Migrations do Corretor v5 — aplicar/verificar
+
+Aplicar na ordem abaixo antes de homologar o fluxo v5. Não há Edge Function nova ou alterada
+pelos WS-1–WS-5; a lista de Functions a publicar acima continua sendo a do Coverage 90.
+
+| Ordem | Migration | Finalidade | Verificação rápida |
+|---|---|---|---|
+| 1 | `20260713160000_corretor_v5_ata_gate.sql` | `ata_confirmada` + `uf` no portão da Ata | Abrir estudo, confirmar/editar cidade e UF e conferir persistência. |
+| 2 | `20260713170000_corretor_v5_relatorio.sql` | snapshot `studies_v3.relatorio` | Entregar estudo e abrir `/corretor/:id/relatorio`. |
+| 3 | `20260713180000_corretor_v5_calibration.sql` | `findings_v3.verdict_revisado` + índice de FP | Abrir `/corretor/calibracao`, reconhecer item/grupo e recarregar. |
+
+SQL de diagnóstico após aplicação:
+
+```sql
+select
+  to_regclass('public.studies_v3') is not null as studies_v3,
+  exists (select 1 from information_schema.columns where table_schema='public' and table_name='studies_v3' and column_name='ata_confirmada') as ata_gate,
+  exists (select 1 from information_schema.columns where table_schema='public' and table_name='studies_v3' and column_name='relatorio') as relatorio,
+  exists (select 1 from information_schema.columns where table_schema='public' and table_name='findings_v3' and column_name='verdict_revisado') as calibracao;
+```
+
 ## Etapas de teste final
 
 1. **Build e regressão local**
@@ -44,6 +65,12 @@ Edge Function nova.
 6. **Medição de aceite**
    - Com o IR local do Marka, executar `set CORRETOR_CALIBRATION_IR=C:\caminho\Marka.ir.json` e o teste `recall-marka.test.ts`.
    - Registrar recall, falsos positivos e slides não cobertos no doc vivo. Só considerar a meta concluída com **recall ≥90%** nas 57 notas ancoradas e **FP ≤15%** nos estudos Marka e Itajaí.
+7. **Fluxo v5 de ponta a ponta**
+   - Confirmar/editar Ata antes dos passes pagos e validar cidade/UF persistidas.
+   - Abrir a triagem rápida; testar `Enter`, `C`, `F`, `I`, `G`, `Esc` e confirmar que inputs focados não capturam atalhos.
+   - Salvar uma correção no PowerPoint e soltar o `.pptx` no workspace; conferir diff, scroll e **R$ 0** quando todas as imagens estiverem no cache.
+   - Entregar o estudo e conferir o relatório read-only/impressão.
+   - Abrir a calibradora, reconhecer item e grupo, recarregar a página, abrir o link do estudo e exportar CSV.
 
 ## Pendências humanas que não devem ser mascaradas pelo motor
 

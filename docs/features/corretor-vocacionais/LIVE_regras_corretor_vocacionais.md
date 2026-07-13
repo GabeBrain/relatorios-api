@@ -16,6 +16,18 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.39 — 2026-07-13 — Corretor v5 WS-5: vista da calibradora (RUNTIME)
+
+Nova rota **`/corretor/calibracao`**, acessível pelo cabeçalho do Corretor, fecha o loop do
+veredito “Não é erro (FP)”. Ela carrega FPs de todos os estudos, agrupa por tipo, preserva
+imagem/visualização de evidência e oferece link direto ao workspace do estudo. A tabela
+**Saúde por regra** cobre todo o catálogo e ordena por `% FP`, com total, FP e `% corrigidos`.
+A calibradora pode reconhecer uma ocorrência ou o grupo inteiro sem apagar/mudar o veredito;
+o CSV exporta a fila completa. Migration `20260713180000_corretor_v5_calibration.sql` adiciona
+`findings_v3.verdict_revisado boolean not null default false` e índice parcial da fila de FP.
+Acesso fica liberado aos usuários atuais nesta primeira fatia; papel específico segue como
+decisão de produto futura.
+
 ## Versão 0.38 — 2026-07-13 — Corretor v5 WS-4: reconferência sem atrito (RUNTIME)
 
 Com um estudo aberto, soltar um `.pptx` em qualquer ponto da área de trabalho agora inicia a

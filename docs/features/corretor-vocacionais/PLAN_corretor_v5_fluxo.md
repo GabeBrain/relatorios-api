@@ -14,6 +14,15 @@ Leia antes: `DESIGN_uiux_corretor_v4.md` (implementado), `REVIEW_coverage_90_aju
 (v0.29–0.33). Regras de sempre: atualizar o LIVE doc por WS; testes para função pura nova;
 nenhum PPTX versionado; custo de IA novo só com estimativa atualizada.
 
+## Execução — 2026-07-13
+
+WS-0 a WS-5 concluídos no código. Commits por fatia: `09e87f1` (WS-0), `3bb2902`
+(WS-1), `d7f06c5` (WS-2), `75ad627` (WS-3), `62a0276` (WS-4) e o commit desta
+entrega (WS-5).
+Validação local: 48 testes e build com
+`tsc --noEmit`. As migrations v5 devem ser aplicadas/verificadas no Supabase conforme
+`OPERACAO_coverage_90.md`; WS-F continua FUTURO e não foi implementado.
+
 ## Estado de partida (verificado no código em 13/jul, pós-v0.33)
 
 - Passo único: DET → ata → texto+visão (paralelo) → cruzamentos, com custo vivo e abort.

@@ -35,6 +35,7 @@ export interface FindingV3 {
   primeiraVersao: number;
   resolvidoNaVersao: number | null;
   verdict: 'bug' | 'fp' | null;
+  verdictRevisado: boolean;
   finding: Finding;
 }
 
@@ -166,6 +167,7 @@ export async function loadFindings(studyId: string): Promise<FindingV3[]> {
     primeiraVersao: r.primeira_versao,
     resolvidoNaVersao: r.resolvido_na_versao,
     verdict: r.verdict === 'bug' || r.verdict === 'fp' ? r.verdict : null,
+    verdictRevisado: r.verdict_revisado === true,
     finding: r.payload as Finding,
   }));
 }
@@ -374,4 +376,89 @@ export async function loadDeliveryReport(studyId: string): Promise<DeliveryRepor
     study, snapshot: (s.relatorio ?? null) as AnalysisReport | null,
     corrigidos, ignorados, fps, verificarAssumidos, porTipo, findings,
   };
+}
+
+// ─── WS-5: painel de calibração dos falsos positivos ──────────────────────────
+
+export interface CalibrationFinding extends FindingV3 {
+  studyId: string;
+  studyName: string;
+  studyCity: string | null;
+  studyUf: string | null;
+}
+
+export interface CalibrationHealth {
+  tipo: string;
+  total: number;
+  fps: number;
+  corrigidos: number;
+  fpPct: number;
+  corrigidosPct: number;
+}
+
+export interface CalibrationDashboard {
+  queue: CalibrationFinding[];
+  health: CalibrationHealth[];
+}
+
+/** Carrega a fila global de FP e calcula a saúde por tipo sobre todos os achados. */
+export async function loadCalibrationDashboard(): Promise<CalibrationDashboard> {
+  const [{ data: rows, error }, { data: studies }] = await Promise.all([
+    db.from('findings_v3').select('*'),
+    db.from('studies_v3').select('id,nome,cidade,uf'),
+  ]);
+  if (error) throw new Error(error.message);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const studyMap = new Map<string, any>((studies ?? []).map((study: any) => [study.id, study]));
+  const byType = new Map<string, { total: number; fps: number; corrigidos: number }>();
+  const queue: CalibrationFinding[] = [];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const row of rows ?? [] as any[]) {
+    const totals = byType.get(row.tipo) ?? { total: 0, fps: 0, corrigidos: 0 };
+    totals.total++;
+    if (row.verdict === 'fp') totals.fps++;
+    if (row.status === 'corrigido') totals.corrigidos++;
+    byType.set(row.tipo, totals);
+
+    if (row.verdict !== 'fp') continue;
+    const study = studyMap.get(row.study_id);
+    queue.push({
+      studyId: row.study_id,
+      studyName: study?.nome ?? 'Estudo removido',
+      studyCity: study?.cidade ?? null,
+      studyUf: study?.uf ?? null,
+      ruleId: row.rule_id,
+      status: row.status,
+      origem: row.origem,
+      primeiraVersao: row.primeira_versao,
+      resolvidoNaVersao: row.resolvido_na_versao,
+      verdict: 'fp',
+      verdictRevisado: row.verdict_revisado === true,
+      finding: row.payload as Finding,
+    });
+  }
+
+  const health = [...byType.entries()].map(([tipo, value]) => ({
+    tipo,
+    ...value,
+    fpPct: value.total ? (value.fps / value.total) * 100 : 0,
+    corrigidosPct: value.total ? (value.corrigidos / value.total) * 100 : 0,
+  })).sort((a, b) => b.fpPct - a.fpPct || b.total - a.total);
+
+  queue.sort((a, b) => Number(a.verdictRevisado) - Number(b.verdictRevisado) || a.finding.type.localeCompare(b.finding.type));
+  return { queue, health };
+}
+
+export async function acknowledgeCalibrationFinding(studyId: string, ruleId: string): Promise<void> {
+  const { error } = await db.from('findings_v3').update({ verdict_revisado: true })
+    .eq('study_id', studyId).eq('rule_id', ruleId).eq('verdict', 'fp');
+  if (error) throw new Error(error.message);
+}
+
+export async function acknowledgeCalibrationType(tipo: string): Promise<void> {
+  const { error } = await db.from('findings_v3').update({ verdict_revisado: true })
+    .eq('tipo', tipo).eq('verdict', 'fp');
+  if (error) throw new Error(error.message);
 }

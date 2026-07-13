@@ -4,10 +4,11 @@
 // Navegação sem rail duplo: landing com cards de estudos → workspace com voltar.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
-  Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X,
+  Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X, BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -306,6 +307,7 @@ function StudyCard({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) 
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function CorretorV3Page() {
+  const [searchParams] = useSearchParams();
   const [studies, setStudies] = useState<StudyV3[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -343,6 +345,11 @@ export default function CorretorV3Page() {
     setLoadingStudy(true);
     try { setItems(await loadFindings(id)); } finally { setLoadingStudy(false); }
   }, []);
+
+  useEffect(() => {
+    const requested = searchParams.get('study');
+    if (requested && requested !== selectedId && studies.some((study) => study.id === requested)) void openStudy(requested);
+  }, [openStudy, searchParams, selectedId, studies]);
 
   /**
    * FASE 2 (paga): texto + visão + cruzamentos, com a cidade/UF JÁ confirmadas no
@@ -666,11 +673,16 @@ export default function CorretorV3Page() {
     const prontos = studies.filter((s) => s.status === 'pronto');
     return (
       <div className="min-h-screen bg-background">
-        <header className="border-b bg-card px-6 py-4">
-          <h1 className="text-base font-semibold">Corretor de Estudos</h1>
-          <p className="text-xs text-muted-foreground">
-            Suba o .pptx → análise completa automática (texto + números) → corrija a worklist → entregue ao A&R com 0 pendentes
-          </p>
+        <header className="border-b bg-card px-6 py-4 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-base font-semibold">Corretor de Estudos</h1>
+            <p className="text-xs text-muted-foreground">
+              Suba o .pptx → análise completa automática (texto + números) → corrija a worklist → entregue ao A&R com 0 pendentes
+            </p>
+          </div>
+          <a href="/corretor/calibracao" className="text-xs rounded-md px-3 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 shrink-0">
+            <BarChart3 className="w-3.5 h-3.5" /> Calibração
+          </a>
         </header>
 
         <div className="max-w-5xl mx-auto px-6 py-6 space-y-8">
