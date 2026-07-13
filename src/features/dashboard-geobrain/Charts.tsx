@@ -15,8 +15,8 @@ const A = 'hsl(var(--dg-accent))';
 const M = 'hsl(var(--dg-muted))';
 const WINDOW = 12;
 
-// ============ Tooltip padrão (§8) ============
-const HL = 'var(--dg-tooltip-hl)';
+// ============ Tooltip padrão (§2) — cor #212529 no texto ============
+const HL = '#212529';
 
 interface TooltipEntry { name?: string | number; value?: number | string | null; color?: string; dataKey?: string | number }
 interface DGTooltipProps { active?: boolean; label?: string | number; payload?: TooltipEntry[]; format?: (v: number) => string }
