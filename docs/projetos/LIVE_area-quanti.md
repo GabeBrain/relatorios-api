@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-13 — Barra superior do Área Quanti no padrão de contraste escuro — Lovable
+- **O quê:** repaginação da barra de abas (`Banco Quanti` / `Sobre`) em `src/pages/AreaQuanti.tsx` para fundo `#1B1E28` (mesmo padrão do dark mode do dashboard), aba ativa em amarelo Brain `#F8D000`, abas inativas em cinza claro com hover de alto contraste, e aplicação do token `--qd-text` no título/conteúdo da aba Sobre. Importação do `dashboard.css` e classe `qd-root` no container garantem que os tokens sejam reutilizados sem duplicação.
+- **Por quê:** uniformizar a identidade visual da Área Quanti e eliminar a quebra de contraste (fundo branco + azul) que existia na barra de navegação.
+- **Arquivos:** `src/pages/AreaQuanti.tsx`, `src/features/area-quanti/dashboard/dashboard.css`.
+
 ### 2026-07-13 — Mapa BR em tons de amarelo + Análise Cruzada com todas as 92 colunas — Lovable
 - **O quê:** (1) mapa BR e municipal repaginados: rampa amarela (claro → âmbar profundo) para o heat, cinza mais escuro (`#c8c8c8`) para UFs/municípios sem registros, piso de intensidade elevado para que estados com poucas pesquisas já se destaquem do "sem dados", divisas visíveis (`#4d4d4d`, `1px` estados / `0.6px` cidades) e legenda com swatch dedicado "sem dados"; seleção em verde Brain para contraste com o amarelo. (2) `base-2020.json` regenerado com **todas as 92 colunas** da planilha (antes: 19), incluindo mapa `questions` (texto da linha 2 usado como rótulo). `detectFieldSchema` agora expõe todas as colunas do dataset — só exclui identificadores (`respondent_id`, `survey_id`, `Código`), coordenadas (`lat/lng/latitude/longitude`), sufixos `_original/_texto_original/_raw/_hash` e duplicatas normalizadas (`Cidade/Estado/idade_numerica/Data/Status`). Resultado: **76 colunas elegíveis** nos seletores "Agrupar por" e "Comparar com", com rótulos vindos da pergunta original quando disponível. (3) Legenda dentro das barras do gráfico da Análise Cruzada (padrão já adotado nos demais gráficos).
 - **Por quê:** deixar o heat mais legível conforme paleta Brain, permitir cruzar qualquer variável da base (incluindo perguntas específicas de pesquisa) sem depender de whitelist no código, e alinhar leitura de barras com o padrão do dashboard.
