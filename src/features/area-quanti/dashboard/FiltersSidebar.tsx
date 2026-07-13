@@ -48,9 +48,9 @@ export function FiltersSidebar({ open, onClose, rows }: Props) {
 
   return (
     <aside
-      className={`qd-scroll transition-all duration-200 ease-out overflow-y-auto ${
+      className={`qd-side qd-scroll transition-all duration-200 ease-out overflow-y-auto ${
         open ? 'w-72' : 'w-0'
-      } shrink-0 border-r border-[var(--qd-border)] bg-white`}
+      } shrink-0 border-r border-[var(--qd-border)]`}
     >
       {open && (
         <div className="p-4 space-y-3">
