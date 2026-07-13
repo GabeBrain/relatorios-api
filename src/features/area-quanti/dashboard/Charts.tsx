@@ -3,6 +3,7 @@ import {
   Bar,
   BarChart,
   Cell,
+  LabelList,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -16,7 +17,21 @@ import type { CategoricalField, QuantiRecord } from './types';
 import { countBy, histogram, orderedValues, crosstab, type Crosstab } from './aggregate';
 import { useQuantiStore } from './store';
 
-const PALETTE = ['#1e3a8a', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#64748b', '#94a3b8', '#0ea5e9', '#38bdf8'];
+// Brain palette — tons de verde e amarelo
+const PALETTE = [
+  '#5B7537', // brain verde primário
+  '#71984a', // verde médio
+  '#8fb85f', // verde claro
+  '#b5cf7d', // verde suave
+  '#d7e3a8', // verde muito claro
+  '#F8D000', // amarelo destaque
+  '#f4d83f', // amarelo médio
+  '#ffe173', // amarelo claro
+  '#c7a300', // mostarda
+  '#6e6e6e', // neutro
+];
+const HEATMAP_RGB = '91, 117, 55'; // #5B7537
+const ACTIVE_STROKE = '#3d5024';
 
 interface CardProps { title: string; subtitle?: string; children: React.ReactNode; className?: string; action?: React.ReactNode }
 export function ChartCard({ title, subtitle, children, className, action }: CardProps) {
