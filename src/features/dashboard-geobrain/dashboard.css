@@ -11,12 +11,17 @@
   --dg-card: 0 0% 100%;
   --dg-border: 0 0% 88%;
   --dg-text: 0 0% 15%;
+  --dg-tooltip-hl: #917C09;
 
   font-family: 'Archivo', Tahoma, sans-serif;
   font-size: 12px;
   color: hsl(var(--dg-text));
   background: hsl(var(--dg-bg));
 }
+
+.dash-geobrain .dg-header .dg-chip,
+.dash-geobrain .dg-header .dg-select { height: 32px; }
+.dash-geobrain .dg-header .dg-chip { padding: 0 12px; }
 
 .dash-geobrain .dg-card {
   background: hsl(var(--dg-card));
