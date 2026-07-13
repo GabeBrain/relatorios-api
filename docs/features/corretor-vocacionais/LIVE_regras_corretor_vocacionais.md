@@ -16,6 +16,30 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.31 — 2026-07-13 — Coverage 90: WS2–WS8 conectados ao passo único (BETA, validação real pendente)
+
+Os workstreams restantes do `PLAN_coverage_90.md` agora rodam no fluxo v3, sem chamada de IA
+adicional além da visão já existente. Todos começam como **BETA**: a meta não é alegar 90% sem
+os IRs reais e a calibração humana.
+
+| WS | Regra RUNTIME | Implementação |
+|---|---|---|
+| 2 | `CROSS_TABLE_MISMATCH` / `TOTALS_EQUALITY` | cruza faixas de renda SOCIO×ABSORÇÃO, população/domicílios, lacunas próximas e consolidada×oferta; usa tabelas nativas e de visão. |
+| 3 | `ATA_COVERAGE` | checklist DET de pedidos/dúvidas e “Produto proposto”; ausência de evidência textual é apresentada como **conferir**, não como prova final de ausência. |
+| 4 | `STRUCTURE_MISSING` | checklist granular 1.1–8.1 do deck de parâmetros sobre título/texto; itens de mapa/imagem seguem β até calibração. |
+| 5 | `TEMPORAL_WINDOW` / `PROJECTION_FORMULA` | janela ano atual+1…+6 e série contra taxa explícita/ritmo interno; fórmula oficial A&R ainda é pendência humana. |
+| 6 | `VALUE_PLAUSIBILITY` | fichas técnicas entram no passe visual; extração de unidades e checagens de preço÷m², vagas e tickets em tom “verificar”. |
+| 7 | `SOURCE_MISSING` / `REQUIRED_NOTE` / `EXCLUSION_RULE` | visão informa fonte visível; nota de segunda moradia e exclusões Gardens/Duplex/Coberturas são checadas. |
+| 8 | `REQUIRED_NOTE` / `VALUE_PLAUSIBILITY` | consolidada exige média R$/m²+estoque; VSO preenchido com estoque zero é sinalizado. |
+
+**IA/visão:** `analyze-table-image` passa a devolver `unidades[]` e `tem_fonte`, além de
+`locais_visiveis[]`; `CACHE_SCHEMA` 5→6 para uma única releitura por imagem. Requer deploy da
+function. Regras, testes e limites operacionais estão em `OPERACAO_coverage_90.md`.
+
+Validação local: testes de regras finais + notas/contexto verdes e build de produção verde.
+**Pendente antes de declarar aceite:** deploy, Marka/Itajaí/GO, harness com IR real e fórmula
+oficial de projeção. O catálogo foi corrigido para refletir o estado BETA (não PLENO/MOCK).
+
 ## Versão 0.30 — 2026-07-13 — Coverage 90: WS1 cidade/UF em imagens (BETA, aguarda calibração real)
 
 Implementada a primeira regra de alto recall do `PLAN_coverage_90.md`:

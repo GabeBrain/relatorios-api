@@ -5,6 +5,7 @@
 import { checkTableSums } from './engine';
 import { toAuditSection, type Ir, type IrSlide, type IrTable } from './ir';
 import type { Cell, ExtractedTable, Finding, StudyFixture } from './model';
+import { structureChecklistFinding } from './structure-checklist';
 
 // Regras desativáveis por decisão de produto. SOURCE_MISSING desligada em
 // 09/jul/2026 (Gabriel): veio do doc de parâmetros mais recente, mas na prática
@@ -16,7 +17,6 @@ const RULES_ENABLED = {
 
 const LEFTOVER = /\b(agrupar|ajustar|revisar|conferir|confirmar|checar|verificar|inserir|colocar|preencher|refazer|corrigir|pendente|trazer|falar com|fale comigo|todo|xxx)\b/i;
 const TOTAL_ROW = /^\s*total/i;
-const CANONICAS = ['IDENTIFICACAO', 'SOCIO', 'MERCADO', 'ABSORCAO', 'LACUNAS', 'ENTORNO', 'CONCLUSAO'];
 const UFS = new Set(['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']);
 
 function slideRef(n: number) { return `s${n}`; }
@@ -67,7 +67,8 @@ function sourceFindings(ir: Ir, cap = 25): Finding[] {
 }
 
 // ── Numéricas (ABSOLUTE_SUM / PERCENTAGE_SUM) ────────────────────────────────
-function irTableToExtracted(t: IrTable): ExtractedTable | null {
+/** Converte tabela nativa do IR para o contrato comum da visão/cross-check. */
+export function irTableToExtracted(t: IrTable): ExtractedTable | null {
   if (!t.linhas || t.linhas.length < 2) return null;
   const header = (t.linhas[0] ?? []).map((c) => (c ?? '').toString());
   const totalIdx = t.linhas.findIndex((r, i) => i > 0 && TOTAL_ROW.test((r?.[0] ?? '').toString()));
@@ -188,23 +189,7 @@ function radiiFindings(ir: Ir): Finding[] {
 
 // ── Cobertura de seções (STRUCTURE_MISSING) ──────────────────────────────────
 function structureFinding(ir: Ir): Finding {
-  const present = new Set(ir.slides.map((s) => (s.secao_canonica ?? '').toUpperCase()));
-  return {
-    id: 'structure',
-    type: 'STRUCTURE_MISSING',
-    section: 'ESTRUTURA',
-    slideRef: '—',
-    title: 'Cobertura de seções canônicas (β — dicionário v0)',
-    detail: 'Seções detectadas pelo dicionário v0 do extrator (a calibrar com a analista).',
-    ok: CANONICAS.every((c) => present.has(c)),
-    viz: {
-      kind: 'text',
-      checklist: CANONICAS.map((c) => ({
-        label: c.charAt(0) + c.slice(1).toLowerCase(),
-        status: present.has(c) ? ('ok' as const) : ('missing' as const),
-      })),
-    },
-  };
+  return structureChecklistFinding(ir);
 }
 
 /**

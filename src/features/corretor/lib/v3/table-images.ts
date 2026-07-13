@@ -7,6 +7,7 @@ import type { Ir } from '../audit/ir';
 import { NS_REL, pngDims, jpegDims, sha1Hex } from './pptx-media';
 
 const SECOES_NUMERICAS = new Set(['SOCIO', 'MERCADO', 'LACUNAS', 'ABSORCAO']);
+const FICHA_TITLE = /ficha\s+t[ée]cnica/i;
 
 // Heurística de tabela (calibrada no manifest real: tabelas 914–3203px de largura,
 // 250–1300px de altura, 15–500 KB; mapas ≥ 1 MB; ícones < 15 KB)
@@ -25,6 +26,8 @@ export interface TableImageCandidate {
   w: number;
   h: number;
   kb: number;
+  /** Fichas técnicas têm layout de unidades, não uma tabela de soma. */
+  tipo: 'tabela' | 'ficha';
 }
 
 /**
@@ -55,7 +58,9 @@ export async function findTableImages(
     if (!m) continue;
     const slide = parseInt(m[1], 10);
     const secao = meta.get(slide)?.secao ?? null;
-    if (!secao || !SECOES_NUMERICAS.has(secao.toUpperCase())) continue;
+    const titulo = meta.get(slide)?.titulo ?? '';
+    const ficha = FICHA_TITLE.test(titulo);
+    if ((!secao || !SECOES_NUMERICAS.has(secao.toUpperCase())) && !ficha) continue;
     const root = parser.parseFromString(dec.decode(files[name]), 'application/xml');
     for (const rel of Array.from(root.getElementsByTagNameNS(NS_REL, 'Relationship'))) {
       if ((rel.getAttribute('Type') ?? '').endsWith('/image')) {
@@ -86,7 +91,7 @@ export async function findTableImages(
       titulo: meta.get(slide)?.titulo ?? null,
       name: target,
       mime: target.endsWith('.jpg') || target.endsWith('.jpeg') ? 'image/jpeg' : 'image/png',
-      sha1, bytes: data, w, h, kb,
+      sha1, bytes: data, w, h, kb, tipo: FICHA_TITLE.test(meta.get(slide)?.titulo ?? '') ? 'ficha' : 'tabela',
     });
   }
   return out.sort((a, b) => a.slide - b.slide);

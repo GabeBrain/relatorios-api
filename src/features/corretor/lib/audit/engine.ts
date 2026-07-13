@@ -216,6 +216,98 @@ export function crossBands(
   return rows;
 }
 
+export interface UnitRecord {
+  tipologia?: unknown;
+  m2?: unknown;
+  vagas?: unknown;
+  preco?: unknown;
+  preco_m2?: unknown;
+}
+
+/**
+ * WS6 — plausibilidade conservadora das unidades de ficha técnica. Só acusa
+ * relações aritméticas ou inversões suficientemente explícitas; o texto do
+ * achado sempre pede conferência porque posicionamento/andar podem explicar
+ * diferenças de preço legítimas.
+ */
+export function checkUnitPlausibility(units: UnitRecord[]): TableViz | null {
+  const rows: Cell[][] = units.map((u) => [
+    typeof u.tipologia === 'string' ? u.tipologia : 'Unidade',
+    numberOrNull(u.m2), numberOrNull(u.vagas), numberOrNull(u.preco), numberOrNull(u.preco_m2),
+  ]);
+  if (!rows.length) return null;
+  const table: ExtractedTable = { title: 'Ficha técnica', columns: ['Tipologia', 'm²', 'Vagas', 'Preço', 'R$/m²'], rows };
+  const bad = new Set<number>();
+  const notes: string[] = [];
+  rows.forEach((row, i) => {
+    const [label, m2, vagas, preco, precoM2] = row;
+    if (isNum(m2) && isNum(preco) && isNum(precoM2) && m2 > 0) {
+      const calculated = preco / m2;
+      if (Math.abs(calculated - precoM2) / calculated > 0.02) {
+        bad.add(i); notes.push(`«${label}»: R$/m² ${round(precoM2)} não bate com preço ÷ área (${round(calculated)}).`);
+      }
+    }
+    if (isNum(m2) && isNum(vagas) && m2 < 45 && vagas >= 2) {
+      bad.add(i); notes.push(`«${label}»: ${m2}m² com ${vagas} vagas — verificar plausibilidade.`);
+    }
+  });
+  for (let i = 0; i < rows.length; i++) for (let j = i + 1; j < rows.length; j++) {
+    const a = rows[i], b = rows[j];
+    const aM2 = a[1], bM2 = b[1], aVagas = a[2], bVagas = b[2], aPm = a[4], bPm = b[4];
+    if (!isNum(aM2) || !isNum(bM2) || !isNum(aVagas) || !isNum(bVagas) || !isNum(aPm) || !isNum(bPm)) continue;
+    const sameProfile = String(a[0]).toLowerCase() === String(b[0]).toLowerCase() && Math.abs(aM2 - bM2) / Math.max(aM2, bM2) <= 0.1;
+    if (sameProfile && aVagas !== bVagas) {
+      const withGarage = aVagas > bVagas ? [i, aPm, j, bPm] : [j, bPm, i, aPm];
+      if (withGarage[1] < withGarage[3] * 0.98) {
+        bad.add(withGarage[0]); bad.add(withGarage[2]);
+        notes.push(`Unidades comparáveis: a opção com mais vagas tem R$/m² menor — verificar.`);
+      }
+    }
+    if (Math.abs(aM2 - bM2) / Math.max(aM2, bM2) > 0.1 && isNum(a[3]) && isNum(b[3]) && Math.abs(a[3] - b[3]) <= 1) {
+      bad.add(i); bad.add(j); notes.push(`Tickets idênticos para metragens bem diferentes — verificar.`);
+    }
+  }
+  return { kind: 'table', table, badRows: [...bad].sort((a, b) => a - b), notes };
+}
+
+/** WS5 — confere série anual contra taxa explícita; sem taxa só marca variação muito irregular. */
+export function checkProjectionSeries(
+  table: ExtractedTable,
+  opts: { currentYear?: number; tolerance?: number } = {},
+): TableViz | null {
+  const yearCols = table.columns.map((c, i) => ({ i, year: Number(c.match(/\b(20\d{2})\b/)?.[1]) })).filter((x) => Number.isFinite(x.year));
+  if (yearCols.length < 2) return null;
+  const bad = new Set<number>();
+  const notes: string[] = [];
+  const tolerance = opts.tolerance ?? 0.01;
+  const rateCol = table.columns.findIndex((c) => /taxa|varia[çc]/i.test(c) && /%|anual/i.test(c));
+  table.rows.forEach((row, ri) => {
+    const values = yearCols.map(({ i, year }) => ({ year, value: row[i] })).filter((x): x is { year: number; value: number } => isNum(x.value));
+    if (values.length < 2) return;
+    const rate = rateCol >= 0 && isNum(row[rateCol]) ? row[rateCol] / 100 : null;
+    const ratios: number[] = [];
+    for (let i = 1; i < values.length; i++) {
+      if (values[i - 1].value <= 0) continue;
+      const ratio = values[i].value / values[i - 1].value;
+      ratios.push(ratio);
+      if (rate !== null && Math.abs(ratio - (1 + rate)) > tolerance) {
+        bad.add(ri); notes.push(`«${row[0]}»: ${values[i].year} não segue a taxa anual informada.`); break;
+      }
+    }
+    if (rate === null && ratios.length >= 3) {
+      const avg = ratios.reduce((a, v) => a + v, 0) / ratios.length;
+      if (avg > 0 && ratios.some((v) => Math.abs(v - avg) / avg > 0.2)) {
+        bad.add(ri); notes.push(`«${row[0]}»: variação anual irregular na projeção — verificar fórmula.`);
+      }
+    }
+  });
+  return { kind: 'table', table, badRows: [...bad].sort((a, b) => a - b), notes };
+}
+
+function numberOrNull(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
 /** BINNING_RULE — furo/sobreposição na sequência de faixas "de X a Y" / "acima de Z". */
 export function detectBinGap(bins: Bin[]): { gapAfterIndex?: number; description?: string } {
   for (let i = 1; i < bins.length; i++) {

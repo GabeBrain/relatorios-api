@@ -17,6 +17,8 @@ import { attachEvidenceImages } from './evidence';
 import { findAtaImage, type AtaImageCandidate } from './ata-image';
 import { estimateAtaPass, extractAtaFromImage, type AtaData } from './ia-ata';
 import { usdToBrl, VISION_CONCURRENCY } from './config';
+import { crossTableFindings, nativeTableRefs, projectionFindings } from './cross-table';
+import { ataCoverageFindings, requiredAndExclusionFindings, sourceFindingsFromVision } from './coverage-rules';
 
 // ── estimativa combinada (antes de gastar) ────────────────────────────────────
 
@@ -141,6 +143,9 @@ export async function runFullAnalysis(
   // A UF vem da ata e só está disponível após a primeira triagem. Reexecutar a
   // camada DET é barato; IDs estáveis evitam duplicidade na persistência.
   if (ata?.uf) detFindings = irToFindings(ir, { uf: ata.uf }).filter((f) => !f.ok);
+  // ATA_COVERAGE é determinística no primeiro corte; itens sem evidência ficam
+  // explícitos para revisão, sem chamada adicional nem falso "coberto".
+  detFindings.push(...ataCoverageFindings(ir, ata).filter((f) => !f.ok));
 
   // 3. texto (com a cidade da ata) + visão em paralelo
   const textPromise = runTextPass(
@@ -157,19 +162,25 @@ export async function runFullAnalysis(
     signal,
     expected: { cidade: cityUsed, uf: ata?.uf },
     onProgress: (done, total) => onStage?.({ stage: 'visao', done, total }),
-  }).then(async (res) => {
-    // persiste a imagem original de cada achado → evidência visual na correção
-    await attachEvidenceImages(res.findings, candidates);
-    onStage?.({ stage: 'visao', done: candidates.length, total: candidates.length, findings: res.findings, spentUsd: res.costUsd });
-    return res;
   });
 
   const [text, vision] = await Promise.all([textPromise, visionPromise]);
+  const refs = nativeTableRefs(ir).concat(vision.tables.map((table) => ({ ...table, source: 'vision' as const })));
+  const cross = crossTableFindings(ir, vision.tables);
+  const projection = projectionFindings(refs);
+  const coverage = [
+    ...sourceFindingsFromVision(ir, vision.sourceSlides),
+    ...requiredAndExclusionFindings(ir, refs),
+  ];
+  const visionFindings = [...vision.findings, ...cross, ...projection, ...coverage].filter((f) => !f.ok);
+  // Persiste a imagem original de cada achado → evidência visual na correção.
+  await attachEvidenceImages(visionFindings, candidates);
+  onStage?.({ stage: 'visao', done: candidates.length, total: candidates.length, findings: visionFindings, spentUsd: vision.costUsd });
 
   return {
     detFindings,
     textFindings: text.findings,
-    visionFindings: vision.findings,
+    visionFindings,
     ata,
     cityUsed,
     ataCostUsd,

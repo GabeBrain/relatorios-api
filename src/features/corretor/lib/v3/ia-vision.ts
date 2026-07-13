@@ -4,7 +4,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, calculateImageTokens, type ModelId } from '../cost-calculator';
-import { checkTableSums, checkPercentConsistency, detectBinGap } from '../audit/engine';
+import { checkTableSums, checkPercentConsistency, checkUnitPlausibility, detectBinGap } from '../audit/engine';
 import { toAuditSection } from '../audit/ir';
 import type { Cell, ColKind, ExtractedTable, Finding, Bin } from '../audit/model';
 import type { TableImageCandidate } from './table-images';
@@ -17,7 +17,8 @@ const db = supabase as any;
 // v4: semântica declarada (col_kinds/total_kind/share_of) capturada na extração e usada
 //     como hipótese verificada pela aritmética (participação vs taxa vs média).
 // v5: locais visíveis em título/legenda principal para detectar cidade/UF de outro estudo.
-const CACHE_SCHEMA = 5;
+// v6: fonte visível e unidades de fichas técnicas; um único bump para WS6/WS7.
+const CACHE_SCHEMA = 6;
 
 interface RawTable {
   title?: string;
@@ -29,7 +30,22 @@ interface RawTable {
   share_of?: Record<string, unknown>;
 }
 export interface RawLocale { texto?: unknown; tipo?: unknown; principal?: unknown }
-interface CachePayload { tables: RawTable[]; locais_visiveis?: RawLocale[] }
+export interface RawUnit { tipologia?: unknown; m2?: unknown; vagas?: unknown; preco?: unknown; preco_m2?: unknown }
+interface CachePayload {
+  tables: RawTable[];
+  locais_visiveis?: RawLocale[];
+  unidades?: RawUnit[];
+  tem_fonte?: boolean;
+}
+
+/** Tabela já extraída, com origem para cruzamentos e evidência visual. */
+export interface ExtractedTableRef {
+  slide: number;
+  secao: string | null;
+  titulo: string | null;
+  sha1: string;
+  table: ExtractedTable;
+}
 
 export interface ExpectedLocation { cidade: string; uf?: string | null }
 
@@ -145,6 +161,9 @@ function binsFromColumns(columns: string[]): Bin[] {
 
 export interface VisionPassResult {
   findings: Finding[];
+  tables: ExtractedTableRef[];
+  /** Slides com fonte/elaboração detectada na própria imagem. */
+  sourceSlides: number[];
   tablesExtracted: number;
   tablesVerified: number;
   fromCache: number;
@@ -240,19 +259,23 @@ async function extractWithModel(
   payload: CachePayload; inputTokens: number; outputTokens: number;
 }> {
   const { data, error } = await supabase.functions.invoke<{
-    tables: RawTable[]; locais_visiveis?: RawLocale[]; inputTokens: number; outputTokens: number; error?: string;
+    tables: RawTable[]; locais_visiveis?: RawLocale[]; unidades?: RawUnit[]; tem_fonte?: boolean; inputTokens: number; outputTokens: number; error?: string;
   }>('analyze-table-image', {
     body: {
       base64: imageOverride?.base64 ?? toBase64(c.bytes),
       mime: imageOverride?.mime ?? c.mime,
       model,
       contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
+      tipo: c.tipo,
     },
   });
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
   return {
-    payload: { tables: data?.tables ?? [], locais_visiveis: data?.locais_visiveis ?? [] },
+    payload: {
+      tables: data?.tables ?? [], locais_visiveis: data?.locais_visiveis ?? [],
+      unidades: data?.unidades ?? [], tem_fonte: data?.tem_fonte === true,
+    },
     inputTokens: data?.inputTokens ?? 0,
     outputTokens: data?.outputTokens ?? 0,
   };
@@ -283,8 +306,13 @@ async function processImage(
   c: TableImageCandidate,
   model: ModelId,
   expected?: ExpectedLocation,
-): Promise<{ findings: Finding[]; tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number; outputTokens: number; costUsd: number; escalated: boolean }> {
+): Promise<{
+  findings: Finding[]; tables: ExtractedTableRef[]; hasVisibleSource: boolean;
+  tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number;
+  outputTokens: number; costUsd: number; escalated: boolean;
+}> {
   const findings: Finding[] = [];
+  const tables: ExtractedTableRef[] = [];
   let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0, costUsd = 0;
   let escalated = false;
   let usedModel = model;
@@ -335,6 +363,7 @@ async function processImage(
   (payload?.tables ?? []).forEach((raw, ti) => {
     const ext = toExtracted(raw);
     if (!ext) return;
+    tables.push({ slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext });
     tablesExtracted++;
     let flagged = false;
 
@@ -397,7 +426,21 @@ async function processImage(
     if (!flagged) tablesVerified++;
   });
 
-  return { findings, tablesExtracted, tablesVerified, fromCache, inputTokens, outputTokens, costUsd, escalated };
+  const unitViz = checkUnitPlausibility(payload?.unidades ?? []);
+  if (unitViz && ((unitViz.badRows?.length ?? 0) > 0 || (unitViz.notes?.length ?? 0) > 0)) {
+    findings.push({
+      id: `iavis-plaus-${c.sha1.slice(0, 10)}`,
+      type: 'VALUE_PLAUSIBILITY', section: secao, slideRef: `s${c.slide}`,
+      title: 'Valores a conferir na ficha técnica',
+      detail: `Plausibilidade das unidades extraídas da ficha: ${unitViz.notes?.[0] ?? 'verifique os valores marcados.'}`,
+      ok: false, viz: unitViz, evidenceSha1: c.sha1,
+    });
+  }
+
+  return {
+    findings, tables, hasVisibleSource: payload?.tem_fonte === true,
+    tablesExtracted, tablesVerified, fromCache, inputTokens, outputTokens, costUsd, escalated,
+  };
 }
 
 export async function runVisionPass(
@@ -409,7 +452,8 @@ export async function runVisionPass(
   const o: VisionPassOpts = typeof opts === 'function' ? { onProgress: opts } : opts;
   const concurrency = Math.max(1, o.concurrency ?? 1);
 
-  const findings: Finding[] = [];
+  const findings: Finding[] = [], tables: ExtractedTableRef[] = [];
+  const sourceSlides = new Set<number>();
   let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0;
   let costUsd = 0, escalated = 0, done = 0;
 
@@ -420,6 +464,8 @@ export async function runVisionPass(
       const i = next++;
       const r = await processImage(candidates[i], model, o.expected);
       findings.push(...r.findings);
+      tables.push(...r.tables);
+      if (r.hasVisibleSource) sourceSlides.add(candidates[i].slide);
       tablesExtracted += r.tablesExtracted;
       tablesVerified += r.tablesVerified;
       fromCache += r.fromCache;
@@ -433,7 +479,7 @@ export async function runVisionPass(
   await Promise.all(Array.from({ length: Math.min(concurrency, candidates.length) }, worker));
 
   return {
-    findings, tablesExtracted, tablesVerified, fromCache,
+    findings, tables, sourceSlides: [...sourceSlides].sort((a, b) => a - b), tablesExtracted, tablesVerified, fromCache,
     inputTokens, outputTokens, escalated,
     costUsd,
   };

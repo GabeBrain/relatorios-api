@@ -50,6 +50,7 @@ interface RequestBody {
   mime: string;
   model: ModelId;
   contexto: string; // "slide 121 · TABELA DE LACUNAS · seção LACUNAS"
+  tipo: 'tabela' | 'ficha';
 }
 
 function validate(body: unknown): { ok: true; value: RequestBody } | { ok: false; error: string; status: number } {
@@ -66,11 +67,12 @@ function validate(body: unknown): { ok: true; value: RequestBody } | { ok: false
       mime: typeof b.mime === 'string' && b.mime.startsWith('image/') ? b.mime : 'image/png',
       model,
       contexto: String(b.contexto ?? '').slice(0, 300),
+      tipo: b.tipo === 'ficha' ? 'ficha' : 'tabela',
     },
   };
 }
 
-const PROMPT = (contexto: string) => `Você transcreve tabelas de estudos imobiliários brasileiros a partir de imagens.
+const PROMPT = (contexto: string, tipo: RequestBody['tipo']) => `Você transcreve dados de estudos imobiliários brasileiros a partir de imagens.
 Contexto: ${contexto}.
 
 Transcreva TODAS as tabelas numéricas da imagem, fielmente:
@@ -89,6 +91,13 @@ rodapé, barra de busca ou cabeçalho da imagem. Não deduza: transcreva literal
 Para cada local, marque "principal": true SOMENTE se estiver no título ou na legenda principal
 da tabela/gráfico (não em uma referência comparativa secundária).
 
+Também informe "tem_fonte": true somente se for possível ler FONTE:, Fonte:, Elaboração:
+ou equivalente na imagem; caso contrário false. Não deduza.
+
+${tipo === 'ficha' ? `Esta imagem é uma FICHA TÉCNICA. Além das tabelas, extraia cada unidade legível em
+"unidades": [{"tipologia":"2 dorms","m2":65,"vagas":1,"preco":550000,"preco_m2":8461}].
+Use null para valor ilegível e não invente unidades.` : 'Esta imagem é uma tabela; responda "unidades": [].'}
+
 CLASSIFIQUE a semântica (o verificador confere a aritmética; classificar errado é pego):
 - "col_kinds": um rótulo por coluna, na ordem —
     "label"   (1ª coluna de rótulos),
@@ -105,8 +114,9 @@ CLASSIFIQUE a semântica (o verificador confere a aritmética; classificar errad
 Responda EXATAMENTE este JSON (sem markdown):
 {"tables": [{"title": "…", "columns": ["…"], "rows": [["rótulo", 123, null]], "totals": ["Total", 456],
   "col_kinds": ["label","count","share"], "total_kind": "sum", "share_of": {"2": 1}}],
- "locais_visiveis": [{"texto": "São Paulo", "tipo": "cidade", "principal": true}]}
-Se não houver tabela numérica: {"tables": [], "locais_visiveis": []}`;
+ "locais_visiveis": [{"texto": "São Paulo", "tipo": "cidade", "principal": true}],
+ "unidades": [], "tem_fonte": false}
+Se não houver tabela numérica: {"tables": [], "locais_visiveis": [], "unidades": [], "tem_fonte": false}`;
 
 async function callOpenAI(apiKey: string, body: RequestBody, retries = 3) {
   const payload = {
@@ -115,7 +125,7 @@ async function callOpenAI(apiKey: string, body: RequestBody, retries = 3) {
     messages: [{
       role: 'user',
       content: [
-        { type: 'text', text: PROMPT(body.contexto) },
+        { type: 'text', text: PROMPT(body.contexto, body.tipo) },
         { type: 'image_url', image_url: { url: `data:${body.mime};base64,${body.base64}`, detail: 'high' } },
       ],
     }],
@@ -161,12 +171,14 @@ Deno.serve(async (req) => {
     if (!parsed.ok) return json({ error: parsed.error }, parsed.status);
 
     const response = await callOpenAI(apiKey, parsed.value);
-    let content: { tables?: unknown[]; locais_visiveis?: unknown[] } = {};
-    try { content = JSON.parse(response.choices?.[0]?.message?.content ?? '{}'); } catch { content = { tables: [], locais_visiveis: [] }; }
+    let content: { tables?: unknown[]; locais_visiveis?: unknown[]; unidades?: unknown[]; tem_fonte?: unknown } = {};
+    try { content = JSON.parse(response.choices?.[0]?.message?.content ?? '{}'); } catch { content = { tables: [], locais_visiveis: [], unidades: [], tem_fonte: false }; }
 
     return json({
       tables: Array.isArray(content.tables) ? content.tables : [],
       locais_visiveis: Array.isArray(content.locais_visiveis) ? content.locais_visiveis : [],
+      unidades: Array.isArray(content.unidades) ? content.unidades : [],
+      tem_fonte: content.tem_fonte === true,
       inputTokens: response.usage?.prompt_tokens ?? 0,
       outputTokens: response.usage?.completion_tokens ?? 0,
     });
