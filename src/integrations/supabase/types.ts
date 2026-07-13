@@ -299,6 +299,7 @@ export type Database = {
           custo_total: number
           id: string
           nome: string
+          relatorio: Json | null
           status: string
           uf: string | null
         }
@@ -311,6 +312,7 @@ export type Database = {
           custo_total?: number
           id?: string
           nome: string
+          relatorio?: Json | null
           status?: string
           uf?: string | null
         }
@@ -323,6 +325,7 @@ export type Database = {
           custo_total?: number
           id?: string
           nome?: string
+          relatorio?: Json | null
           status?: string
           uf?: string | null
         }
