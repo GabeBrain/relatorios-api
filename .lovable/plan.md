@@ -1,27 +1,21 @@
-## Diagnóstico
+## Plano de correção
 
-O site publicado devolve **404** em `/data/quanti/base-2020.json` porque a pasta `public/data/quanti/` está listada no `.gitignore` (padrão `quanti`) — o arquivo de 6,6 MB existe apenas no sandbox local e nunca é versionado nem incluído no bundle publicado.
+1. **Regenerar a base Quanti 2020 corretamente**
+   - Reprocessar o Excel mantendo a regra já definida: linha 1 = nomes das variáveis, linha 2 = perguntas desconsideradas, dados a partir da linha 3.
+   - Converter valores inválidos de planilha (`NaN`, `Infinity`, vazios especiais) para `null` antes de serializar.
+   - Garantir que o arquivo final seja JSON estritamente válido.
 
-## Solução: mover a base para o Lovable Cloud Storage
+2. **Substituir o arquivo no Lovable Cloud Storage**
+   - Reenviar `base-2020.json` para o bucket `quanti-datasets`, sobrescrevendo a versão atual inválida.
+   - Manter o mesmo caminho (`base-2020.json`) para não alterar a configuração do dashboard.
 
-Repo continua leve, novas bases (2019/2021/…) entram por upload sem `git push`, e o carregamento continua 100% client-side (fetch → cache → agregação em memória).
+3. **Adicionar proteção no carregamento do dashboard**
+   - Ajustar `useQuantiDataset.ts` para tratar JSON legado com tokens inválidos (`NaN`, `Infinity`, `-Infinity`) antes do `JSON.parse`.
+   - Se ainda houver erro de parse, exibir uma mensagem mais clara indicando que o dataset está corrompido/inválido.
 
-### Passos
+4. **Validar no app**
+   - Abrir `/quanti` e confirmar que a base carrega sem erro.
+   - Conferir se o total de entrevistas permanece considerando apenas os dados a partir da linha 3.
 
-1. **Criar bucket público** `quanti-datasets` (Lovable Cloud Storage).
-2. **Upload** de `public/data/quanti/base-2020.json` para `quanti-datasets/base-2020.json` e capturar a URL pública.
-3. **Registry dinâmico** — atualizar `src/features/area-quanti/dashboard/datasets.ts` para apontar a base 2020 para a URL do bucket. Manter a shape `{ id, label, url }` para que novas bases entrem só adicionando um item.
-4. **Loader resiliente** — em `useQuantiDataset.ts`, melhorar a mensagem de erro (status + URL) e manter o cache por URL.
-5. **Limpeza** — remover `public/data/quanti/base-2020.json` do sandbox (não é mais fonte) e manter `quanti` no `.gitignore` para evitar recommits acidentais de bases grandes.
-6. **Doc vivo** — registrar em `docs/projetos/LIVE_area-quanti.md` que a fonte oficial passou a ser o bucket `quanti-datasets` e como subir novas bases.
-
-### Como adicionar bases futuras (2019, 2021, 2022…)
-
-- Fazer upload do JSON convertido no bucket `quanti-datasets`.
-- Adicionar uma linha em `DATASETS` (`{ id, label, url }`).
-- Nenhuma alteração de código nos gráficos/filtros — o dashboard já lê pelo registry.
-
-### Fora do escopo
-
-- Migração para tabela relacional (fica como próxima evolução se as bases passarem de ~50 MB somadas).
-- Alterações nos gráficos, KPIs ou filtros.
+5. **Atualizar documento vivo da Área Quanti**
+   - Registrar a correção no doc do projeto, já que altera a fonte de dados e robustez do carregamento.
