@@ -182,6 +182,10 @@ function BrazilLevel({
   onClickUF: (uf: string) => void;
 }) {
   const [hover, setHover] = useState<{ uf: string; x: number; y: number } | null>(null);
+  const colorFor = useMemo(
+    () => buildColorScale(Array.from(byUF.values()).map((x) => x.count)),
+    [byUF],
+  );
 
   if (!geo) {
     return <div className="flex h-[420px] items-center justify-center text-xs text-[var(--qd-text-muted)]"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Carregando mapa…</div>;
