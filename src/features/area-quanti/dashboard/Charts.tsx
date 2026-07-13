@@ -200,7 +200,7 @@ export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
                     key={c}
                     className="qd-hm-cell whitespace-nowrap p-1 text-center"
                     style={{
-                      background: `rgba(37, 99, 235, ${0.08 + alpha * 0.72})`,
+                      background: `rgba(${HEATMAP_RGB}, ${0.08 + alpha * 0.72})`,
                       color: alpha > 0.55 ? '#fff' : '#0f172a',
                       minWidth: 60,
                     }}
