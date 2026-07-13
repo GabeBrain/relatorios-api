@@ -14,11 +14,15 @@ export const CONFIDENCE_META: Record<Confidence, { label: string; icon: string; 
 const VERIFY = new Set<ErrorType>(['VALUE_PLAUSIBILITY', 'PROJECTION_FORMULA', 'SOURCE_MISSING', 'ATA_COVERAGE', 'STRUCTURE_MISSING', 'REQUIRED_NOTE', 'EXCLUSION_RULE']);
 
 /** Determina o tom pelo tipo, origem e confirmação de leitura da visão. */
-export function confidenceOf(finding: Pick<Finding, 'type' | 'detail' | 'escalated'>, origem = 'DET'): Confidence {
+export function confidenceOf(finding: Pick<Finding, 'type' | 'detail' | 'escalated' | 'evidenceSha1'>, origem = 'DET'): Confidence {
   const type = finding.type as ErrorType;
   if (VERIFY.has(type)) return 3;
-  if (type === 'WRONG_CONTEXT') return 1; // evidência literal de cidade/UF
   if (finding.escalated || /confirmado no gpt-4o/i.test(finding.detail)) return 1;
+  if (type === 'WRONG_CONTEXT') {
+    // Evidência literal do texto (regra de UF, sem imagem) é nível 1. Vinda da
+    // leitura de visão não escalonada, é só uma transcrição do modelo econômico → nível 2.
+    return finding.evidenceSha1 ? 2 : 1;
+  }
   const meta = ERROR_CATALOG[type];
   if (origem === 'DET' && meta?.mode === 'PLENO') return 1;
   return 2;

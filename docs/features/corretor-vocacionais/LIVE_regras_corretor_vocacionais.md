@@ -16,6 +16,20 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.34 — 2026-07-13 — Revisão da v0.33 (1 fix aplicado) + plano do Corretor v5 (docs)
+
+Revisão do commit `561f7f9` (Claude): A1–A4/B1–B6 conferidos como corretos. **1 bug corrigido
+direto no working tree:** `wl.completeness` → `wl.completude` em `CorretorV3Page.tsx` — a aba
+padrão crashava ao abrir qualquer estudo (Vite não roda typecheck no build; `tsc --noEmit`
+agora passa limpo). Ajustes menores apontados para o WS-0 do plano novo: `grid-cols-16/20`
+inexistentes no Tailwind (régua cai p/ 12 col), guarda de anos futuros da projeção pode gerar
+falso negativo, `slice(5)` do checklist estrutural é frágil, `WRONG_CONTEXT` de visão não
+confirmada deveria ser nível 2, origem `IA_visao` em cruzamento de tabelas nativas.
+
+Novo plano de fluxo: `PLAN_corretor_v5_fluxo.md` (executor: Opus) — portão da ata antes dos
+passes pagos, relatório de entrega (attestation), modo triage por teclado, reconferência sem
+atrito e vista da calibradora; file watch (File System Access) registrado como WS-F futuro.
+
 ## Versão 0.33 — 2026-07-13 — Precisão Coverage 90 + Corretor v4 (RUNTIME)
 
 Implementados os ajustes obrigatórios da revisão e as fatias v4.0–v4.3 da interface.

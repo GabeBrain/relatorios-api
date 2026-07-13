@@ -40,10 +40,21 @@ export const CHECKLIST: StructureItem[] = [
   item('8.3', 'Revenda por tipologia', 'MERCADO', /revenda.*tipologia|tipologia.*revenda/i), item('8.4', 'Ticket de revenda', 'MERCADO', /ticket.*revenda|revenda.*ticket/i),
 ];
 
+// Slides de capa/sumário/objetivos listam o índice inteiro — reconhecê-los pela
+// seção (ou ausência dela nos primeiros slides) evita o falso "presente" e não
+// derruba conteúdo real que apareça cedo no deck (ex.: endereço no slide 4).
+const INDEX_SECTIONS = new Set(['CAPA', 'SUMARIO', 'INDICE', 'OBJETIVOS', 'AGENDA', 'METODOLOGIA']);
+const SUMMARY_RX = /sum[áa]rio|[íi]ndice|agenda|objetivos\s+do\s+estudo/i;
+
+function isIndexSlide(slide: Ir['slides'][number]): boolean {
+  const sec = (slide.secao_canonica ?? '').toUpperCase();
+  if (INDEX_SECTIONS.has(sec)) return true;
+  if ((!sec || sec === 'IDENTIFICACAO') && SUMMARY_RX.test(slide.titulo ?? '')) return true;
+  return slide.n <= 2 && !sec;
+}
+
 export function structureChecklistFinding(ir: Ir): Finding {
-  // Capa/sumário/objetivos listam o índice inteiro; não são prova de que o
-  // conteúdo existe. Só olha título + duas primeiras linhas da área de trabalho.
-  const evidence = ir.slides.slice(5).map((s) => `${s.titulo ?? ''}\n${(s.textos ?? []).slice(0, 2).join('\n')}`).map((text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+  const evidence = ir.slides.filter((s) => !isIndexSlide(s)).map((s) => `${s.titulo ?? ''}\n${(s.textos ?? []).slice(0, 2).join('\n')}`).map((text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
   const status = CHECKLIST.map((entry) => ({ entry, ok: evidence.some((slide) => entry.patterns.some((p) => p.test(slide))) }));
   const missing = status.filter((s) => !s.ok);
   return {

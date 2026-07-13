@@ -553,14 +553,14 @@ export default function CorretorV3Page() {
       byType.get(i.finding.type)!.push(i);
     }
     const confidence = ([1, 2, 3] as Confidence[]).map((level) => [level, active.filter((item) => item.status === 'pendente' && confidenceOf(item.finding, item.origem) === level)] as const);
-    const completeness = active.filter((item) => ['ATA_COVERAGE', 'STRUCTURE_MISSING'].includes(item.finding.type));
+    const completude = active.filter((item) => ['ATA_COVERAGE', 'STRUCTURE_MISSING'].includes(item.finding.type));
     const problems = active.filter((item) => !['ATA_COVERAGE', 'STRUCTURE_MISSING'].includes(item.finding.type));
     const grouped = new Map<string, FindingV3[]>();
     for (const item of problems) {
       if (!grouped.has(item.finding.type)) grouped.set(item.finding.type, []);
       grouped.get(item.finding.type)!.push(item);
     }
-    return { pend, total: items.length, slides: [...bySlide.entries()], relational: [...byType.entries()], confidence, completeness, grouped: [...grouped.entries()] };
+    return { pend, total: items.length, slides: [...bySlide.entries()], relational: [...byType.entries()], confidence, completude, grouped: [...grouped.entries()] };
   }, [items]);
 
   const progressPct = wl.total > 0 ? Math.round(((wl.total - wl.pend) / wl.total) * 100) : 0;
@@ -873,7 +873,7 @@ function DeckRuler({ slides, items, onSlide }: { slides: number; items: FindingV
   return (
     <div className="rounded-lg border bg-card p-3 space-y-2">
       <div className="text-xs font-semibold">Vista geral do deck</div>
-      <div className="grid grid-cols-12 sm:grid-cols-16 md:grid-cols-20 gap-1">
+      <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(26px, 1fr))' }}>
         {Array.from({ length: slides }, (_, index) => index + 1).map((slide) => <button key={slide} onClick={() => onSlide(slide)} title={`Slide ${slide}${pinned.has(slide) ? ' — possui pendência' : ''}`} className={cn('h-5 rounded text-[9px] font-mono border', pinned.has(slide) ? 'bg-amber-500/20 border-amber-500/50 text-amber-700 dark:text-amber-300' : 'bg-muted/40 border-border text-muted-foreground hover:border-primary/50')}>{slide}</button>)}
       </div>
       <p className="text-[10px] text-muted-foreground">Pinos âmbar indicam slides com pendência; clique para abrir a varredura daquele ponto.</p>

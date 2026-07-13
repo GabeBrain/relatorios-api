@@ -33,6 +33,8 @@ function mismatch(id: string, type: 'CROSS_TABLE_MISMATCH' | 'TOTALS_EQUALITY', 
     id, type, section, slideRef: `s${left.slide} × s${right.slide}`, title, detail, ok: false,
     viz: { kind: 'sidebyside', leftLabel: refLabel(left), rightLabel: refLabel(right), rows },
     evidenceSha1: left.source === 'vision' ? left.sha1 : right.source === 'vision' ? right.sha1 : undefined,
+    // Cruzamento de duas tabelas nativas é DET puro; se um lado veio da visão, herda visão.
+    origem: left.source === 'ir' && right.source === 'ir' ? 'DET' : 'IA_visao',
   };
 }
 
@@ -175,7 +177,10 @@ export function projectionFindings(refs: CrossTableRef[], currentYear = new Date
     const projectionTitle = norm(`${ref.titulo ?? ''} ${ref.table.title}`);
     if (!['SOCIO', 'ABSORCAO'].includes(section) || !/projec[aã]o|projecoes/.test(projectionTitle)) continue;
     const years = ref.table.columns.map((c) => Number(c.match(/\b(20\d{2})\b/)?.[1])).filter(Number.isFinite);
-    if (!years.length || years.filter((year) => year >= currentYear).length <= years.length / 2) continue;
+    // Projeção olha para frente. Exigir que a série alcance pelo menos ano+3 evita
+    // pular projeções com histórico longo (falso negativo) e ignorar tabelas de
+    // oferta histórica por ano (só passado) que casaram no título por acidente.
+    if (!years.length || Math.max(...years) < currentYear + 3) continue;
     if (years.length >= 2) {
       const expected = Array.from({ length: 6 }, (_, i) => currentYear + 1 + i);
       const found = [...new Set(years)].sort((a, b) => a - b);

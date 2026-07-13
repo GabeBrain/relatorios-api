@@ -104,6 +104,12 @@ export interface Finding {
   escalated?: boolean;
   /** path no Storage da imagem-evidência, depois de persistida (v3.3). */
   evidenceImage?: string;
+  /**
+   * Origem efetiva do achado, quando difere do estágio que o emitiu. Um cruzamento
+   * entre duas tabelas NATIVAS nasce do estágio de visão, mas é DET puro — a UI usa
+   * isso para a confiança (v5/WS-0). Ausente = herda a origem do estágio.
+   */
+  origem?: 'DET' | 'IA_texto' | 'IA_visao';
 }
 
 export interface StudyFixture {

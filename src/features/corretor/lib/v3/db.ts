@@ -247,7 +247,8 @@ export async function insertIaFindings(
       detalhe: f.detail,
       payload: f,
       status: 'pendente',
-      origem,
+      // Um cruzamento de tabelas nativas é DET mesmo saindo do estágio de visão.
+      origem: f.origem ?? origem,
       primeira_versao: versionN,
     })),
     { onConflict: 'study_id,rule_id', ignoreDuplicates: true, count: 'exact' }
