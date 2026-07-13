@@ -79,14 +79,14 @@ export function QuantiDashboard() {
             {/* Perfil Demográfico */}
             <section className="space-y-2">
               <h2 className="qd-section-title">Perfil Demográfico</h2>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <ChartCard title="Gênero" subtitle="Clique para filtrar">
-                  <DonutField rows={filtered} field="genero" />
+                  <DonutField rows={filtered} field="genero" height={320} />
                 </ChartCard>
                 <ChartCard title="Faixa etária">
                   <BarField rows={filtered} field="faixa_etaria" />
                 </ChartCard>
-                <ChartCard title="Geração">
+                <ChartCard title="Geração" className="lg:col-span-2">
                   <BarField rows={filtered} field="geracao" />
                 </ChartCard>
               </div>
@@ -95,7 +95,7 @@ export function QuantiDashboard() {
             {/* Perfil de Renda */}
             <section className="space-y-2">
               <h2 className="qd-section-title">Perfil de Renda</h2>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <ChartCard title="Macro faixa de renda">
                   <BarField rows={filtered} field="renda_macro_faixa" />
                 </ChartCard>
@@ -105,11 +105,11 @@ export function QuantiDashboard() {
                 <ChartCard title="Classe social agregada">
                   <BarField rows={filtered} field="renda_classe_agregada" />
                 </ChartCard>
-                <ChartCard title="Classe social detalhada" className="xl:col-span-2">
-                  <BarField rows={filtered} field="renda_classe_detalhada" height={300} />
+                <ChartCard title="Classe social detalhada">
+                  <BarField rows={filtered} field="renda_classe_detalhada" />
                 </ChartCard>
-                <ChartCard title="Histograma — renda estimada (R$)">
-                  <HistogramChart rows={filtered} field="renda_valor_estimado" bins={20} height={300} />
+                <ChartCard title="Histograma — renda estimada (R$)" subtitle="Distribuição por faixas" className="lg:col-span-2">
+                  <HistogramChart rows={filtered} field="renda_valor_estimado" bins={30} height={520} />
                 </ChartCard>
               </div>
             </section>
@@ -117,12 +117,12 @@ export function QuantiDashboard() {
             {/* Distribuição Geográfica */}
             <section className="space-y-2">
               <h2 className="qd-section-title">Distribuição Geográfica</h2>
-              <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
-                <ChartCard title="Brasil por estado" subtitle="Intensidade = volume de entrevistas · clique para filtrar" className="lg:col-span-3">
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                <ChartCard title="Brasil por estado" subtitle="Intensidade = volume de entrevistas · clique para filtrar">
                   <BrazilMap rows={filtered} />
                 </ChartCard>
-                <ChartCard title="Top cidades" className="lg:col-span-2">
-                  <BarField rows={filtered} field="cidade" topN={15} height={340} />
+                <ChartCard title="Top cidades">
+                  <BarField rows={filtered} field="cidade" topN={15} />
                 </ChartCard>
               </div>
             </section>
@@ -130,7 +130,7 @@ export function QuantiDashboard() {
             {/* Intenção de Compra */}
             <section className="space-y-2">
               <h2 className="qd-section-title">Intenção de Compra</h2>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <ChartCard title="Intenção padronizada">
                   <BarField rows={filtered} field="intencao_compra_padronizada" />
                 </ChartCard>
@@ -143,7 +143,7 @@ export function QuantiDashboard() {
                 <ChartCard title="Intenção × Faixa etária">
                   <Heatmap ct={crosstab(filtered, 'intencao_compra_padronizada', 'faixa_etaria', 'count')} metricLabel="Intenção" />
                 </ChartCard>
-                <ChartCard title="Intenção × Classe social agregada" className="md:col-span-2">
+                <ChartCard title="Intenção × Classe social agregada" className="lg:col-span-2">
                   <Heatmap ct={crosstab(filtered, 'intencao_compra_padronizada', 'renda_classe_agregada', 'count')} metricLabel="Intenção" />
                 </ChartCard>
               </div>
