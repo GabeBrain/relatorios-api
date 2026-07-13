@@ -16,6 +16,17 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.38 — 2026-07-13 — Corretor v5 WS-4: reconferência sem atrito (RUNTIME)
+
+Com um estudo aberto, soltar um `.pptx` em qualquer ponto da área de trabalho agora inicia a
+reconferência da próxima versão; um overlay identifica estudo e versão antes do drop. A entrada
+por seletor e o drop compartilham `recheckFromBytes(bytes, filename)`, também preparado para um
+file watch futuro. O diff DET é identificado no botão como **R$ 0**. Após ler o arquivo,
+`estimateFullAnalysis` consulta os SHA-1 das imagens: se todas estiverem no `vision_cache`,
+nenhum passe pago é executado; se houver imagem nova, a fase de IA segue normalmente. O resultado
+gera toast, scroll suave para o banner de diff e animação discreta nos itens resolvidos. Achados
+de IA anteriores não são falsamente resolvidos pelo diff DET.
+
 ## Versão 0.37 — 2026-07-13 — Corretor v5 WS-3: triagem por teclado (RUNTIME)
 
 A worklist ganhou o modo **Triagem rápida**, com uma fila congelada de achados pendentes

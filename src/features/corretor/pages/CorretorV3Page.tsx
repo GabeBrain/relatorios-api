@@ -77,6 +77,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
   return (
     <div className={cn(
       'rounded-lg border border-l-4 bg-card transition-opacity',
+      item.resolvidoNaVersao && 'animate-in fade-in zoom-in-95 duration-300',
       done ? 'border-border opacity-60' : confidence === 1 ? 'border-l-red-500 border-red-500/30' : confidence === 2 ? 'border-l-orange-500 border-orange-500/30' : 'border-l-amber-500 border-amber-500/30'
     )}>
       <div className="flex items-start gap-3 px-4 py-3">
@@ -325,6 +326,7 @@ export default function CorretorV3Page() {
   const [triaging, setTriaging] = useState(false);
   const newRef = useRef<HTMLInputElement>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
+  const diffRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const selected = studies.find((s) => s.id === selectedId) ?? null;
@@ -536,14 +538,22 @@ export default function CorretorV3Page() {
         findings
       );
       setLastDiff(diff);
+      window.setTimeout(() => diffRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
       toast.success(`Reconferido (v${newVersion})`, {
         description: `${diff.resolved.length} resolvido(s) · ${diff.persistent.length} persistem · ${diff.fresh.length} novo(s)`,
       });
       await refreshList();
       setItems(await loadFindings(selected.id));
-      setBusy(null);
-      // re-roda a fase paga direto (cidade/UF já confirmadas; visão puxa do cache → barato)
+      // Sem imagem nova, o ciclo termina no diff DET: custo efetivo R$ 0. Achados de IA
+      // antigos permanecem intactos e não são falsamente dados como resolvidos.
       const estimate = await estimateFullAnalysis(ir, bytes, MODEL);
+      if (estimate.visionToRun === 0) {
+        toast.info('Reconferência gratuita concluída', {
+          description: `${estimate.visionCached} imagem(ns) no cache · nenhum passe pago executado.`,
+        });
+        return;
+      }
+      // Imagens novas exigem a fase paga; cidade/UF já foram confirmadas no portão.
       await runPaidAnalysis(
         { studyId: selected.id, version: newVersion, ir, bytes, estimate },
         { cidade: selected.cidade ?? '', uf: selected.uf ?? '', ata: selected.ata ?? null },
@@ -551,8 +561,22 @@ export default function CorretorV3Page() {
       );
     } catch (err) {
       toast.error('Falha ao reconferir', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
       setBusy(null);
     }
+  }
+
+  async function handleWorkspaceDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setDragging(false);
+    if (busy !== null || analysis?.running || selected?.status === 'pronto') return;
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    if (!/\.pptx$/i.test(file.name)) {
+      toast.error('Formato não suportado', { description: 'Solte a versão corrigida em .pptx.' });
+      return;
+    }
+    await recheckFromBytes(new Uint8Array(await file.arrayBuffer()), file.name);
   }
 
   async function handleStatus(ruleId: string, s: FindingStatus) {
@@ -709,7 +733,24 @@ export default function CorretorV3Page() {
 
   // ─── WORKSPACE ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div
+      className="min-h-screen bg-background flex flex-col relative"
+      onDragEnter={(e) => { e.preventDefault(); if (busy === null && !analysis?.running && selected.status !== 'pronto') setDragging(true); }}
+      onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }}
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false);
+      }}
+      onDrop={(e) => void handleWorkspaceDrop(e)}
+    >
+      {dragging && (
+        <div className="fixed inset-0 z-40 pointer-events-none bg-background/85 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="w-full max-w-xl rounded-xl border-2 border-dashed border-primary bg-card px-8 py-12 text-center shadow-xl">
+            <RefreshCw className="w-10 h-10 text-primary mx-auto mb-3" />
+            <p className="text-base font-semibold">Soltar para reconferir a v{selected.lastVersion + 1}</p>
+            <p className="text-sm text-muted-foreground mt-1 truncate">{selected.nome}</p>
+          </div>
+        </div>
+      )}
       <header className="border-b bg-card px-6 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <button
@@ -733,10 +774,10 @@ export default function CorretorV3Page() {
             onClick={() => recheckRef.current?.click()}
             disabled={busy !== null || analysis?.running || selected.status === 'pronto'}
             className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 disabled:opacity-50"
-            title="Subir a versão corrigida do PPTX e comparar"
+            title="O diff determinístico é grátis; IA só roda quando houver imagem nova"
           >
             {busy === 'recheck' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-            Reconferir
+            Reconferir (DET R$ 0)
           </button>
           {selected.status === 'pronto' ? (
             <div className="flex items-center gap-2">
@@ -802,7 +843,7 @@ export default function CorretorV3Page() {
       </div>
 
       {lastDiff && (
-        <div className="border-b bg-sky-500/5 px-6 py-2 text-xs text-muted-foreground flex items-center gap-3">
+        <div ref={diffRef} className="border-b bg-sky-500/5 px-6 py-2 text-xs text-muted-foreground flex items-center gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
           <RefreshCw className="w-3.5 h-3.5 text-sky-500 shrink-0" />
           <span><strong className="text-emerald-600 dark:text-emerald-400">{lastDiff.resolved.length} resolvido(s)</strong> na versão nova</span>
           <span>· {lastDiff.persistent.length} persistem</span>
