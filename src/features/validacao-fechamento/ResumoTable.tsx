@@ -40,7 +40,7 @@ export function ResumoTable({ resumo, granularity }: Props) {
   }, [buckets]);
 
   // Inicia a rolagem da tabela resumo no máximo à direita, exibindo "% Var. Total" por padrão.
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTo({ left: el.scrollWidth, behavior: 'auto' });
