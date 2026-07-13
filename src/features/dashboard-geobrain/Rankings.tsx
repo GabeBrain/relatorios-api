@@ -10,12 +10,13 @@ interface Props {
   searchable?: boolean;
   /** Se true, defaults to Top 10; toggle to show all. */
   topDefault?: boolean;
+  info?: ReactNode;
 }
 
 type SortBy = 'value' | 'label';
 type Dir = 'asc' | 'desc';
 
-export function RankingCard({ title, rows, formatValue, searchable = true, topDefault = true }: Props) {
+export function RankingCard({ title, rows, formatValue, searchable = true, topDefault = true, info }: Props) {
   const [query, setQuery] = useState('');
   const [topOnly, setTopOnly] = useState(topDefault);
   const [sortBy, setSortBy] = useState<SortBy>('value');
