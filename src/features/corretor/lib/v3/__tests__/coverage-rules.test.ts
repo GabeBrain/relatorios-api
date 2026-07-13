@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Ir } from '../../audit/ir';
-import { checkProjectionSeries, checkUnitPlausibility } from '../../audit/engine';
+import { binsFromColumns, checkProjectionSeries, checkUnitPlausibility, detectBinGap } from '../../audit/engine';
 import { ataCoverageFindings, requiredAndExclusionFindings, sourceFindingsFromVision } from '../coverage-rules';
 import { crossTableFindings, projectionFindings } from '../cross-table';
 
@@ -80,5 +80,32 @@ describe('Coverage 90 — regras puras finais', () => {
     const study = ir([slide(1, 'ABSORCAO', 'Absorção'), slide(2, 'LACUNAS', 'Lacunas')]);
     const findings = requiredAndExclusionFindings(study, []);
     expect(findings.map((f) => f.type)).toEqual(expect.arrayContaining(['REQUIRED_NOTE', 'EXCLUSION_RULE']));
+  });
+
+  it('não confunde raios cumulativos com faixas exclusivas', () => {
+    const bins = binsFromColumns(['Faixa de renda', 'Até 5 min', '%', 'Até 10 min', '%', 'Até 15 min', '%']);
+    expect(bins).toHaveLength(3);
+    expect(detectBinGap(bins).gapAfterIndex).toBeUndefined();
+  });
+
+  it('aceita faixas monetárias decrescentes contínuas por centavos', () => {
+    const bins = [
+      'Acima de R$ 19.747,00',
+      'R$ 9.850,01 a 19.747,00',
+      'R$ 5.499,01 a 9.850,00',
+      'R$ 3.191,01 a 5.499,00',
+      'R$ 1.745,01 a 3.191,00',
+      'Até R$ 1.745,00',
+    ].map((label) => binsFromColumns([label])[0]);
+    expect(detectBinGap(bins).gapAfterIndex).toBeUndefined();
+  });
+
+  it('mantém a detecção de um furo real depois de ordenar as faixas', () => {
+    const bins = binsFromColumns([
+      'Acima de R$ 10.000', 'R$ 9.001 a 9.500', 'R$ 8.501 a 9.000', 'Até R$ 8.500',
+    ]);
+    const result = detectBinGap(bins);
+    expect(result.gapAfterIndex).toBe(2);
+    expect(result.description).toContain('pula valores');
   });
 });

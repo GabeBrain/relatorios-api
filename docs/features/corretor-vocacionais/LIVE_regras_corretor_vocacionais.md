@@ -16,6 +16,26 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.41 — 2026-07-13 — Guardrail de faixas cumulativas (RUNTIME)
+
+A regra **DET `BINNING_RULE`** deixa de interpretar cabeçalhos cumulativos como faixas
+exclusivas. Séries como `Até 5 min / Até 10 min / Até 15 min` representam raios acumulados
+`0→5 / 0→10 / 0→15`; quando há dois ou mais intervalos partindo de zero, o motor se abstém
+de procurar furo/sobreposição. Isso elimina os 22 falsos positivos observados no estudo de
+Brumadinho sem depender de julgamento da IA.
+
+Para faixas exclusivas legítimas, o motor agora normaliza a ordem antes da comparação
+(aceita tabelas crescentes ou decrescentes) e infere a menor unidade do rótulo: `1` para
+valores inteiros e `0,01` para moeda com centavos. Assim, `R$ 9.850,00 → R$ 9.850,01` é
+continuidade válida, enquanto o furo real `R$ 9.500 → acima de R$ 10.000` continua sendo
+apontado. A régua de evidência usa a mesma ordem normalizada. Cobertura automatizada inclui
+raios cumulativos, rendas decrescentes por centavos e um furo verdadeiro.
+
+Ao abrir um estudo já analisado, achados `BINNING_RULE` pendentes são reavaliados contra o
+guardrail. Registros legados que agora são comprovadamente inválidos ficam encerrados na
+versão atual e saem da worklist, preservando a linha no banco para auditoria. A reconciliação
+não altera vereditos humanos nem achados que ainda contenham um furo/sobreposição real.
+
 ## Versão 0.40 — 2026-07-13 — Contexto Brumadinho + contrato defensivo de visão (RUNTIME)
 
 Correção disparada pelo estudo de Brumadinho: `wrongCityFindings` é uma regra **DET pós-Ata**

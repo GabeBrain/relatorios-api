@@ -331,22 +331,62 @@ function numberOrNull(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
-/** BINNING_RULE — furo/sobreposição na sequência de faixas "de X a Y" / "acima de Z". */
-export function detectBinGap(bins: Bin[]): { gapAfterIndex?: number; description?: string } {
-  for (let i = 1; i < bins.length; i++) {
-    const prev = bins[i - 1];
-    const cur = bins[i];
-    if (prev.to !== null && cur.from !== prev.to && cur.from !== prev.to + 1) {
-      return {
-        gapAfterIndex: i - 1,
-        description:
-          cur.from > (prev.to ?? 0)
-            ? `Furo: faixa termina em ${prev.to} e a próxima começa em ${cur.from} (${prev.to + 1}–${cur.from - 1} inexistente).`
-            : `Sobreposição: faixa termina em ${prev.to} e a próxima começa em ${cur.from}.`,
-      };
-    }
+export interface BinGapResult {
+  gapAfterIndex?: number;
+  description?: string;
+  /** Ordem usada na comparação; evita uma régua invertida quando a tabela vem decrescente. */
+  normalizedBins?: Bin[];
+}
+
+/**
+ * BINNING_RULE — furo/sobreposição em faixas exclusivas "de X a Y" / "acima de Z".
+ *
+ * Guardrail importante: cabeçalhos como "Até 5 min / Até 10 min / Até 15 min"
+ * são raios cumulativos, não faixas. Como todos partem implicitamente de zero,
+ * compará-los como intervalos exclusivos inventa sobreposições.
+ */
+export function detectBinGap(bins: Bin[]): BinGapResult {
+  if (bins.length < 2) return {};
+
+  // Duas ou mais faixas 0→X representam cortes cumulativos (raios, acumulados etc.).
+  // Sem evidência explícita de limites inferiores exclusivos, a regra se abstém.
+  if (bins.filter((bin) => bin.from === 0 && bin.to !== null).length > 1) return {};
+
+  const normalizedBins = [...bins].sort((a, b) => {
+    if (a.from !== b.from) return a.from - b.from;
+    return (a.to ?? Number.POSITIVE_INFINITY) - (b.to ?? Number.POSITIVE_INFINITY);
+  });
+  const step = binStep(normalizedBins);
+  const epsilon = Math.max(step / 100, Number.EPSILON * 10);
+
+  for (let i = 1; i < normalizedBins.length; i++) {
+    const prev = normalizedBins[i - 1];
+    const cur = normalizedBins[i];
+    if (prev.to === null) continue;
+
+    const delta = cur.from - prev.to;
+    const isAdjacent = Math.abs(delta) <= epsilon || Math.abs(delta - step) <= epsilon;
+    if (isAdjacent) continue;
+
+    return {
+      gapAfterIndex: i - 1,
+      normalizedBins,
+      description:
+        delta > step
+          ? `Furo entre «${prev.label}» e «${cur.label}»: a sequência pula valores.`
+          : `Sobreposição entre «${prev.label}» e «${cur.label}»: os intervalos cobrem valores em comum.`,
+    };
   }
-  return {};
+  return { normalizedBins };
+}
+
+/** Menor unidade explícita dos rótulos: centavos quando há decimal; 1 nos demais casos. */
+function binStep(bins: Bin[]): number {
+  const decimalPlaces = bins.reduce((max, bin) => {
+    const matches = [...bin.label.matchAll(/,([0-9]{1,6})(?![0-9])/g)];
+    return Math.max(max, ...matches.map((match) => match[1].length), 0);
+  }, 0);
+  return decimalPlaces > 0 ? 10 ** -decimalPlaces : 1;
 }
 
 function norm(s: string): string {

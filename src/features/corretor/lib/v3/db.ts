@@ -187,6 +187,27 @@ export async function setFindingStatus(
   if (error) throw new Error(error.message);
 }
 
+/**
+ * Encerra achados legados que um guardrail determinístico passou a provar como inválidos.
+ * Mantém a linha para auditoria, mas a retira da worklist ativa na versão mais recente.
+ */
+export async function resolveInvalidFindings(studyId: string, ruleIds: string[]): Promise<void> {
+  if (!ruleIds.length) return;
+  const { data: version } = await db
+    .from('study_versions')
+    .select('n')
+    .eq('study_id', studyId)
+    .order('n', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const { error } = await db.from('findings_v3')
+    .update({ status: 'corrigido', resolvido_na_versao: version?.n ?? 1 })
+    .eq('study_id', studyId)
+    .eq('status', 'pendente')
+    .in('rule_id', ruleIds);
+  if (error) throw new Error(error.message);
+}
+
 /** Loop de calibração v4: FP continua visível, mas fica cinza e não bloqueia entrega. */
 export async function setFindingVerdict(
   studyId: string, ruleId: string, verdict: 'bug' | 'fp' | null

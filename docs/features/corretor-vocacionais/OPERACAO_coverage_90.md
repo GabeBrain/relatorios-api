@@ -33,6 +33,10 @@ pelos WS-1–WS-5; a lista de Functions a publicar acima continua sendo a do Cov
 | 2 | `20260713170000_corretor_v5_relatorio.sql` | snapshot `studies_v3.relatorio` | Entregar estudo e abrir `/corretor/:id/relatorio`. |
 | 3 | `20260713180000_corretor_v5_calibration.sql` | `findings_v3.verdict_revisado` + índice de FP | Abrir `/corretor/calibracao`, reconhecer item/grupo e recarregar. |
 
+Verificação de 13/jul/2026: a migration `20260713170000_corretor_v5_relatorio.sql` foi aplicada
+no ambiente Supabase (`public.studies_v3.relatorio = jsonb`) e o schema do PostgREST foi
+recarregado com `pg_notify('pgrst', 'reload schema')`.
+
 SQL de diagnóstico após aplicação:
 
 ```sql

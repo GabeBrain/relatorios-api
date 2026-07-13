@@ -18,6 +18,7 @@ import type { Finding } from '../lib/audit/model';
 import type { Ir } from '../lib/audit/ir';
 import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import { irToFindings } from '../lib/audit/ir-rules';
+import { detectBinGap } from '../lib/audit/engine';
 import { VizSwitch } from '../components/audit/FindingCard';
 import LegacyV1Panel from '../components/LegacyV1Panel';
 import AtaTestPanel from '../components/AtaTestPanel';
@@ -34,7 +35,8 @@ import { confidenceOf, CONFIDENCE_META, type Confidence } from '../lib/v3/confid
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
-  saveReport, setFindingVerdict, type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
+  saveReport, setFindingVerdict, resolveInvalidFindings,
+  type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 
 const MODEL: ModelId = 'gpt-4o-mini'; // econômico por padrão; visão cai p/ R$ 0 após cache
@@ -343,8 +345,24 @@ export default function CorretorV3Page() {
     setSelectedId(id);
     setLastDiff(null);
     setLoadingStudy(true);
-    try { setItems(await loadFindings(id)); } finally { setLoadingStudy(false); }
-  }, []);
+    try {
+      let loaded = await loadFindings(id);
+      const invalidBins = loaded.filter((item) => {
+        if (item.status !== 'pendente' || item.finding.type !== 'BINNING_RULE') return false;
+        const viz = item.finding.viz;
+        return viz?.kind === 'binrange' && detectBinGap(viz.bins).gapAfterIndex === undefined;
+      });
+      if (invalidBins.length) {
+        await resolveInvalidFindings(id, invalidBins.map((item) => item.ruleId));
+        loaded = await loadFindings(id);
+        toast.info('Faixas cumulativas reconciliadas', {
+          description: `${invalidBins.length} falso(s) positivo(s) antigo(s) removido(s) da worklist.`,
+        });
+        await refreshList();
+      }
+      setItems(loaded);
+    } finally { setLoadingStudy(false); }
+  }, [refreshList]);
 
   useEffect(() => {
     const requested = searchParams.get('study');

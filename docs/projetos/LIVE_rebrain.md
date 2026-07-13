@@ -49,6 +49,20 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-13 — Corretor: guardrail contra falsos positivos de faixas — Gabriel
+- **Correção:** `BINNING_RULE` não confunde mais raios cumulativos (`Até 5/10/15 min`) com
+  faixas exclusivas; sequências ambíguas com múltiplos intervalos partindo de zero são
+  ignoradas de forma conservadora.
+- **Faixas reais:** comparação normaliza tabelas crescentes/decrescentes e respeita centavos,
+  mantendo a detecção de furos verdadeiros. A evidência passa a seguir a ordem comparada.
+- **Legado:** ao abrir o estudo, falsos positivos pendentes comprovados pelo novo guardrail
+  são encerrados e retirados da worklist, preservando o histórico no banco.
+- **Validação:** 53 testes verdes e build tipado aprovado. Mudança somente no app; não requer
+  migration nem publicação de Edge Function.
+- **Ambiente:** `studies_v3.relatorio` estava ausente e interrompia o fechamento da análise;
+  a migration `20260713170000` foi aplicada e o cache do PostgREST recarregado. Coluna
+  `relatorio` confirmada no Supabase em 13/jul/2026.
+
 ### 2026-07-13 — Corretor: contexto de cidade e resiliência da visão — Gabriel
 - **Contexto:** regra DET pós-Ata passou a identificar município IBGE no padrão explícito
   `Cidade – UF`; cobre vazamento como `Curitiba – MG` em estudo de Brumadinho/MG, que a regra
@@ -315,7 +329,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, PPTX→IR, mapas, thumbnails) | 🟡 (no ar: **upload de .pptx** + fixtures + recall/export + RADII/mapa + thumbnails c/ poda; falta gráficos no extrator, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
 | 6f | Corretor v2 — estratégia de testes do fluxo do analista | 🟡 (design ✅ + slice 1 worklist ✅; slices 2-4 absorvidos pela v3) |
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
-| 6h | **Corretor v5** — fluxo operacional unificado | 🟡 WS0–WS5 ✅ no código (portão da Ata, relatório, triagem, recheck cache-first, calibradora). Build + 48 testes ✅; falta aplicar/verificar migrations v5, deploy da `analyze-table-image` (cache v6), homologação real e recall >=90%. |
+| 6h | **Corretor v5** — fluxo operacional unificado | 🟡 WS0–WS5 ✅ no código (portão da Ata, relatório, triagem, recheck cache-first, calibradora). Build + 53 testes ✅; guardrail de faixas cumulativas ✅; migration do relatório `20260713170000` verificada ✅; falta verificar as demais migrations v5, deploy da `analyze-table-image` (cache v7), homologação real e recall >=90%. |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
@@ -332,8 +346,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] Expandir o enum de tipos de erro (`analysis-store.ts`) para o catálogo da rubrica + tipos evidenciados pelas atas reais (`ATA_COVERAGE` etc.).
 - [ ] Coverage 90: publicar `analyze-table-image` (contrato `locais_visiveis`/`unidades`/`tem_fonte`, cache v6), medir o
   harness no IR real do Marka (`CORRETOR_CALIBRATION_IR`) e calibrar Marka, Itajaí e GO (meta: >=90% recall, <=15% FP). A versão atual usa cache v7 e inclui teste Brumadinho/Curitiba.
-- [ ] Corretor v5: aplicar/verificar migrations `20260713160000`, `20260713170000` e
-  `20260713180000`; homologar portão da Ata, relatório, triagem, drop/cache e calibradora no Supabase real.
+- [ ] Corretor v5: verificar migrations `20260713160000` e `20260713180000` (`20260713170000`
+  aplicada e confirmada); homologar portão da Ata, relatório, triagem, drop/cache e calibradora no Supabase real.
 - [ ] Definir se `/corretor/calibracao` permanece visível a todos os usuários internos ou exige papel específico.
 - [ ] Gabriel → analista A&R: obter fórmula oficial de projeção e validar falsos positivos do checklist estrutural/fonte.
 - [ ] CID: retomar validação de base quando sair do standby.

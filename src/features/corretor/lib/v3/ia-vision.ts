@@ -438,7 +438,10 @@ async function processImage(
           title: 'Furo/sobreposição nas faixas da tabela',
           detail: gap.description ?? 'Sequência de faixas inconsistente.',
           ok: false,
-          viz: { kind: 'binrange', unit: '', bins, gapAfterIndex: gap.gapAfterIndex, gapDescription: gap.description },
+          viz: {
+            kind: 'binrange', unit: '', bins: gap.normalizedBins ?? bins,
+            gapAfterIndex: gap.gapAfterIndex, gapDescription: gap.description,
+          },
           evidenceSha1: c.sha1,
           escalated,
         });
