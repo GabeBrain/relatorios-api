@@ -51,7 +51,7 @@ describe('Coverage 90 — regras puras finais', () => {
       { slide: 10, secao: 'SOCIO', titulo: 'População', sha1: 'a', table: { title: 'População', columns: ['Faixa', 'População', '%'], colKinds: ['label', 'count', 'share'] as const, rows: [['A', 1000, 50], ['B', 1000, 50]], totals: ['Total', 2000, 100] } },
       { slide: 11, secao: 'SOCIO', titulo: 'População', sha1: 'b', table: { title: 'População', columns: ['Faixa', 'População', '%'], colKinds: ['label', 'count', 'share'] as const, rows: [['A', 1000, 50], ['B', 1000, 50]], totals: ['Total', 2000, 100] } },
     ];
-    expect(crossTableFindings(study, refs).filter((f) => f.type === 'CROSS_TABLE_MISMATCH')).toEqual([]);
+    expect(crossTableFindings(study, refs as never).filter((f) => f.type === 'CROSS_TABLE_MISMATCH')).toEqual([]);
   });
 
   it('não acusa fonte em imagem que não foi analisada', () => {
