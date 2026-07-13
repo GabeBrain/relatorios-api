@@ -5,6 +5,27 @@ import type { QuantiDataset } from './types';
 
 const cache = new Map<string, Promise<QuantiDataset>>();
 
+function parseDataset(text: string, label: string): QuantiDataset {
+  try {
+    return JSON.parse(text) as QuantiDataset;
+  } catch (originalError) {
+    const sanitized = text.replace(/(:|\[|,)\s*(NaN|Infinity|-Infinity)(?=\s*[,}\]])/g, '$1 null');
+    if (sanitized === text) {
+      throw new Error(
+        `Dataset "${label}" inválido: ${(originalError as Error).message}`,
+      );
+    }
+
+    try {
+      return JSON.parse(sanitized) as QuantiDataset;
+    } catch (sanitizedError) {
+      throw new Error(
+        `Dataset "${label}" inválido mesmo após normalização: ${(sanitizedError as Error).message}`,
+      );
+    }
+  }
+}
+
 async function fetchDataset(ref: DatasetRef): Promise<QuantiDataset> {
   const key = `${ref.bucket}/${ref.path}`;
   if (!cache.has(key)) {
@@ -16,7 +37,7 @@ async function fetchDataset(ref: DatasetRef): Promise<QuantiDataset> {
           throw new Error(`Falha ao carregar dataset "${ref.label}": ${error?.message ?? 'sem dados'}`);
         }
         const text = await data.text();
-        return JSON.parse(text) as QuantiDataset;
+        return parseDataset(text, ref.label);
       })(),
     );
   }
