@@ -298,7 +298,7 @@ function UFLevel({
             <path
               key={i}
               d={d}
-              fill={active ? YELLOW_HL : color(n, max)}
+              fill={active ? YELLOW_HL : colorFor(n)}
               stroke={active ? STROKE_ACTIVE : STROKE}
               strokeWidth={active ? 1.6 : 0.6}
               style={{ cursor: entry ? 'pointer' : 'default', transition: 'fill .12s' }}
