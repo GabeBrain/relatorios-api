@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-13 — Reversão da cor da barra superior no modo claro — Lovable
+- **O quê:** ajuste em `src/features/area-quanti/dashboard/dashboard.css` para que o token `--qd-area-topbar-bg` volte a ser `var(--qd-surface)` (branco) no modo claro, mantendo `#1B1E28` apenas no modo escuro. O azul `#2563EB` retorna como cor da aba ativa no modo claro; o amarelo `#F8D000` permanece no modo escuro. Tokens CSS `--qd-tab-active`, `--qd-tab-inactive` e `--qd-tab-inactive-hover` foram criados para garantir alto contraste em ambos os temas sem duplicar classes.
+- **Por quê:** a cor `#1B1E28` foi aplicada indesejadamente no modo claro; a solicitação do usuário era para deixá-la apenas no modo escuro, preservando o visual claro original da barra de abas (`Banco Quanti` / `Sobre`).
+- **Arquivos:** `src/features/area-quanti/dashboard/dashboard.css`, `src/pages/AreaQuanti.tsx`.
+
 ### 2026-07-13 — Barra superior do Área Quanti no padrão de contraste escuro — Lovable
 - **O quê:** repaginação da barra de abas (`Banco Quanti` / `Sobre`) em `src/pages/AreaQuanti.tsx` para fundo `#1B1E28` (mesmo padrão do dark mode do dashboard), aba ativa em amarelo Brain `#F8D000`, abas inativas em cinza claro com hover de alto contraste, e aplicação do token `--qd-text` no título/conteúdo da aba Sobre. Importação do `dashboard.css` e classe `qd-root` no container garantem que os tokens sejam reutilizados sem duplicação.
 - **Por quê:** uniformizar a identidade visual da Área Quanti e eliminar a quebra de contraste (fundo branco + azul) que existia na barra de navegação.
