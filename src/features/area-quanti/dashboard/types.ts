@@ -37,6 +37,7 @@ export type CategoricalField =
   | 'localidade'
   | 'estado'
   | 'cidade'
+  | 'cidade_original'
   | 'genero'
   | 'faixa_etaria'
   | 'geracao'
@@ -55,7 +56,8 @@ export const FIELD_LABELS: Record<CategoricalField, string> = {
   regiao: 'Região',
   localidade: 'Localidade',
   estado: 'Estado',
-  cidade: 'Cidade',
+  cidade: 'Cidade (coleta)',
+  cidade_original: 'Cidade do empreendimento',
   genero: 'Gênero',
   faixa_etaria: 'Faixa etária',
   geracao: 'Geração',
