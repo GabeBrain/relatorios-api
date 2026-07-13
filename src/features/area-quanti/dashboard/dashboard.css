@@ -1,18 +1,18 @@
-/* Quanti Dashboard — corporate blue/white/gray palette */
+/* Quanti Dashboard — Brain green/yellow palette */
 .qd-root {
-  --qd-primary: #1e3a8a;
-  --qd-primary-2: #2563eb;
-  --qd-accent: #3b82f6;
-  --qd-light: #dbeafe;
-  --qd-bg: #f8fafc;
+  --qd-primary: #5B7537;
+  --qd-primary-2: #71984a;
+  --qd-accent: #71984a;
+  --qd-light: #eaf2d8;
+  --qd-bg: #f6f8f1;
   --qd-surface: #ffffff;
-  --qd-border: #e2e8f0;
-  --qd-text: #0f172a;
-  --qd-text-muted: #64748b;
-  --qd-warn: #f59e0b;
+  --qd-border: #e2e8d5;
+  --qd-text: #1f2a12;
+  --qd-text-muted: #6e7b55;
+  --qd-warn: #F8D000;
   background: var(--qd-bg);
   color: var(--qd-text);
-  font-family: 'Inter', 'Archivo', system-ui, sans-serif;
+  font-family: 'Archivo', 'Inter', system-ui, sans-serif;
 }
 .qd-card {
   background: var(--qd-surface);
