@@ -221,7 +221,7 @@ export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
         <tbody>
           {ct.rows.map((r, i) => (
             <tr key={r}>
-              <th className="sticky left-0 z-10 max-w-[160px] truncate whitespace-nowrap bg-white p-1 pr-2 text-left font-medium" title={r}>
+              <th className="sticky left-0 z-10 max-w-[160px] truncate whitespace-nowrap p-1 pr-2 text-left font-medium" style={{ background: 'var(--qd-surface)' }} title={r}>
                 {r}
               </th>
               {ct.cols.map((c, j) => {
