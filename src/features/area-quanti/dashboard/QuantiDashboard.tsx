@@ -121,9 +121,14 @@ export function QuantiDashboard() {
                 <ChartCard title="Brasil por estado" subtitle="Clique num estado para fazer drill-down · clique nos municípios para filtrar">
                   <GeoMap rows={filtered} />
                 </ChartCard>
-                <ChartCard title="Top cidades">
-                  <BarField rows={filtered} field="cidade" topN={15} />
-                </ChartCard>
+                <div className="grid grid-cols-1 gap-3">
+                  <ChartCard title="Top Cidades — Empreendimentos" subtitle="Cidade de origem do projeto/estudo (cidade_original)">
+                    <BarField rows={filtered} field="cidade_original" topN={10} />
+                  </ChartCard>
+                  <ChartCard title="Top Cidades — Coleta" subtitle="Cidade onde a entrevista foi coletada (cidade)">
+                    <BarField rows={filtered} field="cidade" topN={10} />
+                  </ChartCard>
+                </div>
               </div>
             </section>
 
