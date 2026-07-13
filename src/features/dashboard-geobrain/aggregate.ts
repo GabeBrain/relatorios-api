@@ -240,7 +240,7 @@ export function computeSeries(buildings: Building[], f: Filters, g: Granularity)
         const key = periodKey(h.period, g);
         const p = map.get(key) ?? emptyPoint(key, periodSortKey(h.period, g));
         const price = h.price ?? 0;
-        if (isRelease(b, h)) {
+        if (isRelease(b, h) && b.status === 'Ativo') {
           p.ofertaLancada += t.qty;
           p.vgvLancamento += t.qty * price;
         }
