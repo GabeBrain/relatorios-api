@@ -20,7 +20,7 @@ export function QuantiDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const ds = DATASETS.find((d) => d.id === datasetId) ?? DATASETS[0];
-  const { data, loading, error } = useQuantiDataset(ds.url);
+  const { data, loading, error } = useQuantiDataset(ds);
 
   const filtered = useMemo(() => (data ? applyFilters(data.records, filters) : []), [data, filters]);
 
