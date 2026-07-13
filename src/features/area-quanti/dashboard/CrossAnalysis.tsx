@@ -94,7 +94,7 @@ export function CrossAnalysis({ rows }: { rows: QuantiRecord[] }) {
   const rowLabel = schema.find((f) => f.key === rowField)?.label ?? rowField;
   const colLabel = colField ? (schema.find((f) => f.key === colField)?.label ?? colField) : null;
 
-  const availableViews = ct ? compatibleViews(rowField, colField, metric, ct) : ['table'];
+  const availableViews: ViewKind[] = ct ? compatibleViews(rowField, colField, metric, ct) : ['table'];
   const effectiveView = availableViews.includes(view) ? view : availableViews[0];
 
   function buildSheet() {
