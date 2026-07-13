@@ -254,6 +254,10 @@ function UFLevel({
   const [geo, setGeo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [hover, setHover] = useState<{ name: string; x: number; y: number } | null>(null);
+  const colorFor = useMemo(
+    () => buildColorScale(Array.from(byCity.values()).map((x) => x.count)),
+    [byCity],
+  );
 
   useEffect(() => {
     setError(null);
