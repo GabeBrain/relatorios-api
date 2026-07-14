@@ -252,7 +252,7 @@
 .dark .qd-root .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item {
   color: #f2f4ea !important;
 }
-/* Bar right-label list — force high-contrast yellow over dark surface */
+/* Bar labels stay neutral in dark mode; only KPI values use brand yellow. */
 .dark .qd-root .recharts-bar .recharts-label-list text,
-.dark .qd-root .recharts-label-list text { fill: #F8D000 !important; }
+.dark .qd-root .recharts-label-list text { fill: var(--qd-text) !important; }
 
