@@ -9,7 +9,7 @@ import { ActiveFiltersBar } from './ActiveFiltersBar';
 import { KpiRow } from './KpiRow';
 import { BarField, ChartCard, DonutField, Heatmap, HistogramChart } from './Charts';
 import { GeoMap } from './geo/GeoMap';
-import { Rankings } from './Rankings';
+import { Rankings, RegionDistribution } from './Rankings';
 import { CrossAnalysis } from './CrossAnalysis';
 import './dashboard.css';
 
@@ -121,6 +121,7 @@ export function QuantiDashboard() {
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <ChartCard title="Brasil por estado" subtitle="Clique num estado para fazer drill-down · clique nos municípios para filtrar">
                   <GeoMap rows={filtered} />
+                  <RegionDistribution rows={filtered} />
                 </ChartCard>
                 <div className="grid grid-cols-1 gap-3">
                   <ChartCard title="Top Cidades — Empreendimentos" subtitle="Cidade de origem do projeto/estudo (cidade_original)">

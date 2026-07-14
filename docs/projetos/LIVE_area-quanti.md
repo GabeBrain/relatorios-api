@@ -34,6 +34,7 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 - **Barras agrupadas:** cruzamentos universais com muitas séries agora ordenam as barras de cada grupo do maior para o menor, calculam altura por categoria conforme a quantidade de barras, ampliam o eixo Y, separam categoria principal do filtro secundário, inserem respiro entre grupos, exibem valor ao lado da barra e usam legenda superior centralizada para evitar leitura distante.
 - **Métricas:** `Quantidade` voltou a mostrar apenas número bruto; foi adicionada a métrica `Quantidade + %` para exibir número de registros acompanhado da participação percentual.
 - **Mapa:** mapa do Brasil e mapas municipais ganharam controles de zoom in/out/reset, área rolável e navegação por arraste do mouse para facilitar busca por municípios.
+- **Layout geográfico:** o card `Distribuição por região` saiu da seção Ranking e passou a ocupar o espaço abaixo do mapa interativo, dentro do bloco `Brasil por estado`.
 - **Recolhimento:** a seção `Análise Cruzada (pivot dinâmico)` agora inicia recolhida e abre/fecha pelo cabeçalho, reduzindo o peso visual inicial do dashboard.
 - **Pizza/Rosca:** rótulos passam a exibir nome + valor/percentual dentro da fatia quando há espaço; fatias pequenas usam chamada externa com linha guia. A legenda foi movida para a lateral direita.
 - **Bugfix:** pizza/rosca agora usam o valor calculado da métrica selecionada; ao escolher `% do total`, os rótulos exibem percentuais reais em vez da contagem base formatada como porcentagem.
