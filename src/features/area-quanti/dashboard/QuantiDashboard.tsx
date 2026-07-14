@@ -15,6 +15,7 @@ import { CrossAnalysis } from './CrossAnalysis';
 import './dashboard.css';
 
 type IntentMetric = 'pct' | 'count' | 'count_pct';
+type HeatmapMetric = IntentMetric;
 
 function GenerationInfoButton() {
   return (
@@ -37,8 +38,7 @@ function GenerationInfoButton() {
   );
 }
 
-function buildIntentCrosstab(rows: QuantiRecord[], rowField: CategoricalField, metric: IntentMetric, topN?: number) {
-  const base = crosstab(rows, rowField, 'intencao_compra_padronizada', 'count');
+function applyHeatmapMetric(base: ReturnType<typeof crosstab>, metric: HeatmapMetric, topN?: number) {
   const order = base.rowTotals
     .map((total, index) => ({ total, index }))
     .sort((a, b) => b.total - a.total)
@@ -74,6 +74,34 @@ function buildIntentCrosstab(rows: QuantiRecord[], rowField: CategoricalField, m
   };
 }
 
+function buildIntentCrosstab(rows: QuantiRecord[], rowField: CategoricalField, metric: IntentMetric, topN?: number) {
+  return applyHeatmapMetric(crosstab(rows, rowField, 'intencao_compra_padronizada', 'count'), metric, topN);
+}
+
+function MetricSelect({ metric, onChange }: { metric: HeatmapMetric; onChange: (metric: HeatmapMetric) => void }) {
+  return (
+    <label className="flex items-center gap-1 text-[11px] font-semibold text-[var(--qd-text-muted)]">
+      Métrica
+      <select
+        value={metric}
+        onChange={(event) => onChange(event.target.value as HeatmapMetric)}
+        className="qd-select h-7 rounded-md px-2 text-[11px]"
+      >
+        <option value="pct">%</option>
+        <option value="count">Quantidade</option>
+        <option value="count_pct">Quantidade + %</option>
+      </select>
+    </label>
+  );
+}
+
+function formatHeatmapValue(metric: HeatmapMetric, ct: ReturnType<typeof crosstab>, value: number, rowIndex: number) {
+  if (metric === 'pct') return value ? `${value.toFixed(1)}%` : '';
+  if (metric === 'count') return value ? value.toLocaleString('pt-BR') : '';
+  const total = ct.rowTotals[rowIndex] || 1;
+  return value ? `${value.toLocaleString('pt-BR')} · ${((value / total) * 100).toFixed(1)}%` : '';
+}
+
 function IntentHeatmapCard({
   rows,
   title,
@@ -92,33 +120,36 @@ function IntentHeatmapCard({
   const [metric, setMetric] = useState<IntentMetric>('pct');
   const ct = useMemo(() => buildIntentCrosstab(rows, rowField, metric, topN), [rows, rowField, metric, topN]);
 
-  const format = (value: number, rowIndex: number) => {
-    if (metric === 'pct') return value ? `${value.toFixed(1)}%` : '';
-    if (metric === 'count') return value ? value.toLocaleString('pt-BR') : '';
-    const total = ct.rowTotals[rowIndex] || 1;
-    return value ? `${value.toLocaleString('pt-BR')} · ${((value / total) * 100).toFixed(1)}%` : '';
-  };
-
   return (
     <ChartCard
       title={title}
       className={className}
-      action={
-        <label className="flex items-center gap-1 text-[11px] font-semibold text-[var(--qd-text-muted)]">
-          Métrica
-          <select
-            value={metric}
-            onChange={(event) => setMetric(event.target.value as IntentMetric)}
-            className="qd-select h-7 rounded-md px-2 text-[11px]"
-          >
-            <option value="pct">%</option>
-            <option value="count">Quantidade</option>
-            <option value="count_pct">Quantidade + %</option>
-          </select>
-        </label>
-      }
+      action={<MetricSelect metric={metric} onChange={setMetric} />}
     >
-      <Heatmap ct={ct} metricLabel={metricLabel} format={format} />
+      <Heatmap ct={ct} metricLabel={metricLabel} format={(value, rowIndex) => formatHeatmapValue(metric, ct, value, rowIndex)} />
+    </ChartCard>
+  );
+}
+
+function CrosstabHeatmapCard({
+  rows,
+  title,
+  rowField,
+  colField,
+  metricLabel,
+}: {
+  rows: QuantiRecord[];
+  title: string;
+  rowField: CategoricalField;
+  colField: CategoricalField;
+  metricLabel: string;
+}) {
+  const [metric, setMetric] = useState<HeatmapMetric>('pct');
+  const ct = useMemo(() => applyHeatmapMetric(crosstab(rows, rowField, colField, 'count'), metric), [rows, rowField, colField, metric]);
+
+  return (
+    <ChartCard title={title} action={<MetricSelect metric={metric} onChange={setMetric} />}>
+      <Heatmap ct={ct} metricLabel={metricLabel} format={(value, rowIndex) => formatHeatmapValue(metric, ct, value, rowIndex)} />
     </ChartCard>
   );
 }
@@ -269,18 +300,10 @@ export function QuantiDashboard() {
             <section className="space-y-2">
               <h2 className="qd-section-title">Cruzamentos</h2>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <ChartCard title="Faixa etária × Classe de renda">
-                  <Heatmap ct={crosstab(filtered, 'faixa_etaria', 'renda_classe_agregada', 'count')} metricLabel="Faixa etária" />
-                </ChartCard>
-                <ChartCard title="Gênero × Classe de renda">
-                  <Heatmap ct={crosstab(filtered, 'genero', 'renda_classe_agregada', 'count')} metricLabel="Gênero" />
-                </ChartCard>
-                <ChartCard title="Estado × Classe de renda">
-                  <Heatmap ct={crosstab(filtered, 'estado', 'renda_classe_agregada', 'count')} metricLabel="Estado" />
-                </ChartCard>
-                <ChartCard title="Região × Classe de renda">
-                  <Heatmap ct={crosstab(filtered, 'regiao', 'renda_classe_agregada', 'count')} metricLabel="Região" />
-                </ChartCard>
+                <CrosstabHeatmapCard rows={filtered} title="Faixa etária × Classe de renda" rowField="faixa_etaria" colField="renda_classe_agregada" metricLabel="Faixa etária" />
+                <CrosstabHeatmapCard rows={filtered} title="Gênero × Classe de renda" rowField="genero" colField="renda_classe_agregada" metricLabel="Gênero" />
+                <CrosstabHeatmapCard rows={filtered} title="Estado × Classe de renda" rowField="estado" colField="renda_classe_agregada" metricLabel="Estado" />
+                <CrosstabHeatmapCard rows={filtered} title="Região × Classe de renda" rowField="regiao" colField="renda_classe_agregada" metricLabel="Região" />
               </div>
             </section>
 
