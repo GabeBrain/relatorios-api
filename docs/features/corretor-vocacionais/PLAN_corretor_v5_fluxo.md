@@ -17,11 +17,17 @@ nenhum PPTX versionado; custo de IA novo só com estimativa atualizada.
 ## Execução — 2026-07-13
 
 WS-0 a WS-5 concluídos no código. Commits por fatia: `09e87f1` (WS-0), `3bb2902`
-(WS-1), `d7f06c5` (WS-2), `75ad627` (WS-3), `62a0276` (WS-4) e o commit desta
-entrega (WS-5).
-Validação local: 48 testes e build com
+(WS-1), `d7f06c5` (WS-2), `75ad627` (WS-3), `62a0276` (WS-4) e `0c48924` (WS-5).
+Pós-entrega: `273c0e4` (cidade IBGE + contrato defensivo da visão) e `f9f3cf6`
+(guardrail de faixas cumulativas). Validação local: 52 testes e build com
 `tsc --noEmit`. As migrations v5 devem ser aplicadas/verificadas no Supabase conforme
 `OPERACAO_coverage_90.md`; WS-F continua FUTURO e não foi implementado.
+
+> **FECHAMENTO — 2026-07-14 (revisão Claude):** todos os WS revisados e **aprovados** na main
+> integrada (typecheck limpo, 52 testes verdes). Este plano está CONCLUÍDO como fatia de
+> implementação. As 7 pendências técnicas da revisão (P1–P7) e o roadmap de fechamento
+> (deploy → homologação real → pendências humanas → ajustes finos → WS-F) estão consolidados
+> na **v0.42 do `LIVE_regras_corretor_vocacionais.md`** — é lá que o acompanhamento continua.
 
 ## Estado de partida (verificado no código em 13/jul, pós-v0.33)
 

@@ -16,6 +16,45 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.42 — 2026-07-14 — Revisão final do v5 + FECHAMENTO da fatia (docs)
+
+Revisão de código (Claude) dos commits que fecharam o `PLAN_corretor_v5_fluxo.md`:
+`75ad627` (WS-3), `62a0276` (WS-4), `0c48924` (WS-5), `273c0e4` (cidade IBGE + visão
+defensiva), `f9f3cf6` (faixas cumulativas) e 3 micro-commits do Lovable em teste.
+**Veredito: aprovado.** Typecheck limpo e 52 testes verdes na main integrada. Destaques
+positivos: semântica do `G` na triagem (aceitar grupo sem tocar no banco), caminho grátis do
+recheck (`visionToRun === 0` encerra sem passe pago), `sanitizeVisionPayload` (payload
+malformado não derruba a análise), guardrail de faixas cumulativas com auto-reconciliação
+dos FP antigos, e a calibradora com deep-link `?study=` + índice parcial de FP.
+
+### Pendências técnicas da revisão (nenhuma bloqueia uso; calibrar na homologação)
+
+| # | Pendência | Onde | Risco |
+|---|---|---|---|
+| P1 | Filtro de seção das candidatas de visão foi **removido** (`SECOES_NUMERICAS` extinto em `table-images.ts`) — toda imagem 15–500KB de qualquer slide vira candidata | `lib/v3/table-images.ts` | custo de visão ↑ (fotos de entorno, artes). Medir custo/estudo na homologação; se subir, restaurar filtro com whitelist ampliada |
+| P2 | `wrongCityFindings` roda em TODAS as seções e não valida a sigla capturada contra a lista de UFs (`match[2]`) — "São Paulo – SP" em slide de acessos/distâncias de estudo de Guarulhos flagra; "Santos – FC" também | `lib/audit/ir-rules.ts` | FP em menções legítimas (região metropolitana, comparáveis). Validar UF + considerar excluir ENTORNO |
+| P3 | Recheck grátis **não re-roda o passe de TEXTO** quando não há imagem nova — texto alterado sem imagem nova não é re-revisado (limitação consciente de custo) | `CorretorV3Page.tsx` `recheckFromBytes` | documentar p/ analista; opção futura: botão "re-revisar texto" |
+| P4 | Auto-reconciliação de BINNING antigos vive em `openStudy` (migração de dados embutida na UI) | `CorretorV3Page.tsx` | remover depois que os estudos ativos forem abertos 1× |
+| P5 | `loadCalibrationDashboard` carrega TODOS os findings de todos os estudos sem paginação | `lib/v3/db.ts` | ok hoje; revisar quando houver dezenas de estudos |
+| P6 | `refs as never` no teste (apaziguamento de tipo do Lovable) — tipar como `ExtractedTableRef[]` | `coverage-rules.test.ts` | cosmético |
+| P7 | 3 bumps de cache na mesma release (v5→v6→v7): a primeira análise pós-deploy paga a releitura integral das imagens 1× | `ia-vision.ts` | custo único esperado; avisar antes da homologação |
+
+### Roadmap (fatia v5 FECHADA — próximos passos em ordem)
+
+1. **Deploy + migrations** — publicar `analyze-table-image` (contrato v7) e verificar as 3
+   migrations v5 (`ata_gate`, `relatorio` ✅ aplicada, `calibration`) — roteiro completo no
+   `OPERACAO_coverage_90.md`.
+2. **Homologação real** (o único portão para declarar a meta): Marka/Itajaí/GO ponta a ponta,
+   recall ≥90% nas 57 notas ancoradas e FP ≤15%; registrar números aqui no LIVE doc.
+   Inclui calibrar P1/P2 acima com os FPs observados.
+3. **Pendências humanas** — fórmula oficial de projeção (analista A&R se ofereceu); validação
+   do checklist estrutural com a Juliana; decisões de produto: quem acessa `/corretor/calibracao`
+   e se o relatório de entrega vira PDF exportável para além do link interno.
+4. **Ajustes finos pós-homologação** — P1–P6 conforme os dados reais priorizarem.
+5. **WS-F (futuro): reconferência contínua** via File System Access API — design registrado no
+   `PLAN_corretor_v5_fluxo.md` §WS-F; gatilho: WS-1–4 em uso semanal + homologação concluída.
+   O refactor `recheckFromBytes` (pré-requisito) já está pronto.
+
 ## Versão 0.41 — 2026-07-13 — Guardrail de faixas cumulativas (RUNTIME)
 
 A regra **DET `BINNING_RULE`** deixa de interpretar cabeçalhos cumulativos como faixas

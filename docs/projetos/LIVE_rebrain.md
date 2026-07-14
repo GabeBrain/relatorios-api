@@ -49,6 +49,19 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-14 — Corretor v5: revisão final aprovada e fatia FECHADA — Gabriel + Claude
+- **Revisão de código** dos commits que completaram o plano v5 (`75ad627` WS-3 triagem,
+  `62a0276` WS-4 recheck sem atrito, `0c48924` WS-5 calibradora, `273c0e4` cidade IBGE +
+  visão defensiva, `f9f3cf6` faixas cumulativas): **aprovada** — typecheck limpo e 52 testes
+  verdes na main integrada.
+- **Fechamento:** implementação do `PLAN_corretor_v5_fluxo.md` concluída. As 7 pendências
+  técnicas da revisão (P1 custo de visão sem filtro de seção; P2 FP de cidade legítima em
+  slides de acessos; P3 recheck não re-roda texto; P4–P7 menores) e o **roadmap** (deploy →
+  homologação real → pendências humanas → ajustes finos → WS-F file watch) estão consolidados
+  na **v0.42 do LIVE do Corretor** — acompanhamento continua lá.
+- **Próximo marco:** homologação real (Marka/Itajaí/GO) — é o portão para declarar a meta de
+  recall ≥90% / FP ≤15%. Roteiro completo em `OPERACAO_coverage_90.md`.
+
 ### 2026-07-13 — Validação do Fechamento: ajustes de UX no segmentador, filtros e tabela resumo — Rebrain
 - **Segmentador:** adicionada a label `Visualização` acima do grupo de chips de granularidade
   (Ano / Trimestre / Mês/Ano), envolvida no container `flex flex-wrap items-end gap-3 flex-1 min-w-[320px]`.
@@ -339,7 +352,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, PPTX→IR, mapas, thumbnails) | 🟡 (no ar: **upload de .pptx** + fixtures + recall/export + RADII/mapa + thumbnails c/ poda; falta gráficos no extrator, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
 | 6f | Corretor v2 — estratégia de testes do fluxo do analista | 🟡 (design ✅ + slice 1 worklist ✅; slices 2-4 absorvidos pela v3) |
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
-| 6h | **Corretor v5** — fluxo operacional unificado | 🟡 WS0–WS5 ✅ no código (portão da Ata, relatório, triagem, recheck cache-first, calibradora). Build + 53 testes ✅; guardrail de faixas cumulativas ✅; migration do relatório `20260713170000` verificada ✅; falta verificar as demais migrations v5, deploy da `analyze-table-image` (cache v7), homologação real e recall >=90%. |
+| 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
@@ -358,6 +371,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
   harness no IR real do Marka (`CORRETOR_CALIBRATION_IR`) e calibrar Marka, Itajaí e GO (meta: >=90% recall, <=15% FP). A versão atual usa cache v7 e inclui teste Brumadinho/Curitiba.
 - [ ] Corretor v5: verificar migrations `20260713160000` e `20260713180000` (`20260713170000`
   aplicada e confirmada); homologar portão da Ata, relatório, triagem, drop/cache e calibradora no Supabase real.
+- [ ] Corretor v5 — pendências da revisão final (P1–P7, detalhe na v0.42 do LIVE do Corretor): destacam-se
+  **P1** (candidatas de visão sem filtro de seção → monitorar custo/estudo na homologação) e
+  **P2** (`wrongCityFindings` sem validação de UF e rodando em ENTORNO → FP em "São Paulo – SP" legítimo).
 - [ ] Definir se `/corretor/calibracao` permanece visível a todos os usuários internos ou exige papel específico.
 - [ ] Gabriel → analista A&R: obter fórmula oficial de projeção e validar falsos positivos do checklist estrutural/fonte.
 - [ ] CID: retomar validação de base quando sair do standby.
