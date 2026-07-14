@@ -49,13 +49,22 @@ export function ChartCard({ title, subtitle, children, className, action }: Card
   );
 }
 
-interface FieldChartProps { rows: QuantiRecord[]; field: CategoricalField; height?: number; topN?: number }
+export type SortOrder = 'desc' | 'asc';
 
-export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
+interface FieldChartProps { rows: QuantiRecord[]; field: CategoricalField; height?: number; topN?: number; sortOrder?: SortOrder }
+
+export function DonutField({ rows, field, height = 240, sortOrder = 'desc' }: FieldChartProps) {
   const toggle = useQuantiStore((s) => s.toggleValue);
   const filters = useQuantiStore((s) => s.filters);
-  const data = useMemo(() => countBy(rows, field), [rows, field]);
-  const total = rows.length || 1;
+  const data = useMemo(() => {
+    const c = countBy(rows, field);
+    const naturalOrder = new Map(orderedValues(field, c.map((x) => x.key)).map((key, index) => [key, index]));
+    return [...c].sort((a, b) => {
+      const diff = sortOrder === 'desc' ? b.count - a.count : a.count - b.count;
+      return diff || ((naturalOrder.get(a.key) ?? 0) - (naturalOrder.get(b.key) ?? 0));
+    });
+  }, [rows, field, sortOrder]);
+  const total = data.reduce((sum, item) => sum + item.count, 0) || 1;
   const renderLabel = (props: any) => {
     const RAD = Math.PI / 180;
     const { cx, cy, midAngle, innerRadius, outerRadius, value, name } = props;
@@ -110,19 +119,21 @@ export function DonutField({ rows, field, height = 240 }: FieldChartProps) {
   );
 }
 
-export function BarField({ rows, field, height, topN }: FieldChartProps) {
+export function BarField({ rows, field, height, topN, sortOrder = 'desc' }: FieldChartProps) {
   const toggle = useQuantiStore((s) => s.toggleValue);
   const filters = useQuantiStore((s) => s.filters);
-  const data = useMemo(() => {
+  const { data, total } = useMemo(() => {
     const c = countBy(rows, field);
-    const keys = orderedValues(field, c.map((x) => x.key));
-    const map = new Map(c.map((x) => [x.key, x.count]));
-    let out = keys.map((k) => ({ key: k, count: map.get(k) ?? 0 }));
-    if (topN) out = out.slice(0, topN);
-    return out;
-  }, [rows, field, topN]);
+    const total = c.reduce((sum, item) => sum + item.count, 0) || 1;
+    const naturalOrder = new Map(orderedValues(field, c.map((x) => x.key)).map((key, index) => [key, index]));
+    const base = topN ? c.slice(0, topN) : c;
+    const data = [...base].sort((a, b) => {
+      const diff = sortOrder === 'desc' ? b.count - a.count : a.count - b.count;
+      return diff || ((naturalOrder.get(a.key) ?? 0) - (naturalOrder.get(b.key) ?? 0));
+    });
+    return { data, total };
+  }, [rows, field, topN, sortOrder]);
 
-  const total = rows.length || 1;
   // Larger bars: ~36px per row, min 220
   const h = height ?? Math.max(220, data.length * 36 + 24);
   const maxLabel = Math.max(0, ...data.map((d) => d.key.length));

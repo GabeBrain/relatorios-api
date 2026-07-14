@@ -39,6 +39,8 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 - **Cruzamentos:** heatmaps prontos também passaram a iniciar em `%`, com seletor para `%`, `Quantidade` e `Quantidade + %`, e a tabela visual foi ajustada para caber na largura do card sem exigir arraste lateral.
 - **Ranking:** cards `Top 10 cidades` e `Top 10 estados` foram removidos por redundância com os rankings geográficos já existentes.
 - **Perfil demográfico:** o card `Geração` ganhou botão informativo com as faixas de nascimento usadas para Geração Silenciosa, Baby Boomers, Geração X, Geração Y/Millennials e Geração Z.
+- **Tratamento de `-`:** em `Intenção de compra`, o valor `-` passou a ser tratado como nulo e desconsiderado em filtros, gráficos e cruzamentos; em `Tempo para compra`, `-` passou a ser exibido/agregado como `0. Sem intenção`.
+- **Ordenação de gráficos:** gráficos categóricos ganharam botão compacto no cabeçalho para alternar entre maior→menor (padrão) e menor→maior.
 - **Recolhimento:** a seção `Análise Cruzada (pivot dinâmico)` agora inicia recolhida e abre/fecha pelo cabeçalho, reduzindo o peso visual inicial do dashboard.
 - **Pizza/Rosca:** rótulos passam a exibir nome + valor/percentual dentro da fatia quando há espaço; fatias pequenas usam chamada externa com linha guia. A legenda foi movida para a lateral direita.
 - **Bugfix:** pizza/rosca agora usam o valor calculado da métrica selecionada; ao escolher `% do total`, os rótulos exibem percentuais reais em vez da contagem base formatada como porcentagem.

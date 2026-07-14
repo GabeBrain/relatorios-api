@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronRight, Filter, Info, Loader2 } from 'lucide-react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { ArrowDownUp, ChevronDown, ChevronRight, Filter, Info, Loader2 } from 'lucide-react';
 import { DATASETS } from './datasets';
 import { useQuantiDataset } from './useQuantiDataset';
 import { useQuantiStore } from './store';
@@ -8,7 +8,7 @@ import type { CategoricalField, QuantiRecord } from './types';
 import { FiltersSidebar } from './FiltersSidebar';
 import { ActiveFiltersBar } from './ActiveFiltersBar';
 import { KpiRow } from './KpiRow';
-import { BarField, ChartCard, DonutField, Heatmap, HistogramChart } from './Charts';
+import { BarField, ChartCard, DonutField, Heatmap, HistogramChart, type SortOrder } from './Charts';
 import { GeoMap } from './geo/GeoMap';
 import { RegionDistribution } from './Rankings';
 import { CrossAnalysis } from './CrossAnalysis';
@@ -35,6 +35,68 @@ function GenerationInfoButton() {
         <span className="block"><strong>Geração Z:</strong> Nascidos entre 1997 e 2012</span>
       </span>
     </span>
+  );
+}
+
+function SortToggle({ order, onChange }: { order: SortOrder; onChange: (order: SortOrder) => void }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(order === 'desc' ? 'asc' : 'desc')}
+      className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)]"
+      title={order === 'desc' ? 'Maior para menor' : 'Menor para maior'}
+      aria-label={order === 'desc' ? 'Ordenar do menor para o maior' : 'Ordenar do maior para o menor'}
+    >
+      <ArrowDownUp className="h-3.5 w-3.5" />
+    </button>
+  );
+}
+
+function SortableBarCard({
+  rows,
+  field,
+  title,
+  subtitle,
+  className,
+  height,
+  topN,
+}: {
+  rows: QuantiRecord[];
+  field: CategoricalField;
+  title: ReactNode;
+  subtitle?: string;
+  className?: string;
+  height?: number;
+  topN?: number;
+}) {
+  const [order, setOrder] = useState<SortOrder>('desc');
+  return (
+    <ChartCard title={title} subtitle={subtitle} className={className} action={<SortToggle order={order} onChange={setOrder} />}>
+      <BarField rows={rows} field={field} height={height} topN={topN} sortOrder={order} />
+    </ChartCard>
+  );
+}
+
+function SortableDonutCard({
+  rows,
+  field,
+  title,
+  subtitle,
+  className,
+  height,
+}: {
+  rows: QuantiRecord[];
+  field: CategoricalField;
+  title: ReactNode;
+  subtitle?: string;
+  className?: string;
+  height?: number;
+}) {
+  const [order, setOrder] = useState<SortOrder>('desc');
+  return (
+    <ChartCard title={title} subtitle={subtitle} className={className} action={<SortToggle order={order} onChange={setOrder} />}>
+      <DonutField rows={rows} field={field} height={height} sortOrder={order} />
+    </ChartCard>
   );
 }
 
@@ -222,18 +284,14 @@ export function QuantiDashboard() {
             <section className="space-y-2">
               <h2 className="qd-section-title">Perfil Demográfico</h2>
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                <ChartCard title="Gênero" subtitle="Clique para filtrar">
-                  <DonutField rows={filtered} field="genero" height={320} />
-                </ChartCard>
-                <ChartCard title="Faixa etária">
-                  <BarField rows={filtered} field="faixa_etaria" />
-                </ChartCard>
-                <ChartCard
+                <SortableDonutCard rows={filtered} title="Gênero" subtitle="Clique para filtrar" field="genero" height={320} />
+                <SortableBarCard rows={filtered} title="Faixa etária" field="faixa_etaria" />
+                <SortableBarCard
+                  rows={filtered}
                   title={<span className="inline-flex items-center gap-1.5">Geração <GenerationInfoButton /></span>}
+                  field="geracao"
                   className="lg:col-span-2"
-                >
-                  <BarField rows={filtered} field="geracao" />
-                </ChartCard>
+                />
               </div>
             </section>
 
@@ -241,18 +299,10 @@ export function QuantiDashboard() {
             <section className="space-y-2">
               <h2 className="qd-section-title">Perfil de Renda</h2>
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                <ChartCard title="Macro faixa de renda">
-                  <BarField rows={filtered} field="renda_macro_faixa" />
-                </ChartCard>
-                <ChartCard title="Faixa padronizada">
-                  <BarField rows={filtered} field="renda_faixa_padronizada" />
-                </ChartCard>
-                <ChartCard title="Classe social agregada">
-                  <BarField rows={filtered} field="renda_classe_agregada" />
-                </ChartCard>
-                <ChartCard title="Classe social detalhada">
-                  <BarField rows={filtered} field="renda_classe_detalhada" />
-                </ChartCard>
+                <SortableBarCard rows={filtered} title="Macro faixa de renda" field="renda_macro_faixa" />
+                <SortableBarCard rows={filtered} title="Faixa padronizada" field="renda_faixa_padronizada" />
+                <SortableBarCard rows={filtered} title="Classe social agregada" field="renda_classe_agregada" />
+                <SortableBarCard rows={filtered} title="Classe social detalhada" field="renda_classe_detalhada" />
                 <ChartCard title="Histograma — renda estimada (R$)" subtitle="Distribuição por faixas" className="lg:col-span-2">
                   <HistogramChart rows={filtered} field="renda_valor_estimado" bins={30} height={520} />
                 </ChartCard>
@@ -268,12 +318,8 @@ export function QuantiDashboard() {
                   <RegionDistribution rows={filtered} />
                 </ChartCard>
                 <div className="grid grid-cols-1 gap-3">
-                  <ChartCard title="Top Cidades — Empreendimentos" subtitle="Cidade de origem do projeto/estudo (cidade_original)">
-                    <BarField rows={filtered} field="cidade_original" topN={10} />
-                  </ChartCard>
-                  <ChartCard title="Top Cidades — Coleta" subtitle="Cidade onde a entrevista foi coletada (cidade)">
-                    <BarField rows={filtered} field="cidade" topN={10} />
-                  </ChartCard>
+                  <SortableBarCard rows={filtered} title="Top Cidades — Empreendimentos" subtitle="Cidade de origem do projeto/estudo (cidade_original)" field="cidade_original" topN={10} />
+                  <SortableBarCard rows={filtered} title="Top Cidades — Coleta" subtitle="Cidade onde a entrevista foi coletada (cidade)" field="cidade" topN={10} />
                 </div>
               </div>
             </section>
@@ -282,12 +328,8 @@ export function QuantiDashboard() {
             <section className="space-y-2">
               <h2 className="qd-section-title">Intenção de Compra</h2>
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                <ChartCard title="Intenção padronizada">
-                  <BarField rows={filtered} field="intencao_compra_padronizada" />
-                </ChartCard>
-                <ChartCard title="Tempo para compra">
-                  <BarField rows={filtered} field="tempo_intencao_padronizado" />
-                </ChartCard>
+                <SortableBarCard rows={filtered} title="Intenção padronizada" field="intencao_compra_padronizada" />
+                <SortableBarCard rows={filtered} title="Tempo para compra" field="tempo_intencao_padronizado" />
                 <IntentHeatmapCard rows={filtered} title="Gênero × Intenção de compra" rowField="genero" metricLabel="Gênero" />
                 <IntentHeatmapCard rows={filtered} title="Faixa etária × Intenção de compra" rowField="faixa_etaria" metricLabel="Faixa etária" />
                 <IntentHeatmapCard rows={filtered} title="Classe social agregada × Intenção de compra" rowField="renda_classe_agregada" metricLabel="Classe social" className="lg:col-span-2" />

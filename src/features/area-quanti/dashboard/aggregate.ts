@@ -2,11 +2,22 @@ import type { CategoricalField, Filters, QuantiRecord } from './types';
 
 export const NA = 'Não informado';
 
+export function normalizeCategoricalValue(field: string, value: unknown): string | null {
+  const raw = value == null || value === '' ? NA : String(value);
+  if (field === 'intencao_compra_padronizada' && raw === '-') return null;
+  if (field === 'tempo_intencao_padronizado' && raw === '-') return '0. Sem intenção';
+  return raw;
+}
+
 export function applyFilters(rows: QuantiRecord[], filters: Filters): QuantiRecord[] {
   const entries = Object.entries(filters) as [CategoricalField, string[]][];
   if (!entries.length) return rows;
   return rows.filter((r) =>
-    entries.every(([f, values]) => !values.length || values.includes(String((r as any)[f] ?? NA))),
+    entries.every(([f, values]) => {
+      if (!values.length) return true;
+      const value = normalizeCategoricalValue(f, (r as any)[f]);
+      return value != null && values.includes(value);
+    }),
   );
 }
 
@@ -16,7 +27,8 @@ export function countBy<T extends string>(
 ): { key: T; count: number }[] {
   const m = new Map<string, number>();
   for (const r of rows) {
-    const v = String((r as any)[field] ?? NA);
+    const v = normalizeCategoricalValue(field, (r as any)[field]);
+    if (v == null) continue;
     m.set(v, (m.get(v) ?? 0) + 1);
   }
   return Array.from(m, ([key, count]) => ({ key: key as T, count })).sort(
@@ -27,7 +39,8 @@ export function countBy<T extends string>(
 export function distinctCount(rows: QuantiRecord[], field: CategoricalField): number {
   const s = new Set<string>();
   for (const r of rows) {
-    const v = String((r as any)[field] ?? NA);
+    const v = normalizeCategoricalValue(field, (r as any)[field]);
+    if (v == null) continue;
     if (v !== NA) s.add(v);
   }
   return s.size;
@@ -35,7 +48,10 @@ export function distinctCount(rows: QuantiRecord[], field: CategoricalField): nu
 
 export function distinctValues(rows: QuantiRecord[], field: CategoricalField): string[] {
   const s = new Set<string>();
-  for (const r of rows) s.add(String((r as any)[field] ?? NA));
+  for (const r of rows) {
+    const v = normalizeCategoricalValue(field, (r as any)[field]);
+    if (v != null) s.add(v);
+  }
   return Array.from(s).sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
 
@@ -100,8 +116,9 @@ export function crosstab(
   const colKeys = new Set<string>();
   const buckets = new Map<string, { count: number; rendaSum: number; rendaN: number }>();
   for (const r of rows) {
-    const rk = String((r as any)[rowField] ?? NA);
-    const ck = String((r as any)[colField] ?? NA);
+    const rk = normalizeCategoricalValue(rowField, (r as any)[rowField]);
+    const ck = normalizeCategoricalValue(colField, (r as any)[colField]);
+    if (rk == null || ck == null) continue;
     rowKeys.add(rk);
     colKeys.add(ck);
     const k = `${rk}||${ck}`;
@@ -113,7 +130,7 @@ export function crosstab(
   }
   const rowArr = Array.from(rowKeys).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   const colArr = Array.from(colKeys).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  const total = rows.length;
+  const total = Array.from(buckets.values()).reduce((sum, bucket) => sum + bucket.count, 0);
   const matrix = rowArr.map((rk) =>
     colArr.map((ck) => {
       const b = buckets.get(`${rk}||${ck}`);
@@ -262,8 +279,9 @@ export function crosstabUniversal(
   const NONE = '—';
 
   for (const r of rows) {
-    const rk = String(r[rowField] ?? NA);
-    const ck = colField ? String(r[colField] ?? NA) : NONE;
+    const rk = normalizeCategoricalValue(rowField, r[rowField]);
+    const ck = colField ? normalizeCategoricalValue(colField, r[colField]) : NONE;
+    if (rk == null || ck == null) continue;
     rowKeys.add(rk);
     colKeys.add(ck);
     const k = `${rk}||${ck}`;
@@ -281,7 +299,7 @@ export function crosstabUniversal(
 
   const rowArr = Array.from(rowKeys).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   const colArr = Array.from(colKeys).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  const total = rows.length;
+  const total = Array.from(buckets.values()).reduce((sum, bucket) => sum + bucket.count, 0);
 
   // Base counts for percent calculations
   const counts = rowArr.map((rk) => colArr.map((ck) => buckets.get(`${rk}||${ck}`)?.count ?? 0));
