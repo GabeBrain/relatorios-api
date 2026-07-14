@@ -28,6 +28,8 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ### 2026-07-14 — Contraste de tabelas no modo escuro — Lovable
 - **O quê:** ajuste visual localizado na aba Banco Quanti para que a Análise Cruzada Universal e os heatmaps de Intenção de Compra/Cruzamentos respeitem os tokens do tema escuro. Controles de visualização, botões CSV/XLSX, selects, tabela pivot, cabeçalho, linhas alternadas, total e células/labels de heatmap agora usam `--qd-surface`, `--qd-surface-2`, `--qd-border`, `--qd-text` e `--qd-text-muted`, eliminando fundos brancos/cinzas claros e textos escuros sem contraste no dark mode.
+- **Correção adicional:** a visualização `Tabela dinâmica` da Análise Cruzada deixou de cair no fallback de barras agrupadas; agora a tabela é renderizada como tabela e gráficos só aparecem para visualizações gráficas.
+- **Layout:** os gráficos da Análise Cruzada ganharam mais altura mínima, margens internas e eixo Y responsivo para rótulos longos, deixando barras, pizza/rosca e treemap menos apertados.
 - **Por quê:** integrar essas áreas ao modo escuro sem alterar a paleta global nem qualquer função de cálculo, filtro, gráfico ou exportação.
 - **Arquivos:** `src/features/area-quanti/dashboard/CrossAnalysis.tsx`, `src/features/area-quanti/dashboard/Charts.tsx`, `src/features/area-quanti/dashboard/dashboard.css`.
 

@@ -98,6 +98,8 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
 
   const availableViews: ViewKind[] = ct ? compatibleViews(rowField, colField, metric, ct) : ['table'];
   const effectiveView = availableViews.includes(view) ? view : availableViews[0];
+  const showTable = mode !== 'chart' || effectiveView === 'table';
+  const showChart = effectiveView !== 'table' && (mode === 'both' || mode === 'chart');
 
   function buildSheet() {
     if (!ct) return [];
@@ -187,13 +189,13 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
       </div>
 
       {/* Table */}
-      {(mode === 'both' || mode === 'table') && (
+      {showTable && (
         <PivotTable ct={ct} rowLabel={rowLabel} colLabel={colLabel} rowField={rowField} colField={colField} />
       )}
 
       {/* Chart */}
-      {(mode === 'both' || mode === 'chart') && (
-        <div className={mode === 'both' ? 'mt-4' : ''}>
+      {showChart && (
+        <div className={showTable ? 'mt-4' : ''}>
           <UniversalChart
             view={effectiveView}
             ct={ct}
@@ -293,7 +295,9 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
   view: ViewKind; ct: UniversalCrosstab; metric: UniversalMetric; rowField: string; colField: string | null;
 }) {
   const toggle = useQuantiStore((s) => s.toggleValue);
-  const height = Math.max(320, ct.rows.length * 26 + 60);
+  const height = Math.max(420, ct.rows.length * 34 + 110);
+  const maxRowLabel = Math.max(0, ...ct.rows.map((r) => String(r).length));
+  const yAxisWidth = Math.min(260, Math.max(170, maxRowLabel * 6.5));
 
   if (view === 'heatmap') {
     return <Heatmap ct={ct as any} metricLabel={rowField} format={(n) => fmt(n, metric)} />;
@@ -303,7 +307,7 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
     // 1D: sum across cols
     const data = ct.rows.map((r, i) => ({ name: r, value: ct.rowTotals[i] || ct.matrix[i][0] || 0 }));
     return (
-      <ResponsiveContainer width="100%" height={380}>
+      <ResponsiveContainer width="100%" height={460}>
         <PieChart>
           <Pie
             data={data} dataKey="value" nameKey="name"
@@ -330,7 +334,7 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
       ct.rows.forEach((r, i) => leaves.push({ name: r, value: ct.rowTotals[i] || ct.matrix[i][0] || 0 }));
     }
     return (
-      <ResponsiveContainer width="100%" height={420}>
+      <ResponsiveContainer width="100%" height={500}>
         <Treemap data={leaves} dataKey="value" stroke="#fff" fill={PALETTE[0]} content={undefined as any}>
           <RTooltip formatter={(v: any) => fmt(Number(v), metric)} />
         </Treemap>
@@ -351,10 +355,10 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} layout="vertical" margin={{ top: 6, right: 24, left: 8, bottom: 6 }} stackOffset={stackOffset as any}>
+      <BarChart data={data} layout="vertical" margin={{ top: 14, right: 48, left: 12, bottom: 18 }} barCategoryGap={8} stackOffset={stackOffset as any}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
         <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={view === 'stacked100' ? (v) => `${Math.round(v * 100)}%` : undefined} />
-        <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={160} interval={0} />
+        <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={yAxisWidth} interval={0} />
         <RTooltip formatter={(v: any) => fmt(Number(v), metric)} />
         <Legend wrapperStyle={{ fontSize: 10 }} />
         {keys.map((k, i) => (
