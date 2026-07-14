@@ -328,7 +328,12 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
 
   if (view === 'pie' || view === 'donut') {
     // 1D: sum across cols
-    const data = ct.rows.map((r, i) => ({ name: r, value: ct.rowTotals[i] || ct.matrix[i][0] || 0 }));
+    const data = ct.rows.map((r, i) => ({
+      name: r,
+      value: ct.metric === 'count' || ct.metric === 'sum'
+        ? ct.rowTotals[i] || ct.matrix[i][0] || 0
+        : ct.matrix[i][0] || 0,
+    }));
     const total = data.reduce((acc, item) => acc + item.value, 0) || 1;
     const renderPieLabel = (props: any) => {
       const RADIAN = Math.PI / 180;

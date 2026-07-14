@@ -33,6 +33,7 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 - **Filtros:** a barra lateral passou a oferecer também `Cidade (empreendimento)` (`cidade_original`), além de `Cidade (coleta)`, respeitando o filtro de Estado quando aplicado.
 - **Barras agrupadas:** cruzamentos universais com muitas séries agora ordenam as barras de cada grupo do maior para o menor, calculam altura por categoria conforme a quantidade de barras, ampliam o eixo Y, exibem valor + percentual ao lado da barra e usam legenda superior para evitar leitura distante.
 - **Pizza/Rosca:** rótulos passam a exibir nome + valor/percentual dentro da fatia quando há espaço; fatias pequenas usam chamada externa com linha guia. A legenda foi movida para a lateral direita.
+- **Bugfix:** pizza/rosca agora usam o valor calculado da métrica selecionada; ao escolher `% do total`, os rótulos exibem percentuais reais em vez da contagem base formatada como porcentagem.
 - **Contraste numérico:** no modo escuro, labels numéricos de gráficos voltaram a usar o texto claro do tema; o amarelo Brain fica restrito aos KPIs principais.
 - **Por quê:** integrar essas áreas ao modo escuro sem alterar a paleta global nem qualquer função de cálculo, filtro, gráfico ou exportação.
 - **Arquivos:** `src/features/area-quanti/dashboard/CrossAnalysis.tsx`, `src/features/area-quanti/dashboard/Charts.tsx`, `src/features/area-quanti/dashboard/FiltersSidebar.tsx`, `src/features/area-quanti/dashboard/types.ts`, `src/features/area-quanti/dashboard/dashboard.css`.
