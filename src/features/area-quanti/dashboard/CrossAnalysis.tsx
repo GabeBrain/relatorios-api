@@ -38,6 +38,7 @@ const PALETTE = [
 
 const METRIC_LABEL: Record<UniversalMetric, string> = {
   count: 'Quantidade',
+  count_pct: 'Quantidade + %',
   pct_total: '% do total',
   pct_row: '% por linha',
   pct_col: '% por coluna',
@@ -57,8 +58,9 @@ function fmt(v: number, metric: UniversalMetric): string {
 function fmtValuePct(value: number, base: number, metric: UniversalMetric): string {
   const valueText = fmt(value, metric);
   if (!valueText) return '';
+  if (metric === 'count_pct') return base ? `${valueText} (${((value / base) * 100).toFixed(1)}%)` : valueText;
   if (!base || metric.startsWith('pct')) return valueText;
-  return `${valueText} (${((value / base) * 100).toFixed(1)}%)`;
+  return valueText;
 }
 
 function truncateLabel(value: string, max = 28): string {
@@ -177,6 +179,7 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
         <SelectBox label="Métrica">
           <select value={metric} onChange={(e) => setMetric(e.target.value as UniversalMetric)} className="w-full">
             <option value="count">Quantidade</option>
+            <option value="count_pct">Quantidade + %</option>
             <option value="pct_total">% do total</option>
             <option value="pct_row" disabled={!colField}>% por linha</option>
             <option value="pct_col" disabled={!colField}>% por coluna</option>
@@ -275,7 +278,7 @@ function PivotTable({ ct, rowLabel, colLabel, rowField, colField }: {
   ct: UniversalCrosstab; rowLabel: string; colLabel: string | null; rowField: string; colField: string | null;
 }) {
   const toggle = useQuantiStore((s) => s.toggleValue);
-  const showColTotals = ct.metric === 'count' || ct.metric === 'sum';
+  const showColTotals = ct.metric === 'count' || ct.metric === 'count_pct' || ct.metric === 'sum';
 
   return (
     <div className="qd-cross-table qd-scroll max-h-[520px] overflow-auto rounded-md border border-slate-100">
@@ -330,7 +333,7 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
     // 1D: sum across cols
     const data = ct.rows.map((r, i) => ({
       name: r,
-      value: ct.metric === 'count' || ct.metric === 'sum'
+      value: ct.metric === 'count' || ct.metric === 'count_pct' || ct.metric === 'sum'
         ? ct.rowTotals[i] || ct.matrix[i][0] || 0
         : ct.matrix[i][0] || 0,
     }));
@@ -426,33 +429,52 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
   if (isGrouped) {
     const flatData = ct.rows.flatMap((r, i) => {
       const rowBase = ct.matrix[i].reduce((acc, value) => acc + value, 0) || ct.rowTotals[i] || 1;
-      return keys
+      const items = keys
         .map((k, j) => ({
           name: r,
           series: k,
           value: ct.matrix[i][j] ?? 0,
           base: rowBase,
           fill: PALETTE[j % PALETTE.length],
-          axisLabel: `${truncateLabel(r, 20)} · ${truncateLabel(k, 26)}`,
+          axisLabel: '',
+          secondaryLabel: k,
+          isSpacer: false,
         }))
         .filter((item) => item.value > 0)
-        .sort((a, b) => b.value - a.value);
+        .sort((a, b) => b.value - a.value)
+        .map((item, itemIndex) => ({
+          ...item,
+          axisLabel: itemIndex === 0 ? r : '',
+        }));
+      return [
+        ...items,
+        {
+          name: `${r}__gap`,
+          series: '',
+          value: 0,
+          base: rowBase,
+          fill: 'transparent',
+          axisLabel: '',
+          secondaryLabel: '',
+          isSpacer: true,
+        },
+      ];
     });
-    const groupedHeight = Math.max(500, flatData.length * 30 + 150);
+    const groupedHeight = Math.max(520, flatData.length * 34 + 160);
 
     return (
       <div className="qd-cross-chart-stack">
         <SeriesLegend items={keys.map((k, i) => ({ label: k, color: PALETTE[i % PALETTE.length] }))} />
         <ResponsiveContainer width="100%" height={groupedHeight}>
-          <BarChart data={flatData} layout="vertical" margin={{ top: 10, right: 170, left: 12, bottom: 24 }} barCategoryGap={6}>
+          <BarChart data={flatData} layout="vertical" margin={{ top: 12, right: 130, left: 12, bottom: 24 }} barCategoryGap={4}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
             <XAxis type="number" tick={{ fontSize: 10 }} />
-            <YAxis dataKey="axisLabel" type="category" tick={{ fontSize: 10 }} width={Math.min(420, Math.max(240, yAxisWidth + 80))} interval={0} />
+            <YAxis dataKey="axisLabel" type="category" tick={{ fontSize: 11, fontWeight: 700 }} width={Math.min(260, Math.max(120, yAxisWidth - 60))} interval={0} />
             <RTooltip
               formatter={(v: any, _name, props: any) => fmtValuePct(Number(v), Number(props.payload?.base ?? 0), metric)}
               labelFormatter={(_, payload: any[]) => {
                 const item = payload?.[0]?.payload;
-                return item ? `${item.name} · ${item.series}` : '';
+                return item && !item.isSpacer ? `${item.name} · ${item.series}` : '';
               }}
             />
             <Bar
@@ -464,18 +486,24 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
                 if (colField) toggle(colField as any, d.series);
               }}
             >
-              {flatData.map((item) => <Cell key={`${item.name}:${item.series}`} fill={item.fill} />)}
+              {flatData.map((item, index) => <Cell key={`${item.name}:${item.series}:${index}`} fill={item.fill} />)}
               <LabelList
                 dataKey="value"
                 content={(props: any) => {
                   const item = flatData[props.index];
-                  if (!item || !props.value) return null;
-                  const x = Number(props.x ?? 0) + Number(props.width ?? 0) + 8;
+                  if (!item || item.isSpacer || !props.value) return null;
+                  const startX = Number(props.x ?? 0);
+                  const x = startX + Number(props.width ?? 0) + 8;
                   const y = Number(props.y ?? 0) + Number(props.height ?? 0) / 2;
                   return (
-                    <text x={x} y={y} fill="var(--qd-text)" dominantBaseline="central" style={{ fontSize: 11, fontWeight: 700 }}>
-                      {fmtValuePct(Number(props.value), item.base, metric)}
-                    </text>
+                    <g>
+                      <text x={startX - 12} y={y} fill="var(--qd-text-muted)" textAnchor="end" dominantBaseline="central" style={{ fontSize: 10, fontWeight: 600 }}>
+                        {truncateLabel(String(item.secondaryLabel), 24)}
+                      </text>
+                      <text x={x} y={y} fill="var(--qd-text)" dominantBaseline="central" style={{ fontSize: 11, fontWeight: 700 }}>
+                        {fmtValuePct(Number(props.value), item.base, metric)}
+                      </text>
+                    </g>
                   );
                 }}
               />

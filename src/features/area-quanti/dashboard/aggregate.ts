@@ -231,6 +231,7 @@ export function detectFieldSchema(
 
 export type UniversalMetric =
   | 'count'
+  | 'count_pct'
   | 'pct_total'
   | 'pct_row'
   | 'pct_col'
@@ -293,6 +294,7 @@ export function crosstabUniversal(
       const c = b?.count ?? 0;
       switch (metric) {
         case 'count': return c;
+        case 'count_pct': return c;
         case 'pct_total': return total ? (c / total) * 100 : 0;
         case 'pct_row': return rowTotalsCnt[i] ? (c / rowTotalsCnt[i]) * 100 : 0;
         case 'pct_col': return colTotalsCnt[j] ? (c / colTotalsCnt[j]) * 100 : 0;
@@ -308,10 +310,10 @@ export function crosstabUniversal(
     }),
   );
 
-  const rowTotals = metric === 'count' || metric === 'sum'
+  const rowTotals = metric === 'count' || metric === 'count_pct' || metric === 'sum'
     ? matrix.map((r) => r.reduce((a, b) => a + b, 0))
     : rowTotalsCnt;
-  const colTotals = metric === 'count' || metric === 'sum'
+  const colTotals = metric === 'count' || metric === 'count_pct' || metric === 'sum'
     ? colArr.map((_, j) => matrix.reduce((a, r) => a + r[j], 0))
     : colTotalsCnt;
 
