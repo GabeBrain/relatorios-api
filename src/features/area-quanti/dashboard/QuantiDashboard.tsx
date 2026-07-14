@@ -4,14 +4,103 @@ import { DATASETS } from './datasets';
 import { useQuantiDataset } from './useQuantiDataset';
 import { useQuantiStore } from './store';
 import { applyFilters, crosstab } from './aggregate';
+import type { CategoricalField, QuantiRecord } from './types';
 import { FiltersSidebar } from './FiltersSidebar';
 import { ActiveFiltersBar } from './ActiveFiltersBar';
 import { KpiRow } from './KpiRow';
 import { BarField, ChartCard, DonutField, Heatmap, HistogramChart } from './Charts';
 import { GeoMap } from './geo/GeoMap';
-import { Rankings, RegionDistribution } from './Rankings';
+import { RegionDistribution } from './Rankings';
 import { CrossAnalysis } from './CrossAnalysis';
 import './dashboard.css';
+
+type IntentMetric = 'pct' | 'count' | 'count_pct';
+
+function buildIntentCrosstab(rows: QuantiRecord[], rowField: CategoricalField, metric: IntentMetric, topN?: number) {
+  const base = crosstab(rows, rowField, 'intencao_compra_padronizada', 'count');
+  const order = base.rowTotals
+    .map((total, index) => ({ total, index }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, topN ?? base.rows.length)
+    .map((item) => item.index);
+
+  const pickedRows = order.map((index) => base.rows[index]);
+  const pickedCounts = order.map((index) => base.matrix[index]);
+  const pickedTotals = order.map((index) => base.rowTotals[index]);
+
+  if (metric === 'pct') {
+    const matrix = pickedCounts.map((row, index) => {
+      const total = pickedTotals[index] || 1;
+      return row.map((value) => (value / total) * 100);
+    });
+    return {
+      rows: pickedRows,
+      cols: base.cols,
+      matrix,
+      rowTotals: pickedTotals,
+      colTotals: base.colTotals,
+      total: base.total,
+    };
+  }
+
+  return {
+    rows: pickedRows,
+    cols: base.cols,
+    matrix: pickedCounts,
+    rowTotals: pickedTotals,
+    colTotals: base.colTotals,
+    total: base.total,
+  };
+}
+
+function IntentHeatmapCard({
+  rows,
+  title,
+  rowField,
+  metricLabel,
+  className,
+  topN,
+}: {
+  rows: QuantiRecord[];
+  title: string;
+  rowField: CategoricalField;
+  metricLabel: string;
+  className?: string;
+  topN?: number;
+}) {
+  const [metric, setMetric] = useState<IntentMetric>('pct');
+  const ct = useMemo(() => buildIntentCrosstab(rows, rowField, metric, topN), [rows, rowField, metric, topN]);
+
+  const format = (value: number, rowIndex: number) => {
+    if (metric === 'pct') return value ? `${value.toFixed(1)}%` : '';
+    if (metric === 'count') return value ? value.toLocaleString('pt-BR') : '';
+    const total = ct.rowTotals[rowIndex] || 1;
+    return value ? `${value.toLocaleString('pt-BR')} · ${((value / total) * 100).toFixed(1)}%` : '';
+  };
+
+  return (
+    <ChartCard
+      title={title}
+      className={className}
+      action={
+        <label className="flex items-center gap-1 text-[11px] font-semibold text-[var(--qd-text-muted)]">
+          Métrica
+          <select
+            value={metric}
+            onChange={(event) => setMetric(event.target.value as IntentMetric)}
+            className="qd-select h-7 rounded-md px-2 text-[11px]"
+          >
+            <option value="pct">%</option>
+            <option value="count">Quantidade</option>
+            <option value="count_pct">Quantidade + %</option>
+          </select>
+        </label>
+      }
+    >
+      <Heatmap ct={ct} metricLabel={metricLabel} format={format} />
+    </ChartCard>
+  );
+}
 
 export function QuantiDashboard() {
   const datasetId = useQuantiStore((s) => s.datasetId);
@@ -144,15 +233,11 @@ export function QuantiDashboard() {
                 <ChartCard title="Tempo para compra">
                   <BarField rows={filtered} field="tempo_intencao_padronizado" />
                 </ChartCard>
-                <ChartCard title="Intenção × Gênero">
-                  <Heatmap ct={crosstab(filtered, 'intencao_compra_padronizada', 'genero', 'count')} metricLabel="Intenção" />
-                </ChartCard>
-                <ChartCard title="Intenção × Faixa etária">
-                  <Heatmap ct={crosstab(filtered, 'intencao_compra_padronizada', 'faixa_etaria', 'count')} metricLabel="Intenção" />
-                </ChartCard>
-                <ChartCard title="Intenção × Classe social agregada" className="lg:col-span-2">
-                  <Heatmap ct={crosstab(filtered, 'intencao_compra_padronizada', 'renda_classe_agregada', 'count')} metricLabel="Intenção" />
-                </ChartCard>
+                <IntentHeatmapCard rows={filtered} title="Gênero × Intenção de compra" rowField="genero" metricLabel="Gênero" />
+                <IntentHeatmapCard rows={filtered} title="Faixa etária × Intenção de compra" rowField="faixa_etaria" metricLabel="Faixa etária" />
+                <IntentHeatmapCard rows={filtered} title="Classe social agregada × Intenção de compra" rowField="renda_classe_agregada" metricLabel="Classe social" className="lg:col-span-2" />
+                <IntentHeatmapCard rows={filtered} title="Geração × Intenção de compra" rowField="geracao" metricLabel="Geração" />
+                <IntentHeatmapCard rows={filtered} title="Cidade × Intenção de compra (top 20 cidades)" rowField="cidade" metricLabel="Cidade" topN={20} />
               </div>
             </section>
 
@@ -172,37 +257,7 @@ export function QuantiDashboard() {
                 <ChartCard title="Região × Classe de renda">
                   <Heatmap ct={crosstab(filtered, 'regiao', 'renda_classe_agregada', 'count')} metricLabel="Região" />
                 </ChartCard>
-                <ChartCard title="Geração × Intenção de compra">
-                  <Heatmap ct={crosstab(filtered, 'geracao', 'intencao_compra_padronizada', 'count')} metricLabel="Geração" />
-                </ChartCard>
-                <ChartCard title="Cidade × Intenção de compra (top 20 cidades)">
-                  <Heatmap
-                    ct={(() => {
-                      const c = crosstab(filtered, 'cidade', 'intencao_compra_padronizada', 'count');
-                      const idx = c.rowTotals
-                        .map((t, i) => ({ t, i }))
-                        .sort((a, b) => b.t - a.t)
-                        .slice(0, 20)
-                        .map((x) => x.i);
-                      return {
-                        rows: idx.map((i) => c.rows[i]),
-                        cols: c.cols,
-                        matrix: idx.map((i) => c.matrix[i]),
-                        rowTotals: idx.map((i) => c.rowTotals[i]),
-                        colTotals: c.colTotals,
-                        total: c.total,
-                      };
-                    })()}
-                    metricLabel="Cidade"
-                  />
-                </ChartCard>
               </div>
-            </section>
-
-            {/* Ranking */}
-            <section className="space-y-2">
-              <h2 className="qd-section-title">Ranking</h2>
-              <Rankings rows={filtered} />
             </section>
 
             {/* Análise Cruzada */}

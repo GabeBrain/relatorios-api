@@ -199,7 +199,7 @@ export function HistogramChart({ rows, field, bins = 20, height = 260 }: HistPro
 }
 
 /* ── Heatmap ─────────────────────────────────────────────────── */
-interface HeatmapProps { ct: Crosstab; metricLabel?: string; height?: number; format?: (n: number) => string }
+interface HeatmapProps { ct: Crosstab; metricLabel?: string; height?: number; format?: (n: number, rowIndex: number, colIndex: number) => string }
 export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
   const max = Math.max(1, ...ct.matrix.flat());
   const fmt = format ?? ((n: number) => (n ? n.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : ''));
@@ -236,9 +236,9 @@ export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
                       color: alpha > 0.55 ? 'var(--qd-heatmap-strong-text, #fff)' : 'var(--qd-heatmap-soft-text, #0f172a)',
                       minWidth: 60,
                     }}
-                    title={`${r} × ${c}: ${fmt(v)}`}
+                    title={`${r} × ${c}: ${fmt(v, i, j)}`}
                   >
-                    {fmt(v)}
+                    {fmt(v, i, j)}
                   </td>
                 );
               })}

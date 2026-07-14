@@ -2,15 +2,6 @@ import { useMemo } from 'react';
 import type { QuantiRecord } from './types';
 import { countBy } from './aggregate';
 import { useQuantiStore } from './store';
-import { ChartCard } from './Charts';
-
-function List({ title, data, field, total }: { title: string; data: { key: string; count: number }[]; field: 'cidade' | 'estado' | 'regiao'; total: number }) {
-  return (
-    <ChartCard title={title}>
-      <RankList data={data} field={field} total={total} />
-    </ChartCard>
-  );
-}
 
 function RankList({ data, field, total }: { data: { key: string; count: number }[]; field: 'cidade' | 'estado' | 'regiao'; total: number }) {
   const toggle = useQuantiStore((s) => s.toggleValue);
@@ -49,18 +40,6 @@ export function RegionDistribution({ rows }: { rows: QuantiRecord[] }) {
     <div className="mt-4 border-t border-[var(--qd-border)] pt-3">
       <div className="mb-2 text-xs font-semibold text-[var(--qd-text)]">Distribuição por região</div>
       <RankList data={regioes} field="regiao" total={rows.length} />
-    </div>
-  );
-}
-
-export function Rankings({ rows }: { rows: QuantiRecord[] }) {
-  const topCidades = useMemo(() => countBy(rows, 'cidade').slice(0, 10), [rows]);
-  const topEstados = useMemo(() => countBy(rows, 'estado').slice(0, 10), [rows]);
-
-  return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      <List title="Top 10 cidades" data={topCidades} field="cidade" total={rows.length} />
-      <List title="Top 10 estados" data={topEstados} field="estado" total={rows.length} />
     </div>
   );
 }
