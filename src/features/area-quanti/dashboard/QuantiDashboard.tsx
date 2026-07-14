@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronRight, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { ChevronDown, ChevronRight, Filter, Loader2 } from 'lucide-react';
 import { DATASETS } from './datasets';
 import { useQuantiDataset } from './useQuantiDataset';
 import { useQuantiStore } from './store';
@@ -17,7 +17,7 @@ export function QuantiDashboard() {
   const datasetId = useQuantiStore((s) => s.datasetId);
   const setDatasetId = useQuantiStore((s) => s.setDatasetId);
   const filters = useQuantiStore((s) => s.filters);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [crossAnalysisOpen, setCrossAnalysisOpen] = useState(false);
 
   const ds = DATASETS.find((d) => d.id === datasetId) ?? DATASETS[0];
@@ -35,10 +35,10 @@ export function QuantiDashboard() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSidebarOpen((v) => !v)}
-              className="rounded p-1.5 text-[var(--qd-text-muted)] hover:bg-[var(--qd-light)]"
-              title={sidebarOpen ? 'Recolher filtros' : 'Expandir filtros'}
+              className="flex items-center gap-1.5 rounded border border-[var(--qd-border)] px-2 py-1.5 text-xs font-semibold text-[var(--qd-text-muted)] hover:bg-[var(--qd-light)]"
+              title="Filtros"
             >
-              {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+              <Filter className="h-4 w-4" /> Filtros
             </button>
             <div>
               <div className="text-sm font-semibold text-[var(--qd-primary)]">Banco Quanti · Dashboard</div>

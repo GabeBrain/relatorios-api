@@ -48,12 +48,16 @@ export function FiltersSidebar({ open, onClose, rows }: Props) {
   }, [rows, filters.estado]);
 
   return (
-    <aside
-      className={`qd-side qd-scroll transition-all duration-200 ease-out overflow-y-auto ${
-        open ? 'w-72' : 'w-0'
-      } shrink-0 border-r border-[var(--qd-border)]`}
-    >
-      {open && (
+    <>
+      <div
+        className={`qd-filter-backdrop ${open ? 'is-open' : ''}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <aside
+        className={`qd-side qd-filter-popin qd-scroll ${open ? 'is-open' : ''}`}
+        aria-hidden={!open}
+      >
         <div className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -88,7 +92,7 @@ export function FiltersSidebar({ open, onClose, rows }: Props) {
             />
           ))}
         </div>
-      )}
-    </aside>
+      </aside>
+    </>
   );
 }
