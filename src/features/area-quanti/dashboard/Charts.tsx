@@ -33,7 +33,7 @@ const PALETTE = [
 const HEATMAP_RGB = '91, 117, 55'; // #5B7537
 const ACTIVE_STROKE = '#3d5024';
 
-interface CardProps { title: string; subtitle?: string; children: React.ReactNode; className?: string; action?: React.ReactNode }
+interface CardProps { title: React.ReactNode; subtitle?: string; children: React.ReactNode; className?: string; action?: React.ReactNode }
 export function ChartCard({ title, subtitle, children, className, action }: CardProps) {
   return (
     <div className={`qd-card p-4 ${className ?? ''}`}>

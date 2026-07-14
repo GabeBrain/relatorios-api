@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronRight, Filter, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Filter, Info, Loader2 } from 'lucide-react';
 import { DATASETS } from './datasets';
 import { useQuantiDataset } from './useQuantiDataset';
 import { useQuantiStore } from './store';
@@ -15,6 +15,27 @@ import { CrossAnalysis } from './CrossAnalysis';
 import './dashboard.css';
 
 type IntentMetric = 'pct' | 'count' | 'count_pct';
+
+function GenerationInfoButton() {
+  return (
+    <span className="group relative inline-flex">
+      <button
+        type="button"
+        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[var(--qd-border)] text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)]"
+        aria-label="Informações sobre gerações"
+      >
+        <Info className="h-3.5 w-3.5" />
+      </button>
+      <span className="pointer-events-none absolute left-0 top-7 z-20 hidden w-80 rounded-md border border-[var(--qd-border)] bg-[var(--qd-surface)] p-3 text-left text-[11px] font-normal leading-relaxed text-[var(--qd-text)] shadow-lg group-hover:block group-focus-within:block">
+        <span className="block"><strong>Geração Silenciosa:</strong> Nascidos entre 1928 e 1945</span>
+        <span className="block"><strong>Baby Boomers:</strong> Nascidos entre 1946 e 1964</span>
+        <span className="block"><strong>Geração X:</strong> Nascidos entre 1965 e 1980</span>
+        <span className="block"><strong>Geração Y (Millennials):</strong> Nascidos entre 1981 e 1996</span>
+        <span className="block"><strong>Geração Z:</strong> Nascidos entre 1997 e 2012</span>
+      </span>
+    </span>
+  );
+}
 
 function buildIntentCrosstab(rows: QuantiRecord[], rowField: CategoricalField, metric: IntentMetric, topN?: number) {
   const base = crosstab(rows, rowField, 'intencao_compra_padronizada', 'count');
@@ -176,7 +197,10 @@ export function QuantiDashboard() {
                 <ChartCard title="Faixa etária">
                   <BarField rows={filtered} field="faixa_etaria" />
                 </ChartCard>
-                <ChartCard title="Geração" className="lg:col-span-2">
+                <ChartCard
+                  title={<span className="inline-flex items-center gap-1.5">Geração <GenerationInfoButton /></span>}
+                  className="lg:col-span-2"
+                >
                   <BarField rows={filtered} field="geracao" />
                 </ChartCard>
               </div>

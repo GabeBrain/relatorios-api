@@ -37,6 +37,7 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 - **Layout geográfico:** o card `Distribuição por região` saiu da seção Ranking e passou a ocupar o espaço abaixo do mapa interativo, dentro do bloco `Brasil por estado`.
 - **Intenção de compra:** todos os cruzamentos de intenção foram agrupados na seção `Intenção de Compra`, com intenção como coluna e o filtro analisado como linha; cada card inicia em `%` e ganhou seletor para `%`, `Quantidade` e `Quantidade + %`.
 - **Ranking:** cards `Top 10 cidades` e `Top 10 estados` foram removidos por redundância com os rankings geográficos já existentes.
+- **Perfil demográfico:** o card `Geração` ganhou botão informativo com as faixas de nascimento usadas para Geração Silenciosa, Baby Boomers, Geração X, Geração Y/Millennials e Geração Z.
 - **Recolhimento:** a seção `Análise Cruzada (pivot dinâmico)` agora inicia recolhida e abre/fecha pelo cabeçalho, reduzindo o peso visual inicial do dashboard.
 - **Pizza/Rosca:** rótulos passam a exibir nome + valor/percentual dentro da fatia quando há espaço; fatias pequenas usam chamada externa com linha guia. A legenda foi movida para a lateral direita.
 - **Bugfix:** pizza/rosca agora usam o valor calculado da métrica selecionada; ao escolher `% do total`, os rótulos exibem percentuais reais em vez da contagem base formatada como porcentagem.
