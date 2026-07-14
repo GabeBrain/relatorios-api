@@ -54,6 +54,17 @@ function fmt(v: number, metric: UniversalMetric): string {
   return BRL(v);
 }
 
+function fmtValuePct(value: number, base: number, metric: UniversalMetric): string {
+  const valueText = fmt(value, metric);
+  if (!valueText) return '';
+  if (!base || metric.startsWith('pct')) return valueText;
+  return `${valueText} (${((value / base) * 100).toFixed(1)}%)`;
+}
+
+function truncateLabel(value: string, max = 28): string {
+  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
+}
+
 /** Which visualizations are compatible with the current selection. */
 function compatibleViews(rowField: string, colField: string | null, metric: UniversalMetric, ct: UniversalCrosstab): ViewKind[] {
   const has2D = !!colField;
@@ -246,6 +257,19 @@ function viewOptions(list: ViewKind[]) {
   return list.map((v) => <option key={v} value={v}>{labels[v]}</option>);
 }
 
+function SeriesLegend({ items }: { items: Array<{ label: string; color: string }> }) {
+  return (
+    <div className="qd-cross-series-legend">
+      {items.map((item) => (
+        <span key={item.label} className="qd-cross-series-legend-item" title={item.label}>
+          <span className="qd-cross-series-legend-swatch" style={{ background: item.color }} />
+          <span>{item.label}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 /* ── Table ── */
 function PivotTable({ ct, rowLabel, colLabel, rowField, colField }: {
   ct: UniversalCrosstab; rowLabel: string; colLabel: string | null; rowField: string; colField: string | null;
@@ -305,19 +329,57 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
   if (view === 'pie' || view === 'donut') {
     // 1D: sum across cols
     const data = ct.rows.map((r, i) => ({ name: r, value: ct.rowTotals[i] || ct.matrix[i][0] || 0 }));
+    const total = data.reduce((acc, item) => acc + item.value, 0) || 1;
+    const renderPieLabel = (props: any) => {
+      const RADIAN = Math.PI / 180;
+      const { cx, cy, midAngle, innerRadius, outerRadius, percent, value, name } = props;
+      const isSmall = percent < 0.07 || String(name).length > 18;
+      const sin = Math.sin(-RADIAN * midAngle);
+      const cos = Math.cos(-RADIAN * midAngle);
+      const label = `${truncateLabel(String(name), isSmall ? 24 : 16)} ${fmtValuePct(Number(value), total, metric)}`;
+
+      if (!isSmall) {
+        const radius = innerRadius + (outerRadius - innerRadius) * 0.58;
+        const x = cx + radius * cos;
+        const y = cy + radius * sin;
+        return (
+          <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" style={{ fontSize: 10, fontWeight: 700, pointerEvents: 'none' }}>
+            {label}
+          </text>
+        );
+      }
+
+      const sx = cx + outerRadius * cos;
+      const sy = cy + outerRadius * sin;
+      const mx = cx + (outerRadius + 16) * cos;
+      const my = cy + (outerRadius + 16) * sin;
+      const ex = mx + (cos >= 0 ? 34 : -34);
+      const ey = my;
+      return (
+        <g>
+          <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke="var(--qd-text-muted)" fill="none" strokeWidth={1} />
+          <text x={ex + (cos >= 0 ? 4 : -4)} y={ey} fill="var(--qd-text)" textAnchor={cos >= 0 ? 'start' : 'end'} dominantBaseline="central" style={{ fontSize: 10, fontWeight: 600 }}>
+            {label}
+          </text>
+        </g>
+      );
+    };
     return (
-      <ResponsiveContainer width="100%" height={460}>
-        <PieChart>
+      <ResponsiveContainer width="100%" height={500}>
+        <PieChart margin={{ top: 18, right: 220, bottom: 18, left: 24 }}>
           <Pie
             data={data} dataKey="value" nameKey="name"
-            innerRadius={view === 'donut' ? '55%' : 0} outerRadius="85%"
+            cx="42%"
+            innerRadius={view === 'donut' ? '52%' : 0} outerRadius="72%"
             paddingAngle={1}
+            labelLine={false}
+            label={renderPieLabel}
             onClick={(d: any) => toggle(rowField as any, d.name)}
           >
             {data.map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} style={{ cursor: 'pointer' }} />)}
           </Pie>
-          <RTooltip formatter={(v: any) => fmt(Number(v), metric)} />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
+          <RTooltip formatter={(v: any) => fmtValuePct(Number(v), total, metric)} />
+          <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: 11, lineHeight: '18px', maxWidth: 210 }} />
         </PieChart>
       </ResponsiveContainer>
     );
@@ -343,7 +405,7 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
 
   // Bar variants
   const data = ct.rows.map((r, i) => {
-    const obj: any = { name: r };
+    const obj: any = { name: r, __base: ct.rowTotals[i] || ct.matrix[i].reduce((acc, value) => acc + value, 0) || ct.total || 1 };
     if (colField) ct.cols.forEach((c, j) => (obj[c] = ct.matrix[i][j]));
     else obj[METRIC_LABEL[metric]] = ct.matrix[i][0];
     return obj;
@@ -356,14 +418,77 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
   const height = Math.max(460, ct.rows.length * rowHeight + 130);
   const showBarLabels = !stackId && (keys.length === 1 || (keys.length <= 3 && ct.rows.length <= 10));
 
+  if (isGrouped) {
+    const flatData = ct.rows.flatMap((r, i) => {
+      const rowBase = ct.matrix[i].reduce((acc, value) => acc + value, 0) || ct.rowTotals[i] || 1;
+      return keys
+        .map((k, j) => ({
+          name: r,
+          series: k,
+          value: ct.matrix[i][j] ?? 0,
+          base: rowBase,
+          fill: PALETTE[j % PALETTE.length],
+          axisLabel: `${truncateLabel(r, 20)} · ${truncateLabel(k, 26)}`,
+        }))
+        .filter((item) => item.value > 0)
+        .sort((a, b) => b.value - a.value);
+    });
+    const groupedHeight = Math.max(500, flatData.length * 30 + 150);
+
+    return (
+      <div className="qd-cross-chart-stack">
+        <SeriesLegend items={keys.map((k, i) => ({ label: k, color: PALETTE[i % PALETTE.length] }))} />
+        <ResponsiveContainer width="100%" height={groupedHeight}>
+          <BarChart data={flatData} layout="vertical" margin={{ top: 10, right: 170, left: 12, bottom: 24 }} barCategoryGap={6}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+            <XAxis type="number" tick={{ fontSize: 10 }} />
+            <YAxis dataKey="axisLabel" type="category" tick={{ fontSize: 10 }} width={Math.min(420, Math.max(240, yAxisWidth + 80))} interval={0} />
+            <RTooltip
+              formatter={(v: any, _name, props: any) => fmtValuePct(Number(v), Number(props.payload?.base ?? 0), metric)}
+              labelFormatter={(_, payload: any[]) => {
+                const item = payload?.[0]?.payload;
+                return item ? `${item.name} · ${item.series}` : '';
+              }}
+            />
+            <Bar
+              dataKey="value"
+              cursor="pointer"
+              maxBarSize={18}
+              onClick={(d: any) => {
+                toggle(rowField as any, d.name);
+                if (colField) toggle(colField as any, d.series);
+              }}
+            >
+              {flatData.map((item) => <Cell key={`${item.name}:${item.series}`} fill={item.fill} />)}
+              <LabelList
+                dataKey="value"
+                content={(props: any) => {
+                  const item = flatData[props.index];
+                  if (!item || !props.value) return null;
+                  const x = Number(props.x ?? 0) + Number(props.width ?? 0) + 8;
+                  const y = Number(props.y ?? 0) + Number(props.height ?? 0) / 2;
+                  return (
+                    <text x={x} y={y} fill="var(--qd-text)" dominantBaseline="central" style={{ fontSize: 11, fontWeight: 700 }}>
+                      {fmtValuePct(Number(props.value), item.base, metric)}
+                    </text>
+                  );
+                }}
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} layout="vertical" margin={{ top: 18, right: 56, left: 12, bottom: 24 }} barCategoryGap={isGrouped ? 14 : 10} stackOffset={stackOffset as any}>
+      <BarChart data={data} layout="vertical" margin={{ top: 42, right: showBarLabels ? 170 : 72, left: 12, bottom: 24 }} barCategoryGap={isGrouped ? 14 : 10} stackOffset={stackOffset as any}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
         <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={view === 'stacked100' ? (v) => `${Math.round(v * 100)}%` : undefined} />
         <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={yAxisWidth} interval={0} />
         <RTooltip formatter={(v: any) => fmt(Number(v), metric)} />
-        <Legend wrapperStyle={{ fontSize: 10 }} />
+        <Legend verticalAlign="top" align="right" wrapperStyle={{ fontSize: 10, paddingBottom: 8 }} />
         {keys.map((k, i) => (
           <Bar
             key={k} dataKey={k} stackId={stackId} fill={PALETTE[i % PALETTE.length]}
@@ -377,12 +502,17 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
             {showBarLabels && (
               <LabelList
                 dataKey={k}
-                position="insideLeft"
-                offset={8}
-                fill="#1f2a12"
-                fontSize={11}
-                fontWeight={600}
-                formatter={(v: any) => (v ? fmt(Number(v), metric) : '')}
+                content={(props: any) => {
+                  const item = data[props.index];
+                  if (!item || !props.value) return null;
+                  const x = Number(props.x ?? 0) + Number(props.width ?? 0) + 8;
+                  const y = Number(props.y ?? 0) + Number(props.height ?? 0) / 2;
+                  return (
+                    <text x={x} y={y} fill="var(--qd-text)" dominantBaseline="central" style={{ fontSize: 11, fontWeight: 700 }}>
+                      {fmtValuePct(Number(props.value), Number(item.__base ?? 0), metric)}
+                    </text>
+                  );
+                }}
               />
             )}
           </Bar>

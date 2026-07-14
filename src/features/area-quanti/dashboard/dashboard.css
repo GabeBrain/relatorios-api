@@ -170,6 +170,39 @@
   background: var(--qd-surface);
   color: var(--qd-text);
 }
+.qd-cross-chart-stack {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+.qd-cross-series-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: center;
+  padding: 2px 4px 6px;
+  color: var(--qd-text-muted);
+  font-size: 10px;
+  line-height: 1.2;
+}
+.qd-cross-series-legend-item {
+  display: inline-flex;
+  max-width: 220px;
+  align-items: center;
+  gap: 5px;
+}
+.qd-cross-series-legend-item span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qd-cross-series-legend-swatch {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+}
 .qd-cross-table {
   background: var(--qd-surface);
   border-color: var(--qd-border);

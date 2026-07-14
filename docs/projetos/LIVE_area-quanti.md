@@ -31,10 +31,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 - **Correção adicional:** a visualização `Tabela dinâmica` da Análise Cruzada deixou de cair no fallback de barras agrupadas; agora a tabela é renderizada como tabela e gráficos só aparecem para visualizações gráficas.
 - **Layout:** os gráficos da Análise Cruzada ganharam mais altura mínima, margens internas e eixo Y responsivo para rótulos longos, deixando barras, pizza/rosca e treemap menos apertados.
 - **Filtros:** a barra lateral passou a oferecer também `Cidade (empreendimento)` (`cidade_original`), além de `Cidade (coleta)`, respeitando o filtro de Estado quando aplicado.
-- **Barras agrupadas:** cruzamentos universais com muitas séries agora calculam altura por categoria conforme a quantidade de barras, ampliam o eixo Y e ocultam labels internos quando eles prejudicam a leitura, mantendo valores acessíveis via tooltip.
+- **Barras agrupadas:** cruzamentos universais com muitas séries agora ordenam as barras de cada grupo do maior para o menor, calculam altura por categoria conforme a quantidade de barras, ampliam o eixo Y, exibem valor + percentual ao lado da barra e usam legenda superior para evitar leitura distante.
+- **Pizza/Rosca:** rótulos passam a exibir nome + valor/percentual dentro da fatia quando há espaço; fatias pequenas usam chamada externa com linha guia. A legenda foi movida para a lateral direita.
 - **Contraste numérico:** no modo escuro, labels numéricos de gráficos voltaram a usar o texto claro do tema; o amarelo Brain fica restrito aos KPIs principais.
 - **Por quê:** integrar essas áreas ao modo escuro sem alterar a paleta global nem qualquer função de cálculo, filtro, gráfico ou exportação.
-- **Arquivos:** `src/features/area-quanti/dashboard/CrossAnalysis.tsx`, `src/features/area-quanti/dashboard/Charts.tsx`, `src/features/area-quanti/dashboard/dashboard.css`.
+- **Arquivos:** `src/features/area-quanti/dashboard/CrossAnalysis.tsx`, `src/features/area-quanti/dashboard/Charts.tsx`, `src/features/area-quanti/dashboard/FiltersSidebar.tsx`, `src/features/area-quanti/dashboard/types.ts`, `src/features/area-quanti/dashboard/dashboard.css`.
 
 ### 2026-07-13 — Reversão da cor da barra superior no modo claro — Lovable
 - **O quê:** ajuste em `src/features/area-quanti/dashboard/dashboard.css` para que o token `--qd-area-topbar-bg` volte a ser `var(--qd-surface)` (branco) no modo claro, mantendo `#1B1E28` apenas no modo escuro. O azul `#2563EB` retorna como cor da aba ativa no modo claro; o amarelo `#F8D000` permanece no modo escuro. Tokens CSS `--qd-tab-active`, `--qd-tab-inactive` e `--qd-tab-inactive-hover` foram criados para garantir alto contraste em ambos os temas sem duplicar classes.
