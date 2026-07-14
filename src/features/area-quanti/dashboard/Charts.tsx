@@ -204,15 +204,15 @@ export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
   const max = Math.max(1, ...ct.matrix.flat());
   const fmt = format ?? ((n: number) => (n ? n.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : ''));
   return (
-    <div className="qd-scroll overflow-auto">
+    <div className="qd-heatmap qd-scroll overflow-auto">
       <table className="min-w-full border-collapse text-[11px]">
         <thead>
           <tr>
-            <th className="sticky left-0 z-10 p-1 text-left font-medium text-[var(--qd-text-muted)]" style={{ background: 'var(--qd-surface)' }}>
+            <th className="qd-heatmap-sticky sticky left-0 z-10 p-1 text-left font-medium text-[var(--qd-text-muted)]">
               {metricLabel ?? ''}
             </th>
             {ct.cols.map((c) => (
-              <th key={c} className="max-w-[140px] truncate p-1 text-left font-medium text-[var(--qd-text-muted)]" title={c}>
+              <th key={c} className="qd-heatmap-col max-w-[140px] truncate p-1 text-left font-medium text-[var(--qd-text-muted)]" title={c}>
                 {c}
               </th>
             ))}
@@ -221,7 +221,7 @@ export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
         <tbody>
           {ct.rows.map((r, i) => (
             <tr key={r}>
-              <th className="sticky left-0 z-10 max-w-[160px] truncate whitespace-nowrap p-1 pr-2 text-left font-medium" style={{ background: 'var(--qd-surface)' }} title={r}>
+              <th className="qd-heatmap-sticky sticky left-0 z-10 max-w-[160px] truncate whitespace-nowrap p-1 pr-2 text-left font-medium" title={r}>
                 {r}
               </th>
               {ct.cols.map((c, j) => {
@@ -233,7 +233,7 @@ export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
                     className="qd-hm-cell whitespace-nowrap p-1 text-center"
                     style={{
                       background: `rgba(${HEATMAP_RGB}, ${0.08 + alpha * 0.72})`,
-                      color: alpha > 0.55 ? '#fff' : '#0f172a',
+                      color: alpha > 0.55 ? 'var(--qd-heatmap-strong-text, #fff)' : 'var(--qd-heatmap-soft-text, #0f172a)',
                       minWidth: 60,
                     }}
                     title={`${r} × ${c}: ${fmt(v)}`}

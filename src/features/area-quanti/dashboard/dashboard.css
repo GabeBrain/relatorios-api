@@ -97,6 +97,43 @@
 }
 .qd-chip button { color: var(--qd-primary); opacity: .75; }
 .qd-chip button:hover { opacity: 1; }
+.qd-heatmap {
+  --qd-heatmap-soft-text: #1f2a12;
+  --qd-heatmap-strong-text: #ffffff;
+  background: var(--qd-surface);
+  color: var(--qd-text);
+}
+.qd-heatmap table {
+  background: var(--qd-surface);
+}
+.qd-heatmap th {
+  color: var(--qd-text-muted);
+}
+.qd-heatmap-sticky {
+  background: var(--qd-surface);
+}
+.qd-heatmap tbody .qd-heatmap-sticky {
+  color: var(--qd-text);
+}
+.qd-heatmap-col {
+  background: var(--qd-surface);
+}
+.dark .qd-root .qd-heatmap {
+  --qd-heatmap-soft-text: #dfe6cf;
+  --qd-heatmap-strong-text: #ffffff;
+  background: var(--qd-surface);
+}
+.dark .qd-root .qd-heatmap table,
+.dark .qd-root .qd-heatmap-sticky,
+.dark .qd-root .qd-heatmap-col {
+  background: var(--qd-surface) !important;
+}
+.dark .qd-root .qd-heatmap th {
+  color: var(--qd-text-muted) !important;
+}
+.dark .qd-root .qd-heatmap tbody .qd-heatmap-sticky {
+  color: var(--qd-text) !important;
+}
 .qd-hm-cell { transition: transform .12s ease; }
 .qd-hm-cell:hover { transform: scale(1.04); outline: 2px solid var(--qd-primary); outline-offset: -1px; }
 .qd-scroll { scrollbar-width: thin; scrollbar-color: var(--qd-scroll-thumb) transparent; }
