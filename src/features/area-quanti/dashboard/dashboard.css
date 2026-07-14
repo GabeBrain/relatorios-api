@@ -68,6 +68,13 @@
 .qd-kpi-label { font-size: 11px; color: var(--qd-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .qd-section-title { font-size: 15px; font-weight: 700; color: var(--qd-text); }
 .qd-section-sub { font-size: 12px; color: var(--qd-text-muted); }
+.qd-collapse-trigger {
+  color: var(--qd-text);
+  transition: background .12s ease, border-color .12s ease;
+}
+.qd-collapse-trigger:hover {
+  background: var(--qd-btn-hover);
+}
 .qd-topbar { background: var(--qd-topbar-bg); border-bottom: 1px solid var(--qd-border); }
 .qd-side { background: var(--qd-side-bg); }
 .dark .qd-root .qd-topbar,
@@ -139,6 +146,11 @@
 .qd-map-zoom-stage {
   max-height: 520px;
   border-radius: 6px;
+  cursor: grab;
+  user-select: none;
+}
+.qd-map-zoom-stage:active {
+  cursor: grabbing;
 }
 .qd-map-zoom-canvas {
   transform-origin: top left;

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { ChevronDown, ChevronRight, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { DATASETS } from './datasets';
 import { useQuantiDataset } from './useQuantiDataset';
 import { useQuantiStore } from './store';
@@ -18,6 +18,7 @@ export function QuantiDashboard() {
   const setDatasetId = useQuantiStore((s) => s.setDatasetId);
   const filters = useQuantiStore((s) => s.filters);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [crossAnalysisOpen, setCrossAnalysisOpen] = useState(false);
 
   const ds = DATASETS.find((d) => d.id === datasetId) ?? DATASETS[0];
   const { data, loading, error } = useQuantiDataset(ds);
@@ -205,8 +206,21 @@ export function QuantiDashboard() {
 
             {/* Análise Cruzada */}
             <section className="space-y-2">
-              <h2 className="qd-section-title">Análise Cruzada (pivot dinâmico)</h2>
-              <CrossAnalysis rows={filtered} questions={data.questions} />
+              <button
+                type="button"
+                onClick={() => setCrossAnalysisOpen((v) => !v)}
+                className="qd-collapse-trigger w-full rounded-md border border-[var(--qd-border)] bg-[var(--qd-surface)] px-3 py-2 text-left"
+                aria-expanded={crossAnalysisOpen}
+              >
+                <span className="flex items-center gap-2">
+                  {crossAnalysisOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  <span className="qd-section-title">Análise Cruzada (pivot dinâmico)</span>
+                </span>
+                <span className="text-[11px] text-[var(--qd-text-muted)]">
+                  {crossAnalysisOpen ? 'Clique para recolher' : 'Clique para abrir a análise cruzada universal'}
+                </span>
+              </button>
+              {crossAnalysisOpen && <CrossAnalysis rows={filtered} questions={data.questions} />}
             </section>
 
             <div className="pt-2 text-[11px] text-[var(--qd-text-muted)]">

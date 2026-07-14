@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { ChevronRight, Home, Loader2, Minus, Plus, RotateCcw } from 'lucide-react';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import { geoMercator, geoPath } from 'd3-geo';
@@ -195,7 +195,7 @@ function BrazilLevel({
   return (
     <div className="relative">
       <ZoomControls zoom={zoom} onZoomIn={() => setZoom((v) => Math.min(3, Number((v + 0.25).toFixed(2))))} onZoomOut={() => setZoom((v) => Math.max(0.75, Number((v - 0.25).toFixed(2))))} onReset={() => setZoom(1)} />
-      <div className="qd-map-zoom-stage qd-scroll overflow-auto">
+      <ZoomStage>
         <div className="qd-map-zoom-canvas" style={{ width: `${zoom * 100}%`, minWidth: '100%' }}>
           <ComposableMap projection="geoMercator" projectionConfig={{ scale: 720, center: [-54, -15] }} width={800} height={480} style={{ width: '100%', height: 'auto' }}>
             <Geographies geography={geo}>
@@ -228,7 +228,7 @@ function BrazilLevel({
             </Geographies>
           </ComposableMap>
         </div>
-      </div>
+      </ZoomStage>
       {hover && <Tooltip x={hover.x} y={hover.y}>
         <div className="font-semibold">{ufInfo(hover.uf)?.name ?? hover.uf}</div>
         <div className="mt-0.5 text-[11px]">
@@ -294,7 +294,7 @@ function UFLevel({
   return (
     <div className="relative">
       <ZoomControls zoom={zoom} onZoomIn={() => setZoom((v) => Math.min(4, Number((v + 0.25).toFixed(2))))} onZoomOut={() => setZoom((v) => Math.max(0.75, Number((v - 0.25).toFixed(2))))} onReset={() => setZoom(1)} />
-      <div className="qd-map-zoom-stage qd-scroll overflow-auto">
+      <ZoomStage>
         <div className="qd-map-zoom-canvas" style={{ width: `${zoom * 100}%`, minWidth: '100%' }}>
           <svg viewBox="0 0 800 480" width="100%" style={{ height: 'auto' }}>
             {geo.features.map((f: any, i: number) => {
@@ -321,7 +321,7 @@ function UFLevel({
             })}
           </svg>
         </div>
-      </div>
+      </ZoomStage>
       {hover && (() => {
         const key = strip(hover.name);
         const n = byCity.get(key)?.count ?? 0;
@@ -335,6 +335,47 @@ function UFLevel({
         );
       })()}
       <Legend max={max} label="entrevistas" />
+    </div>
+  );
+}
+
+function ZoomStage({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const drag = useRef({ active: false, moved: false, x: 0, y: 0, left: 0, top: 0 });
+
+  return (
+    <div
+      ref={ref}
+      className="qd-map-zoom-stage qd-scroll overflow-auto"
+      onMouseDown={(e) => {
+        if (e.button !== 0 || !ref.current) return;
+        drag.current = {
+          active: true,
+          moved: false,
+          x: e.clientX,
+          y: e.clientY,
+          left: ref.current.scrollLeft,
+          top: ref.current.scrollTop,
+        };
+      }}
+      onMouseMove={(e) => {
+        if (!drag.current.active || !ref.current) return;
+        const dx = e.clientX - drag.current.x;
+        const dy = e.clientY - drag.current.y;
+        if (Math.abs(dx) + Math.abs(dy) > 3) drag.current.moved = true;
+        ref.current.scrollLeft = drag.current.left - dx;
+        ref.current.scrollTop = drag.current.top - dy;
+      }}
+      onMouseUp={() => { drag.current.active = false; }}
+      onMouseLeave={() => { drag.current.active = false; }}
+      onClickCapture={(e) => {
+        if (!drag.current.moved) return;
+        e.preventDefault();
+        e.stopPropagation();
+        drag.current.moved = false;
+      }}
+    >
+      {children}
     </div>
   );
 }
