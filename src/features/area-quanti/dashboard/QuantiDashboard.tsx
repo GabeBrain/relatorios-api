@@ -158,10 +158,10 @@ function MetricSelect({ metric, onChange }: { metric: HeatmapMetric; onChange: (
 }
 
 function formatHeatmapValue(metric: HeatmapMetric, ct: ReturnType<typeof crosstab>, value: number, rowIndex: number) {
-  if (metric === 'pct') return value ? `${value.toFixed(1)}%` : '';
-  if (metric === 'count') return value ? value.toLocaleString('pt-BR') : '';
+  if (metric === 'pct') return `${value.toFixed(1)}%`;
+  if (metric === 'count') return value.toLocaleString('pt-BR');
   const total = ct.rowTotals[rowIndex] || 1;
-  return value ? `${value.toLocaleString('pt-BR')} · ${((value / total) * 100).toFixed(1)}%` : '';
+  return `${value.toLocaleString('pt-BR')} · ${((value / total) * 100).toFixed(1)}%`;
 }
 
 function IntentHeatmapCard({

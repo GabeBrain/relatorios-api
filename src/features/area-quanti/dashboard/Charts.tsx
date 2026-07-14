@@ -213,7 +213,7 @@ export function HistogramChart({ rows, field, bins = 20, height = 260 }: HistPro
 interface HeatmapProps { ct: Crosstab; metricLabel?: string; height?: number; format?: (n: number, rowIndex: number, colIndex: number) => string }
 export function Heatmap({ ct, metricLabel, format }: HeatmapProps) {
   const max = Math.max(1, ...ct.matrix.flat());
-  const fmt = format ?? ((n: number) => (n ? n.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : ''));
+  const fmt = format ?? ((n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 }));
   return (
     <div className="qd-heatmap overflow-hidden">
       <table className="w-full table-fixed border-collapse text-[10px] sm:text-[11px]">

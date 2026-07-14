@@ -37,6 +37,7 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 - **Layout geográfico:** o card `Distribuição por região` saiu da seção Ranking e passou a ocupar o espaço abaixo do mapa interativo, dentro do bloco `Brasil por estado`.
 - **Intenção de compra:** todos os cruzamentos de intenção foram agrupados na seção `Intenção de Compra`, com intenção como coluna e o filtro analisado como linha; cada card inicia em `%` e ganhou seletor para `%`, `Quantidade` e `Quantidade + %`.
 - **Cruzamentos:** heatmaps prontos também passaram a iniciar em `%`, com seletor para `%`, `Quantidade` e `Quantidade + %`, e a tabela visual foi ajustada para caber na largura do card sem exigir arraste lateral.
+- **Zeros em heatmaps:** células sem amostra nos cruzamentos e cruzamentos de intenção agora exibem `0.0%`, `0` ou `0 · 0.0%` conforme a métrica selecionada, evitando lacunas visuais.
 - **Ranking:** cards `Top 10 cidades` e `Top 10 estados` foram removidos por redundância com os rankings geográficos já existentes.
 - **Perfil demográfico:** o card `Geração` ganhou botão informativo com as faixas de nascimento usadas para Geração Silenciosa, Baby Boomers, Geração X, Geração Y/Millennials e Geração Z.
 - **Tratamento de `-`:** em `Intenção de compra`, o valor `-` passou a ser tratado como nulo e desconsiderado em filtros, gráficos e cruzamentos; em `Tempo para compra`, `-` passou a ser exibido/agregado como `0. Sem intenção`.
