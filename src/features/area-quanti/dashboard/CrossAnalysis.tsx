@@ -295,9 +295,8 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
   view: ViewKind; ct: UniversalCrosstab; metric: UniversalMetric; rowField: string; colField: string | null;
 }) {
   const toggle = useQuantiStore((s) => s.toggleValue);
-  const height = Math.max(420, ct.rows.length * 34 + 110);
   const maxRowLabel = Math.max(0, ...ct.rows.map((r) => String(r).length));
-  const yAxisWidth = Math.min(260, Math.max(170, maxRowLabel * 6.5));
+  const yAxisWidth = Math.min(320, Math.max(180, maxRowLabel * 6.8));
 
   if (view === 'heatmap') {
     return <Heatmap ct={ct as any} metricLabel={rowField} format={(n) => fmt(n, metric)} />;
@@ -352,10 +351,14 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
   const keys = colField ? ct.cols : [METRIC_LABEL[metric]];
   const stackId = view === 'stacked' || view === 'stacked100' ? 's' : undefined;
   const stackOffset = view === 'stacked100' ? 'expand' : 'none';
+  const isGrouped = view === 'grouped' && keys.length > 1;
+  const rowHeight = isGrouped ? Math.max(54, keys.length * 18 + 28) : 42;
+  const height = Math.max(460, ct.rows.length * rowHeight + 130);
+  const showBarLabels = !stackId && (keys.length === 1 || (keys.length <= 3 && ct.rows.length <= 10));
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} layout="vertical" margin={{ top: 14, right: 48, left: 12, bottom: 18 }} barCategoryGap={8} stackOffset={stackOffset as any}>
+      <BarChart data={data} layout="vertical" margin={{ top: 18, right: 56, left: 12, bottom: 24 }} barCategoryGap={isGrouped ? 14 : 10} stackOffset={stackOffset as any}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
         <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={view === 'stacked100' ? (v) => `${Math.round(v * 100)}%` : undefined} />
         <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={yAxisWidth} interval={0} />
@@ -369,8 +372,9 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
               if (colField) toggle(colField as any, k);
             }}
             cursor="pointer"
+            maxBarSize={isGrouped ? 16 : 24}
           >
-            {!stackId && (
+            {showBarLabels && (
               <LabelList
                 dataKey={k}
                 position="insideLeft"

@@ -57,7 +57,7 @@ export const FIELD_LABELS: Record<CategoricalField, string> = {
   localidade: 'Localidade',
   estado: 'Estado',
   cidade: 'Cidade (coleta)',
-  cidade_original: 'Cidade do empreendimento',
+  cidade_original: 'Cidade (empreendimento)',
   genero: 'Gênero',
   faixa_etaria: 'Faixa etária',
   geracao: 'Geração',

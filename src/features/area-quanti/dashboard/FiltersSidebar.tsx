@@ -10,6 +10,7 @@ const FILTER_FIELDS: CategoricalField[] = [
   'data_pesquisa',
   'estado',
   'cidade',
+  'cidade_original',
   'regiao',
   'genero',
   'faixa_etaria',
@@ -35,9 +36,9 @@ export function FiltersSidebar({ open, onClose, rows }: Props) {
   const optionsMap = useMemo(() => {
     const map: Partial<Record<CategoricalField, MultiSelectOption[]>> = {};
     for (const field of FILTER_FIELDS) {
-      // Cidade depende de Estado (se selecionado)
+      // Cidades dependem de Estado (se selecionado)
       let base = rows;
-      if (field === 'cidade' && filters.estado?.length) {
+      if ((field === 'cidade' || field === 'cidade_original') && filters.estado?.length) {
         base = rows.filter((r) => filters.estado!.includes(String(r.estado)));
       }
       const values = orderedValues(field, distinctValues(base, field));
