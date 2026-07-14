@@ -131,17 +131,18 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
     <ChartCard
       title="Análise Cruzada Universal"
       subtitle="Cruze qualquer variável analítica da base. Novas colunas aparecem automaticamente."
+      className="qd-cross-analysis"
       action={
         <div className="flex flex-wrap items-center gap-1.5">
-          <div className="flex items-center rounded-md border border-slate-200 bg-white">
+          <div className="qd-cross-mode-group flex items-center rounded-md border border-slate-200 bg-white">
             <ModeBtn active={mode === 'both'} onClick={() => setMode('both')} icon={<LayoutGrid className="h-3 w-3" />}>Tabela + Gráfico</ModeBtn>
             <ModeBtn active={mode === 'table'} onClick={() => setMode('table')} icon={<Table2 className="h-3 w-3" />}>Só tabela</ModeBtn>
             <ModeBtn active={mode === 'chart'} onClick={() => setMode('chart')} icon={<BarChart3 className="h-3 w-3" />}>Só gráfico</ModeBtn>
           </div>
-          <button onClick={exportCSV} className="flex items-center gap-1 rounded border border-slate-200 px-2 py-1 text-[11px] hover:bg-slate-50">
+          <button onClick={exportCSV} className="qd-cross-export-btn flex items-center gap-1 rounded border border-slate-200 px-2 py-1 text-[11px] hover:bg-slate-50">
             <Download className="h-3 w-3" /> CSV
           </button>
-          <button onClick={exportXLSX} className="flex items-center gap-1 rounded border border-slate-200 px-2 py-1 text-[11px] hover:bg-slate-50">
+          <button onClick={exportXLSX} className="qd-cross-export-btn flex items-center gap-1 rounded border border-slate-200 px-2 py-1 text-[11px] hover:bg-slate-50">
             <FileSpreadsheet className="h-3 w-3" /> XLSX
           </button>
         </div>
@@ -211,7 +212,7 @@ function SelectBox({ label, children }: { label: string; children: React.ReactNo
   return (
     <label className="block text-[11px] font-semibold text-[var(--qd-text-muted)]">
       <div className="mb-0.5">{label}</div>
-      <div className="[&_select]:h-8 [&_select]:rounded-md [&_select]:border [&_select]:border-slate-200 [&_select]:bg-white [&_select]:px-2 [&_select]:text-xs">
+      <div className="qd-cross-select-wrap [&_select]:h-8 [&_select]:rounded-md [&_select]:border [&_select]:border-slate-200 [&_select]:bg-white [&_select]:px-2 [&_select]:text-xs">
         {children}
       </div>
     </label>
@@ -222,7 +223,7 @@ function ModeBtn({ active, onClick, icon, children }: { active: boolean; onClick
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1 px-2 py-1 text-[11px] ${active ? 'bg-[var(--qd-light)] text-[var(--qd-primary)] font-semibold' : 'text-[var(--qd-text-muted)] hover:bg-slate-50'}`}
+      className={`qd-cross-mode-btn flex items-center gap-1 px-2 py-1 text-[11px] ${active ? 'is-active bg-[var(--qd-light)] text-[var(--qd-primary)] font-semibold' : 'text-[var(--qd-text-muted)] hover:bg-slate-50'}`}
     >
       {icon}{children}
     </button>
@@ -251,9 +252,9 @@ function PivotTable({ ct, rowLabel, colLabel, rowField, colField }: {
   const showColTotals = ct.metric === 'count' || ct.metric === 'sum';
 
   return (
-    <div className="qd-scroll max-h-[520px] overflow-auto rounded-md border border-slate-100">
+    <div className="qd-cross-table qd-scroll max-h-[520px] overflow-auto rounded-md border border-slate-100">
       <table className="min-w-full text-[11px]">
-        <thead className="sticky top-0 bg-slate-50">
+        <thead className="qd-cross-table-head sticky top-0 bg-slate-50">
           <tr>
             <th className="sticky left-0 z-10 bg-slate-50 p-2 text-left font-semibold">{rowLabel}</th>
             {colField ? ct.cols.map((c) => (
@@ -266,7 +267,7 @@ function PivotTable({ ct, rowLabel, colLabel, rowField, colField }: {
         </thead>
         <tbody>
           {ct.rows.map((r, i) => (
-            <tr key={r} className="odd:bg-white even:bg-slate-50/40">
+            <tr key={r} className="qd-cross-table-row odd:bg-white even:bg-slate-50/40">
               <th className="sticky left-0 z-10 cursor-pointer bg-inherit p-2 text-left font-medium hover:text-[var(--qd-primary)]" title={`Filtrar ${rowLabel}: ${r}`} onClick={() => toggle(rowField as any, r)}>{r}</th>
               {ct.matrix[i].map((v, j) => (
                 <td key={j} className="p-2 text-right tabular-nums">{fmt(v, ct.metric)}</td>
@@ -274,7 +275,7 @@ function PivotTable({ ct, rowLabel, colLabel, rowField, colField }: {
               <td className="p-2 text-right font-semibold tabular-nums">{showColTotals ? fmt(ct.rowTotals[i], ct.metric === 'sum' ? 'sum' : 'count') : ''}</td>
             </tr>
           ))}
-          <tr className="border-t border-slate-200 bg-slate-100 font-semibold">
+          <tr className="qd-cross-table-total border-t border-slate-200 bg-slate-100 font-semibold">
             <td className="p-2 text-left">Total</td>
             {ct.matrix[0]?.map((_, j) => (
               <td key={j} className="p-2 text-right tabular-nums">{showColTotals ? fmt(ct.colTotals[j], ct.metric === 'sum' ? 'sum' : 'count') : ''}</td>

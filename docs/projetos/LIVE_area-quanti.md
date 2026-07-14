@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-14 — Contraste da Análise Cruzada Universal no modo escuro — Lovable
+- **O quê:** ajuste visual localizado na aba Banco Quanti para que a Análise Cruzada Universal respeite os tokens do tema escuro: controles de visualização, botões CSV/XLSX, selects, tabela pivot, cabeçalho, linhas alternadas e total agora usam `--qd-surface`, `--qd-surface-2`, `--qd-border`, `--qd-text` e `--qd-text-muted`, eliminando fundos brancos/cinzas claros no dark mode.
+- **Por quê:** integrar a área ao modo escuro sem alterar a paleta global nem qualquer função de cálculo, filtro, gráfico ou exportação.
+- **Arquivos:** `src/features/area-quanti/dashboard/CrossAnalysis.tsx`, `src/features/area-quanti/dashboard/dashboard.css`.
+
 ### 2026-07-13 — Reversão da cor da barra superior no modo claro — Lovable
 - **O quê:** ajuste em `src/features/area-quanti/dashboard/dashboard.css` para que o token `--qd-area-topbar-bg` volte a ser `var(--qd-surface)` (branco) no modo claro, mantendo `#1B1E28` apenas no modo escuro. O azul `#2563EB` retorna como cor da aba ativa no modo claro; o amarelo `#F8D000` permanece no modo escuro. Tokens CSS `--qd-tab-active`, `--qd-tab-inactive` e `--qd-tab-inactive-hover` foram criados para garantir alto contraste em ambos os temas sem duplicar classes.
 - **Por quê:** a cor `#1B1E28` foi aplicada indesejadamente no modo claro; a solicitação do usuário era para deixá-la apenas no modo escuro, preservando o visual claro original da barra de abas (`Banco Quanti` / `Sobre`).

@@ -108,6 +108,97 @@
   border: 1px solid var(--qd-border);
 }
 
+/* Análise Cruzada Universal: controles e tabela seguem os tokens do tema. */
+.qd-cross-analysis .qd-cross-mode-group,
+.qd-cross-analysis .qd-cross-export-btn,
+.qd-cross-analysis .qd-cross-select-wrap select {
+  background: var(--qd-surface);
+  border-color: var(--qd-border);
+  color: var(--qd-text);
+}
+.qd-cross-analysis .qd-cross-mode-btn:hover,
+.qd-cross-analysis .qd-cross-export-btn:hover {
+  background: var(--qd-btn-hover);
+}
+.qd-cross-analysis .qd-cross-mode-btn.is-active {
+  background: var(--qd-light);
+  color: var(--qd-primary);
+}
+.qd-cross-analysis .qd-cross-select-wrap select:focus {
+  border-color: var(--qd-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--qd-primary) 22%, transparent);
+  outline: none;
+}
+.qd-cross-analysis .qd-cross-select-wrap option {
+  background: var(--qd-surface);
+  color: var(--qd-text);
+}
+.qd-cross-table {
+  background: var(--qd-surface);
+  border-color: var(--qd-border);
+  color: var(--qd-text);
+}
+.qd-cross-table th,
+.qd-cross-table td {
+  border-bottom: 1px solid var(--qd-border);
+  color: var(--qd-text);
+}
+.qd-cross-table-head,
+.qd-cross-table-head th {
+  background: var(--qd-surface-2);
+  color: var(--qd-text-muted);
+}
+.qd-cross-table-row {
+  background: var(--qd-surface);
+}
+.qd-cross-table-row:nth-child(even) {
+  background: color-mix(in srgb, var(--qd-surface-2) 72%, var(--qd-surface));
+}
+.qd-cross-table-total {
+  background: var(--qd-light);
+  border-color: var(--qd-border);
+}
+.qd-cross-table-total td {
+  color: var(--qd-text);
+}
+.dark .qd-cross-analysis .qd-cross-mode-group,
+.dark .qd-cross-analysis .qd-cross-export-btn,
+.dark .qd-cross-analysis .qd-cross-select-wrap select,
+.dark .qd-cross-table {
+  background: var(--qd-surface-2) !important;
+  border-color: var(--qd-border) !important;
+  color: var(--qd-text) !important;
+}
+.dark .qd-cross-analysis .qd-cross-mode-btn:not(.is-active) {
+  color: var(--qd-text-muted) !important;
+}
+.dark .qd-cross-analysis .qd-cross-mode-btn:hover,
+.dark .qd-cross-analysis .qd-cross-export-btn:hover {
+  background: var(--qd-btn-hover) !important;
+}
+.dark .qd-cross-table-head,
+.dark .qd-cross-table-head th {
+  background: #3a3a38 !important;
+  color: var(--qd-text) !important;
+}
+.dark .qd-cross-table-row {
+  background: var(--qd-surface) !important;
+}
+.dark .qd-cross-table-row:nth-child(even) {
+  background: var(--qd-surface-2) !important;
+}
+.dark .qd-cross-table-total {
+  background: var(--qd-light) !important;
+}
+.dark .qd-cross-table th,
+.dark .qd-cross-table td {
+  border-color: var(--qd-border);
+  color: var(--qd-text) !important;
+}
+.dark .qd-cross-table .bg-inherit {
+  background: inherit !important;
+}
+
 /* ── Recharts dark-mode contrast (axes, grid, legend, tooltip, labels) ── */
 .dark .qd-root .recharts-cartesian-axis-tick text,
 .dark .qd-root .recharts-polar-angle-axis-tick text {
