@@ -442,9 +442,9 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
         }))
         .filter((item) => item.value > 0)
         .sort((a, b) => b.value - a.value)
-        .map((item, itemIndex) => ({
+        .map((item, itemIndex, arr) => ({
           ...item,
-          axisLabel: itemIndex === 0 ? r : '',
+          axisLabel: itemIndex === Math.floor((arr.length - 1) / 2) ? r : '',
         }));
       return [
         ...items,
@@ -466,7 +466,7 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
       <div className="qd-cross-chart-stack">
         <SeriesLegend items={keys.map((k, i) => ({ label: k, color: PALETTE[i % PALETTE.length] }))} />
         <ResponsiveContainer width="100%" height={groupedHeight}>
-          <BarChart data={flatData} layout="vertical" margin={{ top: 12, right: 130, left: 12, bottom: 24 }} barCategoryGap={4}>
+          <BarChart data={flatData} layout="vertical" margin={{ top: 12, right: 220, left: 12, bottom: 24 }} barCategoryGap={4}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
             <XAxis type="number" tick={{ fontSize: 10 }} />
             <YAxis dataKey="axisLabel" type="category" tick={{ fontSize: 11, fontWeight: 700 }} width={Math.min(260, Math.max(120, yAxisWidth - 60))} interval={0} />
@@ -492,18 +492,12 @@ function UniversalChart({ view, ct, metric, rowField, colField }: {
                 content={(props: any) => {
                   const item = flatData[props.index];
                   if (!item || item.isSpacer || !props.value) return null;
-                  const startX = Number(props.x ?? 0);
-                  const x = startX + Number(props.width ?? 0) + 8;
+                  const x = Number(props.x ?? 0) + Number(props.width ?? 0) + 8;
                   const y = Number(props.y ?? 0) + Number(props.height ?? 0) / 2;
                   return (
-                    <g>
-                      <text x={startX - 12} y={y} fill="var(--qd-text-muted)" textAnchor="end" dominantBaseline="central" style={{ fontSize: 10, fontWeight: 600 }}>
-                        {truncateLabel(String(item.secondaryLabel), 24)}
-                      </text>
-                      <text x={x} y={y} fill="var(--qd-text)" dominantBaseline="central" style={{ fontSize: 11, fontWeight: 700 }}>
-                        {fmtValuePct(Number(props.value), item.base, metric)}
-                      </text>
-                    </g>
+                    <text x={x} y={y} fill="var(--qd-text)" dominantBaseline="central" style={{ fontSize: 11, fontWeight: 700 }}>
+                      {fmtValuePct(Number(props.value), item.base, metric)} · {truncateLabel(String(item.secondaryLabel), 24)}
+                    </text>
                   );
                 }}
               />

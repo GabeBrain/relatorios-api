@@ -136,6 +136,13 @@
 }
 .qd-hm-cell { transition: transform .12s ease; }
 .qd-hm-cell:hover { transform: scale(1.04); outline: 2px solid var(--qd-primary); outline-offset: -1px; }
+.qd-map-zoom-stage {
+  max-height: 520px;
+  border-radius: 6px;
+}
+.qd-map-zoom-canvas {
+  transform-origin: top left;
+}
 .qd-scroll { scrollbar-width: thin; scrollbar-color: var(--qd-scroll-thumb) transparent; }
 .qd-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
 .qd-scroll::-webkit-scrollbar-thumb { background: var(--qd-scroll-thumb); border-radius: 4px; }

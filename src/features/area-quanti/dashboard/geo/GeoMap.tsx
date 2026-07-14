@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronRight, Home, Loader2 } from 'lucide-react';
+import { ChevronRight, Home, Loader2, Minus, Plus, RotateCcw } from 'lucide-react';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import { geoMercator, geoPath } from 'd3-geo';
 import type { QuantiRecord } from '../types';
@@ -182,6 +182,7 @@ function BrazilLevel({
   onClickUF: (uf: string) => void;
 }) {
   const [hover, setHover] = useState<{ uf: string; x: number; y: number } | null>(null);
+  const [zoom, setZoom] = useState(1);
   const colorFor = useMemo(
     () => buildColorScale(Array.from(byUF.values()).map((x) => x.count)),
     [byUF],
@@ -193,36 +194,41 @@ function BrazilLevel({
 
   return (
     <div className="relative">
-      <ComposableMap projection="geoMercator" projectionConfig={{ scale: 720, center: [-54, -15] }} width={800} height={480} style={{ width: '100%', height: 'auto' }}>
-        <Geographies geography={geo}>
-          {({ geographies }: any) =>
-            geographies.map((g: any) => {
-              const uf = g.properties.sigla as string;
-              const entry = byUF.get(uf);
-              const n = entry?.count ?? 0;
-              const active = selectedUFs.includes(uf);
-              return (
-                <Geography
-                  key={g.rsmKey}
-                  geography={g}
-                  fill={active ? YELLOW_HL : colorFor(n)}
-                  stroke={active ? STROKE_ACTIVE : STROKE}
-                  strokeWidth={active ? 1.8 : 0.9}
-                  onClick={() => onClickUF(uf)}
-                  onMouseEnter={(e) => setHover({ uf, x: e.clientX, y: e.clientY })}
-                  onMouseMove={(e) => setHover({ uf, x: e.clientX, y: e.clientY })}
-                  onMouseLeave={() => setHover(null)}
-                  style={{
-                    default: { outline: 'none', cursor: 'pointer', transition: 'fill .15s' },
-                    hover: { outline: 'none', fill: active ? YELLOW_HL : '#d9a900', cursor: 'pointer' },
-                    pressed: { outline: 'none' },
-                  }}
-                />
-              );
-            })
-          }
-        </Geographies>
-      </ComposableMap>
+      <ZoomControls zoom={zoom} onZoomIn={() => setZoom((v) => Math.min(3, Number((v + 0.25).toFixed(2))))} onZoomOut={() => setZoom((v) => Math.max(0.75, Number((v - 0.25).toFixed(2))))} onReset={() => setZoom(1)} />
+      <div className="qd-map-zoom-stage qd-scroll overflow-auto">
+        <div className="qd-map-zoom-canvas" style={{ width: `${zoom * 100}%`, minWidth: '100%' }}>
+          <ComposableMap projection="geoMercator" projectionConfig={{ scale: 720, center: [-54, -15] }} width={800} height={480} style={{ width: '100%', height: 'auto' }}>
+            <Geographies geography={geo}>
+              {({ geographies }: any) =>
+                geographies.map((g: any) => {
+                  const uf = g.properties.sigla as string;
+                  const entry = byUF.get(uf);
+                  const n = entry?.count ?? 0;
+                  const active = selectedUFs.includes(uf);
+                  return (
+                    <Geography
+                      key={g.rsmKey}
+                      geography={g}
+                      fill={active ? YELLOW_HL : colorFor(n)}
+                      stroke={active ? STROKE_ACTIVE : STROKE}
+                      strokeWidth={active ? 1.8 : 0.9}
+                      onClick={() => onClickUF(uf)}
+                      onMouseEnter={(e) => setHover({ uf, x: e.clientX, y: e.clientY })}
+                      onMouseMove={(e) => setHover({ uf, x: e.clientX, y: e.clientY })}
+                      onMouseLeave={() => setHover(null)}
+                      style={{
+                        default: { outline: 'none', cursor: 'pointer', transition: 'fill .15s' },
+                        hover: { outline: 'none', fill: active ? YELLOW_HL : '#d9a900', cursor: 'pointer' },
+                        pressed: { outline: 'none' },
+                      }}
+                    />
+                  );
+                })
+              }
+            </Geographies>
+          </ComposableMap>
+        </div>
+      </div>
       {hover && <Tooltip x={hover.x} y={hover.y}>
         <div className="font-semibold">{ufInfo(hover.uf)?.name ?? hover.uf}</div>
         <div className="mt-0.5 text-[11px]">
@@ -254,6 +260,7 @@ function UFLevel({
   const [geo, setGeo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [hover, setHover] = useState<{ name: string; x: number; y: number } | null>(null);
+  const [zoom, setZoom] = useState(1);
   const colorFor = useMemo(
     () => buildColorScale(Array.from(byCity.values()).map((x) => x.count)),
     [byCity],
@@ -286,30 +293,35 @@ function UFLevel({
 
   return (
     <div className="relative">
-      <svg viewBox="0 0 800 480" width="100%" style={{ height: 'auto' }}>
-        {geo.features.map((f: any, i: number) => {
-          const name = f.properties.name || f.properties.NM_MUN || f.properties.NOME || '';
-          const key = strip(name);
-          const entry = byCity.get(key);
-          const n = entry?.count ?? 0;
-          const active = selectedNorm === key;
-          const d = path(f) || '';
-          return (
-            <path
-              key={i}
-              d={d}
-              fill={active ? YELLOW_HL : colorFor(n)}
-              stroke={active ? STROKE_ACTIVE : STROKE}
-              strokeWidth={active ? 1.6 : 0.6}
-              style={{ cursor: entry ? 'pointer' : 'default', transition: 'fill .12s' }}
-              onClick={() => entry && onClickCity(entry.raw)}
-              onMouseEnter={(e) => setHover({ name, x: e.clientX, y: e.clientY })}
-              onMouseMove={(e) => setHover({ name, x: e.clientX, y: e.clientY })}
-              onMouseLeave={() => setHover(null)}
-            />
-          );
-        })}
-      </svg>
+      <ZoomControls zoom={zoom} onZoomIn={() => setZoom((v) => Math.min(4, Number((v + 0.25).toFixed(2))))} onZoomOut={() => setZoom((v) => Math.max(0.75, Number((v - 0.25).toFixed(2))))} onReset={() => setZoom(1)} />
+      <div className="qd-map-zoom-stage qd-scroll overflow-auto">
+        <div className="qd-map-zoom-canvas" style={{ width: `${zoom * 100}%`, minWidth: '100%' }}>
+          <svg viewBox="0 0 800 480" width="100%" style={{ height: 'auto' }}>
+            {geo.features.map((f: any, i: number) => {
+              const name = f.properties.name || f.properties.NM_MUN || f.properties.NOME || '';
+              const key = strip(name);
+              const entry = byCity.get(key);
+              const n = entry?.count ?? 0;
+              const active = selectedNorm === key;
+              const d = path(f) || '';
+              return (
+                <path
+                  key={i}
+                  d={d}
+                  fill={active ? YELLOW_HL : colorFor(n)}
+                  stroke={active ? STROKE_ACTIVE : STROKE}
+                  strokeWidth={active ? 1.6 : 0.6}
+                  style={{ cursor: entry ? 'pointer' : 'default', transition: 'fill .12s' }}
+                  onClick={() => entry && onClickCity(entry.raw)}
+                  onMouseEnter={(e) => setHover({ name, x: e.clientX, y: e.clientY })}
+                  onMouseMove={(e) => setHover({ name, x: e.clientX, y: e.clientY })}
+                  onMouseLeave={() => setHover(null)}
+                />
+              );
+            })}
+          </svg>
+        </div>
+      </div>
       {hover && (() => {
         const key = strip(hover.name);
         const n = byCity.get(key)?.count ?? 0;
@@ -323,6 +335,33 @@ function UFLevel({
         );
       })()}
       <Legend max={max} label="entrevistas" />
+    </div>
+  );
+}
+
+function ZoomControls({
+  zoom,
+  onZoomIn,
+  onZoomOut,
+  onReset,
+}: {
+  zoom: number;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onReset: () => void;
+}) {
+  return (
+    <div className="absolute right-2 top-2 z-20 flex items-center gap-1 rounded-md border border-[var(--qd-border)] bg-[var(--qd-surface)] p-1 shadow-sm">
+      <button type="button" onClick={onZoomOut} className="rounded p-1 text-[var(--qd-text)] hover:bg-[var(--qd-btn-hover)]" title="Diminuir zoom">
+        <Minus className="h-3.5 w-3.5" />
+      </button>
+      <span className="min-w-10 text-center text-[10px] font-semibold tabular-nums text-[var(--qd-text-muted)]">{Math.round(zoom * 100)}%</span>
+      <button type="button" onClick={onZoomIn} className="rounded p-1 text-[var(--qd-text)] hover:bg-[var(--qd-btn-hover)]" title="Aumentar zoom">
+        <Plus className="h-3.5 w-3.5" />
+      </button>
+      <button type="button" onClick={onReset} className="rounded p-1 text-[var(--qd-text)] hover:bg-[var(--qd-btn-hover)]" title="Redefinir zoom">
+        <RotateCcw className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }
