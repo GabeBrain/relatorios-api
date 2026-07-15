@@ -36,6 +36,7 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 ### 2026-07-15 — Exportação da base selecionada — Codex
 - **O quê:** inclusão de botões `CSV` e `XLSX` antes do seletor `Base` na topbar do Banco Quanti. Os botões exportam a base selecionada respeitando os filtros ativos; sem filtros, baixam a base inteira.
 - **Correção:** exportações passam a preservar a estrutura da planilha original: linha 1 com variáveis, linha 2 com perguntas, dados a partir da linha 3 e colunas na ordem original do arquivo fonte.
+- **Otimização:** o XLSX passou a ser gravado com compactação ZIP (`compression: true`) para evitar arquivos muito maiores que o CSV.
 - **Por quê:** permitir baixar a Base Unificada 2020 hoje e futuras bases 2016–2026/histórica diretamente pela interface.
 - **Arquivos:** `src/features/area-quanti/dashboard/QuantiDashboard.tsx`.
 

@@ -259,7 +259,7 @@ async function exportDatasetXlsx(rows: QuantiRecord[], label: string, questions?
   const ws = XLSX.utils.aoa_to_sheet(buildDatasetExportRows(rows, questions));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Base');
-  XLSX.writeFile(wb, datasetFileName(label, 'xlsx'));
+  XLSX.writeFile(wb, datasetFileName(label, 'xlsx'), { compression: true });
 }
 
 export function QuantiDashboard() {
