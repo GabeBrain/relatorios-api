@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-15 — Exportação da base selecionada — Codex
+- **O quê:** inclusão de botões `CSV` e `XLSX` antes do seletor `Base` na topbar do Banco Quanti. Os botões exportam a base selecionada inteira, sem aplicar os filtros ativos.
+- **Por quê:** permitir baixar a Base Unificada 2020 hoje e futuras bases 2016–2026/histórica diretamente pela interface.
+- **Arquivos:** `src/features/area-quanti/dashboard/QuantiDashboard.tsx`.
+
 ### 2026-07-15 — KPIs de intenção de compra — Codex
 - **O quê:** inclusão de dois KPIs no topo do Banco Quanti: `Intenção até 2 anos` e `Intenção geral`.
 - **Regra:** `Intenção geral` considera, sobre as respostas válidas de intenção, quem está em grupos positivos de intenção de compra. `Intenção até 2 anos` usa o mesmo denominador, mas restringe o numerador a quem tem intenção positiva e prazo até 2 anos, ignorando `Sem intenção`, `Acima de 2 anos`, `"-"` e nulos.
