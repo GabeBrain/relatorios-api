@@ -1,0 +1,134 @@
+/* Scoped design tokens for Dashboard Geobrain — do not leak to global app. */
+.dash-geobrain {
+  --dg-primary: 88 36% 45%;      /* #71984a */
+  --dg-primary-strong: 88 40% 35%;
+  --dg-primary-soft: 88 40% 88%;
+  --dg-accent: 51 88% 60%;       /* #f4d83f */
+  --dg-accent-soft: 51 90% 88%;
+  --dg-muted: 0 0% 43%;          /* #6e6e6e */
+  --dg-muted-soft: 0 0% 94%;
+  --dg-bg: 0 0% 98%;
+  --dg-card: 0 0% 100%;
+  --dg-border: 0 0% 88%;
+  --dg-text: 0 0% 15%;
+  --dg-tooltip-hl: #212529;
+
+  font-family: 'Archivo', Tahoma, sans-serif;
+  font-size: 12px;
+  color: hsl(var(--dg-text));
+  background: hsl(var(--dg-bg));
+}
+
+.dash-geobrain .dg-header .dg-chip,
+.dash-geobrain .dg-header .dg-select { height: 36px; }
+.dash-geobrain .dg-header .dg-chip { padding: 0 12px; }
+.dash-geobrain .dg-header-group { display: inline-flex; flex-direction: column; gap: 6px; }
+.dash-geobrain .dg-header-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: hsl(var(--dg-muted)); }
+
+.dash-geobrain .dg-card {
+  background: hsl(var(--dg-card));
+  border: 1px solid hsl(var(--dg-border));
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.dash-geobrain .dg-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: hsl(var(--dg-text));
+  letter-spacing: -0.01em;
+}
+
+.dash-geobrain .dg-subtle {
+  color: hsl(var(--dg-muted));
+  font-size: 10px;
+}
+
+.dash-geobrain .dg-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: hsl(var(--dg-primary-strong));
+  background: hsl(var(--dg-primary-soft));
+  border: 1px solid hsl(var(--dg-primary));
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dash-geobrain .dg-chip:hover { background: hsl(var(--dg-primary) / 0.25); }
+.dash-geobrain .dg-chip[data-active="true"] {
+  background: hsl(var(--dg-primary));
+  color: white;
+}
+
+.dash-geobrain .dg-chip-group { display: inline-flex; border-radius: 4px; overflow: hidden; }
+.dash-geobrain .dg-chip-group .dg-chip { border-radius: 0; }
+.dash-geobrain .dg-chip-group .dg-chip:first-child { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
+.dash-geobrain .dg-chip-group .dg-chip:last-child { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+
+.dash-geobrain .dg-select {
+  height: 32px;
+  border: 1px solid hsl(var(--dg-border));
+  border-radius: 4px;
+  padding: 0 8px;
+  font-size: 11px;
+  background: hsl(var(--dg-card));
+  color: hsl(var(--dg-text));
+}
+
+.dash-geobrain .dg-kpi {
+  border-left: 3px solid hsl(var(--dg-primary));
+  background: hsl(var(--dg-card));
+  border-radius: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid hsl(var(--dg-border));
+  border-right: 1px solid hsl(var(--dg-border));
+  border-bottom: 1px solid hsl(var(--dg-border));
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.dash-geobrain .dg-kpi-label-row { display: inline-flex; align-items: center; gap: 4px; justify-content: center; }
+.dash-geobrain .dg-kpi-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: hsl(var(--dg-muted)); }
+.dash-geobrain .dg-kpi-value { font-size: 16px; font-weight: 700; margin-top: 4px; color: hsl(var(--dg-text)); }
+.dash-geobrain .dg-kpi-hint { font-size: 9px; color: hsl(var(--dg-muted)); margin-top: 2px; }
+
+.dash-geobrain .dg-var-strip {
+  display: inline-flex;
+  gap: 6px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.dash-geobrain .dg-var-item {
+  min-width: 56px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: hsl(var(--dg-primary-soft));
+  color: hsl(var(--dg-primary-strong));
+  text-align: center;
+  line-height: 1.1;
+}
+.dash-geobrain .dg-var-item[data-neg="true"] { background: hsl(0 60% 92%); color: hsl(0 60% 40%); }
+.dash-geobrain .dg-var-label { font-size: 8px; font-weight: 600; text-transform: uppercase; opacity: 0.8; }
+.dash-geobrain .dg-var-value { font-size: 12px; font-weight: 700; }
+
+/* Heatmap cell colors — verde forte (IVV alto) → amarelo (IVV baixo) */
+.dash-geobrain .dg-heat-0 { background: transparent; color: hsl(var(--dg-muted)); }
+.dash-geobrain .dg-heat-1 { background: hsl(var(--dg-primary)); color: white; }
+.dash-geobrain .dg-heat-2 { background: hsl(88 45% 60%); color: white; }
+.dash-geobrain .dg-heat-3 { background: hsl(88 45% 78%); }
+.dash-geobrain .dg-heat-4 { background: hsl(51 90% 78%); }
+.dash-geobrain .dg-heat-5 { background: hsl(var(--dg-accent)); }
+
+.dash-geobrain table.dg-heatmap { border-collapse: collapse; width: 100%; font-size: 10px; }
+.dash-geobrain table.dg-heatmap th,
+.dash-geobrain table.dg-heatmap td {
+  padding: 4px 8px;
+  border: 1px solid hsl(var(--dg-border));
+  text-align: right;
+}
+.dash-geobrain table.dg-heatmap th { background: hsl(var(--dg-primary)); color: white; font-weight: 600; }
+.dash-geobrain table.dg-heatmap td:first-child { text-align: left; font-weight: 500; background: hsl(var(--dg-muted-soft)); }

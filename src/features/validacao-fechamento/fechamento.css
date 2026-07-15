@@ -1,0 +1,127 @@
+/* Tokens escopados — Validação do Fechamento. Não vaza para o app. */
+.validacao-fechamento {
+  --vf-primary: #71984a;
+  --vf-primary-soft: #e5efd8;
+  --vf-primary-strong: #567a35;
+  --vf-accent: #f4d83f;
+  --vf-accent-soft: #fbf3b8;
+  --vf-muted: #6e6e6e;
+  --vf-muted-soft: #f2f2f2;
+  --vf-text: #212529;
+  --vf-neg: #f93f16;
+  --vf-pos: #2f982f;
+  --vf-bg: #fafafa;
+  --vf-card: #ffffff;
+  --vf-border: #e2e2e2;
+
+  font-family: 'Archivo', Tahoma, sans-serif;
+  font-size: 10pt;
+  color: var(--vf-text);
+  background: var(--vf-bg);
+}
+.dark .validacao-fechamento {
+  --vf-text: #eef1f2;
+  --vf-muted: #9b9b9b;
+  --vf-muted-soft: #2a2a2a;
+  --vf-bg: #121417;
+  --vf-card: #1a1c1f;
+  --vf-border: #2b2e33;
+  --vf-primary-soft: #263420;
+  --vf-accent-soft: #3a3520;
+}
+
+.validacao-fechamento .vf-card {
+  background: var(--vf-card);
+  border: 1px solid var(--vf-border);
+  border-radius: 8px;
+}
+.validacao-fechamento .vf-chip {
+  display: inline-flex; align-items: center;
+  padding: 6px 14px; font-size: 10pt; font-weight: 600;
+  color: var(--vf-primary-strong); background: var(--vf-primary-soft);
+  border: 1px solid var(--vf-primary); cursor: pointer;
+  transition: all .15s;
+}
+.validacao-fechamento .vf-chip:hover { filter: brightness(0.97); }
+.validacao-fechamento .vf-chip[data-active="true"] {
+  background: var(--vf-primary); color: #fff;
+}
+.validacao-fechamento .vf-chip-group { display: inline-flex; border-radius: 4px; overflow: hidden; }
+.validacao-fechamento .vf-chip-group .vf-chip { border-radius: 0; }
+.validacao-fechamento .vf-chip-group .vf-chip:first-child { border-radius: 4px 0 0 4px; }
+.validacao-fechamento .vf-chip-group .vf-chip:last-child { border-radius: 0 4px 4px 0; }
+
+.validacao-fechamento .vf-btn {
+  height: 32px; padding: 0 12px; font-size: 10pt; font-weight: 600;
+  border-radius: 4px; border: 1px solid var(--vf-border);
+  background: var(--vf-card); color: var(--vf-text); cursor: pointer;
+  transition: all .15s;
+}
+.validacao-fechamento .vf-btn:hover { border-color: var(--vf-primary); color: var(--vf-primary-strong); }
+.validacao-fechamento .vf-btn[data-variant="primary"] {
+  background: var(--vf-primary); color: #fff; border-color: var(--vf-primary);
+}
+
+.validacao-fechamento .vf-tabs { display: inline-flex; border-bottom: 1px solid var(--vf-border); gap: 0; }
+.validacao-fechamento .vf-tab {
+  padding: 8px 20px; font-size: 10pt; font-weight: 600; cursor: pointer;
+  color: var(--vf-muted); background: transparent; border: none;
+  border-bottom: 2px solid transparent; transition: all .15s;
+}
+.validacao-fechamento .vf-tab[data-active="true"] {
+  color: var(--vf-primary-strong); border-bottom-color: var(--vf-primary);
+}
+
+/* Resumo table */
+.validacao-fechamento table.vf-resumo {
+  border-collapse: collapse; width: 100%; font-size: 10pt;
+  background: var(--vf-card);
+}
+.validacao-fechamento table.vf-resumo th,
+.validacao-fechamento table.vf-resumo td {
+  padding: 6px 10px; border: 1px solid var(--vf-border);
+  text-align: right; white-space: nowrap;
+  transition: color .2s, background .2s;
+}
+.validacao-fechamento table.vf-resumo thead th {
+  background: var(--vf-primary); color: #fff; font-weight: 600; text-align: center;
+  position: sticky; top: 0; z-index: 1;
+}
+.validacao-fechamento table.vf-resumo td.vf-label,
+.validacao-fechamento table.vf-resumo th.vf-label {
+  text-align: left; background: var(--vf-muted-soft); font-weight: 500;
+  position: sticky; left: 0; z-index: 2;
+}
+.validacao-fechamento table.vf-resumo thead th.vf-label { z-index: 3; }
+.validacao-fechamento table.vf-resumo tbody tr.vf-total {
+  background: var(--vf-accent-soft); font-weight: 700;
+}
+.validacao-fechamento table.vf-resumo thead th.vf-total {
+  background: var(--vf-primary); color: #fff;
+}
+.validacao-fechamento table.vf-resumo .vf-var td { font-weight: 600; }
+.validacao-fechamento .vf-pos { color: var(--vf-pos); }
+.validacao-fechamento .vf-neg { color: var(--vf-neg); }
+.validacao-fechamento .vf-zero { color: var(--vf-muted); }
+
+/* DataGrid */
+.validacao-fechamento .vf-grid-wrap { border: 1px solid var(--vf-border); border-radius: 8px; overflow: hidden; background: var(--vf-card); }
+.validacao-fechamento .vf-grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 10pt; }
+.validacao-fechamento .vf-grid th,
+.validacao-fechamento .vf-grid td {
+  padding: 6px 8px; border-bottom: 1px solid var(--vf-border); text-align: left; white-space: nowrap;
+}
+.validacao-fechamento .vf-grid thead th {
+  background: var(--vf-muted-soft); font-weight: 600; position: sticky; top: 0; z-index: 1;
+  user-select: none;
+}
+.validacao-fechamento .vf-grid tbody tr:hover { background: var(--vf-primary-soft); }
+.validacao-fechamento .vf-grid input.vf-col-filter {
+  width: 100%; padding: 2px 4px; font-size: 9pt; border: 1px solid var(--vf-border);
+  background: var(--vf-card); color: var(--vf-text); border-radius: 3px;
+}
+.validacao-fechamento .vf-grid .vf-resizer {
+  position: absolute; right: 0; top: 0; height: 100%; width: 4px; cursor: col-resize;
+  background: transparent;
+}
+.validacao-fechamento .vf-grid .vf-resizer:hover { background: var(--vf-primary); }

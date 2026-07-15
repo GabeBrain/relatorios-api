@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-Content \"c:\\\\Users\\\\GaloD\\\\Desktop\\\\SE\\\\Relatorios API\\\\relat-rios-api\\\\docs\\\\Validação Dados CID.ipynb\")",
+      "Bash(Select-Object -First 200)",
+      "Bash(Out-String)",
+      "Bash(python3 -c \"import json; import sys; f=open\\('c:\\\\\\\\Users\\\\\\\\GaloD\\\\\\\\Desktop\\\\\\\\SE\\\\\\\\Relatorios API\\\\\\\\relat-rios-api\\\\\\\\docs\\\\\\\\Validação Dados CID.ipynb', encoding='utf-8'\\); data=json.load\\(f\\); cells=[c for c in data['cells'] if 'empreendimento' in str\\(c\\).lower\\(\\) or 'preço' in str\\(c\\).lower\\(\\) or 'm2' in str\\(c\\).lower\\(\\)]; print\\('Found cells with relevant keywords'\\); [print\\(json.dumps\\(c, indent=2\\)[:500]\\) for c in cells[:3]]\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\GaloD\\\\Desktop\\\\SE\\\\Relatorios API\\\\relat-rios-api\" -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "Read(//c/Users/GaloD/Desktop/SE/Relatorios/ API/relat-rios-api/**)"
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+project_id = "mxinpvcqzbfbzjodhgtz"
+
+[functions.analyze-slide]
+verify_jwt = false

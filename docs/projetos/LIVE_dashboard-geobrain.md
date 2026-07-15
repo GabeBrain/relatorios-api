@@ -1,0 +1,79 @@
+# Dashboard GeoBrain — Documento Vivo
+
+**Responsável:** Edgar · **Rota:** `/dash-geobrain` · **Código:** [`src/features/dashboard-geobrain/`](../../src/features/dashboard-geobrain/) · Página: [`src/pages/DashboardGeobrain.tsx`](../../src/pages/DashboardGeobrain.tsx)
+
+Doc vivo do projeto. Ver a convenção e a regra de atualização em [`README.md`](./README.md).
+Atualize **Desenvolvimentos / Etapas / Pendências** sempre que sincronizar uma alteração relevante.
+
+---
+
+## Motor / arquitetura atual (base zero — 2026-07-08)
+
+Dashboard de KPIs e gráficos sobre a base de empreendimentos da **API pública GeoBrain**.
+
+- **Conexão de API — `RUNTIME`.** [`api.ts`](../../src/features/dashboard-geobrain/api.ts) consome
+  `https://geobrain.com.br/public-api` via `apiGet(path, params, token, signal)`. Autenticação
+  por token (reusa o auth global da plataforma). Paginação de 100 itens/página (`PER_PAGE`).
+- **Normalização — `RUNTIME`.** `normalizeBuilding()` + helpers (`toNum`, `toNumOrNull`,
+  `parseDate`, `parseGarage`) saneiam o payload cru da API. Domínios conhecidos:
+  tipos `Vertical | Horizontal | Comercial | Hotel`; status `Ativo | Esgotado`.
+- **Tipos — `RUNTIME`.** [`types.ts`](../../src/features/dashboard-geobrain/types.ts): `Building`, `Typology`, `HistoryEntry`.
+- **Agregação — `RUNTIME`.** [`aggregate.ts`](../../src/features/dashboard-geobrain/aggregate.ts) computa os KPIs/séries a partir dos buildings normalizados.
+- **Data hook — `RUNTIME`.** [`use-dashboard-data.ts`](../../src/features/dashboard-geobrain/use-dashboard-data.ts) orquestra fetch + agregação (React Query).
+- **UI — `RUNTIME`.** [`Charts.tsx`](../../src/features/dashboard-geobrain/Charts.tsx) (visualizações),
+  [`FiltersPanel.tsx`](../../src/features/dashboard-geobrain/FiltersPanel.tsx) + [`MultiSelect.tsx`](../../src/features/dashboard-geobrain/MultiSelect.tsx) (filtros por tipo/status/etc.).
+
+**O que já está pronto:** conexão à API GeoBrain, normalização do payload, agregação de KPIs,
+gráficos e painel de filtros funcionais em runtime.
+
+---
+
+## 1. Desenvolvimentos
+
+### 2026-07-13 (b) — KPIs, header e mapa de oportunidades por padrão — Edgar
+- **O quê:** (1) Header reorganizado com labels acima de cada controle (**Tipo empreendimento**, **Visualização**) e chips/selectores alinhados pela base (`items-end`), altura padronizada em 36px; caixa de Município reduzida para 180px. (2) Tooltip dos gráficos com destaque em `#212529`. (3) KPI **Empreendimentos** removido e novo KPI **Preço médio m²** adicionado; `Unidades Lançadas` e `VGV Lançado` agora **somam sobre todo o período filtrado** (KEEPFILTERS status = Ativo) via `computeReleaseTotals`; `numCompact` já entrega 1 casa decimal para valores ≥ 1 mil (ex. `1,3 mil`). (4) Filtro **Períodos (mês)** aplicado por padrão nos **últimos 12 meses** ao carregar uma cidade. (5) Novo gráfico **Unidades Lançadas × Estoque** entre `IvvChart` e `VgvChart`. (6) `computeSeries` só contabiliza lançamento quando `status = "Ativo"`. (7) `computeOpportunityMap` ganhou `groupBy: 'standard'`; segundo mapa da página agora é **Mapa de oportunidades — Padrão**. (8) Rankings renomeados (`IVV por bairro`, `Tempo de estoque por bairro`, `Preço m² por bairro`, `Preço médio por bairro`) e passaram a exibir botão `(i)` com fórmula. (9) `GeoApiScopeSelector` aceita `cityContainerClassName` para ajuste externo do container do Município.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,Header.tsx,KpiRow.tsx,Charts.tsx,Rankings.tsx,dashboard.css}`, `src/features/shared/geo-api-scope-engine/GeoApiScopeSelector.tsx`, `src/pages/DashboardGeobrain.tsx`.
+
+
+### 2026-07-13 — Ajustes de regra de negócio e UX (§1–§15) — Edgar
+- **O quê:** (1) período agora derivado 100% de `h.period` (string, sem `Date`) em toda a agregação — fim de shifts de fuso; (2) `ActiveFiltersBar` abaixo do header exibe todos os filtros aplicados em linha única; (3) chips do header sem "Hotel" e reordenados **Vertical · Horizontal · Comercial**, alinhados na mesma altura do seletor de cidade; (4) renomeação global "Oferta Final" → **Estoque** em títulos/labels/tooltips; (5) KPIs agora usam apenas o **período mais recente do escopo filtrado** (fórmulas §13: `isRelease`, `vgvSold`, `initialStock`, `vgvRelease`, `qtyRelease`); (6) `VariationStrip` reduzida para **Desde início / 3a / 1a**, com modo `avg` no IVV e no IPC (evita agregação de percentuais); (7) tooltips padronizados (`DGTooltip`) com 1 casa decimal e destaque em amarelo escuro `#917C09`; (8) ordenação por valor/rótulo nos rankings e no combo horizontal `OfertaComboChart`; (9) gráfico de padrões sem limite de Top 10 (§10); (10) IPC com `ReferenceLine y=1` extendida (linha de corte) + Popover (i) com explicação; (11) `OpportunityMap` recebe `groupBy` e a página renderiza **dois mapas** lado a lado (Bairro e `building_type`); busca com padding para não sobrepor a lupa; (12) IVV/Tempo de Estoque exclusivamente sobre o período mais recente (Tempo = 1/IVV).
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,Header.tsx,KpiRow.tsx,Charts.tsx,Rankings.tsx,VariationStrip.tsx,OpportunityMap.tsx,ActiveFiltersBar.tsx,dashboard.css}`, `src/pages/DashboardGeobrain.tsx`.
+
+
+
+### 2026-07-09 — GeoApiScopeEngine: motor compartilhado de escopo geográfico — Edgar
+- **O quê:** criado o padrão **GeoApiScopeEngine** (`src/features/shared/geo-api-scope-engine/`) — fetch paginado de `/public-api/monitored-cities`, cache por token, hook `useGeoApiScope` e componente `GeoApiScopeSelector` (UF + Combobox de cidades). Substitui a lista IBGE offline (`municipios-br.json`) pela lista real disponível no token. Dashboard GeoBrain, Relatórios Secovi e CID legado agora consomem o mesmo motor. Regra registrada em `AGENTS.md` e `CLAUDE.md` como padrão obrigatório para novas telas que dependam da API GeoBrain.
+- **Arquivos:** `src/features/shared/geo-api-scope-engine/{types.ts,fetch-monitored-cities.ts,use-geo-api-scope.ts,GeoApiScopeSelector.tsx,index.ts}`, `src/features/dashboard-geobrain/{Header.tsx,use-dashboard-data.ts}`, `src/pages/{DashboardGeobrain.tsx,TestesArquitetura.tsx}`, `src/legacy/standby-qualidade/TQCidValidacaoBase.tsx`, `AGENTS.md`, `CLAUDE.md`.
+
+
+
+### 2026-07-09 — Ajustes finos de UX e correção de filtros temporais — Edgar
+- **O quê:** (1) gráficos temporais agora exibem os 12 períodos mais recentes com scroll horizontal alinhado à direita; (2) rótulos em todos os pontos da linha de tempo de estoque nos combos; (3) eixos Y ocultos em todos os gráficos; (4) linha de referência `y=1` no IPC; (5) KPIs centralizados; (6) `k` → `mil` em `numCompact`/`brlCompact`; (7) mapa de oportunidades invertido (verde=alto, amarelo=baixo); (8) novo segmentador **Períodos (mês)** na sidebar; (9) filtros Ano/Período/Dormitório/Garagem/Tipologia agora se aplicam **dentro** das entradas de histórico via helper `historyMatches`/`lastHistoryMatching`, corrigindo o bug em que categorias fora do filtro apareciam no eixo X.
+- **Arquivos:** `Charts.tsx`, `Sidebar.tsx`, `KpiRow.tsx`, `OpportunityMap.tsx`, `dashboard.css`, `aggregate.ts`, `types.ts`, `src/lib/format.ts`, `src/pages/DashboardGeobrain.tsx`.
+
+### 2026-07-08 — Base zero documentada — Gabriel
+- **O quê:** criação deste doc vivo consolidando o estado atual do Dashboard GeoBrain.
+- **Por quê:** estabelecer a linha de base de desenvolvimento para colaboração via git.
+- **Arquivos:** todos em `src/features/dashboard-geobrain/`.
+
+<!-- novas entradas acima desta linha, mais recente no topo -->
+
+---
+
+## 2. Etapas
+
+| # | Etapa | Status |
+|---|---|---|
+| 1 | Conexão à API pública GeoBrain (auth + paginação) | ✅ |
+| 2 | Normalização/saneamento do payload | ✅ |
+| 3 | Agregação de KPIs e séries | ✅ |
+| 4 | Gráficos + painel de filtros | ✅ |
+| 5 | (a definir com Edgar — novos indicadores/filtros, export, etc.) | 🔲 |
+
+---
+
+## 3. Pendências
+
+- [ ] Definir com o Edgar os próximos indicadores/visualizações desejados.
+- [ ] Confirmar cobertura de testes (Vitest) para `aggregate.ts` e `normalizeBuilding`.
+- [ ] Documentar os endpoints exatos da GeoBrain public-api consumidos (paths e params).

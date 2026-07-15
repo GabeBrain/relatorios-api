@@ -1,0 +1,38 @@
+{
+  "schema": "ir_complemento_visao/v0",
+  "estudo": "Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_estudo exemplo.pptx",
+  "slide": 122,
+  "secao": "LACUNAS",
+  "titulo_slide": "TABELA DE LACUNAS- TIPOLOGIA POR R$/M²",
+  "imagem": "ppt/media/image157.png",
+  "extraido_por": "piloto-manual (Claude, referência de qualidade — produção usará edge function)",
+  "nota_gabarito": "Ajustar com os valores que pedi na tabela de lacunas geral",
+  "tabelas": [
+    {
+      "titulo": "Oferta Lançada — tipologia × faixa R$/m²",
+      "colunas": ["Tipologia", "Até R$7500", "7501-8000", "8001-8500", "8501-9000", "9001-9500", "Acima de 10000", "Total", "Part.%"],
+      "linhas_num": [
+        ["1 Dormitório", 190, 0, 0, 0, 834, 0, 1024, 19],
+        ["2 Dormitórios", 1660, 1478, 1316, 0, 0, 0, 4454, 81],
+        ["3 Dormitórios", 0, 0, 0, 0, 0, 0, 0, 0],
+        ["4 Dormitórios", 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      "totais_declarados": ["Total", 1850, 1478, 1316, 0, 834, 0, 5478, 100]
+    },
+    {
+      "titulo": "Oferta Final — tipologia × faixa R$/m²",
+      "colunas": ["Tipologia", "Até R$7500", "7501-8000", "8001-8500", "8501-9000", "9001-9500", "Acima de 10000", "Total", "Part.%"],
+      "linhas_num": [
+        ["1 Dormitório", 41, 0, 0, 0, 128, 0, 169, 14],
+        ["2 Dormitórios", 362, 543, 122, 0, 0, 0, 1027, 86],
+        ["3 Dormitórios", 0, 0, 0, 0, 0, 0, 0, 0],
+        ["4 Dormitórios", 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      "totais_declarados": ["Total", 403, 543, 122, 0, 128, 0, 1196, 100]
+    }
+  ],
+  "bugs_evidenciados": [
+    "BINNING_RULE: furo de faixa — 'De R$9001 a 9500' salta para 'Acima de R$ 10000'; a faixa 9501-10000 não existe (detectável por continuidade de bins).",
+    "CROSS_TABLE_MISMATCH: Oferta Lançada total 5.478 ≠ 12.143 do s121 (mesma Z.I., tabela geral por m²); Oferta Final bate (1.196 = 1.196). É exatamente a nota da analista."
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "schema": "ir_complemento_visao/v0",
+  "estudo": "Vocacional_Horizontal(Av. Itaipava)_Elio_Winter_Itajai_SC_estudo exemplo.pptx",
+  "slide": 60,
+  "secao": "SOCIO",
+  "titulo_slide": "PROJEÇÃO DA DEMANDA VEGETATIVA DE DOMICÍLIOS",
+  "imagem": "ppt/media/image125.png",
+  "extraido_por": "piloto-manual (Claude, referência de qualidade — produção usará edge function)",
+  "nota_gabarito": "Ajustar com as mesmas rendas do slide | Por favor, verificar essa taxa, me parece que está errada, bom confirmar",
+  "observacao_extracao": "Base 'Domicílios Total 2024', anos 2025-2030, 'Incremento 2025/2030', 'Domicílios 2030'. Total 2024 = 224.938 (bate com 30min do s41).",
+  "tabelas": [
+    {
+      "titulo": "Projeção demanda vegetativa — 30 min (base 2024, 2025-2030)",
+      "colunas": ["Faixa de Renda", "Renda Financ.", "VM 20% entrada", "VM 30% entrada", "VM 50% entrada", "Dom Total 2024", "2025", "2026", "2027", "2028", "2029", "2030", "Incremento 2025/2030", "Dom 2030"],
+      "linhas_num": [
+        ["Acima de R$ 40.000,01",       40000, 1263717, 1444248, 2021948,  2048,   82,   85,   89,   92,   96,  100,   543,  2591],
+        ["R$ 37.258,01 a R$ 40.000,00", 38629, 1220403, 1394746, 1952645,   579,   23,   24,   25,   26,   27,   28,   154,   733],
+        ["R$ 34.360,01 a R$ 37.258,00", 36172, 1142795, 1306051, 1828472,  1031,   41,   43,   45,   46,   48,   50,   273,  1304],
+        ["R$ 25.710,01 a R$ 34.360,00", 34723, 1171450, 1338800, 1874321,  2358,   94,   98,  102,  106,  110,  115,   626,  2984],
+        ["R$ 19.747,01 a R$ 25.710,00", 30035, 1013277, 1158030, 1621243,  5426,  217,  226,  235,  244,  254,  264,  1440,  6865],
+        ["R$ 16.035,01 a R$ 19.747,00", 22728,  766781,  876321, 1226849,  4256,  170,  177,  184,  191,  199,  207,  1129,  5385],
+        ["R$ 13.561,01 a R$ 16.035,00", 17891,  603580,  689806,  965728,  7847,  314,  326,  340,  353,  367,  382,  2082,  9929],
+        ["R$ 9.850,01 a R$ 13.561,00",  14798,  499233,  570552,  798773, 15598,  624,  649,  675,  702,  730,  759,  4139, 19737],
+        ["R$ 6.947,01 a R$ 9.850,00",   11705,  394903,  451318,  631845, 37112, 1484, 1544, 1606, 1670, 1737, 1806,  9846, 46958],
+        ["R$ 5.499,01 a R$ 6.947,00",    8398,  368331,  420949,  589329, 22674,  907,  943,  981, 1020, 1061, 1103,  6016, 28690],
+        ["R$ 3.191,01 a R$ 5.499,00",    6223,  272920,  311909,  436672, 60351, 2414, 2511, 2611, 2715, 2824, 2937, 16012, 76363],
+        ["Abaixo de R$ 3.191,01",        null,    null,    null,    null, 65658, 2626, 2731, 2841, 2954, 3072, 3195, 17420, 83079]
+      ],
+      "totais_declarados": ["Total", null, null, null, null, 224938, 8998, 9357, 9732, 10121, 10526, 10947, 59680, 284618]
+    }
+  ],
+  "bugs_evidenciados": [
+    "TEMPORAL_WINDOW: janela 2025-2030 (base 2024) difere do slide irmão s59 (2026-2031, base 2025).",
+    "VALUE_PLAUSIBILITY (nota da analista): taxa de crescimento a confirmar."
+  ]
+}

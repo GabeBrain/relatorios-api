@@ -1,0 +1,58 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Env
+# NOTA: o .env É versionado neste projeto de propósito — o Lovable builda a
+# partir do repositório e lê as VITE_SUPABASE_* daqui. A anon key é pública
+# por design. Segredos de backend (ex.: OPENAI_API_KEY) NUNCA ficam aqui —
+# vão nos Secrets do Supabase. Ver docs/architecture/SECURITY_NOTES.md.
+.env.local
+.env.*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local datasets
+assets/*.csv
+assets/_ibge_setores_2022/source/
+assets/_ibge_setores_2022/extract_*/
+
+# Heavy geo data (legado Mapa — recuperável via histórico git)
+public/data/
+*.geojson
+*.kml
+*.kmz
+__pycache__/
+
+# Local API support (temporarily disabled in frontend)
+.local_api_support/
+
+# Amostras de estudos vocacionais (locais, pesadas — NÃO versionar)
+docs/features/corretor-vocacionais/*.pdf
+docs/features/corretor-vocacionais/Teste IA Masterplan.pptx
+docs/features/corretor-vocacionais/Vocacional_e_Quanti_*.pptx
+docs/features/corretor-vocacionais/*_estudo exemplo.pptx
+docs/features/**/desktop.ini
+docs/features/corretor-vocacionais/ir/
+
+# Arquivos temporarios de lock do Office
+~$*
