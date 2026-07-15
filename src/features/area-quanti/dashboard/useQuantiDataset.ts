@@ -62,11 +62,24 @@ function parseDataset(text: string, label: string): QuantiDataset {
 }
 
 async function fetchDataset(ref: DatasetRef): Promise<QuantiDataset> {
-  const key = `${ref.bucket}/${ref.path}`;
+  const source = ref.source ?? 'storage';
+  const key = `${source}/${ref.bucket ?? ''}/${ref.path}`;
   if (!cache.has(key)) {
     cache.set(
       key,
       (async () => {
+        if (source === 'public') {
+          const response = await fetch(ref.path);
+          if (!response.ok) {
+            throw new Error(`Falha ao carregar dataset "${ref.label}": HTTP ${response.status}`);
+          }
+          return parseDataset(await response.text(), ref.label);
+        }
+
+        if (!ref.bucket) {
+          throw new Error(`Dataset "${ref.label}" sem bucket configurado`);
+        }
+
         const { data, error } = await supabase.storage.from(ref.bucket).download(ref.path);
         if (error || !data) {
           throw new Error(`Falha ao carregar dataset "${ref.label}": ${error?.message ?? 'sem dados'}`);
@@ -93,7 +106,7 @@ export function useQuantiDataset(ref: DatasetRef) {
       .catch((e) => { if (alive) setError(e); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
-  }, [ref.bucket, ref.path]);
+  }, [ref.source, ref.bucket, ref.path]);
 
   return { data, error, loading };
 }

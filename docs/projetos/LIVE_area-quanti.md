@@ -14,8 +14,8 @@ Atualize **Desenvolvimentos / Etapas / Pendências** sempre que sincronizar uma 
 
 - **Estado atual — dashboard operacional.** [`AreaQuanti.tsx`](../../src/pages/AreaQuanti.tsx)
   carrega o dashboard Banco Quanti com KPIs, filtros, gráficos, mapas, rankings e análise cruzada.
-- **Fonte atual:** `base-2020.json` no bucket `quanti-datasets`, gerado a partir de
-  `Base_Unificada_2020-2.xlsx`.
+- **Fonte atual:** `public/quanti/base-2020.json`, gerado a partir de
+  `Base Unificada 2020.xlsx` (14.928 registros).
 - **Regra da planilha:** linha 1 = variáveis, linha 2 = texto das perguntas desconsiderado,
   dados válidos a partir da linha 3.
 
@@ -25,6 +25,12 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 ---
 
 ## 1. Desenvolvimentos
+
+### 2026-07-15 — Substituição da fonte 2020 completa — Codex
+- **O quê:** substituição da fonte da aba Banco Quanti pela nova planilha `Base Unificada 2020.xlsx`, convertida para `public/quanti/base-2020.json` com 14.928 registros, 92 colunas e mapa `questions` derivado da linha 2 da planilha. O JSON preserva as colunas originais e adiciona aliases canônicos usados pelo dashboard (`estado`, `cidade`, `idade`, `lat`, `lng`).
+- **Arquitetura:** `datasets.ts` agora aponta a base 2020 para um arquivo público versionado no próprio site (`/quanti/base-2020.json`) e `useQuantiDataset.ts` passa a aceitar fonte `public` além do fluxo legado por Supabase Storage.
+- **Por quê:** a fonte anterior não continha todas as pesquisas de 2020; a nova base passa a representar a safra 2020 completa, ainda pendente de algumas higienizações de dados informadas pelo Lucas.
+- **Arquivos:** `public/quanti/base-2020.json`, `src/features/area-quanti/dashboard/datasets.ts`, `src/features/area-quanti/dashboard/useQuantiDataset.ts`.
 
 ### 2026-07-14 — Contraste de tabelas no modo escuro — Lovable
 - **O quê:** ajuste visual localizado na aba Banco Quanti para que a Análise Cruzada Universal e os heatmaps de Intenção de Compra/Cruzamentos respeitem os tokens do tema escuro. Controles de visualização, botões CSV/XLSX, selects, tabela pivot, cabeçalho, linhas alternadas, total e células/labels de heatmap agora usam `--qd-surface`, `--qd-surface-2`, `--qd-border`, `--qd-text` e `--qd-text-muted`, eliminando fundos brancos/cinzas claros e textos escuros sem contraste no dark mode.
