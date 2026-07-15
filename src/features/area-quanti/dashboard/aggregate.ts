@@ -78,6 +78,52 @@ export function pctGenero(rows: QuantiRecord[], target: string): number {
   return valid ? (n / valid) * 100 : 0;
 }
 
+function comparableText(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function hasPurchaseIntent(value: unknown): boolean | null {
+  const normalized = normalizeCategoricalValue('intencao_compra_padronizada', value);
+  if (normalized == null || normalized === NA) return null;
+  const text = comparableText(normalized);
+  if (text.includes('nao pretende') || text.includes('sem intencao')) return false;
+  return text.includes('pretende') || text.startsWith('sim');
+}
+
+function isWithinTwoYears(value: unknown): boolean {
+  const normalized = normalizeCategoricalValue('tempo_intencao_padronizado', value);
+  if (normalized == null || normalized === NA) return false;
+  const text = comparableText(normalized);
+  if (text.includes('sem intencao') || text.includes('acima')) return false;
+  return text.includes('ate') || text.includes('entre');
+}
+
+export function purchaseIntentKpis(rows: QuantiRecord[]) {
+  let validIntent = 0;
+  let generalIntent = 0;
+  let intentWithinTwoYears = 0;
+
+  for (const row of rows) {
+    const hasIntent = hasPurchaseIntent(row.intencao_compra_padronizada);
+    if (hasIntent == null) continue;
+    validIntent++;
+    if (!hasIntent) continue;
+    generalIntent++;
+    if (isWithinTwoYears(row.tempo_intencao_padronizado)) intentWithinTwoYears++;
+  }
+
+  return {
+    validIntent,
+    generalIntent,
+    intentWithinTwoYears,
+    pctGeneralIntent: validIntent ? (generalIntent / validIntent) * 100 : 0,
+    pctIntentWithinTwoYears: validIntent ? (intentWithinTwoYears / validIntent) * 100 : 0,
+  };
+}
+
 export function histogram(
   rows: QuantiRecord[],
   field: 'idade' | 'renda_valor_estimado',

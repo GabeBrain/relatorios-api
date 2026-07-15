@@ -26,6 +26,12 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-15 — KPIs de intenção de compra — Codex
+- **O quê:** inclusão de dois KPIs no topo do Banco Quanti: `Intenção até 2 anos` e `Intenção geral`.
+- **Regra:** `Intenção geral` considera, sobre as respostas válidas de intenção, quem está em grupos positivos de intenção de compra. `Intenção até 2 anos` usa o mesmo denominador, mas restringe o numerador a quem tem intenção positiva e prazo até 2 anos, ignorando `Sem intenção`, `Acima de 2 anos`, `"-"` e nulos.
+- **Base atual:** com a Base Unificada 2020 completa, os KPIs calculam 47,0% de intenção geral e 33,3% de intenção até 2 anos antes de filtros.
+- **Arquivos:** `src/features/area-quanti/dashboard/aggregate.ts`, `src/features/area-quanti/dashboard/KpiRow.tsx`.
+
 ### 2026-07-15 — Ordenação da distribuição por região — Codex
 - **O quê:** o gráfico/lista `% de coletas por região` abaixo do mapa ganhou o mesmo botão compacto de ordenação usado nos demais gráficos. O padrão permanece maior → menor e o botão alterna para menor → maior.
 - **Por quê:** padronizar a interação de ordenação nos gráficos do Banco Quanti.
