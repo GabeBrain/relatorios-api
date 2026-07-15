@@ -273,7 +273,7 @@ export function QuantiDashboard() {
   const { data, loading, error } = useQuantiDataset(ds);
 
   const filtered = useMemo(() => (data ? applyFilters(data.records, filters) : []), [data, filters]);
-  const canExportDataset = !!data?.records.length;
+  const canExportDataset = !!data && filtered.length > 0;
 
   return (
     <div className="qd-root flex h-full min-h-0 flex-1">
@@ -298,19 +298,19 @@ export function QuantiDashboard() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => data && exportDatasetCsv(data.records, ds.label, data.questions)}
+              onClick={() => data && exportDatasetCsv(filtered, ds.label, data.questions)}
               disabled={!canExportDataset}
               className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--qd-border)] px-2 text-xs font-semibold text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] disabled:cursor-not-allowed disabled:opacity-50"
-              title="Exportar base selecionada em CSV"
+              title="Exportar base selecionada em CSV respeitando os filtros ativos"
             >
               <Download className="h-3.5 w-3.5" /> CSV
             </button>
             <button
               type="button"
-              onClick={() => data && exportDatasetXlsx(data.records, ds.label, data.questions)}
+              onClick={() => data && exportDatasetXlsx(filtered, ds.label, data.questions)}
               disabled={!canExportDataset}
               className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--qd-border)] px-2 text-xs font-semibold text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] disabled:cursor-not-allowed disabled:opacity-50"
-              title="Exportar base selecionada em Excel"
+              title="Exportar base selecionada em Excel respeitando os filtros ativos"
             >
               <FileSpreadsheet className="h-3.5 w-3.5" /> XLSX
             </button>
