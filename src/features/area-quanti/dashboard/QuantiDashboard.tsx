@@ -226,17 +226,24 @@ function datasetFileName(label: string, extension: 'csv' | 'xlsx') {
   return `${slug || 'base-quanti'}.${extension}`;
 }
 
-function exportDatasetCsv(rows: QuantiRecord[], label: string) {
-  if (!rows.length) return;
-  const headers = Array.from(rows.reduce((keys, row) => {
+function buildDatasetExportRows(rows: QuantiRecord[], questions: Record<string, string> = {}) {
+  const recordKeys = rows.reduce((keys, row) => {
     Object.keys(row as any).forEach((key) => keys.add(key));
     return keys;
-  }, new Set<string>()));
+  }, new Set<string>());
+  const headers = [
+    ...Object.keys(questions).filter((key) => recordKeys.has(key)),
+    ...Array.from(recordKeys).filter((key) => !(key in questions)),
+  ];
+  const questionRow = headers.map((key) => questions[key] || key);
+  const dataRows = rows.map((row) => headers.map((key) => (row as any)[key] ?? ''));
+  return [headers, questionRow, ...dataRows];
+}
+
+function exportDatasetCsv(rows: QuantiRecord[], label: string, questions?: Record<string, string>) {
+  if (!rows.length) return;
   const escape = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`;
-  const csv = [
-    headers.map(escape).join(','),
-    ...rows.map((row) => headers.map((key) => escape((row as any)[key])).join(',')),
-  ].join('\n');
+  const csv = buildDatasetExportRows(rows, questions).map((row) => row.map(escape).join(',')).join('\n');
   const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
@@ -246,10 +253,10 @@ function exportDatasetCsv(rows: QuantiRecord[], label: string) {
   URL.revokeObjectURL(url);
 }
 
-async function exportDatasetXlsx(rows: QuantiRecord[], label: string) {
+async function exportDatasetXlsx(rows: QuantiRecord[], label: string, questions?: Record<string, string>) {
   if (!rows.length) return;
   const XLSX = await import('xlsx');
-  const ws = XLSX.utils.json_to_sheet(rows as any[]);
+  const ws = XLSX.utils.aoa_to_sheet(buildDatasetExportRows(rows, questions));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Base');
   XLSX.writeFile(wb, datasetFileName(label, 'xlsx'));
@@ -291,7 +298,7 @@ export function QuantiDashboard() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => data && exportDatasetCsv(data.records, ds.label)}
+              onClick={() => data && exportDatasetCsv(data.records, ds.label, data.questions)}
               disabled={!canExportDataset}
               className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--qd-border)] px-2 text-xs font-semibold text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] disabled:cursor-not-allowed disabled:opacity-50"
               title="Exportar base selecionada em CSV"
@@ -300,7 +307,7 @@ export function QuantiDashboard() {
             </button>
             <button
               type="button"
-              onClick={() => data && exportDatasetXlsx(data.records, ds.label)}
+              onClick={() => data && exportDatasetXlsx(data.records, ds.label, data.questions)}
               disabled={!canExportDataset}
               className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--qd-border)] px-2 text-xs font-semibold text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] disabled:cursor-not-allowed disabled:opacity-50"
               title="Exportar base selecionada em Excel"
