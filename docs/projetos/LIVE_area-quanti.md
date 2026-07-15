@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-15 — Correção de rótulos em barras filtradas — Codex
+- **O quê:** ajuste no rótulo de valores dos gráficos de barra para evitar sobreposição/embolamento visual quando um filtro aplicado pelo próprio gráfico deixa uma única categoria com 100% da amostra.
+- **Como:** o label agora é renderizado de forma customizada; quando não há espaço à direita da barra, ele entra dentro da barra com texto branco, e a margem direita do gráfico foi ampliada.
+- **Arquivos:** `src/features/area-quanti/dashboard/Charts.tsx`.
+
 ### 2026-07-15 — Migração da base 2020 para JSON colunar — Codex
 - **O quê:** conversão de `public/quanti/base-2020.json` do formato de array de objetos para o formato colunar `quanti-columnar-v1` (`columns`, `questions`, `rows`), preservando a ordem original das colunas e os aliases canônicos usados pelo dashboard.
 - **Ganho:** o arquivo bruto caiu de ~37,36 MB para ~17,83 MB; gzip estimado caiu para ~1,07 MB. A base segue com 14.928 registros e 97 colunas carregadas em memória (92 originais + aliases).
