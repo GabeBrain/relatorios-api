@@ -35,11 +35,12 @@ function RankList({ data, field, total }: { data: { key: string; count: number }
 
 export function RegionDistribution({ rows }: { rows: QuantiRecord[] }) {
   const regioes = useMemo(() => countBy(rows, 'regiao'), [rows]);
+  const total = useMemo(() => regioes.reduce((sum, item) => sum + item.count, 0), [regioes]);
 
   return (
     <div className="mt-4 border-t border-[var(--qd-border)] pt-3">
       <div className="mb-2 text-xs font-semibold text-[var(--qd-text)]">Distribuição por região</div>
-      <RankList data={regioes} field="regiao" total={rows.length} />
+      <RankList data={regioes} field="regiao" total={total} />
     </div>
   );
 }

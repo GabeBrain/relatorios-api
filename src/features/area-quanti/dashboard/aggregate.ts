@@ -2,10 +2,13 @@ import type { CategoricalField, Filters, QuantiRecord } from './types';
 
 export const NA = 'Não informado';
 
-export function normalizeCategoricalValue(field: string, value: unknown): string | null {
-  const raw = value == null || value === '' ? NA : String(value);
-  if (field === 'intencao_compra_padronizada' && raw === '-') return null;
-  if (field === 'tempo_intencao_padronizado' && raw === '-') return '0. Sem intenção';
+function isNullMarker(value: string): boolean {
+  return value.trim() === '-';
+}
+
+export function normalizeCategoricalValue(_field: string, value: unknown): string | null {
+  const raw = value == null || value === '' ? NA : String(value).trim();
+  if (isNullMarker(raw)) return null;
   return raw;
 }
 
@@ -65,12 +68,14 @@ export function mean(rows: QuantiRecord[], field: 'idade' | 'renda_valor_estimad
 }
 
 export function pctGenero(rows: QuantiRecord[], target: string): number {
-  if (!rows.length) return 0;
-  let n = 0;
+  let n = 0, valid = 0;
   for (const r of rows) {
-    if (String(r.genero).toLowerCase().startsWith(target.toLowerCase())) n++;
+    const genero = normalizeCategoricalValue('genero', r.genero);
+    if (genero == null || genero === NA) continue;
+    valid++;
+    if (genero.toLowerCase().startsWith(target.toLowerCase())) n++;
   }
-  return (n / rows.length) * 100;
+  return valid ? (n / valid) * 100 : 0;
 }
 
 export function histogram(
@@ -217,6 +222,7 @@ export function detectFieldSchema(
     for (const r of sample) {
       const v = r[key];
       if (v == null || v === '') continue;
+      if (typeof v === 'string' && isNullMarker(v)) continue;
       nonNullCount++;
       if (typeof v === 'number' && Number.isFinite(v)) numericCount++;
       if (values.size < 5000) values.add(String(v));
@@ -274,8 +280,8 @@ export function crosstabUniversal(
 ): UniversalCrosstab {
   const rowKeys = new Set<string>();
   const colKeys = new Set<string>();
-  // key -> { count, values[] (only when we need median), sum }
-  const buckets = new Map<string, { count: number; sum: number; values: number[] }>();
+  // key -> { count, values[] (only when we need median), sum, valueN }
+  const buckets = new Map<string, { count: number; sum: number; valueN: number; values: number[] }>();
   const NONE = '—';
 
   for (const r of rows) {
@@ -286,12 +292,13 @@ export function crosstabUniversal(
     colKeys.add(ck);
     const k = `${rk}||${ck}`;
     let b = buckets.get(k);
-    if (!b) { b = { count: 0, sum: 0, values: [] }; buckets.set(k, b); }
+    if (!b) { b = { count: 0, sum: 0, valueN: 0, values: [] }; buckets.set(k, b); }
     b.count++;
     if (valueField) {
       const v = r[valueField];
       if (typeof v === 'number' && Number.isFinite(v)) {
         b.sum += v;
+        b.valueN++;
         if (metric === 'median') b.values.push(v);
       }
     }
@@ -317,7 +324,7 @@ export function crosstabUniversal(
         case 'pct_row': return rowTotalsCnt[i] ? (c / rowTotalsCnt[i]) * 100 : 0;
         case 'pct_col': return colTotalsCnt[j] ? (c / colTotalsCnt[j]) * 100 : 0;
         case 'sum': return b?.sum ?? 0;
-        case 'avg': return b && b.count ? b.sum / b.count : 0;
+        case 'avg': return b && b.valueN ? b.sum / b.valueN : 0;
         case 'median': {
           if (!b || !b.values.length) return 0;
           const s = [...b.values].sort((a, b) => a - b);

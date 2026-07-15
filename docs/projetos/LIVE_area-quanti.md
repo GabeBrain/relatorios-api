@@ -26,6 +26,12 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-15 — `-` como nulo em percentuais e cruzamentos — Codex
+- **O quê:** padronização do tratamento de `"-"` como valor nulo em campos categóricos. O valor deixa de aparecer como opção/categoria e deixa de entrar nos denominadores de contagem/percentual dos gráficos, heatmaps, rankings, mapa, KPIs de gênero e Análise Cruzada Universal.
+- **Regra:** se uma pergunta tem 150 linhas, sendo 100 com `"-"` e 50 respostas válidas, os percentuais daquela pergunta passam a ser calculados sobre as 50 respostas válidas.
+- **Arquitetura:** a regra foi centralizada em `normalizeCategoricalValue`; `detectFieldSchema` ignora `"-"` ao inferir campos; percentuais geográficos e rankings usam soma de itens válidos como denominador.
+- **Arquivos:** `src/features/area-quanti/dashboard/aggregate.ts`, `src/features/area-quanti/dashboard/Rankings.tsx`, `src/features/area-quanti/dashboard/geo/GeoMap.tsx`.
+
 ### 2026-07-15 — Substituição da fonte 2020 completa — Codex
 - **O quê:** substituição da fonte da aba Banco Quanti pela nova planilha `Base Unificada 2020.xlsx`, convertida para `public/quanti/base-2020.json` com 14.928 registros, 92 colunas e mapa `questions` derivado da linha 2 da planilha. O JSON preserva as colunas originais e adiciona aliases canônicos usados pelo dashboard (`estado`, `cidade`, `idade`, `lat`, `lng`).
 - **Arquitetura:** `datasets.ts` agora aponta a base 2020 para um arquivo público versionado no próprio site (`/quanti/base-2020.json`) e `useQuantiDataset.ts` passa a aceitar fonte `public` além do fluxo legado por Supabase Storage.
