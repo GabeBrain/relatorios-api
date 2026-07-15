@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-15 — Ordenação da distribuição por região — Codex
+- **O quê:** o gráfico/lista `% de coletas por região` abaixo do mapa ganhou o mesmo botão compacto de ordenação usado nos demais gráficos. O padrão permanece maior → menor e o botão alterna para menor → maior.
+- **Por quê:** padronizar a interação de ordenação nos gráficos do Banco Quanti.
+- **Arquivos:** `src/features/area-quanti/dashboard/Rankings.tsx`.
+
 ### 2026-07-15 — `-` como nulo em percentuais e cruzamentos — Codex
 - **O quê:** padronização do tratamento de `"-"` como valor nulo em campos categóricos. O valor deixa de aparecer como opção/categoria e deixa de entrar nos denominadores de contagem/percentual dos gráficos, heatmaps, rankings, mapa, KPIs de gênero e Análise Cruzada Universal.
 - **Regra:** se uma pergunta tem 150 linhas, sendo 100 com `"-"` e 50 respostas válidas, os percentuais daquela pergunta passam a ser calculados sobre as 50 respostas válidas.

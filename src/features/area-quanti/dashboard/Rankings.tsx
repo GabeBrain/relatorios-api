@@ -1,7 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { ArrowDownUp } from 'lucide-react';
 import type { QuantiRecord } from './types';
 import { countBy } from './aggregate';
 import { useQuantiStore } from './store';
+
+type SortOrder = 'desc' | 'asc';
 
 function RankList({ data, field, total }: { data: { key: string; count: number }[]; field: 'cidade' | 'estado' | 'regiao'; total: number }) {
   const toggle = useQuantiStore((s) => s.toggleValue);
@@ -34,13 +37,29 @@ function RankList({ data, field, total }: { data: { key: string; count: number }
 }
 
 export function RegionDistribution({ rows }: { rows: QuantiRecord[] }) {
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const regioes = useMemo(() => countBy(rows, 'regiao'), [rows]);
   const total = useMemo(() => regioes.reduce((sum, item) => sum + item.count, 0), [regioes]);
+  const sortedRegioes = useMemo(
+    () => [...regioes].sort((a, b) => (sortOrder === 'desc' ? b.count - a.count : a.count - b.count)),
+    [regioes, sortOrder],
+  );
 
   return (
     <div className="mt-4 border-t border-[var(--qd-border)] pt-3">
-      <div className="mb-2 text-xs font-semibold text-[var(--qd-text)]">Distribuição por região</div>
-      <RankList data={regioes} field="regiao" total={total} />
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="text-xs font-semibold text-[var(--qd-text)]">Distribuição por região</div>
+        <button
+          type="button"
+          onClick={() => setSortOrder((order) => (order === 'desc' ? 'asc' : 'desc'))}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)]"
+          title={sortOrder === 'desc' ? 'Maior para menor' : 'Menor para maior'}
+          aria-label={sortOrder === 'desc' ? 'Ordenar do menor para o maior' : 'Ordenar do maior para o menor'}
+        >
+          <ArrowDownUp className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <RankList data={sortedRegioes} field="regiao" total={total} />
     </div>
   );
 }
