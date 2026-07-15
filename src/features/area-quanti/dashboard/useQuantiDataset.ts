@@ -5,6 +5,16 @@ import type { QuantiDataset } from './types';
 
 const cache = new Map<string, Promise<QuantiDataset>>();
 
+interface ColumnarDataset {
+  id: string;
+  label: string;
+  count: number;
+  generated_at: string;
+  columns: string[];
+  questions?: string[] | Record<string, string>;
+  rows: unknown[][];
+}
+
 function toNumber(v: unknown): number | null {
   if (v == null || v === '') return null;
   if (typeof v === 'number') return Number.isFinite(v) ? v : null;
@@ -39,11 +49,33 @@ function normalizeRecords(ds: QuantiDataset): QuantiDataset {
   return ds;
 }
 
+function expandColumnarDataset(raw: ColumnarDataset): QuantiDataset {
+  const questions = Array.isArray(raw.questions)
+    ? Object.fromEntries(raw.columns.map((column, index) => [column, raw.questions?.[index] ?? column]))
+    : raw.questions;
+  const records = raw.rows.map((row) => Object.fromEntries(raw.columns.map((column, index) => [column, row[index]])));
+  return {
+    id: raw.id,
+    label: raw.label,
+    count: raw.count ?? records.length,
+    generated_at: raw.generated_at,
+    questions,
+    records: records as QuantiDataset['records'],
+  };
+}
+
+function normalizeDataset(raw: QuantiDataset | ColumnarDataset): QuantiDataset {
+  if (Array.isArray((raw as ColumnarDataset).columns) && Array.isArray((raw as ColumnarDataset).rows)) {
+    return normalizeRecords(expandColumnarDataset(raw as ColumnarDataset));
+  }
+  return normalizeRecords(raw as QuantiDataset);
+}
+
 function parseDataset(text: string, label: string): QuantiDataset {
   const sanitize = (s: string) =>
     s.replace(/(:|\[|,)\s*(NaN|Infinity|-Infinity)(?=\s*[,}\]])/g, '$1 null');
   try {
-    return normalizeRecords(JSON.parse(text) as QuantiDataset);
+    return normalizeDataset(JSON.parse(text) as QuantiDataset | ColumnarDataset);
   } catch (originalError) {
     const sanitized = sanitize(text);
     if (sanitized === text) {
@@ -52,7 +84,7 @@ function parseDataset(text: string, label: string): QuantiDataset {
       );
     }
     try {
-      return normalizeRecords(JSON.parse(sanitized) as QuantiDataset);
+      return normalizeDataset(JSON.parse(sanitized) as QuantiDataset | ColumnarDataset);
     } catch (sanitizedError) {
       throw new Error(
         `Dataset "${label}" inválido mesmo após normalização: ${(sanitizedError as Error).message}`,

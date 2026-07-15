@@ -14,10 +14,10 @@ Atualize **Desenvolvimentos / Etapas / Pendências** sempre que sincronizar uma 
 
 - **Estado atual — dashboard operacional.** [`AreaQuanti.tsx`](../../src/pages/AreaQuanti.tsx)
   carrega o dashboard Banco Quanti com KPIs, filtros, gráficos, mapas, rankings e análise cruzada.
-- **Fonte atual:** `public/quanti/base-2020.json`, gerado a partir de
-  `Base Unificada 2020.xlsx` (14.928 registros).
-- **Regra da planilha:** linha 1 = variáveis, linha 2 = texto das perguntas desconsiderado,
-  dados válidos a partir da linha 3.
+- **Fonte atual:** `public/quanti/base-2020.json` em formato colunar `quanti-columnar-v1`,
+  gerado a partir de `Base Unificada 2020.xlsx` (14.928 registros).
+- **Regra da planilha:** linha 1 = variáveis, linha 2 = texto das perguntas preservado como
+  metadado, dados válidos a partir da linha 3.
 
 **O que já está pronto:** exploração da base 2020 com processamento 100% client-side e registro
 de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
@@ -25,6 +25,13 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 ---
 
 ## 1. Desenvolvimentos
+
+### 2026-07-15 — Migração da base 2020 para JSON colunar — Codex
+- **O quê:** conversão de `public/quanti/base-2020.json` do formato de array de objetos para o formato colunar `quanti-columnar-v1` (`columns`, `questions`, `rows`), preservando a ordem original das colunas e os aliases canônicos usados pelo dashboard.
+- **Ganho:** o arquivo bruto caiu de ~37,36 MB para ~17,83 MB; gzip estimado caiu para ~1,07 MB. A base segue com 14.928 registros e 97 colunas carregadas em memória (92 originais + aliases).
+- **Compatibilidade:** `useQuantiDataset.ts` agora aceita tanto o formato antigo quanto o formato colunar e reconstrói `records`/`questions` em memória, mantendo filtros, KPIs, gráficos, Análise Cruzada Universal e exportações sem mudança visual.
+- **Por quê:** reduzir o peso do repositório/projeto e preparar o Banco Quanti para bases futuras/históricas sem duplicar overhead estrutural.
+- **Arquivos:** `public/quanti/base-2020.json`, `src/features/area-quanti/dashboard/useQuantiDataset.ts`.
 
 ### 2026-07-15 — Exportação da base selecionada — Codex
 - **O quê:** inclusão de botões `CSV` e `XLSX` antes do seletor `Base` na topbar do Banco Quanti. Os botões exportam a base selecionada respeitando os filtros ativos; sem filtros, baixam a base inteira.
