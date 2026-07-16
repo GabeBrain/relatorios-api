@@ -80,7 +80,7 @@ export function ChartCard({ title, subtitle, children, className, action }: Card
   );
 }
 
-export type SortOrder = 'desc' | 'asc' | 'alpha';
+export type SortOrder = 'desc' | 'asc' | 'alpha' | 'alphaDesc';
 
 interface FieldChartProps { rows: QuantiRecord[]; field: CategoricalField; height?: number; topN?: number; sortOrder?: SortOrder }
 
@@ -93,6 +93,7 @@ export function DonutField({ rows, field, height = 240, sortOrder = 'desc' }: Fi
     return [...c]
       .sort((a, b) => {
         if (sortOrder === 'alpha') return compareCategoricalAlphabetic(field, a.key, b.key);
+        if (sortOrder === 'alphaDesc') return compareCategoricalAlphabetic(field, b.key, a.key);
         const diff = sortOrder === 'desc' ? b.count - a.count : a.count - b.count;
         return diff || ((naturalOrder.get(a.key) ?? 0) - (naturalOrder.get(b.key) ?? 0));
       })
@@ -164,6 +165,7 @@ export function BarField({ rows, field, height, topN, sortOrder = 'desc' }: Fiel
     const data = [...base]
       .sort((a, b) => {
         if (sortOrder === 'alpha') return compareCategoricalAlphabetic(field, a.key, b.key);
+        if (sortOrder === 'alphaDesc') return compareCategoricalAlphabetic(field, b.key, a.key);
         const diff = sortOrder === 'desc' ? b.count - a.count : a.count - b.count;
         return diff || ((naturalOrder.get(a.key) ?? 0) - (naturalOrder.get(b.key) ?? 0));
       })

@@ -40,21 +40,23 @@ function GenerationInfoButton() {
 
 function SortToggle({ order, onChange }: { order: SortOrder; onChange: (order: SortOrder) => void }) {
   const countOrder = order === 'asc' ? 'asc' : 'desc';
+  const isAlpha = order === 'alpha' || order === 'alphaDesc';
+  const nextAlphaOrder: SortOrder = order === 'alpha' ? 'alphaDesc' : order === 'alphaDesc' ? 'desc' : 'alpha';
   return (
     <div className="flex items-center gap-1">
       <button
         type="button"
-        onClick={() => onChange(order === 'alpha' ? 'desc' : 'alpha')}
-        className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)] ${order === 'alpha' ? 'bg-[var(--qd-light)] text-[var(--qd-text)]' : 'text-[var(--qd-text-muted)]'}`}
-        title="Ordem alfabética/numérica"
-        aria-label="Alternar ordem alfabética ou numérica"
+        onClick={() => onChange(nextAlphaOrder)}
+        className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)] ${isAlpha ? 'bg-[var(--qd-light)] text-[var(--qd-text)]' : 'text-[var(--qd-text-muted)]'}`}
+        title={order === 'alpha' ? 'A-Z' : order === 'alphaDesc' ? 'Z-A' : 'Ordem alfabética/numérica'}
+        aria-label={order === 'alpha' ? 'Ordenar de Z para A' : order === 'alphaDesc' ? 'Voltar para ordenação padrão' : 'Ordenar de A para Z'}
       >
         <ArrowDownAZ className="h-3.5 w-3.5" />
       </button>
       <button
         type="button"
         onClick={() => onChange(countOrder === 'desc' ? 'asc' : 'desc')}
-        className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)] ${order === 'alpha' ? 'text-[var(--qd-text-muted)]' : 'bg-[var(--qd-light)] text-[var(--qd-text)]'}`}
+        className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)] ${isAlpha ? 'text-[var(--qd-text-muted)]' : 'bg-[var(--qd-light)] text-[var(--qd-text)]'}`}
         title={countOrder === 'desc' ? 'Maior para menor' : 'Menor para maior'}
         aria-label={countOrder === 'desc' ? 'Ordenar do menor para o maior' : 'Ordenar do maior para o menor'}
       >
