@@ -17,5 +17,5 @@ export interface DatasetRef {
  * Nenhuma alteração nos gráficos/filtros é necessária.
  */
 export const DATASETS: DatasetRef[] = [
-  { id: '2020', label: 'Base Unificada 2020', source: 'public', path: '/quanti/base-2020.json' },
+  { id: '2020', label: 'Base Unificada 2020', source: 'storage', bucket: 'quanti-datasets', path: 'base-2020.json' },
 ];
