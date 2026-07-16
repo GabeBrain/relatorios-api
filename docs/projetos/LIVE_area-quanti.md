@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-16 — Centralização dos KPIs — Codex
+- **O quê:** ajuste visual nos cards de KPI para centralizar melhor os valores e rótulos, com foco em `Renda média estimada`, `% Homens` e `% Mulheres`.
+- **Como:** os cards passam a usar um layout flex centralizado e valores com largura total, alinhamento central, `line-height` estável e dígitos tabulares, sem alterar cálculo, cores ou regras de filtro.
+- **Arquivos:** `src/features/area-quanti/dashboard/KpiRow.tsx`, `src/features/area-quanti/dashboard/dashboard.css`.
+
 ### 2026-07-15 — Correção de rótulos em barras filtradas — Codex
 - **O quê:** ajuste no rótulo de valores dos gráficos de barra para evitar sobreposição/embolamento visual quando um filtro aplicado pelo próprio gráfico deixa uma única categoria com 100% da amostra.
 - **Como:** o label agora é renderizado de forma customizada; quando não há espaço à direita da barra, ele entra dentro da barra com texto branco, e a margem direita do gráfico foi ampliada.

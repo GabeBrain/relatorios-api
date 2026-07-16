@@ -32,7 +32,7 @@ export function KpiRow({ rows }: Props) {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-9">
       {kpis.map((k) => (
-        <div key={k.label} className="qd-card p-4 text-center">
+        <div key={k.label} className="qd-card qd-kpi-card p-4 text-center">
           <k.icon className="mx-auto mb-2 h-4 w-4 text-[var(--qd-accent)]" />
           <div className="qd-kpi-value">{k.value}</div>
           <div className="qd-kpi-label mt-1">{k.label}</div>
