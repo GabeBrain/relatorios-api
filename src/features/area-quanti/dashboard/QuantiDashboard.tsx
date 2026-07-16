@@ -1,9 +1,9 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { ArrowDownUp, ChevronDown, ChevronRight, Download, FileSpreadsheet, Filter, Info, Loader2 } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownUp, ChevronDown, ChevronRight, Download, FileSpreadsheet, Filter, Info, Loader2 } from 'lucide-react';
 import { DATASETS } from './datasets';
 import { useQuantiDataset } from './useQuantiDataset';
 import { useQuantiStore } from './store';
-import { applyFilters, crosstab } from './aggregate';
+import { applyFilters, crosstab, displayCategoricalValue } from './aggregate';
 import type { CategoricalField, QuantiRecord } from './types';
 import { FiltersSidebar } from './FiltersSidebar';
 import { ActiveFiltersBar } from './ActiveFiltersBar';
@@ -39,16 +39,28 @@ function GenerationInfoButton() {
 }
 
 function SortToggle({ order, onChange }: { order: SortOrder; onChange: (order: SortOrder) => void }) {
+  const countOrder = order === 'asc' ? 'asc' : 'desc';
   return (
-    <button
-      type="button"
-      onClick={() => onChange(order === 'desc' ? 'asc' : 'desc')}
-      className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)]"
-      title={order === 'desc' ? 'Maior para menor' : 'Menor para maior'}
-      aria-label={order === 'desc' ? 'Ordenar do menor para o maior' : 'Ordenar do maior para o menor'}
-    >
-      <ArrowDownUp className="h-3.5 w-3.5" />
-    </button>
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={() => onChange(countOrder === 'desc' ? 'asc' : 'desc')}
+        className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)] ${order === 'alpha' ? 'text-[var(--qd-text-muted)]' : 'bg-[var(--qd-light)] text-[var(--qd-text)]'}`}
+        title={countOrder === 'desc' ? 'Maior para menor' : 'Menor para maior'}
+        aria-label={countOrder === 'desc' ? 'Ordenar do menor para o maior' : 'Ordenar do maior para o menor'}
+      >
+        <ArrowDownUp className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange(order === 'alpha' ? 'desc' : 'alpha')}
+        className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)] ${order === 'alpha' ? 'bg-[var(--qd-light)] text-[var(--qd-text)]' : 'text-[var(--qd-text-muted)]'}`}
+        title="Ordem alfabética/numérica"
+        aria-label="Alternar ordem alfabética ou numérica"
+      >
+        <ArrowDownAZ className="h-3.5 w-3.5" />
+      </button>
+    </div>
   );
 }
 
@@ -140,6 +152,14 @@ function buildIntentCrosstab(rows: QuantiRecord[], rowField: CategoricalField, m
   return applyHeatmapMetric(crosstab(rows, rowField, 'intencao_compra_padronizada', 'count'), metric, topN);
 }
 
+function displayHeatmapLabels(ct: ReturnType<typeof crosstab>, rowField: CategoricalField, colField: CategoricalField) {
+  return {
+    ...ct,
+    rows: ct.rows.map((row) => displayCategoricalValue(rowField, row)),
+    cols: ct.cols.map((col) => displayCategoricalValue(colField, col)),
+  };
+}
+
 function MetricSelect({ metric, onChange }: { metric: HeatmapMetric; onChange: (metric: HeatmapMetric) => void }) {
   return (
     <label className="flex items-center gap-1 text-[11px] font-semibold text-[var(--qd-text-muted)]">
@@ -181,6 +201,7 @@ function IntentHeatmapCard({
 }) {
   const [metric, setMetric] = useState<IntentMetric>('pct');
   const ct = useMemo(() => buildIntentCrosstab(rows, rowField, metric, topN), [rows, rowField, metric, topN]);
+  const displayCt = useMemo(() => displayHeatmapLabels(ct, rowField, 'intencao_compra_padronizada'), [ct, rowField]);
 
   return (
     <ChartCard
@@ -188,7 +209,7 @@ function IntentHeatmapCard({
       className={className}
       action={<MetricSelect metric={metric} onChange={setMetric} />}
     >
-      <Heatmap ct={ct} metricLabel={metricLabel} format={(value, rowIndex) => formatHeatmapValue(metric, ct, value, rowIndex)} />
+      <Heatmap ct={displayCt} metricLabel={metricLabel} format={(value, rowIndex) => formatHeatmapValue(metric, ct, value, rowIndex)} />
     </ChartCard>
   );
 }
@@ -208,10 +229,11 @@ function CrosstabHeatmapCard({
 }) {
   const [metric, setMetric] = useState<HeatmapMetric>('pct');
   const ct = useMemo(() => applyHeatmapMetric(crosstab(rows, rowField, colField, 'count'), metric), [rows, rowField, colField, metric]);
+  const displayCt = useMemo(() => displayHeatmapLabels(ct, rowField, colField), [ct, rowField, colField]);
 
   return (
     <ChartCard title={title} action={<MetricSelect metric={metric} onChange={setMetric} />}>
-      <Heatmap ct={ct} metricLabel={metricLabel} format={(value, rowIndex) => formatHeatmapValue(metric, ct, value, rowIndex)} />
+      <Heatmap ct={displayCt} metricLabel={metricLabel} format={(value, rowIndex) => formatHeatmapValue(metric, ct, value, rowIndex)} />
     </ChartCard>
   );
 }

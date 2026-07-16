@@ -197,10 +197,32 @@ export function crosstab(
   return { rows: rowArr, cols: colArr, matrix, rowTotals, colTotals, total };
 }
 
+const ORDER_PREFIX_FIELDS = new Set<CategoricalField>([
+  'faixa_etaria',
+  'geracao',
+  'renda_macro_faixa',
+  'renda_faixa_padronizada',
+  'tempo_intencao_padronizado',
+]);
+
+export function displayCategoricalValue(field: CategoricalField, value: string): string {
+  if (!ORDER_PREFIX_FIELDS.has(field)) return value;
+  return value.replace(/^\s*\d+\.\s*/, '');
+}
+
+function leadingOrder(value: string): number | null {
+  const match = value.match(/^\s*(\d+)\./);
+  if (!match) return null;
+  return Number.parseInt(match[1], 10);
+}
+
 /** Preferred ordering for known ordinal fields (age ranges, generations, income). */
 const ORDER: Partial<Record<CategoricalField, RegExp>> = {
-  faixa_etaria: /(\d+)/,
-  renda_faixa_padronizada: /(\d+)/,
+  faixa_etaria: /^(\d+)\./,
+  geracao: /^(\d+)\./,
+  renda_macro_faixa: /^(\d+)\./,
+  renda_faixa_padronizada: /^(\d+)\./,
+  tempo_intencao_padronizado: /^(\d+)\./,
 };
 
 export function orderedValues(field: CategoricalField, values: string[]): string[] {
@@ -208,12 +230,21 @@ export function orderedValues(field: CategoricalField, values: string[]): string
   if (rx) {
     return [...values].sort((a, b) => {
       if (a === NA) return 1; if (b === NA) return -1;
-      const na = parseInt(a.match(rx)?.[1] ?? '999999', 10);
-      const nb = parseInt(b.match(rx)?.[1] ?? '999999', 10);
-      return na - nb;
+      const na = Number.parseInt(a.match(rx)?.[1] ?? '999999', 10);
+      const nb = Number.parseInt(b.match(rx)?.[1] ?? '999999', 10);
+      return na - nb || displayCategoricalValue(field, a).localeCompare(displayCategoricalValue(field, b), 'pt-BR');
     });
   }
   return values;
+}
+
+export function compareCategoricalAlphabetic(field: CategoricalField, a: string, b: string): number {
+  if (a === NA) return 1;
+  if (b === NA) return -1;
+  const ao = leadingOrder(a);
+  const bo = leadingOrder(b);
+  if (ORDER_PREFIX_FIELDS.has(field) && ao != null && bo != null && ao !== bo) return ao - bo;
+  return displayCategoricalValue(field, a).localeCompare(displayCategoricalValue(field, b), 'pt-BR');
 }
 
 /* ══════ Universal schema detection + universal crosstab ══════ */

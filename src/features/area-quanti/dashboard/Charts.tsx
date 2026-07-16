@@ -14,7 +14,15 @@ import {
   Legend,
 } from 'recharts';
 import type { CategoricalField, QuantiRecord } from './types';
-import { countBy, histogram, orderedValues, crosstab, type Crosstab } from './aggregate';
+import {
+  compareCategoricalAlphabetic,
+  countBy,
+  displayCategoricalValue,
+  histogram,
+  orderedValues,
+  crosstab,
+  type Crosstab,
+} from './aggregate';
 import { useQuantiStore } from './store';
 
 // Brain palette — tons de verde e amarelo
@@ -49,7 +57,7 @@ export function ChartCard({ title, subtitle, children, className, action }: Card
   );
 }
 
-export type SortOrder = 'desc' | 'asc';
+export type SortOrder = 'desc' | 'asc' | 'alpha';
 
 interface FieldChartProps { rows: QuantiRecord[]; field: CategoricalField; height?: number; topN?: number; sortOrder?: SortOrder }
 
@@ -59,10 +67,13 @@ export function DonutField({ rows, field, height = 240, sortOrder = 'desc' }: Fi
   const data = useMemo(() => {
     const c = countBy(rows, field);
     const naturalOrder = new Map(orderedValues(field, c.map((x) => x.key)).map((key, index) => [key, index]));
-    return [...c].sort((a, b) => {
-      const diff = sortOrder === 'desc' ? b.count - a.count : a.count - b.count;
-      return diff || ((naturalOrder.get(a.key) ?? 0) - (naturalOrder.get(b.key) ?? 0));
-    });
+    return [...c]
+      .sort((a, b) => {
+        if (sortOrder === 'alpha') return compareCategoricalAlphabetic(field, a.key, b.key);
+        const diff = sortOrder === 'desc' ? b.count - a.count : a.count - b.count;
+        return diff || ((naturalOrder.get(a.key) ?? 0) - (naturalOrder.get(b.key) ?? 0));
+      })
+      .map((item) => ({ ...item, displayKey: displayCategoricalValue(field, item.key) }));
   }, [rows, field, sortOrder]);
   const total = data.reduce((sum, item) => sum + item.count, 0) || 1;
   const renderLabel = (props: any) => {
@@ -86,7 +97,7 @@ export function DonutField({ rows, field, height = 240, sortOrder = 'desc' }: Fi
         <Pie
           data={data}
           dataKey="count"
-          nameKey="key"
+          nameKey="displayKey"
           innerRadius="55%"
           outerRadius="85%"
           paddingAngle={2}
@@ -110,7 +121,7 @@ export function DonutField({ rows, field, height = 240, sortOrder = 'desc' }: Fi
         <Tooltip
           formatter={(v: number, _n, p: any) => [
             `${v.toLocaleString('pt-BR')} (${((v / total) * 100).toFixed(1)}%)`,
-            p.payload.key,
+            p.payload.displayKey,
           ]}
         />
         <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -127,16 +138,19 @@ export function BarField({ rows, field, height, topN, sortOrder = 'desc' }: Fiel
     const total = c.reduce((sum, item) => sum + item.count, 0) || 1;
     const naturalOrder = new Map(orderedValues(field, c.map((x) => x.key)).map((key, index) => [key, index]));
     const base = topN ? c.slice(0, topN) : c;
-    const data = [...base].sort((a, b) => {
-      const diff = sortOrder === 'desc' ? b.count - a.count : a.count - b.count;
-      return diff || ((naturalOrder.get(a.key) ?? 0) - (naturalOrder.get(b.key) ?? 0));
-    });
+    const data = [...base]
+      .sort((a, b) => {
+        if (sortOrder === 'alpha') return compareCategoricalAlphabetic(field, a.key, b.key);
+        const diff = sortOrder === 'desc' ? b.count - a.count : a.count - b.count;
+        return diff || ((naturalOrder.get(a.key) ?? 0) - (naturalOrder.get(b.key) ?? 0));
+      })
+      .map((item) => ({ ...item, displayKey: displayCategoricalValue(field, item.key) }));
     return { data, total };
   }, [rows, field, topN, sortOrder]);
 
   // Larger bars: ~36px per row, min 220
   const h = height ?? Math.max(220, data.length * 36 + 24);
-  const maxLabel = Math.max(0, ...data.map((d) => d.key.length));
+  const maxLabel = Math.max(0, ...data.map((d) => d.displayKey.length));
   const yWidth = Math.min(180, Math.max(80, maxLabel * 6.2));
   const renderValueLabel = (props: any) => {
     const value = Number(props.value ?? 0);
@@ -171,7 +185,7 @@ export function BarField({ rows, field, height, topN, sortOrder = 'desc' }: Fiel
       <BarChart data={data} layout="vertical" margin={{ top: 6, right: 96, left: 6, bottom: 6 }} barCategoryGap={6}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
         <XAxis type="number" tick={{ fontSize: 10 }} />
-        <YAxis dataKey="key" type="category" tick={{ fontSize: 11 }} width={yWidth} interval={0} />
+        <YAxis dataKey="displayKey" type="category" tick={{ fontSize: 11 }} width={yWidth} interval={0} />
         <Tooltip
           cursor={{ fill: 'rgba(91,117,55,0.08)' }}
           formatter={(v: number) => [`${v.toLocaleString('pt-BR')} (${((v / total) * 100).toFixed(1)}%)`, 'Entrevistas']}
