@@ -321,11 +321,8 @@ export function detectFieldSchema(
     out.push({ key, label, kind, cardinality });
   }
 
-  // Stable, human-friendly order: categorical first, then alphabetical by label.
-  out.sort((a, b) => {
-    if (a.kind !== b.kind) return a.kind === 'categorical' ? -1 : 1;
-    return a.label.localeCompare(b.label, 'pt-BR');
-  });
+  // Keep source-column order. For columnar JSON this follows `columns`;
+  // for record JSON this follows the key insertion order of the first rows.
   return out;
 }
 
