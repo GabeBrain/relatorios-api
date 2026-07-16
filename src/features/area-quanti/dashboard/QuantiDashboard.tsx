@@ -8,7 +8,7 @@ import type { CategoricalField, QuantiRecord } from './types';
 import { FiltersSidebar } from './FiltersSidebar';
 import { ActiveFiltersBar } from './ActiveFiltersBar';
 import { KpiRow } from './KpiRow';
-import { BarField, ChartCard, DonutField, Heatmap, HistogramChart, type SortOrder } from './Charts';
+import { BarField, ChartCard, DonutField, Heatmap, type SortOrder } from './Charts';
 import { GeoMap } from './geo/GeoMap';
 import { RegionDistribution } from './Rankings';
 import { CrossAnalysis } from './CrossAnalysis';
@@ -392,9 +392,6 @@ export function QuantiDashboard() {
                 <SortableBarCard rows={filtered} title="Faixa padronizada" field="renda_faixa_padronizada" />
                 <SortableBarCard rows={filtered} title="Classe social agregada" field="renda_classe_agregada" />
                 <SortableBarCard rows={filtered} title="Classe social detalhada" field="renda_classe_detalhada" />
-                <ChartCard title="Histograma — renda estimada (R$)" subtitle="Distribuição por faixas" className="lg:col-span-2">
-                  <HistogramChart rows={filtered} field="renda_valor_estimado" bins={20} height={520} />
-                </ChartCard>
               </div>
             </section>
 

@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-16 — Remoção temporária do histograma de renda — Codex
+- **O quê:** o card `Histograma — renda estimada (R$)` foi retirado do dashboard por ora, mantendo os demais gráficos categóricos de renda.
+- **Por quê:** a lógica do histograma por bins automáticos será reavaliada antes de decidir se vale mantê-lo.
+- **Arquivos:** `src/features/area-quanti/dashboard/QuantiDashboard.tsx`.
+
 ### 2026-07-16 — Histograma de renda estimada com 20 bins — Codex
 - **O quê:** o histograma `renda estimada (R$)` mantém a referência em `renda_valor_estimado`, mas passou de 30 para 20 bins para reduzir a fragmentação dos recortes automáticos.
 - **Arquivos:** `src/features/area-quanti/dashboard/QuantiDashboard.tsx`.
