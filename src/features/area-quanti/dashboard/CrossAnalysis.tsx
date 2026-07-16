@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -90,12 +90,13 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
   const catFields = schema.filter((f) => f.kind === 'categorical');
   const numFields = schema.filter((f) => f.kind === 'numeric');
 
-  const [rowField, setRowField] = useState<string>(() => catFields[0]?.key ?? '');
-  const [colField, setColField] = useState<string | null>(() => catFields[1]?.key ?? null);
+  const [rowField, setRowField] = useState<string>('');
+  const [colField, setColField] = useState<string | null>(null);
   const [metric, setMetric] = useState<UniversalMetric>('count');
   const [valueField, setValueField] = useState<string | null>(() => numFields[0]?.key ?? null);
   const [view, setView] = useState<ViewKind>('table');
   const [mode, setMode] = useState<Mode>('both');
+  const [allowLargeMatrix, setAllowLargeMatrix] = useState(false);
 
   const needsValueField = metric === 'avg' || metric === 'sum' || metric === 'median';
 
@@ -106,13 +107,19 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
     [rows, rowField, colField, metric, valueField, needsValueField],
   );
 
-  const rowLabel = schema.find((f) => f.key === rowField)?.label ?? rowField;
+  const rowLabel = rowField ? (schema.find((f) => f.key === rowField)?.label ?? rowField) : '';
   const colLabel = colField ? (schema.find((f) => f.key === colField)?.label ?? colField) : null;
 
   const availableViews: ViewKind[] = ct ? compatibleViews(rowField, colField, metric, ct) : ['table'];
   const effectiveView = availableViews.includes(view) ? view : availableViews[0];
-  const showTable = mode !== 'chart' || effectiveView === 'table';
-  const showChart = effectiveView !== 'table' && (mode === 'both' || mode === 'chart');
+  const showTable = !!ct && (mode !== 'chart' || effectiveView === 'table');
+  const showChart = !!ct && effectiveView !== 'table' && (mode === 'both' || mode === 'chart');
+  const cellCount = ct ? ct.rows.length * Math.max(1, ct.cols.length) : 0;
+  const isLargeMatrix = cellCount > 1500;
+
+  useEffect(() => {
+    setAllowLargeMatrix(false);
+  }, [rowField, colField, metric, valueField]);
 
   function buildSheet() {
     if (!ct) return [];
@@ -136,10 +143,6 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Cruzamento');
     XLSX.writeFile(wb, `cruzamento_${rowField}_x_${colField ?? 'total'}.xlsx`);
-  }
-
-  if (!rowField || !ct) {
-    return <ChartCard title="Análise Cruzada Universal"><div className="p-4 text-xs text-[var(--qd-text-muted)]">Sem campos categóricos detectados na base.</div></ChartCard>;
   }
 
   return (
@@ -166,14 +169,23 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
       {/* Controls */}
       <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
         <SelectBox label="Agrupar por">
-          <select value={rowField} onChange={(e) => setRowField(e.target.value)} className="w-full">
+          <select
+            value={rowField}
+            onChange={(e) => {
+              const next = e.target.value;
+              setRowField(next);
+              if (next && colField === next) setColField(null);
+            }}
+            className="w-full"
+          >
+            <option value="">Selecione uma pergunta</option>
             {catFields.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
           </select>
         </SelectBox>
         <SelectBox label="Comparar com">
           <select value={colField ?? ''} onChange={(e) => setColField(e.target.value || null)} className="w-full">
             <option value="">— (nenhum · 1D)</option>
-            {catFields.filter((f) => f.key !== rowField).map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+            {catFields.filter((f) => !rowField || f.key !== rowField).map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
           </select>
         </SelectBox>
         <SelectBox label="Métrica">
@@ -203,7 +215,15 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
       </div>
 
       {/* Table */}
-      {showTable && (
+      {!ct && (
+        <div className="rounded-md border border-[var(--qd-border)] bg-[var(--qd-surface-2)] p-3 text-xs text-[var(--qd-text-muted)]">
+          Selecione uma pergunta em <strong>Agrupar por</strong> para iniciar a análise cruzada.
+        </div>
+      )}
+      {ct && showTable && isLargeMatrix && !allowLargeMatrix && (
+        <LargeMatrixNotice rows={ct.rows.length} cols={ct.cols.length} cells={cellCount} onConfirm={() => setAllowLargeMatrix(true)} />
+      )}
+      {ct && showTable && (!isLargeMatrix || allowLargeMatrix) && (
         <PivotTable ct={ct} rowLabel={rowLabel} colLabel={colLabel} rowField={rowField} colField={colField} />
       )}
 
@@ -243,6 +263,24 @@ function ModeBtn({ active, onClick, icon, children }: { active: boolean; onClick
     >
       {icon}{children}
     </button>
+  );
+}
+
+function LargeMatrixNotice({ rows, cols, cells, onConfirm }: { rows: number; cols: number; cells: number; onConfirm: () => void }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-[var(--qd-border)] bg-[var(--qd-surface-2)] p-3 text-xs text-[var(--qd-text-muted)]">
+      <span>
+        Esta combinação gera uma tabela grande ({rows.toLocaleString('pt-BR')} linhas × {cols.toLocaleString('pt-BR')} colunas, {cells.toLocaleString('pt-BR')} células).
+        Use filtros, escolha uma variável com menos categorias ou exporte em CSV/XLSX.
+      </span>
+      <button
+        type="button"
+        onClick={onConfirm}
+        className="rounded-md border border-[var(--qd-border)] bg-[var(--qd-surface)] px-3 py-1.5 text-[11px] font-semibold text-[var(--qd-text)] hover:bg-[var(--qd-light)]"
+      >
+        Renderizar mesmo assim
+      </button>
+    </div>
   );
 }
 
