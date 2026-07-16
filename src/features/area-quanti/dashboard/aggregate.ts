@@ -203,6 +203,7 @@ const ORDER_PREFIX_FIELDS = new Set<CategoricalField>([
   'renda_macro_faixa',
   'renda_faixa_padronizada',
   'tempo_intencao_padronizado',
+  'motivo_intencao_padronizado',
 ]);
 
 export function displayCategoricalValue(field: CategoricalField, value: string): string {
@@ -223,6 +224,7 @@ const ORDER: Partial<Record<CategoricalField, RegExp>> = {
   renda_macro_faixa: /^(\d+)\./,
   renda_faixa_padronizada: /^(\d+)\./,
   tempo_intencao_padronizado: /^(\d+)\./,
+  motivo_intencao_padronizado: /^(\d+)\./,
 };
 
 export function orderedValues(field: CategoricalField, values: string[]): string[] {

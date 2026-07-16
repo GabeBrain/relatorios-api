@@ -41,6 +41,29 @@ const PALETTE = [
 const HEATMAP_RGB = '91, 117, 55'; // #5B7537
 const ACTIVE_STROKE = '#3d5024';
 
+function wrapAxisLabel(value: string, maxChars: number, maxLines = 3): string[] {
+  const words = value.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = '';
+
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length <= maxChars) {
+      current = next;
+      continue;
+    }
+    if (current) lines.push(current);
+    current = word;
+    if (lines.length === maxLines - 1) break;
+  }
+
+  if (current && lines.length < maxLines) lines.push(current);
+  if (lines.length === maxLines && words.join(' ').length > lines.join(' ').length) {
+    lines[maxLines - 1] = `${lines[maxLines - 1].replace(/\s*…$/, '')}…`;
+  }
+  return lines.length ? lines : [value];
+}
+
 interface CardProps { title: React.ReactNode; subtitle?: string; children: React.ReactNode; className?: string; action?: React.ReactNode }
 export function ChartCard({ title, subtitle, children, className, action }: CardProps) {
   return (
@@ -148,10 +171,27 @@ export function BarField({ rows, field, height, topN, sortOrder = 'desc' }: Fiel
     return { data, total };
   }, [rows, field, topN, sortOrder]);
 
-  // Larger bars: ~36px per row, min 220
-  const h = height ?? Math.max(220, data.length * 36 + 24);
   const maxLabel = Math.max(0, ...data.map((d) => d.displayKey.length));
-  const yWidth = Math.min(180, Math.max(80, maxLabel * 6.2));
+  const yWidth = Math.min(300, Math.max(96, maxLabel * 5.2));
+  const maxCharsPerLine = Math.max(10, Math.floor(yWidth / 6.2));
+  const wrappedLabelLines = data.map((d) => wrapAxisLabel(d.displayKey, maxCharsPerLine));
+  const maxLines = Math.max(1, ...wrappedLabelLines.map((lines) => lines.length));
+  const rowHeight = Math.max(36, maxLines * 13 + 12);
+  const h = height ?? Math.max(220, data.length * rowHeight + 24);
+  const renderYAxisTick = (props: any) => {
+    const { x, y, payload } = props;
+    const lines = wrapAxisLabel(String(payload.value ?? ''), maxCharsPerLine);
+    const startDy = -((lines.length - 1) * 6);
+    return (
+      <text x={x} y={y} textAnchor="end" fill="var(--qd-text)" style={{ fontSize: 11 }}>
+        {lines.map((line, index) => (
+          <tspan key={`${line}-${index}`} x={x} dy={index === 0 ? startDy : 12}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+    );
+  };
   const renderValueLabel = (props: any) => {
     const value = Number(props.value ?? 0);
     if (!value) return null;
@@ -185,7 +225,7 @@ export function BarField({ rows, field, height, topN, sortOrder = 'desc' }: Fiel
       <BarChart data={data} layout="vertical" margin={{ top: 6, right: 96, left: 6, bottom: 6 }} barCategoryGap={6}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
         <XAxis type="number" tick={{ fontSize: 10 }} />
-        <YAxis dataKey="displayKey" type="category" tick={{ fontSize: 11 }} width={yWidth} interval={0} />
+        <YAxis dataKey="displayKey" type="category" tick={renderYAxisTick} width={yWidth} interval={0} />
         <Tooltip
           cursor={{ fill: 'rgba(91,117,55,0.08)' }}
           formatter={(v: number) => [`${v.toLocaleString('pt-BR')} (${((v / total) * 100).toFixed(1)}%)`, 'Entrevistas']}
