@@ -60,7 +60,7 @@ function expandColumnarDataset(raw: ColumnarDataset): QuantiDataset {
     count: raw.count ?? records.length,
     generated_at: raw.generated_at,
     questions,
-    records: records as QuantiDataset['records'],
+    records: records as unknown as QuantiDataset['records'],
   };
 }
 
