@@ -26,6 +26,10 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-16 — Histograma de renda estimada com 20 bins — Codex
+- **O quê:** o histograma `renda estimada (R$)` mantém a referência em `renda_valor_estimado`, mas passou de 30 para 20 bins para reduzir a fragmentação dos recortes automáticos.
+- **Arquivos:** `src/features/area-quanti/dashboard/QuantiDashboard.tsx`.
+
 ### 2026-07-16 — Filtro Ano da Pesquisa e KPI de renda — Codex
 - **O quê:** o filtro `Data da pesquisa` foi removido da lateral e substituído por `Ano da Pesquisa`, alimentado pela variável `Ano_Pesquisa` via alias interno `ano_pesquisa`.
 - **Ajuste visual:** o KPI `Renda média estimada` ganhou tratamento de valor largo para manter quantias com 5+ dígitos centralizadas dentro do card.

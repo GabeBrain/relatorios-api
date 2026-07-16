@@ -393,7 +393,7 @@ export function QuantiDashboard() {
                 <SortableBarCard rows={filtered} title="Classe social agregada" field="renda_classe_agregada" />
                 <SortableBarCard rows={filtered} title="Classe social detalhada" field="renda_classe_detalhada" />
                 <ChartCard title="Histograma — renda estimada (R$)" subtitle="Distribuição por faixas" className="lg:col-span-2">
-                  <HistogramChart rows={filtered} field="renda_valor_estimado" bins={30} height={520} />
+                  <HistogramChart rows={filtered} field="renda_valor_estimado" bins={20} height={520} />
                 </ChartCard>
               </div>
             </section>
