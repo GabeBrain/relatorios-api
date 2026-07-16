@@ -17,6 +17,7 @@ export interface QuantiRecord {
   renda_valor_estimado: number | null;
   intencao_compra_padronizada: string;
   tempo_intencao_padronizado: string;
+  motivo_intencao_padronizado?: string;
   lat: number | null;
   lng: number | null;
 }
@@ -47,6 +48,7 @@ export type CategoricalField =
   | 'renda_classe_detalhada'
   | 'intencao_compra_padronizada'
   | 'tempo_intencao_padronizado'
+  | 'motivo_intencao_padronizado'
   | 'data_pesquisa';
 
 export type Filters = Partial<Record<CategoricalField, string[]>>;
@@ -67,5 +69,6 @@ export const FIELD_LABELS: Record<CategoricalField, string> = {
   renda_classe_detalhada: 'Classe social detalhada',
   intencao_compra_padronizada: 'Intenção de compra',
   tempo_intencao_padronizado: 'Tempo para compra',
+  motivo_intencao_padronizado: 'Motivo de intenção de compra',
   data_pesquisa: 'Data da pesquisa',
 };

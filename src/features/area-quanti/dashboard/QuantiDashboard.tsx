@@ -417,6 +417,7 @@ export function QuantiDashboard() {
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <SortableBarCard rows={filtered} title="Intenção padronizada" field="intencao_compra_padronizada" />
                 <SortableBarCard rows={filtered} title="Tempo para compra" field="tempo_intencao_padronizado" />
+                <SortableBarCard rows={filtered} title="Motivos de intenção de compra" field="motivo_intencao_padronizado" className="lg:col-span-2" />
                 <IntentHeatmapCard rows={filtered} title="Gênero × Intenção de compra" rowField="genero" metricLabel="Gênero" />
                 <IntentHeatmapCard rows={filtered} title="Faixa etária × Intenção de compra" rowField="faixa_etaria" metricLabel="Faixa etária" />
                 <IntentHeatmapCard rows={filtered} title="Classe social agregada × Intenção de compra" rowField="renda_classe_agregada" metricLabel="Classe social" className="lg:col-span-2" />

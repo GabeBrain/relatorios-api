@@ -78,6 +78,7 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 - **Mapa:** mapa do Brasil e mapas municipais ganharam controles de zoom in/out/reset, área rolável e navegação por arraste do mouse para facilitar busca por municípios.
 - **Layout geográfico:** o card `Distribuição por região` saiu da seção Ranking e passou a ocupar o espaço abaixo do mapa interativo, dentro do bloco `Brasil por estado`.
 - **Intenção de compra:** todos os cruzamentos de intenção foram agrupados na seção `Intenção de Compra`, com intenção como coluna e o filtro analisado como linha; cada card inicia em `%` e ganhou seletor para `%`, `Quantidade` e `Quantidade + %`.
+- **Motivos de intenção:** a seção `Intenção de Compra` ganhou gráfico de barras para `motivo_intencao_padronizado`, com os mesmos controles de ordenação dos demais gráficos categóricos.
 - **Cruzamentos:** heatmaps prontos também passaram a iniciar em `%`, com seletor para `%`, `Quantidade` e `Quantidade + %`, e a tabela visual foi ajustada para caber na largura do card sem exigir arraste lateral.
 - **Zeros em heatmaps:** células sem amostra nos cruzamentos e cruzamentos de intenção agora exibem `0.0%`, `0` ou `0 · 0.0%` conforme a métrica selecionada, evitando lacunas visuais.
 - **Ranking:** cards `Top 10 cidades` e `Top 10 estados` foram removidos por redundância com os rankings geográficos já existentes.
