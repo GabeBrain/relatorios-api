@@ -1,6 +1,7 @@
 export interface QuantiRecord {
   research_name: string;
   data_pesquisa: string;
+  ano_pesquisa: string;
   regiao: string;
   localidade: string;
   estado: string;
@@ -49,6 +50,7 @@ export type CategoricalField =
   | 'intencao_compra_padronizada'
   | 'tempo_intencao_padronizado'
   | 'motivo_intencao_padronizado'
+  | 'ano_pesquisa'
   | 'data_pesquisa';
 
 export type Filters = Partial<Record<CategoricalField, string[]>>;
@@ -70,5 +72,6 @@ export const FIELD_LABELS: Record<CategoricalField, string> = {
   intencao_compra_padronizada: 'Intenção de compra',
   tempo_intencao_padronizado: 'Tempo para compra',
   motivo_intencao_padronizado: 'Motivo de intenção de compra',
+  ano_pesquisa: 'Ano da Pesquisa',
   data_pesquisa: 'Data da pesquisa',
 };

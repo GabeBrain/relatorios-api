@@ -66,6 +66,8 @@
 .qd-kpi-card {
   display: flex;
   min-height: 116px;
+  padding-right: 12px !important;
+  padding-left: 12px !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -79,6 +81,9 @@
   color: var(--qd-primary);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+.qd-kpi-value--wide {
+  font-size: 18px;
 }
 .dark .qd-root .qd-kpi-value { color: #F8D000; }  /* amarelo marca sobre superfície escura = alto contraste */
 .qd-kpi-label { width: 100%; text-align: center; font-size: 11px; color: var(--qd-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }

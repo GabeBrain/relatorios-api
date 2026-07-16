@@ -7,7 +7,7 @@ import { useQuantiStore } from './store';
 
 const FILTER_FIELDS: CategoricalField[] = [
   'research_name',
-  'data_pesquisa',
+  'ano_pesquisa',
   'estado',
   'cidade',
   'cidade_original',

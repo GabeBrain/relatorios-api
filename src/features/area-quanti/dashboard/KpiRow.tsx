@@ -1,4 +1,4 @@
-import { Users, MapPin, Map, Wallet, CalendarClock, User, UserRound, Target, Timer } from 'lucide-react';
+import { Users, MapPin, Map, Wallet, CalendarClock, User, UserRound, Target, Timer, type LucideIcon } from 'lucide-react';
 import type { QuantiRecord } from './types';
 import { distinctCount, mean, pctGenero, purchaseIntentKpis } from './aggregate';
 
@@ -17,13 +17,13 @@ export function KpiRow({ rows }: Props) {
   const pctM = pctGenero(rows, 'fem') || pctGenero(rows, 'mulher');
   const intent = purchaseIntentKpis(rows);
 
-  const kpis = [
+  const kpis: Array<{ icon: LucideIcon; label: string; value: string; valueClassName?: string }> = [
     { icon: Users, label: 'Total de entrevistas', value: rows.length.toLocaleString('pt-BR') },
     { icon: Timer, label: 'Intenção até 2 anos', value: PCT(intent.pctIntentWithinTwoYears) },
     { icon: Target, label: 'Intenção geral', value: PCT(intent.pctGeneralIntent) },
     { icon: MapPin, label: 'Cidades', value: totalCidades.toLocaleString('pt-BR') },
     { icon: Map, label: 'Estados', value: totalEstados.toLocaleString('pt-BR') },
-    { icon: Wallet, label: 'Renda média estimada', value: rendaMedia ? BRL(rendaMedia) : '—' },
+    { icon: Wallet, label: 'Renda média estimada', value: rendaMedia ? BRL(rendaMedia) : '—', valueClassName: 'qd-kpi-value--wide' },
     { icon: CalendarClock, label: 'Idade média', value: idadeMedia ? idadeMedia.toFixed(1) : '—' },
     { icon: User, label: '% Homens', value: `${pctH.toFixed(1)}%` },
     { icon: UserRound, label: '% Mulheres', value: `${pctM.toFixed(1)}%` },
@@ -34,7 +34,7 @@ export function KpiRow({ rows }: Props) {
       {kpis.map((k) => (
         <div key={k.label} className="qd-card qd-kpi-card p-4 text-center">
           <k.icon className="mx-auto mb-2 h-4 w-4 text-[var(--qd-accent)]" />
-          <div className="qd-kpi-value">{k.value}</div>
+          <div className={`qd-kpi-value ${k.valueClassName ?? ''}`}>{k.value}</div>
           <div className="qd-kpi-label mt-1">{k.label}</div>
         </div>
       ))}

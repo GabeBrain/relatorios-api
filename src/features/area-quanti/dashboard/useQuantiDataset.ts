@@ -78,6 +78,10 @@ function normalizeRecords(ds: QuantiDataset): QuantiDataset {
       const value = getAlias(r, ['cidade_original', 'Cidade_Original', 'Cidade Original', 'Cidade (empreendimento)', 'cidade_empreendimento']);
       if (value != null) r.cidade_original = value;
     }
+    if (r.ano_pesquisa == null) {
+      const value = getAlias(r, ['ano_pesquisa', 'Ano_Pesquisa', 'Ano Pesquisa', 'Ano da Pesquisa']);
+      if (value != null) r.ano_pesquisa = value;
+    }
     if (r.lat == null) {
       const n = toNumber(getAlias(r, ['lat', 'latitude', 'Latitude']));
       if (n != null) r.lat = n;

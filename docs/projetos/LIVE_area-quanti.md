@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-16 — Filtro Ano da Pesquisa e KPI de renda — Codex
+- **O quê:** o filtro `Data da pesquisa` foi removido da lateral e substituído por `Ano da Pesquisa`, alimentado pela variável `Ano_Pesquisa` via alias interno `ano_pesquisa`.
+- **Ajuste visual:** o KPI `Renda média estimada` ganhou tratamento de valor largo para manter quantias com 5+ dígitos centralizadas dentro do card.
+- **Arquivos:** `src/features/area-quanti/dashboard/FiltersSidebar.tsx`, `src/features/area-quanti/dashboard/types.ts`, `src/features/area-quanti/dashboard/useQuantiDataset.ts`, `src/features/area-quanti/dashboard/KpiRow.tsx`, `src/features/area-quanti/dashboard/dashboard.css`.
+
 ### 2026-07-16 — Centralização dos KPIs — Codex
 - **O quê:** ajuste visual nos cards de KPI para centralizar melhor os valores e rótulos, com foco em `Renda média estimada`, `% Homens` e `% Mulheres`.
 - **Como:** os cards passam a usar um layout flex centralizado e valores com largura total, alinhamento central, `line-height` estável e dígitos tabulares, sem alterar cálculo, cores ou regras de filtro.
