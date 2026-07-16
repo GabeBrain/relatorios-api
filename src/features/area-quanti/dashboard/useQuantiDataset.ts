@@ -27,6 +27,32 @@ function toNumber(v: unknown): number | null {
   return null;
 }
 
+function normalizeKey(key: string): string {
+  return key
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toLowerCase();
+}
+
+function getAlias(record: Record<string, unknown>, aliases: string[]): unknown {
+  for (const alias of aliases) {
+    if (record[alias] != null && record[alias] !== '') return record[alias];
+  }
+
+  const normalized = new Map<string, unknown>();
+  for (const [key, value] of Object.entries(record)) {
+    if (value != null && value !== '') normalized.set(normalizeKey(key), value);
+  }
+
+  for (const alias of aliases) {
+    const value = normalized.get(normalizeKey(alias));
+    if (value != null && value !== '') return value;
+  }
+
+  return null;
+}
+
 /**
  * Reconcilia campos que a extração da Base Unificada 2020 grava com nomes
  * alternativos ou como string, para que os componentes do dashboard (KPIs,
@@ -36,6 +62,30 @@ function normalizeRecords(ds: QuantiDataset): QuantiDataset {
   const recs = (ds as any).records as any[] | undefined;
   if (!Array.isArray(recs)) return ds;
   for (const r of recs) {
+    if (r.estado == null) {
+      const value = getAlias(r, ['estado', 'Estado_Original', 'estado_original', 'Estado Original']);
+      if (value != null) r.estado = value;
+    }
+    if (r.estado_original == null) {
+      const value = getAlias(r, ['estado_original', 'Estado_Original', 'Estado Original']);
+      if (value != null) r.estado_original = value;
+    }
+    if (r.cidade == null) {
+      const value = getAlias(r, ['cidade', 'Cidade', 'Cidade (coleta)', 'cidade_coleta', 'Cidade_Coleta']);
+      if (value != null) r.cidade = value;
+    }
+    if (r.cidade_original == null) {
+      const value = getAlias(r, ['cidade_original', 'Cidade_Original', 'Cidade Original', 'Cidade (empreendimento)', 'cidade_empreendimento']);
+      if (value != null) r.cidade_original = value;
+    }
+    if (r.lat == null) {
+      const n = toNumber(getAlias(r, ['lat', 'latitude', 'Latitude']));
+      if (n != null) r.lat = n;
+    }
+    if (r.lng == null) {
+      const n = toNumber(getAlias(r, ['lng', 'longitude', 'Longitude', 'lon', 'long']));
+      if (n != null) r.lng = n;
+    }
     if (r.idade == null && r.idade_numerica != null) {
       const n = toNumber(r.idade_numerica);
       if (n != null) r.idade = n;

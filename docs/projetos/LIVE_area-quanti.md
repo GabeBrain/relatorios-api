@@ -85,6 +85,7 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 - **Tratamento de `-`:** em `Intenção de compra`, o valor `-` passou a ser tratado como nulo e desconsiderado em filtros, gráficos e cruzamentos; em `Tempo para compra`, `-` passou a ser exibido/agregado como `0. Sem intenção`.
 - **Ordenação de gráficos:** gráficos categóricos ganharam botão compacto no cabeçalho para alternar entre maior→menor (padrão) e menor→maior.
 - **Ordenação A-Z:** gráficos categóricos ganharam botão de ordem alfabética/numérica; prefixos internos como `1.`, `2.` e `0.` seguem sendo usados para ordenar faixa etária, geração, renda e tempo para compra, mas deixam de aparecer para o usuário nos rótulos dos gráficos e heatmaps.
+- **Base colunar:** o carregador da Base Unificada 2020 passou a reconciliar aliases de `Cidade`, `Cidade_Original`, `Estado`, `Estado_Original`, `Latitude` e `Longitude` ao expandir JSON colunar, evitando KPIs zerados quando a planilha/JSON muda capitalização, underscores ou rótulos de coluna.
 - **Recolhimento:** a seção `Análise Cruzada (pivot dinâmico)` agora inicia recolhida e abre/fecha pelo cabeçalho, reduzindo o peso visual inicial do dashboard.
 - **Pizza/Rosca:** rótulos passam a exibir nome + valor/percentual dentro da fatia quando há espaço; fatias pequenas usam chamada externa com linha guia. A legenda foi movida para a lateral direita.
 - **Bugfix:** pizza/rosca agora usam o valor calculado da métrica selecionada; ao escolher `% do total`, os rótulos exibem percentuais reais em vez da contagem base formatada como porcentagem.
