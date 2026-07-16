@@ -44,21 +44,21 @@ function SortToggle({ order, onChange }: { order: SortOrder; onChange: (order: S
     <div className="flex items-center gap-1">
       <button
         type="button"
-        onClick={() => onChange(countOrder === 'desc' ? 'asc' : 'desc')}
-        className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)] ${order === 'alpha' ? 'text-[var(--qd-text-muted)]' : 'bg-[var(--qd-light)] text-[var(--qd-text)]'}`}
-        title={countOrder === 'desc' ? 'Maior para menor' : 'Menor para maior'}
-        aria-label={countOrder === 'desc' ? 'Ordenar do menor para o maior' : 'Ordenar do maior para o menor'}
-      >
-        <ArrowDownUp className="h-3.5 w-3.5" />
-      </button>
-      <button
-        type="button"
         onClick={() => onChange(order === 'alpha' ? 'desc' : 'alpha')}
         className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)] ${order === 'alpha' ? 'bg-[var(--qd-light)] text-[var(--qd-text)]' : 'text-[var(--qd-text-muted)]'}`}
         title="Ordem alfabética/numérica"
         aria-label="Alternar ordem alfabética ou numérica"
       >
         <ArrowDownAZ className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange(countOrder === 'desc' ? 'asc' : 'desc')}
+        className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--qd-border)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qd-primary)] ${order === 'alpha' ? 'text-[var(--qd-text-muted)]' : 'bg-[var(--qd-light)] text-[var(--qd-text)]'}`}
+        title={countOrder === 'desc' ? 'Maior para menor' : 'Menor para maior'}
+        aria-label={countOrder === 'desc' ? 'Ordenar do menor para o maior' : 'Ordenar do maior para o menor'}
+      >
+        <ArrowDownUp className="h-3.5 w-3.5" />
       </button>
     </div>
   );
