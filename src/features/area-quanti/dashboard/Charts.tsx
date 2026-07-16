@@ -138,10 +138,37 @@ export function BarField({ rows, field, height, topN, sortOrder = 'desc' }: Fiel
   const h = height ?? Math.max(220, data.length * 36 + 24);
   const maxLabel = Math.max(0, ...data.map((d) => d.key.length));
   const yWidth = Math.min(180, Math.max(80, maxLabel * 6.2));
+  const renderValueLabel = (props: any) => {
+    const value = Number(props.value ?? 0);
+    if (!value) return null;
+    const label = `${value.toLocaleString('pt-BR')} (${((value / total) * 100).toFixed(1)}%)`;
+    const x = Number(props.x ?? 0);
+    const y = Number(props.y ?? 0);
+    const width = Number(props.width ?? 0);
+    const height = Number(props.height ?? 0);
+    const estimatedTextWidth = label.length * 6.8;
+    const outsideX = x + width + 8;
+    const shouldPlaceInside = value / total >= 0.85 && width > estimatedTextWidth + 16;
+    const textX = shouldPlaceInside ? x + width - 8 : outsideX;
+    const textY = y + height / 2;
+
+    return (
+      <text
+        x={textX}
+        y={textY}
+        textAnchor={shouldPlaceInside ? 'end' : 'start'}
+        dominantBaseline="central"
+        fill={shouldPlaceInside ? '#fff' : 'var(--qd-text)'}
+        style={{ fontSize: 11, fontWeight: 700, pointerEvents: 'none' }}
+      >
+        {label}
+      </text>
+    );
+  };
 
   return (
     <ResponsiveContainer width="100%" height={h}>
-      <BarChart data={data} layout="vertical" margin={{ top: 6, right: 56, left: 6, bottom: 6 }} barCategoryGap={6}>
+      <BarChart data={data} layout="vertical" margin={{ top: 6, right: 96, left: 6, bottom: 6 }} barCategoryGap={6}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
         <XAxis type="number" tick={{ fontSize: 10 }} />
         <YAxis dataKey="key" type="category" tick={{ fontSize: 11 }} width={yWidth} interval={0} />
@@ -163,11 +190,7 @@ export function BarField({ rows, field, height, topN, sortOrder = 'desc' }: Fiel
           })}
           <LabelList
             dataKey="count"
-            position="right"
-            style={{ fontSize: 11, fill: '#3d5024', fontWeight: 600 }}
-            formatter={(v: number) =>
-              `${v.toLocaleString('pt-BR')} (${((v / total) * 100).toFixed(1)}%)`
-            }
+            content={renderValueLabel}
           />
         </Bar>
       </BarChart>

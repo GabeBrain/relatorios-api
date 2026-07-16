@@ -14,10 +14,10 @@ Atualize **Desenvolvimentos / Etapas / Pendências** sempre que sincronizar uma 
 
 - **Estado atual — dashboard operacional.** [`AreaQuanti.tsx`](../../src/pages/AreaQuanti.tsx)
   carrega o dashboard Banco Quanti com KPIs, filtros, gráficos, mapas, rankings e análise cruzada.
-- **Fonte atual:** `base-2020.json` no bucket `quanti-datasets`, gerado a partir de
-  `Base_Unificada_2020-2.xlsx`.
-- **Regra da planilha:** linha 1 = variáveis, linha 2 = texto das perguntas desconsiderado,
-  dados válidos a partir da linha 3.
+- **Fonte atual:** `public/quanti/base-2020.json` em formato colunar `quanti-columnar-v1`,
+  gerado a partir de `Base Unificada 2020.xlsx` (14.928 registros).
+- **Regra da planilha:** linha 1 = variáveis, linha 2 = texto das perguntas preservado como
+  metadado, dados válidos a partir da linha 3.
 
 **O que já está pronto:** exploração da base 2020 com processamento 100% client-side e registro
 de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
@@ -25,6 +25,48 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 ---
 
 ## 1. Desenvolvimentos
+
+### 2026-07-15 — Correção de rótulos em barras filtradas — Codex
+- **O quê:** ajuste no rótulo de valores dos gráficos de barra para evitar sobreposição/embolamento visual quando um filtro aplicado pelo próprio gráfico deixa uma única categoria com 100% da amostra.
+- **Como:** o label agora é renderizado de forma customizada; quando não há espaço à direita da barra, ele entra dentro da barra com texto branco, e a margem direita do gráfico foi ampliada.
+- **Arquivos:** `src/features/area-quanti/dashboard/Charts.tsx`.
+
+### 2026-07-15 — Migração da base 2020 para JSON colunar — Codex
+- **O quê:** conversão de `public/quanti/base-2020.json` do formato de array de objetos para o formato colunar `quanti-columnar-v1` (`columns`, `questions`, `rows`), preservando a ordem original das colunas e os aliases canônicos usados pelo dashboard.
+- **Ganho:** o arquivo bruto caiu de ~37,36 MB para ~17,83 MB; gzip estimado caiu para ~1,07 MB. A base segue com 14.928 registros e 97 colunas carregadas em memória (92 originais + aliases).
+- **Compatibilidade:** `useQuantiDataset.ts` agora aceita tanto o formato antigo quanto o formato colunar e reconstrói `records`/`questions` em memória, mantendo filtros, KPIs, gráficos, Análise Cruzada Universal e exportações sem mudança visual.
+- **Por quê:** reduzir o peso do repositório/projeto e preparar o Banco Quanti para bases futuras/históricas sem duplicar overhead estrutural.
+- **Arquivos:** `public/quanti/base-2020.json`, `src/features/area-quanti/dashboard/useQuantiDataset.ts`.
+
+### 2026-07-15 — Exportação da base selecionada — Codex
+- **O quê:** inclusão de botões `CSV` e `XLSX` antes do seletor `Base` na topbar do Banco Quanti. Os botões exportam a base selecionada respeitando os filtros ativos; sem filtros, baixam a base inteira.
+- **Correção:** exportações passam a preservar a estrutura da planilha original: linha 1 com variáveis, linha 2 com perguntas, dados a partir da linha 3 e colunas na ordem original do arquivo fonte.
+- **Otimização:** o XLSX passou a ser gravado com compactação ZIP (`compression: true`) para evitar arquivos muito maiores que o CSV.
+- **Por quê:** permitir baixar a Base Unificada 2020 hoje e futuras bases 2016–2026/histórica diretamente pela interface.
+- **Arquivos:** `src/features/area-quanti/dashboard/QuantiDashboard.tsx`.
+
+### 2026-07-15 — KPIs de intenção de compra — Codex
+- **O quê:** inclusão de dois KPIs no topo do Banco Quanti: `Intenção até 2 anos` e `Intenção geral`.
+- **Regra:** `Intenção geral` considera, sobre as respostas válidas de intenção, quem está em grupos positivos de intenção de compra. `Intenção até 2 anos` usa o mesmo denominador, mas restringe o numerador a quem tem intenção positiva e prazo até 2 anos, ignorando `Sem intenção`, `Acima de 2 anos`, `"-"` e nulos.
+- **Base atual:** com a Base Unificada 2020 completa, os KPIs calculam 47,0% de intenção geral e 33,3% de intenção até 2 anos antes de filtros.
+- **Arquivos:** `src/features/area-quanti/dashboard/aggregate.ts`, `src/features/area-quanti/dashboard/KpiRow.tsx`.
+
+### 2026-07-15 — Ordenação da distribuição por região — Codex
+- **O quê:** o gráfico/lista `% de coletas por região` abaixo do mapa ganhou o mesmo botão compacto de ordenação usado nos demais gráficos. O padrão permanece maior → menor e o botão alterna para menor → maior.
+- **Por quê:** padronizar a interação de ordenação nos gráficos do Banco Quanti.
+- **Arquivos:** `src/features/area-quanti/dashboard/Rankings.tsx`.
+
+### 2026-07-15 — `-` como nulo em percentuais e cruzamentos — Codex
+- **O quê:** padronização do tratamento de `"-"` como valor nulo em campos categóricos. O valor deixa de aparecer como opção/categoria e deixa de entrar nos denominadores de contagem/percentual dos gráficos, heatmaps, rankings, mapa, KPIs de gênero e Análise Cruzada Universal.
+- **Regra:** se uma pergunta tem 150 linhas, sendo 100 com `"-"` e 50 respostas válidas, os percentuais daquela pergunta passam a ser calculados sobre as 50 respostas válidas.
+- **Arquitetura:** a regra foi centralizada em `normalizeCategoricalValue`; `detectFieldSchema` ignora `"-"` ao inferir campos; percentuais geográficos e rankings usam soma de itens válidos como denominador.
+- **Arquivos:** `src/features/area-quanti/dashboard/aggregate.ts`, `src/features/area-quanti/dashboard/Rankings.tsx`, `src/features/area-quanti/dashboard/geo/GeoMap.tsx`.
+
+### 2026-07-15 — Substituição da fonte 2020 completa — Codex
+- **O quê:** substituição da fonte da aba Banco Quanti pela nova planilha `Base Unificada 2020.xlsx`, convertida para `public/quanti/base-2020.json` com 14.928 registros, 92 colunas e mapa `questions` derivado da linha 2 da planilha. O JSON preserva as colunas originais e adiciona aliases canônicos usados pelo dashboard (`estado`, `cidade`, `idade`, `lat`, `lng`).
+- **Arquitetura:** `datasets.ts` agora aponta a base 2020 para um arquivo público versionado no próprio site (`/quanti/base-2020.json`) e `useQuantiDataset.ts` passa a aceitar fonte `public` além do fluxo legado por Supabase Storage.
+- **Por quê:** a fonte anterior não continha todas as pesquisas de 2020; a nova base passa a representar a safra 2020 completa, ainda pendente de algumas higienizações de dados informadas pelo Lucas.
+- **Arquivos:** `public/quanti/base-2020.json`, `src/features/area-quanti/dashboard/datasets.ts`, `src/features/area-quanti/dashboard/useQuantiDataset.ts`.
 
 ### 2026-07-14 — Contraste de tabelas no modo escuro — Lovable
 - **O quê:** ajuste visual localizado na aba Banco Quanti para que a Análise Cruzada Universal e os heatmaps de Intenção de Compra/Cruzamentos respeitem os tokens do tema escuro. Controles de visualização, botões CSV/XLSX, selects, tabela pivot, cabeçalho, linhas alternadas, total e células/labels de heatmap agora usam `--qd-surface`, `--qd-surface-2`, `--qd-border`, `--qd-text` e `--qd-text-muted`, eliminando fundos brancos/cinzas claros e textos escuros sem contraste no dark mode.

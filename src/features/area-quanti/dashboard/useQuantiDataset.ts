@@ -5,6 +5,16 @@ import type { QuantiDataset } from './types';
 
 const cache = new Map<string, Promise<QuantiDataset>>();
 
+interface ColumnarDataset {
+  id: string;
+  label: string;
+  count: number;
+  generated_at: string;
+  columns: string[];
+  questions?: string[] | Record<string, string>;
+  rows: unknown[][];
+}
+
 function toNumber(v: unknown): number | null {
   if (v == null || v === '') return null;
   if (typeof v === 'number') return Number.isFinite(v) ? v : null;
@@ -39,11 +49,33 @@ function normalizeRecords(ds: QuantiDataset): QuantiDataset {
   return ds;
 }
 
+function expandColumnarDataset(raw: ColumnarDataset): QuantiDataset {
+  const questions = Array.isArray(raw.questions)
+    ? Object.fromEntries(raw.columns.map((column, index) => [column, raw.questions?.[index] ?? column]))
+    : raw.questions;
+  const records = raw.rows.map((row) => Object.fromEntries(raw.columns.map((column, index) => [column, row[index]])));
+  return {
+    id: raw.id,
+    label: raw.label,
+    count: raw.count ?? records.length,
+    generated_at: raw.generated_at,
+    questions,
+    records: records as QuantiDataset['records'],
+  };
+}
+
+function normalizeDataset(raw: QuantiDataset | ColumnarDataset): QuantiDataset {
+  if (Array.isArray((raw as ColumnarDataset).columns) && Array.isArray((raw as ColumnarDataset).rows)) {
+    return normalizeRecords(expandColumnarDataset(raw as ColumnarDataset));
+  }
+  return normalizeRecords(raw as QuantiDataset);
+}
+
 function parseDataset(text: string, label: string): QuantiDataset {
   const sanitize = (s: string) =>
     s.replace(/(:|\[|,)\s*(NaN|Infinity|-Infinity)(?=\s*[,}\]])/g, '$1 null');
   try {
-    return normalizeRecords(JSON.parse(text) as QuantiDataset);
+    return normalizeDataset(JSON.parse(text) as QuantiDataset | ColumnarDataset);
   } catch (originalError) {
     const sanitized = sanitize(text);
     if (sanitized === text) {
@@ -52,7 +84,7 @@ function parseDataset(text: string, label: string): QuantiDataset {
       );
     }
     try {
-      return normalizeRecords(JSON.parse(sanitized) as QuantiDataset);
+      return normalizeDataset(JSON.parse(sanitized) as QuantiDataset | ColumnarDataset);
     } catch (sanitizedError) {
       throw new Error(
         `Dataset "${label}" inválido mesmo após normalização: ${(sanitizedError as Error).message}`,
@@ -62,11 +94,24 @@ function parseDataset(text: string, label: string): QuantiDataset {
 }
 
 async function fetchDataset(ref: DatasetRef): Promise<QuantiDataset> {
-  const key = `${ref.bucket}/${ref.path}`;
+  const source = ref.source ?? 'storage';
+  const key = `${source}/${ref.bucket ?? ''}/${ref.path}`;
   if (!cache.has(key)) {
     cache.set(
       key,
       (async () => {
+        if (source === 'public') {
+          const response = await fetch(ref.path);
+          if (!response.ok) {
+            throw new Error(`Falha ao carregar dataset "${ref.label}": HTTP ${response.status}`);
+          }
+          return parseDataset(await response.text(), ref.label);
+        }
+
+        if (!ref.bucket) {
+          throw new Error(`Dataset "${ref.label}" sem bucket configurado`);
+        }
+
         const { data, error } = await supabase.storage.from(ref.bucket).download(ref.path);
         if (error || !data) {
           throw new Error(`Falha ao carregar dataset "${ref.label}": ${error?.message ?? 'sem dados'}`);
@@ -93,7 +138,7 @@ export function useQuantiDataset(ref: DatasetRef) {
       .catch((e) => { if (alive) setError(e); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
-  }, [ref.bucket, ref.path]);
+  }, [ref.source, ref.bucket, ref.path]);
 
   return { data, error, loading };
 }

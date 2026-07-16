@@ -4,6 +4,7 @@ import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import { geoMercator, geoPath } from 'd3-geo';
 import type { QuantiRecord } from '../types';
 import { useQuantiStore } from '../store';
+import { normalizeCategoricalValue } from '../aggregate';
 import { municipalitiesUrl, strip, toUF, ufInfo, UF_LIST } from './geo-utils';
 
 const STATES_URL = '/geo/br-states.json';
@@ -72,7 +73,8 @@ export function GeoMap({ rows }: Props) {
   const byUF = useMemo(() => {
     const m = new Map<string, { count: number; raw: string }>();
     for (const r of rows) {
-      const raw = String((r as any).estado ?? '');
+      const raw = normalizeCategoricalValue('estado', (r as any).estado);
+      if (raw == null) continue;
       const uf = toUF(raw);
       if (!uf) continue;
       const cur = m.get(uf);
@@ -82,7 +84,7 @@ export function GeoMap({ rows }: Props) {
     return m;
   }, [rows]);
 
-  const total = rows.length;
+  const total = useMemo(() => Array.from(byUF.values()).reduce((sum, item) => sum + item.count, 0), [byUF]);
   const stateMax = Math.max(1, ...Array.from(byUF.values()).map((x) => x.count));
 
   // Municipal counts for the focused UF (keyed by normalized city name → { count, raw }).
@@ -90,9 +92,11 @@ export function GeoMap({ rows }: Props) {
     if (!focusedUF) return new Map<string, { count: number; raw: string }>();
     const m = new Map<string, { count: number; raw: string }>();
     for (const r of rows) {
-      const uf = toUF(String((r as any).estado ?? ''));
+      const estado = normalizeCategoricalValue('estado', (r as any).estado);
+      const uf = estado ? toUF(estado) : null;
       if (uf !== focusedUF) continue;
-      const raw = String((r as any).cidade ?? '');
+      const raw = normalizeCategoricalValue('cidade', (r as any).cidade);
+      if (raw == null) continue;
       const k = strip(raw);
       if (!k) continue;
       const cur = m.get(k);
@@ -101,6 +105,7 @@ export function GeoMap({ rows }: Props) {
     }
     return m;
   }, [rows, focusedUF]);
+  const cityTotal = useMemo(() => Array.from(byCity.values()).reduce((sum, item) => sum + item.count, 0), [byCity]);
   const cityMax = Math.max(1, ...Array.from(byCity.values()).map((x) => x.count));
 
   return (
@@ -156,7 +161,7 @@ export function GeoMap({ rows }: Props) {
           uf={focusedUF}
           byCity={byCity}
           max={cityMax}
-          total={total}
+          total={cityTotal}
           selectedCity={focusedCity}
           onClickCity={(raw) => toggle('cidade', raw)}
         />

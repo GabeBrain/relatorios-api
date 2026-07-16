@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { ArrowDownUp, ChevronDown, ChevronRight, Filter, Info, Loader2 } from 'lucide-react';
+import { ArrowDownUp, ChevronDown, ChevronRight, Download, FileSpreadsheet, Filter, Info, Loader2 } from 'lucide-react';
 import { DATASETS } from './datasets';
 import { useQuantiDataset } from './useQuantiDataset';
 import { useQuantiStore } from './store';
@@ -216,6 +216,52 @@ function CrosstabHeatmapCard({
   );
 }
 
+function datasetFileName(label: string, extension: 'csv' | 'xlsx') {
+  const slug = label
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase();
+  return `${slug || 'base-quanti'}.${extension}`;
+}
+
+function buildDatasetExportRows(rows: QuantiRecord[], questions: Record<string, string> = {}) {
+  const recordKeys = rows.reduce((keys, row) => {
+    Object.keys(row as any).forEach((key) => keys.add(key));
+    return keys;
+  }, new Set<string>());
+  const headers = [
+    ...Object.keys(questions).filter((key) => recordKeys.has(key)),
+    ...Array.from(recordKeys).filter((key) => !(key in questions)),
+  ];
+  const questionRow = headers.map((key) => questions[key] || key);
+  const dataRows = rows.map((row) => headers.map((key) => (row as any)[key] ?? ''));
+  return [headers, questionRow, ...dataRows];
+}
+
+function exportDatasetCsv(rows: QuantiRecord[], label: string, questions?: Record<string, string>) {
+  if (!rows.length) return;
+  const escape = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+  const csv = buildDatasetExportRows(rows, questions).map((row) => row.map(escape).join(',')).join('\n');
+  const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = datasetFileName(label, 'csv');
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+async function exportDatasetXlsx(rows: QuantiRecord[], label: string, questions?: Record<string, string>) {
+  if (!rows.length) return;
+  const XLSX = await import('xlsx');
+  const ws = XLSX.utils.aoa_to_sheet(buildDatasetExportRows(rows, questions));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Base');
+  XLSX.writeFile(wb, datasetFileName(label, 'xlsx'), { compression: true });
+}
+
 export function QuantiDashboard() {
   const datasetId = useQuantiStore((s) => s.datasetId);
   const setDatasetId = useQuantiStore((s) => s.setDatasetId);
@@ -227,6 +273,7 @@ export function QuantiDashboard() {
   const { data, loading, error } = useQuantiDataset(ds);
 
   const filtered = useMemo(() => (data ? applyFilters(data.records, filters) : []), [data, filters]);
+  const canExportDataset = !!data && filtered.length > 0;
 
   return (
     <div className="qd-root flex h-full min-h-0 flex-1">
@@ -249,6 +296,24 @@ export function QuantiDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => data && exportDatasetCsv(filtered, ds.label, data.questions)}
+              disabled={!canExportDataset}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--qd-border)] px-2 text-xs font-semibold text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] disabled:cursor-not-allowed disabled:opacity-50"
+              title="Exportar base selecionada em CSV respeitando os filtros ativos"
+            >
+              <Download className="h-3.5 w-3.5" /> CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => data && exportDatasetXlsx(filtered, ds.label, data.questions)}
+              disabled={!canExportDataset}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--qd-border)] px-2 text-xs font-semibold text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)] disabled:cursor-not-allowed disabled:opacity-50"
+              title="Exportar base selecionada em Excel respeitando os filtros ativos"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" /> XLSX
+            </button>
             <label className="text-[11px] font-medium text-[var(--qd-text-muted)]">Base</label>
             <select
               value={datasetId}
