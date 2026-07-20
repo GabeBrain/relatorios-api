@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-20 — Atualização das bases de storage 2020 e 2025 — Codex
+- **O quê:** `base-2020.json` foi regenerado a partir da versão mais recente/corrigida de `Base Unificada 2020.xlsx`, e `base-2025.json` foi gerado no formato colunar `quanti-columnar-v1` para substituir a versão JSON comum no bucket `quanti-datasets`.
+- **Resultado:** 2020 ficou com 14.928 registros e 103 colunas; 2025 ficou com 24.023 registros e 96 colunas. O seletor `Base` já apontava para `Base Unificada 2020` e `Base Unificada 2025`, então não houve mudança no registro de datasets.
+- **Arquivos:** `base-2020.json`, `base-2025.json`.
+
 ### 2026-07-16 — Remoção temporária do histograma de renda — Codex
 - **O quê:** o card `Histograma — renda estimada (R$)` foi retirado do dashboard por ora, mantendo os demais gráficos categóricos de renda.
 - **Por quê:** a lógica do histograma por bins automáticos será reavaliada antes de decidir se vale mantê-lo.
