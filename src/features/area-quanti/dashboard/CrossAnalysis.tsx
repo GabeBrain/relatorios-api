@@ -179,13 +179,13 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
             className="w-full"
           >
             <option value="">Selecione uma pergunta</option>
-            {catFields.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+            {schema.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
           </select>
         </SelectBox>
         <SelectBox label="Comparar com">
           <select value={colField ?? ''} onChange={(e) => setColField(e.target.value || null)} className="w-full">
             <option value="">— (nenhum · 1D)</option>
-            {catFields.filter((f) => !rowField || f.key !== rowField).map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+            {schema.filter((f) => !rowField || f.key !== rowField).map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
           </select>
         </SelectBox>
         <SelectBox label="Métrica">
