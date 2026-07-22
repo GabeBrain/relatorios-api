@@ -74,4 +74,6 @@ export const FIELD_LABELS: Record<CategoricalField, string> = {
   motivo_intencao_padronizado: 'Motivo de intenção de compra',
   ano_pesquisa: 'Ano da Pesquisa',
   data_pesquisa: 'Data da pesquisa',
-};
+  renda_valor_estimado: 'Renda estimada (R$)' as any,
+  idade: 'Idade' as any,
+} as Record<string, string> as Record<CategoricalField, string>;
