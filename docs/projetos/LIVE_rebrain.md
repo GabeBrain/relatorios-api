@@ -49,6 +49,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-28 — Corretor: fonte cobrada de forma inconsistente entre slides iguais — Gabriel + Claude
+- **Sintoma (feedback no uso real):** s28/s29 acusados por falta de fonte, mas s20/s25/s26 não —
+  nenhum deles tem FONTE (confirmado abrindo a imagem do s25: só o rodapé do Google Maps).
+- **Causa:** dicionário de **seção canônica** não conhecia títulos do template novo
+  (“Densidade demográfica”, “Índice de verticalização”, “Análise de locação”) → seção `null` →
+  a regra de fonte, que filtra por seção, ignorava o slide. Corrigido nos dois extratores
+  (29 → 21 slides sem seção no estudo real).
+- **Também:** MERCADO passa a exigir fonte (oferta/revenda/locação) e slide cujo único conteúdo
+  tabular é legenda de mapa deixa de ser candidato.
+- **Verificação:** tsc limpo, **75 testes verdes**, build ok. Ver v0.47 do LIVE do Corretor.
+
 ### 2026-07-28 — Corretor: ata da Rolândia não era lida no upload — 3 correções — Gabriel + Claude
 - **Sintoma:** subindo o estudo do zero, o portão dizia “sem ata detectada”, embora a ata esteja
   no slide 1. O **localizador estava certo**; a falha era na leitura.

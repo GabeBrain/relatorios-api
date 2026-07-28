@@ -2,7 +2,7 @@
  "ir_version": 1,
  "arquivo": "Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_v1.pptx",
  "sha1": "736dc564c1dcc68a567c5c37f8a63f3d5857f779",
- "gerado_em": "2026-07-28T17:31:46+00:00",
+ "gerado_em": "2026-07-28T18:30:41+00:00",
  "n_slides": 78,
  "slides": [
   {
@@ -765,7 +765,7 @@
   {
    "n": 25,
    "titulo": "Densidade demográfica",
-   "secao_canonica": null,
+   "secao_canonica": "SOCIO",
    "textos": [
     "Densidade demográfica",
     "Baixíssima densidade",
@@ -927,7 +927,7 @@
   {
    "n": 26,
    "titulo": "Densidade demográfica",
-   "secao_canonica": null,
+   "secao_canonica": "SOCIO",
    "textos": [
     "Densidade demográfica",
     "Baixíssima densidade",
@@ -1515,7 +1515,7 @@
   {
    "n": 32,
    "titulo": "Índice de verticalização",
-   "secao_canonica": null,
+   "secao_canonica": "SOCIO",
    "textos": [
     "Índice de verticalização",
     "Baixa Verticalização",
@@ -1613,7 +1613,7 @@
   {
    "n": 33,
    "titulo": "Índice de verticalização",
-   "secao_canonica": null,
+   "secao_canonica": "SOCIO",
    "textos": [
     "Índice de verticalização",
     "Baixa Verticalização",
@@ -3027,7 +3027,7 @@
   {
    "n": 68,
    "titulo": "Análise de locação",
-   "secao_canonica": null,
+   "secao_canonica": "MERCADO",
    "textos": [
     "Análise de locação"
    ],
@@ -3131,7 +3131,7 @@
   {
    "n": 69,
    "titulo": "Locação | Apartamentos",
-   "secao_canonica": null,
+   "secao_canonica": "MERCADO",
    "textos": [
     "FONTE: IMOBILIÁRIAS | ELABORAÇÃO: BRAIN",
     "Locação | Apartamentos"
@@ -3151,7 +3151,7 @@
   {
    "n": 70,
    "titulo": "Locação por bairro",
-   "secao_canonica": null,
+   "secao_canonica": "MERCADO",
    "textos": [
     "FONTE: IMOBILIÁRIAS | ELABORAÇÃO: BRAIN",
     "Locação por bairro"
@@ -3191,7 +3191,7 @@
   {
    "n": 72,
    "titulo": "Locação | Análise por ticket, metragem e preço",
-   "secao_canonica": null,
+   "secao_canonica": "MERCADO",
    "textos": [
     "FONTE: IMOBILIÁRIAS | ELABORAÇÃO: BRAIN",
     "Locação | Análise por ticket, metragem e preço"

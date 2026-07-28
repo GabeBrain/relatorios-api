@@ -76,8 +76,11 @@ const SECOES: [string, RegExp][] = [
   ['LACUNAS', /lacuna/i],
   ['ABSORCAO', /absor[çc][ãa]o/i],
   ['IDENTIFICACAO', /identifica[çc][ãa]o|terreno|zona\s+de\s+influ[êe]ncia|\bz\.?\s?i\.?\b|deslocamento|descolamento/i],
-  ['SOCIO', /socio[dg]emogr|demanda\s+vegetativa|proje[çc][ãa]o\s+de\s+demanda|faixa[s]?\s+de\s+renda|domic[íi]lio|popula[çc][ãa]o|condi[çc][ãa]o\s+de\s+ocupa[çc][ãa]o|renda\s+(m[ée]dia|domiciliar)/i],
-  ['MERCADO', /oferta\s+(lan[çc]ada|atual|consolidada|final)|lan[çc]a(mento|da)|tipologia|mercado|unidades\s+(lan[çc]adas|vendidas)|empreendimento|concorr[êe]nc|revenda|pre[çc]o\s+m[ée]dio|tabela[s]?\s+de\s+pre[çc]o|vgv/i],
+  // "densidade demográfica" e "índice de verticalização" são títulos do template
+  // novo: têm tabelas e mapa, mas ficavam sem seção e escapavam das regras que
+  // filtram por seção numérica (fonte, cruzamentos) — Rolândia, jul/2026.
+  ['SOCIO', /socio[dg]emogr|demanda\s+vegetativa|proje[çc][ãa]o\s+de\s+demanda|faixa[s]?\s+de\s+renda|domic[íi]lio|popula[çc][ãa]o|condi[çc][ãa]o\s+de\s+ocupa[çc][ãa]o|renda\s+(m[ée]dia|domiciliar)|densidade\s+demogr[áa]fica|[íi]ndice\s+de\s+verticaliza[çc][ãa]o|faixa\s+et[áa]ria/i],
+  ['MERCADO', /oferta\s+(lan[çc]ada|atual|consolidada|final)|lan[çc]a(mento|da)|tipologia|mercado|unidades\s+(lan[çc]adas|vendidas)|empreendimento|concorr[êe]nc|revenda|loca[çc][ãa]o|pre[çc]o\s+m[ée]dio|tabela[s]?\s+de\s+pre[çc]o|vgv/i],
   ['ENTORNO', /entorno|mapeamento\s+f[íi]sico|infraestrutura/i],
   ['CONCLUSAO', /voca[çc][ãa]o\s+do|conclus|recomenda[çc]|produto\s+(sugerido|proposto)/i],
 ];

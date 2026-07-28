@@ -40,13 +40,22 @@ export function ataCoverageFindings(ir: Ir, ata: AtaData | null): Finding[] {
   }];
 }
 
-/** WS7: fonte só falta quando há dado nativo ou imagem que a visão realmente analisou. */
+/**
+ * WS7: fonte só falta quando há dado nativo ou imagem que a visão realmente analisou.
+ * MERCADO entra junto com SOCIO/ABSORCAO/LACUNAS — tabelas de oferta, revenda e
+ * locação também precisam de fonte (Rolândia jul/2026: "Análise de locação"
+ * escapava só por causa da seção).
+ */
+const SECOES_COM_FONTE = ['SOCIO', 'ABSORCAO', 'LACUNAS', 'MERCADO'];
+
 export function sourceFindingsFromVision(ir: Ir, sourceSlides: number[], analyzedSlides: number[]): Finding[] {
   const visible = new Set(sourceSlides);
   const analyzed = new Set(analyzedSlides);
   return ir.slides.filter((slide) => {
-    const numericSection = ['SOCIO', 'ABSORCAO', 'LACUNAS'].includes((slide.secao_canonica ?? '').toUpperCase());
-    const hasData = (slide.tabelas?.length ?? 0) > 0 || (slide.graficos?.length ?? 0) > 0 || analyzed.has(slide.n);
+    const numericSection = SECOES_COM_FONTE.includes((slide.secao_canonica ?? '').toUpperCase());
+    // Legenda de mapa não é dado: exige tabela com conteúdo além do rótulo.
+    const realTables = (slide.tabelas ?? []).filter((t) => t.n_linhas > 1 || t.n_colunas > 2).length;
+    const hasData = realTables > 0 || (slide.graficos?.length ?? 0) > 0 || analyzed.has(slide.n);
     return numericSection && hasData && (slide.fontes?.length ?? 0) === 0 && !visible.has(slide.n);
   }).slice(0, 25).map((slide) => ({
     id: `src-${slide.n}`, type: 'SOURCE_MISSING' as const, section: toAuditSection(slide.secao_canonica), slideRef: `s${slide.n}`,

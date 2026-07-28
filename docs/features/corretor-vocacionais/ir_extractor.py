@@ -118,12 +118,16 @@ SECOES = [
     ('ABSORCAO', r'absor[çc][ãa]o'),
     ('IDENTIFICACAO', r'identifica[çc][ãa]o|terreno|zona\s+de\s+influ[êe]ncia|'
                       r'\bz\.?\s?i\.?\b|deslocamento|descolamento'),
+    # "densidade demográfica" e "índice de verticalização" são títulos do template
+    # novo: têm tabelas e mapa, mas ficavam sem seção e escapavam das regras que
+    # filtram por seção numérica (fonte, cruzamentos) — Rolândia, jul/2026.
     ('SOCIO', r'socio[dg]emogr|demanda\s+vegetativa|proje[çc][ãa]o\s+de\s+demanda|'
               r'faixa[s]?\s+de\s+renda|domic[íi]lio|popula[çc][ãa]o|'
-              r'condi[çc][ãa]o\s+de\s+ocupa[çc][ãa]o|renda\s+(m[ée]dia|domiciliar)'),
+              r'condi[çc][ãa]o\s+de\s+ocupa[çc][ãa]o|renda\s+(m[ée]dia|domiciliar)|'
+              r'densidade\s+demogr[áa]fica|[íi]ndice\s+de\s+verticaliza[çc][ãa]o|faixa\s+et[áa]ria'),
     ('MERCADO', r'oferta\s+(lan[çc]ada|atual|consolidada|final)|lan[çc]a(mento|da)|'
                 r'tipologia|mercado|unidades\s+(lan[çc]adas|vendidas)|empreendimento|'
-                r'concorr[êe]nc|revenda|pre[çc]o\s+m[ée]dio|tabela[s]?\s+de\s+pre[çc]o|vgv'),
+                r'concorr[êe]nc|revenda|loca[çc][ãa]o|pre[çc]o\s+m[ée]dio|tabela[s]?\s+de\s+pre[çc]o|vgv'),
     ('ENTORNO', r'entorno|mapeamento\s+f[íi]sico|infraestrutura'),
     ('CONCLUSAO', r'voca[çc][ãa]o\s+do|conclus|recomenda[çc]|produto\s+(sugerido|proposto)'),
 ]

@@ -16,6 +16,28 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.47 — 2026-07-28 — Cobrança de fonte inconsistente entre slides equivalentes (RUNTIME)
+
+Feedback do Gabriel testando a Rolândia: os slides 28/29 (“Renda domiciliar”) eram cobrados por
+`SOURCE_MISSING`, mas 20, 25 e 26 não — **e nenhum deles tem FONTE**. Verificado na imagem real
+do s25 (extraída do PPTX): só existe o rodapé do Google Maps, sem `FONTE/ELABORAÇÃO`. A causa
+não era a fonte, era a **seção canônica**:
+
+- **Dicionário de seção defasado.** “Densidade demográfica”, “Índice de verticalização”,
+  “Faixa etária” e “Análise de locação” são títulos do template novo e não estavam no
+  dicionário → seção `null` → a regra, que filtra por seção numérica, nem os avaliava.
+  Corrigido nos **dois** extratores (`pptx-to-ir.ts` e `ir_extractor.py`, que precisam bater).
+  Efeito no estudo real: **29 → 21 slides sem seção**.
+- **MERCADO passa a exigir fonte** (`SECOES_COM_FONTE`): tabelas de oferta, revenda e locação
+  também precisam de fonte; antes só SOCIO/ABSORCAO/LACUNAS eram cobradas.
+- **Legenda de mapa não conta como dado.** Slide cujo único conteúdo tabular são tabelas
+  `LEGENDA` (1 coluna de rótulos) não é candidato — evita cobrar fonte de slide de mapa puro
+  (s20, “Zona de influência”).
+
+Resultado: s25, s26, s32 e s33 passam a ser tratados como s28/s29 — a decisão final continua
+sendo da visão (`tem_fonte` na imagem). Regressão em `rolandia-real.test.ts`.
+**Verificação:** tsc limpo, **75 testes verdes**, build ok. Sem migration nem deploy.
+
 ## Versão 0.46 — 2026-07-28 — Ata não lida no upload da Rolândia: separador, multi-estudo e comentários (RUNTIME)
 
 Ao subir a Rolândia do zero, o portão abriu com **“sem ata detectada”** embora a ata esteja no
