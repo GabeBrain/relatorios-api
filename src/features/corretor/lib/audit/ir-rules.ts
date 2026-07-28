@@ -28,6 +28,21 @@ const MUNICIPIO_BY_NORMALIZED = new Map([...new Set(
   Object.values(municipiosPorUf as Record<string, string[]>).flat().map((city) => city.trim()).filter(Boolean)
 )].map((city) => [normalized(city), city]));
 
+/** Nome oficial IBGE para um texto normalizado, ou undefined se não for município. */
+export function municipioOficial(value: string): string | undefined {
+  return MUNICIPIO_BY_NORMALIZED.get(normalized(value));
+}
+
+/**
+ * Compara nomes de cidade tolerando conectivos ("São José do(s) Campos"): atas
+ * digitadas à mão erram artigos e a comparação exata viraria FP contra a própria
+ * cidade do estudo (caso Housi SJC v1, jul/2026).
+ */
+export function sameCity(a: string, b: string): boolean {
+  const strip = (v: string) => normalized(v).split(/\s+/).filter((w) => !['de', 'da', 'do', 'das', 'dos', 'e', 'd'].includes(w)).join(' ');
+  return strip(a) === strip(b);
+}
+
 function slideRef(n: number) { return `s${n}`; }
 
 // ── LEFTOVER_NOTE ────────────────────────────────────────────────────────────
@@ -235,6 +250,64 @@ export function wrongUfFindings(ir: Ir, uf?: string): Finding[] {
   return out;
 }
 
+// ── ZI_LABEL_MISMATCH (FN-3) ─────────────────────────────────────────────────
+const ZI_ORDINAIS = ['primaria', 'secundaria', 'terciaria', 'quaternaria'] as const;
+
+/**
+ * FN-3 do feedback (Lucas Finoti): o estudo declara a convenção de Z.I. num
+ * slide ("Z.I. primária: 1 km; secundária: 2 km; terciária: 3 km") e depois um
+ * texto troca o rótulo ("não foram encontrados empreendimentos na Z.I.
+ * secundária (até 2 Km)" quando 2 km é a primária daquele estudo).
+ *
+ * DET puro e conservador: só roda se o deck declarar a convenção pelo menos uma
+ * vez com 2+ pares ordinal→raio consistentes; e só acusa quando o MESMO texto
+ * traz ordinal + raio explícitos que contradizem a tabela declarada.
+ */
+export function ziLabelFindings(ir: Ir): Finding[] {
+  const pairRx = /z\.?\s*i\.?\s*(primaria|secundaria|terciaria|quaternaria)\s*:?\s*(?:de\s*\d+\s*km\s*a\s*)?(\d+)\s*km/gi;
+  const declared = new Map<string, number>();
+  const conflicting = new Set<string>();
+
+  for (const slide of ir.slides) {
+    const source = normalized([slide.titulo ?? '', ...(slide.textos ?? [])].join('\n'));
+    for (const match of source.matchAll(pairRx)) {
+      const ordinal = match[1].toLowerCase(), km = Number(match[2]);
+      if (!Number.isFinite(km)) continue;
+      const known = declared.get(ordinal);
+      if (known === undefined) declared.set(ordinal, km);
+      else if (known !== km) conflicting.add(ordinal);
+    }
+  }
+  // Convenção ambígua no próprio deck: sem base segura, a regra se abstém.
+  for (const ordinal of conflicting) declared.delete(ordinal);
+  if (declared.size < 2) return [];
+
+  const out: Finding[] = [];
+  // Frases que citam ordinal e raio juntos, incluindo o formato "(até 2 Km)".
+  const usageRx = /z\.?\s*i\.?\s*(primaria|secundaria|terciaria|quaternaria)[^.;]{0,60}?\(?\s*(?:ate|de\s*\d+\s*km\s*a)?\s*(\d+)\s*km/gi;
+  for (const slide of ir.slides) {
+    const source = normalized([slide.titulo ?? '', ...(slide.textos ?? [])].join('\n'));
+    for (const match of source.matchAll(usageRx)) {
+      const ordinal = match[1].toLowerCase(), km = Number(match[2]);
+      const expected = declared.get(ordinal);
+      if (expected === undefined || !Number.isFinite(km) || expected === km) continue;
+      const correct = ZI_ORDINAIS.find((o) => declared.get(o) === km);
+      out.push({
+        id: `zi-label-${slide.n}-${ordinal}-${km}`,
+        type: 'WRONG_CONTEXT',
+        section: toAuditSection(slide.secao_canonica),
+        slideRef: slideRef(slide.n),
+        title: `Z.I. ${ordinal} não corresponde a ${km} km neste estudo`,
+        detail: `O estudo define Z.I. ${ordinal} = ${expected} km${correct ? `; ${km} km é a Z.I. ${correct}` : ''}. Confira o rótulo usado no texto.`,
+        ok: false,
+        viz: { kind: 'text', location: slide.titulo ?? undefined, evidence: match[0].trim() },
+      });
+      break; // um apontamento por slide basta
+    }
+  }
+  return out;
+}
+
 /**
  * DET pós-Ata para vazamento explícito "Cidade – UF". Cobre o caso em que a
  * UF ainda é a correta, como Curitiba–MG num estudo de Brumadinho/MG. A regra
@@ -253,13 +326,15 @@ export function wrongCityFindings(ir: Ir, city?: string): Finding[] {
     const cityUf = /([a-z']+(?:\s+[a-z']+){0,6})\s*(?:-|–|\/)\s*([a-z]{2})\b/gi;
     let match: RegExpExecArray | null;
     while ((match = cityUf.exec(source)) !== null) {
+      // Sigla que não é UF brasileira ("Santos – FC") não é padrão Cidade – UF.
+      if (!UFS.has(match[2].toUpperCase())) continue;
       const words = match[1].trim().split(/\s+/);
       let found: string | undefined;
       for (let size = Math.min(7, words.length); size >= 1; size--) {
         found = MUNICIPIO_BY_NORMALIZED.get(words.slice(-size).join(' '));
         if (found) break;
       }
-      if (!found || normalized(found) === expectedNormalized) continue;
+      if (!found || normalized(found) === expectedNormalized || sameCity(found, expected)) continue;
       out.push({
         id: `wrong-city-${slide.n}-${normalized(found).replace(/[^a-z0-9]+/g, '-').slice(0, 36)}`,
         type: 'WRONG_CONTEXT',
@@ -290,6 +365,7 @@ export function irToFindings(ir: Ir, ctx?: { city?: string; uf?: string }): Find
     ...num.findings,
     ...wrongCityFindings(ir, ctx?.city),
     ...wrongUfFindings(ir, ctx?.uf),
+    ...ziLabelFindings(ir),
   ];
   if (num.verified > 0) {
     findings.push({

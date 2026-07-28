@@ -76,6 +76,25 @@ function sameMagnitude(left: number, right: number): boolean {
   return ratio >= 900 && ratio <= 1100;
 }
 
+/**
+ * Legenda de mapa extraída como tabela ("LEGENDA", rótulos de linha vazios) não
+ * é tabela de dados: pareá-la com a absorção gerou os FPs cross-renda da
+ * Rolândia (jul/2026). Poucos rótulos preenchidos = sem material para comparar.
+ */
+function isMapLegend(r: CrossTableRef): boolean {
+  if (/legenda/.test(norm(`${r.table.title ?? ''} ${r.table.columns[0] ?? ''}`))) return true;
+  return rowLabels(r.table).filter((label) => label.trim()).length < 2;
+}
+
+type BinUnit = 'reais' | 'm2' | 'outro';
+/** Unidade dominante das faixas de coluna. R$ primeiro: "De R$5.001/m²" é preço. */
+function columnBinUnit(columns: string[]): BinUnit {
+  const text = norm(columns.join(' '));
+  if (/r\$|reais/.test(text)) return 'reais';
+  if (/m²|m2|metragem/.test(text)) return 'm2';
+  return 'outro';
+}
+
 type RowAxis = 'tipologia' | 'preco' | 'metragem' | 'outro';
 export function rowAxis(labels: string[]): RowAxis {
   const text = norm(labels.join(' | '));
@@ -106,7 +125,7 @@ function binRows(left: CrossTableRef, right: CrossTableRef) {
 export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): Finding[] {
   const refs = [...nativeTableRefs(ir), ...asCross(visionTables)];
   const out: Finding[] = [];
-  const income = refs.filter((r) => /renda/.test(titleOf(r)));
+  const income = refs.filter((r) => /renda/.test(titleOf(r)) && !isMapLegend(r));
   const socioIncome = income.filter((r) => (r.secao ?? '').toUpperCase() === 'SOCIO' && /domic/.test(titleOf(r)));
   const absIncome = income.filter((r) => (r.secao ?? '').toUpperCase() === 'ABSORCAO');
   for (const left of socioIncome) for (const right of absIncome) {
@@ -135,17 +154,23 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
     }
   }
 
-  const lacunas = refs.filter((r) => (r.secao ?? '').toUpperCase() === 'LACUNAS' && /lacuna|oferta/.test(titleOf(r)));
+  const lacunas = refs.filter((r) => (r.secao ?? '').toUpperCase() === 'LACUNAS' && /lacuna|oferta/.test(titleOf(r)) && !isMapLegend(r));
   for (let i = 0; i < lacunas.length; i++) for (let j = i + 1; j < lacunas.length; j++) {
     const left = lacunas[i], right = lacunas[j];
+    // Duas tabelas do mesmo slide são fatias da mesma análise (Oferta Lançada ×
+    // Oferta Final), não quebras a reconciliar — comparar gerou FP 53×53.
+    if (left.slide === right.slide) continue;
     // Só compara tabelas próximas ou da mesma referência textual; evita cruzar Z.I.s diferentes.
     if (Math.abs(left.slide - right.slide) > 5) continue;
     const axisLeft = rowAxis(rowLabels(left.table)), axisRight = rowAxis(rowLabels(right.table));
     // 5.1–5.3 têm eixos de linha diferentes por desenho. Quando os eixos batem,
-    // comparamos linhas; entre eixos, só faz sentido comparar as faixas de coluna.
+    // comparamos linhas; entre eixos, só faz sentido comparar faixas de coluna da
+    // MESMA unidade — metragem (5.1) × preço (5.2) diverge por desenho, não por erro.
     const rows = axisLeft === axisRight && axisLeft !== 'outro'
       ? crossBands(rowLabels(left.table), rowLabels(right.table), refLabel(left), refLabel(right))
-      : binRows(left, right);
+      : columnBinUnit(left.table.columns) === columnBinUnit(right.table.columns)
+        ? binRows(left, right)
+        : [];
     if (!rows.length) continue;
     const f = mismatch(`cross-lacunas-bins-${left.slide}-${right.slide}`, 'CROSS_TABLE_MISMATCH', 'LACUNAS', left, right,
       'Faixas de lacunas divergem entre as análises',

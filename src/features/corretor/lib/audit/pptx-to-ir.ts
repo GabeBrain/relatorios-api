@@ -142,16 +142,22 @@ function parseSlide(xml: string, num: number, parser: DOMParser): IrSlide {
   const allParas = shapesParas.flat();
   const fulltext = allParas.join(' ');
 
+  // O rodapé "FONTE: … | ELABORAÇÃO: …" do template novo é uma TABELA 1×1, não
+  // uma caixa de texto (deck Rolândia, jul/2026): sem varrer as células, 11 de 11
+  // slides com fonte visível viravam SOURCE_MISSING. Ver CH-4 do sprint.
+  const tabelas = els(root, NS.a, 'tbl').map(parseTable);
+  const cellParas = tabelas.flatMap((t) => t.linhas.flat()).filter((c) => c.trim());
+
   return {
     n: num,
     titulo: slideTitle(root, shapesParas),
     secao_canonica: secaoCanonica(slideTitle(root, shapesParas)),
     textos: shapesParas.map((paras) => paras.join('\n')),
-    fontes: allParas.filter((p) => FONTE_RX.test(p)),
+    fontes: [...allParas, ...cellParas].filter((p) => FONTE_RX.test(p)),
     notas: allParas.filter((p) => NOTA_RX.test(p) && !FONTE_RX.test(p)),
     notas_edicao: allParas.filter((p) => p.length > 3 && p.length < 80 && LEFTOVER_RX.test(p)),
     notas_revisao: notasRevisao,
-    tabelas: els(root, NS.a, 'tbl').map(parseTable),
+    tabelas,
     graficos: [], // 2ª rodada
     n_imagens: els(root, NS.p, 'pic').length,
     flags: { resposta_multipla: MULTI_RESP_RX.test(fulltext) },

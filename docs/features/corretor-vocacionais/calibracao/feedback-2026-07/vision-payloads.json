@@ -1,0 +1,2448 @@
+[
+ {
+  "sha1": "f6be28d6b93b1c4c0ce21cc66cd8e6f79b96596c",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "62d0efcf966b9400075d50f560f60ca4f2072cf9",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "78b5c50ed50c2995f21aed68dfb69ef511784fc2",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "Acima de R$ 36.511,01",
+       9,
+       18,
+       28,
+       37,
+       46,
+       11,
+       22,
+       33,
+       45,
+       56
+      ],
+      [
+       "R$ 27.320,01 a R$ 36.511,00",
+       10,
+       20,
+       30,
+       40,
+       50,
+       12,
+       24,
+       36,
+       48,
+       60
+      ],
+      [
+       "R$ 20.983,01 a R$ 27.320,00",
+       15,
+       30,
+       45,
+       60,
+       75,
+       18,
+       36,
+       54,
+       73,
+       91
+      ],
+      [
+       "R$ 17.147,01 a R$ 20.983,00",
+       15,
+       30,
+       45,
+       61,
+       76,
+       18,
+       36,
+       55,
+       73,
+       91
+      ],
+      [
+       "R$ 14.590,01 a R$ 17.147,00",
+       14,
+       28,
+       42,
+       56,
+       70,
+       17,
+       34,
+       50,
+       67,
+       84
+      ],
+      [
+       "R$ 10.755,01 a R$ 14.590,00",
+       31,
+       62,
+       94,
+       125,
+       156,
+       37,
+       74,
+       111,
+       148,
+       185
+      ],
+      [
+       "R$ 7.716,01 a R$ 10.755,00",
+       47,
+       94,
+       142,
+       189,
+       236,
+       56,
+       112,
+       168,
+       225,
+       281
+      ],
+      [
+       "Abaixo de R$ 7.716,00",
+       341,
+       682,
+       1024,
+       1365,
+       1706,
+       404,
+       808,
+       1212,
+       1616,
+       2020
+      ]
+     ],
+     "title": "Faixa de Renda / Média Anual",
+     "totals": [
+      "Total",
+      483,
+      966,
+      1449,
+      1932,
+      2415,
+      574,
+      1147,
+      1721,
+      2294,
+      2868
+     ],
+     "columns": [
+      "Faixa de Renda / Média Anual",
+      "20%",
+      "40%",
+      "60%",
+      "80%",
+      "100%",
+      "20%",
+      "40%",
+      "60%",
+      "80%",
+      "100%"
+     ],
+     "share_of": {},
+     "col_kinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count"
+     ],
+     "total_kind": "sum"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "Rolândia",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "3f9c9a3b4962827c29a334bcd02b71dd669a8ba9",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "337cad04d478e6b4f9fb9e21417392777b97c80b",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "24c8d196b231d8dba934bd950173374f896cea67",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "brasileiras",
+     "principal": false
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "5968f7db269fee1ff891472ae3258edeb4982dbc",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "Oferta Lançada",
+       0,
+       192,
+       0,
+       0,
+       32,
+       0,
+       0,
+       64,
+       0,
+       288
+      ],
+      [
+       "Oferta Final",
+       0,
+       87,
+       0,
+       0,
+       7,
+       0,
+       0,
+       18,
+       0,
+       112
+      ],
+      [
+       "Dispon. S/O.L.",
+       0,
+       45.3,
+       null,
+       null,
+       21.9,
+       null,
+       null,
+       28.1,
+       null,
+       null
+      ]
+     ],
+     "title": "Lacunas de mercado | tipologia vs metragem",
+     "totals": [
+      "Total",
+      0,
+      45.3,
+      null,
+      null,
+      21.9,
+      null,
+      null,
+      28.1,
+      null,
+      null
+     ],
+     "columns": [
+      "Tipologia",
+      "Até 50m²",
+      "De 51m² a 55m²",
+      "De 56m² a 60m²",
+      "De 61m² a 70m²",
+      "De 71m² a 80m²",
+      "De 81m² a 90m²",
+      "De 91m² a 100m²",
+      "De 101m² a 105m²",
+      "Acima de 105m²",
+      "Total"
+     ],
+     "share_of": {
+      "2": 1,
+      "3": 2,
+      "4": 3,
+      "5": 4,
+      "6": 5,
+      "7": 6,
+      "8": 7,
+      "9": 8
+     },
+     "col_kinds": [
+      "label",
+      "count",
+      "share",
+      "other",
+      "other",
+      "other",
+      "other",
+      "other",
+      "other",
+      "other"
+     ],
+     "total_kind": "mixed"
+    },
+    {
+     "rows": [
+      [
+       "Total",
+       288
+      ],
+      [
+       "Total",
+       112
+      ]
+     ],
+     "title": "Totais",
+     "totals": [
+      "Total",
+      400
+     ],
+     "columns": [
+      "Tipologia",
+      "Total"
+     ],
+     "share_of": {},
+     "col_kinds": [
+      "label",
+      "count"
+     ],
+     "total_kind": "sum"
+    },
+    {
+     "rows": [
+      [
+       "Total",
+       "45.3"
+      ],
+      [
+       "Total",
+       "38.9"
+      ]
+     ],
+     "title": "Parte",
+     "totals": [
+      "Total",
+      null
+     ],
+     "columns": [
+      "Tipologia",
+      "Participação %"
+     ],
+     "share_of": {},
+     "col_kinds": [
+      "label",
+      "share"
+     ],
+     "total_kind": "none"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "94f6b0ac8f00d3554a647aba7e252360b71acc0d",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "1 Dormitório",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "2 Dormitórios",
+       192,
+       0,
+       0,
+       0,
+       0,
+       224
+      ],
+      [
+       "3 Dormitórios",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "4 Dormitórios",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "Total",
+       192,
+       0,
+       0,
+       0,
+       0,
+       288
+      ],
+      [
+       "1 Dormitório",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "2 Dormitórios",
+       87,
+       0,
+       0,
+       0,
+       0,
+       94
+      ],
+      [
+       "3 Dormitórios",
+       0,
+       0,
+       0,
+       0,
+       0,
+       18
+      ],
+      [
+       "4 Dormitórios",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "Total",
+       87,
+       0,
+       0,
+       0,
+       0,
+       112
+      ],
+      [
+       "1 Dormitório",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      [
+       "2 Dormitórios",
+       null,
+       45.3,
+       null,
+       null,
+       null,
+       null
+      ],
+      [
+       "3 Dormitórios",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      [
+       "4 Dormitórios",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      [
+       "Total",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ]
+     ],
+     "title": "…",
+     "totals": [
+      "Total",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "columns": [
+      "Tipologia",
+      "Até R$5.000/m²",
+      "De R$5.001/m² a 7.000/m²",
+      "De R$7.001/m² a 7.500/m²",
+      "De R$7.501/m² a 8.000/m²",
+      "De R$8.001/m² a 8.500/m²",
+      "Acima de R$ 8.500/m²",
+      "Total"
+     ],
+     "share_of": {
+      "2": 1
+     },
+     "col_kinds": [
+      "label",
+      "count",
+      "share",
+      "rate",
+      "measure",
+      "other"
+     ],
+     "total_kind": "none"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "d679ec5af074a949673016a2fce2dd4ccda33e38",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "Oferta Lançada",
+       0,
+       192,
+       null,
+       0,
+       32,
+       0,
+       64,
+       0,
+       0,
+       288
+      ],
+      [
+       "Até R$5.000/m²",
+       0,
+       192,
+       null,
+       0,
+       0,
+       0,
+       64,
+       0,
+       0,
+       256
+      ],
+      [
+       "De 5.001/m² a R$7.000/m²",
+       0,
+       0,
+       null,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "De 7.001/m² a R$7.500/m²",
+       0,
+       0,
+       null,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "De 7.501/m² a R$8.000/m²",
+       0,
+       0,
+       null,
+       0,
+       32,
+       0,
+       0,
+       0,
+       0,
+       32
+      ],
+      [
+       "De 8.001/m² a R$8.500/m²",
+       0,
+       0,
+       null,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "Acima de R$8.500/m²",
+       0,
+       0,
+       null,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "Total",
+       0,
+       192,
+       null,
+       0,
+       32,
+       0,
+       64,
+       0,
+       0,
+       288
+      ]
+     ],
+     "title": "Lacunas de mercado | preço vs metragem",
+     "totals": [
+      "Total",
+      0,
+      192,
+      null,
+      0,
+      32,
+      0,
+      64,
+      0,
+      0,
+      288
+     ],
+     "columns": [
+      "Tipologia",
+      "Até 50m²",
+      "De 51m² a 55m²",
+      "De 56m² a 60m²",
+      "De 61m² a 70m²",
+      "De 71m² a 80m²",
+      "De 81m² a 90m²",
+      "De 91m² a 100m²",
+      "De 101m² a 105m²",
+      "Acima de 105m²",
+      "Total"
+     ],
+     "share_of": {},
+     "col_kinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count"
+     ],
+     "total_kind": "sum"
+    },
+    {
+     "rows": [
+      [
+       "Oferta Final",
+       0,
+       87,
+       null,
+       0,
+       0,
+       0,
+       18,
+       0,
+       7,
+       112
+      ],
+      [
+       "Até R$5.000/m²",
+       0,
+       87,
+       null,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       87
+      ],
+      [
+       "De 5.001/m² a R$7.000/m²",
+       0,
+       0,
+       null,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "De 7.001/m² a R$7.500/m²",
+       0,
+       0,
+       null,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "De 7.501/m² a R$8.000/m²",
+       0,
+       0,
+       null,
+       0,
+       0,
+       0,
+       7,
+       0,
+       0,
+       7
+      ],
+      [
+       "De 8.001/m² a R$8.500/m²",
+       0,
+       0,
+       null,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      [
+       "Acima de R$8.500/m²",
+       0,
+       0,
+       null,
+       0,
+       0,
+       0,
+       18,
+       0,
+       0,
+       18
+      ],
+      [
+       "Total",
+       0,
+       87,
+       null,
+       0,
+       0,
+       0,
+       18,
+       0,
+       7,
+       112
+      ]
+     ],
+     "title": "Oferta Final",
+     "totals": [
+      "Total",
+      0,
+      87,
+      null,
+      0,
+      0,
+      0,
+      18,
+      0,
+      7,
+      112
+     ],
+     "columns": [
+      "Tipologia",
+      "Até 50m²",
+      "De 51m² a 55m²",
+      "De 56m² a 60m²",
+      "De 61m² a 70m²",
+      "De 71m² a 80m²",
+      "De 81m² a 90m²",
+      "De 91m² a 100m²",
+      "De 101m² a 105m²",
+      "Acima de 105m²",
+      "Total"
+     ],
+     "share_of": {},
+     "col_kinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count"
+     ],
+     "total_kind": "sum"
+    },
+    {
+     "rows": [
+      [
+       "Dispon. S/ O.L.",
+       null,
+       "45.3",
+       null,
+       null,
+       null,
+       null,
+       "21.9",
+       null,
+       null,
+       "38.9"
+      ],
+      [
+       "Até R$5.000/m²",
+       null,
+       "45.3",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       "45.3"
+      ],
+      [
+       "De 5.001/m² a R$7.000/m²",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      [
+       "De 7.001/m² a R$7.500/m²",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      [
+       "De 7.501/m² a R$8.000/m²",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       "28.1",
+       null,
+       null,
+       "28.1"
+      ],
+      [
+       "De 8.001/m² a R$8.500/m²",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       null
+      ],
+      [
+       "Acima de R$8.500/m²",
+       null,
+       null,
+       null,
+       null,
+       null,
+       null,
+       "21.9",
+       null,
+       null,
+       "21.9"
+      ],
+      [
+       "Total",
+       null,
+       "45.3",
+       null,
+       null,
+       null,
+       null,
+       "21.9",
+       null,
+       null,
+       "38.9"
+      ]
+     ],
+     "title": "Dispon. S/ O.L.",
+     "totals": [
+      "Total",
+      null,
+      "45.3",
+      null,
+      null,
+      null,
+      null,
+      "21.9",
+      null,
+      null,
+      "38.9"
+     ],
+     "columns": [
+      "Tipologia",
+      "Até 50m²",
+      "De 51m² a 55m²",
+      "De 56m² a 60m²",
+      "De 61m² a 70m²",
+      "De 71m² a 80m²",
+      "De 81m² a 90m²",
+      "De 91m² a 100m²",
+      "De 101m² a 105m²",
+      "Acima de 105m²",
+      "Total"
+     ],
+     "share_of": {},
+     "col_kinds": [
+      "label",
+      "other",
+      "rate",
+      "rate",
+      "rate",
+      "rate",
+      "rate",
+      "rate",
+      "rate",
+      "rate",
+      "rate"
+     ],
+     "total_kind": "mixed"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": []
+  }
+ },
+ {
+  "sha1": "b8f3452acd453abb5115cbfa91d9de21eec06b39",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "Campos do Jordão",
+     "principal": false
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "f257d4bdde83c4738d62a9ff439b590ebeaeca57",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "9962d13edd6f67136107d4b4d3b5679813feafc2",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "025255127226b61a51cfb169396b3c4f53e612eb",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "26f7f32761823c81c9623467512b3ae4e6de4165",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "bairro",
+     "texto": "Jardim Real",
+     "principal": true
+    },
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "ffcada91c73765ce287657bbdbeff6ba515959fd",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "2961805dce524fe6aa959717481a44c01f5c07bd",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "1be01cb51bb241a11667513b747eb200b794e288",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "Edificio Bela Vista",
+       90,
+       81,
+       9,
+       10
+      ],
+      [
+       "Edificio Urban",
+       45,
+       44,
+       1,
+       2.2
+      ],
+      [
+       "Residencial Amarante",
+       58,
+       57,
+       1,
+       1.7
+      ],
+      [
+       "Edificio West Lake",
+       39,
+       34,
+       5,
+       12.8
+      ],
+      [
+       "Edificio Genebra",
+       18,
+       16,
+       2,
+       11.1
+      ],
+      [
+       "Vancouver",
+       24,
+       21,
+       3,
+       12.5
+      ],
+      [
+       "Duo Pilastri",
+       14,
+       13,
+       1,
+       7.1
+      ],
+      [
+       "Nord",
+       31,
+       19,
+       12,
+       38.7
+      ],
+      [
+       "Edificio Dumont Exclusive Home",
+       27,
+       20,
+       7,
+       25.9
+      ],
+      [
+       "Villa Bordeguini Residencial",
+       32,
+       30,
+       2,
+       6.3
+      ],
+      [
+       "Thielke",
+       20,
+       14,
+       6,
+       30
+      ],
+      [
+       "Bossa 1616",
+       36,
+       31,
+       5,
+       13.9
+      ]
+     ],
+     "title": "Empreendimentos até 1km",
+     "totals": [
+      "Total",
+      1099,
+      702,
+      397,
+      null
+     ],
+     "columns": [
+      "Empreendimento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)"
+     ],
+     "share_of": {},
+     "col_kinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "rate"
+     ],
+     "total_kind": "sum"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "bairro",
+     "texto": "Centro",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Vila Industrial",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Jardim Coopagro",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Jardim Gisela",
+     "principal": false
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "f5892394249974de87978ff09fa268e571c40572",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "Mogno",
+       18,
+       18,
+       0,
+       0
+      ],
+      [
+       "Alto Das Pedras Residencial Clube",
+       78,
+       40,
+       38,
+       48.7
+      ],
+      [
+       "Edificio Madrid",
+       30,
+       28,
+       2,
+       6.7
+      ],
+      [
+       "Santorini",
+       20,
+       20,
+       0,
+       0
+      ],
+      [
+       "Jardim La Salle",
+       6,
+       6,
+       0,
+       0
+      ],
+      [
+       "Edificio Nevada",
+       15,
+       14,
+       1,
+       6.7
+      ],
+      [
+       "Sun7 Residence",
+       36,
+       36,
+       0,
+       0
+      ],
+      [
+       "Vivace",
+       36,
+       17,
+       19,
+       52.8
+      ],
+      [
+       "Zulmir Longhi",
+       14,
+       12,
+       2,
+       14.3
+      ],
+      [
+       "Grings",
+       26,
+       26,
+       0,
+       0
+      ],
+      [
+       "Royal Park Forest",
+       192,
+       175,
+       17,
+       8.9
+      ]
+     ],
+     "title": "Empreendimentos até 2km",
+     "totals": [
+      "Total",
+      665,
+      524,
+      141,
+      21.2
+     ],
+     "columns": [
+      "Empreendimento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)"
+     ],
+     "share_of": {
+      "4": 1
+     },
+     "col_kinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "share"
+     ],
+     "total_kind": "sum"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "bairro",
+     "texto": "Jardim La Salle",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Jardim Santa Maria",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Centro",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Jardim Concórdia",
+     "principal": false
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "5b0d79ab59a3eb165b519ddfbb7cd0eae7e74f0b",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "Edificio Dumont Exclusive Home",
+       27,
+       20,
+       7,
+       25.9
+      ],
+      [
+       "Villa Bordeguini Residencial",
+       32,
+       30,
+       2,
+       6.3
+      ],
+      [
+       "Thielke",
+       20,
+       14,
+       6,
+       30
+      ],
+      [
+       "Bossa 1616",
+       36,
+       31,
+       5,
+       13.9
+      ],
+      [
+       "Znt Equador",
+       18,
+       18,
+       0,
+       0
+      ],
+      [
+       "Elevatt",
+       20,
+       17,
+       3,
+       15
+      ],
+      [
+       "Ch Sublime Residence",
+       34,
+       34,
+       0,
+       0
+      ],
+      [
+       "Jardins Residence",
+       40,
+       28,
+       12,
+       30
+      ],
+      [
+       "Tau Haus",
+       24,
+       21,
+       3,
+       12.5
+      ]
+     ],
+     "title": "Empreendimentos até 1km",
+     "totals": [
+      "Total",
+      109,
+      702,
+      397,
+      36.1
+     ],
+     "columns": [
+      "Empreendimento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)"
+     ],
+     "share_of": {},
+     "col_kinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "rate"
+     ],
+     "total_kind": "sum"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "bairro",
+     "texto": "Centro",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Jardim Coopagro",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Jardim Gisela",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Vila Industrial",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Biopark",
+     "principal": false
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "a0d70b7f8a7b9670ab44bd815991e046f05465f2",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "Gramado Garden",
+       46,
+       25,
+       21,
+       45.7
+      ],
+      [
+       "Havilá",
+       17,
+       17,
+       0,
+       0
+      ],
+      [
+       "Zara",
+       22,
+       21,
+       1,
+       4.5
+      ],
+      [
+       "Infinitty",
+       25,
+       21,
+       4,
+       16
+      ],
+      [
+       "Edificio 122",
+       15,
+       15,
+       0,
+       0
+      ],
+      [
+       "Znt Guarani",
+       24,
+       13,
+       11,
+       45.8
+      ],
+      [
+       "Villagio Dei Fiori",
+       7,
+       5,
+       2,
+       28.6
+      ],
+      [
+       "Murano",
+       38,
+       15,
+       23,
+       60.5
+      ]
+     ],
+     "title": "Empreendimentos até 2km",
+     "totals": [
+      "Total",
+      665,
+      524,
+      141,
+      21.2
+     ],
+     "columns": [
+      "Empreendimento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)"
+     ],
+     "share_of": {},
+     "col_kinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "rate"
+     ],
+     "total_kind": "mixed"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "bairro",
+     "texto": "Centro",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Jardim Gisela",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Conj Res Tocantins",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Vila Industrial",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Tocantins",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Jardim La Salle",
+     "principal": false
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "5b203f7c019b8529c6365a92f35f17ca186677dc",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "fe482a6a1244a3e788993dce08d1b17e1f3a114e",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "SP",
+     "principal": true
+    },
+    {
+     "tipo": "cidade",
+     "texto": "São José dos Campos",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "71fb55c1a39331b7e35818eca95a2d0967286c37",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "44cfce6e6901c443e14b1282782b54a19b8e4c0b",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "ad8ee381808f99eae2e32198e79d70471ac0a6a7",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "bairro",
+     "texto": "Caminho dos Jerivás",
+     "principal": true
+    },
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "924d8136de19cdc1250f33cb55f6aa6c555c1fac",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "Alameda Das Castanheiras I",
+       "Bom Retiro",
+       "Coevo",
+       "ago/25",
+       300,
+       172,
+       128,
+       42.7,
+       2,
+       "Econômico",
+       280,
+       "Comercialização",
+       "Padrão",
+       313000,
+       47,
+       6678,
+       "1 Vaga Descoberta",
+       -6.5
+      ],
+      [
+       "Caminho Das Cerejeiras",
+       "Jardim Santa Inês Ii",
+       "MRV",
+       "set/25",
+       288,
+       166,
+       122,
+       42.4,
+       2,
+       "Econômico",
+       282,
+       "Comercialização",
+       "Padrão",
+       334990,
+       45,
+       7466,
+       "1 Vaga Descoberta",
+       4.5
+      ],
+      [
+       "Novolar Cenarium 1",
+       "Novo Horizonte",
+       "Novolar",
+       "set/25",
+       300,
+       212,
+       88,
+       29.3,
+       2,
+       "Econômico",
+       280,
+       "Comercialização",
+       "Padrão",
+       245367,
+       36,
+       6816,
+       "1 Vaga Descoberta",
+       -4.6
+      ],
+      [
+       "Caminho Dos Jerivas",
+       "Jardim Santa Inês Ii",
+       "MRV",
+       "out/25",
+       299,
+       164,
+       135,
+       45.2,
+       2,
+       "Econômico",
+       279,
+       "Comercialização",
+       "Padrão",
+       292900,
+       38,
+       7634,
+       "1 Vaga Descoberta",
+       6.9
+      ]
+     ],
+     "title": "Empreendimentos de 2 Km a 4 Km",
+     "totals": [
+      "Total",
+      1187,
+      714,
+      473,
+      39.8,
+      null,
+      null,
+      1187,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "columns": [
+      "Empreendimento",
+      "Bairro",
+      "Incorporadora",
+      "Lançamento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)",
+      "Quartos",
+      "Padrão",
+      "Unidades por Tipologia",
+      "Status",
+      "Tipo",
+      "Preço (R$)",
+      "m² (priv.)",
+      "R$/m² (priv.)",
+      "Vagas de Garagem",
+      "Abaixo ou acima da média"
+     ],
+     "share_of": {
+      "7": 4
+     },
+     "col_kinds": [
+      "label",
+      "other",
+      "other",
+      "other",
+      "count",
+      "count",
+      "count",
+      "share",
+      "count",
+      "other",
+      "count",
+      "other",
+      "other",
+      "measure",
+      "measure",
+      "measure",
+      "other",
+      "rate"
+     ],
+     "total_kind": "mixed"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "bairro",
+     "texto": "Bom Retiro",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Jardim Santa Inês Ii",
+     "principal": false
+    },
+    {
+     "tipo": "bairro",
+     "texto": "Novo Horizonte",
+     "principal": false
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "ce3adbb68781d160cea89f552bb2298ad62f96e6",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "1c65a8e45777a453967ab84cc5ae577fc5a4cd24",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "d3d1728345925c938d5e8ea80e276cdb45132fb3",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "4ab0cd80dca433e9ceaa1fa5b29e9d98b5566b29",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "Acima de R$ 36.511,01",
+       265,
+       530,
+       794,
+       1059,
+       1324,
+       320,
+       640,
+       960,
+       1280,
+       1600
+      ],
+      [
+       "R$ 27.320,01 a R$ 36.511,00",
+       190,
+       381,
+       571,
+       761,
+       951,
+       230,
+       460,
+       690,
+       920,
+       1150
+      ],
+      [
+       "R$ 20.983,01 a R$ 27.320,00",
+       251,
+       502,
+       753,
+       1003,
+       1254,
+       303,
+       606,
+       910,
+       1213,
+       1516
+      ],
+      [
+       "R$ 17.147,01 a R$ 20.983,00",
+       226,
+       452,
+       678,
+       903,
+       1129,
+       272,
+       543,
+       815,
+       1087,
+       1358
+      ],
+      [
+       "R$ 14.590,01 a R$ 17.147,00",
+       194,
+       388,
+       581,
+       775,
+       969,
+       232,
+       464,
+       695,
+       927,
+       1159
+      ],
+      [
+       "R$ 10.755,01 a R$ 14.590,00",
+       391,
+       781,
+       1172,
+       1563,
+       1954,
+       465,
+       929,
+       1394,
+       1858,
+       2323
+      ],
+      [
+       "R$ 7.716,01 a R$ 10.755,00",
+       526,
+       1052,
+       1578,
+       2104,
+       2630,
+       626,
+       1251,
+       1877,
+       2502,
+       3128
+      ],
+      [
+       "Abaixo de R$ 7.716,00",
+       2803,
+       5606,
+       8409,
+       11212,
+       14015,
+       3321,
+       6642,
+       9963,
+       13284,
+       16605
+      ]
+     ],
+     "title": "Cenários de absorção de lançamentos | São José dos Campos",
+     "totals": [
+      "Total",
+      4845,
+      9691,
+      14536,
+      19382,
+      24227,
+      5768,
+      11536,
+      17303,
+      23071,
+      28839
+     ],
+     "columns": [
+      "Faixa de Renda / Média Anual",
+      "20%",
+      "40%",
+      "60%",
+      "80%",
+      "100%",
+      "20%",
+      "40%",
+      "60%",
+      "80%",
+      "100%"
+     ],
+     "share_of": {},
+     "col_kinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count",
+      "count"
+     ],
+     "total_kind": "sum"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São José dos Campos",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "1453864f92d87c5978fa2d82b9344758d4167d47",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "a6bc12a3232164b4dccd701753735c7f5d4e6534",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "75b649a4b685b44689b7b36762714d2772cd9755",
+  "payload": {
+   "tables": [],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ },
+ {
+  "sha1": "472a73daaa364f5730efbbad4635d12ab5a01bd5",
+  "payload": {
+   "tables": [
+    {
+     "rows": [
+      [
+       "Acima de",
+       4000,
+       0,
+       null
+      ],
+      [
+       "3.001 - 4.000",
+       null,
+       1,
+       5.6
+      ],
+      [
+       "2.501 - 3.000",
+       null,
+       3,
+       16.7
+      ],
+      [
+       "2.001 - 2.500",
+       null,
+       4,
+       22.2
+      ],
+      [
+       "1.501 - 2.000",
+       null,
+       5,
+       27.8
+      ],
+      [
+       "1.101 - 1.500",
+       null,
+       4,
+       22.2
+      ],
+      [
+       "Até 1.100",
+       null,
+       1,
+       5.6
+      ],
+      [
+       "TOTAL",
+       null,
+       18,
+       100
+      ]
+     ],
+     "title": "…",
+     "totals": [
+      "Total",
+      null,
+      null
+     ],
+     "columns": [
+      "Preço",
+      "Quant.",
+      "%"
+     ],
+     "share_of": {
+      "2": 1
+     },
+     "col_kinds": [
+      "label",
+      "count",
+      "share"
+     ],
+     "total_kind": "sum"
+    },
+    {
+     "rows": [
+      [
+       "Acima de",
+       70,
+       0,
+       null
+      ],
+      [
+       "66 m² - 70 m²",
+       null,
+       2,
+       11.1
+      ],
+      [
+       "61 m² - 65 m²",
+       null,
+       3,
+       16.7
+      ],
+      [
+       "56 m² - 60 m²",
+       null,
+       1,
+       5.6
+      ],
+      [
+       "51 m² - 55 m²",
+       null,
+       5,
+       27.8
+      ],
+      [
+       "43 m² - 50 m²",
+       null,
+       5,
+       27.8
+      ],
+      [
+       "Até 42 m²",
+       null,
+       2,
+       11.1
+      ],
+      [
+       "TOTAL",
+       null,
+       18,
+       100
+      ]
+     ],
+     "title": "…",
+     "totals": [
+      "Total",
+      null,
+      null
+     ],
+     "columns": [
+      "Metragem",
+      "Quant.",
+      "%"
+     ],
+     "share_of": {
+      "2": 1
+     },
+     "col_kinds": [
+      "label",
+      "count",
+      "share"
+     ],
+     "total_kind": "sum"
+    },
+    {
+     "rows": [
+      [
+       "Acima de",
+       45,
+       null,
+       3,
+       16.7
+      ],
+      [
+       "R$ 41/m² - R$ 45/m²",
+       null,
+       2,
+       11.1
+      ],
+      [
+       "R$ 36/m² - R$ 40/m²",
+       null,
+       6,
+       33.3
+      ],
+      [
+       "R$ 31/m² - R$ 35/m²",
+       null,
+       3,
+       16.7
+      ],
+      [
+       "R$ 26/m² - R$ 30/m²",
+       null,
+       3,
+       16.7
+      ],
+      [
+       "R$ 21/m² - R$ 25/m²",
+       null,
+       1,
+       5.6
+      ],
+      [
+       "Até R$ 20/m²",
+       null,
+       0,
+       0
+      ],
+      [
+       "TOTAL",
+       null,
+       18,
+       100
+      ]
+     ],
+     "title": "…",
+     "totals": [
+      "Total",
+      null,
+      null
+     ],
+     "columns": [
+      "R$/m²",
+      "Quant.",
+      "%"
+     ],
+     "share_of": {
+      "2": 1
+     },
+     "col_kinds": [
+      "label",
+      "count",
+      "share"
+     ],
+     "total_kind": "sum"
+    }
+   ],
+   "unidades": [],
+   "tem_fonte": false,
+   "locais_visiveis": [
+    {
+     "tipo": "cidade",
+     "texto": "São Paulo",
+     "principal": true
+    }
+   ]
+  }
+ }
+]

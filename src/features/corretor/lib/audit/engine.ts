@@ -62,6 +62,12 @@ export function checkTableSums(
         const mn = Math.min(...vals);
         const mx = Math.max(...vals);
         if ((decl >= mn && decl <= mx) || notSummable(c)) continue;
+        // (c) linha de total deslocada na extração de visão: se a soma da coluna
+        // bate com o total DECLARADO de outra coluna, o OCR desalinhou a linha
+        // (célula mesclada some) — caso real Housi jul/2026: soma 1.187 acusada
+        // contra o "39,8" da coluna % vizinha. Desalinhamento não é erro do estudo.
+        const shifted = totals.some((t, c2) => c2 !== c && isNum(t) && Math.abs(soma - t) <= tol);
+        if (shifted) continue;
       }
       checks.push({ c, decl, tol, soma, ok });
     }

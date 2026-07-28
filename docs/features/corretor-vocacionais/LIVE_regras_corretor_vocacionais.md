@@ -16,6 +16,94 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.45 — 2026-07-28 — Fase 2 com o deck real da Rolândia: CH-4, CH-1 e FN-3 (RUNTIME)
+
+Com o PPTX da Rolândia (Daniele) em mãos, o IR real derrubou uma hipótese e fechou três frentes.
+**Aceite medido no deck real: de 17 achados (todos FP) para 1** — e o que sobra é ausência
+legítima ("7.1 Futuros lançamentos"), não contestada pela analista.
+
+- **CH-4 `SOURCE_MISSING` — hipótese do master estava ERRADA.** O rodapé
+  `FONTE: GEOBRAIN | ELABORAÇÃO: BRAIN` está no próprio slide, mas dentro de uma **tabela 1×1**
+  (`<a:tbl>`), não numa caixa de texto — e ambos os extratores só varriam `<p:sp>`. Corrigido em
+  `pptx-to-ir.ts` **e** no `ir_extractor.py` (referência do schema): células de tabela agora
+  entram na busca de fonte. Efeito no deck: 25 → 34 slides com fonte; **os 11 SOURCE_MISSING
+  zeraram**. Os 2 slides de mapa (s28/s29) seguem sem fonte no texto — está dentro da imagem, e
+  quem decide é o `tem_fonte` da visão, como projetado.
+- **CH-1 `STRUCTURE_MISSING` — três estados.** Itens do checklist ganham a marca `visual`
+  (mapas, ficha do terreno, consolidada, fichas técnicas): sem confirmação textual eles ficam
+  **“a conferir em imagem”** (`na`), nunca “ausente”. Padrões calibrados nos títulos reais do
+  template novo ("Densidade demográfica", "Índice de verticalização", "Renda domiciliar",
+  "Localização dos empreendimentos") e a varredura passou a ler **todo o texto do slide**, não
+  só as 2 primeiras linhas. Bug achado no caminho: `SUMMARY_RX` tratava "**Índice** de
+  verticalização" como slide de sumário e descartava o conteúdo — agora exige a forma de
+  sumário (`índice` não seguido de "de <palavra>").
+- **FN-3 `ziLabelFindings` (novo, DET puro).** O deck declara a convenção
+  ("Z.I. primária: 1 km; secundária: 2 km; terciária: 3 km") e a regra confere o uso dos
+  rótulos no texto. Conservadora: exige 2+ pares declarados, abstém-se se o próprio deck for
+  ambíguo, e só acusa quando ordinal e raio aparecem juntos contradizendo a tabela. A Rolândia
+  usa a convenção corretamente (nenhum alerta); o caso do Finoti (2 km chamado de secundária
+  quando é primária) dispara — ambos cobertos por teste.
+
+**Reteste sem PPTX:** `rolandia-v1.ir.json` (62 KB) versionado no corpus; `rolandia-real.test.ts`
+fixa o aceite. **Verificação:** tsc limpo, **71 testes verdes**, build ok. Sem migration/deploy.
+
+**Segue pendente:** CH-6 (exclusões declaradas) e FN-1/FN-2 (verticalização cross-slide e taxa
+0,9%×1,7%) — dependem do Housi v2, ainda não recebido.
+
+## Versão 0.44 — 2026-07-28 — Sprint feedback Fase 1: CH-2, CH-3, CH-5 + reconciliação (RUNTIME)
+
+Correções implementadas sobre o corpus real (offline, sem PPTX, custo de IA R$ 0 — os payloads
+de visão já estavam no `vision_cache`):
+
+- **CH-2 `WRONG_CONTEXT` visão** (`ia-vision.ts`): a regra só roda em seções de dados
+  (`SOCIO/MERCADO/LACUNAS/ABSORCAO`), valida o texto contra a base de municípios IBGE
+  ("brasileiras"/"SP" deixam de ser cidade) e compara com a cidade da ata tolerando conectivos
+  (`sameCity`: "São José do Campos" digitado na ata ≠ FP contra "São José dos Campos").
+- **CH-2 DET** (`ir-rules.ts`): `wrongCityFindings` valida a sigla capturada contra as 27 UFs
+  ("Santos – FC" não é padrão Cidade–UF) e usa `sameCity` contra a cidade esperada. Exportados
+  `municipioOficial()` e `sameCity()` para reuso.
+- **CH-3 `CROSS_TABLE_MISMATCH`** (`cross-table.ts`): legendas de mapa (título "LEGENDA" ou <2
+  rótulos de linha preenchidos) não pareiam com absorção; `binRows` entre eixos diferentes só
+  compara faixas da mesma unidade (metragem 5.1 × preço 5.2 diverge por desenho); tabelas do
+  mesmo slide (fatias Oferta Lançada × Final) não são comparadas entre si.
+- **CH-5 `ABSOLUTE_SUM`** (`engine.ts` `checkTableSums`): se a soma da coluna bate com o total
+  declarado de OUTRA coluna, a linha de total veio desalinhada do OCR (célula mesclada) — abstém.
+  Caso real: soma 1.187 acusada contra o "39,8" da coluna % vizinha.
+- **Reconciliação** (`lib/v3/reconcile.ts`, novo — padrão v0.41): ao abrir estudo,
+  `isStaleVisionContext`/`isStaleCrossTable`/`isStaleWrongCity` encerram FPs legados pendentes
+  dessas famílias (worklists da Daniele/Beatriz/Lucas limpam sozinhas, preservando histórico).
+
+**Corpus versionado**: `calibracao/feedback-2026-07/` (snapshot dos 102 achados + 34 payloads de
+visão + estudos). Teste de regressão `feedback-2026-07.test.ts`: nenhum dos 47 `iavis-context-*`
+regenera, os 7 cross-legenda reconciliam, o total desalinhado não acusa — e Brumadinho/Curitiba
+segue disparando. **Verificação:** `tsc` limpo, **64 testes verdes**, `vite build` ok.
+Sem migration nem deploy de Edge Function (tudo client-side; cache v7 intacto).
+
+**Fase 2 pendente** (precisa dos PPTXs Rolândia + Housi v2): CH-1 (checklist visual), CH-4
+(fonte no master), CH-6 (exclusões declaradas), FN-1..3 (erros que o Lucas achou).
+
+## Versão 0.43 — 2026-07-28 — Feedback dos analistas (1ª homologação real) + sprint de correção (docs)
+
+Primeiros usos reais: 4 estudos no banco (22–24/jul) — Rolândia (Daniele Nunes) e
+Housi/São José dos Campos (Beatriz Pontes, Lucas Finoti). Resultado confirmado via consulta ao
+`findings_v3`: **~100% de FP nos estudos triados** (Rolândia 17/17; Housi v2 19/19) e **3 falsos
+negativos** apontados pelo Lucas (verticalização cross-slide, taxa 0,9%×1,7%, Z.I. primária ×
+secundária). Famílias de FP e causas ancoradas no código:
+
+- `WRONG_CONTEXT` (54) — visão aceita "cidade" sem validar IBGE ("brasileiras") e roda em
+  capa/institucional; o cache por sha1 propaga o mesmo FP entre estudos (materialização do P2).
+- `SOURCE_MISSING` (33) — hipótese: rodapé FONTE/ELABORAÇÃO no layout/master do template, fora
+  do alcance do extrator IR.
+- `CROSS_TABLE_MISMATCH` (7) — legenda de mapa pareada com absorção; lacunas 5.1–5.3 comparadas
+  entre unidades diferentes (m²×R$); comparação de tabela consigo mesma (53-53).
+- `ABSOLUTE_SUM` — total pareado por índice pega a coluna vizinha (1187 ≠ "39,8"); exclusões
+  declaradas em NOTA TÉCNICA (esgotados/garden/cobertura) não são respeitadas.
+- `STRUCTURE_MISSING` — itens de mapa/imagem acusados como ausentes (checklist só olha texto).
+
+Plano completo, correções (CH-1..6, FN-3) e estratégia de categorização em
+[`SPRINT_feedback_analistas_2026-07-28.md`](./SPRINT_feedback_analistas_2026-07-28.md).
+Nenhuma regra mudou ainda nesta versão — é o registro do diagnóstico e do plano.
+
 ## Versão 0.42 — 2026-07-14 — Revisão final do v5 + FECHAMENTO da fatia (docs)
 
 Revisão de código (Claude) dos commits que fecharam o `PLAN_corretor_v5_fluxo.md`:

@@ -51,8 +51,15 @@ docs/features/corretor-vocacionais/*.pdf
 docs/features/corretor-vocacionais/Teste IA Masterplan.pptx
 docs/features/corretor-vocacionais/Vocacional_e_Quanti_*.pptx
 docs/features/corretor-vocacionais/*_estudo exemplo.pptx
+# Decks reais do feedback dos analistas (jul/2026) — pesados; o IR derivado
+# (calibracao/feedback-2026-07/*.ir.json) é o que sobe e basta para reteste.
+docs/features/corretor-vocacionais/Brain_Vocacional_*.pptx
 docs/features/**/desktop.ini
 docs/features/corretor-vocacionais/ir/
+
+# Amostras pesadas do Panorama Secovi/FIERGS (locais — NÃO versionar; xlsx de inventário e docs .md sobem)
+docs/features/Relatorios Secovi_FIERGS/*.pptx
+docs/features/Relatorios Secovi_FIERGS/*.pdf
 
 # Arquivos temporarios de lock do Office
 ~$*

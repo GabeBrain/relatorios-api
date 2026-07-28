@@ -229,11 +229,16 @@ def parse_slide(z, names, slide_name, rid2target):
     all_paras = [p for paras in shapes_paras for p in paras]
     fulltext = ' '.join(all_paras)
 
-    fontes = [p for p in all_paras if FONTE_RX.search(p)]
+    tabelas = [parse_table(t) for t in root.iter('{%s}tbl' % NS['a'])]
+
+    # O rodapé "FONTE: … | ELABORAÇÃO: …" do template novo vem como TABELA 1×1
+    # (deck Rolândia, jul/2026), não como caixa de texto — varrer só os shapes
+    # gerava SOURCE_MISSING em todo slide com fonte visível. Ver CH-4 do sprint.
+    cell_paras = [c for t in tabelas for row in t['linhas'] for c in row if c and c.strip()]
+
+    fontes = [p for p in all_paras + cell_paras if FONTE_RX.search(p)]
     notas = [p for p in all_paras if NOTA_RX.match(p) and not FONTE_RX.search(p)]
     notas_edicao = [p for p in all_paras if 3 < len(p) < 80 and LEFTOVER_RX.search(p)]
-
-    tabelas = [parse_table(t) for t in root.iter('{%s}tbl' % NS['a'])]
 
     graficos = []
     for chart_ref in root.iter('{%s}chart' % NS['c']):

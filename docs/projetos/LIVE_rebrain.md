@@ -49,6 +49,61 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-28 — Corretor: sprint Fase 2 com o deck real da Rolândia (17 achados → 1) — Gabriel + Claude
+- **Aceite medido:** rodando o motor sobre o IR real do PPTX da Daniele, os **17 achados (100% FP)
+  caíram para 1** — e o restante ("7.1 Futuros lançamentos") é ausência legítima do deck.
+- **CH-4 — hipótese corrigida:** o rodapé `FONTE: … | ELABORAÇÃO: …` **não** vinha do master; está
+  no slide, dentro de uma **tabela 1×1**. Os dois extratores (`pptx-to-ir.ts` e `ir_extractor.py`)
+  varriam só caixas de texto. Corrigido: 25 → 34 slides com fonte, 11 `SOURCE_MISSING` zerados.
+- **CH-1:** checklist ganhou itens `visual` e o terceiro estado “a conferir em imagem”; padrões
+  calibrados nos títulos do template novo. Bug colateral: "**Índice** de verticalização" era
+  descartado como slide de sumário.
+- **FN-3 (Finoti):** nova regra DET `ziLabelFindings` — o deck declara a convenção de Z.I. e a
+  regra confere o uso dos rótulos; conservadora (abstém-se sem convenção declarada).
+- **Reteste sem PPTX:** `rolandia-v1.ir.json` versionado no corpus (62 KB, o deck tem 162 MB).
+- **Verificação:** tsc limpo, **71 testes verdes**, build ok. Detalhes na v0.45 do LIVE do Corretor.
+
+### 2026-07-28 — Corretor: 1ª homologação real (feedback analistas) + sprint Fase 1 — Gabriel + Claude
+- **Diagnóstico:** primeiros 4 estudos reais (Daniele/Rolândia, Beatriz e Lucas Finoti/Housi)
+  triaram **~100% dos achados como FP**; consulta direta ao `findings_v3`/`vision_cache` ancorou
+  cada família na causa-raiz do código. 3 falsos negativos reais apontados pelo Lucas.
+- **Fase 1 implementada (offline, custo de IA R$ 0):** CH-2 (WRONG_CONTEXT: escopo de seção +
+  validação IBGE + `sameCity` p/ typo de ata + UF no DET), CH-3 (legendas de mapa, unidade das
+  faixas, guard same-slide), CH-5 (linha de total desalinhada do OCR) e **auto-reconciliação**
+  (`lib/v3/reconcile.ts`) que limpa os FPs legados ao abrir o estudo.
+- **Corpus versionado:** `calibracao/feedback-2026-07/` (102 achados + 34 payloads de visão do
+  banco) vira suíte de regressão permanente — reteste sem PPTX e sem token.
+- **Verificação:** tsc limpo, 64 testes verdes, build ok. Sem migration/deploy de função.
+- **Fase 2 (aguarda PPTXs Rolândia + Housi v2):** CH-1/CH-4/CH-6 + FN-1..3. Detalhes:
+  `SPRINT_feedback_analistas_2026-07-28.md` + v0.43–0.44 do LIVE do Corretor.
+
+### 2026-07-26 — Panorama Secovi/FIERGS: análise de automatização (pré-plano de ação) — Gabriel
+- **O quê:** análise técnica do deck `Panorama_Secovi_SP_Piracicaba_1T26` (62 slides) + inventário
+  de slides + template institucional, para subsidiar a conversa com o head da área.
+- **Anatomia:** ~24 slides institucionais/estáticos, 11 gráficos/tabelas **nativos** do PowerPoint e
+  **~25 colados como imagem** (prints de Excel) — ou seja, ~40% do conteúdo quantitativo vive como
+  imagem, e esse é o maior custo de atualização e o maior obstáculo à automação plena.
+- **Cobertura pela API GeoBrain:** essencialmente **todo o conteúdo quantitativo é obtível**
+  (direto por `temporal-analysis-city/*` ou derivado de `building-with-history`), com 2 lacunas de
+  metodologia: **VGV lançado** (não vem em `releases`) e **% MCMV** (sem flag na API, exige critério
+  oficial do analista). Sem dependência obrigatória de exportação manual identificada.
+- **Camadas propostas:** (1) XLSX "dados prontos" reusando o padrão `GeoApiScopeEngine`/
+  `TestesArquitetura.tsx`; (2) visualização web para QA; (3) geração do PPTX (pré-requisito one-off:
+  reconstruir os ~25 slides-imagem como objetos nativos no template); (4) textos analíticos.
+- **1º passo definido:** **teste de aderência** — reproduzir Piracicaba 1T26 via API e comparar
+  número a número com o deck, antes de qualquer UI. Sem isso, automatizar industrializa divergências
+  (risco já visto nos apontamentos da Juliana).
+- **Arquivos:** [`docs/features/Relatorios Secovi_FIERGS/ANALISE_automatizacao_panorama.md`](../features/Relatorios%20Secovi_FIERGS/ANALISE_automatizacao_panorama.md);
+  `.gitignore` passa a excluir os `.pptx`/`.pdf` pesados dessa pasta (os `.md` e o xlsx de inventário sobem).
+
+### 2026-07-26 — Limpeza de espaço: estudos pesados fora do repo — Gabriel
+- **O quê:** movidos ~673 MB de PPTX/PDF-fonte do Corretor para `C:\Users\GaloD\Desktop\SE\_backup_estudos\`
+  (fora do repo). Nenhum estava versionado (cobertos pelo `.gitignore`), logo **não há cópia no histórico**.
+- **Preservado no repo:** os derivados que o pipeline usa (`ir/*.ir.json`, `calibracao/*.csv` +
+  `*.labels.json`, `visao/`), o gabarito Marka/Tancredo (congelado desde 13/jul) e as duas fixtures
+  versionadas de propósito (`Marka Prime_Reduzido.pptx`, `Vocacionais_parametros_de_correcao.pptx`).
+- **Arquivos:** [`docs/features/corretor-vocacionais/ARQUIVOS_REMOVIDOS.md`](../features/corretor-vocacionais/ARQUIVOS_REMOVIDOS.md).
+
 ### 2026-07-14 — Corretor v5: revisão final aprovada e fatia FECHADA — Gabriel + Claude
 - **Revisão de código** dos commits que completaram o plano v5 (`75ad627` WS-3 triagem,
   `62a0276` WS-4 recheck sem atrito, `0c48924` WS-5 calibradora, `273c0e4` cidade IBGE +
@@ -354,6 +409,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
 | 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
+| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (análise de cobertura ✅ em 26/jul; próximo: teste de aderência Piracicaba 1T26 número a número, depois Camada 1 = XLSX) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
 
@@ -361,7 +417,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] Corretor v2: executar as fases A→E da estratégia de testes (ver `DESIGN_corretor_v2.md`) — próxima ação: Fase A (regras DET sobre o IR, custo zero) + gerar tabela de calibração da Fase B.
+- [ ] **Panorama Secovi/FIERGS — teste de aderência (próximo passo):** reproduzir Piracicaba 1T26 via
+  API GeoBrain e comparar número a número com o deck, gerando a matriz "bate / não bate / não tem".
+  É o portão que decide o escopo das Camadas 1–3 (ver `ANALISE_automatizacao_panorama.md`).
+- [ ] **Panorama — fechar metodologia com os analistas:** critério oficial de **VGV lançado**
+  (estimativa via `building-with-history`) e de **% MCMV** (proxy por padrão Econômico / teto de preço).
+- [ ] Panorama — confirmar que o token Secovi cobre o histórico desde 1T/22 (dado pontual 4T/21) nas cidades-alvo.
+- [ ] Corretor v2: fases restantes da estratégia de testes (ver `DESIGN_corretor_v2.md`) — A/C/E já andaram; falta **Fase B** (calibração de seção) e **Fase D** (catálogo validado contra o gabarito).
 - [ ] Corretor v2: calibrar dicionário de seção canônica com a analista (item 2 do plano; agora com os 2 estudos reais como base) — ver doc vivo do Corretor.
 - [ ] Alinhar com o time o formato dos artefatos por estudo: slides sempre em **PPTX** (não PDF) e ata sempre em **DOCX separado** (nunca print no slide 1). Vale a partir dos próximos estudos; os 2 atuais seguem com ata em imagem (Fase C).
 - [ ] **Gabriel → time de analistas (médio prazo, semanas):** propor tabelas nativas no PPT com os argumentos de `fase_c_visao.md`/`custos_visao_reais.md`; **plano B**: pré-análise dos Excels de trabalho (origem dos prints) — bater os números direto na fonte antes da colagem no PPT. Decisão do gestor (09/jul): até lá, **imagem é o padrão**.

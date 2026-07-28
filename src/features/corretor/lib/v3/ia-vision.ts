@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, calculateImageTokens, type ModelId } from '../cost-calculator';
 import { binsFromColumns, checkTableSums, checkPercentConsistency, checkUnitPlausibility, detectBinGap } from '../audit/engine';
 import { toAuditSection } from '../audit/ir';
+import { municipioOficial, sameCity } from '../audit/ir-rules';
 import type { Cell, ColKind, ExtractedTable, Finding } from '../audit/model';
 import type { TableImageCandidate } from './table-images';
 
@@ -207,6 +208,14 @@ function normalized(value: string): string {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
 
+/**
+ * Seções onde cidade estranha numa imagem é sinal de copy-paste. Capa, fotos,
+ * institucionais e entorno (slides GLOBAL/ESTRUTURA/ENTORNO) citam outras cidades
+ * legitimamente — nos 4 primeiros estudos reais (jul/2026), 45 dos 54 achados
+ * desta regra vinham dessas seções e todos os triados eram FP.
+ */
+const CONTEXT_SECTIONS = new Set(['SOCIO', 'MERCADO', 'LACUNAS', 'ABSORCAO']);
+
 /** Comparação conservadora: só usa cidade marcada como protagonista da imagem pela visão. */
 export function wrongContextFromVisibleLocales(
   rawLocales: RawLocale[] | undefined,
@@ -215,6 +224,7 @@ export function wrongContextFromVisibleLocales(
 ): Finding[] {
   const city = expected?.cidade?.trim();
   if (!city) return [];
+  if (!CONTEXT_SECTIONS.has((candidate.secao ?? '').toUpperCase())) return [];
   const expectedCity = normalized(city);
   const title = normalized(candidate.titulo ?? '');
   const comparative = /\bbrasil\b|\bestado\b/.test(title);
@@ -230,6 +240,10 @@ export function wrongContextFromVisibleLocales(
     // como comparação Estado/Brasil, Curitiba em estudo de Brumadinho é sinal de
     // copy-paste mesmo quando a visão não a chama de "principal".
     if (!found || found === expectedCity || found === 'brasil' || comparative || seen.has(found)) continue;
+    // A visão devolve qualquer rótulo como "cidade" ("brasileiras", "SP"); só é
+    // divergência se o texto for município IBGE — e diferente além de conectivos
+    // ("São José do Campos" digitado na ata ≠ FP contra "São José dos Campos").
+    if (!municipioOficial(text) || sameCity(text, city)) continue;
     seen.add(found);
     findings.push({
       id: `iavis-context-${candidate.sha1.slice(0, 10)}-${found.replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`,

@@ -1,0 +1,4220 @@
+[
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "structure",
+  "tipo": "STRUCTURE_MISSING",
+  "slide_ref": "—",
+  "titulo": "Checklist estrutural (19 item(ns) a conferir)",
+  "detalhe": "Cobertura por título e primeiras linhas fora do sumário. β: confirme ausências que dependem de mapa ou imagem.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "structure",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "checklist": [
+     {
+      "label": "1.1 — Endereço",
+      "status": "missing"
+     },
+     {
+      "label": "1.2 — Latitude/longitude",
+      "status": "missing"
+     },
+     {
+      "label": "1.3 — Área do terreno",
+      "status": "missing"
+     },
+     {
+      "label": "1.4 — Acessos",
+      "status": "missing"
+     },
+     {
+      "label": "1.5 — Entorno varejo/serviços",
+      "status": "ok"
+     },
+     {
+      "label": "1.6 — Entorno revendas",
+      "status": "ok"
+     },
+     {
+      "label": "1.7 — Mapeamento físico",
+      "status": "ok"
+     },
+     {
+      "label": "1.9 — Distância ao centro",
+      "status": "missing"
+     },
+     {
+      "label": "2.1 — Dados cidade/estado/Brasil",
+      "status": "missing"
+     },
+     {
+      "label": "2.2 — Variação da população",
+      "status": "ok"
+     },
+     {
+      "label": "2.3 — Variação dos domicílios",
+      "status": "ok"
+     },
+     {
+      "label": "2.4 — População por renda",
+      "status": "missing"
+     },
+     {
+      "label": "2.4.1 — Mapa de densidade populacional",
+      "status": "missing"
+     },
+     {
+      "label": "2.5 — Domicílios por renda",
+      "status": "ok"
+     },
+     {
+      "label": "2.6 — Domicílios por moradores",
+      "status": "ok"
+     },
+     {
+      "label": "2.5.1 — Mapa de renda",
+      "status": "missing"
+     },
+     {
+      "label": "2.7 — Domicílios por tipo",
+      "status": "ok"
+     },
+     {
+      "label": "2.7.1 — Mapa de verticalização",
+      "status": "missing"
+     },
+     {
+      "label": "2.8 — Ocupação/propriedade",
+      "status": "missing"
+     },
+     {
+      "label": "2.8.1 — Mapa de propriedade",
+      "status": "missing"
+     },
+     {
+      "label": "3.1 — Absorção Z.I. total",
+      "status": "ok"
+     },
+     {
+      "label": "3.1.1 — Cenários de absorção",
+      "status": "ok"
+     },
+     {
+      "label": "4.1 — Mapa de localização",
+      "status": "missing"
+     },
+     {
+      "label": "4.2 — Mapa R$/m²",
+      "status": "missing"
+     },
+     {
+      "label": "4.3 — Mapa de estoque",
+      "status": "missing"
+     },
+     {
+      "label": "4.4 — Mapa de área média",
+      "status": "missing"
+     },
+     {
+      "label": "4.5 — Consolidada",
+      "status": "missing"
+     },
+     {
+      "label": "4.6 — Oferta por padrão",
+      "status": "ok"
+     },
+     {
+      "label": "4.7 — Oferta por ano",
+      "status": "ok"
+     },
+     {
+      "label": "4.8 — Oferta por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "4.9 — Preços por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "4.10 — Preços por padrão",
+      "status": "ok"
+     },
+     {
+      "label": "5.1 — Lacunas tipologia × metragem",
+      "status": "ok"
+     },
+     {
+      "label": "5.2 — Lacunas tipologia × preço",
+      "status": "ok"
+     },
+     {
+      "label": "5.3 — Lacunas preço × metragem",
+      "status": "ok"
+     },
+     {
+      "label": "6 — Fichas técnicas",
+      "status": "missing"
+     },
+     {
+      "label": "7.1 — Futuros lançamentos",
+      "status": "missing"
+     },
+     {
+      "label": "8.1 — Revenda",
+      "status": "ok"
+     },
+     {
+      "label": "8.2 — Revenda por bairro",
+      "status": "ok"
+     },
+     {
+      "label": "8.3 — Revenda por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "8.4 — Ticket de revenda",
+      "status": "ok"
+     }
+    ]
+   },
+   "type": "STRUCTURE_MISSING",
+   "title": "Checklist estrutural (19 item(ns) a conferir)",
+   "detail": "Cobertura por título e primeiras linhas fora do sumário. β: confirme ausências que dependem de mapa ou imagem.",
+   "section": "ESTRUTURA",
+   "slideRef": "—"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "cross-lacunas-bins-51-52",
+  "tipo": "CROSS_TABLE_MISMATCH",
+  "slide_ref": "s51 × s52",
+  "titulo": "Faixas de lacunas divergem entre as análises",
+  "detalhe": "A tabela geral e suas quebras devem usar o mesmo conjunto de faixas. Confira a lacuna indicada.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "cross-lacunas-bins-51-52",
+   "ok": false,
+   "viz": {
+    "kind": "sidebyside",
+    "rows": [
+     {
+      "left": "Até 50m²",
+      "label": "Faixa 1",
+      "right": "Até R$5.000/m²",
+      "mismatch": true
+     },
+     {
+      "left": "Acima de 105m²",
+      "label": "Faixa 2",
+      "right": "Acima de R$ 8.500/m²",
+      "mismatch": true
+     }
+    ],
+    "leftLabel": "s51 — Lacunas de mercado | tipologia vs metragem",
+    "rightLabel": "s52 — …"
+   },
+   "type": "CROSS_TABLE_MISMATCH",
+   "title": "Faixas de lacunas divergem entre as análises",
+   "detail": "A tabela geral e suas quebras devem usar o mesmo conjunto de faixas. Confira a lacuna indicada.",
+   "origem": "IA_visao",
+   "section": "LACUNAS",
+   "slideRef": "s51 × s52",
+   "evidenceSha1": "5968f7db269fee1ff891472ae3258edeb4982dbc",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/5968f7db269fee1ff891472ae3258edeb4982dbc.png"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-37",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s37",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-37",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Cenários de absorção de lançamentos | Rolândia"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "ABSORCAO",
+   "slideRef": "s37"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "cross-renda-28-37",
+  "tipo": "CROSS_TABLE_MISMATCH",
+  "slide_ref": "s28 × s37",
+  "titulo": "Faixas de renda divergem entre sociodemografia e absorção",
+  "detalhe": "As faixas de renda da absorção devem reproduzir a tabela “Domicílios por faixa de renda”.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "cross-renda-28-37",
+   "ok": false,
+   "viz": {
+    "kind": "sidebyside",
+    "rows": [
+     {
+      "left": "Raios",
+      "label": "Faixa 1",
+      "right": "Acima de R$ 36.511,01",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 2",
+      "right": "R$ 27.320,01 a R$ 36.511,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 3",
+      "right": "R$ 20.983,01 a R$ 27.320,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 4",
+      "right": "R$ 17.147,01 a R$ 20.983,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 5",
+      "right": "R$ 14.590,01 a R$ 17.147,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 6",
+      "right": "R$ 10.755,01 a R$ 14.590,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 7",
+      "right": "R$ 7.716,01 a R$ 10.755,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 8",
+      "right": "Abaixo de R$ 7.716,00",
+      "mismatch": true
+     }
+    ],
+    "leftLabel": "s28 — LEGENDA",
+    "rightLabel": "s37 — Faixa de Renda / Média Anual"
+   },
+   "type": "CROSS_TABLE_MISMATCH",
+   "title": "Faixas de renda divergem entre sociodemografia e absorção",
+   "detail": "As faixas de renda da absorção devem reproduzir a tabela “Domicílios por faixa de renda”.",
+   "origem": "IA_visao",
+   "section": "ABSORCAO",
+   "slideRef": "s28 × s37",
+   "evidenceSha1": "78b5c50ed50c2995f21aed68dfb69ef511784fc2",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/78b5c50ed50c2995f21aed68dfb69ef511784fc2.png"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "cross-lacunas-bins-53-53",
+  "tipo": "CROSS_TABLE_MISMATCH",
+  "slide_ref": "s53 × s53",
+  "titulo": "Faixas de lacunas divergem entre as análises",
+  "detalhe": "A tabela geral e suas quebras devem usar o mesmo conjunto de faixas. Confira a lacuna indicada.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "cross-lacunas-bins-53-53",
+   "ok": false,
+   "viz": {
+    "kind": "sidebyside",
+    "rows": [
+     {
+      "left": "Oferta Lançada",
+      "label": "Faixa 1",
+      "right": "Oferta Final",
+      "mismatch": true
+     },
+     {
+      "left": "Até R$5.000/m²",
+      "label": "Faixa 2",
+      "right": "Até R$5.000/m²",
+      "mismatch": false
+     },
+     {
+      "left": "De 5.001/m² a R$7.000/m²",
+      "label": "Faixa 3",
+      "right": "De 5.001/m² a R$7.000/m²",
+      "mismatch": false
+     },
+     {
+      "left": "De 7.001/m² a R$7.500/m²",
+      "label": "Faixa 4",
+      "right": "De 7.001/m² a R$7.500/m²",
+      "mismatch": false
+     },
+     {
+      "left": "De 7.501/m² a R$8.000/m²",
+      "label": "Faixa 5",
+      "right": "De 7.501/m² a R$8.000/m²",
+      "mismatch": false
+     },
+     {
+      "left": "De 8.001/m² a R$8.500/m²",
+      "label": "Faixa 6",
+      "right": "De 8.001/m² a R$8.500/m²",
+      "mismatch": false
+     },
+     {
+      "left": "Acima de R$8.500/m²",
+      "label": "Faixa 7",
+      "right": "Acima de R$8.500/m²",
+      "mismatch": false
+     },
+     {
+      "left": "Total",
+      "label": "Faixa 8",
+      "right": "Total",
+      "mismatch": false
+     }
+    ],
+    "leftLabel": "s53 — Lacunas de mercado | preço vs metragem",
+    "rightLabel": "s53 — Oferta Final"
+   },
+   "type": "CROSS_TABLE_MISMATCH",
+   "title": "Faixas de lacunas divergem entre as análises",
+   "detail": "A tabela geral e suas quebras devem usar o mesmo conjunto de faixas. Confira a lacuna indicada.",
+   "origem": "IA_visao",
+   "section": "LACUNAS",
+   "slideRef": "s53 × s53",
+   "evidenceSha1": "d679ec5af074a949673016a2fce2dd4ccda33e38",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/d679ec5af074a949673016a2fce2dd4ccda33e38.png"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-36",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s36",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-36",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Absorção de domicílios | Rolândia"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "ABSORCAO",
+   "slideRef": "s36"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "cross-renda-29-37",
+  "tipo": "CROSS_TABLE_MISMATCH",
+  "slide_ref": "s29 × s37",
+  "titulo": "Faixas de renda divergem entre sociodemografia e absorção",
+  "detalhe": "As faixas de renda da absorção devem reproduzir a tabela “Domicílios por faixa de renda”.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "cross-renda-29-37",
+   "ok": false,
+   "viz": {
+    "kind": "sidebyside",
+    "rows": [
+     {
+      "left": "Raios",
+      "label": "Faixa 1",
+      "right": "Acima de R$ 36.511,01",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 2",
+      "right": "R$ 27.320,01 a R$ 36.511,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 3",
+      "right": "R$ 20.983,01 a R$ 27.320,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 4",
+      "right": "R$ 17.147,01 a R$ 20.983,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 5",
+      "right": "R$ 14.590,01 a R$ 17.147,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 6",
+      "right": "R$ 10.755,01 a R$ 14.590,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 7",
+      "right": "R$ 7.716,01 a R$ 10.755,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 8",
+      "right": "Abaixo de R$ 7.716,00",
+      "mismatch": true
+     }
+    ],
+    "leftLabel": "s29 — LEGENDA",
+    "rightLabel": "s37 — Faixa de Renda / Média Anual"
+   },
+   "type": "CROSS_TABLE_MISMATCH",
+   "title": "Faixas de renda divergem entre sociodemografia e absorção",
+   "detail": "As faixas de renda da absorção devem reproduzir a tabela “Domicílios por faixa de renda”.",
+   "origem": "IA_visao",
+   "section": "ABSORCAO",
+   "slideRef": "s29 × s37",
+   "evidenceSha1": "78b5c50ed50c2995f21aed68dfb69ef511784fc2",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/78b5c50ed50c2995f21aed68dfb69ef511784fc2.png"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-34",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s34",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-34",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por tipo"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s34"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-22",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s22",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-22",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Variação anual da população | 2027 a 2032"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s22"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "cross-lacunas-bins-52-53",
+  "tipo": "CROSS_TABLE_MISMATCH",
+  "slide_ref": "s52 × s53",
+  "titulo": "Faixas de lacunas divergem entre as análises",
+  "detalhe": "A tabela geral e suas quebras devem usar o mesmo conjunto de faixas. Confira a lacuna indicada.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "cross-lacunas-bins-52-53",
+   "ok": false,
+   "viz": {
+    "kind": "sidebyside",
+    "rows": [
+     {
+      "left": "Até R$5.000/m²",
+      "label": "Faixa 1",
+      "right": "Até 50m²",
+      "mismatch": true
+     },
+     {
+      "left": "Acima de R$ 8.500/m²",
+      "label": "Faixa 2",
+      "right": "Acima de 105m²",
+      "mismatch": true
+     }
+    ],
+    "leftLabel": "s52 — …",
+    "rightLabel": "s53 — Lacunas de mercado | preço vs metragem"
+   },
+   "type": "CROSS_TABLE_MISMATCH",
+   "title": "Faixas de lacunas divergem entre as análises",
+   "detail": "A tabela geral e suas quebras devem usar o mesmo conjunto de faixas. Confira a lacuna indicada.",
+   "origem": "IA_visao",
+   "section": "LACUNAS",
+   "slideRef": "s52 × s53",
+   "evidenceSha1": "94f6b0ac8f00d3554a647aba7e252360b71acc0d",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/94f6b0ac8f00d3554a647aba7e252360b71acc0d.png"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-23",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s23",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-23",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Variação anual dos domicílios | 2027 a 2032"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s23"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-24",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s24",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-24",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "População por faixa etária"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s24"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-27",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s27",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-27",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por faixa de renda"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s27"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-28",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s28",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-28",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Renda domiciliar"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s28"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-29",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s29",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-29",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Renda domiciliar"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s29"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-30",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s30",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-30",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por número de moradores"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s30"
+  }
+ },
+ {
+  "study_id": "17b1be6f-7570-4ed5-bb52-b175ce580402",
+  "rule_id": "src-31",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s31",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "src-31",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por tipo"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s31"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "structure",
+  "tipo": "STRUCTURE_MISSING",
+  "slide_ref": "—",
+  "titulo": "Checklist estrutural (17 item(ns) a conferir)",
+  "detalhe": "Cobertura por título e primeiras linhas fora do sumário. β: confirme ausências que dependem de mapa ou imagem.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "structure",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "checklist": [
+     {
+      "label": "1.1 — Endereço",
+      "status": "missing"
+     },
+     {
+      "label": "1.2 — Latitude/longitude",
+      "status": "missing"
+     },
+     {
+      "label": "1.3 — Área do terreno",
+      "status": "missing"
+     },
+     {
+      "label": "1.4 — Acessos",
+      "status": "missing"
+     },
+     {
+      "label": "1.5 — Entorno varejo/serviços",
+      "status": "ok"
+     },
+     {
+      "label": "1.6 — Entorno revendas",
+      "status": "ok"
+     },
+     {
+      "label": "1.7 — Mapeamento físico",
+      "status": "ok"
+     },
+     {
+      "label": "1.9 — Distância ao centro",
+      "status": "missing"
+     },
+     {
+      "label": "2.1 — Dados cidade/estado/Brasil",
+      "status": "missing"
+     },
+     {
+      "label": "2.2 — Variação da população",
+      "status": "ok"
+     },
+     {
+      "label": "2.3 — Variação dos domicílios",
+      "status": "ok"
+     },
+     {
+      "label": "2.4 — População por renda",
+      "status": "missing"
+     },
+     {
+      "label": "2.4.1 — Mapa de densidade populacional",
+      "status": "missing"
+     },
+     {
+      "label": "2.5 — Domicílios por renda",
+      "status": "ok"
+     },
+     {
+      "label": "2.6 — Domicílios por moradores",
+      "status": "ok"
+     },
+     {
+      "label": "2.5.1 — Mapa de renda",
+      "status": "missing"
+     },
+     {
+      "label": "2.7 — Domicílios por tipo",
+      "status": "ok"
+     },
+     {
+      "label": "2.7.1 — Mapa de verticalização",
+      "status": "missing"
+     },
+     {
+      "label": "2.8 — Ocupação/propriedade",
+      "status": "missing"
+     },
+     {
+      "label": "2.8.1 — Mapa de propriedade",
+      "status": "missing"
+     },
+     {
+      "label": "3.1 — Absorção Z.I. total",
+      "status": "ok"
+     },
+     {
+      "label": "3.1.1 — Cenários de absorção",
+      "status": "ok"
+     },
+     {
+      "label": "4.1 — Mapa de localização",
+      "status": "missing"
+     },
+     {
+      "label": "4.2 — Mapa R$/m²",
+      "status": "missing"
+     },
+     {
+      "label": "4.3 — Mapa de estoque",
+      "status": "missing"
+     },
+     {
+      "label": "4.4 — Mapa de área média",
+      "status": "ok"
+     },
+     {
+      "label": "4.5 — Consolidada",
+      "status": "ok"
+     },
+     {
+      "label": "4.6 — Oferta por padrão",
+      "status": "ok"
+     },
+     {
+      "label": "4.7 — Oferta por ano",
+      "status": "ok"
+     },
+     {
+      "label": "4.8 — Oferta por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "4.9 — Preços por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "4.10 — Preços por padrão",
+      "status": "ok"
+     },
+     {
+      "label": "5.1 — Lacunas tipologia × metragem",
+      "status": "ok"
+     },
+     {
+      "label": "5.2 — Lacunas tipologia × preço",
+      "status": "ok"
+     },
+     {
+      "label": "5.3 — Lacunas preço × metragem",
+      "status": "ok"
+     },
+     {
+      "label": "6 — Fichas técnicas",
+      "status": "missing"
+     },
+     {
+      "label": "7.1 — Futuros lançamentos",
+      "status": "missing"
+     },
+     {
+      "label": "8.1 — Revenda",
+      "status": "ok"
+     },
+     {
+      "label": "8.2 — Revenda por bairro",
+      "status": "ok"
+     },
+     {
+      "label": "8.3 — Revenda por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "8.4 — Ticket de revenda",
+      "status": "ok"
+     }
+    ]
+   },
+   "type": "STRUCTURE_MISSING",
+   "title": "Checklist estrutural (17 item(ns) a conferir)",
+   "detail": "Cobertura por título e primeiras linhas fora do sumário. β: confirme ausências que dependem de mapa ou imagem.",
+   "section": "ESTRUTURA",
+   "slideRef": "—"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iatxt-12-spelling-7wl45l",
+  "tipo": "SPELLING",
+  "slide_ref": "s12",
+  "titulo": "Uso incorreto de 'à' em vez de 'a' em contexto que exige preposição sem crase.",
+  "detalhe": "Uso incorreto de 'à' em vez de 'a' em contexto que exige preposição sem crase.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iatxt-12-spelling-7wl45l",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "'a cidade de Toledo, à 20km de Cascavel'"
+   },
+   "type": "SPELLING",
+   "title": "Uso incorreto de 'à' em vez de 'a' em contexto que exige preposição sem crase.",
+   "detail": "Uso incorreto de 'à' em vez de 'a' em contexto que exige preposição sem crase.",
+   "section": "ESTRUTURA",
+   "slideRef": "s12"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "wrong-uf-23-sp",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s23",
+  "titulo": "UF divergente do estudo (SP ≠ PR)",
+  "detalhe": "O slide declara a UF SP, mas a ata identifica o estudo como PR. Confira possível conteúdo de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "wrong-uf-23-sp",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "- SP",
+    "location": "Variação anual dos domicílios | 2027 a 2032"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "UF divergente do estudo (SP ≠ PR)",
+   "detail": "O slide declara a UF SP, mas a ata identifica o estudo como PR. Confira possível conteúdo de outro estudo.",
+   "section": "SOCIO",
+   "slideRef": "s23"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-sum-1be01cb51b-0",
+  "tipo": "ABSOLUTE_SUM",
+  "slide_ref": "s43",
+  "titulo": "Tabela não fecha no total (Empreendimentos até 1km)",
+  "detalhe": "Números da imagem do slide 43 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-sum-1be01cb51b-0",
+   "ok": false,
+   "viz": {
+    "kind": "table",
+    "notes": [
+     "Coluna «Oferta Lançada»: soma 434 ≠ total 1099",
+     "Coluna «Vendidas»: soma 380 ≠ total 702",
+     "Coluna «Oferta Atual»: soma 54 ≠ total 397"
+    ],
+    "table": {
+     "rows": [
+      [
+       "Edificio Bela Vista",
+       90,
+       81,
+       9,
+       10
+      ],
+      [
+       "Edificio Urban",
+       45,
+       44,
+       1,
+       2.2
+      ],
+      [
+       "Residencial Amarante",
+       58,
+       57,
+       1,
+       1.7
+      ],
+      [
+       "Edificio West Lake",
+       39,
+       34,
+       5,
+       12.8
+      ],
+      [
+       "Edificio Genebra",
+       18,
+       16,
+       2,
+       11.1
+      ],
+      [
+       "Vancouver",
+       24,
+       21,
+       3,
+       12.5
+      ],
+      [
+       "Duo Pilastri",
+       14,
+       13,
+       1,
+       7.1
+      ],
+      [
+       "Nord",
+       31,
+       19,
+       12,
+       38.7
+      ],
+      [
+       "Edificio Dumont Exclusive Home",
+       27,
+       20,
+       7,
+       25.9
+      ],
+      [
+       "Villa Bordeguini Residencial",
+       32,
+       30,
+       2,
+       6.3
+      ],
+      [
+       "Thielke",
+       20,
+       14,
+       6,
+       30
+      ],
+      [
+       "Bossa 1616",
+       36,
+       31,
+       5,
+       13.9
+      ]
+     ],
+     "title": "Empreendimentos até 1km",
+     "totals": [
+      "Total",
+      1099,
+      702,
+      397,
+      null
+     ],
+     "columns": [
+      "Empreendimento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)"
+     ],
+     "shareOf": {},
+     "colKinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "rate"
+     ],
+     "totalKind": "sum"
+    },
+    "badRows": [],
+    "badColumns": [
+     1,
+     2,
+     3
+    ]
+   },
+   "type": "ABSOLUTE_SUM",
+   "title": "Tabela não fecha no total (Empreendimentos até 1km)",
+   "detail": "Números da imagem do slide 43 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo.",
+   "section": "MERCADO",
+   "slideRef": "s43",
+   "escalated": true,
+   "evidenceSha1": "1be01cb51bb241a11667513b747eb200b794e288",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/1be01cb51bb241a11667513b747eb200b794e288.png"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-sum-5b0d79ab59-0",
+  "tipo": "ABSOLUTE_SUM",
+  "slide_ref": "s95",
+  "titulo": "Tabela não fecha no total (Empreendimentos até 1km)",
+  "detalhe": "Números da imagem do slide 95 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-sum-5b0d79ab59-0",
+   "ok": false,
+   "viz": {
+    "kind": "table",
+    "notes": [
+     "Coluna «Oferta Lançada»: soma 251 ≠ total 109",
+     "Coluna «Vendidas»: soma 213 ≠ total 702",
+     "Coluna «Oferta Atual»: soma 38 ≠ total 397"
+    ],
+    "table": {
+     "rows": [
+      [
+       "Edificio Dumont Exclusive Home",
+       27,
+       20,
+       7,
+       25.9
+      ],
+      [
+       "Villa Bordeguini Residencial",
+       32,
+       30,
+       2,
+       6.3
+      ],
+      [
+       "Thielke",
+       20,
+       14,
+       6,
+       30
+      ],
+      [
+       "Bossa 1616",
+       36,
+       31,
+       5,
+       13.9
+      ],
+      [
+       "Znt Equador",
+       18,
+       18,
+       0,
+       0
+      ],
+      [
+       "Elevatt",
+       20,
+       17,
+       3,
+       15
+      ],
+      [
+       "Ch Sublime Residence",
+       34,
+       34,
+       0,
+       0
+      ],
+      [
+       "Jardins Residence",
+       40,
+       28,
+       12,
+       30
+      ],
+      [
+       "Tau Haus",
+       24,
+       21,
+       3,
+       12.5
+      ]
+     ],
+     "title": "Empreendimentos até 1km",
+     "totals": [
+      "Total",
+      109,
+      702,
+      397,
+      36.1
+     ],
+     "columns": [
+      "Empreendimento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)"
+     ],
+     "shareOf": {},
+     "colKinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "rate"
+     ],
+     "totalKind": "sum"
+    },
+    "badRows": [],
+    "badColumns": [
+     1,
+     2,
+     3
+    ]
+   },
+   "type": "ABSOLUTE_SUM",
+   "title": "Tabela não fecha no total (Empreendimentos até 1km)",
+   "detail": "Números da imagem do slide 95 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo.",
+   "section": "MERCADO",
+   "slideRef": "s95",
+   "escalated": true,
+   "evidenceSha1": "5b0d79ab59a3eb165b519ddfbb7cd0eae7e74f0b",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/5b0d79ab59a3eb165b519ddfbb7cd0eae7e74f0b.png"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-context-f257d4bdde-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s68",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-f257d4bdde-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Nature | Plantas"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s68",
+   "evidenceSha1": "f257d4bdde83c4738d62a9ff439b590ebeaeca57",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/f257d4bdde83c4738d62a9ff439b590ebeaeca57.png"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-context-b8f3452acd-campos-do-jordao",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s1",
+  "titulo": "Cidade divergente na imagem (Campos do Jordão ≠ Toledo)",
+  "detalhe": "A cidade “Campos do Jordão” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-b8f3452acd-campos-do-jordao",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "Campos do Jordão",
+    "location": "Vocacional Vertical | Toledo | Junho/2026"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (Campos do Jordão ≠ Toledo)",
+   "detail": "A cidade “Campos do Jordão” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s1",
+   "evidenceSha1": "b8f3452acd453abb5115cbfa91d9de21eec06b39",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/b8f3452acd453abb5115cbfa91d9de21eec06b39.png"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-sum-f589239424-0",
+  "tipo": "ABSOLUTE_SUM",
+  "slide_ref": "s97",
+  "titulo": "Tabela não fecha no total (Empreendimentos até 2km)",
+  "detalhe": "Números da imagem do slide 97 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-sum-f589239424-0",
+   "ok": false,
+   "viz": {
+    "kind": "table",
+    "notes": [
+     "Coluna «Oferta Lançada»: soma 471 ≠ total 665",
+     "Coluna «Vendidas»: soma 392 ≠ total 524",
+     "Coluna «Oferta Atual»: soma 79 ≠ total 141"
+    ],
+    "table": {
+     "rows": [
+      [
+       "Mogno",
+       18,
+       18,
+       0,
+       0
+      ],
+      [
+       "Alto Das Pedras Residencial Clube",
+       78,
+       40,
+       38,
+       48.7
+      ],
+      [
+       "Edificio Madrid",
+       30,
+       28,
+       2,
+       6.7
+      ],
+      [
+       "Santorini",
+       20,
+       20,
+       0,
+       0
+      ],
+      [
+       "Jardim La Salle",
+       6,
+       6,
+       0,
+       0
+      ],
+      [
+       "Edificio Nevada",
+       15,
+       14,
+       1,
+       6.7
+      ],
+      [
+       "Sun7 Residence",
+       36,
+       36,
+       0,
+       0
+      ],
+      [
+       "Vivace",
+       36,
+       17,
+       19,
+       52.8
+      ],
+      [
+       "Zulmir Longhi",
+       14,
+       12,
+       2,
+       14.3
+      ],
+      [
+       "Grings",
+       26,
+       26,
+       0,
+       0
+      ],
+      [
+       "Royal Park Forest",
+       192,
+       175,
+       17,
+       8.9
+      ]
+     ],
+     "title": "Empreendimentos até 2km",
+     "totals": [
+      "Total",
+      665,
+      524,
+      141,
+      21.2
+     ],
+     "columns": [
+      "Empreendimento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)"
+     ],
+     "shareOf": {
+      "4": 1
+     },
+     "colKinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "share"
+     ],
+     "totalKind": "sum"
+    },
+    "badRows": [],
+    "badColumns": [
+     1,
+     2,
+     3
+    ]
+   },
+   "type": "ABSOLUTE_SUM",
+   "title": "Tabela não fecha no total (Empreendimentos até 2km)",
+   "detail": "Números da imagem do slide 97 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo.",
+   "section": "MERCADO",
+   "slideRef": "s97",
+   "escalated": true,
+   "evidenceSha1": "f5892394249974de87978ff09fa268e571c40572",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/f5892394249974de87978ff09fa268e571c40572.png"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-sum-a0d70b7f8a-0",
+  "tipo": "ABSOLUTE_SUM",
+  "slide_ref": "s98",
+  "titulo": "Tabela não fecha no total (Empreendimentos até 2km)",
+  "detalhe": "Números da imagem do slide 98 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-sum-a0d70b7f8a-0",
+   "ok": false,
+   "viz": {
+    "kind": "table",
+    "notes": [
+     "Coluna «Oferta Lançada»: soma 194 ≠ total 665",
+     "Coluna «Vendidas»: soma 132 ≠ total 524",
+     "Coluna «Oferta Atual»: soma 62 ≠ total 141"
+    ],
+    "table": {
+     "rows": [
+      [
+       "Gramado Garden",
+       46,
+       25,
+       21,
+       45.7
+      ],
+      [
+       "Havilá",
+       17,
+       17,
+       0,
+       0
+      ],
+      [
+       "Zara",
+       22,
+       21,
+       1,
+       4.5
+      ],
+      [
+       "Infinitty",
+       25,
+       21,
+       4,
+       16
+      ],
+      [
+       "Edificio 122",
+       15,
+       15,
+       0,
+       0
+      ],
+      [
+       "Znt Guarani",
+       24,
+       13,
+       11,
+       45.8
+      ],
+      [
+       "Villagio Dei Fiori",
+       7,
+       5,
+       2,
+       28.6
+      ],
+      [
+       "Murano",
+       38,
+       15,
+       23,
+       60.5
+      ]
+     ],
+     "title": "Empreendimentos até 2km",
+     "totals": [
+      "Total",
+      665,
+      524,
+      141,
+      21.2
+     ],
+     "columns": [
+      "Empreendimento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)"
+     ],
+     "shareOf": {},
+     "colKinds": [
+      "label",
+      "count",
+      "count",
+      "count",
+      "rate"
+     ],
+     "totalKind": "mixed"
+    },
+    "badRows": [],
+    "badColumns": [
+     1,
+     2,
+     3
+    ]
+   },
+   "type": "ABSOLUTE_SUM",
+   "title": "Tabela não fecha no total (Empreendimentos até 2km)",
+   "detail": "Números da imagem do slide 98 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo.",
+   "section": "MERCADO",
+   "slideRef": "s98",
+   "escalated": true,
+   "evidenceSha1": "a0d70b7f8a7b9670ab44bd815991e046f05465f2",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/a0d70b7f8a7b9670ab44bd815991e046f05465f2.png"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-context-24c8d196b2-brasileiras",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s3",
+  "titulo": "Cidade divergente na imagem (brasileiras ≠ Toledo)",
+  "detalhe": "A cidade “brasileiras” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-24c8d196b2-brasileiras",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "brasileiras",
+    "location": "(sem título)"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (brasileiras ≠ Toledo)",
+   "detail": "A cidade “brasileiras” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s3",
+   "evidenceSha1": "24c8d196b231d8dba934bd950173374f896cea67",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/24c8d196b231d8dba934bd950173374f896cea67.jpg"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-context-3f9c9a3b49-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s2",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-3f9c9a3b49-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "(sem título)"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s2",
+   "evidenceSha1": "3f9c9a3b4962827c29a334bcd02b71dd669a8ba9",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/3f9c9a3b4962827c29a334bcd02b71dd669a8ba9.jpg"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-context-337cad04d4-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s4",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-337cad04d4-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "(sem título)"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s4",
+   "evidenceSha1": "337cad04d478e6b4f9fb9e21417392777b97c80b",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/337cad04d478e6b4f9fb9e21417392777b97c80b.jpg"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-context-9962d13edd-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s69",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-9962d13edd-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Nature | Plantas"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s69",
+   "evidenceSha1": "9962d13edd6f67136107d4b4d3b5679813feafc2",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/9962d13edd6f67136107d4b4d3b5679813feafc2.png"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-context-26f7f32761-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s73",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-26f7f32761-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Jardim Real"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s73",
+   "evidenceSha1": "26f7f32761823c81c9623467512b3ae4e6de4165",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/26f7f32761823c81c9623467512b3ae4e6de4165.jpg"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "iavis-context-0252551272-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s72",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-0252551272-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Znt Guarani | Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ Toledo)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Toledo/PR. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s72",
+   "evidenceSha1": "025255127226b61a51cfb169396b3c4f53e612eb",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/025255127226b61a51cfb169396b3c4f53e612eb.jpg"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-30",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s30",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-30",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por número de moradores"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s30"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-22",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s22",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-22",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Variação anual da população | 2027 a 2032"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s22"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-23",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s23",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-23",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Variação anual dos domicílios | 2027 a 2032"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s23"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-24",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s24",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-24",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "População por faixa etária"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s24"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-27",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s27",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-27",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por faixa de renda"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s27"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-28",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s28",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-28",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Renda domiciliar"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s28"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-29",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s29",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-29",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Renda domiciliar"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s29"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-31",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s31",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-31",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por tipo"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s31"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-34",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s34",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-34",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por tipo"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s34"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-36",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s36",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-36",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Absorção de domicílios | Toledo"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "ABSORCAO",
+   "slideRef": "s36"
+  }
+ },
+ {
+  "study_id": "d1a6c148-6512-48ff-a36f-cea4819e9ea7",
+  "rule_id": "src-37",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s37",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-37",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Cenários de absorção de lançamentos | Toledo"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "ABSORCAO",
+   "slideRef": "s37"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "structure",
+  "tipo": "STRUCTURE_MISSING",
+  "slide_ref": "—",
+  "titulo": "Checklist estrutural (16 item(ns) a conferir)",
+  "detalhe": "Cobertura por título e primeiras linhas fora do sumário. β: confirme ausências que dependem de mapa ou imagem.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "structure",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "checklist": [
+     {
+      "label": "1.1 — Endereço",
+      "status": "missing"
+     },
+     {
+      "label": "1.2 — Latitude/longitude",
+      "status": "missing"
+     },
+     {
+      "label": "1.3 — Área do terreno",
+      "status": "missing"
+     },
+     {
+      "label": "1.4 — Acessos",
+      "status": "missing"
+     },
+     {
+      "label": "1.5 — Entorno varejo/serviços",
+      "status": "ok"
+     },
+     {
+      "label": "1.6 — Entorno revendas",
+      "status": "ok"
+     },
+     {
+      "label": "1.7 — Mapeamento físico",
+      "status": "ok"
+     },
+     {
+      "label": "1.9 — Distância ao centro",
+      "status": "missing"
+     },
+     {
+      "label": "2.1 — Dados cidade/estado/Brasil",
+      "status": "missing"
+     },
+     {
+      "label": "2.2 — Variação da população",
+      "status": "ok"
+     },
+     {
+      "label": "2.3 — Variação dos domicílios",
+      "status": "ok"
+     },
+     {
+      "label": "2.4 — População por renda",
+      "status": "missing"
+     },
+     {
+      "label": "2.4.1 — Mapa de densidade populacional",
+      "status": "missing"
+     },
+     {
+      "label": "2.5 — Domicílios por renda",
+      "status": "ok"
+     },
+     {
+      "label": "2.6 — Domicílios por moradores",
+      "status": "ok"
+     },
+     {
+      "label": "2.5.1 — Mapa de renda",
+      "status": "missing"
+     },
+     {
+      "label": "2.7 — Domicílios por tipo",
+      "status": "ok"
+     },
+     {
+      "label": "2.7.1 — Mapa de verticalização",
+      "status": "missing"
+     },
+     {
+      "label": "2.8 — Ocupação/propriedade",
+      "status": "ok"
+     },
+     {
+      "label": "2.8.1 — Mapa de propriedade",
+      "status": "missing"
+     },
+     {
+      "label": "3.1 — Absorção Z.I. total",
+      "status": "ok"
+     },
+     {
+      "label": "3.1.1 — Cenários de absorção",
+      "status": "ok"
+     },
+     {
+      "label": "4.1 — Mapa de localização",
+      "status": "missing"
+     },
+     {
+      "label": "4.2 — Mapa R$/m²",
+      "status": "missing"
+     },
+     {
+      "label": "4.3 — Mapa de estoque",
+      "status": "missing"
+     },
+     {
+      "label": "4.4 — Mapa de área média",
+      "status": "ok"
+     },
+     {
+      "label": "4.5 — Consolidada",
+      "status": "ok"
+     },
+     {
+      "label": "4.6 — Oferta por padrão",
+      "status": "ok"
+     },
+     {
+      "label": "4.7 — Oferta por ano",
+      "status": "ok"
+     },
+     {
+      "label": "4.8 — Oferta por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "4.9 — Preços por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "4.10 — Preços por padrão",
+      "status": "ok"
+     },
+     {
+      "label": "5.1 — Lacunas tipologia × metragem",
+      "status": "ok"
+     },
+     {
+      "label": "5.2 — Lacunas tipologia × preço",
+      "status": "ok"
+     },
+     {
+      "label": "5.3 — Lacunas preço × metragem",
+      "status": "ok"
+     },
+     {
+      "label": "6 — Fichas técnicas",
+      "status": "missing"
+     },
+     {
+      "label": "7.1 — Futuros lançamentos",
+      "status": "missing"
+     },
+     {
+      "label": "8.1 — Revenda",
+      "status": "ok"
+     },
+     {
+      "label": "8.2 — Revenda por bairro",
+      "status": "ok"
+     },
+     {
+      "label": "8.3 — Revenda por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "8.4 — Ticket de revenda",
+      "status": "ok"
+     }
+    ]
+   },
+   "type": "STRUCTURE_MISSING",
+   "title": "Checklist estrutural (16 item(ns) a conferir)",
+   "detail": "Cobertura por título e primeiras linhas fora do sumário. β: confirme ausências que dependem de mapa ou imagem.",
+   "section": "ESTRUTURA",
+   "slideRef": "—"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iatxt-12-spelling-1oi04sy",
+  "tipo": "SPELLING",
+  "slide_ref": "s12",
+  "titulo": "Uso incorreto da preposição 'à' que deve ser 'a' no contexto.",
+  "detalhe": "Uso incorreto da preposição 'à' que deve ser 'a' no contexto.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iatxt-12-spelling-1oi04sy",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "à cidade de São José do Campos"
+   },
+   "type": "SPELLING",
+   "title": "Uso incorreto da preposição 'à' que deve ser 'a' no contexto.",
+   "detail": "Uso incorreto da preposição 'à' que deve ser 'a' no contexto.",
+   "section": "ESTRUTURA",
+   "slideRef": "s12"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-f6be28d6b9-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s71",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-f6be28d6b9-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Alameda das Castanheiras | Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s71",
+   "evidenceSha1": "f6be28d6b93b1c4c0ce21cc66cd8e6f79b96596c",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/f6be28d6b93b1c4c0ce21cc66cd8e6f79b96596c.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-337cad04d4-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s4",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-337cad04d4-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "(sem título)"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s4",
+   "evidenceSha1": "337cad04d478e6b4f9fb9e21417392777b97c80b",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/337cad04d478e6b4f9fb9e21417392777b97c80b.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-24c8d196b2-brasileiras",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s3",
+  "titulo": "Cidade divergente na imagem (brasileiras ≠ São José do Campos)",
+  "detalhe": "A cidade “brasileiras” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-24c8d196b2-brasileiras",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "brasileiras",
+    "location": "(sem título)"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (brasileiras ≠ São José do Campos)",
+   "detail": "A cidade “brasileiras” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s3",
+   "evidenceSha1": "24c8d196b231d8dba934bd950173374f896cea67",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/24c8d196b231d8dba934bd950173374f896cea67.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-3f9c9a3b49-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s2",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-3f9c9a3b49-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "(sem título)"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s2",
+   "evidenceSha1": "3f9c9a3b4962827c29a334bcd02b71dd669a8ba9",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/3f9c9a3b4962827c29a334bcd02b71dd669a8ba9.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-5b203f7c01-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s15",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-5b203f7c01-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Entorno do Terreno"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "ESTRUTURA",
+   "slideRef": "s15",
+   "evidenceSha1": "5b203f7c019b8529c6365a92f35f17ca186677dc",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/5b203f7c019b8529c6365a92f35f17ca186677dc.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-fe482a6a12-sp",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s30",
+  "titulo": "Cidade divergente na imagem (SP ≠ São José do Campos)",
+  "detalhe": "A cidade “SP” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-fe482a6a12-sp",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "SP",
+    "location": "Domicílios por tipo"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (SP ≠ São José do Campos)",
+   "detail": "A cidade “SP” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "SOCIO",
+   "slideRef": "s30",
+   "evidenceSha1": "fe482a6a1244a3e788993dce08d1b17e1f3a114e",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/fe482a6a1244a3e788993dce08d1b17e1f3a114e.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-fe482a6a12-sao-jose-dos-campos",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s30",
+  "titulo": "Cidade divergente na imagem (São José dos Campos ≠ São José do Campos)",
+  "detalhe": "A cidade “São José dos Campos” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-fe482a6a12-sao-jose-dos-campos",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São José dos Campos",
+    "location": "Domicílios por tipo"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São José dos Campos ≠ São José do Campos)",
+   "detail": "A cidade “São José dos Campos” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "SOCIO",
+   "slideRef": "s30",
+   "evidenceSha1": "fe482a6a1244a3e788993dce08d1b17e1f3a114e",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/fe482a6a1244a3e788993dce08d1b17e1f3a114e.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-71fb55c1a3-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s15",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-71fb55c1a3-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Entorno do Terreno"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "ESTRUTURA",
+   "slideRef": "s15",
+   "evidenceSha1": "71fb55c1a39331b7e35818eca95a2d0967286c37",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/71fb55c1a39331b7e35818eca95a2d0967286c37.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-44cfce6e69-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s15",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-44cfce6e69-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Entorno do Terreno"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "ESTRUTURA",
+   "slideRef": "s15",
+   "evidenceSha1": "44cfce6e6901c443e14b1282782b54a19b8e4c0b",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/44cfce6e6901c443e14b1282782b54a19b8e4c0b.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-ad8ee38180-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s67",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-ad8ee38180-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás | Plantas"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s67",
+   "evidenceSha1": "ad8ee381808f99eae2e32198e79d70471ac0a6a7",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/ad8ee381808f99eae2e32198e79d70471ac0a6a7.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-d3d1728345-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s68",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-d3d1728345-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás| Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s68",
+   "evidenceSha1": "d3d1728345925c938d5e8ea80e276cdb45132fb3",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/d3d1728345925c938d5e8ea80e276cdb45132fb3.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-sum-924d8136de-0",
+  "tipo": "ABSOLUTE_SUM",
+  "slide_ref": "s43",
+  "titulo": "Tabela não fecha no total (Empreendimentos de 2 Km a 4 Km)",
+  "detalhe": "Números da imagem do slide 43 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-sum-924d8136de-0",
+   "ok": false,
+   "viz": {
+    "kind": "table",
+    "notes": [
+     "Coluna «Oferta Lançada»: soma 1187 ≠ total 39.8"
+    ],
+    "table": {
+     "rows": [
+      [
+       "Alameda Das Castanheiras I",
+       "Bom Retiro",
+       "Coevo",
+       "ago/25",
+       300,
+       172,
+       128,
+       42.7,
+       2,
+       "Econômico",
+       280,
+       "Comercialização",
+       "Padrão",
+       313000,
+       47,
+       6678,
+       "1 Vaga Descoberta",
+       -6.5
+      ],
+      [
+       "Caminho Das Cerejeiras",
+       "Jardim Santa Inês Ii",
+       "MRV",
+       "set/25",
+       288,
+       166,
+       122,
+       42.4,
+       2,
+       "Econômico",
+       282,
+       "Comercialização",
+       "Padrão",
+       334990,
+       45,
+       7466,
+       "1 Vaga Descoberta",
+       4.5
+      ],
+      [
+       "Novolar Cenarium 1",
+       "Novo Horizonte",
+       "Novolar",
+       "set/25",
+       300,
+       212,
+       88,
+       29.3,
+       2,
+       "Econômico",
+       280,
+       "Comercialização",
+       "Padrão",
+       245367,
+       36,
+       6816,
+       "1 Vaga Descoberta",
+       -4.6
+      ],
+      [
+       "Caminho Dos Jerivas",
+       "Jardim Santa Inês Ii",
+       "MRV",
+       "out/25",
+       299,
+       164,
+       135,
+       45.2,
+       2,
+       "Econômico",
+       279,
+       "Comercialização",
+       "Padrão",
+       292900,
+       38,
+       7634,
+       "1 Vaga Descoberta",
+       6.9
+      ]
+     ],
+     "title": "Empreendimentos de 2 Km a 4 Km",
+     "totals": [
+      "Total",
+      1187,
+      714,
+      473,
+      39.8,
+      null,
+      null,
+      1187,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "columns": [
+      "Empreendimento",
+      "Bairro",
+      "Incorporadora",
+      "Lançamento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)",
+      "Quartos",
+      "Padrão",
+      "Unidades por Tipologia",
+      "Status",
+      "Tipo",
+      "Preço (R$)",
+      "m² (priv.)",
+      "R$/m² (priv.)",
+      "Vagas de Garagem",
+      "Abaixo ou acima da média"
+     ],
+     "shareOf": {
+      "7": 4
+     },
+     "colKinds": [
+      "label",
+      "other",
+      "other",
+      "other",
+      "count",
+      "count",
+      "count",
+      "share",
+      "count",
+      "other",
+      "count",
+      "other",
+      "other",
+      "measure",
+      "measure",
+      "measure",
+      "other",
+      "rate"
+     ],
+     "totalKind": "mixed"
+    },
+    "badRows": [],
+    "badColumns": [
+     4
+    ]
+   },
+   "type": "ABSOLUTE_SUM",
+   "title": "Tabela não fecha no total (Empreendimentos de 2 Km a 4 Km)",
+   "detail": "Números da imagem do slide 43 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo.",
+   "section": "MERCADO",
+   "slideRef": "s43",
+   "escalated": true,
+   "evidenceSha1": "924d8136de19cdc1250f33cb55f6aa6c555c1fac",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/924d8136de19cdc1250f33cb55f6aa6c555c1fac.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-ce3adbb687-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s67",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-ce3adbb687-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás | Plantas"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s67",
+   "evidenceSha1": "ce3adbb68781d160cea89f552bb2298ad62f96e6",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/ce3adbb68781d160cea89f552bb2298ad62f96e6.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-4ab0cd80dc-sao-jose-dos-campos",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s36",
+  "titulo": "Cidade divergente na imagem (São José dos Campos ≠ São José do Campos)",
+  "detalhe": "A cidade “São José dos Campos” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-4ab0cd80dc-sao-jose-dos-campos",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São José dos Campos",
+    "location": "Cenários de absorção de lançamentos | São José dos Campos"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São José dos Campos ≠ São José do Campos)",
+   "detail": "A cidade “São José dos Campos” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "ABSORCAO",
+   "slideRef": "s36",
+   "evidenceSha1": "4ab0cd80dca433e9ceaa1fa5b29e9d98b5566b29",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/4ab0cd80dca433e9ceaa1fa5b29e9d98b5566b29.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-1453864f92-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s68",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-1453864f92-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás| Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s68",
+   "evidenceSha1": "1453864f92d87c5978fa2d82b9344758d4167d47",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/1453864f92d87c5978fa2d82b9344758d4167d47.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-1c65a8e457-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s68",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-1c65a8e457-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás| Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s68",
+   "evidenceSha1": "1c65a8e45777a453967ab84cc5ae577fc5a4cd24",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/1c65a8e45777a453967ab84cc5ae577fc5a4cd24.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-a6bc12a323-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s68",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-a6bc12a323-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás| Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s68",
+   "evidenceSha1": "a6bc12a3232164b4dccd701753735c7f5d4e6534",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/a6bc12a3232164b4dccd701753735c7f5d4e6534.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-ffcada91c7-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s69",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-ffcada91c7-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Alameda das Castanheiras"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s69",
+   "evidenceSha1": "ffcada91c73765ce287657bbdbeff6ba515959fd",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/ffcada91c73765ce287657bbdbeff6ba515959fd.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-2961805dce-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s69",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-2961805dce-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Alameda das Castanheiras"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s69",
+   "evidenceSha1": "2961805dce524fe6aa959717481a44c01f5c07bd",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/2961805dce524fe6aa959717481a44c01f5c07bd.jpg"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-75b649a4b6-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s90",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-75b649a4b6-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Anúncios Ativos"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s90",
+   "evidenceSha1": "75b649a4b685b44689b7b36762714d2772cd9755",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/75b649a4b685b44689b7b36762714d2772cd9755.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-62d0efcf96-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s92",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-62d0efcf96-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Anúncios Ativos"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s92",
+   "evidenceSha1": "62d0efcf966b9400075d50f560f60ca4f2072cf9",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/62d0efcf966b9400075d50f560f60ca4f2072cf9.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "iavis-context-472a73daaa-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s86",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "iavis-context-472a73daaa-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Locação | Análise por ticket, metragem e preço"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José do Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José do Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s86",
+   "evidenceSha1": "472a73daaa364f5730efbbad4635d12ab5a01bd5",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/472a73daaa364f5730efbbad4635d12ab5a01bd5.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "wrong-city-1-sao-jose-dos-campos",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s1",
+  "titulo": "Cidade divergente do estudo (São José dos Campos ≠ São José do Campos)",
+  "detalhe": "O slide declara “São José dos Campos – SP”, mas a Ata confirmada define o estudo como São José do Campos. Possível conteúdo de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "wrong-city-1-sao-jose-dos-campos",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São José dos Campos – SP",
+    "location": "Vocacional Vertical | São José dos Campos-SP | Junho/2026"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente do estudo (São José dos Campos ≠ São José do Campos)",
+   "detail": "O slide declara “São José dos Campos – SP”, mas a Ata confirmada define o estudo como São José do Campos. Possível conteúdo de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s1"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "wrong-city-22-sao-jose-dos-campos",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s22",
+  "titulo": "Cidade divergente do estudo (São José dos Campos ≠ São José do Campos)",
+  "detalhe": "O slide declara “São José dos Campos – SP”, mas a Ata confirmada define o estudo como São José do Campos. Possível conteúdo de outro estudo.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "wrong-city-22-sao-jose-dos-campos",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São José dos Campos – SP",
+    "location": "Variação anual dos domicílios | 2027 a 2032"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente do estudo (São José dos Campos ≠ São José do Campos)",
+   "detail": "O slide declara “São José dos Campos – SP”, mas a Ata confirmada define o estudo como São José do Campos. Possível conteúdo de outro estudo.",
+   "section": "SOCIO",
+   "slideRef": "s22"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "cross-renda-27-36",
+  "tipo": "CROSS_TABLE_MISMATCH",
+  "slide_ref": "s27 × s36",
+  "titulo": "Faixas de renda divergem entre sociodemografia e absorção",
+  "detalhe": "As faixas de renda da absorção devem reproduzir a tabela “Domicílios por faixa de renda”.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "cross-renda-27-36",
+   "ok": false,
+   "viz": {
+    "kind": "sidebyside",
+    "rows": [
+     {
+      "left": "",
+      "label": "Faixa 1",
+      "right": "Acima de R$ 36.511,01",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 2",
+      "right": "R$ 27.320,01 a R$ 36.511,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 3",
+      "right": "R$ 20.983,01 a R$ 27.320,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 4",
+      "right": "R$ 17.147,01 a R$ 20.983,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 5",
+      "right": "R$ 14.590,01 a R$ 17.147,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 6",
+      "right": "R$ 10.755,01 a R$ 14.590,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 7",
+      "right": "R$ 7.716,01 a R$ 10.755,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 8",
+      "right": "Abaixo de R$ 7.716,00",
+      "mismatch": true
+     }
+    ],
+    "leftLabel": "s27 — LEGENDA",
+    "rightLabel": "s36 — Cenários de absorção de lançamentos | São "
+   },
+   "type": "CROSS_TABLE_MISMATCH",
+   "title": "Faixas de renda divergem entre sociodemografia e absorção",
+   "detail": "As faixas de renda da absorção devem reproduzir a tabela “Domicílios por faixa de renda”.",
+   "origem": "IA_visao",
+   "section": "ABSORCAO",
+   "slideRef": "s27 × s36",
+   "evidenceSha1": "4ab0cd80dca433e9ceaa1fa5b29e9d98b5566b29",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/4ab0cd80dca433e9ceaa1fa5b29e9d98b5566b29.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "cross-renda-28-36",
+  "tipo": "CROSS_TABLE_MISMATCH",
+  "slide_ref": "s28 × s36",
+  "titulo": "Faixas de renda divergem entre sociodemografia e absorção",
+  "detalhe": "As faixas de renda da absorção devem reproduzir a tabela “Domicílios por faixa de renda”.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "cross-renda-28-36",
+   "ok": false,
+   "viz": {
+    "kind": "sidebyside",
+    "rows": [
+     {
+      "left": "Raios",
+      "label": "Faixa 1",
+      "right": "Acima de R$ 36.511,01",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 2",
+      "right": "R$ 27.320,01 a R$ 36.511,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 3",
+      "right": "R$ 20.983,01 a R$ 27.320,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 4",
+      "right": "R$ 17.147,01 a R$ 20.983,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 5",
+      "right": "R$ 14.590,01 a R$ 17.147,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 6",
+      "right": "R$ 10.755,01 a R$ 14.590,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 7",
+      "right": "R$ 7.716,01 a R$ 10.755,00",
+      "mismatch": true
+     },
+     {
+      "left": "",
+      "label": "Faixa 8",
+      "right": "Abaixo de R$ 7.716,00",
+      "mismatch": true
+     }
+    ],
+    "leftLabel": "s28 — LEGENDA",
+    "rightLabel": "s36 — Cenários de absorção de lançamentos | São "
+   },
+   "type": "CROSS_TABLE_MISMATCH",
+   "title": "Faixas de renda divergem entre sociodemografia e absorção",
+   "detail": "As faixas de renda da absorção devem reproduzir a tabela “Domicílios por faixa de renda”.",
+   "origem": "IA_visao",
+   "section": "ABSORCAO",
+   "slideRef": "s28 × s36",
+   "evidenceSha1": "4ab0cd80dca433e9ceaa1fa5b29e9d98b5566b29",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/4ab0cd80dca433e9ceaa1fa5b29e9d98b5566b29.png"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-21",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s21",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-21",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Variação anual da população | 2027 a 2032"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s21"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-22",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s22",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-22",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Variação anual dos domicílios | 2027 a 2032"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s22"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-23",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s23",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-23",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "População por faixa etária"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s23"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-26",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s26",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-26",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por faixa de renda"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s26"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-27",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s27",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-27",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Renda domiciliar"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s27"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-28",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s28",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-28",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Renda domiciliar"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s28"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-29",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s29",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-29",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por número de moradores"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s29"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-30",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s30",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-30",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por tipo"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s30"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-33",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s33",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-33",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Domicílios por tipo"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "SOCIO",
+   "slideRef": "s33"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-35",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s35",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-35",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Absorção de domicílios | São José dos Campos"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "ABSORCAO",
+   "slideRef": "s35"
+  }
+ },
+ {
+  "study_id": "22715dd2-3d24-470f-9d13-568ecf016499",
+  "rule_id": "src-36",
+  "tipo": "SOURCE_MISSING",
+  "slide_ref": "s36",
+  "titulo": "Dado sem fonte identificada",
+  "detalhe": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "src-36",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "location": "Cenários de absorção de lançamentos | São José dos Campos"
+   },
+   "type": "SOURCE_MISSING",
+   "title": "Dado sem fonte identificada",
+   "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+   "section": "ABSORCAO",
+   "slideRef": "s36"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "structure",
+  "tipo": "STRUCTURE_MISSING",
+  "slide_ref": "—",
+  "titulo": "Checklist estrutural (16 item(ns) a conferir)",
+  "detalhe": "Cobertura por título e primeiras linhas fora do sumário. β: confirme ausências que dependem de mapa ou imagem.",
+  "status": "pendente",
+  "verdict": null,
+  "payload": {
+   "id": "structure",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "checklist": [
+     {
+      "label": "1.1 — Endereço",
+      "status": "missing"
+     },
+     {
+      "label": "1.2 — Latitude/longitude",
+      "status": "missing"
+     },
+     {
+      "label": "1.3 — Área do terreno",
+      "status": "missing"
+     },
+     {
+      "label": "1.4 — Acessos",
+      "status": "missing"
+     },
+     {
+      "label": "1.5 — Entorno varejo/serviços",
+      "status": "ok"
+     },
+     {
+      "label": "1.6 — Entorno revendas",
+      "status": "ok"
+     },
+     {
+      "label": "1.7 — Mapeamento físico",
+      "status": "ok"
+     },
+     {
+      "label": "1.9 — Distância ao centro",
+      "status": "missing"
+     },
+     {
+      "label": "2.1 — Dados cidade/estado/Brasil",
+      "status": "missing"
+     },
+     {
+      "label": "2.2 — Variação da população",
+      "status": "ok"
+     },
+     {
+      "label": "2.3 — Variação dos domicílios",
+      "status": "ok"
+     },
+     {
+      "label": "2.4 — População por renda",
+      "status": "missing"
+     },
+     {
+      "label": "2.4.1 — Mapa de densidade populacional",
+      "status": "missing"
+     },
+     {
+      "label": "2.5 — Domicílios por renda",
+      "status": "ok"
+     },
+     {
+      "label": "2.6 — Domicílios por moradores",
+      "status": "ok"
+     },
+     {
+      "label": "2.5.1 — Mapa de renda",
+      "status": "missing"
+     },
+     {
+      "label": "2.7 — Domicílios por tipo",
+      "status": "ok"
+     },
+     {
+      "label": "2.7.1 — Mapa de verticalização",
+      "status": "missing"
+     },
+     {
+      "label": "2.8 — Ocupação/propriedade",
+      "status": "ok"
+     },
+     {
+      "label": "2.8.1 — Mapa de propriedade",
+      "status": "missing"
+     },
+     {
+      "label": "3.1 — Absorção Z.I. total",
+      "status": "ok"
+     },
+     {
+      "label": "3.1.1 — Cenários de absorção",
+      "status": "ok"
+     },
+     {
+      "label": "4.1 — Mapa de localização",
+      "status": "missing"
+     },
+     {
+      "label": "4.2 — Mapa R$/m²",
+      "status": "missing"
+     },
+     {
+      "label": "4.3 — Mapa de estoque",
+      "status": "missing"
+     },
+     {
+      "label": "4.4 — Mapa de área média",
+      "status": "ok"
+     },
+     {
+      "label": "4.5 — Consolidada",
+      "status": "ok"
+     },
+     {
+      "label": "4.6 — Oferta por padrão",
+      "status": "ok"
+     },
+     {
+      "label": "4.7 — Oferta por ano",
+      "status": "ok"
+     },
+     {
+      "label": "4.8 — Oferta por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "4.9 — Preços por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "4.10 — Preços por padrão",
+      "status": "ok"
+     },
+     {
+      "label": "5.1 — Lacunas tipologia × metragem",
+      "status": "ok"
+     },
+     {
+      "label": "5.2 — Lacunas tipologia × preço",
+      "status": "ok"
+     },
+     {
+      "label": "5.3 — Lacunas preço × metragem",
+      "status": "ok"
+     },
+     {
+      "label": "6 — Fichas técnicas",
+      "status": "missing"
+     },
+     {
+      "label": "7.1 — Futuros lançamentos",
+      "status": "missing"
+     },
+     {
+      "label": "8.1 — Revenda",
+      "status": "ok"
+     },
+     {
+      "label": "8.2 — Revenda por bairro",
+      "status": "ok"
+     },
+     {
+      "label": "8.3 — Revenda por tipologia",
+      "status": "ok"
+     },
+     {
+      "label": "8.4 — Ticket de revenda",
+      "status": "ok"
+     }
+    ]
+   },
+   "type": "STRUCTURE_MISSING",
+   "title": "Checklist estrutural (16 item(ns) a conferir)",
+   "detail": "Cobertura por título e primeiras linhas fora do sumário. β: confirme ausências que dependem de mapa ou imagem.",
+   "section": "ESTRUTURA",
+   "slideRef": "—"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-24c8d196b2-brasileiras",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s3",
+  "titulo": "Cidade divergente na imagem (brasileiras ≠ São José dos Campos)",
+  "detalhe": "A cidade “brasileiras” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-24c8d196b2-brasileiras",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "brasileiras",
+    "location": "(sem título)"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (brasileiras ≠ São José dos Campos)",
+   "detail": "A cidade “brasileiras” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s3",
+   "evidenceSha1": "24c8d196b231d8dba934bd950173374f896cea67",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/24c8d196b231d8dba934bd950173374f896cea67.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-71fb55c1a3-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s15",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-71fb55c1a3-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Entorno do Terreno"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "ESTRUTURA",
+   "slideRef": "s15",
+   "evidenceSha1": "71fb55c1a39331b7e35818eca95a2d0967286c37",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/71fb55c1a39331b7e35818eca95a2d0967286c37.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-44cfce6e69-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s15",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-44cfce6e69-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Entorno do Terreno"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "ESTRUTURA",
+   "slideRef": "s15",
+   "evidenceSha1": "44cfce6e6901c443e14b1282782b54a19b8e4c0b",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/44cfce6e6901c443e14b1282782b54a19b8e4c0b.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-5b203f7c01-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s15",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-5b203f7c01-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Entorno do Terreno"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "ESTRUTURA",
+   "slideRef": "s15",
+   "evidenceSha1": "5b203f7c019b8529c6365a92f35f17ca186677dc",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/5b203f7c019b8529c6365a92f35f17ca186677dc.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-ad8ee38180-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s67",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-ad8ee38180-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás | Plantas"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s67",
+   "evidenceSha1": "ad8ee381808f99eae2e32198e79d70471ac0a6a7",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/ad8ee381808f99eae2e32198e79d70471ac0a6a7.png"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-ce3adbb687-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s67",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-ce3adbb687-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás | Plantas"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s67",
+   "evidenceSha1": "ce3adbb68781d160cea89f552bb2298ad62f96e6",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/ce3adbb68781d160cea89f552bb2298ad62f96e6.png"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-1c65a8e457-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s68",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-1c65a8e457-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás| Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s68",
+   "evidenceSha1": "1c65a8e45777a453967ab84cc5ae577fc5a4cd24",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/1c65a8e45777a453967ab84cc5ae577fc5a4cd24.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-d3d1728345-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s68",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-d3d1728345-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás| Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s68",
+   "evidenceSha1": "d3d1728345925c938d5e8ea80e276cdb45132fb3",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/d3d1728345925c938d5e8ea80e276cdb45132fb3.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-2961805dce-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s69",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-2961805dce-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Alameda das Castanheiras"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s69",
+   "evidenceSha1": "2961805dce524fe6aa959717481a44c01f5c07bd",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/2961805dce524fe6aa959717481a44c01f5c07bd.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-ffcada91c7-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s69",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-ffcada91c7-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Alameda das Castanheiras"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s69",
+   "evidenceSha1": "ffcada91c73765ce287657bbdbeff6ba515959fd",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/ffcada91c73765ce287657bbdbeff6ba515959fd.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-f6be28d6b9-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s71",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-f6be28d6b9-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Alameda das Castanheiras | Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s71",
+   "evidenceSha1": "f6be28d6b93b1c4c0ce21cc66cd8e6f79b96596c",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/f6be28d6b93b1c4c0ce21cc66cd8e6f79b96596c.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-a6bc12a323-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s68",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-a6bc12a323-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás| Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s68",
+   "evidenceSha1": "a6bc12a3232164b4dccd701753735c7f5d4e6534",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/a6bc12a3232164b4dccd701753735c7f5d4e6534.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-3f9c9a3b49-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s2",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-3f9c9a3b49-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "(sem título)"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s2",
+   "evidenceSha1": "3f9c9a3b4962827c29a334bcd02b71dd669a8ba9",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/3f9c9a3b4962827c29a334bcd02b71dd669a8ba9.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-337cad04d4-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s4",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-337cad04d4-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "(sem título)"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s4",
+   "evidenceSha1": "337cad04d478e6b4f9fb9e21417392777b97c80b",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/337cad04d478e6b4f9fb9e21417392777b97c80b.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-sum-924d8136de-0",
+  "tipo": "ABSOLUTE_SUM",
+  "slide_ref": "s43",
+  "titulo": "Tabela não fecha no total (Empreendimentos de 2 Km a 4 Km)",
+  "detalhe": "Números da imagem do slide 43 (lido pelo modelo gpt-4o). Pode ser bug do estudo OU dígito mal lido — confira na imagem.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-sum-924d8136de-0",
+   "ok": false,
+   "viz": {
+    "kind": "table",
+    "notes": [
+     "Coluna «Oferta Lançada»: soma 1187 ≠ total 39.8"
+    ],
+    "table": {
+     "rows": [
+      [
+       "Alameda Das Castanheiras I",
+       "Bom Retiro",
+       "Coevo",
+       "ago/25",
+       300,
+       172,
+       128,
+       42.7,
+       2,
+       "Econômico",
+       280,
+       "Comercialização",
+       "Padrão",
+       313000,
+       47,
+       6678,
+       "1 Vaga Descoberta",
+       -6.5
+      ],
+      [
+       "Caminho Das Cerejeiras",
+       "Jardim Santa Inês Ii",
+       "MRV",
+       "set/25",
+       288,
+       166,
+       122,
+       42.4,
+       2,
+       "Econômico",
+       282,
+       "Comercialização",
+       "Padrão",
+       334990,
+       45,
+       7466,
+       "1 Vaga Descoberta",
+       4.5
+      ],
+      [
+       "Novolar Cenarium 1",
+       "Novo Horizonte",
+       "Novolar",
+       "set/25",
+       300,
+       212,
+       88,
+       29.3,
+       2,
+       "Econômico",
+       280,
+       "Comercialização",
+       "Padrão",
+       245367,
+       36,
+       6816,
+       "1 Vaga Descoberta",
+       -4.6
+      ],
+      [
+       "Caminho Dos Jerivas",
+       "Jardim Santa Inês Ii",
+       "MRV",
+       "out/25",
+       299,
+       164,
+       135,
+       45.2,
+       2,
+       "Econômico",
+       279,
+       "Comercialização",
+       "Padrão",
+       292900,
+       38,
+       7634,
+       "1 Vaga Descoberta",
+       6.9
+      ]
+     ],
+     "title": "Empreendimentos de 2 Km a 4 Km",
+     "totals": [
+      "Total",
+      1187,
+      714,
+      473,
+      39.8,
+      null,
+      null,
+      1187,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "columns": [
+      "Empreendimento",
+      "Bairro",
+      "Incorporadora",
+      "Lançamento",
+      "Oferta Lançada",
+      "Vendidas",
+      "Oferta Atual",
+      "Disp. (%)",
+      "Quartos",
+      "Padrão",
+      "Unidades por Tipologia",
+      "Status",
+      "Tipo",
+      "Preço (R$)",
+      "m² (priv.)",
+      "R$/m² (priv.)",
+      "Vagas de Garagem",
+      "Abaixo ou acima da média"
+     ],
+     "shareOf": {
+      "7": 4
+     },
+     "colKinds": [
+      "label",
+      "other",
+      "other",
+      "other",
+      "count",
+      "count",
+      "count",
+      "share",
+      "count",
+      "other",
+      "count",
+      "other",
+      "other",
+      "measure",
+      "measure",
+      "measure",
+      "other",
+      "rate"
+     ],
+     "totalKind": "mixed"
+    },
+    "badRows": [],
+    "badColumns": [
+     4
+    ]
+   },
+   "type": "ABSOLUTE_SUM",
+   "title": "Tabela não fecha no total (Empreendimentos de 2 Km a 4 Km)",
+   "detail": "Números da imagem do slide 43 (lido pelo modelo gpt-4o). Pode ser bug do estudo OU dígito mal lido — confira na imagem.",
+   "section": "MERCADO",
+   "slideRef": "s43",
+   "escalated": false,
+   "evidenceSha1": "924d8136de19cdc1250f33cb55f6aa6c555c1fac",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/924d8136de19cdc1250f33cb55f6aa6c555c1fac.png"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-472a73daaa-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s86",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-472a73daaa-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Locação | Análise por ticket, metragem e preço"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s86",
+   "evidenceSha1": "472a73daaa364f5730efbbad4635d12ab5a01bd5",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/472a73daaa364f5730efbbad4635d12ab5a01bd5.png"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-62d0efcf96-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s92",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-62d0efcf96-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Anúncios Ativos"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s92",
+   "evidenceSha1": "62d0efcf966b9400075d50f560f60ca4f2072cf9",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/62d0efcf966b9400075d50f560f60ca4f2072cf9.png"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-1453864f92-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s68",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-1453864f92-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Caminho dos Jerivás| Área de Lazer"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s68",
+   "evidenceSha1": "1453864f92d87c5978fa2d82b9344758d4167d47",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/1453864f92d87c5978fa2d82b9344758d4167d47.jpg"
+  }
+ },
+ {
+  "study_id": "433ceda4-54f3-4048-84f2-f42e3e568e88",
+  "rule_id": "iavis-context-75b649a4b6-sao-paulo",
+  "tipo": "WRONG_CONTEXT",
+  "slide_ref": "s90",
+  "titulo": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+  "detalhe": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+  "status": "ignorado",
+  "verdict": "fp",
+  "payload": {
+   "id": "iavis-context-75b649a4b6-sao-paulo",
+   "ok": false,
+   "viz": {
+    "kind": "text",
+    "evidence": "São Paulo",
+    "location": "Anúncios Ativos"
+   },
+   "type": "WRONG_CONTEXT",
+   "title": "Cidade divergente na imagem (São Paulo ≠ São José dos Campos)",
+   "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como São José dos Campos/SP. Verifique possível dado de outro estudo.",
+   "section": "GLOBAL",
+   "slideRef": "s90",
+   "evidenceSha1": "75b649a4b685b44689b7b36762714d2772cd9755",
+   "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/75b649a4b685b44689b7b36762714d2772cd9755.png"
+  }
+ }
+]

@@ -19,6 +19,7 @@ import type { Ir } from '../lib/audit/ir';
 import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import { irToFindings } from '../lib/audit/ir-rules';
 import { detectBinGap } from '../lib/audit/engine';
+import { isStaleCrossTable, isStaleVisionContext, isStaleWrongCity } from '../lib/v3/reconcile';
 import { VizSwitch } from '../components/audit/FindingCard';
 import LegacyV1Panel from '../components/LegacyV1Panel';
 import AtaTestPanel from '../components/AtaTestPanel';
@@ -347,22 +348,27 @@ export default function CorretorV3Page() {
     setLoadingStudy(true);
     try {
       let loaded = await loadFindings(id);
-      const invalidBins = loaded.filter((item) => {
-        if (item.status !== 'pendente' || item.finding.type !== 'BINNING_RULE') return false;
-        const viz = item.finding.viz;
-        return viz?.kind === 'binrange' && detectBinGap(viz.bins).gapAfterIndex === undefined;
+      const studyCity = studies.find((s) => s.id === id)?.cidade ?? null;
+      const invalid = loaded.filter((item) => {
+        if (item.status !== 'pendente') return false;
+        const { finding } = item;
+        if (finding.type === 'BINNING_RULE') {
+          const viz = finding.viz;
+          return viz?.kind === 'binrange' && detectBinGap(viz.bins).gapAfterIndex === undefined;
+        }
+        return isStaleVisionContext(finding, studyCity) || isStaleCrossTable(finding) || isStaleWrongCity(finding, studyCity);
       });
-      if (invalidBins.length) {
-        await resolveInvalidFindings(id, invalidBins.map((item) => item.ruleId));
+      if (invalid.length) {
+        await resolveInvalidFindings(id, invalid.map((item) => item.ruleId));
         loaded = await loadFindings(id);
-        toast.info('Faixas cumulativas reconciliadas', {
-          description: `${invalidBins.length} falso(s) positivo(s) antigo(s) removido(s) da worklist.`,
+        toast.info('Achados reconciliados com as regras atuais', {
+          description: `${invalid.length} falso(s) positivo(s) antigo(s) removido(s) da worklist.`,
         });
         await refreshList();
       }
       setItems(loaded);
     } finally { setLoadingStudy(false); }
-  }, [refreshList]);
+  }, [refreshList, studies]);
 
   useEffect(() => {
     const requested = searchParams.get('study');

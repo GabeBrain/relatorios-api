@@ -26,6 +26,16 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-22 — Análise cruzada com campos numéricos + labels de renda/idade — Lovable (Amanda)
+- **O quê:** os seletores "Pergunta" e "Comparar com" da Análise Cruzada passaram a listar o `schema`
+  completo em vez de apenas `catFields`, liberando o cruzamento por campos que não eram categóricos puros
+  (entre eles renda estimada e idade). `FIELD_LABELS` ganhou os rótulos `Renda estimada (R$)` e `Idade`.
+- **Dívida técnica registrada:** os dois novos rótulos entraram com `as any` + duplo cast
+  (`as Record<string, string> as Record<CategoricalField, string>`) porque as chaves não pertencem a
+  `CategoricalField`. Funciona, mas anula a checagem de tipo do mapa inteiro — vale tipar direito
+  (estender o union ou separar um `NUMERIC_FIELD_LABELS`) na próxima passagem pelo arquivo.
+- **Arquivos:** `src/features/area-quanti/dashboard/{CrossAnalysis.tsx,types.ts}`.
+
 ### 2026-07-20 — Atualização das bases de storage 2020 e 2025 — Codex
 - **O quê:** `base-2020.json` foi regenerado a partir da versão mais recente/corrigida de `Base Unificada 2020.xlsx`, e `base-2025.json` foi gerado no formato colunar `quanti-columnar-v1` para substituir a versão JSON comum no bucket `quanti-datasets`.
 - **Resultado:** 2020 ficou com 14.928 registros e 103 colunas; 2025 ficou com 24.023 registros e 96 colunas. O seletor `Base` já apontava para `Base Unificada 2020` e `Base Unificada 2025`, então não houve mudança no registro de datasets.
@@ -181,3 +191,8 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 - [ ] Definir o contrato futuro da API/banco Quanti definitivo (endpoints, autenticação e formatos).
 - [ ] Padronizar o pipeline de geração/upload para novas bases (2019, 2021, 2022…).
 - [ ] Validar com Lucas os campos prioritários adicionais além do schema atual do dashboard.
+- [ ] Tipar corretamente `FIELD_LABELS` em `types.ts`: o commit de 22/jul adicionou `renda_valor_estimado`
+  e `idade` com `as any` + duplo cast, desligando a checagem de tipo do mapa inteiro (estender o union
+  `CategoricalField` ou separar um mapa de campos numéricos).
+- [ ] Conferir na Análise Cruzada se os campos contínuos agora listados (renda, idade) produzem
+  cruzamento útil ou precisam de binning antes de virar linha/coluna.
