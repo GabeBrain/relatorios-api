@@ -48,11 +48,29 @@ export function ataCoverageFindings(ir: Ir, ata: AtaData | null): Finding[] {
  */
 const SECOES_COM_FONTE = ['SOCIO', 'ABSORCAO', 'LACUNAS', 'MERCADO'];
 
+/**
+ * Slide de mapa: a imagem é base cartográfica de terceiro (Google Maps) e o
+ * conteúdo tabular são só LEGENDAs de raios/terreno/faixas. Por convenção do
+ * estudo esses slides NÃO levam FONTE/ELABORAÇÃO — cobrar gera FP em série
+ * (Rolândia jul/2026: 8 slides, incluindo "Renda domiciliar" e "Densidade
+ * demográfica"). Exige a assinatura do mapa (legenda de raios ou terreno) para
+ * não isentar um slide de dados que por acaso tenha uma legenda.
+ */
+export function isMapSlide(slide: Ir['slides'][number]): boolean {
+  const tables = slide.tabelas ?? [];
+  if (!tables.length || (slide.n_imagens ?? 0) === 0) return false;
+  const label = (t: (typeof tables)[number]) => String(t.linhas?.[0]?.[0] ?? '').trim().toUpperCase();
+  if (!tables.every((t) => label(t) === 'LEGENDA')) return false;
+  const flat = tables.flatMap((t) => (t.linhas ?? []).flat()).join(' ').toLowerCase();
+  return /\braios?\b/.test(flat) || /\bterreno\b/.test(flat);
+}
+
 export function sourceFindingsFromVision(ir: Ir, sourceSlides: number[], analyzedSlides: number[]): Finding[] {
   const visible = new Set(sourceSlides);
   const analyzed = new Set(analyzedSlides);
   return ir.slides.filter((slide) => {
     const numericSection = SECOES_COM_FONTE.includes((slide.secao_canonica ?? '').toUpperCase());
+    if (isMapSlide(slide)) return false;
     // Legenda de mapa não é dado: exige tabela com conteúdo além do rótulo.
     const realTables = (slide.tabelas ?? []).filter((t) => t.n_linhas > 1 || t.n_colunas > 2).length;
     const hasData = realTables > 0 || (slide.graficos?.length ?? 0) > 0 || analyzed.has(slide.n);

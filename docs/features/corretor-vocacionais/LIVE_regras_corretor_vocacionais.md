@@ -16,6 +16,28 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.48 — 2026-07-28 — Slide de mapa não é cobrado por fonte (RUNTIME)
+
+Refinamento da v0.47, a partir do feedback do Gabriel: **nenhum slide de mapa leva
+FONTE/ELABORAÇÃO** — a base é cartografia de terceiro (Google Maps) e a convenção do estudo não
+pede fonte ali. Conferido no estudo real: os 8 slides em questão (incluindo “Renda domiciliar”
+s28/s29, que eram os únicos acusados, e “Densidade demográfica”) têm **100% do conteúdo tabular
+em LEGENDA** — raios, terreno e faixas de cor.
+
+Nova regra `isMapSlide` (`coverage-rules.ts`): slide com imagem cujas tabelas são **todas**
+`LEGENDA` **e** que menciona raios ou terreno. As duas condições evitam isentar demais — um
+slide de dados com uma legenda avulsa continua sendo cobrado (coberto por teste).
+
+Efeito no estudo da Rolândia: **15 slides de mapa isentos** e `SOURCE_MISSING` cai a **zero** no
+cenário real (tabelas nativas). Restam candidatos apenas s35/s50/s62 (aberturas de seção sem
+tabela), que só disparariam se a visão analisasse suas imagens.
+
+Nota de calibração: isso reclassifica o julgamento inicial dos s28/s29 — o analista os aceitou
+como erro real, mas a evidência do PPTX mostra que são mapas como os demais. A regra da área
+(“mapa não leva fonte”) prevalece.
+
+**Verificação:** tsc limpo, **75 testes verdes**, build ok. Sem migration nem deploy.
+
 ## Versão 0.47 — 2026-07-28 — Cobrança de fonte inconsistente entre slides equivalentes (RUNTIME)
 
 Feedback do Gabriel testando a Rolândia: os slides 28/29 (“Renda domiciliar”) eram cobrados por

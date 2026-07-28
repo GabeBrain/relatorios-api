@@ -49,6 +49,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-28 — Corretor: slide de mapa deixa de ser cobrado por fonte — Gabriel + Claude
+- **Regra da área (Gabriel):** mapa usa base cartográfica de terceiro (Google Maps) e **não leva
+  FONTE/ELABORAÇÃO**. Confirmado no estudo real: os 8 slides em questão têm 100% do conteúdo
+  tabular em LEGENDA (raios/terreno/faixas) — inclusive os s28/s29 que pareciam erro legítimo.
+- **`isMapSlide`:** exige imagem + todas as tabelas serem LEGENDA + menção a raios/terreno, para
+  não isentar slide de dados com uma legenda avulsa.
+- **Efeito:** 15 slides isentos; `SOURCE_MISSING` cai a **zero** no cenário real da Rolândia.
+- **Verificação:** tsc limpo, 75 testes verdes, build ok. Ver v0.48 do LIVE do Corretor.
+
 ### 2026-07-28 — Corretor: fonte cobrada de forma inconsistente entre slides iguais — Gabriel + Claude
 - **Sintoma (feedback no uso real):** s28/s29 acusados por falta de fonte, mas s20/s25/s26 não —
   nenhum deles tem FONTE (confirmado abrindo a imagem do s25: só o rodapé do Google Maps).

@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 import { irToFindings, ziLabelFindings } from '../../audit/ir-rules';
 import { crossTableFindings } from '../cross-table';
-import { sourceFindingsFromVision } from '../coverage-rules';
+import { isMapSlide, sourceFindingsFromVision } from '../coverage-rules';
 import type { Ir } from '../../audit/ir';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -45,27 +45,30 @@ describe('Rolândia — deck real (baseline: 17 achados, 17 FP)', () => {
     expect(findings).toHaveLength(1);
   });
 
-  it('a cobrança de fonte é consistente entre slides equivalentes', () => {
-    // Feedback do Gabriel (28/jul): s28/s29 eram cobrados e s20/s25/s26 não,
-    // embora nenhum tenha FONTE — a diferença era a seção canônica ausente
-    // ("Densidade demográfica", "Índice de verticalização" não estavam no
-    // dicionário). Com a seção corrigida, os equivalentes são tratados igual.
-    const comDados = [25, 26, 28, 29, 32, 33];
-    for (const n of comDados) {
-      const slide = ir.slides.find((s) => s.n === n);
-      expect(slide?.secao_canonica, `s${n} precisa de seção canônica`).toBeTruthy();
-      expect(slide?.fontes ?? [], `s${n} não tem FONTE em texto`).toEqual([]);
+  it('slide de mapa não é cobrado por fonte — nenhum leva FONTE por convenção', () => {
+    // Feedback do Gabriel (28/jul): mapas usam base cartográfica de terceiro
+    // (Google Maps) e não levam FONTE/ELABORAÇÃO. No estudo real são 8 slides
+    // cujo conteúdo tabular é 100% LEGENDA (raios/terreno/faixas) — inclusive
+    // "Renda domiciliar" (s28/s29), que antes eram os únicos acusados.
+    const mapas = [20, 25, 26, 28, 29, 32, 33, 68];
+    for (const n of mapas) {
+      const slide = ir.slides.find((s) => s.n === n)!;
+      expect(isMapSlide(slide), `s${n} deveria ser reconhecido como mapa`).toBe(true);
     }
-    // Todos são cobrados igualmente quando a visão não acha fonte na imagem —
-    // sem visão nenhuma, as tabelas nativas já bastam para candidatá-los.
-    const flagged = new Set(sourceFindingsFromVision(ir, [], []).map((f) => f.slideRef));
-    for (const n of comDados) expect(flagged.has(`s${n}`), `s${n} deveria ser cobrado`).toBe(true);
+    const flagged = new Set(sourceFindingsFromVision(ir, [], ir.slides.map((s) => s.n)).map((f) => f.slideRef));
+    for (const n of mapas) expect(flagged.has(`s${n}`), `s${n} é mapa e não deve ser cobrado`).toBe(false);
   });
 
-  it('slide cujo único conteúdo é legenda de mapa não é cobrado por fonte', () => {
-    // s20 ("Zona de influência") só tem 2 tabelas LEGENDA — não é dado.
-    const slide = ir.slides.find((s) => s.n === 20)!;
-    expect(sourceFindingsFromVision({ ...ir, slides: [slide] }, [], [])).toEqual([]);
+  it('slide de dados com tabela real continua sendo cobrado quando não tem fonte', () => {
+    // Guarda contra isentar demais: tabela de verdade (não-legenda) sem FONTE
+    // segue candidata — a regra só perdoa a assinatura de mapa.
+    const slide = {
+      ...ir.slides.find((s) => s.n === 27)!,
+      n: 900, fontes: [], n_imagens: 1,
+      tabelas: [{ n_linhas: 3, n_colunas: 3, linhas: [['Faixa', '2024', '2025'], ['A', '1', '2'], ['B', '3', '4']], linhas_num: [] }],
+    };
+    expect(isMapSlide(slide)).toBe(false);
+    expect(sourceFindingsFromVision({ ...ir, slides: [slide] }, [], []).map((f) => f.slideRef)).toEqual(['s900']);
   });
 });
 
