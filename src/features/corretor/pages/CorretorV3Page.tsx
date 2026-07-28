@@ -32,7 +32,7 @@ import {
 } from '../lib/v3/pipeline';
 import type { AtaData } from '../lib/v3/ia-ata';
 import { BUDGET_STUDY_BRL, formatBRL, usdToBrl } from '../lib/v3/config';
-import { confidenceOf, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
+import { confidenceOf, countLabel, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
@@ -853,7 +853,7 @@ export default function CorretorV3Page() {
           <div className="flex flex-wrap gap-2">
             {wl.confidence.map(([level, findings]) => {
               const meta = CONFIDENCE_META[level];
-              return <span key={level} className={cn('rounded border px-2 py-0.5 font-medium', meta.className)}>{meta.icon} {findings.length} {meta.label.toLowerCase()}{findings.length === 1 ? '' : 's'}</span>;
+              return <span key={level} className={cn('rounded border px-2 py-0.5 font-medium', meta.className)}>{meta.icon} {countLabel(level, findings.length)}</span>;
             })}
           </div>
           <span className={cn('font-medium', blockingPend === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground')}>
@@ -928,7 +928,7 @@ export default function CorretorV3Page() {
                 <div className="flex flex-wrap gap-1.5">
                   {([1, 2, 3] as Confidence[]).map((level) => <button key={level} onClick={() => setConfidenceFilter((current) => current.includes(level) ? current.filter((item) => item !== level) : [...current, level])} className={cn('text-[11px] rounded-full border px-2.5 py-1', confidenceFilter.includes(level) ? CONFIDENCE_META[level].className : 'border-border text-muted-foreground')}>{CONFIDENCE_META[level].icon} {CONFIDENCE_META[level].label}</button>)}
                 </div>
-                <WlHead title="Por slide (ordem do deck)" count={wl.slides.reduce((total, [, findings]) => total + findings.length, 0)} />
+                <WlHead title="Por slide (ordem do estudo)" count={wl.slides.reduce((total, [, findings]) => total + findings.length, 0)} />
                 {wl.slides.map(([n, findings]) => {
                   const visible = findings.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem)));
                   if (!visible.length) return null;
@@ -1058,7 +1058,7 @@ function DeckRuler({ slides, items, onSlide }: { slides: number; items: FindingV
   }
   return (
     <div className="rounded-lg border bg-card p-3 space-y-2">
-      <div className="text-xs font-semibold">Vista geral do deck</div>
+      <div className="text-xs font-semibold">Vista geral do estudo</div>
       <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(26px, 1fr))' }}>
         {Array.from({ length: slides }, (_, index) => index + 1).map((slide) => <button key={slide} onClick={() => onSlide(slide)} title={`Slide ${slide}${pinned.has(slide) ? ' — possui pendência' : ''}`} className={cn('h-5 rounded text-[9px] font-mono border', pinned.has(slide) ? 'bg-amber-500/20 border-amber-500/50 text-amber-700 dark:text-amber-300' : 'bg-muted/40 border-border text-muted-foreground hover:border-primary/50')}>{slide}</button>)}
       </div>

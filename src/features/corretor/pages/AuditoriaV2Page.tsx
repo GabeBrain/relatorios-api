@@ -276,7 +276,7 @@ export default function AuditoriaV2Page() {
                   <>
                     {/* Espinha: sequencial por slide (erros locais) */}
                     <section className="space-y-3">
-                      <SectionHead title="Por slide (ordem do deck)" count={worklist.slides.reduce((a, [, fs]) => a + fs.length, 0)} />
+                      <SectionHead title="Por slide (ordem do estudo)" count={worklist.slides.reduce((a, [, fs]) => a + fs.length, 0)} />
                       {worklist.slides.length === 0 && (
                         <p className="text-xs text-muted-foreground">Nenhum erro local neste estudo.</p>
                       )}

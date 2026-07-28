@@ -120,7 +120,7 @@ itaFindings.push(
   {
     id: 'ita-leftover-s41', type: 'LEFTOVER_NOTE', section: 'SOCIO', slideRef: 's41',
     title: 'Nota interna esquecida no slide', ok: false,
-    detail: 'Comentário do revisor deixado no deck. Rede de segurança: estudos entregues não devem conter notas de edição.',
+    detail: 'Comentário do revisor deixado no estudo. Rede de segurança: estudos entregues não devem conter notas de edição.',
     gabarito: 'Ajustar o erro da fórmula',
     viz: { kind: 'text', location: 'Balão de comentário sobre a tabela', evidence: '“Ajustar o erro da fórmula”' },
   },

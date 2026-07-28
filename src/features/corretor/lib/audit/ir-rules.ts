@@ -59,7 +59,7 @@ function noteFindings(ir: Ir): Finding[] {
         section: toAuditSection(s.secao_canonica),
         slideRef: slideRef(s.n),
         title: 'Nota interna de revisão no slide',
-        detail: 'Comentário de revisão deixado no deck (rede de segurança — estudos entregues não devem conter notas).',
+        detail: 'Comentário de revisão deixado no estudo (rede de segurança — estudos entregues não devem conter notas).',
         ok: false,
         viz: { kind: 'text', location: s.titulo ?? undefined, evidence: `“${t.trim()}”` },
       });

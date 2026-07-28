@@ -5,11 +5,22 @@ import type { Finding } from '../audit/model';
 
 export type Confidence = 1 | 2 | 3;
 
-export const CONFIDENCE_META: Record<Confidence, { label: string; icon: string; className: string }> = {
-  1: { label: 'Erro', icon: '⛔', className: 'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300' },
-  2: { label: 'Provável', icon: '⚠', className: 'border-orange-500/40 bg-orange-500/10 text-orange-700 dark:text-orange-300' },
-  3: { label: 'Verificar', icon: '👁', className: 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300' },
+/**
+ * `plural` é explícito porque "Verificar" é verbo: somar "s" gerava
+ * "4 verificars". Contagens usam `countLabel`, nunca `label + 's'`.
+ */
+export const CONFIDENCE_META: Record<Confidence, { label: string; plural: string; icon: string; className: string }> = {
+  1: { label: 'Erro', plural: 'erros', icon: '⛔', className: 'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300' },
+  2: { label: 'Provável', plural: 'prováveis', icon: '⚠', className: 'border-orange-500/40 bg-orange-500/10 text-orange-700 dark:text-orange-300' },
+  3: { label: 'Verificar', plural: 'a verificar', icon: '👁', className: 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300' },
 };
+
+/** Rótulo de contagem já flexionado: 1 erro / 2 erros / 1 a verificar / 4 a verificar. */
+export function countLabel(level: Confidence, n: number): string {
+  const meta = CONFIDENCE_META[level];
+  if (level === 3) return `${n} a verificar`;
+  return `${n} ${n === 1 ? meta.label.toLowerCase() : meta.plural}`;
+}
 
 const VERIFY = new Set<ErrorType>(['VALUE_PLAUSIBILITY', 'PROJECTION_FORMULA', 'SOURCE_MISSING', 'ATA_COVERAGE', 'STRUCTURE_MISSING', 'REQUIRED_NOTE', 'EXCLUSION_RULE']);
 

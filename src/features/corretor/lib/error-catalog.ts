@@ -74,7 +74,7 @@ export const ERROR_CATALOG: Record<ErrorType, ErrorMeta> = {
   SOURCE_MISSING: { label: 'Fonte ausente', description: 'Slide com dado deve indicar fonte no texto ou imagem; validar o beta contra estudos reais.', mode: 'BETA', viz: 'overlay', motor: 'DET+IA' },
   REQUIRED_NOTE: { label: 'Nota obrigatória', description: 'Slides específicos exigem notas padrão (ex.: absorção desconsidera 2ª moradia).', mode: 'BETA', viz: 'overlay', motor: 'DET' },
   EXCLUSION_RULE: { label: 'Exclusões', description: 'Lacunas excluem Gardens, Duplex e Coberturas; esgotados variam por análise.', mode: 'BETA', viz: 'table', motor: 'DET' },
-  LEFTOVER_NOTE: { label: 'Nota de edição vazada', description: 'Comentário interno do revisor esquecido no deck (rede de segurança).', mode: 'PLENO', viz: 'overlay', motor: 'DET' },
+  LEFTOVER_NOTE: { label: 'Nota de edição vazada', description: 'Comentário interno do revisor esquecido no estudo (rede de segurança).', mode: 'PLENO', viz: 'overlay', motor: 'DET' },
   ATA_COVERAGE: { label: 'Cobertura da ata', description: 'Pedidos da ata são buscados no estudo por evidência textual; itens sem evidência pedem revisão.', mode: 'BETA', viz: 'checklist', motor: 'DET' },
   MAP_CHART_MISMATCH: { label: 'Mapa × gráfico', description: 'Dados exibidos no mapa correspondem ao gráfico/tabela do slide.', mode: 'MOCK', viz: 'map', motor: 'IA' },
 };

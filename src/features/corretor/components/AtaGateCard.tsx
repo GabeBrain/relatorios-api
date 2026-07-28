@@ -74,11 +74,11 @@ export default function AtaGateCard({ ata, costBrl, running, onConfirm }: {
       </div>
 
       {/* Ata multi-estudo (uma ata abre vários estudos): a LLM não escolhe por nós —
-          o analista clica na cidade correta deste deck. */}
+          o analista clica na cidade correta deste estudo. */}
       {(ata?.cidades_candidatas?.length ?? 0) > 1 && (
         <div className="space-y-1.5">
           <p className="text-[11px] text-muted-foreground">
-            Esta ata abre <strong>vários estudos</strong>. Qual é a cidade deste deck?
+            Esta ata abre <strong>vários estudos</strong>. Qual é a cidade deste estudo?
           </p>
           <div className="flex flex-wrap gap-1.5">
             {ata!.cidades_candidatas.map((c) => {
