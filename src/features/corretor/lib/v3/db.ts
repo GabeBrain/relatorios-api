@@ -483,3 +483,27 @@ export async function acknowledgeCalibrationType(tipo: string): Promise<void> {
     .eq('tipo', tipo).eq('verdict', 'fp');
   if (error) throw new Error(error.message);
 }
+
+/**
+ * Texto transcrito pela visão para cada imagem (título/colunas/células), por sha1.
+ * Usado na reconciliação para detectar cidade que o modelo INFERIU em vez de ler
+ * — sem âncora no texto transcrito, o achado é alucinação.
+ */
+export async function loadTranscribedBySha1(shas: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (!shas.length) return out;
+  const { data } = await db.from('vision_cache').select('sha1, payload').in('sha1', shas);
+  for (const row of data ?? []) {
+    const payload = row.payload as { tables?: unknown[] } | null;
+    const parts: string[] = [];
+    for (const table of Array.isArray(payload?.tables) ? payload!.tables : []) {
+      const t = table as { title?: unknown; columns?: unknown[]; rows?: unknown[][]; totals?: unknown[] };
+      parts.push(String(t.title ?? ''));
+      for (const col of t.columns ?? []) parts.push(String(col ?? ''));
+      for (const row2 of t.rows ?? []) for (const cell of row2 ?? []) parts.push(String(cell ?? ''));
+      for (const total of t.totals ?? []) parts.push(String(total ?? ''));
+    }
+    out.set(row.sha1 as string, parts.join(' | '));
+  }
+  return out;
+}

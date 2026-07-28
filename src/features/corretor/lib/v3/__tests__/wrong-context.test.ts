@@ -44,6 +44,56 @@ describe('WRONG_CONTEXT — cidade/UF', () => {
     expect(wrongCityFindings(ir, 'Curitiba')).toEqual([]);
   });
 
+  it('ignora cidade que a visão INFERIU mas não transcreveu (alucinação s45)', () => {
+    // Caso real Rolândia jul/2026: o modelo devolveu "São Paulo" como principal
+    // a partir dos bairros "Centro" e "Jardim Das Américas"; o nome não existe
+    // na imagem. Sem âncora no texto transcrito, não vira achado.
+    const payload = {
+      tables: [{
+        title: 'Empreendimentos até 3 Km',
+        columns: ['Empreendimento', 'Bairro', 'Oferta Lançada'],
+        rows: [['Terrasse', 'Centro', 100], ['Boulevard', 'Jardim Das Américas', 192]],
+      }],
+    };
+    expect(wrongContextFromVisibleLocales(
+      [{ texto: 'São Paulo', tipo: 'cidade', principal: true }],
+      { cidade: 'Rolândia', uf: 'PR' },
+      { ...candidate, titulo: 'Empreendimentos até 3 Km' },
+      payload,
+    )).toEqual([]);
+  });
+
+  it('mantém o achado quando a cidade está escrita DENTRO da tabela-imagem', () => {
+    // O nome só existe no print — é exatamente o vazamento que queremos pegar,
+    // e a âncora o encontra porque a visão transcreveu a célula.
+    const payload = {
+      tables: [{
+        title: 'Empreendimentos até 3 Km',
+        columns: ['Empreendimento', 'Cidade', 'Oferta'],
+        rows: [['Terrasse', 'São Paulo', 100], ['Boulevard', 'São Paulo', 192]],
+      }],
+    };
+    const out = wrongContextFromVisibleLocales(
+      [{ texto: 'São Paulo', tipo: 'cidade', principal: true }],
+      { cidade: 'Rolândia', uf: 'PR' },
+      { ...candidate, titulo: 'Empreendimentos até 3 Km' },
+      payload,
+    );
+    expect(out).toHaveLength(1);
+    expect(out[0].type).toBe('WRONG_CONTEXT');
+  });
+
+  it('sem payload de tabelas, mantém o comportamento anterior (não silencia)', () => {
+    // Imagem sem tabela extraída (mapa/arte): não há o que ancorar, então a
+    // regra continua valendo pelo julgamento da visão.
+    expect(wrongContextFromVisibleLocales(
+      [{ texto: 'São Paulo', tipo: 'cidade', principal: true }],
+      { cidade: 'Rolândia', uf: 'PR' },
+      { ...candidate, titulo: null },
+      { tables: [] },
+    )).toHaveLength(1);
+  });
+
   it('descarta payload de visão malformado sem deixar map derrubar o passe', () => {
     const payload = sanitizeVisionPayload({
       tables: [{ columns: { errado: true }, rows: { errado: true }, totals: null }],

@@ -34,7 +34,7 @@ interface RawTable {
 }
 export interface RawLocale { texto?: unknown; tipo?: unknown; principal?: unknown }
 export interface RawUnit { tipologia?: unknown; m2?: unknown; vagas?: unknown; preco?: unknown; preco_m2?: unknown }
-interface CachePayload {
+export interface CachePayload {
   tables: RawTable[];
   locais_visiveis?: RawLocale[];
   unidades?: RawUnit[];
@@ -216,11 +216,42 @@ function normalized(value: string): string {
  */
 const CONTEXT_SECTIONS = new Set(['SOCIO', 'MERCADO', 'LACUNAS', 'ABSORCAO']);
 
-/** Comparação conservadora: só usa cidade marcada como protagonista da imagem pela visão. */
+/**
+ * Texto que a visão realmente TRANSCREVEU da imagem: título, colunas e células
+ * das tabelas extraídas, mais o título do slide. É a âncora contra alucinação —
+ * `locais_visiveis` é interpretação do modelo, isto é leitura.
+ */
+function transcribedText(
+  payload: Pick<CachePayload, 'tables'> | undefined,
+  candidate: Pick<TableImageCandidate, 'titulo'>,
+): string {
+  // Sem tabela extraída não há leitura para ancorar (mapa, arte, foto): devolve
+  // vazio e a regra segue pelo julgamento da visão, como antes.
+  if (!payload?.tables?.length) return '';
+  const parts: string[] = [candidate.titulo ?? ''];
+  for (const table of payload.tables) {
+    parts.push(String(table.title ?? ''));
+    for (const col of table.columns ?? []) parts.push(String(col ?? ''));
+    for (const row of table.rows ?? []) for (const cell of row ?? []) parts.push(String(cell ?? ''));
+    for (const total of table.totals ?? []) parts.push(String(total ?? ''));
+  }
+  return normalized(parts.join(' | '));
+}
+
+/**
+ * Comparação conservadora: só usa cidade marcada como protagonista da imagem
+ * pela visão E cujo nome esteja ancorado no texto transcrito. Sem a âncora, o
+ * modelo pode INFERIR a cidade a partir de pistas indiretas: no s45 da Rolândia
+ * (jul/2026) ele devolveu "São Paulo" como `principal: true` a partir dos
+ * bairros "Centro" e "Jardim Das Américas", sem que o nome existisse na imagem.
+ * Cidade escrita DENTRO de tabela-imagem continua valendo — ela aparece nas
+ * células transcritas, que é justamente onde procuramos.
+ */
 export function wrongContextFromVisibleLocales(
   rawLocales: RawLocale[] | undefined,
   expected: ExpectedLocation | undefined,
   candidate: Pick<TableImageCandidate, 'slide' | 'secao' | 'titulo' | 'sha1'>,
+  payload?: Pick<CachePayload, 'tables'>,
 ): Finding[] {
   const city = expected?.cidade?.trim();
   if (!city) return [];
@@ -228,6 +259,7 @@ export function wrongContextFromVisibleLocales(
   const expectedCity = normalized(city);
   const title = normalized(candidate.titulo ?? '');
   const comparative = /\bbrasil\b|\bestado\b/.test(title);
+  const transcribed = transcribedText(payload, candidate);
   const seen = new Set<string>();
   const findings: Finding[] = [];
 
@@ -244,6 +276,9 @@ export function wrongContextFromVisibleLocales(
     // divergência se o texto for município IBGE — e diferente além de conectivos
     // ("São José do Campos" digitado na ata ≠ FP contra "São José dos Campos").
     if (!municipioOficial(text) || sameCity(text, city)) continue;
+    // ÂNCORA: o nome precisa estar no texto transcrito da imagem. Sem isso, a
+    // "cidade" é inferência do modelo, não leitura — origem de alucinação.
+    if (transcribed && !transcribed.includes(found)) continue;
     seen.add(found);
     findings.push({
       id: `iavis-context-${candidate.sha1.slice(0, 10)}-${found.replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`,
@@ -392,7 +427,7 @@ async function processImage(
     : `lido pelo modelo ${usedModel}`;
 
   const secao = toAuditSection(c.secao);
-  findings.push(...wrongContextFromVisibleLocales(payload?.locais_visiveis, expected, c));
+  findings.push(...wrongContextFromVisibleLocales(payload?.locais_visiveis, expected, c, payload));
   (payload?.tables ?? []).forEach((raw, ti) => {
     const ext = toExtracted(raw);
     if (!ext) return;

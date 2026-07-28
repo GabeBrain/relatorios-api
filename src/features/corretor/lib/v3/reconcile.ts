@@ -14,13 +14,23 @@ const CONTEXT_AUDIT_SECTIONS = new Set(['SOCIO', 'MERCADO', 'LACUNAS', 'ABSORCAO
  * fora das seções de dados, texto que não é município IBGE ("brasileiras") ou
  * a própria cidade do estudo com conectivos divergentes (typo da ata).
  */
-export function isStaleVisionContext(finding: Finding, expectedCity: string | null | undefined): boolean {
+export function isStaleVisionContext(
+  finding: Finding,
+  expectedCity: string | null | undefined,
+  /** Texto transcrito da imagem (título/colunas/células), quando disponível. */
+  transcribed?: string,
+): boolean {
   if (finding.type !== 'WRONG_CONTEXT' || !finding.id.startsWith('iavis-context-')) return false;
   if (!CONTEXT_AUDIT_SECTIONS.has(finding.section)) return true;
   const seen = finding.viz?.kind === 'text' ? finding.viz.evidence?.trim() : undefined;
   if (!seen) return false;
   if (!municipioOficial(seen)) return true;
-  return Boolean(expectedCity && sameCity(seen, expectedCity));
+  if (expectedCity && sameCity(seen, expectedCity)) return true;
+  // Sem âncora no texto lido da imagem, a cidade foi inferida pelo modelo e não
+  // transcrita — alucinação (caso s45 da Rolândia, "São Paulo" deduzido dos
+  // bairros "Centro" e "Jardim Das Américas").
+  const norm = (v: string) => v.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  return Boolean(transcribed && !norm(transcribed).includes(norm(seen)));
 }
 
 /**

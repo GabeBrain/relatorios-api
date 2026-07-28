@@ -49,6 +49,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-28 — Corretor: ancoragem textual contra cidade alucinada pela visão — Gabriel + Claude
+- **Novo tipo de FP:** no s45 a visão devolveu “São Paulo” como cidade principal de uma tabela
+  onde o nome não existe — inferiu dos bairros “Centro”/“Jardim Das Américas”. Diferente dos FPs
+  anteriores: aqui a **entrada** é falsa, não o julgamento da regra.
+- **Âncora:** cidade só vira achado se o nome estiver no texto que a visão transcreveu (título,
+  colunas, células, totais). Preserva o caso legítimo de **cidade escrita dentro da
+  tabela-imagem**; sem tabela extraída (mapa/arte), a regra segue como antes.
+- **Medição no banco:** dos 5 achados com tabela extraída, os 5 eram cidade inferida.
+- **Verificação:** tsc limpo, **78 testes verdes**, build ok. Ver v0.49 do LIVE do Corretor.
+
 ### 2026-07-28 — Corretor: slide de mapa deixa de ser cobrado por fonte — Gabriel + Claude
 - **Regra da área (Gabriel):** mapa usa base cartográfica de terceiro (Google Maps) e **não leva
   FONTE/ELABORAÇÃO**. Confirmado no estudo real: os 8 slides em questão têm 100% do conteúdo

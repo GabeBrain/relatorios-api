@@ -36,7 +36,7 @@ import { confidenceOf, countLabel, CONFIDENCE_META, type Confidence } from '../l
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
-  saveReport, setFindingVerdict, resolveInvalidFindings,
+  saveReport, setFindingVerdict, resolveInvalidFindings, loadTranscribedBySha1,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 
@@ -349,6 +349,11 @@ export default function CorretorV3Page() {
     try {
       let loaded = await loadFindings(id);
       const studyCity = studies.find((s) => s.id === id)?.cidade ?? null;
+      // Texto que a visão transcreveu de cada imagem: âncora contra cidade alucinada.
+      const shas = [...new Set(loaded
+        .filter((item) => item.status === 'pendente' && item.finding.id.startsWith('iavis-context-'))
+        .map((item) => item.finding.evidenceSha1).filter((s): s is string => Boolean(s)))];
+      const transcribed = shas.length ? await loadTranscribedBySha1(shas) : new Map<string, string>();
       const invalid = loaded.filter((item) => {
         if (item.status !== 'pendente') return false;
         const { finding } = item;
@@ -356,7 +361,8 @@ export default function CorretorV3Page() {
           const viz = finding.viz;
           return viz?.kind === 'binrange' && detectBinGap(viz.bins).gapAfterIndex === undefined;
         }
-        return isStaleVisionContext(finding, studyCity) || isStaleCrossTable(finding) || isStaleWrongCity(finding, studyCity);
+        const seen = finding.evidenceSha1 ? transcribed.get(finding.evidenceSha1) : undefined;
+        return isStaleVisionContext(finding, studyCity, seen) || isStaleCrossTable(finding) || isStaleWrongCity(finding, studyCity);
       });
       if (invalid.length) {
         await resolveInvalidFindings(id, invalid.map((item) => item.ruleId));

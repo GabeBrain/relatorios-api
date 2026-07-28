@@ -16,6 +16,35 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.49 — 2026-07-28 — Ancoragem textual contra cidade alucinada pela visão (RUNTIME)
+
+Novo tipo de FP, diferente dos anteriores: até aqui a visão **lia certo** e a regra julgava mal;
+no s45 da Rolândia a **entrada é falsa**. O modelo devolveu
+`{"tipo":"cidade","texto":"São Paulo","principal":true}` para uma tabela de empreendimentos onde
+o nome **não existe** — inferiu a cidade dos bairros “Centro” e “Jardim Das Américas”. Todas as
+defesas da v0.44 passaram (seção MERCADO ✅, município IBGE ✅, ≠ Rolândia ✅) porque todas
+assumem que o texto lido existe. Sinal de leitura ruim no mesmo payload: `653.116` virou `651.116`.
+
+**Regra da âncora** (`transcribedText` em `ia-vision.ts`): a cidade só vira achado se o nome
+aparecer no texto que a visão **transcreveu** — título, colunas, células e totais das tabelas
+extraídas. `locais_visiveis` é interpretação do modelo; as células são leitura.
+
+Preserva o caso legítimo levantado pelo Gabriel — **cidade escrita dentro da tabela-imagem**
+continua sendo detectada, porque nesse caso ela aparece nas células transcritas (coberto por
+teste). E quando não há tabela extraída (mapa, arte, foto) a âncora não se aplica: a regra segue
+pelo julgamento da visão, sem silenciar nada.
+
+Reconciliação estendida: `isStaleVisionContext` aceita o texto transcrito
+(`loadTranscribedBySha1` busca do `vision_cache` ao abrir o estudo) e encerra os achados legados
+sem âncora. Medido no banco: dos 5 `iavis-context-*` com tabela extraída, **os 5 eram cidade
+inferida** — nenhum tinha o nome na leitura.
+
+**Nota para a decisão de modelo:** ancoragem é defesa determinística e barata (R$ 0), e vale
+independentemente do modelo — mesmo um modelo melhor erra às vezes, e aqui o erro é filtrado sem
+custo. O teste A/B de modelo continua pendente e agora tem um caso-âncora concreto para medir.
+
+**Verificação:** tsc limpo, **78 testes verdes**, build ok. Sem migration nem deploy.
+
 ## Versão 0.48 — 2026-07-28 — Slide de mapa não é cobrado por fonte (RUNTIME)
 
 Refinamento da v0.47, a partir do feedback do Gabriel: **nenhum slide de mapa leva
