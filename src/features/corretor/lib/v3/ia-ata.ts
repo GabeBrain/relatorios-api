@@ -35,12 +35,21 @@ export interface AtaData {
   preco_m2_viabilidade: number | null;
   /** Características/fatos de localização transcritos da ata. */
   observacoes_localizacao: string[];
+  /**
+   * Ata que abre VÁRIOS estudos lista várias cidades ("Toledo PR", "Rolândia PR",
+   * "São José dos Campos SP"). Nesse caso cidade/uf vêm null e o analista escolhe
+   * no portão da ata a partir desta lista.
+   */
+  cidades_candidatas: string[];
+  /** Texto de caixas de comentário sobrepostas à ata — contexto, não conteúdo dela. */
+  comentarios_sobrepostos: string[];
   duvidas_cliente: string[];
   pedidos_analista: string[];
 }
 
-// A v6 acrescenta evidência literal para cidade/UF e força a releitura de extrações anteriores.
-const ATA_CACHE_SCHEMA = 6;
+// A v7 acrescenta cidades_candidatas/comentarios_sobrepostos (ata multi-estudo e
+// caixas de comentário sobre a ata) e força releitura das extrações anteriores.
+const ATA_CACHE_SCHEMA = 7;
 
 export interface AtaExtractResult {
   ata: AtaData | null;

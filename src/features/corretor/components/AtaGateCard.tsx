@@ -73,8 +73,43 @@ export default function AtaGateCard({ ata, costBrl, running, onConfirm }: {
         </label>
       </div>
 
+      {/* Ata multi-estudo (uma ata abre vários estudos): a LLM não escolhe por nós —
+          o analista clica na cidade correta deste deck. */}
+      {(ata?.cidades_candidatas?.length ?? 0) > 1 && (
+        <div className="space-y-1.5">
+          <p className="text-[11px] text-muted-foreground">
+            Esta ata abre <strong>vários estudos</strong>. Qual é a cidade deste deck?
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {ata!.cidades_candidatas.map((c) => {
+              const [nome, sigla] = c.split(/\s*[/\-–—]\s*|\s+(?=[A-Z]{2}$)/);
+              const active = cidade.trim().toLowerCase() === (nome ?? '').trim().toLowerCase();
+              return (
+                <button
+                  key={c} type="button"
+                  onClick={() => { setCidade((nome ?? '').trim()); setUf((sigla ?? '').trim().toUpperCase()); }}
+                  className={cn('text-xs rounded-full border px-2.5 py-1 transition-colors',
+                    active ? 'border-emerald-600 bg-emerald-600/10 text-emerald-700 font-medium' : 'border-border hover:bg-muted')}
+                >
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {ata?.localizacao_fonte && (
         <p className="text-[11px] text-muted-foreground italic">A ata diz: “{ata.localizacao_fonte}”</p>
+      )}
+
+      {(ata?.comentarios_sobrepostos?.length ?? 0) > 0 && (
+        <div className="text-[11px] text-muted-foreground">
+          <span className="font-medium">Comentário sobre a ata:</span>
+          <ul className="list-disc pl-4 mt-0.5 space-y-0.5">
+            {ata!.comentarios_sobrepostos.map((c, i) => <li key={i} className="italic">“{c}”</li>)}
+          </ul>
+        </div>
       )}
 
       {p && (p.torres || p.unidades || p.dorms?.length) && (

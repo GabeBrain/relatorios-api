@@ -58,14 +58,19 @@ interface RequestBody {
  * Cidade/UF é dado de alto impacto. Quando a LLM devolve a citação literal da ata,
  * a aplicação deriva esses dois campos dela em vez de confiar numa interpretação solta.
  */
+const UF_LIST = 'AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SE|SP|TO';
+
 function normalizeAtaLocation(ata: unknown): unknown {
   if (!ata || typeof ata !== 'object') return ata;
   const data = ata as Record<string, unknown>;
   const source = typeof data.localizacao_fonte === 'string' ? data.localizacao_fonte.trim() : '';
   if (!source) return ata;
-  const match = source.match(/([^|,/\n]+?)\s*\/\s*([a-z]{2})\b/i);
+  // Separador entre cidade e UF varia por ata: "Guarulhos/SP", "Rolândia - PR"
+  // e "Rolândia PR" (lista de cidades da ata multi-estudo da Housi, jul/2026).
+  // A sigla é validada contra a lista de UFs para não capturar palavra solta.
+  const match = source.match(new RegExp(`([^|,/\\n]+?)\\s*(?:[/\\-–—]\\s*|\\s)(${UF_LIST})\\b`, 'i'));
   if (!match) return ata;
-  const city = match[1].trim().replace(/^[|,\-–—\s]+/, '');
+  const city = match[1].trim().replace(/^[|,\-–—\s]+/, '').replace(/\s+(?:pr|sp|mg|rs|sc|go|ba|pe|ce)$/i, '');
   if (!city) return ata;
   return { ...data, cidade: city, uf: match[2].toUpperCase() };
 }
@@ -113,6 +118,17 @@ Regras:
 - A imagem pode ser um slide com fundo decorativo e uma ata/cartão branco inserido no centro.
   Leia o documento inserido: se contiver "Produto pretendido", "Terreno e localização",
   "Dúvida do cliente" ou "Analista da Rebrain", ele É uma ata, mesmo com capa/fundo ao redor.
+- Um e-mail de abertura de estudos TAMBÉM é ata (ex.: "Segue a ata da reunião de abertura...").
+  Extraia dele o que houver: prazo, escopo e a lista de análises pedidas vira "pedidos_analista".
+- ATA MULTI-ESTUDO: uma mesma ata pode abrir VÁRIOS estudos e listar várias cidades
+  ("Toledo PR", "Rolândia PR", "São José dos Campos SP"). Nesse caso NÃO escolha uma:
+  devolva "cidade" e "uf" como null e liste TODAS em "cidades_candidatas"
+  (ex.: ["Toledo/PR", "Rolândia/PR", "São José dos Campos/SP"]) — quem decide é o analista.
+  "localizacao_fonte" recebe a transcrição literal da lista.
+- A ata pode estar PARCIALMENTE COBERTA por caixas de comentário/observação sobrepostas
+  (retângulos coloridos com texto, tipicamente notas para o analista). Leia o que está
+  visível da ata por baixo e coloque o texto dessas caixas em "comentarios_sobrepostos".
+  Nunca trate o comentário como se fosse conteúdo da ata.
 
 Responda EXATAMENTE este JSON (sem markdown):
 {"ata": {
@@ -123,6 +139,8 @@ Responda EXATAMENTE este JSON (sem markdown):
               "vagas_pct": 50, "programa": "MCMV", "observacoes": ["Todas as unidades de 2 dorm com e sem sacada."]},
   "preco_m2_viabilidade": 8500,
   "observacoes_localizacao": ["Excelente localização colado na Via Dutra"],
+  "cidades_candidatas": ["Toledo/PR", "Rolândia/PR"],
+  "comentarios_sobrepostos": ["…"],
   "duvidas_cliente": ["…"],
   "pedidos_analista": ["…"]
 }}

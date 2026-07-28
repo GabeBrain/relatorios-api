@@ -49,6 +49,18 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-28 — Corretor: ata da Rolândia não era lida no upload — 3 correções — Gabriel + Claude
+- **Sintoma:** subindo o estudo do zero, o portão dizia “sem ata detectada”, embora a ata esteja
+  no slide 1. O **localizador estava certo**; a falha era na leitura.
+- **Causa principal:** a derivação de cidade/UF exigia barra (`Guarulhos/SP`) e a ata escreve
+  **“Rolândia PR”**. Padrão passou a aceitar `/ - – —` e espaço, validando a sigla contra as 27 UFs.
+- **Ata multi-estudo:** a ata abre 3 estudos (Toledo, Rolândia, SJC). A LLM devolve
+  `cidades_candidatas` e o **analista escolhe no portão** (chips), em vez de a IA chutar.
+- **Comentários sobrepostos:** caixa de recado sobre a ata agora é lida à parte
+  (`comentarios_sobrepostos`) e exibida como contexto, não como conteúdo da ata.
+- **Também:** busca da ata vai até o 5º slide; cache de ata v6 → v7 (força releitura).
+- **Requer deploy:** `analyze-ata-image`. tsc limpo, **73 testes verdes**, build ok. Ver v0.46 do LIVE.
+
 ### 2026-07-28 — Corretor: sprint Fase 2 com o deck real da Rolândia (17 achados → 1) — Gabriel + Claude
 - **Aceite medido:** rodando o motor sobre o IR real do PPTX da Daniele, os **17 achados (100% FP)
   caíram para 1** — e o restante ("7.1 Futuros lançamentos") é ausência legítima do deck.

@@ -16,6 +16,33 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.46 — 2026-07-28 — Ata não lida no upload da Rolândia: separador, multi-estudo e comentários (RUNTIME)
+
+Ao subir a Rolândia do zero, o portão abriu com **“sem ata detectada”** embora a ata esteja no
+slide 1. Diagnóstico no PPTX real: **o localizador acertou** (`image9.png`, s1, 1174×545 — é o
+print do e-mail da ata). A falha estava depois, em duas camadas:
+
+1. **Separador cidade/UF (causa principal).** `normalizeAtaLocation` exigia barra
+   (`Guarulhos/SP`). A ata da Housi escreve **“Rolândia PR”**, sem separador → sem match →
+   `cidade`/`uf` nulas → portão trata como sem ata. O padrão passou a aceitar `/`, `-`, `–`, `—`
+   **e espaço**, com a sigla validada contra a lista das 27 UFs (não captura “Santos FC”).
+   Regressão em `ata-location.test.ts` com os formatos reais.
+2. **Ata multi-estudo.** Esta ata abre **três estudos** (“Toledo PR”, “Rolândia PR”, “São José
+   dos Campos SP”). Não há resposta única, então a LLM não deve escolher: o prompt agora
+   devolve `cidade`/`uf` nulas e preenche **`cidades_candidatas`**; o portão da ata exibe as
+   candidatas como chips e **o analista clica na correta**. Também reconhece e-mail de abertura
+   como ata (“Segue a ata da reunião de abertura…”).
+3. **Comentários sobrepostos.** A ata vinha parcialmente coberta por uma caixa azul de recado
+   (“a parte da análise de airbnb eu não fiz…”). O prompt manda ler a ata por baixo e separar o
+   recado em **`comentarios_sobrepostos`**, exibido no portão como contexto — nunca confundido
+   com conteúdo da ata.
+
+Também: `MAX_ATA_SLIDE` 4 → **5** (decks que abrem com capa + institucionais antes da ata) e
+`ATA_CACHE_SCHEMA` 6 → **7** (força releitura das atas já extraídas com o contrato antigo).
+
+**Requer deploy:** `supabase functions deploy analyze-ata-image` (prompt e normalização mudaram).
+**Verificação:** tsc limpo, **73 testes verdes**, build ok. Sem migration.
+
 ## Versão 0.45 — 2026-07-28 — Fase 2 com o deck real da Rolândia: CH-4, CH-1 e FN-3 (RUNTIME)
 
 Com o PPTX da Rolândia (Daniele) em mãos, o IR real derrubou uma hipótese e fechou três frentes.
