@@ -82,6 +82,60 @@ function tableToSvg(table: HTMLTableElement, variables: Record<string, string>) 
   return { node: group, width, height };
 }
 
+interface LegendItem { label: string; color: string }
+
+function readLegendItems(element: HTMLElement, variables: Record<string, string>): LegendItem[] {
+  return Array.from(element.querySelectorAll<HTMLElement>('.recharts-legend-item, .qd-cross-series-legend-item'))
+    .map((item) => {
+      const label = (item.querySelector('.recharts-legend-item-text, .qd-cross-series-legend-item span:last-child')?.textContent ?? item.textContent ?? '').trim();
+      const swatch = item.querySelector<HTMLElement>('.qd-cross-series-legend-swatch, .recharts-legend-icon');
+      const style = swatch ? getComputedStyle(swatch) : null;
+      const color = swatch?.getAttribute('fill') || swatch?.getAttribute('stroke') || style?.backgroundColor || style?.color || variables['--qd-primary'] || '#5B7537';
+      return { label, color: cssValue(color, variables) };
+    })
+    .filter((item) => item.label);
+}
+
+function legendToSvg(items: LegendItem[], width: number, variables: Record<string, string>) {
+  if (!items.length) return null;
+  const group = document.createElementNS(SVG_NS, 'g');
+  const rowHeight = 22;
+  const gap = 12;
+  let x = 0;
+  let y = 0;
+  let rows = 1;
+
+  items.forEach((item) => {
+    const itemWidth = Math.min(260, Math.max(76, item.label.length * 7 + 28));
+    if (x > 0 && x + itemWidth > width) {
+      x = 0;
+      y += rowHeight;
+      rows += 1;
+    }
+
+    const swatch = document.createElementNS(SVG_NS, 'rect');
+    swatch.setAttribute('x', String(x));
+    swatch.setAttribute('y', String(y + 5));
+    swatch.setAttribute('width', '10');
+    swatch.setAttribute('height', '10');
+    swatch.setAttribute('rx', '2');
+    swatch.setAttribute('fill', item.color);
+    group.appendChild(swatch);
+
+    const text = document.createElementNS(SVG_NS, 'text');
+    text.setAttribute('x', String(x + 16));
+    text.setAttribute('y', String(y + 15));
+    text.setAttribute('fill', variables['--qd-text'] || '#1f2a12');
+    text.setAttribute('font-family', 'Arial, sans-serif');
+    text.setAttribute('font-size', '11');
+    text.textContent = item.label;
+    group.appendChild(text);
+    x += itemWidth + gap;
+  });
+
+  return { node: group, height: rows * rowHeight };
+}
+
 export function exportElementAsSvg(element: HTMLElement | null, title: string, filename: string) {
   if (!element) return;
   const svg = element.querySelector<SVGSVGElement>('svg');
@@ -90,13 +144,16 @@ export function exportElementAsSvg(element: HTMLElement | null, title: string, f
 
   const variables = readThemeVariables(element.closest<HTMLElement>('.qd-root') ?? element);
   const visual = svg ? copyChartSvg(svg, variables) : tableToSvg(table as HTMLTableElement, variables);
+  const legend = svg ? legendToSvg(readLegendItems(element, variables), visual.width, variables) : null;
   const padding = 24;
   const titleHeight = title ? 30 : 0;
+  const legendHeight = legend ? legend.height + 8 : 0;
+  const outputHeight = visual.height + padding * 2 + titleHeight + legendHeight;
   const output = document.createElementNS(SVG_NS, 'svg');
   output.setAttribute('xmlns', SVG_NS);
   output.setAttribute('width', String(visual.width + padding * 2));
-  output.setAttribute('height', String(visual.height + padding * 2 + titleHeight));
-  output.setAttribute('viewBox', `0 0 ${visual.width + padding * 2} ${visual.height + padding * 2 + titleHeight}`);
+  output.setAttribute('height', String(outputHeight));
+  output.setAttribute('viewBox', `0 0 ${visual.width + padding * 2} ${outputHeight}`);
 
   const background = document.createElementNS(SVG_NS, 'rect');
   background.setAttribute('width', '100%');
@@ -129,6 +186,10 @@ export function exportElementAsSvg(element: HTMLElement | null, title: string, f
     return;
   }
   output.appendChild(content);
+  if (legend) {
+    legend.node.setAttribute('transform', `translate(${padding}, ${padding + titleHeight + visual.height + 8})`);
+    output.appendChild(legend.node);
+  }
   download(output, filename);
 }
 
