@@ -82,6 +82,63 @@ function tableToSvg(table: HTMLTableElement, variables: Record<string, string>) 
   return { node: group, width, height };
 }
 
+function barsToSvg(element: HTMLElement, variables: Record<string, string>) {
+  const bars = Array.from(element.querySelectorAll<HTMLElement>('[data-svg-export-bar]'));
+  const width = 760;
+  const rowHeight = 38;
+  const labelWidth = 170;
+  const valueWidth = 120;
+  const barWidth = width - labelWidth - valueWidth;
+  const height = Math.max(rowHeight, bars.length * rowHeight);
+  const max = Math.max(...bars.map((item) => Number(item.dataset.count ?? 0)), 1);
+  const group = document.createElementNS(SVG_NS, 'g');
+
+  bars.forEach((bar, index) => {
+    const y = index * rowHeight + 7;
+    const count = Number(bar.dataset.count ?? 0);
+    const pct = Number(bar.dataset.pct ?? 0);
+    const label = bar.dataset.label ?? '';
+
+    const labelText = document.createElementNS(SVG_NS, 'text');
+    labelText.setAttribute('x', '0');
+    labelText.setAttribute('y', String(y + 17));
+    labelText.setAttribute('fill', variables['--qd-text'] || '#1f2a12');
+    labelText.setAttribute('font-family', 'Arial, sans-serif');
+    labelText.setAttribute('font-size', '13');
+    labelText.textContent = label;
+    group.appendChild(labelText);
+
+    const background = document.createElementNS(SVG_NS, 'rect');
+    background.setAttribute('x', String(labelWidth));
+    background.setAttribute('y', String(y));
+    background.setAttribute('width', String(barWidth));
+    background.setAttribute('height', '20');
+    background.setAttribute('rx', '5');
+    background.setAttribute('fill', variables['--qd-border'] || '#eef2f5');
+    group.appendChild(background);
+
+    const fill = document.createElementNS(SVG_NS, 'rect');
+    fill.setAttribute('x', String(labelWidth));
+    fill.setAttribute('y', String(y));
+    fill.setAttribute('width', String((count / max) * barWidth));
+    fill.setAttribute('height', '20');
+    fill.setAttribute('rx', '5');
+    fill.setAttribute('fill', '#5B7537');
+    group.appendChild(fill);
+
+    const valueText = document.createElementNS(SVG_NS, 'text');
+    valueText.setAttribute('x', String(labelWidth + barWidth + 12));
+    valueText.setAttribute('y', String(y + 16));
+    valueText.setAttribute('fill', variables['--qd-text-muted'] || '#6e7b55');
+    valueText.setAttribute('font-family', 'Arial, sans-serif');
+    valueText.setAttribute('font-size', '12');
+    valueText.textContent = `${count.toLocaleString('pt-BR')} - ${pct.toFixed(1)}%`;
+    group.appendChild(valueText);
+  });
+
+  return { node: group, width, height };
+}
+
 interface LegendItem { label: string; color: string }
 
 function readLegendItems(element: HTMLElement, variables: Record<string, string>): LegendItem[] {
@@ -140,10 +197,15 @@ export function exportElementAsSvg(element: HTMLElement | null, title: string, f
   if (!element) return;
   const svg = element.querySelector<SVGSVGElement>('svg');
   const table = element.querySelector<HTMLTableElement>('table');
-  if (!svg && !table) return;
+  const bars = element.querySelector('[data-svg-export-bar]');
+  if (!svg && !table && !bars) return;
 
   const variables = readThemeVariables(element.closest<HTMLElement>('.qd-root') ?? element);
-  const visual = svg ? copyChartSvg(svg, variables) : tableToSvg(table as HTMLTableElement, variables);
+  const visual = svg
+    ? copyChartSvg(svg, variables)
+    : table
+      ? tableToSvg(table, variables)
+      : barsToSvg(element, variables);
   const legend = svg ? legendToSvg(readLegendItems(element, variables), visual.width, variables) : null;
   const padding = 24;
   const titleHeight = title ? 30 : 0;
