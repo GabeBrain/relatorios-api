@@ -49,6 +49,19 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-28 — Corretor: checkpoint do dia + 2 ajustes desenhados aguardando decisão — Gabriel + Claude
+- **Checkpoint:** [`CHECKPOINT_2026-07-28.md`](../features/corretor-vocacionais/CHECKPOINT_2026-07-28.md)
+  consolida o dia (v0.44→v0.49, 6 commits, 78 testes) e o ponto de retomada de 29/jul.
+- **Ajuste A — somas que não fecham** (estudo Raimundo Leonardi V3/Toledo): investigado, o
+  comentário da analista sobre garden/cobertura **não explica** os 6 achados. São 3 causas:
+  **tabela paginada** (total geral repetido em cada fatia — dominante), **leitura ruim da visão**
+  e **exclusão declarada** (o CH-6 de fato). Decisão pendente: com exclusão declarada, o achado
+  some ou vira "Verificar"?
+- **Ajuste B — notas de edição** (32 dos 39 achados do estudo): deixam de ser "Erro" e viram
+  categoria própria agregada ("Comunicação da revisão"), usada também como **pista dirigida**
+  para o motor. Decisão pendente: na entrega, comentário bloqueia, avisa ou só informa?
+- **Pendente:** deploy de `analyze-ata-image`; Housi v2 do Finoti (FN-1/FN-2).
+
 ### 2026-07-28 — Corretor: ancoragem textual contra cidade alucinada pela visão — Gabriel + Claude
 - **Novo tipo de FP:** no s45 a visão devolveu “São Paulo” como cidade principal de uma tabela
   onde o nome não existe — inferiu dos bairros “Centro”/“Jardim Das Américas”. Diferente dos FPs
