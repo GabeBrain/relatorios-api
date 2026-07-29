@@ -26,6 +26,11 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-07-29 - Exportacao SVG editavel - Codex
+- **O que:** os cards de graficos e tabelas do Banco Quanti, incluindo a Analise Cruzada Universal, ganharam botao `SVG`.
+- **Uso:** o arquivo preserva o visual como vetor; no PowerPoint, use o menu de contexto **Converter em Forma** para editar cores, textos e legendas.
+- **Arquivos:** `src/features/area-quanti/dashboard/{Charts.tsx,CrossAnalysis.tsx,svgExport.ts}`.
+
 ### 2026-07-22 — Análise cruzada com campos numéricos + labels de renda/idade — Lovable (Amanda)
 - **O quê:** os seletores "Pergunta" e "Comparar com" da Análise Cruzada passaram a listar o `schema`
   completo em vez de apenas `catFields`, liberando o cruzamento por campos que não eram categóricos puros

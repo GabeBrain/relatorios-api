@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef, type RefObject } from 'react';
 import {
   Bar,
   BarChart,
@@ -13,6 +13,7 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
+import { Download } from 'lucide-react';
 import type { CategoricalField, QuantiRecord } from './types';
 import {
   compareCategoricalAlphabetic,
@@ -24,6 +25,7 @@ import {
   type Crosstab,
 } from './aggregate';
 import { useQuantiStore } from './store';
+import { exportElementAsSvg } from './svgExport';
 
 // Brain palette — tons de verde e amarelo
 const PALETTE = [
@@ -64,8 +66,25 @@ function wrapAxisLabel(value: string, maxChars: number, maxLines = 3): string[] 
   return lines.length ? lines : [value];
 }
 
-interface CardProps { title: React.ReactNode; subtitle?: string; children: React.ReactNode; className?: string; action?: React.ReactNode }
-export function ChartCard({ title, subtitle, children, className, action }: CardProps) {
+interface CardProps { title: React.ReactNode; subtitle?: string; children: React.ReactNode; className?: string; action?: React.ReactNode; exportable?: boolean }
+export function SvgExportButton({ targetRef, title, filename, disabled = false }: { targetRef: RefObject<HTMLElement>; title: string; filename?: string; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={() => exportElementAsSvg(targetRef.current, title, filename ?? title)}
+      disabled={disabled}
+      className="qd-svg-export-btn inline-flex h-7 items-center gap-1 rounded border border-[var(--qd-border)] px-2 text-[11px] font-semibold text-[var(--qd-text-muted)] transition hover:bg-[var(--qd-light)] hover:text-[var(--qd-text)]"
+      title="SVG editável: baixe e insira no PowerPoint; clique com o botão direito > Converter em Forma para editar cores, textos e legendas."
+      aria-label={`Exportar ${title} em SVG editável`}
+    >
+      <Download className="h-3 w-3" /> SVG
+    </button>
+  );
+}
+
+export function ChartCard({ title, subtitle, children, className, action, exportable = true }: CardProps) {
+  const visualRef = useRef<HTMLDivElement>(null);
+  const titleText = typeof title === 'string' ? title : 'Visualização Banco Quanti';
   return (
     <div className={`qd-card p-4 ${className ?? ''}`}>
       <div className="mb-3 flex items-center justify-between gap-2">
@@ -73,9 +92,12 @@ export function ChartCard({ title, subtitle, children, className, action }: Card
           <div className="qd-section-title">{title}</div>
           {subtitle && <div className="qd-section-sub">{subtitle}</div>}
         </div>
-        {action}
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
+          {action}
+          {exportable && <SvgExportButton targetRef={visualRef} title={titleText} />}
+        </div>
       </div>
-      {children}
+      <div ref={visualRef}>{children}</div>
     </div>
   );
 }

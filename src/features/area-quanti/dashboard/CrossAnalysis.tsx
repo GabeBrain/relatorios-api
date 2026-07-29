@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -25,7 +25,7 @@ import {
   type UniversalCrosstab,
   type UniversalMetric,
 } from './aggregate';
-import { ChartCard, Heatmap } from './Charts';
+import { ChartCard, Heatmap, SvgExportButton } from './Charts';
 import { useQuantiStore } from './store';
 
 type ViewKind = 'table' | 'grouped' | 'stacked' | 'stacked100' | 'heatmap' | 'pie' | 'donut' | 'treemap';
@@ -97,6 +97,7 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
   const [view, setView] = useState<ViewKind>('table');
   const [mode, setMode] = useState<Mode>('both');
   const [allowLargeMatrix, setAllowLargeMatrix] = useState(false);
+  const visualRef = useRef<HTMLDivElement>(null);
 
   const needsValueField = metric === 'avg' || metric === 'sum' || metric === 'median';
 
@@ -150,6 +151,7 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
       title="Análise Cruzada Universal"
       subtitle="Cruze qualquer variável analítica da base. Novas colunas aparecem automaticamente."
       className="qd-cross-analysis"
+      exportable={false}
       action={
         <div className="flex flex-wrap items-center gap-1.5">
           <div className="qd-cross-mode-group flex items-center rounded-md border border-slate-200 bg-white">
@@ -163,6 +165,12 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
           <button onClick={exportXLSX} className="qd-cross-export-btn flex items-center gap-1 rounded border border-slate-200 px-2 py-1 text-[11px] hover:bg-slate-50">
             <FileSpreadsheet className="h-3 w-3" /> XLSX
           </button>
+          <SvgExportButton
+            targetRef={visualRef}
+            title={`Cruzamento ${rowLabel}${colLabel ? ` x ${colLabel}` : ''}`}
+            filename={`cruzamento_${rowField}_x_${colField ?? 'total'}`}
+            disabled={!ct}
+          />
         </div>
       }
     >
@@ -214,6 +222,7 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
         </SelectBox>
       </div>
 
+      <div ref={visualRef}>
       {/* Table */}
       {!ct && (
         <div className="rounded-md border border-[var(--qd-border)] bg-[var(--qd-surface-2)] p-3 text-xs text-[var(--qd-text-muted)]">
@@ -239,6 +248,7 @@ export function CrossAnalysis({ rows, questions }: { rows: QuantiRecord[]; quest
           />
         </div>
       )}
+      </div>
     </ChartCard>
   );
 }
