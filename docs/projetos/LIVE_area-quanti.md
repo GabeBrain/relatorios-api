@@ -26,11 +26,6 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
-### 2026-07-29 — Loader animado no carregamento da base — Codex
-- **O quê:** a tela de carregamento do Banco Quanti deixou de usar o spinner/texto padrão e passou a exibir a animação em vídeo fornecida pelo Lucas.
-- **Tema:** o loader usa o fundo real do dashboard e `mix-blend-mode: screen` para se adaptar aos modos claro e escuro sem criar uma placa escura fixa.
-- **Arquivos:** `src/features/area-quanti/dashboard/QuantiDashboard.tsx`, `src/features/area-quanti/dashboard/dashboard.css`, `public/area-quanti/quanti-loader.mp4`.
-
 ### 2026-07-22 — Análise cruzada com campos numéricos + labels de renda/idade — Lovable (Amanda)
 - **O quê:** os seletores "Pergunta" e "Comparar com" da Análise Cruzada passaram a listar o `schema`
   completo em vez de apenas `catFields`, liberando o cruzamento por campos que não eram categóricos puros

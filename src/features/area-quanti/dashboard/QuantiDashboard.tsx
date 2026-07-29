@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { ArrowDownAZ, ArrowDownUp, ChevronDown, ChevronRight, Download, FileSpreadsheet, Filter, Info } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownUp, ChevronDown, ChevronRight, Download, FileSpreadsheet, Filter, Info, Loader2 } from 'lucide-react';
 import { DATASETS } from './datasets';
 import { useQuantiDataset } from './useQuantiDataset';
 import { useQuantiStore } from './store';
@@ -62,24 +62,6 @@ function SortToggle({ order, onChange }: { order: SortOrder; onChange: (order: S
       >
         <ArrowDownUp className="h-3.5 w-3.5" />
       </button>
-    </div>
-  );
-}
-
-function QuantiLoadingState({ label }: { label: string }) {
-  return (
-    <div className="qd-loading-state" role="status" aria-label={`Carregando ${label}`}>
-      <video
-        className="qd-loading-video"
-        src="/area-quanti/quanti-loader.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        aria-hidden="true"
-      />
-      <span className="sr-only">Carregando {label}</span>
     </div>
   );
 }
@@ -370,7 +352,9 @@ export function QuantiDashboard() {
         </div>
 
         {loading && (
-          <QuantiLoadingState label={ds.label} />
+          <div className="flex flex-1 items-center justify-center gap-2 text-sm text-[var(--qd-text-muted)]">
+            <Loader2 className="h-4 w-4 animate-spin" /> Carregando {ds.label}…
+          </div>
         )}
         {error && (
           <div className="flex flex-1 items-center justify-center p-6">
