@@ -29,6 +29,7 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 ### 2026-07-29 - Ordenacao e SVG na distribuicao por regiao - Codex
 - **O que:** a lista de distribuicao regional ganhou ordenacao por quantidade maior-menor/menor-maior e por nome A-Z/Z-A, com atualizacao animada das linhas.
 - **Exportacao:** o botao `SVG` exporta as barras, regioes, quantidades e percentuais dessa visualizacao.
+- **Tema:** o arquivo exportado usa fundo branco e contraste claro, independentemente do modo escuro do dashboard.
 
 ### 2026-07-29 - Exportacao SVG editavel - Codex
 - **O que:** os cards de graficos e tabelas do Banco Quanti, incluindo a Analise Cruzada Universal, ganharam botao `SVG`.

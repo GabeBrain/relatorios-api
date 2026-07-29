@@ -200,7 +200,14 @@ export function exportElementAsSvg(element: HTMLElement | null, title: string, f
   const bars = element.querySelector('[data-svg-export-bar]');
   if (!svg && !table && !bars) return;
 
-  const variables = readThemeVariables(element.closest<HTMLElement>('.qd-root') ?? element);
+  const variables = {
+    ...readThemeVariables(element.closest<HTMLElement>('.qd-root') ?? element),
+    '--qd-surface': '#ffffff',
+    '--qd-surface-2': '#ffffff',
+    '--qd-text': '#1f2a12',
+    '--qd-text-muted': '#4b5563',
+    '--qd-border': '#d9ded0',
+  };
   const visual = svg
     ? copyChartSvg(svg, variables)
     : table
