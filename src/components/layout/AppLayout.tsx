@@ -297,6 +297,8 @@ export function AppLayout({ children }: AppLayoutProps) {
           {TOP_ITEMS.map(renderNavItem)}
 
           {NAV_GROUPS.map((group) => {
+            if (group.id === 'apis') return null;
+
             if (group.id === 'rebrain') {
               return (
                 <div key={group.id} className="mt-2 space-y-0.5">
