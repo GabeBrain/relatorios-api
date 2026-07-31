@@ -29,6 +29,7 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 ### 2026-07-31 - Banco Quanti como item direto de navegacao - Codex
 - **O que:** a Área Quanti passou a aparecer como uma única opção direta `Banco Quanti`, sem grupo expansível ou submenu.
 - **Escopo:** apenas a navegação foi alterada; a rota `/quanti`, o dashboard e suas funções permanecem inalterados.
+- **Navegação compartilhada:** os demais projetos também passaram a exibir seus itens diretamente, sem alterar as rotas ou funcionalidades das abas.
 
 ### 2026-07-29 - Ordenacao e SVG na distribuicao por regiao - Codex
 - **O que:** a lista de distribuicao regional ganhou ordenacao por quantidade maior-menor/menor-maior e por nome A-Z/Z-A, com atualizacao animada das linhas.

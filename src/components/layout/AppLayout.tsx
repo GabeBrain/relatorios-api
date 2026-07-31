@@ -297,6 +297,26 @@ export function AppLayout({ children }: AppLayoutProps) {
           {TOP_ITEMS.map(renderNavItem)}
 
           {NAV_GROUPS.map((group) => {
+            if (group.id === 'rebrain') {
+              return (
+                <div key={group.id} className="mt-2 space-y-0.5">
+                  {group.items.map((entry) => (isFolder(entry) ? null : renderNavItem(entry)))}
+                </div>
+              );
+            }
+
+            if (group.id === 'dash-geobrain') {
+              return (
+                <div key={group.id} className="mt-2">
+                  {renderNavItem({
+                    path: '/dash-geobrain',
+                    label: 'Dashboard Geobrain',
+                    icon: <BarChart2 className="h-4 w-4" />,
+                  })}
+                </div>
+              );
+            }
+
             if (group.id === 'quanti') {
               return (
                 <div key={group.id} className="mt-2">

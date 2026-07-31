@@ -29,7 +29,7 @@ const PAGES: Destination[] = [
   { label: 'Início', path: '/inicio', icon: <Home className="h-4 w-4" /> },
   { label: 'Rebrain — Secovi', path: '/rebrain/secovi', icon: <Building2 className="h-4 w-4" />, keywords: 'barretos excel mercado relatorio' },
   { label: 'Rebrain — Corretor | Vocacionais', path: '/auditoria', icon: <ClipboardList className="h-4 w-4" />, keywords: 'corretor vocacional slides auditoria' },
-  { label: 'Dash Geobrain', path: '/dash-geobrain', icon: <BarChart2 className="h-4 w-4" />, keywords: 'dashboard' },
+  { label: 'Dashboard Geobrain', path: '/dash-geobrain', icon: <BarChart2 className="h-4 w-4" />, keywords: 'dash geobrain dashboard' },
   { label: 'Banco Quanti', path: '/quanti', icon: <Database className="h-4 w-4" />, keywords: 'area quanti quantitativo base dashboard' },
   { label: 'API Explorer', path: '/apis/explorer', icon: <Plug className="h-4 w-4" />, keywords: 'documentacao testes requisicao endpoint console' },
 ];
