@@ -297,6 +297,19 @@ export function AppLayout({ children }: AppLayoutProps) {
           {TOP_ITEMS.map(renderNavItem)}
 
           {NAV_GROUPS.map((group) => {
+            if (group.id === 'quanti') {
+              return (
+                <div key={group.id} className="mt-2">
+                  {renderNavItem({
+                    path: '/quanti',
+                    label: 'Banco Quanti',
+                    icon: <Database className="h-4 w-4" />,
+                    standbyLabel: '(em implementação)',
+                  })}
+                </div>
+              );
+            }
+
             const hasActiveChild = group.items.some(isActiveEntry);
             const isOpen = (openGroups[group.id] ?? true) || hasActiveChild;
 
