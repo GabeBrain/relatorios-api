@@ -435,20 +435,10 @@ export function computeResumo(rows: ClosureRow[], allRowsUnfiltered: ClosureRow[
     accumulate(byBucket.get(k)!, r, k, releaseBucketKeyOfRow(r, g));
   }
   const bucketsSorted = sortBuckets(Array.from(byBucket.keys()), g);
-  const buckets: ResumoBucket[] = bucketsSorted.map((k) => {
-    const agg = byBucket.get(k)!;
-    return {
-      key: k,
-      metrics: {
-        empreendimentos_lancados: metricValue(agg, 'empreendimentos_lancados'),
-        unidades_lancadas: metricValue(agg, 'unidades_lancadas'),
-        unidades_vendidas: metricValue(agg, 'unidades_vendidas'),
-        oferta_final: metricValue(agg, 'oferta_final'),
-        preco_medio: metricValue(agg, 'preco_medio'),
-        preco_m2: metricValue(agg, 'preco_m2'),
-      },
-    };
-  });
+  const buckets: ResumoBucket[] = bucketsSorted.map((k) => ({
+    key: k,
+    metrics: allMetrics(byBucket.get(k)!),
+  }));
 
   // Para AA/PA usamos allRowsUnfiltered filtrado apenas por dimensões (padrão/tipo/empreend.)
   // -> aqui já entra pronto (o caller aplica filtros dimensionais sem temporais).
@@ -459,17 +449,8 @@ export function computeResumo(rows: ClosureRow[], allRowsUnfiltered: ClosureRow[
     accumulate(byBucketFull.get(k)!, r, k, releaseBucketKeyOfRow(r, g));
   }
   const allSorted = sortBuckets(Array.from(byBucketFull.keys()), g);
-  function aggMetrics(agg: Aggregates | undefined): Record<MetricKey, number | null> {
-    if (!agg) return { empreendimentos_lancados: null, unidades_lancadas: null, unidades_vendidas: null, oferta_final: null, preco_medio: null, preco_m2: null };
-    return {
-      empreendimentos_lancados: metricValue(agg, 'empreendimentos_lancados'),
-      unidades_lancadas: metricValue(agg, 'unidades_lancadas'),
-      unidades_vendidas: metricValue(agg, 'unidades_vendidas'),
-      oferta_final: metricValue(agg, 'oferta_final'),
-      preco_medio: metricValue(agg, 'preco_medio'),
-      preco_m2: metricValue(agg, 'preco_m2'),
-    };
-  }
+  const aggMetrics = allMetrics;
+
 
   const yearAgo = new Map<string, Record<MetricKey, number | null>>();
   const prevBucket = new Map<string, Record<MetricKey, number | null>>();
