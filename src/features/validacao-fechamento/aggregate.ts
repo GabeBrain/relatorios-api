@@ -131,6 +131,7 @@ export function flattenBuildings(buildings: Building[]): ClosureRow[] {
 
 export function applyVFFilters(rows: ClosureRow[], f: VFFilters): ClosureRow[] {
   return rows.filter((r) => {
+    if (f.cities.length && !f.cities.includes(r.city)) return false;
     if (f.years.length && !f.years.includes(r.bucketYear)) return false;
     if (f.quarters.length && !f.quarters.includes(r.bucketQuarter)) return false;
     if (f.periods.length && !f.periods.includes(r.periodKey)) return false;
@@ -140,6 +141,7 @@ export function applyVFFilters(rows: ClosureRow[], f: VFFilters): ClosureRow[] {
     return true;
   });
 }
+
 
 export interface VFOptions {
   years: string[];
