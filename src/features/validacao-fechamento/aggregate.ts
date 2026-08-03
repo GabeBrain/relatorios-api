@@ -188,22 +188,71 @@ export function extractVFOptions(rows: ClosureRow[]): VFOptions {
 
 // ============ Métricas ============
 
-export type MetricKey = 'empreendimentos_lancados' | 'unidades_lancadas' | 'unidades_vendidas' | 'oferta_final' | 'preco_medio' | 'preco_m2';
+export type MetricKey =
+  | 'pct_fechamento'
+  | 'empreendimentos_lancados'
+  | 'unidades_lancadas'
+  | 'unidades_vendidas'
+  | 'oferta_final'
+  | 'preco_medio'
+  | 'preco_m2';
 
 export interface MetricDef {
   key: MetricKey;
   label: string;
-  format: 'int' | 'currency';
+  format: 'int' | 'currency' | 'percent';
+  /** Regra de cálculo exibida no ícone (i). */
+  info: string;
+  /** Medidas sem linhas de variação (ex.: medidor 0–100%). */
+  noVariation?: boolean;
 }
 
 export const METRICS: MetricDef[] = [
-  { key: 'empreendimentos_lancados', label: 'Empreendimentos lançados', format: 'int' },
-  { key: 'unidades_lancadas',        label: 'Unidades lançadas',        format: 'int' },
-  { key: 'unidades_vendidas',        label: 'Unidades vendidas',        format: 'int' },
-  { key: 'oferta_final',             label: 'Oferta final',              format: 'int' },
-  { key: 'preco_medio',              label: 'Preço médio',               format: 'currency' },
-  { key: 'preco_m2',                 label: 'Preço M²',                  format: 'currency' },
+  {
+    key: 'pct_fechamento',
+    label: '% de fechamento da cidade',
+    format: 'percent',
+    noVariation: true,
+    info: 'Medidor de 0% a 100%. Representatividade dos building_id distintos que possuem registro em typologies_history no último período do intervalo, sobre o total de building_id distintos presentes no intervalo. Indica o quanto da base da cidade já foi fechada naquele período.',
+  },
+  {
+    key: 'empreendimentos_lancados',
+    label: 'Empreendimentos lançados',
+    format: 'int',
+    info: 'Contagem de building_id distintos cujo release_date cai dentro do período exibido (KEEPFILTERS release_date = período).',
+  },
+  {
+    key: 'unidades_lancadas',
+    label: 'Unidades lançadas',
+    format: 'int',
+    info: 'Soma de qty das tipologias dos empreendimentos cujo release_date cai dentro do período exibido.',
+  },
+  {
+    key: 'unidades_vendidas',
+    label: 'Unidades vendidas',
+    format: 'int',
+    info: 'Soma de sold_in_period de todos os registros de histórico do período exibido.',
+  },
+  {
+    key: 'oferta_final',
+    label: 'Oferta final',
+    format: 'int',
+    info: 'Soma de typology_stock considerando, para cada typology_id, apenas o último período dentro do intervalo exibido.',
+  },
+  {
+    key: 'preco_medio',
+    label: 'Preço médio',
+    format: 'currency',
+    info: 'Σ(qty × price) ÷ Σ(qty), restrito a type_of_typology = "Padrão" e typology_stock ≠ 0.',
+  },
+  {
+    key: 'preco_m2',
+    label: 'Preço M²',
+    format: 'currency',
+    info: 'Σ(qty × price) ÷ Σ(qty × private_area), restrito a type_of_typology = "Padrão", typology_stock ≠ 0 e private_area > 0.',
+  },
 ];
+
 
 function bucketKeyOfRow(r: ClosureRow, g: Granularity): string {
   if (g === 'year') return r.bucketYear;
