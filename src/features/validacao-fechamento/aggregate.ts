@@ -9,11 +9,13 @@ export interface VFFilters {
   standards: string[];
   buildingTypes: string[];
   buildings: string[];    // building_id
+  cities: string[];       // cidade ativa (0 ou 1 item)
 }
 
 export const EMPTY_VF_FILTERS: VFFilters = {
-  years: [], quarters: [], periods: [], standards: [], buildingTypes: [], buildings: [],
+  years: [], quarters: [], periods: [], standards: [], buildingTypes: [], buildings: [], cities: [],
 };
+
 
 /** Uma linha achatada por typology-period do dataset. */
 export interface ClosureRow {
