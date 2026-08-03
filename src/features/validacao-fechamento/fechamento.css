@@ -125,3 +125,38 @@
   background: transparent;
 }
 .validacao-fechamento .vf-grid .vf-resizer:hover { background: var(--vf-primary); }
+
+/* Ícone (i) de regra de cálculo */
+.validacao-fechamento .vf-info {
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--vf-muted); opacity: .75; cursor: pointer;
+  border: none; background: transparent; padding: 0;
+}
+.validacao-fechamento .vf-info:hover { color: var(--vf-primary-strong); opacity: 1; }
+
+/* Medidor 0–100% (% de fechamento da cidade) */
+.validacao-fechamento table.vf-resumo td.vf-gauge-cell { min-width: 120px; }
+.validacao-fechamento .vf-gauge {
+  display: inline-flex; align-items: center; gap: 6px; width: 100%; justify-content: flex-end;
+}
+.validacao-fechamento .vf-gauge-track {
+  flex: 1; min-width: 48px; height: 8px; border-radius: 999px;
+  background: var(--vf-muted-soft); border: 1px solid var(--vf-border);
+  overflow: hidden; display: inline-block;
+}
+.validacao-fechamento .vf-gauge-fill {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--vf-accent), var(--vf-primary));
+  transition: width .25s;
+}
+.validacao-fechamento .vf-gauge-value { font-variant-numeric: tabular-nums; font-weight: 700; }
+
+/* Blocos do Resumo por cidade */
+.validacao-fechamento .vf-city-block { margin-bottom: 18px; }
+.validacao-fechamento .vf-city-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11pt; font-weight: 700; color: var(--vf-text); margin-bottom: 6px;
+}
+.validacao-fechamento .vf-city-title::before {
+  content: ''; width: 4px; height: 16px; border-radius: 2px; background: var(--vf-primary);
+}
