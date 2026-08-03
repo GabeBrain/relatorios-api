@@ -9,11 +9,13 @@ export interface VFFilters {
   standards: string[];
   buildingTypes: string[];
   buildings: string[];    // building_id
+  cities: string[];       // cidade ativa (0 ou 1 item)
 }
 
 export const EMPTY_VF_FILTERS: VFFilters = {
-  years: [], quarters: [], periods: [], standards: [], buildingTypes: [], buildings: [],
+  years: [], quarters: [], periods: [], standards: [], buildingTypes: [], buildings: [], cities: [],
 };
+
 
 /** Uma linha achatada por typology-period do dataset. */
 export interface ClosureRow {
@@ -129,6 +131,7 @@ export function flattenBuildings(buildings: Building[]): ClosureRow[] {
 
 export function applyVFFilters(rows: ClosureRow[], f: VFFilters): ClosureRow[] {
   return rows.filter((r) => {
+    if (f.cities.length && !f.cities.includes(r.city)) return false;
     if (f.years.length && !f.years.includes(r.bucketYear)) return false;
     if (f.quarters.length && !f.quarters.includes(r.bucketQuarter)) return false;
     if (f.periods.length && !f.periods.includes(r.periodKey)) return false;
@@ -139,6 +142,7 @@ export function applyVFFilters(rows: ClosureRow[], f: VFFilters): ClosureRow[] {
   });
 }
 
+
 export interface VFOptions {
   years: string[];
   quarters: string[];
@@ -146,7 +150,9 @@ export interface VFOptions {
   standards: string[];
   buildingTypes: string[];
   buildings: { id: string; name: string }[];
+  cities: string[];
 }
+
 
 export function extractVFOptions(rows: ClosureRow[]): VFOptions {
   const years = new Set<string>();
@@ -155,6 +161,7 @@ export function extractVFOptions(rows: ClosureRow[]): VFOptions {
   const standards = new Set<string>();
   const btypes = new Set<string>();
   const buildingsMap = new Map<string, string>();
+  const cities = new Set<string>();
   for (const r of rows) {
     if (r.bucketYear) years.add(r.bucketYear);
     if (r.bucketQuarter) quarters.add(r.bucketQuarter);
@@ -162,6 +169,7 @@ export function extractVFOptions(rows: ClosureRow[]): VFOptions {
     if (r.standard) standards.add(r.standard);
     if (r.building_type) btypes.add(r.building_type);
     if (r.building_id) buildingsMap.set(r.building_id, r.building_name);
+    if (r.city) cities.add(r.city);
   }
   const periods = Array.from(periodMap.entries())
     .sort((a, b) => (a[0] < b[0] ? 1 : -1))     // desc
@@ -179,27 +187,78 @@ export function extractVFOptions(rows: ClosureRow[]): VFOptions {
     standards: Array.from(standards).sort(),
     buildingTypes: Array.from(btypes).sort(),
     buildings: Array.from(buildingsMap.entries()).map(([id, name]) => ({ id, name })).sort((a,b) => a.name.localeCompare(b.name)),
+    cities: Array.from(cities).sort((a, b) => a.localeCompare(b)),
   };
+
 }
 
 // ============ Métricas ============
 
-export type MetricKey = 'empreendimentos_lancados' | 'unidades_lancadas' | 'unidades_vendidas' | 'oferta_final' | 'preco_medio' | 'preco_m2';
+export type MetricKey =
+  | 'pct_fechamento'
+  | 'empreendimentos_lancados'
+  | 'unidades_lancadas'
+  | 'unidades_vendidas'
+  | 'oferta_final'
+  | 'preco_medio'
+  | 'preco_m2';
 
 export interface MetricDef {
   key: MetricKey;
   label: string;
-  format: 'int' | 'currency';
+  format: 'int' | 'currency' | 'percent';
+  /** Regra de cálculo exibida no ícone (i). */
+  info: string;
+  /** Medidas sem linhas de variação (ex.: medidor 0–100%). */
+  noVariation?: boolean;
 }
 
 export const METRICS: MetricDef[] = [
-  { key: 'empreendimentos_lancados', label: 'Empreendimentos lançados', format: 'int' },
-  { key: 'unidades_lancadas',        label: 'Unidades lançadas',        format: 'int' },
-  { key: 'unidades_vendidas',        label: 'Unidades vendidas',        format: 'int' },
-  { key: 'oferta_final',             label: 'Oferta final',              format: 'int' },
-  { key: 'preco_medio',              label: 'Preço médio',               format: 'currency' },
-  { key: 'preco_m2',                 label: 'Preço M²',                  format: 'currency' },
+  {
+    key: 'pct_fechamento',
+    label: '% de fechamento da cidade',
+    format: 'percent',
+    noVariation: true,
+    info: 'Medidor de 0% a 100%. Representatividade dos building_id distintos que possuem registro em typologies_history no último período do intervalo, sobre o total de building_id distintos presentes no intervalo. Indica o quanto da base da cidade já foi fechada naquele período.',
+  },
+  {
+    key: 'empreendimentos_lancados',
+    label: 'Empreendimentos lançados',
+    format: 'int',
+    info: 'Contagem de building_id distintos cujo release_date cai dentro do período exibido (KEEPFILTERS release_date = período).',
+  },
+  {
+    key: 'unidades_lancadas',
+    label: 'Unidades lançadas',
+    format: 'int',
+    info: 'Soma de qty das tipologias dos empreendimentos cujo release_date cai dentro do período exibido.',
+  },
+  {
+    key: 'unidades_vendidas',
+    label: 'Unidades vendidas',
+    format: 'int',
+    info: 'Soma de sold_in_period de todos os registros de histórico do período exibido.',
+  },
+  {
+    key: 'oferta_final',
+    label: 'Oferta final',
+    format: 'int',
+    info: 'Soma de typology_stock considerando, para cada typology_id, apenas o último período dentro do intervalo exibido.',
+  },
+  {
+    key: 'preco_medio',
+    label: 'Preço médio',
+    format: 'currency',
+    info: 'Σ(qty × price) ÷ Σ(qty), restrito a type_of_typology = "Padrão" e typology_stock ≠ 0.',
+  },
+  {
+    key: 'preco_m2',
+    label: 'Preço M²',
+    format: 'currency',
+    info: 'Σ(qty × price) ÷ Σ(qty × private_area), restrito a type_of_typology = "Padrão", typology_stock ≠ 0 e private_area > 0.',
+  },
 ];
+
 
 function bucketKeyOfRow(r: ClosureRow, g: Granularity): string {
   if (g === 'year') return r.bucketYear;
@@ -261,6 +320,10 @@ interface Aggregates {
   // Preço m²: mesmos filtros
   pmm2SumVgv: number;
   pmm2SumArea: number; // sum(qty * private_area)
+  // % de fechamento: building_id distintos com histórico em cada period
+  allBuildingIds: Set<string>;
+  buildingIdsByPeriod: Map<string, Set<string>>;
+  maxPeriodKey: string;
 }
 
 function newAgg(): Aggregates {
@@ -272,6 +335,9 @@ function newAgg(): Aggregates {
     offerLastPeriodKey: new Map(),
     pmSumVgv: 0, pmSumQty: 0,
     pmm2SumVgv: 0, pmm2SumArea: 0,
+    allBuildingIds: new Set(),
+    buildingIdsByPeriod: new Map(),
+    maxPeriodKey: '',
   };
 }
 
@@ -288,6 +354,16 @@ function accumulate(agg: Aggregates, r: ClosureRow, bucketKey: string, releaseKe
     agg.offerLastPeriodKey.set(r.typology_id, r.periodKey);
     agg.offerAtLast.set(r.typology_id, r.typology_stock);
   }
+  // % de fechamento
+  if (r.building_id) {
+    agg.allBuildingIds.add(r.building_id);
+    if (r.periodKey) {
+      if (r.periodKey > agg.maxPeriodKey) agg.maxPeriodKey = r.periodKey;
+      let set = agg.buildingIdsByPeriod.get(r.periodKey);
+      if (!set) { set = new Set(); agg.buildingIdsByPeriod.set(r.periodKey, set); }
+      set.add(r.building_id);
+    }
+  }
   // Preço médio: type_of_typology='Padrão' e typology_stock<>0
   if (r.type_of_typology === 'Padrão' && r.typology_stock !== 0 && r.price != null) {
     agg.pmSumVgv += r.qty * r.price;
@@ -301,6 +377,12 @@ function accumulate(agg: Aggregates, r: ClosureRow, bucketKey: string, releaseKe
 
 function metricValue(agg: Aggregates, metric: MetricKey): number | null {
   switch (metric) {
+    case 'pct_fechamento': {
+      const total = agg.allBuildingIds.size;
+      if (!total || !agg.maxPeriodKey) return null;
+      const withRef = agg.buildingIdsByPeriod.get(agg.maxPeriodKey)?.size ?? 0;
+      return withRef / total;
+    }
     case 'empreendimentos_lancados': return agg.buildingIds.size;
     case 'unidades_lancadas': return agg.qtyLancadas;
     case 'unidades_vendidas': return agg.soldPeriodo;
@@ -311,6 +393,30 @@ function metricValue(agg: Aggregates, metric: MetricKey): number | null {
     case 'preco_m2': return agg.pmm2SumArea > 0 ? agg.pmm2SumVgv / agg.pmm2SumArea : null;
   }
 }
+
+function allMetrics(agg: Aggregates | undefined): Record<MetricKey, number | null> {
+  if (!agg) {
+    return {
+      pct_fechamento: null,
+      empreendimentos_lancados: null,
+      unidades_lancadas: null,
+      unidades_vendidas: null,
+      oferta_final: null,
+      preco_medio: null,
+      preco_m2: null,
+    };
+  }
+  return {
+    pct_fechamento: metricValue(agg, 'pct_fechamento'),
+    empreendimentos_lancados: metricValue(agg, 'empreendimentos_lancados'),
+    unidades_lancadas: metricValue(agg, 'unidades_lancadas'),
+    unidades_vendidas: metricValue(agg, 'unidades_vendidas'),
+    oferta_final: metricValue(agg, 'oferta_final'),
+    preco_medio: metricValue(agg, 'preco_medio'),
+    preco_m2: metricValue(agg, 'preco_m2'),
+  };
+}
+
 
 export interface ResumoBucket {
   key: string;
@@ -335,20 +441,10 @@ export function computeResumo(rows: ClosureRow[], allRowsUnfiltered: ClosureRow[
     accumulate(byBucket.get(k)!, r, k, releaseBucketKeyOfRow(r, g));
   }
   const bucketsSorted = sortBuckets(Array.from(byBucket.keys()), g);
-  const buckets: ResumoBucket[] = bucketsSorted.map((k) => {
-    const agg = byBucket.get(k)!;
-    return {
-      key: k,
-      metrics: {
-        empreendimentos_lancados: metricValue(agg, 'empreendimentos_lancados'),
-        unidades_lancadas: metricValue(agg, 'unidades_lancadas'),
-        unidades_vendidas: metricValue(agg, 'unidades_vendidas'),
-        oferta_final: metricValue(agg, 'oferta_final'),
-        preco_medio: metricValue(agg, 'preco_medio'),
-        preco_m2: metricValue(agg, 'preco_m2'),
-      },
-    };
-  });
+  const buckets: ResumoBucket[] = bucketsSorted.map((k) => ({
+    key: k,
+    metrics: allMetrics(byBucket.get(k)!),
+  }));
 
   // Para AA/PA usamos allRowsUnfiltered filtrado apenas por dimensões (padrão/tipo/empreend.)
   // -> aqui já entra pronto (o caller aplica filtros dimensionais sem temporais).
@@ -359,17 +455,8 @@ export function computeResumo(rows: ClosureRow[], allRowsUnfiltered: ClosureRow[
     accumulate(byBucketFull.get(k)!, r, k, releaseBucketKeyOfRow(r, g));
   }
   const allSorted = sortBuckets(Array.from(byBucketFull.keys()), g);
-  function aggMetrics(agg: Aggregates | undefined): Record<MetricKey, number | null> {
-    if (!agg) return { empreendimentos_lancados: null, unidades_lancadas: null, unidades_vendidas: null, oferta_final: null, preco_medio: null, preco_m2: null };
-    return {
-      empreendimentos_lancados: metricValue(agg, 'empreendimentos_lancados'),
-      unidades_lancadas: metricValue(agg, 'unidades_lancadas'),
-      unidades_vendidas: metricValue(agg, 'unidades_vendidas'),
-      oferta_final: metricValue(agg, 'oferta_final'),
-      preco_medio: metricValue(agg, 'preco_medio'),
-      preco_m2: metricValue(agg, 'preco_m2'),
-    };
-  }
+  const aggMetrics = allMetrics;
+
 
   const yearAgo = new Map<string, Record<MetricKey, number | null>>();
   const prevBucket = new Map<string, Record<MetricKey, number | null>>();

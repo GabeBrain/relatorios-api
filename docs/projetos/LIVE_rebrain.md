@@ -49,6 +49,20 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### Validação do Fechamento — multi-cidade, resumo por cidade e % de fechamento
+- **Multi-cidade:** novo `use-vf-data.ts` consulta até **10 municípios** da UF selecionada em
+  paralelo e mescla tudo em uma base única deduplicada por `building_id`; falhas por cidade são
+  reportadas sem derrubar as demais.
+- **Header:** `VFCityMultiSelect` (UF + multi-seleção de municípios monitorados, sem fallback IBGE)
+  e novo filtro **"Cidades carregadas"** (seleção única, `Todas` por padrão).
+- **Nova guia "Resumo por cidade":** repete a tabela Resumo em um bloco por cidade carregada.
+- **Nova medida "% de fechamento":** representatividade de `building_id` distintos com
+  `typologies_history.period` no último período do bucket sobre o total de empreendimentos,
+  renderizada como medidor 0–100%.
+- **Ícones (i):** cada medida do Resumo exibe popover com a regra de cálculo (`METRICS[].info`).
+
+
+
 ### 2026-07-28 — Corretor: checkpoint do dia + 2 ajustes desenhados aguardando decisão — Gabriel + Claude
 - **Checkpoint:** [`CHECKPOINT_2026-07-28.md`](../features/corretor-vocacionais/CHECKPOINT_2026-07-28.md)
   consolida o dia (v0.44→v0.49, 6 commits, 78 testes) e o ponto de retomada de 29/jul.

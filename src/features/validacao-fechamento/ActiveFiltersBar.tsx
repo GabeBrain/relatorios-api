@@ -1,10 +1,11 @@
 import { X } from 'lucide-react';
-import type { GeoScope } from '@/features/shared/geo-api-scope-engine';
 import type { Granularity, VFFilters, VFOptions } from './aggregate';
 import { EMPTY_VF_FILTERS } from './aggregate';
 
 interface Props {
-  scope: GeoScope;
+  uf: string;
+  loadedCities: string[];
+  activeCity: string;
   granularity: Granularity;
   filters: VFFilters;
   options: VFOptions;
@@ -21,8 +22,12 @@ function joinOrDash(values: string[]): string {
   return values.length ? values.join(', ') : '—';
 }
 
-export function ActiveFiltersBar({ scope, granularity, filters, options, onReset }: Props) {
-  const cityLabel = scope.uf && scope.city ? `${scope.city}/${scope.uf}` : '—';
+export function ActiveFiltersBar({ uf, loadedCities, activeCity, granularity, filters, options, onReset }: Props) {
+  const cityLabel = loadedCities.length === 0
+    ? '—'
+    : activeCity
+      ? `${activeCity}/${uf}`
+      : `${loadedCities.length} cidades/${uf}`;
 
   const periodLabels = filters.periods
     .map((v) => options.periods.find((p) => p.value === v)?.label ?? v);
@@ -32,7 +37,7 @@ export function ActiveFiltersBar({ scope, granularity, filters, options, onReset
     : filters.buildings.map((id) => options.buildings.find((b) => b.id === id)?.name ?? id);
 
   const parts: { label: string; value: string; optional?: boolean }[] = [
-    { label: 'Cidade', value: cityLabel },
+    { label: 'Cidades', value: cityLabel },
     { label: 'Granularidade', value: GRAN_LABEL[granularity] },
     { label: 'Ano', value: joinOrDash(filters.years), optional: true },
     { label: 'Trimestre', value: joinOrDash(filters.quarters), optional: true },

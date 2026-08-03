@@ -64,7 +64,9 @@ describe('Coverage 90 — regras puras finais', () => {
     const findings = ataCoverageFindings(study, {
       cliente: null, projeto: null, cidade: null, uf: null, localizacao_fonte: null, endereco: null, bairro: null,
       area_terreno_m2: null, preco_m2_viabilidade: null, observacoes_localizacao: [], duvidas_cliente: [],
+      cidades_candidatas: [], comentarios_sobrepostos: [],
       pedidos_analista: ['Trazer tabela de lacunas de vagas'], produto: { torres: 8, unidades: null, dorms: null, m2_min: null, m2_max: null, vagas_pct: null, programa: null, observacoes: [] },
+
     });
     expect(findings[0].ok).toBe(false);
     expect(findings[0].viz?.kind === 'text' && findings[0].viz.checklist?.some((x) => x.label.startsWith('Produto') && x.status === 'ok')).toBe(true);
