@@ -314,6 +314,10 @@ interface Aggregates {
   // Preço m²: mesmos filtros
   pmm2SumVgv: number;
   pmm2SumArea: number; // sum(qty * private_area)
+  // % de fechamento: building_id distintos com histórico em cada period
+  allBuildingIds: Set<string>;
+  buildingIdsByPeriod: Map<string, Set<string>>;
+  maxPeriodKey: string;
 }
 
 function newAgg(): Aggregates {
@@ -325,6 +329,9 @@ function newAgg(): Aggregates {
     offerLastPeriodKey: new Map(),
     pmSumVgv: 0, pmSumQty: 0,
     pmm2SumVgv: 0, pmm2SumArea: 0,
+    allBuildingIds: new Set(),
+    buildingIdsByPeriod: new Map(),
+    maxPeriodKey: '',
   };
 }
 
@@ -341,6 +348,16 @@ function accumulate(agg: Aggregates, r: ClosureRow, bucketKey: string, releaseKe
     agg.offerLastPeriodKey.set(r.typology_id, r.periodKey);
     agg.offerAtLast.set(r.typology_id, r.typology_stock);
   }
+  // % de fechamento
+  if (r.building_id) {
+    agg.allBuildingIds.add(r.building_id);
+    if (r.periodKey) {
+      if (r.periodKey > agg.maxPeriodKey) agg.maxPeriodKey = r.periodKey;
+      let set = agg.buildingIdsByPeriod.get(r.periodKey);
+      if (!set) { set = new Set(); agg.buildingIdsByPeriod.set(r.periodKey, set); }
+      set.add(r.building_id);
+    }
+  }
   // Preço médio: type_of_typology='Padrão' e typology_stock<>0
   if (r.type_of_typology === 'Padrão' && r.typology_stock !== 0 && r.price != null) {
     agg.pmSumVgv += r.qty * r.price;
@@ -354,6 +371,12 @@ function accumulate(agg: Aggregates, r: ClosureRow, bucketKey: string, releaseKe
 
 function metricValue(agg: Aggregates, metric: MetricKey): number | null {
   switch (metric) {
+    case 'pct_fechamento': {
+      const total = agg.allBuildingIds.size;
+      if (!total || !agg.maxPeriodKey) return null;
+      const withRef = agg.buildingIdsByPeriod.get(agg.maxPeriodKey)?.size ?? 0;
+      return withRef / total;
+    }
     case 'empreendimentos_lancados': return agg.buildingIds.size;
     case 'unidades_lancadas': return agg.qtyLancadas;
     case 'unidades_vendidas': return agg.soldPeriodo;
@@ -364,6 +387,30 @@ function metricValue(agg: Aggregates, metric: MetricKey): number | null {
     case 'preco_m2': return agg.pmm2SumArea > 0 ? agg.pmm2SumVgv / agg.pmm2SumArea : null;
   }
 }
+
+function allMetrics(agg: Aggregates | undefined): Record<MetricKey, number | null> {
+  if (!agg) {
+    return {
+      pct_fechamento: null,
+      empreendimentos_lancados: null,
+      unidades_lancadas: null,
+      unidades_vendidas: null,
+      oferta_final: null,
+      preco_medio: null,
+      preco_m2: null,
+    };
+  }
+  return {
+    pct_fechamento: metricValue(agg, 'pct_fechamento'),
+    empreendimentos_lancados: metricValue(agg, 'empreendimentos_lancados'),
+    unidades_lancadas: metricValue(agg, 'unidades_lancadas'),
+    unidades_vendidas: metricValue(agg, 'unidades_vendidas'),
+    oferta_final: metricValue(agg, 'oferta_final'),
+    preco_medio: metricValue(agg, 'preco_medio'),
+    preco_m2: metricValue(agg, 'preco_m2'),
+  };
+}
+
 
 export interface ResumoBucket {
   key: string;
