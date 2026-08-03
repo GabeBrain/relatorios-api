@@ -160,3 +160,13 @@
 .validacao-fechamento .vf-city-title::before {
   content: ''; width: 4px; height: 16px; border-radius: 2px; background: var(--vf-primary);
 }
+
+.validacao-fechamento .vf-select {
+  border: 1px solid var(--vf-border);
+  background: var(--vf-card);
+  color: var(--vf-text);
+  border-radius: 8px;
+  padding: 0 8px;
+  font-size: 10pt;
+}
+.validacao-fechamento .vf-select:disabled { opacity: .55; }
