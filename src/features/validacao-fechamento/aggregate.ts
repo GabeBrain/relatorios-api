@@ -161,6 +161,7 @@ export function extractVFOptions(rows: ClosureRow[]): VFOptions {
   const standards = new Set<string>();
   const btypes = new Set<string>();
   const buildingsMap = new Map<string, string>();
+  const cities = new Set<string>();
   for (const r of rows) {
     if (r.bucketYear) years.add(r.bucketYear);
     if (r.bucketQuarter) quarters.add(r.bucketQuarter);
@@ -168,6 +169,7 @@ export function extractVFOptions(rows: ClosureRow[]): VFOptions {
     if (r.standard) standards.add(r.standard);
     if (r.building_type) btypes.add(r.building_type);
     if (r.building_id) buildingsMap.set(r.building_id, r.building_name);
+    if (r.city) cities.add(r.city);
   }
   const periods = Array.from(periodMap.entries())
     .sort((a, b) => (a[0] < b[0] ? 1 : -1))     // desc
@@ -185,7 +187,9 @@ export function extractVFOptions(rows: ClosureRow[]): VFOptions {
     standards: Array.from(standards).sort(),
     buildingTypes: Array.from(btypes).sort(),
     buildings: Array.from(buildingsMap.entries()).map(([id, name]) => ({ id, name })).sort((a,b) => a.name.localeCompare(b.name)),
+    cities: Array.from(cities).sort((a, b) => a.localeCompare(b)),
   };
+
 }
 
 // ============ Métricas ============
