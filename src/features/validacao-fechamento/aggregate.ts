@@ -150,7 +150,9 @@ export interface VFOptions {
   standards: string[];
   buildingTypes: string[];
   buildings: { id: string; name: string }[];
+  cities: string[];
 }
+
 
 export function extractVFOptions(rows: ClosureRow[]): VFOptions {
   const years = new Set<string>();
