@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
 import MUNICIPIOS_BR from '@/assets/municipios-br.json';
 import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
+import { aggregateTypologyHistoryByQuarter, periodToQuarter } from '@/features/relatorios-secovi/quarterly-history';
 
 const UF_LIST = Object.keys(MUNICIPIOS_BR as Record<string, string[]>).sort();
 
@@ -69,14 +70,6 @@ function qKey(q: string): [number, number] {
 }
 function qLabel(q: string): string { return `${q.slice(0, 2)} ${q.slice(2)}`; }
 function qSheet(q: string): string { return `${q[0]}T${q.slice(4)}`; }
-
-function periodToQuarter(period: string): string | null {
-  try {
-    const d = new Date(period.slice(0, 10));
-    const q = Math.floor(d.getMonth() / 3) + 1;
-    return `${q}T${d.getFullYear()}`;
-  } catch { return null; }
-}
 
 function toNum(v: unknown): number | null {
   if (v === null || v === undefined) return null;
@@ -336,7 +329,6 @@ function deriveQuarters(buildings: Record<string, unknown>[]): string[] {
 }
 
 function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]): Row[] {
-  const qSet = new Set(quarterCols);
   const rows: Row[] = [];
 
   for (const b of buildings) {
@@ -355,33 +347,18 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
 
     for (const [, entries] of typoMap) {
       entries.sort((a, b) => String(a.period ?? '').localeCompare(String(b.period ?? '')));
-      const first = entries[0]; const last = entries[entries.length - 1];
+      const quarterlyHistory = aggregateTypologyHistoryByQuarter(entries);
+      const first = entries[0];
+      const [, lastQuarter] = [...quarterlyHistory.entries()].at(-1) ?? [];
+      const last = lastQuarter?.lastEntry ?? entries[entries.length - 1];
       const qty = toNum(last.qty) ?? toNum(first.qty) ?? 0;
       const privArea = toNum(last.private_area) ?? 0;
       const launchPrice = toNum(first.release_price) ?? 0;
       const stockRaw = toNum(last.typology_stock);
       const stock = stockRaw !== null ? stockRaw : 0;
 
-      const qSales: Record<string, number | null> = {};
-      const qDistratos: Record<string, number | null> = {};
-      let prevStock: number | null = null;
-      for (const e of entries) {
-        const q = periodToQuarter(String(e.period ?? ''));
-        const curStock = toNum(e.typology_stock);
-        const sold = toNum(e.sold_in_period) ?? 0;
-        if (q && qSet.has(q)) {
-          qSales[q] = toNum(e.sold_in_period);
-          if (prevStock !== null && curStock !== null) {
-            const est = curStock - prevStock + sold;
-            qDistratos[q] = est >= 0 ? est : null;
-          } else {
-            qDistratos[q] = null;
-          }
-        }
-        if (curStock !== null) prevStock = curStock;
-      }
-      const lastPeriodQ = periodToQuarter(String(last.period ?? ''));
-      const distratosUltimoT = lastPeriodQ ? (qDistratos[lastPeriodQ] ?? null) : null;
+      const vendidosUltimoT = lastQuarter?.hasSalesData ? lastQuarter.sales : null;
+      const distratosUltimoT = lastQuarter?.estimatedCancellations ?? null;
 
       const pctDisp = qty ? Math.round((stock / qty) * 1000) / 10 : null;
       const vgvLancado = qty && launchPrice ? Math.round(qty * launchPrice * 100) / 100 : null;
@@ -393,15 +370,15 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
       const r_m2_estoque = (vgvEstoque !== null && m2Estoque > 0)
         ? Math.round((vgvEstoque / m2Estoque) * 100) / 100
         : 0;
-      const latestSold = toNum(last.sold_in_period) ?? 0;
-      const currentPrice = toNum(last.price) ?? 0;
-      // BQ = O × S
-      const vgvVendasBrutas = latestSold && currentPrice
-        ? Math.round(latestSold * currentPrice * 100) / 100
-        : 0;
+      // VGV de vendas é fluxo: soma venda × preço de cada fechamento do trimestre.
+      const vgvVendasBrutas = lastQuarter?.grossSalesVgv === null || !lastQuarter
+        ? null
+        : Math.round(lastQuarter.grossSalesVgv * 100) / 100;
       // BR = O × T — Distratos indisponível na API
       const vgvDistratos = 0;
-      const vendasLiqVgv = Math.round((vgvVendasBrutas - vgvDistratos) * 100) / 100;
+      const vendasLiqVgv = vgvVendasBrutas === null
+        ? null
+        : Math.round((vgvVendasBrutas - vgvDistratos) * 100) / 100;
 
       const row: Row = {
         'Tipo': b.building_type as string ?? '',
@@ -422,11 +399,14 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
         'm2 Priv.': privArea || null,
         'Valor m2 Priv.': toNum(last.price_private_area),
         'Unidades por Tipologia': qty || null,
-        '*Vendidos no trimestre': toNum(last.sold_in_period),
+        '*Vendidos no trimestre': vendidosUltimoT,
         '*Distratos no trimestre': distratosUltimoT,
       };
 
-      for (const q of quarterCols) row[`Vendas líquidas ${q}`] = qSales[q] ?? 0;
+      for (const q of quarterCols) {
+        const quarter = quarterlyHistory.get(q);
+        row[`Vendas líquidas ${q}`] = quarter?.hasSalesData ? quarter.sales : 0;
+      }
 
       Object.assign(row, {
         'Estoque por Tipologia': stock,

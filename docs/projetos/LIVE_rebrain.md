@@ -49,6 +49,19 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-04 — Relatório Secovi: vendas trimestrais passam a somar todos os fechamentos — Terra
+- **O quê:** `sold_in_period` deixou de ser sobrescrito pelo último mês do trimestre. A nova
+  agregação separa fluxo de snapshot: soma vendas e VGV por fechamento; mantém estoque, preço e
+  disponibilidade no fechamento mais recente.
+- **Regressão coberta:** Rubi passa de `300` para `349` no 4T/2025 (`49` em novembro + `300` em
+  dezembro), preservando `100` no 1T/2026, `18` no 2T/2026 e estoque `189`.
+- **Qualidade:** helper isolado cobre ordem irregular, mês zerado/ausente, venda negativa, preço
+  ausente, período inválido e distrato parcial. **103 testes verdes** e build tipado aprovado.
+- **Arquivos:** `src/features/relatorios-secovi/quarterly-history.ts`,
+  `src/features/relatorios-secovi/__tests__/quarterly-history.test.ts`,
+  `src/pages/TestesArquitetura.tsx`.
+- **Pendente:** homologação manual da exportação no ambiente da área antes de encerrar o ticket.
+
 ### Validação do Fechamento — multi-cidade, resumo por cidade e % de fechamento
 - **Multi-cidade:** novo `use-vf-data.ts` consulta até **10 municípios** da UF selecionada em
   paralelo e mescla tudo em uma base única deduplicada por `building_id`; falhas por cidade são
@@ -496,7 +509,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6f | Corretor v2 — estratégia de testes do fluxo do analista | 🟡 (design ✅ + slice 1 worklist ✅; slices 2-4 absorvidos pela v3) |
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
 | 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. **Homologação real começou em 22–24/jul** com 4 estudos de analistas (Rolândia/Daniele + Housi/Beatriz e Finoti): 102 achados, ~100% FP nos triados → sprint de 28/jul derrubou Rolândia de 17 achados para 1 (v0.44–0.49, 78 testes verdes). |
-| 7 | Relatórios Secovi (export Excel) | ✅ |
+| 7 | Relatórios Secovi (export Excel) | 🟡 (correção trimestral implementada e testada em 04/ago; aguarda homologação manual da exportação) |
 | 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (análise de cobertura ✅ em 26/jul; próximo: teste de aderência Piracicaba 1T26 número a número, depois Camada 1 = XLSX) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
@@ -505,6 +518,10 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
+- [ ] **Relatório Secovi — homologar vendas trimestrais:** correção implementada e coberta por testes;
+  gerar o Excel no ambiente da área e conferir a Rubi (`4T2025 = 49 + 300 = 349`, `1T2026 = 100`,
+  `2T2026 = 18`, estoque `189`). Plano e roteiro:
+  [`PLAN_correcao_agregacao_vendas_trimestrais.md`](../features/relatorios-secovi/PLAN_correcao_agregacao_vendas_trimestrais.md).
 - [ ] **Panorama Secovi/FIERGS — teste de aderência (próximo passo):** reproduzir Piracicaba 1T26 via
   API GeoBrain e comparar número a número com o deck, gerando a matriz "bate / não bate / não tem".
   É o portão que decide o escopo das Camadas 1–3 (ver `ANALISE_automatizacao_panorama.md`).
