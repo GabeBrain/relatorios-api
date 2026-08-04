@@ -6,7 +6,8 @@
 
 import type { Ir } from '../audit/ir';
 import type { Finding } from '../audit/model';
-import { irToFindings } from '../audit/ir-rules';
+import { irToFindings, reviewNoteBlindSpots } from '../audit/ir-rules';
+import { applyDeclaredExclusions } from './declared-exclusions';
 import type { ModelId } from '../cost-calculator';
 import { estimateTextPass, runTextPass } from './ia-text';
 import {
@@ -138,7 +139,7 @@ export async function runPhase1(
 ): Promise<Phase1Result> {
   const { model, signal, onStage } = opts;
 
-  let detFindings = irToFindings(ir).filter((f) => !f.ok);
+  const detFindings = irToFindings(ir).filter((f) => !f.ok);
   onStage?.({ stage: 'det', done: 1, total: 1, findings: detFindings });
 
   const candidates = opts.candidates ?? (await findTableImages(bytes, ir));
@@ -235,6 +236,9 @@ export async function runPhase2(
     expected: { cidade: cityUsed, uf: uf ?? undefined },
     onProgress: (done, total) => onStage?.({ stage: 'visao', done, total }),
   }).then(async (res) => {
+    // CH-6: o slide que declara exclusão (esgotados, garden, cobertura) explica o
+    // total aberto — o achado desce para “Verificar” citando a nota, nunca “Erro”.
+    res.findings = applyDeclaredExclusions(ir, res.findings);
     await attachEvidenceImages(res.findings, candidates);
     onStage?.({ stage: 'visao', done: candidates.length, total: candidates.length, findings: res.findings, spentUsd: res.costUsd });
     return res;
@@ -248,10 +252,16 @@ export async function runPhase2(
     ...sourceFindingsFromVision(ir, vision.sourceSlides, vision.analyzedSlides),
     ...requiredAndExclusionFindings(ir, refs),
   ];
-  const visionFindings = [...vision.findings, ...cross, ...projection, ...coverage].filter((f) => !f.ok);
-  const crossFindings = [...cross, ...projection, ...coverage].filter((f) => !f.ok);
+  const crossFindings = applyDeclaredExclusions(ir, [...cross, ...projection, ...coverage].filter((f) => !f.ok));
+  const visionFindings = [...vision.findings.filter((f) => !f.ok), ...crossFindings];
   await attachEvidenceImages(crossFindings, candidates);
   onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: crossFindings });
+
+  // Pista dirigida: slide com comentário da revisão e nenhum achado do motor é
+  // candidato a regra faltante. Só faz sentido com texto e visão já concluídos.
+  detFindings = detFindings.concat(
+    reviewNoteBlindSpots(ir, [...detFindings, ...text.findings, ...visionFindings])
+  );
 
   const report: AnalysisReport = {
     tabelasExtraidas: vision.tablesExtracted,

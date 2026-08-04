@@ -25,9 +25,12 @@ distintas, e cada uma pede tratamento próprio:
 | **B. Leitura ruim da visão** | s43, s61 | s43 tem linha duplicada ("Jardim Real" repetido); s61 acusa `soma 479,9 ≠ total 298` numa coluna de **contagem** — 479,9 é % somada por engano | Guardrail de plausibilidade de tipo por coluna. **Adiar** — mesmo tema do teste de modelo |
 | **C. Exclusão declarada (CH-6, o caso da analista)** | s43 e afins | Coluna Status mistura `Comercialização` e **`Esgotado`**; o rodapé do estudo declara: *"Unidades garden, duplex e coberturas não são apresentadas na análise para evitar distorções de preço e metragem"* | Antes de acusar soma, procurar exclusão declarada no texto do slide (`não são apresentadas\|desconsidera\|ocultamos\|esgotados\|garden\|duplex\|cobertura`) |
 
-> ⚠️ **DECISÃO PENDENTE (A):** com exclusão declarada, o achado deve **sumir** ou virar
+> ✅ **DECISÃO (A) TOMADA em 31/jul — “Verificar”** (Gabriel seguiu a recomendação). Implementada em
+> `v3/declared-exclusions.ts`; ver v0.50 do [LIVE do Corretor](./LIVE_regras_corretor_vocacionais.md).
+>
+> ~~⚠️ DECISÃO PENDENTE (A): com exclusão declarada, o achado deve **sumir** ou virar
 > **"Verificar"**? Recomendação: *Verificar* — o total pode não fechar por exclusão legítima
-> **ou** por erro real, e só quem lê o apêndice sabe. Suprimir só se na prática nunca compensar olhar.
+> **ou** por erro real, e só quem lê o apêndice sabe. Suprimir só se na prática nunca compensar olhar.~~
 
 **Ordem sugerida de implementação:** (1) tabela paginada — é o que mais reduz ruído aqui;
 (2) CH-6 exclusão declarada; (3) plausibilidade de coluna fica para depois.
@@ -56,9 +59,12 @@ informação: a nota diz o que precisa ser corrigido.
 - A rede de segurança original (estudo entregue não deve ter nota) continua válida, mas o lugar
   dela é o **portão de entrega**, não a worklist
 
-> ⚠️ **DECISÃO PENDENTE (B):** na entrega final, comentário no arquivo **(a)** bloqueia,
+> ✅ **DECISÃO (B) TOMADA em 31/jul — (b) avisa e pede confirmação** (Gabriel seguiu a recomendação).
+> Implementada no `handleConclude` do `CorretorV3Page`; ver v0.50 do LIVE do Corretor.
+>
+> ~~⚠️ DECISÃO PENDENTE (B): na entrega final, comentário no arquivo **(a)** bloqueia,
 > **(b)** avisa e pede confirmação, ou **(c)** só informa no relatório? Recomendação: **(b)** —
-> mas depende de o PPTX que sai do corretor passar ou não por outra etapa depois.
+> mas depende de o PPTX que sai do corretor passar ou não por outra etapa depois.~~
 
 ---
 

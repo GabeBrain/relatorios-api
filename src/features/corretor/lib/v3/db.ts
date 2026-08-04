@@ -256,6 +256,23 @@ export async function recheck(
       .eq('study_id', studyId)
       .in('rule_id', resolved);
   }
+  // O achado persiste, mas o CONTEÚDO pode ter mudado entre versões: o item
+  // agregado de comunicação da revisão traz a contagem ("32 comentários") e o
+  // checklist de estrutura traz os itens. Sem isto o card mentiria após um
+  // reconferir em que o analista limpou parte dos comentários.
+  const persistentSet = new Set(persistent);
+  const byRuleId = new Map(current.map((c) => [c.ruleId, c]));
+  const changed = newFindings.filter((f) => {
+    const stored = persistentSet.has(f.id) ? byRuleId.get(f.id) : undefined;
+    return stored && JSON.stringify(stored.finding) !== JSON.stringify(f);
+  });
+  for (const f of changed) {
+    await db.from('findings_v3')
+      .update({ titulo: f.title, detalhe: f.detail, slide_ref: f.slideRef, payload: f })
+      .eq('study_id', studyId)
+      .eq('rule_id', f.id);
+  }
+
   // correções manuais que não pegaram voltam a pendente
   const notFixed = current
     .filter((c) => persistent.includes(c.ruleId) && c.status === 'corrigido')

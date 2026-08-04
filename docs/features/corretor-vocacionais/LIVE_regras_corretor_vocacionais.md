@@ -16,6 +16,82 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.50 — 2026-07-31 — Tabela paginada, exclusão declarada e “Comunicação da revisão” (RUNTIME)
+
+As duas decisões de produto que estavam pendentes no [checkpoint de 28/jul](./CHECKPOINT_2026-07-28.md)
+foram tomadas pelo Gabriel — **(A) exclusão declarada rebaixa para “Verificar”, não some**;
+**(B) comentário no arquivo final avisa e pede confirmação, não bloqueia** — e a fila combinada
+(tabela paginada → CH-6 → notas como categoria própria) foi implementada.
+
+### 1. Tabela paginada — `resolvePaginatedSums` (DET, `v3/paginated-tables.ts`)
+
+Causa dominante dos 6 `ABSOLUTE_SUM` do Toledo (Raimundo Leonardi V3): o trio `1099 / 702 / 397`
+aparece como “Total” em s42 **e** s43, com 12 e 24 linhas — é o total do conjunto repetido em cada
+fatia, então **nenhuma fatia fecha sozinha**.
+
+Em vez de só abster, a paginação virou uma checagem melhor: as fatias são agrupadas por
+**cabeçalho + assinatura dos totais declarados**, as linhas distintas de todas elas são somadas e o
+resultado é conferido contra o total comum — usando o mesmo `checkTableSums`, então herda as
+abstenções já calibradas (coluna de média, subtotal no meio, linha de total deslocada).
+
+- Fecha → os achados por fatia são encerrados e contam como **tabela verificada** no relatório.
+- Não fecha → **um** achado do conjunto (`paged-sum-42-43`, ref `s42 × s43`) em **“Verificar”**:
+  o veredito depende de todas as fatias terem sido lidas certo, uma linha mal lida basta para desfechar.
+- Guardas contra agrupar o que não é fatia: exige **≥2 totais numéricos iguais** (um total só —
+  “100%” — coincide o tempo todo), **slides vizinhos** (gap ≤ 2), cabeçalho igual e **≥2 slides**.
+  Linha repetida entre fatias conta uma vez (protege da leitura duplicada da visão, caso “Jardim Real”).
+
+Roda nos dois motores: tabelas nativas (`ir-rules`) e tabelas-imagem (fim do `runVisionPass`).
+
+### 2. CH-6 — exclusão declarada (DET, `v3/declared-exclusions.ts`)
+
+Fechamento do último item aberto do sprint de 28/jul (dependia do Housi v2, que não chegou; foi
+implementado com o rodapé real do Toledo como caso). Antes de sustentar um achado de soma, procura
+no texto do slide a frase que **declara** a exclusão — *“Unidades garden, duplex e coberturas não são
+apresentadas na análise para evitar distorções de preço e metragem”*, *“ocultamos os esgotados”*.
+
+**Decisão (A):** encontrou → o achado **não some**, vira **“Verificar”** com a frase citada na
+evidência. O total pode não fechar por exclusão legítima **ou** por erro real, e só quem lê o
+apêndice sabe qual dos dois é.
+
+Guarda contra silenciar soma real: **exige verbo de exclusão**. Citar “cobertura” ou “esgotado” como
+tipologia não basta — senão toda consolidada que lista tipologias ficaria imune. Vale para
+`ABSOLUTE_SUM`, `PERCENTAGE_SUM`, `TOTALS_EQUALITY` e `CROSS_TABLE_MISMATCH` (consolidada × oferta);
+em achado cross-slide, basta uma das pontas declarar.
+
+### 3. `LEFTOVER_NOTE` sai do catálogo de erros → **Comunicação da revisão**
+
+No Toledo eram **32 dos 39 achados** — sozinhas afogavam todo o resto — e o conteúdo não é erro
+(*“Ajustar a legenda. Melhor pegar a legenda do geobrain”*): é comunicação entre analista e A&R.
+
+- **Categoria própria** (`category: 'comunicacao'` no `error-catalog`), **fora** da contagem
+  Erro/Provável/Verificar, dos grupos por causa raiz e da fila de triagem. Chip próprio (💬 violeta)
+  e bloco dedicado na aba Completude.
+- **Um item agregado** (`review-notes`) no lugar de N: “3 comentário(s) de revisão em 2 slide(s)”,
+  com slide + texto de cada um no checklist expansível.
+- **Pista dirigida** (`review-notes-blind`, calculada no fim da fase 2, com texto e visão já
+  concluídos): slide comentado onde o motor **não achou nada** é candidato a regra faltante — a nota
+  é gabarito parcial de graça. Insumo direto de calibração.
+- **Decisão (B) — portão de entrega:** comentário pendente **avisa e pede confirmação**
+  (“O estudo ainda tem N comentário(s) de revisão no arquivo… Entregar assim mesmo?”). Não bloqueia.
+- **Reconciliação:** `isStaleReviewNote` encerra as notas por slide (`note-<slide>-<i>`) dos 4 estudos
+  já analisados ao reabri-los; o item agregado aparece na próxima análise/reconferência.
+
+**Não implementado de propósito:** “subir a confiança dos achados do slide comentado”. A nota costuma
+ser editorial (cor, legenda, layout) e promover um achado de nível 3 para 2 o tornaria **bloqueante**
+por associação — troca FP por bloqueio. A metade valiosa (o ponto cego) está entregue.
+
+### 4. Correção de apoio — achado persistente com conteúdo desatualizado (`db.recheck`)
+
+O `recheck` só mexia em status: achado que persiste entre versões mantinha o **payload da versão
+anterior**. Fica evidente no item agregado (diria “32 comentários” depois de o analista limpar 20) e
+já valia para o checklist de estrutura. Agora os achados persistentes cujo payload mudou têm
+título/detalhe/ref/payload atualizados na reconferência.
+
+**Verificação:** tsc limpo, **97 testes verdes** (78 → 97: 5 de paginação, 7 de exclusão declarada,
+7 de comunicação/reconciliação), lint e build ok. Sem migration nem deploy novo — segue pendente
+apenas o `analyze-ata-image` da v0.46.
+
 ## Versão 0.49 — 2026-07-28 — Ancoragem textual contra cidade alucinada pela visão (RUNTIME)
 
 Novo tipo de FP, diferente dos anteriores: até aqui a visão **lia certo** e a regra julgava mal;

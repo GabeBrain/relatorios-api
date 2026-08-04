@@ -6,6 +6,8 @@ import { checkTableSums } from './engine';
 import { toAuditSection, type Ir, type IrSlide, type IrTable } from './ir';
 import type { Cell, ExtractedTable, Finding, StudyFixture } from './model';
 import { structureChecklistFinding } from './structure-checklist';
+import { resolvePaginatedSums, type SumSlice } from '../v3/paginated-tables';
+import { applyDeclaredExclusions } from '../v3/declared-exclusions';
 import municipiosPorUf from '@/assets/municipios-br.json';
 
 // Regras desativáveis por decisão de produto. SOURCE_MISSING desligada em
@@ -45,27 +47,79 @@ export function sameCity(a: string, b: string): boolean {
 
 function slideRef(n: number) { return `s${n}`; }
 
-// ── LEFTOVER_NOTE ────────────────────────────────────────────────────────────
-function noteFindings(ir: Ir): Finding[] {
-  const out: Finding[] = [];
+// ── Comunicação da revisão (ex-LEFTOVER_NOTE) ────────────────────────────────
+// Decisão de 31/jul/2026 (Gabriel): comentário de revisão não é erro do estudo —
+// é recado do analista para o A&R. No Toledo eram 32 dos 39 achados e afogavam
+// todo o resto. Vira UM item agregado, fora da contagem Erro/Provável/Verificar,
+// que serve de checklist do que a revisão pediu e de aviso no portão de entrega.
+
+export interface ReviewNote { slide: number; text: string }
+
+/** Comentários de revisão do estudo, na ordem dos slides. */
+export function reviewNotesOf(ir: Ir): ReviewNote[] {
+  const out: ReviewNote[] = [];
   for (const s of ir.slides) {
     const revisionNotes = (s.notas_revisao ?? []).filter(Boolean);
     const editionNotes = (s.notas_edicao ?? []).filter((t) => t && LEFTOVER.test(t));
-    const notes = [...revisionNotes, ...editionNotes];
-    notes.forEach((t, i) => {
-      out.push({
-        id: `note-${s.n}-${i}`,
-        type: 'LEFTOVER_NOTE',
-        section: toAuditSection(s.secao_canonica),
-        slideRef: slideRef(s.n),
-        title: 'Nota interna de revisão no slide',
-        detail: 'Comentário de revisão deixado no estudo (rede de segurança — estudos entregues não devem conter notas).',
-        ok: false,
-        viz: { kind: 'text', location: s.titulo ?? undefined, evidence: `“${t.trim()}”` },
-      });
-    });
+    for (const text of [...revisionNotes, ...editionNotes]) out.push({ slide: s.n, text: text.trim() });
   }
   return out;
+}
+
+function reviewNotesFinding(ir: Ir): Finding[] {
+  const notes = reviewNotesOf(ir);
+  if (notes.length === 0) return [];
+  const slides = [...new Set(notes.map((note) => note.slide))];
+  const refs = slides.map((n) => slideRef(n));
+  return [{
+    id: 'review-notes',
+    type: 'LEFTOVER_NOTE',
+    section: 'GLOBAL',
+    slideRef: '—',
+    title: `${notes.length} comentário(s) de revisão em ${slides.length} slide(s)`,
+    detail: 'Comunicação entre analista e A&R deixada no arquivo — não é erro do estudo. Use como checklist do que a revisão pediu; o portão de entrega avisa se o PPTX final ainda contiver comentários.',
+    ok: false,
+    viz: {
+      kind: 'text',
+      evidence: refs.join(', '),
+      checklist: notes.map((note) => ({ label: `${slideRef(note.slide)} · “${note.text}”`, status: 'na' as const })),
+    },
+  }];
+}
+
+/**
+ * A parte mais valiosa da nota: ela é gabarito parcial de graça. Slide que a
+ * revisão apontou e onde o motor não achou NADA é candidato a regra faltante —
+ * insumo direto de calibração. Roda no fim da análise, com texto e visão já
+ * incluídos, senão acusaria o deck inteiro.
+ */
+export function reviewNoteBlindSpots(ir: Ir, findings: Finding[]): Finding[] {
+  const notes = reviewNotesOf(ir);
+  if (notes.length === 0) return [];
+  const covered = new Set<number>();
+  for (const finding of findings) {
+    if (finding.ok || finding.type === 'LEFTOVER_NOTE') continue;
+    for (const match of finding.slideRef.matchAll(/\d+/g)) covered.add(Number(match[0]));
+  }
+  const blind = notes.filter((note) => !covered.has(note.slide));
+  const slides = [...new Set(blind.map((note) => note.slide))];
+  if (slides.length === 0) return [];
+  return [{
+    id: 'review-notes-blind',
+    type: 'LEFTOVER_NOTE',
+    section: 'GLOBAL',
+    slideRef: '—',
+    title: `A revisão apontou ${slides.length} slide(s) onde o corretor não detectou nada`,
+    detail: 'Nestes slides existe comentário da revisão e nenhum achado do motor. Pode ser pedido editorial (cor, legenda, layout) ou uma regra que ainda falta — vale conferir e, se for erro de dado, registrar na calibração.',
+    ok: false,
+    viz: {
+      kind: 'text',
+      evidence: slides.map((n) => slideRef(n)).join(', '),
+      // 'na' e não 'missing': é pista de calibração, não defeito — a categoria
+      // inteira é não-bloqueante e não deve pintar de vermelho.
+      checklist: blind.map((note) => ({ label: `${slideRef(note.slide)} · “${note.text}”`, status: 'na' as const })),
+    },
+  }];
 }
 
 // ── SOURCE_MISSING ───────────────────────────────────────────────────────────
@@ -113,6 +167,7 @@ export function irTableToExtracted(t: IrTable): ExtractedTable | null {
 
 function numericFindings(ir: Ir): { findings: Finding[]; verified: number; numericTables: number } {
   const findings: Finding[] = [];
+  const slices: SumSlice[] = [];
   let verified = 0;
   let numericTables = 0;
   for (const s of ir.slides) {
@@ -127,8 +182,9 @@ function numericFindings(ir: Ir): { findings: Finding[]; verified: number; numer
       const viz = checkTableSums(ext, { absTol: Math.max(0.5, nRows / 2) });
       const bad = (viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0);
       if (bad > 0) {
+        const id = `sum-${s.n}-${ti}`;
         findings.push({
-          id: `sum-${s.n}-${ti}`,
+          id,
           type: 'ABSOLUTE_SUM',
           section: toAuditSection(s.secao_canonica),
           slideRef: slideRef(s.n),
@@ -137,12 +193,21 @@ function numericFindings(ir: Ir): { findings: Finding[]; verified: number; numer
           ok: false,
           viz,
         });
+        slices.push({ slide: s.n, section: toAuditSection(s.secao_canonica), findingId: id, table: ext });
       } else {
         verified++;
       }
     }
   }
-  return { findings, verified, numericTables };
+
+  // Fatias da mesma tabela repetindo o total do conjunto não são N erros: a soma
+  // do conjunto é que decide (ver paginated-tables).
+  const paged = resolvePaginatedSums(slices);
+  return {
+    findings: findings.filter((f) => !paged.dropIds.has(f.id)).concat(paged.findings),
+    verified: verified + paged.verified,
+    numericTables,
+  };
 }
 
 // ── RADII (nível 1 DET) — consistência dos raios/zonas de tempo ──────────────
@@ -359,7 +424,7 @@ export function wrongCityFindings(ir: Ir, city?: string): Finding[] {
 export function irToFindings(ir: Ir, ctx?: { city?: string; uf?: string }): Finding[] {
   const num = numericFindings(ir);
   const findings: Finding[] = [
-    ...noteFindings(ir),
+    ...reviewNotesFinding(ir),
     ...(RULES_ENABLED.SOURCE_MISSING ? sourceFindings(ir) : []),
     ...radiiFindings(ir),
     ...num.findings,
@@ -380,7 +445,8 @@ export function irToFindings(ir: Ir, ctx?: { city?: string; uf?: string }): Find
     });
   }
   findings.push(structureFinding(ir));
-  return findings;
+  // CH-6: total que não fecha por exclusão declarada no slide vira “Verificar”.
+  return applyDeclaredExclusions(ir, findings);
 }
 
 function basename(path: string): string {

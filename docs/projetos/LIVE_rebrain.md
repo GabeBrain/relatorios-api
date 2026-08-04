@@ -62,6 +62,25 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Ícones (i):** cada medida do Resumo exibe popover com a regra de cálculo (`METRICS[].info`).
 
 
+### 2026-07-31 — Corretor: decisões A/B tomadas + fila implementada (paginação, CH-6, comunicação) — Gabriel + Claude
+- **As 2 decisões de produto que travavam a fila foram tomadas** (Gabriel seguiu as recomendações):
+  **(A)** exclusão declarada **rebaixa para “Verificar”**, não apaga o achado; **(B)** comentário de
+  revisão no arquivo final **avisa e pede confirmação** na entrega, não bloqueia.
+- **Tabela paginada** (`v3/paginated-tables.ts`): fatias da mesma tabela em slides vizinhos repetem o
+  total do conjunto (Toledo: `1099/702/397` em s42 e s43) e nenhuma fecha sozinha. Agora as fatias são
+  agrupadas por cabeçalho + assinatura de totais, somadas e conferidas **como conjunto** — fecha,
+  encerra os achados por fatia; não fecha, sai **um** achado `s42 × s43` em “Verificar”. Roda nas
+  tabelas nativas e nas tabelas-imagem.
+- **CH-6** (`v3/declared-exclusions.ts`): antes de sustentar soma, procura a frase que declara a
+  exclusão (“garden, duplex e coberturas não são apresentadas…”, “ocultamos os esgotados”) e rebaixa
+  citando a nota. Exige **verbo de exclusão** — citar “cobertura” como tipologia não silencia nada.
+  Era o último item aberto do sprint de 28/jul (dependia do Housi v2; resolvido com o caso do Toledo).
+- **“Comunicação da revisão”:** `LEFTOVER_NOTE` sai do catálogo de erros — fora da contagem
+  Erro/Provável/Verificar, **um item agregado** com checklist expansível no lugar de 32, chip próprio
+  na UI, aviso no portão de entrega e **pista dirigida** (`review-notes-blind`: slide comentado onde o
+  motor não achou nada = candidato a regra faltante). Estudos antigos são reconciliados ao reabrir.
+- **Verificação:** 97 testes verdes (78 → 97), tsc limpo, lint e build ok. Sem migration. Detalhe na
+  **v0.50** do [LIVE do Corretor](../features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md).
 
 ### 2026-07-28 — Corretor: checkpoint do dia + 2 ajustes desenhados aguardando decisão — Gabriel + Claude
 - **Checkpoint:** [`CHECKPOINT_2026-07-28.md`](../features/corretor-vocacionais/CHECKPOINT_2026-07-28.md)
@@ -476,7 +495,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6e | Corretor v2 — Fase E: interface v2 (21 tipos, visualizações, veredito, export, PPTX→IR, mapas, thumbnails) | 🟡 (no ar: **upload de .pptx** + fixtures + recall/export + RADII/mapa + thumbnails c/ poda; falta gráficos no extrator, visão nível 2 dos mapas, TEMPORAL_WINDOW sobre IR) |
 | 6f | Corretor v2 — estratégia de testes do fluxo do analista | 🟡 (design ✅ + slice 1 worklist ✅; slices 2-4 absorvidos pela v3) |
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
-| 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. |
+| 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. **Homologação real começou em 22–24/jul** com 4 estudos de analistas (Rolândia/Daniele + Housi/Beatriz e Finoti): 102 achados, ~100% FP nos triados → sprint de 28/jul derrubou Rolândia de 17 achados para 1 (v0.44–0.49, 78 testes verdes). |
 | 7 | Relatórios Secovi (export Excel) | ✅ |
 | 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (análise de cobertura ✅ em 26/jul; próximo: teste de aderência Piracicaba 1T26 número a número, depois Camada 1 = XLSX) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
@@ -502,9 +521,22 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
   harness no IR real do Marka (`CORRETOR_CALIBRATION_IR`) e calibrar Marka, Itajaí e GO (meta: >=90% recall, <=15% FP). A versão atual usa cache v7 e inclui teste Brumadinho/Curitiba.
 - [ ] Corretor v5: verificar migrations `20260713160000` e `20260713180000` (`20260713170000`
   aplicada e confirmada); homologar portão da Ata, relatório, triagem, drop/cache e calibradora no Supabase real.
-- [ ] Corretor v5 — pendências da revisão final (P1–P7, detalhe na v0.42 do LIVE do Corretor): destacam-se
-  **P1** (candidatas de visão sem filtro de seção → monitorar custo/estudo na homologação) e
-  **P2** (`wrongCityFindings` sem validação de UF e rodando em ENTORNO → FP em "São Paulo – SP" legítimo).
+- [ ] Corretor v5 — pendências da revisão final (P1–P7, detalhe na v0.42 do LIVE do Corretor): segue aberto
+  **P1** (candidatas de visão sem filtro de seção → monitorar custo/estudo na homologação).
+  ✅ **P2 resolvido em 28/jul** (CH-2: validação IBGE + UF + escopo de seção, v0.44 do LIVE do Corretor).
+- [x] ~~Corretor — 2 decisões de produto do Gabriel~~ **tomadas em 31/jul**: (A) exclusão declarada → “Verificar”;
+  (B) comentário no arquivo final → avisa e pede confirmação. Ambas implementadas (v0.50 do LIVE do Corretor).
+- [x] ~~Corretor — fila de 28/jul~~: (1) tabela paginada ✅, (2) CH-6 exclusão declarada ✅,
+  (3) `LEFTOVER_NOTE` → “Comunicação da revisão” ✅ (31/jul). Segue adiada a **(4) plausibilidade de tipo por
+  coluna** — mesmo tema do teste A/B de modelo (caso s61 do Toledo: `479,9` é % somada numa coluna de contagem).
+- [ ] **Corretor — validar a v0.50 no estudo do Toledo** (`study_id = 17062ca6-9814-43b4-a6bf-9f61e0c7db1e`):
+  reabrir e medir os 39 achados → esperado cair para a ordem de 1–7 (as 32 notas viram 1 item de comunicação;
+  os 6 de soma passam pela paginação/CH-6). É o aceite real das três regras novas.
+- [ ] **Corretor — deploy pendente:** `supabase functions deploy analyze-ata-image` (prompt + normalização de
+  cidade/UF mudaram; `ATA_CACHE_SCHEMA` 6 → 7 força releitura).
+- [ ] **Corretor — Housi v2 (Lucas Finoti) não recebido:** destrava FN-1 (verticalização cross-slide s33 × s32)
+  e FN-2 (taxa 0,9% × 1,7%) — exigem o passo novo de "memória do estudo" (valores-âncora por métrica).
+- [ ] Corretor — teste A/B de modelo de visão (caso-âncora: s45 da Rolândia, cidade inferida dos bairros).
 - [ ] Definir se `/corretor/calibracao` permanece visível a todos os usuários internos ou exige papel específico.
 - [ ] Gabriel → analista A&R: obter fórmula oficial de projeção e validar falsos positivos do checklist estrutural/fonte.
 - [ ] CID: retomar validação de base quando sair do standby.

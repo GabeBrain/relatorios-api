@@ -23,7 +23,14 @@ describe('PPTX → IR — notas de revisão', () => {
     expect(ir.slides[0].textos).toEqual(['Dados de Guarulhos']);
     expect(ir.slides[0].notas_revisao).toEqual(['Ajustar os dados desta tabela']);
 
+    // Desde 31/jul/2026 os comentários viram UM item agregado ("Comunicação da
+    // revisão"), fora da contagem de erros: o slide vai no checklist, não no ref.
     const findings = irToFindings(ir).filter((f) => !f.ok);
-    expect(findings.some((f) => f.type === 'LEFTOVER_NOTE' && f.slideRef === 's1')).toBe(true);
+    const comunicacao = findings.find((f) => f.id === 'review-notes');
+    expect(comunicacao?.type).toBe('LEFTOVER_NOTE');
+    expect(comunicacao?.viz).toMatchObject({
+      kind: 'text',
+      checklist: [{ label: 's1 · “Ajustar os dados desta tabela”', status: 'na' }],
+    });
   });
 });

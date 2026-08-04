@@ -9,6 +9,7 @@ import { toAuditSection } from '../audit/ir';
 import { municipioOficial, sameCity } from '../audit/ir-rules';
 import type { Cell, ColKind, ExtractedTable, Finding } from '../audit/model';
 import type { TableImageCandidate } from './table-images';
+import { resolvePaginatedSums } from './paginated-tables';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -74,6 +75,8 @@ export interface ExtractedTableRef {
   titulo: string | null;
   sha1: string;
   table: ExtractedTable;
+  /** id do achado de soma desta tabela, quando ela sozinha não fechou. */
+  sumFindingId?: string;
 }
 
 export interface ExpectedLocation { cidade: string; uf?: string | null }
@@ -431,7 +434,8 @@ async function processImage(
   (payload?.tables ?? []).forEach((raw, ti) => {
     const ext = toExtracted(raw);
     if (!ext) return;
-    tables.push({ slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext });
+    const ref: ExtractedTableRef = { slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext };
+    tables.push(ref);
     tablesExtracted++;
     let flagged = false;
 
@@ -440,6 +444,7 @@ async function processImage(
       const viz = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
       if ((viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0) > 0) {
         flagged = true;
+        ref.sumFindingId = `iavis-sum-${c.sha1.slice(0, 10)}-${ti}`;
         findings.push({
           id: `iavis-sum-${c.sha1.slice(0, 10)}-${ti}`,
           type: 'ABSOLUTE_SUM',
@@ -553,8 +558,18 @@ export async function runVisionPass(
   }
   await Promise.all(Array.from({ length: Math.min(concurrency, candidates.length) }, worker));
 
+  // Tabela grande fatiada em slides vizinhos: cada fatia repete o total do
+  // conjunto e sozinha nunca fecha. Só o conjunto tem veredito (Toledo, jul/2026).
+  const paged = resolvePaginatedSums(
+    tables
+      .filter((ref): ref is ExtractedTableRef & { sumFindingId: string } => Boolean(ref.sumFindingId))
+      .map((ref) => ({ slide: ref.slide, section: toAuditSection(ref.secao), findingId: ref.sumFindingId, table: ref.table }))
+  );
+
   return {
-    findings, tables, sourceSlides: [...sourceSlides].sort((a, b) => a - b), analyzedSlides: [...analyzedSlides].sort((a, b) => a - b), tablesExtracted, tablesVerified, fromCache,
+    findings: findings.filter((f) => !paged.dropIds.has(f.id)).concat(paged.findings),
+    tables, sourceSlides: [...sourceSlides].sort((a, b) => a - b), analyzedSlides: [...analyzedSlides].sort((a, b) => a - b),
+    tablesExtracted, tablesVerified: tablesVerified + paged.verified, fromCache,
     inputTokens, outputTokens, escalated,
     costUsd,
   };

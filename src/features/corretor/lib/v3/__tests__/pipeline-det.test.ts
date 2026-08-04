@@ -28,7 +28,18 @@ describe('Corretor v3 — pipeline DET sobre estudo sintético', () => {
     const findings = irToFindings(ir).filter((f) => !f.ok); // só problemas
 
     const detErros = gab.erros.filter((e) => e.layer === 'DET');
-    const encontrados = new Set(findings.map((f) => `${f.type}@${f.slideRef}`));
+    const encontrados = new Set<string>();
+    for (const f of findings) {
+      encontrados.add(`${f.type}@${f.slideRef}`);
+      // A comunicação da revisão virou UM item agregado (31/jul/2026); o gabarito
+      // segue apontando slide a slide, então expandimos o checklist para o recall.
+      if (f.viz?.kind === 'text' && f.viz.checklist) {
+        for (const item of f.viz.checklist) {
+          const ref = item.label.match(/^s\d+/)?.[0];
+          if (ref) encontrados.add(`${f.type}@${ref}`);
+        }
+      }
+    }
 
     const faltando: string[] = [];
     for (const e of detErros) {

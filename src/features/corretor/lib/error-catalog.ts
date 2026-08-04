@@ -53,6 +53,17 @@ export interface ErrorMeta {
   mode: ErrorMode;
   viz: VizPattern;
   motor: Motor;
+  /**
+   * Ausente = erro do estudo, entra na contagem Erro/Provável/Verificar.
+   * `comunicacao` = recado entre analista e A&R deixado no arquivo: não é erro,
+   * fica fora da contagem e não bloqueia a entrega (decisão de 31/jul/2026).
+   */
+  category?: 'comunicacao';
+}
+
+/** Achado que é recado da revisão, não defeito do estudo. */
+export function isCommunication(type: ErrorType): boolean {
+  return ERROR_CATALOG[type]?.category === 'comunicacao';
 }
 
 export const ERROR_CATALOG: Record<ErrorType, ErrorMeta> = {
@@ -74,7 +85,7 @@ export const ERROR_CATALOG: Record<ErrorType, ErrorMeta> = {
   SOURCE_MISSING: { label: 'Fonte ausente', description: 'Slide com dado deve indicar fonte no texto ou imagem; validar o beta contra estudos reais.', mode: 'BETA', viz: 'overlay', motor: 'DET+IA' },
   REQUIRED_NOTE: { label: 'Nota obrigatória', description: 'Slides específicos exigem notas padrão (ex.: absorção desconsidera 2ª moradia).', mode: 'BETA', viz: 'overlay', motor: 'DET' },
   EXCLUSION_RULE: { label: 'Exclusões', description: 'Lacunas excluem Gardens, Duplex e Coberturas; esgotados variam por análise.', mode: 'BETA', viz: 'table', motor: 'DET' },
-  LEFTOVER_NOTE: { label: 'Nota de edição vazada', description: 'Comentário interno do revisor esquecido no estudo (rede de segurança).', mode: 'PLENO', viz: 'overlay', motor: 'DET' },
+  LEFTOVER_NOTE: { label: 'Comunicação da revisão', description: 'Comentários que a revisão deixou no arquivo (balões amarelos, notas de edição). Não são erros do estudo: viram checklist do que foi pedido e aviso no portão de entrega.', mode: 'PLENO', viz: 'checklist', motor: 'DET', category: 'comunicacao' },
   ATA_COVERAGE: { label: 'Cobertura da ata', description: 'Pedidos da ata são buscados no estudo por evidência textual; itens sem evidência pedem revisão.', mode: 'BETA', viz: 'checklist', motor: 'DET' },
   MAP_CHART_MISMATCH: { label: 'Mapa × gráfico', description: 'Dados exibidos no mapa correspondem ao gráfico/tabela do slide.', mode: 'MOCK', viz: 'map', motor: 'IA' },
 };

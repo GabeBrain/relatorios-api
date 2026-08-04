@@ -44,6 +44,17 @@ export function isStaleWrongCity(finding: Finding, expectedCity: string | null |
   return Boolean(city && sameCity(city, expectedCity));
 }
 
+/**
+ * Nota de revisão por slide (`note-<slide>-<i>`) dos estudos analisados antes de
+ * 31/jul/2026. A regra atual não gera mais um achado por comentário: eles viraram
+ * UM item agregado de “Comunicação da revisão” (`review-notes`), fora da contagem
+ * de erros. No Toledo eram 32 dos 39 achados — encerrá-los desafoga a worklist,
+ * e o item agregado aparece na próxima análise/reconferência.
+ */
+export function isStaleReviewNote(finding: Finding): boolean {
+  return finding.type === 'LEFTOVER_NOTE' && /^note-\d+-\d+$/.test(finding.id);
+}
+
 const slideOf = (label: string) => /^s(\d+)/.exec(label.trim())?.[1];
 const unitOf = (text: string) => (/r\$|reais/i.test(text) ? 'reais' : /m²|m2|metragem/i.test(text) ? 'm2' : 'outro');
 

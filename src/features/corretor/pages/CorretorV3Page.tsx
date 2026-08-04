@@ -13,13 +13,13 @@ import {
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
-import { errorLabel, ERROR_CATALOG, MODE_META, type ErrorType } from '../lib/error-catalog';
+import { errorLabel, ERROR_CATALOG, isCommunication, MODE_META, type ErrorType } from '../lib/error-catalog';
 import type { Finding } from '../lib/audit/model';
 import type { Ir } from '../lib/audit/ir';
 import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import { irToFindings } from '../lib/audit/ir-rules';
 import { detectBinGap } from '../lib/audit/engine';
-import { isStaleCrossTable, isStaleVisionContext, isStaleWrongCity } from '../lib/v3/reconcile';
+import { isStaleCrossTable, isStaleReviewNote, isStaleVisionContext, isStaleWrongCity } from '../lib/v3/reconcile';
 import { VizSwitch } from '../components/audit/FindingCard';
 import LegacyV1Panel from '../components/LegacyV1Panel';
 import AtaTestPanel from '../components/AtaTestPanel';
@@ -56,6 +56,9 @@ const STAGE_ORDER: StageProgress['stage'][] = ['det', 'ata', 'texto', 'visao', '
 
 const isLocal = (f: Finding) => /^s\d+$/.test(f.slideRef.trim());
 const slideNumOf = (f: Finding) => parseInt(f.slideRef.replace(/\D/g, ''), 10) || 0;
+const isComunicacao = (item: FindingV3) => isCommunication(item.finding.type as ErrorType);
+/** Quantos comentários o item agregado representa (o checklist é a lista real). */
+const noteCount = (f: Finding) => (f.viz?.kind === 'text' && f.viz.checklist?.length) || 1;
 
 // ─── Card de achado com status de correção ────────────────────────────────────
 
@@ -75,14 +78,19 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
   const mode = meta ? MODE_META[meta.mode] : null;
   const done = item.status !== 'pendente';
   const confidence = confidenceOf(f, item.origem);
-  const confidenceMeta = CONFIDENCE_META[confidence];
-  const [evidenceOpen, setEvidenceOpen] = useState(confidence === 1);
+  // Recado da revisão não usa a escala de erro: chip próprio, e o checklist —
+  // que É o conteúdo do item — já vem aberto.
+  const comunicacao = isCommunication(f.type as ErrorType);
+  const confidenceMeta = comunicacao
+    ? { label: 'Comunicação', icon: '💬', className: 'border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-300' }
+    : CONFIDENCE_META[confidence];
+  const [evidenceOpen, setEvidenceOpen] = useState(confidence === 1 || comunicacao);
 
   return (
     <div className={cn(
       'rounded-lg border border-l-4 bg-card transition-opacity',
       item.resolvidoNaVersao && 'animate-in fade-in zoom-in-95 duration-300',
-      done ? 'border-border opacity-60' : confidence === 1 ? 'border-l-red-500 border-red-500/30' : confidence === 2 ? 'border-l-orange-500 border-orange-500/30' : 'border-l-amber-500 border-amber-500/30'
+      done ? 'border-border opacity-60' : comunicacao ? 'border-l-violet-500 border-violet-500/30' : confidence === 1 ? 'border-l-red-500 border-red-500/30' : confidence === 2 ? 'border-l-orange-500 border-orange-500/30' : 'border-l-amber-500 border-amber-500/30'
     )}>
       <div className="flex items-start gap-3 px-4 py-3">
         <div className="mt-0.5 shrink-0">
@@ -128,7 +136,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
       {(f.evidenceImage || f.viz) && !done && (
         <div className="px-4 pb-2">
           <button onClick={() => setEvidenceOpen((open) => !open)} className="text-[11px] text-primary hover:underline mb-2">
-            {evidenceOpen ? 'Ocultar evidência' : 'Ver evidência'}
+            {evidenceOpen ? 'Ocultar' : 'Ver'} {comunicacao ? 'comentários' : 'evidência'}
           </button>
           {evidenceOpen && <div className="space-y-2">
           {f.evidenceImage && <>
@@ -362,13 +370,14 @@ export default function CorretorV3Page() {
           return viz?.kind === 'binrange' && detectBinGap(viz.bins).gapAfterIndex === undefined;
         }
         const seen = finding.evidenceSha1 ? transcribed.get(finding.evidenceSha1) : undefined;
-        return isStaleVisionContext(finding, studyCity, seen) || isStaleCrossTable(finding) || isStaleWrongCity(finding, studyCity);
+        return isStaleVisionContext(finding, studyCity, seen) || isStaleCrossTable(finding)
+          || isStaleWrongCity(finding, studyCity) || isStaleReviewNote(finding);
       });
       if (invalid.length) {
         await resolveInvalidFindings(id, invalid.map((item) => item.ruleId));
         loaded = await loadFindings(id);
         toast.info('Achados reconciliados com as regras atuais', {
-          description: `${invalid.length} falso(s) positivo(s) antigo(s) removido(s) da worklist.`,
+          description: `${invalid.length} achado(s) que as regras de hoje não geram mais foram encerrados.`,
         });
         await refreshList();
       }
@@ -645,13 +654,22 @@ export default function CorretorV3Page() {
 
   async function handleConclude() {
     if (!selected) return;
-    const blocking = items.filter((item) => item.status === 'pendente' && confidenceOf(item.finding, item.origem) <= 2);
-    const verify = items.filter((item) => item.status === 'pendente' && confidenceOf(item.finding, item.origem) === 3);
+    const pendentes = items.filter((item) => item.status === 'pendente');
+    const erros = pendentes.filter((item) => !isComunicacao(item));
+    const blocking = erros.filter((item) => confidenceOf(item.finding, item.origem) <= 2);
+    const verify = erros.filter((item) => confidenceOf(item.finding, item.origem) === 3);
     if (blocking.length) {
       toast.error('Ainda há erros ou prováveis pendentes', { description: `${blocking.length} item(ns) de nível 1–2 bloqueiam a entrega.` });
       return;
     }
     if (verify.length && !window.confirm(`Entregar com ${verify.length} item(ns) “Verificar” ainda abertos?`)) return;
+    // Decisão do Gabriel (31/jul): comentário no arquivo AVISA e pede confirmação
+    // — não bloqueia. O PPTX entregue ao A&R não deveria levar recado da revisão.
+    const comentarios = pendentes.filter(isComunicacao).reduce((total, item) => total + noteCount(item.finding), 0);
+    if (comentarios && !window.confirm(
+      `O estudo ainda tem ${comentarios} comentário(s) de revisão no arquivo. ` +
+      'O PPTX entregue ao A&R não deveria conter comentários. Entregar assim mesmo?'
+    )) return;
     try {
       await concludeStudy(selected.id);
       toast.success('Estudo pronto para o A&R 🎉');
@@ -662,8 +680,15 @@ export default function CorretorV3Page() {
   }
 
   const wl = useMemo(() => {
-    const active = items.filter((i) => i.resolvidoNaVersao === null || i.status === 'pendente');
-    const pend = items.filter((i) => i.status === 'pendente').length;
+    const vivos = items.filter((i) => i.resolvidoNaVersao === null || i.status === 'pendente');
+    // Comunicação da revisão não é erro do estudo (31/jul/2026): sai da contagem,
+    // dos grupos e da triagem. Tem bloco próprio e vira aviso no portão de entrega.
+    const comunicacao = vivos.filter(isComunicacao);
+    const comentarios = comunicacao
+      .filter((i) => i.status === 'pendente')
+      .reduce((total, i) => total + noteCount(i.finding), 0);
+    const active = vivos.filter((i) => !isComunicacao(i));
+    const pend = items.filter((i) => i.status === 'pendente' && !isComunicacao(i)).length;
     const local = active.filter((i) => isLocal(i.finding));
     const rel = active.filter((i) => !isLocal(i.finding));
     const bySlide = new Map<number, FindingV3[]>();
@@ -691,7 +716,12 @@ export default function CorretorV3Page() {
       .sort((a, b) =>
         confidenceOf(a.finding, a.origem) - confidenceOf(b.finding, b.origem) ||
         slideNumOf(a.finding) - slideNumOf(b.finding));
-    return { pend, total: items.length, slides: [...bySlide.entries()], relational: [...byType.entries()], confidence, completude, grouped: [...grouped.entries()], triageQueue };
+    return {
+      pend, total: items.filter((i) => !isComunicacao(i)).length,
+      slides: [...bySlide.entries()], relational: [...byType.entries()],
+      confidence, completude, grouped: [...grouped.entries()], triageQueue,
+      comunicacao, comentarios,
+    };
   }, [items]);
 
   const progressPct = wl.total > 0 ? Math.round(((wl.total - wl.pend) / wl.total) * 100) : 0;
@@ -861,6 +891,14 @@ export default function CorretorV3Page() {
               const meta = CONFIDENCE_META[level];
               return <span key={level} className={cn('rounded border px-2 py-0.5 font-medium', meta.className)}>{meta.icon} {countLabel(level, findings.length)}</span>;
             })}
+            {wl.comentarios > 0 && (
+              <span
+                className="rounded border px-2 py-0.5 font-medium border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-300"
+                title="Recados da revisão no arquivo — não contam como erro"
+              >
+                💬 {wl.comentarios} comentário(s)
+              </span>
+            )}
           </div>
           <span className={cn('font-medium', blockingPend === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground')}>
             {blockingPend === 0 ? (wl.pend ? `${wl.pend} item(ns) para verificar` : '0 pendentes — pronto para entregar 🎉') : `${blockingPend} bloqueia(m) a entrega`}
@@ -922,6 +960,17 @@ export default function CorretorV3Page() {
                   : selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
                 <WlHead title="Cobertura da ata e estrutura" count={wl.completude.length} hint="corrija o que falta produzir antes da varredura fina" />
                 {wl.completude.length === 0 ? <p className="text-xs text-muted-foreground">Nenhum item estrutural pendente.</p> : wl.completude.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
+
+                {wl.comunicacao.length > 0 && (
+                  <>
+                    <WlHead
+                      title="Comunicação da revisão"
+                      count={wl.comentarios}
+                      hint="recados do analista para o A&R — não são erros; viram checklist e aviso na entrega"
+                    />
+                    {wl.comunicacao.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
+                  </>
+                )}
                 <DeckRuler slides={selected.nSlides} items={items} onSlide={(slide) => { setWorkspaceTab('slides'); setConfidenceFilter([1, 2, 3]); requestAnimationFrame(() => document.getElementById(`slide-${slide}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }} />
               </section>}
 

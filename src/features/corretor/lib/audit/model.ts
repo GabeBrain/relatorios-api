@@ -102,6 +102,13 @@ export interface Finding {
   evidenceSha1?: string;
   /** A leitura da visão foi reconfirmada no modelo maior após divergência. */
   escalated?: boolean;
+  /**
+   * Nível de confiança fixado pela própria regra (1 Erro · 2 Provável · 3 Verificar),
+   * quando ela sabe mais que o padrão do tipo: soma de tabela paginada depende de
+   * todas as fatias, exclusão declarada explica o total aberto. Ausente = o
+   * `confidenceOf` decide pelo tipo/origem.
+   */
+  confidence?: 1 | 2 | 3;
   /** path no Storage da imagem-evidência, depois de persistida (v3.3). */
   evidenceImage?: string;
   /**
