@@ -6,6 +6,7 @@ import {
   Building2,
   Database,
   FolderSearch,
+  TrendingUp,
 } from 'lucide-react';
 import {
   CommandDialog,
@@ -28,6 +29,7 @@ const PAGES: Destination[] = [
   { label: 'Início', path: '/inicio', icon: <Home className="h-4 w-4" /> },
   { label: 'Rebrain — Secovi', path: '/rebrain/secovi', icon: <Building2 className="h-4 w-4" />, keywords: 'barretos excel mercado relatorio' },
   { label: 'Rebrain — Corretor | Vocacionais', path: '/auditoria', icon: <ClipboardList className="h-4 w-4" />, keywords: 'corretor vocacional slides auditoria' },
+  { label: 'Rebrain — Atualizador VGV', path: '/atualizador-vgv', icon: <TrendingUp className="h-4 w-4" />, keywords: 'vgv empreendimento excel incc ipca igp-di mapa' },
   { label: 'Dashboard Geobrain', path: '/dash-geobrain', icon: <BarChart2 className="h-4 w-4" />, keywords: 'dash geobrain dashboard' },
   { label: 'Banco Quanti', path: '/quanti', icon: <Database className="h-4 w-4" />, keywords: 'area quanti quantitativo base dashboard' },
 ];

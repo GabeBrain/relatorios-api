@@ -15,6 +15,7 @@ import {
   Home,
   Plug,
   Search,
+  TrendingUp,
 } from 'lucide-react';
 import { AuthBlock } from './AuthBlock';
 import { CommandPalette } from './CommandPalette';
@@ -60,6 +61,7 @@ const NAV_GROUPS: NavGroup[] = [
       { path: '/rebrain/secovi', label: 'Secovi', icon: <Building2 className="h-4 w-4" /> },
       { path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList className="h-4 w-4" /> },
       { path: '/corretor', label: 'Corretor', icon: <ClipboardList className="h-4 w-4" /> },
+      { path: '/atualizador-vgv', label: 'Atualizador VGV', icon: <TrendingUp className="h-4 w-4" /> },
     ],
   },
   {

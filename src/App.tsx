@@ -21,6 +21,7 @@ import ValidacaoFechamento from './pages/ValidacaoFechamento.tsx';
 const CorretorV3Page = lazy(() => import('./features/corretor/pages/CorretorV3Page.tsx'));
 const CorretorReportPage = lazy(() => import('./features/corretor/pages/CorretorReportPage.tsx'));
 const CorretorCalibrationPage = lazy(() => import('./features/corretor/pages/CorretorCalibrationPage.tsx'));
+const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/AtualizadorVgvPage.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -71,6 +72,7 @@ const App = () => (
                 <Route path="/corretor" element={<CorretorV3Page />} />
                 <Route path="/corretor/calibracao" element={<CorretorCalibrationPage />} />
                 <Route path="/corretor/:id/relatorio" element={<CorretorReportPage />} />
+                <Route path="/atualizador-vgv" element={<AtualizadorVgvPage />} />
                 {/* v1/v2 aposentadas → tudo cai no corretor v3 (histórico v1 = leitura lá dentro) */}
                 <Route path="/auditoria" element={<Navigate to="/corretor" replace />} />
                 <Route path="/auditoria/analise" element={<Navigate to="/corretor" replace />} />

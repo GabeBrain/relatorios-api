@@ -1,6 +1,6 @@
 # Rebrain (Plataforma) — Documento Vivo
 
-**Responsável:** Gabriel · **Rotas:** `/inicio`, `/rebrain/secovi`, `/auditoria`, `/qualidade/*`, `/apis/explorer`
+**Responsável:** Gabriel · **Rotas:** `/inicio`, `/rebrain/secovi`, `/corretor`, `/atualizador-vgv`, `/qualidade/*`, `/apis/explorer`
 
 Doc vivo do projeto que abriga a **plataforma/shell** (o "Studio Brain" → Rebrain) e as
 features que rodam sobre ela. Ver a convenção e a regra de atualização em [`README.md`](./README.md).
@@ -48,6 +48,23 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+
+### 2026-08-04 — Atualizador VGV V1 client-side — Codex
+- **O quê:** migração da aplicação Streamlit `AtualizadorVGV` para uma feature React/TypeScript na rota
+  `/atualizador-vgv`, com item próprio no menu Rebrain e na busca global. A V1 inclui upload/drag-and-drop
+  de XLS/XLSX, base de demonstração, filtros encadeados, KPIs, séries de VGV, estoque × vendas, mapa
+  clicável, ficha do empreendimento, amenidades, comparador INCC-DI/IPCA/IGP-DI e exportação XLSX.
+- **Arquitetura:** processamento integral no navegador, sem persistência ou envio do arquivo. O parser de
+  blocos mensais, a conversão wide→long e a correção direta para base 12/2025 foram portados para
+  `src/features/atualizador-vgv/engine.ts`; os quatro XLSX de demonstração/índices ficam em
+  `public/atualizador-vgv/`.
+- **Interface:** página responsiva com identidade Brain, visualizações interativas e suporte aos temas claro
+  e escuro globais. A feature é carregada por lazy route para isolar seu bundle.
+- **Paridade/verificação:** teste contra os arquivos reais confirma 19 registros, 57 linhas mensais,
+  66 amenidades e séries INCC-DI/IPCA/IGP-DI com 378/385/378 pontos. Typecheck e build de produção
+  aprovados; suíte total com os 5 testes do motor VGV.
+- **Pendências V1:** homologação visual pelo setor usuário e definição da atualização futura dos índices
+  locais, atualmente encerrados em 01/2026.
 
 ### 2026-08-04 — Relatório Secovi: vendas trimestrais passam a somar todos os fechamentos — Terra
 - **O quê:** `sold_in_period` deixou de ser sobrescrito pelo último mês do trimestre. A nova
@@ -513,10 +530,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (análise de cobertura ✅ em 26/jul; próximo: teste de aderência Piracicaba 1T26 número a número, depois Camada 1 = XLSX) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
+| 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI, testes e build ✅; homologação pelo setor usuário pendente) |
 
 ---
 
 ## 3. Pendências
+
+- [ ] Atualizador VGV V1: homologar `/atualizador-vgv` em desktop/mobile e nos temas claro/escuro.
+- [ ] Atualizador VGV: definir rotina de atualização das séries INCC-DI, IPCA e IGP-DI (assets atuais até 01/2026).
 
 - [ ] **Relatório Secovi — homologar vendas trimestrais:** correção implementada e coberta por testes;
   gerar o Excel no ambiente da área e conferir a Rubi (`4T2025 = 49 + 300 = 349`, `1T2026 = 100`,
