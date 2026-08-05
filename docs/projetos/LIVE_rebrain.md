@@ -49,6 +49,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-05 — Atualizador VGV alinhado à interface compartilhada — Codex
+- **O quê:** a abertura de `/atualizador-vgv` foi reorganizada para seguir o padrão visual dos demais
+  módulos da plataforma, com cabeçalho compacto, barra de arquivo, navegação por abas, filtros e cards
+  em superfícies neutras, bordas discretas e verde reservado aos estados ativos.
+- **Preservado:** os quatro KPIs originais do Atualizador VGV, o upload/drag-and-drop, filtros encadeados,
+  visão geral, comparador de índices, gráficos, mapa, ficha, amenidades e exportações continuam com as
+  mesmas regras e dados; a mudança é apenas de hierarquia e acabamento visual.
+- **Responsividade/tema:** estilos claro e escuro e quebras para tablet/mobile foram atualizados junto
+  da nova composição; tipagem, 5 testes do motor e build de produção passaram.
+- **Arquivos:** `src/features/atualizador-vgv/{AtualizadorVgvPage.tsx,atualizador-vgv.css}`.
+
 ### 2026-08-04 — Atualizador VGV V1 client-side — Codex
 - **O quê:** migração da aplicação Streamlit `AtualizadorVGV` para uma feature React/TypeScript na rota
   `/atualizador-vgv`, com item próprio no menu Rebrain e na busca global. A V1 inclui upload/drag-and-drop
@@ -530,13 +541,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (análise de cobertura ✅ em 26/jul; próximo: teste de aderência Piracicaba 1T26 número a número, depois Camada 1 = XLSX) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
-| 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI, testes e build ✅; homologação pelo setor usuário pendente) |
+| 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI padronizada, testes e build ✅; homologação pelo setor usuário pendente) |
 
 ---
 
 ## 3. Pendências
 
-- [ ] Atualizador VGV V1: homologar `/atualizador-vgv` em desktop/mobile e nos temas claro/escuro.
+- [ ] Atualizador VGV V1: homologar a interface padronizada de `/atualizador-vgv` em desktop/mobile e nos temas claro/escuro.
 - [ ] Atualizador VGV: definir rotina de atualização das séries INCC-DI, IPCA e IGP-DI (assets atuais até 01/2026).
 
 - [ ] **Relatório Secovi — homologar vendas trimestrais:** correção implementada e coberta por testes;

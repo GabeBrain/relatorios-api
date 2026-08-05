@@ -5,11 +5,11 @@ import {
   Building2,
   CheckCircle2,
   FileSpreadsheet,
+  Filter,
   GitCompareArrows,
   Loader2,
   MapPin,
   RefreshCw,
-  Sparkles,
   UploadCloud,
   X,
 } from 'lucide-react';
@@ -269,46 +269,53 @@ export default function AtualizadorVgvPage() {
 
   return (
     <div className="vvg-root min-h-full">
-      <header className="vvg-hero">
-        <div>
-          <div className="vvg-eyebrow"><Sparkles className="h-3.5 w-3.5" /> Inteligência imobiliária · processamento local</div>
-          <h1>Atualizador VGV</h1>
-          <p>Explore a evolução dos empreendimentos, compare índices e exporte recortes sem enviar dados para um servidor.</p>
+      <header className="vvg-page-header">
+        <div className="vvg-page-title">
+          <span className="vvg-page-icon"><BarChart3 className="h-4 w-4" /></span>
+          <div>
+            <h1>Atualizador VGV</h1>
+            <p>Inteligência imobiliária · atualização e análise de empreendimentos</p>
+          </div>
         </div>
-        <div className="vvg-privacy"><CheckCircle2 className="h-4 w-4" /><span><strong>100% no navegador</strong><small>Nenhum arquivo é armazenado</small></span></div>
+        <div className="vvg-privacy"><CheckCircle2 className="h-4 w-4" /><span><strong>Processamento local</strong><small>Nenhum arquivo é armazenado</small></span></div>
       </header>
 
       <main className="vvg-content">
-        <section className="vvg-source-card">
-          <div
-            className={`vvg-dropzone ${dragging ? 'is-dragging' : ''}`}
-            onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(event) => { event.preventDefault(); setDragging(false); handleFile(event.dataTransfer.files[0]); }}
-          >
-            <input ref={inputRef} type="file" accept=".xlsx,.xls" hidden onChange={(event) => handleFile(event.target.files?.[0])} />
-            <div className="vvg-drop-icon"><UploadCloud className="h-5 w-5" /></div>
-            <div className="min-w-0 flex-1">
+        <input ref={inputRef} type="file" accept=".xlsx,.xls" hidden onChange={(event) => handleFile(event.target.files?.[0])} />
+        <section
+          className={`vvg-source-toolbar ${dragging ? 'is-dragging' : ''}`}
+          onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(event) => { event.preventDefault(); setDragging(false); handleFile(event.dataTransfer.files[0]); }}
+        >
+          <div className="vvg-source-info">
+            <div className="vvg-drop-icon"><UploadCloud className="h-4 w-4" /></div>
+            <div className="min-w-0">
               <strong>{sourceName || 'Carregue uma planilha VGV'}</strong>
               <span>{dataset ? `${dataset.base.length} registros · ${dataset.metadata.monthLabels.length} meses · ${dataset.metadata.amenityColumns.length} amenidades` : 'Arraste o arquivo aqui ou escolha no computador'}</span>
             </div>
+          </div>
+          <div className="vvg-source-actions">
             <Button size="sm" variant="outline" onClick={() => inputRef.current?.click()} disabled={loading}>Escolher arquivo</Button>
             <Button size="sm" variant="ghost" onClick={() => loadSample()} disabled={loading} title="Restaurar demonstração"><RefreshCw className="h-4 w-4" /></Button>
           </div>
-          {loading && <div className="vvg-loading"><Loader2 className="h-4 w-4 animate-spin" /> Processando dados localmente…</div>}
-          {error && <div className="vvg-error">{error}</div>}
         </section>
+        {loading && <div className="vvg-loading"><Loader2 className="h-4 w-4 animate-spin" /> Processando dados localmente…</div>}
+        {error && <div className="vvg-error">{error}</div>}
 
         {dataset && !loading && (
           <>
-            <div className="vvg-tabs" role="tablist">
-              <button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}><BarChart3 className="h-4 w-4" /> Visão geral</button>
-              <button className={tab === 'indices' ? 'active' : ''} onClick={() => setTab('indices')}><GitCompareArrows className="h-4 w-4" /> Comparador de índices</button>
+            <div className="vvg-viewbar">
+              <div className="vvg-tabs" role="tablist">
+                <button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}><BarChart3 className="h-4 w-4" /> Visão geral</button>
+                <button className={tab === 'indices' ? 'active' : ''} onClick={() => setTab('indices')}><GitCompareArrows className="h-4 w-4" /> Comparador de índices</button>
+              </div>
+              <span className="vvg-scope-summary">{filteredBase.length} de {dataset.base.length} registros no recorte</span>
             </div>
 
             <section className="vvg-filter-card">
               <div className="vvg-filter-heading">
-                <div><strong>Filtros inteligentes</strong><span>As opções se adaptam ao recorte selecionado.</span></div>
+                <div><strong><Filter className="h-4 w-4" /> Filtros</strong><span>As opções se adaptam ao recorte selecionado.</span></div>
                 {activeFilterCount > 0 && <button onClick={() => setFilters(EMPTY_FILTERS)}><X className="h-3.5 w-3.5" /> Limpar {activeFilterCount}</button>}
               </div>
               <div className="vvg-filter-grid">
@@ -495,7 +502,7 @@ function IndexComparator({ rows, selected, onChange, indices, projectCount }: { 
   return (
     <div className="vvg-section-stack">
       <section className="vvg-index-intro">
-        <div><span className="vvg-index-icon"><GitCompareArrows className="h-5 w-5" /></span><div><h2>Comparador de índices</h2><p>VGV da oferta corrigido para a base de dezembro de 2025.</p></div></div>
+        <div><span className="vvg-index-icon"><GitCompareArrows className="h-5 w-5" /></span><div><h2>Comparador de índices</h2><p>VGV da oferta corrigido para dezembro de 2025 · {projectCount} {projectCount === 1 ? 'empreendimento' : 'empreendimentos'} · referência {String(reference?.month ?? '—')}</p></div></div>
         <div className="vvg-index-toggle">{INDEX_NAMES.map((name) => <button key={name} className={selected.includes(name) ? 'active' : ''} onClick={() => toggle(name)}><span style={{ background: name === 'INCC-DI' ? FIELD_COLORS.primary : name === 'IPCA' ? FIELD_COLORS.secondary : FIELD_COLORS.accent }} />{name}</button>)}</div>
       </section>
       <section className="vvg-kpis vvg-index-kpis">
