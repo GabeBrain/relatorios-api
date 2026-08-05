@@ -49,6 +49,19 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-05 — Mapa urbano operacional no Atualizador VGV — Codex
+- **O quê:** o mapa nacional estático de `/atualizador-vgv` foi substituído por um mapa urbano MapLibre
+  com ruas, bairros, rótulos cartográficos, zoom, tela cheia, escala e enquadramento automático nos
+  empreendimentos do recorte.
+- **Navegação:** uma lista lateral permite localizar cada empreendimento; o marcador abre nome,
+  bairro, cidade/UF, endereço, status e VGV da oferta antes da ação explícita de focar toda a análise.
+  Recortes com uma única localização aproximam o endereço, e o botão `Ver todos` recompõe os limites.
+- **Resiliência:** a tela informa empreendimentos sem latitude/longitude e mantém a lista de endereços
+  utilizável enquanto a base cartográfica externa carrega ou em caso de falha de conexão.
+- **Limpeza:** removido do cabeçalho o selo `Processamento local / Nenhum arquivo é armazenado`.
+- **Arquivos:** `src/features/atualizador-vgv/{AtualizadorVgvPage.tsx,ProjectMap.tsx,atualizador-vgv.css}`,
+  `package.json` e `package-lock.json` (`maplibre-gl`).
+
 ### 2026-08-05 — Atualizador VGV alinhado à interface compartilhada — Codex
 - **O quê:** a abertura de `/atualizador-vgv` foi reorganizada para seguir o padrão visual dos demais
   módulos da plataforma, com cabeçalho compacto, barra de arquivo, navegação por abas, filtros e cards
@@ -541,13 +554,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (análise de cobertura ✅ em 26/jul; próximo: teste de aderência Piracicaba 1T26 número a número, depois Camada 1 = XLSX) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
-| 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI padronizada, testes e build ✅; homologação pelo setor usuário pendente) |
+| 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI padronizada, mapa urbano, testes e build ✅; homologação pelo setor usuário pendente) |
 
 ---
 
 ## 3. Pendências
 
-- [ ] Atualizador VGV V1: homologar a interface padronizada de `/atualizador-vgv` em desktop/mobile e nos temas claro/escuro.
+- [ ] Atualizador VGV V1: homologar a interface padronizada e o mapa urbano de `/atualizador-vgv` em desktop/mobile e nos temas claro/escuro.
 - [ ] Atualizador VGV: definir rotina de atualização das séries INCC-DI, IPCA e IGP-DI (assets atuais até 01/2026).
 
 - [ ] **Relatório Secovi — homologar vendas trimestrais:** correção implementada e coberta por testes;

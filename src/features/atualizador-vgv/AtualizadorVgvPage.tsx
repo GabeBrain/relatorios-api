@@ -3,7 +3,6 @@ import {
   ArrowDownToLine,
   BarChart3,
   Building2,
-  CheckCircle2,
   FileSpreadsheet,
   Filter,
   GitCompareArrows,
@@ -25,7 +24,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { MultiSelect } from '@/features/dashboard-geobrain/MultiSelect';
@@ -35,17 +33,16 @@ import {
   extractAmenities,
   findColumn,
   loadBundledIndexSeries,
-  normalizeText,
   parseVgvArrayBuffer,
   toNumber,
 } from './engine';
+import { ProjectMap } from './ProjectMap';
 import type { AdjustmentRow, IndexName, IndexSeries, ParsedVgvWorkbook, PerformanceRow, VgvFilters, VgvRow } from './types';
 import { INDEX_NAMES } from './types';
 import './atualizador-vgv.css';
 
-const GEO_URL = '/geo/br-states.json';
 const EMPTY_FILTERS: VgvFilters = { empreendimentos: [], cidades: [], tipologias: [], status: [] };
-const FIELD_COLORS = { primary: '#71984a', secondary: '#315b78', accent: '#f8d000', muted: '#94a3b8', danger: '#b00020' };
+const FIELD_COLORS = { primary: '#71984a', secondary: '#315b78', accent: '#f8d000', muted: '#94a3b8' };
 
 type ViewTab = 'overview' | 'indices';
 
@@ -171,6 +168,9 @@ export default function AtualizadorVgvPage() {
       empreendimento: findColumn(all, ['Empreendimento']),
       cidade: findColumn(all, ['Cidade']),
       estado: findColumn(all, ['Estado']),
+      bairro: findColumn(all, ['Bairro']),
+      endereco: findColumn(all, ['Endereço', 'Endereco']),
+      numero: findColumn(all, ['Número', 'Numero']),
       tipologia: findColumn(all, ['Tipologia']),
       latitude: findColumn(all, ['Latitude']),
       longitude: findColumn(all, ['Longitude']),
@@ -277,7 +277,6 @@ export default function AtualizadorVgvPage() {
             <p>Inteligência imobiliária · atualização e análise de empreendimentos</p>
           </div>
         </div>
-        <div className="vvg-privacy"><CheckCircle2 className="h-4 w-4" /><span><strong>Processamento local</strong><small>Nenhum arquivo é armazenado</small></span></div>
       </header>
 
       <main className="vvg-content">
@@ -423,45 +422,6 @@ function Kpi({ icon, label, value, detail }: { icon: React.ReactNode; label: str
 
 function ChartCard({ title, subtitle, className = '', children }: { title: string; subtitle: string; className?: string; children: React.ReactNode }) {
   return <section className={`vvg-card ${className}`}><div className="vvg-card-head"><div><h2>{title}</h2><p>{subtitle}</p></div></div>{children}</section>;
-}
-
-function ProjectMap({ rows, columns, onFocus }: { rows: EnrichedRow[]; columns: Record<string, string | undefined>; onFocus: (name: string) => void }) {
-  const points = useMemo(() => {
-    const projects = new Map<string, { name: string; city: string; status: string; lat: number; lon: number; vgv: number }>();
-    rows.forEach((row) => {
-      const name = String(row[columns.empreendimento ?? ''] ?? '').trim();
-      const lat = toNumber(row[columns.latitude ?? '']);
-      const lon = toNumber(row[columns.longitude ?? '']);
-      if (!name || lat === null || lon === null) return;
-      const current = projects.get(name);
-      projects.set(name, {
-        name,
-        city: String(row[columns.cidade ?? ''] ?? ''),
-        status: row.__status_atual ?? '',
-        lat,
-        lon,
-        vgv: (current?.vgv ?? 0) + (row.__vgv_oferta_atual ?? 0),
-      });
-    });
-    return [...projects.values()];
-  }, [columns, rows]);
-  return (
-    <section className="vvg-card vvg-map-card">
-      <div className="vvg-card-head"><div><h2>Mapa de empreendimentos</h2><p>Clique em um ponto para focar a análise</p></div><span className="vvg-count">{points.length} pontos</span></div>
-      <div className="vvg-map-shell">
-        <ComposableMap projection="geoMercator" projectionConfig={{ center: [-52, -15], scale: 720 }}>
-          <ZoomableGroup minZoom={1} maxZoom={6}>
-            <Geographies geography={GEO_URL}>{({ geographies }) => geographies.map((geo) => <Geography key={geo.rsmKey} geography={geo} fill="var(--vvg-map-fill)" stroke="var(--vvg-map-line)" strokeWidth={0.65} style={{ default: { outline: 'none' }, hover: { fill: 'var(--vvg-map-hover)', outline: 'none' }, pressed: { outline: 'none' } }} />)}</Geographies>
-            {points.map((point) => (
-              <Marker key={point.name} coordinates={[point.lon, point.lat]} onClick={() => onFocus(point.name)}>
-                <circle r={5.5} fill={normalizeText(point.status).includes('esgotado') ? FIELD_COLORS.danger : FIELD_COLORS.primary} stroke="white" strokeWidth={1.6} className="vvg-marker"><title>{`${point.name}\n${point.city}\n${point.status}\n${brl(point.vgv)}`}</title></circle>
-              </Marker>
-            ))}
-          </ZoomableGroup>
-        </ComposableMap>
-      </div>
-    </section>
-  );
 }
 
 function ProjectDetails({ rows, columns, amenityColumns }: { rows: EnrichedRow[]; columns: Record<string, string | undefined>; amenityColumns: string[] }) {
