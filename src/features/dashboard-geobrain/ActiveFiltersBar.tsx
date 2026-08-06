@@ -1,16 +1,18 @@
 import { X } from 'lucide-react';
 import type { GeoScope } from '@/features/shared/geo-api-scope-engine';
 import type { Filters } from './types';
-import type { extractOptions } from './aggregate';
+import type { extractOptions, extractRangeOptions } from './aggregate';
 import type { BuildingType } from './Header';
 
 type Options = ReturnType<typeof extractOptions>;
+type RangeOptions = ReturnType<typeof extractRangeOptions>;
 
 interface Props {
   scope: GeoScope;
   buildingType: BuildingType;
   filters: Filters;
   options: Options;
+  rangeOptions: RangeOptions;
   onReset: () => void;
 }
 
