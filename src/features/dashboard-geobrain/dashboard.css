@@ -134,6 +134,9 @@
 .dash-geobrain table.dg-heatmap th { background: hsl(var(--dg-primary)); color: white; font-weight: 600; }
 .dash-geobrain table.dg-heatmap td:first-child { text-align: left; font-weight: 500; background: hsl(var(--dg-muted-soft)); }
 
+/* §9 — descrição das legendas dos gráficos */
+.dash-geobrain .recharts-legend-item-text { color: var(--dg-legend) !important; }
+
 /* ============ Modo escuro ============ */
 .dark .dash-geobrain {
   --dg-primary: 88 34% 52%;
