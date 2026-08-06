@@ -571,7 +571,8 @@ export function computeIpcByStandard(
     for (const t of b.typologies) {
       for (const h of t.history) {
         const key = periodKey(h.period, g);
-        addSort.set(key, periodSortKey(h.period, g));
+        // denominador de mercado usa todos os empreendimentos, mas o eixo de
+        // períodos é definido apenas pelos períodos filtrados (loop abaixo).
         allVendas.set(key, (allVendas.get(key) ?? 0) + h.sold_in_period);
         allEstoque.set(key, (allEstoque.get(key) ?? 0) + h.typology_stock);
       }
