@@ -17,6 +17,8 @@ const WINDOW = 12;
 
 // ============ Tooltip padrão (§2) — cor via token (#212529 no claro) ============
 const HL = 'var(--dg-tooltip-hl)';
+// §9 — cor da descrição das legendas dos gráficos.
+const LEGEND_COLOR = 'var(--dg-legend)';
 
 interface TooltipEntry { name?: string | number; value?: number | string | null; color?: string; dataKey?: string | number }
 interface DGTooltipProps { active?: boolean; label?: string | number; payload?: TooltipEntry[]; format?: (v: number) => string }
