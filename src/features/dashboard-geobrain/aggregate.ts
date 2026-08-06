@@ -385,7 +385,7 @@ export function computeOfertaPorDormitorio(buildings: Building[], f: Filters): C
 }
 
 export function computeOfertaPorPadrao(buildings: Building[], f: Filters): ComboBucket[] {
-  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.standard || 'Sem classificação');
+  const acc = tempoEstoqueByLatest(buildings, f, (b, _t, h) => patternOf(h, b));
   // §10 — sem limitação de Top 10
   return Array.from(acc.entries())
     .map(([key, { est, vnd }]) => ({ key, estoque: est, tempoEstoque: tempoFromIvv(est, vnd) }))
