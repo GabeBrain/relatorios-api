@@ -23,7 +23,7 @@ function toOpts(arr: string[]): MultiSelectOption[] {
 
 const STATUS_LABEL: Record<string, string> = { Ativo: 'Comercialização', Esgotado: 'Esgotado' };
 
-export function Sidebar({ open, onClose, filters, onFiltersChange, options, onReset }: Props) {
+export function Sidebar({ open, onClose, filters, onFiltersChange, options, rangeOptions, onReset }: Props) {
   const set = <K extends keyof Filters>(k: K, v: Filters[K]) => onFiltersChange({ ...filters, [k]: v });
 
   const bedroomOpts = useMemo<MultiSelectOption[]>(
