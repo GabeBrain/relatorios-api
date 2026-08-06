@@ -32,6 +32,13 @@ export function Header({
   onGranularityChange,
   onOpenSidebar,
 }: Props) {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const toggleDark = () => {
+    const next = !dark;
+    document.documentElement.classList.toggle('dark', next);
+    setDark(next);
+  };
+
   return (
     <header className="dg-header flex flex-wrap items-end gap-3 border-b border-[hsl(var(--dg-border))] bg-[hsl(var(--dg-card))] px-4 py-3">
       <button
