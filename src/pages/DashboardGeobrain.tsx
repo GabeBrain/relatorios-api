@@ -140,6 +140,7 @@ export default function DashboardGeobrain() {
         buildingType={buildingType}
         filters={filters}
         options={options}
+        rangeOptions={rangeOptions}
         onReset={() => setFilters(EMPTY_FILTERS)}
       />
 
