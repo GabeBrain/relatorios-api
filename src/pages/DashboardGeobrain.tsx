@@ -76,6 +76,7 @@ export default function DashboardGeobrain() {
 
   const rankIvv = useMemo(() => rankBairrosPorIvv(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankTempo = useMemo(() => rankBairrosPorTempoEstoque(filtered, filtersWithType), [filtered, filtersWithType]);
+  const rankEstoque = useMemo(() => rankBairrosPorEstoque(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankM2 = useMemo(() => rankBairrosPorPrecoM2(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
