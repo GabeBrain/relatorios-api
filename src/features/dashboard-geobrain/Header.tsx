@@ -92,6 +92,19 @@ export function Header({
           ))}
         </div>
       </div>
+      <div className="dg-header-group ml-auto">
+        <label className="dg-header-label">Tema</label>
+        <button
+          type="button"
+          className="dg-chip"
+          data-active={dark}
+          onClick={toggleDark}
+          title={dark ? 'Modo claro' : 'Modo escuro'}
+          aria-label={dark ? 'Ativar modo claro' : 'Ativar modo escuro'}
+        >
+          {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+        </button>
+      </div>
     </header>
   );
 }
