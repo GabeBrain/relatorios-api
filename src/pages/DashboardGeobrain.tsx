@@ -198,6 +198,7 @@ export default function DashboardGeobrain() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <RankingCard title="IVV por bairro" rows={rankIvv} formatValue={(v) => pctRaw(v * 100, 1)} info={infoIvv} />
           <RankingCard title="Tempo de estoque por bairro" rows={rankTempo} formatValue={(v) => monthsFmt(v)} info={infoTempoEstoque} />
+          <RankingCard title="Estoque atual por bairro" rows={rankEstoque} formatValue={(v) => intFmt(v)} info={infoEstoqueAtual} />
           <RankingCard title="Preço m² por bairro" rows={rankM2} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoM2} />
           <RankingCard title="Preço médio por bairro" rows={rankMedio} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoMedio} />
         </div>
