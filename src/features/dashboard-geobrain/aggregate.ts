@@ -398,6 +398,16 @@ export function rankBairrosPorIvv(buildings: Building[], f: Filters): RankRow[] 
   return rows.sort((a, b) => b.value - a.value);
 }
 
+/** Estoque atual (unidades) por bairro no período mais recente do escopo filtrado. */
+export function rankBairrosPorEstoque(buildings: Building[], f: Filters): RankRow[] {
+  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.neighborhood);
+  const rows: RankRow[] = [];
+  for (const [k, { est }] of acc) {
+    if (est > 0) rows.push({ key: k, value: est });
+  }
+  return rows.sort((a, b) => b.value - a.value);
+}
+
 export function rankBairrosPorTempoEstoque(buildings: Building[], f: Filters): RankRow[] {
   const acc = tempoEstoqueByLatest(buildings, f, (b) => b.neighborhood);
   const rows: RankRow[] = [];
