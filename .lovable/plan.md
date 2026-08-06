@@ -2,10 +2,6 @@
 
 Quatro ajustes na página `/dash-geobrain`, preservando o layout atual.
 
-> Observação: o JSON de exemplo com os campos novos ainda não chegou até mim (a lista de anexos
-> não mostra nenhum arquivo `.json`). O item 7 abaixo descreve o mecanismo de mapeamento; assim
-> que o arquivo for anexado, mapeio campo a campo dentro da mesma estrutura.
-
 ## 6. Novo endpoint (POST v2)
 
 - Trocar a base da consulta de `https://geobrain.com.br/public-api/building-with-history` (GET)
@@ -13,17 +9,27 @@ Quatro ajustes na página `/dash-geobrain`, preservando o layout atual.
 - Mesmos parâmetros (`uf`, `city`, `type`, `status`, `per_page`, `page`), mantidos na
   **query string**, com o `Authorization: Bearer <token>` como hoje.
 - Paginação por `meta.last_page` e as 8 "lanes" paralelas (tipo × status) permanecem iguais.
-- Se a resposta v2 vier com envelope diferente (`data`/`meta`), o parser trata os dois formatos
-  para não quebrar em caso de divergência.
 
 ## 7. Mapear os campos novos
 
-- `normalizeBuilding()` passa a ler também os campos novos, mantendo os atuais.
-- Cada campo novo entra em `types.ts` (`Building`, `Typology`, `HistoryEntry`) com o mesmo
-  tratamento numérico/nulo já usado (`toNum`, `toNumOrNull`, datas).
-- Campos textuais que servem de agrupamento seguem a regra de bairro: normalização e trim.
-- Nenhum campo novo é exibido em gráfico nesta etapa — apenas fica disponível para uso;
-  se algum deles for medida esperada em tela, incluo depois de ver o JSON.
+Com base no JSON de exemplo enviado, o parser passa a ler:
+
+- **No empreendimento**: `delivery_date`, `zipcode`, `address`, `address_number`, `city_id`,
+  `latitude`, `longitude`, `towers`, `floors`, `elevators`, `period`, `time_on_sale`,
+  `total_stock`, `total_units`, `builder_name`, `bathrooms`, `has_suites`, `last_update`,
+  condições comerciais (`interest_rate_index`, `interest_rate_tax`, `bank_financing`,
+  `own_financing`, `fiduciary_ownership`, `down_payment_percentage`, `discount_percentage`,
+  `number_of_installments`), além das listas `incorporators[]` e `areas[]`.
+- **No histórico da tipologia**: `pattern`, `building_status`, `time_on_sale`, `public_area`,
+  `price_public_area`, `vgv_total`, `sold`, `number_suite`, `estagio_empreendimento`,
+  `taxa_associativa`. Campos que antes eram fixos por tipologia (`private_area`,
+  `release_price`, `number_bedroom`, `garage`, `qty`) agora vêm por período — passam a ser
+  guardados também na entrada de histórico, mantendo o valor representativo na tipologia
+  para compatibilidade com as medidas atuais.
+- Todos com o mesmo tratamento numérico/nulo já usado (`toNum`, `toNumOrNull`, datas), e
+  `latitude`/`longitude` convertidos para número.
+- Nenhum campo novo entra em gráfico nesta etapa — ficam disponíveis para uso futuro.
+
 
 ## 8. `standard` → `typologies_history[].pattern`
 
