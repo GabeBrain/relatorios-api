@@ -350,7 +350,7 @@ export function computeSeries(buildings: Building[], f: Filters, g: Granularity)
 export interface ComboBucket { key: string; estoque: number; tempoEstoque: number; }
 
 /** Tempo de estoque no período mais recente = 1 / IVV(latest). */
-function tempoEstoqueByLatest(buildings: Building[], f: Filters, groupKey: (b: Building, t: Typology) => string): Map<string, { est: number; vnd: number }> {
+function tempoEstoqueByLatest(buildings: Building[], f: Filters, groupKey: (b: Building, t: Typology, h: HistoryEntry) => string): Map<string, { est: number; vnd: number }> {
   const latest = latestPeriodInScope(buildings, f);
   const acc = new Map<string, { est: number; vnd: number }>();
   if (!latest) return acc;
@@ -358,7 +358,7 @@ function tempoEstoqueByLatest(buildings: Building[], f: Filters, groupKey: (b: B
     for (const t of b.typologies) {
       const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
       if (!h) continue;
-      const k = groupKey(b, t);
+      const k = groupKey(b, t, h);
       if (!k) continue;
       const cur = acc.get(k) ?? { est: 0, vnd: 0 };
       cur.est += h.typology_stock;
