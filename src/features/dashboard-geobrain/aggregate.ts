@@ -453,10 +453,10 @@ export function rankBairrosPorPrecoMedio(buildings: Building[], f: Filters): Ran
   return avgLastPrice(buildings, f, 'price', (b) => b.neighborhood).sort((a, b) => a.value - b.value);
 }
 export function precoM2PorPadrao(buildings: Building[], f: Filters): RankRow[] {
-  return avgLastPrice(buildings, f, 'price_private_area', (b) => b.standard || 'Sem classificação').sort((a, b) => a.value - b.value);
+  return avgLastPrice(buildings, f, 'price_private_area', (b, _t, h) => patternOf(h, b)).sort((a, b) => a.value - b.value);
 }
 export function precoMedioPorPadrao(buildings: Building[], f: Filters): RankRow[] {
-  return avgLastPrice(buildings, f, 'price', (b) => b.standard || 'Sem classificação').sort((a, b) => a.value - b.value);
+  return avgLastPrice(buildings, f, 'price', (b, _t, h) => patternOf(h, b)).sort((a, b) => a.value - b.value);
 }
 
 // ============ Mapa de oportunidades ============
