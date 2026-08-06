@@ -48,6 +48,11 @@ export default function DashboardGeobrain() {
 
   const allBuildings = buildings ?? [];
   const options = useMemo(() => extractOptions(allBuildings), [allBuildings]);
+  // §5 — faixas dinâmicas por cidade carregada + tipo de empreendimento selecionado.
+  const rangeOptions = useMemo(
+    () => extractRangeOptions(allBuildings.filter((b) => b.building_type === buildingType)),
+    [allBuildings, buildingType],
+  );
 
   // §4 — Ao carregar dados, aplicar por padrão os últimos 12 meses (períodos).
   useEffect(() => {
