@@ -75,7 +75,7 @@ function normalizeBuilding(raw: Record<string, unknown>): Building {
     status: String(raw.status ?? ''),
     city: String(raw.city ?? ''),
     state: String(raw.state ?? ''),
-    neighborhood: String(raw.neighborhood ?? ''),
+    neighborhood: stripAccents(String(raw.neighborhood ?? '')),
     building_type: String(raw.building_type ?? ''),
     standard: String(raw.standard ?? ''),
     release_date: releaseDate,
