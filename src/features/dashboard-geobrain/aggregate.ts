@@ -112,12 +112,19 @@ export function extractRangeOptions(buildings: Building[]) {
   };
 }
 
-function typologyMatchesFilters(t: Typology, f: Filters): boolean {
+/** Padrão do período (v2: `typologies_history[].pattern`), com fallback no empreendimento. */
+export function patternOf(h: HistoryEntry | undefined, b?: Building): string {
+  return (h?.pattern || b?.standard || '').trim() || 'Sem classificação';
+}
+
+function typologyMatchesFilters(t: Typology, f: Filters, b: Building): boolean {
   if (f.typologies.length && !f.typologies.includes(t.type_of_typology)) return false;
   if (f.bedrooms.length && !f.bedrooms.includes(bedroomBucket(t.number_bedroom))) return false;
   if (f.garages.length && !f.garages.includes(garageBucket(t.garage))) return false;
   if (f.privateAreas?.length && !inRange(t.private_area, f.privateAreas)) return false;
   if (f.pricePerM2?.length && !inRange(typologyPriceM2(t), f.pricePerM2)) return false;
+  // §8 — padrão vive no histórico da tipologia e pode variar por período.
+  if (f.standards.length && !t.history.some((h) => f.standards.includes(patternOf(h, b)))) return false;
   return true;
 }
 
@@ -128,9 +135,8 @@ export function applyFilters(buildings: Building[], f: Filters): Building[] {
     if (f.cities.length && !f.cities.includes(b.city)) continue;
     if (f.neighborhoods.length && !f.neighborhoods.includes(b.neighborhood)) continue;
     if (f.types.length && !f.types.includes(b.building_type)) continue;
-    if (f.standards.length && !f.standards.includes(b.standard)) continue;
     if (f.buildings.length && !f.buildings.includes(b.building_id)) continue;
-    const typologies = b.typologies.filter((t) => typologyMatchesFilters(t, f));
+    const typologies = b.typologies.filter((t) => typologyMatchesFilters(t, f, b));
     if (!typologies.length) continue;
     out.push({ ...b, typologies });
   }
