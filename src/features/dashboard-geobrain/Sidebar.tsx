@@ -2,9 +2,10 @@ import { useMemo } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import { MultiSelect, type MultiSelectOption } from './MultiSelect';
 import type { Filters } from './types';
-import type { extractOptions } from './aggregate';
+import type { extractOptions, extractRangeOptions } from './aggregate';
 
 type Options = ReturnType<typeof extractOptions>;
+type RangeOptions = ReturnType<typeof extractRangeOptions>;
 
 interface Props {
   open: boolean;
@@ -12,6 +13,7 @@ interface Props {
   filters: Filters;
   onFiltersChange: (f: Filters) => void;
   options: Options;
+  rangeOptions: RangeOptions;
   onReset: () => void;
 }
 
