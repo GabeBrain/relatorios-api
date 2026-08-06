@@ -652,6 +652,8 @@ export function extractOptions(buildings: Building[]) {
           const mk = monthKeyFromPeriod(h.period);
           if (!monthsMap.has(mk)) monthsMap.set(mk, { year: y, month: monthFromPeriod(h.period) });
         }
+        // §8 — padrões vêm do histórico da tipologia.
+        if (h.pattern) standards.add(h.pattern.trim());
       }
     }
     if (b.status) status.add(b.status);
