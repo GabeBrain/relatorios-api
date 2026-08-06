@@ -24,6 +24,7 @@ import '@/features/dashboard-geobrain/dashboard.css';
 const EMPTY_FILTERS: Filters = {
   from: null, to: null, years: [], periods: [], status: [], cities: [], neighborhoods: [],
   types: [], typologies: [], standards: [], bedrooms: [], garages: [], buildings: [],
+  privateAreas: [], pricePerM2: [],
 };
 
 export default function DashboardGeobrain() {
