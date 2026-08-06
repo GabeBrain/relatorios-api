@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Moon, Sun } from 'lucide-react';
 import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
 import type { GeoScope } from '@/features/shared/geo-api-scope-engine';
 import type { Granularity } from './types';
