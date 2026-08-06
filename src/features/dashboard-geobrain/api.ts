@@ -26,6 +26,10 @@ function parseGarage(v: unknown): number {
   const n = parseInt(s, 10);
   return Number.isFinite(n) ? n : 0;
 }
+/** Remove acentuação — o bairro sem acentos é o valor canônico em filtros e gráficos. */
+export function stripAccents(s: string): string {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+}
 
 function normalizeBuilding(raw: Record<string, unknown>): Building {
   const typHistRaw = (raw.typologies_history as unknown[]) ?? [];
@@ -71,7 +75,7 @@ function normalizeBuilding(raw: Record<string, unknown>): Building {
     status: String(raw.status ?? ''),
     city: String(raw.city ?? ''),
     state: String(raw.state ?? ''),
-    neighborhood: String(raw.neighborhood ?? ''),
+    neighborhood: stripAccents(String(raw.neighborhood ?? '')),
     building_type: String(raw.building_type ?? ''),
     standard: String(raw.standard ?? ''),
     release_date: releaseDate,

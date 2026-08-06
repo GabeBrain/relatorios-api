@@ -1,16 +1,18 @@
 import { X } from 'lucide-react';
 import type { GeoScope } from '@/features/shared/geo-api-scope-engine';
 import type { Filters } from './types';
-import type { extractOptions } from './aggregate';
+import type { extractOptions, extractRangeOptions } from './aggregate';
 import type { BuildingType } from './Header';
 
 type Options = ReturnType<typeof extractOptions>;
+type RangeOptions = ReturnType<typeof extractRangeOptions>;
 
 interface Props {
   scope: GeoScope;
   buildingType: BuildingType;
   filters: Filters;
   options: Options;
+  rangeOptions: RangeOptions;
   onReset: () => void;
 }
 
@@ -20,11 +22,13 @@ function joinOrDash(values: string[]): string {
 
 const STATUS_LABEL: Record<string, string> = { Ativo: 'Comercialização', Esgotado: 'Esgotado' };
 
-export function ActiveFiltersBar({ scope, buildingType, filters, options, onReset }: Props) {
+export function ActiveFiltersBar({ scope, buildingType, filters, options, rangeOptions, onReset }: Props) {
   const cityLabel = scope.uf && scope.city ? `${scope.city}/${scope.uf}` : '—';
 
   const periodLabels = filters.periods.map((v) => options.months.find((p) => p.value === v)?.label ?? v);
   const statusLabels = filters.status.map((s) => STATUS_LABEL[s] ?? s);
+  const areaLabels = filters.privateAreas.map((v) => rangeOptions.privateAreas.find((r) => r.value === v)?.label ?? v);
+  const m2Labels = filters.pricePerM2.map((v) => rangeOptions.pricePerM2.find((r) => r.value === v)?.label ?? v);
   const buildingNames = filters.buildings.length > 3
     ? [`${filters.buildings.length} selecionados`]
     : filters.buildings.map((id) => options.buildings.find((b) => b.id === id)?.name ?? id);
@@ -38,6 +42,8 @@ export function ActiveFiltersBar({ scope, buildingType, filters, options, onRese
     { label: 'Tipologia', value: joinOrDash(filters.typologies), optional: true },
     { label: 'Dormitórios', value: joinOrDash(filters.bedrooms), optional: true },
     { label: 'Garagens', value: joinOrDash(filters.garages), optional: true },
+    { label: 'Área privativa', value: joinOrDash(areaLabels), optional: true },
+    { label: 'Preço/m²', value: joinOrDash(m2Labels), optional: true },
     { label: 'Anos', value: joinOrDash(filters.years), optional: true },
     { label: 'Períodos', value: joinOrDash(periodLabels), optional: true },
     { label: 'Empreendimentos', value: joinOrDash(buildingNames), optional: true },
@@ -47,6 +53,7 @@ export function ActiveFiltersBar({ scope, buildingType, filters, options, onRese
   const hasAny =
     filters.status.length || filters.neighborhoods.length || filters.standards.length ||
     filters.typologies.length || filters.bedrooms.length || filters.garages.length ||
+    filters.privateAreas.length || filters.pricePerM2.length ||
     filters.years.length || filters.periods.length || filters.buildings.length;
 
   return (

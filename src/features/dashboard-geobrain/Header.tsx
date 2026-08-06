@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Moon, Sun } from 'lucide-react';
 import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
 import type { GeoScope } from '@/features/shared/geo-api-scope-engine';
 import type { Granularity } from './types';
@@ -30,6 +32,13 @@ export function Header({
   onGranularityChange,
   onOpenSidebar,
 }: Props) {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const toggleDark = () => {
+    const next = !dark;
+    document.documentElement.classList.toggle('dark', next);
+    setDark(next);
+  };
+
   return (
     <header className="dg-header flex flex-wrap items-end gap-3 border-b border-[hsl(var(--dg-border))] bg-[hsl(var(--dg-card))] px-4 py-3">
       <button
@@ -82,6 +91,19 @@ export function Header({
             </button>
           ))}
         </div>
+      </div>
+      <div className="dg-header-group ml-auto">
+        <label className="dg-header-label">Tema</label>
+        <button
+          type="button"
+          className="dg-chip"
+          data-active={dark}
+          onClick={toggleDark}
+          title={dark ? 'Modo claro' : 'Modo escuro'}
+          aria-label={dark ? 'Ativar modo claro' : 'Ativar modo escuro'}
+        >
+          {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+        </button>
       </div>
     </header>
   );

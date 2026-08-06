@@ -47,6 +47,8 @@ export interface Filters {
   bedrooms: string[];
   garages: string[]; // '0','1','2','3','4+'
   buildings: string[]; // building_id
+  privateAreas: string[]; // faixas dinâmicas 'lo|hi'
+  pricePerM2: string[]; // faixas dinâmicas 'lo|hi'
 }
 
 export type Granularity = 'month' | 'quarter' | 'year';
