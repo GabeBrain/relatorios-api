@@ -424,16 +424,16 @@ export function rankBairrosPorTempoEstoque(buildings: Building[], f: Filters): R
   return rows.sort((a, b) => a.value - b.value);
 }
 
-function avgLastPrice(buildings: Building[], f: Filters, field: 'price' | 'price_private_area', groupBy: (b: Building) => string): RankRow[] {
+function avgLastPrice(buildings: Building[], f: Filters, field: 'price' | 'price_private_area', groupBy: (b: Building, t: Typology, h: HistoryEntry) => string): RankRow[] {
   const latest = latestPeriodInScope(buildings, f);
   const sum = new Map<string, { s: number; c: number }>();
   if (!latest) return [];
   for (const b of buildings) {
-    const k = groupBy(b);
-    if (!k) continue;
     for (const t of b.typologies) {
       const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
       if (!h) continue;
+      const k = groupBy(b, t, h);
+      if (!k) continue;
       const val = h[field];
       if (val == null || !Number.isFinite(val)) continue;
       const cur = sum.get(k) ?? { s: 0, c: 0 };
