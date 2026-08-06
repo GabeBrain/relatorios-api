@@ -3,9 +3,9 @@ import { Activity, AlertCircle, Loader2, BarChart2 } from 'lucide-react';
 import { intFmt, numCompact, months as monthsFmt, currencyCompactNoPrefix, pctRaw } from '@/lib/format';
 import { useDashboardData } from '@/features/dashboard-geobrain/use-dashboard-data';
 import {
-  applyFilters, computeKpis, computeSeries, extractOptions,
+  applyFilters, computeKpis, computeSeries, extractOptions, extractRangeOptions,
   computeOfertaPorDormitorio, computeOfertaPorPadrao,
-  rankBairrosPorIvv, rankBairrosPorTempoEstoque, rankBairrosPorPrecoM2, rankBairrosPorPrecoMedio,
+  rankBairrosPorIvv, rankBairrosPorTempoEstoque, rankBairrosPorEstoque, rankBairrosPorPrecoM2, rankBairrosPorPrecoMedio,
   precoM2PorPadrao, precoMedioPorPadrao, computeOpportunityMap, computeIpcByStandard,
 } from '@/features/dashboard-geobrain/aggregate';
 import { Header, type BuildingType } from '@/features/dashboard-geobrain/Header';
