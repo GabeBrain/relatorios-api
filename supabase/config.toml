@@ -2,3 +2,7 @@ project_id = "mxinpvcqzbfbzjodhgtz"
 
 [functions.analyze-slide]
 verify_jwt = false
+
+[functions.socio-proxy]
+# A autenticação é o Bearer token da API Geobrain, validado pelo serviço upstream.
+verify_jwt = false

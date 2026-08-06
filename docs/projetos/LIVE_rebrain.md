@@ -90,6 +90,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Pendências V1:** homologação visual pelo setor usuário e definição da atualização futura dos índices
   locais, atualmente encerrados em 01/2026.
 
+### 2026-08-06 — API Explorer: ponte server-side para Sociodemografia
+- **O quê:** criada a Edge Function `socio-proxy`, com allowlist dos endpoints Socio, que encaminha o Bearer token para `sociodemografia.geobrain.com.br` e devolve a resposta ao Explorer com CORS para o domínio Lovable.
+- **Motivo:** a API Socio funcionava via terminal, mas o host não devolvia cabeçalhos CORS no preflight do browser. A API GeoBrain principal permanece com chamada direta.
+- **Arquivos:** `supabase/functions/socio-proxy/index.ts`, `supabase/config.toml`, `src/lib/openapi-engine.ts`.
+- **Pendente:** publicar `socio-proxy` no projeto Supabase `mxinpvcqzbfbzjodhgtz` e redeployar o front-end.
+
 ### 2026-08-04 — Relatório Secovi: vendas trimestrais passam a somar todos os fechamentos — Terra
 - **O quê:** `sold_in_period` deixou de ser sobrescrito pelo último mês do trimestre. A nova
   agregação separa fluxo de snapshot: soma vendas e VGV por fechamento; mantém estoque, preço e
@@ -562,6 +568,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 - [ ] Atualizador VGV V1: homologar a interface padronizada e o mapa urbano de `/atualizador-vgv` em desktop/mobile e nos temas claro/escuro.
 - [ ] Atualizador VGV: definir rotina de atualização das séries INCC-DI, IPCA e IGP-DI (assets atuais até 01/2026).
+- [ ] **API Explorer — publicar proxy Socio:** executar `supabase functions deploy socio-proxy --project-ref mxinpvcqzbfbzjodhgtz` com uma conta que tenha acesso ao projeto e, em seguida, redeployar o front-end Lovable.
 
 - [ ] **Relatório Secovi — homologar vendas trimestrais:** correção implementada e coberta por testes;
   gerar o Excel no ambiente da área e conferir a Rubi (`4T2025 = 49 + 300 = 349`, `1T2026 = 100`,

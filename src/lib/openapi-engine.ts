@@ -288,7 +288,11 @@ export async function executeRequest(opts: ExecuteRequestOptions): Promise<Reque
     if (Array.isArray(v)) v.forEach((item) => qs.append(k, String(item)));
     else qs.set(k, String(v));
   }
-  const fullUrl = qs.toString() ? `${url}?${qs}` : url;
+  const directUrl = qs.toString() ? `${url}?${qs}` : url;
+  const useSocioProxy = operation.documentId === 'api-socio';
+  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL ?? '').replace(/\/$/, '');
+  const publishableKey = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '');
+  const fullUrl = useSocioProxy ? `${supabaseUrl}/functions/v1/socio-proxy` : directUrl;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutSeconds * 1000);
@@ -298,8 +302,19 @@ export async function executeRequest(opts: ExecuteRequestOptions): Promise<Reque
   const start = performance.now();
 
   try {
-    const fetchOpts: RequestInit = { method: operation.method, headers, signal: combinedSignal };
-    if (requestBody !== null) fetchOpts.body = JSON.stringify(requestBody);
+    if (useSocioProxy && (!supabaseUrl || !publishableKey)) {
+      throw new Error('Configuração Supabase ausente para o proxy de Sociodemografia.');
+    }
+
+    const fetchHeaders: Record<string, string> = { ...headers };
+    let wireBody = requestBody;
+    if (useSocioProxy) {
+      fetchHeaders.apikey = publishableKey;
+      wireBody = { path: operation.path, query: queryValues, body: requestBody ?? {} };
+    }
+
+    const fetchOpts: RequestInit = { method: operation.method, headers: fetchHeaders, signal: combinedSignal };
+    if (wireBody !== null) fetchOpts.body = JSON.stringify(wireBody);
 
     const response = await fetch(fullUrl, fetchOpts);
     clearTimeout(timer);
@@ -329,7 +344,7 @@ export async function executeRequest(opts: ExecuteRequestOptions): Promise<Reque
       contentType,
       requestHeaders: maskHeaders(headers),
       requestQuery: queryValues,
-      requestBody,
+      requestBody: wireBody,
       responseJson,
       responseText,
     };
@@ -347,7 +362,7 @@ export async function executeRequest(opts: ExecuteRequestOptions): Promise<Reque
       contentType: '',
       requestHeaders: maskHeaders(headers),
       requestQuery: queryValues,
-      requestBody,
+      requestBody: wireBody,
       responseJson: null,
       responseText: null,
     };
