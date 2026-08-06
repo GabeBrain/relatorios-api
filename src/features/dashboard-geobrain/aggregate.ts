@@ -593,11 +593,12 @@ export function computeIpcByStandard(
     return inner;
   };
   for (const b of filtered) {
-    const std = b.standard || 'Sem classificação';
-    standardsSet.add(std);
     for (const t of b.typologies) {
       for (const h of t.history) {
         if (!historyMatches(h, f)) continue;
+        // §8 — padrão do próprio período em análise.
+        const std = patternOf(h, b);
+        standardsSet.add(std);
         const key = periodKey(h.period, g);
         addSort.set(key, periodSortKey(h.period, g));
         ensure(stdVendas, std).set(key, (ensure(stdVendas, std).get(key) ?? 0) + h.sold_in_period);
