@@ -121,6 +121,7 @@ export default function DashboardGeobrain() {
         filters={filters}
         onFiltersChange={setFilters}
         options={options}
+        rangeOptions={rangeOptions}
         onReset={() => setFilters(EMPTY_FILTERS)}
       />
 
