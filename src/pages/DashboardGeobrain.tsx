@@ -113,6 +113,13 @@ export default function DashboardGeobrain() {
       <code className="text-[10px]">1 ÷ IVV</code>
     </div>
   );
+  const infoEstoqueAtual = (
+    <div className="space-y-1">
+      <div className="font-semibold">Estoque atual</div>
+      <div>Unidades em estoque no <strong>período mais recente</strong> do escopo filtrado.</div>
+      <code className="text-[10px]">Σ(typology_stock) do último período</code>
+    </div>
+  );
 
   return (
     <div className="dash-geobrain min-h-screen">
