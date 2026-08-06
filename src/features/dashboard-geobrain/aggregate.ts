@@ -495,9 +495,9 @@ export function computeOpportunityMap(
   const bedroomKeys = ['1', '2', '3', '4+'];
   const bedroomLabel = (k: string) => (k === '4+' ? '4 dorms' : k === '1' ? '1 dorm' : `${k} dorms`);
 
-  const rowKeyFn = (b: Building) => {
+  const rowKeyFn = (b: Building, h: HistoryEntry) => {
     if (rowBy === 'building_type') return b.building_type;
-    if (rowBy === 'standard') return b.standard || 'Sem classificação';
+    if (rowBy === 'standard') return patternOf(h, b);
     return b.neighborhood;
   };
 
@@ -513,16 +513,15 @@ export function computeOpportunityMap(
 
   if (latest) {
     for (const b of buildings) {
-      const row = rowKeyFn(b);
-      if (!row) continue;
-      const bStandard = b.standard || 'Sem classificação';
       for (const t of b.typologies) {
         const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
         if (!h) continue;
+        const row = rowKeyFn(b, h);
+        if (!row) continue;
 
         let col: string;
         if (colBy === 'standard') {
-          col = bStandard;
+          col = patternOf(h, b);
         } else {
           const bk = bedroomBucket(t.number_bedroom);
           if (!bedroomKeys.includes(bk)) continue;
