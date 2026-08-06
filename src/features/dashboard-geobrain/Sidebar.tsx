@@ -68,6 +68,8 @@ export function Sidebar({ open, onClose, filters, onFiltersChange, options, rang
           <MultiSelect label="Padrão" options={toOpts(options.standards)} value={filters.standards} onChange={(v) => set('standards', v)} />
           <MultiSelect label="Dormitórios" options={bedroomOpts} value={filters.bedrooms} onChange={(v) => set('bedrooms', v)} />
           <MultiSelect label="Vagas de garagem" options={garageOpts} value={filters.garages} onChange={(v) => set('garages', v)} />
+          <MultiSelect label="Área privativa" options={rangeOptions.privateAreas.map((r) => ({ value: r.value, label: r.label }))} value={filters.privateAreas} onChange={(v) => set('privateAreas', v)} />
+          <MultiSelect label="Preço/m²" options={rangeOptions.pricePerM2.map((r) => ({ value: r.value, label: r.label }))} value={filters.pricePerM2} onChange={(v) => set('pricePerM2', v)} />
           <MultiSelect label="Bairros" options={toOpts(options.neighborhoods)} value={filters.neighborhoods} onChange={(v) => set('neighborhoods', v)} />
           <MultiSelect label="Empreendimentos" options={buildingOpts} value={filters.buildings} onChange={(v) => set('buildings', v)} />
         </div>
