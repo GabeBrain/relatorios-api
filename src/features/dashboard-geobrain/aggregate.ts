@@ -35,10 +35,89 @@ function periodSortKey(p: string, g: Granularity): number {
 function garageBucket(g: number): string { return g >= 4 ? '4+' : String(g); }
 function bedroomBucket(n: number): string { return n >= 4 ? '4+' : String(n); }
 
+// ---- faixas dinâmicas (Área Privativa / Preço-m²) ----
+
+export interface RangeBucket { value: string; label: string; lo: number; hi: number }
+
+/** Preço/m² representativo da tipologia = última entrada de histórico com valor. */
+export function typologyPriceM2(t: Typology): number | null {
+  for (let i = t.history.length - 1; i >= 0; i--) {
+    const v = t.history[i].price_private_area;
+    if (v != null && Number.isFinite(v) && v > 0) return v;
+  }
+  return null;
+}
+
+function inRange(v: number | null, ids: string[]): boolean {
+  if (v == null || !Number.isFinite(v)) return false;
+  for (const id of ids) {
+    const [loS, hiS] = id.split('|');
+    const lo = parseFloat(loS);
+    const hi = hiS === '' ? Infinity : parseFloat(hiS);
+    if (v >= lo && (hi === Infinity ? true : v < hi)) return true;
+  }
+  return false;
+}
+
+function roundNice(v: number): number {
+  if (!Number.isFinite(v) || v <= 0) return 0;
+  const mag = Math.pow(10, Math.floor(Math.log10(v)) - 1);
+  return Math.round(v / mag) * mag;
+}
+
+/**
+ * Gera até 6 faixas por quantis a partir dos valores presentes no escopo
+ * (cidade carregada + tipo de empreendimento selecionado).
+ */
+export function computeRangeBuckets(values: number[], fmt: (n: number) => string, maxBuckets = 6): RangeBucket[] {
+  const vals = values.filter((v) => Number.isFinite(v) && v > 0).sort((a, b) => a - b);
+  if (vals.length === 0) return [];
+  const edges: number[] = [];
+  for (let i = 1; i < maxBuckets; i++) {
+    const q = vals[Math.min(vals.length - 1, Math.floor((vals.length * i) / maxBuckets))];
+    const r = roundNice(q);
+    if (r > 0 && (edges.length === 0 || r > edges[edges.length - 1])) edges.push(r);
+  }
+  const cuts = [0, ...edges];
+  const out: RangeBucket[] = [];
+  for (let i = 0; i < cuts.length; i++) {
+    const lo = cuts[i];
+    const hi = i + 1 < cuts.length ? cuts[i + 1] : Infinity;
+    out.push({
+      value: `${lo}|${hi === Infinity ? '' : hi}`,
+      label: i === 0 ? `até ${fmt(hi)}` : hi === Infinity ? `acima de ${fmt(lo)}` : `${fmt(lo)} – ${fmt(hi)}`,
+      lo,
+      hi,
+    });
+  }
+  return out;
+}
+
+export function extractRangeOptions(buildings: Building[]) {
+  const areas: number[] = [];
+  const pricesM2: number[] = [];
+  for (const b of buildings) {
+    for (const t of b.typologies) {
+      if (t.private_area != null && t.private_area > 0) areas.push(t.private_area);
+      const p = typologyPriceM2(t);
+      if (p != null) pricesM2.push(p);
+    }
+  }
+  const m2 = (n: number) => `${Math.round(n).toLocaleString('pt-BR')} m²`;
+  const brl = (n: number) =>
+    n >= 1000 ? `R$ ${(n / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mil` : `R$ ${Math.round(n)}`;
+  return {
+    privateAreas: computeRangeBuckets(areas, m2),
+    pricePerM2: computeRangeBuckets(pricesM2, brl),
+  };
+}
+
 function typologyMatchesFilters(t: Typology, f: Filters): boolean {
   if (f.typologies.length && !f.typologies.includes(t.type_of_typology)) return false;
   if (f.bedrooms.length && !f.bedrooms.includes(bedroomBucket(t.number_bedroom))) return false;
   if (f.garages.length && !f.garages.includes(garageBucket(t.garage))) return false;
+  if (f.privateAreas?.length && !inRange(t.private_area, f.privateAreas)) return false;
+  if (f.pricePerM2?.length && !inRange(typologyPriceM2(t), f.pricePerM2)) return false;
   return true;
 }
 
