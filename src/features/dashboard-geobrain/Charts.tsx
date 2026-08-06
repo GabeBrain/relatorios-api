@@ -17,6 +17,8 @@ const WINDOW = 12;
 
 // ============ Tooltip padrão (§2) — cor via token (#212529 no claro) ============
 const HL = 'var(--dg-tooltip-hl)';
+// §9 — cor da descrição das legendas dos gráficos.
+const LEGEND_COLOR = 'var(--dg-legend)';
 
 interface TooltipEntry { name?: string | number; value?: number | string | null; color?: string; dataKey?: string | number }
 interface DGTooltipProps { active?: boolean; label?: string | number; payload?: TooltipEntry[]; format?: (v: number) => string }
@@ -121,7 +123,7 @@ export function EvolucaoChart({ data }: { data: SeriesPoint[]; granularity: Gran
           <XAxis dataKey="period" tick={{ fontSize: 10 }} interval={0} />
           <YAxis hide />
           <Tooltip content={<DGTooltip format={(v) => numCompactBR(v, 1)} />} />
-          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Legend wrapperStyle={{ fontSize: 10, color: LEGEND_COLOR }} />
           <Area type="monotone" dataKey="ofertaLancada" name="Unidades Lançadas" stroke={A} fill="url(#dg-gL)" strokeWidth={2} />
           <Area type="monotone" dataKey="vendaLiquida" name="Unidades Vendidas" stroke={P} fill="url(#dg-gV)" strokeWidth={2}>
             <LabelList dataKey="vendaLiquida" position="top" formatter={(v: number) => (v > 0 ? numCompactBR(v, 1) : '')} className="fill-[hsl(var(--dg-text))] text-[9px]" />
@@ -164,7 +166,7 @@ export function UnidadesVsEstoqueChart({ data }: { data: SeriesPoint[]; granular
           <XAxis dataKey="period" tick={{ fontSize: 10 }} interval={0} />
           <YAxis hide />
           <Tooltip content={<DGTooltip format={(v) => numCompactBR(v, 1)} />} />
-          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Legend wrapperStyle={{ fontSize: 10, color: LEGEND_COLOR }} />
           <Bar dataKey="ofertaLancada" name="Unidades Lançadas" fill={P} radius={[2, 2, 0, 0]}>
             <LabelList dataKey="ofertaLancada" position="top" formatter={(v: number) => (v > 0 ? numCompactBR(v, 1) : '')} className="fill-[hsl(var(--dg-text))] text-[9px]" />
           </Bar>
@@ -186,7 +188,7 @@ export function VgvChart({ data }: { data: SeriesPoint[]; granularity: Granulari
           <XAxis dataKey="period" tick={{ fontSize: 10 }} interval={0} />
           <YAxis hide />
           <Tooltip content={<DGTooltip format={(v) => currencyCompactNoPrefix(v)} />} />
-          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Legend wrapperStyle={{ fontSize: 10, color: LEGEND_COLOR }} />
           <Bar dataKey="vgvLancamento" name="VGV Lançamento" fill={P} radius={[2, 2, 0, 0]}>
             <LabelList dataKey="vgvLancamento" position="top" formatter={(v: number) => (v > 0 ? currencyCompactNoPrefix(v) : '')} className="fill-[hsl(var(--dg-text))] text-[9px]" />
           </Bar>
@@ -240,7 +242,7 @@ export function OfertaComboChart({ title, data }: { title: string; data: ComboBu
           <YAxis yAxisId="left" hide />
           <YAxis yAxisId="right" orientation="right" hide />
           <Tooltip content={<DGTooltip format={(v) => numCompactBR(v, 1)} />} />
-          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Legend wrapperStyle={{ fontSize: 10, color: LEGEND_COLOR }} />
           <Bar yAxisId="left" dataKey="estoque" name="Estoque" fill={P} radius={[2, 2, 0, 0]}>
             <LabelList dataKey="estoque" position="top" formatter={(v: number) => (v > 0 ? numCompactBR(v, 1) : '')} className="fill-[hsl(var(--dg-text))] text-[9px]" />
           </Bar>
@@ -300,7 +302,7 @@ export function IpcChart({ series, standards, granularity }: { series: IpcSeries
           <XAxis dataKey="period" tick={{ fontSize: 10 }} interval={0} />
           <YAxis hide domain={[minV, maxV]} />
           <Tooltip content={<DGTooltip format={(v) => v.toFixed(1).replace('.', ',')} />} />
-          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Legend wrapperStyle={{ fontSize: 10, color: LEGEND_COLOR }} />
           <ReferenceLine y={1} stroke={M} strokeDasharray="4 4" ifOverflow="extendDomain" label={{ value: '1,0', fontSize: 9, position: 'right', fill: M }} />
           {standards.map((s, i) => (
             <Area key={s} type="monotone" dataKey={s} stroke={colors[i % colors.length]} fill={colors[i % colors.length]} fillOpacity={0.35} strokeWidth={1.5} connectNulls={false} />

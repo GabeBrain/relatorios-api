@@ -12,6 +12,7 @@
   --dg-border: 0 0% 88%;
   --dg-text: 0 0% 15%;
   --dg-tooltip-hl: #212529;
+  --dg-legend: #212829;
 
   font-family: 'Archivo', Tahoma, sans-serif;
   font-size: 12px;
@@ -133,6 +134,9 @@
 .dash-geobrain table.dg-heatmap th { background: hsl(var(--dg-primary)); color: white; font-weight: 600; }
 .dash-geobrain table.dg-heatmap td:first-child { text-align: left; font-weight: 500; background: hsl(var(--dg-muted-soft)); }
 
+/* §9 — descrição das legendas dos gráficos */
+.dash-geobrain .recharts-legend-item-text { color: var(--dg-legend) !important; }
+
 /* ============ Modo escuro ============ */
 .dark .dash-geobrain {
   --dg-primary: 88 34% 52%;
@@ -147,6 +151,7 @@
   --dg-border: 0 0% 30%;
   --dg-text: 60 8% 95%;
   --dg-tooltip-hl: #F8D000;
+  --dg-legend: #e9ecec;
 }
 .dark .dash-geobrain .dg-chip[data-active="true"] { color: #1b1e28; }
 .dark .dash-geobrain table.dg-heatmap th { color: #1b1e28; }

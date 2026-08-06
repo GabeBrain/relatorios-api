@@ -112,12 +112,19 @@ export function extractRangeOptions(buildings: Building[]) {
   };
 }
 
-function typologyMatchesFilters(t: Typology, f: Filters): boolean {
+/** Padrão do período (v2: `typologies_history[].pattern`), com fallback no empreendimento. */
+export function patternOf(h: HistoryEntry | undefined, b?: Building): string {
+  return (h?.pattern || b?.standard || '').trim() || 'Sem classificação';
+}
+
+function typologyMatchesFilters(t: Typology, f: Filters, b: Building): boolean {
   if (f.typologies.length && !f.typologies.includes(t.type_of_typology)) return false;
   if (f.bedrooms.length && !f.bedrooms.includes(bedroomBucket(t.number_bedroom))) return false;
   if (f.garages.length && !f.garages.includes(garageBucket(t.garage))) return false;
   if (f.privateAreas?.length && !inRange(t.private_area, f.privateAreas)) return false;
   if (f.pricePerM2?.length && !inRange(typologyPriceM2(t), f.pricePerM2)) return false;
+  // §8 — padrão vive no histórico da tipologia e pode variar por período.
+  if (f.standards.length && !t.history.some((h) => f.standards.includes(patternOf(h, b)))) return false;
   return true;
 }
 
@@ -128,9 +135,8 @@ export function applyFilters(buildings: Building[], f: Filters): Building[] {
     if (f.cities.length && !f.cities.includes(b.city)) continue;
     if (f.neighborhoods.length && !f.neighborhoods.includes(b.neighborhood)) continue;
     if (f.types.length && !f.types.includes(b.building_type)) continue;
-    if (f.standards.length && !f.standards.includes(b.standard)) continue;
     if (f.buildings.length && !f.buildings.includes(b.building_id)) continue;
-    const typologies = b.typologies.filter((t) => typologyMatchesFilters(t, f));
+    const typologies = b.typologies.filter((t) => typologyMatchesFilters(t, f, b));
     if (!typologies.length) continue;
     out.push({ ...b, typologies });
   }
@@ -344,7 +350,7 @@ export function computeSeries(buildings: Building[], f: Filters, g: Granularity)
 export interface ComboBucket { key: string; estoque: number; tempoEstoque: number; }
 
 /** Tempo de estoque no período mais recente = 1 / IVV(latest). */
-function tempoEstoqueByLatest(buildings: Building[], f: Filters, groupKey: (b: Building, t: Typology) => string): Map<string, { est: number; vnd: number }> {
+function tempoEstoqueByLatest(buildings: Building[], f: Filters, groupKey: (b: Building, t: Typology, h: HistoryEntry) => string): Map<string, { est: number; vnd: number }> {
   const latest = latestPeriodInScope(buildings, f);
   const acc = new Map<string, { est: number; vnd: number }>();
   if (!latest) return acc;
@@ -352,7 +358,7 @@ function tempoEstoqueByLatest(buildings: Building[], f: Filters, groupKey: (b: B
     for (const t of b.typologies) {
       const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
       if (!h) continue;
-      const k = groupKey(b, t);
+      const k = groupKey(b, t, h);
       if (!k) continue;
       const cur = acc.get(k) ?? { est: 0, vnd: 0 };
       cur.est += h.typology_stock;
@@ -379,7 +385,7 @@ export function computeOfertaPorDormitorio(buildings: Building[], f: Filters): C
 }
 
 export function computeOfertaPorPadrao(buildings: Building[], f: Filters): ComboBucket[] {
-  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.standard || 'Sem classificação');
+  const acc = tempoEstoqueByLatest(buildings, f, (b, _t, h) => patternOf(h, b));
   // §10 — sem limitação de Top 10
   return Array.from(acc.entries())
     .map(([key, { est, vnd }]) => ({ key, estoque: est, tempoEstoque: tempoFromIvv(est, vnd) }))
@@ -418,16 +424,16 @@ export function rankBairrosPorTempoEstoque(buildings: Building[], f: Filters): R
   return rows.sort((a, b) => a.value - b.value);
 }
 
-function avgLastPrice(buildings: Building[], f: Filters, field: 'price' | 'price_private_area', groupBy: (b: Building) => string): RankRow[] {
+function avgLastPrice(buildings: Building[], f: Filters, field: 'price' | 'price_private_area', groupBy: (b: Building, t: Typology, h: HistoryEntry) => string): RankRow[] {
   const latest = latestPeriodInScope(buildings, f);
   const sum = new Map<string, { s: number; c: number }>();
   if (!latest) return [];
   for (const b of buildings) {
-    const k = groupBy(b);
-    if (!k) continue;
     for (const t of b.typologies) {
       const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
       if (!h) continue;
+      const k = groupBy(b, t, h);
+      if (!k) continue;
       const val = h[field];
       if (val == null || !Number.isFinite(val)) continue;
       const cur = sum.get(k) ?? { s: 0, c: 0 };
@@ -447,10 +453,10 @@ export function rankBairrosPorPrecoMedio(buildings: Building[], f: Filters): Ran
   return avgLastPrice(buildings, f, 'price', (b) => b.neighborhood).sort((a, b) => a.value - b.value);
 }
 export function precoM2PorPadrao(buildings: Building[], f: Filters): RankRow[] {
-  return avgLastPrice(buildings, f, 'price_private_area', (b) => b.standard || 'Sem classificação').sort((a, b) => a.value - b.value);
+  return avgLastPrice(buildings, f, 'price_private_area', (b, _t, h) => patternOf(h, b)).sort((a, b) => a.value - b.value);
 }
 export function precoMedioPorPadrao(buildings: Building[], f: Filters): RankRow[] {
-  return avgLastPrice(buildings, f, 'price', (b) => b.standard || 'Sem classificação').sort((a, b) => a.value - b.value);
+  return avgLastPrice(buildings, f, 'price', (b, _t, h) => patternOf(h, b)).sort((a, b) => a.value - b.value);
 }
 
 // ============ Mapa de oportunidades ============
@@ -489,9 +495,9 @@ export function computeOpportunityMap(
   const bedroomKeys = ['1', '2', '3', '4+'];
   const bedroomLabel = (k: string) => (k === '4+' ? '4 dorms' : k === '1' ? '1 dorm' : `${k} dorms`);
 
-  const rowKeyFn = (b: Building) => {
+  const rowKeyFn = (b: Building, h: HistoryEntry) => {
     if (rowBy === 'building_type') return b.building_type;
-    if (rowBy === 'standard') return b.standard || 'Sem classificação';
+    if (rowBy === 'standard') return patternOf(h, b);
     return b.neighborhood;
   };
 
@@ -507,16 +513,15 @@ export function computeOpportunityMap(
 
   if (latest) {
     for (const b of buildings) {
-      const row = rowKeyFn(b);
-      if (!row) continue;
-      const bStandard = b.standard || 'Sem classificação';
       for (const t of b.typologies) {
         const h = t.history.find((e) => e.period === latest && historyMatches(e, f));
         if (!h) continue;
+        const row = rowKeyFn(b, h);
+        if (!row) continue;
 
         let col: string;
         if (colBy === 'standard') {
-          col = bStandard;
+          col = patternOf(h, b);
         } else {
           const bk = bedroomBucket(t.number_bedroom);
           if (!bedroomKeys.includes(bk)) continue;
@@ -588,11 +593,12 @@ export function computeIpcByStandard(
     return inner;
   };
   for (const b of filtered) {
-    const std = b.standard || 'Sem classificação';
-    standardsSet.add(std);
     for (const t of b.typologies) {
       for (const h of t.history) {
         if (!historyMatches(h, f)) continue;
+        // §8 — padrão do próprio período em análise.
+        const std = patternOf(h, b);
+        standardsSet.add(std);
         const key = periodKey(h.period, g);
         addSort.set(key, periodSortKey(h.period, g));
         ensure(stdVendas, std).set(key, (ensure(stdVendas, std).get(key) ?? 0) + h.sold_in_period);
@@ -646,6 +652,8 @@ export function extractOptions(buildings: Building[]) {
           const mk = monthKeyFromPeriod(h.period);
           if (!monthsMap.has(mk)) monthsMap.set(mk, { year: y, month: monthFromPeriod(h.period) });
         }
+        // §8 — padrões vêm do histórico da tipologia.
+        if (h.pattern) standards.add(h.pattern.trim());
       }
     }
     if (b.status) status.add(b.status);
