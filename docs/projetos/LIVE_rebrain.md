@@ -52,6 +52,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ### 2026-08-10 — Paleta dos gráficos do Atualizador VGV — Codex
 - **O quê:** as séries que usavam azul passaram a usar o amarelo padrão da interface, incluindo linhas,
   marcadores e ícones da legenda nos gráficos de VGV e de valores corrigidos.
+- **Distinção:** no comparador com múltiplos índices, INCC-DI, IPCA, IGP-DI e a série nominal pontilhada
+  usam tons distintos da paleta verde–amarela para evitar sobreposição visual.
 
 ### 2026-08-10 — Exportação do Atualizador VGV separada por formato e escopo — Codex
 - **O quê:** a área de exportação passou a se chamar `Exporte a análise` e oferece, separadamente,
