@@ -49,6 +49,10 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-10 — Paleta dos gráficos do Atualizador VGV — Codex
+- **O quê:** as séries que usavam azul passaram a usar o amarelo padrão da interface, incluindo linhas,
+  marcadores e ícones da legenda nos gráficos de VGV e de valores corrigidos.
+
 ### 2026-08-10 — Exportação do Atualizador VGV separada por formato e escopo — Codex
 - **O quê:** a área de exportação passou a se chamar `Exporte a análise` e oferece, separadamente,
   `Base completa` e `Recorte selecionado`, cada um com ações XLSX e CSV.

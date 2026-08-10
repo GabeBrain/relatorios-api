@@ -43,7 +43,7 @@ import { INDEX_NAMES } from './types';
 import './atualizador-vgv.css';
 
 const EMPTY_FILTERS: VgvFilters = { empreendimentos: [], cidades: [], tipologias: [], status: [] };
-const FIELD_COLORS = { primary: '#71984a', secondary: '#315b78', accent: '#f8d000', muted: '#94a3b8' };
+const FIELD_COLORS = { primary: '#71984a', secondary: '#f8d000', accent: '#f8d000', muted: '#94a3b8' };
 
 type ViewTab = 'overview' | 'indices';
 
