@@ -49,6 +49,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-10 — Exportação do Atualizador VGV separada por formato e escopo — Codex
+- **O quê:** a área de exportação passou a se chamar `Exporte a análise` e oferece, separadamente,
+  `Base completa` e `Recorte selecionado`, cada um com ações XLSX e CSV.
+- **CSV:** exporta a aba principal do escopo escolhido com BOM UTF-8 e separador compatível com Excel;
+  o XLSX mantém as três abas existentes.
+- **Arquivos:** `src/features/atualizador-vgv/{AtualizadorVgvPage.tsx,engine.ts,atualizador-vgv.css}`.
+
 ### 2026-08-05 — Mapa urbano operacional no Atualizador VGV — Codex
 - **O quê:** o mapa nacional estático de `/atualizador-vgv` foi substituído por um mapa urbano MapLibre
   com ruas, bairros, rótulos cartográficos, zoom, tela cheia, escala e enquadramento automático nos

@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { MultiSelect } from '@/features/dashboard-geobrain/MultiSelect';
 import {
   buildAdjustments,
+  exportVgvCsv,
   exportVgvWorkbook,
   extractAmenities,
   findColumn,
@@ -267,6 +268,14 @@ export default function AtualizadorVgvPage() {
     );
   }
 
+  function exportCsv(scope: 'all' | 'filtered') {
+    if (!dataset) return;
+    exportVgvCsv(
+      scope === 'all' ? dataset.base : filteredBase,
+      scope === 'all' ? 'dados_vgv_base_completa.csv' : 'dados_vgv_recorte_selecionado.csv',
+    );
+  }
+
   return (
     <div className="vvg-root min-h-full">
       <header className="vvg-page-header">
@@ -343,10 +352,10 @@ export default function AtualizadorVgvPage() {
             )}
 
             <section className="vvg-export-card">
-              <div><ArrowDownToLine className="h-5 w-5" /><span><strong>Leve a análise com você</strong><small>O arquivo é gerado localmente com três abas.</small></span></div>
+              <div><ArrowDownToLine className="h-5 w-5" /><span><strong>Exporte a análise</strong><small>Escolha a base completa ou o recorte selecionado.</small></span></div>
               <div>
-                <Button variant="outline" onClick={() => exportScope('all')}><FileSpreadsheet className="mr-2 h-4 w-4" /> Base completa</Button>
-                <Button onClick={() => exportScope('filtered')}><ArrowDownToLine className="mr-2 h-4 w-4" /> Exportar recorte</Button>
+                <div className="vvg-export-group"><strong>Base completa</strong><Button variant="outline" size="sm" onClick={() => exportScope('all')}><FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> XLSX</Button><Button variant="outline" size="sm" onClick={() => exportCsv('all')}><ArrowDownToLine className="mr-1.5 h-3.5 w-3.5" /> CSV</Button></div>
+                <div className="vvg-export-group"><strong>Recorte selecionado</strong><Button size="sm" onClick={() => exportScope('filtered')}><FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> XLSX</Button><Button size="sm" onClick={() => exportCsv('filtered')}><ArrowDownToLine className="mr-1.5 h-3.5 w-3.5" /> CSV</Button></div>
               </div>
             </section>
           </>
