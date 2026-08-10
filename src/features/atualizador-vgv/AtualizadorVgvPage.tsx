@@ -355,7 +355,7 @@ export default function AtualizadorVgvPage() {
               <div><ArrowDownToLine className="h-5 w-5" /><span><strong>Exporte a análise</strong><small>Escolha a base completa ou o recorte selecionado.</small></span></div>
               <div>
                 <div className="vvg-export-group"><strong>Base completa</strong><Button variant="outline" size="sm" onClick={() => exportScope('all')}><FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> XLSX</Button><Button variant="outline" size="sm" onClick={() => exportCsv('all')}><ArrowDownToLine className="mr-1.5 h-3.5 w-3.5" /> CSV</Button></div>
-                <div className="vvg-export-group"><strong>Recorte selecionado</strong><Button size="sm" onClick={() => exportScope('filtered')}><FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> XLSX</Button><Button size="sm" onClick={() => exportCsv('filtered')}><ArrowDownToLine className="mr-1.5 h-3.5 w-3.5" /> CSV</Button></div>
+                <div className="vvg-export-group"><strong>Recorte selecionado</strong><Button variant="outline" size="sm" onClick={() => exportScope('filtered')}><FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> XLSX</Button><Button variant="outline" size="sm" onClick={() => exportCsv('filtered')}><ArrowDownToLine className="mr-1.5 h-3.5 w-3.5" /> CSV</Button></div>
               </div>
             </section>
           </>
