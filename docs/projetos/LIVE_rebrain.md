@@ -67,7 +67,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ### 2026-08-10 — Exportações e identificação visual dos índices no Atualizador VGV — Lucas
 - **Ambiente/funcionalidade:** `/atualizador-vgv` — exportação da base/recorte e comparador de índices.
-- **O quê:** as exportações foram separadas por escopo (**base completa** ou **recorte selecionado**) e por formato (**XLSX** ou **CSV**). O CSV usa `;` e BOM para abrir corretamente no Excel. No comparador, cada índice passou a manter uma cor própria e o VGV nominal deixou de disputar a mesma cor das séries corrigidas.
+- **O quê:** as exportações foram separadas por escopo (**base completa** ou **recorte selecionado**) e por formato (**XLSX** ou **CSV**). O CSV usa `;` e BOM para abrir corretamente no Excel. As séries antes azuis passaram a usar o amarelo da interface; no comparador, cada índice mantém uma cor própria e o VGV nominal não disputa a mesma cor das séries corrigidas.
 - **Por quê:** tornar explícito o conjunto exportado e evitar a leitura ambígua das séries do gráfico.
 - **Arquivos:** `src/features/atualizador-vgv/{AtualizadorVgvPage.tsx,atualizador-vgv.css,engine.ts}`.
 - **Commits:** `508744f`, `646d5bb`, `767b0c4`, `b91173b`.
