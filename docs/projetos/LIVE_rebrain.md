@@ -59,10 +59,10 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ### 2026-08-11 — Corte temporal explícito no Relatório Secovi — Gabriel
 - **Ambiente/funcionalidade:** `/rebrain/secovi` — geração de relatórios trimestrais para cidades mensais.
-- **O que:** o antigo seletor "Análise temporal desde" virou o intervalo **Período de análise** (início e fim, padrão 1T2021 até o trimestre corrente). O corte final agora filtra o histórico antes da agregação trimestral: vendas, colunas exportadas, estoque e demais snapshots usam exclusivamente competências até o trimestre selecionado.
+- **O que:** o antigo seletor "Análise temporal desde" virou o intervalo **Período de análise** (início e fim, padrão 1T2021 até o trimestre corrente). O bloco foi posicionado após os filtros de tipo/status e antes das ações de coleta, para tornar o recorte explícito no fluxo do analista. O corte final agora filtra o histórico antes da agregação trimestral: vendas, colunas exportadas, estoque e demais snapshots usam exclusivamente competências até o trimestre selecionado.
 - **Por quê:** impedir que uma competência mensal já aberta do trimestre seguinte, como 07/2026, apareça ou altere a fotografia de um relatório fechado em 2T2026.
 - **Arquivos:** `src/pages/TestesArquitetura.tsx`, `src/features/relatorios-secovi/quarterly-history.ts`, `src/features/relatorios-secovi/__tests__/quarterly-history.test.ts`.
-- **Commits:** `ac8ef83`.
+- **Commits:** `ac8ef83`, `cbfedf3`.
 - **Impacto em Etapas/Pendências:** Relatórios Secovi mantém a etapa de homologação manual; adicionada cobertura de regressão para o corte de competências futuras.
 
 ### 2026-08-10 — Exportações e identificação visual dos índices no Atualizador VGV — Lucas
