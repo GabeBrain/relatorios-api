@@ -302,3 +302,16 @@ export function exportVgvWorkbook(base: VgvRow[], performance: PerformanceRow[],
   XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(adjustmentRows), 'Reajuste_Indices');
   XLSX.writeFile(workbook, fileName, { compression: true });
 }
+
+/** Exporta a aba principal em CSV (CSV não suporta as três abas do XLSX). */
+export function exportVgvCsv(rows: VgvRow[], fileName: string): void {
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const csv = XLSX.utils.sheet_to_csv(worksheet, { FS: ';' });
+  const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}

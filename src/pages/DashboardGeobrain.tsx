@@ -3,9 +3,9 @@ import { Activity, AlertCircle, Loader2, BarChart2 } from 'lucide-react';
 import { intFmt, numCompact, months as monthsFmt, currencyCompactNoPrefix, pctRaw } from '@/lib/format';
 import { useDashboardData } from '@/features/dashboard-geobrain/use-dashboard-data';
 import {
-  applyFilters, computeKpis, computeSeries, extractOptions,
+  applyFilters, computeKpis, computeSeries, extractOptions, extractRangeOptions,
   computeOfertaPorDormitorio, computeOfertaPorPadrao,
-  rankBairrosPorIvv, rankBairrosPorTempoEstoque, rankBairrosPorPrecoM2, rankBairrosPorPrecoMedio,
+  rankBairrosPorIvv, rankBairrosPorTempoEstoque, rankBairrosPorEstoque, rankBairrosPorPrecoM2, rankBairrosPorPrecoMedio,
   precoM2PorPadrao, precoMedioPorPadrao, computeOpportunityMap, computeIpcByStandard,
 } from '@/features/dashboard-geobrain/aggregate';
 import { Header, type BuildingType } from '@/features/dashboard-geobrain/Header';
@@ -24,6 +24,7 @@ import '@/features/dashboard-geobrain/dashboard.css';
 const EMPTY_FILTERS: Filters = {
   from: null, to: null, years: [], periods: [], status: [], cities: [], neighborhoods: [],
   types: [], typologies: [], standards: [], bedrooms: [], garages: [], buildings: [],
+  privateAreas: [], pricePerM2: [],
 };
 
 export default function DashboardGeobrain() {
@@ -47,6 +48,11 @@ export default function DashboardGeobrain() {
 
   const allBuildings = buildings ?? [];
   const options = useMemo(() => extractOptions(allBuildings), [allBuildings]);
+  // §5 — faixas dinâmicas por cidade carregada + tipo de empreendimento selecionado.
+  const rangeOptions = useMemo(
+    () => extractRangeOptions(allBuildings.filter((b) => b.building_type === buildingType)),
+    [allBuildings, buildingType],
+  );
 
   // §4 — Ao carregar dados, aplicar por padrão os últimos 12 meses (períodos).
   useEffect(() => {
@@ -70,6 +76,7 @@ export default function DashboardGeobrain() {
 
   const rankIvv = useMemo(() => rankBairrosPorIvv(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankTempo = useMemo(() => rankBairrosPorTempoEstoque(filtered, filtersWithType), [filtered, filtersWithType]);
+  const rankEstoque = useMemo(() => rankBairrosPorEstoque(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankM2 = useMemo(() => rankBairrosPorPrecoM2(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
@@ -106,6 +113,13 @@ export default function DashboardGeobrain() {
       <code className="text-[10px]">1 ÷ IVV</code>
     </div>
   );
+  const infoEstoqueAtual = (
+    <div className="space-y-1">
+      <div className="font-semibold">Estoque atual</div>
+      <div>Unidades em estoque no <strong>período mais recente</strong> do escopo filtrado.</div>
+      <code className="text-[10px]">Σ(typology_stock) do último período</code>
+    </div>
+  );
 
   return (
     <div className="dash-geobrain min-h-screen">
@@ -115,6 +129,7 @@ export default function DashboardGeobrain() {
         filters={filters}
         onFiltersChange={setFilters}
         options={options}
+        rangeOptions={rangeOptions}
         onReset={() => setFilters(EMPTY_FILTERS)}
       />
 
@@ -133,6 +148,7 @@ export default function DashboardGeobrain() {
         buildingType={buildingType}
         filters={filters}
         options={options}
+        rangeOptions={rangeOptions}
         onReset={() => setFilters(EMPTY_FILTERS)}
       />
 
@@ -182,6 +198,7 @@ export default function DashboardGeobrain() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <RankingCard title="IVV por bairro" rows={rankIvv} formatValue={(v) => pctRaw(v * 100, 1)} info={infoIvv} />
           <RankingCard title="Tempo de estoque por bairro" rows={rankTempo} formatValue={(v) => monthsFmt(v)} info={infoTempoEstoque} />
+          <RankingCard title="Estoque atual por bairro" rows={rankEstoque} formatValue={(v) => intFmt(v)} info={infoEstoqueAtual} />
           <RankingCard title="Preço m² por bairro" rows={rankM2} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoM2} />
           <RankingCard title="Preço médio por bairro" rows={rankMedio} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoMedio} />
         </div>

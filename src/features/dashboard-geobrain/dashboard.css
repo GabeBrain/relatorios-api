@@ -12,6 +12,7 @@
   --dg-border: 0 0% 88%;
   --dg-text: 0 0% 15%;
   --dg-tooltip-hl: #212529;
+  --dg-legend: #212829;
 
   font-family: 'Archivo', Tahoma, sans-serif;
   font-size: 12px;
@@ -132,3 +133,33 @@
 }
 .dash-geobrain table.dg-heatmap th { background: hsl(var(--dg-primary)); color: white; font-weight: 600; }
 .dash-geobrain table.dg-heatmap td:first-child { text-align: left; font-weight: 500; background: hsl(var(--dg-muted-soft)); }
+
+/* §9 — descrição das legendas dos gráficos */
+.dash-geobrain .recharts-legend-item-text { color: var(--dg-legend) !important; }
+
+/* ============ Modo escuro ============ */
+.dark .dash-geobrain {
+  --dg-primary: 88 34% 52%;
+  --dg-primary-strong: 88 45% 72%;
+  --dg-primary-soft: 88 18% 24%;
+  --dg-accent: 51 88% 60%;
+  --dg-accent-soft: 51 40% 24%;
+  --dg-muted: 0 0% 72%;
+  --dg-muted-soft: 0 0% 24%;
+  --dg-bg: 60 1% 15%;          /* #272726 */
+  --dg-card: 60 1% 18%;        /* #2f2f2e */
+  --dg-border: 0 0% 30%;
+  --dg-text: 60 8% 95%;
+  --dg-tooltip-hl: #F8D000;
+  --dg-legend: #e9ecec;
+}
+.dark .dash-geobrain .dg-chip[data-active="true"] { color: #1b1e28; }
+.dark .dash-geobrain table.dg-heatmap th { color: #1b1e28; }
+.dark .dash-geobrain .dg-heat-1 { color: #1b1e28; }
+.dark .dash-geobrain .dg-heat-2 { color: #1b1e28; }
+.dark .dash-geobrain .dg-heat-3 { background: hsl(88 30% 42%); color: #f2f4ea; }
+.dark .dash-geobrain .dg-heat-4 { background: hsl(51 45% 40%); color: #f2f4ea; }
+.dark .dash-geobrain .dg-heat-5 { background: hsl(51 70% 52%); color: #1b1e28; }
+.dark .dash-geobrain .dg-var-item[data-neg="true"] { background: hsl(0 40% 26%); color: hsl(0 70% 82%); }
+.dark .dash-geobrain input::placeholder { color: hsl(var(--dg-muted)); }
+.dark .dash-geobrain .recharts-text { fill: hsl(var(--dg-muted)); }

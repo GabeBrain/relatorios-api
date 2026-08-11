@@ -301,13 +301,14 @@ export async function executeRequest(opts: ExecuteRequestOptions): Promise<Reque
 
   const start = performance.now();
 
+  let wireBody: unknown = requestBody;
+
   try {
     if (useSocioProxy && (!supabaseUrl || !publishableKey)) {
       throw new Error('Configuração Supabase ausente para o proxy de Sociodemografia.');
     }
 
     const fetchHeaders: Record<string, string> = { ...headers };
-    let wireBody = requestBody;
     if (useSocioProxy) {
       fetchHeaders.apikey = publishableKey;
       wireBody = { path: operation.path, query: queryValues, body: requestBody ?? {} };

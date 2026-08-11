@@ -1022,6 +1022,21 @@
 
 .vvg-export-card > div:last-child {
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.vvg-export-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.vvg-export-group > strong {
+  margin-right: 2px;
+  font-size: 10px;
+  color: var(--vvg-text);
 }
 
 .vvg-empty {

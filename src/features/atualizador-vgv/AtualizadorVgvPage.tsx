@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { MultiSelect } from '@/features/dashboard-geobrain/MultiSelect';
 import {
   buildAdjustments,
+  exportVgvCsv,
   exportVgvWorkbook,
   extractAmenities,
   findColumn,
@@ -42,7 +43,13 @@ import { INDEX_NAMES } from './types';
 import './atualizador-vgv.css';
 
 const EMPTY_FILTERS: VgvFilters = { empreendimentos: [], cidades: [], tipologias: [], status: [] };
-const FIELD_COLORS = { primary: '#71984a', secondary: '#315b78', accent: '#f8d000', muted: '#94a3b8' };
+const FIELD_COLORS = { primary: '#71984a', secondary: '#f8d000', accent: '#f8d000', muted: '#94a3b8' };
+const INDEX_COLORS: Record<IndexName, string> = {
+  'INCC-DI': '#71984a',
+  IPCA: '#f8d000',
+  'IGP-DI': '#d6a800',
+};
+const NOMINAL_COLOR = '#9a8a52';
 
 type ViewTab = 'overview' | 'indices';
 
@@ -267,6 +274,14 @@ export default function AtualizadorVgvPage() {
     );
   }
 
+  function exportCsv(scope: 'all' | 'filtered') {
+    if (!dataset) return;
+    exportVgvCsv(
+      scope === 'all' ? dataset.base : filteredBase,
+      scope === 'all' ? 'dados_vgv_base_completa.csv' : 'dados_vgv_recorte_selecionado.csv',
+    );
+  }
+
   return (
     <div className="vvg-root min-h-full">
       <header className="vvg-page-header">
@@ -343,10 +358,10 @@ export default function AtualizadorVgvPage() {
             )}
 
             <section className="vvg-export-card">
-              <div><ArrowDownToLine className="h-5 w-5" /><span><strong>Leve a análise com você</strong><small>O arquivo é gerado localmente com três abas.</small></span></div>
+              <div><ArrowDownToLine className="h-5 w-5" /><span><strong>Exporte a análise</strong><small>Escolha a base completa ou o recorte selecionado.</small></span></div>
               <div>
-                <Button variant="outline" onClick={() => exportScope('all')}><FileSpreadsheet className="mr-2 h-4 w-4" /> Base completa</Button>
-                <Button onClick={() => exportScope('filtered')}><ArrowDownToLine className="mr-2 h-4 w-4" /> Exportar recorte</Button>
+                <div className="vvg-export-group"><strong>Base completa</strong><Button variant="outline" size="sm" onClick={() => exportScope('all')}><FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> XLSX</Button><Button variant="outline" size="sm" onClick={() => exportCsv('all')}><ArrowDownToLine className="mr-1.5 h-3.5 w-3.5" /> CSV</Button></div>
+                <div className="vvg-export-group"><strong>Recorte selecionado</strong><Button variant="outline" size="sm" onClick={() => exportScope('filtered')}><FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> XLSX</Button><Button variant="outline" size="sm" onClick={() => exportCsv('filtered')}><ArrowDownToLine className="mr-1.5 h-3.5 w-3.5" /> CSV</Button></div>
               </div>
             </section>
           </>
@@ -463,7 +478,7 @@ function IndexComparator({ rows, selected, onChange, indices, projectCount }: { 
     <div className="vvg-section-stack">
       <section className="vvg-index-intro">
         <div><span className="vvg-index-icon"><GitCompareArrows className="h-5 w-5" /></span><div><h2>Comparador de índices</h2><p>VGV da oferta corrigido para dezembro de 2025 · {projectCount} {projectCount === 1 ? 'empreendimento' : 'empreendimentos'} · referência {String(reference?.month ?? '—')}</p></div></div>
-        <div className="vvg-index-toggle">{INDEX_NAMES.map((name) => <button key={name} className={selected.includes(name) ? 'active' : ''} onClick={() => toggle(name)}><span style={{ background: name === 'INCC-DI' ? FIELD_COLORS.primary : name === 'IPCA' ? FIELD_COLORS.secondary : FIELD_COLORS.accent }} />{name}</button>)}</div>
+        <div className="vvg-index-toggle">{INDEX_NAMES.map((name) => <button key={name} className={selected.includes(name) ? 'active' : ''} onClick={() => toggle(name)}><span style={{ background: INDEX_COLORS[name] }} />{name}</button>)}</div>
       </section>
       <section className="vvg-kpis vvg-index-kpis">
         <Kpi icon={<Building2 />} label="Recorte" value={projectCount === 1 ? '1 empreendimento' : `${projectCount} empreendimentos`} detail={String(reference?.month ?? 'Sem período')} />
@@ -478,10 +493,10 @@ function IndexComparator({ rows, selected, onChange, indices, projectCount }: { 
             <YAxis tickFormatter={chartMoney} tick={{ fontSize: 11 }} stroke="var(--vvg-muted)" width={66} />
             <Tooltip formatter={tooltipMoney} contentStyle={{ borderRadius: 12, borderColor: 'var(--vvg-border)', background: 'var(--vvg-card)' }} />
             <Legend />
-            <Line type="monotone" dataKey="nominal" name="VGV nominal" stroke={FIELD_COLORS.muted} strokeDasharray="5 4" strokeWidth={2} dot={{ r: 3 }} />
-            {selected.includes('INCC-DI') && <Line type="monotone" dataKey="INCC-DI" name="Corrigido INCC-DI" stroke={FIELD_COLORS.primary} strokeWidth={2.5} dot={{ r: 3 }} />}
-            {selected.includes('IPCA') && <Line type="monotone" dataKey="IPCA" name="Corrigido IPCA" stroke={FIELD_COLORS.secondary} strokeWidth={2.5} dot={{ r: 3 }} />}
-            {selected.includes('IGP-DI') && <Line type="monotone" dataKey="IGP-DI" name="Corrigido IGP-DI" stroke={FIELD_COLORS.accent} strokeWidth={2.5} dot={{ r: 3 }} />}
+            <Line type="monotone" dataKey="nominal" name="VGV nominal" stroke={NOMINAL_COLOR} strokeDasharray="5 4" strokeWidth={2} dot={{ r: 3 }} />
+            {selected.includes('INCC-DI') && <Line type="monotone" dataKey="INCC-DI" name="Corrigido INCC-DI" stroke={INDEX_COLORS['INCC-DI']} strokeWidth={2.5} dot={{ r: 3 }} />}
+            {selected.includes('IPCA') && <Line type="monotone" dataKey="IPCA" name="Corrigido IPCA" stroke={INDEX_COLORS.IPCA} strokeWidth={2.5} dot={{ r: 3 }} />}
+            {selected.includes('IGP-DI') && <Line type="monotone" dataKey="IGP-DI" name="Corrigido IGP-DI" stroke={INDEX_COLORS['IGP-DI']} strokeWidth={2.5} dot={{ r: 3 }} />}
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>

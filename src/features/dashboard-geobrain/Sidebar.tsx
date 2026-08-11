@@ -2,9 +2,10 @@ import { useMemo } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import { MultiSelect, type MultiSelectOption } from './MultiSelect';
 import type { Filters } from './types';
-import type { extractOptions } from './aggregate';
+import type { extractOptions, extractRangeOptions } from './aggregate';
 
 type Options = ReturnType<typeof extractOptions>;
+type RangeOptions = ReturnType<typeof extractRangeOptions>;
 
 interface Props {
   open: boolean;
@@ -12,6 +13,7 @@ interface Props {
   filters: Filters;
   onFiltersChange: (f: Filters) => void;
   options: Options;
+  rangeOptions: RangeOptions;
   onReset: () => void;
 }
 
@@ -21,7 +23,7 @@ function toOpts(arr: string[]): MultiSelectOption[] {
 
 const STATUS_LABEL: Record<string, string> = { Ativo: 'Comercialização', Esgotado: 'Esgotado' };
 
-export function Sidebar({ open, onClose, filters, onFiltersChange, options, onReset }: Props) {
+export function Sidebar({ open, onClose, filters, onFiltersChange, options, rangeOptions, onReset }: Props) {
   const set = <K extends keyof Filters>(k: K, v: Filters[K]) => onFiltersChange({ ...filters, [k]: v });
 
   const bedroomOpts = useMemo<MultiSelectOption[]>(
@@ -66,6 +68,8 @@ export function Sidebar({ open, onClose, filters, onFiltersChange, options, onRe
           <MultiSelect label="Padrão" options={toOpts(options.standards)} value={filters.standards} onChange={(v) => set('standards', v)} />
           <MultiSelect label="Dormitórios" options={bedroomOpts} value={filters.bedrooms} onChange={(v) => set('bedrooms', v)} />
           <MultiSelect label="Vagas de garagem" options={garageOpts} value={filters.garages} onChange={(v) => set('garages', v)} />
+          <MultiSelect label="Área privativa" options={rangeOptions.privateAreas.map((r) => ({ value: r.value, label: r.label }))} value={filters.privateAreas} onChange={(v) => set('privateAreas', v)} />
+          <MultiSelect label="Preço/m²" options={rangeOptions.pricePerM2.map((r) => ({ value: r.value, label: r.label }))} value={filters.pricePerM2} onChange={(v) => set('pricePerM2', v)} />
           <MultiSelect label="Bairros" options={toOpts(options.neighborhoods)} value={filters.neighborhoods} onChange={(v) => set('neighborhoods', v)} />
           <MultiSelect label="Empreendimentos" options={buildingOpts} value={filters.buildings} onChange={(v) => set('buildings', v)} />
         </div>
