@@ -49,12 +49,20 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-11 — Governança de documentação viva e frontend — Gabriel
+- **Ambiente/funcionalidade:** plataforma Rebrain — regras compartilhadas de desenvolvimento e revisão.
+- **O quê:** formalizado o controle de documentos vivos em PR/push, com validação automatizada, e publicado o contrato de frontend para componentes, estados de página, acessibilidade, responsividade e registro de decisões duradouras.
+- **Por quê:** manter as mudanças de cada ambiente rastreáveis e preservar padrões consistentes nas próximas evoluções da plataforma.
+- **Arquivos:** `AGENTS.md`, `CLAUDE.md`, `docs/architecture/{FRONTEND_GUIDELINES.md,FRONTEND_DECISIONS.md}`, `docs/projetos/README.md`, `.github/{pull_request_template.md,workflows/live-docs-check.yml}`, `scripts/check-live-docs.mjs`.
+- **Commits:** `4b2eb4a`.
+- **Impacto em Etapas/Pendências:** sem alteração de runtime; a documentação viva passa a ser verificada no fluxo de integração.
+
 ### 2026-08-11 — Corte temporal explícito no Relatório Secovi — Gabriel
 - **Ambiente/funcionalidade:** `/rebrain/secovi` — geração de relatórios trimestrais para cidades mensais.
 - **O que:** o antigo seletor "Análise temporal desde" virou o intervalo **Período de análise** (início e fim, padrão 1T2021 até o trimestre corrente). O corte final agora filtra o histórico antes da agregação trimestral: vendas, colunas exportadas, estoque e demais snapshots usam exclusivamente competências até o trimestre selecionado.
 - **Por quê:** impedir que uma competência mensal já aberta do trimestre seguinte, como 07/2026, apareça ou altere a fotografia de um relatório fechado em 2T2026.
 - **Arquivos:** `src/pages/TestesArquitetura.tsx`, `src/features/relatorios-secovi/quarterly-history.ts`, `src/features/relatorios-secovi/__tests__/quarterly-history.test.ts`.
-- **Commits:** a registrar no push desta entrega.
+- **Commits:** `ac8ef83`.
 - **Impacto em Etapas/Pendências:** Relatórios Secovi mantém a etapa de homologação manual; adicionada cobertura de regressão para o corte de competências futuras.
 
 ### 2026-08-10 — Exportações e identificação visual dos índices no Atualizador VGV — Lucas
