@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
+    "check:live-docs": "node scripts/check-live-docs.mjs",
     "test:watch": "vitest"
   },
   "dependencies": {

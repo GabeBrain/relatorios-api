@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-10 — Exportações e identificação visual dos índices no Atualizador VGV — Lucas
+- **Ambiente/funcionalidade:** `/atualizador-vgv` — exportação da base/recorte e comparador de índices.
+- **O quê:** as exportações foram separadas por escopo (**base completa** ou **recorte selecionado**) e por formato (**XLSX** ou **CSV**). O CSV usa `;` e BOM para abrir corretamente no Excel. No comparador, cada índice passou a manter uma cor própria e o VGV nominal deixou de disputar a mesma cor das séries corrigidas.
+- **Por quê:** tornar explícito o conjunto exportado e evitar a leitura ambígua das séries do gráfico.
+- **Arquivos:** `src/features/atualizador-vgv/{AtualizadorVgvPage.tsx,atualizador-vgv.css,engine.ts}`.
+- **Commits:** `508744f`, `646d5bb`, `767b0c4`, `b91173b`.
+- **Impacto em Etapas/Pendências:** amplia a etapa 10 em runtime; a homologação do setor usuário e a rotina de atualização dos índices permanecem abertas.
+
 ### 2026-08-05 — Mapa urbano operacional no Atualizador VGV — Codex
 - **O quê:** o mapa nacional estático de `/atualizador-vgv` foi substituído por um mapa urbano MapLibre
   com ruas, bairros, rótulos cartográficos, zoom, tela cheia, escala e enquadramento automático nos

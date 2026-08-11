@@ -19,8 +19,8 @@ majoritariamente por uma pessoa, mas colaborados via git. Cada projeto tem um
 
 Cada doc vivo é organizado nos mesmos três eixos:
 
-1. **Desenvolvimentos** — log cronológico das alterações relevantes (o que mudou, por quê,
-   arquivos tocados, autor). Entrada nova no topo.
+1. **Desenvolvimentos** — log cronológico das alterações relevantes (ambiente/funcionalidade,
+   o que mudou, por quê, arquivos tocados, autor e commits). Entrada nova no topo.
 2. **Etapas** — o roadmap/marcos do projeto e o status de cada um.
 3. **Pendências** — backlog, bloqueios, dívidas técnicas e decisões em aberto.
 
@@ -35,6 +35,20 @@ introduziu a mudança. Na prática:
   **Etapas**/**Pendências** conforme o caso.
 - **Depois de um `pull`/merge**: leia as entradas novas do(s) doc(s) para se situar sobre o
   que mudou no trabalho dos colegas.
+
+### Fonte de verdade e conciliação
+
+O **commit/merge é a evidência técnica** e o documento vivo é a **leitura operacional** dessa
+evidência. Um não substitui o outro. Para impedir que se desencontrem:
+
+- Todo commit relevante precisa indicar, na mensagem ou no doc, o **ambiente/funcionalidade**
+  afetado; se tocar mais de um, registre cada um.
+- Antes do push, inclua na entrada do doc os hashes curtos dos commits que ela resume. Um conjunto
+  de commits pequenos da mesma entrega pode virar uma única entrada.
+- Depois de pull/merge, compare os commits novos com os docs dos ambientes alterados. Se faltar
+  documentação, crie a entrada retroativa com o autor real do commit e ajuste Etapas/Pendências.
+- Não crie entrada para formatação/typo isolado; quando a alteração mudar comportamento,
+  integração, regra, UX, dado ou entrega, a documentação é obrigatória.
 
 Alterações puramente triviais (formatação, typo, ajuste de comentário) não exigem entrada.
 
@@ -53,8 +67,34 @@ Para **Etapas** usamos também: ✅ concluída · 🟡 em andamento · 🔲 não
 
 ```
 ### AAAA-MM-DD — <título curto> — <autor>
+- **Ambiente/funcionalidade:** `<rota ou módulo>` — <nome compreensível da capacidade alterada>
 - **O quê:** <resumo da mudança>
 - **Por quê:** <motivo/contexto>
 - **Arquivos:** `caminho/arquivo.ts`, ...
+- **Commits:** `<hash-curto>`, ...
 - **Impacto em Etapas/Pendências:** <o que virou ✅ ou o que abriu de novo>
 ```
+
+## Contrato de resumo em saudações
+
+Uma saudação abre uma revisão rápida do estado compartilhado, não uma alteração automática de
+documentação. O resumo deve ser baseado em `git status`, commits desde a última entrada dos docs
+e em **todos os documentos vivos**, organizado por ambiente. Para cada ambiente, informar: última
+alteração relevante (data, autor e funcionalidade), status atual e até duas pendências prioritárias.
+Se houver commit relevante sem entrada, sinalizar explicitamente `documentação pendente` e
+propor/registrar a conciliação antes do próximo push.
+
+## Origens de alteração e proteção do fluxo
+
+As mudanças podem chegar por **Lovable**, pelo **Codex do Lucas** (especialmente na Área Quanti)
+ou pela equipe/Codex interno. A origem identifica quem produziu a alteração, mas **não substitui a
+classificação por ambiente**: ela é determinada pela rota/módulo e pelo comportamento alterado.
+
+- Pull requests usam o checklist em `.github/pull_request_template.md` e a validação
+  `npm run check:live-docs -- <base> <head>`.
+- A validação exige um doc vivo de projeto quando há mudança de runtime e exige o doc detalhado
+  adicional para o Corretor. Ela roda também em `push` na `main` como auditoria de integrações
+  diretas do Lovable.
+- Para impedir uma integração direta *antes* de entrar na `main`, configure a proteção da branch
+  no GitHub exigindo o check **Documentação viva** e revisão por pull request. Sem essa proteção,
+  o check em `push` detecta e sinaliza a pendência, mas não desfaz um push já aceito.

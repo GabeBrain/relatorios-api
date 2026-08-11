@@ -15,6 +15,11 @@ do push**. Após `pull`/merge, leia as entradas novas para se situar. Convençã
 - Área Quanti → `docs/projetos/LIVE_area-quanti.md`
 - Rebrain → `docs/projetos/LIVE_rebrain.md`
 
+As alterações podem vir do **Lovable**, do **Codex do Lucas** (sobretudo Área Quanti) ou da equipe.
+Registre no doc o autor/origem real, mas determine o ambiente pela funcionalidade alterada — nunca
+pela ferramenta que gerou o commit. Antes de push/merge, execute
+`npm run check:live-docs -- <base> <head>`.
+
 ## Padrão obrigatório: GeoApiScopeEngine
 
 Para qualquer tela que use filtros geográficos e chamadas à API GeoBrain, usar o padrão
@@ -46,20 +51,33 @@ sugestões de próximo passo.
 Se a identidade não bater com ninguém, **pergunte em qual projeto a pessoa está focando**. O foco
 é um padrão, não uma trava: se pedirem algo de outro projeto, atenda normalmente.
 
-### Ritual de saudação (revisão de status)
+### Ritual de saudação (resumo de status por ambiente)
 
 Quando a interação começar com uma **saudação** ("oi", "olá", "bom dia", "boa tarde",
 "boa noite" e variações), antes de responder ao pedido:
 
-1. Verifique o que mudou desde o último sync (`git log`/`git status` + diff dos docs) e
-   **reconcilie os documentos vivos** dos projetos afetados: atualize **Etapas** (✅/🟡) e
-   **Pendências** (remova o resolvido, registre o que surgiu). Se nada mudou, confirme que os
-   docs seguem fiéis ao estado atual.
-2. Ao final da resposta, **pergunte se há algum bug específico mais urgente** a tratar.
-3. Se não houver, sugira **um próximo passo natural focado no projeto do colaborador ativo**
-   (ver mapa acima) — derivado das *Etapas* em andamento (🟡) ou das *Pendências* prioritárias
-   do doc vivo daquele projeto. Assim Edgar vê sugestões do GeoBrain, Lucas da Quanti e Gabriel
-   do Rebrain.
+1. Consulte `git status`, `git log` desde as entradas mais recentes e os três docs vivos. Não
+   altere docs apenas por cumprimentar: reconcilie-os somente quando um commit/merge relevante
+   estiver sem registro ou quando Etapas/Pendências estiverem comprovadamente desatualizadas.
+2. Responda com um **resumo por ambiente/funcionalidade** (Dashboard GeoBrain, Área Quanti e
+   Rebrain, incluindo suas features): última alteração relevante com **data, autor e nome da
+   funcionalidade**, estado da etapa e até duas pendências prioritárias. Diga claramente se
+   houver árvore de trabalho suja ou `documentação pendente`.
+3. Para cada commit relevante sem doc vivo, registre (ou proponha registrar, se faltar contexto)
+   uma entrada com ambiente, autor, hashes e impacto em Etapas/Pendências, conforme
+   `docs/projetos/README.md`. Commits pequenos de uma só entrega podem ser agrupados.
+4. **Depois de apresentar as pendências mais latentes**, pergunte se há algum bug específico que o
+   autor queira endereçar. Se não houver, sugira um próximo passo natural focado no projeto do
+   colaborador ativo, derivado das Etapas/Pendências.
+
+## Guidelines de frontend — Rebrain
+
+Antes de desenvolver ou alterar interface React, leia
+`docs/architecture/FRONTEND_GUIDELINES.md` e o `DESIGN_SYSTEM.md`. Classifique o pedido, reutilize
+o padrão/componente existente e cubra os estados de página aplicáveis. Páginas de feature são lazy
+por padrão; exceções duradouras (novo primitive, token, fluxo ou desvio de lazy-loading) devem ser
+registradas em `docs/architecture/FRONTEND_DECISIONS.md`. No handoff, informe o padrão reutilizado e
+os estados verificados. Essas regras se aplicam a Lovable, Codex do Lucas e qualquer outro autor.
 
 ## Corretor de Vocacionais
 

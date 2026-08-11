@@ -15,3 +15,11 @@
 > Documentos aqui são **contexto e referência** — não são carregados em runtime pelo app.
 > O código legado do Mapa (aposentado) e suas fontes de dados estão documentados em
 > [`../src/legacy/mapa/DATA_SOURCES.md`](../src/legacy/mapa/DATA_SOURCES.md).
+
+## Frontend Rebrain
+
+Para criação e evolução de interfaces, consulte o
+[`FRONTEND_GUIDELINES.md`](./architecture/FRONTEND_GUIDELINES.md): ele complementa o
+[`DESIGN_SYSTEM.md`](./architecture/DESIGN_SYSTEM.md) com contratos de componentes, estados de
+página, lazy-loading, responsividade e acessibilidade. Exceções duradouras ficam em
+[`FRONTEND_DECISIONS.md`](./architecture/FRONTEND_DECISIONS.md).
