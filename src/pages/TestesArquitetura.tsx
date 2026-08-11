@@ -1050,29 +1050,10 @@ export default function TestesArquitetura() {
           <strong>Limitação da API:</strong> Distratos não são fornecidos diretamente. <code>*Distratos no trimestre</code> é uma estimativa via variação de estoque; <code>VGV Distratos</code> permanece em branco.
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="space-y-1">
           <div className="space-y-1">
             <Label className="text-xs">Escopo geográfico *</Label>
             <GeoApiScopeSelector value={scope} onChange={handleScopeChange} disabled={loading} />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs">Período de análise</Label>
-            <div className="grid grid-cols-2 gap-2">
-              <Select value={startQ} onValueChange={(next) => {
-                setStartQ(next);
-                if (compareTuple(qKey(next), qKey(endQ)) > 0) setEndQ(next);
-              }} disabled={loading}>
-                <SelectTrigger className="h-8 text-xs" aria-label="Início do período de análise"><SelectValue /></SelectTrigger>
-                <SelectContent>{quarters.filter((q) => compareTuple(qKey(q), qKey(endQ)) <= 0).map((q) => <SelectItem key={q} value={q}>De: {qLabel(q)}</SelectItem>)}</SelectContent>
-              </Select>
-              <Select value={endQ} onValueChange={(next) => {
-                setEndQ(next);
-                if (compareTuple(qKey(next), qKey(startQ)) < 0) setStartQ(next);
-              }} disabled={loading}>
-                <SelectTrigger className="h-8 text-xs" aria-label="Fim do período de análise"><SelectValue /></SelectTrigger>
-                <SelectContent>{quarters.filter((q) => compareTuple(qKey(q), qKey(startQ)) >= 0).map((q) => <SelectItem key={q} value={q}>Até: {qLabel(q)}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
           </div>
         </div>
 
@@ -1098,6 +1079,26 @@ export default function TestesArquitetura() {
                 </label>
               ))}
             </div>
+          </div>
+        </div>
+
+        <div className="space-y-1 max-w-xl">
+          <Label className="text-xs">Período de análise</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Select value={startQ} onValueChange={(next) => {
+              setStartQ(next);
+              if (compareTuple(qKey(next), qKey(endQ)) > 0) setEndQ(next);
+            }} disabled={loading}>
+              <SelectTrigger className="h-8 text-xs" aria-label="Início do período de análise"><SelectValue /></SelectTrigger>
+              <SelectContent>{quarters.filter((q) => compareTuple(qKey(q), qKey(endQ)) <= 0).map((q) => <SelectItem key={q} value={q}>De: {qLabel(q)}</SelectItem>)}</SelectContent>
+            </Select>
+            <Select value={endQ} onValueChange={(next) => {
+              setEndQ(next);
+              if (compareTuple(qKey(next), qKey(startQ)) < 0) setStartQ(next);
+            }} disabled={loading}>
+              <SelectTrigger className="h-8 text-xs" aria-label="Fim do período de análise"><SelectValue /></SelectTrigger>
+              <SelectContent>{quarters.filter((q) => compareTuple(qKey(q), qKey(startQ)) >= 0).map((q) => <SelectItem key={q} value={q}>Até: {qLabel(q)}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
         </div>
 
