@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { aggregateTypologyHistoryByQuarter, periodToQuarter } from '../quarterly-history';
+import { aggregateTypologyHistoryByQuarter, filterHistoryThroughQuarter, periodToQuarter } from '../quarterly-history';
 
 const rubi = [
   { period: '2025-11-01', sold_in_period: 49, typology_stock: 607, price: 263000 },
@@ -74,5 +74,15 @@ describe('aggregateTypologyHistoryByQuarter', () => {
 
     // O primeiro fechamento não tem estoque anterior para calcular o intervalo.
     expect(result.get('1T2026')?.estimatedCancellations).toBeNull();
+  });
+  it('excludes future periods before calculating the final quarter snapshot', () => {
+    const result = aggregateTypologyHistoryByQuarter(filterHistoryThroughQuarter([
+      { period: '2026-04-01', sold_in_period: 10, typology_stock: 90, price: 100000 },
+      { period: '2026-06-01', sold_in_period: 8, typology_stock: 82, price: 100000 },
+      { period: '2026-07-01', sold_in_period: 12, typology_stock: 70, price: 100000 },
+    ], '2T2026'));
+
+    expect(result.get('2T2026')).toMatchObject({ sales: 18, lastEntry: { typology_stock: 82 } });
+    expect(result.has('3T2026')).toBe(false);
   });
 });

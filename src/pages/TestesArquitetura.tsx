@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
 import MUNICIPIOS_BR from '@/assets/municipios-br.json';
 import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
-import { aggregateTypologyHistoryByQuarter, periodToQuarter } from '@/features/relatorios-secovi/quarterly-history';
+import { aggregateTypologyHistoryByQuarter, filterHistoryThroughQuarter, periodToQuarter } from '@/features/relatorios-secovi/quarterly-history';
 
 const UF_LIST = Object.keys(MUNICIPIOS_BR as Record<string, string[]>).sort();
 
@@ -139,12 +139,13 @@ async function apiGet(
   }
 }
 
-function hasPeriodFrom(building: Record<string, unknown>, startQ: string): boolean {
+function hasPeriodInRange(building: Record<string, unknown>, startQ: string, endQ: string): boolean {
   const startKey = qKey(startQ);
+  const endKey = qKey(endQ);
   const history = (building.typologies_history as unknown[]) ?? [];
   return history.some((e) => {
     const q = periodToQuarter(((e as Record<string, unknown>).period as string) ?? '');
-    return q && compareTuple(qKey(q), startKey) >= 0;
+    return q && compareTuple(qKey(q), startKey) >= 0 && compareTuple(qKey(q), endKey) <= 0;
   });
 }
 
@@ -173,6 +174,7 @@ async function fetchLane(
   city: string,
   uf: string,
   startQ: string,
+  endQ: string,
   token: string,
   signal: AbortSignal,
   onPage: (delta: Partial<LiveStats>) => void,
@@ -215,7 +217,7 @@ async function fetchLane(
 
       if (!allSeen.has(bid)) { allSeen.add(bid); allIds.push(bid); newAllIds++; }
 
-      if (!hasPeriodFrom(it, startQ)) continue;
+      if (!hasPeriodInRange(it, startQ, endQ)) continue;
       if (!eligibleSeen.has(bid)) {
         eligibleSeen.add(bid);
         eligibleIds.push(bid);
@@ -242,7 +244,7 @@ interface PreviewResult {
 }
 
 async function collectPreview(
-  city: string, uf: string, types: string[], statuses: string[], startQ: string,
+  city: string, uf: string, types: string[], statuses: string[], startQ: string, endQ: string,
   token: string, signal: AbortSignal, onLiveStats: (stats: LiveStats) => void,
 ): Promise<PreviewResult> {
   const pairs = statuses.flatMap((s) => types.map((t) => ({ status: s, type: t })));
@@ -256,7 +258,7 @@ async function collectPreview(
   }
 
   const settled = await Promise.allSettled(
-    pairs.map(({ status, type }) => fetchLane(status, type, city, uf, startQ, token, signal, applyDelta))
+    pairs.map(({ status, type }) => fetchLane(status, type, city, uf, startQ, endQ, token, signal, applyDelta))
   );
 
   const allSeen = new Set<number>(); const eligibleSeen = new Set<number>();
@@ -328,7 +330,7 @@ function deriveQuarters(buildings: Record<string, unknown>[]): string[] {
   return [...qs].sort((a, b) => compareTuple(qKey(a), qKey(b)));
 }
 
-function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]): Row[] {
+function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], endQ: string): Row[] {
   const rows: Row[] = [];
 
   for (const b of buildings) {
@@ -347,10 +349,12 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[]):
 
     for (const [, entries] of typoMap) {
       entries.sort((a, b) => String(a.period ?? '').localeCompare(String(b.period ?? '')));
-      const quarterlyHistory = aggregateTypologyHistoryByQuarter(entries);
-      const first = entries[0];
+      const entriesThroughEnd = filterHistoryThroughQuarter(entries, endQ);
+      if (entriesThroughEnd.length === 0) continue;
+      const quarterlyHistory = aggregateTypologyHistoryByQuarter(entriesThroughEnd);
+      const first = entriesThroughEnd[0];
       const [, lastQuarter] = [...quarterlyHistory.entries()].at(-1) ?? [];
-      const last = lastQuarter?.lastEntry ?? entries[entries.length - 1];
+      const last = lastQuarter?.lastEntry ?? entriesThroughEnd[entriesThroughEnd.length - 1];
       const qty = toNum(last.qty) ?? toNum(first.qty) ?? 0;
       const privArea = toNum(last.private_area) ?? 0;
       const launchPrice = toNum(first.release_price) ?? 0;
@@ -846,6 +850,7 @@ export default function TestesArquitetura() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>(['Vertical']);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(['Ativo', 'Esgotado']);
   const [startQ, setStartQ] = useState('1T2021');
+  const [endQ, setEndQ] = useState(() => availableQuarters(2021).at(-1) ?? '1T2021');
 
   const [phase, setPhase] = useState<'idle' | 'preview' | 'fetching'>('idle');
   const [previewPct, setPreviewPct] = useState(0);
@@ -931,7 +936,7 @@ export default function TestesArquitetura() {
     try {
       const p = await collectPreview(
         city.trim(), uf.trim().toUpperCase(), selectedTypes, selectedStatuses,
-        startQ, getToken(), ctrl.signal,
+        startQ, endQ, getToken(), ctrl.signal,
         (stats) => {
           setLiveStats({ ...stats });
           const pct = stats.pagesTotal > 0 ? Math.min(99, (stats.pagesDone / stats.pagesTotal) * 100) : 0;
@@ -950,7 +955,7 @@ export default function TestesArquitetura() {
     } finally {
       setPhase('idle');
     }
-  }, [city, uf, selectedTypes, selectedStatuses, startQ, getToken, hasValidToken]);
+  }, [city, uf, selectedTypes, selectedStatuses, startQ, endQ, getToken, hasValidToken]);
 
   const handleAbortPreview = useCallback(() => {
     previewAbortRef.current?.abort();
@@ -984,15 +989,17 @@ export default function TestesArquitetura() {
 
       const allBuildings = [...details.values()];
       const allQuarters = deriveQuarters(allBuildings);
-      const filteredQs = allQuarters.filter((q) => compareTuple(qKey(q), qKey(startQ)) >= 0);
+      const filteredQs = allQuarters.filter((q) =>
+        compareTuple(qKey(q), qKey(startQ)) >= 0 && compareTuple(qKey(q), qKey(endQ)) <= 0,
+      );
 
       if (filteredQs.length === 0) { toast.error('Nenhum trimestre válido no período.'); return; }
 
-      const lastQ = filteredQs[filteredQs.length - 1];
+      const lastQ = endQ;
       const activeBuildings = preview.activeIds.map((id) => details.get(id)).filter(Boolean) as Record<string, unknown>[];
       const inactiveBuildings = preview.inactiveIds.map((id) => details.get(id)).filter(Boolean) as Record<string, unknown>[];
-      const activeRows = buildRows(activeBuildings, filteredQs);
-      const inactiveRows = buildRows(inactiveBuildings, filteredQs);
+      const activeRows = buildRows(activeBuildings, filteredQs, endQ);
+      const inactiveRows = buildRows(inactiveBuildings, filteredQs, endQ);
 
       setResult({ activeRows, inactiveRows, quarterCols: filteredQs, city: city.trim(), lastQ, startQ, nBuildings: details.size, allBuildings });
       const warn = failed > 0 ? ` — ${failed} falha(s)` : '';
@@ -1002,7 +1009,7 @@ export default function TestesArquitetura() {
     } finally {
       setPhase('idle');
     }
-  }, [preview, city, startQ, getToken, hasValidToken]);
+  }, [preview, city, startQ, endQ, getToken, hasValidToken]);
 
   const handleAbortFetch = useCallback(() => {
     fetchAbortRef.current?.abort();
@@ -1049,11 +1056,23 @@ export default function TestesArquitetura() {
             <GeoApiScopeSelector value={scope} onChange={handleScopeChange} disabled={loading} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Análise temporal desde</Label>
-            <Select value={startQ} onValueChange={setStartQ} disabled={loading}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>{quarters.map((q) => <SelectItem key={q} value={q}>{qLabel(q)}</SelectItem>)}</SelectContent>
-            </Select>
+            <Label className="text-xs">Período de análise</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Select value={startQ} onValueChange={(next) => {
+                setStartQ(next);
+                if (compareTuple(qKey(next), qKey(endQ)) > 0) setEndQ(next);
+              }} disabled={loading}>
+                <SelectTrigger className="h-8 text-xs" aria-label="Início do período de análise"><SelectValue /></SelectTrigger>
+                <SelectContent>{quarters.filter((q) => compareTuple(qKey(q), qKey(endQ)) <= 0).map((q) => <SelectItem key={q} value={q}>De: {qLabel(q)}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={endQ} onValueChange={(next) => {
+                setEndQ(next);
+                if (compareTuple(qKey(next), qKey(startQ)) < 0) setStartQ(next);
+              }} disabled={loading}>
+                <SelectTrigger className="h-8 text-xs" aria-label="Fim do período de análise"><SelectValue /></SelectTrigger>
+                <SelectContent>{quarters.filter((q) => compareTuple(qKey(q), qKey(startQ)) >= 0).map((q) => <SelectItem key={q} value={q}>Até: {qLabel(q)}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 

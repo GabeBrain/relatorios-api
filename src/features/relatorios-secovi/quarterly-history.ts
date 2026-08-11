@@ -89,6 +89,25 @@ function periodSortKey(period: unknown): number | null {
   return month >= 1 && month <= 12 && day >= 1 && day <= 31 ? Date.UTC(year, month - 1, day) : null;
 }
 
+function quarterSortKey(quarter: string): number | null {
+  const match = /^(\d)T(\d{4})$/.exec(quarter);
+  if (!match) return null;
+  const month = (Number(match[1]) - 1) * 3 + 1;
+  return Date.UTC(Number(match[2]), month - 1, 1);
+}
+
+/** Keeps only entries through the inclusive report cutoff quarter. */
+export function filterHistoryThroughQuarter(entries: HistoryEntry[], endQuarter: string): HistoryEntry[] {
+  const endKey = quarterSortKey(endQuarter);
+  if (endKey === null) return entries;
+
+  return entries.filter((entry) => {
+    const quarter = periodToQuarter(entry.period);
+    const entryKey = quarter ? quarterSortKey(quarter) : null;
+    return entryKey !== null && entryKey <= endKey;
+  });
+}
+
 /**
  * Agrupa os fechamentos válidos de uma tipologia por trimestre. A estimativa de
  * distratos só é entregue quando todos os intervalos do trimestre são calculáveis,
