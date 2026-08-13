@@ -63,6 +63,10 @@ docs/features/corretor-vocacionais/ir/
 # Convenção completa em docs/features/corretor-vocacionais/fontes/README.md.
 docs/features/corretor-vocacionais/fontes/**/estudo/
 docs/features/corretor-vocacionais/fontes/**/excel/
+# Pacotes como chegam do analista (TransferNow, Drive, e-mail). Descompactar e apagar.
+docs/features/corretor-vocacionais/fontes/*.zip
+docs/features/corretor-vocacionais/fontes/**/*.zip
+docs/features/corretor-vocacionais/fontes/**/*.rar
 
 # Amostras pesadas do Panorama Secovi/FIERGS (locais — NÃO versionar; xlsx de inventário e docs .md sobem)
 docs/features/Relatorios Secovi_FIERGS/*.pptx

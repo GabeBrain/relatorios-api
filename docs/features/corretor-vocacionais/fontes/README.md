@@ -76,15 +76,49 @@ exatamente** entre estudos que cumprem o mesmo papel:
 | Integridade | `1. OnMaps (5.xlsm` — nome truncado com parêntese aberto |
 | Duplicatas | Toledo tem 2 `ABSORCAO LANCAMENTOS` e 2 arquivos de área de lazer |
 
-**Gerações diferentes de template.** Jan/2026 (Marka) organiza por **segmento de produto**
-(`Analise Vertical Otimizada - HIS 1/HIS 2/HMP/Primaria`, `Cenarios - 3 Anos`, `OnMaps`);
-jul/2026 (Rolândia, Toledo) organiza por **raio** (`Consolidada - 1 Km`, `SOCIODEMOGRAFIA`,
-`ABSORÇAO LANÇAMENTOS`). Papéis equivalentes, vocabulário incompatível.
+## O nome mente; a aba não (medido com os 3 pacotes abertos, 13/ago/2026)
 
-**Consequência:** classificar por **papel**, via palavra-chave sobre o nome normalizado (sem acento,
-minúsculo, sem pontuação/numeração), nunca por nome exato — e manter **um mapa de abas por geração**,
-detectada pelo conjunto de arquivos presente. Quando dois arquivos disputam o mesmo papel, **registrar
-a ambiguidade** em vez de escolher em silêncio.
+> ⚠️ **Correção.** A primeira leitura, feita só pelos nomes de arquivo, concluiu que jan/2026 (Marka)
+> era "outra geração de template". **Abrir os arquivos desmentiu isso.** Os nomes divergem por
+> completo, mas a camada de abas é a mesma família nos três estudos e nas duas épocas.
+
+| Papel | Rolândia (jul/26) | Toledo (jul/26) | Marka (jan/26) |
+|---|---|---|---|
+| Oferta consolidada | `01. Consolidada - 1 Km_verificação - OK` | `1.CONSOLIDADA 1 KM` | `Analise Vertical Otimizada - HIS 1` |
+| Sociodemografia | `02. SOCIODEMOGRAFIA` | `02. SOCIODEMOGRAFIA 2 raios` | `1. OnMaps (5` |
+| Absorção | `03. ABSORÇAO LANÇAMENTOS` | `03. ABSORCAO LANCAMENTOS - ZI` | `Cenarios - 3 Anos ok` |
+| População/domicílios | `01. POPULACAO E DOMICÍLIOS` | `1.Populacao de Domicilios` | `2. Populacao e Domicilios` |
+| Revenda/locação | `02. Revenda - Apartamento` | idem | `Revenda casas cond` |
+
+Nomes irreconhecíveis entre si — e **as abas são as mesmas** em todos: a consolidada sempre traz
+`CONSOLIDADA`, `Padrão`, `Ano`, `Tipologia`, `Comerc. Mensal`, `Preço Tipologia`, `Preço Padrão`,
+`M²TIPO`, `M² PADRÃO`, `R$M²TIPO`, `M² POR R$M²`, `INCC`; a absorção sempre traz exatamente `TAXAS`,
+`DOMICÍLIOS POR RENDIMENTO`, `ABSORÇÃO`, `GRAFICOS`; a sociodemografia sempre traz `Dom.p Tipo`,
+`Dom.p Cond. Ocup.`, `População - Faixa Etária`, `Dom.p nº Moradores`.
+
+Variam só **abas opcionais**: Toledo não tem `GARAGEM*` nem `GRÁFICOS_R$`; Marka acrescenta `VSO` e
+`R$TIPO`; `Esgotados` duplica blocos com sufixo ` - 2`.
+
+**O que não é estável, mesmo dentro da aba certa:**
+
+| | jul/2026 | jan/2026 |
+|---|---|---|
+| Cabeçalho de `Padrão` | linha 5 | linha 5 |
+| Cabeçalho de `Ano` e `Tipologia` | **linha 5** | **linha 6** |
+| Oferta remanescente | `Oferta Atual` | **`Oferta         Final`** (espaços múltiplos internos) |
+| Vendas | `Vendas` | `Vendas s/ O.L.` |
+| Disponibilidade | `Disp. Sobre Lançados` / `Disp. Sobre lançados` (caixa varia no mesmo estudo) | `Disp. s/ O.L.` |
+
+**Consequência:** ancorar **na aba**, não no arquivo. Achar o cabeçalho **procurando os nomes das
+colunas** — a linha varia. Normalizar acento, caixa e **runs de espaço** antes de comparar. Manter um
+**dicionário de sinônimos por conceito** (`oferta atual` ≡ `oferta final`; `vendas` ≡ `vendas s/ o.l.`),
+não um mapa por geração. O nome do arquivo serve só para **rotular o recorte** (1 Km, 2 Km, Z.I.,
+HIS 1, HMP, Primária) — e mesmo nisso é falível.
+
+**Ambiguidade real, não hipotética:** o Toledo tem `03. ABSORCAO LANCAMENTOS - ZI.xlsm` e
+`03. ABSORCAO LANCAMENTOS -.xlsm`. Parecem duplicatas e **não são**: a primeira é a Z.I.
+(23.499 domicílios), a segunda é a cidade (56.405). Escolher pelo nome pegaria o escopo errado em
+silêncio. **Registrar a ambiguidade e exigir desempate.**
 
 **Consequência para o extrator:**
 1. Ler apenas uma **lista branca de abas de saída** — nunca varrer o workbook inteiro.
