@@ -129,6 +129,38 @@ silêncio. **Registrar a ambiguidade e exigir desempate.**
 5. Registrar no `fonte.json` a **procedência de cada número** (arquivo, aba, célula), para o achado
    poder citar a evidência como já faz com a imagem.
 
+## O extrator
+
+[`../fonte_extractor.py`](../fonte_extractor.py) — irmão do `ir_extractor.py`. Implementa o contrato
+acima e produz `<slug>.fonte.json`:
+
+```bash
+python fonte_extractor.py fontes/<slug>/excel --slug <slug> -o calibracao/<slug>/<nome>.fonte.json
+```
+
+Aceite em `src/features/corretor/lib/v3/__tests__/fonte-real.test.ts`, sobre os três pacotes reais.
+
+**Blocos extraídos hoje:** `oferta` (Padrão · Ano · Tipologia de cada consolidada), `socio`
+(Dom.p Tipo · Cond. Ocup. · Faixa Etária · nº Moradores), `populacao` (série 2000/2010/2026) e
+`absorcao` (TAXAS). Cobrem as três famílias de erro achadas no FN-04. Revenda, locação, lazer e
+anúncios entram no inventário mas ainda não são extraídos.
+
+**Saída, por bloco:** papel, tabela, recorte, arquivo, aba, linha do cabeçalho, conceitos
+reconhecidos, itens e linha de total — com `linha` em cada registro, para o achado citar procedência
+como já faz com a imagem-evidência.
+
+**Rendimento medido (13/ago):** 1,1 GB de planilhas → **194 KB de JSON**; 55 blocos nos três pacotes.
+
+### Armadilhas que ele já evita (todas encontradas em dado real)
+
+| Armadilha | Onde apareceu | Defesa |
+|---|---|---|
+| Coluna órfã herdando o recorte anterior e **sobrescrevendo com zero** | `População - Faixa Etária` da Rolândia: restos de `#VALUE!`/`#DIV/0!` depois de "Até 3 Km" | cada recorte é dono de **exatamente um** `Absoluto` e um `%` — os primeiros a partir da sua coluna |
+| `\b` não fecha antes de `_` | `1 Km_verificação` não casava com `\b1 km\b` | `_` e `-` viram espaço antes de classificar |
+| Cabeçalho da coluna de rótulos lido como recorte | `TIPO DE DOMICÍLIO`, `MORADORES` | só entram rótulos a partir da primeira coluna `Absoluto` |
+| Base bruta disputando papel com a análise | `00. Base - Revenda e Locação` × `02. Revenda - Apartamento` | papel `base` reconhecido antes, e papéis coletivos não geram aviso de ambiguidade |
+| Nome de arquivo em NFD | acento do Windows quebra comparação com literal NFC | normalizar antes de comparar |
+
 ## Ciclo de vida
 
 1. Material chega → cria a pasta do estudo e o `MANIFEST.md`.

@@ -83,6 +83,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Arquivos:** `src/pages/RelatorioAelo.tsx`.
 - **Impacto em Etapas/Pendências:** esses campos deixam de ser lacunas do relatório; permanece pendente validar a unidade/formatação dos percentuais com a base AELO.
 
+### 2026-08-13 — Corretor: `fonte_extractor` — verdade numérica das planilhas do analista — Gabriel + Claude
+- **Ambiente/funcionalidade:** Corretor | Estudos Vocacionais — extração de material-fonte (POC, fora do runtime).
+- **O quê:** `fonte_extractor.py` transforma as planilhas do analista em JSON versionável para o futuro `SOURCE_CROSSCHECK`; três pacotes reais de Rolândia, Toledo e Marka foram calibrados e receberam fixtures/testes de regressão.
+- **Arquivos:** `docs/features/corretor-vocacionais/{fonte_extractor.py,fontes/,calibracao/}`, `src/features/corretor/lib/v3/__tests__/fonte-real.test.ts`.
+- **Impacto em Etapas/Pendências:** abre a etapa de `SOURCE_CROSSCHECK`; descarte do material bruto continua condicionado à cobertura de revenda, locação, lazer e anúncios.
+
 ### 2026-08-12 — Corretor: sessão de calibração de FPs no banco + consulta por terminal — Gabriel + Claude
 - **Ambiente/funcionalidade:** Corretor | Estudos Vocacionais — regras de soma e ferramenta de apoio.
 - **O quê:** corrige o alinhamento de linhas de totais e o agrupamento de fatias paginadas, com testes de regressão sobre Toledo; adiciona `scripts/corretor-db.mjs` e sua skill para investigar achados e payloads diretamente no banco.

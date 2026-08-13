@@ -1,0 +1,2730 @@
+{
+  "fonte_version": 1,
+  "estudo": "marka-tancredo-2026-01",
+  "gerado_em": "2026-08-13T19:58:01+00:00",
+  "pasta": "fontes/marka-tancredo-2026-01/excel",
+  "inventario": [
+    {
+      "arquivo": "1. OnMaps (5.xlsm",
+      "sha1": "98309dba7512ee85",
+      "papel": "socio",
+      "recorte": null,
+      "tamanho_kb": 481.0
+    },
+    {
+      "arquivo": "2. Populacao e Domicilios.xlsx",
+      "sha1": "2ce5d988f8bcca45",
+      "papel": "populacao",
+      "recorte": null,
+      "tamanho_kb": 19.8
+    },
+    {
+      "arquivo": "3. Pontos de Interesse ok.xlsx",
+      "sha1": "b8505476f614b526",
+      "papel": "pontos_interesse",
+      "recorte": null,
+      "tamanho_kb": 118.5
+    },
+    {
+      "arquivo": "5. Financiamento.xlsx",
+      "sha1": "9312f0c2ef6523e3",
+      "papel": "financiamento",
+      "recorte": null,
+      "tamanho_kb": 97.3
+    },
+    {
+      "arquivo": "Analise Vertical Otimizada - HIS 1.xlsm",
+      "sha1": "4a140f9a750c8643",
+      "papel": "oferta",
+      "recorte": "his 1",
+      "tamanho_kb": 965.9
+    },
+    {
+      "arquivo": "Analise Vertical Otimizada - HIS 2.xlsm",
+      "sha1": "f5209c404dd47da7",
+      "papel": "oferta",
+      "recorte": "his 2",
+      "tamanho_kb": 1265.7
+    },
+    {
+      "arquivo": "Analise Vertical Otimizada - HMP.xlsm",
+      "sha1": "8b0c37a12838a6ed",
+      "papel": "oferta",
+      "recorte": "hmp",
+      "tamanho_kb": 1267.1
+    },
+    {
+      "arquivo": "Analise Vertical Otimizada - Primaria.xlsm",
+      "sha1": "e818b9d8de175fa8",
+      "papel": "oferta",
+      "recorte": "primaria",
+      "tamanho_kb": 999.5
+    },
+    {
+      "arquivo": "Cenarios - 3 Anos ok.xlsm",
+      "sha1": "160fafc6af3f22c9",
+      "papel": "absorcao",
+      "recorte": null,
+      "tamanho_kb": 102.9
+    },
+    {
+      "arquivo": "Esgotados - Ate 2 km.xlsm",
+      "sha1": "5b609beeec53e321",
+      "papel": "oferta",
+      "recorte": "2 km",
+      "tamanho_kb": 1157.0
+    },
+    {
+      "arquivo": "Revenda casas cond.xlsm",
+      "sha1": "3df1834199669c66",
+      "papel": "revenda",
+      "recorte": null,
+      "tamanho_kb": 811.9
+    }
+  ],
+  "blocos": [
+    {
+      "papel": "socio",
+      "tabela": "domicilios_por_tipo",
+      "recorte": null,
+      "arquivo": "1. OnMaps (5.xlsm",
+      "aba": "Dom.p Tipo",
+      "cabecalho_linha": 5,
+      "recortes": [
+        "Até 10 min",
+        "Até 15 min",
+        "De 10 a 15 min",
+        "Guarulhos",
+        "SP"
+      ],
+      "itens": [
+        {
+          "rotulo": "Casa",
+          "linha": 6,
+          "recortes": {
+            "SP": {
+              "absoluto": 11237983.517,
+              "%": 0.667
+            },
+            "Guarulhos": {
+              "absoluto": 362390.1818101854,
+              "%": 0.7712
+            },
+            "Até 10 min": {
+              "absoluto": 35963.77761732972,
+              "%": 0.905
+            },
+            "De 10 a 15 min": {
+              "absoluto": 177623.99919172705,
+              "%": 0.734
+            },
+            "Até 15 min": {
+              "absoluto": 180027.725734002,
+              "%": 0.639
+            }
+          }
+        },
+        {
+          "rotulo": "Apartamento",
+          "linha": 7,
+          "recortes": {
+            "SP": {
+              "absoluto": 5610567.483,
+              "%": 0.333
+            },
+            "Guarulhos": {
+              "absoluto": 107514.09958268986,
+              "%": 0.2288
+            },
+            "Até 10 min": {
+              "absoluto": 3775.203175299804,
+              "%": 0.095
+            },
+            "De 10 a 15 min": {
+              "absoluto": 64370.550115802995,
+              "%": 0.266
+            },
+            "Até 15 min": {
+              "absoluto": 101705.80436615761,
+              "%": 0.361
+            }
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 8,
+        "recortes": {
+          "SP": {
+            "absoluto": 16848551,
+            "%": 1
+          },
+          "Guarulhos": {
+            "absoluto": 469904.28139287524,
+            "%": 1
+          },
+          "Até 10 min": {
+            "absoluto": 39738.98079262952,
+            "%": 1
+          },
+          "De 10 a 15 min": {
+            "absoluto": 241994.54930753005,
+            "%": 1
+          },
+          "Até 15 min": {
+            "absoluto": 281733.5301001596,
+            "%": 1
+          }
+        }
+      }
+    },
+    {
+      "papel": "socio",
+      "tabela": "condicao_ocupacao",
+      "recorte": null,
+      "arquivo": "1. OnMaps (5.xlsm",
+      "aba": "Dom.p Cond. Ocup.",
+      "cabecalho_linha": 5,
+      "recortes": [
+        "Até 10 min",
+        "Até 15 min",
+        "De 10 a 15 min",
+        "Guarulhos",
+        "SP"
+      ],
+      "itens": [
+        {
+          "rotulo": "Próprio",
+          "linha": 6,
+          "recortes": {
+            "SP": {
+              "absoluto": 11355923.374,
+              "%": 0.674
+            },
+            "Guarulhos": {
+              "absoluto": 322495.3083199303,
+              "%": 0.6863
+            },
+            "Até 10 min": {
+              "absoluto": 27298.12355298436,
+              "%": 0.686935673952851
+            },
+            "De 10 a 15 min": {
+              "absoluto": 169491.76683689628,
+              "%": 0.7003949771674558
+            },
+            "Até 15 min": {
+              "absoluto": 196789.89038988063,
+              "%": 0.6984965201689679
+            }
+          }
+        },
+        {
+          "rotulo": "Alugado",
+          "linha": 7,
+          "recortes": {
+            "SP": {
+              "absoluto": 4380623.26,
+              "%": 0.26
+            },
+            "Guarulhos": {
+              "absoluto": 112683.0466780115,
+              "%": 0.2398
+            },
+            "Até 10 min": {
+              "absoluto": 7933.60975519695,
+              "%": 0.19964301038813795
+            },
+            "De 10 a 15 min": {
+              "absoluto": 53476.02767075075,
+              "%": 0.22098029820825704
+            },
+            "Até 15 min": {
+              "absoluto": 61409.6374259477,
+              "%": 0.21797063844021639
+            }
+          }
+        },
+        {
+          "rotulo": "Cedido",
+          "linha": 8,
+          "recortes": {
+            "SP": {
+              "absoluto": 1112004.3659999992,
+              "%": 0.06599999999999995
+            },
+            "Guarulhos": {
+              "absoluto": 34725.92639493348,
+              "%": 0.0739
+            },
+            "Até 10 min": {
+              "absoluto": 4507.247484448187,
+              "%": 0.11342131565901048
+            },
+            "De 10 a 15 min": {
+              "absoluto": 19026.754799883,
+              "%": 0.07862472462428703
+            },
+            "Até 15 min": {
+              "absoluto": 23534.00228433119,
+              "%": 0.08353284139081556
+            }
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 9,
+        "recortes": {
+          "SP": {
+            "absoluto": 16848551,
+            "%": 1
+          },
+          "Guarulhos": {
+            "absoluto": 469904.28139287524,
+            "%": 1
+          },
+          "Até 10 min": {
+            "absoluto": 39738.98079262952,
+            "%": 0.9999999999999994
+          },
+          "De 10 a 15 min": {
+            "absoluto": 241994.54930753005,
+            "%": 0.9999999999999999
+          },
+          "Até 15 min": {
+            "absoluto": 281733.5301001596,
+            "%": 0.9999999999999998
+          }
+        }
+      }
+    },
+    {
+      "papel": "socio",
+      "tabela": "populacao_faixa_etaria",
+      "recorte": null,
+      "arquivo": "1. OnMaps (5.xlsm",
+      "aba": "População - Faixa Etária",
+      "cabecalho_linha": 8,
+      "recortes": [
+        "Até 10 min",
+        "Até 15 min",
+        "De 10 a 15 min",
+        "Guarulhos",
+        "SP"
+      ],
+      "itens": [
+        {
+          "rotulo": "de 0-19 anos",
+          "linha": 9,
+          "recortes": {
+            "SP": {
+              "absoluto": 12294480.87426421,
+              "%": 0.2733635570706198
+            },
+            "Guarulhos": {
+              "absoluto": 320764.38045308116,
+              "%": 0.23842200360131666
+            },
+            "Até 10 min": {
+              "absoluto": 33892.61293180874,
+              "%": 0.29995000239430936
+            },
+            "De 10 a 15 min": {
+              "absoluto": 199638.0216536512,
+              "%": 0.29329096303598046
+            },
+            "Até 15 min": {
+              "absoluto": 233530.63458545995,
+              "%": 0.29423899752419014
+            }
+          }
+        },
+        {
+          "rotulo": "de 20-24",
+          "linha": 10,
+          "recortes": {
+            "SP": {
+              "absoluto": 2913109.863817003,
+              "%": 0.0647719966914165
+            },
+            "Guarulhos": {
+              "absoluto": 101482.1670473075,
+              "%": 0.07543101127078448
+            },
+            "Até 10 min": {
+              "absoluto": 8308.30926141718,
+              "%": 0.07352862961226259
+            },
+            "De 10 a 15 min": {
+              "absoluto": 46719.258876793436,
+              "%": 0.06863590569973683
+            },
+            "Até 15 min": {
+              "absoluto": 55027.56813821061,
+              "%": 0.06933247329166146
+            }
+          }
+        },
+        {
+          "rotulo": "de 25-34",
+          "linha": 11,
+          "recortes": {
+            "SP": {
+              "absoluto": 7398961.797090183,
+              "%": 0.16451337280259468
+            },
+            "Guarulhos": {
+              "absoluto": 198707.68001863544,
+              "%": 0.14769808023600736
+            },
+            "Até 10 min": {
+              "absoluto": 16618.274872529928,
+              "%": 0.14707191793780144
+            },
+            "De 10 a 15 min": {
+              "absoluto": 100198.4458864169,
+              "%": 0.14720291478203154
+            },
+            "Até 15 min": {
+              "absoluto": 116816.72075894683,
+              "%": 0.14718426501597762
+            }
+          }
+        },
+        {
+          "rotulo": "de 35-49",
+          "linha": 12,
+          "recortes": {
+            "SP": {
+              "absoluto": 9913109.63085994,
+              "%": 0.22041458586473836
+            },
+            "Guarulhos": {
+              "absoluto": 316400.8937893004,
+              "%": 0.23517865335277366
+            },
+            "Até 10 min": {
+              "absoluto": 23342.31229356858,
+              "%": 0.20657972409597172
+            },
+            "De 10 a 15 min": {
+              "absoluto": 150550.47425614134,
+              "%": 0.2211757721017254
+            },
+            "Até 15 min": {
+              "absoluto": 173892.7865497099,
+              "%": 0.21909776112200188
+            }
+          }
+        },
+        {
+          "rotulo": "de 50-59",
+          "linha": 13,
+          "recortes": {
+            "SP": {
+              "absoluto": 5027844.9011304695,
+              "%": 0.1117924034880944
+            },
+            "Guarulhos": {
+              "absoluto": 144758.13953780243,
+              "%": 0.10759775015371506
+            },
+            "Até 10 min": {
+              "absoluto": 14047.155032049335,
+              "%": 0.12431747867813552
+            },
+            "De 10 a 15 min": {
+              "absoluto": 82726.57422094265,
+              "%": 0.12153474784488297
+            },
+            "Até 15 min": {
+              "absoluto": 96773.729252992,
+              "%": 0.12193091982395803
+            }
+          }
+        },
+        {
+          "rotulo": "mais 60",
+          "linha": 14,
+          "recortes": {
+            "SP": {
+              "absoluto": 7427327.9328381885,
+              "%": 0.1651440840825361
+            },
+            "Guarulhos": {
+              "absoluto": 263250.73915387056,
+              "%": 0.19567250138540282
+            },
+            "Até 10 min": {
+              "absoluto": 16785.543514162662,
+              "%": 0.14855224728151942
+            },
+            "De 10 a 15 min": {
+              "absoluto": 100849.71046841459,
+              "%": 0.14815969653564312
+            },
+            "Até 15 min": {
+              "absoluto": 117635.25398257725,
+              "%": 0.14821558322221118
+            }
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "TOTAL",
+        "linha": 15,
+        "recortes": {
+          "SP": {
+            "absoluto": 44974835,
+            "%": 0.9999999999999999
+          },
+          "Guarulhos": {
+            "absoluto": 1345363.9999999974,
+            "%": 1
+          },
+          "Até 10 min": {
+            "absoluto": 112994.20790553642,
+            "%": 1
+          },
+          "De 10 a 15 min": {
+            "absoluto": 680682.4853623599,
+            "%": 1.0000000000000002
+          },
+          "Até 15 min": {
+            "absoluto": 793676.6932678963,
+            "%": 1.0000000000000002
+          }
+        }
+      }
+    },
+    {
+      "papel": "socio",
+      "tabela": "domicilios_por_moradores",
+      "recorte": null,
+      "arquivo": "1. OnMaps (5.xlsm",
+      "aba": "Dom.p nº Moradores",
+      "cabecalho_linha": 5,
+      "recortes": [
+        "Até 10 min",
+        "Até 15 min",
+        "De 10 a 15 min",
+        "Guarulhos",
+        "SP"
+      ],
+      "itens": [
+        {
+          "rotulo": "1 morador",
+          "linha": 6,
+          "recortes": {
+            "SP": {
+              "absoluto": 2143821.6325995717,
+              "%": 0.1272407124268177
+            },
+            "Guarulhos": {
+              "absoluto": 46900.700645426565,
+              "%": 0.09980905155067966
+            },
+            "Até 10 min": {
+              "absoluto": 4280.34670540295,
+              "%": 0.10771153713627289
+            },
+            "De 10 a 15 min": {
+              "absoluto": 25838.154564251858,
+              "%": 0.10677163860999353
+            },
+            "Até 15 min": {
+              "absoluto": 30118.501269654807,
+              "%": 0.10690421285300095
+            }
+          }
+        },
+        {
+          "rotulo": "2 moradores",
+          "linha": 7,
+          "recortes": {
+            "SP": {
+              "absoluto": 4107805.958014877,
+              "%": 0.24380766975242424
+            },
+            "Guarulhos": {
+              "absoluto": 100766.38695293135,
+              "%": 0.2144402401575122
+            },
+            "Até 10 min": {
+              "absoluto": 8767.25104707272,
+              "%": 0.22062093370796268
+            },
+            "De 10 a 15 min": {
+              "absoluto": 53882.102624052386,
+              "%": 0.22265833167828197
+            },
+            "Até 15 min": {
+              "absoluto": 62649.35367112511,
+              "%": 0.22237095332192985
+            }
+          }
+        },
+        {
+          "rotulo": "3 moradores",
+          "linha": 8,
+          "recortes": {
+            "SP": {
+              "absoluto": 4451379.865843998,
+              "%": 0.26419956623237206
+            },
+            "Guarulhos": {
+              "absoluto": 125888.8161039588,
+              "%": 0.2679031051404835
+            },
+            "Até 10 min": {
+              "absoluto": 10732.683962789166,
+              "%": 0.27007949747870186
+            },
+            "De 10 a 15 min": {
+              "absoluto": 64961.310634775284,
+              "%": 0.26844121415404915
+            },
+            "Até 15 min": {
+              "absoluto": 75693.99459756445,
+              "%": 0.2686722967289493
+            }
+          }
+        },
+        {
+          "rotulo": "4 moradores",
+          "linha": 9,
+          "recortes": {
+            "SP": {
+              "absoluto": 3492129.602321131,
+              "%": 0.20726587125036042
+            },
+            "Guarulhos": {
+              "absoluto": 108513.15671993674,
+              "%": 0.23092608647507
+            },
+            "Até 10 min": {
+              "absoluto": 8771.821698329177,
+              "%": 0.22073595052936304
+            },
+            "De 10 a 15 min": {
+              "absoluto": 54702.658140451,
+              "%": 0.22604913332545395
+            },
+            "Até 15 min": {
+              "absoluto": 63474.47983878018,
+              "%": 0.22529970009680514
+            }
+          }
+        },
+        {
+          "rotulo": "5 ou mais moradores",
+          "linha": 10,
+          "recortes": {
+            "SP": {
+              "absoluto": 2653413.9412204213,
+              "%": 0.15748618033802558
+            },
+            "Guarulhos": {
+              "absoluto": 87835.22097062175,
+              "%": 0.1869215166762546
+            },
+            "Até 10 min": {
+              "absoluto": 7186.877379035515,
+              "%": 0.18085208114769974
+            },
+            "De 10 a 15 min": {
+              "absoluto": 42610.323343999495,
+              "%": 0.17607968223222129
+            },
+            "Até 15 min": {
+              "absoluto": 49797.200723035014,
+              "%": 0.17675283699931466
+            }
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 11,
+        "recortes": {
+          "SP": {
+            "absoluto": 16848551,
+            "%": 1
+          },
+          "Guarulhos": {
+            "absoluto": 469904.28139287524,
+            "%": 1
+          },
+          "Até 10 min": {
+            "absoluto": 39738.98079262952,
+            "%": 1.0000000000000002
+          },
+          "De 10 a 15 min": {
+            "absoluto": 241994.54930753005,
+            "%": 0.9999999999999998
+          },
+          "Até 15 min": {
+            "absoluto": 281733.5301001596,
+            "%": 0.9999999999999999
+          }
+        }
+      }
+    },
+    {
+      "papel": "populacao",
+      "tabela": "populacao",
+      "recorte": null,
+      "arquivo": "2. Populacao e Domicilios.xlsx",
+      "aba": "População",
+      "itens": [
+        {
+          "rotulo": "Guarulhos",
+          "linha": 5,
+          "numeros": [
+            1071268,
+            1221979,
+            1345363.9999999974,
+            0.01324988011298256,
+            0.00643346860925198,
+            2027,
+            1362730.3980919933,
+            45494462.66842697
+          ]
+        },
+        {
+          "rotulo": "SP",
+          "linha": 6,
+          "numeros": [
+            36969476,
+            41262199,
+            44974835,
+            0.0110459816103603,
+            0.005760280897107117,
+            0.21653969344872515,
+            2028,
+            1371497.4813309915
+          ]
+        },
+        {
+          "rotulo": "Brasil",
+          "linha": 7,
+          "numeros": [
+            169590693,
+            190755794,
+            205804681,
+            0.011830047881857597,
+            0.005075069692019651,
+            0.21353759076861611,
+            2029,
+            1380320.9673248027
+          ]
+        }
+      ]
+    },
+    {
+      "papel": "populacao",
+      "tabela": "domicilios",
+      "recorte": null,
+      "arquivo": "2. Populacao e Domicilios.xlsx",
+      "aba": "Domicilios",
+      "itens": [
+        {
+          "rotulo": "Guarulhos",
+          "linha": 5,
+          "numeros": [
+            291074,
+            360540,
+            469904.28139287524,
+            0.021633214782326604,
+            0.017818631487364067,
+            2027,
+            486799.5801560175,
+            17472438.792358242
+          ]
+        },
+        {
+          "rotulo": "SP",
+          "linha": 6,
+          "numeros": [
+            10395482,
+            12827153,
+            16848551,
+            0.021241757688821084,
+            0.018346289839978658,
+            0.6207570750447164,
+            2028,
+            495473.6824830211
+          ]
+        },
+        {
+          "rotulo": "Brasil",
+          "linha": 7,
+          "numeros": [
+            45021478,
+            57324167,
+            75298796,
+            0.024452438250525343,
+            0.018349103264550415,
+            0.6725083081457255,
+            2029,
+            504302.3454428733
+          ]
+        }
+      ]
+    },
+    {
+      "papel": "oferta",
+      "tabela": "padrao",
+      "recorte": "his 1",
+      "arquivo": "Analise Vertical Otimizada - HIS 1.xlsm",
+      "aba": "Padrão",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Compacto",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Econômico",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": 11,
+            "oferta_lancada": 5336,
+            "oferta_atual": 1139,
+            "vendas": 0.7865442278860569,
+            "disponibilidade": 0.21345577211394304
+          }
+        },
+        {
+          "rotulo": "Standard",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Médio",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Alto",
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Luxo",
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Super Luxo",
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 13,
+        "valores": {
+          "n_empreendimentos": 11,
+          "oferta_lancada": 5336,
+          "oferta_atual": 1139,
+          "vendas": 0.7865442278860569,
+          "disponibilidade": 0.21345577211394304
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "ano",
+      "recorte": "his 1",
+      "arquivo": "Analise Vertical Otimizada - HIS 1.xlsm",
+      "aba": "Ano",
+      "cabecalho_linha": 6,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Até 2017",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2018,
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Até 2021",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2022,
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2023,
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 216,
+            "oferta_atual": 25,
+            "vendas": 0.8842592592592593,
+            "disponibilidade": 0.11574074074074074
+          }
+        },
+        {
+          "rotulo": 2024,
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": 5,
+            "oferta_lancada": 3198,
+            "oferta_atual": 325,
+            "vendas": 0.8983739837398375,
+            "disponibilidade": 0.1016260162601626
+          }
+        },
+        {
+          "rotulo": 2025,
+          "linha": 13,
+          "valores": {
+            "n_empreendimentos": 5,
+            "oferta_lancada": 1922,
+            "oferta_atual": 789,
+            "vendas": 0.5894901144640998,
+            "disponibilidade": 0.4105098855359001
+          }
+        },
+        {
+          "rotulo": "2026*",
+          "linha": 14,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "A partir de 2022",
+          "linha": 15,
+          "valores": {
+            "n_empreendimentos": 11,
+            "oferta_lancada": 5336,
+            "oferta_atual": 1139,
+            "vendas": 0.7865442278860569,
+            "disponibilidade": 0.21345577211394304
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 16,
+        "valores": {
+          "n_empreendimentos": 11,
+          "oferta_lancada": 5336,
+          "oferta_atual": 1139,
+          "vendas": 0.7865442278860569,
+          "disponibilidade": 0.21345577211394304
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "tipologia",
+      "recorte": "his 1",
+      "arquivo": "Analise Vertical Otimizada - HIS 1.xlsm",
+      "aba": "Tipologia",
+      "cabecalho_linha": 6,
+      "conceitos": [
+        "disponibilidade",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "1 Dormitório",
+          "linha": 7,
+          "valores": {
+            "oferta_lancada": 1173,
+            "oferta_atual": 169,
+            "vendas": 0.855924978687127,
+            "disponibilidade": 0.14407502131287298
+          }
+        },
+        {
+          "rotulo": "2 Dormitórios",
+          "linha": 8,
+          "valores": {
+            "oferta_lancada": 4163,
+            "oferta_atual": 970,
+            "vendas": 0.7669949555608936,
+            "disponibilidade": 0.2330050444391064
+          }
+        },
+        {
+          "rotulo": "3 Dormitórios",
+          "linha": 9,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "4 ou + Dormitórios",
+          "linha": 10,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 11,
+        "valores": {
+          "oferta_lancada": 5336,
+          "oferta_atual": 1139,
+          "vendas": 0.7865442278860569,
+          "disponibilidade": 0.21345577211394304
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "padrao",
+      "recorte": "his 2",
+      "arquivo": "Analise Vertical Otimizada - HIS 2.xlsm",
+      "aba": "Padrão",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Compacto",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Econômico",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": 6,
+            "oferta_lancada": 2304,
+            "oferta_atual": 88,
+            "vendas": 0.9618055555555556,
+            "disponibilidade": 0.03819444444444445
+          }
+        },
+        {
+          "rotulo": "Standard",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": 4,
+            "oferta_lancada": 1126,
+            "oferta_atual": 97,
+            "vendas": 0.9138543516873889,
+            "disponibilidade": 0.08614564831261101
+          }
+        },
+        {
+          "rotulo": "Médio",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Alto",
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Luxo",
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Super Luxo",
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 13,
+        "valores": {
+          "n_empreendimentos": 10,
+          "oferta_lancada": 3430,
+          "oferta_atual": 185,
+          "vendas": 0.9460641399416909,
+          "disponibilidade": 0.05393586005830904
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "ano",
+      "recorte": "his 2",
+      "arquivo": "Analise Vertical Otimizada - HIS 2.xlsm",
+      "aba": "Ano",
+      "cabecalho_linha": 6,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Até 2017",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2018,
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Até 2021",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2022,
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": 3,
+            "oferta_lancada": 969,
+            "oferta_atual": 73,
+            "vendas": 0.9246646026831785,
+            "disponibilidade": 0.07533539731682147
+          }
+        },
+        {
+          "rotulo": 2023,
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 100,
+            "oferta_atual": 2,
+            "vendas": 0.98,
+            "disponibilidade": 0.02
+          }
+        },
+        {
+          "rotulo": 2024,
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": 5,
+            "oferta_lancada": 1094,
+            "oferta_atual": 110,
+            "vendas": 0.8994515539305301,
+            "disponibilidade": 0.10054844606946983
+          }
+        },
+        {
+          "rotulo": 2025,
+          "linha": 13,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 1267,
+            "oferta_atual": 0,
+            "vendas": 1,
+            "disponibilidade": 0
+          }
+        },
+        {
+          "rotulo": "2026*",
+          "linha": 14,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "A partir de 2022",
+          "linha": 15,
+          "valores": {
+            "n_empreendimentos": 10,
+            "oferta_lancada": 3430,
+            "oferta_atual": 185,
+            "vendas": 0.9460641399416909,
+            "disponibilidade": 0.05393586005830904
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 16,
+        "valores": {
+          "n_empreendimentos": 10,
+          "oferta_lancada": 3430,
+          "oferta_atual": 185,
+          "vendas": 0.9460641399416909,
+          "disponibilidade": 0.05393586005830904
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "tipologia",
+      "recorte": "his 2",
+      "arquivo": "Analise Vertical Otimizada - HIS 2.xlsm",
+      "aba": "Tipologia",
+      "cabecalho_linha": 6,
+      "conceitos": [
+        "disponibilidade",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "1 Dormitório",
+          "linha": 7,
+          "valores": {
+            "oferta_lancada": 387,
+            "oferta_atual": 0,
+            "vendas": 1,
+            "disponibilidade": 0
+          }
+        },
+        {
+          "rotulo": "2 Dormitórios",
+          "linha": 8,
+          "valores": {
+            "oferta_lancada": 3043,
+            "oferta_atual": 185,
+            "vendas": 0.9392047321721985,
+            "disponibilidade": 0.060795267827801515
+          }
+        },
+        {
+          "rotulo": "3 Dormitórios",
+          "linha": 9,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "4 ou + Dormitórios",
+          "linha": 10,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 11,
+        "valores": {
+          "oferta_lancada": 3430,
+          "oferta_atual": 185,
+          "vendas": 0.9460641399416909,
+          "disponibilidade": 0.05393586005830904
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "padrao",
+      "recorte": "hmp",
+      "arquivo": "Analise Vertical Otimizada - HMP.xlsm",
+      "aba": "Padrão",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Compacto",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 322,
+            "oferta_atual": 0,
+            "vendas": 1,
+            "disponibilidade": 0
+          }
+        },
+        {
+          "rotulo": "Econômico",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": 2,
+            "oferta_lancada": 45,
+            "oferta_atual": 4,
+            "vendas": 0.9111111111111111,
+            "disponibilidade": 0.08888888888888889
+          }
+        },
+        {
+          "rotulo": "Standard",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": 15,
+            "oferta_lancada": 3699,
+            "oferta_atual": 495,
+            "vendas": 0.8661800486618005,
+            "disponibilidade": 0.13381995133819952
+          }
+        },
+        {
+          "rotulo": "Médio",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Alto",
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Luxo",
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Super Luxo",
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 13,
+        "valores": {
+          "n_empreendimentos": 18,
+          "oferta_lancada": 4066,
+          "oferta_atual": 499,
+          "vendas": 0.8772749631087063,
+          "disponibilidade": 0.12272503689129366
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "ano",
+      "recorte": "hmp",
+      "arquivo": "Analise Vertical Otimizada - HMP.xlsm",
+      "aba": "Ano",
+      "cabecalho_linha": 6,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Até 2017",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2018,
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Até 2021",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": 7,
+            "oferta_lancada": 1771,
+            "oferta_atual": 46,
+            "vendas": 0.974025974025974,
+            "disponibilidade": 0.025974025974025976
+          }
+        },
+        {
+          "rotulo": 2022,
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": 4,
+            "oferta_lancada": 896,
+            "oferta_atual": 32,
+            "vendas": 0.9642857142857143,
+            "disponibilidade": 0.03571428571428571
+          }
+        },
+        {
+          "rotulo": 2023,
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": 3,
+            "oferta_lancada": 316,
+            "oferta_atual": 22,
+            "vendas": 0.930379746835443,
+            "disponibilidade": 0.06962025316455696
+          }
+        },
+        {
+          "rotulo": 2024,
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": 3,
+            "oferta_lancada": 393,
+            "oferta_atual": 47,
+            "vendas": 0.8804071246819338,
+            "disponibilidade": 0.11959287531806616
+          }
+        },
+        {
+          "rotulo": 2025,
+          "linha": 13,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 690,
+            "oferta_atual": 352,
+            "vendas": 0.48985507246376814,
+            "disponibilidade": 0.5101449275362319
+          }
+        },
+        {
+          "rotulo": "2026*",
+          "linha": 14,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "A partir de 2022",
+          "linha": 15,
+          "valores": {
+            "n_empreendimentos": 11,
+            "oferta_lancada": 2295,
+            "oferta_atual": 453,
+            "vendas": 0.8026143790849674,
+            "disponibilidade": 0.19738562091503267
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 16,
+        "valores": {
+          "n_empreendimentos": 18,
+          "oferta_lancada": 4066,
+          "oferta_atual": 499,
+          "vendas": 0.8772749631087063,
+          "disponibilidade": 0.12272503689129366
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "tipologia",
+      "recorte": "hmp",
+      "arquivo": "Analise Vertical Otimizada - HMP.xlsm",
+      "aba": "Tipologia",
+      "cabecalho_linha": 6,
+      "conceitos": [
+        "disponibilidade",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "1 Dormitório",
+          "linha": 7,
+          "valores": {
+            "oferta_lancada": 395,
+            "oferta_atual": 2,
+            "vendas": 0.9949367088607595,
+            "disponibilidade": 0.005063291139240506
+          }
+        },
+        {
+          "rotulo": "2 Dormitórios",
+          "linha": 8,
+          "valores": {
+            "oferta_lancada": 2923,
+            "oferta_atual": 466,
+            "vendas": 0.840574751967157,
+            "disponibilidade": 0.15942524803284297
+          }
+        },
+        {
+          "rotulo": "3 Dormitórios",
+          "linha": 9,
+          "valores": {
+            "oferta_lancada": 748,
+            "oferta_atual": 31,
+            "vendas": 0.9585561497326203,
+            "disponibilidade": 0.04144385026737968
+          }
+        },
+        {
+          "rotulo": "4 ou + Dormitórios",
+          "linha": 10,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 11,
+        "valores": {
+          "oferta_lancada": 4066,
+          "oferta_atual": 499,
+          "vendas": 0.8772749631087063,
+          "disponibilidade": 0.12272503689129366
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "padrao",
+      "recorte": "primaria",
+      "arquivo": "Analise Vertical Otimizada - Primaria.xlsm",
+      "aba": "Padrão",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Compacto",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Econômico",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": 18,
+            "oferta_lancada": 6901,
+            "oferta_atual": 1296,
+            "vendas": 0.8122011302709752,
+            "disponibilidade": 0.1877988697290248
+          }
+        },
+        {
+          "rotulo": "Standard",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": 19,
+            "oferta_lancada": 4288,
+            "oferta_atual": 797,
+            "vendas": 0.8141324626865671,
+            "disponibilidade": 0.18586753731343283
+          }
+        },
+        {
+          "rotulo": "Médio",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": 6,
+            "oferta_lancada": 1156,
+            "oferta_atual": 43,
+            "vendas": 0.96280276816609,
+            "disponibilidade": 0.037197231833910036
+          }
+        },
+        {
+          "rotulo": "Alto",
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": 2,
+            "oferta_lancada": 124,
+            "oferta_atual": 24,
+            "vendas": 0.8064516129032258,
+            "disponibilidade": 0.1935483870967742
+          }
+        },
+        {
+          "rotulo": "Luxo",
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": 3,
+            "oferta_lancada": 191,
+            "oferta_atual": 99,
+            "vendas": 0.481675392670157,
+            "disponibilidade": 0.518324607329843
+          }
+        },
+        {
+          "rotulo": "Super Luxo",
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 13,
+        "valores": {
+          "n_empreendimentos": 48,
+          "oferta_lancada": 12660,
+          "oferta_atual": 2259,
+          "vendas": 0.821563981042654,
+          "disponibilidade": 0.17843601895734598
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "ano",
+      "recorte": "primaria",
+      "arquivo": "Analise Vertical Otimizada - Primaria.xlsm",
+      "aba": "Ano",
+      "cabecalho_linha": 6,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Até 2017",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2018,
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Até 2021",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": 8,
+            "oferta_lancada": 1971,
+            "oferta_atual": 80,
+            "vendas": 0.9594114662607813,
+            "disponibilidade": 0.04058853373921867
+          }
+        },
+        {
+          "rotulo": 2022,
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": 10,
+            "oferta_lancada": 1807,
+            "oferta_atual": 168,
+            "vendas": 0.9070282235749861,
+            "disponibilidade": 0.09297177642501384
+          }
+        },
+        {
+          "rotulo": 2023,
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": 5,
+            "oferta_lancada": 776,
+            "oferta_atual": 85,
+            "vendas": 0.8904639175257731,
+            "disponibilidade": 0.1095360824742268
+          }
+        },
+        {
+          "rotulo": 2024,
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": 14,
+            "oferta_lancada": 4887,
+            "oferta_atual": 501,
+            "vendas": 0.8974831184775937,
+            "disponibilidade": 0.10251688152240639
+          }
+        },
+        {
+          "rotulo": 2025,
+          "linha": 13,
+          "valores": {
+            "n_empreendimentos": 11,
+            "oferta_lancada": 3219,
+            "oferta_atual": 1425,
+            "vendas": 0.5573159366262814,
+            "disponibilidade": 0.4426840633737186
+          }
+        },
+        {
+          "rotulo": "2026*",
+          "linha": 14,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "A partir de 2022",
+          "linha": 15,
+          "valores": {
+            "n_empreendimentos": 40,
+            "oferta_lancada": 10689,
+            "oferta_atual": 2179,
+            "vendas": 0.7961455702123679,
+            "disponibilidade": 0.20385442978763216
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 16,
+        "valores": {
+          "n_empreendimentos": 48,
+          "oferta_lancada": 12660,
+          "oferta_atual": 2259,
+          "vendas": 0.821563981042654,
+          "disponibilidade": 0.17843601895734598
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "tipologia",
+      "recorte": "primaria",
+      "arquivo": "Analise Vertical Otimizada - Primaria.xlsm",
+      "aba": "Tipologia",
+      "cabecalho_linha": 6,
+      "conceitos": [
+        "disponibilidade",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "1 Dormitório",
+          "linha": 7,
+          "valores": {
+            "oferta_lancada": 1338,
+            "oferta_atual": 171,
+            "vendas": 0.8721973094170403,
+            "disponibilidade": 0.12780269058295965
+          }
+        },
+        {
+          "rotulo": "2 Dormitórios",
+          "linha": 8,
+          "valores": {
+            "oferta_lancada": 9546,
+            "oferta_atual": 1734,
+            "vendas": 0.8183532369578881,
+            "disponibilidade": 0.1816467630421119
+          }
+        },
+        {
+          "rotulo": "3 Dormitórios",
+          "linha": 9,
+          "valores": {
+            "oferta_lancada": 1611,
+            "oferta_atual": 300,
+            "vendas": 0.813780260707635,
+            "disponibilidade": 0.186219739292365
+          }
+        },
+        {
+          "rotulo": "4 ou + Dormitórios",
+          "linha": 10,
+          "valores": {
+            "oferta_lancada": 165,
+            "oferta_atual": 54,
+            "vendas": 0.6727272727272727,
+            "disponibilidade": 0.32727272727272727
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 11,
+        "valores": {
+          "oferta_lancada": 12660,
+          "oferta_atual": 2259,
+          "vendas": 0.821563981042654,
+          "disponibilidade": 0.17843601895734598
+        }
+      }
+    },
+    {
+      "papel": "absorcao",
+      "tabela": "taxas",
+      "recorte": null,
+      "arquivo": "Cenarios - 3 Anos ok.xlsm",
+      "aba": "TAXAS",
+      "valores": [
+        {
+          "linha": 4,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "Acima de R$ 19.747,00"
+        },
+        {
+          "linha": 4,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "Acima de R$ 19.747,00"
+        },
+        {
+          "linha": 4,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "Acima de R$ 19.747,00"
+        },
+        {
+          "linha": 4,
+          "coluna": 9,
+          "valor": 0.016,
+          "contexto": "Acima de R$ 19.747,00"
+        },
+        {
+          "linha": 4,
+          "coluna": 10,
+          "valor": 0.016,
+          "contexto": "Acima de R$ 19.747,00"
+        },
+        {
+          "linha": 4,
+          "coluna": 11,
+          "valor": 0.016,
+          "contexto": "Acima de R$ 19.747,00"
+        },
+        {
+          "linha": 4,
+          "coluna": 15,
+          "valor": 0.056,
+          "contexto": "Acima de R$ 19.747,00"
+        },
+        {
+          "linha": 4,
+          "coluna": 16,
+          "valor": 0.066,
+          "contexto": "Acima de R$ 19.747,00"
+        },
+        {
+          "linha": 4,
+          "coluna": 17,
+          "valor": 0.076,
+          "contexto": "Acima de R$ 19.747,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 3,
+          "valor": 0.03,
+          "contexto": "R$ 16.035,01 a R$ 19.747,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 4,
+          "valor": 0.04,
+          "contexto": "R$ 16.035,01 a R$ 19.747,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 5,
+          "valor": 0.05,
+          "contexto": "R$ 16.035,01 a R$ 19.747,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 9,
+          "valor": 0.016,
+          "contexto": "R$ 16.035,01 a R$ 19.747,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 10,
+          "valor": 0.016,
+          "contexto": "R$ 16.035,01 a R$ 19.747,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 11,
+          "valor": 0.016,
+          "contexto": "R$ 16.035,01 a R$ 19.747,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 15,
+          "valor": 0.046,
+          "contexto": "R$ 16.035,01 a R$ 19.747,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 16,
+          "valor": 0.056,
+          "contexto": "R$ 16.035,01 a R$ 19.747,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 17,
+          "valor": 0.066,
+          "contexto": "R$ 16.035,01 a R$ 19.747,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 3,
+          "valor": 0.025,
+          "contexto": "R$ 13.561,01 a R$ 16.035,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 4,
+          "valor": 0.035,
+          "contexto": "R$ 13.561,01 a R$ 16.035,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 5,
+          "valor": 0.045,
+          "contexto": "R$ 13.561,01 a R$ 16.035,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 9,
+          "valor": 0.016,
+          "contexto": "R$ 13.561,01 a R$ 16.035,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 10,
+          "valor": 0.016,
+          "contexto": "R$ 13.561,01 a R$ 16.035,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 11,
+          "valor": 0.016,
+          "contexto": "R$ 13.561,01 a R$ 16.035,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 15,
+          "valor": 0.041,
+          "contexto": "R$ 13.561,01 a R$ 16.035,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 16,
+          "valor": 0.051,
+          "contexto": "R$ 13.561,01 a R$ 16.035,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 17,
+          "valor": 0.061,
+          "contexto": "R$ 13.561,01 a R$ 16.035,00"
+        },
+        {
+          "linha": 7,
+          "coluna": 3,
+          "valor": 0.02,
+          "contexto": "R$ 5.499,01 a R$ 13.561,00"
+        },
+        {
+          "linha": 7,
+          "coluna": 4,
+          "valor": 0.03,
+          "contexto": "R$ 5.499,01 a R$ 13.561,00"
+        },
+        {
+          "linha": 7,
+          "coluna": 5,
+          "valor": 0.04,
+          "contexto": "R$ 5.499,01 a R$ 13.561,00"
+        },
+        {
+          "linha": 7,
+          "coluna": 9,
+          "valor": 0.016,
+          "contexto": "R$ 5.499,01 a R$ 13.561,00"
+        },
+        {
+          "linha": 7,
+          "coluna": 10,
+          "valor": 0.016,
+          "contexto": "R$ 5.499,01 a R$ 13.561,00"
+        },
+        {
+          "linha": 7,
+          "coluna": 11,
+          "valor": 0.016,
+          "contexto": "R$ 5.499,01 a R$ 13.561,00"
+        },
+        {
+          "linha": 7,
+          "coluna": 15,
+          "valor": 0.036,
+          "contexto": "R$ 5.499,01 a R$ 13.561,00"
+        },
+        {
+          "linha": 7,
+          "coluna": 16,
+          "valor": 0.046,
+          "contexto": "R$ 5.499,01 a R$ 13.561,00"
+        },
+        {
+          "linha": 7,
+          "coluna": 17,
+          "valor": 0.056,
+          "contexto": "R$ 5.499,01 a R$ 13.561,00"
+        },
+        {
+          "linha": 8,
+          "coluna": 3,
+          "valor": 0.015,
+          "contexto": "Abaixo de R$ 5.499,01"
+        },
+        {
+          "linha": 8,
+          "coluna": 4,
+          "valor": 0.025,
+          "contexto": "Abaixo de R$ 5.499,01"
+        },
+        {
+          "linha": 8,
+          "coluna": 5,
+          "valor": 0.035,
+          "contexto": "Abaixo de R$ 5.499,01"
+        },
+        {
+          "linha": 8,
+          "coluna": 9,
+          "valor": 0.016,
+          "contexto": "Abaixo de R$ 5.499,01"
+        },
+        {
+          "linha": 8,
+          "coluna": 10,
+          "valor": 0.016,
+          "contexto": "Abaixo de R$ 5.499,01"
+        },
+        {
+          "linha": 8,
+          "coluna": 11,
+          "valor": 0.016,
+          "contexto": "Abaixo de R$ 5.499,01"
+        },
+        {
+          "linha": 8,
+          "coluna": 15,
+          "valor": 0.031,
+          "contexto": "Abaixo de R$ 5.499,01"
+        },
+        {
+          "linha": 8,
+          "coluna": 16,
+          "valor": 0.041,
+          "contexto": "Abaixo de R$ 5.499,01"
+        },
+        {
+          "linha": 8,
+          "coluna": 17,
+          "valor": 0.051,
+          "contexto": "Abaixo de R$ 5.499,01"
+        },
+        {
+          "linha": 12,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "Acima de R$ 40.092,01"
+        },
+        {
+          "linha": 12,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "Acima de R$ 40.092,01"
+        },
+        {
+          "linha": 12,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "Acima de R$ 40.092,01"
+        },
+        {
+          "linha": 13,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 34.261,01 a R$ 40.092,00"
+        },
+        {
+          "linha": 13,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 34.261,01 a R$ 40.092,00"
+        },
+        {
+          "linha": 13,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 34.261,01 a R$ 40.092,00"
+        },
+        {
+          "linha": 14,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 29,643.01 a R$ R$ 34.261,00"
+        },
+        {
+          "linha": 14,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 29,643.01 a R$ R$ 34.261,00"
+        },
+        {
+          "linha": 14,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 29,643.01 a R$ R$ 34.261,00"
+        },
+        {
+          "linha": 15,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 28.096,01 a R$ 29.643,00"
+        },
+        {
+          "linha": 15,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 28.096,01 a R$ 29.643,00"
+        },
+        {
+          "linha": 15,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 28.096,01 a R$ 29.643,00"
+        },
+        {
+          "linha": 16,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 21.046,01 a R$ 28.096,00"
+        },
+        {
+          "linha": 16,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 21.046,01 a R$ 28.096,00"
+        },
+        {
+          "linha": 16,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 21.046,01 a R$ 28.096,00"
+        },
+        {
+          "linha": 17,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 16.186,01 a R$ 21.046,00"
+        },
+        {
+          "linha": 17,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 16.186,01 a R$ 21.046,00"
+        },
+        {
+          "linha": 17,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 16.186,01 a R$ 21.046,00"
+        },
+        {
+          "linha": 18,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 13.172,01 a R$ 16.186,00"
+        },
+        {
+          "linha": 18,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 13.172,01 a R$ 16.186,00"
+        },
+        {
+          "linha": 18,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 13.172,01 a R$ 16.186,00"
+        },
+        {
+          "linha": 19,
+          "coluna": 3,
+          "valor": 0.03,
+          "contexto": "R$ 11.163,01 a R$ 13.172,00"
+        },
+        {
+          "linha": 19,
+          "coluna": 4,
+          "valor": 0.04,
+          "contexto": "R$ 11.163,01 a R$ 13.172,00"
+        },
+        {
+          "linha": 19,
+          "coluna": 5,
+          "valor": 0.05,
+          "contexto": "R$ 11.163,01 a R$ 13.172,00"
+        },
+        {
+          "linha": 20,
+          "coluna": 3,
+          "valor": 0.025,
+          "contexto": "R$ 8.150,01 a R$ 11.163,00"
+        },
+        {
+          "linha": 20,
+          "coluna": 4,
+          "valor": 0.035,
+          "contexto": "R$ 8.150,01 a R$ 11.163,00"
+        },
+        {
+          "linha": 20,
+          "coluna": 5,
+          "valor": 0.045,
+          "contexto": "R$ 8.150,01 a R$ 11.163,00"
+        },
+        {
+          "linha": 21,
+          "coluna": 3,
+          "valor": 0.015,
+          "contexto": "R$ 5.786,01 a R$ 8.150,00"
+        },
+        {
+          "linha": 21,
+          "coluna": 4,
+          "valor": 0.02,
+          "contexto": "R$ 5.786,01 a R$ 8.150,00"
+        },
+        {
+          "linha": 21,
+          "coluna": 5,
+          "valor": 0.03,
+          "contexto": "R$ 5.786,01 a R$ 8.150,00"
+        },
+        {
+          "linha": 22,
+          "coluna": 3,
+          "valor": 0.015,
+          "contexto": "R$ 4.607,01 a R$ 5.786,00"
+        },
+        {
+          "linha": 22,
+          "coluna": 4,
+          "valor": 0.02,
+          "contexto": "R$ 4.607,01 a R$ 5.786,00"
+        },
+        {
+          "linha": 22,
+          "coluna": 5,
+          "valor": 0.03,
+          "contexto": "R$ 4.607,01 a R$ 5.786,00"
+        },
+        {
+          "linha": 23,
+          "coluna": 3,
+          "valor": 0.015,
+          "contexto": "R$ 2.713,01 a R$ 4.607,00"
+        },
+        {
+          "linha": 23,
+          "coluna": 4,
+          "valor": 0.02,
+          "contexto": "R$ 2.713,01 a R$ 4.607,00"
+        },
+        {
+          "linha": 23,
+          "coluna": 5,
+          "valor": 0.03,
+          "contexto": "R$ 2.713,01 a R$ 4.607,00"
+        }
+      ]
+    },
+    {
+      "papel": "oferta",
+      "tabela": "padrao",
+      "recorte": "2 km",
+      "arquivo": "Esgotados - Ate 2 km.xlsm",
+      "aba": "Padrão",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Compacto",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": 2,
+            "oferta_lancada": 350,
+            "oferta_atual": 4,
+            "vendas": 0.9885714285714285,
+            "disponibilidade": 0.011428571428571429
+          }
+        },
+        {
+          "rotulo": "Econômico",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": 28,
+            "oferta_lancada": 6588,
+            "oferta_atual": 50,
+            "vendas": 0.9924104432301154,
+            "disponibilidade": 0.007589556769884639
+          }
+        },
+        {
+          "rotulo": "Standard",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": 14,
+            "oferta_lancada": 4213,
+            "oferta_atual": 27,
+            "vendas": 0.9935912651317351,
+            "disponibilidade": 0.006408734868264894
+          }
+        },
+        {
+          "rotulo": "Médio",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 56,
+            "oferta_atual": 1,
+            "vendas": 0.9821428571428571,
+            "disponibilidade": 0.017857142857142856
+          }
+        },
+        {
+          "rotulo": "Alto",
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Luxo",
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Super Luxo",
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 13,
+        "valores": {
+          "n_empreendimentos": 45,
+          "oferta_lancada": 11207,
+          "oferta_atual": 82,
+          "vendas": 0.9926831444632819,
+          "disponibilidade": 0.007316855536718123
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "ano",
+      "recorte": "2 km",
+      "arquivo": "Esgotados - Ate 2 km.xlsm",
+      "aba": "Ano",
+      "cabecalho_linha": 6,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Até 2021",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": 33,
+            "oferta_lancada": 8197,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2022,
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": 4,
+            "oferta_lancada": 654,
+            "oferta_atual": 4,
+            "vendas": 0.9938837920489296,
+            "disponibilidade": 0.0061162079510703364
+          }
+        },
+        {
+          "rotulo": 2023,
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": 6,
+            "oferta_lancada": 1591,
+            "oferta_atual": 6,
+            "vendas": 0.9962287869264613,
+            "disponibilidade": 0.003771213073538655
+          }
+        },
+        {
+          "rotulo": 2024,
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 411,
+            "oferta_atual": 1,
+            "vendas": 0.9975669099756691,
+            "disponibilidade": 0.0024330900243309003
+          }
+        },
+        {
+          "rotulo": "2025*",
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 354,
+            "oferta_atual": 1,
+            "vendas": 0.9971751412429378,
+            "disponibilidade": 0.002824858757062147
+          }
+        },
+        {
+          "rotulo": "A partir de 2022",
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": 12,
+            "oferta_lancada": 3010,
+            "oferta_atual": 12,
+            "vendas": 0.9960132890365448,
+            "disponibilidade": 0.003986710963455149
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 13,
+        "valores": {
+          "n_empreendimentos": 45,
+          "oferta_lancada": 11207,
+          "oferta_atual": 12,
+          "vendas": 0.9989292406531632,
+          "disponibilidade": 0.0010707593468367983
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "tipologia",
+      "recorte": "2 km",
+      "arquivo": "Esgotados - Ate 2 km.xlsm",
+      "aba": "Tipologia",
+      "cabecalho_linha": 6,
+      "conceitos": [
+        "disponibilidade",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "1 Dormitório",
+          "linha": 7,
+          "valores": {
+            "oferta_lancada": 874,
+            "oferta_atual": 14,
+            "vendas": 0.9839816933638444,
+            "disponibilidade": 0.016018306636155607
+          }
+        },
+        {
+          "rotulo": "2 Dormitórios",
+          "linha": 8,
+          "valores": {
+            "oferta_lancada": 9594,
+            "oferta_atual": 59,
+            "vendas": 0.9938503231186158,
+            "disponibilidade": 0.006149676881384199
+          }
+        },
+        {
+          "rotulo": "3 Dormitórios",
+          "linha": 9,
+          "valores": {
+            "oferta_lancada": 739,
+            "oferta_atual": 9,
+            "vendas": 0.9878213802435724,
+            "disponibilidade": 0.012178619756427604
+          }
+        },
+        {
+          "rotulo": "4 ou + Dormitórios",
+          "linha": 10,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 11,
+        "valores": {
+          "oferta_lancada": 11207,
+          "oferta_atual": 82,
+          "vendas": 0.9926831444632819,
+          "disponibilidade": 0.007316855536718123
+        }
+      }
+    }
+  ],
+  "avisos": []
+}

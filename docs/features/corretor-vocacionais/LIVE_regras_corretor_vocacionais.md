@@ -16,6 +16,46 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.52 — 2026-08-13 — `fonte_extractor`: a verdade numérica das planilhas do analista (POC)
+
+Pré-requisito do `SOURCE_CROSSCHECK` — conferir o deck contra a planilha que o gerou, classe de erro
+que **nenhuma checagem interna pega** porque os erros são internamente consistentes (FN-04 do
+[log da sessão](./FP_sessao_2026-08-12.md): verticalização 5,7% × 5,16% real, domicílios do PR
+4.216.017 × 4.216.107).
+
+### `fonte_extractor.py` (POC, irmão do `ir_extractor.py`)
+
+Planilhas de trabalho → `<slug>.fonte.json`. Medido em **3 pacotes reais** — Rolândia e Toledo
+(jul/2026), Marka (jan/2026) — escolhidos por cobrirem duas épocas do template.
+
+**Princípio:** o nome do arquivo mente; a aba não. Os nomes não se repetem entre estudos que cumprem
+o mesmo papel (`01. Consolidada - 1 Km_verificação - OK` × `1.CONSOLIDADA 1 KM` ×
+`Analise Vertical Otimizada - HIS 1`), mas as abas são a mesma família. Então: âncora na **aba**,
+cabeçalho achado pelos **nomes das colunas** (linha 5 em jul/2026, **6** em jan/2026), normalização de
+acento/caixa/runs de espaço (`Oferta         Final`) e **sinônimos por conceito**
+(`oferta atual` ≡ `oferta final`; `vendas` ≡ `vendas s/ o.l.`).
+
+**Falha alto:** aba ausente, cabeçalho não encontrado, papel ambíguo ou célula `#REF!`/`#DIV/0!` viram
+aviso explícito no JSON. Célula quebrada vira `null`, **nunca zero** — zero é mentira aritmética.
+
+**Ambiguidade preservada:** as duas `ABSORCAO LANCAMENTOS` do Toledo não são duplicatas (Z.I. com
+23.499 domicílios × cidade com 56.405). Ambas extraídas, com procedência; escolher pelo nome pegaria
+o escopo errado em silêncio.
+
+### O que a extração já provou
+
+- **Os totais do Toledo estavam certos o tempo todo.** `1.CONSOLIDADA 1 KM` e `2 KM` confirmam
+  exatamente 1.099/397 e 665/141 dos slides s42/s43/s98 e s100/s101. Os `ABSOLUTE_SUM` nunca foram
+  sobre total errado — a causa é contagem de linhas: **28 empreendimentos no raio de 1 km contra 36
+  linhas lidas** pela visão em s42+s43, 8 fantasma. No raio de 2 km, s100+s101 = 19 = os 19 do Excel,
+  e por isso o par fecha desde a v0.51.
+- **1,1 GB de planilhas → 194 KB de JSON**, versionável e diffável.
+
+**Verificação:** tsc limpo, **131 testes verdes** (117 → 131; 14 de `fonte-real.test.ts` sobre os 3
+pacotes), lint limpo, build ok. Sem migration e sem deploy — nada disso está em runtime ainda.
+
+**Próximo passo:** o `SOURCE_CROSSCHECK` em si, casando `fonte.json` × IR/visão do deck.
+
 ## Versão 0.51 — 2026-08-12 — Alinhamento da linha de totais e agrupamento tolerante de fatias (RUNTIME)
 
 Sessão de calibração de falsos positivos feita **direto no banco**, sem PPTX: os payloads reais

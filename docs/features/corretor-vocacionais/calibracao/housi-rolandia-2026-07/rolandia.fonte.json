@@ -1,0 +1,2215 @@
+{
+  "fonte_version": 1,
+  "estudo": "housi-rolandia-2026-07",
+  "gerado_em": "2026-08-13T19:57:42+00:00",
+  "pasta": "fontes/housi-rolandia-2026-07/excel",
+  "inventario": [
+    {
+      "arquivo": "00. Base - Revenda e Locação.xlsx",
+      "sha1": "10eb8d356976ac04",
+      "papel": "base",
+      "recorte": null,
+      "tamanho_kb": 117.5
+    },
+    {
+      "arquivo": "00. Base - Rolândia 06.2026.xlsx",
+      "sha1": "d44a19f944123a43",
+      "papel": "base",
+      "recorte": null,
+      "tamanho_kb": 15.8
+    },
+    {
+      "arquivo": "00. Base - Área de Lazer.xlsx",
+      "sha1": "9b856116461d3a65",
+      "papel": "base",
+      "recorte": null,
+      "tamanho_kb": 15.4
+    },
+    {
+      "arquivo": "01. Consolidada - 1 Km_verificação - OK.xlsm",
+      "sha1": "6b18659bb1bb16ca",
+      "papel": "oferta",
+      "recorte": "1 km",
+      "tamanho_kb": 1281.6
+    },
+    {
+      "arquivo": "01. Consolidada - 3 Km_verificação - OK.xlsm",
+      "sha1": "b1517f6463057f00",
+      "papel": "oferta",
+      "recorte": "3 km",
+      "tamanho_kb": 6819.2
+    },
+    {
+      "arquivo": "01. Consolidada - Z.I. Total.xlsm",
+      "sha1": "3969b893adb7572d",
+      "papel": "oferta",
+      "recorte": "z.i. total",
+      "tamanho_kb": 1277.4
+    },
+    {
+      "arquivo": "01. POPULACAO E DOMICÍLIOS.xlsx",
+      "sha1": "4d1c3a4315897d56",
+      "papel": "populacao",
+      "recorte": null,
+      "tamanho_kb": 25.5
+    },
+    {
+      "arquivo": "02. Revenda - Apartamento.xlsm",
+      "sha1": "de37984c22013fc8",
+      "papel": "revenda",
+      "recorte": null,
+      "tamanho_kb": 1617.6
+    },
+    {
+      "arquivo": "02. SOCIODEMOGRAFIA.xlsm",
+      "sha1": "6880a4c7b136db52",
+      "papel": "socio",
+      "recorte": null,
+      "tamanho_kb": 238.7
+    },
+    {
+      "arquivo": "03. ABSORÇAO LANÇAMENTOS - Rolândia.xlsm",
+      "sha1": "afbc5d3708c6f5d8",
+      "papel": "absorcao",
+      "recorte": null,
+      "tamanho_kb": 98.5
+    },
+    {
+      "arquivo": "03. Locação - Apartamento.xlsm",
+      "sha1": "6ee69ed025205a5b",
+      "papel": "locacao",
+      "recorte": null,
+      "tamanho_kb": 1615.1
+    },
+    {
+      "arquivo": "04. Área de Lazer - Z.I. Total.xlsx",
+      "sha1": "535839cb2b96ae32",
+      "papel": "lazer",
+      "recorte": "z.i. total",
+      "tamanho_kb": 80.0
+    },
+    {
+      "arquivo": "05. Análise - Anúncios.xlsx",
+      "sha1": "bd60d5539b475306",
+      "papel": "anuncios",
+      "recorte": null,
+      "tamanho_kb": 97.4
+    }
+  ],
+  "blocos": [
+    {
+      "papel": "oferta",
+      "tabela": "padrao",
+      "recorte": "1 km",
+      "arquivo": "01. Consolidada - 1 Km_verificação - OK.xlsm",
+      "aba": "Padrão",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Compacto",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Econômico",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Standard",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 100,
+            "oferta_atual": 26,
+            "vendas": 0.74,
+            "disponibilidade": 0.26
+          }
+        },
+        {
+          "rotulo": "Médio",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Médio-Alto",
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Alto",
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Luxo",
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 13,
+        "valores": {
+          "n_empreendimentos": 1,
+          "oferta_lancada": 100,
+          "oferta_atual": 26,
+          "vendas": 0.74,
+          "disponibilidade": 0.26
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "ano",
+      "recorte": "1 km",
+      "arquivo": "01. Consolidada - 1 Km_verificação - OK.xlsm",
+      "aba": "Ano",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Até 2017",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2018,
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Até 2022",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2023,
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 100,
+            "oferta_atual": 26,
+            "vendas": 0.74,
+            "disponibilidade": 0.26
+          }
+        },
+        {
+          "rotulo": 2024,
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2025,
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2026,
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Após 2024",
+          "linha": 13,
+          "valores": {
+            "n_empreendimentos": 0,
+            "oferta_lancada": 0,
+            "oferta_atual": 0,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 14,
+        "valores": {
+          "n_empreendimentos": 1,
+          "oferta_lancada": 100,
+          "oferta_atual": 26,
+          "vendas": 0.74,
+          "disponibilidade": 0.26
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "tipologia",
+      "recorte": "1 km",
+      "arquivo": "01. Consolidada - 1 Km_verificação - OK.xlsm",
+      "aba": "Tipologia",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "1 Dormitório",
+          "linha": 6,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "2 Dormitórios",
+          "linha": 7,
+          "valores": {
+            "oferta_lancada": 32,
+            "oferta_atual": 7,
+            "vendas": 0.78125,
+            "disponibilidade": 0.21875
+          }
+        },
+        {
+          "rotulo": "3 Dormitórios",
+          "linha": 8,
+          "valores": {
+            "oferta_lancada": 68,
+            "oferta_atual": 19,
+            "vendas": 0.7205882352941176,
+            "disponibilidade": 0.27941176470588236
+          }
+        },
+        {
+          "rotulo": "4 ou + Dormitórios",
+          "linha": 9,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 10,
+        "valores": {
+          "oferta_lancada": 100,
+          "oferta_atual": 26,
+          "vendas": 0.74,
+          "disponibilidade": 0.26
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "padrao",
+      "recorte": "3 km",
+      "arquivo": "01. Consolidada - 3 Km_verificação - OK.xlsm",
+      "aba": "Padrão",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Compacto",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Econômico",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 192,
+            "oferta_atual": 184,
+            "vendas": 0.04166666666666663,
+            "disponibilidade": 0.9583333333333334
+          }
+        },
+        {
+          "rotulo": "Standard",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Médio",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Médio-Alto",
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Alto",
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Luxo",
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 13,
+        "valores": {
+          "n_empreendimentos": 1,
+          "oferta_lancada": 192,
+          "oferta_atual": 184,
+          "vendas": 0.04166666666666663,
+          "disponibilidade": 0.9583333333333334
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "ano",
+      "recorte": "3 km",
+      "arquivo": "01. Consolidada - 3 Km_verificação - OK.xlsm",
+      "aba": "Ano",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Até 2017",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2018,
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Até 2022",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2023,
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2024,
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2025,
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2026,
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 192,
+            "oferta_atual": 184,
+            "vendas": 0.04166666666666663,
+            "disponibilidade": 0.9583333333333334
+          }
+        },
+        {
+          "rotulo": "Após 2024",
+          "linha": 13,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 192,
+            "oferta_atual": 184,
+            "vendas": 0.04166666666666663,
+            "disponibilidade": 0.9583333333333334
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 14,
+        "valores": {
+          "n_empreendimentos": 1,
+          "oferta_lancada": 192,
+          "oferta_atual": 184,
+          "vendas": 0.04166666666666663,
+          "disponibilidade": 0.9583333333333334
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "tipologia",
+      "recorte": "3 km",
+      "arquivo": "01. Consolidada - 3 Km_verificação - OK.xlsm",
+      "aba": "Tipologia",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "1 Dormitório",
+          "linha": 6,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "2 Dormitórios",
+          "linha": 7,
+          "valores": {
+            "oferta_lancada": 192,
+            "oferta_atual": 184,
+            "vendas": 0.04166666666666663,
+            "disponibilidade": 0.9583333333333334
+          }
+        },
+        {
+          "rotulo": "3 Dormitórios",
+          "linha": 8,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "4 ou + Dormitórios",
+          "linha": 9,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 10,
+        "valores": {
+          "oferta_lancada": 192,
+          "oferta_atual": 184,
+          "vendas": 0.04166666666666663,
+          "disponibilidade": 0.9583333333333334
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "padrao",
+      "recorte": "z.i. total",
+      "arquivo": "01. Consolidada - Z.I. Total.xlsm",
+      "aba": "Padrão",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Compacto",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Econômico",
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 192,
+            "oferta_atual": 184,
+            "vendas": 0.04166666666666663,
+            "disponibilidade": 0.9583333333333334
+          }
+        },
+        {
+          "rotulo": "Standard",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 100,
+            "oferta_atual": 26,
+            "vendas": 0.74,
+            "disponibilidade": 0.26
+          }
+        },
+        {
+          "rotulo": "Médio",
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Médio-Alto",
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Alto",
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Luxo",
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 13,
+        "valores": {
+          "n_empreendimentos": 2,
+          "oferta_lancada": 292,
+          "oferta_atual": 210,
+          "vendas": 0.2808219178082192,
+          "disponibilidade": 0.7191780821917808
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "ano",
+      "recorte": "z.i. total",
+      "arquivo": "01. Consolidada - Z.I. Total.xlsm",
+      "aba": "Ano",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "n_empreendimentos",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "Até 2017",
+          "linha": 6,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2018,
+          "linha": 7,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "Até 2022",
+          "linha": 8,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2023,
+          "linha": 9,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 100,
+            "oferta_atual": 26,
+            "vendas": 0.74,
+            "disponibilidade": 0.26
+          }
+        },
+        {
+          "rotulo": 2024,
+          "linha": 10,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2025,
+          "linha": 11,
+          "valores": {
+            "n_empreendimentos": null,
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": 2026,
+          "linha": 12,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 192,
+            "oferta_atual": 184,
+            "vendas": 0.04166666666666663,
+            "disponibilidade": 0.9583333333333334
+          }
+        },
+        {
+          "rotulo": "Após 2024",
+          "linha": 13,
+          "valores": {
+            "n_empreendimentos": 1,
+            "oferta_lancada": 192,
+            "oferta_atual": 184,
+            "vendas": 0.04166666666666663,
+            "disponibilidade": 0.9583333333333334
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 14,
+        "valores": {
+          "n_empreendimentos": 2,
+          "oferta_lancada": 292,
+          "oferta_atual": 210,
+          "vendas": 0.2808219178082192,
+          "disponibilidade": 0.7191780821917808
+        }
+      }
+    },
+    {
+      "papel": "oferta",
+      "tabela": "tipologia",
+      "recorte": "z.i. total",
+      "arquivo": "01. Consolidada - Z.I. Total.xlsm",
+      "aba": "Tipologia",
+      "cabecalho_linha": 5,
+      "conceitos": [
+        "disponibilidade",
+        "oferta_atual",
+        "oferta_lancada",
+        "vendas"
+      ],
+      "itens": [
+        {
+          "rotulo": "1 Dormitório",
+          "linha": 6,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        },
+        {
+          "rotulo": "2 Dormitórios",
+          "linha": 7,
+          "valores": {
+            "oferta_lancada": 224,
+            "oferta_atual": 191,
+            "vendas": 0.1473214285714286,
+            "disponibilidade": 0.8526785714285714
+          }
+        },
+        {
+          "rotulo": "3 Dormitórios",
+          "linha": 8,
+          "valores": {
+            "oferta_lancada": 68,
+            "oferta_atual": 19,
+            "vendas": 0.7205882352941176,
+            "disponibilidade": 0.27941176470588236
+          }
+        },
+        {
+          "rotulo": "4 ou + Dormitórios",
+          "linha": 9,
+          "valores": {
+            "oferta_lancada": null,
+            "oferta_atual": null,
+            "vendas": null,
+            "disponibilidade": null
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 10,
+        "valores": {
+          "oferta_lancada": 292,
+          "oferta_atual": 210,
+          "vendas": 0.2808219178082192,
+          "disponibilidade": 0.7191780821917808
+        }
+      }
+    },
+    {
+      "papel": "populacao",
+      "tabela": "populacao",
+      "recorte": null,
+      "arquivo": "01. POPULACAO E DOMICÍLIOS.xlsx",
+      "aba": "População",
+      "itens": [
+        {
+          "rotulo": "Rolândia",
+          "linha": 6,
+          "numeros": [
+            49424,
+            57862,
+            76216,
+            76216,
+            0.015887355965311878,
+            0.017368517982338627,
+            0.5420848170929102,
+            2028
+          ]
+        },
+        {
+          "rotulo": "PR",
+          "linha": 7,
+          "numeros": [
+            9558454,
+            10444526,
+            11941454,
+            11941454,
+            0.008904613769491254,
+            0.008406252186030416,
+            0.2493080994060337,
+            2029
+          ]
+        },
+        {
+          "rotulo": "Brasil",
+          "linha": 8,
+          "numeros": [
+            169590693,
+            190755794,
+            205804681,
+            205804681,
+            0.011830047881857597,
+            0.005075069692019651,
+            0.21353759076861611,
+            2030
+          ]
+        }
+      ]
+    },
+    {
+      "papel": "populacao",
+      "tabela": "domicilios",
+      "recorte": null,
+      "arquivo": "01. POPULACAO E DOMICÍLIOS.xlsx",
+      "aba": "Domicilios",
+      "itens": [
+        {
+          "rotulo": "Rolândia",
+          "linha": 7,
+          "numeros": [
+            14003,
+            18406,
+            25787,
+            25787,
+            0.027717691961959723,
+            0.021298249807547354,
+            2028,
+            26897.13331705117
+          ]
+        },
+        {
+          "rotulo": "PR",
+          "linha": 8,
+          "numeros": [
+            2681685,
+            3298578,
+            4216107,
+            4216107,
+            0.020920441306374604,
+            0.0154570383595658,
+            2029,
+            27469.995181544633
+          ]
+        },
+        {
+          "rotulo": "Brasil",
+          "linha": 9,
+          "numeros": [
+            45021478,
+            57324167,
+            75298796,
+            75298796,
+            0.024452438250525343,
+            0.018349103264550415,
+            2030,
+            28055.058001133293
+          ]
+        }
+      ]
+    },
+    {
+      "papel": "socio",
+      "tabela": "domicilios_por_tipo",
+      "recorte": null,
+      "arquivo": "02. SOCIODEMOGRAFIA.xlsm",
+      "aba": "Dom.p Tipo",
+      "cabecalho_linha": 5,
+      "recortes": [
+        "Até 1 km",
+        "Até 2 km",
+        "Até 3 Km",
+        "PR",
+        "Rolândia"
+      ],
+      "itens": [
+        {
+          "rotulo": "Casa",
+          "linha": 6,
+          "recortes": {
+            "PR": {
+              "absoluto": 3658316.0439,
+              "%": 0.8677
+            },
+            "Rolândia": {
+              "absoluto": 24456.3908,
+              "%": 0.9484
+            },
+            "Até 1 km": {
+              "absoluto": 5485.5932,
+              "%": 0.8429
+            },
+            "Até 2 km": {
+              "absoluto": 15172.5639,
+              "%": 0.9087
+            },
+            "Até 3 Km": {
+              "absoluto": 22617.6676,
+              "%": 0.9406
+            }
+          }
+        },
+        {
+          "rotulo": "Apartamento",
+          "linha": 7,
+          "recortes": {
+            "PR": {
+              "absoluto": 557790.9561,
+              "%": 0.1323
+            },
+            "Rolândia": {
+              "absoluto": 1330.6092,
+              "%": 0.0516
+            },
+            "Até 1 km": {
+              "absoluto": 1022.4068,
+              "%": 0.1571
+            },
+            "Até 2 km": {
+              "absoluto": 1524.4361000000001,
+              "%": 0.0913
+            },
+            "Até 3 Km": {
+              "absoluto": 1428.3324,
+              "%": 0.0594
+            }
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 8,
+        "recortes": {
+          "PR": {
+            "absoluto": 4216107,
+            "%": 1
+          },
+          "Rolândia": {
+            "absoluto": 25787,
+            "%": 1
+          },
+          "Até 1 km": {
+            "absoluto": 6508,
+            "%": 1
+          },
+          "Até 2 km": {
+            "absoluto": 16697,
+            "%": 1
+          },
+          "Até 3 Km": {
+            "absoluto": 24046,
+            "%": 1
+          }
+        }
+      }
+    },
+    {
+      "papel": "socio",
+      "tabela": "condicao_ocupacao",
+      "recorte": null,
+      "arquivo": "02. SOCIODEMOGRAFIA.xlsm",
+      "aba": "Dom.p Cond. Ocup.",
+      "cabecalho_linha": 4,
+      "recortes": [
+        "Até 1 km",
+        "Até 2 km",
+        "Até 3 Km",
+        "PR",
+        "Rolândia"
+      ],
+      "itens": [
+        {
+          "rotulo": "Próprio",
+          "linha": 5,
+          "recortes": {
+            "PR": {
+              "absoluto": 2955069.3962999997,
+              "%": 0.7009
+            },
+            "Rolândia": {
+              "absoluto": 16784.7583,
+              "%": 0.6509
+            },
+            "Até 1 km": {
+              "absoluto": 4234.7555999999995,
+              "%": 0.6507
+            },
+            "Até 2 km": {
+              "absoluto": 10866.4076,
+              "%": 0.6508
+            },
+            "Até 3 Km": {
+              "absoluto": 15990.59,
+              "%": 0.665
+            }
+          }
+        },
+        {
+          "rotulo": "Alugado",
+          "linha": 6,
+          "recortes": {
+            "PR": {
+              "absoluto": 956213.0676,
+              "%": 0.2268
+            },
+            "Rolândia": {
+              "absoluto": 7607.165,
+              "%": 0.295
+            },
+            "Até 1 km": {
+              "absoluto": 1919.86,
+              "%": 0.295
+            },
+            "Até 2 km": {
+              "absoluto": 4923.9453,
+              "%": 0.2949
+            },
+            "Até 3 Km": {
+              "absoluto": 4833.246,
+              "%": 0.201
+            }
+          }
+        },
+        {
+          "rotulo": "Cedido",
+          "linha": 7,
+          "recortes": {
+            "PR": {
+              "absoluto": 304824.53610000014,
+              "%": 0.07230000000000003
+            },
+            "Rolândia": {
+              "absoluto": 1395.076700000001,
+              "%": 0.05410000000000004
+            },
+            "Até 1 km": {
+              "absoluto": 353.3844000000001,
+              "%": 0.054300000000000015
+            },
+            "Até 2 km": {
+              "absoluto": 906.6471000000003,
+              "%": 0.054300000000000015
+            },
+            "Até 3 Km": {
+              "absoluto": 3222.1639999999975,
+              "%": 0.1339999999999999
+            }
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 8,
+        "recortes": {
+          "PR": {
+            "absoluto": 4216107,
+            "%": 1
+          },
+          "Rolândia": {
+            "absoluto": 25787,
+            "%": 1
+          },
+          "Até 1 km": {
+            "absoluto": 6508,
+            "%": 1
+          },
+          "Até 2 km": {
+            "absoluto": 16697,
+            "%": 1
+          },
+          "Até 3 Km": {
+            "absoluto": 24046,
+            "%": 1
+          }
+        }
+      }
+    },
+    {
+      "papel": "socio",
+      "tabela": "populacao_faixa_etaria",
+      "recorte": null,
+      "arquivo": "02. SOCIODEMOGRAFIA.xlsm",
+      "aba": "População - Faixa Etária",
+      "cabecalho_linha": 8,
+      "recortes": [
+        "Até 1 km",
+        "Até 2 km",
+        "Até 3 Km",
+        "PR",
+        "Rolândia"
+      ],
+      "itens": [
+        {
+          "rotulo": "de 0-19 anos",
+          "linha": 9,
+          "recortes": {
+            "PR": {
+              "absoluto": 3079700.9866000004,
+              "%": 0.2579
+            },
+            "Rolândia": {
+              "absoluto": 20212.4832,
+              "%": 0.2652
+            },
+            "Até 1 km": {
+              "absoluto": 2612.1663,
+              "%": 0.2117
+            },
+            "Até 2 km": {
+              "absoluto": 8362.8816,
+              "%": 0.2298
+            },
+            "Até 3 Km": {
+              "absoluto": 16706.804399999997,
+              "%": 0.25739999999999996
+            }
+          }
+        },
+        {
+          "rotulo": "de 20-24",
+          "linha": 10,
+          "recortes": {
+            "PR": {
+              "absoluto": 878891.0144,
+              "%": 0.0736
+            },
+            "Rolândia": {
+              "absoluto": 6013.4424,
+              "%": 0.0789
+            },
+            "Até 1 km": {
+              "absoluto": 871.1333999999999,
+              "%": 0.0706
+            },
+            "Até 2 km": {
+              "absoluto": 2711.2039999999997,
+              "%": 0.0745
+            },
+            "Até 3 Km": {
+              "absoluto": 5147.0458,
+              "%": 0.0793
+            }
+          }
+        },
+        {
+          "rotulo": "de 25-29",
+          "linha": 11,
+          "recortes": {
+            "PR": {
+              "absoluto": 920686.1034,
+              "%": 0.0771
+            },
+            "Rolândia": {
+              "absoluto": 6051.5504,
+              "%": 0.0794
+            },
+            "Até 1 km": {
+              "absoluto": 868.6656,
+              "%": 0.0704
+            },
+            "Até 2 km": {
+              "absoluto": 2660.2552,
+              "%": 0.0731
+            },
+            "Até 3 Km": {
+              "absoluto": 5088.6304,
+              "%": 0.0784
+            }
+          }
+        },
+        {
+          "rotulo": "de 30-39",
+          "linha": 12,
+          "recortes": {
+            "PR": {
+              "absoluto": 1816295.1534000002,
+              "%": 0.1521
+            },
+            "Rolândia": {
+              "absoluto": 11691.5344,
+              "%": 0.1534
+            },
+            "Até 1 km": {
+              "absoluto": 1653.4260000000002,
+              "%": 0.134
+            },
+            "Até 2 km": {
+              "absoluto": 4872.8888,
+              "%": 0.1339
+            },
+            "Até 3 Km": {
+              "absoluto": 9716.4282,
+              "%": 0.1497
+            }
+          }
+        },
+        {
+          "rotulo": "de 40-49",
+          "linha": 13,
+          "recortes": {
+            "PR": {
+              "absoluto": 1720763.5214,
+              "%": 0.1441
+            },
+            "Rolândia": {
+              "absoluto": 10502.5648,
+              "%": 0.1378
+            },
+            "Até 1 km": {
+              "absoluto": 1562.1173999999999,
+              "%": 0.1266
+            },
+            "Até 2 km": {
+              "absoluto": 4923.8376,
+              "%": 0.1353
+            },
+            "Até 3 Km": {
+              "absoluto": 8982.9904,
+              "%": 0.1384
+            }
+          }
+        },
+        {
+          "rotulo": "de 50-59",
+          "linha": 14,
+          "recortes": {
+            "PR": {
+              "absoluto": 1520147.0942,
+              "%": 0.1273
+            },
+            "Rolândia": {
+              "absoluto": 9267.8656,
+              "%": 0.1216
+            },
+            "Até 1 km": {
+              "absoluto": 1729.9278,
+              "%": 0.1402
+            },
+            "Até 2 km": {
+              "absoluto": 5014.8176,
+              "%": 0.1378
+            },
+            "Até 3 Km": {
+              "absoluto": 8165.1748,
+              "%": 0.1258
+            }
+          }
+        },
+        {
+          "rotulo": "mais 60",
+          "linha": 15,
+          "recortes": {
+            "PR": {
+              "absoluto": 2004970.1265999998,
+              "%": 0.1679
+            },
+            "Rolândia": {
+              "absoluto": 12476.559200000002,
+              "%": 0.1637
+            },
+            "Até 1 km": {
+              "absoluto": 3041.5634999999997,
+              "%": 0.2465
+            },
+            "Até 2 km": {
+              "absoluto": 7846.1152,
+              "%": 0.2156
+            },
+            "Até 3 Km": {
+              "absoluto": 11098.926,
+              "%": 0.17099999999999999
+            }
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "TOTAL",
+        "linha": 16,
+        "recortes": {
+          "PR": {
+            "absoluto": 11941454,
+            "%": 1
+          },
+          "Rolândia": {
+            "absoluto": 76216,
+            "%": 1
+          },
+          "Até 1 km": {
+            "absoluto": 12339,
+            "%": 1
+          },
+          "Até 2 km": {
+            "absoluto": 36392,
+            "%": 1
+          },
+          "Até 3 Km": {
+            "absoluto": 64906,
+            "%": 1
+          }
+        }
+      }
+    },
+    {
+      "papel": "socio",
+      "tabela": "domicilios_por_moradores",
+      "recorte": null,
+      "arquivo": "02. SOCIODEMOGRAFIA.xlsm",
+      "aba": "Dom.p nº Moradores",
+      "cabecalho_linha": 4,
+      "recortes": [
+        "Até 1 km",
+        "Até 2 km",
+        "Até 3 Km",
+        "PR",
+        "Rolândia"
+      ],
+      "itens": [
+        {
+          "rotulo": "1 morador",
+          "linha": 5,
+          "recortes": {
+            "PR": {
+              "absoluto": 771125.9703,
+              "%": 0.1829
+            },
+            "Rolândia": {
+              "absoluto": 4293.5355,
+              "%": 0.1665
+            },
+            "Até 1 km": {
+              "absoluto": 1349.7592,
+              "%": 0.2074
+            },
+            "Até 2 km": {
+              "absoluto": 3244.2271,
+              "%": 0.1943
+            },
+            "Até 3 Km": {
+              "absoluto": 4121.4844,
+              "%": 0.1714
+            }
+          }
+        },
+        {
+          "rotulo": "2 moradores",
+          "linha": 6,
+          "recortes": {
+            "PR": {
+              "absoluto": 1301090.6202,
+              "%": 0.3086
+            },
+            "Rolândia": {
+              "absoluto": 7865.035,
+              "%": 0.305
+            },
+            "Até 1 km": {
+              "absoluto": 2233.5456,
+              "%": 0.3432
+            },
+            "Até 2 km": {
+              "absoluto": 5389.7916,
+              "%": 0.3228
+            },
+            "Até 3 Km": {
+              "absoluto": 7386.931199999999,
+              "%": 0.3072
+            }
+          }
+        },
+        {
+          "rotulo": "3 moradores",
+          "linha": 7,
+          "recortes": {
+            "PR": {
+              "absoluto": 1067096.6817,
+              "%": 0.2531
+            },
+            "Rolândia": {
+              "absoluto": 6686.5691,
+              "%": 0.2593
+            },
+            "Até 1 km": {
+              "absoluto": 1494.8876,
+              "%": 0.2297
+            },
+            "Até 2 km": {
+              "absoluto": 4025.6467000000002,
+              "%": 0.2411
+            },
+            "Até 3 Km": {
+              "absoluto": 6206.2726,
+              "%": 0.2581
+            }
+          }
+        },
+        {
+          "rotulo": "4 moradores",
+          "linha": 8,
+          "recortes": {
+            "PR": {
+              "absoluto": 716738.1900000001,
+              "%": 0.17
+            },
+            "Rolândia": {
+              "absoluto": 4659.7109,
+              "%": 0.1807
+            },
+            "Até 1 km": {
+              "absoluto": 948.2156,
+              "%": 0.1457
+            },
+            "Até 2 km": {
+              "absoluto": 2724.9504,
+              "%": 0.1632
+            },
+            "Até 3 Km": {
+              "absoluto": 4306.6386,
+              "%": 0.1791
+            }
+          }
+        },
+        {
+          "rotulo": "5 ou mais moradores",
+          "linha": 9,
+          "recortes": {
+            "PR": {
+              "absoluto": 360055.5378,
+              "%": 0.0854
+            },
+            "Rolândia": {
+              "absoluto": 2282.1495,
+              "%": 0.0885
+            },
+            "Até 1 km": {
+              "absoluto": 481.592,
+              "%": 0.074
+            },
+            "Até 2 km": {
+              "absoluto": 1312.3842,
+              "%": 0.0786
+            },
+            "Até 3 Km": {
+              "absoluto": 2024.6732,
+              "%": 0.0842
+            }
+          }
+        }
+      ],
+      "total": {
+        "rotulo": "Total",
+        "linha": 10,
+        "recortes": {
+          "PR": {
+            "absoluto": 4216107,
+            "%": 1
+          },
+          "Rolândia": {
+            "absoluto": 25787,
+            "%": 1
+          },
+          "Até 1 km": {
+            "absoluto": 6508,
+            "%": 0.9999999999999999
+          },
+          "Até 2 km": {
+            "absoluto": 16697,
+            "%": 1
+          },
+          "Até 3 Km": {
+            "absoluto": 24046,
+            "%": 1
+          }
+        }
+      }
+    },
+    {
+      "papel": "absorcao",
+      "tabela": "taxas",
+      "recorte": null,
+      "arquivo": "03. ABSORÇAO LANÇAMENTOS - Rolândia.xlsm",
+      "aba": "TAXAS",
+      "valores": [
+        {
+          "linha": 4,
+          "coluna": 3,
+          "valor": 0.09,
+          "contexto": "Acima de R$ 20.983,01"
+        },
+        {
+          "linha": 4,
+          "coluna": 4,
+          "valor": 0.1,
+          "contexto": "Acima de R$ 20.983,01"
+        },
+        {
+          "linha": 4,
+          "coluna": 5,
+          "valor": 0.12,
+          "contexto": "Acima de R$ 20.983,01"
+        },
+        {
+          "linha": 4,
+          "coluna": 7,
+          "valor": 0.333333,
+          "contexto": "Acima de R$ 20.983,01"
+        },
+        {
+          "linha": 4,
+          "coluna": 11,
+          "valor": 0.015,
+          "contexto": "Acima de R$ 20.983,01"
+        },
+        {
+          "linha": 4,
+          "coluna": 12,
+          "valor": 0.021,
+          "contexto": "Acima de R$ 20.983,01"
+        },
+        {
+          "linha": 4,
+          "coluna": 13,
+          "valor": 0.021,
+          "contexto": "Acima de R$ 20.983,01"
+        },
+        {
+          "linha": 4,
+          "coluna": 17,
+          "valor": 0.105,
+          "contexto": "Acima de R$ 20.983,01"
+        },
+        {
+          "linha": 4,
+          "coluna": 18,
+          "valor": 0.121,
+          "contexto": "Acima de R$ 20.983,01"
+        },
+        {
+          "linha": 4,
+          "coluna": 19,
+          "valor": 0.141,
+          "contexto": "Acima de R$ 20.983,01"
+        },
+        {
+          "linha": 5,
+          "coluna": 3,
+          "valor": 0.081,
+          "contexto": "R$ 17.147,01 a R$ 20.983,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 4,
+          "valor": 0.09,
+          "contexto": "R$ 17.147,01 a R$ 20.983,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 5,
+          "valor": 0.108,
+          "contexto": "R$ 17.147,01 a R$ 20.983,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 7,
+          "valor": 0.333333,
+          "contexto": "R$ 17.147,01 a R$ 20.983,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 11,
+          "valor": 0.015,
+          "contexto": "R$ 17.147,01 a R$ 20.983,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 12,
+          "valor": 0.021,
+          "contexto": "R$ 17.147,01 a R$ 20.983,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 13,
+          "valor": 0.021,
+          "contexto": "R$ 17.147,01 a R$ 20.983,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 17,
+          "valor": 0.096,
+          "contexto": "R$ 17.147,01 a R$ 20.983,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 18,
+          "valor": 0.111,
+          "contexto": "R$ 17.147,01 a R$ 20.983,00"
+        },
+        {
+          "linha": 5,
+          "coluna": 19,
+          "valor": 0.129,
+          "contexto": "R$ 17.147,01 a R$ 20.983,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 3,
+          "valor": 0.072,
+          "contexto": "R$ 14.590,01 a R$ 17.147,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 4,
+          "valor": 0.08,
+          "contexto": "R$ 14.590,01 a R$ 17.147,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 5,
+          "valor": 0.096,
+          "contexto": "R$ 14.590,01 a R$ 17.147,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 7,
+          "valor": 0.333333,
+          "contexto": "R$ 14.590,01 a R$ 17.147,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 11,
+          "valor": 0.015,
+          "contexto": "R$ 14.590,01 a R$ 17.147,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 12,
+          "valor": 0.021,
+          "contexto": "R$ 14.590,01 a R$ 17.147,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 13,
+          "valor": 0.021,
+          "contexto": "R$ 14.590,01 a R$ 17.147,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 17,
+          "valor": 0.087,
+          "contexto": "R$ 14.590,01 a R$ 17.147,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 18,
+          "valor": 0.101,
+          "contexto": "R$ 14.590,01 a R$ 17.147,00"
+        },
+        {
+          "linha": 6,
+          "coluna": 19,
+          "valor": 0.117,
+          "contexto": "R$ 14.590,01 a R$ 17.147,00"
+        },
+        {
+          "linha": 7,
+          "coluna": 3,
+          "valor": 0.063,
+          "contexto": "R$ 6.200,01 a R$ 14.590,01"
+        },
+        {
+          "linha": 7,
+          "coluna": 4,
+          "valor": 0.07,
+          "contexto": "R$ 6.200,01 a R$ 14.590,01"
+        },
+        {
+          "linha": 7,
+          "coluna": 5,
+          "valor": 0.084,
+          "contexto": "R$ 6.200,01 a R$ 14.590,01"
+        },
+        {
+          "linha": 7,
+          "coluna": 7,
+          "valor": 0.333333,
+          "contexto": "R$ 6.200,01 a R$ 14.590,01"
+        },
+        {
+          "linha": 7,
+          "coluna": 11,
+          "valor": 0.015,
+          "contexto": "R$ 6.200,01 a R$ 14.590,01"
+        },
+        {
+          "linha": 7,
+          "coluna": 12,
+          "valor": 0.021,
+          "contexto": "R$ 6.200,01 a R$ 14.590,01"
+        },
+        {
+          "linha": 7,
+          "coluna": 13,
+          "valor": 0.021,
+          "contexto": "R$ 6.200,01 a R$ 14.590,01"
+        },
+        {
+          "linha": 7,
+          "coluna": 17,
+          "valor": 0.078,
+          "contexto": "R$ 6.200,01 a R$ 14.590,01"
+        },
+        {
+          "linha": 7,
+          "coluna": 18,
+          "valor": 0.091,
+          "contexto": "R$ 6.200,01 a R$ 14.590,01"
+        },
+        {
+          "linha": 7,
+          "coluna": 19,
+          "valor": 0.105,
+          "contexto": "R$ 6.200,01 a R$ 14.590,01"
+        },
+        {
+          "linha": 8,
+          "coluna": 3,
+          "valor": 0.054,
+          "contexto": "Abaixo de R$ 6.200,00"
+        },
+        {
+          "linha": 8,
+          "coluna": 4,
+          "valor": 0.06,
+          "contexto": "Abaixo de R$ 6.200,00"
+        },
+        {
+          "linha": 8,
+          "coluna": 5,
+          "valor": 0.072,
+          "contexto": "Abaixo de R$ 6.200,00"
+        },
+        {
+          "linha": 8,
+          "coluna": 7,
+          "valor": 0.333333,
+          "contexto": "Abaixo de R$ 6.200,00"
+        },
+        {
+          "linha": 8,
+          "coluna": 11,
+          "valor": 0.015,
+          "contexto": "Abaixo de R$ 6.200,00"
+        },
+        {
+          "linha": 8,
+          "coluna": 12,
+          "valor": 0.021,
+          "contexto": "Abaixo de R$ 6.200,00"
+        },
+        {
+          "linha": 8,
+          "coluna": 13,
+          "valor": 0.021,
+          "contexto": "Abaixo de R$ 6.200,00"
+        },
+        {
+          "linha": 8,
+          "coluna": 17,
+          "valor": 0.069,
+          "contexto": "Abaixo de R$ 6.200,00"
+        },
+        {
+          "linha": 8,
+          "coluna": 18,
+          "valor": 0.081,
+          "contexto": "Abaixo de R$ 6.200,00"
+        },
+        {
+          "linha": 8,
+          "coluna": 19,
+          "valor": 0.093,
+          "contexto": "Abaixo de R$ 6.200,00"
+        },
+        {
+          "linha": 12,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "Acima de R$ 40.092,01"
+        },
+        {
+          "linha": 12,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "Acima de R$ 40.092,01"
+        },
+        {
+          "linha": 12,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "Acima de R$ 40.092,01"
+        },
+        {
+          "linha": 13,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 34.261,01 a R$ 40.092,00"
+        },
+        {
+          "linha": 13,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 34.261,01 a R$ 40.092,00"
+        },
+        {
+          "linha": 13,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 34.261,01 a R$ 40.092,00"
+        },
+        {
+          "linha": 14,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 29,643.01 a R$ R$ 34.261,00"
+        },
+        {
+          "linha": 14,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 29,643.01 a R$ R$ 34.261,00"
+        },
+        {
+          "linha": 14,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 29,643.01 a R$ R$ 34.261,00"
+        },
+        {
+          "linha": 15,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$  28.096,01 a R$ 29.643,00"
+        },
+        {
+          "linha": 15,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$  28.096,01 a R$ 29.643,00"
+        },
+        {
+          "linha": 15,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$  28.096,01 a R$ 29.643,00"
+        },
+        {
+          "linha": 16,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 21.046,01e R$ 28.096,00"
+        },
+        {
+          "linha": 16,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 21.046,01e R$ 28.096,00"
+        },
+        {
+          "linha": 16,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 21.046,01e R$ 28.096,00"
+        },
+        {
+          "linha": 17,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 16.186,01 a R$ 21.046,00"
+        },
+        {
+          "linha": 17,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 16.186,01 a R$ 21.046,00"
+        },
+        {
+          "linha": 17,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 16.186,01 a R$ 21.046,00"
+        },
+        {
+          "linha": 18,
+          "coluna": 3,
+          "valor": 0.04,
+          "contexto": "R$ 13.172,01 a R$ 16.186,00"
+        },
+        {
+          "linha": 18,
+          "coluna": 4,
+          "valor": 0.05,
+          "contexto": "R$ 13.172,01 a R$ 16.186,00"
+        },
+        {
+          "linha": 18,
+          "coluna": 5,
+          "valor": 0.06,
+          "contexto": "R$ 13.172,01 a R$ 16.186,00"
+        },
+        {
+          "linha": 19,
+          "coluna": 3,
+          "valor": 0.03,
+          "contexto": "R$ 11.163,01 a R$ 13.172,00"
+        },
+        {
+          "linha": 19,
+          "coluna": 4,
+          "valor": 0.04,
+          "contexto": "R$ 11.163,01 a R$ 13.172,00"
+        },
+        {
+          "linha": 19,
+          "coluna": 5,
+          "valor": 0.05,
+          "contexto": "R$ 11.163,01 a R$ 13.172,00"
+        },
+        {
+          "linha": 20,
+          "coluna": 3,
+          "valor": 0.025,
+          "contexto": "R$ 8.150,01 a R$ 11.163,00"
+        },
+        {
+          "linha": 20,
+          "coluna": 4,
+          "valor": 0.035,
+          "contexto": "R$ 8.150,01 a R$ 11.163,00"
+        },
+        {
+          "linha": 20,
+          "coluna": 5,
+          "valor": 0.045,
+          "contexto": "R$ 8.150,01 a R$ 11.163,00"
+        },
+        {
+          "linha": 21,
+          "coluna": 3,
+          "valor": 0.015,
+          "contexto": "R$  5.786,01 a R$ 8.150,00"
+        },
+        {
+          "linha": 21,
+          "coluna": 4,
+          "valor": 0.02,
+          "contexto": "R$  5.786,01 a R$ 8.150,00"
+        },
+        {
+          "linha": 21,
+          "coluna": 5,
+          "valor": 0.03,
+          "contexto": "R$  5.786,01 a R$ 8.150,00"
+        },
+        {
+          "linha": 22,
+          "coluna": 3,
+          "valor": 0.015,
+          "contexto": "R$ 4.607,01 a R$ 5.786,00"
+        },
+        {
+          "linha": 22,
+          "coluna": 4,
+          "valor": 0.02,
+          "contexto": "R$ 4.607,01 a R$ 5.786,00"
+        },
+        {
+          "linha": 22,
+          "coluna": 5,
+          "valor": 0.03,
+          "contexto": "R$ 4.607,01 a R$ 5.786,00"
+        },
+        {
+          "linha": 23,
+          "coluna": 3,
+          "valor": 0.015,
+          "contexto": "R$ 2.713,01 a R$ 4.607,00"
+        },
+        {
+          "linha": 23,
+          "coluna": 4,
+          "valor": 0.02,
+          "contexto": "R$ 2.713,01 a R$ 4.607,00"
+        },
+        {
+          "linha": 23,
+          "coluna": 5,
+          "valor": 0.03,
+          "contexto": "R$ 2.713,01 a R$ 4.607,00"
+        }
+      ]
+    }
+  ],
+  "avisos": [
+    {
+      "tipo": "celula_invalida",
+      "arquivo": "01. Consolidada - 1 Km_verificação - OK.xlsm",
+      "aba": "Ano",
+      "linha": 13,
+      "conceitos": [
+        "vendas",
+        "disponibilidade"
+      ]
+    }
+  ]
+}
