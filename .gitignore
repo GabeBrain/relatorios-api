@@ -57,6 +57,13 @@ docs/features/corretor-vocacionais/Brain_Vocacional_*.pptx
 docs/features/**/desktop.ini
 docs/features/corretor-vocacionais/ir/
 
+# Material-fonte dos estudos (PPTX + Excel de trabalho dos analistas). Pesado e
+# transitório: fica só até virar derivado versionável (*.ir.json / *.fonte.json)
+# em calibracao/. O MANIFEST.md de cada pasta SOBE — é o registro do que chegou.
+# Convenção completa em docs/features/corretor-vocacionais/fontes/README.md.
+docs/features/corretor-vocacionais/fontes/**/estudo/
+docs/features/corretor-vocacionais/fontes/**/excel/
+
 # Amostras pesadas do Panorama Secovi/FIERGS (locais — NÃO versionar; xlsx de inventário e docs .md sobem)
 docs/features/Relatorios Secovi_FIERGS/*.pptx
 docs/features/Relatorios Secovi_FIERGS/*.pdf

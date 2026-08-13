@@ -83,6 +83,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Arquivos:** `src/pages/RelatorioAelo.tsx`.
 - **Impacto em Etapas/Pendências:** esses campos deixam de ser lacunas do relatório; permanece pendente validar a unidade/formatação dos percentuais com a base AELO.
 
+### 2026-08-12 — Corretor: sessão de calibração de FPs no banco + consulta por terminal — Gabriel + Claude
+- **Ambiente/funcionalidade:** Corretor | Estudos Vocacionais — regras de soma e ferramenta de apoio.
+- **O quê:** corrige o alinhamento de linhas de totais e o agrupamento de fatias paginadas, com testes de regressão sobre Toledo; adiciona `scripts/corretor-db.mjs` e sua skill para investigar achados e payloads diretamente no banco.
+- **Arquivos:** `src/features/corretor/lib/{audit,v3}/`, `src/features/corretor/lib/v3/__tests__/toledo-real.test.ts`, `scripts/corretor-db.mjs`, `docs/features/corretor-vocacionais/{FP_sessao_2026-08-12.md,calibracao/toledo-2026-08/sum-payloads.json}`.
+- **Impacto em Etapas/Pendências:** preserva o aceite de calibração do Toledo e abre a necessidade de reprocessar estudos parados no portão da ata.
+
 ### 2026-08-11 — Governança de documentação viva e frontend — Gabriel
 - **Ambiente/funcionalidade:** plataforma Rebrain — regras compartilhadas de desenvolvimento e revisão.
 - **O quê:** formalizado o controle de documentos vivos em PR/push, com validação automatizada, e publicado o contrato de frontend para componentes, estados de página, acessibilidade, responsividade e registro de decisões duradouras.
