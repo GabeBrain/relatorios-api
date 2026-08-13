@@ -15,6 +15,60 @@ function columnSum(rows: Cell[][], col: number): number {
   return rows.reduce((acc, r) => (isNum(r[col]) ? acc + (r[col] as number) : acc), 0);
 }
 
+/** Largura real da tabela: a maior entre o cabeçalho e a linha mais longa. */
+function tableWidth(table: ExtractedTable): number {
+  return table.rows.reduce((max, r) => Math.max(max, r.length), table.columns.length);
+}
+
+/**
+ * Colunas numéricas — as que participam de soma.
+ *
+ * `min` é o número de células numéricas exigido. Conferência de soma usa 2 (uma
+ * célula só não é soma); identificação de coluna usa 1, para a resposta não
+ * mudar conforme o tamanho da fatia.
+ */
+export function numericColumns(table: ExtractedTable, min = 2): number[] {
+  const out: number[] = [];
+  for (let c = 0; c < tableWidth(table); c++) {
+    if (table.rows.filter((r) => isNum(r[c])).length >= min) out.push(c);
+  }
+  return out;
+}
+
+/**
+ * Alinha a linha de totais às colunas.
+ *
+ * A visão às vezes devolve o array de totais **compacto**, pulando as células
+ * vazias que o rótulo "Total" atravessa, enquanto o motor casa total×coluna por
+ * índice. O resultado é acusar a coluna errada — caso real s42 do Toledo
+ * (12/ago): `["Total",1099,702,397,36.1,1099]` para 15 colunas virou
+ * "Oferta Lançada: soma 434 ≠ total 397", sendo 397 o total de *Oferta Atual*.
+ * Medido no banco: 19 de 67 tabelas com totais declarados vêm desalinhadas.
+ *
+ * - Comprimento igual ao da tabela → já está 1:1.
+ * - Comprimentos diferentes, mas **tantos totais numéricos quanto colunas
+ *   numéricas** → a ordem resolve, realinha.
+ * - Fora disso a atribuição é indecidível: devolve `null` para o chamador se
+ *   abster em vez de chutar.
+ */
+export function alignTotals(table: ExtractedTable): { totals: Cell[] | null; realigned: boolean } {
+  const totals = table.totals;
+  if (!totals || !table.rows.length) return { totals: totals ?? null, realigned: false };
+
+  const width = tableWidth(table);
+  if (totals.length === width) return { totals, realigned: false };
+
+  const declared = totals.filter(isNum);
+  const cols = numericColumns(table);
+  if (!declared.length || declared.length !== cols.length) return { totals: null, realigned: false };
+
+  const aligned: Cell[] = new Array(width).fill(null);
+  cols.forEach((c, i) => {
+    aligned[c] = declared[i];
+  });
+  return { totals: aligned, realigned: true };
+}
+
 /**
  * ABSOLUTE_SUM / PERCENTAGE_SUM — colunas cujas linhas não fecham no total
  * declarado, e linhas cujas células não somam o "Total". Tolerância maior em
@@ -29,7 +83,9 @@ export function checkTableSums(
   const badColumns: number[] = [];
   const badRows: number[] = [];
   const notes: string[] = [];
-  const totals = table.totals;
+  // Totais casados às colunas de verdade; null = desalinhamento indecidível.
+  const { totals } = alignTotals(table);
+  const unaligned = Boolean(table.totals?.some(isNum)) && !totals;
 
   // Semântica declarada pela visão (hipótese): colunas que NÃO fecham em soma.
   // É só uma DAS pistas — a aritmética continua decidindo (ver abaixo).
@@ -38,8 +94,17 @@ export function checkTableSums(
     return k === 'measure' || k === 'rate' || k === 'share';
   };
 
+  if (unaligned) {
+    // Existe total declarado, mas não dá para saber de qual coluna cada número é.
+    // Acusar uma coluna aqui é chute — e chute com nome de coluna errado foi
+    // exatamente o FP do s42. Um único aviso, e o veredito fica "Verificar".
+    notes.push(
+      `A linha de totais não pôde ser alinhada às colunas (${table.totals?.length} totais para ${tableWidth(table)} colunas) — confira os totais na imagem.`
+    );
+  }
+
   if (totals) {
-    const ncols = Math.max(...table.rows.map((r) => r.length));
+    const ncols = tableWidth(table);
 
     // 1ª passada: status de cada coluna somável (média-final não é somável)
     interface ColCheck { c: number; decl: number; tol: number; soma: number; ok: boolean }
@@ -113,7 +178,7 @@ export function checkTableSums(
     }
   }
 
-  return { kind: 'table', table, badColumns, badRows, notes };
+  return { kind: 'table', table, badColumns, badRows, notes, ...(unaligned ? { unaligned } : {}) };
 }
 
 /**

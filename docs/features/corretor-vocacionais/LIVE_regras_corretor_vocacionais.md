@@ -16,6 +16,56 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.51 — 2026-08-12 — Alinhamento da linha de totais e agrupamento tolerante de fatias (RUNTIME)
+
+Sessão de calibração de falsos positivos feita **direto no banco**, sem PPTX: os payloads reais
+viraram fixture e o aceite virou teste. Registro completo em
+[`FP_sessao_2026-08-12.md`](./FP_sessao_2026-08-12.md). Ferramenta nova: `scripts/corretor-db.mjs`
+(skill `corretor-db`), leitura do Supabase pelo terminal — achado, payload e imagem-evidência.
+
+### 1. FP-01 — `alignTotals` (DET, `audit/engine.ts`)
+
+A visão às vezes devolve a linha de totais **compacta**, pulando as células vazias que o rótulo
+"Total" atravessa, enquanto `checkTableSums` casava total×coluna **por índice**. O resultado era
+acusar a coluna errada. Caso-âncora, s42 do Toledo: `["Total",1099,702,397,36.1,1099]` para 15
+colunas produziu *"Oferta Lançada: soma 434 ≠ total 397"* — **397 é o total de Oferta Atual**.
+
+Medido no banco: **19 de 67 tabelas com totais declarados (28%) vêm desalinhadas** — não era caso
+isolado, era uma fonte sistêmica de acusação com nome de coluna errado.
+
+- Comprimento igual ao da tabela → 1:1, como antes.
+- Comprimentos diferentes mas **tantos totais numéricos quanto colunas numéricas** → a ordem
+  resolve, realinha e a conferência segue (5 dos 19 casos).
+- Fora disso a atribuição é **indecidível**: nenhuma coluna é acusada, sai **um** aviso
+  (`viz.unaligned`) e o achado vira **"Verificar"** — coerente com a decisão (A) de 31/jul,
+  há um total declarado que ninguém conferiu.
+
+### 2. FP-02 — agrupamento tolerante de fatias (DET, `v3/paginated-tables.ts`)
+
+O par **s42 × s43 do Toledo — que motivou a regra de tabela paginada da v0.50 — escapava dela**,
+reprovado nas duas chaves: `headerKey` comparava a lista inteira de colunas (15 × 16, porque
+"Incorporadora Lançamento" virou duas colunas numa das fatias) e `totalsKey` era ancorado no índice
+(`1:1099|2:702|…` × `4:1099|5:702|…`, mesmos números em posições diferentes).
+
+- `totalsKey` passa a ser o **conjunto ordenado de valores**, não posições.
+- O cabeçalho sai da chave de Map e vira comparação tolerante (`sameTable`): **sobreposição dos
+  nomes das colunas numéricas ≥ 70%**. Absorve a coluna a mais e o typo de OCR — o par real diferia
+  em um caractere, "Vagas de Garage" × "Vagas de Garagem" — sem casar tabelas de assunto diferente.
+- O representante do conjunto passa a ser uma fatia com totais **alinháveis**.
+- Conjunto sem alinhamento **não conta como verificado**: encerrar as fatias ali esconderia um total
+  que ninguém checou.
+
+**Aceite (`toledo-real.test.ts`, payloads reais do banco):** os 6 achados de soma do Toledo caem para
+**3** — s100 × s101 fecham exatamente (471+194=665 · 392+132=524 · 79+62=141), s42 × s43 viram um
+achado do conjunto em "Verificar", s61 e s98 seguem sozinhos.
+
+**Verificação:** tsc limpo, **117 testes verdes** (109 → 117), lint limpo nos arquivos tocados, build
+ok. Sem migration nem deploy novo; segue pendente apenas o `analyze-ata-image` da v0.46.
+
+**Não implementado de propósito:** disparar o escalonamento para `gpt-4o` quando o payload vem
+desalinhado. Provavelmente melhoraria a leitura, mas afeta ~28% das tabelas com totais e o Marka já
+está em 71% do teto de R$ 4/estudo — é decisão de custo, separada da defesa (que custa R$ 0).
+
 ## Versão 0.50 — 2026-07-31 — Tabela paginada, exclusão declarada e “Comunicação da revisão” (RUNTIME)
 
 As duas decisões de produto que estavam pendentes no [checkpoint de 28/jul](./CHECKPOINT_2026-07-28.md)

@@ -8,7 +8,7 @@
 // distintas de todas as fatias e o resultado é conferido contra o total comum.
 // Fecha → os achados por fatia caem; não fecha → UM achado do conjunto.
 
-import { checkTableSums } from '../audit/engine';
+import { alignTotals, checkTableSums, numericColumns } from '../audit/engine';
 import type { AuditSection } from '../error-catalog';
 import type { Cell, ExtractedTable, Finding } from '../audit/model';
 
@@ -33,6 +33,13 @@ export interface PaginationOutcome {
 /** Fatias da mesma tabela ficam em slides adjacentes; 2 tolera um slide de quebra. */
 const MAX_SLIDE_GAP = 2;
 
+/**
+ * Fração das colunas numéricas que duas fatias precisam compartilhar para serem
+ * a mesma tabela. 0,7 absorve a coluna a mais e o typo de OCR (10 de 11 = 0,91
+ * no par s42×s43 do Toledo) sem casar tabelas de assunto diferente.
+ */
+const HEADER_OVERLAP_MIN = 0.7;
+
 function isNum(value: Cell): value is number {
   return typeof value === 'number';
 }
@@ -46,21 +53,49 @@ function normalized(value: string): string {
     .trim();
 }
 
-/** Assinatura do cabeçalho — fatias da mesma tabela repetem as colunas. */
-function headerKey(table: ExtractedTable): string {
-  return table.columns.map((column) => normalized(String(column ?? ''))).join('|');
+/** Nomes normalizados das colunas numéricas — as que participam da soma. */
+function headerSet(table: ExtractedTable): Set<string> {
+  // min = 1: uma fatia de uma linha só tem de produzir o mesmo conjunto que uma de vinte.
+  return new Set(numericColumns(table, 1).map((c) => normalized(String(table.columns[c] ?? c))));
+}
+
+/**
+ * Duas fatias descrevem a mesma tabela?
+ *
+ * Comparar a lista de colunas por igualdade exata não sobrevive ao ruído da
+ * visão: no Toledo o s42 e o s43 são a mesma tabela, mas saíram com 15 e 16
+ * colunas ("Incorporadora Lançamento" virou duas) e um cabeçalho lido como
+ * "Vagas de Garage" num slide e "Vagas de Garagem" no outro. Um caractere
+ * derrubava o agrupamento.
+ *
+ * Então a comparação é por **sobreposição dos nomes das colunas numéricas**:
+ * tolera a coluna a mais e o typo isolado, mas reprova tabelas de assunto
+ * diferente (Domicílios/Renda × Unidades/Vendidas quase não se cruzam).
+ */
+function sameTable(a: ExtractedTable, b: ExtractedTable): boolean {
+  const setA = headerSet(a);
+  const setB = headerSet(b);
+  if (!setA.size || !setB.size) return false;
+  let shared = 0;
+  for (const name of setA) if (setB.has(name)) shared++;
+  return shared / Math.min(setA.size, setB.size) >= HEADER_OVERLAP_MIN;
 }
 
 /**
  * Assinatura dos totais declarados. Exige DOIS ou mais totais numéricos: um
  * único número igual entre tabelas vizinhas é coincidência comum (100%, 0),
  * dois ou três repetidos são a impressão digital da mesma tabela fatiada.
+ *
+ * Comparado como **conjunto ordenado de valores**, não por índice: o mesmo trio
+ * 1099/702/397 aparecia nas posições 1,2,3 do s42 e 4,5,6 do s43 — mesma tabela,
+ * chaves diferentes, agrupamento perdido.
  */
 function totalsKey(table: ExtractedTable): string | null {
-  const parts = (table.totals ?? [])
-    .map((cell, index) => (isNum(cell) ? `${index}:${Math.round(cell * 100) / 100}` : null))
-    .filter((part): part is string => part !== null);
-  return parts.length >= 2 ? parts.join('|') : null;
+  const values = (table.totals ?? [])
+    .filter(isNum)
+    .map((cell) => Math.round(cell * 100) / 100)
+    .sort((a, b) => a - b);
+  return values.length >= 2 ? values.join('|') : null;
 }
 
 /** Linha repetida entre fatias (paginação com sobreposição, ou leitura duplicada). */
@@ -78,17 +113,30 @@ export function resolvePaginatedSums(slices: SumSlice[]): PaginationOutcome {
   const findings: Finding[] = [];
   let verified = 0;
 
-  const groups = new Map<string, SumSlice[]>();
+  // Chaveia pela assinatura dos totais (forte: ≥2 números iguais entre vizinhos) e
+  // só então separa por tabela, já que o cabeçalho exige comparação tolerante e
+  // não serve como chave de Map.
+  const byTotals = new Map<string, SumSlice[]>();
   for (const slice of slices) {
     const totals = totalsKey(slice.table);
     if (!totals) continue;
-    const key = `${headerKey(slice.table)}#${totals}`;
-    const group = groups.get(key);
-    if (group) group.push(slice);
-    else groups.set(key, [slice]);
+    const bucket = byTotals.get(totals);
+    if (bucket) bucket.push(slice);
+    else byTotals.set(totals, [slice]);
   }
 
-  for (const group of groups.values()) {
+  const groups: SumSlice[][] = [];
+  for (const bucket of byTotals.values()) {
+    const local: SumSlice[][] = [];
+    for (const slice of bucket) {
+      const group = local.find((g) => sameTable(g[0].table, slice.table));
+      if (group) group.push(slice);
+      else local.push([slice]);
+    }
+    groups.push(...local);
+  }
+
+  for (const group of groups) {
     const slideNumbers = [...new Set(group.map((slice) => slice.slide))].sort((a, b) => a - b);
     if (slideNumbers.length < 2) continue;
     if (slideNumbers.some((n, i) => i > 0 && n - slideNumbers[i - 1] > MAX_SLIDE_GAP)) continue;
@@ -106,7 +154,11 @@ export function resolvePaginatedSums(slices: SumSlice[]): PaginationOutcome {
       }
     }
 
-    const first = group[0].table;
+    // Representante do conjunto: a fatia cujos totais o motor consegue casar com
+    // as colunas. As fatias declaram o mesmo total, mas nem todas o transcrevem
+    // alinhado — usar uma alinhada é o que permite conferir o conjunto.
+    const first =
+      group.map((slice) => slice.table).find((table) => alignTotals(table).totals !== null) ?? group[0].table;
     const merged: ExtractedTable = {
       title: first.title,
       columns: first.columns,
@@ -124,7 +176,9 @@ export function resolvePaginatedSums(slices: SumSlice[]): PaginationOutcome {
     for (const slice of group) dropIds.add(slice.findingId);
     const refs = slideNumbers.map((n) => `s${n}`);
 
-    if (bad === 0) {
+    // Sem alinhamento não houve conferência: encerrar as fatias aqui esconderia
+    // um total que ninguém checou. Só conta como verificado quando fechou de fato.
+    if (bad === 0 && !viz.unaligned) {
       verified += group.length;
       continue;
     }
@@ -133,8 +187,12 @@ export function resolvePaginatedSums(slices: SumSlice[]): PaginationOutcome {
       type: 'ABSOLUTE_SUM',
       section: group[0].section,
       slideRef: refs.join(' × '),
-      title: `Tabela paginada não fecha somando as ${group.length} fatias`,
-      detail: `Os slides ${refs.join(', ')} repetem o mesmo total declarado — são fatias da mesma tabela, então cada fatia sozinha nunca fecharia. Somando as ${rows.length} linhas distintas: ${viz.notes?.[0] ?? 'o conjunto não fecha no total.'} Confira se falta uma fatia ou se alguma linha foi lida errado.`,
+      title: viz.unaligned
+        ? `Totais da tabela paginada não conferidos (${group.length} fatias)`
+        : `Tabela paginada não fecha somando as ${group.length} fatias`,
+      detail: viz.unaligned
+        ? `Os slides ${refs.join(', ')} repetem o mesmo total declarado — são fatias da mesma tabela. A linha de totais não pôde ser casada com as colunas em nenhuma das fatias, então a soma do conjunto não foi conferida: confira na imagem.`
+        : `Os slides ${refs.join(', ')} repetem o mesmo total declarado — são fatias da mesma tabela, então cada fatia sozinha nunca fecharia. Somando as ${rows.length} linhas distintas: ${viz.notes?.[0] ?? 'o conjunto não fecha no total.'} Confira se falta uma fatia ou se alguma linha foi lida errado.`,
       ok: false,
       viz,
       // O conjunto depende de TODAS as fatias terem sido lidas certo; uma linha

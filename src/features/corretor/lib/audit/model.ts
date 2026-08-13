@@ -38,6 +38,12 @@ export interface TableViz {
   badRows?: number[];
   /** Resumo por coluna marcada: soma calculada vs total declarado. */
   notes?: string[];
+  /**
+   * A linha de totais não pôde ser alinhada às colunas — a atribuição
+   * coluna↔total seria um chute, então nenhuma coluna é acusada. O achado vira
+   * "Verificar": há um total declarado que ninguém conferiu.
+   */
+  unaligned?: boolean;
 }
 
 export interface SideBySideRow {

@@ -181,17 +181,21 @@ function numericFindings(ir: Ir): { findings: Finding[]; verified: number; numer
       const nRows = ext.rows.length;
       const viz = checkTableSums(ext, { absTol: Math.max(0.5, nRows / 2) });
       const bad = (viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0);
-      if (bad > 0) {
+      if (bad > 0 || viz.unaligned) {
         const id = `sum-${s.n}-${ti}`;
         findings.push({
           id,
           type: 'ABSOLUTE_SUM',
           section: toAuditSection(s.secao_canonica),
           slideRef: slideRef(s.n),
-          title: 'Tabela não fecha no total declarado',
-          detail: `Checagem determinística de soma sobre a tabela nativa do slide ${s.n}.`,
+          title: viz.unaligned ? 'Totais da tabela não conferidos' : 'Tabela não fecha no total declarado',
+          detail: viz.unaligned
+            ? `A linha de totais do slide ${s.n} não pôde ser casada com as colunas, então a soma não foi conferida.`
+            : `Checagem determinística de soma sobre a tabela nativa do slide ${s.n}.`,
           ok: false,
           viz,
+          // Sem alinhamento não há acusação a sustentar: é convite a olhar, não erro.
+          ...(viz.unaligned ? { confidence: 3 as const } : {}),
         });
         slices.push({ slide: s.n, section: toAuditSection(s.secao_canonica), findingId: id, table: ext });
       } else {

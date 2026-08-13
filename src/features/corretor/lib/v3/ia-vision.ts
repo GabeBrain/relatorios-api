@@ -442,7 +442,8 @@ async function processImage(
     // 1) soma de coluna/linha × total declarado
     if (ext.totals) {
       const viz = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
-      if ((viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0) > 0) {
+      const bad = (viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0);
+      if (bad > 0 || viz.unaligned) {
         flagged = true;
         ref.sumFindingId = `iavis-sum-${c.sha1.slice(0, 10)}-${ti}`;
         findings.push({
@@ -450,12 +451,18 @@ async function processImage(
           type: 'ABSOLUTE_SUM',
           section: secao,
           slideRef: `s${c.slide}`,
-          title: `Tabela não fecha no total (${ext.title.slice(0, 50)})`,
-          detail: `Números da imagem do slide ${c.slide} (${origemLeitura}). ${escalated ? 'Como o 4o confirmou, é provável bug real do estudo.' : 'Pode ser bug do estudo OU dígito mal lido — confira na imagem.'}`,
+          title: viz.unaligned
+            ? `Totais da tabela não conferidos (${ext.title.slice(0, 50)})`
+            : `Tabela não fecha no total (${ext.title.slice(0, 50)})`,
+          detail: viz.unaligned
+            ? `A linha de totais do slide ${c.slide} não pôde ser casada com as colunas, então a soma não foi conferida — confira na imagem.`
+            : `Números da imagem do slide ${c.slide} (${origemLeitura}). ${escalated ? 'Como o 4o confirmou, é provável bug real do estudo.' : 'Pode ser bug do estudo OU dígito mal lido — confira na imagem.'}`,
           ok: false,
           viz,
           evidenceSha1: c.sha1,
           escalated,
+          // Sem alinhamento não há acusação a sustentar: é convite a olhar, não erro.
+          ...(viz.unaligned ? { confidence: 3 as const } : {}),
         });
       }
     }
