@@ -60,6 +60,32 @@ Antes de calibrar o extrator, o que dá e o que não dá para assumir:
   `"Alterar 0 por traço"`. São os pontos onde o erro humano entra.
 - Posição de linha/coluna dos dados **abaixo** do cabeçalho varia com o número de categorias.
 
+## Nomes de arquivo: instáveis em toda dimensão (medido em 3 pacotes, 13/ago/2026)
+
+Comparando Rolândia (jul/26), Toledo (jul/26) e Marka (jan/26), **nenhum nome de arquivo se repete
+exatamente** entre estudos que cumprem o mesmo papel:
+
+| Dimensão | Evidência |
+|---|---|
+| Acentuação | `ABSORÇAO` × `ABSORCAO` · `Locação` × `Locacao` · `Área` × `Area` |
+| Prefixo numérico | `01. Consolidada - 1 Km_verificação - OK` × `1.CONSOLIDADA 1 KM` |
+| Caixa | `SOCIODEMOGRAFIA` × `Sociodemografia` × `socio` |
+| Sufixo livre | `_verificação - OK` · ` 2 raios` · ` - ZI` · ` ok` |
+| Recorte | por raio (1/2/3 Km, Z.I.) × por segmento (HIS 1, HIS 2, HMP, Primária) |
+| Quantidade | 2 consolidadas no Toledo, 3 na Rolândia, 4 "Analise Vertical" no Marka |
+| Integridade | `1. OnMaps (5.xlsm` — nome truncado com parêntese aberto |
+| Duplicatas | Toledo tem 2 `ABSORCAO LANCAMENTOS` e 2 arquivos de área de lazer |
+
+**Gerações diferentes de template.** Jan/2026 (Marka) organiza por **segmento de produto**
+(`Analise Vertical Otimizada - HIS 1/HIS 2/HMP/Primaria`, `Cenarios - 3 Anos`, `OnMaps`);
+jul/2026 (Rolândia, Toledo) organiza por **raio** (`Consolidada - 1 Km`, `SOCIODEMOGRAFIA`,
+`ABSORÇAO LANÇAMENTOS`). Papéis equivalentes, vocabulário incompatível.
+
+**Consequência:** classificar por **papel**, via palavra-chave sobre o nome normalizado (sem acento,
+minúsculo, sem pontuação/numeração), nunca por nome exato — e manter **um mapa de abas por geração**,
+detectada pelo conjunto de arquivos presente. Quando dois arquivos disputam o mesmo papel, **registrar
+a ambiguidade** em vez de escolher em silêncio.
+
 **Consequência para o extrator:**
 1. Ler apenas uma **lista branca de abas de saída** — nunca varrer o workbook inteiro.
 2. Localizar o cabeçalho **procurando os nomes das colunas**, nunca por coordenada fixa.
