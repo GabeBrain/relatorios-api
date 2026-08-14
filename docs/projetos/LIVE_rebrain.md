@@ -49,6 +49,25 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-14 — Relatório AELO no menu — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — navegação e relatório AELO
+- **O quê:** novo item lateral e destino AELO com uma cópia independente da implementação do Relatório Secovi; a página inicia com os mesmos filtros, escopo GeoBrain, coleta, estados e exportação, mas possui código próprio para evoluir sem afetar o Secovi.
+- **Por quê:** disponibilizar uma entrada própria para o relatório AELO sem duplicar a implementação funcional.
+- **Arquivos:** `src/components/layout/AppLayout.tsx`, `src/components/layout/CommandPalette.tsx`, `src/App.tsx`, `src/pages/TestesArquitetura.tsx`, `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** amplia a etapa de Relatórios Secovi para uma segunda entrada de relatório com paridade funcional; homologação específica do AELO permanece pendente.
+
+### 2026-08-14 — Segmentação do tempo de vendas no AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — coluna de tempo de vendas
+- **O quê:** adicionada a segmentação do campo `time_on_sales` da API em “Até 6 Meses”, “De 7 a 24 Meses”, “De 25 a 48 Meses” e “Acima de 49 Meses”.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** coluna disponível no relatório AELO; validar os valores contra a base AELO SP 1T26.
+
+### 2026-08-14 — Mapeamento de campos comerciais no AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — colunas comerciais da base AELO
+- **O quê:** adicionadas as colunas Taxa administrativa, Oferta por lotes, Entrada, Nº de Parcelas, % de Juros Mensal, Indíce de Juros e Desconto à Vista, mapeadas para os campos informados da API.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** esses campos deixam de ser lacunas do relatório; permanece pendente validar a unidade/formatação dos percentuais com a base AELO.
+
 ### 2026-08-11 — Governança de documentação viva e frontend — Gabriel
 - **Ambiente/funcionalidade:** plataforma Rebrain — regras compartilhadas de desenvolvimento e revisão.
 - **O quê:** formalizado o controle de documentos vivos em PR/push, com validação automatizada, e publicado o contrato de frontend para componentes, estados de página, acessibilidade, responsividade e registro de decisões duradouras.

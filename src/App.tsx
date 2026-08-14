@@ -22,6 +22,7 @@ const CorretorV3Page = lazy(() => import('./features/corretor/pages/CorretorV3Pa
 const CorretorReportPage = lazy(() => import('./features/corretor/pages/CorretorReportPage.tsx'));
 const CorretorCalibrationPage = lazy(() => import('./features/corretor/pages/CorretorCalibrationPage.tsx'));
 const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/AtualizadorVgvPage.tsx'));
+const RelatorioAeloPage = lazy(() => import('./pages/RelatorioAelo.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -68,6 +69,14 @@ const App = () => (
 
                 {/* Rebrain */}
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
+                <Route
+                  path="/rebrain/aelo"
+                  element={(
+                    <Suspense fallback={<div className="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">Carregando o Relatório AELO...</div>}>
+                      <RelatorioAeloPage />
+                    </Suspense>
+                  )}
+                />
                 <Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento />} />
                 <Route path="/corretor" element={<CorretorV3Page />} />
                 <Route path="/corretor/calibracao" element={<CorretorCalibrationPage />} />
