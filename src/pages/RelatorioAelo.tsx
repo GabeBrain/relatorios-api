@@ -26,11 +26,8 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
-import MUNICIPIOS_BR from '@/assets/municipios-br.json';
 import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
 import { aggregateTypologyHistoryByQuarter, filterHistoryThroughQuarter, periodToQuarter } from '@/features/relatorios-secovi/quarterly-history';
-
-const UF_LIST = Object.keys(MUNICIPIOS_BR as Record<string, string[]>).sort();
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const ALL_BUILDING_TYPES = ['Vertical', 'Horizontal', 'Comercial', 'Hotel'];
