@@ -49,6 +49,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-14 — Relatório AELO no menu — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — navegação e relatório AELO
+- **O quê:** novo item lateral e destino AELO reutilizando integralmente o fluxo do Relatório Secovi; a página mantém filtros, escopo GeoBrain, coleta, estados e exportação, alterando apenas o título exibido.
+- **Por quê:** disponibilizar uma entrada própria para o relatório AELO sem duplicar a implementação funcional.
+- **Arquivos:** `src/components/layout/AppLayout.tsx`, `src/components/layout/CommandPalette.tsx`, `src/App.tsx`, `src/pages/TestesArquitetura.tsx`.
+- **Impacto em Etapas/Pendências:** amplia a etapa de Relatórios Secovi para uma segunda entrada de relatório com paridade funcional; homologação específica do AELO permanece pendente.
+
 ### 2026-08-11 — Governança de documentação viva e frontend — Gabriel
 - **Ambiente/funcionalidade:** plataforma Rebrain — regras compartilhadas de desenvolvimento e revisão.
 - **O quê:** formalizado o controle de documentos vivos em PR/push, com validação automatizada, e publicado o contrato de frontend para componentes, estados de página, acessibilidade, responsividade e registro de decisões duradouras.

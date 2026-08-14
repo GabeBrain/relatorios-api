@@ -68,6 +68,7 @@ const App = () => (
 
                 {/* Rebrain */}
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
+                <Route path="/rebrain/aelo" element={<TestesArquitetura reportName="Relatório AELO" />} />
                 <Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento />} />
                 <Route path="/corretor" element={<CorretorV3Page />} />
                 <Route path="/corretor/calibracao" element={<CorretorCalibrationPage />} />
