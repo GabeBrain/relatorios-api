@@ -9,6 +9,7 @@ import MapaLegado from './pages/MapaLegado.tsx';
 import Home from './pages/Home.tsx';
 import ApiExplorer from './pages/ApiExplorer.tsx';
 import TestesArquitetura from './pages/TestesArquitetura.tsx';
+import RelatorioAelo from './pages/RelatorioAelo.tsx';
 import Assistente from './pages/Assistente.tsx';
 import AreaQuanti from './pages/AreaQuanti.tsx';
 import NotFound from './pages/NotFound.tsx';
@@ -68,7 +69,7 @@ const App = () => (
 
                 {/* Rebrain */}
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
-                <Route path="/rebrain/aelo" element={<TestesArquitetura reportName="Relatório AELO" />} />
+                <Route path="/rebrain/aelo" element={<RelatorioAelo />} />
                 <Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento />} />
                 <Route path="/corretor" element={<CorretorV3Page />} />
                 <Route path="/corretor/calibracao" element={<CorretorCalibrationPage />} />
