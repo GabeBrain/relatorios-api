@@ -49,6 +49,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-14 — Correção de codificação visual no Relatório AELO — Gabriel
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — textos e rótulos do relatório.
+- **O quê:** corrigida a codificação UTF-8 que fazia acentos, símbolos e mensagens aparecerem corrompidos na tela e na exportação; a lógica do relatório, seus campos comerciais e o escopo GeoApi permanecem inalterados.
+- **Por quê:** restaurar legibilidade dos textos no runtime após a cópia inicial da página.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** AELO segue pendente apenas de homologação específica da base SP 1T26 e da formatação/unidade dos percentuais.
+
 ### 2026-08-14 — Relatório AELO no menu — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — navegação e relatório AELO
 - **O quê:** novo item lateral e destino AELO com uma cópia independente da implementação do Relatório Secovi; a página inicia com os mesmos filtros, escopo GeoBrain, coleta, estados e exportação, mas possui código próprio para evoluir sem afetar o Secovi.
