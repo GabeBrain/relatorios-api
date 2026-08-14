@@ -1,8 +1,4 @@
-Exit code: 0
-Wall time: 2.5 seconds
-Total output lines: 1268
-Output:
-import { useState, useCallback, useRef, useEffect } from 'react';
+﻿import { useState, useCallback, useRef, useEffect } from 'react';
 import { Download, Play, Building2, X, HelpCircle, ChevronsUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -39,11 +35,11 @@ const ESTIMATED_SECONDS_PER_DETAIL = 0.7;
 type Row = Record<string, string | number | null>;
 
 const HEADER_COLS = [
-  'Tipo', 'Tempo de vendas', 'Empreendimentos', 'Logradouro', 'NÃºmero', 'Bairro', 'Cidade/UF',
+  'Tipo', 'Empreendimentos', 'Logradouro', 'NÃºmero', 'Bairro', 'Cidade/UF',
   'Incorporadora', 'PadrÃ£o', 'LanÃ§amento', 'ANO', 'Entrega',
   'Tipo de Tipologia', 'Dorm.', 'PreÃ§o de lanÃ§amento', 'PreÃ§o atual',
   'm2 Priv.', 'Valor m2 Priv.', 'Unidades por Tipologia',
-  'Taxa administrativa', 'Oferta por lotes', 'Entrada', 'Nº de Parcelas',
+  'Tempo de vendas', 'Taxa administrativa', 'Oferta por lotes', 'Entrada', 'Nº de Parcelas',
   '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista',
   '*Vendidos no trimestre', '*Distratos no trimestre',
 ];
@@ -398,7 +394,6 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
 
       const row: Row = {
         'Tipo': b.building_type as string ?? '',
-        'Tempo de vendas': salesTimeSegment(last.time_on_sales ?? b.time_on_sales),
         'Empreendimentos': b.name as string ?? '',
         'Logradouro': b.address as string ?? '',
         'NÃºmero': b.address_number as string ?? '',
@@ -416,6 +411,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
         'm2 Priv.': privArea || null,
         'Valor m2 Priv.': toNum(last.price_private_area),
         'Unidades por Tipologia': qty || null,
+        'Tempo de vendas': salesTimeSegment(last.time_on_sales ?? b.time_on_sales),
         'Taxa administrativa': toNum(last.taxa_associativa),
         'Oferta por lotes': toNum(last.qty),
         'Entrada': toNum(b.down_payment_percentage),
@@ -456,7 +452,409 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
     const tb = TYPE_ORDER[String(b['Tipo'] ?? '')] ?? 99;
     if (ta !== tb) return ta - tb;
     const da = sortableDate(String(a['LanÃ§amento'] ?? ''));
-    const db = sortableDate(String(b['LanÃ…4426 tokens truncated…€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    const db = sortableDate(String(b['LanÃ§amento'] ?? ''));
+    if (da !== db) return da.localeCompare(db);
+    const na = String(a['Empreendimentos'] ?? ''); const nb = String(b['Empreendimentos'] ?? '');
+    if (na !== nb) return na.localeCompare(nb);
+    return (toNum(a['Dorm.']) ?? 0) - (toNum(b['Dorm.']) ?? 0);
+  });
+
+  return rows;
+}
+
+async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: string[], city: string, lastQ: string): Promise<void> {
+  const { utils, writeFile } = await import('xlsx');
+  const allCols = [...HEADER_COLS, ...quarterCols.map((q) => `Vendas lÃ­quidas ${q}`), ...FOOTER_COLS];
+  const sheetRows = (rows: Row[]) =>
+    [allCols, ...rows.map((row) => allCols.map((c) => row[c] ?? null))];
+  const sfx = qSheet(lastQ);
+  const wb = utils.book_new();
+  utils.book_append_sheet(wb, utils.aoa_to_sheet(sheetRows(activeRows)), `CONSOLIDADA ${sfx}`);
+  utils.book_append_sheet(wb, utils.aoa_to_sheet(sheetRows(inactiveRows)), 'ESGOTADOS');
+  writeFile(wb, `Relatorio_${city.trim()}_${sfx}.xlsx`);
+}
+
+// â”€â”€ timeseries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+type TimeMetric = 'sold_in_period' | 'typology_stock' | 'pct_avail' | 'price' | 'price_private_area' | 'vgv_stock';
+
+const TIME_METRICS: {
+  key: TimeMetric; label: string; agg: 'sum' | 'avg';
+  description: string; format: (v: number) => string; axis: 'left' | 'right';
+}[] = [
+  {
+    key: 'sold_in_period', label: 'Vendas (unidades)', agg: 'sum', axis: 'left',
+    description: 'Total de unidades vendidas por trimestre',
+    format: (v) => v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
+  },
+  {
+    key: 'typology_stock', label: 'Estoque (unidades)', agg: 'sum', axis: 'left',
+    description: 'Total de unidades em estoque por trimestre',
+    format: (v) => v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
+  },
+  {
+    key: 'pct_avail', label: '% Disponibilidade', agg: 'avg', axis: 'left',
+    description: 'Percentual mÃ©dio de unidades disponÃ­veis',
+    format: (v) => `${(v * 100).toFixed(1)}%`,
+  },
+  {
+    key: 'price', label: 'PreÃ§o mÃ©dio (R$)', agg: 'avg', axis: 'right',
+    description: 'PreÃ§o mÃ©dio por unidade entre todas as tipologias',
+    format: (v) => v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(2)}M` : `R$ ${(v / 1_000).toFixed(0)}k`,
+  },
+  {
+    key: 'price_private_area', label: 'R$/mÂ² mÃ©dio', agg: 'avg', axis: 'right',
+    description: 'PreÃ§o mÃ©dio por metro quadrado privativo',
+    format: (v) => `R$ ${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`,
+  },
+  {
+    key: 'vgv_stock', label: 'VGV Estoque', agg: 'sum', axis: 'right',
+    description: 'Valor Geral de Vendas do estoque disponÃ­vel por trimestre',
+    format: (v) => v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1)}M` : `R$ ${(v / 1_000).toFixed(0)}k`,
+  },
+];
+
+// Brand colors per metric: greens for left-axis (units), blues for right-axis (prices)
+const LINE_COLORS: Record<TimeMetric, string> = {
+  sold_in_period:     '#4d7c0f',
+  typology_stock:     '#2563eb',
+  pct_avail:          '#65a30d',
+  price:              '#1d4ed8',
+  price_private_area: '#84cc16',
+  vgv_stock:          '#3b82f6',
+};
+
+// Bar chart: single green family, darkest â†’ lightest (bars sorted desc)
+const BAR_GREEN_SHADES = ['#3f6212', '#4d7c0f', '#65a30d', '#84cc16', '#a3e635', '#bef264', '#d9f99d', '#ecfccb'];
+function barGreen(i: number, total: number): string {
+  const idx = Math.round((i / Math.max(total - 1, 1)) * (BAR_GREEN_SHADES.length - 1));
+  return BAR_GREEN_SHADES[Math.min(idx, BAR_GREEN_SHADES.length - 1)];
+}
+
+function buildTimeseriesData(
+  buildings: Record<string, unknown>[],
+  quarterCols: string[],
+  metric: TimeMetric,
+): { quarter: string; value: number | null }[] {
+  const qSet = new Set(quarterCols);
+  const byQuarter = new Map<string, number[]>();
+  for (const q of quarterCols) byQuarter.set(q, []);
+
+  for (const b of buildings) {
+    for (const e of ((b.typologies_history as unknown[]) ?? [])) {
+      const entry = e as Record<string, unknown>;
+      const q = periodToQuarter(String(entry.period ?? ''));
+      if (!q || !qSet.has(q)) continue;
+
+      let v: number | null = null;
+      if (metric === 'pct_avail') {
+        const stock = toNum(entry.typology_stock);
+        const qty = toNum(entry.qty);
+        v = stock !== null && qty ? stock / qty : null;
+      } else {
+        v = toNum(entry[metric]);
+      }
+
+      if (v !== null) byQuarter.get(q)!.push(v);
+    }
+  }
+
+  const def = TIME_METRICS.find((m) => m.key === metric)!;
+  return quarterCols.map((q) => {
+    const vals = byQuarter.get(q) ?? [];
+    if (vals.length === 0) return { quarter: qLabel(q), value: null };
+    const value = def.agg === 'sum'
+      ? vals.reduce((a, b) => a + b, 0)
+      : vals.reduce((a, b) => a + b, 0) / vals.length;
+    return { quarter: qLabel(q), value };
+  });
+}
+
+// Multi-metric timeseries: returns rows with one key per selected metric
+function buildMultiTimeseriesData(
+  buildings: Record<string, unknown>[],
+  quarterCols: string[],
+  metrics: TimeMetric[],
+): Record<string, number | string | null>[] {
+  const seriesMap = new Map<TimeMetric, (number | null)[]>();
+  for (const metric of metrics) {
+    seriesMap.set(metric, buildTimeseriesData(buildings, quarterCols, metric).map((d) => d.value));
+  }
+  return quarterCols.map((q, i) => {
+    const row: Record<string, number | string | null> = { quarter: qLabel(q) };
+    for (const metric of metrics) row[metric] = seriesMap.get(metric)?.[i] ?? null;
+    return row;
+  });
+}
+
+// â”€â”€ sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+function BrainLogoProgress({ pct, label }: { pct: number; label?: string }) {
+  const clipped = Math.max(0, Math.min(100, pct));
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative w-20 h-10">
+        <img src={brainLogo} alt="" className="absolute inset-0 w-full h-full object-contain opacity-10" />
+        <img
+          src={brainLogo}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ clipPath: `inset(0 ${100 - clipped}% 0 0)` }}
+        />
+      </div>
+      {label && <p className="text-[11px] text-muted-foreground">{label}</p>}
+    </div>
+  );
+}
+function FetchingOverlay({ pct, done, total, failed, onAbort }: {
+  pct: number; done: number; total: number; failed: number; onAbort: () => void;
+}) {
+  const clipped = Math.max(0, Math.min(100, pct));
+  return (
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-background/90 backdrop-blur-sm">
+      <div className="relative w-64 h-32 mb-6">
+        <img src={brainLogo} alt="" className="absolute inset-0 w-full h-full object-contain opacity-10" />
+        <img
+          src={brainLogo} alt=""
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ clipPath: `inset(0 ${100 - clipped}% 0 0)` }}
+        />
+      </div>
+      <p className="text-sm font-medium text-foreground animate-pulse">Carregando...</p>
+      {total > 0 && (
+        <p className="text-xs text-muted-foreground mt-2">
+          {done.toLocaleString('pt-BR')} / {total.toLocaleString('pt-BR')} empreendimentos
+          {failed > 0 && <span className="text-amber-500 ml-2">Â· {failed} falha(s)</span>}
+        </p>
+      )}
+      <button
+        type="button" onClick={onAbort}
+        className="mt-6 flex items-center gap-1.5 text-xs text-red-500 hover:text-red-400 transition-colors"
+      >
+        <X className="h-3.5 w-3.5" />
+        Cancelar coleta
+      </button>
+    </div>
+  );
+}
+
+function TimeseriesChart({ buildings, quarterCols }: {
+  buildings: Record<string, unknown>[];
+  quarterCols: string[];
+}) {
+  const [selectedMetrics, setSelectedMetrics] = useState<TimeMetric[]>(['sold_in_period']);
+
+  function toggleMetric(key: TimeMetric) {
+    setSelectedMetrics((prev) => {
+      if (prev.includes(key)) return prev.length > 1 ? prev.filter((k) => k !== key) : prev;
+      return [...prev, key];
+    });
+  }
+
+  const data = buildMultiTimeseriesData(buildings, quarterCols, selectedMetrics);
+
+  const leftMetrics = selectedMetrics.filter((k) => TIME_METRICS.find((m) => m.key === k)?.axis === 'left');
+  const rightMetrics = selectedMetrics.filter((k) => TIME_METRICS.find((m) => m.key === k)?.axis === 'right');
+  const hasLeft = leftMetrics.length > 0;
+  const hasRight = rightMetrics.length > 0;
+
+  const firstLeftDef = TIME_METRICS.find((m) => leftMetrics.includes(m.key));
+  const firstRightDef = TIME_METRICS.find((m) => rightMetrics.includes(m.key));
+
+  function leftTickFmt(v: number) {
+    if (!firstLeftDef) return String(v);
+    if (firstLeftDef.key === 'pct_avail') return `${(v * 100).toFixed(0)}%`;
+    if (v >= 1_000) return `${(v / 1_000).toFixed(0)}k`;
+    return v.toFixed(0);
+  }
+
+  function rightTickFmt(v: number) {
+    if (!firstRightDef) return String(v);
+    if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
+    if (v >= 1_000) return `${(v / 1_000).toFixed(0)}k`;
+    return v.toFixed(0);
+  }
+
+  const activeDef = selectedMetrics.length === 1
+    ? TIME_METRICS.find((m) => m.key === selectedMetrics[0])
+    : undefined;
+
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      {/* Header */}
+      <div className="flex items-start justify-between px-4 py-3 border-b border-border">
+        <div>
+          <p className="text-sm font-semibold">SÃ©rie HistÃ³rica</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {activeDef ? activeDef.description : 'MÃºltiplas variÃ¡veis â€” eixo esquerdo: unidades, direito: valores (R$)'}
+          </p>
+        </div>
+      </div>
+
+      {/* Metric selector pills */}
+      <div className="flex flex-wrap gap-2 px-4 pt-3 pb-1">
+        {TIME_METRICS.map((m) => {
+          const isSelected = selectedMetrics.includes(m.key);
+          const color = LINE_COLORS[m.key];
+          return (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => toggleMetric(m.key)}
+              className={cn(
+                'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border transition-all font-medium',
+                isSelected ? 'text-foreground' : 'text-muted-foreground border-border/60 hover:border-border'
+              )}
+              style={isSelected ? { borderColor: color, backgroundColor: color + '18', color } : {}}
+            >
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ background: isSelected ? color : 'currentColor', opacity: isSelected ? 1 : 0.35 }}
+              />
+              {m.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Chart */}
+      <div className="px-2 pt-2 pb-3">
+        <ResponsiveContainer width="100%" height={230}>
+          <LineChart data={data} margin={{ top: 8, right: hasRight ? 16 : 24, left: 0, bottom: 4 }}>
+            <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="4 4" vertical={false} />
+            <XAxis
+              dataKey="quarter"
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 9 }}
+              axisLine={{ stroke: 'hsl(var(--border))' }}
+              tickLine={false}
+              interval="preserveStartEnd"
+            />
+            {hasLeft && (
+              <YAxis
+                yAxisId="left"
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={leftTickFmt}
+                width={52}
+              />
+            )}
+            {hasRight && (
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={rightTickFmt}
+                width={60}
+              />
+            )}
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '8px',
+                fontSize: 11,
+              }}
+              labelStyle={{ color: 'hsl(var(--foreground))', marginBottom: 4 }}
+              formatter={(value: number, name: string) => {
+                const def = TIME_METRICS.find((m) => m.key === name);
+                return [def ? def.format(value) : value, def?.label ?? name];
+              }}
+            />
+            {selectedMetrics.map((key) => {
+              const def = TIME_METRICS.find((m) => m.key === key)!;
+              const color = LINE_COLORS[key];
+              return (
+                <Line
+                  key={key}
+                  type="monotone"
+                  dataKey={key}
+                  yAxisId={def.axis}
+                  stroke={color}
+                  strokeWidth={2}
+                  dot={{ fill: color, r: 3, strokeWidth: 0 }}
+                  activeDot={{ r: 5, fill: color, strokeWidth: 0 }}
+                  connectNulls={false}
+                />
+              );
+            })}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+function formatCell(col: string, val: unknown): string {
+  if (val === null || val === undefined || val === '') return '';
+  if (col === '% Dispon.') return `${(val as number).toFixed(1)}%`;
+  if (typeof val === 'number') {
+    if (col.startsWith('VGV') || col === 'Vendas LÃ­quidas') {
+      return val >= 1_000_000
+        ? `R$ ${(val / 1_000_000).toFixed(2)}M`
+        : `R$ ${val.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
+    }
+    if (
+      col === 'PreÃ§o de lanÃ§amento' || col === 'PreÃ§o atual' ||
+      col === 'Valor m2 Priv.' || col === 'R$/mÂ²\nEstoque' || col === 'R$/mÂ² LanÃ§ado'
+    ) return `R$ ${val.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
+  }
+  return String(val);
+}
+
+function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }) {
+  const allCols = [
+    ...HEADER_COLS,
+    ...quarterCols.map((q) => `Vendas lÃ­quidas ${q}`),
+    ...FOOTER_COLS,
+  ];
+  if (rows.length === 0) return <p className="text-xs text-muted-foreground py-4">Nenhum dado.</p>;
+  return (
+    <UITooltipProvider delayDuration={200}>
+      <div className="overflow-auto max-h-[50vh]">
+        <table className="w-full text-[11px] border-collapse">
+          <thead className="sticky top-0 bg-muted">
+            <tr>
+              {allCols.map((c) => {
+                const note = COLUMN_NOTES[c] ?? (c.startsWith('Vendas lÃ­quidas ') ? NOTE_VENDAS_LIQUIDAS : undefined);
+                return (
+                  <th key={c} className="text-left px-2 py-1.5 font-medium text-muted-foreground whitespace-nowrap border-b border-border">
+                    {note ? (
+                      <span className="flex items-center gap-1">
+                        {c}
+                        <UITooltip>
+                          <UITooltipTrigger asChild>
+                            <HelpCircle className="h-3 w-3 cursor-help flex-shrink-0 opacity-60 hover:opacity-100" />
+                          </UITooltipTrigger>
+                          <UITooltipContent className="max-w-sm text-xs leading-relaxed whitespace-normal break-words">{note}</UITooltipContent>
+                        </UITooltip>
+                      </span>
+                    ) : c}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {rows.map((row, i) => (
+              <tr key={i} className="hover:bg-accent/20">
+                {allCols.map((c) => (
+                  <td key={c} className="px-2 py-1 whitespace-nowrap">
+                    {formatCell(c, row[c])}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </UITooltipProvider>
+  );
+}
+
+// â”€â”€ main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function RelatorioAelo() {
   const { getToken, hasValidToken } = useAuthStore();
@@ -878,3 +1276,4 @@ export default function RelatorioAelo() {
     </div>
   );
 }
+
