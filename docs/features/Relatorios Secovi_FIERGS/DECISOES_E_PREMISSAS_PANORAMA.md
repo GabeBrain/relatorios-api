@@ -40,6 +40,9 @@ congelado não deve ser usado como log mutável.
 | PRE-020 | RECONCILED | lançamentos temporais | o pós-publicação confirma A/B/C granulares nos 17 trimestres verticais; `temporal-analysis-city/releases` segue diagnóstico divergente e não é promovido | validar o universo horizontal somente quando o analista solicitar |
 | PRE-021 | ASSUMED | bancadas de mercado | Vendas/Estoque/IVV começam pelo endpoint temporal e gabarito dos slides 21–24/29; VGV de estoque e IVV ainda não possuem referência dimensional completa para promoção | executar comparação autenticada e adicionar método granular concorrente |
 | PRE-022 | ASSUMED | curadoria na UI | a interface de revisão de universo fica ocultada por ora; o registro auditável e os tipos permanecem preservados para excluir qualquer empreendimento, vertical ou horizontal, quando solicitado | conectar exclusões aprovadas ao cálculo e persistência versionada |
+| PRE-023 | RECONCILED | contrato de lançamentos na UI | a comparação e o relatório passam a consumir `release_date` + empreendimento/unidades, em vez de somar cada snapshot do histórico | homologar o VGV lançado separadamente |
+| PRE-024 | ASSUMED | diagnóstico e exportação | uma ação única executa contratos e bancadas do recorte; o XLSX exporta resumo e todas as células, inclusive fonte, fórmula e diferença | acrescentar método granular de Vendas/Estoque no mesmo dossiê |
+| PRE-025 | OPEN | IVV temporal | IVV não é aditivo: a consulta direta não usa `group_by`, para receber total por segmento; a promoção ainda depende da fórmula ponderada por oferta anterior + lançamentos | confrontar endpoint e fórmula granular por faixa de área |
 
 ## Premissas de implementaÃ§Ã£o v1
 

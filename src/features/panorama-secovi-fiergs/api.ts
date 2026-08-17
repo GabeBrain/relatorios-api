@@ -15,46 +15,28 @@ function segmentOf(value: unknown): Segment | null {
 }
 function standardOf(value: unknown): string { return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
 
-/**
- * The endpoint returns one row per typology history. This adapter consolidates it
- * per building/quarter before it reaches the contracts: one empreendimento, with
- * units and VGV summed across its typologies.
- */
+/** Promoted launch contract: a release is one building on its release_date, never every history snapshot. */
 export async function fetchLaunchRecords(scope: PanoramaScope, signal?: AbortSignal): Promise<LaunchRecord[]> {
   const records: LaunchRecord[] = [];
   for (const type of ['Vertical', 'Horizontal']) {
     let page = 1; let lastPage = 1;
     do {
-      const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, status: 'Ativo', per_page: PER_PAGE, page }, signal });
+      const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
       if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain (${response.status ?? 'rede'}).`);
       const payload = response.data; const data = Array.isArray(payload.data) ? payload.data as Record<string, unknown>[] : [];
       lastPage = Number((payload.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
       for (const building of data) {
-        const segment = segmentOf(building.type ?? type); if (!segment) continue;
-        const buildingUnits = safeNumber(building.total_units ?? building.qty ?? building.total_stock) ?? 0;
+        const segment = segmentOf(building.building_type ?? building.type ?? type); const quarter = periodToQuarter(building.release_date); if (!segment || !quarter || quarterKey(quarter) > quarterKey(scope.endQuarter)) continue;
+        const buildingUnits = safeNumber(building.total_units ?? building.qty) ?? 0;
         const history = Array.isArray(building.typologies_history) ? building.typologies_history as Record<string, unknown>[] : [];
-        const byQuarter = new Map<string, LaunchRecord>();
-        for (const entry of history) {
-          const quarter = periodToQuarter(entry.period); if (!quarter) continue;
-          const units = safeNumber(entry.qty ?? entry.total_units ?? buildingUnits) ?? buildingUnits;
-          const price = safeNumber(entry.release_price ?? entry.price);
-          const standard = standardOf(entry.pattern ?? building.standard);
-          const economic = standard.includes('econom');
-          const key = `${segment}:${quarter}`;
-          const current = byQuarter.get(key);
-          const vgvMillions = price === null ? null : units * price / 1_000_000;
-          if (!current) {
-            byQuarter.set(key, { quarter, segment, projects: 1, units, vgvMillions, economicProjects: economic ? 1 : 0, otherProjects: economic ? 0 : 1, economicUnits: economic ? units : 0, otherUnits: economic ? 0 : units, economicVgvMillions: economic && vgvMillions !== null ? vgvMillions : 0, otherVgvMillions: !economic && vgvMillions !== null ? vgvMillions : 0 });
-            continue;
-          }
-          current.units += units;
-          current.vgvMillions = current.vgvMillions === null || vgvMillions === null ? null : current.vgvMillions + vgvMillions;
-          current.economicUnits = (current.economicUnits ?? 0) + (economic ? units : 0);
-          current.otherUnits = (current.otherUnits ?? 0) + (economic ? 0 : units);
-          current.economicVgvMillions = (current.economicVgvMillions ?? 0) + (economic && vgvMillions !== null ? vgvMillions : 0);
-          current.otherVgvMillions = (current.otherVgvMillions ?? 0) + (!economic && vgvMillions !== null ? vgvMillions : 0);
-        }
-        records.push(...byQuarter.values());
+        const releaseMonth = String(building.release_date).slice(0, 7);
+        const vgvMillions = history.filter((entry) => String(entry.period ?? '').slice(0, 7) === releaseMonth).reduce<number | null>((sum, entry) => {
+          const qty = safeNumber(entry.qty); const price = safeNumber(entry.release_price ?? entry.price);
+          return sum === null || qty === null || price === null ? null : sum + qty * price / 1_000_000;
+        }, 0);
+        const standard = standardOf(building.standard ?? history.find((entry) => String(entry.period ?? '').slice(0, 7) === releaseMonth)?.pattern);
+        const economic = standard.includes('econom');
+        records.push({ quarter, segment, projects: 1, units: buildingUnits, vgvMillions, economicProjects: economic ? 1 : 0, otherProjects: economic ? 0 : 1, economicUnits: economic ? buildingUnits : 0, otherUnits: economic ? 0 : buildingUnits, economicVgvMillions: economic ? vgvMillions : 0, otherVgvMillions: economic ? 0 : vgvMillions });
       }
       page += 1;
     } while (page <= lastPage);
@@ -113,7 +95,9 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
 async function temporalRows(scope: PanoramaScope, endpoint: 'sales' | 'stock' | 'ivv', signal?: AbortSignal): Promise<{ rows: Record<string, unknown>[]; available: boolean; source: string }> {
   const rows: Record<string, unknown>[] = []; let page = 1; let lastPage = 1;
   do {
-    const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: '2022-01-01', end_period: `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}-31`, per_page: PER_PAGE, page, group_by: 'Padrão', 'type[]': ['Vertical', 'Horizontal'] }, signal });
+    // IVV is a rate, not an additive category. Omitting group_by asks the API for the segment total;
+    // sales and stock remain grouped for their additive aggregation.
+    const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: '2022-01-01', end_period: `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}-31`, per_page: PER_PAGE, page, ...(endpoint === 'ivv' ? {} : { group_by: 'Padrão' }), 'type[]': ['Vertical', 'Horizontal'] }, signal });
     if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}` };
     rows.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
     lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
