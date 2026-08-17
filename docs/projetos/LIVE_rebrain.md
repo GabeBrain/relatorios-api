@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Medidas trimestrais e campos do Relatório AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — relatório AELO
+- **O quê:** removida a duplicidade entre “Unidades por Tipologia” e “Oferta por lotes”; corrigida a segmentação de tempo de vendas para aceitar `time_on_sale`/`time_on_sales`; adicionadas colunas trimestrais de VGV (`sold_in_period × price`), Estoque (último snapshot disponível do trimestre) e VGV Estoque (`estoque × preço`).
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** medidas trimestrais disponíveis no AELO; validar os recortes com a base AELO e homologar os valores com o usuário.
+
 ### 2026-08-17 — Panorama: dossiê de status para retomada — Gabriel + Codex
 - **Estado real:** a demonstração tem coleta/estrutura parcial e slides corporativos finais fiéis, mas não está pronta como reprodução integral: PDF do recorte real e contratos das páginas 29–56 seguem bloqueadores.
 - **Evidência:** `ReportPaginator` continua roteando coorte, participação e maturidade para `stock.units`/`MetricTable`; o PDF atual rasteriza DOM por ponte sobre `window.print`, abrindo a aba antes de existir Blob.

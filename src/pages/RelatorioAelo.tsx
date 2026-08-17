@@ -38,7 +38,7 @@ const HEADER_COLS = [
   'Tipo', 'Empreendimentos', 'Logradouro', 'Número', 'Bairro', 'Cidade/UF',
   'Incorporadora', 'Padrão', 'Lançamento', 'ANO', 'Entrega',
   'Tipo de Tipologia', 'Dorm.', 'Preço de lançamento', 'Preço atual',
-  'm2 Priv.', 'Valor m2 Priv.', 'Unidades por Tipologia',
+  'm2 Priv.', 'Valor m2 Priv.',
   'Tempo de vendas', 'Taxa administrativa', 'Oferta por lotes', 'Entrada', 'Nº de Parcelas',
   '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista',
   '*Vendidos no trimestre', '*Distratos no trimestre',
@@ -83,6 +83,10 @@ function salesTimeSegment(value: unknown): string {
   if (months <= 24) return 'De 7 a 24 Meses';
   if (months <= 48) return 'De 25 a 48 Meses';
   return 'Acima de 49 Meses';
+}
+
+function salesTimeValue(entry: Record<string, unknown>, building: Record<string, unknown>): unknown {
+  return entry.time_on_sale ?? entry.time_on_sales ?? building.time_on_sale ?? building.time_on_sales;
 }
 
 function extractYear(dateStr: string): string | null {
@@ -410,8 +414,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
         'Preço atual': toNum(last.price),
         'm2 Priv.': privArea || null,
         'Valor m2 Priv.': toNum(last.price_private_area),
-        'Unidades por Tipologia': qty || null,
-        'Tempo de vendas': salesTimeSegment(last.time_on_sales ?? b.time_on_sales),
+        'Tempo de vendas': salesTimeSegment(salesTimeValue(last, b)),
         'Taxa administrativa': toNum(last.taxa_associativa),
         'Oferta por lotes': toNum(last.qty),
         'Entrada': toNum(b.down_payment_percentage),
@@ -426,6 +429,14 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
       for (const q of quarterCols) {
         const quarter = quarterlyHistory.get(q);
         row[`Vendas líquidas ${q}`] = quarter?.hasSalesData ? quarter.sales : 0;
+        const quarterEntry = quarter?.lastEntry;
+        const quarterStock = toNum(quarterEntry?.typology_stock);
+        const quarterPrice = toNum(quarterEntry?.price);
+        row[`VGV ${q}`] = quarter?.grossSalesVgv ?? null;
+        row[`Estoque ${q}`] = quarterStock;
+        row[`VGV Estoque ${q}`] = quarterStock !== null && quarterPrice !== null
+          ? Math.round(quarterStock * quarterPrice * 100) / 100
+          : null;
       }
 
       Object.assign(row, {
@@ -464,7 +475,8 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
 
 async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: string[], city: string, lastQ: string): Promise<void> {
   const { utils, writeFile } = await import('xlsx');
-  const allCols = [...HEADER_COLS, ...quarterCols.map((q) => `Vendas líquidas ${q}`), ...FOOTER_COLS];
+  const quarterMeasureCols = quarterCols.flatMap((q) => [`Vendas líquidas ${q}`, `VGV ${q}`, `Estoque ${q}`, `VGV Estoque ${q}`]);
+  const allCols = [...HEADER_COLS, ...quarterMeasureCols, ...FOOTER_COLS];
   const sheetRows = (rows: Row[]) =>
     [allCols, ...rows.map((row) => allCols.map((c) => row[c] ?? null))];
   const sfx = qSheet(lastQ);
@@ -805,9 +817,10 @@ function formatCell(col: string, val: unknown): string {
 }
 
 function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }) {
+  const quarterMeasureCols = quarterCols.flatMap((q) => [`Vendas líquidas ${q}`, `VGV ${q}`, `Estoque ${q}`, `VGV Estoque ${q}`]);
   const allCols = [
     ...HEADER_COLS,
-    ...quarterCols.map((q) => `Vendas líquidas ${q}`),
+    ...quarterMeasureCols,
     ...FOOTER_COLS,
   ];
   if (rows.length === 0) return <p className="text-xs text-muted-foreground py-4">Nenhum dado.</p>;
