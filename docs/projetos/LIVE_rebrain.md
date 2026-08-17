@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: plano v2 de reprodução fiel e dados visíveis — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — reconstrução integral do relatório/PDF.
+- **O quê:** novo plano terminal corrige a interpretação de metodologia aberta: valores disponíveis nas APIs devem continuar visíveis com selo de validação. Define uso obrigatório dos decks Panorama e `PPT Institucional_2026 - Widescreen_NOVO (1)`, reprodução fiel das páginas institucionais/divisórias, tabelas comparativas oficiais, gráficos de 17 trimestres, coleta completa, textos determinísticos e QA visual das 62 páginas.
+- **Impacto em Etapas/Pendências:** a próxima execução substitui o esqueleto genérico atual por layout reconhecível e amplia o `PanoramaReportModel` para Vendas, Estoque, IVV, preços, coortes, maturidade e mapa; analistas permanecem responsáveis apenas pela homologação dos tratamentos sinalizados.
+
 ### 2026-08-17 — Panorama: PDF editorial de 62 páginas com fonte única — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — livro paginado e impressão 16:9.
 - **O quê:** implementa `PanoramaReportModel`, manifesto versionado das 62 intenções editoriais e templates reutilizáveis para capa, divisória, tabela, gráfico, narrativa, metodologia e encerramento. Uma coleta de `building-with-history` por recorte alimenta os lançamentos do PDF; não há valores do gabarito, mock ou hardcode em runtime.
