@@ -104,6 +104,6 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
     ...cells('A · release_date + building_id distinto', 'Empreendimentos', 'building-with-history · sem status', reference, projectValues, true),
     ...cells('B · release_date + total_units', 'Unidades lançadas', 'building-with-history · total_units', reference, unitTotalValues, true),
     ...cells('C · release_date + qty no mês', 'Unidades lançadas', 'building-with-history · typologies_history', reference, unitHistoryValues, true),
-    ...cells('D · endpoint releases', 'Unidades lançadas', 'temporal-analysis-city/releases', reference, temporalValues, response.ok && response.data !== null),
+    ...cells('D · endpoint releases', 'Unidades lançadas', response.ok ? 'temporal-analysis-city/releases' : `temporal-analysis-city/releases · HTTP ${response.status ?? 'rede'}`, reference, temporalValues, response.ok && response.data !== null),
   ];
 }
