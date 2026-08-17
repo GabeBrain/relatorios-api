@@ -1,6 +1,7 @@
 import { httpRequest } from '@/lib/http-client';
 import { periodToQuarter, quarterKey, safeNumber } from './lib/launches';
-import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrationCell, PanoramaReference, PanoramaScope, Quarter, Segment } from './types';
+import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrationCell, PanoramaReference, PanoramaReportModel, PanoramaScope, Quarter, Segment } from './types';
+import { buildPanoramaReportModel } from './report/model';
 import { aggregateTemporal, buildMarketCells } from './lib/market-calibration';
 import { PIRACICABA_1T26_MARKET_REFERENCE } from './reference/piracicaba-1t26-market';
 
@@ -42,6 +43,11 @@ export async function fetchLaunchRecords(scope: PanoramaScope, signal?: AbortSig
     } while (page <= lastPage);
   }
   return records;
+}
+
+/** Uma coleta de lançamentos por recorte alimenta todas as páginas do PDF. */
+export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal): Promise<PanoramaReportModel> {
+  return buildPanoramaReportModel(scope, await fetchLaunchRecords(scope, signal));
 }
 
 function releaseQuarter(value: unknown): Quarter | null { return periodToQuarter(value); }

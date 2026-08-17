@@ -66,6 +66,17 @@ export interface PanoramaReference {
   model: LaunchModel;
 }
 
+/** Fonte única do livro editorial; páginas sem contrato homologado não recebem números de referência. */
+export type ReportDataState = 'ready' | 'partial' | 'unavailable' | 'not_applicable';
+export interface PanoramaReportModel {
+  scope: PanoramaScope;
+  generatedAt: string;
+  launches: LaunchModel;
+  source: 'building-with-history';
+  dataState: ReportDataState;
+  openMethodologies: string[];
+}
+
 export interface CalibrationCell {
   method: string;
   metric: 'Empreendimentos' | 'Unidades lançadas';

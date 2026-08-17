@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: PDF editorial de 62 páginas com fonte única — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — livro paginado e impressão 16:9.
+- **O quê:** implementa `PanoramaReportModel`, manifesto versionado das 62 intenções editoriais e templates reutilizáveis para capa, divisória, tabela, gráfico, narrativa, metodologia e encerramento. Uma coleta de `building-with-history` por recorte alimenta os lançamentos do PDF; não há valores do gabarito, mock ou hardcode em runtime.
+- **Estados e pendências:** lançamentos observados recebem visualizações reais; Vendas, Estoque, IVV, preços, coortes, mapa e horizontais mantêm página e intenção, mas comunicam metodologia aberta até homologação. Impressão nativa preserva todas as páginas 16:9.
+- **Impacto:** a demonstração passa a mostrar a estrutura completa do produto, isolando com transparência as fórmulas e filtros que dependem da próxima rodada com analistas.
+
 ### 2026-08-17 — Panorama: plano terminal do PDF para demonstração — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — relatório paginado/PDF.
 - **O quê:** define a implementação do `PanoramaReportModel`, manifesto das 62 intenções editoriais, templates e visualizações alimentadas exclusivamente pela API, estados metodológicos sem mocks, impressão 16:9, QA visual e roteiro de demonstração ao Diego.
