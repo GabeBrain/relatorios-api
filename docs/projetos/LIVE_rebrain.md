@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 â€” Panorama Secovi/FIERGS: bancada de calibraÃ§Ã£o de LanÃ§amentos â€” Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` â€” modo ValidaÃ§Ã£o.
+- **O quÃª:** adiciona a aÃ§Ã£o explÃ­cita **Executar calibraÃ§Ã£o**, que confronta o gabarito de Piracicaba com quatro candidatos: empreendimentos por `release_date`, unidades por `total_units`, unidades pelo `qty` do mÃªs de lanÃ§amento e `temporal-analysis-city/releases`. A tabela mostra fonte, resultado, diferenÃ§a e status de cada cÃ©lula; nenhum candidato altera o relatÃ³rio automaticamente.
+- **Por quÃª:** corrigir a leitura anterior de `typologies_history.period` como lanÃ§amento e fechar o contrato com evidÃªncia antes de expandir os demais blocos.
+- **Impacto em Etapas/PendÃªncias:** a homologaÃ§Ã£o Piracicaba 1T26 passa a escolher, por mÃ©trica, o mÃ©todo que reconcilia os 17 trimestres.
+
 ### 2026-08-17 — Panorama Secovi/FIERGS: primeiro slice executável de Lançamentos — Gabriel + Codex
 - **Ambiente/funcionalidade:** nova rota lazy `/rebrain/panorama-secovi-fiergs` dentro de Rebrain, independente do Relatório Secovi existente.
 - **O quê:** cria o modo de **Validação** (gabarito Piracicaba 1T26 × API, com valor esperado/calculado/diferença/status) e o modo **Relatório** com 11 páginas 16:9 navegáveis, tabelas e gráficos de Lançamentos, premissas/fonte e exportação por impressão nativa para PDF. A rota usa `GeoApiScopeSelector`, faz a coleta pesada somente após **Comparar dados** e não possui fallback geográfico.

@@ -65,3 +65,15 @@ export interface PanoramaReference {
   scope: PanoramaScope;
   model: LaunchModel;
 }
+
+export interface CalibrationCell {
+  method: string;
+  metric: 'Empreendimentos' | 'Unidades lançadas';
+  source: string;
+  quarter: Quarter;
+  segment: 'vertical' | 'horizontal' | 'total';
+  expected: number;
+  actual: number | null;
+  difference: number | null;
+  status: 'match' | 'different' | 'missing_api';
+}
