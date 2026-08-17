@@ -98,3 +98,19 @@ export interface PanoramaExclusion {
   createdAt: string;
   status: 'approved' | 'revoked';
 }
+
+export type MarketMetric = 'Unidades vendidas' | 'VGV vendido (R$ mi)' | 'Estoque final' | 'VGV estoque (R$ mi)' | 'IVV';
+
+/** A cell from a competing-method bench. It is intentionally independent from report contracts. */
+export interface MarketCalibrationCell {
+  block: 'Vendas' | 'Estoque' | 'IVV';
+  method: string;
+  metric: MarketMetric;
+  source: string;
+  period: Quarter;
+  segment: 'vertical' | 'horizontal' | 'total';
+  expected: number | null;
+  actual: number | null;
+  difference: number | null;
+  status: 'match' | 'different' | 'missing_api' | 'not_comparable';
+}

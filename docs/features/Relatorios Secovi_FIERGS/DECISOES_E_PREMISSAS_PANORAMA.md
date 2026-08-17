@@ -37,6 +37,9 @@ congelado não deve ser usado como log mutável.
 |---|---|---|---|---|
 | PRE-018 | RECONCILED | lançamentos verticais | `building_id` distinto por `release_date` reconcilia 17/17 trimestres; `total_units` também reconcilia as unidades verticais | promover ao relatório após homologação visual |
 | PRE-019 | ASSUMED | exclusões | curadoria local inicial usa `release_only`, preserva motivo/autor/data e não recalcula o relatório até aceite | persistir em backend/versionar com o primeiro retorno do analista |
+| PRE-020 | RECONCILED | lançamentos temporais | o pós-publicação confirma A/B/C granulares nos 17 trimestres verticais; `temporal-analysis-city/releases` segue diagnóstico divergente e não é promovido | validar o universo horizontal somente quando o analista solicitar |
+| PRE-021 | ASSUMED | bancadas de mercado | Vendas/Estoque/IVV começam pelo endpoint temporal e gabarito dos slides 21–24/29; VGV de estoque e IVV ainda não possuem referência dimensional completa para promoção | executar comparação autenticada e adicionar método granular concorrente |
+| PRE-022 | ASSUMED | curadoria na UI | a interface de revisão de universo fica ocultada por ora; o registro auditável e os tipos permanecem preservados para excluir qualquer empreendimento, vertical ou horizontal, quando solicitado | conectar exclusões aprovadas ao cálculo e persistência versionada |
 
 ## Premissas de implementaÃ§Ã£o v1
 

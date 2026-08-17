@@ -1,6 +1,8 @@
 import { httpRequest } from '@/lib/http-client';
 import { periodToQuarter, quarterKey, safeNumber } from './lib/launches';
-import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, PanoramaReference, PanoramaScope, Quarter, Segment } from './types';
+import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrationCell, PanoramaReference, PanoramaScope, Quarter, Segment } from './types';
+import { aggregateTemporal, buildMarketCells } from './lib/market-calibration';
+import { PIRACICABA_1T26_MARKET_REFERENCE } from './reference/piracicaba-1t26-market';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const PER_PAGE = 100;
@@ -105,6 +107,31 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
     ...cells('B · release_date + total_units', 'Unidades lançadas', 'building-with-history · total_units', reference, unitTotalValues, true),
     ...cells('C · release_date + qty no mês', 'Unidades lançadas', 'building-with-history · typologies_history', reference, unitHistoryValues, true),
     ...cells('D · endpoint releases', 'Unidades lançadas', response.ok ? 'temporal-analysis-city/releases' : `temporal-analysis-city/releases · HTTP ${response.status ?? 'rede'}`, reference, temporalValues, response.ok && response.data !== null),
+  ];
+}
+
+async function temporalRows(scope: PanoramaScope, endpoint: 'sales' | 'stock' | 'ivv', signal?: AbortSignal): Promise<{ rows: Record<string, unknown>[]; available: boolean; source: string }> {
+  const rows: Record<string, unknown>[] = []; let page = 1; let lastPage = 1;
+  do {
+    const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: '2022-01-01', end_period: `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}-31`, per_page: PER_PAGE, page, group_by: 'Padrão', 'type[]': ['Vertical', 'Horizontal'] }, signal });
+    if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}` };
+    rows.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
+    lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
+  } while (page <= lastPage);
+  return { rows, available: true, source: `temporal-analysis-city/${endpoint}` };
+}
+
+/** Initial T3/T4 bench: direct temporal endpoints only; it cannot silently promote a report contract. */
+export async function fetchMarketCalibration(scope: PanoramaScope, signal?: AbortSignal): Promise<MarketCalibrationCell[]> {
+  const reference = PIRACICABA_1T26_MARKET_REFERENCE;
+  const [sales, stock, ivv] = await Promise.all([temporalRows(scope, 'sales', signal), temporalRows(scope, 'stock', signal), temporalRows(scope, 'ivv', signal)]);
+  const stockPeriod = [scope.endQuarter];
+  return [
+    ...buildMarketCells('Vendas', 'A · endpoint sales', 'Unidades vendidas', sales.source, reference, aggregateTemporal(sales.rows, 'liquid_sales'), sales.available),
+    ...buildMarketCells('Vendas', 'A · endpoint sales', 'VGV vendido (R$ mi)', sales.source, reference, aggregateTemporal(sales.rows.map((row) => ({ ...row, vgv_liquid_sales: Number(row.vgv_liquid_sales ?? 0) / 1_000_000 })), 'vgv_liquid_sales'), sales.available),
+    ...buildMarketCells('Estoque', 'A · endpoint stock', 'Estoque final', stock.source, reference, aggregateTemporal(stock.rows, 'stock'), stock.available, stockPeriod),
+    ...buildMarketCells('Estoque', 'A · endpoint stock', 'VGV estoque (R$ mi)', stock.source, reference, aggregateTemporal(stock.rows.map((row) => ({ ...row, vgv_stock: Number(row.vgv_stock ?? 0) / 1_000_000 })), 'vgv_stock'), stock.available, stockPeriod),
+    ...buildMarketCells('IVV', 'A · endpoint ivv', 'IVV', ivv.source, reference, aggregateTemporal(ivv.rows, 'ivv'), ivv.available, stockPeriod),
   ];
 }
 

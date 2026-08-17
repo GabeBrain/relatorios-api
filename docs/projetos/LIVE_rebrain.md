@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: início das bancadas Vendas, Estoque e IVV — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Validação.
+- **O quê:** o resultado pós-publicação consolida os três métodos granulares de lançamentos verticais; o endpoint `releases` permanece apenas diagnóstico. A revisão manual de universo sai da UI sem apagar o mecanismo auditável. Entram gabarito executável dos slides 21–24/29, adaptadores dos endpoints `sales`, `stock` e `ivv`, e bancada separada que não promove contratos silenciosamente.
+- **Impacto em Etapas/Pendências:** próxima coleta autenticada compara os endpoints e adiciona a derivação granular concorrente; só então Vendas/Estoque/IVV passam ao modelo/PDF/XLSX.
+
 ### 2026-08-17 — Panorama: T0–T2 de calibração e curadoria operacional — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Validação.
 - **O quê:** adiciona revisão do universo horizontal com IDs, trimestre/unidades, seleção em lote, motivo obrigatório e exclusão `release_only` persistida localmente por recorte. Corrige os parâmetros de `releases` (`per_page` e tipos) e marca empreendimentos/unidades verticais como contratos `reconciled`, mantendo horizontais como hipótese auditável.
@@ -645,7 +650,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
 | 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. **Homologação real começou em 22–24/jul** com 4 estudos de analistas (Rolândia/Daniele + Housi/Beatriz e Finoti): 102 achados, ~100% FP nos triados → sprint de 28/jul derrubou Rolândia de 17 achados para 1 (v0.44–0.49, 78 testes verdes). |
 | 7 | Relatórios Secovi (export Excel) | 🟡 (correção trimestral implementada e testada em 04/ago; aguarda homologação manual da exportação) |
-| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (gabarito, contratos de Lançamentos, UI de validação/relatório e PDF v1 ✅; próximo portão: aderência Piracicaba 1T26 via API autenticada e retorno dos analistas) |
+| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (Lançamentos verticais reconciliados por método granular; gabarito e bancada inicial de Vendas/Estoque/IVV ✅; próximo portão: coleta autenticada e método granular concorrente antes de promover esses blocos ao PDF/XLSX) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
 | 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI padronizada, mapa urbano, testes e build ✅; homologação pelo setor usuário pendente) |
