@@ -1,3 +1,4 @@
+import '../lib/pdf-print-interceptor';
 import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Download, FileText } from 'lucide-react';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';

@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: PDF rasterizado de uma página por slide — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — visualização/exportação do relatório.
+- **O quê:** a exportação deixa de depender do layout de impressão para compor o arquivo. O gerador captura cada slide ativo isoladamente em 1920×1080 e monta um Blob PDF com página 16:9 correspondente; o arquivo abre em nova aba no visualizador nativo do navegador. A capa municipal redundante foi removida do manifesto de saída, deixando 61 páginas ativas.
+- **Verificações:** testes validam a proporção 16:9 e a contagem/ordem sem a capa duplicada; typecheck, suite de testes e build foram executados com sucesso.
+- **Pendência real:** a validação visual autenticada do PDF completo publicado continua necessária, assim como a implementação dos contratos específicos de Mercado Imobiliário previstos no plano v3.
+
 ### 2026-08-17 — Panorama: revisão do exportador PDF e contrato rasterizado — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — ação `Exportar PDF`.
 - **Diagnóstico:** o botão atual executa `window.print()` e depende de uma árvore `hidden print:block`; no teste publicado o navegador imprimiu o shell, somente a página corrente e uma folha residual, totalizando duas páginas desconfiguradas.
