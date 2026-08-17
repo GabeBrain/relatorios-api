@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: plano v3 para corrigir Mercado Imobiliário e encerramento — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — páginas 29–56 e encerramento corporativo.
+- **O quê:** diagnóstico confirmou que páginas de padrão, coorte, tipologia, maturidade e horizontais reutilizam indevidamente a mesma tabela de `stock.units`. O plano v3 define contratos e visuais próprios por intenção, uma única capa, validação antirrepetição no manifesto e incorporação integral dos seis slides corporativos finais exportados do deck oficial.
+- **Regra de dados:** números continuam exclusivamente derivados das APIs; metodologia aberta gera selo e rastreabilidade, nunca valor substituto ou cópia de outra dimensão.
+- **Próximo passo:** executar [`PLAN_TERRA_CORRECAO_MERCADO_E_ENCERRAMENTO_v3.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_TERRA_CORRECAO_MERCADO_E_ENCERRAMENTO_v3.md) direto na `main`, validar visualmente as referências 29–56, rodar testes/build e publicar.
+
 ### 2026-08-17 — Panorama: bases oficiais, coleta ampliada e páginas quantitativas — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preview/PDF 16:9.
 - **O quê:** extrai e incorpora assets autorizados dos dois PPTX oficiais (capa e assinatura), substitui o paginador genérico por composição editorial Secovi, páginas institucionais, divisórias, encerramentos, matrizes trimestrais/anuais e gráficos com 17 trimestres, curva monotônica, destaques comparáveis e variações. O relatório passa a coletar em paralelo lançamentos, vendas, estoque, IVV, ticket, preço/m² e coordenadas.
