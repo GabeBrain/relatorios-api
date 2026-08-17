@@ -42,9 +42,6 @@ const HEADER_COLS = [
   'Tempo de vendas', 'Taxa administrativa', 'Oferta por lotes', 'Entrada', 'Nº de Parcelas',
   '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista',
   '*Vendidos no trimestre', '*Distratos no trimestre',
-];
-
-const FOOTER_COLS = [
   'Estoque por Tipologia', '% Dispon.', 'Vagas de Garagem',
   'VGV Estoque', 'm² Estoque', 'R$/m²\nEstoque',
   'VGV Lançado', 'm² Lançado', 'R$/m² Lançado',
@@ -476,7 +473,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
 async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: string[], city: string, lastQ: string): Promise<void> {
   const { utils, writeFile } = await import('xlsx');
   const quarterMeasureCols = quarterCols.flatMap((q) => [`Vendas líquidas ${q}`, `VGV ${q}`, `Estoque ${q}`, `VGV Estoque ${q}`]);
-  const allCols = [...HEADER_COLS, ...quarterMeasureCols, ...FOOTER_COLS];
+  const allCols = [...HEADER_COLS, ...quarterMeasureCols];
   const sheetRows = (rows: Row[]) =>
     [allCols, ...rows.map((row) => allCols.map((c) => row[c] ?? null))];
   const sfx = qSheet(lastQ);
@@ -488,7 +485,7 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
 
 // ── timeseries ────────────────────────────────────────────────────────────────
 
-type TimeMetric = 'sold_in_period' | 'typology_stock' | 'pct_avail' | 'price' | 'price_private_area' | 'vgv_stock';
+type TimeMetric = 'sold_in_period' | 'typology_stock' | 'pct_avail' | 'price' | 'price_private_area' | 'vgv_stock' | 'vgv_sales';
 
 const TIME_METRICS: {
   key: TimeMetric; label: string; agg: 'sum' | 'avg';
@@ -524,6 +521,11 @@ const TIME_METRICS: {
     description: 'Valor Geral de Vendas do estoque disponível por trimestre',
     format: (v) => v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1)}M` : `R$ ${(v / 1_000).toFixed(0)}k`,
   },
+  {
+    key: 'vgv_sales', label: 'VGV Vendas', agg: 'sum', axis: 'right',
+    description: 'VGV de vendas por trimestre (unidades vendidas × preço)',
+    format: (v) => v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1)}M` : `R$ ${(v / 1_000).toFixed(0)}k`,
+  },
 ];
 
 // Brand colors per metric: greens for left-axis (units), blues for right-axis (prices)
@@ -534,6 +536,7 @@ const LINE_COLORS: Record<TimeMetric, string> = {
   price:              '#1d4ed8',
   price_private_area: '#84cc16',
   vgv_stock:          '#3b82f6',
+  vgv_sales:          '#9333ea',
 };
 
 // Bar chart: single green family, darkest → lightest (bars sorted desc)
@@ -563,6 +566,10 @@ function buildTimeseriesData(
         const stock = toNum(entry.typology_stock);
         const qty = toNum(entry.qty);
         v = stock !== null && qty ? stock / qty : null;
+      } else if (metric === 'vgv_sales') {
+        const sold = toNum(entry.sold_in_period);
+        const price = toNum(entry.price);
+        v = sold !== null && price !== null ? sold * price : null;
       } else {
         v = toNum(entry[metric]);
       }
@@ -818,11 +825,7 @@ function formatCell(col: string, val: unknown): string {
 
 function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }) {
   const quarterMeasureCols = quarterCols.flatMap((q) => [`Vendas líquidas ${q}`, `VGV ${q}`, `Estoque ${q}`, `VGV Estoque ${q}`]);
-  const allCols = [
-    ...HEADER_COLS,
-    ...quarterMeasureCols,
-    ...FOOTER_COLS,
-  ];
+  const allCols = [...HEADER_COLS, ...quarterMeasureCols];
   if (rows.length === 0) return <p className="text-xs text-muted-foreground py-4">Nenhum dado.</p>;
   return (
     <UITooltipProvider delayDuration={200}>
