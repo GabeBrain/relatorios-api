@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: T0–T2 de calibração e curadoria operacional — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Validação.
+- **O quê:** adiciona revisão do universo horizontal com IDs, trimestre/unidades, seleção em lote, motivo obrigatório e exclusão `release_only` persistida localmente por recorte. Corrige os parâmetros de `releases` (`per_page` e tipos) e marca empreendimentos/unidades verticais como contratos `reconciled`, mantendo horizontais como hipótese auditável.
+- **Impacto em Etapas/Pendências:** analista pode agora identificar e explicar os horizontais excedentes sem alterar o relatório; próxima etapa é medir o retorno da fonte `releases` e iniciar as bancadas de Vendas, Estoque e IVV.
+
 ### 2026-08-17 — Panorama: plano de calibração integral e curadoria do universo — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — evolução planejada do modo Validação.
 - **O quê:** define bancadas análogas para Lançamentos, Vendas, Estoque, IVV, Preços, Coortes/Maturidade, VGV e Mapa; introduz exclusões auditáveis por empreendimento/grupo, com escopo global, lançamento, período ou métrica e prévia antes × depois.

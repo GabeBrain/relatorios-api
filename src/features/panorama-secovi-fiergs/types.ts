@@ -77,3 +77,24 @@ export interface CalibrationCell {
   difference: number | null;
   status: 'match' | 'different' | 'missing_api';
 }
+
+export interface LaunchAuditBuilding {
+  buildingId: string;
+  name: string;
+  segment: Segment;
+  releaseQuarter: Quarter;
+  totalUnits: number;
+  releaseMonthQty: number;
+}
+
+export interface PanoramaExclusion {
+  id: string;
+  scope: 'global' | 'release_only' | 'period' | 'metric';
+  buildingIds: string[];
+  periods?: Quarter[];
+  metricIds?: string[];
+  reason: string;
+  author: string;
+  createdAt: string;
+  status: 'approved' | 'revoked';
+}

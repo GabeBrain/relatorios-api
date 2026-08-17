@@ -2,12 +2,13 @@ import { contractById } from '../contracts/launches';
 import type { ComparisonCell, LaunchModel, PanoramaReference } from '../types';
 
 function compare(metricId: string, label: string, expected: number | null, actual: number | null, coordinates: Record<string, string>): ComparisonCell {
-  const contract = contractById(metricId)!;
+  const verticalId = coordinates.segment === 'vertical' && metricId === 'launch.projects.quarter.type' ? 'launch.projects.quarter.vertical' : coordinates.segment === 'vertical' && metricId === 'launch.units.quarter.type' ? 'launch.units.quarter.vertical' : metricId;
+  const contract = contractById(verticalId)!;
   const absoluteDifference = expected === null || actual === null ? null : actual - expected;
   const relativeDifference = absoluteDifference === null || expected === 0 ? null : absoluteDifference / Math.abs(expected);
   const tolerance = contract.tolerance.absolute ?? 0;
   const result = contract.status === 'open_method' ? 'not_comparable' : expected === null ? 'missing_reference' : actual === null ? 'missing_api' : Math.abs(absoluteDifference) <= tolerance ? 'match' : 'different';
-  return { metricId, label, coordinates, expected, actual, absoluteDifference, relativeDifference, result, status: contract.status, formula: contract.formula, source: contract.source };
+  return { metricId: verticalId, label, coordinates, expected, actual, absoluteDifference, relativeDifference, result, status: contract.status, formula: contract.formula, source: contract.source };
 }
 export function compareLaunchModel(reference: PanoramaReference, actual: LaunchModel): ComparisonCell[] {
   const cells: ComparisonCell[] = [];

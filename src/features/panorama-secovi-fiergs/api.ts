@@ -1,6 +1,6 @@
 import { httpRequest } from '@/lib/http-client';
 import { periodToQuarter, quarterKey, safeNumber } from './lib/launches';
-import type { CalibrationCell, LaunchRecord, PanoramaReference, PanoramaScope, Quarter, Segment } from './types';
+import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, PanoramaReference, PanoramaScope, Quarter, Segment } from './types';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const PER_PAGE = 100;
@@ -98,7 +98,7 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
     add(unitHistoryValues, quarter, segment, qty);
   }
   const temporalValues = new Map<string, number>();
-  const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/releases`, query: { city: scope.city, uf: scope.uf, start_period: '2022-01-01', end_period: `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}-31`, per_page: 500, group_by: 'Padrão' }, signal });
+  const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/releases`, query: { city: scope.city, uf: scope.uf, start_period: '2022-01-01', end_period: `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}-31`, per_page: 100, group_by: 'Padrão', 'type[]': ['Vertical', 'Horizontal'] }, signal });
   if (response.ok && response.data) for (const row of (Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [])) { const quarter = periodToQuarter(row.period); const segment = rawSegment(row.building_type); if (quarter && segment) add(temporalValues, quarter, segment, safeNumber(row.releases_in_period) ?? 0); }
   return [
     ...cells('A · release_date + building_id distinto', 'Empreendimentos', 'building-with-history · sem status', reference, projectValues, true),
@@ -106,4 +106,27 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
     ...cells('C · release_date + qty no mês', 'Unidades lançadas', 'building-with-history · typologies_history', reference, unitHistoryValues, true),
     ...cells('D · endpoint releases', 'Unidades lançadas', response.ok ? 'temporal-analysis-city/releases' : `temporal-analysis-city/releases · HTTP ${response.status ?? 'rede'}`, reference, temporalValues, response.ok && response.data !== null),
   ];
+}
+
+/** Raw, audited universe used only by analyst curation; it never changes contracts by itself. */
+export async function fetchLaunchAuditBuildings(scope: PanoramaScope, signal?: AbortSignal): Promise<LaunchAuditBuilding[]> {
+  const raw: Record<string, unknown>[] = [];
+  for (const type of ['Vertical', 'Horizontal']) {
+    let page = 1; let lastPage = 1;
+    do {
+      const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha ao carregar universo (${response.status ?? 'rede'}).`);
+      raw.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
+      lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
+    } while (page <= lastPage);
+  }
+  const seen = new Set<string>(); const rows: LaunchAuditBuilding[] = [];
+  for (const building of raw) {
+    const quarter = releaseQuarter(building.release_date); const segment = rawSegment(building.building_type ?? building.type); const buildingId = String(building.building_id ?? building.id ?? '');
+    if (!quarter || !segment || !buildingId || quarterKey(quarter) > quarterKey(scope.endQuarter) || seen.has(buildingId)) continue;
+    seen.add(buildingId); const releaseMonth = String(building.release_date).slice(0, 7);
+    const releaseMonthQty = (Array.isArray(building.typologies_history) ? building.typologies_history as Record<string, unknown>[] : []).filter((entry) => String(entry.period ?? '').slice(0, 7) === releaseMonth).reduce((sum, entry) => sum + (safeNumber(entry.qty) ?? 0), 0);
+    rows.push({ buildingId, name: String(building.name ?? 'Sem nome'), segment, releaseQuarter: quarter, totalUnits: safeNumber(building.total_units ?? building.qty) ?? 0, releaseMonthQty });
+  }
+  return rows.sort((a, b) => quarterKey(a.releaseQuarter) - quarterKey(b.releaseQuarter) || a.name.localeCompare(b.name));
 }

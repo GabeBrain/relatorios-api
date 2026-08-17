@@ -31,6 +31,13 @@ congelado não deve ser usado como log mutável.
 
 ## Template para retorno do analista
 
+## Execução T0–T2
+
+| ID | Estado | Tema | Premissa/questão | Recuperação futura |
+|---|---|---|---|---|
+| PRE-018 | RECONCILED | lançamentos verticais | `building_id` distinto por `release_date` reconcilia 17/17 trimestres; `total_units` também reconcilia as unidades verticais | promover ao relatório após homologação visual |
+| PRE-019 | ASSUMED | exclusões | curadoria local inicial usa `release_only`, preserva motivo/autor/data e não recalcula o relatório até aceite | persistir em backend/versionar com o primeiro retorno do analista |
+
 ## Premissas de implementaÃ§Ã£o v1
 
 | ID | Estado | Tema | Premissa/questÃ£o | RecuperaÃ§Ã£o futura |
