@@ -23,6 +23,7 @@ const CorretorReportPage = lazy(() => import('./features/corretor/pages/Corretor
 const CorretorCalibrationPage = lazy(() => import('./features/corretor/pages/CorretorCalibrationPage.tsx'));
 const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/AtualizadorVgvPage.tsx'));
 const RelatorioAeloPage = lazy(() => import('./pages/RelatorioAelo.tsx'));
+const PanoramaSecoviFiergsPage = lazy(() => import('./features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -69,6 +70,7 @@ const App = () => (
 
                 {/* Rebrain */}
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
+                <Route path="/rebrain/panorama-secovi-fiergs" element={<PanoramaSecoviFiergsPage />} />
                 <Route
                   path="/rebrain/aelo"
                   element={(

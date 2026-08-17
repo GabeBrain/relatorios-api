@@ -4,6 +4,15 @@
 `Inventario_Slides_Panorama_Piracicaba_1T26.xlsx`, `PPT Institucional_2026 - Widescreen_NOVO (1).pptx`.
 **Objetivo:** subsidiar o plano de ação de automatização a discutir com o head da área.
 
+## Artefatos de execução derivados
+
+- [`GABARITO_CONGELADO_PANORAMA_PIRACICABA_1T26_v1.md`](./GABARITO_CONGELADO_PANORAMA_PIRACICABA_1T26_v1.md)
+  — transcrição congelada dos 62 slides, números, reconciliações, anomalias e métodos abertos.
+- [`PLAN_TERRA_PANORAMA_SECOVI_FIERGS_V1.md`](./PLAN_TERRA_PANORAMA_SECOVI_FIERGS_V1.md)
+  — plano executável da primeira versão, começando pelos contratos de Lançamentos e PDF paginado.
+- [`DECISOES_E_PREMISSAS_PANORAMA.md`](./DECISOES_E_PREMISSAS_PANORAMA.md)
+  — registro vivo de hipóteses e retornos dos analistas, sem alterar o gabarito histórico.
+
 ## 1. Anatomia do deck (o que descobrimos abrindo o arquivo)
 
 | Bloco | Slides | Natureza técnica |

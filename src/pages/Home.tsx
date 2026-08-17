@@ -29,6 +29,12 @@ const QUICK_LINKS = [
     desc: 'Gerar relatório de mercado com export Excel',
   },
   {
+    to: '/rebrain/panorama-secovi-fiergs',
+    icon: <BarChart2 className="h-5 w-5" />,
+    title: 'Relatório Secovi/FIERGS',
+    desc: 'Validar dados e gerar o Panorama paginado',
+  },
+  {
     to: '/dash-geobrain',
     icon: <BarChart2 className="h-5 w-5" />,
     title: 'Dash Geobrain',

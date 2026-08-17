@@ -29,6 +29,7 @@ const PAGES: Destination[] = [
   { label: 'Início', path: '/inicio', icon: <Home className="h-4 w-4" /> },
   { label: 'Rebrain — Secovi', path: '/rebrain/secovi', icon: <Building2 className="h-4 w-4" />, keywords: 'barretos excel mercado relatorio' },
   { label: 'Rebrain — Relatório AELO', path: '/rebrain/aelo', icon: <Building2 className="h-4 w-4" />, keywords: 'aelo excel mercado relatorio' },
+  { label: 'Rebrain — Relatório Secovi/FIERGS', path: '/rebrain/panorama-secovi-fiergs', icon: <BarChart2 className="h-4 w-4" />, keywords: 'panorama fiergs piracicaba lancamentos pdf comparacao' },
   { label: 'Rebrain — Corretor | Vocacionais', path: '/auditoria', icon: <ClipboardList className="h-4 w-4" />, keywords: 'corretor vocacional slides auditoria' },
   { label: 'Rebrain — Atualizador VGV', path: '/atualizador-vgv', icon: <TrendingUp className="h-4 w-4" />, keywords: 'vgv empreendimento excel incc ipca igp-di mapa' },
   { label: 'Dashboard Geobrain', path: '/dash-geobrain', icon: <BarChart2 className="h-4 w-4" />, keywords: 'dash geobrain dashboard' },

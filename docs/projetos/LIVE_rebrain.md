@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama Secovi/FIERGS: primeiro slice executável de Lançamentos — Gabriel + Codex
+- **Ambiente/funcionalidade:** nova rota lazy `/rebrain/panorama-secovi-fiergs` dentro de Rebrain, independente do Relatório Secovi existente.
+- **O quê:** cria o modo de **Validação** (gabarito Piracicaba 1T26 × API, com valor esperado/calculado/diferença/status) e o modo **Relatório** com 11 páginas 16:9 navegáveis, tabelas e gráficos de Lançamentos, premissas/fonte e exportação por impressão nativa para PDF. A rota usa `GeoApiScopeSelector`, faz a coleta pesada somente após **Comparar dados** e não possui fallback geográfico.
+- **Motor/dados:** nove contratos versionados, fixture de referência dos 17 trimestres de Piracicaba, agregação pura, comparação com tolerância e adaptador autenticado de `building-with-history`, consolidando tipologias por empreendimento/trimestre para não duplicar projetos. VGV e MCMV permanecem metodologias abertas, explicitamente comunicadas.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/`, `src/{App.tsx,components/layout/AppLayout.tsx,components/layout/CommandPalette.tsx,pages/Home.tsx}`, `docs/features/Relatorios Secovi_FIERGS/{GABARITO_CONGELADO_PANORAMA_PIRACICABA_1T26_v1.md,PLAN_TERRA_PANORAMA_SECOVI_FIERGS_V1.md,DECISOES_E_PREMISSAS_PANORAMA.md}`.
+- **Verificação:** typecheck, 135 testes e build de produção aprovados. Lint global continua bloqueado por erros legados fora desta feature; homologação visual autenticada/Playwright e aderência à API real são pendências.
+- **Impacto em Etapas/Pendências:** a etapa 7a sai de análise para protótipo funcional, mas o portão de aderência com analistas permanece obrigatório antes de chamar o PDF de relatório final.
+
 ### 2026-08-14 — Correção de codificação visual no Relatório AELO — Gabriel
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — textos e rótulos do relatório.
 - **O quê:** corrigida a codificação UTF-8 que fazia acentos, símbolos e mensagens aparecerem corrompidos na tela e na exportação; a lógica do relatório, seus campos comerciais e o escopo GeoApi permanecem inalterados.
@@ -607,7 +615,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
 | 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. **Homologação real começou em 22–24/jul** com 4 estudos de analistas (Rolândia/Daniele + Housi/Beatriz e Finoti): 102 achados, ~100% FP nos triados → sprint de 28/jul derrubou Rolândia de 17 achados para 1 (v0.44–0.49, 78 testes verdes). |
 | 7 | Relatórios Secovi (export Excel) | 🟡 (correção trimestral implementada e testada em 04/ago; aguarda homologação manual da exportação) |
-| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (análise de cobertura ✅ em 26/jul; próximo: teste de aderência Piracicaba 1T26 número a número, depois Camada 1 = XLSX) |
+| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (gabarito, contratos de Lançamentos, UI de validação/relatório e PDF v1 ✅; próximo portão: aderência Piracicaba 1T26 via API autenticada e retorno dos analistas) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
 | 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI padronizada, mapa urbano, testes e build ✅; homologação pelo setor usuário pendente) |
@@ -624,9 +632,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
   gerar o Excel no ambiente da área e conferir a Rubi (`4T2025 = 49 + 300 = 349`, `1T2026 = 100`,
   `2T2026 = 18`, estoque `189`). Plano e roteiro:
   [`PLAN_correcao_agregacao_vendas_trimestrais.md`](../features/relatorios-secovi/PLAN_correcao_agregacao_vendas_trimestrais.md).
-- [ ] **Panorama Secovi/FIERGS — teste de aderência (próximo passo):** reproduzir Piracicaba 1T26 via
-  API GeoBrain e comparar número a número com o deck, gerando a matriz "bate / não bate / não tem".
-  É o portão que decide o escopo das Camadas 1–3 (ver `ANALISE_automatizacao_panorama.md`).
+- [ ] **Panorama Secovi/FIERGS — homologar aderência:** usar token/API autenticada para reproduzir Piracicaba 1T26 e revisar a matriz do modo Validação (bate / diverge / sem método) com o analista. É o portão que decide as Camadas 1–3 e libera outras cidades.
 - [ ] **Panorama — fechar metodologia com os analistas:** critério oficial de **VGV lançado**
   (estimativa via `building-with-history`) e de **% MCMV** (proxy por padrão Econômico / teto de preço).
 - [ ] Panorama — confirmar que o token Secovi cobre o histórico desde 1T/22 (dado pontual 4T/21) nas cidades-alvo.

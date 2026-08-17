@@ -1,0 +1,52 @@
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { AlertCircle, BarChart3, CheckCircle2, CircleHelp, Loader2, RefreshCw, TriangleAlert } from 'lucide-react';
+import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { fetchLaunchRecords } from '../api';
+import { compareLaunchModel } from '../lib/compare-reference';
+import { buildLaunchModel } from '../lib/launches';
+import { referenceForScope } from '../reference/piracicaba-1t26';
+import { ReportPaginator } from '../components/ReportPaginator';
+import type { PanoramaScope, Quarter } from '../types';
+
+const QUARTERS: Quarter[] = ['1T2022', '2T2022', '3T2022', '4T2022', '1T2023', '2T2023', '3T2023', '4T2023', '1T2024', '2T2024', '3T2024', '4T2024', '1T2025', '2T2025', '3T2025', '4T2025', '1T2026'];
+const labelQuarter = (quarter: Quarter) => `${quarter.slice(0, 2)} ${quarter.slice(2)}`;
+
+function ResultBadge({ result }: { result: string }) {
+  const classes: Record<string, string> = { match: 'bg-success/10 text-success', different: 'bg-destructive/10 text-destructive', missing_api: 'bg-warning/10 text-warning', missing_reference: 'bg-info/10 text-info', not_comparable: 'bg-muted text-muted-foreground' };
+  const labels: Record<string, string> = { match: 'Bate', different: 'Diverge', missing_api: 'Sem API', missing_reference: 'Sem gabarito', not_comparable: 'Método pendente' };
+  return <span className={`inline-flex rounded-md px-2 py-0.5 text-xs font-medium ${classes[result] ?? classes.not_comparable}`}>{labels[result] ?? result}</span>;
+}
+
+export default function PanoramaSecoviFiergsPage() {
+  const [scope, setScope] = useState<PanoramaScope>({ uf: '', city: '', endQuarter: '1T2026' });
+  const [submittedScope, setSubmittedScope] = useState<PanoramaScope | null>(null);
+  const ready = Boolean(scope.uf && scope.city && scope.endQuarter);
+  const query = useQuery({ queryKey: ['panorama-secovi-fiergs', submittedScope], queryFn: ({ signal }) => fetchLaunchRecords(submittedScope!, signal), enabled: Boolean(submittedScope), staleTime: 5 * 60 * 1000, retry: 1 });
+  const model = useMemo(() => query.data ? buildLaunchModel(query.data) : null, [query.data]);
+  const reference = submittedScope ? referenceForScope(submittedScope.uf, submittedScope.city, submittedScope.endQuarter) : null;
+  const comparisons = useMemo(() => reference && model ? compareLaunchModel(reference, model) : [], [reference, model]);
+  const counts = comparisons.reduce((all, cell) => ({ ...all, [cell.result]: (all[cell.result] ?? 0) + 1 }), {} as Record<string, number>);
+  const submit = () => { if (ready) setSubmittedScope({ ...scope }); };
+
+  return <div className="mx-auto max-w-[1440px] space-y-6 p-4 sm:p-6 animate-fade-in">
+    <header className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex flex-wrap items-center gap-2"><h1 className="text-2xl font-semibold">Relatório Secovi/FIERGS</h1><Badge variant="outline" className="border-warning/40 bg-warning/10 text-warning">Em validação · referência Piracicaba 1T26</Badge></div><p className="mt-1 text-sm text-muted-foreground">Comparação de dados e relatório automatizado de lançamentos, com rastreabilidade de metodologia.</p></div></header>
+
+    <section className="rounded-xl border border-border bg-card p-4 shadow-sm"><div className="flex flex-wrap items-end gap-3"><GeoApiScopeSelector value={scope} onChange={(next) => { setScope((current) => ({ ...current, ...next })); setSubmittedScope(null); }} cityContainerClassName="min-w-[230px] flex-1 space-y-1.5" /><div className="w-36 space-y-1.5"><label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Trimestre final</label><Select value={scope.endQuarter} onValueChange={(endQuarter) => { setScope((current) => ({ ...current, endQuarter: endQuarter as Quarter })); setSubmittedScope(null); }}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{QUARTERS.map((quarter) => <SelectItem key={quarter} value={quarter}>{labelQuarter(quarter)}</SelectItem>)}</SelectContent></Select></div><Button onClick={submit} disabled={!ready || query.isFetching} className="h-9"><BarChart3 />{query.isFetching ? 'Comparando…' : 'Comparar dados'}</Button></div><p className="mt-3 text-xs text-muted-foreground">A consulta pesada só começa após UF, município e trimestre válidos. Trocar o escopo invalida o resultado anterior.</p></section>
+
+    {!submittedScope && <Alert><CircleHelp className="h-4 w-4" /><AlertTitle>Defina o recorte do Panorama</AlertTitle><AlertDescription>Selecione uma cidade autorizada pelo token e clique em <strong>Comparar dados</strong>. Piracicaba/SP em 1T2026 possui gabarito oficial; outros recortes ainda geram relatório sem paridade.</AlertDescription></Alert>}
+    {query.isFetching && <div className="space-y-4"><Skeleton className="h-28" /><Skeleton className="h-72" /></div>}
+    {query.isError && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertTitle>Não foi possível carregar os dados do Panorama</AlertTitle><AlertDescription className="flex flex-wrap items-center gap-3">{query.error instanceof Error ? query.error.message : 'Erro desconhecido.'}<Button variant="outline" size="sm" onClick={() => query.refetch()}><RefreshCw /> Tentar novamente</Button></AlertDescription></Alert>}
+    {submittedScope && !query.isFetching && !query.isError && model && <Tabs defaultValue="validation"><TabsList><TabsTrigger value="validation">Validação</TabsTrigger><TabsTrigger value="report">Relatório</TabsTrigger></TabsList><TabsContent value="validation" className="space-y-4"><section className="grid grid-cols-2 gap-3 md:grid-cols-5">{[{ label: 'Batem', value: counts.match ?? 0, className: 'text-success' }, { label: 'Divergem', value: counts.different ?? 0, className: 'text-destructive' }, { label: 'Sem API', value: counts.missing_api ?? 0, className: 'text-warning' }, { label: 'Método pendente', value: counts.not_comparable ?? 0, className: 'text-muted-foreground' }, { label: 'Avisos', value: model.warnings.length, className: 'text-warning' }].map((item) => <div key={item.label} className="rounded-xl border border-border bg-card p-4"><p className="text-xs text-muted-foreground">{item.label}</p><p className={`mt-1 text-2xl font-semibold tabular-nums ${item.className}`}>{item.value}</p></div>)}</section>
+      {!reference && <Alert><TriangleAlert className="h-4 w-4" /><AlertTitle>Sem gabarito oficial para este recorte</AlertTitle><AlertDescription>O relatório pode ser visualizado, mas a comparação fica disponível apenas para Piracicaba/SP no 1T2026.</AlertDescription></Alert>}
+      {reference && <section className="rounded-xl border border-border bg-card"><div className="border-b border-border p-4"><h2 className="font-semibold">Comparação de Lançamentos</h2><p className="text-sm text-muted-foreground">Esperado, calculado e premissa de cada célula comparável.</p></div><Table><TableHeader><TableRow><TableHead>Métrica</TableHead><TableHead>Período</TableHead><TableHead>Segmento</TableHead><TableHead className="text-right">Referência</TableHead><TableHead className="text-right">API</TableHead><TableHead className="text-right">Diferença</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{comparisons.map((cell, index) => <TableRow key={`${cell.metricId}-${index}`}><TableCell className="max-w-[210px] text-xs font-medium">{cell.label}</TableCell><TableCell className="text-xs">{cell.coordinates.quarter}</TableCell><TableCell className="text-xs capitalize">{cell.coordinates.segment}</TableCell><TableCell className="text-right tabular-nums">{cell.expected?.toLocaleString('pt-BR') ?? '—'}</TableCell><TableCell className="text-right tabular-nums">{cell.actual?.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) ?? '—'}</TableCell><TableCell className="text-right tabular-nums">{cell.absoluteDifference?.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) ?? '—'}</TableCell><TableCell><ResultBadge result={cell.result} /></TableCell></TableRow>)}</TableBody></Table></section>}
+      {model.warnings.length > 0 && <Alert><TriangleAlert className="h-4 w-4" /><AlertTitle>Cobertura parcial</AlertTitle><AlertDescription>{model.warnings.join(' ')}</AlertDescription></Alert>}</TabsContent><TabsContent value="report"><ReportPaginator model={model} scope={submittedScope} /></TabsContent></Tabs>}
+  </div>;
+}
