@@ -40,6 +40,70 @@ function syncOfficialStaticSlides() {
 new MutationObserver(() => { syncExportLabel(); syncOfficialStaticSlides(); }).observe(document.documentElement, { childList: true, subtree: true });
 queueMicrotask(() => { syncExportLabel(); syncOfficialStaticSlides(); });
 
+function setExportStatus(button: HTMLButtonElement, message: string, error = false, link?: string) {
+  let status = button.parentElement?.querySelector<HTMLElement>('[data-panorama-pdf-status]');
+  if (!status) {
+    status = document.createElement('span');
+    status.dataset.panoramaPdfStatus = 'true';
+    status.className = 'text-xs text-muted-foreground';
+    button.parentElement?.append(status);
+  }
+  status.textContent = message;
+  status.className = error ? 'text-xs text-destructive' : 'text-xs text-muted-foreground';
+  if (link) {
+    const open = document.createElement('a');
+    open.href = link;
+    open.target = '_blank';
+    open.rel = 'noreferrer';
+    open.textContent = ' Abrir PDF';
+    open.className = 'ml-2 underline text-primary';
+    status.append(open);
+  }
+}
+
+function panoramaSlides() {
+  return [...document.querySelectorAll<HTMLElement>('.print\\:block .panorama-report-page')];
+}
+
+async function exportFromButton(button: HTMLButtonElement) {
+  if (window.__panoramaPdfExporting) return;
+  const slides = panoramaSlides();
+  if (!slides.length) {
+    setExportStatus(button, 'Não foi possível localizar as páginas do relatório. Gere o relatório novamente.', true);
+    return;
+  }
+  const viewer = window.open('', '_blank');
+  window.__panoramaPdfExporting = true;
+  button.disabled = true;
+  setExportStatus(button, `Preparando PDF: 0 de ${slides.length}`);
+  try {
+    const result = await buildPanoramaPdf(slides, {
+      title: 'Panorama Secovi/FIERGS',
+      author: 'Brain Inteligência Estratégica',
+      subject: 'Relatório de mercado',
+    }, ({ current, total }) => setExportStatus(button, `Gerando PDF: ${current} de ${total}`));
+    const url = URL.createObjectURL(result.blob);
+    if (viewer) viewer.location.href = url;
+    setExportStatus(button, `PDF pronto: ${result.pageCount} páginas.`, false, viewer ? undefined : url);
+  } catch (error) {
+    viewer?.close();
+    console.error('Falha ao gerar PDF do Panorama', error);
+    const detail = error instanceof Error ? error.message : 'Erro inesperado ao rasterizar as páginas.';
+    setExportStatus(button, `Não foi possível gerar o PDF: ${detail}`, true);
+  } finally {
+    button.disabled = false;
+    window.__panoramaPdfExporting = false;
+  }
+}
+
+document.addEventListener('click', (event) => {
+  const button = (event.target as Element | null)?.closest<HTMLButtonElement>('button');
+  if (!button || !button.textContent?.includes('Visualizar PDF')) return;
+  event.preventDefault();
+  event.stopPropagation();
+  void exportFromButton(button);
+}, true);
+
 window.print = () => {
   if (window.__panoramaPdfExporting) return;
   const slides = [...document.querySelectorAll<HTMLElement>('.print\\:block .panorama-report-page')];

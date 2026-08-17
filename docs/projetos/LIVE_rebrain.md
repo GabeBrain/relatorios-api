@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: recuperação visível do exportador PDF — Gabriel + Codex
+- **Ambiente/funcionalidade:** ação `Visualizar PDF` do Panorama.
+- **O quê:** o clique passa a abrir a aba antes da geração, mostrar progresso página a página e expor erro recuperável na interface. O fluxo não depende mais de falha silenciosa no console; se o visualizador for bloqueado, a geração mantém um link explícito para abrir o Blob PDF.
+- **Verificações:** suite de 141 testes e build concluídos após o ajuste.
+
 ### 2026-08-17 — Panorama: seis lâminas corporativas oficiais no preview e PDF — Gabriel + Codex
 - **Ambiente/funcionalidade:** páginas finais 57–62 de `/rebrain/panorama-secovi-fiergs`.
 - **O quê:** exporta diretamente do `Panorama_Secovi_SP_Piracicaba_1T26_vApres_28MAI_13h50.pptx` as seis páginas finais em PNG 1920×1080 e substitui os placeholders por suas imagens integrais. Equipe, consultores, peças institucionais, QR code e encerramentos passam a preservar composição, fotos, logos e rodapé do material aprovado, tanto no preview quanto no PDF rasterizado.
