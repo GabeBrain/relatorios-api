@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: dossiê de status para retomada — Gabriel + Codex
+- **Estado real:** a demonstração tem coleta/estrutura parcial e slides corporativos finais fiéis, mas não está pronta como reprodução integral: PDF do recorte real e contratos das páginas 29–56 seguem bloqueadores.
+- **Evidência:** `ReportPaginator` continua roteando coorte, participação e maturidade para `stock.units`/`MetricTable`; o PDF atual rasteriza DOM por ponte sobre `window.print`, abrindo a aba antes de existir Blob.
+- **Próximo passo:** seguir a ordem fixa do [`DOSSIER_STATUS_PANORAMA_2026-08-17.md`](../features/Relatorios%20Secovi_FIERGS/DOSSIER_STATUS_PANORAMA_2026-08-17.md): PDF direto, registry antirrepetição, cubo granular e contratos 29–56.
+
 ### 2026-08-17 — Panorama: recuperação visível do exportador PDF — Gabriel + Codex
 - **Ambiente/funcionalidade:** ação `Visualizar PDF` do Panorama.
 - **O quê:** o clique passa a abrir a aba antes da geração, mostrar progresso página a página e expor erro recuperável na interface. O fluxo não depende mais de falha silenciosa no console; se o visualizador for bloqueado, a geração mantém um link explícito para abrir o Blob PDF.
