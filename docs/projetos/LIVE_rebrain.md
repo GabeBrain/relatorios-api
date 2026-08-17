@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: plano v4 de fidelidade total e slides estáticos — Gabriel + Codex
+- **Diagnóstico:** placeholders corporativos e reaproveitamento de `stock.units` persistem em páginas de coorte, participação e maturidade; ambos contradizem o deck oficial e o gabarito congelado.
+- **Decisão:** o plano v4 obriga exportar e usar os slides estáticos oficiais como imagem integral, cria registry auditável por página e separa os contratos/visuais das referências 29–56. Página sem dimensão coberta deve declarar ausência, nunca reutilizar outra tabela.
+- **Próximo passo:** executar [`PLAN_TERRA_FIDELIDADE_TOTAL_SLIDES_E_STATICOS_v4.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_TERRA_FIDELIDADE_TOTAL_SLIDES_E_STATICOS_v4.md) na `main`.
+
 ### 2026-08-17 — Panorama: PDF rasterizado de uma página por slide — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — visualização/exportação do relatório.
 - **O quê:** a exportação deixa de depender do layout de impressão para compor o arquivo. O gerador captura cada slide ativo isoladamente em 1920×1080 e monta um Blob PDF com página 16:9 correspondente; o arquivo abre em nova aba no visualizador nativo do navegador. A capa municipal redundante foi removida do manifesto de saída, deixando 61 páginas ativas.
