@@ -51,8 +51,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ### 2026-08-17 — Panorama: diagnóstico único e dossiê de calibração — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Diagnóstico.
-- **O quê:** substitui a tabela operacional longa por resumo de status por bloco, uma única ação para executar Lançamentos/Vendas/Estoque/IVV e exportação XLSX com abas de resumo, contrato e todas as bancadas. A tela passa a consumir o contrato granular promovido de lançamentos, eliminando a soma indevida de snapshots históricos. IVV deixa de somar percentuais por padrão.
+- **O quê:** substitui a tabela operacional longa por resumo de status por bloco, uma única ação para executar Lançamentos/Vendas/Estoque/IVV e um dossiê completo de calibração. A tela passa a consumir o contrato granular promovido de lançamentos, eliminando a soma indevida de snapshots históricos. IVV deixa de somar percentuais por padrão.
 - **Impacto em Etapas/Pendências:** próximo teste verifica o diagnóstico consolidado e o XLSX; a próxima implementação é a bancada granular concorrente de Vendas/Estoque e o IVV ponderado.
+
+### 2026-08-17 — Panorama: dossiê copiado em Markdown — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Diagnóstico.
+- **O quê:** substitui o download XLSX por uma área de texto Markdown gerada sob demanda e um botão de cópia. O conteúdo completo da calibração fica na sessão para ser colado diretamente na conversa de análise.
+- **Impacto em Etapas/Pendências:** teste seguinte passa a enviar o texto copiado, sem artefato de arquivo intermediário.
 
 ### 2026-08-17 — Panorama: início das bancadas Vendas, Estoque e IVV — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Validação.
