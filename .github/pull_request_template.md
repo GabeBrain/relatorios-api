@@ -1,3 +1,7 @@
+> **Fluxo atual:** as entregas regulares são feitas diretamente na `main`, pois a publicação é o
+> ambiente de testes. Este template permanece somente para solicitações externas; não abra branches
+> ou PRs para o trabalho normal do produto.
+
 ## Resumo
 
 <!-- Explique o comportamento e o motivo da mudança. -->

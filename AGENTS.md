@@ -21,6 +21,19 @@ Registre no doc o autor/origem real, mas determine o ambiente pela funcionalidad
 pela ferramenta que gerou o commit. Antes de push/merge, execute
 `npm run check:live-docs -- <base> <head>`.
 
+## Fluxo de entrega: `main` direta
+
+Este repositório valida as entregas pela publicação da **`main`**. Portanto, todo trabalho de
+produto deve ser desenvolvido, testado, documentado e commitado diretamente na `main`.
+
+- Não criar branches de feature, correção ou experiência; uma feature pode ficar isolada na
+  estrutura de `src/features/`, mas sua integração Git é direta na `main`.
+- Antes de iniciar alterações, confirmar `git branch --show-current` = `main`, atualizar a base e
+  checar a árvore de trabalho.
+- Antes de publicar, executar as validações aplicáveis e `npm run check:live-docs -- <base> <head>`.
+- Branches locais criadas por engano devem ter seus commits aplicados na `main` e ser removidas
+  após a confirmação de que não há trabalho exclusivo nelas.
+
 ## Padrão obrigatório: GeoApiScopeEngine
 
 Para qualquer tela que use filtros geográficos e chamadas à API GeoBrain, usar o padrão

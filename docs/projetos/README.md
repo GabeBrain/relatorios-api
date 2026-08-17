@@ -36,6 +36,17 @@ introduziu a mudança. Na prática:
 - **Depois de um `pull`/merge**: leia as entradas novas do(s) doc(s) para se situar sobre o
   que mudou no trabalho dos colegas.
 
+## Fluxo de trabalho e publicação
+
+A publicação é validada a partir da **`main`**. Assim, o repositório adota fluxo direto: cada
+alteração deve ser implementada, testada, documentada e commitada na `main`, mantendo o isolamento
+por módulo/feature no código e não por branch Git.
+
+- Antes de editar: confirmar que a branch atual é `main` e que a árvore está limpa.
+- Antes do push: rodar a suite proporcional ao impacto e `npm run check:live-docs -- <base> <head>`.
+- Não abrir pull request nem branch para trabalho regular. Caso uma branch seja criada por engano,
+  aplique somente os commits pretendidos na `main`, confirme o resultado e exclua a branch local.
+
 ### Fonte de verdade e conciliação
 
 O **commit/merge é a evidência técnica** e o documento vivo é a **leitura operacional** dessa
@@ -90,11 +101,6 @@ As mudanças podem chegar por **Lovable**, pelo **Codex do Lucas** (especialment
 ou pela equipe/Codex interno. A origem identifica quem produziu a alteração, mas **não substitui a
 classificação por ambiente**: ela é determinada pela rota/módulo e pelo comportamento alterado.
 
-- Pull requests usam o checklist em `.github/pull_request_template.md` e a validação
-  `npm run check:live-docs -- <base> <head>`.
 - A validação exige um doc vivo de projeto quando há mudança de runtime e exige o doc detalhado
-  adicional para o Corretor. Ela roda também em `push` na `main` como auditoria de integrações
-  diretas do Lovable.
-- Para impedir uma integração direta *antes* de entrar na `main`, configure a proteção da branch
-  no GitHub exigindo o check **Documentação viva** e revisão por pull request. Sem essa proteção,
-  o check em `push` detecta e sinaliza a pendência, mas não desfaz um push já aceito.
+  adicional para o Corretor. Ela roda no `push` da `main` e deve ser executada localmente antes da
+  publicação.
