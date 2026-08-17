@@ -17,6 +17,9 @@ export interface LaunchRecord {
   otherUnits?: number;
   economicVgvMillions?: number | null;
   otherVgvMillions?: number | null;
+  name?: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface LaunchSeries { quarter: Quarter; vertical: number; horizontal: number; total: number; }
@@ -68,11 +71,26 @@ export interface PanoramaReference {
 
 /** Fonte única do livro editorial; páginas sem contrato homologado não recebem números de referência. */
 export type ReportDataState = 'ready' | 'partial' | 'unavailable' | 'not_applicable';
+export interface ReportSeries extends LaunchSeries { methodStatus: MethodStatus; dataStatus: ReportDataState; source: string; }
+export interface ReportMarketBlock {
+  series: ReportSeries[];
+  byGroup: { label: string; vertical: number; horizontal: number; total: number }[];
+  unit: 'count' | 'brl_millions' | 'percent' | 'brl_sqm';
+  methodStatus: MethodStatus;
+  dataStatus: ReportDataState;
+  source: string;
+  formula: string;
+}
 export interface PanoramaReportModel {
   scope: PanoramaScope;
   generatedAt: string;
   launches: LaunchModel;
-  source: 'building-with-history';
+  sales: { units: ReportMarketBlock; vgv: ReportMarketBlock };
+  stock: { units: ReportMarketBlock; vgv: ReportMarketBlock };
+  ivv: ReportMarketBlock;
+  prices: { ticket: ReportMarketBlock; meter: ReportMarketBlock };
+  locations: { name: string; segment: Segment; latitude: number; longitude: number }[];
+  source: 'GeoBrain API';
   dataState: ReportDataState;
   openMethodologies: string[];
 }

@@ -37,7 +37,7 @@ export async function fetchLaunchRecords(scope: PanoramaScope, signal?: AbortSig
         }, 0);
         const standard = standardOf(building.standard ?? history.find((entry) => String(entry.period ?? '').slice(0, 7) === releaseMonth)?.pattern);
         const economic = standard.includes('econom');
-        records.push({ quarter, segment, projects: 1, units: buildingUnits, vgvMillions, economicProjects: economic ? 1 : 0, otherProjects: economic ? 0 : 1, economicUnits: economic ? buildingUnits : 0, otherUnits: economic ? 0 : buildingUnits, economicVgvMillions: economic ? vgvMillions : 0, otherVgvMillions: economic ? 0 : vgvMillions });
+        records.push({ quarter, segment, projects: 1, units: buildingUnits, vgvMillions, economicProjects: economic ? 1 : 0, otherProjects: economic ? 0 : 1, economicUnits: economic ? buildingUnits : 0, otherUnits: economic ? 0 : buildingUnits, economicVgvMillions: economic ? vgvMillions : 0, otherVgvMillions: economic ? 0 : vgvMillions, name: String(building.name ?? building.building_name ?? 'Empreendimento'), latitude: safeNumber(building.latitude ?? building.lat), longitude: safeNumber(building.longitude ?? building.lng ?? building.lon) });
       }
       page += 1;
     } while (page <= lastPage);
@@ -47,7 +47,11 @@ export async function fetchLaunchRecords(scope: PanoramaScope, signal?: AbortSig
 
 /** Uma coleta de lançamentos por recorte alimenta todas as páginas do PDF. */
 export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal): Promise<PanoramaReportModel> {
-  return buildPanoramaReportModel(scope, await fetchLaunchRecords(scope, signal));
+  const [records, sales, stock, ivv, ticket, meter] = await Promise.all([
+    fetchLaunchRecords(scope, signal), temporalRows(scope, 'sales', signal), temporalRows(scope, 'stock', signal), temporalRows(scope, 'ivv', signal), temporalRows(scope, 'medium-prices', signal), temporalRows(scope, 'medium-prices-meter', signal),
+  ]);
+  const millions = (source: Awaited<ReturnType<typeof temporalRows>>, field: string) => ({ ...source, rows: source.rows.map((row) => ({ ...row, [field]: (safeNumber(row[field]) ?? 0) / 1_000_000 })) });
+  return buildPanoramaReportModel(scope, records, { sales: millions(sales, 'vgv_liquid_sales'), stock: millions(stock, 'vgv_stock'), ivv, ticket, meter });
 }
 
 function releaseQuarter(value: unknown): Quarter | null { return periodToQuarter(value); }
@@ -98,7 +102,7 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
   ];
 }
 
-async function temporalRows(scope: PanoramaScope, endpoint: 'sales' | 'stock' | 'ivv', signal?: AbortSignal): Promise<{ rows: Record<string, unknown>[]; available: boolean; source: string }> {
+async function temporalRows(scope: PanoramaScope, endpoint: 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-prices-meter', signal?: AbortSignal): Promise<{ rows: Record<string, unknown>[]; available: boolean; source: string }> {
   const rows: Record<string, unknown>[] = []; let page = 1; let lastPage = 1;
   do {
     // IVV is a rate, not an additive category. Omitting group_by asks the API for the segment total;

@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: bases oficiais, coleta ampliada e páginas quantitativas — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preview/PDF 16:9.
+- **O quê:** extrai e incorpora assets autorizados dos dois PPTX oficiais (capa e assinatura), substitui o paginador genérico por composição editorial Secovi, páginas institucionais, divisórias, encerramentos, matrizes trimestrais/anuais e gráficos com 17 trimestres, curva monotônica, destaques comparáveis e variações. O relatório passa a coletar em paralelo lançamentos, vendas, estoque, IVV, ticket, preço/m² e coordenadas.
+- **Regra de dados:** status metodológico aberto não oculta mais dado retornado. As páginas mostram os valores e a fórmula/fonte da API com selo “Em validação”; ausência somente aparece quando a fonte não cobre o recorte.
+- **Impacto em Etapas/Pendências:** assets e estrutura visual estão no produto; restam QA autenticado lado a lado do PDF e homologação de universos/agregações com analistas, especialmente VGV lançado, grupos e IVV por área.
+
 ### 2026-08-17 — Panorama: plano v2 de reprodução fiel e dados visíveis — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — reconstrução integral do relatório/PDF.
 - **O quê:** novo plano terminal corrige a interpretação de metodologia aberta: valores disponíveis nas APIs devem continuar visíveis com selo de validação. Define uso obrigatório dos decks Panorama e `PPT Institucional_2026 - Widescreen_NOVO (1)`, reprodução fiel das páginas institucionais/divisórias, tabelas comparativas oficiais, gráficos de 17 trimestres, coleta completa, textos determinísticos e QA visual das 62 páginas.
