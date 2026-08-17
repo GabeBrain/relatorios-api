@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: plano terminal do PDF para demonstração — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — relatório paginado/PDF.
+- **O quê:** define a implementação do `PanoramaReportModel`, manifesto das 62 intenções editoriais, templates e visualizações alimentadas exclusivamente pela API, estados metodológicos sem mocks, impressão 16:9, QA visual e roteiro de demonstração ao Diego.
+- **Impacto em Etapas/Pendências:** Terra pode executar o PDF completo em paralelo à calibração metodológica; a demo evidencia a fábrica pronta e isola filtros/fórmulas ainda dependentes dos analistas.
+
 ### 2026-08-17 — Panorama: diagnóstico único e dossiê de calibração — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Diagnóstico.
 - **O quê:** substitui a tabela operacional longa por resumo de status por bloco, uma única ação para executar Lançamentos/Vendas/Estoque/IVV e um dossiê completo de calibração. A tela passa a consumir o contrato granular promovido de lançamentos, eliminando a soma indevida de snapshots históricos. IVV deixa de somar percentuais por padrão.
