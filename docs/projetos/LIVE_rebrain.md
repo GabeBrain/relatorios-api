@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: revisão do exportador PDF e contrato rasterizado — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — ação `Exportar PDF`.
+- **Diagnóstico:** o botão atual executa `window.print()` e depende de uma árvore `hidden print:block`; no teste publicado o navegador imprimiu o shell, somente a página corrente e uma folha residual, totalizando duas páginas desconfiguradas.
+- **Decisão:** o plano v3 passa a exigir geração explícita de um Blob PDF rasterizado, com uma página 16:9 por slide ativo, abertura no visualizador nativo do navegador, progresso, fallback de download e validação via `pdfjs-dist`. PDF editável e PPTX ficam fora desta fase.
+- **Próximo passo:** Terra deve implementar e testar o exportador antes de considerar o relatório publicável.
+
 ### 2026-08-17 — Panorama: plano v3 para corrigir Mercado Imobiliário e encerramento — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — páginas 29–56 e encerramento corporativo.
 - **O quê:** diagnóstico confirmou que páginas de padrão, coorte, tipologia, maturidade e horizontais reutilizam indevidamente a mesma tabela de `stock.units`. O plano v3 define contratos e visuais próprios por intenção, uma única capa, validação antirrepetição no manifesto e incorporação integral dos seis slides corporativos finais exportados do deck oficial.

@@ -163,7 +163,48 @@ Gerar os textos de análise com regras determinísticas. Cada frase deve apontar
 
 Não usar LLM nesta entrega. Quando uma frase depender de regra editorial ainda não homologada, exibir o número da API com selo “Em validação” e registrar a premissa no painel de metodologia. Remover placeholders como “LLM necessário aqui” do PDF demonstrável.
 
-## 10. Fase G — testes de contrato, regressão e QA visual
+## 10. Fase G — gerador e visualizador real de PDF
+
+O fluxo atual está comprovadamente incorreto: `ReportPaginator` chama `window.print()` e tenta alternar entre a página visível e todas as páginas por `hidden print:block`. A impressão inclui partes do shell da aplicação e, no ambiente publicado testado, materializa somente duas folhas — uma com formulário/interface/capa e outra praticamente vazia. O CSS `@page` não transforma essa árvore em um deck confiável.
+
+Substituir integralmente esse caminho por geração explícita de um arquivo PDF no navegador. A primeira versão não precisa ser editável e não deve gerar PPTX.
+
+### Contrato da exportação v1
+
+1. Renderizar todas as entradas ativas do manifesto em um contêiner de exportação isolado, fora da tela, mas nunca com `display: none`.
+2. Fixar cada slide em 1920 × 1080 px, proporção 16:9, sem shell, filtros, abas, botões, navegação ou margens do navegador.
+3. Aguardar `document.fonts.ready`, decodificação de todas as imagens e estabilização dos gráficos antes da captura.
+4. Desabilitar animações durante a exportação, especialmente nos componentes Recharts.
+5. Rasterizar cada slide individualmente em alta resolução e inserir a imagem em uma página PDF 16:9 própria. Nunca capturar o relatório inteiro como uma única imagem longa.
+6. Usar uma biblioteca de captura DOM compatível com SVG e uma biblioteca de composição de PDF, preferencialmente `html-to-image` + `pdf-lib` ou equivalentes tecnicamente justificados.
+7. Processar sequencialmente ou em lotes pequenos para limitar memória, liberando canvases e URLs temporárias após cada página.
+8. O total de páginas do PDF deve ser exatamente igual ao total de entradas `enabled` do manifesto — previsto em 61 após a remoção da capa redundante.
+9. Adicionar metadados do arquivo: título, cidade/UF, trimestre, data de geração e versão do manifesto.
+10. O arquivo pode ser rasterizado; preservar texto editável, acessibilidade interna ou PPTX fica explicitamente para uma fase posterior.
+
+### Fluxo de interface
+
+- Renomear a ação principal para **“Visualizar PDF”** enquanto estivermos nesta etapa.
+- No clique, abrir imediatamente uma aba vazia autorizada pelo gesto do usuário, gerar o PDF com progresso `n/total` e então navegar essa aba para uma `Blob URL` com MIME `application/pdf`.
+- O resultado deve abrir no visualizador nativo de PDF do Chrome/Edge, onde o usuário poderá revisar, paginar e baixar. Não abrir a caixa de impressão.
+- Exibir no app estados `preparando`, `renderizando página n de total`, `montando PDF`, `pronto` e `erro`, impedindo cliques duplicados.
+- Se o navegador bloquear a nova aba, manter o Blob e apresentar ações **“Abrir PDF”** e **“Baixar PDF”**, sem refazer a coleta ou a renderização.
+- Revogar a `Blob URL` anterior somente quando ela não estiver mais em uso; limpar recursos ao trocar recorte ou desmontar a página.
+
+### Aceite obrigatório do PDF
+
+- abre no visualizador de PDF do navegador, não em `window.print()`;
+- contém exatamente uma página por slide ativo e nenhuma página branca;
+- todas as páginas são 16:9 e têm o mesmo enquadramento do preview;
+- não contém cabeçalho, URL, data, filtros, tabs ou qualquer interface da aplicação;
+- capa, gráficos, tabelas, mapa, footers e slides corporativos são visíveis e não estão cortados;
+- a ordem segue `outputOrder` e a numeração editorial permanece rastreável por `referenceSlide`;
+- funciona no build de desenvolvimento e no publicado, ao menos em Chrome e Edge;
+- gerar novamente o mesmo recorte não dispara nova coleta das APIs se o modelo ainda estiver válido no cache.
+
+Remover `window.print()` do botão do Panorama e deixar `panorama-print.css` apenas como legado temporário não utilizado, ou eliminá-lo se não houver outro consumidor. A funcionalidade não pode depender de diálogo de impressão ou de `@media print` para existir.
+
+## 11. Fase H — testes de contrato, regressão e QA visual
 
 Adicionar testes para:
 
@@ -180,7 +221,20 @@ Executar QA visual lado a lado, no mínimo, para as referências 1, 12, 14, 29, 
 
 Rodar typecheck, testes, build e, se disponível, o smoke visual automatizado. Falha em teste, build ou página vazia bloqueia publicação.
 
-## 11. Fase H — documentação, commit e publicação
+Adicionar testes específicos do exportador para:
+
+- contagem `PDF pages === manifest.filter(enabled).length`;
+- dimensões 16:9 de todas as páginas;
+- ordem do manifesto;
+- ausência de página em branco;
+- ausência dos seletores do shell no contêiner capturado;
+- geração de Blob `application/pdf` com tamanho não vazio;
+- recuperação quando uma imagem ou página falhar;
+- reuso do `PanoramaReportModel` já carregado, sem chamadas duplicadas à API.
+
+Em smoke E2E, interceptar a Blob URL ou salvar o PDF de teste, abrir com `pdfjs-dist` e validar contagem, dimensões e renderização de miniaturas representativas das páginas 1, 29, 40, 51, 56 e encerramento.
+
+## 12. Fase I — documentação, commit e publicação
 
 Atualizar antes do commit:
 
@@ -192,18 +246,19 @@ Atualizar antes do commit:
 
 Revisar `git diff`, preservar alterações não relacionadas, fazer commit direto na `main`, publicar pelo fluxo já adotado e conferir a URL publicada.
 
-## 12. Ordem de execução para maximizar o resultado de hoje
+## 13. Ordem de execução para maximizar o resultado de hoje
 
 1. Corrigir manifesto, remover segunda capa e importar os seis slides finais.
 2. Criar contratos específicos e bloquear o fallback repetido.
 3. Implementar primeiro os visuais 29, 31–46, 48, 49 e 51.
 4. Conectar narrativas e mapa aos modelos reais.
-5. Fazer acabamento visual até o slide 28 sem regressão.
-6. Rodar QA completo, testes/build, documentar, commitar e publicar.
+5. Implementar o gerador rasterizado, abrir o Blob no visualizador nativo e validar uma página por slide.
+6. Fazer acabamento visual até o slide 28 sem regressão.
+7. Rodar QA completo, testes/build, documentar, commitar e publicar.
 
 Se o tempo exigir corte, não sacrificar a correção semântica: é preferível um gráfico fiel com selo metodológico a uma tabela bonita reutilizada no slide errado.
 
-## 13. Relatório obrigatório ao final
+## 14. Relatório obrigatório ao final
 
 Terra deve informar:
 
@@ -214,5 +269,7 @@ Terra deve informar:
 - páginas com dados completos, parciais ou dimensão não coberta;
 - testes/typecheck/build e resultados;
 - screenshots de QA ou localização dos artefatos;
+- quantidade, dimensões e tamanho em bytes do PDF de teste;
+- confirmação de abertura no visualizador nativo e ausência de `window.print()`;
 - diferenças visuais remanescentes;
 - métodos ainda dependentes dos analistas, sem tratá-los como bloqueio para a demonstração.
