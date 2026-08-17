@@ -10,6 +10,8 @@
   — transcrição congelada dos 62 slides, números, reconciliações, anomalias e métodos abertos.
 - [`PLAN_TERRA_PANORAMA_SECOVI_FIERGS_V1.md`](./PLAN_TERRA_PANORAMA_SECOVI_FIERGS_V1.md)
   — plano executável da primeira versão, começando pelos contratos de Lançamentos e PDF paginado.
+- [`PLAN_TERRA_CALIBRACAO_TODOS_BLOCOS_v1.md`](./PLAN_TERRA_CALIBRACAO_TODOS_BLOCOS_v1.md)
+  — plano de bancada por bloco, curadoria auditável do universo e portões suficientes para avançar.
 - [`DECISOES_E_PREMISSAS_PANORAMA.md`](./DECISOES_E_PREMISSAS_PANORAMA.md)
   — registro vivo de hipóteses e retornos dos analistas, sem alterar o gabarito histórico.
 

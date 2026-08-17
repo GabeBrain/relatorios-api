@@ -49,6 +49,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: plano de calibração integral e curadoria do universo — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — evolução planejada do modo Validação.
+- **O quê:** define bancadas análogas para Lançamentos, Vendas, Estoque, IVV, Preços, Coortes/Maturidade, VGV e Mapa; introduz exclusões auditáveis por empreendimento/grupo, com escopo global, lançamento, período ou métrica e prévia antes × depois.
+- **Decisão:** divergências não bloqueiam o PDF quando o contrato tem semântica, reconciliação interna, cobertura e estado explícitos. Exclusões em lote congelam IDs e nunca alteram o gabarito congelado.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/PLAN_TERRA_CALIBRACAO_TODOS_BLOCOS_v1.md` e log de premissas.
+- **Impacto em Etapas/Pendências:** próximo slice técnico é T0–T2: framework compartilhado, curadoria, auditoria horizontal e promoção dos contratos verticais; depois Vendas/Estoque/IVV.
+
 ### 2026-08-17 â€” Panorama Secovi/FIERGS: bancada de calibraÃ§Ã£o de LanÃ§amentos â€” Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` â€” modo ValidaÃ§Ã£o.
 - **O quÃª:** adiciona a aÃ§Ã£o explÃ­cita **Executar calibraÃ§Ã£o**, que confronta o gabarito de Piracicaba com quatro candidatos: empreendimentos por `release_date`, unidades por `total_units`, unidades pelo `qty` do mÃªs de lanÃ§amento e `temporal-analysis-city/releases`. A tabela mostra fonte, resultado, diferenÃ§a e status de cada cÃ©lula; nenhum candidato altera o relatÃ³rio automaticamente.

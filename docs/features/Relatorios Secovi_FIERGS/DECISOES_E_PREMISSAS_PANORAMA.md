@@ -38,6 +38,7 @@ congelado não deve ser usado como log mutável.
 | PRE-014 | ASSUMED | adaptador API | `building-with-history` Ã© consolidado por empreendimento e trimestre antes dos contratos; unidades e VGV somam tipologias, empreendimento conta uma vez | validar com payload real e regra oficial de `release_date` |
 | PRE-015 | OPEN | VGV incompleto | preÃ§o ausente mantÃ©m VGV do perÃ­odo como `null` e expÃµe warning; nÃ£o Ã© convertido em zero | confirmar disponibilidade e semÃ¢ntica de `release_price` |
 | PRE-016 | ASSUMED | calibraÃ§Ã£o | a bancada compara candidatos de `release_date`, `total_units`, `typologies_history.qty` e `temporal-analysis-city/releases`, sem alterar o contrato do relatÃ³rio | promover somente o mÃ©todo aprovado nos 17 trimestres |
+| PRE-017 | ASSUMED | curadoria | analista pode excluir empreendimento/grupo com escopo global, de lanÃ§amento, perÃ­odo ou mÃ©trica; exclusÃ£o em grupo congela IDs e nunca reescreve o gabarito | validar governanÃ§a e persistÃªncia com analistas |
 
 ```md
 ### ANA-000 — título
