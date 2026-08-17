@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-17 — Panorama: seis lâminas corporativas oficiais no preview e PDF — Gabriel + Codex
+- **Ambiente/funcionalidade:** páginas finais 57–62 de `/rebrain/panorama-secovi-fiergs`.
+- **O quê:** exporta diretamente do `Panorama_Secovi_SP_Piracicaba_1T26_vApres_28MAI_13h50.pptx` as seis páginas finais em PNG 1920×1080 e substitui os placeholders por suas imagens integrais. Equipe, consultores, peças institucionais, QR code e encerramentos passam a preservar composição, fotos, logos e rodapé do material aprovado, tanto no preview quanto no PDF rasterizado.
+- **Verificações:** typecheck, 141 testes e build concluídos. A correção dos contratos dinâmicos 29–56 continua como próximo bloco obrigatório do plano v4.
+
 ### 2026-08-17 — Panorama: plano v4 de fidelidade total e slides estáticos — Gabriel + Codex
 - **Diagnóstico:** placeholders corporativos e reaproveitamento de `stock.units` persistem em páginas de coorte, participação e maturidade; ambos contradizem o deck oficial e o gabarito congelado.
 - **Decisão:** o plano v4 obriga exportar e usar os slides estáticos oficiais como imagem integral, cria registry auditável por página e separa os contratos/visuais das referências 29–56. Página sem dimensão coberta deve declarar ausência, nunca reutilizar outra tabela.

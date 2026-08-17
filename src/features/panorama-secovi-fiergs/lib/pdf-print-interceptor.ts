@@ -1,4 +1,10 @@
 import { buildPanoramaPdf } from './pdf-export';
+import slide57 from '../assets/corporate/panorama-57.png';
+import slide58 from '../assets/corporate/panorama-58.png';
+import slide59 from '../assets/corporate/panorama-59.png';
+import slide60 from '../assets/corporate/panorama-60.png';
+import slide61 from '../assets/corporate/panorama-61.png';
+import slide62 from '../assets/corporate/panorama-62.png';
 
 declare global { interface Window { __panoramaPdfExporting?: boolean; } }
 
@@ -15,8 +21,24 @@ function syncExportLabel() {
   }
 }
 
-new MutationObserver(syncExportLabel).observe(document.documentElement, { childList: true, subtree: true });
-queueMicrotask(syncExportLabel);
+const officialSlides: Record<number, string> = { 57: slide57, 58: slide58, 59: slide59, 60: slide60, 61: slide61, 62: slide62 };
+
+function syncOfficialStaticSlides() {
+  for (const [page, asset] of Object.entries(officialSlides)) {
+    for (const sheet of document.querySelectorAll<HTMLElement>(`[aria-label^="Página ${page}:"]`)) {
+      if (sheet.dataset.officialStatic === asset) continue;
+      const image = document.createElement('img');
+      image.src = asset;
+      image.alt = `Slide oficial ${page} do Panorama Secovi/FIERGS`;
+      image.className = 'panorama-static-official';
+      sheet.replaceChildren(image);
+      sheet.dataset.officialStatic = asset;
+    }
+  }
+}
+
+new MutationObserver(() => { syncExportLabel(); syncOfficialStaticSlides(); }).observe(document.documentElement, { childList: true, subtree: true });
+queueMicrotask(() => { syncExportLabel(); syncOfficialStaticSlides(); });
 
 window.print = () => {
   if (window.__panoramaPdfExporting) return;

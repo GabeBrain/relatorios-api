@@ -9,6 +9,7 @@
 @media screen { .print\:block.hidden { display:block !important; position:fixed !important; top:0 !important; left:-2200px !important; width:1920px !important; z-index:-1 !important; pointer-events:none !important; } .print\:block.hidden .panorama-report-page { width:1920px !important; height:1080px !important; min-height:1080px !important; margin:0 !important; } }
 
 .panorama-official-page { background: #fff; color: #080808; font-family: Arial, sans-serif; }
+.panorama-static-official { display:block; width:100%; height:100%; object-fit:cover; }
 .panorama-official-footer { background-position: center bottom; background-size: cover; color: transparent !important; border: 0 !important; min-height: 29px; }
 .panorama-cover { height: 100%; background-position: center; background-size: cover; color: white; display: flex; align-items: center; padding: 9% 8%; text-shadow: 0 2px 6px #530000; }
 .panorama-cover p { text-transform: uppercase; letter-spacing: .18em; font-weight: 700; }.panorama-cover h1 { font-size: clamp(2rem,5vw,4.6rem); max-width: 65%; line-height: 1.05; }.panorama-cover h2 { font-size: clamp(1rem,2vw,2rem); }
