@@ -59,11 +59,13 @@ const AELO_PERCENT_COLUMNS = new Set(['Entrada', '% de Juros Mensal', 'Desconto 
 function formatAeloPercent(value: unknown): string {
   const numeric = toNum(value);
   if (numeric === null) return '';
-  const normalized = numeric > 1 ? numeric / 100 : numeric;
-  return `${normalized.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}%`;
+  return `${numeric.toLocaleString('pt-BR')}%`;
+}
+
+function formatAeloVgv(value: unknown): string {
+  const numeric = toNum(value);
+  if (numeric === null) return '';
+  return `R$ ${Math.round(numeric / 1_000_000).toLocaleString('pt-BR')}M`;
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -520,6 +522,7 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
   const exportValue = (col: string, value: Row[string]): Row[string] => {
     if (value === null || value === undefined || value === '') return null;
     if (AELO_PERCENT_COLUMNS.has(col)) return formatAeloPercent(value);
+    if (col.startsWith('VGV')) return formatAeloVgv(value);
     if (col === 'Lançamento' || col === 'Entrega') {
       const date = new Date(String(value));
       if (!Number.isNaN(date.getTime())) return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
@@ -530,8 +533,7 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
     [allCols, ...rows.map((row) => allCols.map((c) => exportValue(c, row[c])) )];
   const sfx = qSheet(lastQ);
   const wb = utils.book_new();
-  utils.book_append_sheet(wb, utils.aoa_to_sheet(sheetRows(activeRows)), `CONSOLIDADA ${sfx}`);
-  utils.book_append_sheet(wb, utils.aoa_to_sheet(sheetRows(inactiveRows)), 'ESGOTADOS');
+  utils.book_append_sheet(wb, utils.aoa_to_sheet(sheetRows([...activeRows, ...inactiveRows])), `RELATÓRIO ${sfx}`);
   writeFile(wb, `Relatorio_${city.trim()}_${sfx}.xlsx`);
 }
 
@@ -869,9 +871,7 @@ function formatCell(col: string, val: unknown): string {
   }
   if (typeof val === 'number') {
     if (col.startsWith('VGV') || col === 'Vendas Líquidas') {
-      return val >= 1_000_000
-        ? `R$ ${(val / 1_000_000).toFixed(2)}M`
-        : `R$ ${val.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
+      return `R$ ${Math.round(val / 1_000_000).toLocaleString('pt-BR')}M`;
     }
     if (
       col === 'Preço de lançamento' || col === 'Preço atual' ||
