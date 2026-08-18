@@ -13,7 +13,7 @@ import type { PanoramaScope, Quarter } from '../types';
 
 const quarters: Quarter[] = ['1T2022','2T2022','3T2022','4T2022','1T2023','2T2023','3T2023','4T2023','1T2024','2T2024','3T2024','4T2024','1T2025','2T2025','3T2025','4T2025','1T2026'];
 export default function PanoramaSecoviFiergsPage() {
-  const [scope, setScope] = useState<PanoramaScope>({ uf: '', city: '', endQuarter: '1T2026' });
+  const [scope, setScope] = useState<PanoramaScope>({ uf: 'SP', city: '', endQuarter: '1T2026' });
   const [submitted, setSubmitted] = useState<PanoramaScope | null>(null);
   const report = useQuery({ queryKey: ['panorama-report', submitted], queryFn: ({ signal }) => fetchPanoramaReportModel(submitted!, signal), enabled: Boolean(submitted), staleTime: 5 * 60_000, retry: 1 });
   const ready = Boolean(scope.uf && scope.city && scope.endQuarter);

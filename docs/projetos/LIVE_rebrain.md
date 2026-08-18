@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Panorama: UF inicial fixada em SP — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — filtros de consulta.
+- **O que:** o escopo inicial passa a abrir com UF `SP`, coerente com o produto Secovi-SP; o municipio continua vazio ate o usuario escolher uma cidade autorizada pela API.
+- **Impacto em Etapas/Pendencias:** nao dispara consulta pesada automaticamente e preserva o contrato GeoApiScopeEngine de limpar o municipio em toda troca de UF.
+
 ### 2026-08-18 — Panorama: municipio dinamico na capa oficial — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capa de pesquisa, slide 1.
 - **O que:** a arte oficial permanece como base visual, mas a regiao que continha Piracicaba recebeu uma camada de texto dinamica sincronizada ao municipio do recorte. Assim, Araçatuba e as demais cidades usam a mesma capa sem manter o nome do gabarito.
