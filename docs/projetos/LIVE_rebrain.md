@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Formatação percentual do Excel AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** os campos Entrada, % de Juros Mensal e Desconto à Vista passam a exibir sempre duas casas no padrão `0,00%`, normalizando os valores percentuais da API.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+
 ### 2026-08-18 — Correção dos cálculos de VGV no Excel AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela resumo e exportação Excel
 - **O quê:** restauradas as colunas solicitadas “VGV Lançado” e “m² Lançado”; VGV histórico, VGV Estoque histórico e VGV Lançado passam a usar o Preço atual do último período da tipologia, com a regra informada também na interface.

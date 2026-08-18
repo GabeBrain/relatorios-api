@@ -54,6 +54,18 @@ const HEADER_COLS = [
   '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'VGV Lançado', 'm² Lançado',
 ];
 
+const AELO_PERCENT_COLUMNS = new Set(['Entrada', '% de Juros Mensal', 'Desconto à Vista']);
+
+function formatAeloPercent(value: unknown): string {
+  const numeric = toNum(value);
+  if (numeric === null) return '';
+  const normalized = numeric > 1 ? numeric / 100 : numeric;
+  return `${normalized.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}%`;
+}
+
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function availableQuarters(yearStart = 2021): string[] {
@@ -507,9 +519,7 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
   const allCols = [...HEADER_COLS, ...quarterMeasureCols];
   const exportValue = (col: string, value: Row[string]): Row[string] => {
     if (value === null || value === undefined || value === '') return null;
-    if (col === 'Entrada' || col === '% de Juros Mensal' || col === 'Desconto à Vista') {
-      return typeof value === 'number' && value > 1 ? value / 100 : value;
-    }
+    if (AELO_PERCENT_COLUMNS.has(col)) return formatAeloPercent(value);
     if (col === 'Lançamento' || col === 'Entrega') {
       const date = new Date(String(value));
       if (!Number.isNaN(date.getTime())) return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
@@ -851,10 +861,7 @@ function TimeseriesChart({ buildings, quarterCols }: {
 function formatCell(col: string, val: unknown): string {
   if (val === null || val === undefined || val === '') return '';
   if (col === '% Dispon.') return `${(val as number).toFixed(1)}%`;
-  if (col === 'Entrada' || col === '% de Juros Mensal' || col === 'Desconto à Vista') {
-    const percent = (val as number) > 1 ? (val as number) / 100 : (val as number);
-    return `${percent.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
-  }
+  if (AELO_PERCENT_COLUMNS.has(col)) return formatAeloPercent(val);
   if (col === 'Lançamento' || col === 'Entrega') {
     const raw = String(val);
     const date = new Date(raw);
