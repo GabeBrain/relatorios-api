@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Correções da consulta e prévia do Relatório AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — consulta API e escopo geográfico
+- **O quê:** incluído informativo da regra de consulta; registros da prévia passam a ser reutilizados na busca final, corrigindo o resultado vazio após uma prévia com empreendimentos; o seletor de Município fica oculto somente no AELO e a consulta usa exclusivamente UF.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`, `src/features/shared/geo-api-scope-engine/GeoApiScopeSelector.tsx`.
+- **Impacto em Etapas/Pendências:** prévia e busca final alinhadas; validar a resposta real do endpoint interno com os quantitativos de SP.
+
 ### 2026-08-18 — Relatório AELO: endpoint interno e catálogo de municípios — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — coleta, escopo e exportação do relatório AELO
 - **O quê:** migração para `POST /public-api/v2/building-with-history-internal` por UF, tipo Horizontal fixo, filtro de padrões de loteamento e municípios do catálogo AELO; inclusão do de-para de Região Administrativa, início do período em 4T2017, status atual/tipologia e formatação de datas/percentuais na tabela e Excel.

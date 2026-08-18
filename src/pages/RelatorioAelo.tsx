@@ -182,6 +182,7 @@ interface LaneResult {
   eligibleActiveIds: number[];
   eligibleInactiveIds: number[];
   failedCalls: number;
+  records: Map<number, Record<string, unknown>>;
 }
 
 interface LiveStats {
@@ -208,6 +209,7 @@ async function fetchLane(
   const eligibleIds: number[] = [];
   const eligibleActiveIds: number[] = [];
   const eligibleInactiveIds: number[] = [];
+  const records = new Map<number, Record<string, unknown>>();
   const allSeen = new Set<number>();
   const eligibleSeen = new Set<number>();
   let failedCalls = 0;
@@ -247,6 +249,7 @@ async function fetchLane(
 
       if (!hasPeriodInRange(it, startQ, endQ)) continue;
       if (!eligibleSeen.has(bid)) {
+        records.set(bid, it);
         eligibleSeen.add(bid);
         eligibleIds.push(bid);
         newEligible++;
@@ -262,13 +265,14 @@ async function fetchLane(
     page++;
   }
 
-  return { allIds, eligibleIds, isActiveStatus: status === 'Ativo', eligibleActiveIds, eligibleInactiveIds, failedCalls };
+  return { allIds, eligibleIds, isActiveStatus: status === 'Ativo', eligibleActiveIds, eligibleInactiveIds, failedCalls, records };
 }
 
 interface PreviewResult {
   totalCity: number; eligibleTotal: number; eligibleActive: number; eligibleInactive: number;
   eligibleIds: number[]; activeIds: number[]; inactiveIds: number[];
   failedCalls: number; etaSeconds: number;
+  records: Record<string, unknown>[];
 }
 
 async function collectPreview(
@@ -294,6 +298,7 @@ async function collectPreview(
   const allIds: number[] = []; const eligibleIds: number[] = [];
   const activeIds: number[] = []; const inactiveIds: number[] = [];
   let failedCalls = 0;
+  const records = new Map<number, Record<string, unknown>>();
 
   for (const r of settled) {
     if (r.status !== 'fulfilled') continue;
@@ -303,12 +308,13 @@ async function collectPreview(
     for (const id of lane.eligibleIds) { if (!eligibleSeen.has(id)) { eligibleSeen.add(id); eligibleIds.push(id); } }
     for (const id of lane.eligibleActiveIds) { if (!activeSeen.has(id)) { activeSeen.add(id); activeIds.push(id); } }
     for (const id of lane.eligibleInactiveIds) { if (!inactiveSeen.has(id)) { inactiveSeen.add(id); inactiveIds.push(id); } }
+    for (const [id, record] of lane.records) { if (!records.has(id)) records.set(id, record); }
   }
 
   return {
     totalCity: allIds.length, eligibleTotal: eligibleIds.length,
     eligibleActive: activeIds.length, eligibleInactive: inactiveIds.length,
-    eligibleIds, activeIds, inactiveIds, failedCalls,
+    eligibleIds, activeIds, inactiveIds, failedCalls, records: [...records.values()],
     etaSeconds: eligibleIds.length * ESTIMATED_SECONDS_PER_DETAIL / DETAIL_CONCURRENCY,
   };
 }
@@ -1044,12 +1050,9 @@ export default function RelatorioAelo() {
     setResult(null);
 
     try {
-      const token = getToken();
-      const { details, failed } = await fetchDetailsParallel(
-        preview.eligibleIds, token,
-        (done, total, fail) => { setProgressDone(done); setProgressTotal(total); setProgressFailed(fail); },
-        ctrl.signal,
-      );
+      const details = new Map(preview.records.map((record) => [record.building_id as number, record]));
+      setProgressDone(preview.eligibleIds.length);
+      setProgressFailed(0);
 
       if (ctrl.signal.aborted) return;
 
@@ -1068,7 +1071,7 @@ export default function RelatorioAelo() {
       const inactiveRows = buildRows(inactiveBuildings, filteredQs, endQ);
 
       setResult({ activeRows, inactiveRows, quarterCols: filteredQs, city: city.trim() || uf.trim().toUpperCase(), lastQ, startQ, nBuildings: details.size, allBuildings });
-      const warn = failed > 0 ? ` — ${failed} falha(s)` : '';
+      const warn = '';
       toast.success(`Concluído: ${details.size} empreendimentos | ${qLabel(startQ)} → ${qLabel(lastQ)}${warn}`);
     } catch (err) {
       if (!ctrl.signal.aborted) toast.error(`Erro na coleta: ${err instanceof Error ? err.message : String(err)}`);
@@ -1115,11 +1118,14 @@ export default function RelatorioAelo() {
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-600 dark:text-amber-400">
           <strong>Limitação da API:</strong> Distratos não são fornecidos diretamente. <code>*Distratos no trimestre</code> é uma estimativa via variação de estoque; <code>VGV Distratos</code> permanece em branco.
         </div>
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
+          <strong className="text-foreground">Regra da consulta AELO:</strong> consulta POST no endpoint interno v2 por UF, sempre com tipo Horizontal. O relatório mantém somente empreendimentos com padrão Loteamento Aberto ou Loteamento Fechado e municípios presentes no catálogo AELO; o Município selecionado, quando informado, é aplicado apenas como filtro local após a consulta.
+        </div>
 
         <div className="space-y-1">
           <div className="space-y-1">
             <Label className="text-xs">Escopo geográfico *</Label>
-            <GeoApiScopeSelector value={scope} onChange={handleScopeChange} disabled={loading} />
+            <GeoApiScopeSelector value={scope} onChange={handleScopeChange} disabled={loading} hideCity />
           </div>
         </div>
 
