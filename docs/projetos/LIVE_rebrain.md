@@ -49,6 +49,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Panorama: municipio dinamico na capa oficial — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capa de pesquisa, slide 1.
+- **O que:** a arte oficial permanece como base visual, mas a regiao que continha Piracicaba recebeu uma camada de texto dinamica sincronizada ao municipio do recorte. Assim, Araçatuba e as demais cidades usam a mesma capa sem manter o nome do gabarito.
+- **Cobertura:** preview no browser e as 62 paginas renderizadas para o PDF recebem a mesma camada.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Impacto em Etapas/Pendencias:** corrige a paridade funcional da capa; a calibracao estrutural de tabelas/graficos variaveis segue como proxima familia.
+
 ### 2026-08-18 — Panorama: primeira calibracao visual das tabelas e graficos variaveis — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — lancamentos e vendas, slides 12–27.
 - **O que:** a regua visual passou a ser a exportacao direta do deck Piracicaba 1T26; o CSS das paginas dinamicas agora replica a hierarquia tipografica, espacos, tabela cinza, celulas de variacao com barra vermelho/verde e painel de variacao dos graficos.
