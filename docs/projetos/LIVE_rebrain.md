@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Relatório AELO: endpoint interno e catálogo de municípios — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — coleta, escopo e exportação do relatório AELO
+- **O quê:** migração para `POST /public-api/v2/building-with-history-internal` por UF, tipo Horizontal fixo, filtro de padrões de loteamento e municípios do catálogo AELO; inclusão do de-para de Região Administrativa, início do período em 4T2017, status atual/tipologia e formatação de datas/percentuais na tabela e Excel.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`, `src/features/relatorios-aelo/municipios-aelo.ts`.
+- **Impacto em Etapas/Pendências:** coleta e estrutura do AELO ajustadas ao catálogo oficial; homologar resposta do endpoint interno, paginação e valores exportados com o usuário.
+
 ### 2026-08-17 — Medidas trimestrais e campos do Relatório AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — relatório AELO
 - **O quê:** removida a duplicidade entre “Unidades por Tipologia” e “Oferta por lotes”; corrigida a segmentação de tempo de vendas para aceitar `time_on_sale`/`time_on_sales`; adicionadas colunas trimestrais de VGV (`sold_in_period × price`), Estoque (último snapshot disponível do trimestre) e VGV Estoque (`estoque × preço`).

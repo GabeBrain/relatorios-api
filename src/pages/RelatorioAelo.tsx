@@ -23,10 +23,22 @@ import {
 import { cn } from '@/lib/utils';
 import brainLogo from '../../assets/logoBrain.png';
 import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
+import { AELO_MUNICIPIOS_REGIOES } from '@/features/relatorios-aelo/municipios-aelo';
 import { aggregateTypologyHistoryByQuarter, filterHistoryThroughQuarter, periodToQuarter } from '@/features/relatorios-secovi/quarterly-history';
 
-const BASE_URL = 'https://geobrain.com.br/public-api';
-const ALL_BUILDING_TYPES = ['Vertical', 'Horizontal', 'Comercial', 'Hotel'];
+const BASE_URL = 'https://app.geobrain.com.br/public-api/v2/building-with-history-internal';
+const AELO_STANDARDS = new Set(['Loteamento Aberto', 'Loteamento Fechado']);
+function repairMojibake(value: unknown): string {
+  const text = String(value ?? '');
+  if (!text.includes('Ã') && !text.includes('Â')) return text;
+  try {
+    return decodeURIComponent(Array.from(text).map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`).join(''));
+  } catch {
+    return text;
+  }
+}
+const normalizeCity = (value: unknown) => repairMojibake(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase('pt-BR');
+const AELO_CITY_KEYS = new Set(Object.keys(AELO_MUNICIPIOS_REGIOES).map(normalizeCity));
 const ALL_STATUSES = ['Ativo', 'Esgotado'];
 const PREVIEW_PER_PAGE = 100;
 const DETAIL_CONCURRENCY = 8;
@@ -35,17 +47,11 @@ const ESTIMATED_SECONDS_PER_DETAIL = 0.7;
 type Row = Record<string, string | number | null>;
 
 const HEADER_COLS = [
-  'Tipo', 'Empreendimentos', 'Logradouro', 'Número', 'Bairro', 'Cidade/UF',
-  'Incorporadora', 'Padrão', 'Lançamento', 'ANO', 'Entrega',
-  'Tipo de Tipologia', 'Dorm.', 'Preço de lançamento', 'Preço atual',
-  'm2 Priv.', 'Valor m2 Priv.',
+  'Status Atual', 'Status da Tipologia', 'Empreendimentos', 'Logradouro', 'Número', 'Bairro', 'Cidade/UF',
+  'Região Administrativa', 'Urbanizadora', 'Padrão', 'Lançamento', 'ANO', 'Entrega',
+  'Preço de lançamento', 'Preço atual', 'm2 Priv.', 'Valor m2 Priv.',
   'Tempo de vendas', 'Taxa administrativa', 'Oferta por lotes', 'Entrada', 'Nº de Parcelas',
   '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista',
-  '*Vendidos no trimestre', '*Distratos no trimestre',
-  'Estoque por Tipologia', '% Dispon.', 'Vagas de Garagem',
-  'VGV Estoque', 'm² Estoque', 'R$/m²\nEstoque',
-  'VGV Lançado', 'm² Lançado', 'R$/m² Lançado',
-  'VGV Vendas Brutas', 'VGV Distratos', 'Vendas Líquidas',
 ];
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -82,8 +88,21 @@ function salesTimeSegment(value: unknown): string {
   return 'Acima de 49 Meses';
 }
 
-function salesTimeValue(entry: Record<string, unknown>, building: Record<string, unknown>): unknown {
-  return entry.time_on_sale ?? entry.time_on_sales ?? building.time_on_sale ?? building.time_on_sales;
+function monthsBetween(startValue: unknown, endValue: unknown): number | null {
+  const start = new Date(String(startValue ?? ''));
+  const end = new Date(String(endValue ?? ''));
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+  return Math.max(0, (end.getUTCFullYear() - start.getUTCFullYear()) * 12 + end.getUTCMonth() - start.getUTCMonth());
+}
+
+function calculatedSalesTime(building: Record<string, unknown>): string {
+  const activeHistory = ((building.typologies_history as unknown[]) ?? [])
+    .map((entry) => entry as Record<string, unknown>)
+    .filter((entry) => String(entry.building_status ?? '').trim() === 'Ativo')
+    .sort((a, b) => sortableDate(String(a.period ?? '')).localeCompare(sortableDate(String(b.period ?? ''))));
+  const lastActive = activeHistory.at(-1);
+  const months = monthsBetween(building.release_date, lastActive?.period);
+  return salesTimeSegment(months);
 }
 
 function extractYear(dateStr: string): string | null {
@@ -118,17 +137,13 @@ function compareTuple(a: [number, number], b: [number, number]): number {
 
 // ── API ───────────────────────────────────────────────────────────────────────
 
-async function apiGet(
+async function apiPost(
   path: string,
   params: Record<string, unknown>,
   token: string,
   signal?: AbortSignal,
 ): Promise<{ data: unknown; status: number | null; error: string }> {
-  const qs = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v !== null && v !== undefined && v !== '') qs.set(k, String(v));
-  }
-  const url = `${BASE_URL}${path}${qs.toString() ? `?${qs}` : ''}`;
+  const url = `${BASE_URL}${path}`;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 40000);
@@ -136,7 +151,9 @@ async function apiGet(
 
   try {
     const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
       signal: controller.signal,
     });
     clearTimeout(timer);
@@ -179,7 +196,6 @@ interface LiveStats {
 
 async function fetchLane(
   status: string,
-  btype: string,
   city: string,
   uf: string,
   startQ: string,
@@ -200,10 +216,9 @@ async function fetchLane(
   while (true) {
     if (signal.aborted) break;
 
-    const params: Record<string, unknown> = { type: btype, city, status, per_page: PREVIEW_PER_PAGE, page };
-    if (uf) params['uf'] = uf;
+    const params: Record<string, unknown> = { type: 'Horizontal', uf, status, per_page: PREVIEW_PER_PAGE, page };
 
-    const { data, error } = await apiGet('/building-with-history', params, token, signal);
+    const { data, error } = await apiPost('', params, token, signal);
 
     if (signal.aborted) break;
     if (error || typeof data !== 'object' || data === null) {
@@ -223,6 +238,10 @@ async function fetchLane(
       const it = item as Record<string, unknown>;
       const bid = it.building_id as number;
       if (bid === null || bid === undefined) continue;
+      const itemCity = it.city ?? it.municipality;
+      if (!AELO_STANDARDS.has(String(it.standard ?? '').trim())) continue;
+      if (!AELO_CITY_KEYS.has(normalizeCity(itemCity))) continue;
+      if (city && normalizeCity(itemCity) !== normalizeCity(city)) continue;
 
       if (!allSeen.has(bid)) { allSeen.add(bid); allIds.push(bid); newAllIds++; }
 
@@ -253,10 +272,10 @@ interface PreviewResult {
 }
 
 async function collectPreview(
-  city: string, uf: string, types: string[], statuses: string[], startQ: string, endQ: string,
+  city: string, uf: string, statuses: string[], startQ: string, endQ: string,
   token: string, signal: AbortSignal, onLiveStats: (stats: LiveStats) => void,
 ): Promise<PreviewResult> {
-  const pairs = statuses.flatMap((s) => types.map((t) => ({ status: s, type: t })));
+  const pairs = statuses.map((status) => ({ status }));
   const live: LiveStats = { pagesTotal: 0, pagesDone: 0, totalFound: 0, eligibleFound: 0, activeFound: 0, inactiveFound: 0, failedCalls: 0 };
 
   function applyDelta(delta: Partial<LiveStats>) {
@@ -267,7 +286,7 @@ async function collectPreview(
   }
 
   const settled = await Promise.allSettled(
-    pairs.map(({ status, type }) => fetchLane(status, type, city, uf, startQ, endQ, token, signal, applyDelta))
+    pairs.map(({ status }) => fetchLane(status, city, uf, startQ, endQ, token, signal, applyDelta))
   );
 
   const allSeen = new Set<number>(); const eligibleSeen = new Set<number>();
@@ -295,7 +314,7 @@ async function collectPreview(
 }
 
 async function fetchDetail(bid: number, token: string, signal?: AbortSignal): Promise<Record<string, unknown> | null> {
-  const { data } = await apiGet(`/building-with-history/${bid}`, {}, token, signal);
+  const { data } = await apiPost(`/${bid}`, {}, token, signal);
   if (typeof data === 'object' && data !== null && 'data' in (data as object)) {
     return (data as Record<string, unknown>).data as Record<string, unknown>;
   }
@@ -346,6 +365,8 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
     const incs = (b.incorporators as Record<string, unknown>[]) ?? [];
     const incorporadora = incs.length > 0 ? String(incs[0].name ?? '') : '';
     const cityUf = `${b.city ?? ''}/${b.state ?? ''}`;
+    const regionKey = Object.keys(AELO_MUNICIPIOS_REGIOES).find((name) => normalizeCity(name) === normalizeCity(b.city));
+    const region = repairMojibake(regionKey ? AELO_MUNICIPIOS_REGIOES[regionKey] : '');
     const typoMap = new Map<number, Record<string, unknown>[]>();
     for (const e of ((b.typologies_history as unknown[]) ?? [])) {
       const entry = e as Record<string, unknown>;
@@ -394,13 +415,15 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
         : Math.round((vgvVendasBrutas - vgvDistratos) * 100) / 100;
 
       const row: Row = {
-        'Tipo': b.building_type as string ?? '',
+        'Status Atual': b.status as string ?? '',
+        'Status da Tipologia': stock > 0 ? 'Ativo' : 'Esgotado',
         'Empreendimentos': b.name as string ?? '',
         'Logradouro': b.address as string ?? '',
         'Número': b.address_number as string ?? '',
         'Bairro': b.neighborhood as string ?? '',
         'Cidade/UF': cityUf,
-        'Incorporadora': incorporadora,
+        'Região Administrativa': region,
+        'Urbanizadora': incorporadora,
         'Padrão': b.standard as string ?? '',
         'Lançamento': b.release_date as string ?? '',
         'ANO': extractYear(String(b.release_date ?? '')),
@@ -411,7 +434,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
         'Preço atual': toNum(last.price),
         'm2 Priv.': privArea || null,
         'Valor m2 Priv.': toNum(last.price_private_area),
-        'Tempo de vendas': salesTimeSegment(salesTimeValue(last, b)),
+        'Tempo de vendas': calculatedSalesTime(b),
         'Taxa administrativa': toNum(last.taxa_associativa),
         'Oferta por lotes': toNum(last.qty),
         'Entrada': toNum(b.down_payment_percentage),
@@ -456,9 +479,6 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
   }
 
   rows.sort((a, b) => {
-    const ta = TYPE_ORDER[String(a['Tipo'] ?? '')] ?? 99;
-    const tb = TYPE_ORDER[String(b['Tipo'] ?? '')] ?? 99;
-    if (ta !== tb) return ta - tb;
     const da = sortableDate(String(a['Lançamento'] ?? ''));
     const db = sortableDate(String(b['Lançamento'] ?? ''));
     if (da !== db) return da.localeCompare(db);
@@ -474,8 +494,19 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
   const { utils, writeFile } = await import('xlsx');
   const quarterMeasureCols = quarterCols.flatMap((q) => [`Vendas líquidas ${q}`, `VGV ${q}`, `Estoque ${q}`, `VGV Estoque ${q}`]);
   const allCols = [...HEADER_COLS, ...quarterMeasureCols];
+  const exportValue = (col: string, value: Row[string]): Row[string] => {
+    if (value === null || value === undefined || value === '') return null;
+    if (col === 'Entrada' || col === '% de Juros Mensal' || col === 'Desconto à Vista') {
+      return typeof value === 'number' && value > 1 ? value / 100 : value;
+    }
+    if (col === 'Lançamento' || col === 'Entrega') {
+      const date = new Date(String(value));
+      if (!Number.isNaN(date.getTime())) return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+    }
+    return value;
+  };
   const sheetRows = (rows: Row[]) =>
-    [allCols, ...rows.map((row) => allCols.map((c) => row[c] ?? null))];
+    [allCols, ...rows.map((row) => allCols.map((c) => exportValue(c, row[c])) )];
   const sfx = qSheet(lastQ);
   const wb = utils.book_new();
   utils.book_append_sheet(wb, utils.aoa_to_sheet(sheetRows(activeRows)), `CONSOLIDADA ${sfx}`);
@@ -809,6 +840,15 @@ function TimeseriesChart({ buildings, quarterCols }: {
 function formatCell(col: string, val: unknown): string {
   if (val === null || val === undefined || val === '') return '';
   if (col === '% Dispon.') return `${(val as number).toFixed(1)}%`;
+  if (col === 'Entrada' || col === '% de Juros Mensal' || col === 'Desconto à Vista') {
+    const percent = (val as number) > 1 ? (val as number) / 100 : (val as number);
+    return `${percent.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
+  }
+  if (col === 'Lançamento' || col === 'Entrega') {
+    const raw = String(val);
+    const date = new Date(raw);
+    if (!Number.isNaN(date.getTime())) return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+  }
   if (typeof val === 'number') {
     if (col.startsWith('VGV') || col === 'Vendas Líquidas') {
       return val >= 1_000_000
@@ -878,10 +918,9 @@ export default function RelatorioAelo() {
   const [city, setCity] = useState('');
   const [uf, setUf] = useState('');
   const [cityOpen, setCityOpen] = useState(false);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(['Vertical']);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(['Ativo', 'Esgotado']);
-  const [startQ, setStartQ] = useState('1T2021');
-  const [endQ, setEndQ] = useState(() => availableQuarters(2021).at(-1) ?? '1T2021');
+  const [startQ, setStartQ] = useState('4T2017');
+  const [endQ, setEndQ] = useState(() => availableQuarters(2017).at(-1) ?? '4T2017');
 
   const [phase, setPhase] = useState<'idle' | 'preview' | 'fetching'>('idle');
   const [previewPct, setPreviewPct] = useState(0);
@@ -941,17 +980,13 @@ export default function RelatorioAelo() {
 
   const previewAbortRef = useRef<AbortController | null>(null);
   const fetchAbortRef = useRef<AbortController | null>(null);
-  const quarters = availableQuarters(2021);
-
-  function toggleType(t: string) {
-    setSelectedTypes((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
-  }
+  const quarters = availableQuarters(2017);
   function toggleStatus(s: string) {
     setSelectedStatuses((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
   }
 
   const handlePreview = useCallback(async () => {
-    if (!city.trim() || selectedTypes.length === 0 || selectedStatuses.length === 0) return;
+    if (!uf.trim() || selectedStatuses.length === 0) return;
     if (!hasValidToken()) { toast.error('Token ausente ou expirado. Faça login no menu lateral.'); return; }
 
     previewAbortRef.current?.abort();
@@ -966,7 +1001,7 @@ export default function RelatorioAelo() {
 
     try {
       const p = await collectPreview(
-        city.trim(), uf.trim().toUpperCase(), selectedTypes, selectedStatuses,
+        city.trim(), uf.trim().toUpperCase(), selectedStatuses,
         startQ, endQ, getToken(), ctrl.signal,
         (stats) => {
           setLiveStats({ ...stats });
@@ -986,7 +1021,7 @@ export default function RelatorioAelo() {
     } finally {
       setPhase('idle');
     }
-  }, [city, uf, selectedTypes, selectedStatuses, startQ, endQ, getToken, hasValidToken]);
+  }, [city, uf, selectedStatuses, startQ, endQ, getToken, hasValidToken]);
 
   const handleAbortPreview = useCallback(() => {
     previewAbortRef.current?.abort();
@@ -1032,7 +1067,7 @@ export default function RelatorioAelo() {
       const activeRows = buildRows(activeBuildings, filteredQs, endQ);
       const inactiveRows = buildRows(inactiveBuildings, filteredQs, endQ);
 
-      setResult({ activeRows, inactiveRows, quarterCols: filteredQs, city: city.trim(), lastQ, startQ, nBuildings: details.size, allBuildings });
+      setResult({ activeRows, inactiveRows, quarterCols: filteredQs, city: city.trim() || uf.trim().toUpperCase(), lastQ, startQ, nBuildings: details.size, allBuildings });
       const warn = failed > 0 ? ` — ${failed} falha(s)` : '';
       toast.success(`Concluído: ${details.size} empreendimentos | ${qLabel(startQ)} → ${qLabel(lastQ)}${warn}`);
     } catch (err) {
@@ -1073,7 +1108,7 @@ export default function RelatorioAelo() {
 
       <div className="border-b border-border px-6 py-4 bg-card">
         <h1 className="text-lg font-semibold">Relatório AELO</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Gerador de relatório Geobrain — coleta paralela de empreendimentos por cidade.</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Gerador de relatório Geobrain — coleta por UF com municípios AELO autorizados.</p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
@@ -1089,17 +1124,6 @@ export default function RelatorioAelo() {
         </div>
 
         <div className="flex flex-wrap gap-x-8 gap-y-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs">Tipos de empreendimento</Label>
-            <div className="flex flex-wrap gap-3">
-              {ALL_BUILDING_TYPES.map((t) => (
-                <label key={t} className="flex items-center gap-2 cursor-pointer text-xs">
-                  <Checkbox checked={selectedTypes.includes(t)} onCheckedChange={() => toggleType(t)} disabled={loading} />
-                  {t}
-                </label>
-              ))}
-            </div>
-          </div>
           <div className="space-y-1.5">
             <Label className="text-xs">Status</Label>
             <div className="flex flex-wrap gap-3">
@@ -1135,7 +1159,7 @@ export default function RelatorioAelo() {
 
         <div className="flex flex-wrap gap-2">
           {phase !== 'preview' ? (
-            <Button onClick={handlePreview} disabled={loading || !city.trim() || selectedTypes.length === 0 || selectedStatuses.length === 0} variant="outline" className="gap-2 text-xs h-8">
+            <Button onClick={handlePreview} disabled={loading || !uf.trim() || selectedStatuses.length === 0} variant="outline" className="gap-2 text-xs h-8">
               <Building2 className="h-3.5 w-3.5" />
               Calcular prévia
             </Button>
