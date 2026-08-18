@@ -49,6 +49,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Panorama: primeira calibracao visual das tabelas e graficos variaveis — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — lancamentos e vendas, slides 12–27.
+- **O que:** a regua visual passou a ser a exportacao direta do deck Piracicaba 1T26; o CSS das paginas dinamicas agora replica a hierarquia tipografica, espacos, tabela cinza, celulas de variacao com barra vermelho/verde e painel de variacao dos graficos.
+- **Premissa:** os dados continuam dinamicos e os assets PNG ficam restritos aos slides efetivamente estaticos; esta etapa nao converte tabelas/graficos em imagens.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/print/panorama-print.css`.
+- **Impacto em Etapas/Pendencias:** a proxima calibracao e estrutural: os dois deltas das tabelas e a matriz de tres comparacoes dos graficos devem ser modelados como componentes, apos validar este primeiro ajuste no browser/PDF.
+
 ### 2026-08-18 — Panorama: slides institucionais passam a usar o deck oficial — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — identidade visual do preview/PDF.
 - **O quê:** PowerPoint exportou os 62 slides da referência; 24 páginas estáticas prioritárias foram incorporadas como PNGs oficiais (capas, sumário, institucional, objetivos, divisores, créditos e encerramentos). O paginador resolve o asset oficial por referência de slide e o usa tanto no preview quanto no PDF, substituindo os layouts CSS genéricos nessas páginas.
