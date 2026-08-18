@@ -1,5 +1,7 @@
 # PLAN TERRA — Fidelidade total dos slides, estáticos e blocos do mercado v4
 
+> **SUPERADO em 2026-08-18:** usar `PLAN_TERRA_V1_PARIDADE_APRESENTACAO_E_PDF_v5.md`. A instrução abaixo de remover o slide 2/gerar 61 páginas não representa mais o escopo aprovado.
+
 **Execução:** direta na `main`  
 **Rota:** `/rebrain/panorama-secovi-fiergs`  
 **Objetivo:** substituir placeholders e fallback repetido por uma reprodução fiel, verificável e automatizável do Panorama.

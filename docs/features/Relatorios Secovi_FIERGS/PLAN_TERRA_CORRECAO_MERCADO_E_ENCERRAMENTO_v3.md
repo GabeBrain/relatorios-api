@@ -1,5 +1,7 @@
 # PLAN TERRA — Correção do mercado imobiliário e encerramento fiel v3
 
+> **SUPERADO em 2026-08-18:** usar `PLAN_TERRA_V1_PARIDADE_APRESENTACAO_E_PDF_v5.md`, que consolida paridade visual, 62 slides, sumário navegável, PDF e separação da Fase 2 metodológica.
+
 **Data:** 2026-08-17  
 **Execução:** tarefa terminal única, direto na `main`  
 **Rota:** `/rebrain/panorama-secovi-fiergs`  

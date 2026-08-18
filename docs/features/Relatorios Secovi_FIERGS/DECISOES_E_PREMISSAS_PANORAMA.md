@@ -25,7 +25,7 @@ congelado não deve ser usado como log mutável.
 | PRE-008 | ASSUMED | padrões | “Especial” no slide 44 é alias editorial de Compacto | confirmar nomenclatura |
 | PRE-009 | RECONCILED | IVV | vendas / (estoque anterior + lançamentos) reconciliado no slide 27 | manter teste de fórmula |
 | PRE-010 | RECONCILED | disponibilidade | oferta final / oferta lançada | manter reconciliação |
-| PRE-011 | ASSUMED | PDF | v1 usa HTML/SVG paginado e impressão nativa 16:9 | reavaliar download direto |
+| PRE-011 | ASSUMED | PDF | v1 usa preview no browser e PDF paginado direto 16:9; `window.print` não é fluxo de produto | implementar controller React, captura por slide, montagem e viewer Blob |
 | PRE-012 | ASSUMED | narrativa | fatos são templates determinísticos; qualitativo exibe `[LLM NECESSÁRIO AQUI]` | tratar LLM por último |
 | PRE-013 | OPEN | mapa | universo exato de marcadores do slide 56 não está documentado | comparar coordenadas/contagem |
 

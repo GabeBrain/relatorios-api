@@ -49,6 +49,20 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Panorama: livro de 62 slides, sumário e PDF direto integrados — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preview e exportação da V1.
+- **O quê:** o manifesto agora mantém os 62 slides da referência, incluindo a capa municipal 2, com seção, família visual, contratos e estado metodológico por página. O preview recebeu sumário navegável por seção e o botão `Visualizar PDF` passou a gerar um Blob paginado diretamente, sem `window.print()`. Slides oficiais 58–62 entram como assets integrais e o exportador captura o mesmo registry do preview.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/manifest.ts,components/ReportPaginator.tsx,print/panorama-print.css,lib/pdf-export.ts,__tests__/pdf-export.test.ts}`.
+- **Verificação:** typecheck, 141 testes e build de produção aprovados.
+- **Impacto em Etapas/Pendências:** fundação de navegação/exportação concluída; falta migrar as famílias visuais/contratos específicos de mercado para eliminar o `MetricTable` genérico das páginas 29–56 e executar QA visual slide a slide.
+
+### 2026-08-18 — Panorama: Fase 0 fecha o mapa de paridade Piracicaba 1T26 — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — especificação da V1.
+- **O quê:** definido o escopo de 62 slides (incluindo a segunda capa), preview/sumário por seção e PDF paginado como artefato V1; o mapa integral associa cada família visual aos contratos, fórmulas e estados metodológicos. Páginas sem método preservam estrutura e sinalização, sem repetir tabelas ou inventar dados.
+- **Evidência:** consulta direta ao PPTX de referência (62 slides, 13,333 × 7,5 pol.; objetos, textos, imagens, tabelas e gráficos nativos) e ao gabarito congelado. O PowerPoint COM não pôde exportar imagens nesta sessão por falta de logon interativo; QA visual final segue previsto em ambiente com PowerPoint.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/MAPEAMENTO_FASE0_PIRACICABA_1T26.md`, `PLAN_TERRA_V1_PARIDADE_APRESENTACAO_E_PDF_v5.md`, `DECISOES_E_PREMISSAS_PANORAMA.md`.
+- **Impacto em Etapas/Pendências:** mapa e plano terminal fechados; próximo portão é executar registry de 62 slides/sumário + PDF direto, seguido da reconstrução visual/contratual. Divergências residuais ficam isoladas para a Fase 2 metodológica.
+
 ### 2026-08-18 — Carregamento e tipos numéricos na exportação AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — busca de empreendimentos e exportação Excel.
 - **O quê:** restaurada a renderização do estado de carregamento antes do processamento da busca; campos numéricos permanecem numéricos no Excel, incluindo VGV convertido para milhões.

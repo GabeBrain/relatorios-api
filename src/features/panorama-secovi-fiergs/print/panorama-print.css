@@ -7,6 +7,9 @@
 }
 @media screen { .panorama-report-page { aspect-ratio: 16 / 9; min-height: 540px; overflow: hidden; } .panorama-page-content { height: calc(100% - 29px); } .panorama-page-footer { display: flex; justify-content: space-between; border-top: 1px solid hsl(var(--border)); padding: 6px 14px; color: hsl(var(--muted-foreground)); font-size: 10px; } }
 @media screen { .print\:block.hidden { display:block !important; position:fixed !important; top:0 !important; left:-2200px !important; width:1920px !important; z-index:-1 !important; pointer-events:none !important; } .print\:block.hidden .panorama-report-page { width:1920px !important; height:1080px !important; min-height:1080px !important; margin:0 !important; } }
+.panorama-export-root { position:fixed; left:-10000px; top:0; width:1920px; height:1080px; overflow:hidden; pointer-events:none; z-index:-1; }
+.panorama-export-root .panorama-report-page { width:1920px !important; height:1080px !important; min-height:1080px !important; margin:0 !important; }
+.panorama-static-slide { display:block; width:100%; height:100%; object-fit:contain; background:#fff; }
 
 .panorama-official-page { background: #fff; color: #080808; font-family: Arial, sans-serif; }
 .panorama-static-official { display:block; width:100%; height:100%; object-fit:cover; }
