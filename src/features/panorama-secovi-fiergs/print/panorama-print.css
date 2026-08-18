@@ -10,8 +10,19 @@
 .panorama-export-root { position:fixed; left:-10000px; top:0; width:1920px; height:1080px; overflow:hidden; pointer-events:none; z-index:-1; }
 .panorama-export-root .panorama-report-page { width:1920px !important; height:1080px !important; min-height:1080px !important; margin:0 !important; }
 .panorama-static-slide { display:block; width:100%; height:100%; object-fit:contain; background:#fff; }
-.panorama-city-cover-host { position:relative; container-type:inline-size; }
-.panorama-city-cover-title { position:absolute; left:23.5%; top:64%; width:21%; min-height:11%; display:flex; align-items:center; background:#f71924; color:#fff; font-family:"Courier New",monospace; font-size:3.1cqw; font-weight:800; line-height:1; letter-spacing:-.06em; white-space:nowrap; }
+.panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"]),
+.panorama-page-content:has(>img[alt="Slide oficial 2 do Panorama"]),
+.panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"]) { position:relative; container-type:inline-size; }
+.panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"])::before,
+.panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"])::after,
+.panorama-page-content:has(>img[alt="Slide oficial 2 do Panorama"])::before,
+.panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"])::before,
+.panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"])::after { position:absolute; z-index:1; color:#fff; font-family:Tahoma,Arial,sans-serif; font-weight:700; line-height:1; white-space:pre-line; }
+.panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"])::before { content:var(--panorama-city); left:7.2%; top:73%; max-width:27%; font-size:calc(3.7cqw * var(--panorama-city-scale)); white-space:nowrap; }
+.panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"])::after { content:var(--panorama-year); left:16%; top:90%; font-size:2.5cqw; }
+.panorama-page-content:has(>img[alt="Slide oficial 2 do Panorama"])::before { content:var(--panorama-city) "\A" var(--panorama-year); left:8%; top:39%; max-width:31%; font-size:calc(4.1cqw * var(--panorama-city-scale)); line-height:1.03; }
+.panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"])::before { content:var(--panorama-city-uf); left:8%; top:38.7%; max-width:31%; font-size:calc(3.1cqw * var(--panorama-city-scale)); line-height:1.03; white-space:nowrap; }
+.panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"])::after { content:var(--panorama-period); left:8%; top:58%; font-size:3.1cqw; }
 .panorama-coverage-notice { margin-top:8%; max-width:72%; padding:4%; border-left:10px solid #ffd000; background:#f5f5f2; font-size:clamp(1rem,1.5vw,1.45rem); line-height:1.45; }.panorama-coverage-notice strong { display:block; font-size:1.2em; color:#5d7833; }.panorama-coverage-notice span { color:#666; font-size:.88em; }
 .panorama-participation-list { display:grid; gap:18px; margin:4% 3% 0; }.panorama-participation-list>div>div:first-child { display:flex; justify-content:space-between; gap:18px; font-size:clamp(.8rem,1.25vw,1.2rem); }.panorama-participation-track { height:20px; margin-top:6px; background:#e8e8e8; overflow:hidden; }.panorama-participation-track span { display:block; height:100%; background:#5d7833; }
 .panorama-summary-matrix { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:8%; }.panorama-summary-matrix>div { min-height:190px; padding:24px; border-bottom:8px solid #ffd000; background:#f3f3f1; display:flex; flex-direction:column; justify-content:center; }.panorama-summary-matrix span { font-size:clamp(.9rem,1.25vw,1.25rem); }.panorama-summary-matrix strong { margin:10px 0; color:#5d7833; font-size:clamp(2rem,4vw,4.1rem); line-height:1; }.panorama-summary-matrix small { color:#666; }

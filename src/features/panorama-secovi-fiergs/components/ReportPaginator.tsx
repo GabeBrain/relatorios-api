@@ -12,19 +12,21 @@ import '../print/panorama-print.css';
 
 const officialSlides = import.meta.glob('../assets/official/*.png', { eager: true, import: 'default' }) as Record<string, string>;
 
-function synchronizeOfficialCoverCity(root: HTMLElement | null, city: string) {
-  root?.querySelectorAll<HTMLImageElement>('img[alt="Slide oficial 1 do Panorama"]').forEach((image) => {
-    const host = image.parentElement;
-    if (!host) return;
-    host.classList.add('panorama-city-cover-host');
-    let label = host.querySelector<HTMLElement>('.panorama-city-cover-title');
-    if (!label) {
-      label = document.createElement('span');
-      label.className = 'panorama-city-cover-title';
-      host.appendChild(label);
-    }
-    label.textContent = city.toLocaleUpperCase('pt-BR');
-  });
+for (const page of [1, 2, 4]) {
+  officialSlides[`../assets/official/panorama-${String(page).padStart(2, '0')}.png`] =
+    officialSlides[`../assets/official/panorama-${String(page).padStart(2, '0')}-neutral.png`];
+}
+
+function synchronizeOfficialCoverCity(city: string, uf: string, endQuarter: string) {
+  const normalizedCity = city.toLocaleUpperCase('pt-BR');
+  const reportYear = endQuarter.slice(2);
+  const cityScale = Math.min(1, 12 / Math.max(normalizedCity.length, 1));
+  const style = document.documentElement.style;
+  style.setProperty('--panorama-city', JSON.stringify(normalizedCity));
+  style.setProperty('--panorama-city-uf', JSON.stringify(`${normalizedCity} (${uf})`));
+  style.setProperty('--panorama-year', JSON.stringify(reportYear));
+  style.setProperty('--panorama-period', JSON.stringify(`${endQuarter[0]}ºTRI/${reportYear}`));
+  style.setProperty('--panorama-city-scale', String(cityScale));
 }
 
 const n = (v: number) => v.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
@@ -62,7 +64,7 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
 export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const [current, setCurrent] = useState(0); const [exportState, setExportState] = useState<'idle' | 'preparing' | 'capturing' | 'assembling' | 'error'>('idle'); const [progress, setProgress] = useState(0);
   const exportRoot = useRef<HTMLDivElement>(null); const pages = useMemo(() => PANORAMA_REPORT_MANIFEST, []); const page = pages[current];
-  useEffect(() => { synchronizeOfficialCoverCity(document.body, report.scope.city); }, [report.scope.city, current]);
+  useEffect(() => { synchronizeOfficialCoverCity(report.scope.city, report.scope.uf, report.scope.endQuarter); }, [report.scope.city, report.scope.uf, report.scope.endQuarter]);
   const jump = (number: number) => setCurrent(Math.max(0, pages.findIndex((item) => item.page === number)));
   const exportPdf = async () => { const popup = window.open('', '_blank'); setExportState('preparing'); setProgress(0); try { const slides = [...(exportRoot.current?.querySelectorAll<HTMLElement>('.panorama-report-page') ?? [])]; setExportState('capturing'); const result = await buildPanoramaPdf(slides, { title: `Panorama imobiliário de ${report.scope.city}`, author: 'Brain Inteligência Estratégica', subject: `${report.scope.city}/${report.scope.uf} · ${quarterLabel(report.scope.endQuarter)}` }, ({ current: rendered }) => { setProgress(rendered); if (rendered === slides.length) setExportState('assembling'); }); const url = URL.createObjectURL(result.blob); if (popup) popup.location.href = url; else { const link = document.createElement('a'); link.href = url; link.download = `panorama-${report.scope.city.toLowerCase().replaceAll(' ', '-')}-${report.scope.endQuarter}.pdf`; link.click(); } setExportState('idle'); } catch { popup?.close(); setExportState('error'); } };
   return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">Página {page.page} de {pages.length} · {page.intention}</span></div><div className="flex gap-2"><Button variant="outline" size="sm" disabled={!current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button size="sm" disabled={exportState !== 'idle'} onClick={exportPdf}>{exportState === 'idle' ? <Download/> : <LoaderCircle className="animate-spin"/>}{exportState === 'idle' ? 'Visualizar PDF' : `${exportState === 'capturing' ? `${progress}/${pages.length}` : 'Preparando PDF…'}`}</Button></div></div>{exportState === 'error' && <p className="text-sm text-destructive">Não foi possível montar o PDF. Revise o recorte e tente novamente.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{PANORAMA_SECTIONS.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside><Sheet def={page} report={report}><Content def={page} report={report}/></Sheet></div><div ref={exportRoot} className="panorama-export-root" aria-hidden="true">{pages.map((def) => <Sheet key={def.page} def={def} report={report}><Content def={def} report={report}/></Sheet>)}</div></div>;

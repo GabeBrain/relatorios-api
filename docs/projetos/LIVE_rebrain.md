@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Panorama: capas automatizaveis passam a usar artes neutras — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 1, 2 e 4 no preview e PDF.
+- **Correcao de estrategia:** removida a camada DOM imperativa que permanecia no conteiner ao navegar e fazia o municipio aparecer sobre slides institucionais e tabelas.
+- **O que:** o PowerPoint de referencia exportou tres bases neutras, sem os textos variaveis, e os PNGs antigos com Piracicaba sairam do bundle automatizado. Cidade, UF, ano e trimestre agora sao compostos por seletores exclusivos de cada slide, com fonte Tahoma, coordenadas extraidas do PPTX e reducao tipografica para nomes longos.
+- **Evidencia:** QA em Chromium a 1280x720 com Americana confirmou que o texto aparece apenas nas tres paginas previstas; demais slides nao recebem pseudo-elementos.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{assets/official/panorama-0{1,2,4}-neutral.png,components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Impacto em Etapas/Pendencias:** capas deixam de depender de termos rasterizados de Piracicaba; a proxima familia continua sendo a estrutura fiel de tabelas e graficos variaveis.
+
 ### 2026-08-18 — Panorama: UF inicial fixada em SP — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — filtros de consulta.
 - **O que:** o escopo inicial passa a abrir com UF `SP`, coerente com o produto Secovi-SP; o municipio continua vazio ate o usuario escolher uma cidade autorizada pela API.
