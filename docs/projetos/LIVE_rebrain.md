@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Panorama: V1 visual recomposta até o fechamento do livro — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preview e PDF paginado de 62 páginas.
+- **O quê:** os slides 14–26 deixam de compartilhar séries incorretas: famílias por segmento usam verde/amarelo e famílias por padrão usam econômico/demais padrões em vermelho/cinza, com títulos, resumos anuais, variações e cartões MCMV próprios. Os slides 27 e 29–56 passam a ter componentes dedicados para área/IVV, resumo de mercado, oferta por padrão/tipologia/coorte, preços, matrizes, maturidade, VGV, análises editoriais e localização. O slide 10 foi neutralizado sem o nome da cidade.
+- **Contratos:** a coleta temporal passou a consultar também `Padrão` e `Tipologia`; o modelo preserva séries por grupo, diferencia soma de média simples e utiliza os campos oficiais de ticket e preço por metro. Onde a API não cobre cruzamentos de oferta lançada ou maturidade, a estrutura permanece visível com travessão e explicação metodológica, sem inventar valores.
+- **Evidência:** inspeção direta dos objetos e imagens do PPTX Piracicaba 1T26; QA Chromium dos slides-chave 10, 14–19, 25, 27, 29, 31–46, 48, 49, 51, 53 e 56 sem overflow; 143 testes e build de produção aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,types.ts,report/model.ts,components/ReportPaginator.tsx,components/MarketSlides.tsx,print/panorama-print.css}`.
+- **Impacto em Etapas/Pendências:** a V1 fica visualmente testável de ponta a ponta; o portão seguinte é o reteste com dados autenticados e a calibração residual registrada por slide, mantendo inconsistências metodológicas para a Fase 2.
+
 ### 2026-08-18 — Panorama: tabelas e gráficos assumem a estrutura integral do gabarito — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — famílias dinâmicas de lançamentos, vendas e séries temporais no preview/PDF.
 - **O que:** as tabelas 12/13/21/22 passam a exibir os dois períodos comparativos do deck, grupos com células mescladas, unidade monetária no cabeçalho e barras percentuais proporcionais em verde/vermelho. Os gráficos 14–19, 23–26 e 40 recebem matriz de três comparações por segmento, resumo anual, rótulos em todos os pontos e destaques do trimestre comparável. O rodapé oficial completo passa a reservar sua altura real e a mostrar a fonte Brain sem recorte.
@@ -843,7 +851,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
 | 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. **Homologação real começou em 22–24/jul** com 4 estudos de analistas (Rolândia/Daniele + Housi/Beatriz e Finoti): 102 achados, ~100% FP nos triados → sprint de 28/jul derrubou Rolândia de 17 achados para 1 (v0.44–0.49, 78 testes verdes). |
 | 7 | Relatórios Secovi (export Excel) | 🟡 (correção trimestral implementada e testada em 04/ago; aguarda homologação manual da exportação) |
-| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (livro 62 páginas, capas neutras, estáticos oficiais, PDF, tabelas comparativas e gráficos temporais estruturados ✅; próximo portão: reteste visual autenticado e correção dos deltas residuais por slide) |
+| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (V1 visual testável de ponta a ponta: livro 62 páginas, capas, estáticos, PDF e famílias dinâmicas 12–56 recompostas ✅; próximo portão: reteste autenticado e calibração residual por slide) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
 | 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI padronizada, mapa urbano, testes e build ✅; homologação pelo setor usuário pendente) |
@@ -860,7 +868,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
   gerar o Excel no ambiente da área e conferir a Rubi (`4T2025 = 49 + 300 = 349`, `1T2026 = 100`,
   `2T2026 = 18`, estoque `189`). Plano e roteiro:
   [`PLAN_correcao_agregacao_vendas_trimestrais.md`](../features/relatorios-secovi/PLAN_correcao_agregacao_vendas_trimestrais.md).
-- [ ] **Panorama Secovi/FIERGS — reteste visual autenticado:** revisar as 62 páginas no browser/PDF, começando por 12–27, e registrar o primeiro slide divergente após a nova estrutura transversal; diferenças numéricas ficam na matriz `aprovado / divergente / sem método` e não bloqueiam fidelidade visual quando o contrato está correto.
+- [ ] **Panorama Secovi/FIERGS — reteste visual autenticado:** revisar as 62 páginas no browser/PDF com Piracicaba 1T26, registrar deltas residuais de geometria/componente por slide e atualizar a matriz `aprovado / divergente / sem método`; diferenças numéricas não bloqueiam fidelidade visual quando o contrato está correto.
 - [ ] **Panorama — fechar metodologia com os analistas:** critério oficial de **VGV lançado**
   (estimativa via `building-with-history`) e de **% MCMV** (proxy por padrão Econômico / teto de preço).
 - [ ] Panorama — confirmar que o token Secovi cobre o histórico desde 1T/22 (dado pontual 4T/21) nas cidades-alvo.

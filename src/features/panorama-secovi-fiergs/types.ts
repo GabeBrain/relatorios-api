@@ -72,9 +72,11 @@ export interface PanoramaReference {
 /** Fonte única do livro editorial; páginas sem contrato homologado não recebem números de referência. */
 export type ReportDataState = 'ready' | 'partial' | 'unavailable' | 'not_applicable';
 export interface ReportSeries extends LaunchSeries { methodStatus: MethodStatus; dataStatus: ReportDataState; source: string; }
+export interface ReportGroupSeries { label: string; series: ReportSeries[]; }
 export interface ReportMarketBlock {
   series: ReportSeries[];
   byGroup: { label: string; vertical: number; horizontal: number; total: number }[];
+  groupSeries: ReportGroupSeries[];
   unit: 'count' | 'brl_millions' | 'percent' | 'brl_sqm';
   methodStatus: MethodStatus;
   dataStatus: ReportDataState;
@@ -86,11 +88,12 @@ export interface PanoramaReportModel {
   scope: PanoramaScope;
   generatedAt: string;
   launches: LaunchModel;
-  sales: { units: ReportMarketBlock; vgv: ReportMarketBlock };
-  stock: { units: ReportMarketBlock; vgv: ReportMarketBlock };
+  sales: { units: ReportMarketBlock; vgv: ReportMarketBlock; unitsByTypology: ReportMarketBlock; vgvByTypology: ReportMarketBlock };
+  stock: { units: ReportMarketBlock; vgv: ReportMarketBlock; unitsByTypology: ReportMarketBlock; vgvByTypology: ReportMarketBlock };
   ivv: ReportMarketBlock;
-  prices: { ticket: ReportMarketBlock; meter: ReportMarketBlock };
-  market: { cohorts: ReportMarketBlock };
+  ivvByTypology: ReportMarketBlock;
+  prices: { ticket: ReportMarketBlock; meter: ReportMarketBlock; ticketByTypology: ReportMarketBlock; meterByTypology: ReportMarketBlock };
+  market: { cohorts: ReportMarketBlock; cohortMatrix: { year: string; standard: string; vertical: number; horizontal: number; total: number }[] };
   locations: { name: string; segment: Segment; latitude: number; longitude: number }[];
   source: 'GeoBrain API';
   dataState: ReportDataState;

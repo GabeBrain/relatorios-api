@@ -47,12 +47,21 @@ export async function fetchLaunchRecords(scope: PanoramaScope, signal?: AbortSig
 
 /** Uma coleta de lançamentos por recorte alimenta todas as páginas do PDF. */
 export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal): Promise<PanoramaReportModel> {
-  const [records, sales, stock, ivv, ticket, meter, cohorts] = await Promise.all([
-    fetchLaunchRecords(scope, signal), temporalRows(scope, 'sales', signal), temporalRows(scope, 'stock', signal), temporalRows(scope, 'ivv', signal), temporalRows(scope, 'medium-prices', signal), temporalRows(scope, 'medium-prices-meter', signal),
+  const [records, sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology, cohorts] = await Promise.all([
+    fetchLaunchRecords(scope, signal),
+    temporalRows(scope, 'sales', 'Padrão', signal), temporalRows(scope, 'sales', 'Tipologia', signal),
+    temporalRows(scope, 'stock', 'Padrão', signal), temporalRows(scope, 'stock', 'Tipologia', signal),
+    temporalRows(scope, 'ivv', 'Padrão', signal), temporalRows(scope, 'ivv', 'Tipologia', signal),
+    temporalRows(scope, 'medium-prices', 'Padrão', signal), temporalRows(scope, 'medium-prices', 'Tipologia', signal),
+    temporalRows(scope, 'medium-prices-meter', 'Padrão', signal), temporalRows(scope, 'medium-prices-meter', 'Tipologia', signal),
     fetchCohortRows(scope, signal),
   ]);
   const millions = (source: Awaited<ReturnType<typeof temporalRows>>, field: string) => ({ ...source, rows: source.rows.map((row) => ({ ...row, [field]: (safeNumber(row[field]) ?? 0) / 1_000_000 })) });
-  return buildPanoramaReportModel(scope, records, { sales: millions(sales, 'vgv_liquid_sales'), stock: millions(stock, 'vgv_stock'), ivv, ticket, meter }, cohorts);
+  return buildPanoramaReportModel(scope, records, {
+    sales: millions(sales, 'vgv_liquid_sales'), salesTypology: millions(salesTypology, 'vgv_liquid_sales'),
+    stock: millions(stock, 'vgv_stock'), stockTypology: millions(stockTypology, 'vgv_stock'),
+    ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology,
+  }, cohorts);
 }
 
 async function fetchCohortRows(scope: PanoramaScope, signal?: AbortSignal): Promise<MarketCohortRow[]> {
@@ -116,23 +125,21 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
   ];
 }
 
-async function temporalRows(scope: PanoramaScope, endpoint: 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-prices-meter', signal?: AbortSignal): Promise<{ rows: Record<string, unknown>[]; available: boolean; source: string }> {
+async function temporalRows(scope: PanoramaScope, endpoint: 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-prices-meter', groupBy: 'Padrão' | 'Tipologia' = 'Padrão', signal?: AbortSignal): Promise<{ rows: Record<string, unknown>[]; available: boolean; source: string }> {
   const rows: Record<string, unknown>[] = []; let page = 1; let lastPage = 1;
   do {
-    // IVV is a rate, not an additive category. Omitting group_by asks the API for the segment total;
-    // sales and stock remain grouped for their additive aggregation.
-    const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: '2022-01-01', end_period: `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}-31`, per_page: PER_PAGE, page, ...(endpoint === 'ivv' ? {} : { group_by: 'Padrão' }), 'type[]': ['Vertical', 'Horizontal'] }, signal });
+    const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: '2022-01-01', end_period: `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}-31`, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal });
     if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}` };
     rows.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
     lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
   } while (page <= lastPage);
-  return { rows, available: true, source: `temporal-analysis-city/${endpoint}` };
+  return { rows, available: true, source: `temporal-analysis-city/${endpoint} · ${groupBy}` };
 }
 
 /** Initial T3/T4 bench: direct temporal endpoints only; it cannot silently promote a report contract. */
 export async function fetchMarketCalibration(scope: PanoramaScope, signal?: AbortSignal): Promise<MarketCalibrationCell[]> {
   const reference = PIRACICABA_1T26_MARKET_REFERENCE;
-  const [sales, stock, ivv] = await Promise.all([temporalRows(scope, 'sales', signal), temporalRows(scope, 'stock', signal), temporalRows(scope, 'ivv', signal)]);
+  const [sales, stock, ivv] = await Promise.all([temporalRows(scope, 'sales', 'Padrão', signal), temporalRows(scope, 'stock', 'Padrão', signal), temporalRows(scope, 'ivv', 'Padrão', signal)]);
   const stockPeriod = [scope.endQuarter];
   return [
     ...buildMarketCells('Vendas', 'A · endpoint sales', 'Unidades vendidas', sales.source, reference, aggregateTemporal(sales.rows, 'liquid_sales'), sales.available),
