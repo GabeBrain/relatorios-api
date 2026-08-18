@@ -49,9 +49,9 @@ type Row = Record<string, string | number | null>;
 const HEADER_COLS = [
   'Status Atual', 'Status da Tipologia', 'Empreendimentos', 'Logradouro', 'Número', 'Bairro', 'Cidade/UF',
   'Região Administrativa', 'Urbanizadora', 'Padrão', 'Lançamento', 'ANO', 'Entrega',
-  'Preço de lançamento', 'Preço atual', 'm2 Priv.', 'Valor m2 Priv.',
+  'Preço atual', 'm2 Priv.', 'Valor m2 Priv.',
   'Tempo de vendas', 'Taxa administrativa', 'Oferta por lotes', 'Entrada', 'Nº de Parcelas',
-  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista',
+  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'VGV Lançado', 'm² Lançado',
 ];
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -130,6 +130,10 @@ const NOTE_VENDAS_LIQUIDAS =
   'Fonte: campo "sold_in_period" da API Geobrain — unidades vendidas no período (vendas brutas). ' +
   'O dado de distratos não está disponível na API, portanto não é possível calcular vendas líquidas reais. ' +
   'A coluna de distratos é preenchida por estimativa via variação de estoque.';
+const NOTE_VGV_PRECO_ATUAL =
+  'VGV histórico, VGV Estoque e VGV Lançado são calculados usando o Preço atual do último período disponível da tipologia.';
+COLUMN_NOTES['VGV Lançado'] = NOTE_VGV_PRECO_ATUAL;
+COLUMN_NOTES['VGV Estoque'] = NOTE_VGV_PRECO_ATUAL;
 
 function compareTuple(a: [number, number], b: [number, number]): number {
   return a[0] !== b[0] ? a[0] - b[0] : a[1] - b[1];
@@ -401,19 +405,20 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
       const distratosUltimoT = lastQuarter?.estimatedCancellations ?? null;
 
       const pctDisp = qty ? Math.round((stock / qty) * 1000) / 10 : null;
-      const vgvLancado = qty && launchPrice ? Math.round(qty * launchPrice * 100) / 100 : null;
+      const currentPrice = toNum(last.price);
+      const vgvLancado = qty && currentPrice !== null ? Math.round(qty * currentPrice * 100) / 100 : null;
       const m2Lancado = privArea && qty ? Math.round(privArea * qty * 100) / 100 : null;
-      const r_m2_lancado = launchPrice && privArea ? Math.round((launchPrice / privArea) * 10000) / 10000 : null;
-      const vgvEstoque = toNum(last.vgv_stock);
+      const r_m2_lancado = currentPrice !== null && privArea ? Math.round((currentPrice / privArea) * 10000) / 10000 : null;
+      const vgvEstoque = currentPrice !== null ? Math.round(currentPrice * stock * 100) / 100 : null;
       const m2Estoque = privArea > 0 ? Math.round(privArea * stock * 100) / 100 : 0;
       // BM = BK / BL
       const r_m2_estoque = (vgvEstoque !== null && m2Estoque > 0)
         ? Math.round((vgvEstoque / m2Estoque) * 100) / 100
         : 0;
       // VGV de vendas é fluxo: soma venda × preço de cada fechamento do trimestre.
-      const vgvVendasBrutas = lastQuarter?.grossSalesVgv === null || !lastQuarter
+      const vgvVendasBrutas = lastQuarter?.sales === null || !lastQuarter || currentPrice === null
         ? null
-        : Math.round(lastQuarter.grossSalesVgv * 100) / 100;
+        : Math.round(lastQuarter.sales * currentPrice * 100) / 100;
       // BR = O × T — Distratos indisponível na API
       const vgvDistratos = 0;
       const vendasLiqVgv = vgvVendasBrutas === null
@@ -436,8 +441,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
         'Entrega': b.delivery_date as string ?? '',
         'Tipo de Tipologia': last.type_of_typology as string ?? '',
         'Dorm.': toNum(last.number_bedroom),
-        'Preço de lançamento': launchPrice || null,
-        'Preço atual': toNum(last.price),
+        'Preço atual': currentPrice,
         'm2 Priv.': privArea || null,
         'Valor m2 Priv.': toNum(last.price_private_area),
         'Tempo de vendas': calculatedSalesTime(b),
@@ -457,11 +461,12 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
         row[`Vendas líquidas ${q}`] = quarter?.hasSalesData ? quarter.sales : 0;
         const quarterEntry = quarter?.lastEntry;
         const quarterStock = toNum(quarterEntry?.typology_stock);
-        const quarterPrice = toNum(quarterEntry?.price);
-        row[`VGV ${q}`] = quarter?.grossSalesVgv ?? null;
+        row[`VGV ${q}`] = quarter?.sales !== undefined && currentPrice !== null
+          ? Math.round(quarter.sales * currentPrice * 100) / 100
+          : null;
         row[`Estoque ${q}`] = quarterStock;
-        row[`VGV Estoque ${q}`] = quarterStock !== null && quarterPrice !== null
-          ? Math.round(quarterStock * quarterPrice * 100) / 100
+        row[`VGV Estoque ${q}`] = quarterStock !== null && currentPrice !== null
+          ? Math.round(quarterStock * currentPrice * 100) / 100
           : null;
       }
 
@@ -1119,7 +1124,7 @@ export default function RelatorioAelo() {
           <strong>Limitação da API:</strong> Distratos não são fornecidos diretamente. <code>*Distratos no trimestre</code> é uma estimativa via variação de estoque; <code>VGV Distratos</code> permanece em branco.
         </div>
         <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
-          <strong className="text-foreground">Regra da consulta AELO:</strong> consulta POST no endpoint interno v2 por UF, sempre com tipo Horizontal. O relatório mantém somente empreendimentos com padrão Loteamento Aberto ou Loteamento Fechado e municípios presentes no catálogo AELO; o Município selecionado, quando informado, é aplicado apenas como filtro local após a consulta.
+          <strong className="text-foreground">Regra da consulta AELO:</strong> consulta POST no endpoint interno v2 por UF, sempre com tipo Horizontal. O relatório mantém somente empreendimentos com padrão Loteamento Aberto ou Loteamento Fechado e municípios presentes no catálogo AELO; o Município selecionado, quando informado, é aplicado apenas como filtro local após a consulta. VGV histórico, VGV Estoque e VGV Lançado usam o Preço atual do último período da tipologia.
         </div>
 
         <div className="space-y-1">

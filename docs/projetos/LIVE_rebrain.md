@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Correção dos cálculos de VGV no Excel AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela resumo e exportação Excel
+- **O quê:** restauradas as colunas solicitadas “VGV Lançado” e “m² Lançado”; VGV histórico, VGV Estoque histórico e VGV Lançado passam a usar o Preço atual do último período da tipologia, com a regra informada também na interface.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** cálculos ajustados; homologar os valores exportados com a planilha AELO de referência.
+
 ### 2026-08-18 — Correções da consulta e prévia do Relatório AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — consulta API e escopo geográfico
 - **O quê:** incluído informativo da regra de consulta; registros da prévia passam a ser reutilizados na busca final, corrigindo o resultado vazio após uma prévia com empreendimentos; o seletor de Município fica oculto somente no AELO e a consulta usa exclusivamente UF.
