@@ -81,6 +81,7 @@ export interface ReportMarketBlock {
   source: string;
   formula: string;
 }
+export interface MarketCohortRow { segment: Segment; releaseYear: string; standard: string; stock: number; }
 export interface PanoramaReportModel {
   scope: PanoramaScope;
   generatedAt: string;
@@ -89,6 +90,7 @@ export interface PanoramaReportModel {
   stock: { units: ReportMarketBlock; vgv: ReportMarketBlock };
   ivv: ReportMarketBlock;
   prices: { ticket: ReportMarketBlock; meter: ReportMarketBlock };
+  market: { cohorts: ReportMarketBlock };
   locations: { name: string; segment: Segment; latitude: number; longitude: number }[];
   source: 'GeoBrain API';
   dataState: ReportDataState;

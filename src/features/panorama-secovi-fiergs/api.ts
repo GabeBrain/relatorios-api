@@ -1,6 +1,6 @@
 import { httpRequest } from '@/lib/http-client';
 import { periodToQuarter, quarterKey, safeNumber } from './lib/launches';
-import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrationCell, PanoramaReference, PanoramaReportModel, PanoramaScope, Quarter, Segment } from './types';
+import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrationCell, MarketCohortRow, PanoramaReference, PanoramaReportModel, PanoramaScope, Quarter, Segment } from './types';
 import { buildPanoramaReportModel } from './report/model';
 import { aggregateTemporal, buildMarketCells } from './lib/market-calibration';
 import { PIRACICABA_1T26_MARKET_REFERENCE } from './reference/piracicaba-1t26-market';
@@ -47,11 +47,25 @@ export async function fetchLaunchRecords(scope: PanoramaScope, signal?: AbortSig
 
 /** Uma coleta de lançamentos por recorte alimenta todas as páginas do PDF. */
 export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal): Promise<PanoramaReportModel> {
-  const [records, sales, stock, ivv, ticket, meter] = await Promise.all([
+  const [records, sales, stock, ivv, ticket, meter, cohorts] = await Promise.all([
     fetchLaunchRecords(scope, signal), temporalRows(scope, 'sales', signal), temporalRows(scope, 'stock', signal), temporalRows(scope, 'ivv', signal), temporalRows(scope, 'medium-prices', signal), temporalRows(scope, 'medium-prices-meter', signal),
+    fetchCohortRows(scope, signal),
   ]);
   const millions = (source: Awaited<ReturnType<typeof temporalRows>>, field: string) => ({ ...source, rows: source.rows.map((row) => ({ ...row, [field]: (safeNumber(row[field]) ?? 0) / 1_000_000 })) });
-  return buildPanoramaReportModel(scope, records, { sales: millions(sales, 'vgv_liquid_sales'), stock: millions(stock, 'vgv_stock'), ivv, ticket, meter });
+  return buildPanoramaReportModel(scope, records, { sales: millions(sales, 'vgv_liquid_sales'), stock: millions(stock, 'vgv_stock'), ivv, ticket, meter }, cohorts);
+}
+
+async function fetchCohortRows(scope: PanoramaScope, signal?: AbortSignal): Promise<MarketCohortRow[]> {
+  const rows: MarketCohortRow[] = []; const endMonth = `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}`;
+  for (const type of ['Vertical', 'Horizontal']) { let page = 1; let lastPage = 1; do {
+    const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
+    if (!response.ok || !response.data) return [];
+    const data = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
+    lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
+    for (const building of data) { const segment = segmentOf(building.building_type ?? building.type ?? type); const release = String(building.release_date ?? ''); if (!segment || !/^\d{4}/.test(release)) continue; const history = (Array.isArray(building.typologies_history) ? building.typologies_history : []) as Record<string, unknown>[]; const latest = history.filter((entry) => String(entry.period ?? '').slice(0, 7) <= endMonth).sort((a, b) => String(b.period ?? '').localeCompare(String(a.period ?? '')))[0]; const stock = safeNumber(latest?.typology_stock ?? latest?.stock ?? latest?.qty); if (stock === null) continue; rows.push({ segment, releaseYear: release.slice(0, 4), standard: standardOf(latest?.pattern ?? building.standard) || 'não classificado', stock }); }
+    page += 1;
+  } while (page <= lastPage); }
+  return rows;
 }
 
 function releaseQuarter(value: unknown): Quarter | null { return periodToQuarter(value); }

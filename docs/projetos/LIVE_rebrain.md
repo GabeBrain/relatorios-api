@@ -49,6 +49,28 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Panorama: slides institucionais passam a usar o deck oficial — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — identidade visual do preview/PDF.
+- **O quê:** PowerPoint exportou os 62 slides da referência; 24 páginas estáticas prioritárias foram incorporadas como PNGs oficiais (capas, sumário, institucional, objetivos, divisores, créditos e encerramentos). O paginador resolve o asset oficial por referência de slide e o usa tanto no preview quanto no PDF, substituindo os layouts CSS genéricos nessas páginas.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/assets/official/panorama-*.png`, `components/ReportPaginator.tsx`.
+- **Verificação:** build de produção aprovado com todos os assets no bundle.
+- **Impacto em Etapas/Pendências:** paridade visual dos blocos estáticos alcançada; próximas famílias a reproduzir fielmente são tabelas e gráficos variáveis, com o PPTX como régua visual.
+
+### 2026-08-18 — Panorama: cubo de coorte passa a alimentar slides de lançamento — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 33, 41, 42 e 48.
+- **O quê:** o modelo passa a coletar o último snapshot de `typologies_history` até o fechamento selecionado e a agrupá-lo por ano de `release_date` e segmento. As páginas de coorte e sua participação agora consomem o contrato granular, em vez de aviso genérico ou estoque reutilizado.
+- **Premissa:** método `ASSUMED` até confronto autenticado com Piracicaba; maturidade segue separada porque a regra Planta/Construção/Pronto ainda não foi homologada.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,report/model.ts,types.ts,components/ReportPaginator.tsx}`.
+- **Verificação:** typecheck e 141 testes aprovados.
+- **Impacto em Etapas/Pendências:** próximo contrato é maturidade — comparar `building_status`, `time_on_sale` e idade desde lançamento com o gabarito antes de liberar 43–46.
+
+### 2026-08-18 — Panorama: páginas de mercado deixam de reutilizar tabela genérica — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 27–56.
+- **O quê:** resumo, participação, preços e VGV passam a ter apresentações próprias; coortes e maturidade deixam de receber estoque como fallback e exibem a cobertura metodológica pendente no desenho reservado. O mapa também passa a tratar corretamente recorte sem coordenadas, sem calcular limites inválidos.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Verificação:** typecheck e 141 testes aprovados.
+- **Impacto em Etapas/Pendências:** a repetição semântica foi removida; próxima implementação natural é o cubo granular/contratos de coorte e maturidade, que substituirão os avisos por tabelas, matrizes e participações reais.
+
 ### 2026-08-18 — Panorama: livro de 62 slides, sumário e PDF direto integrados — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preview e exportação da V1.
 - **O quê:** o manifesto agora mantém os 62 slides da referência, incluindo a capa municipal 2, com seção, família visual, contratos e estado metodológico por página. O preview recebeu sumário navegável por seção e o botão `Visualizar PDF` passou a gerar um Blob paginado diretamente, sem `window.print()`. Slides oficiais 58–62 entram como assets integrais e o exportador captura o mesmo registry do preview.
