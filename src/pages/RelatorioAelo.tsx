@@ -65,7 +65,11 @@ function formatAeloPercent(value: unknown): string {
 function formatAeloVgv(value: unknown): string {
   const numeric = toNum(value);
   if (numeric === null) return '';
-  return Math.round(numeric / 1_000_000).toLocaleString('pt-BR');
+  return formatAeloVgvMillions(numeric).toLocaleString('pt-BR');
+}
+
+function formatAeloVgvMillions(value: number): number {
+  return Math.round(value / 1_000_000);
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -522,7 +526,10 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
   const exportValue = (col: string, value: Row[string]): Row[string] => {
     if (value === null || value === undefined || value === '') return null;
     if (AELO_PERCENT_COLUMNS.has(col)) return formatAeloPercent(value);
-    if (col.startsWith('VGV')) return formatAeloVgv(value);
+    if (col.startsWith('VGV')) {
+      const numeric = toNum(value);
+      return numeric === null ? null : formatAeloVgvMillions(numeric);
+    }
     if (col === 'Lançamento' || col === 'Entrega') {
       const date = new Date(String(value));
       if (!Number.isNaN(date.getTime())) return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
@@ -1060,6 +1067,9 @@ export default function RelatorioAelo() {
     setProgressTotal(preview.eligibleIds.length);
     setProgressFailed(0);
     setResult(null);
+
+    // Permite que o overlay de carregamento seja renderizado antes da montagem dos dados.
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
     try {
       const details = new Map(preview.records.map((record) => [record.building_id as number, record]));

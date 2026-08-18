@@ -49,6 +49,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Carregamento e tipos numéricos na exportação AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — busca de empreendimentos e exportação Excel.
+- **O quê:** restaurada a renderização do estado de carregamento antes do processamento da busca; campos numéricos permanecem numéricos no Excel, incluindo VGV convertido para milhões.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+
 ### 2026-08-18 — Formato numérico dos valores de VGV AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
 - **O quê:** os valores de VGV deixam de usar os sufixos `R$` e `M` e passam a ser exibidos no formato numérico padrão, com a informação de que estão convertidos para milhões pela divisão por `1.000.000`.
