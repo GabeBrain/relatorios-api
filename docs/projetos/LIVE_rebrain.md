@@ -49,6 +49,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-18 — Panorama: escala 16:9 calibrada para capas, tabelas e graficos — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capas dinamicas e familias variaveis 12–27.
+- **O que:** tipografia e espacamento deixam de depender do viewport externo (`vw`, `clamp` e minimos em px) e passam a usar unidades relativas ao proprio slide (`cqw`). As capas 1 e 2 centralizam cidade/ano pela largura do painel vermelho; tabelas usam Tahoma e proporcoes de titulo, marcador, cabecalho e linhas do deck; graficos recuperam titulo em duas linhas, painel de variacoes, faixa anual e area util sem corte.
+- **Evidencia:** fontes e caixas de texto extraidas do PPTX (Tahoma 32 pt nas tabelas, Tahoma 25 pt nos graficos e 10 pt nos resumos anuais) e QA Chromium em 840x472, alem do canvas de exportacao 1920x1080.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/print/panorama-print.css`.
+- **Impacto em Etapas/Pendencias:** corrige a escala responsiva comum; a proxima etapa estrutural continua sendo reproduzir os dois deltas das tabelas e as tres comparacoes dos graficos.
+
 ### 2026-08-18 — Panorama: capas automatizaveis passam a usar artes neutras — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 1, 2 e 4 no preview e PDF.
 - **Correcao de estrategia:** removida a camada DOM imperativa que permanecia no conteiner ao navegar e fazia o municipio aparecer sobre slides institucionais e tabelas.
