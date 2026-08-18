@@ -65,7 +65,7 @@ function formatAeloPercent(value: unknown): string {
 function formatAeloVgv(value: unknown): string {
   const numeric = toNum(value);
   if (numeric === null) return '';
-  return `R$ ${Math.round(numeric / 1_000_000).toLocaleString('pt-BR')}M`;
+  return Math.round(numeric / 1_000_000).toLocaleString('pt-BR');
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ const NOTE_VENDAS_LIQUIDAS =
   'O dado de distratos não está disponível na API, portanto não é possível calcular vendas líquidas reais. ' +
   'A coluna de distratos é preenchida por estimativa via variação de estoque.';
 const NOTE_VGV_PRECO_ATUAL =
-  'VGV histórico, VGV Estoque e VGV Lançado são calculados usando o Preço atual do último período disponível da tipologia.';
+  'VGV histórico, VGV Estoque e VGV Lançado são calculados usando o Preço atual do último período disponível da tipologia. Os valores são apresentados em milhões (/1.000.000).';
 COLUMN_NOTES['VGV Lançado'] = NOTE_VGV_PRECO_ATUAL;
 COLUMN_NOTES['VGV Estoque'] = NOTE_VGV_PRECO_ATUAL;
 
@@ -871,7 +871,7 @@ function formatCell(col: string, val: unknown): string {
   }
   if (typeof val === 'number') {
     if (col.startsWith('VGV') || col === 'Vendas Líquidas') {
-      return `R$ ${Math.round(val / 1_000_000).toLocaleString('pt-BR')}M`;
+      return Math.round(val / 1_000_000).toLocaleString('pt-BR');
     }
     if (
       col === 'Preço de lançamento' || col === 'Preço atual' ||
@@ -1131,7 +1131,7 @@ export default function RelatorioAelo() {
           <strong>Limitação da API:</strong> Distratos não são fornecidos diretamente. <code>*Distratos no trimestre</code> é uma estimativa via variação de estoque; <code>VGV Distratos</code> permanece em branco.
         </div>
         <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
-          <strong className="text-foreground">Regra da consulta AELO:</strong> consulta POST no endpoint interno v2 por UF, sempre com tipo Horizontal. O relatório mantém somente empreendimentos com padrão Loteamento Aberto ou Loteamento Fechado e municípios presentes no catálogo AELO; o Município selecionado, quando informado, é aplicado apenas como filtro local após a consulta. VGV histórico, VGV Estoque e VGV Lançado usam o Preço atual do último período da tipologia.
+          <strong className="text-foreground">Regra da consulta AELO:</strong> consulta POST no endpoint interno v2 por UF, sempre com tipo Horizontal. O relatório mantém somente empreendimentos com padrão Loteamento Aberto ou Loteamento Fechado e municípios presentes no catálogo AELO; o Município selecionado, quando informado, é aplicado apenas como filtro local após a consulta. VGV histórico, VGV Estoque e VGV Lançado usam o Preço atual do último período da tipologia e são apresentados em milhões (/1.000.000).
         </div>
 
         <div className="space-y-1">
