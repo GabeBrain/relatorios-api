@@ -61,7 +61,14 @@ export async function buildPanoramaPdf(
 ): Promise<PanoramaPdfResult> {
   if (!slides.length) throw new Error('Não há páginas ativas para exportar.');
 
-  const [{ PDFDocument }, { toJpeg }] = await Promise.all([import('pdf-lib'), import('html-to-image')]);
+  const [{ PDFDocument }, { toJpeg, getFontEmbedCSS }] = await Promise.all([import('pdf-lib'), import('html-to-image')]);
+
+  // Sem isto o html-to-image re-baixa e re-embute as webfonts a cada lâmina — ~950 ms por página,
+  // 12x o custo total do export. O CSS é resolvido a partir da raiz do deck, e não de uma lâmina
+  // isolada: `getFontEmbedCSS` filtra pelas fontes usadas no nó recebido, e uma página que só tem
+  // imagem devolveria vazio, alterando a renderização das demais.
+  const deckRoot = slides[0].closest<HTMLElement>('.panorama-export-root') ?? slides[0].parentElement ?? slides[0];
+  const fontEmbedCSS = await getFontEmbedCSS(deckRoot);
   const pdf = await PDFDocument.create();
   pdf.setTitle(metadata.title);
   pdf.setAuthor(metadata.author);
@@ -74,6 +81,7 @@ export async function buildPanoramaPdf(
     const slide = slides[index];
     await waitForSlide(slide);
     const jpeg = await toJpeg(slide, {
+      fontEmbedCSS,
       quality: 0.96,
       width: PANORAMA_EXPORT_WIDTH,
       height: PANORAMA_EXPORT_HEIGHT,

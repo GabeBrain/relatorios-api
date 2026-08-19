@@ -49,6 +49,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-19 — Panorama: export 12x mais rápido e leitura contínua das 62 páginas — Gabriel + Claude
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — exportação de PDF e navegação do livro.
+- **Causa medida:** o custo do export não estava nas páginas estáticas, e sim nas webfonts. O `html-to-image` re-baixava e re-embutia Montserrat/Source Sans 3 **a cada lâmina** — ~950 ms por página. Resolvendo o CSS das fontes uma única vez (415 ms) e reaproveitando-o, o export caiu de **87,4 s para 7,3 s** na bancada e ~13 s no fluxo real, com saída **byte a byte idêntica** (mesmos 9.923.588 bytes).
+- **Detalhe do contrato:** `getFontEmbedCSS` filtra pelas fontes usadas no nó recebido. Resolver a partir de uma lâmina isolada devolve vazio quando ela é só imagem, o que alterava a renderização das demais; por isso o CSS é resolvido a partir da **raiz do deck**.
+- **Leitura contínua:** novo modo “Ver as 62 páginas”, que exibe o livro inteiro em rolagem sem gerar arquivo — 0,38 s para montar, reutilizando as mesmas lâminas. O Sumário passa a rolar até a página, com busca restrita ao container do preview (o deck de exportação usa os mesmos rótulos e vem antes no DOM).
+- **Estimativa corrigida:** a ideia de embutir os 21 PNGs oficiais direto no PDF foi **descartada**. A medição por tipo de página mostrou que as estáticas custavam 17,6% do tempo (e não ~1/3, número que vinha de contagem de páginas, não de tempo); depois da correção das fontes o ganho residual seria de poucos segundos, em troca de ~4 MB a mais no arquivo.
+- **Evidência:** bancada Playwright com o `ReportPaginator` real — tempo por página por tipo, comparação byte a byte entre baseline e otimizado em 8 lâminas amostradas, e o fluxo completo com o usuário saindo da página aos 2,5 s. Typecheck, 143 testes, ESLint e build de produção aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{lib/pdf-export.ts,components/ReportPaginator.tsx}`.
+- **Impacto em Etapas/Pendências:** fecha as duas melhorias que estavam previstas para a próxima etapa e torna o reteste autenticado da etapa 7a bem mais barato de repetir.
+
 ### 2026-08-19 — Panorama: exportação de PDF passa a rodar em segundo plano — Gabriel + Claude
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — exportação do livro de 62 páginas.
 - **Pedido:** a rasterização leva ~90 s e prendia o usuário na página; ela deveria correr em paralelo com o resto da navegação.
@@ -888,8 +898,6 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
   gerar o Excel no ambiente da área e conferir a Rubi (`4T2025 = 49 + 300 = 349`, `1T2026 = 100`,
   `2T2026 = 18`, estoque `189`). Plano e roteiro:
   [`PLAN_correcao_agregacao_vendas_trimestrais.md`](../features/relatorios-secovi/PLAN_correcao_agregacao_vendas_trimestrais.md).
-- [ ] **Panorama — preview instantâneo sem gerar arquivo:** exibir as 62 lâminas em rolagem/apresentação reutilizando o deck já montado no DOM; custo próximo de zero e separa "ver" de "baixar".
-- [ ] **Panorama — cortar ~1/3 do tempo de export:** 21 das 62 páginas são um único PNG oficial de página inteira e hoje são fotografadas e re-encodadas como JPEG; embutir os bytes originais no PDF é mais rápido e mais fiel (páginas 1, 2 e 4 ficam de fora — recebem o nome da cidade via `::before/::after`).
 - [ ] **Panorama — avaliar impressão nativa vetorial:** o CSS `@media print` já existe e daria PDF instantâneo, mas os gráficos usam `ResponsiveContainer` do recharts, que mede via JS e não é remedido na mídia de impressão; exige verificação lâmina a lâmina antes de considerar.
 - [ ] **Panorama — remover `lib/pdf-print-interceptor.ts`:** arquivo morto (nenhum import) que ainda sobrescreve `window.print` e intercepta cliques com a estratégia de popup já abandonada em 19/ago.
 - [ ] **Panorama Secovi/FIERGS — reteste visual autenticado:** revisar as 62 páginas no browser/PDF com Piracicaba 1T26, registrar deltas residuais de geometria/componente por slide e atualizar a matriz `aprovado / divergente / sem método`; diferenças numéricas não bloqueiam fidelidade visual quando o contrato está correto.

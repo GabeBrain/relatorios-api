@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle } from 'lucide-react';
 import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
@@ -192,20 +192,34 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
  * As 62 lâminas montadas fora da tela — é sobre elas que a rasterização acontece. Fica isolado
  * porque o host de exportação em segundo plano precisa montá-lo fora da árvore da rota.
  */
+/** Leitura contínua das 62 lâminas. Não gera arquivo: são os mesmos componentes já montados. */
+function AllPagesView({ report, containerRef }: { report: PanoramaReportModel; containerRef: React.RefObject<HTMLDivElement> }) {
+  return <div ref={containerRef} className="space-y-6">{PANORAMA_REPORT_MANIFEST.map((def) => (
+    <div key={def.page} className="space-y-1.5">
+      <p className="text-xs font-medium text-muted-foreground">Página {def.page} de {PANORAMA_REPORT_MANIFEST.length} · {def.title}</p>
+      <Sheet def={def} report={report}><Content def={def} report={report}/></Sheet>
+    </div>
+  ))}</div>;
+}
+
 export function PanoramaExportDeck({ report, rootRef }: { report: PanoramaReportModel; rootRef: React.RefObject<HTMLDivElement> }) {
   return <div ref={rootRef} className="panorama-export-root" aria-hidden="true">{PANORAMA_REPORT_MANIFEST.map((def) => <Sheet key={def.page} def={def} report={report}><Content def={def} report={report}/></Sheet>)}</div>;
 }
 
 export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(0); const [view, setView] = useState<'page' | 'all'>('page');
+  const allPagesRef = useRef<HTMLDivElement>(null);
   const exportStatus = usePanoramaExportStore((state) => state.status);
   const exportProgress = usePanoramaExportStore((state) => state.progress);
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
   const pages = useMemo(() => PANORAMA_REPORT_MANIFEST, []); const page = pages[current];
   useEffect(() => { synchronizeOfficialCoverCity(report.scope.city, report.scope.uf, report.scope.endQuarter); }, [report.scope.city, report.scope.uf, report.scope.endQuarter]);
-  const jump = (number: number) => setCurrent(Math.max(0, pages.findIndex((item) => item.page === number)));
+  const jump = (number: number) => {
+    setCurrent(Math.max(0, pages.findIndex((item) => item.page === number)));
+    if (view === 'all') allPagesRef.current?.querySelector(`[aria-label^="Página ${number}:"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   // O trabalho pesado roda no host montado pelo shell: o usuário pode sair desta página.
   const exportPdf = () => usePanoramaExportStore.getState().start(report);
-  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">Página {page.page} de {pages.length} · {page.intention}</span></div><div className="flex gap-2"><Button variant="outline" size="sm" disabled={!current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button size="sm" disabled={exporting} onClick={exportPdf}>{exporting ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exporting && <p className="text-sm text-muted-foreground">O PDF está sendo gerado em segundo plano — você pode navegar para outras páginas sem interromper.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{PANORAMA_SECTIONS.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside><Sheet def={page} report={report}><Content def={page} report={report}/></Sheet></div></div>;
+  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver as 62 páginas</>}</Button><Button size="sm" disabled={exporting} onClick={exportPdf}>{exporting ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exporting && <p className="text-sm text-muted-foreground">O PDF está sendo gerado em segundo plano — você pode navegar para outras páginas sem interromper.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{PANORAMA_SECTIONS.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} containerRef={allPagesRef}/> : <Sheet def={page} report={report}><Content def={page} report={report}/></Sheet>}</div></div>;
 }
