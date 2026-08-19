@@ -5,6 +5,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PanoramaExportGate } from './features/panorama-secovi-fiergs/components/PanoramaExportGate.tsx';
 import MapaLegado from './pages/MapaLegado.tsx';
 import Home from './pages/Home.tsx';
 import ApiExplorer from './pages/ApiExplorer.tsx';
@@ -62,6 +63,7 @@ const App = () => (
       <Sonner richColors closeButton />
       <BrowserRouter>
         <AppLayout>
+          <PanoramaExportGate />
           <ErrorBoundary>
             <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando...</div>}>
               <Routes>

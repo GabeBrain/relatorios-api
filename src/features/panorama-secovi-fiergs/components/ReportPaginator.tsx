@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle } from 'lucide-react';
 import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
 import type { LaunchSeries, PanoramaReportModel, ReportMarketBlock } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
+import { synchronizeOfficialCoverCity } from '../lib/official-cover';
 import { PANORAMA_REPORT_MANIFEST, PANORAMA_SECTIONS, type ReportPageDefinition } from '../report/manifest';
-import { buildPanoramaPdf } from '../lib/pdf-export';
+import { panoramaExportIsRunning, usePanoramaExportStore } from '../export-store';
 import { AreaIvvSlide, CohortMatrixSlide, CohortTableSlide, LocationSlide, MarketSummarySlide, MaturitySlide, NarrativeSlide, OfferChartSlide, OfferTableSlide, PriceChartSlide, PriceTableSlide, VgvSlide } from './MarketSlides';
 import coverImage from '../assets/secovi-cover.jpg';
 import footerImage from '../assets/secovi-footer.jpeg';
@@ -18,17 +19,6 @@ for (const page of [1, 2, 4]) {
     officialSlides[`../assets/official/panorama-${String(page).padStart(2, '0')}-neutral.png`];
 }
 
-function synchronizeOfficialCoverCity(city: string, uf: string, endQuarter: string) {
-  const normalizedCity = city.toLocaleUpperCase('pt-BR');
-  const reportYear = endQuarter.slice(2);
-  const cityScale = Math.min(1, 12 / Math.max(normalizedCity.length, 1));
-  const style = document.documentElement.style;
-  style.setProperty('--panorama-city', JSON.stringify(normalizedCity));
-  style.setProperty('--panorama-city-uf', JSON.stringify(`${normalizedCity} (${uf})`));
-  style.setProperty('--panorama-year', JSON.stringify(reportYear));
-  style.setProperty('--panorama-period', JSON.stringify(`${endQuarter[0]}ºTRI/${reportYear}`));
-  style.setProperty('--panorama-city-scale', String(cityScale));
-}
 
 const n = (v: number) => v.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 const decimal = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -198,37 +188,24 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   if (p === 56) return <LocationSlide report={report}/>;
   return dataPage(p, report) ?? <div className="panorama-corporate"><h2>{title}</h2><p>Conteúdo editorial do relatório.</p></div>;
 }
+/**
+ * As 62 lâminas montadas fora da tela — é sobre elas que a rasterização acontece. Fica isolado
+ * porque o host de exportação em segundo plano precisa montá-lo fora da árvore da rota.
+ */
+export function PanoramaExportDeck({ report, rootRef }: { report: PanoramaReportModel; rootRef: React.RefObject<HTMLDivElement> }) {
+  return <div ref={rootRef} className="panorama-export-root" aria-hidden="true">{PANORAMA_REPORT_MANIFEST.map((def) => <Sheet key={def.page} def={def} report={report}><Content def={def} report={report}/></Sheet>)}</div>;
+}
+
 export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
-  const [current, setCurrent] = useState(0); const [exportState, setExportState] = useState<'idle' | 'preparing' | 'capturing' | 'assembling' | 'error'>('idle'); const [progress, setProgress] = useState(0);
-  const [exportError, setExportError] = useState(''); const [download, setDownload] = useState<{ url: string; name: string; pages: number } | null>(null);
-  const exportRoot = useRef<HTMLDivElement>(null); const pages = useMemo(() => PANORAMA_REPORT_MANIFEST, []); const page = pages[current];
+  const [current, setCurrent] = useState(0);
+  const exportStatus = usePanoramaExportStore((state) => state.status);
+  const exportProgress = usePanoramaExportStore((state) => state.progress);
+  const exportTotal = usePanoramaExportStore((state) => state.total);
+  const exporting = panoramaExportIsRunning(exportStatus);
+  const pages = useMemo(() => PANORAMA_REPORT_MANIFEST, []); const page = pages[current];
   useEffect(() => { synchronizeOfficialCoverCity(report.scope.city, report.scope.uf, report.scope.endQuarter); }, [report.scope.city, report.scope.uf, report.scope.endQuarter]);
   const jump = (number: number) => setCurrent(Math.max(0, pages.findIndex((item) => item.page === number)));
-  const exportPdf = async () => {
-    setExportState('preparing'); setProgress(0); setExportError('');
-    if (download) URL.revokeObjectURL(download.url);
-    setDownload(null);
-    try {
-      const slides = [...(exportRoot.current?.querySelectorAll<HTMLElement>('.panorama-report-page') ?? [])];
-      setExportState('capturing');
-      const result = await buildPanoramaPdf(slides, {
-        title: `Panorama imobiliário de ${report.scope.city}`,
-        author: 'Brain Inteligência Estratégica',
-        subject: `${report.scope.city}/${report.scope.uf} · ${quarterLabel(report.scope.endQuarter)}`,
-      }, ({ current: rendered }) => { setProgress(rendered); if (rendered === slides.length) setExportState('assembling'); });
-      // Entrega por download: não depende de popup nem de navegação para blob:, que o navegador
-      // pode bloquear silenciosamente numa aba aberta minutos antes de o arquivo existir.
-      const name = `panorama-${report.scope.city.toLowerCase().replaceAll(' ', '-')}-${report.scope.endQuarter}.pdf`;
-      const url = URL.createObjectURL(result.blob);
-      const link = document.createElement('a'); link.href = url; link.download = name; link.rel = 'noopener';
-      document.body.append(link); link.click(); link.remove();
-      setDownload({ url, name, pages: result.pageCount });
-      setExportState('idle');
-    } catch (error) {
-      console.error('Falha ao gerar o PDF do Panorama', error);
-      setExportError(error instanceof Error ? error.message : 'Erro inesperado ao rasterizar as páginas.');
-      setExportState('error');
-    }
-  };
-  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">Página {page.page} de {pages.length} · {page.intention}</span></div><div className="flex gap-2"><Button variant="outline" size="sm" disabled={!current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button size="sm" disabled={exportState !== 'idle'} onClick={exportPdf}>{exportState === 'idle' ? <Download/> : <LoaderCircle className="animate-spin"/>}{exportState === 'idle' ? 'Visualizar PDF' : `${exportState === 'capturing' ? `${progress}/${pages.length}` : 'Preparando PDF…'}`}</Button></div></div>{exportState === 'error' && <p className="text-sm text-destructive">Não foi possível montar o PDF: {exportError} Revise o recorte e tente novamente.</p>}{download && <p className="text-sm text-muted-foreground">PDF pronto: {download.pages} páginas · <a href={download.url} download={download.name} className="underline text-primary">baixar novamente</a> · <a href={download.url} target="_blank" rel="noreferrer" className="underline text-primary">abrir em nova aba</a></p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{PANORAMA_SECTIONS.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside><Sheet def={page} report={report}><Content def={page} report={report}/></Sheet></div><div ref={exportRoot} className="panorama-export-root" aria-hidden="true">{pages.map((def) => <Sheet key={def.page} def={def} report={report}><Content def={def} report={report}/></Sheet>)}</div></div>;
+  // O trabalho pesado roda no host montado pelo shell: o usuário pode sair desta página.
+  const exportPdf = () => usePanoramaExportStore.getState().start(report);
+  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">Página {page.page} de {pages.length} · {page.intention}</span></div><div className="flex gap-2"><Button variant="outline" size="sm" disabled={!current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button size="sm" disabled={exporting} onClick={exportPdf}>{exporting ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exporting && <p className="text-sm text-muted-foreground">O PDF está sendo gerado em segundo plano — você pode navegar para outras páginas sem interromper.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{PANORAMA_SECTIONS.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside><Sheet def={page} report={report}><Content def={page} report={report}/></Sheet></div></div>;
 }

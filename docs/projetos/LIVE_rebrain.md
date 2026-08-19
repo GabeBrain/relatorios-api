@@ -49,6 +49,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-19 — Panorama: exportação de PDF passa a rodar em segundo plano — Gabriel + Claude
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — exportação do livro de 62 páginas.
+- **Pedido:** a rasterização leva ~90 s e prendia o usuário na página; ela deveria correr em paralelo com o resto da navegação.
+- **O quê:** o job saiu da árvore da rota. Um store leve (`export-store.ts`) guarda o snapshot do modelo no clique e um host montado pelo `AppLayout` monta as 62 lâminas e executa a captura — o usuário navega para qualquer página sem interromper. O progresso vira um card fixo com barra, ação de **Cancelar** e, ao fim, download automático mais links de baixar novamente/abrir em nova aba. O botão da página virou **“Baixar PDF”**, refletindo o estado global.
+- **Aba oculta:** `waitForSlide` deixou de esperar por `requestAnimationFrame`, que o Chrome não dispara em aba de fundo e congelaria o export justamente quando o usuário troca de aba; quando o documento está oculto, cede o event loop.
+- **Lazy-loading preservado:** o shell monta apenas um portão que assina o store; o host é `lazy()` e só carrega quando há job ativo. O build confirma `ReportPaginator` em chunk próprio (49 kB).
+- **Evidência:** Playwright com o `ReportPaginator` real e a aba se declarando oculta o tempo todo — export iniciado, usuário navegado para fora aos 6 s (paginador desmontado), job concluído e download entregue com os **mesmos 9.923.588 bytes** da execução em primeiro plano. Cancelamento testado: card e deck removidos do DOM, zero downloads, reinício normal. Typecheck, 143 testes, ESLint e build de produção aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{export-store.ts,components/PanoramaExportHost.tsx,components/PanoramaExportGate.tsx,components/ReportPaginator.tsx,lib/pdf-export.ts,lib/official-cover.ts}`, `src/App.tsx`.
+- **Padrão registrado:** [`FRONTEND_DECISIONS.md`](../architecture/FRONTEND_DECISIONS.md) — trabalho longo de feature roda no shell, não na rota.
+- **Impacto em Etapas/Pendências:** a etapa 7a ganha ergonomia para o reteste autenticado. Seguem em aberto, por decisão do Gabriel de testar depois: preview instantâneo das 62 lâminas sem gerar arquivo e o corte de ~1/3 do tempo embutindo os 21 PNGs oficiais direto no PDF.
+
 ### 2026-08-19 — Panorama: exportação de PDF deixa de depender de popup — Gabriel + Claude
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — botão de exportação do livro de 62 páginas.
 - **Sintoma:** o clique abria uma aba `about:blank`, a rasterização levava ~90 s e ao final nada acontecia — sem arquivo baixado, sem pré-visualização e sem mensagem de erro.
@@ -877,6 +888,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
   gerar o Excel no ambiente da área e conferir a Rubi (`4T2025 = 49 + 300 = 349`, `1T2026 = 100`,
   `2T2026 = 18`, estoque `189`). Plano e roteiro:
   [`PLAN_correcao_agregacao_vendas_trimestrais.md`](../features/relatorios-secovi/PLAN_correcao_agregacao_vendas_trimestrais.md).
+- [ ] **Panorama — preview instantâneo sem gerar arquivo:** exibir as 62 lâminas em rolagem/apresentação reutilizando o deck já montado no DOM; custo próximo de zero e separa "ver" de "baixar".
+- [ ] **Panorama — cortar ~1/3 do tempo de export:** 21 das 62 páginas são um único PNG oficial de página inteira e hoje são fotografadas e re-encodadas como JPEG; embutir os bytes originais no PDF é mais rápido e mais fiel (páginas 1, 2 e 4 ficam de fora — recebem o nome da cidade via `::before/::after`).
+- [ ] **Panorama — avaliar impressão nativa vetorial:** o CSS `@media print` já existe e daria PDF instantâneo, mas os gráficos usam `ResponsiveContainer` do recharts, que mede via JS e não é remedido na mídia de impressão; exige verificação lâmina a lâmina antes de considerar.
 - [ ] **Panorama — remover `lib/pdf-print-interceptor.ts`:** arquivo morto (nenhum import) que ainda sobrescreve `window.print` e intercepta cliques com a estratégia de popup já abandonada em 19/ago.
 - [ ] **Panorama Secovi/FIERGS — reteste visual autenticado:** revisar as 62 páginas no browser/PDF com Piracicaba 1T26, registrar deltas residuais de geometria/componente por slide e atualizar a matriz `aprovado / divergente / sem método`; diferenças numéricas não bloqueiam fidelidade visual quando o contrato está correto.
 - [ ] **Panorama — fechar metodologia com os analistas:** critério oficial de **VGV lançado**

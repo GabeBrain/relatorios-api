@@ -4,6 +4,10 @@ export const PANORAMA_EXPORT_WIDTH = 1920;
 export const PANORAMA_EXPORT_HEIGHT = 1080;
 const IMAGE_TIMEOUT_MS = 10_000;
 
+export class PanoramaExportCancelled extends Error {
+  constructor() { super('Exportação cancelada.'); this.name = 'PanoramaExportCancelled'; }
+}
+
 export interface PanoramaPdfProgress {
   current: number;
   total: number;
@@ -29,6 +33,19 @@ async function waitForSlide(slide: HTMLElement) {
       image.addEventListener('error', done, { once: true });
     });
   }));
+  await settlePaint();
+}
+
+/**
+ * Em aba oculta o Chrome não dispara `requestAnimationFrame`: esperar por ele congelaria o export
+ * justamente quando o usuário foi fazer outra coisa. Nesse caso basta ceder o event loop — o
+ * layout, que é o que a captura precisa, continua sendo calculado.
+ */
+async function settlePaint() {
+  if (document.visibilityState === 'hidden') {
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    return;
+  }
   await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
@@ -40,6 +57,7 @@ export async function buildPanoramaPdf(
   slides: HTMLElement[],
   metadata: { title: string; author: string; subject: string },
   onProgress: (progress: PanoramaPdfProgress) => void,
+  signal?: AbortSignal,
 ): Promise<PanoramaPdfResult> {
   if (!slides.length) throw new Error('Não há páginas ativas para exportar.');
 
@@ -52,6 +70,7 @@ export async function buildPanoramaPdf(
   pdf.setCreationDate(new Date());
 
   for (let index = 0; index < slides.length; index += 1) {
+    if (signal?.aborted) throw new PanoramaExportCancelled();
     const slide = slides[index];
     await waitForSlide(slide);
     const jpeg = await toJpeg(slide, {
