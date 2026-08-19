@@ -2,6 +2,7 @@ export const PANORAMA_PDF_WIDTH = 960;
 export const PANORAMA_PDF_HEIGHT = 540;
 export const PANORAMA_EXPORT_WIDTH = 1920;
 export const PANORAMA_EXPORT_HEIGHT = 1080;
+const IMAGE_TIMEOUT_MS = 10_000;
 
 export interface PanoramaPdfProgress {
   current: number;
@@ -20,9 +21,12 @@ async function waitForSlide(slide: HTMLElement) {
   const images = [...slide.querySelectorAll('img')];
   await Promise.all(images.map(async (image) => {
     if (image.complete) return;
+    // Nunca esperar indefinidamente: um asset preso travaria a exportação inteira sem sinal ao usuário.
     await new Promise<void>((resolve) => {
-      image.addEventListener('load', () => resolve(), { once: true });
-      image.addEventListener('error', () => resolve(), { once: true });
+      const done = () => { clearTimeout(timer); resolve(); };
+      const timer = setTimeout(done, IMAGE_TIMEOUT_MS);
+      image.addEventListener('load', done, { once: true });
+      image.addEventListener('error', done, { once: true });
     });
   }));
   await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));

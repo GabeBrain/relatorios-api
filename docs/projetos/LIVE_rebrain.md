@@ -49,6 +49,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-19 — Panorama: exportação de PDF deixa de depender de popup — Gabriel + Claude
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — botão de exportação do livro de 62 páginas.
+- **Sintoma:** o clique abria uma aba `about:blank`, a rasterização levava ~90 s e ao final nada acontecia — sem arquivo baixado, sem pré-visualização e sem mensagem de erro.
+- **Causa:** a aba era aberta no clique e só recebia o arquivo minutos depois, via `popup.location.href = blobUrl`. Quando essa navegação não acontece, o código não tinha plano B — o caminho de download só rodava se `window.open` tivesse retornado `null`. Somado a isso, o `catch {}` descartava o erro sem `console.error`, tornando falha e sucesso indistinguíveis para o usuário.
+- **O quê:** a entrega passou a ser por download direto (`<a download>` com nome `panorama-<cidade>-<trimestre>.pdf`), sem abrir aba nenhuma. Ao final aparece “PDF pronto: N páginas” com links para **baixar novamente** e **abrir em nova aba** (agora por gesto real do usuário). O erro passou a ser logado e exibido com a mensagem real. A espera por imagens em `waitForSlide` ganhou teto de 10 s, para que um asset preso não trave a exportação inteira em silêncio.
+- **Evidência:** reprodução com Playwright montando o `ReportPaginator` real — antes: PDF gerado com sucesso e aba presa em `about:blank`, sem download; depois: download de `panorama-piracicaba-1T2026.pdf` com 9,9 MB e 62 imagens embutidas, nenhuma aba extra. Typecheck, 143 testes e ESLint aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,lib/pdf-export.ts}`.
+- **Impacto em Etapas/Pendências:** destrava o reteste visual autenticado da etapa 7a — agora o PDF chega ao disco do analista. Fica registrada a pendência de remover `lib/pdf-print-interceptor.ts`, que não é importado por ninguém e ainda carrega a estratégia antiga de popup e o override de `window.print`.
+
 ### 2026-08-18 — Panorama: V1 visual recomposta até o fechamento do livro — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preview e PDF paginado de 62 páginas.
 - **O quê:** os slides 14–26 deixam de compartilhar séries incorretas: famílias por segmento usam verde/amarelo e famílias por padrão usam econômico/demais padrões em vermelho/cinza, com títulos, resumos anuais, variações e cartões MCMV próprios. Os slides 27 e 29–56 passam a ter componentes dedicados para área/IVV, resumo de mercado, oferta por padrão/tipologia/coorte, preços, matrizes, maturidade, VGV, análises editoriais e localização. O slide 10 foi neutralizado sem o nome da cidade.
@@ -868,6 +877,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
   gerar o Excel no ambiente da área e conferir a Rubi (`4T2025 = 49 + 300 = 349`, `1T2026 = 100`,
   `2T2026 = 18`, estoque `189`). Plano e roteiro:
   [`PLAN_correcao_agregacao_vendas_trimestrais.md`](../features/relatorios-secovi/PLAN_correcao_agregacao_vendas_trimestrais.md).
+- [ ] **Panorama — remover `lib/pdf-print-interceptor.ts`:** arquivo morto (nenhum import) que ainda sobrescreve `window.print` e intercepta cliques com a estratégia de popup já abandonada em 19/ago.
 - [ ] **Panorama Secovi/FIERGS — reteste visual autenticado:** revisar as 62 páginas no browser/PDF com Piracicaba 1T26, registrar deltas residuais de geometria/componente por slide e atualizar a matriz `aprovado / divergente / sem método`; diferenças numéricas não bloqueiam fidelidade visual quando o contrato está correto.
 - [ ] **Panorama — fechar metodologia com os analistas:** critério oficial de **VGV lançado**
   (estimativa via `building-with-history`) e de **% MCMV** (proxy por padrão Econômico / teto de preço).
