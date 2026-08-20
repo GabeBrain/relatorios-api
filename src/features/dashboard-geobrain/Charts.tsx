@@ -210,11 +210,14 @@ function BubbleTooltip({ active, payload }: DGTooltipProps & { payload?: Array<T
   );
 }
 
-export function PriceAreaBubbleChart({ data, standards, standard, onStandardChange }: {
+export function PriceAreaBubbleChart({ data, standards, standard, neighborhoods, neighborhood, onStandardChange, onNeighborhoodChange }: {
   data: BubblePoint[];
   standards: string[];
   standard: string | null;
+  neighborhoods: string[];
+  neighborhood: string | null;
   onStandardChange: (value: string | null) => void;
+  onNeighborhoodChange: (value: string | null) => void;
 }) {
   return (
     <ChartCard
@@ -224,7 +227,7 @@ export function PriceAreaBubbleChart({ data, standards, standard, onStandardChan
         <div className="space-y-1">
           <div className="font-semibold">Regra das bolhas</div>
           <div>São exibidas apenas tipologias com <strong>Estoque final &gt; 0</strong>.</div>
-          <div>Disponibilidade = estoque final ÷ quantidade lançada. A cor varia linearmente de <span style={{ color: '#b8a000' }}>#f4d83f</span> (0%) a <span style={{ color: '#71984a' }}>#71984a</span> (100%).</div>
+          <div>Disponibilidade por tipologia = estoque final da tipologia ÷ unidades lançadas da própria tipologia. A cor varia linearmente de <span style={{ color: '#b8a000' }}>#f4d83f</span> (0%) a <span style={{ color: '#71984a' }}>#71984a</span> (100%).</div>
         </div>
       )}
       extras={(
@@ -233,6 +236,11 @@ export function PriceAreaBubbleChart({ data, standards, standard, onStandardChan
           <select className="dg-select" value={standard ?? ''} onChange={(e) => onStandardChange(e.target.value || null)} aria-label="Filtrar gráfico por padrão">
             <option value="">Todos</option>
             {standards.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+          <span>Bairro</span>
+          <select className="dg-select" value={neighborhood ?? ''} onChange={(e) => onNeighborhoodChange(e.target.value || null)} aria-label="Filtrar gráfico por bairro">
+            <option value="">Todos</option>
+            {neighborhoods.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
         </label>
       )}

@@ -186,11 +186,12 @@ export interface BubblePoint {
   availability: number;
 }
 
-export function computePriceAreaBubbles(buildings: Building[], f: Filters, standard: string | null): BubblePoint[] {
+export function computePriceAreaBubbles(buildings: Building[], f: Filters, standard: string | null, neighborhood: string | null): BubblePoint[] {
   const latest = latestPeriodInScope(buildings, f);
   if (!latest) return [];
   const points: BubblePoint[] = [];
   for (const b of buildings) {
+    if (neighborhood && b.neighborhood !== neighborhood) continue;
     for (const t of b.typologies) {
       const h = t.history.find((entry) => entry.period === latest && historyMatches(entry, f));
       const x = t.private_area;

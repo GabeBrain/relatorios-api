@@ -36,6 +36,7 @@ export default function DashboardGeobrain() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [defaultsAppliedFor, setDefaultsAppliedFor] = useState<string | null>(null);
   const [bubbleStandard, setBubbleStandard] = useState<string | null>(null);
+  const [bubbleNeighborhood, setBubbleNeighborhood] = useState<string | null>(null);
 
   const { status, buildings, error, progress, load, reset } = useDashboardData();
 
@@ -83,7 +84,7 @@ export default function DashboardGeobrain() {
   const rankEstoque = useMemo(() => rankBairrosPorEstoque(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankM2 = useMemo(() => rankBairrosPorPrecoM2(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType), [filtered, filtersWithType]);
-  const priceAreaBubbles = useMemo(() => computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard), [filtered, filtersWithType, bubbleStandard]);
+  const priceAreaBubbles = useMemo(() => computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, bubbleNeighborhood), [filtered, filtersWithType, bubbleStandard, bubbleNeighborhood]);
   const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoMedioStd = useMemo(() => precoMedioPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const oppMap = useMemo(() => computeOpportunityMap(filtered, filtersWithType, 'neighborhood'), [filtered, filtersWithType]);
@@ -146,6 +147,7 @@ export default function DashboardGeobrain() {
           setBuildingType(nextType);
           setFilters((prev) => ({ ...prev, standards: [] }));
           setBubbleStandard(null);
+          setBubbleNeighborhood(null);
         }}
         granularity={granularity}
         onGranularityChange={setGranularity}
@@ -210,7 +212,7 @@ export default function DashboardGeobrain() {
           <RankingCard title="Estoque atual por bairro" rows={rankEstoque} formatValue={(v) => intFmt(v)} info={infoEstoqueAtual} />
           <RankingCard title="Preço m² por bairro" rows={rankM2} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoM2} />
           <RankingCard title="Preço médio por bairro" rows={rankMedio} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoMedio} />
-          <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} onStandardChange={setBubbleStandard} />
+          <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} neighborhoods={options.neighborhoods} neighborhood={bubbleNeighborhood} onStandardChange={setBubbleStandard} onNeighborhoodChange={setBubbleNeighborhood} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
