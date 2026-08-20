@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Cores das legendas nos SVGs exportados — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — legendas das exportações SVG.
+- **O quê:** cada ícone da legenda passa a receber a cor real da série correspondente (barras, áreas, linhas ou bolhas), evitando `currentColor` e `none` no arquivo final.
+- **Arquivos:** `src/features/dashboard-geobrain/Charts.tsx`.
+- **Commits:** `1f93424`.
+- **Impacto em Etapas/Pendências:** exportações VGV, IPC e demais gráficos preservam a correspondência visual entre série e legenda.
+
 ### 2026-08-20 — Exportação dos rankings e Mapas de oportunidades — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — rankings Top 10 e mapas de oportunidades.
 - **O quê:** corrigida a identificação das barras para exportação SVG dos rankings e adicionados botões SVG aos dois Mapas de oportunidades, com tabelas editáveis.
