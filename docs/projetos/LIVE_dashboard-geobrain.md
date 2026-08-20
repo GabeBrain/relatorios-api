@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Limpeza de Padrão ao trocar tipo de empreendimento — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — filtros e segmentador do gráfico de bolhas.
+- **O quê:** ao trocar o tipo de empreendimento, o filtro global de Padrão e o segmentador específico do gráfico são limpos para impedir recortes incompatíveis.
+- **Arquivos:** `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `1922341`.
+- **Impacto em Etapas/Pendências:** mantém a consistência entre as opções de Padrão disponíveis e o tipo selecionado.
+
 ### 2026-08-20 — Regras de cor, tooltip e filtros do gráfico de bolhas — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — visualização Preço/m² × Área privativa.
 - **O quê:** regra informativa movida para o ícone `(i)`; tooltip inclui Unidades lançadas totais do empreendimento; cores interpolam de `#f4d83f` (0%) a `#71984a` (100%); padrões, faixas de Área privativa e faixas de Preço/m² acompanham o tipo de empreendimento e os filtros ativos.
