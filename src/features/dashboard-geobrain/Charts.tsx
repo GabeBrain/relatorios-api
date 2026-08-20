@@ -21,6 +21,26 @@ const HL = 'var(--dg-tooltip-hl)';
 // §9 — cor da descrição das legendas dos gráficos.
 const LEGEND_COLOR = 'var(--dg-legend)';
 
+function exportGeoBrainSvg(element: HTMLElement | null, title: string) {
+  if (!element) return;
+  const svg = element.querySelector('svg');
+  if (!svg) return;
+  const nodes = [svg, ...Array.from(svg.querySelectorAll<SVGElement>('*'))];
+  const changes: Array<{ node: SVGElement; attribute: string; value: string }> = [];
+  const styles = getComputedStyle(element);
+  const resolve = (value: string) => value.replace(/var\((--dg-[\w-]+)(?:,\s*([^\)]+))?\)/g, (_match, name: string, fallback?: string) => styles.getPropertyValue(name).trim() || fallback || 'currentColor');
+  for (const node of nodes) {
+    for (const attribute of ['fill', 'stroke', 'style', 'class']) {
+      const value = node.getAttribute(attribute);
+      if (!value || !value.includes('--dg-')) continue;
+      changes.push({ node, attribute, value });
+      node.setAttribute(attribute, resolve(value));
+    }
+  }
+  exportElementAsSvg(element, title, title);
+  for (const change of changes) change.node.setAttribute(change.attribute, change.value);
+}
+
 interface TooltipEntry { name?: string | number; value?: number | string | null; color?: string; dataKey?: string | number }
 interface DGTooltipProps { active?: boolean; label?: string | number; payload?: TooltipEntry[]; format?: (v: number) => string }
 
@@ -91,7 +111,7 @@ function ChartCard({ title, subtitle, extras, info, variationSlot, children }: C
           <button
             type="button"
             className="dg-chip"
-            onClick={() => exportElementAsSvg(visualRef.current, title, title)}
+            onClick={() => exportGeoBrainSvg(visualRef.current, title)}
             title="Exportar gráfico em SVG editável"
             aria-label={`Exportar ${title} em SVG editável`}
             style={{ padding: '2px 7px', fontSize: '9px' }}
@@ -372,24 +392,15 @@ export function IpcChart({ series, standards, granularity }: { series: IpcSeries
       subtitle="Participação nas vendas ÷ Participação no estoque"
       variationSlot={<VariationStrip values={variation} granularity={granularity} mode="avg" format={(v) => v.toFixed(1).replace('.', ',')} />}
       info={
-        <Popover>
-          <PopoverTrigger asChild>
-            <button type="button" aria-label="Ajuda IPC" className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full text-[hsl(var(--dg-primary-strong))] hover:bg-[hsl(var(--dg-primary-soft))]">
-              <Info className="h-3.5 w-3.5" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent side="bottom" align="start" className="w-80 text-[11px]">
-            <div className="font-semibold mb-1">Índice de Performance Comercial (IPC)</div>
-            <p className="mb-2 text-muted-foreground">
-              Compara a participação do empreendimento nas vendas com sua participação no estoque disponível.
-            </p>
-            <ul className="space-y-0.5">
-              <li><strong>&gt; 1</strong> — vende acima da média do mercado.</li>
-              <li><strong>= 1</strong> — vende proporcionalmente ao estoque.</li>
-              <li><strong>&lt; 1</strong> — vende abaixo da média.</li>
-            </ul>
-          </PopoverContent>
-        </Popover>
+        <div>
+          <div className="font-semibold mb-1">Índice de Performance Comercial (IPC)</div>
+          <p className="mb-2 text-muted-foreground">Compara a participação do empreendimento nas vendas com sua participação no estoque disponível.</p>
+          <ul className="space-y-0.5">
+            <li><strong>&gt; 1</strong> — vende acima da média do mercado.</li>
+            <li><strong>= 1</strong> — vende proporcionalmente ao estoque.</li>
+            <li><strong>&lt; 1</strong> — vende abaixo da média.</li>
+          </ul>
+        </div>
       }
     >
       <ScrollableChart height={280} count={series.length}>
