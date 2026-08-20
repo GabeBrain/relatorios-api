@@ -186,6 +186,19 @@ function bubbleColor(availability: number) {
   return '#4d5a31';
 }
 
+function BubbleTooltip({ active, payload }: DGTooltipProps & { payload?: Array<TooltipEntry & { payload?: BubblePoint }> }) {
+  const point = payload?.[0]?.payload;
+  if (!active || !point) return null;
+  return (
+    <div style={{ background: 'hsl(var(--dg-card))', border: '1px solid hsl(var(--dg-border))', borderRadius: 4, padding: '6px 8px', fontSize: 10, boxShadow: '0 2px 6px hsl(0 0% 0% / 0.08)' }}>
+      <div style={{ fontWeight: 700, color: HL, marginBottom: 4 }}>{point.name}</div>
+      <div>Área privativa: <strong>{numCompactBR(point.privateArea, 1)} m²</strong></div>
+      <div>Preço/m²: <strong>{currencyCompactNoPrefix(point.pricePerM2)}</strong></div>
+      <div>Estoque final: <strong>{numCompactBR(point.stock, 1)}</strong></div>
+    </div>
+  );
+}
+
 export function PriceAreaBubbleChart({ data, standards, standard, onStandardChange }: {
   data: BubblePoint[];
   standards: string[];
@@ -196,6 +209,14 @@ export function PriceAreaBubbleChart({ data, standards, standard, onStandardChan
     <ChartCard
       title="Preço/m² × Área privativa"
       subtitle="Tamanho = estoque final · cor = estoque final / quantidade lançada"
+      info={(
+        <div className="space-y-1">
+          <div className="font-semibold">Regra das bolhas</div>
+          <div>São exibidas apenas tipologias com <strong>Estoque final &gt; 0</strong>.</div>
+          <div>Disponibilidade = estoque final ÷ quantidade lançada.</div>
+          <div>Até 25%: <span style={{ color: '#6e6e6e' }}>● cinza</span> · até 50%: <span style={{ color: '#b8a000' }}>● amarelo</span> · até 75%: <span style={{ color: '#71984a' }}>● verde oliva</span> · acima de 75%: <span style={{ color: '#4d5a31' }}>● verde escuro</span>.</div>
+        </div>
+      )}
       extras={(
         <label className="flex items-center gap-1 text-[9px] text-[hsl(var(--dg-muted))]">
           <span>Padrão</span>
@@ -213,7 +234,7 @@ export function PriceAreaBubbleChart({ data, standards, standard, onStandardChan
             <XAxis type="number" dataKey="privateArea" name="Área privativa" tick={{ fontSize: 10 }} unit=" m²" />
             <YAxis type="number" dataKey="pricePerM2" name="Preço/m²" tick={{ fontSize: 10 }} />
             <ZAxis type="number" dataKey="stock" range={[36, 500]} name="Estoque final" />
-            <Tooltip cursor={{ strokeDasharray: '3 3' }} content={<DGTooltip format={(v) => numCompactBR(v, 1)} />} />
+            <Tooltip cursor={{ strokeDasharray: '3 3' }} content={<BubbleTooltip />} />
             <Scatter data={data} name="Tipologias">
               {data.map((point) => <Cell key={point.id} fill={bubbleColor(point.availability)} />)}
             </Scatter>

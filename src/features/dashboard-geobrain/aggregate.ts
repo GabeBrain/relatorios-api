@@ -201,7 +201,7 @@ export function computePriceAreaBubbles(buildings: Building[], f: Filters, stand
       const stock = Math.max(0, h.typology_stock);
       points.push({
         id: `${b.building_id}-${t.typology_id}`,
-        name: `${b.name} · ${t.type_of_typology}`,
+        name: b.name,
         standard: currentStandard,
         privateArea: x,
         pricePerM2: y,
@@ -211,7 +211,7 @@ export function computePriceAreaBubbles(buildings: Building[], f: Filters, stand
       });
     }
   }
-  return points;
+  return points.filter((point) => point.stock > 0);
 }
 
 // ============ campos calculados por linha (§13) ============
