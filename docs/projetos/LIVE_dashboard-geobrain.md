@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Exportação dos rankings e Mapas de oportunidades — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — rankings Top 10 e mapas de oportunidades.
+- **O quê:** corrigida a identificação das barras para exportação SVG dos rankings e adicionados botões SVG aos dois Mapas de oportunidades, com tabelas editáveis.
+- **Arquivos:** `src/features/dashboard-geobrain/{Rankings.tsx,OpportunityMap.tsx}`.
+- **Commits:** `55fb8e6`.
+- **Impacto em Etapas/Pendências:** exportação editável ampliada e corrigida nos blocos analíticos do dashboard.
+
 ### 2026-08-20 — Exportação SVG dos rankings Top 10 — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — rankings por bairro e padrão.
 - **O quê:** rankings Top 10 ganharam botão SVG, exportando rótulos, valores e barras editáveis com o mesmo mecanismo reutilizado dos gráficos.
