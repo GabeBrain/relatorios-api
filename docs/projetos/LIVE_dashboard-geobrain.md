@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Bairros do gráfico limitados ao estoque positivo — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — segmentador de Bairro do gráfico de bolhas.
+- **O quê:** o filtro lista apenas bairros com pelo menos uma tipologia com Estoque final maior que zero no recorte ativo do gráfico.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `37326c4`.
+- **Impacto em Etapas/Pendências:** mantém o filtro alinhado aos dados efetivamente exibidos.
+
 ### 2026-08-20 — Filtro de Bairro e disponibilidade por tipologia nas bolhas — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — gráfico Preço/m² × Área privativa.
 - **O quê:** disponibilidade documentada e aplicada por tipologia (`estoque final da tipologia ÷ unidades lançadas da própria tipologia`); o gráfico ganhou segmentador de Bairro, com opções do tipo de empreendimento selecionado.
