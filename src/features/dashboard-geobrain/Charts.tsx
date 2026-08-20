@@ -52,7 +52,7 @@ export function exportGeoBrainSvg(element: HTMLElement | null, title: string) {
     const icon = item.querySelector<SVGElement>('.recharts-legend-icon');
     const shape = icon?.querySelector<SVGElement>('[fill], [stroke]');
     const color = legendColors[index] || shape?.getAttribute('fill') || shape?.getAttribute('stroke');
-    if (!icon || !color) continue;
+    if (!icon || !color) return;
     changes.push({ node: icon, attribute: 'fill', value: icon.getAttribute('fill') ?? '' });
     icon.setAttribute('fill', resolve(color));
   });
