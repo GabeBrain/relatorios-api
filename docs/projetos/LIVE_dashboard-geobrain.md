@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Correção de sintaxe no exportador SVG — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — build e exportação SVG.
+- **O quê:** substituído `continue` inválido dentro de `forEach` por retorno do callback, restaurando o parsing do `Charts.tsx` pelo Vite/SWC.
+- **Arquivos:** `src/features/dashboard-geobrain/Charts.tsx`.
+- **Commits:** `49f2f56`.
+- **Impacto em Etapas/Pendências:** build de produção voltou a concluir normalmente.
+
 ### 2026-08-20 — Cores das legendas nos SVGs exportados — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — legendas das exportações SVG.
 - **O quê:** cada ícone da legenda passa a receber a cor real da série correspondente (barras, áreas, linhas ou bolhas), evitando `currentColor` e `none` no arquivo final.
