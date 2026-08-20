@@ -21,11 +21,10 @@ const HL = 'var(--dg-tooltip-hl)';
 // §9 — cor da descrição das legendas dos gráficos.
 const LEGEND_COLOR = 'var(--dg-legend)';
 
-function exportGeoBrainSvg(element: HTMLElement | null, title: string) {
+export function exportGeoBrainSvg(element: HTMLElement | null, title: string) {
   if (!element) return;
   const svg = element.querySelector('svg');
-  if (!svg) return;
-  const nodes = [svg, ...Array.from(svg.querySelectorAll<SVGElement>('*'))];
+  const nodes = svg ? [svg, ...Array.from(svg.querySelectorAll<SVGElement>('*'))] : [];
   const changes: Array<{ node: SVGElement; attribute: string; value: string }> = [];
   const styles = getComputedStyle(element);
   const resolve = (value: string) => value.replace(/var\((--dg-[\w-]+)(?:,\s*([^\)]+))?\)/g, (_match, name: string, fallback?: string) => styles.getPropertyValue(name).trim() || fallback || 'currentColor');
