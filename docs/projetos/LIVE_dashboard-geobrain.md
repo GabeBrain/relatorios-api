@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Correção das cores das legendas SVG — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — exportação SVG dos gráficos.
+- **O quê:** cores dos ícones de legenda são promovidas temporariamente dos elementos filhos para o próprio ícone antes do exportador gerar a legenda, preservando as cores originais.
+- **Arquivos:** `src/features/dashboard-geobrain/Charts.tsx`.
+- **Commits:** `7058483`.
+- **Impacto em Etapas/Pendências:** exportação SVG passa a manter também a identidade visual das legendas.
+
 ### 2026-08-20 — Correção do info IPC e das cores na exportação SVG — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — IPC e exportação dos gráficos.
 - **O quê:** regras do IPC passam a aparecer corretamente no popover `(i)` do card; tokens visuais `--dg-*` são resolvidos antes do exportador SVG reutilizado do Banco Quanti, preservando as cores originais.
