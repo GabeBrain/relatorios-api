@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Layout e exportação SVG dos gráficos — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — gráficos e exportações.
+- **O quê:** gráfico Preço/m² × Área privativa movido para depois de VGV, ocupando a largura total e mantendo 260px de altura; botão SVG adicionado aos gráficos GeoBrain, reutilizando `exportElementAsSvg` já existente no Banco Quanti sem alterar aquela feature.
+- **Arquivos:** `src/features/dashboard-geobrain/{Charts.tsx}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `1adb550`.
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; exportação editável adicionada ao dashboard.
+
 ### 2026-08-20 — Bairros do gráfico limitados ao estoque positivo — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — segmentador de Bairro do gráfico de bolhas.
 - **O quê:** o filtro lista apenas bairros com pelo menos uma tipologia com Estoque final maior que zero no recorte ativo do gráfico.
