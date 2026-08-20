@@ -23,7 +23,11 @@ const LEGEND_COLOR = 'var(--dg-legend)';
 
 export function exportGeoBrainSvg(element: HTMLElement | null, title: string) {
   if (!element) return;
-  const svg = element.querySelector('svg');
+  const hiddenSvgs = Array.from(element.querySelectorAll<SVGSVGElement>('svg'))
+    .filter((node) => !node.classList.contains('recharts-surface') && !node.classList.contains('recharts-legend-icon'))
+    .map((node) => ({ node, parent: node.parentNode, next: node.nextSibling }));
+  for (const hidden of hiddenSvgs) hidden.parent?.removeChild(hidden.node);
+  const svg = element.querySelector('svg.recharts-surface');
   const nodes = svg ? [svg, ...Array.from(svg.querySelectorAll<SVGElement>('*'))] : [];
   const changes: Array<{ node: SVGElement; attribute: string; value: string }> = [];
   const styles = getComputedStyle(element);
@@ -36,20 +40,32 @@ export function exportGeoBrainSvg(element: HTMLElement | null, title: string) {
       node.setAttribute(attribute, resolve(value));
     }
   }
-  // Recharts stores each legend color on a child shape, while the reused
+  const legendColors = svg
+    ? Array.from(svg.querySelectorAll<SVGElement>('.recharts-bar-rectangle path[fill], .recharts-area-curve[stroke], .recharts-line-curve[stroke], .recharts-scatter-symbol[fill]'))
+      .map((node) => node.getAttribute('fill') || node.getAttribute('stroke') || '')
+      .filter((color) => color && color !== 'none' && color !== 'currentColor')
+      .filter((color, index, colors) => colors.indexOf(color) === index)
+    : [];
+  // Recharts stores each legend color on the chart series, while the reused
   // exporter reads the color from `.recharts-legend-icon` itself.
-  for (const item of Array.from(element.querySelectorAll<HTMLElement>('.recharts-legend-item'))) {
+  Array.from(element.querySelectorAll<HTMLElement>('.recharts-legend-item')).forEach((item, index) => {
     const icon = item.querySelector<SVGElement>('.recharts-legend-icon');
     const shape = icon?.querySelector<SVGElement>('[fill], [stroke]');
-    const color = shape?.getAttribute('fill') || shape?.getAttribute('stroke');
-    if (!icon || !color || icon.hasAttribute('fill')) continue;
+    const color = legendColors[index] || shape?.getAttribute('fill') || shape?.getAttribute('stroke');
+    if (!icon || !color) continue;
     changes.push({ node: icon, attribute: 'fill', value: icon.getAttribute('fill') ?? '' });
     icon.setAttribute('fill', resolve(color));
-  }
-  exportElementAsSvg(element, title, title);
-  for (const change of changes) {
-    if (change.value) change.node.setAttribute(change.attribute, change.value);
-    else change.node.removeAttribute(change.attribute);
+  });
+  try {
+    exportElementAsSvg(element, title, title);
+  } finally {
+    for (const change of changes) {
+      if (change.value) change.node.setAttribute(change.attribute, change.value);
+      else change.node.removeAttribute(change.attribute);
+    }
+    for (const hidden of hiddenSvgs) {
+      hidden.parent?.insertBefore(hidden.node, hidden.next && hidden.next.parentNode === hidden.parent ? hidden.next : null);
+    }
   }
 }
 
