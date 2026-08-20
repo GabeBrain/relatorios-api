@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Regras de cor, tooltip e filtros do gráfico de bolhas — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — visualização Preço/m² × Área privativa.
+- **O quê:** regra informativa movida para o ícone `(i)`; tooltip inclui Unidades lançadas totais do empreendimento; cores interpolam de `#f4d83f` (0%) a `#71984a` (100%); padrões, faixas de Área privativa e faixas de Preço/m² acompanham o tipo de empreendimento e os filtros ativos.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,Charts.tsx}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `8bf5518`.
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; nova visualização alinhada às regras de filtros do dashboard.
+
 ### 2026-08-20 — Refinamento do tooltip do gráfico de bolhas — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — tooltip e regra de exibição da visualização Preço/m² × Área privativa.
 - **O quê:** tooltip passa a exibir o nome do empreendimento, Área privativa, Preço/m² e Estoque final. Bolhas com estoque final zero deixam de ser exibidas; a regra e as faixas de cor foram detalhadas no ícone informativo.
