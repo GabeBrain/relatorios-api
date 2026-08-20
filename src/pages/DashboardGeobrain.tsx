@@ -142,7 +142,11 @@ export default function DashboardGeobrain() {
         scope={scope}
         onScopeChange={setScope}
         buildingType={buildingType}
-        onBuildingTypeChange={setBuildingType}
+        onBuildingTypeChange={(nextType) => {
+          setBuildingType(nextType);
+          setFilters((prev) => ({ ...prev, standards: [] }));
+          setBubbleStandard(null);
+        }}
         granularity={granularity}
         onGranularityChange={setGranularity}
         onOpenSidebar={() => setSidebarOpen(true)}
