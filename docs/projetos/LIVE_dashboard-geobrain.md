@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Filtro de Bairro e disponibilidade por tipologia nas bolhas — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — gráfico Preço/m² × Área privativa.
+- **O quê:** disponibilidade documentada e aplicada por tipologia (`estoque final da tipologia ÷ unidades lançadas da própria tipologia`); o gráfico ganhou segmentador de Bairro, com opções do tipo de empreendimento selecionado.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,Charts.tsx}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `bac9230`.
+- **Impacto em Etapas/Pendências:** mantém a etapa 4 concluída e amplia o recorte analítico da visualização.
+
 ### 2026-08-20 — Limpeza de Padrão ao trocar tipo de empreendimento — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — filtros e segmentador do gráfico de bolhas.
 - **O quê:** ao trocar o tipo de empreendimento, o filtro global de Padrão e o segmentador específico do gráfico são limpos para impedir recortes incompatíveis.
