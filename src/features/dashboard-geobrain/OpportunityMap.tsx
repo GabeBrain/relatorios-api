@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { Download, Search } from 'lucide-react';
 import { pctRaw } from '@/lib/format';
 import type { OpportunityMatrix } from './aggregate';
+import { exportGeoBrainSvg } from './Charts';
 
 function heatClass(v: number): string {
   // Verde = IVV alto (bom), amarelo = IVV baixo (fraco).
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function OpportunityMap({ matrix, title = 'Mapa de oportunidades', subtitle }: Props) {
+  const cardRef = useRef<HTMLElement>(null);
   const [query, setQuery] = useState('');
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -30,13 +32,24 @@ export function OpportunityMap({ matrix, title = 'Mapa de oportunidades', subtit
   const sub = subtitle ?? `IVV por ${matrix.rowLabel.toLowerCase()} × dormitórios — amarelo (baixo) → verde (alto)`;
 
   return (
-    <section className="dg-card w-full">
+    <section ref={cardRef} className="dg-card w-full">
       <header className="mb-2 flex items-center justify-between gap-2">
         <div>
           <h2 className="dg-title">{title}</h2>
           <p className="dg-subtle">{sub}</p>
         </div>
-        <div className="relative">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            className="dg-chip"
+            onClick={() => exportGeoBrainSvg(cardRef.current, title)}
+            title="Exportar mapa em SVG editável"
+            aria-label={`Exportar ${title} em SVG editável`}
+            style={{ padding: '2px 7px', fontSize: '9px' }}
+          >
+            <Download className="h-3 w-3" /> SVG
+          </button>
+          <div className="relative">
           <Search className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[hsl(var(--dg-muted))]" />
           <input
             value={query}
@@ -45,6 +58,7 @@ export function OpportunityMap({ matrix, title = 'Mapa de oportunidades', subtit
             className="dg-select"
             style={{ height: '24px', width: '180px', paddingLeft: '22px' }}
           />
+          </div>
         </div>
       </header>
       <div className="max-h-96 overflow-auto">

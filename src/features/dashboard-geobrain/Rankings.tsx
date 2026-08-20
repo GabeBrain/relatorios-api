@@ -1,7 +1,8 @@
-import { useMemo, useState, type ReactNode } from 'react';
-import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Info, Search } from 'lucide-react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Download, Info, Search } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { RankRow } from './aggregate';
+import { exportGeoBrainSvg } from './Charts';
 
 interface Props {
   title: string;
@@ -17,6 +18,7 @@ type SortBy = 'value' | 'label';
 type Dir = 'asc' | 'desc';
 
 export function RankingCard({ title, rows, formatValue, searchable = true, topDefault = true, info }: Props) {
+  const cardRef = useRef<HTMLElement>(null);
   const [query, setQuery] = useState('');
   const [topOnly, setTopOnly] = useState(topDefault);
   const [sortBy, setSortBy] = useState<SortBy>('value');
@@ -40,7 +42,7 @@ export function RankingCard({ title, rows, formatValue, searchable = true, topDe
   };
 
   return (
-    <section className="dg-card w-full">
+    <section ref={cardRef} className="dg-card w-full">
       <header className="mb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <h2 className="dg-title">{title}</h2>
@@ -68,6 +70,16 @@ export function RankingCard({ title, rows, formatValue, searchable = true, topDe
               />
             </div>
           )}
+          <button
+            type="button"
+            className="dg-chip"
+            onClick={() => exportGeoBrainSvg(cardRef.current, title)}
+            title="Exportar ranking em SVG editável"
+            aria-label={`Exportar ${title} em SVG editável`}
+            style={{ padding: '2px 7px', fontSize: '9px' }}
+          >
+            <Download className="h-3 w-3" /> SVG
+          </button>
           <button
             type="button"
             className="dg-chip"
@@ -106,7 +118,7 @@ export function RankingCard({ title, rows, formatValue, searchable = true, topDe
         {filtered.map((r) => {
           const pct = (Math.abs(r.value) / max) * 100;
           return (
-            <div key={r.key} className="grid grid-cols-[110px_1fr_auto] items-center gap-2 text-[10px]">
+            <div key={r.key} className="grid grid-cols-[110px_1fr_auto] items-center gap-2 text-[10px]" data-svg-export-bar="true" data-label={r.key} data-count={r.value} data-pct={Math.abs(r.value) / max * 100}>
               <span className="truncate">{r.key}</span>
               <div className="h-3.5 rounded-sm bg-[hsl(var(--dg-muted-soft))]">
                 <div className="h-full rounded-sm bg-[hsl(var(--dg-primary))]" style={{ width: `${pct}%` }} />

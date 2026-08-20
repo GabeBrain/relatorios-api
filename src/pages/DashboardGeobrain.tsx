@@ -6,13 +6,13 @@ import {
   applyFilters, computeKpis, computeSeries, extractOptions, extractRangeOptions,
   computeOfertaPorDormitorio, computeOfertaPorPadrao,
   rankBairrosPorIvv, rankBairrosPorTempoEstoque, rankBairrosPorEstoque, rankBairrosPorPrecoM2, rankBairrosPorPrecoMedio,
-  precoM2PorPadrao, precoMedioPorPadrao, computeOpportunityMap, computeIpcByStandard,
+  precoM2PorPadrao, precoMedioPorPadrao, computeOpportunityMap, computeIpcByStandard, computePriceAreaBubbles,
 } from '@/features/dashboard-geobrain/aggregate';
 import { Header, type BuildingType } from '@/features/dashboard-geobrain/Header';
 import { Sidebar } from '@/features/dashboard-geobrain/Sidebar';
 import { KpiRow } from '@/features/dashboard-geobrain/KpiRow';
 import {
-  EvolucaoChart, IvvChart, VgvChart, OfertaComboChart, IpcChart, UnidadesVsEstoqueChart,
+  EvolucaoChart, IvvChart, VgvChart, OfertaComboChart, IpcChart, UnidadesVsEstoqueChart, PriceAreaBubbleChart,
 } from '@/features/dashboard-geobrain/Charts';
 import { RankingCard } from '@/features/dashboard-geobrain/Rankings';
 import { OpportunityMap } from '@/features/dashboard-geobrain/OpportunityMap';
@@ -35,6 +35,8 @@ export default function DashboardGeobrain() {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [defaultsAppliedFor, setDefaultsAppliedFor] = useState<string | null>(null);
+  const [bubbleStandard, setBubbleStandard] = useState<string | null>(null);
+  const [bubbleNeighborhood, setBubbleNeighborhood] = useState<string | null>(null);
 
   const { status, buildings, error, progress, load, reset } = useDashboardData();
 
@@ -47,7 +49,10 @@ export default function DashboardGeobrain() {
   }, [scope.uf, scope.city, load, reset]);
 
   const allBuildings = buildings ?? [];
-  const options = useMemo(() => extractOptions(allBuildings), [allBuildings]);
+  const options = useMemo(
+    () => extractOptions(allBuildings.filter((b) => b.building_type === buildingType)),
+    [allBuildings, buildingType],
+  );
   // §5 — faixas dinâmicas por cidade carregada + tipo de empreendimento selecionado.
   const rangeOptions = useMemo(
     () => extractRangeOptions(allBuildings.filter((b) => b.building_type === buildingType)),
@@ -79,6 +84,12 @@ export default function DashboardGeobrain() {
   const rankEstoque = useMemo(() => rankBairrosPorEstoque(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankM2 = useMemo(() => rankBairrosPorPrecoM2(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType), [filtered, filtersWithType]);
+  const priceAreaBubbles = useMemo(() => computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, bubbleNeighborhood), [filtered, filtersWithType, bubbleStandard, bubbleNeighborhood]);
+  const bubbleNeighborhoods = useMemo(
+    () => Array.from(new Set(computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, null).map((point) => point.neighborhood)))
+      .sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    [filtered, filtersWithType, bubbleStandard],
+  );
   const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoMedioStd = useMemo(() => precoMedioPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const oppMap = useMemo(() => computeOpportunityMap(filtered, filtersWithType, 'neighborhood'), [filtered, filtersWithType]);
@@ -137,7 +148,12 @@ export default function DashboardGeobrain() {
         scope={scope}
         onScopeChange={setScope}
         buildingType={buildingType}
-        onBuildingTypeChange={setBuildingType}
+        onBuildingTypeChange={(nextType) => {
+          setBuildingType(nextType);
+          setFilters((prev) => ({ ...prev, standards: [] }));
+          setBubbleStandard(null);
+          setBubbleNeighborhood(null);
+        }}
         granularity={granularity}
         onGranularityChange={setGranularity}
         onOpenSidebar={() => setSidebarOpen(true)}
@@ -189,6 +205,7 @@ export default function DashboardGeobrain() {
         <IvvChart data={series} granularity={granularity} />
         <UnidadesVsEstoqueChart data={series} granularity={granularity} />
         <VgvChart data={series} granularity={granularity} />
+        <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} neighborhoods={bubbleNeighborhoods} neighborhood={bubbleNeighborhood} onStandardChange={(value) => { setBubbleStandard(value); setBubbleNeighborhood(null); }} onNeighborhoodChange={setBubbleNeighborhood} />
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <OfertaComboChart title="Estoque por dormitórios" data={ofertaDorm} />

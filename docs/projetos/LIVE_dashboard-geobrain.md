@@ -30,6 +30,97 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Correção de sintaxe no exportador SVG — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — build e exportação SVG.
+- **O quê:** substituído `continue` inválido dentro de `forEach` por retorno do callback, restaurando o parsing do `Charts.tsx` pelo Vite/SWC.
+- **Arquivos:** `src/features/dashboard-geobrain/Charts.tsx`.
+- **Commits:** `49f2f56`.
+- **Impacto em Etapas/Pendências:** build de produção voltou a concluir normalmente.
+
+### 2026-08-20 — Cores das legendas nos SVGs exportados — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — legendas das exportações SVG.
+- **O quê:** cada ícone da legenda passa a receber a cor real da série correspondente (barras, áreas, linhas ou bolhas), evitando `currentColor` e `none` no arquivo final.
+- **Arquivos:** `src/features/dashboard-geobrain/Charts.tsx`.
+- **Commits:** `1f93424`.
+- **Impacto em Etapas/Pendências:** exportações VGV, IPC e demais gráficos preservam a correspondência visual entre série e legenda.
+
+### 2026-08-20 — Exportação dos rankings e Mapas de oportunidades — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — rankings Top 10 e mapas de oportunidades.
+- **O quê:** corrigida a identificação das barras para exportação SVG dos rankings e adicionados botões SVG aos dois Mapas de oportunidades, com tabelas editáveis.
+- **Arquivos:** `src/features/dashboard-geobrain/{Rankings.tsx,OpportunityMap.tsx}`.
+- **Commits:** `55fb8e6`.
+- **Impacto em Etapas/Pendências:** exportação editável ampliada e corrigida nos blocos analíticos do dashboard.
+
+### 2026-08-20 — Exportação SVG dos rankings Top 10 — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — rankings por bairro e padrão.
+- **O quê:** rankings Top 10 ganharam botão SVG, exportando rótulos, valores e barras editáveis com o mesmo mecanismo reutilizado dos gráficos.
+- **Arquivos:** `src/features/dashboard-geobrain/{Charts.tsx,Rankings.tsx}`.
+- **Commits:** `effc8dc`.
+- **Impacto em Etapas/Pendências:** exportação editável ampliada aos rankings do dashboard.
+
+### 2026-08-20 — Correção das cores das legendas SVG — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — exportação SVG dos gráficos.
+- **O quê:** cores dos ícones de legenda são promovidas temporariamente dos elementos filhos para o próprio ícone antes do exportador gerar a legenda, preservando as cores originais.
+- **Arquivos:** `src/features/dashboard-geobrain/Charts.tsx`.
+- **Commits:** `7058483`.
+- **Impacto em Etapas/Pendências:** exportação SVG passa a manter também a identidade visual das legendas.
+
+### 2026-08-20 — Correção do info IPC e das cores na exportação SVG — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — IPC e exportação dos gráficos.
+- **O quê:** regras do IPC passam a aparecer corretamente no popover `(i)` do card; tokens visuais `--dg-*` são resolvidos antes do exportador SVG reutilizado do Banco Quanti, preservando as cores originais.
+- **Arquivos:** `src/features/dashboard-geobrain/Charts.tsx`.
+- **Commits:** `e8e1414`.
+- **Impacto em Etapas/Pendências:** mantém a etapa 4 concluída e corrige a interpretação das regras e a fidelidade visual das exportações.
+
+### 2026-08-20 — Layout e exportação SVG dos gráficos — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — gráficos e exportações.
+- **O quê:** gráfico Preço/m² × Área privativa movido para depois de VGV, ocupando a largura total e mantendo 260px de altura; botão SVG adicionado aos gráficos GeoBrain, reutilizando `exportElementAsSvg` já existente no Banco Quanti sem alterar aquela feature.
+- **Arquivos:** `src/features/dashboard-geobrain/{Charts.tsx}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `1adb550`.
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; exportação editável adicionada ao dashboard.
+
+### 2026-08-20 — Bairros do gráfico limitados ao estoque positivo — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — segmentador de Bairro do gráfico de bolhas.
+- **O quê:** o filtro lista apenas bairros com pelo menos uma tipologia com Estoque final maior que zero no recorte ativo do gráfico.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `37326c4`.
+- **Impacto em Etapas/Pendências:** mantém o filtro alinhado aos dados efetivamente exibidos.
+
+### 2026-08-20 — Filtro de Bairro e disponibilidade por tipologia nas bolhas — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — gráfico Preço/m² × Área privativa.
+- **O quê:** disponibilidade documentada e aplicada por tipologia (`estoque final da tipologia ÷ unidades lançadas da própria tipologia`); o gráfico ganhou segmentador de Bairro, com opções do tipo de empreendimento selecionado.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,Charts.tsx}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `bac9230`.
+- **Impacto em Etapas/Pendências:** mantém a etapa 4 concluída e amplia o recorte analítico da visualização.
+
+### 2026-08-20 — Limpeza de Padrão ao trocar tipo de empreendimento — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — filtros e segmentador do gráfico de bolhas.
+- **O quê:** ao trocar o tipo de empreendimento, o filtro global de Padrão e o segmentador específico do gráfico são limpos para impedir recortes incompatíveis.
+- **Arquivos:** `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `1922341`.
+- **Impacto em Etapas/Pendências:** mantém a consistência entre as opções de Padrão disponíveis e o tipo selecionado.
+
+### 2026-08-20 — Regras de cor, tooltip e filtros do gráfico de bolhas — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — visualização Preço/m² × Área privativa.
+- **O quê:** regra informativa movida para o ícone `(i)`; tooltip inclui Unidades lançadas totais do empreendimento; cores interpolam de `#f4d83f` (0%) a `#71984a` (100%); padrões, faixas de Área privativa e faixas de Preço/m² acompanham o tipo de empreendimento e os filtros ativos.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,Charts.tsx}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `8bf5518`.
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; nova visualização alinhada às regras de filtros do dashboard.
+
+### 2026-08-20 — Refinamento do tooltip do gráfico de bolhas — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — tooltip e regra de exibição da visualização Preço/m² × Área privativa.
+- **O quê:** tooltip passa a exibir o nome do empreendimento, Área privativa, Preço/m² e Estoque final. Bolhas com estoque final zero deixam de ser exibidas; a regra e as faixas de cor foram detalhadas no ícone informativo.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,Charts.tsx}`.
+- **Commits:** `06f6acd`.
+- **Impacto em Etapas/Pendências:** mantém a etapa 4 concluída e melhora a leitura da nova visualização.
+
+### 2026-08-20 — Gráfico de bolhas Preço/m² × Área privativa — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — nova visualização de disponibilidade por tipologia.
+- **O quê:** adiciona gráfico de dispersão com eixo X de Área privativa, eixo Y de Preço/m², tamanho proporcional ao estoque final e segmentador por Padrão. A cor usa `estoque final ÷ quantidade lançada`: até 25% `#6e6e6e`, até 50% `#f4d83f`, até 75% `#71984a` e acima de 75% `#4d5a31`.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,Charts.tsx}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `1d687ca`.
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; a pendência de novos indicadores/visualizações recebeu esta entrega.
+
 ### 2026-08-06 — Migração para a API v2, padrão por período e cor das legendas — Edgar
 - **O quê:** (1) consulta migrada para `POST https://api.geobrain.com.br/public-api/v2/building-with-history`, mantendo os parâmetros na query string, o `Bearer` token e as 8 lanes paralelas com paginação por `meta.last_page`; (2) `normalizeBuilding` mapeia os campos novos — no empreendimento (`delivery_date`, endereço/CEP, `city_id`, lat/long, `towers`, `floors`, `elevators`, `period`, `time_on_sale`, `total_stock`, `total_units`, `builder_name`, `bathrooms`, `has_suites`, `last_update`, condições comerciais, `incorporators[]`, `areas[]`) e no histórico da tipologia (`pattern`, `building_status`, `time_on_sale`, `public_area`, `price_public_area`, `vgv_total`, `sold`, `number_suite`, `estagio_empreendimento`, `taxa_associativa`, além de `private_area`/`release_price`/`number_bedroom`/`garage`/`qty` agora por período); (3) o padrão passa a vir de `typologies_history[].pattern` **do período em análise** via helper `patternOf`, afetando filtro Padrão, estoque por padrão, preço m²/médio por padrão, mapa de oportunidades e IPC (fallback em `building.standard`); (4) legendas dos gráficos com cor `#212829` via token `--dg-legend` (variante clara no modo escuro).
 - **Arquivos:** `api.ts`, `types.ts`, `aggregate.ts`, `Charts.tsx`, `dashboard.css`.

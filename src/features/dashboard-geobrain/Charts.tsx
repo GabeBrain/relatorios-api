@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, LabelList, Legend, Line, LineChart,
-  ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  ReferenceLine, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis, Cell,
 } from 'recharts';
-import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Info } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Download, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { currencyCompactNoPrefix, numCompactBR, pctRaw } from '@/lib/format';
 import { VariationStrip } from './VariationStrip';
-import type { SeriesPoint, ComboBucket, IpcSeriesPoint } from './aggregate';
+import type { SeriesPoint, ComboBucket, IpcSeriesPoint, BubblePoint } from './aggregate';
 import type { Granularity } from './types';
+import { exportElementAsSvg } from '../area-quanti/dashboard/svgExport';
 
 const P = 'hsl(var(--dg-primary))';
 const A = 'hsl(var(--dg-accent))';
@@ -19,6 +20,54 @@ const WINDOW = 12;
 const HL = 'var(--dg-tooltip-hl)';
 // §9 — cor da descrição das legendas dos gráficos.
 const LEGEND_COLOR = 'var(--dg-legend)';
+
+export function exportGeoBrainSvg(element: HTMLElement | null, title: string) {
+  if (!element) return;
+  const hiddenSvgs = Array.from(element.querySelectorAll<SVGSVGElement>('svg'))
+    .filter((node) => !node.classList.contains('recharts-surface') && !node.classList.contains('recharts-legend-icon'))
+    .map((node) => ({ node, parent: node.parentNode, next: node.nextSibling }));
+  for (const hidden of hiddenSvgs) hidden.parent?.removeChild(hidden.node);
+  const svg = element.querySelector('svg.recharts-surface');
+  const nodes = svg ? [svg, ...Array.from(svg.querySelectorAll<SVGElement>('*'))] : [];
+  const changes: Array<{ node: SVGElement; attribute: string; value: string }> = [];
+  const styles = getComputedStyle(element);
+  const resolve = (value: string) => value.replace(/var\((--dg-[\w-]+)(?:,\s*([^\)]+))?\)/g, (_match, name: string, fallback?: string) => styles.getPropertyValue(name).trim() || fallback || 'currentColor');
+  for (const node of nodes) {
+    for (const attribute of ['fill', 'stroke', 'style', 'class']) {
+      const value = node.getAttribute(attribute);
+      if (!value || !value.includes('--dg-')) continue;
+      changes.push({ node, attribute, value });
+      node.setAttribute(attribute, resolve(value));
+    }
+  }
+  const legendColors = svg
+    ? Array.from(svg.querySelectorAll<SVGElement>('.recharts-bar-rectangle path[fill], .recharts-area-curve[stroke], .recharts-line-curve[stroke], .recharts-scatter-symbol[fill]'))
+      .map((node) => node.getAttribute('fill') || node.getAttribute('stroke') || '')
+      .filter((color) => color && color !== 'none' && color !== 'currentColor')
+      .filter((color, index, colors) => colors.indexOf(color) === index)
+    : [];
+  // Recharts stores each legend color on the chart series, while the reused
+  // exporter reads the color from `.recharts-legend-icon` itself.
+  Array.from(element.querySelectorAll<HTMLElement>('.recharts-legend-item')).forEach((item, index) => {
+    const icon = item.querySelector<SVGElement>('.recharts-legend-icon');
+    const shape = icon?.querySelector<SVGElement>('[fill], [stroke]');
+    const color = legendColors[index] || shape?.getAttribute('fill') || shape?.getAttribute('stroke');
+    if (!icon || !color) return;
+    changes.push({ node: icon, attribute: 'fill', value: icon.getAttribute('fill') ?? '' });
+    icon.setAttribute('fill', resolve(color));
+  });
+  try {
+    exportElementAsSvg(element, title, title);
+  } finally {
+    for (const change of changes) {
+      if (change.value) change.node.setAttribute(change.attribute, change.value);
+      else change.node.removeAttribute(change.attribute);
+    }
+    for (const hidden of hiddenSvgs) {
+      hidden.parent?.insertBefore(hidden.node, hidden.next && hidden.next.parentNode === hidden.parent ? hidden.next : null);
+    }
+  }
+}
 
 interface TooltipEntry { name?: string | number; value?: number | string | null; color?: string; dataKey?: string | number }
 interface DGTooltipProps { active?: boolean; label?: string | number; payload?: TooltipEntry[]; format?: (v: number) => string }
@@ -64,22 +113,42 @@ interface CardProps {
   variationSlot?: ReactNode;
 }
 function ChartCard({ title, subtitle, extras, info, variationSlot, children }: CardProps) {
+  const visualRef = useRef<HTMLDivElement>(null);
   return (
     <section className="dg-card w-full">
       <header className="mb-2 flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="flex items-center gap-1">
             <h2 className="dg-title">{title}</h2>
-            {info}
+            {info && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button type="button" className="text-[hsl(var(--dg-muted))] hover:text-[hsl(var(--dg-text))]" aria-label="Info">
+                    <Info className="h-3 w-3" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 text-[11px] leading-snug">{info}</PopoverContent>
+              </Popover>
+            )}
           </div>
           {subtitle && <p className="dg-subtle">{subtitle}</p>}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {variationSlot}
           {extras}
+          <button
+            type="button"
+            className="dg-chip"
+            onClick={() => exportGeoBrainSvg(visualRef.current, title)}
+            title="Exportar gráfico em SVG editável"
+            aria-label={`Exportar ${title} em SVG editável`}
+            style={{ padding: '2px 7px', fontSize: '9px' }}
+          >
+            <Download className="h-3 w-3" /> SVG
+          </button>
         </div>
       </header>
-      {children}
+      <div ref={visualRef}>{children}</div>
     </section>
   );
 }
@@ -175,6 +244,81 @@ export function UnidadesVsEstoqueChart({ data }: { data: SeriesPoint[]; granular
           </Bar>
         </BarChart>
       </ScrollableChart>
+    </ChartCard>
+  );
+}
+
+function bubbleColor(availability: number) {
+  const ratio = Math.max(0, Math.min(100, availability)) / 100;
+  const from = [244, 216, 63];
+  const to = [113, 152, 74];
+  const rgb = from.map((channel, index) => Math.round(channel + (to[index] - channel) * ratio));
+  return `rgb(${rgb.join(', ')})`;
+}
+
+function BubbleTooltip({ active, payload }: DGTooltipProps & { payload?: Array<TooltipEntry & { payload?: BubblePoint }> }) {
+  const point = payload?.[0]?.payload;
+  if (!active || !point) return null;
+  return (
+    <div style={{ background: 'hsl(var(--dg-card))', border: '1px solid hsl(var(--dg-border))', borderRadius: 4, padding: '6px 8px', fontSize: 10, boxShadow: '0 2px 6px hsl(0 0% 0% / 0.08)' }}>
+      <div style={{ fontWeight: 700, color: HL, marginBottom: 4 }}>{point.name}</div>
+      <div>Área privativa: <strong>{numCompactBR(point.privateArea, 1)} m²</strong></div>
+      <div>Preço/m²: <strong>{currencyCompactNoPrefix(point.pricePerM2)}</strong></div>
+      <div>Estoque final: <strong>{numCompactBR(point.stock, 1)}</strong></div>
+      <div>Unidades lançadas: <strong>{numCompactBR(point.launchedTotal, 1)}</strong></div>
+    </div>
+  );
+}
+
+export function PriceAreaBubbleChart({ data, standards, standard, neighborhoods, neighborhood, onStandardChange, onNeighborhoodChange }: {
+  data: BubblePoint[];
+  standards: string[];
+  standard: string | null;
+  neighborhoods: string[];
+  neighborhood: string | null;
+  onStandardChange: (value: string | null) => void;
+  onNeighborhoodChange: (value: string | null) => void;
+}) {
+  return (
+    <ChartCard
+      title="Preço/m² × Área privativa"
+      subtitle="Tamanho = estoque final · cor = estoque final / quantidade lançada"
+      info={(
+        <div className="space-y-1">
+          <div className="font-semibold">Regra das bolhas</div>
+          <div>São exibidas apenas tipologias com <strong>Estoque final &gt; 0</strong>.</div>
+          <div>Disponibilidade por tipologia = estoque final da tipologia ÷ unidades lançadas da própria tipologia. A cor varia linearmente de <span style={{ color: '#b8a000' }}>#f4d83f</span> (0%) a <span style={{ color: '#71984a' }}>#71984a</span> (100%).</div>
+        </div>
+      )}
+      extras={(
+        <label className="flex items-center gap-1 text-[9px] text-[hsl(var(--dg-muted))]">
+          <span>Padrão</span>
+          <select className="dg-select" value={standard ?? ''} onChange={(e) => onStandardChange(e.target.value || null)} aria-label="Filtrar gráfico por padrão">
+            <option value="">Todos</option>
+            {standards.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+          <span>Bairro</span>
+          <select className="dg-select" value={neighborhood ?? ''} onChange={(e) => onNeighborhoodChange(e.target.value || null)} aria-label="Filtrar gráfico por bairro">
+            <option value="">Todos</option>
+            {neighborhoods.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+      )}
+    >
+      {data.length === 0 ? <p className="dg-subtle py-16 text-center">Sem dados para o recorte selecionado.</p> : (
+        <ResponsiveContainer width="100%" height={260}>
+          <ScatterChart margin={{ top: 16, right: 24, left: 8, bottom: 16 }}>
+            <CartesianGrid stroke="hsl(var(--dg-border))" strokeDasharray="3 3" />
+            <XAxis type="number" dataKey="privateArea" name="Área privativa" tick={{ fontSize: 10 }} unit=" m²" />
+            <YAxis type="number" dataKey="pricePerM2" name="Preço/m²" tick={{ fontSize: 10 }} />
+            <ZAxis type="number" dataKey="stock" range={[36, 500]} name="Estoque final" />
+            <Tooltip cursor={{ strokeDasharray: '3 3' }} content={<BubbleTooltip />} />
+            <Scatter data={data} name="Tipologias">
+              {data.map((point) => <Cell key={point.id} fill={bubbleColor(point.availability)} />)}
+            </Scatter>
+          </ScatterChart>
+        </ResponsiveContainer>
+      )}
     </ChartCard>
   );
 }
@@ -276,24 +420,15 @@ export function IpcChart({ series, standards, granularity }: { series: IpcSeries
       subtitle="Participação nas vendas ÷ Participação no estoque"
       variationSlot={<VariationStrip values={variation} granularity={granularity} mode="avg" format={(v) => v.toFixed(1).replace('.', ',')} />}
       info={
-        <Popover>
-          <PopoverTrigger asChild>
-            <button type="button" aria-label="Ajuda IPC" className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full text-[hsl(var(--dg-primary-strong))] hover:bg-[hsl(var(--dg-primary-soft))]">
-              <Info className="h-3.5 w-3.5" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent side="bottom" align="start" className="w-80 text-[11px]">
-            <div className="font-semibold mb-1">Índice de Performance Comercial (IPC)</div>
-            <p className="mb-2 text-muted-foreground">
-              Compara a participação do empreendimento nas vendas com sua participação no estoque disponível.
-            </p>
-            <ul className="space-y-0.5">
-              <li><strong>&gt; 1</strong> — vende acima da média do mercado.</li>
-              <li><strong>= 1</strong> — vende proporcionalmente ao estoque.</li>
-              <li><strong>&lt; 1</strong> — vende abaixo da média.</li>
-            </ul>
-          </PopoverContent>
-        </Popover>
+        <div>
+          <div className="font-semibold mb-1">Índice de Performance Comercial (IPC)</div>
+          <p className="mb-2 text-muted-foreground">Compara a participação do empreendimento nas vendas com sua participação no estoque disponível.</p>
+          <ul className="space-y-0.5">
+            <li><strong>&gt; 1</strong> — vende acima da média do mercado.</li>
+            <li><strong>= 1</strong> — vende proporcionalmente ao estoque.</li>
+            <li><strong>&lt; 1</strong> — vende abaixo da média.</li>
+          </ul>
+        </div>
       }
     >
       <ScrollableChart height={280} count={series.length}>
