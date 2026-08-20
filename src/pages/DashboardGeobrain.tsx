@@ -85,6 +85,11 @@ export default function DashboardGeobrain() {
   const rankM2 = useMemo(() => rankBairrosPorPrecoM2(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType), [filtered, filtersWithType]);
   const priceAreaBubbles = useMemo(() => computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, bubbleNeighborhood), [filtered, filtersWithType, bubbleStandard, bubbleNeighborhood]);
+  const bubbleNeighborhoods = useMemo(
+    () => Array.from(new Set(computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, null).map((point) => point.neighborhood)))
+      .sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    [filtered, filtersWithType, bubbleStandard],
+  );
   const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoMedioStd = useMemo(() => precoMedioPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const oppMap = useMemo(() => computeOpportunityMap(filtered, filtersWithType, 'neighborhood'), [filtered, filtersWithType]);
@@ -212,7 +217,7 @@ export default function DashboardGeobrain() {
           <RankingCard title="Estoque atual por bairro" rows={rankEstoque} formatValue={(v) => intFmt(v)} info={infoEstoqueAtual} />
           <RankingCard title="Preço m² por bairro" rows={rankM2} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoM2} />
           <RankingCard title="Preço médio por bairro" rows={rankMedio} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoMedio} />
-          <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} neighborhoods={options.neighborhoods} neighborhood={bubbleNeighborhood} onStandardChange={setBubbleStandard} onNeighborhoodChange={setBubbleNeighborhood} />
+          <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} neighborhoods={bubbleNeighborhoods} neighborhood={bubbleNeighborhood} onStandardChange={(value) => { setBubbleStandard(value); setBubbleNeighborhood(null); }} onNeighborhoodChange={setBubbleNeighborhood} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

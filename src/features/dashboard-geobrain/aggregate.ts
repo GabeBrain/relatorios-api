@@ -177,6 +177,7 @@ export function latestPeriodInScope(buildings: Building[], f: Filters): string |
 export interface BubblePoint {
   id: string;
   name: string;
+  neighborhood: string;
   standard: string;
   privateArea: number;
   pricePerM2: number;
@@ -204,6 +205,7 @@ export function computePriceAreaBubbles(buildings: Building[], f: Filters, stand
       points.push({
         id: `${b.building_id}-${t.typology_id}`,
         name: b.name,
+        neighborhood: b.neighborhood,
         standard: currentStandard,
         privateArea: x,
         pricePerM2: y,
