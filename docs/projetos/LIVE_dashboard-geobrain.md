@@ -34,7 +34,7 @@ gráficos e painel de filtros funcionais em runtime.
 - **Ambiente/funcionalidade:** `/dash-geobrain` — nova visualização de disponibilidade por tipologia.
 - **O quê:** adiciona gráfico de dispersão com eixo X de Área privativa, eixo Y de Preço/m², tamanho proporcional ao estoque final e segmentador por Padrão. A cor usa `estoque final ÷ quantidade lançada`: até 25% `#6e6e6e`, até 50% `#f4d83f`, até 75% `#71984a` e acima de 75% `#4d5a31`.
 - **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,Charts.tsx}`, `src/pages/DashboardGeobrain.tsx`.
-- **Commits:** `54767a1`.
+- **Commits:** `1d687ca`.
 - **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; a pendência de novos indicadores/visualizações recebeu esta entrega.
 
 ### 2026-08-06 — Migração para a API v2, padrão por período e cor das legendas — Edgar
