@@ -182,6 +182,7 @@ export interface BubblePoint {
   pricePerM2: number;
   stock: number;
   launched: number;
+  launchedTotal: number;
   availability: number;
 }
 
@@ -207,6 +208,7 @@ export function computePriceAreaBubbles(buildings: Building[], f: Filters, stand
         pricePerM2: y,
         stock,
         launched,
+        launchedTotal: b.typologies.reduce((sum, item) => sum + Math.max(0, item.qty), 0),
         availability: launched > 0 ? (stock / launched) * 100 : 0,
       });
     }

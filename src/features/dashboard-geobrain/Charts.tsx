@@ -70,7 +70,16 @@ function ChartCard({ title, subtitle, extras, info, variationSlot, children }: C
         <div>
           <div className="flex items-center gap-1">
             <h2 className="dg-title">{title}</h2>
-            {info}
+            {info && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button type="button" className="text-[hsl(var(--dg-muted))] hover:text-[hsl(var(--dg-text))]" aria-label="Info">
+                    <Info className="h-3 w-3" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 text-[11px] leading-snug">{info}</PopoverContent>
+              </Popover>
+            )}
           </div>
           {subtitle && <p className="dg-subtle">{subtitle}</p>}
         </div>
@@ -180,10 +189,11 @@ export function UnidadesVsEstoqueChart({ data }: { data: SeriesPoint[]; granular
 }
 
 function bubbleColor(availability: number) {
-  if (availability <= 25) return '#6e6e6e';
-  if (availability <= 50) return '#f4d83f';
-  if (availability <= 75) return '#71984a';
-  return '#4d5a31';
+  const ratio = Math.max(0, Math.min(100, availability)) / 100;
+  const from = [244, 216, 63];
+  const to = [113, 152, 74];
+  const rgb = from.map((channel, index) => Math.round(channel + (to[index] - channel) * ratio));
+  return `rgb(${rgb.join(', ')})`;
 }
 
 function BubbleTooltip({ active, payload }: DGTooltipProps & { payload?: Array<TooltipEntry & { payload?: BubblePoint }> }) {
@@ -195,6 +205,7 @@ function BubbleTooltip({ active, payload }: DGTooltipProps & { payload?: Array<T
       <div>Área privativa: <strong>{numCompactBR(point.privateArea, 1)} m²</strong></div>
       <div>Preço/m²: <strong>{currencyCompactNoPrefix(point.pricePerM2)}</strong></div>
       <div>Estoque final: <strong>{numCompactBR(point.stock, 1)}</strong></div>
+      <div>Unidades lançadas: <strong>{numCompactBR(point.launchedTotal, 1)}</strong></div>
     </div>
   );
 }
@@ -213,8 +224,7 @@ export function PriceAreaBubbleChart({ data, standards, standard, onStandardChan
         <div className="space-y-1">
           <div className="font-semibold">Regra das bolhas</div>
           <div>São exibidas apenas tipologias com <strong>Estoque final &gt; 0</strong>.</div>
-          <div>Disponibilidade = estoque final ÷ quantidade lançada.</div>
-          <div>Até 25%: <span style={{ color: '#6e6e6e' }}>● cinza</span> · até 50%: <span style={{ color: '#b8a000' }}>● amarelo</span> · até 75%: <span style={{ color: '#71984a' }}>● verde oliva</span> · acima de 75%: <span style={{ color: '#4d5a31' }}>● verde escuro</span>.</div>
+          <div>Disponibilidade = estoque final ÷ quantidade lançada. A cor varia linearmente de <span style={{ color: '#b8a000' }}>#f4d83f</span> (0%) a <span style={{ color: '#71984a' }}>#71984a</span> (100%).</div>
         </div>
       )}
       extras={(

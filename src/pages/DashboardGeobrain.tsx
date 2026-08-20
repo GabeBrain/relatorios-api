@@ -48,7 +48,10 @@ export default function DashboardGeobrain() {
   }, [scope.uf, scope.city, load, reset]);
 
   const allBuildings = buildings ?? [];
-  const options = useMemo(() => extractOptions(allBuildings), [allBuildings]);
+  const options = useMemo(
+    () => extractOptions(allBuildings.filter((b) => b.building_type === buildingType)),
+    [allBuildings, buildingType],
+  );
   // §5 — faixas dinâmicas por cidade carregada + tipo de empreendimento selecionado.
   const rangeOptions = useMemo(
     () => extractRangeOptions(allBuildings.filter((b) => b.building_type === buildingType)),
