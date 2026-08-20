@@ -1,5 +1,55 @@
 # AGENTS.md
 
+<!-- PROTOCOLO-SESSAO v1 -->
+## Protocolo de sessão
+
+Vale para qualquer agente (Claude, Codex, Lovable) e qualquer pessoa trabalhando neste repo.
+Existe para que toda sessão comece do mesmo ponto e termine com o trabalho visível para os outros.
+Nada aqui bloqueia trabalho.
+
+### Abertura — antes de alterar qualquer arquivo
+
+1. `git fetch origin`
+2. Comparar: `git rev-list --left-right --count origin/main...main`
+3. Agir conforme o caso:
+
+| Situação | O que fazer |
+|---|---|
+| Em dia, árvore limpa | Seguir. Não dizer nada. |
+| Atrás do remoto, árvore limpa | `git pull --ff-only` e **avisar em uma linha** o que entrou. |
+| Atrás do remoto, árvore suja | **Não puxar.** Avisar o que há de novo lá e perguntar antes. |
+| À frente do remoto | Avisar quantos commits locais existem e desde quando. Não empurrar sozinho. |
+| Divergiu (à frente **e** atrás) | Avisar e perguntar. Nunca resolver merge sem o humano. |
+
+Nunca usar `git pull` sem `--ff-only`, e nunca `rebase`/`reset` de histórico já publicado — os
+repos são conectados ao Lovable e reescrever histórico corrompe o projeto do outro lado.
+
+### Fechamento — ao encerrar uma entrega
+
+1. Commit isolado, com `git add <caminhos>` explícito. **Nunca** `git add .` ou `-A`: há agentes
+   trabalhando em paralelo na mesma árvore.
+2. Entrada no documento vivo do projeto, quando a alteração for relevante.
+3. **Reportar o que ficou local:** quantos commits estão à frente do remoto e desde quando.
+4. **Perguntar se quer enviar.** Nunca fazer `git push` por conta própria — o push dispara
+   build/deploy no Lovable e é decisão de quem está tocando a entrega.
+
+Trabalho que não volta para o remoto é invisível para o resto do time e para qualquer leitura
+automática. Isso não é regra de conformidade: é a diferença entre o time ver seu avanço ou não.
+
+### Vínculo com o Monday
+
+Toda entrada de documento vivo que corresponda a um card traz o campo:
+
+- **Monday:** [Nome do card](https://brain381753.monday.com/boards/<board>/pulses/<itemId>) — `<itemId>`
+
+O link é obrigatório, não só o número: quem lê o doc precisa chegar ao card em um clique, e o
+Radar usa o ID para cruzar commits com cards. Sem esse campo, a entrega não aparece no card
+correspondente.
+
+Board principal: `Backlogs & Roadmaps` — `18398428946`.
+Board de execução semanal: `Entregas` — `18398428948`.
+<!-- FIM PROTOCOLO-SESSAO -->
+
 ## Documentos vivos por projeto (regra de sincronização)
 
 O repositório abriga três projetos — **Dashboard GeoBrain** (Edgar), **Área Quanti** (Lucas) e

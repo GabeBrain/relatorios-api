@@ -83,8 +83,15 @@ Para **Etapas** usamos também: ✅ concluída · 🟡 em andamento · 🔲 não
 - **Por quê:** <motivo/contexto>
 - **Arquivos:** `caminho/arquivo.ts`, ...
 - **Commits:** `<hash-curto>`, ...
+- **Monday:** [<nome do card>](https://brain381753.monday.com/boards/18398428946/pulses/<itemId>) — `<itemId>`
 - **Impacto em Etapas/Pendências:** <o que virou ✅ ou o que abriu de novo>
 ```
+
+O campo **Monday** entrou em 20/08/2026, junto com o *Protocolo de sessão* do `AGENTS.md`. Ele traz
+o **link**, não só o número: quem lê o doc chega ao card em um clique, e a rotina de acompanhamento
+usa o ID para cruzar commits com cards e publicar o avanço no card certo.
+
+Entrega sem card correspondente: escrever `—`. Entrega que toca mais de um card: listar todos.
 
 ## Contrato de resumo em saudações
 
