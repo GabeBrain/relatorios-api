@@ -118,7 +118,7 @@ export function RankingCard({ title, rows, formatValue, searchable = true, topDe
         {filtered.map((r) => {
           const pct = (Math.abs(r.value) / max) * 100;
           return (
-            <div key={r.key} className="grid grid-cols-[110px_1fr_auto] items-center gap-2 text-[10px]" data-svg-export-bar data-label={r.key} data-count={r.value} data-pct={Math.abs(r.value) / max * 100}>
+            <div key={r.key} className="grid grid-cols-[110px_1fr_auto] items-center gap-2 text-[10px]" data-svg-export-bar="true" data-label={r.key} data-count={r.value} data-pct={Math.abs(r.value) / max * 100}>
               <span className="truncate">{r.key}</span>
               <div className="h-3.5 rounded-sm bg-[hsl(var(--dg-muted-soft))]">
                 <div className="h-full rounded-sm bg-[hsl(var(--dg-primary))]" style={{ width: `${pct}%` }} />
