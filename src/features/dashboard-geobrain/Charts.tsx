@@ -3,12 +3,13 @@ import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, LabelList, Legend, Line, LineChart,
   ReferenceLine, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis, Cell,
 } from 'recharts';
-import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Info } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Download, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { currencyCompactNoPrefix, numCompactBR, pctRaw } from '@/lib/format';
 import { VariationStrip } from './VariationStrip';
 import type { SeriesPoint, ComboBucket, IpcSeriesPoint, BubblePoint } from './aggregate';
 import type { Granularity } from './types';
+import { exportElementAsSvg } from '../area-quanti/dashboard/svgExport';
 
 const P = 'hsl(var(--dg-primary))';
 const A = 'hsl(var(--dg-accent))';
@@ -64,6 +65,7 @@ interface CardProps {
   variationSlot?: ReactNode;
 }
 function ChartCard({ title, subtitle, extras, info, variationSlot, children }: CardProps) {
+  const visualRef = useRef<HTMLDivElement>(null);
   return (
     <section className="dg-card w-full">
       <header className="mb-2 flex flex-wrap items-start justify-between gap-2">
@@ -86,9 +88,19 @@ function ChartCard({ title, subtitle, extras, info, variationSlot, children }: C
         <div className="flex flex-wrap items-center gap-2">
           {variationSlot}
           {extras}
+          <button
+            type="button"
+            className="dg-chip"
+            onClick={() => exportElementAsSvg(visualRef.current, title, title)}
+            title="Exportar gráfico em SVG editável"
+            aria-label={`Exportar ${title} em SVG editável`}
+            style={{ padding: '2px 7px', fontSize: '9px' }}
+          >
+            <Download className="h-3 w-3" /> SVG
+          </button>
         </div>
       </header>
-      {children}
+      <div ref={visualRef}>{children}</div>
     </section>
   );
 }
