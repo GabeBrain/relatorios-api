@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Gráfico de bolhas Preço/m² × Área privativa — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — nova visualização de disponibilidade por tipologia.
+- **O quê:** adiciona gráfico de dispersão com eixo X de Área privativa, eixo Y de Preço/m², tamanho proporcional ao estoque final e segmentador por Padrão. A cor usa `estoque final ÷ quantidade lançada`: até 25% `#6e6e6e`, até 50% `#f4d83f`, até 75% `#71984a` e acima de 75% `#4d5a31`.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,Charts.tsx}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `54767a1`.
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; a pendência de novos indicadores/visualizações recebeu esta entrega.
+
 ### 2026-08-06 — Migração para a API v2, padrão por período e cor das legendas — Edgar
 - **O quê:** (1) consulta migrada para `POST https://api.geobrain.com.br/public-api/v2/building-with-history`, mantendo os parâmetros na query string, o `Bearer` token e as 8 lanes paralelas com paginação por `meta.last_page`; (2) `normalizeBuilding` mapeia os campos novos — no empreendimento (`delivery_date`, endereço/CEP, `city_id`, lat/long, `towers`, `floors`, `elevators`, `period`, `time_on_sale`, `total_stock`, `total_units`, `builder_name`, `bathrooms`, `has_suites`, `last_update`, condições comerciais, `incorporators[]`, `areas[]`) e no histórico da tipologia (`pattern`, `building_status`, `time_on_sale`, `public_area`, `price_public_area`, `vgv_total`, `sold`, `number_suite`, `estagio_empreendimento`, `taxa_associativa`, além de `private_area`/`release_price`/`number_bedroom`/`garage`/`qty` agora por período); (3) o padrão passa a vir de `typologies_history[].pattern` **do período em análise** via helper `patternOf`, afetando filtro Padrão, estoque por padrão, preço m²/médio por padrão, mapa de oportunidades e IPC (fallback em `building.standard`); (4) legendas dos gráficos com cor `#212829` via token `--dg-legend` (variante clara no modo escuro).
 - **Arquivos:** `api.ts`, `types.ts`, `aggregate.ts`, `Charts.tsx`, `dashboard.css`.

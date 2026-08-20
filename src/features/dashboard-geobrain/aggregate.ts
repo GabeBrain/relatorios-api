@@ -174,6 +174,46 @@ export function latestPeriodInScope(buildings: Building[], f: Filters): string |
   return best;
 }
 
+export interface BubblePoint {
+  id: string;
+  name: string;
+  standard: string;
+  privateArea: number;
+  pricePerM2: number;
+  stock: number;
+  launched: number;
+  availability: number;
+}
+
+export function computePriceAreaBubbles(buildings: Building[], f: Filters, standard: string | null): BubblePoint[] {
+  const latest = latestPeriodInScope(buildings, f);
+  if (!latest) return [];
+  const points: BubblePoint[] = [];
+  for (const b of buildings) {
+    for (const t of b.typologies) {
+      const h = t.history.find((entry) => entry.period === latest && historyMatches(entry, f));
+      const x = t.private_area;
+      const y = typologyPriceM2(t);
+      if (!h || x == null || x <= 0 || y == null || y <= 0) continue;
+      const currentStandard = patternOf(h, b);
+      if (standard && currentStandard !== standard) continue;
+      const launched = Math.max(0, t.qty);
+      const stock = Math.max(0, h.typology_stock);
+      points.push({
+        id: `${b.building_id}-${t.typology_id}`,
+        name: `${b.name} · ${t.type_of_typology}`,
+        standard: currentStandard,
+        privateArea: x,
+        pricePerM2: y,
+        stock,
+        launched,
+        availability: launched > 0 ? (stock / launched) * 100 : 0,
+      });
+    }
+  }
+  return points;
+}
+
 // ============ campos calculados por linha (§13) ============
 export const isRelease = (b: Building, h: HistoryEntry) =>
   Boolean(b.release_date) && b.release_date.slice(0, 7) === h.period.slice(0, 7);

@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, LabelList, Legend, Line, LineChart,
-  ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  ReferenceLine, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis, Cell,
 } from 'recharts';
 import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { currencyCompactNoPrefix, numCompactBR, pctRaw } from '@/lib/format';
 import { VariationStrip } from './VariationStrip';
-import type { SeriesPoint, ComboBucket, IpcSeriesPoint } from './aggregate';
+import type { SeriesPoint, ComboBucket, IpcSeriesPoint, BubblePoint } from './aggregate';
 import type { Granularity } from './types';
 
 const P = 'hsl(var(--dg-primary))';
@@ -175,6 +175,51 @@ export function UnidadesVsEstoqueChart({ data }: { data: SeriesPoint[]; granular
           </Bar>
         </BarChart>
       </ScrollableChart>
+    </ChartCard>
+  );
+}
+
+function bubbleColor(availability: number) {
+  if (availability <= 25) return '#6e6e6e';
+  if (availability <= 50) return '#f4d83f';
+  if (availability <= 75) return '#71984a';
+  return '#4d5a31';
+}
+
+export function PriceAreaBubbleChart({ data, standards, standard, onStandardChange }: {
+  data: BubblePoint[];
+  standards: string[];
+  standard: string | null;
+  onStandardChange: (value: string | null) => void;
+}) {
+  return (
+    <ChartCard
+      title="Preço/m² × Área privativa"
+      subtitle="Tamanho = estoque final · cor = estoque final / quantidade lançada"
+      extras={(
+        <label className="flex items-center gap-1 text-[9px] text-[hsl(var(--dg-muted))]">
+          <span>Padrão</span>
+          <select className="dg-select" value={standard ?? ''} onChange={(e) => onStandardChange(e.target.value || null)} aria-label="Filtrar gráfico por padrão">
+            <option value="">Todos</option>
+            {standards.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+      )}
+    >
+      {data.length === 0 ? <p className="dg-subtle py-16 text-center">Sem dados para o recorte selecionado.</p> : (
+        <ResponsiveContainer width="100%" height={260}>
+          <ScatterChart margin={{ top: 16, right: 24, left: 8, bottom: 16 }}>
+            <CartesianGrid stroke="hsl(var(--dg-border))" strokeDasharray="3 3" />
+            <XAxis type="number" dataKey="privateArea" name="Área privativa" tick={{ fontSize: 10 }} unit=" m²" />
+            <YAxis type="number" dataKey="pricePerM2" name="Preço/m²" tick={{ fontSize: 10 }} />
+            <ZAxis type="number" dataKey="stock" range={[36, 500]} name="Estoque final" />
+            <Tooltip cursor={{ strokeDasharray: '3 3' }} content={<DGTooltip format={(v) => numCompactBR(v, 1)} />} />
+            <Scatter data={data} name="Tipologias">
+              {data.map((point) => <Cell key={point.id} fill={bubbleColor(point.availability)} />)}
+            </Scatter>
+          </ScatterChart>
+        </ResponsiveContainer>
+      )}
     </ChartCard>
   );
 }

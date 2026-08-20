@@ -6,13 +6,13 @@ import {
   applyFilters, computeKpis, computeSeries, extractOptions, extractRangeOptions,
   computeOfertaPorDormitorio, computeOfertaPorPadrao,
   rankBairrosPorIvv, rankBairrosPorTempoEstoque, rankBairrosPorEstoque, rankBairrosPorPrecoM2, rankBairrosPorPrecoMedio,
-  precoM2PorPadrao, precoMedioPorPadrao, computeOpportunityMap, computeIpcByStandard,
+  precoM2PorPadrao, precoMedioPorPadrao, computeOpportunityMap, computeIpcByStandard, computePriceAreaBubbles,
 } from '@/features/dashboard-geobrain/aggregate';
 import { Header, type BuildingType } from '@/features/dashboard-geobrain/Header';
 import { Sidebar } from '@/features/dashboard-geobrain/Sidebar';
 import { KpiRow } from '@/features/dashboard-geobrain/KpiRow';
 import {
-  EvolucaoChart, IvvChart, VgvChart, OfertaComboChart, IpcChart, UnidadesVsEstoqueChart,
+  EvolucaoChart, IvvChart, VgvChart, OfertaComboChart, IpcChart, UnidadesVsEstoqueChart, PriceAreaBubbleChart,
 } from '@/features/dashboard-geobrain/Charts';
 import { RankingCard } from '@/features/dashboard-geobrain/Rankings';
 import { OpportunityMap } from '@/features/dashboard-geobrain/OpportunityMap';
@@ -35,6 +35,7 @@ export default function DashboardGeobrain() {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [defaultsAppliedFor, setDefaultsAppliedFor] = useState<string | null>(null);
+  const [bubbleStandard, setBubbleStandard] = useState<string | null>(null);
 
   const { status, buildings, error, progress, load, reset } = useDashboardData();
 
@@ -79,6 +80,7 @@ export default function DashboardGeobrain() {
   const rankEstoque = useMemo(() => rankBairrosPorEstoque(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankM2 = useMemo(() => rankBairrosPorPrecoM2(filtered, filtersWithType), [filtered, filtersWithType]);
   const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType), [filtered, filtersWithType]);
+  const priceAreaBubbles = useMemo(() => computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard), [filtered, filtersWithType, bubbleStandard]);
   const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoMedioStd = useMemo(() => precoMedioPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const oppMap = useMemo(() => computeOpportunityMap(filtered, filtersWithType, 'neighborhood'), [filtered, filtersWithType]);
@@ -201,6 +203,7 @@ export default function DashboardGeobrain() {
           <RankingCard title="Estoque atual por bairro" rows={rankEstoque} formatValue={(v) => intFmt(v)} info={infoEstoqueAtual} />
           <RankingCard title="Preço m² por bairro" rows={rankM2} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoM2} />
           <RankingCard title="Preço médio por bairro" rows={rankMedio} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoMedio} />
+          <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} onStandardChange={setBubbleStandard} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
