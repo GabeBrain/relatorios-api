@@ -30,6 +30,13 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-20 — Exportação SVG dos rankings Top 10 — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — rankings por bairro e padrão.
+- **O quê:** rankings Top 10 ganharam botão SVG, exportando rótulos, valores e barras editáveis com o mesmo mecanismo reutilizado dos gráficos.
+- **Arquivos:** `src/features/dashboard-geobrain/{Charts.tsx,Rankings.tsx}`.
+- **Commits:** `effc8dc`.
+- **Impacto em Etapas/Pendências:** exportação editável ampliada aos rankings do dashboard.
+
 ### 2026-08-20 — Correção das cores das legendas SVG — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — exportação SVG dos gráficos.
 - **O quê:** cores dos ícones de legenda são promovidas temporariamente dos elementos filhos para o próprio ícone antes do exportador gerar a legenda, preservando as cores originais.
