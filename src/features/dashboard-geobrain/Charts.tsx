@@ -266,7 +266,8 @@ function BubbleTooltip({ active, payload }: DGTooltipProps & { payload?: Array<T
       <div>Área privativa: <strong>{numCompactBR(point.privateArea, 1)} m²</strong></div>
       <div>Preço/m²: <strong>{currencyCompactNoPrefix(point.pricePerM2)}</strong></div>
       <div>Estoque final: <strong>{numCompactBR(point.stock, 1)}</strong></div>
-      <div>Unidades lançadas: <strong>{numCompactBR(point.launchedTotal, 1)}</strong></div>
+      <div>Unidades lançadas da tipologia: <strong>{numCompactBR(point.launched, 1)}</strong></div>
+      <div>Unidades lançadas do empreendimento: <strong>{numCompactBR(point.launchedTotal, 1)}</strong></div>
     </div>
   );
 }
@@ -283,12 +284,17 @@ export function PriceAreaBubbleChart({ data, standards, standard, neighborhoods,
   return (
     <ChartCard
       title="Preço/m² × Área privativa"
-      subtitle="Tamanho = estoque final · cor = estoque final / quantidade lançada"
+      subtitle="Tamanho = estoque final da tipologia · cor = estoque final da tipologia / unidades lançadas da tipologia"
       info={(
         <div className="space-y-1">
           <div className="font-semibold">Regra das bolhas</div>
           <div>São exibidas apenas tipologias com <strong>Estoque final &gt; 0</strong>.</div>
-          <div>Disponibilidade por tipologia = estoque final da tipologia ÷ unidades lançadas da própria tipologia. A cor varia de <span style={{ color: '#71984a' }}>#71984a</span> (0%) a <span style={{ color: '#f4d83f' }}>#f4d83f</span> (50%) e <span style={{ color: '#f93f16' }}>#f93f16</span> (100%).</div>
+          <div>
+            Disponibilidade por tipologia = estoque final da tipologia ÷ unidades lançadas da própria tipologia. A cor varia de{' '}
+            <span className="inline-flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: '#71984a' }} aria-hidden="true" />0%</span>{' '}
+            a <span className="inline-flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: '#f4d83f' }} aria-hidden="true" />50%</span>{' '}
+            e <span className="inline-flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: '#f93f16' }} aria-hidden="true" />100%</span>.
+          </div>
         </div>
       )}
       extras={(
