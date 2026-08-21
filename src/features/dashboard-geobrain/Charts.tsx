@@ -250,9 +250,10 @@ export function UnidadesVsEstoqueChart({ data }: { data: SeriesPoint[]; granular
 
 function bubbleColor(availability: number) {
   const ratio = Math.max(0, Math.min(100, availability)) / 100;
-  const from = [244, 216, 63];
-  const to = [113, 152, 74];
-  const rgb = from.map((channel, index) => Math.round(channel + (to[index] - channel) * ratio));
+  const from = ratio <= 0.5 ? [113, 152, 74] : [244, 216, 63];
+  const to = ratio <= 0.5 ? [244, 216, 63] : [249, 63, 22];
+  const segmentRatio = ratio <= 0.5 ? ratio * 2 : (ratio - 0.5) * 2;
+  const rgb = from.map((channel, index) => Math.round(channel + (to[index] - channel) * segmentRatio));
   return `rgb(${rgb.join(', ')})`;
 }
 
@@ -287,7 +288,7 @@ export function PriceAreaBubbleChart({ data, standards, standard, neighborhoods,
         <div className="space-y-1">
           <div className="font-semibold">Regra das bolhas</div>
           <div>São exibidas apenas tipologias com <strong>Estoque final &gt; 0</strong>.</div>
-          <div>Disponibilidade por tipologia = estoque final da tipologia ÷ unidades lançadas da própria tipologia. A cor varia linearmente de <span style={{ color: '#b8a000' }}>#f4d83f</span> (0%) a <span style={{ color: '#71984a' }}>#71984a</span> (100%).</div>
+          <div>Disponibilidade por tipologia = estoque final da tipologia ÷ unidades lançadas da própria tipologia. A cor varia de <span style={{ color: '#71984a' }}>#71984a</span> (0%) a <span style={{ color: '#f4d83f' }}>#f4d83f</span> (50%) e <span style={{ color: '#f93f16' }}>#f93f16</span> (100%).</div>
         </div>
       )}
       extras={(
