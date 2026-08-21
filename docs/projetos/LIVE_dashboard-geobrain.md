@@ -30,6 +30,14 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-21 — Critério de disponibilidade explicitado por tipologia — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — tooltip e subtítulo do gráfico de bolhas.
+- **O quê:** tooltip passou a distinguir unidades lançadas da tipologia e do empreendimento; o subtítulo explicita que tamanho, estoque final, unidades lançadas e cor são calculados por tipologia.
+- **Arquivos:** `src/features/dashboard-geobrain/Charts.tsx`.
+- **Commits:** `e1320cd`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+- **Impacto em Etapas/Pendências:** elimina ambiguidade entre o denominador da cor e o total do empreendimento.
+
 ### 2026-08-21 — Nova escala de cores das bolhas — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — gráfico Preço/m² × Área privativa.
 - **O quê:** disponibilidade por tipologia agora interpola continuamente de `#71984a` em 0% para `#f4d83f` em 50% e `#f93f16` em 100%.
