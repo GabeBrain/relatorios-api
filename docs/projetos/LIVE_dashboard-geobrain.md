@@ -30,6 +30,14 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-21 — Nova escala de cores das bolhas — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — gráfico Preço/m² × Área privativa.
+- **O quê:** disponibilidade por tipologia agora interpola continuamente de `#71984a` em 0% para `#f4d83f` em 50% e `#f93f16` em 100%.
+- **Arquivos:** `src/features/dashboard-geobrain/Charts.tsx`.
+- **Commits:** `dbdff61`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+- **Impacto em Etapas/Pendências:** mantém a etapa 4 concluída e atualiza a leitura visual da disponibilidade.
+
 ### 2026-08-20 — Correção de sintaxe no exportador SVG — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — build e exportação SVG.
 - **O quê:** substituído `continue` inválido dentro de `forEach` por retorno do callback, restaurando o parsing do `Charts.tsx` pelo Vite/SWC.
