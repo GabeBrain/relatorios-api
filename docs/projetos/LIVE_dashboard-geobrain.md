@@ -30,6 +30,14 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-24 — Ajustes de composição dos gráficos — Edgar
+- **Ambiente/funcionalidade:** `/dash-geobrain` — layout do Dashboard GeoBrain.
+- **O quê:** gráfico de bolhas movido para abaixo da linha dos Mapas de oportunidades; `Preço médio por bairro` passou a ocupar a largura completa quando fica sozinho na grade de rankings.
+- **Arquivos:** `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `6c2d9e5`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+- **Impacto em Etapas/Pendências:** melhora a hierarquia visual e o aproveitamento horizontal dos cards.
+
 ### 2026-08-21 — Critério de disponibilidade explicitado por tipologia — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — tooltip e subtítulo do gráfico de bolhas.
 - **O quê:** tooltip passou a distinguir unidades lançadas da tipologia e do empreendimento; o subtítulo explicita que tamanho, estoque final, unidades lançadas e cor são calculados por tipologia.
