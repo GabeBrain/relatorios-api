@@ -205,8 +205,6 @@ export default function DashboardGeobrain() {
         <IvvChart data={series} granularity={granularity} />
         <UnidadesVsEstoqueChart data={series} granularity={granularity} />
         <VgvChart data={series} granularity={granularity} />
-        <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} neighborhoods={bubbleNeighborhoods} neighborhood={bubbleNeighborhood} onStandardChange={(value) => { setBubbleStandard(value); setBubbleNeighborhood(null); }} onNeighborhoodChange={setBubbleNeighborhood} />
-
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <OfertaComboChart title="Estoque por dormitórios" data={ofertaDorm} />
           <OfertaComboChart title="Estoque por padrão" data={ofertaPadrao} />
@@ -217,7 +215,9 @@ export default function DashboardGeobrain() {
           <RankingCard title="Tempo de estoque por bairro" rows={rankTempo} formatValue={(v) => monthsFmt(v)} info={infoTempoEstoque} />
           <RankingCard title="Estoque atual por bairro" rows={rankEstoque} formatValue={(v) => intFmt(v)} info={infoEstoqueAtual} />
           <RankingCard title="Preço m² por bairro" rows={rankM2} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoM2} />
-          <RankingCard title="Preço médio por bairro" rows={rankMedio} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoMedio} />
+          <div className="md:col-span-2">
+            <RankingCard title="Preço médio por bairro" rows={rankMedio} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoMedio} />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -231,6 +231,8 @@ export default function DashboardGeobrain() {
           <OpportunityMap matrix={oppMap} title="Mapa de oportunidades — Bairro" />
           <OpportunityMap matrix={oppMapStd} title="Mapa de oportunidades — Padrão" />
         </div>
+
+        <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} neighborhoods={bubbleNeighborhoods} neighborhood={bubbleNeighborhood} onStandardChange={(value) => { setBubbleStandard(value); setBubbleNeighborhood(null); }} onNeighborhoodChange={setBubbleNeighborhood} />
 
         <footer className="flex items-center gap-2 pt-4 text-[9px] text-[hsl(var(--dg-muted))]">
           <BarChart2 className="h-3 w-3" />
