@@ -147,7 +147,8 @@ const COLUMN_NOTES: Record<string, string> = {
 const NOTE_VENDAS_LIQUIDAS =
   'Fonte: campo "sold_in_period" da API Geobrain — unidades vendidas no período (vendas brutas). ' +
   'O dado de distratos não está disponível na API, portanto não é possível calcular vendas líquidas reais. ' +
-  'A coluna de distratos é preenchida por estimativa via variação de estoque.';
+  'A coluna de distratos é preenchida por estimativa via variação de estoque. ' +
+  'Antes do trimestre de lançamento (release_date), vendas e estoque são apresentados como zero.';
 const NOTE_VGV_PRECO_ATUAL =
   'VGV histórico, VGV Estoque e VGV Lançado são calculados usando o Preço atual do último período disponível da tipologia. Os valores são apresentados em milhões (/1.000.000).';
 COLUMN_NOTES['VGV Lançado'] = NOTE_VGV_PRECO_ATUAL;
@@ -407,7 +408,13 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
 
     for (const [, entries] of typoMap) {
       entries.sort((a, b) => String(a.period ?? '').localeCompare(String(b.period ?? '')));
-      const entriesThroughEnd = filterHistoryThroughQuarter(entries, endQ);
+      const releaseQuarter = periodToQuarter(b.release_date);
+      const entriesThroughEnd = filterHistoryThroughQuarter(entries, endQ)
+        .filter((entry) => {
+          if (!releaseQuarter) return true;
+          const entryQuarter = periodToQuarter(entry.period);
+          return entryQuarter ? compareTuple(qKey(entryQuarter), qKey(releaseQuarter)) >= 0 : false;
+        });
       if (entriesThroughEnd.length === 0) continue;
       const quarterlyHistory = aggregateTypologyHistoryByQuarter(entriesThroughEnd);
       const first = entriesThroughEnd[0];
@@ -476,6 +483,16 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
 
       for (const q of quarterCols) {
         const quarter = quarterlyHistory.get(q);
+        const beforeRelease = releaseQuarter
+          ? compareTuple(qKey(q), qKey(releaseQuarter)) < 0
+          : false;
+        if (beforeRelease) {
+          row[`Vendas líquidas ${q}`] = 0;
+          row[`VGV ${q}`] = 0;
+          row[`Estoque ${q}`] = 0;
+          row[`VGV Estoque ${q}`] = 0;
+          continue;
+        }
         row[`Vendas líquidas ${q}`] = quarter?.hasSalesData ? quarter.sales : 0;
         const quarterEntry = quarter?.lastEntry;
         const quarterStock = toNum(quarterEntry?.typology_stock);

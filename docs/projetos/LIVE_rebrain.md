@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-25 — Corte histórico pelo lançamento no AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — séries trimestrais de vendas e estoque.
+- **O quê:** históricos anteriores ao trimestre de `release_date` passam a ser zerados para Vendas líquidas, Estoque e seus VGVs; esses períodos também deixam de influenciar a agregação a partir do lançamento.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
 ### 2026-08-19 — Panorama: export 12x mais rápido e leitura contínua das 62 páginas — Gabriel + Claude
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — exportação de PDF e navegação do livro.
 - **Causa medida:** o custo do export não estava nas páginas estáticas, e sim nas webfonts. O `html-to-image` re-baixava e re-embutia Montserrat/Source Sans 3 **a cada lâmina** — ~950 ms por página. Resolvendo o CSS das fontes uma única vez (415 ms) e reaproveitando-o, o export caiu de **87,4 s para 7,3 s** na bancada e ~13 s no fluxo real, com saída **byte a byte idêntica** (mesmos 9.923.588 bytes).
