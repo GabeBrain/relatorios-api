@@ -1158,7 +1158,7 @@ export default function RelatorioAelo() {
           <strong>Limitação da API:</strong> Distratos não são fornecidos diretamente. <code>*Distratos no trimestre</code> é uma estimativa via variação de estoque; <code>VGV Distratos</code> permanece em branco.
         </div>
         <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
-          <strong className="text-foreground">Regra da consulta AELO:</strong> consulta POST no endpoint interno v2 por UF, sempre com tipo Horizontal. O relatório mantém somente empreendimentos com padrão Loteamento Aberto ou Loteamento Fechado e municípios presentes no catálogo AELO; o Município selecionado, quando informado, é aplicado apenas como filtro local após a consulta. VGV histórico, VGV Estoque e VGV Lançado usam o Preço atual do último período da tipologia e são apresentados em milhões (/1.000.000).
+          <strong className="text-foreground">Regra da consulta AELO:</strong> consulta POST no endpoint interno v2 por UF, sempre com tipo Horizontal. O relatório mantém somente empreendimentos com padrão Loteamento Aberto ou Loteamento Fechado e municípios presentes no catálogo AELO; o Município selecionado, quando informado, é aplicado apenas como filtro local após a consulta. Vendas líquidas, Estoque, VGV e VGV Estoque só são considerados a partir do trimestre de lançamento informado em <code>data[].release_date</code>; períodos anteriores são apresentados como zero. VGV histórico, VGV Estoque e VGV Lançado usam o Preço atual do último período da tipologia e são apresentados em milhões (/1.000.000).
         </div>
 
         <div className="space-y-1">

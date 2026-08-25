@@ -52,6 +52,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ### 2026-08-25 — Corte histórico pelo lançamento no AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — séries trimestrais de vendas e estoque.
 - **O quê:** históricos anteriores ao trimestre de `release_date` passam a ser zerados para Vendas líquidas, Estoque e seus VGVs; esses períodos também deixam de influenciar a agregação a partir do lançamento.
+- **Interface:** a regra também é apresentada no informativo visível “Regra da consulta AELO”.
 - **Arquivos:** `src/pages/RelatorioAelo.tsx`.
 - **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
 
