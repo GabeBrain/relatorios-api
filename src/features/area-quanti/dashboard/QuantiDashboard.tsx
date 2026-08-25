@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { ArrowDownAZ, ArrowDownUp, ChevronDown, ChevronRight, Download, FileSpreadsheet, Filter, Info, Loader2 } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownUp, ChevronDown, ChevronRight, Download, FileSpreadsheet, Filter, Info } from 'lucide-react';
+import brainLogo from '../../../../assets/logoBrain.png';
 import { DATASETS } from './datasets';
 import { useQuantiDataset } from './useQuantiDataset';
 import { useQuantiStore } from './store';
@@ -16,6 +17,18 @@ import './dashboard.css';
 
 type IntentMetric = 'pct' | 'count' | 'count_pct';
 type HeatmapMetric = IntentMetric;
+
+function BrainLoader({ text = 'Carregando...' }: { text?: string }) {
+  return (
+    <div className="qd-brain-loader" role="status" aria-live="polite">
+      <div className="qd-brain-loader__logo">
+        <img className="qd-brain-loader__ghost" src={brainLogo} alt="" aria-hidden="true" />
+        <img className="qd-brain-loader__fill" src={brainLogo} alt={text} />
+      </div>
+      {text && <p className="qd-brain-loader__text">{text}</p>}
+    </div>
+  );
+}
 
 function GenerationInfoButton() {
   return (
@@ -351,11 +364,7 @@ export function QuantiDashboard() {
           </div>
         </div>
 
-        {loading && (
-          <div className="flex flex-1 items-center justify-center gap-2 text-sm text-[var(--qd-text-muted)]">
-            <Loader2 className="h-4 w-4 animate-spin" /> Carregando {ds.label}…
-          </div>
-        )}
+        {loading && <BrainLoader text="Carregando..." />}
         {error && (
           <div className="flex flex-1 items-center justify-center p-6">
             <div className="qd-card max-w-md p-4 text-sm text-red-700">
