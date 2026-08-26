@@ -1325,8 +1325,8 @@ export default function RelatorioAelo() {
             {/* Categorical bar charts — single green gradient */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {[
+                { title: 'Ativos x Esgotados', field: 'Status Tipologia' },
                 { title: 'Tipo de empreendimento', field: 'Tipo' },
-                { title: 'Status da tipologia', field: 'Status Tipologia' },
               ].map(({ title, field }) => {
                 const chartData = buildChartData([...result.activeRows, ...result.inactiveRows], field);
                 return (
