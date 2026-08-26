@@ -50,7 +50,7 @@ const HEADER_COLS = [
   'Status Atual', 'Status da Tipologia', 'Empreendimentos', 'Logradouro', 'Número', 'Bairro', 'Cidade/UF',
   'Região Administrativa', 'Urbanizadora', 'Padrão', 'Lançamento', 'ANO', 'Entrega',
   'Preço atual', 'm2 Priv.', 'Valor m2 Priv.',
-  'Tempo de vendas', 'Taxa administrativa', 'Oferta por lotes', 'Entrada', 'Nº de Parcelas',
+  'Tempo de vendas', 'Taxa administrativa', 'Oferta por lotes', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
   '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'VGV Lançado', 'm² Lançado',
 ];
 
@@ -65,11 +65,11 @@ function formatAeloPercent(value: unknown): string {
 function formatAeloVgv(value: unknown): string {
   const numeric = toNum(value);
   if (numeric === null) return '';
-  return formatAeloVgvMillions(numeric).toLocaleString('pt-BR');
+  return formatAeloVgvMillions(numeric).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function formatAeloVgvMillions(value: number): number {
-  return Math.round(value / 1_000_000);
+  return Math.round((value / 1_000_000) * 100) / 100;
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -474,6 +474,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
         'Oferta por lotes': toNum(last.qty),
         'Entrada': toNum(b.down_payment_percentage),
         'Nº de Parcelas': toNum(b.number_of_installments),
+        'Valor da parcela': toNum(b.valor_parcela),
         '% de Juros Mensal': toNum(b.interest_rate_tax),
         'Indíce de Juros': b.interest_rate_index as string ?? '',
         'Desconto à Vista': toNum(b.discount_percentage),
@@ -557,7 +558,15 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
     [allCols, ...rows.map((row) => allCols.map((c) => exportValue(c, row[c])) )];
   const sfx = qSheet(lastQ);
   const wb = utils.book_new();
-  utils.book_append_sheet(wb, utils.aoa_to_sheet(sheetRows([...activeRows, ...inactiveRows])), `RELATÓRIO ${sfx}`);
+  const sheet = utils.aoa_to_sheet(sheetRows([...activeRows, ...inactiveRows]));
+  allCols.forEach((col, columnIndex) => {
+    if (!col.startsWith('VGV')) return;
+    for (let rowIndex = 1; rowIndex <= [...activeRows, ...inactiveRows].length; rowIndex++) {
+      const cell = sheet[utils.encode_cell({ r: rowIndex, c: columnIndex })];
+      if (cell && typeof cell.v === 'number') cell.z = '0.00';
+    }
+  });
+  utils.book_append_sheet(wb, sheet, `RELATÓRIO ${sfx}`);
   writeFile(wb, `Relatorio_${city.trim()}_${sfx}.xlsx`);
 }
 
