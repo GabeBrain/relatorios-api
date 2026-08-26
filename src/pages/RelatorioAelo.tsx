@@ -47,11 +47,12 @@ const ESTIMATED_SECONDS_PER_DETAIL = 0.7;
 type Row = Record<string, string | number | null>;
 
 const HEADER_COLS = [
-  'Status Atual', 'Status da Tipologia', 'Empreendimentos', 'Logradouro', 'Número', 'Bairro', 'Cidade/UF',
-  'Região Administrativa', 'Urbanizadora', 'Padrão', 'Lançamento', 'ANO', 'Entrega',
-  'Preço atual', 'm2 Priv.', 'Valor m2 Priv.',
-  'Tempo de vendas', 'Taxa administrativa', 'Oferta por lotes', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
-  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'VGV Lançado', 'm² Lançado',
+  'ID Empreendimento', 'ID Tipologia', 'Status Empreendimento', 'Status Tipologia',
+  'Região Administrativa', 'Cidade/UF', 'Tipo', 'Tempo de Vendas', 'Empreendimentos',
+  'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Urbanizadora', 'Oferta por Lotes',
+  'Lançamento', 'Ano', 'Entrega', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
+  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'Valor m2 Priv.', 'Preço atual',
+  'm2 Priv.', 'VGV Lançado', 'm² Lançado',
 ];
 
 const AELO_PERCENT_COLUMNS = new Set(['Entrada', '% de Juros Mensal', 'Desconto à Vista']);
@@ -406,7 +407,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
       }
     }
 
-    for (const [, entries] of typoMap) {
+    for (const [typologyId, entries] of typoMap) {
       entries.sort((a, b) => String(a.period ?? '').localeCompare(String(b.period ?? '')));
       const releaseQuarter = periodToQuarter(b.release_date);
       const entriesThroughEnd = filterHistoryThroughQuarter(entries, endQ)
@@ -451,33 +452,33 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
         : Math.round((vgvVendasBrutas - vgvDistratos) * 100) / 100;
 
       const row: Row = {
-        'Status Atual': b.status as string ?? '',
-        'Status da Tipologia': stock > 0 ? 'Ativo' : 'Esgotado',
-        'Empreendimentos': b.name as string ?? '',
-        'Logradouro': b.address as string ?? '',
-        'Número': b.address_number as string ?? '',
-        'Bairro': b.neighborhood as string ?? '',
-        'Cidade/UF': cityUf,
+        'ID Empreendimento': toNum(b.building_id),
+        'ID Tipologia': typologyId,
+        'Status Empreendimento': b.status as string ?? '',
+        'Status Tipologia': stock > 0 ? 'Ativo' : 'Esgotado',
         'Região Administrativa': region,
+        'Cidade/UF': cityUf,
+        'Tipo': b.standard as string ?? '',
+        'Tempo de Vendas': calculatedSalesTime(b),
+        'Empreendimentos': b.name as string ?? '',
+        'Taxa Administrativa': toNum(last.taxa_associativa),
+        'Bairro': b.neighborhood as string ?? '',
+        'Endereço': b.address as string ?? '',
+        'Número': b.address_number as string ?? '',
         'Urbanizadora': incorporadora,
-        'Padrão': b.standard as string ?? '',
+        'Oferta por Lotes': toNum(last.qty),
         'Lançamento': b.release_date as string ?? '',
-        'ANO': extractYear(String(b.release_date ?? '')),
+        'Ano': extractYear(String(b.release_date ?? '')),
         'Entrega': b.delivery_date as string ?? '',
-        'Tipo de Tipologia': last.type_of_typology as string ?? '',
-        'Dorm.': toNum(last.number_bedroom),
-        'Preço atual': currentPrice,
-        'm2 Priv.': privArea || null,
         'Valor m2 Priv.': toNum(last.price_private_area),
-        'Tempo de vendas': calculatedSalesTime(b),
-        'Taxa administrativa': toNum(last.taxa_associativa),
-        'Oferta por lotes': toNum(last.qty),
         'Entrada': toNum(b.down_payment_percentage),
         'Nº de Parcelas': toNum(b.number_of_installments),
         'Valor da parcela': toNum(b.valor_parcela),
         '% de Juros Mensal': toNum(b.interest_rate_tax),
         'Indíce de Juros': b.interest_rate_index as string ?? '',
         'Desconto à Vista': toNum(b.discount_percentage),
+        'Preço atual': currentPrice,
+        'm2 Priv.': privArea || null,
         '*Vendidos no trimestre': vendidosUltimoT,
         '*Distratos no trimestre': distratosUltimoT,
       };
@@ -531,7 +532,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
     if (da !== db) return da.localeCompare(db);
     const na = String(a['Empreendimentos'] ?? ''); const nb = String(b['Empreendimentos'] ?? '');
     if (na !== nb) return na.localeCompare(nb);
-    return (toNum(a['Dorm.']) ?? 0) - (toNum(b['Dorm.']) ?? 0);
+    return (toNum(a['ID Tipologia']) ?? 0) - (toNum(b['ID Tipologia']) ?? 0);
   });
 
   return rows;
@@ -539,7 +540,12 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
 
 async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: string[], city: string, lastQ: string): Promise<void> {
   const { utils, writeFile } = await import('xlsx');
-  const quarterMeasureCols = quarterCols.flatMap((q) => [`Vendas líquidas ${q}`, `VGV ${q}`, `Estoque ${q}`, `VGV Estoque ${q}`]);
+  const quarterMeasureCols = [
+    ...quarterCols.map((q) => `Estoque ${q}`),
+    ...quarterCols.map((q) => `Vendas líquidas ${q}`),
+    ...quarterCols.map((q) => `VGV ${q}`),
+    ...quarterCols.map((q) => `VGV Estoque ${q}`),
+  ];
   const allCols = [...HEADER_COLS, ...quarterMeasureCols];
   const exportValue = (col: string, value: Row[string]): Row[string] => {
     if (value === null || value === undefined || value === '') return null;
@@ -915,7 +921,12 @@ function formatCell(col: string, val: unknown): string {
 }
 
 function DataTable({ rows, quarterCols }: { rows: Row[]; quarterCols: string[] }) {
-  const quarterMeasureCols = quarterCols.flatMap((q) => [`Vendas líquidas ${q}`, `VGV ${q}`, `Estoque ${q}`, `VGV Estoque ${q}`]);
+  const quarterMeasureCols = [
+    ...quarterCols.map((q) => `Estoque ${q}`),
+    ...quarterCols.map((q) => `Vendas líquidas ${q}`),
+    ...quarterCols.map((q) => `VGV ${q}`),
+    ...quarterCols.map((q) => `VGV Estoque ${q}`),
+  ];
   const allCols = [...HEADER_COLS, ...quarterMeasureCols];
   if (rows.length === 0) return <p className="text-xs text-muted-foreground py-4">Nenhum dado.</p>;
   return (
@@ -1315,7 +1326,7 @@ export default function RelatorioAelo() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {[
                 { title: 'Tipo de empreendimento', field: 'Tipo' },
-                { title: 'Padrão', field: 'Padrão' },
+                { title: 'Status da tipologia', field: 'Status Tipologia' },
               ].map(({ title, field }) => {
                 const chartData = buildChartData([...result.activeRows, ...result.inactiveRows], field);
                 return (
