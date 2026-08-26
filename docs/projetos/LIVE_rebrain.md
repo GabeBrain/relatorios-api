@@ -63,7 +63,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ### 2026-08-26 — Valor da parcela e precisão do VGV no AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
-- **O quê:** adicionada a coluna `Valor da parcela` após `Nº de Parcelas`, preparada para o campo futuro `data[].valor_parcela`; valores de VGV em milhões passam a ser apresentados com duas casas decimais, mantendo tipo numérico no Excel.
+- **O quê:** adicionada a coluna `Valor da parcela` após `Nº de Parcelas`, preparada para o campo futuro `data[].installment_value`; valores de VGV em milhões passam a ser apresentados com duas casas decimais, mantendo tipo numérico no Excel.
 - **Arquivos:** `src/pages/RelatorioAelo.tsx`.
 - **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
 
