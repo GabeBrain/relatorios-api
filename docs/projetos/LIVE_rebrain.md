@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-27 — Panorama: feedback de Jundiaí mapeado e plano terminal da V1 — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento da V1 após retorno da analista.
+- **O quê:** inspecionados os 62 slides e as 28 anotações internas do PDF corrigido de Jundiaí; cada comentário foi resolvido em requisito, ponto técnico e critério de aceite. O mapa incorpora também multi-cidade, períodos posteriores a 1T/26 e a política Secovi de verticais + somente Condomínio de Casas no horizontal. Criado plano terminal para o Luna executar código, QA das 62 páginas, PDF final e resposta de e-mail à Juliana.
+- **Escopo:** novo padrão visual de tabelas e exportação PPTX foram formalmente adiados para V2 por ausência de referência/decisão do card; resumo/narrativas permanecem não homologados porque Juliana declarou não tê-los revisado nesta rodada.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/{MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md,PLAN_LUNA_CORRECOES_V1_JUNDIAI.md}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a continua em andamento; o portão agora é executar o plano, gerar novo PDF de Jundiaí e obter a segunda validação da analista.
+
 ### 2026-08-26 — Ajuste dos gráficos do AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — resumos gráficos.
 - **O quê:** `Tipo` permanece representando o `Padrão` (`data[].standard`); o primeiro gráfico passa a resumir `Ativos x Esgotados`, e o segundo continua resumindo o tipo de empreendimento.
@@ -906,7 +914,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
 | 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. **Homologação real começou em 22–24/jul** com 4 estudos de analistas (Rolândia/Daniele + Housi/Beatriz e Finoti): 102 achados, ~100% FP nos triados → sprint de 28/jul derrubou Rolândia de 17 achados para 1 (v0.44–0.49, 78 testes verdes). |
 | 7 | Relatórios Secovi (export Excel) | 🟡 (correção trimestral implementada e testada em 04/ago; aguarda homologação manual da exportação) |
-| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (V1 visual testável de ponta a ponta: livro 62 páginas, capas, estáticos, PDF e famílias dinâmicas 12–56 recompostas ✅; próximo portão: reteste autenticado e calibração residual por slide) |
+| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (V1 visual testável de ponta a ponta ✅; retorno de Jundiaí mapeado em 27/ago: 28 comentários + multi-cidade, período dinâmico e política Secovi; próximo portão é executar o plano Luna, gerar novo PDF e reenviar à Juliana. Layout novo e PPTX ficaram para V2.) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
 | 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI padronizada, mapa urbano, testes e build ✅; homologação pelo setor usuário pendente) |
@@ -925,7 +933,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
   [`PLAN_correcao_agregacao_vendas_trimestrais.md`](../features/relatorios-secovi/PLAN_correcao_agregacao_vendas_trimestrais.md).
 - [ ] **Panorama — avaliar impressão nativa vetorial:** o CSS `@media print` já existe e daria PDF instantâneo, mas os gráficos usam `ResponsiveContainer` do recharts, que mede via JS e não é remedido na mídia de impressão; exige verificação lâmina a lâmina antes de considerar.
 - [ ] **Panorama — remover `lib/pdf-print-interceptor.ts`:** arquivo morto (nenhum import) que ainda sobrescreve `window.print` e intercepta cliques com a estratégia de popup já abandonada em 19/ago.
-- [ ] **Panorama Secovi/FIERGS — reteste visual autenticado:** revisar as 62 páginas no browser/PDF com Piracicaba 1T26, registrar deltas residuais de geometria/componente por slide e atualizar a matriz `aprovado / divergente / sem método`; diferenças numéricas não bloqueiam fidelidade visual quando o contrato está correto.
+- [ ] **Panorama Secovi/FIERGS — executar correções da V1 de Jundiaí:** seguir [`PLAN_LUNA_CORRECOES_V1_JUNDIAI.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_LUNA_CORRECOES_V1_JUNDIAI.md), cobrindo os 28 comentários, multi-cidade, período após 1T/26, universo Secovi e novo PDF de 62 páginas; matriz de aceite em [`MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md`](../features/Relatorios%20Secovi_FIERGS/MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md).
+- [ ] **Panorama V2 — itens adiados:** novo padrão visual de tabelas Rebrain (aguarda referência) e exportação PPTX editável; não bloqueiam o fechamento da V1.
 - [ ] **Panorama — fechar metodologia com os analistas:** critério oficial de **VGV lançado**
   (estimativa via `building-with-history`) e de **% MCMV** (proxy por padrão Econômico / teto de preço).
 - [ ] Panorama — confirmar que o token Secovi cobre o histórico desde 1T/22 (dado pontual 4T/21) nas cidades-alvo.
