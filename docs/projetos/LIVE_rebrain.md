@@ -64,6 +64,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
 - **Impacto em Etapas/Pendências:** etapa 7a segue em QA autenticado; novo portão é validar multi-cidade, chamadas únicas, rodapé/capa e slides 14–33 com dados reais. Tabela Rebrain e PPTX continuam V2.
 
+### 2026-08-27 — Panorama: refinamento do painel de filtros e confirmação do período — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — painel de seleção antes da geração.
+- **O quê:** reorganizada a grade responsiva para alinhar UF, municípios, período e ação; textos e chips ganham áreas controladas para não deslocar o cabeçalho. O range picker agora mantém um rascunho visual e só aplica início/fim após `Confirmar período`; `Cancelar` descarta a alteração.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx`, `src/features/panorama-secovi-fiergs/components/PanoramaQuarterRangePicker.tsx`, `src/features/panorama-secovi-fiergs/components/PanoramaCityMultiSelect.tsx`.
+- **Verificação:** typecheck, suíte da feature e QA Playwright do fluxo de confirmação aprovados.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** geração/API permanecem inalteradas; falta repetir o aceite com token e cidades reais.
+
 ### 2026-08-27 — Panorama: verificação antes × agora de Jundiaí — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — auditoria pós-integração da V1.
 - **O quê:** criado relatório operacional que compara comportamento anterior e atual de cada requisito, reúne evidências de código/testes e cruza individualmente as 28 anotações do PDF de Jundiaí por slide. Itens dependentes de token/PDF real e itens V2 ficaram explicitamente separados.

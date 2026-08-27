@@ -47,7 +47,7 @@ export function PanoramaCityMultiSelect({ cities, options, disabled, loading, on
         </Command>
       </PopoverContent>
     </Popover>
-    <div className="flex min-h-6 flex-wrap items-center gap-1" aria-live="polite">
+    <div className="flex max-h-12 min-h-6 flex-wrap items-center gap-1 overflow-y-auto" aria-live="polite">
       {ordered.length ? ordered.map((city) => <Badge key={city} variant="secondary" className="gap-1 pr-1 text-[11px]">
         {city}<button type="button" aria-label={`Remover ${city}`} className="rounded-full p-0.5 hover:bg-background/70" onClick={() => toggle(city)}><X className="h-3 w-3" /></button>
       </Badge>) : <span className="text-[11px] text-muted-foreground">Nenhuma cidade selecionada</span>}
