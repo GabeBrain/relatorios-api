@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle } from 'lucide-react';
 import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
-import type { LaunchSeries, PanoramaReportModel, ReportMarketBlock } from '../types';
+import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
 import { synchronizeOfficialCoverCity } from '../lib/official-cover';
 import { PANORAMA_REPORT_MANIFEST, PANORAMA_SECTIONS, type ReportPageDefinition } from '../report/manifest';
@@ -28,7 +28,7 @@ function Footer() { return <footer className="panorama-page-footer panorama-offi
 function Sheet({ def, children }: { def: ReportPageDefinition; report: PanoramaReportModel; children: React.ReactNode }) { const hasBakedFooter = Boolean(officialSlides[`../assets/official/panorama-${String(def.page).padStart(2, '0')}.png`]); return <section className={`panorama-report-page panorama-official-page ${hasBakedFooter ? 'panorama-baked-page' : ''}`} aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div>{!hasBakedFooter && <Footer/>}</section>; }
 function Divider({ title }: { title: string }) { return <div className="panorama-divider"><div><p>Panorama imobiliário</p><h2>{title}</h2><i/></div></div>; }
 function Corporate({ page, report }: { page: number; report: PanoramaReportModel }) {
-  const city = `${report.scope.city} - ${report.scope.uf}`;
+  const city = `${scopeCityLabel(report.scope)} - ${report.scope.uf}`;
   if (page === 3) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><h3>Nossa visão</h3><p>Ser reconhecido pela sociedade como a entidade mais importante na realização do maior sonho do brasileiro: a casa própria.</p><h3>Nossa missão</h3><p>Desenvolver, representar, promover e defender a atividade imobiliária em seus segmentos, dentro de padrões reconhecidamente éticos e comprometidos com os anseios da coletividade.</p><h3>Nossos valores</h3><ul>{['Presteza','Confiabilidade','Ética','Transparência','Profissionalismo','Eficácia','Inovação','Espírito de equipe'].map((x) => <li key={x}>✓ {x}</li>)}</ul></div>;
   if (page === 7) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><p>O Secovi-SP faz história desde 1946 e cumpre seu compromisso com o Estado de São Paulo por meio do desenvolvimento do setor urbano ao lado de parceiros públicos, corporativos e da grande mídia.</p><p>Seu trabalho representa empresas, viabiliza negócios, incentiva inovação e contribui para a oferta de habitação e o desenvolvimento das cidades.</p><p>O Sindicato mantém diálogo permanente com autoridades e associados, criando propostas e serviços que favorecem a urbanização, a geração de empregos e a segurança nas relações imobiliárias.</p></div>;
   if (page === 8) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><h3>Política da Qualidade:</h3><p>Fornecer aos seus associados e categorias representadas, com máxima presteza, confiabilidade e alto padrão de qualidade, informações e subsídios pertinentes ao exercício de suas atividades.</p><p>Defender ativamente os interesses dos associados dentro de padrões éticos e segundo os interesses coletivos; valorizar o crescimento gerencial e profissional da entidade; promover o espírito de equipe e a eficácia do sistema da qualidade.</p></div>;
@@ -54,7 +54,7 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
   const series = seriesFor(page, report);
   const data = series.data.slice(-17);
   const referenceQuarter = report.scope.endQuarter[0];
-  const formatValue = (value: number) => series.unit === 'mi' ? decimal(value) : series.unit === 'percent' ? pct(value) : series.unit === 'sqm' ? `R$ ${n(value)}/m²` : n(value);
+  const formatValue = (value: number) => series.unit === 'mi' ? decimal(value) : series.unit === 'sqm' ? `R$ ${n(value)}/m²` : n(value);
   const highlighted = data.filter((row) => row.quarter[0] === referenceQuarter);
   const comparisons = highlighted.slice(-4).slice(1).map((current, index) => ({ previous: highlighted.slice(-4)[index], current }));
   const renderPointLabel = (key: 'vertical' | 'horizontal', color: string, textColor: string) => (props: { index?: number; x?: number; y?: number; value?: number }) => {
@@ -177,10 +177,10 @@ function dataPage(page: number, report: PanoramaReportModel) {
   return null;
 }
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
-  const title = def.title.replace('{cidade}', report.scope.city); const p = def.page;
+  const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
   const official = officialSlides[`../assets/official/panorama-${String(p).padStart(2, '0')}.png`];
   if (official) return <img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/>;
-  if (p === 1 || p === 2 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>{p === 4 ? `Panorama Imobiliário de ${report.scope.city}` : report.scope.city}</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
+  if (p === 1 || p === 2 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>{p === 4 ? `Panorama Imobiliário de ${cityLabel}` : cityLabel}</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
   if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <Divider title={title}/>;
   if ([3,7,8,10].includes(p)) return <Corporate page={p} report={report}/>;
   if (p === 5) return <div className="panorama-corporate"><h2>Sumário</h2><ol className="panorama-summary">{PANORAMA_SECTIONS.map((section) => <li key={section.id}>{section.label}</li>)}</ol></div>;
@@ -214,7 +214,7 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
   const pages = useMemo(() => PANORAMA_REPORT_MANIFEST, []); const page = pages[current];
-  useEffect(() => { synchronizeOfficialCoverCity(report.scope.city, report.scope.uf, report.scope.endQuarter); }, [report.scope.city, report.scope.uf, report.scope.endQuarter]);
+  useEffect(() => { synchronizeOfficialCoverCity(scopeCityLabel(report.scope), report.scope.uf, report.scope.endQuarter); }, [report.scope.cities, report.scope.uf, report.scope.endQuarter]);
   const jump = (number: number) => {
     setCurrent(Math.max(0, pages.findIndex((item) => item.page === number)));
     if (view === 'all') allPagesRef.current?.querySelector(`[aria-label^="Página ${number}:"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });

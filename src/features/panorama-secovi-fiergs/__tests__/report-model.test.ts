@@ -1,9 +1,24 @@
 import { describe, expect, it } from 'vitest';
 import { buildPanoramaReportModel } from '../report/model';
+import { buildCityCube } from '../domain/cube';
 import type { PanoramaScope } from '../types';
 
-const scope: PanoramaScope = { uf: 'SP', city: 'Piracicaba', endQuarter: '1T2026' };
+const scope: PanoramaScope = { uf: 'SP', cities: ['Piracicaba'], endQuarter: '1T2026' };
 const source = (rows: Record<string, unknown>[]) => ({ rows, available: true, source: 'fixture' });
+
+/** Empreendimento vertical mínimo, reaproveitado pelos casos multi-cidade. */
+const sampleBuilding: Record<string, unknown> = {
+  building_id: 'B1',
+  name: 'Residencial Alfa',
+  building_type: 'Vertical',
+  standard: 'Standard',
+  release_date: '2025-02-10',
+  total_units: 100,
+  typologies_history: [
+    { period: '2025-02-01', typology: '2 dorm', qty: 100, release_price: 400000, private_area: 50 },
+    { period: '2026-03-01', typology: '2 dorm', typology_stock: 30, liquid_sales: 70, price: 420000, private_area: 50 },
+  ],
+};
 
 describe('Panorama Secovi/FIERGS — modelo editorial por grupo', () => {
   it('preserva séries trimestrais e usa o trimestre atual no resumo por grupo', () => {
@@ -39,5 +54,81 @@ describe('Panorama Secovi/FIERGS — modelo editorial por grupo', () => {
     expect(model.ivv.series.at(-1)?.vertical).toBe(20);
     expect(model.prices.ticket.series.at(-1)?.vertical).toBe(650000);
     expect(model.prices.meter.series.at(-1)?.vertical).toBe(8125);
+  });
+});
+
+describe('Panorama Secovi/FIERGS — consolidado multi-cidade e proveniência (G-01)', () => {
+  const empty = source([]);
+  const allEmpty = {
+    sales: empty, salesTypology: empty, stock: empty, stockTypology: empty,
+    ivv: empty, ivvTypology: empty, ticket: empty, ticketTypology: empty,
+    meter: empty, meterTypology: empty,
+  };
+
+  it('expõe cidades solicitadas, concluídas e falhas, e cai para partial na falha parcial', () => {
+    const multiScope: PanoramaScope = { uf: 'SP', cities: ['Jundiaí', 'Piracicaba'], endQuarter: '1T2026' };
+    const model = buildPanoramaReportModel(multiScope, [], allEmpty, [], {
+      cubes: [buildCityCube([sampleBuilding], { city: 'Jundiaí', uf: 'SP', endQuarter: '1T2026' })],
+      provenance: {
+        requestedCities: ['Jundiaí', 'Piracicaba'],
+        completedCities: ['Jundiaí'],
+        failedCities: [{ city: 'Piracicaba', error: 'HTTP 500' }],
+      },
+    });
+
+    expect(model.provenance.requestedCities).toEqual(['Jundiaí', 'Piracicaba']);
+    expect(model.provenance.completedCities).toEqual(['Jundiaí']);
+    expect(model.provenance.failedCities).toEqual([{ city: 'Piracicaba', error: 'HTTP 500' }]);
+    // Falha parcial nunca vira consolidado silencioso.
+    expect(model.dataState).toBe('partial');
+  });
+
+  it('reporta unavailable quando nenhuma cidade conclui, sem fabricar zero', () => {
+    const model = buildPanoramaReportModel({ uf: 'SP', cities: ['Jundiaí'], endQuarter: '1T2026' }, [], allEmpty, [], {
+      cubes: [],
+      provenance: { requestedCities: ['Jundiaí'], completedCities: [], failedCities: [{ city: 'Jundiaí', error: 'token sem acesso' }] },
+    });
+    expect(model.dataState).toBe('unavailable');
+    expect(model.cube.projects).toEqual([]);
+    expect(model.granular.offerByStandard.at(-1)?.launchedUnits).toBeNull();
+  });
+
+  it('soma numeradores municipais antes das agregações, sem colisão de IDs entre cidades', () => {
+    const model = buildPanoramaReportModel({ uf: 'SP', cities: ['Jundiaí', 'Piracicaba'], endQuarter: '1T2026' }, [], allEmpty, [], {
+      cubes: [
+        buildCityCube([sampleBuilding], { city: 'Jundiaí', uf: 'SP', endQuarter: '1T2026' }),
+        buildCityCube([sampleBuilding], { city: 'Piracicaba', uf: 'SP', endQuarter: '1T2026' }),
+      ],
+      provenance: { requestedCities: ['Jundiaí', 'Piracicaba'], completedCities: ['Jundiaí', 'Piracicaba'], failedCities: [] },
+    });
+    expect(model.dataState).toBe('ready');
+    // Mesmo building_id nas duas cidades conta como dois empreendimentos distintos.
+    expect(model.granular.offerByStandard.at(-1)?.projects).toBe(2);
+    expect(model.granular.offerByStandard.at(-1)?.launchedUnits).toBe(200);
+  });
+
+  it('gera a janela editorial a partir de um fechamento posterior a 1T/26 (G-02)', () => {
+    const model = buildPanoramaReportModel({ uf: 'SP', cities: ['Jundiaí'], endQuarter: '3T2026' }, [], allEmpty);
+    expect(model.stock.units.series).toHaveLength(17);
+    expect(model.stock.units.series.at(-1)?.quarter).toBe('3T2026');
+    expect(model.stock.units.series[0].quarter).toBe('3T2022');
+  });
+
+  it('sinaliza Faixa de Valor como indisponível para o Luna remover a coluna na V1 (slide 31)', () => {
+    const model = buildPanoramaReportModel(scope, [], allEmpty);
+    expect(model.granular.valueRangeAvailable).toBe(false);
+    expect(model.openMethodologies.some((item) => /Faixa de Valor/i.test(item))).toBe(true);
+  });
+
+  it('agrupa por motivo os empreendimentos recusados pela política de universo (G-03)', () => {
+    const model = buildPanoramaReportModel(scope, [], allEmpty, [], {
+      cubes: [buildCityCube([
+        sampleBuilding,
+        { ...sampleBuilding, building_id: 'H1', building_type: 'Horizontal', building_subtype: 'Loteamento' },
+        { ...sampleBuilding, building_id: 'H2', building_type: 'Horizontal', building_subtype: 'Loteamento' },
+      ], { city: 'Piracicaba', uf: 'SP', endQuarter: '1T2026' })],
+    });
+    expect(model.provenance.rejectedByPolicy).toEqual([{ reason: 'horizontal_fora_da_politica', count: 2 }]);
+    expect(model.provenance.entity).toBe('secovi-sp');
   });
 });

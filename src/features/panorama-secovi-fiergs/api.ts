@@ -4,9 +4,51 @@ import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrat
 import { buildPanoramaReportModel } from './report/model';
 import { aggregateTemporal, buildMarketCells } from './lib/market-calibration';
 import { PIRACICABA_1T26_MARKET_REFERENCE } from './reference/piracicaba-1t26-market';
+import { editorialWindow, quarterEndDate, quarterStartDate } from './domain/quarters';
+import { buildCityCube, type MarketCube } from './domain/cube';
+import { collectByCity, completedValues, type CollectionResult } from './domain/collection';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const PER_PAGE = 100;
+const CITY_CONCURRENCY = 3;
+
+/** Recorte de uma única cidade; o escopo público continua sendo multi-cidade. */
+type CityScope = { uf: string; city: string; endQuarter: Quarter };
+
+const cityScopes = (scope: PanoramaScope): CityScope[] =>
+  scope.cities.filter(Boolean).map((city) => ({ uf: scope.uf, city, endQuarter: scope.endQuarter }));
+
+/** Primeira cidade do recorte; usado só por bancadas de calibração, que são mono-cidade. */
+function primaryCity(scope: PanoramaScope): string {
+  const city = scope.cities.find(Boolean);
+  if (!city) throw new Error('Recorte sem cidade: selecione ao menos um município autorizado.');
+  return city;
+}
+
+/**
+ * Janela temporal derivada do fechamento escolhido (G-02): o `start_period` acompanha os 17
+ * trimestres editoriais em vez de um `2022-01-01` fixo, e o `end_period` acompanha `endQuarter`.
+ */
+function temporalWindow(endQuarter: Quarter): { start: string; end: string } {
+  const window = editorialWindow(endQuarter);
+  return { start: quarterStartDate(window[0]), end: quarterEndDate(endQuarter) };
+}
+
+/** Paginação completa de `building-with-history` para uma cidade e um tipo. */
+async function fetchBuildings(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
+  const raw: Record<string, unknown>[] = [];
+  for (const type of ['Vertical', 'Horizontal']) {
+    let page = 1; let lastPage = 1;
+    do {
+      const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain em ${scope.city} (${response.status ?? 'rede'}).`);
+      raw.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
+      lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
+      page += 1;
+    } while (page <= lastPage);
+  }
+  return raw;
+}
 
 function segmentOf(value: unknown): Segment | null {
   const raw = String(value ?? '').toLowerCase();
@@ -17,17 +59,10 @@ function segmentOf(value: unknown): Segment | null {
 function standardOf(value: unknown): string { return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
 
 /** Promoted launch contract: a release is one building on its release_date, never every history snapshot. */
-export async function fetchLaunchRecords(scope: PanoramaScope, signal?: AbortSignal): Promise<LaunchRecord[]> {
+export function launchRecordsFrom(data: Record<string, unknown>[], scope: CityScope): LaunchRecord[] {
   const records: LaunchRecord[] = [];
-  for (const type of ['Vertical', 'Horizontal']) {
-    let page = 1; let lastPage = 1;
-    do {
-      const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
-      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain (${response.status ?? 'rede'}).`);
-      const payload = response.data; const data = Array.isArray(payload.data) ? payload.data as Record<string, unknown>[] : [];
-      lastPage = Number((payload.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
-      for (const building of data) {
-        const segment = segmentOf(building.building_type ?? building.type ?? type); const quarter = periodToQuarter(building.release_date); if (!segment || !quarter || quarterKey(quarter) > quarterKey(scope.endQuarter)) continue;
+  for (const building of data) {
+        const segment = segmentOf(building.building_type ?? building.type); const quarter = periodToQuarter(building.release_date); if (!segment || !quarter || quarterKey(quarter) > quarterKey(scope.endQuarter)) continue;
         const buildingUnits = safeNumber(building.total_units ?? building.qty) ?? 0;
         const history = Array.isArray(building.typologies_history) ? building.typologies_history as Record<string, unknown>[] : [];
         const releaseMonth = String(building.release_date).slice(0, 7);
@@ -38,42 +73,99 @@ export async function fetchLaunchRecords(scope: PanoramaScope, signal?: AbortSig
         const standard = standardOf(building.standard ?? history.find((entry) => String(entry.period ?? '').slice(0, 7) === releaseMonth)?.pattern);
         const economic = standard.includes('econom');
         records.push({ quarter, segment, projects: 1, units: buildingUnits, vgvMillions, economicProjects: economic ? 1 : 0, otherProjects: economic ? 0 : 1, economicUnits: economic ? buildingUnits : 0, otherUnits: economic ? 0 : buildingUnits, economicVgvMillions: economic ? vgvMillions : 0, otherVgvMillions: economic ? 0 : vgvMillions, name: String(building.name ?? building.building_name ?? 'Empreendimento'), latitude: safeNumber(building.latitude ?? building.lat), longitude: safeNumber(building.longitude ?? building.lng ?? building.lon) });
-      }
-      page += 1;
-    } while (page <= lastPage);
   }
   return records;
 }
 
-/** Uma coleta de lançamentos por recorte alimenta todas as páginas do PDF. */
-export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal): Promise<PanoramaReportModel> {
-  const [records, sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology, cohorts] = await Promise.all([
-    fetchLaunchRecords(scope, signal),
+/** Tudo o que uma cidade contribui para o consolidado. */
+interface CityHarvest {
+  city: string;
+  records: LaunchRecord[];
+  cube: MarketCube;
+  cohorts: MarketCohortRow[];
+  sources: Record<TemporalKey, SourceResult>;
+}
+
+type TemporalKey = 'sales' | 'salesTypology' | 'stock' | 'stockTypology' | 'ivv' | 'ivvTypology' | 'ticket' | 'ticketTypology' | 'meter' | 'meterTypology';
+type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string };
+
+async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], signal?: AbortSignal): Promise<CityHarvest> {
+  const [buildings, sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
+    fetchBuildings(scope, signal),
     temporalRows(scope, 'sales', 'Padrão', signal), temporalRows(scope, 'sales', 'Tipologia', signal),
     temporalRows(scope, 'stock', 'Padrão', signal), temporalRows(scope, 'stock', 'Tipologia', signal),
     temporalRows(scope, 'ivv', 'Padrão', signal), temporalRows(scope, 'ivv', 'Tipologia', signal),
     temporalRows(scope, 'medium-prices', 'Padrão', signal), temporalRows(scope, 'medium-prices', 'Tipologia', signal),
     temporalRows(scope, 'medium-prices-meter', 'Padrão', signal), temporalRows(scope, 'medium-prices-meter', 'Tipologia', signal),
-    fetchCohortRows(scope, signal),
   ]);
-  const millions = (source: Awaited<ReturnType<typeof temporalRows>>, field: string) => ({ ...source, rows: source.rows.map((row) => ({ ...row, [field]: (safeNumber(row[field]) ?? 0) / 1_000_000 })) });
-  return buildPanoramaReportModel(scope, records, {
-    sales: millions(sales, 'vgv_liquid_sales'), salesTypology: millions(salesTypology, 'vgv_liquid_sales'),
-    stock: millions(stock, 'vgv_stock'), stockTypology: millions(stockTypology, 'vgv_stock'),
-    ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology,
-  }, cohorts);
+  return {
+    city: scope.city,
+    records: launchRecordsFrom(buildings, scope),
+    cube: buildCityCube(buildings, { city: scope.city, uf: scope.uf, endQuarter: scope.endQuarter, entity }),
+    cohorts: cohortRowsFrom(buildings, scope),
+    sources: { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology },
+  };
 }
 
-async function fetchCohortRows(scope: PanoramaScope, signal?: AbortSignal): Promise<MarketCohortRow[]> {
-  const rows: MarketCohortRow[] = []; const endMonth = `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}`;
-  for (const type of ['Vertical', 'Horizontal']) { let page = 1; let lastPage = 1; do {
-    const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
-    if (!response.ok || !response.data) return [];
-    const data = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
-    lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
-    for (const building of data) { const segment = segmentOf(building.building_type ?? building.type ?? type); const release = String(building.release_date ?? ''); if (!segment || !/^\d{4}/.test(release)) continue; const history = (Array.isArray(building.typologies_history) ? building.typologies_history : []) as Record<string, unknown>[]; const latest = history.filter((entry) => String(entry.period ?? '').slice(0, 7) <= endMonth).sort((a, b) => String(b.period ?? '').localeCompare(String(a.period ?? '')))[0]; const stock = safeNumber(latest?.typology_stock ?? latest?.stock ?? latest?.qty); if (stock === null) continue; rows.push({ segment, releaseYear: release.slice(0, 4), standard: standardOf(latest?.pattern ?? building.standard) || 'não classificado', stock }); }
-    page += 1;
-  } while (page <= lastPage); }
+/**
+ * Coleta multi-cidade (G-01). Cada município é consultado isoladamente, com concorrência limitada;
+ * uma cidade que falha aparece nomeada na proveniência e o relatório fica `partial`. Só o
+ * cancelamento propaga exceção — falha total devolve modelo `unavailable` com as cidades listadas.
+ */
+export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal): Promise<PanoramaReportModel> {
+  const scopes = cityScopes(scope);
+  if (!scopes.length) throw new Error('Recorte sem cidade: selecione ao menos um município autorizado.');
+
+  const collection: CollectionResult<CityHarvest> = await collectByCity(
+    scopes.map((item) => item.city),
+    (city, citySignal) => harvestCity({ uf: scope.uf, city, endQuarter: scope.endQuarter }, scope.entity, citySignal),
+    { concurrency: CITY_CONCURRENCY, signal },
+  );
+
+  const harvests = completedValues(collection);
+  // Numeradores e denominadores municipais somam ANTES de qualquer percentual ou média.
+  const merge = (key: TemporalKey): SourceResult => ({
+    rows: harvests.flatMap((harvest) => harvest.sources[key].rows),
+    available: harvests.some((harvest) => harvest.sources[key].available),
+    source: harvests.length ? harvests[0].sources[key].source : `temporal-analysis-city/${key} · sem cidade concluída`,
+  });
+  const millions = (source: SourceResult, field: string): SourceResult => ({ ...source, rows: source.rows.map((row) => ({ ...row, [field]: (safeNumber(row[field]) ?? 0) / 1_000_000 })) });
+
+  return buildPanoramaReportModel(
+    scope,
+    harvests.flatMap((harvest) => harvest.records),
+    {
+      sales: millions(merge('sales'), 'vgv_liquid_sales'), salesTypology: millions(merge('salesTypology'), 'vgv_liquid_sales'),
+      stock: millions(merge('stock'), 'vgv_stock'), stockTypology: millions(merge('stockTypology'), 'vgv_stock'),
+      ivv: merge('ivv'), ivvTypology: merge('ivvTypology'),
+      ticket: merge('ticket'), ticketTypology: merge('ticketTypology'),
+      meter: merge('meter'), meterTypology: merge('meterTypology'),
+    },
+    harvests.flatMap((harvest) => harvest.cohorts),
+    {
+      cubes: harvests.map((harvest) => harvest.cube),
+      provenance: {
+        requestedCities: collection.requestedCities,
+        completedCities: collection.completedCities,
+        failedCities: collection.failedCities,
+      },
+    },
+  );
+}
+
+function cohortRowsFrom(data: Record<string, unknown>[], scope: CityScope): MarketCohortRow[] {
+  const rows: MarketCohortRow[] = [];
+  const endMonth = quarterEndDate(scope.endQuarter).slice(0, 7);
+  for (const building of data) {
+    const segment = segmentOf(building.building_type ?? building.type);
+    const release = String(building.release_date ?? '');
+    if (!segment || !/^\d{4}/.test(release)) continue;
+    const history = (Array.isArray(building.typologies_history) ? building.typologies_history : []) as Record<string, unknown>[];
+    const latest = history.filter((entry) => String(entry.period ?? '').slice(0, 7) <= endMonth).sort((a, b) => String(b.period ?? '').localeCompare(String(a.period ?? '')))[0];
+    const stock = safeNumber(latest?.typology_stock ?? latest?.stock ?? latest?.qty);
+    if (stock === null) continue;
+    rows.push({ segment, releaseYear: release.slice(0, 4), standard: standardOf(latest?.pattern ?? building.standard) || 'não classificado', stock });
+  }
   return rows;
 }
 
@@ -94,16 +186,10 @@ function add(map: Map<string, number>, quarter: Quarter, segment: Segment, value
 
 /** Explicit calibration suite. It never changes the report contracts. */
 export async function fetchLaunchCalibration(scope: PanoramaScope, reference: PanoramaReference, signal?: AbortSignal): Promise<CalibrationCell[]> {
-  const raw: Record<string, unknown>[] = [];
-  for (const type of ['Vertical', 'Horizontal']) {
-    let page = 1; let lastPage = 1;
-    do {
-      const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
-      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha na calibração granular (${response.status ?? 'rede'}).`);
-      raw.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
-      lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
-    } while (page <= lastPage);
-  }
+  // Bancada de calibração é mono-cidade por construção: compara contra um gabarito municipal.
+  const city = primaryCity(scope);
+  const cityScope: CityScope = { uf: scope.uf, city, endQuarter: scope.endQuarter };
+  const raw = await fetchBuildings(cityScope, signal);
   const projectValues = new Map<string, number>(); const unitTotalValues = new Map<string, number>(); const unitHistoryValues = new Map<string, number>();
   const seen = new Set<string>();
   for (const building of raw) {
@@ -115,7 +201,8 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
     add(unitHistoryValues, quarter, segment, qty);
   }
   const temporalValues = new Map<string, number>();
-  const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/releases`, query: { city: scope.city, uf: scope.uf, start_period: '2022-01-01', end_period: `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}-31`, per_page: 100, group_by: 'Padrão', 'type[]': ['Vertical', 'Horizontal'] }, signal });
+  const releasesWindow = temporalWindow(scope.endQuarter);
+  const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/releases`, query: { city, uf: scope.uf, start_period: releasesWindow.start, end_period: releasesWindow.end, per_page: 100, group_by: 'Padrão', 'type[]': ['Vertical', 'Horizontal'] }, signal });
   if (response.ok && response.data) for (const row of (Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [])) { const quarter = periodToQuarter(row.period); const segment = rawSegment(row.building_type); if (quarter && segment) add(temporalValues, quarter, segment, safeNumber(row.releases_in_period) ?? 0); }
   return [
     ...cells('A · release_date + building_id distinto', 'Empreendimentos', 'building-with-history · sem status', reference, projectValues, true),
@@ -125,10 +212,11 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
   ];
 }
 
-async function temporalRows(scope: PanoramaScope, endpoint: 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-prices-meter', groupBy: 'Padrão' | 'Tipologia' = 'Padrão', signal?: AbortSignal): Promise<{ rows: Record<string, unknown>[]; available: boolean; source: string }> {
+async function temporalRows(scope: CityScope, endpoint: 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-prices-meter', groupBy: 'Padrão' | 'Tipologia' = 'Padrão', signal?: AbortSignal): Promise<SourceResult> {
   const rows: Record<string, unknown>[] = []; let page = 1; let lastPage = 1;
+  const window = temporalWindow(scope.endQuarter);
   do {
-    const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: '2022-01-01', end_period: `${scope.endQuarter.slice(2)}-${String(Number(scope.endQuarter[0]) * 3).padStart(2, '0')}-31`, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal });
+    const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: window.start, end_period: window.end, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal });
     if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}` };
     rows.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
     lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
@@ -139,7 +227,9 @@ async function temporalRows(scope: PanoramaScope, endpoint: 'sales' | 'stock' | 
 /** Initial T3/T4 bench: direct temporal endpoints only; it cannot silently promote a report contract. */
 export async function fetchMarketCalibration(scope: PanoramaScope, signal?: AbortSignal): Promise<MarketCalibrationCell[]> {
   const reference = PIRACICABA_1T26_MARKET_REFERENCE;
-  const [sales, stock, ivv] = await Promise.all([temporalRows(scope, 'sales', 'Padrão', signal), temporalRows(scope, 'stock', 'Padrão', signal), temporalRows(scope, 'ivv', 'Padrão', signal)]);
+  // Bancada mono-cidade: compara contra o gabarito municipal congelado.
+  const cityScope: CityScope = { uf: scope.uf, city: primaryCity(scope), endQuarter: scope.endQuarter };
+  const [sales, stock, ivv] = await Promise.all([temporalRows(cityScope, 'sales', 'Padrão', signal), temporalRows(cityScope, 'stock', 'Padrão', signal), temporalRows(cityScope, 'ivv', 'Padrão', signal)]);
   const stockPeriod = [scope.endQuarter];
   return [
     ...buildMarketCells('Vendas', 'A · endpoint sales', 'Unidades vendidas', sales.source, reference, aggregateTemporal(sales.rows, 'liquid_sales'), sales.available),
@@ -152,21 +242,19 @@ export async function fetchMarketCalibration(scope: PanoramaScope, signal?: Abor
 
 /** Raw, audited universe used only by analyst curation; it never changes contracts by itself. */
 export async function fetchLaunchAuditBuildings(scope: PanoramaScope, signal?: AbortSignal): Promise<LaunchAuditBuilding[]> {
-  const raw: Record<string, unknown>[] = [];
-  for (const type of ['Vertical', 'Horizontal']) {
-    let page = 1; let lastPage = 1;
-    do {
-      const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
-      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha ao carregar universo (${response.status ?? 'rede'}).`);
-      raw.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
-      lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
-    } while (page <= lastPage);
-  }
+  // A curadoria cobre todas as cidades do recorte; a chave de dedupe é por cidade + building_id.
+  const collection = await collectByCity(
+    cityScopes(scope).map((item) => item.city),
+    (city, citySignal) => fetchBuildings({ uf: scope.uf, city, endQuarter: scope.endQuarter }, citySignal).then((buildings) => ({ city, buildings })),
+    { concurrency: CITY_CONCURRENCY, signal },
+  );
+  const harvested = completedValues(collection);
   const seen = new Set<string>(); const rows: LaunchAuditBuilding[] = [];
-  for (const building of raw) {
+  for (const { city, buildings } of harvested) for (const building of buildings) {
     const quarter = releaseQuarter(building.release_date); const segment = rawSegment(building.building_type ?? building.type); const buildingId = String(building.building_id ?? building.id ?? '');
-    if (!quarter || !segment || !buildingId || quarterKey(quarter) > quarterKey(scope.endQuarter) || seen.has(buildingId)) continue;
-    seen.add(buildingId); const releaseMonth = String(building.release_date).slice(0, 7);
+    const key = `${city}#${buildingId}`;
+    if (!quarter || !segment || !buildingId || quarterKey(quarter) > quarterKey(scope.endQuarter) || seen.has(key)) continue;
+    seen.add(key); const releaseMonth = String(building.release_date).slice(0, 7);
     const releaseMonthQty = (Array.isArray(building.typologies_history) ? building.typologies_history as Record<string, unknown>[] : []).filter((entry) => String(entry.period ?? '').slice(0, 7) === releaseMonth).reduce((sum, entry) => sum + (safeNumber(entry.qty) ?? 0), 0);
     rows.push({ buildingId, name: String(building.name ?? 'Sem nome'), segment, releaseQuarter: quarter, totalUnits: safeNumber(building.total_units ?? building.qty) ?? 0, releaseMonthQty });
   }

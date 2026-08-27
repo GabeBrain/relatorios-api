@@ -30,6 +30,14 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-27 — Correção de tipagem no exportador SVG — Codex (integração Panorama)
+- **Ambiente/funcionalidade:** `/dash-geobrain` — exportação SVG dos gráficos.
+- **O quê:** o nó raiz do SVG de Recharts passou a ser tipado explicitamente como `SVGSVGElement`, eliminando erro do typecheck real (`tsconfig.app.json`) sem alterar o comportamento visual ou os dados exportados.
+- **Arquivos:** `src/features/dashboard-geobrain/Charts.tsx`.
+- **Commits:** `06d9ec2` (commit integrado da V1 do Panorama).
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; correção necessária para liberar a validação de tipos completa do repositório.
+
 ### 2026-08-24 — Ajustes de composição dos gráficos — Edgar
 - **Ambiente/funcionalidade:** `/dash-geobrain` — layout do Dashboard GeoBrain.
 - **O quê:** gráfico de bolhas movido para abaixo da linha dos Mapas de oportunidades; `Preço médio por bairro` passou a ocupar a largura completa quando fica sozinho na grade de rankings.

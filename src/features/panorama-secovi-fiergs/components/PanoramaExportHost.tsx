@@ -6,6 +6,7 @@ import { synchronizeOfficialCoverCity } from '../lib/official-cover';
 import { buildPanoramaPdf, PanoramaExportCancelled } from '../lib/pdf-export';
 import { usePanoramaExportStore } from '../export-store';
 import { quarterLabel } from '../lib/launches';
+import { scopeCityLabel, scopeCitySlug } from '../types';
 
 /**
  * Executa a exportação do Panorama fora da árvore da rota: montado pelo shell, sobrevive à
@@ -23,7 +24,8 @@ export default function PanoramaExportHost() {
     const runKey = report as PanoramaExportRunKey;
     if (startedFor.current === runKey) return;
     startedFor.current = runKey;
-    synchronizeOfficialCoverCity(report.scope.city, report.scope.uf, report.scope.endQuarter);
+    const cityLabel = scopeCityLabel(report.scope);
+    synchronizeOfficialCoverCity(cityLabel, report.scope.uf, report.scope.endQuarter);
 
     // Aguarda o deck pintar antes de capturar; o efeito roda no mesmo commit que o monta.
     const run = async () => {
@@ -33,16 +35,16 @@ export default function PanoramaExportHost() {
       usePanoramaExportStore.getState().markCapturing(slides.length);
       try {
         const built = await buildPanoramaPdf(slides, {
-          title: `Panorama imobiliário de ${report.scope.city}`,
+          title: `Panorama imobiliário de ${cityLabel}`,
           author: 'Brain Inteligência Estratégica',
-          subject: `${report.scope.city}/${report.scope.uf} · ${quarterLabel(report.scope.endQuarter)}`,
+          subject: `${cityLabel}/${report.scope.uf} · ${quarterLabel(report.scope.endQuarter)}`,
         }, ({ current, total: pages }) => {
           const live = usePanoramaExportStore.getState();
           live.reportProgress(current, pages);
           if (current === pages) live.markAssembling();
         }, signal);
         if (signal?.aborted) return;
-        const name = `panorama-${report.scope.city.toLowerCase().replaceAll(' ', '-')}-${report.scope.endQuarter}.pdf`;
+        const name = `panorama-${scopeCitySlug(report.scope)}-${report.scope.endQuarter}.pdf`;
         const url = URL.createObjectURL(built.blob);
         const link = document.createElement('a');
         link.href = url; link.download = name; link.rel = 'noopener';

@@ -46,7 +46,7 @@ async function settlePaint() {
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
     return;
   }
-  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 }
 
 /**

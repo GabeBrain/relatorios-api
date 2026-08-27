@@ -13,4 +13,12 @@ describe('Panorama PDF export contract', () => {
     expect(PANORAMA_REPORT_MANIFEST.map((page) => page.page)).toContain(2);
     expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.page)).size).toBe(PANORAMA_REPORT_MANIFEST.length);
   });
+
+  it('keeps the institutional reference slide 3 at output position 7', () => {
+    const outputSeven = PANORAMA_REPORT_MANIFEST.find((page) => page.page === 7);
+    const outputThree = PANORAMA_REPORT_MANIFEST.find((page) => page.page === 3);
+    expect(outputSeven?.referenceSlide).toBe(3);
+    expect(outputThree?.referenceSlide).toBe(4);
+    expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.referenceSlide)).size).toBe(62);
+  });
 });

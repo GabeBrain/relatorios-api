@@ -20,7 +20,7 @@ export const PIRACICABA_1T26_RECORDS: LaunchRecord[] = quarters.flatMap((quarter
 export const PIRACICABA_1T26_REFERENCE: PanoramaReference = {
   id: 'piracicaba-sp-1t2026',
   label: 'Piracicaba/SP · 1T2026',
-  scope: { uf: 'SP', city: 'Piracicaba', endQuarter: '1T2026' },
+  scope: { uf: 'SP', cities: ['Piracicaba'], endQuarter: '1T2026' },
   model: buildLaunchModel(PIRACICABA_1T26_RECORDS),
 };
 

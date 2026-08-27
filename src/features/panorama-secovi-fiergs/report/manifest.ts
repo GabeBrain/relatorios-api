@@ -5,7 +5,7 @@ export interface ReportPageDefinition { page: number; referenceSlide: number; se
 export interface PanoramaSection { id: string; label: string; start: number; end: number; }
 
 export const PANORAMA_SECTIONS: PanoramaSection[] = [
-  { id: 'about', label: 'Sobre o SECOVI-SP', start: 6, end: 10 }, { id: 'launches', label: 'Análise de Lançamentos', start: 11, end: 19 }, { id: 'sales', label: 'Análise de Vendas', start: 20, end: 27 }, { id: 'market', label: 'Análise Geral do Mercado', start: 28, end: 29 }, { id: 'vertical', label: 'Análise do Mercado Residencial Vertical', start: 30, end: 46 }, { id: 'horizontal', label: 'Análise do Mercado Residencial Horizontal', start: 47, end: 49 }, { id: 'vgv', label: 'Análise do VGV Geral', start: 50, end: 51 }, { id: 'observations', label: 'Análises e Observações Sobre o Mercado', start: 52, end: 54 }, { id: 'location', label: 'Localização dos Empreendimentos', start: 55, end: 56 }, { id: 'consultants', label: 'Consultores do Estudo', start: 57, end: 62 },
+  { id: 'about', label: 'Sobre o SECOVI-SP', start: 5, end: 10 }, { id: 'launches', label: 'Análise de Lançamentos', start: 11, end: 19 }, { id: 'sales', label: 'Análise de Vendas', start: 20, end: 27 }, { id: 'market', label: 'Análise Geral do Mercado', start: 28, end: 29 }, { id: 'vertical', label: 'Análise do Mercado Residencial Vertical', start: 30, end: 46 }, { id: 'horizontal', label: 'Análise do Mercado Residencial Horizontal', start: 47, end: 49 }, { id: 'vgv', label: 'Análise do VGV Geral', start: 50, end: 51 }, { id: 'observations', label: 'Análises e Observações Sobre o Mercado', start: 52, end: 54 }, { id: 'location', label: 'Localização dos Empreendimentos', start: 55, end: 56 }, { id: 'consultants', label: 'Consultores do Estudo', start: 57, end: 62 },
 ];
 
 type Definition = [string, string, PanoramaVisualFamily, string[], MethodStatus | 'not_applicable'];
@@ -17,7 +17,13 @@ const pages: Definition[] = [
   ['Mercado residencial horizontal','Abertura de bloco','divider',[],'not_applicable'],['Oferta horizontal por coorte','Coortes','market-table',['cohorts'],'open_method'],['Ticket, área e R$/m² horizontal','Indicadores de preço','price',['prices'],'open_method'],['VGV geral','Abertura de bloco','divider',[],'not_applicable'],['VGV ofertado, disponível e vendido por padrão','Matriz de VGV','matrix',['stock.vgv'],'open_method'],['Análises e observações','Abertura de bloco','divider',[],'not_applicable'],['Análise de mercado','Narrativa orientada por dados','narrative',['narrative.facts'],'assumed'],['Análise de mercado','Narrativa orientada por dados','narrative',['narrative.facts'],'assumed'],['Localização dos empreendimentos','Abertura de bloco','divider',[],'not_applicable'],['Mapa de empreendimentos verticais','Visualização geográfica','map',['locations'],'open_method'],['Consultores do estudo','Abertura','divider',[],'not_applicable'],['Créditos','Equipe e fontes','static',[],'not_applicable'],['Brain Inteligência Estratégica','Encerramento','closing',[],'not_applicable'],['Panorama imobiliário','Encerramento','closing',[],'not_applicable'],['Obrigado','Encerramento','closing',[],'not_applicable'],['Fontes, premissas e rastreabilidade','Encerramento técnico','closing',[],'not_applicable'],
 ];
 
-export const PANORAMA_REPORT_MANIFEST: ReportPageDefinition[] = pages.map(([title, intention, visualFamily, contractKeys, methodologyStatus], index) => {
-  const page = index + 1; const section = PANORAMA_SECTIONS.find((item) => page >= item.start && page <= item.end);
-  return { page, referenceSlide: page, sectionId: section?.id ?? 'opening', title, intention, visualFamily, contractKeys, methodologyStatus };
+// A lâmina institucional de visão/missão/valores (referência 3) ocupa a posição 7 no deck final.
+// `page` é sempre a posição de saída; `referenceSlide` mantém a identidade editorial original.
+const outputReferenceSlides = [1, 2, 4, 5, 6, 7, 3, 8, 9, 10, ...Array.from({ length: 52 }, (_, index) => index + 11)];
+
+export const PANORAMA_REPORT_MANIFEST: ReportPageDefinition[] = outputReferenceSlides.map((referenceSlide, index) => {
+  const page = index + 1;
+  const [title, intention, visualFamily, contractKeys, methodologyStatus] = pages[referenceSlide - 1];
+  const section = PANORAMA_SECTIONS.find((item) => page >= item.start && page <= item.end);
+  return { page, referenceSlide, sectionId: section?.id ?? 'opening', title, intention, visualFamily, contractKeys, methodologyStatus };
 });

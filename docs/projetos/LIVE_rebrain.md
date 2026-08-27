@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-27 — Panorama: integração Luna + Opus concluída para validação final — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — V1 Jundiaí.
+- **O quê:** handoff `OPUS_READY` revisado; contrato `cities[]`, política Secovi, período dinâmico e agregações granulares foram conectados à UI/PDF. O manifesto mantém a referência 3 na posição 7, a seleção de municípios é multi-cidade, e os slides 31–51 consomem linhas prontas do cubo com nulos explícitos e remoção da Faixa de Valor sem fonte.
+- **Verificação:** typecheck real (`tsconfig.app.json`) aprovado; suíte 230/230; build de produção gerado; rota local HTTP 200. QA visual autenticado e PDF real de 62 páginas ainda precisam ser executados no ambiente com token/agent-browser.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{domain,types.ts,api.ts,report/model.ts,components,pages,report/manifest.ts,lib/pdf-export.ts}` e testes/documentação associados.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a aguarda somente QA autenticado, PDF final e homologação; G-04/G-05 permanecem V2.
+
 ### 2026-08-27 — Panorama: execução da V1 dividida entre Luna e Opus — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — estratégia de execução paralela das correções de Jundiaí.
 - **O quê:** o plano terminal foi separado em duas trilhas com propriedade de arquivos: Opus implementa domínio/API/agregações sem staging ou commit; Luna implementa UI/PDF, aguarda o handoff `OPUS_READY`, revisa o conjunto e cria o único commit integrado após a verificação das 62 páginas. Foram incluídos protocolo contra interferência, contrato congelado, marcadores de handoff e CTAs independentes.
