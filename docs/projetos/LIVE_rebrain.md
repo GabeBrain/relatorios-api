@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-27 — Panorama: capa central, ausência de dados explícita e isolamento por página — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capa 2, slides 48–49, leitura contínua e exportação.
+- **O quê:** a composição da capa 2 foi centralizada no canvas inteiro: cidade, faixa amarela e trimestre ocupam o mesmo eixo vertical, com a faixa entre o nome e o período. As lâminas de coorte e preço agora removem anos integralmente zerados e mostram uma mensagem objetiva quando a API não devolve dados observados; em especial, o slide 49 não apresenta mais a tabela enganosa `Média Geral —`. A renderização de cada página foi isolada por um error boundary: uma lâmina com falha passa a apresentar seu estado local, preservando a leitura e a exportação das demais. O planejador de tiles tem teste adicional para extremos geográficos válidos, mas inviáveis.
+- **Verificação:** testes da feature, typecheck real e build de produção pendentes desta entrega; a QA autenticada deve confirmar a leitura de 62 páginas e distinguir mensagem de ausência de dado de falha da API.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/{ReportPaginator.tsx,MarketSlides.tsx},print/panorama-print.css,__tests__/map-tiles.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** leitura contínua deixa de ter uma única falha global; falta o aceite visual autenticado da capa e a investigação de origem para qualquer ausência de dado que persista na API.
+
 ### 2026-08-27 — Panorama: leitura contínua protegida contra coordenadas inválidas — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — ação `Ver as 62 páginas`, slide 56.
 - **O quê:** corrigido o `Invalid array length` que interrompia a leitura contínua: o gerador de tiles agora descarta latitude/longitude fora do globo, limita o mosaico a 20 tiles e não monta o fundo cartográfico quando o recorte é impossível. A contagem de pontos do slide 56 passou a considerar apenas coordenadas válidas.

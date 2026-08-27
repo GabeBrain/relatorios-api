@@ -26,4 +26,10 @@ describe('map tiles do slide 56', () => {
     expect(buildMapTilePlan([{ latitude: -23.18, longitude: -46.88 }, { latitude: 999_999_999, longitude: 999_999_999 }])).not.toBeNull();
     expect(buildMapTilePlan([{ latitude: Number.NaN, longitude: -46.88 }])).toBeNull();
   });
+
+  it('falha de modo seguro quando pontos válidos exigem um mosaico maior do que o permitido', () => {
+    const distantPoints = [{ latitude: -80, longitude: -179 }, { latitude: 80, longitude: 179 }];
+    expect(() => buildMapTilePlan(distantPoints)).not.toThrow();
+    expect(buildMapTilePlan(distantPoints)).toBeNull();
+  });
 });
