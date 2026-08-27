@@ -49,6 +49,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-27 — Panorama: plano visual até o slide 33 a partir dos prints — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — filtros, geração e slides 1–33.
+- **O quê:** os dez primeiros apontamentos visuais foram diagnosticados e transformados em plano: multi-select pesquisável com chips, range inicial/final, bloqueio de refetch pesado, correção da capa 2, rodapé dinâmico, legibilidade/colisão de labels, tag vertical compacta e ordenação semântica. O plano inclui causas no código, sequência e matriz de prints para aceite.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/PLAN_CORRECOES_VISUAIS_ATE_SLIDE33_2026-08-27.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA; próximo portão é implementar P0–P7 e comparar os prints até o slide 33 antes da inspeção integral do novo PDF.
+
 ### 2026-08-27 — Panorama: verificação antes × agora de Jundiaí — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — auditoria pós-integração da V1.
 - **O quê:** criado relatório operacional que compara comportamento anterior e atual de cada requisito, reúne evidências de código/testes e cruza individualmente as 28 anotações do PDF de Jundiaí por slide. Itens dependentes de token/PDF real e itens V2 ficaram explicitamente separados.
