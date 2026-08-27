@@ -13,10 +13,10 @@ const PER_PAGE = 100;
 const CITY_CONCURRENCY = 3;
 
 /** Recorte de uma única cidade; o escopo público continua sendo multi-cidade. */
-type CityScope = { uf: string; city: string; endQuarter: Quarter };
+type CityScope = { uf: string; city: string; startQuarter?: Quarter; endQuarter: Quarter };
 
 const cityScopes = (scope: PanoramaScope): CityScope[] =>
-  scope.cities.filter(Boolean).map((city) => ({ uf: scope.uf, city, endQuarter: scope.endQuarter }));
+  scope.cities.filter(Boolean).map((city) => ({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }));
 
 /** Primeira cidade do recorte; usado só por bancadas de calibração, que são mono-cidade. */
 function primaryCity(scope: PanoramaScope): string {
@@ -29,9 +29,9 @@ function primaryCity(scope: PanoramaScope): string {
  * Janela temporal derivada do fechamento escolhido (G-02): o `start_period` acompanha os 17
  * trimestres editoriais em vez de um `2022-01-01` fixo, e o `end_period` acompanha `endQuarter`.
  */
-function temporalWindow(endQuarter: Quarter): { start: string; end: string } {
-  const window = editorialWindow(endQuarter);
-  return { start: quarterStartDate(window[0]), end: quarterEndDate(endQuarter) };
+function temporalWindow(scope: Pick<CityScope, 'startQuarter' | 'endQuarter'>): { start: string; end: string } {
+  const window = scope.startQuarter ? [scope.startQuarter] : editorialWindow(scope.endQuarter);
+  return { start: quarterStartDate(window[0]), end: quarterEndDate(scope.endQuarter) };
 }
 
 /** Paginação completa de `building-with-history` para uma cidade e um tipo. */
@@ -118,7 +118,7 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
 
   const collection: CollectionResult<CityHarvest> = await collectByCity(
     scopes.map((item) => item.city),
-    (city, citySignal) => harvestCity({ uf: scope.uf, city, endQuarter: scope.endQuarter }, scope.entity, citySignal),
+    (city, citySignal) => harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, citySignal),
     { concurrency: CITY_CONCURRENCY, signal },
   );
 
@@ -188,7 +188,7 @@ function add(map: Map<string, number>, quarter: Quarter, segment: Segment, value
 export async function fetchLaunchCalibration(scope: PanoramaScope, reference: PanoramaReference, signal?: AbortSignal): Promise<CalibrationCell[]> {
   // Bancada de calibração é mono-cidade por construção: compara contra um gabarito municipal.
   const city = primaryCity(scope);
-  const cityScope: CityScope = { uf: scope.uf, city, endQuarter: scope.endQuarter };
+  const cityScope: CityScope = { uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter };
   const raw = await fetchBuildings(cityScope, signal);
   const projectValues = new Map<string, number>(); const unitTotalValues = new Map<string, number>(); const unitHistoryValues = new Map<string, number>();
   const seen = new Set<string>();
@@ -201,7 +201,7 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
     add(unitHistoryValues, quarter, segment, qty);
   }
   const temporalValues = new Map<string, number>();
-  const releasesWindow = temporalWindow(scope.endQuarter);
+  const releasesWindow = temporalWindow(scope);
   const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/releases`, query: { city, uf: scope.uf, start_period: releasesWindow.start, end_period: releasesWindow.end, per_page: 100, group_by: 'Padrão', 'type[]': ['Vertical', 'Horizontal'] }, signal });
   if (response.ok && response.data) for (const row of (Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [])) { const quarter = periodToQuarter(row.period); const segment = rawSegment(row.building_type); if (quarter && segment) add(temporalValues, quarter, segment, safeNumber(row.releases_in_period) ?? 0); }
   return [
@@ -214,7 +214,7 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
 
 async function temporalRows(scope: CityScope, endpoint: 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-prices-meter', groupBy: 'Padrão' | 'Tipologia' = 'Padrão', signal?: AbortSignal): Promise<SourceResult> {
   const rows: Record<string, unknown>[] = []; let page = 1; let lastPage = 1;
-  const window = temporalWindow(scope.endQuarter);
+  const window = temporalWindow(scope);
   do {
     const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: window.start, end_period: window.end, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal });
     if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}` };
@@ -228,7 +228,7 @@ async function temporalRows(scope: CityScope, endpoint: 'sales' | 'stock' | 'ivv
 export async function fetchMarketCalibration(scope: PanoramaScope, signal?: AbortSignal): Promise<MarketCalibrationCell[]> {
   const reference = PIRACICABA_1T26_MARKET_REFERENCE;
   // Bancada mono-cidade: compara contra o gabarito municipal congelado.
-  const cityScope: CityScope = { uf: scope.uf, city: primaryCity(scope), endQuarter: scope.endQuarter };
+  const cityScope: CityScope = { uf: scope.uf, city: primaryCity(scope), startQuarter: scope.startQuarter, endQuarter: scope.endQuarter };
   const [sales, stock, ivv] = await Promise.all([temporalRows(cityScope, 'sales', 'Padrão', signal), temporalRows(cityScope, 'stock', 'Padrão', signal), temporalRows(cityScope, 'ivv', 'Padrão', signal)]);
   const stockPeriod = [scope.endQuarter];
   return [
@@ -245,7 +245,7 @@ export async function fetchLaunchAuditBuildings(scope: PanoramaScope, signal?: A
   // A curadoria cobre todas as cidades do recorte; a chave de dedupe é por cidade + building_id.
   const collection = await collectByCity(
     cityScopes(scope).map((item) => item.city),
-    (city, citySignal) => fetchBuildings({ uf: scope.uf, city, endQuarter: scope.endQuarter }, citySignal).then((buildings) => ({ city, buildings })),
+    (city, citySignal) => fetchBuildings({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, citySignal).then((buildings) => ({ city, buildings })),
     { concurrency: CITY_CONCURRENCY, signal },
   );
   const harvested = completedValues(collection);

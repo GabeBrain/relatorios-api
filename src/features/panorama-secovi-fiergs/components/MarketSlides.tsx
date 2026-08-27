@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { scopeCityLabel, type PanoramaReportModel, type ReportMarketBlock, type ReportSeries } from '../types';
+import { orderStandards, orderTypologies } from '../domain/taxonomy';
 
 const integer = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 const decimal = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -17,7 +18,13 @@ function last(block: ReportMarketBlock) { return block.series.at(-1) ?? { vertic
 function group(block: ReportMarketBlock, label: string) { return block.groupSeries.find((item) => normalize(item.label) === normalize(label)); }
 function currentGroup(block: ReportMarketBlock, label: string, segment: SegmentKey) { const item = group(block, label)?.series.at(-1); return item ? valueOf(item, segment) : 0; }
 function cumulativeGroup(block: ReportMarketBlock, label: string, segment: SegmentKey) { return group(block, label)?.series.reduce((sum, item) => sum + valueOf(item, segment), 0) ?? 0; }
-function labels(...blocks: ReportMarketBlock[]) { return [...new Set(blocks.flatMap((block) => block.byGroup.map((row) => row.label)))]; }
+function orderedLabels(...blocks: ReportMarketBlock[]) {
+  const values = [...new Set(blocks.flatMap((block) => block.byGroup.map((row) => row.label)))];
+  const normalized = values.map((value) => normalize(value));
+  if (normalized.some((value) => /dorm|studio|kitnet|quarto/.test(value))) return orderTypologies(values as never);
+  if (normalized.some((value) => /compacto|econom|standard|medio|alto|luxo/.test(value))) return orderStandards(values as never);
+  return values.sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+}
 
 function DataBar({ value, max, tone = 'green', format = integer }: { value: number; max: number; tone?: 'green' | 'red' | 'blue' | 'yellow'; format?: (value: number) => string }) {
   const size = max > 0 ? Math.min(100, Math.abs(value) / max * 100) : 0;
@@ -36,7 +43,7 @@ function offerRows({ report, dimension, segment = 'vertical' }: { report: Panora
   }
   const stock = dimension === 'pattern' ? report.stock.units : report.stock.unitsByTypology;
   const sales = dimension === 'pattern' ? report.sales.units : report.sales.unitsByTypology;
-  const rows = labels(stock, sales).slice(0, 8).map((label) => {
+  const rows = orderedLabels(stock, sales).slice(0, 8).map((label) => {
     const final = currentGroup(stock, label, segment);
     const sold = cumulativeGroup(sales, label, segment);
     return { label, final, launched: final + sold };
@@ -50,7 +57,7 @@ export function AreaIvvSlide({ report }: { report: PanoramaReportModel }) {
   const stock = report.stock.unitsByTypology;
   const sales = report.sales.unitsByTypology;
   const ivv = report.ivvByTypology;
-  const rowLabels = labels(stock, sales, ivv).slice(0, 10);
+  const rowLabels = orderedLabels(stock, sales, ivv).slice(0, 10);
   const currentIndex = Math.max(0, stock.series.length - 1);
   const previousIndex = Math.max(0, currentIndex - 1);
   const currentTotal = rowLabels.reduce((sum, label) => sum + (group(stock, label)?.series[currentIndex]?.vertical ?? 0), 0);
@@ -104,7 +111,7 @@ export function PriceTableSlide({ report, dimension, horizontal = false }: { rep
   }
   const ticket = dimension === 'pattern' ? report.prices.ticket : report.prices.ticketByTypology;
   const meter = dimension === 'pattern' ? report.prices.meter : report.prices.meterByTypology;
-  const rowLabels = labels(ticket, meter).slice(0, 8);
+  const rowLabels = orderedLabels(ticket, meter).slice(0, 8);
   const rows = horizontal ? [{ label: 'Casas em Cond. Fechado', ticket: last(ticket).horizontal, meter: last(meter).horizontal }] : rowLabels.map((label) => ({ label, ticket: currentGroup(ticket, label, 'vertical'), meter: currentGroup(meter, label, 'vertical') }));
   const averageTicket = rows.length ? rows.reduce((sum, row) => sum + row.ticket, 0) / rows.length : 0; const averageMeter = rows.length ? rows.reduce((sum, row) => sum + row.meter, 0) / rows.length : 0;
   return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${horizontal ? 'TIPOLOGIA' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipo Imóvel</th><th>Preço Médio</th><th>Área Priv. Média</th><th>R$/m² Privativa</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{currency(row.ticket)}</td><td>{row.ticket && row.meter ? integer(row.ticket / row.meter) : '—'}</td><td><DataBar value={row.meter} max={Math.max(...rows.map((item) => item.meter), 1)} format={integer}/></td></tr>)}{!horizontal && <tr className="panorama-total-row"><td>Média Geral</td><td>{currency(averageTicket)}</td><td>{averageTicket && averageMeter ? integer(averageTicket / averageMeter) : '—'}</td><td>{integer(averageMeter)}</td></tr>}</tbody></table></Slide>;
@@ -119,7 +126,7 @@ export function PriceChartSlide({ report, dimension }: { report: PanoramaReportM
     return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-chart-slide"><div className="panorama-price-bars">{rows.map((row) => <div key={row.label}><span style={{ height: `${(row.value ?? 0) / max * 100}%` }}><b>{integer(row.value)}</b></span><strong>{row.label}</strong></div>)}{average !== null && <i className="panorama-average-line" style={{ bottom: `${average / max * 100}%` }}><b>{integer(average)}</b></i>}</div><div className="panorama-chart-legend"><span className="green">Preço por {dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</span><span className="yellow">Média Geral</span></div></Slide>;
   }
   const meter = dimension === 'pattern' ? report.prices.meter : report.prices.meterByTypology;
-  const rows = meter.byGroup.slice(0, 8).map((row) => ({ label: row.label, value: row.vertical })); const max = Math.max(...rows.map((row) => row.value), 1); const average = rows.length ? rows.reduce((sum, row) => sum + row.value, 0) / rows.length : 0;
+  const rows = orderedLabels(meter).slice(0, 8).map((label) => ({ label, value: meter.byGroup.find((row) => row.label === label)?.vertical ?? 0 })); const max = Math.max(...rows.map((row) => row.value), 1); const average = rows.length ? rows.reduce((sum, row) => sum + row.value, 0) / rows.length : 0;
   return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-chart-slide"><div className="panorama-price-bars">{rows.map((row) => <div key={row.label}><span style={{ height: `${row.value / max * 100}%` }}><b>{integer(row.value)}</b></span><strong>{row.label}</strong></div>)}<i className="panorama-average-line" style={{ bottom: `${average / max * 100}%` }}><b>{integer(average)}</b></i></div><div className="panorama-chart-legend"><span className="green">Preço por {dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</span><span className="yellow">Média Geral</span></div></Slide>;
 }
 
@@ -129,7 +136,7 @@ export function CohortMatrixSlide({ report, participation = false }: { report: P
     const display = (value: number | null) => value === null ? '—' : participation ? percent(value) : integer(value);
     return <Slide title={`${participation ? 'PARTICIPAÇÃO DA ' : ''}OFERTA LANÇADA E FINAL POR ANO DE LANÇAMENTO X PADRÃO`} className="panorama-cohort-matrix-slide"><table className="panorama-reference-table"><thead><tr><th>Ano de Lançamento / Padrão</th>{granularMatrix.standards.map((standard) => <th colSpan={2} key={standard}>{standard}</th>)}<th colSpan={2}>Total</th></tr><tr><th/><>{granularMatrix.standards.flatMap((standard) => [<th key={`${standard}-l`}>Lançada</th>, <th key={`${standard}-f`}>Final</th>])}</><th>Lançada</th><th>Final</th></tr></thead><tbody>{granularMatrix.rows.map((row) => <tr key={row.label}><td>{row.label}</td>{granularMatrix.standards.flatMap((standard) => [<td key={`${standard}-l`}>{display(row.cells[standard]?.launchedUnits ?? null)}</td>, <td key={`${standard}-f`}>{display(row.cells[standard]?.finalUnits ?? null)}</td>])}<td>{display(row.total.launchedUnits)}</td><td>{display(row.total.finalUnits)}</td></tr>)}</tbody></table></Slide>;
   }
-  const years = [...new Set(report.market.cohortMatrix.map((row) => row.year))].sort(); const standards = [...new Set(report.market.cohortMatrix.map((row) => row.standard))].slice(0, 7);
+  const years = [...new Set(report.market.cohortMatrix.map((row) => row.year))].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true })); const standards = orderStandards([...new Set(report.market.cohortMatrix.map((row) => row.standard))] as never).slice(0, 7);
   const value = (year: string, standard: string) => report.market.cohortMatrix.find((row) => row.year === year && row.standard === standard)?.vertical ?? 0;
   const standardTotal = (standard: string) => years.reduce((sum, annualYear) => sum + value(annualYear, standard), 0);
   return <Slide title={`${participation ? 'PARTICIPAÇÃO DA ' : ''}OFERTA LANÇADA E FINAL POR ANO DE LANÇAMENTO X PADRÃO`} className="panorama-cohort-matrix-slide"><table className="panorama-reference-table"><thead><tr><th rowSpan={2}>Ano de<br/>Lançamento / Padrão</th>{standards.map((standard) => <th colSpan={2} key={standard}>{standard}</th>)}<th colSpan={2}>Total</th></tr><tr>{[...standards, 'Total'].flatMap((standard) => [<th key={`${standard}-l`}>Oferta<br/>Lançada</th>, <th key={`${standard}-f`}>Oferta<br/>Final</th>])}</tr></thead><tbody>{years.map((annualYear) => { const yearTotal = standards.reduce((sum, standard) => sum + value(annualYear, standard), 0); return <tr key={annualYear}><td>{annualYear}</td>{standards.flatMap((standard) => { const final = value(annualYear, standard); const total = standardTotal(standard); const display = participation ? percent(total ? final / total * 100 : 0) : integer(final); return [<td key={`${standard}-l`}>—</td>, <td key={`${standard}-f`}><DataBar value={participation ? (total ? final / total * 100 : 0) : final} max={participation ? 100 : Math.max(total, 1)} tone="green" format={() => display}/></td>]; })}<td>—</td><td><DataBar value={yearTotal} max={Math.max(...years.map((yearItem) => standards.reduce((sum, standard) => sum + value(yearItem, standard), 0)), 1)} tone="red" format={integer}/></td></tr>; })}</tbody></table></Slide>;
@@ -142,7 +149,7 @@ export function MaturitySlide({ report, dimension, participation = false }: { re
     const show = (value: number | null) => value === null ? '—' : participation ? percent(total ? value / total * 100 : null) : integer(value);
     return <Slide title={`${participation ? 'PARTICIPAÇÃO DO ' : ''}TEMPO MÉDIO DA OFERTA LANÇADA E FINAL | POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-maturity-slide"><table className="panorama-reference-table"><thead><tr><th>Tempo Médio - {dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</th><th>Planta lançada</th><th>Construção lançada</th><th>Pronto lançado</th><th>Total lançado</th><th>Planta final</th><th>Construção final</th><th>Pronto final</th><th>Total final</th></tr></thead><tbody>{granularRows.map((row) => <tr key={row.label} className={row.kind === 'total' ? 'panorama-total-row' : undefined}><td>{row.label}</td><td>{show(row.launched.Planta)}</td><td>{show(row.launched.Construção)}</td><td>{show(row.launched.Pronto)}</td><td>{show(row.launched.total)}</td><td>{show(row.final.Planta)}</td><td>{show(row.final.Construção)}</td><td>{show(row.final.Pronto)}</td><td>{show(row.final.total)}</td></tr>)}</tbody></table></Slide>;
   }
-  const block = dimension === 'pattern' ? report.stock.units : report.stock.unitsByTypology; const rows = block.byGroup.slice(0, 8); const total = rows.reduce((sum, row) => sum + row.vertical, 0);
+  const block = dimension === 'pattern' ? report.stock.units : report.stock.unitsByTypology; const rows = orderedLabels(block).slice(0, 8).map((label) => block.byGroup.find((row) => row.label === label)!).filter(Boolean); const total = rows.reduce((sum, row) => sum + row.vertical, 0);
   return <Slide title={`${participation ? 'PARTICIPAÇÃO DO ' : ''}TEMPO MÉDIO DA OFERTA LANÇADA E FINAL | POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-maturity-slide"><table className="panorama-reference-table"><thead><tr><th rowSpan={3}>Tempo Médio -<br/>{dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</th><th colSpan={4}>Oferta Lançada</th><th colSpan={4}>Oferta Final</th></tr><tr><th>Planta</th><th>Construção</th><th>Pronto</th><th>Total</th><th>Planta</th><th>Construção</th><th>Pronto</th><th>Total</th></tr><tr><th>Até 6 meses</th><th>7 a 36 meses</th><th>+ de 37 meses</th><th/><th>Até 6 meses</th><th>7 a 36 meses</th><th>+ de 37 meses</th><th/></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>{participation ? percent(total ? row.vertical / total * 100 : 0) : integer(row.vertical)}</td></tr>)}</tbody></table><p className="panorama-coverage-caption">A API fornece o total por grupo; a distribuição Planta / Construção / Pronto permanece sem método homologado.</p></Slide>;
 }
 
@@ -150,7 +157,7 @@ export function VgvSlide({ report }: { report: PanoramaReportModel }) {
   if (report.granular.vgv.length) {
     return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th>Padrão</th><th>Empreendimentos</th><th>Ticket Médio</th><th>Lançada</th><th>Final</th><th>Vendidas</th><th>Lançada (R$ mi)</th><th>Final (R$ mi)</th><th>Vendidas (R$ mi)</th></tr></thead><tbody>{report.granular.vgv.map((row) => <tr key={`${row.segment}-${row.label}`} className={row.kind !== 'row' ? 'panorama-total-row' : undefined}><td>{row.label}</td><td>{integer(row.projects)}</td><td>{currency(row.averageTicket)}</td><td>{integer(row.launchedUnits)}</td><td>{integer(row.finalUnits)}</td><td>{integer(row.soldUnits)}</td><td>{decimal(row.launchedVgvMillions)}</td><td>{decimal(row.finalVgvMillions)}</td><td>{decimal(row.soldVgvMillions)}</td></tr>)}</tbody></table></Slide>;
   }
-  const rowLabels = labels(report.stock.units, report.stock.vgv, report.sales.units, report.sales.vgv).slice(0, 8);
+  const rowLabels = orderedLabels(report.stock.units, report.stock.vgv, report.sales.units, report.sales.vgv).slice(0, 8);
   return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th rowSpan={2}>Padrão</th><th rowSpan={2}>Empreendimentos</th><th rowSpan={2}>Ticket Médio</th><th colSpan={3}>UNIDADES EM OFERTA</th><th colSpan={3}>OFERTA EM VGV</th></tr><tr><th>Lançada</th><th>Final</th><th>Vendidas</th><th>Lançada<br/>(R$ MILHÕES)</th><th>Final<br/>(R$ MILHÕES)</th><th>Vendidas<br/>(R$ MILHÕES)</th></tr></thead><tbody>{rowLabels.map((label) => { const finalUnits = currentGroup(report.stock.units, label, 'total'); const soldUnits = cumulativeGroup(report.sales.units, label, 'total'); const finalVgv = currentGroup(report.stock.vgv, label, 'total'); const soldVgv = cumulativeGroup(report.sales.vgv, label, 'total'); return <tr key={label}><td>{label}</td><td>—</td><td>{currency(currentGroup(report.prices.ticket, label, 'total'))}</td><td>{integer(finalUnits + soldUnits)}</td><td>{integer(finalUnits)}</td><td>{integer(soldUnits)}</td><td>{decimal(finalVgv + soldVgv)}</td><td>{decimal(finalVgv)}</td><td>{decimal(soldVgv)}</td></tr>; })}</tbody></table></Slide>;
 }
 

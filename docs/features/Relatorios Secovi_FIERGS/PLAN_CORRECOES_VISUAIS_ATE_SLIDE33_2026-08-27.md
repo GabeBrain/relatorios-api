@@ -4,7 +4,7 @@
 **Origem:** primeira revisão visual do relatório em tela, imagens 1–10 do usuário
 **Escopo:** filtros/geração + slides 1–33
 **Card:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`
-**Estado:** `READY_FOR_IMPLEMENTATION`
+**Estado:** `IMPLEMENTED_PENDING_AUTHENTICATED_QA`
 
 ## 1. Objetivo desta rodada
 

@@ -56,6 +56,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
 - **Impacto em Etapas/Pendências:** etapa 7a permanece em QA; próximo portão é implementar P0–P7 e comparar os prints até o slide 33 antes da inspeção integral do novo PDF.
 
+### 2026-08-27 — Panorama: execução das correções visuais e de fluxo até o slide 33 — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — filtros, geração, capa 2, rodapé e gráficos dos slides 1–33.
+- **O quê:** implementado multi-select pesquisável com chips, período inicial/final inclusivo (`1T2022`–`2T2026` sugerido), query sem refetch automático/skeleton de background, overlay semântico da capa municipal, grid de rodapé dinâmico, tipografia maior, supressão de labels zero, tag vertical compacta e ordenação semântica antes dos cortes.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{pages/PanoramaSecoviFiergsPage.tsx,components/PanoramaCityMultiSelect.tsx,components/PanoramaQuarterRangePicker.tsx,components/ReportPaginator.tsx,components/MarketSlides.tsx,print/panorama-print.css,api.ts,domain/quarters.ts,lib/launches.ts,report/model.ts,types.ts}`.
+- **Verificação:** typecheck real (`tsconfig.app.json`), build de produção e 99 testes da feature aprovados; QA Playwright headless confirmou rota, período padrão e abertura do range picker sem token. QA autenticado, PDF real de 62 páginas e comparação visual completa permanecem pendentes.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a segue em QA autenticado; novo portão é validar multi-cidade, chamadas únicas, rodapé/capa e slides 14–33 com dados reais. Tabela Rebrain e PPTX continuam V2.
+
 ### 2026-08-27 — Panorama: verificação antes × agora de Jundiaí — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — auditoria pós-integração da V1.
 - **O quê:** criado relatório operacional que compara comportamento anterior e atual de cada requisito, reúne evidências de código/testes e cruza individualmente as 28 anotações do PDF de Jundiaí por slide. Itens dependentes de token/PDF real e itens V2 ficaram explicitamente separados.

@@ -1,6 +1,6 @@
 import { buildLaunchModel, periodToQuarter, safeNumber } from '../lib/launches';
 import type { LaunchRecord, MarketCohortRow, MethodStatus, PanoramaGranularBlocks, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
-import { editorialWindow } from '../domain/quarters';
+import { editorialWindow, quarterRange } from '../domain/quarters';
 import { mergeCubes, type MarketCube } from '../domain/cube';
 import {
   cohortMatrix as buildCohortMatrix,
@@ -15,10 +15,37 @@ import {
   pricesByTypology,
   vgvSummary,
 } from '../domain/aggregations';
+import { STANDARD_ORDER, TYPOLOGY_ORDER, normalizeText } from '../domain/taxonomy';
 
 type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string };
 type AggregateMode = 'sum' | 'average';
 type Accumulator = { sum: number; count: number };
+
+function semanticGroupOrder(a: string, b: string): number {
+  const numberOf = (value: string) => Number((value.match(/\d+/) ?? [])[0]);
+  const aNumber = numberOf(a); const bNumber = numberOf(b);
+  if (Number.isFinite(aNumber) && Number.isFinite(bNumber)) return aNumber - bNumber || a.localeCompare(b, 'pt-BR');
+  const standardIndex = (value: string) => {
+    const normalized = normalizeText(value);
+    return STANDARD_ORDER.findIndex((label) => normalizeText(label) === normalized);
+  };
+  const aStandard = standardIndex(a); const bStandard = standardIndex(b);
+  if (aStandard >= 0 || bStandard >= 0) return (aStandard < 0 ? STANDARD_ORDER.length : aStandard) - (bStandard < 0 ? STANDARD_ORDER.length : bStandard);
+  const typologyIndex = (value: string) => TYPOLOGY_ORDER.findIndex((label) => normalizeText(label) === normalizeText(value));
+  const aTypology = typologyIndex(a); const bTypology = typologyIndex(b);
+  if (aTypology >= 0 || bTypology >= 0) return (aTypology < 0 ? TYPOLOGY_ORDER.length : aTypology) - (bTypology < 0 ? TYPOLOGY_ORDER.length : bTypology);
+  return a.localeCompare(b, 'pt-BR', { numeric: true });
+}
+
+function cohortOrder(a: string, b: string): number {
+  const rank = (label: string) => {
+    if (/total geral/i.test(label)) return 10_000;
+    if (/subtotal/i.test(label)) return 9_000;
+    const year = Number(label.match(/\d{4}/)?.[0]);
+    return Number.isFinite(year) ? year : 0;
+  };
+  return rank(a) - rank(b) || a.localeCompare(b, 'pt-BR');
+}
 
 function segment(value: unknown): Segment | null {
   const raw = String(value ?? '').toLowerCase();
@@ -27,7 +54,7 @@ function segment(value: unknown): Segment | null {
 
 /** Janela editorial gerada dinamicamente; não há mais limite fixo em 1T2026 (G-02). */
 function canonical(scope: PanoramaScope): Quarter[] {
-  return editorialWindow(scope.endQuarter);
+  return scope.startQuarter ? quarterRange(scope.startQuarter, scope.endQuarter) : editorialWindow(scope.endQuarter);
 }
 
 function add(target: Map<string, Accumulator>, key: string, value: number) {
@@ -71,11 +98,11 @@ function marketBlock(scope: PanoramaScope, source: SourceResult, field: string, 
     grouped.set(label, group);
   }
   const status: ReportDataState = source.available ? (source.rows.length ? 'ready' : 'partial') : 'unavailable';
-  const groupSeries = [...grouped].map(([label, group]) => ({ label, series: reportSeries(periods, group, mode, status, source.source) }));
+  const groupSeries = [...grouped].sort(([a], [b]) => semanticGroupOrder(a, b)).map(([label, group]) => ({ label, series: reportSeries(periods, group, mode, status, source.source) }));
   const byGroup = groupSeries.map(({ label, series }) => {
     const current = series.find((item) => item.quarter === scope.endQuarter) ?? series.at(-1)!;
     return { label, vertical: current.vertical, horizontal: current.horizontal, total: current.total };
-  }).sort((a, b) => b.total - a.total);
+  });
   return { series: reportSeries(periods, values, mode, status, source.source), byGroup, groupSeries, unit, methodStatus: 'open_method', dataStatus: status, source: source.source, formula };
 }
 
@@ -89,13 +116,13 @@ function cohortBlock(scope: PanoramaScope, rows: MarketCohortRow[]): ReportMarke
   }
   const status: ReportDataState = rows.length ? 'ready' : 'unavailable';
   const emptySeries = () => periods.map((quarter) => ({ quarter, vertical: 0, horizontal: 0, total: 0, methodStatus: 'assumed' as MethodStatus, dataStatus: status, source: 'building-with-history' }));
-  const groupSeries = [...groups].sort(([a], [b]) => a.localeCompare(b)).map(([label, value]) => ({
+  const groupSeries = [...groups].sort(([a], [b]) => cohortOrder(a, b)).map(([label, value]) => ({
     label,
     series: emptySeries().map((item) => item.quarter === scope.endQuarter ? { ...item, ...value, total: value.vertical + value.horizontal } : item),
   }));
   return {
     series: emptySeries(),
-    byGroup: [...groups].sort(([a], [b]) => a.localeCompare(b)).map(([label, value]) => ({ label, ...value, total: value.vertical + value.horizontal })),
+    byGroup: [...groups].sort(([a], [b]) => cohortOrder(a, b)).map(([label, value]) => ({ label, ...value, total: value.vertical + value.horizontal })),
     groupSeries,
     unit: 'count',
     methodStatus: 'assumed',
@@ -154,7 +181,7 @@ export function buildPanoramaReportModel(
   cohorts: MarketCohortRow[] = [],
   options: { cubes?: MarketCube[]; provenance?: Partial<PanoramaProvenance> } = {},
 ): PanoramaReportModel {
-  const launches = buildLaunchModel(records);
+  const launches = buildLaunchModel(records, canonical(scope));
   const cube = options.cubes?.length
     ? mergeCubes(options.cubes, scope.endQuarter, scope.entity ?? 'secovi-sp')
     : emptyCube(scope);

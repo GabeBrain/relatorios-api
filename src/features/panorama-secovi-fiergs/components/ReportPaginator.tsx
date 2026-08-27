@@ -52,7 +52,7 @@ function seriesFor(page: number, r: PanoramaReportModel): TrendConfig {
 }
 function TimeChart({ page, report }: { page: number; report: PanoramaReportModel }) {
   const series = seriesFor(page, report);
-  const data = series.data.slice(-17);
+  const data = series.data;
   const referenceQuarter = report.scope.endQuarter[0];
   const formatValue = (value: number) => series.unit === 'mi' ? decimal(value) : series.unit === 'sqm' ? `R$ ${n(value)}/m²` : n(value);
   const highlighted = data.filter((row) => row.quarter[0] === referenceQuarter);
@@ -61,8 +61,9 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
     const index = props.index ?? -1;
     const row = data[index];
     if (!row || props.x === undefined || props.y === undefined || props.value === undefined) return null;
+    if (Number(props.value) === 0) return null;
     const emphasized = row.quarter[0] === referenceQuarter;
-    const yOffset = key === 'vertical' ? -10 : 18;
+    const yOffset = key === 'vertical' ? -14 : 24;
     const label = formatValue(Number(props.value));
     if (!emphasized) return <text className="panorama-point-label" x={props.x} y={props.y + yOffset} textAnchor="middle">{label}</text>;
     const width = Math.max(34, label.length * 7 + 12);
@@ -179,6 +180,7 @@ function dataPage(page: number, report: PanoramaReportModel) {
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
   const official = officialSlides[`../assets/official/panorama-${String(p).padStart(2, '0')}.png`];
+  if (official && p === 2) return <div className="panorama-official-cover-2"><img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/><div className="panorama-cover-2-overlay"><span>{cityLabel.toLocaleUpperCase('pt-BR')}</span><i/><strong>{report.scope.endQuarter.slice(2)}</strong></div></div>;
   if (official) return <img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/>;
   if (p === 1 || p === 2 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>{p === 4 ? `Panorama Imobiliário de ${cityLabel}` : cityLabel}</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
   if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <Divider title={title}/>;

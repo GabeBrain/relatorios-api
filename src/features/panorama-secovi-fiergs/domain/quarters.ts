@@ -36,6 +36,14 @@ export function compareQuarters(a: Quarter, b: Quarter): number {
   return quarterIndex(a) - quarterIndex(b);
 }
 
+/** Retorna todos os trimestres do intervalo inclusivo em ordem cronológica. */
+export function quarterRange(start: Quarter, end: Quarter): Quarter[] {
+  const first = quarterIndex(start);
+  const last = quarterIndex(end);
+  if (last < first) return [];
+  return Array.from({ length: last - first + 1 }, (_, offset) => quarterFromIndex(first + offset));
+}
+
 export function shiftQuarter(quarter: Quarter, offset: number): Quarter {
   return quarterFromIndex(quarterIndex(quarter) + offset);
 }

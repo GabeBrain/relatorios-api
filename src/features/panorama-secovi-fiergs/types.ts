@@ -13,7 +13,14 @@ export type ComparisonResult = 'match' | 'different' | 'missing_reference' | 'mi
  * Recorte canônico do Panorama. `cities` é sempre um array — uma cidade é um array de um item —
  * para que multi-cidade (G-01) não exija um segundo contrato. Não há mais `scope.city`.
  */
-export interface PanoramaScope { uf: string; cities: string[]; endQuarter: Quarter; entity?: EntityId; }
+export interface PanoramaScope {
+  uf: string;
+  cities: string[];
+  /** Início do recorte. Opcional apenas para compatibilidade com referências V1 antigas. */
+  startQuarter?: Quarter;
+  endQuarter: Quarter;
+  entity?: EntityId;
+}
 
 /** Rótulo determinístico do recorte para capa, título e nome de arquivo, com uma ou várias cidades. */
 export function scopeCityLabel(scope: Pick<PanoramaScope, 'cities'>): string {
