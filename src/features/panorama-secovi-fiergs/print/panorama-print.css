@@ -15,14 +15,6 @@
 .panorama-static-slide { display:block; width:100%; height:100%; object-fit:contain; background:#fff; }
 .panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"]),
 .panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"]) { position:relative; container-type:inline-size; }
-.panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"])::before,
-.panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"])::after,
-.panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"])::before,
-.panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"])::after { position:absolute; z-index:1; color:#fff; font-family:Tahoma,Arial,sans-serif; font-weight:700; line-height:1; white-space:pre-line; }
-.panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"])::before { content:var(--panorama-city); left:6.6%; top:73%; width:27%; font-size:calc(3.7cqw * var(--panorama-city-scale)); text-align:center; white-space:nowrap; }
-.panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"])::after { content:var(--panorama-year); left:6.6%; top:90%; width:27%; font-size:2.5cqw; text-align:center; }
-.panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"])::before { content:var(--panorama-city-uf); left:8%; top:38.7%; max-width:31%; font-size:calc(3.1cqw * var(--panorama-city-scale)); line-height:1.03; white-space:nowrap; }
-.panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"])::after { content:var(--panorama-period); left:8%; top:58%; font-size:3.1cqw; }
 .panorama-page-content:has(>img[alt="Slide oficial 10 do Panorama"]) { position:relative; }
 .panorama-page-content:has(>img[alt="Slide oficial 10 do Panorama"])::after { content:""; position:absolute; z-index:2; left:3.5%; top:64.5%; width:92%; height:11%; background:#fff; }
 .panorama-coverage-notice { margin-top:8%; max-width:72%; padding:4%; border-left:10px solid #ffd000; background:#f5f5f2; font-size:clamp(1rem,1.5vw,1.45rem); line-height:1.45; }.panorama-coverage-notice strong { display:block; font-size:1.2em; color:#5d7833; }.panorama-coverage-notice span { color:#666; font-size:.88em; }
@@ -62,3 +54,11 @@
 .panorama-point-label,.panorama-highlight-label text { font-size:.95cqw; }
 .panorama-highlight-label text { font-size:1.05cqw; }
 .panorama-segment-band { display:inline-flex; width:auto; margin:.45cqw 0 .2cqw; padding:.45cqw 1.3cqw; font-size:1.12cqw; letter-spacing:.14em; }
+.panorama-city-cover { align-items:center; padding:8% 9%; background-position:center; }
+.panorama-city-cover-content { width:min(58%, 62cqw); text-align:center; }
+.panorama-city-cover-content p { margin:0 0 1.2cqw; font-size:1.45cqw; letter-spacing:.2em; }
+.panorama-city-cover-content h1 { max-width:100%; margin:0; overflow-wrap:anywhere; font-size:clamp(2.6rem,5.3cqw,6rem); line-height:1.02; }
+.panorama-city-cover-content i { display:block; width:9.5cqw; height:.65cqw; margin:1.3cqw 0; border-radius:999px; background:#ffd000; }
+.panorama-city-cover-content h2 { margin:0; font-size:clamp(1.2rem,2.2cqw,2.6rem); }
+.panorama-loading-logo { animation:panorama-loading-pulse 1.35s ease-in-out infinite; transform-origin:center; }
+@keyframes panorama-loading-pulse { 0%,100% { opacity:.3; transform:scale(.92); } 50% { opacity:1; transform:scale(1); } }

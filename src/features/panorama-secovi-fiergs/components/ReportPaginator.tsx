@@ -25,7 +25,7 @@ const decimal = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits
 const pct = (v: number | null) => v === null ? '—' : `${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 const year = (q: string) => q.slice(2);
 function Footer() { return <footer className="panorama-page-footer panorama-official-footer" style={{ backgroundImage: `url(${footerImage})` }}><span>FONTE: BRAIN | ELABORAÇÃO: BRAIN</span></footer>; }
-function Sheet({ def, children }: { def: ReportPageDefinition; report: PanoramaReportModel; children: React.ReactNode }) { const hasBakedFooter = Boolean(officialSlides[`../assets/official/panorama-${String(def.page).padStart(2, '0')}.png`]); return <section className={`panorama-report-page panorama-official-page ${hasBakedFooter ? 'panorama-baked-page' : ''}`} aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div>{!hasBakedFooter && <Footer/>}</section>; }
+function Sheet({ def, children }: { def: ReportPageDefinition; report: PanoramaReportModel; children: React.ReactNode }) { const hasBakedFooter = def.referenceSlide !== 2 && Boolean(officialSlides[`../assets/official/panorama-${String(def.referenceSlide).padStart(2, '0')}.png`]); return <section className={`panorama-report-page panorama-official-page ${hasBakedFooter ? 'panorama-baked-page' : ''}`} aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div>{!hasBakedFooter && <Footer/>}</section>; }
 function Divider({ title }: { title: string }) { return <div className="panorama-divider"><div><p>Panorama imobiliário</p><h2>{title}</h2><i/></div></div>; }
 function Corporate({ page, report }: { page: number; report: PanoramaReportModel }) {
   const city = `${scopeCityLabel(report.scope)} - ${report.scope.uf}`;
@@ -63,11 +63,14 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
     if (!row || props.x === undefined || props.y === undefined || props.value === undefined) return null;
     if (Number(props.value) === 0) return null;
     const emphasized = row.quarter[0] === referenceQuarter;
-    const yOffset = key === 'vertical' ? -14 : 24;
+    // Ambas as séries recebem o rótulo acima do ponto: nunca empurramos texto para a
+    // baseline, onde ele concorria com os trimestres e a legenda do eixo X.
+    const yOffset = key === 'vertical' ? -18 : -42;
+    const labelY = Math.max(18, props.y + yOffset);
     const label = formatValue(Number(props.value));
-    if (!emphasized) return <text className="panorama-point-label" x={props.x} y={props.y + yOffset} textAnchor="middle">{label}</text>;
+    if (!emphasized) return <text className="panorama-point-label" x={props.x} y={labelY} textAnchor="middle">{label}</text>;
     const width = Math.max(34, label.length * 7 + 12);
-    return <g className="panorama-highlight-label" transform={`translate(${props.x - width / 2} ${props.y + yOffset - 13})`}><rect width={width} height={19} fill={color}/><text x={width / 2} y={13} textAnchor="middle" fill={textColor}>{label}</text></g>;
+    return <g className="panorama-highlight-label" transform={`translate(${props.x - width / 2} ${labelY - 13})`}><rect width={width} height={19} fill={color}/><text x={width / 2} y={13} textAnchor="middle" fill={textColor}>{label}</text></g>;
   };
 
   const years = [...new Set(data.map((item) => year(item.quarter)))];
@@ -93,8 +96,8 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
       return <span key={annualYear}><b>{annualYear}{annualYear === year(report.scope.endQuarter) ? '*' : ''}</b>{formatValue(total)} {unitLabel}<small>{formatValue(total / Math.max(rows.length, 1))} {series.unit === 'count' && [14, 15].includes(page) ? 'Emp.' : series.unit === 'count' ? 'Unid.' : series.unit === 'mi' ? 'Mi.' : ''}/Trimestre</small></span>;
     })}</div>
     <ResponsiveContainer width="100%" height={series.pattern ? '51%' : '62%'}>
-      <LineChart data={data} margin={{ left: 22, right: 22, top: 26, bottom: 6 }}>
-        <XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} axisLine={{ stroke: '#c9c9c9' }} tick={{ fontSize: 11 }}/>
+      <LineChart data={data} margin={{ left: 22, right: 22, top: 26, bottom: 18 }}>
+        <XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} tickMargin={8} axisLine={{ stroke: '#c9c9c9' }} tick={{ fontSize: 11 }}/>
         <Tooltip formatter={(value) => formatValue(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as never)}/>
         <Legend verticalAlign="bottom"/>
         <Line type="monotone" dataKey="vertical" name={series.nouns[0]} stroke={series.colors[0]} strokeWidth={4} dot={false} isAnimationActive={false} label={renderPointLabel('vertical', series.colors[0], '#fff')}/>
@@ -180,9 +183,9 @@ function dataPage(page: number, report: PanoramaReportModel) {
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
   const official = officialSlides[`../assets/official/panorama-${String(p).padStart(2, '0')}.png`];
-  if (official && p === 2) return <div className="panorama-official-cover-2"><img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/><div className="panorama-cover-2-overlay"><span>{cityLabel.toLocaleUpperCase('pt-BR')}</span><i/><strong>{report.scope.endQuarter.slice(2)}</strong></div></div>;
+  if (p === 2) return <div className="panorama-cover panorama-city-cover" style={{ backgroundImage: `url(${coverImage})` }}><div className="panorama-city-cover-content"><p>Panorama imobiliário</p><h1>{cityLabel}</h1><i/><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
   if (official) return <img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/>;
-  if (p === 1 || p === 2 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>{p === 4 ? `Panorama Imobiliário de ${cityLabel}` : cityLabel}</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
+  if (p === 1 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>Panorama imobiliário</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
   if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <Divider title={title}/>;
   if ([3,7,8,10].includes(p)) return <Corporate page={p} report={report}/>;
   if (p === 5) return <div className="panorama-corporate"><h2>Sumário</h2><ol className="panorama-summary">{PANORAMA_SECTIONS.map((section) => <li key={section.id}>{section.label}</li>)}</ol></div>;

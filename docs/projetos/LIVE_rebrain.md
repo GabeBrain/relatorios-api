@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-27 — Panorama: capa municipal única, carregamento com marca e rótulos protegidos — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração e apresentação do deck.
+- **O quê:** a posição 2 passou a ser a única capa com o nome das cidades, usando `secovi-cover.jpg` e composição responsiva; capas/aberturas restantes não repetem o nome do recorte. O carregamento inicial e as atualizações em segundo plano usam o componente visual com a marca Brain. Rótulos das séries históricas agora ficam acima dos pontos, omitem zeros e recebem margem adicional do eixo X para impedir colisões; o painel de filtros ganhou coluna de UF independente e botão verticalmente centralizado.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{pages/PanoramaSecoviFiergsPage.tsx,components/PanoramaLoadingState.tsx,components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Verificação:** typecheck real, testes da feature, build e QA visual local devem ser repetidos após a integração; PDF autenticado de 62 páginas permanece o aceite final.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a segue em QA autenticado; falta confirmar a capa e a não sobreposição em dados reais. Layout novo de tabelas e exportação PPTX continuam V2.
+
 ### 2026-08-27 — Panorama: plano visual até o slide 33 a partir dos prints — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — filtros, geração e slides 1–33.
 - **O quê:** os dez primeiros apontamentos visuais foram diagnosticados e transformados em plano: multi-select pesquisável com chips, range inicial/final, bloqueio de refetch pesado, correção da capa 2, rodapé dinâmico, legibilidade/colisão de labels, tag vertical compacta e ordenação semântica. O plano inclui causas no código, sequência e matriz de prints para aceite.
