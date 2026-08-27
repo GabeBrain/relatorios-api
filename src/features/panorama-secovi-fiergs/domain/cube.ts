@@ -196,16 +196,18 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
       return current;
     };
     for (const entry of releaseEntries) {
-      const row = ensure(canonicalTypology(firstText(entry, ['typology', 'typology_name', 'bedrooms', 'dorms'])));
+      // O contrato oficial de `building-with-history` usa `number_bedroom`;
+      // os aliases anteriores permanecem para não quebrar respostas legadas.
+      const row = ensure(canonicalTypology(firstText(entry, ['number_bedroom', 'typology', 'typology_name', 'type_of_typology', 'bedrooms', 'dorms'])));
       row.launchedUnits = addNullable(row.launchedUnits, firstNumber(entry, ['qty', 'released_units', 'units']));
     }
     for (const entry of latestEntries) {
-      const row = ensure(canonicalTypology(firstText(entry, ['typology', 'typology_name', 'bedrooms', 'dorms'])));
+      const row = ensure(canonicalTypology(firstText(entry, ['number_bedroom', 'typology', 'typology_name', 'type_of_typology', 'bedrooms', 'dorms'])));
       row.finalUnits = addNullable(row.finalUnits, firstNumber(entry, ['typology_stock', 'stock']));
-      row.soldUnits = addNullable(row.soldUnits, firstNumber(entry, ['liquid_sales', 'sold', 'sales']));
+      row.soldUnits = addNullable(row.soldUnits, firstNumber(entry, ['sold_in_period', 'liquid_sales', 'sold', 'sales']));
       const area = firstNumber(entry, ['private_area', 'area', 'average_area']);
       const price = firstNumber(entry, ['price', 'average_price', 'release_price']);
-      const meter = firstNumber(entry, ['price_per_meter', 'average_price_per_meter']);
+      const meter = firstNumber(entry, ['price_private_area', 'price_per_meter', 'average_price_per_meter']);
       row.averageArea = row.averageArea ?? area;
       row.averageTicket = row.averageTicket ?? price;
       row.averagePricePerMeter = row.averagePricePerMeter ?? meter ?? (price !== null && area ? price / area : null);

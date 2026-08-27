@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-27 — Panorama: tipologia real da API, capa sem corte e mapa base — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 2, 14–27, 34–37 e 56.
+- **O quê:** a inspeção do contrato `BuildingWithHistoricResource` identificou que a API entrega a tipologia em `number_bedroom` (com `type_of_typology` como alternativa), enquanto o adaptador lia apenas aliases inexistentes; isso criava a linha espúria `Não classificado`. O cubo agora lê os campos oficiais também para vendas por período e preço/m². A capa municipal usa a arte inteira sem recorte, centraliza melhor o título e exibe o trimestre uma única vez. Labels históricos ficam próximos ao ponto, recebem fundo que evita invasão da curva e linha-guia somente quando afastados. O mapa ganhou mosaico CARTO/OSM sem chave, com atribuição e pontos projetados nas coordenadas reais.
+- **Verificação:** endpoint sem JWT retornou HTTP 401 neste ambiente; contrato OpenAPI local revisado. Typecheck real, build e 102 testes do Panorama aprovados. Falta a confirmação visual autenticada e a exportação PDF com tiles carregados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{domain/cube.ts,lib/map-tiles.ts,components/{ReportPaginator.tsx,MarketSlides.tsx},print/panorama-print.css,__tests__/{opus-cube-aggregations.test.ts,map-tiles.test.ts}}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a mantém QA autenticado como próximo portão; o dado de tipologia deixa de depender do fallback visível. A infraestrutura de tiles gratuita precisa apenas ser validada na geração real antes do aceite final.
+
 ### 2026-08-27 — Panorama: capa municipal única, carregamento com marca e rótulos protegidos — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração e apresentação do deck.
 - **O quê:** a posição 2 passou a ser a única capa com o nome das cidades, usando `secovi-cover.jpg` e composição responsiva; capas/aberturas restantes não repetem o nome do recorte. O carregamento inicial e as atualizações em segundo plano usam o componente visual com a marca Brain. Rótulos das séries históricas agora ficam acima dos pontos, omitem zeros e recebem margem adicional do eixo X para impedir colisões; o painel de filtros ganhou coluna de UF independente e botão verticalmente centralizado.

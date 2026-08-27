@@ -57,6 +57,21 @@ describe('OP-4 · cubo granular', () => {
     expect(project.typologies.map((row) => row.typology)).toEqual(['2 Dormitórios', '3 Dormitórios']);
   });
 
+  it('lê number_bedroom e os nomes oficiais do histórico sem criar Não classificado', () => {
+    const cube = cubeOf([building({
+      typologies_history: [
+        { period: '2025-02-01', number_bedroom: '2', qty: 60, release_price: 400000, private_area: 50 },
+        { period: '2025-02-01', number_bedroom: '3', qty: 40, release_price: 600000, private_area: 75 },
+        { period: '2026-03-01', number_bedroom: '2', typology_stock: 20, sold_in_period: 40, price: 420000, price_private_area: 8400, private_area: 50 },
+        { period: '2026-03-01', number_bedroom: '3', typology_stock: 10, sold_in_period: 30, price: 630000, price_private_area: 8400, private_area: 75 },
+      ],
+    })]);
+    const project = cube.projects[0];
+    expect(project.typologies.map((row) => row.typology)).toEqual(['2 Dormitórios', '3 Dormitórios']);
+    expect(project.typologies.some((row) => row.typology === 'Não classificado')).toBe(false);
+    expect(project.soldUnits).toBe(70);
+  });
+
   it('usa chave por cidade, de modo que building_id igual em cidades distintas não colide', () => {
     const jundiai = cubeOf([building()]);
     const piracicaba = cubeOf([building()], { city: 'Piracicaba' });

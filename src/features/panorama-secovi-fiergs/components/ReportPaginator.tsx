@@ -63,14 +63,17 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
     if (!row || props.x === undefined || props.y === undefined || props.value === undefined) return null;
     if (Number(props.value) === 0) return null;
     const emphasized = row.quarter[0] === referenceQuarter;
-    // Ambas as séries recebem o rótulo acima do ponto: nunca empurramos texto para a
-    // baseline, onde ele concorria com os trimestres e a legenda do eixo X.
-    const yOffset = key === 'vertical' ? -18 : -42;
+    const companion = key === 'vertical' ? row.horizontal : row.vertical;
+    const valuesAreClose = !series.single && Math.abs(Number(props.value) - companion) <= Math.max(Math.abs(Number(props.value)), Math.abs(companion), 1) * .18;
+    // O padrão é ficar junto do ponto. Só afastamos a segunda etiqueta quando os dois
+    // valores disputam a mesma região; nesse caso, a linha-guia preserva a associação.
+    const yOffset = valuesAreClose && key === 'horizontal' ? -34 : -14;
     const labelY = Math.max(18, props.y + yOffset);
     const label = formatValue(Number(props.value));
-    if (!emphasized) return <text className="panorama-point-label" x={props.x} y={labelY} textAnchor="middle">{label}</text>;
     const width = Math.max(34, label.length * 7 + 12);
-    return <g className="panorama-highlight-label" transform={`translate(${props.x - width / 2} ${labelY - 13})`}><rect width={width} height={19} fill={color}/><text x={width / 2} y={13} textAnchor="middle" fill={textColor}>{label}</text></g>;
+    const needsLeader = props.y - labelY > 20;
+    if (!emphasized) return <g className="panorama-point-label"><>{needsLeader && <line x1={props.x} y1={props.y - 3} x2={props.x} y2={labelY + 3} stroke={color} strokeWidth={1}/>}<rect x={props.x - width / 2} y={labelY - 13} width={width} height={16} rx={2} fill="#fff" fillOpacity={.94}/><text x={props.x} y={labelY} textAnchor="middle">{label}</text></></g>;
+    return <g className="panorama-highlight-label"><>{needsLeader && <line x1={props.x} y1={props.y - 3} x2={props.x} y2={labelY + 4} stroke={color} strokeWidth={1}/>}<g transform={`translate(${props.x - width / 2} ${labelY - 13})`}><rect width={width} height={19} fill={color}/><text x={width / 2} y={13} textAnchor="middle" fill={textColor}>{label}</text></g></></g>;
   };
 
   const years = [...new Set(data.map((item) => year(item.quarter)))];
@@ -183,7 +186,7 @@ function dataPage(page: number, report: PanoramaReportModel) {
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
   const official = officialSlides[`../assets/official/panorama-${String(p).padStart(2, '0')}.png`];
-  if (p === 2) return <div className="panorama-cover panorama-city-cover" style={{ backgroundImage: `url(${coverImage})` }}><div className="panorama-city-cover-content"><p>Panorama imobiliário</p><h1>{cityLabel}</h1><i/><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
+  if (p === 2) return <div className="panorama-cover panorama-city-cover" style={{ backgroundImage: `url(${coverImage})` }}><div className="panorama-city-cover-content"><p>Panorama imobiliário</p><h1>{cityLabel}</h1><i/><h2>{quarterLabel(report.scope.endQuarter)}</h2></div></div>;
   if (official) return <img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/>;
   if (p === 1 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>Panorama imobiliário</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
   if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <Divider title={title}/>;

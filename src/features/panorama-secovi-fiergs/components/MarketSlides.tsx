@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { scopeCityLabel, type PanoramaReportModel, type ReportMarketBlock, type ReportSeries } from '../types';
+import { buildMapTilePlan } from '../lib/map-tiles';
 import { orderStandards, orderTypologies } from '../domain/taxonomy';
 
 const integer = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
@@ -194,11 +195,10 @@ export function NarrativeSlide({ report, continuation = false }: { report: Panor
 export function LocationSlide({ report }: { report: PanoramaReportModel }) {
   const vertical = report.locations.filter((item) => item.segment === 'Vertical');
   const points = vertical.length ? vertical : report.locations;
-  const lats = points.map((item) => item.latitude); const lons = points.map((item) => item.longitude);
-  const minLat = Math.min(...lats, 0); const maxLat = Math.max(...lats, 0); const minLon = Math.min(...lons, 0); const maxLon = Math.max(...lons, 0);
+  const tiles = buildMapTilePlan(points);
   return <Slide title="EMPREENDIMENTOS VERTICAIS" className="panorama-location-slide"><div className="panorama-location-layout">
-    <div className="panorama-location-map"><span className="panorama-map-road panorama-map-road-a"/><span className="panorama-map-road panorama-map-road-b"/><span className="panorama-map-road panorama-map-road-c"/>
-      {points.map((item, index) => <button key={`${item.name}-${index}`} title={item.name} style={{ left: `${12 + 76 * (item.longitude - minLon) / Math.max(maxLon - minLon, .0001)}%`, top: `${12 + 70 * (maxLat - item.latitude) / Math.max(maxLat - minLat, .0001)}%` }}><span>{index + 1}</span></button>)}
+    <div className="panorama-location-map">{tiles && <><div className="panorama-map-tiles" style={{ gridTemplateColumns: `repeat(${tiles.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${tiles.rows}, minmax(0, 1fr))` }}>{tiles.tiles.map((tile) => <img key={`${tile.x}-${tile.y}`} src={tile.url} crossOrigin="anonymous" alt=""/>)}</div><small className="panorama-map-attribution">© OpenStreetMap contributors · © CARTO</small></>}
+      {tiles && points.map((item, index) => { const position = tiles.positionOf(item); return <button key={`${item.name}-${index}`} title={item.name} style={{ left: `${position.left}%`, top: `${position.top}%` }}><span>{index + 1}</span></button>; })}
       {!points.length && <div className="panorama-map-empty"><strong>Localização não disponível</strong><span>A API não retornou coordenadas válidas para este recorte.</span></div>}
     </div>
     <aside><h3>{scopeCityLabel(report.scope)}</h3><p>Empreendimentos residenciais verticais identificados no recorte.</p><strong>{integer(vertical.length)}</strong><span>pontos georreferenciados</span><small>Os marcadores são exibidos somente quando há latitude e longitude válidas.</small></aside>
