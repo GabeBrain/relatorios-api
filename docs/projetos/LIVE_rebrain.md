@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-27 — Panorama: contrato granular v2 e geocoordenadas decimais — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — coleta de empreendimentos, slide 49 e slide 56.
+- **O quê:** identificado e corrigido o parser que removia o ponto decimal de coordenadas retornadas como string pelo contrato v2 (por exemplo, `-23.1857` virava `-231857` e era descartado como fora do globo). A coleta granular do Panorama foi alinhada ao endpoint `POST api.geobrain.com.br/public-api/v2/building-with-history`, já utilizado pelo Dashboard GeoBrain, cobrindo status Ativo/Esgotado e deduplicando por empreendimento. O vazio do slide 49 agora separa claramente ausência de Condomínio de Casas elegível da ausência de preço no universo permitido; a política Secovi continua sem assumir que todo horizontal é condomínio.
+- **Verificação:** 105 testes do Panorama, typecheck real e build aprovados. Os dois endpoints respondem 401 sem JWT neste ambiente; validar o payload v2 autenticado de Jundiaí é o próximo aceite para confirmar campos de subtipo/preço e a recuperação dos pontos no mapa.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,domain/cube.ts,components/MarketSlides.tsx,__tests__/opus-cube-aggregations.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** o erro determinístico de geolocalização foi removido; a pendência restante é evidência autenticada para mapear o subtipo horizontal oficial e confirmar a cobertura real de preços.
+
 ### 2026-08-27 — Panorama: capa central, ausência de dados explícita e isolamento por página — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capa 2, slides 48–49, leitura contínua e exportação.
 - **O quê:** a composição da capa 2 foi centralizada no canvas inteiro: cidade, faixa amarela e trimestre ocupam o mesmo eixo vertical, com a faixa entre o nome e o período. As lâminas de coorte e preço agora removem anos integralmente zerados e mostram uma mensagem objetiva quando a API não devolve dados observados; em especial, o slide 49 não apresenta mais a tabela enganosa `Média Geral —`. A renderização de cada página foi isolada por um error boundary: uma lâmina com falha passa a apresentar seu estado local, preservando a leitura e a exportação das demais. O planejador de tiles tem teste adicional para extremos geográficos válidos, mas inviáveis.

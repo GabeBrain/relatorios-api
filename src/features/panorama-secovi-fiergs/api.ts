@@ -9,8 +9,10 @@ import { buildCityCube, type MarketCube } from './domain/cube';
 import { collectByCity, completedValues, type CollectionResult } from './domain/collection';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
+const BUILDINGS_V2_BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
 const PER_PAGE = 100;
 const CITY_CONCURRENCY = 3;
+const BUILDING_STATUSES = ['Ativo', 'Esgotado'];
 
 /** Recorte de uma única cidade; o escopo público continua sendo multi-cidade. */
 type CityScope = { uf: string; city: string; startQuarter?: Quarter; endQuarter: Quarter };
@@ -34,20 +36,28 @@ function temporalWindow(scope: Pick<CityScope, 'startQuarter' | 'endQuarter'>): 
   return { start: quarterStartDate(window[0]), end: quarterEndDate(scope.endQuarter) };
 }
 
-/** Paginação completa de `building-with-history` para uma cidade e um tipo. */
+/**
+ * Universo granular no contrato v2: é o mesmo contrato já consumido pelo Dashboard GeoBrain.
+ * A versão anterior do Panorama ainda chamava o host legado via GET, que não preservava a
+ * cobertura de campos granulares usada por preço e geolocalização.
+ */
 async function fetchBuildings(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
-  const raw: Record<string, unknown>[] = [];
-  for (const type of ['Vertical', 'Horizontal']) {
+  const byId = new Map<string, Record<string, unknown>>();
+  for (const type of ['Vertical', 'Horizontal']) for (const status of BUILDING_STATUSES) {
     let page = 1; let lastPage = 1;
     do {
-      const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
-      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain em ${scope.city} (${response.status ?? 'rede'}).`);
-      raw.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
+      const response = await httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_V2_BASE_URL}/building-with-history`, query: { type, status, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain v2 em ${scope.city} (${response.status ?? 'rede'}).`);
+      const entries = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
+      for (const building of entries) {
+        const id = String(building.building_id ?? building.id ?? '');
+        if (id && !byId.has(id)) byId.set(id, building);
+      }
       lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
       page += 1;
     } while (page <= lastPage);
   }
-  return raw;
+  return [...byId.values()];
 }
 
 function segmentOf(value: unknown): Segment | null {

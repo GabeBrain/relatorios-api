@@ -71,7 +71,15 @@ export interface MarketCube {
 
 function toNumber(value: unknown): number | null {
   if (value === '' || value === null || value === undefined) return null;
-  const parsed = typeof value === 'string' ? Number(value.replace(/\./g, '').replace(',', '.')) : Number(value);
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  const raw = String(value).trim().replace(/\s/g, '');
+  // A API v2 pode devolver strings JSON com ponto decimal ("-23.1857"). Só tratamos
+  // pontuação brasileira como milhar quando a vírgula é o separador decimal final.
+  const comma = raw.lastIndexOf(','); const dot = raw.lastIndexOf('.');
+  const normalized = comma >= 0 && dot >= 0
+    ? (comma > dot ? raw.replace(/\./g, '').replace(',', '.') : raw.replace(/,/g, ''))
+    : comma >= 0 ? raw.replace(',', '.') : raw;
+  const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : null;
 }
 

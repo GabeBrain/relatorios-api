@@ -108,13 +108,20 @@ export function CohortTableSlide({ report, segment = 'vertical' }: { report: Pan
 
 export function PriceTableSlide({ report, dimension, horizontal = false }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; horizontal?: boolean }) {
   const granularRows = horizontal ? report.granular.horizontalPricesByStandard : dimension === 'pattern' ? report.granular.pricesByStandard : report.granular.pricesByTypology;
+  const eligibleHorizontal = report.cube.projects.filter((project) => project.segment === 'Horizontal').length;
+  const rejectedHorizontal = report.provenance.rejectedByPolicy.filter((item) => item.reason === 'horizontal_fora_da_politica' || item.reason === 'subtipo_horizontal_indefinido').reduce((sum, item) => sum + item.count, 0);
+  const noPriceMessage = horizontal
+    ? eligibleHorizontal === 0
+      ? `Não há Condomínio de Casas elegível neste recorte${rejectedHorizontal ? `; ${rejectedHorizontal} horizontal(is) foram excluído(s) pela regra Secovi.` : '.'}`
+      : 'Há Condomínio de Casas no recorte, mas a API não retornou preço, área ou R$/m² para esse universo.'
+    : 'A API não retornou preço, área ou R$/m² para este recorte.';
   if (granularRows.length) {
     const rows = granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, ticket: row.averageTicket, area: row.averageArea, meter: row.averagePricePerMeter }));
     const total = granularRows.find((row) => row.kind === 'total');
-    if (!rows.some((row) => hasObservedValue(row.ticket, row.area, row.meter)) && !hasObservedValue(total?.averageTicket, total?.averageArea, total?.averagePricePerMeter)) return <Slide title={`TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><DataUnavailable>A API não retornou preço, área ou R$/m² para este recorte.</DataUnavailable></Slide>;
+    if (!rows.some((row) => hasObservedValue(row.ticket, row.area, row.meter)) && !hasObservedValue(total?.averageTicket, total?.averageArea, total?.averagePricePerMeter)) return <Slide title={`TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><DataUnavailable>{noPriceMessage}</DataUnavailable></Slide>;
     return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipo Imóvel</th><th>Preço Médio</th><th>Área Priv. Média</th><th>R$/m² Privativa</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{currency(row.ticket)}</td><td>{integer(row.area)}</td><td>{integer(row.meter)}</td></tr>)}{total && <tr className="panorama-total-row"><td>{total.label}</td><td>{currency(total.averageTicket)}</td><td>{integer(total.averageArea)}</td><td>{integer(total.averagePricePerMeter)}</td></tr>}</tbody></table></Slide>;
   }
-  if (horizontal) return <Slide title="TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR PADRÃO" className="panorama-price-table-slide"><DataUnavailable>Não há dados de preço homologados para Condomínio de Casas neste recorte.</DataUnavailable></Slide>;
+  if (horizontal) return <Slide title="TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR PADRÃO" className="panorama-price-table-slide"><DataUnavailable>{noPriceMessage}</DataUnavailable></Slide>;
   const ticket = dimension === 'pattern' ? report.prices.ticket : report.prices.ticketByTypology;
   const meter = dimension === 'pattern' ? report.prices.meter : report.prices.meterByTypology;
   const rowLabels = orderedLabels(ticket, meter).slice(0, 8);

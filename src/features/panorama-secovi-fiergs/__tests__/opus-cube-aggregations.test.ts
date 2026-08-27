@@ -72,6 +72,21 @@ describe('OP-4 · cubo granular', () => {
     expect(project.soldUnits).toBe(70);
   });
 
+  it('preserva decimais com ponto do contrato v2 para coordenadas e preço por m²', () => {
+    const cube = cubeOf([building({
+      latitude: '-23.1857',
+      longitude: '-46.8978',
+      typologies_history: [
+        { period: '2025-02-01', number_bedroom: '2', qty: '100', release_price: '420000.50', private_area: '50.5' },
+        { period: '2026-03-01', number_bedroom: '2', typology_stock: '20', sold_in_period: '80', price: '430000.25', price_private_area: '8514.86', private_area: '50.5' },
+      ],
+    })]);
+    const project = cube.projects[0];
+    expect(project.latitude).toBeCloseTo(-23.1857, 6);
+    expect(project.longitude).toBeCloseTo(-46.8978, 6);
+    expect(project.averagePricePerMeter).toBeCloseTo(8514.86, 2);
+  });
+
   it('usa chave por cidade, de modo que building_id igual em cidades distintas não colide', () => {
     const jundiai = cubeOf([building()]);
     const piracicaba = cubeOf([building()], { city: 'Piracicaba' });
