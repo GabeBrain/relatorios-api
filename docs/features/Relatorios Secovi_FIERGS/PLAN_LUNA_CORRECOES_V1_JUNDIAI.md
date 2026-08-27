@@ -1,244 +1,201 @@
-# Plano terminal — Luna — correções da V1 do Panorama Jundiaí
+# Plano terminal paralelo — Luna — UI, PDF e integração final da V1
 
-**Status:** `READY_FOR_EXECUTION`
+**Status:** `READY_FOR_PARALLEL_EXECUTION`
 **Data:** 2026-08-27
+**Papel:** trilha B, integrador final e único responsável pelo commit combinado
 **Rota:** `/rebrain/panorama-secovi-fiergs`
 **Card:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`
-**Fonte principal:** [`MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md`](./MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md)
+**Matriz de aceite:** [`MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md`](./MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md)
+**Plano par:** [`PLAN_OPUS_CORRECOES_V1_JUNDIAI.md`](./PLAN_OPUS_CORRECOES_V1_JUNDIAI.md)
 
-## 1. Missão terminal
+## 1. Missão
 
-Corrigir integralmente a V1 do Panorama com base nos 28 comentários da Juliana e nos requisitos
-transversais já recebidos, gerar um novo PDF de Jundiaí, verificar as 62 páginas e entregar um
-handoff pronto para responder ao e-mail da analista.
+Executar em paralelo com o Opus a camada de apresentação da V1, sem editar arquivos reservados ao
+Opus. Se terminar antes, não commitar, não encerrar a tarefa e não assumir que a árvore transitória
+quebrada é falha: aguardar o handoff `OPUS_READY`, revisar as duas trilhas juntas, corrigir a
+integração, validar as 62 páginas e somente então criar um único commit sólido e combinado.
 
-Não encerrar apenas porque testes unitários passam. O resultado terminal é um PDF real revisado,
-com cada correção rastreada e evidência de aceite.
+O resultado terminal é código integrado, testes e build verdes, PDF real de Jundiaí inspecionado,
+matriz de evidências atualizada e resposta de e-mail pronta para Juliana.
 
-## 2. Escopo fechado
+## 2. Protocolo de concorrência obrigatório
 
-### Obrigatório na V1
+### Base comum
 
-1. multi-cidade;
-2. períodos posteriores a 1T/26;
-3. política Secovi: vertical + somente Condomínio de Casas no horizontal;
-4. correções dos slides 2, 3, 14–19, 23–26, 31, 33–46, 48, 49 e 51;
-5. regressão das 62 páginas;
-6. PDF final e resposta de fechamento à Juliana.
+- Ambos começam na `main`, no mesmo `HEAD` atual que contém estes dois planos.
+- O PDF-fonte em `assets/exportados/` é entrada não versionada: não mover, editar, adicionar ou apagar.
+- Depois do início, não executar `git pull`, `checkout`, `reset`, `rebase`, `stash`, `clean` ou troca de branch.
+- Durante a fase paralela, nenhum agente executa `git add`, `git commit` ou `git push`.
+- Mudanças transitórias do outro agente na árvore são esperadas e devem ser preservadas.
 
-### Proibido absorver na V1
+### Propriedade de arquivos durante a fase paralela
 
-- novo padrão de tabelas Rebrain sem referência;
-- exportação PPT/PPTX;
-- editor livre de narrativas ou novos slides.
+O Luna pode editar somente:
 
-Esses três itens ficam documentados como V2. Não parar a execução para pedir definição sobre eles.
+- `src/features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx`;
+- `src/features/panorama-secovi-fiergs/components/**`;
+- `src/features/panorama-secovi-fiergs/report/manifest.ts`;
+- `src/features/panorama-secovi-fiergs/print/panorama-print.css`;
+- `src/features/panorama-secovi-fiergs/lib/pdf-export.ts`;
+- `src/features/panorama-secovi-fiergs/lib/pdf-print-interceptor.ts`, apenas para remoção comprovada;
+- `src/features/panorama-secovi-fiergs/export-store.ts`;
+- `src/features/panorama-secovi-fiergs/__tests__/pdf-export.test.ts`;
+- novos testes de componente/manifesto com nomes que comecem por `luna-`;
+- `docs/features/Relatorios Secovi_FIERGS/HANDOFF_LUNA_CORRECOES_V1_JUNDIAI.md`.
 
-## 3. Leitura obrigatória antes de editar
+O Luna não edita, até o handoff do Opus:
+
+- `types.ts`, `api.ts`, `contracts/**`, `report/model.ts`;
+- `lib/launches.ts`, `lib/market-calibration.ts` e qualquer arquivo novo em `domain/**`;
+- `report-model.test.ts`, `market-calibration.test.ts`, `launches.test.ts`;
+- `HANDOFF_OPUS_CORRECOES_V1_JUNDIAI.md`.
+
+Se precisar de mudança em arquivo do Opus, registrar a necessidade no handoff Luna e continuar o que
+for independente. Não editar o arquivo reservado durante a fase paralela.
+
+### Portão de integração
+
+O Opus sinaliza conclusão criando
+`docs/features/Relatorios Secovi_FIERGS/HANDOFF_OPUS_CORRECOES_V1_JUNDIAI.md` com
+`Status: OPUS_READY`, base, arquivos alterados, contrato final, testes e limitações. Enquanto o
+arquivo não existir ou não tiver esse status, o Luna:
+
+1. pode concluir seus arquivos e testes isolados;
+2. deve registrar `LUNA_WAITING_FOR_OPUS` em seu próprio handoff;
+3. não pode commitar nem encerrar como concluído;
+4. deve usar o mecanismo de espera/continuação do agente e reavaliar quando a árvore mudar, sem loop
+   de terminal bloqueante prolongado.
+
+Depois de `OPUS_READY`, termina a propriedade exclusiva. O Luna passa a integrador e pode ajustar
+qualquer arquivo necessário, preservando a intenção e os testes do Opus. O Opus não volta a editar.
+
+## 3. Contrato congelado entre as trilhas
+
+O Luna deve programar contra estas decisões, implementadas pelo Opus:
+
+- `PanoramaScope` usa `uf`, `cities: string[]` e `endQuarter`; não criar novo uso de `scope.city`;
+- uma cidade é representada por array com um item;
+- o relatório preserva os blocos públicos atuais e acrescenta proveniência do consolidado, incluindo
+  cidades solicitadas, concluídas e falhas;
+- período é gerado dinamicamente até `endQuarter`, mantendo janela editorial de 17 trimestres;
+- tipologias e padrões chegam canonizados e ordenados;
+- universo Secovi já chega filtrado: todos os verticais e somente Condomínio de Casas horizontal;
+- ausência não vira zero silencioso; os estados de dados existentes continuam explícitos;
+- contagens de empreendimentos e médias ponderadas vêm do modelo, não são reinventadas no JSX;
+- coortes, matrizes, maturidade e VGV expõem linhas prontas para os subtotais/totais requeridos.
+
+Se a implementação do Opus divergir nominalmente, o Luna adapta os consumidores apenas na fase de
+integração; não cria um segundo domínio concorrente dentro de componentes.
+
+## 4. Leitura obrigatória
 
 1. `AGENTS.md` e protocolo de sessão;
 2. `docs/architecture/FRONTEND_GUIDELINES.md`;
 3. `docs/architecture/DESIGN_SYSTEM.md`;
-4. `MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md`;
+4. o mapeamento de Jundiaí e o plano Opus vinculados acima;
 5. `MAPEAMENTO_FASE0_PIRACICABA_1T26.md`;
 6. `GABARITO_CONGELADO_PANORAMA_PIRACICABA_1T26_v1.md`;
 7. `DECISOES_E_PREMISSAS_PANORAMA.md`;
-8. o PDF corrigido de Jundiaí e seus comentários internos.
+8. PDF corrigido de Jundiaí e suas 28 anotações.
 
-## 4. Regras de implementação
+## 5. Trilha paralela do Luna
 
-- Continuar na `main`; preservar alterações e arquivos alheios.
-- Reutilizar `GeoApiScopeEngine`; a extensão multi-cidade continua limitada às cidades monitoradas.
-- Não codificar listas ou valores de Jundiaí no runtime.
-- Centralizar política de entidade, taxonomias e ordenações em domínio puro; não espalhar regex e
-  arrays diferentes pelos componentes.
-- Não rotular todo `Horizontal` como Condomínio de Casas.
-- Não preencher ausências com `0`; distinguir zero real, `null`, não coberto e erro.
-- Tabela, gráfico e narrativa derivados devem consumir o mesmo agregado.
-- Preview e PDF devem renderizar o mesmo registry e os mesmos componentes.
-- Manter estados carregando, vazio, erro, escopo inválido e sucesso.
-- A alteração é da feature Panorama; não criar primitive global sem necessidade.
+### LU-0 — baseline visual e rastreio
 
-## 5. Sequência de execução
+1. Confirmar base comum e registrar SHA-256 do PDF sem versioná-lo.
+2. Rodar baseline de testes/build antes de editar, anotando falhas preexistentes.
+3. Criar no handoff Luna a matriz `LU-ID → slides → arquivos → evidência → status`.
+4. Capturar baseline das 62 páginas e da paginação.
 
-### L0 — base, baseline e matriz de rastreio
+### LU-1 — escopo multi-cidade e período
 
-1. Executar o protocolo Git do repositório.
-2. Preservar o PDF-fonte e registrar seu hash SHA-256.
-3. Criar checklist executável com os IDs `G-01…G-05` e cada slide comentado.
-4. Gerar baseline visual das 62 páginas do PDF atual e registrar tamanho/paginação.
-5. Rodar testes específicos do Panorama, typecheck e build para separar falhas preexistentes.
+1. Adaptar a página para `cities[]`, reutilizando a lista autorizada do `GeoApiScopeEngine`.
+2. UF continua obrigatória; trocar UF limpa todas as cidades.
+3. Bloquear geração sem cidade válida e mostrar uma ou várias cidades no recorte/proveniência.
+4. Substituir a lista fixa de trimestres por opções dinâmicas coerentes com o contrato do Opus.
+5. Título, capa e nome do PDF devem ser determinísticos para uma ou várias cidades.
+6. Cobrir carregando, vazio, erro total, falha parcial, escopo inválido e sucesso.
 
-**Saída:** baseline reproduzível e checklist sem item órfão.
+### LU-2 — manifesto e ordem institucional
 
-### L1 — contratos centrais de entidade, categorias e período
+1. Separar `referenceSlide` de `outputOrder`.
+2. Mover a lâmina atual 3 para a posição 7, deslocando 4–7 e mantendo 62 posições contínuas.
+3. Fazer navegador, sumário, leitura contínua, deck offscreen e PDF consumirem `outputOrder`.
+4. Recalibrar o slide 2 contra a arte neutra.
 
-1. Criar política tipada de entidade, começando por `secovi-sp`:
-   - aceita todos os verticais;
-   - aceita no horizontal somente o subtipo canônico Condomínio de Casas;
-   - expõe rótulos de apresentação e predicado auditável;
-   - mantém ponto de extensão para FIERGS sem inventar sua regra.
-2. Aplicar a política em todas as coletas e agregações: lançamentos, vendas, estoque, IVV, preços,
-   coortes, maturidade, VGV e localizações.
-3. Criar funções puras únicas para:
-   - tipologias `1 Dormitório`, `2 Dormitórios`, `3 Dormitórios`, `4 ou + Dormitórios`;
-   - padrões `Compacto`, `Econômico`, `Standard`, `Médio`, `Médio-Alto`, `Alto`, `Luxo`;
-   - coortes `Até 2022`, `2023`, `2024`, `Subtotal até 2024`, anos posteriores, `Total geral`.
-4. Substituir o array fixo de trimestres por geração dinâmica. O trimestre selecionado dirige
-   `end_period`, capa, nomes e séries; não assumir que 1T/26 é o último dado.
+### LU-3 — gráficos 14–26 e 40
 
-**Testes:** aliases, ordem, exclusão horizontal, zero/null, trimestre corrente e trimestre sem dados.
+1. Exibir explicitamente primeiro e último ticks nos gráficos temporais.
+2. Evitar colisão de rótulos com regra determinística e manter tooltip acessível.
+3. Reduzir a caixa/faixa de “Residencial Vertical”.
+4. Aplicar a correção aos slides 14–19 e 23–26.
+5. Converter o slide 40 em gráfico de barras, preservando 17 períodos.
 
-### L2 — multi-cidade no escopo e na coleta
+### LU-4 — consumidores das tabelas 31–51
 
-1. Evoluir o escopo para `cities: string[]`, mantendo adaptador de compatibilidade onde necessário.
-2. Estender o seletor compartilhado ou compor uma camada específica do Panorama que reutilize a
-   lista autorizada do `GeoApiScopeEngine`; UF continua obrigatória e trocar UF limpa as cidades.
-3. Consultar cada cidade com limite de concorrência e `AbortSignal`; falha parcial deve identificar
-   a cidade e não produzir consolidado silenciosamente incompleto.
-4. Agregar somas por cidade; médias/percentuais devem ser recomputados a partir dos numeradores e
-   denominadores consolidados, nunca pela média das médias municipais.
-5. Mostrar recorte e proveniência: cidades selecionadas, UF, trimestre e eventuais falhas.
-6. Definir título/capa/nome do arquivo de forma determinística para uma e várias cidades.
+Consumir os agregados do Opus, sem recalculá-los de forma paralela no JSX:
 
-**Aceite:** teste real com duas cidades monitoradas, sem chamadas antes do escopo válido e sem
-duplicidade de empreendimento dentro de cada cidade.
+1. 31/32: padrão vertical, empreendimentos e remoção de coluna sem fonte;
+2. 33 e 48: coortes, agrupamento até 2022, subtotal até 2024 e total geral;
+3. 34–37: tipologias canônicas `1`, `2`, `3`, `4 ou + Dormitórios`;
+4. 38–39: somente vertical e sete padrões canônicos;
+5. 41/42: matrizes ano × padrão com lançada/final;
+6. 43–46: maturidade preenchida, somente vertical;
+7. 49: horizontal aprovado aberto por padrão;
+8. 51: linhas verticais, subtotal vertical, horizontais, total geral e empreendimentos distintos.
 
-### L3 — ordem institucional e capa
+Cada tabela/gráfico deve renderizar ausência como ausência, sem converter `null` em zero. O “novo
+padrão das tabelas Rebrain” e PPTX continuam fora da V1.
 
-1. Recalibrar o slide 2 contra a arte oficial neutra.
-2. Evoluir o manifesto para separar identidade da lâmina (`referenceSlide`) de posição
-   (`outputOrder`).
-3. Mover a lâmina atual 3 para a posição 7 e deslocar 4–7, preservando 62 páginas.
-4. Fazer contador, navegação, sumário, leitura contínua, deck offscreen e PDF consumirem
-   `outputOrder`.
+### LU-5 — narrativas, mapa, exportação e regressão própria
 
-**Testes:** 62 posições contínuas, referências únicas, slide de visão/missão na posição 7 e links do
-sumário corretos.
+1. Recalcular slides 29, 53 e 54, marcando-os como não homologados pela Juliana.
+2. Validar que o mapa reflete o universo Secovi recebido do modelo.
+3. Verificar assets e encerramento 57–62.
+4. Remover `pdf-print-interceptor.ts` somente se continuar sem imports e o build cobrir a remoção.
+5. Rodar testes exclusivos do Luna, typecheck e build; registrar o resultado, ainda sem commit.
+6. Se o Opus não estiver pronto, gravar `LUNA_WAITING_FOR_OPUS` e aguardar.
 
-### L4 — família de gráficos 14–26 e slide 40
+## 6. Integração exclusiva do Luna após `OPUS_READY`
 
-1. Garantir ticks explícitos do primeiro e último trimestre em todos os gráficos temporais.
-2. Criar renderização de rótulos com prevenção determinística de colisão; manter tooltip acessível.
-3. Reduzir a faixa “Residencial Vertical” e reservar altura suficiente ao gráfico.
-4. Aplicar a mesma família aos slides 14–19 e 23–26.
-5. Trocar o slide 40 para barras trimestrais, mantendo 17 períodos, destaques e comparações.
-6. Não encobrir erro de dado com CSS; valores da série continuam vindos do modelo.
+1. Ler integralmente o handoff do Opus e comparar arquivos reais com a lista declarada.
+2. Inspecionar `git diff` completo; não descartar mudanças de nenhuma trilha.
+3. Revisar domínio, políticas Secovi, multi-cidade, ponderações, nulos e reconciliações do Opus.
+4. Ajustar consumidores ao contrato final e corrigir falhas cruzadas onde for necessário.
+5. Executar testes de domínio, componentes, manifesto, exportação, suíte completa, typecheck, lint
+   aplicável e build.
+6. Subir a aplicação e verificar no navegador: uma cidade; duas cidades monitoradas; período posterior
+   a 1T/26 quando disponível; vazio; falha parcial; erro total; navegação e exportação das 62 páginas.
+7. Gerar o PDF corrigido de Jundiaí e inspecionar as 62 páginas em 1920×1080.
+8. Fechar a matriz `requisito/slide → evidência → status` para os 28 comentários e G-01/G-02/G-03.
+9. Atualizar `DECISOES_E_PREMISSAS_PANORAMA.md`, este plano, o handoff Luna e
+   `docs/projetos/LIVE_rebrain.md`, com o link Monday.
+10. Executar `npm run check:live-docs -- <base> <head>` no intervalo correto.
+11. Somente com tudo verde, usar `git add <caminhos explícitos>` e criar um único commit combinado.
+    Nunca usar `git add .` ou `-A`; nunca incluir o PDF-fonte.
+12. Reportar quantos commits ficaram à frente e perguntar antes de qualquer push.
 
-**QA:** 14–19, 23–26 e 40 em 1920×1080, preview e captura do PDF.
+Se houver conflito sem solução segura, não commitar parcialmente: documentar evidência e pedir
+decisão. Não usar reset/checkout para “limpar” a árvore.
 
-### L5 — cubo granular de mercado
+## 7. Critério terminal de pronto
 
-Criar/estender uma estrutura granular por empreendimento que sustente, no mesmo fechamento:
-
-- cidade, ID do empreendimento, segmento aprovado e padrão;
-- tipologia canônica;
-- ano de lançamento;
-- unidades lançadas, finais e vendidas;
-- ticket, área, R$/m² e VGV de fonte;
-- faixa de maturidade e coordenadas.
-
-Não calcular “nº de empreendimentos” a partir de quantidade de linhas de endpoint agregado. Usar
-IDs distintos. Não calcular médias de preço por média simples das categorias.
-
-Se “Faixa de Valor” do slide 31 não tiver campo ou regra autoritativa após inspecionar o contrato da
-API, remover a coluna da V1 e registrar a ausência; não deixar coluna de travessões nem inventar
-limites.
-
-**Reconciliações obrigatórias:** cada dimensão soma os mesmos totais vertical/horizontal; vendidas =
-lançadas − finais quando este contrato for aplicável; VGV usa fonte bruta preferencial.
-
-### L6 — tabelas e gráficos 31–51
-
-Executar na ordem abaixo porque cada passo alimenta o seguinte:
-
-1. **31/32 — padrão vertical:** preencher empreendimentos, remover coluna vazia sem fonte e derivar
-   a participação da mesma tabela.
-2. **33 — coorte vertical:** agrupar até 2022, subtotal até 2024 e total geral.
-3. **34–37 — tipologia vertical:** aplicar nomes/ordem canônica e média ponderada única.
-4. **38–40 — padrão vertical/preço:** aplicar sete padrões e substituir a linha temporal por barras.
-5. **41/42 — ano × padrão:** usar coortes/ordem canônicas e preencher lançada/final; participação
-   deriva da matriz absoluta.
-6. **43/44 — maturidade × padrão:** somente vertical, com Planta/Construção/Pronto preenchidos.
-7. **45/46 — maturidade × tipologia:** mesma base, nomes 1→4+.
-8. **48 — coorte horizontal:** agrupamento canônico e política Condomínio de Casas.
-9. **49 — preço horizontal:** abrir por padrão e manter somente horizontal aprovado.
-10. **51 — VGV geral:** padrões verticais, subtotal vertical, padrões horizontais, total geral e
-    empreendimentos distintos.
-
-Em cada par tabela/gráfico, adicionar teste que prove igualdade de categorias, ordem e totais.
-
-### L7 — resumo, narrativa, mapa e regressão
-
-1. Recalcular os slides 29, 53 e 54 a partir dos agregados corrigidos.
-2. Não escrever que foram aprovados pela Juliana; ela declarou não ter revisado o resumo.
-3. Aplicar a política Secovi ao mapa e validar que apenas o universo vertical previsto aparece.
-4. Revisar assets/encerramento 57–62 e garantir ausência de regressão.
-5. Remover o arquivo morto `lib/pdf-print-interceptor.ts` somente se continuar sem imports e se a
-   remoção estiver coberta pelo build.
-
-### L8 — verificação terminal
-
-1. Testes unitários de domínio e modelo.
-2. Testes de registry/ordem e antirrepetição.
-3. Testes de componentes críticos e acessibilidade básica.
-4. Typecheck, lint aplicável, suíte completa e build.
-5. Subir o app e executar verificação no navegador:
-   - uma cidade;
-   - duas cidades;
-   - período posterior a 1T/26 disponível;
-   - vazio, falha de uma cidade e erro total;
-   - navegação das 62 páginas;
-   - exportação cancelada, retomada e concluída.
-6. Gerar PDF de Jundiaí e verificar página a página em 1920×1080.
-7. Gerar matriz final `requisito/slide → evidência → status`.
-
-Não encerrar com falha conhecida de V1. Se a API não fornecer um campo necessário, aplicar o
-comportamento determinístico definido neste plano (remover coluna sem fonte ou estado explícito),
-documentar e seguir; não fabricar valor.
-
-### L9 — documentação, commit e handoff
-
-1. Atualizar `DECISOES_E_PREMISSAS_PANORAMA.md` com decisões da Juliana e evidências.
-2. Atualizar este plano com status/checks finais, sem apagar a especificação original.
-3. Atualizar `LIVE_rebrain.md`, sempre com o link do card Monday.
-4. Executar `npm run check:live-docs -- <base> <head>`.
-5. Commit isolado com caminhos explícitos. Não usar `git add .`/`-A`; não adicionar o PDF-fonte sem
-   autorização explícita.
-6. Reportar commits locais à frente e perguntar antes de push.
-
-## 6. Critério terminal de pronto
-
+- [ ] handoff Opus contém `OPUS_READY` e foi revisado;
 - [ ] G-01, G-02 e G-03 implementados e verificados;
 - [ ] G-04 e G-05 registrados como V2;
-- [ ] 28 comentários do PDF rastreados e resolvidos;
-- [ ] slides 23–26 cobertos pela regra transversal de vendas;
-- [ ] slides 29/53/54 identificados como não revisados pela Juliana;
-- [ ] 62 páginas corretas em preview e PDF;
-- [ ] nenhuma coluna totalmente vazia, zero silencioso ou categoria indevida;
-- [ ] totais e subtotais reconciliados entre dimensões;
-- [ ] testes, typecheck, lint e build aprovados;
+- [ ] 28 comentários rastreados e resolvidos;
+- [ ] 62 páginas corretas no preview e PDF;
+- [ ] totais, subtotais, contagens e médias reconciliados;
+- [ ] nenhuma categoria indevida, coluna vazia ou zero silencioso;
+- [ ] testes, typecheck, lint aplicável e build aprovados;
 - [ ] PDF final gerado e inspecionado;
-- [ ] documentação viva atualizada;
+- [ ] documentos e dois handoffs atualizados;
+- [ ] um único commit combinado criado pelo Luna;
 - [ ] resposta de e-mail preenchida com evidências reais.
 
-## 7. Formato obrigatório do handoff técnico
+## 8. Resposta final em formato de e-mail para Juliana
 
-Informar:
-
-- commit(s) e arquivos alterados;
-- URL/ambiente verificado;
-- cidades e trimestre usados no aceite;
-- tabela `ID/slide → correção → teste/evidência → status`;
-- total de páginas, nome e tamanho do PDF final;
-- resultados de testes/typecheck/lint/build;
-- pendências V2;
-- qualquer limitação de API ainda visível e o comportamento aplicado.
-
-## 8. Resposta final em formato de e-mail para a Juliana
-
-Ao terminar, preencher os colchetes com resultados reais e devolver exatamente uma resposta pronta
-para envio, neste formato:
+Preencher apenas com resultados comprovados:
 
 > **Assunto: Panorama Secovi-SP — retorno das correções da V1**
 >
@@ -250,36 +207,34 @@ para envio, neste formato:
 > Principais ajustes realizados:
 >
 > - corrigimos a ordem das páginas institucionais e o layout da capa municipal;
-> - ajustamos os gráficos de lançamentos e vendas para exibir o primeiro período, evitar
->   sobreposição de rótulos e melhorar a área útil;
+> - ajustamos os gráficos para exibir o primeiro período, evitar sobreposição de rótulos e melhorar
+>   a área útil;
 > - padronizamos nomes e ordem de tipologias e padrões;
-> - agrupamos os anos conforme solicitado e incluímos subtotal até 2024 e total geral;
-> - corrigimos as matrizes de oferta lançada/final, maturidade e VGV, incluindo contagens de
->   empreendimentos, subtotais verticais, horizontais e total do mercado;
-> - aplicamos ao Secovi-SP o universo de empreendimentos verticais e, no horizontal, apenas
->   Condomínio de Casas;
-> - incluímos seleção de múltiplas cidades e períodos posteriores a 1T/26.
+> - agrupamos os anos e incluímos subtotal até 2024 e total geral;
+> - corrigimos oferta lançada/final, maturidade e VGV, com contagens e subtotais;
+> - aplicamos ao Secovi-SP os verticais e, no horizontal, somente Condomínio de Casas;
+> - incluímos múltiplas cidades e períodos posteriores a 1T/26.
 >
 > Validamos as 62 páginas no preview e no PDF usando **[cidade(s)]**, **[trimestre]**. O arquivo final
-> possui **[tamanho]** e foi conferido página a página. Também executamos **[testes e resultado]**.
+> possui **[tamanho]** e foi conferido página a página. Executamos **[testes e resultado]**.
 >
-> Como combinado, ficaram para uma V2:
+> Ficaram para V2 o novo padrão visual das tabelas, quando recebermos uma referência, e a exportação
+> em PowerPoint editável. O resumo textual permanece não homologado nesta rodada.
 >
-> - a adoção do novo padrão visual das tabelas da Rebrain, assim que recebermos uma referência;
-> - a exportação em PowerPoint editável.
->
-> A parte de resumo/análises textuais foi mantida como não homologada, pois entendemos que ela não
-> fez parte desta primeira rodada de comentários. Podemos incluí-la na próxima rodada de validação.
->
-> Segue o novo PDF para conferência: **[nome/link do arquivo]**.
+> Segue o novo PDF para conferência: **[nome/link]**.
 >
 > Obrigado!
 
-## 9. Prompt terminal para o Luna
+## 9. CTA para iniciar o Luna
 
-> Execute integralmente `PLAN_LUNA_CORRECOES_V1_JUNDIAI.md` na `main`. Use
-> `MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md` como matriz de aceite. Não implemente o novo padrão
-> de tabelas nem PPTX: ambos são V2. Não pare após alterar o código; conclua testes, browser QA,
-> geração e inspeção do PDF de 62 páginas, documentação, commit isolado e handoff. Preserve o
-> PDF-fonte não versionado. Só encerre quando os 28 comentários e G-01/G-02/G-03 tiverem evidência,
-> e devolva ao final a resposta de e-mail à Juliana preenchida com resultados reais.
+> Você é o **Luna, trilha B e integrador final**. Trabalhe na `main` compartilhada e execute
+> integralmente `docs/features/Relatorios Secovi_FIERGS/PLAN_LUNA_CORRECOES_V1_JUNDIAI.md`, usando o
+> mapeamento de Jundiaí como matriz de aceite e respeitando rigorosamente a propriedade de arquivos.
+> O Opus estará alterando domínio/API em paralelo. Durante essa fase, não edite arquivos reservados
+> ao Opus, não faça `git add`, commit, push, pull, stash, checkout, reset ou clean. Se sua trilha
+> terminar primeiro, registre `LUNA_WAITING_FOR_OPUS`, aguarde pelo arquivo
+> `HANDOFF_OPUS_CORRECOES_V1_JUNDIAI.md` com `Status: OPUS_READY` e não encerre. Depois disso, revise
+> todas as mudanças das duas trilhas, integre e corrija o conjunto, execute a verificação completa,
+> gere e inspecione o PDF de 62 páginas, atualize a documentação e crie o único commit combinado com
+> caminhos explícitos. Preserve e não versione o PDF-fonte. Ao final, entregue a matriz de evidências
+> e a resposta pronta para o e-mail da Juliana; não faça push sem autorização.
