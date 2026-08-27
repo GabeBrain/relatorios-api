@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-27 — Panorama: leitura contínua protegida contra coordenadas inválidas — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — ação `Ver as 62 páginas`, slide 56.
+- **O quê:** corrigido o `Invalid array length` que interrompia a leitura contínua: o gerador de tiles agora descarta latitude/longitude fora do globo, limita o mosaico a 20 tiles e não monta o fundo cartográfico quando o recorte é impossível. A contagem de pontos do slide 56 passou a considerar apenas coordenadas válidas.
+- **Verificação:** typecheck real, build e 103 testes do Panorama aprovados, incluindo coordenada extrema e `NaN`.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{lib/map-tiles.ts,components/MarketSlides.tsx,__tests__/map-tiles.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** a leitura de 62 páginas não deve mais depender da validade geográfica completa do retorno da API; validar manualmente no recorte que reportou a falha.
+
 ### 2026-08-27 — Panorama: tipologia real da API, capa sem corte e mapa base — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 2, 14–27, 34–37 e 56.
 - **O quê:** a inspeção do contrato `BuildingWithHistoricResource` identificou que a API entrega a tipologia em `number_bedroom` (com `type_of_typology` como alternativa), enquanto o adaptador lia apenas aliases inexistentes; isso criava a linha espúria `Não classificado`. O cubo agora lê os campos oficiais também para vendas por período e preço/m². A capa municipal usa a arte inteira sem recorte, centraliza melhor o título e exibe o trimestre uma única vez. Labels históricos ficam próximos ao ponto, recebem fundo que evita invasão da curva e linha-guia somente quando afastados. O mapa ganhou mosaico CARTO/OSM sem chave, com atribuição e pontos projetados nas coordenadas reais.

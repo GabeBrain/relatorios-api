@@ -193,8 +193,11 @@ export function NarrativeSlide({ report, continuation = false }: { report: Panor
 }
 
 export function LocationSlide({ report }: { report: PanoramaReportModel }) {
-  const vertical = report.locations.filter((item) => item.segment === 'Vertical');
-  const points = vertical.length ? vertical : report.locations;
+  const locations = report.locations.filter((item) => Number.isFinite(item.latitude) && Number.isFinite(item.longitude)
+    && item.latitude >= -85.05112878 && item.latitude <= 85.05112878
+    && item.longitude >= -180 && item.longitude <= 180);
+  const vertical = locations.filter((item) => item.segment === 'Vertical');
+  const points = vertical.length ? vertical : locations;
   const tiles = buildMapTilePlan(points);
   return <Slide title="EMPREENDIMENTOS VERTICAIS" className="panorama-location-slide"><div className="panorama-location-layout">
     <div className="panorama-location-map">{tiles && <><div className="panorama-map-tiles" style={{ gridTemplateColumns: `repeat(${tiles.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${tiles.rows}, minmax(0, 1fr))` }}>{tiles.tiles.map((tile) => <img key={`${tile.x}-${tile.y}`} src={tile.url} crossOrigin="anonymous" alt=""/>)}</div><small className="panorama-map-attribution">© OpenStreetMap contributors · © CARTO</small></>}

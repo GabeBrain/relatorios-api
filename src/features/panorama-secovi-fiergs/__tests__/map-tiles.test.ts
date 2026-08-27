@@ -21,4 +21,9 @@ describe('map tiles do slide 56', () => {
   it('não solicita tiles quando não há coordenadas', () => {
     expect(buildMapTilePlan([])).toBeNull();
   });
+
+  it('ignora coordenadas inválidas sem tentar criar um mosaico de tamanho impossível', () => {
+    expect(buildMapTilePlan([{ latitude: -23.18, longitude: -46.88 }, { latitude: 999_999_999, longitude: 999_999_999 }])).not.toBeNull();
+    expect(buildMapTilePlan([{ latitude: Number.NaN, longitude: -46.88 }])).toBeNull();
+  });
 });
