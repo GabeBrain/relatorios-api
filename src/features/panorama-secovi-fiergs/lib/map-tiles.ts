@@ -22,9 +22,9 @@ const isMappable = (point: GeographicPoint) => Number.isFinite(point.latitude) &
  * Pequeno mosaico CARTO/OSM, sem chave, apenas para dar referência geográfica ao slide 56.
  * O zoom diminui até o recorte inteiro caber em no máximo 5 × 4 tiles.
  */
-export function buildMapTilePlan(points: GeographicPoint[]): MapTilePlan | null {
+export function buildMapTilePlan(points: GeographicPoint[], mapboxAccessToken: string): MapTilePlan | null {
   const validPoints = points.filter(isMappable);
-  if (!validPoints.length) return null;
+  if (!validPoints.length || !mapboxAccessToken.trim()) return null;
   let zoom = 14;
   let minX = 0; let maxX = 0; let minY = 0; let maxY = 0;
   for (; zoom >= 4; zoom -= 1) {
@@ -44,8 +44,7 @@ export function buildMapTilePlan(points: GeographicPoint[]): MapTilePlan | null 
   if (!Number.isSafeInteger(columns) || !Number.isSafeInteger(rows) || columns < 1 || rows < 1 || columns * rows > 20) return null;
   const tiles = Array.from({ length: rows * columns }, (_, index) => {
     const x = minX + index % columns; const y = minY + Math.floor(index / columns);
-    const host = ['a', 'b', 'c', 'd'][(x + y) & 3];
-    return { x, y, url: `https://${host}.basemaps.cartocdn.com/light_all/${zoom}/${x}/${y}.png` };
+    return { x, y, url: `https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/256/${zoom}/${x}/${y}?access_token=${encodeURIComponent(mapboxAccessToken)}` };
   });
   return {
     zoom, columns, rows, tiles,

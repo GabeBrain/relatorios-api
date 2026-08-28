@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Panorama: mapa do slide 56 passa a usar Mapbox — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — mapa de empreendimentos verticais (slide 56).
+- **O quê:** substituído o mosaico CARTO, que passou a inserir marca d’água sem chave, por tiles Mapbox no mesmo planejador limitado e testado. A chave pública é lida exclusivamente de `VITE_MAPBOX_ACCESS_TOKEN`; sem ela, o slide informa que o fundo cartográfico não está configurado e não faz requisição incompleta. O arquivo de exemplo documenta a variável sem registrar valor.
+- **Verificação:** 105 testes do Panorama, typecheck real e build de produção aprovados. Próximo aceite: conferir o PDF autenticado com a variável também configurada no ambiente de deploy.
+- **Arquivos:** `.env.example`, `src/features/panorama-secovi-fiergs/{lib/map-tiles.ts,components/MarketSlides.tsx,__tests__/map-tiles.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** eliminada a dependência de tiles CARTO sem credencial; manter a chave Mapbox restrita aos domínios da aplicação e cadastrada no ambiente publicado.
+
 ### 2026-08-28 — Panorama: capa estática consistente e rótulos de preço legíveis — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slide 1 e série histórica de preço por m².
 - **O quê:** o texto residual `Panorama imobiliário de` da arte estática foi neutralizado, pois o nome do recorte pertence exclusivamente à capa dinâmica da página 2. No gráfico de preço por m², os rótulos trimestrais agora alternam quatro patamares, preservam proximidade com o ponto e desenham guia fina sempre que precisam ser deslocados.
