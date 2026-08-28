@@ -1,0 +1,11 @@
+# Documentos vivos são logs append-only: cada sessão insere uma entrada nova no
+# topo de "## 1. Desenvolvimentos". Duas pessoas trabalhando em paralelo colidem
+# na mesma âncora todo merge, mesmo sem discordar de nada.
+#
+# merge=union faz o Git manter os dois lados sozinho, em vez de abrir conflito.
+# O preço: a ordem cronológica sai bagunçada de vez em quando (reordenar é edição
+# de texto, não merge), e uma contradição real na MESMA linha entra duas vezes
+# em silêncio, sem aviso. Para um log de entradas, é o troco certo.
+#
+# Vale só para os LIVE_*.md. Markdown normal segue com merge padrão.
+LIVE_*.md merge=union
