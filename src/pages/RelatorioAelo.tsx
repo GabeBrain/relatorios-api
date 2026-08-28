@@ -449,8 +449,8 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
         ? null
         : Math.round(lastQuarter.sales * currentPrice * 100) / 100;
       // BR = O × T — Distratos indisponível na API
-      const vgvDistratos = 0;
-      const vendasLiqVgv = vgvVendasBrutas === null
+      const vgvDistratos = null;
+      const vendasLiqVgv = vgvVendasBrutas === null || vgvDistratos === null
         ? null
         : Math.round((vgvVendasBrutas - vgvDistratos) * 100) / 100;
 
@@ -498,7 +498,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
           row[`VGV Estoque ${q}`] = 0;
           continue;
         }
-        row[`Vendas líquidas ${q}`] = quarter?.hasSalesData ? quarter.sales : 0;
+        row[`Vendas líquidas ${q}`] = quarter?.hasSalesData ? quarter.sales : null;
         const quarterEntry = quarter?.lastEntry;
         const quarterStock = toNum(quarterEntry?.typology_stock);
         row[`VGV ${q}`] = quarter?.sales !== undefined && currentPrice !== null
@@ -561,7 +561,7 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
       const date = new Date(String(value));
       if (!Number.isNaN(date.getTime())) return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
     }
-    return value;
+    return typeof value === 'number' ? value : value;
   };
   const sheetRows = (rows: Row[]) =>
     [allCols, ...rows.map((row) => allCols.map((c) => exportValue(c, row[c])) )];
