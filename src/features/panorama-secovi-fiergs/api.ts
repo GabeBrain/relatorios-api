@@ -36,12 +36,7 @@ function temporalWindow(scope: Pick<CityScope, 'startQuarter' | 'endQuarter'>): 
   return { start: quarterStartDate(window[0]), end: quarterEndDate(scope.endQuarter) };
 }
 
-/**
- * Universo granular no contrato v2: é o mesmo contrato já consumido pelo Dashboard GeoBrain.
- * A versão anterior do Panorama ainda chamava o host legado via GET, que não preservava a
- * cobertura de campos granulares usada por preço e geolocalização.
- */
-async function fetchBuildings(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
+async function fetchBuildingsV2(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
   const byId = new Map<string, Record<string, unknown>>();
   for (const type of ['Vertical', 'Horizontal']) for (const status of BUILDING_STATUSES) {
     let page = 1; let lastPage = 1;
@@ -58,6 +53,41 @@ async function fetchBuildings(scope: CityScope, signal?: AbortSignal): Promise<R
     } while (page <= lastPage);
   }
   return [...byId.values()];
+}
+
+/** Contrato legado que já sustenta o Panorama em produção. */
+async function fetchBuildingsLegacy(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
+  const raw: Record<string, unknown>[] = [];
+  for (const type of ['Vertical', 'Horizontal']) {
+    let page = 1; let lastPage = 1;
+    do {
+      const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain legada em ${scope.city} (${response.status ?? 'rede'}).`);
+      raw.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
+      lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
+      page += 1;
+    } while (page <= lastPage);
+  }
+  return raw;
+}
+
+/**
+ * O endpoint v2 é preferido, mas a transição não pode transformar indisponibilidade do contrato
+ * em um relatório zerado. Enquanto a paridade autenticada não estiver confirmada, preservamos o
+ * contrato legado como fallback explícito.
+ */
+async function fetchBuildings(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
+  try {
+    return await fetchBuildingsV2(scope, signal);
+  } catch (v2Error) {
+    try {
+      return await fetchBuildingsLegacy(scope, signal);
+    } catch (legacyError) {
+      const v2Message = v2Error instanceof Error ? v2Error.message : String(v2Error);
+      const legacyMessage = legacyError instanceof Error ? legacyError.message : String(legacyError);
+      throw new Error(`Coleta de empreendimentos falhou em ${scope.city}. v2: ${v2Message}. Legado: ${legacyMessage}.`);
+    }
+  }
 }
 
 function segmentOf(value: unknown): Segment | null {
@@ -133,6 +163,10 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
   );
 
   const harvests = completedValues(collection);
+  if (collection.state === 'unavailable') {
+    const details = collection.failedCities.map(({ city, error }) => `${city}: ${error}`).join(' | ');
+    throw new Error(`Nenhuma cidade do recorte foi carregada pela API GeoBrain. ${details}`);
+  }
   // Numeradores e denominadores municipais somam ANTES de qualquer percentual ou média.
   const merge = (key: TemporalKey): SourceResult => ({
     rows: harvests.flatMap((harvest) => harvest.sources[key].rows),

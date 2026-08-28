@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Panorama: nunca exportar relatório zerado por falha de coleta — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração de relatório e coleta de empreendimentos.
+- **O quê:** a primeira tentativa de migração do contrato granular para v2 fez a coleta municipal falhar e o fluxo anterior ainda renderizava o modelo indisponível como tabelas zeradas. A coleta v2 agora possui fallback explícito para o contrato legado já funcional; se ambos falharem, nenhuma cidade concluída gera erro humano com cidade e causas dos dois contratos, sem exibir nem permitir exportar um PDF fictício de zeros.
+- **Verificação:** testes da feature, typecheck real e build executados nesta entrega. Próximo aceite: recorte autenticado de Jundiaí deve voltar a apresentar dados legados; caso v2 falhe, a tela explicará o status sem ocultá-lo.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,pages/PanoramaSecoviFiergsPage.tsx}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** nenhum relatório vazio será apresentado como resultado; a promoção definitiva para v2 continua dependente de evidência autenticada de paridade.
+
 ### 2026-08-27 — Panorama: contrato granular v2 e geocoordenadas decimais — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — coleta de empreendimentos, slide 49 e slide 56.
 - **O quê:** identificado e corrigido o parser que removia o ponto decimal de coordenadas retornadas como string pelo contrato v2 (por exemplo, `-23.1857` virava `-231857` e era descartado como fora do globo). A coleta granular do Panorama foi alinhada ao endpoint `POST api.geobrain.com.br/public-api/v2/building-with-history`, já utilizado pelo Dashboard GeoBrain, cobrindo status Ativo/Esgotado e deduplicando por empreendimento. O vazio do slide 49 agora separa claramente ausência de Condomínio de Casas elegível da ausência de preço no universo permitido; a política Secovi continua sem assumir que todo horizontal é condomínio.
