@@ -9,17 +9,18 @@ describe('Panorama PDF export contract', () => {
   });
 
   it('exports one active page per reference slide, including the municipal cover', () => {
-    expect(PANORAMA_REPORT_MANIFEST).toHaveLength(61);
+    expect(PANORAMA_REPORT_MANIFEST).toHaveLength(60);
     expect(PANORAMA_REPORT_MANIFEST.map((page) => page.page)).toContain(2);
     expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.page)).size).toBe(PANORAMA_REPORT_MANIFEST.length);
   });
 
-  it('keeps the institutional reference slide 3 at output position 7', () => {
-    const outputSeven = PANORAMA_REPORT_MANIFEST.find((page) => page.page === 7);
+  it('keeps the institutional reference slide 3 at output position 6', () => {
+    const outputSix = PANORAMA_REPORT_MANIFEST.find((page) => page.page === 6);
     const outputThree = PANORAMA_REPORT_MANIFEST.find((page) => page.page === 3);
-    expect(outputSeven?.referenceSlide).toBe(3);
-    expect(outputThree?.referenceSlide).toBe(4);
-    expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.referenceSlide)).size).toBe(61);
+    expect(outputSix?.referenceSlide).toBe(3);
+    expect(outputThree?.referenceSlide).toBe(5);
+    expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.referenceSlide)).size).toBe(60);
+    expect(PANORAMA_REPORT_MANIFEST.some((page) => page.referenceSlide === 4)).toBe(false);
     expect(PANORAMA_REPORT_MANIFEST.some((page) => page.referenceSlide === 56)).toBe(false);
   });
 });

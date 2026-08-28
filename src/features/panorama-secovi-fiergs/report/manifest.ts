@@ -13,6 +13,8 @@ PANORAMA_SECTIONS.splice(8, 2,
   { id: 'location', label: 'Localização dos Empreendimentos', start: 55, end: 55 },
   { id: 'consultants', label: 'Consultores do Estudo', start: 56, end: 61 },
 );
+// A abertura “Panorama imobiliário de …” também fica fora da V1 por não ter cidade dinâmica.
+PANORAMA_SECTIONS.forEach((section) => { section.start -= 1; section.end -= 1; });
 
 type Definition = [string, string, PanoramaVisualFamily, string[], MethodStatus | 'not_applicable'];
 const pages: Definition[] = [
@@ -23,9 +25,9 @@ const pages: Definition[] = [
   ['Mercado residencial horizontal','Abertura de bloco','divider',[],'not_applicable'],['Oferta horizontal por coorte','Coortes','market-table',['cohorts'],'open_method'],['Ticket, área e R$/m² horizontal','Indicadores de preço','price',['prices'],'open_method'],['VGV geral','Abertura de bloco','divider',[],'not_applicable'],['VGV ofertado, disponível e vendido por padrão','Matriz de VGV','matrix',['stock.vgv'],'open_method'],['Análises e observações','Abertura de bloco','divider',[],'not_applicable'],['Análise de mercado','Narrativa orientada por dados','narrative',['narrative.facts'],'assumed'],['Análise de mercado','Narrativa orientada por dados','narrative',['narrative.facts'],'assumed'],['Localização dos empreendimentos','Abertura de bloco','divider',[],'not_applicable'],['Mapa de empreendimentos verticais','Visualização geográfica','map',['locations'],'open_method'],['Consultores do estudo','Abertura','divider',[],'not_applicable'],['Créditos','Equipe e fontes','static',[],'not_applicable'],['Brain Inteligência Estratégica','Encerramento','closing',[],'not_applicable'],['Panorama imobiliário','Encerramento','closing',[],'not_applicable'],['Obrigado','Encerramento','closing',[],'not_applicable'],['Fontes, premissas e rastreabilidade','Encerramento técnico','closing',[],'not_applicable'],
 ];
 
-// A lâmina institucional de visão/missão/valores (referência 3) ocupa a posição 7 no deck final.
+// A lâmina institucional de visão/missão/valores (referência 3) ocupa a posição 6 no deck final.
 // `page` é sempre a posição de saída; `referenceSlide` mantém a identidade editorial original.
-const outputReferenceSlides = [1, 2, 4, 5, 6, 7, 3, 8, 9, 10, ...Array.from({ length: 52 }, (_, index) => index + 11)].filter((referenceSlide) => referenceSlide !== 56);
+const outputReferenceSlides = [1, 2, 4, 5, 6, 7, 3, 8, 9, 10, ...Array.from({ length: 52 }, (_, index) => index + 11)].filter((referenceSlide) => referenceSlide !== 4 && referenceSlide !== 56);
 
 export const PANORAMA_REPORT_MANIFEST: ReportPageDefinition[] = outputReferenceSlides.map((referenceSlide, index) => {
   const page = index + 1;

@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Panorama: remoção da abertura residual — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — composição do livro, prévia e exportação PDF.
+- **O quê:** retirada da V1 a abertura estática `Panorama imobiliário de {cidade}` (referência 4), pois ela não recebe com segurança os municípios do recorte. A capa dinâmica da página 2 continua sendo a única capa com cidades; a máscara CSS experimental foi removida integralmente, sem afetar os slides institucionais.
+- **Verificação:** o manifesto agora contém 60 páginas ativas, sem as referências 4 e 56; 108 testes da feature, typecheck e build de produção aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/manifest.ts,components/ReportPaginator.tsx,print/panorama-print.css,__tests__/pdf-export.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** a abertura só deve retornar numa V2 com composição dinâmica aprovada; o mapa permanece suspenso até configuração e homologação Mapbox no deploy.
+
 ### 2026-08-28 — Panorama: mapa de empreendimentos temporariamente desativado — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slide de mapa de empreendimentos verticais.
 - **O quê:** removido o slide de mapa da composição do preview e do PDF enquanto o ambiente publicado não recebe `VITE_MAPBOX_ACCESS_TOKEN`. O livro passa a ter 61 páginas e os controles usam a contagem real; a abertura de Localização permanece como peça editorial, sem exibir um mapa indisponível.
@@ -1069,6 +1077,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] **Panorama Secovi/FIERGS — executar correções da V1 de Jundiaí:** executar em paralelo [`PLAN_OPUS_CORRECOES_V1_JUNDIAI.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_OPUS_CORRECOES_V1_JUNDIAI.md) e [`PLAN_LUNA_CORRECOES_V1_JUNDIAI.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_LUNA_CORRECOES_V1_JUNDIAI.md); o Luna integra após `OPUS_READY`, cobrindo os 28 comentários, multi-cidade, período após 1T/26, universo Secovi e novo PDF de 62 páginas. Matriz de aceite em [`MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md`](../features/Relatorios%20Secovi_FIERGS/MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md).
 - [ ] **Panorama V2 — itens adiados:** novo padrão visual de tabelas Rebrain (aguarda referência) e exportação PPTX editável; não bloqueiam o fechamento da V1.
 - [ ] **Panorama V2 — reativar mapa de empreendimentos:** cadastrar `VITE_MAPBOX_ACCESS_TOKEN` no ambiente publicado, restringir o token aos domínios da aplicação e homologar preview/PDF antes de reintroduzir o slide 56.
+- [ ] **Panorama V2 — avaliar retorno da abertura de praça:** a referência 4 foi retirada porque a arte estática não recebe o nome do recorte; só reintroduzir com composição dinâmica aprovada.
 - [ ] **Panorama — fechar metodologia com os analistas:** critério oficial de **VGV lançado**
   (estimativa via `building-with-history`) e de **% MCMV** (proxy por padrão Econômico / teto de preço).
 - [ ] Panorama — confirmar que o token Secovi cobre o histórico desde 1T/22 (dado pontual 4T/21) nas cidades-alvo.
