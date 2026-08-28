@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Panorama: impedir séries temporais vazias de virarem zeros — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — vendas, preços, estoque e IVV por trimestre.
+- **O quê:** corrigido o fallback que aceitava `HTTP 200` com lista temporal vazia como fonte disponível e, por consequência, compunha gráficos e tabelas inteiros com zero. Uma resposta sem linhas agora é identificada na proveniência; quando todos os endpoints temporais de uma cidade estão indisponíveis, a geração é interrompida com os endpoints e seus status, em vez de produzir um relatório numérico falso.
+- **Verificação:** 105 testes do Panorama, typecheck real e build de produção aprovados. Próximo aceite: executar Jundiaí autenticado e registrar a mensagem retornada para corrigir o contrato/parâmetro que estiver sem dados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/api.ts`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** nenhuma lâmina temporal deve voltar a representar indisponibilidade da API como valor zero; permanece necessária a evidência autenticada de Jundiaí para fechar a causa no endpoint.
+
 ### 2026-08-28 — Panorama: mapa do slide 56 passa a usar Mapbox — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — mapa de empreendimentos verticais (slide 56).
 - **O quê:** substituído o mosaico CARTO, que passou a inserir marca d’água sem chave, por tiles Mapbox no mesmo planejador limitado e testado. A chave pública é lida exclusivamente de `VITE_MAPBOX_ACCESS_TOKEN`; sem ela, o slide informa que o fundo cartográfico não está configurado e não faz requisição incompleta. O arquivo de exemplo documenta a variável sem registrar valor.

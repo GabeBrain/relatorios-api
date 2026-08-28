@@ -138,12 +138,17 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], si
     temporalRows(scope, 'medium-prices', 'Padrão', signal), temporalRows(scope, 'medium-prices', 'Tipologia', signal),
     temporalRows(scope, 'medium-prices-meter', 'Padrão', signal), temporalRows(scope, 'medium-prices-meter', 'Tipologia', signal),
   ]);
+  const sources = { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology };
+  if (Object.values(sources).every((source) => !source.available)) {
+    const details = Object.entries(sources).map(([key, source]) => `${key}: ${source.source}`).join(' | ');
+    throw new Error(`A API GeoBrain não retornou séries temporais utilizáveis para ${scope.city}. ${details}`);
+  }
   return {
     city: scope.city,
     records: launchRecordsFrom(buildings, scope),
     cube: buildCityCube(buildings, { city: scope.city, uf: scope.uf, endQuarter: scope.endQuarter, entity }),
     cohorts: cohortRowsFrom(buildings, scope),
-    sources: { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology },
+    sources,
   };
 }
 
@@ -262,10 +267,13 @@ async function temporalRows(scope: CityScope, endpoint: 'sales' | 'stock' | 'ivv
   do {
     const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: window.start, end_period: window.end, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal });
     if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}` };
-    rows.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
+    const pageRows = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
+    rows.push(...pageRows);
     lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
   } while (page <= lastPage);
-  return { rows, available: true, source: `temporal-analysis-city/${endpoint} · ${groupBy}` };
+  return rows.length
+    ? { rows, available: true, source: `temporal-analysis-city/${endpoint} · ${groupBy}` }
+    : { rows, available: false, source: `temporal-analysis-city/${endpoint} · HTTP 200 · sem linhas` };
 }
 
 /** Initial T3/T4 bench: direct temporal endpoints only; it cannot silently promote a report contract. */
