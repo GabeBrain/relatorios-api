@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- PROTOCOLO-SESSAO v1 -->
+<!-- PROTOCOLO-SESSAO v2 -->
 ## Protocolo de sessão
 
 Vale para qualquer agente (Claude, Codex, Lovable) e qualquer pessoa trabalhando neste repo.
@@ -38,13 +38,40 @@ automática. Isso não é regra de conformidade: é a diferença entre o time ve
 
 ### Vínculo com o Monday
 
+**Regra fixa: nunca escreva no Monday por conta própria.**
+
+O Monday é território humano. Nenhum agente — Claude, Codex, Lovable — cria card, comenta,
+move status, altera prazo ou responsável sem que uma pessoa peça explicitamente, naquela
+sessão, para fazer aquilo. Não há exceção por "a tarefa claramente terminou" nem por
+"o commit dizia que concluiu".
+
+O que fazer, em vez disso:
+
+| Situação | Ação correta |
+|---|---|
+| O trabalho corresponde a um card | **Propor**: "isto fecha o card X — quer que eu comente lá?" e esperar |
+| A pessoa pediu ("atualiza o Monday") | Fazer, e dizer o que foi escrito |
+| Nenhuma das duas | Não tocar no Monday. Registrar no documento vivo |
+
+Propor é bem-vindo; agir sozinho, não. A diferença é que a proposta custa uma linha e a
+pessoa decide em dois segundos, enquanto um comentário indesejado já está no card de todo
+mundo e não sai mais.
+
+**Para leitura, o Monday é livre.** Consultar cards para entender contexto — o que está em
+andamento, quem é o responsável, qual o escopo acordado — é encorajado, e é para isso que
+existe o `MONDAY_MAP.md`. A restrição é só de escrita.
+
+O que a automação faz sozinha: atualiza o painel do Observatório e regenera os documentos
+vivos no Drive. O Monday fica de fora, por decisão.
+
+#### Referência ao card no documento vivo
+
 Toda entrada de documento vivo que corresponda a um card traz o campo:
 
 - **Monday:** [Nome do card](https://brain381753.monday.com/boards/<board>/pulses/<itemId>) — `<itemId>`
 
-O link é obrigatório, não só o número: quem lê o doc precisa chegar ao card em um clique, e o
-Radar usa o ID para cruzar commits com cards. Sem esse campo, a entrega não aparece no card
-correspondente.
+O link é obrigatório, não só o número: quem lê o doc precisa chegar ao card em um clique.
+Este campo é referência, não escrita — ele vive no documento, não no Monday.
 
 Board principal: `Backlogs & Roadmaps` — `18398428946`.
 Board de execução semanal: `Entregas` — `18398428948`.
