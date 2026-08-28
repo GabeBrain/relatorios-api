@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Teste headless da exportação percentual do AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — exportação Excel.
+- **O quê:** adicionada cobertura Vitest para a conversão dos percentuais, o tipo numérico das células, o formato `0.00%` e a preservação de valores nulos/vazios.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`, `src/pages/__tests__/RelatorioAelo.test.ts`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
 ### 2026-08-28 — Landing de entrada orientada por objetivo — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/inicio` — página de entrada da plataforma Rebrain.
 - **O quê:** substituído o painel operacional de KPIs de auditoria e atividade recente por uma landing de direcionamento. A página agora organiza os ambientes por três objetivos (gerar relatório de mercado, analisar mercado/pesquisa e validar/atualizar dados), identifica o tipo de estudo em cada destino e permite destacar os fluxos por público (Analistas, Pesquisa, Gestão, Operação ou Técnico). Todos os módulos ativos possuem acesso direto; API Explorer ficou como ferramenta de apoio.

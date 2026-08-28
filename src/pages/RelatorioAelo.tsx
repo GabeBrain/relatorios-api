@@ -66,8 +66,22 @@ function formatAeloPercent(value: unknown): string {
   })}%`;
 }
 
-function formatAeloPercentValue(value: number): number {
+export function formatAeloPercentValue(value: number): number {
   return value / 100;
+}
+
+export function exportAeloPercentValue(value: unknown): number | null {
+  const numeric = toNum(value);
+  return numeric === null ? null : formatAeloPercentValue(numeric);
+}
+
+export function exportAeloPercentCell(value: unknown): { v: number | null; z: string } {
+  return { v: exportAeloPercentValue(value), z: '0.00%' };
+}
+
+export function exportAeloValue(col: string, value: Row[string]): Row[string] {
+  if (value === null || value === undefined || value === '') return null;
+  return AELO_PERCENT_COLUMNS.has(col) ? exportAeloPercentValue(value) : value;
 }
 
 function formatAeloVgv(value: unknown): string {
@@ -556,10 +570,7 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
   const allCols = [...HEADER_COLS, ...quarterMeasureCols];
   const exportValue = (col: string, value: Row[string]): Row[string] => {
     if (value === null || value === undefined || value === '') return null;
-    if (AELO_PERCENT_COLUMNS.has(col)) {
-      const numeric = toNum(value);
-      return numeric === null ? null : formatAeloPercentValue(numeric);
-    }
+    if (AELO_PERCENT_COLUMNS.has(col)) return exportAeloValue(col, value);
     if (col.startsWith('VGV')) {
       const numeric = toNum(value);
       return numeric === null ? null : formatAeloVgvMillions(numeric);
