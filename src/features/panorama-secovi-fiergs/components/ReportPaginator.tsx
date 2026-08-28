@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle } from 'lucide-react';
 import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
-import type { LaunchSeries, PanoramaReportModel, ReportMarketBlock } from '../types';
+import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
 import { synchronizeOfficialCoverCity } from '../lib/official-cover';
 import { PANORAMA_REPORT_MANIFEST, PANORAMA_SECTIONS, type ReportPageDefinition } from '../report/manifest';
@@ -25,10 +25,16 @@ const decimal = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits
 const pct = (v: number | null) => v === null ? '—' : `${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 const year = (q: string) => q.slice(2);
 function Footer() { return <footer className="panorama-page-footer panorama-official-footer" style={{ backgroundImage: `url(${footerImage})` }}><span>FONTE: BRAIN | ELABORAÇÃO: BRAIN</span></footer>; }
-function Sheet({ def, children }: { def: ReportPageDefinition; report: PanoramaReportModel; children: React.ReactNode }) { const hasBakedFooter = Boolean(officialSlides[`../assets/official/panorama-${String(def.page).padStart(2, '0')}.png`]); return <section className={`panorama-report-page panorama-official-page ${hasBakedFooter ? 'panorama-baked-page' : ''}`} aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div>{!hasBakedFooter && <Footer/>}</section>; }
+function Sheet({ def, children }: { def: ReportPageDefinition; report: PanoramaReportModel; children: React.ReactNode }) { const hasBakedFooter = def.referenceSlide !== 2 && Boolean(officialSlides[`../assets/official/panorama-${String(def.referenceSlide).padStart(2, '0')}.png`]); return <section className={`panorama-report-page panorama-official-page ${hasBakedFooter ? 'panorama-baked-page' : ''}`} aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div>{!hasBakedFooter && <Footer/>}</section>; }
+class ReportPageBoundary extends Component<{ page: number; fallback: ReactNode; children: ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error) { console.error(`Falha ao renderizar a página ${this.props.page} do Panorama`, error); }
+  render() { return this.state.error ? this.props.fallback : this.props.children; }
+}
 function Divider({ title }: { title: string }) { return <div className="panorama-divider"><div><p>Panorama imobiliário</p><h2>{title}</h2><i/></div></div>; }
 function Corporate({ page, report }: { page: number; report: PanoramaReportModel }) {
-  const city = `${report.scope.city} - ${report.scope.uf}`;
+  const city = `${scopeCityLabel(report.scope)} - ${report.scope.uf}`;
   if (page === 3) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><h3>Nossa visão</h3><p>Ser reconhecido pela sociedade como a entidade mais importante na realização do maior sonho do brasileiro: a casa própria.</p><h3>Nossa missão</h3><p>Desenvolver, representar, promover e defender a atividade imobiliária em seus segmentos, dentro de padrões reconhecidamente éticos e comprometidos com os anseios da coletividade.</p><h3>Nossos valores</h3><ul>{['Presteza','Confiabilidade','Ética','Transparência','Profissionalismo','Eficácia','Inovação','Espírito de equipe'].map((x) => <li key={x}>✓ {x}</li>)}</ul></div>;
   if (page === 7) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><p>O Secovi-SP faz história desde 1946 e cumpre seu compromisso com o Estado de São Paulo por meio do desenvolvimento do setor urbano ao lado de parceiros públicos, corporativos e da grande mídia.</p><p>Seu trabalho representa empresas, viabiliza negócios, incentiva inovação e contribui para a oferta de habitação e o desenvolvimento das cidades.</p><p>O Sindicato mantém diálogo permanente com autoridades e associados, criando propostas e serviços que favorecem a urbanização, a geração de empregos e a segurança nas relações imobiliárias.</p></div>;
   if (page === 8) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><h3>Política da Qualidade:</h3><p>Fornecer aos seus associados e categorias representadas, com máxima presteza, confiabilidade e alto padrão de qualidade, informações e subsídios pertinentes ao exercício de suas atividades.</p><p>Defender ativamente os interesses dos associados dentro de padrões éticos e segundo os interesses coletivos; valorizar o crescimento gerencial e profissional da entidade; promover o espírito de equipe e a eficácia do sistema da qualidade.</p></div>;
@@ -52,21 +58,29 @@ function seriesFor(page: number, r: PanoramaReportModel): TrendConfig {
 }
 function TimeChart({ page, report }: { page: number; report: PanoramaReportModel }) {
   const series = seriesFor(page, report);
-  const data = series.data.slice(-17);
+  const data = series.data;
   const referenceQuarter = report.scope.endQuarter[0];
-  const formatValue = (value: number) => series.unit === 'mi' ? decimal(value) : series.unit === 'percent' ? pct(value) : series.unit === 'sqm' ? `R$ ${n(value)}/m²` : n(value);
+  const formatValue = (value: number) => series.unit === 'mi' ? decimal(value) : series.unit === 'sqm' ? `R$ ${n(value)}/m²` : n(value);
   const highlighted = data.filter((row) => row.quarter[0] === referenceQuarter);
   const comparisons = highlighted.slice(-4).slice(1).map((current, index) => ({ previous: highlighted.slice(-4)[index], current }));
   const renderPointLabel = (key: 'vertical' | 'horizontal', color: string, textColor: string) => (props: { index?: number; x?: number; y?: number; value?: number }) => {
     const index = props.index ?? -1;
     const row = data[index];
     if (!row || props.x === undefined || props.y === undefined || props.value === undefined) return null;
+    if (Number(props.value) === 0) return null;
     const emphasized = row.quarter[0] === referenceQuarter;
-    const yOffset = key === 'vertical' ? -10 : 18;
+    const companion = key === 'vertical' ? row.horizontal : row.vertical;
+    const valuesAreClose = !series.single && Math.abs(Number(props.value) - companion) <= Math.max(Math.abs(Number(props.value)), Math.abs(companion), 1) * .18;
+    // O padrão é ficar junto do ponto. Só afastamos a segunda etiqueta quando os dois
+    // valores disputam a mesma região; nesse caso, a linha-guia preserva a associação.
+    const labelTier = series.single ? index % 4 : 0;
+    const yOffset = series.single ? -14 - labelTier * 19 : valuesAreClose && key === 'horizontal' ? -34 : -14;
+    const labelY = Math.max(18, props.y + yOffset);
     const label = formatValue(Number(props.value));
-    if (!emphasized) return <text className="panorama-point-label" x={props.x} y={props.y + yOffset} textAnchor="middle">{label}</text>;
     const width = Math.max(34, label.length * 7 + 12);
-    return <g className="panorama-highlight-label" transform={`translate(${props.x - width / 2} ${props.y + yOffset - 13})`}><rect width={width} height={19} fill={color}/><text x={width / 2} y={13} textAnchor="middle" fill={textColor}>{label}</text></g>;
+    const needsLeader = labelTier > 0 || props.y - labelY > 20;
+    if (!emphasized) return <g className="panorama-point-label"><>{needsLeader && <line x1={props.x} y1={props.y - 3} x2={props.x} y2={labelY + 3} stroke={color} strokeWidth={1}/>}<rect x={props.x - width / 2} y={labelY - 13} width={width} height={16} rx={2} fill="#fff" fillOpacity={.94}/><text x={props.x} y={labelY} textAnchor="middle">{label}</text></></g>;
+    return <g className="panorama-highlight-label"><>{needsLeader && <line x1={props.x} y1={props.y - 3} x2={props.x} y2={labelY + 4} stroke={color} strokeWidth={1}/>}<g transform={`translate(${props.x - width / 2} ${labelY - 13})`}><rect width={width} height={19} fill={color}/><text x={width / 2} y={13} textAnchor="middle" fill={textColor}>{label}</text></g></></g>;
   };
 
   const years = [...new Set(data.map((item) => year(item.quarter)))];
@@ -92,8 +106,8 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
       return <span key={annualYear}><b>{annualYear}{annualYear === year(report.scope.endQuarter) ? '*' : ''}</b>{formatValue(total)} {unitLabel}<small>{formatValue(total / Math.max(rows.length, 1))} {series.unit === 'count' && [14, 15].includes(page) ? 'Emp.' : series.unit === 'count' ? 'Unid.' : series.unit === 'mi' ? 'Mi.' : ''}/Trimestre</small></span>;
     })}</div>
     <ResponsiveContainer width="100%" height={series.pattern ? '51%' : '62%'}>
-      <LineChart data={data} margin={{ left: 22, right: 22, top: 26, bottom: 6 }}>
-        <XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} axisLine={{ stroke: '#c9c9c9' }} tick={{ fontSize: 11 }}/>
+      <LineChart data={data} margin={{ left: 22, right: 22, top: series.single ? 88 : 26, bottom: 18 }}>
+        <XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} tickMargin={8} axisLine={{ stroke: '#c9c9c9' }} tick={{ fontSize: 11 }}/>
         <Tooltip formatter={(value) => formatValue(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as never)}/>
         <Legend verticalAlign="bottom"/>
         <Line type="monotone" dataKey="vertical" name={series.nouns[0]} stroke={series.colors[0]} strokeWidth={4} dot={false} isAnimationActive={false} label={renderPointLabel('vertical', series.colors[0], '#fff')}/>
@@ -177,10 +191,11 @@ function dataPage(page: number, report: PanoramaReportModel) {
   return null;
 }
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
-  const title = def.title.replace('{cidade}', report.scope.city); const p = def.page;
+  const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
   const official = officialSlides[`../assets/official/panorama-${String(p).padStart(2, '0')}.png`];
+  if (p === 2) return <div className="panorama-cover panorama-city-cover" style={{ backgroundImage: `url(${coverImage})` }}><div className="panorama-city-cover-content"><p>Panorama imobiliário</p><h1>{cityLabel}</h1><i/><h2>{quarterLabel(report.scope.endQuarter)}</h2></div></div>;
   if (official) return <img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/>;
-  if (p === 1 || p === 2 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>{p === 4 ? `Panorama Imobiliário de ${report.scope.city}` : report.scope.city}</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
+  if (p === 1 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>Panorama imobiliário</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
   if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <Divider title={title}/>;
   if ([3,7,8,10].includes(p)) return <Corporate page={p} report={report}/>;
   if (p === 5) return <div className="panorama-corporate"><h2>Sumário</h2><ol className="panorama-summary">{PANORAMA_SECTIONS.map((section) => <li key={section.id}>{section.label}</li>)}</ol></div>;
@@ -188,22 +203,26 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   if (p === 56) return <LocationSlide report={report}/>;
   return dataPage(p, report) ?? <div className="panorama-corporate"><h2>{title}</h2><p>Conteúdo editorial do relatório.</p></div>;
 }
+function SafeSheet({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
+  const fallback = <Sheet def={def} report={report}><div className="panorama-page-unavailable"><h2>PÁGINA INDISPONÍVEL</h2><i/><p>Esta página não pôde ser montada. As demais páginas do relatório continuam disponíveis.</p></div></Sheet>;
+  return <ReportPageBoundary page={def.page} fallback={fallback}><Sheet def={def} report={report}><Content def={def} report={report}/></Sheet></ReportPageBoundary>;
+}
 /**
- * As 62 lâminas montadas fora da tela — é sobre elas que a rasterização acontece. Fica isolado
+ * As lâminas montadas fora da tela — é sobre elas que a rasterização acontece. Fica isolado
  * porque o host de exportação em segundo plano precisa montá-lo fora da árvore da rota.
  */
-/** Leitura contínua das 62 lâminas. Não gera arquivo: são os mesmos componentes já montados. */
+/** Leitura contínua de todas as lâminas ativas. Não gera arquivo: são os mesmos componentes já montados. */
 function AllPagesView({ report, containerRef }: { report: PanoramaReportModel; containerRef: React.RefObject<HTMLDivElement> }) {
   return <div ref={containerRef} className="space-y-6">{PANORAMA_REPORT_MANIFEST.map((def) => (
     <div key={def.page} className="space-y-1.5">
       <p className="text-xs font-medium text-muted-foreground">Página {def.page} de {PANORAMA_REPORT_MANIFEST.length} · {def.title}</p>
-      <Sheet def={def} report={report}><Content def={def} report={report}/></Sheet>
+      <SafeSheet def={def} report={report}/>
     </div>
   ))}</div>;
 }
 
 export function PanoramaExportDeck({ report, rootRef }: { report: PanoramaReportModel; rootRef: React.RefObject<HTMLDivElement> }) {
-  return <div ref={rootRef} className="panorama-export-root" aria-hidden="true">{PANORAMA_REPORT_MANIFEST.map((def) => <Sheet key={def.page} def={def} report={report}><Content def={def} report={report}/></Sheet>)}</div>;
+  return <div ref={rootRef} className="panorama-export-root" aria-hidden="true">{PANORAMA_REPORT_MANIFEST.map((def) => <SafeSheet key={def.page} def={def} report={report}/>)}</div>;
 }
 
 export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
@@ -214,12 +233,12 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
   const pages = useMemo(() => PANORAMA_REPORT_MANIFEST, []); const page = pages[current];
-  useEffect(() => { synchronizeOfficialCoverCity(report.scope.city, report.scope.uf, report.scope.endQuarter); }, [report.scope.city, report.scope.uf, report.scope.endQuarter]);
+  useEffect(() => { synchronizeOfficialCoverCity(scopeCityLabel(report.scope), report.scope.uf, report.scope.endQuarter); }, [report.scope.cities, report.scope.uf, report.scope.endQuarter]);
   const jump = (number: number) => {
     setCurrent(Math.max(0, pages.findIndex((item) => item.page === number)));
     if (view === 'all') allPagesRef.current?.querySelector(`[aria-label^="Página ${number}:"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   // O trabalho pesado roda no host montado pelo shell: o usuário pode sair desta página.
   const exportPdf = () => usePanoramaExportStore.getState().start(report);
-  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver as 62 páginas</>}</Button><Button size="sm" disabled={exporting} onClick={exportPdf}>{exporting ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exporting && <p className="text-sm text-muted-foreground">O PDF está sendo gerado em segundo plano — você pode navegar para outras páginas sem interromper.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{PANORAMA_SECTIONS.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} containerRef={allPagesRef}/> : <Sheet def={page} report={report}><Content def={page} report={report}/></Sheet>}</div></div>;
+  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver todas as páginas</>}</Button><Button size="sm" disabled={exporting} onClick={exportPdf}>{exporting ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exporting && <p className="text-sm text-muted-foreground">O PDF está sendo gerado em segundo plano — você pode navegar para outras páginas sem interromper.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{PANORAMA_SECTIONS.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} containerRef={allPagesRef}/> : <SafeSheet def={page} report={report}/>}</div></div>;
 }

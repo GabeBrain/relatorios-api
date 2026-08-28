@@ -49,6 +49,161 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Landing de entrada orientada por objetivo — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/inicio` — página de entrada da plataforma Rebrain.
+- **O quê:** substituído o painel operacional de KPIs de auditoria e atividade recente por uma landing de direcionamento. A página agora organiza os ambientes por três objetivos (gerar relatório de mercado, analisar mercado/pesquisa e validar/atualizar dados), identifica o tipo de estudo em cada destino e permite destacar os fluxos por público (Analistas, Pesquisa, Gestão, Operação ou Técnico). Todos os módulos ativos possuem acesso direto; API Explorer ficou como ferramenta de apoio.
+- **Verificação:** build de produção e typecheck aprovados. Conferência local em navegador confirmou conteúdo, rota `/inicio` e ausência de overlay de erro; o ambiente bloqueou somente o carregamento das fontes externas do Google.
+- **Arquivos:** `src/pages/Home.tsx`, `src/App.css`.
+- **Impacto em Etapas/Pendências:** a entrada deixa de depender de métricas que não orientavam a escolha do usuário. O próximo aceite é validar com os públicos reais a nomenclatura dos objetivos e o encaixe de cada fluxo.
+
+### 2026-08-28 — Panorama: remoção da abertura residual — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — composição do livro, prévia e exportação PDF.
+- **O quê:** retirada da V1 a abertura estática `Panorama imobiliário de {cidade}` (referência 4), pois ela não recebe com segurança os municípios do recorte. A capa dinâmica da página 2 continua sendo a única capa com cidades; a máscara CSS experimental foi removida integralmente, sem afetar os slides institucionais.
+- **Verificação:** o manifesto agora contém 60 páginas ativas, sem as referências 4 e 56; 108 testes da feature, typecheck e build de produção aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/manifest.ts,components/ReportPaginator.tsx,print/panorama-print.css,__tests__/pdf-export.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** a abertura só deve retornar numa V2 com composição dinâmica aprovada; o mapa permanece suspenso até configuração e homologação Mapbox no deploy.
+
+### 2026-08-28 — Panorama: mapa de empreendimentos temporariamente desativado — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slide de mapa de empreendimentos verticais.
+- **O quê:** removido o slide de mapa da composição do preview e do PDF enquanto o ambiente publicado não recebe `VITE_MAPBOX_ACCESS_TOKEN`. O livro passa a ter 61 páginas e os controles usam a contagem real; a abertura de Localização permanece como peça editorial, sem exibir um mapa indisponível.
+- **Verificação:** manifesto e contrato de exportação atualizados; testes da feature, typecheck real e build de produção aprovados nesta entrega.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/manifest.ts,components/ReportPaginator.tsx,__tests__/pdf-export.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** mapa passa a ser V2 até a chave Mapbox estar configurada no deploy e o PDF autenticado ser homologado.
+
+### 2026-08-28 — Panorama: erros da GeoBrain em linguagem de produto — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração do panorama quando séries temporais não podem ser consultadas.
+- **O quê:** a falha técnica dos endpoints temporais passou a ser traduzida para quatro orientações práticas: sessão expirada/sem permissão, indisponibilidade momentânea da GeoBrain, consulta recusada que exige ajuste da integração do relatório, ou ausência de dados publicados para o recorte. A mensagem informa de quem é a próxima ação e confirma que o relatório foi bloqueado para não representar a indisponibilidade como zero.
+- **Verificação:** 108 testes do Panorama, typecheck real e build de produção aprovados; testes dedicados cobrem acesso, provedor indisponível, requisição inválida e resposta vazia.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,__tests__/api-error-messages.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** usuários não técnicos passam a receber uma orientação acionável sem códigos HTTP; a investigação autenticada de Jundiaí continua necessária se a API não publicar séries para o recorte.
+
+### 2026-08-28 — Panorama: impedir séries temporais vazias de virarem zeros — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — vendas, preços, estoque e IVV por trimestre.
+- **O quê:** corrigido o fallback que aceitava `HTTP 200` com lista temporal vazia como fonte disponível e, por consequência, compunha gráficos e tabelas inteiros com zero. Uma resposta sem linhas agora é identificada na proveniência; quando todos os endpoints temporais de uma cidade estão indisponíveis, a geração é interrompida com os endpoints e seus status, em vez de produzir um relatório numérico falso.
+- **Verificação:** 105 testes do Panorama, typecheck real e build de produção aprovados. Próximo aceite: executar Jundiaí autenticado e registrar a mensagem retornada para corrigir o contrato/parâmetro que estiver sem dados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/api.ts`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** nenhuma lâmina temporal deve voltar a representar indisponibilidade da API como valor zero; permanece necessária a evidência autenticada de Jundiaí para fechar a causa no endpoint.
+
+### 2026-08-28 — Panorama: mapa do slide 56 passa a usar Mapbox — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — mapa de empreendimentos verticais (slide 56).
+- **O quê:** substituído o mosaico CARTO, que passou a inserir marca d’água sem chave, por tiles Mapbox no mesmo planejador limitado e testado. A chave pública é lida exclusivamente de `VITE_MAPBOX_ACCESS_TOKEN`; sem ela, o slide informa que o fundo cartográfico não está configurado e não faz requisição incompleta. O arquivo de exemplo documenta a variável sem registrar valor.
+- **Verificação:** 105 testes do Panorama, typecheck real e build de produção aprovados. Próximo aceite: conferir o PDF autenticado com a variável também configurada no ambiente de deploy.
+- **Arquivos:** `.env.example`, `src/features/panorama-secovi-fiergs/{lib/map-tiles.ts,components/MarketSlides.tsx,__tests__/map-tiles.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** eliminada a dependência de tiles CARTO sem credencial; manter a chave Mapbox restrita aos domínios da aplicação e cadastrada no ambiente publicado.
+
+### 2026-08-28 — Panorama: capa estática consistente e rótulos de preço legíveis — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slide 3 e série histórica de preço por m².
+- **O quê:** o texto residual `Panorama imobiliário de` da arte estática foi neutralizado no slide 3, pois o nome do recorte pertence exclusivamente à capa dinâmica da página 2; a máscara foi calibrada pela posição real do canvas, sem alterar a capa PMI. No gráfico de preço por m², os rótulos trimestrais agora alternam quatro patamares, preservam proximidade com o ponto e desenham guia fina sempre que precisam ser deslocados.
+- **Verificação:** 105 testes do Panorama, typecheck real e build de produção aprovados. Ajuste visual deve ser conferido no próximo PDF autenticado.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** o mapa do slide 56 não usa mais uma fonte de tiles sem credencial: a CARTO passou a exigir chave para remover a marca d’água. A alternativa recomendada é uma chave pública gratuita configurada por ambiente; migrar para provedor vetorial sem chave é uma tarefa separada porque muda a captura do PDF.
+
+### 2026-08-28 — Panorama: nunca exportar relatório zerado por falha de coleta — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração de relatório e coleta de empreendimentos.
+- **O quê:** a primeira tentativa de migração do contrato granular para v2 fez a coleta municipal falhar e o fluxo anterior ainda renderizava o modelo indisponível como tabelas zeradas. A coleta v2 agora possui fallback explícito para o contrato legado já funcional; se ambos falharem, nenhuma cidade concluída gera erro humano com cidade e causas dos dois contratos, sem exibir nem permitir exportar um PDF fictício de zeros.
+- **Verificação:** testes da feature, typecheck real e build executados nesta entrega. Próximo aceite: recorte autenticado de Jundiaí deve voltar a apresentar dados legados; caso v2 falhe, a tela explicará o status sem ocultá-lo.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,pages/PanoramaSecoviFiergsPage.tsx}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** nenhum relatório vazio será apresentado como resultado; a promoção definitiva para v2 continua dependente de evidência autenticada de paridade.
+
+### 2026-08-27 — Panorama: contrato granular v2 e geocoordenadas decimais — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — coleta de empreendimentos, slide 49 e slide 56.
+- **O quê:** identificado e corrigido o parser que removia o ponto decimal de coordenadas retornadas como string pelo contrato v2 (por exemplo, `-23.1857` virava `-231857` e era descartado como fora do globo). A coleta granular do Panorama foi alinhada ao endpoint `POST api.geobrain.com.br/public-api/v2/building-with-history`, já utilizado pelo Dashboard GeoBrain, cobrindo status Ativo/Esgotado e deduplicando por empreendimento. O vazio do slide 49 agora separa claramente ausência de Condomínio de Casas elegível da ausência de preço no universo permitido; a política Secovi continua sem assumir que todo horizontal é condomínio.
+- **Verificação:** 105 testes do Panorama, typecheck real e build aprovados. Os dois endpoints respondem 401 sem JWT neste ambiente; validar o payload v2 autenticado de Jundiaí é o próximo aceite para confirmar campos de subtipo/preço e a recuperação dos pontos no mapa.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,domain/cube.ts,components/MarketSlides.tsx,__tests__/opus-cube-aggregations.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** o erro determinístico de geolocalização foi removido; a pendência restante é evidência autenticada para mapear o subtipo horizontal oficial e confirmar a cobertura real de preços.
+
+### 2026-08-27 — Panorama: capa central, ausência de dados explícita e isolamento por página — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capa 2, slides 48–49, leitura contínua e exportação.
+- **O quê:** a composição da capa 2 foi centralizada no canvas inteiro: cidade, faixa amarela e trimestre ocupam o mesmo eixo vertical, com a faixa entre o nome e o período. As lâminas de coorte e preço agora removem anos integralmente zerados e mostram uma mensagem objetiva quando a API não devolve dados observados; em especial, o slide 49 não apresenta mais a tabela enganosa `Média Geral —`. A renderização de cada página foi isolada por um error boundary: uma lâmina com falha passa a apresentar seu estado local, preservando a leitura e a exportação das demais. O planejador de tiles tem teste adicional para extremos geográficos válidos, mas inviáveis.
+- **Verificação:** testes da feature, typecheck real e build de produção pendentes desta entrega; a QA autenticada deve confirmar a leitura de 62 páginas e distinguir mensagem de ausência de dado de falha da API.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/{ReportPaginator.tsx,MarketSlides.tsx},print/panorama-print.css,__tests__/map-tiles.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** leitura contínua deixa de ter uma única falha global; falta o aceite visual autenticado da capa e a investigação de origem para qualquer ausência de dado que persista na API.
+
+### 2026-08-27 — Panorama: leitura contínua protegida contra coordenadas inválidas — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — ação `Ver as 62 páginas`, slide 56.
+- **O quê:** corrigido o `Invalid array length` que interrompia a leitura contínua: o gerador de tiles agora descarta latitude/longitude fora do globo, limita o mosaico a 20 tiles e não monta o fundo cartográfico quando o recorte é impossível. A contagem de pontos do slide 56 passou a considerar apenas coordenadas válidas.
+- **Verificação:** typecheck real, build e 103 testes do Panorama aprovados, incluindo coordenada extrema e `NaN`.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{lib/map-tiles.ts,components/MarketSlides.tsx,__tests__/map-tiles.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** a leitura de 62 páginas não deve mais depender da validade geográfica completa do retorno da API; validar manualmente no recorte que reportou a falha.
+
+### 2026-08-27 — Panorama: tipologia real da API, capa sem corte e mapa base — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 2, 14–27, 34–37 e 56.
+- **O quê:** a inspeção do contrato `BuildingWithHistoricResource` identificou que a API entrega a tipologia em `number_bedroom` (com `type_of_typology` como alternativa), enquanto o adaptador lia apenas aliases inexistentes; isso criava a linha espúria `Não classificado`. O cubo agora lê os campos oficiais também para vendas por período e preço/m². A capa municipal usa a arte inteira sem recorte, centraliza melhor o título e exibe o trimestre uma única vez. Labels históricos ficam próximos ao ponto, recebem fundo que evita invasão da curva e linha-guia somente quando afastados. O mapa ganhou mosaico CARTO/OSM sem chave, com atribuição e pontos projetados nas coordenadas reais.
+- **Verificação:** endpoint sem JWT retornou HTTP 401 neste ambiente; contrato OpenAPI local revisado. Typecheck real, build e 102 testes do Panorama aprovados. Falta a confirmação visual autenticada e a exportação PDF com tiles carregados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{domain/cube.ts,lib/map-tiles.ts,components/{ReportPaginator.tsx,MarketSlides.tsx},print/panorama-print.css,__tests__/{opus-cube-aggregations.test.ts,map-tiles.test.ts}}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a mantém QA autenticado como próximo portão; o dado de tipologia deixa de depender do fallback visível. A infraestrutura de tiles gratuita precisa apenas ser validada na geração real antes do aceite final.
+
+### 2026-08-27 — Panorama: capa municipal única, carregamento com marca e rótulos protegidos — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração e apresentação do deck.
+- **O quê:** a posição 2 passou a ser a única capa com o nome das cidades, usando `secovi-cover.jpg` e composição responsiva; capas/aberturas restantes não repetem o nome do recorte. O carregamento inicial e as atualizações em segundo plano usam o componente visual com a marca Brain. Rótulos das séries históricas agora ficam acima dos pontos, omitem zeros e recebem margem adicional do eixo X para impedir colisões; o painel de filtros ganhou coluna de UF independente e botão verticalmente centralizado.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{pages/PanoramaSecoviFiergsPage.tsx,components/PanoramaLoadingState.tsx,components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Verificação:** typecheck real, testes da feature, build e QA visual local devem ser repetidos após a integração; PDF autenticado de 62 páginas permanece o aceite final.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a segue em QA autenticado; falta confirmar a capa e a não sobreposição em dados reais. Layout novo de tabelas e exportação PPTX continuam V2.
+
+### 2026-08-27 — Panorama: plano visual até o slide 33 a partir dos prints — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — filtros, geração e slides 1–33.
+- **O quê:** os dez primeiros apontamentos visuais foram diagnosticados e transformados em plano: multi-select pesquisável com chips, range inicial/final, bloqueio de refetch pesado, correção da capa 2, rodapé dinâmico, legibilidade/colisão de labels, tag vertical compacta e ordenação semântica. O plano inclui causas no código, sequência e matriz de prints para aceite.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/PLAN_CORRECOES_VISUAIS_ATE_SLIDE33_2026-08-27.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA; próximo portão é implementar P0–P7 e comparar os prints até o slide 33 antes da inspeção integral do novo PDF.
+
+### 2026-08-27 — Panorama: execução das correções visuais e de fluxo até o slide 33 — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — filtros, geração, capa 2, rodapé e gráficos dos slides 1–33.
+- **O quê:** implementado multi-select pesquisável com chips, período inicial/final inclusivo (`1T2022`–`2T2026` sugerido), query sem refetch automático/skeleton de background, overlay semântico da capa municipal, grid de rodapé dinâmico, tipografia maior, supressão de labels zero, tag vertical compacta e ordenação semântica antes dos cortes.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{pages/PanoramaSecoviFiergsPage.tsx,components/PanoramaCityMultiSelect.tsx,components/PanoramaQuarterRangePicker.tsx,components/ReportPaginator.tsx,components/MarketSlides.tsx,print/panorama-print.css,api.ts,domain/quarters.ts,lib/launches.ts,report/model.ts,types.ts}`.
+- **Verificação:** typecheck real (`tsconfig.app.json`), build de produção e 99 testes da feature aprovados; QA Playwright headless confirmou rota, período padrão e abertura do range picker sem token. QA autenticado, PDF real de 62 páginas e comparação visual completa permanecem pendentes.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a segue em QA autenticado; novo portão é validar multi-cidade, chamadas únicas, rodapé/capa e slides 14–33 com dados reais. Tabela Rebrain e PPTX continuam V2.
+
+### 2026-08-27 — Panorama: refinamento do painel de filtros e confirmação do período — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — painel de seleção antes da geração.
+- **O quê:** reorganizada a grade responsiva para alinhar UF, municípios, período e ação; textos e chips ganham áreas controladas para não deslocar o cabeçalho. O range picker agora mantém um rascunho visual e só aplica início/fim após `Confirmar período`; `Cancelar` descarta a alteração.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx`, `src/features/panorama-secovi-fiergs/components/PanoramaQuarterRangePicker.tsx`, `src/features/panorama-secovi-fiergs/components/PanoramaCityMultiSelect.tsx`.
+- **Verificação:** typecheck, suíte da feature e QA Playwright do fluxo de confirmação aprovados.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** geração/API permanecem inalteradas; falta repetir o aceite com token e cidades reais.
+
+### 2026-08-27 — Panorama: verificação antes × agora de Jundiaí — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — auditoria pós-integração da V1.
+- **O quê:** criado relatório operacional que compara comportamento anterior e atual de cada requisito, reúne evidências de código/testes e cruza individualmente as 28 anotações do PDF de Jundiaí por slide. Itens dependentes de token/PDF real e itens V2 ficaram explicitamente separados.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/VERIFICACAO_ANTES_AGORA_JUNDIAI_V1.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a ganha checklist operacional para QA autenticado, PDF de 62 páginas e nova homologação da Juliana.
+
+### 2026-08-27 — Panorama: integração Luna + Opus concluída para validação final — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — V1 Jundiaí.
+- **O quê:** handoff `OPUS_READY` revisado; contrato `cities[]`, política Secovi, período dinâmico e agregações granulares foram conectados à UI/PDF. O manifesto mantém a referência 3 na posição 7, a seleção de municípios é multi-cidade, e os slides 31–51 consomem linhas prontas do cubo com nulos explícitos e remoção da Faixa de Valor sem fonte.
+- **Verificação:** typecheck real (`tsconfig.app.json`) aprovado; suíte 230/230; build de produção gerado; rota local HTTP 200. QA visual autenticado e PDF real de 62 páginas ainda precisam ser executados no ambiente com token/agent-browser.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{domain,types.ts,api.ts,report/model.ts,components,pages,report/manifest.ts,lib/pdf-export.ts}` e testes/documentação associados.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a aguarda somente QA autenticado, PDF final e homologação; G-04/G-05 permanecem V2.
+
+### 2026-08-27 — Panorama: execução da V1 dividida entre Luna e Opus — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — estratégia de execução paralela das correções de Jundiaí.
+- **O quê:** o plano terminal foi separado em duas trilhas com propriedade de arquivos: Opus implementa domínio/API/agregações sem staging ou commit; Luna implementa UI/PDF, aguarda o handoff `OPUS_READY`, revisa o conjunto e cria o único commit integrado após a verificação das 62 páginas. Foram incluídos protocolo contra interferência, contrato congelado, marcadores de handoff e CTAs independentes.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/{PLAN_LUNA_CORRECOES_V1_JUNDIAI.md,PLAN_OPUS_CORRECOES_V1_JUNDIAI.md}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em andamento; próximo portão é iniciar as duas trilhas na mesma base e concluir a integração única pelo Luna.
+
+### 2026-08-27 — Panorama: feedback de Jundiaí mapeado e plano terminal da V1 — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento da V1 após retorno da analista.
+- **O quê:** inspecionados os 62 slides e as 28 anotações internas do PDF corrigido de Jundiaí; cada comentário foi resolvido em requisito, ponto técnico e critério de aceite. O mapa incorpora também multi-cidade, períodos posteriores a 1T/26 e a política Secovi de verticais + somente Condomínio de Casas no horizontal. Criado plano terminal para o Luna executar código, QA das 62 páginas, PDF final e resposta de e-mail à Juliana.
+- **Escopo:** novo padrão visual de tabelas e exportação PPTX foram formalmente adiados para V2 por ausência de referência/decisão do card; resumo/narrativas permanecem não homologados porque Juliana declarou não tê-los revisado nesta rodada.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/{MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md,PLAN_LUNA_CORRECOES_V1_JUNDIAI.md}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a continua em andamento; o portão agora é executar o plano, gerar novo PDF de Jundiaí e obter a segunda validação da analista.
 ### 2026-08-28 — Percentuais numéricos no Excel AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — exportação Excel.
 - **O quê:** campos percentuais passam a ser gravados como números, sem símbolo no valor da célula; o formato numérico `0,00%` é aplicado diretamente nas células.
@@ -924,7 +1079,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
 | 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. **Homologação real começou em 22–24/jul** com 4 estudos de analistas (Rolândia/Daniele + Housi/Beatriz e Finoti): 102 achados, ~100% FP nos triados → sprint de 28/jul derrubou Rolândia de 17 achados para 1 (v0.44–0.49, 78 testes verdes). |
 | 7 | Relatórios Secovi (export Excel) | 🟡 (correção trimestral implementada e testada em 04/ago; aguarda homologação manual da exportação) |
-| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (V1 visual testável de ponta a ponta: livro 62 páginas, capas, estáticos, PDF e famílias dinâmicas 12–56 recompostas ✅; próximo portão: reteste autenticado e calibração residual por slide) |
+| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (V1 visual testável de ponta a ponta ✅; retorno de Jundiaí mapeado em 27/ago: 28 comentários + multi-cidade, período dinâmico e política Secovi; próximo portão é executar em paralelo os planos Opus/Luna, integrar, gerar novo PDF e reenviar à Juliana. Layout novo e PPTX ficaram para V2.) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
 | 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI padronizada, mapa urbano, testes e build ✅; homologação pelo setor usuário pendente) |
@@ -943,7 +1098,10 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
   [`PLAN_correcao_agregacao_vendas_trimestrais.md`](../features/relatorios-secovi/PLAN_correcao_agregacao_vendas_trimestrais.md).
 - [ ] **Panorama — avaliar impressão nativa vetorial:** o CSS `@media print` já existe e daria PDF instantâneo, mas os gráficos usam `ResponsiveContainer` do recharts, que mede via JS e não é remedido na mídia de impressão; exige verificação lâmina a lâmina antes de considerar.
 - [ ] **Panorama — remover `lib/pdf-print-interceptor.ts`:** arquivo morto (nenhum import) que ainda sobrescreve `window.print` e intercepta cliques com a estratégia de popup já abandonada em 19/ago.
-- [ ] **Panorama Secovi/FIERGS — reteste visual autenticado:** revisar as 62 páginas no browser/PDF com Piracicaba 1T26, registrar deltas residuais de geometria/componente por slide e atualizar a matriz `aprovado / divergente / sem método`; diferenças numéricas não bloqueiam fidelidade visual quando o contrato está correto.
+- [ ] **Panorama Secovi/FIERGS — executar correções da V1 de Jundiaí:** executar em paralelo [`PLAN_OPUS_CORRECOES_V1_JUNDIAI.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_OPUS_CORRECOES_V1_JUNDIAI.md) e [`PLAN_LUNA_CORRECOES_V1_JUNDIAI.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_LUNA_CORRECOES_V1_JUNDIAI.md); o Luna integra após `OPUS_READY`, cobrindo os 28 comentários, multi-cidade, período após 1T/26, universo Secovi e novo PDF de 62 páginas. Matriz de aceite em [`MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md`](../features/Relatorios%20Secovi_FIERGS/MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md).
+- [ ] **Panorama V2 — itens adiados:** novo padrão visual de tabelas Rebrain (aguarda referência) e exportação PPTX editável; não bloqueiam o fechamento da V1.
+- [ ] **Panorama V2 — reativar mapa de empreendimentos:** cadastrar `VITE_MAPBOX_ACCESS_TOKEN` no ambiente publicado, restringir o token aos domínios da aplicação e homologar preview/PDF antes de reintroduzir o slide 56.
+- [ ] **Panorama V2 — avaliar retorno da abertura de praça:** a referência 4 foi retirada porque a arte estática não recebe o nome do recorte; só reintroduzir com composição dinâmica aprovada.
 - [ ] **Panorama — fechar metodologia com os analistas:** critério oficial de **VGV lançado**
   (estimativa via `building-with-history`) e de **% MCMV** (proxy por padrão Econômico / teto de preço).
 - [ ] Panorama — confirmar que o token Secovi cobre o histórico desde 1T/22 (dado pontual 4T/21) nas cidades-alvo.

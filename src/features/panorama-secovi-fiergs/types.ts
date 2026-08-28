@@ -1,9 +1,53 @@
+import type { EntityId } from './domain/entity-policy';
+import type { CohortMatrix, MaturityRow, OfferRow, PriceRow, VgvRow } from './domain/aggregations';
+import type { MarketCube } from './domain/cube';
+
+export type { EntityId };
+
 export type Quarter = `${1 | 2 | 3 | 4}T${number}`;
 export type Segment = 'Vertical' | 'Horizontal';
 export type MethodStatus = 'reconciled' | 'assumed' | 'open_method' | 'approved';
 export type ComparisonResult = 'match' | 'different' | 'missing_reference' | 'missing_api' | 'not_comparable';
 
-export interface PanoramaScope { uf: string; city: string; endQuarter: Quarter; }
+/**
+ * Recorte canônico do Panorama. `cities` é sempre um array — uma cidade é um array de um item —
+ * para que multi-cidade (G-01) não exija um segundo contrato. Não há mais `scope.city`.
+ */
+export interface PanoramaScope {
+  uf: string;
+  cities: string[];
+  /** Início do recorte. Opcional apenas para compatibilidade com referências V1 antigas. */
+  startQuarter?: Quarter;
+  endQuarter: Quarter;
+  entity?: EntityId;
+}
+
+/** Rótulo determinístico do recorte para capa, título e nome de arquivo, com uma ou várias cidades. */
+export function scopeCityLabel(scope: Pick<PanoramaScope, 'cities'>): string {
+  const cities = scope.cities.filter(Boolean);
+  if (!cities.length) return '—';
+  if (cities.length === 1) return cities[0];
+  if (cities.length === 2) return `${cities[0]} e ${cities[1]}`;
+  return `${cities.slice(0, -1).join(', ')} e ${cities[cities.length - 1]}`;
+}
+
+/** Slug estável para nome de arquivo; várias cidades viram uma lista curta e ordenada. */
+export function scopeCitySlug(scope: Pick<PanoramaScope, 'cities'>): string {
+  const slug = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const cities = scope.cities.filter(Boolean).map(slug).sort();
+  if (!cities.length) return 'sem-cidade';
+  return cities.length <= 3 ? cities.join('-') : `${cities.slice(0, 3).join('-')}-e-mais-${cities.length - 3}`;
+}
+
+/** Proveniência do consolidado multi-cidade: o que foi pedido, o que fechou e o que falhou. */
+export interface PanoramaProvenance {
+  requestedCities: string[];
+  completedCities: string[];
+  failedCities: { city: string; error: string }[];
+  entity: EntityId;
+  /** Empreendimentos recusados pela política de universo, agrupados por motivo. */
+  rejectedByPolicy: { reason: string; count: number }[];
+}
 
 export interface LaunchRecord {
   quarter: Quarter;
@@ -98,6 +142,48 @@ export interface PanoramaReportModel {
   source: 'GeoBrain API';
   dataState: ReportDataState;
   openMethodologies: string[];
+  /** Proveniência do consolidado multi-cidade (G-01). */
+  provenance: PanoramaProvenance;
+  /** Base granular por empreendimento; fonte única das agregações abaixo. */
+  cube: MarketCube;
+  /** Linhas prontas para os slides 31–51, já canonizadas, ordenadas e reconciliadas. */
+  granular: PanoramaGranularBlocks;
+}
+
+/**
+ * Linhas prontas para consumo direto pelos componentes. Nenhuma delas deve ser recalculada no JSX:
+ * todas derivam do mesmo `cube` e por isso fecham entre si.
+ */
+export interface PanoramaGranularBlocks {
+  /** Slide 31 — oferta lançada/final por padrão, vertical. */
+  offerByStandard: OfferRow[];
+  /** Slides 34/35 — oferta por tipologia canônica, vertical. */
+  offerByTypology: OfferRow[];
+  /** Slide 33 — coortes verticais com `Subtotal até 2024` e `Total geral`. */
+  cohortsVertical: OfferRow[];
+  /** Slide 48 — coortes do horizontal permitido pela política. */
+  cohortsHorizontal: OfferRow[];
+  /** Slide 41 — matriz ano × padrão com oferta lançada e final. */
+  cohortMatrix: CohortMatrix;
+  /** Slide 42 — participação derivada exclusivamente da matriz do slide 41. */
+  cohortMatrixParticipation: CohortMatrix;
+  /** Slides 43/44 — maturidade × padrão, somente vertical. */
+  maturityByStandard: MaturityRow[];
+  /** Slides 45/46 — maturidade × tipologia, somente vertical. */
+  maturityByTypology: MaturityRow[];
+  /** Slides 38/39 — ticket, área e R$/m² por padrão vertical. */
+  pricesByStandard: PriceRow[];
+  /** Slides 36/37 — ticket, área e R$/m² por tipologia vertical. */
+  pricesByTypology: PriceRow[];
+  /** Slide 49 — preços horizontais abertos por padrão. */
+  horizontalPricesByStandard: PriceRow[];
+  /** Slide 51 — VGV com subtotal vertical, horizontais e total geral. */
+  vgv: VgvRow[];
+  /**
+   * Slide 31: `false` enquanto não houver campo/regra autoritativa de Faixa de Valor. O Luna deve
+   * remover a coluna na V1 em vez de exibir travessões.
+   */
+  valueRangeAvailable: boolean;
 }
 
 export interface CalibrationCell {

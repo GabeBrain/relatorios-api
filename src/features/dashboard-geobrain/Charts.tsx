@@ -27,7 +27,7 @@ export function exportGeoBrainSvg(element: HTMLElement | null, title: string) {
     .filter((node) => !node.classList.contains('recharts-surface') && !node.classList.contains('recharts-legend-icon'))
     .map((node) => ({ node, parent: node.parentNode, next: node.nextSibling }));
   for (const hidden of hiddenSvgs) hidden.parent?.removeChild(hidden.node);
-  const svg = element.querySelector('svg.recharts-surface');
+  const svg = element.querySelector<SVGSVGElement>('svg.recharts-surface');
   const nodes = svg ? [svg, ...Array.from(svg.querySelectorAll<SVGElement>('*'))] : [];
   const changes: Array<{ node: SVGElement; attribute: string; value: string }> = [];
   const styles = getComputedStyle(element);

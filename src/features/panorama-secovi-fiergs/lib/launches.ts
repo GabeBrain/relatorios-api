@@ -31,8 +31,10 @@ function standardSeries(quarters: Quarter[], records: LaunchRecord[], economic: 
     };
   });
 }
-export function buildLaunchModel(records: LaunchRecord[]): LaunchModel {
-  const quarters = [...new Set(records.map((record) => record.quarter))].sort((a, b) => quarterKey(a) - quarterKey(b));
+export function buildLaunchModel(records: LaunchRecord[], requestedQuarters?: Quarter[]): LaunchModel {
+  const quarters = requestedQuarters?.length
+    ? [...requestedQuarters].sort((a, b) => quarterKey(a) - quarterKey(b))
+    : [...new Set(records.map((record) => record.quarter))].sort((a, b) => quarterKey(a) - quarterKey(b));
   const projects = series(quarters, records, (record) => record.projects);
   const units = series(quarters, records, (record) => record.units);
   const vgv = series(quarters, records, (record) => record.vgvMillions);

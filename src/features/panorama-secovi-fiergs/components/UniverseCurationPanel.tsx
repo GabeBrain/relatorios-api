@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { fetchLaunchAuditBuildings } from '../api';
-import type { PanoramaExclusion, PanoramaScope } from '../types';
+import { scopeCitySlug, type PanoramaExclusion, type PanoramaScope } from '../types';
 
-const storeKey = (scope: PanoramaScope) => `panorama-exclusions:${scope.uf}:${scope.city}:${scope.endQuarter}`;
+const storeKey = (scope: PanoramaScope) => `panorama-exclusions:${scope.uf}:${scopeCitySlug(scope)}:${scope.endQuarter}`;
 
 export function UniverseCurationPanel({ scope }: { scope: PanoramaScope }) {
   const [requested, setRequested] = useState(false);
