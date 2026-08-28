@@ -75,7 +75,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ### 2026-08-28 — Panorama: capa estática consistente e rótulos de preço legíveis — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slide 3 e série histórica de preço por m².
-- **O quê:** o texto residual `Panorama imobiliário de` da arte estática foi neutralizado, pois o nome do recorte pertence exclusivamente à capa dinâmica da página 2. No gráfico de preço por m², os rótulos trimestrais agora alternam quatro patamares, preservam proximidade com o ponto e desenham guia fina sempre que precisam ser deslocados.
+- **O quê:** o texto residual `Panorama imobiliário de` da arte estática foi neutralizado no slide 3, pois o nome do recorte pertence exclusivamente à capa dinâmica da página 2; a máscara foi calibrada pela posição real do canvas, sem alterar a capa PMI. No gráfico de preço por m², os rótulos trimestrais agora alternam quatro patamares, preservam proximidade com o ponto e desenham guia fina sempre que precisam ser deslocados.
 - **Verificação:** 105 testes do Panorama, typecheck real e build de produção aprovados. Ajuste visual deve ser conferido no próximo PDF autenticado.
 - **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css}`.
 - **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.

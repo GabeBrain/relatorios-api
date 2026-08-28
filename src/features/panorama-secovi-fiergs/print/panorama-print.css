@@ -15,7 +15,7 @@
 .panorama-static-slide { display:block; width:100%; height:100%; object-fit:contain; background:#fff; }
 .panorama-official-cover-three { position:relative; width:100%; height:100%; overflow:hidden; }
 /* A cidade agora é apresentada exclusivamente na capa dinâmica (página 2). */
-.panorama-official-cover-three::after { content:""; position:absolute; z-index:1; left:35.4%; top:37.4%; width:9.6%; height:10.8%; background:#f21b22; }
+.panorama-official-cover-three::after { content:""; position:absolute; z-index:1; left:29.7%; top:31.8%; width:5.2%; height:8.2%; background:#f21b22; }
 .panorama-page-content:has(>img[alt="Slide oficial 1 do Panorama"]),
 .panorama-page-content:has(>img[alt="Slide oficial 4 do Panorama"]) { position:relative; container-type:inline-size; }
 .panorama-page-content:has(>img[alt="Slide oficial 10 do Panorama"]) { position:relative; }
