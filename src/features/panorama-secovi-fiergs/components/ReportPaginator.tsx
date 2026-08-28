@@ -194,8 +194,8 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
   const official = officialSlides[`../assets/official/panorama-${String(p).padStart(2, '0')}.png`];
   if (p === 2) return <div className="panorama-cover panorama-city-cover" style={{ backgroundImage: `url(${coverImage})` }}><div className="panorama-city-cover-content"><p>Panorama imobiliário</p><h1>{cityLabel}</h1><i/><h2>{quarterLabel(report.scope.endQuarter)}</h2></div></div>;
-  if (official) return p === 1
-    ? <div className="panorama-official-cover-one"><img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/></div>
+  if (official) return p === 3
+    ? <div className="panorama-official-cover-three"><img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/></div>
     : <img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/>;
   if (p === 1 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>Panorama imobiliário</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
   if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <Divider title={title}/>;
