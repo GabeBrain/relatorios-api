@@ -49,6 +49,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Landing de entrada orientada por objetivo — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/inicio` — página de entrada da plataforma Rebrain.
+- **O quê:** substituído o painel operacional de KPIs de auditoria e atividade recente por uma landing de direcionamento. A página agora organiza os ambientes por três objetivos (gerar relatório de mercado, analisar mercado/pesquisa e validar/atualizar dados), identifica o tipo de estudo em cada destino e permite destacar os fluxos por público (Analistas, Pesquisa, Gestão, Operação ou Técnico). Todos os módulos ativos possuem acesso direto; API Explorer ficou como ferramenta de apoio.
+- **Verificação:** build de produção e typecheck aprovados. Conferência local em navegador confirmou conteúdo, rota `/inicio` e ausência de overlay de erro; o ambiente bloqueou somente o carregamento das fontes externas do Google.
+- **Arquivos:** `src/pages/Home.tsx`, `src/App.css`.
+- **Impacto em Etapas/Pendências:** a entrada deixa de depender de métricas que não orientavam a escolha do usuário. O próximo aceite é validar com os públicos reais a nomenclatura dos objetivos e o encaixe de cada fluxo.
+
 ### 2026-08-28 — Panorama: remoção da abertura residual — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — composição do livro, prévia e exportação PDF.
 - **O quê:** retirada da V1 a abertura estática `Panorama imobiliário de {cidade}` (referência 4), pois ela não recebe com segurança os municípios do recorte. A capa dinâmica da página 2 continua sendo a única capa com cidades; a máscara CSS experimental foi removida integralmente, sem afetar os slides institucionais.
