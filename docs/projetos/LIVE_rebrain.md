@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Panorama: mapa de empreendimentos temporariamente desativado — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slide de mapa de empreendimentos verticais.
+- **O quê:** removido o slide de mapa da composição do preview e do PDF enquanto o ambiente publicado não recebe `VITE_MAPBOX_ACCESS_TOKEN`. O livro passa a ter 61 páginas e os controles usam a contagem real; a abertura de Localização permanece como peça editorial, sem exibir um mapa indisponível.
+- **Verificação:** manifesto e contrato de exportação atualizados; testes da feature, typecheck real e build de produção aprovados nesta entrega.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/manifest.ts,components/ReportPaginator.tsx,__tests__/pdf-export.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** mapa passa a ser V2 até a chave Mapbox estar configurada no deploy e o PDF autenticado ser homologado.
+
 ### 2026-08-28 — Panorama: erros da GeoBrain em linguagem de produto — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração do panorama quando séries temporais não podem ser consultadas.
 - **O quê:** a falha técnica dos endpoints temporais passou a ser traduzida para quatro orientações práticas: sessão expirada/sem permissão, indisponibilidade momentânea da GeoBrain, consulta recusada que exige ajuste da integração do relatório, ou ausência de dados publicados para o recorte. A mensagem informa de quem é a próxima ação e confirma que o relatório foi bloqueado para não representar a indisponibilidade como zero.
@@ -1060,6 +1068,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] **Panorama — remover `lib/pdf-print-interceptor.ts`:** arquivo morto (nenhum import) que ainda sobrescreve `window.print` e intercepta cliques com a estratégia de popup já abandonada em 19/ago.
 - [ ] **Panorama Secovi/FIERGS — executar correções da V1 de Jundiaí:** executar em paralelo [`PLAN_OPUS_CORRECOES_V1_JUNDIAI.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_OPUS_CORRECOES_V1_JUNDIAI.md) e [`PLAN_LUNA_CORRECOES_V1_JUNDIAI.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_LUNA_CORRECOES_V1_JUNDIAI.md); o Luna integra após `OPUS_READY`, cobrindo os 28 comentários, multi-cidade, período após 1T/26, universo Secovi e novo PDF de 62 páginas. Matriz de aceite em [`MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md`](../features/Relatorios%20Secovi_FIERGS/MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md).
 - [ ] **Panorama V2 — itens adiados:** novo padrão visual de tabelas Rebrain (aguarda referência) e exportação PPTX editável; não bloqueiam o fechamento da V1.
+- [ ] **Panorama V2 — reativar mapa de empreendimentos:** cadastrar `VITE_MAPBOX_ACCESS_TOKEN` no ambiente publicado, restringir o token aos domínios da aplicação e homologar preview/PDF antes de reintroduzir o slide 56.
 - [ ] **Panorama — fechar metodologia com os analistas:** critério oficial de **VGV lançado**
   (estimativa via `building-with-history`) e de **% MCMV** (proxy por padrão Econômico / teto de preço).
 - [ ] Panorama — confirmar que o token Secovi cobre o histórico desde 1T/22 (dado pontual 4T/21) nas cidades-alvo.

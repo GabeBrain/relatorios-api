@@ -9,7 +9,7 @@ describe('Panorama PDF export contract', () => {
   });
 
   it('exports one active page per reference slide, including the municipal cover', () => {
-    expect(PANORAMA_REPORT_MANIFEST).toHaveLength(62);
+    expect(PANORAMA_REPORT_MANIFEST).toHaveLength(61);
     expect(PANORAMA_REPORT_MANIFEST.map((page) => page.page)).toContain(2);
     expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.page)).size).toBe(PANORAMA_REPORT_MANIFEST.length);
   });
@@ -19,6 +19,7 @@ describe('Panorama PDF export contract', () => {
     const outputThree = PANORAMA_REPORT_MANIFEST.find((page) => page.page === 3);
     expect(outputSeven?.referenceSlide).toBe(3);
     expect(outputThree?.referenceSlide).toBe(4);
-    expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.referenceSlide)).size).toBe(62);
+    expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.referenceSlide)).size).toBe(61);
+    expect(PANORAMA_REPORT_MANIFEST.some((page) => page.referenceSlide === 56)).toBe(false);
   });
 });

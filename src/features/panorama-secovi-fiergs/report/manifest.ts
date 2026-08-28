@@ -8,6 +8,12 @@ export const PANORAMA_SECTIONS: PanoramaSection[] = [
   { id: 'about', label: 'Sobre o SECOVI-SP', start: 5, end: 10 }, { id: 'launches', label: 'Análise de Lançamentos', start: 11, end: 19 }, { id: 'sales', label: 'Análise de Vendas', start: 20, end: 27 }, { id: 'market', label: 'Análise Geral do Mercado', start: 28, end: 29 }, { id: 'vertical', label: 'Análise do Mercado Residencial Vertical', start: 30, end: 46 }, { id: 'horizontal', label: 'Análise do Mercado Residencial Horizontal', start: 47, end: 49 }, { id: 'vgv', label: 'Análise do VGV Geral', start: 50, end: 51 }, { id: 'observations', label: 'Análises e Observações Sobre o Mercado', start: 52, end: 54 }, { id: 'location', label: 'Localização dos Empreendimentos', start: 55, end: 56 }, { id: 'consultants', label: 'Consultores do Estudo', start: 57, end: 62 },
 ];
 
+// O mapa (referência 56) fica fora da V1 até a variável Mapbox existir no ambiente publicado.
+PANORAMA_SECTIONS.splice(8, 2,
+  { id: 'location', label: 'Localização dos Empreendimentos', start: 55, end: 55 },
+  { id: 'consultants', label: 'Consultores do Estudo', start: 56, end: 61 },
+);
+
 type Definition = [string, string, PanoramaVisualFamily, string[], MethodStatus | 'not_applicable'];
 const pages: Definition[] = [
   ['Pesquisa de mercado','Capa de pesquisa','cover',[],'not_applicable'],['Piracicaba','Capa municipal','cover',[],'not_applicable'],['Visão, missão e valores','Institucional','static',[],'not_applicable'],['Panorama imobiliário de {cidade}','Abertura da praça','cover',[],'not_applicable'],['Sumário','Orientação de leitura','summary',[],'not_applicable'],['Sobre o SECOVI-SP','Abertura institucional','divider',[],'not_applicable'],['Sobre o SECOVI-SP','Institucional','static',[],'not_applicable'],['Política da qualidade','Institucional','static',[],'not_applicable'],['Objetivos','Abertura','divider',[],'not_applicable'],['Objetivos do estudo','Objetivos editoriais','static',[],'not_applicable'],
@@ -19,7 +25,7 @@ const pages: Definition[] = [
 
 // A lâmina institucional de visão/missão/valores (referência 3) ocupa a posição 7 no deck final.
 // `page` é sempre a posição de saída; `referenceSlide` mantém a identidade editorial original.
-const outputReferenceSlides = [1, 2, 4, 5, 6, 7, 3, 8, 9, 10, ...Array.from({ length: 52 }, (_, index) => index + 11)];
+const outputReferenceSlides = [1, 2, 4, 5, 6, 7, 3, 8, 9, 10, ...Array.from({ length: 52 }, (_, index) => index + 11)].filter((referenceSlide) => referenceSlide !== 56);
 
 export const PANORAMA_REPORT_MANIFEST: ReportPageDefinition[] = outputReferenceSlides.map((referenceSlide, index) => {
   const page = index + 1;
