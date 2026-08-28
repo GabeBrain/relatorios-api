@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Panorama: capa estática consistente e rótulos de preço legíveis — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slide 1 e série histórica de preço por m².
+- **O quê:** o texto residual `Panorama imobiliário de` da arte estática foi neutralizado, pois o nome do recorte pertence exclusivamente à capa dinâmica da página 2. No gráfico de preço por m², os rótulos trimestrais agora alternam quatro patamares, preservam proximidade com o ponto e desenham guia fina sempre que precisam ser deslocados.
+- **Verificação:** 105 testes do Panorama, typecheck real e build de produção aprovados. Ajuste visual deve ser conferido no próximo PDF autenticado.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** o mapa do slide 56 não usa mais uma fonte de tiles sem credencial: a CARTO passou a exigir chave para remover a marca d’água. A alternativa recomendada é uma chave pública gratuita configurada por ambiente; migrar para provedor vetorial sem chave é uma tarefa separada porque muda a captura do PDF.
+
 ### 2026-08-28 — Panorama: nunca exportar relatório zerado por falha de coleta — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração de relatório e coleta de empreendimentos.
 - **O quê:** a primeira tentativa de migração do contrato granular para v2 fez a coleta municipal falhar e o fluxo anterior ainda renderizava o modelo indisponível como tabelas zeradas. A coleta v2 agora possui fallback explícito para o contrato legado já funcional; se ambos falharem, nenhuma cidade concluída gera erro humano com cidade e causas dos dois contratos, sem exibir nem permitir exportar um PDF fictício de zeros.

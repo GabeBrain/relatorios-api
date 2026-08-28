@@ -73,11 +73,12 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
     const valuesAreClose = !series.single && Math.abs(Number(props.value) - companion) <= Math.max(Math.abs(Number(props.value)), Math.abs(companion), 1) * .18;
     // O padrão é ficar junto do ponto. Só afastamos a segunda etiqueta quando os dois
     // valores disputam a mesma região; nesse caso, a linha-guia preserva a associação.
-    const yOffset = valuesAreClose && key === 'horizontal' ? -34 : -14;
+    const labelTier = series.single ? index % 4 : 0;
+    const yOffset = series.single ? -14 - labelTier * 19 : valuesAreClose && key === 'horizontal' ? -34 : -14;
     const labelY = Math.max(18, props.y + yOffset);
     const label = formatValue(Number(props.value));
     const width = Math.max(34, label.length * 7 + 12);
-    const needsLeader = props.y - labelY > 20;
+    const needsLeader = labelTier > 0 || props.y - labelY > 20;
     if (!emphasized) return <g className="panorama-point-label"><>{needsLeader && <line x1={props.x} y1={props.y - 3} x2={props.x} y2={labelY + 3} stroke={color} strokeWidth={1}/>}<rect x={props.x - width / 2} y={labelY - 13} width={width} height={16} rx={2} fill="#fff" fillOpacity={.94}/><text x={props.x} y={labelY} textAnchor="middle">{label}</text></></g>;
     return <g className="panorama-highlight-label"><>{needsLeader && <line x1={props.x} y1={props.y - 3} x2={props.x} y2={labelY + 4} stroke={color} strokeWidth={1}/>}<g transform={`translate(${props.x - width / 2} ${labelY - 13})`}><rect width={width} height={19} fill={color}/><text x={width / 2} y={13} textAnchor="middle" fill={textColor}>{label}</text></g></></g>;
   };
@@ -105,7 +106,7 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
       return <span key={annualYear}><b>{annualYear}{annualYear === year(report.scope.endQuarter) ? '*' : ''}</b>{formatValue(total)} {unitLabel}<small>{formatValue(total / Math.max(rows.length, 1))} {series.unit === 'count' && [14, 15].includes(page) ? 'Emp.' : series.unit === 'count' ? 'Unid.' : series.unit === 'mi' ? 'Mi.' : ''}/Trimestre</small></span>;
     })}</div>
     <ResponsiveContainer width="100%" height={series.pattern ? '51%' : '62%'}>
-      <LineChart data={data} margin={{ left: 22, right: 22, top: 26, bottom: 18 }}>
+      <LineChart data={data} margin={{ left: 22, right: 22, top: series.single ? 88 : 26, bottom: 18 }}>
         <XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} tickMargin={8} axisLine={{ stroke: '#c9c9c9' }} tick={{ fontSize: 11 }}/>
         <Tooltip formatter={(value) => formatValue(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as never)}/>
         <Legend verticalAlign="bottom"/>
@@ -193,7 +194,9 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
   const official = officialSlides[`../assets/official/panorama-${String(p).padStart(2, '0')}.png`];
   if (p === 2) return <div className="panorama-cover panorama-city-cover" style={{ backgroundImage: `url(${coverImage})` }}><div className="panorama-city-cover-content"><p>Panorama imobiliário</p><h1>{cityLabel}</h1><i/><h2>{quarterLabel(report.scope.endQuarter)}</h2></div></div>;
-  if (official) return <img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/>;
+  if (official) return p === 1
+    ? <div className="panorama-official-cover-one"><img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/></div>
+    : <img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/>;
   if (p === 1 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>Panorama imobiliário</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
   if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <Divider title={title}/>;
   if ([3,7,8,10].includes(p)) return <Corporate page={p} report={report}/>;
