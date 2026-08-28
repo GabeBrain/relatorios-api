@@ -108,7 +108,7 @@ export default function Home() {
           </div>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">O que você precisa fazer hoje?</h1>
           <p className="mt-3 text-base leading-6 text-muted-foreground sm:text-lg">
-            Escolha pelo objetivo do seu trabalho. Nós levamos você à ferramenta certa para analisar, validar ou apresentar dados.
+            Escolha pelo objetivo do seu trabalho.
           </p>
         </div>
         <Button asChild variant="outline" className="w-fit">
