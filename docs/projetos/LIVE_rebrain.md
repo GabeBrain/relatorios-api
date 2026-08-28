@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Conversão dos percentuais do AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** Entrada, % de Juros Mensal e Desconto à Vista passam a usar o valor original da API dividido por 100 antes da exibição percentual, com duas casas decimais.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
 ### 2026-08-26 — Ajuste dos gráficos do AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — resumos gráficos.
 - **O quê:** `Tipo` permanece representando o `Padrão` (`data[].standard`); o primeiro gráfico passa a resumir `Ativos x Esgotados`, e o segundo continua resumindo o tipo de empreendimento.

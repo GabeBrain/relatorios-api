@@ -60,7 +60,10 @@ const AELO_PERCENT_COLUMNS = new Set(['Entrada', '% de Juros Mensal', 'Desconto 
 function formatAeloPercent(value: unknown): string {
   const numeric = toNum(value);
   if (numeric === null) return '';
-  return `${numeric.toLocaleString('pt-BR')}%`;
+  return `${(numeric / 100).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}%`;
 }
 
 function formatAeloVgv(value: unknown): string {
