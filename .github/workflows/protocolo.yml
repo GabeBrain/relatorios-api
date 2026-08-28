@@ -1,0 +1,15 @@
+name: Contrato do protocolo
+
+on:
+  pull_request:
+  push:
+    paths:
+      - AGENTS.md
+      - CLAUDE.md
+      - .github/workflows/protocolo.yml
+  workflow_dispatch:
+
+jobs:
+  protocolo:
+    uses: GabeBrain/observatorio/.github/workflows/protocolo-reutilizavel.yml@main
+    secrets: inherit
