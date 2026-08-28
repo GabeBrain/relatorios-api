@@ -60,10 +60,14 @@ const AELO_PERCENT_COLUMNS = new Set(['Entrada', '% de Juros Mensal', 'Desconto 
 function formatAeloPercent(value: unknown): string {
   const numeric = toNum(value);
   if (numeric === null) return '';
-  return `${(numeric / 100).toLocaleString('pt-BR', {
+  return `${formatAeloPercentValue(numeric).toLocaleString('pt-BR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}%`;
+}
+
+function formatAeloPercentValue(value: number): number {
+  return value / 100;
 }
 
 function formatAeloVgv(value: unknown): string {
@@ -552,7 +556,10 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
   const allCols = [...HEADER_COLS, ...quarterMeasureCols];
   const exportValue = (col: string, value: Row[string]): Row[string] => {
     if (value === null || value === undefined || value === '') return null;
-    if (AELO_PERCENT_COLUMNS.has(col)) return formatAeloPercent(value);
+    if (AELO_PERCENT_COLUMNS.has(col)) {
+      const numeric = toNum(value);
+      return numeric === null ? null : formatAeloPercentValue(numeric);
+    }
     if (col.startsWith('VGV')) {
       const numeric = toNum(value);
       return numeric === null ? null : formatAeloVgvMillions(numeric);
@@ -569,10 +576,11 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
   const wb = utils.book_new();
   const sheet = utils.aoa_to_sheet(sheetRows([...activeRows, ...inactiveRows]));
   allCols.forEach((col, columnIndex) => {
-    if (!col.startsWith('VGV')) return;
+    if (!col.startsWith('VGV') && !AELO_PERCENT_COLUMNS.has(col)) return;
+    const numberFormat = AELO_PERCENT_COLUMNS.has(col) ? '0.00%' : '0.00';
     for (let rowIndex = 1; rowIndex <= [...activeRows, ...inactiveRows].length; rowIndex++) {
       const cell = sheet[utils.encode_cell({ r: rowIndex, c: columnIndex })];
-      if (cell && typeof cell.v === 'number') cell.z = '0.00';
+      if (cell && typeof cell.v === 'number') cell.z = numberFormat;
     }
   });
   utils.book_append_sheet(wb, sheet, `RELATÓRIO ${sfx}`);

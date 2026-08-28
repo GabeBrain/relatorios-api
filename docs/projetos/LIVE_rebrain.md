@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Percentuais numéricos no Excel AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — exportação Excel.
+- **O quê:** campos percentuais passam a ser gravados como números, sem símbolo no valor da célula; o formato numérico `0,00%` é aplicado diretamente nas células.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
 ### 2026-08-28 — Preservação de nulos na exportação AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
 - **O quê:** campos numéricos continuam sendo exportados como números; valores sem informação permanecem nulos, sem preenchimento artificial com zero. Zeros anteriores ao `release_date` continuam sendo aplicados pela regra histórica definida.
