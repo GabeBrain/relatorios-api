@@ -127,7 +127,32 @@ interface CityHarvest {
 }
 
 type TemporalKey = 'sales' | 'salesTypology' | 'stock' | 'stockTypology' | 'ivv' | 'ivvTypology' | 'ticket' | 'ticketTypology' | 'meter' | 'meterTypology';
-type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string };
+type TemporalEndpoint = 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-prices-meter';
+export type TemporalIssue = { endpoint: TemporalEndpoint; status: number | null; empty: boolean };
+type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string; issue?: TemporalIssue };
+
+const temporalMetricLabel: Record<TemporalEndpoint, string> = {
+  sales: 'vendas', stock: 'oferta disponível', ivv: 'velocidade de vendas',
+  'medium-prices': 'preço médio', 'medium-prices-meter': 'preço por m²',
+};
+
+export function describeTemporalFailure(city: string, issues: TemporalIssue[]): string {
+  const metrics = [...new Set(issues.map((issue) => temporalMetricLabel[issue.endpoint]))].join(', ');
+  const statuses = issues.map((issue) => issue.status);
+  if (statuses.every((status) => status === 401 || status === 403)) {
+    return `Não foi possível consultar ${metrics} em ${city} porque a sessão de acesso à GeoBrain expirou ou não tem permissão. É uma questão de acesso ao provedor de dados, não do seu filtro nem dos números do relatório. Entre novamente e tente gerar o relatório.`;
+  }
+  if (statuses.every((status) => status === null || status === 408 || status === 429 || (status !== null && status >= 500))) {
+    return `A GeoBrain está indisponível para consultar ${metrics} em ${city}. É uma instabilidade do provedor de dados; o relatório não foi gerado para evitar exibir zeros como se fossem dados reais. Tente novamente em alguns minutos.`;
+  }
+  if (statuses.every((status) => status === 400 || status === 404 || status === 405 || status === 422)) {
+    return `A GeoBrain recusou a consulta de ${metrics} em ${city}. Isso indica um ajuste necessário na integração do nosso relatório com a API; você não precisa mudar o filtro. O time técnico deve corrigir a consulta antes de gerar este panorama.`;
+  }
+  if (issues.every((issue) => issue.empty)) {
+    return `A GeoBrain respondeu à consulta, mas não disponibilizou dados de ${metrics} para ${city} no período selecionado. Não é falha do seu computador nem do layout; o relatório foi interrompido para não apresentar zeros como se fossem informações observadas.`;
+  }
+  return `Não foi possível consultar ${metrics} em ${city}: a GeoBrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
+}
 
 async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], signal?: AbortSignal): Promise<CityHarvest> {
   const [buildings, sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
@@ -140,8 +165,8 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], si
   ]);
   const sources = { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology };
   if (Object.values(sources).every((source) => !source.available)) {
-    const details = Object.entries(sources).map(([key, source]) => `${key}: ${source.source}`).join(' | ');
-    throw new Error(`A API GeoBrain não retornou séries temporais utilizáveis para ${scope.city}. ${details}`);
+    const issues = Object.values(sources).flatMap((source) => source.issue ? [source.issue] : []);
+    throw new Error(describeTemporalFailure(scope.city, issues));
   }
   return {
     city: scope.city,
@@ -261,19 +286,19 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
   ];
 }
 
-async function temporalRows(scope: CityScope, endpoint: 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-prices-meter', groupBy: 'Padrão' | 'Tipologia' = 'Padrão', signal?: AbortSignal): Promise<SourceResult> {
+async function temporalRows(scope: CityScope, endpoint: TemporalEndpoint, groupBy: 'Padrão' | 'Tipologia' = 'Padrão', signal?: AbortSignal): Promise<SourceResult> {
   const rows: Record<string, unknown>[] = []; let page = 1; let lastPage = 1;
   const window = temporalWindow(scope);
   do {
     const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: window.start, end_period: window.end, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal });
-    if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}` };
+    if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}`, issue: { endpoint, status: response.status, empty: false } };
     const pageRows = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
     rows.push(...pageRows);
     lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
   } while (page <= lastPage);
   return rows.length
     ? { rows, available: true, source: `temporal-analysis-city/${endpoint} · ${groupBy}` }
-    : { rows, available: false, source: `temporal-analysis-city/${endpoint} · HTTP 200 · sem linhas` };
+    : { rows, available: false, source: `temporal-analysis-city/${endpoint} · HTTP 200 · sem linhas`, issue: { endpoint, status: 200, empty: true } };
 }
 
 /** Initial T3/T4 bench: direct temporal endpoints only; it cannot silently promote a report contract. */

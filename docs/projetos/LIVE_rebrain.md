@@ -49,6 +49,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Panorama: erros da GeoBrain em linguagem de produto — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração do panorama quando séries temporais não podem ser consultadas.
+- **O quê:** a falha técnica dos endpoints temporais passou a ser traduzida para quatro orientações práticas: sessão expirada/sem permissão, indisponibilidade momentânea da GeoBrain, consulta recusada que exige ajuste da integração do relatório, ou ausência de dados publicados para o recorte. A mensagem informa de quem é a próxima ação e confirma que o relatório foi bloqueado para não representar a indisponibilidade como zero.
+- **Verificação:** 108 testes do Panorama, typecheck real e build de produção aprovados; testes dedicados cobrem acesso, provedor indisponível, requisição inválida e resposta vazia.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,__tests__/api-error-messages.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** usuários não técnicos passam a receber uma orientação acionável sem códigos HTTP; a investigação autenticada de Jundiaí continua necessária se a API não publicar séries para o recorte.
+
 ### 2026-08-28 — Panorama: impedir séries temporais vazias de virarem zeros — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — vendas, preços, estoque e IVV por trimestre.
 - **O quê:** corrigido o fallback que aceitava `HTTP 200` com lista temporal vazia como fonte disponível e, por consequência, compunha gráficos e tabelas inteiros com zero. Uma resposta sem linhas agora é identificada na proveniência; quando todos os endpoints temporais de uma cidade estão indisponíveis, a geração é interrompida com os endpoints e seus status, em vez de produzir um relatório numérico falso.
