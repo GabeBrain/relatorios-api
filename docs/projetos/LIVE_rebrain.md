@@ -49,6 +49,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-28 — Teste headless da exportação percentual do AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — exportação Excel.
+- **O quê:** adicionada cobertura Vitest para a conversão dos percentuais, o tipo numérico das células, o formato `0.00%` e a preservação de valores nulos/vazios.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`, `src/pages/__tests__/RelatorioAelo.test.ts`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
 ### 2026-08-28 — Landing de entrada orientada por objetivo — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/inicio` — página de entrada da plataforma Rebrain.
 - **O quê:** substituído o painel operacional de KPIs de auditoria e atividade recente por uma landing de direcionamento. A página agora organiza os ambientes por três objetivos (gerar relatório de mercado, analisar mercado/pesquisa e validar/atualizar dados), identifica o tipo de estudo em cada destino e permite destacar os fluxos por público (Analistas, Pesquisa, Gestão, Operação ou Técnico). Todos os módulos ativos possuem acesso direto; API Explorer ficou como ferramenta de apoio.
@@ -204,6 +210,23 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/{MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md,PLAN_LUNA_CORRECOES_V1_JUNDIAI.md}`.
 - **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
 - **Impacto em Etapas/Pendências:** etapa 7a continua em andamento; o portão agora é executar o plano, gerar novo PDF de Jundiaí e obter a segunda validação da analista.
+### 2026-08-28 — Percentuais numéricos no Excel AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — exportação Excel.
+- **O quê:** campos percentuais passam a ser gravados como números, sem símbolo no valor da célula; o formato numérico `0,00%` é aplicado diretamente nas células.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
+### 2026-08-28 — Preservação de nulos na exportação AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** campos numéricos continuam sendo exportados como números; valores sem informação permanecem nulos, sem preenchimento artificial com zero. Zeros anteriores ao `release_date` continuam sendo aplicados pela regra histórica definida.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
+### 2026-08-28 — Conversão dos percentuais do AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** Entrada, % de Juros Mensal e Desconto à Vista passam a usar o valor original da API dividido por 100 antes da exibição percentual, com duas casas decimais.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
 
 ### 2026-08-26 — Ajuste dos gráficos do AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — resumos gráficos.

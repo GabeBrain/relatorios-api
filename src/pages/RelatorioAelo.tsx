@@ -60,7 +60,28 @@ const AELO_PERCENT_COLUMNS = new Set(['Entrada', '% de Juros Mensal', 'Desconto 
 function formatAeloPercent(value: unknown): string {
   const numeric = toNum(value);
   if (numeric === null) return '';
-  return `${numeric.toLocaleString('pt-BR')}%`;
+  return `${formatAeloPercentValue(numeric).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}%`;
+}
+
+export function formatAeloPercentValue(value: number): number {
+  return value / 100;
+}
+
+export function exportAeloPercentValue(value: unknown): number | null {
+  const numeric = toNum(value);
+  return numeric === null ? null : formatAeloPercentValue(numeric);
+}
+
+export function exportAeloPercentCell(value: unknown): { v: number | null; z: string } {
+  return { v: exportAeloPercentValue(value), z: '0.00%' };
+}
+
+export function exportAeloValue(col: string, value: Row[string]): Row[string] {
+  if (value === null || value === undefined || value === '') return null;
+  return AELO_PERCENT_COLUMNS.has(col) ? exportAeloPercentValue(value) : value;
 }
 
 function formatAeloVgv(value: unknown): string {
@@ -446,8 +467,8 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
         ? null
         : Math.round(lastQuarter.sales * currentPrice * 100) / 100;
       // BR = O × T — Distratos indisponível na API
-      const vgvDistratos = 0;
-      const vendasLiqVgv = vgvVendasBrutas === null
+      const vgvDistratos = null;
+      const vendasLiqVgv = vgvVendasBrutas === null || vgvDistratos === null
         ? null
         : Math.round((vgvVendasBrutas - vgvDistratos) * 100) / 100;
 
@@ -495,7 +516,7 @@ function buildRows(buildings: Record<string, unknown>[], quarterCols: string[], 
           row[`VGV Estoque ${q}`] = 0;
           continue;
         }
-        row[`Vendas líquidas ${q}`] = quarter?.hasSalesData ? quarter.sales : 0;
+        row[`Vendas líquidas ${q}`] = quarter?.hasSalesData ? quarter.sales : null;
         const quarterEntry = quarter?.lastEntry;
         const quarterStock = toNum(quarterEntry?.typology_stock);
         row[`VGV ${q}`] = quarter?.sales !== undefined && currentPrice !== null
@@ -549,7 +570,7 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
   const allCols = [...HEADER_COLS, ...quarterMeasureCols];
   const exportValue = (col: string, value: Row[string]): Row[string] => {
     if (value === null || value === undefined || value === '') return null;
-    if (AELO_PERCENT_COLUMNS.has(col)) return formatAeloPercent(value);
+    if (AELO_PERCENT_COLUMNS.has(col)) return exportAeloValue(col, value);
     if (col.startsWith('VGV')) {
       const numeric = toNum(value);
       return numeric === null ? null : formatAeloVgvMillions(numeric);
@@ -558,7 +579,7 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
       const date = new Date(String(value));
       if (!Number.isNaN(date.getTime())) return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
     }
-    return value;
+    return typeof value === 'number' ? value : value;
   };
   const sheetRows = (rows: Row[]) =>
     [allCols, ...rows.map((row) => allCols.map((c) => exportValue(c, row[c])) )];
@@ -566,10 +587,11 @@ async function exportXLSX(activeRows: Row[], inactiveRows: Row[], quarterCols: s
   const wb = utils.book_new();
   const sheet = utils.aoa_to_sheet(sheetRows([...activeRows, ...inactiveRows]));
   allCols.forEach((col, columnIndex) => {
-    if (!col.startsWith('VGV')) return;
+    if (!col.startsWith('VGV') && !AELO_PERCENT_COLUMNS.has(col)) return;
+    const numberFormat = AELO_PERCENT_COLUMNS.has(col) ? '0.00%' : '0.00';
     for (let rowIndex = 1; rowIndex <= [...activeRows, ...inactiveRows].length; rowIndex++) {
       const cell = sheet[utils.encode_cell({ r: rowIndex, c: columnIndex })];
-      if (cell && typeof cell.v === 'number') cell.z = '0.00';
+      if (cell && typeof cell.v === 'number') cell.z = numberFormat;
     }
   });
   utils.book_append_sheet(wb, sheet, `RELATÓRIO ${sfx}`);
