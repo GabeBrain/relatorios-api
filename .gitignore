@@ -72,5 +72,12 @@ docs/features/corretor-vocacionais/fontes/**/*.rar
 docs/features/Relatorios Secovi_FIERGS/*.pptx
 docs/features/Relatorios Secovi_FIERGS/*.pdf
 
+# Insumos locais de referência e revisão visual do Panorama V2. Os ativos finais
+# consumidos pelo app vivem em `assets/official_v2/` e continuam versionados.
+.tmp/
+src/features/panorama-secovi-fiergs/assets/exportados/
+src/features/panorama-secovi-fiergs/assets/nova ref/
+src/features/panorama-secovi-fiergs/assets/panorama-jundiai-1T2026.pdf
+
 # Arquivos temporarios de lock do Office
 ~$*
