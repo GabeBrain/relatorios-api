@@ -2,7 +2,7 @@
 
 ### 2026-08-31 — Validação do Fechamento: consulta interna e divergências — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — validação pós-consulta de empreendimentos e tipologias.
-- **O quê:** a feature consulta exclusivamente `building-with-history-internal`, preserva os campos internos necessários e executa as tratativas v3 somente depois de concluídas todas as requisições. A guia **Divergências** lista os campos auditáveis, inclui cidade e período, apresenta Campo em PT-BR, mantém Valor e Regra visíveis durante a rolagem, explica os agrupamentos das comparações, restringe Erro pela Regra selecionada, permite limpar os filtros locais e exporta o recorte completo em Excel.
+- **O quê:** a feature consulta exclusivamente `building-with-history-internal`, preserva os campos internos necessários e executa as tratativas v3 somente depois de concluídas todas as requisições. A guia **Divergências** inclui cidade, status e período, apresenta Campo em PT-BR, mantém Valor visível durante a rolagem, explica os agrupamentos das comparações, restringe Erro pela Regra selecionada, permite limpar os filtros locais e exporta o recorte completo em Excel.
 - **Por quê:** disponibilizar no produto as regras já definidas para conferência de fechamento, sem alterar o Dashboard GeoBrain.
 - **Arquivos:** `src/features/validacao-fechamento/api.ts`, `validation-rules.ts`, `DivergencesGrid.tsx`, `use-vf-data.ts`, `src/pages/ValidacaoFechamento.tsx`.
 - **Commits:** — (alterações locais ainda não commitadas).

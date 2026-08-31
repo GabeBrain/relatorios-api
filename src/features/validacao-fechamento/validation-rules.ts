@@ -1,7 +1,7 @@
 import type { ValidationBuilding, ValidationHistory } from './api';
 
 export interface Divergence {
-  building_id: string; typology_id: string; building_name: string; private_area: number | null; city: string; period: string;
+  building_id: string; typology_id: string; building_name: string; private_area: number | null; city: string; status: string; period: string;
   field: string; error: string; value: string; rule: string;
 }
 interface Row {
@@ -35,7 +35,7 @@ export function validateBuildings(buildings: ValidationBuilding[]): Divergence[]
   }
   for (const r of base) { const bs = sum.get(key(r.b.building_id, r.h.period))!; const cs = city.get(key(r.b.city, r.b.building_type, r.h.type_of_typology, r.h.pattern, `${r.h.number_bedroom} dorms`, r.h.period))!; cs.units.push(bs.qty); }
   const rows: Row[] = base.map(({ b, h, typologyId, database }) => { const bs = sum.get(key(b.building_id, h.period))!; const cs = city.get(key(b.city, b.building_type, h.type_of_typology, h.pattern, `${h.number_bedroom} dorms`, h.period))!; const ls = cityLote.get(key(b.city, h.period))!; const median = [...cs.units].sort((a, z) => a - z)[Math.floor(cs.units.length / 2)] ?? 0; return { b, h, typologyId, database, buildingUnits: bs.qty, buildingSold: bs.sold, buildingPrice: bs.price, buildingArea: bs.area, cityPriceM2: ratio(cs.price, cs.area), cityTicket: ratio(cs.price, cs.qty), cityAvgArea: ratio(cs.area, cs.qty), citySalesRate: ratio(cs.sold, cs.qty), cityBuildingUnits: median, standardTicket: ratio(bs.standardPrice, bs.standardQty), standardPriceM2: ratio(bs.standardPrice, bs.standardArea), noGarageTicket: ratio(bs.noGaragePrice, bs.noGarageQty), loteFechadoM2: ratio(ls.price, ls.area) }; });
-  const out: Divergence[] = []; const emit = (r: Row, field: string, error: string, value: string, rule: string) => out.push({ building_id: r.b.building_id, typology_id: r.typologyId, building_name: r.b.name, private_area: r.h.private_area, city: r.b.city, period: r.h.period, field, error, value, rule });
+  const out: Divergence[] = []; const emit = (r: Row, field: string, error: string, value: string, rule: string) => out.push({ building_id: r.b.building_id, typology_id: r.typologyId, building_name: r.b.name, private_area: r.h.private_area, city: r.b.city, status: r.h.building_status, period: r.h.period, field, error, value, rule });
   const latestBuilding = new Map<string, Row>(), latestTypology = new Map<string, Row>();
   for (const r of rows) { const order = `${r.database}|${r.h.period}|${r.b.building_id}|${r.typologyId}`; if (!latestBuilding.has(r.b.building_id) || order > `${latestBuilding.get(r.b.building_id)!.database}|${latestBuilding.get(r.b.building_id)!.h.period}|${r.b.building_id}|${latestBuilding.get(r.b.building_id)!.typologyId}`) latestBuilding.set(r.b.building_id, r); if (!latestTypology.has(r.typologyId) || r.h.period > latestTypology.get(r.typologyId)!.h.period) latestTypology.set(r.typologyId, r); }
   for (const r of latestBuilding.values()) { const months = Math.round((new Date(r.h.period).getTime() - new Date(r.b.release_date).getTime()) / 86400000 / 30.44); const half = r.buildingUnits * .5; const lot = contains(r.b.standard, 'Loteamento');
