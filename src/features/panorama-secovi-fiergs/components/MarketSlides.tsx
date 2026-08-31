@@ -108,11 +108,16 @@ export function CohortTableSlide({ report, segment = 'vertical' }: { report: Pan
 
 export function PriceTableSlide({ report, dimension, horizontal = false }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; horizontal?: boolean }) {
   const granularRows = horizontal ? report.granular.horizontalPricesByStandard : dimension === 'pattern' ? report.granular.pricesByStandard : report.granular.pricesByTypology;
-  const eligibleHorizontal = report.cube.projects.filter((project) => project.segment === 'Horizontal').length;
+  const horizontalProjects = report.cube.projects.filter((project) => project.segment === 'Horizontal');
+  const eligibleHorizontal = horizontalProjects.length;
+  const horizontalStockIsKnown = horizontalProjects.every((project) => project.finalUnits !== null);
+  const hasActiveHorizontalOffer = horizontalProjects.some((project) => (project.finalUnits ?? 0) > 0);
   const rejectedHorizontal = report.provenance.rejectedByPolicy.filter((item) => item.reason === 'horizontal_fora_da_politica' || item.reason === 'subtipo_horizontal_indefinido').reduce((sum, item) => sum + item.count, 0);
   const noPriceMessage = horizontal
     ? eligibleHorizontal === 0
       ? `Não há Condomínio de Casas elegível neste recorte${rejectedHorizontal ? `; ${rejectedHorizontal} horizontal(is) foram excluído(s) pela regra Secovi.` : '.'}`
+      : horizontalStockIsKnown && !hasActiveHorizontalOffer
+        ? 'Há Condomínios de Casas no histórico do recorte, porém todos estão esgotados e não possuem oferta ativa no fechamento selecionado. Por isso, não há base corrente para calcular ticket, área e R$/m² da oferta ativa.'
       : 'Há Condomínios de Casas válidos no recorte, mas os campos granulares de preço, área e R$/m² não vieram no payload. A média temporal de “Horizontal” não é usada como substituta, pois mistura loteamentos e outros subtipos fora do universo Secovi.'
     : 'A API não retornou preço, área ou R$/m² para este recorte.';
   if (granularRows.length) {
