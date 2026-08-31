@@ -9,7 +9,30 @@ on:
       - .github/workflows/protocolo.yml
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   protocolo:
-    uses: GabeBrain/observatorio/.github/workflows/protocolo-reutilizavel.yml@main
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do sistema
+        uses: actions/checkout@v5
+
+      # O sistema e publico, mas o Observatorio e privado. Por isso o contrato
+      # canonico e obtido em tempo de execucao com o token de integracao, em vez
+      # de usar `workflow_call`, que o GitHub nao permite nesse sentido.
+      - name: Checkout do contrato canonico
+        uses: actions/checkout@v5
+        with:
+          repository: GabeBrain/observatorio
+          ref: main
+          path: _protocol-source
+          token: ${{ secrets.OBSERVATORIO_TOKEN }}
+          sparse-checkout: |
+            PROTOCOLO_SESSAO.md
+            sistemas.json
+            scripts/check-protocol.mjs
+
+      - name: Verificar AGENTS.md e CLAUDE.md
+        run: node _protocol-source/scripts/check-protocol.mjs --self . --repo "${{ github.repository }}"
