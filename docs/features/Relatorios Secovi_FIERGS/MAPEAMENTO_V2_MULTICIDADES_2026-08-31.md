@@ -4,6 +4,21 @@
 **Escopo:** cidades selecionadas no mesmo relatório, com atualizações mensais e trimestrais misturadas.
 **Estado:** motor implementado e coberto por testes; evidência autenticada confirma frequência mista em Guarujá. Falta a homologação visual autenticada de preview/PDF e a paridade de autenticação no endpoint v2.
 
+## Composição condicional entregue — 31/ago/2026
+
+O manifesto V2 agora preserva **um único** encerramento institucional (referência 60) e injeta três
+slides comparativos imediatamente após o resumo de mercado (referência 29), somente quando
+`cityComparisons.enabled` comprova que todas as cidades solicitadas foram concluídas:
+
+1. Unidades vendidas por cidade no trimestre de fechamento;
+2. Empreendimentos, oferta lançada/final e disponibilidade por cidade;
+3. Disponibilidade residencial vertical por padrão × cidade.
+
+O sumário, controles de paginação, leitura contínua e PDF usam o mesmo manifesto: são 57 páginas no
+recorte simples e 60 páginas no multicidade completo. Coleta parcial não recebe comparativos, para não
+comparar uma cidade concluída contra outra ausente. A homologação visual autenticada continua sendo o
+portão de aceite das métricas reais.
+
 ## Incidentes observados no pós-deploy — 31/ago/2026
 
 1. A previsão observada de tempo oscilava e acabou parecendo fixa; foi removida da interface. O progresso permanece baseado exclusivamente em chamadas concluídas.

@@ -61,6 +61,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-31 — Panorama V2: encerramento único e comparativos condicionais — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — manifesto, sumário, leitura contínua e exportação PDF.
+- **O quê:** removidas as referências finais duplicadas 61 e 62; a referência 60 é o único encerramento institucional do livro. Em recortes com todas as cidades concluídas, o manifesto passa a inserir após o resumo de mercado três páginas: vendas líquidas por município, oferta/disponibilidade por município e disponibilidade vertical por padrão × cidade. Sumário, paginação, leitura contínua e PDF consomem o mesmo manifesto: 57 páginas no recorte simples e 60 no multicidade completo. Coleta parcial continua sem comparativos.
+- **Unidades e preço horizontal:** a correção de VGV municipal em R$ milhões permanece aplicada antes da normalização. Para Condomínio de Casas, preço/área/R$/m² vêm do `building-with-history`, única fonte que permite filtrar o subtipo Secovi; o endpoint temporal agrega todos os horizontais e não pode substituir essa fonte sem reintroduzir loteamentos. Ausência desses campos no payload permanece indisponibilidade explícita, não zero.
+- **Verificação:** 60 testes direcionados aprovados e build de produção aprovou. O runner visual autenticado não está disponível neste ambiente; conferir em produção o recorte real e o PDF continua sendo o aceite visual.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/manifest.ts,components/ReportPaginator.tsx,pages/PanoramaSecoviFiergsPage.tsx,__tests__/pdf-export.test.ts}`, `docs/features/Relatorios Secovi_FIERGS/MAPEAMENTO_V2_MULTICIDADES_2026-08-31.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** as páginas comparativas deixam de ser pendência de implementação; resta homologar, com sessão GeoBrain autenticada, os valores reais de vendas e preços e a composição visual do PDF.
+
 ### 2026-08-31 — Panorama V2: estabilidade multicidade, unidades monetárias e margens — Gabriel + Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração, séries temporais, preview e PDF.

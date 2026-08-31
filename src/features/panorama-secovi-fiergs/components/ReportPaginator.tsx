@@ -1,10 +1,10 @@
-import { Component, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { Component, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle } from 'lucide-react';
 import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
-import { PANORAMA_REPORT_MANIFEST, PANORAMA_SECTIONS, type ReportPageDefinition } from '../report/manifest';
+import { createPanoramaReportManifest, createPanoramaSections, type ReportPageDefinition } from '../report/manifest';
 import { panoramaExportIsRunning, usePanoramaExportStore } from '../export-store';
 import { AreaIvvSlide, CohortMatrixSlide, CohortTableSlide, LocationSlide, MarketSummarySlide, MaturitySlide, NarrativeSlide, OfferChartSlide, OfferTableSlide, PriceChartSlide, PriceTableSlide, VgvSlide } from './MarketSlides';
 import coverBackground from '../assets/official_v2/backgrounds/cover-report.png';
@@ -54,7 +54,8 @@ function CityCover({ report }: { report: PanoramaReportModel }) {
   return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DA</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
 function V2Summary({ report }: { report: PanoramaReportModel }) {
-  return <div className="panorama-v2-summary"><h2>Sumário</h2><ol>{PANORAMA_SECTIONS.map((section) => <li key={section.id}><span>{section.label}</span><b>{section.start}–{section.end}</b></li>)}</ol>{report.cityComparisons.enabled && <p className="panorama-v2-summary-note">O recorte multicidades habilita comparativos entre municípios ao final da análise geral.</p>}</div>;
+  const sections = createPanoramaSections(createPanoramaReportManifest(report.cityComparisons.enabled));
+  return <div className="panorama-v2-summary"><h2>Sumário</h2><ol>{sections.map((section) => <li key={section.id}><span>{section.label}</span><b>{section.start}–{section.end}</b></li>)}</ol></div>;
 }
 type PresentationPerson = NonNullable<PanoramaReportModel['presentation']['consultant']>;
 function PersonSlot({ person, label, quiet = false }: { person?: PresentationPerson; label: string; quiet?: boolean }) {
@@ -226,8 +227,14 @@ function dataPage(page: number, report: PanoramaReportModel) {
   if (page === 51) return <VgvSlide report={report}/>;
   return null;
 }
+function CityComparisonPage({ kind, report }: { kind: NonNullable<ReportPageDefinition['cityComparison']>; report: PanoramaReportModel }) {
+  if (kind === 'sales') return <div className="panorama-table-page panorama-city-comparison"><h2>UNIDADES VENDIDAS POR CIDADE <span>| {quarterLabel(report.scope.endQuarter)}</span></h2><table><thead><tr><th>Municípios</th><th>Vendas líquidas</th></tr></thead><tbody>{report.cityComparisons.sales.map((row) => <tr key={row.city}><td>{row.city}</td><td>{row.liquidSales === null ? '—' : n(row.liquidSales)}</td></tr>)}<tr className="panorama-total-row"><td>Total</td><td>{n(report.cityComparisons.sales.reduce((sum, row) => sum + (row.liquidSales ?? 0), 0))}</td></tr></tbody></table></div>;
+  if (kind === 'market') return <div className="panorama-table-page panorama-city-comparison"><h2>ANÁLISE GERAL DO MERCADO POR CIDADE</h2><table><thead><tr><th>Municípios</th><th>Empreend.</th><th>Oferta lançada</th><th>Oferta final</th><th>Disponibilidade s/ O.L.</th></tr></thead><tbody>{report.cityComparisons.market.map((row) => <tr key={row.city}><td>{row.city}</td><td>{n(row.projects)}</td><td>{row.launchedUnits === null ? '—' : n(row.launchedUnits)}</td><td>{row.finalUnits === null ? '—' : n(row.finalUnits)}</td><td>{pct(row.availability)}</td></tr>)}</tbody></table></div>;
+  return <div className="panorama-table-page panorama-city-comparison"><h2>DISPONIBILIDADE RESIDENCIAL VERTICAL POR PADRÃO</h2><table><thead><tr><th>Padrão</th>{report.cityComparisons.sales.map((row) => <th key={row.city}>{row.city}</th>)}</tr></thead><tbody>{report.cityComparisons.availabilityByStandard.map((row) => <tr key={row.standard}><td>{row.standard}</td>{report.cityComparisons.sales.map(({ city }) => <td key={city}>{pct(row.values.find((value) => value.city === city)?.availability ?? null)}</td>)}</tr>)}</tbody></table></div>;
+}
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
+  if (def.cityComparison) return <CityComparisonPage kind={def.cityComparison} report={report}/>;
   if (p === 2) return <CityCover report={report}/>;
   if (p === 5) return <V2Summary report={report}/>;
   if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <V2Divider title={title}/>;
@@ -249,17 +256,18 @@ function SafeSheet({ def, report }: { def: ReportPageDefinition; report: Panoram
  * porque o host de exportação em segundo plano precisa montá-lo fora da árvore da rota.
  */
 /** Leitura contínua de todas as lâminas ativas. Não gera arquivo: são os mesmos componentes já montados. */
-function AllPagesView({ report, containerRef }: { report: PanoramaReportModel; containerRef: React.RefObject<HTMLDivElement> }) {
-  return <div ref={containerRef} className="space-y-6">{PANORAMA_REPORT_MANIFEST.map((def) => (
+function AllPagesView({ report, pages, containerRef }: { report: PanoramaReportModel; pages: ReportPageDefinition[]; containerRef: React.RefObject<HTMLDivElement> }) {
+  return <div ref={containerRef} className="space-y-6">{pages.map((def) => (
     <div key={def.page} className="space-y-1.5">
-      <p className="text-xs font-medium text-muted-foreground">Página {def.page} de {PANORAMA_REPORT_MANIFEST.length} · {def.title}</p>
+      <p className="text-xs font-medium text-muted-foreground">Página {def.page} de {pages.length} · {def.title}</p>
       <SafeSheet def={def} report={report}/>
     </div>
   ))}</div>;
 }
 
 export function PanoramaExportDeck({ report, rootRef }: { report: PanoramaReportModel; rootRef: React.RefObject<HTMLDivElement> }) {
-  return <div ref={rootRef} className="panorama-export-root" aria-hidden="true">{PANORAMA_REPORT_MANIFEST.map((def) => <SafeSheet key={def.page} def={def} report={report}/>)}</div>;
+  const pages = createPanoramaReportManifest(report.cityComparisons.enabled);
+  return <div ref={rootRef} className="panorama-export-root" aria-hidden="true">{pages.map((def) => <SafeSheet key={def.page} def={def} report={report}/>)}</div>;
 }
 
 export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
@@ -269,12 +277,15 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const exportProgress = usePanoramaExportStore((state) => state.progress);
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
-  const pages = useMemo(() => PANORAMA_REPORT_MANIFEST, []); const page = pages[current];
+  const pages = useMemo(() => createPanoramaReportManifest(report.cityComparisons.enabled), [report.cityComparisons.enabled]);
+  const sections = useMemo(() => createPanoramaSections(pages), [pages]);
+  useEffect(() => setCurrent((value) => Math.min(value, pages.length - 1)), [pages.length]);
+  const page = pages[Math.min(current, pages.length - 1)];
   const jump = (number: number) => {
     setCurrent(Math.max(0, pages.findIndex((item) => item.page === number)));
     if (view === 'all') allPagesRef.current?.querySelector(`[aria-label^="Página ${number}:"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   // O trabalho pesado roda no host montado pelo shell: o usuário pode sair desta página.
   const exportPdf = () => usePanoramaExportStore.getState().start(report);
-  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver todas as páginas</>}</Button><Button size="sm" disabled={exporting} onClick={exportPdf}>{exporting ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exporting && <p className="text-sm text-muted-foreground">O PDF está sendo gerado em segundo plano — você pode navegar para outras páginas sem interromper.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{PANORAMA_SECTIONS.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} containerRef={allPagesRef}/> : <SafeSheet def={page} report={report}/>}</div></div>;
+  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver todas as páginas</>}</Button><Button size="sm" disabled={exporting} onClick={exportPdf}>{exporting ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exporting && <p className="text-sm text-muted-foreground">O PDF está sendo gerado em segundo plano — você pode navegar para outras páginas sem interromper.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{sections.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} pages={pages} containerRef={allPagesRef}/> : <SafeSheet def={page} report={report}/>}</div></div>;
 }

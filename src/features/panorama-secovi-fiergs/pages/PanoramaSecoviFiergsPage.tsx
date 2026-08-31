@@ -14,7 +14,7 @@ import { PanoramaQuarterRangePicker } from '../components/PanoramaQuarterRangePi
 import { PanoramaLoadingState } from '../components/PanoramaLoadingState';
 import { availableEndQuarters } from '../domain/quarters';
 import { type PanoramaGenerationProgress } from '../domain/generation-progress';
-import { PANORAMA_REPORT_MANIFEST } from '../report/manifest';
+import { createPanoramaReportManifest } from '../report/manifest';
 import type { PanoramaScope, Quarter } from '../types';
 
 export default function PanoramaSecoviFiergsPage() {
@@ -34,6 +34,7 @@ export default function PanoramaSecoviFiergsPage() {
     queryFn: () => fetchPanoramaReportModel(queryScope!, undefined, setGenerationProgress),
     enabled: Boolean(queryScope), staleTime: 5 * 60_000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: 0,
   });
+  const reportPageCount = report.data ? createPanoramaReportManifest(report.data.cityComparisons.enabled).length : 0;
   const ready = Boolean(geoApi.strictReady && cities.length && scope.startQuarter && scope.endQuarter);
   const updateCities = (next: string[]) => { setCities(next); setGeo((current) => ({ ...current, city: next[0] ?? '' })); setScope((current) => ({ ...current, cities: next })); setSubmitted(null); };
   const updateRange = (startQuarter: Quarter, endQuarter: Quarter) => { setScope((current) => ({ ...current, startQuarter, endQuarter })); setSubmitted(null); };
@@ -52,6 +53,6 @@ export default function PanoramaSecoviFiergsPage() {
     {report.isPending && submitted && <PanoramaLoadingState label="Consultando APIs e montando o relatório…" progress={generationProgress} />}
     {report.data && report.isFetching && <PanoramaLoadingState compact label="Atualizando relatório…" progress={generationProgress} />}
     {report.isError && <Alert variant="destructive"><AlertCircle className="h-4 w-4"/><AlertTitle>Não foi possível compor o relatório</AlertTitle><AlertDescription><p className="mt-1 break-words">{report.error instanceof Error ? report.error.message : 'A API não retornou um recorte utilizável.'}</p><Button className="mt-3" variant="outline" size="sm" onClick={() => report.refetch()}><RefreshCw/>Tentar novamente</Button></AlertDescription></Alert>}
-    {report.data && <Tabs defaultValue="report"><TabsList><TabsTrigger value="report">Relatório ({PANORAMA_REPORT_MANIFEST.length} páginas)</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger></TabsList><TabsContent value="report"><ReportPaginator report={report.data}/></TabsContent><TabsContent value="method"><Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Estados metodológicos explícitos</AlertTitle><AlertDescription>Os lançamentos vêm de `building-with-history`. Vendas, estoque, IVV, preços, coortes e mapa exibem estado da metodologia e proveniência por município — sem fallback para gabarito ou mock.</AlertDescription></Alert></TabsContent></Tabs>}
+    {report.data && <Tabs defaultValue="report"><TabsList><TabsTrigger value="report">Relatório ({reportPageCount} páginas)</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger></TabsList><TabsContent value="report"><ReportPaginator report={report.data}/></TabsContent><TabsContent value="method"><Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Estados metodológicos explícitos</AlertTitle><AlertDescription>Os lançamentos vêm de `building-with-history`. Vendas, estoque, IVV, preços, coortes e mapa exibem estado da metodologia e proveniência por município — sem fallback para gabarito ou mock.</AlertDescription></Alert></TabsContent></Tabs>}
   </div>;
 }

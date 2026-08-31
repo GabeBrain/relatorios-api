@@ -1,21 +1,30 @@
 import type { MethodStatus } from '../types';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
-export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; }
+export type CityComparisonKind = 'sales' | 'market' | 'availability';
+export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; }
 export interface PanoramaSection { id: string; label: string; start: number; end: number; }
 
-export const PANORAMA_SECTIONS: PanoramaSection[] = [
-  { id: 'about', label: 'Sobre o SECOVI-SP', start: 5, end: 10 }, { id: 'launches', label: 'Análise de Lançamentos', start: 11, end: 19 }, { id: 'sales', label: 'Análise de Vendas', start: 20, end: 27 }, { id: 'market', label: 'Análise Geral do Mercado', start: 28, end: 29 }, { id: 'vertical', label: 'Análise do Mercado Residencial Vertical', start: 30, end: 46 }, { id: 'horizontal', label: 'Análise do Mercado Residencial Horizontal', start: 47, end: 49 }, { id: 'vgv', label: 'Análise do VGV Geral', start: 50, end: 51 }, { id: 'observations', label: 'Análises e Observações Sobre o Mercado', start: 52, end: 54 }, { id: 'location', label: 'Localização dos Empreendimentos', start: 55, end: 56 }, { id: 'consultants', label: 'Consultores do Estudo', start: 57, end: 62 },
-];
+const SECTION_LABELS: Record<string, string> = {
+  about: 'Sobre o SECOVI-SP', launches: 'Análise de Lançamentos', sales: 'Análise de Vendas',
+  market: 'Análise Geral do Mercado', vertical: 'Análise do Mercado Residencial Vertical',
+  horizontal: 'Análise do Mercado Residencial Horizontal', vgv: 'Análise do VGV Geral',
+  observations: 'Análises e Observações Sobre o Mercado', location: 'Localização dos Empreendimentos',
+  consultants: 'Consultores do Estudo',
+};
 
-// O mapa (referência 56) fica fora da V1 até a variável Mapbox existir no ambiente publicado.
-PANORAMA_SECTIONS.splice(8, 2,
-  { id: 'location', label: 'Localização dos Empreendimentos', start: 55, end: 55 },
-  { id: 'consultants', label: 'Consultores do Estudo', start: 56, end: 61 },
-);
-// A abertura “Panorama imobiliário de …” também fica fora da V1 por não ter cidade dinâmica.
-// A capa legada (referência 1) e a abertura legada (referência 4) saem do livro V2.
-PANORAMA_SECTIONS.forEach((section) => { section.start -= 2; section.end -= 2; });
+function sectionIdForReference(referenceSlide: number): string {
+  if (referenceSlide <= 10) return 'about';
+  if (referenceSlide <= 19) return 'launches';
+  if (referenceSlide <= 27) return 'sales';
+  if (referenceSlide <= 29) return 'market';
+  if (referenceSlide <= 46) return 'vertical';
+  if (referenceSlide <= 49) return 'horizontal';
+  if (referenceSlide <= 51) return 'vgv';
+  if (referenceSlide <= 54) return 'observations';
+  if (referenceSlide === 55) return 'location';
+  return 'consultants';
+}
 
 type Definition = [string, string, PanoramaVisualFamily, string[], MethodStatus | 'not_applicable'];
 const pages: Definition[] = [
@@ -29,11 +38,37 @@ const pages: Definition[] = [
 // A lâmina institucional de visão/missão/valores (referência 3) ocupa a posição 6 no deck final.
 // `page` é sempre a posição de saída; `referenceSlide` mantém a identidade editorial original.
 const outputReferenceSlides = [1, 2, 4, 5, 6, 7, 3, 8, 9, 10, ...Array.from({ length: 52 }, (_, index) => index + 11)]
-  .filter((referenceSlide) => ![1, 4, 56].includes(referenceSlide));
+  // Apenas a referência 60 é encerramento V2: 61 e 62 são cópias do mesmo fundo.
+  .filter((referenceSlide) => ![1, 4, 56, 61, 62].includes(referenceSlide));
 
-export const PANORAMA_REPORT_MANIFEST: ReportPageDefinition[] = outputReferenceSlides.map((referenceSlide, index) => {
+const baseManifest = (): ReportPageDefinition[] => outputReferenceSlides.map((referenceSlide, index) => {
   const page = index + 1;
   const [title, intention, visualFamily, contractKeys, methodologyStatus] = pages[referenceSlide - 1];
-  const section = PANORAMA_SECTIONS.find((item) => page >= item.start && page <= item.end);
-  return { page, referenceSlide, sectionId: section?.id ?? 'opening', title, intention, visualFamily, contractKeys, methodologyStatus };
+  return { page, referenceSlide, sectionId: sectionIdForReference(referenceSlide), title, intention, visualFamily, contractKeys, methodologyStatus };
 });
+
+const comparisonDefinitions: Omit<ReportPageDefinition, 'page'>[] = [
+  { referenceSlide: 0, sectionId: 'market', title: 'Unidades vendidas por cidade', intention: 'Comparativo municipal de vendas', visualFamily: 'comparison-table', contractKeys: ['cityComparisons.sales'], methodologyStatus: 'reconciled', cityComparison: 'sales' },
+  { referenceSlide: 0, sectionId: 'market', title: 'Análise geral do mercado por cidade', intention: 'Comparativo municipal de oferta e disponibilidade', visualFamily: 'comparison-table', contractKeys: ['cityComparisons.market'], methodologyStatus: 'reconciled', cityComparison: 'market' },
+  { referenceSlide: 0, sectionId: 'market', title: 'Disponibilidade por padrão e cidade', intention: 'Comparativo municipal de disponibilidade vertical', visualFamily: 'comparison-table', contractKeys: ['cityComparisons.availabilityByStandard'], methodologyStatus: 'reconciled', cityComparison: 'availability' },
+];
+
+/** Comparativos entram somente quando todas as cidades do recorte foram coletadas. */
+export function createPanoramaReportManifest(includeCityComparisons = false): ReportPageDefinition[] {
+  const output = baseManifest();
+  if (includeCityComparisons) {
+    const afterMarket = output.findIndex((page) => page.referenceSlide === 29) + 1;
+    output.splice(afterMarket, 0, ...comparisonDefinitions);
+  }
+  return output.map((page, index) => ({ ...page, page: index + 1 }));
+}
+
+export function createPanoramaSections(manifest: ReportPageDefinition[]): PanoramaSection[] {
+  return Object.entries(SECTION_LABELS).flatMap(([id, label]) => {
+    const entries = manifest.filter((page) => page.sectionId === id);
+    return entries.length ? [{ id, label, start: entries[0].page, end: entries.at(-1)!.page }] : [];
+  });
+}
+
+export const PANORAMA_REPORT_MANIFEST = createPanoramaReportManifest();
+export const PANORAMA_SECTIONS = createPanoramaSections(PANORAMA_REPORT_MANIFEST);
