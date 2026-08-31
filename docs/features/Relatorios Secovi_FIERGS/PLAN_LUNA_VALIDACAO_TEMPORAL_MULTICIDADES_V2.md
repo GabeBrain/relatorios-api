@@ -1,8 +1,8 @@
 # Plano terminal — Luna — consistência temporal multicidades V2
 
-**Data:** 31/ago/2026  
-**Rota:** `/rebrain/panorama-secovi-fiergs`  
-**Escopo de homologação:** SP · Guarujá · Praia Grande · Santos · São Vicente · fechamento `2T2026`.  
+**Data:** 31/ago/2026
+**Rota:** `/rebrain/panorama-secovi-fiergs`
+**Escopo de homologação:** SP · Guarujá · Praia Grande · Santos · São Vicente · fechamento `2T2026`.
 **Pré-requisito obrigatório:** credencial GeoBrain fornecida ao processo por variável efêmera ou sessão autenticada. Não copiar token, e-mail ou senha para `.env`, código, fixture versionada, log ou PDF.
 
 ## Estado de execução — Codex, 31/ago/2026

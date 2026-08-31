@@ -1,7 +1,7 @@
 # Panorama V2 — portão de consistência temporal multicidades
 
-**Data:** 31/ago/2026  
-**Escopo:** cidades selecionadas no mesmo relatório, com atualizações mensais e trimestrais misturadas.  
+**Data:** 31/ago/2026
+**Escopo:** cidades selecionadas no mesmo relatório, com atualizações mensais e trimestrais misturadas.
 **Estado:** motor implementado e coberto por testes; evidência autenticada confirma frequência mista em Guarujá. Falta a homologação visual autenticada de preview/PDF e a paridade de autenticação no endpoint v2.
 
 ## Evidência no fluxo atual
