@@ -13,6 +13,13 @@
 - **Progresso/ETA:** cada cidade emite 11 unidades de trabalho concluídas (empreendimentos e dez séries temporais), seguidas de consolidação e preparação. A barra acessível é determinada; ETA usa velocidade observada depois de duas unidades e o PDF calcula o equivalente por página capturada.
 - **QA:** `tests/panorama-v2-visual.spec.ts` interceptou APIs com fixture, comparou o mesmo `Sheet` em preview e export, salvou as seis capturas críticas e baixou `panorama-v2.pdf` de 59 páginas. O PNG e o PDF ficam em `.tmp/`, fora do Git. Testes de contrato e build de produção passaram.
 
+### Refinamento após homologação visual
+
+- O ETA não usa mais relógio em atualização contínua: só recebe novo cálculo quando uma unidade da coleta conclui e nunca pode aumentar entre etapas. O rótulo passou a indicar `Até …`.
+- O exportador oculta somente o retângulo decorativo horizontal do slide de conteúdo; a geometria, o degradê e a marca superior permanecem exatamente os institucionais.
+- O slide de equipe usa uma grade central 2×3: perfis fixos maiores na primeira linha e segunda linha limpa/equivalente para consultor e analistas, sem rótulos ou caixas-guia.
+- Referências 60–62 usam `closing-report.png`, exportado do slide 37 da Baixada Santista, sem overlay HTML.
+
 ## Diagnóstico confirmado
 
 1. A primeira página continua legada porque o manifesto ainda começa na referência 1, e `Content`

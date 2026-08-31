@@ -20,12 +20,17 @@ try {
   @{
     'divider.png' = 2
     'dark-team.png' = 3
-    'content.png' = 4
     'closing.png' = 5
     'closing-alt.png' = 6
   }.GetEnumerator() | ForEach-Object {
     $institutionalDeck.Slides.Item($_.Value).Export((Join-Path $OutputDirectory $_.Key), 'PNG', 1920, 1080)
   }
+  $contentSlide = $institutionalDeck.Slides.Item(4)
+  # A única barra vermelha é o retângulo decorativo horizontal. Ela não pertence aos slides de dados V2.
+  foreach ($shape in @($contentSlide.Shapes)) {
+    if ($shape.Name -like 'Rectangle*' -and $shape.Width -gt 100 -and $shape.Height -lt 10) { $shape.Visible = 0 }
+  }
+  $contentSlide.Export((Join-Path $OutputDirectory 'content.png'), 'PNG', 1920, 1080)
   $institutionalDeck.Close()
 
   $reportDeck = $powerPoint.Presentations.Open($baixada, $true, $false, $false)
@@ -34,6 +39,7 @@ try {
     if ($shape.HasTextFrame -and $shape.TextFrame.HasText) { $shape.TextFrame.TextRange.Text = ' ' }
   }
   $reportDeck.Slides.Item(1).Export((Join-Path $OutputDirectory 'cover-report.png'), 'PNG', 1920, 1080)
+  $reportDeck.Slides.Item(37).Export((Join-Path $OutputDirectory 'closing-report.png'), 'PNG', 1920, 1080)
   $reportDeck.Close()
 } finally {
   $powerPoint.Quit()

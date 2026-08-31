@@ -28,6 +28,7 @@ test('Panorama V2 preserves the institutional backgrounds in preview and PDF', a
   for (let i = 0; i < 43; i += 1) await page.getByRole('button', { name: 'Próxima' }).click();
   await capture('preview-team');
   await page.getByRole('button', { name: 'Próxima' }).click(); await capture('preview-consultant');
+  await page.getByRole('button', { name: 'Próxima' }).click(); await capture('preview-closing');
 
   const [download] = await Promise.all([
     page.waitForEvent('download', { timeout: 180_000 }),

@@ -11,7 +11,7 @@ import coverBackground from '../assets/official_v2/backgrounds/cover-report.png'
 import contentBackground from '../assets/official_v2/backgrounds/content.png';
 import dividerBackground from '../assets/official_v2/backgrounds/divider.png';
 import darkTeamBackground from '../assets/official_v2/backgrounds/dark-team.png';
-import closingBackground from '../assets/official_v2/backgrounds/closing.png';
+import closingBackground from '../assets/official_v2/backgrounds/closing-report.png';
 import '../print/panorama-print.css';
 
 const officialV2Assets = import.meta.glob('../assets/official_v2/*.png', { eager: true, import: 'default' }) as Record<string, string>;
@@ -57,8 +57,8 @@ function V2Summary({ report }: { report: PanoramaReportModel }) {
   return <div className="panorama-v2-summary"><h2>Sumário</h2><ol>{PANORAMA_SECTIONS.map((section) => <li key={section.id}><span>{section.label}</span><b>{section.start}–{section.end}</b></li>)}</ol>{report.cityComparisons.enabled && <p className="panorama-v2-summary-note">O recorte multicidades habilita comparativos entre municípios ao final da análise geral.</p>}</div>;
 }
 type PresentationPerson = NonNullable<PanoramaReportModel['presentation']['consultant']>;
-function PersonSlot({ person, label }: { person?: PresentationPerson; label: string }) {
-  return <div className={`panorama-v2-person-slot ${person?.photoUrl ? 'is-filled' : ''}`}>{person?.photoUrl ? <img src={person.photoUrl} alt={person.name ?? label}/> : <span className="panorama-v2-person-placeholder">{label}</span>}{(person?.name || person?.role || person?.email) && <div><strong>{person.name}</strong><small>{person.role}</small>{person.email && <small>{person.email}</small>}</div>}</div>;
+function PersonSlot({ person, label, quiet = false }: { person?: PresentationPerson; label: string; quiet?: boolean }) {
+  return <div className={`panorama-v2-person-slot ${person?.photoUrl ? 'is-filled' : ''} ${quiet ? 'is-quiet' : ''}`}>{person?.photoUrl ? <img src={person.photoUrl} alt={person.name ?? label}/> : !quiet && <span className="panorama-v2-person-placeholder">{label}</span>}{(person?.name || person?.role || person?.email) && <div><strong>{person.name}</strong><small>{person.role}</small>{person.email && <small>{person.email}</small>}</div>}</div>;
 }
 function ConsultantClosing({ report }: { report: PanoramaReportModel }) {
   const consultant = report.presentation.consultant;
@@ -67,7 +67,7 @@ function ConsultantClosing({ report }: { report: PanoramaReportModel }) {
 const fixedTeam = [{ name: 'Fábio Tadeu Araújo', role: 'CEO', photo: 'team-fabio.png' }, { name: 'Marcos Kahtalian', role: 'Sócio-Fundador', photo: 'team-marcos.png' }, { name: 'Teresa Cristina', role: 'Sócia e Gestora de Projetos', photo: 'team-teresa.png' }];
 function TeamSlide({ report }: { report: PanoramaReportModel }) {
   const analysts = report.presentation.analysts ?? [];
-  return <div className="panorama-v2-team"><div className="panorama-v2-team-grid">{fixedTeam.map((member) => <div className="panorama-v2-team-member" key={member.name}><img src={officialV2(member.photo)} alt={member.name}/><strong>{member.name}</strong><small>{member.role}</small></div>)}{[0, 1, 2].map((index) => <PersonSlot key={index} person={analysts[index]} label={index === 0 ? 'CONSULTOR' : 'ANALISTA'}/>)}</div><h2>Equipe técnica</h2></div>;
+  return <div className="panorama-v2-team"><div className="panorama-v2-team-grid">{fixedTeam.map((member) => <div className="panorama-v2-team-member" key={member.name}><img src={officialV2(member.photo)} alt={member.name}/><strong>{member.name}</strong><small>{member.role}</small></div>)}{[0, 1, 2].map((index) => <PersonSlot key={index} person={analysts[index]} label="" quiet/>)}</div><h2>Equipe técnica</h2></div>;
 }
 type TrendConfig = { title: string; data: LaunchSeries[]; unit: 'count' | 'mi' | 'sqm'; pattern?: boolean; single?: boolean; metric: string; nouns: [string, string]; colors: [string, string] };
 function launchPatternSeries(source: { quarter: string; economic: number | null; other: number | null }[]): LaunchSeries[] { return source.map((item) => ({ quarter: item.quarter as never, vertical: item.economic ?? 0, horizontal: item.other ?? 0, total: (item.economic ?? 0) + (item.other ?? 0) })); }
@@ -226,6 +226,7 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <V2Divider title={title}/>;
   if (p === 58) return <TeamSlide report={report}/>;
   if (p === 59) return <ConsultantClosing report={report}/>;
+  if (p >= 60) return <div aria-hidden="true"/>;
   // A V2 não usa lâminas legadas com textos/cidades congelados nem o rodapé da V1.
   if ([3,7,8,10].includes(p)) return <Corporate page={p} report={report}/>;
   if (p === 53 || p === 54) return <NarrativeSlide report={report} continuation={p === 54}/>;

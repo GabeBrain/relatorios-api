@@ -10,7 +10,8 @@ auditoria. Os arquivos aqui são usados somente pela composição V2.
   analista e para futura integração com um catálogo de pessoas.
 
 `backgrounds/` contém as superfícies **sem texto dinâmico**, exportadas em 16:9 diretamente dos
-PPTs institucionais locais. `cover-report.png` vem da capa Baixada Santista, com os campos de cidade
-e trimestre neutralizados antes da exportação; `content.png`, `divider.png`, `dark-team.png` e os
-fechamentos vêm do PPT Institucional 2026. O renderer V2 aplica somente as camadas de dados e pessoas
+PPTs institucionais locais. `cover-report.png` vem da capa Baixada Santista, com cidade e trimestre
+neutralizados antes da exportação; `content.png` remove apenas a faixa vermelha
+decorativa do fundo institucional, `divider.png` e `dark-team.png` vêm do PPT Institucional 2026, e
+`closing-report.png` é o fechamento estático do estudo da Baixada Santista. O renderer V2 aplica somente as camadas de dados e pessoas
 sobre esses fundos, sem reconstruir o padrão em CSS nem injetar o rodapé legado.
