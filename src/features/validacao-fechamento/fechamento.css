@@ -125,6 +125,12 @@
   background: transparent;
 }
 .validacao-fechamento .vf-grid .vf-resizer:hover { background: var(--vf-primary); }
+.validacao-fechamento .vf-grid .vf-div-value,
+.validacao-fechamento .vf-grid .vf-div-rule { position: sticky; background: var(--vf-card); z-index: 2; }
+.validacao-fechamento .vf-grid th.vf-div-value,
+.validacao-fechamento .vf-grid th.vf-div-rule { background: var(--vf-muted-soft); z-index: 3; }
+.validacao-fechamento .vf-grid .vf-div-rule { right: 0; min-width: 210px; }
+.validacao-fechamento .vf-grid .vf-div-value { right: 210px; min-width: 300px; border-right: 1px solid var(--vf-border); }
 
 /* Ícone (i) de regra de cálculo */
 .validacao-fechamento .vf-info {
