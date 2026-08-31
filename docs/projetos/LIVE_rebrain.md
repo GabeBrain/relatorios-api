@@ -61,6 +61,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-31 — Panorama V2: comparativos municipais completos e exportação para homologação — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — recortes multicidade completos, prévia, PDF e PPT espelho.
+- **Estado de entrega:** os três comparativos municipais quantitativos da referência Baixada Santista estão implementados e condicionados a coleta completa de todas as cidades: **vendas líquidas por cidade**, **mercado por cidade e segmento** e **disponibilidade vertical por padrão × cidade**. Sumário, paginação, leitura contínua, PDF e PPT consomem o mesmo manifesto (60 páginas no multicidade completo; 57 no recorte simples).
+- **Exportação:** PDF e PPT espelho usam a mesma captura 1920×1080; os rótulos de todos os trimestres, inclusive `1T`, são forçados no eixo dos gráficos temporais. O PPT é visualmente fiel, mas permanece não editável internamente.
+- **Aceite restante:** homologar em produção um recorte GeoBrain autenticado, conferindo valores e os dois arquivos. Não há pendência de implementação para os comparativos; PPT editável é escopo V3.
+- **Commits:** `3277b0b`, `cff0bf8`, `fd8c69a`, `fa89567`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-08-31 — Panorama V2: PPT espelho e rótulos temporais completos — Gabriel + Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — exportação de entregáveis e gráficos temporais.
