@@ -61,6 +61,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-31 — Panorama V2: PPT espelho e rótulos temporais completos — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — exportação de entregáveis e gráficos temporais.
+- **O quê:** incluído o botão **Baixar PPT espelho**. Ele usa a mesma captura JPEG 1920×1080 do PDF e monta uma lâmina 16:9 por página no `.pptx`, preservando visual, paginação e fundos; por definição, os elementos do relatório não são editáveis individualmente. A exportação informa o formato em andamento e mantém download, cancelamento e nova tentativa do fluxo atual.
+- **Correção PDF/PPT:** o `XAxis` dos gráficos temporais agora força todos os trimestres e reserva respiro nas extremidades, impedindo que a legenda de `1T` seja descartada pelo algoritmo automático do Recharts na prévia, no PDF e no PPT espelho.
+- **Verificação:** typecheck, build de produção e 257 testes/33 suítes aprovados. O PPTX foi gerado em memória com Blob válido (44.761 bytes); preview sem autenticação confirmou a rota, mas o aceite visual de um recorte real continua pendente por não haver sessão GeoBrain neste ambiente.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{lib/pdf-export.ts,export-store.ts,components/{PanoramaExportHost.tsx,ReportPaginator.tsx},__tests__/pdf-export.test.ts}`, `package.json`.
+- **Commits:** `fd8c69a`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** PPT espelho passa a estar em runtime; PowerPoint editável permanece explicitamente como escopo V3. Falta apenas homologar os dois downloads com um recorte autenticado real.
+
 ### 2026-08-31 — Panorama V2: enquadramento integral e mercado municipal por segmento — Gabriel + Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capa, institucional, encerramento e comparativos multicidade.
@@ -1126,7 +1137,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
 | 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. **Homologação real começou em 22–24/jul** com 4 estudos de analistas (Rolândia/Daniele + Housi/Beatriz e Finoti): 102 achados, ~100% FP nos triados → sprint de 28/jul derrubou Rolândia de 17 achados para 1 (v0.44–0.49, 78 testes verdes). |
 | 7 | Relatórios Secovi (export Excel) | 🟡 (correção trimestral implementada e testada em 04/ago; aguarda homologação manual da exportação) |
-| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (V1 visual testável de ponta a ponta ✅; retorno de Jundiaí mapeado em 27/ago: 28 comentários + multi-cidade, período dinâmico e política Secovi; próximo portão é executar em paralelo os planos Opus/Luna, integrar, gerar novo PDF e reenviar à Juliana. Layout novo e PPTX ficaram para V2.) |
+| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (V1 visual testável de ponta a ponta ✅; V2 reúne padrão institucional, multi-cidade, período dinâmico, política Secovi, comparativos condicionais e PDF/PPT espelho. Próximo portão: homologar preview e os dois arquivos em recorte GeoBrain autenticado. PPT editável segue para V3.) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
 | 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI padronizada, mapa urbano, testes e build ✅; homologação pelo setor usuário pendente) |
@@ -1146,7 +1157,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] **Panorama — avaliar impressão nativa vetorial:** o CSS `@media print` já existe e daria PDF instantâneo, mas os gráficos usam `ResponsiveContainer` do recharts, que mede via JS e não é remedido na mídia de impressão; exige verificação lâmina a lâmina antes de considerar.
 - [ ] **Panorama — remover `lib/pdf-print-interceptor.ts`:** arquivo morto (nenhum import) que ainda sobrescreve `window.print` e intercepta cliques com a estratégia de popup já abandonada em 19/ago.
 - [ ] **Panorama Secovi/FIERGS — executar correções da V1 de Jundiaí:** executar em paralelo [`PLAN_OPUS_CORRECOES_V1_JUNDIAI.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_OPUS_CORRECOES_V1_JUNDIAI.md) e [`PLAN_LUNA_CORRECOES_V1_JUNDIAI.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_LUNA_CORRECOES_V1_JUNDIAI.md); o Luna integra após `OPUS_READY`, cobrindo os 28 comentários, multi-cidade, período após 1T/26, universo Secovi e novo PDF de 62 páginas. Matriz de aceite em [`MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md`](../features/Relatorios%20Secovi_FIERGS/MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md).
-- [ ] **Panorama V2 — itens adiados:** novo padrão visual de tabelas Rebrain (aguarda referência) e exportação PPTX editável; não bloqueiam o fechamento da V1.
+- [ ] **Panorama V3 — PPT editável:** o PPT espelho já está disponível na V2 como uma imagem 16:9 por lâmina; a reconstrução de textos, tabelas e gráficos em objetos nativos do PowerPoint requer escopo próprio e não bloqueia a homologação atual.
 - [ ] **Panorama V2 — reativar mapa de empreendimentos:** cadastrar `VITE_MAPBOX_ACCESS_TOKEN` no ambiente publicado, restringir o token aos domínios da aplicação e homologar preview/PDF antes de reintroduzir o slide 56.
 - [ ] **Panorama V2 — avaliar retorno da abertura de praça:** a referência 4 foi retirada porque a arte estática não recebe o nome do recorte; só reintroduzir com composição dinâmica aprovada.
 - [ ] **Panorama — fechar metodologia com os analistas:** critério oficial de **VGV lançado**
