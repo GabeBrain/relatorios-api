@@ -61,6 +61,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-31 — Panorama V2: estabilidade multicidade, unidades monetárias e margens — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração, séries temporais, preview e PDF.
+- **O quê:** removida a previsão de tempo instável, preservando o percentual por chamadas realmente concluídas; limitada a coleta a uma cidade e quatro requisições simultâneas para evitar o cancelamento do fallback de empreendimentos observado em recortes de três cidades. Vendas e R$/m² sem fonte temporal passam a declarar indisponibilidade, sem preencher tabelas/gráficos com zeros. O VGV das fontes municipais agora é convertido de reais para **R$ milhões antes da normalização**, corrigindo séries e faixas anuais que exibiam valores em reais sob legenda de milhões. As páginas V2 receberam margem interna segura, sem comprimir fundos, capa ou rodapé.
+- **Verificação:** 29 testes direcionados aprovados e build de produção aprovado; preview local com fixtures confirmou margem de sumário, divisória, página institucional, tabela e PDF. O runner `agent-browser` não está instalado e o Playwright compartilhado aponta dependência ausente; a homologação autenticada do recorte real segue pendente.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,pages/PanoramaSecoviFiergsPage.tsx,components/PanoramaLoadingState.tsx,components/ReportPaginator.tsx,components/MarketSlides.tsx,print/panorama-print.css,__tests__/report-model.test.ts}`, `docs/features/Relatorios Secovi_FIERGS/MAPEAMENTO_V2_MULTICIDADES_2026-08-31.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** comparativos municipais continuam calculados, mas ainda precisam das três páginas condicionais e da homologação autenticada de vendas/R$/m²; nenhuma ausência de fonte deve voltar a se passar por resultado numérico.
+
 ### 2026-08-28 — Teste headless da exportação percentual do AELO — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/aelo` — exportação Excel.
 - **O quê:** adicionada cobertura Vitest para a conversão dos percentuais, o tipo numérico das células, o formato `0.00%` e a preservação de valores nulos/vazios.

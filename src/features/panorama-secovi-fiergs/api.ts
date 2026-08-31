@@ -12,7 +12,10 @@ import { createPanoramaGenerationProgress, type PanoramaProgressListener } from 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const BUILDINGS_V2_BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
 const PER_PAGE = 100;
-const CITY_CONCURRENCY = 3;
+// Uma cidade abre consultas de prédios e dez séries temporais. Processar três ao mesmo tempo
+// disparava mais de trinta conexões e fazia o navegador abortar inclusive o fallback legado.
+const CITY_CONCURRENCY = 1;
+const REQUEST_CONCURRENCY_PER_CITY = 4;
 const BUILDING_STATUSES = ['Ativo', 'Esgotado'];
 
 /** Recorte de uma única cidade; o escopo público continua sendo multi-cidade. */
@@ -35,6 +38,25 @@ function primaryCity(scope: PanoramaScope): string {
 function temporalWindow(scope: Pick<CityScope, 'startQuarter' | 'endQuarter'>): { start: string; end: string } {
   const window = scope.startQuarter ? [scope.startQuarter] : editorialWindow(scope.endQuarter);
   return { start: quarterStartDate(window[0]), end: quarterEndDate(scope.endQuarter) };
+}
+
+/** Limita a rajada por município sem alterar a ordem nem a semântica das fontes. */
+function createRequestGate(limit: number) {
+  let active = 0;
+  const waiting: (() => void)[] = [];
+  const release = () => {
+    active -= 1;
+    waiting.shift()?.();
+  };
+  return async <T>(request: () => Promise<T>): Promise<T> => {
+    if (active >= limit) await new Promise<void>((resolve) => waiting.push(resolve));
+    active += 1;
+    try {
+      return await request();
+    } finally {
+      release();
+    }
+  };
 }
 
 async function fetchBuildingsV2(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
@@ -132,6 +154,11 @@ type TemporalEndpoint = 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-pr
 export type TemporalIssue = { endpoint: TemporalEndpoint; status: number | null; empty: boolean };
 type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string; issue?: TemporalIssue };
 
+/** Os endpoints monetários respondem em reais; o relatório editorial consome R$ milhões. */
+export function valuesInMillions(source: SourceResult, field: string): SourceResult {
+  return { ...source, rows: source.rows.map((row) => ({ ...row, [field]: (safeNumber(row[field]) ?? 0) / 1_000_000 })) };
+}
+
 const temporalMetricLabel: Record<TemporalEndpoint, string> = {
   sales: 'vendas', stock: 'oferta disponível', ivv: 'velocidade de vendas',
   'medium-prices': 'preço médio', 'medium-prices-meter': 'preço por m²',
@@ -156,14 +183,15 @@ export function describeTemporalFailure(city: string, issues: TemporalIssue[]): 
 }
 
 async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
-  const track = <T,>(operation: string, request: Promise<T>) => request.finally(() => onUnit?.(scope.city, operation));
+  const gate = createRequestGate(REQUEST_CONCURRENCY_PER_CITY);
+  const track = <T,>(operation: string, request: () => Promise<T>) => gate(request).finally(() => onUnit?.(scope.city, operation));
   const [buildings, sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
-    track('empreendimentos', fetchBuildings(scope, signal)),
-    track('vendas por padrão', temporalRows(scope, 'sales', 'Padrão', signal)), track('vendas por tipologia', temporalRows(scope, 'sales', 'Tipologia', signal)),
-    track('oferta por padrão', temporalRows(scope, 'stock', 'Padrão', signal)), track('oferta por tipologia', temporalRows(scope, 'stock', 'Tipologia', signal)),
-    track('IVV por padrão', temporalRows(scope, 'ivv', 'Padrão', signal)), track('IVV por tipologia', temporalRows(scope, 'ivv', 'Tipologia', signal)),
-    track('preços por padrão', temporalRows(scope, 'medium-prices', 'Padrão', signal)), track('preços por tipologia', temporalRows(scope, 'medium-prices', 'Tipologia', signal)),
-    track('R$/m² por padrão', temporalRows(scope, 'medium-prices-meter', 'Padrão', signal)), track('R$/m² por tipologia', temporalRows(scope, 'medium-prices-meter', 'Tipologia', signal)),
+    track('empreendimentos', () => fetchBuildings(scope, signal)),
+    track('vendas por padrão', () => temporalRows(scope, 'sales', 'Padrão', signal)), track('vendas por tipologia', () => temporalRows(scope, 'sales', 'Tipologia', signal)),
+    track('oferta por padrão', () => temporalRows(scope, 'stock', 'Padrão', signal)), track('oferta por tipologia', () => temporalRows(scope, 'stock', 'Tipologia', signal)),
+    track('IVV por padrão', () => temporalRows(scope, 'ivv', 'Padrão', signal)), track('IVV por tipologia', () => temporalRows(scope, 'ivv', 'Tipologia', signal)),
+    track('preços por padrão', () => temporalRows(scope, 'medium-prices', 'Padrão', signal)), track('preços por tipologia', () => temporalRows(scope, 'medium-prices', 'Tipologia', signal)),
+    track('R$/m² por padrão', () => temporalRows(scope, 'medium-prices-meter', 'Padrão', signal)), track('R$/m² por tipologia', () => temporalRows(scope, 'medium-prices-meter', 'Tipologia', signal)),
   ]);
   const sources = { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology };
   if (Object.values(sources).every((source) => !source.available)) {
@@ -213,15 +241,27 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
     available: harvests.some((harvest) => harvest.sources[key].available),
     source: harvests.length ? harvests[0].sources[key].source : `temporal-analysis-city/${key} · sem cidade concluída`,
   });
-  const millions = (source: SourceResult, field: string): SourceResult => ({ ...source, rows: source.rows.map((row) => ({ ...row, [field]: (safeNumber(row[field]) ?? 0) / 1_000_000 })) });
+  const cityTemporalSources = harvests.map(({ city, sources }) => ({
+    city,
+    // `normalizeTemporalSource` prioriza as fontes municipais. Elas precisam estar na mesma
+    // unidade do consolidado; antes, apenas este último era convertido e o VGV multicidade
+    // acabava sendo desenhado em reais sob o rótulo "R$ milhões".
+    sources: {
+      ...sources,
+      sales: valuesInMillions(sources.sales, 'vgv_liquid_sales'),
+      salesTypology: valuesInMillions(sources.salesTypology, 'vgv_liquid_sales'),
+      stock: valuesInMillions(sources.stock, 'vgv_stock'),
+      stockTypology: valuesInMillions(sources.stockTypology, 'vgv_stock'),
+    },
+  }));
 
   progress.consolidate();
   const model = buildPanoramaReportModel(
     scope,
     harvests.flatMap((harvest) => harvest.records),
     {
-      sales: millions(merge('sales'), 'vgv_liquid_sales'), salesTypology: millions(merge('salesTypology'), 'vgv_liquid_sales'),
-      stock: millions(merge('stock'), 'vgv_stock'), stockTypology: millions(merge('stockTypology'), 'vgv_stock'),
+      sales: valuesInMillions(merge('sales'), 'vgv_liquid_sales'), salesTypology: valuesInMillions(merge('salesTypology'), 'vgv_liquid_sales'),
+      stock: valuesInMillions(merge('stock'), 'vgv_stock'), stockTypology: valuesInMillions(merge('stockTypology'), 'vgv_stock'),
       ivv: merge('ivv'), ivvTypology: merge('ivvTypology'),
       ticket: merge('ticket'), ticketTypology: merge('ticketTypology'),
       meter: merge('meter'), meterTypology: merge('meterTypology'),
@@ -235,7 +275,7 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
         failedCities: collection.failedCities,
       },
       citySalesSources: harvests.map((harvest) => ({ city: harvest.city, rows: harvest.sources.sales.rows })),
-      cityTemporalSources: harvests.map((harvest) => ({ city: harvest.city, sources: harvest.sources })),
+      cityTemporalSources,
     },
   );
   progress.prepare();

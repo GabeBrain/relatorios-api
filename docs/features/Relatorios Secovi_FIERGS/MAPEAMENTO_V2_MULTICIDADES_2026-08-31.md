@@ -4,6 +4,13 @@
 **Escopo:** cidades selecionadas no mesmo relatório, com atualizações mensais e trimestrais misturadas.
 **Estado:** motor implementado e coberto por testes; evidência autenticada confirma frequência mista em Guarujá. Falta a homologação visual autenticada de preview/PDF e a paridade de autenticação no endpoint v2.
 
+## Incidentes observados no pós-deploy — 31/ago/2026
+
+1. A previsão observada de tempo oscilava e acabou parecendo fixa; foi removida da interface. O progresso permanece baseado exclusivamente em chamadas concluídas.
+2. Uma geração com três municípios pôde receber cancelamento do `AbortSignal` do React Query durante o fallback de `building-with-history`; o erro acabava nomeando todas as cidades. A coleta passa a não reutilizar esse sinal efêmero e limita a rajada a uma cidade e quatro requisições por vez.
+3. Quando `sales` ou `medium-prices-meter` não retornam fonte utilizável, os componentes antigos imprimiam `0` em toda a tabela/gráfico. Isto não é um agregado trimestral válido. As páginas temporais devem exibir indisponibilidade explícita até a resposta autenticada ser homologada.
+4. O teste manual sem token nos hosts documentados respondeu HTML, não JSON; a confirmação final de cobertura de vendas e R$/m² continua dependente de uma sessão autenticada no navegador/API.
+
 ## Evidência no fluxo atual
 
 O comportamento anterior concatenava as linhas de `temporal-analysis-city/*` antes de agregá-las por

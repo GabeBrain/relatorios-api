@@ -28,7 +28,10 @@ export default function PanoramaSecoviFiergsPage() {
   const queryScope = submitted ? { ...submitted, cities: [...submitted.cities].sort((a, b) => a.localeCompare(b, 'pt-BR')) } : null;
   const report = useQuery({
     queryKey: ['panorama-report', queryScope?.uf, queryScope?.cities, queryScope?.startQuarter, queryScope?.endQuarter, queryScope?.entity],
-    queryFn: ({ signal }) => fetchPanoramaReportModel(queryScope!, signal, setGenerationProgress),
+    // O recorte só muda por uma nova geração (o botão fica bloqueado durante a coleta).
+    // Não repassamos o sinal efêmero do React Query: ele vinha cancelando o fallback legado de
+    // todas as cidades quando uma das requisições paralelas era descartada pelo navegador.
+    queryFn: () => fetchPanoramaReportModel(queryScope!, undefined, setGenerationProgress),
     enabled: Boolean(queryScope), staleTime: 5 * 60_000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: 0,
   });
   const ready = Boolean(geoApi.strictReady && cities.length && scope.startQuarter && scope.endQuarter);

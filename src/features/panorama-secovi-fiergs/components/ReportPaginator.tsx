@@ -87,6 +87,9 @@ function seriesFor(page: number, r: PanoramaReportModel): TrendConfig {
 }
 function TimeChart({ page, report }: { page: number; report: PanoramaReportModel }) {
   const series = seriesFor(page, report);
+  if (page === 40 && report.prices.meter.dataStatus === 'unavailable') {
+    return <CoveragePage title="PREÇO POR M² PRIV. MÉDIO TOTAL RESIDENCIAL VERTICAL" detail="A API não disponibilizou a série temporal de R$/m² para este recorte. O gráfico foi mantido indisponível para não representar ausência de resposta como preço igual a zero."/>;
+  }
   const data = series.data;
   const referenceQuarter = report.scope.endQuarter[0];
   const formatValue = (value: number) => series.unit === 'mi' ? decimal(value) : series.unit === 'sqm' ? `R$ ${n(value)}/m²` : n(value);
@@ -149,6 +152,10 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
 }
 function comparisonSeries(report: PanoramaReportModel, sales = false) { const metric = sales ? report.sales : { units: { series: report.launches.units }, vgv: { series: report.launches.vgv } }; const quarters = metric.units.series.filter((x: LaunchSeries) => x.quarter[0] === report.scope.endQuarter[0]).slice(-5); return { quarters, rows: [{ label: 'Empreendimentos', series: report.launches.projects, money: false, show: !sales }, { label: 'Unidades', series: metric.units.series, money: false, show: true }, { label: sales ? 'VGV vendido' : 'VGV lançado', series: metric.vgv.series, money: true, show: true }].filter((x) => x.show) }; }
 function ComparisonTable({ report, sales = false, annual = false }: { report: PanoramaReportModel; sales?: boolean; annual?: boolean }) {
+  const temporalBlock = sales ? report.sales.units : null;
+  if (temporalBlock?.dataStatus === 'unavailable') {
+    return <CoveragePage title={annual ? 'VENDAS | POR ANO' : 'VENDAS | POR TRIMESTRE'} detail="A API não disponibilizou a série temporal de vendas para este recorte. A tabela foi preservada como indisponível para não apresentar zeros como se fossem resultados observados."/>;
+  }
   const { quarters, rows } = comparisonSeries(report, sales);
   const periods = annual ? report.launches.annual.slice(-4).map((item) => String(item.year)) : quarters.map((item: LaunchSeries) => item.quarter);
   const comparisonPairs = [[periods.at(-3), periods.at(-2)], [periods.at(-2), periods.at(-1)]] as const;

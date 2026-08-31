@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { valuesInMillions } from '../api';
 import { buildPanoramaReportModel } from '../report/model';
 import { buildCityCube } from '../domain/cube';
 import type { PanoramaScope } from '../types';
@@ -21,6 +22,25 @@ const sampleBuilding: Record<string, unknown> = {
 };
 
 describe('Panorama Secovi/FIERGS — modelo editorial por grupo', () => {
+  it('converte VGV municipal de reais para milhões antes da normalização multicidade', () => {
+    const sourceInReais = source([{ period: '2026-06-01', vgv_liquid_sales: 1_124_444_223.7 }]);
+    const converted = valuesInMillions(sourceInReais, 'vgv_liquid_sales');
+    expect(converted.rows[0]?.vgv_liquid_sales).toBeCloseTo(1124.4442237);
+  });
+
+  it('mantém VGV em milhões quando a fonte municipal alimenta o normalizador', () => {
+    const empty = source([]);
+    const salesInReais = source([{ period: '2026-03-01', building_type: 'Vertical', group: 'Standard', liquid_sales: 10, vgv_liquid_sales: 1_124_444_223.7 }]);
+    const sales = valuesInMillions(salesInReais, 'vgv_liquid_sales');
+    const model = buildPanoramaReportModel(scope, [], {
+      sales, salesTypology: empty, stock: empty, stockTypology: empty,
+      ivv: empty, ivvTypology: empty, ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty,
+    }, [], {
+      cityTemporalSources: [{ city: 'Piracicaba', sources: { sales, salesTypology: empty, stock: empty, stockTypology: empty, ivv: empty, ivvTypology: empty, ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty } }],
+    });
+    expect(model.sales.vgv.series.at(-1)?.vertical).toBeCloseTo(1124.4442237);
+  });
+
   it('preserva séries trimestrais e usa o trimestre atual no resumo por grupo', () => {
     const stock = source([
       { period: '2025-12-01', building_type: 'Vertical', group: 'Econômico', stock: 40, vgv_stock: 4 },
