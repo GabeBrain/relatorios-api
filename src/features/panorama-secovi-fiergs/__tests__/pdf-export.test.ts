@@ -8,6 +8,11 @@ describe('Panorama PDF export contract', () => {
     expect(PANORAMA_PDF_WIDTH / PANORAMA_PDF_HEIGHT).toBeCloseTo(16 / 9);
   });
 
+  it('uses the same 16:9 capture for the mirrored PowerPoint export', () => {
+    expect(PANORAMA_EXPORT_WIDTH).toBe(1920);
+    expect(PANORAMA_EXPORT_HEIGHT).toBe(1080);
+  });
+
   it('exports one active page per V2 reference slide, starting at the municipal cover', () => {
     expect(PANORAMA_REPORT_MANIFEST).toHaveLength(57);
     expect(PANORAMA_REPORT_MANIFEST[0]?.referenceSlide).toBe(2);

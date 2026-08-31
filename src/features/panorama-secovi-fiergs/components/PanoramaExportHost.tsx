@@ -3,21 +3,19 @@ import { CheckCircle2, LoaderCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PanoramaExportDeck } from './ReportPaginator';
 import { synchronizeOfficialCoverCity } from '../lib/official-cover';
-import { buildPanoramaPdf, PanoramaExportCancelled } from '../lib/pdf-export';
+import { buildPanoramaPdf, buildPanoramaPptx, PanoramaExportCancelled } from '../lib/pdf-export';
 import { usePanoramaExportStore } from '../export-store';
 import { quarterLabel } from '../lib/launches';
 import { scopeCityLabel, scopeCitySlug } from '../types';
-import { formatRemainingTime } from '../domain/generation-progress';
 
 /**
  * Executa a exportação do Panorama fora da árvore da rota: montado pelo shell, sobrevive à
  * navegação do usuário entre páginas. O deck só existe enquanto o job está ativo.
  */
 export default function PanoramaExportHost() {
-  const { status, progress, total, error, report, result } = usePanoramaExportStore();
+  const { status, progress, total, error, report, result, format } = usePanoramaExportStore();
   const deckRef = useRef<HTMLDivElement>(null);
   const startedFor = useRef<PanoramaExportRunKey>(null);
-  const exportStartedAt = useRef<number | null>(null);
 
   useEffect(() => {
     if (status !== 'preparing' || !report) return;
@@ -36,17 +34,19 @@ export default function PanoramaExportHost() {
       if (!slides.length) { usePanoramaExportStore.getState().fail('Não foi possível montar as páginas do relatório.'); return; }
       usePanoramaExportStore.getState().markCapturing(slides.length);
       try {
-        const built = await buildPanoramaPdf(slides, {
+        const metadata = {
           title: `Panorama imobiliário de ${cityLabel}`,
           author: 'Brain Inteligência Estratégica',
           subject: `${cityLabel}/${report.scope.uf} · ${quarterLabel(report.scope.endQuarter)}`,
-        }, ({ current, total: pages }) => {
+        };
+        const builder = format === 'pptx' ? buildPanoramaPptx : buildPanoramaPdf;
+        const built = await builder(slides, metadata, ({ current, total: pages }) => {
           const live = usePanoramaExportStore.getState();
           live.reportProgress(current, pages);
           if (current === pages) live.markAssembling();
         }, signal);
         if (signal?.aborted) return;
-        const name = `panorama-${scopeCitySlug(report.scope)}-${report.scope.endQuarter}.pdf`;
+        const name = `panorama-${scopeCitySlug(report.scope)}-${report.scope.endQuarter}.${format}`;
         const url = URL.createObjectURL(built.blob);
         const link = document.createElement('a');
         link.href = url; link.download = name; link.rel = 'noopener';
@@ -54,19 +54,15 @@ export default function PanoramaExportHost() {
         usePanoramaExportStore.getState().succeed({ url, name, pages: built.pageCount });
       } catch (cause) {
         if (cause instanceof PanoramaExportCancelled || signal?.aborted) return;
-        console.error('Falha ao gerar o PDF do Panorama', cause);
+        console.error(`Falha ao gerar o ${format.toUpperCase()} do Panorama`, cause);
         usePanoramaExportStore.getState().fail(cause instanceof Error ? cause.message : 'Erro inesperado ao rasterizar as páginas.');
       }
     };
     void run();
-  }, [status, report]);
+  }, [status, report, format]);
 
   const running = status === 'preparing' || status === 'capturing' || status === 'assembling';
-  if (running && exportStartedAt.current === null) exportStartedAt.current = Date.now();
-  if (!running) exportStartedAt.current = null;
-  const eta = status === 'capturing' && progress >= 2 && total > progress && exportStartedAt.current
-    ? formatRemainingTime((Date.now() - exportStartedAt.current) / progress * (total - progress))
-    : null;
+  const formatLabel = format === 'pptx' ? 'PPT espelho' : 'PDF';
   if (status === 'idle') return null;
 
   return (
@@ -78,11 +74,11 @@ export default function PanoramaExportHost() {
           {status === 'done' && <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium">
-              {status === 'preparing' && 'Preparando o PDF do Panorama…'}
-              {status === 'capturing' && `Gerando o PDF do Panorama: ${progress} de ${total} páginas${eta ? ` · cerca de ${eta}` : ''}`}
+              {status === 'preparing' && `Preparando o ${formatLabel} do Panorama…`}
+              {status === 'capturing' && `Gerando o ${formatLabel} do Panorama: ${progress} de ${total} páginas`}
               {status === 'assembling' && 'Montando o arquivo final…'}
-              {status === 'done' && `PDF pronto: ${result?.pages} páginas`}
-              {status === 'error' && 'Não foi possível gerar o PDF'}
+              {status === 'done' && `${formatLabel} pronto: ${result?.pages} páginas`}
+              {status === 'error' && `Não foi possível gerar o ${formatLabel}`}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               {running && 'Pode continuar navegando pela plataforma; o download começa sozinho ao terminar.'}

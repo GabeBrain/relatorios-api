@@ -7,6 +7,7 @@ import type { PanoramaReportModel } from './types';
  * deliberadamente leve — quem o importa não deve arrastar a feature inteira para o bundle inicial.
  */
 export type PanoramaExportStatus = 'idle' | 'preparing' | 'capturing' | 'assembling' | 'done' | 'error';
+export type PanoramaExportFormat = 'pdf' | 'pptx';
 
 export interface PanoramaExportResult { url: string; name: string; pages: number }
 
@@ -15,12 +16,13 @@ interface PanoramaExportState {
   progress: number;
   total: number;
   error: string;
+  format: PanoramaExportFormat;
   /** Snapshot do modelo no momento do clique: o export não depende mais da página seguir montada. */
   report: PanoramaReportModel | null;
   result: PanoramaExportResult | null;
   controller: AbortController | null;
 
-  start: (report: PanoramaReportModel) => void;
+  start: (report: PanoramaReportModel, format: PanoramaExportFormat) => void;
   markCapturing: (total: number) => void;
   reportProgress: (current: number, total: number) => void;
   markAssembling: () => void;
@@ -37,15 +39,16 @@ export const usePanoramaExportStore = create<PanoramaExportState>()((set, get) =
   progress: 0,
   total: 0,
   error: '',
+  format: 'pdf',
   report: null,
   result: null,
   controller: null,
 
-  start: (report) => {
+  start: (report, format) => {
     if (isRunning(get().status)) return;
     const previous = get().result;
     if (previous) URL.revokeObjectURL(previous.url);
-    set({ status: 'preparing', progress: 0, total: 0, error: '', report, result: null, controller: new AbortController() });
+    set({ status: 'preparing', progress: 0, total: 0, error: '', format, report, result: null, controller: new AbortController() });
   },
   markCapturing: (total) => set({ status: 'capturing', total }),
   reportProgress: (current, total) => set({ progress: current, total }),

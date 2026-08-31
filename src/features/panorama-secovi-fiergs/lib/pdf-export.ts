@@ -20,6 +20,19 @@ export interface PanoramaPdfResult {
   height: number;
 }
 
+export interface PanoramaPptxResult {
+  blob: Blob;
+  pageCount: number;
+  width: number;
+  height: number;
+}
+
+export interface PanoramaExportMetadata {
+  title: string;
+  author: string;
+  subject: string;
+}
+
 async function waitForSlide(slide: HTMLElement) {
   await document.fonts?.ready;
   const images = [...slide.querySelectorAll('img')];
@@ -55,7 +68,7 @@ async function settlePaint() {
  */
 export async function buildPanoramaPdf(
   slides: HTMLElement[],
-  metadata: { title: string; author: string; subject: string },
+  metadata: PanoramaExportMetadata,
   onProgress: (progress: PanoramaPdfProgress) => void,
   signal?: AbortSignal,
 ): Promise<PanoramaPdfResult> {
@@ -100,5 +113,59 @@ export async function buildPanoramaPdf(
     pageCount: slides.length,
     width: PANORAMA_PDF_WIDTH,
     height: PANORAMA_PDF_HEIGHT,
+  };
+}
+
+/**
+ * Gera um PowerPoint espelho: cada página é a mesma captura JPEG 16:9 usada no PDF.
+ * É intencionalmente fiel ao layout, e não tenta declarar gráficos/tabelas HTML como
+ * objetos nativos do PowerPoint (o que alteraria o desenho e os cálculos visíveis).
+ */
+export async function buildPanoramaPptx(
+  slides: HTMLElement[],
+  metadata: PanoramaExportMetadata,
+  onProgress: (progress: PanoramaPdfProgress) => void,
+  signal?: AbortSignal,
+): Promise<PanoramaPptxResult> {
+  if (!slides.length) throw new Error('Não há páginas ativas para exportar.');
+
+  const [{ default: PptxGenJS }, { toJpeg, getFontEmbedCSS }] = await Promise.all([
+    import('pptxgenjs'),
+    import('html-to-image'),
+  ]);
+  const deckRoot = slides[0].closest<HTMLElement>('.panorama-export-root') ?? slides[0].parentElement ?? slides[0];
+  const fontEmbedCSS = await getFontEmbedCSS(deckRoot);
+  const pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_WIDE';
+  pptx.author = metadata.author;
+  pptx.subject = metadata.subject;
+  pptx.title = metadata.title;
+  pptx.company = 'Brain Inteligência Estratégica';
+  pptx.lang = 'pt-BR';
+
+  for (let index = 0; index < slides.length; index += 1) {
+    if (signal?.aborted) throw new PanoramaExportCancelled();
+    const slide = slides[index];
+    await waitForSlide(slide);
+    const jpeg = await toJpeg(slide, {
+      fontEmbedCSS,
+      quality: 0.96,
+      width: PANORAMA_EXPORT_WIDTH,
+      height: PANORAMA_EXPORT_HEIGHT,
+      pixelRatio: 1,
+      cacheBust: false,
+      backgroundColor: '#ffffff',
+    });
+    const pptSlide = pptx.addSlide();
+    // LAYOUT_WIDE = 13,333 × 7,5 polegadas, exatamente a razão 16:9 do deck.
+    pptSlide.addImage({ data: jpeg, x: 0, y: 0, w: 13.333, h: 7.5 });
+    onProgress({ current: index + 1, total: slides.length });
+  }
+
+  return {
+    blob: await pptx.write({ outputType: 'blob', compression: true }) as Blob,
+    pageCount: slides.length,
+    width: PANORAMA_EXPORT_WIDTH,
+    height: PANORAMA_EXPORT_HEIGHT,
   };
 }
