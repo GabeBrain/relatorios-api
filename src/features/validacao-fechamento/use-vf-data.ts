@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { fetchBuildings } from '@/features/dashboard-geobrain/api';
+import { fetchValidationBuildings } from './api';
 import type { Building } from '@/features/dashboard-geobrain/types';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -63,7 +63,7 @@ export function useVFData() {
       await Promise.all(
         list.map(async (city) => {
           try {
-            const data = await fetchBuildings({ uf, city, token, signal: controller.signal });
+            const data = await fetchValidationBuildings({ uf, city, token, signal: controller.signal });
             for (const b of data) {
               if (b.building_id && !merged.has(b.building_id)) merged.set(b.building_id, b);
             }

@@ -6,6 +6,8 @@ import { VFSidebar } from '@/features/validacao-fechamento/VFSidebar';
 import { ResumoTable } from '@/features/validacao-fechamento/ResumoTable';
 import { ResumoPorCidade } from '@/features/validacao-fechamento/ResumoPorCidade';
 import { DetalhamentoGrid } from '@/features/validacao-fechamento/DetalhamentoGrid';
+import { DivergencesGrid } from '@/features/validacao-fechamento/DivergencesGrid';
+import { validateBuildings } from '@/features/validacao-fechamento/validation-rules';
 import { ActiveFiltersBar } from '@/features/validacao-fechamento/ActiveFiltersBar';
 import { useVFData } from '@/features/validacao-fechamento/use-vf-data';
 import {
@@ -16,7 +18,7 @@ import { intFmt } from '@/lib/format';
 import '@/features/validacao-fechamento/fechamento.css';
 
 const STORAGE_KEY = 'validacao-fechamento:state';
-type Tab = 'resumo' | 'resumo-cidade' | 'detalhamento';
+type Tab = 'resumo' | 'resumo-cidade' | 'detalhamento' | 'divergencias';
 
 export default function ValidacaoFechamento() {
   const hasToken = useAuthStore((s) => s.hasValidToken());
@@ -51,6 +53,7 @@ export default function ValidacaoFechamento() {
   const { status, buildings, loadedCities, failures, error, progress, load, reset } = useVFData();
 
   const allRows = useMemo(() => flattenBuildings(buildings ?? []), [buildings]);
+  const divergences = useMemo(() => status === 'ready' ? validateBuildings(buildings ?? []) : [], [buildings, status]);
   const options = useMemo(() => extractVFOptions(allRows), [allRows]);
 
   // Cidade ativa do header ('' = todas) aplicada sobre os filtros da sidebar
@@ -139,6 +142,7 @@ export default function ValidacaoFechamento() {
             <button type="button" className="vf-tab" data-active={tab === 'resumo'} onClick={() => setTab('resumo')}>Resumo</button>
             <button type="button" className="vf-tab" data-active={tab === 'resumo-cidade'} onClick={() => setTab('resumo-cidade')}>Resumo por cidade</button>
             <button type="button" className="vf-tab" data-active={tab === 'detalhamento'} onClick={() => setTab('detalhamento')}>Detalhamento</button>
+            <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências Encontradas ({divergences.length})</button>
           </div>
         </div>
 
@@ -173,6 +177,7 @@ export default function ValidacaoFechamento() {
             <ResumoPorCidade rows={allRows} filters={filters} granularity={granularity} cities={cityBlocks} />
           )}
           {tab === 'detalhamento' && <DetalhamentoGrid rows={filtered} />}
+          {tab === 'divergencias' && <DivergencesGrid rows={divergences} />}
         </div>
       </main>
     </div>

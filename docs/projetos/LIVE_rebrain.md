@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-08-31 — Validação do Fechamento: consulta interna e divergências — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — validação pós-consulta de empreendimentos e tipologias.
+- **O quê:** a feature consulta exclusivamente `building-with-history-internal`, preserva os campos internos necessários e executa as tratativas v3 somente depois de concluídas todas as requisições. A guia **Divergências Encontradas** lista os oito campos auditáveis e filtra por Erro e Regra.
+- **Por quê:** disponibilizar no produto as regras já definidas para conferência de fechamento, sem alterar o Dashboard GeoBrain.
+- **Arquivos:** `src/features/validacao-fechamento/api.ts`, `validation-rules.ts`, `DivergencesGrid.tsx`, `use-vf-data.ts`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** — (alterações locais ainda não commitadas).
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME pendente de homologação funcional com token e amostra produtiva.
+
 > **Panorama V2 · revisão visual pós-deploy · 31/ago/2026:** produção confirmou quatro resíduos da V1: capa vermelha ainda é a primeira página, fundos 2026 foram aproximados em CSS, rodapé legado é injetado globalmente e comprime inclusive equipe/consultor, e o carregamento não informa percentual/ETA. A inspeção dos PPTX mostrou fundos vazios canônicos nos slides 1–4 do deck institucional, correspondentes a capa, divisória, equipe e conteúdo do estudo da Baixada. Plano terminal: [`PLAN_TERMINAL_CORRECAO_VISUAL_V2_POS_DEPLOY_2026-08-31.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_TERMINAL_CORRECAO_VISUAL_V2_POS_DEPLOY_2026-08-31.md). **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — 12517501135.
 
 > **Panorama V2 · ponderação e horizontais multicidades · 31/ago/2026:** IVV, ticket e preço por m² agora consolidam municípios por **média ponderada pelo estoque final** no mesmo fechamento, segmento e recorte; quando o endpoint não oferece estoque correspondente, o relatório preserva o valor disponível com média simples e não inventa peso zero. Testes do motor: **16/16 aprovados**. Auditoria autenticada do fallback legado `building-with-history` para Guarujá, Praia Grande, Santos e São Vicente encontrou 75 horizontais: somente 3 Condomínios de Casas (todos em Praia Grande) entram no universo Secovi; 72 outros horizontais ficam excluídos. O endpoint v2 respondeu 401 com esse token e permanece sob fallback legado explícito até paridade de autenticação. **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — 12517501135.
