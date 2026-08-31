@@ -223,6 +223,8 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
         completedCities: collection.completedCities,
         failedCities: collection.failedCities,
       },
+      citySalesSources: harvests.map((harvest) => ({ city: harvest.city, rows: harvest.sources.sales.rows })),
+      cityTemporalSources: harvests.map((harvest) => ({ city: harvest.city, sources: harvest.sources })),
     },
   );
 }

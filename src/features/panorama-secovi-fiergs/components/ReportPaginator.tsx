@@ -1,10 +1,9 @@
-import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Component, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle } from 'lucide-react';
 import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
-import { synchronizeOfficialCoverCity } from '../lib/official-cover';
 import { PANORAMA_REPORT_MANIFEST, PANORAMA_SECTIONS, type ReportPageDefinition } from '../report/manifest';
 import { panoramaExportIsRunning, usePanoramaExportStore } from '../export-store';
 import { AreaIvvSlide, CohortMatrixSlide, CohortTableSlide, LocationSlide, MarketSummarySlide, MaturitySlide, NarrativeSlide, OfferChartSlide, OfferTableSlide, PriceChartSlide, PriceTableSlide, VgvSlide } from './MarketSlides';
@@ -12,12 +11,8 @@ import coverImage from '../assets/secovi-cover.jpg';
 import footerImage from '../assets/secovi-footer.jpeg';
 import '../print/panorama-print.css';
 
-const officialSlides = import.meta.glob('../assets/official/*.png', { eager: true, import: 'default' }) as Record<string, string>;
-
-for (const page of [1, 2, 4]) {
-  officialSlides[`../assets/official/panorama-${String(page).padStart(2, '0')}.png`] =
-    officialSlides[`../assets/official/panorama-${String(page).padStart(2, '0')}-neutral.png`];
-}
+const officialV2Assets = import.meta.glob('../assets/official_v2/*.png', { eager: true, import: 'default' }) as Record<string, string>;
+const officialV2 = (name: string) => officialV2Assets[`../assets/official_v2/${name}`];
 
 
 const n = (v: number) => v.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
@@ -25,7 +20,7 @@ const decimal = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits
 const pct = (v: number | null) => v === null ? '—' : `${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 const year = (q: string) => q.slice(2);
 function Footer() { return <footer className="panorama-page-footer panorama-official-footer" style={{ backgroundImage: `url(${footerImage})` }}><span>FONTE: BRAIN | ELABORAÇÃO: BRAIN</span></footer>; }
-function Sheet({ def, children }: { def: ReportPageDefinition; report: PanoramaReportModel; children: React.ReactNode }) { const hasBakedFooter = def.referenceSlide !== 2 && Boolean(officialSlides[`../assets/official/panorama-${String(def.referenceSlide).padStart(2, '0')}.png`]); return <section className={`panorama-report-page panorama-official-page ${hasBakedFooter ? 'panorama-baked-page' : ''}`} aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div>{!hasBakedFooter && <Footer/>}</section>; }
+function Sheet({ def, children }: { def: ReportPageDefinition; report: PanoramaReportModel; children: React.ReactNode }) { return <section className="panorama-report-page panorama-official-page panorama-v2-page" aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div><Footer/></section>; }
 class ReportPageBoundary extends Component<{ page: number; fallback: ReactNode; children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
   static getDerivedStateFromError(error: Error) { return { error }; }
@@ -39,6 +34,27 @@ function Corporate({ page, report }: { page: number; report: PanoramaReportModel
   if (page === 7) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><p>O Secovi-SP faz história desde 1946 e cumpre seu compromisso com o Estado de São Paulo por meio do desenvolvimento do setor urbano ao lado de parceiros públicos, corporativos e da grande mídia.</p><p>Seu trabalho representa empresas, viabiliza negócios, incentiva inovação e contribui para a oferta de habitação e o desenvolvimento das cidades.</p><p>O Sindicato mantém diálogo permanente com autoridades e associados, criando propostas e serviços que favorecem a urbanização, a geração de empregos e a segurança nas relações imobiliárias.</p></div>;
   if (page === 8) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><h3>Política da Qualidade:</h3><p>Fornecer aos seus associados e categorias representadas, com máxima presteza, confiabilidade e alto padrão de qualidade, informações e subsídios pertinentes ao exercício de suas atividades.</p><p>Defender ativamente os interesses dos associados dentro de padrões éticos e segundo os interesses coletivos; valorizar o crescimento gerencial e profissional da entidade; promover o espírito de equipe e a eficácia do sistema da qualidade.</p></div>;
   return <div className="panorama-corporate"><h2>Objetivos</h2><i/><p>✓ Analisar a evolução dos principais indicadores do mercado imobiliário local:</p><ol><li>Lançamentos;</li><li>Oferta;</li><li>Vendas;</li><li>Estoque; e</li><li>Evolução de preços.</li></ol><p>✓ Apresentar a evolução analítica do posicionamento das incorporadoras em <strong>{city}</strong>.</p></div>;
+}
+function V2Divider({ title }: { title: string }) { return <div className="panorama-v2-divider"><span className="panorama-v2-brand">SECOVI SP</span><h2>{title}</h2></div>; }
+function CityCover({ report }: { report: PanoramaReportModel }) {
+  const cities = report.scope.cities.filter(Boolean);
+  return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DA</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div><span className="panorama-v2-cover-brand">SECOVI SP</span></div>;
+}
+function V2Summary({ report }: { report: PanoramaReportModel }) {
+  return <div className="panorama-v2-summary"><span className="panorama-v2-brand">SECOVI SP</span><h2>Sumário</h2><i/><ol>{PANORAMA_SECTIONS.map((section) => <li key={section.id}><span>{section.label}</span><b>{section.start}–{section.end}</b></li>)}</ol>{report.cityComparisons.enabled && <p className="panorama-v2-summary-note">O recorte multicidades habilita comparativos entre municípios ao final da análise geral.</p>}</div>;
+}
+type PresentationPerson = NonNullable<PanoramaReportModel['presentation']['consultant']>;
+function PersonSlot({ person, label }: { person?: PresentationPerson; label: string }) {
+  return <div className={`panorama-v2-person-slot ${person?.photoUrl ? 'is-filled' : ''}`}>{person?.photoUrl ? <img src={person.photoUrl} alt={person.name ?? label}/> : <span className="panorama-v2-person-placeholder">{label}</span>}{(person?.name || person?.role || person?.email) && <div><strong>{person.name}</strong><small>{person.role}</small>{person.email && <small>{person.email}</small>}</div>}</div>;
+}
+function ConsultantClosing({ report }: { report: PanoramaReportModel }) {
+  const consultant = report.presentation.consultant;
+  return <div className="panorama-v2-consultant"><span className="panorama-v2-brand">SECOVI SP</span><PersonSlot person={consultant} label="FOTO DO CONSULTOR"/><div className="panorama-v2-consultant-copy"><h2>Obrigado pela atenção</h2>{consultant?.name ? <><strong>{consultant.name}</strong><span>{consultant.role}</span>{consultant.email && <small>{consultant.email}</small>}</> : <p>Espaço reservado para a finalização do consultor responsável.</p>}</div></div>;
+}
+const fixedTeam = [{ name: 'Fábio Tadeu Araújo', role: 'CEO', photo: 'team-fabio.png' }, { name: 'Marcos Kahtalian', role: 'Sócio-Fundador', photo: 'team-marcos.png' }, { name: 'Teresa Cristina', role: 'Sócia e Gestora de Projetos', photo: 'team-teresa.png' }];
+function TeamSlide({ report }: { report: PanoramaReportModel }) {
+  const analysts = report.presentation.analysts ?? [];
+  return <div className="panorama-v2-team"><span className="panorama-v2-brand">SECOVI SP</span><div className="panorama-v2-team-grid">{fixedTeam.map((member) => <div className="panorama-v2-team-member" key={member.name}><img src={officialV2(member.photo)} alt={member.name}/><strong>{member.name}</strong><small>{member.role}</small></div>)}{[0, 1, 2].map((index) => <PersonSlot key={index} person={analysts[index]} label={index === 0 ? 'CONSULTOR' : 'ANALISTA'}/>)}</div><h2>Equipe técnica</h2></div>;
 }
 type TrendConfig = { title: string; data: LaunchSeries[]; unit: 'count' | 'mi' | 'sqm'; pattern?: boolean; single?: boolean; metric: string; nouns: [string, string]; colors: [string, string] };
 function launchPatternSeries(source: { quarter: string; economic: number | null; other: number | null }[]): LaunchSeries[] { return source.map((item) => ({ quarter: item.quarter as never, vertical: item.economic ?? 0, horizontal: item.other ?? 0, total: (item.economic ?? 0) + (item.other ?? 0) })); }
@@ -192,7 +208,13 @@ function dataPage(page: number, report: PanoramaReportModel) {
 }
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
-  const official = officialSlides[`../assets/official/panorama-${String(p).padStart(2, '0')}.png`];
+  if (p === 2) return <CityCover report={report}/>;
+  if (p === 5) return <V2Summary report={report}/>;
+  if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <V2Divider title={title}/>;
+  if (p === 58) return <TeamSlide report={report}/>;
+  if (p === 59) return <ConsultantClosing report={report}/>;
+  // A V2 não usa lâminas legadas com textos/cidades congelados. `official/` permanece apenas como fallback histórico.
+  const official: string | undefined = undefined;
   if (p === 2) return <div className="panorama-cover panorama-city-cover" style={{ backgroundImage: `url(${coverImage})` }}><div className="panorama-city-cover-content"><p>Panorama imobiliário</p><h1>{cityLabel}</h1><i/><h2>{quarterLabel(report.scope.endQuarter)}</h2></div></div>;
   if (official) return <img className="panorama-static-slide" src={official} alt={`Slide oficial ${p} do Panorama`}/>;
   if (p === 1 || p === 4) return <div className="panorama-cover" style={{ backgroundImage: `linear-gradient(90deg, rgba(100,0,0,.15), rgba(100,0,0,.2)), url(${coverImage})` }}><div><p>Pesquisa de mercado</p><h1>Panorama imobiliário</h1><h2>{quarterLabel(report.scope.endQuarter)} · {report.scope.endQuarter.slice(2)}</h2></div></div>;
@@ -233,7 +255,6 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
   const pages = useMemo(() => PANORAMA_REPORT_MANIFEST, []); const page = pages[current];
-  useEffect(() => { synchronizeOfficialCoverCity(scopeCityLabel(report.scope), report.scope.uf, report.scope.endQuarter); }, [report.scope.cities, report.scope.uf, report.scope.endQuarter]);
   const jump = (number: number) => {
     setCurrent(Math.max(0, pages.findIndex((item) => item.page === number)));
     if (view === 'all') allPagesRef.current?.querySelector(`[aria-label^="Página ${number}:"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });

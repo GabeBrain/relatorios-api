@@ -57,6 +57,27 @@ describe('Panorama Secovi/FIERGS — modelo editorial por grupo', () => {
   });
 });
 
+describe('Panorama Secovi/FIERGS — comparativos municipais V2', () => {
+  const empty = source([]);
+  const allEmpty = { sales: empty, salesTypology: empty, stock: empty, stockTypology: empty, ivv: empty, ivvTypology: empty, ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty };
+
+  it('habilita comparativo apenas com cobertura completa e calcula disponibilidade por cidade', () => {
+    const multiScope: PanoramaScope = { uf: 'SP', cities: ['Jundiaí', 'Piracicaba'], endQuarter: '1T2026' };
+    const jundiai = buildCityCube([sampleBuilding], { city: 'Jundiaí', uf: 'SP', endQuarter: '1T2026' });
+    const piracicaba = buildCityCube([{ ...sampleBuilding, total_units: 200, typologies_history: [{ period: '2025-02-01', typology: '2 dorm', qty: 200, release_price: 400000 }, { period: '2026-03-01', typology: '2 dorm', typology_stock: 100, liquid_sales: 100, price: 420000, private_area: 50 }] }], { city: 'Piracicaba', uf: 'SP', endQuarter: '1T2026' });
+    const model = buildPanoramaReportModel(multiScope, [], allEmpty, [], { cubes: [jundiai, piracicaba], provenance: { requestedCities: multiScope.cities, completedCities: multiScope.cities, failedCities: [] }, citySalesSources: [{ city: 'Jundiaí', rows: [{ period: '2026-03-01', liquid_sales: 70 }] }, { city: 'Piracicaba', rows: [{ period: '2026-03-01', liquid_sales: 100 }] }] });
+    expect(model.cityComparisons.enabled).toBe(true);
+    expect(model.cityComparisons.sales).toEqual([{ city: 'Jundiaí', liquidSales: 70 }, { city: 'Piracicaba', liquidSales: 100 }]);
+    expect(model.cityComparisons.market.map((row) => row.availability)).toEqual([30, 50]);
+  });
+
+  it('suprime o comparativo em coleta parcial', () => {
+    const model = buildPanoramaReportModel({ uf: 'SP', cities: ['Jundiaí', 'Piracicaba'], endQuarter: '1T2026' }, [], allEmpty, [], { cubes: [buildCityCube([sampleBuilding], { city: 'Jundiaí', uf: 'SP', endQuarter: '1T2026' })], provenance: { requestedCities: ['Jundiaí', 'Piracicaba'], completedCities: ['Jundiaí'], failedCities: [{ city: 'Piracicaba', error: 'HTTP 500' }] } });
+    expect(model.cityComparisons.enabled).toBe(false);
+    expect(model.cityComparisons.sales).toEqual([]);
+  });
+});
+
 describe('Panorama Secovi/FIERGS — consolidado multi-cidade e proveniência (G-01)', () => {
   const empty = source([]);
   const allEmpty = {

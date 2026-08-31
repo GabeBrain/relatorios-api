@@ -128,6 +128,34 @@ export interface ReportMarketBlock {
   formula: string;
 }
 export interface MarketCohortRow { segment: Segment; releaseYear: string; standard: string; stock: number; }
+/** Comparativos liberados apenas quando todas as cidades do recorte foram concluídas. */
+export interface CityComparisonSalesRow { city: string; liquidSales: number | null; }
+export interface CityComparisonMarketRow {
+  city: string;
+  projects: number;
+  launchedUnits: number | null;
+  finalUnits: number | null;
+  availability: number | null;
+}
+export interface CityComparisonAvailabilityRow { standard: string; values: { city: string; availability: number | null }[]; }
+export interface PanoramaCityComparisons {
+  enabled: boolean;
+  /** Explica por que o comparativo não entrou no PDF, sem mascarar um consolidado parcial. */
+  suppressionReason?: string;
+  sales: CityComparisonSalesRow[];
+  market: CityComparisonMarketRow[];
+  availabilityByStandard: CityComparisonAvailabilityRow[];
+}
+
+/**
+ * Créditos de apresentação. A V2 preserva a identidade fixa e recebe pessoas variáveis como
+ * slots opcionais — a ausência é intencional para finalização do analista, nunca um nome errado.
+ */
+export interface PresentationPerson { name?: string; role?: string; email?: string; photoUrl?: string; }
+export interface PanoramaPresentationCredits {
+  consultant?: PresentationPerson;
+  analysts?: PresentationPerson[];
+}
 export interface PanoramaReportModel {
   scope: PanoramaScope;
   generatedAt: string;
@@ -148,6 +176,8 @@ export interface PanoramaReportModel {
   cube: MarketCube;
   /** Linhas prontas para os slides 31–51, já canonizadas, ordenadas e reconciliadas. */
   granular: PanoramaGranularBlocks;
+  cityComparisons: PanoramaCityComparisons;
+  presentation: PanoramaPresentationCredits;
 }
 
 /**

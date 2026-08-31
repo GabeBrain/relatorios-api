@@ -4,6 +4,8 @@ export function quarterKey(quarter: Quarter): number { return Number(quarter.sli
 export function quarterLabel(quarter: Quarter): string { return `${quarter.slice(0, 2)} ${quarter.slice(2)}`; }
 export function periodToQuarter(value: unknown): Quarter | null {
   const raw = String(value ?? '').trim();
+  const explicitQuarter = /^([1-4])\s*(?:º|o)?\s*T\s*\/?\s*(20\d{2})$/i.exec(raw);
+  if (explicitQuarter) return `${explicitQuarter[1]}T${explicitQuarter[2]}` as Quarter;
   const iso = /^(\d{4})-(\d{1,2})/.exec(raw);
   const brazil = /^(\d{1,2})\/(\d{4})$/.exec(raw);
   const year = Number(iso?.[1] ?? brazil?.[2]); const month = Number(iso?.[2] ?? brazil?.[1]);

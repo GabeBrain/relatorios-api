@@ -1,5 +1,5 @@
 import { buildLaunchModel, periodToQuarter, safeNumber } from '../lib/launches';
-import type { LaunchRecord, MarketCohortRow, MethodStatus, PanoramaGranularBlocks, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
+import type { LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
 import { editorialWindow, quarterRange } from '../domain/quarters';
 import { mergeCubes, type MarketCube } from '../domain/cube';
 import {
@@ -16,10 +16,13 @@ import {
   vgvSummary,
 } from '../domain/aggregations';
 import { STANDARD_ORDER, TYPOLOGY_ORDER, normalizeText } from '../domain/taxonomy';
+import { normalizeCityTemporalRows, type TemporalMetricKind } from '../domain/temporal-normalization';
 
 type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string };
-type AggregateMode = 'sum' | 'average';
-type Accumulator = { sum: number; count: number };
+type TemporalKey = 'sales' | 'salesTypology' | 'stock' | 'stockTypology' | 'ivv' | 'ivvTypology' | 'ticket' | 'ticketTypology' | 'meter' | 'meterTypology';
+type CityTemporalSources = { city: string; sources: Record<TemporalKey, SourceResult> };
+type AggregateMode = 'sum' | 'average' | 'weighted_average';
+type Accumulator = { sum: number; count: number; weight: number };
 
 function semanticGroupOrder(a: string, b: string): number {
   const numberOf = (value: string) => Number((value.match(/\d+/) ?? [])[0]);
@@ -57,24 +60,28 @@ function canonical(scope: PanoramaScope): Quarter[] {
   return scope.startQuarter ? quarterRange(scope.startQuarter, scope.endQuarter) : editorialWindow(scope.endQuarter);
 }
 
-function add(target: Map<string, Accumulator>, key: string, value: number) {
-  const current = target.get(key) ?? { sum: 0, count: 0 };
-  current.sum += value;
+function add(target: Map<string, Accumulator>, key: string, value: number, mode: AggregateMode, weight?: number | null) {
+  const current = target.get(key) ?? { sum: 0, count: 0, weight: 0 };
+  const validWeight = typeof weight === 'number' && Number.isFinite(weight) && weight > 0 ? weight : null;
+  current.sum += mode === 'weighted_average' && validWeight !== null ? value * validWeight : value;
   current.count += 1;
+  if (mode === 'weighted_average' && validWeight !== null) current.weight += validWeight;
   target.set(key, current);
 }
 
 function result(target: Map<string, Accumulator>, key: string, mode: AggregateMode) {
   const value = target.get(key);
   if (!value) return 0;
-  return mode === 'average' ? value.sum / Math.max(value.count, 1) : value.sum;
+  if (mode === 'average') return value.sum / Math.max(value.count, 1);
+  // Sem estoque correspondente, preserva o dado retornado com mÃ©dia simples em vez de fabricar peso zero.
+  return mode === 'weighted_average' ? value.sum / (value.weight || Math.max(value.count, 1)) : value.sum;
 }
 
 function reportSeries(periods: Quarter[], target: Map<string, Accumulator>, mode: AggregateMode, status: ReportMarketBlock['dataStatus'], source: string): ReportSeries[] {
   return periods.map((quarter) => {
     const vertical = result(target, `${quarter}:Vertical`, mode);
     const horizontal = result(target, `${quarter}:Horizontal`, mode);
-    const total = mode === 'average' ? result(target, `${quarter}:Total`, mode) : vertical + horizontal;
+    const total = mode === 'average' || mode === 'weighted_average' ? result(target, `${quarter}:Total`, mode) : vertical + horizontal;
     return { quarter, vertical, horizontal, total, methodStatus: 'open_method' as MethodStatus, dataStatus: status, source };
   });
 }
@@ -90,11 +97,12 @@ function marketBlock(scope: PanoramaScope, source: SourceResult, field: string, 
     const parsed = safeNumber(row[field]);
     if (parsed === null) continue;
     const label = String(row.group ?? row.pattern ?? row.standard ?? row.typology ?? row.typology_name ?? 'Total').trim() || 'Total';
-    add(values, `${quarter}:${type}`, parsed);
-    add(values, `${quarter}:Total`, parsed);
+    const weight = safeNumber(row.temporal_weight);
+    add(values, `${quarter}:${type}`, parsed, mode, weight);
+    add(values, `${quarter}:Total`, parsed, mode, weight);
     const group = grouped.get(label) ?? new Map<string, Accumulator>();
-    add(group, `${quarter}:${type}`, parsed);
-    add(group, `${quarter}:Total`, parsed);
+    add(group, `${quarter}:${type}`, parsed, mode, weight);
+    add(group, `${quarter}:Total`, parsed, mode, weight);
     grouped.set(label, group);
   }
   const status: ReportDataState = source.available ? (source.rows.length ? 'ready' : 'partial') : 'unavailable';
@@ -104,6 +112,33 @@ function marketBlock(scope: PanoramaScope, source: SourceResult, field: string, 
     return { label, vertical: current.vertical, horizontal: current.horizontal, total: current.total };
   });
   return { series: reportSeries(periods, values, mode, status, source.source), byGroup, groupSeries, unit, methodStatus: 'open_method', dataStatus: status, source: source.source, formula };
+}
+
+function temporalDimension(row: Record<string, unknown>) {
+  const city = normalizeText(String(row.city ?? ''));
+  const period = periodToQuarter(row.period) ?? '';
+  const group = normalizeText(String(row.group ?? row.pattern ?? row.standard ?? row.typology ?? row.typology_name ?? ''));
+  const type = normalizeText(String(row.building_type ?? row.type ?? ''));
+  return `${city}\u0000${period}\u0000${group}\u0000${type}`;
+}
+
+/**
+ * IVV e preÃ§os sÃ£o taxas/mÃ©dias municipais. No agregado, o peso aberto Ã© o estoque de unidades
+ * no mesmo fechamento, cidade, segmento e recorte (padrÃ£o ou tipologia). Nunca usamos VGV como
+ * peso, para nÃ£o transformar o indicador de mercado em indicador de valor financeiro.
+ */
+function withClosingStockWeight(metric: SourceResult, stock: SourceResult): SourceResult {
+  const weights = new Map<string, number>();
+  for (const row of stock.rows) {
+    const weight = safeNumber(row.stock);
+    if (weight === null || weight <= 0) continue;
+    const key = temporalDimension(row);
+    weights.set(key, (weights.get(key) ?? 0) + weight);
+  }
+  return {
+    ...metric,
+    rows: metric.rows.map((row) => ({ ...row, temporal_weight: weights.get(temporalDimension(row)) ?? null })),
+  };
 }
 
 function cohortBlock(scope: PanoramaScope, rows: MarketCohortRow[]): ReportMarketBlock {
@@ -170,6 +205,70 @@ function provenanceOf(scope: PanoramaScope, cube: MarketCube, partial?: Partial<
   };
 }
 
+function normalizeTemporalSource(scope: PanoramaScope, harvests: CityTemporalSources[] | undefined, key: TemporalKey, metric: TemporalMetricKind, fallback: SourceResult): SourceResult {
+  if (!harvests?.length) return fallback;
+  const sourceRows = harvests.flatMap((harvest) => normalizeCityTemporalRows(harvest.city, harvest.sources[key].rows, metric, metric === 'snapshot' ? canonical(scope) : undefined));
+  const available = harvests.some((harvest) => harvest.sources[key].available);
+  return {
+    rows: sourceRows,
+    available,
+    source: `${fallback.source} · normalizado por município (${metric === 'flow' ? 'fluxo' : 'fechamento'})`,
+  };
+}
+
+type CitySalesSource = { city: string; rows: Record<string, unknown>[] };
+
+function nullableSum(values: (number | null)[]): number | null {
+  return values.reduce<number | null>((sum, value) => value === null ? sum : (sum ?? 0) + value, null);
+}
+
+function availability(launched: number | null, final: number | null): number | null {
+  return launched === null || final === null || launched === 0 ? null : final / launched * 100;
+}
+
+/**
+ * Comparação municipal baseada nos mesmos numeradores do consolidado. Não há média de percentuais:
+ * disponibilidade é sempre oferta final ÷ oferta lançada dentro de cada município/padrão.
+ */
+function buildCityComparisons(scope: PanoramaScope, cube: MarketCube, provenance: PanoramaProvenance, salesSources: CitySalesSource[]): PanoramaCityComparisons {
+  const selected = scope.cities.filter(Boolean);
+  const completed = new Set(provenance.completedCities);
+  const completeScope = selected.length >= 2 && provenance.failedCities.length === 0 && selected.every((city) => completed.has(city));
+  if (!completeScope) {
+    return {
+      enabled: false,
+      suppressionReason: selected.length < 2 ? 'O comparativo é exibido somente para recortes com duas ou mais cidades.' : 'O comparativo foi suprimido porque nem todas as cidades do recorte concluíram a coleta.',
+      sales: [], market: [], availabilityByStandard: [],
+    };
+  }
+
+  const sales = selected.map((city) => {
+    const source = salesSources.find((item) => item.city === city);
+    const values = normalizeCityTemporalRows(city, source?.rows ?? [], 'flow')
+      .filter((row) => periodToQuarter(row.period) === scope.endQuarter)
+      .map((row) => safeNumber(row.liquid_sales));
+    return { city, liquidSales: nullableSum(values) };
+  });
+  const market = selected.map((city) => {
+    const projects = cube.projects.filter((project) => project.city === city);
+    const launchedUnits = nullableSum(projects.map((project) => project.launchedUnits));
+    const finalUnits = nullableSum(projects.map((project) => project.finalUnits));
+    return { city, projects: new Set(projects.map((project) => project.key)).size, launchedUnits, finalUnits, availability: availability(launchedUnits, finalUnits) };
+  });
+  const standards = [...new Set(cube.projects.filter((project) => project.segment === 'Vertical').map((project) => project.standard))]
+    .sort((a, b) => semanticGroupOrder(a, b));
+  const availabilityByStandard = standards.map((standard) => ({
+    standard,
+    values: selected.map((city) => {
+      const projects = cube.projects.filter((project) => project.city === city && project.segment === 'Vertical' && project.standard === standard);
+      const launchedUnits = nullableSum(projects.map((project) => project.launchedUnits));
+      const finalUnits = nullableSum(projects.map((project) => project.finalUnits));
+      return { city, availability: availability(launchedUnits, finalUnits) };
+    }),
+  }));
+  return { enabled: true, sales, market, availabilityByStandard };
+}
+
 export function buildPanoramaReportModel(
   scope: PanoramaScope,
   records: LaunchRecord[],
@@ -179,7 +278,7 @@ export function buildPanoramaReportModel(
     meter: SourceResult; meterTypology: SourceResult;
   },
   cohorts: MarketCohortRow[] = [],
-  options: { cubes?: MarketCube[]; provenance?: Partial<PanoramaProvenance> } = {},
+  options: { cubes?: MarketCube[]; provenance?: Partial<PanoramaProvenance>; citySalesSources?: CitySalesSource[]; cityTemporalSources?: CityTemporalSources[]; presentation?: PanoramaPresentationCredits } = {},
 ): PanoramaReportModel {
   const launches = buildLaunchModel(records, canonical(scope));
   const cube = options.cubes?.length
@@ -188,27 +287,40 @@ export function buildPanoramaReportModel(
   const provenance = provenanceOf(scope, cube, options.provenance);
   const failedCities = provenance.failedCities.length > 0;
   const granular = buildGranularBlocks(cube);
+  const cityComparisons = buildCityComparisons(scope, cube, provenance, options.citySalesSources ?? []);
+  const temporal = {
+    sales: normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales),
+    salesTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'salesTypology', 'flow', sources.salesTypology),
+    stock: normalizeTemporalSource(scope, options.cityTemporalSources, 'stock', 'snapshot', sources.stock),
+    stockTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'stockTypology', 'snapshot', sources.stockTypology),
+    ivv: normalizeTemporalSource(scope, options.cityTemporalSources, 'ivv', 'snapshot', sources.ivv),
+    ivvTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'ivvTypology', 'snapshot', sources.ivvTypology),
+    ticket: normalizeTemporalSource(scope, options.cityTemporalSources, 'ticket', 'snapshot', sources.ticket),
+    ticketTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'ticketTypology', 'snapshot', sources.ticketTypology),
+    meter: normalizeTemporalSource(scope, options.cityTemporalSources, 'meter', 'snapshot', sources.meter),
+    meterTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'meterTypology', 'snapshot', sources.meterTypology),
+  };
   return {
     scope, generatedAt: new Date().toISOString(), launches,
     sales: {
-      units: marketBlock(scope, sources.sales, 'liquid_sales', 'count', 'Soma de vendas líquidas por período, segmento e padrão.'),
-      vgv: marketBlock(scope, sources.sales, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido da API.'),
-      unitsByTypology: marketBlock(scope, sources.salesTypology, 'liquid_sales', 'count', 'Soma de vendas líquidas por período e tipologia.'),
-      vgvByTypology: marketBlock(scope, sources.salesTypology, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido por tipologia.'),
+      units: marketBlock(scope, temporal.sales, 'liquid_sales', 'count', 'Soma de vendas líquidas por período, segmento e padrão.'),
+      vgv: marketBlock(scope, temporal.sales, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido da API.'),
+      unitsByTypology: marketBlock(scope, temporal.salesTypology, 'liquid_sales', 'count', 'Soma de vendas líquidas por período e tipologia.'),
+      vgvByTypology: marketBlock(scope, temporal.salesTypology, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido por tipologia.'),
     },
     stock: {
-      units: marketBlock(scope, sources.stock, 'stock', 'count', 'Estoque no fechamento por segmento e padrão.'),
-      vgv: marketBlock(scope, sources.stock, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por padrão.'),
-      unitsByTypology: marketBlock(scope, sources.stockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia.'),
-      vgvByTypology: marketBlock(scope, sources.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.'),
+      units: marketBlock(scope, temporal.stock, 'stock', 'count', 'Estoque no fechamento por segmento e padrão.'),
+      vgv: marketBlock(scope, temporal.stock, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por padrão.'),
+      unitsByTypology: marketBlock(scope, temporal.stockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia.'),
+      vgvByTypology: marketBlock(scope, temporal.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.'),
     },
-    ivv: marketBlock(scope, sources.ivv, 'ivv', 'percent', 'IVV médio retornado por padrão e segmento.', 'average'),
-    ivvByTypology: marketBlock(scope, sources.ivvTypology, 'ivv', 'percent', 'IVV médio retornado por tipologia.', 'average'),
+    ivv: marketBlock(scope, withClosingStockWeight(temporal.ivv, temporal.stock), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average'),
+    ivvByTypology: marketBlock(scope, withClosingStockWeight(temporal.ivvTypology, temporal.stockTypology), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average'),
     prices: {
-      ticket: marketBlock(scope, sources.ticket, 'average_price', 'brl_millions', 'Preço médio retornado pela API.', 'average'),
-      meter: marketBlock(scope, sources.meter, 'average_price_per_meter', 'brl_sqm', 'Preço médio por m² retornado pela API.', 'average'),
-      ticketByTypology: marketBlock(scope, sources.ticketTypology, 'average_price', 'brl_millions', 'Preço médio por tipologia retornado pela API.', 'average'),
-      meterByTypology: marketBlock(scope, sources.meterTypology, 'average_price_per_meter', 'brl_sqm', 'Preço médio por m² e tipologia retornado pela API.', 'average'),
+      ticket: marketBlock(scope, withClosingStockWeight(temporal.ticket, temporal.stock), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average'),
+      meter: marketBlock(scope, withClosingStockWeight(temporal.meter, temporal.stock), 'average_price_per_meter', 'brl_sqm', 'Média ponderada do preço por m² municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average'),
+      ticketByTypology: marketBlock(scope, withClosingStockWeight(temporal.ticketTypology, temporal.stockTypology), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average'),
+      meterByTypology: marketBlock(scope, withClosingStockWeight(temporal.meterTypology, temporal.stockTypology), 'average_price_per_meter', 'brl_sqm', 'Média ponderada do preço por m² municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average'),
     },
     market: {
       cohorts: cohortBlock(scope, cohorts),
@@ -239,5 +351,7 @@ export function buildPanoramaReportModel(
     provenance,
     cube,
     granular,
+    cityComparisons,
+    presentation: options.presentation ?? {},
   };
 }
