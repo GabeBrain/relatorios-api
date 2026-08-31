@@ -142,7 +142,7 @@ export default function ValidacaoFechamento() {
             <button type="button" className="vf-tab" data-active={tab === 'resumo'} onClick={() => setTab('resumo')}>Resumo</button>
             <button type="button" className="vf-tab" data-active={tab === 'resumo-cidade'} onClick={() => setTab('resumo-cidade')}>Resumo por cidade</button>
             <button type="button" className="vf-tab" data-active={tab === 'detalhamento'} onClick={() => setTab('detalhamento')}>Detalhamento</button>
-            <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências Encontradas ({divergences.length})</button>
+            <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências ({divergences.length})</button>
           </div>
         </div>
 
