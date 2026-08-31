@@ -249,12 +249,12 @@ function buildCityComparisons(scope: PanoramaScope, cube: MarketCube, provenance
       .map((row) => safeNumber(row.liquid_sales));
     return { city, liquidSales: nullableSum(values) };
   });
-  const market = selected.map((city) => {
-    const projects = cube.projects.filter((project) => project.city === city);
+  const market = selected.flatMap((city) => (['Vertical', 'Horizontal'] as const).map((segment) => {
+    const projects = cube.projects.filter((project) => project.city === city && project.segment === segment);
     const launchedUnits = nullableSum(projects.map((project) => project.launchedUnits));
     const finalUnits = nullableSum(projects.map((project) => project.finalUnits));
-    return { city, projects: new Set(projects.map((project) => project.key)).size, launchedUnits, finalUnits, availability: availability(launchedUnits, finalUnits) };
-  });
+    return { city, segment, projects: new Set(projects.map((project) => project.key)).size, launchedUnits, finalUnits, availability: availability(launchedUnits, finalUnits) };
+  }));
   const standards = [...new Set(cube.projects.filter((project) => project.segment === 'Vertical').map((project) => project.standard))]
     .sort((a, b) => semanticGroupOrder(a, b));
   const availabilityByStandard = standards.map((standard) => ({

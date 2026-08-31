@@ -132,6 +132,8 @@ export interface MarketCohortRow { segment: Segment; releaseYear: string; standa
 export interface CityComparisonSalesRow { city: string; liquidSales: number | null; }
 export interface CityComparisonMarketRow {
   city: string;
+  /** Vertical ou o único horizontal permitido pela política Secovi: Condomínio de Casas. */
+  segment: Segment;
   projects: number;
   launchedUnits: number | null;
   finalUnits: number | null;

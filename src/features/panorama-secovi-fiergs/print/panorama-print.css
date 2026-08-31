@@ -91,7 +91,7 @@
 .panorama-v2-team { padding:5.8cqw 15cqw 4.2cqw; }.panorama-v2-team-grid { position:relative; z-index:1; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(2,auto); column-gap:5.2cqw; row-gap:3.2cqw; align-items:start; }.panorama-v2-team-member { display:flex; min-width:0; flex-direction:column; align-items:center; text-align:center; }.panorama-v2-team-member img { width:12cqw; height:12cqw; border:2px solid #fff; border-radius:50%; object-fit:cover; }.panorama-v2-team-member strong { margin-top:.7cqw; font-size:1.15cqw; }.panorama-v2-team-member small { margin-top:.25cqw; color:#dbe2e9; font-size:.82cqw; line-height:1.1; }.panorama-v2-team .panorama-v2-person-slot { min-height:12cqw; border-radius:0; }.panorama-v2-team .panorama-v2-person-slot.is-quiet:not(.is-filled) { border:0; background:transparent; }.panorama-v2-team .panorama-v2-person-slot img { min-height:12cqw; }.panorama-v2-team h2 { position:relative; z-index:1; margin:2.5cqw 0 0; font-size:2.2cqw; text-align:center; }
 
 /* V2 final: as superfícies vêm diretamente do PPT. O HTML só posiciona conteúdo variável. */
-.panorama-v2-page { background-color:#fff; }
+.panorama-v2-page { background-color:#fff; background-position:center center; background-size:100% 100%; }
 .panorama-v2-page .panorama-page-content { padding:1.35cqw 1.8cqw 2.2cqw; }
 .panorama-v2-page .panorama-v2-city-cover,.panorama-v2-page .panorama-v2-divider,.panorama-v2-page .panorama-v2-summary,.panorama-v2-page .panorama-v2-consultant,.panorama-v2-page .panorama-v2-team { background:transparent; }
 .panorama-v2-page .panorama-v2-city-cover::after,.panorama-v2-page .panorama-v2-summary::before,.panorama-v2-page .panorama-v2-divider::before,.panorama-v2-page .panorama-v2-divider::after,.panorama-v2-page .panorama-v2-consultant::before,.panorama-v2-page .panorama-v2-consultant::after,.panorama-v2-page .panorama-v2-team::before,.panorama-v2-page .panorama-v2-team::after { display:none; }
@@ -100,3 +100,8 @@
 .panorama-v2-city-cover-copy h1 { font-size:4.05cqw; }
 .panorama-v2-city-cover-copy strong { margin-top:4.1cqw; font-size:2.7cqw; }
 .panorama-v2-page .panorama-table-page>i,.panorama-v2-page .panorama-chart-head i,.panorama-v2-page .panorama-market-slide header>i,.panorama-v2-page .panorama-page-unavailable i { opacity:0; }
+.panorama-v2-page .panorama-corporate { padding:3.5cqw 4.5cqw 5.8cqw; font-size:clamp(.78rem,1.18vw,1.25rem); line-height:1.5; }
+.panorama-v2-page .panorama-corporate h2 { margin-bottom:2.3%; font-size:clamp(2rem,3.6vw,3.6rem); }
+.panorama-v2-page .panorama-corporate h3 { margin-top:1.8%; }
+.panorama-v2-page .panorama-city-comparison table { table-layout:fixed; font-size:.94cqw; }
+.panorama-v2-page .panorama-city-comparison th:first-child,.panorama-v2-page .panorama-city-comparison td:first-child { width:38%; text-align:left; }

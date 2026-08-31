@@ -11,7 +11,7 @@ slides comparativos imediatamente após o resumo de mercado (referência 29), so
 `cityComparisons.enabled` comprova que todas as cidades solicitadas foram concluídas:
 
 1. Unidades vendidas por cidade no trimestre de fechamento;
-2. Empreendimentos, oferta lançada/final e disponibilidade por cidade;
+2. Mercado por município e segmento (residencial vertical e Condomínio de Casas), com total geral de empreendimentos, oferta lançada/final e disponibilidade;
 3. Disponibilidade residencial vertical por padrão × cidade.
 
 O sumário, controles de paginação, leitura contínua e PDF usam o mesmo manifesto: são 57 páginas no

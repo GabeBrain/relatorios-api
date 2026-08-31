@@ -51,7 +51,7 @@ function Corporate({ page, report }: { page: number; report: PanoramaReportModel
 function V2Divider({ title }: { title: string }) { return <div className="panorama-v2-divider"><h2>{title}</h2></div>; }
 function CityCover({ report }: { report: PanoramaReportModel }) {
   const cities = report.scope.cities.filter(Boolean);
-  return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DA</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
+  return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DE</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
 function V2Summary({ report }: { report: PanoramaReportModel }) {
   const sections = createPanoramaSections(createPanoramaReportManifest(report.cityComparisons.enabled));
@@ -229,7 +229,12 @@ function dataPage(page: number, report: PanoramaReportModel) {
 }
 function CityComparisonPage({ kind, report }: { kind: NonNullable<ReportPageDefinition['cityComparison']>; report: PanoramaReportModel }) {
   if (kind === 'sales') return <div className="panorama-table-page panorama-city-comparison"><h2>UNIDADES VENDIDAS POR CIDADE <span>| {quarterLabel(report.scope.endQuarter)}</span></h2><table><thead><tr><th>Municípios</th><th>Vendas líquidas</th></tr></thead><tbody>{report.cityComparisons.sales.map((row) => <tr key={row.city}><td>{row.city}</td><td>{row.liquidSales === null ? '—' : n(row.liquidSales)}</td></tr>)}<tr className="panorama-total-row"><td>Total</td><td>{n(report.cityComparisons.sales.reduce((sum, row) => sum + (row.liquidSales ?? 0), 0))}</td></tr></tbody></table></div>;
-  if (kind === 'market') return <div className="panorama-table-page panorama-city-comparison"><h2>ANÁLISE GERAL DO MERCADO POR CIDADE</h2><table><thead><tr><th>Municípios</th><th>Empreend.</th><th>Oferta lançada</th><th>Oferta final</th><th>Disponibilidade s/ O.L.</th></tr></thead><tbody>{report.cityComparisons.market.map((row) => <tr key={row.city}><td>{row.city}</td><td>{n(row.projects)}</td><td>{row.launchedUnits === null ? '—' : n(row.launchedUnits)}</td><td>{row.finalUnits === null ? '—' : n(row.finalUnits)}</td><td>{pct(row.availability)}</td></tr>)}</tbody></table></div>;
+  if (kind === 'market') {
+    const rows = report.cityComparisons.market;
+    const launched = rows.reduce((sum, row) => sum + (row.launchedUnits ?? 0), 0);
+    const final = rows.reduce((sum, row) => sum + (row.finalUnits ?? 0), 0);
+    return <div className="panorama-table-page panorama-city-comparison"><h2>ANÁLISE GERAL DO MERCADO</h2><table><thead><tr><th>Tipo do imóvel</th><th>Empreend.</th><th>Oferta lançada</th><th>Oferta final</th><th>Disponibilidade s/ O.L.</th></tr></thead><tbody>{rows.map((row) => <tr key={`${row.city}-${row.segment}`}><td>Total Mercado Residencial {row.segment === 'Vertical' ? 'Vertical' : 'Horizontal'} — {row.city}</td><td>{n(row.projects)}</td><td>{row.launchedUnits === null ? '—' : n(row.launchedUnits)}</td><td>{row.finalUnits === null ? '—' : n(row.finalUnits)}</td><td>{pct(row.availability)}</td></tr>)}<tr className="panorama-total-row"><td>Total Mercado</td><td>{n(rows.reduce((sum, row) => sum + row.projects, 0))}</td><td>{n(launched)}</td><td>{n(final)}</td><td>{launched ? pct(final / launched * 100) : '—'}</td></tr></tbody></table></div>;
+  }
   return <div className="panorama-table-page panorama-city-comparison"><h2>DISPONIBILIDADE RESIDENCIAL VERTICAL POR PADRÃO</h2><table><thead><tr><th>Padrão</th>{report.cityComparisons.sales.map((row) => <th key={row.city}>{row.city}</th>)}</tr></thead><tbody>{report.cityComparisons.availabilityByStandard.map((row) => <tr key={row.standard}><td>{row.standard}</td>{report.cityComparisons.sales.map(({ city }) => <td key={city}>{pct(row.values.find((value) => value.city === city)?.availability ?? null)}</td>)}</tr>)}</tbody></table></div>;
 }
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {

@@ -61,6 +61,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-08-31 — Panorama V2: enquadramento integral e mercado municipal por segmento — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capa, institucional, encerramento e comparativos multicidade.
+- **O quê:** a capa passou a usar “Panorama imobiliário de”; os conteúdos institucionais ganharam área segura inferior para não cortar a lista de valores; e os fundos V2 passam a preencher o canvas 16:9 sem `cover`, preservando integralmente a arte do encerramento institucional. O comparativo de mercado deixou de somar cada cidade em uma linha: agora reproduz a referência com linhas distintas de residencial vertical e Condomínio de Casas por município, seguidas do total geral.
+- **Cobertura multicidade:** a referência Baixada possui três comparativos quantitativos por cidade: vendas líquidas, mercado por segmento e disponibilidade vertical por padrão. Os três estão no manifesto condicional; as demais páginas daquele bloco são consolidadas ou narrativas, não tabelas municipais adicionais.
+- **Verificação:** 58 testes direcionados e build de produção aprovados. O aceite visual autenticado em preview/PDF permanece pendente neste ambiente sem runner de navegador.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/{ReportPaginator.tsx,MarketSlides.tsx},print/panorama-print.css,report/model.ts,types.ts,__tests__/report-model.test.ts}`, `docs/features/Relatorios Secovi_FIERGS/MAPEAMENTO_V2_MULTICIDADES_2026-08-31.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** conteúdo e enquadramento seguem o deck de referência; falta somente a homologação visual e numérica autenticada no recorte real.
+
 ### 2026-08-31 — Panorama V2: encerramento único e comparativos condicionais — Gabriel + Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — manifesto, sumário, leitura contínua e exportação PDF.

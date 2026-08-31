@@ -88,7 +88,8 @@ describe('Panorama Secovi/FIERGS — comparativos municipais V2', () => {
     const model = buildPanoramaReportModel(multiScope, [], allEmpty, [], { cubes: [jundiai, piracicaba], provenance: { requestedCities: multiScope.cities, completedCities: multiScope.cities, failedCities: [] }, citySalesSources: [{ city: 'Jundiaí', rows: [{ period: '2026-03-01', liquid_sales: 70 }] }, { city: 'Piracicaba', rows: [{ period: '2026-03-01', liquid_sales: 100 }] }] });
     expect(model.cityComparisons.enabled).toBe(true);
     expect(model.cityComparisons.sales).toEqual([{ city: 'Jundiaí', liquidSales: 70 }, { city: 'Piracicaba', liquidSales: 100 }]);
-    expect(model.cityComparisons.market.map((row) => row.availability)).toEqual([30, 50]);
+    expect(model.cityComparisons.market.filter((row) => row.segment === 'Vertical').map((row) => row.availability)).toEqual([30, 50]);
+    expect(model.cityComparisons.market.filter((row) => row.segment === 'Horizontal').map((row) => row.projects)).toEqual([0, 0]);
   });
 
   it('suprime o comparativo em coleta parcial', () => {
