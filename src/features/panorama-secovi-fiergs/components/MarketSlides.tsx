@@ -113,7 +113,7 @@ export function PriceTableSlide({ report, dimension, horizontal = false }: { rep
   const noPriceMessage = horizontal
     ? eligibleHorizontal === 0
       ? `Não há Condomínio de Casas elegível neste recorte${rejectedHorizontal ? `; ${rejectedHorizontal} horizontal(is) foram excluído(s) pela regra Secovi.` : '.'}`
-      : 'Há Condomínio de Casas no recorte, mas a API não retornou preço, área ou R$/m² para esse universo.'
+      : 'Há Condomínios de Casas válidos no recorte, mas os campos granulares de preço, área e R$/m² não vieram no payload. A média temporal de “Horizontal” não é usada como substituta, pois mistura loteamentos e outros subtipos fora do universo Secovi.'
     : 'A API não retornou preço, área ou R$/m² para este recorte.';
   if (granularRows.length) {
     const rows = granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, ticket: row.averageTicket, area: row.averageArea, meter: row.averagePricePerMeter }));
