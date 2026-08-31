@@ -14,7 +14,8 @@ PANORAMA_SECTIONS.splice(8, 2,
   { id: 'consultants', label: 'Consultores do Estudo', start: 56, end: 61 },
 );
 // A abertura “Panorama imobiliário de …” também fica fora da V1 por não ter cidade dinâmica.
-PANORAMA_SECTIONS.forEach((section) => { section.start -= 1; section.end -= 1; });
+// A capa legada (referência 1) e a abertura legada (referência 4) saem do livro V2.
+PANORAMA_SECTIONS.forEach((section) => { section.start -= 2; section.end -= 2; });
 
 type Definition = [string, string, PanoramaVisualFamily, string[], MethodStatus | 'not_applicable'];
 const pages: Definition[] = [
@@ -27,7 +28,8 @@ const pages: Definition[] = [
 
 // A lâmina institucional de visão/missão/valores (referência 3) ocupa a posição 6 no deck final.
 // `page` é sempre a posição de saída; `referenceSlide` mantém a identidade editorial original.
-const outputReferenceSlides = [1, 2, 4, 5, 6, 7, 3, 8, 9, 10, ...Array.from({ length: 52 }, (_, index) => index + 11)].filter((referenceSlide) => referenceSlide !== 4 && referenceSlide !== 56);
+const outputReferenceSlides = [1, 2, 4, 5, 6, 7, 3, 8, 9, 10, ...Array.from({ length: 52 }, (_, index) => index + 11)]
+  .filter((referenceSlide) => ![1, 4, 56].includes(referenceSlide));
 
 export const PANORAMA_REPORT_MANIFEST: ReportPageDefinition[] = outputReferenceSlides.map((referenceSlide, index) => {
   const page = index + 1;

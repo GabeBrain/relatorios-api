@@ -35,7 +35,7 @@ export function buildMapTilePlan(points: GeographicPoint[], mapboxAccessToken: s
     if (maxX - minX + 1 <= 5 && maxY - minY + 1 <= 4) break;
   }
   // A API pode trazer uma coordenada fora do globo; nunca deixe isso produzir um
-  // mosaico gigantesco ao renderizar as 62 páginas de uma vez.
+  // mosaico gigantesco ao renderizar todas as páginas de uma vez.
   if (zoom < 4) return null;
   const world = 2 ** zoom;
   minX = clamp(minX, 0, world - 1); maxX = clamp(maxX, 0, world - 1);

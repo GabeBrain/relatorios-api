@@ -7,6 +7,7 @@ import { PIRACICABA_1T26_MARKET_REFERENCE } from './reference/piracicaba-1t26-ma
 import { editorialWindow, quarterEndDate, quarterStartDate } from './domain/quarters';
 import { buildCityCube, type MarketCube } from './domain/cube';
 import { collectByCity, completedValues, type CollectionResult } from './domain/collection';
+import { createPanoramaGenerationProgress, type PanoramaProgressListener } from './domain/generation-progress';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const BUILDINGS_V2_BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
@@ -154,14 +155,15 @@ export function describeTemporalFailure(city: string, issues: TemporalIssue[]): 
   return `Não foi possível consultar ${metrics} em ${city}: a GeoBrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
 }
 
-async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], signal?: AbortSignal): Promise<CityHarvest> {
+async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
+  const track = <T,>(operation: string, request: Promise<T>) => request.finally(() => onUnit?.(scope.city, operation));
   const [buildings, sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
-    fetchBuildings(scope, signal),
-    temporalRows(scope, 'sales', 'Padrão', signal), temporalRows(scope, 'sales', 'Tipologia', signal),
-    temporalRows(scope, 'stock', 'Padrão', signal), temporalRows(scope, 'stock', 'Tipologia', signal),
-    temporalRows(scope, 'ivv', 'Padrão', signal), temporalRows(scope, 'ivv', 'Tipologia', signal),
-    temporalRows(scope, 'medium-prices', 'Padrão', signal), temporalRows(scope, 'medium-prices', 'Tipologia', signal),
-    temporalRows(scope, 'medium-prices-meter', 'Padrão', signal), temporalRows(scope, 'medium-prices-meter', 'Tipologia', signal),
+    track('empreendimentos', fetchBuildings(scope, signal)),
+    track('vendas por padrão', temporalRows(scope, 'sales', 'Padrão', signal)), track('vendas por tipologia', temporalRows(scope, 'sales', 'Tipologia', signal)),
+    track('oferta por padrão', temporalRows(scope, 'stock', 'Padrão', signal)), track('oferta por tipologia', temporalRows(scope, 'stock', 'Tipologia', signal)),
+    track('IVV por padrão', temporalRows(scope, 'ivv', 'Padrão', signal)), track('IVV por tipologia', temporalRows(scope, 'ivv', 'Tipologia', signal)),
+    track('preços por padrão', temporalRows(scope, 'medium-prices', 'Padrão', signal)), track('preços por tipologia', temporalRows(scope, 'medium-prices', 'Tipologia', signal)),
+    track('R$/m² por padrão', temporalRows(scope, 'medium-prices-meter', 'Padrão', signal)), track('R$/m² por tipologia', temporalRows(scope, 'medium-prices-meter', 'Tipologia', signal)),
   ]);
   const sources = { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology };
   if (Object.values(sources).every((source) => !source.available)) {
@@ -182,15 +184,23 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], si
  * uma cidade que falha aparece nomeada na proveniência e o relatório fica `partial`. Só o
  * cancelamento propaga exceção — falha total devolve modelo `unavailable` com as cidades listadas.
  */
-export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal): Promise<PanoramaReportModel> {
+export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal, onProgress?: PanoramaProgressListener): Promise<PanoramaReportModel> {
   const scopes = cityScopes(scope);
   if (!scopes.length) throw new Error('Recorte sem cidade: selecione ao menos um município autorizado.');
+  const progress = createPanoramaGenerationProgress(scopes.length, onProgress);
+  progress.start();
 
   const collection: CollectionResult<CityHarvest> = await collectByCity(
     scopes.map((item) => item.city),
-    (city, citySignal) => harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, citySignal),
+    async (city, citySignal) => {
+      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, citySignal, progress.unit);
+      progress.cityComplete(city);
+      return harvest;
+    },
     { concurrency: CITY_CONCURRENCY, signal },
   );
+
+  collection.failedCities.forEach(({ city }) => progress.cityFailed(city));
 
   const harvests = completedValues(collection);
   if (collection.state === 'unavailable') {
@@ -205,7 +215,8 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
   });
   const millions = (source: SourceResult, field: string): SourceResult => ({ ...source, rows: source.rows.map((row) => ({ ...row, [field]: (safeNumber(row[field]) ?? 0) / 1_000_000 })) });
 
-  return buildPanoramaReportModel(
+  progress.consolidate();
+  const model = buildPanoramaReportModel(
     scope,
     harvests.flatMap((harvest) => harvest.records),
     {
@@ -227,6 +238,8 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
       cityTemporalSources: harvests.map((harvest) => ({ city: harvest.city, sources: harvest.sources })),
     },
   );
+  progress.prepare();
+  return model;
 }
 
 function cohortRowsFrom(data: Record<string, unknown>[], scope: CityScope): MarketCohortRow[] {

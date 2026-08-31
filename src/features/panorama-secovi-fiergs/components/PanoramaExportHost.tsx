@@ -7,15 +7,17 @@ import { buildPanoramaPdf, PanoramaExportCancelled } from '../lib/pdf-export';
 import { usePanoramaExportStore } from '../export-store';
 import { quarterLabel } from '../lib/launches';
 import { scopeCityLabel, scopeCitySlug } from '../types';
+import { formatRemainingTime } from '../domain/generation-progress';
 
 /**
  * Executa a exportação do Panorama fora da árvore da rota: montado pelo shell, sobrevive à
- * navegação do usuário entre páginas. O deck de 62 lâminas só existe enquanto o job está ativo.
+ * navegação do usuário entre páginas. O deck só existe enquanto o job está ativo.
  */
 export default function PanoramaExportHost() {
   const { status, progress, total, error, report, result } = usePanoramaExportStore();
   const deckRef = useRef<HTMLDivElement>(null);
   const startedFor = useRef<PanoramaExportRunKey>(null);
+  const exportStartedAt = useRef<number | null>(null);
 
   useEffect(() => {
     if (status !== 'preparing' || !report) return;
@@ -60,6 +62,11 @@ export default function PanoramaExportHost() {
   }, [status, report]);
 
   const running = status === 'preparing' || status === 'capturing' || status === 'assembling';
+  if (running && exportStartedAt.current === null) exportStartedAt.current = Date.now();
+  if (!running) exportStartedAt.current = null;
+  const eta = status === 'capturing' && progress >= 2 && total > progress && exportStartedAt.current
+    ? formatRemainingTime((Date.now() - exportStartedAt.current) / progress * (total - progress))
+    : null;
   if (status === 'idle') return null;
 
   return (
@@ -72,7 +79,7 @@ export default function PanoramaExportHost() {
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium">
               {status === 'preparing' && 'Preparando o PDF do Panorama…'}
-              {status === 'capturing' && `Gerando o PDF do Panorama: ${progress} de ${total} páginas`}
+              {status === 'capturing' && `Gerando o PDF do Panorama: ${progress} de ${total} páginas${eta ? ` · cerca de ${eta}` : ''}`}
               {status === 'assembling' && 'Montando o arquivo final…'}
               {status === 'done' && `PDF pronto: ${result?.pages} páginas`}
               {status === 'error' && 'Não foi possível gerar o PDF'}

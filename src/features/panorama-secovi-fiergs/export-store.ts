@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { PanoramaReportModel } from './types';
 
 /**
- * Estado do export do Panorama fora da árvore da rota: a rasterização das 62 lâminas leva ~90 s e
+ * Estado do export do Panorama fora da árvore da rota: a rasterização das lâminas pode levar alguns minutos e
  * o usuário precisa continuar navegando pela plataforma enquanto ela acontece. Este módulo é
  * deliberadamente leve — quem o importa não deve arrastar a feature inteira para o bundle inicial.
  */
