@@ -125,7 +125,7 @@
   background: transparent;
 }
 .validacao-fechamento .vf-grid .vf-resizer:hover { background: var(--vf-primary); }
-.validacao-fechamento .vf-grid .vf-div-value { position: sticky; right: 0; min-width: 360px; background: var(--vf-card); z-index: 2; border-left: 1px solid var(--vf-border); white-space: normal; }
+.validacao-fechamento .vf-grid .vf-div-value { position: sticky; right: 0; min-width: 360px; max-width: 360px; background: var(--vf-card); z-index: 2; border-left: 1px solid var(--vf-border); white-space: normal; overflow-wrap: anywhere; word-break: break-word; line-height: 1.35; }
 .validacao-fechamento .vf-grid th.vf-div-value { background: var(--vf-muted-soft); z-index: 3; }
 .validacao-fechamento .vf-grid .vf-div-building { min-width: 220px; max-width: 280px; white-space: normal; }
 .validacao-fechamento .vf-grid .vf-div-area { min-width: 110px; }
