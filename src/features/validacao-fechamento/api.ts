@@ -6,6 +6,7 @@ const STATUSES = ['Ativo', 'Esgotado'];
 const PER_PAGE = 100;
 
 export interface ValidationHistory extends HistoryEntry {
+  type_of_typology: string;
   garage_label: string;
   distractions: number | null;
   gross_sales: number | null;
@@ -61,7 +62,7 @@ function normalizeBuilding(raw: Record<string, unknown>): ValidationBuilding {
       building_status: text(entry.building_status), time_on_sale: numberValue(entry.time_on_sale),
       private_area: numberValue(entry.private_area), public_area: numberValue(entry.public_area),
       price_public_area: numberValue(entry.price_public_area), release_price: numberValue(entry.release_price),
-      vgv_total: numberValue(entry.vgv_total), sold: numberOrZero(entry.sold),
+      vgv_total: numberValue(entry.vgv_total), sold: numberOrZero(entry.sold), type_of_typology: text(entry.type_of_typology),
       number_bedroom: numberOrZero(entry.number_bedroom), number_suite: numberOrZero(entry.number_suite),
       garage: numberOrZero(entry.garage), garage_label: stringValue(entry.garage), qty: numberOrZero(entry.qty),
       distractions: numberValue(entry.distractions), gross_sales: numberValue(entry.gross_sales),
