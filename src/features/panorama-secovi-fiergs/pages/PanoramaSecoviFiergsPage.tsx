@@ -15,26 +15,26 @@ import { PanoramaLoadingState } from '../components/PanoramaLoadingState';
 import { availableEndQuarters } from '../domain/quarters';
 import { type PanoramaGenerationProgress } from '../domain/generation-progress';
 import { createPanoramaReportManifest } from '../report/manifest';
-import type { PanoramaScope, Quarter } from '../types';
+import type { PanoramaEngineVersion, PanoramaScope, Quarter } from '../types';
 
 export default function PanoramaSecoviFiergsPage() {
   const [geo, setGeo] = useState<GeoScope>({ uf: 'SP', city: '' });
   const [cities, setCities] = useState<string[]>([]);
-  const [scope, setScope] = useState<PanoramaScope>({ uf: 'SP', cities: [], startQuarter: '1T2022', endQuarter: '2T2026', entity: 'secovi-sp' });
+  const [scope, setScope] = useState<PanoramaScope>({ uf: 'SP', cities: [], startQuarter: '1T2022', endQuarter: '2T2026', entity: 'secovi-sp', engineVersion: 'v2' });
   const [submitted, setSubmitted] = useState<PanoramaScope | null>(null);
   const [generationProgress, setGenerationProgress] = useState<PanoramaGenerationProgress | null>(null);
   const geoApi = useGeoApiScope({ value: geo, onChange: (next) => { setGeo(next); if (next.uf !== geo.uf) { setCities([]); setScope((current) => ({ ...current, cities: [] })); setSubmitted(null); } } });
   const quarters = useMemo(() => availableEndQuarters('1T2019'), []);
   const queryScope = submitted ? { ...submitted, cities: [...submitted.cities].sort((a, b) => a.localeCompare(b, 'pt-BR')) } : null;
   const report = useQuery({
-    queryKey: ['panorama-report', queryScope?.uf, queryScope?.cities, queryScope?.startQuarter, queryScope?.endQuarter, queryScope?.entity],
+    queryKey: ['panorama-report', queryScope?.uf, queryScope?.cities, queryScope?.startQuarter, queryScope?.endQuarter, queryScope?.entity, queryScope?.engineVersion],
     // O recorte só muda por uma nova geração (o botão fica bloqueado durante a coleta).
     // Não repassamos o sinal efêmero do React Query: ele vinha cancelando o fallback legado de
     // todas as cidades quando uma das requisições paralelas era descartada pelo navegador.
     queryFn: () => fetchPanoramaReportModel(queryScope!, undefined, setGenerationProgress),
     enabled: Boolean(queryScope), staleTime: 5 * 60_000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: 0,
   });
-  const reportPageCount = report.data ? createPanoramaReportManifest(report.data.cityComparisons.enabled).length : 0;
+  const reportPageCount = report.data ? createPanoramaReportManifest({ includeCityComparisons: report.data.cityComparisons.enabled, includeHorizontal: report.data.provenance.engineVersion !== 'v3' || report.data.cube.projects.some((project) => project.segment === 'Horizontal'), includeMap: report.data.locations.length > 0 }).length : 0;
   const ready = Boolean(geoApi.strictReady && cities.length && scope.startQuarter && scope.endQuarter);
   const updateCities = (next: string[]) => { setCities(next); setGeo((current) => ({ ...current, city: next[0] ?? '' })); setScope((current) => ({ ...current, cities: next })); setSubmitted(null); };
   const updateRange = (startQuarter: Quarter, endQuarter: Quarter) => { setScope((current) => ({ ...current, startQuarter, endQuarter })); setSubmitted(null); };
@@ -47,6 +47,7 @@ export default function PanoramaSecoviFiergsPage() {
         <div className="min-w-[260px] flex-1"><PanoramaCityMultiSelect cities={cities} options={geoApi.availableCities} onChange={updateCities} loading={geoApi.isLoading} disabled={geoApi.isLoading || !geo.uf} /></div>
       </>}
       <PanoramaQuarterRangePicker start={scope.startQuarter} end={scope.endQuarter} options={quarters} onChange={updateRange} />
+      <div className="w-full space-y-1.5"><label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Motor</label><Select value={scope.engineVersion ?? 'v2'} onValueChange={(engineVersion: PanoramaEngineVersion) => { setScope((current) => ({ ...current, engineVersion })); setSubmitted(null); }}><SelectTrigger className="h-9 text-sm"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="v2">V2 atual</SelectItem><SelectItem value="v3">V3 · universo oficial</SelectItem></SelectContent></Select></div>
       <Button className="self-center h-9 whitespace-nowrap" onClick={generate} disabled={!ready || report.isFetching}><BarChart3/>{report.isFetching ? 'Consultando APIs…' : 'Gerar relatório'}</Button>
     </div></section>
     {!submitted && <Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Defina o recorte</AlertTitle><AlertDescription>Escolha a UF, um ou mais municípios monitorados e o período; nenhuma chamada pesada é feita antes de um escopo válido.</AlertDescription></Alert>}

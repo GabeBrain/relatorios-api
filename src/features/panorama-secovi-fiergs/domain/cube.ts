@@ -135,6 +135,7 @@ export interface BuildCubeOptions {
   uf: string;
   endQuarter: Quarter;
   entity?: EntityId;
+  engineVersion?: 'v2' | 'v3';
 }
 
 /**
@@ -144,7 +145,7 @@ export interface BuildCubeOptions {
  */
 export function buildCityCube(raw: Record<string, unknown>[], options: BuildCubeOptions): MarketCube {
   const entity = options.entity ?? 'secovi-sp';
-  const policy = entityPolicy(entity);
+  const policy = entityPolicy(entity, options.engineVersion ?? 'v2');
   const endMonth = quarterEndMonth(options.endQuarter);
   const endIndex = quarterIndex(options.endQuarter);
   const projects: CubeProject[] = [];
@@ -158,6 +159,8 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
       rawSubtype: firstText(building, ['building_subtype', 'subtype', 'sub_type', 'horizontal_type', 'product_type']),
       rawType: firstText(building, ['building_type', 'type']),
       rawName: firstText(building, ['name', 'building_name']),
+      standard: firstText(building, ['standard', 'pattern']),
+      historicalPatterns: (Array.isArray(building.typologies_history) ? building.typologies_history : []).map((entry) => firstText(entry as Record<string, unknown>, ['pattern', 'standard'])),
     });
 
     if (!buildingId) {

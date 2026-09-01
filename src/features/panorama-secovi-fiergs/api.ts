@@ -8,6 +8,7 @@ import { editorialWindow, quarterEndDate, quarterStartDate } from './domain/quar
 import { buildCityCube, type MarketCube } from './domain/cube';
 import { collectByCity, completedValues, type CollectionResult } from './domain/collection';
 import { createPanoramaGenerationProgress, type PanoramaProgressListener } from './domain/generation-progress';
+import { requestWithRetry } from './lib/request-with-retry';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const BUILDINGS_V2_BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
@@ -64,7 +65,7 @@ async function fetchBuildingsV2(scope: CityScope, signal?: AbortSignal): Promise
   for (const type of ['Vertical', 'Horizontal']) for (const status of BUILDING_STATUSES) {
     let page = 1; let lastPage = 1;
     do {
-      const response = await httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_V2_BASE_URL}/building-with-history`, query: { type, status, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
+      const response = await requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_V2_BASE_URL}/building-with-history`, query: { type, status, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal });
       if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain v2 em ${scope.city} (${response.status ?? 'rede'}).`);
       const entries = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
       for (const building of entries) {
@@ -99,10 +100,11 @@ async function fetchBuildingsLegacy(scope: CityScope, signal?: AbortSignal): Pro
  * em um relatório zerado. Enquanto a paridade autenticada não estiver confirmada, preservamos o
  * contrato legado como fallback explícito.
  */
-async function fetchBuildings(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
+async function fetchBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' = 'v2'): Promise<Record<string, unknown>[]> {
   try {
     return await fetchBuildingsV2(scope, signal);
   } catch (v2Error) {
+    if (engineVersion === 'v3') throw v2Error;
     try {
       return await fetchBuildingsLegacy(scope, signal);
     } catch (legacyError) {
@@ -120,6 +122,16 @@ function segmentOf(value: unknown): Segment | null {
   return null;
 }
 function standardOf(value: unknown): string { return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+
+/** Firewall V3: números horizontais só atravessam se o cubo oficial os aceitou. */
+function launchRecordsFromCube(cube: MarketCube): LaunchRecord[] {
+  return cube.projects.map((project) => {
+    const economic = standardOf(project.standard).includes('econom');
+    return { quarter: project.releaseQuarter, segment: project.segment, projects: 1, units: project.launchedUnits ?? 0, vgvMillions: project.launchedVgvMillions,
+      economicProjects: economic ? 1 : 0, otherProjects: economic ? 0 : 1, economicUnits: economic ? (project.launchedUnits ?? 0) : 0, otherUnits: economic ? 0 : (project.launchedUnits ?? 0),
+      economicVgvMillions: economic ? project.launchedVgvMillions : 0, otherVgvMillions: economic ? 0 : project.launchedVgvMillions, name: project.name, latitude: project.latitude, longitude: project.longitude };
+  });
+}
 
 /** Promoted launch contract: a release is one building on its release_date, never every history snapshot. */
 export function launchRecordsFrom(data: Record<string, unknown>[], scope: CityScope): LaunchRecord[] {
@@ -182,11 +194,11 @@ export function describeTemporalFailure(city: string, issues: TemporalIssue[]): 
   return `Não foi possível consultar ${metrics} em ${city}: a GeoBrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
 }
 
-async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
+async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3', signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
   const gate = createRequestGate(REQUEST_CONCURRENCY_PER_CITY);
   const track = <T,>(operation: string, request: () => Promise<T>) => gate(request).finally(() => onUnit?.(scope.city, operation));
   const [buildings, sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
-    track('empreendimentos', () => fetchBuildings(scope, signal)),
+    track('empreendimentos', () => fetchBuildings(scope, signal, engineVersion)),
     track('vendas por padrão', () => temporalRows(scope, 'sales', 'Padrão', signal)), track('vendas por tipologia', () => temporalRows(scope, 'sales', 'Tipologia', signal)),
     track('oferta por padrão', () => temporalRows(scope, 'stock', 'Padrão', signal)), track('oferta por tipologia', () => temporalRows(scope, 'stock', 'Tipologia', signal)),
     track('IVV por padrão', () => temporalRows(scope, 'ivv', 'Padrão', signal)), track('IVV por tipologia', () => temporalRows(scope, 'ivv', 'Tipologia', signal)),
@@ -198,11 +210,12 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], si
     const issues = Object.values(sources).flatMap((source) => source.issue ? [source.issue] : []);
     throw new Error(describeTemporalFailure(scope.city, issues));
   }
+  const cube = buildCityCube(buildings, { city: scope.city, uf: scope.uf, endQuarter: scope.endQuarter, entity, engineVersion });
   return {
     city: scope.city,
-    records: launchRecordsFrom(buildings, scope),
-    cube: buildCityCube(buildings, { city: scope.city, uf: scope.uf, endQuarter: scope.endQuarter, entity }),
-    cohorts: cohortRowsFrom(buildings, scope),
+    records: engineVersion === 'v3' ? launchRecordsFromCube(cube) : launchRecordsFrom(buildings, scope),
+    cube,
+    cohorts: engineVersion === 'v3' ? cube.projects.map((project) => ({ segment: project.segment, releaseYear: String(project.releaseYear), standard: project.standard, stock: project.finalUnits ?? 0 })).filter((row) => row.stock > 0) : cohortRowsFrom(buildings, scope),
     sources,
   };
 }
@@ -221,7 +234,7 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
   const collection: CollectionResult<CityHarvest> = await collectByCity(
     scopes.map((item) => item.city),
     async (city, citySignal) => {
-      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, citySignal, progress.unit);
+      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, scope.engineVersion ?? 'v2', citySignal, progress.unit);
       progress.cityComplete(city);
       return harvest;
     },

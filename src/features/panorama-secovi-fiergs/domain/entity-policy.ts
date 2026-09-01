@@ -19,6 +19,9 @@ export interface UniverseCandidate {
   rawSubtype?: unknown;
   rawType?: unknown;
   rawName?: unknown;
+  /** Campos oficiais do contrato v2; V3 não usa nome para inferir tipologia. */
+  standard?: unknown;
+  historicalPatterns?: unknown[];
 }
 
 export type UniverseRejectionReason = 'segmento_desconhecido' | 'horizontal_fora_da_politica' | 'subtipo_horizontal_indefinido';
@@ -81,6 +84,22 @@ export const SECOVI_SP_POLICY: EntityPolicy = {
   },
 };
 
+/** PRE-026: somente rótulo explícito do payload oficial. Sem regex em nome, sem inferência. */
+export const SECOVI_SP_V3_POLICY: EntityPolicy = {
+  ...SECOVI_SP_POLICY,
+  classify(candidate) {
+    if (candidate.segment === 'Vertical') return { accepted: true, segment: 'Vertical', horizontalSubtype: null, reason: null };
+    if (candidate.segment !== 'Horizontal') return { accepted: false, segment: null, horizontalSubtype: null, reason: 'segmento_desconhecido' };
+    const labels = [candidate.rawSubtype, candidate.rawType, candidate.standard, ...(candidate.historicalPatterns ?? [])]
+      .map(normalizeText).filter(Boolean);
+    if (!labels.length) return { accepted: false, segment: 'Horizontal', horizontalSubtype: 'indefinido', reason: 'subtipo_horizontal_indefinido' };
+    const allowed = labels.some((label) => /^(condominio de casas|condominio de casas e sobrados|casas em condominio fechado)$/.test(label));
+    return allowed
+      ? { accepted: true, segment: 'Horizontal', horizontalSubtype: 'condominio_casas', reason: null }
+      : { accepted: false, segment: 'Horizontal', horizontalSubtype: 'outro', reason: 'horizontal_fora_da_politica' };
+  },
+};
+
 /**
  * FIERGS ainda não tem regra de universo entregue. O ponto de extensão existe e é explícito: até a
  * regra chegar, a entidade não é selecionável e não herda silenciosamente a regra Secovi.
@@ -90,8 +109,8 @@ export const ENTITY_POLICIES: Record<EntityId, EntityPolicy | null> = {
   'fiergs-rs': null,
 };
 
-export function entityPolicy(id: EntityId = 'secovi-sp'): EntityPolicy {
-  const policy = ENTITY_POLICIES[id];
+export function entityPolicy(id: EntityId = 'secovi-sp', version: 'v2' | 'v3' = 'v2'): EntityPolicy {
+  const policy = id === 'secovi-sp' && version === 'v3' ? SECOVI_SP_V3_POLICY : ENTITY_POLICIES[id];
   if (!policy) throw new Error(`Política de universo não definida para a entidade ${id}.`);
   return policy;
 }

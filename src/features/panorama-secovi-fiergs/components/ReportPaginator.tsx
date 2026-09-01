@@ -54,7 +54,7 @@ function CityCover({ report }: { report: PanoramaReportModel }) {
   return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DE</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
 function V2Summary({ report }: { report: PanoramaReportModel }) {
-  const sections = createPanoramaSections(createPanoramaReportManifest(report.cityComparisons.enabled));
+  const sections = createPanoramaSections(createPanoramaReportManifest({ includeCityComparisons: report.cityComparisons.enabled, includeHorizontal: report.provenance.engineVersion !== 'v3' || report.cube.projects.some((project) => project.segment === 'Horizontal'), includeMap: report.locations.length > 0 }));
   return <div className="panorama-v2-summary"><h2>Sumário</h2><ol>{sections.map((section) => <li key={section.id}><span>{section.label}</span><b>{section.start}–{section.end}</b></li>)}</ol></div>;
 }
 type PresentationPerson = NonNullable<PanoramaReportModel['presentation']['consultant']>;
@@ -271,7 +271,7 @@ function AllPagesView({ report, pages, containerRef }: { report: PanoramaReportM
 }
 
 export function PanoramaExportDeck({ report, rootRef }: { report: PanoramaReportModel; rootRef: React.RefObject<HTMLDivElement> }) {
-  const pages = createPanoramaReportManifest(report.cityComparisons.enabled);
+  const pages = createPanoramaReportManifest({ includeCityComparisons: report.cityComparisons.enabled, includeHorizontal: report.provenance.engineVersion !== 'v3' || report.cube.projects.some((project) => project.segment === 'Horizontal'), includeMap: report.locations.length > 0 });
   return <div ref={rootRef} className="panorama-export-root" aria-hidden="true">{pages.map((def) => <SafeSheet key={def.page} def={def} report={report}/>)}</div>;
 }
 
@@ -283,7 +283,7 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const exportProgress = usePanoramaExportStore((state) => state.progress);
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
-  const pages = useMemo(() => createPanoramaReportManifest(report.cityComparisons.enabled), [report.cityComparisons.enabled]);
+  const pages = useMemo(() => createPanoramaReportManifest({ includeCityComparisons: report.cityComparisons.enabled, includeHorizontal: report.provenance.engineVersion !== 'v3' || report.cube.projects.some((project) => project.segment === 'Horizontal'), includeMap: report.locations.length > 0 }), [report.cityComparisons.enabled, report.provenance.engineVersion, report.cube.projects, report.locations.length]);
   const sections = useMemo(() => createPanoramaSections(pages), [pages]);
   useEffect(() => setCurrent((value) => Math.min(value, pages.length - 1)), [pages.length]);
   const page = pages[Math.min(current, pages.length - 1)];

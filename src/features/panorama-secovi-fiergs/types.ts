@@ -8,6 +8,7 @@ export type Quarter = `${1 | 2 | 3 | 4}T${number}`;
 export type Segment = 'Vertical' | 'Horizontal';
 export type MethodStatus = 'reconciled' | 'assumed' | 'open_method' | 'approved';
 export type ComparisonResult = 'match' | 'different' | 'missing_reference' | 'missing_api' | 'not_comparable';
+export type PanoramaEngineVersion = 'v2' | 'v3';
 
 /**
  * Recorte canônico do Panorama. `cities` é sempre um array — uma cidade é um array de um item —
@@ -20,6 +21,8 @@ export interface PanoramaScope {
   startQuarter?: Quarter;
   endQuarter: Quarter;
   entity?: EntityId;
+  /** V2 permanece padrão; V3 só usa o universo granular oficial. */
+  engineVersion?: PanoramaEngineVersion;
 }
 
 /** Rótulo determinístico do recorte para capa, título e nome de arquivo, com uma ou várias cidades. */
@@ -45,6 +48,7 @@ export interface PanoramaProvenance {
   completedCities: string[];
   failedCities: { city: string; error: string }[];
   entity: EntityId;
+  engineVersion?: PanoramaEngineVersion;
   /** Empreendimentos recusados pela política de universo, agrupados por motivo. */
   rejectedByPolicy: { reason: string; count: number }[];
 }

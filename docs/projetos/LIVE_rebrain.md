@@ -1,5 +1,12 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-01 — Panorama V3: trilho oficial de universo e resiliência — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — V3 paralela à V2, sem promoção de padrão.
+- **O quê:** V3 usa `building-with-history` v2 com retry limitado para falhas transitórias (rede, 408, 429 e 5xx), sem fallback legado; horizontais só passam por rótulo oficial do payload, nunca por nome. Lançamentos e coortes V3 são emitidos pelo cubo já filtrado. A tela mantém V2 como padrão e expõe o seletor V3; manifesto suprime bloco horizontal vazio e mapa sem coordenadas.
+- **Evidência:** 72 testes direcionados aprovados (incluindo resiliência e política V3). A compilação TypeScript/Vite foi iniciada; o ambiente não devolveu o término do Vite após `transforming`, portanto preview/PDF/PPT e cenários autenticados continuam pendentes de homologação com token.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a segue em QA. Faltam circuit breaker explícito, herança PRE-027 por período, os 40 fechamentos visuais individualizados e os artefatos autenticados; nenhum deles foi marcado como concluído sem evidência.
+
 ### 2026-09-01 — Matriz terminal dos 40 comentários de Juliana para a V3 — Gabriel
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento editorial e visual da V3.
 - **O quê:** as 40 anotações do PDF corrigido foram convertidas em requisitos `JG-01` a `JG-40`, preservando comentários repetidos por página e separando as duas anotações de p40, p42 e p52. A matriz cobre fontes, universo horizontal, rótulo zero/2T26, fundos trimestrais, IVV/metragens, formatação condicional, subtotais, percentuais, gráfico de barras, tabelas, páginas condicionais, narrativas, dormitórios, preços, mapa e consultor.

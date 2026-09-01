@@ -54,9 +54,10 @@ const comparisonDefinitions: Omit<ReportPageDefinition, 'page'>[] = [
 ];
 
 /** Comparativos entram somente quando todas as cidades do recorte foram coletadas. */
-export function createPanoramaReportManifest(includeCityComparisons = false): ReportPageDefinition[] {
-  const output = baseManifest();
-  if (includeCityComparisons) {
+export function createPanoramaReportManifest(options: boolean | { includeCityComparisons?: boolean; includeHorizontal?: boolean; includeMap?: boolean } = false): ReportPageDefinition[] {
+  const resolved = typeof options === 'boolean' ? { includeCityComparisons: options } : options;
+  const output = baseManifest().filter((page) => (resolved.includeHorizontal !== false || ![47, 48, 49].includes(page.referenceSlide)) && (resolved.includeMap !== false || ![55, 56].includes(page.referenceSlide)));
+  if (resolved.includeCityComparisons) {
     const afterMarket = output.findIndex((page) => page.referenceSlide === 29) + 1;
     output.splice(afterMarket, 0, ...comparisonDefinitions);
   }

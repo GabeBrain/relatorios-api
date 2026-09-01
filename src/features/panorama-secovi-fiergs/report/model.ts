@@ -201,6 +201,7 @@ function provenanceOf(scope: PanoramaScope, cube: MarketCube, partial?: Partial<
     completedCities: partial?.completedCities ?? cube.cities,
     failedCities: partial?.failedCities ?? [],
     entity: scope.entity ?? 'secovi-sp',
+    engineVersion: scope.engineVersion ?? 'v2',
     rejectedByPolicy: [...rejections].map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count),
   };
 }
