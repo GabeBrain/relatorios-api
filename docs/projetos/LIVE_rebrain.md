@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-01 — Matriz terminal dos 40 comentários de Juliana para a V3 — Gabriel
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento editorial e visual da V3.
+- **O quê:** as 40 anotações do PDF corrigido foram convertidas em requisitos `JG-01` a `JG-40`, preservando comentários repetidos por página e separando as duas anotações de p40, p42 e p52. A matriz cobre fontes, universo horizontal, rótulo zero/2T26, fundos trimestrais, IVV/metragens, formatação condicional, subtotais, percentuais, gráfico de barras, tabelas, páginas condicionais, narrativas, dormitórios, preços, mapa e consultor.
+- **Plano:** executar conjuntamente [`PLAN_TERRA_PANORAMA_V3_UNIVERSO_HORIZONTAL_TERMINAL_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_TERRA_PANORAMA_V3_UNIVERSO_HORIZONTAL_TERMINAL_2026-09-01.md) e [`MATRIZ_TERMINAL_40_COMENTARIOS_JULIANA_PANORAMA_V3_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/MATRIZ_TERMINAL_40_COMENTARIOS_JULIANA_PANORAMA_V3_2026-09-01.md).
+- **Commits:** — (registro desta sessão).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA; o aceite da V3 agora exige evidência individual 40/40, além dos portões técnicos do universo horizontal.
+
 ### 2026-09-01 — Plano terminal da V3 do Panorama: universo horizontal oficial — Gabriel
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preparação da V3 para homologação interna.
 - **O quê:** fechadas as decisões de produto após o retorno de Juliana: somente `Condomínio de Casas/Sobrados` entra; produto não informado fica fora; quando o histórico trouxer produto em vez de padrão socioeconômico, herda-se o último padrão anterior. Cinco matrizes autenticadas registraram 79 respostas 500 transitórias do v2, todas recuperadas na segunda tentativa. Nova auditoria confirmou `ivv` por Tipologia em HTTP 500 nas quatro cidades da Baixada.

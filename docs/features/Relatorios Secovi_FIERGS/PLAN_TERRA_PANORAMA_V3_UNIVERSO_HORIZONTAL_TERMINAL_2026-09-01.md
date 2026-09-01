@@ -10,6 +10,7 @@ com preview, PDF e PPT espelho coerentes.
 ## Fontes obrigatórias
 
 - [`MAPEAMENTO_UNIVERSO_HORIZONTAL_SECOVI_2026-09-01.md`](./MAPEAMENTO_UNIVERSO_HORIZONTAL_SECOVI_2026-09-01.md)
+- [`MATRIZ_TERMINAL_40_COMENTARIOS_JULIANA_PANORAMA_V3_2026-09-01.md`](./MATRIZ_TERMINAL_40_COMENTARIOS_JULIANA_PANORAMA_V3_2026-09-01.md), que deve ser executada integralmente junto deste plano
 - [`DECISOES_E_PREMISSAS_PANORAMA.md`](./DECISOES_E_PREMISSAS_PANORAMA.md), PRE-002, PRE-025,
   PRE-026 e PRE-027
 - retorno de Juliana em `panorama-jundiai-2T2026 - corrigido.pdf` (insumo local, não versionado)
@@ -200,7 +201,7 @@ com preview, PDF e PPT espelho coerentes.
 6. O IVV por tipologia abre circuito após confirmação e não multiplica espera por cidade.
 7. Toda métrica horizontal comprova origem no cubo filtrado ou aparece indisponível.
 8. Sumário, páginas, preview, PDF e PPT espelho permanecem sincronizados após supressão condicional.
-9. Todos os comentários de Juliana listados no P6 têm teste ou evidência visual correspondente.
+9. A matriz de Juliana fecha `JG-01` a `JG-40`, cada item com teste ou evidência visual da página correspondente.
 10. V3 fica acessível para testes e V2 permanece como rollback/default até homologação.
 11. Typecheck, testes da feature, browser QA, build e `check:live-docs` passam.
 
