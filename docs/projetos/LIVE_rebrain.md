@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-01 — Plano terminal da V3 do Panorama: universo horizontal oficial — Gabriel
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preparação da V3 para homologação interna.
+- **O quê:** fechadas as decisões de produto após o retorno de Juliana: somente `Condomínio de Casas/Sobrados` entra; produto não informado fica fora; quando o histórico trouxer produto em vez de padrão socioeconômico, herda-se o último padrão anterior. Cinco matrizes autenticadas registraram 79 respostas 500 transitórias do v2, todas recuperadas na segunda tentativa. Nova auditoria confirmou `ivv` por Tipologia em HTTP 500 nas quatro cidades da Baixada.
+- **Plano:** [`PLAN_TERRA_PANORAMA_V3_UNIVERSO_HORIZONTAL_TERMINAL_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_TERRA_PANORAMA_V3_UNIVERSO_HORIZONTAL_TERMINAL_2026-09-01.md) cobre retry limitado, circuit breaker, política pura, herança temporal, firewall de fontes, manifesto condicional, comentários de Juliana e disponibilização V2/V3 para testes.
+- **Arquivos:** mapeamento do universo, premissas PRE-002/PRE-026/PRE-027, script de taxonomia e plano terminal.
+- **Commits:** — (registro desta sessão).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA; o próximo passo é o Terra executar o plano e disponibilizar a V3 sem promovê-la a padrão antes da homologação.
+
 ### 2026-09-01 — Diagnóstico do universo horizontal do Panorama Secovi/FIERGS — Gabriel
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — correção da V2 após retorno de Juliana e orientação de Edgar.
 - **O quê:** documentado o diagnóstico autenticado que cruza as 40 anotações da analista com a taxonomia de `standard`/`typologies_history[].pattern` em 24 municípios. A regra estrita identifica apenas `Condomínio de Casas/Sobrados`, encontra 11 empreendimentos elegíveis e suprime o bloco horizontal quando o universo é vazio.

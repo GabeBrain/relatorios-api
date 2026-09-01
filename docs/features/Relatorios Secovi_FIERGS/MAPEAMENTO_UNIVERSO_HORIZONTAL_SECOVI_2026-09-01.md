@@ -5,7 +5,7 @@
 **Origem:** retorno de Juliana Guimarães sobre `panorama-jundiai-2T2026 - corrigido.pdf` (31/ago),
 orientação técnica de Edgar sobre `typologies_history[].pattern` (01/set, 10:15) e evidência
 autenticada colhida com token de sessão em 01/set.
-**Estado:** diagnóstico fechado com evidência; implementação **não** iniciada.
+**Estado:** diagnóstico e decisões fechados; plano terminal da V3 pronto; implementação **não** iniciada.
 **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`
 
 Este documento existe porque o universo horizontal é, simultaneamente, o comentário mais repetido
@@ -83,6 +83,15 @@ A varredura maior de §3 (24 municípios, centenas de chamadas) **corrige essa l
 **intermitente em ambos os status**, e não uma falha exclusiva da primeira chamada de `Esgotado`.
 O que se sustenta é o essencial: é transitório e **um retry resolve** — nenhuma cidade ficou
 inacessível no v2 em toda a varredura.
+
+Nova bateria em 01/set, após a decisão de produto: **cinco matrizes completas** das 24 cidades
+produziram respectivamente 15, 16, 16, 16 e 16 falhas HTTP 500 no contrato granular — **79 falhas
+transitórias**, todas convertidas em 200 na tentativa imediatamente seguinte. Nenhuma chamada
+precisou da terceira tentativa. O erro apareceu nos dois status em todas as rodadas.
+
+Isto sustenta uma política limitada: no máximo três tentativas totais, retry apenas para erro de
+rede, 429 e 5xx, backoff exponencial com jitter e respeito a cancelamento. Não sustenta retry
+ilimitado nem fallback silencioso para o legado, que não contém `pattern`.
 
 Isto também **derruba o diagnóstico de 401** registrado em
 [`MAPEAMENTO_V2_MULTICIDADES_2026-08-31.md`](./MAPEAMENTO_V2_MULTICIDADES_2026-08-31.md) §portão 5:
@@ -216,12 +225,27 @@ recusar o registro **e** emitir alerta, nunca classificar por semelhança textua
 
 ### 3.5 A massa ambígua
 
-**351 dos 924 horizontais (38%) têm apenas rótulo socioeconômico** — `Econômico`, `Standard`,
+Na primeira medição, **351 dos 924 horizontais (38%)** tinham apenas rótulo socioeconômico — `Econômico`, `Standard`,
 `Médio` etc. — e nenhum rótulo de produto em nenhum período. Para esses, **o dado não diz se são
 condomínio de casas, loteamento ou outra coisa.** A regra estrita de Juliana os exclui, o que é o
 comportamento correto sob incerteza, mas é uma exclusão por ausência de informação, não por
-evidência de que não pertencem. Vale confirmar com a analista se o volume é aceitável ou se a
-GeoBrain deve completar o produto desses registros.
+evidência de que não pertencem.
+
+A repetição autenticada encontrou **349** ambíguos e 563 produtos explicitamente fora da política,
+mantendo o total de 924 e os mesmos 11 aceitos — dois registros mudaram de classificação na fonte
+entre as medições. Nos 349 atuais:
+
+- `building_type` está preenchido como `Horizontal` em 349/349, mas esse é apenas o segmento geral;
+- `standard` está preenchido em 349/349 com rótulo socioeconômico;
+- `building_subtype`, `subtype`, `sub_type`, `horizontal_type` e `product_type` estão ausentes em
+  **349/349**;
+- o histórico traz `type_of_typology=Padrão`, portanto não contém um segundo campo de produto;
+- filtros experimentais `standard`, `pattern` e `product_type` no endpoint v2 devolveram exatamente
+  os mesmos 11 IDs e o mesmo total da consulta-base em Praia Grande: são parâmetros ignorados. O
+  contrato documentado aceita apenas cidade, UF, tipo, status, paginação e datas de atualização.
+
+Conclusão: não há filtro de busca nem campo irmão capaz de inferir o produto. Como Juliana aprovou
+reiteradamente o universo estrito, produto não informado fica fora, com motivo e contagem explícitos.
 
 ---
 
@@ -254,8 +278,9 @@ empreendimento**, estável ao longo da série:
 
 **Agrupamento por padrão dentro do período** — é aqui, e só aqui, que a orientação do Edgar se
 aplica: usar `typologies_history[].pattern` **daquele período**. Quando o `pattern` do período for
-rótulo de produto (e não socioeconômico), o padrão socioeconômico do período é **desconhecido**:
-rotular explicitamente, nunca inventar nem herdar em silêncio.
+rótulo de produto (e não socioeconômico), herdar o último rótulo socioeconômico conhecido em período
+anterior. Antes do primeiro padrão conhecido, usar `Não classificado`; nunca olhar para o futuro.
+O dossiê registra se o valor foi observado, herdado ou permaneceu não classificado.
 
 ### 4.3 Exclusões explícitas e contadas
 
@@ -286,25 +311,18 @@ Jundiaí:** em **18 dos 24 municípios** varridos o universo é vazio (§3.2). A
 
 ---
 
-## 5. Pendências que dependem de decisão humana
+## 5. Decisões fechadas e falha externa restante
 
-- **Eixo duplo no mesmo campo (Edgar / analista):** como `standard` e `pattern` misturam produto e
-  padrão socioeconômico, nos períodos em que o `pattern` diz `Condomínio de Casas/Sobrados` o
-  padrão socioeconômico daquele período é desconhecido. Existe campo separado? Ou o socioeconômico
-  deve ser herdado do último período conhecido? Enquanto não houver resposta: **não classificado**.
-- **`ivv` + `group_by=Tipologia` responde HTTP 500** nas quatro cidades da Baixada — falha
-  sistemática do endpoint, não ausência de dado. Casa com o **PRE-025** e explica o “IVV está todo
-  zerado” do p25. Precisa ser reportado a quem mantém a API.
-- **Massa ambígua de 38%:** 351 horizontais têm só rótulo socioeconômico, sem produto em nenhum
-  período (§3.5). A regra estrita os exclui por ausência de informação. Confirmar com a analista se
-  é aceitável ou se a GeoBrain deve completar o produto desses registros.
-- **PRE-002** segue `REJECTED`; a substituta proposta aqui deve entrar em
-  [`DECISOES_E_PREMISSAS_PANORAMA.md`](./DECISOES_E_PREMISSAS_PANORAMA.md) como premissa nova,
-  passando a `APPROVED` só com aceite de Juliana.
-- **Confirmar com Juliana o efeito prático da regra:** em 18 das 24 praças o bloco horizontal
-  desaparece do relatório, e onde existe tem 1 a 6 empreendimentos. É a consequência correta da
-  instrução dada, mas muda o produto entregue ao cliente e não deveria ser implementada sem ciência
-  explícita.
+- **Fechado — universo:** Gabriel assume como suficiente o retorno reiterado de Juliana: entra apenas
+  `Condomínio de Casas/Sobrados`, mesmo que 18 das 24 praças percam o bloco horizontal (PRE-026).
+- **Fechado — padrão:** quando o período trouxer produto no `pattern`, herdar o último padrão
+  socioeconômico anterior; sem anterior, `Não classificado` (PRE-027).
+- **Fechado — ambíguos:** produto não informado não pode ser inferido por campos ou filtros e fica
+  fora do universo, com contagem e motivo rastreáveis.
+- **Falha externa restante:** `ivv` + `group_by=Tipologia` voltou a responder HTTP 500 em **4/4**
+  cidades da Baixada numa nova execução; cada cidade terminou com 9/10 séries utilizáveis. É falha
+  sistemática do endpoint, não zero. Aplicar circuit breaker/indisponibilidade explícita e reportar
+  à manutenção da API; retry longo não resolve esse contrato.
 
 ---
 

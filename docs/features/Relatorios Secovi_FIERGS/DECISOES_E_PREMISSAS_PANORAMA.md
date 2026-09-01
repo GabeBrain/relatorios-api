@@ -16,7 +16,7 @@ congelado não deve ser usado como log mutável.
 | ID | Estado | Tema | Premissa/questão | Recuperação futura |
 |---|---|---|---|---|
 | PRE-001 | ASSUMED | escopo | fechamento de 1T26 = posição de março/2026 | confirmar em segunda cidade |
-| PRE-002 | ASSUMED | segmentos | Horizontal da API representa Condomínio de Casas no relatório | validar taxonomia real |
+| PRE-002 | REJECTED | segmentos | Todo Horizontal da API representa Condomínio de Casas no relatório | substituída pela PRE-026 após taxonomia autenticada e retorno reiterado de Juliana |
 | PRE-003 | ASSUMED | empreendimentos | contagem de lançados é distinta por building e `release_date` | comparar slides 12/14 |
 | PRE-004 | OPEN | VGV lançado | unidades × preço de lançamento por produto | obter fórmula oficial |
 | PRE-005 | OPEN | MCMV | padrão Econômico pode ser proxy, mas não será rotulado MCMV sem aceite | obter critério oficial |
@@ -43,6 +43,8 @@ congelado não deve ser usado como log mutável.
 | PRE-023 | RECONCILED | contrato de lançamentos na UI | a comparação e o relatório passam a consumir `release_date` + empreendimento/unidades, em vez de somar cada snapshot do histórico | homologar o VGV lançado separadamente |
 | PRE-024 | ASSUMED | diagnóstico e exportação | uma ação única executa contratos e bancadas do recorte; o XLSX exporta resumo e todas as células, inclusive fonte, fórmula e diferença | acrescentar método granular de Vendas/Estoque no mesmo dossiê |
 | PRE-025 | OPEN | IVV temporal | IVV não é aditivo: a consulta direta não usa `group_by`, para receber total por segmento; a promoção ainda depende da fórmula ponderada por oferta anterior + lançamentos | confrontar endpoint e fórmula granular por faixa de área |
+| PRE-026 | APPROVED | universo horizontal Secovi | entra somente empreendimento cujo `standard` ou algum `typologies_history[].pattern` seja exatamente `Condomínio de Casas/Sobrados`; loteamentos, chácaras, terrenos e produto não informado ficam fora | decisão de Gabriel em 01/set/2026 a partir das anotações reiteradas de Juliana; manter teste de taxonomia e contagem de exclusões |
+| PRE-027 | APPROVED | padrão histórico | quando o `pattern` do período trouxer produto em vez de padrão socioeconômico, herdar o último padrão socioeconômico conhecido em período anterior; antes do primeiro conhecido, usar `Não classificado` | decisão de Gabriel em 01/set/2026; proibir look-ahead e registrar a origem herdada no dossiê |
 
 ## Premissas de implementaÃ§Ã£o v1
 

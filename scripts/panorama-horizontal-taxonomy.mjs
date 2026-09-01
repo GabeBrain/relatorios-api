@@ -16,8 +16,8 @@
  *   5. divergência entre `standard` e o histórico, e empreendimentos cujo `pattern` alterna entre
  *      rótulo de produto e rótulo socioeconômico (a taxonomia mistura dois eixos num campo só).
  *
- * O v2 falha com 500 na **primeira** chamada de `status=Esgotado` e responde na segunda; o
- * `withRetry` abaixo existe por isso e conta as ocorrências, porque é evidência do portão 5.
+ * O v2 apresenta 500 transitório em `Ativo` e `Esgotado`; o `withRetry` abaixo conta as
+ * recuperações porque elas são evidência do portão de resiliência da V3.
  *
  * Credencial: `.secrets/geobrain.env`. Saída: `.tmp/horizontal-taxonomia.{json,md}`.
  *
@@ -112,6 +112,30 @@ async function fetchHorizontals(bearer, uf, city, { v2 }) {
   return { error: null, rows };
 }
 
+async function probeV2ProductFilters(bearer) {
+  const scope = { uf: 'SP', city: 'Praia Grande', type: 'Horizontal', status: 'Ativo', per_page: 100, page: 1 };
+  const variants = {
+    baseline: {},
+    standard: { standard: CONDO_PATTERN_LABEL },
+    pattern: { pattern: CONDO_PATTERN_LABEL },
+    product_type: { product_type: CONDO_PATTERN_LABEL },
+  };
+  const result = {};
+  for (const [name, extra] of Object.entries(variants)) {
+    const url = new URL(`${V2_URL}/building-with-history`);
+    for (const [key, value] of Object.entries({ ...scope, ...extra })) url.searchParams.set(key, String(value));
+    const body = await withRetry(url, bearer, 'POST', `probe·${name}`);
+    const rows = body.__error ? [] : (body.data ?? []);
+    result[name] = {
+      error: body.__error ?? null,
+      total: body.__error ? null : Number(body.meta?.total ?? rows.length),
+      ids: rows.map((building) => building.building_id ?? building.id ?? null),
+      returnedCondoLabel: rows.filter((building) => acceptedByField(building).accepted).length,
+    };
+  }
+  return result;
+}
+
 // --- taxonomia --------------------------------------------------------------
 
 const normalize = (value) => String(value ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
@@ -129,6 +153,10 @@ const PRODUCT_LABELS = new Map([
 
 /** Rótulos socioeconômicos: dizem o padrão, não o produto. `Futuro` é marcador de período. */
 const SOCIOECONOMIC_LABELS = new Set(['economico', 'standard', 'medio', 'medio-alto', 'alto', 'luxo', 'futuro']);
+const PRODUCT_CANDIDATE_FIELDS = [
+  'building_subtype', 'subtype', 'sub_type', 'horizontal_type', 'product_type',
+  'building_type', 'type', 'standard',
+];
 
 function classifyLabel(value) {
   const key = normalize(value);
@@ -199,7 +227,9 @@ async function main() {
   });
 
   const bearer = await token();
-  const report = { startedAt: new Date().toISOString(), condoLabel: CONDO_PATTERN_LABEL, cities: [], legacyFieldCheck: null, retries: null };
+  const report = { startedAt: new Date().toISOString(), condoLabel: CONDO_PATTERN_LABEL, cities: [], legacyFieldCheck: null, filterProbe: null, retries: null };
+
+  report.filterProbe = await probeV2ProductFilters(bearer);
 
   // Checagem de contrato: o legado tem `pattern` em `typologies_history`?
   const legacy = await fetchHorizontals(bearer, targets[0].uf, targets[0].city, { v2: false });
@@ -228,6 +258,7 @@ async function main() {
     const byField = rows.map((building) => ({ building, decision: acceptedByField(building) }));
     const byName = rows.map((building) => ({ building, decision: acceptedByNameHeuristic(building) }));
     const accepted = byField.filter((entry) => entry.decision.accepted);
+    const ambiguous = byField.filter((entry) => entry.decision.reason === 'apenas_socioeconomico');
 
     // Divergência entre padrão atual e histórico, e mistura de eixos no mesmo empreendimento.
     const standardOnly = rows.filter(
@@ -262,6 +293,31 @@ async function main() {
       historyOnly,
       mixedAxes,
       acceptedNames: accepted.map((entry) => String(entry.building.name ?? entry.building.building_name ?? '?')),
+      ambiguousAudit: {
+        count: ambiguous.length,
+        candidateFieldCoverage: Object.fromEntries(PRODUCT_CANDIDATE_FIELDS.map((field) => [
+          field,
+          ambiguous.filter(({ building }) => building[field] != null && String(building[field]).trim() !== '').length,
+        ])),
+        candidateFieldValues: Object.fromEntries(PRODUCT_CANDIDATE_FIELDS.map((field) => [
+          field,
+          tally(ambiguous, ({ building }) => building[field]),
+        ])),
+        historyTypeOfTypology: tally(
+          ambiguous.flatMap(({ building }) => building.typologies_history ?? []),
+          (entry) => entry.type_of_typology,
+        ),
+        samples: ambiguous.slice(0, 5).map(({ building }) => ({
+          id: building.building_id ?? building.id ?? null,
+          name: building.name ?? building.building_name ?? null,
+          building_type: building.building_type ?? null,
+          type: building.type ?? null,
+          standard: building.standard ?? null,
+          candidateFields: Object.fromEntries(PRODUCT_CANDIDATE_FIELDS.map((field) => [field, building[field] ?? null])),
+          historyPatterns: [...new Set((building.typologies_history ?? []).map((entry) => entry.pattern ?? null))],
+          historyTypeOfTypology: [...new Set((building.typologies_history ?? []).map((entry) => entry.type_of_typology ?? null))],
+        })),
+      },
     });
     process.stdout.write(
       `${rows.length} horizontais · ${accepted.length} aceitos pelo campo · ${byName.filter((entry) => entry.decision.accepted).length} pela heurística de nome`
@@ -279,6 +335,7 @@ async function main() {
 
 function renderMarkdown(report) {
   const ok = report.cities.filter((city) => !city.error);
+  const ambiguousTotal = ok.reduce((sum, city) => sum + (city.ambiguousAudit?.count ?? 0), 0);
   const allPatterns = new Map();
   for (const city of ok) for (const [label, count] of Object.entries(city.patternTally)) allPatterns.set(label, (allPatterns.get(label) ?? 0) + count);
 
@@ -297,6 +354,17 @@ function renderMarkdown(report) {
     `Campos do legado: \`${report.legacyFieldCheck.fields.join('`, `')}\``,
     '',
     `Retries que converteram um 500 em 200: **${report.retries.total}** — ${JSON.stringify(report.retries.byStatus)}`,
+    '',
+    '## Filtros de produto no v2',
+    '',
+    '| Variante | Total | IDs iguais à consulta-base | Condomínios rotulados retornados |',
+    '|---|---:|---|---:|',
+    ...Object.entries(report.filterProbe ?? {}).map(([name, probe]) => {
+      const baselineIds = JSON.stringify(report.filterProbe?.baseline?.ids ?? []);
+      return `| ${name} | ${probe.total ?? '—'} | ${JSON.stringify(probe.ids ?? []) === baselineIds ? 'sim' : 'não'} | ${probe.returnedCondoLabel ?? '—'} |`;
+    }),
+    '',
+    'Parâmetros experimentais que devolvem os mesmos IDs da base foram ignorados pelo endpoint; não filtram produto.',
     '',
     '## Universo horizontal por município',
     '',
@@ -325,6 +393,20 @@ function renderMarkdown(report) {
     lines.push(
       `| ${city.uf} | ${city.city} | ${city.standardOnly} | ${city.historyOnly} | ${city.mixedAxes} | ${city.acceptedNames.join(', ') || '—'} |`
     );
+  }
+
+  lines.push(
+    '',
+    '## Auditoria dos produtos não informados',
+    '',
+    `Registros com apenas eixo socioeconômico: **${ambiguousTotal}**.`,
+    '',
+    '| Campo candidato | Preenchidos nos ambíguos |',
+    '|---|---:|',
+  );
+  for (const field of PRODUCT_CANDIDATE_FIELDS) {
+    const count = ok.reduce((sum, city) => sum + Number(city.ambiguousAudit?.candidateFieldCoverage?.[field] ?? 0), 0);
+    lines.push(`| ${field} | ${count} |`);
   }
 
   const notMapped = [...allPatterns.keys()].filter((label) => classifyLabel(label) === 'desconhecido');
