@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-01 — Validação do Fechamento: regra desativada e nomenclatura de divergências — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — validação pós-consulta.
+- **O quê:** desativada a regra de baixa disponibilidade para novos empreendimentos e renomeada a coluna/exportação de `Erro` para `Divergência`.
+- **Por quê:** manter a regra temporariamente fora do processamento e alinhar a nomenclatura exibida ao resultado da validação.
+- **Arquivos:** `src/features/validacao-fechamento/validation-rules.ts`, `src/features/validacao-fechamento/DivergencesGrid.tsx`.
+- **Commits:** `44717c1`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; regra de baixa disponibilidade permanece desativada até eventual reativação solicitada.
+
 ### 2026-08-31 — Validação do Fechamento: consulta interna e divergências — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — validação pós-consulta de empreendimentos e tipologias.
 - **O quê:** a feature consulta exclusivamente `building-with-history-internal`, preserva os campos internos necessários e executa as tratativas v3 somente depois de concluídas todas as requisições. A guia **Divergências** inclui cidade, status, período e grupo aplicado, quebra o conteúdo da tabela, apresenta Campo em PT-BR, mantém Valor visível durante a rolagem, explica os agrupamentos das comparações, restringe Erro pela Regra selecionada, permite limpar os filtros locais e exporta o recorte completo em Excel.
