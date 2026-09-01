@@ -1,5 +1,11 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-01 — Panorama: alinhamento do botão de geração — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — controles de recorte.
+- **O quê:** o botão de gerar passou a reservar a mesma altura de rótulo dos filtros. Ele não é mais empurrado pela mensagem de estado abaixo do seletor de municípios e permanece alinhado aos inputs.
+- **Evidência:** build de produção concluído.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-09-01 — Panorama: V3 única na tela e evidência autenticada resiliente — Gabriel Hxg
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — controle de recorte e diagnóstico autenticado.
 - **O quê:** removido o seletor de motor: a tela envia exclusivamente V3. O botão primário recebeu largura mínima e alinhamento no grid para manter “Consultando APIs…” legível. O coletor autenticado passou a ter timeout de 12s por chamada, progresso por série e checkpoint JSON/Markdown a cada resultado em `.tmp`, preservando evidência parcial em vez de travar a sessão.

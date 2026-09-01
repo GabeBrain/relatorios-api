@@ -47,7 +47,7 @@ export default function PanoramaSecoviFiergsPage() {
         <div className="min-w-[260px] flex-1"><PanoramaCityMultiSelect cities={cities} options={geoApi.availableCities} onChange={updateCities} loading={geoApi.isLoading} disabled={geoApi.isLoading || !geo.uf} /></div>
       </>}
       <PanoramaQuarterRangePicker start={scope.startQuarter} end={scope.endQuarter} options={quarters} onChange={updateRange} />
-      <Button className="h-9 min-w-[176px] self-end justify-center whitespace-nowrap" onClick={generate} disabled={!ready || report.isFetching}><BarChart3 className="shrink-0"/>{report.isFetching ? 'Consultando APIs…' : 'Gerar relatório'}</Button>
+      <div className="min-w-[176px] space-y-1.5"><label className="invisible block text-[10px] font-medium uppercase tracking-wide" aria-hidden="true">Ação</label><Button className="h-9 w-full justify-center whitespace-nowrap" onClick={generate} disabled={!ready || report.isFetching}><BarChart3 className="shrink-0"/>{report.isFetching ? 'Consultando APIs…' : 'Gerar relatório'}</Button></div>
     </div></section>
     {!submitted && <Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Defina o recorte</AlertTitle><AlertDescription>Escolha a UF, um ou mais municípios monitorados e o período; nenhuma chamada pesada é feita antes de um escopo válido.</AlertDescription></Alert>}
     {report.isPending && submitted && <PanoramaLoadingState label="Consultando APIs e montando o relatório…" progress={generationProgress} />}
