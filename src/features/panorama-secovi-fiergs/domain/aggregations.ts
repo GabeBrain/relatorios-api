@@ -424,13 +424,20 @@ export function offerByAreaBand(cube: MarketCube): AreaBandRow[] {
     // A base do IVV é a oferta disponível para venda no período: anterior + lançamentos. Com o piso
     // aplicado, ela permanece igual a `final + vendas` sempre que o piso não age.
     const base = previous === null || value.launched === null ? null : previous + value.launched;
+    /**
+     * IVV é uma taxa de absorção: só existe com base positiva e venda não negativa. A API devolve
+     * venda líquida negativa quando os distratos superam as vendas do período — é um fato da fonte
+     * e continua impresso na coluna de vendas, mas não pode virar taxa. Publicar `−1,2%` de IVV,
+     * como saiu no Jundiaí pós-correções, é apresentar um indicador que não existe.
+     */
+    const sellable = value.sold !== null && value.sold >= 0 && base !== null && base > 0;
     return {
       label, kind,
       previousUnits: previous,
       finalUnits: value.final,
       launchedUnits: value.launched,
       soldUnits: value.sold,
-      ivv: value.sold === null || base === null || base === 0 ? null : value.sold / base * 100,
+      ivv: sellable ? value.sold! / base! * 100 : null,
     };
   };
   const rows = orderAreaBands(buckets.keys()).map((label) => rowOf(label, 'row', buckets.get(label)!));
@@ -445,6 +452,7 @@ export function offerByAreaBand(cube: MarketCube): AreaBandRow[] {
   const launchedUnits = sum((row) => row.launchedUnits);
   const soldUnits = sum((row) => row.soldUnits);
   const base = previousUnits === null || launchedUnits === null ? null : previousUnits + launchedUnits;
+  const sellable = soldUnits !== null && soldUnits >= 0 && base !== null && base > 0;
   return [...rows, {
     label: 'Total',
     kind: 'total',
@@ -452,7 +460,7 @@ export function offerByAreaBand(cube: MarketCube): AreaBandRow[] {
     finalUnits: sum((row) => row.finalUnits),
     launchedUnits,
     soldUnits,
-    ivv: soldUnits === null || base === null || base === 0 ? null : soldUnits / base * 100,
+    ivv: sellable ? soldUnits! / base! * 100 : null,
   }];
 }
 
@@ -493,7 +501,9 @@ export function vgvSummary(cube: MarketCube): VgvRow[] {
     return orderStandards(groups.keys()).map((label) => vgvRow(segment === 'Horizontal' ? `${SECOVI_HORIZONTAL_LABEL} · ${label}` : label, 'row', segment, groups.get(label) ?? []));
   };
   const rows: VgvRow[] = [...rowsFor(vertical, 'Vertical')];
-  if (vertical.length) rows.push(vgvRow('Subtotal vertical', 'subtotal', 'Vertical', vertical));
+  // Sem horizontal aceito, `Subtotal vertical` repetiria célula a célula o `Total geral`. Duas
+  // linhas idênticas em sequência não informam nada e fazem o leitor procurar a diferença.
+  if (vertical.length && horizontal.length) rows.push(vgvRow('Subtotal vertical', 'subtotal', 'Vertical', vertical));
   rows.push(...rowsFor(horizontal, 'Horizontal'));
   if (horizontal.length) rows.push(vgvRow('Subtotal horizontal', 'subtotal', 'Horizontal', horizontal));
   rows.push(vgvRow(COHORT_TOTAL_LABEL, 'total', 'Total', cube.projects));

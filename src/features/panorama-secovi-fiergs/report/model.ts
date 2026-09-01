@@ -1,7 +1,8 @@
 import { buildLaunchModel, periodToQuarter, safeNumber } from '../lib/launches';
-import type { LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
+import type { HorizontalSeriesPolicy, LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
 import { editorialWindow, quarterRange } from '../domain/quarters';
-import { mergeCubes, type MarketCube } from '../domain/cube';
+import { horizontalProjects, mergeCubes, type MarketCube } from '../domain/cube';
+import { classifyHorizontalLabel } from '../domain/entity-policy';
 import {
   cohortMatrix as buildCohortMatrix,
   cohortMatrixParticipation,
@@ -173,6 +174,63 @@ function emptyCube(scope: PanoramaScope): MarketCube {
   return { projects: [], rejections: [], cities: [], endQuarter: scope.endQuarter, entity: scope.entity ?? 'secovi-sp' };
 }
 
+/* -------------------------------------------------------------------------- */
+/* Firewall de fontes — contratos municipais nunca falam pelo universo Secovi  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Os contratos `temporal-analysis-city/*` são **municipais**: agregam o horizontal inteiro em
+ * `building_type` e devolvem rótulos de produto (`Loteamento Fechado`, `Condomínio de Chácaras`)
+ * como se fossem padrão socioeconômico. Nenhum deles sabe da política PRE-026.
+ *
+ * Sem este firewall, o número de loteamento atravessa o relatório e — desde que o rótulo editorial
+ * passou a ser `Condomínio de Casas` — se apresenta com o nome do universo aceito. Foi exatamente o
+ * que apareceu no Jundiaí pós-correções: 0 empreendimentos com 6.055 unidades, e a narrativa
+ * imprimindo "o padrão com maior oferta final é Loteamento Fechado".
+ *
+ * A regra é simples e vale para todo bloco temporal: **na V3 eles são lidos como Vertical.** O
+ * horizontal do Panorama Secovi vem do cubo, e só dele.
+ */
+/**
+ * `attributable` é `true` quando a série horizontal impressa corresponde de fato ao universo
+ * aceito — o que acontece quando o universo é vazio, caso em que zero é o valor verdadeiro e não um
+ * zero fabricado. Com condomínios aceitos, o contrato municipal não sabe separá-los dos loteamentos
+ * e a série deixa de ser atribuível.
+ */
+function horizontalSeriesPolicyOf(cube: MarketCube, engineVersion: 'v2' | 'v3'): HorizontalSeriesPolicy {
+  const accepted = horizontalProjects(cube).length;
+  if (engineVersion !== 'v3') return { attributable: true, reason: 'Motor V2: série municipal usada como está.', acceptedProjects: accepted };
+  if (!accepted) {
+    return {
+      attributable: true,
+      acceptedProjects: 0,
+      reason: 'Nenhum Condomínio de Casas elegível no recorte: a série horizontal é zero por definição do universo, não por ausência de resposta.',
+    };
+  }
+  return {
+    attributable: false,
+    acceptedProjects: accepted,
+    reason: `Há ${accepted} Condomínio(s) de Casas no recorte, mas o contrato municipal agrega todo o horizontal e não permite separá-los dos demais produtos. A série horizontal fica indisponível em vez de publicar número de outro universo.`,
+  };
+}
+
+/**
+ * Aplica o firewall a um bloco temporal: remove os grupos cujo rótulo é produto horizontal fora da
+ * política — é o que impedia `Loteamento Fechado` de virar "padrão" em tabela e em narrativa — e
+ * zera a componente horizontal das séries, deixando o total igual ao vertical.
+ */
+function firewallTemporalBlock(block: ReportMarketBlock, policy: HorizontalSeriesPolicy): ReportMarketBlock {
+  const isExcludedProduct = (label: string) => classifyHorizontalLabel(label) === 'produto_excluido';
+  const verticalOnly = <T extends { vertical: number; horizontal: number; total: number }>(row: T): T => ({ ...row, horizontal: 0, total: row.vertical });
+  return {
+    ...block,
+    series: block.series.map(verticalOnly),
+    byGroup: block.byGroup.filter((row) => !isExcludedProduct(row.label)).map(verticalOnly),
+    groupSeries: block.groupSeries.filter((group) => !isExcludedProduct(group.label)).map((group) => ({ ...group, series: group.series.map(verticalOnly) })),
+    formula: `${block.formula} Contrato municipal lido como Vertical (política PRE-026); o horizontal do relatório vem do cubo.`,
+  };
+}
+
 /** Agrega as linhas prontas dos slides 31–51 a partir do cubo granular. */
 export function buildGranularBlocks(cube: MarketCube): PanoramaGranularBlocks {
   const matrix = buildCohortMatrix(cube, 'Vertical');
@@ -303,27 +361,31 @@ export function buildPanoramaReportModel(
     meter: normalizeTemporalSource(scope, options.cityTemporalSources, 'meter', 'snapshot', sources.meter),
     meterTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'meterTypology', 'snapshot', sources.meterTypology),
   };
+  // Firewall de fontes: na V3 nenhum contrato municipal fala pelo horizontal do Panorama Secovi.
+  const horizontalSeries = horizontalSeriesPolicyOf(cube, scope.engineVersion ?? 'v3');
+  const guard = (block: ReportMarketBlock) => (scope.engineVersion ?? 'v3') === 'v3' ? firewallTemporalBlock(block, horizontalSeries) : block;
+
   return {
-    scope, generatedAt: new Date().toISOString(), launches,
+    scope, generatedAt: new Date().toISOString(), launches, horizontalSeries,
     sales: {
-      units: marketBlock(scope, temporal.sales, 'liquid_sales', 'count', 'Soma de vendas líquidas por período, segmento e padrão.'),
-      vgv: marketBlock(scope, temporal.sales, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido da API.'),
-      unitsByTypology: marketBlock(scope, temporal.salesTypology, 'liquid_sales', 'count', 'Soma de vendas líquidas por período e tipologia.'),
-      vgvByTypology: marketBlock(scope, temporal.salesTypology, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido por tipologia.'),
+      units: guard(marketBlock(scope, temporal.sales, 'liquid_sales', 'count', 'Soma de vendas líquidas por período, segmento e padrão.')),
+      vgv: guard(marketBlock(scope, temporal.sales, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido da API.')),
+      unitsByTypology: guard(marketBlock(scope, temporal.salesTypology, 'liquid_sales', 'count', 'Soma de vendas líquidas por período e tipologia.')),
+      vgvByTypology: guard(marketBlock(scope, temporal.salesTypology, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido por tipologia.')),
     },
     stock: {
-      units: marketBlock(scope, temporal.stock, 'stock', 'count', 'Estoque no fechamento por segmento e padrão.'),
-      vgv: marketBlock(scope, temporal.stock, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por padrão.'),
-      unitsByTypology: marketBlock(scope, temporal.stockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia.'),
-      vgvByTypology: marketBlock(scope, temporal.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.'),
+      units: guard(marketBlock(scope, temporal.stock, 'stock', 'count', 'Estoque no fechamento por segmento e padrão.')),
+      vgv: guard(marketBlock(scope, temporal.stock, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por padrão.')),
+      unitsByTypology: guard(marketBlock(scope, temporal.stockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia.')),
+      vgvByTypology: guard(marketBlock(scope, temporal.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.')),
     },
-    ivv: marketBlock(scope, withClosingStockWeight(temporal.ivv, temporal.stock), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average'),
-    ivvByTypology: marketBlock(scope, withClosingStockWeight(temporal.ivvTypology, temporal.stockTypology), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average'),
+    ivv: guard(marketBlock(scope, withClosingStockWeight(temporal.ivv, temporal.stock), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
+    ivvByTypology: guard(marketBlock(scope, withClosingStockWeight(temporal.ivvTypology, temporal.stockTypology), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average')),
     prices: {
-      ticket: marketBlock(scope, withClosingStockWeight(temporal.ticket, temporal.stock), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average'),
-      meter: marketBlock(scope, withClosingStockWeight(temporal.meter, temporal.stock), 'average_price_per_meter', 'brl_sqm', 'Média ponderada do preço por m² municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average'),
-      ticketByTypology: marketBlock(scope, withClosingStockWeight(temporal.ticketTypology, temporal.stockTypology), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average'),
-      meterByTypology: marketBlock(scope, withClosingStockWeight(temporal.meterTypology, temporal.stockTypology), 'average_price_per_meter', 'brl_sqm', 'Média ponderada do preço por m² municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average'),
+      ticket: guard(marketBlock(scope, withClosingStockWeight(temporal.ticket, temporal.stock), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
+      meter: guard(marketBlock(scope, withClosingStockWeight(temporal.meter, temporal.stock), 'average_price_per_meter', 'brl_sqm', 'Média ponderada do preço por m² municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
+      ticketByTypology: guard(marketBlock(scope, withClosingStockWeight(temporal.ticketTypology, temporal.stockTypology), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average')),
+      meterByTypology: guard(marketBlock(scope, withClosingStockWeight(temporal.meterTypology, temporal.stockTypology), 'average_price_per_meter', 'brl_sqm', 'Média ponderada do preço por m² municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average')),
     },
     market: {
       cohorts: cohortBlock(scope, cohorts),

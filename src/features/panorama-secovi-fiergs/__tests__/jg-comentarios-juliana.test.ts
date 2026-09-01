@@ -136,6 +136,24 @@ describe('JG-19 · faixas de área útil e IVV', () => {
     }
   });
 
+  it('venda líquida negativa não vira taxa: o IVV fica indisponível', () => {
+    // A API devolve venda líquida negativa quando os distratos superam as vendas do período. O
+    // número continua sendo um fato da fonte, mas `−1,2%` de IVV — como saiu no Jundiaí
+    // pós-correções — é um indicador que não existe.
+    const cube = buildCityCube([
+      { building_id: 'V1', building_type: 'Vertical', standard: 'Médio', release_date: '2024-05-01', total_units: 80,
+        typologies_history: [
+          { period: '2024-05-01', number_bedroom: '2', qty: 80, private_area: 220 },
+          { period: '2026-06-01', number_bedroom: '2', typology_stock: 83, liquid_sales: -1, private_area: 220 },
+        ] },
+    ], { ...options, city: 'Jundiaí' });
+    const band = offerByAreaBand(cube).find((row) => row.kind === 'row')!;
+    // A venda observada continua visível na sua coluna.
+    expect(band.soldUnits).toBe(-1);
+    // Mas não produz taxa.
+    expect(band.ivv).toBeNull();
+  });
+
   it('faixa sem base devolve `null`, e não zero', () => {
     const cube = buildCityCube([{ building_id: 'V9', building_type: 'Vertical', standard: 'Médio', release_date: '2025-01-01', total_units: 10, typologies_history: [{ period: '2026-06-01', number_bedroom: '2', private_area: 62 }] }], { ...options, city: 'Jundiaí' });
     const band = offerByAreaBand(cube).find((row) => row.kind === 'row');

@@ -162,10 +162,22 @@ export interface PanoramaPresentationCredits {
   consultant?: PresentationPerson;
   analysts?: PresentationPerson[];
 }
+/**
+ * Atribuibilidade da série horizontal vinda dos contratos municipais. Ver `firewallTemporalBlock`
+ * em `report/model.ts`: eles agregam todo o horizontal e não conhecem a política PRE-026.
+ */
+export interface HorizontalSeriesPolicy {
+  attributable: boolean;
+  reason: string;
+  acceptedProjects: number;
+}
+
 export interface PanoramaReportModel {
   scope: PanoramaScope;
   generatedAt: string;
   launches: LaunchModel;
+  /** Se a série horizontal impressa corresponde ao universo aceito (JG-13 a JG-18, JG-20). */
+  horizontalSeries: HorizontalSeriesPolicy;
   sales: { units: ReportMarketBlock; vgv: ReportMarketBlock; unitsByTypology: ReportMarketBlock; vgvByTypology: ReportMarketBlock };
   stock: { units: ReportMarketBlock; vgv: ReportMarketBlock; unitsByTypology: ReportMarketBlock; vgvByTypology: ReportMarketBlock };
   ivv: ReportMarketBlock;

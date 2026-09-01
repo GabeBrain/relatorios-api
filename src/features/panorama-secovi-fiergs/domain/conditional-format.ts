@@ -15,11 +15,12 @@ export type ConditionalState = 'positive' | 'negative' | 'neutral' | 'null' | 'u
 
 /**
  * Métricas com semântica própria. `variation` julga pelo sinal; as demais julgam pela posição
- * relativa a uma referência do próprio recorte (média geral, total ou período anterior).
+ * relativa a uma referência do próprio recorte (média geral, total ou período anterior) — quando
+ * uma referência é fornecida. `share` é chamada sem referência e funciona como escala.
  */
 export type ConditionalMetric =
   | 'variation'        // variação entre períodos: positivo cresce
-  | 'share'            // participação percentual: acima da fatia média destaca
+  | 'share'            // participação percentual: escala sequencial, sem julgar acima/abaixo
   | 'availability'     // oferta final / oferta lançada: quanto maior, pior o giro
   | 'ivv'              // índice de velocidade de vendas: quanto maior, melhor
   | 'pricePerMeter'    // R$/m²: acima da média geral destaca
@@ -38,6 +39,10 @@ export interface ConditionalInput {
   /**
    * Referência do recorte: média geral, total da coluna ou período anterior. Sem referência
    * utilizável, o valor é exibido sem julgamento (`neutral`) — nunca com um sinal inventado.
+   *
+   * Participação é chamada **sem** referência de propósito: comparar cada fatia com a fatia média
+   * pinta de vermelho toda linha abaixo da média e comunica "ruim" onde só há "menor". Sem
+   * referência a barra comunica magnitude — escala sequencial, não divergente.
    */
   reference?: number | null;
   /** Teto da escala para o comprimento da barra. Sem teto, a barra não é desenhada. */

@@ -118,6 +118,11 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
     return <CoveragePage title="PREÇO POR M² PRIV. MÉDIO TOTAL RESIDENCIAL VERTICAL" detail="A API não disponibilizou a série temporal de R$/m² para este recorte. O gráfico foi mantido indisponível para não representar ausência de resposta como preço igual a zero."/>;
   }
   const data = series.data;
+  // JG-13 a JG-18: com Condomínio de Casas aceito, o contrato municipal não sabe separá-lo dos
+  // demais horizontais. A segunda linha desaparece — publicar a série agregada sob o rótulo
+  // `Cond. de Casas` seria atribuir venda de loteamento ao universo Secovi.
+  const salesPage = [23, 24, 25, 26].includes(page);
+  const hideCompanion = salesPage && !series.pattern && !report.horizontalSeries.attributable;
   const referenceQuarter = report.scope.endQuarter[0];
   const formatValue = (value: number) => series.unit === 'mi' ? decimal(value) : series.unit === 'sqm' ? `R$ ${n(value)}/m²` : n(value);
   const highlighted = data.filter((row) => row.quarter[0] === referenceQuarter);
@@ -161,8 +166,10 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
     const delta = previous ? variation(Number(props.value), previous.vertical) : null;
     const centre = props.x + props.width / 2;
     const emphasized = row.quarter[0] === referenceQuarter;
+    // Rótulo compacto: com 17 barras, `R$ 10.574/m²` por barra se sobrepõe ao vizinho. A unidade já
+    // está no título e na legenda da lâmina, então a barra carrega só o número.
     return <g className={emphasized ? 'panorama-bar-label is-reference' : 'panorama-bar-label'}>
-      <text x={centre} y={Math.max(24, props.y - 16)} textAnchor="middle">{formatValue(Number(props.value))}</text>
+      <text x={centre} y={Math.max(24, props.y - 16)} textAnchor="middle">{n(Number(props.value))}</text>
       <text x={centre} y={Math.max(36, props.y - 4)} textAnchor="middle" className={delta === null ? 'panorama-bar-delta' : delta >= 0 ? 'panorama-bar-delta panorama-cf-positive' : 'panorama-bar-delta panorama-cf-negative'}>
         {delta === null ? '—' : `${delta >= 0 ? '▲' : '▼'} ${pct(Math.abs(delta))}`}
       </text>
@@ -180,16 +187,30 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
           <span aria-hidden="true"/>
           {comparisons.map(({ previous, current }) => <span key={`${previous.quarter}-${current.quarter}`}>{quarterLabel(previous.quarter)} x {quarterLabel(current.quarter)}</span>)}
           <span>{series.nouns[0]}</span>
-          {comparisons.map(({ previous, current }) => <strong className="panorama-variation-primary" style={{ background: series.colors[0] }} key={`v-${current.quarter}`}>{pct(variation(current.vertical, previous.vertical))}</strong>)}
-          {!series.single && <><span>{series.nouns[1]}</span>{comparisons.map(({ previous, current }) => <strong className="panorama-variation-secondary" style={{ background: series.colors[1], color: series.pattern ? '#fff' : '#080808' }} key={`h-${current.quarter}`}>{pct(variation(current.horizontal, previous.horizontal))}</strong>)}</>}
+          {/* A cor da série identifica a linha do gráfico; ela não pode julgar o sinal. Uma
+              variação de −66,7% pintada de verde é o oposto do que a regra semântica manda. */}
+          {comparisons.map(({ previous, current }) => { const delta = variation(current.vertical, previous.vertical); const verdict = conditionalFormat('variation', { value: delta }); return <strong className={`panorama-variation-primary ${verdict.className}`} key={`v-${current.quarter}`}>{delta === null ? '—' : `${verdict.symbol} ${pct(Math.abs(delta))}`.trim()}<span className="panorama-sr-only">{verdict.srLabel}</span></strong>; })}
+          {!series.single && !hideCompanion && <><span>{series.nouns[1]}</span>{comparisons.map(({ previous, current }) => { const delta = variation(current.horizontal, previous.horizontal); const verdict = conditionalFormat('variation', { value: delta }); return <strong className={`panorama-variation-secondary ${verdict.className}`} key={`h-${current.quarter}`}>{delta === null ? '—' : `${verdict.symbol} ${pct(Math.abs(delta))}`.trim()}<span className="panorama-sr-only">{verdict.srLabel}</span></strong>; })}</>}
         </div>
       </div>
     </div>
     {series.pattern && <div className="panorama-segment-band">RESIDENCIAL VERTICAL</div>}
+    {/* A faixa anual soma o que é fluxo (empreendimentos, unidades, VGV) e **pondera** o que é taxa
+        (R$/m²). Somar preço por m² dos quatro trimestres produz um número sem significado — era o
+        `2022 · R$ 17.173/m²` impresso em destaque, e o portão da matriz proíbe somar preços. */}
     <div className="panorama-annual-strip">{years.map((annualYear) => {
       const rows = data.filter((item) => year(item.quarter) === annualYear);
-      const total = rows.reduce((sum, row) => sum + row.total, 0);
-      return <span key={annualYear}><b>{annualYear}{annualYear === year(report.scope.endQuarter) ? '*' : ''}</b>{formatValue(total)} {unitLabel}<small>{formatValue(total / Math.max(rows.length, 1))} {series.unit === 'count' && [14, 15].includes(page) ? 'Emp.' : series.unit === 'count' ? 'Unid.' : series.unit === 'mi' ? 'Mi.' : ''}/Trimestre</small></span>;
+      const observed = rows.filter((row) => Number.isFinite(row.total));
+      const isRate = series.unit === 'sqm';
+      const total = observed.reduce((sum, row) => sum + row.total, 0);
+      const average = observed.length ? total / observed.length : 0;
+      const headline = isRate ? average : total;
+      const isClosingYear = annualYear === year(report.scope.endQuarter);
+      return <span key={annualYear}>
+        <b>{annualYear}{isClosingYear ? '*' : ''}</b>
+        {formatValue(headline)}{isRate ? '' : ` ${unitLabel}`}
+        <small>{isRate ? 'média do ano' : <>{formatValue(average)} {series.unit === 'count' && [14, 15].includes(page) ? 'Emp.' : series.unit === 'count' ? 'Unid.' : 'Mi.'}/Trimestre</>}</small>
+      </span>;
     })}</div>
     <ResponsiveContainer width="100%" height={series.pattern ? '51%' : '62%'}>
       {series.bars
@@ -204,11 +225,12 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
             <Tooltip formatter={(value) => formatValue(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as never)}/>
             <Legend verticalAlign="bottom"/>
             <Line type="monotone" dataKey="vertical" name={series.nouns[0]} stroke={series.colors[0]} strokeWidth={4} dot={false} isAnimationActive={false} label={renderPointLabel('vertical', series.colors[0], '#fff')}/>
-            {!series.single && <Line type="monotone" dataKey="horizontal" name={series.nouns[1]} stroke={series.colors[1]} strokeWidth={4} dot={false} isAnimationActive={false} label={renderPointLabel('horizontal', series.colors[1], series.pattern ? '#fff' : '#080808')}/>}
+            {!series.single && !hideCompanion && <Line type="monotone" dataKey="horizontal" name={series.nouns[1]} stroke={series.colors[1]} strokeWidth={4} dot={false} isAnimationActive={false} label={renderPointLabel('horizontal', series.colors[1], series.pattern ? '#fff' : '#080808')}/>}
           </LineChart>}
     </ResponsiveContainer>
     {series.pattern && <div className="panorama-mcmv-strip">{years.slice(-4).map((annualYear) => { const rows = data.filter((item) => year(item.quarter) === annualYear); const economic = rows.reduce((sum, row) => sum + row.vertical, 0); const total = rows.reduce((sum, row) => sum + row.total, 0); return <strong key={annualYear}>MCMV {annualYear}{annualYear === year(report.scope.endQuarter) ? '*' : ''}<span>{total ? pct(economic / total * 100) : '—'}</span></strong>; })}</div>}
     {series.pattern && <p className="panorama-chart-note">OBS.: MCMV = Minha Casa Minha Vida.</p>}
+    {hideCompanion && <p className="panorama-chart-note">{report.horizontalSeries.reason}</p>}
   </div>;
 }
 function comparisonSeries(report: PanoramaReportModel, sales = false) { const metric = sales ? report.sales : { units: { series: report.launches.units }, vgv: { series: report.launches.vgv } }; const quarters = metric.units.series.filter((x: LaunchSeries) => x.quarter[0] === report.scope.endQuarter[0]).slice(-5); return { quarters, rows: [{ label: 'Empreendimentos', series: report.launches.projects, money: false, show: !sales }, { label: 'Unidades', series: metric.units.series, money: false, show: true }, { label: sales ? 'VGV vendido' : 'VGV lançado', series: metric.vgv.series, money: true, show: true }].filter((x) => x.show) }; }
@@ -238,19 +260,23 @@ function ComparisonTable({ report, sales = false, annual = false }: { report: Pa
       <thead><tr><th aria-label="Indicador"/><th>Tipo do Imóvel</th>{periods.map((period) => <th key={period}>{annual ? period : quarterLabel(period as never)}</th>)}{comparisonPairs.map(([from, to]) => from && to ? <th key={`${from}-${to}`}>{comparisonLabel(from, to)}</th> : null)}</tr></thead>
       <tbody>{rows.flatMap((row) => (['vertical', 'horizontal', 'total'] as const).map((type, rowIndex) => {
         const values = periods.map((period) => get(row, period, type));
+        // JG-13 a JG-18: o contrato municipal de vendas agrega todo o horizontal. Quando existe
+        // Condomínio de Casas aceito, ele não sabe separá-lo dos loteamentos — então a linha vira
+        // indisponível em vez de publicar venda de outro universo com o rótulo do universo Secovi.
+        const suppressed = sales && type !== 'vertical' && !report.horizontalSeries.attributable;
         return <tr key={`${row.label}-${type}`} className={type === 'total' ? 'panorama-total-row' : ''}>
           {rowIndex === 0 && <th rowSpan={3} scope="rowgroup" className="panorama-group-cell">{groupLabel(row.label)}</th>}
           {/* JG-05: o rótulo do segmento é a mesma função nas três linhas e por isso recebe o mesmo
               tratamento. O cinza só aparecia no Horizontal e no Total porque o `rowspan` do grupo
               deslocava o `td:first-child` — era artefato de marcação, não decisão editorial. */}
           <td className="panorama-segment-cell">{type === 'vertical' ? 'Residencial Vertical' : type === 'horizontal' ? SECOVI_HORIZONTAL_LABEL : 'Total Mercado'}</td>
-          {values.map((value, index) => <td key={index}>{row.money ? decimal(value) : n(value)}</td>)}
+          {values.map((value, index) => <td key={index}>{suppressed ? '—' : row.money ? decimal(value) : n(value)}</td>)}
           {comparisonPairs.map(([from, to]) => {
             if (!from || !to) return null;
-            const delta = variation(get(row, to, type), get(row, from, type));
+            const delta = suppressed ? null : variation(get(row, to, type), get(row, from, type));
             // JG-05: colunas de variação usam a mesma regra semântica das demais formatações
             // condicionais do relatório — sinal e símbolo, não só cor.
-            const verdict = conditionalFormat('variation', { value: delta, max: 100 });
+            const verdict = conditionalFormat('variation', { value: delta, max: 100, unavailable: suppressed });
             return <td className={`panorama-variation-cell ${type === 'total' ? 'panorama-cf-neutral' : verdict.className}`} style={{ '--panorama-change-size': `${verdict.intensity}%` } as React.CSSProperties} key={`${from}-${to}`}>
               {type !== 'total' && delta !== null && <span className="panorama-change-bar"/>}
               <strong>{delta === null ? '—' : `${verdict.symbol} ${pct(Math.abs(delta))}`.trim()}</strong>
@@ -260,6 +286,7 @@ function ComparisonTable({ report, sales = false, annual = false }: { report: Pa
         </tr>;
       }))}</tbody>
     </table>
+    {sales && !report.horizontalSeries.attributable && <p className="panorama-coverage-caption">{report.horizontalSeries.reason}</p>}
   </div>;
 }
 function CoveragePage({ title, detail }: { title: string; detail: string }) { return <div className="panorama-table-page"><h2>{title}</h2><i/><div className="panorama-coverage-notice"><strong>Dimensão em validação</strong><p>{detail}</p><span>O desenho desta página está reservado para o contrato correto; nenhum indicador de outro bloco foi reutilizado.</span></div></div>; }

@@ -29,9 +29,14 @@ const QUARTERS = ['2022-06-01', '2022-09-01', '2022-12-01', '2023-03-01', '2023-
 
 /** Série temporal por padrão/tipologia, com valores distintos por período para provar variação. */
 function temporalRows(groupBy: string, endpoint: string) {
-  const groups = groupBy === 'Tipologia' ? ['1', '2', '3'] : ['Econômico', 'Médio', 'Alto'];
-  return QUARTERS.flatMap((period, index) => groups.map((group, position) => ({
-    period, group, building_type: 'Vertical',
+  // O contrato municipal devolve rótulo de PRODUTO horizontal como se fosse padrão. Manter
+  // `Loteamento Fechado` aqui é deliberado: é o caminho que os fixtures anteriores não exercitavam
+  // e por onde o loteamento chegou ao PDF entregue.
+  const groups = groupBy === 'Tipologia'
+    ? [{ label: '1', type: 'Vertical' }, { label: '2', type: 'Vertical' }, { label: '3', type: 'Vertical' }]
+    : [{ label: 'Econômico', type: 'Vertical' }, { label: 'Médio', type: 'Vertical' }, { label: 'Alto', type: 'Vertical' }, { label: 'Loteamento Fechado', type: 'Horizontal' }];
+  return QUARTERS.flatMap((period, index) => groups.map(({ label: group, type }, position) => ({
+    period, group, building_type: type,
     liquid_sales: endpoint === 'sales' ? 20 + index * 3 + position * 5 : undefined,
     vgv_liquid_sales: endpoint === 'sales' ? (20 + index * 3) * 400_000 : undefined,
     stock: endpoint === 'stock' ? 200 - index * 4 + position * 30 : undefined,
@@ -203,9 +208,13 @@ for (const [name, scenario] of Object.entries(SCENARIOS)) {
     const text = await page.locator('.panorama-export-root, .space-y-6').first().innerText().catch(() => '');
     const deck = text.toLowerCase();
 
-    // JG-36: nenhuma narrativa do deck menciona loteamento ou a API GeoBrain.
+    // JG-36 e firewall de fontes: o contrato municipal deste cenário CONTÉM `Loteamento Fechado`.
+    // Nenhuma lâmina — tabela, gráfico ou narrativa — pode publicá-lo.
     expect(deck).not.toContain('loteamento');
     expect(deck).not.toContain('api geobrain');
+    // Reconciliação: o resumo geral e a oferta por padrão nascem do mesmo cubo.
+    const numbers = (label: string) => [...text.matchAll(new RegExp(`${label}[^\d]*([\d.]+)`, 'g'))].map((match) => match[1]);
+    expect(numbers('Total Mercado').length).toBeGreaterThan(0);
     // JG-40: nenhum placeholder de foto no encerramento.
     expect(text).not.toContain('FOTO DO CONSULTOR');
 
