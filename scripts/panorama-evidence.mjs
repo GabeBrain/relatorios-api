@@ -131,13 +131,17 @@ function buildUrl(url, query) {
   return target;
 }
 
-async function request(token, { url, query, method = 'GET' }) {
+async function request(token, { url, query, method = 'GET', timeoutMs = 12_000 }) {
   const started = Date.now();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(buildUrl(url, query), {
       method,
       headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+      signal: controller.signal,
     });
+    clearTimeout(timer);
     const contentType = response.headers.get('content-type') ?? '';
     if (!contentType.includes('json')) {
       return { ok: false, status: response.status, ms: Date.now() - started, error: `resposta ${contentType || 'sem content-type'}, não JSON` };
@@ -145,7 +149,8 @@ async function request(token, { url, query, method = 'GET' }) {
     const data = await response.json();
     return { ok: response.ok, status: response.status, ms: Date.now() - started, data };
   } catch (error) {
-    return { ok: false, status: null, ms: Date.now() - started, error: String(error?.message ?? error) };
+    clearTimeout(timer);
+    return { ok: false, status: null, ms: Date.now() - started, error: controller.signal.aborted ? `timeout após ${timeoutMs}ms` : String(error?.message ?? error) };
   }
 }
 
@@ -217,10 +222,11 @@ async function collectBuildingsLegacy(token, { uf, city }) {
   return { total, byType, ok: Object.values(byType).every((entry) => entry.ok) };
 }
 
-async function collectTemporal(token, { uf, city }, window) {
+async function collectTemporal(token, { uf, city }, window, onSeries) {
   const series = [];
   for (const endpoint of TEMPORAL_ENDPOINTS) {
     for (const groupBy of GROUPINGS) {
+      process.stdout.write(` ${endpoint}/${groupBy}…`);
       const result = await paginate(token, {
         url: `${BASE_URL}/temporal-analysis-city/${endpoint}`,
         query: { city, uf, start_period: window.start, end_period: window.end, group_by: groupBy, 'type[]': BUILDING_TYPES },
@@ -247,6 +253,8 @@ async function collectTemporal(token, { uf, city }, window) {
         // Lista completa e ordenada: é a evidência de cobertura, não uma amostra.
         periods: [...periods.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([label, kind]) => ({ label, kind })),
       });
+      await onSeries?.(series.at(-1));
+      process.stdout.write(`${result.ok ? '200' : `HTTP ${result.status ?? 'rede'}`}`);
     }
   }
   return series;
@@ -349,6 +357,14 @@ async function main() {
     tokenOrigin: origin,
     cities: [],
   };
+  const outDir = resolve(ROOT, '.tmp');
+  const jsonPath = resolve(outDir, `panorama-evidencia-${quarter}.json`);
+  const mdPath = resolve(outDir, `panorama-evidencia-${quarter}.md`);
+  const persist = async () => {
+    await mkdir(outDir, { recursive: true });
+    await writeFile(jsonPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+    await writeFile(mdPath, renderMarkdown(report), 'utf8');
+  };
 
   // Uma cidade por vez, como CITY_CONCURRENCY = 1 no produto: a rajada maior fazia o
   // navegador abortar inclusive o fallback legado (incidente 2 do mapeamento).
@@ -359,18 +375,16 @@ async function main() {
     process.stdout.write(`${buildingsV2.ok ? '200' : `HTTP ${buildingsV2.status ?? 'rede'}`} · legado… `);
     const buildingsLegacy = await collectBuildingsLegacy(token, scope);
     process.stdout.write(`${buildingsLegacy.total} empreendimentos · séries temporais… `);
-    const temporal = await collectTemporal(token, scope, window);
+    const cityReport = { city, buildingsV2, buildingsLegacy, temporal: [] };
+    report.cities.push(cityReport);
+    await persist();
+    const temporal = await collectTemporal(token, scope, window, async (serie) => { cityReport.temporal.push(serie); await persist(); });
     const usable = temporal.filter((serie) => serie.ok && serie.rows > 0).length;
     process.stdout.write(`${usable}/${temporal.length} com linhas`);
-    report.cities.push({ city, buildingsV2, buildingsLegacy, temporal });
+    cityReport.temporal = temporal;
+    await persist();
   }
-
-  const outDir = resolve(ROOT, '.tmp');
-  await mkdir(outDir, { recursive: true });
-  const jsonPath = resolve(outDir, `panorama-evidencia-${quarter}.json`);
-  const mdPath = resolve(outDir, `panorama-evidencia-${quarter}.md`);
-  await writeFile(jsonPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-  await writeFile(mdPath, renderMarkdown(report), 'utf8');
+  await persist();
   console.log(`\n\nRelatório gravado em:\n  ${jsonPath}\n  ${mdPath}`);
 }
 

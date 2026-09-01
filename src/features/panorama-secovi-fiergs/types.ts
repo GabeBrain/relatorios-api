@@ -21,7 +21,7 @@ export interface PanoramaScope {
   startQuarter?: Quarter;
   endQuarter: Quarter;
   entity?: EntityId;
-  /** V2 permanece padrão; V3 só usa o universo granular oficial. */
+  /** V3 é o único motor produtivo e só usa o universo granular oficial. */
   engineVersion?: PanoramaEngineVersion;
 }
 

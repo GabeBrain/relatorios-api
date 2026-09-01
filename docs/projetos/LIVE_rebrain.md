@@ -1,5 +1,12 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-01 — Panorama: V3 única na tela e evidência autenticada resiliente — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — controle de recorte e diagnóstico autenticado.
+- **O quê:** removido o seletor de motor: a tela envia exclusivamente V3. O botão primário recebeu largura mínima e alinhamento no grid para manter “Consultando APIs…” legível. O coletor autenticado passou a ter timeout de 12s por chamada, progresso por série e checkpoint JSON/Markdown a cada resultado em `.tmp`, preservando evidência parcial em vez de travar a sessão.
+- **Evidência:** Jundiaí autenticada confirmou alternância do contrato granular V2 (`200` e `500` em tentativas distintas), legado com 165 empreendimentos e séries temporais parcialmente registradas antes do limite de execução. Build e testes do núcleo foram aprovados antes do ajuste do coletor; `node --check scripts/panorama-evidence.mjs` aprovou depois dele. Automação visual não pôde rodar porque o binário `agent-browser` não está instalado no ambiente.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** V3 é a única opção produtiva; a V2 fica somente no código de compatibilidade. Preview/PDF/PPT e a evidência 40/40 seguem pendentes de verificação renderizada/autenticada.
+
 ### 2026-09-01 — Panorama V3: PRE-027 e circuito de IVV por tipologia — Gabriel Hxg
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — continuidade da V3 paralela à V2.
 - **O quê:** o cubo V3 resolve padrão em ordem cronológica, marca a origem como `observed`, `inherited` ou `unclassified`, ignora o marcador `Futuro` e não consulta `building.standard` como look-ahead. IVV por Tipologia recebe uma repetição de confirmação; um 5xx confirmado abre circuito no restante da geração, preservando as demais séries e registrando cidade/status/chamadas evitadas na fonte indisponível.

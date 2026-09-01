@@ -100,7 +100,7 @@ async function fetchBuildingsLegacy(scope: CityScope, signal?: AbortSignal): Pro
  * em um relatório zerado. Enquanto a paridade autenticada não estiver confirmada, preservamos o
  * contrato legado como fallback explícito.
  */
-async function fetchBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' = 'v2'): Promise<Record<string, unknown>[]> {
+async function fetchBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' = 'v3'): Promise<Record<string, unknown>[]> {
   try {
     return await fetchBuildingsV2(scope, signal);
   } catch (v2Error) {
