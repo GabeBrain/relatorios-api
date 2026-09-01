@@ -64,6 +64,18 @@ function orderBy<T extends string>(order: readonly T[]) {
   };
 }
 
+/**
+ * JG-37: a analista recusou o rótulo numérico solto — "2" precisa ser lido como "2 Dormitórios".
+ * Rótulo que já é editorial passa intacto; só a forma numérica crua é canonizada, para não
+ * reescrever nomes vindos de outra dimensão.
+ */
+export function typologyDisplayLabel(value: unknown): string {
+  const raw = String(value ?? '').trim();
+  if (!raw) return UNCLASSIFIED;
+  if (/^\d+\s*(\+|ou\s*mais)?$/i.test(raw)) return canonicalTypology(raw);
+  return raw;
+}
+
 export const orderTypologies = orderBy(TYPOLOGY_ORDER);
 export const orderStandards = orderBy(STANDARD_ORDER);
 
@@ -72,7 +84,12 @@ export const orderStandards = orderBy(STANDARD_ORDER);
 /* -------------------------------------------------------------------------- */
 
 export const COHORT_LEGACY_LABEL = 'Até 2022';
-export const COHORT_SUBTOTAL_LABEL = 'Subtotal até 2024';
+/**
+ * JG-22/26/27: a analista corrigiu duas coisas ao mesmo tempo — o subtotal soma os lançados
+ * **após** 2024 (não até), e a linha vem **depois** do último ano, isto é, depois de 2026.
+ */
+export const COHORT_SUBTOTAL_LABEL = 'Subtotal lançados após 2024';
+export const COHORT_SUBTOTAL_FROM_YEAR = 2024;
 export const COHORT_TOTAL_LABEL = 'Total geral';
 
 export type CohortRowKind = 'cohort' | 'subtotal' | 'total';
@@ -85,9 +102,12 @@ export interface CohortBucket {
 }
 
 /**
- * Constrói a lista de linhas exigida: `Até 2022`, `2023`, `2024`, `Subtotal até 2024`, anos
- * posteriores individualmente e `Total geral`. Só cria linha para ano com dados, exceto os
- * marcos 2023/2024 quando existir qualquer coorte, para que o subtotal seja legível.
+ * Constrói a lista de linhas exigida: `Até 2022`, cada ano em ordem crescente,
+ * `Subtotal lançados após 2024` logo depois do último ano, e `Total geral`.
+ *
+ * O subtotal soma **estritamente** os anos maiores que 2024 (JG-22/26/27). Anos anteriores nunca
+ * entram nele — é a diferença que a analista apontou três vezes. A linha só existe quando há pelo
+ * menos um ano posterior a 2024: sem base, a tabela não ganha uma linha zerada.
  */
 export function cohortBuckets(years: Iterable<number>): CohortBucket[] {
   const present = [...new Set([...years].filter((year) => Number.isInteger(year)))].sort((a, b) => a - b);
@@ -95,10 +115,9 @@ export function cohortBuckets(years: Iterable<number>): CohortBucket[] {
   const legacy = present.filter((year) => year <= 2022);
   const buckets: CohortBucket[] = [];
   if (legacy.length) buckets.push({ label: COHORT_LEGACY_LABEL, kind: 'cohort', years: legacy });
-  for (const year of [2023, 2024]) if (present.includes(year)) buckets.push({ label: String(year), kind: 'cohort', years: [year] });
-  const untilSubtotal = buckets.flatMap((bucket) => bucket.years);
-  if (untilSubtotal.length) buckets.push({ label: COHORT_SUBTOTAL_LABEL, kind: 'subtotal', years: untilSubtotal });
-  for (const year of present.filter((year) => year > 2024)) buckets.push({ label: String(year), kind: 'cohort', years: [year] });
+  for (const year of present.filter((year) => year > 2022)) buckets.push({ label: String(year), kind: 'cohort', years: [year] });
+  const afterSubtotal = present.filter((year) => year > COHORT_SUBTOTAL_FROM_YEAR);
+  if (afterSubtotal.length) buckets.push({ label: COHORT_SUBTOTAL_LABEL, kind: 'subtotal', years: afterSubtotal });
   buckets.push({ label: COHORT_TOTAL_LABEL, kind: 'total', years: present });
   return buckets;
 }
@@ -107,6 +126,36 @@ export function cohortBuckets(years: Iterable<number>): CohortBucket[] {
 export function cohortLabelOf(year: number): string {
   return year <= 2022 ? COHORT_LEGACY_LABEL : String(year);
 }
+
+/* -------------------------------------------------------------------------- */
+/* Faixas de área útil (slide 27)                                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * JG-19: "ajustar para ficar igual as metragens do 1T/26". As faixas abaixo são as do gabarito
+ * congelado do Panorama Piracicaba 1T26, na ordem em que a analista as lê. O slide 27 é "por área
+ * útil em m²" — o número solto de dormitórios que estava sendo impresso não é metragem nenhuma.
+ */
+export const AREA_BAND_ORDER = [
+  'Até 44m²', '45–49m²', '50–59m²', '60–69m²', '70–84m²',
+  '85–99m²', '100–150m²', '151–200m²', '201–250m²', 'Acima de 250m²',
+] as const;
+export type AreaBandLabel = (typeof AREA_BAND_ORDER)[number];
+
+const AREA_BAND_CEILINGS: { label: AreaBandLabel; ceiling: number }[] = [
+  { label: 'Até 44m²', ceiling: 44 }, { label: '45–49m²', ceiling: 49 }, { label: '50–59m²', ceiling: 59 },
+  { label: '60–69m²', ceiling: 69 }, { label: '70–84m²', ceiling: 84 }, { label: '85–99m²', ceiling: 99 },
+  { label: '100–150m²', ceiling: 150 }, { label: '151–200m²', ceiling: 200 }, { label: '201–250m²', ceiling: 250 },
+  { label: 'Acima de 250m²', ceiling: Number.POSITIVE_INFINITY },
+];
+
+/** Faixa de uma área privativa. `null` quando a área não foi informada — nunca cai numa faixa padrão. */
+export function areaBandOf(area: number | null | undefined): AreaBandLabel | null {
+  if (area === null || area === undefined || !Number.isFinite(area) || area <= 0) return null;
+  return AREA_BAND_CEILINGS.find((band) => area <= band.ceiling)?.label ?? 'Acima de 250m²';
+}
+
+export const orderAreaBands = orderBy(AREA_BAND_ORDER);
 
 /* -------------------------------------------------------------------------- */
 /* Maturidade (slides 43–46)                                                   */

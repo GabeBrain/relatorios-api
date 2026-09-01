@@ -1,4 +1,5 @@
 import type { MethodStatus } from '../types';
+import { buildMapTilePlan, type GeographicPoint } from '../lib/map-tiles';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
 export type CityComparisonKind = 'sales' | 'market' | 'availability';
@@ -22,7 +23,7 @@ function sectionIdForReference(referenceSlide: number): string {
   if (referenceSlide <= 49) return 'horizontal';
   if (referenceSlide <= 51) return 'vgv';
   if (referenceSlide <= 54) return 'observations';
-  if (referenceSlide === 55) return 'location';
+  if (referenceSlide === 55 || referenceSlide === 56) return 'location';
   return 'consultants';
 }
 
@@ -39,7 +40,9 @@ const pages: Definition[] = [
 // `page` é sempre a posição de saída; `referenceSlide` mantém a identidade editorial original.
 const outputReferenceSlides = [1, 2, 4, 5, 6, 7, 3, 8, 9, 10, ...Array.from({ length: 52 }, (_, index) => index + 11)]
   // Apenas a referência 60 é encerramento V2: 61 e 62 são cópias do mesmo fundo.
-  .filter((referenceSlide) => ![1, 4, 56, 61, 62].includes(referenceSlide));
+  // A referência 56 (mapa) voltou ao livro: JG-39 exige que ela exista quando carrega e que
+  // desapareça junto com o divisor 55 quando não carrega — nunca um divisor órfão sem mapa.
+  .filter((referenceSlide) => ![1, 4, 61, 62].includes(referenceSlide));
 
 const baseManifest = (): ReportPageDefinition[] => outputReferenceSlides.map((referenceSlide, index) => {
   const page = index + 1;
@@ -73,3 +76,38 @@ export function createPanoramaSections(manifest: ReportPageDefinition[]): Panora
 
 export const PANORAMA_REPORT_MANIFEST = createPanoramaReportManifest();
 export const PANORAMA_SECTIONS = createPanoramaSections(PANORAMA_REPORT_MANIFEST);
+
+/* -------------------------------------------------------------------------- */
+/* Decisão de inclusão condicional — fonte única de preview, PDF e PPT espelho  */
+/* -------------------------------------------------------------------------- */
+
+export interface ManifestSubject {
+  provenance: { engineVersion?: 'v2' | 'v3' };
+  cube: { projects: { segment: string; finalUnits: number | null }[] };
+  locations: GeographicPoint[];
+  cityComparisons: { enabled: boolean };
+}
+
+/**
+ * JG-34 e JG-39 decidem a existência da lâmina **antes** do sumário e da paginação, e o portão
+ * transversal exige que preview, PDF e PPT tenham exatamente a mesma contagem e ordem. Por isso a
+ * decisão vive aqui, numa função só: quando ela estava repetida em quatro chamadas, bastava um
+ * consumidor esquecer um termo para o sumário divergir do arquivo entregue.
+ */
+export function panoramaManifestOptions(report: ManifestSubject, mapboxAccessToken = ''): { includeCityComparisons: boolean; includeHorizontal: boolean; includeMap: boolean } {
+  const horizontal = report.cube.projects.filter((project) => project.segment === 'Horizontal');
+  return {
+    includeCityComparisons: report.cityComparisons.enabled,
+    // JG-34: "se não tiver empreendimentos ativos, essa página precisa ser excluída". Existir no
+    // histórico não basta — o bloco só entra com oferta ativa no fechamento selecionado.
+    includeHorizontal: report.provenance.engineVersion !== 'v3' || horizontal.some((project) => (project.finalUnits ?? 0) > 0),
+    // JG-39: o mapa entra apenas quando tiles e marcadores estão prontos; sem isso, o bloco inteiro
+    // sai do manifesto em vez de exportar um mapa quebrado.
+    includeMap: buildMapTilePlan(report.locations, mapboxAccessToken) !== null,
+  };
+}
+
+/** Manifesto efetivo de um relatório — o único caminho que os consumidores devem usar. */
+export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken = ''): ReportPageDefinition[] {
+  return createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
+}

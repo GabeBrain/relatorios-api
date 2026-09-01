@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { PanoramaExportDeck } from './ReportPaginator';
 import { synchronizeOfficialCoverCity } from '../lib/official-cover';
 import { buildPanoramaPdf, buildPanoramaPptx, PanoramaExportCancelled } from '../lib/pdf-export';
-import { usePanoramaExportStore } from '../export-store';
+import { usePanoramaExportStore, type PanoramaExportFormat } from '../export-store';
 import { quarterLabel } from '../lib/launches';
 import { scopeCityLabel, scopeCitySlug } from '../types';
 
@@ -21,9 +21,13 @@ export default function PanoramaExportHost() {
     if (status !== 'preparing' || !report) return;
     const store = usePanoramaExportStore.getState();
     const signal = store.controller?.signal;
-    const runKey = report as PanoramaExportRunKey;
-    if (startedFor.current === runKey) return;
-    startedFor.current = runKey;
+    // O guard existe para o efeito não disparar duas vezes o mesmo trabalho quando React reexecuta
+    // o commit. Ele precisa considerar **formato e relatório**: com a chave só no relatório, pedir o
+    // PPT logo depois do PDF do mesmo recorte reencontrava a chave anterior, o efeito retornava sem
+    // nada fazer e a exportação ficava presa em "Preparando…" para sempre — que é exatamente o
+    // caminho do PPT espelho pedido na homologação.
+    if (startedFor.current?.report === report && startedFor.current.format === format) return;
+    startedFor.current = { report, format };
     const cityLabel = scopeCityLabel(report.scope);
     synchronizeOfficialCoverCity(cityLabel, report.scope.uf, report.scope.endQuarter);
 
@@ -112,4 +116,4 @@ export default function PanoramaExportHost() {
   );
 }
 
-type PanoramaExportRunKey = object | null;
+type PanoramaExportRunKey = { report: object; format: PanoramaExportFormat } | null;

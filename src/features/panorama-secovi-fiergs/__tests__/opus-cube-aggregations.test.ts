@@ -251,17 +251,18 @@ describe('OP-5 · slides 34/35 — oferta por tipologia', () => {
 });
 
 describe('OP-5 · slides 33/48 — coortes', () => {
-  it('produz Até 2022, anos, subtotal até 2024 e total geral', () => {
+  it('produz Até 2022, anos, subtotal pós-2024 depois do último ano e total geral', () => {
     const rows = offerByCohort(scenarioCube(), 'Vertical');
-    expect(rows.map((row) => row.label)).toEqual(['Até 2022', '2023', '2024', 'Subtotal até 2024', '2025', 'Total geral']);
+    expect(rows.map((row) => row.label)).toEqual(['Até 2022', '2023', '2024', '2025', 'Subtotal lançados após 2024', 'Total geral']);
   });
 
-  it('o subtotal até 2024 soma exatamente as coortes acima dele', () => {
+  it('o subtotal soma exatamente os anos posteriores a 2024, e nenhum anterior', () => {
     const rows = offerByCohort(scenarioCube(), 'Vertical');
-    const subtotal = rows.find((row) => row.label === 'Subtotal até 2024')!;
-    const above = rows.filter((row) => ['Até 2022', '2023', '2024'].includes(row.label));
-    expect(subtotal.launchedUnits).toBe(above.reduce((sum, row) => sum + row.launchedUnits!, 0));
-    expect(subtotal.projects).toBe(3);
+    const subtotal = rows.find((row) => row.label === 'Subtotal lançados após 2024')!;
+    const after = rows.filter((row) => row.kind === 'row' && Number(row.label) > 2024);
+    expect(subtotal.launchedUnits).toBe(after.reduce((sum, row) => sum + row.launchedUnits!, 0));
+    const before = rows.filter((row) => ['Até 2022', '2023', '2024'].includes(row.label));
+    expect(subtotal.launchedUnits).not.toBe(before.reduce((sum, row) => sum + row.launchedUnits!, 0));
   });
 
   it('o total geral fecha com o universo vertical', () => {
@@ -289,7 +290,7 @@ describe('OP-5 · slides 41/42 — matriz ano × padrão', () => {
 
   it('usa a ordem canônica de padrões e o agrupamento de anos do slide 33', () => {
     expect(matrix.standards).toEqual(['Econômico', 'Standard', 'Alto']);
-    expect(matrix.rows.map((row) => row.label)).toEqual(['Até 2022', '2023', '2024', 'Subtotal até 2024', '2025', 'Total geral']);
+    expect(matrix.rows.map((row) => row.label)).toEqual(['Até 2022', '2023', '2024', '2025', 'Subtotal lançados após 2024', 'Total geral']);
   });
 
   it('a linha de total reconcilia com os slides 31 e 33', () => {
@@ -378,7 +379,7 @@ describe('OP-5 · slide 51 — VGV geral', () => {
 
   it('estrutura verticais, subtotal vertical, horizontais e total geral', () => {
     expect(rows.map((row) => row.label)).toEqual([
-      'Econômico', 'Standard', 'Alto', 'Subtotal vertical', 'Médio', 'Subtotal horizontal', 'Total geral',
+      'Econômico', 'Standard', 'Alto', 'Subtotal vertical', 'Condomínio de Casas · Médio', 'Subtotal horizontal', 'Total geral',
     ]);
   });
 

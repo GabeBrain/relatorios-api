@@ -1,5 +1,5 @@
 import type { EntityId } from './domain/entity-policy';
-import type { CohortMatrix, MaturityRow, OfferRow, PriceRow, VgvRow } from './domain/aggregations';
+import type { AreaBandRow, CohortMatrix, MaturityRow, OfferRow, PriceRow, VgvRow } from './domain/aggregations';
 import type { MarketCube } from './domain/cube';
 
 export type { EntityId };
@@ -193,6 +193,8 @@ export interface PanoramaReportModel {
 export interface PanoramaGranularBlocks {
   /** Slide 31 — oferta lançada/final por padrão, vertical. */
   offerByStandard: OfferRow[];
+  /** Slide 27 — oferta final e IVV por faixa de área útil, calculados do cubo (JG-19). */
+  areaBands: AreaBandRow[];
   /** Slides 34/35 — oferta por tipologia canônica, vertical. */
   offerByTypology: OfferRow[];
   /** Slide 33 — coortes verticais com `Subtotal até 2024` e `Total geral`. */

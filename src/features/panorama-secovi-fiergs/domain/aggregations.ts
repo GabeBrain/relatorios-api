@@ -1,14 +1,18 @@
 import type { CubeProject, MarketCube } from './cube';
 import { addNullable, horizontalProjects, verticalProjects, weightedAverage } from './cube';
+import { SECOVI_HORIZONTAL_LABEL } from './entity-policy';
 import {
   COHORT_SUBTOTAL_LABEL,
   COHORT_TOTAL_LABEL,
   MATURITY_ORDER,
+  areaBandOf,
   cohortBuckets,
   cohortLabelOf,
+  orderAreaBands,
   orderStandards,
   orderTypologies,
   type CohortRowKind,
+  type AreaBandLabel,
   type MaturityLabel,
   type TypologyLabel,
 } from './taxonomy';
@@ -361,6 +365,98 @@ export function horizontalPricesByStandard(cube: MarketCube): PriceRow[] {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Slide 27 — oferta final e IVV por área útil                                 */
+/* -------------------------------------------------------------------------- */
+
+export interface AreaBandRow {
+  label: string;
+  kind: RowKind;
+  /** Oferta final do fechamento anterior, reconstituída por identidade contábil. */
+  previousUnits: number | null;
+  finalUnits: number | null;
+  /** Unidades lançadas **no fechamento**, não o total histórico do empreendimento. */
+  launchedUnits: number | null;
+  soldUnits: number | null;
+  /** PRE-009: vendas / (oferta anterior + lançamentos). `null` quando a base não existe. */
+  ivv: number | null;
+}
+
+/**
+ * Slide 27 (JG-19). Duas correções na mesma página:
+ *
+ * 1. o eixo é **área útil em m²**, nas faixas do gabarito 1T26 — o número de dormitórios solto que
+ *    estava impresso não é metragem;
+ * 2. o IVV vem da identidade reconciliada PRE-009 sobre o cubo granular, e não do endpoint
+ *    `ivv?group_by=Tipologia`, que responde 500 de forma sistemática e produzia uma coluna inteira
+ *    de zeros. Onde a base não existe, a célula é `null` e a página imprime indisponibilidade —
+ *    nunca zero.
+ *
+ * `oferta anterior = max(0, final + vendas − lançamentos do período)` e
+ * `IVV = vendas / (oferta anterior + lançamentos)`. Enquanto o piso não age, a base equivale a
+ * `final + vendas`. Uma faixa sem área informada não é distribuída: fica de fora, e a diferença
+ * entre o total das faixas e o total do universo permanece visível.
+ */
+export function offerByAreaBand(cube: MarketCube): AreaBandRow[] {
+  const universe = verticalProjects(cube);
+  const buckets = new Map<AreaBandLabel, { final: number | null; launched: number | null; sold: number | null }>();
+  for (const project of universe) {
+    const launchedInPeriod = project.releaseQuarter === cube.endQuarter;
+    for (const typology of project.typologies) {
+      const band = areaBandOf(typology.averageArea);
+      if (!band) continue;
+      const bucket = buckets.get(band) ?? { final: null, launched: null, sold: null };
+      bucket.final = addNullable(bucket.final, typology.finalUnits);
+      // Empreendimento lançado antes do fechamento contribui com zero **medido** neste período —
+      // não com ausência. Tratar isso como `null` propagaria indisponibilidade para a oferta
+      // anterior e para o IVV de faixas que têm base perfeitamente calculável.
+      bucket.launched = addNullable(bucket.launched, launchedInPeriod ? typology.launchedUnits ?? 0 : 0);
+      bucket.sold = addNullable(bucket.sold, typology.soldUnits);
+      buckets.set(band, bucket);
+    }
+  }
+  const rowOf = (label: string, kind: RowKind, value: { final: number | null; launched: number | null; sold: number | null }): AreaBandRow => {
+    // A oferta anterior é reconstituída por identidade contábil, mas não pode ser negativa: um
+    // empreendimento lançado **dentro** do fechamento não tinha oferta no período anterior. Sem o
+    // piso em zero, uma faixa cujo lançamento supera final + vendas imprimia uma oferta negativa.
+    const previous = value.final === null || value.sold === null || value.launched === null
+      ? null
+      : Math.max(0, value.final + value.sold - value.launched);
+    // A base do IVV é a oferta disponível para venda no período: anterior + lançamentos. Com o piso
+    // aplicado, ela permanece igual a `final + vendas` sempre que o piso não age.
+    const base = previous === null || value.launched === null ? null : previous + value.launched;
+    return {
+      label, kind,
+      previousUnits: previous,
+      finalUnits: value.final,
+      launchedUnits: value.launched,
+      soldUnits: value.sold,
+      ivv: value.sold === null || base === null || base === 0 ? null : value.sold / base * 100,
+    };
+  };
+  const rows = orderAreaBands(buckets.keys()).map((label) => rowOf(label, 'row', buckets.get(label)!));
+  if (!rows.length) return [];
+  const sum = (pick: (row: AreaBandRow) => number | null) => rows.reduce<number | null>((total, row) => addNullable(total, pick(row)), null);
+  /**
+   * O total soma **as linhas impressas**, não o universo. É a diferença que importa depois do piso
+   * em zero da oferta anterior: totalizar o universo à parte produziria uma coluna cujo total não
+   * fecha com o que está na página, e a analista leria como erro de conta.
+   */
+  const previousUnits = sum((row) => row.previousUnits);
+  const launchedUnits = sum((row) => row.launchedUnits);
+  const soldUnits = sum((row) => row.soldUnits);
+  const base = previousUnits === null || launchedUnits === null ? null : previousUnits + launchedUnits;
+  return [...rows, {
+    label: 'Total',
+    kind: 'total',
+    previousUnits,
+    finalUnits: sum((row) => row.finalUnits),
+    launchedUnits,
+    soldUnits,
+    ivv: soldUnits === null || base === null || base === 0 ? null : soldUnits / base * 100,
+  }];
+}
+
+/* -------------------------------------------------------------------------- */
 /* Slide 51 — VGV geral                                                        */
 /* -------------------------------------------------------------------------- */
 
@@ -392,7 +488,9 @@ export function vgvSummary(cube: MarketCube): VgvRow[] {
   const horizontal = horizontalProjects(cube);
   const rowsFor = (projects: CubeProject[], segment: 'Vertical' | 'Horizontal') => {
     const groups = groupBy(projects, (project) => project.standard);
-    return orderStandards(groups.keys()).map((label) => vgvRow(label, 'row', segment, groups.get(label) ?? []));
+    // JG-35: os condomínios entram depois do subtotal Vertical e precisam ser reconhecíveis como
+    // tal — um "Econômico" solto logo abaixo do subtotal seria lido como mais uma linha vertical.
+    return orderStandards(groups.keys()).map((label) => vgvRow(segment === 'Horizontal' ? `${SECOVI_HORIZONTAL_LABEL} · ${label}` : label, 'row', segment, groups.get(label) ?? []));
   };
   const rows: VgvRow[] = [...rowsFor(vertical, 'Vertical')];
   if (vertical.length) rows.push(vgvRow('Subtotal vertical', 'subtotal', 'Vertical', vertical));

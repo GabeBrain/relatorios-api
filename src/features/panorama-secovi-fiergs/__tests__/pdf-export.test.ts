@@ -14,7 +14,7 @@ describe('Panorama PDF export contract', () => {
   });
 
   it('exports one active page per V2 reference slide, starting at the municipal cover', () => {
-    expect(PANORAMA_REPORT_MANIFEST).toHaveLength(57);
+    expect(PANORAMA_REPORT_MANIFEST).toHaveLength(58);
     expect(PANORAMA_REPORT_MANIFEST[0]?.referenceSlide).toBe(2);
     expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.page)).size).toBe(PANORAMA_REPORT_MANIFEST.length);
   });
@@ -24,16 +24,18 @@ describe('Panorama PDF export contract', () => {
     const outputTwo = PANORAMA_REPORT_MANIFEST.find((page) => page.page === 2);
     expect(outputFive?.referenceSlide).toBe(3);
     expect(outputTwo?.referenceSlide).toBe(5);
-    expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.referenceSlide)).size).toBe(57);
+    expect(new Set(PANORAMA_REPORT_MANIFEST.map((page) => page.referenceSlide)).size).toBe(58);
     expect(PANORAMA_REPORT_MANIFEST.some((page) => page.referenceSlide === 1)).toBe(false);
     expect(PANORAMA_REPORT_MANIFEST.some((page) => page.referenceSlide === 4)).toBe(false);
-    expect(PANORAMA_REPORT_MANIFEST.some((page) => page.referenceSlide === 56)).toBe(false);
+    // JG-39: a lâmina de mapa (referência 56) voltou ao livro base; quem a suprime é
+    // `panoramaManifestOptions`, quando tiles ou coordenadas não estão prontos.
+    expect(PANORAMA_REPORT_MANIFEST.some((page) => page.referenceSlide === 56)).toBe(true);
     expect(PANORAMA_REPORT_MANIFEST.some((page) => page.referenceSlide === 61 || page.referenceSlide === 62)).toBe(false);
   });
 
   it('adds three city-comparison pages after the market summary only for a complete multicity report', () => {
     const manifest = createPanoramaReportManifest(true);
-    expect(manifest).toHaveLength(60);
+    expect(manifest).toHaveLength(61);
     expect(manifest.filter((page) => page.cityComparison).map((page) => page.cityComparison)).toEqual(['sales', 'market', 'availability']);
     expect(manifest.find((page) => page.referenceSlide === 29)?.page).toBe(27);
     expect(manifest.find((page) => page.referenceSlide === 30)?.page).toBe(31);

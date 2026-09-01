@@ -14,7 +14,7 @@ import { PanoramaQuarterRangePicker } from '../components/PanoramaQuarterRangePi
 import { PanoramaLoadingState } from '../components/PanoramaLoadingState';
 import { availableEndQuarters } from '../domain/quarters';
 import { type PanoramaGenerationProgress } from '../domain/generation-progress';
-import { createPanoramaReportManifest } from '../report/manifest';
+import { panoramaManifestFor } from '../report/manifest';
 import type { PanoramaScope, Quarter } from '../types';
 
 export default function PanoramaSecoviFiergsPage() {
@@ -34,7 +34,7 @@ export default function PanoramaSecoviFiergsPage() {
     queryFn: () => fetchPanoramaReportModel(queryScope!, undefined, setGenerationProgress),
     enabled: Boolean(queryScope), staleTime: 5 * 60_000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: 0,
   });
-  const reportPageCount = report.data ? createPanoramaReportManifest({ includeCityComparisons: report.data.cityComparisons.enabled, includeHorizontal: report.data.provenance.engineVersion !== 'v3' || report.data.cube.projects.some((project) => project.segment === 'Horizontal'), includeMap: report.data.locations.length > 0 }).length : 0;
+  const reportPageCount = report.data ? panoramaManifestFor(report.data, import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '').length : 0;
   const ready = Boolean(geoApi.strictReady && cities.length && scope.startQuarter && scope.endQuarter);
   const updateCities = (next: string[]) => { setCities(next); setGeo((current) => ({ ...current, city: next[0] ?? '' })); setScope((current) => ({ ...current, cities: next })); setSubmitted(null); };
   const updateRange = (startQuarter: Quarter, endQuarter: Quarter) => { setScope((current) => ({ ...current, startQuarter, endQuarter })); setSubmitted(null); };

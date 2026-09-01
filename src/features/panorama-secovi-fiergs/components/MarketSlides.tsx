@@ -1,7 +1,9 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { scopeCityLabel, type PanoramaReportModel, type ReportMarketBlock, type ReportSeries } from '../types';
 import { buildMapTilePlan } from '../lib/map-tiles';
-import { orderStandards, orderTypologies } from '../domain/taxonomy';
+import { orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
+import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
+import { SECOVI_HORIZONTAL_LABEL } from '../domain/entity-policy';
 
 const integer = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 const decimal = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -31,6 +33,34 @@ function DataBar({ value, max, tone = 'green', format = integer }: { value: numb
   const size = max > 0 ? Math.min(100, Math.abs(value) / max * 100) : 0;
   return <span className={`panorama-data-bar panorama-data-bar-${tone}`} style={{ '--bar-size': `${size}%` } as CSSProperties}><i/><b>{format(value)}</b></span>;
 }
+
+/**
+ * Célula com formatação condicional — JG-20, JG-21, JG-23, JG-24, JG-28, JG-29 e JG-31.
+ *
+ * A comparação numérica vive em `domain/conditional-format`; aqui só se desenha o veredito. Os
+ * cinco estados aparecem sempre com **sinal redundante à cor** (símbolo + texto acessível), porque
+ * o portão transversal da matriz proíbe comunicar apenas por cor — e porque a cor é o único canal
+ * que se perde na impressão em preto e branco.
+ */
+function CfCell({ metric, value, reference, max, format = integer, unavailable = false, tone = 'green' }: {
+  metric: ConditionalMetric;
+  value: number | null | undefined;
+  reference?: number | null;
+  max?: number | null;
+  format?: (value: number | null | undefined) => string;
+  unavailable?: boolean;
+  tone?: 'green' | 'red' | 'blue' | 'yellow';
+}) {
+  const verdict = conditionalFormat(metric, { value, reference, max, unavailable });
+  const text = verdict.state === 'unavailable' ? 'Indisponível' : verdict.state === 'null' ? '—' : format(value);
+  return <span className={`panorama-data-bar panorama-data-bar-${tone} panorama-cf ${verdict.className}`} style={{ '--bar-size': `${verdict.intensity}%` } as CSSProperties}>
+    <i/><b>{text}</b>{verdict.symbol && verdict.state !== 'null' && verdict.state !== 'unavailable' ? <em aria-hidden="true">{verdict.symbol}</em> : null}
+    <span className="panorama-sr-only">{verdict.srLabel}</span>
+  </span>;
+}
+
+/** Classe da linha por natureza: subtotal e total nunca se confundem com uma coorte. */
+const rowClassOf = (kind: 'row' | 'subtotal' | 'total') => kind === 'total' ? 'panorama-total-row' : kind === 'subtotal' ? 'panorama-subtotal-row' : undefined;
 function hasObservedValue(...values: (number | null | undefined)[]) { return values.some((value) => value !== null && value !== undefined && Number.isFinite(value) && value !== 0); }
 function DataUnavailable({ children }: { children: ReactNode }) { return <p className="panorama-no-data">{children}</p>; }
 
@@ -56,29 +86,64 @@ function offerRows({ report, dimension, segment = 'vertical' }: { report: Panora
   return { rows: rows.map((row) => ({ ...row, projects: undefined })), launchedTotal, finalTotal };
 }
 
+/**
+ * Slide 27 — JG-19. A analista apontou duas coisas: as metragens precisam seguir o formato do
+ * 1T/26 e o IVV não pode aparecer todo zerado.
+ *
+ * As linhas passam a ser as faixas de área útil do gabarito, calculadas do cubo granular, e o IVV
+ * usa a identidade reconciliada PRE-009 sobre esse mesmo cubo. O endpoint `ivv?group_by=Tipologia`
+ * — que responde 500 de forma sistemática e abriu o circuito — deixa de ser fonte desta página; sua
+ * indisponibilidade continua registrada no dossiê, e uma faixa sem base imprime `Indisponível`,
+ * nunca `0,0%`.
+ */
 export function AreaIvvSlide({ report }: { report: PanoramaReportModel }) {
-  const stock = report.stock.unitsByTypology;
-  const sales = report.sales.unitsByTypology;
-  const ivv = report.ivvByTypology;
-  const rowLabels = orderedLabels(stock, sales, ivv).slice(0, 10);
-  const currentIndex = Math.max(0, stock.series.length - 1);
-  const previousIndex = Math.max(0, currentIndex - 1);
-  const currentTotal = rowLabels.reduce((sum, label) => sum + (group(stock, label)?.series[currentIndex]?.vertical ?? 0), 0);
-  const salesTotal = rowLabels.reduce((sum, label) => sum + (group(sales, label)?.series[currentIndex]?.vertical ?? 0), 0);
+  const bands = report.granular.areaBands;
+  const rows = bands.filter((row) => row.kind === 'row');
+  const total = bands.find((row) => row.kind === 'total');
+  if (!rows.length) {
+    return <Slide title="OFERTA FINAL TOTAL E IVV POR ÁREA ÚTIL EM M²" subtitle="MERCADO RESIDENCIAL VERTICAL" className="panorama-area-slide">
+      <DataUnavailable>O payload granular não trouxe área privativa por tipologia neste recorte, portanto não há base para distribuir a oferta por faixa de metragem. A página não substitui a distribuição por zeros nem por outra dimensão.</DataUnavailable>
+    </Slide>;
+  }
+  const ivvUnavailable = report.ivvByTypology.dataStatus === 'unavailable';
   return <Slide title="OFERTA FINAL TOTAL E IVV POR ÁREA ÚTIL EM M²" subtitle="MERCADO RESIDENCIAL VERTICAL" className="panorama-area-slide">
-    <table className="panorama-reference-table"><thead><tr><th>Área / tipologia</th><th>Oferta Final<br/>período anterior</th><th>Oferta Final<br/>período atual</th><th>(%)</th><th>Lançamentos</th><th>(%)</th><th>Vendas<br/>Líquidas</th><th>(%)</th><th>IVV (%)</th></tr></thead><tbody>
-      {rowLabels.map((label) => { const stockSeries = group(stock, label)?.series ?? []; const salesSeries = group(sales, label)?.series ?? []; const ivvSeries = group(ivv, label)?.series ?? []; const previous = stockSeries[previousIndex]?.vertical ?? 0; const current = stockSeries[currentIndex]?.vertical ?? 0; const sold = salesSeries[currentIndex]?.vertical ?? 0; const release = Math.max(0, current + sold - previous); const ivvValue = ivvSeries[currentIndex]?.vertical ?? 0; return <tr key={label}><td>{label}</td><td>{integer(previous)}</td><td>{integer(current)}</td><td><DataBar value={currentTotal ? current / currentTotal * 100 : 0} max={100} tone="yellow" format={percent}/></td><td>{integer(release)}</td><td><DataBar value={currentTotal ? release / currentTotal * 100 : 0} max={100} format={percent}/></td><td>{integer(sold)}</td><td><DataBar value={salesTotal ? sold / salesTotal * 100 : 0} max={100} format={percent}/></td><td><DataBar value={ivvValue} max={100} tone="red" format={percent}/></td></tr>; })}
-      <tr className="panorama-total-row"><td>Total</td><td>{integer(rowLabels.reduce((sum, label) => sum + (group(stock, label)?.series[previousIndex]?.vertical ?? 0), 0))}</td><td>{integer(currentTotal)}</td><td>100%</td><td>—</td><td>—</td><td>{integer(salesTotal)}</td><td>100%</td><td>{percent(last(report.ivv).vertical)}</td></tr>
+    <table className="panorama-reference-table"><thead><tr><th>Área útil</th><th>Oferta Final<br/>período anterior</th><th>Oferta Final<br/>período atual</th><th>(%)</th><th>Lançamentos</th><th>(%)</th><th>Vendas<br/>Líquidas</th><th>(%)</th><th>IVV (%)</th></tr></thead><tbody>
+      {rows.map((row) => <tr key={row.label}>
+        <td>{row.label}</td>
+        <td>{integer(row.previousUnits)}</td>
+        <td>{integer(row.finalUnits)}</td>
+        <td><CfCell metric="share" value={shareOf(row.finalUnits, total?.finalUnits)} reference={rows.length ? 100 / rows.length : null} max={100} format={percent} tone="yellow"/></td>
+        <td>{integer(row.launchedUnits)}</td>
+        <td><CfCell metric="share" value={shareOf(row.launchedUnits, total?.launchedUnits)} reference={rows.length ? 100 / rows.length : null} max={100} format={percent}/></td>
+        <td>{integer(row.soldUnits)}</td>
+        <td><CfCell metric="share" value={shareOf(row.soldUnits, total?.soldUnits)} reference={rows.length ? 100 / rows.length : null} max={100} format={percent}/></td>
+        <td><CfCell metric="ivv" value={row.ivv} reference={total?.ivv ?? null} max={100} format={percent} tone="red"/></td>
+      </tr>)}
+      {total && <tr className="panorama-total-row">
+        <td>Total</td><td>{integer(total.previousUnits)}</td><td>{integer(total.finalUnits)}</td><td>{total.finalUnits === null ? '—' : '100%'}</td>
+        <td>{integer(total.launchedUnits)}</td><td>{total.launchedUnits === null ? '—' : '100%'}</td>
+        <td>{integer(total.soldUnits)}</td><td>{total.soldUnits === null ? '—' : '100%'}</td>
+        <td>{total.ivv === null ? 'Indisponível' : percent(total.ivv)}</td>
+      </tr>}
     </tbody></table>
+    <p className="panorama-coverage-caption">IVV = vendas líquidas ÷ (oferta final anterior + lançamentos), calculado por faixa a partir do cubo granular por empreendimento.{ivvUnavailable ? ' O contrato `ivv?group_by=Tipologia` segue indisponível na API e não é usado nesta página.' : ''}</p>
   </Slide>;
 }
 
+/**
+ * Slide 29 — JG-20. O mercado horizontal desta página é, por PRE-026, apenas Condomínio de Casas:
+ * o rótulo diz isso na própria linha. A última coluna ganha a formatação condicional pedida, com
+ * referência no mercado total e sinal redundante à cor.
+ */
 export function MarketSummarySlide({ report }: { report: PanoramaReportModel }) {
-  const segments: { label: string; key: SegmentKey }[] = [{ label: 'Total Mercado Residencial Vertical', key: 'vertical' }, { label: 'Total Mercado Residencial Horizontal', key: 'horizontal' }, { label: 'Total Mercado', key: 'total' }];
+  const segments: { label: string; key: SegmentKey }[] = [{ label: 'Total Mercado Residencial Vertical', key: 'vertical' }, { label: `Total Mercado Residencial Horizontal — ${SECOVI_HORIZONTAL_LABEL}`, key: 'horizontal' }, { label: 'Total Mercado', key: 'total' }];
   const final = last(report.stock.units);
   const sold = report.sales.units.series.reduce((acc, item) => ({ vertical: acc.vertical + item.vertical, horizontal: acc.horizontal + item.horizontal, total: acc.total + item.total }), { vertical: 0, horizontal: 0, total: 0 });
   const projects = report.launches.projects.reduce((acc, item) => ({ vertical: acc.vertical + item.vertical, horizontal: acc.horizontal + item.horizontal, total: acc.total + item.total }), { vertical: 0, horizontal: 0, total: 0 });
-  return <Slide title="ANÁLISE GERAL DO MERCADO"><table className="panorama-reference-table panorama-summary-table"><thead><tr><th>Tipo do Imóvel</th><th>Nº de Empreend.</th><th>Oferta<br/>Lançada</th><th>Oferta<br/>Final</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>{segments.map(({ label, key }, index) => { const finalValue = valueOf(final, key); const launched = finalValue + valueOf(sold, key); return <tr className={index === 2 ? 'panorama-total-row' : ''} key={key}><td>{label}</td><td>{integer(valueOf(projects, key))}</td><td>{integer(launched)}</td><td>{integer(finalValue)}</td><td><DataBar value={launched ? finalValue / launched * 100 : 0} max={100} tone="red" format={percent}/></td></tr>; })}</tbody></table></Slide>;
+  const totalFinal = valueOf(final, 'total');
+  const totalLaunched = totalFinal + valueOf(sold, 'total');
+  const totalAvailability = totalLaunched ? totalFinal / totalLaunched * 100 : null;
+  return <Slide title="ANÁLISE GERAL DO MERCADO"><table className="panorama-reference-table panorama-summary-table"><thead><tr><th>Tipo do Imóvel</th><th>Nº de Empreend.</th><th>Oferta<br/>Lançada</th><th>Oferta<br/>Final</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>{segments.map(({ label, key }, index) => { const finalValue = valueOf(final, key); const launched = finalValue + valueOf(sold, key); return <tr className={index === 2 ? 'panorama-total-row' : ''} key={key}><td>{label}</td><td>{integer(valueOf(projects, key))}</td><td>{integer(launched)}</td><td>{integer(finalValue)}</td><td><CfCell metric="availability" value={launched ? finalValue / launched * 100 : null} reference={totalAvailability} max={100} format={percent} tone="red"/></td></tr>; })}</tbody></table></Slide>;
 }
 
 export function OfferTableSlide({ report, dimension, segment = 'vertical' }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; segment?: SegmentKey }) {
@@ -86,7 +151,7 @@ export function OfferTableSlide({ report, dimension, segment = 'vertical' }: { r
   const showValueRange = dimension === 'pattern' && report.granular.valueRangeAvailable;
   const title = dimension === 'pattern' ? 'OFERTA LANÇADA E FINAL | POR PADRÃO' : 'OFERTA LANÇADA E FINAL | POR TIPOLOGIA';
   return <Slide title={title} className="panorama-offer-table-slide"><table className="panorama-reference-table"><thead><tr><th>{dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</th>{dimension === 'pattern' && <>{showValueRange && <th>Faixa de Valor</th>}<th>Nº de<br/>Empreend.</th><th>(%)</th></>}<th>Oferta<br/>Lançada</th><th>(%)</th><th>Oferta Final</th><th>(%)</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>
-    {rows.map((row) => <tr key={row.label}><td>{row.label}</td>{dimension === 'pattern' && <>{showValueRange && <td>—</td>}<td>{integer(row.projects)}</td><td>{launchedTotal ? percent((row.launched ?? 0) / launchedTotal * 100) : '—'}</td></>}<td>{integer(row.launched)}</td><td><DataBar value={launchedTotal ? (row.launched ?? 0) / launchedTotal * 100 : 0} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><DataBar value={finalTotal ? (row.final ?? 0) / finalTotal * 100 : 0} max={100} format={percent}/></td><td><DataBar value={row.launched ? (row.final ?? 0) / row.launched * 100 : 0} max={100} tone="red" format={percent}/></td></tr>)}
+    {rows.map((row) => { const share = 100 / Math.max(rows.length, 1); return <tr key={row.label}><td>{dimension === 'typology' ? typologyDisplayLabel(row.label) : row.label}</td>{dimension === 'pattern' && <>{showValueRange && <td>—</td>}<td>{integer(row.projects)}</td><td>{shareOf(row.launched, launchedTotal) === null ? '—' : percent(shareOf(row.launched, launchedTotal))}</td></>}<td>{integer(row.launched)}</td><td><CfCell metric="share" value={shareOf(row.launched, launchedTotal)} reference={share} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><CfCell metric="share" value={shareOf(row.final, finalTotal)} reference={share} max={100} format={percent}/></td><td><CfCell metric="availability" value={shareOf(row.final, row.launched)} reference={shareOf(finalTotal, launchedTotal)} max={100} format={percent} tone="red"/></td></tr>; })}
     <tr className="panorama-total-row"><td>Total</td>{dimension === 'pattern' && <>{showValueRange && <td/>}<td>{integer(rows.reduce((sum, row) => sum + (row.projects ?? 0), 0))}</td><td>100%</td></>}<td>{integer(launchedTotal)}</td><td>100%</td><td>{integer(finalTotal)}</td><td>100%</td><td>{launchedTotal ? percent((finalTotal ?? 0) / launchedTotal * 100) : '—'}</td></tr>
   </tbody></table></Slide>;
 }
@@ -100,10 +165,12 @@ export function OfferChartSlide({ report, dimension }: { report: PanoramaReportM
 export function CohortTableSlide({ report, segment = 'vertical' }: { report: PanoramaReportModel; segment?: SegmentKey }) {
   const granularRows = segment === 'horizontal' ? report.granular.cohortsHorizontal : report.granular.cohortsVertical;
   const granularTotal = granularRows.find((row) => row.kind === 'total');
-  const allRows = granularRows.length ? granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, projects: row.projects, launched: row.launchedUnits, final: row.finalUnits })) : report.market.cohorts.byGroup.map((row) => { const annual = report.launches.annual.find((item) => String(item.year) === row.label); const launched = annual ? valueOf(annual.units, segment) : 0; return { label: row.label, projects: annual ? valueOf(annual.projects, segment) : 0, launched, final: valueOf(row, segment) }; });
-  const rows = allRows.filter((row) => hasObservedValue(row.projects, row.launched, row.final));
+  const allRows = granularRows.length ? granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, kind: row.kind, projects: row.projects, launched: row.launchedUnits, final: row.finalUnits })) : report.market.cohorts.byGroup.map((row) => { const annual = report.launches.annual.find((item) => String(item.year) === row.label); const launched = annual ? valueOf(annual.units, segment) : 0; return { label: row.label, kind: 'row' as const, projects: annual ? valueOf(annual.projects, segment) : 0, launched, final: valueOf(row, segment) }; });
+  // O subtotal permanece mesmo sem valor observado: JG-22 pede a linha, e uma tabela que a esconde
+  // quando o recorte é magro faz a analista procurar de novo o que já foi corrigido.
+  const rows = allRows.filter((row) => row.kind === 'subtotal' || hasObservedValue(row.projects, row.launched, row.final));
   const launchedTotal = granularRows.length ? granularTotal?.launchedUnits ?? null : rows.reduce((sum, row) => sum + (row.launched ?? 0), 0); const finalTotal = granularRows.length ? granularTotal?.finalUnits ?? null : rows.reduce((sum, row) => sum + (row.final ?? 0), 0); const projectsTotal = granularRows.length ? granularTotal?.projects ?? null : rows.reduce((sum, row) => sum + (row.projects ?? 0), 0);
-  return <Slide title="OFERTA LANÇADA E FINAL | POR ANO DE LANÇAMENTO">{rows.length ? <table className="panorama-reference-table"><thead><tr><th>Ano Lançamento</th><th>Nº de<br/>Empreend.</th><th>Em %</th><th>Oferta<br/>Lançada</th><th>Em %</th><th>Oferta<br/>Final</th><th>Em %</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{integer(row.projects)}</td><td><DataBar value={projectsTotal ? row.projects / projectsTotal * 100 : 0} max={100} format={percent}/></td><td>{integer(row.launched)}</td><td><DataBar value={launchedTotal ? row.launched / launchedTotal * 100 : 0} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><DataBar value={finalTotal ? row.final / finalTotal * 100 : 0} max={100} format={percent}/></td><td><DataBar value={row.launched ? row.final / row.launched * 100 : 0} max={100} tone="red" format={percent}/></td></tr>)}<tr className="panorama-total-row"><td>Total</td><td>{integer(projectsTotal)}</td><td>100%</td><td>{integer(launchedTotal)}</td><td>100%</td><td>{integer(finalTotal)}</td><td>100%</td><td>{percent(launchedTotal ? finalTotal / launchedTotal * 100 : 0)}</td></tr></tbody></table> : <DataUnavailable>{segment === 'horizontal' ? 'A API não retornou oferta de Condomínio de Casas por ano com valores diferentes de zero neste recorte.' : 'A API não retornou oferta residencial vertical por ano com valores diferentes de zero neste recorte.'}</DataUnavailable>}</Slide>;
+  return <Slide title="OFERTA LANÇADA E FINAL | POR ANO DE LANÇAMENTO">{rows.length ? <table className="panorama-reference-table"><thead><tr><th>Ano Lançamento</th><th>Nº de<br/>Empreend.</th><th>Em %</th><th>Oferta<br/>Lançada</th><th>Em %</th><th>Oferta<br/>Final</th><th>Em %</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>{rows.map((row) => { const share = 100 / Math.max(rows.filter((item) => item.kind === 'row').length, 1); return <tr key={row.label} className={rowClassOf(row.kind)}><td>{row.label}</td><td>{integer(row.projects)}</td><td><CfCell metric="share" value={shareOf(row.projects, projectsTotal)} reference={share} max={100} format={percent}/></td><td>{integer(row.launched)}</td><td><CfCell metric="share" value={shareOf(row.launched, launchedTotal)} reference={share} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><CfCell metric="share" value={shareOf(row.final, finalTotal)} reference={share} max={100} format={percent}/></td><td><CfCell metric="availability" value={shareOf(row.final, row.launched)} reference={shareOf(finalTotal, launchedTotal)} max={100} format={percent} tone="red"/></td></tr>; })}<tr className="panorama-total-row"><td>Total geral</td><td>{integer(projectsTotal)}</td><td>100%</td><td>{integer(launchedTotal)}</td><td>100%</td><td>{integer(finalTotal)}</td><td>100%</td><td>{shareOf(finalTotal, launchedTotal) === null ? '—' : percent(shareOf(finalTotal, launchedTotal))}</td></tr></tbody></table> : <DataUnavailable>{segment === 'horizontal' ? 'A API não retornou oferta de Condomínio de Casas por ano com valores diferentes de zero neste recorte.' : 'A API não retornou oferta residencial vertical por ano com valores diferentes de zero neste recorte.'}</DataUnavailable>}</Slide>;
 }
 
 export function PriceTableSlide({ report, dimension, horizontal = false }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; horizontal?: boolean }) {
@@ -124,7 +191,11 @@ export function PriceTableSlide({ report, dimension, horizontal = false }: { rep
     const rows = granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, ticket: row.averageTicket, area: row.averageArea, meter: row.averagePricePerMeter }));
     const total = granularRows.find((row) => row.kind === 'total');
     if (!rows.some((row) => hasObservedValue(row.ticket, row.area, row.meter)) && !hasObservedValue(total?.averageTicket, total?.averageArea, total?.averagePricePerMeter)) return <Slide title={`TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><DataUnavailable>{noPriceMessage}</DataUnavailable></Slide>;
-    return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipo Imóvel</th><th>Preço Médio</th><th>Área Priv. Média</th><th>R$/m² Privativa</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{currency(row.ticket)}</td><td>{integer(row.area)}</td><td>{integer(row.meter)}</td></tr>)}{total && <tr className="panorama-total-row"><td>{total.label}</td><td>{currency(total.averageTicket)}</td><td>{integer(total.averageArea)}</td><td>{integer(total.averagePricePerMeter)}</td></tr>}</tbody></table></Slide>;
+    // JG-23/24: "inserir formatação condicional no R$/m²". A referência é a média geral ponderada
+    // da própria tabela — nunca a média simples das linhas, que não é o preço do recorte.
+    const meterReference = total?.averagePricePerMeter ?? null;
+    const meterMax = Math.max(...rows.map((row) => row.meter ?? 0), meterReference ?? 0, 1);
+    return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipo Imóvel</th><th>Preço Médio</th><th>Área Priv. Média</th><th>R$/m² Privativa</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{dimension === 'typology' && !horizontal ? typologyDisplayLabel(row.label) : row.label}</td><td>{currency(row.ticket)}</td><td>{integer(row.area)}</td><td><CfCell metric="pricePerMeter" value={row.meter} reference={meterReference} max={meterMax} format={integer}/></td></tr>)}{total && <tr className="panorama-total-row"><td>{total.label}</td><td>{currency(total.averageTicket)}</td><td>{integer(total.averageArea)}</td><td>{integer(total.averagePricePerMeter)}</td></tr>}</tbody></table></Slide>;
   }
   if (horizontal) return <Slide title="TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR PADRÃO" className="panorama-price-table-slide"><DataUnavailable>{noPriceMessage}</DataUnavailable></Slide>;
   const ticket = dimension === 'pattern' ? report.prices.ticket : report.prices.ticketByTypology;
@@ -132,7 +203,7 @@ export function PriceTableSlide({ report, dimension, horizontal = false }: { rep
   const rowLabels = orderedLabels(ticket, meter).slice(0, 8);
   const rows = horizontal ? [{ label: 'Casas em Cond. Fechado', ticket: last(ticket).horizontal, meter: last(meter).horizontal }] : rowLabels.map((label) => ({ label, ticket: currentGroup(ticket, label, 'vertical'), meter: currentGroup(meter, label, 'vertical') }));
   const averageTicket = rows.length ? rows.reduce((sum, row) => sum + row.ticket, 0) / rows.length : 0; const averageMeter = rows.length ? rows.reduce((sum, row) => sum + row.meter, 0) / rows.length : 0;
-  return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${horizontal ? 'TIPOLOGIA' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipo Imóvel</th><th>Preço Médio</th><th>Área Priv. Média</th><th>R$/m² Privativa</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{currency(row.ticket)}</td><td>{row.ticket && row.meter ? integer(row.ticket / row.meter) : '—'}</td><td><DataBar value={row.meter} max={Math.max(...rows.map((item) => item.meter), 1)} format={integer}/></td></tr>)}{!horizontal && <tr className="panorama-total-row"><td>Média Geral</td><td>{currency(averageTicket)}</td><td>{averageTicket && averageMeter ? integer(averageTicket / averageMeter) : '—'}</td><td>{integer(averageMeter)}</td></tr>}</tbody></table></Slide>;
+  return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${horizontal ? 'TIPOLOGIA' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipo Imóvel</th><th>Preço Médio</th><th>Área Priv. Média</th><th>R$/m² Privativa</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{dimension === 'typology' && !horizontal ? typologyDisplayLabel(row.label) : row.label}</td><td>{currency(row.ticket)}</td><td>{row.ticket && row.meter ? integer(row.ticket / row.meter) : '—'}</td><td><CfCell metric="pricePerMeter" value={row.meter} reference={averageMeter} max={Math.max(...rows.map((item) => item.meter), 1)} format={integer}/></td></tr>)}{!horizontal && <tr className="panorama-total-row"><td>Média Geral</td><td>{currency(averageTicket)}</td><td>{averageTicket && averageMeter ? integer(averageTicket / averageMeter) : '—'}</td><td>{integer(averageMeter)}</td></tr>}</tbody></table></Slide>;
 }
 
 export function PriceChartSlide({ report, dimension }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology' }) {
@@ -155,7 +226,13 @@ export function CohortMatrixSlide({ report, participation = false }: { report: P
   const granularMatrix = participation ? report.granular.cohortMatrixParticipation : report.granular.cohortMatrix;
   if (granularMatrix.rows.length) {
     const display = (value: number | null) => value === null ? '—' : participation ? percent(value) : integer(value);
-    return <Slide title={`${participation ? 'PARTICIPAÇÃO DA ' : ''}OFERTA LANÇADA E FINAL POR ANO DE LANÇAMENTO X PADRÃO`} className="panorama-cohort-matrix-slide"><table className="panorama-reference-table"><thead><tr><th>Ano de Lançamento / Padrão</th>{granularMatrix.standards.map((standard) => <th colSpan={2} key={standard}>{standard}</th>)}<th colSpan={2}>Total</th></tr><tr><th/><>{granularMatrix.standards.flatMap((standard) => [<th key={`${standard}-l`}>Lançada</th>, <th key={`${standard}-f`}>Final</th>])}</><th>Lançada</th><th>Final</th></tr></thead><tbody>{granularMatrix.rows.map((row) => <tr key={row.label}><td>{row.label}</td>{granularMatrix.standards.flatMap((standard) => [<td key={`${standard}-l`}>{display(row.cells[standard]?.launchedUnits ?? null)}</td>, <td key={`${standard}-f`}>{display(row.cells[standard]?.finalUnits ?? null)}</td>])}<td>{display(row.total.launchedUnits)}</td><td>{display(row.total.finalUnits)}</td></tr>)}</tbody></table></Slide>;
+    // JG-27/28: a linha `Subtotal lançados após 2024` vem do próprio motor de coortes, já
+    // posicionada depois do último ano, e é destacada como subtotal — não como mais uma coorte.
+    // JG-28/29: na variante de participação, cada célula é julgada contra a fatia média do recorte.
+    const cohortRows = granularMatrix.rows.filter((row) => row.kind === 'row').length;
+    const share = cohortRows ? 100 / cohortRows : null;
+    const cell = (value: number | null, key: string) => <td key={key}>{participation ? <CfCell metric="share" value={value} reference={share} max={100} format={percent}/> : display(value)}</td>;
+    return <Slide title={`${participation ? 'PARTICIPAÇÃO DA ' : ''}OFERTA LANÇADA E FINAL POR ANO DE LANÇAMENTO X PADRÃO`} className="panorama-cohort-matrix-slide"><table className="panorama-reference-table"><thead><tr><th>Ano de Lançamento / Padrão</th>{granularMatrix.standards.map((standard) => <th colSpan={2} key={standard}>{standard}</th>)}<th colSpan={2}>Total</th></tr><tr><th/><>{granularMatrix.standards.flatMap((standard) => [<th key={`${standard}-l`}>Lançada</th>, <th key={`${standard}-f`}>Final</th>])}</><th>Lançada</th><th>Final</th></tr></thead><tbody>{granularMatrix.rows.map((row) => <tr key={row.label} className={rowClassOf(row.kind)}><td>{row.label}</td>{granularMatrix.standards.flatMap((standard) => [cell(row.cells[standard]?.launchedUnits ?? null, `${standard}-l`), cell(row.cells[standard]?.finalUnits ?? null, `${standard}-f`)])}<td>{display(row.total.launchedUnits)}</td><td>{display(row.total.finalUnits)}</td></tr>)}</tbody></table></Slide>;
   }
   const years = [...new Set(report.market.cohortMatrix.map((row) => row.year))].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true })); const standards = orderStandards([...new Set(report.market.cohortMatrix.map((row) => row.standard))] as never).slice(0, 7);
   const value = (year: string, standard: string) => report.market.cohortMatrix.find((row) => row.year === year && row.standard === standard)?.vertical ?? 0;
@@ -166,9 +243,26 @@ export function CohortMatrixSlide({ report, participation = false }: { report: P
 export function MaturitySlide({ report, dimension, participation = false }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; participation?: boolean }) {
   const granularRows = dimension === 'pattern' ? report.granular.maturityByStandard : report.granular.maturityByTypology;
   if (granularRows.length) {
-    const total = granularRows.find((row) => row.kind === 'total')?.final.total ?? null;
-    const show = (value: number | null) => value === null ? '—' : participation ? percent(total ? value / total * 100 : null) : integer(value);
-    return <Slide title={`${participation ? 'PARTICIPAÇÃO DO ' : ''}TEMPO MÉDIO DA OFERTA LANÇADA E FINAL | POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-maturity-slide"><table className="panorama-reference-table"><thead><tr><th>Tempo Médio - {dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</th><th>Planta lançada</th><th>Construção lançada</th><th>Pronto lançado</th><th>Total lançado</th><th>Planta final</th><th>Construção final</th><th>Pronto final</th><th>Total final</th></tr></thead><tbody>{granularRows.map((row) => <tr key={row.label} className={row.kind === 'total' ? 'panorama-total-row' : undefined}><td>{row.label}</td><td>{show(row.launched.Planta)}</td><td>{show(row.launched.Construção)}</td><td>{show(row.launched.Pronto)}</td><td>{show(row.launched.total)}</td><td>{show(row.final.Planta)}</td><td>{show(row.final.Construção)}</td><td>{show(row.final.Pronto)}</td><td>{show(row.final.total)}</td></tr>)}</tbody></table></Slide>;
+    /**
+     * JG-30/31: "corrigir essas porcentagens, estão bem erradas".
+     *
+     * O defeito era um denominador só: **todas** as oito colunas — inclusive as quatro de oferta
+     * lançada — eram divididas pelo total da oferta **final**. Cada coluna passa a usar o seu
+     * próprio total, de modo que Planta, Construção, Pronto e Total fecham 100% cada uma, na
+     * vertical. Célula sem base não vira 0%: vira `—`.
+     */
+    const totalRow = granularRows.find((row) => row.kind === 'total');
+    const dataRows = granularRows.filter((row) => row.kind === 'row');
+    const share = dataRows.length ? 100 / dataRows.length : null;
+    const denominator = (group: 'launched' | 'final', key: 'Planta' | 'Construção' | 'Pronto' | 'total') => totalRow?.[group][key] ?? null;
+    const cell = (row: typeof granularRows[number], group: 'launched' | 'final', key: 'Planta' | 'Construção' | 'Pronto' | 'total') => {
+      const value = row[group][key];
+      if (!participation) return value === null ? '—' : integer(value);
+      if (row.kind === 'total') return value === null ? '—' : '100%';
+      return <CfCell metric="share" value={shareOf(value, denominator(group, key))} reference={share} max={100} format={percent}/>;
+    };
+    const label = dimension === 'typology' ? typologyDisplayLabel : (value: string) => value;
+    return <Slide title={`${participation ? 'PARTICIPAÇÃO DO ' : ''}TEMPO MÉDIO DA OFERTA LANÇADA E FINAL | POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-maturity-slide"><table className="panorama-reference-table"><thead><tr><th>Tempo Médio - {dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</th><th>Planta lançada</th><th>Construção lançada</th><th>Pronto lançado</th><th>Total lançado</th><th>Planta final</th><th>Construção final</th><th>Pronto final</th><th>Total final</th></tr></thead><tbody>{granularRows.map((row) => <tr key={row.label} className={rowClassOf(row.kind)}><td>{label(row.label)}</td>{(['launched', 'final'] as const).flatMap((group) => (['Planta', 'Construção', 'Pronto', 'total'] as const).map((key) => <td key={`${group}-${key}`}>{cell(row, group, key)}</td>))}</tr>)}</tbody></table>{participation && <p className="panorama-coverage-caption">Participação vertical: cada coluna divide o valor da linha pelo total da própria coluna, portanto Planta, Construção, Pronto e Total fecham 100% cada um.</p>}</Slide>;
   }
   const block = dimension === 'pattern' ? report.stock.units : report.stock.unitsByTypology; const rows = orderedLabels(block).slice(0, 8).map((label) => block.byGroup.find((row) => row.label === label)!).filter(Boolean); const total = rows.reduce((sum, row) => sum + row.vertical, 0);
   return <Slide title={`${participation ? 'PARTICIPAÇÃO DO ' : ''}TEMPO MÉDIO DA OFERTA LANÇADA E FINAL | POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-maturity-slide"><table className="panorama-reference-table"><thead><tr><th rowSpan={3}>Tempo Médio -<br/>{dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</th><th colSpan={4}>Oferta Lançada</th><th colSpan={4}>Oferta Final</th></tr><tr><th>Planta</th><th>Construção</th><th>Pronto</th><th>Total</th><th>Planta</th><th>Construção</th><th>Pronto</th><th>Total</th></tr><tr><th>Até 6 meses</th><th>7 a 36 meses</th><th>+ de 37 meses</th><th/><th>Até 6 meses</th><th>7 a 36 meses</th><th>+ de 37 meses</th><th/></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>{participation ? percent(total ? row.vertical / total * 100 : 0) : integer(row.vertical)}</td></tr>)}</tbody></table><p className="panorama-coverage-caption">A API fornece o total por grupo; a distribuição Planta / Construção / Pronto permanece sem método homologado.</p></Slide>;
@@ -176,7 +270,7 @@ export function MaturitySlide({ report, dimension, participation = false }: { re
 
 export function VgvSlide({ report }: { report: PanoramaReportModel }) {
   if (report.granular.vgv.length) {
-    return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th>Padrão</th><th>Empreendimentos</th><th>Ticket Médio</th><th>Lançada</th><th>Final</th><th>Vendidas</th><th>Lançada (R$ mi)</th><th>Final (R$ mi)</th><th>Vendidas (R$ mi)</th></tr></thead><tbody>{report.granular.vgv.map((row) => <tr key={`${row.segment}-${row.label}`} className={row.kind !== 'row' ? 'panorama-total-row' : undefined}><td>{row.label}</td><td>{integer(row.projects)}</td><td>{currency(row.averageTicket)}</td><td>{integer(row.launchedUnits)}</td><td>{integer(row.finalUnits)}</td><td>{integer(row.soldUnits)}</td><td>{decimal(row.launchedVgvMillions)}</td><td>{decimal(row.finalVgvMillions)}</td><td>{decimal(row.soldVgvMillions)}</td></tr>)}</tbody></table></Slide>;
+    return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th>Padrão</th><th>Empreendimentos</th><th>Ticket Médio</th><th>Lançada</th><th>Final</th><th>Vendidas</th><th>Lançada (R$ mi)</th><th>Final (R$ mi)</th><th>Vendidas (R$ mi)</th></tr></thead><tbody>{report.granular.vgv.map((row) => <tr key={`${row.segment}-${row.label}`} className={rowClassOf(row.kind)}><td>{row.label}</td><td>{integer(row.projects)}</td><td>{currency(row.averageTicket)}</td><td>{integer(row.launchedUnits)}</td><td>{integer(row.finalUnits)}</td><td>{integer(row.soldUnits)}</td><td>{decimal(row.launchedVgvMillions)}</td><td>{decimal(row.finalVgvMillions)}</td><td>{decimal(row.soldVgvMillions)}</td></tr>)}</tbody></table></Slide>;
   }
   const rowLabels = orderedLabels(report.stock.units, report.stock.vgv, report.sales.units, report.sales.vgv).slice(0, 8);
   return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th rowSpan={2}>Padrão</th><th rowSpan={2}>Empreendimentos</th><th rowSpan={2}>Ticket Médio</th><th colSpan={3}>UNIDADES EM OFERTA</th><th colSpan={3}>OFERTA EM VGV</th></tr><tr><th>Lançada</th><th>Final</th><th>Vendidas</th><th>Lançada<br/>(R$ MILHÕES)</th><th>Final<br/>(R$ MILHÕES)</th><th>Vendidas<br/>(R$ MILHÕES)</th></tr></thead><tbody>{rowLabels.map((label) => { const finalUnits = currentGroup(report.stock.units, label, 'total'); const soldUnits = cumulativeGroup(report.sales.units, label, 'total'); const finalVgv = currentGroup(report.stock.vgv, label, 'total'); const soldVgv = cumulativeGroup(report.sales.vgv, label, 'total'); return <tr key={label}><td>{label}</td><td>—</td><td>{currency(currentGroup(report.prices.ticket, label, 'total'))}</td><td>{integer(finalUnits + soldUnits)}</td><td>{integer(finalUnits)}</td><td>{integer(soldUnits)}</td><td>{decimal(finalVgv + soldVgv)}</td><td>{decimal(finalVgv)}</td><td>{decimal(soldVgv)}</td></tr>; })}</tbody></table></Slide>;
@@ -189,21 +283,38 @@ function strongestGroup(block: ReportMarketBlock, segment: SegmentKey = 'vertica
   }, null);
 }
 
+/**
+ * Slides 53/54 — JG-36, JG-37 e JG-38.
+ *
+ * - JG-36: o texto perde a menção a loteamentos e à "API GeoBrain". O horizontal do Panorama
+ *   Secovi é Condomínio de Casas e nada mais; a rastreabilidade da fonte continua no dossiê
+ *   técnico, que é onde ela pertence — não na narrativa entregue ao cliente.
+ * - JG-37: nenhum rótulo numérico solto; tipologia é lida por extenso.
+ * - JG-38: preço de vertical e de Condomínio de Casas nunca são misturados numa média. Cada
+ *   segmento traz o seu, ponderado pelo próprio universo; sem base, o segmento é omitido em vez de
+ *   herdar o número do outro.
+ */
 export function NarrativeSlide({ report, continuation = false }: { report: PanoramaReportModel; continuation?: boolean }) {
   const finalStock = last(report.stock.units);
   const sold = report.sales.units.series.reduce((sum, row) => sum + row.total, 0);
   const launched = finalStock.total + sold;
   const topPattern = strongestGroup(report.stock.units, 'total');
   const topTypology = strongestGroup(report.stock.unitsByTypology, 'total');
+  const verticalPrices = report.granular.pricesByStandard.find((row) => row.kind === 'total');
+  const horizontalPrices = report.granular.horizontalPricesByStandard.find((row) => row.kind === 'total');
+  const hasHorizontal = report.cube.projects.some((project) => project.segment === 'Horizontal');
   const firstPage = [
-    <>No período analisado, o mercado residencial de <strong>{scopeCityLabel(report.scope)}</strong> reúne oferta final de <strong>{integer(finalStock.total)} unidades</strong>, sendo {integer(finalStock.vertical)} verticais e {integer(finalStock.horizontal)} horizontais.</>,
+    <>No período analisado, o mercado residencial de <strong>{scopeCityLabel(report.scope)}</strong> reúne oferta final de <strong>{integer(finalStock.total)} unidades</strong>, sendo {integer(finalStock.vertical)} no vertical{hasHorizontal ? <> e {integer(finalStock.horizontal)} em {SECOVI_HORIZONTAL_LABEL}</> : <>; não há {SECOVI_HORIZONTAL_LABEL} elegível neste recorte</>}.</>,
     <>A oferta lançada estimada no recorte é de <strong>{integer(launched)} unidades</strong>; a disponibilidade sobre essa base corresponde a <strong>{percent(launched ? finalStock.total / launched * 100 : 0)}</strong>.</>,
-    <>O IVV do mercado total encerra o trimestre em <strong>{percent(last(report.ivv).total)}</strong>, calculado a partir dos contratos de estoque e vendas da API GeoBrain.</>,
+    <>O IVV do mercado total encerra o trimestre em <strong>{percent(last(report.ivv).total)}</strong>, obtido da razão entre as vendas líquidas e a soma da oferta anterior com os lançamentos do período.</>,
   ];
   const secondPage = [
     <>{topPattern ? <>O padrão com maior oferta final é <strong>{topPattern.label}</strong>, com {integer(topPattern.value)} unidades disponíveis.</> : <>A distribuição da oferta por padrão não retornou dados para o recorte.</>}</>,
-    <>{topTypology ? <>A tipologia de maior presença na oferta é <strong>{topTypology.label}</strong>, totalizando {integer(topTypology.value)} unidades.</> : <>A distribuição por tipologia não retornou dados para o recorte.</>}</>,
-    <>O ticket médio observado é de <strong>{currency(last(report.prices.ticket).total)}</strong>, e o preço médio privativo alcança <strong>{currency(last(report.prices.meter).total)}/m²</strong>.</>,
+    <>{topTypology ? <>A tipologia de maior presença na oferta é <strong>{typologyDisplayLabel(topTypology.label)}</strong>, totalizando {integer(topTypology.value)} unidades.</> : <>A distribuição por tipologia não retornou dados para o recorte.</>}</>,
+    <>No <strong>residencial vertical</strong>, o ticket médio é de <strong>{currency(verticalPrices?.averageTicket)}</strong> e o preço privativo, <strong>{currency(verticalPrices?.averagePricePerMeter)}/m²</strong>.</>,
+    <>{hasHorizontal
+      ? <>Em <strong>{SECOVI_HORIZONTAL_LABEL}</strong>, os indicadores são apurados à parte: ticket médio de <strong>{currency(horizontalPrices?.averageTicket)}</strong> e <strong>{currency(horizontalPrices?.averagePricePerMeter)}/m²</strong>. Os dois segmentos não são combinados em uma média única.</>
+      : <>Não há <strong>{SECOVI_HORIZONTAL_LABEL}</strong> elegível no recorte, portanto o bloco horizontal não compõe preço nem média deste panorama.</>}</>,
   ];
   return <Slide title="ANÁLISES E OBSERVAÇÕES SOBRE O MERCADO" className="panorama-narrative-slide">
     <div className="panorama-narrative-kicker">{continuation ? 'LEITURA DO PRODUTO E PREÇOS' : 'SÍNTESE DO PERÍODO'}</div>

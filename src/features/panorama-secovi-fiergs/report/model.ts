@@ -9,6 +9,7 @@ import {
   maturityByStandard,
   maturityByTypology,
   offerByCohort,
+  offerByAreaBand,
   offerByStandard,
   offerByTypology,
   pricesByStandard,
@@ -177,6 +178,7 @@ export function buildGranularBlocks(cube: MarketCube): PanoramaGranularBlocks {
   const matrix = buildCohortMatrix(cube, 'Vertical');
   return {
     offerByStandard: offerByStandard(cube, 'Vertical'),
+    areaBands: offerByAreaBand(cube),
     offerByTypology: offerByTypology(cube, 'Vertical'),
     cohortsVertical: offerByCohort(cube, 'Vertical'),
     cohortsHorizontal: offerByCohort(cube, 'Horizontal'),

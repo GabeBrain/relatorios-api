@@ -100,8 +100,68 @@
 .panorama-v2-city-cover-copy h1 { font-size:4.05cqw; }
 .panorama-v2-city-cover-copy strong { margin-top:4.1cqw; font-size:2.7cqw; }
 .panorama-v2-page .panorama-table-page>i,.panorama-v2-page .panorama-chart-head i,.panorama-v2-page .panorama-market-slide header>i,.panorama-v2-page .panorama-page-unavailable i { opacity:0; }
-.panorama-v2-page .panorama-corporate { padding:3.5cqw 4.5cqw 5.8cqw; font-size:clamp(.78rem,1.18vw,1.25rem); line-height:1.5; }
-.panorama-v2-page .panorama-corporate h2 { margin-bottom:2.3%; font-size:clamp(2rem,3.6vw,3.6rem); }
-.panorama-v2-page .panorama-corporate h3 { margin-top:1.8%; }
+/* JG-01 a JG-04 — "aumentar fonte" nas páginas 4, 5, 6 e 8.
+   A causa era a unidade: só as institucionais mediam a fonte em `vw` (largura da janela), enquanto
+   todo o restante do deck mede em `cqw` (largura da própria lâmina). No preview, onde a lâmina
+   ocupa parte da tela, o mesmo texto saía muito menor que o das outras páginas; e o teto de
+   `1.25rem` impedia que ele crescesse na exportação a 1920px. Passar para `cqw` faz a tipografia
+   institucional escalar junto com a lâmina, em preview e em PDF, sem número mágico por página. */
+.panorama-v2-page .panorama-corporate { padding:3.5cqw 4.5cqw 5.8cqw; font-size:1.5cqw; line-height:1.5; }
+.panorama-v2-page .panorama-corporate h2 { margin-bottom:2.3%; font-size:3.4cqw; }
+.panorama-v2-page .panorama-corporate h3 { margin-top:1.8%; font-size:1.2em; }
+.panorama-v2-page .panorama-corporate li { margin:.45em 0; }
+.panorama-v2-page .panorama-corporate ol { margin:.6em 0 0 1.2em; }
 .panorama-v2-page .panorama-city-comparison table { table-layout:fixed; font-size:.94cqw; }
 .panorama-v2-page .panorama-city-comparison th:first-child,.panorama-v2-page .panorama-city-comparison td:first-child { width:38%; text-align:left; }
+
+
+/* -------------------------------------------------------------------------- */
+/* Formatação condicional — regra semântica única (JG-20/21/23/24/28/29/31)     */
+/* -------------------------------------------------------------------------- */
+
+/* Texto exclusivo de leitor de tela. Não é `display:none`: precisa continuar sendo conteúdo para
+   que a exportação e a auditoria automatizada consigam ler o estado de cada célula. */
+.panorama-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+
+/* O símbolo é o canal redundante à cor exigido pelo portão transversal da matriz. */
+.panorama-cf>em { position:relative; z-index:1; margin-left:.28cqw; font-style:normal; font-size:.85em; line-height:1; }
+.panorama-cf-positive>em { color:#2f7d45; }
+.panorama-cf-negative>em { color:#b3121b; }
+.panorama-cf-positive>i { border-color:#59bd77; background:linear-gradient(90deg,#68ca87,#e8f7ed); }
+.panorama-cf-negative>i { border-color:#ff565e; background:linear-gradient(90deg,#ff5059,#ffe3e5); }
+/* O estado neutro NÃO repinta a barra: a métrica mantém o seu tom (verde, vermelho, amarelo) e a
+   barra continua comunicando magnitude. Repintar de cinza apagava a coluna de IVV inteira, que é
+   quase sempre neutra em relação ao total e ficaria visualmente idêntica a um dado ausente. */
+/* Nulo e indisponível não desenham barra: um traço de comprimento zero seria lido como "quase zero". */
+.panorama-cf-null>i,.panorama-cf-unavailable>i { display:none; }
+.panorama-cf-null>b { color:#767676; }
+.panorama-cf-unavailable>b { color:#7b5d00; font-weight:700; font-size:.92em; }
+
+/* Subtotal é linha de síntese, não coorte: fica visualmente entre a linha comum e o total geral. */
+.panorama-subtotal-row td { background:#ececec; font-weight:700; }
+.panorama-reference-table tr.panorama-subtotal-row td { background:#ececec; font-weight:700; }
+
+/* JG-05 — o rótulo do segmento tem a mesma função nas três linhas do grupo; o cinza que aparecia
+   só no Horizontal e no Total vinha do `rowspan` deslocar o `td:first-child`, não de uma decisão. */
+.panorama-comparison-table td.panorama-segment-cell { background:#fff; font-weight:400; }
+.panorama-comparison-table .panorama-total-row td.panorama-segment-cell { background:#d5d5d5; font-weight:700; }
+/* Colunas de dado e de variação passam a compartilhar a mesma superfície: era o contraste entre a
+   célula transparente (que deixava o fundo da lâmina aparecer) e a célula branca da variação. */
+.panorama-comparison-table tbody td { background:#fff; }
+.panorama-comparison-table .panorama-total-row td { background:#d5d5d5; }
+.panorama-comparison-table .panorama-cf-positive .panorama-change-bar { background:linear-gradient(90deg,#e5f5e8,#54bd72); }
+.panorama-comparison-table .panorama-cf-negative .panorama-change-bar { background:linear-gradient(90deg,#ffdede,#ff1717); }
+.panorama-comparison-table .panorama-cf-positive { box-shadow:inset 0 0 0 1px #55b96d; }
+.panorama-comparison-table .panorama-cf-negative { box-shadow:inset 0 0 0 1px #ff2b2b; }
+
+/* JG-25 — rótulos do gráfico de barras: valor e variação em relação ao período anterior. */
+.panorama-bar-label text { font-family:Tahoma,Arial,sans-serif; font-size:.95cqw; font-weight:700; fill:#080808; }
+.panorama-bar-label.is-reference text { fill:#3e5e25; }
+.panorama-bar-label .panorama-bar-delta { font-size:.82cqw; }
+.panorama-bar-label .panorama-cf-positive { fill:#2f7d45; }
+.panorama-bar-label .panorama-cf-negative { fill:#b3121b; }
+
+/* JG-40 — sem foto, o encerramento não reserva moldura para uma imagem que não existe. A lâmina é
+   um grid de duas colunas; sem o primeiro filho, a cópia escorregaria para a coluna da esquerda e
+   perderia o alinhamento da referência. A coluna vazia é suprimida e a cópia permanece à direita. */
+.panorama-v2-consultant.is-photoless { grid-template-columns:1fr; padding-left:20cqw; }

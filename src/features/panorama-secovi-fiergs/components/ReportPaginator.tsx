@@ -1,10 +1,15 @@
 import { Component, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle, Presentation } from 'lucide-react';
-import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
+import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
-import { createPanoramaReportManifest, createPanoramaSections, type ReportPageDefinition } from '../report/manifest';
+import { conditionalFormat } from '../domain/conditional-format';
+import { SECOVI_HORIZONTAL_LABEL } from '../domain/entity-policy';
+import { createPanoramaSections, panoramaManifestFor, type ReportPageDefinition } from '../report/manifest';
+
+/** Token do fundo cartográfico: define, junto das coordenadas, se a lâmina de mapa existe (JG-39). */
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
 import { panoramaExportIsRunning, usePanoramaExportStore } from '../export-store';
 import { AreaIvvSlide, CohortMatrixSlide, CohortTableSlide, LocationSlide, MarketSummarySlide, MaturitySlide, NarrativeSlide, OfferChartSlide, OfferTableSlide, PriceChartSlide, PriceTableSlide, VgvSlide } from './MarketSlides';
 import coverBackground from '../assets/official_v2/backgrounds/cover-report.png';
@@ -54,23 +59,29 @@ function CityCover({ report }: { report: PanoramaReportModel }) {
   return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DE</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
 function V2Summary({ report }: { report: PanoramaReportModel }) {
-  const sections = createPanoramaSections(createPanoramaReportManifest({ includeCityComparisons: report.cityComparisons.enabled, includeHorizontal: report.provenance.engineVersion !== 'v3' || report.cube.projects.some((project) => project.segment === 'Horizontal'), includeMap: report.locations.length > 0 }));
+  const sections = createPanoramaSections(panoramaManifestFor(report, MAPBOX_TOKEN));
   return <div className="panorama-v2-summary"><h2>Sumário</h2><ol>{sections.map((section) => <li key={section.id}><span>{section.label}</span><b>{section.start}–{section.end}</b></li>)}</ol></div>;
 }
 type PresentationPerson = NonNullable<PanoramaReportModel['presentation']['consultant']>;
 function PersonSlot({ person, label, quiet = false }: { person?: PresentationPerson; label: string; quiet?: boolean }) {
   return <div className={`panorama-v2-person-slot ${person?.photoUrl ? 'is-filled' : ''} ${quiet ? 'is-quiet' : ''}`}>{person?.photoUrl ? <img src={person.photoUrl} alt={person.name ?? label}/> : !quiet && <span className="panorama-v2-person-placeholder">{label}</span>}{(person?.name || person?.role || person?.email) && <div><strong>{person.name}</strong><small>{person.role}</small>{person.email && <small>{person.email}</small>}</div>}</div>;
 }
+/**
+ * JG-40: "'Foto do Consultor' está sem foto". Com foto, a imagem entra com `alt`. Sem foto, a
+ * lâmina não exibe moldura tracejada nem o texto do slot: um espaço vazio rotulado é justamente o
+ * que chegou ao cliente. O encerramento vale por si; a identificação, quando existir, é textual.
+ */
 function ConsultantClosing({ report }: { report: PanoramaReportModel }) {
   const consultant = report.presentation.consultant;
-  return <div className="panorama-v2-consultant"><PersonSlot person={consultant} label="FOTO DO CONSULTOR"/><div className="panorama-v2-consultant-copy"><h2>Obrigado pela atenção</h2>{consultant?.name ? <><strong>{consultant.name}</strong><span>{consultant.role}</span>{consultant.email && <small>{consultant.email}</small>}</> : <p>Espaço reservado para a finalização do consultor responsável.</p>}</div></div>;
+  const hasPhoto = Boolean(consultant?.photoUrl);
+  return <div className={`panorama-v2-consultant ${hasPhoto ? '' : 'is-photoless'}`}>{hasPhoto && <PersonSlot person={consultant} label={consultant?.name ?? 'Consultor responsável'}/>}<div className="panorama-v2-consultant-copy"><h2>Obrigado pela atenção</h2>{consultant?.name ? <><strong>{consultant.name}</strong><span>{consultant.role}</span>{consultant.email && <small>{consultant.email}</small>}</> : null}</div></div>;
 }
 const fixedTeam = [{ name: 'Fábio Tadeu Araújo', role: 'CEO', photo: 'team-fabio.png' }, { name: 'Marcos Kahtalian', role: 'Sócio-Fundador', photo: 'team-marcos.png' }, { name: 'Teresa Cristina', role: 'Sócia e Gestora de Projetos', photo: 'team-teresa.png' }];
 function TeamSlide({ report }: { report: PanoramaReportModel }) {
   const analysts = report.presentation.analysts ?? [];
   return <div className="panorama-v2-team"><div className="panorama-v2-team-grid">{fixedTeam.map((member) => <div className="panorama-v2-team-member" key={member.name}><img src={officialV2(member.photo)} alt={member.name}/><strong>{member.name}</strong><small>{member.role}</small></div>)}{[0, 1, 2].map((index) => <PersonSlot key={index} person={analysts[index]} label="" quiet/>)}</div><h2>Equipe técnica</h2></div>;
 }
-type TrendConfig = { title: string; data: LaunchSeries[]; unit: 'count' | 'mi' | 'sqm'; pattern?: boolean; single?: boolean; metric: string; nouns: [string, string]; colors: [string, string] };
+type TrendConfig = { title: string; data: LaunchSeries[]; unit: 'count' | 'mi' | 'sqm'; pattern?: boolean; single?: boolean; /** JG-25: a série de preço no tempo é barra, não linha. */ bars?: boolean; metric: string; nouns: [string, string]; colors: [string, string] };
 function launchPatternSeries(source: { quarter: string; economic: number | null; other: number | null }[]): LaunchSeries[] { return source.map((item) => ({ quarter: item.quarter as never, vertical: item.economic ?? 0, horizontal: item.other ?? 0, total: (item.economic ?? 0) + (item.other ?? 0) })); }
 function marketPatternSeries(block: ReportMarketBlock): LaunchSeries[] { const economic = block.groupSeries.find((group) => /econ/i.test(group.label)); return block.series.map((total, index) => { const economicValue = economic?.series[index]?.vertical ?? 0; return { quarter: total.quarter, vertical: economicValue, horizontal: Math.max(0, total.vertical - economicValue), total: total.vertical }; }); }
 function seriesFor(page: number, r: PanoramaReportModel): TrendConfig {
@@ -84,8 +95,23 @@ function seriesFor(page: number, r: PanoramaReportModel): TrendConfig {
   if (page === 24) return { title: 'VGV vendido por trimestre (em R$ milhões)', data: r.sales.vgv.series, unit: 'mi', metric: 'VGV VENDIDO', nouns: ['Vertical', 'Cond. de Casas'], colors: ['#5b7537', '#ffc000'] };
   if (page === 25) return { title: 'Unidades vendidas por padrão por trimestre', data: marketPatternSeries(r.sales.units), unit: 'count', pattern: true, metric: 'UNIDS. VENDIDAS', nouns: ['Econômico', 'Demais Padrões'], colors: ['#c00000', '#858585'] };
   if (page === 26) return { title: 'VGV vendido por padrão por trimestre (em R$ milhões)', data: marketPatternSeries(r.sales.vgv), unit: 'mi', pattern: true, metric: 'VGV VENDIDO', nouns: ['Econômico', 'Demais Padrões'], colors: ['#c00000', '#858585'] };
-  return { title: 'Preço por m² priv. médio total residencial vertical', data: r.prices.meter.series, unit: 'sqm', single: true, metric: 'R$/M²', nouns: ['Preço por m²', ''], colors: ['#5b7537', '#ffc000'] };
+  return { title: 'Preço por m² priv. médio total residencial vertical', data: r.prices.meter.series, unit: 'sqm', single: true, bars: true, metric: 'R$/M²', nouns: ['Preço por m²', ''], colors: ['#5b7537', '#ffc000'] };
 }
+/**
+ * JG-07 — regra de rótulo dos gráficos temporais, exigida em nove páginas (12–17 e 21–24).
+ *
+ * Duas decisões que a analista corrigiu de uma vez:
+ *
+ * - `render` é sempre verdadeiro para um valor observado, **inclusive zero**. Zero é resultado; era
+ *   a supressão do zero que fazia o 2T26 sumir dos gráficos onde não houve lançamento.
+ * - `plate` identifica o trimestre **pelo seu valor**, não pela posição na série: só o trimestre de
+ *   fechamento recebe a placa; os demais ficam sem fundo, com o texto contornado.
+ */
+export function pointLabelPlan(value: number | null | undefined, quarter: string, referenceQuarter: string): { render: boolean; plate: 'chip' | 'none' } {
+  const render = value !== null && value !== undefined && Number.isFinite(value);
+  return { render, plate: quarter[0] === referenceQuarter ? 'chip' : 'none' };
+}
+
 function TimeChart({ page, report }: { page: number; report: PanoramaReportModel }) {
   const series = seriesFor(page, report);
   if (page === 40 && report.prices.meter.dataStatus === 'unavailable') {
@@ -100,8 +126,11 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
     const index = props.index ?? -1;
     const row = data[index];
     if (!row || props.x === undefined || props.y === undefined || props.value === undefined) return null;
-    if (Number(props.value) === 0) return null;
-    const emphasized = row.quarter[0] === referenceQuarter;
+    // JG-07: "mesmo que o rótulo seja 0, precisa aparecer". Zero é um resultado observado; era a
+    // supressão do zero que apagava o 2T26 dos gráficos em que a analista notou o dado faltando.
+    const plan = pointLabelPlan(props.value, row.quarter, referenceQuarter);
+    if (!plan.render) return null;
+    const emphasized = plan.plate === 'chip';
     const companion = key === 'vertical' ? row.horizontal : row.vertical;
     const valuesAreClose = !series.single && Math.abs(Number(props.value) - companion) <= Math.max(Math.abs(Number(props.value)), Math.abs(companion), 1) * .18;
     // O padrão é ficar junto do ponto. Só afastamos a segunda etiqueta quando os dois
@@ -112,8 +141,32 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
     const label = formatValue(Number(props.value));
     const width = Math.max(34, label.length * 7 + 12);
     const needsLeader = labelTier > 0 || props.y - labelY > 20;
-    if (!emphasized) return <g className="panorama-point-label"><>{needsLeader && <line x1={props.x} y1={props.y - 3} x2={props.x} y2={labelY + 3} stroke={color} strokeWidth={1}/>}<rect x={props.x - width / 2} y={labelY - 13} width={width} height={16} rx={2} fill="#fff" fillOpacity={.94}/><text x={props.x} y={labelY} textAnchor="middle">{label}</text></></g>;
+    // JG-07: "tirar o branco do fundo dos períodos que não são os 2Trimestres". O trimestre é
+    // identificado pelo seu valor (`quarter[0]`), não pela posição na série. Fora do trimestre de
+    // fechamento não há placa: a legibilidade vem do contorno do próprio texto, não de um retângulo.
+    if (!emphasized) return <g className="panorama-point-label"><>{needsLeader && <line x1={props.x} y1={props.y - 3} x2={props.x} y2={labelY + 3} stroke={color} strokeWidth={1}/>}<text x={props.x} y={labelY} textAnchor="middle" stroke="#fff" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{label}</text></></g>;
     return <g className="panorama-highlight-label"><>{needsLeader && <line x1={props.x} y1={props.y - 3} x2={props.x} y2={labelY + 4} stroke={color} strokeWidth={1}/>}<g transform={`translate(${props.x - width / 2} ${labelY - 13})`}><rect width={width} height={19} fill={color}/><text x={width / 2} y={13} textAnchor="middle" fill={textColor}>{label}</text></g></></g>;
+  };
+
+  /**
+   * JG-25: "alterar para gráfico em barra, inserir quanto variou de um período para outro".
+   * A variação é `atual − anterior` sobre o anterior; o primeiro período e o denominador zero não
+   * produzem percentual — devolvem `null` e são impressos como `—`, nunca como infinito ou 0%.
+   */
+  const renderBarLabel = (props: { index?: number; x?: number; y?: number; width?: number; value?: number }) => {
+    const index = props.index ?? -1;
+    const row = data[index];
+    if (!row || props.x === undefined || props.y === undefined || props.width === undefined || props.value === undefined) return null;
+    const previous = data[index - 1];
+    const delta = previous ? variation(Number(props.value), previous.vertical) : null;
+    const centre = props.x + props.width / 2;
+    const emphasized = row.quarter[0] === referenceQuarter;
+    return <g className={emphasized ? 'panorama-bar-label is-reference' : 'panorama-bar-label'}>
+      <text x={centre} y={Math.max(24, props.y - 16)} textAnchor="middle">{formatValue(Number(props.value))}</text>
+      <text x={centre} y={Math.max(36, props.y - 4)} textAnchor="middle" className={delta === null ? 'panorama-bar-delta' : delta >= 0 ? 'panorama-bar-delta panorama-cf-positive' : 'panorama-bar-delta panorama-cf-negative'}>
+        {delta === null ? '—' : `${delta >= 0 ? '▲' : '▼'} ${pct(Math.abs(delta))}`}
+      </text>
+    </g>;
   };
 
   const years = [...new Set(data.map((item) => year(item.quarter)))];
@@ -139,13 +192,20 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
       return <span key={annualYear}><b>{annualYear}{annualYear === year(report.scope.endQuarter) ? '*' : ''}</b>{formatValue(total)} {unitLabel}<small>{formatValue(total / Math.max(rows.length, 1))} {series.unit === 'count' && [14, 15].includes(page) ? 'Emp.' : series.unit === 'count' ? 'Unid.' : series.unit === 'mi' ? 'Mi.' : ''}/Trimestre</small></span>;
     })}</div>
     <ResponsiveContainer width="100%" height={series.pattern ? '51%' : '62%'}>
-      <LineChart data={data} margin={{ left: 22, right: 22, top: series.single ? 88 : 26, bottom: 18 }}>
-        <XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} tickMargin={8} axisLine={{ stroke: '#c9c9c9' }} tick={{ fontSize: 11 }} interval={0} minTickGap={0} padding={{ left: 12, right: 12 }}/>
-        <Tooltip formatter={(value) => formatValue(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as never)}/>
-        <Legend verticalAlign="bottom"/>
-        <Line type="monotone" dataKey="vertical" name={series.nouns[0]} stroke={series.colors[0]} strokeWidth={4} dot={false} isAnimationActive={false} label={renderPointLabel('vertical', series.colors[0], '#fff')}/>
-        {!series.single && <Line type="monotone" dataKey="horizontal" name={series.nouns[1]} stroke={series.colors[1]} strokeWidth={4} dot={false} isAnimationActive={false} label={renderPointLabel('horizontal', series.colors[1], series.pattern ? '#fff' : '#080808')}/>}
-      </LineChart>
+      {series.bars
+        ? <BarChart data={data} margin={{ left: 22, right: 22, top: 64, bottom: 18 }}>
+            <XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} tickMargin={8} axisLine={{ stroke: '#c9c9c9' }} tick={{ fontSize: 11 }} interval={0} minTickGap={0}/>
+            <Tooltip formatter={(value) => formatValue(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as never)}/>
+            <Legend verticalAlign="bottom"/>
+            <Bar dataKey="vertical" name={series.nouns[0]} fill={series.colors[0]} isAnimationActive={false} label={renderBarLabel}/>
+          </BarChart>
+        : <LineChart data={data} margin={{ left: 22, right: 22, top: series.single ? 88 : 26, bottom: 18 }}>
+            <XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} tickMargin={8} axisLine={{ stroke: '#c9c9c9' }} tick={{ fontSize: 11 }} interval={0} minTickGap={0} padding={{ left: 12, right: 12 }}/>
+            <Tooltip formatter={(value) => formatValue(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as never)}/>
+            <Legend verticalAlign="bottom"/>
+            <Line type="monotone" dataKey="vertical" name={series.nouns[0]} stroke={series.colors[0]} strokeWidth={4} dot={false} isAnimationActive={false} label={renderPointLabel('vertical', series.colors[0], '#fff')}/>
+            {!series.single && <Line type="monotone" dataKey="horizontal" name={series.nouns[1]} stroke={series.colors[1]} strokeWidth={4} dot={false} isAnimationActive={false} label={renderPointLabel('horizontal', series.colors[1], series.pattern ? '#fff' : '#080808')}/>}
+          </LineChart>}
     </ResponsiveContainer>
     {series.pattern && <div className="panorama-mcmv-strip">{years.slice(-4).map((annualYear) => { const rows = data.filter((item) => year(item.quarter) === annualYear); const economic = rows.reduce((sum, row) => sum + row.vertical, 0); const total = rows.reduce((sum, row) => sum + row.total, 0); return <strong key={annualYear}>MCMV {annualYear}{annualYear === year(report.scope.endQuarter) ? '*' : ''}<span>{total ? pct(economic / total * 100) : '—'}</span></strong>; })}</div>}
     {series.pattern && <p className="panorama-chart-note">OBS.: MCMV = Minha Casa Minha Vida.</p>}
@@ -180,16 +240,21 @@ function ComparisonTable({ report, sales = false, annual = false }: { report: Pa
         const values = periods.map((period) => get(row, period, type));
         return <tr key={`${row.label}-${type}`} className={type === 'total' ? 'panorama-total-row' : ''}>
           {rowIndex === 0 && <th rowSpan={3} scope="rowgroup" className="panorama-group-cell">{groupLabel(row.label)}</th>}
-          <td>{type === 'vertical' ? 'Residencial Vertical' : type === 'horizontal' ? 'Residencial Horizontal' : 'Total Mercado'}</td>
+          {/* JG-05: o rótulo do segmento é a mesma função nas três linhas e por isso recebe o mesmo
+              tratamento. O cinza só aparecia no Horizontal e no Total porque o `rowspan` do grupo
+              deslocava o `td:first-child` — era artefato de marcação, não decisão editorial. */}
+          <td className="panorama-segment-cell">{type === 'vertical' ? 'Residencial Vertical' : type === 'horizontal' ? SECOVI_HORIZONTAL_LABEL : 'Total Mercado'}</td>
           {values.map((value, index) => <td key={index}>{row.money ? decimal(value) : n(value)}</td>)}
           {comparisonPairs.map(([from, to]) => {
             if (!from || !to) return null;
             const delta = variation(get(row, to, type), get(row, from, type));
-            const barSize = delta === null ? 0 : Math.min(Math.abs(delta), 100);
-            const tone = delta === null ? '' : delta >= 0 ? 'panorama-positive' : 'panorama-negative';
-            return <td className={`panorama-variation-cell ${type === 'total' ? '' : tone}`} style={{ '--panorama-change-size': `${barSize}%` } as React.CSSProperties} key={`${from}-${to}`}>
+            // JG-05: colunas de variação usam a mesma regra semântica das demais formatações
+            // condicionais do relatório — sinal e símbolo, não só cor.
+            const verdict = conditionalFormat('variation', { value: delta, max: 100 });
+            return <td className={`panorama-variation-cell ${type === 'total' ? 'panorama-cf-neutral' : verdict.className}`} style={{ '--panorama-change-size': `${verdict.intensity}%` } as React.CSSProperties} key={`${from}-${to}`}>
               {type !== 'total' && delta !== null && <span className="panorama-change-bar"/>}
-              <strong>{delta === null ? '-' : pct(delta)}</strong>
+              <strong>{delta === null ? '—' : `${verdict.symbol} ${pct(Math.abs(delta))}`.trim()}</strong>
+              <span className="panorama-sr-only">{verdict.srLabel}</span>
             </td>;
           })}
         </tr>;
@@ -271,7 +336,7 @@ function AllPagesView({ report, pages, containerRef }: { report: PanoramaReportM
 }
 
 export function PanoramaExportDeck({ report, rootRef }: { report: PanoramaReportModel; rootRef: React.RefObject<HTMLDivElement> }) {
-  const pages = createPanoramaReportManifest({ includeCityComparisons: report.cityComparisons.enabled, includeHorizontal: report.provenance.engineVersion !== 'v3' || report.cube.projects.some((project) => project.segment === 'Horizontal'), includeMap: report.locations.length > 0 });
+  const pages = panoramaManifestFor(report, MAPBOX_TOKEN);
   return <div ref={rootRef} className="panorama-export-root" aria-hidden="true">{pages.map((def) => <SafeSheet key={def.page} def={def} report={report}/>)}</div>;
 }
 
@@ -283,7 +348,7 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const exportProgress = usePanoramaExportStore((state) => state.progress);
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
-  const pages = useMemo(() => createPanoramaReportManifest({ includeCityComparisons: report.cityComparisons.enabled, includeHorizontal: report.provenance.engineVersion !== 'v3' || report.cube.projects.some((project) => project.segment === 'Horizontal'), includeMap: report.locations.length > 0 }), [report.cityComparisons.enabled, report.provenance.engineVersion, report.cube.projects, report.locations.length]);
+  const pages = useMemo(() => panoramaManifestFor(report, MAPBOX_TOKEN), [report]);
   const sections = useMemo(() => createPanoramaSections(pages), [pages]);
   useEffect(() => setCurrent((value) => Math.min(value, pages.length - 1)), [pages.length]);
   const page = pages[Math.min(current, pages.length - 1)];

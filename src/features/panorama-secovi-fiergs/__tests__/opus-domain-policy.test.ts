@@ -116,17 +116,31 @@ describe('OP-1 · taxonomia de padrões (slides 38, 39, 51)', () => {
 });
 
 describe('OP-1 · coortes por ano de lançamento (slides 33, 41, 42, 48)', () => {
-  it('agrupa até 2022, mantém 2023/2024 e cria subtotal e total geral', () => {
+  // JG-22/26/27: o subtotal soma os lançados APÓS 2024 e fica DEPOIS da linha de 2026.
+  it('agrupa até 2022, mantém os anos e põe o subtotal pós-2024 depois de 2026', () => {
     const buckets = cohortBuckets([2018, 2020, 2022, 2023, 2024, 2025, 2026]);
     expect(buckets.map((bucket) => bucket.label))
-      .toEqual(['Até 2022', '2023', '2024', 'Subtotal até 2024', '2025', '2026', 'Total geral']);
+      .toEqual(['Até 2022', '2023', '2024', '2025', '2026', 'Subtotal lançados após 2024', 'Total geral']);
   });
 
-  it('o subtotal até 2024 soma exatamente as coortes anteriores a ele', () => {
-    const buckets = cohortBuckets([2019, 2023, 2024, 2025]);
-    const subtotal = buckets.find((bucket) => bucket.label === 'Subtotal até 2024')!;
+  it('o subtotal soma somente os anos posteriores a 2024', () => {
+    const buckets = cohortBuckets([2019, 2023, 2024, 2025, 2026]);
+    const subtotal = buckets.find((bucket) => bucket.label === 'Subtotal lançados após 2024')!;
     expect(subtotal.kind).toBe('subtotal');
-    expect(subtotal.years.sort()).toEqual([2019, 2023, 2024]);
+    expect([...subtotal.years].sort()).toEqual([2025, 2026]);
+    // A prova de que anos anteriores não entram: nenhum ano <= 2024 aparece no subtotal.
+    expect(subtotal.years.every((year) => year > 2024)).toBe(true);
+  });
+
+  it('posiciona o subtotal imediatamente após o último ano e antes do total geral', () => {
+    const labels = cohortBuckets([2023, 2024, 2025, 2026]).map((bucket) => bucket.label);
+    expect(labels.indexOf('Subtotal lançados após 2024')).toBe(labels.indexOf('2026') + 1);
+    expect(labels.at(-1)).toBe('Total geral');
+  });
+
+  it('sem ano posterior a 2024, não cria linha de subtotal vazia', () => {
+    expect(cohortBuckets([2019, 2023, 2024]).map((bucket) => bucket.label))
+      .toEqual(['Até 2022', '2023', '2024', 'Total geral']);
   });
 
   it('não produz lista longa 2000–2022: todos viram uma única linha', () => {

@@ -11,6 +11,13 @@ import type { Segment } from '../types';
  */
 export type EntityId = 'secovi-sp' | 'fiergs-rs';
 
+/**
+ * Rótulo editorial do único horizontal que o Panorama Secovi aceita. Aparece nas tabelas e nos
+ * gráficos para que a página responda sozinha à pergunta do p12 — "os horizontais são só
+ * condomínios de casas, correto?" — sem depender do dossiê técnico.
+ */
+export const SECOVI_HORIZONTAL_LABEL = 'Condomínio de Casas';
+
 export type HorizontalSubtype = 'condominio_casas' | 'loteamento' | 'outro' | 'indefinido';
 
 export interface UniverseCandidate {
@@ -84,19 +91,70 @@ export const SECOVI_SP_POLICY: EntityPolicy = {
   },
 };
 
+/**
+ * PRE-026 — vocabulário oficial de **produto** horizontal, exatamente como a API v2 o escreve em
+ * `data[].standard` e `data[].typologies_history[].pattern`. A grafia canônica da fonte é
+ * `Condomínio de Casas/Sobrados`, com barra: a varredura de 24 municípios não produziu nenhuma
+ * outra forma. As variantes aceitas abaixo existem só para grafias já observadas em recortes
+ * antigos — nenhuma delas é inferência por semelhança.
+ */
+const V3_ACCEPTED_PRODUCTS = new Set([
+  'condominio de casas/sobrados',
+  'condominio de casas e sobrados',
+  'condominio de casas',
+  'casas em condominio fechado',
+]);
+
+/** Produtos horizontais explicitamente fora do universo Secovi (§4.3 do mapeamento). */
+const V3_EXCLUDED_PRODUCTS = new Set([
+  'loteamento fechado',
+  'loteamento aberto',
+  'loteamento comercial',
+  'condominio de chacaras',
+  'terreno',
+]);
+
+/**
+ * Rótulos socioeconômicos e marcadores de período: não dizem nada sobre o produto. Um horizontal
+ * que só os apresenta é ambíguo — sai do universo por ausência de informação, não por evidência.
+ */
+const V3_SOCIOECONOMIC = new Set(['economico', 'standard', 'medio', 'medio-alto', 'alto', 'luxo', 'futuro']);
+
+export type HorizontalLabelAxis = 'produto_aceito' | 'produto_excluido' | 'socioeconomico' | 'desconhecido';
+
+/** Classifica um rótulo isolado nos eixos da taxonomia. Nunca casa por semelhança textual. */
+export function classifyHorizontalLabel(label: unknown): HorizontalLabelAxis {
+  const normalized = normalizeText(label);
+  if (!normalized) return 'desconhecido';
+  if (V3_ACCEPTED_PRODUCTS.has(normalized)) return 'produto_aceito';
+  if (V3_EXCLUDED_PRODUCTS.has(normalized)) return 'produto_excluido';
+  if (V3_SOCIOECONOMIC.has(normalized)) return 'socioeconomico';
+  return 'desconhecido';
+}
+
+/**
+ * Rótulos novos precisam falhar de forma ruidosa: a taxonomia da API cresce sem aviso e foi
+ * exatamente a classificação silenciosa por nome que produziu o erro de 100% medido em Jundiaí.
+ * O coletor lê esta lista e a leva para o dossiê.
+ */
+export const unmappedHorizontalLabels = new Set<string>();
+
 /** PRE-026: somente rótulo explícito do payload oficial. Sem regex em nome, sem inferência. */
 export const SECOVI_SP_V3_POLICY: EntityPolicy = {
   ...SECOVI_SP_POLICY,
   classify(candidate) {
     if (candidate.segment === 'Vertical') return { accepted: true, segment: 'Vertical', horizontalSubtype: null, reason: null };
     if (candidate.segment !== 'Horizontal') return { accepted: false, segment: null, horizontalSubtype: null, reason: 'segmento_desconhecido' };
+    // O nome comercial nunca entra: é a heurística que a PRE-026 substituiu.
     const labels = [candidate.rawSubtype, candidate.rawType, candidate.standard, ...(candidate.historicalPatterns ?? [])]
-      .map(normalizeText).filter(Boolean);
+      .map(normalizeText).filter((label) => label && !SEGMENT_ONLY.test(label));
     if (!labels.length) return { accepted: false, segment: 'Horizontal', horizontalSubtype: 'indefinido', reason: 'subtipo_horizontal_indefinido' };
-    const allowed = labels.some((label) => /^(condominio de casas|condominio de casas e sobrados|casas em condominio fechado)$/.test(label));
-    return allowed
-      ? { accepted: true, segment: 'Horizontal', horizontalSubtype: 'condominio_casas', reason: null }
-      : { accepted: false, segment: 'Horizontal', horizontalSubtype: 'outro', reason: 'horizontal_fora_da_politica' };
+    const axes = labels.map(classifyHorizontalLabel);
+    if (axes.includes('produto_aceito')) return { accepted: true, segment: 'Horizontal', horizontalSubtype: 'condominio_casas', reason: null };
+    for (const [index, axis] of axes.entries()) if (axis === 'desconhecido') unmappedHorizontalLabels.add(labels[index]);
+    // Produto explícito fora da política é recusa com evidência; só socioeconômico é ambiguidade.
+    if (axes.includes('produto_excluido')) return { accepted: false, segment: 'Horizontal', horizontalSubtype: 'outro', reason: 'horizontal_fora_da_politica' };
+    return { accepted: false, segment: 'Horizontal', horizontalSubtype: 'indefinido', reason: 'subtipo_horizontal_indefinido' };
   },
 };
 
