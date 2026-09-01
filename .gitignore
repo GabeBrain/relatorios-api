@@ -79,6 +79,14 @@ test-results/
 src/features/panorama-secovi-fiergs/assets/exportados/
 src/features/panorama-secovi-fiergs/assets/nova ref/
 src/features/panorama-secovi-fiergs/assets/panorama-jundiai-1T2026.pdf
+src/features/panorama-secovi-fiergs/assets/correcao_v2/
 
 # Arquivos temporarios de lock do Office
 ~$*
+
+# Credenciais locais de execução (login GeoBrain usado pelos scripts de evidência).
+# A pasta inteira é ignorada; só o template e o README sobem. NUNCA colocar
+# credencial no `.env` — ele É versionado neste repo (ver nota acima).
+.secrets/*
+!.secrets/README.md
+!.secrets/geobrain.env.example

@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-01 — Diagnóstico do universo horizontal do Panorama Secovi/FIERGS — Gabriel
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — correção da V2 após retorno de Juliana e orientação de Edgar.
+- **O quê:** documentado o diagnóstico autenticado que cruza as 40 anotações da analista com a taxonomia de `standard`/`typologies_history[].pattern` em 24 municípios. A regra estrita identifica apenas `Condomínio de Casas/Sobrados`, encontra 11 empreendimentos elegíveis e suprime o bloco horizontal quando o universo é vazio.
+- **Achado crítico:** `pattern` só aparece no contrato v2; a coleta v2 teve `500` intermitente recuperável com retry, não indisponibilidade permanente. A implementação da correção ainda não começou.
+- **Arquivos:** [`MAPEAMENTO_UNIVERSO_HORIZONTAL_SECOVI_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/MAPEAMENTO_UNIVERSO_HORIZONTAL_SECOVI_2026-09-01.md), `scripts/panorama-horizontal-taxonomy.mjs`, `scripts/panorama-evidence.mjs`.
+- **Commits:** — (registro desta sessão).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA/homologação autenticada; antes de implementar, é necessário decidir o tratamento do padrão socioeconômico ausente, aceitar explicitamente a redução do universo e confirmar a regra com Juliana.
+
 ### 2026-09-01 — Validação do Fechamento: regra desativada e nomenclatura de divergências — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — validação pós-consulta.
 - **O quê:** desativada a regra de baixa disponibilidade para novos empreendimentos e renomeada a coluna/exportação de `Erro` para `Divergência`.
