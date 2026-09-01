@@ -166,6 +166,15 @@ type TemporalEndpoint = 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-pr
 export type TemporalIssue = { endpoint: TemporalEndpoint; status: number | null; empty: boolean };
 type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string; issue?: TemporalIssue };
 
+/** Circuito por geração, exclusivo para a falha 500 confirmada de IVV por Tipologia. */
+export class PanoramaTemporalCircuit {
+  private failure: { city: string; status: number | null } | null = null;
+  avoided = 0;
+  isOpen(endpoint: TemporalEndpoint, groupBy: 'Padrão' | 'Tipologia') { return endpoint === 'ivv' && groupBy === 'Tipologia' && this.failure !== null; }
+  open(city: string, status: number | null) { if (!this.failure) this.failure = { city, status }; }
+  source() { return this.failure ? `temporal-analysis-city/ivv · Tipologia · circuito aberto após HTTP ${this.failure.status ?? 'rede'} em ${this.failure.city}; ${this.avoided} chamada(s) evitada(s)` : ''; }
+}
+
 /** Os endpoints monetários respondem em reais; o relatório editorial consome R$ milhões. */
 export function valuesInMillions(source: SourceResult, field: string): SourceResult {
   return { ...source, rows: source.rows.map((row) => ({ ...row, [field]: (safeNumber(row[field]) ?? 0) / 1_000_000 })) };
@@ -194,14 +203,14 @@ export function describeTemporalFailure(city: string, issues: TemporalIssue[]): 
   return `Não foi possível consultar ${metrics} em ${city}: a GeoBrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
 }
 
-async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3', signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
+async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3', circuit: PanoramaTemporalCircuit, signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
   const gate = createRequestGate(REQUEST_CONCURRENCY_PER_CITY);
   const track = <T,>(operation: string, request: () => Promise<T>) => gate(request).finally(() => onUnit?.(scope.city, operation));
   const [buildings, sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
     track('empreendimentos', () => fetchBuildings(scope, signal, engineVersion)),
     track('vendas por padrão', () => temporalRows(scope, 'sales', 'Padrão', signal)), track('vendas por tipologia', () => temporalRows(scope, 'sales', 'Tipologia', signal)),
     track('oferta por padrão', () => temporalRows(scope, 'stock', 'Padrão', signal)), track('oferta por tipologia', () => temporalRows(scope, 'stock', 'Tipologia', signal)),
-    track('IVV por padrão', () => temporalRows(scope, 'ivv', 'Padrão', signal)), track('IVV por tipologia', () => temporalRows(scope, 'ivv', 'Tipologia', signal)),
+    track('IVV por padrão', () => temporalRows(scope, 'ivv', 'Padrão', signal, circuit)), track('IVV por tipologia', () => temporalRows(scope, 'ivv', 'Tipologia', signal, circuit)),
     track('preços por padrão', () => temporalRows(scope, 'medium-prices', 'Padrão', signal)), track('preços por tipologia', () => temporalRows(scope, 'medium-prices', 'Tipologia', signal)),
     track('R$/m² por padrão', () => temporalRows(scope, 'medium-prices-meter', 'Padrão', signal)), track('R$/m² por tipologia', () => temporalRows(scope, 'medium-prices-meter', 'Tipologia', signal)),
   ]);
@@ -230,11 +239,12 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
   if (!scopes.length) throw new Error('Recorte sem cidade: selecione ao menos um município autorizado.');
   const progress = createPanoramaGenerationProgress(scopes.length, onProgress);
   progress.start();
+  const circuit = new PanoramaTemporalCircuit();
 
   const collection: CollectionResult<CityHarvest> = await collectByCity(
     scopes.map((item) => item.city),
     async (city, citySignal) => {
-      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, scope.engineVersion ?? 'v2', citySignal, progress.unit);
+      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, scope.engineVersion ?? 'v2', circuit, citySignal, progress.unit);
       progress.cityComplete(city);
       return harvest;
     },
@@ -354,11 +364,13 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
   ];
 }
 
-async function temporalRows(scope: CityScope, endpoint: TemporalEndpoint, groupBy: 'Padrão' | 'Tipologia' = 'Padrão', signal?: AbortSignal): Promise<SourceResult> {
+async function temporalRows(scope: CityScope, endpoint: TemporalEndpoint, groupBy: 'Padrão' | 'Tipologia' = 'Padrão', signal?: AbortSignal, circuit?: PanoramaTemporalCircuit): Promise<SourceResult> {
+  if (circuit?.isOpen(endpoint, groupBy)) { circuit.avoided += 1; return { rows: [], available: false, source: circuit.source(), issue: { endpoint, status: 500, empty: false } }; }
   const rows: Record<string, unknown>[] = []; let page = 1; let lastPage = 1;
   const window = temporalWindow(scope);
   do {
-    const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: window.start, end_period: window.end, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal });
+    const response = await requestWithRetry(() => httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: window.start, end_period: window.end, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal }), { signal, attempts: endpoint === 'ivv' && groupBy === 'Tipologia' ? 2 : 1 });
+    if (!response.ok && endpoint === 'ivv' && groupBy === 'Tipologia' && response.status !== null && response.status >= 500) circuit?.open(scope.city, response.status);
     if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}`, issue: { endpoint, status: response.status, empty: false } };
     const pageRows = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
     rows.push(...pageRows);

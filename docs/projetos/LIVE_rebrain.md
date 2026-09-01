@@ -1,5 +1,12 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-01 — Panorama V3: PRE-027 e circuito de IVV por tipologia — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — continuidade da V3 paralela à V2.
+- **O quê:** o cubo V3 resolve padrão em ordem cronológica, marca a origem como `observed`, `inherited` ou `unclassified`, ignora o marcador `Futuro` e não consulta `building.standard` como look-ahead. IVV por Tipologia recebe uma repetição de confirmação; um 5xx confirmado abre circuito no restante da geração, preservando as demais séries e registrando cidade/status/chamadas evitadas na fonte indisponível.
+- **Evidência:** 58 testes de domínio/modelo passaram e `npm run build` concluiu com sucesso.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** PRE-027 e o comportamento técnico inicial do circuito estão implementados; falta gerar a evidência autenticada e finalizar JG-01–JG-40, sem promoção da V3.
+
 ### 2026-09-01 — Panorama V3: trilho oficial de universo e resiliência — Gabriel Hxg
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — V3 paralela à V2, sem promoção de padrão.
 - **O quê:** V3 usa `building-with-history` v2 com retry limitado para falhas transitórias (rede, 408, 429 e 5xx), sem fallback legado; horizontais só passam por rótulo oficial do payload, nunca por nome. Lançamentos e coortes V3 são emitidos pelo cubo já filtrado. A tela mantém V2 como padrão e expõe o seletor V3; manifesto suprime bloco horizontal vazio e mapa sem coordenadas.

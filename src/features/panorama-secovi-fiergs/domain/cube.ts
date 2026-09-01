@@ -22,6 +22,7 @@ export interface CubeTypology {
 }
 
 export type CubeCoverage = 'complete' | 'partial' | 'missing';
+export type StandardOrigin = 'observed' | 'inherited' | 'unclassified';
 
 export interface CubeProject {
   /** Chave única e estável entre cidades: evita colisão de `building_id` em municípios distintos. */
@@ -33,6 +34,8 @@ export interface CubeProject {
   segment: Segment;
   horizontalSubtype: HorizontalSubtype | null;
   standard: StandardLabel;
+  /** PRE-027: origem temporal do padrão usado no fechamento. */
+  standardOrigin: StandardOrigin;
   releaseQuarter: Quarter;
   releaseYear: number;
   maturity: MaturityLabel | null;
@@ -94,6 +97,28 @@ function firstNumber(source: Record<string, unknown>, keys: string[]): number | 
 function firstText(source: Record<string, unknown>, keys: string[]): unknown {
   for (const key of keys) if (source[key] !== undefined && source[key] !== null && source[key] !== '') return source[key];
   return undefined;
+}
+
+/**
+ * PRE-027. Só o histórico até o fechamento participa; produto e "Futuro" não substituem
+ * o último padrão socioeconômico conhecido. A ordem de entrada da API não é considerada confiável.
+ */
+export function resolveHistoricalStandard(entries: Record<string, unknown>[]): { standard: StandardLabel; origin: StandardOrigin } {
+  let lastKnown: StandardLabel | null = null;
+  let result: { standard: StandardLabel; origin: StandardOrigin } = { standard: canonicalStandard(null), origin: 'unclassified' };
+  for (const entry of [...entries].sort((a, b) => String(a.period ?? '').localeCompare(String(b.period ?? '')))) {
+    const raw = firstText(entry, ['pattern', 'standard']);
+    const normalized = String(raw ?? '').trim().toLowerCase();
+    if (normalized === 'futuro') continue;
+    const standard = canonicalStandard(raw);
+    if (standard !== canonicalStandard(null)) {
+      lastKnown = standard;
+      result = { standard, origin: 'observed' };
+    } else {
+      result = lastKnown ? { standard: lastKnown, origin: 'inherited' } : { standard: canonicalStandard(null), origin: 'unclassified' };
+    }
+  }
+  return result;
 }
 
 /** Soma respeitando ausência: `null + null` continua `null`; um valor presente domina. */
@@ -193,11 +218,10 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
     const latestMonth = withinWindow.map((entry) => String(entry.period ?? '').slice(0, 7)).sort().at(-1) ?? null;
     const latestEntries = latestMonth ? withinWindow.filter((entry) => String(entry.period ?? '').slice(0, 7) === latestMonth) : [];
 
-    const standard = canonicalStandard(
-      firstText(building, ['standard', 'pattern'])
-      ?? firstText(latestEntries[0] ?? {}, ['pattern', 'standard'])
-      ?? firstText(releaseEntries[0] ?? {}, ['pattern', 'standard']),
-    );
+    const resolvedStandard = options.engineVersion === 'v3'
+      ? resolveHistoricalStandard(withinWindow)
+      : { standard: canonicalStandard(firstText(building, ['standard', 'pattern']) ?? firstText(latestEntries[0] ?? {}, ['pattern', 'standard']) ?? firstText(releaseEntries[0] ?? {}, ['pattern', 'standard'])), origin: 'observed' as StandardOrigin };
+    const standard = resolvedStandard.standard;
 
     const byTypology = new Map<TypologyLabel, CubeTypology>();
     const ensure = (label: TypologyLabel) => {
@@ -275,6 +299,7 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
       segment: decision.segment,
       horizontalSubtype: decision.horizontalSubtype,
       standard,
+      standardOrigin: resolvedStandard.origin,
       releaseQuarter,
       releaseYear: Number(releaseQuarter.slice(2)),
       maturity: maturityOfMonths(ageMonths),
