@@ -134,6 +134,8 @@
 .validacao-fechamento .vf-grid .vf-div-period { width: 105px; }
 .validacao-fechamento .vf-grid .vf-div-field { width: 155px; white-space: normal; }
 .validacao-fechamento .vf-grid .vf-div-error { width: 320px; white-space: normal; }
+.validacao-fechamento .vf-divergences th,
+.validacao-fechamento .vf-divergences td { white-space: normal; overflow-wrap: anywhere; word-break: break-word; vertical-align: top; }
 .validacao-fechamento .vf-div-columns { position: absolute; z-index: 20; margin-top: 190px; width: 220px; border: 1px solid var(--vf-border); border-radius: 4px; background: var(--vf-card); padding: 8px; box-shadow: 0 4px 12px #0002; }
 .validacao-fechamento .vf-div-columns label { display: block; padding: 3px 0; font-size: 10pt; }
 
