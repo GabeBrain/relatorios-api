@@ -18,6 +18,7 @@ const fmt = (v: number | null | undefined) => n(v).toLocaleString('pt-BR', { max
 
 /** Tradução literal das tratativas v3. `database` é o período de data[] informado pelo usuário. */
 export function validateBuildings(buildings: ValidationBuilding[]): Divergence[] {
+  const out: Divergence[] = [];
   const base = buildings.flatMap((b) => b.typologies.flatMap((t) => t.history.map((h) => ({ b, h, typologyId: t.typology_id, database: b.period }))));
   const sum = new Map<string, { qty: number; sold: number; price: number; area: number; standardQty: number; standardPrice: number; standardArea: number; noGarageQty: number; noGaragePrice: number }>();
   const city = new Map<string, { qty: number; sold: number; price: number; area: number; units: number[] }>();
