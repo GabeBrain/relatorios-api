@@ -1,5 +1,10 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-01 — Plano Opus para fechamento total da V3 — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento editorial, dados e homologação.
+- **O quê:** criado plano terminal para o Opus começar pela leitura, em modo somente leitura, do último estudo de correção V2 carregado no banco; guardar fonte e comentários extraídos em `.tmp/opus-panorama-v3/`, reconciliar com JG-01–JG-40 e corrigir cada página com evidência individual. O plano preserva as regras horizontais já implementadas e exige preview/PDF/PPT/dossiê/matriz 40/40 antes de qualquer promoção.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-09-01 — Panorama: correção fina do alinhamento do botão — Gabriel Hxg
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — controles de recorte.
 - **O quê:** a captura de homologação mostrou que a reserva de rótulo ainda deixava o botão acima dos selects. A coluna da ação passou a usar deslocamento explícito de 30px, alinhando o topo do botão ao topo dos campos.
