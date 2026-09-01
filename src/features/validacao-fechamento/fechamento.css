@@ -125,15 +125,15 @@
   background: transparent;
 }
 .validacao-fechamento .vf-grid .vf-resizer:hover { background: var(--vf-primary); }
-.validacao-fechamento .vf-grid .vf-div-value { position: sticky; right: 0; min-width: 360px; max-width: 360px; background: var(--vf-card); z-index: 2; border-left: 1px solid var(--vf-border); white-space: normal; overflow-wrap: anywhere; word-break: break-word; line-height: 1.35; }
-.validacao-fechamento .vf-grid th.vf-div-value { background: var(--vf-muted-soft); z-index: 3; }
-.validacao-fechamento .vf-grid .vf-div-building { min-width: 220px; max-width: 280px; white-space: normal; }
-.validacao-fechamento .vf-grid .vf-div-area { min-width: 110px; }
-.validacao-fechamento .vf-grid .vf-div-city { min-width: 140px; }
-.validacao-fechamento .vf-grid .vf-div-status { min-width: 100px; }
-.validacao-fechamento .vf-grid .vf-div-period { min-width: 105px; }
-.validacao-fechamento .vf-grid .vf-div-field { min-width: 150px; white-space: normal; }
-.validacao-fechamento .vf-grid .vf-div-error { min-width: 320px; white-space: normal; }
+.validacao-fechamento .vf-grid.vf-divergences { table-layout: fixed; min-width: 1280px; }
+.validacao-fechamento .vf-grid .vf-div-value { width: 300px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; line-height: 1.35; }
+.validacao-fechamento .vf-grid .vf-div-building { width: 210px; white-space: normal; }
+.validacao-fechamento .vf-grid .vf-div-area { width: 110px; }
+.validacao-fechamento .vf-grid .vf-div-city { width: 140px; }
+.validacao-fechamento .vf-grid .vf-div-status { width: 100px; }
+.validacao-fechamento .vf-grid .vf-div-period { width: 105px; }
+.validacao-fechamento .vf-grid .vf-div-field { width: 155px; white-space: normal; }
+.validacao-fechamento .vf-grid .vf-div-error { width: 320px; white-space: normal; }
 
 /* Ícone (i) de regra de cálculo */
 .validacao-fechamento .vf-info {
