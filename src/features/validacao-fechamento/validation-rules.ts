@@ -2,7 +2,7 @@ import type { ValidationBuilding, ValidationHistory } from './api';
 
 export interface Divergence {
   building_id: string; typology_id: string; building_name: string; private_area: number | null; city: string; status: string; period: string;
-  field: string; error: string; value: string; rule: string; group: string;
+  field: string; error: string; value: string; rule: string; group: string; isBuildingRule: boolean;
 }
 interface Row {
   b: ValidationBuilding; h: ValidationHistory; typologyId: string; database: string;
@@ -40,10 +40,13 @@ export function validateBuildings(buildings: ValidationBuilding[]): Divergence[]
   const emit = (r: Row, field: string, error: string, value: string, rule: string) => {
     const cityAverage = error.includes('ticket') ? `Média cidade: ${fmt(r.cityTicket)}` : error.includes('Metragem') ? `Média cidade: ${fmt(r.cityAvgArea)}` : `Média cidade: ${fmt(r.cityPriceM2)}`;
     const hasCityAverage = /preço\/m2|preço por m²|ticket|Metragem|Vertical com preço/i.test(error);
-    const group = enterpriseErrors.has(error)
-      ? `Empreendimento: building_id=${r.b.building_id} | período=${r.h.period}`
-      : `Cidade: cidade=${r.b.city} | tipo=${r.b.building_type} | tipologia=${r.h.type_of_typology} | padrão=${r.h.pattern} | dormitórios=${r.h.number_bedroom} | período=${r.h.period}`;
-    out.push({ building_id: r.b.building_id, typology_id: r.typologyId, building_name: r.b.name, private_area: r.h.private_area, city: r.b.city, status: r.h.building_status, period: r.h.period, field, error, value: hasCityAverage && !value.includes('Média cidade:') ? `${value} | ${cityAverage}` : value, rule, group });
+    const usesCityGroup = hasCityAverage || value.includes('Média cidade:') || value.includes('Mediana cidade:');
+    const usesEnterpriseGroup = field === 'total_stock' || field === 'total_units' || value.includes('Ticket Empreendimento') || value.includes('Padrão') || error.includes('empreendimento');
+    const groups = [
+      usesEnterpriseGroup ? `Empreendimento: building_id=${r.b.building_id} | período=${r.h.period}` : '',
+      usesCityGroup ? `Cidade: cidade=${r.b.city} | tipo=${r.b.building_type} | tipologia=${r.h.type_of_typology} | padrão=${r.h.pattern} | dormitórios=${r.h.number_bedroom} | período=${r.h.period}` : '',
+    ].filter(Boolean).join(' / ');
+    out.push({ building_id: r.b.building_id, typology_id: r.typologyId, building_name: r.b.name, private_area: r.h.private_area, city: r.b.city, status: r.h.building_status, period: r.h.period, field, error, value: hasCityAverage && !value.includes('Média cidade:') ? `${value} | ${cityAverage}` : value, rule, group: groups, isBuildingRule: enterpriseErrors.has(error) });
   };
   const latestBuilding = new Map<string, Row>(), latestTypology = new Map<string, Row>();
   for (const r of rows) { const order = `${r.database}|${r.h.period}|${r.b.building_id}|${r.typologyId}`; if (!latestBuilding.has(r.b.building_id) || order > `${latestBuilding.get(r.b.building_id)!.database}|${latestBuilding.get(r.b.building_id)!.h.period}|${r.b.building_id}|${latestBuilding.get(r.b.building_id)!.typologyId}`) latestBuilding.set(r.b.building_id, r); if (!latestTypology.has(r.typologyId) || r.h.period > latestTypology.get(r.typologyId)!.h.period) latestTypology.set(r.typologyId, r); }
