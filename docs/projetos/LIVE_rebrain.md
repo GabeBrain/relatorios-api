@@ -1,5 +1,11 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-01 — Panorama: correção fina do alinhamento do botão — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — controles de recorte.
+- **O quê:** a captura de homologação mostrou que a reserva de rótulo ainda deixava o botão 9px acima dos selects. A coluna da ação passou a usar esse deslocamento explícito, alinhando o topo do botão ao topo dos campos.
+- **Evidência:** build de produção concluído; validação visual automatizada segue indisponível neste ambiente.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-09-01 — Panorama: alinhamento do botão de geração — Gabriel Hxg
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — controles de recorte.
 - **O quê:** o botão de gerar passou a reservar a mesma altura de rótulo dos filtros. Ele não é mais empurrado pela mensagem de estado abaixo do seletor de municípios e permanece alinhado aos inputs.
