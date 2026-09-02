@@ -91,9 +91,7 @@ function offerRows({ report, dimension, segment = 'vertical' }: { report: Panora
  * 1T/26 e o IVV não pode aparecer todo zerado.
  *
  * As linhas passam a ser as faixas de área útil do gabarito, calculadas do cubo granular, e o IVV
- * usa a identidade reconciliada PRE-009 sobre esse mesmo cubo. O endpoint `ivv?group_by=Tipologia`
- * — que responde 500 de forma sistemática e abriu o circuito — deixa de ser fonte desta página; sua
- * indisponibilidade continua registrada no dossiê, e uma faixa sem base imprime `Indisponível`,
+ * usa a identidade reconciliada PRE-009 sobre esse mesmo cubo. Uma faixa sem base imprime `—`,
  * nunca `0,0%`.
  */
 export function AreaIvvSlide({ report }: { report: PanoramaReportModel }) {
@@ -105,7 +103,6 @@ export function AreaIvvSlide({ report }: { report: PanoramaReportModel }) {
       <DataUnavailable>O payload granular não trouxe área privativa por tipologia neste recorte, portanto não há base para distribuir a oferta por faixa de metragem. A página não substitui a distribuição por zeros nem por outra dimensão.</DataUnavailable>
     </Slide>;
   }
-  const ivvUnavailable = report.ivvByTypology.dataStatus === 'unavailable';
   return <Slide title="OFERTA FINAL TOTAL E IVV POR ÁREA ÚTIL EM M²" subtitle="MERCADO RESIDENCIAL VERTICAL" className="panorama-area-slide">
     <table className="panorama-reference-table"><thead><tr><th>Área útil</th><th>Oferta Final<br/>período anterior</th><th>Oferta Final<br/>período atual</th><th>(%)</th><th>Lançamentos</th><th>(%)</th><th>Vendas<br/>Líquidas</th><th>(%)</th><th>IVV (%)</th></tr></thead><tbody>
       {rows.map((row) => <tr key={row.label}>
@@ -123,10 +120,10 @@ export function AreaIvvSlide({ report }: { report: PanoramaReportModel }) {
         <td>Total</td><td>{integer(total.previousUnits)}</td><td>{integer(total.finalUnits)}</td><td>{total.finalUnits === null ? '—' : '100%'}</td>
         <td>{integer(total.launchedUnits)}</td><td>{total.launchedUnits === null ? '—' : '100%'}</td>
         <td>{integer(total.soldUnits)}</td><td>{total.soldUnits === null ? '—' : '100%'}</td>
-        <td>{total.ivv === null ? 'Indisponível' : percent(total.ivv)}</td>
+        <td>{percent(total.ivv)}</td>
       </tr>}
     </tbody></table>
-    <p className="panorama-coverage-caption">IVV = vendas líquidas ÷ (oferta final anterior + lançamentos), calculado por faixa a partir do cubo granular por empreendimento.{ivvUnavailable ? ' O contrato `ivv?group_by=Tipologia` segue indisponível na API e não é usado nesta página.' : ''}</p>
+    <p className="panorama-coverage-caption">IVV = vendas líquidas ÷ (oferta final anterior + lançamentos), calculado por faixa a partir do histórico granular por empreendimento.</p>
   </Slide>;
 }
 

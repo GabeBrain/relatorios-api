@@ -82,7 +82,7 @@ export const PANORAMA_SECTIONS = createPanoramaSections(PANORAMA_REPORT_MANIFEST
 /* -------------------------------------------------------------------------- */
 
 export interface ManifestSubject {
-  provenance: { engineVersion?: 'v2' | 'v3' };
+  provenance: { engineVersion?: 'v2' | 'v3' | 'v4' };
   cube: { projects: { segment: string; finalUnits: number | null }[] };
   locations: GeographicPoint[];
   cityComparisons: { enabled: boolean };
@@ -100,7 +100,7 @@ export function panoramaManifestOptions(report: ManifestSubject, mapboxAccessTok
     includeCityComparisons: report.cityComparisons.enabled,
     // JG-34: "se não tiver empreendimentos ativos, essa página precisa ser excluída". Existir no
     // histórico não basta — o bloco só entra com oferta ativa no fechamento selecionado.
-    includeHorizontal: report.provenance.engineVersion !== 'v3' || horizontal.some((project) => (project.finalUnits ?? 0) > 0),
+    includeHorizontal: (report.provenance.engineVersion !== 'v3' && report.provenance.engineVersion !== 'v4') || horizontal.some((project) => (project.finalUnits ?? 0) > 0),
     // JG-39: o mapa entra apenas quando tiles e marcadores estão prontos; sem isso, o bloco inteiro
     // sai do manifesto em vez de exportar um mapa quebrado.
     includeMap: buildMapTilePlan(report.locations, mapboxAccessToken) !== null,

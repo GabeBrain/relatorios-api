@@ -216,9 +216,9 @@ function emptyCube(scope: PanoramaScope): MarketCube {
  * zero fabricado. Com condomínios aceitos, o contrato municipal não sabe separá-los dos loteamentos
  * e a série deixa de ser atribuível.
  */
-function horizontalSeriesPolicyOf(cube: MarketCube, engineVersion: 'v2' | 'v3'): HorizontalSeriesPolicy {
+function horizontalSeriesPolicyOf(cube: MarketCube, engineVersion: 'v2' | 'v3' | 'v4'): HorizontalSeriesPolicy {
   const accepted = horizontalProjects(cube).length;
-  if (engineVersion !== 'v3') return { attributable: true, reason: 'Motor V2: série municipal usada como está.', acceptedProjects: accepted };
+  if (engineVersion === 'v2') return { attributable: true, reason: 'Motor V2: série municipal usada como está.', acceptedProjects: accepted };
   return {
     attributable: true,
     acceptedProjects: accepted,
@@ -268,7 +268,7 @@ function provenanceOf(scope: PanoramaScope, cube: MarketCube, partial?: Partial<
     completedCities: partial?.completedCities ?? cube.cities,
     failedCities: partial?.failedCities ?? [],
     entity: scope.entity ?? 'secovi-sp',
-    engineVersion: scope.engineVersion ?? 'v2',
+    engineVersion: scope.engineVersion ?? 'v4',
     rejectedByPolicy: [...rejections].map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count),
   };
 }
@@ -368,9 +368,9 @@ export function buildPanoramaReportModel(
     meter: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'meter', 'snapshot', sources.meter)),
     meterTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'meterTypology', 'snapshot', sources.meterTypology),
   };
-  // Firewall de fontes: na V3 nenhum contrato municipal fala pelo horizontal do Panorama Secovi.
-  const horizontalSeries = horizontalSeriesPolicyOf(cube, scope.engineVersion ?? 'v3');
-  const guard = (block: ReportMarketBlock) => (scope.engineVersion ?? 'v3') === 'v3' ? firewallTemporalBlock(block, horizontalSeries) : block;
+  // Firewall de fontes: nas versões granulares nenhum contrato municipal fala pelo horizontal do Panorama Secovi.
+  const horizontalSeries = horizontalSeriesPolicyOf(cube, scope.engineVersion ?? 'v4');
+  const guard = (block: ReportMarketBlock) => (scope.engineVersion ?? 'v4') !== 'v2' ? firewallTemporalBlock(block, horizontalSeries) : block;
 
   return {
     scope, generatedAt: new Date().toISOString(), launches, horizontalSeries,

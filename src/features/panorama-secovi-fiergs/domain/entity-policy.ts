@@ -183,8 +183,8 @@ export const ENTITY_POLICIES: Record<EntityId, EntityPolicy | null> = {
   'fiergs-rs': null,
 };
 
-export function entityPolicy(id: EntityId = 'secovi-sp', version: 'v2' | 'v3' = 'v2'): EntityPolicy {
-  const policy = id === 'secovi-sp' && version === 'v3' ? SECOVI_SP_V3_POLICY : ENTITY_POLICIES[id];
+export function entityPolicy(id: EntityId = 'secovi-sp', version: 'v2' | 'v3' | 'v4' = 'v2'): EntityPolicy {
+  const policy = id === 'secovi-sp' && (version === 'v3' || version === 'v4') ? SECOVI_SP_V3_POLICY : ENTITY_POLICIES[id];
   if (!policy) throw new Error(`Política de universo não definida para a entidade ${id}.`);
   return policy;
 }

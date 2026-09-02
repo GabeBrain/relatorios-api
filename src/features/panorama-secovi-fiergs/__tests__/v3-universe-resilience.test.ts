@@ -1,17 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { SECOVI_SP_V3_POLICY } from '../domain/entity-policy';
+import { entityPolicy, SECOVI_SP_V3_POLICY } from '../domain/entity-policy';
 import { requestWithRetry } from '../lib/request-with-retry';
 import { buildCityCube, resolveHistoricalStandard } from '../domain/cube';
-import { PanoramaTemporalCircuit } from '../api';
 
-describe('V3 · universo oficial e resiliência', () => {
+describe('V4 · universo oficial e resiliência', () => {
   it('exige rótulo oficial e nunca deduz condomínio a partir do nome', () => {
     expect(SECOVI_SP_V3_POLICY.classify({ segment: 'Horizontal', rawName: 'Condomínio de Casas Jardins' }).accepted).toBe(false);
     expect(SECOVI_SP_V3_POLICY.classify({ segment: 'Horizontal', rawSubtype: 'Condomínio de Casas e Sobrados' }).accepted).toBe(true);
   });
 
   it('aceita o padrão socioeconômico oficial quando o subtipo horizontal não vem no contrato', () => {
-    const cube = buildCityCube([{ building_id: 'H-standard', building_type: 'Horizontal', standard: 'Standard', release_date: '2025-05-01', total_units: 266, typologies_history: [{ period: '2025-05-01', pattern: 'Standard', qty: 266 }] }], { city: 'Jundiaí', uf: 'SP', endQuarter: '2T2026', engineVersion: 'v3' });
+    const cube = buildCityCube([{ building_id: 'H-standard', building_type: 'Horizontal', standard: 'Standard', release_date: '2025-05-01', total_units: 266, typologies_history: [{ period: '2025-05-01', pattern: 'Standard', qty: 266 }] }], { city: 'Jundiaí', uf: 'SP', endQuarter: '2T2026', engineVersion: 'v4' });
     expect(cube.projects).toHaveLength(1);
     expect(cube.projects[0].segment).toBe('Horizontal');
     expect(cube.projects[0].launchedUnits).toBe(266);
@@ -33,10 +32,7 @@ describe('V3 · universo oficial e resiliência', () => {
     expect(cube.projects[0].standard).toBe('Econômico'); expect(cube.projects[0].standardOrigin).toBe('inherited');
   });
 
-  it('abre circuito somente para IVV por Tipologia', () => {
-    const circuit = new PanoramaTemporalCircuit();
-    circuit.open('Praia Grande', 500);
-    expect(circuit.isOpen('ivv', 'Tipologia')).toBe(true);
-    expect(circuit.isOpen('ivv', 'Padrão')).toBe(false);
+  it('mantém a política granular oficial na versão V4', () => {
+    expect(entityPolicy('secovi-sp', 'v4')).toBe(SECOVI_SP_V3_POLICY);
   });
 });

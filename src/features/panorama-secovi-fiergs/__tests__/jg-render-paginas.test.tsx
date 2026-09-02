@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { render, screen } from '@testing-library/react';
 import { buildPanoramaReportModel } from '../report/model';
 import { buildCityCube } from '../domain/cube';
-import { MarketSummarySlide, NarrativeSlide, PriceTableSlide } from '../components/MarketSlides';
+import { AreaIvvSlide, MarketSummarySlide, NarrativeSlide, PriceTableSlide } from '../components/MarketSlides';
 import { PanoramaExportDeck, pointLabelPlan } from '../components/ReportPaginator';
 import type { PanoramaReportModel, PanoramaScope } from '../types';
 
@@ -87,6 +87,15 @@ describe('JG-20/32 · o horizontal exibido é apenas Condomínio de Casas', () =
     // Um dos cinco estados fechados precisa estar declarado na célula — inclusive `null` e
     // `unavailable`, que são justamente os que não podem virar 0% silencioso.
     expect(container.querySelector('[class*="panorama-cf-"]')).toBeTruthy();
+  });
+});
+
+describe('V4 · IVV granular no material exportado', () => {
+  it('explica o cálculo sem expor falha técnica ou indisponibilidade da API', () => {
+    const { container } = render(<AreaIvvSlide report={modelOf([vertical, condominio])}/>);
+    const text = container.textContent ?? '';
+    expect(text).toContain('calculado por faixa a partir do histórico granular por empreendimento');
+    expect(text).not.toMatch(/api|http|indisponível|circuito/i);
   });
 });
 

@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-02 — Panorama Secovi/FIERGS V4: IVV granular sem erro técnico no material — Gabriel Hxg + Terra/Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — primeira versão V4 para teste de Jundiaí.
+- **O que:** V4 mantém a reconciliação horizontal por `Padrão` da V3.1 e deixa de consultar `ivv?group_by=Tipologia` durante a geração: o endpoint retorna HTTP 500 mesmo para Vertical isolado e um trimestre. A lâmina de IVV por área/tipologia passa a assumir formalmente o cálculo granular `vendas líquidas / (oferta anterior + lançamentos)`, usando `sold_in_period`, `typology_stock` e histórico por empreendimento.
+- **Experiência:** PDF/PPT/preview não mencionam API, HTTP, circuito ou indisponibilidade. A tela geradora, fora do material exportado, apresenta a nota: “IVV por tipologia calculado pelo histórico granular”, com a fórmula em linguagem de negócio.
+- **Evidência:** sonda autenticada em Jundiaí: IVV por `Padrão` respondeu 200 (inclusive Horizontal); IVV por `Tipologia` respondeu 500 para ambos os segmentos, Vertical, Horizontal e um trimestre; vendas e estoque por Tipologia responderam 200; `building-with-history` trouxe os campos granulares necessários. Regressão: 38 arquivos / 322 testes; typecheck e build aprovados.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** V4 pronta localmente para Gabriel gerar Jundiaí e conferir o primeiro material. Sem push, deploy ou escrita no Monday.
+
 ### 2026-09-02 — V3.1: horizontal de Jundiai reconciliado com Juliana — Terra/Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — versao de teste V3.1.
 - **O que:** a classificacao temporal passou a aceitar explicitamente os Padroes socioeconomicos horizontais permitidos (`Economico`, `Standard`, `Medio`, `Medio-Alto`, `Alto`, `Luxo` e `Compacto`) e a excluir, antes de qualquer agregacao, produto de loteamento/chacara/terreno. Um produto explicitamente excluido prevalece sobre qualquer rotulo socioeconomico. O cubo V3 e os contratos temporais por Padrao agora seguem a mesma decisao.

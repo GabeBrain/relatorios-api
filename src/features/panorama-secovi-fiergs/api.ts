@@ -100,11 +100,11 @@ async function fetchBuildingsLegacy(scope: CityScope, signal?: AbortSignal): Pro
  * em um relatório zerado. Enquanto a paridade autenticada não estiver confirmada, preservamos o
  * contrato legado como fallback explícito.
  */
-async function fetchBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' = 'v3'): Promise<Record<string, unknown>[]> {
+async function fetchBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' | 'v4' = 'v4'): Promise<Record<string, unknown>[]> {
   try {
     return await fetchBuildingsV2(scope, signal);
   } catch (v2Error) {
-    if (engineVersion === 'v3') throw v2Error;
+    if (engineVersion !== 'v2') throw v2Error;
     try {
       return await fetchBuildingsLegacy(scope, signal);
     } catch (legacyError) {
@@ -203,17 +203,20 @@ export function describeTemporalFailure(city: string, issues: TemporalIssue[]): 
   return `Não foi possível consultar ${metrics} em ${city}: a GeoBrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
 }
 
-async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3', circuit: PanoramaTemporalCircuit, signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
+async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3' | 'v4', circuit: PanoramaTemporalCircuit, signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
   const gate = createRequestGate(REQUEST_CONCURRENCY_PER_CITY);
   const track = <T,>(operation: string, request: () => Promise<T>) => gate(request).finally(() => onUnit?.(scope.city, operation));
-  const [buildings, sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
+  const [buildings, sales, salesTypology, stock, stockTypology, ivv, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
     track('empreendimentos', () => fetchBuildings(scope, signal, engineVersion)),
     track('vendas por padrão', () => temporalRows(scope, 'sales', 'Padrão', signal)), track('vendas por tipologia', () => temporalRows(scope, 'sales', 'Tipologia', signal)),
     track('oferta por padrão', () => temporalRows(scope, 'stock', 'Padrão', signal)), track('oferta por tipologia', () => temporalRows(scope, 'stock', 'Tipologia', signal)),
-    track('IVV por padrão', () => temporalRows(scope, 'ivv', 'Padrão', signal, circuit)), track('IVV por tipologia', () => temporalRows(scope, 'ivv', 'Tipologia', signal, circuit)),
+    track('IVV por padrão', () => temporalRows(scope, 'ivv', 'Padrão', signal, circuit)),
     track('preços por padrão', () => temporalRows(scope, 'medium-prices', 'Padrão', signal)), track('preços por tipologia', () => temporalRows(scope, 'medium-prices', 'Tipologia', signal)),
     track('R$/m² por padrão', () => temporalRows(scope, 'medium-prices-meter', 'Padrão', signal)), track('R$/m² por tipologia', () => temporalRows(scope, 'medium-prices-meter', 'Tipologia', signal)),
   ]);
+  // A API falha sistematicamente em IVV por Tipologia; a lâmina correspondente calcula a métrica
+  // pelo cubo granular, que contém estoque, vendas e lançamentos por tipologia.
+  const ivvTypology: SourceResult = { rows: [], available: false, source: 'IVV por tipologia calculado pelo histórico granular do recorte' };
   const sources = { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology };
   if (Object.values(sources).every((source) => !source.available)) {
     const issues = Object.values(sources).flatMap((source) => source.issue ? [source.issue] : []);
@@ -222,9 +225,9 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
   const cube = buildCityCube(buildings, { city: scope.city, uf: scope.uf, endQuarter: scope.endQuarter, entity, engineVersion });
   return {
     city: scope.city,
-    records: engineVersion === 'v3' ? launchRecordsFromCube(cube) : launchRecordsFrom(buildings, scope),
+    records: engineVersion !== 'v2' ? launchRecordsFromCube(cube) : launchRecordsFrom(buildings, scope),
     cube,
-    cohorts: engineVersion === 'v3' ? cube.projects.map((project) => ({ segment: project.segment, releaseYear: String(project.releaseYear), standard: project.standard, stock: project.finalUnits ?? 0 })).filter((row) => row.stock > 0) : cohortRowsFrom(buildings, scope),
+    cohorts: engineVersion !== 'v2' ? cube.projects.map((project) => ({ segment: project.segment, releaseYear: String(project.releaseYear), standard: project.standard, stock: project.finalUnits ?? 0 })).filter((row) => row.stock > 0) : cohortRowsFrom(buildings, scope),
     sources,
   };
 }
@@ -244,7 +247,7 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
   const collection: CollectionResult<CityHarvest> = await collectByCity(
     scopes.map((item) => item.city),
     async (city, citySignal) => {
-      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, scope.engineVersion ?? 'v2', circuit, citySignal, progress.unit);
+      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, scope.engineVersion ?? 'v4', circuit, citySignal, progress.unit);
       progress.cityComplete(city);
       return harvest;
     },

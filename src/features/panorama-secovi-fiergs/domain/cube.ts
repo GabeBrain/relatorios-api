@@ -160,7 +160,7 @@ export interface BuildCubeOptions {
   uf: string;
   endQuarter: Quarter;
   entity?: EntityId;
-  engineVersion?: 'v2' | 'v3';
+  engineVersion?: 'v2' | 'v3' | 'v4';
 }
 
 /**
@@ -218,7 +218,7 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
     const latestMonth = withinWindow.map((entry) => String(entry.period ?? '').slice(0, 7)).sort().at(-1) ?? null;
     const latestEntries = latestMonth ? withinWindow.filter((entry) => String(entry.period ?? '').slice(0, 7) === latestMonth) : [];
 
-    const resolvedStandard = options.engineVersion === 'v3'
+    const resolvedStandard = options.engineVersion === 'v3' || options.engineVersion === 'v4'
       ? resolveHistoricalStandard(withinWindow)
       : { standard: canonicalStandard(firstText(building, ['standard', 'pattern']) ?? firstText(latestEntries[0] ?? {}, ['pattern', 'standard']) ?? firstText(releaseEntries[0] ?? {}, ['pattern', 'standard'])), origin: 'observed' as StandardOrigin };
     const standard = resolvedStandard.standard;
