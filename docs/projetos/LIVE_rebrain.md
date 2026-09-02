@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-02 — Plano terminal V3.1 para corrigir o horizontal de Jundiaí — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — nova rodada de teste para Juliana.
+- **O quê:** diagnóstico autenticado reproduziu exatamente o Relatório de Acompanhamento enviado por Juliana (`428` unidades horizontais lançadas e `369` vendidas de 1T2023 a 2T2026). Foi criado um plano terminal para o Terra corrigir a política que zerava horizontais sem `building_subtype`, filtrar os contratos temporais por `Padrão`, preservar a exclusão de loteamentos/chácaras e manter o IVV por Tipologia em degradação explícita diante do HTTP 500.
+- **Evidência:** `releases`, `sales`, `stock`, `ivv`, `medium-prices` e `medium-prices-meter` por Padrão responderam 200 no recorte filtrado; o 500 de IVV por Tipologia foi isolado independentemente de período e tipo. Baseline local: 56 testes direcionados e build aprovados antes da implementação.
+- **Arquivos:** [`PLAN_TERRA_CORRECAO_HORIZONTAL_JUNDIAI_V3_1_2026-09-02.md`](../features/Relatorios%20Secovi_FIERGS/opus-v3-closure/PLAN_TERRA_CORRECAO_HORIZONTAL_JUNDIAI_V3_1_2026-09-02.md).
+- **Commits:** — (plano desta sessão).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA. Próximo portão: Terra entregar `TERRA_READY_FOR_GABRIEL`; após publicação autorizada, Gabriel gera Jundiaí e compara o PDF com o e-mail de Juliana antes da resposta.
+
 ### 2026-09-01 — Panorama V3: firewall de fontes e correções pós-Jundiaí — Gabriel Hxg
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — procedência dos números.
 - **Origem:** comparação página a página do `panorama-jundiai-2T2026- pos correcoes.pdf` (53 páginas, gerado por Gabriel) contra o PDF anotado pela Juliana. A camada editorial/visual tinha fechado; a de procedência, não.
