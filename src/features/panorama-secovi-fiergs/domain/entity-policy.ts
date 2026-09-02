@@ -115,10 +115,10 @@ const V3_EXCLUDED_PRODUCTS = new Set([
 ]);
 
 /**
- * Rótulos socioeconômicos e marcadores de período: não dizem nada sobre o produto. Um horizontal
- * que só os apresenta é ambíguo — sai do universo por ausência de informação, não por evidência.
+ * Rótulos socioeconômicos são o recorte temporal confirmado para os horizontais de Jundiaí.
+ * Marcadores de período continuam sem significado de produto.
  */
-const V3_SOCIOECONOMIC = new Set(['economico', 'standard', 'medio', 'medio-alto', 'alto', 'luxo', 'futuro']);
+const V3_SOCIOECONOMIC = new Set(['compacto', 'economico', 'standard', 'medio', 'medio-alto', 'alto', 'luxo', 'futuro']);
 
 export type HorizontalLabelAxis = 'produto_aceito' | 'produto_excluido' | 'socioeconomico' | 'desconhecido';
 
@@ -130,6 +130,22 @@ export function classifyHorizontalLabel(label: unknown): HorizontalLabelAxis {
   if (V3_EXCLUDED_PRODUCTS.has(normalized)) return 'produto_excluido';
   if (V3_SOCIOECONOMIC.has(normalized)) return 'socioeconomico';
   return 'desconhecido';
+}
+
+export type TemporalHorizontalDecision = 'keep' | 'exclude' | 'unknown';
+
+/**
+ * Regra única para os contratos temporais agrupados por Padrão. O contrato devolve o produto e o
+ * padrão socioeconômico no mesmo campo `group`; para Secovi-SP, o segundo é o recorte validado
+ * pela Juliana e o primeiro continua sendo uma exclusão explícita.
+ */
+export function classifySecoviTemporalRow(segment: Segment | null, group: unknown): TemporalHorizontalDecision {
+  if (segment === 'Vertical') return 'keep';
+  if (segment !== 'Horizontal') return 'unknown';
+  const axis = classifyHorizontalLabel(group);
+  if (axis === 'produto_excluido') return 'exclude';
+  if (axis === 'produto_aceito' || axis === 'socioeconomico') return 'keep';
+  return 'unknown';
 }
 
 /**
@@ -150,10 +166,10 @@ export const SECOVI_SP_V3_POLICY: EntityPolicy = {
       .map(normalizeText).filter((label) => label && !SEGMENT_ONLY.test(label));
     if (!labels.length) return { accepted: false, segment: 'Horizontal', horizontalSubtype: 'indefinido', reason: 'subtipo_horizontal_indefinido' };
     const axes = labels.map(classifyHorizontalLabel);
-    if (axes.includes('produto_aceito')) return { accepted: true, segment: 'Horizontal', horizontalSubtype: 'condominio_casas', reason: null };
-    for (const [index, axis] of axes.entries()) if (axis === 'desconhecido') unmappedHorizontalLabels.add(labels[index]);
-    // Produto explícito fora da política é recusa com evidência; só socioeconômico é ambiguidade.
+    // Produto explicitamente excluído vence qualquer padrão socioeconômico visto em outro período.
     if (axes.includes('produto_excluido')) return { accepted: false, segment: 'Horizontal', horizontalSubtype: 'outro', reason: 'horizontal_fora_da_politica' };
+    if (axes.includes('produto_aceito') || axes.includes('socioeconomico')) return { accepted: true, segment: 'Horizontal', horizontalSubtype: 'condominio_casas', reason: null };
+    for (const [index, axis] of axes.entries()) if (axis === 'desconhecido') unmappedHorizontalLabels.add(labels[index]);
     return { accepted: false, segment: 'Horizontal', horizontalSubtype: 'indefinido', reason: 'subtipo_horizontal_indefinido' };
   },
 };

@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-02 — V3.1: horizontal de Jundiai reconciliado com Juliana — Terra/Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — versao de teste V3.1.
+- **O que:** a classificacao temporal passou a aceitar explicitamente os Padroes socioeconomicos horizontais permitidos (`Economico`, `Standard`, `Medio`, `Medio-Alto`, `Alto`, `Luxo` e `Compacto`) e a excluir, antes de qualquer agregacao, produto de loteamento/chacara/terreno. Um produto explicitamente excluido prevalece sobre qualquer rotulo socioeconomico. O cubo V3 e os contratos temporais por Padrao agora seguem a mesma decisao.
+- **IVV por Tipologia:** HTTP 500 do GeoBrain permanece tratado como indisponibilidade explicita pelo circuito existente; nao gera timeout nem preenche zeros. IVV por Padrao continua disponivel quando o endpoint responde 200.
+- **Evidencia:** fixture T0/T6 de Jundiai fixa **428 unidades lancadas** e **369 vendidas** entre 1T2023 e 2T2026, com loteamento de alto volume no mesmo contrato e zero contaminacao. Regressao: 38 arquivos / 321 testes; `npm run typecheck`; `npm run build`. Playwright gerou preview, PDF e PPT espelho em Jundiai (55 paginas), Praia Grande (58) e Baixada com IVV/Tipologia 500 (61); manifestos e artefatos em `.tmp/opus-panorama-v3/evidencias/`.
+- **Arquivos:** politica/cubo temporal em `src/features/panorama-secovi-fiergs/`; plano [`PLAN_TERRA_CORRECAO_HORIZONTAL_JUNDIAI_V3_1_2026-09-02.md`](../features/Relatorios%20Secovi_FIERGS/opus-v3-closure/PLAN_TERRA_CORRECAO_HORIZONTAL_JUNDIAI_V3_1_2026-09-02.md).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendencias:** pronto para Gabriel gerar Jundiai no ambiente autenticado e bater com o email da Juliana; sem push, deploy ou escrita no Monday.
+
 ### 2026-09-02 — Plano terminal V3.1 para corrigir o horizontal de Jundiaí — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — nova rodada de teste para Juliana.
 - **O quê:** diagnóstico autenticado reproduziu exatamente o Relatório de Acompanhamento enviado por Juliana (`428` unidades horizontais lançadas e `369` vendidas de 1T2023 a 2T2026). Foi criado um plano terminal para o Terra corrigir a política que zerava horizontais sem `building_subtype`, filtrar os contratos temporais por `Padrão`, preservar a exclusão de loteamentos/chácaras e manter o IVV por Tipologia em degradação explícita diante do HTTP 500.

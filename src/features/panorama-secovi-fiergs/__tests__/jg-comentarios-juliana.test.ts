@@ -56,10 +56,10 @@ describe('JG-05/07/20/32/33/34/35 · universo horizontal PRE-026', () => {
     expect(SECOVI_SP_V3_POLICY.classify({ segment: 'Horizontal', rawName: 'Condomínio de Casas Jardins' }).accepted).toBe(false);
   });
 
-  it('trata só-socioeconômico como ausência de informação, não como produto recusado', () => {
+  it('aceita padrão sócio-econômico horizontal como recorte temporal permitido', () => {
     const decision = SECOVI_SP_V3_POLICY.classify({ segment: 'Horizontal', standard: 'Médio' });
-    expect(decision.accepted).toBe(false);
-    expect(decision.reason).toBe('subtipo_horizontal_indefinido');
+    expect(decision.accepted).toBe(true);
+    expect(decision.horizontalSubtype).toBe('condominio_casas');
   });
 
   it('rótulo novo falha de forma ruidosa: recusa sem casar por semelhança textual', () => {

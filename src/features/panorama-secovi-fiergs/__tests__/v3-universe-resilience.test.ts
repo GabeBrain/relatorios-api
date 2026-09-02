@@ -10,6 +10,13 @@ describe('V3 · universo oficial e resiliência', () => {
     expect(SECOVI_SP_V3_POLICY.classify({ segment: 'Horizontal', rawSubtype: 'Condomínio de Casas e Sobrados' }).accepted).toBe(true);
   });
 
+  it('aceita o padrão socioeconômico oficial quando o subtipo horizontal não vem no contrato', () => {
+    const cube = buildCityCube([{ building_id: 'H-standard', building_type: 'Horizontal', standard: 'Standard', release_date: '2025-05-01', total_units: 266, typologies_history: [{ period: '2025-05-01', pattern: 'Standard', qty: 266 }] }], { city: 'Jundiaí', uf: 'SP', endQuarter: '2T2026', engineVersion: 'v3' });
+    expect(cube.projects).toHaveLength(1);
+    expect(cube.projects[0].segment).toBe('Horizontal');
+    expect(cube.projects[0].launchedUnits).toBe(266);
+  });
+
   it('repete somente falha transitória 500', async () => {
     let calls = 0;
     const transient = await requestWithRetry(async () => ({ ok: ++calls === 3, status: calls === 3 ? 200 : 500 }), { sleep: async () => {}, random: () => 0 });

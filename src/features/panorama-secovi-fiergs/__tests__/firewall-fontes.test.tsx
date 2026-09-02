@@ -73,7 +73,7 @@ describe('Firewall de fontes · o rótulo de produto não atravessa o contrato m
     }
   });
 
-  it('lê o contrato municipal como Vertical: o horizontal não herda o agregado', () => {
+  it('remove o loteamento antes de agregar: o horizontal não herda o agregado', () => {
     const closing = modelOf([vertical, loteamento]).stock.units.series.at(-1)!;
     expect(closing.horizontal).toBe(0);
     expect(closing.total).toBe(closing.vertical);
@@ -86,9 +86,9 @@ describe('Firewall de fontes · o rótulo de produto não atravessa o contrato m
     expect(report.horizontalSeries.acceptedProjects).toBe(0);
   });
 
-  it('com condomínio aceito, a série municipal deixa de ser atribuível', () => {
+  it('com condomínio aceito, a série municipal filtrada é atribuível', () => {
     const report = modelOf([vertical, loteamento, condominio]);
-    expect(report.horizontalSeries.attributable).toBe(false);
+    expect(report.horizontalSeries.attributable).toBe(true);
     expect(report.horizontalSeries.acceptedProjects).toBe(1);
   });
 });
@@ -120,12 +120,38 @@ describe('Firewall de fontes · páginas', () => {
     expect(flat(container).toLowerCase()).not.toContain('loteamento');
   });
 
-  it('com condomínio aceito, a venda horizontal municipal não é publicada', () => {
+  it('com condomínio aceito, o loteamento continua fora do deck', () => {
     const { container } = render(<PanoramaExportDeck report={modelOf([vertical, loteamento, condominio])} rootRef={{ current: null }} />);
     const text = flat(container);
     expect(text.toLowerCase()).not.toContain('loteamento');
-    // O motivo da indisponibilidade é declarado ao leitor, em vez de sumir em silêncio.
-    expect(text).toContain('não permite separá-los');
+    expect(text).not.toContain('6.230');
+  });
+});
+
+describe('Firewall de fontes · regressão Jundiaí/Juliana', () => {
+  const jundiaiScope: PanoramaScope = { uf: 'SP', cities: ['Jundiaí'], startQuarter: '1T2023', endQuarter: '2T2026', engineVersion: 'v3' };
+  const quarters = ['1T2023', '2T2023', '3T2023', '4T2023', '1T2024', '2T2024', '3T2024', '4T2024', '1T2025', '2T2025', '3T2025', '4T2025', '1T2026', '2T2026'] as const;
+  const sales = [28, 31, 10, 4, 1, 6, 1, 57, 0, 122, 18, 52, 23, 16];
+  const jundiaiSalesRows = quarters.map((period, index) => ({ period, building_type: 'Horizontal', group: index % 2 ? 'Standard' : 'Médio', liquid_sales: sales[index], vgv_liquid_sales: sales[index] * 100_000 }));
+  const jundiaiLaunches = [
+    { quarter: '4T2024' as const, segment: 'Horizontal' as const, projects: 1, units: 162, vgvMillions: 80 },
+    { quarter: '2T2025' as const, segment: 'Horizontal' as const, projects: 1, units: 266, vgvMillions: 126 },
+  ];
+
+  it('preserva 428 lançadas e 369 vendidas ao excluir o loteamento contaminante', () => {
+    const cube = buildCityCube([
+      { ...condominio, building_id: 'J-162', standard: 'Médio', release_date: '2024-12-01', total_units: 162 },
+      { ...condominio, building_id: 'J-266', standard: 'Standard', release_date: '2025-05-01', total_units: 266 },
+      loteamento,
+    ], { city: 'Jundiaí', uf: 'SP', endQuarter: '2T2026', engineVersion: 'v3' });
+    const report = buildPanoramaReportModel(jundiaiScope, jundiaiLaunches, {
+      sales: src([...jundiaiSalesRows, { period: '2T2026', building_type: 'Horizontal', group: 'Loteamento Fechado', liquid_sales: 6_055, vgv_liquid_sales: 1 }]),
+      salesTypology: src([]), stock: src([]), stockTypology: src([]), ivv: src([]), ivvTypology: src([]), ticket: src([]), ticketTypology: src([]), meter: src([]), meterTypology: src([]),
+    }, [], { cubes: [cube], provenance: { engineVersion: 'v3', completedCities: ['Jundiaí'] } });
+    expect(report.launches.units.reduce((sum, row) => sum + row.horizontal, 0)).toBe(428);
+    expect(report.sales.units.series.map((row) => row.horizontal)).toEqual(sales);
+    expect(report.sales.units.series.reduce((sum, row) => sum + row.horizontal, 0)).toBe(369);
+    expect(report.sales.units.byGroup.map((row) => row.label)).not.toContain('Loteamento Fechado');
   });
 });
 

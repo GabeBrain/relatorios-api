@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SECOVI_SP_POLICY, classifyHorizontalSubtype, entityPolicy } from '../domain/entity-policy';
+import { SECOVI_SP_POLICY, classifyHorizontalSubtype, classifySecoviTemporalRow, entityPolicy } from '../domain/entity-policy';
 import {
   UNCLASSIFIED,
   canonicalStandard,
@@ -58,6 +58,17 @@ describe('OP-1 · política de universo Secovi (G-03)', () => {
   it('mantém a extensão FIERGS explícita, sem herdar a regra Secovi em silêncio', () => {
     expect(() => entityPolicy('fiergs-rs')).toThrow(/fiergs-rs/);
     expect(entityPolicy().id).toBe('secovi-sp');
+  });
+
+  it('classifica as linhas temporais horizontais pelo grupo oficial, sem usar nome comercial', () => {
+    expect(classifySecoviTemporalRow('Vertical', 'qualquer grupo')).toBe('keep');
+    for (const label of ['Compacto', 'Econômico', 'Standard', 'Médio', 'Médio-Alto', 'Alto', 'Luxo', 'Condomínio de Casas/Sobrados']) {
+      expect(classifySecoviTemporalRow('Horizontal', label)).toBe('keep');
+    }
+    for (const label of ['Loteamento Fechado', 'Loteamento Aberto', 'Condomínio de Chácaras', 'Terreno']) {
+      expect(classifySecoviTemporalRow('Horizontal', label)).toBe('exclude');
+    }
+    expect(classifySecoviTemporalRow('Horizontal', 'Produto novo')).toBe('unknown');
   });
 });
 

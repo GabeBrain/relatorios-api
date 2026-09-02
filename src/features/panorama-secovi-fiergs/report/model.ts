@@ -2,7 +2,7 @@ import { buildLaunchModel, periodToQuarter, safeNumber } from '../lib/launches';
 import type { HorizontalSeriesPolicy, LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
 import { editorialWindow, quarterRange } from '../domain/quarters';
 import { horizontalProjects, mergeCubes, type MarketCube } from '../domain/cube';
-import { classifyHorizontalLabel } from '../domain/entity-policy';
+import { classifySecoviTemporalRow } from '../domain/entity-policy';
 import {
   cohortMatrix as buildCohortMatrix,
   cohortMatrixParticipation,
@@ -55,6 +55,25 @@ function cohortOrder(a: string, b: string): number {
 function segment(value: unknown): Segment | null {
   const raw = String(value ?? '').toLowerCase();
   return raw.includes('vertical') ? 'Vertical' : raw.includes('horizontal') || raw.includes('casa') ? 'Horizontal' : null;
+}
+
+function temporalGroup(row: Record<string, unknown>) {
+  return row.group ?? row.pattern ?? row.standard ?? row.typology ?? row.typology_name;
+}
+
+/** Filtra o contrato municipal por linha antes de somar qualquer total do relatório. */
+function filterSecoviPatternSource(source: SourceResult): SourceResult {
+  const rows = source.rows.filter((row) => {
+    const rowSegment = segment(row.building_type ?? row.type);
+    // Linhas agregadas de fixtures/contratos legados não carregam segmento: não há
+    // evidência suficiente para classificá-las como horizontal e removê-las.
+    return rowSegment === null || classifySecoviTemporalRow(rowSegment, temporalGroup(row)) === 'keep';
+  });
+  return {
+    ...source,
+    rows,
+    source: `${source.source} · horizontal filtrado por Padrão (política Secovi)`,
+  };
 }
 
 /** Janela editorial gerada dinamicamente; não há mais limite fixo em 1T2026 (G-02). */
@@ -200,34 +219,22 @@ function emptyCube(scope: PanoramaScope): MarketCube {
 function horizontalSeriesPolicyOf(cube: MarketCube, engineVersion: 'v2' | 'v3'): HorizontalSeriesPolicy {
   const accepted = horizontalProjects(cube).length;
   if (engineVersion !== 'v3') return { attributable: true, reason: 'Motor V2: série municipal usada como está.', acceptedProjects: accepted };
-  if (!accepted) {
-    return {
-      attributable: true,
-      acceptedProjects: 0,
-      reason: 'Nenhum Condomínio de Casas elegível no recorte: a série horizontal é zero por definição do universo, não por ausência de resposta.',
-    };
-  }
   return {
-    attributable: false,
+    attributable: true,
     acceptedProjects: accepted,
-    reason: `Há ${accepted} Condomínio(s) de Casas no recorte, mas o contrato municipal agrega todo o horizontal e não permite separá-los dos demais produtos. A série horizontal fica indisponível em vez de publicar número de outro universo.`,
+    reason: accepted
+      ? `Há ${accepted} empreendimento(s) horizontal(is) elegível(is); as séries municipais foram filtradas por Padrão antes da agregação.`
+      : 'Nenhum horizontal elegível no cubo; as séries municipais continuam filtradas por Padrão para não introduzir loteamentos.',
   };
 }
 
 /**
- * Aplica o firewall a um bloco temporal: remove os grupos cujo rótulo é produto horizontal fora da
- * política — é o que impedia `Loteamento Fechado` de virar "padrão" em tabela e em narrativa — e
- * zera a componente horizontal das séries, deixando o total igual ao vertical.
+ * Registra a política já aplicada às linhas temporais antes da agregação do bloco.
  */
 function firewallTemporalBlock(block: ReportMarketBlock, policy: HorizontalSeriesPolicy): ReportMarketBlock {
-  const isExcludedProduct = (label: string) => classifyHorizontalLabel(label) === 'produto_excluido';
-  const verticalOnly = <T extends { vertical: number; horizontal: number; total: number }>(row: T): T => ({ ...row, horizontal: 0, total: row.vertical });
   return {
     ...block,
-    series: block.series.map(verticalOnly),
-    byGroup: block.byGroup.filter((row) => !isExcludedProduct(row.label)).map(verticalOnly),
-    groupSeries: block.groupSeries.filter((group) => !isExcludedProduct(group.label)).map((group) => ({ ...group, series: group.series.map(verticalOnly) })),
-    formula: `${block.formula} Contrato municipal lido como Vertical (política PRE-026); o horizontal do relatório vem do cubo.`,
+    formula: `${block.formula} Linhas horizontais filtradas por Padrão antes da agregação (política Secovi). ${policy.reason}`,
   };
 }
 
@@ -305,7 +312,7 @@ function buildCityComparisons(scope: PanoramaScope, cube: MarketCube, provenance
 
   const sales = selected.map((city) => {
     const source = salesSources.find((item) => item.city === city);
-    const values = normalizeCityTemporalRows(city, source?.rows ?? [], 'flow')
+    const values = filterSecoviPatternSource({ rows: normalizeCityTemporalRows(city, source?.rows ?? [], 'flow'), available: true, source: 'comparativo municipal' }).rows
       .filter((row) => periodToQuarter(row.period) === scope.endQuarter)
       .map((row) => safeNumber(row.liquid_sales));
     return { city, liquidSales: nullableSum(values) };
@@ -350,15 +357,15 @@ export function buildPanoramaReportModel(
   const granular = buildGranularBlocks(cube);
   const cityComparisons = buildCityComparisons(scope, cube, provenance, options.citySalesSources ?? []);
   const temporal = {
-    sales: normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales),
+    sales: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales)),
     salesTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'salesTypology', 'flow', sources.salesTypology),
-    stock: normalizeTemporalSource(scope, options.cityTemporalSources, 'stock', 'snapshot', sources.stock),
+    stock: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'stock', 'snapshot', sources.stock)),
     stockTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'stockTypology', 'snapshot', sources.stockTypology),
-    ivv: normalizeTemporalSource(scope, options.cityTemporalSources, 'ivv', 'snapshot', sources.ivv),
+    ivv: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'ivv', 'snapshot', sources.ivv)),
     ivvTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'ivvTypology', 'snapshot', sources.ivvTypology),
-    ticket: normalizeTemporalSource(scope, options.cityTemporalSources, 'ticket', 'snapshot', sources.ticket),
+    ticket: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'ticket', 'snapshot', sources.ticket)),
     ticketTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'ticketTypology', 'snapshot', sources.ticketTypology),
-    meter: normalizeTemporalSource(scope, options.cityTemporalSources, 'meter', 'snapshot', sources.meter),
+    meter: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'meter', 'snapshot', sources.meter)),
     meterTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'meterTypology', 'snapshot', sources.meterTypology),
   };
   // Firewall de fontes: na V3 nenhum contrato municipal fala pelo horizontal do Panorama Secovi.
