@@ -4,6 +4,7 @@ import { buildMapTilePlan } from '../lib/map-tiles';
 import { orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
 import { SECOVI_HORIZONTAL_LABEL } from '../domain/entity-policy';
+import { cubeInLaunchWindow } from '../report/model';
 
 const integer = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 const decimal = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -138,7 +139,8 @@ export function AreaIvvSlide({ report }: { report: PanoramaReportModel }) {
  * 31 e 51, que sempre foram granulares.
  */
 export function MarketSummarySlide({ report }: { report: PanoramaReportModel }) {
-  const segmentsOf = (segment: 'Vertical' | 'Horizontal') => report.cube.projects.filter((project) => project.segment === segment);
+  const launchCube = cubeInLaunchWindow(report.cube, report.scope);
+  const segmentsOf = (segment: 'Vertical' | 'Horizontal') => launchCube.projects.filter((project) => project.segment === segment);
   // Universo vazio soma zero — não `null`. É a diferença entre "nenhum empreendimento elegível",
   // que é um resultado, e "não sabemos", que é ausência de resposta. A analista pediu o `0` visível.
   const sumOver = (projects: typeof report.cube.projects, pick: (project: typeof projects[number]) => number | null) =>
@@ -151,10 +153,10 @@ export function MarketSummarySlide({ report }: { report: PanoramaReportModel }) 
   const rows = [
     { label: 'Total Mercado Residencial Vertical', ...totalsOf(segmentsOf('Vertical')) },
     { label: `Total Mercado Residencial Horizontal — ${SECOVI_HORIZONTAL_LABEL}`, ...totalsOf(segmentsOf('Horizontal')) },
-    { label: 'Total Mercado', ...totalsOf(report.cube.projects) },
+    { label: 'Total Mercado', ...totalsOf(launchCube.projects) },
   ];
   const totalAvailability = shareOf(rows[2].final, rows[2].launched);
-  if (!report.cube.projects.length) {
+  if (!launchCube.projects.length) {
     return <Slide title="ANÁLISE GERAL DO MERCADO"><DataUnavailable>O universo granular não foi coletado neste recorte, portanto não há base por empreendimento para o resumo geral. A página não reaproveita o agregado municipal, que inclui produtos horizontais fora da política Secovi.</DataUnavailable></Slide>;
   }
   return <Slide title="ANÁLISE GERAL DO MERCADO"><table className="panorama-reference-table panorama-summary-table"><thead><tr><th>Tipo do Imóvel</th><th>Nº de Empreend.</th><th>Oferta<br/>Lançada</th><th>Oferta<br/>Final</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>

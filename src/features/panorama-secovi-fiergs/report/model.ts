@@ -1,6 +1,6 @@
 import { buildLaunchModel, periodToQuarter, safeNumber } from '../lib/launches';
 import type { HorizontalSeriesPolicy, LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
-import { editorialWindow, quarterRange } from '../domain/quarters';
+import { editorialWindow, quarterIndex, quarterRange } from '../domain/quarters';
 import { horizontalProjects, mergeCubes, type MarketCube } from '../domain/cube';
 import { classifySecoviTemporalRow } from '../domain/entity-policy';
 import {
@@ -239,14 +239,26 @@ function firewallTemporalBlock(block: ReportMarketBlock, policy: HorizontalSerie
 }
 
 /** Agrega as linhas prontas dos slides 31–51 a partir do cubo granular. */
-export function buildGranularBlocks(cube: MarketCube): PanoramaGranularBlocks {
-  const matrix = buildCohortMatrix(cube, 'Vertical');
+/** Launch-offer blocks respect the selected interval; IVV keeps full history. */
+export function cubeInLaunchWindow(cube: MarketCube, scope: PanoramaScope): MarketCube {
+  if (!scope.startQuarter) return cube;
+  const start = quarterIndex(scope.startQuarter);
+  const end = quarterIndex(scope.endQuarter);
+  return { ...cube, projects: cube.projects.filter((project) => {
+    const release = quarterIndex(project.releaseQuarter);
+    return release >= start && release <= end;
+  }) };
+}
+
+export function buildGranularBlocks(cube: MarketCube, scope?: PanoramaScope): PanoramaGranularBlocks {
+  const launchCube = scope ? cubeInLaunchWindow(cube, scope) : cube;
+  const matrix = buildCohortMatrix(launchCube, 'Vertical');
   return {
-    offerByStandard: offerByStandard(cube, 'Vertical'),
+    offerByStandard: offerByStandard(launchCube, 'Vertical'),
     areaBands: offerByAreaBand(cube),
-    offerByTypology: offerByTypology(cube, 'Vertical'),
-    cohortsVertical: offerByCohort(cube, 'Vertical'),
-    cohortsHorizontal: offerByCohort(cube, 'Horizontal'),
+    offerByTypology: offerByTypology(launchCube, 'Vertical'),
+    cohortsVertical: offerByCohort(launchCube, 'Vertical'),
+    cohortsHorizontal: offerByCohort(launchCube, 'Horizontal'),
     cohortMatrix: matrix,
     cohortMatrixParticipation: cohortMatrixParticipation(matrix),
     maturityByStandard: maturityByStandard(cube),
@@ -254,7 +266,7 @@ export function buildGranularBlocks(cube: MarketCube): PanoramaGranularBlocks {
     pricesByStandard: pricesByStandard(cube, 'Vertical'),
     pricesByTypology: pricesByTypology(cube),
     horizontalPricesByStandard: horizontalPricesByStandard(cube),
-    vgv: vgvSummary(cube),
+    vgv: vgvSummary(launchCube),
     // Nenhum campo de Faixa de Valor foi identificado no payload nem existe regra autoritativa.
     valueRangeAvailable: false,
   };
@@ -354,7 +366,7 @@ export function buildPanoramaReportModel(
     : emptyCube(scope);
   const provenance = provenanceOf(scope, cube, options.provenance);
   const failedCities = provenance.failedCities.length > 0;
-  const granular = buildGranularBlocks(cube);
+  const granular = buildGranularBlocks(cube, scope);
   const cityComparisons = buildCityComparisons(scope, cube, provenance, options.citySalesSources ?? []);
   const temporal = {
     sales: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales)),

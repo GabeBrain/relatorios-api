@@ -20,7 +20,7 @@ import type { PanoramaScope, Quarter } from '../types';
 export default function PanoramaSecoviFiergsPage() {
   const [geo, setGeo] = useState<GeoScope>({ uf: 'SP', city: '' });
   const [cities, setCities] = useState<string[]>([]);
-  const [scope, setScope] = useState<PanoramaScope>({ uf: 'SP', cities: [], startQuarter: '1T2022', endQuarter: '2T2026', entity: 'secovi-sp', engineVersion: 'v4' });
+  const [scope, setScope] = useState<PanoramaScope>({ uf: 'SP', cities: [], startQuarter: '1T2023', endQuarter: '2T2026', entity: 'secovi-sp', engineVersion: 'v4' });
   const [submitted, setSubmitted] = useState<PanoramaScope | null>(null);
   const [generationProgress, setGenerationProgress] = useState<PanoramaGenerationProgress | null>(null);
   const geoApi = useGeoApiScope({ value: geo, onChange: (next) => { setGeo(next); if (next.uf !== geo.uf) { setCities([]); setScope((current) => ({ ...current, cities: [] })); setSubmitted(null); } } });

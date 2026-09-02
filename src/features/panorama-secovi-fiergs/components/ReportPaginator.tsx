@@ -234,16 +234,33 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
   </div>;
 }
 function comparisonSeries(report: PanoramaReportModel, sales = false) { const metric = sales ? report.sales : { units: { series: report.launches.units }, vgv: { series: report.launches.vgv } }; const quarters = metric.units.series.filter((x: LaunchSeries) => x.quarter[0] === report.scope.endQuarter[0]).slice(-5); return { quarters, rows: [{ label: 'Empreendimentos', series: report.launches.projects, money: false, show: !sales }, { label: 'Unidades', series: metric.units.series, money: false, show: true }, { label: sales ? 'VGV vendido' : 'VGV lançado', series: metric.vgv.series, money: true, show: true }].filter((x) => x.show) }; }
+export function annualizeSeries(series: LaunchSeries[]) {
+  const annual = new Map<number, { year: number; vertical: number; horizontal: number; total: number }>();
+  for (const item of series) {
+    const year = Number(item.quarter.slice(2));
+    const current = annual.get(year) ?? { year, vertical: 0, horizontal: 0, total: 0 };
+    current.vertical += item.vertical ?? 0;
+    current.horizontal += item.horizontal ?? 0;
+    current.total += item.total ?? 0;
+    annual.set(year, current);
+  }
+  return [...annual.values()].sort((a, b) => a.year - b.year);
+}
 function ComparisonTable({ report, sales = false, annual = false }: { report: PanoramaReportModel; sales?: boolean; annual?: boolean }) {
   const temporalBlock = sales ? report.sales.units : null;
   if (temporalBlock?.dataStatus === 'unavailable') {
     return <CoveragePage title={annual ? 'VENDAS | POR ANO' : 'VENDAS | POR TRIMESTRE'} detail="A API não disponibilizou a série temporal de vendas para este recorte. A tabela foi preservada como indisponível para não apresentar zeros como se fossem resultados observados."/>;
   }
   const { quarters, rows } = comparisonSeries(report, sales);
-  const periods = annual ? report.launches.annual.slice(-4).map((item) => String(item.year)) : quarters.map((item: LaunchSeries) => item.quarter);
+  const annualSales = sales ? { units: annualizeSeries(report.sales.units.series), vgv: annualizeSeries(report.sales.vgv.series) } : null;
+  const periods = annual ? (sales ? annualSales!.units : report.launches.annual).slice(-4).map((item) => String(item.year)) : quarters.map((item: LaunchSeries) => item.quarter);
   const comparisonPairs = [[periods.at(-3), periods.at(-2)], [periods.at(-2), periods.at(-1)]] as const;
   const get = (row: typeof rows[number], period: string, type: 'vertical' | 'horizontal' | 'total') => {
     if (annual) {
+      if (sales) {
+        const source = row.label === 'Unidades' ? annualSales!.units : annualSales!.vgv;
+        return source.find((annualItem) => String(annualItem.year) === period)?.[type] ?? 0;
+      }
       const item = report.launches.annual.find((annualItem) => String(annualItem.year) === period);
       const key = row.label === 'Empreendimentos' ? 'projects' : row.label === 'Unidades' ? 'units' : 'vgv';
       return item?.[key][type] ?? 0;

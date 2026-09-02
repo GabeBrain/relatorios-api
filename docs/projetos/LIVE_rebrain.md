@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-02 — Panorama Secovi/FIERGS V4: fechamento do teste Jundiaí — Terra/Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — correções decorrentes da leitura do primeiro PDF V4 de Jundiaí.
+- **O quê:** a tabela anual de vendas passou a agregar `sales.units.series` e `sales.vgv.series`; ela não reutiliza mais a série anual de lançamentos. Os blocos que publicam Oferta Lançada (resumo geral, padrão, tipologia, coortes e VGV) agora filtram o cubo pelo intervalo selecionado. O padrão da tela passa a ser 1T2023–2T2026, alinhado ao recorte de Juliana. IVV por área preserva seu histórico granular completo, necessário à fórmula de absorção no fechamento.
+- **Evidência:** a revisão do PDF V4 encontrou a cópia incorreta dos lançamentos na página anual de vendas e 830 unidades horizontais por incluir 402 anteriores ao recorte. Novos testes fixam a agregação anual e a exclusão de lançamentos pré-1T2023; regressão completa: 40 arquivos / 324 testes; `tsc --noEmit` e build aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/report/model.ts`, `components/ReportPaginator.tsx`, `components/MarketSlides.tsx`, `pages/PanoramaSecoviFiergsPage.tsx`, testes V4.
+- **Commits:** pendente de commit local desta sessão.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** pronto para gerar uma nova amostra V4 de Jundiaí; a conferência visual do PDF/PPT regenerado permanece o próximo portão. Sem push, deploy ou escrita no Monday.
+
 ### 2026-09-02 — Panorama Secovi/FIERGS V4: IVV granular sem erro técnico no material — Gabriel Hxg + Terra/Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — primeira versão V4 para teste de Jundiaí.
 - **O que:** V4 mantém a reconciliação horizontal por `Padrão` da V3.1 e deixa de consultar `ivv?group_by=Tipologia` durante a geração: o endpoint retorna HTTP 500 mesmo para Vertical isolado e um trimestre. A lâmina de IVV por área/tipologia passa a assumir formalmente o cálculo granular `vendas líquidas / (oferta anterior + lançamentos)`, usando `sold_in_period`, `typology_stock` e histórico por empreendimento.

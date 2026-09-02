@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react';
 import { buildPanoramaReportModel } from '../report/model';
 import { buildCityCube } from '../domain/cube';
 import { AreaIvvSlide, MarketSummarySlide, NarrativeSlide, PriceTableSlide } from '../components/MarketSlides';
-import { PanoramaExportDeck, pointLabelPlan } from '../components/ReportPaginator';
+import { annualizeSeries, PanoramaExportDeck, pointLabelPlan } from '../components/ReportPaginator';
 import type { PanoramaReportModel, PanoramaScope } from '../types';
 
 /**
