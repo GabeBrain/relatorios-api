@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchValidationBuildings } from './api';
-import type { Building } from '@/features/dashboard-geobrain/types';
+import type { ValidationBuilding } from './api';
 import { useAuthStore } from '@/store/auth-store';
 
 export const MAX_CITIES = 10;
@@ -26,7 +26,7 @@ export interface CityFailure {
 export function useVFData() {
   const token = useAuthStore((s) => s.getToken());
   const [status, setStatus] = useState<Status>('idle');
-  const [buildings, setBuildings] = useState<Building[] | null>(null);
+  const [buildings, setBuildings] = useState<ValidationBuilding[] | null>(null);
   const [loadedCities, setLoadedCities] = useState<string[]>([]);
   const [failures, setFailures] = useState<CityFailure[]>([]);
   const [error, setError] = useState<string>('');
@@ -56,7 +56,7 @@ export function useVFData() {
       };
       setProgress({ ...prog });
 
-      const merged = new Map<string, Building>();
+      const merged = new Map<string, ValidationBuilding>();
       const fails: CityFailure[] = [];
       const ok: string[] = [];
 

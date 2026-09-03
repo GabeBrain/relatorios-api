@@ -11,8 +11,8 @@ describe('fixtures de homologação RAIS', () => {
     expect(existsSync(file)).toBe(true);
     const lines = readFileSync(file, 'utf8').trim().split(/\r?\n/);
     const rows = lines.slice(1).map((line) => line.split(';'));
-    const employeesColumn = lines[0].split(';').findIndex((value) => value.replaceAll('"', '').trim() === 'empregados');
-    const total = rows.reduce((sum, row) => sum + Number(row[employeesColumn]?.replaceAll('"', '').replace(',', '.') ?? 0), 0);
+    const employeesColumn = lines[0].split(';').findIndex((value) => value.replace(/"/g, '').trim() === 'empregados');
+    const total = rows.reduce((sum, row) => sum + Number(row[employeesColumn]?.replace(/"/g, '').replace(',', '.') ?? 0), 0);
     expect(rows).toHaveLength(1390);
     expect(total).toBe(154664);
   });
