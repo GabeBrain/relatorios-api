@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-03 — Empregados: abas lazy e municípios monitorados — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — refinamento da experiência inicial do relatório RAIS.
+- **O que:** removido o texto introdutório redundante; Empregados e Empresas passaram a ser abas de produto com conteúdo carregado sob demanda. Empregados reutiliza o `GeoApiScopeEngine`: UF e combobox pesquisável mostram exclusivamente cidades de `/public-api/monitored-cities` autorizadas para o Bearer. A lista nacional do IBGE permanece interna apenas para resolver o código que a RAIS exige depois da escolha; não funciona como fallback. Empresas mantém placeholder/contrato fantasma, sem rede, banco, batch ou dados simulados.
+- **Evidência local:** build com TypeScript aprovado; 4 arquivos/10 testes da feature passam, incluindo a garantia de não haver fallback para município não monitorado. A build gerou chunks separados para página, Empregados e Empresas.
+- **Estado remoto informado:** Gabriel aplicou a migration, configurou a Edge Function/secrets e realizou teste do fluxo; esta entrada não executou deploy, migration nem escrita no Monday.
+- **Arquivos:** `src/features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx`, `components/EmployeesReportWorkspace.tsx`, `components/CompaniesPlaceholder.tsx`, `api.ts`, testes e documentação da feature.
+- **Commits:** pendente de commit local desta execução.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** seleção de cidade fica alinhada ao controle de acesso GeoBrain apesar da fonte RAIS/Base dos Dados. A próxima verificação humana recomendada é conferir visualmente a tela autenticada e uma cidade que não esteja na lista monitorada.
+
 ### 2026-09-03 — Empregados V1 implementado localmente; ativação remota pendente — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — primeira versão do relatório municipal de vínculos RAIS.
 - **O que:** criada a rota lazy, entrada na navegação/home/busca, seleção de UF/município IBGE/ano, abas de visão geral, setores, ocupações virtualizadas e metodologia, exportação XLSX somente no computador do usuário, autenticação pelo Bearer GeoBrain, Edge Function BigQuery e cache/auditoria no Supabase. Empresas está presente apenas como contrato/provider fantasma que retorna `FEATURE_DISABLED`; não há chamada, tabela, batch ou dado de CNPJ.

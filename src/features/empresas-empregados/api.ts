@@ -27,6 +27,10 @@ interface IbgeMunicipality {
 
 let municipalitiesPromise: Promise<MunicipalityOption[]> | null = null;
 
+function comparableName(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase('pt-BR');
+}
+
 export function loadMunicipalities(signal?: AbortSignal): Promise<MunicipalityOption[]> {
   if (!municipalitiesPromise) {
     municipalitiesPromise = fetch(IBGE_MUNICIPALITIES_URL, { signal })
@@ -44,6 +48,18 @@ export function loadMunicipalities(signal?: AbortSignal): Promise<MunicipalityOp
       });
   }
   return municipalitiesPromise;
+}
+
+/**
+ * `monitored-cities` é o universo autorizado de escolha. A lista IBGE entra
+ * somente para resolver o código necessário pela RAIS da cidade já autorizada.
+ */
+export function resolveMonitoredMunicipality(
+  municipalities: MunicipalityOption[],
+  scope: { uf: string; city: string },
+): MunicipalityOption | null {
+  const comparableCity = comparableName(scope.city);
+  return municipalities.find((municipality) => municipality.uf === scope.uf && comparableName(municipality.name) === comparableCity) ?? null;
 }
 
 async function functionRequest<T>(body: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
