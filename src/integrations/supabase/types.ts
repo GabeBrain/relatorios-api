@@ -204,6 +204,246 @@ export type Database = {
         }
         Relationships: []
       }
+      rais_employee_occupations: {
+        Row: {
+          average_salary: number | null
+          code: string
+          created_at: string
+          employees: number
+          family: string
+          id: string
+          major_group: string
+          median_salary: number | null
+          occupation: string
+          percentage: number
+          snapshot_id: string
+        }
+        Insert: {
+          average_salary?: number | null
+          code: string
+          created_at?: string
+          employees?: number
+          family: string
+          id?: string
+          major_group: string
+          median_salary?: number | null
+          occupation: string
+          percentage?: number
+          snapshot_id: string
+        }
+        Update: {
+          average_salary?: number | null
+          code?: string
+          created_at?: string
+          employees?: number
+          family?: string
+          id?: string
+          major_group?: string
+          median_salary?: number | null
+          occupation?: string
+          percentage?: number
+          snapshot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rais_employee_occupations_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "rais_employee_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rais_employee_query_runs: {
+        Row: {
+          application_version: string
+          bigquery_job_ids: string[]
+          bytes_billed: number | null
+          bytes_processed: number | null
+          cache_hit: boolean
+          created_at: string
+          duration_ms: number | null
+          error_code: string | null
+          id: string
+          ip_hash: string | null
+          municipality_ibge: string
+          query_version: string
+          requester_email: string | null
+          requester_id: string
+          snapshot_id: string | null
+          status: string
+          uf: string
+          year: number
+        }
+        Insert: {
+          application_version?: string
+          bigquery_job_ids?: string[]
+          bytes_billed?: number | null
+          bytes_processed?: number | null
+          cache_hit?: boolean
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          id?: string
+          ip_hash?: string | null
+          municipality_ibge: string
+          query_version: string
+          requester_email?: string | null
+          requester_id: string
+          snapshot_id?: string | null
+          status?: string
+          uf: string
+          year: number
+        }
+        Update: {
+          application_version?: string
+          bigquery_job_ids?: string[]
+          bytes_billed?: number | null
+          bytes_processed?: number | null
+          cache_hit?: boolean
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          id?: string
+          ip_hash?: string | null
+          municipality_ibge?: string
+          query_version?: string
+          requester_email?: string | null
+          requester_id?: string
+          snapshot_id?: string | null
+          status?: string
+          uf?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rais_employee_query_runs_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "rais_employee_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rais_employee_sectors: {
+        Row: {
+          average_salary: number | null
+          code: string
+          created_at: string
+          employees: number
+          id: string
+          median_salary: number | null
+          name: string
+          percentage: number
+          snapshot_id: string
+        }
+        Insert: {
+          average_salary?: number | null
+          code: string
+          created_at?: string
+          employees?: number
+          id?: string
+          median_salary?: number | null
+          name: string
+          percentage?: number
+          snapshot_id: string
+        }
+        Update: {
+          average_salary?: number | null
+          code?: string
+          created_at?: string
+          employees?: number
+          id?: string
+          median_salary?: number | null
+          name?: string
+          percentage?: number
+          snapshot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rais_employee_sectors_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "rais_employee_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rais_employee_snapshots: {
+        Row: {
+          attempt_count: number
+          average_salary: number | null
+          bytes_processed: number | null
+          created_at: string
+          id: string
+          last_error_code: string | null
+          lease_expires_at: string | null
+          median_salary: number | null
+          methodology_version: string
+          missing_cbo: number
+          municipality_ibge: string
+          municipality_name: string
+          query_duration_ms: number | null
+          query_version: string
+          salary_missing_or_zero: number
+          source: string
+          status: string
+          total_employees: number
+          total_links_in_year: number | null
+          uf: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          attempt_count?: number
+          average_salary?: number | null
+          bytes_processed?: number | null
+          created_at?: string
+          id?: string
+          last_error_code?: string | null
+          lease_expires_at?: string | null
+          median_salary?: number | null
+          methodology_version: string
+          missing_cbo?: number
+          municipality_ibge: string
+          municipality_name: string
+          query_duration_ms?: number | null
+          query_version: string
+          salary_missing_or_zero?: number
+          source: string
+          status?: string
+          total_employees?: number
+          total_links_in_year?: number | null
+          uf: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          attempt_count?: number
+          average_salary?: number | null
+          bytes_processed?: number | null
+          created_at?: string
+          id?: string
+          last_error_code?: string | null
+          lease_expires_at?: string | null
+          median_salary?: number | null
+          methodology_version?: string
+          missing_cbo?: number
+          municipality_ibge?: string
+          municipality_name?: string
+          query_duration_ms?: number | null
+          query_version?: string
+          salary_missing_or_zero?: number
+          source?: string
+          status?: string
+          total_employees?: number
+          total_links_in_year?: number | null
+          uf?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       slide_errors: {
         Row: {
           description: string
@@ -404,7 +644,42 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      rais_claim_snapshot: {
+        Args: {
+          p_lease_seconds?: number
+          p_methodology_version: string
+          p_municipality_ibge: string
+          p_municipality_name: string
+          p_query_version: string
+          p_source: string
+          p_uf: string
+          p_year: number
+        }
+        Returns: {
+          acquired: boolean
+          retry_after_ms: number
+          snapshot_id: string
+          snapshot_status: string
+        }[]
+      }
+      rais_fail_snapshot: {
+        Args: { p_error_code: string; p_snapshot_id: string }
+        Returns: undefined
+      }
+      rais_finish_snapshot: {
+        Args: {
+          p_average_salary: number
+          p_bytes_processed: number
+          p_median_salary: number
+          p_missing_cbo: number
+          p_query_duration_ms: number
+          p_salary_missing_or_zero: number
+          p_snapshot_id: string
+          p_total_employees: number
+          p_total_links_in_year: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
