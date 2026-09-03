@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-03 — Plano terminal Luna para Empregados V1 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — relatório municipal e anual de vínculos formais RAIS.
+- **O que:** requisitos do Grill-me foram consolidados em um plano terminal T0–T7. A V1 entrega somente Empregados, com Bearer GeoBrain validado no backend, BigQuery/Base dos Dados, cache agregado compartilhado no Supabase, auditoria técnica sem histórico visível, exploração web e XLSX gerado exclusivamente na máquina do usuário. Empresas fica como contrato fantasma desabilitado, sem rede, banco ou batch.
+- **Referências de aceite:** Rio Verde/GO 2025 possui 81.601 vínculos e 1.115 ocupações; Blumenau/SC 2025 possui 154.664 vínculos e 1.390 ocupações na amostra disponível. Diferenças por retificação da fonte deverão ser explicadas, nunca mascaradas.
+- **Arquivos:** `docs/features/empresas-empregados/PLAN_LUNA_EMPREGADOS_V1_2026-09-03.md`, README e materiais de referência da feature.
+- **Commits:** pendente de commit local desta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** descoberta encerrada e implementação pronta para ativação da Luna. Permanecem fora do escopo: pipeline Receita/CNPJ, interface de histórico, deploy, migrations remotas e publicação. Sem escrita no Monday.
+
 ### 2026-09-03 — Empresas e Empregados: descoberta e área documental iniciadas — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** nova página planejada em `/rebrain/empresas-empregados`.
 - **O que:** criada a área documental da feature para receber o `DEVELOPMENT.md` de Diego, os workbooks de Blumenau/Rio Verde e demais insumos. O gerador RAIS do Sistema Quanti foi identificado apenas como protótipo técnico; a nova entrega pertencerá ao Rebrain e usará seu Supabase/Lovable.
