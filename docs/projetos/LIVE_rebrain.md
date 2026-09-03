@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-03 — Plano Luna para os quatro ajustes finais do Panorama V4 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — revisão do PDF V4 anotado por Juliana.
+- **O quê:** diagnóstico fechou quatro divergências: preço de 2T2026 vindo de fonte temporal diferente das tabelas granulares; maturidade por padrão e tipologia ignorando o início `1T2023`; cobertura tipológica 208 unidades abaixo do total por empreendimento; e narrativa somando o cubo completo em vez do recorte. Foi criado plano terminal para Luna centralizar fatos de fechamento, reconciliar o último preço, aplicar a janela às maturidades e representar unidades sem tipologia como cobertura não informada.
+- **Evidência:** no PDF recebido, p.38 mostra R$ 10.558/m² contra R$ 10.240/m² nos slides correntes; p.41/p.43 mostram 22.561/22.353 lançadas contra 6.642 no vertical do recorte; p.51 mostra 23.391 lançadas e 1.561 finais contra 7.070 e 1.433 no resumo/VGV.
+- **Arquivos:** [`PLAN_LUNA_AJUSTES_FINAIS_PANORAMA_V4_2026-09-03.md`](../features/Relatorios%20Secovi_FIERGS/opus-v3-closure/PLAN_LUNA_AJUSTES_FINAIS_PANORAMA_V4_2026-09-03.md).
+- **Commits:** pendente de commit local desta sessão.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** V4 permanece em QA. Próximo portão: Luna implementar o plano, emitir `LUNA_READY_FOR_GABRIEL` e Gabriel gerar novo PDF autenticado para comparação. Sem push, deploy ou escrita no Monday.
+
 ### 2026-09-02 — Panorama Secovi/FIERGS V4: fechamento do teste Jundiaí — Terra/Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — correções decorrentes da leitura do primeiro PDF V4 de Jundiaí.
 - **O quê:** a tabela anual de vendas passou a agregar `sales.units.series` e `sales.vgv.series`; ela não reutiliza mais a série anual de lançamentos. Os blocos que publicam Oferta Lançada (resumo geral, padrão, tipologia, coortes e VGV) agora filtram o cubo pelo intervalo selecionado. O padrão da tela passa a ser 1T2023–2T2026, alinhado ao recorte de Juliana. IVV por área preserva seu histórico granular completo, necessário à fórmula de absorção no fechamento.
