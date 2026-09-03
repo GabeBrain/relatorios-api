@@ -64,7 +64,7 @@ export default function EmployeesReportWorkspace() {
     setMunicipality(null); setYear(''); setYears([]); setReport(null);
     if (!scope.uf || !scope.city) { setLoadingMunicipality(false); return () => { active = false; }; }
     setLoadingMunicipality(true); setError(null);
-    resolveRaisMunicipality(scope).then((resolved) => {
+    resolveRaisMunicipality({ name: scope.city, uf: scope.uf }).then((resolved) => {
       if (!active) return;
       setMunicipality(resolved);
     }).catch((err) => { if (active) setError(err instanceof Error ? err.message : 'Não foi possível preparar o município.'); }).finally(() => { if (active) setLoadingMunicipality(false); });
