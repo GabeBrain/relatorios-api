@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-03 — Empregados: diagnóstico explícito de assinatura da ponte — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Edge `rais-employees-report` — erro operacional da ponte RAIS/Cloud Run.
+- **O que:** a Edge agora distingue a resposta `401 invalid_signature` da ponte e informa que `BIGQUERY_PROXY_HMAC_SECRET` deve ter exatamente o mesmo valor de `PROXY_HMAC_SECRET` do Cloud Run. A análise dos logs confirmou que a revisão Cloud Run ativa recebeu chamadas e as rejeitou por HMAC antes de iniciar uma consulta BigQuery.
+- **Evidência local:** build TypeScript/Vite aprovado. Sem consulta RAIS, dado sensível ou alteração de secret nesta execução.
+- **Arquivos:** `supabase/functions/rais-employees-report/index.ts` e este documento.
+- **Commits:** `933f400` local; publicação pendente.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** atualizar o secret HMAC do Supabase com o valor do Secret Manager efetivamente referenciado pelo Cloud Run e testar metadata novamente.
+
 ### 2026-09-03 — Empregados: ponte RAIS via Cloud Run do Sistema Quanti — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — substituição da credencial privada GCP pela identidade de workload existente.
 - **O que:** a Edge `rais-employees-report` passa a chamar a rota HMAC fechada `/v1/rais-employees` do `bigquery-proxy` do Sistema Quanti para metadata e agregado RAIS municipal. O proxy executa apenas consultas fixas/parametrizadas, sob a service account vinculada ao Cloud Run; não recebe SQL do navegador ou do Rebrain. Foram removidos do caminho ativo `GCP_SERVICE_ACCOUNT_EMAIL` e `GCP_PRIVATE_KEY`.
