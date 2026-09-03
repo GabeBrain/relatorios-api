@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-03 — Panorama V4: plano terminal T0–T7 implementado — Luna/Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento do estudo V4 após revisão de Juliana.
+- **O que:** o modelo agora publica `closingFacts` canônicos por segmento e total; maturidade por padrão/tipologia e preços de fechamento usam o cubo do recorte; o preço final do gráfico é reconciliado com o preço granular; unidades sem tipologia recebem a categoria explícita `Não classificado`; resumo e narrativa consomem os mesmos fatos, sem hardcode de Jundiaí ou correção textual no JSX.
+- **Evidência:** testes direcionados cobrem janela editorial, residual tipológico, reconciliação do preço final e paridade estrutural do deck/exportação. Suíte completa, typecheck e build aprovados. Lint dos arquivos alterados sem erro; lint global permanece bloqueado por erros preexistentes fora desta entrega.
+- **Limite de verificação:** a geração visual autenticada do novo PDF/PPT não foi executada neste ambiente; a paridade real de artefatos aguarda a nova geração por Gabriel. A validação automatizada estrutural preview/PDF/PPT passou.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/types.ts`, `report/model.ts`, `domain/aggregations.ts`, `components/MarketSlides.tsx`, `__tests__/final-adjustments.test.ts` e este documento.
+- **Commits:** pendente de commit local desta sessão.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** T0–T7 concluídos localmente; pronto para `LUNA_READY_FOR_GABRIEL` e geração de nova amostra autenticada. Sem push, deploy ou escrita no Monday.
+
 ### 2026-09-03 — Plano Luna para os quatro ajustes finais do Panorama V4 — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — revisão do PDF V4 anotado por Juliana.
 - **O quê:** diagnóstico fechou quatro divergências: preço de 2T2026 vindo de fonte temporal diferente das tabelas granulares; maturidade por padrão e tipologia ignorando o início `1T2023`; cobertura tipológica 208 unidades abaixo do total por empreendimento; e narrativa somando o cubo completo em vez do recorte. Foi criado plano terminal para Luna centralizar fatos de fechamento, reconciliar o último preço, aplicar a janela às maturidades e representar unidades sem tipologia como cobertura não informada.

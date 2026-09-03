@@ -4,7 +4,6 @@ import { buildMapTilePlan } from '../lib/map-tiles';
 import { orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
 import { SECOVI_HORIZONTAL_LABEL } from '../domain/entity-policy';
-import { cubeInLaunchWindow } from '../report/model';
 
 const integer = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 const decimal = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -139,24 +138,14 @@ export function AreaIvvSlide({ report }: { report: PanoramaReportModel }) {
  * 31 e 51, que sempre foram granulares.
  */
 export function MarketSummarySlide({ report }: { report: PanoramaReportModel }) {
-  const launchCube = cubeInLaunchWindow(report.cube, report.scope);
-  const segmentsOf = (segment: 'Vertical' | 'Horizontal') => launchCube.projects.filter((project) => project.segment === segment);
-  // Universo vazio soma zero — não `null`. É a diferença entre "nenhum empreendimento elegível",
-  // que é um resultado, e "não sabemos", que é ausência de resposta. A analista pediu o `0` visível.
-  const sumOver = (projects: typeof report.cube.projects, pick: (project: typeof projects[number]) => number | null) =>
-    projects.length ? projects.reduce<number | null>((sum, project) => pick(project) === null ? sum : (sum ?? 0) + pick(project)!, null) : 0;
-  const totalsOf = (projects: typeof report.cube.projects) => ({
-    projects: new Set(projects.map((project) => project.key)).size,
-    launched: sumOver(projects, (project) => project.launchedUnits),
-    final: sumOver(projects, (project) => project.finalUnits),
-  });
+  const facts = report.closingFacts;
   const rows = [
-    { label: 'Total Mercado Residencial Vertical', ...totalsOf(segmentsOf('Vertical')) },
-    { label: `Total Mercado Residencial Horizontal — ${SECOVI_HORIZONTAL_LABEL}`, ...totalsOf(segmentsOf('Horizontal')) },
-    { label: 'Total Mercado', ...totalsOf(launchCube.projects) },
+    { label: 'Total Mercado Residencial Vertical', projects: facts.vertical.projects, launched: facts.vertical.launchedUnits, final: facts.vertical.finalUnits },
+    { label: `Total Mercado Residencial Horizontal — ${SECOVI_HORIZONTAL_LABEL}`, projects: facts.horizontal.projects, launched: facts.horizontal.launchedUnits, final: facts.horizontal.finalUnits },
+    { label: 'Total Mercado', projects: facts.total.projects, launched: facts.total.launchedUnits, final: facts.total.finalUnits },
   ];
   const totalAvailability = shareOf(rows[2].final, rows[2].launched);
-  if (!launchCube.projects.length) {
+  if (!facts.total.projects) {
     return <Slide title="ANÁLISE GERAL DO MERCADO"><DataUnavailable>O universo granular não foi coletado neste recorte, portanto não há base por empreendimento para o resumo geral. A página não reaproveita o agregado municipal, que inclui produtos horizontais fora da política Secovi.</DataUnavailable></Slide>;
   }
   return <Slide title="ANÁLISE GERAL DO MERCADO"><table className="panorama-reference-table panorama-summary-table"><thead><tr><th>Tipo do Imóvel</th><th>Nº de Empreend.</th><th>Oferta<br/>Lançada</th><th>Oferta<br/>Final</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>
@@ -308,15 +297,11 @@ export function NarrativeSlide({ report, continuation = false }: { report: Panor
   // JG-36: a narrativa deixa de ler o agregado municipal, que devolve `Loteamento Fechado` como se
   // fosse padrão — era daí que saía "o padrão com maior oferta final é Loteamento Fechado". Padrão,
   // tipologia, oferta e disponibilidade vêm do cubo, e por isso fecham com os slides 29, 31 e 51.
-  const universe = report.cube.projects;
-  const sumOf = (pick: (project: typeof universe[number]) => number | null) =>
-    universe.reduce<number | null>((sum, project) => pick(project) === null ? sum : (sum ?? 0) + pick(project)!, null);
-  const finalUnits = sumOf((project) => project.finalUnits);
-  const launchedUnits = sumOf((project) => project.launchedUnits);
-  const verticalFinal = universe.filter((project) => project.segment === 'Vertical')
-    .reduce<number | null>((sum, project) => project.finalUnits === null ? sum : (sum ?? 0) + project.finalUnits, null);
-  const horizontalFinal = universe.filter((project) => project.segment === 'Horizontal')
-    .reduce<number | null>((sum, project) => project.finalUnits === null ? sum : (sum ?? 0) + project.finalUnits, null);
+  const facts = report.closingFacts;
+  const finalUnits = facts.total.finalUnits;
+  const launchedUnits = facts.total.launchedUnits;
+  const verticalFinal = facts.vertical.finalUnits;
+  const horizontalFinal = facts.horizontal.finalUnits;
   const topRow = <T extends { label: string; kind: string }>(rows: T[], value: (row: T) => number | null) =>
     rows.filter((row) => row.kind === 'row').reduce<{ label: string; value: number } | null>((best, row) => {
       const current = value(row);
@@ -326,7 +311,7 @@ export function NarrativeSlide({ report, continuation = false }: { report: Panor
   const topTypology = topRow(report.granular.offerByTypology, (row) => row.finalUnits);
   const verticalPrices = report.granular.pricesByStandard.find((row) => row.kind === 'total');
   const horizontalPrices = report.granular.horizontalPricesByStandard.find((row) => row.kind === 'total');
-  const hasHorizontal = report.cube.projects.some((project) => project.segment === 'Horizontal');
+  const hasHorizontal = facts.horizontal.projects > 0;
   const areaTotal = report.granular.areaBands.find((row) => row.kind === 'total');
   const firstPage = [
     <>No período analisado, o mercado residencial de <strong>{scopeCityLabel(report.scope)}</strong> reúne oferta final de <strong>{integer(finalUnits)} unidades</strong>, sendo {integer(verticalFinal)} no vertical{hasHorizontal ? <> e {integer(horizontalFinal)} em {SECOVI_HORIZONTAL_LABEL}</> : <>; não há {SECOVI_HORIZONTAL_LABEL} elegível neste recorte</>}.</>,

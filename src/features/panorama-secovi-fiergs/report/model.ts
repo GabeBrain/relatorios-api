@@ -1,5 +1,5 @@
 import { buildLaunchModel, periodToQuarter, safeNumber } from '../lib/launches';
-import type { HorizontalSeriesPolicy, LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
+import type { HorizontalSeriesPolicy, LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaClosingFacts, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
 import { editorialWindow, quarterIndex, quarterRange } from '../domain/quarters';
 import { horizontalProjects, mergeCubes, type MarketCube } from '../domain/cube';
 import { classifySecoviTemporalRow } from '../domain/entity-policy';
@@ -261,14 +261,52 @@ export function buildGranularBlocks(cube: MarketCube, scope?: PanoramaScope): Pa
     cohortsHorizontal: offerByCohort(launchCube, 'Horizontal'),
     cohortMatrix: matrix,
     cohortMatrixParticipation: cohortMatrixParticipation(matrix),
-    maturityByStandard: maturityByStandard(cube),
-    maturityByTypology: maturityByTypology(cube),
-    pricesByStandard: pricesByStandard(cube, 'Vertical'),
-    pricesByTypology: pricesByTypology(cube),
-    horizontalPricesByStandard: horizontalPricesByStandard(cube),
+    maturityByStandard: maturityByStandard(launchCube),
+    maturityByTypology: maturityByTypology(launchCube),
+    pricesByStandard: pricesByStandard(launchCube, 'Vertical'),
+    pricesByTypology: pricesByTypology(launchCube),
+    horizontalPricesByStandard: horizontalPricesByStandard(launchCube),
     vgv: vgvSummary(launchCube),
     // Nenhum campo de Faixa de Valor foi identificado no payload nem existe regra autoritativa.
     valueRangeAvailable: false,
+  };
+}
+
+function closingSegment(projects: MarketCube['projects'], segment: 'Vertical' | 'Horizontal' | 'Total') {
+  const selected = segment === 'Total' ? projects : projects.filter((project) => project.segment === segment);
+  if (!selected.length) return { projects: 0, launchedUnits: 0, finalUnits: 0, availability: null };
+  return {
+    projects: new Set(selected.map((project) => project.key)).size,
+    launchedUnits: selected.reduce<number | null>((sum, project) => project.launchedUnits === null ? sum : (sum ?? 0) + project.launchedUnits, null),
+    finalUnits: selected.reduce<number | null>((sum, project) => project.finalUnits === null ? sum : (sum ?? 0) + project.finalUnits, null),
+    availability: null,
+  };
+}
+
+function withAvailability<T extends ReturnType<typeof closingSegment>>(facts: T) {
+  return { ...facts, availability: facts.launchedUnits === null || facts.finalUnits === null || facts.launchedUnits === 0 ? null : facts.finalUnits / facts.launchedUnits * 100 };
+}
+
+function closingFactsOf(launchCube: MarketCube, granular: PanoramaGranularBlocks): PanoramaClosingFacts {
+  const vertical = withAvailability(closingSegment(launchCube.projects, 'Vertical'));
+  const horizontal = withAvailability(closingSegment(launchCube.projects, 'Horizontal'));
+  const total = withAvailability(closingSegment(launchCube.projects, 'Total'));
+  const price = granular.pricesByStandard.find((row) => row.kind === 'total');
+  return {
+    vertical,
+    horizontal,
+    total,
+    verticalPricePerMeter: price?.averagePricePerMeter ?? null,
+    priceSource: 'building-with-history / cubo granular / preço ponderado no fechamento do recorte',
+  };
+}
+
+function reconcileClosingPrice(block: ReportMarketBlock, closingPrice: number | null, source: string, endQuarter: Quarter): ReportMarketBlock {
+  if (closingPrice === null) return block;
+  return {
+    ...block,
+    series: block.series.map((item) => item.quarter === endQuarter ? { ...item, vertical: closingPrice, source: `${item.source} · fechamento reconciliado: ${source}` } : item),
+    source: `${block.source} · fechamento reconciliado: ${source}`,
   };
 }
 
@@ -367,6 +405,8 @@ export function buildPanoramaReportModel(
   const provenance = provenanceOf(scope, cube, options.provenance);
   const failedCities = provenance.failedCities.length > 0;
   const granular = buildGranularBlocks(cube, scope);
+  const launchCube = scope.startQuarter ? cubeInLaunchWindow(cube, scope) : cube;
+  const closingFacts = closingFactsOf(launchCube, granular);
   const cityComparisons = buildCityComparisons(scope, cube, provenance, options.citySalesSources ?? []);
   const temporal = {
     sales: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales)),
@@ -383,6 +423,12 @@ export function buildPanoramaReportModel(
   // Firewall de fontes: nas versões granulares nenhum contrato municipal fala pelo horizontal do Panorama Secovi.
   const horizontalSeries = horizontalSeriesPolicyOf(cube, scope.engineVersion ?? 'v4');
   const guard = (block: ReportMarketBlock) => (scope.engineVersion ?? 'v4') !== 'v2' ? firewallTemporalBlock(block, horizontalSeries) : block;
+  const meter = reconcileClosingPrice(
+    guard(marketBlock(scope, withClosingStockWeight(temporal.meter, temporal.stock), 'average_price_per_meter', 'brl_sqm', 'Média ponderada do preço por m² municipal reconciliada no fechamento pelo cubo granular.', 'weighted_average')),
+    closingFacts.verticalPricePerMeter,
+    closingFacts.priceSource,
+    scope.endQuarter,
+  );
 
   return {
     scope, generatedAt: new Date().toISOString(), launches, horizontalSeries,
@@ -402,7 +448,7 @@ export function buildPanoramaReportModel(
     ivvByTypology: guard(marketBlock(scope, withClosingStockWeight(temporal.ivvTypology, temporal.stockTypology), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average')),
     prices: {
       ticket: guard(marketBlock(scope, withClosingStockWeight(temporal.ticket, temporal.stock), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
-      meter: guard(marketBlock(scope, withClosingStockWeight(temporal.meter, temporal.stock), 'average_price_per_meter', 'brl_sqm', 'Média ponderada do preço por m² municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
+      meter,
       ticketByTypology: guard(marketBlock(scope, withClosingStockWeight(temporal.ticketTypology, temporal.stockTypology), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average')),
       meterByTypology: guard(marketBlock(scope, withClosingStockWeight(temporal.meterTypology, temporal.stockTypology), 'average_price_per_meter', 'brl_sqm', 'Média ponderada do preço por m² municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average')),
     },
@@ -437,5 +483,6 @@ export function buildPanoramaReportModel(
     granular,
     cityComparisons,
     presentation: options.presentation ?? {},
+    closingFacts,
   };
 }

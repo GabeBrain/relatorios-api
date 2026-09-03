@@ -15,6 +15,7 @@ import {
   type AreaBandLabel,
   type MaturityLabel,
   type TypologyLabel,
+  UNCLASSIFIED,
 } from './taxonomy';
 
 /**
@@ -313,15 +314,28 @@ export function maturityByTypology(cube: MarketCube): MaturityRow[] {
     final.total = MATURITY_ORDER.reduce<number | null>((sum, key) => addNullable(sum, final[key]), null);
     return { label, kind: 'row' as RowKind, projects: distinctProjects(projects), launched, final };
   });
-  const totalLaunched = emptyMaturity();
-  const totalFinal = emptyMaturity();
+  // O total canônico vem do universo por empreendimento, não da soma das tipologias: a API pode
+  // omitir a tipologia de parte das unidades. O resíduo fica explícito em uma linha não classificada.
+  const canonical = maturityByStandard(cube).find((row) => row.kind === 'total')!;
+  const residual = emptyMaturity();
+  const residualFinal = emptyMaturity();
   for (const key of MATURITY_ORDER) {
-    totalLaunched[key] = rows.reduce<number | null>((sum, row) => addNullable(sum, row.launched[key]), null);
-    totalFinal[key] = rows.reduce<number | null>((sum, row) => addNullable(sum, row.final[key]), null);
+    const typedLaunched = rows.reduce<number>((sum, row) => sum + (row.launched[key] ?? 0), 0);
+    const typedFinal = rows.reduce<number>((sum, row) => sum + (row.final[key] ?? 0), 0);
+    residual[key] = Math.max(0, (canonical.launched[key] ?? 0) - typedLaunched);
+    residualFinal[key] = Math.max(0, (canonical.final[key] ?? 0) - typedFinal);
   }
-  totalLaunched.total = MATURITY_ORDER.reduce<number | null>((sum, key) => addNullable(sum, totalLaunched[key]), null);
-  totalFinal.total = MATURITY_ORDER.reduce<number | null>((sum, key) => addNullable(sum, totalFinal[key]), null);
-  return [...rows, { label: 'Total', kind: 'total', projects: distinctProjects(universe), launched: totalLaunched, final: totalFinal }];
+  residual.total = MATURITY_ORDER.reduce((sum, key) => sum + (residual[key] ?? 0), 0);
+  residualFinal.total = MATURITY_ORDER.reduce((sum, key) => sum + (residualFinal[key] ?? 0), 0);
+  const residualProjects = universe.filter((project) => {
+    const typed = project.typologies.reduce((sum, row) => sum + (row.launchedUnits ?? 0), 0);
+    const typedFinal = project.typologies.reduce((sum, row) => sum + (row.finalUnits ?? 0), 0);
+    return typed < (project.launchedUnits ?? 0) || typedFinal < (project.finalUnits ?? 0);
+  }).length;
+  const residualRow = residual.total || residualFinal.total
+    ? [{ label: UNCLASSIFIED, kind: 'row' as RowKind, projects: residualProjects, launched: residual, final: residualFinal }]
+    : [];
+  return [...rows, ...residualRow, maturityRow('Total', 'total', universe)];
 }
 
 /* -------------------------------------------------------------------------- */

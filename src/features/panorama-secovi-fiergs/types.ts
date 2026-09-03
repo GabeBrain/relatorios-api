@@ -153,6 +153,22 @@ export interface PanoramaCityComparisons {
   availabilityByStandard: CityComparisonAvailabilityRow[];
 }
 
+export interface PanoramaSegmentClosingFacts {
+  projects: number;
+  launchedUnits: number | null;
+  finalUnits: number | null;
+  availability: number | null;
+}
+
+/** Fatos de fechamento do recorte editorial; consumidores não devem recalculá-los no JSX. */
+export interface PanoramaClosingFacts {
+  vertical: PanoramaSegmentClosingFacts;
+  horizontal: PanoramaSegmentClosingFacts;
+  total: PanoramaSegmentClosingFacts;
+  verticalPricePerMeter: number | null;
+  priceSource: string;
+}
+
 /**
  * Créditos de apresentação. A V2 preserva a identidade fixa e recebe pessoas variáveis como
  * slots opcionais — a ausência é intencional para finalização do analista, nunca um nome errado.
@@ -196,6 +212,7 @@ export interface PanoramaReportModel {
   granular: PanoramaGranularBlocks;
   cityComparisons: PanoramaCityComparisons;
   presentation: PanoramaPresentationCredits;
+  closingFacts: PanoramaClosingFacts;
 }
 
 /**
