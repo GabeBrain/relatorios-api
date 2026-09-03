@@ -219,7 +219,7 @@ const params = (uf: string, ibge: string, year: number) => [
   { name: 'uf', type: 'STRING', value: uf }, { name: 'ibge', type: 'STRING', value: ibge }, { name: 'year', type: 'INT64', value: year },
 ];
 
-async function queryReport(uf: string, ibge: string, year: number) {
+async function legacyQueryReport(uf: string, ibge: string, year: number) {
   const filter = `sigla_uf = @uf AND id_municipio = @ibge AND ano = @year AND vinculo_ativo_3112 = '1'`;
   const common = params(uf, ibge, year);
   const summarySql = `SELECT COUNT(*) AS total_vinculos, COUNTIF(valor_remuneracao_media IS NULL OR valor_remuneracao_media <= 0) AS salarios_zerados, COUNTIF(cbo_2002 IS NULL OR cbo_2002 = '') AS cbo_ausente, AVG(IF(valor_remuneracao_media > 0, valor_remuneracao_media, NULL)) AS salario_medio, APPROX_QUANTILES(IF(valor_remuneracao_media > 0, valor_remuneracao_media, NULL), 100)[SAFE_OFFSET(50)] AS salario_mediano, (SELECT COUNT(*) FROM \`basedosdados.br_me_rais.microdados_vinculos\` WHERE sigla_uf = @uf AND id_municipio = @ibge AND ano = @year) AS vinculos_no_ano FROM \`basedosdados.br_me_rais.microdados_vinculos\` WHERE ${filter}`;
@@ -239,12 +239,57 @@ async function queryReport(uf: string, ibge: string, year: number) {
   };
 }
 
-async function availableYears(): Promise<number[]> {
+async function legacyAvailableYears(): Promise<number[]> {
   if (yearsCache && yearsCache.expiresAt > Date.now()) return yearsCache.years;
   const query = await runQuery('SELECT DISTINCT CAST(ano AS INT64) AS year FROM `basedosdados.br_me_rais.microdados_vinculos` ORDER BY year DESC', [], BigInt(100_000_000));
   const years = query.rows.map((row) => integer(row.year)).filter((year) => year >= 1985 && year <= new Date().getFullYear());
   yearsCache = { years, expiresAt: Date.now() + 30 * 60 * 1000 };
   return years;
+}
+
+function bytesToHex(bytes: Uint8Array): string {
+  return [...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function proxySignature(secret: string, timestamp: string, body: string): Promise<string> {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  return bytesToHex(new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${timestamp}.${body}`))));
+}
+
+async function raisProxyRequest<T>(payload: Record<string, unknown>): Promise<T> {
+  const proxyUrl = Deno.env.get('BIGQUERY_PROXY_URL')?.replace(/\/$/, '');
+  const secret = Deno.env.get('BIGQUERY_PROXY_HMAC_SECRET')?.trim();
+  if (!proxyUrl || !secret) throw new BigQueryError('Ponte BigQuery não configurada.', 'PROXY_CONFIGURATION');
+  const body = JSON.stringify(payload);
+  const timestamp = String(Date.now());
+  let response: Response;
+  try {
+    response = await fetch(`${proxyUrl}/v1/rais-employees`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Quanti-Timestamp': timestamp, 'X-Quanti-Signature': await proxySignature(secret, timestamp, body) }, body });
+  } catch { throw new BigQueryError('Não foi possível alcançar a ponte BigQuery.', 'PROXY_NETWORK'); }
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new BigQueryError('A ponte BigQuery não concluiu a consulta RAIS.', String(data?.error ?? 'PROXY_UPSTREAM'));
+  return data as T;
+}
+
+async function availableYears(): Promise<number[]> {
+  if (yearsCache && yearsCache.expiresAt > Date.now()) return yearsCache.years;
+  const result = await raisProxyRequest<{ years?: unknown[] }>({ action: 'metadata' });
+  const years = (result.years ?? []).map(Number).filter((year) => Number.isInteger(year)).sort((a, b) => b - a);
+  yearsCache = { years, expiresAt: Date.now() + 30 * 60 * 1000 };
+  return years;
+}
+
+async function queryReport(uf: string, ibge: string, year: number) {
+  const startedAt = Date.now();
+  const result = await raisProxyRequest<{ summary: Record<string, unknown>; sectors: Array<Record<string, unknown>>; occupations: Array<Record<string, unknown>>; bytesProcessed?: number | null; jobIds?: string[] }>({ action: 'report', municipality: { uf, ibgeCode: ibge }, year });
+  return {
+    startedAt, durationMs: Date.now() - startedAt,
+    summary: { totalEmployees: integer(result.summary?.totalEmployees), salaryMissingOrZero: integer(result.summary?.salaryMissingOrZero), missingCbo: integer(result.summary?.missingCbo), totalLinksInYear: integer(result.summary?.totalLinksInYear), averageSalary: toNumber(result.summary?.averageSalary), medianSalary: toNumber(result.summary?.medianSalary) },
+    sectors: (result.sectors ?? []).map((row) => ({ code: text(row.code, 'não informado'), name: text(row.name), employees: integer(row.employees), percentage: toNumber(row.percentage) ?? 0, averageSalary: toNumber(row.averageSalary), medianSalary: toNumber(row.medianSalary) })),
+    occupations: (result.occupations ?? []).map((row) => ({ code: text(row.code, 'não informado'), majorGroup: text(row.majorGroup), family: text(row.family), occupation: text(row.occupation), employees: integer(row.employees), percentage: toNumber(row.percentage) ?? 0, averageSalary: toNumber(row.averageSalary), medianSalary: toNumber(row.medianSalary) })),
+    bytesProcessed: toNumber(result.bytesProcessed), bytesBilled: null,
+    jobIds: Array.isArray(result.jobIds) ? result.jobIds.filter((item): item is string => typeof item === 'string') : [],
+  };
 }
 
 async function readSnapshot(supabase: ReturnType<typeof dbClient>, snapshotId: string, cacheHit: boolean) {

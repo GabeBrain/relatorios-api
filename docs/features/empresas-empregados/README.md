@@ -39,6 +39,15 @@ o código IBGE é resolvido pela Edge Function, sem depender de uma chamada exte
 Bearer GeoBrain, consulta a RAIS no BigQuery e compartilha snapshots agregados pelo Supabase entre
 usuários e sessões. O sistema registra auditoria técnica, mas não oferece histórico na interface.
 
+### Ponte BigQuery
+
+As consultas RAIS são executadas pela identidade de workload do Cloud Run do Sistema Quanti, no
+serviço `gcp/bigquery-proxy`, e não por chave privada no Supabase. A Edge Function Rebrain chama
+somente a rota HMAC fechada `/v1/rais-employees`. Para ativar a ponte, configurar no Supabase do
+Rebrain `BIGQUERY_PROXY_URL` e `BIGQUERY_PROXY_HMAC_SECRET`; o segundo deve coincidir com
+`PROXY_HMAC_SECRET` do Cloud Run. O Cloud Run precisa de `BIGQUERY_BILLING_PROJECT` e permissões
+BigQuery para sua identidade vinculada.
+
 Empresas aparece apenas como capacidade desabilitada. O `DEVELOPMENT.md` descreve a futura fonte
 Receita/CNPJ e orienta seus contratos, mas nenhum download, batch, banco ou relatório de Empresas
 faz parte desta versão.

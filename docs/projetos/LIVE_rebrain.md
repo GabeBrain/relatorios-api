@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-03 — Empregados: ponte RAIS via Cloud Run do Sistema Quanti — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — substituição da credencial privada GCP pela identidade de workload existente.
+- **O que:** a Edge `rais-employees-report` passa a chamar a rota HMAC fechada `/v1/rais-employees` do `bigquery-proxy` do Sistema Quanti para metadata e agregado RAIS municipal. O proxy executa apenas consultas fixas/parametrizadas, sob a service account vinculada ao Cloud Run; não recebe SQL do navegador ou do Rebrain. Foram removidos do caminho ativo `GCP_SERVICE_ACCOUNT_EMAIL` e `GCP_PRIVATE_KEY`.
+- **Evidência local:** build do Rebrain e 9 testes da feature aprovados; proxy Cloud Run com 8 testes aprovados, incluindo HMAC, metadata, relatório RAIS e rejeição de SQL/escopo inválido.
+- **Limite de verificação:** a ponte não foi publicada nem recebeu secrets nesta execução; o teste real depende de URL do Cloud Run, HMAC igual nos dois lados e revisão do proxy publicada.
+- **Arquivos:** `supabase/functions/rais-employees-report/index.ts`, documentação da feature e `Sistema-Quanti/Sistema Novo/gcp/bigquery-proxy/{src/server.mjs,test/server.test.mjs,README.md}`.
+- **Commits:** pendente de commits locais coordenados nos dois repositórios.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** ativação deixa de exigir chave JSON de service account no Supabase; resta publicar Cloud Run e cadastrar os dois secrets de integração no Rebrain.
+
 ### 2026-09-03 — Empregados: catálogo RAIS nacional e resolução protegida de IBGE — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — correção do escopo municipal e da falha de rede após validação publicada.
 - **O que:** removido o uso indevido de `/monitored-cities`: a seleção agora usa o catálogo nacional de municípios, por UF e combobox pesquisável desde a primeira letra. A escolha não chama serviços externos no navegador. A Edge Function recebe nome/UF, resolve o código IBGE no servidor e só então libera ano/geração RAIS. O CORS também reflete origens de preview `*.lovable.app`, além das origens configuradas, evitando o bloqueio de `fetch` nos previews do Lovable.
