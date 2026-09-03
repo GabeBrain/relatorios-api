@@ -19,5 +19,6 @@ export interface DatasetRef {
 export const DATASETS: DatasetRef[] = [
   { id: '2019', label: 'Base Unificada 2019', source: 'storage', bucket: 'quanti-datasets', path: 'base-2019.json' },
   { id: '2020', label: 'Base Unificada 2020', source: 'storage', bucket: 'quanti-datasets', path: 'base-2020.json' },
+  { id: '2024', label: 'Base Unificada 2024', source: 'storage', bucket: 'quanti-datasets', path: 'base-2024.json' },
   { id: '2025', label: 'Base Unificada 2025', source: 'storage', bucket: 'quanti-datasets', path: 'base-2025.json' },
 ];

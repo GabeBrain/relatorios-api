@@ -26,6 +26,13 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-09-03 - Base Unificada 2024 adicionada ao seletor - Lovable
+- **O que:** a `Base Unificada 2024` (25.361 respondentes, 97 variáveis) foi convertida para o formato colunar `quanti-columnar-v1` e publicada no bucket `quanti-datasets` como `base-2024.json`.
+- **Registro:** novo item em `src/features/area-quanti/dashboard/datasets.ts`, em ordem cronológica entre 2020 e 2025.
+- **Compatibilidade:** o conjunto de colunas é superset do da base 2025 (7 colunas `status_*` a mais); nenhuma alteração foi necessária em filtros, gráficos ou agregações.
+- **Verificação:** carregamento validado no preview — 25.361 entrevistas, 117 cidades, 22 estados, KPIs e gráficos respondendo.
+
+
 ### 2026-07-31 - Banco Quanti como item direto de navegacao - Codex
 - **O que:** a Área Quanti passou a aparecer como uma única opção direta `Banco Quanti`, sem grupo expansível ou submenu.
 - **Escopo:** apenas a navegação foi alterada; a rota `/quanti`, o dashboard e suas funções permanecem inalterados.
