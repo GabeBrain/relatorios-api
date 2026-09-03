@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-03 — Empresas e Empregados: descoberta e área documental iniciadas — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** nova página planejada em `/rebrain/empresas-empregados`.
+- **O que:** criada a área documental da feature para receber o `DEVELOPMENT.md` de Diego, os workbooks de Blumenau/Rio Verde e demais insumos. O gerador RAIS do Sistema Quanti foi identificado apenas como protótipo técnico; a nova entrega pertencerá ao Rebrain e usará seu Supabase/Lovable.
+- **Decisões pendentes:** contrato de “empresa” versus estabelecimento, autenticação para consultas pagas, anos/recortes suportados, cache/histórico, conteúdo do workbook e fluxo humano da página.
+- **Arquivos:** `docs/features/empresas-empregados/README.md` e este documento.
+- **Commits:** pendente de commit local desta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** etapa de descoberta iniciada; implementação bloqueada deliberadamente até leitura dos materiais e fechamento do Grill-me. Sem escrita no Monday.
+
 ### 2026-09-03 — Panorama V4: plano terminal T0–T7 implementado — Luna/Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento do estudo V4 após revisão de Juliana.
 - **O que:** o modelo agora publica `closingFacts` canônicos por segmento e total; maturidade por padrão/tipologia e preços de fechamento usam o cubo do recorte; o preço final do gráfico é reconciliado com o preço granular; unidades sem tipologia recebem a categoria explícita `Não classificado`; resumo e narrativa consomem os mesmos fatos, sem hardcode de Jundiaí ou correção textual no JSX.
