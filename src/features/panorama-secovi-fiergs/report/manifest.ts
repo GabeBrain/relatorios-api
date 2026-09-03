@@ -62,7 +62,7 @@ export function createPanoramaReportManifest(options: boolean | { includeCityCom
   const output = baseManifest().filter((page) => (resolved.includeHorizontal !== false || ![47, 48, 49].includes(page.referenceSlide)) && (resolved.includeMap !== false || ![55, 56].includes(page.referenceSlide)));
   if (resolved.includeCityComparisons) {
     const afterMarket = output.findIndex((page) => page.referenceSlide === 29) + 1;
-    output.splice(afterMarket, 0, ...comparisonDefinitions);
+    output.splice(afterMarket, 0, ...(comparisonDefinitions as ReportPageDefinition[]));
   }
   return output.map((page, index) => ({ ...page, page: index + 1 }));
 }

@@ -109,7 +109,7 @@ export async function buildPanoramaPdf(
   }
 
   return {
-    blob: new Blob([await pdf.save()], { type: 'application/pdf' }),
+    blob: new Blob([(await pdf.save()) as unknown as BlobPart], { type: 'application/pdf' }),
     pageCount: slides.length,
     width: PANORAMA_PDF_WIDTH,
     height: PANORAMA_PDF_HEIGHT,
@@ -141,7 +141,7 @@ export async function buildPanoramaPptx(
   pptx.subject = metadata.subject;
   pptx.title = metadata.title;
   pptx.company = 'Brain Inteligência Estratégica';
-  pptx.lang = 'pt-BR';
+  (pptx as unknown as { lang?: string }).lang = 'pt-BR';
 
   for (let index = 0; index < slides.length; index += 1) {
     if (signal?.aborted) throw new PanoramaExportCancelled();
