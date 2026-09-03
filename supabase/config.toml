@@ -6,3 +6,7 @@ verify_jwt = false
 [functions.socio-proxy]
 # A autenticação é o Bearer token da API Geobrain, validado pelo serviço upstream.
 verify_jwt = false
+
+[functions.rais-employees-report]
+# O token de entrada é o Bearer do GeoBrain, não um JWT do Supabase.
+verify_jwt = false

@@ -1,5 +1,16 @@
 # Plano terminal Luna — Empregados V1
 
+## Registro de execução — 2026-09-03
+
+- **T0 OK local:** protocolo Git cumprido em `main`; `origin` foi atualizado após permissão para escrever `.git/FETCH_HEAD`; materiais lidos; fixtures reais confirmadas em testes.
+- **T1 OK:** domínio, normalização, contrato de metodologia, SQL parametrizado no provider e contrato fantasma de Empresas implementados.
+- **T2 OK local / remoto pendente:** migration de snapshots, linhas agregadas, auditoria, RLS sem acesso público e funções de lock/finalização criadas; não aplicada ao Supabase remoto.
+- **T3 OK em código / runtime pendente:** Edge Function com validação GeoBrain, OAuth de service account, BigQuery REST, teto de bytes, cache e auditoria criada; secrets, função publicada e chamada autenticada aguardam ambiente autorizado.
+- **T4 OK local:** rota lazy, menu, home, command palette, seleção UF/município/ano, quatro abas e estados humanos implementados.
+- **T5 OK local:** XLSX lazy, exclusivamente local, com três abas e nome datado; teste estrutural passou.
+- **T6 PENDENTE_AMBIENTE:** não há credenciais/secrets nem autorização para deploy/migration remota nesta execução. Os marcos headless das duas amostras passam.
+- **T7 OK local / T6 pendente:** typecheck, build, lint direcionado e suíte completa (44 arquivos/336 testes) passam; `check:live-docs` passa contra `origin/main`. A validação real autenticada continua pendente até secrets/deploy/migration remota autorizados.
+
 **Data:** 2026-09-03
 
 **Executor:** Luna

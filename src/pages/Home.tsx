@@ -44,6 +44,7 @@ const JOURNEYS: Journey[] = [
       { title: 'Relatório Secovi', description: 'Consolide o mercado de uma cidade e exporte os dados para Excel.', to: '/rebrain/secovi', audiences: ['Analistas', 'Gestão'], study: 'Relatório municipal' },
       { title: 'Panorama Secovi/FIERGS', description: 'Monte um panorama editorial paginado por praça e período.', to: '/rebrain/panorama-secovi-fiergs', audiences: ['Analistas', 'Gestão'], study: 'Panorama executivo' },
       { title: 'Relatório AELO', description: 'Analise loteamentos abertos e fechados nas regiões atendidas.', to: '/rebrain/aelo', audiences: ['Analistas', 'Gestão'], study: 'Loteamentos' },
+      { title: 'Empresas e Empregados', description: 'Explore vínculos formais da RAIS por município, setor e ocupação.', to: '/rebrain/empresas-empregados', audiences: ['Analistas', 'Pesquisa', 'Gestão'], study: 'Emprego formal' },
     ],
   },
   {

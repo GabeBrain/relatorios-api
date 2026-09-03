@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-03 — Empregados V1 implementado localmente; ativação remota pendente — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — primeira versão do relatório municipal de vínculos RAIS.
+- **O que:** criada a rota lazy, entrada na navegação/home/busca, seleção de UF/município IBGE/ano, abas de visão geral, setores, ocupações virtualizadas e metodologia, exportação XLSX somente no computador do usuário, autenticação pelo Bearer GeoBrain, Edge Function BigQuery e cache/auditoria no Supabase. Empresas está presente apenas como contrato/provider fantasma que retorna `FEATURE_DISABLED`; não há chamada, tabela, batch ou dado de CNPJ.
+- **Evidência local:** typecheck, build, lint direcionado, suíte completa (44 arquivos/336 testes) e 8 testes da feature passam; as fixtures confirmam Rio Verde/GO 2025 (81.601 vínculos, 1.115 ocupações) e Blumenau/SC 2025 (154.664 vínculos, 1.390 ocupações). A execução da suíte precisou ocorrer fora da restrição inicial do sandbox.
+- **Limite de verificação:** migration e Edge Function ainda não foram aplicadas ao Supabase remoto; secrets GCP/GeoBrain não estão disponíveis nesta execução. Portanto não foi afirmado runtime autenticado, custo real ou consulta BigQuery ao vivo.
+- **Arquivos:** `src/features/empresas-empregados/`, `supabase/functions/rais-employees-report/index.ts`, `supabase/migrations/20260903160000_rais_employees_report.sql`, `supabase/config.toml` e documentação da feature.
+- **Commits:** pendente de commit local desta execução.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** implementação local concluída até T5; T6 depende de secrets/deploy/migration autorizados. Próximo passo humano: revisar SQL, cadastrar secrets, aplicar migration e executar smoke test autenticado de Rio Verde/Blumenau. Sem push, deploy ou escrita no Monday.
+
 ### 2026-09-03 — Plano terminal Luna para Empregados V1 — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — relatório municipal e anual de vínculos formais RAIS.
 - **O que:** requisitos do Grill-me foram consolidados em um plano terminal T0–T7. A V1 entrega somente Empregados, com Bearer GeoBrain validado no backend, BigQuery/Base dos Dados, cache agregado compartilhado no Supabase, auditoria técnica sem histórico visível, exploração web e XLSX gerado exclusivamente na máquina do usuário. Empresas fica como contrato fantasma desabilitado, sem rede, banco ou batch.

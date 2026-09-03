@@ -6,7 +6,7 @@ Pasta de referência da nova página **Empresas e Empregados** do ambiente Rebra
 - **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`
 - **Fonte de Empregados:** RAIS, publicada pela Base dos Dados no BigQuery.
 - **Fonte futura de Empresas:** Dados Abertos de CNPJ da Receita Federal; fora da V1.
-- **Estado:** requisitos da V1 fechados; implementação de Empregados ainda não iniciada.
+- **Estado:** implementação local da V1 concluída; migration, secrets e função ainda aguardam aplicação remota autorizada.
 - **Plano terminal:** [`PLAN_LUNA_EMPREGADOS_V1_2026-09-03.md`](PLAN_LUNA_EMPREGADOS_V1_2026-09-03.md).
 
 ## Materiais a depositar aqui

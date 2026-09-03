@@ -62,6 +62,7 @@ const NAV_GROUPS: NavGroup[] = [
       { path: '/rebrain/aelo', label: 'Relatório AELO', icon: <Building2 className="h-4 w-4" /> },
       { path: '/rebrain/panorama-secovi-fiergs', label: 'Relatório Secovi/FIERGS', icon: <BarChart2 className="h-4 w-4" /> },
       { path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList className="h-4 w-4" /> },
+      { path: '/rebrain/empresas-empregados', label: 'Empresas e Empregados', icon: <Building2 className="h-4 w-4" /> },
       { path: '/corretor', label: 'Corretor', icon: <ClipboardList className="h-4 w-4" /> },
       { path: '/atualizador-vgv', label: 'Atualizador VGV', icon: <TrendingUp className="h-4 w-4" /> },
     ],
