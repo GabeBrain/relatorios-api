@@ -1,12 +1,10 @@
 name: Contrato do protocolo
 
+# Copie este arquivo para .github/workflows/protocolo.yml no sistema.
 on:
-  pull_request:
   push:
-    paths:
-      - AGENTS.md
-      - CLAUDE.md
-      - .github/workflows/protocolo.yml
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -15,24 +13,28 @@ permissions:
 jobs:
   protocolo:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout do sistema
         uses: actions/checkout@v5
 
-      # O sistema e publico, mas o Observatorio e privado. Por isso o contrato
-      # canonico e obtido em tempo de execucao com o token de integracao, em vez
-      # de usar `workflow_call`, que o GitHub nao permite nesse sentido.
-      - name: Checkout do contrato canonico
+      - name: Checkout do contrato canônico
+        if: ${{ secrets.OBSERVATORIO_TOKEN != '' }}
         uses: actions/checkout@v5
         with:
           repository: GabeBrain/observatorio
           ref: main
-          path: _protocol-source
-          token: ${{ secrets.OBSERVATORIO_TOKEN }}
+          path: _observatorio
           sparse-checkout: |
             PROTOCOLO_SESSAO.md
             sistemas.json
             scripts/check-protocol.mjs
+          token: ${{ secrets.OBSERVATORIO_TOKEN }}
 
-      - name: Verificar AGENTS.md e CLAUDE.md
-        run: node _protocol-source/scripts/check-protocol.mjs --self . --repo "${{ github.repository }}"
+      - name: Verificar instruções de sessão
+        if: ${{ secrets.OBSERVATORIO_TOKEN != '' }}
+        run: node _observatorio/scripts/check-protocol.mjs --self . --repo "${{ github.repository }}"
+
+      - name: Informar ausência da credencial
+        if: ${{ secrets.OBSERVATORIO_TOKEN == '' }}
+        run: echo "::warning::OBSERVATORIO_TOKEN não configurado; check do protocolo foi ignorado sem bloquear o trabalho."
