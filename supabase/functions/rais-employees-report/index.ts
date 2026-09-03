@@ -267,6 +267,12 @@ async function raisProxyRequest<T>(payload: Record<string, unknown>): Promise<T>
     response = await fetch(`${proxyUrl}/v1/rais-employees`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Quanti-Timestamp': timestamp, 'X-Quanti-Signature': await proxySignature(secret, timestamp, body) }, body });
   } catch { throw new BigQueryError('Não foi possível alcançar a ponte BigQuery.', 'PROXY_NETWORK'); }
   const data = await response.json().catch(() => ({}));
+  if (response.status === 401 && data?.error === 'invalid_signature') {
+    throw new BigQueryError('A assinatura da ponte BigQuery não confere. Atualize BIGQUERY_PROXY_HMAC_SECRET com o mesmo valor de PROXY_HMAC_SECRET do Cloud Run.', 'PROXY_HMAC_INVALID');
+  }
+  if (response.status === 401 && data?.error === 'expired') {
+    throw new BigQueryError('A assinatura da ponte BigQuery expirou antes de ser processada.', 'PROXY_HMAC_EXPIRED');
+  }
   if (!response.ok) throw new BigQueryError('A ponte BigQuery não concluiu a consulta RAIS.', String(data?.error ?? 'PROXY_UPSTREAM'));
   return data as T;
 }
