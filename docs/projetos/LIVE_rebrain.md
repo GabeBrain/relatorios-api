@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-03 — Empregados: catálogo RAIS nacional e resolução protegida de IBGE — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — correção do escopo municipal e da falha de rede após validação publicada.
+- **O que:** removido o uso indevido de `/monitored-cities`: a seleção agora usa o catálogo nacional de municípios, por UF e combobox pesquisável desde a primeira letra. A escolha não chama serviços externos no navegador. A Edge Function recebe nome/UF, resolve o código IBGE no servidor e só então libera ano/geração RAIS. O CORS também reflete origens de preview `*.lovable.app`, além das origens configuradas, evitando o bloqueio de `fetch` nos previews do Lovable.
+- **Evidência local:** build TypeScript/Vite aprovado; 4 arquivos/9 testes da feature passam. O teste cobre que o Acre não fica limitado a Rio Branco.
+- **Limite de verificação:** esta alteração de Edge Function exige publicação junto ao próximo push/deploy para a resolução protegida e o CORS entrarem em produção. Não foram executados deploy, migration nem escrita no Monday.
+- **Arquivos:** `src/features/empresas-empregados/{api.ts,components/EmployeesReportWorkspace.tsx,components/RaisMunicipalitySelector.tsx,__tests__/api.test.ts}`, `supabase/functions/rais-employees-report/index.ts` e documentação da feature.
+- **Commits:** pendente de commit local desta execução.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** o Bearer GeoBrain segue protegendo o relatório, mas não limita o universo RAIS. Após publicar, validar Rio Branco e Cruzeiro do Sul no AC e um preview Lovable autenticado.
+
 ### 2026-09-03 — Empregados: abas lazy e municípios monitorados — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — refinamento da experiência inicial do relatório RAIS.
 - **O que:** removido o texto introdutório redundante; Empregados e Empresas passaram a ser abas de produto com conteúdo carregado sob demanda. Empregados reutiliza o `GeoApiScopeEngine`: UF e combobox pesquisável mostram exclusivamente cidades de `/public-api/monitored-cities` autorizadas para o Bearer. A lista nacional do IBGE permanece interna apenas para resolver o código que a RAIS exige depois da escolha; não funciona como fallback. Empresas mantém placeholder/contrato fantasma, sem rede, banco, batch ou dados simulados.

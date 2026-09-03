@@ -24,15 +24,20 @@ const SECTOR_NAMES: Record<string, string> = {
 
 let yearsCache: { expiresAt: number; years: number[] } | null = null;
 let googleAccessToken: { token: string; expiresAt: number } | null = null;
+const ibgeMunicipalityCache = new Map<string, { expiresAt: number; municipalities: Array<{ ibgeCode: string; name: string; uf: string }> }>();
 
 function origins(): string[] {
   return [...new Set([...DEV_ORIGINS, PRODUCTION_ORIGIN, ...(Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((v) => v.trim()).filter(Boolean)])];
 }
 
+function isAllowedOrigin(origin: string): boolean {
+  return origins().includes(origin) || /^https:\/\/[a-z0-9-]+\.lovable\.app$/i.test(origin);
+}
+
 function cors(req: Request): Record<string, string> {
   const origin = req.headers.get('Origin') ?? '';
   return {
-    'Access-Control-Allow-Origin': origins().includes(origin) ? origin : PRODUCTION_ORIGIN,
+    'Access-Control-Allow-Origin': isAllowedOrigin(origin) ? origin : PRODUCTION_ORIGIN,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Vary': 'Origin',
@@ -51,6 +56,29 @@ function toNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === '') return null;
   const result = Number(value);
   return Number.isFinite(result) ? result : null;
+}
+
+function comparableName(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase('pt-BR');
+}
+
+async function resolveIbgeMunicipality(uf: string, name: string): Promise<{ ibgeCode: string; name: string; uf: string }> {
+  const cached = ibgeMunicipalityCache.get(uf);
+  const rows = cached && cached.expiresAt > Date.now()
+    ? cached.municipalities
+    : await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(uf)}/municipios`)
+      .then(async (response) => {
+        if (!response.ok) throw new HttpError('Não foi possível consultar o catálogo municipal para a RAIS.', 502, 'IBGE_UPSTREAM');
+        const municipalities = (await response.json() as Array<{ id?: number; nome?: string }>)
+          .map((item) => ({ ibgeCode: String(item.id ?? '').padStart(7, '0'), name: String(item.nome ?? '').trim(), uf }))
+          .filter((item) => /^\d{7}$/.test(item.ibgeCode) && item.name.length > 0);
+        ibgeMunicipalityCache.set(uf, { municipalities, expiresAt: Date.now() + 24 * 60 * 60 * 1000 });
+        return municipalities;
+      })
+      .catch((error) => { if (error instanceof HttpError) throw error; throw new HttpError('Não foi possível consultar o catálogo municipal para a RAIS.', 502, 'IBGE_UPSTREAM'); });
+  const municipality = rows.find((item) => comparableName(item.name) === comparableName(name));
+  if (!municipality) throw new HttpError('O município selecionado não foi encontrado no catálogo RAIS.', 400, 'INVALID_SCOPE');
+  return municipality;
 }
 
 function integer(value: unknown): number { return Math.max(0, Math.round(toNumber(value) ?? 0)); }
@@ -235,11 +263,17 @@ async function handle(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
   if (req.method !== 'POST') return json({ error: 'Método não permitido.' }, 405, headers);
   const identity = await authenticateGeoBrain(req);
-  const supabase = dbClient();
-  await enforceRateLimit(supabase, identity.id);
   let body: any;
   try { body = await req.json(); } catch { throw new HttpError('JSON inválido.', 400, 'BAD_REQUEST'); }
   const action = String(body?.action ?? '');
+  if (action === 'resolveMunicipality') {
+    const uf = String(body?.municipality?.uf ?? '').toUpperCase();
+    const name = text(body?.municipality?.name, '');
+    if (!/^[A-Z]{2}$/.test(uf) || !name) throw new HttpError('Município ou UF inválido.', 400, 'INVALID_SCOPE');
+    return json({ municipality: await resolveIbgeMunicipality(uf, name) }, 200, headers);
+  }
+  const supabase = dbClient();
+  await enforceRateLimit(supabase, identity.id);
   if (action === 'metadata') return json({ years: await availableYears(), queryVersion: QUERY_VERSION, methodologyVersion: METHODOLOGY_VERSION }, 200, headers);
   if (action === 'status') {
     const snapshotId = String(body?.snapshotId ?? '');

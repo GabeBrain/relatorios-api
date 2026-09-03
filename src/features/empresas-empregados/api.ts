@@ -5,7 +5,6 @@ import { METHODOLOGY_VERSION, QUERY_VERSION, type EmployeeReport, type EmployeeR
 const SUPABASE_URL = String(import.meta.env.VITE_SUPABASE_URL ?? '').replace(/\/$/, '');
 const SUPABASE_KEY = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '');
 const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/rais-employees-report`;
-const IBGE_MUNICIPALITIES_URL = 'https://servicodados.ibge.gov.br/api/v1/localidades/municipios';
 
 export class EmployeesApiError extends Error {
   status: number | null;
@@ -17,49 +16,6 @@ export class EmployeesApiError extends Error {
     this.status = status;
     this.code = code;
   }
-}
-
-interface IbgeMunicipality {
-  id: number;
-  nome: string;
-  microrregiao?: { mesorregiao?: { UF?: { sigla?: string } } };
-}
-
-let municipalitiesPromise: Promise<MunicipalityOption[]> | null = null;
-
-function comparableName(value: string): string {
-  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase('pt-BR');
-}
-
-export function loadMunicipalities(signal?: AbortSignal): Promise<MunicipalityOption[]> {
-  if (!municipalitiesPromise) {
-    municipalitiesPromise = fetch(IBGE_MUNICIPALITIES_URL, { signal })
-      .then(async (response) => {
-        if (!response.ok) throw new EmployeesApiError('Não foi possível carregar os municípios do IBGE.', response.status);
-        const rows = await response.json() as IbgeMunicipality[];
-        return rows
-          .map((row) => ({ ibgeCode: String(row.id).padStart(7, '0'), name: row.nome, uf: String(row.microrregiao?.mesorregiao?.UF?.sigla ?? '').toUpperCase() }))
-          .filter((row) => /^\d{7}$/.test(row.ibgeCode) && /^[A-Z]{2}$/.test(row.uf))
-          .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-      })
-      .catch((error) => {
-        municipalitiesPromise = null;
-        throw error;
-      });
-  }
-  return municipalitiesPromise;
-}
-
-/**
- * `monitored-cities` é o universo autorizado de escolha. A lista IBGE entra
- * somente para resolver o código necessário pela RAIS da cidade já autorizada.
- */
-export function resolveMonitoredMunicipality(
-  municipalities: MunicipalityOption[],
-  scope: { uf: string; city: string },
-): MunicipalityOption | null {
-  const comparableCity = comparableName(scope.city);
-  return municipalities.find((municipality) => municipality.uf === scope.uf && comparableName(municipality.name) === comparableCity) ?? null;
 }
 
 async function functionRequest<T>(body: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
@@ -81,7 +37,7 @@ async function functionRequest<T>(body: Record<string, unknown>, signal?: AbortS
       signal,
     });
   } catch (error) {
-    throw new EmployeesApiError(error instanceof Error ? error.message : 'Falha de rede ao gerar relatório.', null, 'NETWORK');
+    throw new EmployeesApiError('Não foi possível alcançar o serviço do relatório. Verifique a publicação da Edge Function e a origem permitida no CORS.', null, 'NETWORK');
   }
 
   let payload: unknown = null;
@@ -96,6 +52,15 @@ async function functionRequest<T>(body: Record<string, unknown>, signal?: AbortS
     throw new EmployeesApiError(String(errorPayload.error ?? 'A fonte de dados não respondeu corretamente.'), response.status, String(errorPayload.code ?? 'UPSTREAM'));
   }
   return payload as T;
+}
+
+/** Resolve o código IBGE no backend; o navegador não consulta catálogo externo. */
+export async function resolveRaisMunicipality(scope: Pick<MunicipalityOption, 'name' | 'uf'>, signal?: AbortSignal): Promise<MunicipalityOption> {
+  const payload = await functionRequest<{ municipality?: MunicipalityOption }>({ action: 'resolveMunicipality', municipality: scope }, signal);
+  if (!payload.municipality || !/^\d{7}$/.test(payload.municipality.ibgeCode)) {
+    throw new EmployeesApiError('Não foi possível associar o município selecionado ao código IBGE da RAIS.', null, 'MUNICIPALITY_RESOLUTION');
+  }
+  return payload.municipality;
 }
 
 export async function loadAvailableYears(signal?: AbortSignal): Promise<number[]> {

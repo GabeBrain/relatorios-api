@@ -11,12 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GeoApiScopeSelector, useGeoApiScope } from '@/features/shared/geo-api-scope-engine';
-import type { GeoScope } from '@/features/shared/geo-api-scope-engine/types';
-import { EmployeesApiError, generateEmployeeReport, loadAvailableYears, loadMunicipalities, resolveMonitoredMunicipality } from '../api';
+import { EmployeesApiError, generateEmployeeReport, loadAvailableYears, resolveRaisMunicipality } from '../api';
 import { formatCurrency, formatInteger, formatPercentage, methodologyText } from '../domain';
 import { downloadEmployeeWorkbook } from '../export-xlsx';
 import type { EmployeeOccupationRow, EmployeeReport, EmployeeSectorRow, MunicipalityOption } from '../types';
+import RaisMunicipalitySelector from './RaisMunicipalitySelector';
 
 function SummaryCard({ label, value, description }: { label: string; value: string; description?: string }) {
   return <Card><CardContent className="p-4"><p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p><p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>{description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}</CardContent></Card>;
@@ -50,8 +49,7 @@ function ReportResult({ report, onExport }: { report: EmployeeReport; onExport: 
 }
 
 export default function EmployeesReportWorkspace() {
-  const [scope, setScope] = useState<GeoScope>({ uf: '', city: '' });
-  const geoScope = useGeoApiScope({ value: scope, onChange: setScope });
+  const [scope, setScope] = useState({ uf: '', city: '' });
   const [municipality, setMunicipality] = useState<MunicipalityOption | null>(null);
   const [years, setYears] = useState<number[]>([]);
   const [year, setYear] = useState('');
@@ -64,16 +62,14 @@ export default function EmployeesReportWorkspace() {
   useEffect(() => {
     let active = true;
     setMunicipality(null); setYear(''); setYears([]); setReport(null);
-    if (!geoScope.strictReady) { setLoadingMunicipality(false); return () => { active = false; }; }
+    if (!scope.uf || !scope.city) { setLoadingMunicipality(false); return () => { active = false; }; }
     setLoadingMunicipality(true); setError(null);
-    loadMunicipalities().then((all) => {
+    resolveRaisMunicipality(scope).then((resolved) => {
       if (!active) return;
-      const resolved = resolveMonitoredMunicipality(all, scope);
-      if (!resolved) throw new EmployeesApiError('Não foi possível associar este município monitorado ao código IBGE da RAIS.');
       setMunicipality(resolved);
     }).catch((err) => { if (active) setError(err instanceof Error ? err.message : 'Não foi possível preparar o município.'); }).finally(() => { if (active) setLoadingMunicipality(false); });
     return () => { active = false; };
-  }, [geoScope.strictReady, scope.uf, scope.city]);
+  }, [scope.uf, scope.city]);
 
   useEffect(() => {
     if (!municipality) return;
@@ -84,7 +80,7 @@ export default function EmployeesReportWorkspace() {
   }, [municipality?.ibgeCode]);
 
   async function handleGenerate() {
-    if (!municipality || !year) { setError('Escolha um município monitorado e o ano RAIS antes de gerar.'); return; }
+    if (!municipality || !year) { setError('Escolha um município e o ano RAIS antes de gerar.'); return; }
     setError(null); setLoadingReport(true);
     try { setReport(await generateEmployeeReport({ municipality, year: Number(year) })); toast.success('Relatório de empregados gerado.'); }
     catch (err) { const apiError = err instanceof EmployeesApiError ? err : null; setError(apiError?.message ?? 'Não foi possível gerar o relatório.'); }
@@ -93,8 +89,8 @@ export default function EmployeesReportWorkspace() {
 
   async function handleExport() { if (!report) return; const filename = await downloadEmployeeWorkbook(report); toast.success(`Arquivo exportado: ${filename}`); }
 
-  return <section className="space-y-5"><Card><CardContent className="p-4 sm:p-5"><div className="flex flex-col gap-4 lg:flex-row lg:items-end"><GeoApiScopeSelector value={scope} onChange={setScope} disabled={loadingReport} className="flex-1" cityContainerClassName="min-w-[260px] flex-1 space-y-1.5" /><div className="w-full space-y-1.5 lg:w-52"><Label htmlFor="employee-year">Ano RAIS</Label><Select value={year} onValueChange={(value) => { setYear(value); setReport(null); }} disabled={!municipality || loadingMunicipality || loadingYears || years.length === 0 || loadingReport}><SelectTrigger id="employee-year"><SelectValue placeholder={loadingMunicipality ? 'Preparando município…' : loadingYears ? 'Carregando anos…' : !scope.city ? 'Escolha o município' : 'Selecione o ano'} /></SelectTrigger><SelectContent>{years.map((item, index) => <SelectItem key={item} value={String(item)}>{item}{index === 0 ? ' — mais recente' : ''}</SelectItem>)}</SelectContent></Select></div><Button onClick={handleGenerate} disabled={loadingReport || !municipality || !year}>{loadingReport ? <><Loader2 className="animate-spin" /> Gerando…</> : <><BarChart3 /> Gerar relatório</>}</Button></div>{municipality && <p className="mt-3 text-xs text-muted-foreground">Município autorizado pelo GeoBrain · código IBGE RAIS: {municipality.ibgeCode}</p>}</CardContent></Card>
-    {!geoScope.hasToken && <Alert><LockKeyhole className="h-4 w-4" /><AlertTitle>Login necessário</AlertTitle><AlertDescription>Use o bloco de autenticação no menu lateral para carregar os municípios disponíveis para o seu acesso.</AlertDescription></Alert>}
+  return <section className="space-y-5"><Card><CardContent className="p-4 sm:p-5"><div className="flex flex-col gap-4 lg:flex-row lg:items-end"><RaisMunicipalitySelector uf={scope.uf} city={scope.city} onChange={setScope} disabled={loadingReport} /><div className="w-full space-y-1.5 lg:w-52"><Label htmlFor="employee-year">Ano RAIS</Label><Select value={year} onValueChange={(value) => { setYear(value); setReport(null); }} disabled={!municipality || loadingMunicipality || loadingYears || years.length === 0 || loadingReport}><SelectTrigger id="employee-year"><SelectValue placeholder={loadingMunicipality ? 'Preparando município…' : loadingYears ? 'Carregando anos…' : !scope.city ? 'Escolha o município' : 'Selecione o ano'} /></SelectTrigger><SelectContent>{years.map((item, index) => <SelectItem key={item} value={String(item)}>{item}{index === 0 ? ' — mais recente' : ''}</SelectItem>)}</SelectContent></Select></div><Button onClick={handleGenerate} disabled={loadingReport || !municipality || !year}>{loadingReport ? <><Loader2 className="animate-spin" /> Gerando…</> : <><BarChart3 /> Gerar relatório</>}</Button></div>{municipality && <p className="mt-3 text-xs text-muted-foreground">Município RAIS · código IBGE: {municipality.ibgeCode}</p>}</CardContent></Card>
+    <Alert><LockKeyhole className="h-4 w-4" /><AlertTitle>Consulta protegida</AlertTitle><AlertDescription>O Bearer GeoBrain protege a geração do relatório; ele não limita os municípios disponíveis na RAIS.</AlertDescription></Alert>
     {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertTitle>Não foi possível continuar</AlertTitle><AlertDescription className="flex items-center justify-between gap-3">{error}<Button variant="outline" size="sm" onClick={() => setError(null)}>Fechar</Button></AlertDescription></Alert>}
     {loadingReport && <div className="grid gap-4 md:grid-cols-4"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div>}
     {report && !loadingReport && <ReportResult report={report} onExport={handleExport} />}

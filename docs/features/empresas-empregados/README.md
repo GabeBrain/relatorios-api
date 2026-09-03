@@ -33,9 +33,9 @@ backend protegido, cache/auditoria no Supabase do Rebrain e experiência web ori
 ## Escopo fechado da primeira versão
 
 Empregados e Empresas são relatórios independentes. A V1 implementa somente **Empregados**:
-um município monitorado pelo GeoBrain e um ano por relatório, exploração web e XLSX gerado localmente.
-O seletor usa `/public-api/monitored-cities` com o Bearer da sessão; o código IBGE é resolvido apenas
-internamente para a consulta RAIS, sem oferecer o catálogo nacional como fallback. O backend valida o
+um município brasileiro e um ano por relatório, exploração web e XLSX gerado localmente.
+O seletor usa o catálogo municipal nacional aplicável à RAIS, com busca por texto e escolha assistida;
+o código IBGE é resolvido pela Edge Function, sem depender de uma chamada externa no navegador. O backend valida o
 Bearer GeoBrain, consulta a RAIS no BigQuery e compartilha snapshots agregados pelo Supabase entre
 usuários e sessões. O sistema registra auditoria técnica, mas não oferece histórico na interface.
 

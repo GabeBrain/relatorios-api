@@ -51,7 +51,7 @@ Luna não está autorizada a:
 Ao final, um usuário autenticado pelo Bearer do GeoBrain deve conseguir:
 
 1. abrir a nova página pelo menu, home, busca e URL direta;
-2. escolher uma UF, um município monitorado pelo GeoBrain e um ano RAIS disponível;
+2. escolher uma UF, um município brasileiro e um ano RAIS disponível;
 3. gerar um relatório de um único município por vez;
 4. consultar resumo, setores, ocupações e metodologia na tela;
 5. pesquisar, ordenar e percorrer a lista completa de ocupações sem travar a página;
@@ -159,11 +159,11 @@ desenvolvimento e não usar chave do usuário final para a fonte de dados.
 - responder 401/403 de modo distinguível na UI, encerrando a sessão conforme o padrão existente;
 - aplicar rate limit por identidade e IP hash, com parâmetros configuráveis.
 
-O seletor geográfico desta feature usa `GeoApiScopeEngine` e `/public-api/monitored-cities` para
-limitar a escolha às cidades disponíveis ao Bearer GeoBrain. A fonte continua sendo RAIS/Base dos
-Dados: após a seleção autorizada, o cliente resolve somente o código IBGE correspondente para enviar
-à Edge Function. Não há fallback visível ou de consulta ao catálogo nacional quando uma cidade não
-está monitorada; falha de carregamento deve ser apresentada ao usuário.
+O seletor geográfico desta feature não usa `GeoApiScopeEngine`, pois a fonte é RAIS/Base dos Dados
+e seu universo é municipal nacional, não o conjunto de cidades monitoradas da API GeoBrain. A lista
+pesquisável vem do catálogo municipal nacional empacotado na aplicação; a Edge Function resolve o
+código IBGE correspondente de forma protegida antes da consulta. O Bearer GeoBrain continua sendo
+exclusivamente a proteção de acesso ao relatório.
 
 ### 3.3 Consultas BigQuery
 
