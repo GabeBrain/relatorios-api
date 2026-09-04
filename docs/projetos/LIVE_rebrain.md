@@ -1,5 +1,25 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-04 — Empregados: evolução histórica RAIS V1 sob demanda — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba `Evolução histórica` após um relatório anual.
+- **O que:** implementada a série municipal anual de vínculos ativos em 31/12 (1985–2025): uma única
+  consulta agregada, autenticada pelo Bearer GeoBrain, com teto de 3 GiB, cache compartilhado por
+  município + versões e auditoria técnica isolada. A interface expõe primeiro/último ano, variação,
+  crescimento acumulado e gráfico de linha; a série é disparada apenas por clique. Empresas segue sem
+  rede, banco, batch ou dados.
+- **Evidência local:** `npm run typecheck`, build de produção e 10 testes direcionados de Empregados
+  aprovados. A rota do proxy foi coberta por 9 testes locais; não houve consulta BigQuery real nesta entrega.
+- **Arquivos:** `src/features/empresas-empregados/{api,domain,types}.ts`,
+  `components/{EmployeesReportWorkspace,EmployeeHistoryPanel}.tsx`,
+  `supabase/functions/rais-employees-report/index.ts`,
+  `supabase/migrations/20260904180000_rais_employee_history.sql` e documentação da feature.
+- **Commits:** `e949e01` (Rebrain) e `c169492` (proxy Quanti); ambos precisam ser publicados e a
+  revisão do proxy implantada no Cloud Run antes do smoke test.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** aplicar a migration, publicar a Edge e publicar a revisão do proxy
+  com `action: history`; então executar uma primeira consulta de cidade pequena/média e conferir job,
+  bytes e reutilização de cache. Fase 2 preservada para salários, setores, ocupações, comparação e batch.
+
 ### 2026-09-04 — Empregados: cabeçalho editorial comum de relatórios — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — contexto de página.
 - **O que:** o card hero provisório foi substituído pela faixa leve usada como referência nos
