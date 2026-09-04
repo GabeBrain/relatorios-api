@@ -1,4 +1,4 @@
 # Roadmap
 
-## Em andamento
-- [ ] Corrigir erros de build do preview (edge functions Deno dependencies)
+## Concluído
+- [x] Corrigir erros de build do preview (edge functions Deno dependencies)
