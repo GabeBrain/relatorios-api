@@ -204,6 +204,169 @@ export type Database = {
         }
         Relationships: []
       }
+      rais_employee_history_points: {
+        Row: {
+          active_employees: number
+          created_at: string
+          id: string
+          snapshot_id: string
+          year: number
+        }
+        Insert: {
+          active_employees: number
+          created_at?: string
+          id?: string
+          snapshot_id: string
+          year: number
+        }
+        Update: {
+          active_employees?: number
+          created_at?: string
+          id?: string
+          snapshot_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rais_employee_history_points_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "rais_employee_history_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rais_employee_history_query_runs: {
+        Row: {
+          application_version: string
+          bigquery_job_ids: string[]
+          bytes_billed: number | null
+          bytes_processed: number | null
+          cache_hit: boolean
+          created_at: string
+          duration_ms: number | null
+          error_code: string | null
+          id: string
+          ip_hash: string | null
+          municipality_ibge: string
+          query_version: string
+          requester_email: string | null
+          requester_id: string
+          snapshot_id: string | null
+          status: string
+          uf: string
+        }
+        Insert: {
+          application_version?: string
+          bigquery_job_ids?: string[]
+          bytes_billed?: number | null
+          bytes_processed?: number | null
+          cache_hit?: boolean
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          id?: string
+          ip_hash?: string | null
+          municipality_ibge: string
+          query_version: string
+          requester_email?: string | null
+          requester_id: string
+          snapshot_id?: string | null
+          status?: string
+          uf: string
+        }
+        Update: {
+          application_version?: string
+          bigquery_job_ids?: string[]
+          bytes_billed?: number | null
+          bytes_processed?: number | null
+          cache_hit?: boolean
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          id?: string
+          ip_hash?: string | null
+          municipality_ibge?: string
+          query_version?: string
+          requester_email?: string | null
+          requester_id?: string
+          snapshot_id?: string | null
+          status?: string
+          uf?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rais_employee_history_query_runs_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "rais_employee_history_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rais_employee_history_snapshots: {
+        Row: {
+          attempt_count: number
+          bytes_processed: number | null
+          created_at: string
+          first_year: number
+          id: string
+          last_error_code: string | null
+          last_year: number
+          lease_expires_at: string | null
+          methodology_version: string
+          municipality_ibge: string
+          municipality_name: string
+          point_count: number
+          query_duration_ms: number | null
+          query_version: string
+          source: string
+          status: string
+          uf: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          bytes_processed?: number | null
+          created_at?: string
+          first_year?: number
+          id?: string
+          last_error_code?: string | null
+          last_year?: number
+          lease_expires_at?: string | null
+          methodology_version: string
+          municipality_ibge: string
+          municipality_name: string
+          point_count?: number
+          query_duration_ms?: number | null
+          query_version: string
+          source: string
+          status?: string
+          uf: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          bytes_processed?: number | null
+          created_at?: string
+          first_year?: number
+          id?: string
+          last_error_code?: string | null
+          last_year?: number
+          lease_expires_at?: string | null
+          methodology_version?: string
+          municipality_ibge?: string
+          municipality_name?: string
+          point_count?: number
+          query_duration_ms?: number | null
+          query_version?: string
+          source?: string
+          status?: string
+          uf?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rais_employee_occupations: {
         Row: {
           average_salary: number | null
@@ -644,6 +807,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      rais_claim_history_snapshot: {
+        Args: {
+          p_lease_seconds?: number
+          p_methodology_version: string
+          p_municipality_ibge: string
+          p_municipality_name: string
+          p_query_version: string
+          p_source: string
+          p_uf: string
+        }
+        Returns: {
+          acquired: boolean
+          retry_after_ms: number
+          snapshot_id: string
+          snapshot_status: string
+        }[]
+      }
       rais_claim_snapshot: {
         Args: {
           p_lease_seconds?: number
@@ -662,8 +842,23 @@ export type Database = {
           snapshot_status: string
         }[]
       }
+      rais_fail_history_snapshot: {
+        Args: { p_error_code: string; p_snapshot_id: string }
+        Returns: undefined
+      }
       rais_fail_snapshot: {
         Args: { p_error_code: string; p_snapshot_id: string }
+        Returns: undefined
+      }
+      rais_finish_history_snapshot: {
+        Args: {
+          p_bytes_processed: number
+          p_first_year: number
+          p_last_year: number
+          p_point_count: number
+          p_query_duration_ms: number
+          p_snapshot_id: string
+        }
         Returns: undefined
       }
       rais_finish_snapshot: {
