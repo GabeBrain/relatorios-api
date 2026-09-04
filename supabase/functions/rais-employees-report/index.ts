@@ -144,6 +144,16 @@ function dbClient() {
   return createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 }
 
+function databaseErrorContext(error: unknown) {
+  const value = error as { code?: unknown; message?: unknown; details?: unknown; hint?: unknown } | null;
+  return {
+    code: String(value?.code ?? 'unknown').slice(0, 80),
+    message: String(value?.message ?? 'unknown').slice(0, 240),
+    details: String(value?.details ?? '').slice(0, 240),
+    hint: String(value?.hint ?? '').slice(0, 160),
+  };
+}
+
 async function enforceRateLimit(supabase: ReturnType<typeof dbClient>, requesterId: string): Promise<void> {
   const since = new Date(Date.now() - WINDOW_MS).toISOString();
   const result = await supabase.from('rais_employee_query_runs').select('id', { count: 'exact', head: true }).eq('requester_id', requesterId).gte('created_at', since);
@@ -348,7 +358,12 @@ async function handle(req: Request): Promise<Response> {
   const runId = run.data.id;
   let claimed: any;
   const claim = await supabase.rpc('rais_claim_snapshot', { p_municipality_ibge: ibge, p_municipality_name: municipalityName, p_uf: uf, p_year: year, p_query_version: QUERY_VERSION, p_methodology_version: METHODOLOGY_VERSION, p_source: SOURCE });
-  if (claim.error || !claim.data?.[0]) { await supabase.from('rais_employee_query_runs').update({ status: 'failed', error_code: 'CACHE_CLAIM' }).eq('id', runId); throw new HttpError('Não foi possível reservar o snapshot.', 503, 'CACHE_CLAIM'); }
+  if (claim.error || !claim.data?.[0]) {
+    const context = databaseErrorContext(claim.error);
+    console.error('[rais-employees] snapshot claim failed', context);
+    await supabase.from('rais_employee_query_runs').update({ status: 'failed', error_code: `CACHE_CLAIM_${context.code}`.slice(0, 120) }).eq('id', runId);
+    throw new HttpError('Não foi possível reservar o snapshot.', 503, 'CACHE_CLAIM');
+  }
   claimed = claim.data[0];
   if (!claimed.acquired && claimed.snapshot_status === 'ready') {
     const report = await readSnapshot(supabase, claimed.snapshot_id, true);
