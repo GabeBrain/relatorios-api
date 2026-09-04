@@ -1,5 +1,30 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-04 — Empregados: feedback de consulta e controles Brain padronizados — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — experiência de carregamento e filtros do relatório RAIS.
+- **O que:** criado `BrainLoadingState` compartilhado para a reserva lazy, carregamentos dependentes
+  e geração do relatório; a operação longa passa a exibir etapa e cronômetro real, sem ETA
+  inventado. Os primitives `Select`, `Popover` e `Command` ganharam superfície Brain (borda verde
+  sutil, cantos amplos, sombra/foco coesos), e a ordenação de ocupações deixou de usar `<select>`
+  nativo. Guidelines, Design System e decisões de frontend agora tornam esse contrato reproduzível
+  em novas ferramentas.
+- **Histórico RAIS:** três `dryRun` gratuitos da série anual básica (1985–2025) mediram 212,5 MiB
+  em Acrelândia, 1.003,4 MiB em Rio Verde e 1.929,6 MiB em Blumenau. A proposta documentada é
+  permitir somente sob demanda, com teto inicial de 3 GiB e cache compartilhado por município +
+  versão; nenhuma interface ou consulta histórica foi implementada.
+- **Evidência local:** `npm run typecheck`, build de produção e 9 testes direcionados da feature
+  aprovados; `git diff --check` aprovado. O executor `agent-browser` não está instalado nesta
+  máquina e o Vite local não inicia dentro do sandbox por permissão do esbuild, portanto não há
+  inspeção visual automatizada declarada nesta entrega.
+- **Arquivos:** `src/components/feedback/BrainLoadingState.tsx`, `src/components/ui/{select,popover,command}.tsx`,
+  `src/features/empresas-empregados/{pages/EmpresasEmpregadosPage.tsx,components/EmployeesReportWorkspace.tsx}`,
+  `docs/architecture/{FRONTEND_GUIDELINES,DESIGN_SYSTEM,FRONTEND_DECISIONS}.md` e plano da feature.
+- **Commits:** `535382d`.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** acabamento de Empregados está pronto para publicação e teste
+  humano visual; a evolução histórica permanece uma decisão de produto/custo pendente de aprovação
+  explícita. Empresas segue sem rede, banco, batch ou dados.
+
 ### 2026-09-04 — Empregados: reserva de snapshot RAIS corrigida e diagnóstico do RPC — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** Edge `rais-employees-report` e cache/auditoria RAIS no Supabase.
 - **O que:** preparada migração que faz a primeira criação do snapshot retornar `acquired=true` para a própria requisição geradora; antes ela ficava em `processing` sem uma execução responsável por gerar os agregados. A Edge passou a registrar de forma limitada e sem segredos o código/mensagem/detalhe/hint do PostgREST caso `rais_claim_snapshot` volte a falhar.
