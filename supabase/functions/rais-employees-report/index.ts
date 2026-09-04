@@ -6,11 +6,15 @@ const SOURCE = 'RAIS · Base dos Dados · BigQuery';
 const QUERY_VERSION = 'rais-employees-v1';
 const METHODOLOGY_VERSION = 'rais-employees-methodology-v1';
 const APP_VERSION = 'employees-v1';
+const HISTORY_QUERY_VERSION = 'rais-employees-history-v1';
+const HISTORY_METHODOLOGY_VERSION = 'rais-employees-history-methodology-v1';
+const HISTORY_APP_VERSION = 'employees-history-v1';
 const DEV_ORIGINS = ['http://localhost:8080', 'http://localhost:5173'];
 const PRODUCTION_ORIGIN = 'https://geobrain-relatorios.lovable.app';
 const MAX_REQUESTS_PER_WINDOW = 20;
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_QUERY_BYTES = BigInt(Deno.env.get('BIGQUERY_MAX_BYTES_BILLED') ?? '5000000000');
+const MAX_HISTORY_QUERY_BYTES = BigInt(Deno.env.get('BIGQUERY_HISTORY_MAX_BYTES_BILLED') ?? '3221225472');
 
 const SECTOR_NAMES: Record<string, string> = {
   '1': 'Extração Mineral', '2': 'Ind. Minerais não Metálicos', '3': 'Ind. Metalúrgica', '4': 'Ind. Mecânica',
@@ -156,9 +160,12 @@ function databaseErrorContext(error: unknown) {
 
 async function enforceRateLimit(supabase: ReturnType<typeof dbClient>, requesterId: string): Promise<void> {
   const since = new Date(Date.now() - WINDOW_MS).toISOString();
-  const result = await supabase.from('rais_employee_query_runs').select('id', { count: 'exact', head: true }).eq('requester_id', requesterId).gte('created_at', since);
-  if (result.error) throw new HttpError('Não foi possível verificar o limite de consultas.', 503, 'RATE_LIMIT_UNAVAILABLE');
-  if ((result.count ?? 0) >= MAX_REQUESTS_PER_WINDOW) throw new HttpError('Limite de consultas atingido. Aguarde alguns minutos.', 429, 'RATE_LIMIT');
+  const [reportRuns, historyRuns] = await Promise.all([
+    supabase.from('rais_employee_query_runs').select('id', { count: 'exact', head: true }).eq('requester_id', requesterId).gte('created_at', since),
+    supabase.from('rais_employee_history_query_runs').select('id', { count: 'exact', head: true }).eq('requester_id', requesterId).gte('created_at', since),
+  ]);
+  if (reportRuns.error || historyRuns.error) throw new HttpError('Não foi possível verificar o limite de consultas.', 503, 'RATE_LIMIT_UNAVAILABLE');
+  if ((reportRuns.count ?? 0) + (historyRuns.count ?? 0) >= MAX_REQUESTS_PER_WINDOW) throw new HttpError('Limite de consultas atingido. Aguarde alguns minutos.', 429, 'RATE_LIMIT');
 }
 
 async function googleToken(): Promise<string> {
@@ -308,6 +315,17 @@ async function queryReport(uf: string, ibge: string, year: number) {
   };
 }
 
+async function queryHistory(uf: string, ibge: string) {
+  const startedAt = Date.now();
+  const result = await raisProxyRequest<{ points?: Array<Record<string, unknown>>; bytesProcessed?: number | null; jobIds?: string[] }>({ action: 'history', municipality: { uf, ibgeCode: ibge } });
+  const points = (result.points ?? []).map((row) => ({ year: integer(row.year), activeEmployees: integer(row.activeEmployees ?? row.totalEmployees) }))
+    .filter((row) => row.year >= 1985 && row.year <= new Date().getFullYear()).sort((a, b) => a.year - b.year);
+  if (!points.length) throw new BigQueryError('A fonte não retornou pontos históricos para este município.', 'HISTORY_EMPTY');
+  const bytesProcessed = toNumber(result.bytesProcessed);
+  if (bytesProcessed !== null && BigInt(Math.round(bytesProcessed)) > MAX_HISTORY_QUERY_BYTES) throw new BigQueryError('A consulta histórica excedeu o limite de custo configurado.', 'COST_LIMIT', bytesProcessed);
+  return { startedAt, durationMs: Date.now() - startedAt, points, bytesProcessed, bytesBilled: null, jobIds: Array.isArray(result.jobIds) ? result.jobIds.filter((item): item is string => typeof item === 'string') : [] };
+}
+
 async function readSnapshot(supabase: ReturnType<typeof dbClient>, snapshotId: string, cacheHit: boolean) {
   const [snapshot, sectors, occupations] = await Promise.all([
     supabase.from('rais_employee_snapshots').select('*').eq('id', snapshotId).eq('status', 'ready').single(),
@@ -317,6 +335,16 @@ async function readSnapshot(supabase: ReturnType<typeof dbClient>, snapshotId: s
   if (snapshot.error || !snapshot.data || sectors.error || occupations.error) throw new HttpError('Snapshot pronto não pôde ser lido.', 503, 'CACHE_READ');
   const data: any = snapshot.data;
   return { kind: 'employees', meta: { municipality: { ibgeCode: data.municipality_ibge, name: data.municipality_name, uf: data.uf }, year: data.year, generatedAt: data.updated_at, source: data.source, referenceDate: `31/12/${data.year}`, queryVersion: data.query_version, methodologyVersion: data.methodology_version, cacheHit, bytesProcessed: data.bytes_processed, queryDurationMs: data.query_duration_ms }, summary: { totalEmployees: data.total_employees, salaryMissingOrZero: data.salary_missing_or_zero, missingCbo: data.missing_cbo, totalLinksInYear: data.total_links_in_year, averageSalary: data.average_salary, medianSalary: data.median_salary }, sectors: (sectors.data ?? []).map((row: any) => ({ code: row.code, name: row.name, employees: row.employees, percentage: Number(row.percentage), averageSalary: row.average_salary === null ? null : Number(row.average_salary), medianSalary: row.median_salary === null ? null : Number(row.median_salary) })), occupations: (occupations.data ?? []).map((row: any) => ({ code: row.code, majorGroup: row.major_group, family: row.family, occupation: row.occupation, employees: row.employees, percentage: Number(row.percentage), averageSalary: row.average_salary === null ? null : Number(row.average_salary), medianSalary: row.median_salary === null ? null : Number(row.median_salary) })) };
+}
+
+async function readHistorySnapshot(supabase: ReturnType<typeof dbClient>, snapshotId: string, cacheHit: boolean) {
+  const [snapshot, points] = await Promise.all([
+    supabase.from('rais_employee_history_snapshots').select('*').eq('id', snapshotId).eq('status', 'ready').single(),
+    supabase.from('rais_employee_history_points').select('*').eq('snapshot_id', snapshotId).order('year', { ascending: true }),
+  ]);
+  if (snapshot.error || !snapshot.data || points.error || !(points.data ?? []).length) throw new HttpError('Histórico pronto não pôde ser lido.', 503, 'HISTORY_CACHE_READ');
+  const data: any = snapshot.data;
+  return { kind: 'employee-history', meta: { municipality: { ibgeCode: data.municipality_ibge, name: data.municipality_name, uf: data.uf }, generatedAt: data.updated_at, source: data.source, firstYear: data.first_year, lastYear: data.last_year, queryVersion: data.query_version, methodologyVersion: data.methodology_version, cacheHit, bytesProcessed: data.bytes_processed, queryDurationMs: data.query_duration_ms }, points: (points.data ?? []).map((row: any) => ({ year: row.year, activeEmployees: row.active_employees })) };
 }
 
 async function handle(req: Request): Promise<Response> {
@@ -336,6 +364,15 @@ async function handle(req: Request): Promise<Response> {
   const supabase = dbClient();
   await enforceRateLimit(supabase, identity.id);
   if (action === 'metadata') return json({ years: await availableYears(), queryVersion: QUERY_VERSION, methodologyVersion: METHODOLOGY_VERSION }, 200, headers);
+  if (action === 'historyStatus') {
+    const snapshotId = String(body?.snapshotId ?? '');
+    if (!/^[0-9a-f-]{36}$/i.test(snapshotId)) throw new HttpError('Snapshot histórico inválido.', 400, 'BAD_REQUEST');
+    const current = await supabase.from('rais_employee_history_snapshots').select('id,status').eq('id', snapshotId).single();
+    if (current.error || !current.data) throw new HttpError('Histórico não encontrado.', 404, 'NOT_FOUND');
+    if (current.data.status === 'processing') return json({ pending: true, snapshotId, retryAfterMs: 3000 }, 202, headers);
+    if (current.data.status === 'failed') throw new HttpError('A geração do histórico falhou. Tente novamente.', 502, 'HISTORY_GENERATION_FAILED');
+    return json({ history: await readHistorySnapshot(supabase, snapshotId, false) }, 200, headers);
+  }
   if (action === 'status') {
     const snapshotId = String(body?.snapshotId ?? '');
     if (!/^[0-9a-f-]{36}$/i.test(snapshotId)) throw new HttpError('Snapshot inválido.', 400, 'BAD_REQUEST');
@@ -344,6 +381,48 @@ async function handle(req: Request): Promise<Response> {
     if (current.data.status === 'processing') return json({ pending: true, snapshotId, retryAfterMs: 3000 }, 202, headers);
     if (current.data.status === 'failed') throw new HttpError('A geração do relatório falhou. Tente novamente.', 502, 'GENERATION_FAILED');
     return json({ report: await readSnapshot(supabase, snapshotId, false) }, 200, headers);
+  }
+  if (action === 'historyGenerate') {
+    const municipality = body?.municipality;
+    const ibge = String(municipality?.ibgeCode ?? '');
+    const municipalityName = text(municipality?.name, '');
+    const uf = String(municipality?.uf ?? '').toUpperCase();
+    if (!/^[A-Z]{2}$/.test(uf) || !/^\d{7}$/.test(ibge) || !municipalityName) throw new HttpError('Município ou UF inválido para o histórico.', 400, 'INVALID_SCOPE');
+    const startedAt = Date.now();
+    const run = await supabase.from('rais_employee_history_query_runs').insert({ requester_id: identity.id, requester_email: identity.email, ip_hash: identity.ipHash, municipality_ibge: ibge, uf, query_version: HISTORY_QUERY_VERSION, application_version: HISTORY_APP_VERSION, status: 'started' }).select('id').single();
+    if (run.error || !run.data) throw new HttpError('Não foi possível registrar a consulta histórica.', 503, 'HISTORY_AUDIT_WRITE');
+    const runId = run.data.id;
+    const claim = await supabase.rpc('rais_claim_history_snapshot', { p_municipality_ibge: ibge, p_municipality_name: municipalityName, p_uf: uf, p_query_version: HISTORY_QUERY_VERSION, p_methodology_version: HISTORY_METHODOLOGY_VERSION, p_source: SOURCE });
+    if (claim.error || !claim.data?.[0]) {
+      const context = databaseErrorContext(claim.error);
+      console.error('[rais-employees] history snapshot claim failed', context);
+      await supabase.from('rais_employee_history_query_runs').update({ status: 'failed', error_code: `HISTORY_CLAIM_${context.code}`.slice(0, 120) }).eq('id', runId);
+      throw new HttpError('Não foi possível reservar o histórico.', 503, 'HISTORY_CACHE_CLAIM');
+    }
+    const claimed: any = claim.data[0];
+    if (!claimed.acquired && claimed.snapshot_status === 'ready') {
+      const history = await readHistorySnapshot(supabase, claimed.snapshot_id, true);
+      await supabase.from('rais_employee_history_query_runs').update({ snapshot_id: claimed.snapshot_id, cache_hit: true, status: 'cache_hit', duration_ms: Date.now() - startedAt }).eq('id', runId);
+      return json({ history }, 200, headers);
+    }
+    if (!claimed.acquired && claimed.snapshot_status === 'processing') {
+      await supabase.from('rais_employee_history_query_runs').update({ snapshot_id: claimed.snapshot_id, status: 'pending', duration_ms: Date.now() - startedAt }).eq('id', runId);
+      return json({ pending: true, snapshotId: claimed.snapshot_id, retryAfterMs: claimed.retry_after_ms ?? 3000 }, 202, headers);
+    }
+    try {
+      const result = await queryHistory(uf, ibge);
+      const snapshotId = claimed.snapshot_id;
+      const pointInsert = await supabase.from('rais_employee_history_points').insert(result.points.map((row) => ({ snapshot_id: snapshotId, year: row.year, active_employees: row.activeEmployees })));
+      if (pointInsert.error) throw new HttpError('Não foi possível persistir os pontos históricos.', 503, 'HISTORY_CACHE_ROWS');
+      const snapshotUpdate = await supabase.rpc('rais_finish_history_snapshot', { p_snapshot_id: snapshotId, p_first_year: result.points[0].year, p_last_year: result.points.at(-1)!.year, p_point_count: result.points.length, p_bytes_processed: result.bytesProcessed, p_query_duration_ms: result.durationMs });
+      if (snapshotUpdate.error) throw new HttpError('Não foi possível finalizar o histórico.', 503, 'HISTORY_CACHE_FINALIZE');
+      await supabase.from('rais_employee_history_query_runs').update({ snapshot_id: snapshotId, status: 'generated', bigquery_job_ids: result.jobIds, bytes_processed: result.bytesProcessed, bytes_billed: result.bytesBilled, duration_ms: Date.now() - startedAt }).eq('id', runId);
+      return json({ history: { kind: 'employee-history', meta: { municipality: { ibgeCode: ibge, name: municipalityName, uf }, generatedAt: new Date().toISOString(), source: SOURCE, firstYear: result.points[0].year, lastYear: result.points.at(-1)!.year, queryVersion: HISTORY_QUERY_VERSION, methodologyVersion: HISTORY_METHODOLOGY_VERSION, cacheHit: false, bytesProcessed: result.bytesProcessed, queryDurationMs: result.durationMs }, points: result.points } }, 200, headers);
+    } catch (error) {
+      await supabase.rpc('rais_fail_history_snapshot', { p_snapshot_id: claimed.snapshot_id, p_error_code: error instanceof HttpError ? error.code : error instanceof BigQueryError ? error.code : 'HISTORY_GENERATION_ERROR' });
+      await supabase.from('rais_employee_history_query_runs').update({ snapshot_id: claimed.snapshot_id, status: 'failed', error_code: error instanceof HttpError ? error.code : error instanceof BigQueryError ? error.code : 'HISTORY_GENERATION_ERROR', duration_ms: Date.now() - startedAt }).eq('id', runId);
+      throw error;
+    }
   }
   if (action !== 'generate') throw new HttpError('Ação não permitida.', 400, 'BAD_REQUEST');
   const municipality = body?.municipality;

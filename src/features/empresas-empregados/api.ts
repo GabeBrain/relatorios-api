@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/store/auth-store';
-import { normalizeEmployeeReport } from './domain';
-import { METHODOLOGY_VERSION, QUERY_VERSION, type EmployeeReport, type EmployeeReportRequest, type MunicipalityOption } from './types';
+import { normalizeEmployeeHistoryReport, normalizeEmployeeReport } from './domain';
+import { HISTORY_METHODOLOGY_VERSION, HISTORY_QUERY_VERSION, METHODOLOGY_VERSION, QUERY_VERSION, type EmployeeHistoryReport, type EmployeeReport, type EmployeeReportRequest, type MunicipalityOption } from './types';
 
 const SUPABASE_URL = String(import.meta.env.VITE_SUPABASE_URL ?? '').replace(/\/$/, '');
 const SUPABASE_KEY = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '');
@@ -85,4 +85,16 @@ export async function generateEmployeeReport(request: EmployeeReportRequest, sig
     throw new EmployeesApiError('A geração ainda está em andamento. Tente novamente em alguns segundos.', 202, 'PENDING');
   }
   return normalizeEmployeeReport(payload.report ?? payload);
+}
+
+export async function generateEmployeeHistory(municipality: MunicipalityOption, signal?: AbortSignal): Promise<EmployeeHistoryReport> {
+  let payload = await functionRequest<{ history?: unknown; pending?: boolean; snapshotId?: string; retryAfterMs?: number }>({
+    action: 'historyGenerate', municipality, queryVersion: HISTORY_QUERY_VERSION, methodologyVersion: HISTORY_METHODOLOGY_VERSION,
+  }, signal);
+  for (let attempt = 0; payload.pending && payload.snapshotId && attempt < 50; attempt += 1) {
+    await new Promise((resolve, reject) => { const timer = window.setTimeout(resolve, Math.min(5000, Math.max(1000, payload.retryAfterMs ?? 3000))); signal?.addEventListener('abort', () => { window.clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')); }, { once: true }); });
+    payload = await functionRequest<{ history?: unknown; pending?: boolean; snapshotId?: string; retryAfterMs?: number }>({ action: 'historyStatus', snapshotId: payload.snapshotId }, signal);
+  }
+  if (payload.pending) throw new EmployeesApiError('A evolução histórica ainda está sendo preparada. Tente novamente em alguns segundos.', 202, 'PENDING');
+  return normalizeEmployeeHistoryReport(payload.history ?? payload);
 }

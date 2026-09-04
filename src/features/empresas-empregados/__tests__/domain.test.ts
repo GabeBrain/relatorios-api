@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DisabledCompanyReportProvider, isReportKindEnabled } from '../companies';
-import { EmployeeReportValidationError, formatCurrency, formatInteger, formatPercentage, methodologyText, normalizeEmployeeReport, validateEmployeeRequest } from '../domain';
-import { METHODOLOGY_VERSION, QUERY_VERSION, type EmployeeReport } from '../types';
+import { EmployeeReportValidationError, formatCurrency, formatInteger, formatPercentage, methodologyText, normalizeEmployeeHistoryReport, normalizeEmployeeReport, validateEmployeeRequest } from '../domain';
+import { HISTORY_METHODOLOGY_VERSION, HISTORY_QUERY_VERSION, METHODOLOGY_VERSION, QUERY_VERSION, type EmployeeReport } from '../types';
 
 const request = { municipality: { ibgeCode: '5218805', name: 'Rio Verde', uf: 'GO' }, year: 2025 };
 
@@ -36,6 +36,13 @@ describe('Empresas e Empregados — domínio V1', () => {
     expect(formatInteger(sampleReport().summary.totalEmployees)).toBe('81.601');
     expect(formatPercentage(0.125)).toBe('12,5%');
     expect(formatCurrency(1234.5)).toContain('1.234,50');
+  });
+
+  it('normaliza a série histórica em ordem anual e preserva o cache compartilhado', () => {
+    const history = normalizeEmployeeHistoryReport({ meta: { municipality: request.municipality, firstYear: 1985, lastYear: 2025, queryVersion: HISTORY_QUERY_VERSION, methodologyVersion: HISTORY_METHODOLOGY_VERSION, cacheHit: true }, points: [{ year: 2025, activeEmployees: '20' }, { year: 1985, total_vinculos: '10' }] });
+    expect(history.kind).toBe('employee-history');
+    expect(history.meta.cacheHit).toBe(true);
+    expect(history.points).toEqual([{ year: 1985, activeEmployees: 10 }, { year: 2025, activeEmployees: 20 }]);
   });
 
   it('mantém Empresas desabilitado e sem provider ativo', async () => {

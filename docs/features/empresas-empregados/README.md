@@ -37,7 +37,9 @@ um município brasileiro e um ano por relatório, exploração web e XLSX gerado
 O seletor usa o catálogo municipal nacional aplicável à RAIS, com busca por texto e escolha assistida;
 o código IBGE é resolvido pela Edge Function, sem depender de uma chamada externa no navegador. O backend valida o
 Bearer GeoBrain, consulta a RAIS no BigQuery e compartilha snapshots agregados pelo Supabase entre
-usuários e sessões. O sistema registra auditoria técnica, mas não oferece histórico na interface.
+usuários e sessões. A aba de evolução histórica, disponível sob demanda após a geração do relatório,
+mostra somente a série anual de vínculos ativos em 31 de dezembro (1985–2025), com cache compartilhado
+por município e versão. Salários, setores, ocupações, comparações e batch nacional permanecem fora desta versão.
 
 ### Ponte BigQuery
 

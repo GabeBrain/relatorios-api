@@ -138,13 +138,13 @@ em 31/12, filtrada por UF e código IBGE, de 1985 a 2025.
 \* Estimativa antes da franquia e condicionada ao modelo on-demand. A medição não executou a
 consulta nem gerou resultado ou persistência de microdados.
 
-**Decisão proposta:** `APROVAR SOB DEMANDA`, com `maximumBytesBilled` inicial de 3 GiB para a
+**Decisão:** `APROVADO SOB DEMANDA` em 2026-09-04, com `maximumBytesBilled` inicial de 3 GiB para a
 série básica e cache compartilhado por município + versão da consulta. A série simples é viável;
 salários, setores e ocupações históricos continuam fora do escopo até uma medição separada.
 
-## 5. Proposta técnica de histórico, condicionada ao P5
+## 5. Histórico V1 implementado
 
-Se os dry runs forem aprovados:
+Após a aprovação dos dry runs, a V1 foi implementada com este fluxo:
 
 ```text
 Usuário pede histórico de um município
@@ -153,16 +153,21 @@ Usuário pede histórico de um município
   -> hit: devolve pontos anuais
   -> miss: uma query BigQuery agregada e limitada por bytes
   -> grava somente pontos anuais e metadados de custo
-  -> gráfico de evolução + variação anual
+  -> gráfico de evolução + indicadores do período
 ```
 
 Primeira versão de produto:
 
 - apenas série anual de vínculos ativos em 31/12;
 - de 1985 ao último ano RAIS publicado;
-- linha temporal, variação anual e maior/menor ponto;
+- linha temporal, primeiro/último ponto, variação absoluta e crescimento acumulado;
 - sem série mensal, pois RAIS é anual;
 - sem pré-carga nacional: cache sob demanda e compartilhado entre usuários/sessões.
+
+Implementação local: migration `20260904180000_rais_employee_history.sql`, Edge
+`rais-employees-report`, contrato HMAC `action: history` no proxy BigQuery e aba `Evolução histórica`
+após o relatório municipal anual. A ativação remota requer aplicar a migration e publicar tanto a
+Edge quanto a revisão do Cloud Run que contém a nova ação.
 
 ## 5.1 Pendências da feature — Histórico de Empregados, Fase 2
 
@@ -191,7 +196,8 @@ multiplicam consultas, custo e complexidade interpretativa.
 - [ ] Cache hit, consulta nova, erro e retry são distinguíveis e acessíveis.
 - [ ] Guidelines e Design System permitem reproduzir o padrão em nova ferramenta sem depender deste plano.
 - [ ] Empresas não recebe rede, banco, batch, dados ou UI além do placeholder atual.
-- [ ] Histórico não avança para implementação sem dry run registrado e aprovação explícita de custo.
+- [x] Histórico V1 avança somente após dry run registrado e aprovação explícita de custo; ativação
+  remota e smoke test ainda dependem da publicação coordenada.
 
 ## 7. Handoff esperado
 

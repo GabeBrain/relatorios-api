@@ -2,6 +2,9 @@ import {
   METHODOLOGY_VERSION,
   QUERY_VERSION,
   SOURCE_LABEL,
+  HISTORY_METHODOLOGY_VERSION,
+  HISTORY_QUERY_VERSION,
+  type EmployeeHistoryReport,
   type EmployeeReport,
   type EmployeeReportRequest,
   type EmployeeOccupationRow,
@@ -113,6 +116,42 @@ export function normalizeEmployeeReport(payload: unknown): EmployeeReport {
     },
     sectors,
     occupations,
+  };
+}
+
+export function normalizeEmployeeHistoryReport(payload: unknown): EmployeeHistoryReport {
+  if (!payload || typeof payload !== 'object') throw new Error('Resposta do histórico inválida.');
+  const raw = record(payload);
+  const rawMeta = record(raw.meta);
+  const municipality = record(rawMeta.municipality ?? raw.municipality);
+  const normalizedMunicipality = {
+    ibgeCode: String(municipality.ibgeCode ?? municipality.codigo_ibge ?? ''),
+    name: String(municipality.name ?? municipality.municipio ?? ''),
+    uf: String(municipality.uf ?? '').toUpperCase(),
+  };
+  if (!/^\d{7}$/.test(normalizedMunicipality.ibgeCode) || !normalizedMunicipality.name.trim() || !/^[A-Z]{2}$/.test(normalizedMunicipality.uf)) {
+    throw new Error('Município inválido no histórico.');
+  }
+  const points = (Array.isArray(raw.points) ? raw.points : []).map((item) => {
+    const row = record(item);
+    return { year: Math.round(finiteNumber(row.year)), activeEmployees: Math.max(0, Math.round(finiteNumber(row.activeEmployees ?? row.active_employees ?? row.total_vinculos))) };
+  }).filter((item) => Number.isInteger(item.year) && item.year >= 1985 && item.year <= new Date().getFullYear()).sort((a, b) => a.year - b.year);
+  if (!points.length) throw new Error('A fonte não retornou pontos históricos para este município.');
+  return {
+    kind: 'employee-history',
+    meta: {
+      municipality: normalizedMunicipality,
+      generatedAt: String(rawMeta.generatedAt ?? new Date().toISOString()),
+      source: String(rawMeta.source ?? SOURCE_LABEL),
+      firstYear: Math.round(finiteNumber(rawMeta.firstYear ?? points[0].year)),
+      lastYear: Math.round(finiteNumber(rawMeta.lastYear ?? points.at(-1)?.year)),
+      queryVersion: String(rawMeta.queryVersion ?? HISTORY_QUERY_VERSION),
+      methodologyVersion: String(rawMeta.methodologyVersion ?? HISTORY_METHODOLOGY_VERSION),
+      cacheHit: Boolean(rawMeta.cacheHit),
+      bytesProcessed: nullableNumber(rawMeta.bytesProcessed),
+      queryDurationMs: nullableNumber(rawMeta.queryDurationMs),
+    },
+    points,
   };
 }
 
