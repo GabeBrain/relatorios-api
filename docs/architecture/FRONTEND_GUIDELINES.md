@@ -67,6 +67,23 @@ Toda página que consulta, processa ou filtra dados precisa prever explicitament
 Em telas de filtro, trocar um filtro pai limpa opções filhas incompatíveis. Em operações demoradas,
 o botão deve indicar progresso e não aceitar submissões duplicadas.
 
+### 4.1 Contrato Brain de carregamento
+
+Toda página de dados deve tratar carregamento em três níveis: **página lazy** (reserva contextual),
+**campo dependente** (somente o controle afetado fica indisponível) e **operação longa** (etapa,
+tempo decorrido real e prevenção de duplicidade). Reutilize `BrainLoadingState` quando a espera
+for perceptível; skeletons preservam a estrutura que será entregue.
+
+Não prometa ETA sem métrica observada. Use cronômetro real ou texto honesto como “pode levar alguns
+instantes”. Erro e retry preservam o escopo já escolhido.
+
+### 4.2 Seleções e superfícies flutuantes
+
+Em páginas React de produto, não usar `<select>` nativo. Use `Select` para listas curtas e
+`Popover + Command` para busca. Os triggers, conteúdos e itens devem reutilizar os primitives em
+`src/components/ui/`, que carregam raio, foco, borda e sombra Brain. Filtros dependentes limpam
+valores incompatíveis e explicam brevemente o estado desabilitado.
+
 ## 5. Hierarquia visual e interação
 
 - Um contexto de decisão tem **uma ação primária**; ações secundárias usam variante discreta.
@@ -101,6 +118,8 @@ consequência e os módulos afetados.
 
 - [ ] Reutilizei primitives/tokens existentes ou documentei a exceção.
 - [ ] Cobri carregando, vazio, erro e escopo inválido quando aplicável.
+- [ ] Usei `Select` ou combobox Brain; não há `<select>` nativo na tela de produto.
+- [ ] Carregamentos longos exibem etapa e tempo decorrido real, sem ETA inventado.
 - [ ] A rota nova é lazy ou a exceção está registrada.
 - [ ] Verifiquei claro/escuro e desktop/mobile.
 - [ ] Rodei typecheck, lint/build e testes proporcionais ao risco.

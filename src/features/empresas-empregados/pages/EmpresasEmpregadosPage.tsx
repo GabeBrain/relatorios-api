@@ -3,13 +3,14 @@ import { Building2, LockKeyhole, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { useAuthStore } from '@/store/auth-store';
 
 const EmployeesReportWorkspace = lazy(() => import('../components/EmployeesReportWorkspace'));
 const CompaniesPlaceholder = lazy(() => import('../components/CompaniesPlaceholder'));
 
 function WorkspaceLoading() {
-  return <div className="space-y-5" aria-label="Carregando relatório"><Skeleton className="h-28 w-full" /><div className="grid gap-4 md:grid-cols-4"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div></div>;
+  return <div className="space-y-5" aria-label="Carregando relatório"><BrainLoadingState variant="page" title="Preparando relatório" description="Carregando a experiência de dados." /><div className="grid gap-4 md:grid-cols-4"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div></div>;
 }
 
 export default function EmpresasEmpregadosPage() {

@@ -695,6 +695,16 @@ export function cn(...inputs: ClassValue[]) {
 </div>
 ```
 
+### Select, combobox e carregamento de dados
+
+Use os primitives de `src/components/ui/select.tsx` e `popover.tsx`; eles são a superfície Brain
+canônica: trigger `rounded-lg`, conteúdo `rounded-xl`, borda `primary/20`, sombra verde sutil e foco
+visível. Não criar `<select>` nativo em páginas de produto.
+
+Para operações percebidas como espera, use `BrainLoadingState` de
+`src/components/feedback/BrainLoadingState.tsx`. Ele mostra logo discreto, etapa e cronômetro real.
+Skeletons complementam a reserva estrutural; não substituem a explicação da operação longa.
+
 ---
 
 ## 13. Identidade de marca — resumo visual

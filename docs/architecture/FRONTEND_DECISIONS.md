@@ -25,4 +25,18 @@ Não use para changelog de feature; mudanças funcionais continuam nos documento
   terminar ou cancelar, e o estado não sobrevive a recarregar a página.
 - **Escopo:** `src/features/panorama-secovi-fiergs/{export-store.ts,components/PanoramaExport*}`, `src/App.tsx`
 
+### 2026-09-04 — Carregamentos e seleções usam superfícies Brain compartilhadas
+- **Contexto:** telas de dados tinham *skeletons* sem contexto e controles nativos com aparência
+  inconsistente. Isso aumentava a incerteza nas consultas RAIS e fazia novos fluxos divergirem
+  visualmente desde a primeira entrega.
+- **Decisão:** o estado compartilhado `BrainLoadingState` comunica etapa, marca e tempo decorrido
+  real para operações assíncronas; os primitives `Select`, `Popover` e `Command` adotam a mesma
+  superfície Brain (borda verde sutil, raio amplo e sombra leve). Combobox pesquisável continua a
+  ser `Popover` + `Command`; escolha finita, `Select`.
+- **Consequência:** novas telas não usam `<select>` nativo nem ETA inventado. A alteração dos
+  primitives tem alcance global, por isso cada uso existente deve conservar contraste, teclado e
+  foco ao ser alterado.
+- **Escopo:** `src/components/{feedback/BrainLoadingState.tsx,ui/{select,popover,command}.tsx}` e
+  telas consumidoras, inicialmente `src/features/empresas-empregados/`.
+
 <!-- novas decisões acima desta linha -->

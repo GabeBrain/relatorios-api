@@ -124,6 +124,24 @@ Não usar ETA fixo. Após observabilidade suficiente, uma expectativa pode ser i
 
 **Aceite:** decisão documentada como `APROVAR SOB DEMANDA`, `RESTRINGIR RECORTE` ou `NÃO IMPLEMENTAR AGORA`, com números observados — nunca por estimativa intuitiva.
 
+### P5 — Resultado medido em 2026-09-04
+
+Consulta avaliada (somente `dryRun: true`, sem retorno de linhas): série anual de vínculos ativos
+em 31/12, filtrada por UF e código IBGE, de 1985 a 2025.
+
+| Perfil | Município | Bytes estimados | Referência on-demand* |
+|---|---|---:|---:|
+| Pequeno | Acrelândia/AC | 212,5 MiB | ~US$ 0,0013 |
+| Médio | Rio Verde/GO | 1.003,4 MiB | ~US$ 0,0060 |
+| Grande | Blumenau/SC | 1.929,6 MiB | ~US$ 0,0115 |
+
+\* Estimativa antes da franquia e condicionada ao modelo on-demand. A medição não executou a
+consulta nem gerou resultado ou persistência de microdados.
+
+**Decisão proposta:** `APROVAR SOB DEMANDA`, com `maximumBytesBilled` inicial de 3 GiB para a
+série básica e cache compartilhado por município + versão da consulta. A série simples é viável;
+salários, setores e ocupações históricos continuam fora do escopo até uma medição separada.
+
 ## 5. Proposta técnica de histórico, condicionada ao P5
 
 Se os dry runs forem aprovados:
