@@ -1445,6 +1445,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
+- [ ] **Plataforma Rebrain — governança de custo BigQuery:** implantar o plano de labels comuns,
+  auditoria de produto, agregação administrativa de `INFORMATION_SCHEMA.JOBS_BY_PROJECT`, exportação
+  de Cloud Billing, orçamento/alertas e painel interno por feature. A telemetria de jobs não deve
+  ser consultada a cada abertura de página. Detalhe em
+  [`PLAN_BIGQUERY_COST_OBSERVABILITY.md`](../architecture/PLAN_BIGQUERY_COST_OBSERVABILITY.md).
 - [ ] Atualizador VGV V1: homologar a interface padronizada e o mapa urbano de `/atualizador-vgv` em desktop/mobile e nos temas claro/escuro.
 - [ ] Atualizador VGV: definir rotina de atualização das séries INCC-DI, IPCA e IGP-DI (assets atuais até 01/2026).
 - [ ] **API Explorer — publicar proxy Socio:** executar `supabase functions deploy socio-proxy --project-ref mxinpvcqzbfbzjodhgtz` com uma conta que tenha acesso ao projeto e, em seguida, redeployar o front-end Lovable.
