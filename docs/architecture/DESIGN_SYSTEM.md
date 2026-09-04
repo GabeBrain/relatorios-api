@@ -695,6 +695,26 @@ export function cn(...inputs: ClassValue[]) {
 </div>
 ```
 
+### Cabeçalho de relatório
+```tsx
+<header className="border-b border-border bg-card px-5 py-4 shadow-sm sm:px-6">
+  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="min-w-0 space-y-1">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        Relatórios · Categoria
+      </p>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Nome do relatório</h1>
+      <p className="text-sm text-muted-foreground">Uma frase sobre o recorte disponível.</p>
+    </div>
+    {/* contexto de sessão ou ação secundária, quando necessário */}
+  </div>
+</header>
+```
+
+Use este cabeçalho editorial leve para páginas de relatório. Não transformar o título em card hero,
+nem repetir badges de marca no topo; a marca já é responsabilidade do shell. O contexto técnico de
+sessão deve ser curto e discreto, e detalhes operacionais pertencem ao estado que os demanda.
+
 ### Select, combobox e carregamento de dados
 
 Use os primitives de `src/components/ui/select.tsx` e `popover.tsx`; eles são a superfície Brain

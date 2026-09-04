@@ -39,4 +39,15 @@ Não use para changelog de feature; mudanças funcionais continuam nos documento
 - **Escopo:** `src/components/{feedback/BrainLoadingState.tsx,ui/{select,popover,command}.tsx}` e
   telas consumidoras, inicialmente `src/features/empresas-empregados/`.
 
+### 2026-09-04 — Páginas de relatório usam cabeçalho editorial leve
+- **Contexto:** títulos de relatórios coexistiam como cards hero, barras simples e blocos isolados,
+  o que fragmentava a leitura ao navegar entre AELO, Secovi e as novas páginas Rebrain.
+- **Decisão:** o padrão comum é uma faixa `border-b` com categoria, título, subtítulo de recorte e
+  contexto secundário opcional. Badges de marca não pertencem ao cabeçalho de página; a identidade
+  já está no shell.
+- **Consequência:** relatórios novos adotam o padrão imediatamente; relatórios existentes migram
+  apenas quando forem tocados, sem refatoração visual em massa.
+- **Escopo:** `docs/architecture/DESIGN_SYSTEM.md` e páginas de relatório, inicialmente
+  `src/features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx`.
+
 <!-- novas decisões acima desta linha -->
