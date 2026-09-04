@@ -164,7 +164,24 @@ Primeira versão de produto:
 - sem série mensal, pois RAIS é anual;
 - sem pré-carga nacional: cache sob demanda e compartilhado entre usuários/sessões.
 
-Indicadores salariais e recortes por setor/ocupação históricos ficam para decisão posterior, pois multiplicam consultas, custo e complexidade interpretativa.
+## 5.1 Pendências da feature — Histórico de Empregados, Fase 2
+
+Não fazem parte da V1 anual municipal. Cada item exige novo *dry run*, teto de bytes, decisão de
+cache/retenção e revisão metodológica antes de implementação:
+
+- [ ] **Remuneração histórica:** média, mediana e cobertura de salários positivos por ano. Requer
+  explicar mudanças monetárias/metodológicas e não deve ser comparada nominalmente sem critério.
+- [ ] **Setores históricos:** evolução anual por subsetor, com escolha explícita entre série dos
+  principais setores atuais ou composição completa por ano.
+- [ ] **Ocupações históricas:** evolução por CBO/família/grande grupo; precisa tratar códigos e
+  classificações ausentes/alteradas ao longo do tempo.
+- [ ] **Comparação municipal:** dois ou mais municípios na mesma visualização, somente após medir
+  custo de múltiplos escopos e definir normalização por população/emprego.
+- [ ] **Pré-carga ou batch nacional:** proibido por enquanto. Só considerar com telemetria de custo,
+  política de atualização/expiração e estimativa aprovada para o universo inteiro.
+
+Indicadores salariais e recortes por setor/ocupação históricos ficam para fase posterior, pois
+multiplicam consultas, custo e complexidade interpretativa.
 
 ## 6. Critérios de aceite finais
 

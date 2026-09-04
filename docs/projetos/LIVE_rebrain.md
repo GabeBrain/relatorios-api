@@ -1450,6 +1450,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
   de Cloud Billing, orçamento/alertas e painel interno por feature. A telemetria de jobs não deve
   ser consultada a cada abertura de página. Detalhe em
   [`PLAN_BIGQUERY_COST_OBSERVABILITY.md`](../architecture/PLAN_BIGQUERY_COST_OBSERVABILITY.md).
+- [ ] **Empresas e Empregados — Histórico de Empregados, Fase 2:** remuneração, setores e ocupações
+  históricos; comparação municipal; e qualquer pré-carga/batch nacional. Permanecem fora da V1 de
+  vínculos anuais e só avançam após *dry run*, teto de bytes, política de cache/retenção e revisão
+  metodológica por recorte. Detalhe em
+  [`PLAN_POS_TESTE_EMPREGADOS_UX_HISTORICO_2026-09-04.md`](../features/empresas-empregados/PLAN_POS_TESTE_EMPREGADOS_UX_HISTORICO_2026-09-04.md).
 - [ ] Atualizador VGV V1: homologar a interface padronizada e o mapa urbano de `/atualizador-vgv` em desktop/mobile e nos temas claro/escuro.
 - [ ] Atualizador VGV: definir rotina de atualização das séries INCC-DI, IPCA e IGP-DI (assets atuais até 01/2026).
 - [ ] **API Explorer — publicar proxy Socio:** executar `supabase functions deploy socio-proxy --project-ref mxinpvcqzbfbzjodhgtz` com uma conta que tenha acesso ao projeto e, em seguida, redeployar o front-end Lovable.
