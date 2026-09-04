@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertCircle, ArrowDownUp, BarChart3, Download, LockKeyhole, Search } from 'lucide-react';
+import { AlertCircle, ArrowDownUp, BarChart3, Download, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -100,9 +100,8 @@ export default function EmployeesReportWorkspace() {
   async function handleExport() { if (!report) return; const filename = await downloadEmployeeWorkbook(report); toast.success(`Arquivo exportado: ${filename}`); }
 
   return <section className="space-y-5"><Card className="border-primary/15 shadow-sm"><CardContent className="p-4 sm:p-5"><div className="flex flex-col gap-4 lg:flex-row lg:items-end"><RaisMunicipalitySelector uf={scope.uf} city={scope.city} onChange={setScope} disabled={loadingReport} /><div className="w-full space-y-1.5 lg:w-52"><Label htmlFor="employee-year">Ano RAIS</Label><Select value={year} onValueChange={(value) => { setYear(value); setReport(null); }} disabled={!municipality || loadingMunicipality || loadingYears || years.length === 0 || loadingReport}><SelectTrigger id="employee-year"><SelectValue placeholder={loadingMunicipality ? 'Preparando município…' : loadingYears ? 'Carregando anos…' : !scope.city ? 'Escolha o município' : 'Selecione o ano'} /></SelectTrigger><SelectContent>{years.map((item, index) => <SelectItem key={item} value={String(item)}>{item}{index === 0 ? ' — mais recente' : ''}</SelectItem>)}</SelectContent></Select></div><Button onClick={handleGenerate} disabled={loadingReport || !municipality || !year}>{loadingReport ? <><BarChart3 /> Gerando relatório…</> : <><BarChart3 /> Gerar relatório</>}</Button></div>{municipality && <p className="mt-3 text-xs text-muted-foreground">Município RAIS · código IBGE: {municipality.ibgeCode}</p>}{loadingMunicipality && <BrainLoadingState variant="field" title="Confirmando município na RAIS" className="mt-3" />}{loadingYears && !loadingMunicipality && <BrainLoadingState variant="field" title="Preparando anos disponíveis" className="mt-3" />}</CardContent></Card>
-    <Alert><LockKeyhole className="h-4 w-4" /><AlertTitle>Consulta protegida</AlertTitle><AlertDescription>O Bearer GeoBrain protege a geração do relatório; ele não limita os municípios disponíveis na RAIS.</AlertDescription></Alert>
     {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertTitle>Não foi possível continuar</AlertTitle><AlertDescription className="flex items-center justify-between gap-3">{error}<Button variant="outline" size="sm" onClick={() => setError(null)}>Fechar</Button></AlertDescription></Alert>}
-    {loadingReport && <div className="space-y-4"><BrainLoadingState title="Consultando vínculos, setores e ocupações" description="Essa consulta pode levar alguns instantes." startedAt={generationStartedAt} /><div className="grid gap-4 md:grid-cols-4"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div></div>}
+    {loadingReport && <BrainLoadingState variant="overlay" title="Consultando vínculos, setores e ocupações" description="Essa consulta pode levar alguns instantes." startedAt={generationStartedAt} />}
     {report && !loadingReport && <ReportResult report={report} onExport={handleExport} />}
   </section>;
 }

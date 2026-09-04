@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import brainLogo from '../../../assets/logoBrain.png';
 import { cn } from '@/lib/utils';
 
-type BrainLoadingVariant = 'page' | 'field' | 'operation';
+type BrainLoadingVariant = 'page' | 'field' | 'operation' | 'overlay';
 
 interface BrainLoadingStateProps {
   title: string;
@@ -34,6 +34,18 @@ export function BrainLoadingState({ title, description, startedAt, variant = 'op
 
   const elapsed = elapsedLabel(startedAt, now);
   const compact = variant === 'field';
+
+  if (variant === 'overlay') {
+    return <div className={cn('fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/90 px-6 backdrop-blur-sm', className)} role="status" aria-live="polite" aria-busy="true">
+      <div className="relative h-28 w-64 sm:h-32 sm:w-80">
+        <img src={brainLogo} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-contain opacity-15" />
+        <img src={brainLogo} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full animate-pulse object-contain" />
+      </div>
+      <div className="mt-6 flex items-center gap-2 text-sm font-medium text-foreground"><Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />{title}</div>
+      {description && <p className="mt-2 text-center text-sm text-muted-foreground">{description}</p>}
+      {elapsed && <p className="mt-3 font-mono text-xs tabular-nums text-muted-foreground">{elapsed} decorridos</p>}
+    </div>;
+  }
 
   return <div className={cn(
     'flex items-center gap-3 text-sm text-muted-foreground',

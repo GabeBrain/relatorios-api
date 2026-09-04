@@ -71,8 +71,9 @@ o botão deve indicar progresso e não aceitar submissões duplicadas.
 
 Toda página de dados deve tratar carregamento em três níveis: **página lazy** (reserva contextual),
 **campo dependente** (somente o controle afetado fica indisponível) e **operação longa** (etapa,
-tempo decorrido real e prevenção de duplicidade). Reutilize `BrainLoadingState` quando a espera
-for perceptível; skeletons preservam a estrutura que será entregue.
+tempo decorrido real e prevenção de duplicidade). Quando a operação bloqueia a tela inteira,
+`BrainLoadingState` na variante `overlay` usa véu opaco, fundo desfocado e logo Brain central;
+use-o em vez de um card estático. Skeletons preservam a estrutura que será entregue.
 
 Não prometa ETA sem métrica observada. Use cronômetro real ou texto honesto como “pode levar alguns
 instantes”. Erro e retry preservam o escopo já escolhido.
