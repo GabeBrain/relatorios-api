@@ -1,5 +1,21 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-04 — Empregados: overlay Brain para consulta e aviso técnico removido — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — geração do relatório RAIS.
+- **O que:** a geração passou do card inline para o `BrainLoadingState` em variante `overlay`:
+  véu opaco, fundo desfocado, logo Brain central, etapa e tempo real. O padrão foi recuperado da
+  composição de overlay já existente no Relatório AELO. O card “Consulta protegida” foi removido,
+  pois descrevia infraestrutura/autorização, não uma decisão que o usuário precisasse tomar.
+- **Evidência local:** `npm run typecheck` aprovado e `git diff --check` sem erro. Verificação
+  visual automatizada segue indisponível nesta máquina (executor de navegador ausente).
+- **Arquivos:** `src/components/feedback/BrainLoadingState.tsx`,
+  `src/features/empresas-empregados/components/EmployeesReportWorkspace.tsx` e
+  `docs/architecture/FRONTEND_GUIDELINES.md`.
+- **Commits:** `908ac2a`.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** a espera longa deixa de parecer um aviso estático e passa a
+  ter feedback de aplicação; Empresas continua sem rede, banco, batch ou dados.
+
 ### 2026-09-04 — Empregados: feedback de consulta e controles Brain padronizados — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — experiência de carregamento e filtros do relatório RAIS.
 - **O que:** criado `BrainLoadingState` compartilhado para a reserva lazy, carregamentos dependentes
