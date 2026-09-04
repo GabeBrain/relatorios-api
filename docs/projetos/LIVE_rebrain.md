@@ -1,5 +1,19 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-04 — Empregados: cabeçalho editorial comum de relatórios — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — contexto de página.
+- **O que:** o card hero provisório foi substituído pela faixa leve usada como referência nos
+  relatórios AELO/Secovi: categoria, título, subtítulo de recorte e sessão GeoBrain discreta.
+  Badges “Rebrain”/“Dados agregados” não competem mais com o título. O Design System e as decisões
+  de frontend passam a documentar esse cabeçalho como padrão incremental para relatórios.
+- **Evidência local:** `npm run typecheck` aprovado; `git diff --check` sem erro.
+- **Arquivos:** `src/features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx`,
+  `docs/architecture/{DESIGN_SYSTEM,FRONTEND_DECISIONS}.md`.
+- **Commits:** `a847e13`.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** o padrão de cabeçalho pode ser aplicado gradualmente ao tocar
+  outros relatórios; não houve alteração de dados, autorização ou Empresas.
+
 ### 2026-09-04 — Empregados: overlay Brain para consulta e aviso técnico removido — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — geração do relatório RAIS.
 - **O que:** a geração passou do card inline para o `BrainLoadingState` em variante `overlay`:
