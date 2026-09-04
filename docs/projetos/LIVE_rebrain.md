@@ -308,6 +308,21 @@
 - **Commits:** `5f440e2`.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** RUNTIME; homologação visual depende de consulta autenticada no navegador.
+### 2026-09-04 — Empresas: fonte Receita validada sem batch — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** futura aba Empresas em `/rebrain/empresas-empregados`.
+- **O que:** a sonda WebDAV de leitura confirmou que a fonte pública CNPJ está disponível e que a
+  competência mais recente é `2026-08`; o manifesto contém os 22 ZIPs mínimos. A medição de
+  metadados aponta 6,52 GiB compactados, sendo 4,97 GiB de estabelecimentos. `Municipios.zip`
+  confirmou os códigos Receita `8047` (Blumenau) e `9571` (Rio Verde), reforçando que IBGE não
+  pode ser usado diretamente e que UF é necessária para desambiguar nomes.
+- **Evidência local:** somente `PROPFIND` e leitura em memória de `Municipios.zip` (43 KB); nenhum
+  ZIP nacional foi persistido, nenhum batch, Edge, banco ou UI de Empresas foi criado.
+- **Arquivos:** `docs/features/empresas-empregados/TESTE_INICIAL_FONTE_RECEITA_2026-09-04.md`.
+- **Commits:** `fe5dfa5`.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** a próxima reprodução depende de recuperar `cnpj_blumenau.py`
+  e `exportar_xlsx.py` ou uma especificação fechada do mapeamento setorial e da regra de porte;
+  não inferir regras para forçar paridade com os resultados de Diego.
 
 ### 2026-09-04 — Empregados: evolução histórica RAIS V1 sob demanda — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba `Evolução histórica` após um relatório anual.
