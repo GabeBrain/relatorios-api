@@ -5,7 +5,7 @@
 - **O que:** preparada migração que faz a primeira criação do snapshot retornar `acquired=true` para a própria requisição geradora; antes ela ficava em `processing` sem uma execução responsável por gerar os agregados. A Edge passou a registrar de forma limitada e sem segredos o código/mensagem/detalhe/hint do PostgREST caso `rais_claim_snapshot` volte a falhar.
 - **Evidência local:** build TypeScript/Vite aprovado fora do sandbox; `git diff --check` aprovado. O export dos logs remotos recebido contém apenas eventos `booted`/`shutdown`, sem log de requisição ou exceção, por isso não permite atribuir a causa operacional da primeira falha.
 - **Arquivos:** `supabase/migrations/20260904143854_fix_rais_snapshot_claim.sql`, `supabase/functions/rais-employees-report/index.ts` e este documento.
-- **Commits:** pendente de commit local nesta execução.
+- **Commits:** `26372ca`, `0a41820`.
 - **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
 - **Impacto em Etapas/Pendências:** requer aplicar a migração e redeploy da Edge para ativar a correção; a primeira nova geração mostrará o diagnóstico efetivo se ainda houver falha de schema/permissão.
 
