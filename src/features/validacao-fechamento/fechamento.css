@@ -92,7 +92,9 @@
   text-align: left; background: var(--vf-muted-soft); font-weight: 500;
   position: sticky; left: 0; z-index: 2;
 }
-.validacao-fechamento table.vf-resumo thead th.vf-label { z-index: 3; }
+.validacao-fechamento table.vf-resumo thead th.vf-label {
+  z-index: 3; background: var(--vf-primary); color: #fff; font-weight: 600;
+}
 .validacao-fechamento table.vf-resumo tbody tr.vf-total {
   background: var(--vf-accent-soft); font-weight: 700;
 }
