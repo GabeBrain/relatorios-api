@@ -444,3 +444,11 @@
 /* Bar labels stay neutral in dark mode; only KPI values use brand yellow. */
 .dark .qd-root .recharts-bar .recharts-label-list text,
 .dark .qd-root .recharts-label-list text { fill: var(--qd-text) !important; }
+
+.qd-historical-matrix-scroll { overflow-x: auto; }
+.qd-historical-matrix { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 11px; }
+.qd-historical-matrix th,
+.qd-historical-matrix td { padding: 8px; text-align: center; white-space: nowrap; }
+.qd-historical-matrix thead th { color: var(--qd-text-muted); font-weight: 600; }
+.qd-historical-matrix tbody th { color: var(--qd-text); text-align: left; font-weight: 600; }
+.qd-historical-matrix td { background: rgb(91 117 55 / var(--qd-cell-alpha)); color: var(--qd-text); font-variant-numeric: tabular-nums; }

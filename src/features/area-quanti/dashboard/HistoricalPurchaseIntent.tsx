@@ -1,7 +1,8 @@
-import { useMemo, useRef, type ReactNode } from 'react';
+import { useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
 import {
   CartesianGrid,
   Legend,
+  LabelList,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -10,7 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import { ChartCard } from './Charts';
-import { displayCategoricalValue, normalizeCategoricalValue, purchaseIntentStatus } from './aggregate';
+import { displayCategoricalValue, normalizeCategoricalValue, orderedValues, purchaseIntentStatus } from './aggregate';
 import type { CategoricalField, QuantiRecord } from './types';
 
 type SeriesDefinition = {
@@ -23,7 +24,8 @@ type SeriesDefinition = {
 
 type HistoryPoint = Record<string, string | number | null> & { period: string };
 
-const COLORS = ['#5B7537', '#71984a', '#8fb85f', '#b5cf7d', '#d7e3a8', '#F8D000'];
+const COLORS = ['#5B7537', '#D89B00', '#3B82A0', '#B45B5B', '#8B6BB5', '#D47C29', '#4C9A7A'];
+const PROPERTY_FIELD = 'IC4P33_1' as CategoricalField;
 
 function comparableText(value: string): string {
   return value
@@ -98,6 +100,20 @@ function categoryDefinitions(
   }));
 }
 
+function distributionDefinitions(
+  rows: QuantiRecord[],
+  field: CategoricalField,
+  limit: number,
+  denominator: (row: QuantiRecord) => boolean,
+): SeriesDefinition[] {
+  return topCategories(rows, field, limit, denominator).map((category, index) => ({
+    key: `series_${index}`,
+    label: displayCategoricalValue(field, category),
+    color: COLORS[index % COLORS.length],
+    denominator,
+    matches: (row) => normalizeCategoricalValue(field, (row as any)[field]) === category,
+  }));
+}
 function intentIsTrue(row: QuantiRecord): boolean {
   return purchaseIntentStatus(row.intencao_compra_padronizada) === true;
 }
@@ -152,6 +168,7 @@ function HistoricalLineCard({
   definitions: SeriesDefinition[];
 }) {
   const data = useMemo(() => historyByQuarter(rows, definitions), [rows, definitions]);
+  const labels = useMemo(() => new Map(definitions.map((definition) => [definition.key, definition.label])), [definitions]);
   const chartWidth = Math.max(620, data.length * 92);
 
   return (
@@ -159,7 +176,7 @@ function HistoricalLineCard({
       <HorizontalChartScroll>
         <div style={{ minWidth: chartWidth }}>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data} margin={{ top: 12, right: 22, left: 0, bottom: 8 }}>
+            <LineChart data={data} margin={{ top: 26, right: 22, left: 0, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--qd-border)" vertical={false} />
               <XAxis dataKey="period" tick={{ fontSize: 10, fill: 'var(--qd-text-muted)' }} interval={0} />
               <YAxis
@@ -169,7 +186,7 @@ function HistoricalLineCard({
                 width={38}
               />
               <Tooltip
-                formatter={(value: number, _name: string, item: any) => [`${Number(value).toFixed(1)}%`, item.dataKey]}
+                formatter={(value: number, name: string, item: any) => [`${Number(value).toFixed(1)}%`, labels.get(String(item?.dataKey ?? 'serie')) ?? name]}
                 labelStyle={{ color: '#1f2a12' }}
               />
               <Legend verticalAlign="top" align="center" wrapperStyle={{ fontSize: 10, paddingBottom: 12 }} />
@@ -184,7 +201,12 @@ function HistoricalLineCard({
                   dot={{ r: 3, fill: definition.color }}
                   activeDot={{ r: 5 }}
                   connectNulls
-                />
+
+                  >
+
+                    <LabelList dataKey={definition.key} position="top" fill={definition.color} fontSize={9} formatter={(value: number) => `${Number(value).toFixed(1)}%`} />
+
+                  </Line>
               ))}
             </LineChart>
           </ResponsiveContainer>
@@ -194,6 +216,36 @@ function HistoricalLineCard({
   );
 }
 
+function hasDesiredProperty(row: QuantiRecord): boolean {
+  return normalizeCategoricalValue(PROPERTY_FIELD, (row as any)[PROPERTY_FIELD]) != null;
+}
+
+function DesiredPropertyMatrix({ rows, rowField, title, subtitle }: { rows: QuantiRecord[]; rowField: CategoricalField; title: string; subtitle: string }) {
+  const matrix = useMemo(() => {
+    const activeRows = rows.filter((row) => hasDesiredProperty(row) && normalizeCategoricalValue(rowField, (row as any)[rowField]) != null);
+    const rowValues = orderedValues(rowField, topCategories(activeRows, rowField, 10));
+    const colValues = topCategories(activeRows, PROPERTY_FIELD, 5);
+    const values = rowValues.map((rowValue) => {
+      const base = activeRows.filter((row) => normalizeCategoricalValue(rowField, (row as any)[rowField]) === rowValue);
+      return colValues.map((colValue) => {
+        const count = base.filter((row) => normalizeCategoricalValue(PROPERTY_FIELD, (row as any)[PROPERTY_FIELD]) === colValue).length;
+        return base.length ? (count / base.length) * 100 : 0;
+      });
+    });
+    return { rowValues, colValues, values };
+  }, [rows, rowField]);
+
+  return (
+    <ChartCard title={title} subtitle={subtitle} exportable={false}>
+      <div className="qd-historical-matrix-scroll qd-scroll">
+        <table className="qd-historical-matrix">
+          <thead><tr><th>{rowField === 'localidade' ? 'Localidade' : rowField === 'geracao' ? 'Geracao' : 'Faixa de renda'}</th>{matrix.colValues.map((value) => <th key={value}>{value}</th>)}</tr></thead>
+          <tbody>{matrix.rowValues.map((rowValue, rowIndex) => <tr key={rowValue}><th>{displayCategoricalValue(rowField, rowValue)}</th>{matrix.colValues.map((colValue, colIndex) => { const value = matrix.values[rowIndex]?.[colIndex] ?? 0; return <td key={colValue} style={{ '--qd-cell-alpha': Math.max(0.08, value / 100) } as CSSProperties}>{value.toFixed(1)}%</td>; })}</tr>)}</tbody>
+        </table>
+      </div>
+    </ChartCard>
+  );
+}
 export function HistoricalPurchaseIntent({ rows }: { rows: QuantiRecord[] }) {
   const generalDefinitions = useMemo<SeriesDefinition[]>(() => [
     {
@@ -248,13 +300,18 @@ export function HistoricalPurchaseIntent({ rows }: { rows: QuantiRecord[] }) {
     [rows],
   );
   const timeDefinitions = useMemo(
-    () => categoryDefinitions(rows, 'tempo_intencao_padronizado', 5, validPurchaseTime, () => true),
+    () => distributionDefinitions(rows, 'tempo_intencao_padronizado', 5, validPurchaseTime),
     [rows],
   );
   const motiveDefinitions = useMemo(
-    () => categoryDefinitions(rows, 'motivo_intencao_padronizado', 5, intentIsTrue, () => true),
+    () => distributionDefinitions(rows, 'motivo_intencao_padronizado', 5, intentIsTrue),
     [rows],
   );
+  const propertyDefinitions = useMemo(
+    () => distributionDefinitions(rows, PROPERTY_FIELD, 5, hasDesiredProperty),
+    [rows],
+  );
+  const hasPropertyData = useMemo(() => rows.some(hasDesiredProperty), [rows]);
 
   const availableQuarters = useMemo(() => new Set(rows.map(quarterOf).filter(Boolean).map((quarter) => quarter!.key)).size, [rows]);
   if (!availableQuarters) {
@@ -274,7 +331,18 @@ export function HistoricalPurchaseIntent({ rows }: { rows: QuantiRecord[] }) {
         <HistoricalLineCard rows={rows} title="Intencao de compra por faixa de renda" subtitle="Percentual com intencao dentro de cada faixa" definitions={incomeDefinitions} />
         <HistoricalLineCard rows={rows} title="Prazo para concretizar a compra" subtitle="Distribuicao entre entrevistados com intencao de compra" definitions={timeDefinitions} />
         <HistoricalLineCard rows={rows} title="Motivacoes para compra" subtitle="Cinco principais motivos entre entrevistados com intencao" definitions={motiveDefinitions} />
+        {hasPropertyData && <HistoricalLineCard rows={rows} title="Tipo de imovel desejado ao longo do tempo" subtitle="Cinco tipos mais citados por trimestre" definitions={propertyDefinitions} />}
       </div>
+      {hasPropertyData && (
+        <section className="space-y-2 pt-2">
+          <h3 className="qd-section-title">Imovel de desejo</h3>
+          <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+            <DesiredPropertyMatrix rows={rows} rowField="renda_macro_faixa" title="Tipo de imovel por faixa de renda" subtitle="Percentual dentro de cada faixa de renda" />
+            <DesiredPropertyMatrix rows={rows} rowField="geracao" title="Tipo de imovel por geracao" subtitle="Percentual dentro de cada geracao" />
+            <DesiredPropertyMatrix rows={rows} rowField="localidade" title="Tipo de imovel por capital e interior" subtitle="Percentual dentro de cada localidade" />
+          </div>
+        </section>
+      )}
     </div>
   );
 }
