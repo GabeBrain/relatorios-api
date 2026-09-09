@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { DEFAULT_DATASET_ID } from './datasets';
 import type { CategoricalField, Filters } from './types';
 
 interface State {
@@ -12,7 +13,7 @@ interface State {
 }
 
 export const useQuantiStore = create<State>((set) => ({
-  datasetId: '2020',
+  datasetId: DEFAULT_DATASET_ID,
   filters: {},
   setDatasetId: (id) => set({ datasetId: id, filters: {} }),
   setFilter: (field, values) =>
