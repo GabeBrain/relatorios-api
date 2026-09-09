@@ -13,7 +13,7 @@ interface State {
 }
 
 export const useQuantiStore = create<State>((set) => ({
-  datasetId: '2020',
+  datasetId: DEFAULT_DATASET_ID,
   filters: {},
   setDatasetId: (id) => set({ datasetId: id, filters: {} }),
   setFilter: (field, values) =>
