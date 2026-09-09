@@ -2,11 +2,13 @@ export interface DatasetRef {
   id: string;
   label: string;
   /** Dataset source. Defaults to Lovable Cloud Storage for legacy entries. */
-  source?: 'public' | 'storage';
+  source?: 'public' | 'storage' | 'combined';
   /** Lovable Cloud Storage bucket, when source is storage. */
   bucket?: string;
-  /** Object path within the bucket or public URL path. */
+  /** Object path within the bucket or public URL path. Vazio para bases combinadas. */
   path: string;
+  /** IDs das bases que compõem uma base combinada (reaproveitam o cache já carregado). */
+  parts?: string[];
 }
 
 /**
