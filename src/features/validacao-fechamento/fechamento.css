@@ -104,6 +104,23 @@
 .validacao-fechamento .vf-neg { color: var(--vf-neg); }
 .validacao-fechamento .vf-zero { color: var(--vf-muted); }
 
+/* Resumo Email: uma linha por indicador e barras nas variações calculadas. */
+.validacao-fechamento table.vf-resumo-email { min-width: 1040px; }
+.validacao-fechamento table.vf-resumo-email th { white-space: normal; min-width: 118px; }
+.validacao-fechamento table.vf-resumo-email th.vf-label { min-width: 260px; }
+.validacao-fechamento table.vf-resumo-email td { font-variant-numeric: tabular-nums; }
+.validacao-fechamento table.vf-resumo-email .vf-email-var {
+  position: relative; min-width: 130px; overflow: hidden; font-weight: 700;
+}
+.validacao-fechamento .vf-email-bar {
+  position: absolute; inset: 4px 6px; z-index: 0; overflow: hidden;
+  border: 1px solid var(--vf-border); background: var(--vf-muted-soft);
+}
+.validacao-fechamento .vf-email-bar-fill { display: block; height: 100%; opacity: .28; }
+.validacao-fechamento .vf-email-bar-fill.is-positive { background: var(--vf-pos); }
+.validacao-fechamento .vf-email-bar-fill.is-negative { background: var(--vf-neg); }
+.validacao-fechamento .vf-email-var > span:last-child { position: relative; z-index: 1; }
+
 /* DataGrid */
 .validacao-fechamento .vf-grid-wrap { border: 1px solid var(--vf-border); border-radius: 8px; overflow: hidden; background: var(--vf-card); }
 .validacao-fechamento .vf-grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 10pt; }

@@ -431,6 +431,19 @@ export interface ResumoResult {
   prevBucket: Map<string, Record<MetricKey, number | null>>;
 }
 
+export interface ResumoEmailResult {
+  previousYearKey: string;
+  previousMonthKey: string;
+  selectedKey: string;
+  previousYearAccumLabel: string;
+  selectedAccumLabel: string;
+  previousYear: Record<MetricKey, number | null>;
+  previousMonth: Record<MetricKey, number | null>;
+  selected: Record<MetricKey, number | null>;
+  previousYearAccum: Record<MetricKey, number | null>;
+  selectedAccum: Record<MetricKey, number | null>;
+}
+
 /** Agrega rows em buckets conforme granularidade. Constrói também AA e PA. */
 export function computeResumo(rows: ClosureRow[], allRowsUnfiltered: ClosureRow[], g: Granularity): ResumoResult {
   // Buckets a exibir: derivados dos rows filtrados
@@ -467,6 +480,53 @@ export function computeResumo(rows: ClosureRow[], allRowsUnfiltered: ClosureRow[
     prevBucket.set(k, kPA ? aggMetrics(byBucketFull.get(kPA)) : aggMetrics(undefined));
   }
   return { buckets, yearAgo, prevBucket };
+}
+
+function metricsForRows(rows: ClosureRow[]): Record<MetricKey, number | null> {
+  const agg = newAgg();
+  for (const row of rows) {
+    const bucketKey = bucketKeyOfRow(row, 'month');
+    accumulate(agg, row, bucketKey, releaseBucketKeyOfRow(row, 'month'));
+  }
+  return allMetrics(agg);
+}
+
+function shiftMonth(periodKey: string, months: number): string {
+  const [yearText, monthText] = periodKey.split('-');
+  const year = Number(yearText);
+  const month = Number(monthText);
+  if (!Number.isInteger(year) || !Number.isInteger(month)) return '';
+  const date = new Date(year, month - 1 + months, 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/**
+ * Base da aba Resumo Email: sempre trabalha em meses, mesmo que a visualização
+ * principal esteja anual ou trimestral. O período de referência é o último mês
+ * que permanece após os filtros temporais aplicados.
+ */
+export function computeResumoEmail(selectedRows: ClosureRow[], dimensionRows: ClosureRow[]): ResumoEmailResult | null {
+  const selectedKey = selectedRows.reduce((latest, row) => row.periodKey > latest ? row.periodKey : latest, '');
+  if (!selectedKey) return null;
+
+  const previousMonthKey = shiftMonth(selectedKey, -1);
+  const previousYearKey = shiftMonth(selectedKey, -12);
+  const selectedYear = selectedKey.slice(0, 4);
+  const previousYear = previousYearKey.slice(0, 4);
+  const inRange = (row: ClosureRow, year: string, end: string) => row.periodKey >= `${year}-01` && row.periodKey <= end;
+
+  return {
+    previousYearKey,
+    previousMonthKey,
+    selectedKey,
+    previousYearAccumLabel: `Acum jan/${previousYear.slice(-2)} a ${bucketMonthFromStr(previousYearKey)}`,
+    selectedAccumLabel: `Acum jan/${selectedYear.slice(-2)} a ${bucketMonthFromStr(selectedKey)}`,
+    previousYear: metricsForRows(dimensionRows.filter((row) => row.periodKey === previousYearKey)),
+    previousMonth: metricsForRows(dimensionRows.filter((row) => row.periodKey === previousMonthKey)),
+    selected: metricsForRows(dimensionRows.filter((row) => row.periodKey === selectedKey)),
+    previousYearAccum: metricsForRows(dimensionRows.filter((row) => inRange(row, previousYear, previousYearKey))),
+    selectedAccum: metricsForRows(dimensionRows.filter((row) => inRange(row, selectedYear, selectedKey))),
+  };
 }
 
 /** Fórmula DAX VarXxx: se AA=0 e atual>0 → 1; senão (atual - AA) / AA. */

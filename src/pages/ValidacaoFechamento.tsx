@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { VFHeader } from '@/features/validacao-fechamento/VFHeader';
 import { VFSidebar } from '@/features/validacao-fechamento/VFSidebar';
 import { ResumoTable } from '@/features/validacao-fechamento/ResumoTable';
+import { ResumoEmailTable } from '@/features/validacao-fechamento/ResumoEmailTable';
 import { ResumoPorCidade } from '@/features/validacao-fechamento/ResumoPorCidade';
 import { DetalhamentoGrid } from '@/features/validacao-fechamento/DetalhamentoGrid';
 import { DivergencesGrid } from '@/features/validacao-fechamento/DivergencesGrid';
@@ -11,14 +12,14 @@ import { validateBuildings } from '@/features/validacao-fechamento/validation-ru
 import { ActiveFiltersBar } from '@/features/validacao-fechamento/ActiveFiltersBar';
 import { useVFData } from '@/features/validacao-fechamento/use-vf-data';
 import {
-  EMPTY_VF_FILTERS, applyVFFilters, computeResumo, extractVFOptions, flattenBuildings,
+  EMPTY_VF_FILTERS, applyVFFilters, computeResumo, computeResumoEmail, extractVFOptions, flattenBuildings,
   type Granularity, type VFFilters,
 } from '@/features/validacao-fechamento/aggregate';
 import { intFmt } from '@/lib/format';
 import '@/features/validacao-fechamento/fechamento.css';
 
 const STORAGE_KEY = 'validacao-fechamento:state';
-type Tab = 'resumo' | 'resumo-cidade' | 'detalhamento' | 'divergencias';
+type Tab = 'resumo' | 'resumo-cidade' | 'resumo-email' | 'detalhamento' | 'divergencias';
 
 export default function ValidacaoFechamento() {
   const hasToken = useAuthStore((s) => s.hasValidToken());
@@ -72,6 +73,10 @@ export default function ValidacaoFechamento() {
   const resumo = useMemo(
     () => computeResumo(filtered, filteredDimOnly, granularity),
     [filtered, filteredDimOnly, granularity],
+  );
+  const resumoEmail = useMemo(
+    () => computeResumoEmail(filtered, filteredDimOnly),
+    [filtered, filteredDimOnly],
   );
 
   // Cidades exibidas na guia "Resumo por cidade"
@@ -141,6 +146,7 @@ export default function ValidacaoFechamento() {
           <div className="vf-tabs ml-auto">
             <button type="button" className="vf-tab" data-active={tab === 'resumo'} onClick={() => setTab('resumo')}>Resumo</button>
             <button type="button" className="vf-tab" data-active={tab === 'resumo-cidade'} onClick={() => setTab('resumo-cidade')}>Resumo por cidade</button>
+            <button type="button" className="vf-tab" data-active={tab === 'resumo-email'} onClick={() => setTab('resumo-email')}>Resumo Email</button>
             <button type="button" className="vf-tab" data-active={tab === 'detalhamento'} onClick={() => setTab('detalhamento')}>Detalhamento</button>
             <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências ({divergences.length})</button>
           </div>
@@ -173,6 +179,7 @@ export default function ValidacaoFechamento() {
 
         <div className="transition-opacity duration-200">
           {tab === 'resumo' && <ResumoTable resumo={resumo} granularity={granularity} />}
+          {tab === 'resumo-email' && <ResumoEmailTable resumo={resumoEmail} />}
           {tab === 'resumo-cidade' && (
             <ResumoPorCidade rows={allRows} filters={filters} granularity={granularity} cities={cityBlocks} />
           )}
