@@ -147,9 +147,32 @@ function parseDataset(text: string, label: string): QuantiDataset {
   }
 }
 
+/**
+ * Base combinada: reaproveita o cache das bases anuais já carregadas e apenas
+ * concatena os registros, sem baixar um arquivo único gigante.
+ */
+async function fetchCombined(ref: DatasetRef): Promise<QuantiDataset> {
+  const parts = (ref.parts ?? [])
+    .map((id) => DATASETS.find((d) => d.id === id))
+    .filter((d): d is DatasetRef => Boolean(d));
+
+  const loaded = await Promise.all(parts.map((p) => fetchDataset(p)));
+  const records = loaded.flatMap((d) => d.records);
+  const questions = Object.assign({}, ...loaded.map((d) => d.questions ?? {}));
+
+  return {
+    id: ref.id,
+    label: ref.label,
+    count: records.length,
+    generated_at: new Date().toISOString(),
+    questions,
+    records,
+  };
+}
+
 async function fetchDataset(ref: DatasetRef): Promise<QuantiDataset> {
   const source = ref.source ?? 'storage';
-  const key = `${source}/${ref.bucket ?? ''}/${ref.path}`;
+  const key = source === 'combined' ? `combined/${ref.id}` : `${source}/${ref.bucket ?? ''}/${ref.path}`;
   if (!cache.has(key)) {
     cache.set(
       key,
