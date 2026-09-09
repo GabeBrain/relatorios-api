@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-09 — Validação do Fechamento: isolamento de Oferta ativa — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — indicadores compartilhados das três abas de resumo.
+- **O quê:** renomeada a métrica para **Oferta ativa** e reforçado o isolamento do filtro `status = Ativo`: ele se aplica somente a essa métrica; os demais indicadores mantêm seus cálculos originais.
+- **Por quê:** medir tudo que foi lançado até o período de referência e ainda pertence a empreendimentos ativos, sem alterar os demais resultados.
+- **Arquivos:** `src/features/validacao-fechamento/aggregate.ts`, `aggregate.test.ts`.
+- **Commits:** `d047b0e`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; teste cobre a inclusão de lançamento esgotado em Unidades lançadas e sua exclusão exclusiva de Oferta ativa.
+
 ### 2026-09-09 — Validação do Fechamento: indicador Oferta Ativa — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — Resumo, Resumo por cidade e Resumo Email.
 - **O quê:** incluído o indicador **Oferta Ativa**, que acumula a quantidade de lançamento até o período de referência apenas para empreendimentos com status atual `Ativo`.
