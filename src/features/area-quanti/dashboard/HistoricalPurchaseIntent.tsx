@@ -169,14 +169,14 @@ function HistoricalLineCard({
 }) {
   const data = useMemo(() => historyByQuarter(rows, definitions), [rows, definitions]);
   const labels = useMemo(() => new Map(definitions.map((definition) => [definition.key, definition.label])), [definitions]);
-  const chartWidth = Math.max(620, data.length * 92);
+  const chartWidth = Math.max(960, data.length * 140);
 
   return (
     <ChartCard title={title} subtitle={subtitle} exportable={false}>
       <HorizontalChartScroll>
         <div style={{ minWidth: chartWidth }}>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data} margin={{ top: 26, right: 22, left: 0, bottom: 8 }}>
+          <ResponsiveContainer width="100%" height={390}>
+            <LineChart data={data} margin={{ top: 66, right: 28, left: 0, bottom: 12 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--qd-border)" vertical={false} />
               <XAxis dataKey="period" tick={{ fontSize: 10, fill: 'var(--qd-text-muted)' }} interval={0} />
               <YAxis
@@ -190,7 +190,7 @@ function HistoricalLineCard({
                 labelStyle={{ color: '#1f2a12' }}
               />
               <Legend verticalAlign="top" align="center" wrapperStyle={{ fontSize: 10, paddingBottom: 12 }} />
-              {definitions.map((definition) => (
+              {definitions.map((definition, definitionIndex) => (
                 <Line
                   key={definition.key}
                   type="monotone"
@@ -204,7 +204,7 @@ function HistoricalLineCard({
 
                   >
 
-                    <LabelList dataKey={definition.key} position="top" fill={definition.color} fontSize={9} formatter={(value: number) => `${Number(value).toFixed(1)}%`} />
+                    <LabelList dataKey={definition.key} position="top" offset={8 + (definitionIndex % 4) * 12} fill={definition.color} fontSize={10} fontWeight={700} formatter={(value: number) => `${Number(value).toFixed(1)}%`} />
 
                   </Line>
               ))}
@@ -323,7 +323,7 @@ export function HistoricalPurchaseIntent({ rows }: { rows: QuantiRecord[] }) {
       <p className="qd-section-sub">
         Percentuais calculados dentro de cada trimestre e respeitando os filtros ativos. Series extensas podem ser arrastadas horizontalmente dentro do proprio grafico.
       </p>
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4">
         <HistoricalLineCard rows={rows} title="Intencao de compra ao longo do tempo" subtitle="Intencao geral e horizonte de ate 2 anos" definitions={generalDefinitions} />
         <HistoricalLineCard rows={rows} title="Estagio da busca pelo imovel" subtitle="Distribuicao das etapas de busca entre todos os entrevistados" definitions={searchDefinitions} />
         <HistoricalLineCard rows={rows} title="Intencao de compra por regiao" subtitle="Percentual com intencao dentro de cada regiao" definitions={regionDefinitions} />
@@ -336,7 +336,7 @@ export function HistoricalPurchaseIntent({ rows }: { rows: QuantiRecord[] }) {
       {hasPropertyData && (
         <section className="space-y-2 pt-2">
           <h3 className="qd-section-title">Imovel de desejo</h3>
-          <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4">
             <DesiredPropertyMatrix rows={rows} rowField="renda_macro_faixa" title="Tipo de imovel por faixa de renda" subtitle="Percentual dentro de cada faixa de renda" />
             <DesiredPropertyMatrix rows={rows} rowField="geracao" title="Tipo de imovel por geracao" subtitle="Percentual dentro de cada geracao" />
             <DesiredPropertyMatrix rows={rows} rowField="localidade" title="Tipo de imovel por capital e interior" subtitle="Percentual dentro de cada localidade" />
