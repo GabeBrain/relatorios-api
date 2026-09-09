@@ -91,10 +91,9 @@ function normalizeRecords(ds: QuantiDataset): QuantiDataset {
       if (n != null) r.lng = n;
     }
     if (r.idade == null && r.idade_numerica != null) {
-      const n = toNumber(r.idade_numerica);
-      if (n != null) r.idade = n;
-    } else if (typeof r.idade === 'string') {
-      r.idade = toNumber(r.idade);
+      r.idade = toAge(r.idade_numerica);
+    } else if (typeof r.idade === 'string' || typeof r.idade === 'number') {
+      r.idade = toAge(r.idade);
     }
     if (typeof r.renda_valor_estimado === 'string') {
       r.renda_valor_estimado = toNumber(r.renda_valor_estimado);
