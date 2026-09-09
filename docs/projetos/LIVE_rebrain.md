@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-09 — Validação do Fechamento: quantidade de lançamento da Oferta ativa — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — indicador Oferta ativa.
+- **O quê:** o indicador passou a usar `typologies_history[].qty` da fotografia de lançamento (`qty_release`), em vez da quantidade mais recente da tipologia; mantém o recorte até o período de referência e `status = Ativo` somente nessa métrica.
+- **Por quê:** reproduzir a semântica da medida DAX e evitar subcontagem quando a quantidade da tipologia foi alterada após o lançamento.
+- **Arquivos:** `src/features/validacao-fechamento/aggregate.ts`, `aggregate.test.ts`.
+- **Commits:** `8707cd0`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; validação local cobre quantidades de lançamento distintas e exclusão de empreendimento esgotado.
+
 ### 2026-09-09 — Validação do Fechamento: isolamento de Oferta ativa — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — indicadores compartilhados das três abas de resumo.
 - **O quê:** renomeada a métrica para **Oferta ativa** e reforçado o isolamento do filtro `status = Ativo`: ele se aplica somente a essa métrica; os demais indicadores mantêm seus cálculos originais.
