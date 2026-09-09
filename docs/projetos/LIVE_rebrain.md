@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-09 — Validação do Fechamento: Resumo Email — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — nova síntese mensal para envio por email.
+- **O quê:** adicionada a aba **Resumo Email**, antes de Detalhamento, com uma linha por indicador, último mês selecionado, mês anterior, mesmo mês do ano anterior, variação anual, acumulados de janeiro até o mês de referência e variação acumulada. As colunas calculadas possuem ajuda contextual e barras proporcionais.
+- **Por quê:** disponibilizar uma leitura pronta para comunicação mensal, sem modificar a guia Resumo existente.
+- **Arquivos:** `src/pages/ValidacaoFechamento.tsx`, `src/features/validacao-fechamento/ResumoEmailTable.tsx`, `aggregate.ts`, `fechamento.css`, `aggregate.test.ts`.
+- **Commits:** `5f440e2`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; homologação visual depende de consulta autenticada no navegador.
+
 ### 2026-09-04 — Empregados: evolução histórica RAIS V1 sob demanda — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba `Evolução histórica` após um relatório anual.
 - **O que:** implementada a série municipal anual de vínculos ativos em 31/12 (1985–2025): uma única
