@@ -219,7 +219,7 @@ export function useQuantiDataset(ref: DatasetRef) {
       .catch((e) => { if (alive) setError(e); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
-  }, [ref.source, ref.bucket, ref.path]);
+  }, [ref.id, ref.source, ref.bucket, ref.path]);
 
   return { data, error, loading };
 }
