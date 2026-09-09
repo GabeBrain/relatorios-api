@@ -27,6 +27,16 @@ function toNumber(v: unknown): number | null {
   return null;
 }
 
+/**
+ * Idade plausível (0–120). Algumas bases trazem lixo neste campo — telefone,
+ * código — que distorce a média se entrar no cálculo.
+ */
+function toAge(v: unknown): number | null {
+  const n = toNumber(v);
+  if (n == null || n <= 0 || n > 120) return null;
+  return n;
+}
+
 function normalizeKey(key: string): string {
   return key
     .normalize('NFD')
