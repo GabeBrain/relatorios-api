@@ -250,7 +250,7 @@ export const METRICS: MetricDef[] = [
   },
   {
     key: 'oferta_ativa',
-    label: 'Oferta Ativa',
+    label: 'Oferta ativa',
     format: 'int',
     info: 'Tudo que foi lançado e está ativo',
   },
