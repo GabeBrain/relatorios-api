@@ -7,18 +7,13 @@ function isNullMarker(value: string): boolean {
 }
 
 /**
- * Campos em que "Não informado" é ausência de resposta: não entra em contagens
- * nem no denominador dos percentuais.
+ * "Não informado" é ausência de resposta em qualquer campo: não entra em
+ * contagens, gráficos nem no denominador dos percentuais.
  */
-const DROP_NA_FIELDS = new Set<string>([
-  'intencao_compra_padronizada',
-  'tempo_intencao_padronizado',
-]);
-
-export function normalizeCategoricalValue(field: string, value: unknown): string | null {
+export function normalizeCategoricalValue(_field: string, value: unknown): string | null {
   const raw = value == null || value === '' ? NA : String(value).trim();
   if (isNullMarker(raw)) return null;
-  if (raw === NA && DROP_NA_FIELDS.has(field)) return null;
+  if (raw === NA) return null;
   return raw;
 }
 
