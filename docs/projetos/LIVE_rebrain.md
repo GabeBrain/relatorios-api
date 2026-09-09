@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-09 — Validação do Fechamento: correção do Resumo Email — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — tabela Resumo Email.
+- **O quê:** corrigida a variação acumulada para `(acumulado atual ÷ acumulado anterior) − 1`; removido o fundo amarelo das linhas e aplicado o cabeçalho verde também à coluna Indicador.
+- **Por quê:** alinhar o cálculo e o visual à validação de planilha e ao modelo aprovado.
+- **Arquivos:** `src/features/validacao-fechamento/ResumoEmailTable.tsx`, `aggregate.test.ts`, `fechamento.css`.
+- **Commits:** `4d8a71e`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; homologação visual depende de consulta autenticada no navegador.
+
 ### 2026-09-09 — Validação do Fechamento: Resumo Email — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — nova síntese mensal para envio por email.
 - **O quê:** adicionada a aba **Resumo Email**, antes de Detalhamento, com uma linha por indicador, último mês selecionado, mês anterior, mesmo mês do ano anterior, variação anual, acumulados de janeiro até o mês de referência e variação acumulada. As colunas calculadas possuem ajuda contextual e barras proporcionais.
