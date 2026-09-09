@@ -177,6 +177,10 @@ async function fetchDataset(ref: DatasetRef): Promise<QuantiDataset> {
     cache.set(
       key,
       (async () => {
+        if (source === 'combined') {
+          return fetchCombined(ref);
+        }
+
         if (source === 'public') {
           const response = await fetch(ref.path);
           if (!response.ok) {
