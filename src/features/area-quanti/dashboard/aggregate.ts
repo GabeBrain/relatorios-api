@@ -119,7 +119,7 @@ function comparableText(value: string): string {
     .toLowerCase();
 }
 
-function hasPurchaseIntent(value: unknown): boolean | null {
+export function purchaseIntentStatus(value: unknown): boolean | null {
   const normalized = normalizeCategoricalValue('intencao_compra_padronizada', value);
   if (normalized == null || normalized === NA) return null;
   const text = comparableText(normalized);
@@ -141,7 +141,7 @@ export function purchaseIntentKpis(rows: QuantiRecord[]) {
   let intentWithinTwoYears = 0;
 
   for (const row of rows) {
-    const hasIntent = hasPurchaseIntent(row.intencao_compra_padronizada);
+    const hasIntent = purchaseIntentStatus(row.intencao_compra_padronizada);
     if (hasIntent == null) continue;
     validIntent++;
     if (!hasIntent) continue;

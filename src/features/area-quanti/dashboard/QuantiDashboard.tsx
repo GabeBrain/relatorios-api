@@ -13,6 +13,7 @@ import { BarField, ChartCard, DonutField, Heatmap, type SortOrder } from './Char
 import { GeoMap } from './geo/GeoMap';
 import { RegionDistribution } from './Rankings';
 import { CrossAnalysis } from './CrossAnalysis';
+import { HistoricalPurchaseIntent } from './HistoricalPurchaseIntent';
 import './dashboard.css';
 
 type IntentMetric = 'pct' | 'count' | 'count_pct';
@@ -305,6 +306,7 @@ export function QuantiDashboard() {
   const filters = useQuantiStore((s) => s.filters);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [crossAnalysisOpen, setCrossAnalysisOpen] = useState(false);
+  const [historicalIntentOpen, setHistoricalIntentOpen] = useState(false);
 
   const ds = DATASETS.find((d) => d.id === datasetId) ?? DATASETS[0];
   const { data, loading, error } = useQuantiDataset(ds);
@@ -434,6 +436,26 @@ export function QuantiDashboard() {
               </div>
             </section>
 
+            {/* Intencao de Compra Historica */}
+            <section className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setHistoricalIntentOpen((value) => !value)}
+                className="qd-collapse-trigger w-full rounded-md border border-[var(--qd-border)] bg-[var(--qd-surface)] px-3 py-2 text-left"
+                aria-expanded={historicalIntentOpen}
+              >
+                <span className="flex items-center gap-2">
+                  {historicalIntentOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  <span className="qd-section-title">{'Inten\u00e7\u00e3o de Compra Hist\u00f3rica'}</span>
+                </span>
+                <span className="text-[11px] text-[var(--qd-text-muted)]">
+                  {historicalIntentOpen
+                    ? 'Clique para recolher'
+                    : 'Clique para abrir os indicadores trimestrais de inten\u00e7\u00e3o de compra'}
+                </span>
+              </button>
+              {historicalIntentOpen && <HistoricalPurchaseIntent rows={filtered} />}
+            </section>
             {/* Cruzamentos prontos */}
             <section className="space-y-2">
               <h2 className="qd-section-title">Cruzamentos</h2>
