@@ -35,6 +35,7 @@ export interface ClosureRow {
   number_bedroom: number;
   garage: number;
   qty: number;
+  release_qty: number;
   private_area: number | null;
   period: string;             // YYYY-MM-DD
   periodDate: Date;
@@ -113,6 +114,7 @@ export function flattenBuildings(buildings: Building[]): ClosureRow[] {
           number_bedroom: t.number_bedroom,
           garage: t.garage,
           qty: t.qty,
+          release_qty: h.qty,
           private_area: t.private_area,
           period: h.period,
           periodDate: h.periodDate,
@@ -439,7 +441,7 @@ function ofertaAtiva(rows: ClosureRow[], maxPeriodKey: string): number | null {
   for (const row of rows) {
     if (row.status !== 'Ativo' || !row.release_period_key || row.release_period_key > maxPeriodKey) continue;
     if (row.periodKey !== row.release_period_key) continue;
-    releasedTypologies.set(`${row.building_id}|${row.typology_id}`, row.qty);
+    releasedTypologies.set(`${row.building_id}|${row.typology_id}`, row.release_qty);
   }
   let total = 0;
   releasedTypologies.forEach((qty) => { total += qty; });
