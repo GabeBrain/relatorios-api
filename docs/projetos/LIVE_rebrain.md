@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-09 — Validação do Fechamento: indicador Oferta Ativa — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — Resumo, Resumo por cidade e Resumo Email.
+- **O quê:** incluído o indicador **Oferta Ativa**, que acumula a quantidade de lançamento até o período de referência apenas para empreendimentos com status atual `Ativo`.
+- **Por quê:** distinguir a oferta originalmente lançada que permanece ativa da oferta final em estoque.
+- **Arquivos:** `src/features/validacao-fechamento/aggregate.ts`, `aggregate.test.ts`.
+- **Commits:** `a957339`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; o popover exibe “Tudo que foi lançado e está ativo”.
+
 ### 2026-09-09 — Validação do Fechamento: correção do Resumo Email — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — tabela Resumo Email.
 - **O quê:** corrigida a variação acumulada para `(acumulado atual ÷ acumulado anterior) − 1`; removido o fundo amarelo das linhas e aplicado o cabeçalho verde também à coluna Indicador.
