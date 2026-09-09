@@ -51,8 +51,7 @@ function VariationCell({ value }: { value: number | null }) {
 function MetricRow({ metric, resumo }: { metric: MetricDef; resumo: ResumoEmailResult }) {
   const key: MetricKey = metric.key;
   const annualVariation = metric.noVariation ? null : varPct(resumo.selected[key], resumo.previousYear[key]);
-  // Fórmula solicitada: acumulado do ano anterior ÷ acumulado do ano atual − 1.
-  const accumulatedVariation = metric.noVariation ? null : varPct(resumo.previousYearAccum[key], resumo.selectedAccum[key]);
+  const accumulatedVariation = metric.noVariation ? null : varPct(resumo.selectedAccum[key], resumo.previousYearAccum[key]);
 
   return (
     <tr className="vf-total">
@@ -95,7 +94,7 @@ export function ResumoEmailTable({ resumo }: Props) {
             </th>
             <th><span className="inline-flex items-center justify-center gap-1">{resumo.previousYearAccumLabel}<Help label="Acumulado do ano anterior" text="Recalcula o indicador de janeiro até o mesmo mês do ano anterior, respeitando os filtros de cidade e dimensões." /></span></th>
             <th><span className="inline-flex items-center justify-center gap-1">{resumo.selectedAccumLabel}<Help label="Acumulado do ano atual" text="Recalcula o indicador de janeiro até o último período selecionado, respeitando os filtros de cidade e dimensões." /></span></th>
-            <th><span className="inline-flex items-center justify-center gap-1">Var. Acumulado<Help label="Variação acumulada" text="(acumulado do ano anterior ÷ acumulado do ano atual) − 1." /></span></th>
+            <th><span className="inline-flex items-center justify-center gap-1">Var. Acumulado<Help label="Variação acumulada" text="(acumulado do ano atual ÷ acumulado do ano anterior) − 1." /></span></th>
           </tr>
         </thead>
         <tbody>{METRICS.map((metric) => <MetricRow key={metric.key} metric={metric} resumo={resumo} />)}</tbody>

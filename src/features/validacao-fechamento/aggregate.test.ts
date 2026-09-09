@@ -25,6 +25,6 @@ describe('computeResumoEmail', () => {
     expect(result?.selected.unidades_vendidas).toBe(120);
     expect(result?.previousYearAccum.unidades_vendidas).toBe(130);
     expect(result?.selectedAccum.unidades_vendidas).toBe(280);
-    expect(varPct(result?.previousYearAccum.unidades_vendidas ?? null, result?.selectedAccum.unidades_vendidas ?? null)).toBeCloseTo(130 / 280 - 1);
+    expect(varPct(result?.selectedAccum.unidades_vendidas ?? null, result?.previousYearAccum.unidades_vendidas ?? null)).toBeCloseTo(280 / 130 - 1);
   });
 });

@@ -109,6 +109,10 @@
 .validacao-fechamento table.vf-resumo-email th { white-space: normal; min-width: 118px; }
 .validacao-fechamento table.vf-resumo-email th.vf-label { min-width: 260px; }
 .validacao-fechamento table.vf-resumo-email td { font-variant-numeric: tabular-nums; }
+.validacao-fechamento table.vf-resumo-email tbody tr.vf-total { background: var(--vf-card); }
+.validacao-fechamento table.vf-resumo-email thead th.vf-label {
+  background: var(--vf-primary); color: #fff; font-weight: 600;
+}
 .validacao-fechamento table.vf-resumo-email .vf-email-var {
   position: relative; min-width: 130px; overflow: hidden; font-weight: 700;
 }
