@@ -10,10 +10,39 @@ function isNullMarker(value: string): boolean {
  * "Não informado" é ausência de resposta em qualquer campo: não entra em
  * contagens, gráficos nem no denominador dos percentuais.
  */
-export function normalizeCategoricalValue(_field: string, value: unknown): string | null {
+function plainText(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/^\s*\d+\.\s*/, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+/**
+ * Variações de grafia do motivo de intenção que representam a mesma categoria.
+ * Consolidadas para que bases anuais e a base histórica contem juntas.
+ */
+const MOTIVO_CANONICAL: Record<string, string> = {
+  'ferias / lazer': '13. Férias / Lazer',
+  'ferias/lazer': '13. Férias / Lazer',
+  'lazer / ferias': '13. Férias / Lazer',
+  'lazer/ferias': '13. Férias / Lazer',
+  'segunda moradia': '13. Férias / Lazer',
+  'abrir comercio': '14. Abrir comércio',
+  'aumentar patrimonio': '15. Aumentar patrimônio',
+  'comprar imovel proprio': '15. Aumentar patrimônio',
+};
+
+export function normalizeCategoricalValue(field: string, value: unknown): string | null {
   const raw = value == null || value === '' ? NA : String(value).trim();
   if (isNullMarker(raw)) return null;
   if (raw === NA) return null;
+  if (field === 'motivo_intencao_padronizado') {
+    const canonical = MOTIVO_CANONICAL[plainText(raw)];
+    if (canonical) return canonical;
+  }
   return raw;
 }
 
