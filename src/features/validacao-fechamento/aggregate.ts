@@ -24,6 +24,7 @@ export interface ClosureRow {
   building_type: string;
   standard: string;
   city: string;
+  status: string;
   release_date: string;
   release_period_key: string; // YYYY-MM
   release_period_bucket_year: string;
@@ -101,6 +102,7 @@ export function flattenBuildings(buildings: Building[]): ClosureRow[] {
           building_type: b.building_type,
           standard: b.standard,
           city: b.city,
+          status: b.status,
           release_date: b.release_date,
           release_period_key: relKey,
           release_period_bucket_year: relY,
@@ -200,6 +202,7 @@ export type MetricKey =
   | 'unidades_lancadas'
   | 'unidades_vendidas'
   | 'oferta_final'
+  | 'oferta_ativa'
   | 'preco_medio'
   | 'preco_m2';
 
@@ -244,6 +247,12 @@ export const METRICS: MetricDef[] = [
     label: 'Oferta final',
     format: 'int',
     info: 'Soma de typology_stock considerando, para cada typology_id, apenas o último período dentro do intervalo exibido.',
+  },
+  {
+    key: 'oferta_ativa',
+    label: 'Oferta Ativa',
+    format: 'int',
+    info: 'Tudo que foi lançado e está ativo',
   },
   {
     key: 'preco_medio',
@@ -389,6 +398,7 @@ function metricValue(agg: Aggregates, metric: MetricKey): number | null {
     case 'oferta_final': {
       let s = 0; agg.offerAtLast.forEach((v) => { s += v; }); return s;
     }
+    case 'oferta_ativa': return null;
     case 'preco_medio': return agg.pmSumQty > 0 ? agg.pmSumVgv / agg.pmSumQty : null;
     case 'preco_m2': return agg.pmm2SumArea > 0 ? agg.pmm2SumVgv / agg.pmm2SumArea : null;
   }
@@ -402,6 +412,7 @@ function allMetrics(agg: Aggregates | undefined): Record<MetricKey, number | nul
       unidades_lancadas: null,
       unidades_vendidas: null,
       oferta_final: null,
+      oferta_ativa: null,
       preco_medio: null,
       preco_m2: null,
     };
@@ -412,9 +423,31 @@ function allMetrics(agg: Aggregates | undefined): Record<MetricKey, number | nul
     unidades_lancadas: metricValue(agg, 'unidades_lancadas'),
     unidades_vendidas: metricValue(agg, 'unidades_vendidas'),
     oferta_final: metricValue(agg, 'oferta_final'),
+    oferta_ativa: null,
     preco_medio: metricValue(agg, 'preco_medio'),
     preco_m2: metricValue(agg, 'preco_m2'),
   };
+}
+
+/**
+ * Oferta Ativa: mesmas quantidades de lançamento usadas em Unidades lançadas,
+ * acumuladas até o período de referência e restritas ao status atual Ativo.
+ */
+function ofertaAtiva(rows: ClosureRow[], maxPeriodKey: string): number | null {
+  if (!maxPeriodKey) return null;
+  const releasedTypologies = new Map<string, number>();
+  for (const row of rows) {
+    if (row.status !== 'Ativo' || !row.release_period_key || row.release_period_key > maxPeriodKey) continue;
+    if (row.periodKey !== row.release_period_key) continue;
+    releasedTypologies.set(`${row.building_id}|${row.typology_id}`, row.qty);
+  }
+  let total = 0;
+  releasedTypologies.forEach((qty) => { total += qty; });
+  return total;
+}
+
+function metricsWithOfertaAtiva(agg: Aggregates | undefined, dimensionRows: ClosureRow[], maxPeriodKey = agg?.maxPeriodKey ?? ''): Record<MetricKey, number | null> {
+  return { ...allMetrics(agg), oferta_ativa: ofertaAtiva(dimensionRows, maxPeriodKey) };
 }
 
 
@@ -456,7 +489,7 @@ export function computeResumo(rows: ClosureRow[], allRowsUnfiltered: ClosureRow[
   const bucketsSorted = sortBuckets(Array.from(byBucket.keys()), g);
   const buckets: ResumoBucket[] = bucketsSorted.map((k) => ({
     key: k,
-    metrics: allMetrics(byBucket.get(k)!),
+    metrics: metricsWithOfertaAtiva(byBucket.get(k)!, allRowsUnfiltered),
   }));
 
   // Para AA/PA usamos allRowsUnfiltered filtrado apenas por dimensões (padrão/tipo/empreend.)
@@ -468,27 +501,24 @@ export function computeResumo(rows: ClosureRow[], allRowsUnfiltered: ClosureRow[
     accumulate(byBucketFull.get(k)!, r, k, releaseBucketKeyOfRow(r, g));
   }
   const allSorted = sortBuckets(Array.from(byBucketFull.keys()), g);
-  const aggMetrics = allMetrics;
-
-
   const yearAgo = new Map<string, Record<MetricKey, number | null>>();
   const prevBucket = new Map<string, Record<MetricKey, number | null>>();
   for (const k of bucketsSorted) {
     const kAA = bucketMinusYear(k, g);
-    yearAgo.set(k, aggMetrics(byBucketFull.get(kAA)));
+    yearAgo.set(k, metricsWithOfertaAtiva(byBucketFull.get(kAA), allRowsUnfiltered));
     const kPA = bucketPrev(k, allSorted);
-    prevBucket.set(k, kPA ? aggMetrics(byBucketFull.get(kPA)) : aggMetrics(undefined));
+    prevBucket.set(k, kPA ? metricsWithOfertaAtiva(byBucketFull.get(kPA), allRowsUnfiltered) : metricsWithOfertaAtiva(undefined, allRowsUnfiltered));
   }
   return { buckets, yearAgo, prevBucket };
 }
 
-function metricsForRows(rows: ClosureRow[]): Record<MetricKey, number | null> {
+function metricsForRows(rows: ClosureRow[], dimensionRows: ClosureRow[], maxPeriodKey: string): Record<MetricKey, number | null> {
   const agg = newAgg();
   for (const row of rows) {
     const bucketKey = bucketKeyOfRow(row, 'month');
     accumulate(agg, row, bucketKey, releaseBucketKeyOfRow(row, 'month'));
   }
-  return allMetrics(agg);
+  return metricsWithOfertaAtiva(agg, dimensionRows, maxPeriodKey);
 }
 
 function shiftMonth(periodKey: string, months: number): string {
@@ -521,11 +551,11 @@ export function computeResumoEmail(selectedRows: ClosureRow[], dimensionRows: Cl
     selectedKey,
     previousYearAccumLabel: `Acum jan/${previousYear.slice(-2)} a ${bucketMonthFromStr(previousYearKey)}`,
     selectedAccumLabel: `Acum jan/${selectedYear.slice(-2)} a ${bucketMonthFromStr(selectedKey)}`,
-    previousYear: metricsForRows(dimensionRows.filter((row) => row.periodKey === previousYearKey)),
-    previousMonth: metricsForRows(dimensionRows.filter((row) => row.periodKey === previousMonthKey)),
-    selected: metricsForRows(dimensionRows.filter((row) => row.periodKey === selectedKey)),
-    previousYearAccum: metricsForRows(dimensionRows.filter((row) => inRange(row, previousYear, previousYearKey))),
-    selectedAccum: metricsForRows(dimensionRows.filter((row) => inRange(row, selectedYear, selectedKey))),
+    previousYear: metricsForRows(dimensionRows.filter((row) => row.periodKey === previousYearKey), dimensionRows, previousYearKey),
+    previousMonth: metricsForRows(dimensionRows.filter((row) => row.periodKey === previousMonthKey), dimensionRows, previousMonthKey),
+    selected: metricsForRows(dimensionRows.filter((row) => row.periodKey === selectedKey), dimensionRows, selectedKey),
+    previousYearAccum: metricsForRows(dimensionRows.filter((row) => inRange(row, previousYear, previousYearKey)), dimensionRows, previousYearKey),
+    selectedAccum: metricsForRows(dimensionRows.filter((row) => inRange(row, selectedYear, selectedKey)), dimensionRows, selectedKey),
   };
 }
 
