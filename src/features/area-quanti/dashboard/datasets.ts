@@ -25,3 +25,6 @@ export const DATASETS: DatasetRef[] = [
   { id: '2024', label: 'Base Unificada 2024', source: 'storage', bucket: 'quanti-datasets', path: 'base-2024.json' },
   { id: '2025', label: 'Base Unificada 2025', source: 'storage', bucket: 'quanti-datasets', path: 'base-2025.json' },
 ];
+
+/** Base padrão: último ano disponível. */
+export const DEFAULT_DATASET_ID = DATASETS[DATASETS.length - 1].id;
