@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { DatasetRef } from './datasets';
+import { DATASETS, type DatasetRef } from './datasets';
 import type { QuantiDataset } from './types';
 
 const cache = new Map<string, Promise<QuantiDataset>>();
@@ -25,6 +25,16 @@ function toNumber(v: unknown): number | null {
     return Number.isFinite(n) ? n : null;
   }
   return null;
+}
+
+/**
+ * Idade plausível (0–120). Algumas bases trazem lixo neste campo — telefone,
+ * código — que distorce a média se entrar no cálculo.
+ */
+function toAge(v: unknown): number | null {
+  const n = toNumber(v);
+  if (n == null || n <= 0 || n > 120) return null;
+  return n;
 }
 
 function normalizeKey(key: string): string {
@@ -91,10 +101,9 @@ function normalizeRecords(ds: QuantiDataset): QuantiDataset {
       if (n != null) r.lng = n;
     }
     if (r.idade == null && r.idade_numerica != null) {
-      const n = toNumber(r.idade_numerica);
-      if (n != null) r.idade = n;
-    } else if (typeof r.idade === 'string') {
-      r.idade = toNumber(r.idade);
+      r.idade = toAge(r.idade_numerica);
+    } else if (typeof r.idade === 'string' || typeof r.idade === 'number') {
+      r.idade = toAge(r.idade);
     }
     if (typeof r.renda_valor_estimado === 'string') {
       r.renda_valor_estimado = toNumber(r.renda_valor_estimado);
@@ -147,13 +156,40 @@ function parseDataset(text: string, label: string): QuantiDataset {
   }
 }
 
+/**
+ * Base combinada: reaproveita o cache das bases anuais já carregadas e apenas
+ * concatena os registros, sem baixar um arquivo único gigante.
+ */
+async function fetchCombined(ref: DatasetRef): Promise<QuantiDataset> {
+  const parts = (ref.parts ?? [])
+    .map((id) => DATASETS.find((d) => d.id === id))
+    .filter((d): d is DatasetRef => Boolean(d));
+
+  const loaded = await Promise.all(parts.map((p) => fetchDataset(p)));
+  const records = loaded.flatMap((d) => d.records);
+  const questions = Object.assign({}, ...loaded.map((d) => d.questions ?? {}));
+
+  return {
+    id: ref.id,
+    label: ref.label,
+    count: records.length,
+    generated_at: new Date().toISOString(),
+    questions,
+    records,
+  };
+}
+
 async function fetchDataset(ref: DatasetRef): Promise<QuantiDataset> {
   const source = ref.source ?? 'storage';
-  const key = `${source}/${ref.bucket ?? ''}/${ref.path}`;
+  const key = source === 'combined' ? `combined/${ref.id}` : `${source}/${ref.bucket ?? ''}/${ref.path}`;
   if (!cache.has(key)) {
     cache.set(
       key,
       (async () => {
+        if (source === 'combined') {
+          return fetchCombined(ref);
+        }
+
         if (source === 'public') {
           const response = await fetch(ref.path);
           if (!response.ok) {
@@ -192,7 +228,7 @@ export function useQuantiDataset(ref: DatasetRef) {
       .catch((e) => { if (alive) setError(e); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
-  }, [ref.source, ref.bucket, ref.path]);
+  }, [ref.id, ref.source, ref.bucket, ref.path]);
 
   return { data, error, loading };
 }

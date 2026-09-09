@@ -26,6 +26,14 @@ de datasets em `src/features/area-quanti/dashboard/datasets.ts`.
 
 ## 1. Desenvolvimentos
 
+### 2026-09-09 - Bases anuais 2019-2025 substituídas e base combinada virtual - Lovable
+- **O que:** as sete bases anuais (2019 a 2025) foram reconvertidas para `quanti-columnar-v1` e republicadas no bucket `quanti-datasets`; 2021 e 2022 passaram a existir no seletor.
+- **Base padrão:** `DEFAULT_DATASET_ID` em `datasets.ts` passou a ser `2025` (antes o store fixava `2020`).
+- **Base combinada:** novo item `2019-2025` com `source: 'combined'` e `parts`; `useQuantiDataset.ts` monta o conjunto concatenando as bases anuais já em cache, sem baixar um arquivo único (~66 MB / 228 MB em JSON). Total: 163.578 entrevistas.
+- **Correção de idade:** `toAge()` descarta valores implausíveis (<=0 ou >120) em `idade_numerica` — a base 2021 contém um telefone neste campo, que distorcia a idade média (527.397 → 40,7).
+- **Verificação:** preview em `/quanti` com a base combinada carregando KPIs, gráficos e distribuições; typecheck aprovado.
+
+
 ### 2026-09-03 - Base Unificada 2024 adicionada ao seletor - Lovable
 - **O que:** a `Base Unificada 2024` (25.361 respondentes, 97 variáveis) foi convertida para o formato colunar `quanti-columnar-v1` e publicada no bucket `quanti-datasets` como `base-2024.json`.
 - **Registro:** novo item em `src/features/area-quanti/dashboard/datasets.ts`, em ordem cronológica entre 2020 e 2025.

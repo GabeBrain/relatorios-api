@@ -2,11 +2,13 @@ export interface DatasetRef {
   id: string;
   label: string;
   /** Dataset source. Defaults to Lovable Cloud Storage for legacy entries. */
-  source?: 'public' | 'storage';
+  source?: 'public' | 'storage' | 'combined';
   /** Lovable Cloud Storage bucket, when source is storage. */
   bucket?: string;
-  /** Object path within the bucket or public URL path. */
+  /** Object path within the bucket or public URL path. Vazio para bases combinadas. */
   path: string;
+  /** IDs das bases que compõem uma base combinada (reaproveitam o cache já carregado). */
+  parts?: string[];
 }
 
 /**
@@ -24,7 +26,14 @@ export const DATASETS: DatasetRef[] = [
   { id: '2023', label: 'Base Unificada 2023', source: 'storage', bucket: 'quanti-datasets', path: 'base-2023.json' },
   { id: '2024', label: 'Base Unificada 2024', source: 'storage', bucket: 'quanti-datasets', path: 'base-2024.json' },
   { id: '2025', label: 'Base Unificada 2025', source: 'storage', bucket: 'quanti-datasets', path: 'base-2025.json' },
+  {
+    id: '2019-2025',
+    label: 'Base Unificada 2019 – 2025',
+    source: 'combined',
+    path: '',
+    parts: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+  },
 ];
 
-/** Base padrão: último ano disponível. */
-export const DEFAULT_DATASET_ID = DATASETS[DATASETS.length - 1].id;
+/** Base padrão: último ano anual disponível. */
+export const DEFAULT_DATASET_ID = '2025';
