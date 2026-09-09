@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { DatasetRef } from './datasets';
+import { DATASETS, type DatasetRef } from './datasets';
 import type { QuantiDataset } from './types';
 
 const cache = new Map<string, Promise<QuantiDataset>>();
