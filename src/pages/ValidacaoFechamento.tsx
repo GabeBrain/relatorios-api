@@ -146,7 +146,7 @@ export default function ValidacaoFechamento() {
           <div className="vf-tabs ml-auto">
             <button type="button" className="vf-tab" data-active={tab === 'resumo'} onClick={() => setTab('resumo')}>Resumo</button>
             <button type="button" className="vf-tab" data-active={tab === 'resumo-cidade'} onClick={() => setTab('resumo-cidade')}>Resumo por cidade</button>
-            <button type="button" className="vf-tab" data-active={tab === 'resumo-email'} onClick={() => setTab('resumo-email')}>Resumo Email</button>
+            <button type="button" className="vf-tab" data-active={tab === 'resumo-email'} onClick={() => setTab('resumo-email')}>Resumo email</button>
             <button type="button" className="vf-tab" data-active={tab === 'detalhamento'} onClick={() => setTab('detalhamento')}>Detalhamento</button>
             <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências ({divergences.length})</button>
           </div>

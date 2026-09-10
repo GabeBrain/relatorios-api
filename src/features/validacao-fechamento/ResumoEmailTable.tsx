@@ -1,4 +1,5 @@
-import { Info } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Check, ImageDown, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { intFmt } from '@/lib/format';
 import { METRICS, type MetricDef, type MetricKey, type ResumoEmailResult, varPct } from './aggregate';
@@ -73,6 +74,8 @@ function MetricRow({ metric, resumo }: { metric: MetricDef; resumo: ResumoEmailR
 }
 
 export function ResumoEmailTable({ resumo }: Props) {
+  const tableRef = useRef<HTMLTableElement>(null);
+  const [copyState, setCopyState] = useState<'idle' | 'done' | 'error'>('idle');
   if (!resumo) return <div className="vf-card p-6 text-center text-sm text-[var(--vf-muted)]">Nenhum período mensal disponível para os filtros selecionados.</div>;
 
   const previousYearLabel = resumo.previousYearKey ? resumo.previousYearKey : 'Ano anterior';
@@ -80,9 +83,62 @@ export function ResumoEmailTable({ resumo }: Props) {
   const selectedLabel = resumo.selectedKey;
   const previousYearMonth = resumo.previousYearKey ? resumo.previousYearKey : 'período anterior';
 
+  async function copyTableImage() {
+    const table = tableRef.current;
+    if (!table || !navigator.clipboard || !window.ClipboardItem) {
+      setCopyState('error');
+      return;
+    }
+    const width = table.scrollWidth;
+    const height = table.offsetHeight;
+    const markup = new XMLSerializer().serializeToString(table.cloneNode(true));
+    const styles = `
+      table { border-collapse: collapse; width: 100%; font: 14px Arial, sans-serif; background: #fff; color: #1f2937; }
+      th, td { padding: 6px 10px; border: 1px solid #d1d5db; text-align: right; white-space: nowrap; }
+      thead th { background: #587f35; color: #fff; font-weight: 600; text-align: center; white-space: normal; }
+      th.vf-label, td.vf-label { text-align: left; }
+      td.vf-label { background: #f3f6ef; font-weight: 500; }
+      tbody tr { background: #fff; font-weight: 700; }
+      .vf-email-var { position: relative; font-weight: 700; }
+      .vf-email-bar { display: none; }
+      .vf-pos { color: #326c24; } .vf-neg { color: #a32d2d; } .vf-zero { color: #6b7280; }
+      button { display: none; }
+    `;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>${styles}</style>${markup}</div></foreignObject></svg>`;
+    const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+    try {
+      const image = new Image();
+      await new Promise<void>((resolve, reject) => { image.onload = () => resolve(); image.onerror = () => reject(new Error('Não foi possível gerar a imagem da tabela.')); image.src = url; });
+      const canvas = document.createElement('canvas');
+      canvas.width = width * 2;
+      canvas.height = height * 2;
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Canvas indisponível.');
+      context.scale(2, 2);
+      context.drawImage(image, 0, 0, width, height);
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('Não foi possível gerar a imagem da tabela.');
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      setCopyState('done');
+      window.setTimeout(() => setCopyState('idle'), 2200);
+    } catch {
+      setCopyState('error');
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
   return (
-    <div className="vf-card overflow-auto">
-      <table className="vf-resumo vf-resumo-email">
+    <div className="space-y-2">
+      <div className="flex justify-end">
+        <button type="button" className="vf-btn" onClick={copyTableImage}>
+          {copyState === 'done' ? <Check className="mr-1 inline h-3 w-3" /> : <ImageDown className="mr-1 inline h-3 w-3" />}
+          {copyState === 'done' ? 'Imagem copiada' : 'Copiar tabela como imagem'}
+        </button>
+      </div>
+      {copyState === 'error' && <p className="text-right text-[9pt] text-red-700">Não foi possível copiar a imagem neste navegador.</p>}
+      <div className="vf-card overflow-auto">
+      <table ref={tableRef} className="vf-resumo vf-resumo-email">
         <thead>
           <tr>
             <th className="vf-label">Indicador</th>
@@ -99,6 +155,7 @@ export function ResumoEmailTable({ resumo }: Props) {
         </thead>
         <tbody>{METRICS.map((metric) => <MetricRow key={metric.key} metric={metric} resumo={resumo} />)}</tbody>
       </table>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-10 — Validação do Fechamento: Resumo email e tabela de divergências — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guias Resumo email e Divergências.
+- **O quê:** renomeada a guia para **Resumo email** e incluída a cópia da tabela como imagem PNG. A tabela de Divergências abre com Empreendimento, Área Privativa, Status, Período, Divergência e Valor; as demais colunas seguem disponíveis no seletor e na exportação Excel. As regras de agrupamento foram movidas para o popover de ajuda da coluna Valor.
+- **Por quê:** oferecer uma tabela pronta para compartilhamento e reduzir a densidade visual inicial sem remover informações de auditoria.
+- **Arquivos:** `src/features/validacao-fechamento/ResumoEmailTable.tsx`, `DivergencesGrid.tsx`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; a cópia de imagem depende da permissão de área de transferência do navegador.
+
 ### 2026-09-10 — Validação do Fechamento: coleta interna determinística — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — consulta interna por cidade.
 - **O quê:** alinhada a consulta ao endpoint `https://app.geobrain.com.br/public-api/v2`; a coleta usa somente Comercial, Horizontal e Vertical, envia `city` sem `uf` quando há município selecionado e acumula os retornos sem deduplicação. Para cada cidade e tipologia, consulta a página inicial, obtém `meta.last_page` e busca as páginas restantes em blocos de até cinco.
