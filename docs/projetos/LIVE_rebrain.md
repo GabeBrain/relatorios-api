@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-10 — Validação do Fechamento: controle de páginas e timeout — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — consulta interna.
+- **O quê:** removido o parâmetro `status` das consultas; cada requisição possui timeout de 60 segundos; o progresso mostra páginas retornadas e esperadas, agregado por cidade e tipo.
+- **Por quê:** reduzir duplicidade na coleta, evitar requisições penduradas e tornar a completude da base observável.
+- **Arquivos:** `src/features/validacao-fechamento/api.ts`, `use-vf-data.ts`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** `8828e9d`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; a conferência de completude passa a ser visível no resumo da consulta.
+
 ### 2026-09-09 — Validação do Fechamento: quantidade de lançamento da Oferta ativa — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — indicador Oferta ativa.
 - **O quê:** o indicador passou a usar `typologies_history[].qty` da fotografia de lançamento (`qty_release`), em vez da quantidade mais recente da tipologia; mantém o recorte até o período de referência e `status = Ativo` somente nessa métrica.
