@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-10 — Validação do Fechamento: coleta interna determinística — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — consulta interna por cidade.
+- **O quê:** alinhada a consulta ao endpoint `https://app.geobrain.com.br/public-api/v2`; a coleta usa somente Comercial, Horizontal e Vertical, envia `city` sem `uf` quando há município selecionado e acumula os retornos sem deduplicação. Para cada cidade e tipologia, consulta a página inicial, obtém `meta.last_page` e busca as páginas restantes em blocos de até cinco.
+- **Por quê:** reproduzir a consulta validada externamente, evitar fotografia variável por concorrência e exibir páginas obtidas versus páginas esperadas.
+- **Arquivos:** `src/features/validacao-fechamento/api.ts`, `use-vf-data.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; Sinop passa a usar o recorte de três tipologias e deve totalizar quatro páginas esperadas (Comercial 1, Horizontal 2, Vertical 1).
+
 ### 2026-09-10 — Validação do Fechamento: controle de páginas e timeout — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — consulta interna.
 - **O quê:** removido o parâmetro `status` das consultas; cada requisição possui timeout de 60 segundos; o progresso mostra páginas retornadas e esperadas, agregado por cidade e tipo.

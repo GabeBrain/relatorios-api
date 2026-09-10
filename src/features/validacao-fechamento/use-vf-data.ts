@@ -56,7 +56,7 @@ export function useVFData() {
       const prog: VFProgress = { citiesTotal: list.length, citiesDone: 0, buildingsFound: 0, pagesDone: 0, pagesExpected: 0, current: list };
       setProgress({ ...prog });
 
-      const merged = new Map<string, ValidationBuilding>();
+      const merged: ValidationBuilding[] = [];
       const fails: CityFailure[] = [];
       const ok: string[] = [];
       const cityProgress = new Map<string, ValidationFetchProgress>();
@@ -64,17 +64,14 @@ export function useVFData() {
         const current = Array.from(cityProgress.values());
         prog.pagesDone = current.reduce((sum, value) => sum + value.pagesDone, 0);
         prog.pagesExpected = current.reduce((sum, value) => sum + value.pagesExpected, 0);
-        prog.buildingsFound = merged.size;
+        prog.buildingsFound = merged.length;
         setProgress({ ...prog });
       };
 
-      await Promise.all(
-        list.map(async (city) => {
+      for (const city of list) {
           try {
             const data = await fetchValidationBuildings({ uf, city, token, signal: controller.signal, onProgress: (value) => { cityProgress.set(city, value); publishProgress(); } });
-            for (const b of data) {
-              if (b.building_id && !merged.has(b.building_id)) merged.set(b.building_id, b);
-            }
+            merged.push(...(data ?? []));
             ok.push(city);
           } catch (err) {
             if ((err as Error).name === 'AbortError') return;
@@ -83,12 +80,11 @@ export function useVFData() {
             prog.citiesDone++;
             publishProgress();
           }
-        }),
-      );
+      }
 
       if (controller.signal.aborted || lastKey.current !== key) return;
 
-      setBuildings(Array.from(merged.values()));
+      setBuildings(merged);
       setLoadedCities(ok.sort((a, b) => a.localeCompare(b)));
       setFailures(fails);
       if (ok.length === 0) {

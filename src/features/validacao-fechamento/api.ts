@@ -1,8 +1,9 @@
 import type { Building, BuildingArea, HistoryEntry, Incorporator, Typology } from '@/features/dashboard-geobrain/types';
 
-const BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
-const TYPES = ['Vertical', 'Horizontal', 'Comercial', 'Hotel'];
+const BASE_URL = 'https://app.geobrain.com.br/public-api/v2';
+const TYPES = ['Comercial', 'Horizontal', 'Vertical'];
 const PER_PAGE = 100;
+const PAGE_BATCH_SIZE = 5;
 const REQUEST_TIMEOUT_MS = 60_000;
 
 export interface ValidationHistory extends HistoryEntry {
@@ -119,7 +120,7 @@ async function request(params: Record<string, unknown>, token: string, signal: A
   signal.addEventListener('abort', abortRequest, { once: true });
   try {
     const response = await fetch(`${BASE_URL}/building-with-history-internal?${query}`, {
-      method: 'POST', headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, signal: timeoutController.signal,
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' }, signal: timeoutController.signal,
     });
     if (!response.ok) throw new Error(`HTTP ${response.status} — /building-with-history-internal`);
     return response.json();
@@ -133,28 +134,47 @@ async function request(params: Record<string, unknown>, token: string, signal: A
 }
 
 export async function fetchValidationBuildings({ uf, city, token, signal, onProgress }: { uf: string; city?: string; token: string; signal: AbortSignal; onProgress?: (progress: ValidationFetchProgress) => void }): Promise<ValidationBuilding[]> {
-  const result = new Map<string, ValidationBuilding>();
+  const result: ValidationBuilding[] = [];
   const progress: ValidationFetchProgress = { lanesTotal: TYPES.length, lanesDone: 0, pagesDone: 0, pagesExpected: 0, buildingsFound: 0 };
-  await Promise.all(TYPES.map(async (type) => {
+  const queryScope = city ? { city } : { uf };
+
+  for (const type of TYPES) {
     try {
-      for (let page = 1; !signal.aborted; page++) {
-        const payload = await request({ uf, city, type, per_page: PER_PAGE, page }, token, signal);
-        if (page === 1) progress.pagesExpected += Number(payload?.meta?.last_page ?? 1);
+      const typeResult: ValidationBuilding[] = [];
+      const firstPage = await request({ ...queryScope, type, per_page: PER_PAGE, page: 1 }, token, signal);
+      const lastPage = Math.max(1, Number(firstPage?.meta?.last_page ?? 1));
+      progress.pagesExpected += lastPage;
+
+      const consumePage = (payload: { data?: unknown[] }) => {
         for (const item of (payload?.data ?? []) as Record<string, unknown>[]) {
           const building = normalizeBuilding(item);
-          if (building.building_id && !result.has(building.building_id)) result.set(building.building_id, building);
+          if (building.building_id) typeResult.push(building);
         }
         progress.pagesDone++;
-        progress.buildingsFound = result.size;
+        progress.buildingsFound = result.length + typeResult.length;
         onProgress?.({ ...progress });
-        if (page >= (payload?.meta?.last_page ?? 1)) break;
+      };
+
+      consumePage(firstPage);
+      for (let startPage = 2; startPage <= lastPage && !signal.aborted; startPage += PAGE_BATCH_SIZE) {
+        const pages = Array.from(
+          { length: Math.min(PAGE_BATCH_SIZE, lastPage - startPage + 1) },
+          (_, index) => startPage + index,
+        );
+        const payloads = await Promise.all(
+          pages.map((page) => request({ ...queryScope, type, per_page: PER_PAGE, page }, token, signal)),
+        );
+        payloads.forEach(consumePage);
       }
+      result.push(...typeResult);
+      progress.buildingsFound = result.length;
+      onProgress?.({ ...progress });
     } catch (error) {
-      if ((error as Error).name !== 'AbortError') return;
+      if ((error as Error).name === 'AbortError') break;
     } finally {
       progress.lanesDone++;
       onProgress?.({ ...progress });
     }
-  }));
-  return Array.from(result.values());
+  }
+  return result;
 }
