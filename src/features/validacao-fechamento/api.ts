@@ -2,8 +2,8 @@ import type { Building, BuildingArea, HistoryEntry, Incorporator, Typology } fro
 
 const BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
 const TYPES = ['Vertical', 'Horizontal', 'Comercial', 'Hotel'];
-const STATUSES = ['Ativo', 'Esgotado'];
 const PER_PAGE = 100;
+const REQUEST_TIMEOUT_MS = 60_000;
 
 export interface ValidationHistory extends HistoryEntry {
   type_of_typology: string;
@@ -16,6 +16,14 @@ export interface ValidationBuilding extends Omit<Building, 'typologies'> {
   typologies: ValidationTypology[];
   installment_value: number | null;
   building_created_at: string;
+}
+
+export interface ValidationFetchProgress {
+  lanesTotal: number;
+  lanesDone: number;
+  pagesDone: number;
+  pagesExpected: number;
+  buildingsFound: number;
 }
 
 function stringValue(value: unknown): string { return value == null ? '' : String(value); }
@@ -105,28 +113,48 @@ function normalizeBuilding(raw: Record<string, unknown>): ValidationBuilding {
 async function request(params: Record<string, unknown>, token: string, signal: AbortSignal) {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => { if (value != null && value !== '') query.set(key, String(value)); });
-  const response = await fetch(`${BASE_URL}/building-with-history-internal?${query}`, {
-    method: 'POST', headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, signal,
-  });
-  if (!response.ok) throw new Error(`HTTP ${response.status} — /building-with-history-internal`);
-  return response.json();
+  const timeoutController = new AbortController();
+  const timeoutId = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
+  const abortRequest = () => timeoutController.abort();
+  signal.addEventListener('abort', abortRequest, { once: true });
+  try {
+    const response = await fetch(`${BASE_URL}/building-with-history-internal?${query}`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, signal: timeoutController.signal,
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status} — /building-with-history-internal`);
+    return response.json();
+  } catch (error) {
+    if (timeoutController.signal.aborted && !signal.aborted) throw new Error('Tempo limite de 60 segundos excedido em /building-with-history-internal');
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+    signal.removeEventListener('abort', abortRequest);
+  }
 }
 
-export async function fetchValidationBuildings({ uf, city, token, signal }: { uf: string; city?: string; token: string; signal: AbortSignal }): Promise<ValidationBuilding[]> {
+export async function fetchValidationBuildings({ uf, city, token, signal, onProgress }: { uf: string; city?: string; token: string; signal: AbortSignal; onProgress?: (progress: ValidationFetchProgress) => void }): Promise<ValidationBuilding[]> {
   const result = new Map<string, ValidationBuilding>();
-  await Promise.all(TYPES.flatMap((type) => STATUSES.map(async (status) => {
+  const progress: ValidationFetchProgress = { lanesTotal: TYPES.length, lanesDone: 0, pagesDone: 0, pagesExpected: 0, buildingsFound: 0 };
+  await Promise.all(TYPES.map(async (type) => {
     try {
       for (let page = 1; !signal.aborted; page++) {
-        const payload = await request({ uf, city, type, status, per_page: PER_PAGE, page }, token, signal);
+        const payload = await request({ uf, city, type, per_page: PER_PAGE, page }, token, signal);
+        if (page === 1) progress.pagesExpected += Number(payload?.meta?.last_page ?? 1);
         for (const item of (payload?.data ?? []) as Record<string, unknown>[]) {
           const building = normalizeBuilding(item);
           if (building.building_id && !result.has(building.building_id)) result.set(building.building_id, building);
         }
+        progress.pagesDone++;
+        progress.buildingsFound = result.size;
+        onProgress?.({ ...progress });
         if (page >= (payload?.meta?.last_page ?? 1)) break;
       }
     } catch (error) {
       if ((error as Error).name !== 'AbortError') return;
+    } finally {
+      progress.lanesDone++;
+      onProgress?.({ ...progress });
     }
-  })));
+  }));
   return Array.from(result.values());
 }

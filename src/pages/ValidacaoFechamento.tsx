@@ -139,7 +139,7 @@ export default function ValidacaoFechamento() {
           >
             <Activity className="h-3 w-3" />
             {status === 'ready'
-              ? `${intFmt(filtered.length)} registros · ${intFmt((buildings ?? []).length)} empreendimentos · ${loadedCities.length} cidades`
+              ? `${intFmt(filtered.length)} registros · ${intFmt((buildings ?? []).length)} empreendimentos · ${loadedCities.length} cidades · ${progress?.pagesDone ?? 0} de ${progress?.pagesExpected ?? 0} páginas`
               : status === 'loading' ? 'Carregando dados…' : 'Escolha até 10 cidades e clique em Carregar'}
           </div>
 
@@ -161,7 +161,7 @@ export default function ValidacaoFechamento() {
         {status === 'loading' && (
           <div className="flex items-center gap-2 rounded p-2 text-[10pt] text-[var(--vf-muted)]" style={{ border: '1px solid var(--vf-border)', background: 'var(--vf-card)' }}>
             <Loader2 className="h-3 w-3 animate-spin" />
-            Carregando… {progress?.citiesDone ?? 0}/{progress?.citiesTotal ?? 0} cidades · {progress?.buildingsFound ?? 0} empreendimentos
+            Carregando… {progress?.citiesDone ?? 0}/{progress?.citiesTotal ?? 0} cidades · {progress?.buildingsFound ?? 0} empreendimentos · {progress?.pagesDone ?? 0} de {progress?.pagesExpected ?? 0} páginas
           </div>
         )}
         {status === 'error' && (

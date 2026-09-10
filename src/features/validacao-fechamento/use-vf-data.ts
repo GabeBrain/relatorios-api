@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchValidationBuildings } from './api';
-import type { ValidationBuilding } from './api';
+import type { ValidationBuilding, ValidationFetchProgress } from './api';
 import { useAuthStore } from '@/store/auth-store';
 
 export const MAX_CITIES = 10;
@@ -11,6 +11,8 @@ export interface VFProgress {
   citiesTotal: number;
   citiesDone: number;
   buildingsFound: number;
+  pagesDone: number;
+  pagesExpected: number;
   current: string[];
 }
 
@@ -51,19 +53,25 @@ export function useVFData() {
       setStatus('loading');
       setError('');
       setFailures([]);
-      const prog: VFProgress = {
-        citiesTotal: list.length, citiesDone: 0, buildingsFound: 0, current: list,
-      };
+      const prog: VFProgress = { citiesTotal: list.length, citiesDone: 0, buildingsFound: 0, pagesDone: 0, pagesExpected: 0, current: list };
       setProgress({ ...prog });
 
       const merged = new Map<string, ValidationBuilding>();
       const fails: CityFailure[] = [];
       const ok: string[] = [];
+      const cityProgress = new Map<string, ValidationFetchProgress>();
+      const publishProgress = () => {
+        const current = Array.from(cityProgress.values());
+        prog.pagesDone = current.reduce((sum, value) => sum + value.pagesDone, 0);
+        prog.pagesExpected = current.reduce((sum, value) => sum + value.pagesExpected, 0);
+        prog.buildingsFound = merged.size;
+        setProgress({ ...prog });
+      };
 
       await Promise.all(
         list.map(async (city) => {
           try {
-            const data = await fetchValidationBuildings({ uf, city, token, signal: controller.signal });
+            const data = await fetchValidationBuildings({ uf, city, token, signal: controller.signal, onProgress: (value) => { cityProgress.set(city, value); publishProgress(); } });
             for (const b of data) {
               if (b.building_id && !merged.has(b.building_id)) merged.set(b.building_id, b);
             }
@@ -73,8 +81,7 @@ export function useVFData() {
             fails.push({ city, message: (err as Error).message || 'Erro desconhecido' });
           } finally {
             prog.citiesDone++;
-            prog.buildingsFound = merged.size;
-            if (lastKey.current === key) setProgress({ ...prog });
+            publishProgress();
           }
         }),
       );
