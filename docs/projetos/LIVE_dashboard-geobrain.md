@@ -33,6 +33,15 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-09-15 — Preço médio e preço/m² por tipologia disponível — Codex
+- **Ambiente/funcionalidade:** `/dash-geobrain` — indicadores de preço no período mais recente.
+- **O quê:** preço médio passou a considerar apenas `type_of_typology = Padrão` com `typology_stock > 0`, pela fórmula `Σ(qty × price) ÷ Σ(qty)`. Preço/m² aplica o mesmo recorte e exige `private_area > 0`, pela fórmula `Σ(qty × price) ÷ Σ(qty × private_area)`.
+- **Por quê:** corrigir o ticket médio e o preço médio por área, antes influenciados por outras tipologias e pelo campo pré-calculado `price_private_area`.
+- **Arquivos:** `src/features/dashboard-geobrain/aggregate.ts`, `src/features/dashboard-geobrain/aggregate.test.ts`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `37f8313`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** regras aplicadas em runtime e cobertas por teste unitário; validação manual autenticada contra a API de produção permanece pendente.
+
 ### 2026-09-15 — Consulta paginada do histórico interno — Codex
 - **Ambiente/funcionalidade:** `/dash-geobrain` — carregamento de empreendimentos da API GeoBrain.
 - **O quê:** substituído o endpoint pelo histórico interno v2 e implementada a coleta sequencial por cidade e tipo, com primeira página de controle, lotes de até cinco páginas, timeout de 60 segundos e preservação de registros repetidos.

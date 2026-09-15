@@ -99,15 +99,15 @@ export default function DashboardGeobrain() {
   const infoPrecoMedio = (
     <div className="space-y-1">
       <div className="font-semibold">Preço médio</div>
-      <div>Média ponderada do <strong>preço da tipologia</strong> pela oferta (qty).</div>
+      <div>Somente tipologias <strong>Padrão</strong> com estoque final maior que zero.</div>
       <code className="text-[10px]">Σ(price × qty) ÷ Σ(qty)</code>
     </div>
   );
   const infoPrecoM2 = (
     <div className="space-y-1">
       <div className="font-semibold">Preço médio m²</div>
-      <div>Média ponderada do <strong>price_private_area</strong> pela oferta.</div>
-      <code className="text-[10px]">Σ(price_private_area × qty) ÷ Σ(qty)</code>
+      <div>Somente tipologias <strong>Padrão</strong> com estoque final e área privativa maiores que zero.</div>
+      <code className="text-[10px]">Σ(price × qty) ÷ Σ(qty × private_area)</code>
     </div>
   );
   const infoIvv = (

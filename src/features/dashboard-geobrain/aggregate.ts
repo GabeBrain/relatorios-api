@@ -292,7 +292,7 @@ export function computeKpis(buildings: Building[], f: Filters): KPIValues {
 
   let unidadesVendidas = 0, vgvVendido = 0;
   let estoqueFinal = 0, vgvEstoqueSum = 0, estoqueInicial = 0;
-  let sumPrice = 0, priceQty = 0, sumPm2 = 0, pm2Qty = 0;
+  let sumPrice = 0, priceQty = 0, sumPricePerM2 = 0, priceAreaQty = 0;
   const activeIds = new Set<string>();
   const lancadosIds = new Set<string>();
 
@@ -311,9 +311,17 @@ export function computeKpis(buildings: Building[], f: Filters): KPIValues {
       estoqueFinal += h.typology_stock;
       vgvEstoqueSum += h.vgv_stock ?? vgvStock(h, price);
       estoqueInicial += initialStock(h);
-      if (price > 0) { sumPrice += price * t.qty; priceQty += t.qty; }
-      const pm2 = h.price_private_area;
-      if (pm2 && pm2 > 0) { sumPm2 += pm2 * t.qty; pm2Qty += t.qty; }
+      const qty = h.qty;
+      const isAvailableStandardTypology = t.type_of_typology === 'Padrão' && h.typology_stock > 0;
+      if (isAvailableStandardTypology && price > 0 && qty > 0) {
+        sumPrice += price * qty;
+        priceQty += qty;
+
+        if (h.private_area && h.private_area > 0) {
+          sumPricePerM2 += price * qty;
+          priceAreaQty += qty * h.private_area;
+        }
+      }
     }
   }
 
@@ -321,7 +329,7 @@ export function computeKpis(buildings: Building[], f: Filters): KPIValues {
   const ivv = denom > 0 ? unidadesVendidas / denom : 0;
   const tempoEstoque = ivv > 0 ? 1 / ivv : 0;
   const precoMedio = priceQty > 0 ? sumPrice / priceQty : 0;
-  const precoMedioM2 = pm2Qty > 0 ? sumPm2 / pm2Qty : 0;
+  const precoMedioM2 = priceAreaQty > 0 ? sumPricePerM2 / priceAreaQty : 0;
 
   // §3/§7 — Unidades Lançadas / VGV Lançado sobre TODO período filtrado, Ativo apenas.
   const { unidadesLancadas, vgvLancado } = computeReleaseTotals(buildings, f);
