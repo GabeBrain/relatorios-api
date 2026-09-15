@@ -1,9 +1,11 @@
 import type { Building, Typology, HistoryEntry, Incorporator, BuildingArea } from './types';
 
-const BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
-const ALL_TYPES = ['Vertical', 'Horizontal', 'Comercial', 'Hotel'];
-const ALL_STATUSES = ['Ativo', 'Esgotado'];
+const BASE_URL = 'https://app.geobrain.com.br/public-api/v2';
+const BUILDING_HISTORY_ENDPOINT = '/building-with-history-internal';
+const ALL_TYPES = ['Comercial', 'Horizontal', 'Vertical'];
 const PER_PAGE = 100;
+const PAGE_BATCH_SIZE = 5;
+const REQUEST_TIMEOUT_MS = 60_000;
 
 function toNum(v: unknown, fallback = 0): number {
   if (v === null || v === undefined || v === '') return fallback;
@@ -151,19 +153,37 @@ function normalizeBuilding(raw: Record<string, unknown>): Building {
   };
 }
 
-async function apiGet(path: string, params: Record<string, unknown>, token: string, signal: AbortSignal) {
+async function requestBuildingHistory(params: Record<string, unknown>, token: string, signal: AbortSignal) {
   const qs = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
     if (v !== null && v !== undefined && v !== '') qs.set(k, String(v));
   }
-  const url = `${BASE_URL}${path}${qs.toString() ? `?${qs}` : ''}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-    signal,
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} — ${path}`);
-  return res.json();
+  const timeoutController = new AbortController();
+  const timeoutId = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
+  const abortRequest = () => timeoutController.abort();
+  signal.addEventListener('abort', abortRequest, { once: true });
+
+  try {
+    const response = await fetch(`${BASE_URL}${BUILDING_HISTORY_ENDPOINT}?${qs}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      signal: timeoutController.signal,
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status} — ${BUILDING_HISTORY_ENDPOINT}`);
+    return response.json();
+  } catch (error) {
+    if (timeoutController.signal.aborted && !signal.aborted) {
+      throw new Error(`Tempo limite de 60 segundos excedido em ${BUILDING_HISTORY_ENDPOINT}`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+    signal.removeEventListener('abort', abortRequest);
+  }
 }
 
 
@@ -176,7 +196,7 @@ export interface FetchProgress {
 
 export interface FetchOptions {
   uf: string;
-  city?: string;
+  city: string | string[];
   token: string;
   signal: AbortSignal;
   onProgress?: (p: FetchProgress) => void;
@@ -184,46 +204,52 @@ export interface FetchOptions {
 
 export async function fetchBuildings({ uf, city, token, signal, onProgress }: FetchOptions): Promise<Building[]> {
   if (!uf) throw new Error('UF é obrigatório');
+  const cities = (Array.isArray(city) ? city : [city]).filter(Boolean);
+  if (cities.length === 0) throw new Error('Cidade é obrigatória');
 
-  const pairs = ALL_TYPES.flatMap((t) => ALL_STATUSES.map((s) => ({ type: t, status: s })));
-  const progress: FetchProgress = { lanesTotal: pairs.length, lanesDone: 0, pagesDone: 0, buildingsFound: 0 };
-  const seen = new Map<string, Building>();
+  const progress: FetchProgress = { lanesTotal: cities.length * ALL_TYPES.length, lanesDone: 0, pagesDone: 0, buildingsFound: 0 };
+  const result: Building[] = [];
 
-  await Promise.all(
-    pairs.map(async ({ type, status }) => {
-      let page = 1;
-      while (true) {
-        if (signal.aborted) return;
-        try {
-          const data = await apiGet(
-            '/building-with-history',
-            { uf, city: city || undefined, type, status, per_page: PER_PAGE, page },
+  const consumePage = (payload: { data?: unknown[] }) => {
+    for (const item of payload.data ?? []) {
+      result.push(normalizeBuilding(item as Record<string, unknown>));
+      progress.buildingsFound++;
+    }
+    progress.pagesDone++;
+    onProgress?.({ ...progress });
+  };
+
+  for (const currentCity of cities) {
+    for (const type of ALL_TYPES) {
+      if (signal.aborted) throw new DOMException('A consulta foi cancelada.', 'AbortError');
+
+      const firstPage = await requestBuildingHistory(
+        { city: currentCity, type, per_page: PER_PAGE, page: 1 },
+        token,
+        signal,
+      );
+      const lastPage = Math.max(1, Number(firstPage?.meta?.last_page ?? 1));
+      consumePage(firstPage);
+
+      for (let startPage = 2; startPage <= lastPage; startPage += PAGE_BATCH_SIZE) {
+        if (signal.aborted) throw new DOMException('A consulta foi cancelada.', 'AbortError');
+        const pages = Array.from(
+          { length: Math.min(PAGE_BATCH_SIZE, lastPage - startPage + 1) },
+          (_, index) => startPage + index,
+        );
+        const payloads = await Promise.all(
+          pages.map((page) => requestBuildingHistory(
+            { city: currentCity, type, per_page: PER_PAGE, page },
             token,
             signal,
-          );
-          const items = (data?.data as unknown[]) ?? [];
-          const lastPage = data?.meta?.last_page ?? 1;
-          for (const it of items) {
-            const b = normalizeBuilding(it as Record<string, unknown>);
-            if (b.building_id && !seen.has(b.building_id)) {
-              seen.set(b.building_id, b);
-              progress.buildingsFound++;
-            }
-          }
-          progress.pagesDone++;
-          onProgress?.({ ...progress });
-          if (page >= lastPage) break;
-          page++;
-        } catch (err) {
-          if ((err as Error).name === 'AbortError') return;
-          // swallow individual lane failures — some type/status combos return 4xx
-          break;
-        }
+          )),
+        );
+        payloads.forEach(consumePage);
       }
       progress.lanesDone++;
       onProgress?.({ ...progress });
-    }),
-  );
+    }
+  }
 
-  return Array.from(seen.values());
+  return result;
 }

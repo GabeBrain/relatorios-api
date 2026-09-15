@@ -12,8 +12,11 @@ Atualize **Desenvolvimentos / Etapas / Pendências** sempre que sincronizar uma 
 Dashboard de KPIs e gráficos sobre a base de empreendimentos da **API pública GeoBrain**.
 
 - **Conexão de API — `RUNTIME`.** [`api.ts`](../../src/features/dashboard-geobrain/api.ts) consome
-  `https://geobrain.com.br/public-api` via `apiGet(path, params, token, signal)`. Autenticação
-  por token (reusa o auth global da plataforma). Paginação de 100 itens/página (`PER_PAGE`).
+  `https://app.geobrain.com.br/public-api/v2/building-with-history-internal` por `POST`, autenticado
+  com o token global. Para cada cidade, percorre Comercial, Horizontal e Vertical sequencialmente;
+  consulta a página 1, lê `meta.last_page` e busca as restantes em lotes de até 5, com 100 itens por
+  página e timeout de 60 segundos por requisição. Os registros são agregados sem deduplicação por
+  `building_id`.
 - **Normalização — `RUNTIME`.** `normalizeBuilding()` + helpers (`toNum`, `toNumOrNull`,
   `parseDate`, `parseGarage`) saneiam o payload cru da API. Domínios conhecidos:
   tipos `Vertical | Horizontal | Comercial | Hotel`; status `Ativo | Esgotado`.
@@ -29,6 +32,15 @@ gráficos e painel de filtros funcionais em runtime.
 ---
 
 ## 1. Desenvolvimentos
+
+### 2026-09-15 — Consulta paginada do histórico interno — Codex
+- **Ambiente/funcionalidade:** `/dash-geobrain` — carregamento de empreendimentos da API GeoBrain.
+- **O quê:** substituído o endpoint pelo histórico interno v2 e implementada a coleta sequencial por cidade e tipo, com primeira página de controle, lotes de até cinco páginas, timeout de 60 segundos e preservação de registros repetidos.
+- **Por quê:** corrigir a inconsistência de dados causada pela consulta anterior e impedir que falhas de uma tipologia retornem um recorte parcial silencioso.
+- **Arquivos:** `src/features/dashboard-geobrain/api.ts`, `src/features/dashboard-geobrain/api.test.ts`, `src/features/dashboard-geobrain/use-dashboard-data.ts`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `dbf932c`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** motor de coleta atualizado em runtime; permanece pendente uma validação manual autenticada contra a API de produção.
 
 ### 2026-08-27 — Correção de tipagem no exportador SVG — Codex (integração Panorama)
 - **Ambiente/funcionalidade:** `/dash-geobrain` — exportação SVG dos gráficos.

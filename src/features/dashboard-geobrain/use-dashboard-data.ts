@@ -29,7 +29,7 @@ export function useDashboardData() {
       lastKey.current = key;
       setStatus('loading');
       setError('');
-      setProgress({ lanesTotal: 8, lanesDone: 0, pagesDone: 0, buildingsFound: 0 });
+      setProgress({ lanesTotal: 3, lanesDone: 0, pagesDone: 0, buildingsFound: 0 });
       try {
         const data = await fetchBuildings({
           uf, city, token, signal: controller.signal,

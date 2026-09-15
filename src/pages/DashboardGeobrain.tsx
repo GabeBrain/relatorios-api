@@ -188,7 +188,7 @@ export default function DashboardGeobrain() {
         {status === 'loading' && (
           <div className="flex items-center gap-2 rounded border border-[hsl(var(--dg-border))] bg-[hsl(var(--dg-card))] p-2 text-[10px] text-[hsl(var(--dg-muted))]">
             <Loader2 className="h-3 w-3 animate-spin" />
-            Carregando… {progress?.buildingsFound ?? 0} empreendimentos · {progress?.lanesDone ?? 0}/{progress?.lanesTotal ?? 8} lanes · {progress?.pagesDone ?? 0} páginas
+            Carregando… {progress?.buildingsFound ?? 0} registros · {progress?.lanesDone ?? 0}/{progress?.lanesTotal ?? 3} tipologias · {progress?.pagesDone ?? 0} páginas
           </div>
         )}
 
