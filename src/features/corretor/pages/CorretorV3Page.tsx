@@ -33,6 +33,7 @@ import {
 import type { AtaData } from '../lib/v3/ia-ata';
 import { BUDGET_STUDY_BRL, formatBRL, usdToBrl } from '../lib/v3/config';
 import { confidenceOf, countLabel, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
+import { generateConsultingSuggestion } from '../lib/v3/consulting-suggestion';
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
@@ -325,6 +326,8 @@ export default function CorretorV3Page() {
   const [items, setItems] = useState<FindingV3[]>([]);
   const [loadingStudy, setLoadingStudy] = useState(false);
   const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
+  const [entryMode, setEntryMode] = useState<'evaluate' | 'suggestion' | null>(null);
+  const [consultingSuggestion, setConsultingSuggestion] = useState<{ filename: string; content: string } | null>(null);
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisState | null>(null);
   const [budgetPrompt, setBudgetPrompt] = useState<{ estimate: FullEstimate; run: () => void } | null>(null);
@@ -552,11 +555,31 @@ export default function CorretorV3Page() {
     }
   }
 
+  async function ingestSuggestion(file: File) {
+    if (!/\.pptx$/i.test(file.name)) {
+      toast.error('Formato não suportado', { description: 'A sugestão de análise recebe estudos em .pptx.' });
+      return;
+    }
+    setBusy('upload');
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const ir = await pptxToIr(bytes, file.name);
+      const content = await generateConsultingSuggestion(ir);
+      setConsultingSuggestion({ filename: file.name, content });
+      toast.success('Sugestão de análise gerada');
+    } catch (err) {
+      toast.error('Falha ao gerar sugestão', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setBusy(null);
+    }
+  }
+
   function handleNew(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = '';
-    void ingestNew(file);
+    if (entryMode === 'suggestion') void ingestSuggestion(file);
+    else void ingestNew(file);
   }
 
   async function handleRecheck(e: React.ChangeEvent<HTMLInputElement>) {
@@ -748,37 +771,49 @@ export default function CorretorV3Page() {
         <div className="max-w-5xl mx-auto px-6 py-6 space-y-8">
           {/* Dropzone herói */}
           <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
-          <button
-            type="button"
-            onClick={() => busy === null && newRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragging(false);
-              const f = e.dataTransfer.files?.[0];
-              if (f) void ingestNew(f);
-            }}
-            disabled={busy !== null}
-            className={cn(
-              'w-full rounded-xl border-2 border-dashed px-6 py-10 flex flex-col items-center justify-center gap-3 text-center transition-colors',
-              dragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 bg-card',
-              busy !== null && 'opacity-70 cursor-wait'
-            )}
-          >
-            {busy === 'upload'
-              ? <Loader2 className="w-8 h-8 text-primary animate-spin" />
-              : <Upload className={cn('w-8 h-8', dragging ? 'text-primary' : 'text-muted-foreground')} />}
-            <div>
-              <p className="text-sm font-medium">
-                {busy === 'upload' ? 'Lendo o estudo…' : 'Arraste o .pptx aqui ou clique para escolher'}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                A triagem determinística roda em segundos (R$ 0); a IA de texto e números segue automática, com teto de{' '}
-                R$ {BUDGET_STUDY_BRL.toFixed(2).replace('.', ',')} por estudo.
-              </p>
-            </div>
-          </button>
+          {!entryMode ? (
+            <section className="grid gap-3 sm:grid-cols-2" aria-label="Escolha o tipo de análise">
+              <button onClick={() => setEntryMode('evaluate')} className="rounded-xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <AlertTriangle className="mb-3 h-6 w-6 text-primary" />
+                <h2 className="text-sm font-semibold">Avaliar erros</h2>
+                <p className="mt-1 text-xs text-muted-foreground">Revisa texto, números e completude do estudo para montar a fila de correções.</p>
+              </button>
+              <button onClick={() => setEntryMode('suggestion')} className="rounded-xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <Sparkles className="mb-3 h-6 w-6 text-violet-500" />
+                <h2 className="text-sm font-semibold">Sugestão de Análise</h2>
+                <p className="mt-1 text-xs text-muted-foreground">Gera uma leitura consultiva e recomendação baseada nos dados extraídos do estudo.</p>
+              </button>
+            </section>
+          ) : consultingSuggestion ? (
+            <section className="rounded-xl border border-border bg-card p-5 space-y-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div><h2 className="text-sm font-semibold">Sugestão de Análise</h2><p className="text-xs text-muted-foreground">{consultingSuggestion.filename}</p></div>
+                <button onClick={() => { setConsultingSuggestion(null); setEntryMode(null); }} className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-muted">Nova análise</button>
+              </div>
+              <article className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-lg bg-muted/40 p-4 text-sm leading-6 text-foreground">{consultingSuggestion.content}</article>
+            </section>
+          ) : (
+            <button
+              type="button"
+              onClick={() => busy === null && newRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault(); setDragging(false);
+                const f = e.dataTransfer.files?.[0];
+                if (f) void (entryMode === 'suggestion' ? ingestSuggestion(f) : ingestNew(f));
+              }}
+              disabled={busy !== null}
+              className={cn('w-full rounded-xl border-2 border-dashed px-6 py-10 flex flex-col items-center justify-center gap-3 text-center transition-colors', dragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 bg-card', busy !== null && 'opacity-70 cursor-wait')}
+            >
+              {busy === 'upload' ? <Loader2 className="w-8 h-8 text-primary animate-spin" /> : <Upload className={cn('w-8 h-8', dragging ? 'text-primary' : 'text-muted-foreground')} />}
+              <div>
+                <p className="text-sm font-medium">{busy === 'upload' ? (entryMode === 'suggestion' ? 'Gerando sugestão…' : 'Lendo o estudo…') : 'Arraste o .pptx aqui ou clique para escolher'}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{entryMode === 'suggestion' ? 'A IA usa os dados extraídos para estruturar avaliação, recomendação e orientações ao analista.' : <>A triagem determinística roda em segundos (R$ 0); a IA de texto e números segue automática, com teto de R$ {BUDGET_STUDY_BRL.toFixed(2).replace('.', ',')} por estudo.</>}</p>
+              </div>
+              <span className="text-xs text-primary hover:underline" onClick={(event) => { event.stopPropagation(); setEntryMode(null); }}>Voltar às opções</span>
+            </button>
+          )}
 
           {loadingList ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground gap-2 text-sm">

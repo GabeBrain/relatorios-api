@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-15 — Corretor: sugestão consultiva de análise — Codex
+
+- **Ambiente/funcionalidade:** `/corretor` — escolha de fluxo antes do upload.
+- **O quê:** incluídas as opções **Avaliar erros** e **Sugestão de Análise**. A segunda extrai o conteúdo do `.pptx` e apresenta uma análise em Avaliação da Consultoria, Recomendação e Orientação ao analista, guiada pela base de critérios fornecida; não cria worklist de correção.
+- **Por quê:** separar a auditoria de erros da elaboração consultiva de produto e recomendação.
+- **Arquivos:** `src/features/corretor/pages/CorretorV3Page.tsx`, `src/features/corretor/lib/v3/consulting-suggestion.ts`, `supabase/functions/analyze-consulting-suggestion/index.ts`, `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`.
+- **Commits:** pendente nesta sessão; sem push por solicitação.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** requer teste local com `OPENAI_API_KEY` configurada na Edge Function; o endpoint não foi implantado.
+
 ### 2026-09-10 — Validação do Fechamento: Resumo email e tabela de divergências — Edgar
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guias Resumo email e Divergências.
 - **O quê:** renomeada a guia para **Resumo email** e incluída a cópia da tabela como imagem PNG. A tabela de Divergências abre com Empreendimento, Área Privativa, Status, Período, Divergência e Valor; as demais colunas seguem disponíveis no seletor e na exportação Excel. As regras de agrupamento foram movidas para o popover de ajuda da coluna Valor.

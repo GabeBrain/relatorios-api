@@ -16,6 +16,23 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.53 — 2026-09-15 — sugestão consultiva antes do upload (RUNTIME local)
+
+### Fluxo de entrada
+
+Antes de selecionar um `.pptx`, a página do Corretor oferece dois caminhos: **Avaliar erros**, que preserva a triagem e a worklist existentes, e **Sugestão de Análise**, que não cria estudo nem achados de correção.
+
+### Sugestão de Análise (IA/LLM)
+
+O novo endpoint `analyze-consulting-suggestion` recebe apenas o texto e as tabelas extraídos do PPTX no navegador. A resposta usa o formato **Avaliação da Consultoria → Recomendação → Orientação ao analista** e deve:
+
+- fundamentar leituras e recomendações somente em evidências extraídas, sem inventar dados;
+- ligar indicador, comparação, implicação e recomendação; separar preço por m² e ticket; confrontar revenda, venda primária, renda e velocidade quando disponíveis;
+- aplicar regras específicas para compactos, short stay, unidades maiores, torre única, faseamento e diferenciais/amenities;
+- manter pendências e limites de base somente em **Orientação ao analista**, sem desqualificar o estudo no texto final.
+
+**Fonte:** `base_conhecimento_avaliacao_recomendacao_brain.md` fornecida para esta entrega. **Verificação:** pendente de teste local com credenciais da Edge Function; não houve deploy nem push.
+
 ## Versão 0.52 — 2026-08-13 — `fonte_extractor`: a verdade numérica das planilhas do analista (POC)
 
 Pré-requisito do `SOURCE_CROSSCHECK` — conferir o deck contra a planilha que o gerou, classe de erro
