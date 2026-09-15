@@ -11,7 +11,7 @@ describe('fetchBuildings', () => {
 
   it('consulta cidades e tipos em sequência, pagina em blocos de cinco e preserva registros repetidos', async () => {
     const requests: URL[] = [];
-    const fetchMock = vi.fn(async (input: string) => {
+    const fetchMock = vi.fn(async (input: string, init?: RequestInit) => {
       const url = new URL(input);
       requests.push(url);
       const city = url.searchParams.get('city');
