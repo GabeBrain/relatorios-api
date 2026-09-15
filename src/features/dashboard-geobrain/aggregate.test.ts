@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeKpis } from './aggregate';
+import { computeKpis, computeOpportunityMap } from './aggregate';
 import type { Building, Filters } from './types';
 
 const filters: Filters = {
@@ -35,5 +35,22 @@ describe('computeKpis', () => {
 
     expect(kpis.precoMedio).toBe(160);
     expect(kpis.precoMedioM2).toBe(2);
+  });
+});
+
+describe('computeOpportunityMap', () => {
+  it('mantém a coluna 0 dorms mesmo quando o recorte não possui essa tipologia', () => {
+    const buildings = [{
+      neighborhood: 'Centro', typologies: [
+        { number_bedroom: 1, history: [{ period: '2026-09-01', typology_stock: 10, sold_in_period: 2 }] },
+        { number_bedroom: 2, history: [{ period: '2026-09-01', typology_stock: 8, sold_in_period: 4 }] },
+      ],
+    }] as unknown as Building[];
+
+    const matrix = computeOpportunityMap(buildings, filters, 'neighborhood');
+
+    expect(matrix.cols).toEqual(['0 dorms', '1 dorm', '2 dorms', '3 dorms', '4 dorms']);
+    expect(matrix.data.Centro['0 dorms']).toBe(0);
+    expect(matrix.data.Centro['1 dorm']).toBeCloseTo(2 / 12);
   });
 });

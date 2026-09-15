@@ -33,6 +33,15 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-09-15 — Coluna de zero dormitórios no mapa de oportunidades — Codex
+- **Ambiente/funcionalidade:** `/dash-geobrain` — Mapa de oportunidades por Bairro.
+- **O quê:** a matriz por dormitórios agora mantém as colunas fixas `0`, `1`, `2`, `3` e `4+`, inclusive `0 dorms` quando não há tipologia correspondente no recorte; células sem dados apresentam IVV de 0%.
+- **Por quê:** a lista anterior começava em um dormitório e removia colunas sem registros, ocultando a faixa de zero dormitórios.
+- **Arquivos:** `src/features/dashboard-geobrain/aggregate.ts`, `src/features/dashboard-geobrain/aggregate.test.ts`.
+- **Commits:** `cd7cc32`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** somente a matriz por dormitórios foi padronizada; o Mapa de oportunidades por Padrão permanece inalterado.
+
 ### 2026-09-15 — Preço médio e preço/m² por tipologia disponível — Codex
 - **Ambiente/funcionalidade:** `/dash-geobrain` — indicadores de preço no período mais recente.
 - **O quê:** preço médio passou a considerar apenas `type_of_typology = Padrão` com `typology_stock > 0`, pela fórmula `Σ(qty × price) ÷ Σ(qty)`. Preço/m² aplica o mesmo recorte e exige `private_area > 0`, pela fórmula `Σ(qty × price) ÷ Σ(qty × private_area)`.

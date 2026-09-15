@@ -545,7 +545,7 @@ export function computeOpportunityMap(
     ? { rowBy: opts, colBy: 'bedroom' }
     : { rowBy: opts.rowBy ?? 'neighborhood', colBy: opts.colBy ?? 'bedroom' };
 
-  const bedroomKeys = ['1', '2', '3', '4+'];
+  const bedroomKeys = ['0', '1', '2', '3', '4+'];
   const bedroomLabel = (k: string) => (k === '4+' ? '4 dorms' : k === '1' ? '1 dorm' : `${k} dorms`);
 
   const rowKeyFn = (b: Building, h: HistoryEntry) => {
@@ -588,7 +588,7 @@ export function computeOpportunityMap(
   }
 
   const colKeys = colBy === 'bedroom'
-    ? bedroomKeys.filter((k) => colSet.has(k))
+    ? bedroomKeys
     : Array.from(colSet).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   const colLabels = colBy === 'bedroom' ? colKeys.map(bedroomLabel) : colKeys.slice();
 
