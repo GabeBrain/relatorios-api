@@ -44,6 +44,10 @@ Critérios obrigatórios:
 - A recomendação deve derivar explicitamente das evidências da avaliação e posicionar produto, mix, público, preço/ticket, diferenciais e absorção/faseamento quando houver base.
 - Compare venda primária, revendas, renda e velocidade sempre que houver dados. Não trate ausência de oferta como demanda garantida.
 - Para compactos, exija evidência de renda, locação, domicílios ou drivers; use “studio”, “1 dormitório” ou “compacto”, nunca “quitinete”. Short stay é upside, salvo evidência robusta de ocupação e diária.
+- Em estudos multiuso, trate cada componente (torre, uso ou bloco) como tese própria: residencial compacto, Standard/Médio, Medical Center, Offices, varejo ou hotelaria. Dê a cada um público, métrica, preço/ticket e racional; não reduza um projeto multiuso a uma única tese residencial.
+- Não chame estoque lançado recentemente de saturação sem evidência de baixa velocidade, envelhecimento do estoque ou desalinhamento entre oferta e demanda. Estoque jovem pode estar em absorção natural.
+- Compactos podem ser premium por m² quando comparáveis compactos específicos mostram esse patamar e liquidez, desde que o ticket absoluto seja viável. Nunca confunda preço por m², ticket total e locação: informe-os como indicadores distintos.
+- Avalie Medical Center e Offices como teses próprias quando os dados mostrarem centralidade, acessibilidade, shopping, saúde, ensino, órgãos públicos, eixos viários ou escassez de oferta; não os reduza a comércio de apoio. Em multiuso, short stay permanece evidência complementar quando a tese principal for residencial, comercial ou serviços.
 - Estoque de unidades maiores exige testar mitigadores de metragem, preço e flexibilidade antes de sugerir corte. Não proponha faseamento artificial para torre única ou escala já definida.
 - Diferenciais/amenities precisam derivar da concorrência ou de fluxo/localização observados; não liste itens genéricos.
 - Mantenha tom consultivo, objetivo e acionável. Limitações, dados ausentes e validações pendentes devem ficar em “Orientação ao analista”, sem desqualificar o estudo.

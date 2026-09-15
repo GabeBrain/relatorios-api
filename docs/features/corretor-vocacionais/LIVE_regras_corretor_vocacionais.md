@@ -16,6 +16,20 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.54 — 2026-09-15 — calibração da base de sugestão consultiva (RUNTIME local)
+
+**Fonte:** base revisada `base_conhecimento_avaliacao_recomendacao_brain.md`, fornecida pela equipe após divergências observadas entre análises geradas e recomendações Brain.
+
+### Regras IA/LLM incorporadas
+
+- Em estudo multiuso, gerar recomendação por componente/torre/uso; não concentrar a tese em compactos quando houver evidência para Standard/Médio, Medical Center, Offices, varejo ou hotelaria.
+- Tratar estoque de lançamentos recentes como estoque jovem em absorção, não como saturação automática.
+- Permitir compactos premium por m² com comparáveis específicos e ticket viável; diferenciar sempre preço por m², ticket total e locação.
+- Avaliar Medical Center e Offices como teses próprias quando o entorno sustentar centralidade, acessibilidade, serviços e demanda; short stay é complementar quando não for a tese principal.
+- Converter dados de absorção em direcionamento de volume, mix e prioridade quando a base permitir.
+
+**Arquivos:** `supabase/functions/analyze-consulting-suggestion/index.ts`, `BASE_CONHECIMENTO_SUGESTAO_ANALISE.md`. **Verificação:** pendente de teste com estudo multiuso de referência e Edge Function publicada.
+
 ## Versão 0.53 — 2026-09-15 — sugestão consultiva antes do upload (RUNTIME local)
 
 ### Fluxo de entrada

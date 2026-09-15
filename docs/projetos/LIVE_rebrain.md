@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-15 — Corretor: calibração da Sugestão de Análise — Codex
+
+- **Ambiente/funcionalidade:** `/corretor` — Sugestão de Análise.
+- **O quê:** revisado o prompt consultivo a partir da base atualizada pela equipe. Estudos multiuso passam a exigir tese por componente; estoque recente não é saturação automática; compactos premium, Medical Center/Offices, short stay, preço por m², ticket, locação e absorção ganharam regras explícitas.
+- **Por quê:** reduzir divergências entre análises geradas e recomendações Brain observadas nos estudos de referência.
+- **Arquivos:** `supabase/functions/analyze-consulting-suggestion/index.ts`, `docs/features/corretor-vocacionais/BASE_CONHECIMENTO_SUGESTAO_ANALISE.md`, `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** requer teste controlado com estudo multiuso e publicação da revisão da Edge Function antes de entrar em runtime remoto.
+
 ### 2026-09-15 — Corretor: sugestão consultiva de análise — Codex
 
 - **Ambiente/funcionalidade:** `/corretor` — escolha de fluxo antes do upload.
