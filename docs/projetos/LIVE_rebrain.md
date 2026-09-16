@@ -1,6 +1,17 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-16 — Empresas: conversão divisão→seção CNAE no materializador piloto — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — materializador do piloto Empresas.
+- **O quê:** `empresas-materialize-pilot` passou a converter a divisão CNAE (dois dígitos, ex.: "01", "47") retornada pela ponte BigQuery para a seção CNAE 2.0 (A–U) antes de validar e gravar `cnae_secao`. Seções A–U já vindas da ponte continuam aceitas; divisão "ND", nula ou fora das faixas oficiais grava seção "ND". A validação passa a aceitar apenas `A`–`U` e `ND`.
+- **Por quê:** a ponte retorna divisão e não seção; sem a conversão, toda carga falhava com `INVALID_ROW` / "Seção CNAE inválida".
+- **Arquivos:** `supabase/functions/empresas-materialize-pilot/index.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** destrava a materialização de teste (Blumenau/SC, partições 2026-07-12), que antes falharia na normalização das linhas; nada foi alterado em migration, RLS, tabelas, `empresas-report`, RAIS, frontend ou secrets.
+
 ### 2026-09-16 — Empresas: fundação local do piloto CNPJ pré-agregado — Codex
+
 
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba Empresas.
 - **O quê:** criada a migration local do agregado municipal de estabelecimentos, com manifesto versionado, fatos sem CNPJ individual, publicação atômica por status `ok` e bloqueio de leitura direta por `anon`/`authenticated`.
