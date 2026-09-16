@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-16 — Empresas: materializador piloto tolerante a linhas malformadas — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — materializador do piloto Empresas.
+- **O quê:** `empresas-materialize-pilot` passou a consumir o contrato real da ponte `POST /v1/empresas-pilot` sem falhar campo a campo: `matriz_filial` aceita número ou string (`1`/"1", `2`/"2") e grava inteiro; divisão CNAE vira seção A–U/`ND`; porte aceita os quatro códigos da Receita com fallback `"00"`. Linha malformada é descartada de modo seguro (contabilizada em `linhasDescartadas` na resposta) em vez de abortar a carga; se nenhuma linha válida restar, a materialização falha sem publicar carga parcial. Divergência de município continua erro fatal. Payload externo, HMAC, RLS, tabelas, `empresas-report`, RAIS, frontend e Cloud Run intactos.
+- **Por quê:** uma única linha fora do padrão derrubava a materialização inteira com `INVALID_ROW`.
+- **Arquivos:** `supabase/functions/empresas-materialize-pilot/index.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** testes reais seguem em ambiente externo do Gabriel.
+
 ### 2026-09-16 — Empresas: aceite dos códigos de porte da Receita no materializador piloto — Lovable (Gabriel)
 
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — materializador do piloto Empresas.

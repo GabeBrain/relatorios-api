@@ -119,24 +119,40 @@ function resolvePorte(raw: unknown): string {
   return '00';
 }
 
-function normalizeRows(raw: unknown, expectedIbge: string): AggregatedRow[] {
+function normalizeMatrizFilial(raw: unknown): number | null {
+  const value = typeof raw === 'string' ? raw.trim() : String(raw ?? '').trim();
+  if (value === '1') return 1;
+  if (value === '2') return 2;
+  return null;
+}
+
+function normalizeRows(raw: unknown, expectedIbge: string): { rows: AggregatedRow[]; discarded: number } {
   if (!Array.isArray(raw) || !raw.length) throw new SafeError('PROXY_EMPTY', 502, 'A ponte não retornou linhas agregadas.');
-  return raw.map((item) => {
+  const rows: AggregatedRow[] = [];
+  let discarded = 0;
+  for (const item of raw) {
     const row = (item ?? {}) as Record<string, any>;
     const idMunicipio = String(row.idMunicipio ?? row.id_municipio ?? row.municipalityIbge ?? '').trim();
     if (idMunicipio !== expectedIbge) throw new SafeError('MUNICIPALITY_MISMATCH', 502, 'A ponte retornou município diferente do solicitado.');
     const cnaeSecao = resolveCnaeSecao(row);
     const porte = resolvePorte(row.porte);
-    const matrizFilial = Number(row.matrizFilial ?? row.matriz_filial);
+    const matrizFilial = normalizeMatrizFilial(row.matrizFilial ?? row.matriz_filial);
     const regimeSimples = String(row.regimeSimples ?? row.regime_simples ?? '').trim().toLowerCase();
     const quantidade = Number(row.quantidade ?? row.total ?? row.count);
-    if (!/^[A-U]$|^ND$/.test(cnaeSecao)) throw new SafeError('INVALID_ROW', 502, 'Seção CNAE inválida.');
-    
-    if (matrizFilial !== 1 && matrizFilial !== 2) throw new SafeError('INVALID_ROW', 502, 'Indicador matriz/filial inválido.');
-    if (!['mei', 'simples', 'nenhum'].includes(regimeSimples)) throw new SafeError('INVALID_ROW', 502, 'Regime Simples inválido.');
-    if (!Number.isInteger(quantidade) || quantidade < 0) throw new SafeError('INVALID_ROW', 502, 'Quantidade deve ser inteira e não negativa.');
-    return { id_municipio: idMunicipio, cnae_secao: cnaeSecao, porte, matriz_filial: matrizFilial, regime_simples: regimeSimples, quantidade };
-  });
+    const invalid =
+      !/^[A-U]$|^ND$/.test(cnaeSecao) ||
+      matrizFilial === null ||
+      !['mei', 'simples', 'nenhum'].includes(regimeSimples) ||
+      !Number.isInteger(quantidade) ||
+      quantidade < 0;
+    if (invalid) {
+      discarded += 1;
+      continue;
+    }
+    rows.push({ id_municipio: idMunicipio, cnae_secao: cnaeSecao, porte, matriz_filial: matrizFilial, regime_simples: regimeSimples, quantidade });
+  }
+  if (!rows.length) throw new SafeError('PROXY_EMPTY', 502, 'A ponte não retornou nenhuma linha agregada válida.');
+  return { rows, discarded };
 }
 
 async function callProxy(scope: Scope) {
@@ -212,7 +228,7 @@ Deno.serve(async (req) => {
 
     const started = Date.now();
     const result = await callProxy(scope);
-    const rows = normalizeRows(result.rows ?? result.data ?? result.aggregates, scope.municipality.ibgeCode);
+    const { rows, discarded: linhasDescartadas } = normalizeRows(result.rows ?? result.data ?? result.aggregates, scope.municipality.ibgeCode);
 
     const cleanup = await db.from('empresas_estab_municipio').delete().eq('manifesto_id', manifestoId);
     if (cleanup.error) throw new SafeError('STAGING_CLEANUP', 500, 'Não foi possível limpar a carga anterior.');
@@ -260,6 +276,7 @@ Deno.serve(async (req) => {
       },
       municipality: scope.municipality,
       aggregatedRows: rows.length,
+      linhasDescartadas,
       totalEstabelecimentos,
       bytesProcessed: integerOrNull(result.bytesProcessed ?? result.bytes_processed),
       jobIds,
