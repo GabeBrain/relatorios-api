@@ -38,6 +38,113 @@ export type Database = {
         }
         Relationships: []
       }
+      empresas_estab_manifesto: {
+        Row: {
+          bytes_processados: number | null
+          competencia: string
+          empresas_particao: string
+          erro_codigo: string | null
+          estabelecimentos_particao: string
+          fonte: string
+          gerado_em: string
+          id: string
+          linhas_geradas: number | null
+          methodology_version: string
+          origem_empresas_bytes: number | null
+          origem_empresas_linhas: number | null
+          origem_empresas_modificado_em: string | null
+          origem_estabelecimentos_bytes: number | null
+          origem_estabelecimentos_linhas: number | null
+          origem_estabelecimentos_modificado_em: string | null
+          publicado_em: string | null
+          query_version: string
+          simples_lido_em: string | null
+          status: string
+        }
+        Insert: {
+          bytes_processados?: number | null
+          competencia: string
+          empresas_particao: string
+          erro_codigo?: string | null
+          estabelecimentos_particao: string
+          fonte?: string
+          gerado_em?: string
+          id?: string
+          linhas_geradas?: number | null
+          methodology_version: string
+          origem_empresas_bytes?: number | null
+          origem_empresas_linhas?: number | null
+          origem_empresas_modificado_em?: string | null
+          origem_estabelecimentos_bytes?: number | null
+          origem_estabelecimentos_linhas?: number | null
+          origem_estabelecimentos_modificado_em?: string | null
+          publicado_em?: string | null
+          query_version: string
+          simples_lido_em?: string | null
+          status?: string
+        }
+        Update: {
+          bytes_processados?: number | null
+          competencia?: string
+          empresas_particao?: string
+          erro_codigo?: string | null
+          estabelecimentos_particao?: string
+          fonte?: string
+          gerado_em?: string
+          id?: string
+          linhas_geradas?: number | null
+          methodology_version?: string
+          origem_empresas_bytes?: number | null
+          origem_empresas_linhas?: number | null
+          origem_empresas_modificado_em?: string | null
+          origem_estabelecimentos_bytes?: number | null
+          origem_estabelecimentos_linhas?: number | null
+          origem_estabelecimentos_modificado_em?: string | null
+          publicado_em?: string | null
+          query_version?: string
+          simples_lido_em?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      empresas_estab_municipio: {
+        Row: {
+          cnae_secao: string
+          id_municipio: string
+          manifesto_id: string
+          matriz_filial: number
+          porte: string
+          quantidade: number
+          regime_simples: string
+        }
+        Insert: {
+          cnae_secao: string
+          id_municipio: string
+          manifesto_id: string
+          matriz_filial: number
+          porte: string
+          quantidade: number
+          regime_simples: string
+        }
+        Update: {
+          cnae_secao?: string
+          id_municipio?: string
+          manifesto_id?: string
+          matriz_filial?: number
+          porte?: string
+          quantidade?: number
+          regime_simples?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresas_estab_municipio_manifesto_id_fkey"
+            columns: ["manifesto_id"]
+            isOneToOne: false
+            referencedRelation: "empresas_estab_manifesto"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       findings_v3: {
         Row: {
           created_at: string
@@ -804,7 +911,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      empresas_estab_municipio_publicado: {
+        Row: {
+          cnae_secao: string | null
+          competencia: string | null
+          empresas_particao: string | null
+          estabelecimentos_particao: string | null
+          fonte: string | null
+          id_municipio: string | null
+          manifesto_id: string | null
+          matriz_filial: number | null
+          methodology_version: string | null
+          porte: string | null
+          quantidade: number | null
+          query_version: string | null
+          regime_simples: string | null
+          simples_lido_em: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresas_estab_municipio_manifesto_id_fkey"
+            columns: ["manifesto_id"]
+            isOneToOne: false
+            referencedRelation: "empresas_estab_manifesto"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       rais_claim_history_snapshot: {
