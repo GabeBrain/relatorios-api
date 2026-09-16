@@ -29,7 +29,9 @@ export default function EmpresasEmpregadosPage() {
     if (tab === 'companies' && !companies.available) setTab('employees');
   }, [tab, companies.available]);
 
-  const companiesUnavailableMessage = companies.report && !companies.report.available ? companies.report.message : null;
+  const companiesReport = companies.report;
+  const companiesUnavailableMessage = companiesReport && companiesReport.available === false ? companiesReport.message : null;
+
 
   return <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6 animate-fade-in"><header className="border-b border-border bg-card px-5 py-4 shadow-sm sm:px-6"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0 space-y-1"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Relatórios · Dados agregados</p><h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Empresas e Empregados</h1><p className="text-sm text-muted-foreground">Emprego formal e estabelecimentos ativos no município selecionado.</p></div><div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground"><LockKeyhole className="h-4 w-4" />{hasToken ? 'Acesso GeoBrain' : 'Login GeoBrain necessário'}</div></div></header>
 
