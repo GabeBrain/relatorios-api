@@ -328,7 +328,7 @@ Deno.serve(async (req) => {
     const linhasDescartadas = normalized.discarded;
     const discardReasons = normalized.discardReasons;
 
-    const cleanup = await db.from('empresas_estab_municipio').delete().eq('manifesto_id', manifestoId);
+    const cleanup = await db.from('empresas_estab_municipio').delete().eq('manifesto_id', manifestoId).eq('id_municipio', scope.municipality.ibgeCode);
     if (cleanup.error) throw new SafeError('STAGING_CLEANUP', 500, 'Não foi possível limpar a carga anterior.');
 
     for (let index = 0; index < rows.length; index += 500) {
@@ -387,6 +387,7 @@ Deno.serve(async (req) => {
     if (manifestoId) {
       await db.from('empresas_estab_manifesto').update({ status: 'falha', erro_codigo: safe.code, publicado_em: null }).eq('id', manifestoId);
       await db.from('empresas_estab_municipio').delete().eq('manifesto_id', manifestoId);
+      // A falha afeta somente o manifesto deste município; cargas de outras cidades permanecem publicadas.
     }
     console.error(`empresas-materialize-pilot falhou: ${safe.code}`);
     return json({ ok: false, error: safe.message, code: safe.code, manifestoId }, safe.status);
