@@ -114,12 +114,12 @@ function normalizeRows(raw: unknown, expectedIbge: string): AggregatedRow[] {
     const idMunicipio = String(row.idMunicipio ?? row.id_municipio ?? row.municipalityIbge ?? '').trim();
     if (idMunicipio !== expectedIbge) throw new SafeError('MUNICIPALITY_MISMATCH', 502, 'A ponte retornou município diferente do solicitado.');
     const cnaeSecao = resolveCnaeSecao(row);
-    const porte = String(row.porte ?? '').trim().slice(0, 2);
+    const porte = resolvePorte(row.porte);
     const matrizFilial = Number(row.matrizFilial ?? row.matriz_filial);
     const regimeSimples = String(row.regimeSimples ?? row.regime_simples ?? '').trim().toLowerCase();
     const quantidade = Number(row.quantidade ?? row.total ?? row.count);
     if (!/^[A-U]$|^ND$/.test(cnaeSecao)) throw new SafeError('INVALID_ROW', 502, 'Seção CNAE inválida.');
-    if (!porte || porte.length !== 2) throw new SafeError('INVALID_ROW', 502, 'Porte inválido.');
+    
     if (matrizFilial !== 1 && matrizFilial !== 2) throw new SafeError('INVALID_ROW', 502, 'Indicador matriz/filial inválido.');
     if (!['mei', 'simples', 'nenhum'].includes(regimeSimples)) throw new SafeError('INVALID_ROW', 502, 'Regime Simples inválido.');
     if (!Number.isInteger(quantidade) || quantidade < 0) throw new SafeError('INVALID_ROW', 502, 'Quantidade deve ser inteira e não negativa.');
