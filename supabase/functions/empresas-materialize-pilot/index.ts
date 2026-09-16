@@ -293,6 +293,7 @@ Deno.serve(async (req) => {
     const scope = parseScope(await req.json().catch(() => null));
 
     const manifestoPayload = {
+      id_municipio: scope.municipality.ibgeCode,
       competencia: COMPETENCIA,
       estabelecimentos_particao: scope.establishmentsPartition,
       empresas_particao: scope.companiesPartition,
@@ -305,7 +306,8 @@ Deno.serve(async (req) => {
     };
     const upserted = await db
       .from('empresas_estab_manifesto')
-      .upsert(manifestoPayload, { onConflict: 'competencia,query_version,methodology_version' })
+      .upsert(manifestoPayload, { onConflict: 'id_municipio,competencia,query_version,methodology_version' })
+
       .select('id')
       .single();
     if (upserted.error || !upserted.data) throw new SafeError('MANIFEST_WRITE', 500, 'Não foi possível preparar o manifesto.');
