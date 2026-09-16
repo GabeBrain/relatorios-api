@@ -1,5 +1,16 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-16 — Empresas: aba habilitada no frontend via `empresas-report` — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba Empresas.
+- **O quê:** a aba Empresas deixou de ser placeholder. O escopo geográfico vem do `GeoApiScopeEngine` (`GeoApiScopeSelector` + `useGeoApiScope`, `strictReady`); o código IBGE é resolvido no backend (`rais-employees-report`, ação `resolveMunicipality`) e os agregados vêm exclusivamente da Edge Function `empresas-report`. A aba fica habilitada apenas quando a função responde `available: true`; sem competência publicada, aparece estado vazio orientando que a competência ainda não está disponível. Recortes por seção CNAE (rótulos A–U/ND), porte (códigos da Receita), matriz/filial e regime Simples/MEI, com total de estabelecimentos ativos e a nota "Simples/MEI representa o estado cadastral atual da fonte, não uma foto histórica da competência".
+- **Por quê:** a materialização piloto de Blumenau/SC (competência julho/2026) foi publicada.
+- **Arquivos:** `src/features/empresas-empregados/{companies-api.ts,companies-domain.ts,use-companies-report.ts,types.ts}`, `src/features/empresas-empregados/components/CompaniesWorkspace.tsx`, `src/features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** nenhuma migration, RLS, Edge Function, Cloud Run, RAIS, secret ou modelagem alterada; o navegador não acessa tabelas ou views diretamente.
+
+
 ### 2026-09-16 — Empresas: materializador piloto tolerante a linhas malformadas — Lovable (Gabriel)
 
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — materializador do piloto Empresas.

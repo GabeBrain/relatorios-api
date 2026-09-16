@@ -100,3 +100,38 @@ export const METHODOLOGY_VERSION = 'rais-employees-methodology-v1';
 export const HISTORY_QUERY_VERSION = 'rais-employees-history-v1';
 export const HISTORY_METHODOLOGY_VERSION = 'rais-employees-history-methodology-v1';
 export const SOURCE_LABEL = 'RAIS · Base dos Dados · BigQuery';
+
+export interface CompaniesAggregatedRow {
+  id_municipio: string;
+  cnae_secao: string;
+  porte: string;
+  matriz_filial: 1 | 2;
+  regime_simples: string;
+  quantidade: number;
+}
+
+export interface CompaniesReportMeta {
+  competencia: string;
+  source: string;
+  queryVersion: string;
+  methodologyVersion: string;
+  simplesReadAt: string | null;
+}
+
+export type CompaniesReportResponse =
+  | { available: false; message: string }
+  | { available: true; meta: CompaniesReportMeta; rows: CompaniesAggregatedRow[] };
+
+export interface CompaniesBreakdownItem {
+  code: string;
+  label: string;
+  quantidade: number;
+  percentage: number;
+}
+
+export interface CompaniesBreakdown {
+  cnaeSections: CompaniesBreakdownItem[];
+  porte: CompaniesBreakdownItem[];
+  matrizFilial: CompaniesBreakdownItem[];
+  regimeSimples: CompaniesBreakdownItem[];
+}
