@@ -223,6 +223,23 @@ function normalizeRows(raw: unknown, expectedIbge: string): NormalizeResult {
   return { rows, discarded, discardReasons, observedKeys };
 }
 
+// Reagrupa agregados pela chave canônica da PK
+// (manifesto_id, id_municipio, cnae_secao, porte, matriz_filial, regime_simples),
+// somando quantidades — evita colisão quando divisões CNAE distintas convergem para a mesma seção.
+function mergeAggregatedRows(rows: AggregatedRow[]): AggregatedRow[] {
+  const merged = new Map<string, AggregatedRow>();
+  for (const row of rows) {
+    const key = [row.id_municipio, row.cnae_secao, row.porte, row.matriz_filial, row.regime_simples].join('|');
+    const existing = merged.get(key);
+    if (existing) {
+      existing.quantidade += row.quantidade;
+    } else {
+      merged.set(key, { ...row });
+    }
+  }
+  return [...merged.values()];
+}
+
 async function callProxy(scope: Scope) {
   const proxyUrl = Deno.env.get('BIGQUERY_PROXY_URL')?.replace(/\/$/, '');
   const secret = Deno.env.get('BIGQUERY_PROXY_HMAC_SECRET')?.trim();
@@ -304,7 +321,10 @@ Deno.serve(async (req) => {
       result.items ??
       result.aggregatedRows ??
       (result.data as Record<string, any> | undefined)?.rows;
-    const { rows, discarded: linhasDescartadas, discardReasons } = normalizeRows(rawRows, scope.municipality.ibgeCode);
+    const normalized = normalizeRows(rawRows, scope.municipality.ibgeCode);
+    const rows = mergeAggregatedRows(normalized.rows);
+    const linhasDescartadas = normalized.discarded;
+    const discardReasons = normalized.discardReasons;
 
     const cleanup = await db.from('empresas_estab_municipio').delete().eq('manifesto_id', manifestoId);
     if (cleanup.error) throw new SafeError('STAGING_CLEANUP', 500, 'Não foi possível limpar a carga anterior.');
