@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-16 — Empresas: piloto generalizado para qualquer município — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — banco, materializador e aba Empresas.
+- **O quê:** nova migration adiciona `id_municipio` em `empresas_estab_manifesto` (backfill a partir de `empresas_estab_municipio`, coluna obrigatória), remove a unicidade antiga `(competencia, query_version, methodology_version)` e cria `(id_municipio, competencia, query_version, methodology_version)`; RLS, revokes e a view `empresas_estab_municipio_publicado` (somente `status = 'ok'`) preservados. `empresas-materialize-pilot` passou a gravar `id_municipio` no manifesto e usar o novo `onConflict`, com limpeza restrita ao manifesto do município — falha de uma cidade não altera nem oculta carga publicada de outra; sem allowlist e sem carga nacional. Aba Empresas lê exclusivamente `empresas-report` com Bearer GeoBrain e escopo do `GeoApiScopeEngine`, com estados de carregamento, vazio ("Dados de Empresas ainda não materializados para este município."), erro real de token/permissão e sucesso.
+- **Por quê:** o manifesto único por competência faria a carga de uma nova cidade sobrescrever a de Blumenau.
+- **Arquivos:** migration `id_municipio` no manifesto; `supabase/functions/empresas-materialize-pilot/index.ts`; `src/features/empresas-empregados/*`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** verificado que Blumenau/SC segue publicada (197 linhas, 84.382 estabelecimentos, `status = ok`, `id_municipio = 4202404`). RAIS, Cloud Run, HMAC, secrets e `empresas-report` intactos.
+
 ### 2026-09-16 — Empresas: aba habilitada no frontend via `empresas-report` — Lovable (Gabriel)
 
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba Empresas.

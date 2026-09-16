@@ -29,7 +29,9 @@ export default function EmpresasEmpregadosPage() {
     if (tab === 'companies' && !companies.available) setTab('employees');
   }, [tab, companies.available]);
 
-  const companiesUnavailableMessage = companies.report && !companies.report.available ? companies.report.message : null;
+  const companiesReport = companies.report;
+  const companiesUnavailableMessage = companiesReport && companiesReport.available === false ? companiesReport.message : null;
+
 
   return <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6 animate-fade-in"><header className="border-b border-border bg-card px-5 py-4 shadow-sm sm:px-6"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0 space-y-1"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Relatórios · Dados agregados</p><h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Empresas e Empregados</h1><p className="text-sm text-muted-foreground">Emprego formal e estabelecimentos ativos no município selecionado.</p></div><div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground"><LockKeyhole className="h-4 w-4" />{hasToken ? 'Acesso GeoBrain' : 'Login GeoBrain necessário'}</div></div></header>
 
@@ -37,7 +39,7 @@ export default function EmpresasEmpregadosPage() {
 
     {companies.error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertTitle>Não foi possível consultar Empresas</AlertTitle><AlertDescription>{companies.error}</AlertDescription></Alert>}
 
-    {!companies.isLoading && !companies.error && companiesUnavailableMessage && <Card className="border-dashed"><CardContent className="flex min-h-40 flex-col items-center justify-center gap-3 p-6 text-center"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground"><Clock3 className="h-5 w-5" /></span><div><p className="font-medium">Competência de Empresas ainda não disponível</p><p className="mt-1 max-w-md text-sm leading-6 text-muted-foreground">{companiesUnavailableMessage} Escolha outro município ou aguarde a publicação da competência.</p></div></CardContent></Card>}
+    {!companies.isLoading && !companies.error && companiesUnavailableMessage && <Card className="border-dashed"><CardContent className="flex min-h-40 flex-col items-center justify-center gap-3 p-6 text-center"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground"><Clock3 className="h-5 w-5" /></span><div><p className="font-medium">Dados de Empresas ainda não materializados para este município.</p><p className="mt-1 max-w-md text-sm leading-6 text-muted-foreground">A competência ainda não está disponível aqui. Escolha outro município ou aguarde a publicação.</p></div></CardContent></Card>}
 
     <Tabs value={tab} onValueChange={setTab} className="space-y-5"><TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto"><TabsTrigger value="employees" className="gap-2"><Users className="h-4 w-4" />Empregados<Badge className="ml-1 bg-primary/90 text-primary-foreground">Disponível</Badge></TabsTrigger><TabsTrigger value="companies" disabled={!companies.available} className="gap-2"><Building2 className="h-4 w-4" />Empresas{companies.available ? <Badge className="ml-1 bg-primary/90 text-primary-foreground">Disponível</Badge> : <Badge variant="outline" className="ml-1">Sem competência</Badge>}</TabsTrigger></TabsList>
       <TabsContent value="employees" className="mt-0"><Suspense fallback={<WorkspaceLoading />}><EmployeesReportWorkspace /></Suspense></TabsContent>
