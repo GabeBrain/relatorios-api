@@ -18,3 +18,7 @@ verify_jwt = false
 [functions.empresas-report]
 # O token de entrada é o Bearer do GeoBrain, validado pela própria função.
 verify_jwt = false
+
+[functions.empresas-materialize-pilot]
+# Função interna: autenticada pelo segredo EMPRESAS_MATERIALIZER_SECRET no header próprio.
+verify_jwt = false
