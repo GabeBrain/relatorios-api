@@ -269,7 +269,15 @@ Deno.serve(async (req) => {
 
     const started = Date.now();
     const result = await callProxy(scope);
-    const { rows, discarded: linhasDescartadas } = normalizeRows(result.rows ?? result.data ?? result.aggregates, scope.municipality.ibgeCode);
+    const rawRows =
+      result.rows ??
+      result.data ??
+      result.aggregates ??
+      result.results ??
+      result.items ??
+      result.aggregatedRows ??
+      (result.data as Record<string, any> | undefined)?.rows;
+    const { rows, discarded: linhasDescartadas, discardReasons } = normalizeRows(rawRows, scope.municipality.ibgeCode);
 
     const cleanup = await db.from('empresas_estab_municipio').delete().eq('manifesto_id', manifestoId);
     if (cleanup.error) throw new SafeError('STAGING_CLEANUP', 500, 'Não foi possível limpar a carga anterior.');
