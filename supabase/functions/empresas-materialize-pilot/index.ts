@@ -103,7 +103,7 @@ function cnaeDivisaoToSecao(divisao: string): string {
 function resolveCnaeSecao(row: Record<string, any>): string {
   const rawSecao = String(row.cnaeSecao ?? row.cnae_secao ?? row.cnaeSection ?? '').trim().toUpperCase();
   if (/^[A-U]$/.test(rawSecao)) return rawSecao;
-  const divisao = String(row.cnaeDivisao ?? row.cnae_divisao ?? row.cnaeDivision ?? '').trim();
+  const divisao = String(row.cnaeDivision ?? row.cnaeDivisao ?? row.cnae_divisao ?? '').trim();
   return cnaeDivisaoToSecao(divisao);
 }
 
@@ -178,10 +178,10 @@ function normalizeRows(raw: unknown, expectedIbge: string): NormalizeResult {
     const idMunicipio = String(row.idMunicipio ?? row.id_municipio ?? row.municipalityIbge ?? '').trim();
     if (idMunicipio !== expectedIbge) throw new SafeError('MUNICIPALITY_MISMATCH', 502, 'A ponte retornou município diferente do solicitado.');
     const cnaeSecao = resolveCnaeSecao(row);
-    const porte = resolvePorte(row.porte ?? row.companySize);
-    const matrizFilialRaw = row.matrizFilial ?? row.matriz_filial ?? row.headquartersOrBranch;
-    const regimeSimplesRaw = row.regimeSimples ?? row.regime_simples ?? row.simpleRegimeCurrent;
-    const quantidadeRaw = row.quantidade ?? row.quantity ?? row.total ?? row.count;
+    const porte = resolvePorte(row.companySize ?? row.porte);
+    const matrizFilialRaw = row.headquartersOrBranch ?? row.matrizFilial ?? row.matriz_filial;
+    const regimeSimplesRaw = row.simpleRegimeCurrent ?? row.regimeSimples ?? row.regime_simples;
+    const quantidadeRaw = row.quantity ?? row.quantidade ?? row.total ?? row.count;
     const matrizFilial = normalizeMatrizFilial(matrizFilialRaw);
     const regimeSimples = normalizeRegimeSimples(regimeSimplesRaw);
     const quantidade = normalizeQuantidade(quantidadeRaw);
