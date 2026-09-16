@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-16 — Validação do Fechamento: aprovações persistentes de divergências — Edgar
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
+- **O quê:** incluída aprovação irreversível por linha, com confirmação, e-mail da autenticação GeoBrain e data/hora. Registros aprovados ficam ocultos por padrão, podem ser exibidos sob demanda e continuam no Excel com os campos de auditoria. Criados migration, tabela e Edge Function exclusivos para persistência.
+- **Por quê:** permitir que exceções conhecidas sejam aprovadas sem removê-las da auditoria ou das exportações.
+- **Arquivos:** `src/features/validacao-fechamento/{DivergencesGrid,approvals}.ts`, `supabase/migrations/20260916090000_validacao_fechamento_aprovacoes.sql`, `supabase/functions/validacao-fechamento-approvals/`, `supabase/config.toml`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** PENDENTE DE DEPLOY; o checkout ainda não está vinculado ao Supabase CLI. Antes do primeiro uso, aplicar a migration e publicar `validacao-fechamento-approvals`. A pendência é exclusiva desta funcionalidade.
+
 ### 2026-09-15 — Corretor: calibração da Sugestão de Análise — Codex
 
 - **Ambiente/funcionalidade:** `/corretor` — Sugestão de Análise.

@@ -10,3 +10,7 @@ verify_jwt = false
 [functions.rais-employees-report]
 # O token de entrada é o Bearer do GeoBrain, não um JWT do Supabase.
 verify_jwt = false
+
+[functions.validacao-fechamento-approvals]
+# O token de entrada é o Bearer do GeoBrain, validado pela própria função.
+verify_jwt = false
