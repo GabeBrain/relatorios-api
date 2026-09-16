@@ -326,6 +326,7 @@ Deno.serve(async (req) => {
       municipality: scope.municipality,
       aggregatedRows: rows.length,
       linhasDescartadas,
+      motivosDescarte: discardReasons,
       totalEstabelecimentos,
       bytesProcessed: integerOrNull(result.bytesProcessed ?? result.bytes_processed),
       jobIds,
