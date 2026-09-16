@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-16 — Empresas: aceite dos códigos de porte da Receita no materializador piloto — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — materializador do piloto Empresas.
+- **O quê:** `empresas-materialize-pilot` passou a aceitar os códigos de porte da Receita Federal normalizados pela ponte BigQuery (`"00"`, `"01"`, `"03"`, `"05"`), gravando o valor canônico char(2) em `empresas_estab_municipio.porte`. Códigos de um dígito são normalizados com zero à esquerda; valores ausentes ou desconhecidos viram `"00"` (não informado), sem rejeitar a carga. Mapeamento verificado com 11 casos de teste.
+- **Por quê:** a validação anterior exigia qualquer string de 2 caracteres, mas falhava com `INVALID_ROW` / "Porte inválido" em cenários da ponte; o novo mapeamento é explícito e alinhado ao schema da tabela.
+- **Arquivos:** `supabase/functions/empresas-materialize-pilot/index.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** destrava mais uma etapa da materialização de teste (Blumenau/SC, partições 2026-07-12); migration, RLS, tabelas, `empresas-report`, RAIS, frontend, HMAC e secrets intactos.
+
 ### 2026-09-16 — Empresas: conversão divisão→seção CNAE no materializador piloto — Lovable (Gabriel)
 
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — materializador do piloto Empresas.

@@ -107,6 +107,18 @@ function resolveCnaeSecao(row: Record<string, any>): string {
   return cnaeDivisaoToSecao(divisao);
 }
 
+// Porte canônico da tabela = código da Receita Federal (char(2)):
+// '00' não informado, '01' Microempresa, '03' EPP, '05' Demais.
+const PORTES_VALIDOS = new Set(['00', '01', '03', '05']);
+
+function resolvePorte(raw: unknown): string {
+  const value = String(raw ?? '').trim();
+  if (PORTES_VALIDOS.has(value)) return value;
+  const numeric = value.padStart(2, '0');
+  if (PORTES_VALIDOS.has(numeric)) return numeric;
+  return '00';
+}
+
 function normalizeRows(raw: unknown, expectedIbge: string): AggregatedRow[] {
   if (!Array.isArray(raw) || !raw.length) throw new SafeError('PROXY_EMPTY', 502, 'A ponte não retornou linhas agregadas.');
   return raw.map((item) => {
@@ -114,12 +126,12 @@ function normalizeRows(raw: unknown, expectedIbge: string): AggregatedRow[] {
     const idMunicipio = String(row.idMunicipio ?? row.id_municipio ?? row.municipalityIbge ?? '').trim();
     if (idMunicipio !== expectedIbge) throw new SafeError('MUNICIPALITY_MISMATCH', 502, 'A ponte retornou município diferente do solicitado.');
     const cnaeSecao = resolveCnaeSecao(row);
-    const porte = String(row.porte ?? '').trim().slice(0, 2);
+    const porte = resolvePorte(row.porte);
     const matrizFilial = Number(row.matrizFilial ?? row.matriz_filial);
     const regimeSimples = String(row.regimeSimples ?? row.regime_simples ?? '').trim().toLowerCase();
     const quantidade = Number(row.quantidade ?? row.total ?? row.count);
     if (!/^[A-U]$|^ND$/.test(cnaeSecao)) throw new SafeError('INVALID_ROW', 502, 'Seção CNAE inválida.');
-    if (!porte || porte.length !== 2) throw new SafeError('INVALID_ROW', 502, 'Porte inválido.');
+    
     if (matrizFilial !== 1 && matrizFilial !== 2) throw new SafeError('INVALID_ROW', 502, 'Indicador matriz/filial inválido.');
     if (!['mei', 'simples', 'nenhum'].includes(regimeSimples)) throw new SafeError('INVALID_ROW', 502, 'Regime Simples inválido.');
     if (!Number.isInteger(quantidade) || quantidade < 0) throw new SafeError('INVALID_ROW', 502, 'Quantidade deve ser inteira e não negativa.');
