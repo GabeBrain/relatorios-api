@@ -228,7 +228,7 @@ Deno.serve(async (req) => {
 
     const started = Date.now();
     const result = await callProxy(scope);
-    const rows = normalizeRows(result.rows ?? result.data ?? result.aggregates, scope.municipality.ibgeCode);
+    const { rows, discarded: linhasDescartadas } = normalizeRows(result.rows ?? result.data ?? result.aggregates, scope.municipality.ibgeCode);
 
     const cleanup = await db.from('empresas_estab_municipio').delete().eq('manifesto_id', manifestoId);
     if (cleanup.error) throw new SafeError('STAGING_CLEANUP', 500, 'Não foi possível limpar a carga anterior.');
@@ -276,6 +276,7 @@ Deno.serve(async (req) => {
       },
       municipality: scope.municipality,
       aggregatedRows: rows.length,
+      linhasDescartadas,
       totalEstabelecimentos,
       bytesProcessed: integerOrNull(result.bytesProcessed ?? result.bytes_processed),
       jobIds,
