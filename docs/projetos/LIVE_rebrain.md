@@ -1,5 +1,16 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-16 — Empresas: fundação local do piloto CNPJ pré-agregado — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba Empresas.
+- **O quê:** criada a migration local do agregado municipal de estabelecimentos, com manifesto versionado, fatos sem CNPJ individual, publicação atômica por status `ok` e bloqueio de leitura direta por `anon`/`authenticated`.
+- **Por quê:** preparar a persistência do piloto BigQuery sem expor carga parcial, lista de CNPJs ou consultas diretas do cliente.
+- **Fonte validada:** `estabelecimentos` e `empresas` possuem 53 partições sincronizadas (2021-11-23 a 2026-07-12). `simples` existe, mas não é particionada; no piloto seu estado atual será registrado separadamente, sem alegação de competência histórica.
+- **Arquivos:** `supabase/migrations/20260916113000_empresas_estabelecimentos_piloto.sql`, `supabase/functions/empresas-report/index.ts`, `gcp/empresas-materializer/{query.sql,README.md,package.json}`.
+- **Commits:** pendente nesta sessão; sem push por solicitação do Lucas.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** falta implementar e publicar o materializador Cloud Run, aplicar a migration e habilitar a leitura protegida para a interface; nenhuma aba foi ativada ainda.
+
 ### 2026-09-16 — Validação do Fechamento: aprovações persistentes de divergências — Edgar
 
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
