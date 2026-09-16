@@ -48,6 +48,7 @@ export type Database = {
           fonte: string
           gerado_em: string
           id: string
+          id_municipio: string
           linhas_geradas: number | null
           methodology_version: string
           origem_empresas_bytes: number | null
@@ -70,6 +71,7 @@ export type Database = {
           fonte?: string
           gerado_em?: string
           id?: string
+          id_municipio: string
           linhas_geradas?: number | null
           methodology_version: string
           origem_empresas_bytes?: number | null
@@ -92,6 +94,7 @@ export type Database = {
           fonte?: string
           gerado_em?: string
           id?: string
+          id_municipio?: string
           linhas_geradas?: number | null
           methodology_version?: string
           origem_empresas_bytes?: number | null
