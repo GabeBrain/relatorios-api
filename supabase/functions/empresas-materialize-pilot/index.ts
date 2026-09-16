@@ -101,9 +101,9 @@ function cnaeDivisaoToSecao(divisao: string): string {
 }
 
 function resolveCnaeSecao(row: Record<string, any>): string {
-  const rawSecao = String(row.cnaeSecao ?? row.cnae_secao ?? '').trim().toUpperCase();
+  const rawSecao = String(row.cnaeSecao ?? row.cnae_secao ?? row.cnaeSection ?? '').trim().toUpperCase();
   if (/^[A-U]$/.test(rawSecao)) return rawSecao;
-  const divisao = String(row.cnaeDivisao ?? row.cnae_divisao ?? '').trim();
+  const divisao = String(row.cnaeDivisao ?? row.cnae_divisao ?? row.cnaeDivision ?? '').trim();
   return cnaeDivisaoToSecao(divisao);
 }
 
@@ -116,17 +116,27 @@ function resolvePorte(raw: unknown): string {
   if (PORTES_VALIDOS.has(value)) return value;
   const numeric = value.padStart(2, '0');
   if (PORTES_VALIDOS.has(numeric)) return numeric;
+  const plain = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (plain.includes('micro') && !plain.includes('pequen')) return '01';
+  if (plain.includes('pequen') || plain === 'epp') return '03';
+  if (plain.includes('demais') || plain.includes('outros') || plain.includes('medi') || plain.includes('grande')) return '05';
   return '00';
 }
 
 function normalizeMatrizFilial(raw: unknown): number | null {
-  const value = (typeof raw === 'string' ? raw : String(raw ?? '')).trim().toLowerCase();
-  if (value === '1' || value === 'matriz' || value === 'm' || value === 'true') return 1;
-  if (value === '2' || value === 'filial' || value === 'f' || value === 'false') return 2;
+  const value = (typeof raw === 'string' ? raw : String(raw ?? ''))
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  if (!value) return null;
+  if (value === '1' || value === 'm' || value === 'true' || value.startsWith('matriz') || value.startsWith('headquarter')) return 1;
+  if (value === '2' || value === 'f' || value === 'false' || value.startsWith('filial') || value.startsWith('branch')) return 2;
   return null;
 }
 
 function normalizeRegimeSimples(raw: unknown): string | null {
+  if (typeof raw === 'boolean') return raw ? 'simples' : 'nenhum';
   const value = String(raw ?? '')
     .trim()
     .toLowerCase()
@@ -134,13 +144,17 @@ function normalizeRegimeSimples(raw: unknown): string | null {
     .replace(/[\u0300-\u036f]/g, '');
   if (!value) return null;
   if (value === 'mei' || value.includes('microempreendedor')) return 'mei';
-  if (value === 'simples' || value.includes('simples')) return 'simples';
-  if (['nenhum', 'none', 'nao', 'n', 'outros', 'demais', 'nao optante', 'normal'].includes(value)) return 'nenhum';
+  if (value === 'simples' || value.includes('simples') || value === 'simple' || value === 'true') return 'simples';
+  if (
+    ['nenhum', 'none', 'nao', 'n', 'no', 'false', 'outros', 'demais', 'nao optante', 'normal', 'nd', 'nao informado'].includes(value)
+  ) {
+    return 'nenhum';
+  }
   return null;
 }
 
 function normalizeQuantidade(raw: unknown): number | null {
-  const parsed = typeof raw === 'string' ? Number(raw.trim()) : Number(raw);
+  const parsed = typeof raw === 'string' ? Number(raw.trim().replace(/\s/g, '')) : Number(raw);
   if (!Number.isFinite(parsed) || parsed < 0) return null;
   return Math.round(parsed);
 }
@@ -157,21 +171,34 @@ function normalizeRows(raw: unknown, expectedIbge: string): NormalizeResult {
   const rows: AggregatedRow[] = [];
   const discardReasons: Record<string, number> = {};
   const observedKeys = Object.keys((raw[0] ?? {}) as Record<string, unknown>).sort();
+  const sampleValues: Record<string, string> = {};
   let discarded = 0;
   for (const item of raw) {
     const row = (item ?? {}) as Record<string, any>;
     const idMunicipio = String(row.idMunicipio ?? row.id_municipio ?? row.municipalityIbge ?? '').trim();
     if (idMunicipio !== expectedIbge) throw new SafeError('MUNICIPALITY_MISMATCH', 502, 'A ponte retornou município diferente do solicitado.');
     const cnaeSecao = resolveCnaeSecao(row);
-    const porte = resolvePorte(row.porte);
-    const matrizFilial = normalizeMatrizFilial(row.matrizFilial ?? row.matriz_filial);
-    const regimeSimples = normalizeRegimeSimples(row.regimeSimples ?? row.regime_simples);
-    const quantidade = normalizeQuantidade(row.quantidade ?? row.total ?? row.count);
+    const porte = resolvePorte(row.porte ?? row.companySize);
+    const matrizFilialRaw = row.matrizFilial ?? row.matriz_filial ?? row.headquartersOrBranch;
+    const regimeSimplesRaw = row.regimeSimples ?? row.regime_simples ?? row.simpleRegimeCurrent;
+    const quantidadeRaw = row.quantidade ?? row.quantity ?? row.total ?? row.count;
+    const matrizFilial = normalizeMatrizFilial(matrizFilialRaw);
+    const regimeSimples = normalizeRegimeSimples(regimeSimplesRaw);
+    const quantidade = normalizeQuantidade(quantidadeRaw);
     const reasons: string[] = [];
     if (!/^[A-U]$|^ND$/.test(cnaeSecao)) reasons.push('cnae_secao');
-    if (matrizFilial === null) reasons.push('matriz_filial');
-    if (regimeSimples === null) reasons.push('regime_simples');
-    if (quantidade === null) reasons.push('quantidade');
+    if (matrizFilial === null) {
+      reasons.push('matriz_filial');
+      sampleValues.matriz_filial ??= `${typeof matrizFilialRaw}:${JSON.stringify(matrizFilialRaw ?? null)}`;
+    }
+    if (regimeSimples === null) {
+      reasons.push('regime_simples');
+      sampleValues.regime_simples ??= `${typeof regimeSimplesRaw}:${JSON.stringify(regimeSimplesRaw ?? null)}`;
+    }
+    if (quantidade === null) {
+      reasons.push('quantidade');
+      sampleValues.quantidade ??= `${typeof quantidadeRaw}:${JSON.stringify(quantidadeRaw ?? null)}`;
+    }
     if (reasons.length) {
       discarded += 1;
       for (const reason of reasons) discardReasons[reason] = (discardReasons[reason] ?? 0) + 1;
@@ -190,7 +217,7 @@ function normalizeRows(raw: unknown, expectedIbge: string): NormalizeResult {
     throw new SafeError(
       'PROXY_EMPTY',
       502,
-      `A ponte não retornou nenhuma linha agregada válida. Linhas recebidas: ${raw.length}. Campos observados: ${observedKeys.join(', ') || '(nenhum)'}. Descartes por campo: ${JSON.stringify(discardReasons)}.`,
+      `A ponte não retornou nenhuma linha agregada válida. Linhas recebidas: ${raw.length}. Campos observados: ${observedKeys.join(', ') || '(nenhum)'}. Descartes por campo: ${JSON.stringify(discardReasons)}. Exemplos de valores rejeitados: ${JSON.stringify(sampleValues)}.`,
     );
   }
   return { rows, discarded, discardReasons, observedKeys };
