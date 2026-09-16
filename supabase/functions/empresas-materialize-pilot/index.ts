@@ -107,6 +107,18 @@ function resolveCnaeSecao(row: Record<string, any>): string {
   return cnaeDivisaoToSecao(divisao);
 }
 
+// Porte canônico da tabela = código da Receita Federal (char(2)):
+// '00' não informado, '01' Microempresa, '03' EPP, '05' Demais.
+const PORTES_VALIDOS = new Set(['00', '01', '03', '05']);
+
+function resolvePorte(raw: unknown): string {
+  const value = String(raw ?? '').trim();
+  if (PORTES_VALIDOS.has(value)) return value;
+  const numeric = value.padStart(2, '0');
+  if (PORTES_VALIDOS.has(numeric)) return numeric;
+  return '00';
+}
+
 function normalizeRows(raw: unknown, expectedIbge: string): AggregatedRow[] {
   if (!Array.isArray(raw) || !raw.length) throw new SafeError('PROXY_EMPTY', 502, 'A ponte não retornou linhas agregadas.');
   return raw.map((item) => {
