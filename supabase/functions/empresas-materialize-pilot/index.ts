@@ -86,18 +86,39 @@ type AggregatedRow = {
   quantidade: number;
 };
 
+// Conversão de divisão CNAE (dois dígitos) para seção CNAE 2.0.
+const CNAE_DIVISAO_SECAO: ReadonlyArray<readonly [number, number, string]> = [
+  [1, 3, 'A'], [5, 9, 'B'], [10, 33, 'C'], [35, 35, 'D'], [36, 39, 'E'], [41, 43, 'F'], [45, 47, 'G'],
+  [49, 53, 'H'], [55, 56, 'I'], [58, 63, 'J'], [64, 66, 'K'], [68, 68, 'L'], [69, 75, 'M'], [77, 82, 'N'],
+  [84, 84, 'O'], [85, 85, 'P'], [86, 88, 'Q'], [90, 93, 'R'], [94, 96, 'S'], [97, 97, 'T'], [99, 99, 'U'],
+];
+
+function cnaeDivisaoToSecao(divisao: string): string {
+  if (!/^\d{1,2}$/.test(divisao)) return 'ND';
+  const numeric = Number(divisao);
+  const match = CNAE_DIVISAO_SECAO.find(([min, max]) => numeric >= min && numeric <= max);
+  return match ? match[2] : 'ND';
+}
+
+function resolveCnaeSecao(row: Record<string, any>): string {
+  const rawSecao = String(row.cnaeSecao ?? row.cnae_secao ?? '').trim().toUpperCase();
+  if (/^[A-U]$/.test(rawSecao)) return rawSecao;
+  const divisao = String(row.cnaeDivisao ?? row.cnae_divisao ?? '').trim();
+  return cnaeDivisaoToSecao(divisao);
+}
+
 function normalizeRows(raw: unknown, expectedIbge: string): AggregatedRow[] {
   if (!Array.isArray(raw) || !raw.length) throw new SafeError('PROXY_EMPTY', 502, 'A ponte não retornou linhas agregadas.');
   return raw.map((item) => {
     const row = (item ?? {}) as Record<string, any>;
     const idMunicipio = String(row.idMunicipio ?? row.id_municipio ?? row.municipalityIbge ?? '').trim();
     if (idMunicipio !== expectedIbge) throw new SafeError('MUNICIPALITY_MISMATCH', 502, 'A ponte retornou município diferente do solicitado.');
-    const cnaeSecao = String(row.cnaeSecao ?? row.cnae_secao ?? '').trim().toUpperCase().slice(0, 2);
+    const cnaeSecao = resolveCnaeSecao(row);
     const porte = String(row.porte ?? '').trim().slice(0, 2);
     const matrizFilial = Number(row.matrizFilial ?? row.matriz_filial);
     const regimeSimples = String(row.regimeSimples ?? row.regime_simples ?? '').trim().toLowerCase();
     const quantidade = Number(row.quantidade ?? row.total ?? row.count);
-    if (!cnaeSecao || cnaeSecao.length !== 2) throw new SafeError('INVALID_ROW', 502, 'Seção CNAE inválida.');
+    if (!/^[A-U]$|^ND$/.test(cnaeSecao)) throw new SafeError('INVALID_ROW', 502, 'Seção CNAE inválida.');
     if (!porte || porte.length !== 2) throw new SafeError('INVALID_ROW', 502, 'Porte inválido.');
     if (matrizFilial !== 1 && matrizFilial !== 2) throw new SafeError('INVALID_ROW', 502, 'Indicador matriz/filial inválido.');
     if (!['mei', 'simples', 'nenhum'].includes(regimeSimples)) throw new SafeError('INVALID_ROW', 502, 'Regime Simples inválido.');
