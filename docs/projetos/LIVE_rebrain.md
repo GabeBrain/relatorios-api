@@ -1,3 +1,8 @@
+### 2026-09-17 - Sinduscon - Curitiba: fallback local de processamento - Codex
+- **Ambiente/funcionalidade:** /rebrain/sinduscon-curitiba.
+- **O que:** quando VITE_SINDUSCON_PROCESSOR_URL nao estiver configurada, a interface tenta processar o .xlsx localmente com SheetJS, permitindo validar o fluxo sem Cloud Run. O backend continua disponivel para a preservacao visual mais fiel.
+- **Impacto em Etapas/Pendencias:** fallback pronto para teste; comparar a formatacao gerada localmente antes de decidir se o Cloud Run sera necessario.
+
 ### 2026-09-17 - Sinduscon - Curitiba: entrada somente em XLSX - Codex
 - **Ambiente/funcionalidade:** /rebrain/sinduscon-curitiba - tratamento inicial de Alvaras e CVCO.
 - **O que:** a interface e o processador passam a aceitar exclusivamente arquivos .xlsx; arquivos .xls sao rejeitados com orientacao para usar Salvar como no Excel. Removida a dependencia de conversao LibreOffice do conteiner.
