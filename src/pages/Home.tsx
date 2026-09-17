@@ -61,7 +61,7 @@ const JOURNEYS: Journey[] = [
     description: 'Revise estudos, confira consistência de fechamento e mantenha bases de empreendimentos atualizadas.',
     icon: ClipboardCheck,
     tools: [
-      { title: 'Corretor de Estudos', description: 'Revise estudos vocacionais e organize os achados da auditoria.', to: '/corretor', audiences: ['Pesquisa', 'Analistas'], study: 'Estudo vocacional' },
+      { title: 'Assistente de Projetos', description: 'Revise estudos vocacionais e organize os achados da auditoria.', to: '/corretor', audiences: ['Pesquisa', 'Analistas'], study: 'Estudo vocacional' },
       { title: 'Validação do Fechamento', description: 'Confira vendas, estoque e consistência por cidade e período.', to: '/rebrain/validacao-fechamento', audiences: ['Operação', 'Analistas'], study: 'Qualidade de dados' },
       { title: 'Atualizador VGV', description: 'Carregue uma planilha para atualizar e analisar empreendimentos.', to: '/atualizador-vgv', audiences: ['Operação', 'Analistas'], study: 'Base de VGV' },
     ],
