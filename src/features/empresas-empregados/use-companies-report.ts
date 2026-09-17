@@ -18,7 +18,10 @@ export interface CompaniesReportState {
  * tabelas ou views diretamente.
  */
 export function useCompaniesReport(scope: { uf: string; city: string }, ready: boolean): CompaniesReportState {
-  const [state, setState] = useState<CompaniesReportState>({ isLoading: false, error: null, municipality: null, report: null, available: false });
+  type InternalState = Omit<CompaniesReportState, 'reload'>;
+  const [state, setState] = useState<InternalState>({ isLoading: false, error: null, municipality: null, report: null, available: false });
+  const [reloadToken, setReloadToken] = useState(0);
+  const reload = useCallback(() => setReloadToken((value) => value + 1), []);
 
   useEffect(() => {
     if (!ready || !scope.uf || !scope.city) {
