@@ -27,9 +27,6 @@ export default function EmpresasEmpregadosPage() {
   const { strictReady } = useGeoApiScope({ value: scope, onChange: onScopeChange });
   const companies = useCompaniesReport(scope, strictReady);
 
-  useEffect(() => {
-    if (companies.available) setTab('companies');
-  }, [companies.available]);
 
   const companiesReport = companies.report;
   const companiesUnavailableMessage = companiesReport && companiesReport.available === false ? companiesReport.message : null;
