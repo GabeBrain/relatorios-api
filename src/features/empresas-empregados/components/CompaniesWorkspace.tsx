@@ -46,7 +46,7 @@ function BreakdownCard({ title, rows, note }: { title: string; rows: CompaniesBr
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Progress value={row.percentage} className="h-1.5 w-16" />
-                      <span className="tabular-nums">{formatPercentage(row.percentage)}</span>
+                      <span className="tabular-nums">{formatPercent(row.percentage)}</span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -95,11 +95,11 @@ function SectorSizeTable({ rows }: { rows: CompaniesAggregatedRow[] }) {
                   {PORTE_COLUMNS.map((column) => (
                     <Fragment key={column.code}>
                       <TableCell className="text-right tabular-nums">{formatInteger(row.cells[column.code].quantidade)}</TableCell>
-                      <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercentage(row.cells[column.code].percentage)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercent(row.cells[column.code].percentage)}</TableCell>
                     </Fragment>
                   ))}
                   <TableCell className="text-right font-semibold tabular-nums">{formatInteger(row.total)}</TableCell>
-                  <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercentage(row.totalPercentage)}</TableCell>
+                  <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercent(row.totalPercentage)}</TableCell>
                 </TableRow>
               ))}
               <TableRow className="bg-muted/50 font-semibold">
@@ -107,7 +107,7 @@ function SectorSizeTable({ rows }: { rows: CompaniesAggregatedRow[] }) {
                 {PORTE_COLUMNS.map((column) => (
                   <Fragment key={column.code}>
                     <TableCell className="text-right tabular-nums">{formatInteger(matrix.totals[column.code] ?? 0)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatPercentage(matrix.grandTotal > 0 ? ((matrix.totals[column.code] ?? 0) / matrix.grandTotal) * 100 : 0)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{formatPercent(matrix.grandTotal > 0 ? ((matrix.totals[column.code] ?? 0) / matrix.grandTotal) * 100 : 0)}</TableCell>
                   </Fragment>
                 ))}
                 <TableCell className="text-right tabular-nums">{formatInteger(matrix.grandTotal)}</TableCell>
