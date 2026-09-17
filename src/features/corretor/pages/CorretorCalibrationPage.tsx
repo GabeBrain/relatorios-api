@@ -115,9 +115,9 @@ export default function CorretorCalibrationPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card px-6 py-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Link to="/corretor" className="text-muted-foreground hover:text-foreground" title="Voltar ao corretor"><ArrowLeft className="w-4 h-4" /></Link>
+          <Link to="/corretor" className="text-muted-foreground hover:text-foreground" title="Voltar ao Assistente de Projetos"><ArrowLeft className="w-4 h-4" /></Link>
           <div>
-            <h1 className="text-base font-semibold flex items-center gap-2"><BarChart3 className="w-4 h-4 text-primary" /> Calibração do Corretor</h1>
+            <h1 className="text-base font-semibold flex items-center gap-2"><BarChart3 className="w-4 h-4 text-primary" /> Calibração do Assistente de Projetos</h1>
             <p className="text-xs text-muted-foreground">Falsos positivos de todos os estudos · {newCount} novo(s)</p>
           </div>
         </div>
