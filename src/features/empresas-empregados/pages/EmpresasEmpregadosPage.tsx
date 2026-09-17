@@ -10,6 +10,8 @@ import { GeoApiScopeSelector, useGeoApiScope, type GeoScope } from '@/features/s
 import { useAuthStore } from '@/store/auth-store';
 import { useCompaniesReport } from '../use-companies-report';
 
+import CompaniesMaterializeButton from '../components/CompaniesMaterializeButton';
+
 const EmployeesReportWorkspace = lazy(() => import('../components/EmployeesReportWorkspace'));
 const CompaniesWorkspace = lazy(() => import('../components/CompaniesWorkspace'));
 
@@ -35,7 +37,7 @@ export default function EmpresasEmpregadosPage() {
 
   return <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6 animate-fade-in"><header className="border-b border-border bg-card px-5 py-4 shadow-sm sm:px-6"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0 space-y-1"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Relatórios · Dados agregados</p><h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Empresas e Empregados</h1><p className="text-sm text-muted-foreground">Emprego formal e estabelecimentos ativos no município selecionado.</p></div><div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground"><LockKeyhole className="h-4 w-4" />{hasToken ? 'Acesso GeoBrain' : 'Login GeoBrain necessário'}</div></div></header>
 
-    <Card className="border-primary/15 shadow-sm"><CardContent className="space-y-2 p-4 sm:p-5"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Escopo geográfico · Empresas</p><GeoApiScopeSelector value={scope} onChange={onScopeChange} />{companies.isLoading && <BrainLoadingState variant="field" title="Verificando competência de Empresas publicada" />}</CardContent></Card>
+    <Card className="border-primary/15 shadow-sm"><CardContent className="space-y-3 p-4 sm:p-5"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Escopo geográfico · Empresas</p><GeoApiScopeSelector value={scope} onChange={onScopeChange} />{companies.isLoading && <BrainLoadingState variant="field" title="Verificando competência de Empresas publicada" />}{companies.municipality && !companies.isLoading && <CompaniesMaterializeButton municipality={companies.municipality} onSuccess={companies.reload} />}<p className="text-xs leading-5 text-muted-foreground">Simples/MEI representa o estado cadastral atual da fonte, não uma foto histórica da competência.</p></CardContent></Card>
 
     {companies.error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertTitle>Não foi possível consultar Empresas</AlertTitle><AlertDescription>{companies.error}</AlertDescription></Alert>}
 
