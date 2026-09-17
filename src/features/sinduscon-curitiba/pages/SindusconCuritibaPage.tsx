@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
-import { exportReport, processWorkbook } from '../lib/report-processor';
+import { processSindusconFile } from '../api';
 import type { ProcessedReport, ReportKind } from '../types';
 
 const COPY: Record<ReportKind, { title: string; description: string }> = {
@@ -17,6 +17,7 @@ export default function SindusconCuritibaPage() {
   const [report, setReport] = useState<ProcessedReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [download, setDownload] = useState<{ blob: Blob; fileName: string } | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const processing = startedAt !== null;
 
@@ -24,12 +25,23 @@ export default function SindusconCuritibaPage() {
     if (!file || !step) return;
     if (!/\.(xls|xlsx)$/i.test(file.name)) { setError('Envie um arquivo Excel no formato .xls ou .xlsx.'); return; }
     setError(null); setStartedAt(Date.now());
-    try { setReport(processWorkbook(await file.arrayBuffer(), file.name, step)); }
+    try {
+      const result = await processSindusconFile(file, step);
+      setReport(result.report);
+      setDownload({ blob: result.blob, fileName: result.fileName });
+    }
     catch (cause) { setError(cause instanceof Error ? cause.message : 'Não foi possível tratar esta planilha.'); }
     finally { setStartedAt(null); }
   }
-  function choose(next: ReportKind) { setStep(next); setReport(null); setError(null); }
-  function leave() { setStep(null); setReport(null); setError(null); }
+  function choose(next: ReportKind) { setStep(next); setReport(null); setDownload(null); setError(null); }
+  function leave() { setStep(null); setReport(null); setDownload(null); setError(null); }
+  function downloadReport() {
+    if (!download) return;
+    const url = URL.createObjectURL(download.blob);
+    const anchor = document.createElement('a');
+    anchor.href = url; anchor.download = download.fileName; anchor.click();
+    URL.revokeObjectURL(url);
+  }
 
   return <div className="min-h-full">
     <header className="border-b border-border bg-card px-5 py-6 sm:px-8"><p className="text-xs font-semibold uppercase tracking-wider text-primary">Rebrain · Sinduscon</p><h1 className="mt-1 text-2xl font-semibold tracking-tight">Sinduscon - Curitiba</h1><p className="mt-2 max-w-2xl text-sm text-muted-foreground">Preparação das bases mensais de alvarás e certificados de vistoria e conclusão de obra.</p></header>
@@ -37,7 +49,7 @@ export default function SindusconCuritibaPage() {
       {!step ? <div className="grid gap-5 md:grid-cols-2">{(['alvaras', 'cvco'] as ReportKind[]).map((kind) => <Card key={kind} className="border-primary/15 shadow-sm"><CardHeader><span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary"><FileSpreadsheet className="h-5 w-5" /></span><CardTitle className="mt-3 text-lg">{COPY[kind].title}</CardTitle><CardDescription>{COPY[kind].description}</CardDescription></CardHeader><CardContent><Button className="w-full" onClick={() => choose(kind)}>Iniciar tratamento <ArrowRight /></Button></CardContent></Card>)}</div> : <>
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Etapa atual</p><h2 className="text-xl font-semibold">{COPY[step].title}</h2></div><Button variant="ghost" onClick={leave}>Voltar às etapas</Button></div>
         {!report && <Card className="border-dashed border-primary/30"><CardContent className="p-6 sm:p-10"><button type="button" className="flex w-full flex-col items-center rounded-xl border-2 border-dashed border-border px-6 py-12 text-center transition-colors hover:border-primary/50 hover:bg-primary/[0.03]" onClick={() => input.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void handleFile(event.dataTransfer.files[0]); }}><UploadCloud className="h-9 w-9 text-primary" /><p className="mt-4 font-medium">Arraste a planilha aqui ou selecione um arquivo</p><p className="mt-1 text-sm text-muted-foreground">Aceita arquivos .xls e .xlsx. Mês e ano são lidos do nome do arquivo.</p></button><input ref={input} className="sr-only" type="file" accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void handleFile(event.target.files?.[0])} />{error && <Alert variant="destructive" className="mt-4"><AlertCircle /><AlertTitle>Não foi possível processar o arquivo</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}</CardContent></Card>}
-        {report && <Result report={report} onDownload={() => exportReport(report)} onNext={() => choose(step === 'alvaras' ? 'cvco' : 'alvaras')} onLeave={leave} />}
+        {report && <Result report={report} onDownload={downloadReport} onNext={() => choose(step === 'alvaras' ? 'cvco' : 'alvaras')} onLeave={leave} />}
       </>}
       {processing && <BrainLoadingState variant="overlay" startedAt={startedAt} title="Tratando planilha" description="Organizando colunas e identificando itens para revisão." />}
     </div>

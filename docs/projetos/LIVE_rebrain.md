@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-17 — Sinduscon - Curitiba: motor de planilhas com preservação visual — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás e CVCO.
+- **O quê:** o frontend passa a enviar a planilha ao processador dedicado; o novo serviço Cloud Run converte `.xls` com LibreOffice e aplica as alterações em `.xlsx` com `openpyxl`, preservando estilos, preenchimentos, bordas, filtros, larguras e alturas da aba original. O arquivo é tratado em diretório temporário e não é persistido.
+- **Por quê:** o processamento exclusivamente no navegador descartava os estilos internos de arquivos `.xls` ao regravar os dados.
+- **Arquivos:** `gcp/sinduscon-workbook-processor/{app.py,Dockerfile,requirements.txt,README.md}`, `src/features/sinduscon-curitiba/{api.ts,pages/SindusconCuritibaPage.tsx,types.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** frontend e serviço estão implementados localmente. Falta publicar o Cloud Run e configurar a variável pública `VITE_SINDUSCON_PROCESSOR_URL`; o ambiente atual não possui `gcloud` configurado para realizar esse deploy.
+
 ### 2026-09-17 — Sinduscon - Curitiba: exclusão sem transferência de unidades — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — regras de padronização de unidades.
 - **O quê:** corrigida a regra de uso comercial ou residencial exclusivo: o valor da coluna que não deve ser mantida é apagado, sem somá-lo ou transferi-lo para a outra coluna. O resumo passa a descrever a exclusão e preserva os valores originais/finais para auditoria.

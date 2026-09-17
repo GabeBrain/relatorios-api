@@ -179,13 +179,13 @@ export function processWorkbook(buffer: ArrayBuffer, fileName: string, kind: Rep
     return [output];
   });
   workbook.Sheets[workbook.SheetNames[0]] = formattedSheet(sheet, headers, rows, keptRows, outputHeaders(headers, kind));
-  return { kind, fileName, month, year, rowsRead: sourceRows.length, rowsRemoved: sourceRows.length - rows.length, rows, reviews, decisions, workbook };
+  return { kind, fileName, month, year, rowsRead: sourceRows.length, rowsRemoved: sourceRows.length - rows.length, rows, rowsKept: rows.length, reviews, decisions };
 }
 
 export function exportReport(report: ProcessedReport) {
-  const workbook = report.workbook;
+  const workbook = XLSX.utils.book_new();
   const reviewRows = report.reviews.length ? report.reviews.map((item) => ({ Linha: item.rowNumber, 'Uso(s) Alvará': item.usage, 'Unidades residenciais': item.residential, 'Unidades não residenciais': item.nonResidential, Motivo: item.reason })) : [{ Status: 'Nenhuma revisão humana pendente.' }];
-  if (workbook.Sheets['Revisão humana']) delete workbook.Sheets['Revisão humana'];
+  XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(report.rows), report.kind === 'alvaras' ? 'Alvarás tratados' : 'CVCO tratado');
   XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(reviewRows), 'Revisão humana');
   XLSX.writeFile(workbook, `${report.kind === 'alvaras' ? 'Alvaras' : 'CVCO'}_tratado_${report.month}_${report.year}.xlsx`);
 }

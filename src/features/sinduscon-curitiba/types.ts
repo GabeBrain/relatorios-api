@@ -28,8 +28,7 @@ export interface ProcessedReport {
   rowsRead: number;
   rowsRemoved: number;
   rows: Record<string, unknown>[];
+  rowsKept?: number;
   reviews: ReviewItem[];
   decisions: UnitDecision[];
-  workbook: XLSX.WorkBook;
 }
-import type * as XLSX from 'xlsx';
