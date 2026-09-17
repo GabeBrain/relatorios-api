@@ -331,6 +331,18 @@ export function AppLayout({ children }: AppLayoutProps) {
               );
             }
 
+            if (group.id === 'empresas') {
+              return (
+                <div key={group.id} className="mt-2">
+                  {renderNavItem({
+                    path: '/rebrain/empresas-empregados',
+                    label: 'Empresas e Empregados',
+                    icon: <Building2 className="h-4 w-4" />,
+                  })}
+                </div>
+              );
+            }
+
             if (group.id === 'quanti') {
               return (
                 <div key={group.id} className="mt-2">
