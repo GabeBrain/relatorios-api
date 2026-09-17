@@ -54,9 +54,11 @@ export function useCompaniesReport(scope: { uf: string; city: string }, ready: b
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     (async () => {
+      const force = forceRef.current;
+      forceRef.current = false;
       try {
         const municipality = await resolveRaisMunicipality({ name: scope.city, uf: scope.uf }, controller.signal);
-        let report = await fetchCompaniesReport(municipality.ibgeCode, controller.signal);
+        let report = await fetchCompaniesReport(municipality.ibgeCode, controller.signal, { force });
         if (!active) return;
         setState({ isLoading: false, error: null, municipality, report, available: report.available, materializing: false, materializeMessage: null });
 
