@@ -48,7 +48,7 @@ export function useCompaniesReport(scope: { uf: string; city: string }, ready: b
     })();
 
     return () => { active = false; controller.abort(); };
-  }, [ready, scope.uf, scope.city]);
+  }, [ready, scope.uf, scope.city, reloadToken]);
 
-  return state;
+  return { ...state, reload };
 }
