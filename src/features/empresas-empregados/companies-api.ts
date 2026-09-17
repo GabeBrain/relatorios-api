@@ -130,7 +130,7 @@ export async function fetchCompaniesReport(
   }
 
   const meta = (payload.meta ?? {}) as Record<string, unknown>;
-  return {
+  const report: CompaniesReportResponse = {
     available: true,
     meta: {
       competencia: String(meta.competencia ?? ''),
@@ -141,4 +141,6 @@ export async function fetchCompaniesReport(
     },
     rows: normalizeRows(payload.rows),
   };
+  writeCache(municipalityIbge, report);
+  return report;
 }
