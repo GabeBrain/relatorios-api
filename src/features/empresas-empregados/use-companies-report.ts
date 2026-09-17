@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { EmployeesApiError, resolveRaisMunicipality } from './api';
 import { CompaniesApiError, fetchCompaniesReport } from './companies-api';
 import type { CompaniesReportResponse, MunicipalityOption } from './types';
@@ -9,6 +9,7 @@ export interface CompaniesReportState {
   municipality: MunicipalityOption | null;
   report: CompaniesReportResponse | null;
   available: boolean;
+  reload: () => void;
 }
 
 /**
