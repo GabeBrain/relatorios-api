@@ -1,12 +1,23 @@
-import { Fragment, useMemo } from 'react';
-import { Building2, Info } from 'lucide-react';
+import { Fragment, useMemo, useState } from 'react';
+import { Building2, FileSpreadsheet, Image, Info, Table2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { formatInteger, formatPercentage } from '../domain';
+import { toast } from 'sonner';
+import { formatInteger } from '../domain';
 import { PORTE_COLUMNS, SIMPLES_DISCLAIMER, buildCompaniesBreakdown, buildSectorSizeMatrix, formatCompetencia, totalEstablishments } from '../companies-domain';
+import { downloadCompaniesCsv, downloadCompaniesSvg, downloadCompaniesWorkbook } from '../companies-export';
 import type { CompaniesBreakdownItem, CompaniesReportMeta, CompaniesAggregatedRow, MunicipalityOption } from '../types';
+
+/** Percentuais desta aba já vêm na escala 0–100. */
+function formatPercent(value: number | null | undefined): string {
+  return value === null || value === undefined
+    ? '—'
+    : `${value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+}
+
 
 function BreakdownCard({ title, rows, note }: { title: string; rows: CompaniesBreakdownItem[]; note?: string }) {
   return (
