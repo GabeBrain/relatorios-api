@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-17 — Sinduscon - Curitiba: tratamento inicial de alvarás e CVCO — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — nova aba lateral independente para preparação mensal de planilhas.
+- **O quê:** criada a rota lazy e a entrada no menu lateral/busca. A página recebe `.xls`/`.xlsx`, identifica mês e ano pelo nome, cria as colunas Mês/Ano e de área, remove demolições e áreas liberadas zeradas, reorganiza Área Vistoria/Tipo Vistoria do CVCO, converte zeros em vazio e normaliza unidades por uso. Casos mistos sem margem segura ficam visíveis e também seguem para a aba `Revisão humana` do Excel exportado.
+- **Por quê:** iniciar o fluxo de tratamento dos insumos do relatório Sinduscon Curitiba sem afetar outras áreas do Rebrain.
+- **Arquivos:** `src/features/sinduscon-curitiba/{pages/SindusconCuritibaPage.tsx,lib/report-processor.ts,lib/report-processor.test.ts,types.ts}`, `src/{App.tsx,components/layout/{AppLayout.tsx,CommandPalette.tsx}}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** primeira etapa concluída localmente; a revisão humana para usos mistos permanece explícita. Typecheck e testes focados aprovados. Build visual segue bloqueado por dependências pré-existentes ausentes (`maplibre-gl`, `pdf-lib`, `html-to-image`, `pptxgenjs`).
+
 ### 2026-09-17 — Corretor: logo Brain no carregamento — Codex
 
 - **Ambiente/funcionalidade:** `/corretor` — upload e Sugestão de Análise.

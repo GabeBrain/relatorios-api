@@ -59,6 +59,7 @@ const NAV_GROUPS: NavGroup[] = [
     icon: <BarChart2 className="h-4 w-4" />,
     items: [
       { path: '/rebrain/secovi', label: 'Relatório Secovi', icon: <Building2 className="h-4 w-4" /> },
+      { path: '/rebrain/sinduscon-curitiba', label: 'Sinduscon - Curitiba', icon: <Building2 className="h-4 w-4" /> },
       { path: '/rebrain/aelo', label: 'Relatório AELO', icon: <Building2 className="h-4 w-4" /> },
       { path: '/rebrain/panorama-secovi-fiergs', label: 'Relatório Secovi/FIERGS', icon: <BarChart2 className="h-4 w-4" /> },
       { path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList className="h-4 w-4" /> },

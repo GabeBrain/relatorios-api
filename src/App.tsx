@@ -26,6 +26,7 @@ const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/Atualiz
 const RelatorioAeloPage = lazy(() => import('./pages/RelatorioAelo.tsx'));
 const PanoramaSecoviFiergsPage = lazy(() => import('./features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx'));
 const EmpresasEmpregadosPage = lazy(() => import('./features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx'));
+const SindusconCuritibaPage = lazy(() => import('./features/sinduscon-curitiba/pages/SindusconCuritibaPage.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -84,6 +85,7 @@ const App = () => (
                 />
                 <Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento />} />
                 <Route path="/rebrain/empresas-empregados" element={<EmpresasEmpregadosPage />} />
+                <Route path="/rebrain/sinduscon-curitiba" element={<SindusconCuritibaPage />} />
                 <Route path="/corretor" element={<CorretorV3Page />} />
                 <Route path="/corretor/calibracao" element={<CorretorCalibrationPage />} />
                 <Route path="/corretor/:id/relatorio" element={<CorretorReportPage />} />

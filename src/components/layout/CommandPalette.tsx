@@ -28,6 +28,7 @@ interface Destination {
 const PAGES: Destination[] = [
   { label: 'Início', path: '/inicio', icon: <Home className="h-4 w-4" /> },
   { label: 'Rebrain — Secovi', path: '/rebrain/secovi', icon: <Building2 className="h-4 w-4" />, keywords: 'barretos excel mercado relatorio' },
+  { label: 'Rebrain — Sinduscon - Curitiba', path: '/rebrain/sinduscon-curitiba', icon: <Building2 className="h-4 w-4" />, keywords: 'alvaras cvco excel curitiba construcao' },
   { label: 'Rebrain — Relatório AELO', path: '/rebrain/aelo', icon: <Building2 className="h-4 w-4" />, keywords: 'aelo excel mercado relatorio' },
   { label: 'Rebrain — Relatório Secovi/FIERGS', path: '/rebrain/panorama-secovi-fiergs', icon: <BarChart2 className="h-4 w-4" />, keywords: 'panorama fiergs piracicaba lancamentos pdf comparacao' },
   { label: 'Rebrain — Corretor | Vocacionais', path: '/auditoria', icon: <ClipboardList className="h-4 w-4" />, keywords: 'corretor vocacional slides auditoria' },
