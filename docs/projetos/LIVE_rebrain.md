@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-17 — Corretor: sugestão consultiva em lotes — Codex
+
+- **Ambiente/funcionalidade:** `/corretor` — Sugestão de Análise.
+- **O quê:** estudos cujo conteúdo extraído excede 180 slides ou 180.000 caracteres passam a ser enviados em lotes sequenciais. A função retorna um memo conciso por lote e compila os memos em uma única sugestão final, preservando os critérios consultivos já calibrados. A interface avisa que o processamento pode demorar mais e mostra a barra “Processando lote N de M”, seguida da compilação final.
+- **Por quê:** o cliente antes enviava o estudo inteiro em uma única requisição, enquanto a Edge Function recusava acima dos limites, causando falha em apresentações grandes.
+- **Arquivos:** `src/features/corretor/lib/v3/consulting-suggestion.ts`, `src/features/corretor/pages/CorretorV3Page.tsx`, `supabase/functions/analyze-consulting-suggestion/index.ts`, `src/features/corretor/lib/v3/__tests__/consulting-suggestion.test.ts`, `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** divisão unitariamente testada em 180/181 slides e no limite de caracteres; build de produção aprovado. Ainda é necessário publicar a Edge Function e testar um PPTX grande real no ambiente integrado.
+
 ### 2026-09-17 — Empresas: solicitação pública de materialização — Lovable (Gabriel)
 
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba Empresas e nova Edge Function `empresas-materialize-request`.

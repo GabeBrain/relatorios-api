@@ -16,6 +16,22 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.55 — 2026-09-17 — sugestão consultiva em lotes (RUNTIME local)
+
+### Fluxo de processamento
+
+Quando o conteúdo extraído ultrapassa **180 slides** ou **180.000 caracteres**, o navegador divide o estudo em lotes que respeitam ambos os limites. Cada lote é enviado sequencialmente para a Edge Function, que retorna um memo de evidências; ao término, a função recebe somente esses memos e compila uma única sugestão no formato já vigente. Estudos dentro do limite continuam usando a chamada única.
+
+### Estados de interface
+
+Durante o fluxo em lotes, a área de upload informa que o arquivo pode demorar mais devido ao tamanho e exibe a barra com **“Processando lote N de M”**. Depois do último lote, indica a compilação da sugestão final. O fluxo não cria estudo, achados ou histórico do Corretor.
+
+### Contrato da Edge Function
+
+`analyze-consulting-suggestion` aceita os modos `batch` (slides de um lote, retorno `batch`) e `compile` (memos de lotes, retorno `suggestion`). Ambos mantêm validação de tamanho; a compilação limita a quantidade e o volume dos memos para evitar uma nova chamada excessiva. A análise final permanece fundamentada apenas nas evidências extraídas.
+
+**Arquivos:** `src/features/corretor/lib/v3/consulting-suggestion.ts`, `src/features/corretor/pages/CorretorV3Page.tsx`, `supabase/functions/analyze-consulting-suggestion/index.ts`, `src/features/corretor/lib/v3/__tests__/consulting-suggestion.test.ts`. **Verificação:** testes unitários de divisão (180 slides, 181 slides e 180 mil caracteres) e build de produção aprovados; publicação da Edge Function e teste com PPTX grande permanecem necessários.
+
 ## Versão 0.54 — 2026-09-15 — calibração da base de sugestão consultiva (RUNTIME local)
 
 **Fonte:** base revisada `base_conhecimento_avaliacao_recomendacao_brain.md`, fornecida pela equipe após divergências observadas entre análises geradas e recomendações Brain.

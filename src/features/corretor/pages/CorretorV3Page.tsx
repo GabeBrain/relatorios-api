@@ -33,7 +33,10 @@ import {
 import type { AtaData } from '../lib/v3/ia-ata';
 import { BUDGET_STUDY_BRL, formatBRL, usdToBrl } from '../lib/v3/config';
 import { confidenceOf, countLabel, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
-import { generateConsultingSuggestion } from '../lib/v3/consulting-suggestion';
+import {
+  consultingSuggestionBatchCount, generateConsultingSuggestion,
+  type SuggestionBatchProgress,
+} from '../lib/v3/consulting-suggestion';
 import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
@@ -328,6 +331,7 @@ export default function CorretorV3Page() {
   const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
   const [entryMode, setEntryMode] = useState<'evaluate' | 'suggestion' | null>(null);
   const [consultingSuggestion, setConsultingSuggestion] = useState<{ filename: string; content: string } | null>(null);
+  const [suggestionProgress, setSuggestionProgress] = useState<SuggestionBatchProgress | null>(null);
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisState | null>(null);
   const [budgetPrompt, setBudgetPrompt] = useState<{ estimate: FullEstimate; run: () => void } | null>(null);
@@ -564,13 +568,16 @@ export default function CorretorV3Page() {
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
       const ir = await pptxToIr(bytes, file.name);
-      const content = await generateConsultingSuggestion(ir);
+      const batchCount = consultingSuggestionBatchCount(ir);
+      if (batchCount > 1) setSuggestionProgress({ current: 0, total: batchCount, phase: 'batch' });
+      const content = await generateConsultingSuggestion(ir, setSuggestionProgress);
       setConsultingSuggestion({ filename: file.name, content });
       toast.success('Sugestão de análise gerada');
     } catch (err) {
       toast.error('Falha ao gerar sugestão', { description: err instanceof Error ? err.message : String(err) });
     } finally {
       setBusy(null);
+      setSuggestionProgress(null);
     }
   }
 
@@ -807,9 +814,26 @@ export default function CorretorV3Page() {
               className={cn('w-full rounded-xl border-2 border-dashed px-6 py-10 flex flex-col items-center justify-center gap-3 text-center transition-colors', dragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 bg-card', busy !== null && 'opacity-70 cursor-wait')}
             >
               {busy === 'upload' ? <Loader2 className="w-8 h-8 text-primary animate-spin" /> : <Upload className={cn('w-8 h-8', dragging ? 'text-primary' : 'text-muted-foreground')} />}
-              <div>
-                <p className="text-sm font-medium">{busy === 'upload' ? (entryMode === 'suggestion' ? 'Gerando sugestão…' : 'Lendo o estudo…') : 'Arraste o .pptx aqui ou clique para escolher'}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{entryMode === 'suggestion' ? 'A IA usa os dados extraídos para estruturar avaliação, recomendação e orientações ao analista.' : <>A triagem determinística roda em segundos (R$ 0); a IA de texto e números segue automática, com teto de R$ {BUDGET_STUDY_BRL.toFixed(2).replace('.', ',')} por estudo.</>}</p>
+              <div className="w-full max-w-lg">
+                <p className="text-sm font-medium">
+                  {busy === 'upload'
+                    ? (entryMode === 'suggestion'
+                      ? (suggestionProgress?.phase === 'batch'
+                        ? `Processando lote ${suggestionProgress.current} de ${suggestionProgress.total}`
+                        : suggestionProgress?.phase === 'compile'
+                          ? 'Compilando a sugestão final…'
+                          : 'Gerando sugestão…')
+                      : 'Lendo o estudo…')
+                    : 'Arraste o .pptx aqui ou clique para escolher'}
+                </p>
+                {entryMode === 'suggestion' && suggestionProgress ? (
+                  <>
+                    <p className="mt-0.5 text-xs text-muted-foreground">Este arquivo será processado em lotes e pode demorar um pouco mais que o habitual devido ao tamanho.</p>
+                    <Progress className="mt-3 h-2" value={suggestionProgress.phase === 'compile' ? 100 : Math.round((suggestionProgress.current / suggestionProgress.total) * 100)} />
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-0.5">{entryMode === 'suggestion' ? 'A IA usa os dados extraídos para estruturar avaliação, recomendação e orientações ao analista.' : <>A triagem determinística roda em segundos (R$ 0); a IA de texto e números segue automática, com teto de R$ {BUDGET_STUDY_BRL.toFixed(2).replace('.', ',')} por estudo.</>}</p>
+                )}
               </div>
               <span className="text-xs text-primary hover:underline" onClick={(event) => { event.stopPropagation(); setEntryMode(null); }}>Voltar às opções</span>
             </button>
