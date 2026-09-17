@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-17 — Sinduscon - Curitiba: exclusão sem transferência de unidades — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — regras de padronização de unidades.
+- **O quê:** corrigida a regra de uso comercial ou residencial exclusivo: o valor da coluna que não deve ser mantida é apagado, sem somá-lo ou transferi-lo para a outra coluna. O resumo passa a descrever a exclusão e preserva os valores originais/finais para auditoria.
+- **Por quê:** a padronização define qual categoria permanece, não uma reclassificação da quantidade de unidades.
+- **Arquivos:** `src/features/sinduscon-curitiba/{lib/report-processor.ts,lib/report-processor.test.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** correção determinística local; typecheck pendente nesta sessão.
+
 ### 2026-09-17 — Sinduscon - Curitiba: preservação do layout de origem — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — exportação das planilhas tratadas.
 - **O quê:** a aba original agora é reconstruída célula a célula, mantendo estilos, formatos numéricos, larguras e alturas das colunas/linhas existentes. As colunas Mês, Ano e áreas novas copiam o padrão visual da coluna de referência. O resumo da tela registra linha, valores originais, valores finais e a regra aplicada em toda padronização automática; o arquivo processado mantém apenas a aba `Revisão humana` para pendências.

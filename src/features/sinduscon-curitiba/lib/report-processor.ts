@@ -54,12 +54,10 @@ function applyUnitRule(row: Record<string, unknown>, rowNumber: number, reviews:
 
   if (commercial && !residentialUse) {
     row[COLUMN.residential] = '';
-    row[COLUMN.nonResidential] = residential + nonResidential || '';
-    if (residential) recordDecision('Uso comercial: unidades residenciais foram transferidas para não residenciais.');
+    if (residential) recordDecision('Uso comercial: unidades residenciais foram excluídas; a quantidade não residencial original foi mantida.');
   } else if (residentialUse && !commercial) {
-    row[COLUMN.residential] = residential + nonResidential || '';
     row[COLUMN.nonResidential] = '';
-    if (nonResidential) recordDecision('Uso residencial: unidades não residenciais foram transferidas para residenciais.');
+    if (nonResidential) recordDecision('Uso residencial: unidades não residenciais foram excluídas; a quantidade residencial original foi mantida.');
   } else if (commercial && residentialUse && residential && nonResidential) {
     if (residential >= nonResidential * 3) {
       row[COLUMN.residential] = residential;

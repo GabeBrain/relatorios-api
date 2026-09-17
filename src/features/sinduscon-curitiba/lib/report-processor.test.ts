@@ -28,10 +28,10 @@ describe('processWorkbook', () => {
     expect(report.rows).toHaveLength(1);
     expect(report.rowsRemoved).toBe(2);
     expect(report.rows[0]['Quantidade de Unidades Residênciais']).toBe('');
-    expect(report.rows[0]['Quantidade Unidades Não Residênciais']).toBe(3);
+    expect(report.rows[0]['Quantidade Unidades Não Residênciais']).toBe(1);
     expect(report.rows[0]['Mês']).toBe('Setembro');
     expect(report.rows[0]['Ano']).toBe(2026);
-    expect(report.decisions).toMatchObject([{ originalResidential: 2, originalNonResidential: 1, finalResidential: 0, finalNonResidential: 3 }]);
+    expect(report.decisions).toMatchObject([{ originalResidential: 2, originalNonResidential: 1, finalResidential: 0, finalNonResidential: 1 }]);
     const sheet = report.workbook.Sheets.Sheet1;
     expect(sheet['!cols']?.[2]?.wch).toBe(12);
     expect(sheet['!rows']?.[1]?.hpt).toBe(34);
