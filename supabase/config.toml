@@ -22,3 +22,7 @@ verify_jwt = false
 [functions.empresas-materialize-pilot]
 # Função interna: autenticada pelo segredo EMPRESAS_MATERIALIZER_SECRET no header próprio.
 verify_jwt = false
+
+[functions.empresas-materialize-request]
+# Solicitação pública: sem Supabase Auth e sem login; protegida por limites por IP (hash) e globais.
+verify_jwt = false
