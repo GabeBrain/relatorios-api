@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatInteger, formatPercentage } from '../domain';
-import { SIMPLES_DISCLAIMER, buildCompaniesBreakdown, formatCompetencia, totalEstablishments } from '../companies-domain';
+import { PORTE_COLUMNS, SIMPLES_DISCLAIMER, buildCompaniesBreakdown, buildSectorSizeMatrix, formatCompetencia, totalEstablishments } from '../companies-domain';
 import type { CompaniesBreakdownItem, CompaniesReportMeta, CompaniesAggregatedRow, MunicipalityOption } from '../types';
 
 function BreakdownCard({ title, rows, note }: { title: string; rows: CompaniesBreakdownItem[]; note?: string }) {
