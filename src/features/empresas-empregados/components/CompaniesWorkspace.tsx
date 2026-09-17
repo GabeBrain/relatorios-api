@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import { Building2, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,10 +82,10 @@ function SectorSizeTable({ rows }: { rows: CompaniesAggregatedRow[] }) {
                 <TableRow key={row.sector}>
                   <TableCell className="font-medium">{row.sector}</TableCell>
                   {PORTE_COLUMNS.map((column) => (
-                    <>
-                      <TableCell key={`${column.code}-q`} className="text-right tabular-nums">{formatInteger(row.cells[column.code].quantidade)}</TableCell>
-                      <TableCell key={`${column.code}-p`} className="text-right tabular-nums text-muted-foreground">{formatPercentage(row.cells[column.code].percentage)}</TableCell>
-                    </>
+                    <Fragment key={column.code}>
+                      <TableCell className="text-right tabular-nums">{formatInteger(row.cells[column.code].quantidade)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercentage(row.cells[column.code].percentage)}</TableCell>
+                    </Fragment>
                   ))}
                   <TableCell className="text-right font-semibold tabular-nums">{formatInteger(row.total)}</TableCell>
                   <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercentage(row.totalPercentage)}</TableCell>
@@ -94,10 +94,10 @@ function SectorSizeTable({ rows }: { rows: CompaniesAggregatedRow[] }) {
               <TableRow className="bg-muted/50 font-semibold">
                 <TableCell>Total</TableCell>
                 {PORTE_COLUMNS.map((column) => (
-                  <>
-                    <TableCell key={`t-${column.code}-q`} className="text-right tabular-nums">{formatInteger(matrix.totals[column.code] ?? 0)}</TableCell>
-                    <TableCell key={`t-${column.code}-p`} className="text-right tabular-nums">{formatPercentage(matrix.grandTotal > 0 ? ((matrix.totals[column.code] ?? 0) / matrix.grandTotal) * 100 : 0)}</TableCell>
-                  </>
+                  <Fragment key={column.code}>
+                    <TableCell className="text-right tabular-nums">{formatInteger(matrix.totals[column.code] ?? 0)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{formatPercentage(matrix.grandTotal > 0 ? ((matrix.totals[column.code] ?? 0) / matrix.grandTotal) * 100 : 0)}</TableCell>
+                  </Fragment>
                 ))}
                 <TableCell className="text-right tabular-nums">{formatInteger(matrix.grandTotal)}</TableCell>
                 <TableCell className="text-right tabular-nums">100,0%</TableCell>
@@ -134,6 +134,8 @@ export default function CompaniesWorkspace({ municipality, meta, rows }: Props) 
         <Info className="h-4 w-4" />
         <AlertDescription>{SIMPLES_DISCLAIMER}</AlertDescription>
       </Alert>
+
+      <SectorSizeTable rows={rows} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-4">
