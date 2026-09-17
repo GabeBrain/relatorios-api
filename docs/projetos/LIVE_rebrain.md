@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-17 — Sinduscon - Curitiba: preservação do layout de origem — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — exportação das planilhas tratadas.
+- **O quê:** a aba original agora é reconstruída célula a célula, mantendo estilos, formatos numéricos, larguras e alturas das colunas/linhas existentes. As colunas Mês, Ano e áreas novas copiam o padrão visual da coluna de referência. O resumo da tela registra linha, valores originais, valores finais e a regra aplicada em toda padronização automática; o arquivo processado mantém apenas a aba `Revisão humana` para pendências.
+- **Por quê:** impedir que o tratamento altere a apresentação já definida no arquivo de alvarás ou CVCO.
+- **Arquivos:** `src/features/sinduscon-curitiba/{lib/report-processor.ts,lib/report-processor.test.ts,types.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** typecheck aprovado. O teste focado de exportação está temporariamente bloqueado pela instalação local incompleta do Tailwind (`corePluginList` ausente), fora da feature.
+
 ### 2026-09-17 — Sinduscon - Curitiba: tratamento inicial de alvarás e CVCO — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — nova aba lateral independente para preparação mensal de planilhas.
 - **O quê:** criada a rota lazy e a entrada no menu lateral/busca. A página recebe `.xls`/`.xlsx`, identifica mês e ano pelo nome, cria as colunas Mês/Ano e de área, remove demolições e áreas liberadas zeradas, reorganiza Área Vistoria/Tipo Vistoria do CVCO, converte zeros em vazio e normaliza unidades por uso. Casos mistos sem margem segura ficam visíveis e também seguem para a aba `Revisão humana` do Excel exportado.

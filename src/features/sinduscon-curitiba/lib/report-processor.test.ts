@@ -7,7 +7,10 @@ const headers = ['Uso(s) Alvará', 'Finalidade', 'Área Liberada', 'Quantidade d
 
 function workbookBuffer(rows: unknown[][]) {
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([headers, ...rows]), 'Sheet1');
+  const sheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  sheet['!cols'] = headers.map((_, index) => ({ wch: 12 + index }));
+  sheet['!rows'] = [{ hpt: 28 }, { hpt: 34 }];
+  XLSX.utils.book_append_sheet(workbook, sheet, 'Sheet1');
   return XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
 }
 
@@ -28,6 +31,10 @@ describe('processWorkbook', () => {
     expect(report.rows[0]['Quantidade Unidades Não Residênciais']).toBe(3);
     expect(report.rows[0]['Mês']).toBe('Setembro');
     expect(report.rows[0]['Ano']).toBe(2026);
+    expect(report.decisions).toMatchObject([{ originalResidential: 2, originalNonResidential: 1, finalResidential: 0, finalNonResidential: 3 }]);
+    const sheet = report.workbook.Sheets.Sheet1;
+    expect(sheet['!cols']?.[2]?.wch).toBe(12);
+    expect(sheet['!rows']?.[1]?.hpt).toBe(34);
   });
 
   it('reposiciona área e tipo de vistoria no CVCO e sinaliza uso misto ambíguo', () => {

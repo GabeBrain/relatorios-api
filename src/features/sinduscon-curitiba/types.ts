@@ -9,6 +9,17 @@ export interface ReviewItem {
   reason: string;
 }
 
+export interface UnitDecision {
+  id: string;
+  rowNumber: number;
+  usage: string;
+  originalResidential: number;
+  originalNonResidential: number;
+  finalResidential: number;
+  finalNonResidential: number;
+  decision: string;
+}
+
 export interface ProcessedReport {
   kind: ReportKind;
   fileName: string;
@@ -18,4 +29,7 @@ export interface ProcessedReport {
   rowsRemoved: number;
   rows: Record<string, unknown>[];
   reviews: ReviewItem[];
+  decisions: UnitDecision[];
+  workbook: XLSX.WorkBook;
 }
+import type * as XLSX from 'xlsx';
