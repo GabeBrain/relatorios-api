@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { EmployeesApiError, resolveRaisMunicipality } from './api';
 import { CompaniesApiError, fetchCompaniesReport } from './companies-api';
 import { requestCompaniesMaterialization } from './materialize-request-api';
@@ -41,7 +41,6 @@ export function useCompaniesReport(scope: { uf: string; city: string }, ready: b
   const [state, setState] = useState<InternalState>({ isLoading: false, error: null, municipality: null, report: null, available: false, materializing: false, materializeMessage: null });
   const [reloadToken, setReloadToken] = useState(0);
   const reload = useCallback(() => setReloadToken((value) => value + 1), []);
-  const manualReload = useRef(false);
 
   useEffect(() => {
     if (!ready || !scope.uf || !scope.city) {
@@ -94,11 +93,6 @@ export function useCompaniesReport(scope: { uf: string; city: string }, ready: b
 
     return () => { active = false; controller.abort(); };
   }, [ready, scope.uf, scope.city, reloadToken]);
-
-  useEffect(() => {
-    if (manualReload.current) return;
-    manualReload.current = true;
-  }, []);
 
   return { ...state, reload };
 }
