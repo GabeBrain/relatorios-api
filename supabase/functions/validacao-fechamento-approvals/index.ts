@@ -54,7 +54,7 @@ Deno.serve(async (request) => {
   if (body.action !== 'approve') return json({ error: 'Ação inválida.' }, 400);
   const fields = ['approval_key', 'city', 'building_id', 'typology_id', 'period', 'field', 'divergence', 'rule', 'approved_by_email'] as const;
   if (!fields.every((field) => isText(body[field], field === 'approval_key' ? 3000 : 1000))) return json({ error: 'Dados de aprovação inválidos.' }, 400);
-  const approvedByEmail = body.approved_by_email.trim().toLowerCase();
+  const approvedByEmail = (body.approved_by_email as string).trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(approvedByEmail)) return json({ error: 'E-mail de autenticação inválido.' }, 400);
 
   const record = Object.fromEntries(fields.map((field) => {
