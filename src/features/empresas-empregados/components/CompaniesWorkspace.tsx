@@ -54,6 +54,62 @@ interface Props {
   rows: CompaniesAggregatedRow[];
 }
 
+function SectorSizeTable({ rows }: { rows: CompaniesAggregatedRow[] }) {
+  const matrix = useMemo(() => buildSectorSizeMatrix(rows), [rows]);
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Macro setor × porte</CardTitle>
+        <p className="text-xs leading-5 text-muted-foreground">
+          Percentuais calculados sobre o total de cada setor. A coluna Total traz a participação do setor no município. Os portes seguem o enquadramento da Receita Federal (ME, EPP, demais portes e sem enquadramento).
+        </p>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="min-w-52">Setor</TableHead>
+                {PORTE_COLUMNS.map((column) => (
+                  <TableHead key={column.code} className="text-right" colSpan={2}>{column.label}</TableHead>
+                ))}
+                <TableHead className="text-right" colSpan={2}>Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {matrix.rows.map((row) => (
+                <TableRow key={row.sector}>
+                  <TableCell className="font-medium">{row.sector}</TableCell>
+                  {PORTE_COLUMNS.map((column) => (
+                    <>
+                      <TableCell key={`${column.code}-q`} className="text-right tabular-nums">{formatInteger(row.cells[column.code].quantidade)}</TableCell>
+                      <TableCell key={`${column.code}-p`} className="text-right tabular-nums text-muted-foreground">{formatPercentage(row.cells[column.code].percentage)}</TableCell>
+                    </>
+                  ))}
+                  <TableCell className="text-right font-semibold tabular-nums">{formatInteger(row.total)}</TableCell>
+                  <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercentage(row.totalPercentage)}</TableCell>
+                </TableRow>
+              ))}
+              <TableRow className="bg-muted/50 font-semibold">
+                <TableCell>Total</TableCell>
+                {PORTE_COLUMNS.map((column) => (
+                  <>
+                    <TableCell key={`t-${column.code}-q`} className="text-right tabular-nums">{formatInteger(matrix.totals[column.code] ?? 0)}</TableCell>
+                    <TableCell key={`t-${column.code}-p`} className="text-right tabular-nums">{formatPercentage(matrix.grandTotal > 0 ? ((matrix.totals[column.code] ?? 0) / matrix.grandTotal) * 100 : 0)}</TableCell>
+                  </>
+                ))}
+                <TableCell className="text-right tabular-nums">{formatInteger(matrix.grandTotal)}</TableCell>
+                <TableCell className="text-right tabular-nums">100,0%</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function CompaniesWorkspace({ municipality, meta, rows }: Props) {
   const total = useMemo(() => totalEstablishments(rows), [rows]);
   const breakdown = useMemo(() => buildCompaniesBreakdown(rows), [rows]);
