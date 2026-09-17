@@ -124,6 +124,25 @@ function SectorSizeTable({ rows }: { rows: CompaniesAggregatedRow[] }) {
 export default function CompaniesWorkspace({ municipality, meta, rows }: Props) {
   const total = useMemo(() => totalEstablishments(rows), [rows]);
   const breakdown = useMemo(() => buildCompaniesBreakdown(rows), [rows]);
+  const [exporting, setExporting] = useState<string | null>(null);
+
+  async function handleExport(kind: 'xlsx' | 'csv' | 'svg') {
+    setExporting(kind);
+    try {
+      const input = { municipality, meta, rows };
+      const filename =
+        kind === 'xlsx'
+          ? await downloadCompaniesWorkbook(input)
+          : kind === 'csv'
+            ? downloadCompaniesCsv(input)
+            : downloadCompaniesSvg(input);
+      toast.success(`Arquivo gerado: ${filename}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível gerar o arquivo.');
+    } finally {
+      setExporting(null);
+    }
+  }
 
   return (
     <section className="space-y-5 animate-fade-in" aria-label="Relatório de empresas">
@@ -135,11 +154,25 @@ export default function CompaniesWorkspace({ municipality, meta, rows }: Props) 
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">{meta.source} · {meta.methodologyVersion}</p>
         </div>
-        <div className="text-left sm:text-right">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Estabelecimentos ativos</p>
-          <p className="text-2xl font-semibold tracking-tight">{formatInteger(total)}</p>
+        <div className="flex flex-col gap-3 sm:items-end">
+          <div className="text-left sm:text-right">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Estabelecimentos ativos</p>
+            <p className="text-2xl font-semibold tracking-tight">{formatInteger(total)}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" disabled={exporting !== null} onClick={() => handleExport('xlsx')}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel
+            </Button>
+            <Button variant="outline" size="sm" disabled={exporting !== null} onClick={() => handleExport('csv')}>
+              <Table2 className="mr-2 h-4 w-4" /> CSV
+            </Button>
+            <Button variant="outline" size="sm" disabled={exporting !== null} onClick={() => handleExport('svg')}>
+              <Image className="mr-2 h-4 w-4" /> SVG
+            </Button>
+          </div>
         </div>
       </div>
+
 
       <Alert>
         <Info className="h-4 w-4" />
