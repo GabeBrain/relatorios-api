@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { EmployeesApiError, resolveRaisMunicipality } from './api';
 import { CompaniesApiError, fetchCompaniesReport } from './companies-api';
 import type { CompaniesReportResponse, MunicipalityOption } from './types';
@@ -9,6 +9,7 @@ export interface CompaniesReportState {
   municipality: MunicipalityOption | null;
   report: CompaniesReportResponse | null;
   available: boolean;
+  reload: () => void;
 }
 
 /**
@@ -17,7 +18,10 @@ export interface CompaniesReportState {
  * tabelas ou views diretamente.
  */
 export function useCompaniesReport(scope: { uf: string; city: string }, ready: boolean): CompaniesReportState {
-  const [state, setState] = useState<CompaniesReportState>({ isLoading: false, error: null, municipality: null, report: null, available: false });
+  type InternalState = Omit<CompaniesReportState, 'reload'>;
+  const [state, setState] = useState<InternalState>({ isLoading: false, error: null, municipality: null, report: null, available: false });
+  const [reloadToken, setReloadToken] = useState(0);
+  const reload = useCallback(() => setReloadToken((value) => value + 1), []);
 
   useEffect(() => {
     if (!ready || !scope.uf || !scope.city) {
@@ -44,7 +48,7 @@ export function useCompaniesReport(scope: { uf: string; city: string }, ready: b
     })();
 
     return () => { active = false; controller.abort(); };
-  }, [ready, scope.uf, scope.city]);
+  }, [ready, scope.uf, scope.city, reloadToken]);
 
-  return state;
+  return { ...state, reload };
 }

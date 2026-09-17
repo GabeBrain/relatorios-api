@@ -148,6 +148,36 @@ export type Database = {
           },
         ]
       }
+      empresas_materialize_pedido: {
+        Row: {
+          competencia: string
+          created_at: string
+          id: string
+          id_municipio: string
+          ip_hash: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          competencia: string
+          created_at?: string
+          id?: string
+          id_municipio: string
+          ip_hash: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          competencia?: string
+          created_at?: string
+          id?: string
+          id_municipio?: string
+          ip_hash?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       findings_v3: {
         Row: {
           created_at: string
