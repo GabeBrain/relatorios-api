@@ -1,6 +1,6 @@
 # Processador Sinduscon Curitiba
 
-Serviço Cloud Run que recebe uma planilha `.xls` ou `.xlsx`, converte `.xls` por LibreOffice e altera a planilha com `openpyxl`, preservando estilos, bordas, preenchimentos, filtros, larguras e alturas da aba de origem. O arquivo é processado em diretório temporário e não é persistido.
+Serviço que recebe uma planilha `.xlsx` e altera a planilha com `openpyxl`, preservando estilos, bordas, preenchimentos, filtros, larguras e alturas da aba de origem. O arquivo é processado em diretório temporário e não é persistido. Arquivos `.xls` devem ser salvos previamente como `.xlsx` no Excel.
 
 ## Deploy
 

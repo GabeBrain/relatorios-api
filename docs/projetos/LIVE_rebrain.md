@@ -1,3 +1,12 @@
+### 2026-09-17 - Sinduscon - Curitiba: entrada somente em XLSX - Codex
+- **Ambiente/funcionalidade:** /rebrain/sinduscon-curitiba - tratamento inicial de Alvaras e CVCO.
+- **O que:** a interface e o processador passam a aceitar exclusivamente arquivos .xlsx; arquivos .xls sao rejeitados com orientacao para usar Salvar como no Excel. Removida a dependencia de conversao LibreOffice do conteiner.
+- **Por que:** o openpyxl preserva a formatacao do formato .xlsx, mas nao le .xls.
+- **Arquivos:** src/features/sinduscon-curitiba/pages/SindusconCuritibaPage.tsx, gcp/sinduscon-workbook-processor/{app.py,Dockerfile,README.md}.
+- **Commits:** pendente nesta sessao.
+- **Monday:** -
+- **Impacto em Etapas/Pendencias:** reduzida a infraestrutura necessaria; continua pendente a publicacao/configuracao do processador e a validacao visual em runtime.
+
 # Rebrain (Plataforma) — Documento Vivo
 
 ### 2026-09-17 — Sinduscon - Curitiba: motor de planilhas com preservação visual — Codex

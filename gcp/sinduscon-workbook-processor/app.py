@@ -3,7 +3,6 @@ import html
 import os
 import re
 import shutil
-import subprocess
 import tempfile
 from copy import copy
 from pathlib import Path
@@ -169,22 +168,13 @@ def prepare_sheet(ws, kind, month, year):
         ws.cell(row, insertion + 2).value = unit * non if unit and non else None
     return {"rowsRead": original_rows, "rowsRemoved": removed, "rowsKept": ws.max_row - 1, "decisions": decisions, "reviews": reviews}
 
-def convert_to_xlsx(source, workdir):
-    if source.suffix.lower() == ".xlsx":
-        return source
-    subprocess.run(["libreoffice", "--headless", "--convert-to", "xlsx", "--outdir", str(workdir), str(source)], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=90)
-    converted = workdir / f"{source.stem}.xlsx"
-    if not converted.exists():
-        raise RuntimeError("Não foi possível converter o arquivo XLS mantendo a formatação.")
-    return converted
-
 @app.post("/process")
 async def process(file: UploadFile = File(...), kind: str = Form(...)):
     if kind not in {"alvaras", "cvco"}:
         raise HTTPException(400, "Tipo de relatório inválido.")
     filename = file.filename or "planilha.xlsx"
-    if Path(filename).suffix.lower() not in {".xls", ".xlsx"}:
-        raise HTTPException(400, "Envie um arquivo .xls ou .xlsx.")
+    if Path(filename).suffix.lower() != ".xlsx":
+        raise HTTPException(400, "Envie um arquivo Excel no formato .xlsx. Salve arquivos .xls como .xlsx antes do envio.")
     payload = await file.read()
     if not payload or len(payload) > MAX_BYTES:
         raise HTTPException(400, "Arquivo vazio ou maior que 15 MB.")
@@ -194,8 +184,7 @@ async def process(file: UploadFile = File(...), kind: str = Form(...)):
             workdir = Path(raw_dir)
             source = workdir / filename
             source.write_bytes(payload)
-            converted = convert_to_xlsx(source, workdir)
-            workbook = load_workbook(converted)
+            workbook = load_workbook(source)
             worksheet = workbook[workbook.sheetnames[0]]
             report = prepare_sheet(worksheet, kind, month, year)
             output_name = f"{'Alvaras' if kind == 'alvaras' else 'CVCO'}_tratado_{month}_{year}.xlsx"
