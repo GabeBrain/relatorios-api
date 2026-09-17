@@ -766,7 +766,7 @@ export default function CorretorV3Page() {
       <div className="min-h-screen bg-background">
         <header className="border-b bg-card px-6 py-4 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-base font-semibold">Corretor de Estudos</h1>
+            <h1 className="text-base font-semibold">Assistente de Projetos</h1>
             <p className="text-xs text-muted-foreground">
               Suba o .pptx → análise completa automática (texto + números) → corrija a worklist → entregue ao A&R com 0 pendentes
             </p>

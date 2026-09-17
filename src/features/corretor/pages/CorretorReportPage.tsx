@@ -49,7 +49,7 @@ export default function CorretorReportPage() {
     <div className="min-h-screen bg-background">
       {/* barra de navegação — oculta na impressão */}
       <div className="print:hidden border-b bg-card px-6 py-2 flex items-center justify-between">
-        <Link to="/corretor" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"><ArrowLeft className="w-3.5 h-3.5" /> Corretor</Link>
+        <Link to="/corretor" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"><ArrowLeft className="w-3.5 h-3.5" /> Assistente de Projetos</Link>
         <button onClick={() => window.print()} className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5"><Printer className="w-3.5 h-3.5" /> Imprimir / PDF</button>
       </div>
 
@@ -65,7 +65,7 @@ export default function CorretorReportPage() {
           </p>
           <p className="text-[11px] text-muted-foreground">
             {entregue
-              ? <>Entregue ao A&R{study.concludedAt ? ` em ${new Date(study.concludedAt).toLocaleDateString('pt-BR')}` : ''}. Relatório gerado pelo Corretor de Vocacionais.</>
+              ? <>Entregue ao A&R{study.concludedAt ? ` em ${new Date(study.concludedAt).toLocaleDateString('pt-BR')}` : ''}. Relatório gerado pelo Assistente de Projetos.</>
               : <>Estudo ainda em correção — este é um relatório parcial.</>}
           </p>
         </header>
@@ -126,7 +126,7 @@ export default function CorretorReportPage() {
         )}
 
         <footer className="pt-4 border-t border-border text-[10px] text-muted-foreground">
-          Gerado pelo Corretor de Vocacionais em {new Date().toLocaleString('pt-BR')}.
+          Gerado pelo Assistente de Projetos em {new Date().toLocaleString('pt-BR')}.
         </footer>
       </div>
     </div>
