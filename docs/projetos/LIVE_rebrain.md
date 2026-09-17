@@ -1,5 +1,16 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-17 — Empresas: solicitação pública de materialização — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba Empresas e nova Edge Function `empresas-materialize-request`.
+- **O quê:** nova função pública (sem Supabase Auth e sem login) recebe apenas `{ municipality: { ibgeCode, name, uf }, establishmentsPartition, companiesPartition }`, valida IBGE de 7 dígitos, UF de duas letras e datas `YYYY-MM-DD`, e chama internamente `empresas-materialize-pilot` com `EMPRESAS_MATERIALIZER_SECRET` — a secret nunca chega ao navegador. Município já publicado retorna `published` sem custo; manifesto em `staging` recente retorna `processing` sem segunda execução. Proteção de abuso/custo: nova tabela `empresas_materialize_pedido` (RLS ativo, sem policy; somente `service_role`) guarda apenas hash SHA-256 do IP com sal de servidor, com limite de 3 pedidos/30 min por IP, 12 pedidos/10 min globais e 2 execuções simultâneas, respondendo `429` com mensagem clara. Frontend: botão "Atualizar dados deste município" visível a qualquer visitante, usando o município do `GeoApiScopeEngine`, chamando somente `empresas-materialize-request` e recarregando `empresas-report` após sucesso; estados de publicado, processamento, limite, vazio, erro e sucesso; nota Simples/MEI mantida.
+- **Por quê:** permitir que qualquer visitante solicite a competência do município selecionado sem expor secret, SQL, HMAC ou dados brutos, e sem risco de custo descontrolado no BigQuery.
+- **Arquivos:** migration `empresas_materialize_pedido`; `supabase/functions/empresas-materialize-request/index.ts`; `supabase/config.toml`; `src/features/empresas-empregados/{materialize-request-api.ts,use-companies-report.ts,components/CompaniesMaterializeButton.tsx,pages/EmpresasEmpregadosPage.tsx}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** testado payload inválido (400 `INVALID_SCOPE`) e Blumenau/SC (200 `published`, sem nova materialização). Cloud Run, ponte BigQuery, HMAC, RAIS, RLS, tabelas existentes e `empresas-report` intactos.
+
+
 ### 2026-09-16 — Empresas: piloto generalizado para qualquer município — Lovable (Gabriel)
 
 - **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — banco, materializador e aba Empresas.
