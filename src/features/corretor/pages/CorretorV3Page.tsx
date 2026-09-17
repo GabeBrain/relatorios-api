@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import brainLogo from '../../../../assets/logoBrain.png';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
   Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X, BarChart3,
@@ -813,7 +814,12 @@ export default function CorretorV3Page() {
               disabled={busy !== null}
               className={cn('w-full rounded-xl border-2 border-dashed px-6 py-10 flex flex-col items-center justify-center gap-3 text-center transition-colors', dragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 bg-card', busy !== null && 'opacity-70 cursor-wait')}
             >
-              {busy === 'upload' ? <Loader2 className="w-8 h-8 text-primary animate-spin" /> : <Upload className={cn('w-8 h-8', dragging ? 'text-primary' : 'text-muted-foreground')} />}
+              {busy === 'upload' ? (
+                <div className="relative h-10 w-28" aria-hidden="true">
+                  <img src={brainLogo} alt="" className="absolute inset-0 h-full w-full object-contain opacity-15" />
+                  <img src={brainLogo} alt="" className="absolute inset-0 h-full w-full animate-pulse object-contain" />
+                </div>
+              ) : <Upload className={cn('w-8 h-8', dragging ? 'text-primary' : 'text-muted-foreground')} />}
               <div className="w-full max-w-lg">
                 <p className="text-sm font-medium">
                   {busy === 'upload'

@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-17 — Corretor: logo Brain no carregamento — Codex
+
+- **Ambiente/funcionalidade:** `/corretor` — upload e Sugestão de Análise.
+- **O quê:** o ícone circular de carregamento do upload foi substituído pela logo Brain pulsante, aproveitando o mesmo ativo e linguagem visual dos carregamentos da plataforma; textos e barra de progresso continuam iguais.
+- **Por quê:** tornar a espera de processamento consistente com as demais áreas do sistema.
+- **Arquivos:** `src/features/corretor/pages/CorretorV3Page.tsx`, `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** não altera a análise, a Edge Function, o fluxo de lotes nem a persistência; TypeScript aprovado. O empacotamento Vite segue bloqueado por `maplibre-gl` ausente em `atualizador-vgv/ProjectMap.tsx`, fora deste escopo.
+
 ### 2026-09-17 — Corretor: sugestão consultiva em lotes — Codex
 
 - **Ambiente/funcionalidade:** `/corretor` — Sugestão de Análise.

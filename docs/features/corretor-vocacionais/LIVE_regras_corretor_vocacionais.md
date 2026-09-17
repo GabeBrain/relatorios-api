@@ -16,6 +16,12 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.56 — 2026-09-17 — identidade Brain no carregamento (RUNTIME local)
+
+O indicador circular de carregamento da área de upload do Corretor foi substituído pela logo Brain pulsante, seguindo o padrão visual de operações longas da plataforma. As mensagens, a barra de progresso dos lotes e a prevenção de reenvio permanecem inalteradas.
+
+**Arquivo:** `src/features/corretor/pages/CorretorV3Page.tsx`. **Verificação:** checagem TypeScript aprovada; empacotamento Vite bloqueado por dependência ausente `maplibre-gl` no módulo não relacionado `atualizador-vgv/ProjectMap.tsx`.
+
 ## Versão 0.55 — 2026-09-17 — sugestão consultiva em lotes (RUNTIME local)
 
 ### Fluxo de processamento
