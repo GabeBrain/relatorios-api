@@ -139,7 +139,7 @@ function formattedSheet(source: XLSX.WorkSheet, headers: string[], output: Recor
   return sheet;
 }
 
-export function processWorkbook(buffer: ArrayBuffer, fileName: string, kind: ReportKind): ProcessedReport {
+export function processWorkbook(buffer: ArrayBuffer, fileName: string, kind: ReportKind): ProcessedReport & { workbook: XLSX.WorkBook } {
   const { month, year } = periodFromFileName(fileName);
   const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -179,7 +179,7 @@ export function processWorkbook(buffer: ArrayBuffer, fileName: string, kind: Rep
     return [output];
   });
   workbook.Sheets[workbook.SheetNames[0]] = formattedSheet(sheet, headers, rows, keptRows, outputHeaders(headers, kind));
-  return { kind, fileName, month, year, rowsRead: sourceRows.length, rowsRemoved: sourceRows.length - rows.length, rows, rowsKept: rows.length, reviews, decisions };
+  return { kind, fileName, month, year, rowsRead: sourceRows.length, rowsRemoved: sourceRows.length - rows.length, rows, rowsKept: rows.length, reviews, decisions, workbook };
 }
 
 export function exportReport(report: ProcessedReport) {
