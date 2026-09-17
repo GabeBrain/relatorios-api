@@ -28,10 +28,6 @@ export default function EmpresasEmpregadosPage() {
   const companies = useCompaniesReport(scope, strictReady);
 
   useEffect(() => {
-    if (tab === 'companies' && !companies.available) setTab('employees');
-  }, [tab, companies.available]);
-
-  useEffect(() => {
     if (companies.available) setTab('companies');
   }, [companies.available]);
 
@@ -46,11 +42,9 @@ export default function EmpresasEmpregadosPage() {
 
     {companies.error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertTitle>Não foi possível consultar Empresas</AlertTitle><AlertDescription>{companies.error}</AlertDescription></Alert>}
 
-    {!companies.isLoading && !companies.error && showEmptyState && <Card className="border-dashed"><CardContent className="flex min-h-40 flex-col items-center justify-center gap-3 p-6 text-center"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground"><Clock3 className="h-5 w-5" /></span><div><p className="font-medium">Dados de Empresas ainda não materializados para este município.</p><p className="mt-1 max-w-md text-sm leading-6 text-muted-foreground">A competência ainda não está disponível aqui. Escolha outro município ou aguarde a publicação.</p></div></CardContent></Card>}
-
-    <Tabs value={tab} onValueChange={setTab} className="space-y-5"><TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto"><TabsTrigger value="employees" className="gap-2"><Users className="h-4 w-4" />Empregados<Badge className="ml-1 bg-primary/90 text-primary-foreground">Disponível</Badge></TabsTrigger><TabsTrigger value="companies" disabled={!companies.available} className="gap-2"><Building2 className="h-4 w-4" />Empresas{companies.available ? <Badge className="ml-1 bg-primary/90 text-primary-foreground">Disponível</Badge> : <Badge variant="outline" className="ml-1">Sem competência</Badge>}</TabsTrigger></TabsList>
+    <Tabs value={tab} onValueChange={setTab} className="space-y-5"><TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto"><TabsTrigger value="employees" className="gap-2"><Users className="h-4 w-4" />Empregados<Badge className="ml-1 bg-primary/90 text-primary-foreground">Disponível</Badge></TabsTrigger><TabsTrigger value="companies" className="gap-2"><Building2 className="h-4 w-4" />Empresas{companies.available ? <Badge className="ml-1 bg-primary/90 text-primary-foreground">Disponível</Badge> : <Badge variant="outline" className="ml-1">Sem competência</Badge>}</TabsTrigger></TabsList>
       <TabsContent value="employees" className="mt-0"><Suspense fallback={<WorkspaceLoading />}><EmployeesReportWorkspace /></Suspense></TabsContent>
-      <TabsContent value="companies" className="mt-0">{companies.available && companies.report?.available && companies.municipality && <Suspense fallback={<WorkspaceLoading />}><CompaniesWorkspace municipality={companies.municipality} meta={companies.report.meta} rows={companies.report.rows} /></Suspense>}</TabsContent>
+      <TabsContent value="companies" className="mt-0">{companies.available && companies.report?.available && companies.municipality ? <Suspense fallback={<WorkspaceLoading />}><CompaniesWorkspace municipality={companies.municipality} meta={companies.report.meta} rows={companies.report.rows} /></Suspense> : !companies.isLoading && !companies.error && showEmptyState ? <Card className="border-dashed"><CardContent className="flex min-h-40 flex-col items-center justify-center gap-3 p-6 text-center"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground"><Clock3 className="h-5 w-5" /></span><div><p className="font-medium">Dados de Empresas ainda não materializados para este município.</p><p className="mt-1 max-w-md text-sm leading-6 text-muted-foreground">Use o botão acima para solicitar a preparação dos dados ou escolha outro município.</p></div></CardContent></Card> : null}</TabsContent>
     </Tabs>
   </div>;
 }
