@@ -1,12 +1,23 @@
-import { Fragment, useMemo } from 'react';
-import { Building2, Info } from 'lucide-react';
+import { Fragment, useMemo, useState } from 'react';
+import { Building2, FileSpreadsheet, Image, Info, Table2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { formatInteger, formatPercentage } from '../domain';
+import { toast } from 'sonner';
+import { formatInteger } from '../domain';
 import { PORTE_COLUMNS, SIMPLES_DISCLAIMER, buildCompaniesBreakdown, buildSectorSizeMatrix, formatCompetencia, totalEstablishments } from '../companies-domain';
+import { downloadCompaniesCsv, downloadCompaniesSvg, downloadCompaniesWorkbook } from '../companies-export';
 import type { CompaniesBreakdownItem, CompaniesReportMeta, CompaniesAggregatedRow, MunicipalityOption } from '../types';
+
+/** Percentuais desta aba já vêm na escala 0–100. */
+function formatPercent(value: number | null | undefined): string {
+  return value === null || value === undefined
+    ? '—'
+    : `${value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+}
+
 
 function BreakdownCard({ title, rows, note }: { title: string; rows: CompaniesBreakdownItem[]; note?: string }) {
   return (
@@ -35,7 +46,7 @@ function BreakdownCard({ title, rows, note }: { title: string; rows: CompaniesBr
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Progress value={row.percentage} className="h-1.5 w-16" />
-                      <span className="tabular-nums">{formatPercentage(row.percentage)}</span>
+                      <span className="tabular-nums">{formatPercent(row.percentage)}</span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -84,11 +95,11 @@ function SectorSizeTable({ rows }: { rows: CompaniesAggregatedRow[] }) {
                   {PORTE_COLUMNS.map((column) => (
                     <Fragment key={column.code}>
                       <TableCell className="text-right tabular-nums">{formatInteger(row.cells[column.code].quantidade)}</TableCell>
-                      <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercentage(row.cells[column.code].percentage)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercent(row.cells[column.code].percentage)}</TableCell>
                     </Fragment>
                   ))}
                   <TableCell className="text-right font-semibold tabular-nums">{formatInteger(row.total)}</TableCell>
-                  <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercentage(row.totalPercentage)}</TableCell>
+                  <TableCell className="text-right tabular-nums text-muted-foreground">{formatPercent(row.totalPercentage)}</TableCell>
                 </TableRow>
               ))}
               <TableRow className="bg-muted/50 font-semibold">
@@ -96,7 +107,7 @@ function SectorSizeTable({ rows }: { rows: CompaniesAggregatedRow[] }) {
                 {PORTE_COLUMNS.map((column) => (
                   <Fragment key={column.code}>
                     <TableCell className="text-right tabular-nums">{formatInteger(matrix.totals[column.code] ?? 0)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatPercentage(matrix.grandTotal > 0 ? ((matrix.totals[column.code] ?? 0) / matrix.grandTotal) * 100 : 0)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{formatPercent(matrix.grandTotal > 0 ? ((matrix.totals[column.code] ?? 0) / matrix.grandTotal) * 100 : 0)}</TableCell>
                   </Fragment>
                 ))}
                 <TableCell className="text-right tabular-nums">{formatInteger(matrix.grandTotal)}</TableCell>
@@ -113,6 +124,25 @@ function SectorSizeTable({ rows }: { rows: CompaniesAggregatedRow[] }) {
 export default function CompaniesWorkspace({ municipality, meta, rows }: Props) {
   const total = useMemo(() => totalEstablishments(rows), [rows]);
   const breakdown = useMemo(() => buildCompaniesBreakdown(rows), [rows]);
+  const [exporting, setExporting] = useState<string | null>(null);
+
+  async function handleExport(kind: 'xlsx' | 'csv' | 'svg') {
+    setExporting(kind);
+    try {
+      const input = { municipality, meta, rows };
+      const filename =
+        kind === 'xlsx'
+          ? await downloadCompaniesWorkbook(input)
+          : kind === 'csv'
+            ? downloadCompaniesCsv(input)
+            : downloadCompaniesSvg(input);
+      toast.success(`Arquivo gerado: ${filename}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível gerar o arquivo.');
+    } finally {
+      setExporting(null);
+    }
+  }
 
   return (
     <section className="space-y-5 animate-fade-in" aria-label="Relatório de empresas">
@@ -124,11 +154,25 @@ export default function CompaniesWorkspace({ municipality, meta, rows }: Props) 
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">{meta.source} · {meta.methodologyVersion}</p>
         </div>
-        <div className="text-left sm:text-right">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Estabelecimentos ativos</p>
-          <p className="text-2xl font-semibold tracking-tight">{formatInteger(total)}</p>
+        <div className="flex flex-col gap-3 sm:items-end">
+          <div className="text-left sm:text-right">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Estabelecimentos ativos</p>
+            <p className="text-2xl font-semibold tracking-tight">{formatInteger(total)}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" disabled={exporting !== null} onClick={() => handleExport('xlsx')}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel
+            </Button>
+            <Button variant="outline" size="sm" disabled={exporting !== null} onClick={() => handleExport('csv')}>
+              <Table2 className="mr-2 h-4 w-4" /> CSV
+            </Button>
+            <Button variant="outline" size="sm" disabled={exporting !== null} onClick={() => handleExport('svg')}>
+              <Image className="mr-2 h-4 w-4" /> SVG
+            </Button>
+          </div>
         </div>
       </div>
+
 
       <Alert>
         <Info className="h-4 w-4" />
