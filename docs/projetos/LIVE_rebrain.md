@@ -1,3 +1,12 @@
+### 2026-09-18 — Sinduscon Curitiba: fluxo mensal independente e relatórios-clientes preservados — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — alimentação mensal, tabulação estatística e geração dos relatórios finais.
+- **O quê:** o módulo passa a apresentar quatro etapas independentes: tratamento inicial, alimentação da base acumulada, tabulação substituta do SPSS e geração do relatório final. A alimentação recebe somente base + mês tratado e estende as fórmulas de Área Unidade, Área Residencial e Área Não Residencial. A tabulação recebe somente a base atualizada e gera oito abas estatísticas. A etapa final recebe somente essa tabulação e usa os modelos internos de Liberados/Concluídos armazenados em `public/sinduscon-templates/`.
+- **Por quê:** as operações acontecem em momentos diferentes e seus arquivos precisam ser baixados, conferidos e reutilizados separadamente; o analista não deve reenviar o relatório-modelo a cada competência.
+- **Arquivos:** `public/sinduscon-templates/*.xlsx`, `src/features/sinduscon-curitiba/{api.ts,components/WorkflowStagePanels.tsx,lib/monthly-workflow.ts,lib/monthly-workflow.test.ts,lib/ooxml-patcher.ts,pages/SindusconCuritibaPage.tsx}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** alimentação, tabulação e relatório Excel concluídos e validados nas amostras reais de Liberados e CVCO. A geração final altera somente células de entrada/títulos e bloqueia a entrega se estilos, tema, gráficos, desenhos, imagens, impressão ou estrutura de layout forem modificados. TypeScript, lint focado e quatro testes automatizados aprovados; o build geral continua bloqueado pela dependência local `pdf-lib` ausente, fora desta feature. A exportação PDF fiel continua pendente e exige um motor Excel/LibreOffice para recalcular e renderizar os gráficos.
+
 ### 2026-09-18 — Sinduscon - Curitiba: processamento local com preservação OOXML — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás e CVCO.
 - **O quê:** o arquivo passa a ser processado integralmente no navegador, sem Cloud Run. O motor mantém as regras de exclusão, padronização e cálculo, enquanto um novo exportador remonta somente a grade da primeira aba dentro do pacote OOXML, preservando `styles.xml`, tema, fontes, preenchimentos, bordas, larguras e alturas. A coluna `Mês` permanece no início e `Ano` passa a ser a última coluna.
