@@ -1,3 +1,12 @@
+### 2026-09-18 — Sinduscon - Curitiba: processamento local com preservação OOXML — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás e CVCO.
+- **O quê:** o arquivo passa a ser processado integralmente no navegador, sem Cloud Run. O motor mantém as regras de exclusão, padronização e cálculo, enquanto um novo exportador remonta somente a grade da primeira aba dentro do pacote OOXML, preservando `styles.xml`, tema, fontes, preenchimentos, bordas, larguras e alturas. A coluna `Mês` permanece no início e `Ano` passa a ser a última coluna.
+- **Por quê:** o fallback anterior recriava a planilha com `json_to_sheet` e descartava a estrutura estética; o round-trip do SheetJS também reduzia os estilos do arquivo real.
+- **Arquivos:** `src/features/sinduscon-curitiba/{api.ts,lib/report-processor.ts,lib/report-processor.test.ts,lib/style-preserving-workbook.ts,pages/SindusconCuritibaPage.tsx}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** substitui a dependência operacional do Cloud Run para esta tela; validação automatizada passou no arquivo real de Alvarás de setembro/2026, preservando integralmente os XMLs de estilos e tema. Arquivos com fórmulas, mesclagens, tabelas, desenhos ou formatação condicional são recusados de forma explícita até receberem suporte seguro.
+
 ### 2026-09-17 - Sinduscon - Curitiba: fallback local de processamento - Codex
 - **Ambiente/funcionalidade:** /rebrain/sinduscon-curitiba.
 - **O que:** quando VITE_SINDUSCON_PROCESSOR_URL nao estiver configurada, a interface tenta processar o .xlsx localmente com SheetJS, permitindo validar o fluxo sem Cloud Run. O backend continua disponivel para a preservacao visual mais fiel.

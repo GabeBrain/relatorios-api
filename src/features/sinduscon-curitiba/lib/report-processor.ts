@@ -77,8 +77,17 @@ function applyUnitRule(row: Record<string, unknown>, rowNumber: number, reviews:
 
 interface SourceRow { values: unknown[]; sourceRow: number; }
 
+export interface ProcessedWorkbook extends ProcessedReport {
+  workbook: XLSX.WorkBook;
+  layout: {
+    sourceHeaders: string[];
+    outputHeaders: string[];
+    sourceRows: number[];
+  };
+}
+
 function outputHeaders(headers: string[], kind: ReportKind) {
-  const result = ['Mês', 'Ano'];
+  const result = ['Mês'];
   for (const header of headers) {
     if (kind === 'cvco' && (header === COLUMN.inspectionArea || header === 'Tipo Vistoria')) continue;
     result.push(header);
@@ -88,7 +97,7 @@ function outputHeaders(headers: string[], kind: ReportKind) {
       if (kind === 'cvco') result.push('Tipo Vistoria');
     }
   }
-  return result;
+  return [...result, 'Ano'];
 }
 
 function templateColumn(header: string, headers: string[]) {
@@ -120,14 +129,20 @@ function formattedSheet(source: XLSX.WorkSheet, headers: string[], output: Recor
   const sourceHeights = source['!rows'] ?? [];
   columns.forEach((header, targetColumn) => {
     const sourceColumn = templateColumn(header, headers);
-    if (sourceColumn >= 0 && sourceColumns[sourceColumn]) sheet['!cols'] ??= [], sheet['!cols'][targetColumn] = { ...sourceColumns[sourceColumn] };
+    if (sourceColumn >= 0 && sourceColumns[sourceColumn]) {
+      sheet['!cols'] ??= [];
+      sheet['!cols'][targetColumn] = { ...sourceColumns[sourceColumn] };
+    }
     const headerCell = clonedCell(source[XLSX.utils.encode_cell({ r: 0, c: Math.max(0, sourceColumn) })]);
     sheet[XLSX.utils.encode_cell({ r: 0, c: targetColumn })] = writeValue(headerCell, header);
   });
   if (sourceHeights[0]) sheet['!rows'] = [{ ...sourceHeights[0] }];
   output.forEach((row, targetRow) => {
     const originalRow = sourceRows[targetRow].sourceRow;
-    if (sourceHeights[originalRow]) sheet['!rows'] ??= [], sheet['!rows'][targetRow + 1] = { ...sourceHeights[originalRow] };
+    if (sourceHeights[originalRow]) {
+      sheet['!rows'] ??= [];
+      sheet['!rows'][targetRow + 1] = { ...sourceHeights[originalRow] };
+    }
     columns.forEach((header, targetColumn) => {
       const sourceColumn = templateColumn(header, headers);
       const sourceCell = source[XLSX.utils.encode_cell({ r: originalRow, c: Math.max(0, sourceColumn) })];
@@ -139,9 +154,9 @@ function formattedSheet(source: XLSX.WorkSheet, headers: string[], output: Recor
   return sheet;
 }
 
-export function processWorkbook(buffer: ArrayBuffer, fileName: string, kind: ReportKind): ProcessedReport & { workbook: XLSX.WorkBook } {
+export function processWorkbook(buffer: ArrayBuffer, fileName: string, kind: ReportKind): ProcessedWorkbook {
   const { month, year } = periodFromFileName(fileName);
-  const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
+  const workbook = XLSX.read(buffer, { type: 'array', cellDates: true, cellStyles: true, cellNF: true, sheetStubs: true });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   if (!sheet) throw new Error('A planilha não possui uma aba de dados.');
   const matrix = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: '' });
@@ -178,8 +193,26 @@ export function processWorkbook(buffer: ArrayBuffer, fileName: string, kind: Rep
     keptRows.push({ values, sourceRow });
     return [output];
   });
-  workbook.Sheets[workbook.SheetNames[0]] = formattedSheet(sheet, headers, rows, keptRows, outputHeaders(headers, kind));
-  return { kind, fileName, month, year, rowsRead: sourceRows.length, rowsRemoved: sourceRows.length - rows.length, rows, rowsKept: rows.length, reviews, decisions, workbook };
+  const columns = outputHeaders(headers, kind);
+  workbook.Sheets[workbook.SheetNames[0]] = formattedSheet(sheet, headers, rows, keptRows, columns);
+  return {
+    kind,
+    fileName,
+    month,
+    year,
+    rowsRead: sourceRows.length,
+    rowsRemoved: sourceRows.length - rows.length,
+    rows,
+    rowsKept: rows.length,
+    reviews,
+    decisions,
+    workbook,
+    layout: {
+      sourceHeaders: headers,
+      outputHeaders: columns,
+      sourceRows: keptRows.map(({ sourceRow }) => sourceRow),
+    },
+  };
 }
 
 export function exportReport(report: ProcessedReport) {
