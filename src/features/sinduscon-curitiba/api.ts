@@ -9,6 +9,7 @@ import {
   type FinalReportOutput,
   type TabulationOutput,
 } from './lib/monthly-workflow';
+import { compileSindusconPdf, type CompiledPdf } from './lib/pdf-compiler';
 
 export async function processSindusconFile(file: File, kind: ReportKind): Promise<{ report: ProcessedReport; blob: Blob; fileName: string }> {
   const buffer = await file.arrayBuffer();
@@ -37,4 +38,16 @@ export async function createSindusconFinalReport(file: File, kind: ReportKind): 
   if (!response.ok) throw new Error('O modelo interno do relatório não está disponível. Tente novamente ou avise a equipe responsável.');
   const [tabulationBuffer, templateBuffer] = await Promise.all([file.arrayBuffer(), response.arrayBuffer()]);
   return generateFinalReport(tabulationBuffer, templateBuffer, kind);
+}
+
+export async function createSindusconFinalPdf(file: File, kind: ReportKind, month: string, year: number): Promise<CompiledPdf> {
+  const coverPath = kind === 'alvaras' ? '/sinduscon-templates/capa-liberados.pdf' : '/sinduscon-templates/capa-concluidos.pdf';
+  const [coverResponse, mapResponse, fontResponse, reportPdf] = await Promise.all([
+    fetch(coverPath),
+    fetch('/sinduscon-templates/mapa-curitiba.pdf'),
+    fetch('/sinduscon-templates/righteous-regular.ttf'),
+    file.arrayBuffer(),
+  ]);
+  if (!coverResponse.ok || !mapResponse.ok || !fontResponse.ok) throw new Error('Os modelos internos da capa ou do mapa não estão disponíveis.');
+  return compileSindusconPdf(reportPdf, await coverResponse.arrayBuffer(), await mapResponse.arrayBuffer(), await fontResponse.arrayBuffer(), kind, month, year);
 }

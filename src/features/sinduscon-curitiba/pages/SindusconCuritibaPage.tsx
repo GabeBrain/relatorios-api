@@ -4,11 +4,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
-import { ConsolidationPanel, FinalReportPanel, TabulationPanel } from '../components/WorkflowStagePanels';
+import { ConsolidationPanel, FinalReportPanel, PdfCompilationPanel, TabulationPanel } from '../components/WorkflowStagePanels';
 import { processSindusconFile } from '../api';
 import type { ProcessedReport, ReportKind } from '../types';
 
-type WorkflowStage = 'initial' | 'consolidate' | 'tabulate' | 'report';
+type WorkflowStage = 'initial' | 'consolidate' | 'tabulate' | 'report' | 'pdf';
 type WorkflowStep = `${WorkflowStage}-${ReportKind}`;
 
 const COPY: Record<WorkflowStep, { title: string; description: string; icon: typeof FileSpreadsheet }> = {
@@ -20,6 +20,8 @@ const COPY: Record<WorkflowStep, { title: string; description: string; icon: typ
   'tabulate-cvco': { title: 'Tabular CVCO', description: 'Gere as tabelas estatísticas a partir da base acumulada.', icon: FileSpreadsheet },
   'report-alvaras': { title: 'Relatório Liberado', description: 'Preencha o template interno usando a tabulação de Liberados.', icon: FileSpreadsheet },
   'report-cvco': { title: 'Relatório Concluído', description: 'Preencha o template interno usando a tabulação de CVCO.', icon: FileSpreadsheet },
+  'pdf-alvaras': { title: 'PDF final de Liberados', description: 'Una capa, mapa e o relatório exportado do Excel.', icon: FilePlus2 },
+  'pdf-cvco': { title: 'PDF final de Concluídos', description: 'Una capa, mapa e o relatório exportado do Excel.', icon: FilePlus2 },
 };
 
 function stepKind(step: WorkflowStep): ReportKind { return step.endsWith('alvaras') ? 'alvaras' : 'cvco'; }
@@ -62,9 +64,11 @@ export default function SindusconCuritibaPage() {
         <WorkflowGroup title="2. Alimentar bases acumuladas" steps={['consolidate-alvaras', 'consolidate-cvco']} onChoose={choose} />
         <WorkflowGroup title="3. Gerar tabulações" steps={['tabulate-alvaras', 'tabulate-cvco']} onChoose={choose} />
         <WorkflowGroup title="4. Gerar relatórios finais" steps={['report-alvaras', 'report-cvco']} onChoose={choose} />
+        <WorkflowGroup title="5. Compilar PDFs para entrega" steps={['pdf-alvaras', 'pdf-cvco']} onChoose={choose} />
       </div> : step.startsWith('consolidate-') ? <ConsolidationPanel kind={stepKind(step)} onLeave={leave} />
         : step.startsWith('tabulate-') ? <TabulationPanel kind={stepKind(step)} onLeave={leave} />
-          : step.startsWith('report-') ? <FinalReportPanel kind={stepKind(step)} onLeave={leave} /> : <>
+          : step.startsWith('report-') ? <FinalReportPanel kind={stepKind(step)} onLeave={leave} />
+            : step.startsWith('pdf-') ? <PdfCompilationPanel kind={stepKind(step)} onLeave={leave} /> : <>
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Tratamento inicial</p><h2 className="text-xl font-semibold">{COPY[step].title}</h2></div><Button variant="ghost" onClick={leave}>Voltar às etapas</Button></div>
         {!report && <Card className="border-dashed border-primary/30"><CardContent className="p-6 sm:p-10"><button type="button" className="flex w-full flex-col items-center rounded-xl border-2 border-dashed border-border px-6 py-12 text-center transition-colors hover:border-primary/50 hover:bg-primary/[0.03]" onClick={() => input.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); void handleFile(event.dataTransfer.files[0]); }}><UploadCloud className="h-9 w-9 text-primary" /><p className="mt-4 font-medium">Arraste a planilha aqui ou selecione um arquivo</p><p className="mt-1 text-sm text-muted-foreground">Aceita arquivos .xlsx. Mês e ano são lidos do nome do arquivo.</p></button><input ref={input} className="sr-only" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void handleFile(event.target.files?.[0])} />{error && <Alert variant="destructive" className="mt-4"><AlertCircle /><AlertTitle>Não foi possível processar o arquivo</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}</CardContent></Card>}
         {report && <Result report={report} onDownload={downloadReport} onMonthly={() => choose(`consolidate-${report.kind}`)} onLeave={leave} />}

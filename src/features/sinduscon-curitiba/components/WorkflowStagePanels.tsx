@@ -3,15 +3,19 @@ import { AlertCircle, Download, FileSpreadsheet, UploadCloud } from 'lucide-reac
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
-import { consolidateSindusconFiles, createSindusconFinalReport, tabulateSindusconFile } from '../api';
+import { consolidateSindusconFiles, createSindusconFinalPdf, createSindusconFinalReport, tabulateSindusconFile } from '../api';
+import type { CompiledPdf } from '../lib/pdf-compiler';
 import type { ConsolidationOutput, FinalReportOutput, TabulationOutput } from '../lib/monthly-workflow';
 import type { ReportKind } from '../types';
 
 type Output = ConsolidationOutput | TabulationOutput | FinalReportOutput;
+const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 function download(bytes: Uint8Array, fileName: string) {
-  const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const blob = new Blob([bytes], { type: /\.pdf$/i.test(fileName) ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
@@ -20,10 +24,10 @@ function download(bytes: Uint8Array, fileName: string) {
   URL.revokeObjectURL(url);
 }
 
-function FileField({ label, description, file, onChange }: { label: string; description: string; file: File | null; onChange: (file: File) => void }) {
+function FileField({ label, description, file, onChange, accept = '.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }: { label: string; description: string; file: File | null; onChange: (file: File) => void; accept?: string }) {
   return <label className="block cursor-pointer rounded-xl border border-dashed border-border p-4 transition-colors hover:border-primary/50 hover:bg-primary/[0.03]">
     <span className="flex items-start gap-3"><UploadCloud className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><span><span className="block text-sm font-medium">{label}</span><span className="mt-1 block text-xs text-muted-foreground">{file?.name ?? description}</span></span></span>
-    <input className="sr-only" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => { const next = event.target.files?.[0]; if (next) onChange(next); }} />
+    <input className="sr-only" type="file" accept={accept} onChange={(event) => { const next = event.target.files?.[0]; if (next) onChange(next); }} />
   </label>;
 }
 
@@ -90,6 +94,29 @@ export function FinalReportPanel({ kind, onLeave }: { kind: ReportKind; onLeave:
   }
   return <StageShell title={`Gerar relatório ${kind === 'alvaras' ? 'Liberado' : 'Concluído'}`} description="Envie somente a tabulação. O modelo limpo fica armazenado na aplicação e preserva fórmulas, gráficos, imagens, cores, larguras e alturas originais." onLeave={onLeave} startedAt={startedAt}>
     {result ? <Success result={result} label="Baixar relatório final" onReset={() => setResult(null)} /> : <><FileField label="Tabulação do período" description="Saída da etapa de tabulação" file={file} onChange={setFile} />{error && <ErrorMessage message={error} />}<Button disabled={!file || startedAt !== null} onClick={() => void process()}><FileSpreadsheet /> Gerar relatório final</Button></>}
+  </StageShell>;
+}
+
+export function PdfCompilationPanel({ kind, onLeave }: { kind: ReportKind; onLeave: () => void }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState(String(new Date().getFullYear()));
+  const [result, setResult] = useState<CompiledPdf | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  async function process() {
+    if (!file || !month) return;
+    setStartedAt(Date.now()); setError(null);
+    try { setResult(await createSindusconFinalPdf(file, kind, month, Number(year))); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'Não foi possível compilar o PDF final.'); }
+    finally { setStartedAt(null); }
+  }
+  return <StageShell title={`Compilar PDF ${kind === 'alvaras' ? 'Liberados' : 'Concluídos'}`} description="Depois de conferir o Excel, exporte as oito abas do relatório como um único PDF. A aplicação adicionará a capa do período e o mapa de Curitiba antes dessas oito páginas." onLeave={onLeave} startedAt={startedAt}>
+    {result ? <div className="space-y-4"><Alert><FileSpreadsheet /><AlertTitle>PDF final preparado</AlertTitle><AlertDescription>{result.pageCount} páginas: capa, mapa e oito páginas do relatório.</AlertDescription></Alert><div className="flex flex-wrap gap-3"><Button onClick={() => download(result.bytes, result.fileName)}><Download /> Baixar PDF final</Button><Button variant="outline" onClick={() => setResult(null)}>Compilar outro PDF</Button></div></div> : <>
+      <FileField label="PDF exportado do Excel" description="Selecione o arquivo com as oito abas do relatório" file={file} onChange={setFile} accept=".pdf,application/pdf" />
+      <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-1.5"><label className="text-sm font-medium">Mês de referência</label><Select value={month} onValueChange={setMonth}><SelectTrigger><SelectValue placeholder="Selecione o mês" /></SelectTrigger><SelectContent>{MONTHS.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></div><div className="space-y-1.5"><label htmlFor="sinduscon-pdf-year" className="text-sm font-medium">Ano</label><Input id="sinduscon-pdf-year" type="number" min={2020} max={2100} value={year} onChange={(event) => setYear(event.target.value)} /></div></div>
+      {error && <ErrorMessage message={error} />}<Button disabled={!file || !month || !year || startedAt !== null} onClick={() => void process()}><FileSpreadsheet /> Compilar PDF final</Button>
+    </>}
   </StageShell>;
 }
 
