@@ -3,7 +3,7 @@
 - **O quê:** a geração agora recalcula e grava os resultados em cache das fórmulas de subtotais, totais e divisões após preencher cada tabela, mantendo as fórmulas originais no `.xlsx` e preservando integralmente estilos, dimensões, desenhos e gráficos.
 - **Por quê:** o relatório recebia os dados da nova competência, mas mantinha nos resultados armazenados das fórmulas o total do modelo de junho; por isso leitores sem recálculo imediato exibiam `10987` mesmo com o acumulado maior.
 - **Arquivos:** `src/features/sinduscon-curitiba/lib/{monthly-workflow.ts,monthly-workflow.test.ts,ooxml-patcher.ts}`.
-- **Commits:** pendente nesta sessão.
+- **Commits:** `bcef918`.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** regressão coberta no modelo sintético e no template real de Liberados, incluindo a fórmula total da primeira tabela (`U70`); arquivos já gerados antes desta correção precisam ser gerados novamente.
 
