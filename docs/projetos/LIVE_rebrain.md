@@ -1,3 +1,12 @@
+### 2026-09-19 — Sinduscon Curitiba: equivalência de cabeçalhos na alimentação mensal — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — alimentação da base acumulada de Liberados/CVCO.
+- **O quê:** o pareamento de colunas passou a reconhecer como equivalentes `Uso Alvará`/`Uso(s) Alvará`, `Sub-Uso Alvará`/`Sub-Uso(s) Alvará` e `Material`/`Material(is)`, preservando no arquivo acumulado os nomes originais da base e copiando os valores da coluna correspondente do mês tratado.
+- **Por quê:** pequenas variações de nomenclatura entre a base histórica e a saída do tratamento inicial geravam uma falsa mensagem de colunas ausentes, embora os campos estivessem presentes.
+- **Arquivos:** `src/features/sinduscon-curitiba/lib/{monthly-workflow.ts,monthly-workflow.test.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** erro reproduzido pelo contrato dos cabeçalhos e coberto por regressão automatizada; as seis validações focadas do Sinduscon permanecem aprovadas.
+
 ### 2026-09-19 — Sinduscon Curitiba: compilação do PDF final — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — etapa 5, entrega externa em PDF.
 - **O quê:** adicionada uma etapa independente que recebe o PDF de oito páginas exportado pelo analista a partir do Excel final e compila, no navegador, um arquivo de dez páginas: capa dinâmica de Liberados ou Concluídos, mapa setorial de Curitiba e as oito páginas originais do relatório, sem redimensioná-las ou re-renderizá-las. Mês e ano são escolhidos na tela; a capa preserva o modelo fornecido e atualiza a competência com a fonte aberta Righteous. Arquivos com quantidade diferente de oito páginas são recusados para impedir uma entrega incompleta.

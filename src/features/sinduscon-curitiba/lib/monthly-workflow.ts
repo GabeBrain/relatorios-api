@@ -65,6 +65,14 @@ function normalize(value: unknown) {
   return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, ' ').trim().toLowerCase();
 }
 
+function canonicalHeader(value: unknown) {
+  const header = normalize(value);
+  if (/^uso s? alvara$/.test(header)) return 'uso alvara';
+  if (/^sub uso s? alvara$/.test(header)) return 'sub uso alvara';
+  if (/^materia(l|is|l is)$/.test(header)) return 'material';
+  return header;
+}
+
 function number(value: unknown) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
   const parsed = Number(String(value ?? '').replace(/\./g, '').replace(',', '.'));
@@ -129,8 +137,8 @@ function formulaFor(header: string, row: number, headers: unknown[]) {
 
 function appendRowsPreservingWorkbook(baseBuffer: ArrayBuffer, currentHeaders: unknown[], currentRows: unknown[][]) {
   const base = firstSheetRows(baseBuffer);
-  const baseHeaderKeys = base.headers.map(normalize);
-  const currentHeaderKeys = currentHeaders.map(normalize);
+  const baseHeaderKeys = base.headers.map(canonicalHeader);
+  const currentHeaderKeys = currentHeaders.map(canonicalHeader);
   const missing = baseHeaderKeys.filter((header) => header && !currentHeaderKeys.includes(header) && !/area(s)? (unidade|resid|nao resid)/.test(header));
   if (missing.length) throw new Error(`O arquivo mensal não possui colunas da base acumulada: ${missing.join(', ')}.`);
 
