@@ -3,7 +3,7 @@
 - **O quê:** adicionada uma etapa independente que recebe o PDF de oito páginas exportado pelo analista a partir do Excel final e compila, no navegador, um arquivo de dez páginas: capa dinâmica de Liberados ou Concluídos, mapa setorial de Curitiba e as oito páginas originais do relatório, sem redimensioná-las ou re-renderizá-las. Mês e ano são escolhidos na tela; a capa preserva o modelo fornecido e atualiza a competência com a fonte aberta Righteous. Arquivos com quantidade diferente de oito páginas são recusados para impedir uma entrega incompleta.
 - **Por quê:** o fluxo operacional salva cada resultado separadamente e só monta o PDF externo depois da conferência e exportação manual do Excel, mantendo a ordem e o formato do modelo oficial.
 - **Arquivos:** `public/sinduscon-templates/{capa-liberados.pdf,capa-concluidos.pdf,mapa-curitiba.pdf,righteous-regular.ttf,Righteous-OFL.txt}`, `src/features/sinduscon-curitiba/{api.ts,components/WorkflowStagePanels.tsx,lib/pdf-compiler.ts,lib/pdf-compiler.test.ts,pages/SindusconCuritibaPage.tsx}`, `package.json`, `package-lock.json`.
-- **Commits:** pendente nesta sessão.
+- **Commits:** `f9ed43e`.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** etapa PDF concluída localmente; composição real validada com dez páginas e dimensões idênticas à referência (capa 540×785,28 pt, mapa A4 e oito páginas 595,2×841,68 pt). Capa, mapa, primeira e última página do relatório foram renderizados e inspecionados visualmente. A exportação do Excel para PDF continua deliberadamente no Excel, que é o motor responsável por recalcular fórmulas e gráficos com fidelidade antes da compilação.
 
