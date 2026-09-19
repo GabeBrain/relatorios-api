@@ -1,3 +1,12 @@
+### 2026-09-19 — Sinduscon Curitiba: recálculo dos totais no relatório final — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — geração dos relatórios finais de Liberados/Concluídos.
+- **O quê:** a geração agora recalcula e grava os resultados em cache das fórmulas de subtotais, totais e divisões após preencher cada tabela, mantendo as fórmulas originais no `.xlsx` e preservando integralmente estilos, dimensões, desenhos e gráficos.
+- **Por quê:** o relatório recebia os dados da nova competência, mas mantinha nos resultados armazenados das fórmulas o total do modelo de junho; por isso leitores sem recálculo imediato exibiam `10987` mesmo com o acumulado maior.
+- **Arquivos:** `src/features/sinduscon-curitiba/lib/{monthly-workflow.ts,monthly-workflow.test.ts,ooxml-patcher.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** regressão coberta no modelo sintético e no template real de Liberados, incluindo a fórmula total da primeira tabela (`U70`); arquivos já gerados antes desta correção precisam ser gerados novamente.
+
 ### 2026-09-19 — Sinduscon Curitiba: equivalência de cabeçalhos na alimentação mensal — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — alimentação da base acumulada de Liberados/CVCO.
 - **O quê:** o pareamento de colunas passou a reconhecer como equivalentes `Uso Alvará`/`Uso(s) Alvará`, `Sub-Uso Alvará`/`Sub-Uso(s) Alvará` e `Material`/`Material(is)`, preservando no arquivo acumulado os nomes originais da base e copiando os valores da coluna correspondente do mês tratado.

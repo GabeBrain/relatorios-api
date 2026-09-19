@@ -155,7 +155,15 @@ function worksheetLayoutSignature(document: XMLDocument) {
   return WORKSHEET_LAYOUT_TAGS.map((tag) => elements(document, tag).map((element) => serializer.serializeToString(element)).join('')).join('|');
 }
 
-export type CellPatches = Map<string, Map<string, unknown>>;
+export interface FormulaCachePatch { formulaCache: unknown }
+export type CellPatchValue = unknown | FormulaCachePatch;
+export type CellPatches = Map<string, Map<string, CellPatchValue>>;
+
+export function formulaCache(value: unknown): FormulaCachePatch { return { formulaCache: value }; }
+
+function isFormulaCachePatch(value: CellPatchValue): value is FormulaCachePatch {
+  return typeof value === 'object' && value !== null && 'formulaCache' in value;
+}
 
 export function patchWorkbookCells(buffer: ArrayBuffer, patches: CellPatches) {
   const files = unzipSync(new Uint8Array(buffer));
@@ -169,7 +177,11 @@ export function patchWorkbookCells(buffer: ArrayBuffer, patches: CellPatches) {
     const layoutBefore = worksheetLayoutSignature(document);
     const sheetData = elements(document, 'sheetData')[0];
     if (!sheetData) throw new Error(`A aba “${sheetName}” não possui uma grade válida.`);
-    for (const [reference, value] of changes) writeValue(document, ensureCell(document, sheetData, reference), value);
+    for (const [reference, value] of changes) {
+      const cell = ensureCell(document, sheetData, reference);
+      if (isFormulaCachePatch(value)) writeValue(document, cell, value.formulaCache, true);
+      else writeValue(document, cell, value);
+    }
     if (worksheetLayoutSignature(document) !== layoutBefore) throw new Error(`A geração foi interrompida porque o layout da aba “${sheetName}” seria alterado.`);
     files[path] = strToU8(new XMLSerializer().serializeToString(document));
   }

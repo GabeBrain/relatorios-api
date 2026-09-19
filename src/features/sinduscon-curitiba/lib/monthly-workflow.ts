@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx';
 import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
 import type { ReportKind } from '../types';
-import { ooxml, patchWorkbookCells, worksheetPaths, type CellPatches } from './ooxml-patcher';
+import { formulaCache, ooxml, patchWorkbookCells, worksheetPaths, type CellPatches, type CellPatchValue } from './ooxml-patcher';
 
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const AREA_BANDS = ['Até 50', '50–75', '75–100', '100–150', '150–200', '200–250', '250–300', 'Acima de 300'];
@@ -334,6 +334,55 @@ function setVector(changes: Map<string, unknown>, startColumn: number, row: numb
   values.forEach((item, offset) => changes.set(`${ooxml.columnName(startColumn + offset)}${row}`, blankZero(item)));
 }
 
+function refreshFormulaCaches(sheet: XLSX.WorkSheet, changes: Map<string, CellPatchValue>) {
+  const visiting = new Set<string>();
+  const cached = new Map<string, unknown>();
+  const valueAt = (reference: string): unknown => {
+    const normalized = reference.replace(/\$/g, '').toUpperCase();
+    const patch = changes.get(normalized);
+    if (patch !== undefined && !(typeof patch === 'object' && patch !== null && 'formulaCache' in patch)) return patch;
+    if (cached.has(normalized)) return cached.get(normalized);
+    const cell = sheet[normalized] as XLSX.CellObject | undefined;
+    if (!cell?.f || visiting.has(normalized)) return cell?.v ?? '';
+    visiting.add(normalized);
+    const result = evaluateFormula(cell.f, valueAt);
+    visiting.delete(normalized);
+    if (result !== undefined) cached.set(normalized, result);
+    return result ?? cell.v ?? '';
+  };
+  for (const [reference, cell] of Object.entries(sheet)) {
+    if (reference.startsWith('!') || !(cell as XLSX.CellObject).f) continue;
+    const result = valueAt(reference);
+    if (result !== undefined) changes.set(reference, formulaCache(result));
+  }
+}
+
+function evaluateFormula(formula: string, valueAt: (reference: string) => unknown): unknown {
+  if (/#REF!/i.test(formula)) return undefined;
+  const sum = (expression: string) => expression.split(',').reduce((total, token) => {
+    const item = token.trim();
+    if (item.includes(':')) {
+      const range = XLSX.utils.decode_range(item.replace(/\$/g, ''));
+      let subtotal = 0;
+      for (let row = range.s.r; row <= range.e.r; row += 1) for (let column = range.s.c; column <= range.e.c; column += 1) subtotal += number(valueAt(XLSX.utils.encode_cell({ r: row, c: column })));
+      return total + subtotal;
+    }
+    return total + number(valueAt(item));
+  }, 0);
+  const ifSum = formula.match(/^IF\(SUM\((.+)\),SUM\((.+)\),""\)$/i);
+  if (ifSum) { const result = sum(ifSum[2]); return sum(ifSum[1]) ? result : ''; }
+  const directSum = formula.match(/^SUM\((.+)\)$/i);
+  if (directSum) return sum(directSum[1]);
+  const arithmetic = formula.match(/^\$?([A-Z]+\$?\d+)\s*([/+*\-])\s*(?:\$?([A-Z]+\$?\d+)|(\d+(?:\.\d+)?))$/i);
+  if (!arithmetic) return undefined;
+  const left = number(valueAt(arithmetic[1]));
+  const right = arithmetic[3] ? number(valueAt(arithmetic[3])) : Number(arithmetic[4]);
+  if (arithmetic[2] === '/') return right ? left / right : '';
+  if (arithmetic[2] === '*') return left * right;
+  if (arithmetic[2] === '+') return left + right;
+  return left - right;
+}
+
 function updateReport(template: ArrayBuffer, aggregates: Aggregates, month: string, year: number) {
   const workbook = XLSX.read(template, { type: 'array', cellFormula: true, sheetStubs: true });
   const patches: CellPatches = new Map();
@@ -399,6 +448,7 @@ function updateReport(template: ArrayBuffer, aggregates: Aggregates, month: stri
         setVector(changes, 2, XLSX.utils.decode_cell(reference).r + 1, values);
       }
     }
+    refreshFormulaCaches(sheet, changes);
     if (!changes.size) patches.delete(sheetName);
   }
   const allNeighborhoods = new Set([...aggregates.residentialArea.keys(), ...aggregates.nonResidentialArea.keys(), ...aggregates.neighborhoodAreas.keys()]);

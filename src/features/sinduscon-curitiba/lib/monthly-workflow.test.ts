@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import * as XLSX from 'xlsx';
 import { strToU8, unzipSync, zipSync } from 'fflate';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { consolidateMonthlyBase, generateFinalReport, tabulateConsolidatedBase } from './monthly-workflow';
 
@@ -35,7 +36,15 @@ function reportBuffer() {
     ['Folha 09 area por bairro', [[], [], ['SETORES'], [], [], ['Centro']]],
     ['Folha 10 serie hist', [[], [], [], [], [], [], [new Date(2026, 7, 1)]]],
   ];
-  for (const [name, rows] of sheets) XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), name);
+  for (const [name, rows] of sheets) {
+    const sheet = XLSX.utils.aoa_to_sheet(rows);
+    if (name === 'Folha 03 Resid-area') {
+      sheet.J6 = { t: 'n', v: 10987, f: 'IF(SUM(B6:I6),SUM(B6:I6),"")' };
+      sheet.J8 = { t: 'n', v: 10987, f: 'SUM(J6:J7)' };
+      sheet['!ref'] = 'A1:J8';
+    }
+    XLSX.utils.book_append_sheet(workbook, sheet, name);
+  }
   const raw = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' }) as ArrayBuffer;
   const files = unzipSync(new Uint8Array(raw));
   files['xl/charts/chart-test.xml'] = strToU8('<chart/>');
@@ -65,8 +74,22 @@ describe('processMonthlyWorkflow', () => {
     expect(report.Sheets['Folha 03 Resid-area'].A1.v).toContain('AGOSTO DE 2026');
     expect(report.Sheets['Folha 03 Resid-area'].D6.v).toBe(3);
     expect(report.Sheets['Folha 03 Resid-area'].B7).toBeUndefined();
+    expect(report.Sheets['Folha 03 Resid-area'].J6.f).toBe('IF(SUM(B6:I6),SUM(B6:I6),"")');
+    expect(report.Sheets['Folha 03 Resid-area'].J6.v).toBe(5);
+    expect(report.Sheets['Folha 03 Resid-area'].J8.f).toBe('SUM(J6:J7)');
+    expect(report.Sheets['Folha 03 Resid-area'].J8.v).toBe(5);
     expect(report.Sheets['Folha 06 Resid-area'].D6.v).toBe(1);
     expect(consolidation.appendedRows).toBe(1);
     expect(consolidation.totalRows).toBe(2);
+  });
+
+  it('atualiza o total em cache da primeira tabela do template real', () => {
+    const tabulation = tabulateConsolidatedBase(baseBuffer(), 'alvaras');
+    const template = readFileSync('public/sinduscon-templates/report-liberados.xlsx');
+    const output = generateFinalReport(tabulation.bytes.buffer as ArrayBuffer, Uint8Array.from(template).buffer as ArrayBuffer, 'alvaras');
+    const report = XLSX.read(output.bytes, { type: 'array', cellFormula: true });
+    const total = report.Sheets['Folha 03 Resid-area'].U70;
+    expect(total.f).toContain('SUM(');
+    expect(total.v).toBe(2);
   });
 });
