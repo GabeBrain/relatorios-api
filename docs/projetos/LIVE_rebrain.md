@@ -3,7 +3,7 @@
 - **O quê:** o pareamento de colunas passou a reconhecer como equivalentes `Uso Alvará`/`Uso(s) Alvará`, `Sub-Uso Alvará`/`Sub-Uso(s) Alvará` e `Material`/`Material(is)`, preservando no arquivo acumulado os nomes originais da base e copiando os valores da coluna correspondente do mês tratado.
 - **Por quê:** pequenas variações de nomenclatura entre a base histórica e a saída do tratamento inicial geravam uma falsa mensagem de colunas ausentes, embora os campos estivessem presentes.
 - **Arquivos:** `src/features/sinduscon-curitiba/lib/{monthly-workflow.ts,monthly-workflow.test.ts}`.
-- **Commits:** pendente nesta sessão.
+- **Commits:** `8c620c0`.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** erro reproduzido pelo contrato dos cabeçalhos e coberto por regressão automatizada; as seis validações focadas do Sinduscon permanecem aprovadas.
 
