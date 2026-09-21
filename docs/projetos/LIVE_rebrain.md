@@ -114,6 +114,14 @@
 - **Commits:** pendente nesta sessão.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** primeira etapa de organização concluída; falta criar a rota funcional do novo FIERGS antes de adicioná-lo ao menu e então validar cidades, contrato da API interna v2 e contagem de empreendimentos.
+### 2026-09-20 — Sinduscon Curitiba: carregamentos alinhados ao padrão Brain — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — processamento das cinco etapas independentes.
+- **O quê:** todos os processamentos usam o overlay canônico `BrainLoadingState`, com logo Brain, fundo bloqueado, cronômetro real e textos específicos para tratamento mensal, atualização da base, tabulação, montagem do relatório e compilação do PDF.
+- **Por quê:** alinhar a experiência do Sinduscon às demais abas de dados e informar claramente qual operação está em andamento, sem estimativas artificiais.
+- **Arquivos:** `src/features/sinduscon-curitiba/{components/WorkflowStagePanels.tsx,pages/SindusconCuritibaPage.tsx}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** mudança somente de estado visual e comunicação; regras de planilha, arquivos gerados e fluxo de download permanecem inalterados.
 
 ### 2026-09-20 — Sinduscon Curitiba: arrastar e soltar em todas as entradas — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — uploads das etapas independentes.
