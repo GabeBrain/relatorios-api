@@ -3,7 +3,7 @@
 - **O quê:** os campos de base acumulada, mês tratado, tabulação e PDF final agora aceitam arquivos por arrastar e soltar, além do clique; durante o arraste a área recebe destaque e orienta a soltar, e formatos incompatíveis exibem mensagem textual.
 - **Por quê:** reduzir cliques no fluxo mensal e tornar consistente o upload das etapas 2 a 5 com o tratamento inicial, que já aceitava arraste.
 - **Arquivos:** `src/features/sinduscon-curitiba/components/WorkflowStagePanels.tsx`.
-- **Commits:** pendente nesta sessão.
+- **Commits:** `fafb305`.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** mantidos clique, foco por teclado e validação de `.xlsx`/`.pdf`; typecheck, lint focado e build de produção aprovados. O lint global continua com erros preexistentes fora desta alteração.
 
