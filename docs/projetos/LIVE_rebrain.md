@@ -119,7 +119,7 @@
 - **O quê:** as células da coluna `Ano` recebem formato numérico inteiro `0`, preservando fonte, preenchimento, bordas e faixas alternadas herdadas do arquivo original.
 - **Por quê:** o estilo copiado da planilha de origem aplicava agrupamento de milhar e fazia o Excel exibir `2.026`, embora o valor armazenado fosse corretamente `2026`.
 - **Arquivos:** `src/features/sinduscon-curitiba/lib/{style-preserving-workbook.ts,report-processor.test.ts}`.
-- **Commits:** pendente nesta sessão.
+- **Commits:** `e43ec61`.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** teste de regressão confirma valor numérico `2026` com formato visual `0`; nenhuma regra de tratamento foi alterada.
 
