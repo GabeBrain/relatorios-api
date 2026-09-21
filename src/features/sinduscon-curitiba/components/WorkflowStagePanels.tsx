@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AlertCircle, Download, FileSpreadsheet, UploadCloud } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
+import { cn } from '@/lib/utils';
 import { consolidateSindusconFiles, createSindusconFinalPdf, createSindusconFinalReport, tabulateSindusconFile } from '../api';
 import type { CompiledPdf } from '../lib/pdf-compiler';
 import type { ConsolidationOutput, FinalReportOutput, TabulationOutput } from '../lib/monthly-workflow';
@@ -25,10 +26,23 @@ function download(bytes: Uint8Array, fileName: string) {
 }
 
 function FileField({ label, description, file, onChange, accept = '.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }: { label: string; description: string; file: File | null; onChange: (file: File) => void; accept?: string }) {
-  return <label className="block cursor-pointer rounded-xl border border-dashed border-border p-4 transition-colors hover:border-primary/50 hover:bg-primary/[0.03]">
-    <span className="flex items-start gap-3"><UploadCloud className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><span><span className="block text-sm font-medium">{label}</span><span className="mt-1 block text-xs text-muted-foreground">{file?.name ?? description}</span></span></span>
-    <input className="sr-only" type="file" accept={accept} onChange={(event) => { const next = event.target.files?.[0]; if (next) onChange(next); }} />
-  </label>;
+  const input = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+  const [rejected, setRejected] = useState(false);
+  const expectsPdf = accept.includes('.pdf');
+  function select(next?: File) {
+    if (!next) return;
+    const valid = expectsPdf ? /\.pdf$/i.test(next.name) : /\.xlsx$/i.test(next.name);
+    setRejected(!valid);
+    if (valid) onChange(next);
+  }
+  return <div>
+    <button type="button" className={cn('block w-full cursor-pointer rounded-xl border border-dashed border-border p-4 text-left transition-colors hover:border-primary/50 hover:bg-primary/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', dragging && 'border-primary bg-primary/[0.07]')} onClick={() => input.current?.click()} onDragEnter={(event) => { event.preventDefault(); setDragging(true); }} onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'copy'; }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false); }} onDrop={(event) => { event.preventDefault(); setDragging(false); select(event.dataTransfer.files[0]); }}>
+      <span className="flex items-start gap-3"><UploadCloud className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><span><span className="block text-sm font-medium">{label}</span><span className="mt-1 block text-xs text-muted-foreground">{dragging ? 'Solte o arquivo aqui' : file?.name ?? `${description}. Clique ou arraste o arquivo aqui.`}</span></span></span>
+    </button>
+    <input ref={input} className="sr-only" type="file" accept={accept} onChange={(event) => { select(event.target.files?.[0]); event.target.value = ''; }} />
+    {rejected && <p role="alert" className="mt-1.5 text-xs text-destructive">Formato incompatível. Envie um arquivo {expectsPdf ? '.pdf' : '.xlsx'}.</p>}
+  </div>;
 }
 
 function StageShell({ title, description, children, onLeave, startedAt }: { title: string; description: string; children: React.ReactNode; onLeave: () => void; startedAt: number | null }) {

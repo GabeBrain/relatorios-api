@@ -1,3 +1,12 @@
+### 2026-09-20 — Sinduscon Curitiba: arrastar e soltar em todas as entradas — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — uploads das etapas independentes.
+- **O quê:** os campos de base acumulada, mês tratado, tabulação e PDF final agora aceitam arquivos por arrastar e soltar, além do clique; durante o arraste a área recebe destaque e orienta a soltar, e formatos incompatíveis exibem mensagem textual.
+- **Por quê:** reduzir cliques no fluxo mensal e tornar consistente o upload das etapas 2 a 5 com o tratamento inicial, que já aceitava arraste.
+- **Arquivos:** `src/features/sinduscon-curitiba/components/WorkflowStagePanels.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** mantidos clique, foco por teclado e validação de `.xlsx`/`.pdf`; typecheck, lint focado e build de produção aprovados. O lint global continua com erros preexistentes fora desta alteração.
+
 ### 2026-09-20 — Sinduscon Curitiba: acumulado limitado ao ano da competência — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tabulação e relatório final de Liberados/Concluídos.
 - **O quê:** as tabelas acumuladas por bairro, faixa de área e pavimentos passaram a considerar somente o ano da competência mais recente; registros de anos anteriores permanecem disponíveis na série histórica. Unidades com área zerada também passam a integrar os totais e a primeira faixa de área.
