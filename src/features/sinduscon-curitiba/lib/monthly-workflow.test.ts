@@ -52,6 +52,21 @@ function reportBuffer() {
 }
 
 describe('processMonthlyWorkflow', () => {
+  it('limita as tabelas acumuladas ao ano da competência mais recente', () => {
+    const source = workbookBuffer([
+      HEADERS,
+      ['JULHO', 'Centro', 'ZR2', 5, 1000, '', 100000, 100, 100000, '', 'Habitação', 'Coletiva', 'Alvenaria', 2025],
+      ['JULHO', 'Centro', 'ZR2', 5, 2, '', 200, 100, 200, '', 'Habitação', 'Coletiva', 'Alvenaria', 2026],
+      ['JULHO', 'Centro', 'ZR2', 1, 2, '', 0, 0, 0, '', 'Habitação', 'Coletiva', 'Alvenaria', 2026],
+    ]);
+    const tabulation = tabulateConsolidatedBase(source, 'alvaras');
+    const workbook = XLSX.read(tabulation.bytes, { type: 'array' });
+    const areaRows = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets['Residencial por área'], { header: 1, defval: '', raw: true });
+    const historyRows = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets['Série histórica'], { header: 1, defval: '', raw: true });
+    expect(areaRows.find((row) => row[0] === 'Centro')?.at(-1)).toBe(4);
+    expect(historyRows.slice(1).map((row) => row[0])).toEqual(['2025-7', '2026-7']);
+  });
+
   it('anexa o mês, estende fórmulas e mantém os objetos do relatório', () => {
     const currentHeaders = [...HEADERS];
     currentHeaders[10] = 'Uso(s) Alvará';

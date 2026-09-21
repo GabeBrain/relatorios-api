@@ -1,3 +1,12 @@
+### 2026-09-20 — Sinduscon Curitiba: acumulado limitado ao ano da competência — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tabulação e relatório final de Liberados/Concluídos.
+- **O quê:** as tabelas acumuladas por bairro, faixa de área e pavimentos passaram a considerar somente o ano da competência mais recente; registros de anos anteriores permanecem disponíveis na série histórica. Unidades com área zerada também passam a integrar os totais e a primeira faixa de área.
+- **Por quê:** a base completa de julho continha 22.586 unidades residenciais de 2025 e 13.293 de 2026; a tabulação somava os dois anos e produzia 35.877, enquanto o relatório anual correto de 2026 totaliza 13.293.
+- **Arquivos:** `src/features/sinduscon-curitiba/lib/{monthly-workflow.ts,monthly-workflow.test.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** correção validada na base real `Liberados_JULHO_2026.xlsx` com 5.274 registros e total residencial final exatamente igual a 13.293; regressão automatizada cobre anos anteriores e unidades com área zero.
+
 ### 2026-09-19 — Sinduscon Curitiba: recálculo dos totais no relatório final — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — geração dos relatórios finais de Liberados/Concluídos.
 - **O quê:** a geração agora recalcula e grava os resultados em cache das fórmulas de subtotais, totais e divisões após preencher cada tabela, mantendo as fórmulas originais no `.xlsx` e preservando integralmente estilos, dimensões, desenhos e gráficos.

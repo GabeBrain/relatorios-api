@@ -232,7 +232,9 @@ function buildAggregates(headers: unknown[], matrix: unknown[][]): Aggregates {
     residentialArea: new Map(), residentialFloors: new Map(), nonResidentialArea: new Map(), nonResidentialFloors: new Map(),
     neighborhoodAreas: new Map(), residentialZones: new Map(), nonResidentialZones: new Map(), history: new Map(),
   };
-  for (const row of rowObjects(headers, matrix)) {
+  const objects = rowObjects(headers, matrix);
+  const reportYear = Math.max(...objects.map((row) => number(value(row, 'Ano'))).filter(Boolean));
+  for (const row of objects) {
     const neighborhood = String(value(row, 'Bairro') || '').trim();
     const residential = number(value(row, 'Quantidade de Unidades Residênciais', 'Quantidade de Unidades Residenciais'));
     const nonResidential = number(value(row, 'Quantidade Unidades Não Residênciais', 'Quantidade Unidades Não Residenciais'));
@@ -243,7 +245,7 @@ function buildAggregates(headers: unknown[], matrix: unknown[][]): Aggregates {
     const floors = number(value(row, 'Quantidade Pavimentos'));
     const month = MONTHS.findIndex((item) => normalize(item) === normalize(value(row, 'Mês', 'Mes')));
     const year = number(value(row, 'Ano'));
-    if (neighborhood && unitArea > 0) {
+    if (year === reportYear && neighborhood) {
       addVector(result.residentialArea, neighborhood, areaBand(unitArea), residential, 8);
       addVector(result.nonResidentialArea, neighborhood, areaBand(unitArea), nonResidential, 8);
       addVector(result.residentialFloors, neighborhood, floorBand(floors), residential, 3);
