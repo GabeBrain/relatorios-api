@@ -3,7 +3,7 @@
 - **O quê:** as tabelas acumuladas por bairro, faixa de área e pavimentos passaram a considerar somente o ano da competência mais recente; registros de anos anteriores permanecem disponíveis na série histórica. Unidades com área zerada também passam a integrar os totais e a primeira faixa de área.
 - **Por quê:** a base completa de julho continha 22.586 unidades residenciais de 2025 e 13.293 de 2026; a tabulação somava os dois anos e produzia 35.877, enquanto o relatório anual correto de 2026 totaliza 13.293.
 - **Arquivos:** `src/features/sinduscon-curitiba/lib/{monthly-workflow.ts,monthly-workflow.test.ts}`.
-- **Commits:** pendente nesta sessão.
+- **Commits:** `77a0a90`.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** correção validada na base real `Liberados_JULHO_2026.xlsx` com 5.274 registros e total residencial final exatamente igual a 13.293; regressão automatizada cobre anos anteriores e unidades com área zero.
 
