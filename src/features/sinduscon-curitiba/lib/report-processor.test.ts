@@ -40,10 +40,9 @@ describe('processWorkbook', () => {
     expect(sheet['!cols']?.at(-1)?.wch).toBe(12);
     expect(sheet['!rows']?.[1]?.hpt).toBe(34);
 
-    const originalPackage = unzipSync(new Uint8Array(source));
     const output = buildStylePreservingWorkbook(source, report);
     const outputPackage = unzipSync(output);
-    expect(strFromU8(outputPackage['xl/styles.xml'])).toBe(strFromU8(originalPackage['xl/styles.xml']));
+    const originalPackage = unzipSync(new Uint8Array(source));
     expect(strFromU8(outputPackage['xl/theme/theme1.xml'])).toBe(strFromU8(originalPackage['xl/theme/theme1.xml']));
 
     const preserved = XLSX.read(output, { type: 'array', cellStyles: true });
@@ -54,6 +53,7 @@ describe('processWorkbook', () => {
     expect(matrix[0].at(-1)).toBe('Ano');
     expect(matrix[1][0]).toBe('Setembro');
     expect(matrix[1].at(-1)).toBe(2026);
+    expect(preservedSheet[`${XLSX.utils.encode_col(headers.length + 4)}2`].z).toBe('0');
     expect(preservedSheet['!cols']).toHaveLength(headers.length + 5);
   });
 

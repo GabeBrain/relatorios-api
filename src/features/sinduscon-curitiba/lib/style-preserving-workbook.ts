@@ -166,6 +166,28 @@ function assertSupportedStructure(document: XMLDocument) {
 
 export function buildStylePreservingWorkbook(buffer: ArrayBuffer, processed: ProcessedWorkbook) {
   const files = unzipSync(new Uint8Array(buffer));
+  const stylesBytes = files['xl/styles.xml'];
+  if (!stylesBytes) throw new Error('O arquivo não possui estilos de célula válidos.');
+  const stylesDocument = parseXml(strFromU8(stylesBytes), 'os estilos da planilha');
+  const cellXfs = firstElement(stylesDocument, 'cellXfs');
+  if (!cellXfs) throw new Error('O arquivo não possui formatos de célula válidos.');
+  const integerStyles = new Map<string, string>();
+  const integerStyleFor = (sourceStyle?: string | null) => {
+    const baseStyle = sourceStyle ?? '0';
+    const existing = integerStyles.get(baseStyle);
+    if (existing) return existing;
+    const formats = elements(cellXfs, 'xf');
+    const source = formats[Number(baseStyle)] ?? formats[0];
+    if (!source) throw new Error('Não foi possível preparar o formato da coluna Ano.');
+    const clone = stylesDocument.importNode(source, true) as Element;
+    clone.setAttribute('numFmtId', '1');
+    clone.setAttribute('applyNumberFormat', '1');
+    const style = String(formats.length);
+    cellXfs.appendChild(clone);
+    cellXfs.setAttribute('count', String(formats.length + 1));
+    integerStyles.set(baseStyle, style);
+    return style;
+  };
   const worksheetPath = firstWorksheetPath(files);
   const worksheetBytes = files[worksheetPath];
   if (!worksheetBytes) throw new Error('Não foi possível ler a primeira aba da planilha.');
@@ -212,7 +234,8 @@ export function buildStylePreservingWorkbook(buffer: ArrayBuffer, processed: Pro
       const cell = cloneCell(document, sourceCell, fallback);
       cell.setAttribute('r', `${columnName(outputColumn)}${outputRowNumber}`);
       const style = styleForOutputRow(sourceCell, sourceColumn, outputRowNumber, stripeRows);
-      if (style) cell.setAttribute('s', style);
+      if (header === 'Ano') cell.setAttribute('s', integerStyleFor(style));
+      else if (style) cell.setAttribute('s', style);
       else cell.removeAttribute('s');
       if (DERIVED_HEADERS.has(header) || MUTATED_HEADERS.has(header)) writeCellValue(document, cell, values[header]);
       outputRow.appendChild(cell);
@@ -226,5 +249,6 @@ export function buildStylePreservingWorkbook(buffer: ArrayBuffer, processed: Pro
   dimension?.setAttribute('ref', `A1:${lastColumn}${Math.max(1, processed.rows.length + 1)}`);
 
   files[worksheetPath] = strToU8(new XMLSerializer().serializeToString(document));
+  files['xl/styles.xml'] = strToU8(new XMLSerializer().serializeToString(stylesDocument));
   return zipSync(files, { level: 6 });
 }

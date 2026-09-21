@@ -114,12 +114,21 @@
 - **Commits:** pendente nesta sessão.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** primeira etapa de organização concluída; falta criar a rota funcional do novo FIERGS antes de adicioná-lo ao menu e então validar cidades, contrato da API interna v2 e contagem de empreendimentos.
+### 2026-09-20 — Sinduscon Curitiba: ano sem separador de milhar — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás/CVCO.
+- **O quê:** as células da coluna `Ano` recebem formato numérico inteiro `0`, preservando fonte, preenchimento, bordas e faixas alternadas herdadas do arquivo original.
+- **Por quê:** o estilo copiado da planilha de origem aplicava agrupamento de milhar e fazia o Excel exibir `2.026`, embora o valor armazenado fosse corretamente `2026`.
+- **Arquivos:** `src/features/sinduscon-curitiba/lib/{style-preserving-workbook.ts,report-processor.test.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** teste de regressão confirma valor numérico `2026` com formato visual `0`; nenhuma regra de tratamento foi alterada.
+
 ### 2026-09-20 — Sinduscon Curitiba: carregamentos alinhados ao padrão Brain — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — processamento das cinco etapas independentes.
 - **O quê:** todos os processamentos usam o overlay canônico `BrainLoadingState`, com logo Brain, fundo bloqueado, cronômetro real e textos específicos para tratamento mensal, atualização da base, tabulação, montagem do relatório e compilação do PDF.
 - **Por quê:** alinhar a experiência do Sinduscon às demais abas de dados e informar claramente qual operação está em andamento, sem estimativas artificiais.
 - **Arquivos:** `src/features/sinduscon-curitiba/{components/WorkflowStagePanels.tsx,pages/SindusconCuritibaPage.tsx}`.
-- **Commits:** pendente nesta sessão.
+- **Commits:** `030b1d3`.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** mudança somente de estado visual e comunicação; regras de planilha, arquivos gerados e fluxo de download permanecem inalterados.
 
