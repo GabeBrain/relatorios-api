@@ -2,7 +2,7 @@ import { buildLaunchModel, periodToQuarter, safeNumber } from '../lib/launches';
 import type { HorizontalSeriesPolicy, LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaClosingFacts, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
 import { editorialWindow, quarterIndex, quarterRange } from '../domain/quarters';
 import { horizontalProjects, mergeCubes, type MarketCube } from '../domain/cube';
-import { classifySecoviTemporalRow } from '../domain/entity-policy';
+import { classifyEntityTemporalRow, type EntityId } from '../domain/entity-policy';
 import {
   cohortMatrix as buildCohortMatrix,
   cohortMatrixParticipation,
@@ -62,17 +62,17 @@ function temporalGroup(row: Record<string, unknown>) {
 }
 
 /** Filtra o contrato municipal por linha antes de somar qualquer total do relatório. */
-function filterSecoviPatternSource(source: SourceResult): SourceResult {
+function filterEntityPatternSource(source: SourceResult, entity: EntityId): SourceResult {
   const rows = source.rows.filter((row) => {
     const rowSegment = segment(row.building_type ?? row.type);
     // Linhas agregadas de fixtures/contratos legados não carregam segmento: não há
     // evidência suficiente para classificá-las como horizontal e removê-las.
-    return rowSegment === null || classifySecoviTemporalRow(rowSegment, temporalGroup(row)) === 'keep';
+    return rowSegment === null || classifyEntityTemporalRow(entity, rowSegment, temporalGroup(row)) === 'keep';
   });
   return {
     ...source,
     rows,
-    source: `${source.source} · horizontal filtrado por Padrão (política Secovi)`,
+    source: `${source.source} · horizontal filtrado por Padrão (política ${entity})`,
   };
 }
 
@@ -362,7 +362,7 @@ function buildCityComparisons(scope: PanoramaScope, cube: MarketCube, provenance
 
   const sales = selected.map((city) => {
     const source = salesSources.find((item) => item.city === city);
-    const values = filterSecoviPatternSource({ rows: normalizeCityTemporalRows(city, source?.rows ?? [], 'flow'), available: true, source: 'comparativo municipal' }).rows
+    const values = filterEntityPatternSource({ rows: normalizeCityTemporalRows(city, source?.rows ?? [], 'flow'), available: true, source: 'comparativo municipal' }, scope.entity ?? 'secovi-sp').rows
       .filter((row) => periodToQuarter(row.period) === scope.endQuarter)
       .map((row) => safeNumber(row.liquid_sales));
     return { city, liquidSales: nullableSum(values) };
@@ -398,6 +398,7 @@ export function buildPanoramaReportModel(
   cohorts: MarketCohortRow[] = [],
   options: { cubes?: MarketCube[]; provenance?: Partial<PanoramaProvenance>; citySalesSources?: CitySalesSource[]; cityTemporalSources?: CityTemporalSources[]; presentation?: PanoramaPresentationCredits } = {},
 ): PanoramaReportModel {
+  const entity = scope.entity ?? 'secovi-sp';
   const launches = buildLaunchModel(records, canonical(scope));
   const cube = options.cubes?.length
     ? mergeCubes(options.cubes, scope.endQuarter, scope.entity ?? 'secovi-sp')
@@ -409,15 +410,15 @@ export function buildPanoramaReportModel(
   const closingFacts = closingFactsOf(launchCube, granular);
   const cityComparisons = buildCityComparisons(scope, cube, provenance, options.citySalesSources ?? []);
   const temporal = {
-    sales: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales)),
+    sales: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales), entity),
     salesTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'salesTypology', 'flow', sources.salesTypology),
-    stock: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'stock', 'snapshot', sources.stock)),
+    stock: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'stock', 'snapshot', sources.stock), entity),
     stockTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'stockTypology', 'snapshot', sources.stockTypology),
-    ivv: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'ivv', 'snapshot', sources.ivv)),
+    ivv: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'ivv', 'snapshot', sources.ivv), entity),
     ivvTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'ivvTypology', 'snapshot', sources.ivvTypology),
-    ticket: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'ticket', 'snapshot', sources.ticket)),
+    ticket: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'ticket', 'snapshot', sources.ticket), entity),
     ticketTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'ticketTypology', 'snapshot', sources.ticketTypology),
-    meter: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'meter', 'snapshot', sources.meter)),
+    meter: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'meter', 'snapshot', sources.meter), entity),
     meterTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'meterTypology', 'snapshot', sources.meterTypology),
   };
   // Firewall de fontes: nas versões granulares nenhum contrato municipal fala pelo horizontal do Panorama Secovi.

@@ -18,7 +18,14 @@ export type EntityId = 'secovi-sp' | 'fiergs-rs';
  */
 export const SECOVI_HORIZONTAL_LABEL = 'Condomínio de Casas';
 
-export type HorizontalSubtype = 'condominio_casas' | 'loteamento' | 'outro' | 'indefinido';
+export type HorizontalSubtype =
+  | 'condominio_casas'
+  | 'condominio_chacaras'
+  | 'loteamento_aberto'
+  | 'loteamento_fechado'
+  | 'loteamento'
+  | 'outro'
+  | 'indefinido';
 
 export interface UniverseCandidate {
   segment: Segment | null;
@@ -148,6 +155,28 @@ export function classifySecoviTemporalRow(segment: Segment | null, group: unknow
   return 'unknown';
 }
 
+/** Produtos horizontais que aparecem nos slides 63–66 do estudo FIERGS 4T25. */
+const FIERGS_HORIZONTAL_PRODUCTS = new Map<string, HorizontalSubtype>([
+  ['loteamento aberto', 'loteamento_aberto'],
+  ['condominio de chacaras', 'condominio_chacaras'],
+  ['loteamento fechado', 'loteamento_fechado'],
+  ['condominio de casas/sobrados', 'condominio_casas'],
+]);
+
+export function classifyFiergsTemporalRow(segment: Segment | null, group: unknown): TemporalHorizontalDecision {
+  if (segment === 'Vertical') return 'keep';
+  if (segment !== 'Horizontal') return 'unknown';
+  const normalized = normalizeText(group);
+  if (FIERGS_HORIZONTAL_PRODUCTS.has(normalized) || V3_SOCIOECONOMIC.has(normalized)) return 'keep';
+  return 'unknown';
+}
+
+export function classifyEntityTemporalRow(entity: EntityId, segment: Segment | null, group: unknown): TemporalHorizontalDecision {
+  return entity === 'fiergs-rs'
+    ? classifyFiergsTemporalRow(segment, group)
+    : classifySecoviTemporalRow(segment, group);
+}
+
 /**
  * Rótulos novos precisam falhar de forma ruidosa: a taxonomia da API cresce sem aviso e foi
  * exatamente a classificação silenciosa por nome que produziu o erro de 100% medido em Jundiaí.
@@ -175,12 +204,32 @@ export const SECOVI_SP_V3_POLICY: EntityPolicy = {
 };
 
 /**
- * FIERGS ainda não tem regra de universo entregue. O ponto de extensão existe e é explícito: até a
- * regra chegar, a entidade não é selecionável e não herda silenciosamente a regra Secovi.
+ * O estudo FIERGS agrega os quatro produtos horizontais acima. A regra é deliberadamente
+ * fechada: rótulos novos ficam de fora até serem reconciliados com a fonte oficial.
  */
-export const ENTITY_POLICIES: Record<EntityId, EntityPolicy | null> = {
+export const FIERGS_RS_POLICY: EntityPolicy = {
+  id: 'fiergs-rs',
+  label: 'FIERGS-RS',
+  horizontalLabel: 'Mercado Residencial Horizontal',
+  classify(candidate) {
+    if (candidate.segment === 'Vertical') return { accepted: true, segment: 'Vertical', horizontalSubtype: null, reason: null };
+    if (candidate.segment !== 'Horizontal') return { accepted: false, segment: null, horizontalSubtype: null, reason: 'segmento_desconhecido' };
+    const labels = [candidate.rawSubtype, candidate.rawType, candidate.standard, ...(candidate.historicalPatterns ?? [])]
+      .map(normalizeText).filter((label) => label && !SEGMENT_ONLY.test(label));
+    for (const label of labels) {
+      const subtype = FIERGS_HORIZONTAL_PRODUCTS.get(label);
+      if (subtype) return { accepted: true, segment: 'Horizontal', horizontalSubtype: subtype, reason: null };
+    }
+    return { accepted: false, segment: 'Horizontal', horizontalSubtype: 'indefinido', reason: 'subtipo_horizontal_indefinido' };
+  },
+};
+
+/**
+ * Cada entidade tem uma política explícita e nunca herda silenciosamente a regra da outra.
+ */
+export const ENTITY_POLICIES: Record<EntityId, EntityPolicy> = {
   'secovi-sp': SECOVI_SP_POLICY,
-  'fiergs-rs': null,
+  'fiergs-rs': FIERGS_RS_POLICY,
 };
 
 export function entityPolicy(id: EntityId = 'secovi-sp', version: 'v2' | 'v3' | 'v4' = 'v2'): EntityPolicy {

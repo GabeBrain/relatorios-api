@@ -1,3 +1,12 @@
+### 2026-09-22 — FIERGS-RS: política horizontal e preset metropolitano — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — motor compartilhado Secovi/FIERGS.
+- **O quê:** foi criada a política de universo FIERGS-RS com os quatro produtos horizontais observados nos slides 63–66 do estudo 4T25 (`Loteamento Aberto`, `Condomínio de Chácaras`, `Loteamento Fechado` e `Condomínio de Casas/Sobrados`). O filtro temporal agora respeita a entidade, sem alterar a regra restritiva do Secovi-SP. Também foi criado o preset `Recorte FIERGS — RM Porto Alegre`, com as 11 cidades destacadas no mapa do estudo e motor V4.
+- **Por quê:** concluir primeiro a premissa de aquisição e o universo estatístico, antes de expor entidade, fluxo e formatação na interface.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{domain/entity-policy.ts,presets.ts,report/model.ts,__tests__/opus-domain-policy.test.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** `12880538203`.
+- **Impacto em Etapas/Pendências:** etapas 2 e 3 concluídas em código; o preset ainda não está selecionável na interface (etapa 4). A equivalência numérica contra o deck permanece para a etapa 11.
+
 ### 2026-09-22 — Nomes de produto orientados pela função — Codex
 - **Ambiente/funcionalidade:** shell, início e cabeçalhos dos geradores de mercado da Rebrain.
 - **O quê:** `Relatório Secovi` passou a se apresentar como `Base de Mercado — Excel`, mantendo `antigo Relatório Secovi` como apoio de transição; `Panorama Secovi/FIERGS` passou a `Panorama de Mercado`, mantendo Secovi/FIERGS na descrição. Rotas e nomes técnicos foram preservados para não quebrar links ou contratos existentes.
