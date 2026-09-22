@@ -1,6 +1,7 @@
 import type { PanoramaScope } from './types';
 
-export const FIERGS_RM_PORTO_ALEGRE_CITIES = [
+/** Recorte editorial do estudo FIERGS: entorno metropolitano, sem o município de Porto Alegre. */
+export const FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES = [
   'Alvorada',
   'Cachoeirinha',
   'Canoas',
@@ -9,7 +10,6 @@ export const FIERGS_RM_PORTO_ALEGRE_CITIES = [
   'Gravataí',
   'Guaíba',
   'Novo Hamburgo',
-  'Porto Alegre',
   'São Leopoldo',
   'Viamão',
 ] as const;
@@ -22,10 +22,10 @@ export interface PanoramaPreset {
 
 export const FIERGS_RM_PORTO_ALEGRE_PRESET: PanoramaPreset = {
   id: 'fiergs-rm-porto-alegre',
-  label: 'Recorte FIERGS — RM Porto Alegre',
+  label: 'Recorte FIERGS — RM Porto Alegre (sem Porto Alegre)',
   scope: {
     uf: 'RS',
-    cities: [...FIERGS_RM_PORTO_ALEGRE_CITIES],
+    cities: [...FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES],
     entity: 'fiergs-rs',
     engineVersion: 'v4',
   },

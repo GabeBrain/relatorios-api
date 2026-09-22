@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { FIERGS_RS_POLICY, SECOVI_SP_POLICY, classifyEntityTemporalRow, classifyHorizontalSubtype, classifySecoviTemporalRow, entityPolicy } from '../domain/entity-policy';
-import { FIERGS_RM_PORTO_ALEGRE_CITIES, FIERGS_RM_PORTO_ALEGRE_PRESET } from '../presets';
+import { FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES, FIERGS_RM_PORTO_ALEGRE_PRESET } from '../presets';
 import {
   UNCLASSIFIED,
   canonicalStandard,
@@ -96,16 +96,17 @@ describe('FIERGS-RS · política horizontal e preset', () => {
     expect(classifyEntityTemporalRow('secovi-sp', 'Horizontal', 'Loteamento Aberto')).toBe('exclude');
   });
 
-  it('fixa o recorte oficial nas 11 cidades destacadas no mapa do estudo', () => {
+  it('fixa o recorte editorial nas 10 cidades do entorno, sem Porto Alegre', () => {
     expect(FIERGS_RM_PORTO_ALEGRE_PRESET).toMatchObject({
       id: 'fiergs-rm-porto-alegre',
-      label: 'Recorte FIERGS — RM Porto Alegre',
+      label: 'Recorte FIERGS — RM Porto Alegre (sem Porto Alegre)',
       scope: { uf: 'RS', entity: 'fiergs-rs', engineVersion: 'v4' },
     });
-    expect(FIERGS_RM_PORTO_ALEGRE_CITIES).toHaveLength(11);
-    expect(new Set(FIERGS_RM_PORTO_ALEGRE_CITIES).size).toBe(11);
-    expect(FIERGS_RM_PORTO_ALEGRE_CITIES).toContain('Novo Hamburgo');
-    expect(FIERGS_RM_PORTO_ALEGRE_CITIES).not.toContain('Estância Velha');
+    expect(FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES).toHaveLength(10);
+    expect(new Set(FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES).size).toBe(10);
+    expect(FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES).toContain('Novo Hamburgo');
+    expect(FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES).not.toContain('Porto Alegre');
+    expect(FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES).not.toContain('Estância Velha');
   });
 });
 
