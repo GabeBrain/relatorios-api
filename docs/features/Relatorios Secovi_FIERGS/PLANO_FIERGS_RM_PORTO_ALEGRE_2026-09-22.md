@@ -18,7 +18,7 @@ Reproduzir o estudo oficial `Panorama_FIERGS_RM de Porto Alegre_4T25` como produ
 |---|---|---|---|
 | 4 | Seletor de entidade | Secovi livre; FIERGS aplica RS + 11 cidades e preserva escolha do período | Implementado |
 | 5 | Registro dos 75 slides | numeração contínua, título, família e classe estático/híbrido/dinâmico | Implementado |
-| 6 | Fundos e institucionais oficiais | ativos extraídos do deck, licenciados no bundle e usados pelo renderizador | Fonte baixada e padrões identificados; incorporação pendente |
+| 6 | Fundos e institucionais oficiais | ativos extraídos do deck, licenciados no bundle e usados pelo renderizador | 7 fundos estáticos extraídos e registrados; ligação ao renderizador pendente |
 | 7 | Lançamentos, vendas e oferta | slides 9–37 reproduzidos e reconciliados | Motor compartilhado cobre métricas-base; manifesto/layout FIERGS pendente |
 | 8 | MCMV, bairro/cidade e dormitórios | regra MCMV aprovada; bairro disponível no contrato; séries 1–4 dormitórios | Dormitórios cobertos; MCMV e bairro bloqueados por contrato/metodologia |
 | 9 | Horizontal completo | slides 63–66 com os quatro produtos | Política e agregações-base prontas; páginas FIERGS pendentes |
@@ -44,9 +44,8 @@ Reproduzir o estudo oficial `Panorama_FIERGS_RM de Porto Alegre_4T25` como produ
 
 ## Próxima fatia executável
 
-1. Extrair e versionar apenas os fundos/ativos institucionais necessários, evitando incorporar o PPTX integral ao bundle.
-2. Criar renderizador e manifesto FIERGS próprios, inicialmente para slides 1–37.
+1. Ligar os sete fundos oficiais já registrados ao renderizador FIERGS.
+2. Criar renderizador FIERGS próprio, inicialmente para slides 1–37.
 3. Produzir uma matriz de paridade numérica 4T25 para lançamentos, vendas e oferta.
 4. Obter decisão de negócio para MCMV e confirmar a dimensão bairro no endpoint.
 5. Estender o modelo geográfico com padrão, estoque e preço por m² e implementar os slides 67–69.
-
