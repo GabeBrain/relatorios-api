@@ -58,10 +58,18 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Rebrain',
     icon: <BarChart2 className="h-4 w-4" />,
     items: [
-      { path: '/rebrain/secovi', label: 'Relatório Secovi', icon: <Building2 className="h-4 w-4" /> },
-      { path: '/rebrain/sinduscon-curitiba', label: 'Sinduscon - Curitiba', icon: <Building2 className="h-4 w-4" /> },
-      { path: '/rebrain/aelo', label: 'Relatório AELO', icon: <Building2 className="h-4 w-4" /> },
-      { path: '/rebrain/panorama-secovi-fiergs', label: 'Relatório Secovi/FIERGS', icon: <BarChart2 className="h-4 w-4" /> },
+      {
+        type: 'folder',
+        id: 'relatorios-automatizados',
+        label: 'Relatórios Automatizados',
+        icon: <BarChart2 className="h-4 w-4" />,
+        children: [
+          { path: '/rebrain/secovi', label: 'Secovi', icon: <Building2 className="h-4 w-4" /> },
+          { path: '/rebrain/sinduscon-curitiba', label: 'Sinduscon — Curitiba', icon: <Building2 className="h-4 w-4" /> },
+          { path: '/rebrain/aelo', label: 'AELO', icon: <Building2 className="h-4 w-4" /> },
+          { path: '/rebrain/panorama-secovi-fiergs', label: 'Panorama Secovi/FIERGS', icon: <BarChart2 className="h-4 w-4" /> },
+        ],
+      },
       { path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList className="h-4 w-4" /> },
       { path: '/corretor', label: 'Assistente de Projetos', icon: <ClipboardList className="h-4 w-4" /> },
       { path: '/atualizador-vgv', label: 'Atualizador VGV', icon: <TrendingUp className="h-4 w-4" /> },
@@ -315,7 +323,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             if (group.id === 'rebrain') {
               return (
                 <div key={group.id} className="mt-2 space-y-0.5">
-                  {group.items.map((entry) => (isFolder(entry) ? null : renderNavItem(entry)))}
+                  {group.items.map(renderNavEntry)}
                 </div>
               );
             }

@@ -1,3 +1,12 @@
+### 2026-09-22 — Relatórios automatizados organizados no menu — Codex
+- **Ambiente/funcionalidade:** shell da Rebrain — menu lateral e busca global.
+- **O quê:** Secovi, Sinduscon Curitiba, AELO e o relatório multicidade existente foram agrupados na pasta expansível `Relatórios Automatizados`; os rótulos internos foram simplificados e o produto anterior passou a aparecer como `Panorama Secovi/FIERGS`, distinguindo-o do novo relatório `FIERGS — RM de Porto Alegre` que ainda será implementado. Validação do Fechamento, Assistente de Projetos e Atualizador VGV permanecem como ferramentas independentes.
+- **Por quê:** separar geradores de relatórios das ferramentas operacionais e eliminar a ambiguidade entre o Panorama Secovi/FIERGS existente e a nova entrega específica para a região metropolitana de Porto Alegre.
+- **Arquivos:** `src/components/layout/{AppLayout.tsx,CommandPalette.tsx}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** primeira etapa de organização concluída; falta criar a rota funcional do novo FIERGS antes de adicioná-lo ao menu e então validar cidades, contrato da API interna v2 e contagem de empreendimentos.
+
 ### 2026-09-20 — Sinduscon Curitiba: arrastar e soltar em todas as entradas — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — uploads das etapas independentes.
 - **O quê:** os campos de base acumulada, mês tratado, tabulação e PDF final agora aceitam arquivos por arrastar e soltar, além do clique; durante o arraste a área recebe destaque e orienta a soltar, e formatos incompatíveis exibem mensagem textual.

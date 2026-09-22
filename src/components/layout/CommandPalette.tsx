@@ -27,10 +27,10 @@ interface Destination {
 
 const PAGES: Destination[] = [
   { label: 'Início', path: '/inicio', icon: <Home className="h-4 w-4" /> },
-  { label: 'Rebrain — Secovi', path: '/rebrain/secovi', icon: <Building2 className="h-4 w-4" />, keywords: 'barretos excel mercado relatorio' },
-  { label: 'Rebrain — Sinduscon - Curitiba', path: '/rebrain/sinduscon-curitiba', icon: <Building2 className="h-4 w-4" />, keywords: 'alvaras cvco excel curitiba construcao' },
-  { label: 'Rebrain — Relatório AELO', path: '/rebrain/aelo', icon: <Building2 className="h-4 w-4" />, keywords: 'aelo excel mercado relatorio' },
-  { label: 'Rebrain — Relatório Secovi/FIERGS', path: '/rebrain/panorama-secovi-fiergs', icon: <BarChart2 className="h-4 w-4" />, keywords: 'panorama fiergs piracicaba lancamentos pdf comparacao' },
+  { label: 'Relatórios Automatizados — Secovi', path: '/rebrain/secovi', icon: <Building2 className="h-4 w-4" />, keywords: 'rebrain barretos excel mercado relatorio' },
+  { label: 'Relatórios Automatizados — Sinduscon Curitiba', path: '/rebrain/sinduscon-curitiba', icon: <Building2 className="h-4 w-4" />, keywords: 'rebrain alvaras cvco excel curitiba construcao' },
+  { label: 'Relatórios Automatizados — AELO', path: '/rebrain/aelo', icon: <Building2 className="h-4 w-4" />, keywords: 'rebrain aelo excel mercado relatorio' },
+  { label: 'Relatórios Automatizados — Panorama Secovi/FIERGS', path: '/rebrain/panorama-secovi-fiergs', icon: <BarChart2 className="h-4 w-4" />, keywords: 'rebrain panorama fiergs piracicaba jundiai lancamentos pdf comparacao' },
   { label: 'Rebrain — Assistente de Projetos', path: '/auditoria', icon: <ClipboardList className="h-4 w-4" />, keywords: 'assistente de projetos corretor vocacional slides auditoria' },
   { label: 'Rebrain — Empresas e Empregados', path: '/rebrain/empresas-empregados', icon: <Building2 className="h-4 w-4" />, keywords: 'rais empregados emprego formal empresas cnpj municipio cbo' },
   { label: 'Rebrain — Atualizador VGV', path: '/atualizador-vgv', icon: <TrendingUp className="h-4 w-4" />, keywords: 'vgv empreendimento excel incc ipca igp-di mapa' },
