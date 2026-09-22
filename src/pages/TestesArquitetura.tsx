@@ -1041,8 +1041,8 @@ export default function TestesArquitetura() {
       )}
 
       <div className="border-b border-border px-6 py-4 bg-card">
-        <h1 className="text-lg font-semibold">Relatórios Secovi</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Gerador de relatório Geobrain — coleta paralela de empreendimentos por cidade.</p>
+        <h1 className="text-lg font-semibold">Base de Mercado — Excel</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">Antigo Relatório Secovi · coleta paralela de empreendimentos por cidade.</p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">

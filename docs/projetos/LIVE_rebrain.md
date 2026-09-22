@@ -1,3 +1,12 @@
+### 2026-09-22 — Nomes de produto orientados pela função — Codex
+- **Ambiente/funcionalidade:** shell, início e cabeçalhos dos geradores de mercado da Rebrain.
+- **O quê:** `Relatório Secovi` passou a se apresentar como `Base de Mercado — Excel`, mantendo `antigo Relatório Secovi` como apoio de transição; `Panorama Secovi/FIERGS` passou a `Panorama de Mercado`, mantendo Secovi/FIERGS na descrição. Rotas e nomes técnicos foram preservados para não quebrar links ou contratos existentes.
+- **Por quê:** diferenciar a extração operacional em Excel do entregável editorial e preparar o Panorama para receber Secovi-SP e FIERGS-RS como entidades, sem criar três produtos com nomes quase idênticos.
+- **Arquivos:** `src/components/layout/{AppLayout.tsx,CommandPalette.tsx}`, `src/pages/{Home.tsx,TestesArquitetura.tsx}`, `src/features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** nomenclatura de transição aplicada; continuam pendentes a política de universo FIERGS, o seletor de entidade e o recorte predefinido da RM de Porto Alegre.
+
 ### 2026-09-22 — Relatórios automatizados organizados no menu — Codex
 - **Ambiente/funcionalidade:** shell da Rebrain — menu lateral e busca global.
 - **O quê:** Secovi, Sinduscon Curitiba, AELO e o relatório multicidade existente foram agrupados na pasta expansível `Relatórios Automatizados`; os rótulos internos foram simplificados e o produto anterior passou a aparecer como `Panorama Secovi/FIERGS`, distinguindo-o do novo relatório `FIERGS — RM de Porto Alegre` que ainda será implementado. Validação do Fechamento, Assistente de Projetos e Atualizador VGV permanecem como ferramentas independentes.

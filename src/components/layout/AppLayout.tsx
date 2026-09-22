@@ -64,10 +64,10 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Relatórios Automatizados',
         icon: <BarChart2 className="h-4 w-4" />,
         children: [
-          { path: '/rebrain/secovi', label: 'Secovi', icon: <Building2 className="h-4 w-4" /> },
+          { path: '/rebrain/secovi', label: 'Base de Mercado — Excel', icon: <Building2 className="h-4 w-4" />, standbyLabel: '(antigo Relatório Secovi)' },
           { path: '/rebrain/sinduscon-curitiba', label: 'Sinduscon — Curitiba', icon: <Building2 className="h-4 w-4" /> },
           { path: '/rebrain/aelo', label: 'AELO', icon: <Building2 className="h-4 w-4" /> },
-          { path: '/rebrain/panorama-secovi-fiergs', label: 'Panorama Secovi/FIERGS', icon: <BarChart2 className="h-4 w-4" /> },
+          { path: '/rebrain/panorama-secovi-fiergs', label: 'Panorama de Mercado', icon: <BarChart2 className="h-4 w-4" />, standbyLabel: '(Secovi/FIERGS)' },
         ],
       },
       { path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList className="h-4 w-4" /> },
@@ -210,10 +210,10 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         <span className="shrink-0">{item.icon}</span>
         {!collapsed && (
-          <span className="truncate">
-            {item.label}
+          <span className="min-w-0 flex-1">
+            <span className="block truncate">{item.label}</span>
             {item.standbyLabel && (
-              <span className="ml-1.5 text-[10px] text-muted-foreground font-normal">
+              <span className="mt-0.5 block truncate text-[10px] leading-none text-muted-foreground font-normal">
                 {item.standbyLabel}
               </span>
             )}
