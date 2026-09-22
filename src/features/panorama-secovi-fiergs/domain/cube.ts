@@ -31,6 +31,7 @@ export interface CubeProject {
   city: string;
   uf: string;
   name: string;
+  neighborhood?: string | null;
   segment: Segment;
   horizontalSubtype: HorizontalSubtype | null;
   standard: StandardLabel;
@@ -296,6 +297,7 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
       city: options.city,
       uf: options.uf,
       name: String(firstText(building, ['name', 'building_name']) ?? 'Empreendimento'),
+      neighborhood: String(firstText(building, ['neighborhood', 'bairro']) ?? '').trim() || null,
       segment: decision.segment,
       horizontalSubtype: decision.horizontalSubtype,
       standard,

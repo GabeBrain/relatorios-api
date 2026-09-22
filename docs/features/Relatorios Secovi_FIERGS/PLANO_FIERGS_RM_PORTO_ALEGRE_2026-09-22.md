@@ -18,11 +18,11 @@ Reproduzir o estudo oficial `Panorama_FIERGS_RM de Porto Alegre_4T25` como produ
 |---|---|---|---|
 | 4 | Seletor de entidade | Secovi livre; FIERGS aplica RS + 11 cidades e preserva escolha do período | Implementado |
 | 5 | Registro dos 75 slides | numeração contínua, título, família e classe estático/híbrido/dinâmico | Implementado |
-| 6 | Fundos e institucionais oficiais | ativos extraídos do deck, licenciados no bundle e usados pelo renderizador | 7 fundos estáticos extraídos e registrados; ligação ao renderizador pendente |
-| 7 | Lançamentos, vendas e oferta | slides 9–37 reproduzidos e reconciliados | Motor compartilhado cobre métricas-base; manifesto/layout FIERGS pendente |
-| 8 | MCMV, bairro/cidade e dormitórios | regra MCMV aprovada; bairro disponível no contrato; séries 1–4 dormitórios | Dormitórios cobertos; MCMV e bairro bloqueados por contrato/metodologia |
-| 9 | Horizontal completo | slides 63–66 com os quatro produtos | Política e agregações-base prontas; páginas FIERGS pendentes |
-| 10 | Três mapas | padrão, estoque e R$/m² com legenda e marcadores | Coordenadas existem; atributos/visuais específicos pendentes |
+| 6 | Fundos e institucionais oficiais | ativos extraídos do deck, licenciados no bundle e usados pelo renderizador | 7 fundos estáticos ligados ao fluxo FIERGS; páginas de dados usam superfície neutra, sem marca Secovi |
+| 7 | Lançamentos, vendas e oferta | slides 9–37 reproduzidos e reconciliados | Métricas-base e apresentação sem marca Secovi prontas; ordem/layout fiel de 75 slides ainda pendente |
+| 8 | MCMV, bairro/cidade e dormitórios | regra MCMV aprovada; bairro disponível no contrato; séries 1–4 dormitórios | Dormitórios cobertos; bairro confirmado e preservado no cubo; MCMV segue sem regra autoritativa |
+| 9 | Horizontal completo | slides 63–66 com os quatro produtos | Quatro páginas funcionais: oferta por produto, coorte, preço por produto e faixa min/média/máx |
+| 10 | Três mapas | padrão, estoque e R$/m² com legenda e marcadores | Três modos implementados com padrão, tamanho por estoque e cor por R$/m²; calibração visual pendente |
 | 11 | Paridade 4T25 | tabela de esperado × obtido com tolerância por indicador | Deck e evidências locais disponíveis; rodada autenticada final pendente |
 | 12 | Paridade visual e exportação | 75 slides revisados; PDF/PPT sem divergência estrutural | Suíte atual de exportação Secovi aprovada; FIERGS pendente |
 
@@ -38,14 +38,14 @@ Reproduzir o estudo oficial `Panorama_FIERGS_RM de Porto Alegre_4T25` como produ
 ## Limites que não devem ser atravessados por inferência
 
 - O deck não define uma fórmula auditável de MCMV. Não considerar `Econômico` como sinônimo automático de MCMV.
-- O contrato granular inspecionado não comprovou bairro como dimensão confiável para todos os empreendimentos.
+- O contrato granular possui `neighborhood`; sua cobertura e a regra editorial de seleção dos bairros ainda precisam ser medidas no teste 4T25.
 - O motor atual possui um mapa vertical simples; isso não equivale aos mapas por padrão, estoque e R$/m² do estudo.
 - O manifesto Secovi tem 58 referências editoriais e não deve ser apresentado como se fosse o deck FIERGS de 75 slides.
 
 ## Próxima fatia executável
 
-1. Ligar os sete fundos oficiais já registrados ao renderizador FIERGS.
-2. Criar renderizador FIERGS próprio, inicialmente para slides 1–37.
-3. Produzir uma matriz de paridade numérica 4T25 para lançamentos, vendas e oferta.
-4. Obter decisão de negócio para MCMV e confirmar a dimensão bairro no endpoint.
-5. Estender o modelo geográfico com padrão, estoque e preço por m² e implementar os slides 67–69.
+1. Produzir uma matriz de paridade numérica 4T25 para lançamentos, vendas e oferta.
+2. Medir cobertura de `neighborhood` e reproduzir o critério dos bairros de maior volume.
+3. Obter decisão de negócio para MCMV; não inferir por padrão.
+4. Calibrar visualmente horizontal e mapas contra os slides 63–69.
+5. Completar a ordem/layout fiel do manifesto FIERGS até chegar aos 75 slides oficiais.

@@ -3,7 +3,7 @@ import { buildMapTilePlan, type GeographicPoint } from '../lib/map-tiles';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
 export type CityComparisonKind = 'sales' | 'market' | 'availability';
-export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; }
+export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'horizontal-offer-products' | 'horizontal-price-range'; mapMode?: 'standard' | 'stock' | 'price'; }
 export interface PanoramaSection { id: string; label: string; start: number; end: number; }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -67,8 +67,9 @@ export function createPanoramaReportManifest(options: boolean | { includeCityCom
   return output.map((page, index) => ({ ...page, page: index + 1 }));
 }
 
-export function createPanoramaSections(manifest: ReportPageDefinition[]): PanoramaSection[] {
-  return Object.entries(SECTION_LABELS).flatMap(([id, label]) => {
+export function createPanoramaSections(manifest: ReportPageDefinition[], entity: 'secovi-sp' | 'fiergs-rs' = 'secovi-sp'): PanoramaSection[] {
+  const labels = entity === 'fiergs-rs' ? { ...SECTION_LABELS, about: 'Sobre o estudo FIERGS' } : SECTION_LABELS;
+  return Object.entries(labels).flatMap(([id, label]) => {
     const entries = manifest.filter((page) => page.sectionId === id);
     return entries.length ? [{ id, label, start: entries[0].page, end: entries.at(-1)!.page }] : [];
   });
@@ -82,6 +83,7 @@ export const PANORAMA_SECTIONS = createPanoramaSections(PANORAMA_REPORT_MANIFEST
 /* -------------------------------------------------------------------------- */
 
 export interface ManifestSubject {
+  scope?: { entity?: 'secovi-sp' | 'fiergs-rs' };
   provenance: { engineVersion?: 'v2' | 'v3' | 'v4' };
   cube: { projects: { segment: string; finalUnits: number | null }[] };
   locations: GeographicPoint[];
@@ -109,5 +111,20 @@ export function panoramaManifestOptions(report: ManifestSubject, mapboxAccessTok
 
 /** Manifesto efetivo de um relatório — o único caminho que os consumidores devem usar. */
 export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken = ''): ReportPageDefinition[] {
-  return createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
+  const manifest = createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
+  if (report.scope?.entity !== 'fiergs-rs') return manifest;
+  const horizontalStart = manifest.findIndex((page) => page.referenceSlide === 48);
+  if (horizontalStart < 0) return manifest;
+  manifest.splice(horizontalStart, 0, { page: 0, referenceSlide: 0, sectionId: 'horizontal', title: 'Oferta lançada e final por tipo', intention: 'Produtos horizontais FIERGS', visualFamily: 'market-table', contractKeys: ['cube.horizontalSubtype'], methodologyStatus: 'reconciled', fiergsSlide: 'horizontal-offer-products' });
+  const priceIndex = manifest.findIndex((page) => page.referenceSlide === 49) + 1;
+  manifest.splice(priceIndex, 0, { page: 0, referenceSlide: 0, sectionId: 'horizontal', title: 'Mínimo, média e máximo por tipo', intention: 'Faixa de preços horizontal FIERGS', visualFamily: 'price', contractKeys: ['cube.averagePricePerMeter'], methodologyStatus: 'reconciled', fiergsSlide: 'horizontal-price-range' });
+  const mapIndex = manifest.findIndex((page) => page.referenceSlide === 56);
+  if (mapIndex >= 0) {
+    manifest[mapIndex] = { ...manifest[mapIndex], title: 'Mapa de localização por padrão', mapMode: 'standard' };
+    manifest.splice(mapIndex + 1, 0,
+      { page: 0, referenceSlide: 0, sectionId: 'location', title: 'Mapa de localização por estoque', intention: 'Mapa por oferta final', visualFamily: 'map', contractKeys: ['locations.finalUnits'], methodologyStatus: 'reconciled', mapMode: 'stock' },
+      { page: 0, referenceSlide: 0, sectionId: 'location', title: 'Mapa de localização por R$/m²', intention: 'Mapa por preço privativo', visualFamily: 'map', contractKeys: ['locations.averagePricePerMeter'], methodologyStatus: 'reconciled', mapMode: 'price' },
+    );
+  }
+  return manifest.map((page, index) => ({ ...page, page: index + 1 }));
 }

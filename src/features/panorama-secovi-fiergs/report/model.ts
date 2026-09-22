@@ -467,7 +467,7 @@ export function buildPanoramaReportModel(
     // O mapa passa a usar o cubo já filtrado pela política de universo quando ele existe.
     locations: (cube.projects.length
       ? cube.projects.filter((project) => project.latitude !== null && project.longitude !== null)
-        .map((project) => ({ name: project.name, segment: project.segment, latitude: project.latitude!, longitude: project.longitude! }))
+        .map((project) => ({ name: project.name, segment: project.segment, city: project.city, neighborhood: project.neighborhood, latitude: project.latitude!, longitude: project.longitude!, standard: project.standard, finalUnits: project.finalUnits, averagePricePerMeter: project.averagePricePerMeter }))
       : records.filter((row) => row.latitude != null && row.longitude != null)
         .map((row) => ({ name: row.name ?? 'Empreendimento', segment: row.segment, latitude: row.latitude!, longitude: row.longitude! }))),
     source: 'GeoBrain API',

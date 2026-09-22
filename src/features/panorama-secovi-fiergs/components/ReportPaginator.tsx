@@ -5,18 +5,19 @@ import { Button } from '@/components/ui/button';
 import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
 import { conditionalFormat } from '../domain/conditional-format';
-import { SECOVI_HORIZONTAL_LABEL } from '../domain/entity-policy';
+import { horizontalLabelForEntity } from '../domain/entity-policy';
 import { createPanoramaSections, panoramaManifestFor, type ReportPageDefinition } from '../report/manifest';
 
 /** Token do fundo cartográfico: define, junto das coordenadas, se a lâmina de mapa existe (JG-39). */
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
 import { panoramaExportIsRunning, usePanoramaExportStore } from '../export-store';
-import { AreaIvvSlide, CohortMatrixSlide, CohortTableSlide, LocationSlide, MarketSummarySlide, MaturitySlide, NarrativeSlide, OfferChartSlide, OfferTableSlide, PriceChartSlide, PriceTableSlide, VgvSlide } from './MarketSlides';
+import { AreaIvvSlide, CohortMatrixSlide, CohortTableSlide, FiergsHorizontalOfferSlide, FiergsHorizontalPriceRangeSlide, LocationSlide, MarketSummarySlide, MaturitySlide, NarrativeSlide, OfferChartSlide, OfferTableSlide, PriceChartSlide, PriceTableSlide, VgvSlide } from './MarketSlides';
 import coverBackground from '../assets/official_v2/backgrounds/cover-report.png';
 import contentBackground from '../assets/official_v2/backgrounds/content.png';
 import dividerBackground from '../assets/official_v2/backgrounds/divider.png';
 import darkTeamBackground from '../assets/official_v2/backgrounds/dark-team.png';
 import closingBackground from '../assets/official_v2/backgrounds/closing-report.png';
+import { FIERGS_INSTITUTIONAL_SLIDES } from '../assets/fiergs';
 import '../print/panorama-print.css';
 
 const officialV2Assets = import.meta.glob('../assets/official_v2/*.png', { eager: true, import: 'default' }) as Record<string, string>;
@@ -36,9 +37,11 @@ const n = (v: number) => v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })
 const decimal = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const pct = (v: number | null) => v === null ? '—' : `${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 const year = (q: string) => q.slice(2);
-function Sheet({ def, children }: { def: ReportPageDefinition; report: PanoramaReportModel; children: React.ReactNode }) {
-  const style = { backgroundImage: `url(${v2Background(def.referenceSlide)})` } as CSSProperties;
-  return <section className="panorama-report-page panorama-official-page panorama-v2-page" style={style} aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div></section>;
+function Sheet({ def, report, children }: { def: ReportPageDefinition; report: PanoramaReportModel; children: React.ReactNode }) {
+  const fiergs = report.scope.entity === 'fiergs-rs';
+  const background = fiergs ? fiergsBackground(def.referenceSlide) : v2Background(def.referenceSlide);
+  const style = { backgroundImage: background ? `url(${background})` : 'none' } as CSSProperties;
+  return <section className={`panorama-report-page panorama-official-page panorama-v2-page ${fiergs ? 'panorama-fiergs-page' : ''}`} style={style} aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div></section>;
 }
 class ReportPageBoundary extends Component<{ page: number; fallback: ReactNode; children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -48,6 +51,10 @@ class ReportPageBoundary extends Component<{ page: number; fallback: ReactNode; 
 }
 function Corporate({ page, report }: { page: number; report: PanoramaReportModel }) {
   const city = `${scopeCityLabel(report.scope)} - ${report.scope.uf}`;
+  if (report.scope.entity === 'fiergs-rs') {
+    if ([3, 7].includes(page)) return <div aria-hidden="true"/>;
+    if (page === 8) return <div className="panorama-corporate"><h2>Sobre o estudo FIERGS</h2><p>Panorama do mercado imobiliário residencial da Região Metropolitana de Porto Alegre.</p><p>O universo consolida as cidades monitoradas e separa o mercado vertical dos quatro produtos residenciais horizontais definidos na metodologia.</p></div>;
+  }
   if (page === 3) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><h3>Nossa visão</h3><p>Ser reconhecido pela sociedade como a entidade mais importante na realização do maior sonho do brasileiro: a casa própria.</p><h3>Nossa missão</h3><p>Desenvolver, representar, promover e defender a atividade imobiliária em seus segmentos, dentro de padrões reconhecidamente éticos e comprometidos com os anseios da coletividade.</p><h3>Nossos valores</h3><ul>{['Presteza','Confiabilidade','Ética','Transparência','Profissionalismo','Eficácia','Inovação','Espírito de equipe'].map((x) => <li key={x}>✓ {x}</li>)}</ul></div>;
   if (page === 7) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><p>O Secovi-SP faz história desde 1946 e cumpre seu compromisso com o Estado de São Paulo por meio do desenvolvimento do setor urbano ao lado de parceiros públicos, corporativos e da grande mídia.</p><p>Seu trabalho representa empresas, viabiliza negócios, incentiva inovação e contribui para a oferta de habitação e o desenvolvimento das cidades.</p><p>O Sindicato mantém diálogo permanente com autoridades e associados, criando propostas e serviços que favorecem a urbanização, a geração de empregos e a segurança nas relações imobiliárias.</p></div>;
   if (page === 8) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><h3>Política da Qualidade:</h3><p>Fornecer aos seus associados e categorias representadas, com máxima presteza, confiabilidade e alto padrão de qualidade, informações e subsídios pertinentes ao exercício de suas atividades.</p><p>Defender ativamente os interesses dos associados dentro de padrões éticos e segundo os interesses coletivos; valorizar o crescimento gerencial e profissional da entidade; promover o espírito de equipe e a eficácia do sistema da qualidade.</p></div>;
@@ -56,10 +63,10 @@ function Corporate({ page, report }: { page: number; report: PanoramaReportModel
 function V2Divider({ title }: { title: string }) { return <div className="panorama-v2-divider"><h2>{title}</h2></div>; }
 function CityCover({ report }: { report: PanoramaReportModel }) {
   const cities = report.scope.cities.filter(Boolean);
-  return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DE</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
+  return <div className={`panorama-v2-city-cover ${report.scope.entity === 'fiergs-rs' ? 'is-fiergs' : ''}`}><div className="panorama-v2-city-cover-copy"><p>{report.scope.entity === 'fiergs-rs' ? 'PANORAMA FIERGS · RM PORTO ALEGRE' : 'PANORAMA IMOBILIÁRIO DE'}</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
 function V2Summary({ report }: { report: PanoramaReportModel }) {
-  const sections = createPanoramaSections(panoramaManifestFor(report, MAPBOX_TOKEN));
+  const sections = createPanoramaSections(panoramaManifestFor(report, MAPBOX_TOKEN), report.scope.entity);
   return <div className="panorama-v2-summary"><h2>Sumário</h2><ol>{sections.map((section) => <li key={section.id}><span>{section.label}</span><b>{section.start}–{section.end}</b></li>)}</ol></div>;
 }
 type PresentationPerson = NonNullable<PanoramaReportModel['presentation']['consultant']>;
@@ -246,6 +253,11 @@ export function annualizeSeries(series: LaunchSeries[]) {
   }
   return [...annual.values()].sort((a, b) => a.year - b.year);
 }
+
+function fiergsBackground(referenceSlide: number): string | undefined {
+  const mapping: Record<number, number> = { 2: 1, 3: 3, 7: 4, 59: 72, 60: 73, 61: 74, 62: 75 };
+  return FIERGS_INSTITUTIONAL_SLIDES[mapping[referenceSlide]];
+}
 function ComparisonTable({ report, sales = false, annual = false }: { report: PanoramaReportModel; sales?: boolean; annual?: boolean }) {
   const temporalBlock = sales ? report.sales.units : null;
   if (temporalBlock?.dataStatus === 'unavailable') {
@@ -286,7 +298,7 @@ function ComparisonTable({ report, sales = false, annual = false }: { report: Pa
           {/* JG-05: o rótulo do segmento é a mesma função nas três linhas e por isso recebe o mesmo
               tratamento. O cinza só aparecia no Horizontal e no Total porque o `rowspan` do grupo
               deslocava o `td:first-child` — era artefato de marcação, não decisão editorial. */}
-          <td className="panorama-segment-cell">{type === 'vertical' ? 'Residencial Vertical' : type === 'horizontal' ? SECOVI_HORIZONTAL_LABEL : 'Total Mercado'}</td>
+          <td className="panorama-segment-cell">{type === 'vertical' ? 'Residencial Vertical' : type === 'horizontal' ? horizontalLabelForEntity(report.scope.entity) : 'Total Mercado'}</td>
           {values.map((value, index) => <td key={index}>{suppressed ? '—' : row.money ? decimal(value) : n(value)}</td>)}
           {comparisonPairs.map(([from, to]) => {
             if (!from || !to) return null;
@@ -348,6 +360,8 @@ function CityComparisonPage({ kind, report }: { kind: NonNullable<ReportPageDefi
 }
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
+  if (def.fiergsSlide === 'horizontal-offer-products') return <FiergsHorizontalOfferSlide report={report}/>;
+  if (def.fiergsSlide === 'horizontal-price-range') return <FiergsHorizontalPriceRangeSlide report={report}/>;
   if (def.cityComparison) return <CityComparisonPage kind={def.cityComparison} report={report}/>;
   if (p === 2) return <CityCover report={report}/>;
   if (p === 5) return <V2Summary report={report}/>;
@@ -358,7 +372,7 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   // A V2 não usa lâminas legadas com textos/cidades congelados nem o rodapé da V1.
   if ([3,7,8,10].includes(p)) return <Corporate page={p} report={report}/>;
   if (p === 53 || p === 54) return <NarrativeSlide report={report} continuation={p === 54}/>;
-  if (p === 56) return <LocationSlide report={report}/>;
+  if (p === 56 || def.mapMode) return <LocationSlide report={report} mode={def.mapMode}/>;
   return dataPage(p, report) ?? <div className="panorama-corporate"><h2>{title}</h2><p>Conteúdo editorial do relatório.</p></div>;
 }
 function SafeSheet({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
@@ -393,7 +407,7 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
   const pages = useMemo(() => panoramaManifestFor(report, MAPBOX_TOKEN), [report]);
-  const sections = useMemo(() => createPanoramaSections(pages), [pages]);
+  const sections = useMemo(() => createPanoramaSections(pages, report.scope.entity), [pages, report.scope.entity]);
   useEffect(() => setCurrent((value) => Math.min(value, pages.length - 1)), [pages.length]);
   const page = pages[Math.min(current, pages.length - 1)];
   const jump = (number: number) => {

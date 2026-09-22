@@ -237,3 +237,7 @@ export function entityPolicy(id: EntityId = 'secovi-sp', version: 'v2' | 'v3' | 
   if (!policy) throw new Error(`Política de universo não definida para a entidade ${id}.`);
   return policy;
 }
+
+export function horizontalLabelForEntity(id: EntityId = 'secovi-sp'): string {
+  return id === 'fiergs-rs' ? FIERGS_RS_POLICY.horizontalLabel! : SECOVI_HORIZONTAL_LABEL;
+}

@@ -1,3 +1,12 @@
+### 2026-09-22 — FIERGS-RS: apresentação por entidade, horizontal e mapas — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — renderização e exportação do recorte FIERGS.
+- **O quê:** o renderizador passou a separar identidade por entidade: o FIERGS não recebe mais fundos, textos institucionais ou rótulos horizontais do Secovi. A capa acomoda as 11 cidades. O bloco horizontal ganhou oferta por produto e faixa min/média/máxima, preservando coorte e preço médio por produto. Foram adicionados mapas por padrão, estoque e R$/m². O campo `neighborhood` agora é preservado no cubo granular.
+- **Por quê:** remover falsos positivos editoriais antes da paridade 4T25 e garantir que diferenças do próximo PDF sejam numéricas/metodológicas, não contaminação de template.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,components/MarketSlides.tsx,domain/{entity-policy.ts,cube.ts,aggregations.ts},report/{manifest.ts,model.ts},types.ts,print/panorama-print.css,__tests__/*}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** `12880538203`.
+- **Impacto em Etapas/Pendências:** etapas 6, 9 e 10 avançadas funcionalmente; bairro desbloqueado no contrato. Permanecem MCMV, critério editorial de bairros, paridade 4T25 e fidelidade integral dos 75 slides.
+
 ### 2026-09-22 — FIERGS-RS: seletor e inventário oficial de 75 slides — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — preparação do produto `Recorte FIERGS — RM Porto Alegre`.
 - **O quê:** o fluxo ganhou seletor de entidade; FIERGS aplica automaticamente RS e as 11 cidades do preset, mantendo período editável. O deck oficial de 75 slides foi baixado do Drive e catalogado em um manifesto tipado por família e grau de automação. Os sete fundos institucionais integralmente estáticos foram extraídos e registrados como ativos; o PPTX bruto e as imagens com dados não entraram no bundle. Um plano com portões, estado das etapas 4–12 e limites metodológicos foi registrado.

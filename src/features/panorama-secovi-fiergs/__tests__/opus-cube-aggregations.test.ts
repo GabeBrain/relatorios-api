@@ -57,6 +57,23 @@ describe('OP-4 · cubo granular', () => {
     expect(project.typologies.map((row) => row.typology)).toEqual(['2 Dormitórios', '3 Dormitórios']);
   });
 
+  it('preserva bairro como dimensão observada do contrato granular', () => {
+    const cube = cubeOf([building({ neighborhood: 'Centro Histórico' })]);
+    expect(cube.projects[0].neighborhood).toBe('Centro Histórico');
+  });
+
+  it('abre preços horizontais FIERGS pelos quatro produtos, não por padrão socioeconômico', () => {
+    const fiergs = cubeOf([
+      building({ building_id: 'H1', building_type: 'Horizontal', standard: 'Loteamento Aberto' }),
+      building({ building_id: 'H2', building_type: 'Horizontal', standard: 'Condomínio de Chácaras' }),
+      building({ building_id: 'H3', building_type: 'Horizontal', standard: 'Loteamento Fechado' }),
+      building({ building_id: 'H4', building_type: 'Horizontal', standard: 'Condomínio de Casas/Sobrados' }),
+    ], { city: 'Porto Alegre', uf: 'RS', entity: 'fiergs-rs' });
+    expect(horizontalPricesByStandard(fiergs).filter((row) => row.kind === 'row').map((row) => row.label)).toEqual([
+      'Loteamento Aberto', 'Condomínio de Chácaras', 'Loteamento Fechado', 'Condomínio de Casas/Sobrados',
+    ]);
+  });
+
   it('lê number_bedroom e os nomes oficiais do histórico sem criar Não classificado', () => {
     const cube = cubeOf([building({
       typologies_history: [

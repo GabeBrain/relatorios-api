@@ -99,6 +99,13 @@
 .panorama-v2-city-cover-copy p { font-size:2.55cqw; }
 .panorama-v2-city-cover-copy h1 { font-size:4.05cqw; }
 .panorama-v2-city-cover-copy strong { margin-top:4.1cqw; font-size:2.7cqw; }
+.panorama-fiergs-page { background-color:#fff; }
+.panorama-fiergs-page .panorama-v2-city-cover-copy { width:72%; padding-top:5.5cqw; }
+.panorama-fiergs-page .panorama-v2-city-cover-copy p { font-size:1.8cqw; }
+.panorama-fiergs-page .panorama-v2-city-cover-copy h1 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; column-gap:2cqw; font-size:2.35cqw; line-height:1.15; }
+.panorama-fiergs-page .panorama-v2-city-cover-copy strong { margin-top:1.5cqw; font-size:2.2cqw; }
+.panorama-fiergs-page .panorama-v2-divider { background:linear-gradient(135deg,#17384a,#315d69); color:#fff; }
+.panorama-fiergs-page .panorama-v2-team,.panorama-fiergs-page .panorama-v2-consultant { background:#17384a; color:#fff; }
 .panorama-v2-page .panorama-table-page>i,.panorama-v2-page .panorama-chart-head i,.panorama-v2-page .panorama-market-slide header>i,.panorama-v2-page .panorama-page-unavailable i { opacity:0; }
 /* JG-01 a JG-04 — "aumentar fonte" nas páginas 4, 5, 6 e 8.
    A causa era a unidade: só as institucionais mediam a fonte em `vw` (largura da janela), enquanto
