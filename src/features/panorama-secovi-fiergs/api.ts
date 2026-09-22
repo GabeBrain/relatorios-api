@@ -12,6 +12,7 @@ import { requestWithRetry } from './lib/request-with-retry';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const BUILDINGS_V2_BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
+const BUILDINGS_INTERNAL_V2_BASE_URL = 'https://app.geobrain.com.br/public-api/v2';
 const PER_PAGE = 100;
 // Uma cidade abre consultas de prédios e dez séries temporais. Processar três ao mesmo tempo
 // disparava mais de trinta conexões e fazia o navegador abortar inclusive o fallback legado.
@@ -60,7 +61,45 @@ function createRequestGate(limit: number) {
   };
 }
 
-async function fetchBuildingsV2(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
+/**
+ * Normaliza apenas diferenças representacionais comprovadas entre os contratos v2. A rota interna
+ * devolve `number_bedroom` como número (e usa zero como ausência); a pública devolve texto/null.
+ * Manter uma forma canônica na fronteira impede que a escolha da fonte altere a tipologia editorial.
+ */
+export function normalizeInternalBuilding(building: Record<string, unknown>): Record<string, unknown> {
+  if (!Array.isArray(building.typologies_history)) return building;
+  return {
+    ...building,
+    typologies_history: building.typologies_history.map((raw) => {
+      const entry = raw as Record<string, unknown>;
+      const bedroom = entry.number_bedroom;
+      return { ...entry, number_bedroom: bedroom === 0 ? null : bedroom == null ? bedroom : String(bedroom) };
+    }),
+  };
+}
+
+async function fetchBuildingsInternalV2(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
+  const byId = new Map<string, Record<string, unknown>>();
+  for (const type of ['Vertical', 'Horizontal']) {
+    let page = 1; let lastPage = 1;
+    do {
+      const response = await requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_INTERNAL_V2_BASE_URL}/building-with-history-internal`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal });
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain interna v2 em ${scope.city} (${response.status ?? 'rede'}).`);
+      const entries = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
+      for (const raw of entries) {
+        const building = normalizeInternalBuilding(raw);
+        if (!BUILDING_STATUSES.includes(String(building.status ?? ''))) continue;
+        const id = String(building.building_id ?? building.id ?? '');
+        if (id && !byId.has(id)) byId.set(id, building);
+      }
+      lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
+      page += 1;
+    } while (page <= lastPage);
+  }
+  return [...byId.values()];
+}
+
+async function fetchBuildingsPublicV2(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
   const byId = new Map<string, Record<string, unknown>>();
   for (const type of ['Vertical', 'Horizontal']) for (const status of BUILDING_STATUSES) {
     let page = 1; let lastPage = 1;
@@ -96,21 +135,29 @@ async function fetchBuildingsLegacy(scope: CityScope, signal?: AbortSignal): Pro
 }
 
 /**
- * O endpoint v2 é preferido, mas a transição não pode transformar indisponibilidade do contrato
- * em um relatório zerado. Enquanto a paridade autenticada não estiver confirmada, preservamos o
- * contrato legado como fallback explícito.
+ * A rota interna v2 é a fonte granular canônica. A pública v2 permanece como fallback com retry;
+ * somente o motor V2 antigo pode recorrer ao contrato legado. Nenhuma falha vira coleção vazia.
  */
-async function fetchBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' | 'v4' = 'v4'): Promise<Record<string, unknown>[]> {
+export async function fetchPanoramaBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' | 'v4' = 'v4'): Promise<Record<string, unknown>[]> {
   try {
-    return await fetchBuildingsV2(scope, signal);
-  } catch (v2Error) {
-    if (engineVersion !== 'v2') throw v2Error;
+    return await fetchBuildingsInternalV2(scope, signal);
+  } catch (internalError) {
     try {
-      return await fetchBuildingsLegacy(scope, signal);
-    } catch (legacyError) {
-      const v2Message = v2Error instanceof Error ? v2Error.message : String(v2Error);
-      const legacyMessage = legacyError instanceof Error ? legacyError.message : String(legacyError);
-      throw new Error(`Coleta de empreendimentos falhou em ${scope.city}. v2: ${v2Message}. Legado: ${legacyMessage}.`);
+      return await fetchBuildingsPublicV2(scope, signal);
+    } catch (publicError) {
+      if (engineVersion !== 'v2') {
+        const internalMessage = internalError instanceof Error ? internalError.message : String(internalError);
+        const publicMessage = publicError instanceof Error ? publicError.message : String(publicError);
+        throw new Error(`Coleta granular falhou em ${scope.city}. Interna v2: ${internalMessage}. Pública v2: ${publicMessage}.`);
+      }
+      try {
+        return await fetchBuildingsLegacy(scope, signal);
+      } catch (legacyError) {
+        const internalMessage = internalError instanceof Error ? internalError.message : String(internalError);
+        const publicMessage = publicError instanceof Error ? publicError.message : String(publicError);
+        const legacyMessage = legacyError instanceof Error ? legacyError.message : String(legacyError);
+        throw new Error(`Coleta de empreendimentos falhou em ${scope.city}. Interna v2: ${internalMessage}. Pública v2: ${publicMessage}. Legado: ${legacyMessage}.`);
+      }
     }
   }
 }
@@ -207,7 +254,7 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
   const gate = createRequestGate(REQUEST_CONCURRENCY_PER_CITY);
   const track = <T,>(operation: string, request: () => Promise<T>) => gate(request).finally(() => onUnit?.(scope.city, operation));
   const [buildings, sales, salesTypology, stock, stockTypology, ivv, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
-    track('empreendimentos', () => fetchBuildings(scope, signal, engineVersion)),
+    track('empreendimentos', () => fetchPanoramaBuildings(scope, signal, engineVersion)),
     track('vendas por padrão', () => temporalRows(scope, 'sales', 'Padrão', signal)), track('vendas por tipologia', () => temporalRows(scope, 'sales', 'Tipologia', signal)),
     track('oferta por padrão', () => temporalRows(scope, 'stock', 'Padrão', signal)), track('oferta por tipologia', () => temporalRows(scope, 'stock', 'Tipologia', signal)),
     track('IVV por padrão', () => temporalRows(scope, 'ivv', 'Padrão', signal, circuit)),
@@ -344,7 +391,7 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
   // Bancada de calibração é mono-cidade por construção: compara contra um gabarito municipal.
   const city = primaryCity(scope);
   const cityScope: CityScope = { uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter };
-  const raw = await fetchBuildings(cityScope, signal);
+  const raw = await fetchPanoramaBuildings(cityScope, signal);
   const projectValues = new Map<string, number>(); const unitTotalValues = new Map<string, number>(); const unitHistoryValues = new Map<string, number>();
   const seen = new Set<string>();
   for (const building of raw) {
@@ -405,7 +452,7 @@ export async function fetchLaunchAuditBuildings(scope: PanoramaScope, signal?: A
   // A curadoria cobre todas as cidades do recorte; a chave de dedupe é por cidade + building_id.
   const collection = await collectByCity(
     cityScopes(scope).map((item) => item.city),
-    (city, citySignal) => fetchBuildings({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, citySignal).then((buildings) => ({ city, buildings })),
+    (city, citySignal) => fetchPanoramaBuildings({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, citySignal).then((buildings) => ({ city, buildings })),
     { concurrency: CITY_CONCURRENCY, signal },
   );
   const harvested = completedValues(collection);
