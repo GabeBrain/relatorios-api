@@ -117,7 +117,7 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
   if (horizontalStart < 0) return manifest;
   manifest.splice(horizontalStart, 0, { page: 0, referenceSlide: 0, sectionId: 'horizontal', title: 'Oferta lançada e final por tipo', intention: 'Produtos horizontais FIERGS', visualFamily: 'market-table', contractKeys: ['cube.horizontalSubtype'], methodologyStatus: 'reconciled', fiergsSlide: 'horizontal-offer-products' });
   const priceIndex = manifest.findIndex((page) => page.referenceSlide === 49) + 1;
-  manifest.splice(priceIndex, 0, { page: 0, referenceSlide: 0, sectionId: 'horizontal', title: 'Mínimo, média e máximo por tipo', intention: 'Faixa de preços horizontal FIERGS', visualFamily: 'price', contractKeys: ['cube.averagePricePerMeter'], methodologyStatus: 'reconciled', fiergsSlide: 'horizontal-price-range' });
+  manifest.splice(priceIndex, 0, { page: 0, referenceSlide: 0, sectionId: 'horizontal', title: 'Mínimo, média e máximo por tipo', intention: 'Faixa de preços horizontal FIERGS', visualFamily: 'price', contractKeys: ['cube.averagePricePerMeter'], methodologyStatus: 'assumed', fiergsSlide: 'horizontal-price-range' });
   const mapIndex = manifest.findIndex((page) => page.referenceSlide === 56);
   if (mapIndex >= 0) {
     manifest[mapIndex] = { ...manifest[mapIndex], title: 'Mapa de localização por padrão', mapMode: 'standard' };
