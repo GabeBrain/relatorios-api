@@ -5,6 +5,7 @@ import slide72 from './slide-72-institutional.jpg';
 import slide73 from './slide-73-institutional.png';
 import slide74 from './slide-74-institutional.jpg';
 import slide75 from './slide-75-institutional.png';
+import sectionDivider from './section-divider.png';
 
 /** Fundos oficiais sem dados variáveis, extraídos do deck FIERGS RM Porto Alegre 4T25. */
 export const FIERGS_INSTITUTIONAL_SLIDES: Readonly<Partial<Record<number, string>>> = {
@@ -17,3 +18,5 @@ export const FIERGS_INSTITUTIONAL_SLIDES: Readonly<Partial<Record<number, string
   75: slide75,
 };
 
+/** Fundo neutro extraído da abertura oficial; o título permanece uma camada dinâmica. */
+export const FIERGS_SECTION_DIVIDER = sectionDivider;

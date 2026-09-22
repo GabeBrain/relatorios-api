@@ -26,7 +26,8 @@ describe('manifesto FIERGS RM Porto Alegre 4T25', () => {
     };
     const fiergs = panoramaManifestFor({ ...base, scope: { entity: 'fiergs-rs' } }, 'pk.test');
     const secovi = panoramaManifestFor({ ...base, scope: { entity: 'secovi-sp' } }, 'pk.test');
-    expect(fiergs.filter((page) => page.fiergsSlide)).toHaveLength(2);
+    expect(fiergs.filter((page) => page.fiergsSlide)).toHaveLength(3);
+    expect(fiergs[1]).toMatchObject({ title: 'Cidades analisadas', fiergsSlide: 'city-scope' });
     expect(fiergs.filter((page) => page.mapMode).map((page) => page.mapMode)).toEqual(['standard', 'stock', 'price']);
     expect(secovi.some((page) => page.fiergsSlide || page.mapMode)).toBe(false);
   });

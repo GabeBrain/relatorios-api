@@ -3,7 +3,7 @@ import { buildMapTilePlan, type GeographicPoint } from '../lib/map-tiles';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
 export type CityComparisonKind = 'sales' | 'market' | 'availability';
-export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'horizontal-offer-products' | 'horizontal-price-range'; mapMode?: 'standard' | 'stock' | 'price'; }
+export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'city-scope' | 'horizontal-offer-products' | 'horizontal-price-range'; mapMode?: 'standard' | 'stock' | 'price'; }
 export interface PanoramaSection { id: string; label: string; start: number; end: number; }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -113,6 +113,7 @@ export function panoramaManifestOptions(report: ManifestSubject, mapboxAccessTok
 export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken = ''): ReportPageDefinition[] {
   const manifest = createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
   if (report.scope?.entity !== 'fiergs-rs') return manifest;
+  manifest.splice(1, 0, { page: 0, referenceSlide: 0, sectionId: 'about', title: 'Cidades analisadas', intention: 'Escopo territorial FIERGS', visualFamily: 'static', contractKeys: ['scope.cities'], methodologyStatus: 'reconciled', fiergsSlide: 'city-scope' });
   const horizontalStart = manifest.findIndex((page) => page.referenceSlide === 48);
   if (horizontalStart < 0) return manifest;
   manifest.splice(horizontalStart, 0, { page: 0, referenceSlide: 0, sectionId: 'horizontal', title: 'Oferta lançada e final por tipo', intention: 'Produtos horizontais FIERGS', visualFamily: 'market-table', contractKeys: ['cube.horizontalSubtype'], methodologyStatus: 'reconciled', fiergsSlide: 'horizontal-offer-products' });

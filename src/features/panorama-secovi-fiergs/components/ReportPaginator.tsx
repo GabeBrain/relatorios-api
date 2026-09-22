@@ -17,7 +17,7 @@ import contentBackground from '../assets/official_v2/backgrounds/content.png';
 import dividerBackground from '../assets/official_v2/backgrounds/divider.png';
 import darkTeamBackground from '../assets/official_v2/backgrounds/dark-team.png';
 import closingBackground from '../assets/official_v2/backgrounds/closing-report.png';
-import { FIERGS_INSTITUTIONAL_SLIDES } from '../assets/fiergs';
+import { FIERGS_INSTITUTIONAL_SLIDES, FIERGS_SECTION_DIVIDER } from '../assets/fiergs';
 import '../print/panorama-print.css';
 
 const officialV2Assets = import.meta.glob('../assets/official_v2/*.png', { eager: true, import: 'default' }) as Record<string, string>;
@@ -39,7 +39,7 @@ const pct = (v: number | null) => v === null ? '—' : `${v.toLocaleString('pt-B
 const year = (q: string) => q.slice(2);
 function Sheet({ def, report, children }: { def: ReportPageDefinition; report: PanoramaReportModel; children: React.ReactNode }) {
   const fiergs = report.scope.entity === 'fiergs-rs';
-  const background = fiergs ? fiergsBackground(def.referenceSlide) : v2Background(def.referenceSlide);
+  const background = fiergs ? fiergsBackground(def) : v2Background(def.referenceSlide);
   const style = { backgroundImage: background ? `url(${background})` : 'none' } as CSSProperties;
   return <section className={`panorama-report-page panorama-official-page panorama-v2-page ${fiergs ? 'panorama-fiergs-page' : ''}`} style={style} aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div></section>;
 }
@@ -61,8 +61,12 @@ function Corporate({ page, report }: { page: number; report: PanoramaReportModel
   return <div className="panorama-corporate"><h2>Objetivos</h2><i/><p>✓ Analisar a evolução dos principais indicadores do mercado imobiliário local:</p><ol><li>Lançamentos;</li><li>Oferta;</li><li>Vendas;</li><li>Estoque; e</li><li>Evolução de preços.</li></ol><p>✓ Apresentar a evolução analítica do posicionamento das incorporadoras em <strong>{city}</strong>.</p></div>;
 }
 function V2Divider({ title }: { title: string }) { return <div className="panorama-v2-divider"><h2>{title}</h2></div>; }
+function FiergsCityScope({ report }: { report: PanoramaReportModel }) {
+  return <div className="panorama-fiergs-city-scope"><p>RECORTE DO ESTUDO</p><h2>CIDADES ANALISADAS</h2><div>{report.scope.cities.filter(Boolean).map((city) => <span key={city}>{city}</span>)}</div><small>Região Metropolitana de Porto Alegre · município de Porto Alegre não incluído no universo analisado</small></div>;
+}
 function CityCover({ report }: { report: PanoramaReportModel }) {
   const cities = report.scope.cities.filter(Boolean);
+  if (report.scope.entity === 'fiergs-rs') return <div aria-label="Capa institucional FIERGS"/>;
   return <div className={`panorama-v2-city-cover ${report.scope.entity === 'fiergs-rs' ? 'is-fiergs' : ''}`}><div className="panorama-v2-city-cover-copy"><p>{report.scope.entity === 'fiergs-rs' ? 'PANORAMA FIERGS · RM PORTO ALEGRE' : 'PANORAMA IMOBILIÁRIO DE'}</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
 function V2Summary({ report }: { report: PanoramaReportModel }) {
@@ -254,7 +258,9 @@ export function annualizeSeries(series: LaunchSeries[]) {
   return [...annual.values()].sort((a, b) => a.year - b.year);
 }
 
-function fiergsBackground(referenceSlide: number): string | undefined {
+function fiergsBackground(def: ReportPageDefinition): string | undefined {
+  if (def.visualFamily === 'divider') return FIERGS_SECTION_DIVIDER;
+  const referenceSlide = def.referenceSlide;
   const mapping: Record<number, number> = { 2: 1, 3: 3, 7: 4, 59: 72, 60: 73, 61: 74, 62: 75 };
   return FIERGS_INSTITUTIONAL_SLIDES[mapping[referenceSlide]];
 }
@@ -360,6 +366,7 @@ function CityComparisonPage({ kind, report }: { kind: NonNullable<ReportPageDefi
 }
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
+  if (def.fiergsSlide === 'city-scope') return <FiergsCityScope report={report}/>;
   if (def.fiergsSlide === 'horizontal-offer-products') return <FiergsHorizontalOfferSlide report={report}/>;
   if (def.fiergsSlide === 'horizontal-price-range') return <FiergsHorizontalPriceRangeSlide report={report}/>;
   if (def.cityComparison) return <CityComparisonPage kind={def.cityComparison} report={report}/>;

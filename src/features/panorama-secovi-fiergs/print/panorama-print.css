@@ -104,7 +104,14 @@
 .panorama-fiergs-page .panorama-v2-city-cover-copy p { font-size:1.8cqw; }
 .panorama-fiergs-page .panorama-v2-city-cover-copy h1 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; column-gap:2cqw; font-size:2.35cqw; line-height:1.15; }
 .panorama-fiergs-page .panorama-v2-city-cover-copy strong { margin-top:1.5cqw; font-size:2.2cqw; }
-.panorama-fiergs-page .panorama-v2-divider { background:linear-gradient(135deg,#17384a,#315d69); color:#fff; }
+.panorama-fiergs-page .panorama-v2-divider { align-items:center; justify-content:center; padding:0 22cqw 1cqw; color:#111; }
+.panorama-fiergs-page .panorama-v2-divider h2 { max-width:54cqw; font-size:5cqw; line-height:1.08; text-align:center; text-transform:uppercase; }
+.panorama-fiergs-city-scope { display:flex; height:100%; padding:7.5cqw 10cqw 5.5cqw; box-sizing:border-box; flex-direction:column; color:#111; background:#fff; }
+.panorama-fiergs-city-scope p { margin:0 0 .8cqw; color:#5d7737; font-size:1.45cqw; font-weight:800; letter-spacing:.12em; }
+.panorama-fiergs-city-scope h2 { margin:0 0 3.2cqw; font-size:4.4cqw; line-height:1; }
+.panorama-fiergs-city-scope > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.15cqw 6cqw; padding:2.5cqw 3cqw; border-top:.2cqw solid #5d7737; border-bottom:.2cqw solid #5d7737; }
+.panorama-fiergs-city-scope span { font-size:2.15cqw; font-weight:700; }
+.panorama-fiergs-city-scope small { margin-top:auto; color:#5b6165; font-size:1.25cqw; }
 .panorama-fiergs-page .panorama-v2-team,.panorama-fiergs-page .panorama-v2-consultant { background:#17384a; color:#fff; }
 .panorama-v2-page .panorama-table-page>i,.panorama-v2-page .panorama-chart-head i,.panorama-v2-page .panorama-market-slide header>i,.panorama-v2-page .panorama-page-unavailable i { opacity:0; }
 /* JG-01 a JG-04 — "aumentar fonte" nas páginas 4, 5, 6 e 8.
