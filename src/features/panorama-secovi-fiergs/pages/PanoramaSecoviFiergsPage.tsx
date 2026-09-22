@@ -15,7 +15,8 @@ import { PanoramaLoadingState } from '../components/PanoramaLoadingState';
 import { availableEndQuarters } from '../domain/quarters';
 import { type PanoramaGenerationProgress } from '../domain/generation-progress';
 import { panoramaManifestFor } from '../report/manifest';
-import type { PanoramaScope, Quarter } from '../types';
+import { FIERGS_RM_PORTO_ALEGRE_PRESET } from '../presets';
+import type { EntityId, PanoramaScope, Quarter } from '../types';
 
 export default function PanoramaSecoviFiergsPage() {
   const [geo, setGeo] = useState<GeoScope>({ uf: 'SP', city: '' });
@@ -38,18 +39,32 @@ export default function PanoramaSecoviFiergsPage() {
   const ready = Boolean(geoApi.strictReady && cities.length && scope.startQuarter && scope.endQuarter);
   const updateCities = (next: string[]) => { setCities(next); setGeo((current) => ({ ...current, city: next[0] ?? '' })); setScope((current) => ({ ...current, cities: next })); setSubmitted(null); };
   const updateRange = (startQuarter: Quarter, endQuarter: Quarter) => { setScope((current) => ({ ...current, startQuarter, endQuarter })); setSubmitted(null); };
+  const updateEntity = (entity: EntityId) => {
+    setSubmitted(null);
+    if (entity === 'fiergs-rs') {
+      const presetCities = [...FIERGS_RM_PORTO_ALEGRE_PRESET.scope.cities];
+      setGeo({ uf: 'RS', city: presetCities[0] });
+      setCities(presetCities);
+      setScope((current) => ({ ...current, ...FIERGS_RM_PORTO_ALEGRE_PRESET.scope, cities: presetCities }));
+      return;
+    }
+    setGeo({ uf: 'SP', city: '' });
+    setCities([]);
+    setScope((current) => ({ ...current, uf: 'SP', cities: [], entity: 'secovi-sp', engineVersion: 'v4' }));
+  };
   const generate = () => { if (!ready || !scope.startQuarter) return; const next = { ...scope, uf: geo.uf, cities: [...cities].sort((a, b) => a.localeCompare(b, 'pt-BR')) }; setGenerationProgress(null); setScope(next); setSubmitted(next); };
   return <div className="mx-auto max-w-[1440px] space-y-5 p-4 sm:p-6 animate-fade-in">
     <header className="max-w-3xl"><h1 className="text-2xl font-semibold tracking-tight">Panorama de Mercado</h1><p className="mt-1 text-sm text-muted-foreground">Panoramas executivos Secovi/FIERGS por praça e período.</p></header>
-    <section className="overflow-visible rounded-xl border border-border bg-card p-4 shadow-sm"><div className="grid grid-cols-1 items-start gap-x-5 gap-y-3 md:grid-cols-[96px_minmax(280px,1fr)_minmax(190px,auto)_auto]">
+    <section className="overflow-visible rounded-xl border border-border bg-card p-4 shadow-sm"><div className="grid grid-cols-1 items-start gap-x-5 gap-y-3 md:grid-cols-[210px_96px_minmax(280px,1fr)_minmax(190px,auto)_auto]">
+      <div className="w-full space-y-1.5"><label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Entidade / produto</label><Select value={scope.entity ?? 'secovi-sp'} onValueChange={(value) => updateEntity(value as EntityId)} disabled={report.isFetching}><SelectTrigger className="h-9 text-sm"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="secovi-sp">Secovi-SP</SelectItem><SelectItem value="fiergs-rs">FIERGS — RM Porto Alegre</SelectItem></SelectContent></Select></div>
       {!geoApi.hasToken ? <div className="rounded-lg border border-amber-400 bg-amber-50 px-3 py-2 text-xs text-amber-800 md:col-span-2">Faça login no cabeçalho para carregar as cidades monitoradas.</div> : geoApi.error ? <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive md:col-span-2"><span className="min-w-0 flex-1">Falha ao carregar /monitored-cities: {geoApi.error.message}</span><Button type="button" size="sm" variant="outline" onClick={geoApi.reload}><RefreshCw className="h-3 w-3"/>Tentar novamente</Button></div> : <>
-        <div className="w-full space-y-1.5"><label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">UF</label><Select value={geo.uf} onValueChange={geoApi.setUf} disabled={geoApi.isLoading || !geoApi.citiesByUf}><SelectTrigger className="h-9 text-sm"><SelectValue placeholder={geoApi.isLoading ? '…' : 'UF'}/></SelectTrigger><SelectContent>{geoApi.availableUfs.map((uf) => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}</SelectContent></Select></div>
-        <div className="min-w-[260px] flex-1"><PanoramaCityMultiSelect cities={cities} options={geoApi.availableCities} onChange={updateCities} loading={geoApi.isLoading} disabled={geoApi.isLoading || !geo.uf} /></div>
+        <div className="w-full space-y-1.5"><label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">UF</label><Select value={geo.uf} onValueChange={geoApi.setUf} disabled={geoApi.isLoading || !geoApi.citiesByUf || scope.entity === 'fiergs-rs'}><SelectTrigger className="h-9 text-sm"><SelectValue placeholder={geoApi.isLoading ? '…' : 'UF'}/></SelectTrigger><SelectContent>{geoApi.availableUfs.map((uf) => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}</SelectContent></Select></div>
+        <div className="min-w-[260px] flex-1"><PanoramaCityMultiSelect cities={cities} options={geoApi.availableCities} onChange={updateCities} loading={geoApi.isLoading} disabled={geoApi.isLoading || !geo.uf || scope.entity === 'fiergs-rs'} /></div>
       </>}
       <PanoramaQuarterRangePicker start={scope.startQuarter} end={scope.endQuarter} options={quarters} onChange={updateRange} />
       <div className="min-w-[176px] pt-[30px]"><Button className="h-9 w-full justify-center whitespace-nowrap" onClick={generate} disabled={!ready || report.isFetching}><BarChart3 className="shrink-0"/>{report.isFetching ? 'Consultando APIs…' : 'Gerar relatório'}</Button></div>
     </div></section>
-    {!submitted && <Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Defina o recorte</AlertTitle><AlertDescription>Escolha a UF, um ou mais municípios monitorados e o período; nenhuma chamada pesada é feita antes de um escopo válido.</AlertDescription></Alert>}
+    {!submitted && <Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Defina o recorte</AlertTitle><AlertDescription>{scope.entity === 'fiergs-rs' ? 'O recorte oficial FIERGS preenche as 11 cidades da RM de Porto Alegre. Escolha o período e gere o relatório.' : 'Escolha a UF, um ou mais municípios monitorados e o período; nenhuma chamada pesada é feita antes de um escopo válido.'}</AlertDescription></Alert>}
     {report.isPending && submitted && <PanoramaLoadingState label="Consultando APIs e montando o relatório…" progress={generationProgress} />}
     {report.data && report.isFetching && <PanoramaLoadingState compact label="Atualizando relatório…" progress={generationProgress} />}
     {report.isError && <Alert variant="destructive"><AlertCircle className="h-4 w-4"/><AlertTitle>Não foi possível compor o relatório</AlertTitle><AlertDescription><p className="mt-1 break-words">{report.error instanceof Error ? report.error.message : 'A API não retornou um recorte utilizável.'}</p><Button className="mt-3" variant="outline" size="sm" onClick={() => report.refetch()}><RefreshCw/>Tentar novamente</Button></AlertDescription></Alert>}

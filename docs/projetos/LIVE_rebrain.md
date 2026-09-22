@@ -1,3 +1,12 @@
+### 2026-09-22 — FIERGS-RS: seletor e inventário oficial de 75 slides — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — preparação do produto `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o fluxo ganhou seletor de entidade; FIERGS aplica automaticamente RS e as 11 cidades do preset, mantendo período editável. O deck oficial de 75 slides foi baixado do Drive e catalogado em um manifesto tipado por família e grau de automação. Um plano com portões, estado das etapas 4–12 e limites metodológicos foi registrado.
+- **Por quê:** separar claramente o produto FIERGS da apresentação Secovi e impedir que lacunas como MCMV, bairro e mapas sejam preenchidas por heurística silenciosa.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{pages/PanoramaSecoviFiergsPage.tsx,report/fiergs-manifest.ts,__tests__/fiergs-manifest.test.ts}`, `docs/features/Relatorios Secovi_FIERGS/PLANO_FIERGS_RM_PORTO_ALEGRE_2026-09-22.md`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** `12880538203`.
+- **Impacto em Etapas/Pendências:** etapas 4 e 5 implementadas; etapas 6–12 decompostas com bloqueios objetivos. O produto ainda não deve ser considerado visualmente equivalente ao deck FIERGS.
+
 ### 2026-09-22 — FIERGS-RS: política horizontal e preset metropolitano — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — motor compartilhado Secovi/FIERGS.
 - **O quê:** foi criada a política de universo FIERGS-RS com os quatro produtos horizontais observados nos slides 63–66 do estudo 4T25 (`Loteamento Aberto`, `Condomínio de Chácaras`, `Loteamento Fechado` e `Condomínio de Casas/Sobrados`). O filtro temporal agora respeita a entidade, sem alterar a regra restritiva do Secovi-SP. Também foi criado o preset `Recorte FIERGS — RM Porto Alegre`, com as 11 cidades destacadas no mapa do estudo e motor V4.
