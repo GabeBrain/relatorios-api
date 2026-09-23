@@ -23,8 +23,8 @@ Entregar o Panorama FIERGS com o mesmo contrato editorial do deck oficial de 75 
 | 2 | Sistema visual FIERGS/Rebrain | HUMAN | Montserrat/Source Sans 3 e hierarquia aplicadas ao FIERGS; falta revisão visual do livro completo |
 | 3 | Capa territorial RM Porto Alegre | HUMAN | Mapa, título e trimestre dinâmicos; sem percentuais socioeconômicos |
 | 4 | Nove aberturas oficiais | HUMAN | Fundo oficial e terminologia FIERGS nas posições corretas |
-| 5 | Lançamentos verticais — slides 8–22 | DOING | Teste 1 corrigido: eixo/rótulos adaptativos, acumulado completo e principais lâminas verticais; faltam distribuições específicas |
-| 6 | Vendas e oferta — slides 23–37 | TODO | Mesmo universo entre consolidado e cidade; totais internos fechando |
+| 5 | Lançamentos verticais — slides 8–22 | HUMAN | Séries e distribuições por padrão, tipologia, bairro/cidade concluídas; aguarda PDF do Teste 2 |
+| 6 | Vendas e oferta — slides 23–37 | HUMAN | Arquitetura FIERGS, fluxo, acumulados, padrão, tipologia, cidade e estoque concluídos; aguarda PDF e paridade metodológica municipal |
 | 7 | MCMV, bairros/cidades e dormitórios | TODO | Componentes e agregações específicas, sem reaproveitar indicador incompatível |
 | 8 | IVV, preços e mercado vertical — slides 38–61 | TODO | Uma fonte granular coerente por indicador; unidades e fórmulas explícitas |
 | 9 | Horizontal completo — slides 62–66 | TODO | Quatro produtos FIERGS separados do vertical |
@@ -92,3 +92,5 @@ Deltas prioritários: 3T25 (`634` atual versus `138` oficial), 4T25 (`3.082` ver
 - 2026-09-23: coleta FIERGS otimizada para duas cidades simultâneas com teto global de seis requisições; Secovi preservado em uma cidade e teto quatro; granular vertical/horizontal paralelizado dentro do mesmo limitador.
 - 2026-09-23: Teste 1 do PDF/CSV revisado. Abertura duplicada e roteamento das três lâminas de mapa foram corrigidos; sem token, mapas agora exibem indisponibilidade controlada em vez de página branca.
 - 2026-09-23: FIERGS passou a usar Montserrat em hierarquia e Source Sans 3 em leitura. Eixos trimestrais usam forma curta, amostragem adaptativa e rótulos de valores priorizados em fechamentos anuais e quatro trimestres recentes; acumulados de 12 meses não exibem janelas parciais.
+- 2026-09-23: distribuições dos slides 10, 13, 15–18 e 21 deixaram de reutilizar componentes Secovi; padrão e tipologia derivam do cubo granular do trimestre de lançamento.
+- 2026-09-23: etapa 6 implementada no padrão FIERGS: vendas verticais trimestrais e 12 meses, padrão, tipologia e cidade, VGV vendido e oferta final. Fluxos são somados; estoque permanece fotografia e seus comparativos anuais usam o fechamento, nunca soma de snapshots.

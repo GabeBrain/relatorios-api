@@ -1,3 +1,11 @@
+### 2026-09-23 — FIERGS-RS: fechamento de lançamentos e arquitetura de vendas/oferta — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** os slides 10, 13, 15–18 e 21 passaram a usar distribuições FIERGS por padrão e tipologia derivadas do cubo granular. O bloco 23–37 ganhou séries verticais de vendas e VGV, acumulados de 12 meses, distribuições por padrão/tipologia/cidade e oferta final. Estoque é tratado como fotografia: comparações anuais usam o fechamento, sem somar snapshots trimestrais.
+- **Por quê:** concluir as etapas 5 e 6 sem herdar linguagem visual, horizontal ou semântica temporal do Secovi.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css,__tests__/fiergs-editorial-blocks.test.tsx}` e `docs/features/Relatorios Secovi_FIERGS/PLANO_EXECUCAO_FIERGS_RM_POA.md`.
+- **Impacto em Etapas/Pendências:** etapas 5 e 6 seguem para teste humano do PDF; diferenças municipais continuam na bancada metodológica e não foram corrigidas artificialmente.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-09-23 — FIERGS-RS: legibilidade temporal e correções estruturais do Teste 1 — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
 - **O quê:** o produto FIERGS recebeu tipografia canônica Montserrat/Source Sans 3 e uma política adaptativa para eixos e rótulos de séries: trimestre abreviado, amostragem de ticks, destaque dos fechamentos anuais e dos quatro pontos mais recentes. Acumulados de 12 meses agora começam apenas com quatro trimestres completos. Também foram corrigidos o Sumário duplicado e o roteamento que deixava os três mapas em branco.

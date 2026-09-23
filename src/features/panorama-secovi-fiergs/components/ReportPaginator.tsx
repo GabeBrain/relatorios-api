@@ -312,6 +312,40 @@ function FiergsLaunchCitySlide({ report }: { report: PanoramaReportModel }) {
   return <div className="panorama-fiergs-city-share"><h2>UNIDADES VERTICAIS LANÇADAS<span>POR BAIRRO E CIDADE</span></h2><main><section>{bars(neighborhoods)}</section><section>{bars(rows.map((row) => ({ label: row.city, units: row.units })))}</section></main><footer>Total do trimestre: {n(total)} unidades · Fonte: cubo granular GeoBrain</footer></div>;
 }
 
+type FiergsDistributionRow = { label: string; value: number };
+function FiergsDistributionSlide({ title, subtitle, rows, unit }: { title: string; subtitle: string; rows: FiergsDistributionRow[]; unit: string }) {
+  const visible = rows.filter((row) => row.value > 0).sort((a, b) => b.value - a.value);
+  const total = visible.reduce((sum, row) => sum + row.value, 0); const max = Math.max(1, ...visible.map((row) => row.value));
+  return <div className="panorama-fiergs-distribution"><header><h2>{title}<span>{subtitle}</span></h2><strong>{n(total)}<small>{unit}</small></strong></header>
+    {visible.length ? <main>{visible.slice(0, 9).map((row, index) => <div key={row.label}><span>{row.label}</span><i><b style={{ width: `${row.value / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{pct(row.value / total * 100)}</small>{index < 3 && <em>{index + 1}º</em>}</div>)}</main> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
+    <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer></div>;
+}
+function groupedValues(values: FiergsDistributionRow[]) { const groups = new Map<string, number>(); values.forEach(({ label, value }) => groups.set(label, (groups.get(label) ?? 0) + value)); return [...groups].map(([label, value]) => ({ label, value })); }
+function launchDistribution(report: PanoramaReportModel, dimension: 'standard-projects' | 'standard-units' | 'typology-units' | 'standard-vgv'): FiergsDistributionRow[] {
+  const projects = report.cube.projects.filter((project) => project.segment === 'Vertical' && project.releaseQuarter === report.scope.endQuarter);
+  if (dimension === 'typology-units') return groupedValues(projects.flatMap((project) => project.typologies.map((typology) => ({ label: typology.typology, value: typology.launchedUnits ?? 0 }))));
+  return groupedValues(projects.map((project) => ({ label: project.standard, value: dimension === 'standard-projects' ? 1 : dimension === 'standard-vgv' ? project.launchedVgvMillions ?? 0 : project.launchedUnits ?? 0 })));
+}
+function temporalDistribution(block: ReportMarketBlock): FiergsDistributionRow[] { return block.groupSeries.map((group) => ({ label: group.label, value: group.series.find((row) => row.quarter === block.series.at(-1)?.quarter)?.vertical ?? group.series.at(-1)?.vertical ?? 0 })); }
+
+function FiergsMarketQuarterlySlide({ report, officialSlide }: { report: PanoramaReportModel; officialSlide: number }) {
+  const rolling = [26, 28, 33].includes(officialSlide); const stock = officialSlide === 35; const vgv = [32, 33].includes(officialSlide);
+  const block = stock ? report.stock.units : vgv ? report.sales.vgv : report.sales.units;
+  if (block.dataStatus === 'unavailable') return <CoveragePage title={stock ? 'OFERTA FINAL VERTICAL POR TRIMESTRE' : vgv ? 'VGV VENDIDO VERTICAL' : 'UNIDADES VERTICAIS VENDIDAS'} detail="A API não disponibilizou a série temporal correta para este recorte; a página não foi preenchida com zeros nem com outra métrica."/>;
+  const base = block.series.map((row) => ({ ...row, horizontal: 0, total: row.vertical }));
+  const data = rolling ? base.map((row, index) => ({ ...row, vertical: base.slice(Math.max(0, index - 3), index + 1).reduce((sum, item) => sum + item.vertical, 0) })).filter((_, index) => index >= 3) : base;
+  const annual = (rolling || stock
+    ? data.filter((row, index) => row.quarter.startsWith('4T') || (index === data.length - 1 && !data.some((candidate) => candidate.quarter.startsWith('4T') && candidate.quarter.slice(2) === row.quarter.slice(2)))).map((row) => ({ year: Number(row.quarter.slice(2)), vertical: row.vertical, horizontal: 0, total: row.vertical }))
+    : annualizeSeries(data)).slice(-5);
+  const annualComparisons = annual.slice(1).map((current, index) => ({ from: annual[index], to: current, delta: variation(current.vertical, annual[index].vertical) }));
+  const visibleTicks = visibleQuarterTickIndexes(data); const visibleLabels = visiblePointLabelIndexes(data); const closingYear = Number(report.scope.endQuarter.slice(2)); const closingRows = data.filter((row) => Number(row.quarter.slice(2)) === closingYear);
+  const left = rolling ? annual.at(-2)?.vertical ?? 0 : stock ? closingRows.find((row) => row.quarter.startsWith('2T'))?.vertical ?? closingRows[0]?.vertical ?? 0 : closingRows.filter((row) => ['1T', '2T'].includes(row.quarter.slice(0, 2))).reduce((sum, row) => sum + row.vertical, 0);
+  const right = rolling ? annual.at(-1)?.vertical ?? 0 : stock ? closingRows.find((row) => row.quarter.startsWith('4T'))?.vertical ?? closingRows.at(-1)?.vertical ?? 0 : closingRows.filter((row) => ['3T', '4T'].includes(row.quarter.slice(0, 2))).reduce((sum, row) => sum + row.vertical, 0);
+  const delta = variation(right, left); const format = vgv ? decimal : n; const title = stock ? 'OFERTA FINAL VERTICAL' : vgv ? 'VGV VENDIDO VERTICAL' : 'UNIDADES VERTICAIS VENDIDAS';
+  return <div className="panorama-fiergs-quarterly"><header><h2>{title}<span>{rolling ? 'ACUMULADO 12 MESES' : 'POR TRIMESTRE'}</span></h2><div><b>VARIAÇÕES ANUAIS</b><section>{annualComparisons.map(({ from, to, delta: annualDelta }) => <span key={to.year}><small>{from.year} × {to.year}</small><strong>{annualDelta === null ? '—' : `${annualDelta >= 0 ? '+' : ''}${pct(annualDelta)}`}</strong></span>)}</section></div></header>
+    <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 24, right: 28, top: 42, bottom: 24 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => visibleTicks.has(index) ? compactQuarterLabel(String(value)) : ''} tickLine={false} tickMargin={9} axisLine={{ stroke: '#b8b8b8' }} interval={0}/><Tooltip formatter={(value) => format(Number(value))}/><Line type="monotone" dataKey="vertical" name="RM de Porto Alegre" stroke="#5d7737" strokeWidth={4} dot={{ r: 2.5, fill: '#5d7737' }} isAnimationActive={false} label={({ x, y, value, index }) => value === undefined || !visibleLabels.has(Number(index)) ? null : <text x={Number(x)} y={Number(y) - 12} textAnchor="middle" className="panorama-fiergs-point">{format(Number(value))}</text>}/></LineChart></ResponsiveContainer><p>RM de Porto Alegre · {vgv ? 'R$ milhões' : 'unidades'}</p></div><aside><h3>{rolling ? 'FECHAMENTOS ANUAIS' : stock ? `${closingYear} · 2T × 4T` : closingYear}</h3><div><span><b>{format(left)}</b><small>{rolling ? annual.at(-2)?.year : stock ? `2T ${closingYear}` : `1S ${closingYear}`}</small></span><em>{delta === null ? '—' : `${delta >= 0 ? '+' : ''}${pct(delta)}`}</em><span><b>{format(right)}</b><small>{rolling ? annual.at(-1)?.year : stock ? `4T ${closingYear}` : `2S ${closingYear}`}</small></span></div></aside></main><footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · série temporal GeoBrain</footer></div>;
+}
+
 function fiergsBackground(def: ReportPageDefinition): string | undefined {
   if (def.visualFamily === 'divider') return FIERGS_SECTION_DIVIDER;
   if (def.fiergsOfficialSlide) return FIERGS_INSTITUTIONAL_SLIDES[def.fiergsOfficialSlide];
@@ -427,7 +461,18 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   if (official === 6) return <V2Summary report={report}/>;
   if (official === 7) return <FiergsTerritorialCover report={report}/>;
   if (official && [9, 11, 12, 14, 20, 22].includes(official)) return <FiergsQuarterlySlide report={report} officialSlide={official}/>;
+  if (official === 10) return <FiergsDistributionSlide title="EMPREENDIMENTOS VERTICAIS LANÇADOS" subtitle="POR PADRÃO" rows={launchDistribution(report, 'standard-projects')} unit="empreendimentos"/>;
+  if (official === 13 || official === 18) return <FiergsDistributionSlide title="UNIDADES VERTICAIS LANÇADAS" subtitle="POR PADRÃO" rows={launchDistribution(report, 'standard-units')} unit="unidades"/>;
+  if (official === 15) return <FiergsQuarterlySlide report={report} officialSlide={12}/>;
+  if (official === 16) return <FiergsQuarterlySlide report={report} officialSlide={14}/>;
+  if (official === 17) return <FiergsDistributionSlide title="UNIDADES VERTICAIS LANÇADAS" subtitle="POR TIPOLOGIA" rows={launchDistribution(report, 'typology-units')} unit="unidades"/>;
   if (official === 19) return <FiergsLaunchCitySlide report={report}/>;
+  if (official === 21) return <FiergsDistributionSlide title="VGV LANÇADO VERTICAL" subtitle="POR PADRÃO" rows={launchDistribution(report, 'standard-vgv')} unit="R$ milhões"/>;
+  if (official && [24, 26, 27, 28, 32, 33, 35].includes(official)) return <FiergsMarketQuarterlySlide report={report} officialSlide={official}/>;
+  if (official === 25 || official === 30) return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle="POR PADRÃO" rows={temporalDistribution(report.sales.units)} unit="unidades"/>;
+  if (official === 29) return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle="POR TIPOLOGIA" rows={temporalDistribution(report.sales.unitsByTypology)} unit="unidades"/>;
+  if (official === 36) return <OfferTableSlide report={report} dimension="typology"/>;
+  if (official === 37) return <OfferTableSlide report={report} dimension="pattern"/>;
   if (official === 71) return <TeamSlide report={report}/>;
   if (official && [1, 3, 4, 72, 73, 74, 75].includes(official)) return <div aria-hidden="true"/>;
   if (official && def.visualFamily === 'divider') return <V2Divider title={title}/>;
