@@ -1,9 +1,10 @@
 import type { MethodStatus } from '../types';
 import { buildMapTilePlan, type GeographicPoint } from '../lib/map-tiles';
+import { FIERGS_4T25_SLIDE_MANIFEST } from './fiergs-manifest';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
 export type CityComparisonKind = 'sales' | 'market' | 'availability';
-export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'city-scope' | 'horizontal-offer-products' | 'horizontal-price-range'; mapMode?: 'standard' | 'stock' | 'price'; }
+export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'city-scope' | 'horizontal-offer-products' | 'horizontal-price-range'; fiergsOfficialSlide?: number; contentReferenceSlide?: number; mapMode?: 'standard' | 'stock' | 'price'; }
 export interface PanoramaSection { id: string; label: string; start: number; end: number; }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -111,21 +112,64 @@ export function panoramaManifestOptions(report: ManifestSubject, mapboxAccessTok
 
 /** Manifesto efetivo de um relatório — o único caminho que os consumidores devem usar. */
 export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken = ''): ReportPageDefinition[] {
-  const manifest = createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
-  if (report.scope?.entity !== 'fiergs-rs') return manifest;
-  manifest.splice(1, 0, { page: 0, referenceSlide: 0, sectionId: 'about', title: 'Cidades analisadas', intention: 'Escopo territorial FIERGS', visualFamily: 'static', contractKeys: ['scope.cities'], methodologyStatus: 'reconciled', fiergsSlide: 'city-scope' });
-  const horizontalStart = manifest.findIndex((page) => page.referenceSlide === 48);
-  if (horizontalStart < 0) return manifest;
-  manifest.splice(horizontalStart, 0, { page: 0, referenceSlide: 0, sectionId: 'horizontal', title: 'Oferta lançada e final por tipo', intention: 'Produtos horizontais FIERGS', visualFamily: 'market-table', contractKeys: ['cube.horizontalSubtype'], methodologyStatus: 'reconciled', fiergsSlide: 'horizontal-offer-products' });
-  const priceIndex = manifest.findIndex((page) => page.referenceSlide === 49) + 1;
-  manifest.splice(priceIndex, 0, { page: 0, referenceSlide: 0, sectionId: 'horizontal', title: 'Mínimo, média e máximo por tipo', intention: 'Faixa de preços horizontal FIERGS', visualFamily: 'price', contractKeys: ['cube.averagePricePerMeter'], methodologyStatus: 'assumed', fiergsSlide: 'horizontal-price-range' });
-  const mapIndex = manifest.findIndex((page) => page.referenceSlide === 56);
-  if (mapIndex >= 0) {
-    manifest[mapIndex] = { ...manifest[mapIndex], title: 'Mapa de localização por padrão', mapMode: 'standard' };
-    manifest.splice(mapIndex + 1, 0,
-      { page: 0, referenceSlide: 0, sectionId: 'location', title: 'Mapa de localização por estoque', intention: 'Mapa por oferta final', visualFamily: 'map', contractKeys: ['locations.finalUnits'], methodologyStatus: 'reconciled', mapMode: 'stock' },
-      { page: 0, referenceSlide: 0, sectionId: 'location', title: 'Mapa de localização por R$/m²', intention: 'Mapa por preço privativo', visualFamily: 'map', contractKeys: ['locations.averagePricePerMeter'], methodologyStatus: 'reconciled', mapMode: 'price' },
-    );
-  }
-  return manifest.map((page, index) => ({ ...page, page: index + 1 }));
+  if (report.scope?.entity === 'fiergs-rs') return createFiergsReportManifest();
+  return createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
+}
+
+const FIERGS_DIVIDERS = new Set([8, 23, 34, 38, 42, 48, 53, 62, 70]);
+const FIERGS_STATIC = new Set([1, 3, 4, 72, 73, 74, 75]);
+const FIERGS_CONTENT_REFERENCE: Readonly<Record<number, number>> = {
+  9: 14, 10: 15, 11: 14, 12: 16, 13: 17, 14: 16, 15: 16, 16: 16, 20: 18, 21: 19, 22: 18,
+  24: 23, 25: 25, 26: 23, 27: 23, 28: 23, 30: 25, 32: 24, 33: 24,
+  36: 34, 37: 31, 40: 27, 41: 27, 43: 40, 49: 38, 50: 39, 51: 36, 52: 37,
+  54: 33, 55: 31, 56: 34, 57: 27, 58: 36, 59: 45, 60: 43, 61: 51, 64: 48, 65: 49,
+};
+
+function fiergsSectionId(slide: number): string {
+  if (slide <= 7) return 'about';
+  if (slide <= 22) return 'launches';
+  if (slide <= 33) return 'sales';
+  if (slide <= 37) return 'market';
+  if (slide <= 41) return 'ivv';
+  if (slide <= 52) return 'prices';
+  if (slide <= 61) return 'vertical';
+  if (slide <= 66) return 'horizontal';
+  if (slide <= 69) return 'location';
+  return 'consultants';
+}
+
+function fiergsVisualFamily(slide: number): PanoramaVisualFamily {
+  if (FIERGS_DIVIDERS.has(slide)) return 'divider';
+  if (FIERGS_STATIC.has(slide)) return slide === 1 ? 'cover' : slide >= 72 ? 'closing' : 'static';
+  if ([2, 5, 7].includes(slide)) return 'cover';
+  if (slide === 6) return 'summary';
+  if ([67, 68, 69].includes(slide)) return 'map';
+  if ([19, 31].includes(slide)) return 'comparison-table';
+  if ([63, 64].includes(slide)) return 'market-table';
+  if ([65, 66].includes(slide)) return 'price';
+  return 'trend-chart';
+}
+
+/** Contrato editorial próprio do FIERGS: 75 posições estáveis, inclusive sem token de mapa. */
+export function createFiergsReportManifest(): ReportPageDefinition[] {
+  return FIERGS_4T25_SLIDE_MANIFEST.map((slide) => {
+    const mapMode = slide.slide === 67 ? 'standard' : slide.slide === 68 ? 'stock' : slide.slide === 69 ? 'price' : undefined;
+    const fiergsSlide = slide.slide === 63 ? 'horizontal-offer-products' : slide.slide === 66 ? 'horizontal-price-range' : undefined;
+    const cityComparison = slide.slide === 31 ? 'sales' : undefined;
+    return {
+      page: slide.slide,
+      referenceSlide: slide.slide,
+      fiergsOfficialSlide: slide.slide,
+      contentReferenceSlide: FIERGS_CONTENT_REFERENCE[slide.slide],
+      sectionId: fiergsSectionId(slide.slide),
+      title: slide.title,
+      intention: `Slide oficial FIERGS ${slide.slide}`,
+      visualFamily: fiergsVisualFamily(slide.slide),
+      contractKeys: [],
+      methodologyStatus: FIERGS_STATIC.has(slide.slide) || FIERGS_DIVIDERS.has(slide.slide) ? 'not_applicable' : 'assumed',
+      ...(mapMode ? { mapMode } : {}),
+      ...(fiergsSlide ? { fiergsSlide } : {}),
+      ...(cityComparison ? { cityComparison } : {}),
+    };
+  });
 }

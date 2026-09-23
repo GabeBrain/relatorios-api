@@ -16,6 +16,7 @@ try {
     if ($shape.HasTextFrame -and $shape.TextFrame.HasText) { $shape.Visible = 0 }
   }
   $divider.Export((Join-Path $outputPath 'section-divider.png'), 'PNG', 1920, 1080)
+  $deck.Slides.Item(7).Export((Join-Path $outputPath 'territorial-source.png'), 'PNG', 1920, 1080)
   $deck.Close()
 } finally {
   $powerPoint.Quit()
@@ -27,5 +28,16 @@ $image = [System.Drawing.Image]::FromFile((Join-Path $outputPath 'section-divide
 try {
   if ($image.Width -ne 1920 -or $image.Height -ne 1080) { throw 'section-divider.png não foi exportado em 1920x1080.' }
 } finally { $image.Dispose() }
+
+# O mapa do slide territorial é um asset estável. Título, trimestre e notas permanecem HTML.
+$territorialSource = Join-Path $outputPath 'territorial-source.png'
+$sourceImage = [System.Drawing.Bitmap]::FromFile($territorialSource)
+try {
+  $crop = New-Object System.Drawing.Rectangle(105, 46, 615, 875)
+  $regionMap = $sourceImage.Clone($crop, $sourceImage.PixelFormat)
+  try { $regionMap.Save((Join-Path $outputPath 'region-map.png'), [System.Drawing.Imaging.ImageFormat]::Png) }
+  finally { $regionMap.Dispose() }
+} finally { $sourceImage.Dispose() }
+Remove-Item -LiteralPath $territorialSource -Force
 
 Write-Host 'Asset FIERGS exportado e validado.'

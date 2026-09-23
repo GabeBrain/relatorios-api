@@ -4,6 +4,7 @@ import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, X
 import { Button } from '@/components/ui/button';
 import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
+import { downloadFiergsAudit } from '../lib/fiergs-audit';
 import { conditionalFormat } from '../domain/conditional-format';
 import { horizontalLabelForEntity } from '../domain/entity-policy';
 import { createPanoramaSections, panoramaManifestFor, type ReportPageDefinition } from '../report/manifest';
@@ -17,7 +18,7 @@ import contentBackground from '../assets/official_v2/backgrounds/content.png';
 import dividerBackground from '../assets/official_v2/backgrounds/divider.png';
 import darkTeamBackground from '../assets/official_v2/backgrounds/dark-team.png';
 import closingBackground from '../assets/official_v2/backgrounds/closing-report.png';
-import { FIERGS_INSTITUTIONAL_SLIDES, FIERGS_SECTION_DIVIDER } from '../assets/fiergs';
+import { FIERGS_INSTITUTIONAL_SLIDES, FIERGS_REGION_MAP, FIERGS_SECTION_DIVIDER } from '../assets/fiergs';
 import '../print/panorama-print.css';
 
 const officialV2Assets = import.meta.glob('../assets/official_v2/*.png', { eager: true, import: 'default' }) as Record<string, string>;
@@ -63,6 +64,12 @@ function Corporate({ page, report }: { page: number; report: PanoramaReportModel
 function V2Divider({ title }: { title: string }) { return <div className="panorama-v2-divider"><h2>{title}</h2></div>; }
 function FiergsCityScope({ report }: { report: PanoramaReportModel }) {
   return <div className="panorama-fiergs-city-scope"><p>RECORTE DO ESTUDO</p><h2>CIDADES ANALISADAS</h2><div>{report.scope.cities.filter(Boolean).map((city) => <span key={city}>{city}</span>)}</div><small>Região Metropolitana de Porto Alegre · município de Porto Alegre não incluído no universo analisado</small></div>;
+}
+function FiergsTerritorialCover({ report }: { report: PanoramaReportModel }) {
+  return <div className="panorama-fiergs-territorial"><img src={FIERGS_REGION_MAP} alt="Mapa da Região Metropolitana de Porto Alegre"/><div><p>RECORTE FIERGS</p><h1>REGIÃO<br/>METROPOLITANA<br/>DE PORTO ALEGRE</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong><small>10 municípios analisados · Porto Alegre exibida somente como referência geográfica</small></div></div>;
+}
+function FiergsStudyCover({ report }: { report: PanoramaReportModel }) {
+  return <div className="panorama-fiergs-study-cover"><p>PANORAMA DO MERCADO IMOBILIÁRIO</p><h1>RM PORTO ALEGRE</h1><i/><strong>{quarterLabel(report.scope.endQuarter)}</strong></div>;
 }
 function CityCover({ report }: { report: PanoramaReportModel }) {
   const cities = report.scope.cities.filter(Boolean);
@@ -258,8 +265,51 @@ export function annualizeSeries(series: LaunchSeries[]) {
   return [...annual.values()].sort((a, b) => a.year - b.year);
 }
 
+function FiergsQuarterlySlide({ report, officialSlide }: { report: PanoramaReportModel; officialSlide: number }) {
+  const rolling = [11, 14, 22].includes(officialSlide);
+  const base = [9, 11].includes(officialSlide) ? report.launches.projects : [20, 22].includes(officialSlide) ? report.launches.vgv : report.launches.units;
+  const rollingData = base.map((row, index) => ({ ...row, vertical: base.slice(Math.max(0, index - 3), index + 1).reduce((sum, item) => sum + item.vertical, 0) }));
+  const config = [9, 11].includes(officialSlide)
+    ? { title: 'EMPREENDIMENTOS VERTICAIS LANÇADOS', data: rolling ? rollingData : base, unit: 'empreendimentos' }
+    : [20, 22].includes(officialSlide)
+      ? { title: 'VGV LANÇADO VERTICAL', data: rolling ? rollingData : base, unit: 'R$ milhões' }
+      : { title: 'UNIDADES VERTICAIS LANÇADAS', data: rolling ? rollingData : base, unit: 'unidades' };
+  const data = config.data;
+  const annual = (rolling
+    ? data.filter((row) => row.quarter.startsWith('4T')).map((row) => ({ year: Number(row.quarter.slice(2)), vertical: row.vertical, horizontal: 0, total: row.vertical }))
+    : annualizeSeries(data)).slice(-5);
+  const annualComparisons = annual.slice(1).map((current, index) => ({ from: annual[index], to: current, delta: variation(current.vertical, annual[index].vertical) }));
+  const closingYear = Number(report.scope.endQuarter.slice(2));
+  const closingRows = data.filter((row) => Number(row.quarter.slice(2)) === closingYear);
+  const firstSemester = rolling ? annual.at(-2)?.vertical ?? 0 : closingRows.filter((row) => ['1T', '2T'].includes(row.quarter.slice(0, 2))).reduce((sum, row) => sum + row.vertical, 0);
+  const secondSemester = rolling ? annual.at(-1)?.vertical ?? 0 : closingRows.filter((row) => ['3T', '4T'].includes(row.quarter.slice(0, 2))).reduce((sum, row) => sum + row.vertical, 0);
+  const semesterDelta = variation(secondSemester, firstSemester);
+  const format = (value: number) => officialSlide === 20 ? decimal(value) : n(value);
+  return <div className="panorama-fiergs-quarterly">
+    <header><h2>{config.title}<span>{rolling ? 'ACUMULADO 12 MESES' : 'POR TRIMESTRE'}</span></h2><div><b>VARIAÇÕES ANUAIS</b><section>{annualComparisons.map(({ from, to, delta }) => <span key={to.year}><small>{from.year} × {to.year}</small><strong>{delta === null ? '—' : `${delta >= 0 ? '+' : ''}${pct(delta)}`}</strong></span>)}</section></div></header>
+    <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 18, right: 22, top: 40, bottom: 18 }}><XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} interval={0}/><Tooltip formatter={(value) => format(Number(value))}/><Line type="monotone" dataKey="vertical" name="RM de Porto Alegre" stroke="#5d7737" strokeWidth={4} dot={{ r: 2, fill: '#5d7737' }} isAnimationActive={false} label={({ x, y, value }) => value === undefined ? null : <text x={Number(x)} y={Number(y) - 11} textAnchor="middle" className="panorama-fiergs-point">{format(Number(value))}</text>}/></LineChart></ResponsiveContainer><p>RM de Porto Alegre · {config.unit}</p></div><aside><h3>{rolling ? 'FECHAMENTOS ANUAIS' : closingYear}</h3><div><span><b>{format(firstSemester)}</b><small>{rolling ? annual.at(-2)?.year ?? 'Anterior' : `1S ${closingYear}`}</small></span><em>{semesterDelta === null ? '—' : `${semesterDelta >= 0 ? '+' : ''}${pct(semesterDelta)}`}</em><span><b>{format(secondSemester)}</b><small>{rolling ? annual.at(-1)?.year ?? closingYear : `2S ${closingYear}`}</small></span></div></aside></main>
+    <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer>
+  </div>;
+}
+
+function FiergsLaunchCitySlide({ report }: { report: PanoramaReportModel }) {
+  const rows = report.scope.cities.map((city) => {
+    const projects = report.cube.projects.filter((project) => project.segment === 'Vertical' && project.city === city && project.releaseQuarter === report.scope.endQuarter);
+    return { city, units: projects.reduce((sum, project) => sum + (project.launchedUnits ?? 0), 0), projects };
+  }).sort((a, b) => b.units - a.units);
+  const total = rows.reduce((sum, row) => sum + row.units, 0);
+  const neighborhoods = rows.flatMap((row) => {
+    const grouped = new Map<string, number>();
+    row.projects.forEach((project) => grouped.set(project.neighborhood || 'Bairro não informado', (grouped.get(project.neighborhood || 'Bairro não informado') ?? 0) + (project.launchedUnits ?? 0)));
+    return [...grouped].map(([neighborhood, units]) => ({ label: `${neighborhood} — ${row.city}`, units }));
+  }).sort((a, b) => b.units - a.units).slice(0, 7);
+  const bars = (items: { label: string; units: number }[]) => <div className="panorama-fiergs-share-bars">{items.map((item) => <div key={item.label}><span>{item.label}</span><i><b style={{ width: `${total ? item.units / total * 100 : 0}%` }}/></i><strong>{total ? pct(item.units / total * 100) : '—'}</strong></div>)}</div>;
+  return <div className="panorama-fiergs-city-share"><h2>UNIDADES VERTICAIS LANÇADAS<span>POR BAIRRO E CIDADE</span></h2><main><section>{bars(neighborhoods)}</section><section>{bars(rows.map((row) => ({ label: row.city, units: row.units })))}</section></main><footer>Total do trimestre: {n(total)} unidades · Fonte: cubo granular GeoBrain</footer></div>;
+}
+
 function fiergsBackground(def: ReportPageDefinition): string | undefined {
   if (def.visualFamily === 'divider') return FIERGS_SECTION_DIVIDER;
+  if (def.fiergsOfficialSlide) return FIERGS_INSTITUTIONAL_SLIDES[def.fiergsOfficialSlide];
   const referenceSlide = def.referenceSlide;
   const mapping: Record<number, number> = { 2: 1, 3: 3, 7: 4, 59: 72, 60: 73, 61: 74, 62: 75 };
   return FIERGS_INSTITUTIONAL_SLIDES[mapping[referenceSlide]];
@@ -365,7 +415,16 @@ function CityComparisonPage({ kind, report }: { kind: NonNullable<ReportPageDefi
   return <div className="panorama-table-page panorama-city-comparison"><h2>DISPONIBILIDADE RESIDENCIAL VERTICAL POR PADRÃO</h2><table><thead><tr><th>Padrão</th>{report.cityComparisons.sales.map((row) => <th key={row.city}>{row.city}</th>)}</tr></thead><tbody>{report.cityComparisons.availabilityByStandard.map((row) => <tr key={row.standard}><td>{row.standard}</td>{report.cityComparisons.sales.map(({ city }) => <td key={city}>{pct(row.values.find((value) => value.city === city)?.availability ?? null)}</td>)}</tr>)}</tbody></table></div>;
 }
 function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
-  const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.referenceSlide;
+  const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.contentReferenceSlide ?? def.referenceSlide;
+  const official = def.fiergsOfficialSlide;
+  if (official === 2) return <FiergsStudyCover report={report}/>;
+  if (official === 6) return <V2Summary report={report}/>;
+  if (official === 7) return <FiergsTerritorialCover report={report}/>;
+  if (official && [9, 11, 12, 14, 20, 22].includes(official)) return <FiergsQuarterlySlide report={report} officialSlide={official}/>;
+  if (official === 19) return <FiergsLaunchCitySlide report={report}/>;
+  if (official === 71) return <TeamSlide report={report}/>;
+  if (official && [1, 3, 4, 72, 73, 74, 75].includes(official)) return <div aria-hidden="true"/>;
+  if (official && def.visualFamily === 'divider') return <V2Divider title={title}/>;
   if (def.fiergsSlide === 'city-scope') return <FiergsCityScope report={report}/>;
   if (def.fiergsSlide === 'horizontal-offer-products') return <FiergsHorizontalOfferSlide report={report}/>;
   if (def.fiergsSlide === 'horizontal-price-range') return <FiergsHorizontalPriceRangeSlide report={report}/>;
@@ -380,7 +439,7 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   if ([3,7,8,10].includes(p)) return <Corporate page={p} report={report}/>;
   if (p === 53 || p === 54) return <NarrativeSlide report={report} continuation={p === 54}/>;
   if (p === 56 || def.mapMode) return <LocationSlide report={report} mode={def.mapMode}/>;
-  return dataPage(p, report) ?? <div className="panorama-corporate"><h2>{title}</h2><p>Conteúdo editorial do relatório.</p></div>;
+  return dataPage(p, report) ?? <CoveragePage title={title.toUpperCase()} detail="A posição editorial está preservada no livro FIERGS. O componente específico será concluído sem reutilizar uma métrica incompatível do modelo Secovi."/>;
 }
 function SafeSheet({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const fallback = <Sheet def={def} report={report}><div className="panorama-page-unavailable"><h2>PÁGINA INDISPONÍVEL</h2><i/><p>Esta página não pôde ser montada. As demais páginas do relatório continuam disponíveis.</p></div></Sheet>;
@@ -424,5 +483,5 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   // O trabalho pesado roda no host montado pelo shell: o usuário pode sair desta página.
   const exportPdf = () => usePanoramaExportStore.getState().start(report, 'pdf');
   const exportPptx = () => usePanoramaExportStore.getState().start(report, 'pptx');
-  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver todas as páginas</>}</Button><Button variant="outline" size="sm" disabled={exporting} onClick={exportPptx}><Presentation/>{exporting && exportFormat === 'pptx' && exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Baixar PPT espelho'}</Button><Button size="sm" disabled={exporting} onClick={exportPdf}>{exporting && exportFormat === 'pdf' ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting && exportFormat === 'pdf' ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exporting && <p className="text-sm text-muted-foreground">O arquivo está sendo gerado em segundo plano — você pode navegar pela plataforma sem interromper.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{sections.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} pages={pages} containerRef={allPagesRef}/> : <SafeSheet def={page} report={report}/>}</div></div>;
+  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver todas as páginas</>}</Button>{report.scope.entity === 'fiergs-rs' && <Button variant="outline" size="sm" onClick={() => downloadFiergsAudit(report)}><Download/>Auditoria CSV</Button>}<Button variant="outline" size="sm" disabled={exporting} onClick={exportPptx}><Presentation/>{exporting && exportFormat === 'pptx' && exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Baixar PPT espelho'}</Button><Button size="sm" disabled={exporting} onClick={exportPdf}>{exporting && exportFormat === 'pdf' ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting && exportFormat === 'pdf' ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exporting && <p className="text-sm text-muted-foreground">O arquivo está sendo gerado em segundo plano — você pode navegar pela plataforma sem interromper.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{sections.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} pages={pages} containerRef={allPagesRef}/> : <SafeSheet def={page} report={report}/>}</div></div>;
 }

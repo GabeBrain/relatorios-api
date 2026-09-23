@@ -17,7 +17,7 @@ describe('manifesto FIERGS RM Porto Alegre 4T25', () => {
     expect(FIERGS_4T25_SLIDE_MANIFEST.filter((item) => item.automation === 'static').every((item) => ['institutional', 'credits'].includes(item.dataFamily))).toBe(true);
   });
 
-  it('acrescenta horizontal multiproduto e três mapas somente ao produto FIERGS', () => {
+  it('usa o livro próprio de 75 páginas e preserva mapas mesmo sem token', () => {
     const base = {
       provenance: { engineVersion: 'v4' as const },
       cube: { projects: [{ segment: 'Horizontal', finalUnits: 10 }] },
@@ -25,10 +25,13 @@ describe('manifesto FIERGS RM Porto Alegre 4T25', () => {
       cityComparisons: { enabled: false },
     };
     const fiergs = panoramaManifestFor({ ...base, scope: { entity: 'fiergs-rs' } }, 'pk.test');
+    const fiergsWithoutMapToken = panoramaManifestFor({ ...base, scope: { entity: 'fiergs-rs' } });
     const secovi = panoramaManifestFor({ ...base, scope: { entity: 'secovi-sp' } }, 'pk.test');
-    expect(fiergs.filter((page) => page.fiergsSlide)).toHaveLength(3);
-    expect(fiergs[1]).toMatchObject({ title: 'Cidades analisadas', fiergsSlide: 'city-scope' });
+    expect(fiergs).toHaveLength(75);
+    expect(fiergs.map((page) => page.fiergsOfficialSlide)).toEqual(Array.from({ length: 75 }, (_, index) => index + 1));
+    expect(fiergs[6]).toMatchObject({ title: 'Região Metropolitana de Porto Alegre', fiergsOfficialSlide: 7 });
     expect(fiergs.filter((page) => page.mapMode).map((page) => page.mapMode)).toEqual(['standard', 'stock', 'price']);
+    expect(fiergsWithoutMapToken.filter((page) => page.mapMode)).toHaveLength(3);
     expect(secovi.some((page) => page.fiergsSlide || page.mapMode)).toBe(false);
   });
 });
