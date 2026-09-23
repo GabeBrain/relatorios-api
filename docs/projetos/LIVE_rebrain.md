@@ -1,3 +1,11 @@
+### 2026-09-23 — FIERGS-RS: Teste 2, MCMV, dormitórios e comparações contextuais — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o Sumário foi realinhado; eixos e valores históricos voltaram a exibir todos os pontos com destaque do trimestre equivalente. Pares duplicados foram convertidos em séries MCMV/padrão; vendas municipais usam barras; IVV recebeu a série correta; slides 44–47 usam R$/m² por dormitório. Comparativos laterais agora se adaptam ao fechamento: trimestre mais `1S`, `9M` ou ano, sem acumular snapshots/taxas.
+- **Por quê:** observações visuais do Teste 2 e adoção da diretriz de comparativos gráficos sugerida por Fábio/Marcos.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,lib/chart-labels.ts,print/panorama-print.css,__tests__/chart-labels.test.ts}` e `docs/features/Relatorios Secovi_FIERGS/PLANO_EXECUCAO_FIERGS_RM_POA.md`.
+- **Impacto em Etapas/Pendências:** etapa 7 pronta para teste humano; etapa 8 em execução, com harmonização das tabelas/preços 49–61 ainda pendente. Mapas aguardam token.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-09-23 — Panoramas: decisão de comparativos gráficos contextuais — Gabriel/Fábio/Marcos/Diego
 - **Ambiente/funcionalidade:** Panorama de Mercado — diretriz editorial para FIERGS e futura revisão do Secovi.
 - **O quê:** o exemplo visual apresentado pelo Sinduscon foi incorporado como referência alternativa: série histórica à esquerda e comparações gráficas do trimestre e do acumulado à direita. No 2T, comparar trimestre e semestre; no 3T, trimestre e nove meses; no 4T, trimestre e ano.

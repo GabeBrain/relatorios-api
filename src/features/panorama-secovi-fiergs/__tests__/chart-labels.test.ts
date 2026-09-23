@@ -17,12 +17,11 @@ describe('legibilidade adaptativa de séries FIERGS', () => {
     expect([...visibleQuarterTickIndexes(series(12))]).toHaveLength(12);
   });
 
-  it('preserva fechamentos anuais e o fechamento final em séries longas', () => {
+  it('mantém ticks e valores em todos os pontos de séries longas', () => {
     const data = series(20);
     const ticks = visibleQuarterTickIndexes(data);
     const labels = visiblePointLabelIndexes(data);
-    expect([3, 7, 11, 15, 19].every((index) => ticks.has(index))).toBe(true);
-    expect([3, 7, 11, 15, 16, 17, 18, 19].every((index) => labels.has(index))).toBe(true);
-    expect(labels.size).toBeLessThan(data.length);
+    expect(ticks.size).toBe(data.length);
+    expect(labels.size).toBe(data.length);
   });
 });
