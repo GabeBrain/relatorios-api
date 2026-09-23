@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { httpRequest } = vi.hoisted(() => ({ httpRequest: vi.fn() }));
 vi.mock('@/lib/http-client', () => ({ httpRequest }));
 
-import { fetchPanoramaBuildings, normalizeInternalBuilding } from '../api';
+import { createRequestGate, fetchPanoramaBuildings, normalizeInternalBuilding, panoramaConcurrencyPolicy } from '../api';
 
 const response = (data: Record<string, unknown>[], ok = true, status = 200) => ({
   ok, status, data: ok ? { data, meta: { last_page: 1 } } : null, error: ok ? null : `HTTP ${status}`,
@@ -20,6 +20,23 @@ describe('fonte granular do Panorama', () => {
     expect(normalized.typologies_history).toEqual([
       { number_bedroom: null }, { number_bedroom: '2' }, { number_bedroom: null },
     ]);
+  });
+
+  it('acelera apenas o FIERGS e preserva a política operacional do Secovi', () => {
+    expect(panoramaConcurrencyPolicy('fiergs-rs')).toEqual({ cities: 2, requests: 6 });
+    expect(panoramaConcurrencyPolicy('secovi-sp')).toEqual({ cities: 1, requests: 4 });
+  });
+
+  it('o limitador global nunca excede o teto configurado', async () => {
+    const gate = createRequestGate(3);
+    let active = 0; let peak = 0;
+    await Promise.all(Array.from({ length: 12 }, (_, index) => gate(async () => {
+      active += 1; peak = Math.max(peak, active);
+      await new Promise((resolve) => setTimeout(resolve, 2));
+      active -= 1;
+      return index;
+    })));
+    expect(peak).toBe(3);
   });
 
   it('usa a rota interna como padrão e filtra o mesmo universo Ativo/Esgotado', async () => {

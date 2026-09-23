@@ -14,11 +14,19 @@ const BASE_URL = 'https://geobrain.com.br/public-api';
 const BUILDINGS_V2_BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
 const BUILDINGS_INTERNAL_V2_BASE_URL = 'https://app.geobrain.com.br/public-api/v2';
 const PER_PAGE = 100;
-// Uma cidade abre consultas de prédios e dez séries temporais. Processar três ao mesmo tempo
-// disparava mais de trinta conexões e fazia o navegador abortar inclusive o fallback legado.
-const CITY_CONCURRENCY = 1;
-const REQUEST_CONCURRENCY_PER_CITY = 4;
+// O FIERGS tem dez cidades: duas avançam juntas, mas todas compartilham um teto global. O Secovi
+// mantém uma cidade por vez para preservar o comportamento operacional já validado.
+const SECOVI_CITY_CONCURRENCY = 1;
+const FIERGS_CITY_CONCURRENCY = 2;
+const SECOVI_GLOBAL_REQUEST_CONCURRENCY = 4;
+const FIERGS_GLOBAL_REQUEST_CONCURRENCY = 6;
 const BUILDING_STATUSES = ['Ativo', 'Esgotado'];
+
+export function panoramaConcurrencyPolicy(entity: PanoramaScope['entity']): { cities: number; requests: number } {
+  return entity === 'fiergs-rs'
+    ? { cities: FIERGS_CITY_CONCURRENCY, requests: FIERGS_GLOBAL_REQUEST_CONCURRENCY }
+    : { cities: SECOVI_CITY_CONCURRENCY, requests: SECOVI_GLOBAL_REQUEST_CONCURRENCY };
+}
 
 /** Recorte de uma única cidade; o escopo público continua sendo multi-cidade. */
 type CityScope = { uf: string; city: string; startQuarter?: Quarter; endQuarter: Quarter };
@@ -43,7 +51,8 @@ function temporalWindow(scope: Pick<CityScope, 'startQuarter' | 'endQuarter'>): 
 }
 
 /** Limita a rajada por município sem alterar a ordem nem a semântica das fontes. */
-function createRequestGate(limit: number) {
+export type PanoramaRequestGate = <T>(request: () => Promise<T>) => Promise<T>;
+export function createRequestGate(limit: number): PanoramaRequestGate {
   let active = 0;
   const waiting: (() => void)[] = [];
   const release = () => {
@@ -78,12 +87,12 @@ export function normalizeInternalBuilding(building: Record<string, unknown>): Re
   };
 }
 
-async function fetchBuildingsInternalV2(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
+async function fetchBuildingsInternalV2(scope: CityScope, signal?: AbortSignal, gate: PanoramaRequestGate = (request) => request()): Promise<Record<string, unknown>[]> {
   const byId = new Map<string, Record<string, unknown>>();
-  for (const type of ['Vertical', 'Horizontal']) {
+  await Promise.all(['Vertical', 'Horizontal'].map(async (type) => {
     let page = 1; let lastPage = 1;
     do {
-      const response = await requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_INTERNAL_V2_BASE_URL}/building-with-history-internal`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal });
+      const response = await gate(() => requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_INTERNAL_V2_BASE_URL}/building-with-history-internal`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal }));
       if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain interna v2 em ${scope.city} (${response.status ?? 'rede'}).`);
       const entries = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
       for (const raw of entries) {
@@ -95,16 +104,17 @@ async function fetchBuildingsInternalV2(scope: CityScope, signal?: AbortSignal):
       lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
       page += 1;
     } while (page <= lastPage);
-  }
+  }));
   return [...byId.values()];
 }
 
-async function fetchBuildingsPublicV2(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
+async function fetchBuildingsPublicV2(scope: CityScope, signal?: AbortSignal, gate: PanoramaRequestGate = (request) => request()): Promise<Record<string, unknown>[]> {
   const byId = new Map<string, Record<string, unknown>>();
-  for (const type of ['Vertical', 'Horizontal']) for (const status of BUILDING_STATUSES) {
+  const lanes = ['Vertical', 'Horizontal'].flatMap((type) => BUILDING_STATUSES.map((status) => ({ type, status })));
+  await Promise.all(lanes.map(async ({ type, status }) => {
     let page = 1; let lastPage = 1;
     do {
-      const response = await requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_V2_BASE_URL}/building-with-history`, query: { type, status, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal });
+      const response = await gate(() => requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_V2_BASE_URL}/building-with-history`, query: { type, status, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal }));
       if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain v2 em ${scope.city} (${response.status ?? 'rede'}).`);
       const entries = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
       for (const building of entries) {
@@ -114,7 +124,7 @@ async function fetchBuildingsPublicV2(scope: CityScope, signal?: AbortSignal): P
       lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
       page += 1;
     } while (page <= lastPage);
-  }
+  }));
   return [...byId.values()];
 }
 
@@ -138,12 +148,12 @@ async function fetchBuildingsLegacy(scope: CityScope, signal?: AbortSignal): Pro
  * A rota interna v2 é a fonte granular canônica. A pública v2 permanece como fallback com retry;
  * somente o motor V2 antigo pode recorrer ao contrato legado. Nenhuma falha vira coleção vazia.
  */
-export async function fetchPanoramaBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' | 'v4' = 'v4'): Promise<Record<string, unknown>[]> {
+export async function fetchPanoramaBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' | 'v4' = 'v4', gate?: PanoramaRequestGate): Promise<Record<string, unknown>[]> {
   try {
-    return await fetchBuildingsInternalV2(scope, signal);
+    return await fetchBuildingsInternalV2(scope, signal, gate);
   } catch (internalError) {
     try {
-      return await fetchBuildingsPublicV2(scope, signal);
+      return await fetchBuildingsPublicV2(scope, signal, gate);
     } catch (publicError) {
       if (engineVersion !== 'v2') {
         const internalMessage = internalError instanceof Error ? internalError.message : String(internalError);
@@ -250,11 +260,10 @@ export function describeTemporalFailure(city: string, issues: TemporalIssue[]): 
   return `Não foi possível consultar ${metrics} em ${city}: a GeoBrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
 }
 
-async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3' | 'v4', circuit: PanoramaTemporalCircuit, signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
-  const gate = createRequestGate(REQUEST_CONCURRENCY_PER_CITY);
+async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3' | 'v4', circuit: PanoramaTemporalCircuit, gate: PanoramaRequestGate, signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
   const track = <T,>(operation: string, request: () => Promise<T>) => gate(request).finally(() => onUnit?.(scope.city, operation));
   const [buildings, sales, salesTypology, stock, stockTypology, ivv, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
-    track('empreendimentos', () => fetchPanoramaBuildings(scope, signal, engineVersion)),
+    fetchPanoramaBuildings(scope, signal, engineVersion, gate).finally(() => onUnit?.(scope.city, 'empreendimentos')),
     track('vendas por padrão', () => temporalRows(scope, 'sales', 'Padrão', signal)), track('vendas por tipologia', () => temporalRows(scope, 'sales', 'Tipologia', signal)),
     track('oferta por padrão', () => temporalRows(scope, 'stock', 'Padrão', signal)), track('oferta por tipologia', () => temporalRows(scope, 'stock', 'Tipologia', signal)),
     track('IVV por padrão', () => temporalRows(scope, 'ivv', 'Padrão', signal, circuit)),
@@ -290,15 +299,17 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
   const progress = createPanoramaGenerationProgress(scopes.length, onProgress);
   progress.start();
   const circuit = new PanoramaTemporalCircuit();
+  const concurrency = panoramaConcurrencyPolicy(scope.entity);
+  const requestGate = createRequestGate(concurrency.requests);
 
   const collection: CollectionResult<CityHarvest> = await collectByCity(
     scopes.map((item) => item.city),
     async (city, citySignal) => {
-      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, scope.engineVersion ?? 'v4', circuit, citySignal, progress.unit);
+      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, scope.engineVersion ?? 'v4', circuit, requestGate, citySignal, progress.unit);
       progress.cityComplete(city);
       return harvest;
     },
-    { concurrency: CITY_CONCURRENCY, signal },
+    { concurrency: concurrency.cities, signal },
   );
 
   collection.failedCities.forEach(({ city }) => progress.cityFailed(city));
@@ -453,7 +464,7 @@ export async function fetchLaunchAuditBuildings(scope: PanoramaScope, signal?: A
   const collection = await collectByCity(
     cityScopes(scope).map((item) => item.city),
     (city, citySignal) => fetchPanoramaBuildings({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, citySignal).then((buildings) => ({ city, buildings })),
-    { concurrency: CITY_CONCURRENCY, signal },
+    { concurrency: SECOVI_CITY_CONCURRENCY, signal },
   );
   const harvested = completedValues(collection);
   const seen = new Set<string>(); const rows: LaunchAuditBuilding[] = [];

@@ -32,6 +32,7 @@ Entregar o Panorama FIERGS com o mesmo contrato editorial do deck oficial de 75 
 | 11 | Bancada cidade/empreendimento | DOING | CSV por empreendimento/rejeição disponível; falta anexar referência oficial e calcular deltas |
 | 12 | Paridade numérica 4T25 | BLOCKED | Requer regra/data de congelamento e eventuais exclusões do analista |
 | 13 | Comparação visual dos 75 slides | TODO | Classificação slide a slide e correções de PDF/PPT |
+| 14 | Performance da coleta multi-cidade | DOING | FIERGS: 2 cidades e teto global de 6 requisições; medir geração publicada |
 
 ## Pontos de teste humano
 
@@ -88,3 +89,4 @@ Deltas prioritários: 3T25 (`634` atual versus `138` oficial), 4T25 (`3.082` ver
 - 2026-09-23: slides trimestrais de empreendimentos, unidades e VGV receberam série exclusivamente vertical, variações anuais e comparação semestral.
 - 2026-09-23: acumulados de 12 meses e distribuição de lançamentos por bairro/cidade incorporados ao primeiro bloco.
 - 2026-09-23: download `Auditoria CSV` adicionado ao FIERGS com IDs, cidade, segmento, padrão, trimestre, lançamentos, vendas, oferta, preços, cobertura e rejeições.
+- 2026-09-23: coleta FIERGS otimizada para duas cidades simultâneas com teto global de seis requisições; Secovi preservado em uma cidade e teto quatro; granular vertical/horizontal paralelizado dentro do mesmo limitador.
