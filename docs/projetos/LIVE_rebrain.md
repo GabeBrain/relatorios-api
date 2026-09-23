@@ -1,3 +1,10 @@
+### 2026-09-23 — Panoramas: decisão de comparativos gráficos contextuais — Gabriel/Fábio/Marcos/Diego
+- **Ambiente/funcionalidade:** Panorama de Mercado — diretriz editorial para FIERGS e futura revisão do Secovi.
+- **O quê:** o exemplo visual apresentado pelo Sinduscon foi incorporado como referência alternativa: série histórica à esquerda e comparações gráficas do trimestre e do acumulado à direita. No 2T, comparar trimestre e semestre; no 3T, trimestre e nove meses; no 4T, trimestre e ano.
+- **Por quê:** orientação de Fábio e Marcos para facilitar leitura e automação, encaminhada por Diego e validada por Gabriel.
+- **Impacto em Etapas/Pendências:** aplicar ao FIERGS nesta primeira versão depois da leitura do Teste 2. A conversão dos quadros comparativos do Secovi fica como pendência posterior e não altera a entrega atual.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-09-23 — FIERGS-RS: fechamento de lançamentos e arquitetura de vendas/oferta — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
 - **O quê:** os slides 10, 13, 15–18 e 21 passaram a usar distribuições FIERGS por padrão e tipologia derivadas do cubo granular. O bloco 23–37 ganhou séries verticais de vendas e VGV, acumulados de 12 meses, distribuições por padrão/tipologia/cidade e oferta final. Estoque é tratado como fotografia: comparações anuais usam o fechamento, sem somar snapshots trimestrais.

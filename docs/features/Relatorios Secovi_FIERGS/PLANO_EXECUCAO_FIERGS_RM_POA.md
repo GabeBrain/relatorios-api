@@ -76,6 +76,9 @@ Deltas prioritários: 3T25 (`634` atual versus `138` oficial), 4T25 (`3.082` ver
 - Rota GeoBrain interna permanece principal, com pública + retries como fallback.
 - Números atuais não serão artificialmente corrigidos antes da confirmação do universo histórico.
 - O FIERGS mantém 75 posições mesmo sem mapa ou dado metodologicamente aprovado.
+- O formato visual sugerido pelo Sinduscon passa a ser referência alternativa do FIERGS: série histórica acompanhada de comparação gráfica do trimestre e do acumulado pertinente.
+- A regra comparativa futura será contextual ao fechamento: `2T × 2T` e `1S × 1S`; `3T × 3T` e `9M × 9M`; `4T × 4T` e `ano × ano`. Fluxos podem ser acumulados; estoque, preço e taxas usam fechamento ou ponderação adequada.
+- A migração visual equivalente do Secovi fica registrada como pendência posterior, sem alterar sua saída nesta entrega.
 
 ## Histórico de avanços
 
@@ -94,3 +97,4 @@ Deltas prioritários: 3T25 (`634` atual versus `138` oficial), 4T25 (`3.082` ver
 - 2026-09-23: FIERGS passou a usar Montserrat em hierarquia e Source Sans 3 em leitura. Eixos trimestrais usam forma curta, amostragem adaptativa e rótulos de valores priorizados em fechamentos anuais e quatro trimestres recentes; acumulados de 12 meses não exibem janelas parciais.
 - 2026-09-23: distribuições dos slides 10, 13, 15–18 e 21 deixaram de reutilizar componentes Secovi; padrão e tipologia derivam do cubo granular do trimestre de lançamento.
 - 2026-09-23: etapa 6 implementada no padrão FIERGS: vendas verticais trimestrais e 12 meses, padrão, tipologia e cidade, VGV vendido e oferta final. Fluxos são somados; estoque permanece fotografia e seus comparativos anuais usam o fechamento, nunca soma de snapshots.
+- 2026-09-23: orientação de Fábio/Marcos, encaminhada por Diego, incorporada como referência visual alternativa: substituir quadros comparativos temporais por gráficos de trimestre e acumulado contextual. Aplicar no FIERGS nesta primeira versão após o Teste 2; Secovi permanece como pendência separada.
