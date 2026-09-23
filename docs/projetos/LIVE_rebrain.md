@@ -1,3 +1,11 @@
+### 2026-09-23 — FIERGS-RS: legibilidade temporal e correções estruturais do Teste 1 — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o produto FIERGS recebeu tipografia canônica Montserrat/Source Sans 3 e uma política adaptativa para eixos e rótulos de séries: trimestre abreviado, amostragem de ticks, destaque dos fechamentos anuais e dos quatro pontos mais recentes. Acumulados de 12 meses agora começam apenas com quatro trimestres completos. Também foram corrigidos o Sumário duplicado e o roteamento que deixava os três mapas em branco.
+- **Por quê:** o primeiro PDF de 75 páginas comprovou sobreposição dos rótulos temporais, valores pequenos e três posições cartográficas vazias.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,lib/chart-labels.ts,print/panorama-print.css,__tests__/chart-labels.test.ts}` e `docs/features/Relatorios Secovi_FIERGS/PLANO_EXECUCAO_FIERGS_RM_POA.md`.
+- **Impacto em Etapas/Pendências:** etapa 5 permanece em execução até fechar as distribuições específicas; etapa 10 passa a ter fallback visual correto, mas segue dependente do token Mapbox.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-09-22 — FIERGS-RS: apresentação por entidade, horizontal e mapas — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — renderização e exportação do recorte FIERGS.
 - **O quê:** o renderizador passou a separar identidade por entidade: o FIERGS não recebe mais fundos, textos institucionais ou rótulos horizontais do Secovi. A capa acomoda as 11 cidades. O bloco horizontal ganhou oferta por produto e faixa min/média/máxima, preservando coorte e preço médio por produto. Foram adicionados mapas por padrão, estoque e R$/m². O campo `neighborhood` agora é preservado no cubo granular.

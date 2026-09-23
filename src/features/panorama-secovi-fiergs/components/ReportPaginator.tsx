@@ -4,6 +4,7 @@ import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, X
 import { Button } from '@/components/ui/button';
 import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
+import { compactQuarterLabel, visiblePointLabelIndexes, visibleQuarterTickIndexes } from '../lib/chart-labels';
 import { downloadFiergsAudit } from '../lib/fiergs-audit';
 import { conditionalFormat } from '../domain/conditional-format';
 import { horizontalLabelForEntity } from '../domain/entity-policy';
@@ -268,7 +269,9 @@ export function annualizeSeries(series: LaunchSeries[]) {
 function FiergsQuarterlySlide({ report, officialSlide }: { report: PanoramaReportModel; officialSlide: number }) {
   const rolling = [11, 14, 22].includes(officialSlide);
   const base = [9, 11].includes(officialSlide) ? report.launches.projects : [20, 22].includes(officialSlide) ? report.launches.vgv : report.launches.units;
-  const rollingData = base.map((row, index) => ({ ...row, vertical: base.slice(Math.max(0, index - 3), index + 1).reduce((sum, item) => sum + item.vertical, 0) }));
+  const rollingData = base
+    .map((row, index) => ({ ...row, vertical: base.slice(Math.max(0, index - 3), index + 1).reduce((sum, item) => sum + item.vertical, 0) }))
+    .filter((_, index) => index >= 3);
   const config = [9, 11].includes(officialSlide)
     ? { title: 'EMPREENDIMENTOS VERTICAIS LANÇADOS', data: rolling ? rollingData : base, unit: 'empreendimentos' }
     : [20, 22].includes(officialSlide)
@@ -285,9 +288,11 @@ function FiergsQuarterlySlide({ report, officialSlide }: { report: PanoramaRepor
   const secondSemester = rolling ? annual.at(-1)?.vertical ?? 0 : closingRows.filter((row) => ['3T', '4T'].includes(row.quarter.slice(0, 2))).reduce((sum, row) => sum + row.vertical, 0);
   const semesterDelta = variation(secondSemester, firstSemester);
   const format = (value: number) => officialSlide === 20 ? decimal(value) : n(value);
+  const visibleTicks = visibleQuarterTickIndexes(data);
+  const visibleLabels = visiblePointLabelIndexes(data);
   return <div className="panorama-fiergs-quarterly">
     <header><h2>{config.title}<span>{rolling ? 'ACUMULADO 12 MESES' : 'POR TRIMESTRE'}</span></h2><div><b>VARIAÇÕES ANUAIS</b><section>{annualComparisons.map(({ from, to, delta }) => <span key={to.year}><small>{from.year} × {to.year}</small><strong>{delta === null ? '—' : `${delta >= 0 ? '+' : ''}${pct(delta)}`}</strong></span>)}</section></div></header>
-    <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 18, right: 22, top: 40, bottom: 18 }}><XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} interval={0}/><Tooltip formatter={(value) => format(Number(value))}/><Line type="monotone" dataKey="vertical" name="RM de Porto Alegre" stroke="#5d7737" strokeWidth={4} dot={{ r: 2, fill: '#5d7737' }} isAnimationActive={false} label={({ x, y, value }) => value === undefined ? null : <text x={Number(x)} y={Number(y) - 11} textAnchor="middle" className="panorama-fiergs-point">{format(Number(value))}</text>}/></LineChart></ResponsiveContainer><p>RM de Porto Alegre · {config.unit}</p></div><aside><h3>{rolling ? 'FECHAMENTOS ANUAIS' : closingYear}</h3><div><span><b>{format(firstSemester)}</b><small>{rolling ? annual.at(-2)?.year ?? 'Anterior' : `1S ${closingYear}`}</small></span><em>{semesterDelta === null ? '—' : `${semesterDelta >= 0 ? '+' : ''}${pct(semesterDelta)}`}</em><span><b>{format(secondSemester)}</b><small>{rolling ? annual.at(-1)?.year ?? closingYear : `2S ${closingYear}`}</small></span></div></aside></main>
+    <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 24, right: 28, top: 42, bottom: 24 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => visibleTicks.has(index) ? compactQuarterLabel(String(value)) : ''} tickLine={false} tickMargin={9} axisLine={{ stroke: '#b8b8b8' }} interval={0} minTickGap={0}/><Tooltip formatter={(value) => format(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as LaunchSeries['quarter'])}/><Line type="monotone" dataKey="vertical" name="RM de Porto Alegre" stroke="#5d7737" strokeWidth={4} dot={{ r: 2.5, fill: '#5d7737' }} isAnimationActive={false} label={({ x, y, value, index }) => value === undefined || !visibleLabels.has(Number(index)) ? null : <text x={Number(x)} y={Number(y) - 12} textAnchor="middle" className="panorama-fiergs-point">{format(Number(value))}</text>}/></LineChart></ResponsiveContainer><p>RM de Porto Alegre · {config.unit}</p></div><aside><h3>{rolling ? 'FECHAMENTOS ANUAIS' : closingYear}</h3><div><span><b>{format(firstSemester)}</b><small>{rolling ? annual.at(-2)?.year ?? 'Anterior' : `1S ${closingYear}`}</small></span><em>{semesterDelta === null ? '—' : `${semesterDelta >= 0 ? '+' : ''}${pct(semesterDelta)}`}</em><span><b>{format(secondSemester)}</b><small>{rolling ? annual.at(-1)?.year ?? closingYear : `2S ${closingYear}`}</small></span></div></aside></main>
     <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer>
   </div>;
 }
@@ -418,6 +423,7 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.contentReferenceSlide ?? def.referenceSlide;
   const official = def.fiergsOfficialSlide;
   if (official === 2) return <FiergsStudyCover report={report}/>;
+  if (official === 5) return <Corporate page={8} report={report}/>;
   if (official === 6) return <V2Summary report={report}/>;
   if (official === 7) return <FiergsTerritorialCover report={report}/>;
   if (official && [9, 11, 12, 14, 20, 22].includes(official)) return <FiergsQuarterlySlide report={report} officialSlide={official}/>;
@@ -434,11 +440,11 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   if ([6,9,11,20,28,30,47,50,52,55,57].includes(p)) return <V2Divider title={title}/>;
   if (p === 58) return <TeamSlide report={report}/>;
   if (p === 59) return <ConsultantClosing report={report}/>;
+  if (p === 56 || def.mapMode) return <LocationSlide report={report} mode={def.mapMode}/>;
   if (p >= 60) return <div aria-hidden="true"/>;
   // A V2 não usa lâminas legadas com textos/cidades congelados nem o rodapé da V1.
   if ([3,7,8,10].includes(p)) return <Corporate page={p} report={report}/>;
   if (p === 53 || p === 54) return <NarrativeSlide report={report} continuation={p === 54}/>;
-  if (p === 56 || def.mapMode) return <LocationSlide report={report} mode={def.mapMode}/>;
   return dataPage(p, report) ?? <CoveragePage title={title.toUpperCase()} detail="A posição editorial está preservada no livro FIERGS. O componente específico será concluído sem reutilizar uma métrica incompatível do modelo Secovi."/>;
 }
 function SafeSheet({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {

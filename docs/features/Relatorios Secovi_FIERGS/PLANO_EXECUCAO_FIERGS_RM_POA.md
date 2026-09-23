@@ -20,15 +20,15 @@ Entregar o Panorama FIERGS com o mesmo contrato editorial do deck oficial de 75 
 | Etapa | Entrega | Estado | Critério de conclusão / dependência |
 |---:|---|---|---|
 | 1 | Congelar contrato editorial FIERGS em 75 posições | DONE | Preview, PDF e PPT usam manifesto próprio, sem herdar sequência Secovi |
-| 2 | Sistema visual FIERGS/Rebrain | HUMAN | Tokens iniciais aplicados; falta revisão visual do livro completo |
+| 2 | Sistema visual FIERGS/Rebrain | HUMAN | Montserrat/Source Sans 3 e hierarquia aplicadas ao FIERGS; falta revisão visual do livro completo |
 | 3 | Capa territorial RM Porto Alegre | HUMAN | Mapa, título e trimestre dinâmicos; sem percentuais socioeconômicos |
 | 4 | Nove aberturas oficiais | HUMAN | Fundo oficial e terminologia FIERGS nas posições corretas |
-| 5 | Lançamentos verticais — slides 8–22 | DOING | Vertical isolado, comparativos anuais/semestrais e layouts correspondentes |
+| 5 | Lançamentos verticais — slides 8–22 | DOING | Teste 1 corrigido: eixo/rótulos adaptativos, acumulado completo e principais lâminas verticais; faltam distribuições específicas |
 | 6 | Vendas e oferta — slides 23–37 | TODO | Mesmo universo entre consolidado e cidade; totais internos fechando |
 | 7 | MCMV, bairros/cidades e dormitórios | TODO | Componentes e agregações específicas, sem reaproveitar indicador incompatível |
 | 8 | IVV, preços e mercado vertical — slides 38–61 | TODO | Uma fonte granular coerente por indicador; unidades e fórmulas explícitas |
 | 9 | Horizontal completo — slides 62–66 | TODO | Quatro produtos FIERGS separados do vertical |
-| 10 | Três mapas — slides 67–69 | BLOCKED | Requer `VITE_MAPBOX_ACCESS_TOKEN` local/publicado e novo deploy |
+| 10 | Três mapas — slides 67–69 | BLOCKED | Roteamento e estado controlado corrigidos; fundo cartográfico requer `VITE_MAPBOX_ACCESS_TOKEN` local/publicado e novo deploy |
 | 11 | Bancada cidade/empreendimento | DOING | CSV por empreendimento/rejeição disponível; falta anexar referência oficial e calcular deltas |
 | 12 | Paridade numérica 4T25 | BLOCKED | Requer regra/data de congelamento e eventuais exclusões do analista |
 | 13 | Comparação visual dos 75 slides | TODO | Classificação slide a slide e correções de PDF/PPT |
@@ -90,3 +90,5 @@ Deltas prioritários: 3T25 (`634` atual versus `138` oficial), 4T25 (`3.082` ver
 - 2026-09-23: acumulados de 12 meses e distribuição de lançamentos por bairro/cidade incorporados ao primeiro bloco.
 - 2026-09-23: download `Auditoria CSV` adicionado ao FIERGS com IDs, cidade, segmento, padrão, trimestre, lançamentos, vendas, oferta, preços, cobertura e rejeições.
 - 2026-09-23: coleta FIERGS otimizada para duas cidades simultâneas com teto global de seis requisições; Secovi preservado em uma cidade e teto quatro; granular vertical/horizontal paralelizado dentro do mesmo limitador.
+- 2026-09-23: Teste 1 do PDF/CSV revisado. Abertura duplicada e roteamento das três lâminas de mapa foram corrigidos; sem token, mapas agora exibem indisponibilidade controlada em vez de página branca.
+- 2026-09-23: FIERGS passou a usar Montserrat em hierarquia e Source Sans 3 em leitura. Eixos trimestrais usam forma curta, amostragem adaptativa e rótulos de valores priorizados em fechamentos anuais e quatro trimestres recentes; acumulados de 12 meses não exibem janelas parciais.
