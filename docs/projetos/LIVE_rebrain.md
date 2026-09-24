@@ -1,3 +1,10 @@
+### 2026-09-23 — FIERGS-RS: Teste 3 e densidade editorial dos blocos vertical/horizontal — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o PDF do Teste 3 foi auditado visualmente. Distribuições receberam cabeçalho estruturado, KPI integrado, barras e rótulos maiores; tabelas simples e gráficos de preço passaram a ocupar a área útil; matrizes de coorte, maturidade e VGV preservam densidade compatível com muitas colunas. A regra é exclusiva do FIERGS.
+- **Por quê:** páginas corretas em conteúdo ainda pareciam vazias e tratavam números principais como notas pequenas, reduzindo conforto de leitura e hierarquia.
+- **Verificações:** typecheck e build aprovados; 17 testes focados de renderização/editorial aprovados.
+- **Impacto em Etapas/Pendências:** etapas 8 e 9 seguem para validação humana no Teste 4. Mapas continuam aguardando token; paridade 4T25 continua aguardando a regra de congelamento/exclusões do analista.
+
 ### 2026-09-23 — FIERGS-RS: Teste 2, MCMV, dormitórios e comparações contextuais — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
 - **O quê:** o Sumário foi realinhado; eixos e valores históricos voltaram a exibir todos os pontos com destaque do trimestre equivalente. Pares duplicados foram convertidos em séries MCMV/padrão; vendas municipais usam barras; IVV recebeu a série correta; slides 44–47 usam R$/m² por dormitório. Comparativos laterais agora se adaptam ao fechamento: trimestre mais `1S`, `9M` ou ano, sem acumular snapshots/taxas.

@@ -26,8 +26,8 @@ Entregar o Panorama FIERGS com o mesmo contrato editorial do deck oficial de 75 
 | 5 | Lançamentos verticais — slides 8–22 | HUMAN | Séries e distribuições por padrão, tipologia, bairro/cidade concluídas; aguarda PDF do Teste 2 |
 | 6 | Vendas e oferta — slides 23–37 | HUMAN | Arquitetura FIERGS, fluxo, acumulados, padrão, tipologia, cidade e estoque concluídos; aguarda PDF e paridade metodológica municipal |
 | 7 | MCMV, bairros/cidades e dormitórios | HUMAN | Séries MCMV de lançamentos/vendas, cidade em barras e quatro séries por dormitórios implementadas; aguarda PDF |
-| 8 | IVV, preços e mercado vertical — slides 38–61 | DOING | IVV temporal corrigido e dormitórios separados; faltam harmonizar tabelas/preços dos slides 49–61 |
-| 9 | Horizontal completo — slides 62–66 | TODO | Quatro produtos FIERGS separados do vertical |
+| 8 | IVV, preços e mercado vertical — slides 38–61 | HUMAN | IVV, dormitórios, tabelas, gráficos e matrizes usam densidade editorial FIERGS; aguarda PDF do Teste 4 |
+| 9 | Horizontal completo — slides 62–66 | HUMAN | Quatro produtos FIERGS, coortes, preço médio e faixa de R$/m² separados do vertical; aguarda PDF do Teste 4 |
 | 10 | Três mapas — slides 67–69 | BLOCKED | Roteamento e estado controlado corrigidos; fundo cartográfico requer `VITE_MAPBOX_ACCESS_TOKEN` local/publicado e novo deploy |
 | 11 | Bancada cidade/empreendimento | DOING | CSV por empreendimento/rejeição disponível; falta anexar referência oficial e calcular deltas |
 | 12 | Paridade numérica 4T25 | BLOCKED | Requer regra/data de congelamento e eventuais exclusões do analista |
@@ -103,3 +103,5 @@ Deltas prioritários: 3T25 (`634` atual versus `138` oficial), 4T25 (`3.082` ver
 - 2026-09-23: achados que entram nas etapas 7–8: substituir pares hoje duplicados por recortes MCMV/padrão, harmonizar a página municipal com barras FIERGS, ampliar comparativos anuais e substituir tabelas Secovi pequenas dos slides 39–61 por layouts FIERGS. O slide 47 requer componente real de 4 dormitórios. Mapas 67–69 estão corretamente diagnosticados, mas continuam dependentes do token.
 - 2026-09-23: etapa 7 implementada para teste: os pares duplicados viraram séries MCMV/padrão de lançamentos e vendas, a comparação municipal usa barras e os slides 44–47 usam as séries temporais de R$/m² por dormitório.
 - 2026-09-23: comparativos contextuais automatizados no FIERGS: trimestre equivalente mais acumulado coerente com o fechamento (`1S`, `9M` ou ano); snapshots e taxas não são acumulados. O slide 39 deixou de exibir preço por engano e passou a consumir IVV.
+- 2026-09-23: Teste 3 revisado. A grade FIERGS passou a usar densidade editorial por complexidade: distribuições ganharam KPI integrado, barras e rótulos maiores; tabelas simples ocupam mais área; gráficos de preço cresceram; matrizes de coorte, maturidade e VGV mantêm escala compacta sem herdar o vazio do Secovi.
+- 2026-09-23: etapas 8 e 9 promovidas para validação humana. Os slides 38–61 receberam hierarquia e ocupação FIERGS, e o bloco horizontal 62–66 preserva os quatro produtos da política FIERGS em componentes e agregações próprios.
