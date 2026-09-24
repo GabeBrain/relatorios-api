@@ -138,6 +138,21 @@ fonte na sessão e segue a análise, exibindo um aviso em vez de interromper o e
 **Próxima expansão:** absorção; depois revenda, locação, lazer e anúncios, que ainda não são extraídos. A extração automática dos Excel brutos no
 ambiente publicado continua separada da validação do comparador.
 
+## Versão 0.54 — 2026-09-24 — Landing operacional do Assistente de Projetos
+
+A entrada do Corretor deixa de apresentar uma grade extensa de cards equivalentes e passa a organizar
+o trabalho como painel operacional. O topo resume estudos em correção, prontos, pendências abertas e
+custo acumulado de IA. As ações `Avaliar novo estudo` e `Gerar sugestão de análise` têm hierarquia
+visual própria e preservam os fluxos anteriores.
+
+Os estudos aparecem em lista compacta, com abas Em correção/Prontos/Todos, busca por nome ou cidade
+e ordenação por data, pendências, nome ou custo. Cada linha mostra cidade, versão, número de slides,
+situação, data e custo; estudos ativos com zero pendências são explicitamente apresentados como
+`Revisar e entregar`. A composição possui estados responsivos e estado vazio de busca.
+
+**Verificação:** 131 testes do Corretor aprovados, lint direcionado sem erros e build de produção
+aprovado. Nenhuma migration adicional.
+
 ## Versão 0.51 — 2026-08-12 — Alinhamento da linha de totais e agrupamento tolerante de fatias (RUNTIME)
 
 Sessão de calibração de falsos positivos feita **direto no banco**, sem PPTX: os payloads reais

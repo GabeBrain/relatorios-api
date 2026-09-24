@@ -10,6 +10,7 @@ import brainLogo from '../../../../assets/logoBrain.png';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
   Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X, BarChart3,
+  Search, ArrowUpDown, Clock3, ChevronRight, FolderKanban,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -273,52 +274,49 @@ function BudgetModal({ estimate, onConfirm, onCancel }: {
   );
 }
 
-// ─── Seção + card de estudo (homepage) ───────────────────────────────────────
+// ─── Lista operacional de estudos (homepage) ────────────────────────────────
 
-function StudySection({ title, studies, onOpen, empty }: {
-  title: string;
-  studies: StudyV3[];
-  onOpen: (id: string) => void;
-  empty?: string;
-}) {
-  return (
-    <section className="space-y-3">
-      <div className="flex items-center gap-2">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        <span className="text-[10px] text-muted-foreground">{studies.length}</span>
-        <div className="flex-1 border-t border-border" />
-      </div>
-      {studies.length === 0 ? (
-        empty && <p className="text-xs text-muted-foreground">{empty}</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {studies.map((s) => <StudyCard key={s.id} s={s} onOpen={onOpen} />)}
-        </div>
-      )}
-    </section>
-  );
+function dateLabel(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Data indisponível';
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
-function StudyCard({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
+function StudyRow({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
   const pronto = s.status === 'pronto';
+  const review = !pronto && (s.pendentes ?? 0) === 0;
   return (
     <button
       onClick={() => onOpen(s.id)}
-      className="text-left rounded-lg border border-border bg-card px-4 py-3 hover:border-primary/50 transition-colors space-y-1.5"
+      className="group grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-border px-4 py-3.5 text-left transition-colors last:border-b-0 hover:bg-muted/45 sm:grid-cols-[minmax(0,1.65fr)_minmax(150px,.75fr)_minmax(135px,.65fr)_auto] sm:items-center"
     >
-      <div className="flex items-center gap-2">
-        {pronto
-          ? <PackageCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-          : <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />}
-        <span className="text-sm font-medium truncate">{s.nome}</span>
+      <div className="flex min-w-0 items-start gap-3">
+        <span className={cn('mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', pronto ? 'bg-emerald-500/10 text-emerald-600' : review ? 'bg-primary/10 text-primary' : 'bg-amber-500/10 text-amber-600')}>
+          {pronto ? <PackageCheck className="h-4 w-4" /> : review ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium" title={s.nome}>{s.nome}</p>
+          <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+            {s.cidade || 'Cidade não informada'} · v{s.lastVersion} · {s.nSlides} slides
+          </p>
+        </div>
       </div>
-      <p className="text-[11px] text-muted-foreground">
-        {s.cidade && <>{s.cidade} · </>}v{s.lastVersion} · {s.nSlides} slides
-        {s.custoTotal > 0 && <> · IA {formatUSD(s.custoTotal)}</>}
-      </p>
-      <p className={cn('text-[11px] font-medium', pronto ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400')}>
-        {pronto ? 'Pronto para o A&R' : `${s.pendentes} pendente(s)`}
-      </p>
+      <div className="hidden sm:block">
+        <p className={cn('text-xs font-medium', pronto ? 'text-emerald-600 dark:text-emerald-400' : review ? 'text-primary' : 'text-amber-600 dark:text-amber-400')}>
+          {pronto ? 'Pronto para o A&R' : review ? 'Revisar e entregar' : `${s.pendentes ?? 0} pendência(s)`}
+        </p>
+        <p className="mt-0.5 text-[10px] text-muted-foreground">{pronto ? 'Entrega concluída' : review ? 'Sem bloqueios abertos' : 'Correção em andamento'}</p>
+      </div>
+      <div className="hidden sm:block">
+        <p className="flex items-center gap-1 text-[11px] text-muted-foreground"><Clock3 className="h-3 w-3" /> {dateLabel(s.createdAt)}</p>
+        <p className="mt-0.5 text-[10px] text-muted-foreground">{s.custoTotal > 0 ? `IA ${formatUSD(s.custoTotal)}` : 'Sem custo de IA'}</p>
+      </div>
+      <div className="flex items-center gap-2 self-center">
+        <span className={cn('rounded-full px-2 py-1 text-[10px] font-medium sm:hidden', pronto ? 'bg-emerald-500/10 text-emerald-600' : review ? 'bg-primary/10 text-primary' : 'bg-amber-500/10 text-amber-600')}>
+          {pronto ? 'Pronto' : review ? 'Revisar' : `${s.pendentes ?? 0} pend.`}
+        </span>
+        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+      </div>
     </button>
   );
 }
@@ -334,6 +332,9 @@ export default function CorretorV3Page() {
   const [loadingStudy, setLoadingStudy] = useState(false);
   const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
   const [entryMode, setEntryMode] = useState<'evaluate' | 'suggestion' | null>(null);
+  const [landingTab, setLandingTab] = useState<'correction' | 'ready' | 'all'>('correction');
+  const [landingSearch, setLandingSearch] = useState('');
+  const [landingSort, setLandingSort] = useState<'recent' | 'pending' | 'name' | 'cost'>('recent');
   const [consultingSuggestion, setConsultingSuggestion] = useState<{ filename: string; content: string } | null>(null);
   const [suggestionProgress, setSuggestionProgress] = useState<SuggestionBatchProgress | null>(null);
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
@@ -806,35 +807,64 @@ export default function CorretorV3Page() {
   if (!selected) {
     const emCorrecao = studies.filter((s) => s.status !== 'pronto');
     const prontos = studies.filter((s) => s.status === 'pronto');
+    const totalPendencias = emCorrecao.reduce((total, study) => total + (study.pendentes ?? 0), 0);
+    const totalCost = studies.reduce((total, study) => total + study.custoTotal, 0);
+    const search = landingSearch.trim().toLocaleLowerCase('pt-BR');
+    const visibleStudies = studies
+      .filter((study) => landingTab === 'all' || (landingTab === 'ready' ? study.status === 'pronto' : study.status !== 'pronto'))
+      .filter((study) => !search || `${study.nome} ${study.cidade ?? ''}`.toLocaleLowerCase('pt-BR').includes(search))
+      .sort((left, right) => {
+        if (landingSort === 'pending') return (right.pendentes ?? 0) - (left.pendentes ?? 0);
+        if (landingSort === 'name') return left.nome.localeCompare(right.nome, 'pt-BR');
+        if (landingSort === 'cost') return right.custoTotal - left.custoTotal;
+        return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+      });
     return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b bg-card px-6 py-4 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-base font-semibold">Assistente de Projetos</h1>
-            <p className="text-xs text-muted-foreground">
-              Suba o .pptx → análise completa automática (texto + números) → corrija a worklist → entregue ao A&R com 0 pendentes
-            </p>
+      <div className="min-h-screen bg-muted/25">
+        <header className="border-b bg-card">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><FolderKanban className="h-5 w-5" /></span>
+            <div>
+              <h1 className="text-lg font-semibold tracking-tight">Assistente de Projetos</h1>
+              <p className="text-xs text-muted-foreground">Auditoria, correção e apoio consultivo para estudos Brain.</p>
+            </div>
           </div>
           <a href="/corretor/calibracao" className="text-xs rounded-md px-3 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 shrink-0">
             <BarChart3 className="w-3.5 h-3.5" /> Calibração
           </a>
+          </div>
         </header>
 
-        <div className="max-w-5xl mx-auto px-6 py-6 space-y-8">
+        <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
           {/* Dropzone herói */}
           <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
           <input ref={fonteRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFonte} />
+          <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Resumo dos estudos">
+            {[
+              { label: 'Em correção', value: emCorrecao.length, hint: 'estudos ativos', tone: 'text-amber-600' },
+              { label: 'Prontos', value: prontos.length, hint: 'para o A&R', tone: 'text-emerald-600' },
+              { label: 'Pendências', value: totalPendencias, hint: 'itens em aberto', tone: 'text-foreground' },
+              { label: 'IA acumulada', value: formatUSD(totalCost), hint: `${studies.length} estudos`, tone: 'text-foreground' },
+            ].map((metric) => (
+              <div key={metric.label} className="rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
+                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{metric.label}</p>
+                <p className={cn('mt-1 text-xl font-semibold tracking-tight', metric.tone)}>{metric.value}</p>
+                <p className="text-[10px] text-muted-foreground">{metric.hint}</p>
+              </div>
+            ))}
+          </section>
           {!entryMode ? (
-            <section className="grid gap-3 sm:grid-cols-2" aria-label="Escolha o tipo de análise">
-              <button onClick={() => setEntryMode('evaluate')} className="rounded-xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <AlertTriangle className="mb-3 h-6 w-6 text-primary" />
-                <h2 className="text-sm font-semibold">Avaliar erros</h2>
-                <p className="mt-1 text-xs text-muted-foreground">Revisa texto, números e completude do estudo para montar a fila de correções.</p>
+            <section className="grid gap-3 rounded-xl border border-border bg-card p-3 shadow-sm sm:grid-cols-2" aria-label="Escolha o tipo de análise">
+              <button onClick={() => setEntryMode('evaluate')} className="group flex items-center gap-3 rounded-lg bg-primary px-4 py-3.5 text-left text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15"><Upload className="h-4 w-4" /></span>
+                <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">Avaliar novo estudo</span><span className="mt-0.5 block text-[11px] text-primary-foreground/75">Auditoria completa de texto, números e estrutura.</span></span>
+                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
-              <button onClick={() => setEntryMode('suggestion')} className="rounded-xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <Sparkles className="mb-3 h-6 w-6 text-violet-500" />
-                <h2 className="text-sm font-semibold">Sugestão de Análise</h2>
-                <p className="mt-1 text-xs text-muted-foreground">Gera uma leitura consultiva e recomendação baseada nos dados extraídos do estudo.</p>
+              <button onClick={() => setEntryMode('suggestion')} className="group flex items-center gap-3 rounded-lg border border-violet-500/20 bg-violet-500/5 px-4 py-3.5 text-left transition-colors hover:border-violet-500/40 hover:bg-violet-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600"><Sparkles className="h-4 w-4" /></span>
+                <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">Gerar sugestão de análise</span><span className="mt-0.5 block text-[11px] text-muted-foreground">Leitura consultiva e orientação ao analista.</span></span>
+                <ChevronRight className="h-4 w-4 text-violet-500 transition-transform group-hover:translate-x-0.5" />
               </button>
             </section>
           ) : consultingSuggestion ? (
@@ -910,15 +940,70 @@ export default function CorretorV3Page() {
             </div>
           ) : (
             <>
-              <StudySection
-                title="Em correção"
-                empty="Nenhum estudo em correção — suba um .pptx acima."
-                studies={emCorrecao}
-                onOpen={openStudy}
-              />
-              {prontos.length > 0 && (
-                <StudySection title="Prontos para o A&R" studies={prontos} onOpen={openStudy} />
-              )}
+              <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                <div className="border-b border-border px-4 pt-4">
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                      <h2 className="text-sm font-semibold">Estudos</h2>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">Retome correções, revise entregas e localize estudos anteriores.</p>
+                    </div>
+                    <span className="pb-1 text-[11px] text-muted-foreground">{visibleStudies.length} resultado(s)</span>
+                  </div>
+                  <div className="mt-4 flex gap-5" role="tablist" aria-label="Situação dos estudos">
+                    {([
+                      ['correction', 'Em correção', emCorrecao.length],
+                      ['ready', 'Prontos', prontos.length],
+                      ['all', 'Todos', studies.length],
+                    ] as const).map(([value, label, count]) => (
+                      <button
+                        key={value} type="button" role="tab" aria-selected={landingTab === value}
+                        onClick={() => setLandingTab(value)}
+                        className={cn('border-b-2 pb-2 text-xs font-medium transition-colors', landingTab === value ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground')}
+                      >
+                        {label} <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[9px]">{count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 border-b border-border bg-muted/20 p-3 sm:flex-row sm:items-center">
+                  <label className="relative min-w-0 flex-1">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      value={landingSearch} onChange={(event) => setLandingSearch(event.target.value)}
+                      placeholder="Buscar por estudo ou cidade…"
+                      className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-3 text-xs outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                    />
+                  </label>
+                  <label className="relative flex items-center">
+                    <ArrowUpDown className="pointer-events-none absolute left-3 h-3.5 w-3.5 text-muted-foreground" />
+                    <select
+                      value={landingSort} onChange={(event) => setLandingSort(event.target.value as typeof landingSort)}
+                      className="h-9 appearance-none rounded-md border border-border bg-background pl-9 pr-8 text-xs outline-none focus:border-primary"
+                      aria-label="Ordenar estudos"
+                    >
+                      <option value="recent">Mais recentes</option>
+                      <option value="pending">Mais pendências</option>
+                      <option value="name">Nome</option>
+                      <option value="cost">Maior custo de IA</option>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                  </label>
+                </div>
+                {visibleStudies.length > 0 ? (
+                  <div>
+                    <div className="hidden grid-cols-[minmax(0,1.65fr)_minmax(150px,.75fr)_minmax(135px,.65fr)_auto] gap-3 border-b border-border bg-muted/10 px-4 py-2 text-[9px] font-medium uppercase tracking-[0.12em] text-muted-foreground sm:grid">
+                      <span>Estudo</span><span>Situação</span><span>Criado em</span><span className="w-4" />
+                    </div>
+                    {visibleStudies.map((study) => <StudyRow key={study.id} s={study} onOpen={openStudy} />)}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center px-6 py-12 text-center">
+                    <Search className="h-6 w-6 text-muted-foreground/50" />
+                    <p className="mt-3 text-sm font-medium">Nenhum estudo encontrado</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Ajuste a busca ou selecione outra situação.</p>
+                  </div>
+                )}
+              </section>
               <LegacyV1Panel />
             </>
           )}
