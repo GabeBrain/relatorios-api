@@ -1,6 +1,6 @@
 # Plano vivo de execução — FIERGS RM Porto Alegre
 
-Atualizado em: 2026-09-23
+Atualizado em: 2026-09-24
 
 ## Objetivo
 
@@ -31,7 +31,7 @@ Entregar o Panorama FIERGS com o mesmo contrato editorial do deck oficial de 75 
 | 10 | Três mapas — slides 67–69 | BLOCKED | Roteamento e estado controlado corrigidos; fundo cartográfico requer `VITE_MAPBOX_ACCESS_TOKEN` local/publicado e novo deploy |
 | 11 | Bancada cidade/empreendimento | BLOCKED | CSV por empreendimento/rejeição disponível; deltas finais dependem da relação oficial de IDs/exclusões do analista |
 | 12 | Paridade numérica 4T25 | BLOCKED | Requer regra/data de congelamento e eventuais exclusões do analista |
-| 13 | Comparação visual dos 75 slides | DONE | Paridade preview/PDF corrigida e aceita como concluída; Teste 5 funciona como verificação regressiva |
+| 13 | Comparação visual dos 75 slides | DONE | Teste 5 comparado integralmente ao deck oficial; decisões e trade-offs registrados no mapeamento próprio |
 | 14 | Performance da coleta multi-cidade | HUMAN | FIERGS: 2 cidades e teto global de 6 requisições implementados e testados; falta registrar tempo da geração publicada |
 
 ## Pontos de teste humano
@@ -79,6 +79,7 @@ Deltas prioritários: 3T25 (`634` atual versus `138` oficial), 4T25 (`3.082` ver
 - O formato visual sugerido pelo Sinduscon passa a ser referência alternativa do FIERGS: série histórica acompanhada de comparação gráfica do trimestre e do acumulado pertinente.
 - A regra comparativa futura será contextual ao fechamento: `2T × 2T` e `1S × 1S`; `3T × 3T` e `9M × 9M`; `4T × 4T` e `ano × ano`. Fluxos podem ser acumulados; estoque, preço e taxas usam fechamento ou ponderação adequada.
 - A migração visual equivalente do Secovi fica registrada como pendência posterior, sem alterar sua saída nesta entrega.
+- O mapeamento de fidelidade, melhorias e concessões da automação fica congelado em `MAPEAMENTO_TRADEOFFS_AUTOMACAO_FIERGS_TESTE5_2026-09-24.md`; diferenças futuras devem ser avaliadas contra esse contrato, não apenas contra a aparência do deck manual.
 
 ## Histórico de avanços
 
@@ -107,3 +108,4 @@ Deltas prioritários: 3T25 (`634` atual versus `138` oficial), 4T25 (`3.082` ver
 - 2026-09-23: etapas 8 e 9 promovidas para validação humana. Os slides 38–61 receberam hierarquia e ocupação FIERGS, e o bloco horizontal 62–66 preserva os quatro produtos da política FIERGS em componentes e agregações próprios.
 - 2026-09-23: Teste 4 confirmou divergência entre preview e exportação nos rótulos destacados dos gráficos. O `html-to-image` não preservava de forma confiável classes CSS dentro dos SVGs customizados do Recharts: retângulo e texto caíam no preenchimento preto padrão. Cor, contorno, fonte e tamanho passaram a ser atributos inline; teste automatizado protege a paridade. Tipografia temporal e distribuições também foram ampliadas para audiência 50+, e o KPI de total perdeu faixa lateral/fundo, ficando centralizado.
 - 2026-09-24: paridade visual considerada concluída por decisão do usuário; o Teste 5 passa a ser regressivo. Auditoria semântica dos 75 registros eliminou heranças inadequadas nos slides 57/58 com componentes próprios de tipologia × metragem e faixa de preço por tipologia. O slide 41 deixa explícito que IVV anual por faixa não pode ser reconstruído com o cubo trimestral atual, em vez de duplicar o slide 40.
+- 2026-09-24: Teste 5 comparado página a página com os 75 renders oficiais. O mapeamento consolidou como decisões permanentes os comparativos contextuais, rankings horizontais, tabelas auditáveis e estados honestos de indisponibilidade. A revisão encontrou e corrigiu a ponderação parcial do IVV, que podia gerar percentuais acima de 2.000%; o slide 57 voltou às 12 faixas de área FIERGS, o 58 recuperou área, R$/m² e oferta, e o 5 ganhou conteúdo metodológico dinâmico sem congelar claims promocionais.

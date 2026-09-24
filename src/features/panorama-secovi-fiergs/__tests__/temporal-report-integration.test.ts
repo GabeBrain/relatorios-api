@@ -48,4 +48,19 @@ describe('Panorama Secovi/FIERGS — integração de frequência temporal', () =
     expect(model.ivv.series[0]?.vertical).toBe(25);
     expect(model.prices.ticket.series[0]?.vertical).toBe(250_000);
   });
+
+  it('não mistura valor sem peso no numerador ponderado quando a cobertura de estoque é parcial', () => {
+    const empty = source([]);
+    const stock = source([{ period: '2026-06-01', group: 'Standard', building_type: 'Vertical', stock: 100 }]);
+    const ivv = source([
+      { period: '2026-06-01', group: 'Standard', building_type: 'Vertical', ivv: 20 },
+      { period: '2026-06-01', group: 'Médio', building_type: 'Vertical', ivv: 2_000 },
+    ]);
+    const sources = { sales: empty, salesTypology: empty, stock, stockTypology: empty, ivv, ivvTypology: empty, ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty };
+    const model = buildPanoramaReportModel(scope, [], sources, [], { cityTemporalSources: [{ city: 'Guarujá', sources }] });
+
+    // A linha sem estoque correspondente não pode ser somada ao numerador e dividida pelo peso
+    // parcial da linha Standard — era esse cruzamento que criava picos de milhares por cento.
+    expect(model.ivv.series[0]?.vertical).toBe(20);
+  });
 });

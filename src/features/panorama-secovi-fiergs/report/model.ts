@@ -24,7 +24,7 @@ type SourceResult = { rows: Record<string, unknown>[]; available: boolean; sourc
 type TemporalKey = 'sales' | 'salesTypology' | 'stock' | 'stockTypology' | 'ivv' | 'ivvTypology' | 'ticket' | 'ticketTypology' | 'meter' | 'meterTypology';
 type CityTemporalSources = { city: string; sources: Record<TemporalKey, SourceResult> };
 type AggregateMode = 'sum' | 'average' | 'weighted_average';
-type Accumulator = { sum: number; count: number; weight: number };
+type Accumulator = { sum: number; count: number; weight: number; weightedSum: number };
 
 function semanticGroupOrder(a: string, b: string): number {
   const numberOf = (value: string) => Number((value.match(/\d+/) ?? [])[0]);
@@ -82,11 +82,14 @@ function canonical(scope: PanoramaScope): Quarter[] {
 }
 
 function add(target: Map<string, Accumulator>, key: string, value: number, mode: AggregateMode, weight?: number | null) {
-  const current = target.get(key) ?? { sum: 0, count: 0, weight: 0 };
+  const current = target.get(key) ?? { sum: 0, count: 0, weight: 0, weightedSum: 0 };
   const validWeight = typeof weight === 'number' && Number.isFinite(weight) && weight > 0 ? weight : null;
-  current.sum += mode === 'weighted_average' && validWeight !== null ? value * validWeight : value;
+  current.sum += value;
   current.count += 1;
-  if (mode === 'weighted_average' && validWeight !== null) current.weight += validWeight;
+  if (mode === 'weighted_average' && validWeight !== null) {
+    current.weightedSum += value * validWeight;
+    current.weight += validWeight;
+  }
   target.set(key, current);
 }
 
@@ -95,7 +98,9 @@ function result(target: Map<string, Accumulator>, key: string, mode: AggregateMo
   if (!value) return 0;
   if (mode === 'average') return value.sum / Math.max(value.count, 1);
   // Sem estoque correspondente, preserva o dado retornado com mÃ©dia simples em vez de fabricar peso zero.
-  return mode === 'weighted_average' ? value.sum / (value.weight || Math.max(value.count, 1)) : value.sum;
+  return mode === 'weighted_average'
+    ? value.weight > 0 ? value.weightedSum / value.weight : value.sum / Math.max(value.count, 1)
+    : value.sum;
 }
 
 function reportSeries(periods: Quarter[], target: Map<string, Accumulator>, mode: AggregateMode, status: ReportMarketBlock['dataStatus'], source: string): ReportSeries[] {

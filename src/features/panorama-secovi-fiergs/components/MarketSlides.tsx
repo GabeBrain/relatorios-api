@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { scopeCityLabel, type PanoramaReportModel, type ReportMarketBlock, type ReportSeries } from '../types';
 import { buildMapTilePlan } from '../lib/map-tiles';
-import { AREA_BAND_ORDER, areaBandOf, orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
+import { orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
 import { horizontalLabelForEntity } from '../domain/entity-policy';
 
@@ -206,12 +206,20 @@ export function FiergsHorizontalPriceRangeSlide({ report }: { report: PanoramaRe
   return <Slide title="MÍNIMO, MÉDIA E MÁXIMO | MERCADO HORIZONTAL"><table className="panorama-reference-table"><thead><tr><th>Tipo</th><th>Mínimo R$/m²</th><th>Média R$/m²</th><th>Máximo R$/m²</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{integer(row.min)}</td><td>{integer(row.average)}</td><td>{integer(row.max)}</td></tr>)}</tbody></table></Slide>;
 }
 
-/** FIERGS 57: cruzamento real entre tipologia e faixa de metragem, sem reutilizar a tabela de IVV. */
+const FIERGS_AREA_BANDS = [
+  { label: 'Até 34m²', ceiling: 34 }, { label: '35–39m²', ceiling: 39 }, { label: '40–44m²', ceiling: 44 },
+  { label: '45–49m²', ceiling: 49 }, { label: '50–59m²', ceiling: 59 }, { label: '60–69m²', ceiling: 69 },
+  { label: '70–84m²', ceiling: 84 }, { label: '85–99m²', ceiling: 99 }, { label: '100–150m²', ceiling: 150 },
+  { label: '151–200m²', ceiling: 200 }, { label: '201–250m²', ceiling: 250 }, { label: 'Acima de 250m²', ceiling: Number.POSITIVE_INFINITY },
+] as const;
+function fiergsAreaBand(area: number | null) { return area && area > 0 ? FIERGS_AREA_BANDS.find((band) => area <= band.ceiling)?.label ?? null : null; }
+
+/** FIERGS 57: cruzamento real entre faixa de metragem e tipologia, na leitura do deck oficial. */
 export function FiergsTypologyAreaSlide({ report }: { report: PanoramaReportModel }) {
   const cells = new Map<string, Map<string, number>>();
   for (const project of report.cube.projects.filter((item) => item.segment === 'Vertical')) {
     for (const typology of project.typologies) {
-      const band = areaBandOf(typology.averageArea);
+      const band = fiergsAreaBand(typology.averageArea);
       if (!band || typology.finalUnits === null) continue;
       const row = cells.get(typology.typology) ?? new Map<string, number>();
       row.set(band, (row.get(band) ?? 0) + typology.finalUnits);
@@ -219,25 +227,26 @@ export function FiergsTypologyAreaSlide({ report }: { report: PanoramaReportMode
     }
   }
   const labels = orderTypologies([...cells.keys()] as never);
-  const bands = AREA_BAND_ORDER.filter((band) => labels.some((label) => (cells.get(label)?.get(band) ?? 0) > 0));
+  const bands = FIERGS_AREA_BANDS.map((band) => band.label).filter((band) => labels.some((label) => (cells.get(label)?.get(band) ?? 0) > 0));
   if (!labels.length || !bands.length) return <Slide title="OFERTA FINAL POR TIPOLOGIA E METRAGEM" className="panorama-cohort-matrix-slide"><DataUnavailable>O cubo granular não trouxe simultaneamente tipologia, área privativa e oferta final para este recorte.</DataUnavailable></Slide>;
-  const columnTotal = (band: string) => labels.reduce((sum, label) => sum + (cells.get(label)?.get(band) ?? 0), 0);
-  return <Slide title="OFERTA FINAL POR TIPOLOGIA E METRAGEM" className="panorama-cohort-matrix-slide"><table className="panorama-reference-table"><thead><tr><th>Tipologia</th>{bands.map((band) => <th key={band}>{band}</th>)}<th>Total</th></tr></thead><tbody>{labels.map((label) => { const total = bands.reduce((sum, band) => sum + (cells.get(label)?.get(band) ?? 0), 0); return <tr key={label}><td>{typologyDisplayLabel(label)}</td>{bands.map((band) => <td key={band}>{integer(cells.get(label)?.get(band) ?? 0)}</td>)}<td><b>{integer(total)}</b></td></tr>; })}<tr className="panorama-total-row"><td>Total</td>{bands.map((band) => <td key={band}>{integer(columnTotal(band))}</td>)}<td>{integer(bands.reduce((sum, band) => sum + columnTotal(band), 0))}</td></tr></tbody></table><p className="panorama-coverage-caption">Unidades em oferta final; a faixa usa a área privativa média observada em cada tipologia.</p></Slide>;
+  const rowTotal = (band: string) => labels.reduce((sum, label) => sum + (cells.get(label)?.get(band) ?? 0), 0);
+  return <Slide title="OFERTA FINAL POR TIPOLOGIA E METRAGEM" className="panorama-cohort-matrix-slide panorama-fiergs-area-matrix"><table className="panorama-reference-table"><thead><tr><th>Metragem</th>{labels.map((label) => <th key={label}>{typologyDisplayLabel(label)}</th>)}<th>Total</th></tr></thead><tbody>{bands.map((band) => <tr key={band}><td>{band}</td>{labels.map((label) => <td key={label}>{integer(cells.get(label)?.get(band) ?? 0)}</td>)}<td><b>{integer(rowTotal(band))}</b></td></tr>)}<tr className="panorama-total-row"><td>Total</td>{labels.map((label) => <td key={label}>{integer(bands.reduce((sum, band) => sum + (cells.get(label)?.get(band) ?? 0), 0))}</td>)}<td>{integer(bands.reduce((sum, band) => sum + rowTotal(band), 0))}</td></tr></tbody></table><p className="panorama-coverage-caption">Unidades em oferta final; faixas de área privativa do contrato editorial FIERGS.</p></Slide>;
 }
 
 /** FIERGS 58: faixa observada e média ponderada do R$/m² por tipologia. */
 export function FiergsTypologyPriceRangeSlide({ report }: { report: PanoramaReportModel }) {
-  const grouped = new Map<string, { value: number; weight: number }[]>();
+  const grouped = new Map<string, { meter: number; area: number | null; weight: number }[]>();
   for (const project of report.cube.projects.filter((item) => item.segment === 'Vertical')) {
     for (const typology of project.typologies) {
       if (typology.averagePricePerMeter === null || typology.averagePricePerMeter <= 0) continue;
-      grouped.set(typology.typology, [...(grouped.get(typology.typology) ?? []), { value: typology.averagePricePerMeter, weight: Math.max(typology.finalUnits ?? 0, 0) }]);
+      grouped.set(typology.typology, [...(grouped.get(typology.typology) ?? []), { meter: typology.averagePricePerMeter, area: typology.averageArea, weight: Math.max(typology.finalUnits ?? 0, 0) }]);
     }
   }
   const labels = orderTypologies([...grouped.keys()] as never);
   if (!labels.length) return <Slide title="MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA" className="panorama-price-table-slide"><DataUnavailable>O cubo granular não trouxe R$/m² por tipologia neste recorte.</DataUnavailable></Slide>;
-  const rows = labels.map((label) => { const entries = grouped.get(label)!; const weighted = entries.filter((entry) => entry.weight > 0); const denominator = weighted.reduce((sum, entry) => sum + entry.weight, 0); return { label, min: Math.min(...entries.map((entry) => entry.value)), average: denominator ? weighted.reduce((sum, entry) => sum + entry.value * entry.weight, 0) / denominator : entries.reduce((sum, entry) => sum + entry.value, 0) / entries.length, max: Math.max(...entries.map((entry) => entry.value)) }; });
-  return <Slide title="MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA" className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipologia</th><th>Mínimo R$/m²</th><th>Média R$/m²</th><th>Máximo R$/m²</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{typologyDisplayLabel(row.label)}</td><td>{integer(row.min)}</td><td>{integer(row.average)}</td><td>{integer(row.max)}</td></tr>)}</tbody></table><p className="panorama-coverage-caption">Média ponderada pela oferta final; mínimo e máximo são os extremos observados nas tipologias dos empreendimentos.</p></Slide>;
+  const weightedAverage = (entries: { value: number; weight: number }[]) => { const weighted = entries.filter((entry) => entry.weight > 0); const denominator = weighted.reduce((sum, entry) => sum + entry.weight, 0); return denominator ? weighted.reduce((sum, entry) => sum + entry.value * entry.weight, 0) / denominator : entries.reduce((sum, entry) => sum + entry.value, 0) / entries.length; };
+  const rows = labels.map((label) => { const entries = grouped.get(label)!; const areas = entries.filter((entry): entry is typeof entry & { area: number } => entry.area !== null && entry.area > 0); return { label, areaMin: areas.length ? Math.min(...areas.map((entry) => entry.area)) : null, areaAverage: areas.length ? weightedAverage(areas.map((entry) => ({ value: entry.area, weight: entry.weight }))) : null, areaMax: areas.length ? Math.max(...areas.map((entry) => entry.area)) : null, meterMin: Math.min(...entries.map((entry) => entry.meter)), meterAverage: weightedAverage(entries.map((entry) => ({ value: entry.meter, weight: entry.weight }))), meterMax: Math.max(...entries.map((entry) => entry.meter)), offer: entries.reduce((sum, entry) => sum + entry.weight, 0) }; });
+  return <Slide title="MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA" className="panorama-price-range-slide"><table className="panorama-reference-table"><thead><tr><th rowSpan={2}>Tipologia</th><th colSpan={3}>m² privativo</th><th colSpan={3}>R$/m² privativo</th><th rowSpan={2}>Oferta final</th></tr><tr><th>Mínimo</th><th>Média</th><th>Máximo</th><th>Mínimo</th><th>Média</th><th>Máximo</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{typologyDisplayLabel(row.label)}</td><td>{integer(row.areaMin)}</td><td>{integer(row.areaAverage)}</td><td>{integer(row.areaMax)}</td><td>{integer(row.meterMin)}</td><td>{integer(row.meterAverage)}</td><td>{integer(row.meterMax)}</td><td>{integer(row.offer)}</td></tr>)}</tbody></table><p className="panorama-coverage-caption">Médias ponderadas pela oferta final; mínimo e máximo são os extremos observados nas tipologias dos empreendimentos.</p></Slide>;
 }
 
 export function CohortTableSlide({ report, segment = 'vertical' }: { report: PanoramaReportModel; segment?: SegmentKey }) {
