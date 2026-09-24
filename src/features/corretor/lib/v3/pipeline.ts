@@ -21,7 +21,7 @@ import { usdToBrl, VISION_CONCURRENCY } from './config';
 import { crossTableFindings, nativeTableRefs, projectionFindings } from './cross-table';
 import { ataCoverageFindings, requiredAndExclusionFindings, sourceFindingsFromVision } from './coverage-rules';
 import type { Fonte } from './fonte';
-import { sourceCrosscheckFindings } from './source-crosscheck';
+import { sourceCrosscheckFindings, sourceCrosscheckVisionFindings } from './source-crosscheck';
 
 // ── estimativa combinada (antes de gastar) ────────────────────────────────────
 
@@ -101,6 +101,7 @@ export interface FullAnalysisResult {
 export interface RunFullOpts {
   city: string;
   model: ModelId;
+  fonte?: Fonte | null;
   /** candidatas já localizadas na estimativa (evita re-scan) */
   candidates?: TableImageCandidate[];
   /** candidata da ata já localizada na estimativa */
@@ -207,6 +208,8 @@ export interface RunPhase2Opts {
   ata: AtaData | null;
   model: ModelId;
   candidates: TableImageCandidate[];
+  /** Mesma fonte validada usada na fase 1, quando disponível. */
+  fonte?: Fonte | null;
   signal?: AbortSignal;
   onStage?: (p: StageProgress) => void;
 }
@@ -259,7 +262,8 @@ export async function runPhase2(
     ...sourceFindingsFromVision(ir, vision.sourceSlides, vision.analyzedSlides),
     ...requiredAndExclusionFindings(ir, refs),
   ];
-  const crossFindings = applyDeclaredExclusions(ir, [...cross, ...projection, ...coverage].filter((f) => !f.ok));
+  const sourceCrosscheck = opts.fonte ? sourceCrosscheckVisionFindings(ir, opts.fonte, vision.tables) : [];
+  const crossFindings = applyDeclaredExclusions(ir, [...cross, ...projection, ...coverage, ...sourceCrosscheck].filter((f) => !f.ok));
   const visionFindings = [...vision.findings.filter((f) => !f.ok), ...crossFindings];
   await attachEvidenceImages(crossFindings, candidates);
   onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: crossFindings });
@@ -300,12 +304,12 @@ export async function runFullAnalysis(
 ): Promise<FullAnalysisResult> {
   const { city, model, signal, onStage } = opts;
   const p1 = await runPhase1(ir, bytes, {
-    model, signal, onStage,
+    model, signal, onStage, fonte: opts.fonte,
     candidates: opts.candidates, ataCandidate: opts.ataCandidate,
   });
   const p2 = await runPhase2(ir, {
     city, uf: p1.ata?.uf ?? null, ata: p1.ata, model,
-    candidates: p1.candidates, signal, onStage,
+    candidates: p1.candidates, signal, onStage, fonte: opts.fonte,
   });
 
   // detFindings da fase 2 já traz UF + cobertura; combina com a triagem inicial (IDs estáveis).

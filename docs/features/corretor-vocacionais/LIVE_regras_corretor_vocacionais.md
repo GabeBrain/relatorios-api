@@ -114,17 +114,22 @@ reconferência. O arquivo passa por validação de schema na fronteira; fonte in
 motor como verdade. A camada determinística compara somente métricas com mapeamento semântico
 explícito e se abstém quando o recorte é ausente ou ambíguo.
 
-Primeira cobertura comprovada contra o estudo real de Rolândia: índice de verticalização por recorte
-e total de domicílios. O motor recupera as duas ocorrências de 5,7% × 5,16% e o total do PR
-4.216.017 × 4.216.107, preservando os valores corretos. Cada achado cita arquivo, aba e linha da
-planilha-fonte. Na reconferência, um achado de fonte só pode ser resolvido quando a fonte é anexada
-novamente; sem ela, permanece aberto em vez de virar falso corrigido.
+Primeira cobertura comprovada contra o estudo real de Rolândia: índice de verticalização por recorte,
+séries de população/domicílios e unidade publicada. O motor recupera as duas ocorrências de
+5,7% × 5,16%, o total do PR 4.216.017 × 4.216.107 e o total brasileiro de domicílios rotulado
+incorretamente como habitantes, preservando os valores corretos. Cada achado cita arquivo, aba e
+linha da planilha-fonte. Na reconferência, um achado de fonte só pode ser resolvido quando a fonte é
+anexada novamente; sem ela, permanece aberto em vez de virar falso corrigido.
+
+A fase de visão também cruza oferta por padrão, ano e tipologia quando consegue identificar
+simultaneamente o título, um único recorte, a categoria e as colunas de oferta lançada/atual. O
+resultado conserva a imagem como evidência e recebe confiança 2 porque depende de OCR; qualquer
+ambiguidade faz o motor se abster.
 
 **Arquivos:** `lib/v3/fonte.ts`, `lib/v3/source-crosscheck.ts`, `lib/v3/pipeline.ts`,
 `pages/CorretorV3Page.tsx`, `lib/v3/__tests__/source-crosscheck.test.ts`.
 
-**Próxima expansão:** oferta por padrão/ano/tipologia, população e absorção; depois revenda,
-locação, lazer e anúncios, que ainda não são extraídos. A extração automática dos Excel brutos no
+**Próxima expansão:** absorção; depois revenda, locação, lazer e anúncios, que ainda não são extraídos. A extração automática dos Excel brutos no
 ambiente publicado continua separada da validação do comparador.
 
 ## Versão 0.51 — 2026-08-12 — Alinhamento da linha de totais e agrupamento tolerante de fatias (RUNTIME)

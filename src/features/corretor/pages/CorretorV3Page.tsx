@@ -341,7 +341,7 @@ export default function CorretorV3Page() {
   // WS-1: portão da ata — fase 1 pronta, aguardando o analista confirmar cidade/UF.
   const [gate, setGate] = useState<{
     studyId: string; version: number; ir: Ir; bytes: Uint8Array;
-    ata: AtaData | null; estimate: FullEstimate; phase2Brl: string;
+    ata: AtaData | null; estimate: FullEstimate; phase2Brl: string; fonte?: Fonte | null;
   } | null>(null);
   const [dragging, setDragging] = useState(false);
   const [workspaceTab, setWorkspaceTab] = useState<'completude' | 'problemas' | 'slides'>('completude');
@@ -407,7 +407,7 @@ export default function CorretorV3Page() {
    * portão. Persiste a ata confirmada, os DET pós-ata e registra os passes/custos.
    */
   const runPaidAnalysis = useCallback(async (
-    ctx: { studyId: string; version: number; ir: Ir; bytes: Uint8Array; estimate: FullEstimate },
+    ctx: { studyId: string; version: number; ir: Ir; bytes: Uint8Array; estimate: FullEstimate; fonte?: Fonte | null },
     confirmed: AtaGateValue,
     phase2Usd: number,
   ) => {
@@ -424,6 +424,7 @@ export default function CorretorV3Page() {
         ata: confirmed.ata,
         model: MODEL,
         candidates: ctx.estimate.candidates,
+        fonte: ctx.fonte,
         signal: ac.signal,
         onStage: async (p) => {
           setAnalysis((prev) => prev && {
@@ -511,7 +512,7 @@ export default function CorretorV3Page() {
       const phase2Usd = Math.max(0, estimate.costUsd - p1.ataCostUsd);
       setGate({
         studyId: study.id, version: study.version, ir, bytes,
-        ata: p1.ata, estimate, phase2Brl: formatBRL(phase2Usd),
+        ata: p1.ata, estimate, phase2Brl: formatBRL(phase2Usd), fonte,
       });
     } catch (err) {
       toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
@@ -524,7 +525,7 @@ export default function CorretorV3Page() {
   /** Portão confirmado: valida orçamento da fase 2 e a executa. */
   const confirmGate = useCallback((value: AtaGateValue) => {
     if (!gate) return;
-    const ctx = { studyId: gate.studyId, version: gate.version, ir: gate.ir, bytes: gate.bytes, estimate: gate.estimate };
+    const ctx = { studyId: gate.studyId, version: gate.version, ir: gate.ir, bytes: gate.bytes, estimate: gate.estimate, fonte: gate.fonte };
     // A ata já foi paga na fase 1; o orçamento restante é texto + visão.
     const phase2Usd = Math.max(0, gate.estimate.costUsd - gate.estimate.vision.costUsd) + gate.estimate.vision.costUsd;
     setGate(null);
@@ -654,7 +655,7 @@ export default function CorretorV3Page() {
       }
       // Imagens novas exigem a fase paga; cidade/UF já foram confirmadas no portão.
       await runPaidAnalysis(
-        { studyId: selected.id, version: newVersion, ir, bytes, estimate },
+        { studyId: selected.id, version: newVersion, ir, bytes, estimate, fonte: fonteInput?.fonte },
         { cidade: selected.cidade ?? '', uf: selected.uf ?? '', ata: selected.ata ?? null },
         estimate.costUsd,
       );

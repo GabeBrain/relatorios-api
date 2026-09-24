@@ -13,6 +13,8 @@ export interface FonteItem {
   linha: number;
   valores?: FonteValues;
   recortes?: FonteRecortes;
+  /** Séries legadas do extrator de população/domicílios; preservadas na ordem da planilha. */
+  numeros?: Array<number | null>;
 }
 
 export interface FonteBloco {
