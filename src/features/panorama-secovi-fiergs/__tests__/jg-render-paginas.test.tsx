@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react';
 import { buildPanoramaReportModel } from '../report/model';
 import { buildCityCube } from '../domain/cube';
 import { AreaIvvSlide, MarketSummarySlide, NarrativeSlide, PriceTableSlide } from '../components/MarketSlides';
-import { annualizeSeries, PanoramaExportDeck, pointLabelPlan } from '../components/ReportPaginator';
+import { annualizeSeries, FiergsPointValue, PanoramaExportDeck, pointLabelPlan } from '../components/ReportPaginator';
 import type { PanoramaReportModel, PanoramaScope } from '../types';
 
 /**
@@ -160,6 +160,16 @@ describe('JG-01 a JG-04 · tipografia das institucionais', () => {
 });
 
 describe('JG-07 a JG-12 e JG-15 a JG-18 · rótulo e fundo nos gráficos temporais', () => {
+  it('embute cor e tipografia essenciais no SVG para o PDF espelhar o preview', () => {
+    const data = [{ quarter: '4T2025', vertical: 15, horizontal: 0, total: 15 }];
+    const { container } = render(<svg><FiergsPointValue x={100} y={80} value={15} index={0} data={data} format={String} referenceQuarter="4"/></svg>);
+    const plate = container.querySelector('rect');
+    const label = container.querySelector('text');
+    expect(plate?.getAttribute('fill')).toBe('#5d7737');
+    expect(label?.getAttribute('fill')).toBe('#ffffff');
+    expect(label?.getAttribute('style')).toContain('font-family: Montserrat');
+  });
+
   it('o rótulo zero aparece — era o que apagava o 2T26 dos gráficos', () => {
     expect(pointLabelPlan(0, '2T2026', '2').render).toBe(true);
     expect(pointLabelPlan(329, '2T2026', '2').render).toBe(true);

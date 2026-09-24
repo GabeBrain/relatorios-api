@@ -31,7 +31,7 @@ Entregar o Panorama FIERGS com o mesmo contrato editorial do deck oficial de 75 
 | 10 | Três mapas — slides 67–69 | BLOCKED | Roteamento e estado controlado corrigidos; fundo cartográfico requer `VITE_MAPBOX_ACCESS_TOKEN` local/publicado e novo deploy |
 | 11 | Bancada cidade/empreendimento | DOING | CSV por empreendimento/rejeição disponível; falta anexar referência oficial e calcular deltas |
 | 12 | Paridade numérica 4T25 | BLOCKED | Requer regra/data de congelamento e eventuais exclusões do analista |
-| 13 | Comparação visual dos 75 slides | TODO | Classificação slide a slide e correções de PDF/PPT |
+| 13 | Comparação visual dos 75 slides | DOING | Teste 4 identificou perda de estilos em SVG customizado no PDF; correção inline pronta para novo PDF/PPT |
 | 14 | Performance da coleta multi-cidade | DOING | FIERGS: 2 cidades e teto global de 6 requisições; medir geração publicada |
 
 ## Pontos de teste humano
@@ -105,3 +105,4 @@ Deltas prioritários: 3T25 (`634` atual versus `138` oficial), 4T25 (`3.082` ver
 - 2026-09-23: comparativos contextuais automatizados no FIERGS: trimestre equivalente mais acumulado coerente com o fechamento (`1S`, `9M` ou ano); snapshots e taxas não são acumulados. O slide 39 deixou de exibir preço por engano e passou a consumir IVV.
 - 2026-09-23: Teste 3 revisado. A grade FIERGS passou a usar densidade editorial por complexidade: distribuições ganharam KPI integrado, barras e rótulos maiores; tabelas simples ocupam mais área; gráficos de preço cresceram; matrizes de coorte, maturidade e VGV mantêm escala compacta sem herdar o vazio do Secovi.
 - 2026-09-23: etapas 8 e 9 promovidas para validação humana. Os slides 38–61 receberam hierarquia e ocupação FIERGS, e o bloco horizontal 62–66 preserva os quatro produtos da política FIERGS em componentes e agregações próprios.
+- 2026-09-23: Teste 4 confirmou divergência entre preview e exportação nos rótulos destacados dos gráficos. O `html-to-image` não preservava de forma confiável classes CSS dentro dos SVGs customizados do Recharts: retângulo e texto caíam no preenchimento preto padrão. Cor, contorno, fonte e tamanho passaram a ser atributos inline; teste automatizado protege a paridade. Tipografia temporal e distribuições também foram ampliadas para audiência 50+, e o KPI de total perdeu faixa lateral/fundo, ficando centralizado.

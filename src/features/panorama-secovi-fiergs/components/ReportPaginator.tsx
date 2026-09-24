@@ -266,12 +266,17 @@ export function annualizeSeries(series: LaunchSeries[]) {
   return [...annual.values()].sort((a, b) => a.year - b.year);
 }
 
-function FiergsPointValue({ x, y, value, index, data, format, referenceQuarter }: { x?: number; y?: number; value?: number; index?: number; data: LaunchSeries[]; format: (value: number) => string; referenceQuarter: string }) {
+export function FiergsPointValue({ x, y, value, index, data, format, referenceQuarter }: { x?: number; y?: number; value?: number; index?: number; data: LaunchSeries[]; format: (value: number) => string; referenceQuarter: string }) {
   if (x === undefined || y === undefined || value === undefined || index === undefined) return null;
   const label = format(Number(value)); const equivalent = data[index]?.quarter[0] === referenceQuarter;
-  if (!equivalent) return <text x={x} y={y - 12} textAnchor="middle" className="panorama-fiergs-point">{label}</text>;
+  // Os atributos visuais essenciais ficam inline de propósito. O preview aplica normalmente as
+  // classes CSS ao SVG do Recharts, mas o `html-to-image` serializa os nós customizados em outro
+  // SVG: nesse caminho o `<rect>` voltava ao fill preto padrão e o texto branco também perdia o
+  // fill, ficando invisível no PDF/PPT. Inline mantém preview e arquivos espelho idênticos.
+  const textStyle = { fontFamily: 'Montserrat, Arial, sans-serif', fontSize: '1.12cqw', fontWeight: 700 } as const;
+  if (!equivalent) return <text x={x} y={y - 12} textAnchor="middle" className="panorama-fiergs-point" fill="#20231d" stroke="#ffffff" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round" style={textStyle}>{label}</text>;
   const width = Math.max(36, label.length * 8 + 14);
-  return <g className="panorama-fiergs-point-highlight"><rect x={x - width / 2} y={y - 27} width={width} height={19} rx={2}/><text x={x} y={y - 17} textAnchor="middle">{label}</text></g>;
+  return <g className="panorama-fiergs-point-highlight"><rect x={x - width / 2} y={y - 29} width={width} height={22} rx={2} fill="#5d7737"/><text x={x} y={y - 18} textAnchor="middle" fill="#ffffff" dominantBaseline="middle" style={textStyle}>{label}</text></g>;
 }
 
 type FiergsComparisonPair = { title: string; leftLabel: string; rightLabel: string; left: number; right: number };
@@ -369,7 +374,7 @@ function FiergsPatternTemporalSlide({ report, kind, rolling = false }: { report:
   const point = (key: 'vertical' | 'horizontal', color: string, dy: number) => (props: { x?: number; y?: number; value?: number; index?: number }) => {
     if (props.x === undefined || props.y === undefined || props.value === undefined || props.index === undefined) return null;
     const equivalent = data[props.index]?.quarter[0] === closing; const label = n(props.value);
-    return <text x={props.x} y={props.y + dy} textAnchor="middle" className={`panorama-fiergs-pattern-point ${equivalent ? 'is-reference' : ''}`} style={{ fill: equivalent ? '#fff' : color, stroke: equivalent ? color : '#fff' }}>{label}</text>;
+    return <text x={props.x} y={props.y + dy} textAnchor="middle" className={`panorama-fiergs-pattern-point ${equivalent ? 'is-reference' : ''}`} strokeWidth={equivalent ? 8 : 3} paintOrder="stroke" style={{ fill: equivalent ? '#fff' : color, stroke: equivalent ? color : '#fff', fontFamily: 'Montserrat, Arial, sans-serif', fontSize: '1cqw', fontWeight: 700 }}>{label}</text>;
   };
   return <div className="panorama-fiergs-pattern"><header><h2>UNIDADES VERTICAIS {kind === 'launches' ? 'LANÇADAS' : 'VENDIDAS'}<span>{rolling ? 'MCMV · ACUMULADO 12 MESES' : 'MCMV · POR TRIMESTRE'}</span></h2><div>{share.map((item) => <span key={item.year}><small>{item.year}</small><strong>{pct(item.value)}</strong></span>)}</div></header>
     <main><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 28, right: 28, top: 42, bottom: 26 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => ticks.has(index) ? compactQuarterLabel(String(value)) : ''} interval={0} tickLine={false}/><Tooltip/><Legend/><Line type="monotone" dataKey="vertical" name="MCMV / Econômico" stroke="#c62026" strokeWidth={3.5} dot={{ r: 2.5 }} isAnimationActive={false} label={point('vertical', '#a50f16', -12)}/><Line type="monotone" dataKey="horizontal" name="Demais padrões" stroke="#7b8178" strokeWidth={3.5} dot={{ r: 2.5 }} isAnimationActive={false} label={point('horizontal', '#555b53', 20)}/></LineChart></ResponsiveContainer></main>

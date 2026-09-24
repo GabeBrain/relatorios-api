@@ -1,3 +1,10 @@
+### 2026-09-23 — FIERGS-RS: paridade preview/PDF e legibilidade 50+ — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — renderização e exportação PDF/PPT do recorte FIERGS.
+- **O quê:** o Teste 4 comprovou que classes CSS dos rótulos SVG customizados do Recharts não eram preservadas integralmente pelo `html-to-image`; placas e texto destacados viravam preto no PDF. Fill, contorno, tipografia e tamanho foram incorporados ao SVG. Eixos, valores, comparativos e distribuições foram ampliados; o KPI superior passou a ser centralizado, sem faixa amarela ou cartão.
+- **Por quê:** preview e arquivo baixado precisam ser visualmente equivalentes, e a audiência 50+ requer números e legendas maiores.
+- **Verificações:** typecheck e build aprovados; 23 testes focados aprovados, incluindo regressão explícita dos atributos SVG usados pela exportação.
+- **Impacto em Etapas/Pendências:** etapa 13 em andamento; requer novo PDF para confirmar visualmente a captura real. Mapas e paridade numérica mantêm seus bloqueios externos.
+
 ### 2026-09-23 — FIERGS-RS: Teste 3 e densidade editorial dos blocos vertical/horizontal — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
 - **O quê:** o PDF do Teste 3 foi auditado visualmente. Distribuições receberam cabeçalho estruturado, KPI integrado, barras e rótulos maiores; tabelas simples e gráficos de preço passaram a ocupar a área útil; matrizes de coorte, maturidade e VGV preservam densidade compatível com muitas colunas. A regra é exclusiva do FIERGS.
