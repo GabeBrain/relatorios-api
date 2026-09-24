@@ -1,3 +1,9 @@
+### 2026-09-24 — FIERGS-RS: Teste 6 fecha homologação editorial — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — PDF publicado de 75 páginas.
+- **O quê:** o Teste 6 confirmou no arquivo exportado o slide metodológico 5, a matriz de tipologia × 12 faixas de metragem do 57 e a matriz completa de área, R$/m² e oferta do 58. Não foram encontradas novas perdas editoriais ou divergências de exportação.
+- **Achado metodológico:** o IVV de 2.033,3% em 1T22 continua presente apesar da correção do cruzamento de pesos, evidenciando que o número anômalo já chega da série temporal ou decorre do universo histórico. Ele foi encaminhado à bancada do analista, sem teto, ocultação ou ajuste artificial no relatório.
+- **Impacto em Etapas/Pendências:** homologação editorial encerrada. Restam sincronizar e validar o Mapbox nos slides 67–69 e reconciliar com o analista o congelamento, exclusões e anomalias numéricas do 4T25.
+
 ### 2026-09-24 — FIERGS-RS: vistoria integral do Teste 5 e contrato de trade-offs — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — comparação das 75 páginas com o deck oficial FIERGS 4T25.
 - **O quê:** a vistoria página a página confirmou a maturidade visual da versão 5 e registrou, em `MAPEAMENTO_TRADEOFFS_AUTOMACAO_FIERGS_TESTE5_2026-09-24.md`, quais diferenças são melhorias deliberadas, concessões aceitáveis ou dependências externas. Comparativos contextuais, rankings horizontais, tabelas auditáveis e estados explícitos de indisponibilidade foram preservados como contrato editorial do sistema.
