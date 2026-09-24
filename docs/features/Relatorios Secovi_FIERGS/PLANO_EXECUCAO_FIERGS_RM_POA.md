@@ -26,12 +26,12 @@ Entregar o Panorama FIERGS com o mesmo contrato editorial do deck oficial de 75 
 | 5 | Lançamentos verticais — slides 8–22 | HUMAN | Séries e distribuições por padrão, tipologia, bairro/cidade concluídas; aguarda PDF do Teste 2 |
 | 6 | Vendas e oferta — slides 23–37 | HUMAN | Arquitetura FIERGS, fluxo, acumulados, padrão, tipologia, cidade e estoque concluídos; aguarda PDF e paridade metodológica municipal |
 | 7 | MCMV, bairros/cidades e dormitórios | HUMAN | Séries MCMV de lançamentos/vendas, cidade em barras e quatro séries por dormitórios implementadas; aguarda PDF |
-| 8 | IVV, preços e mercado vertical — slides 38–61 | HUMAN | IVV, dormitórios, tabelas, gráficos e matrizes usam densidade editorial FIERGS; aguarda PDF do Teste 4 |
-| 9 | Horizontal completo — slides 62–66 | HUMAN | Quatro produtos FIERGS, coortes, preço médio e faixa de R$/m² separados do vertical; aguarda PDF do Teste 4 |
+| 8 | IVV, preços e mercado vertical — slides 38–61 | DONE | IVV, dormitórios, tabelas, gráficos e matrizes usam componentes e densidade editorial FIERGS |
+| 9 | Horizontal completo — slides 62–66 | DONE | Quatro produtos FIERGS, coortes, preço médio e faixa de R$/m² separados do vertical |
 | 10 | Três mapas — slides 67–69 | BLOCKED | Roteamento e estado controlado corrigidos; fundo cartográfico requer `VITE_MAPBOX_ACCESS_TOKEN` local/publicado e novo deploy |
 | 11 | Bancada cidade/empreendimento | DOING | CSV por empreendimento/rejeição disponível; falta anexar referência oficial e calcular deltas |
 | 12 | Paridade numérica 4T25 | BLOCKED | Requer regra/data de congelamento e eventuais exclusões do analista |
-| 13 | Comparação visual dos 75 slides | DOING | Teste 4 identificou perda de estilos em SVG customizado no PDF; correção inline pronta para novo PDF/PPT |
+| 13 | Comparação visual dos 75 slides | DONE | Paridade preview/PDF corrigida e aceita como concluída; Teste 5 funciona como verificação regressiva |
 | 14 | Performance da coleta multi-cidade | DOING | FIERGS: 2 cidades e teto global de 6 requisições; medir geração publicada |
 
 ## Pontos de teste humano
@@ -106,3 +106,4 @@ Deltas prioritários: 3T25 (`634` atual versus `138` oficial), 4T25 (`3.082` ver
 - 2026-09-23: Teste 3 revisado. A grade FIERGS passou a usar densidade editorial por complexidade: distribuições ganharam KPI integrado, barras e rótulos maiores; tabelas simples ocupam mais área; gráficos de preço cresceram; matrizes de coorte, maturidade e VGV mantêm escala compacta sem herdar o vazio do Secovi.
 - 2026-09-23: etapas 8 e 9 promovidas para validação humana. Os slides 38–61 receberam hierarquia e ocupação FIERGS, e o bloco horizontal 62–66 preserva os quatro produtos da política FIERGS em componentes e agregações próprios.
 - 2026-09-23: Teste 4 confirmou divergência entre preview e exportação nos rótulos destacados dos gráficos. O `html-to-image` não preservava de forma confiável classes CSS dentro dos SVGs customizados do Recharts: retângulo e texto caíam no preenchimento preto padrão. Cor, contorno, fonte e tamanho passaram a ser atributos inline; teste automatizado protege a paridade. Tipografia temporal e distribuições também foram ampliadas para audiência 50+, e o KPI de total perdeu faixa lateral/fundo, ficando centralizado.
+- 2026-09-24: paridade visual considerada concluída por decisão do usuário; o Teste 5 passa a ser regressivo. Auditoria semântica dos 75 registros eliminou heranças inadequadas nos slides 57/58 com componentes próprios de tipologia × metragem e faixa de preço por tipologia. O slide 41 deixa explícito que IVV anual por faixa não pode ser reconstruído com o cubo trimestral atual, em vez de duplicar o slide 40.
