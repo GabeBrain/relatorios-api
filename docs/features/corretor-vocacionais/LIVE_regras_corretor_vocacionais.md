@@ -128,9 +128,9 @@ ambiguidade faz o motor se abster.
 
 A fonte validada é persistida separadamente em `study_sources_v3` e carregada somente ao abrir o
 estudo, evitando aumentar a resposta da listagem geral. A migration
-`20260924170000_corretor_v3_sources.sql` precisa ser aplicada antes da publicação; enquanto a tabela
-não existir, a interface conserva a fonte na sessão e segue a análise, exibindo um aviso em vez de
-interromper o estudo.
+`20260924170000_corretor_v3_sources.sql` foi aplicada por Gabriel em 24/09/2026. A interface ainda
+mantém a degradação segura: se a persistência estiver indisponível em outro ambiente, conserva a
+fonte na sessão e segue a análise, exibindo um aviso em vez de interromper o estudo.
 
 **Arquivos:** `lib/v3/fonte.ts`, `lib/v3/source-crosscheck.ts`, `lib/v3/pipeline.ts`,
 `pages/CorretorV3Page.tsx`, `lib/v3/__tests__/source-crosscheck.test.ts`.
