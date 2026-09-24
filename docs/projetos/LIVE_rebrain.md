@@ -1,8 +1,8 @@
 ### 2026-09-24 — FIERGS-RS: fechamento visual e componentes semânticos 41/57/58 — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — contrato editorial de 75 slides.
 - **O quê:** paridade visual foi considerada concluída e o Teste 5 virou verificação regressiva. A auditoria do roteamento encontrou três heranças incompatíveis: o slide 41 repetia o IVV trimestral como anual; o 57 reutilizava IVV por área no lugar de tipologia × metragem; o 58 reutilizava preço médio no lugar de mínimo/média/máximo. Os slides 57/58 agora derivam diretamente do cubo granular; o 41 declara a ausência da composição anual por área, sem fabricar ou duplicar números.
-- **Verificações:** typecheck e teste editorial dos 75 registros aprovados.
-- **Impacto em Etapas/Pendências:** etapas 8, 9 e 13 concluídas. Permanecem externos: token cartográfico (10) e confirmação do universo histórico/exclusões do 4T25 (11/12).
+- **Verificações:** typecheck, build e teste editorial dos 75 registros aprovados; a suíte agora falha se qualquer posição voltar ao placeholder genérico.
+- **Impacto em Etapas/Pendências:** etapas 1–9 e 13 concluídas. Permanecem externos: token cartográfico (10), relação oficial de IDs/exclusões e confirmação do universo histórico do 4T25 (11/12), além do registro do tempo real da geração publicada (14).
 
 ### 2026-09-23 — FIERGS-RS: paridade preview/PDF e legibilidade 50+ — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — renderização e exportação PDF/PPT do recorte FIERGS.

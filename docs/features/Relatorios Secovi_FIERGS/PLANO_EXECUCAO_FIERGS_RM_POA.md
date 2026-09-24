@@ -20,19 +20,19 @@ Entregar o Panorama FIERGS com o mesmo contrato editorial do deck oficial de 75 
 | Etapa | Entrega | Estado | Critério de conclusão / dependência |
 |---:|---|---|---|
 | 1 | Congelar contrato editorial FIERGS em 75 posições | DONE | Preview, PDF e PPT usam manifesto próprio, sem herdar sequência Secovi |
-| 2 | Sistema visual FIERGS/Rebrain | HUMAN | Montserrat/Source Sans 3 e hierarquia aplicadas ao FIERGS; falta revisão visual do livro completo |
-| 3 | Capa territorial RM Porto Alegre | HUMAN | Mapa, título e trimestre dinâmicos; sem percentuais socioeconômicos |
-| 4 | Nove aberturas oficiais | HUMAN | Fundo oficial e terminologia FIERGS nas posições corretas |
-| 5 | Lançamentos verticais — slides 8–22 | HUMAN | Séries e distribuições por padrão, tipologia, bairro/cidade concluídas; aguarda PDF do Teste 2 |
-| 6 | Vendas e oferta — slides 23–37 | HUMAN | Arquitetura FIERGS, fluxo, acumulados, padrão, tipologia, cidade e estoque concluídos; aguarda PDF e paridade metodológica municipal |
-| 7 | MCMV, bairros/cidades e dormitórios | HUMAN | Séries MCMV de lançamentos/vendas, cidade em barras e quatro séries por dormitórios implementadas; aguarda PDF |
+| 2 | Sistema visual FIERGS/Rebrain | DONE | Montserrat/Source Sans 3, hierarquia 50+ e paridade preview/PDF aceitas |
+| 3 | Capa territorial RM Porto Alegre | DONE | Mapa, título e trimestre dinâmicos; sem percentuais socioeconômicos |
+| 4 | Nove aberturas oficiais | DONE | Fundo oficial e terminologia FIERGS nas posições corretas |
+| 5 | Lançamentos verticais — slides 8–22 | DONE | Séries e distribuições por padrão, tipologia, bairro/cidade concluídas |
+| 6 | Vendas e oferta — slides 23–37 | DONE | Arquitetura FIERGS, fluxo, acumulados, padrão, tipologia, cidade e estoque concluídos |
+| 7 | MCMV, bairros/cidades e dormitórios | DONE | Séries MCMV de lançamentos/vendas, cidade em barras e quatro séries por dormitórios implementadas |
 | 8 | IVV, preços e mercado vertical — slides 38–61 | DONE | IVV, dormitórios, tabelas, gráficos e matrizes usam componentes e densidade editorial FIERGS |
 | 9 | Horizontal completo — slides 62–66 | DONE | Quatro produtos FIERGS, coortes, preço médio e faixa de R$/m² separados do vertical |
 | 10 | Três mapas — slides 67–69 | BLOCKED | Roteamento e estado controlado corrigidos; fundo cartográfico requer `VITE_MAPBOX_ACCESS_TOKEN` local/publicado e novo deploy |
-| 11 | Bancada cidade/empreendimento | DOING | CSV por empreendimento/rejeição disponível; falta anexar referência oficial e calcular deltas |
+| 11 | Bancada cidade/empreendimento | BLOCKED | CSV por empreendimento/rejeição disponível; deltas finais dependem da relação oficial de IDs/exclusões do analista |
 | 12 | Paridade numérica 4T25 | BLOCKED | Requer regra/data de congelamento e eventuais exclusões do analista |
 | 13 | Comparação visual dos 75 slides | DONE | Paridade preview/PDF corrigida e aceita como concluída; Teste 5 funciona como verificação regressiva |
-| 14 | Performance da coleta multi-cidade | DOING | FIERGS: 2 cidades e teto global de 6 requisições; medir geração publicada |
+| 14 | Performance da coleta multi-cidade | HUMAN | FIERGS: 2 cidades e teto global de 6 requisições implementados e testados; falta registrar tempo da geração publicada |
 
 ## Pontos de teste humano
 

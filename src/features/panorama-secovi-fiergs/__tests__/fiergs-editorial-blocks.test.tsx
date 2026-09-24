@@ -26,5 +26,6 @@ describe('FIERGS · blocos editoriais próprios', () => {
     expect(container.querySelector('[aria-label^="Página 57:"]')?.textContent).toContain('OFERTA FINAL POR TIPOLOGIA E METRAGEM');
     expect(container.querySelector('[aria-label^="Página 58:"]')?.textContent).toContain('MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA');
     expect(container.querySelector('[aria-label^="Página 41:"]')?.textContent).toContain('não é reconstruído');
+    expect(container.textContent).not.toContain('A posição editorial está preservada no livro FIERGS');
   });
 });
