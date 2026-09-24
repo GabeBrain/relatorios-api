@@ -167,6 +167,42 @@ function withClosingStockWeight(metric: SourceResult, stock: SourceResult): Sour
   };
 }
 
+/**
+ * Replica a identidade usada pelo Dashboard GeoBrain do Edgar: IVV = vendas líquidas ÷
+ * (estoque final + vendas líquidas). A identidade equivale a vendas ÷ (oferta anterior +
+ * lançamentos) quando o balanço do período fecha, mas evita consolidar percentuais municipais
+ * prontos — inclusive valores anômalos do endpoint — antes de somar numerador e denominador.
+ */
+function ivvFromSalesAndStock(sales: SourceResult, stock: SourceResult): SourceResult {
+  const buckets = new Map<string, { row: Record<string, unknown>; sales: number; stock: number }>();
+  for (const row of sales.rows) {
+    const value = safeNumber(row.liquid_sales);
+    if (value === null) continue;
+    const key = temporalDimension(row);
+    const bucket = buckets.get(key) ?? { row, sales: 0, stock: 0 };
+    bucket.sales += value;
+    buckets.set(key, bucket);
+  }
+  for (const row of stock.rows) {
+    const value = safeNumber(row.stock);
+    if (value === null) continue;
+    const key = temporalDimension(row);
+    const bucket = buckets.get(key) ?? { row, sales: 0, stock: 0 };
+    bucket.stock += value;
+    buckets.set(key, bucket);
+  }
+  const rows = [...buckets.values()].flatMap(({ row, sales: sold, stock: finalStock }) => {
+    const denominator = finalStock + sold;
+    if (denominator <= 0 || sold < 0) return [];
+    return [{ ...row, ivv: sold / denominator * 100, temporal_weight: denominator }];
+  });
+  return {
+    rows,
+    available: sales.available && stock.available,
+    source: 'cálculo Rebrain/Dashboard GeoBrain · vendas líquidas ÷ (estoque final + vendas líquidas)',
+  };
+}
+
 function cohortBlock(scope: PanoramaScope, rows: MarketCohortRow[]): ReportMarketBlock {
   const periods = canonical(scope);
   const groups = new Map<string, { vertical: number; horizontal: number }>();
@@ -435,6 +471,9 @@ export function buildPanoramaReportModel(
     closingFacts.priceSource,
     scope.endQuarter,
   );
+  const ivvSource = entity === 'fiergs-rs'
+    ? ivvFromSalesAndStock(temporal.sales, temporal.stock)
+    : withClosingStockWeight(temporal.ivv, temporal.stock);
 
   return {
     scope, generatedAt: new Date().toISOString(), launches, horizontalSeries,
@@ -450,7 +489,7 @@ export function buildPanoramaReportModel(
       unitsByTypology: guard(marketBlock(scope, temporal.stockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia.')),
       vgvByTypology: guard(marketBlock(scope, temporal.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.')),
     },
-    ivv: guard(marketBlock(scope, withClosingStockWeight(temporal.ivv, temporal.stock), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
+    ivv: guard(marketBlock(scope, ivvSource, 'ivv', 'percent', entity === 'fiergs-rs' ? 'IVV consolidado pela identidade do Dashboard GeoBrain: soma das vendas líquidas ÷ soma de (estoque final + vendas líquidas).' : 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
     ivvByTypology: guard(marketBlock(scope, withClosingStockWeight(temporal.ivvTypology, temporal.stockTypology), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average')),
     prices: {
       ticket: guard(marketBlock(scope, withClosingStockWeight(temporal.ticket, temporal.stock), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),

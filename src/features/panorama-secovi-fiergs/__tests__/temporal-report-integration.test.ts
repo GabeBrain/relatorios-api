@@ -63,4 +63,27 @@ describe('Panorama Secovi/FIERGS — integração de frequência temporal', () =
     // parcial da linha Standard — era esse cruzamento que criava picos de milhares por cento.
     expect(model.ivv.series[0]?.vertical).toBe(20);
   });
+
+  it('no FIERGS calcula IVV como o Dashboard GeoBrain e ignora percentual anômalo pronto', () => {
+    const empty = source([]);
+    const citySources = (city: string, sold: number, stock: number, endpointIvv: number) => ({
+      city,
+      sources: {
+        sales: source([{ period: '2026-06-01', group: 'Standard', building_type: 'Vertical', liquid_sales: sold }]), salesTypology: empty,
+        stock: source([{ period: '2026-06-01', group: 'Standard', building_type: 'Vertical', stock }]), stockTypology: empty,
+        ivv: source([{ period: '2026-06-01', group: 'Standard', building_type: 'Vertical', ivv: endpointIvv }]), ivvTypology: empty,
+        ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty,
+      },
+    });
+    const first = citySources('Guarujá', 20, 80, 2_033.3);
+    const second = citySources('Santos', 30, 70, 999);
+    const model = buildPanoramaReportModel(
+      { ...scope, cities: ['Guarujá', 'Santos'], entity: 'fiergs-rs' },
+      [], first.sources, [], { cityTemporalSources: [first, second] },
+    );
+
+    // Soma primeiro os fatos das cidades: (20 + 30) / ((80 + 20) + (70 + 30)) = 25%.
+    expect(model.ivv.series[0]?.vertical).toBe(25);
+    expect(model.ivv.source).toContain('Dashboard GeoBrain');
+  });
 });

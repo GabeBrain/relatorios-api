@@ -1,3 +1,11 @@
+### 2026-09-24 — FIERGS-RS: IVV factual, período direto e comparativos em colunas — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — cálculo de IVV, filtro temporal e composição dos comparativos FIERGS.
+- **O quê:** o seletor temporal aplica o intervalo assim que o segundo trimestre é escolhido e fecha automaticamente; clicar fora continua descartando uma seleção incompleta. Os comparativos laterais deixaram de ser caixas iguais e passaram a representar os valores por colunas proporcionais, com eixo-base, rótulos e delta. A tabela de variações anuais no canto superior ganhou tipografia maior para audiência 50+.
+- **Diagnóstico IVV:** chamada autenticada das dez cidades no 1T22 mostrou que o pico consolidado vinha do percentual pronto do endpoint, sobretudo de Canoas (`6.900%` em Econômico, `241,7%` em Standard e `131,3%` em Médio), além de anomalias em Gravataí e Novo Hamburgo. O cálculo próprio do Dashboard GeoBrain resulta em `18,65%` para Canoas e `16,28%` no consolidado das dez cidades. O FIERGS agora calcula `Σ vendas líquidas ÷ Σ (estoque final + vendas líquidas)`; Secovi permanece inalterado.
+- **Verificações:** 6 testes focados aprovados, incluindo aplicação direta do período e rejeição de IVV pronto anômalo; typecheck e build aprovados. Os avisos são apenas do Recharts no JSDOM, Browserslist desatualizado e chunks grandes já conhecidos.
+- **Impacto em Etapas/Pendências:** nova geração publicada deve validar as colunas e o IVV factual. Permanecem a sincronização do Mapbox e a homologação do universo 4T25 com o analista.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-09-24 — FIERGS-RS: Teste 6 fecha homologação editorial — Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — PDF publicado de 75 páginas.
 - **O quê:** o Teste 6 confirmou no arquivo exportado o slide metodológico 5, a matriz de tipologia × 12 faixas de metragem do 57 e a matriz completa de área, R$/m² e oferta do 58. Não foram encontradas novas perdas editoriais ou divergências de exportação.

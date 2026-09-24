@@ -291,7 +291,12 @@ function contextualComparisonPairs(data: LaunchSeries[], endQuarter: string, sna
   return pairs;
 }
 function FiergsContextComparisons({ pairs, format }: { pairs: FiergsComparisonPair[]; format: (value: number) => string }) {
-  return <aside className="panorama-fiergs-context-comparisons">{pairs.map((pair) => { const delta = variation(pair.right, pair.left); return <section key={pair.title}><h3>{pair.title}</h3><div><span><b>{format(pair.left)}</b><small>{pair.leftLabel}</small></span><em>{delta === null ? '—' : `${delta >= 0 ? '+' : ''}${pct(delta)}`}</em><span><b>{format(pair.right)}</b><small>{pair.rightLabel}</small></span></div></section>; })}</aside>;
+  return <aside className="panorama-fiergs-context-comparisons">{pairs.map((pair) => {
+    const delta = variation(pair.right, pair.left);
+    const maximum = Math.max(Math.abs(pair.left), Math.abs(pair.right), 1);
+    const columnHeight = (value: number) => `${Math.max(22, Math.abs(value) / maximum * 100)}%`;
+    return <section key={pair.title}><h3>{pair.title}</h3><div><span><b>{format(pair.left)}</b><i style={{ '--panorama-column-height': columnHeight(pair.left) } as CSSProperties}/><small>{pair.leftLabel}</small></span><em>{delta === null ? '—' : `${delta >= 0 ? '+' : ''}${pct(delta)}`}</em><span><b>{format(pair.right)}</b><i style={{ '--panorama-column-height': columnHeight(pair.right) } as CSSProperties}/><small>{pair.rightLabel}</small></span></div></section>;
+  })}</aside>;
 }
 
 function FiergsQuarterlySlide({ report, officialSlide }: { report: PanoramaReportModel; officialSlide: number }) {
