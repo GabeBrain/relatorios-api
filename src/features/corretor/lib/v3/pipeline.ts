@@ -20,6 +20,8 @@ import { estimateAtaPass, extractAtaFromImage, type AtaData } from './ia-ata';
 import { usdToBrl, VISION_CONCURRENCY } from './config';
 import { crossTableFindings, nativeTableRefs, projectionFindings } from './cross-table';
 import { ataCoverageFindings, requiredAndExclusionFindings, sourceFindingsFromVision } from './coverage-rules';
+import type { Fonte } from './fonte';
+import { sourceCrosscheckFindings } from './source-crosscheck';
 
 // ── estimativa combinada (antes de gastar) ────────────────────────────────────
 
@@ -120,6 +122,8 @@ export interface Phase1Result {
 
 export interface RunPhase1Opts {
   model: ModelId;
+  /** Fonte numérica opcional; sem ela, o comportamento histórico é preservado. */
+  fonte?: Fonte | null;
   candidates?: TableImageCandidate[];
   ataCandidate?: AtaImageCandidate | null;
   signal?: AbortSignal;
@@ -139,7 +143,10 @@ export async function runPhase1(
 ): Promise<Phase1Result> {
   const { model, signal, onStage } = opts;
 
-  const detFindings = irToFindings(ir).filter((f) => !f.ok);
+  const detFindings = [
+    ...irToFindings(ir).filter((f) => !f.ok),
+    ...(opts.fonte ? sourceCrosscheckFindings(ir, opts.fonte) : []),
+  ];
   onStage?.({ stage: 'det', done: 1, total: 1, findings: detFindings });
 
   const candidates = opts.candidates ?? (await findTableImages(bytes, ir));

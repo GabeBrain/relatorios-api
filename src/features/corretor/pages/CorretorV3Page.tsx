@@ -44,6 +44,8 @@ import {
   saveReport, setFindingVerdict, resolveInvalidFindings, loadTranscribedBySha1,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
+import { parseFonteJson, type Fonte } from '../lib/v3/fonte';
+import { sourceCrosscheckFindings } from '../lib/v3/source-crosscheck';
 
 const MODEL: ModelId = 'gpt-4o-mini'; // econômico por padrão; visão cai p/ R$ 0 após cache
 
@@ -346,6 +348,8 @@ export default function CorretorV3Page() {
   const [confidenceFilter, setConfidenceFilter] = useState<Confidence[]>([1, 2, 3]);
   const [triaging, setTriaging] = useState(false);
   const newRef = useRef<HTMLInputElement>(null);
+  const fonteRef = useRef<HTMLInputElement>(null);
+  const [fonteInput, setFonteInput] = useState<{ name: string; fonte: Fonte } | null>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
   const diffRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -473,7 +477,7 @@ export default function CorretorV3Page() {
    * (setGate) — nada de texto/visão paga roda antes da confirmação do analista.
    */
   const startPhase1AndGate = useCallback(async (
-    study: { id: string; version: number }, ir: Ir, bytes: Uint8Array,
+    study: { id: string; version: number }, ir: Ir, bytes: Uint8Array, fonte?: Fonte | null,
   ) => {
     const ac = new AbortController();
     abortRef.current = ac;
@@ -482,6 +486,7 @@ export default function CorretorV3Page() {
       const estimate = await estimateFullAnalysis(ir, bytes, MODEL);
       const p1: Phase1Result = await runPhase1(ir, bytes, {
         model: MODEL,
+        fonte,
         candidates: estimate.candidates,
         ataCandidate: estimate.ataCandidate,
         signal: ac.signal,
@@ -553,11 +558,24 @@ export default function CorretorV3Page() {
       await openStudy(id);
       setBusy(null);
       // fase 1 (DET + ata) → portão de confirmação → fase 2 (paga)
-      await startPhase1AndGate({ id, version: 1 }, ir, bytes);
+      await startPhase1AndGate({ id, version: 1 }, ir, bytes, fonteInput?.fonte);
     } catch (err) {
       toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
       setBusy(null);
     }
+  }
+
+  async function handleFonte(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const parsed = parseFonteJson(await file.text());
+    if (!parsed.ok || !parsed.fonte) {
+      toast.error('Fonte numérica inválida', { description: parsed.errors.slice(0, 3).join(' ') });
+      return;
+    }
+    setFonteInput({ name: file.name, fonte: parsed.fonte });
+    toast.success('Fonte numérica vinculada', { description: `${parsed.fonte.blocos.length} blocos disponíveis para cruzamento.` });
   }
 
   async function ingestSuggestion(file: File) {
@@ -607,12 +625,16 @@ export default function CorretorV3Page() {
     setBusy('recheck');
     try {
       const ir = await pptxToIr(bytes, filename);
-      const findings = irToFindings(ir, { city: selected.cidade ?? undefined, uf: selected.uf }).filter((f) => !f.ok);
+      const findings = [
+        ...irToFindings(ir, { city: selected.cidade ?? undefined, uf: selected.uf }).filter((f) => !f.ok),
+        ...(fonteInput ? sourceCrosscheckFindings(ir, fonteInput.fonte) : []),
+      ];
       const diff = await recheck(
         selected.id,
         newVersion,
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: filename },
-        findings
+        findings,
+        { sourceCrosscheckRan: Boolean(fonteInput) },
       );
       setLastDiff(diff);
       window.setTimeout(() => diffRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
@@ -779,6 +801,7 @@ export default function CorretorV3Page() {
         <div className="max-w-5xl mx-auto px-6 py-6 space-y-8">
           {/* Dropzone herói */}
           <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
+          <input ref={fonteRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFonte} />
           {!entryMode ? (
             <section className="grid gap-3 sm:grid-cols-2" aria-label="Escolha o tipo de análise">
               <button onClick={() => setEntryMode('evaluate')} className="rounded-xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -801,6 +824,19 @@ export default function CorretorV3Page() {
               <article className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-lg bg-muted/40 p-4 text-sm leading-6 text-foreground">{consultingSuggestion.content}</article>
             </section>
           ) : (
+            <div className="space-y-3">
+            {entryMode === 'evaluate' && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
+                <div>
+                  <p className="text-xs font-medium">Planilha-fonte estruturada <span className="font-normal text-muted-foreground">(opcional)</span></p>
+                  <p className="text-[11px] text-muted-foreground">{fonteInput ? `${fonteInput.name} · ${fonteInput.fonte.blocos.length} blocos` : 'Vincule um fonte.json para conferir o deck contra os números de origem.'}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {fonteInput && <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setFonteInput(null)}>Remover</button>}
+                  <button type="button" className="rounded-md border border-border px-3 py-1.5 text-xs hover:border-primary/50" onClick={() => fonteRef.current?.click()}>{fonteInput ? 'Trocar fonte' : 'Vincular fonte'}</button>
+                </div>
+              </div>
+            )}
             <button
               type="button"
               onClick={() => busy === null && newRef.current?.click()}
@@ -843,6 +879,7 @@ export default function CorretorV3Page() {
               </div>
               <span className="text-xs text-primary hover:underline" onClick={(event) => { event.stopPropagation(); setEntryMode(null); }}>Voltar às opções</span>
             </button>
+            </div>
           )}
 
           {loadingList ? (
@@ -907,6 +944,15 @@ export default function CorretorV3Page() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <input ref={recheckRef} type="file" accept=".pptx" className="hidden" onChange={handleRecheck} />
+          <input ref={fonteRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFonte} />
+          <button
+            type="button"
+            onClick={() => fonteRef.current?.click()}
+            className={cn('text-xs rounded-md px-2.5 py-1.5 border inline-flex items-center gap-1.5', fonteInput ? 'border-emerald-500/50 text-emerald-700 dark:text-emerald-400' : 'border-border hover:border-primary/50')}
+            title={fonteInput ? fonteInput.name : 'Vincular fonte.json para a próxima reconferência'}
+          >
+            <BookOpen className="w-3.5 h-3.5" /> {fonteInput ? 'Fonte vinculada' : 'Vincular fonte'}
+          </button>
           <button
             onClick={() => recheckRef.current?.click()}
             disabled={busy !== null || analysis?.running || selected.status === 'pronto'}

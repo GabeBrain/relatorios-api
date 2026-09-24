@@ -8,6 +8,7 @@ export type ErrorType =
   | 'ABSOLUTE_SUM'
   | 'TOTALS_EQUALITY'
   | 'CROSS_TABLE_MISMATCH'
+  | 'SOURCE_CROSSCHECK'
   | 'BINNING_RULE'
   | 'TEMPORAL_WINDOW'
   | 'PROJECTION_FORMULA'
@@ -71,6 +72,7 @@ export const ERROR_CATALOG: Record<ErrorType, ErrorMeta> = {
   ABSOLUTE_SUM: { label: 'Soma absoluta', description: 'Linhas e colunas de valores absolutos devem fechar no total declarado.', mode: 'PLENO', viz: 'table', motor: 'DET' },
   TOTALS_EQUALITY: { label: 'Igualdade de totais', description: 'Total de oferta = total por tipologia; consolidada bate com as análises.', mode: 'BETA', viz: 'table', motor: 'DET' },
   CROSS_TABLE_MISMATCH: { label: 'Inconsistência entre tabelas', description: 'Faixas e valores repetidos em slides diferentes devem ser idênticos.', mode: 'BETA', viz: 'sidebyside', motor: 'DET' },
+  SOURCE_CROSSCHECK: { label: 'Divergência da fonte', description: 'O valor publicado no estudo deve bater com a planilha-fonte, com recorte e procedência inequívocos.', mode: 'BETA', viz: 'sidebyside', motor: 'DET' },
   BINNING_RULE: { label: 'Faixas', description: 'Faixas de valores não podem ter furo nem sobreposição; agrupamentos seguem a regra.', mode: 'PLENO', viz: 'binrange', motor: 'DET' },
   TEMPORAL_WINDOW: { label: 'Janela temporal', description: 'Projeções cobrem a janela canônica de 6 anos; slides irmãos usam a mesma base.', mode: 'BETA', viz: 'sidebyside', motor: 'DET' },
   PROJECTION_FORMULA: { label: 'Fórmula de projeção', description: 'A projeção deve seguir a taxa/ritmo informado; fórmula oficial ainda pendente.', mode: 'BETA', viz: 'table', motor: 'DET' },

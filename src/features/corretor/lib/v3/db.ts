@@ -229,15 +229,19 @@ export async function recheck(
   studyId: string,
   versionN: number,
   meta: { sha1?: string; nSlides: number; arquivo: string },
-  newFindings: Finding[]
+  newFindings: Finding[],
+  opts: { sourceCrosscheckRan?: boolean } = {}
 ): Promise<DiffResult> {
   const current = await loadFindings(studyId);
   // Diff comparado só com achados DET: newFindings vêm do motor determinístico,
   // então achados de IA (origem IA_*) não podem ser dados como resolvidos aqui —
   // eles só se resolvem quando um novo passe de IA rodar sobre a versão nova.
-  const activeIds = new Set(
-    current.filter((c) => c.resolvidoNaVersao === null && c.origem === 'DET').map((c) => c.ruleId)
-  );
+  const activeIds = new Set(current.filter((c) => {
+    if (c.resolvidoNaVersao !== null || c.origem !== 'DET') return false;
+    // Sem a fonte anexada nesta reconferência não há evidência para concluir que
+    // uma divergência fonte×deck sumiu; o achado permanece, em vez de virar falso corrigido.
+    return opts.sourceCrosscheckRan || c.finding.type !== 'SOURCE_CROSSCHECK';
+  }).map((c) => c.ruleId));
   const newIds = new Set(newFindings.map((f) => f.id));
 
   const resolved = [...activeIds].filter((id) => !newIds.has(id));
