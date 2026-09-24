@@ -42,6 +42,7 @@ import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
   saveReport, setFindingVerdict, resolveInvalidFindings, loadTranscribedBySha1,
+  saveStudyFonte, loadStudyFonte,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 import { parseFonteJson, type Fonte } from '../lib/v3/fonte';
@@ -367,7 +368,9 @@ export default function CorretorV3Page() {
     setLastDiff(null);
     setLoadingStudy(true);
     try {
-      let loaded = await loadFindings(id);
+      const [initialFindings, savedFonte] = await Promise.all([loadFindings(id), loadStudyFonte(id)]);
+      let loaded = initialFindings;
+      setFonteInput(savedFonte ? { name: savedFonte.filename, fonte: savedFonte.fonte } : null);
       const studyCity = studies.find((s) => s.id === id)?.cidade ?? null;
       // Texto que a visão transcreveu de cada imagem: âncora contra cidade alucinada.
       const shas = [...new Set(loaded
@@ -552,6 +555,14 @@ export default function CorretorV3Page() {
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name },
         findings
       );
+      if (fonteInput) {
+        try { await saveStudyFonte(id, fonteInput.name, fonteInput.fonte); }
+        catch (error) {
+          toast.warning('Fonte usada nesta análise, mas não persistida', {
+            description: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
       toast.success('Triagem concluída (R$ 0)', {
         description: `${ir.n_slides} slides · ${findings.length} pendências determinísticas`,
       });
@@ -575,8 +586,18 @@ export default function CorretorV3Page() {
       toast.error('Fonte numérica inválida', { description: parsed.errors.slice(0, 3).join(' ') });
       return;
     }
+    if (selected) {
+      try { await saveStudyFonte(selected.id, file.name, parsed.fonte); }
+      catch (error) {
+        toast.warning('Fonte vinculada somente nesta sessão', {
+          description: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
     setFonteInput({ name: file.name, fonte: parsed.fonte });
-    toast.success('Fonte numérica vinculada', { description: `${parsed.fonte.blocos.length} blocos disponíveis para cruzamento.` });
+    toast.success(selected ? 'Fonte numérica salva no estudo' : 'Fonte numérica vinculada', {
+      description: `${parsed.fonte.blocos.length} blocos disponíveis para cruzamento.`,
+    });
   }
 
   async function ingestSuggestion(file: File) {

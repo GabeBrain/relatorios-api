@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Finding } from '../audit/model';
 import type { AtaData } from './ia-ata';
 import type { AnalysisReport } from './pipeline';
+import { validateFonte, type Fonte } from './fonte';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -45,6 +46,11 @@ export interface DiffResult {
   fresh: string[];       // novos
 }
 
+export interface StudyFonte {
+  filename: string;
+  fonte: Fonte;
+}
+
 const isLocal = (f: Finding) => /^s\d+$/.test(f.slideRef.trim());
 
 // ── criação / listagem ────────────────────────────────────────────────────────
@@ -83,6 +89,23 @@ export async function createStudy(
     })));
   }
   return studyId;
+}
+
+export async function saveStudyFonte(studyId: string, filename: string, fonte: Fonte): Promise<void> {
+  const validated = validateFonte(fonte);
+  if (!validated.ok || !validated.fonte) throw new Error(`Fonte inválida: ${validated.errors.join(' ')}`);
+  const { error } = await db.from('study_sources_v3').upsert({
+    study_id: studyId, filename, payload: validated.fonte, updated_at: new Date().toISOString(),
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function loadStudyFonte(studyId: string): Promise<StudyFonte | null> {
+  const { data, error } = await db.from('study_sources_v3')
+    .select('filename, payload').eq('study_id', studyId).maybeSingle();
+  if (error || !data) return null;
+  const validated = validateFonte(data.payload);
+  return validated.ok && validated.fonte ? { filename: data.filename, fonte: validated.fonte } : null;
 }
 
 export async function listStudies(): Promise<StudyV3[]> {
