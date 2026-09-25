@@ -162,7 +162,7 @@ describe('JG-01 a JG-04 · tipografia das institucionais', () => {
 describe('JG-07 a JG-12 e JG-15 a JG-18 · rótulo e fundo nos gráficos temporais', () => {
   it('embute cor e tipografia essenciais no SVG para o PDF espelhar o preview', () => {
     const data = [{ quarter: '4T2025', vertical: 15, horizontal: 0, total: 15 }];
-    const { container } = render(<svg><FiergsPointValue x={100} y={80} value={15} index={0} data={data} format={String} referenceQuarter="4"/></svg>);
+    const { container } = render(<svg><FiergsPointValue x={100} y={80} value={15} index={0} data={data as never} format={String} referenceQuarter="4"/></svg>);
     const plate = container.querySelector('rect');
     const label = container.querySelector('text');
     expect(plate?.getAttribute('fill')).toBe('#5d7737');

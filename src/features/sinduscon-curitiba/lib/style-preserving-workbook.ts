@@ -18,7 +18,7 @@ function elements(parent: Document | Element, localName: string): Element[] {
   return Array.from(parent.getElementsByTagNameNS('*', localName));
 }
 
-function firstElement(parent: Document | Element, localName: string): Element[] {
+function firstElement(parent: Document | Element, localName: string): Element | null {
   return elements(parent, localName)[0] ?? null;
 }
 
