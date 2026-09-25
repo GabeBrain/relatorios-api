@@ -874,6 +874,35 @@ export type Database = {
         }
         Relationships: []
       }
+      study_sources_v3: {
+        Row: {
+          filename: string
+          payload: Json
+          study_id: string
+          updated_at: string
+        }
+        Insert: {
+          filename: string
+          payload: Json
+          study_id: string
+          updated_at?: string
+        }
+        Update: {
+          filename?: string
+          payload?: Json
+          study_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_sources_v3_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: true
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_versions: {
         Row: {
           arquivo: string | null
@@ -911,6 +940,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      validacao_fechamento_aprovacoes: {
+        Row: {
+          approval_key: string
+          approved_at: string
+          approved_by_email: string
+          building_id: string
+          city: string
+          divergence: string
+          field: string
+          period: string
+          rule: string
+          typology_id: string
+        }
+        Insert: {
+          approval_key: string
+          approved_at?: string
+          approved_by_email: string
+          building_id: string
+          city: string
+          divergence: string
+          field: string
+          period: string
+          rule: string
+          typology_id: string
+        }
+        Update: {
+          approval_key?: string
+          approved_at?: string
+          approved_by_email?: string
+          building_id?: string
+          city?: string
+          divergence?: string
+          field?: string
+          period?: string
+          rule?: string
+          typology_id?: string
+        }
+        Relationships: []
       }
       vision_cache: {
         Row: {
