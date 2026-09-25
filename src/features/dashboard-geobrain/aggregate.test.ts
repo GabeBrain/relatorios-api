@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { computeKpis, computeOpportunityMap } from './aggregate';
+import { applyFilters, computeKpis, computeOpportunityMap } from './aggregate';
 import type { Building, Filters } from './types';
 
 const filters: Filters = {
-  from: null, to: null, years: [], periods: [], status: [], cities: [], neighborhoods: [],
+  from: null, to: null, years: [], periods: [], status: [], states: [], cities: [], neighborhoods: [],
   types: [], typologies: [], standards: [], bedrooms: [], garages: [], buildings: [],
   privateAreas: [], pricePerM2: [],
 };
@@ -52,5 +52,20 @@ describe('computeOpportunityMap', () => {
     expect(matrix.cols).toEqual(['0 dorms', '1 dorm', '2 dorms', '3 dorms', '4 dorms']);
     expect(matrix.data.Centro['0 dorms']).toBe(0);
     expect(matrix.data.Centro['1 dorm']).toBeCloseTo(2 / 12);
+  });
+
+  it('filtra dados por UF e Município e permite agrupar o mapa por UF', () => {
+    const buildings = [
+      { state: 'SP', city: 'São Paulo', neighborhood: 'Centro', typologies: [{ number_bedroom: 1, history: [{ period: '2026-09-01', typology_stock: 8, sold_in_period: 2 }] }] },
+      { state: 'MG', city: 'Belo Horizonte', neighborhood: 'Savassi', typologies: [{ number_bedroom: 1, history: [{ period: '2026-09-01', typology_stock: 6, sold_in_period: 3 }] }] },
+    ] as unknown as Building[];
+    const scopedFilters = { ...filters, states: ['SP'], cities: ['São Paulo'] };
+
+    const filtered = applyFilters(buildings, scopedFilters);
+    const matrix = computeOpportunityMap(filtered, scopedFilters, 'state');
+
+    expect(filtered).toHaveLength(1);
+    expect(matrix.rowLabel).toBe('UF');
+    expect(matrix.rows).toEqual(['SP']);
   });
 });

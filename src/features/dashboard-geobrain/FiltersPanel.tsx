@@ -87,7 +87,7 @@ export function FiltersPanel({ uf, onUfChange, ufOptions, filters, onFiltersChan
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         <MultiSelect label="Ano" options={toOpts(options.years)} value={filters.years} onChange={(v) => set('years', v)} disabled={disabled} />
         <MultiSelect label="Situação" options={toOpts(options.status)} value={filters.status} onChange={(v) => set('status', v)} disabled={disabled} />
-        <MultiSelect label="Cidades" options={toOpts(options.cities)} value={filters.cities} onChange={(v) => set('cities', v)} disabled={disabled} />
+        <MultiSelect label="Municípios" options={toOpts(options.cities)} value={filters.cities} onChange={(v) => set('cities', v)} disabled={disabled} />
         <MultiSelect label="Bairros" options={toOpts(options.neighborhoods)} value={filters.neighborhoods} onChange={(v) => set('neighborhoods', v)} disabled={disabled} />
         <MultiSelect label="Tipo" options={toOpts(options.types)} value={filters.types} onChange={(v) => set('types', v)} disabled={disabled} />
         <MultiSelect label="Tipologia" options={toOpts(options.typologies)} value={filters.typologies} onChange={(v) => set('typologies', v)} disabled={disabled} />

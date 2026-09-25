@@ -6,7 +6,7 @@ import {
   applyFilters, computeKpis, computeSeries, extractOptions, extractRangeOptions,
   computeOfertaPorDormitorio, computeOfertaPorPadrao,
   rankBairrosPorIvv, rankBairrosPorTempoEstoque, rankBairrosPorEstoque, rankBairrosPorPrecoM2, rankBairrosPorPrecoMedio,
-  precoM2PorPadrao, precoMedioPorPadrao, computeOpportunityMap, computeIpcByStandard, computePriceAreaBubbles,
+  precoM2PorPadrao, precoMedioPorPadrao, computeOpportunityMap, computeIpcByStandard, computePriceAreaBubbles, GEOGRAPHIC_GROUP_LABEL,
 } from '@/features/dashboard-geobrain/aggregate';
 import { Header, type BuildingType } from '@/features/dashboard-geobrain/Header';
 import type { GeoLoadRequest } from '@/features/shared/geo-api-scope-engine/GeoApiScopeSelector';
@@ -19,11 +19,12 @@ import { RankingCard } from '@/features/dashboard-geobrain/Rankings';
 import { OpportunityMap } from '@/features/dashboard-geobrain/OpportunityMap';
 import { ActiveFiltersBar } from '@/features/dashboard-geobrain/ActiveFiltersBar';
 import type { Filters, Granularity } from '@/features/dashboard-geobrain/types';
+import type { GeographicGroupBy } from '@/features/dashboard-geobrain/aggregate';
 import { useAuthStore } from '@/store/auth-store';
 import '@/features/dashboard-geobrain/dashboard.css';
 
 const EMPTY_FILTERS: Filters = {
-  from: null, to: null, years: [], periods: [], status: [], cities: [], neighborhoods: [],
+  from: null, to: null, years: [], periods: [], status: [], states: [], cities: [], neighborhoods: [],
   types: [], typologies: [], standards: [], bedrooms: [], garages: [], buildings: [],
   privateAreas: [], pricePerM2: [],
 };
@@ -32,6 +33,7 @@ export default function DashboardGeobrain() {
   const hasToken = useAuthStore((s) => s.hasValidToken());
   const [scope, setScope] = useState<{ uf: string; city: string }>({ uf: '', city: '' });
   const [region, setRegion] = useState('');
+  const [geographicGroupBy, setGeographicGroupBy] = useState<GeographicGroupBy>('neighborhood');
   const [buildingType, setBuildingType] = useState<BuildingType>('Vertical');
   const [granularity, setGranularity] = useState<Granularity>('quarter');
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
@@ -72,11 +74,11 @@ export default function DashboardGeobrain() {
   const ofertaDorm = useMemo(() => computeOfertaPorDormitorio(filtered, filtersWithType), [filtered, filtersWithType]);
   const ofertaPadrao = useMemo(() => computeOfertaPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
 
-  const rankIvv = useMemo(() => rankBairrosPorIvv(filtered, filtersWithType), [filtered, filtersWithType]);
-  const rankTempo = useMemo(() => rankBairrosPorTempoEstoque(filtered, filtersWithType), [filtered, filtersWithType]);
-  const rankEstoque = useMemo(() => rankBairrosPorEstoque(filtered, filtersWithType), [filtered, filtersWithType]);
-  const rankM2 = useMemo(() => rankBairrosPorPrecoM2(filtered, filtersWithType), [filtered, filtersWithType]);
-  const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType), [filtered, filtersWithType]);
+  const rankIvv = useMemo(() => rankBairrosPorIvv(filtered, filtersWithType, geographicGroupBy), [filtered, filtersWithType, geographicGroupBy]);
+  const rankTempo = useMemo(() => rankBairrosPorTempoEstoque(filtered, filtersWithType, geographicGroupBy), [filtered, filtersWithType, geographicGroupBy]);
+  const rankEstoque = useMemo(() => rankBairrosPorEstoque(filtered, filtersWithType, geographicGroupBy), [filtered, filtersWithType, geographicGroupBy]);
+  const rankM2 = useMemo(() => rankBairrosPorPrecoM2(filtered, filtersWithType, geographicGroupBy), [filtered, filtersWithType, geographicGroupBy]);
+  const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType, geographicGroupBy), [filtered, filtersWithType, geographicGroupBy]);
   const priceAreaBubbles = useMemo(() => computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, bubbleNeighborhood), [filtered, filtersWithType, bubbleStandard, bubbleNeighborhood]);
   const bubbleNeighborhoods = useMemo(
     () => Array.from(new Set(computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, null).map((point) => point.neighborhood)))
@@ -85,8 +87,10 @@ export default function DashboardGeobrain() {
   );
   const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoMedioStd = useMemo(() => precoMedioPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
-  const oppMap = useMemo(() => computeOpportunityMap(filtered, filtersWithType, 'neighborhood'), [filtered, filtersWithType]);
-  const oppMapStd = useMemo(() => computeOpportunityMap(filtered, filtersWithType, { rowBy: 'neighborhood', colBy: 'standard' }), [filtered, filtersWithType]);
+  const oppMap = useMemo(() => computeOpportunityMap(filtered, filtersWithType, geographicGroupBy), [filtered, filtersWithType, geographicGroupBy]);
+  const oppMapStd = useMemo(() => computeOpportunityMap(filtered, filtersWithType, { rowBy: geographicGroupBy, colBy: 'standard' }), [filtered, filtersWithType, geographicGroupBy]);
+  const geographicGroupLabel = GEOGRAPHIC_GROUP_LABEL[geographicGroupBy];
+  const geographicGroupTitle = geographicGroupBy === 'state' ? geographicGroupLabel : geographicGroupLabel.toLowerCase();
   const ipc = useMemo(() => computeIpcByStandard(allBuildings, filtered, filtersWithType, granularity), [allBuildings, filtered, filtersWithType, granularity]);
 
   const infoPrecoMedio = (
@@ -143,6 +147,7 @@ export default function DashboardGeobrain() {
         region={region}
         onRegionChange={setRegion}
         onLoad={(request: GeoLoadRequest) => load(request)}
+        onClear={() => { setRegion(''); setScope({ uf: '', city: '' }); }}
         buildingType={buildingType}
         onBuildingTypeChange={(nextType) => {
           setBuildingType(nextType);
@@ -170,7 +175,7 @@ export default function DashboardGeobrain() {
             <Activity className="h-3 w-3" />
             {status === 'ready'
               ? `${intFmt(filtered.length)} de ${intFmt(allBuildings.length)} empreendimentos`
-              : status === 'loading' ? 'Carregando dados…' : 'Escolha uma região, UF ou cidade e clique em Carregar'}
+              : status === 'loading' ? 'Carregando dados…' : 'Escolha uma região, UF ou município e clique em Carregar'}
           </div>
         </div>
 
@@ -207,12 +212,12 @@ export default function DashboardGeobrain() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <RankingCard title="IVV por bairro" rows={rankIvv} formatValue={(v) => pctRaw(v * 100, 1)} info={infoIvv} />
-          <RankingCard title="Tempo de estoque por bairro" rows={rankTempo} formatValue={(v) => monthsFmt(v)} info={infoTempoEstoque} />
-          <RankingCard title="Estoque atual por bairro" rows={rankEstoque} formatValue={(v) => intFmt(v)} info={infoEstoqueAtual} />
-          <RankingCard title="Preço m² por bairro" rows={rankM2} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoM2} />
+          <RankingCard title={`IVV por ${geographicGroupTitle}`} rows={rankIvv} formatValue={(v) => pctRaw(v * 100, 1)} info={infoIvv} geographicGroupBy={geographicGroupBy} onGeographicGroupByChange={setGeographicGroupBy} />
+          <RankingCard title={`Tempo de estoque por ${geographicGroupTitle}`} rows={rankTempo} formatValue={(v) => monthsFmt(v)} info={infoTempoEstoque} geographicGroupBy={geographicGroupBy} onGeographicGroupByChange={setGeographicGroupBy} />
+          <RankingCard title={`Estoque atual por ${geographicGroupTitle}`} rows={rankEstoque} formatValue={(v) => intFmt(v)} info={infoEstoqueAtual} geographicGroupBy={geographicGroupBy} onGeographicGroupByChange={setGeographicGroupBy} />
+          <RankingCard title={`Preço m² por ${geographicGroupTitle}`} rows={rankM2} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoM2} geographicGroupBy={geographicGroupBy} onGeographicGroupByChange={setGeographicGroupBy} />
           <div className="md:col-span-2">
-            <RankingCard title="Preço médio por bairro" rows={rankMedio} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoMedio} />
+            <RankingCard title={`Preço médio por ${geographicGroupTitle}`} rows={rankMedio} formatValue={(v) => currencyCompactNoPrefix(v)} info={infoPrecoMedio} geographicGroupBy={geographicGroupBy} onGeographicGroupByChange={setGeographicGroupBy} />
           </div>
         </div>
 
@@ -224,8 +229,8 @@ export default function DashboardGeobrain() {
         <IpcChart series={ipc.series} standards={ipc.standards} granularity={granularity} />
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <OpportunityMap matrix={oppMap} title="Mapa de oportunidades — Bairro" />
-          <OpportunityMap matrix={oppMapStd} title="Mapa de oportunidades — Padrão" />
+          <OpportunityMap matrix={oppMap} title={`Mapa de oportunidades — ${geographicGroupLabel}`} geographicGroupBy={geographicGroupBy} onGeographicGroupByChange={setGeographicGroupBy} />
+          <OpportunityMap matrix={oppMapStd} title={`Mapa de oportunidades — Padrão por ${geographicGroupLabel}`} geographicGroupBy={geographicGroupBy} onGeographicGroupByChange={setGeographicGroupBy} />
         </div>
 
         <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} neighborhoods={bubbleNeighborhoods} neighborhood={bubbleNeighborhood} onStandardChange={(value) => { setBubbleStandard(value); setBubbleNeighborhood(null); }} onNeighborhoodChange={setBubbleNeighborhood} />

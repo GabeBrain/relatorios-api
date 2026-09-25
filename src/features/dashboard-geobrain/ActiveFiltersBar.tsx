@@ -23,7 +23,8 @@ function joinOrDash(values: string[]): string {
 const STATUS_LABEL: Record<string, string> = { Ativo: 'Comercialização', Esgotado: 'Esgotado' };
 
 export function ActiveFiltersBar({ scope, buildingType, filters, options, rangeOptions, onReset }: Props) {
-  const cityLabel = scope.uf && scope.city ? `${scope.city}/${scope.uf}` : '—';
+  const ufLabel = filters.states.length ? joinOrDash(filters.states) : scope.uf || '—';
+  const municipalityLabel = filters.cities.length ? joinOrDash(filters.cities) : scope.city || '—';
 
   const periodLabels = filters.periods.map((v) => options.months.find((p) => p.value === v)?.label ?? v);
   const statusLabels = filters.status.map((s) => STATUS_LABEL[s] ?? s);
@@ -34,7 +35,8 @@ export function ActiveFiltersBar({ scope, buildingType, filters, options, rangeO
     : filters.buildings.map((id) => options.buildings.find((b) => b.id === id)?.name ?? id);
 
   const parts: { label: string; value: string; optional?: boolean }[] = [
-    { label: 'Cidade', value: cityLabel },
+    { label: 'UF', value: ufLabel },
+    { label: 'Município', value: municipalityLabel },
     { label: 'Tipo', value: buildingType },
     { label: 'Situação', value: joinOrDash(statusLabels), optional: true },
     { label: 'Bairros', value: joinOrDash(filters.neighborhoods), optional: true },
@@ -51,7 +53,7 @@ export function ActiveFiltersBar({ scope, buildingType, filters, options, rangeO
   const visible = parts.filter((p) => !p.optional || p.value !== '—');
 
   const hasAny =
-    filters.status.length || filters.neighborhoods.length || filters.standards.length ||
+    filters.status.length || filters.states.length || filters.cities.length || filters.neighborhoods.length || filters.standards.length ||
     filters.typologies.length || filters.bedrooms.length || filters.garages.length ||
     filters.privateAreas.length || filters.pricePerM2.length ||
     filters.years.length || filters.periods.length || filters.buildings.length;

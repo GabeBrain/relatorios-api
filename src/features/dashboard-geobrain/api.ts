@@ -208,7 +208,7 @@ export async function fetchBuildings({ uf, ufs, city, token, signal, onProgress 
   const scopes: Array<{ city: string } | { uf: string }> = cities.length
     ? cities.map((currentCity) => ({ city: currentCity }))
     : (ufs?.length ? ufs : uf ? [uf] : []).map((currentUf) => ({ uf: currentUf }));
-  if (scopes.length === 0) throw new Error('Selecione uma região, UF ou cidade para carregar os dados.');
+  if (scopes.length === 0) throw new Error('Selecione uma região, UF ou município para carregar os dados.');
 
   const progress: FetchProgress = { lanesTotal: scopes.length * ALL_TYPES.length, lanesDone: 0, pagesDone: 0, buildingsFound: 0 };
   const result: Building[] = [];

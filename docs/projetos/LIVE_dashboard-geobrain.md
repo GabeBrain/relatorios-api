@@ -33,6 +33,15 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-09-25 — Filtros e visualizações geográficas do Dashboard — Codex
+- **Ambiente/funcionalidade:** `/dash-geobrain` — filtros locais e agrupamento geográfico dos gráficos.
+- **O quê:** adicionados os filtros locais de UF e Município abaixo de Períodos; eles refinam os dados já carregados sem disparar nova consulta. Os gráficos antes restritos a Bairro e os dois mapas de oportunidades agora permitem alternar entre Bairro, UF e Município. A barra de filtros ativos passou a mostrar UF, toda a terminologia visível foi padronizada para Município e o cabeçalho recebeu Limpar, que remove somente Região, UF e Município do escopo da próxima consulta.
+- **Por quê:** permitir leitura comparativa por diferentes níveis geográficos, separar filtros locais do escopo de coleta e uniformizar a nomenclatura da interface.
+- **Arquivos:** `src/features/dashboard-geobrain/{ActiveFiltersBar.tsx,FiltersPanel.tsx,Header.tsx,OpportunityMap.tsx,Rankings.tsx,Sidebar.tsx,aggregate.ts,aggregate.test.ts,api.ts,types.ts}`, `src/pages/DashboardGeobrain.tsx`, `src/features/shared/geo-api-scope-engine/GeoApiScopeSelector.tsx`.
+- **Commits:** `090f3af`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; filtros locais e escopo de API continuam separados. A validação manual autenticada do Dashboard permanece pendente.
+
 ### 2026-09-25 — Escopo por Região, UF ou Cidade com carregamento manual — Codex
 - **Ambiente/funcionalidade:** `/dash-geobrain` — filtros geográficos e coleta da API.
 - **O quê:** adicionado o filtro Região antes de UF, com dados de `region` do mesmo `/monitored-cities`; ele restringe as opções de UF sem selecionar uma automaticamente. O botão Carregar consulta apenas `city` quando há cidade, apenas `uf` quando há UF e percorre sequencialmente as UFs da Região quando somente ela foi escolhida. A seleção de Períodos recebe os últimos 12 meses apenas na primeira carga e permanece nas consultas seguintes.

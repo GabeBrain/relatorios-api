@@ -26,6 +26,7 @@ interface Props {
   region?: string;
   onRegionChange?: (region: string) => void;
   onLoad?: (request: GeoLoadRequest) => void;
+  onClear?: () => void;
 }
 
 export function GeoApiScopeSelector({
@@ -40,6 +41,7 @@ export function GeoApiScopeSelector({
   region = '',
   onRegionChange,
   onLoad,
+  onClear,
 }: Props) {
   const {
     availableUfs, availableCities, setUf, setCity,
@@ -51,7 +53,7 @@ export function GeoApiScopeSelector({
     return (
       <div className={cn('flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-50 px-3 py-2 text-xs text-amber-800', className)}>
         <AlertTriangle className="h-4 w-4 shrink-0" />
-        Faça login no cabeçalho para carregar as cidades monitoradas.
+        Faça login no cabeçalho para carregar os municípios monitorados.
       </div>
     );
   }
@@ -129,7 +131,7 @@ export function GeoApiScopeSelector({
             >
               <span className="truncate">
                 {isLoading
-                  ? 'Carregando cidades monitoradas…'
+                  ? 'Carregando municípios monitorados…'
                   : value.city
                     ? value.city
                     : value.uf
@@ -172,6 +174,15 @@ export function GeoApiScopeSelector({
         disabled={disabled || isLoading || !loadRequest}
       >
         Carregar
+      </Button>}
+      {onClear && <Button
+        type="button"
+        variant="outline"
+        className="h-9"
+        onClick={onClear}
+        disabled={disabled || (!region && !value.uf && !value.city)}
+      >
+        Limpar
       </Button>}
     </div>
   );

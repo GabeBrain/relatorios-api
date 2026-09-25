@@ -20,6 +20,7 @@ interface Props {
   region: string;
   onRegionChange: (region: string) => void;
   onLoad: (request: GeoLoadRequest) => void;
+  onClear: () => void;
   buildingType: BuildingType;
   onBuildingTypeChange: (v: BuildingType) => void;
   granularity: Granularity;
@@ -33,6 +34,7 @@ export function Header({
   region,
   onRegionChange,
   onLoad,
+  onClear,
   buildingType,
   onBuildingTypeChange,
   granularity,
@@ -65,6 +67,7 @@ export function Header({
         region={region}
         onRegionChange={onRegionChange}
         onLoad={onLoad}
+        onClear={onClear}
         className="flex-none"
         cityContainerClassName="w-[180px] min-w-[180px] space-y-1.5"
       />

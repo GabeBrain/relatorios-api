@@ -132,6 +132,7 @@ export function applyFilters(buildings: Building[], f: Filters): Building[] {
   const out: Building[] = [];
   for (const b of buildings) {
     if (f.status.length && !f.status.includes(b.status)) continue;
+    if (f.states.length && !f.states.includes(b.state)) continue;
     if (f.cities.length && !f.cities.includes(b.city)) continue;
     if (f.neighborhoods.length && !f.neighborhoods.includes(b.neighborhood)) continue;
     if (f.types.length && !f.types.includes(b.building_type)) continue;
@@ -447,8 +448,22 @@ export function computeOfertaPorPadrao(buildings: Building[], f: Filters): Combo
 
 export interface RankRow { key: string; value: number; }
 
-export function rankBairrosPorIvv(buildings: Building[], f: Filters): RankRow[] {
-  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.neighborhood);
+export type GeographicGroupBy = 'neighborhood' | 'state' | 'city';
+
+export const GEOGRAPHIC_GROUP_LABEL: Record<GeographicGroupBy, string> = {
+  neighborhood: 'Bairro',
+  state: 'UF',
+  city: 'Município',
+};
+
+function geographicGroupKey(groupBy: GeographicGroupBy, building: Building): string {
+  if (groupBy === 'state') return building.state;
+  if (groupBy === 'city') return building.city;
+  return building.neighborhood;
+}
+
+export function rankBairrosPorIvv(buildings: Building[], f: Filters, groupBy: GeographicGroupBy = 'neighborhood'): RankRow[] {
+  const acc = tempoEstoqueByLatest(buildings, f, (b) => geographicGroupKey(groupBy, b));
   const rows: RankRow[] = [];
   for (const [k, { est, vnd }] of acc) {
     const denom = est + vnd;
@@ -458,8 +473,8 @@ export function rankBairrosPorIvv(buildings: Building[], f: Filters): RankRow[] 
 }
 
 /** Estoque atual (unidades) por bairro no período mais recente do escopo filtrado. */
-export function rankBairrosPorEstoque(buildings: Building[], f: Filters): RankRow[] {
-  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.neighborhood);
+export function rankBairrosPorEstoque(buildings: Building[], f: Filters, groupBy: GeographicGroupBy = 'neighborhood'): RankRow[] {
+  const acc = tempoEstoqueByLatest(buildings, f, (b) => geographicGroupKey(groupBy, b));
   const rows: RankRow[] = [];
   for (const [k, { est }] of acc) {
     if (est > 0) rows.push({ key: k, value: est });
@@ -467,8 +482,8 @@ export function rankBairrosPorEstoque(buildings: Building[], f: Filters): RankRo
   return rows.sort((a, b) => b.value - a.value);
 }
 
-export function rankBairrosPorTempoEstoque(buildings: Building[], f: Filters): RankRow[] {
-  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.neighborhood);
+export function rankBairrosPorTempoEstoque(buildings: Building[], f: Filters, groupBy: GeographicGroupBy = 'neighborhood'): RankRow[] {
+  const acc = tempoEstoqueByLatest(buildings, f, (b) => geographicGroupKey(groupBy, b));
   const rows: RankRow[] = [];
   for (const [k, { est, vnd }] of acc) {
     const t = tempoFromIvv(est, vnd);
@@ -499,11 +514,11 @@ function avgLastPrice(buildings: Building[], f: Filters, field: 'price' | 'price
     .filter((r) => r.value > 0);
 }
 
-export function rankBairrosPorPrecoM2(buildings: Building[], f: Filters): RankRow[] {
-  return avgLastPrice(buildings, f, 'price_private_area', (b) => b.neighborhood).sort((a, b) => a.value - b.value);
+export function rankBairrosPorPrecoM2(buildings: Building[], f: Filters, groupBy: GeographicGroupBy = 'neighborhood'): RankRow[] {
+  return avgLastPrice(buildings, f, 'price_private_area', (b) => geographicGroupKey(groupBy, b)).sort((a, b) => a.value - b.value);
 }
-export function rankBairrosPorPrecoMedio(buildings: Building[], f: Filters): RankRow[] {
-  return avgLastPrice(buildings, f, 'price', (b) => b.neighborhood).sort((a, b) => a.value - b.value);
+export function rankBairrosPorPrecoMedio(buildings: Building[], f: Filters, groupBy: GeographicGroupBy = 'neighborhood'): RankRow[] {
+  return avgLastPrice(buildings, f, 'price', (b) => geographicGroupKey(groupBy, b)).sort((a, b) => a.value - b.value);
 }
 export function precoM2PorPadrao(buildings: Building[], f: Filters): RankRow[] {
   return avgLastPrice(buildings, f, 'price_private_area', (b, _t, h) => patternOf(h, b)).sort((a, b) => a.value - b.value);
@@ -521,7 +536,7 @@ export interface OpportunityMatrix {
   rowLabel: string;
 }
 
-export type OpportunityRowBy = 'neighborhood' | 'building_type' | 'standard';
+export type OpportunityRowBy = GeographicGroupBy | 'building_type' | 'standard';
 export type OpportunityColBy = 'bedroom' | 'standard';
 export type OpportunityGroupBy = OpportunityRowBy;
 
@@ -532,6 +547,8 @@ interface OpportunityOptions {
 
 const ROW_LABEL: Record<OpportunityRowBy, string> = {
   neighborhood: 'Bairro',
+  state: 'UF',
+  city: 'Município',
   building_type: 'Tipo',
   standard: 'Padrão',
 };
@@ -551,7 +568,7 @@ export function computeOpportunityMap(
   const rowKeyFn = (b: Building, h: HistoryEntry) => {
     if (rowBy === 'building_type') return b.building_type;
     if (rowBy === 'standard') return patternOf(h, b);
-    return b.neighborhood;
+    return geographicGroupKey(rowBy, b);
   };
 
   const est = new Map<string, Map<string, number>>();
@@ -685,6 +702,7 @@ export function extractOptions(buildings: Building[]) {
   const s = <T,>() => new Set<T>();
   const years = s<string>();
   const status = s<string>();
+  const states = s<string>();
   const cities = s<string>();
   const neighborhoods = s<string>();
   const types = s<string>();
@@ -710,6 +728,7 @@ export function extractOptions(buildings: Building[]) {
       }
     }
     if (b.status) status.add(b.status);
+    if (b.state) states.add(b.state);
     if (b.city) cities.add(b.city);
     if (b.neighborhood) neighborhoods.add(b.neighborhood);
     if (b.building_type) types.add(b.building_type);
@@ -737,6 +756,7 @@ export function extractOptions(buildings: Building[]) {
     years: sortStr(Array.from(years)).reverse(),
     months,
     status: sortStr(Array.from(status)),
+    states: sortStr(Array.from(states)),
     cities: sortStr(Array.from(cities)),
     neighborhoods: sortStr(Array.from(neighborhoods)),
     types: sortStr(Array.from(types)),

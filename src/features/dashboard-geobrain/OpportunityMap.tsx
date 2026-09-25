@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { Download, Search } from 'lucide-react';
 import { pctRaw } from '@/lib/format';
-import type { OpportunityMatrix } from './aggregate';
+import { GEOGRAPHIC_GROUP_LABEL, type GeographicGroupBy, type OpportunityMatrix } from './aggregate';
 import { exportGeoBrainSvg } from './Charts';
 
 function heatClass(v: number): string {
@@ -18,9 +18,11 @@ interface Props {
   matrix: OpportunityMatrix;
   title?: string;
   subtitle?: string;
+  geographicGroupBy?: GeographicGroupBy;
+  onGeographicGroupByChange?: (groupBy: GeographicGroupBy) => void;
 }
 
-export function OpportunityMap({ matrix, title = 'Mapa de oportunidades', subtitle }: Props) {
+export function OpportunityMap({ matrix, title = 'Mapa de oportunidades', subtitle, geographicGroupBy, onGeographicGroupByChange }: Props) {
   const cardRef = useRef<HTMLElement>(null);
   const [query, setQuery] = useState('');
   const filtered = useMemo(() => {
@@ -39,6 +41,15 @@ export function OpportunityMap({ matrix, title = 'Mapa de oportunidades', subtit
           <p className="dg-subtle">{sub}</p>
         </div>
         <div className="flex items-center gap-1">
+          {geographicGroupBy && onGeographicGroupByChange && (
+            <div className="dg-chip-group">
+              {(Object.keys(GEOGRAPHIC_GROUP_LABEL) as GeographicGroupBy[]).map((groupBy) => (
+                <button key={groupBy} type="button" className="dg-chip" data-active={groupBy === geographicGroupBy} onClick={() => onGeographicGroupByChange(groupBy)} style={{ padding: '2px 6px', fontSize: '9px' }}>
+                  {GEOGRAPHIC_GROUP_LABEL[groupBy]}
+                </button>
+              ))}
+            </div>
+          )}
           <button
             type="button"
             className="dg-chip"
