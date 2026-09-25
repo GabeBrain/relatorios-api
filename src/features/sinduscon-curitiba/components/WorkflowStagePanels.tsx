@@ -16,7 +16,7 @@ type Output = ConsolidationOutput | TabulationOutput | FinalReportOutput;
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 function download(bytes: Uint8Array, fileName: string) {
-  const blob = new Blob([bytes], { type: /\.pdf$/i.test(fileName) ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const blob = new Blob([bytes as BlobPart], { type: /\.pdf$/i.test(fileName) ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;

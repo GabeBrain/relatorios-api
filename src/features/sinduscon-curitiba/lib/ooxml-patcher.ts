@@ -9,7 +9,7 @@ function parseXml(xml: string, label: string) {
   return document;
 }
 
-function elements(parent: ParentNode, localName: string) {
+function elements(parent: Document | Element, localName: string): Element[] {
   return Array.from(parent.getElementsByTagNameNS('*', localName));
 }
 
