@@ -6,6 +6,7 @@ export interface GeoScope {
 export interface MonitoredCity {
   city?: string;
   state?: string;
+  region?: string;
 }
 
 export type GeoApiScopeErrorCode =

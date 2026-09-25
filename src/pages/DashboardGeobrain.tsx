@@ -9,6 +9,7 @@ import {
   precoM2PorPadrao, precoMedioPorPadrao, computeOpportunityMap, computeIpcByStandard, computePriceAreaBubbles,
 } from '@/features/dashboard-geobrain/aggregate';
 import { Header, type BuildingType } from '@/features/dashboard-geobrain/Header';
+import type { GeoLoadRequest } from '@/features/shared/geo-api-scope-engine/GeoApiScopeSelector';
 import { Sidebar } from '@/features/dashboard-geobrain/Sidebar';
 import { KpiRow } from '@/features/dashboard-geobrain/KpiRow';
 import {
@@ -30,23 +31,16 @@ const EMPTY_FILTERS: Filters = {
 export default function DashboardGeobrain() {
   const hasToken = useAuthStore((s) => s.hasValidToken());
   const [scope, setScope] = useState<{ uf: string; city: string }>({ uf: '', city: '' });
+  const [region, setRegion] = useState('');
   const [buildingType, setBuildingType] = useState<BuildingType>('Vertical');
   const [granularity, setGranularity] = useState<Granularity>('quarter');
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [defaultsAppliedFor, setDefaultsAppliedFor] = useState<string | null>(null);
+  const [initialPeriodsApplied, setInitialPeriodsApplied] = useState(false);
   const [bubbleStandard, setBubbleStandard] = useState<string | null>(null);
   const [bubbleNeighborhood, setBubbleNeighborhood] = useState<string | null>(null);
 
-  const { status, buildings, error, progress, load, reset } = useDashboardData();
-
-  useEffect(() => {
-    if (scope.uf && scope.city) {
-      load({ uf: scope.uf, city: scope.city });
-    } else {
-      reset();
-    }
-  }, [scope.uf, scope.city, load, reset]);
+  const { status, buildings, error, progress, load } = useDashboardData();
 
   const allBuildings = buildings ?? [];
   const options = useMemo(
@@ -59,16 +53,15 @@ export default function DashboardGeobrain() {
     [allBuildings, buildingType],
   );
 
-  // §4 — Ao carregar dados, aplicar por padrão os últimos 12 meses (períodos).
+  // §4 — Na primeira carga, aplicar por padrão os últimos 12 meses; depois, preservar a escolha do usuário.
   useEffect(() => {
     if (status !== 'ready') return;
-    const scopeKey = `${scope.uf}|${scope.city}`;
-    if (defaultsAppliedFor === scopeKey) return;
+    if (initialPeriodsApplied) return;
     if (options.months.length === 0) return;
     const last12 = options.months.slice(0, 12).map((m) => m.value);
-    setFilters((prev) => ({ ...prev, periods: last12 }));
-    setDefaultsAppliedFor(scopeKey);
-  }, [status, options.months, scope.uf, scope.city, defaultsAppliedFor]);
+    setFilters((prev) => prev.periods.length ? prev : { ...prev, periods: last12 });
+    setInitialPeriodsApplied(true);
+  }, [status, options.months, initialPeriodsApplied]);
 
   const filtersWithType = useMemo<Filters>(() => ({ ...filters, types: [buildingType] }), [filters, buildingType]);
   const filtered = useMemo(() => applyFilters(allBuildings, filtersWithType), [allBuildings, filtersWithType]);
@@ -147,6 +140,9 @@ export default function DashboardGeobrain() {
       <Header
         scope={scope}
         onScopeChange={setScope}
+        region={region}
+        onRegionChange={setRegion}
+        onLoad={(request: GeoLoadRequest) => load(request)}
         buildingType={buildingType}
         onBuildingTypeChange={(nextType) => {
           setBuildingType(nextType);
@@ -174,7 +170,7 @@ export default function DashboardGeobrain() {
             <Activity className="h-3 w-3" />
             {status === 'ready'
               ? `${intFmt(filtered.length)} de ${intFmt(allBuildings.length)} empreendimentos`
-              : status === 'loading' ? 'Carregando dados…' : 'Escolha uma cidade e clique em Carregar'}
+              : status === 'loading' ? 'Carregando dados…' : 'Escolha uma região, UF ou cidade e clique em Carregar'}
           </div>
         </div>
 

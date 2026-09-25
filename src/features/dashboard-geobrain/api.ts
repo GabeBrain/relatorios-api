@@ -195,19 +195,22 @@ export interface FetchProgress {
 }
 
 export interface FetchOptions {
-  uf: string;
-  city: string | string[];
+  uf?: string;
+  ufs?: string[];
+  city?: string | string[];
   token: string;
   signal: AbortSignal;
   onProgress?: (p: FetchProgress) => void;
 }
 
-export async function fetchBuildings({ uf, city, token, signal, onProgress }: FetchOptions): Promise<Building[]> {
-  if (!uf) throw new Error('UF é obrigatório');
-  const cities = (Array.isArray(city) ? city : [city]).filter(Boolean);
-  if (cities.length === 0) throw new Error('Cidade é obrigatória');
+export async function fetchBuildings({ uf, ufs, city, token, signal, onProgress }: FetchOptions): Promise<Building[]> {
+  const cities = (Array.isArray(city) ? city : [city]).filter((currentCity): currentCity is string => Boolean(currentCity));
+  const scopes: Array<{ city: string } | { uf: string }> = cities.length
+    ? cities.map((currentCity) => ({ city: currentCity }))
+    : (ufs?.length ? ufs : uf ? [uf] : []).map((currentUf) => ({ uf: currentUf }));
+  if (scopes.length === 0) throw new Error('Selecione uma região, UF ou cidade para carregar os dados.');
 
-  const progress: FetchProgress = { lanesTotal: cities.length * ALL_TYPES.length, lanesDone: 0, pagesDone: 0, buildingsFound: 0 };
+  const progress: FetchProgress = { lanesTotal: scopes.length * ALL_TYPES.length, lanesDone: 0, pagesDone: 0, buildingsFound: 0 };
   const result: Building[] = [];
 
   const consumePage = (payload: { data?: unknown[] }) => {
@@ -219,12 +222,12 @@ export async function fetchBuildings({ uf, city, token, signal, onProgress }: Fe
     onProgress?.({ ...progress });
   };
 
-  for (const currentCity of cities) {
+  for (const scope of scopes) {
     for (const type of ALL_TYPES) {
       if (signal.aborted) throw new DOMException('A consulta foi cancelada.', 'AbortError');
 
       const firstPage = await requestBuildingHistory(
-        { city: currentCity, type, per_page: PER_PAGE, page: 1 },
+        { ...scope, type, per_page: PER_PAGE, page: 1 },
         token,
         signal,
       );
@@ -239,7 +242,7 @@ export async function fetchBuildings({ uf, city, token, signal, onProgress }: Fe
         );
         const payloads = await Promise.all(
           pages.map((page) => requestBuildingHistory(
-            { city: currentCity, type, per_page: PER_PAGE, page },
+            { ...scope, type, per_page: PER_PAGE, page },
             token,
             signal,
           )),

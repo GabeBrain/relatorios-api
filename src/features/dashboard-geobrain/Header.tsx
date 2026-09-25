@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { GeoApiScopeSelector } from '@/features/shared/geo-api-scope-engine';
 import type { GeoScope } from '@/features/shared/geo-api-scope-engine';
+import type { GeoLoadRequest } from '@/features/shared/geo-api-scope-engine/GeoApiScopeSelector';
 import type { Granularity } from './types';
 
 const BUILDING_TYPES = ['Vertical', 'Horizontal', 'Comercial'] as const;
@@ -16,6 +17,9 @@ const GRANS: { value: Granularity; label: string }[] = [
 interface Props {
   scope: GeoScope;
   onScopeChange: (next: GeoScope) => void;
+  region: string;
+  onRegionChange: (region: string) => void;
+  onLoad: (request: GeoLoadRequest) => void;
   buildingType: BuildingType;
   onBuildingTypeChange: (v: BuildingType) => void;
   granularity: Granularity;
@@ -26,6 +30,9 @@ interface Props {
 export function Header({
   scope,
   onScopeChange,
+  region,
+  onRegionChange,
+  onLoad,
   buildingType,
   onBuildingTypeChange,
   granularity,
@@ -55,6 +62,9 @@ export function Header({
       <GeoApiScopeSelector
         value={scope}
         onChange={onScopeChange}
+        region={region}
+        onRegionChange={onRegionChange}
+        onLoad={onLoad}
         className="flex-none"
         cityContainerClassName="w-[180px] min-w-[180px] space-y-1.5"
       />

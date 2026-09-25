@@ -2,6 +2,11 @@ import { GeoApiScopeError, type MonitoredCity } from './types';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 
+export interface MonitoredCitiesCatalog {
+  citiesByUf: Record<string, string[]>;
+  ufsByRegion: Record<string, string[]>;
+}
+
 /**
  * Fetches all monitored cities available to the authenticated token, paginating
  * through `links.next`. Returns a `Record<UF, city[]>` map (cities sorted pt-BR).
@@ -13,11 +18,21 @@ export async function fetchMonitoredCities(
   token: string,
   signal?: AbortSignal,
 ): Promise<Record<string, string[]>> {
+  const catalog = await fetchMonitoredCitiesCatalog(token, signal);
+  return catalog.citiesByUf;
+}
+
+/** Fetches the monitored-city catalog, including the region declared by the API. */
+export async function fetchMonitoredCitiesCatalog(
+  token: string,
+  signal?: AbortSignal,
+): Promise<MonitoredCitiesCatalog> {
   if (!token) {
     throw new GeoApiScopeError('no_token', 'Token ausente. Faça login para consultar cidades monitoradas.');
   }
 
   const byUf: Record<string, Set<string>> = {};
+  const ufsByRegion: Record<string, Set<string>> = {};
   let nextUrl: string | null = `${BASE_URL}/monitored-cities`;
 
   while (nextUrl) {
@@ -52,14 +67,23 @@ export async function fetchMonitoredCities(
       if (!uf || !city) continue;
       if (!byUf[uf]) byUf[uf] = new Set();
       byUf[uf].add(city);
+      const region = String(item.region ?? '').trim();
+      if (region) {
+        if (!ufsByRegion[region]) ufsByRegion[region] = new Set();
+        ufsByRegion[region].add(uf);
+      }
     }
 
     nextUrl = payload.links?.next ?? null;
   }
 
-  const result: Record<string, string[]> = {};
+  const citiesByUf: Record<string, string[]> = {};
   for (const [uf, set] of Object.entries(byUf)) {
-    result[uf] = [...set].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    citiesByUf[uf] = [...set].sort((a, b) => a.localeCompare(b, 'pt-BR'));
   }
-  return result;
+  const sortedUfsByRegion: Record<string, string[]> = {};
+  for (const [region, set] of Object.entries(ufsByRegion)) {
+    sortedUfsByRegion[region] = [...set].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  }
+  return { citiesByUf, ufsByRegion: sortedUfsByRegion };
 }

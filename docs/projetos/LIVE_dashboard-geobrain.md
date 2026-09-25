@@ -33,6 +33,15 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-09-25 — Escopo por Região, UF ou Cidade com carregamento manual — Codex
+- **Ambiente/funcionalidade:** `/dash-geobrain` — filtros geográficos e coleta da API.
+- **O quê:** adicionado o filtro Região antes de UF, com dados de `region` do mesmo `/monitored-cities`; ele restringe as opções de UF sem selecionar uma automaticamente. O botão Carregar consulta apenas `city` quando há cidade, apenas `uf` quando há UF e percorre sequencialmente as UFs da Região quando somente ela foi escolhida. A seleção de Períodos recebe os últimos 12 meses apenas na primeira carga e permanece nas consultas seguintes.
+- **Por quê:** permitir análises regionais/estaduais sem disparos automáticos e preservar o recorte temporal escolhido pelo usuário.
+- **Arquivos:** `src/features/dashboard-geobrain/{Header.tsx,api.ts,api.test.ts,use-dashboard-data.ts}`, `src/pages/DashboardGeobrain.tsx`, `src/features/shared/geo-api-scope-engine/{GeoApiScopeSelector.tsx,fetch-monitored-cities.ts,fetch-monitored-cities.test.ts,types.ts,use-geo-api-scope.ts}`.
+- **Commits:** `a4a2515`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** o seletor compartilhado recebeu somente suporte aditivo e opt-in para Região; os demais ambientes preservam seus fluxos geográficos atuais. Validação manual autenticada do Dashboard permanece pendente.
+
 ### 2026-09-15 — Coluna de zero dormitórios no mapa de oportunidades — Codex
 - **Ambiente/funcionalidade:** `/dash-geobrain` — Mapa de oportunidades por Bairro.
 - **O quê:** a matriz por dormitórios agora mantém as colunas fixas `0`, `1`, `2`, `3` e `4+`, inclusive `0 dorms` quando não há tipologia correspondente no recorte; células sem dados apresentam IVV de 0%.
