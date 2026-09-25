@@ -194,6 +194,16 @@
 
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-25 — Validação do Fechamento: regras para Condomínio de Casas/Sobrados — Edgar
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
+- **O quê:** incluídas regras de ticket médio, área privativa, preço/m² máximo, dormitórios e variação de preço para Condomínio de Casas/Sobrados. A variação compara apenas a última fotografia de cada tipologia com seu período imediatamente anterior. A regra existente de preço/m² abaixo de R$ 3.500 foi preservada; a nova faixa abaixo de R$ 4.300 não foi adicionada por sobreposição confirmada.
+- **Por quê:** ampliar a identificação de casos atípicos sem duplicar a regra de preço/m² já adotada.
+- **Arquivos:** `src/features/validacao-fechamento/validation-rules.ts`, `validation-rules.test.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; testes locais cobrem a comparação temporal e a ausência de período anterior.
+
 ### 2026-09-17 — Sinduscon - Curitiba: motor de planilhas com preservação visual — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás e CVCO.
 - **O quê:** o frontend passa a enviar a planilha ao processador dedicado; o novo serviço Cloud Run converte `.xls` com LibreOffice e aplica as alterações em `.xlsx` com `openpyxl`, preservando estilos, preenchimentos, bordas, filtros, larguras e alturas da aba original. O arquivo é tratado em diretório temporário e não é persistido.
