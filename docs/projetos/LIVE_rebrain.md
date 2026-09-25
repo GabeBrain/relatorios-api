@@ -194,6 +194,16 @@
 
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-09-25 — Validação do Fechamento: tabela de Divergências sem rolagem horizontal — Edgar
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
+- **O quê:** a tabela passou a distribuir as colunas proporcionalmente à largura disponível, com quebra de conteúdo e altura natural das linhas. Itens aprovados não entram no contador da aba e, quando exibidos sob demanda, usam o fundo `#f0e77b`.
+- **Por quê:** eliminar a rolagem horizontal e a sobreposição visual de registros sem remover filtros, ordenação, exportação ou aprovação.
+- **Arquivos:** `src/features/validacao-fechamento/DivergencesGrid.tsx`, `fechamento.css`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; a conferência visual depende da tela autenticada no navegador.
+
 ### 2026-09-25 — Validação do Fechamento: regras para Condomínio de Casas/Sobrados — Edgar
 
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.

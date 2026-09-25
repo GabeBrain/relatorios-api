@@ -30,6 +30,7 @@ export default function ValidacaoFechamento() {
   const [filters, setFilters] = useState<VFFilters>(EMPTY_VF_FILTERS);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tab, setTab] = useState<Tab>('resumo');
+  const [unapprovedDivergenceCount, setUnapprovedDivergenceCount] = useState<number | null>(null);
 
   // Persistência de sessão
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function ValidacaoFechamento() {
 
   const allRows = useMemo(() => flattenBuildings(buildings ?? []), [buildings]);
   const divergences = useMemo(() => status === 'ready' ? validateBuildings(buildings ?? []) : [], [buildings, status]);
+  useEffect(() => setUnapprovedDivergenceCount(null), [divergences]);
   const options = useMemo(() => extractVFOptions(allRows), [allRows]);
 
   // Cidade ativa do header ('' = todas) aplicada sobre os filtros da sidebar
@@ -148,7 +150,7 @@ export default function ValidacaoFechamento() {
             <button type="button" className="vf-tab" data-active={tab === 'resumo-cidade'} onClick={() => setTab('resumo-cidade')}>Resumo por cidade</button>
             <button type="button" className="vf-tab" data-active={tab === 'resumo-email'} onClick={() => setTab('resumo-email')}>Resumo email</button>
             <button type="button" className="vf-tab" data-active={tab === 'detalhamento'} onClick={() => setTab('detalhamento')}>Detalhamento</button>
-            <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências ({divergences.length})</button>
+            <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências ({unapprovedDivergenceCount ?? divergences.length})</button>
           </div>
         </div>
 
@@ -184,7 +186,7 @@ export default function ValidacaoFechamento() {
             <ResumoPorCidade rows={allRows} filters={filters} granularity={granularity} cities={cityBlocks} />
           )}
           {tab === 'detalhamento' && <DetalhamentoGrid rows={filtered} />}
-          {tab === 'divergencias' && <DivergencesGrid rows={divergences} />}
+          {tab === 'divergencias' && <DivergencesGrid rows={divergences} onDivergenceCountChange={setUnapprovedDivergenceCount} />}
         </div>
       </main>
     </div>
