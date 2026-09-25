@@ -40,7 +40,8 @@ export default function DashboardGeobrain() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [initialPeriodsApplied, setInitialPeriodsApplied] = useState(false);
   const [bubbleStandard, setBubbleStandard] = useState<string | null>(null);
-  const [bubbleNeighborhood, setBubbleNeighborhood] = useState<string | null>(null);
+  const [bubbleGeographicGroupBy, setBubbleGeographicGroupBy] = useState<GeographicGroupBy>('neighborhood');
+  const [bubbleGeographicValue, setBubbleGeographicValue] = useState<string | null>(null);
 
   const { status, buildings, error, progress, load } = useDashboardData();
 
@@ -79,11 +80,11 @@ export default function DashboardGeobrain() {
   const rankEstoque = useMemo(() => rankBairrosPorEstoque(filtered, filtersWithType, geographicGroupBy), [filtered, filtersWithType, geographicGroupBy]);
   const rankM2 = useMemo(() => rankBairrosPorPrecoM2(filtered, filtersWithType, geographicGroupBy), [filtered, filtersWithType, geographicGroupBy]);
   const rankMedio = useMemo(() => rankBairrosPorPrecoMedio(filtered, filtersWithType, geographicGroupBy), [filtered, filtersWithType, geographicGroupBy]);
-  const priceAreaBubbles = useMemo(() => computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, bubbleNeighborhood), [filtered, filtersWithType, bubbleStandard, bubbleNeighborhood]);
-  const bubbleNeighborhoods = useMemo(
-    () => Array.from(new Set(computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, null).map((point) => point.neighborhood)))
+  const priceAreaBubbles = useMemo(() => computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, bubbleGeographicGroupBy, bubbleGeographicValue), [filtered, filtersWithType, bubbleStandard, bubbleGeographicGroupBy, bubbleGeographicValue]);
+  const bubbleGeographicValues = useMemo(
+    () => Array.from(new Set(computePriceAreaBubbles(filtered, filtersWithType, bubbleStandard, bubbleGeographicGroupBy, null).map((point) => point[bubbleGeographicGroupBy])))
       .sort((a, b) => a.localeCompare(b, 'pt-BR')),
-    [filtered, filtersWithType, bubbleStandard],
+    [filtered, filtersWithType, bubbleStandard, bubbleGeographicGroupBy],
   );
   const precoM2Std = useMemo(() => precoM2PorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
   const precoMedioStd = useMemo(() => precoMedioPorPadrao(filtered, filtersWithType), [filtered, filtersWithType]);
@@ -233,7 +234,7 @@ export default function DashboardGeobrain() {
           <OpportunityMap matrix={oppMapStd} title={`Mapa de oportunidades — Padrão por ${geographicGroupLabel}`} geographicGroupBy={geographicGroupBy} onGeographicGroupByChange={setGeographicGroupBy} />
         </div>
 
-        <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} neighborhoods={bubbleNeighborhoods} neighborhood={bubbleNeighborhood} onStandardChange={(value) => { setBubbleStandard(value); setBubbleNeighborhood(null); }} onNeighborhoodChange={setBubbleNeighborhood} />
+        <PriceAreaBubbleChart data={priceAreaBubbles} standards={options.standards} standard={bubbleStandard} geographicGroupBy={bubbleGeographicGroupBy} geographicValues={bubbleGeographicValues} geographicValue={bubbleGeographicValue} onStandardChange={(value) => { setBubbleStandard(value); setBubbleGeographicValue(null); }} onGeographicGroupByChange={(value) => { setBubbleGeographicGroupBy(value); setBubbleGeographicValue(null); }} onGeographicValueChange={setBubbleGeographicValue} />
 
         <footer className="flex items-center gap-2 pt-4 text-[9px] text-[hsl(var(--dg-muted))]">
           <BarChart2 className="h-3 w-3" />

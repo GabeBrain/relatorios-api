@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import { MultiSelect, type MultiSelectOption } from './MultiSelect';
 import type { Filters } from './types';
-import type { extractOptions, extractRangeOptions } from './aggregate';
+import { bedroomLabel, type extractOptions, type extractRangeOptions } from './aggregate';
 
 type Options = ReturnType<typeof extractOptions>;
 type RangeOptions = ReturnType<typeof extractRangeOptions>;
@@ -27,7 +27,7 @@ export function Sidebar({ open, onClose, filters, onFiltersChange, options, rang
   const set = <K extends keyof Filters>(k: K, v: Filters[K]) => onFiltersChange({ ...filters, [k]: v });
 
   const bedroomOpts = useMemo<MultiSelectOption[]>(
-    () => options.bedrooms.map((b) => ({ value: b, label: b === '0' ? '0 (Studio)' : `${b} dorm${b === '1' ? '' : 's'}` })),
+    () => options.bedrooms.map((b) => ({ value: b, label: bedroomLabel(b) })),
     [options.bedrooms],
   );
   const garageOpts = useMemo<MultiSelectOption[]>(

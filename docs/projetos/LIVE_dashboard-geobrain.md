@@ -33,6 +33,15 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-09-25 — Filtro geográfico das bolhas e classificação de dormitórios — Codex
+- **Ambiente/funcionalidade:** `/dash-geobrain` — Preço/m² × Área privativa, filtros de dormitórios e mapas de oportunidades.
+- **O quê:** o gráfico de bolhas passou a permitir selecionar Bairro, UF ou Município, mantendo o segmentador de Padrão. A categorização de `number_bedroom` foi unificada em todos os gráficos e filtros: `0` ou nulo = 0 dorms; `1` = 1 dorm; `2` = 2 dorms; `3` = 3 dorms; `4` = 4+ dorms; `5` = Studio.
+- **Por quê:** ampliar o recorte geográfico do gráfico de bolhas e aplicar a regra de classificação de dormitórios de forma consistente.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,aggregate.test.ts,Charts.tsx,Sidebar.tsx,FiltersPanel.tsx}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** pendente de commit.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; a regra fica coberta por teste unitário de agregação.
+
 ### 2026-09-25 — Filtros e visualizações geográficas do Dashboard — Codex
 - **Ambiente/funcionalidade:** `/dash-geobrain` — filtros locais e agrupamento geográfico dos gráficos.
 - **O quê:** adicionados os filtros locais de UF e Município abaixo de Períodos; eles refinam os dados já carregados sem disparar nova consulta. Os gráficos antes restritos a Bairro e os dois mapas de oportunidades agora permitem alternar entre Bairro, UF e Município. A barra de filtros ativos passou a mostrar UF, toda a terminologia visível foi padronizada para Município e o cabeçalho recebeu Limpar, que remove somente Região, UF e Município do escopo da próxima consulta.

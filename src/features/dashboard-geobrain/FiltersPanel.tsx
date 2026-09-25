@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { MultiSelect, type MultiSelectOption } from './MultiSelect';
 import type { Filters } from './types';
-import type { extractOptions } from './aggregate';
+import { bedroomLabel, type extractOptions } from './aggregate';
 
 type Options = ReturnType<typeof extractOptions>;
 
@@ -25,7 +25,7 @@ export function FiltersPanel({ uf, onUfChange, ufOptions, filters, onFiltersChan
   const set = <K extends keyof Filters>(k: K, v: Filters[K]) => onFiltersChange({ ...filters, [k]: v });
 
   const bedroomOpts = useMemo<MultiSelectOption[]>(
-    () => options.bedrooms.map((b) => ({ value: b, label: b === '0' ? '0 (Studio)' : `${b} dorm${b === '1' ? '' : 's'}` })),
+    () => options.bedrooms.map((b) => ({ value: b, label: bedroomLabel(b) })),
     [options.bedrooms],
   );
   const garageOpts = useMemo<MultiSelectOption[]>(

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyFilters, computeKpis, computeOpportunityMap } from './aggregate';
+import { applyFilters, computeKpis, computeOpportunityMap, computeOfertaPorDormitorio, extractOptions } from './aggregate';
 import type { Building, Filters } from './types';
 
 const filters: Filters = {
@@ -44,14 +44,29 @@ describe('computeOpportunityMap', () => {
       neighborhood: 'Centro', typologies: [
         { number_bedroom: 1, history: [{ period: '2026-09-01', typology_stock: 10, sold_in_period: 2 }] },
         { number_bedroom: 2, history: [{ period: '2026-09-01', typology_stock: 8, sold_in_period: 4 }] },
+        { number_bedroom: 4, history: [{ period: '2026-09-01', typology_stock: 3, sold_in_period: 1 }] },
+        { number_bedroom: 5, history: [{ period: '2026-09-01', typology_stock: 2, sold_in_period: 1 }] },
       ],
     }] as unknown as Building[];
 
     const matrix = computeOpportunityMap(buildings, filters, 'neighborhood');
 
-    expect(matrix.cols).toEqual(['0 dorms', '1 dorm', '2 dorms', '3 dorms', '4 dorms']);
+    expect(matrix.cols).toEqual(['0 dorms', '1 dorm', '2 dorms', '3 dorms', '4+ dorms', 'Studio']);
     expect(matrix.data.Centro['0 dorms']).toBe(0);
     expect(matrix.data.Centro['1 dorm']).toBeCloseTo(2 / 12);
+  });
+
+  it('classifica dormitórios conforme a regra do Dashboard', () => {
+    const buildings = [{
+      typologies: [
+        { number_bedroom: null, history: [{ period: '2026-09-01', typology_stock: 1, sold_in_period: 0 }] },
+        { number_bedroom: 4, history: [{ period: '2026-09-01', typology_stock: 1, sold_in_period: 0 }] },
+        { number_bedroom: 5, history: [{ period: '2026-09-01', typology_stock: 1, sold_in_period: 0 }] },
+      ],
+    }] as unknown as Building[];
+
+    expect(extractOptions(buildings).bedrooms).toEqual(['0', '4+', 'studio']);
+    expect(computeOfertaPorDormitorio(buildings, filters).map((row) => row.key)).toEqual(['0 dorms', '4+ dorms', 'Studio']);
   });
 
   it('filtra dados por UF e Município e permite agrupar o mapa por UF', () => {
