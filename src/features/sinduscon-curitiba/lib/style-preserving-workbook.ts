@@ -14,11 +14,11 @@ function parseXml(xml: string, label: string) {
   return document;
 }
 
-function elements(parent: ParentNode, localName: string) {
+function elements(parent: Document | Element, localName: string): Element[] {
   return Array.from(parent.getElementsByTagNameNS('*', localName));
 }
 
-function firstElement(parent: ParentNode, localName: string) {
+function firstElement(parent: Document | Element, localName: string): Element | null {
   return elements(parent, localName)[0] ?? null;
 }
 

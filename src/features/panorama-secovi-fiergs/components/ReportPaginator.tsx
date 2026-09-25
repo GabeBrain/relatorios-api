@@ -75,7 +75,7 @@ function FiergsStudyCover({ report }: { report: PanoramaReportModel }) {
 function CityCover({ report }: { report: PanoramaReportModel }) {
   const cities = report.scope.cities.filter(Boolean);
   if (report.scope.entity === 'fiergs-rs') return <div aria-label="Capa institucional FIERGS"/>;
-  return <div className={`panorama-v2-city-cover ${report.scope.entity === 'fiergs-rs' ? 'is-fiergs' : ''}`}><div className="panorama-v2-city-cover-copy"><p>{report.scope.entity === 'fiergs-rs' ? 'PANORAMA FIERGS · RM PORTO ALEGRE' : 'PANORAMA IMOBILIÁRIO DE'}</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
+  return <div className={`panorama-v2-city-cover ${(report.scope.entity as string) === 'fiergs-rs' ? 'is-fiergs' : ''}`}><div className="panorama-v2-city-cover-copy"><p>{(report.scope.entity as string) === 'fiergs-rs' ? 'PANORAMA FIERGS · RM PORTO ALEGRE' : 'PANORAMA IMOBILIÁRIO DE'}</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
 function V2Summary({ report }: { report: PanoramaReportModel }) {
   const sections = createPanoramaSections(panoramaManifestFor(report, MAPBOX_TOKEN), report.scope.entity);
