@@ -154,7 +154,6 @@ export default function DashboardGeobrain() {
           setBuildingType(nextType);
           setFilters((prev) => ({ ...prev, standards: [] }));
           setBubbleStandard(null);
-          setBubbleNeighborhood(null);
         }}
         granularity={granularity}
         onGranularityChange={setGranularity}
