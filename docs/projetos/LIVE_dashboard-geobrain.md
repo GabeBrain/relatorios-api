@@ -38,7 +38,7 @@ gráficos e painel de filtros funcionais em runtime.
 - **O quê:** o gráfico de bolhas passou a permitir selecionar Bairro, UF ou Município, mantendo o segmentador de Padrão. A categorização de `number_bedroom` foi unificada em todos os gráficos e filtros: `0` ou nulo = 0 dorms; `1` = 1 dorm; `2` = 2 dorms; `3` = 3 dorms; `4` = 4+ dorms; `5` = Studio.
 - **Por quê:** ampliar o recorte geográfico do gráfico de bolhas e aplicar a regra de classificação de dormitórios de forma consistente.
 - **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,aggregate.test.ts,Charts.tsx,Sidebar.tsx,FiltersPanel.tsx}`, `src/pages/DashboardGeobrain.tsx`.
-- **Commits:** pendente de commit.
+- **Commits:** `660ee45`.
 - **Monday:** —
 - **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; a regra fica coberta por teste unitário de agregação.
 
