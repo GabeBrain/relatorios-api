@@ -27,6 +27,7 @@ export interface StudyV3 {
   custoTotal: number;
   lastSha1: string | null;
   ata?: AtaData | null;
+  generation: 'v2' | 'v3';
 }
 
 export interface FindingV3 {
@@ -62,7 +63,7 @@ export async function createStudy(
 ): Promise<string> {
   const { data: study, error } = await db
     .from('studies_v3')
-    .insert({ nome })
+    .insert({ nome, generation: 'v3' })
     .select('id')
     .single();
   if (error || !study) throw new Error(error?.message ?? 'Falha ao criar estudo');
@@ -132,6 +133,7 @@ export async function listStudies(): Promise<StudyV3[]> {
       custoTotal: Number(s.custo_total ?? 0),
       lastSha1: versions[0]?.sha1 ?? null,
       ata: (s.ata ?? null) as AtaData | null,
+      generation: s.generation === 'v3' ? 'v3' : 'v2',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       pendentes: (s.findings_v3 ?? []).filter((f: any) => f.status === 'pendente').length,
     };

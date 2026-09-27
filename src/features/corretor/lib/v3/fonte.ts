@@ -15,6 +15,7 @@ export interface FonteItem {
   recortes?: FonteRecortes;
   /** Séries legadas do extrator de população/domicílios; preservadas na ordem da planilha. */
   numeros?: Array<number | null>;
+  serie?: FonteValues;
 }
 
 export interface FonteBloco {
@@ -59,7 +60,7 @@ const object = (value: unknown): value is Record<string, unknown> =>
 export function validateFonte(value: unknown): FonteValidation {
   const errors: string[] = [];
   if (!object(value)) return { ok: false, errors: ['A fonte deve ser um objeto JSON.'] };
-  if (value.fonte_version !== 1) errors.push('fonte_version deve ser 1.');
+  if (value.fonte_version !== 1 && value.fonte_version !== 2) errors.push('fonte_version deve ser 1 ou 2.');
   if (typeof value.estudo !== 'string' || !value.estudo.trim()) errors.push('estudo é obrigatório.');
   if (!Array.isArray(value.inventario)) errors.push('inventario deve ser uma lista.');
   if (!Array.isArray(value.avisos)) errors.push('avisos deve ser uma lista.');

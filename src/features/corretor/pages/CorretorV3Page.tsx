@@ -47,6 +47,7 @@ import {
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 import { parseFonteJson, type Fonte } from '../lib/v3/fonte';
+import { extractFonteFromExcel } from '../lib/v3/fonte-extractor-browser';
 import { sourceCrosscheckFindings } from '../lib/v3/source-crosscheck';
 
 const MODEL: ModelId = 'gpt-4o-mini'; // econômico por padrão; visão cai p/ R$ 0 após cache
@@ -333,6 +334,7 @@ export default function CorretorV3Page() {
   const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
   const [entryMode, setEntryMode] = useState<'evaluate' | 'suggestion' | null>(null);
   const [landingTab, setLandingTab] = useState<'correction' | 'ready' | 'all'>('correction');
+  const [landingGeneration, setLandingGeneration] = useState<'v3' | 'v2'>('v3');
   const [landingSearch, setLandingSearch] = useState('');
   const [landingSort, setLandingSort] = useState<'recent' | 'pending' | 'name' | 'cost'>('recent');
   const [consultingSuggestion, setConsultingSuggestion] = useState<{ filename: string; content: string } | null>(null);
@@ -351,7 +353,9 @@ export default function CorretorV3Page() {
   const [triaging, setTriaging] = useState(false);
   const newRef = useRef<HTMLInputElement>(null);
   const fonteRef = useRef<HTMLInputElement>(null);
+  const excelRef = useRef<HTMLInputElement>(null);
   const [fonteInput, setFonteInput] = useState<{ name: string; fonte: Fonte } | null>(null);
+  const [sourceProgress, setSourceProgress] = useState<{ done: number; total: number } | null>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
   const diffRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -601,6 +605,33 @@ export default function CorretorV3Page() {
     });
   }
 
+  async function handleExcelSources(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []).filter((file) => /\.(xlsx|xlsm)$/i.test(file.name));
+    e.target.value = '';
+    if (!files.length) return;
+    setSourceProgress({ done: 0, total: files.length });
+    try {
+      const slug = files[0].name.replace(/\.(xlsx|xlsm)$/i, '').replace(/\s+/g, '-').toLowerCase();
+      const fonte = await extractFonteFromExcel(files, slug, (done, total) => setSourceProgress({ done, total }));
+      const recognized = fonte.inventario.filter((item) => item.papel !== null).length;
+      const label = `${files.length} planilha${files.length === 1 ? '' : 's'} · fonte automática`;
+      if (selected) {
+        try { await saveStudyFonte(selected.id, label, fonte); }
+        catch (error) {
+          toast.warning('Fonte vinculada somente nesta sessão', { description: error instanceof Error ? error.message : String(error) });
+        }
+      }
+      setFonteInput({ name: label, fonte });
+      toast.success('Planilhas processadas', {
+        description: `${recognized}/${files.length} reconhecidas · ${fonte.blocos.length} blocos numéricos · ${fonte.avisos.length} aviso(s).`,
+      });
+    } catch (error) {
+      toast.error('Falha ao processar as planilhas', { description: error instanceof Error ? error.message : String(error) });
+    } finally {
+      setSourceProgress(null);
+    }
+  }
+
   async function ingestSuggestion(file: File) {
     if (!/\.pptx$/i.test(file.name)) {
       toast.error('Formato não suportado', { description: 'A sugestão de análise recebe estudos em .pptx.' });
@@ -805,12 +836,13 @@ export default function CorretorV3Page() {
 
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
   if (!selected) {
-    const emCorrecao = studies.filter((s) => s.status !== 'pronto');
-    const prontos = studies.filter((s) => s.status === 'pronto');
+    const generationStudies = studies.filter((study) => study.generation === landingGeneration);
+    const emCorrecao = generationStudies.filter((s) => s.status !== 'pronto');
+    const prontos = generationStudies.filter((s) => s.status === 'pronto');
     const totalPendencias = emCorrecao.reduce((total, study) => total + (study.pendentes ?? 0), 0);
-    const totalCost = studies.reduce((total, study) => total + study.custoTotal, 0);
+    const totalCost = generationStudies.reduce((total, study) => total + study.custoTotal, 0);
     const search = landingSearch.trim().toLocaleLowerCase('pt-BR');
-    const visibleStudies = studies
+    const visibleStudies = generationStudies
       .filter((study) => landingTab === 'all' || (landingTab === 'ready' ? study.status === 'pronto' : study.status !== 'pronto'))
       .filter((study) => !search || `${study.nome} ${study.cidade ?? ''}`.toLocaleLowerCase('pt-BR').includes(search))
       .sort((left, right) => {
@@ -840,12 +872,13 @@ export default function CorretorV3Page() {
           {/* Dropzone herói */}
           <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
           <input ref={fonteRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFonte} />
+          <input ref={excelRef} type="file" accept=".xlsx,.xlsm" multiple className="hidden" onChange={handleExcelSources} />
           <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Resumo dos estudos">
             {[
               { label: 'Em correção', value: emCorrecao.length, hint: 'estudos ativos', tone: 'text-amber-600' },
               { label: 'Prontos', value: prontos.length, hint: 'para o A&R', tone: 'text-emerald-600' },
               { label: 'Pendências', value: totalPendencias, hint: 'itens em aberto', tone: 'text-foreground' },
-              { label: 'IA acumulada', value: formatUSD(totalCost), hint: `${studies.length} estudos`, tone: 'text-foreground' },
+              { label: 'IA acumulada', value: formatUSD(totalCost), hint: `${generationStudies.length} estudos`, tone: 'text-foreground' },
             ].map((metric) => (
               <div key={metric.label} className="rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
                 <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{metric.label}</p>
@@ -880,12 +913,13 @@ export default function CorretorV3Page() {
             {entryMode === 'evaluate' && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
                 <div>
-                  <p className="text-xs font-medium">Planilha-fonte estruturada <span className="font-normal text-muted-foreground">(opcional)</span></p>
-                  <p className="text-[11px] text-muted-foreground">{fonteInput ? `${fonteInput.name} · ${fonteInput.fonte.blocos.length} blocos` : 'Vincule um fonte.json para conferir o deck contra os números de origem.'}</p>
+                  <p className="text-xs font-medium">Bases numéricas do estudo <span className="font-normal text-muted-foreground">(recomendado)</span></p>
+                  <p className="text-[11px] text-muted-foreground">{sourceProgress ? `Lendo planilhas ${sourceProgress.done}/${sourceProgress.total}…` : fonteInput ? `${fonteInput.name} · ${fonteInput.fonte.blocos.length} blocos · ${fonteInput.fonte.avisos.length} aviso(s)` : 'Selecione os arquivos Excel brutos; a fonte de conferência será criada automaticamente.'}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {fonteInput && <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setFonteInput(null)}>Remover</button>}
-                  <button type="button" className="rounded-md border border-border px-3 py-1.5 text-xs hover:border-primary/50" onClick={() => fonteRef.current?.click()}>{fonteInput ? 'Trocar fonte' : 'Vincular fonte'}</button>
+                  <button type="button" disabled={sourceProgress !== null} className="rounded-md border border-border px-3 py-1.5 text-xs hover:border-primary/50 disabled:opacity-50" onClick={() => excelRef.current?.click()}>{fonteInput ? 'Trocar planilhas' : 'Selecionar planilhas'}</button>
+                  <button type="button" className="text-[10px] text-muted-foreground hover:text-foreground" title="Compatibilidade técnica com fontes previamente extraídas" onClick={() => fonteRef.current?.click()}>usar fonte.json</button>
                 </div>
               </div>
             )}
@@ -941,6 +975,14 @@ export default function CorretorV3Page() {
           ) : (
             <>
               <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                <div className="flex border-b border-border bg-muted/20 p-1.5">
+                  {([['v3', 'V3 · Atual'], ['v2', 'V2 · Testes anteriores']] as const).map(([value, label]) => (
+                    <button key={value} type="button" onClick={() => setLandingGeneration(value)}
+                      className={cn('rounded-md px-3 py-1.5 text-xs font-medium transition-colors', landingGeneration === value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 <div className="border-b border-border px-4 pt-4">
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
@@ -953,7 +995,7 @@ export default function CorretorV3Page() {
                     {([
                       ['correction', 'Em correção', emCorrecao.length],
                       ['ready', 'Prontos', prontos.length],
-                      ['all', 'Todos', studies.length],
+                      ['all', 'Todos', generationStudies.length],
                     ] as const).map(([value, label, count]) => (
                       <button
                         key={value} type="button" role="tab" aria-selected={landingTab === value}

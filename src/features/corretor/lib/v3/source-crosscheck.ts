@@ -73,6 +73,7 @@ function verticalizationFindings(ir: Ir, fonte: Fonte): Finding[] {
 }
 
 function currentSeriesValue(item: FonteItem): number | null {
+  if (typeof item.serie?.atual === 'number') return item.serie.atual;
   const values = item.numeros ?? [];
   // O extrator preserva a série da planilha e repete o valor-base antes das
   // taxas. A repetição adjacente é uma âncora observada nos três pacotes.

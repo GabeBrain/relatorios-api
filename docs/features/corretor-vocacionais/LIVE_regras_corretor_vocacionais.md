@@ -16,6 +16,26 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.57 — 2026-09-27 — gerações V1/V2/V3 e ingestão dos Excel brutos (RUNTIME local)
+
+### Organização do histórico
+
+- **V1 · Legado:** permanece no painel próprio do fluxo anterior.
+- **V2 · Testes anteriores:** os estudos já existentes em `studies_v3` recebem `generation = v2` pela migration.
+- **V3 · Atual:** todo novo estudo criado no fluxo vigente recebe `generation = v3`; a landing alterna entre V3 e V2 sem misturar a fila operacional atual com os aproximadamente 30 ensaios históricos.
+
+`generation` identifica a geração do produto, e não a versão do arquivo PPTX. As versões sucessivas de um mesmo estudo continuam em `study_versions`.
+
+### Planilhas-fonte
+
+O fluxo V3 aceita seleção múltipla de `.xlsx`/`.xlsm` antes do PPTX. A extração acontece no navegador e gera internamente o contrato `fonte_version: 2`; os Excel brutos não são enviados nem persistidos. O banco recebe somente o JSON derivado, com inventário, hash, procedência por arquivo/aba/linha, blocos reconhecidos e avisos explícitos.
+
+Cobertura runtime desta primeira etapa: oferta por padrão/ano/tipologia, sociodemografia e população/domicílios. Absorção é reconhecida e marcada como `cobertura_parcial`; revenda, locação, lazer, anúncios e demais arquivos permanecem inventariados sem serem usados como verdade numérica. O upload manual de `fonte.json` continua disponível apenas como compatibilidade técnica.
+
+**Arquivos:** `src/features/corretor/lib/v3/fonte-extractor-browser.ts`, `fonte.ts`, `source-crosscheck.ts`, `db.ts`, `CorretorV3Page.tsx`, `supabase/migrations/20260927100000_corretor_generations.sql` e `fonte-extractor-browser.test.ts`.
+
+**Verificação:** 133 testes do Corretor aprovados e build de produção aprovado. O smoke test real de Rolândia depende de aplicar a migration de gerações no ambiente publicado e selecionar o PPTX final com as planilhas originais, que não estão versionadas no workspace.
+
 ## Versão 0.56 — 2026-09-17 — identidade Brain no carregamento (RUNTIME local)
 
 O indicador circular de carregamento da área de upload do Corretor foi substituído pela logo Brain pulsante, seguindo o padrão visual de operações longas da plataforma. As mensagens, a barra de progresso dos lotes e a prevenção de reenvio permanecem inalteradas.
