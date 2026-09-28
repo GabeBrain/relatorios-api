@@ -1,3 +1,10 @@
+### 2026-09-28 — Rebrain: idioma do documento alinhado ao conteúdo — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** shell da plataforma e seletores Radix, incluindo Panorama de Mercado.
+- **O quê:** o idioma raiz do HTML passou de `en` para `pt-BR`, alinhando os metadados ao conteúdo da aplicação e reduzindo a ativação indevida da tradução automática do navegador, associada ao erro DOM `removeChild` observado durante a troca de entidade para FIERGS.
+- **Verificação:** build de produção aprovado; permanecem apenas os avisos conhecidos de Browserslist desatualizado e chunks grandes.
+- **Impacto em Etapas/Pendências:** Juliana deve repetir a homologação com a tradução do navegador desativada e recarregamento forçado; se o erro persistir, o próximo diagnóstico é isolar extensões do navegador.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-09-24 — FIERGS-RS: IVV factual, período direto e comparativos em colunas — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — cálculo de IVV, filtro temporal e composição dos comparativos FIERGS.
 - **O quê:** o seletor temporal aplica o intervalo assim que o segundo trimestre é escolhido e fecha automaticamente; clicar fora continua descartando uma seleção incompleta. Os comparativos laterais deixaram de ser caixas iguais e passaram a representar os valores por colunas proporcionais, com eixo-base, rótulos e delta. A tabela de variações anuais no canto superior ganhou tipografia maior para audiência 50+.
