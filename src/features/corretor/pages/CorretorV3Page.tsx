@@ -334,7 +334,7 @@ export default function CorretorV3Page() {
   const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
   const [entryMode, setEntryMode] = useState<'evaluate' | 'suggestion' | null>(null);
   const [landingTab, setLandingTab] = useState<'correction' | 'ready' | 'all'>('correction');
-  const [landingGeneration, setLandingGeneration] = useState<'v3' | 'v2'>('v3');
+  const [landingGeneration, setLandingGeneration] = useState<'v3' | 'v2' | 'v1'>('v3');
   const [landingSearch, setLandingSearch] = useState('');
   const [landingSort, setLandingSort] = useState<'recent' | 'pending' | 'name' | 'cost'>('recent');
   const [consultingSuggestion, setConsultingSuggestion] = useState<{ filename: string; content: string } | null>(null);
@@ -873,7 +873,7 @@ export default function CorretorV3Page() {
           <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
           <input ref={fonteRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFonte} />
           <input ref={excelRef} type="file" accept=".xlsx,.xlsm" multiple className="hidden" onChange={handleExcelSources} />
-          <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Resumo dos estudos">
+          {landingGeneration !== 'v1' && <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Resumo dos estudos">
             {[
               { label: 'Em correção', value: emCorrecao.length, hint: 'estudos ativos', tone: 'text-amber-600' },
               { label: 'Prontos', value: prontos.length, hint: 'para o A&R', tone: 'text-emerald-600' },
@@ -886,7 +886,7 @@ export default function CorretorV3Page() {
                 <p className="text-[10px] text-muted-foreground">{metric.hint}</p>
               </div>
             ))}
-          </section>
+          </section>}
           {!entryMode ? (
             <section className="grid gap-3 rounded-xl border border-border bg-card p-3 shadow-sm sm:grid-cols-2" aria-label="Escolha o tipo de análise">
               <button onClick={() => setEntryMode('evaluate')} className="group flex items-center gap-3 rounded-lg bg-primary px-4 py-3.5 text-left text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -976,13 +976,16 @@ export default function CorretorV3Page() {
             <>
               <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <div className="flex border-b border-border bg-muted/20 p-1.5">
-                  {([['v3', 'V3 · Atual'], ['v2', 'V2 · Testes anteriores']] as const).map(([value, label]) => (
+                  {([['v3', 'V3 · Atual'], ['v2', 'V2 · Testes anteriores'], ['v1', 'V1 · Legado']] as const).map(([value, label]) => (
                     <button key={value} type="button" onClick={() => setLandingGeneration(value)}
                       className={cn('rounded-md px-3 py-1.5 text-xs font-medium transition-colors', landingGeneration === value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
                       {label}
                     </button>
                   ))}
                 </div>
+                {landingGeneration === 'v1' ? (
+                  <div className="p-4"><LegacyV1Panel /></div>
+                ) : <>
                 <div className="border-b border-border px-4 pt-4">
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
@@ -1045,8 +1048,8 @@ export default function CorretorV3Page() {
                     <p className="mt-1 text-xs text-muted-foreground">Ajuste a busca ou selecione outra situação.</p>
                   </div>
                 )}
+                </>}
               </section>
-              <LegacyV1Panel />
             </>
           )}
         </div>

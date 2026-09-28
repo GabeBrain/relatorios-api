@@ -16,6 +16,15 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.58 — 2026-09-28 — V1 integrada ao seletor de gerações (RUNTIME local)
+
+O arquivo legado deixou de ocupar um expansor isolado abaixo da lista principal. A landing agora
+apresenta as três gerações no mesmo seletor: `V3 · Atual`, `V2 · Testes anteriores` e
+`V1 · Legado`. A V1 continua estritamente somente leitura e seus registros só são carregados quando
+a aba correspondente é selecionada.
+
+**Arquivos:** `CorretorV3Page.tsx` e `LegacyV1Panel.tsx`.
+
 ## Versão 0.57 — 2026-09-27 — gerações V1/V2/V3 e ingestão dos Excel brutos (RUNTIME local)
 
 ### Organização do histórico

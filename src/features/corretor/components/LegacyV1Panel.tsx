@@ -6,7 +6,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Archive, ChevronDown, Loader2, AlertTriangle, ImageOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { loadProjectsFromDb, getThumbnailUrl } from '../lib/archive-db';
 import type { ArchivedProject } from '../store/archive-store';
 
@@ -68,7 +67,6 @@ function LegacyThumb({ imagePath, slide }: { imagePath: string | null; slide: nu
 }
 
 export default function LegacyV1Panel() {
-  const [open, setOpen] = useState(false);
   const [projects, setProjects] = useState<ArchivedProject[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -80,26 +78,20 @@ export default function LegacyV1Panel() {
     finally { setLoading(false); }
   }, []);
 
-  // carrega só quando o usuário abre a seção (não pesa a homepage à toa)
-  useEffect(() => { if (open && projects === null && !loading) void load(); }, [open, projects, loading, load]);
+  // O componente só é montado quando a aba V1 está ativa.
+  useEffect(() => { if (projects === null && !loading) void load(); }, [projects, loading, load]);
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
       <section className="space-y-3">
-        <CollapsibleTrigger asChild>
-          <button className="w-full flex items-center gap-2">
-            <Archive className="w-4 h-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold">Legado v1</h2>
-            <span className="text-[10px] text-muted-foreground">
-              estudos da versão antiga · somente leitura
-              {projects && ` · ${projects.length}`}
-            </span>
-            <div className="flex-1 border-t border-border" />
-            <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform', open && 'rotate-180')} />
-          </button>
-        </CollapsibleTrigger>
-
-        <CollapsibleContent>
+        <div className="flex items-center gap-2">
+          <Archive className="w-4 h-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold">Estudos da V1</h2>
+          <span className="text-[10px] text-muted-foreground">
+            versão antiga · somente leitura
+            {projects && ` · ${projects.length}`}
+          </span>
+          <div className="flex-1 border-t border-border" />
+        </div>
           {loading ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground py-6">
               <Loader2 className="w-4 h-4 animate-spin" /> Carregando estudos da v1…
@@ -134,8 +126,6 @@ export default function LegacyV1Panel() {
               })}
             </div>
           )}
-        </CollapsibleContent>
       </section>
-    </Collapsible>
   );
 }
