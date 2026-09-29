@@ -421,6 +421,7 @@ export async function loadDeliveryReport(studyId: string): Promise<DeliveryRepor
     lastVersion: versions[0]?.n ?? 1, nSlides: versions[0]?.n_slides ?? 0,
     custoTotal: Number(s.custo_total ?? 0), lastSha1: versions[0]?.sha1 ?? null,
     ata: (s.ata ?? null) as AtaData | null,
+    generation: s.generation === 'v3' ? 'v3' : 'v2',
   };
 
   const findings = await loadFindings(studyId);
