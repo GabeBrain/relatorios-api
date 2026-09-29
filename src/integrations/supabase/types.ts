@@ -840,6 +840,7 @@ export type Database = {
           concluded_at: string | null
           created_at: string
           custo_total: number
+          generation: string
           id: string
           nome: string
           relatorio: Json | null
@@ -853,6 +854,7 @@ export type Database = {
           concluded_at?: string | null
           created_at?: string
           custo_total?: number
+          generation?: string
           id?: string
           nome: string
           relatorio?: Json | null
@@ -866,6 +868,7 @@ export type Database = {
           concluded_at?: string | null
           created_at?: string
           custo_total?: number
+          generation?: string
           id?: string
           nome?: string
           relatorio?: Json | null

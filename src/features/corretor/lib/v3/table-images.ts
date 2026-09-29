@@ -124,7 +124,7 @@ export async function findTableImages(
         skip(slide, target, kb, 'BMP que não pôde ser convertido para PNG');
         continue;
       }
-      bytes = png;
+      bytes = new Uint8Array(png);
       mime = 'image/png';
     }
     out.push({
