@@ -6,6 +6,7 @@
 // Funções puras; nenhuma chamada de IA.
 
 import type { Cell, ExtractedTable } from '../audit/model';
+import { editDistance } from '../audit/engine';
 
 const PCT = /^\s*-?\d{1,3}(?:\.\d{3})*(?:,(\d+))?\s*%\s*$/;
 const BARE_DECIMAL = /^\s*0,\d{2,4}\s*$/;
@@ -75,14 +76,6 @@ export function formatIssues(table: ExtractedTable): FormatIssue[] {
 
 const BIN_KEYWORDS = ['ate', 'acima', 'abaixo', 'de'];
 
-function editDistance(a: string, b: string): number {
-  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array(b.length).fill(0)]);
-  for (let j = 1; j <= b.length; j++) dp[0][j] = j;
-  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
-    dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-  }
-  return dp[a.length][b.length];
-}
 
 /**
  * Erro de digitação na palavra que abre um rótulo de faixa ("Arté 35 m²").
@@ -104,12 +97,24 @@ export function labelTypos(labels: string[]): FormatIssue[] {
   return out;
 }
 
-/** Normaliza o campo livre `anomalias_formato` da visão; descarta itens sem texto. */
+const DOUBLED_SYMBOL = /(\/\/|%%|,,|\.\.|R\$\s*R\$)/;
+
+/**
+ * Anomalia apontada pela visão só vira achado quando uma regra FIXA confirma o
+ * texto: decimal sem % (“0,076”) ou símbolo duplicado (“8.000//m²”). O campo
+ * livre é ruidoso — na 2ª rodada do SJC, 5 de 6 itens eram opinião do modelo
+ * (“100,0%”, “percentual com ','”, “artefato gráfico”). Precisão divergente
+ * (“13%”) fica com `formatIssues`, que compara as strings de verdade.
+ */
 export function visionFormatIssues(raw: RawFormatAnomaly[] | undefined): FormatIssue[] {
   return (raw ?? []).flatMap((a) => {
     const text = typeof a.texto === 'string' ? a.texto.trim() : '';
     if (!text) return [];
+    let reason: string | null = null;
+    if (BARE_DECIMAL.test(text)) reason = `decimal sem formato de percentual entre valores em %; equivale a ${asPercentText(text)}`;
+    else if (DOUBLED_SYMBOL.test(text)) reason = `símbolo duplicado («${text.match(DOUBLED_SYMBOL)?.[0]}»)`;
+    if (!reason) return [];
     const where = [a.bloco, a.linha, a.coluna].filter((x) => typeof x === 'string' && x.trim()).join(' · ');
-    return [{ where: where || 'tabela', text, reason: typeof a.motivo === 'string' && a.motivo.trim() ? a.motivo.trim() : 'formato diferente das células vizinhas' }];
+    return [{ where: where || 'tabela', text, reason }];
   });
 }

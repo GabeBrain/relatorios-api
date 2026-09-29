@@ -85,12 +85,16 @@ Transcreva TODAS as tabelas numéricas da imagem, fielmente:
   são linhas normais: ficam em "rows", NUNCA em "totals".
 - NÃO invente valores: se um dígito estiver ilegível, use null.
 - Legendas de mapa (só cores/faixas, sem valores) NÃO são tabelas: ignore.
-- TABELA EMPILHADA EM BLOCOS (ex.: "Oferta Lançada", "Oferta Final", "Dispon. S/O.L.", cada
-  bloco com as mesmas linhas e a SUA linha Total): devolva CADA bloco como uma tabela separada
-  em "tables", com "title" = nome do bloco e o "totals" daquele bloco. Nunca junte blocos numa
-  tabela só, nem ponha o nome do bloco como linha.
-- CÉLULA MESCLADA que cobre várias linhas: repita o valor em cada linha coberta. Empreendimento
-  com várias sub-linhas (uma por tipologia/metragem): uma linha por sub-linha, repetindo o nome.
+- TABELA EMPILHADA VERTICALMENTE EM BLOCOS (um bloco ABAIXO do outro, ex.: "Oferta Lançada",
+  "Oferta Final", "Dispon. S/O.L.", cada um com as mesmas linhas e a SUA linha Total): devolva
+  cada bloco como uma tabela separada, com "title" = nome do bloco e o "totals" daquele bloco.
+  NUNCA divida uma tabela por COLUNAS: todas as colunas de uma mesma linha ficam na mesma tabela,
+  mesmo que o cabeçalho tenha grupos (ex.: "SP | São José dos Campos | Até 2 km").
+- CÉLULA MESCLADA que cobre várias linhas (ex.: empreendimento com uma sub-linha por tipologia):
+  uma linha por sub-linha. Em colunas de QUANTIDADE que somam no total (oferta, vendidas, estoque,
+  unidades do empreendimento), ponha o valor mesclado só na PRIMEIRA sub-linha e null nas demais —
+  repetir faria a soma contar o mesmo número várias vezes. Em rótulos e medidas (nome, bairro,
+  padrão, preço, m², disponibilidade %), repita o valor em cada sub-linha.
 - Barras coloridas atrás dos números são decoração: leia o número, não a barra, e mantenha cada
   número na coluna do seu cabeçalho.
 - Rótulos de linha, cabeçalhos e títulos: transcreva EXATAMENTE como escritos, inclusive erros

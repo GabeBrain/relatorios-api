@@ -58,6 +58,12 @@ function totalRows(left: CrossTableRef, right: CrossTableRef, matcher: RegExp, l
 function grandTotal(table: ExtractedTable, measure: RegExp): number | null {
   // Nunca pega o “primeiro número”: numa tabela de população ele pode ser o 100%
   // da participação. A ausência de coluna identificável é preferível a um FP.
+  // Tabela com VÁRIOS recortes lado a lado (SP | cidade | 2 km | 4 km) tem várias
+  // colunas de contagem; pegar a primeira comparava SP com a cidade (FP s31×s28
+  // do SJC, set/2026). Só compara quando há um recorte inequívoco.
+  const countCols = table.colKinds?.filter((kind) => kind === 'count').length ?? 0;
+  const measureCols = table.columns.filter((column) => measure.test(norm(column))).length;
+  if (countCols > 1 || measureCols > 1) return null;
   const col = table.colKinds?.findIndex((kind) => kind === 'count') ?? -1;
   const measureCol = table.columns.findIndex((column) => measure.test(norm(column)));
   const target = col >= 1 ? col : measureCol >= 1 ? measureCol : -1;
@@ -169,7 +175,7 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
       const rows = [{ label: `Total de ${measure.label.toLowerCase()}`, left: a, right: b, mismatch: Math.abs(a - b) > 0.5 && !sameMagnitude(a, b) }];
       const f = mismatch(`cross-${measure.key}-${left.slide}-${right.slide}`, 'CROSS_TABLE_MISMATCH', 'SOCIO', left, right,
         `${measure.label} diverge entre tabelas sociodemográficas`,
-        `O total de ${measure.label.toLowerCase()} deve ser o mesmo nas tabelas da mesma Z.I.; confira escala e origem.`, rows);
+        `${refLabel(left)} mostra ${a.toLocaleString('pt-BR')} ${measure.label.toLowerCase()} e ${refLabel(right)} mostra ${b.toLocaleString('pt-BR')}. O total deve ser o mesmo nas tabelas do mesmo recorte; confira escala e origem.`, rows);
       if (f) out.push(f);
     }
   }

@@ -112,7 +112,7 @@ export function checkTableSums(
     for (let c = 1; c < ncols; c++) {
       const decl = totals[c];
       if (!isNum(decl)) continue;
-      const vals = table.rows.map((r) => r[c]).filter(isNum);
+      const vals = summableValues(table, c);
       if (vals.length < 2) continue;
       const soma = vals.reduce((a, b) => a + b, 0);
       const isPct = vals.every((v) => v >= 0 && v <= 100) && decl >= 85 && decl <= 115;
@@ -158,7 +158,7 @@ export function checkTableSums(
       for (const { c, decl, soma, ok } of checks) {
         if (ok) continue;
         badColumns.push(c);
-        const vals = table.rows.map((r) => r[c]).filter(isNum);
+        const vals = summableValues(table, c);
         notes.push(`Coluna «${table.columns[c] ?? c}»: soma ${round(soma)} ≠ total ${decl} — ${sumExpression(vals, soma)}, diferença de ${fmt(round(decl - soma))}`);
       }
       // Todas as colunas abaixo do total na MESMA proporção = linha/faixa omitida
@@ -200,6 +200,23 @@ export function checkTableSums(
     ...(unaligned ? { unaligned } : {}),
     ...(incoherent ? { incoherentReading: true } : {}),
   };
+}
+
+/**
+ * Valores de uma coluna para SOMA. Célula mesclada repetida pela leitura (mesmo
+ * rótulo de linha e mesmo valor em linhas seguidas: um empreendimento com uma
+ * sub-linha por tipologia) conta uma vez — senão 77+77+77 entra no lugar de 77.
+ */
+export function summableValues(table: ExtractedTable, c: number): number[] {
+  const out: number[] = [];
+  table.rows.forEach((r, i) => {
+    const v = r[c];
+    if (!isNum(v)) return;
+    const prev = table.rows[i - 1];
+    if (prev && v !== 0 && prev[c] === v && String(prev[0] ?? '') !== '' && prev[0] === r[0]) return;
+    out.push(v);
+  });
+  return out;
 }
 
 /** Número em pt-BR para as notas (1.187; 39,8). */
@@ -362,8 +379,10 @@ export function crossBands(
       label: `Faixa ${i + 1}`,
       left: a,
       right: b,
-      // “Até R$ 2.000” e “De R$ 0 a R$ 2.000” são a mesma faixa.
-      mismatch: binA && binB ? binA.from !== binB.from || binA.to !== binB.to : norm(a) !== norm(b),
+      // “Até R$ 2.000” e “De R$ 0 a R$ 2.000” são a mesma faixa. Rótulos textuais
+      // quase idênticos (“3 Dormatórios” × “3 Dormitórios”) são o mesmo rótulo com
+      // uma letra mal lida ou digitada — ortografia não é divergência de faixa.
+      mismatch: binA && binB ? binA.from !== binB.from || binA.to !== binB.to : !sameTextLabel(a, b),
     });
   }
   return rows;
@@ -374,7 +393,7 @@ export function binFromLabel(label: string): Bin | null {
   const raw = label.trim();
   // Unidade colada ao número ("9.001/m²", "31m²", "8.000//m²") quebrava o casamento
   // "de X a Y": as faixas de preço do s82 do SJC nem eram lidas como faixas.
-  const compact = raw.toLowerCase().replace(/\/*\s*m[²2]/g, ' ').replace(/\s+/g, ' ');
+  const compact = fixBinKeyword(raw.toLowerCase().replace(/\/*\s*m[²2]/g, ' ').replace(/\s+/g, ' '));
   const number = (value: string) => Number(value.replace(/\./g, '').replace(',', '.'));
   const token = 'r?\\$?\\s*([0-9][0-9.,]*)';
   let match = compact.match(new RegExp(`^at[eé]\\s*(?:de\\s*)?${token}`, 'i'));
@@ -384,6 +403,29 @@ export function binFromLabel(label: string): Bin | null {
   match = compact.match(new RegExp(`(?:de\\s*)?${token}\\s*(?:a|at[eé]|[-–])\\s*(?:r?\\$?\\s*)?([0-9][0-9.,]*)`, 'i'));
   if (match) return { label: raw, from: number(match[1]), to: number(match[2]) };
   return null;
+}
+
+/** Distância de edição (Levenshtein) — pequena, para rótulos curtos. */
+export function editDistance(a: string, b: string): number {
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+    dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  }
+  return dp[a.length][b.length];
+}
+
+/**
+ * Palavra de abertura com erro de digitação ("arté 30") é lida como a palavra-chave
+ * mais próxima. O erro em si é acusado pela regra de ortografia de rótulos; aqui
+ * só evitamos que ele desalinhe a régua de faixas e gere uma cascata de FPs.
+ */
+function fixBinKeyword(compact: string): string {
+  const [first, ...rest] = compact.split(' ');
+  const plain = first.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]/g, '');
+  if (plain.length < 3 || ['ate', 'acima', 'abaixo'].includes(plain)) return compact;
+  const near = ['ate', 'acima', 'abaixo'].find((k) => editDistance(plain, k) === 1);
+  return near ? [near === 'ate' ? 'até' : near, ...rest].join(' ') : compact;
 }
 
 /** Faixas presentes nos cabeçalhos, reutilizável entre visão e cruzamentos. */
@@ -556,6 +598,13 @@ function binStep(bins: Bin[]): number {
     return Math.max(max, ...matches.map((match) => match[1].length), 0);
   }, 0);
   return decimalPlaces > 0 ? 10 ** -decimalPlaces : 1;
+}
+
+function sameTextLabel(a: string, b: string): boolean {
+  const x = norm(a), y = norm(b);
+  if (x === y) return true;
+  if (!x || !y || x.replace(/\D/g, '') !== y.replace(/\D/g, '')) return false; // número tem de bater
+  return Math.min(x.length, y.length) >= 8 && editDistance(x, y) <= 2;
 }
 
 function norm(s: string): string {

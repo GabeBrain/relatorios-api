@@ -23,8 +23,8 @@ const db = supabase as any;
 // v6: fonte visível e unidades de fichas técnicas; um único bump para WS6/WS7.
 // v7: valida o formato profundo antes de confiar no cache; uma resposta de modelo
 // malformada nunca pode derrubar a análise inteira via `.map()`.
-// 8: guarda se as duas leituras (mini × 4o) concordaram na divergência de soma.
-const CACHE_SCHEMA = 8;
+// 8: guarda se as duas leituras (mini × 4o) concordaram. 9: prompt de blocos verticais + mesclas.
+const CACHE_SCHEMA = 9;
 
 interface RawTable {
   title?: string;
@@ -384,6 +384,11 @@ export function sumFailureSignature(payload: CachePayload): string {
     for (const c of v.badColumns ?? []) parts.push(`${ti}:c${c}:${JSON.stringify(ext.rows.map((r) => r[c]))}:${JSON.stringify(ext.totals[c])}`);
     for (const r of v.badRows ?? []) parts.push(`${ti}:r${r}:${JSON.stringify(ext.rows[r])}`);
   });
+  (payload.tables ?? []).forEach((raw, ti) => {
+    const ext = toExtracted(raw);
+    const pc = ext ? checkPercentConsistency(ext) : null;
+    for (const r of pc?.badRows ?? []) parts.push(`${ti}:p${r}:${JSON.stringify(ext?.rows[r])}`);
+  });
   return parts.sort().join('|');
 }
 
@@ -420,6 +425,8 @@ async function processImage(
   const findings: Finding[] = [];
   const tables: ExtractedTableRef[] = [];
   const cellIssues: FormatIssue[] = [];
+  // Blocos da mesma imagem repetem as faixas: o mesmo furo vira UM achado.
+  const binSeen = new Set<string>();
   const textIssues: FormatIssue[] = [];
   let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0, costUsd = 0;
   let escalated = false;
@@ -469,6 +476,8 @@ async function processImage(
 
   // fonte da leitura, para o analista saber a confiança
   const readingsAgree = payload?.releitura?.concordam === true;
+  // Selo de “Erro” para QUALQUER achado desta imagem: releitura que concordou.
+  const trusted = escalated && readingsAgree;
   const origemLeitura = escalated
     ? readingsAgree
       ? 'confirmado no gpt-4o (após divergência no modelo econômico)'
@@ -530,7 +539,8 @@ async function processImage(
         ok: false,
         viz: pc,
         evidenceSha1: c.sha1,
-        escalated,
+        escalated: trusted,
+        ...(escalated && !readingsAgree ? { confidence: 3 as const } : {}),
       });
     }
 
@@ -538,7 +548,8 @@ async function processImage(
     const bins = binsFromColumns(ext.columns);
     if (bins.length >= 3) {
       const gap = detectBinGap(bins);
-      if (gap.gapAfterIndex !== undefined) {
+      if (gap.gapAfterIndex !== undefined && !binSeen.has(gap.description ?? '')) {
+        binSeen.add(gap.description ?? '');
         flagged = true;
         findings.push({
           id: `iavis-bin-${c.sha1.slice(0, 10)}-${ti}`,
@@ -553,7 +564,7 @@ async function processImage(
             gapAfterIndex: gap.gapAfterIndex, gapDescription: gap.description,
           },
           evidenceSha1: c.sha1,
-          escalated,
+          escalated: trusted,
         });
       }
     }
@@ -562,7 +573,8 @@ async function processImage(
     const rowBins = binsFromColumns([...new Set(rowLabels(ext))]);
     if (rowBins.length >= 3) {
       const gap = detectBinGap(rowBins);
-      if (gap.gapAfterIndex !== undefined) {
+      if (gap.gapAfterIndex !== undefined && !binSeen.has(gap.description ?? '')) {
+        binSeen.add(gap.description ?? '');
         flagged = true;
         findings.push({
           id: `iavis-rowbin-${c.sha1.slice(0, 10)}-${ti}`,
@@ -577,7 +589,7 @@ async function processImage(
             gapAfterIndex: gap.gapAfterIndex, gapDescription: gap.description,
           },
           evidenceSha1: c.sha1,
-          escalated,
+          escalated: trusted,
         });
       }
     }
@@ -606,7 +618,7 @@ async function processImage(
       type: 'VALUE_PLAUSIBILITY', section: secao, slideRef: `s${c.slide}`,
       title: 'Valores a conferir na ficha técnica',
       detail: `Plausibilidade das unidades extraídas da ficha: ${unitViz.notes?.[0] ?? 'verifique os valores marcados.'}`,
-      ok: false, viz: unitViz, evidenceSha1: c.sha1, escalated,
+      ok: false, viz: unitViz, evidenceSha1: c.sha1, escalated: trusted,
     });
   }
 

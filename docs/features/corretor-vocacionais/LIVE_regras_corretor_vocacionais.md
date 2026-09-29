@@ -16,6 +16,22 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.60 — 2026-09-29 — correções da 2ª rodada do SJC (RUNTIME local)
+
+**Fonte:** reanálise pós-deploy da v0.59 (SJC v2 e VAP). O nível “Erro” ficou confiável (4 de 5 reais),
+mas o prompt de blocos fez a visão cortar tabelas por coluna e repetir células mescladas (perdeu o
+erro real do s60 e criou somas 77+77+77), e o nível “Provável” ganhou ruído. Regras gerais, testadas
+com dados sintéticos (`precisao-generica.test.ts`) para não sobreajustar ao SJC.
+
+- **Prompt:** blocos só quando empilhados na vertical; nunca dividir tabela por colunas; célula mesclada em coluna de quantidade só na 1ª sub-linha (null nas demais). `CACHE_SCHEMA` 9. **Requer deploy da Edge Function.**
+- **Soma:** mesmo rótulo + mesmo valor em linhas seguidas conta uma vez (proteção se a visão repetir a mescla).
+- **Concordância para todos os achados de visão:** `%↔absoluto`, faixas e plausibilidade só são “Erro” com releitura concordante; `%↔absoluto` discordante vai para “Verificar”.
+- **`anomalias_formato`:** só vira achado quando regra fixa confirma (decimal sem % ou símbolo duplicado).
+- **Faixas:** palavra de abertura com erro de digitação é lida pela palavra-chave mais próxima (não desalinha a régua); rótulos quase idênticos com o mesmo número (“3 Dormatórios” × “3 Dormitórios”) não são divergência; mesmo furo em blocos da mesma imagem vira um achado.
+- **Domicílios entre tabelas:** tabela com vários recortes lado a lado não é comparada; o achado cita os dois totais.
+
+**Verificação:** 157 testes verdes (149 → 157), `tsc` e lint limpos, `vite build` ok. **Não verificado:** efeito do prompt com a Edge Function publicada — próximo teste em estudo novo (Campos do Jordão), sem retestar o SJC.
+
 ## Versão 0.59 — 2026-09-29 — precisão dos achados após triagem do SJC (RUNTIME local)
 
 **Fonte:** triagem manual das duas rodadas de São José dos Campos (v2 31/jul e VAP 03/ago, 29/set),
