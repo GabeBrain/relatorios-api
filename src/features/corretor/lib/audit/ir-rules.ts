@@ -20,6 +20,7 @@ const RULES_ENABLED = {
 
 const LEFTOVER = /\b(agrupar|ajustar|revisar|conferir|confirmar|checar|verificar|inserir|colocar|preencher|refazer|corrigir|pendente|trazer|falar com|fale comigo|todo|xxx)\b/i;
 const TOTAL_ROW = /^\s*total/i;
+const PLAIN_TOTAL = /^\s*total(\s+geral)?\s*[:.]?\s*$/i;
 const UFS = new Set(['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']);
 
 function normalized(value: string): string {
@@ -149,7 +150,16 @@ function sourceFindings(ir: Ir, cap = 25): Finding[] {
 export function irTableToExtracted(t: IrTable): ExtractedTable | null {
   if (!t.linhas || t.linhas.length < 2) return null;
   const header = (t.linhas[0] ?? []).map((c) => (c ?? '').toString());
-  const totalIdx = t.linhas.findIndex((r, i) => i > 0 && TOTAL_ROW.test((r?.[0] ?? '').toString()));
+  // "Total" / "Total geral" é linha de soma em qualquer posição. "Total de
+  // anúncios ativos" no MEIO de uma tabela de indicadores é um indicador como os
+  // outros — somar receita + diária + ocupação contra ele foi o FP do s127 de
+  // São José dos Campos (set/2026). Rótulo composto só vale como total no fim.
+  const lastIdx = t.linhas.length - 1;
+  const totalIdx = t.linhas.findIndex((r, i) => {
+    const label = (r?.[0] ?? '').toString();
+    if (i === 0 || !TOTAL_ROW.test(label)) return false;
+    return PLAIN_TOTAL.test(label) || i === lastIdx;
+  });
   const cellAt = (i: number, c: number): Cell => {
     const num = t.linhas_num?.[i]?.[c];
     if (typeof num === 'number') return num;

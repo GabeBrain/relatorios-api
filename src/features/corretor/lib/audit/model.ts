@@ -44,6 +44,11 @@ export interface TableViz {
    * "Verificar": há um total declarado que ninguém conferiu.
    */
   unaligned?: boolean;
+  /**
+   * Os totais da própria leitura não fecham entre si (linhas × colunas × geral):
+   * sinal de célula lida fora do lugar. O achado desce para “Verificar”.
+   */
+  incoherentReading?: boolean;
 }
 
 export interface SideBySideRow {

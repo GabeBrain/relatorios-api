@@ -68,9 +68,12 @@ describe('SOURCE_CROSSCHECK sobre Rolândia real', () => {
   });
 
   it('recupera a unidade hab. aplicada ao total brasileiro de domicílios', () => {
-    const unit = findings.find((finding) => finding.detail.includes('75.298.796 hab.'));
+    const unit = findings.find((finding) => finding.title.startsWith('Unidade trocada'));
     expect(unit?.slideRef).toBe('s23');
-    expect(unit?.detail).toContain('75.298.796 dom.');
+    // A mensagem diz o que está errado: número certo, unidade trocada.
+    expect(unit?.detail).toContain('O número 75.298.796 está correto');
+    expect(unit?.detail).toContain('habitantes (hab.)');
+    expect(unit?.detail).toContain('domicílios (dom.)');
   });
 
   it('não acusa os percentuais e totais que batem', () => {

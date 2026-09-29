@@ -107,6 +107,26 @@ export function rowAxis(labels: string[]): RowAxis {
   return best && best[1] > 0 ? best[0] : 'outro';
 }
 
+/**
+ * Rótulos de linha que representam FAIXAS numa tabela de lacunas. A tabela real
+ * empilha blocos (Oferta Lançada / Oferta Final / Dispon. S/O.L.), cada um com as
+ * mesmas tipologias; a visão ora devolve o título do bloco como linha, ora repete
+ * as tipologias. Sem limpar isso, "Oferta Lançada" era comparado com
+ * "1 Dormitório" — os três FPs de faixa do SJC (s76×s80, s81×s76, s81×s80).
+ */
+const BLOCK_HEADER = /^(oferta\s*(lancada|final|atual)|dispon|disp\.?\s|vendas|estoque|total|subtotal)/;
+export function lacunaRowLabels(table: ExtractedTable): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const label of rowLabels(table)) {
+    const key = norm(label).replace(/\s+/g, ' ').trim();
+    if (!key || BLOCK_HEADER.test(key) || seen.has(key)) continue;
+    seen.add(key);
+    out.push(label);
+  }
+  return out;
+}
+
 function binRows(left: CrossTableRef, right: CrossTableRef) {
   const a = binsFromColumns(left.table.columns), b = binsFromColumns(right.table.columns);
   if (a.length < 2 || b.length < 2) return [];
@@ -162,19 +182,20 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
     if (left.slide === right.slide) continue;
     // Só compara tabelas próximas ou da mesma referência textual; evita cruzar Z.I.s diferentes.
     if (Math.abs(left.slide - right.slide) > 5) continue;
-    const axisLeft = rowAxis(rowLabels(left.table)), axisRight = rowAxis(rowLabels(right.table));
+    const labelsLeft = lacunaRowLabels(left.table), labelsRight = lacunaRowLabels(right.table);
+    const axisLeft = rowAxis(labelsLeft), axisRight = rowAxis(labelsRight);
     // 5.1–5.3 têm eixos de linha diferentes por desenho. Quando os eixos batem,
     // comparamos linhas; entre eixos, só faz sentido comparar faixas de coluna da
     // MESMA unidade — metragem (5.1) × preço (5.2) diverge por desenho, não por erro.
     const rows = axisLeft === axisRight && axisLeft !== 'outro'
-      ? crossBands(rowLabels(left.table), rowLabels(right.table), refLabel(left), refLabel(right))
+      ? crossBands(labelsLeft, labelsRight, refLabel(left), refLabel(right))
       : columnBinUnit(left.table.columns) === columnBinUnit(right.table.columns)
         ? binRows(left, right)
         : [];
     if (!rows.length) continue;
     const f = mismatch(`cross-lacunas-bins-${left.slide}-${right.slide}`, 'CROSS_TABLE_MISMATCH', 'LACUNAS', left, right,
       'Faixas de lacunas divergem entre as análises',
-      'A tabela geral e suas quebras devem usar o mesmo conjunto de faixas. Confira a lacuna indicada.', rows);
+      lacunaMismatchDetail(rows), rows);
     if (f) out.push(f);
   }
 
@@ -192,6 +213,14 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
     if (f) out.push(f);
   }
   return out;
+}
+
+/** Diz QUAL faixa diverge, em vez de só pedir para conferir. */
+function lacunaMismatchDetail(rows: ReturnType<typeof crossBands>): string {
+  const bad = rows.filter((r) => r.mismatch);
+  const first = bad[0];
+  const sample = first ? ` Primeira divergência: «${first.left || '—'}» × «${first.right || '—'}».` : '';
+  return `A tabela geral e suas quebras devem usar o mesmo conjunto de faixas; ${bad.length} de ${rows.length} faixas não coincidem.${sample}`;
 }
 
 /** WS5: janela canônica (ano atual+1..+6) e fórmula/ritmo de projeção. */

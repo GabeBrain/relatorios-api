@@ -158,27 +158,106 @@ export function checkTableSums(
       for (const { c, decl, soma, ok } of checks) {
         if (ok) continue;
         badColumns.push(c);
-        notes.push(`Coluna «${table.columns[c] ?? c}»: soma ${round(soma)} ≠ total ${decl}`);
+        const vals = table.rows.map((r) => r[c]).filter(isNum);
+        notes.push(`Coluna «${table.columns[c] ?? c}»: soma ${round(soma)} ≠ total ${decl} — ${sumExpression(vals, soma)}, diferença de ${fmt(round(decl - soma))}`);
+      }
+      // Todas as colunas abaixo do total na MESMA proporção = linha/faixa omitida
+      // na tabela, não dígito trocado (caso real s28 SJC: faixas somam 92,5%).
+      const failing = checks.filter((k) => !k.ok && k.decl > 0);
+      if (failing.length >= 2) {
+        const ratios = failing.map((k) => k.soma / k.decl);
+        const allShort = ratios.every((r) => r < 1);
+        const spread = Math.max(...ratios) - Math.min(...ratios);
+        if (allShort && spread <= 0.03) {
+          const missing = (1 - ratios.reduce((a, b) => a + b, 0) / ratios.length) * 100;
+          notes.unshift(`Todas as ${failing.length} colunas conferidas ficam cerca de ${fmt(round(missing))}% abaixo do total declarado: provável linha ou faixa omitida da tabela.`);
+        }
       }
     }
     // linhas com coluna "Total"
     const ti = table.columns.indexOf('Total');
     if (ti > 0) {
       table.rows.forEach((r, i) => {
-        const cells = r.slice(1, ti).filter(isNum);
+        const cellCols = r.slice(1, ti).map((v, k) => (isNum(v) ? k + 1 : -1)).filter((k) => k > 0);
+        const cells = cellCols.map((k) => r[k] as number);
         const rowTotal = r[ti];
-        if (cells.length && isNum(rowTotal)) {
-          const soma = cells.reduce((a, b) => a + b, 0);
-          if (Math.abs(soma - rowTotal) > absTol) {
-            badRows.push(i);
-            notes.push(`Linha «${r[0]}»: células somam ${round(soma)} ≠ Total ${rowTotal}`);
-          }
+        if (!cells.length || !isNum(rowTotal)) return;
+        const soma = cells.reduce((a, b) => a + b, 0);
+        if (!rowIsSummable(cells, rowTotal, cellCols.every(notSummable))) return;
+        const isShare = rowIsShare(cells, rowTotal);
+        if (Math.abs(soma - rowTotal) > (isShare ? pctTol : absTol)) {
+          badRows.push(i);
+          notes.push(`Linha «${r[0]}»: células somam ${round(soma)} ≠ Total ${rowTotal} — ${sumExpression(cells, soma)}, diferença de ${fmt(round(rowTotal - soma))}`);
         }
       });
     }
   }
 
-  return { kind: 'table', table, badColumns, badRows, notes, ...(unaligned ? { unaligned } : {}) };
+  const incoherent = badColumns.length + badRows.length > 0 ? marginsIncoherence(table, totals) : null;
+  if (incoherent) notes.push(incoherent);
+  return {
+    kind: 'table', table, badColumns, badRows, notes,
+    ...(unaligned ? { unaligned } : {}),
+    ...(incoherent ? { incoherentReading: true } : {}),
+  };
+}
+
+/** Número em pt-BR para as notas (1.187; 39,8). */
+function fmt(n: number): string {
+  return n.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+}
+
+/** "44 + 112 + 236 = 392" — a conta que o analista refaz de cabeça. */
+function sumExpression(values: number[], soma: number): string {
+  const terms = values.filter((v) => v !== 0);
+  if (!terms.length) return `as células somam 0`;
+  if (terms.length > 8) return `${terms.length} células somam ${fmt(round(soma))}`;
+  return `${terms.map(fmt).join(' + ')} = ${fmt(round(soma))}`;
+}
+
+/**
+ * Uma linha só é conferida como SOMA quando parece de quantidades. Linha de
+ * disponibilidade/taxa (37,4% · 31,1% · 32,9% → Total 33,7%) fecha por razão,
+ * não por soma: acusá-la foi o FP do s76/s82 de São José dos Campos (set/2026).
+ */
+function rowIsSummable(cells: number[], total: number, allColsNotSummable: boolean): boolean {
+  if (allColsNotSummable) return false;
+  if (rowIsShare(cells, total)) return true; // participação: fecha em ~100
+  const values = [...cells, total];
+  const fractional = values.some((v) => !Number.isInteger(v));
+  if (fractional && values.every((v) => v >= 0 && v <= 100)) return false; // percentuais
+  const nonZero = cells.filter((v) => v !== 0);
+  // Total estritamente ENTRE o menor e o maior valor não-nulo é média, nunca soma.
+  if (nonZero.length >= 2 && total > Math.min(...nonZero) && total < Math.max(...nonZero)) return false;
+  return true;
+}
+
+function rowIsShare(cells: number[], total: number): boolean {
+  return cells.length >= 2 && Math.abs(total - 100) <= 1 && cells.every((v) => v >= 0 && v <= 100);
+}
+
+/**
+ * Coerência interna da LEITURA: numa tabela real (fórmula de Excel) a soma dos
+ * totais de linha e a soma dos totais de coluna dão o mesmo total geral. Se a
+ * própria leitura não fecha nas margens, a visão trocou células de lugar — foi
+ * o caso dos s80/s81/s82 de São José dos Campos (tabelas com barras coloridas).
+ * Devolve a explicação, ou null quando as margens batem ou não dá para conferir.
+ */
+export function marginsIncoherence(table: ExtractedTable, totals: Cell[] | null): string | null {
+  const ti = table.columns.indexOf('Total');
+  if (ti <= 0 || !totals) return null;
+  const grand = totals[ti];
+  if (!isNum(grand) || grand === 0) return null;
+  const rowTotals = table.rows.map((r) => r[ti]).filter(isNum);
+  const colTotals = totals.slice(1, ti).filter(isNum);
+  if (rowTotals.length < 2 || colTotals.length < 2) return null;
+  // Percentuais não têm margem somável.
+  if ([...rowTotals, ...colTotals, grand].some((v) => !Number.isInteger(v))) return null;
+  const byRows = rowTotals.reduce((a, b) => a + b, 0);
+  const byCols = colTotals.reduce((a, b) => a + b, 0);
+  const tol = Math.max(0.5, table.rows.length / 2);
+  if (Math.abs(byRows - grand) <= tol && Math.abs(byCols - grand) <= tol) return null;
+  return `A própria leitura é incoerente: os totais das linhas somam ${fmt(byRows)} e os das colunas somam ${fmt(byCols)}, mas o total geral lido é ${fmt(grand)}. Numa tabela gerada por fórmula isso não acontece: provável erro de leitura da imagem. Confira na imagem antes de corrigir.`;
 }
 
 /**
@@ -293,7 +372,9 @@ export function crossBands(
 /** Extrai faixas numéricas de títulos/rótulos em formatos usuais pt-BR. */
 export function binFromLabel(label: string): Bin | null {
   const raw = label.trim();
-  const compact = raw.toLowerCase().replace(/\s+/g, ' ');
+  // Unidade colada ao número ("9.001/m²", "31m²", "8.000//m²") quebrava o casamento
+  // "de X a Y": as faixas de preço do s82 do SJC nem eram lidas como faixas.
+  const compact = raw.toLowerCase().replace(/\/*\s*m[²2]/g, ' ').replace(/\s+/g, ' ');
   const number = (value: string) => Number(value.replace(/\./g, '').replace(',', '.'));
   const token = 'r?\\$?\\s*([0-9][0-9.,]*)';
   let match = compact.match(new RegExp(`^at[eé]\\s*(?:de\\s*)?${token}`, 'i'));
@@ -429,6 +510,23 @@ export function detectBinGap(bins: Bin[]): BinGapResult {
   });
   const step = binStep(normalizedBins);
   const epsilon = Math.max(step / 100, Number.EPSILON * 10);
+
+  // Faixa aberta ("Acima de R$ 8.000") só pode ser a última. Se existe outra faixa
+  // que começa depois dela, as duas se sobrepõem — caso real s82 do SJC (set/2026):
+  // «Acima de R$ 8.000» seguida de «De 9.001 a 10.000», quando deveria ser
+  // «De 8.001 a 9.000». O laço abaixo pulava esse caso (prev.to === null).
+  const openIdx = normalizedBins.findIndex((bin) => bin.to === null);
+  if (openIdx >= 0) {
+    const open = normalizedBins[openIdx];
+    const after = normalizedBins.find((bin, i) => i !== openIdx && bin.from > open.from);
+    if (after) {
+      return {
+        gapAfterIndex: openIdx,
+        normalizedBins,
+        description: `A faixa aberta «${open.label}» não é a última: «${after.label}» começa acima dela, então os intervalos se sobrepõem. Provável rótulo errado (deveria ser uma faixa fechada, como «De ${fmt(open.from + step)} a ${fmt(after.from - step)}»).`,
+      };
+    }
+  }
 
   for (let i = 1; i < normalizedBins.length; i++) {
     const prev = normalizedBins[i - 1];

@@ -85,6 +85,17 @@ Transcreva TODAS as tabelas numéricas da imagem, fielmente:
   são linhas normais: ficam em "rows", NUNCA em "totals".
 - NÃO invente valores: se um dígito estiver ilegível, use null.
 - Legendas de mapa (só cores/faixas, sem valores) NÃO são tabelas: ignore.
+- TABELA EMPILHADA EM BLOCOS (ex.: "Oferta Lançada", "Oferta Final", "Dispon. S/O.L.", cada
+  bloco com as mesmas linhas e a SUA linha Total): devolva CADA bloco como uma tabela separada
+  em "tables", com "title" = nome do bloco e o "totals" daquele bloco. Nunca junte blocos numa
+  tabela só, nem ponha o nome do bloco como linha.
+- CÉLULA MESCLADA que cobre várias linhas: repita o valor em cada linha coberta. Empreendimento
+  com várias sub-linhas (uma por tipologia/metragem): uma linha por sub-linha, repetindo o nome.
+- Barras coloridas atrás dos números são decoração: leia o número, não a barra, e mantenha cada
+  número na coluna do seu cabeçalho.
+- Rótulos de linha, cabeçalhos e títulos: transcreva EXATAMENTE como escritos, inclusive erros
+  de digitação e símbolos repetidos ("Arté 35 m²" fica "Arté 35 m²"; "R$ 8.000//m²" fica igual).
+  Não corrija nada: o verificador precisa ver o texto real.
 
 Além das tabelas, transcreva qualquer cidade, UF ou bairro visível no título, legenda,
 rodapé, barra de busca ou cabeçalho da imagem. Não deduza: transcreva literalmente.
@@ -92,6 +103,13 @@ Para cada local, marque "principal": true SOMENTE se estiver no título ou na le
 da tabela/gráfico (não em uma referência comparativa secundária).
 Mesmo quando não for principal, inclua cidades que apareçam no cabeçalho de colunas; não omita
 uma localidade só porque a tabela compara mais de uma praça.
+
+FORMATAÇÃO: liste em "anomalias_formato" cada célula cujo FORMATO destoa das vizinhas da mesma
+linha, coluna ou bloco — sem corrigir. Exemplos: número decimal sem "%" numa área de percentuais
+("0,076" entre "1,1%" e "36,0%"); casas decimais diferentes ("13%" entre "11,9%" e "1,6%");
+separador ou símbolo errado ("8.000//m²"). Cada item: {"texto": "0,076", "linha": "2 Dormitórios",
+"coluna": "Acima de R$10.000/m²", "bloco": "Dispon. S/O.L.", "motivo": "decimal sem % entre percentuais"}.
+Se não houver, "anomalias_formato": [].
 
 Também informe "tem_fonte": true somente se for possível ler FONTE:, Fonte:, Elaboração:
 ou equivalente na imagem; caso contrário false. Não deduza.
@@ -117,13 +135,13 @@ Responda EXATAMENTE este JSON (sem markdown):
 {"tables": [{"title": "…", "columns": ["…"], "rows": [["rótulo", 123, null]], "totals": ["Total", 456],
   "col_kinds": ["label","count","share"], "total_kind": "sum", "share_of": {"2": 1}}],
  "locais_visiveis": [{"texto": "São Paulo", "tipo": "cidade", "principal": true}],
- "unidades": [], "tem_fonte": false}
-Se não houver tabela numérica: {"tables": [], "locais_visiveis": [], "unidades": [], "tem_fonte": false}`;
+ "unidades": [], "anomalias_formato": [], "tem_fonte": false}
+Se não houver tabela numérica: {"tables": [], "locais_visiveis": [], "unidades": [], "anomalias_formato": [], "tem_fonte": false}`;
 
 async function callOpenAI(apiKey: string, body: RequestBody, retries = 3) {
   const payload = {
     model: body.model,
-    max_tokens: 3000,
+    max_tokens: 4000,
     messages: [{
       role: 'user',
       content: [
@@ -173,13 +191,14 @@ Deno.serve(async (req) => {
     if (!parsed.ok) return json({ error: parsed.error }, parsed.status);
 
     const response = await callOpenAI(apiKey, parsed.value);
-    let content: { tables?: unknown[]; locais_visiveis?: unknown[]; unidades?: unknown[]; tem_fonte?: unknown } = {};
+    let content: { tables?: unknown[]; locais_visiveis?: unknown[]; unidades?: unknown[]; anomalias_formato?: unknown[]; tem_fonte?: unknown } = {};
     try { content = JSON.parse(response.choices?.[0]?.message?.content ?? '{}'); } catch { content = { tables: [], locais_visiveis: [], unidades: [], tem_fonte: false }; }
 
     return json({
       tables: Array.isArray(content.tables) ? content.tables : [],
       locais_visiveis: Array.isArray(content.locais_visiveis) ? content.locais_visiveis : [],
       unidades: Array.isArray(content.unidades) ? content.unidades : [],
+      anomalias_formato: Array.isArray(content.anomalias_formato) ? content.anomalias_formato : [],
       tem_fonte: content.tem_fonte === true,
       inputTokens: response.usage?.prompt_tokens ?? 0,
       outputTokens: response.usage?.completion_tokens ?? 0,

@@ -16,6 +16,43 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.59 — 2026-09-29 — precisão dos achados após triagem do SJC (RUNTIME local)
+
+**Fonte:** triagem manual das duas rodadas de São José dos Campos (v2 31/jul e VAP 03/ago, 29/set),
+conferindo cada achado contra a imagem do slide e as planilhas. Na VAP, 3 de 15 alertas eram reais;
+3 erros reais não foram apontados. Fixture: `__tests__/fixtures/sjc-vision-readings.json`.
+
+### Falsos positivos removidos (DET)
+
+- **Arredondamento:** percentual da fonte comparado na precisão EXIBIDA (28,85% aceita 28,9% e 29%). `toFixed` foi removido: 0,2885×100 = 28,8499… virava 28,8 (FP s33/s34).
+- **Soma por linha:** linha de taxa/percentual (valores fracionários ≤ 100) e linha cujo total cai entre os valores (média) não são conferidas como soma (FP s76/s82 “Dispon. S/O.L.”).
+- **Tabela nativa de indicadores:** “Total de …” só é linha de total quando é a última linha; “Total”/“Total geral” valem em qualquer posição (FP s127).
+- **Faixas entre lacunas:** títulos de bloco (Oferta Lançada/Final, Dispon., Total) e tipologias repetidas saem da comparação (3 FPs s76×s80, s81×s76, s81×s80).
+
+### Leitura por imagem (IA_visao)
+
+- **“Erro” exige leituras concordantes:** quando mini e 4o falham na soma, o achado só é nível 1 se as duas leituras tiverem a mesma assinatura de divergência; senão vai para “Verificar” dizendo que as leituras discordam. Guardado em `vision_cache.payload.releitura` (`CACHE_SCHEMA` 8: imagens serão relidas uma vez).
+- **Coerência das margens:** se a própria leitura não fecha (soma dos totais de linha ≠ soma dos de coluna ≠ total geral), o achado desce para “Verificar” com a explicação (s80/s81/s82).
+- **Prompt (`analyze-table-image`):** tabela empilhada em blocos vira uma tabela por bloco; célula mesclada e sub-linhas são repetidas; barras coloridas ignoradas; rótulos transcritos literalmente (com erros); novo campo `anomalias_formato`. **Requer deploy da Edge Function.**
+- **BMP:** imagens BMP (colar do Excel) passam a ser convertidas para PNG no navegador. Na v2 do SJC eram 39 tabelas descartadas em silêncio.
+
+### Novas regras (erros reais que passavam)
+
+- `IMAGE_NOT_READ` (DET, Verificar): imagem com cara de tabela em seção numérica que não foi lida (formato não suportado ou conversão falhou), com arquivo e motivo.
+- `BINNING_RULE` nas **linhas** e faixa aberta fora do fim: «Acima de R$ 8.000» antes de «De 9.001 a 10.000» (s82). Rótulos com unidade colada (“9.001/m²”) passam a ser lidos como faixa.
+- `FORMAT_MISMATCH` (Provável): decimal sem % entre percentuais (“0,076” = 7,6%) e casas decimais divergentes (“13%” entre “11,9%”), pelas strings transcritas e pelo campo da visão (s81).
+- `SPELLING` em rótulo de faixa: palavra inicial a uma edição de Até/Acima/Abaixo (“Arté 35 m²”, s76/s80).
+
+### Mensagens explícitas
+
+- Unidade trocada: “O número 75.298.796 está correto, mas o slide o rotula como habitantes (hab.); na planilha ele é de domicílios (dom.)”.
+- Soma: a conta aparece (“44 + 112 + 236 = 392 … diferença de 48”); todas as colunas abaixo na mesma proporção viram “provável linha ou faixa omitida” (s28).
+- Verticalização e oferta: valor do slide, da planilha, arredondado na precisão do slide e diferença em p.p.
+
+**Arquivos:** `audit/engine.ts`, `audit/ir-rules.ts`, `audit/model.ts`, `error-catalog.ts`, `v3/source-crosscheck.ts`, `v3/ia-vision.ts`, `v3/cross-table.ts`, `v3/table-images.ts`, `v3/pptx-media.ts`, `v3/pipeline.ts`, `v3/confidence.ts`, `v3/format-checks.ts` (novo), `supabase/functions/analyze-table-image/index.ts`, testes `sjc-real.test.ts` e `source-crosscheck.test.ts`.
+
+**Verificação:** 149 testes do Corretor verdes (133 → 149), lint sem erros, `vite build` ok; `tsc` acusa só o erro pré-existente de `generation` em `db.ts`. Varredura headless dos PPTX reais: v2 detecta 39 BMP antes invisíveis, VAP sem perdas. **Não verificado:** conversão BMP→PNG no navegador, efeito do prompt novo e as leituras concordantes com a Edge Function publicada — exigem deploy e nova rodada do SJC.
+
 ## Versão 0.58 — 2026-09-28 — V1 integrada ao seletor de gerações (RUNTIME local)
 
 O arquivo legado deixou de ocupar um expansor isolado abaixo da lista principal. A landing agora

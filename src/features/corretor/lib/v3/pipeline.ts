@@ -11,7 +11,7 @@ import { applyDeclaredExclusions } from './declared-exclusions';
 import type { ModelId } from '../cost-calculator';
 import { estimateTextPass, runTextPass } from './ia-text';
 import {
-  findTableImages, type TableImageCandidate,
+  findTableImages, type TableImageCandidate, type TableImageScan,
 } from './table-images';
 import { estimateVisionPass, runVisionPass, type VisionEstimate } from './ia-vision';
 import { attachEvidenceImages } from './evidence';
@@ -255,6 +255,7 @@ export async function runPhase2(
   });
 
   const [text, vision] = await Promise.all([textPromise, visionPromise]);
+  const unread = unreadImageFindings(candidates);
   const refs = nativeTableRefs(ir).concat(vision.tables.map((table) => ({ ...table, source: 'vision' as const })));
   const cross = crossTableFindings(ir, vision.tables);
   const projection = projectionFindings(refs);
@@ -264,9 +265,9 @@ export async function runPhase2(
   ];
   const sourceCrosscheck = opts.fonte ? sourceCrosscheckVisionFindings(ir, opts.fonte, vision.tables) : [];
   const crossFindings = applyDeclaredExclusions(ir, [...cross, ...projection, ...coverage, ...sourceCrosscheck].filter((f) => !f.ok));
-  const visionFindings = [...vision.findings.filter((f) => !f.ok), ...crossFindings];
+  const visionFindings = [...vision.findings.filter((f) => !f.ok), ...crossFindings, ...unread];
   await attachEvidenceImages(crossFindings, candidates);
-  onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: crossFindings });
+  onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: [...crossFindings, ...unread] });
 
   // Pista dirigida: slide com comentário da revisão e nenhum achado do motor é
   // candidato a regra faltante. Só faz sentido com texto e visão já concluídos.
@@ -290,6 +291,34 @@ export async function runPhase2(
     visionEscalated: vision.escalated,
     aborted: signal?.aborted ?? false,
   };
+}
+
+/**
+ * Cobertura explícita: imagem com cara de tabela que não foi lida vira um aviso
+ * por slide. Antes ela simplesmente não existia no relatório, e "nenhum erro"
+ * era indistinguível de "nada conferido" (v2 do SJC, set/2026).
+ */
+export function unreadImageFindings(candidates: TableImageCandidate[]): Finding[] {
+  const skipped = (candidates as TableImageScan).skipped ?? [];
+  const bySlide = new Map<number, typeof skipped>();
+  for (const s of skipped) bySlide.set(s.slide, [...(bySlide.get(s.slide) ?? []), s]);
+  return [...bySlide.entries()].map(([slide, items]) => ({
+    id: `image-not-read-${slide}`,
+    type: 'IMAGE_NOT_READ' as const,
+    section: toAuditSectionSafe(items[0].secao),
+    slideRef: `s${slide}`,
+    title: `Imagem de tabela não lida (${items.length === 1 ? items[0].motivo : `${items.length} imagens`})`,
+    detail: `${items.map((i) => `${i.name.split('/').pop()} (${i.kb} KB): ${i.motivo}`).join('; ')}. Os números desta imagem não foram conferidos; revise manualmente ou cole a tabela como PNG.`,
+    ok: false,
+    confidence: 3 as const,
+    origem: 'DET',
+    viz: { kind: 'text' as const, location: items[0].titulo ?? undefined, evidence: items.map((i) => i.motivo).join('; ') },
+  }));
+}
+
+function toAuditSectionSafe(secao: string | null): Finding['section'] {
+  const s = (secao ?? '').toUpperCase();
+  return (['SOCIO', 'MERCADO', 'LACUNAS', 'ABSORCAO'].includes(s) ? s : 'GLOBAL') as Finding['section'];
 }
 
 /**

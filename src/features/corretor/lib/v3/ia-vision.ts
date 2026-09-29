@@ -4,7 +4,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, calculateImageTokens, type ModelId } from '../cost-calculator';
-import { binsFromColumns, checkTableSums, checkPercentConsistency, checkUnitPlausibility, detectBinGap } from '../audit/engine';
+import { binsFromColumns, checkTableSums, checkPercentConsistency, checkUnitPlausibility, detectBinGap, rowLabels } from '../audit/engine';
+import { formatIssues, labelTypos, visionFormatIssues, type FormatIssue, type RawFormatAnomaly } from './format-checks';
 import { toAuditSection } from '../audit/ir';
 import { municipioOficial, sameCity } from '../audit/ir-rules';
 import type { Cell, ColKind, ExtractedTable, Finding } from '../audit/model';
@@ -22,7 +23,8 @@ const db = supabase as any;
 // v6: fonte visível e unidades de fichas técnicas; um único bump para WS6/WS7.
 // v7: valida o formato profundo antes de confiar no cache; uma resposta de modelo
 // malformada nunca pode derrubar a análise inteira via `.map()`.
-const CACHE_SCHEMA = 7;
+// 8: guarda se as duas leituras (mini × 4o) concordaram na divergência de soma.
+const CACHE_SCHEMA = 8;
 
 interface RawTable {
   title?: string;
@@ -40,6 +42,14 @@ export interface CachePayload {
   locais_visiveis?: RawLocale[];
   unidades?: RawUnit[];
   tem_fonte?: boolean;
+  /** Células cujo formato destoa das vizinhas, segundo a própria visão. */
+  anomalias_formato?: RawFormatAnomaly[];
+  /**
+   * Presente quando a imagem precisou de releitura no 4o e AMBAS as leituras
+   * falharam na soma. `concordam` = as duas encontraram exatamente as mesmas
+   * diferenças; só então o achado sustenta “Erro”.
+   */
+  releitura?: { concordam: boolean };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -59,7 +69,14 @@ export function sanitizeVisionPayload(value: unknown): CachePayload {
   const tables = Array.isArray(raw.tables) ? raw.tables.filter(isRawTable) : [];
   const locais = Array.isArray(raw.locais_visiveis) ? raw.locais_visiveis.filter(isRecord) as RawLocale[] : [];
   const unidades = Array.isArray(raw.unidades) ? raw.unidades.filter(isRecord) as RawUnit[] : [];
-  return { tables, locais_visiveis: locais, unidades, tem_fonte: raw.tem_fonte === true };
+  const releitura = isRecord(raw.releitura) && typeof raw.releitura.concordam === 'boolean'
+    ? { concordam: raw.releitura.concordam } : undefined;
+  const anomalias = Array.isArray(raw.anomalias_formato) ? raw.anomalias_formato.filter(isRecord) as RawFormatAnomaly[] : [];
+  return {
+    tables, locais_visiveis: locais, unidades, tem_fonte: raw.tem_fonte === true,
+    ...(anomalias.length ? { anomalias_formato: anomalias } : {}),
+    ...(releitura ? { releitura } : {}),
+  };
 }
 
 /** Cache só é reaproveitável se todos os campos que podem ser iterados forem listas válidas. */
@@ -352,6 +369,24 @@ async function extractWithModel(
   };
 }
 
+/**
+ * Assinatura das divergências de soma de uma leitura: as notas geradas pelo
+ * motor. Duas leituras independentes com a MESMA assinatura acharam a mesma
+ * conta errada; assinaturas diferentes significam que os números lidos mudaram
+ * entre as leituras — sintoma de OCR instável, não de erro do estudo.
+ */
+export function sumFailureSignature(payload: CachePayload): string {
+  const parts: string[] = [];
+  (payload.tables ?? []).forEach((raw, ti) => {
+    const ext = toExtracted(raw);
+    if (!ext?.totals) return;
+    const v = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
+    for (const c of v.badColumns ?? []) parts.push(`${ti}:c${c}:${JSON.stringify(ext.rows.map((r) => r[c]))}:${JSON.stringify(ext.totals[c])}`);
+    for (const r of v.badRows ?? []) parts.push(`${ti}:r${r}:${JSON.stringify(ext.rows[r])}`);
+  });
+  return parts.sort().join('|');
+}
+
 /** true se TODAS as tabelas do payload passam nas auto-validações (soma + %↔abs). */
 function payloadIsClean(payload: CachePayload): boolean {
   for (const raw of payload.tables ?? []) {
@@ -384,6 +419,8 @@ async function processImage(
 }> {
   const findings: Finding[] = [];
   const tables: ExtractedTableRef[] = [];
+  const cellIssues: FormatIssue[] = [];
+  const textIssues: FormatIssue[] = [];
   let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0, costUsd = 0;
   let escalated = false;
   let usedModel = model;
@@ -396,6 +433,8 @@ async function processImage(
     payload = sanitizeVisionPayload(hit.payload);
     usedModel = (hit.model as ModelId) ?? model;
     fromCache = 1;
+    // A releitura aconteceu numa análise anterior; o veredito dela vale igual.
+    if (payload.releitura) escalated = true;
   } else {
     const first = await extractWithModel(c, model);
     inputTokens += first.inputTokens;
@@ -415,6 +454,10 @@ async function processImage(
       // fica com a leitura que fecha; se ambas falham, fica com a do 4o (OCR melhor)
       payload = payloadIsClean(second.payload) || !payloadIsClean(first.payload)
         ? second.payload : first.payload;
+      if (!payloadIsClean(first.payload) && !payloadIsClean(second.payload)) {
+        const a = sumFailureSignature(first.payload), b = sumFailureSignature(second.payload);
+        payload = { ...payload, releitura: { concordam: a !== '' && a === b } };
+      }
     }
 
     await db.from('vision_cache').upsert({
@@ -425,8 +468,11 @@ async function processImage(
   }
 
   // fonte da leitura, para o analista saber a confiança
+  const readingsAgree = payload?.releitura?.concordam === true;
   const origemLeitura = escalated
-    ? 'confirmado no gpt-4o (após divergência no modelo econômico)'
+    ? readingsAgree
+      ? 'confirmado no gpt-4o (após divergência no modelo econômico)'
+      : 'relido no gpt-4o; as duas leituras discordam entre si'
     : `lido pelo modelo ${usedModel}`;
 
   const secao = toAuditSection(c.secao);
@@ -456,13 +502,16 @@ async function processImage(
             : `Tabela não fecha no total (${ext.title.slice(0, 50)})`,
           detail: viz.unaligned
             ? `A linha de totais do slide ${c.slide} não pôde ser casada com as colunas, então a soma não foi conferida — confira na imagem.`
-            : `Números da imagem do slide ${c.slide} (${origemLeitura}). ${escalated ? 'Como o 4o confirmou, é provável bug real do estudo.' : 'Pode ser bug do estudo OU dígito mal lido — confira na imagem.'}`,
+            : `${viz.notes?.[0] ? `${viz.notes[0]}. ` : ''}Números lidos da imagem do slide ${c.slide} (${origemLeitura}). ${sumVerdict(viz, escalated, readingsAgree)}`,
           ok: false,
           viz,
           evidenceSha1: c.sha1,
-          escalated,
-          // Sem alinhamento não há acusação a sustentar: é convite a olhar, não erro.
-          ...(viz.unaligned ? { confidence: 3 as const } : {}),
+          // “escalated” é o selo de Erro na hierarquia de confiança: só quando as
+          // duas leituras concordaram e a leitura é coerente nas margens.
+          escalated: escalated && readingsAgree && !viz.incoherentReading,
+          // Sem alinhamento, com leitura incoerente ou com leituras discordantes
+          // não há acusação a sustentar: é convite a olhar, não erro.
+          ...(viz.unaligned || viz.incoherentReading || (escalated && !readingsAgree) ? { confidence: 3 as const } : {}),
         });
       }
     }
@@ -509,8 +558,46 @@ async function processImage(
       }
     }
 
+    // 4) faixas nas LINHAS (preço × metragem tem faixas de preço como linhas)
+    const rowBins = binsFromColumns([...new Set(rowLabels(ext))]);
+    if (rowBins.length >= 3) {
+      const gap = detectBinGap(rowBins);
+      if (gap.gapAfterIndex !== undefined) {
+        flagged = true;
+        findings.push({
+          id: `iavis-rowbin-${c.sha1.slice(0, 10)}-${ti}`,
+          type: 'BINNING_RULE',
+          section: secao,
+          slideRef: `s${c.slide}`,
+          title: `Faixas das linhas inconsistentes (${ext.title.slice(0, 40)})`,
+          detail: gap.description ?? 'Sequência de faixas inconsistente.',
+          ok: false,
+          viz: {
+            kind: 'binrange', unit: '', bins: gap.normalizedBins ?? rowBins,
+            gapAfterIndex: gap.gapAfterIndex, gapDescription: gap.description,
+          },
+          evidenceSha1: c.sha1,
+          escalated,
+        });
+      }
+    }
+
+    // 5) formato divergente nas células transcritas (percentual sem %, casas decimais)
+    const fmtIssues = formatIssues(ext);
+    // 6) erro de digitação nos rótulos de faixa (cabeçalhos e linhas)
+    const typos = labelTypos([...ext.columns, ...rowLabels(ext)]);
+    for (const issue of typos) textIssues.push(issue);
+    for (const issue of fmtIssues) cellIssues.push(issue);
+
     if (!flagged) tablesVerified++;
   });
+
+  // Formato: o que a visão apontou + o que as strings transcritas mostram, sem repetir.
+  for (const issue of visionFormatIssues(payload?.anomalias_formato)) {
+    if (!cellIssues.some((i) => i.text === issue.text)) cellIssues.push(issue);
+  }
+  if (cellIssues.length) findings.push(formatFinding(c, secao, cellIssues));
+  if (textIssues.length) findings.push(labelTypoFinding(c, secao, textIssues));
 
   const unitViz = checkUnitPlausibility(payload?.unidades ?? []);
   if (unitViz && ((unitViz.badRows?.length ?? 0) > 0 || (unitViz.notes?.length ?? 0) > 0)) {
@@ -527,6 +614,44 @@ async function processImage(
     findings, tables, hasVisibleSource: payload?.tem_fonte === true,
     tablesExtracted, tablesVerified, fromCache, inputTokens, outputTokens, costUsd, escalated,
   };
+}
+
+function issuesViz(issues: FormatIssue[]) {
+  return {
+    kind: 'table' as const,
+    table: { title: 'Formato', columns: ['Onde', 'Texto na imagem', 'Inconsistência'], rows: issues.map((i) => [i.where, i.text, i.reason]) },
+    badRows: issues.map((_, i) => i),
+    notes: issues.map((i) => `${i.where}: «${i.text}» — ${i.reason}`),
+  };
+}
+
+function formatFinding(c: TableImageCandidate, secao: Finding['section'], issues: FormatIssue[]): Finding {
+  const first = issues[0];
+  return {
+    id: `iavis-format-${c.sha1.slice(0, 10)}`,
+    type: 'FORMAT_MISMATCH', section: secao, slideRef: `s${c.slide}`,
+    title: `Formatação divergente na tabela (${issues.length} célula${issues.length > 1 ? 's' : ''})`,
+    detail: `${first.where}: «${first.text}» ${first.reason}.${issues.length > 1 ? ` Mais ${issues.length - 1} ocorrência(s) na tabela.` : ''} Confira na imagem.`,
+    ok: false, origem: 'IA_visao', confidence: 2, viz: issuesViz(issues), evidenceSha1: c.sha1,
+  };
+}
+
+function labelTypoFinding(c: TableImageCandidate, secao: Finding['section'], issues: FormatIssue[]): Finding {
+  return {
+    id: `iavis-labeltypo-${c.sha1.slice(0, 10)}`,
+    type: 'SPELLING', section: secao, slideRef: `s${c.slide}`,
+    title: `Erro de digitação em rótulo de faixa (${issues.map((i) => `«${i.text}»`).join(', ').slice(0, 60)})`,
+    detail: issues.map((i) => i.reason).join('; ') + '.',
+    ok: false, origem: 'IA_visao', confidence: 2, viz: issuesViz(issues), evidenceSha1: c.sha1,
+  };
+}
+
+/** Frase final do achado de soma: por que confiar (ou não) na leitura. */
+function sumVerdict(viz: { incoherentReading?: boolean }, escalated: boolean, agree: boolean): string {
+  if (viz.incoherentReading) return 'A leitura não fecha nem nas próprias margens: trate como provável erro de leitura e confira na imagem.';
+  if (escalated && agree) return 'Duas leituras independentes (mini e 4o) encontraram a mesma diferença: provável erro real do estudo.';
+  if (escalated) return 'As duas leituras encontraram números diferentes para a mesma tabela: provável erro de leitura. Confira na imagem antes de corrigir.';
+  return 'Pode ser erro do estudo ou dígito mal lido: confira na imagem.';
 }
 
 export async function runVisionPass(

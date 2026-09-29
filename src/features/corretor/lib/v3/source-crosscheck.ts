@@ -6,7 +6,8 @@ import type { ExtractedTableRef } from './ia-vision';
 const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
-const pt = (value: number, digits = 0) => value.toLocaleString('pt-BR', {
+// Arredonda antes de formatar: 28,849999… (0,2885 × 100) tem de sair "28,9".
+const pt = (value: number, digits = 0) => (Math.round(value * 10 ** digits + 1e-9) / 10 ** digits).toLocaleString('pt-BR', {
   minimumFractionDigits: digits, maximumFractionDigits: digits,
 });
 
@@ -16,14 +17,30 @@ const provenance = (block: FonteBloco, item: FonteItem) =>
 const socioBlock = (fonte: Fonte, table: string) =>
   fonte.blocos.find((block) => block.papel === 'socio' && block.tabela === table);
 
-interface LabeledPercent { label: string; value: number }
+interface LabeledPercent { label: string; value: number; decimals: number }
+
+/** Casas decimais efetivamente exibidas ("28,9" → 1; "29" → 0). */
+export function shownDecimals(raw: string): number {
+  return raw.match(/,(\d+)\s*$/)?.[1].length ?? 0;
+}
+
+/**
+ * O relatório final costuma arredondar a planilha: 28,85% vira 28,9% (ou 29%).
+ * Aceita qualquer valor que arredonde para o número exibido, na precisão exibida.
+ * Não usa `toFixed`: 0,2885 × 100 = 28,849999… e `toFixed(1)` devolveria 28,8,
+ * o falso positivo do s33/s34 de São José dos Campos (set/2026).
+ */
+export function matchesAtShownPrecision(shown: number, expected: number, decimals: number): boolean {
+  const halfStep = 0.5 * 10 ** -decimals;
+  return Math.abs(shown - expected) <= halfStep + 1e-9;
+}
 function labeledPercents(slide: IrSlide): LabeledPercent[] {
   const out: LabeledPercent[] = [];
   for (const text of slide.textos) {
     const match = text.match(/^\s*(-?[\d.,]+)\s*%\s*[\r\n]+\s*(.+?)\s*$/s);
     if (!match) continue;
     const parsed = Number(match[1].replace(/\./g, '').replace(',', '.'));
-    if (Number.isFinite(parsed)) out.push({ label: match[2], value: parsed });
+    if (Number.isFinite(parsed)) out.push({ label: match[2], value: parsed, decimals: shownDecimals(match[1]) });
   }
   return out;
 }
@@ -31,21 +48,26 @@ function labeledPercents(slide: IrSlide): LabeledPercent[] {
 function sourceFinding(args: {
   slide: IrSlide; recorte: string; shown: string; expected: string;
   block: FonteBloco; item: FonteItem; suffix: string;
+  /** Explicação da inconsistência; sem ela, usa a frase genérica. */
+  explanation?: string; title?: string; rowLabel?: string;
 }): Finding {
   const { slide, recorte, shown, expected, block, item, suffix } = args;
   const origin = provenance(block, item);
+  const explanation = args.explanation ?? `O slide mostra ${shown}, enquanto a planilha registra ${expected}.`;
   return {
     id: `source-${slide.n}-${normalize(block.tabela)}-${normalize(recorte)}-${suffix}`,
     type: 'SOURCE_CROSSCHECK', section: 'SOCIO', slideRef: `s${slide.n}`,
-    title: `Valor diverge da planilha-fonte — ${recorte}`,
-    detail: `O slide mostra ${shown}, enquanto a fonte registra ${expected}. Origem: ${origin}.`,
+    title: args.title ?? `Valor diverge da planilha-fonte — ${recorte}`,
+    detail: `${explanation} Origem: ${origin}.`,
     confidence: 1, origem: 'DET',
     viz: {
       kind: 'sidebyside', leftLabel: `Slide ${slide.n}`, rightLabel: origin,
-      rows: [{ label: recorte, left: shown, right: expected, mismatch: true }],
+      rows: [{ label: args.rowLabel ?? recorte, left: shown, right: expected, mismatch: true }],
     },
   };
 }
+
+const UNIT_NAME: Record<string, string> = { 'hab.': 'habitantes (hab.)', 'dom.': 'domicílios (dom.)' };
 
 function verticalizationFindings(ir: Ir, fonte: Fonte): Finding[] {
   const block = socioBlock(fonte, 'domicilios_por_tipo');
@@ -60,12 +82,16 @@ function verticalizationFindings(ir: Ir, fonte: Fonte): Finding[] {
       const ratio = values['%'];
       if (typeof ratio !== 'number') continue;
       const expected = ratio * 100;
-      // Compara na precisão publicada: 5,16% vira 5,2% quando o deck mostra uma casa.
-      const roundedExpected = Number(expected.toFixed(1));
-      if (Math.abs(claim.value - roundedExpected) < 0.001) continue;
+      // Compara na precisão publicada: 5,16% aceita 5,2% (uma casa) ou 5% (inteiro).
+      if (matchesAtShownPrecision(claim.value, expected, claim.decimals)) continue;
+      const shown = `${pt(claim.value, claim.decimals)}%`;
+      const expectedText = `${pt(expected, 2)}%`;
+      const rounded = `${pt(expected, claim.decimals)}%`;
+      const gap = pt(Math.abs(claim.value - expected), 1);
       findings.push(sourceFinding({
-        slide, recorte: scope, shown: `${pt(claim.value, 1)}%`, expected: `${pt(expected, 2)}%`,
+        slide, recorte: scope, shown, expected: expectedText,
         block, item: apartment, suffix: 'percentual',
+        explanation: `Verticalização de ${scope}: o slide mostra ${shown}, mas a planilha registra ${expectedText} (${rounded} na precisão do slide). A diferença de ${gap} p.p. não se explica por arredondamento.`,
       }));
     }
   }
@@ -107,9 +133,13 @@ function populationSeriesFindings(ir: Ir, fonte: Fonte): Finding[] {
       if (exact >= 0) {
         used.add(exact);
         if (claims[exact].unit !== expectedUnit) {
+          const shownUnit = claims[exact].unit;
           findings.push(sourceFinding({
-            slide, recorte: scope, shown: `${claims[exact].raw} ${claims[exact].unit}`,
+            slide, recorte: scope, shown: `${claims[exact].raw} ${shownUnit}`,
             expected: `${pt(expected)} ${expectedUnit}`, block, item, suffix: `unidade-${tableName}`,
+            title: `Unidade trocada no slide — ${scope}`,
+            rowLabel: `${scope} · unidade`,
+            explanation: `O número ${claims[exact].raw} está correto, mas o slide o rotula como ${UNIT_NAME[shownUnit] ?? shownUnit}; na planilha ele é de ${UNIT_NAME[expectedUnit] ?? expectedUnit}. Corrija só a unidade.`,
           }));
         }
         continue;
@@ -121,9 +151,11 @@ function populationSeriesFindings(ir: Ir, fonte: Fonte): Finding[] {
       if (candidates.length !== 1 && (candidates.length < 2 || candidates[0].delta === candidates[1].delta)) continue;
       const chosen = candidates[0];
       used.add(chosen.index);
+      const diff = chosen.claim.value - expected;
       findings.push(sourceFinding({
         slide, recorte: scope, shown: `${chosen.claim.raw} ${chosen.claim.unit}`, expected: `${pt(expected)} ${expectedUnit}`,
         block, item, suffix: tableName,
+        explanation: `${scope}: o slide mostra ${chosen.claim.raw} ${chosen.claim.unit}, mas a planilha registra ${pt(expected)} ${expectedUnit} (${diff > 0 ? '+' : '−'}${pt(Math.abs(diff))}). Número próximo com dígitos trocados costuma ser erro de digitação.`,
       }));
     }
   }
@@ -208,7 +240,7 @@ export function sourceCrosscheckVisionFindings(
           id: `source-vision-${ref.slide}-${normalize(tableName)}-${normalize(block.recorte ?? '')}-${normalize(label)}-${metric.key}`,
           type: 'SOURCE_CROSSCHECK', section: 'MERCADO', slideRef: `s${ref.slide}`,
           title: `${metric.label} diverge da planilha — ${label}`,
-          detail: `A leitura do slide mostra ${pt(shown)}, enquanto a fonte registra ${pt(expected)}. Origem: ${origin}.`,
+          detail: `${metric.label} de «${label}» no recorte ${block.recorte ?? '—'}: a leitura da imagem mostra ${pt(shown)}, mas a planilha registra ${pt(expected)} (${shown > expected ? '+' : '−'}${pt(Math.abs(shown - expected))}). Confira também se o slide usa o mesmo recorte. Origem: ${origin}.`,
           confidence: 2, origem: 'IA_visao', evidenceSha1: ref.sha1,
           viz: {
             kind: 'sidebyside', leftLabel: `Slide ${ref.slide} · linha ${rowIndex + 1}`, rightLabel: origin,

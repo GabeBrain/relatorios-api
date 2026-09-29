@@ -29,9 +29,38 @@ export function jpegDims(d: Uint8Array): [number, number] | null {
   return null;
 }
 
-/** Dimensões de PNG ou JPEG. */
+/** [largura, altura] de um BMP pelo BITMAPINFOHEADER, ou null se não for BMP. */
+export function bmpDims(d: Uint8Array): [number, number] | null {
+  if (d.length < 26 || d[0] !== 0x42 || d[1] !== 0x4d) return null;
+  const dv = new DataView(d.buffer, d.byteOffset);
+  // altura negativa = bitmap top-down; o tamanho é o mesmo.
+  return [Math.abs(dv.getInt32(18, true)), Math.abs(dv.getInt32(22, true))];
+}
+
+/** Dimensões de PNG, JPEG ou BMP. */
 export function imageDims(d: Uint8Array): [number, number] | null {
-  return pngDims(d) ?? jpegDims(d);
+  return pngDims(d) ?? jpegDims(d) ?? bmpDims(d);
+}
+
+/**
+ * BMP → PNG no navegador. Os modelos de visão não aceitam BMP, e o PowerPoint
+ * guarda "colar como imagem" do Excel em BMP: na v2 do SJC (jul/2026) eram 48
+ * das tabelas, todas descartadas em silêncio. Sem canvas (node/testes) devolve
+ * null e o chamador registra a imagem como não lida — nunca some calada.
+ */
+export async function bmpToPng(d: Uint8Array): Promise<Uint8Array | null> {
+  try {
+    if (typeof createImageBitmap === 'undefined' || typeof OffscreenCanvas === 'undefined') return null;
+    const bitmap = await createImageBitmap(new Blob([d as BlobPart], { type: 'image/bmp' }));
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    ctx.drawImage(bitmap, 0, 0);
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    return new Uint8Array(await blob.arrayBuffer());
+  } catch {
+    return null;
+  }
 }
 
 export async function sha1Hex(bytes: Uint8Array): Promise<string> {
