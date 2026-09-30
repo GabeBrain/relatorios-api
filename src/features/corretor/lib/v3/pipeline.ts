@@ -13,8 +13,9 @@ import { estimateTextPass, runTextPass } from './ia-text';
 import {
   findTableImages, type TableImageCandidate, type TableImageScan,
 } from './table-images';
-import { estimateVisionPass, runVisionPass, type VisionEstimate } from './ia-vision';
+import { estimateVisionPass, runVisionPass, type VisionEstimate, type VisionPassResult } from './ia-vision';
 import { attachEvidenceImages } from './evidence';
+import { reconcileDeckFindings } from './deck-reconcile';
 import { findAtaImage, type AtaImageCandidate } from './ata-image';
 import { estimateAtaPass, extractAtaFromImage, type AtaData } from './ia-ata';
 import { usdToBrl, VISION_CONCURRENCY } from './config';
@@ -255,19 +256,10 @@ export async function runPhase2(
   });
 
   const [text, vision] = await Promise.all([textPromise, visionPromise]);
-  const unread = unreadImageFindings(candidates);
-  const refs = nativeTableRefs(ir).concat(vision.tables.map((table) => ({ ...table, source: 'vision' as const })));
-  const cross = crossTableFindings(ir, vision.tables);
-  const projection = projectionFindings(refs);
-  const coverage = [
-    ...sourceFindingsFromVision(ir, vision.sourceSlides, vision.analyzedSlides),
-    ...requiredAndExclusionFindings(ir, refs),
-  ];
-  const sourceCrosscheck = opts.fonte ? sourceCrosscheckVisionFindings(ir, opts.fonte, vision.tables) : [];
-  const crossFindings = applyDeclaredExclusions(ir, [...cross, ...projection, ...coverage, ...sourceCrosscheck].filter((f) => !f.ok));
-  const visionFindings = [...vision.findings.filter((f) => !f.ok), ...crossFindings, ...unread];
-  await attachEvidenceImages(crossFindings, candidates);
-  onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: [...crossFindings, ...unread] });
+  const combined = combineVisionFindings(ir, vision, candidates, opts.fonte);
+  const visionFindings = combined.visionFindings;
+  await attachEvidenceImages(combined.crossFindings, candidates);
+  onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: combined.crossFindings });
 
   // Pista dirigida: slide com comentário da revisão e nenhum achado do motor é
   // candidato a regra faltante. Só faz sentido com texto e visão já concluídos.
@@ -294,26 +286,51 @@ export async function runPhase2(
 }
 
 /**
+ * Visão + cruzamentos + cobertura → lista final de achados de imagem. PURA:
+ * o site e o replay dos testes usam a mesma função sobre o mesmo passe.
+ * `crossFindings` são os novos desta etapa (recebem evidência depois).
+ */
+export function combineVisionFindings(
+  ir: Ir, vision: VisionPassResult, candidates: TableImageCandidate[], fonte?: Fonte | null,
+): { visionFindings: Finding[]; crossFindings: Finding[] } {
+  const unread = unreadImageFindings(candidates);
+  const refs = nativeTableRefs(ir).concat(vision.tables.map((table) => ({ ...table, source: 'vision' as const })));
+  const cross = crossTableFindings(ir, vision.tables);
+  const projection = projectionFindings(refs);
+  const coverage = [
+    ...sourceFindingsFromVision(ir, vision.sourceSlides, vision.analyzedSlides),
+    ...requiredAndExclusionFindings(ir, refs),
+  ];
+  const sourceCrosscheck = fonte ? sourceCrosscheckVisionFindings(ir, fonte, vision.tables) : [];
+  const crossFindings = applyDeclaredExclusions(ir, [...cross, ...projection, ...coverage, ...sourceCrosscheck].filter((f) => !f.ok));
+  const visionFindings = reconcileDeckFindings([...vision.findings.filter((f) => !f.ok), ...crossFindings, ...unread], vision.tables);
+  const kept = new Set(visionFindings.map((f) => f.id));
+  return { visionFindings, crossFindings: [...crossFindings, ...unread].filter((f) => kept.has(f.id)).concat(visionFindings.filter((f) => f.id === 'vision-unsafe-sums')) };
+}
+
+/**
  * Cobertura explícita: imagem com cara de tabela que não foi lida vira um aviso
  * por slide. Antes ela simplesmente não existia no relatório, e "nenhum erro"
  * era indistinguível de "nada conferido" (v2 do SJC, set/2026).
  */
 export function unreadImageFindings(candidates: TableImageCandidate[]): Finding[] {
   const skipped = (candidates as TableImageScan).skipped ?? [];
-  const bySlide = new Map<number, typeof skipped>();
-  for (const s of skipped) bySlide.set(s.slide, [...(bySlide.get(s.slide) ?? []), s]);
-  return [...bySlide.entries()].map(([slide, items]) => ({
-    id: `image-not-read-${slide}`,
+  if (!skipped.length) return [];
+  // Um aviso só, com a lista: 30 cartões iguais escondiam os achados de verdade.
+  const slides = [...new Set(skipped.map((s) => `s${s.slide}`))];
+  const motivos = [...new Set(skipped.map((s) => s.motivo))];
+  return [{
+    id: 'image-not-read',
     type: 'IMAGE_NOT_READ' as const,
-    section: toAuditSectionSafe(items[0].secao),
-    slideRef: `s${slide}`,
-    title: `Imagem de tabela não lida (${items.length === 1 ? items[0].motivo : `${items.length} imagens`})`,
-    detail: `${items.map((i) => `${i.name.split('/').pop()} (${i.kb} KB): ${i.motivo}`).join('; ')}. Os números desta imagem não foram conferidos; revise manualmente ou cole a tabela como PNG.`,
+    section: toAuditSectionSafe(skipped[0].secao),
+    slideRef: slides[0],
+    title: `Imagens de tabela não lidas (${skipped.length} em ${slides.length} slide${slides.length > 1 ? 's' : ''})`,
+    detail: `${motivos.join('; ')}: ${slides.join(', ')}. Os números dessas imagens não foram conferidos; revise manualmente ou cole as tabelas como PNG.`,
     ok: false,
     confidence: 3 as const,
     origem: 'DET',
-    viz: { kind: 'text' as const, location: items[0].titulo ?? undefined, evidence: items.map((i) => i.motivo).join('; ') },
-  }));
+    viz: { kind: 'text' as const, evidence: skipped.map((i) => `${i.name.split('/').pop()} (${i.kb} KB)`).join('; ') },
+  }];
 }
 
 function toAuditSectionSafe(secao: string | null): Finding['section'] {

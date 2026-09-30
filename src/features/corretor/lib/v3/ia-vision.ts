@@ -34,6 +34,8 @@ interface RawTable {
   col_kinds?: unknown[];
   total_kind?: unknown;
   share_of?: Record<string, unknown>;
+  /** Marcada quando a tabela foi costurada de várias fatias por coluna. */
+  stitched?: boolean;
 }
 export interface RawLocale { texto?: unknown; tipo?: unknown; principal?: unknown }
 export interface RawUnit { tipologia?: unknown; m2?: unknown; vagas?: unknown; preco?: unknown; preco_m2?: unknown }
@@ -94,6 +96,8 @@ export interface ExtractedTableRef {
   table: ExtractedTable;
   /** id do achado de soma desta tabela, quando ela sozinha não fechou. */
   sumFindingId?: string;
+  /** Releitura no 4o discordou da 1ª leitura: números desta tabela não servem de régua. */
+  unstable?: boolean;
 }
 
 export interface ExpectedLocation { cidade: string; uf?: string | null }
@@ -422,13 +426,7 @@ async function processImage(
   tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number;
   outputTokens: number; costUsd: number; escalated: boolean;
 }> {
-  const findings: Finding[] = [];
-  const tables: ExtractedTableRef[] = [];
-  const cellIssues: FormatIssue[] = [];
-  // Blocos da mesma imagem repetem as faixas: o mesmo furo vira UM achado.
-  const binSeen = new Set<string>();
-  const textIssues: FormatIssue[] = [];
-  let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0, costUsd = 0;
+  let fromCache = 0, inputTokens = 0, outputTokens = 0, costUsd = 0;
   let escalated = false;
   let usedModel = model;
 
@@ -474,6 +472,29 @@ async function processImage(
     });
   }
 
+  const analysis = analyzeVisionPayload(c, payload, { escalated, usedModel, expected });
+  return {
+    ...analysis, fromCache, inputTokens, outputTokens, costUsd, escalated,
+  };
+}
+
+/**
+ * Leitura → achados. Função PURA (sem rede): o site e o replay dos testes rodam
+ * exatamente o mesmo código sobre a mesma leitura cacheada.
+ */
+export function analyzeVisionPayload(
+  c: TableImageCandidate,
+  payload: CachePayload | null,
+  ctx: { escalated: boolean; usedModel: string; expected?: ExpectedLocation },
+): { findings: Finding[]; tables: ExtractedTableRef[]; hasVisibleSource: boolean; tablesExtracted: number; tablesVerified: number } {
+  const { escalated, usedModel, expected } = ctx;
+  const findings: Finding[] = [];
+  const tables: ExtractedTableRef[] = [];
+  const cellIssues: FormatIssue[] = [];
+  // Blocos da mesma imagem repetem as faixas: o mesmo furo vira UM achado.
+  const binSeen = new Set<string>();
+  const textIssues: FormatIssue[] = [];
+  let tablesExtracted = 0, tablesVerified = 0;
   // fonte da leitura, para o analista saber a confiança
   const readingsAgree = payload?.releitura?.concordam === true;
   // Selo de “Erro” para QUALQUER achado desta imagem: releitura que concordou.
@@ -486,10 +507,10 @@ async function processImage(
 
   const secao = toAuditSection(c.secao);
   findings.push(...wrongContextFromVisibleLocales(payload?.locais_visiveis, expected, c, payload));
-  (payload?.tables ?? []).forEach((raw, ti) => {
+  (stitchColumnSplits(payload?.tables ?? [])).forEach((raw, ti) => {
     const ext = toExtracted(raw);
     if (!ext) return;
-    const ref: ExtractedTableRef = { slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext };
+    const ref: ExtractedTableRef = { slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext, ...(escalated && !readingsAgree ? { unstable: true } : {}) };
     tables.push(ref);
     tablesExtracted++;
     let flagged = false;
@@ -497,6 +518,7 @@ async function processImage(
     // 1) soma de coluna/linha × total declarado
     if (ext.totals) {
       const viz = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
+      if (raw.stitched) viz.stitchedReading = true;
       const bad = (viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0);
       if (bad > 0 || viz.unaligned) {
         flagged = true;
@@ -520,7 +542,9 @@ async function processImage(
           escalated: escalated && readingsAgree && !viz.incoherentReading,
           // Sem alinhamento, com leitura incoerente ou com leituras discordantes
           // não há acusação a sustentar: é convite a olhar, não erro.
-          ...(viz.unaligned || viz.incoherentReading || (escalated && !readingsAgree) ? { confidence: 3 as const } : {}),
+          ...(viz.unaligned || viz.incoherentReading || (escalated && !readingsAgree) || (raw.stitched && !trusted)
+            ? { confidence: 3 as const }
+            : viz.totalsByFit ? { confidence: 2 as const } : {}),
         });
       }
     }
@@ -622,10 +646,7 @@ async function processImage(
     });
   }
 
-  return {
-    findings, tables, hasVisibleSource: payload?.tem_fonte === true,
-    tablesExtracted, tablesVerified, fromCache, inputTokens, outputTokens, costUsd, escalated,
-  };
+  return { findings, tables, hasVisibleSource: payload?.tem_fonte === true, tablesExtracted, tablesVerified };
 }
 
 function issuesViz(issues: FormatIssue[]) {
@@ -656,6 +677,52 @@ function labelTypoFinding(c: TableImageCandidate, secao: Finding['section'], iss
     detail: issues.map((i) => i.reason).join('; ') + '.',
     ok: false, origem: 'IA_visao', confidence: 2, viz: issuesViz(issues), evidenceSha1: c.sha1,
   };
+}
+
+/**
+ * A visão às vezes devolve UMA tabela larga como várias estreitas, uma por grupo
+ * de colunas, todas com os mesmos rótulos de linha (s53 de Campos do Jordão: 6
+ * tabelas "Município | Absoluto | %"). Separadas, nenhuma fecha e a paginação
+ * não é reconhecida. Tabelas vizinhas com rótulos de linha idênticos (≥ 3) e
+ * totais com o mesmo rótulo são costuradas lado a lado; blocos EMPILHADOS
+ * (Oferta Lançada / Final) têm títulos-bloco e totais próprios e não são unidos,
+ * pois lá os rótulos de linha se repetem mas cada bloco já fecha sozinho.
+ */
+export function stitchColumnSplits(tables: RawTable[]): RawTable[] {
+  const labels = (t: RawTable) => (t.rows ?? []).map((r) => String(r?.[0] ?? '').trim().toLowerCase());
+  const same = (a: RawTable, b: RawTable) => {
+    const la = labels(a), lb = labels(b);
+    if (la.length < 3 || la.length !== lb.length || la.some((x, i) => x !== lb[i])) return false;
+    // Blocos empilhados de lacunas também repetem as tipologias: só costura quando
+    // os rótulos NÃO são tipologias genéricas e os totais têm o mesmo rótulo.
+    if (la.every((x) => /dormit|quarto|studio|loft/.test(x))) return false;
+    // Blocos empilhados têm título de bloco (Oferta Lançada/Final, Dispon., Vendas).
+    const block = /^(oferta|dispon|disp\.|vendas|estoque|total)/i;
+    if (block.test(String(a.title ?? '').trim()) || block.test(String(b.title ?? '').trim())) return false;
+    const ta = String(a.totals?.[0] ?? ''), tb = String(b.totals?.[0] ?? '');
+    return ta === tb;
+  };
+  const out: RawTable[] = [];
+  for (const t of tables) {
+    const prev = out[out.length - 1];
+    if (prev && same(prev, t)) {
+      const group = String(t.title ?? '').trim();
+      const cols = (t.columns ?? []).slice(1).map((c) => (group ? `${group} | ${String(c ?? '')}` : String(c ?? '')));
+      const prevGroup = String(prev.title ?? '').trim();
+      if (!prev.stitched) {
+        prev.columns = [String(prev.columns?.[0] ?? ''), ...(prev.columns ?? []).slice(1).map((c) => (prevGroup ? `${prevGroup} | ${String(c ?? '')}` : String(c ?? '')))];
+        prev.stitched = true;
+      }
+      prev.columns = [...(prev.columns ?? []), ...cols];
+      prev.rows = (prev.rows ?? []).map((r, i) => [...r, ...((t.rows?.[i] ?? []).slice(1))]);
+      prev.totals = prev.totals && t.totals ? [...prev.totals, ...t.totals.slice(1)] : undefined;
+      prev.col_kinds = Array.isArray(prev.col_kinds) && Array.isArray(t.col_kinds) ? [...prev.col_kinds, ...t.col_kinds.slice(1)] : undefined;
+      prev.share_of = undefined;
+      continue;
+    }
+    out.push({ ...t });
+  }
+  return out;
 }
 
 /** Frase final do achado de soma: por que confiar (ou não) na leitura. */
@@ -702,19 +769,63 @@ export async function runVisionPass(
   }
   await Promise.all(Array.from({ length: Math.min(concurrency, candidates.length) }, worker));
 
+  return finalizeVisionPass({
+    findings, tables, sourceSlides, analyzedSlides, tablesExtracted, tablesVerified,
+    fromCache, inputTokens, outputTokens, escalated, costUsd,
+  });
+}
+
+interface PassParts {
+  findings: Finding[]; tables: ExtractedTableRef[]; sourceSlides: Set<number>; analyzedSlides: Set<number>;
+  tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number;
+  outputTokens: number; escalated: number; costUsd: number;
+}
+
+/** Pós-processamento do passe inteiro (paginação), comum ao site e ao replay. */
+function finalizeVisionPass(p: PassParts): VisionPassResult {
   // Tabela grande fatiada em slides vizinhos: cada fatia repete o total do
   // conjunto e sozinha nunca fecha. Só o conjunto tem veredito (Toledo, jul/2026).
   const paged = resolvePaginatedSums(
-    tables
+    p.tables
       .filter((ref): ref is ExtractedTableRef & { sumFindingId: string } => Boolean(ref.sumFindingId))
       .map((ref) => ({ slide: ref.slide, section: toAuditSection(ref.secao), findingId: ref.sumFindingId, table: ref.table }))
   );
-
   return {
-    findings: findings.filter((f) => !paged.dropIds.has(f.id)).concat(paged.findings),
-    tables, sourceSlides: [...sourceSlides].sort((a, b) => a - b), analyzedSlides: [...analyzedSlides].sort((a, b) => a - b),
-    tablesExtracted, tablesVerified: tablesVerified + paged.verified, fromCache,
-    inputTokens, outputTokens, escalated,
-    costUsd,
+    findings: p.findings.filter((f) => !paged.dropIds.has(f.id)).concat(paged.findings),
+    tables: p.tables, sourceSlides: [...p.sourceSlides].sort((a, b) => a - b), analyzedSlides: [...p.analyzedSlides].sort((a, b) => a - b),
+    tablesExtracted: p.tablesExtracted, tablesVerified: p.tablesVerified + paged.verified, fromCache: p.fromCache,
+    inputTokens: p.inputTokens, outputTokens: p.outputTokens, escalated: p.escalated, costUsd: p.costUsd,
   };
+}
+
+/**
+ * Replay SEM rede: refaz o passe de visão a partir de leituras já cacheadas
+ * (vision_cache). Usado para medir mudanças de regra num estudo real sem
+ * pagar nova leitura — e sem que a aleatoriedade do modelo mude o resultado.
+ */
+export function replayVisionPass(
+  candidates: TableImageCandidate[],
+  readings: Map<string, { payload: unknown; model?: string }>,
+  expected?: ExpectedLocation,
+): VisionPassResult {
+  const parts: PassParts = {
+    findings: [], tables: [], sourceSlides: new Set(), analyzedSlides: new Set(), tablesExtracted: 0,
+    tablesVerified: 0, fromCache: 0, inputTokens: 0, outputTokens: 0, escalated: 0, costUsd: 0,
+  };
+  for (const c of candidates) {
+    const hit = readings.get(c.sha1);
+    if (!hit) continue;
+    const payload = sanitizeVisionPayload(hit.payload);
+    const escalated = Boolean(payload.releitura);
+    const r = analyzeVisionPayload(c, payload, { escalated, usedModel: hit.model ?? 'gpt-4o-mini', expected });
+    parts.findings.push(...r.findings);
+    parts.tables.push(...r.tables);
+    parts.analyzedSlides.add(c.slide);
+    if (r.hasVisibleSource) parts.sourceSlides.add(c.slide);
+    parts.tablesExtracted += r.tablesExtracted;
+    parts.tablesVerified += r.tablesVerified;
+    parts.fromCache += 1;
+    if (escalated) parts.escalated += 1;
+  }
+  return finalizeVisionPass(parts);
 }

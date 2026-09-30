@@ -130,6 +130,85 @@ export function lacunaRowLabels(table: ExtractedTable): string[] {
     seen.add(key);
     out.push(label);
   }
+  // Tipologia quebrada em duas linhas na imagem ("2" / "Dormitórios") vira um
+  // rótulo solto sem número; se os demais têm número, ele não é faixa.
+  const withDigit = out.filter((l) => /\d/.test(l)).length;
+  return withDigit >= 2 ? out.filter((l) => /\d/.test(l)) : out;
+}
+
+const EXCLUSION_NOTE = /nao sao considerad|desconsider|exclu[ií]d|sem (duplex|garden|cobertura)/;
+
+/**
+ * Total geral de um bloco de lacunas, SÓ se a leitura fecha nas margens (soma
+ * dos totais de linha = total geral). Leitura que não fecha não serve de régua
+ * para acusar outro slide (no SJC, um bloco lido como 450 no lugar de 798).
+ */
+function blockGrandTotal(table: ExtractedTable): number | null {
+  const ti = table.columns.findIndex((c) => norm(c).trim() === 'total');
+  if (ti <= 0) return null;
+  const v = table.totals?.[ti];
+  if (!numeric(v)) return null;
+  // Basta UMA margem confirmar o total geral: a leitura das linhas pode falhar
+  // enquanto a linha de totais fecha (s86 de Campos do Jordão), ou o contrário.
+  const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
+  const rowTotals = table.rows.map((r) => r[ti]).filter(numeric);
+  const colTotals = (table.totals ?? []).slice(1, ti).filter(numeric);
+  const byRows = rowTotals.length >= 2 && Math.abs(sum(rowTotals) - v) <= 0.5;
+  const byCols = colTotals.length >= 2 && Math.abs(sum(colTotals) - v) <= 0.5;
+  return byRows || byCols ? v : null;
+}
+
+/**
+ * Rótulos curtos de recorte no slide ("ZI total", "Compactos", nome da cidade).
+ * Lacunas de recortes diferentes descrevem estoques diferentes e não se comparam.
+ */
+function scopeLabels(ir: Ir, slide: number): Set<string> {
+  const textos = ir.slides.find((s) => s.n === slide)?.textos ?? [];
+  return new Set(textos.map((t) => norm(t).replace(/\s+/g, ' ').trim())
+    .filter((t) => t && t.length <= 30 && !/^(lacuna|legenda|fonte|obs|nota)/.test(t)));
+}
+
+/**
+ * Os blocos Oferta Lançada / Oferta Final das análises de lacunas vizinhas
+ * (tipologia×metragem, tipologia×preço, preço×metragem) descrevem o MESMO
+ * estoque: o total geral tem de ser igual. Caso real s86 de Campos do Jordão
+ * (set/2026): 462/259 contra 447/247 nos s87/s88 — o s86 não trazia a nota de
+ * exclusão (duplex, garden, cobertura, esgotados) que os outros dois traziam.
+ */
+function lacunaTotalsFindings(ir: Ir, lacunas: CrossTableRef[]): Finding[] {
+  const out: Finding[] = [];
+  const noteOf = (slide: number) => EXCLUSION_NOTE.test(norm((ir.slides.find((s) => s.n === slide)?.textos ?? []).join(' ')));
+  for (const block of ['oferta lancada', 'oferta final']) {
+    const refs = lacunas.filter((r) => norm(r.table.title).includes(block) && blockGrandTotal(r.table) !== null && blockGrandTotal(r.table)! % 1 === 0);
+    const bySlide = new Map<number, number>();
+    for (const r of refs) if (!bySlide.has(r.slide)) bySlide.set(r.slide, blockGrandTotal(r.table)!);
+    const slides = [...bySlide.keys()].sort((a, b) => a - b);
+    // CONSENSO: só acusa o slide que destoa quando pelo menos DOIS outros slides do
+    // mesmo recorte, lidos em imagens independentes, concordam num total diferente.
+    // Uma leitura sozinha erra (SJC: um bloco lido como 450 no lugar de 798); duas
+    // leituras independentes batendo no mesmo número não erram juntas por acaso.
+    for (const odd of slides) {
+      const scope = scopeLabels(ir, odd);
+      const peers = slides.filter((s) => s !== odd && Math.abs(s - odd) <= 5 && [...scopeLabels(ir, s)].some((x) => scope.has(x)));
+      const counts = new Map<number, number[]>();
+      for (const s of peers) counts.set(bySlide.get(s)!, [...(counts.get(bySlide.get(s)!) ?? []), s]);
+      const agreed = [...counts.entries()].find(([t, ss]) => ss.length >= 2 && t !== bySlide.get(odd));
+      if (!agreed) continue;
+      const ref = agreed[1][0];
+      const id = `lacunas-total-${block.replace(' ', '-')}-${odd}`;
+      const hint = !noteOf(odd) && noteOf(ref)
+        ? ` O s${odd} não traz a nota de exclusão (duplex, garden, cobertura, esgotados) que o s${ref} traz: a diferença pode ser justamente essas unidades.`
+        : '';
+      const label = block === 'oferta lancada' ? 'Oferta Lançada' : 'Oferta Final';
+      out.push({
+        id, type: 'TOTALS_EQUALITY', section: 'LACUNAS', slideRef: `s${odd} × s${ref}`,
+        title: `Total de ${label} diverge entre análises de lacunas`,
+        detail: `O s${odd} soma ${bySlide.get(odd)!.toLocaleString('pt-BR')} unidades em ${label}, e o s${ref} soma ${bySlide.get(ref)!.toLocaleString('pt-BR')}. As quebras por tipologia, metragem e preço descrevem o mesmo estoque.${hint}`,
+        ok: false, origem: 'IA_visao',
+        viz: { kind: 'sidebyside', leftLabel: `s${odd}`, rightLabel: `s${ref}`, rows: [{ label: `Total ${label}`, left: bySlide.get(odd)!, right: bySlide.get(ref)!, mismatch: true }] },
+      });
+    }
+  }
   return out;
 }
 
@@ -201,9 +280,11 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
     if (!rows.length) continue;
     const f = mismatch(`cross-lacunas-bins-${left.slide}-${right.slide}`, 'CROSS_TABLE_MISMATCH', 'LACUNAS', left, right,
       'Faixas de lacunas divergem entre as análises',
-      lacunaMismatchDetail(rows), rows);
+      lacunaMismatchDetail(rows) + lacunaTotalsContext(lacunas, left.slide, right.slide), rows);
     if (f) out.push(f);
   }
+
+  out.push(...lacunaTotalsFindings(ir, lacunas));
 
   const consolidated = refs.filter((r) => /consolid/.test(titleOf(r)));
   const offerAnalysis = refs.filter((r) => /oferta/.test(titleOf(r)) && /padrao|tipologia|ano/.test(titleOf(r)));
@@ -219,6 +300,21 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
     if (f) out.push(f);
   }
   return out;
+}
+
+/**
+ * Contexto, não acusação: se os dois slides também têm total de Oferta Lançada
+ * legível e diferente, o analista vê que a diferença de faixas vem com estoque
+ * diferente (s86 × s88 de Campos do Jordão: 462 × 447).
+ */
+function lacunaTotalsContext(lacunas: CrossTableRef[], a: number, b: number): string {
+  const total = (slide: number) => lacunas
+    .filter((r) => r.slide === slide && norm(r.table.title).includes('oferta lancada'))
+    .map((r) => blockGrandTotal(r.table)).find((v): v is number => v !== null);
+  const ta = total(a), tb = total(b);
+  return ta !== undefined && tb !== undefined && ta !== tb
+    ? ` Os totais de Oferta Lançada também diferem: s${a} = ${ta.toLocaleString('pt-BR')}, s${b} = ${tb.toLocaleString('pt-BR')}.`
+    : '';
 }
 
 /** Diz QUAL faixa diverge, em vez de só pedir para conferir. */

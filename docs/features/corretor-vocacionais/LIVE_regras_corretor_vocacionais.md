@@ -16,6 +16,37 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.61 — 2026-09-30 — reconciliação no nível do deck (RUNTIME local)
+
+**Fonte:** triagem manual de Campos do Jordão (38 achados: 6 válidos, 22 FP, 10 avisos de totais não
+conferidos, 5 erros reais não apontados). Medido por **replay sem custo** sobre as leituras cacheadas
+(`__tests__/replay-real.test.ts`, roda só com `CORRETOR_REPLAY_PPTX`), e conferido contra o SJC para
+evitar sobreajuste.
+
+| Estudo | Antes | Depois | FP restantes |
+|---|---|---|---|
+| Campos do Jordão | 38 (22 FP) | 9 | 0 |
+| SJC VAP | 33 | 6 | 0 |
+| SJC v2 | 22 | 8 (7 + 1 aviso de cobertura) | 0 |
+
+### Regras novas ou alteradas
+
+- **Replay puro:** `analyzeVisionPayload`, `replayVisionPass` e `combineVisionFindings` extraídos; o site e o replay rodam o mesmo código.
+- **Costura de fatias por coluna:** tabelas vizinhas com os mesmos rótulos de linha (≥3, não tipologias, sem título de bloco) viram uma tabela larga. Achado de soma em tabela costurada sem releitura fica em “Verificar”.
+- **Faixas:** “Abaixo de X” é faixa aberta; faixa repetida (Absoluto/%) é removida antes da regra de cortes cumulativos; rótulo “Faixa | Absoluto” exibe só a faixa.
+- **Totais compactos alinhados pelo valor** (soma a até 20% ou total dentro do intervalo); acusação vale no máximo “Provável”.
+- **Leitura incompleta:** coluna que falha com célula vazia em linha com outros valores vai para “Verificar”.
+- **Mescla repetida:** só conta uma vez quando a sub-linha tem outra contagem própria diferente (32 unidades em cada tipologia continuam somando).
+- **Deck (`deck-reconcile.ts`):** erro de digitação some se o rótulo aparece escrito certo em outra tabela; furo de faixa some se outra tabela tem a faixa que faltou; o mesmo problema de faixa em vários slides vira um achado; somas de leitura insegura viram UM aviso de cobertura (somas explicadas por nota de exclusão continuam individuais).
+- **Totais entre lacunas (`TOTALS_EQUALITY`):** só dentro do mesmo recorte declarado no slide (“ZI total”, “Compactos”, cidade), total confirmado por uma margem, e por consenso (dois slides concordando contra um). Cita a falta de nota de exclusão quando é o caso. Sem consenso, o total entra como contexto no achado de faixas.
+- **Texto:** a evidência citada pela IA de texto tem de existir no slide; Z.I. não atravessa “)”.
+- **Formato:** “//” repetido em 3+ células é artefato de transcrição; rótulo embaralhado (várias faixas grudadas) não passa pela regra de digitação.
+- **Imagens não lidas:** um aviso único com a lista de slides.
+
+**Limites conhecidos (Campos do Jordão):** “R$ 7.716,00,00” (s37) e “42%” sem casa decimal (s87) não são pegos — a leitura cacheada normalizou o rótulo e entregou o % como número. Os totais 462 × 447 (s86) aparecem como contexto no achado de faixas s86×s88, não como achado próprio, porque só uma outra leitura confirma o 447.
+
+**Verificação:** 170 testes verdes (157 → 170), `tsc`, lint e `vite build` ok. Sem mudança de prompt: **não requer deploy** da Edge Function.
+
 ## Versão 0.60 — 2026-09-29 — correções da 2ª rodada do SJC (RUNTIME local)
 
 **Fonte:** reanálise pós-deploy da v0.59 (SJC v2 e VAP). O nível “Erro” ficou confiável (4 de 5 reais),

@@ -49,6 +49,10 @@ export interface TableViz {
    * sinal de célula lida fora do lugar. O achado desce para “Verificar”.
    */
   incoherentReading?: boolean;
+  /** Totais compactos casados às colunas pelo valor (não pela posição): acusação vale no máximo “Provável”. */
+  totalsByFit?: boolean;
+  /** Tabela costurada de fatias por coluna, sem releitura: não sustenta acusação. */
+  stitchedReading?: boolean;
 }
 
 export interface SideBySideRow {

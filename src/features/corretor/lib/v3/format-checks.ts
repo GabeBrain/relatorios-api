@@ -86,6 +86,9 @@ export function labelTypos(labels: string[]): FormatIssue[] {
   const out: FormatIssue[] = [];
   for (const label of new Set(labels)) {
     if (!/\d/.test(label)) continue;
+    // Cabeçalho embaralhado pela leitura (várias faixas grudadas num rótulo só)
+    // não tem palavra de abertura confiável.
+    if ((label.match(/\d[\d.]*,\d{2}/g) ?? []).length > 2) continue;
     const first = strip(label.trim().split(/\s+/)[0] ?? '').replace(/[^a-z]/g, '');
     if (first.length < 3 || BIN_KEYWORDS.includes(first)) continue;
     const near = BIN_KEYWORDS.filter((k) => k.length >= 3).find((k) => editDistance(first, k) === 1);
@@ -107,12 +110,17 @@ const DOUBLED_SYMBOL = /(\/\/|%%|,,|\.\.|R\$\s*R\$)/;
  * (“13%”) fica com `formatIssues`, que compara as strings de verdade.
  */
 export function visionFormatIssues(raw: RawFormatAnomaly[] | undefined): FormatIssue[] {
-  return (raw ?? []).flatMap((a) => {
+  const items = raw ?? [];
+  // O mesmo símbolo duplicado em 3+ células da tabela é padrão de TRANSCRIÇÃO
+  // (s110 de Campos do Jordão: "R$ 10.001/ m²- R$ 11.000/ m²" lido como
+  // "R$ 10.001//m²" em todas as linhas), não erro isolado de digitação.
+  const doubled = items.filter((a) => typeof a.texto === 'string' && DOUBLED_SYMBOL.test(a.texto)).length;
+  return items.flatMap((a) => {
     const text = typeof a.texto === 'string' ? a.texto.trim() : '';
     if (!text) return [];
     let reason: string | null = null;
     if (BARE_DECIMAL.test(text)) reason = `decimal sem formato de percentual entre valores em %; equivale a ${asPercentText(text)}`;
-    else if (DOUBLED_SYMBOL.test(text)) reason = `símbolo duplicado («${text.match(DOUBLED_SYMBOL)?.[0]}»)`;
+    else if (DOUBLED_SYMBOL.test(text) && doubled < 3) reason = `símbolo duplicado («${text.match(DOUBLED_SYMBOL)?.[0]}»)`;
     if (!reason) return [];
     const where = [a.bloco, a.linha, a.coluna].filter((x) => typeof x === 'string' && x.trim()).join(' · ');
     return [{ where: where || 'tabela', text, reason }];

@@ -154,7 +154,8 @@ describe('cobertura de imagens (v2 do SJC: 48 tabelas em BMP)', () => {
     ] });
     const [f] = unreadImageFindings(candidates);
     expect(f.type).toBe('IMAGE_NOT_READ');
-    expect(f.detail).toContain('image9.bmp');
+    expect(f.detail).toContain('s76');
+    expect(f.viz?.kind === 'text' ? f.viz.evidence : '').toContain('image9.bmp');
     expect(confidenceOf(f, 'DET')).toBe(3);
   });
 });

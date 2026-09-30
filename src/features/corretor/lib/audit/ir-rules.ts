@@ -363,7 +363,10 @@ export function ziLabelFindings(ir: Ir): Finding[] {
 
   const out: Finding[] = [];
   // Frases que citam ordinal e raio juntos, incluindo o formato "(até 2 Km)".
-  const usageRx = /z\.?\s*i\.?\s*(primaria|secundaria|terciaria|quaternaria)[^.;]{0,60}?\(?\s*(?:ate|de\s*\d+\s*km\s*a)?\s*(\d+)\s*km/gi;
+  // O trecho entre o ordinal e o raio não atravessa ")": em "raio de 2 km (Z.I.
+  // primária) abrange … e o raio de 4 km" o raio do ordinal vem ANTES, e o 4 km
+  // é da frase seguinte (FP s135 de Campos do Jordão, set/2026).
+  const usageRx = /z\.?\s*i\.?\s*(primaria|secundaria|terciaria|quaternaria)[^.;)]{0,60}?\(?\s*(?:ate|de\s*\d+\s*km\s*a)?\s*(\d+)\s*km/gi;
   for (const slide of ir.slides) {
     const source = normalized([slide.titulo ?? '', ...(slide.textos ?? [])].join('\n'));
     for (const match of source.matchAll(usageRx)) {

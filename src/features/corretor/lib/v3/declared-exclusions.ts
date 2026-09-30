@@ -80,6 +80,9 @@ export function applyDeclaredExclusions(ir: Ir, findings: Finding[]): Finding[] 
 
   return findings.map((finding) => {
     if (finding.ok || !SUM_TYPES.has(finding.type)) return finding;
+    // O cruzamento de totais de lacunas já usa a nota de exclusão como a própria
+    // explicação da divergência (um slide com nota, outro sem): não rebaixa.
+    if (finding.id.startsWith('lacunas-total-')) return finding;
     const note = slidesOf(finding).map(exclusionAt).find((sentence): sentence is string => Boolean(sentence));
     if (!note) return finding;
     return {

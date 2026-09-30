@@ -13,6 +13,7 @@ const t = (x: Partial<ExtractedTable>) => ({ title: 'T', columns: [], rows: [], 
 describe('célula mesclada repetida pela leitura', () => {
   const table = t({
     columns: ['Empreendimento', 'Oferta', 'Unidades'],
+    colKinds: ['label', 'count', 'count'],
     rows: [['Alfa', 50, 20], ['Alfa', 50, 30], ['Beta', 40, 40], ['Gama', 10, 10]],
     totals: ['Total', 100, 100],
   });
@@ -24,6 +25,15 @@ describe('célula mesclada repetida pela leitura', () => {
 
   it('a tabela fecha em vez de acusar 150 ≠ 100', () => {
     expect(checkTableSums(table).badColumns).toEqual([]);
+  });
+
+  it('valor igual legítimo em sub-linha (nenhuma outra contagem muda) continua somando', () => {
+    const legit = t({
+      columns: ['Empreendimento', 'Oferta', 'Unidades', 'Preço'], colKinds: ['label', 'count', 'count', 'measure'],
+      rows: [['Alfa', 36, 24, 1000], ['Beta', 64, 32, 900], ['Beta', null, 32, 950]], totals: ['Total', 100, 88, null],
+    });
+    expect(summableValues(legit, 2)).toEqual([24, 32, 32]);
+    expect(checkTableSums(legit).badColumns).toEqual([]);
   });
 
   it('valores iguais em linhas de rótulos diferentes continuam somando', () => {

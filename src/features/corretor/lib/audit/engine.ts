@@ -51,7 +51,7 @@ export function numericColumns(table: ExtractedTable, min = 2): number[] {
  * - Fora disso a atribuição é indecidível: devolve `null` para o chamador se
  *   abster em vez de chutar.
  */
-export function alignTotals(table: ExtractedTable): { totals: Cell[] | null; realigned: boolean } {
+export function alignTotals(table: ExtractedTable): { totals: Cell[] | null; realigned: boolean; byFit?: boolean } {
   const totals = table.totals;
   if (!totals || !table.rows.length) return { totals: totals ?? null, realigned: false };
 
@@ -60,13 +60,48 @@ export function alignTotals(table: ExtractedTable): { totals: Cell[] | null; rea
 
   const declared = totals.filter(isNum);
   const cols = numericColumns(table);
-  if (!declared.length || declared.length !== cols.length) return { totals: null, realigned: false };
+  if (!declared.length) return { totals: null, realigned: false };
+  if (declared.length !== cols.length) {
+    const fitted = alignTotalsByFit(table, declared, cols, width);
+    return fitted ? { totals: fitted, realigned: true, byFit: true } : { totals: null, realigned: false };
+  }
 
   const aligned: Cell[] = new Array(width).fill(null);
   cols.forEach((c, i) => {
     aligned[c] = declared[i];
   });
   return { totals: aligned, realigned: true };
+}
+
+/**
+ * Totais compactos com MENOS valores que colunas numéricas (a imagem não tem
+ * total em Quartos/Vagas): casa cada total, na ordem, com a próxima coluna cuja
+ * soma fica a até 20% dele ou cujo intervalo o contém (média/taxa). Se algum
+ * total não encontra coluna, a atribuição é indecidível e devolve null. Caso
+ * real s72 de Campos do Jordão (set/2026): 7 totais para 10 colunas numéricas;
+ * sem isso, "Unidades por Tipologia" (24 + 32 + 32 = 88 ≠ 100) nem era conferida.
+ */
+function alignTotalsByFit(table: ExtractedTable, declared: number[], cols: number[], width: number): Cell[] | null {
+  const aligned: Cell[] = new Array(width).fill(null);
+  aligned[0] = table.totals?.[0] ?? 'Total';
+  let k = 0;
+  for (const t of declared) {
+    let placed = false;
+    while (k < cols.length && !placed) {
+      const c = cols[k++];
+      const vals = summableValues(table, c);
+      if (vals.length < 2) continue;
+      const soma = vals.reduce((a, b) => a + b, 0);
+      const fitsSum = t !== 0 && Math.abs(soma - t) / Math.abs(t) <= 0.2;
+      const fitsRange = t >= Math.min(...vals) && t <= Math.max(...vals);
+      if (fitsSum || fitsRange) {
+        aligned[c] = t;
+        placed = true;
+      }
+    }
+    if (!placed) return null;
+  }
+  return aligned;
 }
 
 /**
@@ -84,7 +119,7 @@ export function checkTableSums(
   const badRows: number[] = [];
   const notes: string[] = [];
   // Totais casados às colunas de verdade; null = desalinhamento indecidível.
-  const { totals } = alignTotals(table);
+  const { totals, byFit } = alignTotals(table);
   const unaligned = Boolean(table.totals?.some(isNum)) && !totals;
 
   // Semântica declarada pela visão (hipótese): colunas que NÃO fecham em soma.
@@ -193,12 +228,20 @@ export function checkTableSums(
     }
   }
 
-  const incoherent = badColumns.length + badRows.length > 0 ? marginsIncoherence(table, totals) : null;
+  let incoherent = badColumns.length + badRows.length > 0 ? marginsIncoherence(table, totals) : null;
+  // Leitura INCOMPLETA: a coluna que falhou tem célula vazia numa linha que tem
+  // números nas outras colunas — a soma “não fecha” porque faltou ler um valor
+  // (s41 de Campos do Jordão: 20 números para 21 municípios).
+  const holes = badColumns.filter((c) => table.rows.some((r) => r[c] === null && r.filter(isNum).length >= 2));
+  if (!incoherent && holes.length) {
+    incoherent = `A leitura veio incompleta: a coluna «${table.columns[holes[0]] ?? holes[0]}» tem célula vazia em linha que tem valores nas demais colunas. A diferença pode ser só o valor não lido; confira na imagem.`;
+  }
   if (incoherent) notes.push(incoherent);
   return {
     kind: 'table', table, badColumns, badRows, notes,
     ...(unaligned ? { unaligned } : {}),
     ...(incoherent ? { incoherentReading: true } : {}),
+    ...(byFit ? { totalsByFit: true } : {}),
   };
 }
 
@@ -208,12 +251,19 @@ export function checkTableSums(
  * sub-linha por tipologia) conta uma vez — senão 77+77+77 entra no lugar de 77.
  */
 export function summableValues(table: ExtractedTable, c: number): number[] {
+  const kinds = table.colKinds;
   const out: number[] = [];
   table.rows.forEach((r, i) => {
     const v = r[c];
     if (!isNum(v)) return;
     const prev = table.rows[i - 1];
-    if (prev && v !== 0 && prev[c] === v && String(prev[0] ?? '') !== '' && prev[0] === r[0]) return;
+    if (kinds && prev && v !== 0 && prev[c] === v && String(prev[0] ?? '') !== '' && prev[0] === r[0]) {
+      // Só é mescla repetida se a sub-linha tem OUTRA contagem própria, diferente
+      // da linha de cima (unidades 44 → 22 com oferta 77 → 77). Se nenhuma outra
+      // contagem muda, o valor igual é legítimo (32 unidades em cada tipologia).
+      const ownCount = kinds.some((k, j) => j !== c && k === 'count' && isNum(r[j]) && r[j] !== prev[j]);
+      if (ownCount) return;
+    }
     out.push(v);
   });
   return out;
@@ -390,13 +440,17 @@ export function crossBands(
 
 /** Extrai faixas numéricas de títulos/rótulos em formatos usuais pt-BR. */
 export function binFromLabel(label: string): Bin | null {
-  const raw = label.trim();
+  // "Faixa | Absoluto" (grupo de colunas costurado): a faixa é o que vem antes.
+  const raw = label.split(' | ')[0].trim();
   // Unidade colada ao número ("9.001/m²", "31m²", "8.000//m²") quebrava o casamento
   // "de X a Y": as faixas de preço do s82 do SJC nem eram lidas como faixas.
   const compact = fixBinKeyword(raw.toLowerCase().replace(/\/*\s*m[²2]/g, ' ').replace(/\s+/g, ' '));
   const number = (value: string) => Number(value.replace(/\./g, '').replace(',', '.'));
   const token = 'r?\\$?\\s*([0-9][0-9.,]*)';
   let match = compact.match(new RegExp(`^at[eé]\\s*(?:de\\s*)?${token}`, 'i'));
+  if (match) return { label: raw, from: 0, to: number(match[1]) };
+  // "Abaixo de R$ 27.511,00" é o mesmo corte aberto por baixo que "Até".
+  match = compact.match(new RegExp(`^abaixo\\s*(?:de\\s*)?${token}`, 'i'));
   if (match) return { label: raw, from: 0, to: number(match[1]) };
   match = compact.match(new RegExp(`^acima\\s*(?:de\\s*)?${token}`, 'i'));
   if (match) return { label: raw, from: number(match[1]), to: null };
@@ -540,12 +594,20 @@ export interface BinGapResult {
  * compará-los como intervalos exclusivos inventa sobreposições.
  */
 export function detectBinGap(bins: Bin[]): BinGapResult {
+  // A mesma faixa repetida (colunas "Absoluto" e "%" da faixa, ou blocos) é uma
+  // faixa só — e precisa sair ANTES da regra de cortes cumulativos abaixo, senão
+  // duas cópias de "Abaixo de X" pareciam dois cortes 0→X e a regra se abstinha.
+  bins = bins.filter((bin, i) => bins.findIndex((o) => o.from === bin.from && o.to === bin.to) === i);
   if (bins.length < 2) return {};
 
   // Duas ou mais faixas 0→X representam cortes cumulativos (raios, acumulados etc.).
   // Sem evidência explícita de limites inferiores exclusivos, a regra se abstém.
   if (bins.filter((bin) => bin.from === 0 && bin.to !== null).length > 1) return {};
 
+  // A mesma faixa repetida (colunas "Absoluto" e "%" da faixa, ou blocos) é uma
+  // faixa só: sem isso, "27.320–36.511 | Absoluto" × "… | %" virava sobreposição.
+  bins = bins.filter((bin, i) => bins.findIndex((o) => o.from === bin.from && o.to === bin.to) === i);
+  if (bins.length < 2) return {};
   const normalizedBins = [...bins].sort((a, b) => {
     if (a.from !== b.from) return a.from - b.from;
     return (a.to ?? Number.POSITIVE_INFINITY) - (b.to ?? Number.POSITIVE_INFINITY);
