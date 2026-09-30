@@ -5,6 +5,16 @@
 - **Impacto em Etapas/Pendências:** Juliana deve repetir a homologação com a tradução do navegador desativada e recarregamento forçado; se o erro persistir, o próximo diagnóstico é isolar extensões do navegador.
 - **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
 
+### 2026-09-30 — FIERGS-RS: fechamento de vendas reconciliado em 1.091 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — fechamento de vendas verticais do recorte FIERGS 2T2026.
+- **O quê:** após o aceite de Gabriel, padrão, tipologia, cidade e área passaram a derivar o fechamento vertical da última fotografia granular por empreendimento/tipologia. O comparativo municipal rejeita o horizontal e a distribuição preserva ajustes negativos, incluindo `−1` em quatro ou mais dormitórios.
+- **Evidência:** a bancada autenticada das dez cidades mantém os totais brutos auditáveis (`1.137`, `1.180`, `2.317`) e confirma `1.091` nas quatro dimensões do runtime, sem ajuste manual.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/model.ts,components/ReportPaginator.tsx,__tests__/report-model.test.ts,__tests__/fiergs-sales-reconciliation.test.ts}`, `scripts/fiergs-sales-reconciliation.mts` e documentos do plano/evidência/decisões.
+- **Commit:** `63a6177`.
+- **Verificação:** `217/217` testes da feature, typecheck e build de produção aprovados; avisos conhecidos de Recharts/JSDOM, Browserslist e tamanho de chunks sem falha.
+- **Impacto em Etapas/Pendências:** recorte de vendas do portão B concluído; auditoria de estoque é a próxima frente. Ajustes visuais/editoriais continuam bloqueados até a reconciliação numérica restante.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-09-24 — FIERGS-RS: IVV factual, período direto e comparativos em colunas — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — cálculo de IVV, filtro temporal e composição dos comparativos FIERGS.
 - **O quê:** o seletor temporal aplica o intervalo assim que o segundo trimestre é escolhido e fecha automaticamente; clicar fora continua descartando uma seleção incompleta. Os comparativos laterais deixaram de ser caixas iguais e passaram a representar os valores por colunas proporcionais, com eixo-base, rótulos e delta. A tabela de variações anuais no canto superior ganhou tipografia maior para audiência 50+.
