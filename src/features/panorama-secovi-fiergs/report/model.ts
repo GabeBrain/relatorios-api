@@ -399,6 +399,28 @@ function reconcileFiergsClosingSales(source: SourceResult, cube: MarketCube, sco
   };
 }
 
+/**
+ * Oferta final é fotografia. No FIERGS, o endpoint temporal por padrão divergiu do fechamento por
+ * tipologia e do cubo granular (5.459 contra 5.251 no 2T2026). O último snapshot granular passa a
+ * ser o fato do fechamento nas duas dimensões; histórico anterior e horizontal são preservados.
+ */
+function reconcileFiergsClosingStock(source: SourceResult, cube: MarketCube, scope: PanoramaScope, dimension: 'pattern' | 'typology'): SourceResult {
+  if ((scope.entity ?? 'secovi-sp') !== 'fiergs-rs') return source;
+  const granularRows = cube.projects.filter((project) => project.segment === 'Vertical').flatMap((project) => {
+    if (dimension === 'pattern') {
+      return project.finalUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: project.standard, stock: project.finalUnits }];
+    }
+    return project.typologies.flatMap((typology) => typology.finalUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: typology.typology, stock: typology.finalUnits }]);
+  });
+  if (!granularRows.length) return source;
+  const historicalAndHorizontal = source.rows.filter((row) => periodToQuarter(row.period) !== scope.endQuarter || segment(row.building_type ?? row.type) !== 'Vertical');
+  return {
+    rows: [...historicalAndHorizontal, ...granularRows],
+    available: true,
+    source: `${source.source} · fechamento vertical reconciliado pelo cubo granular (última fotografia por empreendimento/tipologia)`,
+  };
+}
+
 type CitySalesSource = { city: string; rows: Record<string, unknown>[] };
 
 function nullableSum(values: (number | null)[]): number | null {
@@ -492,6 +514,8 @@ export function buildPanoramaReportModel(
   };
   const closingSales = reconcileFiergsClosingSales(temporal.sales, cube, scope, 'pattern');
   const closingSalesTypology = reconcileFiergsClosingSales(temporal.salesTypology, cube, scope, 'typology');
+  const closingStock = reconcileFiergsClosingStock(temporal.stock, cube, scope, 'pattern');
+  const closingStockTypology = reconcileFiergsClosingStock(temporal.stockTypology, cube, scope, 'typology');
   // Firewall de fontes: nas versões granulares nenhum contrato municipal fala pelo horizontal do Panorama Secovi.
   const horizontalSeries = horizontalSeriesPolicyOf(cube, scope.engineVersion ?? 'v4');
   const guard = (block: ReportMarketBlock) => (scope.engineVersion ?? 'v4') !== 'v2' ? firewallTemporalBlock(block, horizontalSeries) : block;
@@ -502,7 +526,7 @@ export function buildPanoramaReportModel(
     scope.endQuarter,
   );
   const ivvSource = entity === 'fiergs-rs'
-    ? ivvFromSalesAndStock(closingSales, temporal.stock)
+    ? ivvFromSalesAndStock(closingSales, closingStock)
     : withClosingStockWeight(temporal.ivv, temporal.stock);
 
   return {
@@ -514,9 +538,9 @@ export function buildPanoramaReportModel(
       vgvByTypology: guard(marketBlock(scope, temporal.salesTypology, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido por tipologia.')),
     },
     stock: {
-      units: guard(marketBlock(scope, temporal.stock, 'stock', 'count', 'Estoque no fechamento por segmento e padrão.')),
+      units: guard(marketBlock(scope, closingStock, 'stock', 'count', 'Estoque no fechamento por segmento e padrão; no FIERGS, última fotografia granular por empreendimento.')),
       vgv: guard(marketBlock(scope, temporal.stock, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por padrão.')),
-      unitsByTypology: guard(marketBlock(scope, temporal.stockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia.')),
+      unitsByTypology: guard(marketBlock(scope, closingStockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia; no FIERGS, última fotografia granular por empreendimento.')),
       vgvByTypology: guard(marketBlock(scope, temporal.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.')),
     },
     ivv: guard(marketBlock(scope, ivvSource, 'ivv', 'percent', entity === 'fiergs-rs' ? 'IVV consolidado pela identidade do Dashboard GeoBrain: soma das vendas líquidas ÷ soma de (estoque final + vendas líquidas).' : 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),

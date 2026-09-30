@@ -177,9 +177,9 @@ describe('Panorama Secovi/FIERGS — consolidado multi-cidade e proveniência (G
 
 describe('Panorama FIERGS — fechamento canônico de vendas 2T2026', () => {
   const empty = source([]);
-  const sources = (salesRows: Record<string, unknown>[]) => ({
+  const sources = (salesRows: Record<string, unknown>[], stockRows: Record<string, unknown>[] = []) => ({
     sales: source(salesRows), salesTypology: source(salesRows),
-    stock: empty, stockTypology: empty, ivv: empty, ivvTypology: empty,
+    stock: source(stockRows), stockTypology: source(stockRows), ivv: empty, ivvTypology: empty,
     ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty,
   });
   const building = (id: string, city: string, observations: Record<string, unknown>[]) => ({
@@ -225,5 +225,21 @@ describe('Panorama FIERGS — fechamento canônico de vendas 2T2026', () => {
     ]);
     expect(model.granular.areaBands.find((row) => row.kind === 'total')?.soldUnits).toBe(45);
     expect(model.sales.units.source).toContain('fechamento vertical reconciliado pelo cubo granular');
+  });
+
+  it('substitui o snapshot temporal divergente de estoque pelo mesmo fechamento granular nas dimensões', () => {
+    const scope: PanoramaScope = { uf: 'RS', cities: ['Canoas'], endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4' };
+    const cube = buildCityCube([building('Estoque', 'Canoas', [
+      { period: '2026-06-01', typology_stock: 50, sold_in_period: 2 },
+    ])], { city: 'Canoas', uf: 'RS', endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4' });
+    const temporalStock = [
+      { city: 'Canoas', period: '2026-06-01', building_type: 'Vertical', group: 'Econômico', stock: 57 },
+    ];
+    const model = buildPanoramaReportModel(scope, [], sources([], temporalStock), [], { cubes: [cube] });
+
+    expect(model.stock.units.series.at(-1)?.vertical).toBe(50);
+    expect(model.stock.unitsByTypology.series.at(-1)?.vertical).toBe(50);
+    expect(model.granular.areaBands.find((row) => row.kind === 'total')?.finalUnits).toBe(50);
+    expect(model.stock.units.source).toContain('fechamento vertical reconciliado pelo cubo granular');
   });
 });

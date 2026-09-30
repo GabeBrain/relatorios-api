@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { buildCityCube, mergeCubes } from '../src/features/panorama-secovi-fiergs/domain/cube';
 import { normalizeInternalBuilding } from '../src/features/panorama-secovi-fiergs/api';
-import { offerByAreaBand } from '../src/features/panorama-secovi-fiergs/domain/aggregations';
+import { offerByAreaBand, offerByStandard, offerByTypology } from '../src/features/panorama-secovi-fiergs/domain/aggregations';
 import { normalizeCityTemporalRows } from '../src/features/panorama-secovi-fiergs/domain/temporal-normalization';
 import { FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES } from '../src/features/panorama-secovi-fiergs/presets';
 import { buildPanoramaReportModel } from '../src/features/panorama-secovi-fiergs/report/model';
@@ -93,6 +93,17 @@ async function salesRows(token: string, city: string, groupBy: 'Padrão' | 'Tipo
   });
 }
 
+async function stockRows(token: string, city: string, groupBy: 'Padrão' | 'Tipologia'): Promise<Row[]> {
+  return paginate(token, `${BASE}/temporal-analysis-city/stock`, {
+    city,
+    uf: 'RS',
+    start_period: START_PERIOD,
+    end_period: END_PERIOD,
+    group_by: groupBy,
+    'type[]': ['Vertical', 'Horizontal'],
+  });
+}
+
 async function buildingRows(token: string, city: string): Promise<Row[]> {
   const rows = (await Promise.all(['Vertical', 'Horizontal'].map((type) => paginate(token, `${INTERNAL_V2}/building-with-history-internal`, {
     city,
@@ -159,6 +170,39 @@ function summarizeTemporal(city: string, rows: Row[]) {
   };
 }
 
+function stockValueOf(row: Row): number {
+  const parsed = Number(row.stock ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function summarizeStock(city: string, rows: Row[]) {
+  const normalized = normalizeCityTemporalRows(city, rows, 'snapshot').filter((row) => row.period === END_QUARTER);
+  const totals = { Vertical: 0, Horizontal: 0, Unknown: 0 };
+  const groups = new Map<string, { vertical: number; horizontal: number; unknown: number }>();
+  for (const row of normalized) {
+    const segment = segmentOf(row);
+    totals[segment] += stockValueOf(row);
+    const label = String(row.group ?? row.pattern ?? row.standard ?? row.typology ?? '(sem grupo)');
+    const current = groups.get(label) ?? { vertical: 0, horizontal: 0, unknown: 0 };
+    if (segment === 'Vertical') current.vertical += stockValueOf(row);
+    else if (segment === 'Horizontal') current.horizontal += stockValueOf(row);
+    else current.unknown += stockValueOf(row);
+    groups.set(label, current);
+  }
+  return {
+    rawRows: rows.length,
+    closingRows: normalized.map((row) => ({
+      period: String(row.period ?? ''),
+      observedPeriod: String(row.temporal_observed_period ?? row.period ?? ''),
+      segment: segmentOf(row),
+      group: String(row.group ?? row.pattern ?? row.standard ?? row.typology ?? '(sem grupo)'),
+      stock: stockValueOf(row),
+    })),
+    totals: { ...totals, allSegments: totals.Vertical + totals.Horizontal + totals.Unknown },
+    groups: [...groups].map(([label, values]) => ({ label, ...values })).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR')),
+  };
+}
+
 function granularProjectEvidence(buildings: Row[], cube: ReturnType<typeof buildCityCube>) {
   const rawById = new Map(buildings.map((row) => [String(row.building_id ?? row.id ?? ''), row]));
   return cube.projects.filter((project) => project.segment === 'Vertical').flatMap((project) => {
@@ -198,29 +242,52 @@ const cities = [];
 const cubes = [];
 const patternSources: { city: string; rows: Row[] }[] = [];
 const typologySources: { city: string; rows: Row[] }[] = [];
+const stockPatternSources: { city: string; rows: Row[] }[] = [];
+const stockTypologySources: { city: string; rows: Row[] }[] = [];
 
 for (const city of CITIES) {
   process.stdout.write(`${city}… `);
-  const [patternRows, typologyRows, buildings] = await Promise.all([
+  const [patternRows, typologyRows, stockPatternRows, stockTypologyRows, buildings] = await Promise.all([
     salesRows(token, city, 'Padrão'),
     salesRows(token, city, 'Tipologia'),
+    stockRows(token, city, 'Padrão'),
+    stockRows(token, city, 'Tipologia'),
     buildingRows(token, city),
   ]);
   const pattern = summarizeTemporal(city, patternRows);
   const typology = summarizeTemporal(city, typologyRows);
+  const stockPattern = summarizeStock(city, stockPatternRows);
+  const stockTypology = summarizeStock(city, stockTypologyRows);
   patternSources.push({ city, rows: patternRows });
   typologySources.push({ city, rows: typologyRows });
+  stockPatternSources.push({ city, rows: stockPatternRows });
+  stockTypologySources.push({ city, rows: stockTypologyRows });
   const cube = buildCityCube(buildings, { city, uf: 'RS', endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' });
   cubes.push(cube);
   const areaTotal = offerByAreaBand(cube).find((row) => row.kind === 'total');
   const verticalProjects = cube.projects.filter((project) => project.segment === 'Vertical');
   const granularAllSold = verticalProjects.reduce((sum, project) => sum + (project.soldUnits ?? 0), 0);
   const granularWithAreaSold = areaTotal?.soldUnits ?? 0;
+  const granularAllStock = verticalProjects.reduce((sum, project) => sum + (project.finalUnits ?? 0), 0);
+  const granularWithAreaStock = areaTotal?.finalUnits ?? 0;
+  const projectStockDifferences = verticalProjects.flatMap((project) => {
+    const typologyStock = project.typologies.reduce((total, row) => total + (row.finalUnits ?? 0), 0);
+    const projectStock = project.finalUnits ?? 0;
+    return projectStock === typologyStock ? [] : [{
+      buildingId: project.buildingId,
+      name: project.name,
+      projectStock,
+      typologyStock,
+      difference: projectStock - typologyStock,
+    }];
+  });
   const projectEvidence = granularProjectEvidence(buildings, cube);
   cities.push({
     city,
     pattern,
     typology,
+    stockPattern,
+    stockTypology,
     currentCitySlide: pattern.totals.allSegments,
     granular: {
       acceptedProjects: cube.projects.length,
@@ -231,13 +298,28 @@ for (const city of CITIES) {
       withoutAreaSold: granularAllSold - granularWithAreaSold,
       projectsWhereQuarterHistoryDiffersFromCube: projectEvidence,
     },
+    stock: {
+      granularAllVertical: granularAllStock,
+      granularAreaBand: granularWithAreaStock,
+      granularWithoutArea: granularAllStock - granularWithAreaStock,
+      byStandard: offerByStandard(cube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
+      byTypology: offerByTypology(cube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
+      projects: verticalProjects.map((project) => ({
+        buildingId: project.buildingId,
+        name: project.name,
+        standard: project.standard,
+        finalUnits: project.finalUnits,
+        typologies: project.typologies.map((row) => ({ typology: row.typology, finalUnits: row.finalUnits })),
+      })),
+      projectStockDifferences,
+    },
     deltas: {
       typologyMinusPatternVertical: typology.totals.Vertical - pattern.totals.Vertical,
       citySlideMinusPatternVertical: pattern.totals.allSegments - pattern.totals.Vertical,
       areaMinusPatternVertical: granularWithAreaSold - pattern.totals.Vertical,
     },
   });
-  console.log(`padrão V=${pattern.totals.Vertical} H=${pattern.totals.Horizontal}; tipologia V=${typology.totals.Vertical}; área=${granularWithAreaSold}`);
+  console.log(`vendas P=${pattern.totals.Vertical} T=${typology.totals.Vertical} A=${granularWithAreaSold}; estoque P=${stockPattern.totals.Vertical} T=${stockTypology.totals.Vertical} G=${granularAllStock} A=${granularWithAreaStock}`);
 }
 
 const mergedCube = mergeCubes(cubes, END_QUARTER, 'fiergs-rs');
@@ -256,12 +338,23 @@ const totals = {
   granularAreaBandSold: mergedAreaTotal?.soldUnits ?? 0,
   granularWithoutAreaSold: sum((row) => row.granular.withoutAreaSold),
 };
+const stockTotals = {
+  patternVertical: sum((row) => row.stockPattern.totals.Vertical),
+  patternHorizontal: sum((row) => row.stockPattern.totals.Horizontal),
+  typologyVertical: sum((row) => row.stockTypology.totals.Vertical),
+  typologyHorizontal: sum((row) => row.stockTypology.totals.Horizontal),
+  granularAllVertical: sum((row) => row.stock.granularAllVertical),
+  granularAreaBand: sum((row) => row.stock.granularAreaBand),
+  granularWithoutArea: sum((row) => row.stock.granularWithoutArea),
+};
 const source = (rows: Row[], available = true) => ({ rows, available, source: 'bancada autenticada FIERGS 2T2026' });
 const empty = source([], false);
 const runtimeModel = buildPanoramaReportModel({ uf: 'RS', cities: CITIES, endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' }, [], {
   sales: source(patternSources.flatMap((item) => item.rows)),
   salesTypology: source(typologySources.flatMap((item) => item.rows)),
-  stock: empty, stockTypology: empty, ivv: empty, ivvTypology: empty,
+  stock: source(stockPatternSources.flatMap((item) => item.rows)),
+  stockTypology: source(stockTypologySources.flatMap((item) => item.rows)),
+  ivv: empty, ivvTypology: empty,
   ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty,
 }, [], {
   cubes,
@@ -275,6 +368,11 @@ const runtime = {
   areaVertical: runtimeModel.granular.areaBands.find((row) => row.kind === 'total')?.soldUnits ?? null,
   patternSource: runtimeModel.sales.units.source,
   typologyGroups: runtimeModel.sales.unitsByTypology.byGroup.map((row) => ({ label: row.label, vertical: row.vertical })),
+  stockPatternVertical: runtimeModel.stock.units.series.at(-1)?.vertical ?? null,
+  stockTypologyVertical: runtimeModel.stock.unitsByTypology.series.at(-1)?.vertical ?? null,
+  stockAreaVertical: runtimeModel.granular.areaBands.find((row) => row.kind === 'total')?.finalUnits ?? null,
+  stockByStandard: offerByStandard(mergedCube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
+  stockByTypology: offerByTypology(mergedCube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
 };
 
 const output = {
@@ -287,6 +385,7 @@ const output = {
     area: 'building-with-history-internal; último mês disponível por empreendimento/tipologia com área',
   },
   totals,
+  stockTotals,
   runtime,
   deltas: {
     typologyMinusPatternVertical: totals.typologyVertical - totals.patternVertical,
@@ -298,4 +397,4 @@ const output = {
 
 await writeFile(OUTPUT, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
 console.log(`\nEvidência salva em ${OUTPUT}`);
-console.log(JSON.stringify({ totals, runtime, deltas: output.deltas }, null, 2));
+console.log(JSON.stringify({ totals, stockTotals, runtime, deltas: output.deltas }, null, 2));
