@@ -43,7 +43,7 @@ function Stat({ icon, n, label, tone }: { icon: React.ReactNode; n: number; labe
 }
 
 export default function PreAnalysisCard({
-  ata, suggestion, cities, profile, costBrl, running, temFonte, sourceLabel, onAttachSources, onConfirm,
+  ata, suggestion, cities, profile, costBrl, running, temFonte, sourceLabel, onAttachSources, onConfirm, cache,
 }: {
   ata: AtaData | null;
   suggestion: CitySuggestion | null;
@@ -55,6 +55,8 @@ export default function PreAnalysisCard({
   sourceLabel: string | null;
   onAttachSources: () => void;
   onConfirm: (value: PreAnalysisValue) => void;
+  /** Imagens de tabela já lidas em análises anteriores (cache): não são cobradas de novo. */
+  cache?: { cached: number; total: number };
 }) {
   const [cidade, setCidade] = useState(ata?.cidade ?? suggestion?.cidade ?? '');
   const [uf, setUf] = useState((ata?.uf ?? suggestion?.uf ?? '').toUpperCase());
@@ -201,6 +203,15 @@ export default function PreAnalysisCard({
         <span className="text-[11px] text-muted-foreground">
           {!cidadeOk || !ufOk ? 'Falta confirmar a cidade e a UF.' : choice === null ? 'Falta dizer se o estudo tem planilhas.' : 'Tudo pronto.'}
         </span>
+        {cache && cache.total > 0 && (
+          <span className="ml-auto text-[11px] text-muted-foreground" title="Leituras de imagem ficam guardadas; só as novas são cobradas">
+            {cache.cached === cache.total
+              ? `As ${cache.total} imagens já foram lidas antes: custo só do texto.`
+              : cache.cached > 0
+                ? `${cache.cached} de ${cache.total} imagens já lidas antes (sem custo).`
+                : 'Estimativa inclui releituras no gpt-4o.'}
+          </span>
+        )}
       </div>
     </div>
   );

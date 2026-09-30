@@ -16,6 +16,18 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.65 — 2026-09-30 — cabeçalho enxuto, filtros claros, estimativa com releitura, sem barra lateral (RUNTIME local)
+
+**Fonte:** revisão do Gabriel sobre a v0.64 (capturas do estudo de João Pessoa).
+
+- **Cabeçalho:** a faixa de 6 passos, a caixa âmbar e os contadores deram lugar a UMA linha de estado. Na pré-análise ela só aponta para o cartão (sem o botão duplicado “Confirmar cidade e analisar”); com análise pendente e cartão fechado, traz o único botão “Continuar para a pré-análise”; depois da análise diz “Análise completa · N para revisar · M bloqueiam a entrega · sem planilhas” e “o que foi conferido” num tooltip. Planilhas deixaram de ser etapa com alerta antes da decisão.
+- **Filtros:** as abas Completude/Problemas/Por slide viraram um filtro de nível com contagem (Todos · Erros · Prováveis · Verificar) e a organização da lista (Por slide · Por tipo de problema); estrutura e cobertura ficam no topo da lista; nenhuma lista aparece enquanto a análise não roda.
+- **Fim da análise:** nova etapa “Gravando resultados” no banner e aviso “Os alertas aparecem aqui quando a análise terminar” — antes o banner mostrava tudo concluído e a lista ficava vazia por alguns segundos.
+- **Estimativa:** passa a incluir a releitura no gpt-4o de 17% das imagens novas (medido: 60 de 359 leituras); o cartão diz quantas imagens já foram lidas antes e não são cobradas. O R$ 0,03 do teste era correto (138 de 138 imagens em cache, só texto), mas não era explicado.
+- **Visual:** removida a barra lateral colorida dos cartões (achados, grupos, regras, V1); borda neutra e nível só no selo; ícone ⚠ repetido saiu.
+
+**Verificação:** 182 testes verdes, `tsc` do Corretor, lint e build ok; capturas locais de João Pessoa (por slide e por tipo) e de Tijucas (pendente).
+
 ## Versão 0.64 — 2026-09-30 — um único upload, pré-análise e planilhas depois (RUNTIME local)
 
 **Fonte:** pedido do Gabriel após o teste de João Pessoa: subir o estudo uma vez, pré-avaliar (cidade,

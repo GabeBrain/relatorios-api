@@ -627,12 +627,12 @@ function SidebarItem({
     <button
       onClick={onClick}
       className={cn(
-        'w-full text-left px-3 py-2.5 rounded-lg border-l-2 transition-colors',
+        'w-full text-left px-3 py-2.5 rounded-lg border transition-colors',
         active
-          ? 'bg-primary/10 border-l-primary'
+          ? 'bg-primary/10 border-primary/40'
           : isClean
-          ? 'border-l-green-500/40 hover:bg-muted/60'
-          : 'border-l-destructive/40 hover:bg-muted/60'
+          ? 'border-transparent hover:bg-muted/60'
+          : 'border-transparent hover:bg-muted/60'
       )}
     >
       <div className="flex items-start justify-between gap-2 mb-1">

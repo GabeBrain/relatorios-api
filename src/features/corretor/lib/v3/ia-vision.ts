@@ -119,6 +119,9 @@ export interface VisionEstimate {
   costUsd: number;
 }
 
+/** Fração das imagens que termina relida no gpt-4o (medido: 60 de 359 leituras, set/2026). */
+const ESCALATION_RATE = 0.17;
+
 export async function estimateVisionPass(
   candidates: TableImageCandidate[],
   model: ModelId
@@ -134,13 +137,23 @@ export async function estimateVisionPass(
   const inputTokens = toRun.reduce((a, c) => a + calculateImageTokens(c.w, c.h, model) + 450, 0);
   // Fichas carregam uma lista de unidades; tabela comum agora inclui local/fonte.
   const outputTokens = toRun.reduce((a, c) => a + (c.tipo === 'ficha' ? 2000 : 900), 0);
+  // Releitura no 4o (imagem ampliada até 2×) quando a leitura econômica não fecha.
+  // Sem ela a estimativa subestimava o estudo novo: o 4o custa ~16× o mini.
+  let escalationUsd = 0;
+  if (model === 'gpt-4o-mini') {
+    const upIn = toRun.reduce((a, c) => {
+      const scale = Math.max(1, Math.min(2, 2048 / Math.max(c.w, c.h)));
+      return a + calculateImageTokens(Math.round(c.w * scale), Math.round(c.h * scale), 'gpt-4o') + 450;
+    }, 0);
+    escalationUsd = ESCALATION_RATE * calculateCost(upIn, outputTokens, 'gpt-4o');
+  }
   return {
     candidates: candidates.length,
-    cached: cachedSet.size,
+    cached: candidates.filter((c) => cachedSet.has(c.sha1)).length,
     toRun: toRun.length,
     inputTokens,
     outputTokens,
-    costUsd: calculateCost(inputTokens, outputTokens, model),
+    costUsd: calculateCost(inputTokens, outputTokens, model) + escalationUsd,
   };
 }
 

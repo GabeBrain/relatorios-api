@@ -10,7 +10,7 @@ import brainLogo from '../../../../assets/logoBrain.png';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
   Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X, BarChart3,
-  Search, ArrowUpDown, Clock3, ChevronRight, FolderKanban, FileSpreadsheet, Circle, PlayCircle,
+  Search, ArrowUpDown, Clock3, ChevronRight, FolderKanban, FileSpreadsheet, PlayCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -35,7 +35,7 @@ import {
 } from '../lib/v3/pipeline';
 import type { AtaData } from '../lib/v3/ia-ata';
 import { BUDGET_STUDY_BRL, formatBRL, usdToBrl } from '../lib/v3/config';
-import { confidenceOf, countLabel, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
+import { confidenceOf, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
 import {
   consultingSuggestionBatchCount, generateConsultingSuggestion,
   type SuggestionBatchProgress,
@@ -54,23 +54,26 @@ import { savePptx, loadPptx } from '../lib/v3/pptx-store';
 import { findTableImages } from '../lib/v3/table-images';
 import { replayVisionPass } from '../lib/v3/ia-vision';
 import { sourceCrosscheckFindings as crosscheckDet, sourceCrosscheckVisionFindings } from '../lib/v3/source-crosscheck';
-import type { AnalysisReport } from '../lib/v3/pipeline';
 import { extractFonteFromExcel } from '../lib/v3/fonte-extractor-browser';
 import { sourceCrosscheckFindings } from '../lib/v3/source-crosscheck';
 
 const MODEL: ModelId = 'gpt-4o-mini'; // econômico por padrão; visão cai p/ R$ 0 após cache
 
 // Rótulo humano de cada etapa do pipeline de passo único
-const STAGE_LABEL: Record<StageProgress['stage'], string> = {
-  det: 'Triagem determinística',
-  ata: 'Ata do projeto',
-  texto: 'Revisão de texto (IA)',
-  visao: 'Números das tabelas (visão)',
-  cruzamento: 'Cruzamentos e completude',
+type BannerStage = StageProgress['stage'] | 'gravando';
+const STAGE_LABEL: Record<BannerStage, string> = {
+  det: 'Triagem',
+  ata: 'Ata',
+  texto: 'Texto',
+  visao: 'Tabelas-imagem',
+  cruzamento: 'Cruzamentos',
+  // Gravar achados, encerrar os antigos e salvar o resumo leva alguns segundos:
+  // sem esta etapa o banner mostrava “tudo pronto” e a lista ficava vazia.
+  gravando: 'Gravando resultados',
 };
 
 // ordem de exibição das etapas no banner
-const STAGE_ORDER: StageProgress['stage'][] = ['det', 'ata', 'texto', 'visao', 'cruzamento'];
+const STAGE_ORDER: BannerStage[] = ['det', 'ata', 'texto', 'visao', 'cruzamento', 'gravando'];
 
 const isLocal = (f: Finding) => /^s\d+$/.test(f.slideRef.trim());
 const slideNumOf = (f: Finding) => parseInt(f.slideRef.replace(/\D/g, ''), 10) || 0;
@@ -106,16 +109,15 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
 
   return (
     <div className={cn(
-      'rounded-lg border border-l-4 bg-card transition-opacity',
+      // Borda neutra: o nível já está no selo. A barra lateral colorida saiu (30/set).
+      'rounded-lg border border-border bg-card transition-opacity',
       item.resolvidoNaVersao && 'animate-in fade-in zoom-in-95 duration-300',
-      done ? 'border-border opacity-60' : comunicacao ? 'border-l-violet-500 border-violet-500/30' : confidence === 1 ? 'border-l-red-500 border-red-500/30' : confidence === 2 ? 'border-l-orange-500 border-orange-500/30' : 'border-l-amber-500 border-amber-500/30'
+      done && 'opacity-60',
     )}>
       <div className="flex items-start gap-3 px-4 py-3">
-        <div className="mt-0.5 shrink-0">
-          {item.status === 'corrigido'
-            ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            : <AlertTriangle className="w-4 h-4 text-amber-500" />}
-        </div>
+        {item.status === 'corrigido' && (
+          <div className="mt-0.5 shrink-0"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></div>
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
             <span className={cn('text-[10px] rounded px-1.5 py-0.5 border font-medium', confidenceMeta.className)}>{confidenceMeta.icon} {confidenceMeta.label}</span>
@@ -205,7 +207,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
 
 interface AnalysisState {
   running: boolean;
-  stages: Partial<Record<StageProgress['stage'], { done: number; total: number }>>;
+  stages: Partial<Record<BannerStage, { done: number; total: number }>>;
   spentUsd: number;
   estimateUsd: number;
 }
@@ -217,7 +219,7 @@ function AnalysisBanner({ state, onPause }: { state: AnalysisState; onPause: () 
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <Sparkles className="w-4 h-4 text-violet-500 shrink-0 animate-pulse" />
-          <h3 className="text-sm font-semibold truncate">Analisando o estudo…</h3>
+          <h3 className="text-sm font-semibold truncate">{state.stages.gravando ? 'Gravando os resultados…' : 'Analisando o estudo…'}</h3>
           <span className="text-xs text-muted-foreground">
             ~{formatBRL(state.estimateUsd)} estimado · {formatBRL(state.spentUsd)} gasto
           </span>
@@ -300,53 +302,6 @@ function writeOutras(studyId: string, outras: string[]) {
   try { localStorage.setItem(outrasKey(studyId), JSON.stringify(outras)); } catch { /* sem storage: só nesta análise */ }
 }
 
-/**
- * Onde o estudo está no fluxo. O caso da Ana (30/set) mostrou que “0 erros” no
- * topo era lido como “estudo limpo” quando só a triagem tinha rodado: os passos
- * deixam explícito o que já aconteceu e o que falta.
- */
-function StudySteps({ temFonte, cidade, pending, running, reviewOpen, delivered }: {
-  temFonte: boolean; cidade: string | null; pending: boolean; running: boolean; reviewOpen: number; delivered: boolean;
-}) {
-  const steps: { label: string; state: 'done' | 'todo' | 'current' | 'optional' }[] = [
-    { label: 'Planilhas', state: temFonte ? 'done' : 'optional' },
-    { label: 'Apresentação', state: 'done' },
-    { label: cidade ? `Cidade: ${cidade}` : 'Cidade', state: cidade && !pending ? 'done' : pending ? 'current' : 'done' },
-    { label: running ? 'Análise em andamento' : 'Análise completa', state: pending ? (running ? 'current' : 'todo') : 'done' },
-    { label: reviewOpen > 0 && !pending ? `Revisão (${reviewOpen})` : 'Revisão', state: pending ? 'todo' : reviewOpen > 0 ? 'current' : 'done' },
-    { label: 'Entrega', state: delivered ? 'done' : 'todo' },
-  ];
-  return (
-    <ol className="flex flex-wrap items-center gap-1.5 text-[11px]">
-      {steps.map((step, i) => (
-        <li key={step.label} className="inline-flex items-center gap-1.5">
-          {i > 0 && <span className="text-muted-foreground/50">›</span>}
-          <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5',
-            step.state === 'done' && 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400',
-            step.state === 'current' && 'border-amber-500/60 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-medium',
-            step.state === 'todo' && 'border-border text-muted-foreground',
-            step.state === 'optional' && 'border-dashed border-amber-500/50 text-amber-700 dark:text-amber-400')}
-            title={step.state === 'optional' ? 'Sem planilhas vinculadas: o cruzamento com a fonte fica desligado' : undefined}>
-            {step.state === 'done' ? <CheckCircle2 className="w-3 h-3" /> : step.state === 'optional' ? <AlertTriangle className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-            {i + 1}. {step.label}{step.state === 'optional' ? ' (não vinculadas)' : ''}
-          </span>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-/** O que a análise completa de fato conferiu — “0 erros” só vale sobre isto. */
-function CoverageLine({ report, temFonte }: { report: AnalysisReport; temFonte: boolean }) {
-  return (
-    <p className="text-[11px] text-muted-foreground">
-      Conferido na análise: texto de todos os slides · {report.tabelasNativas} tabela(s) nativa(s) ·{' '}
-      {report.imagensAnalisadas} imagem(ns) de tabela ({report.tabelasVerificadas} de {report.tabelasExtraidas} tabela(s) lida(s) sem achado) ·{' '}
-      {temFonte ? 'planilhas-fonte cruzadas' : <span className="text-amber-700 dark:text-amber-400">sem planilhas-fonte (cruzamento com a fonte desligado)</span>}
-    </p>
-  );
-}
-
 function StudyRow({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
   const pronto = s.status === 'pronto';
   // Sem a análise completa, "0 pendências" não é "revisar e entregar": nada foi lido.
@@ -417,7 +372,7 @@ export default function CorretorV3Page() {
     profile: ImageProfile;
   } | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [workspaceTab, setWorkspaceTab] = useState<'completude' | 'problemas' | 'slides'>('completude');
+  const [workspaceTab, setWorkspaceTab] = useState<'problemas' | 'slides'>('slides');
   const [confidenceFilter, setConfidenceFilter] = useState<Confidence[]>([1, 2, 3]);
   const [triaging, setTriaging] = useState(false);
   const newRef = useRef<HTMLInputElement>(null);
@@ -526,6 +481,7 @@ export default function CorretorV3Page() {
         },
       });
 
+      setAnalysis((prev) => prev && { ...prev, stages: { ...prev.stages, gravando: { done: 0, total: 1 } } });
       // DET pós-ata (UF + cobertura) por upsert — IDs estáveis evitam duplicata.
       await insertIaFindings(ctx.studyId, res.detFindings, 'DET', ctx.version);
       if (!res.aborted) {
@@ -1032,7 +988,6 @@ export default function CorretorV3Page() {
     };
   }, [items]);
 
-  const progressPct = wl.total > 0 ? Math.round(((wl.total - wl.pend) / wl.total) * 100) : 0;
   const blockingPend = wl.confidence.filter(([level]) => level <= 2).reduce((total, [, findings]) => total + findings.length, 0);
 
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
@@ -1339,81 +1294,80 @@ export default function CorretorV3Page() {
         </div>
       </header>
 
-      <div className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur px-6 py-3 space-y-2">
-        <StudySteps
-          temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)}
-          cidade={selected.cidade}
-          pending={pending}
-          running={Boolean(analysis?.running)}
-          reviewOpen={wl.pend}
-          delivered={selected.status === 'pronto'}
-        />
-        {pending && !analysis?.running ? (
-          <div className="rounded-md border-2 border-amber-500/60 bg-amber-500/10 px-3 py-2.5 flex flex-wrap items-center gap-3 text-xs">
-            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-            <p className="flex-1 min-w-[240px]">
-              <strong>Análise completa pendente.</strong> Só a triagem inicial rodou: o texto, as tabelas-imagem e os
-              cruzamentos ainda não foram conferidos. Os itens abaixo não representam o estudo — ainda não há contagem de erros.
-            </p>
-            {gate && gate.studyId === selected.id ? (
-              <button
-                type="button"
-                onClick={() => document.getElementById('analysis-gate')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                className="rounded-md bg-amber-600 text-white px-3 py-1.5 font-medium hover:bg-amber-700 inline-flex items-center gap-1.5"
-              >
-                <PlayCircle className="w-4 h-4" /> Confirmar cidade e analisar
-              </button>
-            ) : (
+      <div className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur px-6 py-2.5 space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs min-h-[32px]">
+          {analysis?.running ? (
+            <p className="inline-flex items-center gap-2 text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Análise em andamento — os resultados aparecem ao final.</p>
+          ) : pending && gate && gate.studyId === selected.id ? (
+            <p className="text-muted-foreground">Pré-análise: confirme a cidade e as planilhas no cartão abaixo para rodar a análise.</p>
+          ) : pending ? (
+            <>
+              <p className="text-foreground"><strong>A análise completa ainda não rodou.</strong> <span className="text-muted-foreground">Nada abaixo representa o estudo.</span></p>
               <button
                 type="button"
                 disabled={busy !== null}
                 onClick={() => void resumeAnalysis()}
-                className="rounded-md bg-amber-600 text-white px-3 py-1.5 font-medium hover:bg-amber-700 inline-flex items-center gap-1.5 disabled:opacity-50"
+                className="rounded-md bg-primary text-primary-foreground px-3 py-1.5 font-medium hover:bg-primary/90 inline-flex items-center gap-1.5 disabled:opacity-50"
                 title="Usa o PPTX guardado neste navegador; se não houver, pede o arquivo uma vez"
               >
-                {busy === 'upload' ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
+                {busy === 'upload' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlayCircle className="w-3.5 h-3.5" />}
                 Continuar para a pré-análise
               </button>
-            )}
-          </div>
-        ) : (<>
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex flex-wrap gap-2">
-            {wl.confidence.map(([level, findings]) => {
-              const meta = CONFIDENCE_META[level];
-              return <span key={level} className={cn('rounded border px-2 py-0.5 font-medium', meta.className)}>{meta.icon} {countLabel(level, findings.length)}</span>;
-            })}
-            {wl.comentarios > 0 && (
-              <span
-                className="rounded border px-2 py-0.5 font-medium border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-300"
-                title="Recados da revisão no arquivo — não contam como erro"
-              >
-                💬 {wl.comentarios} comentário(s)
-              </span>
-            )}
-          </div>
-          <span className={cn('font-medium', blockingPend === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground')}>
-            {blockingPend === 0 ? (wl.pend ? `${wl.pend} item(ns) para verificar` : '0 pendentes — pronto para entregar 🎉') : `${blockingPend} bloqueia(m) a entrega`}
-          </span>
-        </div>
-        <Progress value={progressPct} className="h-1.5" />
-        {selected.analise && <CoverageLine report={selected.analise} temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)} />}
-        </>)}
-        <div className="flex gap-1 pt-0.5 items-center">
-          {([
-            ['completude', 'Completude'], ['problemas', 'Problemas'], ['slides', 'Por slide'],
-          ] as const).map(([tab, label]) => <button key={tab} onClick={() => setWorkspaceTab(tab)} className={cn('text-xs rounded-md px-3 py-1.5 border', workspaceTab === tab ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50')}>{label}</button>)}
-          <div className="flex-1" />
-          {wl.pend > 0 && !pending && (
-            <button
-              onClick={() => setTriaging(true)}
-              className="text-xs rounded-md px-3 py-1.5 border border-primary/40 text-primary hover:bg-primary/5 inline-flex items-center gap-1.5"
-              title="Passar pelos pendentes rapidamente com o teclado"
-            >
-              <Zap className="w-3.5 h-3.5" /> Triar {wl.pend}
-            </button>
+            </>
+          ) : (
+            <>
+              <p className="text-foreground">
+                <span className="font-medium">{selected.status === 'pronto' ? 'Entregue' : 'Análise completa'}</span>
+                <span className="text-muted-foreground"> · {wl.pend} para revisar · </span>
+                <span className={cn(blockingPend > 0 ? 'text-red-600 dark:text-red-400 font-medium' : 'text-muted-foreground')}>{blockingPend} bloqueia(m) a entrega</span>
+                {!(fonteInput || selected.temFonte) && <span className="text-muted-foreground"> · sem planilhas</span>}
+                {selected.analise && (
+                  <span className="text-muted-foreground cursor-help underline decoration-dotted underline-offset-2 ml-2"
+                    title={`Conferido: texto de todos os slides · ${selected.analise.tabelasNativas} tabelas nativas · ${selected.analise.imagensAnalisadas} imagens de tabela${fonteInput || selected.temFonte ? ' · planilhas cruzadas' : ''}`}>
+                    o que foi conferido
+                  </span>
+                )}
+              </p>
+              {wl.pend > 0 && (
+                <button
+                  onClick={() => setTriaging(true)}
+                  className="text-xs rounded-md px-3 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5"
+                  title="Revisar os pendentes um a um, com o teclado"
+                >
+                  <Zap className="w-3.5 h-3.5" /> Revisar um a um
+                </button>
+              )}
+            </>
           )}
         </div>
+        {!pending && !analysis?.running && (
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="inline-flex rounded-md border border-border p-0.5" role="group" aria-label="Filtrar por nível">
+              {([
+                ['todos', 'Todos', wl.pend, [1, 2, 3]],
+                ['erro', 'Erros', wl.confidence.find(([l]) => l === 1)?.[1].length ?? 0, [1]],
+                ['provavel', 'Prováveis', wl.confidence.find(([l]) => l === 2)?.[1].length ?? 0, [2]],
+                ['verificar', 'Verificar', wl.confidence.find(([l]) => l === 3)?.[1].length ?? 0, [3]],
+              ] as const).map(([key, label, n, levels]) => {
+                const on = confidenceFilter.length === levels.length && levels.every((l) => confidenceFilter.includes(l as Confidence));
+                return (
+                  <button key={key} type="button" onClick={() => setConfidenceFilter([...levels] as Confidence[])}
+                    className={cn('rounded px-2.5 py-1', on ? 'bg-foreground text-background font-medium' : 'text-muted-foreground hover:text-foreground')}>
+                    {label} <span className="tabular-nums opacity-70">{n}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="inline-flex rounded-md border border-border p-0.5" role="group" aria-label="Organizar lista">
+              {([['slides', 'Por slide'], ['problemas', 'Por tipo de problema']] as const).map(([tab, label]) => (
+                <button key={tab} type="button" onClick={() => setWorkspaceTab(tab)}
+                  className={cn('rounded px-2.5 py-1', workspaceTab === tab ? 'bg-foreground text-background font-medium' : 'text-muted-foreground hover:text-foreground')}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {lastDiff && (
@@ -1440,6 +1394,7 @@ export default function CorretorV3Page() {
                 suggestion={gate.suggestion}
                 cities={gate.cities}
                 profile={gate.profile}
+                cache={{ cached: gate.estimate.visionCached, total: gate.estimate.visionCandidates }}
                 costBrl={gate.phase2Brl}
                 running={false}
                 temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)}
@@ -1456,42 +1411,41 @@ export default function CorretorV3Page() {
             </div>
           ) : (
             <>
-              {workspaceTab === 'completude' && <section className="space-y-4">
-                {selected.ata
-                  ? <AtaCard ata={selected.ata} />
-                  : debugMode && selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
-                <WlHead title="Cobertura da ata e estrutura" count={wl.completude.length} hint="corrija o que falta produzir antes da varredura fina" />
-                {wl.completude.length === 0 ? <p className="text-xs text-muted-foreground">Nenhum item estrutural pendente.</p> : wl.completude.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
-
-                {wl.comunicacao.length > 0 && (
-                  <>
-                    <WlHead
-                      title="Comunicação da revisão"
-                      count={wl.comentarios}
-                      hint="recados do analista para o A&R — não são erros; viram checklist e aviso na entrega"
-                    />
+              {analysis?.running && (
+                <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+                  Os alertas aparecem aqui quando a análise terminar.
+                </p>
+              )}
+              {!pending && !analysis?.running && <>
+                {(wl.completude.length > 0 || wl.comunicacao.length > 0 || selected.ata) && (
+                  <section className="space-y-3">
+                    <WlHead title="Estrutura e cobertura" count={wl.completude.length} />
+                    {selected.ata && <AtaCard ata={selected.ata} />}
+                    {!selected.ata && debugMode && selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
+                    {wl.completude.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem))).map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
                     {wl.comunicacao.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
-                  </>
+                  </section>
                 )}
-                <DeckRuler slides={selected.nSlides} items={items} onSlide={(slide) => { setWorkspaceTab('slides'); setConfidenceFilter([1, 2, 3]); requestAnimationFrame(() => document.getElementById(`slide-${slide}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }} />
-              </section>}
 
-              {workspaceTab === 'problemas' && <section className="space-y-3">
-                <WlHead title="Problemas por causa raiz" count={wl.grouped.reduce((total, [, group]) => total + group.length, 0)} hint="grupos de “Verificar” ficam recolhidos" />
-                {wl.grouped.sort(([, a], [, b]) => confidenceOf(a[0].finding, a[0].origem) - confidenceOf(b[0].finding, b[0].origem) || b.length - a.length).map(([type, group]) => <ProblemGroup key={type} type={type as ErrorType} items={group} onStatus={handleStatus} onVerdict={handleVerdict} onGroupStatus={handleGroupStatus} />)}
-              </section>}
+                {workspaceTab === 'problemas' && <section className="space-y-3">
+                  <WlHead title="Por tipo de problema" count={wl.grouped.reduce((total, [, group]) => total + group.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem))).length, 0)} />
+                  {wl.grouped
+                    .map(([type, group]) => [type, group.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem)))] as const)
+                    .filter(([, group]) => group.length > 0)
+                    .sort(([, a], [, b]) => confidenceOf(a[0].finding, a[0].origem) - confidenceOf(b[0].finding, b[0].origem) || b.length - a.length)
+                    .map(([type, group]) => <ProblemGroup key={type} type={type as ErrorType} items={[...group]} onStatus={handleStatus} onVerdict={handleVerdict} onGroupStatus={handleGroupStatus} />)}
+                </section>}
 
-              {workspaceTab === 'slides' && <section className="space-y-3">
-                <div className="flex flex-wrap gap-1.5">
-                  {([1, 2, 3] as Confidence[]).map((level) => <button key={level} onClick={() => setConfidenceFilter((current) => current.includes(level) ? current.filter((item) => item !== level) : [...current, level])} className={cn('text-[11px] rounded-full border px-2.5 py-1', confidenceFilter.includes(level) ? CONFIDENCE_META[level].className : 'border-border text-muted-foreground')}>{CONFIDENCE_META[level].icon} {CONFIDENCE_META[level].label}</button>)}
-                </div>
-                <WlHead title="Por slide (ordem do estudo)" count={wl.slides.reduce((total, [, findings]) => total + findings.length, 0)} />
-                {wl.slides.map(([n, findings]) => {
-                  const visible = findings.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem)));
-                  if (!visible.length) return null;
-                  return <div id={`slide-${n}`} key={n} className="space-y-2 scroll-mt-32"><div className="flex items-center gap-2"><span className="text-xs font-semibold rounded bg-muted px-2 py-0.5">Slide {n}</span><span className="text-[10px] text-muted-foreground">{visible.length} item(ns)</span></div>{visible.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}</div>;
-                })}
-              </section>}
+                {workspaceTab === 'slides' && <section className="space-y-3">
+                  <DeckRuler slides={selected.nSlides} items={items} onSlide={(slide) => requestAnimationFrame(() => document.getElementById(`slide-${slide}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))} />
+                  <WlHead title="Por slide" count={wl.slides.reduce((total, [, findings]) => total + findings.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem))).length, 0)} />
+                  {wl.slides.map(([n, findings]) => {
+                    const visible = findings.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem)));
+                    if (!visible.length) return null;
+                    return <div id={`slide-${n}`} key={n} className="space-y-2 scroll-mt-32"><p className="text-xs font-semibold text-muted-foreground">Slide {n}</p>{visible.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}</div>;
+                  })}
+                </section>}
+              </>}
 
               {/* Card de regras */}
               <section className="pt-4">
@@ -1536,7 +1490,7 @@ function RulesCard() {
   );
 
   const RuleItem = ({ type, meta }: { type: string; meta: typeof ERROR_CATALOG['PERCENTAGE_SUM'] }) => (
-    <div className="border-l-2 border-border pl-3 py-2">
+    <div className="py-2">
       <div className="flex items-start justify-between gap-2 mb-1">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -1634,13 +1588,17 @@ function ProblemGroup({ type, items, onStatus, onVerdict, onGroupStatus }: {
   const [open, setOpen] = useState(level !== 3);
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <div className={cn('rounded-lg border', CONFIDENCE_META[level].className)}>
+      <div className="rounded-lg border border-border bg-card">
         <div className="flex items-center gap-2 px-3 py-2">
-          <CollapsibleTrigger className="text-left flex-1 min-w-0"><span className="text-xs font-semibold">{CONFIDENCE_META[level].icon} {errorLabel(type)} ({items.length})</span><span className="ml-2 text-[10px] opacity-70">{open ? 'ocultar' : 'ver grupo'}</span></CollapsibleTrigger>
-          <button onClick={() => void onGroupStatus(items, 'corrigido')} className="text-[10px] rounded border border-current/30 px-2 py-1 hover:bg-background/40">Corrigir grupo</button>
-          <button onClick={() => void onGroupStatus(items, 'ignorado')} className="text-[10px] rounded border border-current/30 px-2 py-1 hover:bg-background/40">Ignorar grupo</button>
+          <CollapsibleTrigger className="text-left flex-1 min-w-0 inline-flex items-center gap-2">
+            <span className={cn('text-[10px] rounded px-1.5 py-0.5 border font-medium', CONFIDENCE_META[level].className)}>{CONFIDENCE_META[level].label}</span>
+            <span className="text-xs font-semibold">{errorLabel(type)} ({items.length})</span>
+            <span className="text-[10px] text-muted-foreground">{open ? 'ocultar' : 'ver grupo'}</span>
+          </CollapsibleTrigger>
+          <button onClick={() => void onGroupStatus(items, 'corrigido')} className="text-[10px] rounded border border-border px-2 py-1 hover:bg-muted">Corrigir grupo</button>
+          <button onClick={() => void onGroupStatus(items, 'ignorado')} className="text-[10px] rounded border border-border px-2 py-1 hover:bg-muted">Ignorar grupo</button>
         </div>
-        <CollapsibleContent className="border-t border-current/15 p-2 space-y-2">
+        <CollapsibleContent className="border-t border-border p-2 space-y-2">
           {items.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => onStatus(item.ruleId, status)} onVerdict={(verdict) => onVerdict(item.ruleId, verdict)} />)}
         </CollapsibleContent>
       </div>

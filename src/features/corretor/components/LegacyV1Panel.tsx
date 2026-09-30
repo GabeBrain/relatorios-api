@@ -28,7 +28,7 @@ function LegacyDetail({ project }: { project: ArchivedProject }) {
             </div>
             <LegacyThumb imagePath={s.imagePath ?? null} slide={s.slideNumber} />
             {s.errors!.map((e) => (
-              <div key={e.id} className="text-xs border-l-2 border-destructive/30 pl-2 py-0.5">
+              <div key={e.id} className="text-xs py-0.5">
                 <span className="font-mono text-[10px] text-muted-foreground">{e.type}</span>
                 <p className="text-muted-foreground">{e.description}</p>
               </div>
