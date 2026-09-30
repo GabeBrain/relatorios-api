@@ -646,6 +646,8 @@ export default function CorretorV3Page() {
       return;
     }
     setBusy('upload');
+    // Planilhas entram na pré-análise do próprio estudo: nada herdado de outro estudo aberto antes.
+    setFonteInput(null);
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
       const ir = await pptxToIr(bytes, file.name);
@@ -657,14 +659,6 @@ export default function CorretorV3Page() {
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name },
         findings
       );
-      if (fonteInput) {
-        try { await saveStudyFonte(id, fonteInput.name, fonteInput.fonte); }
-        catch (error) {
-          toast.warning('Fonte usada nesta análise, mas não persistida', {
-            description: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
       toast.success('Triagem concluída (R$ 0)', {
         description: `${ir.n_slides} slides · ${findings.length} pendências determinísticas`,
       });
@@ -672,7 +666,7 @@ export default function CorretorV3Page() {
       await openStudy(id);
       setBusy(null);
       // fase 1 (DET + ata) → portão de confirmação → fase 2 (paga)
-      await startPhase1AndGate({ id, version: 1 }, ir, bytes, fonteInput?.fonte);
+      await startPhase1AndGate({ id, version: 1 }, ir, bytes, null);
     } catch (err) {
       toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
       setBusy(null);
@@ -1117,19 +1111,6 @@ export default function CorretorV3Page() {
             </section>
           ) : (
             <div className="space-y-3">
-            {entryMode === 'evaluate' && (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
-                <div>
-                  <p className="text-xs font-medium">Bases numéricas do estudo <span className="font-normal text-muted-foreground">(recomendado)</span></p>
-                  <p className="text-[11px] text-muted-foreground">{sourceProgress ? `Lendo planilhas ${sourceProgress.done}/${sourceProgress.total}…` : fonteInput ? `${fonteInput.name} · ${fonteInput.fonte.blocos.length} blocos · ${fonteInput.fonte.avisos.length} aviso(s)` : 'Selecione os arquivos Excel brutos; a fonte de conferência será criada automaticamente.'}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {fonteInput && <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setFonteInput(null)}>Remover</button>}
-                  <button type="button" disabled={sourceProgress !== null} className="rounded-md border border-border px-3 py-1.5 text-xs hover:border-primary/50 disabled:opacity-50" onClick={() => excelRef.current?.click()}>{fonteInput ? 'Trocar planilhas' : 'Selecionar planilhas'}</button>
-                  <button type="button" className="text-[10px] text-muted-foreground hover:text-foreground" title="Compatibilidade técnica com fontes previamente extraídas" onClick={() => fonteRef.current?.click()}>usar fonte.json</button>
-                </div>
-              </div>
-            )}
             <button
               type="button"
               onClick={() => busy === null && newRef.current?.click()}
@@ -1167,7 +1148,7 @@ export default function CorretorV3Page() {
                     <Progress className="mt-3 h-2" value={suggestionProgress.phase === 'compile' ? 100 : Math.round((suggestionProgress.current / suggestionProgress.total) * 100)} />
                   </>
                 ) : (
-                  <p className="text-xs text-muted-foreground mt-0.5">{entryMode === 'suggestion' ? 'A IA usa os dados extraídos para estruturar avaliação, recomendação e orientações ao analista.' : <>A triagem determinística roda em segundos (R$ 0); a IA de texto e números segue automática, com teto de R$ {BUDGET_STUDY_BRL.toFixed(2).replace('.', ',')} por estudo.</>}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{entryMode === 'suggestion' ? 'A IA usa os dados extraídos para estruturar avaliação, recomendação e orientações ao analista.' : <>Primeiro uma pré-análise gratuita; você confirma a cidade e as planilhas antes de rodar a análise completa.</>}</p>
                 )}
               </div>
               <span className="text-xs text-primary hover:underline" onClick={(event) => { event.stopPropagation(); setEntryMode(null); }}>Voltar às opções</span>
