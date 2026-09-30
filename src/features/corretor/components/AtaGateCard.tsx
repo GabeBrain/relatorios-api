@@ -70,11 +70,6 @@ export default function AtaGateCard({ ata, costBrl, running, onConfirm, suggesti
             placeholder="ex.: Guarulhos"
             className={cn('text-sm rounded-md border bg-background px-2.5 py-1.5 w-56', cidadeOk ? 'border-border' : 'border-amber-500/60')}
           />
-          {suggested && (
-            <span className="text-[10px] text-emerald-700 dark:text-emerald-400">
-              sugerida pelo {suggestion!.origem === 'arquivo' ? 'nome do arquivo' : 'texto da capa'} — confira
-            </span>
-          )}
         </label>
         <label className="flex flex-col gap-1">
           <span className="text-[10px] font-medium text-muted-foreground">UF</span>
@@ -87,6 +82,12 @@ export default function AtaGateCard({ ata, costBrl, running, onConfirm, suggesti
           </select>
         </label>
       </div>
+      {/* Fora da linha dos campos: dentro do label da cidade ele desalinhava a UF. */}
+      {suggested && (
+        <p className="-mt-2 text-[11px] text-emerald-700 dark:text-emerald-400">
+          Cidade e UF sugeridas pelo {suggestion!.origem === 'arquivo' ? 'nome do arquivo' : 'texto da capa'} — confira antes de analisar.
+        </p>
+      )}
 
       {/* Ata multi-estudo (uma ata abre vários estudos): a LLM não escolhe por nós —
           o analista clica na cidade correta deste estudo. */}
