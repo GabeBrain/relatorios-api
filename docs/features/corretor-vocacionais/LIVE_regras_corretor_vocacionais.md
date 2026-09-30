@@ -16,6 +16,28 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.64 — 2026-09-30 — um único upload, pré-análise e planilhas depois (RUNTIME local)
+
+**Fonte:** pedido do Gabriel após o teste de João Pessoa: subir o estudo uma vez, pré-avaliar (cidade,
+outras cidades, planilhas, perfil de imagens) e poder incluir as planilhas depois da análise.
+
+- **Cofre local do PPTX** (`pptx-store.ts`, IndexedDB por sha1, 8 estudos mais recentes): o arquivo não vai ao servidor; retomar a análise e vincular planilhas depois usam o cofre. Em outro navegador a interface pede o arquivo uma vez.
+- **Pré-análise** (`PreAnalysisCard`, substitui o portão): cidade/UF sugeridas; outras cidades citadas com UF no texto (`otherCities`) para confirmar — as confirmadas vão para a regra de contexto (`expected.outras`, lembradas no navegador); **decisão obrigatória sobre planilhas** (vincular agora / não tem / vincular depois); perfil de imagens (`imageProfile`: tabelas nativas, tabelas em imagem, mapas/fotos, ilegíveis) com aviso de que tabela colada como imagem pode gerar alerta falso.
+- **Planilhas depois da análise:** o cruzamento com a fonte (DET e visão) roda sobre as leituras do `vision_cache` (`loadVisionReadings` + `replayVisionPass`), sem IA e sem custo.
+
+**Verificação:** 182 testes verdes (incl. `pre-analise.test.tsx`, que renderiza o cartão), `tsc` do Corretor, lint e build ok. **Não verificado:** o fluxo completo no navegador com upload real (cria estudo e cobra a ata).
+
+## Versão 0.63 — 2026-09-30 — análise resiliente e persistência reconciliada (RUNTIME local)
+
+**Fonte:** rodada de João Pessoa (30/set): erro de edge na imagem 114 de 148 (limite de 30 chamadas/min por IP), 28 somas soltas e 7 alertas de cidade.
+
+- **Visão resiliente:** nova tentativa com espera (2–16 s) em 429/5xx; imagem que falha vira “não lida” no aviso de cobertura em vez de derrubar a análise; `VISION_CONCURRENCY` 5 → 3.
+- **Persistência reconciliada:** os achados de visão só são gravados depois da reconciliação do deck (antes eram gravados brutos na etapa “visão” e a reconciliação da v0.61 não valia no site); ao fim da análise, achados de visão pendentes fora do conjunto final são encerrados.
+- **Pausa** não grava mais o snapshot: o estudo continua “análise pendente”.
+- **Contexto errado (visão):** cidade da mesma UF não é acusada; cidades confirmadas pelo analista também não; cidade única só com âncora no texto transcrito; duas ou mais de outra UF bastam (mapa copiado); um achado por imagem. Caso real: s135 de João Pessoa (Novo Hamburgo, São Leopoldo, Esteio — RS) mantido; s73 (Cabedelo, “São Paulo” inexistente) descartado.
+
+**Diagnóstico registrado:** o custo de R$ 0,10 não inclui a 1ª tentativa (o gasto só era registrado ao fim da análise); o passe de texto parou após 1 de 13 lotes (o laço só é interrompido pelo botão Pausar). Documento de interface: `UX_REVISAO_corretor_2026-09-30.md`.
+
 ## Versão 0.62 — 2026-09-30 — fluxo explícito: análise pendente, portão persistente, passos (RUNTIME local)
 
 **Fonte:** estudo de João Pessoa (Ana, 30/set). O painel mostrava “0 erros · 0 prováveis”, barra verde e
