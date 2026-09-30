@@ -19,6 +19,7 @@ import {
 } from '../domain/aggregations';
 import { STANDARD_ORDER, TYPOLOGY_ORDER, normalizeText } from '../domain/taxonomy';
 import { normalizeCityTemporalRows, type TemporalMetricKind } from '../domain/temporal-normalization';
+import { reconcilePanoramaReport } from '../domain/reconciliation';
 
 type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string };
 type TemporalKey = 'sales' | 'salesTypology' | 'stock' | 'stockTypology' | 'ivv' | 'ivvTypology' | 'ticket' | 'ticketTypology' | 'meter' | 'meterTypology';
@@ -528,21 +529,23 @@ export function buildPanoramaReportModel(
   const ivvSource = entity === 'fiergs-rs'
     ? ivvFromSalesAndStock(closingSales, closingStock)
     : withClosingStockWeight(temporal.ivv, temporal.stock);
+  const sales = {
+    units: guard(marketBlock(scope, closingSales, 'liquid_sales', 'count', 'Soma de vendas líquidas por período, segmento e padrão; no fechamento FIERGS, última fotografia granular por empreendimento.')),
+    vgv: guard(marketBlock(scope, temporal.sales, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido da API.')),
+    unitsByTypology: guard(marketBlock(scope, closingSalesTypology, 'liquid_sales', 'count', 'Soma de vendas líquidas por período e tipologia; no fechamento FIERGS, última fotografia granular por empreendimento.')),
+    vgvByTypology: guard(marketBlock(scope, temporal.salesTypology, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido por tipologia.')),
+  };
+  const stock = {
+    units: guard(marketBlock(scope, closingStock, 'stock', 'count', 'Estoque no fechamento por segmento e padrão; no FIERGS, última fotografia granular por empreendimento.')),
+    vgv: guard(marketBlock(scope, temporal.stock, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por padrão.')),
+    unitsByTypology: guard(marketBlock(scope, closingStockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia; no FIERGS, última fotografia granular por empreendimento.')),
+    vgvByTypology: guard(marketBlock(scope, temporal.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.')),
+  };
 
   return {
     scope, generatedAt: new Date().toISOString(), launches, horizontalSeries,
-    sales: {
-      units: guard(marketBlock(scope, closingSales, 'liquid_sales', 'count', 'Soma de vendas líquidas por período, segmento e padrão; no fechamento FIERGS, última fotografia granular por empreendimento.')),
-      vgv: guard(marketBlock(scope, temporal.sales, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido da API.')),
-      unitsByTypology: guard(marketBlock(scope, closingSalesTypology, 'liquid_sales', 'count', 'Soma de vendas líquidas por período e tipologia; no fechamento FIERGS, última fotografia granular por empreendimento.')),
-      vgvByTypology: guard(marketBlock(scope, temporal.salesTypology, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido por tipologia.')),
-    },
-    stock: {
-      units: guard(marketBlock(scope, closingStock, 'stock', 'count', 'Estoque no fechamento por segmento e padrão; no FIERGS, última fotografia granular por empreendimento.')),
-      vgv: guard(marketBlock(scope, temporal.stock, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por padrão.')),
-      unitsByTypology: guard(marketBlock(scope, closingStockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia; no FIERGS, última fotografia granular por empreendimento.')),
-      vgvByTypology: guard(marketBlock(scope, temporal.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.')),
-    },
+    sales,
+    stock,
     ivv: guard(marketBlock(scope, ivvSource, 'ivv', 'percent', entity === 'fiergs-rs' ? 'IVV consolidado pela identidade do Dashboard GeoBrain: soma das vendas líquidas ÷ soma de (estoque final + vendas líquidas).' : 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
     ivvByTypology: guard(marketBlock(scope, withClosingStockWeight(temporal.ivvTypology, temporal.stockTypology), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average')),
     prices: {
@@ -583,5 +586,6 @@ export function buildPanoramaReportModel(
     cityComparisons,
     presentation: options.presentation ?? {},
     closingFacts,
+    reconciliation: reconcilePanoramaReport({ scope, cube, sales, stock, granular, cityComparisons }),
   };
 }

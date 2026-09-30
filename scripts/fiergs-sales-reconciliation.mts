@@ -401,6 +401,7 @@ const runtime = {
   acceptedHorizontalProjects: runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').length,
   acceptedHorizontalFinalUnits: runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').reduce((total, project) => total + (project.finalUnits ?? 0), 0),
   horizontalLabels: [...new Set(runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').map((project) => project.horizontalSubtype))],
+  reconciliation: runtimeModel.reconciliation,
 };
 
 const output = {

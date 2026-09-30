@@ -1,7 +1,7 @@
 # Plano de ação pós-teste Juliana — Panorama FIERGS 2T2026
 
 **Data:** 30/09/2026  
-**Estado:** Fases 0 a 3 concluídas tecnicamente; vendas em `1.091`, estoque em `5.251` e horizontal sem chácaras
+**Estado:** Fases 0 a 4 concluídas tecnicamente; reconciliação crítica validada antes da exportação
 **Escopo:** correções apontadas por Juliana no arquivo `panorama-alvorada-cachoeirinha-canoas-e-mais-7-2T2026.pptx`  
 **Recorte de homologação:** Alvorada, Cachoeirinha, Canoas, Eldorado do Sul, Esteio, Gravataí, Guaíba, Novo Hamburgo, São Leopoldo e Viamão — fechamento 2T2026  
 **Artefato de referência:** `assets/panorama-alvorada-cachoeirinha-canoas-e-mais-7-2T2026.pptx`
@@ -227,6 +227,8 @@ Entregar pacote de homologação
 **Critério de saída:** nenhuma chácara aparece em dados, totais, mapas, médias ou séries da FIERGS; slides 63 e 64 fecham quando representam o mesmo universo.
 
 ### Fase 4 — Contratos canônicos e guardas de reconciliação
+
+**Estado em 30/09/2026:** concluída tecnicamente. O modelo calcula 11 invariantes críticas antes da renderização, a bancada autenticada fechou todas com delta zero e exportações não homologáveis são bloqueadas. Evidência em `EVIDENCIA_FASE_4_GUARDAS_RECONCILIACAO_FIERGS_2T2026_2026-09-30.md`.
 
 **Objetivo:** tornar impossível publicar novamente um deck com totais concorrentes sem aviso.
 

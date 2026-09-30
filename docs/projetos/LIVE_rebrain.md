@@ -1,3 +1,10 @@
+### 2026-09-30 — FIERGS-RS: guardas críticas antes da exportação — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — contrato de homologação e auditoria do recorte FIERGS.
+- **O quê:** o modelo passa a verificar vendas, estoque, horizontal por coorte e ausência de chácaras antes da renderização. Divergência ou indisponibilidade crítica bloqueia PDF/PPT; o CSV registra fonte, fórmula, universo, período, totais e delta.
+- **Evidência:** a bancada autenticada das dez cidades aprovou 11/11 invariantes com tolerância zero e delta zero: vendas `1.091`, estoque `5.251`, horizontal `129 / 30.476 / 3.365` e chácaras no runtime `0`.
+- **Verificação:** `tsconfig.app.json`, regressões de falha/bloqueio, suíte da feature e build de produção.
+- **Impacto em Etapas/Pendências:** Fase 4 concluída tecnicamente. A próxima frente é implementar comparativos e regras editoriais da Fase 5.
+
 ### 2026-09-30 — FIERGS-RS: universo horizontal sem chácaras — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — política horizontal do recorte FIERGS 2T2026.
 - **O quê:** `Condomínio de Chácaras` passa a ser rejeitado na entrada temporal e granular. Os slides por produto e coorte compartilham o mesmo cubo; `Média dos loteamentos` usa somente loteamentos aberto e fechado.

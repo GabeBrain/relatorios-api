@@ -169,6 +169,25 @@ export interface PanoramaClosingFacts {
   priceSource: string;
 }
 
+export type PanoramaReconciliationStatus = 'match' | 'different' | 'unavailable';
+export interface PanoramaReconciliationRow {
+  metricId: string;
+  source: string;
+  formula: string;
+  universe: string;
+  period: Quarter;
+  canonicalTotal: number | null;
+  dimensionalTotal: number | null;
+  delta: number | null;
+  tolerance: number;
+  status: PanoramaReconciliationStatus;
+  critical: boolean;
+}
+export interface PanoramaReconciliation {
+  homologable: boolean;
+  rows: PanoramaReconciliationRow[];
+}
+
 /**
  * Créditos de apresentação. A V2 preserva a identidade fixa e recebe pessoas variáveis como
  * slots opcionais — a ausência é intencional para finalização do analista, nunca um nome errado.
@@ -213,6 +232,8 @@ export interface PanoramaReportModel {
   cityComparisons: PanoramaCityComparisons;
   presentation: PanoramaPresentationCredits;
   closingFacts: PanoramaClosingFacts;
+  /** Guardas críticas calculadas antes da renderização e consultadas novamente no início do export. */
+  reconciliation: PanoramaReconciliation;
 }
 
 /**

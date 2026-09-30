@@ -1,6 +1,6 @@
 import type { PanoramaReportModel } from '../types';
 
-const columns = ['tipo_registro','cidade','building_id','empreendimento','segmento','subtipo_horizontal','padrao','trimestre_lancamento','unidades_lancadas','unidades_vendidas','oferta_final','vgv_lancado_milhoes','ticket_medio','area_media','preco_m2','cobertura','motivo_rejeicao'] as const;
+const columns = ['tipo_registro','cidade','building_id','empreendimento','segmento','subtipo_horizontal','padrao','trimestre_lancamento','unidades_lancadas','unidades_vendidas','oferta_final','vgv_lancado_milhoes','ticket_medio','area_media','preco_m2','cobertura','motivo_rejeicao','metrica','fonte','formula','universo','periodo_observado','total_canonico','total_dimensional','delta','tolerancia','status','critico'] as const;
 
 function cell(value: unknown): string {
   if (value === null || value === undefined) return '';
@@ -22,7 +22,13 @@ export function buildFiergsAuditCsv(report: PanoramaReportModel): string {
     subtipo_horizontal: '', padrao: '', trimestre_lancamento: '', unidades_lancadas: '', unidades_vendidas: '', oferta_final: '',
     vgv_lancado_milhoes: '', ticket_medio: '', area_media: '', preco_m2: '', cobertura: '', motivo_rejeicao: rejection.reason,
   }));
-  const rows = [...projectRows, ...rejectionRows];
+  const reconciliationRows = (report.reconciliation?.rows ?? []).map((item) => ({
+    tipo_registro: 'reconciliacao', metrica: item.metricId, fonte: item.source, formula: item.formula,
+    universo: item.universe, periodo_observado: item.period, total_canonico: item.canonicalTotal,
+    total_dimensional: item.dimensionalTotal, delta: item.delta, tolerancia: item.tolerance,
+    status: item.status, critico: item.critical,
+  }));
+  const rows: Record<string, unknown>[] = [...projectRows, ...rejectionRows, ...reconciliationRows];
   return `\uFEFF${columns.join(';')}\r\n${rows.map((row) => columns.map((column) => cell(row[column])).join(';')).join('\r\n')}`;
 }
 

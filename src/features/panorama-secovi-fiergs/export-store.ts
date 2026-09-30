@@ -46,6 +46,10 @@ export const usePanoramaExportStore = create<PanoramaExportState>()((set, get) =
 
   start: (report, format) => {
     if (isRunning(get().status)) return;
+    if (report.scope.entity === 'fiergs-rs' && !report.reconciliation?.homologable) {
+      set({ status: 'error', progress: 0, total: 0, error: 'Exportação bloqueada: o relatório FIERGS possui invariantes críticas não reconciliadas.', format, report: null, result: null, controller: null });
+      return;
+    }
     const previous = get().result;
     if (previous) URL.revokeObjectURL(previous.url);
     set({ status: 'preparing', progress: 0, total: 0, error: '', format, report, result: null, controller: new AbortController() });
