@@ -49,4 +49,4 @@ No slide 37, as linhas antigas somavam `504 + 3.285 + 678 + 95 + 0 = 4.562`. Na 
 
 ## Estado do portão
 
-O recorte de estoque do portão B está **RECONCILED** tecnicamente. O total `5.251` ainda aguarda confirmação explícita de Gabriel para ser registrado como `APPROVED`.
+O recorte de estoque do portão B está **APPROVED**. Gabriel confirmou explicitamente em 30/09/2026 o total canônico de `5.251`.

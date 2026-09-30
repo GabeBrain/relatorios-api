@@ -5,7 +5,7 @@
 - **Arquivos:** `src/features/panorama-secovi-fiergs/{report/model.ts,__tests__/report-model.test.ts}`, `scripts/fiergs-sales-reconciliation.mts` e `docs/features/Relatorios Secovi_FIERGS/EVIDENCIA_FASE_2_ESTOQUE_FIERGS_2T2026_2026-09-30.md`.
 - **Commit:** `d5dd210`.
 - **Verificação:** bancada autenticada, `218/218` testes da feature, typecheck e build de produção aprovados.
-- **Impacto em Etapas/Pendências:** Fase 2 tecnicamente reconciliada; `5.251` aguarda aceite explícito para PRE-029 virar `APPROVED`. Ajustes visuais continuam não iniciados.
+- **Impacto em Etapas/Pendências:** Fase 2 aprovada por Gabriel com `5.251` como fechamento canônico; a Fase 3 passa a tratar a exclusão de chácaras do universo horizontal. Ajustes visuais continuam não iniciados.
 
 ### 2026-09-28 — Rebrain: idioma do documento alinhado ao conteúdo — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** shell da plataforma e seletores Radix, incluindo Panorama de Mercado.

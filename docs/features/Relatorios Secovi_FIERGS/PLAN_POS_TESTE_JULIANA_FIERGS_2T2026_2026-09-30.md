@@ -183,7 +183,7 @@ Entregar pacote de homologação
 
 ### Fase 2 — Auditoria de oferta final e estoque
 
-**Estado em 30/09/2026:** auditoria e implementação técnica concluídas; `5.459`, `4.562` e `5.251` foram explicados e o runtime fecha em `5.251` por padrão, tipologia e área. Evidência em `EVIDENCIA_FASE_2_ESTOQUE_FIERGS_2T2026_2026-09-30.md`; falta o aceite explícito para promover PRE-029 de `RECONCILED` a `APPROVED`.
+**Estado em 30/09/2026:** concluída e aprovada. `5.459`, `4.562` e `5.251` foram explicados; o runtime fecha em `5.251` por padrão, tipologia e área, e Gabriel aprovou explicitamente a PRE-029. Evidência em `EVIDENCIA_FASE_2_ESTOQUE_FIERGS_2T2026_2026-09-30.md`.
 
 **Objetivo:** determinar a fotografia canônica de oferta final no fechamento do 2T2026.
 
