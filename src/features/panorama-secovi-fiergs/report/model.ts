@@ -383,11 +383,11 @@ function normalizeTemporalSource(scope: PanoramaScope, harvests: CityTemporalSou
  */
 function reconcileFiergsClosingSales(source: SourceResult, cube: MarketCube, scope: PanoramaScope, dimension: 'pattern' | 'typology'): SourceResult {
   if ((scope.entity ?? 'secovi-sp') !== 'fiergs-rs') return source;
-  const granularRows = cube.projects.filter((project) => project.segment === 'Vertical').flatMap((project) => {
+  const granularRows: Record<string, unknown>[] = cube.projects.filter((project) => project.segment === 'Vertical').flatMap<Record<string, unknown>>((project) => {
     if (dimension === 'pattern') {
-      return project.soldUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: project.standard, liquid_sales: project.soldUnits }];
+      return project.soldUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: String(project.standard), liquid_sales: project.soldUnits }];
     }
-    return project.typologies.flatMap((typology) => typology.soldUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: typology.typology, liquid_sales: typology.soldUnits }]);
+    return project.typologies.flatMap<Record<string, unknown>>((typology) => typology.soldUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: String(typology.typology), liquid_sales: typology.soldUnits }]);
   });
   // Sem cobertura granular de vendas, preservar a fonte temporal em vez de fabricar fechamento zero.
   if (!granularRows.length) return source;
@@ -406,11 +406,11 @@ function reconcileFiergsClosingSales(source: SourceResult, cube: MarketCube, sco
  */
 function reconcileFiergsClosingStock(source: SourceResult, cube: MarketCube, scope: PanoramaScope, dimension: 'pattern' | 'typology'): SourceResult {
   if ((scope.entity ?? 'secovi-sp') !== 'fiergs-rs') return source;
-  const granularRows = cube.projects.filter((project) => project.segment === 'Vertical').flatMap((project) => {
+  const granularRows: Record<string, unknown>[] = cube.projects.filter((project) => project.segment === 'Vertical').flatMap<Record<string, unknown>>((project) => {
     if (dimension === 'pattern') {
-      return project.finalUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: project.standard, stock: project.finalUnits }];
+      return project.finalUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: String(project.standard), stock: project.finalUnits }];
     }
-    return project.typologies.flatMap((typology) => typology.finalUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: typology.typology, stock: typology.finalUnits }]);
+    return project.typologies.flatMap<Record<string, unknown>>((typology) => typology.finalUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: String(typology.typology), stock: typology.finalUnits }]);
   });
   if (!granularRows.length) return source;
   const historicalAndHorizontal = source.rows.filter((row) => periodToQuarter(row.period) !== scope.endQuarter || segment(row.building_type ?? row.type) !== 'Vertical');
