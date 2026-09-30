@@ -198,15 +198,20 @@ A recomendação está tecnicamente reconciliada, mas ainda não é uma decisão
 | Deltas explicados por cidade | PASS | Canoas +41; Novo Hamburgo +5; horizontal +1.180 |
 | Delta de tipologia explicado | PASS | linha líquida de 4 dormitórios = −1 removida pelo componente |
 | Fonte canônica recomendada | PASS TÉCNICO | cubo granular/última fotografia = 1.091 |
-| Alteração estrutural aplicada | NÃO INICIADA | bloqueada pelo checkpoint solicitado |
-| Ajustes visuais iniciados | NÃO | fora do escopo das Fases 0 e 1 |
+| Alteração estrutural aplicada | PASS | aprovação de Gabriel em 30/09/2026; runtime fecha 1.091 nas quatro dimensões |
+| Ajustes visuais iniciados | NÃO | apenas o erro funcional que ocultava venda negativa foi corrigido; revisão editorial permanece fora deste portão |
 
 ## 11. Arquivos criados nesta etapa
 
 - `scripts/fiergs-sales-reconciliation.mts` — bancada reproduzível e sanitizada.
 - `docs/features/Relatorios Secovi_FIERGS/EVIDENCIA_FASES_0_1_VENDAS_FIERGS_2T2026_2026-09-30.md` — esta evidência.
 
-Nenhum componente, agregador ou contrato de produção foi alterado nesta etapa.
+Na etapa de diagnóstico nenhum componente foi alterado. Após o aceite explícito do total canônico, a promoção estrutural afetou:
+
+- `src/features/panorama-secovi-fiergs/report/model.ts` — fechamento vertical de vendas reconciliado pelo cubo granular e comparativo municipal restrito ao Vertical;
+- `src/features/panorama-secovi-fiergs/components/ReportPaginator.tsx` — valores negativos permanecem na identidade do total e são exibidos;
+- `src/features/panorama-secovi-fiergs/__tests__/report-model.test.ts` — regressão de fotografias repetidas;
+- `src/features/panorama-secovi-fiergs/__tests__/fiergs-sales-reconciliation.test.ts` — regressão do ajuste líquido negativo.
 
 ## 12. Verificações executadas
 
@@ -218,4 +223,27 @@ Nenhum componente, agregador ou contrato de produção foi alterado nesta etapa.
   - `report-model.test.ts`;
   - `opus-cube-aggregations.test.ts`.
 - Typecheck do repositório: `PASS` (`tsc --noEmit`).
-- Build e exportação não foram executados porque não houve mudança de runtime nem visual nesta fase.
+- No diagnóstico inicial, build e exportação não foram executados porque ainda não havia mudança de runtime; a verificação posterior à promoção está registrada abaixo.
+
+## 13. Promoção aprovada e resultado do portão B
+
+Gabriel aprovou em 30/09/2026 a adoção de `1.091` como fechamento canônico de vendas verticais do FIERGS 2T2026. Não houve alteração manual de valores: o runtime deriva todas as dimensões do mesmo cubo granular.
+
+| Dimensão no runtime | Total |
+|---|---:|
+| Padrão | **1.091** |
+| Tipologia | **1.091** |
+| Cidade | **1.091** |
+| Área | **1.091** |
+
+A tipologia `4 ou + Dormitórios` permanece em `−1` e participa do total. A coleta bruta continua reproduzindo `1.137`, `1.180` horizontais e `2.317`, permitindo auditar a causa em vez de apagar a evidência.
+
+### Verificações posteriores à implementação
+
+- bancada autenticada das dez cidades: `PASS`;
+- suíte completa de Panorama Secovi/FIERGS: `217/217 PASS` em 27 arquivos;
+- typecheck: `PASS`;
+- build de produção: `PASS`;
+- avisos conhecidos: medição zero do Recharts no JSDOM, base Browserslist antiga e chunks grandes; nenhum deles causou falha.
+
+**Recorte de vendas do portão B: CONCLUÍDO. Portão B geral: EM ANDAMENTO.** A auditoria de estoque permanece como próxima frente; ajustes visuais/editoriais não foram iniciados.

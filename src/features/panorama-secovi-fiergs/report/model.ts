@@ -375,6 +375,30 @@ function normalizeTemporalSource(scope: PanoramaScope, harvests: CityTemporalSou
   };
 }
 
+/**
+ * FIERGS 2T2026: o endpoint temporal publica fotografias acumuladas em mais de um mês do mesmo
+ * trimestre. Somá-las como fluxo duplicava 41 vendas em Canoas e 5 em Novo Hamburgo. No fechamento,
+ * padrão e tipologia passam a usar o mesmo fato granular já consumido pela lâmina de área; a série
+ * anterior permanece temporal até que cada trimestre histórico seja reconciliado da mesma forma.
+ */
+function reconcileFiergsClosingSales(source: SourceResult, cube: MarketCube, scope: PanoramaScope, dimension: 'pattern' | 'typology'): SourceResult {
+  if ((scope.entity ?? 'secovi-sp') !== 'fiergs-rs') return source;
+  const granularRows = cube.projects.filter((project) => project.segment === 'Vertical').flatMap((project) => {
+    if (dimension === 'pattern') {
+      return project.soldUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: project.standard, liquid_sales: project.soldUnits }];
+    }
+    return project.typologies.flatMap((typology) => typology.soldUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: typology.typology, liquid_sales: typology.soldUnits }]);
+  });
+  // Sem cobertura granular de vendas, preservar a fonte temporal em vez de fabricar fechamento zero.
+  if (!granularRows.length) return source;
+  const historicalAndHorizontal = source.rows.filter((row) => periodToQuarter(row.period) !== scope.endQuarter || segment(row.building_type ?? row.type) !== 'Vertical');
+  return {
+    rows: [...historicalAndHorizontal, ...granularRows],
+    available: true,
+    source: `${source.source} · fechamento vertical reconciliado pelo cubo granular (última fotografia por empreendimento/tipologia)`,
+  };
+}
+
 type CitySalesSource = { city: string; rows: Record<string, unknown>[] };
 
 function nullableSum(values: (number | null)[]): number | null {
@@ -402,6 +426,10 @@ function buildCityComparisons(scope: PanoramaScope, cube: MarketCube, provenance
   }
 
   const sales = selected.map((city) => {
+    if ((scope.entity ?? 'secovi-sp') === 'fiergs-rs') {
+      const projects = cube.projects.filter((project) => project.city === city && project.segment === 'Vertical');
+      return { city, liquidSales: nullableSum(projects.map((project) => project.soldUnits)) };
+    }
     const source = salesSources.find((item) => item.city === city);
     const values = filterEntityPatternSource({ rows: normalizeCityTemporalRows(city, source?.rows ?? [], 'flow'), available: true, source: 'comparativo municipal' }, scope.entity ?? 'secovi-sp').rows
       .filter((row) => periodToQuarter(row.period) === scope.endQuarter)
@@ -462,6 +490,8 @@ export function buildPanoramaReportModel(
     meter: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'meter', 'snapshot', sources.meter), entity),
     meterTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'meterTypology', 'snapshot', sources.meterTypology),
   };
+  const closingSales = reconcileFiergsClosingSales(temporal.sales, cube, scope, 'pattern');
+  const closingSalesTypology = reconcileFiergsClosingSales(temporal.salesTypology, cube, scope, 'typology');
   // Firewall de fontes: nas versões granulares nenhum contrato municipal fala pelo horizontal do Panorama Secovi.
   const horizontalSeries = horizontalSeriesPolicyOf(cube, scope.engineVersion ?? 'v4');
   const guard = (block: ReportMarketBlock) => (scope.engineVersion ?? 'v4') !== 'v2' ? firewallTemporalBlock(block, horizontalSeries) : block;
@@ -472,15 +502,15 @@ export function buildPanoramaReportModel(
     scope.endQuarter,
   );
   const ivvSource = entity === 'fiergs-rs'
-    ? ivvFromSalesAndStock(temporal.sales, temporal.stock)
+    ? ivvFromSalesAndStock(closingSales, temporal.stock)
     : withClosingStockWeight(temporal.ivv, temporal.stock);
 
   return {
     scope, generatedAt: new Date().toISOString(), launches, horizontalSeries,
     sales: {
-      units: guard(marketBlock(scope, temporal.sales, 'liquid_sales', 'count', 'Soma de vendas líquidas por período, segmento e padrão.')),
+      units: guard(marketBlock(scope, closingSales, 'liquid_sales', 'count', 'Soma de vendas líquidas por período, segmento e padrão; no fechamento FIERGS, última fotografia granular por empreendimento.')),
       vgv: guard(marketBlock(scope, temporal.sales, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido da API.')),
-      unitsByTypology: guard(marketBlock(scope, temporal.salesTypology, 'liquid_sales', 'count', 'Soma de vendas líquidas por período e tipologia.')),
+      unitsByTypology: guard(marketBlock(scope, closingSalesTypology, 'liquid_sales', 'count', 'Soma de vendas líquidas por período e tipologia; no fechamento FIERGS, última fotografia granular por empreendimento.')),
       vgvByTypology: guard(marketBlock(scope, temporal.salesTypology, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido por tipologia.')),
     },
     stock: {

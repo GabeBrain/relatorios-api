@@ -397,6 +397,8 @@ Cada commit deve conter seus testes e não incluir alterações do módulo Corre
 
 ### Portão B — Modelo reconciliado
 
+**Estado em 30/09/2026:** concluído para vendas. Gabriel aprovou o fechamento canônico de `1.091`; padrão, tipologia, cidade e área reconciliam no runtime e a evidência está registrada em `EVIDENCIA_FASES_0_1_VENDAS_FIERGS_2T2026_2026-09-30.md`. Estoque segue para a fase seguinte.
+
 - invariantes numéricas passando;
 - chácaras excluídas;
 - horizontal por produto e por coorte coerentes.

@@ -5,6 +5,7 @@ import { normalizeInternalBuilding } from '../src/features/panorama-secovi-fierg
 import { offerByAreaBand } from '../src/features/panorama-secovi-fiergs/domain/aggregations';
 import { normalizeCityTemporalRows } from '../src/features/panorama-secovi-fiergs/domain/temporal-normalization';
 import { FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES } from '../src/features/panorama-secovi-fiergs/presets';
+import { buildPanoramaReportModel } from '../src/features/panorama-secovi-fiergs/report/model';
 
 type Row = Record<string, unknown>;
 type Segment = 'Vertical' | 'Horizontal' | 'Unknown';
@@ -195,6 +196,8 @@ function granularProjectEvidence(buildings: Row[], cube: ReturnType<typeof build
 const token = await bearerToken();
 const cities = [];
 const cubes = [];
+const patternSources: { city: string; rows: Row[] }[] = [];
+const typologySources: { city: string; rows: Row[] }[] = [];
 
 for (const city of CITIES) {
   process.stdout.write(`${city}… `);
@@ -205,6 +208,8 @@ for (const city of CITIES) {
   ]);
   const pattern = summarizeTemporal(city, patternRows);
   const typology = summarizeTemporal(city, typologyRows);
+  patternSources.push({ city, rows: patternRows });
+  typologySources.push({ city, rows: typologyRows });
   const cube = buildCityCube(buildings, { city, uf: 'RS', endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' });
   cubes.push(cube);
   const areaTotal = offerByAreaBand(cube).find((row) => row.kind === 'total');
@@ -251,6 +256,26 @@ const totals = {
   granularAreaBandSold: mergedAreaTotal?.soldUnits ?? 0,
   granularWithoutAreaSold: sum((row) => row.granular.withoutAreaSold),
 };
+const source = (rows: Row[], available = true) => ({ rows, available, source: 'bancada autenticada FIERGS 2T2026' });
+const empty = source([], false);
+const runtimeModel = buildPanoramaReportModel({ uf: 'RS', cities: CITIES, endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' }, [], {
+  sales: source(patternSources.flatMap((item) => item.rows)),
+  salesTypology: source(typologySources.flatMap((item) => item.rows)),
+  stock: empty, stockTypology: empty, ivv: empty, ivvTypology: empty,
+  ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty,
+}, [], {
+  cubes,
+  provenance: { requestedCities: CITIES, completedCities: CITIES, failedCities: [] },
+  citySalesSources: patternSources,
+});
+const runtime = {
+  patternVertical: runtimeModel.sales.units.series.at(-1)?.vertical ?? null,
+  typologyVertical: runtimeModel.sales.unitsByTypology.series.at(-1)?.vertical ?? null,
+  cityVertical: runtimeModel.cityComparisons.sales.reduce((total, row) => total + (row.liquidSales ?? 0), 0),
+  areaVertical: runtimeModel.granular.areaBands.find((row) => row.kind === 'total')?.soldUnits ?? null,
+  patternSource: runtimeModel.sales.units.source,
+  typologyGroups: runtimeModel.sales.unitsByTypology.byGroup.map((row) => ({ label: row.label, vertical: row.vertical })),
+};
 
 const output = {
   generatedAt: new Date().toISOString(),
@@ -262,6 +287,7 @@ const output = {
     area: 'building-with-history-internal; último mês disponível por empreendimento/tipologia com área',
   },
   totals,
+  runtime,
   deltas: {
     typologyMinusPatternVertical: totals.typologyVertical - totals.patternVertical,
     citySlideMinusPatternVertical: totals.currentCitySlide - totals.patternVertical,
@@ -272,4 +298,4 @@ const output = {
 
 await writeFile(OUTPUT, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
 console.log(`\nEvidência salva em ${OUTPUT}`);
-console.log(JSON.stringify({ totals, deltas: output.deltas }, null, 2));
+console.log(JSON.stringify({ totals, runtime, deltas: output.deltas }, null, 2));

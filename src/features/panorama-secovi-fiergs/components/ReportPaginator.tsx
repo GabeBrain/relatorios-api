@@ -349,11 +349,18 @@ function FiergsLaunchCitySlide({ report }: { report: PanoramaReportModel }) {
 }
 
 type FiergsDistributionRow = { label: string; value: number };
+export function fiergsDistributionData(rows: FiergsDistributionRow[]) {
+  // Venda líquida negativa representa distrato e participa da identidade do total. Ela não pode
+  // desaparecer antes da soma, como ocorria com 4 dormitórios (−1) no FIERGS 2T2026.
+  const visible = rows.filter((row) => row.value !== 0).sort((a, b) => b.value - a.value);
+  const total = rows.reduce((sum, row) => sum + row.value, 0);
+  const max = Math.max(1, ...visible.map((row) => Math.abs(row.value)));
+  return { visible, total, max };
+}
 function FiergsDistributionSlide({ title, subtitle, rows, unit }: { title: string; subtitle: string; rows: FiergsDistributionRow[]; unit: string }) {
-  const visible = rows.filter((row) => row.value > 0).sort((a, b) => b.value - a.value);
-  const total = visible.reduce((sum, row) => sum + row.value, 0); const max = Math.max(1, ...visible.map((row) => row.value));
+  const { visible, total, max } = fiergsDistributionData(rows);
   return <div className="panorama-fiergs-distribution"><header><h2>{title}<span>{subtitle}</span></h2><strong>{n(total)}<small>{unit}</small></strong></header>
-    {visible.length ? <main>{visible.slice(0, 9).map((row, index) => <div key={row.label}><span>{row.label}</span><i><b style={{ width: `${row.value / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{pct(row.value / total * 100)}</small>{index < 3 && <em>{index + 1}º</em>}</div>)}</main> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
+    {visible.length ? <main>{visible.slice(0, 9).map((row, index) => <div key={row.label} className={row.value < 0 ? 'is-negative' : undefined}><span>{row.label}</span><i><b style={{ width: `${Math.abs(row.value) / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{total ? pct(row.value / total * 100) : '—'}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
     <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer></div>;
 }
 function groupedValues(values: FiergsDistributionRow[]) { const groups = new Map<string, number>(); values.forEach(({ label, value }) => groups.set(label, (groups.get(label) ?? 0) + value)); return [...groups].map(([label, value]) => ({ label, value })); }

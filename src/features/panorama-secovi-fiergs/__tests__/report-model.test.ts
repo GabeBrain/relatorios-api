@@ -174,3 +174,56 @@ describe('Panorama Secovi/FIERGS — consolidado multi-cidade e proveniência (G
     expect(model.provenance.entity).toBe('secovi-sp');
   });
 });
+
+describe('Panorama FIERGS — fechamento canônico de vendas 2T2026', () => {
+  const empty = source([]);
+  const sources = (salesRows: Record<string, unknown>[]) => ({
+    sales: source(salesRows), salesTypology: source(salesRows),
+    stock: empty, stockTypology: empty, ivv: empty, ivvTypology: empty,
+    ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty,
+  });
+  const building = (id: string, city: string, observations: Record<string, unknown>[]) => ({
+    building_id: id, name: id, building_type: 'Vertical', standard: 'Econômico',
+    release_date: '2025-01-01', total_units: 100,
+    typologies_history: [
+      { period: '2025-01-01', number_bedroom: '2', qty: 100, release_price: 300000, private_area: 50 },
+      ...observations.map((row) => ({ number_bedroom: '2', typology_stock: 50, private_area: 50, ...row })),
+    ],
+    city,
+  });
+
+  it('substitui fotografias temporais repetidas pelo último fato granular e fecha cidade, padrão, tipologia e área', () => {
+    const scope: PanoramaScope = { uf: 'RS', cities: ['Canoas', 'Novo Hamburgo'], endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4' };
+    const canoas = buildCityCube([building('Ora', 'Canoas', [
+      { period: '2026-04-01', sold_in_period: 41 },
+      { period: '2026-06-01', sold_in_period: 41 },
+    ])], { city: 'Canoas', uf: 'RS', endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4' });
+    const novoHamburgo = buildCityCube([building('Unicco', 'Novo Hamburgo', [
+      { period: '2026-05-01', sold_in_period: 5 },
+      { period: '2026-06-01', sold_in_period: 4 },
+    ])], { city: 'Novo Hamburgo', uf: 'RS', endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4' });
+    const temporal = [
+      { city: 'Canoas', period: '2026-04-01', building_type: 'Vertical', group: 'Econômico', liquid_sales: 41 },
+      { city: 'Canoas', period: '2026-06-01', building_type: 'Vertical', group: 'Econômico', liquid_sales: 41 },
+      { city: 'Novo Hamburgo', period: '2026-05-01', building_type: 'Vertical', group: 'Econômico', liquid_sales: 5 },
+      { city: 'Novo Hamburgo', period: '2026-06-01', building_type: 'Vertical', group: 'Econômico', liquid_sales: 4 },
+    ];
+    const model = buildPanoramaReportModel(scope, [], sources(temporal), [], {
+      cubes: [canoas, novoHamburgo],
+      provenance: { requestedCities: scope.cities, completedCities: scope.cities, failedCities: [] },
+      citySalesSources: [
+        { city: 'Canoas', rows: temporal.filter((row) => row.city === 'Canoas') },
+        { city: 'Novo Hamburgo', rows: temporal.filter((row) => row.city === 'Novo Hamburgo') },
+      ],
+    });
+
+    expect(model.sales.units.series.at(-1)?.vertical).toBe(45);
+    expect(model.sales.unitsByTypology.series.at(-1)?.vertical).toBe(45);
+    expect(model.cityComparisons.sales).toEqual([
+      { city: 'Canoas', liquidSales: 41 },
+      { city: 'Novo Hamburgo', liquidSales: 4 },
+    ]);
+    expect(model.granular.areaBands.find((row) => row.kind === 'total')?.soldUnits).toBe(45);
+    expect(model.sales.units.source).toContain('fechamento vertical reconciliado pelo cubo granular');
+  });
+});
