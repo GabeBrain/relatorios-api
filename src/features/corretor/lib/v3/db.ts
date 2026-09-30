@@ -572,3 +572,17 @@ export async function loadTranscribedBySha1(shas: string[]): Promise<Map<string,
   }
   return out;
 }
+
+/**
+ * Leituras de visão já pagas (vision_cache) para os sha1 dados, em lotes. Base do
+ * cruzamento com planilhas DEPOIS da análise: refaz as tabelas lidas sem nova
+ * chamada de IA e sem custo.
+ */
+export async function loadVisionReadings(shas: string[]): Promise<Map<string, { payload: unknown; model?: string }>> {
+  const out = new Map<string, { payload: unknown; model?: string }>();
+  for (let i = 0; i < shas.length; i += 50) {
+    const { data } = await db.from('vision_cache').select('sha1, payload, model').in('sha1', shas.slice(i, i + 50));
+    for (const row of data ?? []) out.set(row.sha1 as string, { payload: row.payload, model: (row.model as string) ?? undefined });
+  }
+  return out;
+}

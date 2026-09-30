@@ -205,6 +205,8 @@ export interface RunPhase2Opts {
   /** cidade/UF JÁ confirmadas pelo analista no portão (regra do CITY_NAME/WRONG_CONTEXT) */
   city: string;
   uf?: string | null;
+  /** Outras cidades confirmadas pelo analista como parte do estudo. */
+  outras?: string[];
   /** ata confirmada/editada (alimenta ATA_COVERAGE); pode ser null se sem ata */
   ata: AtaData | null;
   model: ModelId;
@@ -246,7 +248,7 @@ export async function runPhase2(
   const visionPromise = runVisionPass(candidates, model, {
     concurrency: VISION_CONCURRENCY,
     signal,
-    expected: { cidade: cityUsed, uf: uf ?? undefined },
+    expected: { cidade: cityUsed, uf: uf ?? undefined, outras: opts.outras ?? [] },
     onProgress: (done, total) => onStage?.({ stage: 'visao', done, total }),
   }).then(async (res) => {
     // CH-6: o slide que declara exclusão (esgotados, garden, cobertura) explica o

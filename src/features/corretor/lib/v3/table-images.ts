@@ -40,7 +40,11 @@ export interface SkippedTableImage {
 }
 
 /** Resultado da varredura: candidatas + imagens que ficaram sem leitura. */
-export type TableImageScan = TableImageCandidate[] & { skipped?: SkippedTableImage[] };
+export type TableImageScan = TableImageCandidate[] & {
+  skipped?: SkippedTableImage[];
+  /** Imagens distintas no deck (mapas, fotos, prints e tabelas) — base da pré-análise. */
+  totalImages?: number;
+};
 
 // Seções onde uma imagem grande quase sempre é tabela/gráfico com número.
 const NUMERIC_SECTIONS = new Set(['SOCIO', 'MERCADO', 'LACUNAS', 'ABSORCAO']);
@@ -138,5 +142,6 @@ export async function findTableImages(
   }
   const result: TableImageScan = out.sort((a, b) => a.slide - b.slide);
   result.skipped = skipped.sort((a, b) => a.slide - b.slide);
+  result.totalImages = new Set(bySlide.map((b) => b.target)).size;
   return result;
 }

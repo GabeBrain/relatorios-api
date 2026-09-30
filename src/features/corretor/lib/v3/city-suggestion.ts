@@ -41,6 +41,23 @@ export function cityFromText(text: string): { cidade: string; uf: string } | nul
   return best ? { cidade: best.cidade, uf: best.uf } : null;
 }
 
+/** TODAS as menções "Cidade - UF" / "Cidade/UF" válidas de um texto. */
+export function citiesInText(text: string): { cidade: string; uf: string }[] {
+  const clean = text.replace(/_/g, ' ').replace(/\s+/g, ' ');
+  const rx = /([A-Za-zÀ-ÿ'. ]+?)\s*(?:-|–|—|\/)\s*([A-Z]{2})(?=$|[\s_.,;:)\]-])/g;
+  const out: { cidade: string; uf: string }[] = [];
+  for (const m of clean.matchAll(rx)) {
+    const cities = BY_UF.get(m[2].toUpperCase());
+    if (!cities) continue;
+    const words = norm(m[1]).split(' ').filter(Boolean);
+    for (let n = Math.min(5, words.length); n >= 1; n--) {
+      const city = cities.get(words.slice(-n).join(' '));
+      if (city) { out.push({ cidade: city, uf: m[2].toUpperCase() }); break; }
+    }
+  }
+  return out;
+}
+
 /** UFs em que existe um município com esse nome (há homônimos entre estados). */
 export function ufsOfCity(name: string): string[] {
   const key = norm(name);

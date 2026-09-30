@@ -26,7 +26,8 @@ import { VizSwitch } from '../components/audit/FindingCard';
 import LegacyV1Panel from '../components/LegacyV1Panel';
 import AtaTestPanel from '../components/AtaTestPanel';
 import AtaCard from '../components/AtaCard';
-import AtaGateCard, { type AtaGateValue } from '../components/AtaGateCard';
+import { type AtaGateValue } from '../components/AtaGateCard';
+import PreAnalysisCard, { type PreAnalysisValue } from '../components/PreAnalysisCard';
 import { formatUSD, type ModelId } from '../lib/cost-calculator';
 import {
   runPhase1, runPhase2, estimateFullAnalysis,
@@ -43,11 +44,16 @@ import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
   saveReport, setFindingVerdict, resolveInvalidFindings, loadTranscribedBySha1,
-  saveStudyFonte, loadStudyFonte, analysisPending,
+  saveStudyFonte, loadStudyFonte, analysisPending, loadVisionReadings,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 import { parseFonteJson, type Fonte } from '../lib/v3/fonte';
 import { suggestCity, type CitySuggestion } from '../lib/v3/city-suggestion';
+import { otherCities, imageProfile, type CityMention, type ImageProfile } from '../lib/v3/pre-analysis';
+import { savePptx, loadPptx } from '../lib/v3/pptx-store';
+import { findTableImages } from '../lib/v3/table-images';
+import { replayVisionPass } from '../lib/v3/ia-vision';
+import { sourceCrosscheckFindings as crosscheckDet, sourceCrosscheckVisionFindings } from '../lib/v3/source-crosscheck';
 import type { AnalysisReport } from '../lib/v3/pipeline';
 import { extractFonteFromExcel } from '../lib/v3/fonte-extractor-browser';
 import { sourceCrosscheckFindings } from '../lib/v3/source-crosscheck';
@@ -285,6 +291,15 @@ function dateLabel(value: string): string {
   return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
+const outrasKey = (studyId: string) => `corretor-outras-${studyId}`;
+/** Outras cidades confirmadas para o estudo, lembradas neste navegador (reconferências). */
+function readOutras(studyId: string): string[] {
+  try { return JSON.parse(localStorage.getItem(outrasKey(studyId)) ?? '[]') as string[]; } catch { return []; }
+}
+function writeOutras(studyId: string, outras: string[]) {
+  try { localStorage.setItem(outrasKey(studyId), JSON.stringify(outras)); } catch { /* sem storage: só nesta análise */ }
+}
+
 /**
  * Onde o estudo está no fluxo. O caso da Ana (30/set) mostrou que “0 erros” no
  * topo era lido como “estudo limpo” quando só a triagem tinha rodado: os passos
@@ -398,6 +413,8 @@ export default function CorretorV3Page() {
     studyId: string; version: number; ir: Ir; bytes: Uint8Array;
     ata: AtaData | null; estimate: FullEstimate; phase2Brl: string; fonte?: Fonte | null;
     suggestion: CitySuggestion | null;
+    cities: CityMention[];
+    profile: ImageProfile;
   } | null>(null);
   const [dragging, setDragging] = useState(false);
   const [workspaceTab, setWorkspaceTab] = useState<'completude' | 'problemas' | 'slides'>('completude');
@@ -413,6 +430,8 @@ export default function CorretorV3Page() {
   const resumeRef = useRef<HTMLInputElement>(null);
   /** Planilhas (ou fonte.json) vinculadas de dentro do estudo, depois do upload. */
   const studySourcesRef = useRef<HTMLInputElement>(null);
+  /** Planilhas vinculadas pós-análise aguardando o PPTX (quando não há cofre local). */
+  const pendingCrosscheck = useRef<Fonte | null>(null);
   // Painel de teste da extração da ata: ferramenta de desenvolvimento, só com ?debug.
   const debugMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debug');
   const diffRef = useRef<HTMLDivElement>(null);
@@ -475,7 +494,7 @@ export default function CorretorV3Page() {
    */
   const runPaidAnalysis = useCallback(async (
     ctx: { studyId: string; version: number; ir: Ir; bytes: Uint8Array; estimate: FullEstimate; fonte?: Fonte | null },
-    confirmed: AtaGateValue,
+    confirmed: AtaGateValue & { outras?: string[] },
     phase2Usd: number,
   ) => {
     const ac = new AbortController();
@@ -488,6 +507,7 @@ export default function CorretorV3Page() {
       const res = await runPhase2(ctx.ir, {
         city: confirmed.cidade,
         uf: confirmed.uf,
+        outras: confirmed.outras ?? readOutras(ctx.studyId),
         ata: confirmed.ata,
         model: MODEL,
         candidates: ctx.estimate.candidates,
@@ -591,6 +611,8 @@ export default function CorretorV3Page() {
         studyId: study.id, version: study.version, ir, bytes,
         ata: p1.ata, estimate, phase2Brl: formatBRL(phase2Usd), fonte,
         suggestion: suggestCity(ir.arquivo ?? '', ir),
+        cities: otherCities(ir, p1.ata?.cidade && p1.ata?.uf ? { cidade: p1.ata.cidade, uf: p1.ata.uf } : suggestCity(ir.arquivo ?? '', ir)),
+        profile: imageProfile(ir, estimate.candidates),
       });
       window.setTimeout(() => document.getElementById('analysis-gate')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
     } catch (err) {
@@ -602,8 +624,9 @@ export default function CorretorV3Page() {
   }, [refreshList]);
 
   /** Portão confirmado: valida orçamento da fase 2 e a executa. */
-  const confirmGate = useCallback((value: AtaGateValue) => {
+  const confirmGate = useCallback((value: PreAnalysisValue) => {
     if (!gate) return;
+    writeOutras(gate.studyId, value.outras);
     // Planilhas vinculadas já no portão valem para a análise que vai rodar agora.
     const ctx = { studyId: gate.studyId, version: gate.version, ir: gate.ir, bytes: gate.bytes, estimate: gate.estimate, fonte: fonteInput?.fonte ?? gate.fonte };
     // A ata já foi paga na fase 1; o orçamento restante é texto + visão.
@@ -626,6 +649,8 @@ export default function CorretorV3Page() {
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
       const ir = await pptxToIr(bytes, file.name);
+      // Cofre local: retomar e vincular planilhas depois sem subir o PPTX de novo.
+      void savePptx(ir.sha1, file.name, bytes);
       const findings = irToFindings(ir).filter((f) => !f.ok);
       const id = await createStudy(
         file.name.replace(/\.pptx$/i, ''),
@@ -654,14 +679,14 @@ export default function CorretorV3Page() {
     }
   }
 
-  async function handleFonte(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFonte(e: React.ChangeEvent<HTMLInputElement>): Promise<Fonte | null> {
     const file = e.target.files?.[0];
     e.target.value = '';
-    if (!file) return;
+    if (!file) return null;
     const parsed = parseFonteJson(await file.text());
     if (!parsed.ok || !parsed.fonte) {
       toast.error('Fonte numérica inválida', { description: parsed.errors.slice(0, 3).join(' ') });
-      return;
+      return null;
     }
     if (selected) {
       try { await saveStudyFonte(selected.id, file.name, parsed.fonte); }
@@ -675,12 +700,13 @@ export default function CorretorV3Page() {
     toast.success(selected ? 'Fonte numérica salva no estudo' : 'Fonte numérica vinculada', {
       description: `${parsed.fonte.blocos.length} blocos disponíveis para cruzamento.`,
     });
+    return parsed.fonte;
   }
 
-  async function handleExcelSources(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleExcelSources(e: React.ChangeEvent<HTMLInputElement>): Promise<Fonte | null> {
     const files = Array.from(e.target.files ?? []).filter((file) => /\.(xlsx|xlsm)$/i.test(file.name));
     e.target.value = '';
-    if (!files.length) return;
+    if (!files.length) return null;
     setSourceProgress({ done: 0, total: files.length });
     try {
       const slug = files[0].name.replace(/\.(xlsx|xlsm)$/i, '').replace(/\s+/g, '-').toLowerCase();
@@ -697,8 +723,10 @@ export default function CorretorV3Page() {
       toast.success('Planilhas processadas', {
         description: `${recognized}/${files.length} reconhecidas · ${fonte.blocos.length} blocos numéricos · ${fonte.avisos.length} aviso(s).`,
       });
+      return fonte;
     } catch (error) {
       toast.error('Falha ao processar as planilhas', { description: error instanceof Error ? error.message : String(error) });
+      return null;
     } finally {
       setSourceProgress(null);
     }
@@ -739,6 +767,23 @@ export default function CorretorV3Page() {
    * perdido ao sair da página). Exige o MESMO arquivo da versão registrada —
    * versão nova é reconferência, não retomada.
    */
+  /** Retoma a análise usando o PPTX guardado neste navegador; sem ele, pede o arquivo. */
+  async function resumeAnalysis() {
+    if (!selected) return;
+    const cached = await loadPptx(selected.lastSha1);
+    if (!cached) { resumeRef.current?.click(); return; }
+    setBusy('upload');
+    try {
+      const ir = await pptxToIr(cached.bytes, cached.name);
+      setBusy(null);
+      await startPhase1AndGate({ id: selected.id, version: selected.lastVersion }, ir, cached.bytes, fonteInput?.fonte);
+    } catch (err) {
+      toast.error('Falha ao preparar a análise', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function handleResume(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -757,7 +802,14 @@ export default function CorretorV3Page() {
         });
         return;
       }
+      void savePptx(ir.sha1, file.name, bytes);
       setBusy(null);
+      if (pendingCrosscheck.current) {
+        const fonte = pendingCrosscheck.current;
+        pendingCrosscheck.current = null;
+        await crosscheckAfterAnalysis(fonte, bytes, file.name);
+        return;
+      }
       await startPhase1AndGate({ id: selected.id, version: selected.lastVersion }, ir, bytes, fonteInput?.fonte);
     } catch (err) {
       toast.error('Falha ao preparar a análise', { description: err instanceof Error ? err.message : String(err) });
@@ -766,12 +818,50 @@ export default function CorretorV3Page() {
     }
   }
 
+  /**
+   * Planilhas vinculadas DEPOIS da análise: cruzamento com a fonte sobre as
+   * leituras já pagas (cache de visão). Sem nova chamada de IA, sem custo, e sem
+   * subir o PPTX de novo quando ele está no cofre local deste navegador.
+   */
+  async function crosscheckAfterAnalysis(fonte: Fonte, bytes?: Uint8Array, name?: string) {
+    if (!selected) return;
+    let deck = bytes && name ? { bytes, name } : await loadPptx(selected.lastSha1);
+    if (!deck) {
+      pendingCrosscheck.current = fonte;
+      toast.info('Selecione o PPTX deste estudo', { description: 'Ele não está guardado neste navegador; é só desta vez.' });
+      resumeRef.current?.click();
+      return;
+    }
+    setBusy('recheck');
+    try {
+      const ir = await pptxToIr(deck.bytes, deck.name);
+      const candidates = await findTableImages(deck.bytes, ir);
+      const readings = await loadVisionReadings(candidates.map((c) => c.sha1));
+      const vision = replayVisionPass(candidates, readings, { cidade: selected.cidade ?? '', uf: selected.uf, outras: readOutras(selected.id) });
+      const det = crosscheckDet(ir, fonte);
+      const vis = sourceCrosscheckVisionFindings(ir, fonte, vision.tables);
+      if (det.length) await insertIaFindings(selected.id, det, 'DET', selected.lastVersion);
+      if (vis.length) await insertIaFindings(selected.id, vis, 'IA_visao', selected.lastVersion);
+      setItems(await loadFindings(selected.id));
+      await refreshList();
+      toast.success('Cruzamento com as planilhas concluído (R$ 0)', {
+        description: `${det.length + vis.length} divergência(s) com a fonte · ${readings.size} leitura(s) reaproveitada(s).`,
+      });
+    } catch (err) {
+      toast.error('Falha no cruzamento com as planilhas', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setBusy(null);
+    }
+    deck = null;
+  }
+
   /** Um só botão para planilhas Excel (fonte automática) ou fonte.json (compatibilidade). */
   async function handleStudySources(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
-    if (files.some((f) => /\.json$/i.test(f.name))) await handleFonte(e);
-    else await handleExcelSources(e);
+    const fonte = files.some((f) => /\.json$/i.test(f.name)) ? await handleFonte(e) : await handleExcelSources(e);
     await refreshList();
+    // Análise já feita: o cruzamento com a fonte roda agora, sobre o cache.
+    if (fonte && selected && !analysisPending(selected) && !gate) await crosscheckAfterAnalysis(fonte);
   }
 
   async function handleRecheck(e: React.ChangeEvent<HTMLInputElement>) {
@@ -791,6 +881,7 @@ export default function CorretorV3Page() {
     setBusy('recheck');
     try {
       const ir = await pptxToIr(bytes, filename);
+      void savePptx(ir.sha1, filename, bytes);
       const findings = [
         ...irToFindings(ir, { city: selected.cidade ?? undefined, uf: selected.uf }).filter((f) => !f.ok),
         ...(fonteInput ? sourceCrosscheckFindings(ir, fonteInput.fonte) : []),
@@ -1295,12 +1386,12 @@ export default function CorretorV3Page() {
               <button
                 type="button"
                 disabled={busy !== null}
-                onClick={() => resumeRef.current?.click()}
+                onClick={() => void resumeAnalysis()}
                 className="rounded-md bg-amber-600 text-white px-3 py-1.5 font-medium hover:bg-amber-700 inline-flex items-center gap-1.5 disabled:opacity-50"
-                title="O arquivo não fica salvo no servidor: selecione o mesmo PPTX para rodar a análise"
+                title="Usa o PPTX guardado neste navegador; se não houver, pede o arquivo uma vez"
               >
                 {busy === 'upload' ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
-                Selecionar o PPTX e analisar
+                Continuar para a pré-análise
               </button>
             )}
           </div>
@@ -1363,15 +1454,17 @@ export default function CorretorV3Page() {
           {/* WS-1: portão da ata — bloqueia os passes pagos até a confirmação da cidade/UF */}
           {gate && gate.studyId === selected.id && !analysis?.running && (
             <div id="analysis-gate">
-              <AtaGateCard
+              <PreAnalysisCard
                 ata={gate.ata}
+                suggestion={gate.suggestion}
+                cities={gate.cities}
+                profile={gate.profile}
                 costBrl={gate.phase2Brl}
                 running={false}
-                onConfirm={confirmGate}
-                suggestion={gate.suggestion}
                 temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)}
                 sourceLabel={fonteInput?.name ?? null}
                 onAttachSources={() => studySourcesRef.current?.click()}
+                onConfirm={confirmGate}
               />
             </div>
           )}
