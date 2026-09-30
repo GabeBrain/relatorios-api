@@ -231,6 +231,8 @@ export async function runPhase2(
   // DET com a UF confirmada + cobertura da ata editada.
   let detFindings = irToFindings(ir, { city: cityUsed, uf }).filter((f) => !f.ok);
   detFindings = detFindings.concat(ataCoverageFindings(ir, ata).filter((f) => !f.ok));
+  // Fonte vinculada depois da triagem (no portão): o cruzamento DET roda aqui também.
+  if (opts.fonte) detFindings = detFindings.concat(sourceCrosscheckFindings(ir, opts.fonte));
 
   const textPromise = runTextPass(
     ir, cityUsed, model,

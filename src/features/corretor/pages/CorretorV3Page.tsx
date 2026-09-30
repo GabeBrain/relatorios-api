@@ -10,7 +10,7 @@ import brainLogo from '../../../../assets/logoBrain.png';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
   Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X, BarChart3,
-  Search, ArrowUpDown, Clock3, ChevronRight, FolderKanban,
+  Search, ArrowUpDown, Clock3, ChevronRight, FolderKanban, FileSpreadsheet, Circle, PlayCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -43,10 +43,12 @@ import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
   saveReport, setFindingVerdict, resolveInvalidFindings, loadTranscribedBySha1,
-  saveStudyFonte, loadStudyFonte,
+  saveStudyFonte, loadStudyFonte, analysisPending,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 import { parseFonteJson, type Fonte } from '../lib/v3/fonte';
+import { suggestCity, type CitySuggestion } from '../lib/v3/city-suggestion';
+import type { AnalysisReport } from '../lib/v3/pipeline';
 import { extractFonteFromExcel } from '../lib/v3/fonte-extractor-browser';
 import { sourceCrosscheckFindings } from '../lib/v3/source-crosscheck';
 
@@ -283,9 +285,58 @@ function dateLabel(value: string): string {
   return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
+/**
+ * Onde o estudo está no fluxo. O caso da Ana (30/set) mostrou que “0 erros” no
+ * topo era lido como “estudo limpo” quando só a triagem tinha rodado: os passos
+ * deixam explícito o que já aconteceu e o que falta.
+ */
+function StudySteps({ temFonte, cidade, pending, running, reviewOpen, delivered }: {
+  temFonte: boolean; cidade: string | null; pending: boolean; running: boolean; reviewOpen: number; delivered: boolean;
+}) {
+  const steps: { label: string; state: 'done' | 'todo' | 'current' | 'optional' }[] = [
+    { label: 'Planilhas', state: temFonte ? 'done' : 'optional' },
+    { label: 'Apresentação', state: 'done' },
+    { label: cidade ? `Cidade: ${cidade}` : 'Cidade', state: cidade && !pending ? 'done' : pending ? 'current' : 'done' },
+    { label: running ? 'Análise em andamento' : 'Análise completa', state: pending ? (running ? 'current' : 'todo') : 'done' },
+    { label: reviewOpen > 0 && !pending ? `Revisão (${reviewOpen})` : 'Revisão', state: pending ? 'todo' : reviewOpen > 0 ? 'current' : 'done' },
+    { label: 'Entrega', state: delivered ? 'done' : 'todo' },
+  ];
+  return (
+    <ol className="flex flex-wrap items-center gap-1.5 text-[11px]">
+      {steps.map((step, i) => (
+        <li key={step.label} className="inline-flex items-center gap-1.5">
+          {i > 0 && <span className="text-muted-foreground/50">›</span>}
+          <span className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5',
+            step.state === 'done' && 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400',
+            step.state === 'current' && 'border-amber-500/60 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-medium',
+            step.state === 'todo' && 'border-border text-muted-foreground',
+            step.state === 'optional' && 'border-dashed border-amber-500/50 text-amber-700 dark:text-amber-400')}
+            title={step.state === 'optional' ? 'Sem planilhas vinculadas: o cruzamento com a fonte fica desligado' : undefined}>
+            {step.state === 'done' ? <CheckCircle2 className="w-3 h-3" /> : step.state === 'optional' ? <AlertTriangle className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+            {i + 1}. {step.label}{step.state === 'optional' ? ' (não vinculadas)' : ''}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** O que a análise completa de fato conferiu — “0 erros” só vale sobre isto. */
+function CoverageLine({ report, temFonte }: { report: AnalysisReport; temFonte: boolean }) {
+  return (
+    <p className="text-[11px] text-muted-foreground">
+      Conferido na análise: texto de todos os slides · {report.tabelasNativas} tabela(s) nativa(s) ·{' '}
+      {report.imagensAnalisadas} imagem(ns) de tabela ({report.tabelasVerificadas} de {report.tabelasExtraidas} tabela(s) lida(s) sem achado) ·{' '}
+      {temFonte ? 'planilhas-fonte cruzadas' : <span className="text-amber-700 dark:text-amber-400">sem planilhas-fonte (cruzamento com a fonte desligado)</span>}
+    </p>
+  );
+}
+
 function StudyRow({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
   const pronto = s.status === 'pronto';
-  const review = !pronto && (s.pendentes ?? 0) === 0;
+  // Sem a análise completa, "0 pendências" não é "revisar e entregar": nada foi lido.
+  const pendente = analysisPending(s);
+  const review = !pronto && !pendente && (s.pendentes ?? 0) === 0;
   return (
     <button
       onClick={() => onOpen(s.id)}
@@ -304,9 +355,9 @@ function StudyRow({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
       </div>
       <div className="hidden sm:block">
         <p className={cn('text-xs font-medium', pronto ? 'text-emerald-600 dark:text-emerald-400' : review ? 'text-primary' : 'text-amber-600 dark:text-amber-400')}>
-          {pronto ? 'Pronto para o A&R' : review ? 'Revisar e entregar' : `${s.pendentes ?? 0} pendência(s)`}
+          {pronto ? 'Pronto para o A&R' : pendente ? 'Análise pendente' : review ? 'Revisar e entregar' : `${s.pendentes ?? 0} pendência(s)`}
         </p>
-        <p className="mt-0.5 text-[10px] text-muted-foreground">{pronto ? 'Entrega concluída' : review ? 'Sem bloqueios abertos' : 'Correção em andamento'}</p>
+        <p className="mt-0.5 text-[10px] text-muted-foreground">{pronto ? 'Entrega concluída' : pendente ? 'Só a triagem inicial rodou' : review ? 'Sem bloqueios abertos' : 'Correção em andamento'}</p>
       </div>
       <div className="hidden sm:block">
         <p className="flex items-center gap-1 text-[11px] text-muted-foreground"><Clock3 className="h-3 w-3" /> {dateLabel(s.createdAt)}</p>
@@ -314,7 +365,7 @@ function StudyRow({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
       </div>
       <div className="flex items-center gap-2 self-center">
         <span className={cn('rounded-full px-2 py-1 text-[10px] font-medium sm:hidden', pronto ? 'bg-emerald-500/10 text-emerald-600' : review ? 'bg-primary/10 text-primary' : 'bg-amber-500/10 text-amber-600')}>
-          {pronto ? 'Pronto' : review ? 'Revisar' : `${s.pendentes ?? 0} pend.`}
+          {pronto ? 'Pronto' : pendente ? 'Analisar' : review ? 'Revisar' : `${s.pendentes ?? 0} pend.`}
         </span>
         <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
       </div>
@@ -346,6 +397,7 @@ export default function CorretorV3Page() {
   const [gate, setGate] = useState<{
     studyId: string; version: number; ir: Ir; bytes: Uint8Array;
     ata: AtaData | null; estimate: FullEstimate; phase2Brl: string; fonte?: Fonte | null;
+    suggestion: CitySuggestion | null;
   } | null>(null);
   const [dragging, setDragging] = useState(false);
   const [workspaceTab, setWorkspaceTab] = useState<'completude' | 'problemas' | 'slides'>('completude');
@@ -357,10 +409,17 @@ export default function CorretorV3Page() {
   const [fonteInput, setFonteInput] = useState<{ name: string; fonte: Fonte } | null>(null);
   const [sourceProgress, setSourceProgress] = useState<{ done: number; total: number } | null>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
+  /** Retomar a análise completa: o PPTX não fica no banco, então é preciso re-selecioná-lo. */
+  const resumeRef = useRef<HTMLInputElement>(null);
+  /** Planilhas (ou fonte.json) vinculadas de dentro do estudo, depois do upload. */
+  const studySourcesRef = useRef<HTMLInputElement>(null);
+  // Painel de teste da extração da ata: ferramenta de desenvolvimento, só com ?debug.
+  const debugMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debug');
   const diffRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const selected = studies.find((s) => s.id === selectedId) ?? null;
+  const pending = selected ? analysisPending(selected) : false;
 
   const refreshList = useCallback(async () => {
     setLoadingList(true);
@@ -521,7 +580,9 @@ export default function CorretorV3Page() {
       setGate({
         studyId: study.id, version: study.version, ir, bytes,
         ata: p1.ata, estimate, phase2Brl: formatBRL(phase2Usd), fonte,
+        suggestion: suggestCity(ir.arquivo ?? '', ir),
       });
+      window.setTimeout(() => document.getElementById('analysis-gate')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
     } catch (err) {
       toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
     } finally {
@@ -533,7 +594,8 @@ export default function CorretorV3Page() {
   /** Portão confirmado: valida orçamento da fase 2 e a executa. */
   const confirmGate = useCallback((value: AtaGateValue) => {
     if (!gate) return;
-    const ctx = { studyId: gate.studyId, version: gate.version, ir: gate.ir, bytes: gate.bytes, estimate: gate.estimate, fonte: gate.fonte };
+    // Planilhas vinculadas já no portão valem para a análise que vai rodar agora.
+    const ctx = { studyId: gate.studyId, version: gate.version, ir: gate.ir, bytes: gate.bytes, estimate: gate.estimate, fonte: fonteInput?.fonte ?? gate.fonte };
     // A ata já foi paga na fase 1; o orçamento restante é texto + visão.
     const phase2Usd = Math.max(0, gate.estimate.costUsd - gate.estimate.vision.costUsd) + gate.estimate.vision.costUsd;
     setGate(null);
@@ -543,7 +605,7 @@ export default function CorretorV3Page() {
       return;
     }
     run();
-  }, [gate, runPaidAnalysis]);
+  }, [gate, runPaidAnalysis, fonteInput]);
 
   async function ingestNew(file: File) {
     if (!/\.pptx$/i.test(file.name)) {
@@ -662,6 +724,46 @@ export default function CorretorV3Page() {
     else void ingestNew(file);
   }
 
+  /**
+   * Retoma a análise completa de um estudo que parou na triagem inicial (portão
+   * perdido ao sair da página). Exige o MESMO arquivo da versão registrada —
+   * versão nova é reconferência, não retomada.
+   */
+  async function handleResume(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !selected) return;
+    if (!/\.pptx$/i.test(file.name)) {
+      toast.error('Formato não suportado', { description: 'Selecione o .pptx deste estudo.' });
+      return;
+    }
+    setBusy('upload');
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const ir = await pptxToIr(bytes, file.name);
+      if (selected.lastSha1 && ir.sha1 !== selected.lastSha1) {
+        toast.error('Este não é o arquivo da versão registrada', {
+          description: `Selecione o mesmo PPTX da versão ${selected.lastVersion}. Para uma versão corrigida, use “Reconferir”.`,
+        });
+        return;
+      }
+      setBusy(null);
+      await startPhase1AndGate({ id: selected.id, version: selected.lastVersion }, ir, bytes, fonteInput?.fonte);
+    } catch (err) {
+      toast.error('Falha ao preparar a análise', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  /** Um só botão para planilhas Excel (fonte automática) ou fonte.json (compatibilidade). */
+  async function handleStudySources(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (files.some((f) => /\.json$/i.test(f.name))) await handleFonte(e);
+    else await handleExcelSources(e);
+    await refreshList();
+  }
+
   async function handleRecheck(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !selected) return;
@@ -761,6 +863,10 @@ export default function CorretorV3Page() {
 
   async function handleConclude() {
     if (!selected) return;
+    if (analysisPending(selected)) {
+      toast.error('A análise completa ainda não rodou', { description: 'Confirme a cidade e rode a análise antes de entregar.' });
+      return;
+    }
     const pendentes = items.filter((item) => item.status === 'pendente');
     const erros = pendentes.filter((item) => !isComunicacao(item));
     const blocking = erros.filter((item) => confidenceOf(item.finding, item.origem) <= 2);
@@ -1097,13 +1203,17 @@ export default function CorretorV3Page() {
         <div className="flex items-center gap-2 shrink-0">
           <input ref={recheckRef} type="file" accept=".pptx" className="hidden" onChange={handleRecheck} />
           <input ref={fonteRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFonte} />
+          <input ref={studySourcesRef} type="file" accept=".xlsx,.xlsm,.json" multiple className="hidden" onChange={handleStudySources} />
+          <input ref={resumeRef} type="file" accept=".pptx" className="hidden" onChange={handleResume} />
           <button
             type="button"
-            onClick={() => fonteRef.current?.click()}
-            className={cn('text-xs rounded-md px-2.5 py-1.5 border inline-flex items-center gap-1.5', fonteInput ? 'border-emerald-500/50 text-emerald-700 dark:text-emerald-400' : 'border-border hover:border-primary/50')}
-            title={fonteInput ? fonteInput.name : 'Vincular fonte.json para a próxima reconferência'}
+            onClick={() => studySourcesRef.current?.click()}
+            disabled={sourceProgress !== null}
+            className={cn('text-xs rounded-md px-2.5 py-1.5 border inline-flex items-center gap-1.5 disabled:opacity-50', fonteInput ? 'border-emerald-500/50 text-emerald-700 dark:text-emerald-400' : 'border-border hover:border-primary/50')}
+            title={fonteInput ? `${fonteInput.name} — clique para trocar` : 'Vincular as planilhas-fonte (.xlsx/.xlsm) do estudo'}
           >
-            <BookOpen className="w-3.5 h-3.5" /> {fonteInput ? 'Fonte vinculada' : 'Vincular fonte'}
+            {sourceProgress ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
+            {sourceProgress ? `Planilhas ${sourceProgress.done}/${sourceProgress.total}` : fonteInput ? 'Planilhas vinculadas' : 'Vincular planilhas'}
           </button>
           <button
             onClick={() => recheckRef.current?.click()}
@@ -1130,9 +1240,9 @@ export default function CorretorV3Page() {
           ) : (
             <button
               onClick={handleConclude}
-              disabled={blockingPend > 0 || analysis?.running}
+              disabled={pending || blockingPend > 0 || analysis?.running}
               className="text-xs rounded-md px-2.5 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1.5 disabled:opacity-40"
-              title={blockingPend > 0 ? `Ainda há ${blockingPend} erro(s)/provável(is) pendente(s)` : 'Marcar como pronto para o A&R'}
+              title={pending ? 'A análise completa ainda não rodou' : blockingPend > 0 ? `Ainda há ${blockingPend} erro(s)/provável(is) pendente(s)` : 'Marcar como pronto para o A&R'}
             >
               <PackageCheck className="w-3.5 h-3.5" /> Entregar
             </button>
@@ -1148,6 +1258,43 @@ export default function CorretorV3Page() {
       </header>
 
       <div className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur px-6 py-3 space-y-2">
+        <StudySteps
+          temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)}
+          cidade={selected.cidade}
+          pending={pending}
+          running={Boolean(analysis?.running)}
+          reviewOpen={wl.pend}
+          delivered={selected.status === 'pronto'}
+        />
+        {pending && !analysis?.running ? (
+          <div className="rounded-md border-2 border-amber-500/60 bg-amber-500/10 px-3 py-2.5 flex flex-wrap items-center gap-3 text-xs">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+            <p className="flex-1 min-w-[240px]">
+              <strong>Análise completa pendente.</strong> Só a triagem inicial rodou: o texto, as tabelas-imagem e os
+              cruzamentos ainda não foram conferidos. Os itens abaixo não representam o estudo — ainda não há contagem de erros.
+            </p>
+            {gate && gate.studyId === selected.id ? (
+              <button
+                type="button"
+                onClick={() => document.getElementById('analysis-gate')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                className="rounded-md bg-amber-600 text-white px-3 py-1.5 font-medium hover:bg-amber-700 inline-flex items-center gap-1.5"
+              >
+                <PlayCircle className="w-4 h-4" /> Confirmar cidade e analisar
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={busy !== null}
+                onClick={() => resumeRef.current?.click()}
+                className="rounded-md bg-amber-600 text-white px-3 py-1.5 font-medium hover:bg-amber-700 inline-flex items-center gap-1.5 disabled:opacity-50"
+                title="O arquivo não fica salvo no servidor: selecione o mesmo PPTX para rodar a análise"
+              >
+                {busy === 'upload' ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
+                Selecionar o PPTX e analisar
+              </button>
+            )}
+          </div>
+        ) : (<>
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
           <div className="flex flex-wrap gap-2">
             {wl.confidence.map(([level, findings]) => {
@@ -1168,12 +1315,14 @@ export default function CorretorV3Page() {
           </span>
         </div>
         <Progress value={progressPct} className="h-1.5" />
+        {selected.analise && <CoverageLine report={selected.analise} temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)} />}
+        </>)}
         <div className="flex gap-1 pt-0.5 items-center">
           {([
             ['completude', 'Completude'], ['problemas', 'Problemas'], ['slides', 'Por slide'],
           ] as const).map(([tab, label]) => <button key={tab} onClick={() => setWorkspaceTab(tab)} className={cn('text-xs rounded-md px-3 py-1.5 border', workspaceTab === tab ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50')}>{label}</button>)}
           <div className="flex-1" />
-          {wl.pend > 0 && (
+          {wl.pend > 0 && !pending && (
             <button
               onClick={() => setTriaging(true)}
               className="text-xs rounded-md px-3 py-1.5 border border-primary/40 text-primary hover:bg-primary/5 inline-flex items-center gap-1.5"
@@ -1203,12 +1352,18 @@ export default function CorretorV3Page() {
 
           {/* WS-1: portão da ata — bloqueia os passes pagos até a confirmação da cidade/UF */}
           {gate && gate.studyId === selected.id && !analysis?.running && (
-            <AtaGateCard
-              ata={gate.ata}
-              costBrl={gate.phase2Brl}
-              running={false}
-              onConfirm={confirmGate}
-            />
+            <div id="analysis-gate">
+              <AtaGateCard
+                ata={gate.ata}
+                costBrl={gate.phase2Brl}
+                running={false}
+                onConfirm={confirmGate}
+                suggestion={gate.suggestion}
+                temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)}
+                sourceLabel={fonteInput?.name ?? null}
+                onAttachSources={() => studySourcesRef.current?.click()}
+              />
+            </div>
           )}
 
           {loadingStudy ? (
@@ -1220,7 +1375,7 @@ export default function CorretorV3Page() {
               {workspaceTab === 'completude' && <section className="space-y-4">
                 {selected.ata
                   ? <AtaCard ata={selected.ata} />
-                  : selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
+                  : debugMode && selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
                 <WlHead title="Cobertura da ata e estrutura" count={wl.completude.length} hint="corrija o que falta produzir antes da varredura fina" />
                 {wl.completude.length === 0 ? <p className="text-xs text-muted-foreground">Nenhum item estrutural pendente.</p> : wl.completude.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
 

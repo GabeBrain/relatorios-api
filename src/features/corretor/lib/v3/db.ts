@@ -28,6 +28,21 @@ export interface StudyV3 {
   lastSha1: string | null;
   ata?: AtaData | null;
   generation: 'v2' | 'v3';
+  /** Snapshot da análise completa (texto + visão + cruzamentos); null = não rodou. */
+  analise?: AnalysisReport | null;
+  /** Há planilhas-fonte (study_sources_v3) vinculadas ao estudo. */
+  temFonte?: boolean;
+}
+
+/**
+ * A análise completa não rodou: só a triagem inicial (R$ 0) existe. Nesse estado
+ * os contadores de erro NÃO descrevem o estudo — nada de texto/imagem foi lido.
+ * Caso real (Ana, João Pessoa, 30/set): o painel mostrava "0 erros" e liberava a
+ * entrega sem a análise ter sido feita. Estudos V2 antigos não têm o snapshot e
+ * não entram nessa regra.
+ */
+export function analysisPending(study: Pick<StudyV3, 'generation' | 'analise' | 'status'>): boolean {
+  return study.generation === 'v3' && study.status !== 'pronto' && !study.analise;
 }
 
 export interface FindingV3 {
@@ -112,7 +127,7 @@ export async function loadStudyFonte(studyId: string): Promise<StudyFonte | null
 export async function listStudies(): Promise<StudyV3[]> {
   const { data, error } = await db
     .from('studies_v3')
-    .select('*, study_versions(n, n_slides, sha1), findings_v3(status)')
+    .select('*, study_versions(n, n_slides, sha1), findings_v3(status), study_sources_v3(study_id)')
     .order('created_at', { ascending: false });
   if (error || !data) return [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,6 +149,8 @@ export async function listStudies(): Promise<StudyV3[]> {
       lastSha1: versions[0]?.sha1 ?? null,
       ata: (s.ata ?? null) as AtaData | null,
       generation: s.generation === 'v3' ? 'v3' : 'v2',
+      analise: (s.relatorio ?? null) as AnalysisReport | null,
+      temFonte: Array.isArray(s.study_sources_v3) ? s.study_sources_v3.length > 0 : Boolean(s.study_sources_v3),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       pendentes: (s.findings_v3 ?? []).filter((f: any) => f.status === 'pendente').length,
     };
@@ -422,6 +439,7 @@ export async function loadDeliveryReport(studyId: string): Promise<DeliveryRepor
     custoTotal: Number(s.custo_total ?? 0), lastSha1: versions[0]?.sha1 ?? null,
     ata: (s.ata ?? null) as AtaData | null,
     generation: s.generation === 'v3' ? 'v3' : 'v2',
+    analise: (s.relatorio ?? null) as AnalysisReport | null,
   };
 
   const findings = await loadFindings(studyId);

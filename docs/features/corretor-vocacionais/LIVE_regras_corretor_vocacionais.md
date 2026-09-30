@@ -16,6 +16,23 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.62 — 2026-09-30 — fluxo explícito: análise pendente, portão persistente, passos (RUNTIME local)
+
+**Fonte:** estudo de João Pessoa (Ana, 30/set). O painel mostrava “0 erros · 0 prováveis”, barra verde e
+“Entregar” liberado, mas só a triagem inicial tinha rodado: a ata não trouxe a cidade, o portão pedia a
+cidade num campo vazio e a análise paga nunca foi disparada. Na lista, outros dois estudos do dia
+(Francisco Beltrão e Tijucas) estavam no mesmo estado.
+
+- **Estado persistido:** `analysisPending(study)` = geração V3, não entregue e sem `relatorio` (snapshot da fase 2). Enquanto pendente, os contadores e a barra dão lugar à faixa “Análise completa pendente”, “Triar” some e “Entregar” fica bloqueado (também no handler).
+- **Retomada:** o PPTX não fica no servidor; “Selecionar o PPTX e analisar” reabre o portão com o MESMO arquivo (sha1 conferido contra a versão registrada). Arquivo diferente é recusado e orientado para “Reconferir”.
+- **Cidade sugerida:** `city-suggestion.ts` lê “Cidade - UF” do nome do arquivo (maior casamento contra os municípios da UF) ou da capa; o portão chega preenchido e diz de onde veio.
+- **Portão:** título “Falta um passo”, explica que os contadores ainda não valem, avisa quando não há planilhas e permite vinculá-las ali; as planilhas vinculadas no portão entram na fase 2 (inclusive o cruzamento DET com a fonte).
+- **Passos numerados** (Planilhas › Apresentação › Cidade › Análise completa › Revisão › Entrega) e **linha de cobertura** (texto, tabelas nativas, imagens, planilhas) após a análise.
+- **Limpeza:** “Vincular fonte” (fonte.json) virou “Vincular planilhas” (.xlsx/.xlsm, json por compatibilidade); o painel “Ata do projeto (β — teste de extração)” só aparece com `?debug`.
+- **Lista de estudos:** “Análise pendente · só a triagem inicial rodou” no lugar de “Revisar e entregar”.
+
+**Verificação:** 175 testes verdes (170 → 175, `fluxo-analise.test.ts`), `tsc`, lint e `vite build` ok; captura local (Playwright) do estudo de João Pessoa e da lista confirmou faixa, passos, “Entregar” desativado e painel de teste oculto. **Não verificado:** o clique de retomada com o PPTX real e a fase 2 completa pela interface — escrevem no estudo da Ana e têm custo; ficam para o teste manual.
+
 ## Versão 0.61 — 2026-09-30 — reconciliação no nível do deck (RUNTIME local)
 
 **Fonte:** triagem manual de Campos do Jordão (38 achados: 6 válidos, 22 FP, 10 avisos de totais não
