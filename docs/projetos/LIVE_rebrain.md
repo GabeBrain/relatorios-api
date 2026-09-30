@@ -2019,3 +2019,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,__tests__/building-source-parity.test.ts}`.
 - **Monday:** [DESAFIO - Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
 - **Impacto em Etapas/Pendências:** aquisição granular padronizada antes da validação dos motores; continuam pendentes a robustez/rate limit das séries temporais e a reconciliação numérica do fechamento FIERGS 4T2025 contra o deck.
+### 2026-09-30 — FIERGS-RS: baseline pós-teste explica quatro totais de vendas — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — reconciliação metodológica do recorte FIERGS 2T2026.
+- **O quê:** uma bancada autenticada e reproduzível congelou o recorte das dez cidades e explicou integralmente os totais apontados pela Juliana. `2.317` soma indevidamente `1.137` verticais e `1.180` horizontais; `1.138` descarta uma venda líquida negativa de quatro dormitórios; e o excesso de `46` entre `1.137` e `1.091` vem da soma de fotografias acumuladas em Canoas (`41`) e Novo Hamburgo (`5`). O total tecnicamente recomendado é `1.091`, derivado da última fotografia granular por empreendimento/tipologia.
+- **Por quê:** concluir as Fases 0 e 1 antes de alterar o runtime e impedir correção arbitrária de números ou avanço prematuro para ajustes visuais.
+- **Arquivos:** `scripts/fiergs-sales-reconciliation.mts`, `docs/features/Relatorios Secovi_FIERGS/{PLAN_POS_TESTE_JULIANA_FIERGS_2T2026_2026-09-30.md,EVIDENCIA_FASES_0_1_VENDAS_FIERGS_2T2026_2026-09-30.md}`.
+- **Commits:** `290a5e2`.
+- **Verificação:** consulta autenticada das dez cidades; repetição focal de Canoas/Novo Hamburgo; 64 testes focais e typecheck aprovados.
+- **Impacto em Etapas/Pendências:** portão A passou tecnicamente; a mudança estrutural permanece bloqueada no checkpoint para aprovação da fonte canônica antes das Fases 2–4. Nenhum componente de produção foi alterado.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
