@@ -41,6 +41,12 @@ export function cityFromText(text: string): { cidade: string; uf: string } | nul
   return best ? { cidade: best.cidade, uf: best.uf } : null;
 }
 
+/** UFs em que existe um município com esse nome (há homônimos entre estados). */
+export function ufsOfCity(name: string): string[] {
+  const key = norm(name);
+  return [...BY_UF.entries()].filter(([, cities]) => cities.has(key)).map(([uf]) => uf);
+}
+
 /** Nome do arquivo primeiro; depois título e textos dos 3 primeiros slides. */
 export function suggestCity(fileName: string, ir?: Pick<Ir, 'slides'> | null): CitySuggestion | null {
   const fromName = cityFromText(fileName);

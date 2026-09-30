@@ -508,8 +508,18 @@ export default function CorretorV3Page() {
 
       // DET pós-ata (UF + cobertura) por upsert — IDs estáveis evitam duplicata.
       await insertIaFindings(ctx.studyId, res.detFindings, 'DET', ctx.version);
-      // snapshot do que foi verificado (attestation / WS-2)
-      await saveReport(ctx.studyId, res.report);
+      if (!res.aborted) {
+        // Achados de visão que não sobreviveram à reconciliação do deck (gravados
+        // brutos por versões anteriores) são encerrados: a lista final é a de agora.
+        const finalIds = new Set(res.visionFindings.map((f) => f.id));
+        const stale = (await loadFindings(ctx.studyId))
+          .filter((i) => i.origem === 'IA_visao' && i.status === 'pendente' && !finalIds.has(i.ruleId))
+          .map((i) => i.ruleId);
+        if (stale.length) await resolveInvalidFindings(ctx.studyId, stale);
+        // Snapshot só de análise COMPLETA: pausada, o estudo continua pendente
+        // (antes a pausa gravava o snapshot e o estudo passava por analisado).
+        await saveReport(ctx.studyId, res.report);
+      }
 
       if (res.textCostUsd > 0 || res.textFindings.length) {
         await registerIaPass(ctx.studyId, 'texto', `${ctx.estimate.textSlides} slides · ${MODEL}`,
@@ -523,7 +533,7 @@ export default function CorretorV3Page() {
       const nIa = res.textFindings.length + res.visionFindings.length;
       const custo = res.textCostUsd + res.visionCostUsd;
       if (res.aborted) {
-        toast.warning('Análise pausada', { description: `${nIa} achado(s) de IA até aqui · ${formatBRL(custo)} — o que foi extraído ficou salvo (cache).` });
+        toast.warning('Análise pausada — continua pendente', { description: `${formatBRL(custo)} gastos até aqui. O que já foi lido ficou no cache: ao retomar, só o restante é cobrado.` });
       } else {
         toast.success(`Análise completa — ${formatBRL(custo)}`, {
           description: `${nIa} achado(s) de IA na worklist` +

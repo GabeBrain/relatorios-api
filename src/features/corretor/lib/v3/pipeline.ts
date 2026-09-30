@@ -13,7 +13,7 @@ import { estimateTextPass, runTextPass } from './ia-text';
 import {
   findTableImages, type TableImageCandidate, type TableImageScan,
 } from './table-images';
-import { estimateVisionPass, runVisionPass, type VisionEstimate, type VisionPassResult } from './ia-vision';
+import { estimateVisionPass, runVisionPass, type VisionEstimate, type VisionPassResult, type FailedImage } from './ia-vision';
 import { attachEvidenceImages } from './evidence';
 import { reconcileDeckFindings } from './deck-reconcile';
 import { findAtaImage, type AtaImageCandidate } from './ata-image';
@@ -253,7 +253,10 @@ export async function runPhase2(
     // total aberto — o achado desce para “Verificar” citando a nota, nunca “Erro”.
     res.findings = applyDeclaredExclusions(ir, res.findings);
     await attachEvidenceImages(res.findings, candidates);
-    onStage?.({ stage: 'visao', done: candidates.length, total: candidates.length, findings: res.findings, spentUsd: res.costUsd });
+    // Sem achados aqui: os de visão só são gravados depois da reconciliação do
+    // deck (etapa “cruzamento”). Gravar os brutos aqui deixou 28 somas soltas no
+    // estudo de João Pessoa (30/set).
+    onStage?.({ stage: 'visao', done: candidates.length, total: candidates.length, spentUsd: res.costUsd });
     return res;
   });
 
@@ -261,7 +264,7 @@ export async function runPhase2(
   const combined = combineVisionFindings(ir, vision, candidates, opts.fonte);
   const visionFindings = combined.visionFindings;
   await attachEvidenceImages(combined.crossFindings, candidates);
-  onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: combined.crossFindings });
+  onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: visionFindings });
 
   // Pista dirigida: slide com comentário da revisão e nenhum achado do motor é
   // candidato a regra faltante. Só faz sentido com texto e visão já concluídos.
@@ -295,7 +298,7 @@ export async function runPhase2(
 export function combineVisionFindings(
   ir: Ir, vision: VisionPassResult, candidates: TableImageCandidate[], fonte?: Fonte | null,
 ): { visionFindings: Finding[]; crossFindings: Finding[] } {
-  const unread = unreadImageFindings(candidates);
+  const unread = unreadImageFindings(candidates, vision.failed ?? []);
   const refs = nativeTableRefs(ir).concat(vision.tables.map((table) => ({ ...table, source: 'vision' as const })));
   const cross = crossTableFindings(ir, vision.tables);
   const projection = projectionFindings(refs);
@@ -315,8 +318,8 @@ export function combineVisionFindings(
  * por slide. Antes ela simplesmente não existia no relatório, e "nenhum erro"
  * era indistinguível de "nada conferido" (v2 do SJC, set/2026).
  */
-export function unreadImageFindings(candidates: TableImageCandidate[]): Finding[] {
-  const skipped = (candidates as TableImageScan).skipped ?? [];
+export function unreadImageFindings(candidates: TableImageCandidate[], failed: FailedImage[] = []): Finding[] {
+  const skipped = [...((candidates as TableImageScan).skipped ?? []), ...failed];
   if (!skipped.length) return [];
   // Um aviso só, com a lista: 30 cartões iguais escondiam os achados de verdade.
   const slides = [...new Set(skipped.map((s) => `s${s.slide}`))];

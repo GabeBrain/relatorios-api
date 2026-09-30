@@ -5,6 +5,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, calculateImageTokens, type ModelId } from '../cost-calculator';
 import { binsFromColumns, checkTableSums, checkPercentConsistency, checkUnitPlausibility, detectBinGap, rowLabels } from '../audit/engine';
+import { ufsOfCity } from './city-suggestion';
 import { formatIssues, labelTypos, visionFormatIssues, type FormatIssue, type RawFormatAnomaly } from './format-checks';
 import { toAuditSection } from '../audit/ir';
 import { municipioOficial, sameCity } from '../audit/ir-rules';
@@ -100,7 +101,12 @@ export interface ExtractedTableRef {
   unstable?: boolean;
 }
 
-export interface ExpectedLocation { cidade: string; uf?: string | null }
+export interface ExpectedLocation {
+  cidade: string;
+  uf?: string | null;
+  /** Outras cidades que o analista confirmou como parte do estudo (não são contexto errado). */
+  outras?: string[];
+}
 
 // ── estimativa (antes de rodar) ───────────────────────────────────────────────
 
@@ -216,6 +222,8 @@ export interface VisionPassResult {
   inputTokens: number;
   outputTokens: number;
   costUsd: number;
+  /** imagens que falharam mesmo após novas tentativas (viram aviso de cobertura) */
+  failed: FailedImage[];
 }
 
 export interface VisionPassOpts {
@@ -286,6 +294,9 @@ export function wrongContextFromVisibleLocales(
   const transcribed = transcribedText(payload, candidate);
   const seen = new Set<string>();
   const findings: Finding[] = [];
+  const uf = (expected?.uf ?? '').toUpperCase();
+  const confirmed = new Set((expected?.outras ?? []).map(normalized));
+  const foreign: { text: string; anchored: boolean }[] = [];
 
   for (const raw of Array.isArray(rawLocales) ? rawLocales : []) {
     const text = typeof raw.texto === 'string' ? raw.texto.trim() : '';
@@ -299,23 +310,34 @@ export function wrongContextFromVisibleLocales(
     // A visão devolve qualquer rótulo como "cidade" ("brasileiras", "SP"); só é
     // divergência se o texto for município IBGE — e diferente além de conectivos
     // ("São José do Campos" digitado na ata ≠ FP contra "São José dos Campos").
-    if (!municipioOficial(text) || sameCity(text, city)) continue;
+    if (!municipioOficial(text) || sameCity(text, city) || confirmed.has(found)) continue;
+    // Cidade da MESMA UF do estudo é vizinha/região metropolitana (Cabedelo num
+    // mapa de João Pessoa): aparece legitimamente em mapas e comparativos.
+    if (uf && ufsOfCity(text).includes(uf)) continue;
     // ÂNCORA: o nome precisa estar no texto transcrito da imagem. Sem isso, a
     // "cidade" é inferência do modelo, não leitura — origem de alucinação.
     if (transcribed && !transcribed.includes(found)) continue;
     seen.add(found);
-    findings.push({
-      id: `iavis-context-${candidate.sha1.slice(0, 10)}-${found.replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`,
-      type: 'WRONG_CONTEXT',
-      section: toAuditSection(candidate.secao),
-      slideRef: `s${candidate.slide}`,
-      title: `Cidade divergente na imagem (${text} ≠ ${city})`,
-      detail: `A cidade “${text}” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como ${city}${expected?.uf ? `/${expected.uf}` : ''}. Verifique possível dado de outro estudo.`,
-      ok: false,
-      viz: { kind: 'text', location: candidate.titulo ?? undefined, evidence: text },
-      evidenceSha1: candidate.sha1,
-    });
+    foreign.push({ text, anchored: Boolean(transcribed) && transcribed.includes(found) });
   }
+  // Uma cidade de fora sozinha, sem estar no texto transcrito, é fraca (o "São
+  // Paulo" inexistente do s73 de João Pessoa). Duas ou mais de outra UF na mesma
+  // imagem é o padrão de mapa copiado de outro estudo (s135: Novo Hamburgo,
+  // São Leopoldo, Esteio… num estudo de João Pessoa).
+  if (!foreign.length || (foreign.length < 2 && !foreign[0].anchored)) return findings;
+  const names = foreign.map((f) => f.text);
+  const otherUfs = [...new Set(names.flatMap((n) => ufsOfCity(n)).filter((u) => u !== uf))];
+  findings.push({
+    id: `iavis-context-${candidate.sha1.slice(0, 10)}`,
+    type: 'WRONG_CONTEXT',
+    section: toAuditSection(candidate.secao),
+    slideRef: `s${candidate.slide}`,
+    title: `Imagem com cidade(s) de outro lugar: ${names.slice(0, 3).join(', ')}${names.length > 3 ? ` e mais ${names.length - 3}` : ''}`,
+    detail: `A imagem mostra ${names.join(', ')}${otherUfs.length ? ` (${otherUfs.join('/')})` : ''}, mas o estudo é de ${city}${uf ? `/${uf}` : ''}. Possível mapa ou tabela copiado de outro estudo.`,
+    ok: false,
+    viz: { kind: 'text', location: candidate.titulo ?? undefined, evidence: names.join(', ') },
+    evidenceSha1: candidate.sha1,
+  });
   return findings;
 }
 
@@ -353,19 +375,27 @@ async function extractWithModel(
 ): Promise<{
   payload: CachePayload; inputTokens: number; outputTokens: number;
 }> {
-  const { data, error } = await supabase.functions.invoke<{
-    tables: RawTable[]; locais_visiveis?: RawLocale[]; unidades?: RawUnit[]; tem_fonte?: boolean; inputTokens: number; outputTokens: number; error?: string;
-  }>('analyze-table-image', {
-    body: {
-      base64: imageOverride?.base64 ?? toBase64(c.bytes),
-      mime: imageOverride?.mime ?? c.mime,
-      model,
-      contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
-      tipo: c.tipo,
-    },
-  });
-  if (error) throw new Error(error.message);
-  if (data?.error) throw new Error(data.error);
+  const body = {
+    base64: imageOverride?.base64 ?? toBase64(c.bytes),
+    mime: imageOverride?.mime ?? c.mime,
+    model,
+    contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
+    tipo: c.tipo,
+  };
+  // Limite de requisições (429) e erro temporário (5xx) são esperados num estudo
+  // com 150 imagens: espera e tenta de novo, em vez de derrubar a análise inteira.
+  type Resp = { tables: RawTable[]; locais_visiveis?: RawLocale[]; unidades?: RawUnit[]; tem_fonte?: boolean; inputTokens: number; outputTokens: number; error?: string };
+  let data: Resp | null = null;
+  for (let attempt = 0; ; attempt++) {
+    const res = await supabase.functions.invoke<Resp>('analyze-table-image', { body });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const status: number | undefined = (res.error as any)?.context?.status;
+    const message = res.error?.message ?? res.data?.error ?? '';
+    if (!message) { data = res.data; break; }
+    const retryable = status !== 400 && status !== 413 && !/inválid|não suportad|grande demais/i.test(message);
+    if (!retryable || attempt >= VISION_RETRIES) throw new Error(message);
+    await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt + Math.random() * 1000));
+  }
   return {
     payload: sanitizeVisionPayload(data),
     inputTokens: data?.inputTokens ?? 0,
@@ -733,6 +763,12 @@ function sumVerdict(viz: { incoherentReading?: boolean }, escalated: boolean, ag
   return 'Pode ser erro do estudo ou dígito mal lido: confira na imagem.';
 }
 
+/** Novas tentativas por imagem antes de desistir dela (2s, 4s, 8s, 16s). */
+const VISION_RETRIES = 4;
+
+/** Imagem que não pôde ser lida mesmo após as novas tentativas. */
+export interface FailedImage { slide: number; secao: string | null; titulo: string | null; name: string; kb: number; motivo: string }
+
 export async function runVisionPass(
   candidates: TableImageCandidate[],
   model: ModelId,
@@ -743,6 +779,7 @@ export async function runVisionPass(
   const concurrency = Math.max(1, o.concurrency ?? 1);
 
   const findings: Finding[] = [], tables: ExtractedTableRef[] = [];
+  const failed: FailedImage[] = [];
   const sourceSlides = new Set<number>(), analyzedSlides = new Set<number>();
   let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0;
   let costUsd = 0, escalated = 0, done = 0;
@@ -752,7 +789,16 @@ export async function runVisionPass(
     while (next < candidates.length) {
       if (o.signal?.aborted) return;
       const i = next++;
-      const r = await processImage(candidates[i], model, o.expected);
+      let r: Awaited<ReturnType<typeof processImage>>;
+      try {
+        r = await processImage(candidates[i], model, o.expected);
+      } catch (err) {
+        // Uma imagem com erro vira “não lida” no relatório; as outras seguem.
+        const c = candidates[i];
+        failed.push({ slide: c.slide, secao: c.secao, titulo: c.titulo, name: c.name, kb: c.kb, motivo: `falha na leitura (${err instanceof Error ? err.message.slice(0, 80) : 'erro'})` });
+        o.onProgress?.(++done, candidates.length);
+        continue;
+      }
       findings.push(...r.findings);
       tables.push(...r.tables);
       analyzedSlides.add(candidates[i].slide);
@@ -771,14 +817,14 @@ export async function runVisionPass(
 
   return finalizeVisionPass({
     findings, tables, sourceSlides, analyzedSlides, tablesExtracted, tablesVerified,
-    fromCache, inputTokens, outputTokens, escalated, costUsd,
+    fromCache, inputTokens, outputTokens, escalated, costUsd, failed,
   });
 }
 
 interface PassParts {
   findings: Finding[]; tables: ExtractedTableRef[]; sourceSlides: Set<number>; analyzedSlides: Set<number>;
   tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number;
-  outputTokens: number; escalated: number; costUsd: number;
+  outputTokens: number; escalated: number; costUsd: number; failed: FailedImage[];
 }
 
 /** Pós-processamento do passe inteiro (paginação), comum ao site e ao replay. */
@@ -795,6 +841,7 @@ function finalizeVisionPass(p: PassParts): VisionPassResult {
     tables: p.tables, sourceSlides: [...p.sourceSlides].sort((a, b) => a - b), analyzedSlides: [...p.analyzedSlides].sort((a, b) => a - b),
     tablesExtracted: p.tablesExtracted, tablesVerified: p.tablesVerified + paged.verified, fromCache: p.fromCache,
     inputTokens: p.inputTokens, outputTokens: p.outputTokens, escalated: p.escalated, costUsd: p.costUsd,
+    failed: p.failed,
   };
 }
 
@@ -810,7 +857,7 @@ export function replayVisionPass(
 ): VisionPassResult {
   const parts: PassParts = {
     findings: [], tables: [], sourceSlides: new Set(), analyzedSlides: new Set(), tablesExtracted: 0,
-    tablesVerified: 0, fromCache: 0, inputTokens: 0, outputTokens: 0, escalated: 0, costUsd: 0,
+    tablesVerified: 0, fromCache: 0, inputTokens: 0, outputTokens: 0, escalated: 0, costUsd: 0, failed: [],
   };
   for (const c of candidates) {
     const hit = readings.get(c.sha1);
