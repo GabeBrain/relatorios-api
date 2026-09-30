@@ -1,3 +1,12 @@
+### 2026-09-30 — FIERGS-RS: oferta final reconciliada em 5.251 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — fechamento de estoque/oferta final do recorte FIERGS 2T2026.
+- **O quê:** o fechamento vertical de estoque por padrão e tipologia passa a usar a última fotografia granular por empreendimento/tipologia. O IVV FIERGS recebe a mesma base reconciliada; histórico temporal anterior e horizontal permanecem preservados.
+- **Evidência:** a bancada autenticada das dez cidades reproduziu `5.459` no temporal por padrão e `5.251` no temporal por tipologia, cubo granular e área. O `4.562` dos slides 36/37 é o caminho dimensional antigo; as linhas do PPTX deixam 689 unidades fora frente ao slide 40.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/model.ts,__tests__/report-model.test.ts}`, `scripts/fiergs-sales-reconciliation.mts` e `docs/features/Relatorios Secovi_FIERGS/EVIDENCIA_FASE_2_ESTOQUE_FIERGS_2T2026_2026-09-30.md`.
+- **Commit:** `d5dd210`.
+- **Verificação:** bancada autenticada, `218/218` testes da feature, typecheck e build de produção aprovados.
+- **Impacto em Etapas/Pendências:** Fase 2 tecnicamente reconciliada; `5.251` aguarda aceite explícito para PRE-029 virar `APPROVED`. Ajustes visuais continuam não iniciados.
+
 ### 2026-09-28 — Rebrain: idioma do documento alinhado ao conteúdo — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** shell da plataforma e seletores Radix, incluindo Panorama de Mercado.
 - **O quê:** o idioma raiz do HTML passou de `en` para `pt-BR`, alinhando os metadados ao conteúdo da aplicação e reduzindo a ativação indevida da tradução automática do navegador, associada ao erro DOM `removeChild` observado durante a troca de entidade para FIERGS.
