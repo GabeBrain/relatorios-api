@@ -26,6 +26,17 @@ describe('FIERGS · blocos editoriais próprios', () => {
     expect(container.querySelector('[aria-label^="Página 57:"]')?.textContent).toContain('OFERTA FINAL POR TIPOLOGIA E METRAGEM');
     expect(container.querySelector('[aria-label^="Página 58:"]')?.textContent).toContain('MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA');
     expect(container.querySelector('[aria-label^="Página 41:"]')?.textContent).toContain('não é reconstruído');
+    for (const page of [11, 14, 22, 26, 33]) {
+      const text = container.querySelector(`[aria-label^="Página ${page}:"]`)?.textContent ?? '';
+      expect(text).toContain('COMPARATIVO ACUMULADO 12 MESES');
+      expect(text).not.toContain('COMPARATIVO 1º SEMESTRE');
+    }
+    for (const page of [15, 16, 27, 28, 35, 39]) {
+      const text = container.querySelector(`[aria-label^="Página ${page}:"]`)?.textContent ?? '';
+      expect(text).toContain('COMPARATIVO 1º SEMESTRE');
+      expect(text).toContain('1S2024');
+      expect(text).toContain('1S2025');
+    }
     expect(container.textContent).not.toContain('A posição editorial está preservada no livro FIERGS');
   });
 });

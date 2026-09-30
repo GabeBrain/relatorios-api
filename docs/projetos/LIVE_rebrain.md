@@ -1,3 +1,10 @@
+### 2026-09-30 — FIERGS-RS: comparativos temporais padronizados — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — comparativos trimestrais, semestrais e móveis do FIERGS.
+- **O quê:** uma função única passa a produzir trimestre equivalente, primeiro semestre comparável e acumulado de 12 meses. Período ausente não vira zero; denominador zero não gera percentual; estoque/IVV usam fotografia do 2T.
+- **Slides:** padrão móvel nos slides 11, 14, 22, 26 e 33; primeiro semestre nos slides 15, 16, 27, 28, 35 e 39.
+- **Verificação:** regressões de domínio, cobertura de rótulos nos onze slides, `tsconfig.app.json`, suíte da feature e build de produção.
+- **Impacto em Etapas/Pendências:** Fase 5 concluída tecnicamente. A próxima frente é a Fase 6, com clareza, arredondamento, slide 41, rótulos e mapas.
+
 ### 2026-09-30 — FIERGS-RS: guardas críticas antes da exportação — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — contrato de homologação e auditoria do recorte FIERGS.
 - **O quê:** o modelo passa a verificar vendas, estoque, horizontal por coorte e ausência de chácaras antes da renderização. Divergência ou indisponibilidade crítica bloqueia PDF/PPT; o CSV registra fonte, fórmula, universo, período, totais e delta.

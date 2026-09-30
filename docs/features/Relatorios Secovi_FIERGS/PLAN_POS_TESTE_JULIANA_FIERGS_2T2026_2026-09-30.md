@@ -1,7 +1,7 @@
 # Plano de ação pós-teste Juliana — Panorama FIERGS 2T2026
 
 **Data:** 30/09/2026  
-**Estado:** Fases 0 a 4 concluídas tecnicamente; reconciliação crítica validada antes da exportação
+**Estado:** Fases 0 a 5 concluídas tecnicamente; comparativos trimestrais, semestrais e móveis padronizados
 **Escopo:** correções apontadas por Juliana no arquivo `panorama-alvorada-cachoeirinha-canoas-e-mais-7-2T2026.pptx`  
 **Recorte de homologação:** Alvorada, Cachoeirinha, Canoas, Eldorado do Sul, Esteio, Gravataí, Guaíba, Novo Hamburgo, São Leopoldo e Viamão — fechamento 2T2026  
 **Artefato de referência:** `assets/panorama-alvorada-cachoeirinha-canoas-e-mais-7-2T2026.pptx`
@@ -256,6 +256,8 @@ Quando uma dimensão não tiver cobertura completa, ela deverá ser declarada in
 
 ### Fase 5 — Comparativos e regras editoriais
 
+**Estado em 30/09/2026:** concluída tecnicamente. Os onze slides-alvo consomem a mesma função de domínio; períodos incompletos e denominador zero ficam indisponíveis, e acumulado móvel mantém rótulo de 12 meses. Evidência em `EVIDENCIA_FASE_5_COMPARATIVOS_FIERGS_2T2026_2026-09-30.md`.
+
 **Objetivo:** atender às solicitações de leitura temporal da Juliana.
 
 **Tarefas:**
@@ -450,8 +452,8 @@ A execução estará concluída quando todos os itens abaixo forem verdadeiros:
 - [x] chácaras excluídas de todo o universo FIERGS;
 - [x] horizontal por produto e por coorte reconciliado;
 - [x] média dos loteamentos implementada com universo correto;
-- [ ] variações solicitadas adicionadas;
-- [ ] comparativos semestrais adicionados;
+- [x] variações solicitadas adicionadas;
+- [x] comparativos semestrais adicionados;
 - [ ] arredondamento, nomenclaturas, legendas e rótulos corrigidos;
 - [ ] slide 41 resolvido editorial e metodologicamente;
 - [ ] mapas enquadrados nas dez cidades;

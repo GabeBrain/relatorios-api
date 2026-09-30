@@ -244,7 +244,14 @@
 .panorama-fiergs-pattern header>div { display:flex; gap:.3cqw; }
 .panorama-fiergs-pattern header>div span { display:flex; min-width:5.2cqw; flex-direction:column; background:#edf0ea; text-align:center; }
 .panorama-fiergs-pattern header>div small { padding:.25cqw; font-size:.7cqw; }.panorama-fiergs-pattern header>div strong { padding:.35cqw; background:#c62026; color:#fff; font-size:.85cqw; }
-.panorama-fiergs-pattern main,.panorama-fiergs-dormitory main { min-height:0; flex:1; margin-top:1.2cqw; }
+.panorama-fiergs-pattern main { display:grid; min-height:0; flex:1; grid-template-columns:minmax(0,1fr) 30%; gap:1.6cqw; margin-top:1.2cqw; }
+.panorama-fiergs-pattern-series { min-width:0; min-height:0; }
+.panorama-fiergs-pattern .panorama-fiergs-context-comparisons { display:flex; min-width:0; flex-direction:column; justify-content:center; gap:.8cqw; }
+.panorama-fiergs-pattern .panorama-fiergs-context-comparisons section h3 { font-size:.82cqw; }
+.panorama-fiergs-pattern .panorama-fiergs-context-comparisons section span { min-height:5.8cqw; }
+.panorama-fiergs-pattern .panorama-fiergs-context-comparisons section span b { font-size:1.05cqw; }
+.panorama-fiergs-pattern .panorama-fiergs-context-comparisons section p,.panorama-fiergs-quarterly .panorama-fiergs-context-comparisons section p { margin:.2cqw 0 0; color:#8a2d2d; font-size:.62cqw; text-align:center; }
+.panorama-fiergs-dormitory main { min-height:0; flex:1; margin-top:1.2cqw; }
 .panorama-fiergs-pattern .recharts-cartesian-axis-tick-value,.panorama-fiergs-dormitory .recharts-cartesian-axis-tick-value { font-size:.68cqw; }
 .panorama-fiergs-pattern-point { stroke-width:3px; paint-order:stroke; font-family:var(--font-heading,'Montserrat',Arial,sans-serif); font-size:.72cqw; font-weight:700; }
 .panorama-fiergs-pattern-point.is-reference { stroke-width:8px; paint-order:stroke; }
