@@ -1,7 +1,7 @@
 # Plano de ação pós-teste Juliana — Panorama FIERGS 2T2026
 
 **Data:** 30/09/2026  
-**Estado:** Fases 0 e 1 concluídas; checkpoint de vendas aguardando aprovação para mudança estrutural  
+**Estado:** Fases 0 a 3 concluídas tecnicamente; vendas em `1.091`, estoque em `5.251` e horizontal sem chácaras
 **Escopo:** correções apontadas por Juliana no arquivo `panorama-alvorada-cachoeirinha-canoas-e-mais-7-2T2026.pptx`  
 **Recorte de homologação:** Alvorada, Cachoeirinha, Canoas, Eldorado do Sul, Esteio, Gravataí, Guaíba, Novo Hamburgo, São Leopoldo e Viamão — fechamento 2T2026  
 **Artefato de referência:** `assets/panorama-alvorada-cachoeirinha-canoas-e-mais-7-2T2026.pptx`
@@ -209,6 +209,8 @@ Entregar pacote de homologação
 
 ### Fase 3 — Política horizontal FIERGS
 
+**Estado em 30/09/2026:** concluída tecnicamente. Chácaras são rejeitadas nos contratos temporal e granular; a bancada das dez cidades fecha em 129 empreendimentos e 3.365 unidades finais, e produto × coorte compartilham o mesmo universo. Evidência em `EVIDENCIA_FASE_3_HORIZONTAL_FIERGS_2T2026_2026-09-30.md`.
+
 **Objetivo:** aplicar a orientação da Juliana em todo o pipeline, e não somente nos slides finais.
 
 **Tarefas:**
@@ -399,7 +401,7 @@ Cada commit deve conter seus testes e não incluir alterações do módulo Corre
 
 ### Portão B — Modelo reconciliado
 
-**Estado em 30/09/2026:** concluído para vendas. Gabriel aprovou o fechamento canônico de `1.091`; padrão, tipologia, cidade e área reconciliam no runtime e a evidência está registrada em `EVIDENCIA_FASES_0_1_VENDAS_FIERGS_2T2026_2026-09-30.md`. Estoque segue para a fase seguinte.
+**Estado em 30/09/2026:** concluído. Gabriel aprovou os fechamentos canônicos de vendas (`1.091`) e estoque (`5.251`); o horizontal exclui chácaras e reconcilia produto × coorte. Evidências registradas nos documentos das Fases 0–1, 2 e 3.
 
 - invariantes numéricas passando;
 - chácaras excluídas;
@@ -439,13 +441,13 @@ Cada commit deve conter seus testes e não incluir alterações do módulo Corre
 
 A execução estará concluída quando todos os itens abaixo forem verdadeiros:
 
-- [ ] total canônico de vendas aprovado tecnicamente;
-- [ ] vendas reconciliadas por padrão, tipologia, cidade e área;
-- [ ] total canônico de oferta final aprovado tecnicamente;
-- [ ] oferta reconciliada entre série, padrão, tipologia, área e preço;
-- [ ] chácaras excluídas de todo o universo FIERGS;
-- [ ] horizontal por produto e por coorte reconciliado;
-- [ ] média dos loteamentos implementada com universo correto;
+- [x] total canônico de vendas aprovado tecnicamente;
+- [x] vendas reconciliadas por padrão, tipologia, cidade e área;
+- [x] total canônico de oferta final aprovado tecnicamente;
+- [x] oferta reconciliada entre série, padrão, tipologia, área e preço;
+- [x] chácaras excluídas de todo o universo FIERGS;
+- [x] horizontal por produto e por coorte reconciliado;
+- [x] média dos loteamentos implementada com universo correto;
 - [ ] variações solicitadas adicionadas;
 - [ ] comparativos semestrais adicionados;
 - [ ] arredondamento, nomenclaturas, legendas e rótulos corrigidos;

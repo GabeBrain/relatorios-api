@@ -1,3 +1,10 @@
+### 2026-09-30 — FIERGS-RS: universo horizontal sem chácaras — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — política horizontal do recorte FIERGS 2T2026.
+- **O quê:** `Condomínio de Chácaras` passa a ser rejeitado na entrada temporal e granular. Os slides por produto e coorte compartilham o mesmo cubo; `Média dos loteamentos` usa somente loteamentos aberto e fechado.
+- **Evidência:** a bancada autenticada das dez cidades identificou 2 empreendimentos de chácaras em Viamão, com 110 unidades lançadas e 48 finais. O universo homologável fecha em 129 empreendimentos, 30.476 lançamentos e 3.365 unidades finais.
+- **Verificação:** regressões de política, produto × coorte e média de loteamentos; typecheck e build de produção.
+- **Impacto em Etapas/Pendências:** Fase 3 concluída tecnicamente, sem iniciar ajustes visuais. A próxima etapa é introduzir guardas canônicas de reconciliação antes da renderização/exportação.
+
 ### 2026-09-30 — FIERGS-RS: oferta final reconciliada em 5.251 — Gabriel Hxg + Codex
 - **Ambiente/funcionalidade:** Panorama de Mercado — fechamento de estoque/oferta final do recorte FIERGS 2T2026.
 - **O quê:** o fechamento vertical de estoque por padrão e tipologia passa a usar a última fotografia granular por empreendimento/tipologia. O IVV FIERGS recebe a mesma base reconciliada; histórico temporal anterior e horizontal permanecem preservados.

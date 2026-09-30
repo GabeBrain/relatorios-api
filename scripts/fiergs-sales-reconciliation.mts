@@ -6,6 +6,7 @@ import { offerByAreaBand, offerByStandard, offerByTypology } from '../src/featur
 import { normalizeCityTemporalRows } from '../src/features/panorama-secovi-fiergs/domain/temporal-normalization';
 import { FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES } from '../src/features/panorama-secovi-fiergs/presets';
 import { buildPanoramaReportModel } from '../src/features/panorama-secovi-fiergs/report/model';
+import { normalizeText } from '../src/features/panorama-secovi-fiergs/domain/taxonomy';
 
 type Row = Record<string, unknown>;
 type Segment = 'Vertical' | 'Horizontal' | 'Unknown';
@@ -237,6 +238,20 @@ function granularProjectEvidence(buildings: Row[], cube: ReturnType<typeof build
   });
 }
 
+function chacaraEvidence(buildings: Row[]) {
+  return buildings.flatMap((building) => {
+    if (!String(building.building_type ?? building.type ?? '').toLowerCase().includes('horizontal')) return [];
+    const history = Array.isArray(building.typologies_history) ? building.typologies_history as Row[] : [];
+    const labels = [building.standard, building.pattern, ...history.map((row) => row.pattern ?? row.standard)].map(normalizeText);
+    if (!labels.includes('condominio de chacaras')) return [];
+    const withinWindow = history.filter((row) => String(row.period ?? '').slice(0, 7) <= '2026-06');
+    const latestMonth = withinWindow.map((row) => String(row.period ?? '').slice(0, 7)).sort().at(-1) ?? null;
+    const latest = latestMonth ? withinWindow.filter((row) => String(row.period ?? '').slice(0, 7) === latestMonth) : [];
+    const finalUnits = latest.reduce((total, row) => total + Number(row.typology_stock ?? row.stock ?? 0), 0);
+    return [{ buildingId: String(building.building_id ?? building.id ?? ''), name: String(building.name ?? ''), latestMonth, finalUnits }];
+  });
+}
+
 const token = await bearerToken();
 const cities = [];
 const cubes = [];
@@ -282,6 +297,7 @@ for (const city of CITIES) {
     }];
   });
   const projectEvidence = granularProjectEvidence(buildings, cube);
+  const chacaras = chacaraEvidence(buildings);
   cities.push({
     city,
     pattern,
@@ -312,6 +328,11 @@ for (const city of CITIES) {
         typologies: project.typologies.map((row) => ({ typology: row.typology, finalUnits: row.finalUnits })),
       })),
       projectStockDifferences,
+    },
+    horizontalPolicy: {
+      rejectedChacaras: chacaras,
+      rejectedChacaraProjects: chacaras.length,
+      rejectedChacaraFinalUnits: chacaras.reduce((total, row) => total + row.finalUnits, 0),
     },
     deltas: {
       typologyMinusPatternVertical: typology.totals.Vertical - pattern.totals.Vertical,
@@ -347,6 +368,10 @@ const stockTotals = {
   granularAreaBand: sum((row) => row.stock.granularAreaBand),
   granularWithoutArea: sum((row) => row.stock.granularWithoutArea),
 };
+const horizontalPolicyTotals = {
+  rejectedChacaraProjects: sum((row) => row.horizontalPolicy.rejectedChacaraProjects),
+  rejectedChacaraFinalUnits: sum((row) => row.horizontalPolicy.rejectedChacaraFinalUnits),
+};
 const source = (rows: Row[], available = true) => ({ rows, available, source: 'bancada autenticada FIERGS 2T2026' });
 const empty = source([], false);
 const runtimeModel = buildPanoramaReportModel({ uf: 'RS', cities: CITIES, endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' }, [], {
@@ -373,6 +398,9 @@ const runtime = {
   stockAreaVertical: runtimeModel.granular.areaBands.find((row) => row.kind === 'total')?.finalUnits ?? null,
   stockByStandard: offerByStandard(mergedCube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
   stockByTypology: offerByTypology(mergedCube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
+  acceptedHorizontalProjects: runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').length,
+  acceptedHorizontalFinalUnits: runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').reduce((total, project) => total + (project.finalUnits ?? 0), 0),
+  horizontalLabels: [...new Set(runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').map((project) => project.horizontalSubtype))],
 };
 
 const output = {
@@ -386,6 +414,7 @@ const output = {
   },
   totals,
   stockTotals,
+  horizontalPolicyTotals,
   runtime,
   deltas: {
     typologyMinusPatternVertical: totals.typologyVertical - totals.patternVertical,
@@ -397,4 +426,4 @@ const output = {
 
 await writeFile(OUTPUT, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
 console.log(`\nEvidência salva em ${OUTPUT}`);
-console.log(JSON.stringify({ totals, stockTotals, runtime, deltas: output.deltas }, null, 2));
+console.log(JSON.stringify({ totals, stockTotals, horizontalPolicyTotals, runtime, deltas: output.deltas }, null, 2));

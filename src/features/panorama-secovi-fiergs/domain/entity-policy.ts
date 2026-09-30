@@ -155,7 +155,8 @@ export function classifySecoviTemporalRow(segment: Segment | null, group: unknow
   return 'unknown';
 }
 
-/** Produtos horizontais que aparecem nos slides 63–66 do estudo FIERGS 4T25. */
+/** Produtos horizontais conhecidos do FIERGS. Chácaras permanecem reconhecidas para auditoria,
+ * mas são explicitamente excluídas do universo homologável conforme retorno da Juliana. */
 const FIERGS_HORIZONTAL_PRODUCTS = new Map<string, HorizontalSubtype>([
   ['loteamento aberto', 'loteamento_aberto'],
   ['condominio de chacaras', 'condominio_chacaras'],
@@ -167,6 +168,7 @@ export function classifyFiergsTemporalRow(segment: Segment | null, group: unknow
   if (segment === 'Vertical') return 'keep';
   if (segment !== 'Horizontal') return 'unknown';
   const normalized = normalizeText(group);
+  if (FIERGS_HORIZONTAL_PRODUCTS.get(normalized) === 'condominio_chacaras') return 'exclude';
   if (FIERGS_HORIZONTAL_PRODUCTS.has(normalized) || V3_SOCIOECONOMIC.has(normalized)) return 'keep';
   return 'unknown';
 }
@@ -204,8 +206,9 @@ export const SECOVI_SP_V3_POLICY: EntityPolicy = {
 };
 
 /**
- * O estudo FIERGS agrega os quatro produtos horizontais acima. A regra é deliberadamente
- * fechada: rótulos novos ficam de fora até serem reconciliados com a fonte oficial.
+ * O estudo FIERGS reconhece os quatro produtos horizontais acima, mas Condomínio de Chácaras
+ * fica fora do universo por decisão da analista. A regra é deliberadamente fechada: rótulos novos
+ * ficam de fora até serem reconciliados com a fonte oficial.
  */
 export const FIERGS_RS_POLICY: EntityPolicy = {
   id: 'fiergs-rs',
@@ -218,6 +221,7 @@ export const FIERGS_RS_POLICY: EntityPolicy = {
       .map(normalizeText).filter((label) => label && !SEGMENT_ONLY.test(label));
     for (const label of labels) {
       const subtype = FIERGS_HORIZONTAL_PRODUCTS.get(label);
+      if (subtype === 'condominio_chacaras') return { accepted: false, segment: 'Horizontal', horizontalSubtype: subtype, reason: 'horizontal_fora_da_politica' };
       if (subtype) return { accepted: true, segment: 'Horizontal', horizontalSubtype: subtype, reason: null };
     }
     return { accepted: false, segment: 'Horizontal', horizontalSubtype: 'indefinido', reason: 'subtipo_horizontal_indefinido' };

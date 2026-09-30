@@ -76,17 +76,25 @@ describe('OP-1 · política de universo Secovi (G-03)', () => {
 describe('FIERGS-RS · política horizontal e preset', () => {
   const products = [
     ['Loteamento Aberto', 'loteamento_aberto'],
-    ['Condomínio de Chácaras', 'condominio_chacaras'],
     ['Loteamento Fechado', 'loteamento_fechado'],
     ['Condomínio de Casas/Sobrados', 'condominio_casas'],
   ] as const;
 
-  it('aceita e preserva os quatro produtos horizontais exibidos nos slides 63–66', () => {
+  it('aceita os três produtos horizontais homologáveis e os preserva na taxonomia', () => {
     for (const [standard, subtype] of products) {
       const decision = FIERGS_RS_POLICY.classify({ segment: 'Horizontal', standard });
       expect(decision).toMatchObject({ accepted: true, horizontalSubtype: subtype, reason: null });
       expect(classifyEntityTemporalRow('fiergs-rs', 'Horizontal', standard)).toBe('keep');
     }
+  });
+
+  it('rejeita Condomínio de Chácaras no cubo e nos contratos temporais FIERGS', () => {
+    expect(FIERGS_RS_POLICY.classify({ segment: 'Horizontal', standard: 'Condomínio de Chácaras' })).toMatchObject({
+      accepted: false,
+      horizontalSubtype: 'condominio_chacaras',
+      reason: 'horizontal_fora_da_politica',
+    });
+    expect(classifyEntityTemporalRow('fiergs-rs', 'Horizontal', 'Condomínio de Chácaras')).toBe('exclude');
   });
 
   it('não amplia o universo horizontal por inferência', () => {

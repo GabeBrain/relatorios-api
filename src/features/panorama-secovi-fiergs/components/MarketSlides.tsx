@@ -4,6 +4,7 @@ import { buildMapTilePlan } from '../lib/map-tiles';
 import { orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
 import { horizontalLabelForEntity } from '../domain/entity-policy';
+import type { CubeProject } from '../domain/cube';
 
 const integer = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 const decimal = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -179,9 +180,9 @@ const FIERGS_PRODUCT_LABELS: Record<string, string> = {
   condominio_casas: 'Condomínio de Casas/Sobrados',
 };
 
-function fiergsHorizontalGroups(report: PanoramaReportModel) {
-  const groups = new Map<string, typeof report.cube.projects>();
-  for (const project of report.cube.projects.filter((item) => item.segment === 'Horizontal')) {
+function fiergsHorizontalGroups(projects: CubeProject[]) {
+  const groups = new Map<string, CubeProject[]>();
+  for (const project of projects.filter((item) => item.segment === 'Horizontal')) {
     const label = FIERGS_PRODUCT_LABELS[project.horizontalSubtype ?? ''] ?? 'Não classificado';
     groups.set(label, [...(groups.get(label) ?? []), project]);
   }
@@ -189,21 +190,43 @@ function fiergsHorizontalGroups(report: PanoramaReportModel) {
 }
 
 export function FiergsHorizontalOfferSlide({ report }: { report: PanoramaReportModel }) {
-  const rows = fiergsHorizontalGroups(report).map(([label, projects]) => ({
-    label,
-    projects: new Set(projects.map((item) => item.key)).size,
-    launched: projects.reduce((sum, item) => sum + (item.launchedUnits ?? 0), 0),
-    final: projects.reduce((sum, item) => sum + (item.finalUnits ?? 0), 0),
-  }));
+  const rows = fiergsHorizontalOfferRows(report.cube.projects);
   return <Slide title="OFERTA LANÇADA E FINAL | POR TIPO"><table className="panorama-reference-table"><thead><tr><th>Tipo</th><th>Nº de Empreend.</th><th>Oferta Lançada</th><th>Oferta Final</th><th>Disponibilidade</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{integer(row.projects)}</td><td>{integer(row.launched)}</td><td>{integer(row.final)}</td><td>{row.launched ? percent(row.final / row.launched * 100) : '—'}</td></tr>)}</tbody></table></Slide>;
 }
 
+export function fiergsHorizontalOfferRows(projects: CubeProject[]) {
+  return fiergsHorizontalGroups(projects).map(([label, group]) => ({
+    label,
+    projects: new Set(group.map((item) => item.key)).size,
+    launched: group.reduce((sum, item) => sum + (item.launchedUnits ?? 0), 0),
+    final: group.reduce((sum, item) => sum + (item.finalUnits ?? 0), 0),
+  }));
+}
+
 export function FiergsHorizontalPriceRangeSlide({ report }: { report: PanoramaReportModel }) {
-  const rows = fiergsHorizontalGroups(report).map(([label, projects]) => {
-    const values = projects.map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
+  const rows = fiergsHorizontalPriceRangeRows(report.cube.projects);
+  return <Slide title="MÍNIMO, MÉDIA E MÁXIMO | MERCADO HORIZONTAL"><table className="panorama-reference-table"><thead><tr><th>Tipo</th><th>Mínimo R$/m²</th><th>Média R$/m²</th><th>Máximo R$/m²</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={row.label === 'Média dos loteamentos' ? 'panorama-total-row' : undefined}><td>{row.label}</td><td>{integer(row.min)}</td><td>{integer(row.average)}</td><td>{integer(row.max)}</td></tr>)}</tbody></table></Slide>;
+}
+
+export function fiergsHorizontalPriceRangeRows(projects: CubeProject[]) {
+  const groups = new Map<string, CubeProject[]>();
+  for (const project of projects.filter((item) => item.segment === 'Horizontal')) {
+    const label = FIERGS_PRODUCT_LABELS[project.horizontalSubtype ?? ''] ?? 'Não classificado';
+    groups.set(label, [...(groups.get(label) ?? []), project]);
+  }
+  const rows = [...groups].map(([label, group]) => {
+    const values = group.map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
     return { label, min: values.length ? Math.min(...values) : null, average: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null, max: values.length ? Math.max(...values) : null };
   });
-  return <Slide title="MÍNIMO, MÉDIA E MÁXIMO | MERCADO HORIZONTAL"><table className="panorama-reference-table"><thead><tr><th>Tipo</th><th>Mínimo R$/m²</th><th>Média R$/m²</th><th>Máximo R$/m²</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{integer(row.min)}</td><td>{integer(row.average)}</td><td>{integer(row.max)}</td></tr>)}</tbody></table></Slide>;
+  const loteamentos = projects.filter((item) => item.segment === 'Horizontal' && (item.horizontalSubtype === 'loteamento_aberto' || item.horizontalSubtype === 'loteamento_fechado'))
+    .map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
+  if (loteamentos.length) rows.push({
+    label: 'Média dos loteamentos',
+    min: Math.min(...loteamentos),
+    average: loteamentos.reduce((sum, value) => sum + value, 0) / loteamentos.length,
+    max: Math.max(...loteamentos),
+  });
+  return rows;
 }
 
 const FIERGS_AREA_BANDS = [
