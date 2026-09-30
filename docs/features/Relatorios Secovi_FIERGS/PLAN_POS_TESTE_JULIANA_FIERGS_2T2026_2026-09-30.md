@@ -1,7 +1,7 @@
 # Plano de ação pós-teste Juliana — Panorama FIERGS 2T2026
 
 **Data:** 30/09/2026  
-**Estado:** Fases 0 a 5 concluídas tecnicamente; comparativos trimestrais, semestrais e móveis padronizados
+**Estado:** Fases 0 a 6 concluídas tecnicamente; clareza visual validada em testes e build, com inspeção dos arquivos finais reservada à Fase 8
 **Escopo:** correções apontadas por Juliana no arquivo `panorama-alvorada-cachoeirinha-canoas-e-mais-7-2T2026.pptx`  
 **Recorte de homologação:** Alvorada, Cachoeirinha, Canoas, Eldorado do Sul, Esteio, Gravataí, Guaíba, Novo Hamburgo, São Leopoldo e Viamão — fechamento 2T2026  
 **Artefato de referência:** `assets/panorama-alvorada-cachoeirinha-canoas-e-mais-7-2T2026.pptx`
@@ -273,6 +273,8 @@ Quando uma dimensão não tiver cobertura completa, ela deverá ser declarada in
 **Critério de saída:** todos os slides indicados exibem a comparação solicitada com números cobertos por testes unitários.
 
 ### Fase 6 — Clareza e ajustes visuais
+
+**Estado em 30/09/2026:** concluída tecnicamente. Evidências em `EVIDENCIA_FASE_6_CLAREZA_VISUAL_FIERGS_2T2026_2026-09-30.md`; a inspeção humana de PDF/PPT permanece no pacote integrado da Fase 8.
 
 **Objetivo:** resolver as observações que não alteram o universo de dados.
 

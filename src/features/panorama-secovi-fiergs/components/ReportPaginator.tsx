@@ -4,12 +4,14 @@ import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, X
 import { Button } from '@/components/ui/button';
 import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
-import { compactQuarterLabel, visiblePointLabelIndexes, visibleQuarterTickIndexes } from '../lib/chart-labels';
+import { compactQuarterLabel, visibleBarLabelIndexes, visiblePointLabelIndexes, visibleQuarterTickIndexes } from '../lib/chart-labels';
 import { downloadFiergsAudit } from '../lib/fiergs-audit';
 import { conditionalFormat } from '../domain/conditional-format';
 import { horizontalLabelForEntity } from '../domain/entity-policy';
 import { createPanoramaSections, panoramaManifestFor, type ReportPageDefinition } from '../report/manifest';
 import { fiergsPeriodComparisons, type FiergsComparisonPair } from '../domain/period-comparisons';
+import { roundedPercentages } from '../domain/percentage-rounding';
+import { typologyDisplayLabel } from '../domain/taxonomy';
 
 /** Token do fundo cartográfico: define, junto das coordenadas, se a lâmina de mapa existe (JG-39). */
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
@@ -144,6 +146,7 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
   const salesPage = [23, 24, 25, 26].includes(page);
   const hideCompanion = salesPage && !series.pattern && !report.horizontalSeries.attributable;
   const referenceQuarter = report.scope.endQuarter[0];
+  const visibleBarLabels = visibleBarLabelIndexes(data, referenceQuarter);
   const formatValue = (value: number) => series.unit === 'mi' ? decimal(value) : series.unit === 'sqm' ? `R$ ${n(value)}/m²` : n(value);
   const highlighted = data.filter((row) => row.quarter[0] === referenceQuarter);
   const comparisons = highlighted.slice(-4).slice(1).map((current, index) => ({ previous: highlighted.slice(-4)[index], current }));
@@ -181,7 +184,7 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
   const renderBarLabel = (props: { index?: number; x?: number; y?: number; width?: number; value?: number }) => {
     const index = props.index ?? -1;
     const row = data[index];
-    if (!row || props.x === undefined || props.y === undefined || props.width === undefined || props.value === undefined) return null;
+    if (!visibleBarLabels.has(index) || !row || props.x === undefined || props.y === undefined || props.width === undefined || props.value === undefined) return null;
     const previous = data[index - 1];
     const delta = previous ? variation(Number(props.value), previous.vertical) : null;
     const centre = props.x + props.width / 2;
@@ -235,7 +238,7 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
     <ResponsiveContainer width="100%" height={series.pattern ? '51%' : '62%'}>
       {series.bars
         ? <BarChart data={data} margin={{ left: 22, right: 22, top: 64, bottom: 18 }}>
-            <XAxis dataKey="quarter" tickFormatter={quarterLabel} tickLine={false} tickMargin={8} axisLine={{ stroke: '#c9c9c9' }} tick={{ fontSize: 11 }} interval={0} minTickGap={0}/>
+            <XAxis dataKey="quarter" tickFormatter={(value) => series.unit === 'sqm' ? compactQuarterLabel(String(value)) : quarterLabel(value)} tickLine={false} tickMargin={8} axisLine={{ stroke: '#c9c9c9' }} tick={{ fontSize: 11 }} interval={0} minTickGap={4}/>
             <Tooltip formatter={(value) => formatValue(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as never)}/>
             <Legend verticalAlign="bottom"/>
             <Bar dataKey="vertical" name={series.nouns[0]} fill={series.colors[0]} isAnimationActive={false} label={renderBarLabel}/>
@@ -341,13 +344,14 @@ export function fiergsDistributionData(rows: FiergsDistributionRow[]) {
   // desaparecer antes da soma, como ocorria com 4 dormitórios (−1) no FIERGS 2T2026.
   const visible = rows.filter((row) => row.value !== 0).sort((a, b) => b.value - a.value);
   const total = rows.reduce((sum, row) => sum + row.value, 0);
+  const shares = roundedPercentages(visible.map((row) => row.value));
   const max = Math.max(1, ...visible.map((row) => Math.abs(row.value)));
-  return { visible, total, max };
+  return { visible, shares, total, max };
 }
-function FiergsDistributionSlide({ title, subtitle, rows, unit }: { title: string; subtitle: string; rows: FiergsDistributionRow[]; unit: string }) {
-  const { visible, total, max } = fiergsDistributionData(rows);
-  return <div className="panorama-fiergs-distribution"><header><h2>{title}<span>{subtitle}</span></h2><strong>{n(total)}<small>{unit}</small></strong></header>
-    {visible.length ? <main>{visible.slice(0, 9).map((row, index) => <div key={row.label} className={row.value < 0 ? 'is-negative' : undefined}><span>{row.label}</span><i><b style={{ width: `${Math.abs(row.value) / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{total ? pct(row.value / total * 100) : '—'}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
+function FiergsDistributionSlide({ title, subtitle, rows, unit, className = '' }: { title: string; subtitle: string; rows: FiergsDistributionRow[]; unit: string; className?: string }) {
+  const { visible, shares, total, max } = fiergsDistributionData(rows);
+  return <div className={`panorama-fiergs-distribution ${className}`.trim()}><header><h2>{title}<span>{subtitle}</span></h2><strong>{n(total)}<small>{unit}</small></strong></header>
+    {visible.length ? <main>{visible.slice(0, 9).map((row, index) => <div key={row.label} className={row.value < 0 ? 'is-negative' : undefined}><span>{row.label}</span><i><b style={{ width: `${Math.abs(row.value) / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{pct(shares[index])}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
     <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer></div>;
 }
 function groupedValues(values: FiergsDistributionRow[]) { const groups = new Map<string, number>(); values.forEach(({ label, value }) => groups.set(label, (groups.get(label) ?? 0) + value)); return [...groups].map(([label, value]) => ({ label, value })); }
@@ -383,7 +387,7 @@ function FiergsPatternTemporalSlide({ report, kind, rolling = false }: { report:
 
 function FiergsSalesCitySlide({ report }: { report: PanoramaReportModel }) {
   const rows = report.cityComparisons.sales.filter((row) => row.liquidSales !== null).map((row) => ({ label: row.city, value: row.liquidSales ?? 0 }));
-  return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle={`POR CIDADE · ${quarterLabel(report.scope.endQuarter)}`} rows={rows} unit="unidades"/>;
+  return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle={`POR CIDADE · ${quarterLabel(report.scope.endQuarter)}`} rows={rows} unit="unidades" className="is-city-ranking"/>;
 }
 
 function FiergsDormitoryPriceSlide({ report, bedroom }: { report: PanoramaReportModel; bedroom: number }) {
@@ -541,12 +545,12 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   if (official === 27) return <FiergsPatternTemporalSlide report={report} kind="sales"/>;
   if (official === 28) return <FiergsPatternTemporalSlide report={report} kind="sales" rolling/>;
   if (official === 25 || official === 30) return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle="POR PADRÃO" rows={temporalDistribution(report.sales.units)} unit="unidades"/>;
-  if (official === 29) return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle="POR TIPOLOGIA" rows={temporalDistribution(report.sales.unitsByTypology)} unit="unidades"/>;
+  if (official === 29) return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle="POR TIPOLOGIA" rows={temporalDistribution(report.sales.unitsByTypology).map((row) => ({ ...row, label: typologyDisplayLabel(row.label) }))} unit="unidades"/>;
   if (official === 31) return <FiergsSalesCitySlide report={report}/>;
   if (official === 36) return <OfferTableSlide report={report} dimension="typology"/>;
   if (official === 37) return <OfferTableSlide report={report} dimension="pattern"/>;
   if (official === 40) return <AreaIvvSlide report={report}/>;
-  if (official === 41) return <CoveragePage title="IVV POR ÁREA ÚTIL · ÚLTIMO ANO" detail="O cubo disponível preserva a fotografia e as vendas do trimestre de fechamento, mas não a composição histórica por faixa de área dos quatro trimestres. O anual não é reconstruído a partir do trimestre nem duplicado como se fosse outra janela."/>;
+  if (official === 41) return <CoveragePage title="IVV POR ÁREA ÚTIL · ÚLTIMO ANO" detail="INDISPONÍVEL PARA O ÚLTIMO ANO. O cubo disponível preserva a fotografia e as vendas do trimestre de fechamento, mas não a composição histórica por faixa de área dos quatro trimestres. O anual não é reconstruído a partir do trimestre nem duplicado como se fosse outra janela."/>;
   if (official && [44, 45, 46, 47].includes(official)) return <FiergsDormitoryPriceSlide report={report} bedroom={official - 43}/>;
   if (official === 57) return <FiergsTypologyAreaSlide report={report}/>;
   if (official === 58) return <FiergsTypologyPriceRangeSlide report={report}/>;

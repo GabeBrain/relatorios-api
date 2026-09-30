@@ -2069,3 +2069,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Impacto em Etapas/Pendências:** portão A passou tecnicamente; a mudança estrutural permanece bloqueada no checkpoint para aprovação da fonte canônica antes das Fases 2–4. Nenhum componente de produção foi alterado.
 - **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
 
+### 2026-09-30 — FIERGS-RS: clareza visual e mapas da Etapa 6 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — lâminas editoriais e mapas FIERGS.
+- **O quê:** percentuais fecham em 100,0% por rateio determinístico; dormitórios usam nomenclatura completa; ranking municipal ganhou margens próprias; o slide 41 declara indisponibilidade anual auditável; o gráfico de R$/m² reduz colisões; mapas calculam bounds/zoom e exibem legendas por padrão, estoque e R$/m².
+- **Verificação:** `235/235` testes da feature, `tsconfig.app.json` e build de produção aprovados; proporção 16:9 coberta pela regressão existente.
+- **Impacto em Etapas/Pendências:** Fase 6 concluída tecnicamente. A inspeção humana dos novos PDF/PPT permanece na Fase 8; a próxima frente de implementação é a Fase 7.
+

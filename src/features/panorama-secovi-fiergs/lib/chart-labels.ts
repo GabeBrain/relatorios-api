@@ -16,3 +16,19 @@ export function visibleQuarterTickIndexes(series: LaunchSeries[]): Set<number> {
 export function visiblePointLabelIndexes(series: LaunchSeries[]): Set<number> {
   return new Set(series.map((_, index) => index));
 }
+
+/** Em séries densas, preserva extremos, fechamento e trimestres equivalentes sem sobrepor 17 rótulos. */
+export function visibleBarLabelIndexes(series: LaunchSeries[], referenceQuarter: string, maxLabels = 9): Set<number> {
+  if (series.length <= maxLabels) return new Set(series.map((_, index) => index));
+  const indexes = new Set<number>([0, series.length - 1]);
+  series.forEach((row, index) => {
+    if (row.quarter[0] === referenceQuarter || index % 2 === 0) indexes.add(index);
+  });
+  if (indexes.size <= maxLabels) return indexes;
+  const required = new Set([...indexes].filter((index) => index === 0 || index === series.length - 1 || series[index].quarter[0] === referenceQuarter));
+  for (const index of indexes) {
+    if (required.size >= maxLabels) break;
+    required.add(index);
+  }
+  return required;
+}

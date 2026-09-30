@@ -26,6 +26,12 @@ describe('FIERGS · blocos editoriais próprios', () => {
     expect(container.querySelector('[aria-label^="Página 57:"]')?.textContent).toContain('OFERTA FINAL POR TIPOLOGIA E METRAGEM');
     expect(container.querySelector('[aria-label^="Página 58:"]')?.textContent).toContain('MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA');
     expect(container.querySelector('[aria-label^="Página 41:"]')?.textContent).toContain('não é reconstruído');
+    expect(container.querySelector('[aria-label^="Página 41:"]')?.textContent).toContain('INDISPONÍVEL PARA O ÚLTIMO ANO');
+    expect(container.querySelector('.panorama-fiergs-distribution.is-city-ranking')).not.toBeNull();
+    expect(container.textContent).toContain('2 Dormitórios');
+    expect(container.textContent).toContain('Legenda por padrão');
+    expect(container.textContent).toContain('Menor estoque');
+    expect(container.textContent).toContain('Menor R$/m²');
     for (const page of [11, 14, 22, 26, 33]) {
       const text = container.querySelector(`[aria-label^="Página ${page}:"]`)?.textContent ?? '';
       expect(text).toContain('COMPARATIVO ACUMULADO 12 MESES');
