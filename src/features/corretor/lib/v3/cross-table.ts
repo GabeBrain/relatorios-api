@@ -27,7 +27,12 @@ function asCross(refs: ExtractedTableRef[]): CrossTableRef[] {
   return refs.map((r) => ({ ...r, source: 'vision' as const }));
 }
 
+/** Contagem de cruzamentos feitos e dos que bateram — base do resumo de acertos. */
+export interface CrossStats { feitos: number; batem: number }
+let stats: CrossStats | null = null;
+
 function mismatch(id: string, type: 'CROSS_TABLE_MISMATCH' | 'TOTALS_EQUALITY', section: Finding['section'], left: CrossTableRef, right: CrossTableRef, title: string, detail: string, rows: ReturnType<typeof crossBands>): Finding | null {
+  if (stats && rows.length) { stats.feitos++; if (!rows.some((r) => r.mismatch)) stats.batem++; }
   if (!rows.some((r) => r.mismatch)) return null;
   return {
     id, type, section, slideRef: `s${left.slide} × s${right.slide}`, title, detail, ok: false,
@@ -192,9 +197,21 @@ function lacunaTotalsFindings(ir: Ir, lacunas: CrossTableRef[]): Finding[] {
       const peers = slides.filter((s) => s !== odd && Math.abs(s - odd) <= 5 && [...scopeLabels(ir, s)].some((x) => scope.has(x)));
       const counts = new Map<number, number[]>();
       for (const s of peers) counts.set(bySlide.get(s)!, [...(counts.get(bySlide.get(s)!) ?? []), s]);
+      if (stats) for (const s of peers) if (s > odd) { stats.feitos++; if (bySlide.get(s) === bySlide.get(odd)) stats.batem++; }
       const agreed = [...counts.entries()].find(([t, ss]) => ss.length >= 2 && t !== bySlide.get(odd));
-      if (!agreed) continue;
-      const ref = agreed[1][0];
+      // Sem consenso, UM par basta quando só um dos dois slides traz a nota de
+      // exclusão: tabela sem exclusão × tabela com exclusão (s67 × s68 do Toledo,
+      // 1.481 × 1.295). Os dois totais já foram confirmados por uma margem.
+      // Com um par só, a diferença tem de ter a FORMA de uma exclusão: o slide sem
+      // a nota é o maior, e por pouco (garden/duplex/cobertura são minoria do
+      // estoque, ≤ 20%). Aceita 462×447 (CJ) e 1.481×1.295 (Toledo); rejeita
+      // 1.060×450 do SJC, que era leitura errada de um bloco.
+      const exclusionShaped = (big: number, small: number) => big > small && (big - small) / big <= 0.2;
+      const lonePeer = !agreed
+        ? peers.find((s) => !noteOf(odd) && noteOf(s) && exclusionShaped(bySlide.get(odd)!, bySlide.get(s)!))
+        : undefined;
+      if (!agreed && lonePeer === undefined) continue;
+      const ref = agreed ? agreed[1][0] : lonePeer!;
       const id = `lacunas-total-${block.replace(' ', '-')}-${odd}`;
       const hint = !noteOf(odd) && noteOf(ref)
         ? ` O s${odd} não traz a nota de exclusão (duplex, garden, cobertura, esgotados) que o s${ref} traz: a diferença pode ser justamente essas unidades.`
@@ -227,7 +244,16 @@ function binRows(left: CrossTableRef, right: CrossTableRef) {
  * A classificação depende de assinatura explícita no título/colunas para não
  * comparar tabelas Brasil/Estado ou grandezas diferentes por acidente.
  */
-export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): Finding[] {
+export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[], counter?: CrossStats): Finding[] {
+  stats = counter ?? null;
+  try {
+    return crossTableFindingsImpl(ir, visionTables);
+  } finally {
+    stats = null;
+  }
+}
+
+function crossTableFindingsImpl(ir: Ir, visionTables: ExtractedTableRef[]): Finding[] {
   const refs = [...nativeTableRefs(ir), ...asCross(visionTables)];
   const out: Finding[] = [];
   const income = refs.filter((r) => /renda/.test(titleOf(r)) && !isMapLegend(r));

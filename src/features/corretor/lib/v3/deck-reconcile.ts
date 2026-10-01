@@ -96,6 +96,7 @@ function summarizeUnsafeSums(findings: Finding[]): Finding[] {
   // declarada no slide continua como achado próprio: ali a leitura é boa e a
   // diferença tem explicação provável que o analista precisa ver.
   const unsafe = findings.filter((f) => (f.type === 'ABSOLUTE_SUM' || f.type === 'PERCENTAGE_SUM') && f.evidenceSha1 && f.confidence === 3
+    && !(f.viz?.kind === 'table' && f.viz.omittedBand)
     && ((f.viz?.kind === 'table' && (f.viz.unaligned || f.viz.incoherentReading || f.viz.stitchedReading)) || /discordam entre si/.test(f.detail)));
   if (!unsafe.length) return findings;
   const keep = findings.filter((f) => !unsafe.includes(f));

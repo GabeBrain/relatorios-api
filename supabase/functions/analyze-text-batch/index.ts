@@ -102,6 +102,9 @@ Verifique, em cada slide:
 - COHERENCE: número citado no texto que contradiga os valores das TABELAS do mesmo slide.
 
 Seja conservador: reporte apenas o que tiver confiança alta. Sem achados = lista vazia.
+Em "evidence", copie o trecho EXATO do texto abaixo; não reporte o que não estiver escrito ali.
+
+${blocks}
 
 Responda EXATAMENTE este JSON (sem markdown):
 {"findings": [{"slide": 12, "type": "SPELLING", "description": "…", "evidence": "trecho exato", "severity": "LOW|MEDIUM|HIGH"}]}`;

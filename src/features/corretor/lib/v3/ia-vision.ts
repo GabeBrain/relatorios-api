@@ -585,9 +585,11 @@ export function analyzeVisionPayload(
           escalated: escalated && readingsAgree && !viz.incoherentReading,
           // Sem alinhamento, com leitura incoerente ou com leituras discordantes
           // não há acusação a sustentar: é convite a olhar, não erro.
-          ...(viz.unaligned || viz.incoherentReading || (escalated && !readingsAgree) || (raw.stitched && !trusted)
-            ? { confidence: 3 as const }
-            : viz.totalsByFit ? { confidence: 2 as const } : {}),
+          ...(viz.omittedBand && !viz.unaligned
+            ? { confidence: 2 as const }
+            : viz.unaligned || viz.incoherentReading || (escalated && !readingsAgree) || (raw.stitched && !trusted)
+              ? { confidence: 3 as const }
+              : viz.totalsByFit ? { confidence: 2 as const } : {}),
         });
       }
     }
@@ -769,7 +771,8 @@ export function stitchColumnSplits(tables: RawTable[]): RawTable[] {
 }
 
 /** Frase final do achado de soma: por que confiar (ou não) na leitura. */
-function sumVerdict(viz: { incoherentReading?: boolean }, escalated: boolean, agree: boolean): string {
+function sumVerdict(viz: { incoherentReading?: boolean; omittedBand?: boolean }, escalated: boolean, agree: boolean): string {
+  if (viz.omittedBand) return 'Todas as colunas ficam abaixo do total na mesma proporção: isso não depende de um dígito lido. Confira se falta uma faixa ou linha na tabela.';
   if (viz.incoherentReading) return 'A leitura não fecha nem nas próprias margens: trate como provável erro de leitura e confira na imagem.';
   if (escalated && agree) return 'Duas leituras independentes (mini e 4o) encontraram a mesma diferença: provável erro real do estudo.';
   if (escalated) return 'As duas leituras encontraram números diferentes para a mesma tabela: provável erro de leitura. Confira na imagem antes de corrigir.';

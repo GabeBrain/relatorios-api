@@ -227,8 +227,13 @@ function numericFindings(ir: Ir): { findings: Finding[]; verified: number; numer
 // ── RADII (nível 1 DET) — consistência dos raios/zonas de tempo ──────────────
 const MIN_TOKEN = /\b(\d{1,3})\s*min\b/gi;
 
+// Tempo COM distância é deslocamento até ponto de interesse ("Hospital … 2 min
+// 950 m", "1,8 km | 5 min"), não raio do estudo — no Toledo (set/2026) isso
+// acusou o s14 e ainda poluiu o conjunto canônico com 2/4/6 min.
+const TRAVEL_PAIR = /\b\d{1,3}\s*min\s*[|·,-]?\s*\d+(?:[.,]\d+)?\s*(?:km|m)\b|\b\d+(?:[.,]\d+)?\s*(?:km|m)\s*[|·,-]?\s*\d{1,3}\s*min\b/gi;
+
 function radiiOf(s: IrSlide): string[] {
-  const text = [s.titulo ?? '', ...(s.textos ?? [])].join(' ');
+  const text = [s.titulo ?? '', ...(s.textos ?? [])].join(' ').replace(TRAVEL_PAIR, ' ');
   const found = new Set<number>();
   let m: RegExpExecArray | null;
   MIN_TOKEN.lastIndex = 0;

@@ -49,6 +49,7 @@ import {
 } from '../lib/v3/db';
 import { parseFonteJson, type Fonte } from '../lib/v3/fonte';
 import { suggestCity, type CitySuggestion } from '../lib/v3/city-suggestion';
+import type { AnalysisReport } from '../lib/v3/pipeline';
 import { otherCities, imageProfile, type CityMention, type ImageProfile } from '../lib/v3/pre-analysis';
 import { savePptx, loadPptx } from '../lib/v3/pptx-store';
 import { findTableImages } from '../lib/v3/table-images';
@@ -291,6 +292,34 @@ function dateLabel(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'Data indisponível';
   return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
+}
+
+/**
+ * “O que bateu”: dimensão do que foi conferido e está certo, em contrapartida aos
+ * erros (que continuam sendo o foco). Só números, cor neutra, uma linha de cartões.
+ */
+function AcertosCard({ report, temFonte }: { report: AnalysisReport; temFonte: boolean }) {
+  const tiles: { n: string; label: string }[] = [
+    { n: `${report.tabelasVerificadas} de ${report.tabelasExtraidas}`, label: 'tabelas-imagem fecham na soma' },
+    { n: String(report.tabelasNativas), label: 'tabelas nativas conferidas' },
+  ];
+  // Snapshot anterior à v0.66 não tem a contagem: omite em vez de afirmar zero.
+  if (report.fonte && report.fonte.comparados > 0) tiles.push({ n: `${report.fonte.batem} de ${report.fonte.comparados}`, label: 'valores iguais às planilhas' });
+  else if (!temFonte) tiles.push({ n: 'sem planilhas', label: 'cruzamento com a fonte desligado' });
+  if (report.cruzamentos && report.cruzamentos.feitos > 0) tiles.push({ n: `${report.cruzamentos.batem} de ${report.cruzamentos.feitos}`, label: 'cruzamentos entre tabelas batem' });
+  return (
+    <section className="space-y-2">
+      <WlHead title="O que bateu" />
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {tiles.map((t) => (
+          <div key={t.label} className="rounded-lg border border-border bg-card px-3 py-2">
+            <p className="text-sm font-semibold tabular-nums">{t.n}</p>
+            <p className="text-[11px] leading-tight text-muted-foreground">{t.label}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 const outrasKey = (studyId: string) => `corretor-outras-${studyId}`;
@@ -788,8 +817,10 @@ export default function CorretorV3Page() {
       const candidates = await findTableImages(deck.bytes, ir);
       const readings = await loadVisionReadings(candidates.map((c) => c.sha1));
       const vision = replayVisionPass(candidates, readings, { cidade: selected.cidade ?? '', uf: selected.uf, outras: readOutras(selected.id) });
-      const det = crosscheckDet(ir, fonte);
-      const vis = sourceCrosscheckVisionFindings(ir, fonte, vision.tables);
+      const tally = { comparados: 0, batem: 0 };
+      const det = crosscheckDet(ir, fonte, tally);
+      const vis = sourceCrosscheckVisionFindings(ir, fonte, vision.tables, tally);
+      if (selected.analise) await saveReport(selected.id, { ...selected.analise, fonte: tally });
       if (det.length) await insertIaFindings(selected.id, det, 'DET', selected.lastVersion);
       if (vis.length) await insertIaFindings(selected.id, vis, 'IA_visao', selected.lastVersion);
       setItems(await loadFindings(selected.id));
@@ -1321,12 +1352,6 @@ export default function CorretorV3Page() {
                 <span className="text-muted-foreground"> · {wl.pend} para revisar · </span>
                 <span className={cn(blockingPend > 0 ? 'text-red-600 dark:text-red-400 font-medium' : 'text-muted-foreground')}>{blockingPend} bloqueia(m) a entrega</span>
                 {!(fonteInput || selected.temFonte) && <span className="text-muted-foreground"> · sem planilhas</span>}
-                {selected.analise && (
-                  <span className="text-muted-foreground cursor-help underline decoration-dotted underline-offset-2 ml-2"
-                    title={`Conferido: texto de todos os slides · ${selected.analise.tabelasNativas} tabelas nativas · ${selected.analise.imagensAnalisadas} imagens de tabela${fonteInput || selected.temFonte ? ' · planilhas cruzadas' : ''}`}>
-                    o que foi conferido
-                  </span>
-                )}
               </p>
               {wl.pend > 0 && (
                 <button
@@ -1417,6 +1442,7 @@ export default function CorretorV3Page() {
                 </p>
               )}
               {!pending && !analysis?.running && <>
+                {selected.analise && <AcertosCard report={selected.analise} temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)} />}
                 {(wl.completude.length > 0 || wl.comunicacao.length > 0 || selected.ata) && (
                   <section className="space-y-3">
                     <WlHead title="Estrutura e cobertura" count={wl.completude.length} />
@@ -1606,11 +1632,11 @@ function ProblemGroup({ type, items, onStatus, onVerdict, onGroupStatus }: {
   );
 }
 
-function WlHead({ title, count, hint }: { title: string; count: number; hint?: string }) {
+function WlHead({ title, count, hint }: { title: string; count?: number; hint?: string }) {
   return (
     <div className="flex items-center gap-2 pt-1">
       <h3 className="text-sm font-semibold">{title}</h3>
-      <span className="text-[10px] text-muted-foreground">{count} achado(s)</span>
+      {count !== undefined && <span className="text-[10px] text-muted-foreground">{count} achado(s)</span>}
       {hint && <span className="text-[10px] text-muted-foreground italic">· {hint}</span>}
       <div className="flex-1 border-t border-border" />
     </div>

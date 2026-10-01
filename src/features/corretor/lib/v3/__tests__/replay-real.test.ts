@@ -60,11 +60,12 @@ describe.skipIf(!PPTX)('replay de estudo real (leituras cacheadas)', () => {
     const uf = env.CORRETOR_REPLAY_UF ?? undefined;
     const vision = replayVisionPass(candidates, readings, { cidade: city, uf });
     vision.findings = applyDeclaredExclusions(ir, vision.findings);
+    const acertos = { fonte: { comparados: 0, batem: 0 }, cruzamentos: { feitos: 0, batem: 0 } };
     const det = [
       ...irToFindings(ir, { city, uf }).filter((f) => !f.ok),
-      ...(fonte ? sourceCrosscheckFindings(ir, fonte) : []),
+      ...(fonte ? sourceCrosscheckFindings(ir, fonte, acertos.fonte) : []),
     ];
-    const { visionFindings } = combineVisionFindings(ir, vision, candidates, fonte);
+    const { visionFindings } = combineVisionFindings(ir, vision, candidates, fonte, acertos);
     // Como o site grava: id único; achado com imagem de evidência é da visão.
     const seen = new Set<string>();
     const all = [...det, ...visionFindings.map((f) => ({ ...f, origem: f.origem ?? (f.evidenceSha1 ? 'IA_visao' : 'DET') }))]
@@ -74,7 +75,7 @@ describe.skipIf(!PPTX)('replay de estudo real (leituras cacheadas)', () => {
       slide: f.slideRef, tipo: f.type, nivel: level[confidenceOf(f, f.origem ?? 'DET')], titulo: f.title,
       detalhe: f.detail.replace(/\s+/g, ' ').slice(0, 240),
     })).sort((a, b) => (parseInt(a.slide?.slice(1) ?? '') || 999) - (parseInt(b.slide?.slice(1) ?? '') || 999));
-    const summary = { candidatas: candidates.length, leituras: readings.size, achados: rows.length };
+    const summary = { candidatas: candidates.length, leituras: readings.size, achados: rows.length, tabelas: `${vision.tablesVerified}/${vision.tablesExtracted}`, acertos };
     if (env.CORRETOR_REPLAY_OUT) writeFileSync(env.CORRETOR_REPLAY_OUT, JSON.stringify({ summary, rows }, null, 1));
     console.log('[replay]', JSON.stringify(summary));
     for (const r of rows) console.log(`[replay] ${r.slide} ${r.tipo} ${r.nivel} | ${r.titulo} | ${r.detalhe.slice(0, 150)}`);

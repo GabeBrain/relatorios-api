@@ -19,6 +19,11 @@ const socioBlock = (fonte: Fonte, table: string) =>
 
 interface LabeledPercent { label: string; value: number; decimals: number }
 
+/** Valores do slide comparados com a planilha e quantos bateram (resumo de acertos). */
+export interface SourceStats { comparados: number; batem: number }
+let tally: SourceStats | null = null;
+const count = (ok: boolean) => { if (tally) { tally.comparados++; if (ok) tally.batem++; } };
+
 /** Casas decimais efetivamente exibidas ("28,9" → 1; "29" → 0). */
 export function shownDecimals(raw: string): number {
   return raw.match(/,(\d+)\s*$/)?.[1].length ?? 0;
@@ -83,7 +88,9 @@ function verticalizationFindings(ir: Ir, fonte: Fonte): Finding[] {
       if (typeof ratio !== 'number') continue;
       const expected = ratio * 100;
       // Compara na precisão publicada: 5,16% aceita 5,2% (uma casa) ou 5% (inteiro).
-      if (matchesAtShownPrecision(claim.value, expected, claim.decimals)) continue;
+      const okPct = matchesAtShownPrecision(claim.value, expected, claim.decimals);
+      count(okPct);
+      if (okPct) continue;
       const shown = `${pt(claim.value, claim.decimals)}%`;
       const expectedText = `${pt(expected, 2)}%`;
       const rounded = `${pt(expected, claim.decimals)}%`;
@@ -132,6 +139,7 @@ function populationSeriesFindings(ir: Ir, fonte: Fonte): Finding[] {
       const exact = claims.findIndex((claim, index) => !used.has(index) && claim.value === Math.round(expected));
       if (exact >= 0) {
         used.add(exact);
+        count(claims[exact].unit === expectedUnit);
         if (claims[exact].unit !== expectedUnit) {
           const shownUnit = claims[exact].unit;
           findings.push(sourceFinding({
@@ -151,6 +159,7 @@ function populationSeriesFindings(ir: Ir, fonte: Fonte): Finding[] {
       if (candidates.length !== 1 && (candidates.length < 2 || candidates[0].delta === candidates[1].delta)) continue;
       const chosen = candidates[0];
       used.add(chosen.index);
+      count(false);
       const diff = chosen.claim.value - expected;
       findings.push(sourceFinding({
         slide, recorte: scope, shown: `${chosen.claim.raw} ${chosen.claim.unit}`, expected: `${pt(expected)} ${expectedUnit}`,
@@ -166,8 +175,13 @@ function populationSeriesFindings(ir: Ir, fonte: Fonte): Finding[] {
  * Compara apenas métricas com mapeamento semântico explícito. Ausência ou
  * ambiguidade não vira acusação; ampliar cobertura exige nova regra + fixture real.
  */
-export function sourceCrosscheckFindings(ir: Ir, fonte: Fonte): Finding[] {
-  return [...verticalizationFindings(ir, fonte), ...populationSeriesFindings(ir, fonte)];
+export function sourceCrosscheckFindings(ir: Ir, fonte: Fonte, counter?: SourceStats): Finding[] {
+  tally = counter ?? null;
+  try {
+    return [...verticalizationFindings(ir, fonte), ...populationSeriesFindings(ir, fonte)];
+  } finally {
+    tally = null;
+  }
 }
 
 const offerTableFromTitle = (title: string): string | null => {
@@ -200,9 +214,10 @@ const columnIndex = (columns: string[], patterns: RegExp[]) =>
  * elo faltar, não produz achado.
  */
 export function sourceCrosscheckVisionFindings(
-  ir: Ir, fonte: Fonte, refs: ExtractedTableRef[],
+  ir: Ir, fonte: Fonte, refs: ExtractedTableRef[], counter?: SourceStats,
 ): Finding[] {
   const findings: Finding[] = [];
+  const hit = (ok: boolean) => { if (counter) { counter.comparados++; if (ok) counter.batem++; } };
   for (const ref of refs) {
     const slide = ir.slides.find((item) => item.n === ref.slide);
     if (!slide) continue;
@@ -234,7 +249,9 @@ export function sourceCrosscheckVisionFindings(
         if (metric.column < 0) continue;
         const shown = row[metric.column];
         const expected = item.valores?.[metric.key];
-        if (typeof shown !== 'number' || typeof expected !== 'number' || Math.abs(shown - expected) <= 0.5) continue;
+        if (typeof shown !== 'number' || typeof expected !== 'number') continue;
+        hit(Math.abs(shown - expected) <= 0.5);
+        if (Math.abs(shown - expected) <= 0.5) continue;
         const origin = provenance(block, item);
         findings.push({
           id: `source-vision-${ref.slide}-${normalize(tableName)}-${normalize(block.recorte ?? '')}-${normalize(label)}-${metric.key}`,

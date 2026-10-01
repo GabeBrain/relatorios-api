@@ -16,6 +16,18 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.66 — 2026-09-30 — rodada de Toledo: texto, faixa omitida, raios, lacunas e resumo de acertos (RUNTIME local)
+
+Plano e resultado medido: [PLAN_v066_toledo.md](./PLAN_v066_toledo.md).
+
+- **Revisão de texto (crítico):** o prompt de `analyze-text-batch` nunca incluía o texto dos slides (desde 09/jul); o modelo revisava só as instruções. Agora inclui título, texto e tabelas de cada slide. **Requer deploy da Edge Function.**
+- **Faixa omitida** (`omittedBand`): todas as colunas abaixo do total na mesma proporção vira Provável mesmo com leituras discordantes e não entra no aviso agrupado (Toledo s30: −8,4% em todas as colunas).
+- **Raios:** tempo com distância até ponto de interesse (“2 min 950 m”, “1,8 km | 5 min”) não conta como raio do estudo (Toledo s14).
+- **Totais de lacunas:** além do consenso, um par basta quando só um slide tem a nota de exclusão e a diferença tem forma de exclusão (sem nota = maior, ≤ 20%).
+- **Resumo “O que bateu”:** bloco no topo da lista com tabelas-imagem que fecham, tabelas nativas conferidas, valores iguais às planilhas e cruzamentos que batem; contagens gravadas no snapshot (`relatorio.fonte`, `relatorio.cruzamentos`) e atualizadas quando as planilhas entram depois da análise.
+
+**Verificação:** 188 testes verdes (incl. `toledo-v066.test.ts`), `tsc`, lint e build ok; replay de Toledo, CJ e SJC (tabela no plano); captura local do bloco de acertos no Toledo.
+
 ## Versão 0.65 — 2026-09-30 — cabeçalho enxuto, filtros claros, estimativa com releitura, sem barra lateral (RUNTIME local)
 
 **Fonte:** revisão do Gabriel sobre a v0.64 (capturas do estudo de João Pessoa).

@@ -19,10 +19,10 @@ import { reconcileDeckFindings } from './deck-reconcile';
 import { findAtaImage, type AtaImageCandidate } from './ata-image';
 import { estimateAtaPass, extractAtaFromImage, type AtaData } from './ia-ata';
 import { usdToBrl, VISION_CONCURRENCY } from './config';
-import { crossTableFindings, nativeTableRefs, projectionFindings } from './cross-table';
+import { crossTableFindings, nativeTableRefs, projectionFindings, type CrossStats } from './cross-table';
 import { ataCoverageFindings, requiredAndExclusionFindings, sourceFindingsFromVision } from './coverage-rules';
 import type { Fonte } from './fonte';
-import { sourceCrosscheckFindings, sourceCrosscheckVisionFindings } from './source-crosscheck';
+import { sourceCrosscheckFindings, sourceCrosscheckVisionFindings, type SourceStats } from './source-crosscheck';
 
 // ── estimativa combinada (antes de gastar) ────────────────────────────────────
 
@@ -185,6 +185,10 @@ export interface AnalysisReport {
   imagensAnalisadas: number;
   tabelasNativas: number;       // tabelas nativas do PPTX conferidas por DET
   geradoEm: string;
+  /** Valores do slide comparados com as planilhas e quantos bateram (resumo de acertos). */
+  fonte?: SourceStats;
+  /** Cruzamentos entre tabelas feitos e quantos bateram (resumo de acertos). */
+  cruzamentos?: CrossStats;
 }
 
 export interface Phase2Result {
@@ -234,7 +238,8 @@ export async function runPhase2(
   let detFindings = irToFindings(ir, { city: cityUsed, uf }).filter((f) => !f.ok);
   detFindings = detFindings.concat(ataCoverageFindings(ir, ata).filter((f) => !f.ok));
   // Fonte vinculada depois da triagem (no portão): o cruzamento DET roda aqui também.
-  if (opts.fonte) detFindings = detFindings.concat(sourceCrosscheckFindings(ir, opts.fonte));
+  const acertos = { fonte: { comparados: 0, batem: 0 }, cruzamentos: { feitos: 0, batem: 0 } };
+  if (opts.fonte) detFindings = detFindings.concat(sourceCrosscheckFindings(ir, opts.fonte, acertos.fonte));
 
   const textPromise = runTextPass(
     ir, cityUsed, model,
@@ -263,7 +268,7 @@ export async function runPhase2(
   });
 
   const [text, vision] = await Promise.all([textPromise, visionPromise]);
-  const combined = combineVisionFindings(ir, vision, candidates, opts.fonte);
+  const combined = combineVisionFindings(ir, vision, candidates, opts.fonte, acertos);
   const visionFindings = combined.visionFindings;
   await attachEvidenceImages(combined.crossFindings, candidates);
   onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: visionFindings });
@@ -275,6 +280,8 @@ export async function runPhase2(
   );
 
   const report: AnalysisReport = {
+    ...(opts.fonte ? { fonte: acertos.fonte } : {}),
+    cruzamentos: acertos.cruzamentos,
     tabelasExtraidas: vision.tablesExtracted,
     tabelasVerificadas: vision.tablesVerified,
     imagensAnalisadas: vision.analyzedSlides.length,
@@ -299,16 +306,17 @@ export async function runPhase2(
  */
 export function combineVisionFindings(
   ir: Ir, vision: VisionPassResult, candidates: TableImageCandidate[], fonte?: Fonte | null,
+  acertos?: { fonte: SourceStats; cruzamentos: CrossStats },
 ): { visionFindings: Finding[]; crossFindings: Finding[] } {
   const unread = unreadImageFindings(candidates, vision.failed ?? []);
   const refs = nativeTableRefs(ir).concat(vision.tables.map((table) => ({ ...table, source: 'vision' as const })));
-  const cross = crossTableFindings(ir, vision.tables);
+  const cross = crossTableFindings(ir, vision.tables, acertos?.cruzamentos);
   const projection = projectionFindings(refs);
   const coverage = [
     ...sourceFindingsFromVision(ir, vision.sourceSlides, vision.analyzedSlides),
     ...requiredAndExclusionFindings(ir, refs),
   ];
-  const sourceCrosscheck = fonte ? sourceCrosscheckVisionFindings(ir, fonte, vision.tables) : [];
+  const sourceCrosscheck = fonte ? sourceCrosscheckVisionFindings(ir, fonte, vision.tables, acertos?.fonte) : [];
   const crossFindings = applyDeclaredExclusions(ir, [...cross, ...projection, ...coverage, ...sourceCrosscheck].filter((f) => !f.ok));
   const visionFindings = reconcileDeckFindings([...vision.findings.filter((f) => !f.ok), ...crossFindings, ...unread], vision.tables);
   const kept = new Set(visionFindings.map((f) => f.id));

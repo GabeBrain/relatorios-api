@@ -118,6 +118,7 @@ export function checkTableSums(
   const badColumns: number[] = [];
   const badRows: number[] = [];
   const notes: string[] = [];
+  let omittedBand = false;
   // Totais casados às colunas de verdade; null = desalinhamento indecidível.
   const { totals, byFit } = alignTotals(table);
   const unaligned = Boolean(table.totals?.some(isNum)) && !totals;
@@ -206,6 +207,7 @@ export function checkTableSums(
         if (allShort && spread <= 0.03) {
           const missing = (1 - ratios.reduce((a, b) => a + b, 0) / ratios.length) * 100;
           notes.unshift(`Todas as ${failing.length} colunas conferidas ficam cerca de ${fmt(round(missing))}% abaixo do total declarado: provável linha ou faixa omitida da tabela.`);
+          omittedBand = true;
         }
       }
     }
@@ -242,6 +244,7 @@ export function checkTableSums(
     ...(unaligned ? { unaligned } : {}),
     ...(incoherent ? { incoherentReading: true } : {}),
     ...(byFit ? { totalsByFit: true } : {}),
+    ...(omittedBand ? { omittedBand: true } : {}),
   };
 }
 

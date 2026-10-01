@@ -51,6 +51,12 @@ export interface TableViz {
   incoherentReading?: boolean;
   /** Totais compactos casados às colunas pelo valor (não pela posição): acusação vale no máximo “Provável”. */
   totalsByFit?: boolean;
+  /**
+   * Todas as colunas ficam abaixo do total na MESMA proporção: faixa/linha omitida.
+   * Padrão estrutural (não depende de um dígito lido): vale mesmo com leituras
+   * discordantes e não entra no aviso de leitura insegura (s30 do Toledo, set/2026).
+   */
+  omittedBand?: boolean;
   /** Tabela costurada de fatias por coluna, sem releitura: não sustenta acusação. */
   stitchedReading?: boolean;
 }
