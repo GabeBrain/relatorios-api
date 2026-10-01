@@ -5,8 +5,8 @@ import { PanoramaExportDeck } from './ReportPaginator';
 import { synchronizeOfficialCoverCity } from '../lib/official-cover';
 import { buildPanoramaPdf, buildPanoramaPptx, PanoramaExportCancelled } from '../lib/pdf-export';
 import { panoramaExportBlockReason, usePanoramaExportStore, type PanoramaExportFormat } from '../export-store';
-import { quarterLabel } from '../lib/launches';
 import { scopeCityLabel, scopeFileSlug } from '../types';
+import { panoramaExportMetadata } from '../lib/export-metadata';
 
 /**
  * Executa a exportação do Panorama fora da árvore da rota: montado pelo shell, sobrevive à
@@ -42,11 +42,7 @@ export default function PanoramaExportHost() {
       try {
         const blockReason = panoramaExportBlockReason(report);
         if (blockReason) { usePanoramaExportStore.getState().fail(blockReason); return; }
-        const metadata = {
-          title: `Panorama imobiliário de ${cityLabel}`,
-          author: 'Brain Inteligência Estratégica',
-          subject: `${cityLabel}/${report.scope.uf} · ${quarterLabel(report.scope.endQuarter)}`,
-        };
+        const metadata = panoramaExportMetadata(report.scope, import.meta.env.VITE_BUILD_ID);
         const builder = format === 'pptx' ? buildPanoramaPptx : buildPanoramaPdf;
         const built = await builder(slides, metadata, ({ current, total: pages }) => {
           const live = usePanoramaExportStore.getState();
@@ -89,7 +85,7 @@ export default function PanoramaExportHost() {
               {status === 'error' && `Não foi possível gerar o ${formatLabel}`}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {running && 'Pode continuar navegando pela plataforma; o download começa sozinho ao terminar.'}
+              {running && 'Mantenha esta aba visível até o download. Você pode navegar dentro da plataforma, mas trocar de aba pode pausar a captura.'}
               {status === 'done' && 'O download começou automaticamente.'}
               {status === 'error' && error}
             </p>

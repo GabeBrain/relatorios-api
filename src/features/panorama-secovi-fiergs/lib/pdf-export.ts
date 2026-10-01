@@ -31,6 +31,7 @@ export interface PanoramaExportMetadata {
   title: string;
   author: string;
   subject: string;
+  keywords?: string[];
 }
 
 async function waitForSlide(slide: HTMLElement) {
@@ -86,6 +87,7 @@ export async function buildPanoramaPdf(
   pdf.setTitle(metadata.title);
   pdf.setAuthor(metadata.author);
   pdf.setSubject(metadata.subject);
+  if (metadata.keywords?.length) pdf.setKeywords(metadata.keywords);
   pdf.setCreator('Rebrain · Panorama Secovi/FIERGS');
   pdf.setCreationDate(new Date());
 
@@ -140,6 +142,7 @@ export async function buildPanoramaPptx(
   pptx.author = metadata.author;
   pptx.subject = metadata.subject;
   pptx.title = metadata.title;
+  if (metadata.keywords?.length) (pptx as unknown as { keywords?: string }).keywords = metadata.keywords.join(', ');
   pptx.company = 'Brain Inteligência Estratégica';
   (pptx as unknown as { lang?: string }).lang = 'pt-BR';
 
