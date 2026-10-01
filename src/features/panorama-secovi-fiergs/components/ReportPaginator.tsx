@@ -15,7 +15,7 @@ import { typologyDisplayLabel } from '../domain/taxonomy';
 
 /** Token do fundo cartográfico: define, junto das coordenadas, se a lâmina de mapa existe (JG-39). */
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
-import { panoramaExportIsRunning, usePanoramaExportStore } from '../export-store';
+import { panoramaExportBlockReason, panoramaExportIsRunning, usePanoramaExportStore } from '../export-store';
 import { AreaIvvSlide, CohortMatrixSlide, CohortTableSlide, FiergsHorizontalOfferSlide, FiergsHorizontalPriceRangeSlide, FiergsTypologyAreaSlide, FiergsTypologyPriceRangeSlide, LocationSlide, MarketSummarySlide, MaturitySlide, NarrativeSlide, OfferChartSlide, OfferTableSlide, PriceChartSlide, PriceTableSlide, VgvSlide } from './MarketSlides';
 import coverBackground from '../assets/official_v2/backgrounds/cover-report.png';
 import contentBackground from '../assets/official_v2/backgrounds/content.png';
@@ -604,7 +604,7 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const exportProgress = usePanoramaExportStore((state) => state.progress);
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
-  const exportBlocked = report.scope.entity === 'fiergs-rs' && !report.reconciliation?.homologable;
+  const exportBlocked = Boolean(panoramaExportBlockReason(report));
   const pages = useMemo(() => panoramaManifestFor(report, MAPBOX_TOKEN), [report]);
   const sections = useMemo(() => createPanoramaSections(pages, report.scope.entity), [pages, report.scope.entity]);
   useEffect(() => setCurrent((value) => Math.min(value, pages.length - 1)), [pages.length]);

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { PanoramaExportDeck } from './ReportPaginator';
 import { synchronizeOfficialCoverCity } from '../lib/official-cover';
 import { buildPanoramaPdf, buildPanoramaPptx, PanoramaExportCancelled } from '../lib/pdf-export';
-import { usePanoramaExportStore, type PanoramaExportFormat } from '../export-store';
+import { panoramaExportBlockReason, usePanoramaExportStore, type PanoramaExportFormat } from '../export-store';
 import { quarterLabel } from '../lib/launches';
 import { scopeCityLabel, scopeFileSlug } from '../types';
 
@@ -28,6 +28,8 @@ export default function PanoramaExportHost() {
     // caminho do PPT espelho pedido na homologação.
     if (startedFor.current?.report === report && startedFor.current.format === format) return;
     startedFor.current = { report, format };
+    const initialBlockReason = panoramaExportBlockReason(report);
+    if (initialBlockReason) { store.fail(initialBlockReason); return; }
     const cityLabel = scopeCityLabel(report.scope);
     synchronizeOfficialCoverCity(cityLabel, report.scope.uf, report.scope.endQuarter);
 
@@ -38,6 +40,8 @@ export default function PanoramaExportHost() {
       if (!slides.length) { usePanoramaExportStore.getState().fail('Não foi possível montar as páginas do relatório.'); return; }
       usePanoramaExportStore.getState().markCapturing(slides.length);
       try {
+        const blockReason = panoramaExportBlockReason(report);
+        if (blockReason) { usePanoramaExportStore.getState().fail(blockReason); return; }
         const metadata = {
           title: `Panorama imobiliário de ${cityLabel}`,
           author: 'Brain Inteligência Estratégica',

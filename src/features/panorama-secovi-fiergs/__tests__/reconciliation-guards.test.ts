@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { reconcilePanoramaReport } from '../domain/reconciliation';
 import { buildFiergsAuditCsv } from '../lib/fiergs-audit';
-import { usePanoramaExportStore } from '../export-store';
+import { panoramaExportBlockReason, usePanoramaExportStore } from '../export-store';
 
-const block = (value: number) => ({ series: [{ quarter: '2T2026', vertical: value }] });
-const base = () => ({
-  scope: { uf: 'RS', cities: ['Canoas', 'Viamão'], endQuarter: '2T2026', entity: 'fiergs-rs' },
+const block = (value: number, quarter: '2T2026' | '4T2025' = '2T2026') => ({ series: [{ quarter, vertical: value }] });
+const base = (endQuarter: '2T2026' | '4T2025' = '2T2026') => ({
+  scope: { uf: 'RS', cities: ['Canoas', 'Viamão'], endQuarter, entity: 'fiergs-rs' },
   cube: {
     projects: [
       { key: 'Canoas::V1', segment: 'Vertical', soldUnits: 30, finalUnits: 70, latitude: -29.9, longitude: -51.1 },
@@ -13,8 +13,8 @@ const base = () => ({
       { key: 'Viamão::H1', segment: 'Horizontal', horizontalSubtype: 'loteamento_aberto', launchedUnits: 100, finalUnits: 40, latitude: -30.1, longitude: -50.9 },
     ],
   },
-  sales: { units: { ...block(50), source: 'padrão' }, unitsByTypology: { ...block(50), source: 'tipologia' } },
-  stock: { units: { ...block(150), source: 'padrão' }, unitsByTypology: { ...block(150), source: 'tipologia' } },
+  sales: { units: { ...block(50, endQuarter), source: 'padrão' }, unitsByTypology: { ...block(50, endQuarter), source: 'tipologia' } },
+  stock: { units: { ...block(150, endQuarter), source: 'padrão' }, unitsByTypology: { ...block(150, endQuarter), source: 'tipologia' } },
   granular: {
     areaBands: [{ kind: 'total', soldUnits: 50, finalUnits: 150 }],
     offerByStandard: [{ kind: 'total', finalUnits: 150 }],
@@ -85,6 +85,47 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
     });
     usePanoramaExportStore.getState().start({ scope: input.scope, reconciliation } as never, 'pdf');
     expect(usePanoramaExportStore.getState()).toMatchObject({ status: 'error', report: null });
+  });
+
+  it.each(['2T2026', '4T2025'] as const)('libera PDF e PPT quando as 23 invariantes fecham em %s', (period) => {
+    const input = base(period);
+    const reconciliation = reconcilePanoramaReport(input as never);
+    const report = { scope: input.scope, reconciliation } as never;
+    for (const format of ['pdf', 'pptx'] as const) {
+      usePanoramaExportStore.setState({ status: 'idle', error: '', report: null });
+      usePanoramaExportStore.getState().start(report, format);
+      expect(usePanoramaExportStore.getState()).toMatchObject({ status: 'preparing', format, report });
+      usePanoramaExportStore.getState().cancel();
+    }
+  });
+
+  it.each(['2T2026', '4T2025'] as const)('bloqueia PDF e PPT diante de divergência crítica em %s', (period) => {
+    const input = base(period);
+    input.granular.cohortsHorizontal[0].finalUnits = 39;
+    const reconciliation = reconcilePanoramaReport(input as never);
+    const report = { scope: input.scope, reconciliation } as never;
+    for (const format of ['pdf', 'pptx'] as const) {
+      usePanoramaExportStore.setState({ status: 'idle', error: '', report: null });
+      usePanoramaExportStore.getState().start(report, format);
+      expect(usePanoramaExportStore.getState()).toMatchObject({ status: 'error', format, report: null });
+      expect(usePanoramaExportStore.getState().error).toContain('horizontal.final.cohort');
+    }
+  });
+
+  it('recalcula as linhas críticas mesmo se homologable vier indevidamente verdadeiro', () => {
+    const input = base('4T2025');
+    const reconciliation = reconcilePanoramaReport(input as never);
+    reconciliation.rows[0] = { ...reconciliation.rows[0], status: 'different', delta: 1 };
+    const forged = { ...reconciliation, homologable: true };
+    expect(panoramaExportBlockReason({ scope: input.scope, reconciliation: forged } as never)).toContain('sales.vertical.pattern');
+  });
+
+  it('bloqueia uma dimensão crítica indisponível em vez de tratá-la como exceção editorial', () => {
+    const input = base('4T2025');
+    input.granular.offerByTypology = [];
+    const reconciliation = reconcilePanoramaReport(input as never);
+    expect(reconciliation.rows.find((row) => row.metricId === 'stock.vertical.typology_table')).toMatchObject({ status: 'unavailable', critical: true });
+    expect(panoramaExportBlockReason({ scope: input.scope, reconciliation } as never)).toContain('stock.vertical.typology_table');
   });
 
   it('leva fonte, fórmula, universo, período e delta para o CSV de auditoria', () => {
