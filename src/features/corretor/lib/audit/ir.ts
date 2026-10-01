@@ -34,6 +34,12 @@ export interface IrSlide {
   notas_edicao: string[];
   /** Balões amarelos com texto vermelho da revisão A&R. Não entram em `textos`. */
   notas_revisao: string[];
+  /**
+   * Texto de imagens SVG do slide (gráficos colados como SVG), um item por SVG.
+   * Fica fora de `textos`: valores e rótulos vêm em listas separadas e as
+   * regras que casam número com rótulo leriam pares errados.
+   */
+  textos_svg?: string[];
   tabelas: IrTable[];
   graficos: IrGrafico[];
   n_imagens: number;

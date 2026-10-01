@@ -70,6 +70,17 @@ describe('applyDeclaredExclusions — rebaixa, não apaga', () => {
     expect(confidenceOf(out, 'DET')).toBe(1);
   });
 
+  it('não rebaixa a faixa de preço incorreta do E5 por uma nota de exclusão', () => {
+    const finding: Finding = {
+      id: 'entity-bin-boulevard', type: 'CROSS_TABLE_MISMATCH', section: 'LACUNAS', slideRef: 's55, s52',
+      title: 'Boulevard: faixa de R$/m² das lacunas não bate com a ficha',
+      detail: 'Preço da ficha está fora da faixa que recebeu as unidades.', ok: false, confidence: 2,
+    };
+    const [out] = applyDeclaredExclusions(ir(slide(52, [RODAPE_TOLEDO])), [finding]);
+    expect(out.confidence).toBe(2);
+    expect(out.detail).not.toContain('declara exclusão');
+  });
+
   it('não mexe em achado que não depende da tabela estar completa', () => {
     const ortografia: Finding = {
       id: 'txt-43', type: 'SPELLING', section: 'MERCADO', slideRef: 's43',

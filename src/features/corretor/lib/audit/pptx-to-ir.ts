@@ -208,17 +208,19 @@ export async function pptxToIr(
     bytes = input as Uint8Array;
   }
 
-  // decompacta só os XMLs de slide/rels (ignora as imagens pesadas)
-  const files = unzipSync(bytes, { filter: (f) => /^ppt\/slides\//.test(f.name) });
+  // decompacta só os XMLs de slide/rels e os SVGs (ignora as imagens pesadas)
+  const files = unzipSync(bytes, { filter: (f) => /^ppt\/slides\//.test(f.name) || /^ppt\/media\/[^/]+\.svg$/i.test(f.name) });
   const dec = new TextDecoder('utf-8');
 
   const slideNames = Object.keys(files)
     .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
     .sort((a, b) => slideNum(a) - slideNum(b));
 
-  const slides: IrSlide[] = slideNames.map((n) =>
-    parseSlide(dec.decode(files[n]), slideNum(n), parser)
-  );
+  const slides: IrSlide[] = slideNames.map((n) => {
+    const slide = parseSlide(dec.decode(files[n]), slideNum(n), parser);
+    const svg = svgTextsOfSlide(files, slideNum(n), dec, parser);
+    return svg.length ? { ...slide, textos_svg: svg } : slide;
+  });
 
   return {
     ir_version: 1,
@@ -227,6 +229,31 @@ export async function pptxToIr(
     n_slides: slides.length,
     slides,
   };
+}
+
+const NS_RELS = 'http://schemas.openxmlformats.org/package/2006/relationships';
+const NS_SVG = 'http://www.w3.org/2000/svg';
+
+/**
+ * Texto dos SVGs do slide. Gráfico colado como SVG (Rolândia s31: verticalização
+ * com o 5,2% que contradiz os s32/s33) era invisível: nem visão (formato não
+ * suportado) nem texto. Sai de graça, sem IA — um item por SVG.
+ */
+function svgTextsOfSlide(files: Record<string, Uint8Array>, num: number, dec: TextDecoder, parser: DOMParser): string[] {
+  const rels = files[`ppt/slides/_rels/slide${num}.xml.rels`];
+  if (!rels) return [];
+  const root = parser.parseFromString(dec.decode(rels), 'application/xml');
+  const out: string[] = [];
+  for (const rel of Array.from(root.getElementsByTagNameNS(NS_RELS, 'Relationship'))) {
+    const target = (rel.getAttribute('Target') ?? '').replace(/^\.\.\//, 'ppt/');
+    if (!/\.svg$/i.test(target) || !files[target]) continue;
+    const svg = parser.parseFromString(dec.decode(files[target]), 'application/xml');
+    const texts = Array.from(svg.getElementsByTagNameNS(NS_SVG, 'text'))
+      .map((t) => (t.textContent ?? '').replace(/\s+/g, ' ').trim())
+      .filter(Boolean);
+    if (texts.length) out.push(texts.join('\n'));
+  }
+  return out;
 }
 
 function slideNum(name: string): number {

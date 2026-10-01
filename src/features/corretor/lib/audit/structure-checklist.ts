@@ -73,6 +73,59 @@ function isIndexSlide(slide: Ir['slides'][number]): boolean {
   return slide.n <= 2 && !sec;
 }
 
+const plain = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+function numberedHeadings(slide: Ir['slides'][number]): Array<{ number: number; label: string }> {
+  const blocks = [...(slide.textos ?? [])];
+  const numberList = blocks.map((block) => block.split(/\r?\n/).map((line) => line.trim()).filter((line) => /^\d{1,2}$/.test(line)))
+    .find((numbers) => numbers.length >= 4);
+  if (numberList) {
+    const labels = blocks.map((block) => block.split(/\r?\n/).map((line) => line.trim()).filter((line) => line.length >= 4 && !/^\d{1,2}$/.test(line)))
+      .find((lines) => lines.length === numberList.length && lines.every((line) => !/^(conte[uú]do|vocacional|mercado imobili[aá]rio)$/i.test(line)));
+    if (labels) return numberList.map((number, index) => ({ number: Number(number), label: labels[index] }));
+  }
+  const text = [slide.titulo ?? '', ...blocks].join('\n');
+  return text.split(/\r?\n/).flatMap((line) => {
+    const match = line.trim().match(/^(\d{1,2})[.)\s-]+(.{4,100})$/);
+    return match ? [{ number: Number(match[1]), label: match[2].trim() }] : [];
+  });
+}
+
+function emptyIndexSections(slides: Ir['slides']): string[] {
+  const summaries = slides.map((slide, index) => ({ slide, index, headings: numberedHeadings(slide) }))
+    .filter((x) => /sum[áa]rio|conte[uú]do|[íi]ndice/i.test(`${x.slide.titulo ?? ''}\n${(x.slide.textos ?? []).join('\n')}`) || x.headings.length >= 4);
+  const groups: typeof summaries[] = [];
+  for (const summary of summaries) {
+    const last = groups.at(-1);
+    if (last && summary.index === last.at(-1)!.index + 1) last.push(summary);
+    else groups.push([summary]);
+  }
+  // Uma única duplicata costuma ser capa + sumário. A família de Rolândia é
+  // uma sequência de 3 páginas de conteúdo; usar o limiar conservador evita
+  // ler sumários normais de dois slides como ausência de seção.
+  const repeated = groups.filter((group) => group.length >= 3);
+  if (!repeated.length) return [];
+  const headings = new Map<number, string>();
+  for (const group of repeated) for (const item of group) for (const heading of item.headings) headings.set(heading.number, heading.label);
+  if (headings.size < 4) return [];
+  const summarySlides = new Set(summaries.map((item) => item.slide.n));
+  const body = slides.filter((slide) => !summarySlides.has(slide.n) && !isIndexSlide(slide))
+    .map((slide) => plain([slide.titulo ?? '', ...(slide.textos ?? []), ...(slide.textos_svg ?? [])].join(' ')));
+  return [...headings.entries()].sort((a, b) => a[0] - b[0]).filter(([, label]) => {
+    const words = plain(label).split(' ').filter((word) => word.length >= 5);
+    if (!words.length) return true;
+    const labelKey = plain(label);
+    const aliases = labelKey.includes('identificacao do terreno') ? [['identificacao', 'terreno']]
+      : labelKey === 'sociodemografia' ? [['sociodemografia']]
+        : labelKey.includes('analise do mercado residencial') ? [['mercado', 'oferta'], ['empreendimento'], ['concorrente'], ['preco'], ['locacao']]
+          : labelKey.includes('avaliacao da consultoria') ? [['avaliacao', 'consultoria']]
+            : labelKey === 'recomendacao' ? [['recomendacao']]
+              : labelKey.includes('consultores do estudo') ? [['consultor'], ['ceo'], ['socio'], ['socia'], ['head'], ['inteligencia', 'mercado']]
+                : [words];
+    return !body.some((text) => aliases.some((alias) => alias.every((word) => text.includes(word))));
+  }).map(([number, label]) => `Seção ${String(number).padStart(2, '0')} (${label})`);
+}
+
 export function structureChecklistFinding(ir: Ir): Finding {
   const evidence = ir.slides.filter((s) => !isIndexSlide(s)).map((s) => `${s.titulo ?? ''}\n${(s.textos ?? []).join('\n')}`).map((text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
   // Item visual só é declarado ausente se o deck não tiver imagem nenhuma —
@@ -85,15 +138,29 @@ export function structureChecklistFinding(ir: Ir): Finding {
 
   const missing = status.filter((s) => s.status === 'missing');
   const toCheck = status.filter((s) => s.status === 'na');
+  const emptySections = emptyIndexSections(ir.slides);
+  const lastSlide = ir.slides.at(-1);
+  const finalBlank = lastSlide && !(lastSlide.textos ?? []).some((t) => t.trim()) && !(lastSlide.textos_svg ?? []).some((t) => t.trim()) && !(lastSlide.tabelas ?? []).length && !(lastSlide.n_imagens ?? 0);
+  const dynamicCheck = finalBlank ? [`Slide final s${lastSlide.n} sem conteúdo detectável`] : [];
   const parts = [
     missing.length ? `${missing.length} ausente(s)` : '',
     toCheck.length ? `${toCheck.length} a conferir em imagem` : '',
+    emptySections.length ? `${emptySections.length} seção(ões) sem conteúdo` : '',
+    dynamicCheck.length ? 'slide final a conferir' : '',
   ].filter(Boolean);
   return {
     id: 'structure', type: 'STRUCTURE_MISSING', section: 'ESTRUTURA', slideRef: '—',
     title: `Checklist estrutural (${parts.join(' · ') || 'completo'})`,
-    detail: 'Cobertura por título e texto do slide, fora do sumário. Itens “a conferir” são mapas/prints: o conteúdo pode estar dentro da imagem — confirme visualmente antes de tratar como ausência.',
-    ok: missing.length === 0,
-    viz: { kind: 'text', checklist: status.map(({ entry, status: s }) => ({ label: `${entry.id} — ${entry.label}`, status: s })) },
+    detail: [
+      'Cobertura por título e texto do slide, fora do sumário. Itens “a conferir” são mapas/prints: o conteúdo pode estar dentro da imagem — confirme visualmente antes de tratar como ausência.',
+      emptySections.length ? `Seções listadas em sumários consecutivos sem conteúdo localizado: ${emptySections.join('; ')}.` : '',
+      dynamicCheck.length ? `${dynamicCheck.join('; ')}; confirme visualmente antes de tratar como ausência.` : '',
+    ].filter(Boolean).join(' '),
+    ok: missing.length === 0 && emptySections.length === 0 && !finalBlank,
+    viz: { kind: 'text', checklist: [
+      ...status.map(({ entry, status: s }) => ({ label: `${entry.id} — ${entry.label}`, status: s })),
+      ...emptySections.map((label) => ({ label, status: 'missing' as const })),
+      ...dynamicCheck.map((label) => ({ label, status: 'na' as const })),
+    ] },
   };
 }

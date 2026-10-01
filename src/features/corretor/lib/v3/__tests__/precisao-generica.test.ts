@@ -44,15 +44,17 @@ describe('célula mesclada repetida pela leitura', () => {
 
 describe('anomalias de formato da visão', () => {
   it('só passam as confirmadas por regra fixa', () => {
-    const issues = visionFormatIssues([
+    const anomalies = [
       { texto: '0,125', motivo: 'decimal sem %' },
-      { texto: 'R$ 9.000//m²', motivo: 'símbolo' },
+      { texto: 'R$ 9.000//m²', motivo: 'símbolo', bloco: 'B', linha: 'A', coluna: 'Preço' },
       { texto: '100,0%', motivo: 'inconsistência com a coluna anterior' },
       { texto: '45,5%', motivo: 'percentual com vírgula' },
       { texto: '0.0', motivo: 'artefato gráfico' },
-    ]);
+    ];
+    const issues = visionFormatIssues(anomalies, [anomalies[1]]);
     expect(issues.map((i) => i.text)).toEqual(['0,125', 'R$ 9.000//m²']);
     expect(issues[0].reason).toContain('12,5%');
+    expect(visionFormatIssues(anomalies).map((i) => i.text)).toEqual(['0,125']);
   });
 });
 

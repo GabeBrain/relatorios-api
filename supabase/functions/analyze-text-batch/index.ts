@@ -101,6 +101,8 @@ Verifique, em cada slide:
 - CITY_NAME: menção a cidade/região DIFERENTE de "${city}" que pareça vazamento de outro estudo (ignore comparações intencionais explícitas e nomes de estados).
 - COHERENCE: número citado no texto que contradiga os valores das TABELAS do mesmo slide.
 
+Para SPELLING, confira também concordância verbal e nominal, inclusive sujeito plural com verbo/adjetivo no singular (ex.: “são esperado” → “são esperados”), e nomes próprios digitados incorretamente quando o contexto do próprio estudo permitir identificar a forma correta (ex.: “Prsidente” quando claramente se refere a “Presidente”). Não marque nomes raros, nomes de empreendimentos, bairros, siglas ou termos técnicos como erro sem evidência contextual forte. Reporte o trecho original exato em evidence; nunca corrija ou parafraseie evidence.
+
 Seja conservador: reporte apenas o que tiver confiança alta. Sem achados = lista vazia.
 Em "evidence", copie o trecho EXATO do texto abaixo; não reporte o que não estiver escrito ali.
 

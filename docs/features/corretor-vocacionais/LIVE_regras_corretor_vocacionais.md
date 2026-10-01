@@ -16,6 +16,17 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.67 — 2026-10-01 — revisão textual, confirmação literal e checklist estrutural (RUNTIME local)
+
+Plano e resultados: [PLAN_v067_rolandia.md](./PLAN_v067_rolandia.md). Alterações locais ainda não publicadas.
+
+- **IA/LLM — E10, pendente de deploy:** o passe textual usa `gpt-4o`, independente do modelo de visão; a estimativa considera o modelo textual. O prompt solicita concordância verbal/nominal e erro em nome próprio somente quando identificável pelo contexto. Evidência continua literal e validada no cliente. `analyze-text-batch` precisa de deploy e teste real no site.
+- **Visão — E11:** símbolo duplicado (`//`, `%%`) só é apontado quando duas leituras concordam na anomalia e posição. Uma leitura isolada não basta. Cache atualizado para schema 10.
+- **DET — E12:** sumários consecutivos são inspecionados para seções sem conteúdo; slides finais vazios ficam como “a conferir”. Replay Rolândia: 3 seções sem conteúdo e slide final a conferir; aceite visual permanece pendente.
+- **DET — E7–E9:** texto SVG preservado em campo separado; divergências equivalentes agrupadas mantendo slides e procedência; formatos literais incluem ano com separador indevido e limite superior `,01` quando confirmado pelo texto.
+
+**Validação local:** cinco estudos reexecutados com leituras em fixture; suíte focada 45/45 e build aprovados. Isso não valida a revisão textual ao vivo: não houve deploy nem chamadas de IA.
+
 ## Versão 0.66 — 2026-09-30 — rodada de Toledo: texto, faixa omitida, raios, lacunas e resumo de acertos (RUNTIME local)
 
 Plano e resultado medido: [PLAN_v066_toledo.md](./PLAN_v066_toledo.md).

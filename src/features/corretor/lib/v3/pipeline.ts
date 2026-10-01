@@ -26,6 +26,9 @@ import { ataCoverageFindings, requiredAndExclusionFindings, sourceFindingsFromVi
 import type { Fonte } from './fonte';
 import { sourceCrosscheckFindings, sourceCrosscheckVisionFindings, type SourceStats } from './source-crosscheck';
 
+/** Revisão textual usa o modelo mais preciso; visão e ata continuam seguindo a seleção do analista. */
+export const TEXT_REVIEW_MODEL: ModelId = 'gpt-4o';
+
 // ── estimativa combinada (antes de gastar) ────────────────────────────────────
 
 export interface FullEstimate {
@@ -51,7 +54,7 @@ export async function estimateFullAnalysis(
     findAtaImage(bytes, ir),
   ]);
   const [text, vision, ata] = await Promise.all([
-    Promise.resolve(estimateTextPass(ir, model)),
+    Promise.resolve(estimateTextPass(ir, TEXT_REVIEW_MODEL)),
     estimateVisionPass(candidates, model),
     estimateAtaPass(ataCandidate, model),
   ]);
@@ -216,6 +219,8 @@ export interface RunPhase2Opts {
   /** ata confirmada/editada (alimenta ATA_COVERAGE); pode ser null se sem ata */
   ata: AtaData | null;
   model: ModelId;
+  /** Permite calibrar o passe textual sem alterar o modelo de visão. */
+  textModel?: ModelId;
   candidates: TableImageCandidate[];
   /** Mesma fonte validada usada na fase 1, quando disponível. */
   fonte?: Fonte | null;
@@ -244,7 +249,7 @@ export async function runPhase2(
   if (opts.fonte) detFindings = detFindings.concat(sourceCrosscheckFindings(ir, opts.fonte, acertos.fonte));
 
   const textPromise = runTextPass(
-    ir, cityUsed, model,
+    ir, cityUsed, opts.textModel ?? TEXT_REVIEW_MODEL,
     (done, total) => onStage?.({ stage: 'texto', done, total }),
     signal
   ).then((res) => {

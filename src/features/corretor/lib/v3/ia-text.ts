@@ -20,7 +20,8 @@ interface RawIaFinding {
 }
 
 function slideText(s: IrSlide): string {
-  return (s.textos ?? []).join('\n').slice(0, MAX_CHARS_PER_SLIDE);
+  const svg = (s.textos_svg ?? []).map((t) => `[texto de imagem SVG]\n${t}`);
+  return [...(s.textos ?? []), ...svg].join('\n').slice(0, MAX_CHARS_PER_SLIDE);
 }
 
 function slideTables(s: IrSlide): string {

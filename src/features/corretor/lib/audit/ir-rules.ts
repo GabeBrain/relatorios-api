@@ -8,6 +8,7 @@ import type { Cell, ExtractedTable, Finding, StudyFixture } from './model';
 import { structureChecklistFinding } from './structure-checklist';
 import { resolvePaginatedSums, type SumSlice } from '../v3/paginated-tables';
 import { applyDeclaredExclusions } from '../v3/declared-exclusions';
+import { literalFormatIssues } from '../v3/format-checks';
 import municipiosPorUf from '@/assets/municipios-br.json';
 
 // Regras desativáveis por decisão de produto. SOURCE_MISSING desligada em
@@ -337,6 +338,38 @@ export function travelSpeedFindings(ir: Ir): Finding[] {
   return out;
 }
 
+// ── Formato literal no texto e nas tabelas nativas ───────────────────────────
+// Ano com ponto (“2.027”), decimal duplicado (“7.716,00,00”), espaço duplo e
+// limite “,01” fora do padrão: a string nativa é o texto exato do slide.
+export function nativeFormatFindings(ir: Ir): Finding[] {
+  const out: Finding[] = [];
+  for (const s of ir.slides) {
+    const lines = (s.textos ?? []).flatMap((t) => t.split('\n'));
+    const issues = [
+      ...literalFormatIssues(lines, 'texto do slide'),
+      ...(s.tabelas ?? []).flatMap((t) => {
+        const width = Math.max(0, ...t.linhas.map((r) => r.length));
+        const columns = Array.from({ length: width }, (_, c) => t.linhas.map((r) => r[c] ?? '').filter(Boolean));
+        return columns.flatMap((col) => literalFormatIssues(col, 'tabela do slide'));
+      }),
+    ];
+    if (!issues.length) continue;
+    const first = issues[0];
+    out.push({
+      id: `native-format-${s.n}`,
+      type: 'FORMAT_MISMATCH',
+      section: toAuditSection(s.secao_canonica),
+      slideRef: slideRef(s.n),
+      title: `Formatação divergente (${issues.length} ocorrência${issues.length > 1 ? 's' : ''})`,
+      detail: `${first.where}: «${first.text}» — ${first.reason}.${issues.length > 1 ? ` Mais ${issues.length - 1}: ${issues.slice(1, 4).map((i) => `«${i.text}»`).join(', ')}.` : ''}`,
+      ok: false,
+      confidence: 2,
+      viz: { kind: 'text', evidence: issues.map((i) => `${i.text} — ${i.reason}`).join('; ') },
+    });
+  }
+  return out;
+}
+
 // ── Cobertura de seções (STRUCTURE_MISSING) ──────────────────────────────────
 function structureFinding(ir: Ir): Finding {
   return structureChecklistFinding(ir);
@@ -492,6 +525,7 @@ export function irToFindings(ir: Ir, ctx?: { city?: string; uf?: string }): Find
     ...(RULES_ENABLED.SOURCE_MISSING ? sourceFindings(ir) : []),
     ...radiiFindings(ir),
     ...travelSpeedFindings(ir),
+    ...nativeFormatFindings(ir),
     ...num.findings,
     ...wrongCityFindings(ir, ctx?.city),
     ...wrongUfFindings(ir, ctx?.uf),

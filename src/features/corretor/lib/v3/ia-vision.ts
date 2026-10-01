@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, calculateImageTokens, type ModelId } from '../cost-calculator';
 import { binsFromColumns, checkTableSums, checkPercentConsistency, checkUnitPlausibility, detectBinGap, rowLabels } from '../audit/engine';
 import { ufsOfCity } from './city-suggestion';
-import { formatIssues, labelTypos, visionFormatIssues, type FormatIssue, type RawFormatAnomaly } from './format-checks';
+import { formatIssues, labelTypos, literalFormatIssues, visionFormatIssues, type FormatIssue, type RawFormatAnomaly } from './format-checks';
 import { toAuditSection } from '../audit/ir';
 import { municipioOficial, sameCity } from '../audit/ir-rules';
 import type { Cell, ColKind, ExtractedTable, Finding } from '../audit/model';
@@ -24,8 +24,9 @@ const db = supabase as any;
 // v6: fonte visível e unidades de fichas técnicas; um único bump para WS6/WS7.
 // v7: valida o formato profundo antes de confiar no cache; uma resposta de modelo
 // malformada nunca pode derrubar a análise inteira via `.map()`.
-// 8: guarda se as duas leituras (mini × 4o) concordaram. 9: prompt de blocos verticais + mesclas.
-const CACHE_SCHEMA = 9;
+// 8: concordância entre leituras; 9: blocos verticais/mesclas; 10: anomalias literais
+// confirmadas por duas leituras independentes.
+const CACHE_SCHEMA = 10;
 
 interface RawTable {
   title?: string;
@@ -47,6 +48,8 @@ export interface CachePayload {
   tem_fonte?: boolean;
   /** Células cujo formato destoa das vizinhas, segundo a própria visão. */
   anomalias_formato?: RawFormatAnomaly[];
+  /** Símbolos literais apontados nas duas leituras independentes. */
+  formatos_confirmados?: RawFormatAnomaly[];
   /**
    * Presente quando a imagem precisou de releitura no 4o e AMBAS as leituras
    * falharam na soma. `concordam` = as duas encontraram exatamente as mesmas
@@ -75,11 +78,22 @@ export function sanitizeVisionPayload(value: unknown): CachePayload {
   const releitura = isRecord(raw.releitura) && typeof raw.releitura.concordam === 'boolean'
     ? { concordam: raw.releitura.concordam } : undefined;
   const anomalias = Array.isArray(raw.anomalias_formato) ? raw.anomalias_formato.filter(isRecord) as RawFormatAnomaly[] : [];
+  const formatosConfirmados = Array.isArray(raw.formatos_confirmados) ? raw.formatos_confirmados.filter(isRecord) as RawFormatAnomaly[] : [];
   return {
     tables, locais_visiveis: locais, unidades, tem_fonte: raw.tem_fonte === true,
     ...(anomalias.length ? { anomalias_formato: anomalias } : {}),
+    ...(formatosConfirmados.length ? { formatos_confirmados: formatosConfirmados } : {}),
     ...(releitura ? { releitura } : {}),
   };
+}
+
+function formatAnomalyKey(a: RawFormatAnomaly): string {
+  return [a.bloco, a.linha, a.coluna, a.texto].map((v) => String(v ?? '').trim().toLocaleLowerCase()).join('|');
+}
+
+export function matchingFormatAnomalies(first: RawFormatAnomaly[] | undefined, second: RawFormatAnomaly[] | undefined): RawFormatAnomaly[] {
+  const keys = new Set((second ?? []).map(formatAnomalyKey));
+  return (first ?? []).filter((item) => keys.has(formatAnomalyKey(item)) && typeof item.texto === 'string' && /(\/\/|%%|,,|\.\.|R\$\s*R\$)/.test(item.texto));
 }
 
 /** Cache só é reaproveitável se todos os campos que podem ser iterados forem listas válidas. */
@@ -501,9 +515,11 @@ async function processImage(
       costUsd += calculateCost(second.inputTokens, second.outputTokens, 'gpt-4o');
       escalated = true;
       usedModel = 'gpt-4o';
+      const formatosConfirmados = matchingFormatAnomalies(first.payload.anomalias_formato, second.payload.anomalias_formato);
       // fica com a leitura que fecha; se ambas falham, fica com a do 4o (OCR melhor)
       payload = payloadIsClean(second.payload) || !payloadIsClean(first.payload)
-        ? second.payload : first.payload;
+        ? { ...second.payload, formatos_confirmados: formatosConfirmados }
+        : { ...first.payload, formatos_confirmados: formatosConfirmados };
       if (!payloadIsClean(first.payload) && !payloadIsClean(second.payload)) {
         const a = sumFailureSignature(first.payload), b = sumFailureSignature(second.payload);
         payload = { ...payload, releitura: { concordam: a !== '' && a === b } };
@@ -670,13 +686,14 @@ export function analyzeVisionPayload(
     // 6) erro de digitação nos rótulos de faixa (cabeçalhos e linhas)
     const typos = labelTypos([...ext.columns, ...rowLabels(ext)]);
     for (const issue of typos) textIssues.push(issue);
+    for (const issue of literalFormatIssues([...ext.columns.map(String), ...rowLabels(ext)])) cellIssues.push(issue);
     for (const issue of fmtIssues) cellIssues.push(issue);
 
     if (!flagged) tablesVerified++;
   });
 
   // Formato: o que a visão apontou + o que as strings transcritas mostram, sem repetir.
-  for (const issue of visionFormatIssues(payload?.anomalias_formato)) {
+  for (const issue of visionFormatIssues(payload?.anomalias_formato, payload?.formatos_confirmados)) {
     if (!cellIssues.some((i) => i.text === issue.text)) cellIssues.push(issue);
   }
   if (cellIssues.length) findings.push(formatFinding(c, secao, cellIssues));

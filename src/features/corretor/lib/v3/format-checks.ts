@@ -100,6 +100,33 @@ export function labelTypos(labels: string[]): FormatIssue[] {
   return out;
 }
 
+// ── Formato literal (v0.67, Rolândia) ───────────────────────────────────────
+// Regras fixas sobre a STRING: valem para texto e células nativos e para os
+// rótulos que a visão transcreve. (A visão costuma normalizar o valor — “,00,00”
+// some na leitura —, então em imagem só pega o que chegar literal.)
+const YEAR_WITH_DOT = /^\s*(?:19|20)\d\.\d{2}\s*$|^\s*[12]\.\d{3}\s*$/;
+const DOUBLED_DECIMAL = /\d,\d{2},\d{2}(?!\d)/;
+const DOUBLE_SPACE_VALUE = /R\$ {2,}\d|\d {2,}\d/;
+const UPPER_BOUND = /\ba\s*R?\$?\s*[\d.]+,(\d{2})\s*$/i;
+
+export function literalFormatIssues(texts: string[], where = 'rótulo'): FormatIssue[] {
+  const out: FormatIssue[] = [];
+  const years = texts.filter((t) => YEAR_WITH_DOT.test(t));
+  // Um “2.027” solto pode ser quantidade; uma sequência é coluna de anos.
+  if (years.length >= 2) out.push({ where, text: years[0].trim(), reason: `ano escrito com separador de milhar (${years.length} ocorrências, ex.: «${years[0].trim()}» em vez de «${years[0].trim().replace('.', '')}»)` });
+  for (const t of texts) {
+    const d = DOUBLED_DECIMAL.exec(t);
+    if (d) out.push({ where, text: t.trim(), reason: `decimal duplicado («${d[0]}»)` });
+    else if (DOUBLE_SPACE_VALUE.test(t)) out.push({ where, text: t.trim(), reason: 'espaço duplo dentro do valor' });
+  }
+  const bounds = texts.map((t) => ({ t, cents: UPPER_BOUND.exec(t.trim())?.[1] })).filter((b) => b.cents);
+  const zeros = bounds.filter((b) => b.cents === '00').length;
+  if (bounds.length >= 3 && zeros >= bounds.length - 1) {
+    for (const b of bounds) if (b.cents === '01') out.push({ where, text: b.t.trim(), reason: 'limite superior da faixa termina em ,01; os demais terminam em ,00' });
+  }
+  return out;
+}
+
 const DOUBLED_SYMBOL = /(\/\/|%%|,,|\.\.|R\$\s*R\$)/;
 
 /**
@@ -109,18 +136,15 @@ const DOUBLED_SYMBOL = /(\/\/|%%|,,|\.\.|R\$\s*R\$)/;
  * (“100,0%”, “percentual com ','”, “artefato gráfico”). Precisão divergente
  * (“13%”) fica com `formatIssues`, que compara as strings de verdade.
  */
-export function visionFormatIssues(raw: RawFormatAnomaly[] | undefined): FormatIssue[] {
+export function visionFormatIssues(raw: RawFormatAnomaly[] | undefined, confirmedDoubles: RawFormatAnomaly[] = []): FormatIssue[] {
   const items = raw ?? [];
-  // O mesmo símbolo duplicado em 3+ células da tabela é padrão de TRANSCRIÇÃO
-  // (s110 de Campos do Jordão: "R$ 10.001/ m²- R$ 11.000/ m²" lido como
-  // "R$ 10.001//m²" em todas as linhas), não erro isolado de digitação.
-  const doubled = items.filter((a) => typeof a.texto === 'string' && DOUBLED_SYMBOL.test(a.texto)).length;
+  const confirmed = new Set(confirmedDoubles.map((a) => `${a.bloco ?? ''}|${a.linha ?? ''}|${a.coluna ?? ''}|${a.texto ?? ''}`.toLowerCase()));
   return items.flatMap((a) => {
     const text = typeof a.texto === 'string' ? a.texto.trim() : '';
     if (!text) return [];
     let reason: string | null = null;
     if (BARE_DECIMAL.test(text)) reason = `decimal sem formato de percentual entre valores em %; equivale a ${asPercentText(text)}`;
-    else if (DOUBLED_SYMBOL.test(text) && doubled < 3) reason = `símbolo duplicado («${text.match(DOUBLED_SYMBOL)?.[0]}»)`;
+    else if (DOUBLED_SYMBOL.test(text) && confirmed.has(`${a.bloco ?? ''}|${a.linha ?? ''}|${a.coluna ?? ''}|${text}`.toLowerCase())) reason = `símbolo duplicado («${text.match(DOUBLED_SYMBOL)?.[0]}»), confirmado em duas leituras`;
     if (!reason) return [];
     const where = [a.bloco, a.linha, a.coluna].filter((x) => typeof x === 'string' && x.trim()).join(' · ');
     return [{ where: where || 'tabela', text, reason }];

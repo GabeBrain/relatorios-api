@@ -171,6 +171,44 @@ function populationSeriesFindings(ir: Ir, fonte: Fonte): Finding[] {
   return findings;
 }
 
+const DIVERGENCE = /mostra ([\d.,%]+).*?registra ([\d.,%]+)/;
+
+/**
+ * O mesmo valor divergente em vários slides é UMA causa: Rolândia mostrava 5,7%
+ * nos s32 e s33 e 87 nos s46 e s47 em cartões separados. Junta por métrica +
+ * valor do slide + valor da planilha. Deck repetindo o mesmo número em vários
+ * slides é sinal de que a planilha pode ser a desatualizada.
+ */
+export function groupSameDivergence(findings: Finding[]): Finding[] {
+  const groups = new Map<string, Finding[]>();
+  const out: Finding[] = [];
+  const keyOf = (f: Finding, m: RegExpExecArray) => {
+    const title = f.title.startsWith('Valor diverge da planilha-fonte') ? f.title : f.title.split(' — ')[0];
+    return `${f.type}|${title}|${m[1]}|${m[2]}`;
+  };
+  for (const f of findings) {
+    const m = f.type === 'SOURCE_CROSSCHECK' ? DIVERGENCE.exec(f.detail) : null;
+    if (!m) { out.push(f); continue; }
+    const key = keyOf(f, m);
+    if (!groups.has(key)) { groups.set(key, []); out.push(f); }
+    groups.get(key)!.push(f);
+  }
+  return out.map((f) => {
+    const m = f.type === 'SOURCE_CROSSCHECK' ? DIVERGENCE.exec(f.detail) : null;
+    const same = m ? groups.get(keyOf(f, m)) ?? [f] : [f];
+    if (same.length < 2) return f;
+    const slides = [...new Set(same.map((x) => x.slideRef))];
+    return {
+      ...f,
+      slideRef: slides.join(', '),
+      detail: `${f.detail} O mesmo valor aparece em ${slides.join(', ')}: se o deck está consistente nele, confira se não é a planilha que está desatualizada. Origens: ${[...new Set(same.map((x) => x.detail.match(/Origem: ([^.]+\.)/)?.[1]).filter(Boolean))].join('; ')}.`,
+      viz: f.viz?.kind === 'sidebyside'
+        ? { ...f.viz, leftLabel: `Slides ${slides.join(', ')}`, rows: same.flatMap((x) => x.viz?.kind === 'sidebyside' ? x.viz.rows ?? [] : []) }
+        : f.viz,
+    };
+  });
+}
+
 /**
  * Compara apenas métricas com mapeamento semântico explícito. Ausência ou
  * ambiguidade não vira acusação; ampliar cobertura exige nova regra + fixture real.
@@ -178,7 +216,7 @@ function populationSeriesFindings(ir: Ir, fonte: Fonte): Finding[] {
 export function sourceCrosscheckFindings(ir: Ir, fonte: Fonte, counter?: SourceStats): Finding[] {
   tally = counter ?? null;
   try {
-    return [...verticalizationFindings(ir, fonte), ...populationSeriesFindings(ir, fonte)];
+    return groupSameDivergence([...verticalizationFindings(ir, fonte), ...populationSeriesFindings(ir, fonte)]);
   } finally {
     tally = null;
   }
@@ -267,5 +305,5 @@ export function sourceCrosscheckVisionFindings(
       }
     });
   }
-  return findings;
+  return groupSameDivergence(findings);
 }

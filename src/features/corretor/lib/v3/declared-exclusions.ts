@@ -83,6 +83,9 @@ export function applyDeclaredExclusions(ir: Ir, findings: Finding[]): Finding[] 
     // O cruzamento de totais de lacunas já usa a nota de exclusão como a própria
     // explicação da divergência (um slide com nota, outro sem): não rebaixa.
     if (finding.id.startsWith('lacunas-total-')) return finding;
+    // A nota explica unidades omitidas, mas não explica preço/m² do Boulevard
+    // caindo na faixa de lacunas errada (E5, v0.67).
+    if (finding.id.startsWith('entity-bin-')) return finding;
     const note = slidesOf(finding).map(exclusionAt).find((sentence): sentence is string => Boolean(sentence));
     if (!note) return finding;
     return {

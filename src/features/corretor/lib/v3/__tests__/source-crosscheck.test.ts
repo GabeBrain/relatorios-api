@@ -54,10 +54,10 @@ describe('SOURCE_CROSSCHECK sobre oferta lida pela visão', () => {
 describe('SOURCE_CROSSCHECK sobre Rolândia real', () => {
   const findings = sourceCrosscheckFindings(ir, fonte);
 
-  it('recupera as duas ocorrências da verticalização errada', () => {
+  it('recupera as duas ocorrências da verticalização errada, num cartão só (v0.67)', () => {
     const vertical = findings.filter((finding) => finding.detail.includes('5,7%'));
-    expect(vertical.map((finding) => finding.slideRef)).toEqual(['s32', 's33']);
-    expect(vertical.every((finding) => finding.detail.includes('5,16%'))).toBe(true);
+    expect(vertical.map((finding) => finding.slideRef)).toEqual(['s32, s33']);
+    expect(vertical[0].detail).toContain('5,16%');
   });
 
   it('recupera o total de domicílios do PR com procedência', () => {
@@ -77,7 +77,8 @@ describe('SOURCE_CROSSCHECK sobre Rolândia real', () => {
   });
 
   it('não acusa os percentuais e totais que batem', () => {
-    expect(findings).toHaveLength(4);
+    // 3 cartões: verticalização (s32+s33 juntos), PR e unidade do Brasil.
+    expect(findings).toHaveLength(3);
     expect(findings.some((finding) => finding.detail.includes('15,7%'))).toBe(false);
     expect(findings.some((finding) => finding.detail.includes('25.787 dom.'))).toBe(false);
   });

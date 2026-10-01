@@ -1,3 +1,12 @@
+### 2026-10-01 — Corretor vocacional v0.67: blocos C e D — Codex
+- **Ambiente/funcionalidade:** `/corretor` — análise de estudos vocacionais.
+- **O que:** fechados localmente E7–E9 e implementados E10–E12. Texto SVG é considerado na revisão; divergências repetidas são agrupadas; formatos literais são verificados; o passe textual usa `gpt-4o` com estimativa independente da visão; símbolos duplicados exigem confirmação em duas leituras; checklist aponta seções sem conteúdo e slide final vazio.
+- **Verificação:** cinco replays com fixture, 45 testes focados e build aprovados. Rolândia: 11 achados; 3 seções sem conteúdo e slide final a conferir. Deploy da Edge Function e aceite visual no site pendentes por falta de permissão no conector Supabase.
+- **Arquivos:** plano e regra viva em `docs/features/corretor-vocacionais/`; implementação em `src/features/corretor/` e `supabase/functions/analyze-text-batch/`.
+- **Commit:** pendente nesta sessão; nenhum push.
+- **Monday:** -
+- **Impacto em Etapas/Pendências:** os blocos ficam prontos para revisão local; publicação depende de deploy de `analyze-text-batch` e validação em runtime dos cinco estudos.
+
 ### 2026-10-01 - Sinduscon Curitiba: controles ocultos em XLSX - Codex
 - **Ambiente/funcionalidade:** /rebrain/sinduscon-curitiba - tratamento inicial de Alvaras e CVCO.
 - **O que:** o preservador de estilo agora aceita somente desenhos integralmente ocultos do Excel, como controles ActiveX inseridos na conversao de XLS para XLSX. Graficos e desenhos visiveis continuam bloqueados.

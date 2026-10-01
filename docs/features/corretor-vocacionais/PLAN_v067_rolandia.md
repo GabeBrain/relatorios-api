@@ -307,3 +307,27 @@ Rebrain com o link do card Monday quando houver correspondência. Preparar o tex
 Edge Function, mudanças de contrato, passos de validação e pontos ainda não cobertos. Fazer commits isolados com
 `git add` por caminhos explícitos. **Não executar push automaticamente:** o `AGENTS.md` do repositório exige decisão
 humana porque o push dispara build/deploy no Lovable. O pedido de execução poderá autorizar esse envio expressamente.
+
+### Registro de execução — 2026-10-01
+
+**Bloco C fechado localmente; E10–E12 implementados localmente.** Publicação de E10 e validação no site pendentes: o conector Supabase negou permissão para consultar e publicar a Edge Function. Nenhum deploy ou push foi feito.
+
+| Estudo | Candidatas | Leituras | Achados | Tabelas conferidas | Resultado relevante |
+|---|---:|---:|---:|---:|---|
+| Toledo | 60 | 60 | 5 | 46/52 | sem perda dos achados anteriores |
+| Campos do Jordão (CJ) | 57 | 57 | 10 | 28/44 | sem perda dos achados anteriores |
+| SJC VAP | 93 | 93 | 7 | 57/67 | E9 identifica `2.023` em s73 |
+| SJC v2 | 74 | 86 | 8 | 41/45 | divergências repetidas agrupadas em s31–s32 |
+| Rolândia | 32 | 44 | 11 | 27/30 | E8 agrupa s32–s33 e s46–s47; E11 remove o alerta `//`; E5 mantém Boulevard como Provável; E12 aponta 3 seções sem conteúdo e slide final a conferir |
+
+**E10:** `pipeline.ts` separa o modelo textual (`gpt-4o`) do modelo de visão e reflete o custo na estimativa. O prompt pede concordância verbal/nominal e nomes próprios com erro identificável, mantendo evidência literal. Código local pronto; sem deploy/site não há medição real de texto nos cinco estudos. Cache de visão: schema 10.
+
+**E11:** anomalia de símbolo duplicado só é promovida quando duas leituras concordam no mesmo bloco, linha, coluna e texto. Uma leitura isolada não basta.
+
+**E12:** checklist reconhece sumários consecutivos e marca slide final vazio para conferência. Replay Rolândia ainda resume “3 seção(ões) sem conteúdo · slide final a conferir”; validar visualmente as seções 04 e 05 no site.
+
+**Validação local:** suíte focada: 45 testes passaram; `npm run build` passou. Suíte geral: 515 passaram e 1 teste não relacionado de Sinduscon Curitiba excedeu timeout de 5 s. Lint focal passou; lint global tem erros fora do escopo. Replays usam fixture cacheada, sem chamadas de IA.
+
+**Texto para Lovable/Supabase:** publicar `supabase/functions/analyze-text-batch/index.ts` no projeto `mxinpvcqzbfbzjodhgtz`, com `verify_jwt = true`. Sem mudança de contrato request/response; o modelo textual passa a `gpt-4o`, com custo refletido na estimativa. Após deploy, abrir estudo real e confirmar chamada da função, autenticação, evidências literais e custo/tokens; reprocessar os cinco estudos e registrar achados textuais e falsos positivos. O conector respondeu “You do not have permission to perform this action”; disponibilizar permissão e repetir validação.
+
+**Antes do push:** revisar este registro e o diff. Assets FIERGS e `referencia_ajustes/` são alterações não relacionadas e ficam fora do commit.
