@@ -301,19 +301,19 @@ export function buildGranularBlocks(cube: MarketCube, scope?: PanoramaScope): Pa
   // O bloco horizontal FIERGS é uma fotografia do universo ativo e possui a coorte editorial
   // "Até 2022". A janela das séries temporais não pode eliminar essa coorte nem criar um delta.
   const horizontalCube = scope?.entity === 'fiergs-rs' ? cube : launchCube;
-  const matrix = buildCohortMatrix(launchCube, 'Vertical');
+  const matrix = buildCohortMatrix(verticalOfferCube, 'Vertical');
   return {
     offerByStandard: offerByStandard(verticalOfferCube, 'Vertical'),
     areaBands: offerByAreaBand(cube),
     offerByTypology: offerByTypology(verticalOfferCube, 'Vertical'),
-    cohortsVertical: offerByCohort(launchCube, 'Vertical'),
+    cohortsVertical: offerByCohort(verticalOfferCube, 'Vertical'),
     cohortsHorizontal: offerByCohort(horizontalCube, 'Horizontal'),
     cohortMatrix: matrix,
     cohortMatrixParticipation: cohortMatrixParticipation(matrix),
-    maturityByStandard: maturityByStandard(launchCube),
-    maturityByTypology: maturityByTypology(launchCube),
-    pricesByStandard: pricesByStandard(launchCube, 'Vertical'),
-    pricesByTypology: pricesByTypology(launchCube),
+    maturityByStandard: maturityByStandard(verticalOfferCube),
+    maturityByTypology: maturityByTypology(verticalOfferCube),
+    pricesByStandard: pricesByStandard(verticalOfferCube, 'Vertical'),
+    pricesByTypology: pricesByTypology(verticalOfferCube),
     horizontalPricesByStandard: horizontalPricesByStandard(horizontalCube),
     vgv: vgvSummary(launchCube),
     // Nenhum campo de Faixa de Valor foi identificado no payload nem existe regra autoritativa.

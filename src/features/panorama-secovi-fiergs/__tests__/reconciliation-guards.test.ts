@@ -17,6 +17,13 @@ const base = () => ({
   stock: { units: { ...block(150), source: 'padrão' }, unitsByTypology: { ...block(150), source: 'tipologia' } },
   granular: {
     areaBands: [{ kind: 'total', soldUnits: 50, finalUnits: 150 }],
+    offerByStandard: [{ kind: 'total', finalUnits: 150 }],
+    offerByTypology: [{ kind: 'total', finalUnits: 150 }],
+    cohortsVertical: [{ kind: 'total', finalUnits: 150 }],
+    maturityByStandard: [{ kind: 'total', final: { total: 150 } }],
+    maturityByTypology: [{ kind: 'total', final: { total: 150 } }],
+    pricesByStandard: [{ kind: 'total', projects: 2 }],
+    pricesByTypology: [{ kind: 'total', projects: 2 }],
     cohortsHorizontal: [{ kind: 'total', projects: 1, launchedUnits: 100, finalUnits: 40 }],
   },
   cityComparisons: { enabled: true, sales: [{ city: 'Canoas', liquidSales: 30 }, { city: 'Viamão', liquidSales: 20 }] },
@@ -28,8 +35,18 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
   it('homologa quando vendas, estoque, coorte e política fecham com tolerância zero', () => {
     const reconciliation = reconcilePanoramaReport(base() as never);
     expect(reconciliation.homologable).toBe(true);
-    expect(reconciliation.rows).toHaveLength(11);
+    expect(reconciliation.rows).toHaveLength(18);
     expect(reconciliation.rows.every((row) => row.status === 'match' && row.delta === 0)).toBe(true);
+  });
+
+  it('bloqueia quando uma tabela granular de estoque usa universo diferente', () => {
+    const input = base();
+    input.granular.maturityByTypology[0].final.total = 143;
+    const reconciliation = reconcilePanoramaReport(input as never);
+    expect(reconciliation.homologable).toBe(false);
+    expect(reconciliation.rows.find((row) => row.metricId === 'stock.vertical.maturity_typology')).toMatchObject({
+      canonicalTotal: 150, dimensionalTotal: 143, delta: -7, status: 'different', critical: true,
+    });
   });
 
   it('marca o delta e bloqueia a exportação quando uma dimensão diverge', () => {

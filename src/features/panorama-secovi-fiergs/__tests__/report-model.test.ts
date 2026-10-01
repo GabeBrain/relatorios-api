@@ -259,12 +259,23 @@ describe('Panorama FIERGS — fechamento canônico de vendas 2T2026', () => {
     const standardTotal = model.granular.offerByStandard.find((row) => row.kind === 'total');
     const typologyTotal = model.granular.offerByTypology.find((row) => row.kind === 'total');
     const areaTotal = model.granular.areaBands.find((row) => row.kind === 'total');
+    const cohortTotal = model.granular.cohortsVertical.find((row) => row.kind === 'total');
+    const maturityStandardTotal = model.granular.maturityByStandard.find((row) => row.kind === 'total');
+    const maturityTypologyTotal = model.granular.maturityByTypology.find((row) => row.kind === 'total');
+    const priceStandardTotal = model.granular.pricesByStandard.find((row) => row.kind === 'total');
+    const priceTypologyTotal = model.granular.pricesByTypology.find((row) => row.kind === 'total');
     expect(standardTotal).toMatchObject({ soldUnits: 6, finalUnits: 10 });
     expect(typologyTotal).toMatchObject({ soldUnits: 6, finalUnits: 10 });
     expect(areaTotal).toMatchObject({ soldUnits: 6, finalUnits: 10 });
+    expect(cohortTotal).toMatchObject({ soldUnits: 6, finalUnits: 10 });
+    expect(maturityStandardTotal?.final.total).toBe(10);
+    expect(maturityTypologyTotal?.final.total).toBe(10);
+    expect(priceStandardTotal?.projects).toBe(3);
+    expect(priceTypologyTotal?.projects).toBe(3);
     expect(model.sales.units.series.at(-1)?.vertical).toBe(6);
     expect(model.sales.unitsByTypology.series.at(-1)?.vertical).toBe(6);
     expect(model.cityComparisons.sales).toEqual([{ city: 'Canoas', liquidSales: 6 }, { city: 'Esteio', liquidSales: 0 }]);
+    expect(model.reconciliation.rows.filter((row) => row.metricId.startsWith('stock.vertical.') || row.metricId.startsWith('projects.vertical.')).every((row) => row.status === 'match')).toBe(true);
   });
 
   it('substitui o snapshot temporal divergente de estoque pelo mesmo fechamento granular nas dimensões', () => {
