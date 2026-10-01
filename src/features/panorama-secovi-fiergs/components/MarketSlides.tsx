@@ -210,19 +210,24 @@ export function FiergsHorizontalOfferSlide({ report }: { report: PanoramaReportM
 }
 
 export function fiergsHorizontalOfferRows(projects: CubeProject[]) {
-  return fiergsHorizontalGroups(projects).map(([label, group]) => ({
-    label,
-    projects: new Set(group.map((item) => item.key)).size,
-    launched: group.reduce((sum, item) => sum + (item.launchedUnits ?? 0), 0),
-    final: group.reduce((sum, item) => sum + (item.finalUnits ?? 0), 0),
-  }));
+  return fiergsHorizontalGroups(projects).map(([label, group]) => {
+    const projectCount = new Set(group.map((item) => item.key)).size;
+    const launched = group.reduce((sum, item) => sum + (item.launchedUnits ?? 0), 0);
+    return {
+      label,
+      projects: projectCount,
+      launched,
+      final: group.reduce((sum, item) => sum + (item.finalUnits ?? 0), 0),
+      averageLaunchedPerProject: projectCount ? launched / projectCount : null,
+    };
+  });
 }
 
 /** Substitui o antigo consolidado misto do slide oficial 61 por três produtos horizontais. */
 export function FiergsHorizontalConsolidatedSlide({ report }: { report: PanoramaReportModel }) {
   const order = ['Condomínio de Casas/Sobrados', 'Loteamento Aberto', 'Loteamento Fechado'];
   const rows = fiergsHorizontalOfferRows(report.cube.projects).sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));
-  return <Slide title="MERCADO RESIDENCIAL HORIZONTAL | POR PRODUTO" className="panorama-offer-table-slide"><table className="panorama-reference-table"><thead><tr><th>Produto</th><th>Empreendimentos</th><th>Oferta Lançada</th><th>Oferta Final</th><th>Média</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{integer(row.projects)}</td><td>{integer(row.launched)}</td><td>{integer(row.final)}</td><td>—</td></tr>)}</tbody></table><p className="panorama-coverage-caption">Fotografia horizontal por produto, independentemente do padrão. A definição da média solicitada será confirmada com a Juliana; nenhum valor é inferido para essa coluna.</p></Slide>;
+  return <Slide title="MERCADO RESIDENCIAL HORIZONTAL | POR PRODUTO" className="panorama-offer-table-slide"><table className="panorama-reference-table"><thead><tr><th>Produto</th><th>Empreendimentos</th><th>Oferta Lançada</th><th>Oferta Final</th><th>Média unid. lançadas/emp.</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{integer(row.projects)}</td><td>{integer(row.launched)}</td><td>{integer(row.final)}</td><td>{decimal(row.averageLaunchedPerProject)}</td></tr>)}</tbody></table><p className="panorama-coverage-caption">Fotografia horizontal histórica por produto, independentemente do padrão. Média = oferta lançada ÷ empreendimentos do mesmo produto; não representa preço nem estoque médio.</p></Slide>;
 }
 
 export function FiergsHorizontalPriceRangeSlide({ report }: { report: PanoramaReportModel }) {

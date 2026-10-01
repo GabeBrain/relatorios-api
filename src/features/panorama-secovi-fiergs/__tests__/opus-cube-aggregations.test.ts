@@ -90,6 +90,7 @@ describe('OP-4 · cubo granular', () => {
     expect(products.reduce((sum, row) => sum + row.projects, 0)).toBe(cohortTotal.projects);
     expect(products.reduce((sum, row) => sum + row.launched, 0)).toBe(cohortTotal.launchedUnits);
     expect(products.reduce((sum, row) => sum + row.final, 0)).toBe(cohortTotal.finalUnits);
+    expect(products.every((row) => row.averageLaunchedPerProject === row.launched / row.projects)).toBe(true);
     expect(fiergs.projects.some((project) => project.buildingId === 'H2')).toBe(false);
   });
 
