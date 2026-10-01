@@ -339,19 +339,20 @@ function FiergsLaunchCitySlide({ report }: { report: PanoramaReportModel }) {
 }
 
 type FiergsDistributionRow = { label: string; value: number };
-export function fiergsDistributionData(rows: FiergsDistributionRow[]) {
+export function fiergsDistributionData(rows: FiergsDistributionRow[], options: { includeZero?: boolean } = {}) {
   // Venda líquida negativa representa distrato e participa da identidade do total. Ela não pode
   // desaparecer antes da soma, como ocorria com 4 dormitórios (−1) no FIERGS 2T2026.
-  const visible = rows.filter((row) => row.value !== 0).sort((a, b) => b.value - a.value);
+  const visible = rows.filter((row) => options.includeZero || row.value !== 0)
+    .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label, 'pt-BR'));
   const total = rows.reduce((sum, row) => sum + row.value, 0);
   const shares = roundedPercentages(visible.map((row) => row.value));
   const max = Math.max(1, ...visible.map((row) => Math.abs(row.value)));
   return { visible, shares, total, max };
 }
-function FiergsDistributionSlide({ title, subtitle, rows, unit, className = '' }: { title: string; subtitle: string; rows: FiergsDistributionRow[]; unit: string; className?: string }) {
-  const { visible, shares, total, max } = fiergsDistributionData(rows);
+function FiergsDistributionSlide({ title, subtitle, rows, unit, className = '', includeZero = false, maxRows = 9 }: { title: string; subtitle: string; rows: FiergsDistributionRow[]; unit: string; className?: string; includeZero?: boolean; maxRows?: number }) {
+  const { visible, shares, total, max } = fiergsDistributionData(rows, { includeZero });
   return <div className={`panorama-fiergs-distribution ${className}`.trim()}><header><h2>{title}<span>{subtitle}</span></h2><strong>{n(total)}<small>{unit}</small></strong></header>
-    {visible.length ? <main>{visible.slice(0, 9).map((row, index) => <div key={row.label} className={row.value < 0 ? 'is-negative' : undefined}><span>{row.label}</span><i><b style={{ width: `${Math.abs(row.value) / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{pct(shares[index])}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
+    {visible.length ? <main>{visible.slice(0, maxRows).map((row, index) => <div key={row.label} className={row.value < 0 ? 'is-negative' : row.value === 0 ? 'is-zero' : undefined}><span>{row.label}</span><i><b style={{ width: `${Math.abs(row.value) / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{pct(shares[index])}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
     <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer></div>;
 }
 function groupedValues(values: FiergsDistributionRow[]) { const groups = new Map<string, number>(); values.forEach(({ label, value }) => groups.set(label, (groups.get(label) ?? 0) + value)); return [...groups].map(([label, value]) => ({ label, value })); }
@@ -387,7 +388,7 @@ function FiergsPatternTemporalSlide({ report, kind, rolling = false }: { report:
 
 function FiergsSalesCitySlide({ report }: { report: PanoramaReportModel }) {
   const rows = report.cityComparisons.sales.filter((row) => row.liquidSales !== null).map((row) => ({ label: row.city, value: row.liquidSales ?? 0 }));
-  return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle={`POR CIDADE · ${quarterLabel(report.scope.endQuarter)}`} rows={rows} unit="unidades" className="is-city-ranking"/>;
+  return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle={`POR CIDADE · ${quarterLabel(report.scope.endQuarter)}`} rows={rows} unit="unidades" className="is-city-ranking" includeZero maxRows={10}/>;
 }
 
 function FiergsDormitoryPriceSlide({ report, bedroom }: { report: PanoramaReportModel; bedroom: number }) {
