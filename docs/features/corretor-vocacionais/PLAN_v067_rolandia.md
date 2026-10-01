@@ -210,3 +210,100 @@ verticalização: 3 km (5,9%) abaixo de 2 km (9,1%) não tem como acontecer com 
 66,5% / 20,1% / 13,4% em Rolândia (3 km), no CJ (4 km) e na SJC v2 (6 km). Os números são idênticos em cidades
 diferentes, o que aponta para uma fórmula fixa no modelo da planilha `02. SOCIODEMOGRAFIA`. Vale avisar a equipe
 que mantém o modelo.
+
+## 6. Retomada técnica em 01/10/2026
+
+Esta seção prevalece sobre as estimativas e o comando genérico da seção 4. O estado foi conferido em `main` após
+`git fetch --all`: `origin/main...main = 0/0`, HEAD `803d7a5`. A árvore está suja com alterações do bloco C e
+arquivos de outras frentes; preservar tudo que não pertence ao Corretor.
+
+### Estado confirmado
+
+| Parte | Estado observado | Próxima ação |
+|---|---|---|
+| A: E1–E2 | Publicado em `44c9242`; replay de 5 estudos registrado acima | Manter como baseline |
+| B: E3–E6 | Publicado em `df75819`; 199 testes verdes no fechamento B | Manter como baseline |
+| C: E7–E9 | Código e testes sintéticos locais, ainda sem commit: `pptx-to-ir.ts`, `ir.ts`, `ir-rules.ts`, `ia-text.ts`, `ia-vision.ts`, `format-checks.ts`, `source-crosscheck.ts` e dois arquivos de teste | Fechar a validação e registrar resultados antes do commit |
+| D: E10–E12 | Ainda sem implementação no código observado | Implementar após fechar C |
+
+O resumo detalhado do trabalho local está em `RESUMO_v067_implementacao.md` (ainda sem commit). A fixture
+`lib/v3/__tests__/fixtures/rolandia-replay.json` já existe. O replay está em `.tmp/v067/run.sh` e o comparador em
+`.tmp/v067/diff.cjs`; confirmar a presença dos scripts locais antes de usá-los, pois `.tmp` não é artefato versionado.
+
+### C. Fechar E7–E9 sem confundir código com entrega
+
+1. Revisar o diff local e preservar as alterações paralelas. Em E7, manter `textos_svg` separado de `textos`: no SVG,
+   rótulos e valores aparecem em listas independentes, e sua junção nas regras numéricas criaria pares falsos. O
+   `ia-text.ts` já envia `textos_svg` à revisão textual. Conferir deduplicação de texto repetido por imagem/slide.
+2. Em E8, conferir `groupSameDivergence` nos dois caminhos de `source-crosscheck.ts`. A chave atual deriva de título e
+   números encontrados por expressão regular em `detail`; só agrupar quando métrica, recorte, unidade, valor do deck
+   e valor da fonte forem inequívocos. Preservar todos os `slideRef` e a procedência da planilha. Testar divergências
+   iguais em métricas ou recortes diferentes para impedir agrupamento indevido.
+3. Em E9, validar `literalFormatIssues` no texto nativo, tabelas nativas e rótulos de tabela lida. Confirmar que um
+   número de população com ponto de milhar não vira ano e que `,01` legítimo em início de faixa não vira erro de
+   limite superior. A imagem transcrita só sustenta achado literal quando conserva o caractere original.
+4. Executar o teste focado de `rolandia-v067.test.ts` e os testes de `source-crosscheck.test.ts`, depois suíte do
+   Corretor, lint dos arquivos alterados, `npm run typecheck` e `npm run build`. Resolver falhas atribuíveis ao bloco
+   C; registrar falhas preexistentes separadamente. Fazer replay dos cinco estudos usando a mesma fixture e o mesmo
+   gabarito do bloco B. Conferir na imagem cada achado novo e cada achado desaparecido.
+5. Acrescentar abaixo uma tabela C com candidatas, achados, cartões após agrupamento, acertos mantidos, falsos
+   positivos e cobertura de tabelas. Só então fazer commit explícito dos arquivos de C e deste plano. Não incluir
+   `src/features/corretor/referencia_ajustes/` nem PDFs/PPTX não relacionados.
+
+### D. Implementar E10–E12
+
+**E10 — revisão textual.** O prompt vigente está em `supabase/functions/analyze-text-batch/index.ts` e o cliente em
+`lib/v3/ia-text.ts`. `runPhase2` passa hoje o mesmo `model` para `runTextPass` e `runVisionPass`; escolher `gpt-4o`
+na interface também encarece toda a visão. Introduzir uma escolha de modelo específica para o passe de texto, com
+estimativa de custo coerente em `estimateTextPass`, e manter a visão no modelo já selecionado pelo fluxo. Reescrever
+o item `SPELLING` do prompt para pedir concordância verbal/nominal e nomes digitados incorretamente **quando o
+contexto permitir identificar o nome**. Dar exemplos positivos como “são esperado” e “Prsidente”; preservar a
+instrução de copiar `evidence` literalmente e a checagem `evidenceInSlide` no cliente. Antes de publicar, testar o
+prompt com payloads controlados: erro de concordância, nome com erro, nome raro correto, sigla e trecho sem erro.
+Medir separadamente achados e custo de texto nos cinco estudos. Como o texto não tem fixture de resposta em cache,
+o replay atual não valida esta etapa: publicar `analyze-text-batch` no projeto Supabase correto e repetir um estudo
+no site, conferindo chamada, custo e cartões. Registrar versão/deploy e evidência observada; não declarar E10 concluída
+apenas por teste local. Consultar documentação atual do Supabase/CLI antes do deploy.
+
+**E11 — símbolo duplicado.** O falso positivo nasce em `visionFormatIssues` (`format-checks.ts`), chamado por
+`analyzeVisionPayload` (`ia-vision.ts`). O campo `payload.releitura.concordam` representa concordância da assinatura
+de **falha de soma**, não do texto literal; portanto não serve para confirmar `//`. Guardar na estrutura de cache,
+por imagem e posição da anomalia, as duas strings literais das leituras quando houver escalada. Gerar achado de
+símbolo duplicado só se ambas contiverem o mesmo símbolo na mesma posição; se houver uma única leitura, exigir
+evidência independente no rótulo irmão ou no texto nativo. Na ausência dessa prova, abster-se. Manter a regra de
+decimal sem `%` separada. Versionar o cache (`CACHE_SCHEMA`) se o contrato persistido mudar, para não reinterpretar
+leituras antigas. Testes: `//` confirmado, leituras discordantes, leitura única com/sem rótulo irmão, `%%` real e s67
+de Rolândia sem cartão.
+
+**E12 — seções vazias.** `audit/structure-checklist.ts` produz hoje um único `STRUCTURE_MISSING` por palavras-chave;
+o sumário repetido pode mascarar seção sem conteúdo. Acrescentar uma checagem estrutural separada que identifique
+slides de sumário pela combinação de título e lista de seções, compare sequências consecutivas e mapeie o intervalo
+entre duas ocorrências ao nome da seção esperado no próprio índice. Exigir que não haja conteúdo entre as ocorrências;
+não inferir ausência por uma capa ou separador isolado. Para slide final vazio, usar `textos`, `tabelas`,
+`textos_svg` e `n_imagens` para classificar como **Verificar**, com `slideRef` explícito. Testar Rolândia s73–s75
+(seções 04 e 05) e s78, além de índice repetido com conteúdo e seção visual válida em outro estudo. Manter o
+checklist agregado para cobertura geral, sem duplicar o mesmo problema em dois cartões.
+
+### Lacunas de cobertura fora da v0.67 e critérios finais
+
+- **Tabelas estreitas/baixas** (Rolândia s22, s23, s36, s40, s43): requerem nova política de candidatos e leitura
+  no site. Não contabilizar esses erros como cobertos por E9 se a imagem não chegou ao modelo. Abrir etapa posterior
+  com limites de dimensão, custo e regressão de mapas, baseada em imagens reais.
+- **Sublinhas mescladas** (Rolândia s45, Toledo s123): E6 continua limitada a tabela nativa. Para imagem, exigir
+  extração que preserve cada sublinha e releitura confiável no `gpt-4o` antes de comparar soma de tipologias.
+- **E5:** rever a classificação do achado Boulevard: a nota de exclusão não explica unidade na faixa de preço
+  errada. A classificação deve refletir a evidência do preço e da faixa, sem rebaixamento automático pela nota.
+- **Modelo da planilha:** encaminhar à equipe responsável a repetição 66,5% / 20,1% / 13,4% em cidades distintas;
+  não corrigir o arquivo-fonte dentro do Corretor.
+- **Meta original de 18/21 em Rolândia:** é meta de cobertura, não resultado confirmado. Informar no fechamento
+  quantos dos 21 problemas foram cobertos, quais ficaram fora por leitura de imagem e o custo medido de visão/texto.
+  Nenhum erro real já detectado pode sumir nos outros quatro estudos; cada novo FP exige triagem na imagem.
+
+### Publicação e registro
+
+Atualizar esta seção com tabela final dos cinco estudos, versão do cache, custos e limites observados. Acrescentar
+entrada v0.67 em `LIVE_regras_corretor_vocacionais.md` e, se a entrega for publicada, atualizar o documento vivo da
+Rebrain com o link do card Monday quando houver correspondência. Preparar o texto para o Lovable com o deploy da
+Edge Function, mudanças de contrato, passos de validação e pontos ainda não cobertos. Fazer commits isolados com
+`git add` por caminhos explícitos. **Não executar push automaticamente:** o `AGENTS.md` do repositório exige decisão
+humana porque o push dispara build/deploy no Lovable. O pedido de execução poderá autorizar esse envio expressamente.
