@@ -236,6 +236,8 @@ export interface PanoramaReportModel {
   cube: MarketCube;
   /** Linhas prontas para os slides 31–51, já canonizadas, ordenadas e reconciliadas. */
   granular: PanoramaGranularBlocks;
+  /** Somente preenchido quando houver fonte anual completa por faixa; nunca inferido do trimestre. */
+  annualAreaIvv?: AreaBandRow[];
   cityComparisons: PanoramaCityComparisons;
   presentation: PanoramaPresentationCredits;
   closingFacts: PanoramaClosingFacts;
@@ -248,6 +250,15 @@ export interface PanoramaReportModel {
  * todas derivam do mesmo `cube` e por isso fecham entre si.
  */
 export interface PanoramaGranularBlocks {
+  /** Fluxo de lançamentos na janela editorial, separado da fotografia integral de fechamento. */
+  launchWindow?: {
+    offerByStandard: OfferRow[];
+    offerByTypology: OfferRow[];
+    cohortsVertical: OfferRow[];
+    cohortsHorizontal: OfferRow[];
+    maturityByStandard: MaturityRow[];
+    maturityByTypology: MaturityRow[];
+  };
   /** Slide 31 — oferta lançada/final por padrão, vertical. */
   offerByStandard: OfferRow[];
   /** Slide 27 — oferta final e IVV por faixa de área útil, calculados do cubo (JG-19). */

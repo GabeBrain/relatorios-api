@@ -85,6 +85,7 @@ export const PANORAMA_SECTIONS = createPanoramaSections(PANORAMA_REPORT_MANIFEST
 
 export interface ManifestSubject {
   scope?: { entity?: 'secovi-sp' | 'fiergs-rs' };
+  annualAreaIvv?: { kind: string; previousUnits: number | null; finalUnits: number | null; launchedUnits: number | null; soldUnits: number | null; ivv: number | null }[];
   provenance: { engineVersion?: 'v2' | 'v3' | 'v4' };
   cube: { projects: { segment: string; finalUnits: number | null }[] };
   locations: GeographicPoint[];
@@ -112,7 +113,12 @@ export function panoramaManifestOptions(report: ManifestSubject, mapboxAccessTok
 
 /** Manifesto efetivo de um relatório — o único caminho que os consumidores devem usar. */
 export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken = ''): ReportPageDefinition[] {
-  if (report.scope?.entity === 'fiergs-rs') return createFiergsReportManifest();
+  if (report.scope?.entity === 'fiergs-rs') {
+    const annualRows = report.annualAreaIvv ?? [];
+    const annualReady = annualRows.some((row) => row.kind === 'row') && annualRows.some((row) => row.kind === 'total')
+      && annualRows.every((row) => [row.previousUnits, row.finalUnits, row.launchedUnits, row.soldUnits, row.ivv].every((value) => value !== null && Number.isFinite(value)));
+    return createFiergsReportManifest(annualReady);
+  }
   return createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
 }
 
@@ -126,6 +132,7 @@ const FIERGS_CONTENT_REFERENCE: Readonly<Record<number, number>> = {
 };
 
 function fiergsSectionId(slide: number): string {
+  if (slide === 61) return 'horizontal';
   if (slide <= 7) return 'about';
   if (slide <= 22) return 'launches';
   if (slide <= 33) return 'sales';
@@ -139,6 +146,7 @@ function fiergsSectionId(slide: number): string {
 }
 
 function fiergsVisualFamily(slide: number): PanoramaVisualFamily {
+  if (slide === 61) return 'market-table';
   if (FIERGS_DIVIDERS.has(slide)) return 'divider';
   if (FIERGS_STATIC.has(slide)) return slide === 1 ? 'cover' : slide >= 72 ? 'closing' : 'static';
   if ([2, 5, 7].includes(slide)) return 'cover';
@@ -150,14 +158,14 @@ function fiergsVisualFamily(slide: number): PanoramaVisualFamily {
   return 'trend-chart';
 }
 
-/** Contrato editorial próprio do FIERGS: 75 posições estáveis, inclusive sem token de mapa. */
-export function createFiergsReportManifest(): ReportPageDefinition[] {
-  return FIERGS_4T25_SLIDE_MANIFEST.map((slide) => {
+/** IDs oficiais permanecem estáveis; a numeração exibida acompanha as páginas realmente exportadas. */
+export function createFiergsReportManifest(includeAnnualAreaIvv = false): ReportPageDefinition[] {
+  return FIERGS_4T25_SLIDE_MANIFEST.filter((slide) => ![59, 60].includes(slide.slide) && (includeAnnualAreaIvv || slide.slide !== 41)).map((slide, index) => {
     const mapMode = slide.slide === 67 ? 'standard' : slide.slide === 68 ? 'stock' : slide.slide === 69 ? 'price' : undefined;
     const fiergsSlide = slide.slide === 63 ? 'horizontal-offer-products' : slide.slide === 66 ? 'horizontal-price-range' : undefined;
     const cityComparison = slide.slide === 31 ? 'sales' : undefined;
     return {
-      page: slide.slide,
+      page: index + 1,
       referenceSlide: slide.slide,
       fiergsOfficialSlide: slide.slide,
       contentReferenceSlide: FIERGS_CONTENT_REFERENCE[slide.slide],
