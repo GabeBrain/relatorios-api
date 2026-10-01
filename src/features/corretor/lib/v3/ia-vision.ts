@@ -99,6 +99,8 @@ export interface ExtractedTableRef {
   sumFindingId?: string;
   /** Releitura no 4o discordou da 1ª leitura: números desta tabela não servem de régua. */
   unstable?: boolean;
+  /** Lida pelo gpt-4o sem discordância: pode servir de âncora para regra entre slides. */
+  reliable?: boolean;
 }
 
 export interface ExpectedLocation {
@@ -553,7 +555,7 @@ export function analyzeVisionPayload(
   (stitchColumnSplits(payload?.tables ?? [])).forEach((raw, ti) => {
     const ext = toExtracted(raw);
     if (!ext) return;
-    const ref: ExtractedTableRef = { slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext, ...(escalated && !readingsAgree ? { unstable: true } : {}) };
+    const ref: ExtractedTableRef = { slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext, ...(escalated && !readingsAgree ? { unstable: true } : {}), ...(/gpt-4o(?!-mini)/.test(usedModel) && !(escalated && !readingsAgree) ? { reliable: true } : {}) };
     tables.push(ref);
     tablesExtracted++;
     let flagged = false;

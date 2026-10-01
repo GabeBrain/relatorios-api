@@ -4,6 +4,8 @@
 // transparência (banner vivo + Pausar), não pedágio; só pede confirmação se a
 // estimativa passar do teto (config.BUDGET_STUDY_BRL).
 
+import { nestedRadiiFindings } from './nested-radii';
+import { entityConsistencyFindings } from './entity-consistency';
 import type { Ir } from '../audit/ir';
 import type { Finding } from '../audit/model';
 import { irToFindings, reviewNoteBlindSpots } from '../audit/ir-rules';
@@ -317,7 +319,8 @@ export function combineVisionFindings(
     ...requiredAndExclusionFindings(ir, refs),
   ];
   const sourceCrosscheck = fonte ? sourceCrosscheckVisionFindings(ir, fonte, vision.tables, acertos?.fonte) : [];
-  const crossFindings = applyDeclaredExclusions(ir, [...cross, ...projection, ...coverage, ...sourceCrosscheck].filter((f) => !f.ok));
+  const nested = [...nestedRadiiFindings(refs, fonte), ...entityConsistencyFindings(ir, refs)];
+  const crossFindings = applyDeclaredExclusions(ir, [...cross, ...projection, ...coverage, ...sourceCrosscheck, ...nested].filter((f) => !f.ok));
   const visionFindings = reconcileDeckFindings([...vision.findings.filter((f) => !f.ok), ...crossFindings, ...unread], vision.tables);
   const kept = new Set(visionFindings.map((f) => f.id));
   return { visionFindings, crossFindings: [...crossFindings, ...unread].filter((f) => kept.has(f.id)).concat(visionFindings.filter((f) => f.id === 'vision-unsafe-sums')) };

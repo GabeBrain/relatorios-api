@@ -295,6 +295,48 @@ function radiiFindings(ir: Ir): Finding[] {
   return out;
 }
 
+// ── Deslocamento fisicamente impossível ─────────────────────────────────────
+// “950 km | 3 min” (Rolândia s17) é 950 m: a velocidade implícita denuncia a
+// unidade trocada sem depender de mapa. Acima de 150 km/h não é trajeto urbano.
+const TRAVEL_DIST_FIRST = /(?<![\d.,])(\d+(?:[.,]\d+)?)\s*(km|m)\b\s*[|·,-]?\s*(\d{1,3})\s*min\b/gi;
+const TRAVEL_MIN_FIRST = /(?<![\d.,])(\d{1,3})\s*min\b\s*[|·,-]?\s*(\d+(?:[.,]\d+)?)\s*(km|m)\b/gi;
+const MAX_KMH = 150;
+
+function distanceKm(raw: string, unit: string): number {
+  // “1.200 m” é milhar; “1,4 km” é decimal.
+  const n = /^\d{1,3}\.\d{3}$/.test(raw) ? Number(raw.replace('.', '')) : Number(raw.replace(',', '.'));
+  return unit.toLowerCase() === 'km' ? n : n / 1000;
+}
+
+export function travelSpeedFindings(ir: Ir): Finding[] {
+  const out: Finding[] = [];
+  for (const s of ir.slides) {
+    // Par só dentro da mesma linha: juntar caixas casava o “3 min” de uma com o
+    // “12 km” da seguinte.
+    const lines = (s.textos ?? []).flatMap((t) => t.split('\n'));
+    const pairs: { raw: string; km: number; min: number }[] = [];
+    for (const line of lines) {
+      for (const m of line.matchAll(TRAVEL_DIST_FIRST)) pairs.push({ raw: m[0], km: distanceKm(m[1], m[2]), min: Number(m[3]) });
+      for (const m of line.matchAll(TRAVEL_MIN_FIRST)) pairs.push({ raw: m[0], km: distanceKm(m[2], m[3]), min: Number(m[1]) });
+    }
+    const bad = pairs.find((p) => p.min > 0 && (p.km / p.min) * 60 > MAX_KMH);
+    if (!bad) continue;
+    const kmh = Math.round((bad.km / bad.min) * 60);
+    out.push({
+      id: `travel-speed-${s.n}`,
+      type: 'FORMAT_MISMATCH',
+      section: toAuditSection(s.secao_canonica),
+      slideRef: slideRef(s.n),
+      title: 'Distância incompatível com o tempo de deslocamento',
+      detail: `«${bad.raw.trim()}» implica ${kmh.toLocaleString('pt-BR')} km/h — a unidade da distância provavelmente está errada (m em vez de km?).`,
+      ok: false,
+      confidence: 2,
+      viz: { kind: 'text', evidence: bad.raw.trim() },
+    });
+  }
+  return out;
+}
+
 // ── Cobertura de seções (STRUCTURE_MISSING) ──────────────────────────────────
 function structureFinding(ir: Ir): Finding {
   return structureChecklistFinding(ir);
@@ -449,6 +491,7 @@ export function irToFindings(ir: Ir, ctx?: { city?: string; uf?: string }): Find
     ...reviewNotesFinding(ir),
     ...(RULES_ENABLED.SOURCE_MISSING ? sourceFindings(ir) : []),
     ...radiiFindings(ir),
+    ...travelSpeedFindings(ir),
     ...num.findings,
     ...wrongCityFindings(ir, ctx?.city),
     ...wrongUfFindings(ir, ctx?.uf),

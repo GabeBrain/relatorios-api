@@ -175,3 +175,38 @@ abaixo já lê os BMPs; por isso a SJC v2 aparece com 10 achados em vez de 8.
 
 Nos PNGs convertidos, as tabelas em BMP ficam entre 12 e 34 KB e os mapas entre 1,1 e 5 MB, então o teto de 500 KB
 separa os dois grupos com folga. Nenhum erro real anterior sumiu.
+
+### Bloco B (E3–E6)
+
+| Estudo | Achados | Mudança |
+|---|---|---|
+| Toledo | 5 → 5 | — |
+| CJ | 10 → 10 | — |
+| SJC VAP | 6 → 6 | — |
+| SJC v2 | 10 → 10 | — |
+| Rolândia | 10 → 14 | +s17 “950 km \| 3 min” (19.000 km/h); +s34 3 km com 4.833 alugados < 4.924 de 2 km; +Boulevard s55 × s52 (R$ 5.120/m² fora de “Até R$ 5.000/m²”); +planilha Dom.p Tipo: 3 km com 1.428 apartamentos < 1.524 de 2 km |
+
+O último achado da tabela é um erro real que a triagem manual não tinha visto. Ele confirma o problema da
+verticalização: 3 km (5,9%) abaixo de 2 km (9,1%) não tem como acontecer com raios acumulados.
+
+**Ajustes feitos durante a validação:**
+
+- **E3:** pares distância + tempo só valem dentro da mesma linha de texto. Quando as caixas eram juntadas, o “3 min” de
+  uma caixa casava com o “12 km” da caixa seguinte.
+- **E4:** a tabela só entra quando cada linha tem o mesmo número de valores e de colunas. No CJ s34, o cabeçalho
+  agrupado (5 colunas para 11 valores) fazia aparecer “14 < 14”, e na SJC v2 s33 aparecia “5.150 < 164.641”.
+- **E5:**
+  - A âncora é o texto nativo (fichas e legendas de mapa). Das lacunas, só entra bloco com escopo igual ao das
+    fichas: o total lançado precisa ficar entre 90% e 100% da soma das fichas. Isso tira as lacunas de segmento,
+    como “Compactos” no SJC s81.
+  - As faixas do bloco precisam somar a coluna Total, e a leitura precisa ser confiável (gpt-4o, sem releitura
+    discordante; campo novo `reliable` no `ExtractedTableRef`). No SJC s77, o gpt-4o-mini deslocou uma coluna sem
+    quebrar a soma: a imagem fecha certinho.
+- **E6:** ficou restrita a tabelas nativas. A visão perde sub-linhas mescladas: o mini embaralhou o s45 de
+  Rolândia, e até o gpt-4o leu 45 + 45 como 45 no Toledo s123. Por isso o 96 × 100 do s45 de Rolândia continua sem
+  detecção, porque a tabela é imagem.
+
+**Padrão visto em três estudos, sem regra por enquanto:** a coluna do raio maior da condição de ocupação traz
+66,5% / 20,1% / 13,4% em Rolândia (3 km), no CJ (4 km) e na SJC v2 (6 km). Os números são idênticos em cidades
+diferentes, o que aponta para uma fórmula fixa no modelo da planilha `02. SOCIODEMOGRAFIA`. Vale avisar a equipe
+que mantém o modelo.
