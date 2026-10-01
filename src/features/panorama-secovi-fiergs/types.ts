@@ -42,6 +42,13 @@ export function scopeCitySlug(scope: Pick<PanoramaScope, 'cities'>): string {
   return cities.length <= 3 ? cities.join('-') : `${cities.slice(0, 3).join('-')}-e-mais-${cities.length - 3}`;
 }
 
+/** Identifica presets institucionais no arquivo exportado; recortes livres mantêm o slug municipal. */
+export function scopeFileSlug(scope: Pick<PanoramaScope, 'cities' | 'entity'>): string {
+  if (scope.entity === 'secovi-sp') return 'secovi-sp';
+  if (scope.entity === 'fiergs-rs') return 'fiergs-rs';
+  return scopeCitySlug(scope);
+}
+
 /** Proveniência do consolidado multi-cidade: o que foi pedido, o que fechou e o que falhou. */
 export interface PanoramaProvenance {
   requestedCities: string[];
