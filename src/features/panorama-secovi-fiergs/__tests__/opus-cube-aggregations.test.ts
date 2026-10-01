@@ -93,7 +93,7 @@ describe('OP-4 · cubo granular', () => {
     expect(fiergs.projects.some((project) => project.buildingId === 'H2')).toBe(false);
   });
 
-  it('calcula Média dos loteamentos apenas com loteamentos aberto e fechado', () => {
+  it('calcula Média Loteamentos apenas com loteamentos aberto e fechado', () => {
     const priced = (id: string, standard: string, pricePerMeter: number) => building({
       building_id: id,
       building_type: 'Horizontal',
@@ -110,8 +110,12 @@ describe('OP-4 · cubo granular', () => {
       priced('H4', 'Condomínio de Chácaras', 11000),
     ], { city: 'Porto Alegre', uf: 'RS', entity: 'fiergs-rs' });
     expect(fiergsHorizontalPriceRangeRows(fiergs.projects)).toContainEqual({
-      label: 'Média dos loteamentos', min: 1000, average: 2000, max: 3000,
+      label: 'Média Loteamentos', min: 1000, average: 2000, max: 3000,
     });
+    const mean = horizontalPricesByStandard(fiergs).find((row) => row.kind === 'total');
+    expect(mean?.label).toBe('Média Loteamentos');
+    expect(mean?.projects).toBe(2);
+    expect(mean?.averagePricePerMeter).toBe(2000);
   });
 
   it('lê number_bedroom e os nomes oficiais do histórico sem criar Não classificado', () => {

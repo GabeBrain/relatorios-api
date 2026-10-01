@@ -15,7 +15,7 @@ const titles = [
   'VSO / IVV', 'IVV por trimestre', 'IVV por área útil · último trimestre', 'IVV por área útil · último ano',
   'Evolução dos preços', 'Evolução do R$/m² vertical · média', 'Evolução do R$/m² · 1 dormitório', 'Evolução do R$/m² · 2 dormitórios', 'Evolução do R$/m² · 3 dormitórios', 'Evolução do R$/m² · 4 dormitórios',
   'Preços por tipologia e padrão', 'Ticket médio por padrão residencial', 'Preço médio m²/privativo por padrão', 'Ticket médio por tipologia residencial', 'Preço médio m²/privativo por tipologia',
-  'Estado atual do mercado residencial vertical', 'Oferta final por ano de lançamento', 'Oferta final por padrão', 'Oferta final por tipologia', 'Oferta final por tipologia e metragem', 'Mínimo, média e máximo do preço por tipologia', 'Tempo médio da oferta lançada e final por tipologia', 'Tempo médio da oferta lançada e final por padrão', 'VGV ofertado e disponível por padrão',
+  'Estado atual do mercado residencial vertical', 'Oferta final por ano de lançamento', 'Oferta final por padrão', 'Oferta final por tipologia', 'Oferta final por tipologia e metragem', 'Mínimo, média e máximo do preço por tipologia', 'Tempo médio da oferta lançada e final por tipologia', 'Tempo médio da oferta lançada e final por padrão', 'Mercado residencial horizontal por produto',
   'Estado atual do mercado residencial horizontal', 'Oferta lançada e final por tipo', 'Oferta final por ano de lançamento', 'Preço médio por tipo', 'Mínimo, média e máxima por tipo',
   'Mapa de localização por padrão', 'Mapa de localização por estoque', 'Mapa de localização por R$/m²',
   'Consultores do estudo', 'Equipe técnica', 'Encerramento institucional', 'Encerramento institucional', 'Encerramento institucional', 'Encerramento institucional',
@@ -25,6 +25,7 @@ const dividers = new Set([8, 23, 34, 38, 42, 48, 53, 62, 70]);
 const staticSlides = new Set([1, 3, 4, 72, 73, 74, 75]);
 
 function family(slide: number): FiergsSlideDefinition['dataFamily'] {
+  if (slide === 61) return 'horizontal';
   if (slide <= 7) return 'institutional';
   if (slide <= 22) return 'launches';
   if (slide <= 33) return 'sales';

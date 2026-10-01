@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { scopeCityLabel, type PanoramaReportModel, type ReportMarketBlock, type ReportSeries } from '../types';
 import { buildMapTilePlan, positionMapPoints } from '../lib/map-tiles';
-import { canonicalStandard, orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
+import { canonicalStandard, canonicalTypology, orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
 import { horizontalLabelForEntity } from '../domain/entity-policy';
 import type { CubeProject } from '../domain/cube';
@@ -69,6 +69,17 @@ function offerRows({ report, dimension, segment = 'vertical' }: { report: Panora
   const granular = segment === 'vertical' && dimension === 'pattern' ? report.granular.offerByStandard : segment === 'vertical' && dimension === 'typology' ? report.granular.offerByTypology : [];
   if (granular.length) {
     const total = granular.find((row) => row.kind === 'total');
+    const windowRows = dimension === 'pattern' ? report.granular.launchWindow?.offerByStandard : report.granular.launchWindow?.offerByTypology;
+    if (report.scope.entity === 'fiergs-rs' && windowRows) {
+      const byLabel = new Map(windowRows.map((row) => [row.label, row]));
+      const windowTotal = windowRows.find((row) => row.kind === 'total');
+      return {
+        rows: granular.filter((row) => row.kind === 'row' && (byLabel.has(row.label) || (row.finalUnits ?? 0) !== 0 || (row.soldUnits ?? 0) !== 0))
+          .map((row) => ({ label: row.label, final: row.finalUnits ?? null, launched: byLabel.get(row.label)?.launchedUnits ?? null, projects: byLabel.get(row.label)?.projects ?? 0 })),
+        launchedTotal: windowTotal?.launchedUnits ?? null,
+        finalTotal: total?.finalUnits ?? null,
+      };
+    }
     return {
       rows: granular.filter((row) => row.kind === 'row').map((row) => ({ label: row.label, final: row.finalUnits ?? null, launched: row.launchedUnits ?? null, projects: row.projects })),
       launchedTotal: total?.launchedUnits ?? null,
@@ -95,8 +106,8 @@ function offerRows({ report, dimension, segment = 'vertical' }: { report: Panora
  * usa a identidade reconciliada PRE-009 sobre esse mesmo cubo. Uma faixa sem base imprime `—`,
  * nunca `0,0%`.
  */
-export function AreaIvvSlide({ report }: { report: PanoramaReportModel }) {
-  const bands = report.granular.areaBands;
+export function AreaIvvSlide({ report, annual = false }: { report: PanoramaReportModel; annual?: boolean }) {
+  const bands = annual ? report.annualAreaIvv ?? [] : report.granular.areaBands;
   const rows = bands.filter((row) => row.kind === 'row');
   const total = bands.find((row) => row.kind === 'total');
   if (!rows.length) {
@@ -104,7 +115,7 @@ export function AreaIvvSlide({ report }: { report: PanoramaReportModel }) {
       <DataUnavailable>O payload granular não trouxe área privativa por tipologia neste recorte, portanto não há base para distribuir a oferta por faixa de metragem. A página não substitui a distribuição por zeros nem por outra dimensão.</DataUnavailable>
     </Slide>;
   }
-  return <Slide title="OFERTA FINAL TOTAL E IVV POR ÁREA ÚTIL EM M²" subtitle="MERCADO RESIDENCIAL VERTICAL" className="panorama-area-slide">
+  return <Slide title={annual ? 'IVV POR ÁREA ÚTIL EM M² | ÚLTIMO ANO' : 'OFERTA FINAL TOTAL E IVV POR ÁREA ÚTIL EM M²'} subtitle="MERCADO RESIDENCIAL VERTICAL" className="panorama-area-slide">
     <table className="panorama-reference-table"><thead><tr><th>Área útil</th><th>Oferta Final<br/>período anterior</th><th>Oferta Final<br/>período atual</th><th>(%)</th><th>Lançamentos</th><th>(%)</th><th>Vendas<br/>Líquidas</th><th>(%)</th><th>IVV (%)</th></tr></thead><tbody>
       {rows.map((row) => <tr key={row.label}>
         <td>{row.label}</td>
@@ -124,7 +135,7 @@ export function AreaIvvSlide({ report }: { report: PanoramaReportModel }) {
         <td>{percent(total.ivv)}</td>
       </tr>}
     </tbody></table>
-    <p className="panorama-coverage-caption">IVV = vendas líquidas ÷ (oferta final anterior + lançamentos), calculado por faixa a partir do histórico granular por empreendimento.</p>
+    <p className="panorama-coverage-caption">{annual ? 'Fonte anual por faixa de área validada; esta página só entra quando todas as linhas e o total estão completos.' : 'IVV = vendas líquidas ÷ (oferta final anterior + lançamentos), calculado por faixa a partir do histórico granular por empreendimento.'}</p>
   </Slide>;
 }
 
@@ -161,10 +172,14 @@ export function OfferTableSlide({ report, dimension, segment = 'vertical' }: { r
   const { rows, launchedTotal, finalTotal } = offerRows({ report, dimension, segment });
   const showValueRange = dimension === 'pattern' && report.granular.valueRangeAvailable;
   const title = dimension === 'pattern' ? 'OFERTA LANÇADA E FINAL | POR PADRÃO' : 'OFERTA LANÇADA E FINAL | POR TIPOLOGIA';
+  const mixedUniverses = report.scope.entity === 'fiergs-rs' && Boolean(report.granular.launchWindow);
+  const totalProjects = mixedUniverses
+    ? report.granular.launchWindow?.offerByStandard.find((row) => row.kind === 'total')?.projects
+    : rows.reduce<number>((sum, row) => sum + (row.projects ?? 0), 0);
   return <Slide title={title} className="panorama-offer-table-slide"><table className="panorama-reference-table"><thead><tr><th>{dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</th>{dimension === 'pattern' && <>{showValueRange && <th>Faixa de Valor</th>}<th>Nº de<br/>Empreend.</th><th>(%)</th></>}<th>Oferta<br/>Lançada</th><th>(%)</th><th>Oferta Final</th><th>(%)</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>
-    {rows.map((row) => <tr key={row.label}><td>{dimension === 'typology' ? typologyDisplayLabel(row.label) : row.label}</td>{dimension === 'pattern' && <>{showValueRange && <td>—</td>}<td>{integer(row.projects)}</td><td>{shareOf(row.launched, launchedTotal) === null ? '—' : percent(shareOf(row.launched, launchedTotal))}</td></>}<td>{integer(row.launched)}</td><td><CfCell metric="share" value={shareOf(row.launched, launchedTotal)} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><CfCell metric="share" value={shareOf(row.final, finalTotal)} max={100} format={percent}/></td><td><CfCell metric="availability" value={shareOf(row.final, row.launched)} reference={shareOf(finalTotal, launchedTotal)} max={100} format={percent} tone="red"/></td></tr>)}
-    <tr className="panorama-total-row"><td>Total</td>{dimension === 'pattern' && <>{showValueRange && <td/>}<td>{integer(rows.reduce((sum, row) => sum + (row.projects ?? 0), 0))}</td><td>100%</td></>}<td>{integer(launchedTotal)}</td><td>100%</td><td>{integer(finalTotal)}</td><td>100%</td><td>{launchedTotal ? percent((finalTotal ?? 0) / launchedTotal * 100) : '—'}</td></tr>
-  </tbody></table></Slide>;
+    {rows.map((row) => <tr key={row.label}><td>{dimension === 'typology' ? typologyDisplayLabel(row.label) : row.label}</td>{dimension === 'pattern' && <>{showValueRange && <td>—</td>}<td>{integer(row.projects)}</td><td>{shareOf(row.launched, launchedTotal) === null ? '—' : percent(shareOf(row.launched, launchedTotal))}</td></>}<td>{integer(row.launched)}</td><td><CfCell metric="share" value={shareOf(row.launched, launchedTotal)} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><CfCell metric="share" value={shareOf(row.final, finalTotal)} max={100} format={percent}/></td><td>{mixedUniverses ? '—' : <CfCell metric="availability" value={shareOf(row.final, row.launched)} reference={shareOf(finalTotal, launchedTotal)} max={100} format={percent} tone="red"/>}</td></tr>)}
+    <tr className="panorama-total-row"><td>Total</td>{dimension === 'pattern' && <>{showValueRange && <td/>}<td>{integer(totalProjects)}</td><td>100%</td></>}<td>{integer(launchedTotal)}</td><td>100%</td><td>{integer(finalTotal)}</td><td>100%</td><td>{mixedUniverses ? '—' : launchedTotal ? percent((finalTotal ?? 0) / launchedTotal * 100) : '—'}</td></tr>
+  </tbody></table>{mixedUniverses && <p className="panorama-coverage-caption">Oferta lançada e empreendimentos: lançamentos da janela selecionada. Oferta final: estoque de todos os empreendimentos ativos no fechamento. A disponibilidade entre universos distintos não é calculada.</p>}</Slide>;
 }
 
 export function OfferChartSlide({ report, dimension }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology' }) {
@@ -203,9 +218,16 @@ export function fiergsHorizontalOfferRows(projects: CubeProject[]) {
   }));
 }
 
+/** Substitui o antigo consolidado misto do slide oficial 61 por três produtos horizontais. */
+export function FiergsHorizontalConsolidatedSlide({ report }: { report: PanoramaReportModel }) {
+  const order = ['Condomínio de Casas/Sobrados', 'Loteamento Aberto', 'Loteamento Fechado'];
+  const rows = fiergsHorizontalOfferRows(report.cube.projects).sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));
+  return <Slide title="MERCADO RESIDENCIAL HORIZONTAL | POR PRODUTO" className="panorama-offer-table-slide"><table className="panorama-reference-table"><thead><tr><th>Produto</th><th>Empreendimentos</th><th>Oferta Lançada</th><th>Oferta Final</th><th>Média</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{integer(row.projects)}</td><td>{integer(row.launched)}</td><td>{integer(row.final)}</td><td>—</td></tr>)}</tbody></table><p className="panorama-coverage-caption">Fotografia horizontal por produto, independentemente do padrão. A definição da média solicitada será confirmada com a Juliana; nenhum valor é inferido para essa coluna.</p></Slide>;
+}
+
 export function FiergsHorizontalPriceRangeSlide({ report }: { report: PanoramaReportModel }) {
   const rows = fiergsHorizontalPriceRangeRows(report.cube.projects);
-  return <Slide title="MÍNIMO, MÉDIA E MÁXIMO | MERCADO HORIZONTAL"><table className="panorama-reference-table"><thead><tr><th>Tipo</th><th>Mínimo R$/m²</th><th>Média R$/m²</th><th>Máximo R$/m²</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={row.label === 'Média dos loteamentos' ? 'panorama-total-row' : undefined}><td>{row.label}</td><td>{integer(row.min)}</td><td>{integer(row.average)}</td><td>{integer(row.max)}</td></tr>)}</tbody></table></Slide>;
+  return <Slide title="MÍNIMO, MÉDIA E MÁXIMO | MERCADO HORIZONTAL"><table className="panorama-reference-table"><thead><tr><th>Tipo</th><th>Mínimo R$/m²</th><th>Média R$/m²</th><th>Máximo R$/m²</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={row.label === 'Média Loteamentos' ? 'panorama-total-row' : undefined}><td>{row.label}</td><td>{integer(row.min)}</td><td>{integer(row.average)}</td><td>{integer(row.max)}</td></tr>)}</tbody></table></Slide>;
 }
 
 export function fiergsHorizontalPriceRangeRows(projects: CubeProject[]) {
@@ -221,7 +243,7 @@ export function fiergsHorizontalPriceRangeRows(projects: CubeProject[]) {
   const loteamentos = projects.filter((item) => item.segment === 'Horizontal' && (item.horizontalSubtype === 'loteamento_aberto' || item.horizontalSubtype === 'loteamento_fechado'))
     .map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
   if (loteamentos.length) rows.push({
-    label: 'Média dos loteamentos',
+    label: 'Média Loteamentos',
     min: Math.min(...loteamentos),
     average: loteamentos.reduce((sum, value) => sum + value, 0) / loteamentos.length,
     max: Math.max(...loteamentos),
@@ -274,13 +296,33 @@ export function FiergsTypologyPriceRangeSlide({ report }: { report: PanoramaRepo
 
 export function CohortTableSlide({ report, segment = 'vertical' }: { report: PanoramaReportModel; segment?: SegmentKey }) {
   const granularRows = segment === 'horizontal' ? report.granular.cohortsHorizontal : report.granular.cohortsVertical;
+  const windowRows = segment === 'horizontal' ? report.granular.launchWindow?.cohortsHorizontal : report.granular.launchWindow?.cohortsVertical;
+  const windowByLabel = windowRows ? new Map(windowRows.map((row) => [row.label, row])) : null;
   const granularTotal = granularRows.find((row) => row.kind === 'total');
-  const allRows = granularRows.length ? granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, kind: row.kind, projects: row.projects, launched: row.launchedUnits, final: row.finalUnits })) : report.market.cohorts.byGroup.map((row) => { const annual = report.launches.annual.find((item) => String(item.year) === row.label); const launched = annual ? valueOf(annual.units, segment) : 0; return { label: row.label, kind: 'row' as const, projects: annual ? valueOf(annual.projects, segment) : 0, launched, final: valueOf(row, segment) }; });
+  const allRows = granularRows.length ? granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, kind: row.kind, projects: windowByLabel ? (windowByLabel.get(row.label)?.projects ?? 0) : row.projects, launched: windowByLabel ? (windowByLabel.get(row.label)?.launchedUnits ?? 0) : row.launchedUnits, final: row.finalUnits })) : report.market.cohorts.byGroup.map((row) => { const annual = report.launches.annual.find((item) => String(item.year) === row.label); const launched = annual ? valueOf(annual.units, segment) : 0; return { label: row.label, kind: 'row' as const, projects: annual ? valueOf(annual.projects, segment) : 0, launched, final: valueOf(row, segment) }; });
   // O subtotal permanece mesmo sem valor observado: JG-22 pede a linha, e uma tabela que a esconde
   // quando o recorte é magro faz a analista procurar de novo o que já foi corrigido.
   const rows = allRows.filter((row) => row.kind === 'subtotal' || hasObservedValue(row.projects, row.launched, row.final));
-  const launchedTotal = granularRows.length ? granularTotal?.launchedUnits ?? null : rows.reduce((sum, row) => sum + (row.launched ?? 0), 0); const finalTotal = granularRows.length ? granularTotal?.finalUnits ?? null : rows.reduce((sum, row) => sum + (row.final ?? 0), 0); const projectsTotal = granularRows.length ? granularTotal?.projects ?? null : rows.reduce((sum, row) => sum + (row.projects ?? 0), 0);
-  return <Slide title="OFERTA LANÇADA E FINAL | POR ANO DE LANÇAMENTO">{rows.length ? <table className="panorama-reference-table"><thead><tr><th>Ano Lançamento</th><th>Nº de<br/>Empreend.</th><th>Em %</th><th>Oferta<br/>Lançada</th><th>Em %</th><th>Oferta<br/>Final</th><th>Em %</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={rowClassOf(row.kind)}><td>{row.label}</td><td>{integer(row.projects)}</td><td><CfCell metric="share" value={shareOf(row.projects, projectsTotal)} max={100} format={percent}/></td><td>{integer(row.launched)}</td><td><CfCell metric="share" value={shareOf(row.launched, launchedTotal)} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><CfCell metric="share" value={shareOf(row.final, finalTotal)} max={100} format={percent}/></td><td><CfCell metric="availability" value={shareOf(row.final, row.launched)} reference={shareOf(finalTotal, launchedTotal)} max={100} format={percent} tone="red"/></td></tr>)}<tr className="panorama-total-row"><td>Total geral</td><td>{integer(projectsTotal)}</td><td>100%</td><td>{integer(launchedTotal)}</td><td>100%</td><td>{integer(finalTotal)}</td><td>100%</td><td>{shareOf(finalTotal, launchedTotal) === null ? '—' : percent(shareOf(finalTotal, launchedTotal))}</td></tr></tbody></table> : <DataUnavailable>{segment === 'horizontal' ? `A API não retornou oferta do ${horizontalLabelForEntity(report.scope.entity)} por ano com valores diferentes de zero neste recorte.` : 'A API não retornou oferta residencial vertical por ano com valores diferentes de zero neste recorte.'}</DataUnavailable>}</Slide>;
+  const windowTotal = windowRows?.find((row) => row.kind === 'total');
+  const launchedTotal = granularRows.length ? windowByLabel ? windowTotal?.launchedUnits ?? null : granularTotal?.launchedUnits ?? null : rows.reduce((sum, row) => sum + (row.launched ?? 0), 0); const finalTotal = granularRows.length ? granularTotal?.finalUnits ?? null : rows.reduce((sum, row) => sum + (row.final ?? 0), 0); const projectsTotal = granularRows.length ? windowByLabel ? windowTotal?.projects ?? null : granularTotal?.projects ?? null : rows.reduce((sum, row) => sum + (row.projects ?? 0), 0);
+  return <Slide title="OFERTA LANÇADA E FINAL | POR ANO DE LANÇAMENTO">{rows.length ? <table className="panorama-reference-table"><thead><tr><th>Ano Lançamento</th><th>Nº de<br/>Empreend.</th><th>Em %</th><th>Oferta<br/>Lançada</th><th>Em %</th><th>Oferta<br/>Final</th><th>Em %</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={rowClassOf(row.kind)}><td>{row.label}</td><td>{integer(row.projects)}</td><td><CfCell metric="share" value={shareOf(row.projects, projectsTotal)} max={100} format={percent}/></td><td>{integer(row.launched)}</td><td><CfCell metric="share" value={shareOf(row.launched, launchedTotal)} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><CfCell metric="share" value={shareOf(row.final, finalTotal)} max={100} format={percent}/></td><td><CfCell metric="availability" value={shareOf(row.final, row.launched)} reference={windowByLabel ? null : shareOf(finalTotal, launchedTotal)} max={100} format={percent} tone="red"/></td></tr>)}<tr className="panorama-total-row"><td>Total geral</td><td>{integer(projectsTotal)}</td><td>100%</td><td>{integer(launchedTotal)}</td><td>100%</td><td>{integer(finalTotal)}</td><td>100%</td><td>{windowByLabel ? '—' : shareOf(finalTotal, launchedTotal) === null ? '—' : percent(shareOf(finalTotal, launchedTotal))}</td></tr></tbody></table> : <DataUnavailable>{segment === 'horizontal' ? `A API não retornou oferta do ${horizontalLabelForEntity(report.scope.entity)} por ano com valores diferentes de zero neste recorte.` : 'A API não retornou oferta residencial vertical por ano com valores diferentes de zero neste recorte.'}</DataUnavailable>}{windowByLabel && <p className="panorama-coverage-caption">Empreendimentos e lançamentos pertencem à janela selecionada; oferta final inclui o estoque das coortes anteriores no fechamento. A disponibilidade geral entre universos distintos não é calculada.</p>}</Slide>;
+}
+
+function fiergsTemporalTypologyMeter(report: PanoramaReportModel, label: string): number | null {
+  const block = report.prices.meterByTypology;
+  if (block.dataStatus !== 'ready') return null;
+  const series = block.groupSeries.find((group) => canonicalTypology(group.label) === canonicalTypology(label))?.series;
+  const value = series?.find((row) => row.quarter === report.scope.endQuarter)?.vertical;
+  return value !== undefined && Number.isFinite(value) && value > 0 ? value : null;
+}
+
+function fiergsTemporalTypologyTotal(report: PanoramaReportModel): number | null {
+  // O total da série de preço por m² é a mesma referência do slide de evolução geral.
+  // Agregar médias tipológicas produz outro indicador quando cobertura/ponderadores diferem.
+  const block = report.prices.meter;
+  if (block.dataStatus !== 'ready') return null;
+  const value = block.series.find((row) => row.quarter === report.scope.endQuarter)?.vertical;
+  return value !== undefined && Number.isFinite(value) && value > 0 ? value : null;
 }
 
 export function PriceTableSlide({ report, dimension, horizontal = false }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; horizontal?: boolean }) {
@@ -298,14 +340,16 @@ export function PriceTableSlide({ report, dimension, horizontal = false }: { rep
       : `Há projetos do ${horizontalLabelForEntity(report.scope.entity)} no recorte, mas os campos granulares de preço, área e R$/m² não vieram no payload.`
     : 'A API não retornou preço, área ou R$/m² para este recorte.';
   if (granularRows.length) {
-    const rows = granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, ticket: row.averageTicket, area: row.averageArea, meter: row.averagePricePerMeter }));
+    const temporalTypology = report.scope.entity === 'fiergs-rs' && dimension === 'typology' && !horizontal;
+    const rows = granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, ticket: row.averageTicket, area: row.averageArea, meter: temporalTypology ? fiergsTemporalTypologyMeter(report, row.label) : row.averagePricePerMeter }));
     const total = granularRows.find((row) => row.kind === 'total');
+    const totalMeter = temporalTypology ? fiergsTemporalTypologyTotal(report) : total?.averagePricePerMeter ?? null;
     if (!rows.some((row) => hasObservedValue(row.ticket, row.area, row.meter)) && !hasObservedValue(total?.averageTicket, total?.averageArea, total?.averagePricePerMeter)) return <Slide title={`TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><DataUnavailable>{noPriceMessage}</DataUnavailable></Slide>;
     // JG-23/24: "inserir formatação condicional no R$/m²". A referência é a média geral ponderada
     // da própria tabela — nunca a média simples das linhas, que não é o preço do recorte.
-    const meterReference = total?.averagePricePerMeter ?? null;
+    const meterReference = totalMeter;
     const meterMax = Math.max(...rows.map((row) => row.meter ?? 0), meterReference ?? 0, 1);
-    return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipo Imóvel</th><th>Preço Médio</th><th>Área Priv. Média</th><th>R$/m² Privativa</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{dimension === 'typology' && !horizontal ? typologyDisplayLabel(row.label) : row.label}</td><td>{currency(row.ticket)}</td><td>{integer(row.area)}</td><td><CfCell metric="pricePerMeter" value={row.meter} reference={meterReference} max={meterMax} format={integer}/></td></tr>)}{total && <tr className="panorama-total-row"><td>{total.label}</td><td>{currency(total.averageTicket)}</td><td>{integer(total.averageArea)}</td><td>{integer(total.averagePricePerMeter)}</td></tr>}</tbody></table></Slide>;
+    return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipo Imóvel</th><th>Preço Médio</th><th>Área Priv. Média</th><th>R$/m² Privativa</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{dimension === 'typology' && !horizontal ? typologyDisplayLabel(row.label) : row.label}</td><td>{currency(row.ticket)}</td><td>{integer(row.area)}</td><td><CfCell metric="pricePerMeter" value={row.meter} reference={meterReference} max={meterMax} format={integer}/></td></tr>)}{total && <tr className="panorama-total-row"><td>{total.label}</td><td>{currency(total.averageTicket)}</td><td>{integer(total.averageArea)}</td><td>{integer(totalMeter)}</td></tr>}</tbody></table>{temporalTypology && <p className="panorama-coverage-caption">R$/m² por tipologia: série temporal ponderada pelo estoque municipal; média geral: série geral reconciliada ao fechamento granular. Ticket e área: histórico granular por empreendimento. São indicadores independentes.</p>}</Slide>;
   }
   if (horizontal) return <Slide title="TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR PADRÃO" className="panorama-price-table-slide"><DataUnavailable>{noPriceMessage}</DataUnavailable></Slide>;
   const ticket = dimension === 'pattern' ? report.prices.ticket : report.prices.ticketByTypology;
@@ -319,8 +363,9 @@ export function PriceTableSlide({ report, dimension, horizontal = false }: { rep
 export function PriceChartSlide({ report, dimension }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology' }) {
   const granularRows = dimension === 'pattern' ? report.granular.pricesByStandard : report.granular.pricesByTypology;
   if (granularRows.length) {
-    const rows = granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, value: row.averagePricePerMeter }));
-    const average = granularRows.find((row) => row.kind === 'total')?.averagePricePerMeter ?? null;
+    const temporalTypology = report.scope.entity === 'fiergs-rs' && dimension === 'typology';
+    const rows = granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, value: temporalTypology ? fiergsTemporalTypologyMeter(report, row.label) : row.averagePricePerMeter }));
+    const average = temporalTypology ? fiergsTemporalTypologyTotal(report) : granularRows.find((row) => row.kind === 'total')?.averagePricePerMeter ?? null;
     const max = Math.max(...rows.map((row) => row.value ?? 0), average ?? 0, 1);
     return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-chart-slide"><div className="panorama-price-bars">{rows.map((row) => <div key={row.label}><span style={{ height: `${(row.value ?? 0) / max * 100}%` }}><b>{integer(row.value)}</b></span><strong>{row.label}</strong></div>)}{average !== null && <i className="panorama-average-line" style={{ bottom: `${average / max * 100}%` }}><b>{integer(average)}</b></i>}</div><div className="panorama-chart-legend"><span className="green">Preço por {dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</span><span className="yellow">Média Geral</span></div></Slide>;
   }
@@ -349,7 +394,11 @@ export function CohortMatrixSlide({ report, participation = false }: { report: P
 }
 
 export function MaturitySlide({ report, dimension, participation = false }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; participation?: boolean }) {
-  const granularRows = dimension === 'pattern' ? report.granular.maturityByStandard : report.granular.maturityByTypology;
+  const closingRows = dimension === 'pattern' ? report.granular.maturityByStandard : report.granular.maturityByTypology;
+  const windowRows = dimension === 'pattern' ? report.granular.launchWindow?.maturityByStandard : report.granular.launchWindow?.maturityByTypology;
+  const windowByLabel = windowRows ? new Map(windowRows.map((row) => [row.label, row])) : null;
+  const granularRows = windowByLabel ? closingRows.filter((row) => row.kind === 'total' || windowByLabel.has(row.label) || (row.final.total ?? 0) !== 0)
+    .map((row) => ({ ...row, projects: windowByLabel.get(row.label)?.projects ?? 0, launched: windowByLabel.get(row.label)?.launched ?? { Planta: 0, Construção: 0, Pronto: 0, total: 0 } })) : closingRows;
   if (granularRows.length) {
     /**
      * JG-30/31: "corrigir essas porcentagens, estão bem erradas".

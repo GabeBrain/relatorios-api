@@ -303,6 +303,14 @@ export function buildGranularBlocks(cube: MarketCube, scope?: PanoramaScope): Pa
   const horizontalCube = scope?.entity === 'fiergs-rs' ? cube : launchCube;
   const matrix = buildCohortMatrix(verticalOfferCube, 'Vertical');
   return {
+    ...(scope?.entity === 'fiergs-rs' ? { launchWindow: {
+      offerByStandard: offerByStandard(launchCube, 'Vertical'),
+      offerByTypology: offerByTypology(launchCube, 'Vertical'),
+      cohortsVertical: offerByCohort(launchCube, 'Vertical'),
+      cohortsHorizontal: offerByCohort(launchCube, 'Horizontal'),
+      maturityByStandard: maturityByStandard(launchCube),
+      maturityByTypology: maturityByTypology(launchCube),
+    } } : {}),
     offerByStandard: offerByStandard(verticalOfferCube, 'Vertical'),
     areaBands: offerByAreaBand(cube),
     offerByTypology: offerByTypology(verticalOfferCube, 'Vertical'),

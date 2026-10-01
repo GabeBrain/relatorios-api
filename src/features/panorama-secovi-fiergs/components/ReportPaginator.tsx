@@ -17,7 +17,7 @@ import { panoramaExportMetadata } from '../lib/export-metadata';
 /** Token do fundo cartográfico: define, junto das coordenadas, se a lâmina de mapa existe (JG-39). */
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
 import { panoramaExportBlockReason, panoramaExportIsRunning, usePanoramaExportStore } from '../export-store';
-import { AreaIvvSlide, CohortMatrixSlide, CohortTableSlide, FiergsHorizontalOfferSlide, FiergsHorizontalPriceRangeSlide, FiergsTypologyAreaSlide, FiergsTypologyPriceRangeSlide, LocationSlide, MarketSummarySlide, MaturitySlide, NarrativeSlide, OfferChartSlide, OfferTableSlide, PriceChartSlide, PriceTableSlide, VgvSlide } from './MarketSlides';
+import { AreaIvvSlide, CohortMatrixSlide, CohortTableSlide, FiergsHorizontalConsolidatedSlide, FiergsHorizontalOfferSlide, FiergsHorizontalPriceRangeSlide, FiergsTypologyAreaSlide, FiergsTypologyPriceRangeSlide, LocationSlide, MarketSummarySlide, MaturitySlide, NarrativeSlide, OfferChartSlide, OfferTableSlide, PriceChartSlide, PriceTableSlide, VgvSlide } from './MarketSlides';
 import coverBackground from '../assets/official_v2/backgrounds/cover-report.png';
 import contentBackground from '../assets/official_v2/backgrounds/content.png';
 import dividerBackground from '../assets/official_v2/backgrounds/divider.png';
@@ -555,10 +555,11 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   if (official === 36) return <OfferTableSlide report={report} dimension="typology"/>;
   if (official === 37) return <OfferTableSlide report={report} dimension="pattern"/>;
   if (official === 40) return <AreaIvvSlide report={report}/>;
-  if (official === 41) return <CoveragePage title="IVV POR ÁREA ÚTIL · ÚLTIMO ANO" detail="INDISPONÍVEL PARA O ÚLTIMO ANO. O cubo disponível preserva a fotografia e as vendas do trimestre de fechamento, mas não a composição histórica por faixa de área dos quatro trimestres. O anual não é reconstruído a partir do trimestre nem duplicado como se fosse outra janela."/>;
+  if (official === 41) return <AreaIvvSlide report={report} annual/>;
   if (official && [44, 45, 46, 47].includes(official)) return <FiergsDormitoryPriceSlide report={report} bedroom={official - 43}/>;
   if (official === 57) return <FiergsTypologyAreaSlide report={report}/>;
   if (official === 58) return <FiergsTypologyPriceRangeSlide report={report}/>;
+  if (official === 61) return <FiergsHorizontalConsolidatedSlide report={report}/>;
   if (official === 71) return <TeamSlide report={report}/>;
   if (official && [1, 3, 4, 72, 73, 74, 75].includes(official)) return <div aria-hidden="true"/>;
   if (official && def.visualFamily === 'divider') return <V2Divider title={title}/>;
