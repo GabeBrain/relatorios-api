@@ -420,3 +420,9 @@ Este complemento **substitui o status de homologação acima**: a segunda revis�
 - Estudos locais 2T2026 e 4T2025 gerados em PDF, 72 páginas cada, com CSV de auditoria: 39 verificações por período e nenhuma divergência crítica. Há capturas e matriz metodológica em `EVIDENCIA_SEGUNDA_REVISAO_JULIANA_FIERGS_2T2026_2026-10-01.md`. Esses estudos são **locais, não publicados**; a última redação da legenda de preço foi refinada após a captura e requer nova exportação publicada.
 
 **Status para próxima comunicação:** correções técnicas verificadas localmente, mas ainda não anunciar homologação final. Pedir a arte institucional vigente, confirmar a média pretendida no 61 e submeter o método de preço temporal à Juliana. Sincronização autorizada após a revisão técnica.
+
+## Complemento pós-publicação — média do quadro horizontal
+
+O PDF `panorama-fiergs-rs-2T2026 (3).pdf` confirmou as correções numéricas e de preço nas páginas inspecionadas, mas ainda exibia “22 anos” na página institucional e “—” na média horizontal. Por decisão editorial do usuário, a coluna passa a mostrar **unidades lançadas por empreendimento** (`oferta lançada histórica ÷ número de empreendimentos`), identificada no próprio quadro. Não é uma média de preço. A versão publicada desse PDF antecede esta alteração; gerar outra após o deploy para conferência da Juliana. O usuário tratará a arte de 23 anos com o marketing; nenhum asset foi alterado.
+
+Na comunicação à Juliana, explicitar que 16.110 lançamentos no snapshot atual, contra 15.950 no arquivo comentado, refletem +160 unidades do empreendimento Nápoles em Canoas na fonte. Pedir novo teste das correções técnicas, sem apresentar a página institucional como final.

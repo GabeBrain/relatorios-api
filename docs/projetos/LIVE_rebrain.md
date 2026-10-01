@@ -904,6 +904,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-01 — Panorama FIERGS: média horizontal para nova rodada com Juliana — Gabriel + Codex
+
+- **Decisão:** a coluna do consolidado horizontal passa a mostrar unidades lançadas por empreendimento, derivadas do mesmo cubo histórico e explicitadas no cabeçalho/legenda. Nenhum número é fixado no runtime. A interpretação é editorial e pode ser revista após a validação da Juliana.
+- **Conferência:** o PDF publicado `(3)` tem 72 páginas; os quadros auditados fecham 16.110 lançadas, 134 empreendimentos e 5.414 finais; tipologias de preço coincidem entre tabela e gráfico. O PDF `(3)` antecede a nova média e precisa ser regenerado. A arte institucional ainda mostra 22 anos; substituição será tratada com o marketing, conforme informado pelo usuário.
+- **Rastreabilidade:** [evidência da segunda revisão](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_SEGUNDA_REVISAO_JULIANA_FIERGS_2T2026_2026-10-01.md) e [resumo de homologação](../features/Relatorios%20Secovi_FIERGS/RESUMO_AJUSTES_POS_VALIDACAO_JULIANA_FIERGS_2T2026.md). A próxima validação é funcional/editorial, não homologação institucional final.
+
 ### 2026-10-01 — Panorama FIERGS: segunda revisão da Juliana — Gabriel + Codex
 
 - **Entrega local:** reconciliação da Oferta Lançada pela janela selecionada, mantendo oferta final e vendas no histórico de fechamento; guardas dimensionais para ambos os recortes; gráficos de preço por tipologia alinhados à série temporal; revisão das páginas horizontais e supressão condicionada de páginas sem dados completos.
