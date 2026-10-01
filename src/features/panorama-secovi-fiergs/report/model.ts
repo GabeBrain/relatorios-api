@@ -375,6 +375,36 @@ function provenanceOf(scope: PanoramaScope, cube: MarketCube, partial?: Partial<
   };
 }
 
+const validMapCoordinate = (latitude: number | null, longitude: number | null) =>
+  latitude !== null && longitude !== null
+  && Number.isFinite(latitude) && Number.isFinite(longitude)
+  && latitude >= -85.05112878 && latitude <= 85.05112878
+  && longitude >= -180 && longitude <= 180;
+
+function mapLocationsOf(cube: MarketCube, records: LaunchRecord[]): PanoramaReportModel['locations'] {
+  if (cube.projects.length) {
+    const unique = new Map<string, PanoramaReportModel['locations'][number]>();
+    for (const project of cube.projects) {
+      if (!validMapCoordinate(project.latitude, project.longitude) || unique.has(project.key)) continue;
+      unique.set(project.key, {
+        projectKey: project.key,
+        name: project.name,
+        segment: project.segment,
+        city: project.city,
+        neighborhood: project.neighborhood,
+        latitude: project.latitude!,
+        longitude: project.longitude!,
+        standard: project.standard,
+        finalUnits: project.finalUnits,
+        averagePricePerMeter: project.averagePricePerMeter,
+      });
+    }
+    return [...unique.values()];
+  }
+  return records.filter((item) => validMapCoordinate(item.latitude ?? null, item.longitude ?? null))
+    .map((item, index) => ({ projectKey: `launch:${index}`, name: item.name ?? 'Empreendimento', segment: item.segment, latitude: item.latitude!, longitude: item.longitude! }));
+}
+
 function normalizeTemporalSource(scope: PanoramaScope, harvests: CityTemporalSources[] | undefined, key: TemporalKey, metric: TemporalMetricKind, fallback: SourceResult): SourceResult {
   if (!harvests?.length) return fallback;
   const sourceRows = harvests.flatMap((harvest) => normalizeCityTemporalRows(harvest.city, harvest.sources[key].rows, metric, metric === 'snapshot' ? canonical(scope) : undefined));
@@ -551,6 +581,7 @@ export function buildPanoramaReportModel(
     unitsByTypology: guard(marketBlock(scope, closingStockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia; no FIERGS, última fotografia granular por empreendimento.')),
     vgvByTypology: guard(marketBlock(scope, temporal.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.')),
   };
+  const locations = mapLocationsOf(cube, records);
 
   return {
     scope, generatedAt: new Date().toISOString(), launches, horizontalSeries,
@@ -575,12 +606,8 @@ export function buildPanoramaReportModel(
         return matrix;
       }, new Map<string, { year: string; standard: string; vertical: number; horizontal: number; total: number }>()).values()],
     },
-    // O mapa passa a usar o cubo já filtrado pela política de universo quando ele existe.
-    locations: (cube.projects.length
-      ? cube.projects.filter((project) => project.latitude !== null && project.longitude !== null)
-        .map((project) => ({ name: project.name, segment: project.segment, city: project.city, neighborhood: project.neighborhood, latitude: project.latitude!, longitude: project.longitude!, standard: project.standard, finalUnits: project.finalUnits, averagePricePerMeter: project.averagePricePerMeter }))
-      : records.filter((row) => row.latitude != null && row.longitude != null)
-        .map((row) => ({ name: row.name ?? 'Empreendimento', segment: row.segment, latitude: row.latitude!, longitude: row.longitude! }))),
+    // Uma chave canônica produz no máximo um marcador, compartilhado pelos três mapas.
+    locations,
     source: 'GeoBrain API',
     // Falha parcial de cidade nunca vira consolidado silencioso: o estado cai para `partial`.
     dataState: !records.length && !cube.projects.length ? 'unavailable'
@@ -596,6 +623,6 @@ export function buildPanoramaReportModel(
     cityComparisons,
     presentation: options.presentation ?? {},
     closingFacts,
-    reconciliation: reconcilePanoramaReport({ scope, cube, sales, stock, granular, cityComparisons }),
+    reconciliation: reconcilePanoramaReport({ scope, cube, sales, stock, granular, cityComparisons, locations }),
   };
 }

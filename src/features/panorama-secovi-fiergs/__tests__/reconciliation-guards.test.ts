@@ -8,9 +8,9 @@ const base = () => ({
   scope: { uf: 'RS', cities: ['Canoas', 'Viamão'], endQuarter: '2T2026', entity: 'fiergs-rs' },
   cube: {
     projects: [
-      { key: 'Canoas::V1', segment: 'Vertical', soldUnits: 30, finalUnits: 70 },
-      { key: 'Viamão::V2', segment: 'Vertical', soldUnits: 20, finalUnits: 80 },
-      { key: 'Viamão::H1', segment: 'Horizontal', horizontalSubtype: 'loteamento_aberto', launchedUnits: 100, finalUnits: 40 },
+      { key: 'Canoas::V1', segment: 'Vertical', soldUnits: 30, finalUnits: 70, latitude: -29.9, longitude: -51.1 },
+      { key: 'Viamão::V2', segment: 'Vertical', soldUnits: 20, finalUnits: 80, latitude: -30.0, longitude: -51.0 },
+      { key: 'Viamão::H1', segment: 'Horizontal', horizontalSubtype: 'loteamento_aberto', launchedUnits: 100, finalUnits: 40, latitude: -30.1, longitude: -50.9 },
     ],
   },
   sales: { units: { ...block(50), source: 'padrão' }, unitsByTypology: { ...block(50), source: 'tipologia' } },
@@ -28,6 +28,11 @@ const base = () => ({
     vgv: [{ kind: 'subtotal', segment: 'Horizontal', projects: 1, launchedUnits: 100, finalUnits: 40 }],
   },
   cityComparisons: { enabled: true, sales: [{ city: 'Canoas', liquidSales: 30 }, { city: 'Viamão', liquidSales: 20 }] },
+  locations: [
+    { projectKey: 'Canoas::V1', latitude: -29.9, longitude: -51.1 },
+    { projectKey: 'Viamão::V2', latitude: -30.0, longitude: -51.0 },
+    { projectKey: 'Viamão::H1', latitude: -30.1, longitude: -50.9 },
+  ],
 });
 
 describe('FIERGS · guardas canônicas de reconciliação', () => {
@@ -36,7 +41,7 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
   it('homologa quando vendas, estoque, coorte e política fecham com tolerância zero', () => {
     const reconciliation = reconcilePanoramaReport(base() as never);
     expect(reconciliation.homologable).toBe(true);
-    expect(reconciliation.rows).toHaveLength(21);
+    expect(reconciliation.rows).toHaveLength(23);
     expect(reconciliation.rows.every((row) => row.status === 'match' && row.delta === 0)).toBe(true);
   });
 
@@ -57,6 +62,16 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
     expect(reconciliation.homologable).toBe(false);
     expect(reconciliation.rows.find((row) => row.metricId === 'horizontal.projects.consolidated')).toMatchObject({
       canonicalTotal: 1, dimensionalTotal: 0, delta: -1, status: 'different', critical: true,
+    });
+  });
+
+  it('bloqueia quando um empreendimento georreferenciado não chega aos mapas', () => {
+    const input = base();
+    input.locations.pop();
+    const reconciliation = reconcilePanoramaReport(input as never);
+    expect(reconciliation.homologable).toBe(false);
+    expect(reconciliation.rows.find((row) => row.metricId === 'map.projects.rendered')).toMatchObject({
+      canonicalTotal: 3, dimensionalTotal: 2, delta: -1, status: 'different', critical: true,
     });
   });
 

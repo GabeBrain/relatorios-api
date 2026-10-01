@@ -317,4 +317,18 @@ describe('Panorama FIERGS — fechamento canônico de vendas 2T2026', () => {
     expect(consolidatedHorizontal).toMatchObject({ projects: 2, launchedUnits: 180, finalUnits: 60 });
     expect(model.reconciliation.rows.filter((row) => row.metricId.startsWith('horizontal.') && row.metricId !== 'horizontal.chacaras.runtime').every((row) => row.status === 'match')).toBe(true);
   });
+
+  it('renderiza uma única localização por chave canônica mesmo se o cubo for repetido', () => {
+    const mapScope: PanoramaScope = { uf: 'RS', cities: ['Canoas'], startQuarter: '1T2023', endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4' };
+    const cube = buildCityCube([{ ...sampleBuilding, latitude: -29.92, longitude: -51.18 }], {
+      city: 'Canoas', uf: 'RS', endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4',
+    });
+    const model = buildPanoramaReportModel(mapScope, [], sources([]), [], { cubes: [cube, cube] });
+
+    expect(model.locations).toHaveLength(1);
+    expect(model.locations[0]?.projectKey).toBe('RS/Canoas#B1');
+    expect(model.reconciliation.rows.find((row) => row.metricId === 'map.projects.unique')).toMatchObject({
+      canonicalTotal: 1, dimensionalTotal: 2, delta: 1, status: 'different', critical: true,
+    });
+  });
 });

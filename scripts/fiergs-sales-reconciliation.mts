@@ -465,6 +465,22 @@ const runtime = {
     return row ? { projects: row.projects, launchedUnits: row.launchedUnits, finalUnits: row.finalUnits } : null;
   })(),
   horizontalLabels: [...new Set(runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').map((project) => project.horizontalSubtype))],
+  mapAudit: (() => {
+    const valid = runtimeModel.cube.projects.filter((project) => project.latitude !== null && project.longitude !== null
+      && Number.isFinite(project.latitude) && Number.isFinite(project.longitude)
+      && project.latitude >= -85.05112878 && project.latitude <= 85.05112878
+      && project.longitude >= -180 && project.longitude <= 180);
+    return {
+      cubeRows: runtimeModel.cube.projects.length,
+      uniqueProjects: new Set(runtimeModel.cube.projects.map((project) => project.key)).size,
+      georeferencedProjects: new Set(valid.map((project) => project.key)).size,
+      withoutValidCoordinates: new Set(runtimeModel.cube.projects.map((project) => project.key)).size - new Set(valid.map((project) => project.key)).size,
+      renderedMarkersPerMap: runtimeModel.locations.length,
+      renderedUniqueProjects: new Set(runtimeModel.locations.map((location) => location.projectKey)).size,
+      verticalRendered: runtimeModel.locations.filter((location) => location.segment === 'Vertical').length,
+      horizontalRendered: runtimeModel.locations.filter((location) => location.segment === 'Horizontal').length,
+    };
+  })(),
   reconciliation: runtimeModel.reconciliation,
 };
 

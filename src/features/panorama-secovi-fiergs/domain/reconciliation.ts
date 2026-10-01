@@ -8,6 +8,7 @@ interface ReconciliationInput {
   stock: { units: ReportMarketBlock; unitsByTypology: ReportMarketBlock };
   granular: PanoramaGranularBlocks;
   cityComparisons: PanoramaCityComparisons;
+  locations: { projectKey?: string; latitude: number; longitude: number }[];
 }
 
 const nullableSum = (values: (number | null)[]): number | null =>
@@ -48,6 +49,14 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
   const horizontalProjects = new Set(horizontal.map((project) => project.key)).size;
   const horizontalLaunched = nullableSum(horizontal.map((project) => project.launchedUnits));
   const horizontalFinal = nullableSum(horizontal.map((project) => project.finalUnits));
+  const uniqueProjectKeys = new Set(input.cube.projects.map((project) => project.key)).size;
+  const georeferencedProjectKeys = new Set(input.cube.projects.filter((project) =>
+    project.latitude !== null && project.longitude !== null
+    && Number.isFinite(project.latitude) && Number.isFinite(project.longitude)
+    && project.latitude >= -85.05112878 && project.latitude <= 85.05112878
+    && project.longitude >= -180 && project.longitude <= 180,
+  ).map((project) => project.key)).size;
+  const renderedProjectKeys = new Set(input.locations.map((location) => location.projectKey).filter(Boolean)).size;
   const universe = `fiergs-rs · ${input.scope.uf} · ${input.scope.cities.join(', ')} · Vertical`;
   const horizontalUniverse = `fiergs-rs · ${input.scope.uf} · ${input.scope.cities.join(', ')} · Horizontal homologável`;
   const countRow = (metricId: string, source: string, formula: string, canonicalTotal: number | null, dimensionalTotal: number | null, rowUniverse = universe) => row({
@@ -75,6 +84,8 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
     countRow('horizontal.launched.consolidated', 'cubo granular / consolidado VGV', 'Soma da oferta lançada no subtotal horizontal consolidado.', horizontalLaunched, horizontalVgvSubtotal?.launchedUnits ?? null, horizontalUniverse),
     countRow('horizontal.final.consolidated', 'cubo granular / consolidado VGV', 'Soma da oferta final no subtotal horizontal consolidado.', horizontalFinal, horizontalVgvSubtotal?.finalUnits ?? null, horizontalUniverse),
     countRow('horizontal.chacaras.runtime', 'política de entidade fiergs-rs', 'Contagem de projetos condominio_chacaras presentes após o filtro.', 0, horizontal.filter((project) => project.horizontalSubtype === 'condominio_chacaras').length, horizontalUniverse),
+    countRow('map.projects.unique', 'cubo granular / chave canônica', 'Cada linha do cubo representa uma única chave de empreendimento.', uniqueProjectKeys, input.cube.projects.length, `${horizontalUniverse} + Vertical`),
+    countRow('map.projects.rendered', 'cubo granular / coordenadas válidas', 'Empreendimentos únicos com coordenada válida renderizados nos três mapas.', georeferencedProjectKeys, renderedProjectKeys, `${horizontalUniverse} + Vertical`),
   ];
   return { homologable: rows.every((item) => !item.critical || item.status === 'match'), rows };
 }
