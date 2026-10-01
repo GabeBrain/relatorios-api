@@ -368,6 +368,12 @@ Os novos PDF e PowerPoint de 4T2025 e 2T2026 devem ser gerados após a atualiza�
 
 Não há divergência numérica crítica aberta. A Fase 7 depende da geração dos novos PDF/PPT e do aceite visual/editorial do pacote, especialmente nas páginas 25, 29–31, 35–41, 57–61 e 63–69. O slide 41 permanecerá explicitamente indisponível enquanto não houver uma fonte histórica auditável por faixa de área.
 
-## 8. Texto curto sugerido para o anúncio
+## 8. Limitação operacional conhecida da exportação
+
+A geração atual de PDF e PowerPoint rasteriza as 75 páginas no navegador. Embora o host de exportação sobreviva à navegação entre telas internas da plataforma, navegadores como o Chrome podem reduzir ou suspender o processamento quando a aba fica oculta. Nessa situação, o avanço das páginas pode pausar e voltar somente quando o usuário retorna à aba.
+
+Até a implementação futura de um worker de exportação no servidor, a orientação operacional é manter a aba do Panorama visível e ativa até o início do download. Essa limitação não altera os cálculos nem o conteúdo do relatório, mas afeta o tempo e a continuidade da geração do arquivo.
+
+## 9. Texto curto sugerido para o anúncio
 
 > Olá, Juliana! Concluímos uma nova rodada de ajustes do Panorama FIERGS com base nas suas observações. Reconciliamos vendas e estoque em todas as dimensões, generalizamos a regra para diferentes fechamentos, alinhamos produto, coorte e consolidado horizontal, adaptamos os comparativos para trimestre, semestre, nove meses ou ano completo e tornamos os mapas auditáveis por empreendimento único. No 2T2026, o relatório fecha em 1.091 vendas verticais, 5.251 unidades finais e 129 empreendimentos horizontais; o 4T2025 também foi validado como regressão, com 1.524 vendas, 5.855 unidades finais e 121 empreendimentos horizontais. PDF e PowerPoint agora só são liberados quando as 23 verificações críticas fecham sem divergência. Seguem os novos arquivos e a auditoria para sua validação visual final.
