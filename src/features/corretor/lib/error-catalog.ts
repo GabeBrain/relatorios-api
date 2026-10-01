@@ -8,11 +8,14 @@ export type ErrorType =
   | 'ABSOLUTE_SUM'
   | 'TOTALS_EQUALITY'
   | 'CROSS_TABLE_MISMATCH'
+  | 'SOURCE_CROSSCHECK'
   | 'BINNING_RULE'
   | 'TEMPORAL_WINDOW'
   | 'PROJECTION_FORMULA'
   | 'IBGE_MISMATCH'
   | 'VALUE_PLAUSIBILITY'
+  | 'FORMAT_MISMATCH'
+  | 'IMAGE_NOT_READ'
   // Contexto / texto
   | 'CITY_NAME'
   | 'WRONG_CONTEXT'
@@ -71,10 +74,13 @@ export const ERROR_CATALOG: Record<ErrorType, ErrorMeta> = {
   ABSOLUTE_SUM: { label: 'Soma absoluta', description: 'Linhas e colunas de valores absolutos devem fechar no total declarado.', mode: 'PLENO', viz: 'table', motor: 'DET' },
   TOTALS_EQUALITY: { label: 'Igualdade de totais', description: 'Total de oferta = total por tipologia; consolidada bate com as análises.', mode: 'BETA', viz: 'table', motor: 'DET' },
   CROSS_TABLE_MISMATCH: { label: 'Inconsistência entre tabelas', description: 'Faixas e valores repetidos em slides diferentes devem ser idênticos.', mode: 'BETA', viz: 'sidebyside', motor: 'DET' },
+  SOURCE_CROSSCHECK: { label: 'Divergência da fonte', description: 'O valor publicado no estudo deve bater com a planilha-fonte, com recorte e procedência inequívocos.', mode: 'BETA', viz: 'sidebyside', motor: 'DET' },
   BINNING_RULE: { label: 'Faixas', description: 'Faixas de valores não podem ter furo nem sobreposição; agrupamentos seguem a regra.', mode: 'PLENO', viz: 'binrange', motor: 'DET' },
   TEMPORAL_WINDOW: { label: 'Janela temporal', description: 'Projeções cobrem a janela canônica de 6 anos; slides irmãos usam a mesma base.', mode: 'BETA', viz: 'sidebyside', motor: 'DET' },
   PROJECTION_FORMULA: { label: 'Fórmula de projeção', description: 'A projeção deve seguir a taxa/ritmo informado; fórmula oficial ainda pendente.', mode: 'BETA', viz: 'table', motor: 'DET' },
   IBGE_MISMATCH: { label: 'Batimento IBGE', description: '% de domicílios por tipo/ocupação batem com o Censo 2022 do município.', mode: 'MOCK', viz: 'table', motor: 'DET' },
+  FORMAT_MISMATCH: { label: 'Formatação', description: 'Células do mesmo bloco usam o mesmo formato: percentual com %, mesma quantidade de casas decimais.', mode: 'BETA', viz: 'table', motor: 'DET' },
+  IMAGE_NOT_READ: { label: 'Imagem não lida', description: 'Imagem de tabela em formato que a leitura automática não processa; o conteúdo dela não foi conferido.', mode: 'BETA', viz: 'overlay', motor: 'DET' },
   VALUE_PLAUSIBILITY: { label: 'Plausibilidade', description: 'Valores fora do padrão: taxa alta demais, m² fora da faixa, monotonicidade quebrada.', mode: 'BETA', viz: 'table', motor: 'DET+IA' },
   CITY_NAME: { label: 'Nome da cidade', description: 'Nome de cidade no slide deve ser o da cidade do estudo.', mode: 'PLENO', viz: 'overlay', motor: 'IA' },
   WRONG_CONTEXT: { label: 'Contexto errado', description: 'Dados de outro estudo/cidade vazados por copy-paste.', mode: 'BETA', viz: 'overlay', motor: 'DET+IA' },

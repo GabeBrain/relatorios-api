@@ -48,6 +48,19 @@ function isReviewNoteShape(shape: Element): boolean {
   });
 }
 
+// Recado do analista em caixa comum (cor do tema), sem o amarelo/vermelho do
+// template: “Lucas, conforme falei com você…”, “Lucas, aqui eu fiquei na dúvida…”
+// (Rolândia, out/2026 — 3 recados, só 1 visto, por acaso, como “outra cidade”).
+// Vocativo no início + marca de conversa, ou duas marcas: texto de relatório não
+// conversa com ninguém nem fala em 1ª pessoa do singular.
+const VOCATIVE_RX = /^\s*[A-ZÀ-Ú][a-zà-ú]{2,}(?:\s[A-ZÀ-Ú][a-zà-ú]+)?\s*,/;
+const CHAT_RX = /(?<![\p{L}])(?:fiquei|eu\s+(?:fiz|coloquei|deixei|n[ãa]o|achei|acho|vi)|conforme\s+(?:falei|conversamos|combinamos)|na\s+d[úu]vida|n[ãa]o\s+sei\s+se|voc[êe]|te\s+(?:mandei|passei|falei)|me\s+(?:avisa|fala|diz))(?![\p{L}])/giu;
+
+export function isConversationalNote(text: string): boolean {
+  const marks = text.match(CHAT_RX)?.length ?? 0;
+  return marks >= 2 || (marks >= 1 && VOCATIVE_RX.test(text));
+}
+
 export function parseNumPtbr(raw: string): number | null {
   let s = raw.trim();
   if (!s) return null;
@@ -138,7 +151,7 @@ function parseSlide(xml: string, num: number, parser: DOMParser): IrSlide {
     if (tx) {
       const paras = txbodyParagraphs(tx);
       if (!paras.length) continue;
-      if (isReviewNoteShape(sp)) notasRevisao.push(paras.join('\n'));
+      if (isReviewNoteShape(sp) || isConversationalNote(paras.join(' '))) notasRevisao.push(paras.join('\n'));
       else shapesParas.push(paras);
     }
   }

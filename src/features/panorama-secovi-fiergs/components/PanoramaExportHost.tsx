@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { PanoramaExportDeck } from './ReportPaginator';
 import { synchronizeOfficialCoverCity } from '../lib/official-cover';
 import { buildPanoramaPdf, buildPanoramaPptx, PanoramaExportCancelled } from '../lib/pdf-export';
-import { usePanoramaExportStore, type PanoramaExportFormat } from '../export-store';
+import { panoramaExportBlockReason, usePanoramaExportStore, type PanoramaExportFormat } from '../export-store';
 import { quarterLabel } from '../lib/launches';
-import { scopeCityLabel, scopeCitySlug } from '../types';
+import { scopeCityLabel, scopeFileSlug } from '../types';
 
 /**
  * Executa a exportação do Panorama fora da árvore da rota: montado pelo shell, sobrevive à
@@ -28,6 +28,8 @@ export default function PanoramaExportHost() {
     // caminho do PPT espelho pedido na homologação.
     if (startedFor.current?.report === report && startedFor.current.format === format) return;
     startedFor.current = { report, format };
+    const initialBlockReason = panoramaExportBlockReason(report);
+    if (initialBlockReason) { store.fail(initialBlockReason); return; }
     const cityLabel = scopeCityLabel(report.scope);
     synchronizeOfficialCoverCity(cityLabel, report.scope.uf, report.scope.endQuarter);
 
@@ -38,6 +40,8 @@ export default function PanoramaExportHost() {
       if (!slides.length) { usePanoramaExportStore.getState().fail('Não foi possível montar as páginas do relatório.'); return; }
       usePanoramaExportStore.getState().markCapturing(slides.length);
       try {
+        const blockReason = panoramaExportBlockReason(report);
+        if (blockReason) { usePanoramaExportStore.getState().fail(blockReason); return; }
         const metadata = {
           title: `Panorama imobiliário de ${cityLabel}`,
           author: 'Brain Inteligência Estratégica',
@@ -50,7 +54,7 @@ export default function PanoramaExportHost() {
           if (current === pages) live.markAssembling();
         }, signal);
         if (signal?.aborted) return;
-        const name = `panorama-${scopeCitySlug(report.scope)}-${report.scope.endQuarter}.${format}`;
+        const name = `panorama-${scopeFileSlug(report.scope)}-${report.scope.endQuarter}.${format}`;
         const url = URL.createObjectURL(built.blob);
         const link = document.createElement('a');
         link.href = url; link.download = name; link.rel = 'noopener';

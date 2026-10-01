@@ -33,6 +33,33 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 1. Desenvolvimentos
 
+### 2026-09-25 — Filtro geográfico das bolhas e classificação de dormitórios — Codex
+- **Ambiente/funcionalidade:** `/dash-geobrain` — Preço/m² × Área privativa, filtros de dormitórios e mapas de oportunidades.
+- **O quê:** o gráfico de bolhas passou a permitir selecionar Bairro, UF ou Município, mantendo o segmentador de Padrão. A categorização de `number_bedroom` foi unificada em todos os gráficos e filtros: `0` ou nulo = 0 dorms; `1` = 1 dorm; `2` = 2 dorms; `3` = 3 dorms; `4` = 4+ dorms; `5` = Studio.
+- **Por quê:** ampliar o recorte geográfico do gráfico de bolhas e aplicar a regra de classificação de dormitórios de forma consistente.
+- **Arquivos:** `src/features/dashboard-geobrain/{aggregate.ts,aggregate.test.ts,Charts.tsx,Sidebar.tsx,FiltersPanel.tsx}`, `src/pages/DashboardGeobrain.tsx`.
+- **Commits:** `660ee45`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; a regra fica coberta por teste unitário de agregação.
+
+### 2026-09-25 — Filtros e visualizações geográficas do Dashboard — Codex
+- **Ambiente/funcionalidade:** `/dash-geobrain` — filtros locais e agrupamento geográfico dos gráficos.
+- **O quê:** adicionados os filtros locais de UF e Município abaixo de Períodos; eles refinam os dados já carregados sem disparar nova consulta. Os gráficos antes restritos a Bairro e os dois mapas de oportunidades agora permitem alternar entre Bairro, UF e Município. A barra de filtros ativos passou a mostrar UF, toda a terminologia visível foi padronizada para Município e o cabeçalho recebeu Limpar, que remove somente Região, UF e Município do escopo da próxima consulta.
+- **Por quê:** permitir leitura comparativa por diferentes níveis geográficos, separar filtros locais do escopo de coleta e uniformizar a nomenclatura da interface.
+- **Arquivos:** `src/features/dashboard-geobrain/{ActiveFiltersBar.tsx,FiltersPanel.tsx,Header.tsx,OpportunityMap.tsx,Rankings.tsx,Sidebar.tsx,aggregate.ts,aggregate.test.ts,api.ts,types.ts}`, `src/pages/DashboardGeobrain.tsx`, `src/features/shared/geo-api-scope-engine/GeoApiScopeSelector.tsx`.
+- **Commits:** `685bf48`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** etapa 4 permanece concluída; filtros locais e escopo de API continuam separados. A validação manual autenticada do Dashboard permanece pendente.
+
+### 2026-09-25 — Escopo por Região, UF ou Cidade com carregamento manual — Codex
+- **Ambiente/funcionalidade:** `/dash-geobrain` — filtros geográficos e coleta da API.
+- **O quê:** adicionado o filtro Região antes de UF, com dados de `region` do mesmo `/monitored-cities`; ele restringe as opções de UF sem selecionar uma automaticamente. O botão Carregar consulta apenas `city` quando há cidade, apenas `uf` quando há UF e percorre sequencialmente as UFs da Região quando somente ela foi escolhida. A seleção de Períodos recebe os últimos 12 meses apenas na primeira carga e permanece nas consultas seguintes.
+- **Por quê:** permitir análises regionais/estaduais sem disparos automáticos e preservar o recorte temporal escolhido pelo usuário.
+- **Arquivos:** `src/features/dashboard-geobrain/{Header.tsx,api.ts,api.test.ts,use-dashboard-data.ts}`, `src/pages/DashboardGeobrain.tsx`, `src/features/shared/geo-api-scope-engine/{GeoApiScopeSelector.tsx,fetch-monitored-cities.ts,fetch-monitored-cities.test.ts,types.ts,use-geo-api-scope.ts}`.
+- **Commits:** `a4a2515`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** o seletor compartilhado recebeu somente suporte aditivo e opt-in para Região; os demais ambientes preservam seus fluxos geográficos atuais. Validação manual autenticada do Dashboard permanece pendente.
+
 ### 2026-09-15 — Coluna de zero dormitórios no mapa de oportunidades — Codex
 - **Ambiente/funcionalidade:** `/dash-geobrain` — Mapa de oportunidades por Bairro.
 - **O quê:** a matriz por dormitórios agora mantém as colunas fixas `0`, `1`, `2`, `3` e `4+`, inclusive `0 dorms` quando não há tipologia correspondente no recorte; células sem dados apresentam IVV de 0%.

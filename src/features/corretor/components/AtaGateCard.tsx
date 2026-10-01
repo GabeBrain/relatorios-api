@@ -4,9 +4,10 @@
 // de cidade/UF — resolve o buraco do `cidade: null` no upload.
 
 import { useState } from 'react';
-import { MapPin, FileText, Loader2, Sparkles } from 'lucide-react';
+import { MapPin, FileText, Loader2, Sparkles, FileSpreadsheet, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AtaData } from '../lib/v3/ia-ata';
+import type { CitySuggestion } from '../lib/v3/city-suggestion';
 
 const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
 
@@ -17,15 +18,22 @@ export interface AtaGateValue {
   ata: AtaData | null;
 }
 
-export default function AtaGateCard({ ata, costBrl, running, onConfirm }: {
+export default function AtaGateCard({ ata, costBrl, running, onConfirm, suggestion, temFonte, onAttachSources, sourceLabel }: {
   ata: AtaData | null;
   /** custo estimado da fase 2 (texto + visão), já em R$ */
   costBrl: string;
   running: boolean;
   onConfirm: (value: AtaGateValue) => void;
+  /** Cidade/UF inferidas do nome do arquivo ou da capa, quando a ata não traz. */
+  suggestion?: CitySuggestion | null;
+  /** Planilhas-fonte vinculadas; sem elas o cruzamento com a fonte fica desligado. */
+  temFonte?: boolean;
+  onAttachSources?: () => void;
+  sourceLabel?: string | null;
 }) {
-  const [cidade, setCidade] = useState(ata?.cidade ?? '');
-  const [uf, setUf] = useState((ata?.uf ?? '').toUpperCase());
+  const [cidade, setCidade] = useState(ata?.cidade ?? suggestion?.cidade ?? '');
+  const [uf, setUf] = useState((ata?.uf ?? suggestion?.uf ?? '').toUpperCase());
+  const suggested = !ata?.cidade && Boolean(suggestion);
   const [pedidos, setPedidos] = useState((ata?.pedidos_analista ?? []).join('\n'));
 
   const cidadeOk = cidade.trim().length >= 2;
@@ -41,15 +49,17 @@ export default function AtaGateCard({ ata, costBrl, running, onConfirm }: {
   }
 
   return (
-    <div className="rounded-lg border-2 border-amber-500/50 bg-amber-500/5 px-4 py-4 space-y-4">
-      <div className="flex items-center gap-2">
-        <FileText className="w-5 h-5 text-amber-600 shrink-0" />
-        <h3 className="text-sm font-semibold">
-          {ata ? 'Confirme a ata antes de analisar' : 'Informe a cidade do estudo'}
-        </h3>
-        <span className="text-[11px] text-muted-foreground">
-          {ata ? 'a cidade/UF é a régua da revisão' : 'sem ata detectada — o corretor precisa saber onde é o estudo'}
-        </span>
+    <div className="rounded-lg border-2 border-amber-500/60 bg-amber-500/5 px-4 py-4 space-y-4">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <FileText className="w-5 h-5 text-amber-600 shrink-0" />
+          <h3 className="text-sm font-semibold">Falta um passo: confirme a cidade para rodar a análise completa</h3>
+        </div>
+        <p className="text-[11px] text-muted-foreground pl-7">
+          Até aqui só a triagem inicial rodou. O texto, as imagens de tabela e os cruzamentos ainda não foram
+          conferidos, então os contadores acima ainda não dizem nada sobre o estudo.
+          {ata ? ' A cidade/UF da ata é a régua da revisão.' : ' A ata não trouxe a cidade.'}
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-3 items-end">
@@ -72,6 +82,12 @@ export default function AtaGateCard({ ata, costBrl, running, onConfirm }: {
           </select>
         </label>
       </div>
+      {/* Fora da linha dos campos: dentro do label da cidade ele desalinhava a UF. */}
+      {suggested && (
+        <p className="-mt-2 text-[11px] text-emerald-700 dark:text-emerald-400">
+          Cidade e UF sugeridas pelo {suggestion!.origem === 'arquivo' ? 'nome do arquivo' : 'texto da capa'} — confira antes de analisar.
+        </p>
+      )}
 
       {/* Ata multi-estudo (uma ata abre vários estudos): a LLM não escolhe por nós —
           o analista clica na cidade correta deste estudo. */}
@@ -127,6 +143,25 @@ export default function AtaGateCard({ ata, costBrl, running, onConfirm }: {
             className="text-xs rounded-md border border-border bg-background px-2.5 py-1.5 font-mono"
           />
         </label>
+      )}
+
+      {temFonte === false && (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-amber-500/40 bg-background px-3 py-2 text-[11px]">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+          <span className="flex-1 min-w-[200px]">
+            Nenhuma planilha vinculada: o cruzamento com a fonte (verticalização, população, oferta) fica desligado.
+          </span>
+          {onAttachSources && (
+            <button type="button" onClick={onAttachSources} className="rounded-md border border-border px-2 py-1 hover:border-primary/50 inline-flex items-center gap-1">
+              <FileSpreadsheet className="w-3.5 h-3.5" /> Vincular planilhas
+            </button>
+          )}
+        </div>
+      )}
+      {temFonte && sourceLabel && (
+        <p className="text-[11px] text-emerald-700 dark:text-emerald-400 inline-flex items-center gap-1">
+          <FileSpreadsheet className="w-3.5 h-3.5" /> Planilhas vinculadas: {sourceLabel}
+        </p>
       )}
 
       <div className="flex items-center gap-3 pt-1">

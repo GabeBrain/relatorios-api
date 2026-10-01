@@ -1,9 +1,10 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { scopeCityLabel, type PanoramaReportModel, type ReportMarketBlock, type ReportSeries } from '../types';
 import { buildMapTilePlan } from '../lib/map-tiles';
-import { orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
+import { canonicalStandard, orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
-import { SECOVI_HORIZONTAL_LABEL } from '../domain/entity-policy';
+import { horizontalLabelForEntity } from '../domain/entity-policy';
+import type { CubeProject } from '../domain/cube';
 
 const integer = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 const decimal = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -141,7 +142,7 @@ export function MarketSummarySlide({ report }: { report: PanoramaReportModel }) 
   const facts = report.closingFacts;
   const rows = [
     { label: 'Total Mercado Residencial Vertical', projects: facts.vertical.projects, launched: facts.vertical.launchedUnits, final: facts.vertical.finalUnits },
-    { label: `Total Mercado Residencial Horizontal — ${SECOVI_HORIZONTAL_LABEL}`, projects: facts.horizontal.projects, launched: facts.horizontal.launchedUnits, final: facts.horizontal.finalUnits },
+    { label: `Total Mercado Residencial Horizontal — ${horizontalLabelForEntity(report.scope.entity)}`, projects: facts.horizontal.projects, launched: facts.horizontal.launchedUnits, final: facts.horizontal.finalUnits },
     { label: 'Total Mercado', projects: facts.total.projects, launched: facts.total.launchedUnits, final: facts.total.finalUnits },
   ];
   const totalAvailability = shareOf(rows[2].final, rows[2].launched);
@@ -153,7 +154,7 @@ export function MarketSummarySlide({ report }: { report: PanoramaReportModel }) 
       <td>{row.label}</td><td>{integer(row.projects)}</td><td>{integer(row.launched)}</td><td>{integer(row.final)}</td>
       <td><CfCell metric="availability" value={shareOf(row.final, row.launched)} reference={totalAvailability} max={100} format={percent} tone="red"/></td>
     </tr>)}
-  </tbody></table><p className="panorama-coverage-caption">Universo por empreendimento do cubo Secovi: verticais integrais e, no horizontal, somente {SECOVI_HORIZONTAL_LABEL}. Fecha com a oferta por padrão e com o VGV geral.</p></Slide>;
+  </tbody></table><p className="panorama-coverage-caption">Universo por empreendimento da política {report.scope.entity === 'fiergs-rs' ? 'FIERGS-RS' : 'Secovi-SP'}: verticais integrais e horizontal {horizontalLabelForEntity(report.scope.entity)}. Fecha com a oferta por padrão e com o VGV geral.</p></Slide>;
 }
 
 export function OfferTableSlide({ report, dimension, segment = 'vertical' }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; segment?: SegmentKey }) {
@@ -172,6 +173,105 @@ export function OfferChartSlide({ report, dimension }: { report: PanoramaReportM
   return <Slide title={`OFERTA LANÇADA E FINAL | POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-column-slide"><div className="panorama-column-chart">{rows.map((row) => { const launched = launchedTotal ? row.launched / launchedTotal * 100 : 0; const final = finalTotal ? row.final / finalTotal * 100 : 0; return <div className="panorama-column-group" key={row.label}><div><span className="panorama-column-green" style={{ height: `${launched / (max * 100) * 100}%` }}><b>{percent(launched)}</b></span><span className="panorama-column-yellow" style={{ height: `${final / (max * 100) * 100}%` }}><b>{percent(final)}</b></span></div><strong>{row.label}</strong></div>; })}</div><div className="panorama-chart-legend"><span className="green">Oferta Lançada</span><span className="yellow">Oferta Final</span></div></Slide>;
 }
 
+const FIERGS_PRODUCT_LABELS: Record<string, string> = {
+  loteamento_aberto: 'Loteamento Aberto',
+  condominio_chacaras: 'Condomínio de Chácaras',
+  loteamento_fechado: 'Loteamento Fechado',
+  condominio_casas: 'Condomínio de Casas/Sobrados',
+};
+
+function fiergsHorizontalGroups(projects: CubeProject[]) {
+  const groups = new Map<string, CubeProject[]>();
+  for (const project of projects.filter((item) => item.segment === 'Horizontal')) {
+    const label = FIERGS_PRODUCT_LABELS[project.horizontalSubtype ?? ''] ?? 'Não classificado';
+    groups.set(label, [...(groups.get(label) ?? []), project]);
+  }
+  return [...groups.entries()];
+}
+
+export function FiergsHorizontalOfferSlide({ report }: { report: PanoramaReportModel }) {
+  const rows = fiergsHorizontalOfferRows(report.cube.projects);
+  return <Slide title="OFERTA LANÇADA E FINAL | POR TIPO"><table className="panorama-reference-table"><thead><tr><th>Tipo</th><th>Nº de Empreend.</th><th>Oferta Lançada</th><th>Oferta Final</th><th>Disponibilidade</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{integer(row.projects)}</td><td>{integer(row.launched)}</td><td>{integer(row.final)}</td><td>{row.launched ? percent(row.final / row.launched * 100) : '—'}</td></tr>)}</tbody></table></Slide>;
+}
+
+export function fiergsHorizontalOfferRows(projects: CubeProject[]) {
+  return fiergsHorizontalGroups(projects).map(([label, group]) => ({
+    label,
+    projects: new Set(group.map((item) => item.key)).size,
+    launched: group.reduce((sum, item) => sum + (item.launchedUnits ?? 0), 0),
+    final: group.reduce((sum, item) => sum + (item.finalUnits ?? 0), 0),
+  }));
+}
+
+export function FiergsHorizontalPriceRangeSlide({ report }: { report: PanoramaReportModel }) {
+  const rows = fiergsHorizontalPriceRangeRows(report.cube.projects);
+  return <Slide title="MÍNIMO, MÉDIA E MÁXIMO | MERCADO HORIZONTAL"><table className="panorama-reference-table"><thead><tr><th>Tipo</th><th>Mínimo R$/m²</th><th>Média R$/m²</th><th>Máximo R$/m²</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={row.label === 'Média dos loteamentos' ? 'panorama-total-row' : undefined}><td>{row.label}</td><td>{integer(row.min)}</td><td>{integer(row.average)}</td><td>{integer(row.max)}</td></tr>)}</tbody></table></Slide>;
+}
+
+export function fiergsHorizontalPriceRangeRows(projects: CubeProject[]) {
+  const groups = new Map<string, CubeProject[]>();
+  for (const project of projects.filter((item) => item.segment === 'Horizontal')) {
+    const label = FIERGS_PRODUCT_LABELS[project.horizontalSubtype ?? ''] ?? 'Não classificado';
+    groups.set(label, [...(groups.get(label) ?? []), project]);
+  }
+  const rows = [...groups].map(([label, group]) => {
+    const values = group.map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
+    return { label, min: values.length ? Math.min(...values) : null, average: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null, max: values.length ? Math.max(...values) : null };
+  });
+  const loteamentos = projects.filter((item) => item.segment === 'Horizontal' && (item.horizontalSubtype === 'loteamento_aberto' || item.horizontalSubtype === 'loteamento_fechado'))
+    .map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
+  if (loteamentos.length) rows.push({
+    label: 'Média dos loteamentos',
+    min: Math.min(...loteamentos),
+    average: loteamentos.reduce((sum, value) => sum + value, 0) / loteamentos.length,
+    max: Math.max(...loteamentos),
+  });
+  return rows;
+}
+
+const FIERGS_AREA_BANDS = [
+  { label: 'Até 34m²', ceiling: 34 }, { label: '35–39m²', ceiling: 39 }, { label: '40–44m²', ceiling: 44 },
+  { label: '45–49m²', ceiling: 49 }, { label: '50–59m²', ceiling: 59 }, { label: '60–69m²', ceiling: 69 },
+  { label: '70–84m²', ceiling: 84 }, { label: '85–99m²', ceiling: 99 }, { label: '100–150m²', ceiling: 150 },
+  { label: '151–200m²', ceiling: 200 }, { label: '201–250m²', ceiling: 250 }, { label: 'Acima de 250m²', ceiling: Number.POSITIVE_INFINITY },
+] as const;
+function fiergsAreaBand(area: number | null) { return area && area > 0 ? FIERGS_AREA_BANDS.find((band) => area <= band.ceiling)?.label ?? null : null; }
+
+/** FIERGS 57: cruzamento real entre faixa de metragem e tipologia, na leitura do deck oficial. */
+export function FiergsTypologyAreaSlide({ report }: { report: PanoramaReportModel }) {
+  const cells = new Map<string, Map<string, number>>();
+  for (const project of report.cube.projects.filter((item) => item.segment === 'Vertical')) {
+    for (const typology of project.typologies) {
+      const band = fiergsAreaBand(typology.averageArea);
+      if (!band || typology.finalUnits === null) continue;
+      const row = cells.get(typology.typology) ?? new Map<string, number>();
+      row.set(band, (row.get(band) ?? 0) + typology.finalUnits);
+      cells.set(typology.typology, row);
+    }
+  }
+  const labels = orderTypologies([...cells.keys()] as never);
+  const bands = FIERGS_AREA_BANDS.map((band) => band.label).filter((band) => labels.some((label) => (cells.get(label)?.get(band) ?? 0) > 0));
+  if (!labels.length || !bands.length) return <Slide title="OFERTA FINAL POR TIPOLOGIA E METRAGEM" className="panorama-cohort-matrix-slide"><DataUnavailable>O cubo granular não trouxe simultaneamente tipologia, área privativa e oferta final para este recorte.</DataUnavailable></Slide>;
+  const rowTotal = (band: string) => labels.reduce((sum, label) => sum + (cells.get(label)?.get(band) ?? 0), 0);
+  return <Slide title="OFERTA FINAL POR TIPOLOGIA E METRAGEM" className="panorama-cohort-matrix-slide panorama-fiergs-area-matrix"><table className="panorama-reference-table"><thead><tr><th>Metragem</th>{labels.map((label) => <th key={label}>{typologyDisplayLabel(label)}</th>)}<th>Total</th></tr></thead><tbody>{bands.map((band) => <tr key={band}><td>{band}</td>{labels.map((label) => <td key={label}>{integer(cells.get(label)?.get(band) ?? 0)}</td>)}<td><b>{integer(rowTotal(band))}</b></td></tr>)}<tr className="panorama-total-row"><td>Total</td>{labels.map((label) => <td key={label}>{integer(bands.reduce((sum, band) => sum + (cells.get(label)?.get(band) ?? 0), 0))}</td>)}<td>{integer(bands.reduce((sum, band) => sum + rowTotal(band), 0))}</td></tr></tbody></table><p className="panorama-coverage-caption">Unidades em oferta final; faixas de área privativa do contrato editorial FIERGS.</p></Slide>;
+}
+
+/** FIERGS 58: faixa observada e média ponderada do R$/m² por tipologia. */
+export function FiergsTypologyPriceRangeSlide({ report }: { report: PanoramaReportModel }) {
+  const grouped = new Map<string, { meter: number; area: number | null; weight: number }[]>();
+  for (const project of report.cube.projects.filter((item) => item.segment === 'Vertical')) {
+    for (const typology of project.typologies) {
+      if (typology.averagePricePerMeter === null || typology.averagePricePerMeter <= 0) continue;
+      grouped.set(typology.typology, [...(grouped.get(typology.typology) ?? []), { meter: typology.averagePricePerMeter, area: typology.averageArea, weight: Math.max(typology.finalUnits ?? 0, 0) }]);
+    }
+  }
+  const labels = orderTypologies([...grouped.keys()] as never);
+  if (!labels.length) return <Slide title="MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA" className="panorama-price-table-slide"><DataUnavailable>O cubo granular não trouxe R$/m² por tipologia neste recorte.</DataUnavailable></Slide>;
+  const weightedAverage = (entries: { value: number; weight: number }[]) => { const weighted = entries.filter((entry) => entry.weight > 0); const denominator = weighted.reduce((sum, entry) => sum + entry.weight, 0); return denominator ? weighted.reduce((sum, entry) => sum + entry.value * entry.weight, 0) / denominator : entries.reduce((sum, entry) => sum + entry.value, 0) / entries.length; };
+  const rows = labels.map((label) => { const entries = grouped.get(label)!; const areas = entries.filter((entry): entry is typeof entry & { area: number } => entry.area !== null && entry.area > 0); return { label, areaMin: areas.length ? Math.min(...areas.map((entry) => entry.area)) : null, areaAverage: areas.length ? weightedAverage(areas.map((entry) => ({ value: entry.area, weight: entry.weight }))) : null, areaMax: areas.length ? Math.max(...areas.map((entry) => entry.area)) : null, meterMin: Math.min(...entries.map((entry) => entry.meter)), meterAverage: weightedAverage(entries.map((entry) => ({ value: entry.meter, weight: entry.weight }))), meterMax: Math.max(...entries.map((entry) => entry.meter)), offer: entries.reduce((sum, entry) => sum + entry.weight, 0) }; });
+  return <Slide title="MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA" className="panorama-price-range-slide"><table className="panorama-reference-table"><thead><tr><th rowSpan={2}>Tipologia</th><th colSpan={3}>m² privativo</th><th colSpan={3}>R$/m² privativo</th><th rowSpan={2}>Oferta final</th></tr><tr><th>Mínimo</th><th>Média</th><th>Máximo</th><th>Mínimo</th><th>Média</th><th>Máximo</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{typologyDisplayLabel(row.label)}</td><td>{integer(row.areaMin)}</td><td>{integer(row.areaAverage)}</td><td>{integer(row.areaMax)}</td><td>{integer(row.meterMin)}</td><td>{integer(row.meterAverage)}</td><td>{integer(row.meterMax)}</td><td>{integer(row.offer)}</td></tr>)}</tbody></table><p className="panorama-coverage-caption">Médias ponderadas pela oferta final; mínimo e máximo são os extremos observados nas tipologias dos empreendimentos.</p></Slide>;
+}
+
 export function CohortTableSlide({ report, segment = 'vertical' }: { report: PanoramaReportModel; segment?: SegmentKey }) {
   const granularRows = segment === 'horizontal' ? report.granular.cohortsHorizontal : report.granular.cohortsVertical;
   const granularTotal = granularRows.find((row) => row.kind === 'total');
@@ -180,7 +280,7 @@ export function CohortTableSlide({ report, segment = 'vertical' }: { report: Pan
   // quando o recorte é magro faz a analista procurar de novo o que já foi corrigido.
   const rows = allRows.filter((row) => row.kind === 'subtotal' || hasObservedValue(row.projects, row.launched, row.final));
   const launchedTotal = granularRows.length ? granularTotal?.launchedUnits ?? null : rows.reduce((sum, row) => sum + (row.launched ?? 0), 0); const finalTotal = granularRows.length ? granularTotal?.finalUnits ?? null : rows.reduce((sum, row) => sum + (row.final ?? 0), 0); const projectsTotal = granularRows.length ? granularTotal?.projects ?? null : rows.reduce((sum, row) => sum + (row.projects ?? 0), 0);
-  return <Slide title="OFERTA LANÇADA E FINAL | POR ANO DE LANÇAMENTO">{rows.length ? <table className="panorama-reference-table"><thead><tr><th>Ano Lançamento</th><th>Nº de<br/>Empreend.</th><th>Em %</th><th>Oferta<br/>Lançada</th><th>Em %</th><th>Oferta<br/>Final</th><th>Em %</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={rowClassOf(row.kind)}><td>{row.label}</td><td>{integer(row.projects)}</td><td><CfCell metric="share" value={shareOf(row.projects, projectsTotal)} max={100} format={percent}/></td><td>{integer(row.launched)}</td><td><CfCell metric="share" value={shareOf(row.launched, launchedTotal)} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><CfCell metric="share" value={shareOf(row.final, finalTotal)} max={100} format={percent}/></td><td><CfCell metric="availability" value={shareOf(row.final, row.launched)} reference={shareOf(finalTotal, launchedTotal)} max={100} format={percent} tone="red"/></td></tr>)}<tr className="panorama-total-row"><td>Total geral</td><td>{integer(projectsTotal)}</td><td>100%</td><td>{integer(launchedTotal)}</td><td>100%</td><td>{integer(finalTotal)}</td><td>100%</td><td>{shareOf(finalTotal, launchedTotal) === null ? '—' : percent(shareOf(finalTotal, launchedTotal))}</td></tr></tbody></table> : <DataUnavailable>{segment === 'horizontal' ? 'A API não retornou oferta de Condomínio de Casas por ano com valores diferentes de zero neste recorte.' : 'A API não retornou oferta residencial vertical por ano com valores diferentes de zero neste recorte.'}</DataUnavailable>}</Slide>;
+  return <Slide title="OFERTA LANÇADA E FINAL | POR ANO DE LANÇAMENTO">{rows.length ? <table className="panorama-reference-table"><thead><tr><th>Ano Lançamento</th><th>Nº de<br/>Empreend.</th><th>Em %</th><th>Oferta<br/>Lançada</th><th>Em %</th><th>Oferta<br/>Final</th><th>Em %</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={rowClassOf(row.kind)}><td>{row.label}</td><td>{integer(row.projects)}</td><td><CfCell metric="share" value={shareOf(row.projects, projectsTotal)} max={100} format={percent}/></td><td>{integer(row.launched)}</td><td><CfCell metric="share" value={shareOf(row.launched, launchedTotal)} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><CfCell metric="share" value={shareOf(row.final, finalTotal)} max={100} format={percent}/></td><td><CfCell metric="availability" value={shareOf(row.final, row.launched)} reference={shareOf(finalTotal, launchedTotal)} max={100} format={percent} tone="red"/></td></tr>)}<tr className="panorama-total-row"><td>Total geral</td><td>{integer(projectsTotal)}</td><td>100%</td><td>{integer(launchedTotal)}</td><td>100%</td><td>{integer(finalTotal)}</td><td>100%</td><td>{shareOf(finalTotal, launchedTotal) === null ? '—' : percent(shareOf(finalTotal, launchedTotal))}</td></tr></tbody></table> : <DataUnavailable>{segment === 'horizontal' ? `A API não retornou oferta do ${horizontalLabelForEntity(report.scope.entity)} por ano com valores diferentes de zero neste recorte.` : 'A API não retornou oferta residencial vertical por ano com valores diferentes de zero neste recorte.'}</DataUnavailable>}</Slide>;
 }
 
 export function PriceTableSlide({ report, dimension, horizontal = false }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; horizontal?: boolean }) {
@@ -192,10 +292,10 @@ export function PriceTableSlide({ report, dimension, horizontal = false }: { rep
   const rejectedHorizontal = report.provenance.rejectedByPolicy.filter((item) => item.reason === 'horizontal_fora_da_politica' || item.reason === 'subtipo_horizontal_indefinido').reduce((sum, item) => sum + item.count, 0);
   const noPriceMessage = horizontal
     ? eligibleHorizontal === 0
-      ? `Não há Condomínio de Casas elegível neste recorte${rejectedHorizontal ? `; ${rejectedHorizontal} horizontal(is) foram excluído(s) pela regra Secovi.` : '.'}`
+      ? `Não há ${horizontalLabelForEntity(report.scope.entity)} elegível neste recorte${rejectedHorizontal ? `; ${rejectedHorizontal} horizontal(is) foram excluído(s) pela política da entidade.` : '.'}`
       : horizontalStockIsKnown && !hasActiveHorizontalOffer
-        ? 'Há Condomínios de Casas no histórico do recorte, porém todos estão esgotados e não possuem oferta ativa no fechamento selecionado. Por isso, não há base corrente para calcular ticket, área e R$/m² da oferta ativa.'
-      : 'Há Condomínios de Casas válidos no recorte, mas os campos granulares de preço, área e R$/m² não vieram no payload. A média temporal de “Horizontal” não é usada como substituta, pois mistura loteamentos e outros subtipos fora do universo Secovi.'
+        ? `Há projetos do ${horizontalLabelForEntity(report.scope.entity)} no histórico, porém todos estão esgotados e não possuem oferta ativa no fechamento selecionado.`
+      : `Há projetos do ${horizontalLabelForEntity(report.scope.entity)} no recorte, mas os campos granulares de preço, área e R$/m² não vieram no payload.`
     : 'A API não retornou preço, área ou R$/m² para este recorte.';
   if (granularRows.length) {
     const rows = granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, ticket: row.averageTicket, area: row.averageArea, meter: row.averagePricePerMeter }));
@@ -314,7 +414,7 @@ export function NarrativeSlide({ report, continuation = false }: { report: Panor
   const hasHorizontal = facts.horizontal.projects > 0;
   const areaTotal = report.granular.areaBands.find((row) => row.kind === 'total');
   const firstPage = [
-    <>No período analisado, o mercado residencial de <strong>{scopeCityLabel(report.scope)}</strong> reúne oferta final de <strong>{integer(finalUnits)} unidades</strong>, sendo {integer(verticalFinal)} no vertical{hasHorizontal ? <> e {integer(horizontalFinal)} em {SECOVI_HORIZONTAL_LABEL}</> : <>; não há {SECOVI_HORIZONTAL_LABEL} elegível neste recorte</>}.</>,
+    <>No período analisado, o mercado residencial de <strong>{scopeCityLabel(report.scope)}</strong> reúne oferta final de <strong>{integer(finalUnits)} unidades</strong>, sendo {integer(verticalFinal)} no vertical{hasHorizontal ? <> e {integer(horizontalFinal)} no {horizontalLabelForEntity(report.scope.entity)}</> : <>; não há {horizontalLabelForEntity(report.scope.entity)} elegível neste recorte</>}.</>,
     <>A oferta lançada do recorte é de <strong>{integer(launchedUnits)} unidades</strong>; a disponibilidade sobre essa base corresponde a <strong>{shareOf(finalUnits, launchedUnits) === null ? '—' : percent(shareOf(finalUnits, launchedUnits))}</strong>.</>,
     <>O IVV do mercado vertical encerra o trimestre em <strong>{areaTotal?.ivv === null || areaTotal === undefined ? '—' : percent(areaTotal.ivv)}</strong>, obtido da razão entre as vendas líquidas e a soma da oferta anterior com os lançamentos do período.</>,
   ];
@@ -323,8 +423,8 @@ export function NarrativeSlide({ report, continuation = false }: { report: Panor
     <>{topTypology ? <>A tipologia de maior presença na oferta é <strong>{typologyDisplayLabel(topTypology.label)}</strong>, totalizando {integer(topTypology.value)} unidades.</> : <>A distribuição por tipologia não retornou dados para o recorte.</>}</>,
     <>No <strong>residencial vertical</strong>, o ticket médio é de <strong>{currency(verticalPrices?.averageTicket)}</strong> e o preço privativo, <strong>{currency(verticalPrices?.averagePricePerMeter)}/m²</strong>.</>,
     <>{hasHorizontal
-      ? <>Em <strong>{SECOVI_HORIZONTAL_LABEL}</strong>, os indicadores são apurados à parte: ticket médio de <strong>{currency(horizontalPrices?.averageTicket)}</strong> e <strong>{currency(horizontalPrices?.averagePricePerMeter)}/m²</strong>. Os dois segmentos não são combinados em uma média única.</>
-      : <>Não há <strong>{SECOVI_HORIZONTAL_LABEL}</strong> elegível no recorte, portanto o bloco horizontal não compõe preço nem média deste panorama.</>}</>,
+      ? <>No <strong>{horizontalLabelForEntity(report.scope.entity)}</strong>, os indicadores são apurados à parte: ticket médio de <strong>{currency(horizontalPrices?.averageTicket)}</strong> e <strong>{currency(horizontalPrices?.averagePricePerMeter)}/m²</strong>. Os dois segmentos não são combinados em uma média única.</>
+      : <>Não há <strong>{horizontalLabelForEntity(report.scope.entity)}</strong> elegível no recorte, portanto o bloco horizontal não compõe preço nem média deste panorama.</>}</>,
   ];
   return <Slide title="ANÁLISES E OBSERVAÇÕES SOBRE O MERCADO" className="panorama-narrative-slide">
     <div className="panorama-narrative-kicker">{continuation ? 'LEITURA DO PRODUTO E PREÇOS' : 'SÍNTESE DO PERÍODO'}</div>
@@ -333,20 +433,28 @@ export function NarrativeSlide({ report, continuation = false }: { report: Panor
   </Slide>;
 }
 
-export function LocationSlide({ report }: { report: PanoramaReportModel }) {
+export function LocationSlide({ report, mode = 'standard' }: { report: PanoramaReportModel; mode?: 'standard' | 'stock' | 'price' }) {
   const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
   const locations = report.locations.filter((item) => Number.isFinite(item.latitude) && Number.isFinite(item.longitude)
     && item.latitude >= -85.05112878 && item.latitude <= 85.05112878
     && item.longitude >= -180 && item.longitude <= 180);
   const vertical = locations.filter((item) => item.segment === 'Vertical');
-  const points = vertical.length ? vertical : locations;
+  const points = report.scope.entity === 'fiergs-rs' ? locations : vertical.length ? vertical : locations;
   const tiles = buildMapTilePlan(points, mapboxAccessToken);
-  return <Slide title="EMPREENDIMENTOS VERTICAIS" className="panorama-location-slide"><div className="panorama-location-layout">
+  const title = mode === 'stock' ? 'MAPA DE LOCALIZAÇÃO POR ESTOQUE' : mode === 'price' ? 'MAPA DE LOCALIZAÇÃO POR R$/M²' : 'MAPA DE LOCALIZAÇÃO POR PADRÃO';
+  const values = points.map((item) => mode === 'stock' ? item.finalUnits ?? 0 : mode === 'price' ? item.averagePricePerMeter ?? 0 : 1);
+  const maxValue = Math.max(1, ...values);
+  const minValue = values.length ? Math.min(...values) : 0;
+  const standardPalette: Record<string, string> = { Compacto: '#9c5fa8', Econômico: '#c62026', Standard: '#4776aa', Médio: '#5d7737', 'Médio-Alto': '#9b7a2f', Alto: '#d16c2f', Luxo: '#30353b', 'Não classificado': '#858585' };
+  const standards = orderStandards(new Set(points.map((item) => canonicalStandard(item.standard))));
+  return <Slide title={title} className="panorama-location-slide"><div className="panorama-location-layout">
     <div className="panorama-location-map">{tiles && <><div className="panorama-map-tiles" style={{ gridTemplateColumns: `repeat(${tiles.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${tiles.rows}, minmax(0, 1fr))` }}>{tiles.tiles.map((tile) => <img key={`${tile.x}-${tile.y}`} src={tile.url} crossOrigin="anonymous" alt=""/>)}</div><small className="panorama-map-attribution">© OpenStreetMap contributors · © Mapbox</small></>}
-      {tiles && points.map((item, index) => { const position = tiles.positionOf(item); return <button key={`${item.name}-${index}`} title={item.name} style={{ left: `${position.left}%`, top: `${position.top}%` }}><span>{index + 1}</span></button>; })}
+      {tiles && points.map((item, index) => { const position = tiles.positionOf(item); const value = values[index]; const size = mode === 'standard' ? 2 : 1.4 + value / maxValue * 2.8; const hue = mode === 'price' ? 15 + value / maxValue * 105 : 0; const standard = canonicalStandard(item.standard); return <button className={`panorama-map-marker is-${mode}`} key={item.projectKey ?? `${item.name}-${index}`} title={`${item.name}${mode === 'stock' ? ` · estoque ${integer(item.finalUnits)}` : mode === 'price' ? ` · ${currency(item.averagePricePerMeter)}/m²` : ` · ${standard}`}`} style={{ left: `${position.left}%`, top: `${position.top}%`, width: `${size}cqw`, height: `${size}cqw`, margin: `${-size / 2}cqw`, backgroundColor: mode === 'price' ? `hsl(${hue} 65% 42%)` : mode === 'standard' ? standardPalette[standard] : undefined }}><span>{mode === 'standard' ? index + 1 : ''}</span></button>; })}
       {!points.length && <div className="panorama-map-empty"><strong>Localização não disponível</strong><span>A API não retornou coordenadas válidas para este recorte.</span></div>}
       {!!points.length && !tiles && <div className="panorama-map-empty"><strong>Mapa base indisponível</strong><span>Configure VITE_MAPBOX_ACCESS_TOKEN para exibir o fundo cartográfico.</span></div>}
     </div>
-    <aside><h3>{scopeCityLabel(report.scope)}</h3><p>Empreendimentos residenciais verticais identificados no recorte.</p><strong>{integer(vertical.length)}</strong><span>pontos georreferenciados</span><small>Os marcadores são exibidos somente quando há latitude e longitude válidas.</small></aside>
+    <aside><h3>{scopeCityLabel(report.scope)}</h3><p>{mode === 'stock' ? 'Tamanho do marcador proporcional à oferta final.' : mode === 'price' ? 'Cor do marcador graduada pelo preço médio por m².' : 'Empreendimentos identificados por padrão no recorte.'}</p><strong>{integer(points.length)}</strong><span>empreendimentos georreferenciados</span>
+      <div className={`panorama-map-legend is-${mode}`}>{mode === 'standard' ? <><b>Legenda por padrão</b>{standards.map((standard) => <span key={standard}><i style={{ background: standardPalette[standard] }}/>{standard}</span>)}</> : <><b>{mode === 'stock' ? 'Escala de estoque' : 'Escala de R$/m²'}</b><div className="panorama-map-scale"><i/><span><small>{mode === 'stock' ? 'Menor estoque' : 'Menor R$/m²'}</small>{mode === 'stock' ? integer(minValue) : currency(minValue)}</span><span><small>{mode === 'stock' ? 'Maior estoque' : 'Maior R$/m²'}</small>{mode === 'stock' ? integer(maxValue) : currency(maxValue)}</span></div></>}</div>
+      <small>Coordenadas válidas enquadradas com margem{tiles ? ` · zoom ${tiles.zoom}` : ''}.</small></aside>
   </div></Slide>;
 }

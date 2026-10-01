@@ -11,7 +11,7 @@ import {
   shiftQuarter,
 } from '../domain/quarters';
 import { collectByCity, completedValues } from '../domain/collection';
-import { scopeCityLabel, scopeCitySlug } from '../types';
+import { scopeCityLabel, scopeCitySlug, scopeFileSlug } from '../types';
 
 describe('OP-2 · período dinâmico (G-02)', () => {
   it('interpreta trimestre, ISO e formato brasileiro sem inventar valor inválido', () => {
@@ -75,6 +75,12 @@ describe('OP-3 · rótulo e slug determinísticos do recorte multi-cidade', () =
     expect(scopeCitySlug({ cities: ['Jundiaí'] })).toBe('jundiai');
     expect(scopeCitySlug({ cities: ['Jundiaí', 'São Paulo'] })).toBe(scopeCitySlug({ cities: ['São Paulo', 'Jundiaí'] }));
     expect(scopeCitySlug({ cities: [] })).toBe('sem-cidade');
+  });
+
+  it('nomeia downloads dos presets pela entidade, sem expor a lista de cidades', () => {
+    expect(scopeFileSlug({ entity: 'secovi-sp', cities: ['Jundiaí'] })).toBe('secovi-sp');
+    expect(scopeFileSlug({ entity: 'fiergs-rs', cities: ['Alvorada', 'Canoas', 'Viamão'] })).toBe('fiergs-rs');
+    expect(scopeFileSlug({ cities: ['Jundiaí'] })).toBe('jundiai');
   });
 });
 

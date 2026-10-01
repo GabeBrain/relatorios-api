@@ -64,6 +64,16 @@
 .panorama-map-tiles { position:absolute; inset:0; display:grid; overflow:hidden; background:#e9e8e2; }
 .panorama-map-tiles img { width:100%; height:100%; min-width:0; min-height:0; object-fit:cover; }
 .panorama-map-attribution { position:absolute; z-index:1; right:.45cqw; bottom:.3cqw; padding:.12cqw .3cqw; background:rgb(255 255 255 / .78); color:#555; font-size:.5cqw; line-height:1; }
+.panorama-map-legend { display:flex; margin-top:1.15cqw; flex-direction:column; gap:.3cqw; color:#31352e; font-size:.7cqw; }
+.panorama-map-legend>b { margin-bottom:.2cqw; color:#5d7737; font-size:.72cqw; text-transform:uppercase; }
+.panorama-map-legend>span { display:flex; align-items:center; gap:.45cqw; }
+.panorama-map-legend>span>i { width:.72cqw; height:.72cqw; flex:0 0 auto; border:.08cqw solid #fff; border-radius:50%; box-shadow:0 0 0 .06cqw #aaa; }
+.panorama-map-scale { display:grid; grid-template-columns:1fr 1fr; gap:.45cqw; }
+.panorama-map-scale>i { grid-column:1/-1; display:block; height:.45cqw; border-radius:.3cqw; background:linear-gradient(90deg,#d6ded0,#5d7737); }
+.panorama-map-legend.is-price .panorama-map-scale>i { background:linear-gradient(90deg,hsl(15 65% 42%),hsl(120 65% 42%)); }
+.panorama-map-scale>span { display:flex; flex-direction:column; font-weight:700; }
+.panorama-map-scale>span:last-child { text-align:right; }
+.panorama-map-scale small { color:#666; font-size:.58cqw; font-weight:400; }
 .panorama-loading-logo { animation:panorama-loading-pulse 1.35s ease-in-out infinite; transform-origin:center; }
 @keyframes panorama-loading-pulse { 0%,100% { opacity:.3; transform:scale(.92); } 50% { opacity:1; transform:scale(1); } }
 
@@ -99,6 +109,166 @@
 .panorama-v2-city-cover-copy p { font-size:2.55cqw; }
 .panorama-v2-city-cover-copy h1 { font-size:4.05cqw; }
 .panorama-v2-city-cover-copy strong { margin-top:4.1cqw; font-size:2.7cqw; }
+.panorama-fiergs-page { background-color:#fff; }
+.panorama-fiergs-page .panorama-v2-city-cover-copy { width:72%; padding-top:5.5cqw; }
+.panorama-fiergs-page .panorama-v2-city-cover-copy p { font-size:1.8cqw; }
+.panorama-fiergs-page .panorama-v2-city-cover-copy h1 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; column-gap:2cqw; font-size:2.35cqw; line-height:1.15; }
+.panorama-fiergs-page .panorama-v2-city-cover-copy strong { margin-top:1.5cqw; font-size:2.2cqw; }
+.panorama-fiergs-page .panorama-v2-divider { align-items:center; justify-content:center; padding:0 22cqw 1cqw; color:#111; }
+.panorama-fiergs-page .panorama-v2-divider h2 { max-width:54cqw; font-size:5cqw; line-height:1.08; text-align:center; text-transform:uppercase; }
+.panorama-fiergs-city-scope { display:flex; height:100%; padding:7.5cqw 10cqw 5.5cqw; box-sizing:border-box; flex-direction:column; color:#111; background:#fff; }
+.panorama-fiergs-city-scope p { margin:0 0 .8cqw; color:#5d7737; font-size:1.45cqw; font-weight:800; letter-spacing:.12em; }
+.panorama-fiergs-city-scope h2 { margin:0 0 3.2cqw; font-size:4.4cqw; line-height:1; }
+.panorama-fiergs-city-scope > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.15cqw 6cqw; padding:2.5cqw 3cqw; border-top:.2cqw solid #5d7737; border-bottom:.2cqw solid #5d7737; }
+.panorama-fiergs-city-scope span { font-size:2.15cqw; font-weight:700; }
+.panorama-fiergs-city-scope small { margin-top:auto; color:#5b6165; font-size:1.25cqw; }
+.panorama-fiergs-study-cover { display:flex; height:100%; box-sizing:border-box; padding:14cqw 9cqw 7cqw; flex-direction:column; align-items:flex-start; background:linear-gradient(135deg,#f7f8f4 0 55%,#e7eddc 55%); color:#151912; }
+.panorama-fiergs-study-cover p { margin:0 0 1.2cqw; color:#5d7737; font-size:1.55cqw; font-weight:800; letter-spacing:.14em; }
+.panorama-fiergs-study-cover h1 { max-width:64cqw; margin:0; font-size:5.6cqw; line-height:.95; }
+.panorama-fiergs-study-cover i { width:10cqw; height:.75cqw; margin:2cqw 0; border-radius:2cqw; background:#ffd200; }
+.panorama-fiergs-study-cover strong { font-size:2.6cqw; }
+.panorama-fiergs-about { display:flex; height:100%; box-sizing:border-box; padding:5.5cqw 7.5cqw 4.5cqw; flex-direction:column; background:linear-gradient(145deg,#fff 0 62%,#eef2e8 62%); color:#171a15; }
+.panorama-fiergs-about header p { margin:0 0 .7cqw; color:#5d7737; font-size:1.15cqw; font-weight:800; letter-spacing:.14em; }
+.panorama-fiergs-about header h2 { margin:0; font-size:4.2cqw; line-height:1; }
+.panorama-fiergs-about header i { display:block; width:9cqw; height:.62cqw; margin:1.15cqw 0 3.2cqw; border-radius:999px; background:#ffd200; }
+.panorama-fiergs-about main { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:2cqw; }
+.panorama-fiergs-about section { display:flex; min-height:18cqw; padding:2.2cqw; box-sizing:border-box; flex-direction:column; border-top:.45cqw solid #5d7737; background:#fff; box-shadow:0 .4cqw 1.4cqw rgb(54 73 33 / .1); }
+.panorama-fiergs-about section strong { color:#5d7737; font-size:4cqw; line-height:.9; }
+.panorama-fiergs-about section span { margin-top:1cqw; font-size:1.55cqw; font-weight:800; }
+.panorama-fiergs-about section small { margin-top:auto; color:#596052; font-size:1.05cqw; line-height:1.3; }
+.panorama-fiergs-about footer { margin-top:auto; color:#5d7737; font-size:.85cqw; font-weight:800; text-align:right; }
+.panorama-fiergs-territorial { display:grid; height:100%; box-sizing:border-box; grid-template-columns:39% 1fr; gap:5cqw; padding:3cqw 6cqw 4.5cqw; background:#fff; color:#111; }
+.panorama-fiergs-territorial>img { width:100%; height:100%; min-height:0; border:.16cqw solid #174f2b; border-radius:3.2cqw; object-fit:cover; }
+.panorama-fiergs-territorial>div { display:flex; min-width:0; flex-direction:column; justify-content:center; }
+.panorama-fiergs-territorial p { margin:0 0 1cqw; color:#5d7737; font-size:1.35cqw; font-weight:800; letter-spacing:.14em; }
+.panorama-fiergs-territorial h1 { margin:0; font-size:4.6cqw; line-height:1.05; }
+.panorama-fiergs-territorial strong { margin-top:3.6cqw; font-size:2.7cqw; }
+.panorama-fiergs-territorial small { max-width:37cqw; margin-top:2cqw; padding:1.3cqw 1.6cqw; border-radius:2cqw; background:#5d7737; color:#fff; font-size:1.15cqw; line-height:1.35; }
+.panorama-fiergs-page { font-family:var(--font-body,'Source Sans 3',Arial,sans-serif); }
+.panorama-fiergs-page h1,.panorama-fiergs-page h2,.panorama-fiergs-page h3,.panorama-fiergs-page strong,.panorama-fiergs-page b { font-family:var(--font-heading,'Montserrat',Arial,sans-serif); }
+.panorama-fiergs-page .panorama-v2-summary { display:flex; padding:5.8cqw 9.5cqw 6.2cqw; flex-direction:column; font-family:var(--font-body,'Source Sans 3',Arial,sans-serif); }
+.panorama-fiergs-page .panorama-v2-summary h2 { margin:0; font-size:3.65cqw; line-height:1; }
+.panorama-fiergs-page .panorama-v2-summary ol { display:grid; width:100%; min-height:0; flex:1; align-content:space-between; gap:0; margin:3.2cqw 0 0; font-size:1.55cqw; }
+.panorama-fiergs-page .panorama-v2-summary li { align-items:center; min-height:3.35cqw; padding:0 0 .65cqw; border-bottom:.08cqw solid #bac3ca; }
+.panorama-fiergs-page .panorama-v2-summary li b { min-width:6cqw; color:#52606d; font-size:.9em; font-variant-numeric:tabular-nums; text-align:right; }
+.panorama-fiergs-quarterly { display:flex; height:100%; box-sizing:border-box; padding:2.2cqw 3.2cqw 1.7cqw; flex-direction:column; background:#fff; color:#171a15; font-family:var(--font-body,'Source Sans 3',Arial,sans-serif); }
+.panorama-fiergs-quarterly header { display:grid; grid-template-columns:1fr 45%; gap:3cqw; align-items:end; }
+.panorama-fiergs-quarterly header h2 { margin:0; font-size:3.4cqw; line-height:.98; }
+.panorama-fiergs-quarterly header h2 span { display:block; margin-top:.35cqw; color:#5d7737; }
+.panorama-fiergs-quarterly header>div>b { display:block; margin-bottom:.5cqw; font-size:1.2cqw; text-align:center; }
+.panorama-fiergs-quarterly header section { display:grid; grid-template-columns:repeat(4,1fr); }
+.panorama-fiergs-quarterly header section span { display:flex; min-width:0; flex-direction:column; border-left:1px solid #fff; background:#e0e0e0; text-align:center; }
+.panorama-fiergs-quarterly header section small { padding:.48cqw .15cqw; font-size:1.02cqw; font-weight:600; white-space:nowrap; }
+.panorama-fiergs-quarterly header section strong { padding:.5cqw .25cqw; background:#5d7737; color:#fff; font-size:1.28cqw; }
+.panorama-fiergs-quarterly main { display:grid; min-height:0; flex:1; grid-template-columns:minmax(0,1fr) 30%; gap:2cqw; margin-top:1.4cqw; }
+.panorama-fiergs-quarterly-series { display:flex; min-height:0; flex-direction:column; }
+.panorama-fiergs-quarterly-series>p { margin:.35cqw 0 0; color:#5d7737; font-size:1.14cqw; font-weight:800; text-align:center; }
+.panorama-fiergs-quarterly .recharts-cartesian-axis-tick-value { font-family:var(--font-body,'Source Sans 3',Arial,sans-serif); font-size:.86cqw; fill:#5f625c; }
+.panorama-fiergs-point { fill:#20231d; stroke:#fff; stroke-width:4px; paint-order:stroke; font-family:var(--font-heading,'Montserrat',Arial,sans-serif); font-size:1.12cqw; font-weight:700; }
+.panorama-fiergs-point-highlight rect { fill:#5d7737; }
+.panorama-fiergs-point-highlight text { fill:#fff; font-family:var(--font-heading,'Montserrat',Arial,sans-serif); font-size:1.12cqw; font-weight:700; dominant-baseline:middle; }
+.panorama-fiergs-quarterly aside { display:flex; flex-direction:column; justify-content:center; }
+.panorama-fiergs-quarterly aside h3 { margin:0 0 1cqw; color:#5d7737; font-size:1.55cqw; text-align:center; }
+.panorama-fiergs-quarterly aside>div { display:grid; grid-template-columns:1fr auto 1fr; gap:.7cqw; align-items:center; }
+.panorama-fiergs-quarterly aside span { display:grid; min-height:15cqw; grid-template-rows:2.35cqw 1fr 1.8cqw; align-items:end; justify-items:center; color:#20231d; }
+.panorama-fiergs-quarterly aside span b { align-self:start; font-size:1.65cqw; line-height:1; }
+.panorama-fiergs-quarterly aside span i { display:block; width:72%; height:var(--panorama-column-height); min-height:2cqw; align-self:end; background:#4c77c3; }
+.panorama-fiergs-quarterly aside span small { align-self:center; font-size:1.05cqw; font-weight:700; }
+.panorama-fiergs-quarterly aside em { align-self:center; padding:.5cqw .62cqw; background:#5d7737; color:#fff; font-size:.92cqw; font-style:normal; font-weight:800; }
+.panorama-fiergs-quarterly .panorama-fiergs-context-comparisons { gap:1.3cqw; }
+.panorama-fiergs-context-comparisons section h3 { margin:0 0 .55cqw; padding-left:.55cqw; border-left:.42cqw solid #5d7737; color:#20231d; font-size:1cqw; text-align:left; }
+.panorama-fiergs-context-comparisons section>div { display:grid; grid-template-columns:1fr auto 1fr; gap:.45cqw; align-items:end; border-bottom:.1cqw solid #aeb3aa; }
+.panorama-fiergs-context-comparisons section span { min-height:7.2cqw; }
+.panorama-fiergs-context-comparisons section span b { font-size:1.35cqw; }
+.panorama-fiergs-context-comparisons section span i { width:68%; }
+.panorama-fiergs-context-comparisons section em { align-self:center; padding:.45cqw; font-size:.72cqw; }
+.panorama-fiergs-quarterly footer { margin-top:.35cqw; color:#5d7737; font-size:.68cqw; font-weight:800; text-align:right; }
+.panorama-fiergs-city-share { display:flex; height:100%; box-sizing:border-box; padding:3.4cqw 5cqw 2.4cqw; flex-direction:column; background:#fff; color:#222; }
+.panorama-fiergs-city-share h2 { margin:0; font-size:3.4cqw; line-height:1; }
+.panorama-fiergs-city-share h2 span { display:block; margin-top:.35cqw; color:#5d7737; }
+.panorama-fiergs-city-share main { display:grid; min-height:0; flex:1; grid-template-columns:1fr 1fr; gap:5cqw; margin-top:2.5cqw; }
+.panorama-fiergs-city-share section { min-width:0; }
+.panorama-fiergs-share-bars { display:flex; flex-direction:column; gap:1.15cqw; }
+.panorama-fiergs-share-bars>div { display:grid; grid-template-columns:15cqw 1fr 4.5cqw; gap:.8cqw; align-items:center; }
+.panorama-fiergs-share-bars span { overflow:hidden; font-size:1.05cqw; font-weight:700; text-align:right; text-overflow:ellipsis; white-space:nowrap; }
+.panorama-fiergs-share-bars i { display:block; height:2.15cqw; background:#edf0e8; }
+.panorama-fiergs-share-bars b { display:block; height:100%; min-width:.15cqw; background:#79a93e; }
+.panorama-fiergs-share-bars strong { font-size:1.1cqw; }
+.panorama-fiergs-city-share section:first-child .panorama-fiergs-share-bars>div:first-child b,.panorama-fiergs-city-share section:last-child .panorama-fiergs-share-bars>div:first-child b { background:#ffd200; }
+.panorama-fiergs-city-share footer { color:#5d7737; font-size:.72cqw; font-weight:800; text-align:right; }
+.panorama-fiergs-distribution { display:flex; height:100%; box-sizing:border-box; padding:3.2cqw 5.4cqw 2.4cqw; flex-direction:column; background:#fff; color:#20231d; }
+.panorama-fiergs-distribution header { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; gap:4cqw; border-bottom:.12cqw solid #d8ddd2; padding-bottom:1.5cqw; }
+.panorama-fiergs-distribution header h2 { max-width:67cqw; margin:0; font-size:3.45cqw; line-height:1; }
+.panorama-fiergs-distribution header h2 span { display:block; margin-top:.4cqw; color:#5d7737; }
+.panorama-fiergs-distribution header>strong { display:flex; min-width:12cqw; padding:.15cqw 0 .3cqw; flex-direction:column; align-items:center; border:0; background:transparent; color:#5d7737; font-size:3.8cqw; line-height:.9; text-align:center; }
+.panorama-fiergs-distribution header>strong small { margin-top:.55cqw; font-family:var(--font-body,'Source Sans 3',Arial,sans-serif); font-size:1.05cqw; line-height:1.1; text-transform:uppercase; }
+.panorama-fiergs-distribution main { display:flex; min-height:0; flex:1; flex-direction:column; justify-content:center; gap:1.35cqw; margin:1.4cqw 0 .6cqw; }
+.panorama-fiergs-distribution main>div { display:grid; grid-template-columns:15.5cqw minmax(0,1fr) 6cqw 5.2cqw 2.6cqw; gap:1cqw; align-items:center; }
+.panorama-fiergs-distribution main span { overflow:hidden; font-size:1.52cqw; font-weight:700; text-align:right; text-overflow:ellipsis; white-space:nowrap; }
+.panorama-fiergs-distribution main i { display:block; height:3.35cqw; border-radius:.28cqw; background:#eef1ea; overflow:hidden; }
+.panorama-fiergs-distribution main i b { display:block; height:100%; min-width:.2cqw; background:linear-gradient(90deg,#5d7737,#82a64e); }
+.panorama-fiergs-distribution main strong { font-size:1.58cqw; text-align:right; }
+.panorama-fiergs-distribution main small { color:#5d7737; font-size:1.3cqw; font-weight:700; }
+.panorama-fiergs-distribution main em { display:flex; width:2.65cqw; height:2.65cqw; align-items:center; justify-content:center; border-radius:50%; background:#ffd200; font-size:1.05cqw; font-style:normal; font-weight:800; }
+.panorama-fiergs-distribution.is-city-ranking main { gap:1.05cqw; margin-top:2cqw; margin-bottom:1.2cqw; }
+.panorama-fiergs-distribution.is-city-ranking main>div { grid-template-columns:15.5cqw minmax(0,1fr) 6cqw 5.2cqw 2.6cqw; }
+.panorama-fiergs-distribution footer { color:#5d7737; font-size:.78cqw; font-weight:800; text-align:right; }
+
+/* FIERGS: densidade editorial. A lâmina usa a área disponível como uma página de leitura,
+   mantendo a matriz densa quando há muitas colunas e ampliando tabelas/gráficos simples. */
+.panorama-fiergs-page .panorama-market-slide { display:flex; padding:3.2cqw 5cqw 2.5cqw; flex-direction:column; font-family:var(--font-body,'Source Sans 3',Arial,sans-serif); }
+.panorama-fiergs-page .panorama-market-slide header h2 { max-width:82cqw; font-family:var(--font-heading,'Montserrat',Arial,sans-serif); font-size:3.15cqw; line-height:1.02; }
+.panorama-fiergs-page .panorama-market-slide header h2::after { content:""; display:block; width:8.5cqw; height:.55cqw; margin-top:.8cqw; border-radius:999px; background:#ffd200; }
+.panorama-fiergs-page .panorama-market-slide header h3 { font-size:2.35cqw; }
+.panorama-fiergs-page .panorama-market-slide header>i { display:none; }
+.panorama-fiergs-page .panorama-reference-table { margin:auto 0; font-size:1.08cqw; line-height:1.12; }
+.panorama-fiergs-page .panorama-reference-table th { padding:.72cqw .35cqw; }
+.panorama-fiergs-page .panorama-reference-table td { height:3.05cqw; padding:.38cqw .3cqw; }
+.panorama-fiergs-page .panorama-data-bar { min-height:2.18cqw; }
+.panorama-fiergs-page .panorama-summary-table { margin:auto 0; font-size:1.35cqw; }
+.panorama-fiergs-page .panorama-summary-table td { height:4cqw; }
+.panorama-fiergs-page .panorama-offer-table-slide .panorama-reference-table { font-size:1.02cqw; }
+.panorama-fiergs-page .panorama-offer-table-slide .panorama-reference-table td { height:2.8cqw; }
+.panorama-fiergs-page .panorama-price-table-slide .panorama-reference-table { width:82%; margin:auto; font-size:1.35cqw; }
+.panorama-fiergs-page .panorama-price-table-slide .panorama-reference-table td { height:4.1cqw; }
+.panorama-fiergs-page .panorama-price-chart-slide { padding-bottom:2cqw; }
+.panorama-fiergs-page .panorama-price-bars { height:auto; min-height:0; flex:1; margin:0 2cqw; }
+.panorama-fiergs-page .panorama-price-bars>div { width:13cqw; }
+.panorama-fiergs-page .panorama-price-bars>div>span { width:6.1cqw; font-size:1.18cqw; }
+.panorama-fiergs-page .panorama-price-bars>div>strong { min-height:2.8cqw; padding-top:.7cqw; font-size:1.12cqw; }
+.panorama-fiergs-page .panorama-average-line b { right:-5.1cqw; font-size:1.18cqw; }
+.panorama-fiergs-page .panorama-chart-legend { margin-top:1.2cqw; font-size:1.08cqw; }
+.panorama-fiergs-page .panorama-cohort-matrix-slide,.panorama-fiergs-page .panorama-vgv-slide { padding-left:1.2cqw; padding-right:1.2cqw; }
+.panorama-fiergs-page .panorama-cohort-matrix-slide header,.panorama-fiergs-page .panorama-vgv-slide header { padding-left:3.8cqw; }
+.panorama-fiergs-page .panorama-cohort-matrix-slide .panorama-reference-table,.panorama-fiergs-page .panorama-vgv-slide .panorama-reference-table { margin:auto 0; font-size:.8cqw; }
+.panorama-fiergs-page .panorama-cohort-matrix-slide .panorama-reference-table td,.panorama-fiergs-page .panorama-vgv-slide .panorama-reference-table td { height:2.75cqw; }
+.panorama-fiergs-page .panorama-maturity-slide .panorama-reference-table { margin:auto 0; font-size:.88cqw; }
+.panorama-fiergs-page .panorama-maturity-slide .panorama-reference-table td { height:2.85cqw; }
+.panorama-fiergs-page .panorama-fiergs-area-matrix .panorama-reference-table { font-size:.78cqw; }
+.panorama-fiergs-page .panorama-fiergs-area-matrix .panorama-reference-table td { height:2.25cqw; }
+.panorama-fiergs-page .panorama-price-range-slide .panorama-reference-table { width:92%; margin:auto; font-size:1.05cqw; }
+.panorama-fiergs-page .panorama-price-range-slide .panorama-reference-table td { height:3.35cqw; }
+.panorama-fiergs-page .panorama-coverage-caption { margin:.9cqw 0 0; font-size:.82cqw; line-height:1.25; }
+.panorama-fiergs-pattern,.panorama-fiergs-dormitory { display:flex; height:100%; box-sizing:border-box; padding:2.8cqw 4.2cqw 2cqw; flex-direction:column; background:#fff; color:#20231d; }
+.panorama-fiergs-pattern header { display:flex; align-items:flex-end; justify-content:space-between; gap:3cqw; }
+.panorama-fiergs-pattern header h2,.panorama-fiergs-dormitory header h2 { margin:0; font-size:3.15cqw; line-height:1; }
+.panorama-fiergs-pattern header h2 span,.panorama-fiergs-dormitory header h2 span { display:block; margin-top:.4cqw; color:#5d7737; }
+.panorama-fiergs-pattern header>div { display:flex; gap:.3cqw; }
+.panorama-fiergs-pattern header>div span { display:flex; min-width:5.2cqw; flex-direction:column; background:#edf0ea; text-align:center; }
+.panorama-fiergs-pattern header>div small { padding:.25cqw; font-size:.7cqw; }.panorama-fiergs-pattern header>div strong { padding:.35cqw; background:#c62026; color:#fff; font-size:.85cqw; }
+.panorama-fiergs-pattern main { display:grid; min-height:0; flex:1; grid-template-columns:minmax(0,1fr) 30%; gap:1.6cqw; margin-top:1.2cqw; }
+.panorama-fiergs-pattern-series { min-width:0; min-height:0; }
+.panorama-fiergs-pattern .panorama-fiergs-context-comparisons { display:flex; min-width:0; flex-direction:column; justify-content:center; gap:.8cqw; }
+.panorama-fiergs-pattern .panorama-fiergs-context-comparisons section h3 { font-size:.82cqw; }
+.panorama-fiergs-pattern .panorama-fiergs-context-comparisons section span { min-height:5.8cqw; }
+.panorama-fiergs-pattern .panorama-fiergs-context-comparisons section span b { font-size:1.05cqw; }
+.panorama-fiergs-pattern .panorama-fiergs-context-comparisons section p,.panorama-fiergs-quarterly .panorama-fiergs-context-comparisons section p { margin:.2cqw 0 0; color:#8a2d2d; font-size:.62cqw; text-align:center; }
+.panorama-fiergs-dormitory main { min-height:0; flex:1; margin-top:1.2cqw; }
+.panorama-fiergs-pattern .recharts-cartesian-axis-tick-value,.panorama-fiergs-dormitory .recharts-cartesian-axis-tick-value { font-size:.68cqw; }
+.panorama-fiergs-pattern-point { stroke-width:3px; paint-order:stroke; font-family:var(--font-heading,'Montserrat',Arial,sans-serif); font-size:.72cqw; font-weight:700; }
+.panorama-fiergs-pattern-point.is-reference { stroke-width:8px; paint-order:stroke; }
+.panorama-fiergs-pattern footer,.panorama-fiergs-dormitory footer { color:#5d7737; font-size:.7cqw; font-weight:800; text-align:right; }
+.panorama-fiergs-page .panorama-v2-team,.panorama-fiergs-page .panorama-v2-consultant { background:#17384a; color:#fff; }
 .panorama-v2-page .panorama-table-page>i,.panorama-v2-page .panorama-chart-head i,.panorama-v2-page .panorama-market-slide header>i,.panorama-v2-page .panorama-page-unavailable i { opacity:0; }
 /* JG-01 a JG-04 — "aumentar fonte" nas páginas 4, 5, 6 e 8.
    A causa era a unidade: só as institucionais mediam a fonte em `vw` (largura da janela), enquanto

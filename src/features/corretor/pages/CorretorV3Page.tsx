@@ -10,6 +10,7 @@ import brainLogo from '../../../../assets/logoBrain.png';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
   Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X, BarChart3,
+  Search, ArrowUpDown, Clock3, ChevronRight, FolderKanban, FileSpreadsheet, PlayCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -25,7 +26,8 @@ import { VizSwitch } from '../components/audit/FindingCard';
 import LegacyV1Panel from '../components/LegacyV1Panel';
 import AtaTestPanel from '../components/AtaTestPanel';
 import AtaCard from '../components/AtaCard';
-import AtaGateCard, { type AtaGateValue } from '../components/AtaGateCard';
+import { type AtaGateValue } from '../components/AtaGateCard';
+import PreAnalysisCard, { type PreAnalysisValue } from '../components/PreAnalysisCard';
 import { formatUSD, type ModelId } from '../lib/cost-calculator';
 import {
   runPhase1, runPhase2, estimateFullAnalysis,
@@ -33,7 +35,7 @@ import {
 } from '../lib/v3/pipeline';
 import type { AtaData } from '../lib/v3/ia-ata';
 import { BUDGET_STUDY_BRL, formatBRL, usdToBrl } from '../lib/v3/config';
-import { confidenceOf, countLabel, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
+import { confidenceOf, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
 import {
   consultingSuggestionBatchCount, generateConsultingSuggestion,
   type SuggestionBatchProgress,
@@ -42,22 +44,37 @@ import {
   createStudy, listStudies, loadFindings, setFindingStatus, recheck,
   concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
   saveReport, setFindingVerdict, resolveInvalidFindings, loadTranscribedBySha1,
+  saveStudyFonte, loadStudyFonte, analysisPending, loadVisionReadings,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
+import { parseFonteJson, type Fonte } from '../lib/v3/fonte';
+import { suggestCity, type CitySuggestion } from '../lib/v3/city-suggestion';
+import type { AnalysisReport } from '../lib/v3/pipeline';
+import { otherCities, imageProfile, type CityMention, type ImageProfile } from '../lib/v3/pre-analysis';
+import { savePptx, loadPptx } from '../lib/v3/pptx-store';
+import { findTableImages } from '../lib/v3/table-images';
+import { replayVisionPass } from '../lib/v3/ia-vision';
+import { sourceCrosscheckFindings as crosscheckDet, sourceCrosscheckVisionFindings } from '../lib/v3/source-crosscheck';
+import { extractFonteFromExcel } from '../lib/v3/fonte-extractor-browser';
+import { sourceCrosscheckFindings } from '../lib/v3/source-crosscheck';
 
 const MODEL: ModelId = 'gpt-4o-mini'; // econômico por padrão; visão cai p/ R$ 0 após cache
 
 // Rótulo humano de cada etapa do pipeline de passo único
-const STAGE_LABEL: Record<StageProgress['stage'], string> = {
-  det: 'Triagem determinística',
-  ata: 'Ata do projeto',
-  texto: 'Revisão de texto (IA)',
-  visao: 'Números das tabelas (visão)',
-  cruzamento: 'Cruzamentos e completude',
+type BannerStage = StageProgress['stage'] | 'gravando';
+const STAGE_LABEL: Record<BannerStage, string> = {
+  det: 'Triagem',
+  ata: 'Ata',
+  texto: 'Texto',
+  visao: 'Tabelas-imagem',
+  cruzamento: 'Cruzamentos',
+  // Gravar achados, encerrar os antigos e salvar o resumo leva alguns segundos:
+  // sem esta etapa o banner mostrava “tudo pronto” e a lista ficava vazia.
+  gravando: 'Gravando resultados',
 };
 
 // ordem de exibição das etapas no banner
-const STAGE_ORDER: StageProgress['stage'][] = ['det', 'ata', 'texto', 'visao', 'cruzamento'];
+const STAGE_ORDER: BannerStage[] = ['det', 'ata', 'texto', 'visao', 'cruzamento', 'gravando'];
 
 const isLocal = (f: Finding) => /^s\d+$/.test(f.slideRef.trim());
 const slideNumOf = (f: Finding) => parseInt(f.slideRef.replace(/\D/g, ''), 10) || 0;
@@ -93,16 +110,15 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
 
   return (
     <div className={cn(
-      'rounded-lg border border-l-4 bg-card transition-opacity',
+      // Borda neutra: o nível já está no selo. A barra lateral colorida saiu (30/set).
+      'rounded-lg border border-border bg-card transition-opacity',
       item.resolvidoNaVersao && 'animate-in fade-in zoom-in-95 duration-300',
-      done ? 'border-border opacity-60' : comunicacao ? 'border-l-violet-500 border-violet-500/30' : confidence === 1 ? 'border-l-red-500 border-red-500/30' : confidence === 2 ? 'border-l-orange-500 border-orange-500/30' : 'border-l-amber-500 border-amber-500/30'
+      done && 'opacity-60',
     )}>
       <div className="flex items-start gap-3 px-4 py-3">
-        <div className="mt-0.5 shrink-0">
-          {item.status === 'corrigido'
-            ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            : <AlertTriangle className="w-4 h-4 text-amber-500" />}
-        </div>
+        {item.status === 'corrigido' && (
+          <div className="mt-0.5 shrink-0"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></div>
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
             <span className={cn('text-[10px] rounded px-1.5 py-0.5 border font-medium', confidenceMeta.className)}>{confidenceMeta.icon} {confidenceMeta.label}</span>
@@ -192,7 +208,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
 
 interface AnalysisState {
   running: boolean;
-  stages: Partial<Record<StageProgress['stage'], { done: number; total: number }>>;
+  stages: Partial<Record<BannerStage, { done: number; total: number }>>;
   spentUsd: number;
   estimateUsd: number;
 }
@@ -204,7 +220,7 @@ function AnalysisBanner({ state, onPause }: { state: AnalysisState; onPause: () 
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <Sparkles className="w-4 h-4 text-violet-500 shrink-0 animate-pulse" />
-          <h3 className="text-sm font-semibold truncate">Analisando o estudo…</h3>
+          <h3 className="text-sm font-semibold truncate">{state.stages.gravando ? 'Gravando os resultados…' : 'Analisando o estudo…'}</h3>
           <span className="text-xs text-muted-foreground">
             ~{formatBRL(state.estimateUsd)} estimado · {formatBRL(state.spentUsd)} gasto
           </span>
@@ -270,52 +286,88 @@ function BudgetModal({ estimate, onConfirm, onCancel }: {
   );
 }
 
-// ─── Seção + card de estudo (homepage) ───────────────────────────────────────
+// ─── Lista operacional de estudos (homepage) ────────────────────────────────
 
-function StudySection({ title, studies, onOpen, empty }: {
-  title: string;
-  studies: StudyV3[];
-  onOpen: (id: string) => void;
-  empty?: string;
-}) {
+function dateLabel(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Data indisponível';
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
+}
+
+/**
+ * “O que bateu”: dimensão do que foi conferido e está certo, em contrapartida aos
+ * erros (que continuam sendo o foco). Só números, cor neutra, uma linha de cartões.
+ */
+function AcertosCard({ report, temFonte }: { report: AnalysisReport; temFonte: boolean }) {
+  const tiles: { n: string; label: string }[] = [
+    { n: `${report.tabelasVerificadas} de ${report.tabelasExtraidas}`, label: 'tabelas-imagem fecham na soma' },
+    { n: String(report.tabelasNativas), label: 'tabelas nativas conferidas' },
+  ];
+  // Snapshot anterior à v0.66 não tem a contagem: omite em vez de afirmar zero.
+  if (report.fonte && report.fonte.comparados > 0) tiles.push({ n: `${report.fonte.batem} de ${report.fonte.comparados}`, label: 'valores iguais às planilhas' });
+  else if (!temFonte) tiles.push({ n: 'sem planilhas', label: 'cruzamento com a fonte desligado' });
+  if (report.cruzamentos && report.cruzamentos.feitos > 0) tiles.push({ n: `${report.cruzamentos.batem} de ${report.cruzamentos.feitos}`, label: 'cruzamentos entre tabelas batem' });
   return (
-    <section className="space-y-3">
-      <div className="flex items-center gap-2">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        <span className="text-[10px] text-muted-foreground">{studies.length}</span>
-        <div className="flex-1 border-t border-border" />
+    <section className="space-y-2">
+      <WlHead title="O que bateu" />
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {tiles.map((t) => (
+          <div key={t.label} className="rounded-lg border border-border bg-card px-3 py-2">
+            <p className="text-sm font-semibold tabular-nums">{t.n}</p>
+            <p className="text-[11px] leading-tight text-muted-foreground">{t.label}</p>
+          </div>
+        ))}
       </div>
-      {studies.length === 0 ? (
-        empty && <p className="text-xs text-muted-foreground">{empty}</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {studies.map((s) => <StudyCard key={s.id} s={s} onOpen={onOpen} />)}
-        </div>
-      )}
     </section>
   );
 }
 
-function StudyCard({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
+const outrasKey = (studyId: string) => `corretor-outras-${studyId}`;
+/** Outras cidades confirmadas para o estudo, lembradas neste navegador (reconferências). */
+function readOutras(studyId: string): string[] {
+  try { return JSON.parse(localStorage.getItem(outrasKey(studyId)) ?? '[]') as string[]; } catch { return []; }
+}
+function writeOutras(studyId: string, outras: string[]) {
+  try { localStorage.setItem(outrasKey(studyId), JSON.stringify(outras)); } catch { /* sem storage: só nesta análise */ }
+}
+
+function StudyRow({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
   const pronto = s.status === 'pronto';
+  // Sem a análise completa, "0 pendências" não é "revisar e entregar": nada foi lido.
+  const pendente = analysisPending(s);
+  const review = !pronto && !pendente && (s.pendentes ?? 0) === 0;
   return (
     <button
       onClick={() => onOpen(s.id)}
-      className="text-left rounded-lg border border-border bg-card px-4 py-3 hover:border-primary/50 transition-colors space-y-1.5"
+      className="group grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-border px-4 py-3.5 text-left transition-colors last:border-b-0 hover:bg-muted/45 sm:grid-cols-[minmax(0,1.65fr)_minmax(150px,.75fr)_minmax(135px,.65fr)_auto] sm:items-center"
     >
-      <div className="flex items-center gap-2">
-        {pronto
-          ? <PackageCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-          : <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />}
-        <span className="text-sm font-medium truncate">{s.nome}</span>
+      <div className="flex min-w-0 items-start gap-3">
+        <span className={cn('mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', pronto ? 'bg-emerald-500/10 text-emerald-600' : review ? 'bg-primary/10 text-primary' : 'bg-amber-500/10 text-amber-600')}>
+          {pronto ? <PackageCheck className="h-4 w-4" /> : review ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium" title={s.nome}>{s.nome}</p>
+          <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+            {s.cidade || 'Cidade não informada'} · v{s.lastVersion} · {s.nSlides} slides
+          </p>
+        </div>
       </div>
-      <p className="text-[11px] text-muted-foreground">
-        {s.cidade && <>{s.cidade} · </>}v{s.lastVersion} · {s.nSlides} slides
-        {s.custoTotal > 0 && <> · IA {formatUSD(s.custoTotal)}</>}
-      </p>
-      <p className={cn('text-[11px] font-medium', pronto ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400')}>
-        {pronto ? 'Pronto para o A&R' : `${s.pendentes} pendente(s)`}
-      </p>
+      <div className="hidden sm:block">
+        <p className={cn('text-xs font-medium', pronto ? 'text-emerald-600 dark:text-emerald-400' : review ? 'text-primary' : 'text-amber-600 dark:text-amber-400')}>
+          {pronto ? 'Pronto para o A&R' : pendente ? 'Análise pendente' : review ? 'Revisar e entregar' : `${s.pendentes ?? 0} pendência(s)`}
+        </p>
+        <p className="mt-0.5 text-[10px] text-muted-foreground">{pronto ? 'Entrega concluída' : pendente ? 'Só a triagem inicial rodou' : review ? 'Sem bloqueios abertos' : 'Correção em andamento'}</p>
+      </div>
+      <div className="hidden sm:block">
+        <p className="flex items-center gap-1 text-[11px] text-muted-foreground"><Clock3 className="h-3 w-3" /> {dateLabel(s.createdAt)}</p>
+        <p className="mt-0.5 text-[10px] text-muted-foreground">{s.custoTotal > 0 ? `IA ${formatUSD(s.custoTotal)}` : 'Sem custo de IA'}</p>
+      </div>
+      <div className="flex items-center gap-2 self-center">
+        <span className={cn('rounded-full px-2 py-1 text-[10px] font-medium sm:hidden', pronto ? 'bg-emerald-500/10 text-emerald-600' : review ? 'bg-primary/10 text-primary' : 'bg-amber-500/10 text-amber-600')}>
+          {pronto ? 'Pronto' : pendente ? 'Analisar' : review ? 'Revisar' : `${s.pendentes ?? 0} pend.`}
+        </span>
+        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+      </div>
     </button>
   );
 }
@@ -331,6 +383,10 @@ export default function CorretorV3Page() {
   const [loadingStudy, setLoadingStudy] = useState(false);
   const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
   const [entryMode, setEntryMode] = useState<'evaluate' | 'suggestion' | null>(null);
+  const [landingTab, setLandingTab] = useState<'correction' | 'ready' | 'all'>('correction');
+  const [landingGeneration, setLandingGeneration] = useState<'v3' | 'v2' | 'v1'>('v3');
+  const [landingSearch, setLandingSearch] = useState('');
+  const [landingSort, setLandingSort] = useState<'recent' | 'pending' | 'name' | 'cost'>('recent');
   const [consultingSuggestion, setConsultingSuggestion] = useState<{ filename: string; content: string } | null>(null);
   const [suggestionProgress, setSuggestionProgress] = useState<SuggestionBatchProgress | null>(null);
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
@@ -339,18 +395,34 @@ export default function CorretorV3Page() {
   // WS-1: portão da ata — fase 1 pronta, aguardando o analista confirmar cidade/UF.
   const [gate, setGate] = useState<{
     studyId: string; version: number; ir: Ir; bytes: Uint8Array;
-    ata: AtaData | null; estimate: FullEstimate; phase2Brl: string;
+    ata: AtaData | null; estimate: FullEstimate; phase2Brl: string; fonte?: Fonte | null;
+    suggestion: CitySuggestion | null;
+    cities: CityMention[];
+    profile: ImageProfile;
   } | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [workspaceTab, setWorkspaceTab] = useState<'completude' | 'problemas' | 'slides'>('completude');
+  const [workspaceTab, setWorkspaceTab] = useState<'problemas' | 'slides'>('slides');
   const [confidenceFilter, setConfidenceFilter] = useState<Confidence[]>([1, 2, 3]);
   const [triaging, setTriaging] = useState(false);
   const newRef = useRef<HTMLInputElement>(null);
+  const fonteRef = useRef<HTMLInputElement>(null);
+  const excelRef = useRef<HTMLInputElement>(null);
+  const [fonteInput, setFonteInput] = useState<{ name: string; fonte: Fonte } | null>(null);
+  const [sourceProgress, setSourceProgress] = useState<{ done: number; total: number } | null>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
+  /** Retomar a análise completa: o PPTX não fica no banco, então é preciso re-selecioná-lo. */
+  const resumeRef = useRef<HTMLInputElement>(null);
+  /** Planilhas (ou fonte.json) vinculadas de dentro do estudo, depois do upload. */
+  const studySourcesRef = useRef<HTMLInputElement>(null);
+  /** Planilhas vinculadas pós-análise aguardando o PPTX (quando não há cofre local). */
+  const pendingCrosscheck = useRef<Fonte | null>(null);
+  // Painel de teste da extração da ata: ferramenta de desenvolvimento, só com ?debug.
+  const debugMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debug');
   const diffRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const selected = studies.find((s) => s.id === selectedId) ?? null;
+  const pending = selected ? analysisPending(selected) : false;
 
   const refreshList = useCallback(async () => {
     setLoadingList(true);
@@ -363,7 +435,9 @@ export default function CorretorV3Page() {
     setLastDiff(null);
     setLoadingStudy(true);
     try {
-      let loaded = await loadFindings(id);
+      const [initialFindings, savedFonte] = await Promise.all([loadFindings(id), loadStudyFonte(id)]);
+      let loaded = initialFindings;
+      setFonteInput(savedFonte ? { name: savedFonte.filename, fonte: savedFonte.fonte } : null);
       const studyCity = studies.find((s) => s.id === id)?.cidade ?? null;
       // Texto que a visão transcreveu de cada imagem: âncora contra cidade alucinada.
       const shas = [...new Set(loaded
@@ -403,8 +477,8 @@ export default function CorretorV3Page() {
    * portão. Persiste a ata confirmada, os DET pós-ata e registra os passes/custos.
    */
   const runPaidAnalysis = useCallback(async (
-    ctx: { studyId: string; version: number; ir: Ir; bytes: Uint8Array; estimate: FullEstimate },
-    confirmed: AtaGateValue,
+    ctx: { studyId: string; version: number; ir: Ir; bytes: Uint8Array; estimate: FullEstimate; fonte?: Fonte | null },
+    confirmed: AtaGateValue & { outras?: string[] },
     phase2Usd: number,
   ) => {
     const ac = new AbortController();
@@ -417,9 +491,11 @@ export default function CorretorV3Page() {
       const res = await runPhase2(ctx.ir, {
         city: confirmed.cidade,
         uf: confirmed.uf,
+        outras: confirmed.outras ?? readOutras(ctx.studyId),
         ata: confirmed.ata,
         model: MODEL,
         candidates: ctx.estimate.candidates,
+        fonte: ctx.fonte,
         signal: ac.signal,
         onStage: async (p) => {
           setAnalysis((prev) => prev && {
@@ -434,10 +510,21 @@ export default function CorretorV3Page() {
         },
       });
 
+      setAnalysis((prev) => prev && { ...prev, stages: { ...prev.stages, gravando: { done: 0, total: 1 } } });
       // DET pós-ata (UF + cobertura) por upsert — IDs estáveis evitam duplicata.
       await insertIaFindings(ctx.studyId, res.detFindings, 'DET', ctx.version);
-      // snapshot do que foi verificado (attestation / WS-2)
-      await saveReport(ctx.studyId, res.report);
+      if (!res.aborted) {
+        // Achados de visão que não sobreviveram à reconciliação do deck (gravados
+        // brutos por versões anteriores) são encerrados: a lista final é a de agora.
+        const finalIds = new Set(res.visionFindings.map((f) => f.id));
+        const stale = (await loadFindings(ctx.studyId))
+          .filter((i) => i.origem === 'IA_visao' && i.status === 'pendente' && !finalIds.has(i.ruleId))
+          .map((i) => i.ruleId);
+        if (stale.length) await resolveInvalidFindings(ctx.studyId, stale);
+        // Snapshot só de análise COMPLETA: pausada, o estudo continua pendente
+        // (antes a pausa gravava o snapshot e o estudo passava por analisado).
+        await saveReport(ctx.studyId, res.report);
+      }
 
       if (res.textCostUsd > 0 || res.textFindings.length) {
         await registerIaPass(ctx.studyId, 'texto', `${ctx.estimate.textSlides} slides · ${MODEL}`,
@@ -451,7 +538,7 @@ export default function CorretorV3Page() {
       const nIa = res.textFindings.length + res.visionFindings.length;
       const custo = res.textCostUsd + res.visionCostUsd;
       if (res.aborted) {
-        toast.warning('Análise pausada', { description: `${nIa} achado(s) de IA até aqui · ${formatBRL(custo)} — o que foi extraído ficou salvo (cache).` });
+        toast.warning('Análise pausada — continua pendente', { description: `${formatBRL(custo)} gastos até aqui. O que já foi lido ficou no cache: ao retomar, só o restante é cobrado.` });
       } else {
         toast.success(`Análise completa — ${formatBRL(custo)}`, {
           description: `${nIa} achado(s) de IA na worklist` +
@@ -473,7 +560,7 @@ export default function CorretorV3Page() {
    * (setGate) — nada de texto/visão paga roda antes da confirmação do analista.
    */
   const startPhase1AndGate = useCallback(async (
-    study: { id: string; version: number }, ir: Ir, bytes: Uint8Array,
+    study: { id: string; version: number }, ir: Ir, bytes: Uint8Array, fonte?: Fonte | null,
   ) => {
     const ac = new AbortController();
     abortRef.current = ac;
@@ -482,6 +569,7 @@ export default function CorretorV3Page() {
       const estimate = await estimateFullAnalysis(ir, bytes, MODEL);
       const p1: Phase1Result = await runPhase1(ir, bytes, {
         model: MODEL,
+        fonte,
         candidates: estimate.candidates,
         ataCandidate: estimate.ataCandidate,
         signal: ac.signal,
@@ -506,8 +594,12 @@ export default function CorretorV3Page() {
       const phase2Usd = Math.max(0, estimate.costUsd - p1.ataCostUsd);
       setGate({
         studyId: study.id, version: study.version, ir, bytes,
-        ata: p1.ata, estimate, phase2Brl: formatBRL(phase2Usd),
+        ata: p1.ata, estimate, phase2Brl: formatBRL(phase2Usd), fonte,
+        suggestion: suggestCity(ir.arquivo ?? '', ir),
+        cities: otherCities(ir, p1.ata?.cidade && p1.ata?.uf ? { cidade: p1.ata.cidade, uf: p1.ata.uf } : suggestCity(ir.arquivo ?? '', ir)),
+        profile: imageProfile(ir, estimate.candidates),
       });
+      window.setTimeout(() => document.getElementById('analysis-gate')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
     } catch (err) {
       toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
     } finally {
@@ -517,9 +609,11 @@ export default function CorretorV3Page() {
   }, [refreshList]);
 
   /** Portão confirmado: valida orçamento da fase 2 e a executa. */
-  const confirmGate = useCallback((value: AtaGateValue) => {
+  const confirmGate = useCallback((value: PreAnalysisValue) => {
     if (!gate) return;
-    const ctx = { studyId: gate.studyId, version: gate.version, ir: gate.ir, bytes: gate.bytes, estimate: gate.estimate };
+    writeOutras(gate.studyId, value.outras);
+    // Planilhas vinculadas já no portão valem para a análise que vai rodar agora.
+    const ctx = { studyId: gate.studyId, version: gate.version, ir: gate.ir, bytes: gate.bytes, estimate: gate.estimate, fonte: fonteInput?.fonte ?? gate.fonte };
     // A ata já foi paga na fase 1; o orçamento restante é texto + visão.
     const phase2Usd = Math.max(0, gate.estimate.costUsd - gate.estimate.vision.costUsd) + gate.estimate.vision.costUsd;
     setGate(null);
@@ -529,7 +623,7 @@ export default function CorretorV3Page() {
       return;
     }
     run();
-  }, [gate, runPaidAnalysis]);
+  }, [gate, runPaidAnalysis, fonteInput]);
 
   async function ingestNew(file: File) {
     if (!/\.pptx$/i.test(file.name)) {
@@ -537,9 +631,13 @@ export default function CorretorV3Page() {
       return;
     }
     setBusy('upload');
+    // Planilhas entram na pré-análise do próprio estudo: nada herdado de outro estudo aberto antes.
+    setFonteInput(null);
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
       const ir = await pptxToIr(bytes, file.name);
+      // Cofre local: retomar e vincular planilhas depois sem subir o PPTX de novo.
+      void savePptx(ir.sha1, file.name, bytes);
       const findings = irToFindings(ir).filter((f) => !f.ok);
       const id = await createStudy(
         file.name.replace(/\.pptx$/i, ''),
@@ -553,10 +651,63 @@ export default function CorretorV3Page() {
       await openStudy(id);
       setBusy(null);
       // fase 1 (DET + ata) → portão de confirmação → fase 2 (paga)
-      await startPhase1AndGate({ id, version: 1 }, ir, bytes);
+      await startPhase1AndGate({ id, version: 1 }, ir, bytes, null);
     } catch (err) {
       toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
       setBusy(null);
+    }
+  }
+
+  async function handleFonte(e: React.ChangeEvent<HTMLInputElement>): Promise<Fonte | null> {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return null;
+    const parsed = parseFonteJson(await file.text());
+    if (!parsed.ok || !parsed.fonte) {
+      toast.error('Fonte numérica inválida', { description: parsed.errors.slice(0, 3).join(' ') });
+      return null;
+    }
+    if (selected) {
+      try { await saveStudyFonte(selected.id, file.name, parsed.fonte); }
+      catch (error) {
+        toast.warning('Fonte vinculada somente nesta sessão', {
+          description: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+    setFonteInput({ name: file.name, fonte: parsed.fonte });
+    toast.success(selected ? 'Fonte numérica salva no estudo' : 'Fonte numérica vinculada', {
+      description: `${parsed.fonte.blocos.length} blocos disponíveis para cruzamento.`,
+    });
+    return parsed.fonte;
+  }
+
+  async function handleExcelSources(e: React.ChangeEvent<HTMLInputElement>): Promise<Fonte | null> {
+    const files = Array.from(e.target.files ?? []).filter((file) => /\.(xlsx|xlsm)$/i.test(file.name));
+    e.target.value = '';
+    if (!files.length) return null;
+    setSourceProgress({ done: 0, total: files.length });
+    try {
+      const slug = files[0].name.replace(/\.(xlsx|xlsm)$/i, '').replace(/\s+/g, '-').toLowerCase();
+      const fonte = await extractFonteFromExcel(files, slug, (done, total) => setSourceProgress({ done, total }));
+      const recognized = fonte.inventario.filter((item) => item.papel !== null).length;
+      const label = `${files.length} planilha${files.length === 1 ? '' : 's'} · fonte automática`;
+      if (selected) {
+        try { await saveStudyFonte(selected.id, label, fonte); }
+        catch (error) {
+          toast.warning('Fonte vinculada somente nesta sessão', { description: error instanceof Error ? error.message : String(error) });
+        }
+      }
+      setFonteInput({ name: label, fonte });
+      toast.success('Planilhas processadas', {
+        description: `${recognized}/${files.length} reconhecidas · ${fonte.blocos.length} blocos numéricos · ${fonte.avisos.length} aviso(s).`,
+      });
+      return fonte;
+    } catch (error) {
+      toast.error('Falha ao processar as planilhas', { description: error instanceof Error ? error.message : String(error) });
+      return null;
+    } finally {
+      setSourceProgress(null);
     }
   }
 
@@ -590,6 +741,110 @@ export default function CorretorV3Page() {
     else void ingestNew(file);
   }
 
+  /**
+   * Retoma a análise completa de um estudo que parou na triagem inicial (portão
+   * perdido ao sair da página). Exige o MESMO arquivo da versão registrada —
+   * versão nova é reconferência, não retomada.
+   */
+  /** Retoma a análise usando o PPTX guardado neste navegador; sem ele, pede o arquivo. */
+  async function resumeAnalysis() {
+    if (!selected) return;
+    const cached = await loadPptx(selected.lastSha1);
+    if (!cached) { resumeRef.current?.click(); return; }
+    setBusy('upload');
+    try {
+      const ir = await pptxToIr(cached.bytes, cached.name);
+      setBusy(null);
+      await startPhase1AndGate({ id: selected.id, version: selected.lastVersion }, ir, cached.bytes, fonteInput?.fonte);
+    } catch (err) {
+      toast.error('Falha ao preparar a análise', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function handleResume(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !selected) return;
+    if (!/\.pptx$/i.test(file.name)) {
+      toast.error('Formato não suportado', { description: 'Selecione o .pptx deste estudo.' });
+      return;
+    }
+    setBusy('upload');
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const ir = await pptxToIr(bytes, file.name);
+      if (selected.lastSha1 && ir.sha1 !== selected.lastSha1) {
+        toast.error('Este não é o arquivo da versão registrada', {
+          description: `Selecione o mesmo PPTX da versão ${selected.lastVersion}. Para uma versão corrigida, use “Reconferir”.`,
+        });
+        return;
+      }
+      void savePptx(ir.sha1, file.name, bytes);
+      setBusy(null);
+      if (pendingCrosscheck.current) {
+        const fonte = pendingCrosscheck.current;
+        pendingCrosscheck.current = null;
+        await crosscheckAfterAnalysis(fonte, bytes, file.name);
+        return;
+      }
+      await startPhase1AndGate({ id: selected.id, version: selected.lastVersion }, ir, bytes, fonteInput?.fonte);
+    } catch (err) {
+      toast.error('Falha ao preparar a análise', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  /**
+   * Planilhas vinculadas DEPOIS da análise: cruzamento com a fonte sobre as
+   * leituras já pagas (cache de visão). Sem nova chamada de IA, sem custo, e sem
+   * subir o PPTX de novo quando ele está no cofre local deste navegador.
+   */
+  async function crosscheckAfterAnalysis(fonte: Fonte, bytes?: Uint8Array, name?: string) {
+    if (!selected) return;
+    let deck = bytes && name ? { bytes, name } : await loadPptx(selected.lastSha1);
+    if (!deck) {
+      pendingCrosscheck.current = fonte;
+      toast.info('Selecione o PPTX deste estudo', { description: 'Ele não está guardado neste navegador; é só desta vez.' });
+      resumeRef.current?.click();
+      return;
+    }
+    setBusy('recheck');
+    try {
+      const ir = await pptxToIr(deck.bytes, deck.name);
+      const candidates = await findTableImages(deck.bytes, ir);
+      const readings = await loadVisionReadings(candidates.map((c) => c.sha1));
+      const vision = replayVisionPass(candidates, readings, { cidade: selected.cidade ?? '', uf: selected.uf, outras: readOutras(selected.id) });
+      const tally = { comparados: 0, batem: 0 };
+      const det = crosscheckDet(ir, fonte, tally);
+      const vis = sourceCrosscheckVisionFindings(ir, fonte, vision.tables, tally);
+      if (selected.analise) await saveReport(selected.id, { ...selected.analise, fonte: tally });
+      if (det.length) await insertIaFindings(selected.id, det, 'DET', selected.lastVersion);
+      if (vis.length) await insertIaFindings(selected.id, vis, 'IA_visao', selected.lastVersion);
+      setItems(await loadFindings(selected.id));
+      await refreshList();
+      toast.success('Cruzamento com as planilhas concluído (R$ 0)', {
+        description: `${det.length + vis.length} divergência(s) com a fonte · ${readings.size} leitura(s) reaproveitada(s).`,
+      });
+    } catch (err) {
+      toast.error('Falha no cruzamento com as planilhas', { description: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setBusy(null);
+    }
+    deck = null;
+  }
+
+  /** Um só botão para planilhas Excel (fonte automática) ou fonte.json (compatibilidade). */
+  async function handleStudySources(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    const fonte = files.some((f) => /\.json$/i.test(f.name)) ? await handleFonte(e) : await handleExcelSources(e);
+    await refreshList();
+    // Análise já feita: o cruzamento com a fonte roda agora, sobre o cache.
+    if (fonte && selected && !analysisPending(selected) && !gate) await crosscheckAfterAnalysis(fonte);
+  }
+
   async function handleRecheck(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !selected) return;
@@ -607,12 +862,17 @@ export default function CorretorV3Page() {
     setBusy('recheck');
     try {
       const ir = await pptxToIr(bytes, filename);
-      const findings = irToFindings(ir, { city: selected.cidade ?? undefined, uf: selected.uf }).filter((f) => !f.ok);
+      void savePptx(ir.sha1, filename, bytes);
+      const findings = [
+        ...irToFindings(ir, { city: selected.cidade ?? undefined, uf: selected.uf }).filter((f) => !f.ok),
+        ...(fonteInput ? sourceCrosscheckFindings(ir, fonteInput.fonte) : []),
+      ];
       const diff = await recheck(
         selected.id,
         newVersion,
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: filename },
-        findings
+        findings,
+        { sourceCrosscheckRan: Boolean(fonteInput) },
       );
       setLastDiff(diff);
       window.setTimeout(() => diffRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
@@ -632,7 +892,7 @@ export default function CorretorV3Page() {
       }
       // Imagens novas exigem a fase paga; cidade/UF já foram confirmadas no portão.
       await runPaidAnalysis(
-        { studyId: selected.id, version: newVersion, ir, bytes, estimate },
+        { studyId: selected.id, version: newVersion, ir, bytes, estimate, fonte: fonteInput?.fonte },
         { cidade: selected.cidade ?? '', uf: selected.uf ?? '', ata: selected.ata ?? null },
         estimate.costUsd,
       );
@@ -685,6 +945,10 @@ export default function CorretorV3Page() {
 
   async function handleConclude() {
     if (!selected) return;
+    if (analysisPending(selected)) {
+      toast.error('A análise completa ainda não rodou', { description: 'Confirme a cidade e rode a análise antes de entregar.' });
+      return;
+    }
     const pendentes = items.filter((item) => item.status === 'pendente');
     const erros = pendentes.filter((item) => !isComunicacao(item));
     const blocking = erros.filter((item) => confidenceOf(item.finding, item.origem) <= 2);
@@ -755,41 +1019,72 @@ export default function CorretorV3Page() {
     };
   }, [items]);
 
-  const progressPct = wl.total > 0 ? Math.round(((wl.total - wl.pend) / wl.total) * 100) : 0;
   const blockingPend = wl.confidence.filter(([level]) => level <= 2).reduce((total, [, findings]) => total + findings.length, 0);
 
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
   if (!selected) {
-    const emCorrecao = studies.filter((s) => s.status !== 'pronto');
-    const prontos = studies.filter((s) => s.status === 'pronto');
+    const generationStudies = studies.filter((study) => study.generation === landingGeneration);
+    const emCorrecao = generationStudies.filter((s) => s.status !== 'pronto');
+    const prontos = generationStudies.filter((s) => s.status === 'pronto');
+    const totalPendencias = emCorrecao.reduce((total, study) => total + (study.pendentes ?? 0), 0);
+    const totalCost = generationStudies.reduce((total, study) => total + study.custoTotal, 0);
+    const search = landingSearch.trim().toLocaleLowerCase('pt-BR');
+    const visibleStudies = generationStudies
+      .filter((study) => landingTab === 'all' || (landingTab === 'ready' ? study.status === 'pronto' : study.status !== 'pronto'))
+      .filter((study) => !search || `${study.nome} ${study.cidade ?? ''}`.toLocaleLowerCase('pt-BR').includes(search))
+      .sort((left, right) => {
+        if (landingSort === 'pending') return (right.pendentes ?? 0) - (left.pendentes ?? 0);
+        if (landingSort === 'name') return left.nome.localeCompare(right.nome, 'pt-BR');
+        if (landingSort === 'cost') return right.custoTotal - left.custoTotal;
+        return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+      });
     return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b bg-card px-6 py-4 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-base font-semibold">Assistente de Projetos</h1>
-            <p className="text-xs text-muted-foreground">
-              Suba o .pptx → análise completa automática (texto + números) → corrija a worklist → entregue ao A&R com 0 pendentes
-            </p>
+      <div className="min-h-screen bg-muted/25">
+        <header className="border-b bg-card">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><FolderKanban className="h-5 w-5" /></span>
+            <div>
+              <h1 className="text-lg font-semibold tracking-tight">Assistente de Projetos</h1>
+              <p className="text-xs text-muted-foreground">Auditoria, correção e apoio consultivo para estudos Brain.</p>
+            </div>
           </div>
           <a href="/corretor/calibracao" className="text-xs rounded-md px-3 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 shrink-0">
             <BarChart3 className="w-3.5 h-3.5" /> Calibração
           </a>
+          </div>
         </header>
 
-        <div className="max-w-5xl mx-auto px-6 py-6 space-y-8">
+        <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
           {/* Dropzone herói */}
           <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
+          <input ref={fonteRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFonte} />
+          <input ref={excelRef} type="file" accept=".xlsx,.xlsm" multiple className="hidden" onChange={handleExcelSources} />
+          {landingGeneration !== 'v1' && <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Resumo dos estudos">
+            {[
+              { label: 'Em correção', value: emCorrecao.length, hint: 'estudos ativos', tone: 'text-amber-600' },
+              { label: 'Prontos', value: prontos.length, hint: 'para o A&R', tone: 'text-emerald-600' },
+              { label: 'Pendências', value: totalPendencias, hint: 'itens em aberto', tone: 'text-foreground' },
+              { label: 'IA acumulada', value: formatUSD(totalCost), hint: `${generationStudies.length} estudos`, tone: 'text-foreground' },
+            ].map((metric) => (
+              <div key={metric.label} className="rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
+                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{metric.label}</p>
+                <p className={cn('mt-1 text-xl font-semibold tracking-tight', metric.tone)}>{metric.value}</p>
+                <p className="text-[10px] text-muted-foreground">{metric.hint}</p>
+              </div>
+            ))}
+          </section>}
           {!entryMode ? (
-            <section className="grid gap-3 sm:grid-cols-2" aria-label="Escolha o tipo de análise">
-              <button onClick={() => setEntryMode('evaluate')} className="rounded-xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <AlertTriangle className="mb-3 h-6 w-6 text-primary" />
-                <h2 className="text-sm font-semibold">Avaliar erros</h2>
-                <p className="mt-1 text-xs text-muted-foreground">Revisa texto, números e completude do estudo para montar a fila de correções.</p>
+            <section className="grid gap-3 rounded-xl border border-border bg-card p-3 shadow-sm sm:grid-cols-2" aria-label="Escolha o tipo de análise">
+              <button onClick={() => setEntryMode('evaluate')} className="group flex items-center gap-3 rounded-lg bg-primary px-4 py-3.5 text-left text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15"><Upload className="h-4 w-4" /></span>
+                <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">Avaliar novo estudo</span><span className="mt-0.5 block text-[11px] text-primary-foreground/75">Auditoria completa de texto, números e estrutura.</span></span>
+                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
-              <button onClick={() => setEntryMode('suggestion')} className="rounded-xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <Sparkles className="mb-3 h-6 w-6 text-violet-500" />
-                <h2 className="text-sm font-semibold">Sugestão de Análise</h2>
-                <p className="mt-1 text-xs text-muted-foreground">Gera uma leitura consultiva e recomendação baseada nos dados extraídos do estudo.</p>
+              <button onClick={() => setEntryMode('suggestion')} className="group flex items-center gap-3 rounded-lg border border-violet-500/20 bg-violet-500/5 px-4 py-3.5 text-left transition-colors hover:border-violet-500/40 hover:bg-violet-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600"><Sparkles className="h-4 w-4" /></span>
+                <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">Gerar sugestão de análise</span><span className="mt-0.5 block text-[11px] text-muted-foreground">Leitura consultiva e orientação ao analista.</span></span>
+                <ChevronRight className="h-4 w-4 text-violet-500 transition-transform group-hover:translate-x-0.5" />
               </button>
             </section>
           ) : consultingSuggestion ? (
@@ -801,6 +1096,7 @@ export default function CorretorV3Page() {
               <article className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-lg bg-muted/40 p-4 text-sm leading-6 text-foreground">{consultingSuggestion.content}</article>
             </section>
           ) : (
+            <div className="space-y-3">
             <button
               type="button"
               onClick={() => busy === null && newRef.current?.click()}
@@ -838,11 +1134,12 @@ export default function CorretorV3Page() {
                     <Progress className="mt-3 h-2" value={suggestionProgress.phase === 'compile' ? 100 : Math.round((suggestionProgress.current / suggestionProgress.total) * 100)} />
                   </>
                 ) : (
-                  <p className="text-xs text-muted-foreground mt-0.5">{entryMode === 'suggestion' ? 'A IA usa os dados extraídos para estruturar avaliação, recomendação e orientações ao analista.' : <>A triagem determinística roda em segundos (R$ 0); a IA de texto e números segue automática, com teto de R$ {BUDGET_STUDY_BRL.toFixed(2).replace('.', ',')} por estudo.</>}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{entryMode === 'suggestion' ? 'A IA usa os dados extraídos para estruturar avaliação, recomendação e orientações ao analista.' : <>Primeiro uma pré-análise gratuita; você confirma a cidade e as planilhas antes de rodar a análise completa.</>}</p>
                 )}
               </div>
               <span className="text-xs text-primary hover:underline" onClick={(event) => { event.stopPropagation(); setEntryMode(null); }}>Voltar às opções</span>
             </button>
+            </div>
           )}
 
           {loadingList ? (
@@ -851,16 +1148,82 @@ export default function CorretorV3Page() {
             </div>
           ) : (
             <>
-              <StudySection
-                title="Em correção"
-                empty="Nenhum estudo em correção — suba um .pptx acima."
-                studies={emCorrecao}
-                onOpen={openStudy}
-              />
-              {prontos.length > 0 && (
-                <StudySection title="Prontos para o A&R" studies={prontos} onOpen={openStudy} />
-              )}
-              <LegacyV1Panel />
+              <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                <div className="flex border-b border-border bg-muted/20 p-1.5">
+                  {([['v3', 'V3 · Atual'], ['v2', 'V2 · Testes anteriores'], ['v1', 'V1 · Legado']] as const).map(([value, label]) => (
+                    <button key={value} type="button" onClick={() => setLandingGeneration(value)}
+                      className={cn('rounded-md px-3 py-1.5 text-xs font-medium transition-colors', landingGeneration === value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {landingGeneration === 'v1' ? (
+                  <div className="p-4"><LegacyV1Panel /></div>
+                ) : <>
+                <div className="border-b border-border px-4 pt-4">
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                      <h2 className="text-sm font-semibold">Estudos</h2>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">Retome correções, revise entregas e localize estudos anteriores.</p>
+                    </div>
+                    <span className="pb-1 text-[11px] text-muted-foreground">{visibleStudies.length} resultado(s)</span>
+                  </div>
+                  <div className="mt-4 flex gap-5" role="tablist" aria-label="Situação dos estudos">
+                    {([
+                      ['correction', 'Em correção', emCorrecao.length],
+                      ['ready', 'Prontos', prontos.length],
+                      ['all', 'Todos', generationStudies.length],
+                    ] as const).map(([value, label, count]) => (
+                      <button
+                        key={value} type="button" role="tab" aria-selected={landingTab === value}
+                        onClick={() => setLandingTab(value)}
+                        className={cn('border-b-2 pb-2 text-xs font-medium transition-colors', landingTab === value ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground')}
+                      >
+                        {label} <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[9px]">{count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 border-b border-border bg-muted/20 p-3 sm:flex-row sm:items-center">
+                  <label className="relative min-w-0 flex-1">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      value={landingSearch} onChange={(event) => setLandingSearch(event.target.value)}
+                      placeholder="Buscar por estudo ou cidade…"
+                      className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-3 text-xs outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                    />
+                  </label>
+                  <label className="relative flex items-center">
+                    <ArrowUpDown className="pointer-events-none absolute left-3 h-3.5 w-3.5 text-muted-foreground" />
+                    <select
+                      value={landingSort} onChange={(event) => setLandingSort(event.target.value as typeof landingSort)}
+                      className="h-9 appearance-none rounded-md border border-border bg-background pl-9 pr-8 text-xs outline-none focus:border-primary"
+                      aria-label="Ordenar estudos"
+                    >
+                      <option value="recent">Mais recentes</option>
+                      <option value="pending">Mais pendências</option>
+                      <option value="name">Nome</option>
+                      <option value="cost">Maior custo de IA</option>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                  </label>
+                </div>
+                {visibleStudies.length > 0 ? (
+                  <div>
+                    <div className="hidden grid-cols-[minmax(0,1.65fr)_minmax(150px,.75fr)_minmax(135px,.65fr)_auto] gap-3 border-b border-border bg-muted/10 px-4 py-2 text-[9px] font-medium uppercase tracking-[0.12em] text-muted-foreground sm:grid">
+                      <span>Estudo</span><span>Situação</span><span>Criado em</span><span className="w-4" />
+                    </div>
+                    {visibleStudies.map((study) => <StudyRow key={study.id} s={study} onOpen={openStudy} />)}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center px-6 py-12 text-center">
+                    <Search className="h-6 w-6 text-muted-foreground/50" />
+                    <p className="mt-3 text-sm font-medium">Nenhum estudo encontrado</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Ajuste a busca ou selecione outra situação.</p>
+                  </div>
+                )}
+                </>}
+              </section>
             </>
           )}
         </div>
@@ -907,6 +1270,19 @@ export default function CorretorV3Page() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <input ref={recheckRef} type="file" accept=".pptx" className="hidden" onChange={handleRecheck} />
+          <input ref={fonteRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFonte} />
+          <input ref={studySourcesRef} type="file" accept=".xlsx,.xlsm,.json" multiple className="hidden" onChange={handleStudySources} />
+          <input ref={resumeRef} type="file" accept=".pptx" className="hidden" onChange={handleResume} />
+          <button
+            type="button"
+            onClick={() => studySourcesRef.current?.click()}
+            disabled={sourceProgress !== null}
+            className={cn('text-xs rounded-md px-2.5 py-1.5 border inline-flex items-center gap-1.5 disabled:opacity-50', fonteInput ? 'border-emerald-500/50 text-emerald-700 dark:text-emerald-400' : 'border-border hover:border-primary/50')}
+            title={fonteInput ? `${fonteInput.name} — clique para trocar` : 'Vincular as planilhas-fonte (.xlsx/.xlsm) do estudo'}
+          >
+            {sourceProgress ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
+            {sourceProgress ? `Planilhas ${sourceProgress.done}/${sourceProgress.total}` : fonteInput ? 'Planilhas vinculadas' : 'Vincular planilhas'}
+          </button>
           <button
             onClick={() => recheckRef.current?.click()}
             disabled={busy !== null || analysis?.running || selected.status === 'pronto'}
@@ -932,9 +1308,9 @@ export default function CorretorV3Page() {
           ) : (
             <button
               onClick={handleConclude}
-              disabled={blockingPend > 0 || analysis?.running}
+              disabled={pending || blockingPend > 0 || analysis?.running}
               className="text-xs rounded-md px-2.5 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1.5 disabled:opacity-40"
-              title={blockingPend > 0 ? `Ainda há ${blockingPend} erro(s)/provável(is) pendente(s)` : 'Marcar como pronto para o A&R'}
+              title={pending ? 'A análise completa ainda não rodou' : blockingPend > 0 ? `Ainda há ${blockingPend} erro(s)/provável(is) pendente(s)` : 'Marcar como pronto para o A&R'}
             >
               <PackageCheck className="w-3.5 h-3.5" /> Entregar
             </button>
@@ -949,42 +1325,74 @@ export default function CorretorV3Page() {
         </div>
       </header>
 
-      <div className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur px-6 py-3 space-y-2">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex flex-wrap gap-2">
-            {wl.confidence.map(([level, findings]) => {
-              const meta = CONFIDENCE_META[level];
-              return <span key={level} className={cn('rounded border px-2 py-0.5 font-medium', meta.className)}>{meta.icon} {countLabel(level, findings.length)}</span>;
-            })}
-            {wl.comentarios > 0 && (
-              <span
-                className="rounded border px-2 py-0.5 font-medium border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-300"
-                title="Recados da revisão no arquivo — não contam como erro"
+      <div className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur px-6 py-2.5 space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs min-h-[32px]">
+          {analysis?.running ? (
+            <p className="inline-flex items-center gap-2 text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Análise em andamento — os resultados aparecem ao final.</p>
+          ) : pending && gate && gate.studyId === selected.id ? (
+            <p className="text-muted-foreground">Pré-análise: confirme a cidade e as planilhas no cartão abaixo para rodar a análise.</p>
+          ) : pending ? (
+            <>
+              <p className="text-foreground"><strong>A análise completa ainda não rodou.</strong> <span className="text-muted-foreground">Nada abaixo representa o estudo.</span></p>
+              <button
+                type="button"
+                disabled={busy !== null}
+                onClick={() => void resumeAnalysis()}
+                className="rounded-md bg-primary text-primary-foreground px-3 py-1.5 font-medium hover:bg-primary/90 inline-flex items-center gap-1.5 disabled:opacity-50"
+                title="Usa o PPTX guardado neste navegador; se não houver, pede o arquivo uma vez"
               >
-                💬 {wl.comentarios} comentário(s)
-              </span>
-            )}
-          </div>
-          <span className={cn('font-medium', blockingPend === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground')}>
-            {blockingPend === 0 ? (wl.pend ? `${wl.pend} item(ns) para verificar` : '0 pendentes — pronto para entregar 🎉') : `${blockingPend} bloqueia(m) a entrega`}
-          </span>
-        </div>
-        <Progress value={progressPct} className="h-1.5" />
-        <div className="flex gap-1 pt-0.5 items-center">
-          {([
-            ['completude', 'Completude'], ['problemas', 'Problemas'], ['slides', 'Por slide'],
-          ] as const).map(([tab, label]) => <button key={tab} onClick={() => setWorkspaceTab(tab)} className={cn('text-xs rounded-md px-3 py-1.5 border', workspaceTab === tab ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50')}>{label}</button>)}
-          <div className="flex-1" />
-          {wl.pend > 0 && (
-            <button
-              onClick={() => setTriaging(true)}
-              className="text-xs rounded-md px-3 py-1.5 border border-primary/40 text-primary hover:bg-primary/5 inline-flex items-center gap-1.5"
-              title="Passar pelos pendentes rapidamente com o teclado"
-            >
-              <Zap className="w-3.5 h-3.5" /> Triar {wl.pend}
-            </button>
+                {busy === 'upload' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlayCircle className="w-3.5 h-3.5" />}
+                Continuar para a pré-análise
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-foreground">
+                <span className="font-medium">{selected.status === 'pronto' ? 'Entregue' : 'Análise completa'}</span>
+                <span className="text-muted-foreground"> · {wl.pend} para revisar · </span>
+                <span className={cn(blockingPend > 0 ? 'text-red-600 dark:text-red-400 font-medium' : 'text-muted-foreground')}>{blockingPend} bloqueia(m) a entrega</span>
+                {!(fonteInput || selected.temFonte) && <span className="text-muted-foreground"> · sem planilhas</span>}
+              </p>
+              {wl.pend > 0 && (
+                <button
+                  onClick={() => setTriaging(true)}
+                  className="text-xs rounded-md px-3 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5"
+                  title="Revisar os pendentes um a um, com o teclado"
+                >
+                  <Zap className="w-3.5 h-3.5" /> Revisar um a um
+                </button>
+              )}
+            </>
           )}
         </div>
+        {!pending && !analysis?.running && (
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="inline-flex rounded-md border border-border p-0.5" role="group" aria-label="Filtrar por nível">
+              {([
+                ['todos', 'Todos', wl.pend, [1, 2, 3]],
+                ['erro', 'Erros', wl.confidence.find(([l]) => l === 1)?.[1].length ?? 0, [1]],
+                ['provavel', 'Prováveis', wl.confidence.find(([l]) => l === 2)?.[1].length ?? 0, [2]],
+                ['verificar', 'Verificar', wl.confidence.find(([l]) => l === 3)?.[1].length ?? 0, [3]],
+              ] as const).map(([key, label, n, levels]) => {
+                const on = confidenceFilter.length === levels.length && levels.every((l) => confidenceFilter.includes(l as Confidence));
+                return (
+                  <button key={key} type="button" onClick={() => setConfidenceFilter([...levels] as Confidence[])}
+                    className={cn('rounded px-2.5 py-1', on ? 'bg-foreground text-background font-medium' : 'text-muted-foreground hover:text-foreground')}>
+                    {label} <span className="tabular-nums opacity-70">{n}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="inline-flex rounded-md border border-border p-0.5" role="group" aria-label="Organizar lista">
+              {([['slides', 'Por slide'], ['problemas', 'Por tipo de problema']] as const).map(([tab, label]) => (
+                <button key={tab} type="button" onClick={() => setWorkspaceTab(tab)}
+                  className={cn('rounded px-2.5 py-1', workspaceTab === tab ? 'bg-foreground text-background font-medium' : 'text-muted-foreground hover:text-foreground')}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {lastDiff && (
@@ -1005,12 +1413,21 @@ export default function CorretorV3Page() {
 
           {/* WS-1: portão da ata — bloqueia os passes pagos até a confirmação da cidade/UF */}
           {gate && gate.studyId === selected.id && !analysis?.running && (
-            <AtaGateCard
-              ata={gate.ata}
-              costBrl={gate.phase2Brl}
-              running={false}
-              onConfirm={confirmGate}
-            />
+            <div id="analysis-gate">
+              <PreAnalysisCard
+                ata={gate.ata}
+                suggestion={gate.suggestion}
+                cities={gate.cities}
+                profile={gate.profile}
+                cache={{ cached: gate.estimate.visionCached, total: gate.estimate.visionCandidates }}
+                costBrl={gate.phase2Brl}
+                running={false}
+                temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)}
+                sourceLabel={fonteInput?.name ?? null}
+                onAttachSources={() => studySourcesRef.current?.click()}
+                onConfirm={confirmGate}
+              />
+            </div>
           )}
 
           {loadingStudy ? (
@@ -1019,42 +1436,42 @@ export default function CorretorV3Page() {
             </div>
           ) : (
             <>
-              {workspaceTab === 'completude' && <section className="space-y-4">
-                {selected.ata
-                  ? <AtaCard ata={selected.ata} />
-                  : selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
-                <WlHead title="Cobertura da ata e estrutura" count={wl.completude.length} hint="corrija o que falta produzir antes da varredura fina" />
-                {wl.completude.length === 0 ? <p className="text-xs text-muted-foreground">Nenhum item estrutural pendente.</p> : wl.completude.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
-
-                {wl.comunicacao.length > 0 && (
-                  <>
-                    <WlHead
-                      title="Comunicação da revisão"
-                      count={wl.comentarios}
-                      hint="recados do analista para o A&R — não são erros; viram checklist e aviso na entrega"
-                    />
+              {analysis?.running && (
+                <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+                  Os alertas aparecem aqui quando a análise terminar.
+                </p>
+              )}
+              {!pending && !analysis?.running && <>
+                {selected.analise && <AcertosCard report={selected.analise} temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)} />}
+                {(wl.completude.length > 0 || wl.comunicacao.length > 0 || selected.ata) && (
+                  <section className="space-y-3">
+                    <WlHead title="Estrutura e cobertura" count={wl.completude.length} />
+                    {selected.ata && <AtaCard ata={selected.ata} />}
+                    {!selected.ata && debugMode && selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
+                    {wl.completude.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem))).map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
                     {wl.comunicacao.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
-                  </>
+                  </section>
                 )}
-                <DeckRuler slides={selected.nSlides} items={items} onSlide={(slide) => { setWorkspaceTab('slides'); setConfidenceFilter([1, 2, 3]); requestAnimationFrame(() => document.getElementById(`slide-${slide}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }} />
-              </section>}
 
-              {workspaceTab === 'problemas' && <section className="space-y-3">
-                <WlHead title="Problemas por causa raiz" count={wl.grouped.reduce((total, [, group]) => total + group.length, 0)} hint="grupos de “Verificar” ficam recolhidos" />
-                {wl.grouped.sort(([, a], [, b]) => confidenceOf(a[0].finding, a[0].origem) - confidenceOf(b[0].finding, b[0].origem) || b.length - a.length).map(([type, group]) => <ProblemGroup key={type} type={type as ErrorType} items={group} onStatus={handleStatus} onVerdict={handleVerdict} onGroupStatus={handleGroupStatus} />)}
-              </section>}
+                {workspaceTab === 'problemas' && <section className="space-y-3">
+                  <WlHead title="Por tipo de problema" count={wl.grouped.reduce((total, [, group]) => total + group.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem))).length, 0)} />
+                  {wl.grouped
+                    .map(([type, group]) => [type, group.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem)))] as const)
+                    .filter(([, group]) => group.length > 0)
+                    .sort(([, a], [, b]) => confidenceOf(a[0].finding, a[0].origem) - confidenceOf(b[0].finding, b[0].origem) || b.length - a.length)
+                    .map(([type, group]) => <ProblemGroup key={type} type={type as ErrorType} items={[...group]} onStatus={handleStatus} onVerdict={handleVerdict} onGroupStatus={handleGroupStatus} />)}
+                </section>}
 
-              {workspaceTab === 'slides' && <section className="space-y-3">
-                <div className="flex flex-wrap gap-1.5">
-                  {([1, 2, 3] as Confidence[]).map((level) => <button key={level} onClick={() => setConfidenceFilter((current) => current.includes(level) ? current.filter((item) => item !== level) : [...current, level])} className={cn('text-[11px] rounded-full border px-2.5 py-1', confidenceFilter.includes(level) ? CONFIDENCE_META[level].className : 'border-border text-muted-foreground')}>{CONFIDENCE_META[level].icon} {CONFIDENCE_META[level].label}</button>)}
-                </div>
-                <WlHead title="Por slide (ordem do estudo)" count={wl.slides.reduce((total, [, findings]) => total + findings.length, 0)} />
-                {wl.slides.map(([n, findings]) => {
-                  const visible = findings.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem)));
-                  if (!visible.length) return null;
-                  return <div id={`slide-${n}`} key={n} className="space-y-2 scroll-mt-32"><div className="flex items-center gap-2"><span className="text-xs font-semibold rounded bg-muted px-2 py-0.5">Slide {n}</span><span className="text-[10px] text-muted-foreground">{visible.length} item(ns)</span></div>{visible.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}</div>;
-                })}
-              </section>}
+                {workspaceTab === 'slides' && <section className="space-y-3">
+                  <DeckRuler slides={selected.nSlides} items={items} onSlide={(slide) => requestAnimationFrame(() => document.getElementById(`slide-${slide}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))} />
+                  <WlHead title="Por slide" count={wl.slides.reduce((total, [, findings]) => total + findings.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem))).length, 0)} />
+                  {wl.slides.map(([n, findings]) => {
+                    const visible = findings.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem)));
+                    if (!visible.length) return null;
+                    return <div id={`slide-${n}`} key={n} className="space-y-2 scroll-mt-32"><p className="text-xs font-semibold text-muted-foreground">Slide {n}</p>{visible.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}</div>;
+                  })}
+                </section>}
+              </>}
 
               {/* Card de regras */}
               <section className="pt-4">
@@ -1099,7 +1516,7 @@ function RulesCard() {
   );
 
   const RuleItem = ({ type, meta }: { type: string; meta: typeof ERROR_CATALOG['PERCENTAGE_SUM'] }) => (
-    <div className="border-l-2 border-border pl-3 py-2">
+    <div className="py-2">
       <div className="flex items-start justify-between gap-2 mb-1">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -1197,13 +1614,17 @@ function ProblemGroup({ type, items, onStatus, onVerdict, onGroupStatus }: {
   const [open, setOpen] = useState(level !== 3);
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <div className={cn('rounded-lg border', CONFIDENCE_META[level].className)}>
+      <div className="rounded-lg border border-border bg-card">
         <div className="flex items-center gap-2 px-3 py-2">
-          <CollapsibleTrigger className="text-left flex-1 min-w-0"><span className="text-xs font-semibold">{CONFIDENCE_META[level].icon} {errorLabel(type)} ({items.length})</span><span className="ml-2 text-[10px] opacity-70">{open ? 'ocultar' : 'ver grupo'}</span></CollapsibleTrigger>
-          <button onClick={() => void onGroupStatus(items, 'corrigido')} className="text-[10px] rounded border border-current/30 px-2 py-1 hover:bg-background/40">Corrigir grupo</button>
-          <button onClick={() => void onGroupStatus(items, 'ignorado')} className="text-[10px] rounded border border-current/30 px-2 py-1 hover:bg-background/40">Ignorar grupo</button>
+          <CollapsibleTrigger className="text-left flex-1 min-w-0 inline-flex items-center gap-2">
+            <span className={cn('text-[10px] rounded px-1.5 py-0.5 border font-medium', CONFIDENCE_META[level].className)}>{CONFIDENCE_META[level].label}</span>
+            <span className="text-xs font-semibold">{errorLabel(type)} ({items.length})</span>
+            <span className="text-[10px] text-muted-foreground">{open ? 'ocultar' : 'ver grupo'}</span>
+          </CollapsibleTrigger>
+          <button onClick={() => void onGroupStatus(items, 'corrigido')} className="text-[10px] rounded border border-border px-2 py-1 hover:bg-muted">Corrigir grupo</button>
+          <button onClick={() => void onGroupStatus(items, 'ignorado')} className="text-[10px] rounded border border-border px-2 py-1 hover:bg-muted">Ignorar grupo</button>
         </div>
-        <CollapsibleContent className="border-t border-current/15 p-2 space-y-2">
+        <CollapsibleContent className="border-t border-border p-2 space-y-2">
           {items.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => onStatus(item.ruleId, status)} onVerdict={(verdict) => onVerdict(item.ruleId, verdict)} />)}
         </CollapsibleContent>
       </div>
@@ -1211,11 +1632,11 @@ function ProblemGroup({ type, items, onStatus, onVerdict, onGroupStatus }: {
   );
 }
 
-function WlHead({ title, count, hint }: { title: string; count: number; hint?: string }) {
+function WlHead({ title, count, hint }: { title: string; count?: number; hint?: string }) {
   return (
     <div className="flex items-center gap-2 pt-1">
       <h3 className="text-sm font-semibold">{title}</h3>
-      <span className="text-[10px] text-muted-foreground">{count} achado(s)</span>
+      {count !== undefined && <span className="text-[10px] text-muted-foreground">{count} achado(s)</span>}
       {hint && <span className="text-[10px] text-muted-foreground italic">· {hint}</span>}
       <div className="flex-1 border-t border-border" />
     </div>

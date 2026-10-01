@@ -37,7 +37,7 @@ Toledo; quando chegar, entra como `..._vERRO.pptx` e destrava o gabarito por dif
 | Derivado | Estado |
 |---|---|
 | `../../calibracao/feedback-2026-07/rolandia-v1.ir.json` | ✅ existe (78 slides) — fixa `rolandia-real.test.ts` |
-| `../../calibracao/<slug>/rolandia.fonte.json` | 🔲 pendente — extrator do pacote Excel |
+| `../../calibracao/housi-rolandia-2026-07/rolandia.fonte.json` | ✅ existe — extraído e coberto por testes reais |
 | gabarito por diff erro × final | 🔲 bloqueado: falta a versão com erro |
 
 ## Achados já obtidos deste material
@@ -49,6 +49,6 @@ internamente consistentes — detalhe em [`../../FP_sessao_2026-08-12.md`](../..
 
 ## Descarte
 
-Ainda **não descartar**: o `fonte.json` não existe, então o pacote Excel é a única cópia da verdade
-numérica. Descartar só depois do extrator rodar e dos testes ficarem verdes — aí registrar em
+O `fonte.json` já existe e os testes estão verdes. O pacote bruto pode seguir o ciclo de descarte
+controlado somente após confirmar a cópia em `_backup_estudos`; então registrar em
 [`../../ARQUIVOS_REMOVIDOS.md`](../../ARQUIVOS_REMOVIDOS.md).

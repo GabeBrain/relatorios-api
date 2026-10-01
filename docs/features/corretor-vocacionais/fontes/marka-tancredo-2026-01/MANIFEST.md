@@ -84,5 +84,5 @@ Detalhe completo em [`../README.md`](../README.md).
 |---|---|
 | `calibracao/notas_marka_tancredo.labels.json` | ✅ gabarito das ~84 notas, congelado desde 13/jul |
 | `calibracao/*.ir.secao.csv` | ✅ calibração de seção |
-| `<slug>.fonte.json` | 🔲 aguarda extrator da geração jan/2026 |
+| `calibracao/marka-tancredo-2026-01/marka.fonte.json` | ✅ existe — geração jan/2026 extraída e coberta por testes reais |
 | diff V2 × Vfinal | 🔲 aguarda download |

@@ -41,8 +41,10 @@ describe('Rolândia — deck real (baseline: 17 achados, 17 FP)', () => {
     expect(missing).toEqual(['7.1 — Futuros lançamentos']);
   });
 
-  it('o estudo real produz 1 achado (era 17, todos FP)', () => {
-    expect(findings).toHaveLength(1);
+  it('o estudo real produz 2 achados (era 17, todos FP)', () => {
+    // v0.67: + s17 “950 km | 3 min” — erro real (são 950 m), conferido no slide.
+    expect(findings).toHaveLength(2);
+    expect(findings.find((f) => f.id === 'travel-speed-17')?.detail).toContain('950 km');
   });
 
   it('slide de mapa não é cobrado por fonte — nenhum leva FONTE por convenção', () => {

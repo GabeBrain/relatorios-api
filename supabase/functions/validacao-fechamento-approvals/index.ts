@@ -4,7 +4,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const DEV_ORIGINS = ['http://localhost:8080', 'http://localhost:5173'];
-const GEO_API_URL = 'https://app.geobrain.com.br/public-api/v2/monitored-cities?per_page=1';
+const GEO_API_URL = Deno.env.get('GEOBRAIN_VALIDATE_URL') ?? 'https://geobrain.com.br/public-api/monitored-cities';
 
 function corsHeadersFor(req: Request): Record<string, string> {
   const origin = req.headers.get('Origin') ?? '';

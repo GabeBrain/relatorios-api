@@ -4,7 +4,7 @@
 
 import { unzipSync } from 'fflate';
 import type { Ir } from '../audit/ir';
-import { NS_REL, pngDims, jpegDims, sha1Hex } from './pptx-media';
+import { NS_REL, pngDims, jpegDims, bmpDims, bmpToPng, sha1Hex } from './pptx-media';
 
 const FICHA_TITLE = /ficha\s+t[ée]cnica/i;
 
@@ -29,6 +29,30 @@ export interface TableImageCandidate {
   tipo: 'tabela' | 'ficha';
 }
 
+/** Imagem com cara de tabela que a leitura automática não conseguiu processar. */
+export interface SkippedTableImage {
+  slide: number;
+  secao: string | null;
+  titulo: string | null;
+  name: string;
+  kb: number;
+  motivo: string;
+}
+
+/** Resultado da varredura: candidatas + imagens que ficaram sem leitura. */
+export type TableImageScan = TableImageCandidate[] & {
+  skipped?: SkippedTableImage[];
+  /** Imagens distintas no deck (mapas, fotos, prints e tabelas) — base da pré-análise. */
+  totalImages?: number;
+};
+
+// Seções onde uma imagem grande quase sempre é tabela/gráfico com número.
+const NUMERIC_SECTIONS = new Set(['SOCIO', 'MERCADO', 'LACUNAS', 'ABSORCAO']);
+// BMP não é comprimido: 500 KB de PNG viram vários MB. O limite dele é de pixels.
+const BMP_MAX_KB = 40_000;
+// Abaixo disso é ícone/logo, nunca tabela.
+const SKIP_REPORT_MIN_KB = 60;
+
 /**
  * Varre o .pptx e devolve as imagens únicas (por sha1) candidatas a tabela
  * numérica, com o slide/seção de origem. `parser` injetável para testes.
@@ -37,7 +61,7 @@ export async function findTableImages(
   input: Uint8Array | ArrayBuffer | File,
   ir: Ir,
   parser: DOMParser = new DOMParser()
-): Promise<TableImageCandidate[]> {
+): Promise<TableImageScan> {
   let bytes: Uint8Array;
   if (typeof File !== 'undefined' && input instanceof File) bytes = new Uint8Array(await input.arrayBuffer());
   else if (input instanceof ArrayBuffer) bytes = new Uint8Array(input);
@@ -72,26 +96,56 @@ export async function findTableImages(
   // únicas por sha1, com heurística de tabela
   const seen = new Set<string>();
   const out: TableImageCandidate[] = [];
+  const skipped: SkippedTableImage[] = [];
+  const skip = (slide: number, target: string, kb: number, motivo: string) => {
+    const secao = meta.get(slide)?.secao ?? null;
+    if (kb < SKIP_REPORT_MIN_KB || !NUMERIC_SECTIONS.has((secao ?? '').toUpperCase())) return;
+    if (skipped.some((s) => s.name === target)) return;
+    skipped.push({ slide, secao, titulo: meta.get(slide)?.titulo ?? null, name: target, kb, motivo });
+  };
   for (const { slide, target, ficha } of bySlide) {
     const data = files[target];
     if (!data) continue;
     const kb = Math.round(data.length / 1024);
-    if (kb < MIN_KB || kb > (ficha ? 1_500 : MAX_KB)) continue;
-    const dims = pngDims(data) ?? jpegDims(data);
-    if (!dims) continue;
+    const bmp = bmpDims(data);
+    const dims = pngDims(data) ?? jpegDims(data) ?? bmp;
+    if (!dims) {
+      skip(slide, target, kb, `formato não suportado (${target.split('.').pop()?.toUpperCase() ?? '?'})`);
+      continue;
+    }
+    if (kb < MIN_KB || kb > (bmp ? BMP_MAX_KB : ficha ? 1_500 : MAX_KB)) continue;
     const [w, h] = dims;
     if (w < MIN_W || h < MIN_H || h > (ficha ? 2_000 : MAX_H) || w / h < (ficha ? 0.7 : MIN_ASPECT)) continue;
+    // sha1 do ORIGINAL: o cache da visão continua estável entre conversões.
     const sha1 = await sha1Hex(data);
     if (seen.has(sha1)) continue;
     seen.add(sha1);
+    let bytes = data;
+    let mime = target.endsWith('.jpg') || target.endsWith('.jpeg') ? 'image/jpeg' : 'image/png';
+    if (bmp) {
+      const png = await bmpToPng(data);
+      if (!png) {
+        skip(slide, target, kb, 'BMP que não pôde ser convertido para PNG');
+        continue;
+      }
+      // O teto do BMP é de pixels; depois de comprimido vale o da tabela. Tabela
+      // em BMP vira PNG de 12–35 KB; mapa/foto, de 1 a 5 MB — e os maiores
+      // derrubavam a Edge Function (Rolândia, out/2026: 5 "não lidas" eram mapas).
+      if (png.length / 1024 > MAX_KB) continue;
+      bytes = new Uint8Array(png);
+      mime = 'image/png';
+    }
     out.push({
       slide,
       secao: meta.get(slide)?.secao ?? null,
       titulo: meta.get(slide)?.titulo ?? null,
       name: target,
-      mime: target.endsWith('.jpg') || target.endsWith('.jpeg') ? 'image/jpeg' : 'image/png',
-      sha1, bytes: data, w, h, kb, tipo: ficha ? 'ficha' : 'tabela',
+      mime,
+      sha1, bytes, w, h, kb: bmp ? Math.round(bytes.length / 1024) : kb, tipo: ficha ? 'ficha' : 'tabela',
     });
   }
-  return out.sort((a, b) => a.slide - b.slide);
+  const result: TableImageScan = out.sort((a, b) => a.slide - b.slide);
+  result.skipped = skipped.sort((a, b) => a.slide - b.slide);
+  result.totalImages = new Set(bySlide.map((b) => b.target)).size;
+  return result;
 }

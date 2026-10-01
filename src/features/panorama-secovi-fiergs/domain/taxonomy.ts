@@ -66,13 +66,12 @@ function orderBy<T extends string>(order: readonly T[]) {
 
 /**
  * JG-37: a analista recusou o rótulo numérico solto — "2" precisa ser lido como "2 Dormitórios".
- * Rótulo que já é editorial passa intacto; só a forma numérica crua é canonizada, para não
- * reescrever nomes vindos de outra dimensão.
+ * Formas numéricas e variações de dormitório são canonizadas; nomes de outra dimensão passam intactos.
  */
 export function typologyDisplayLabel(value: unknown): string {
   const raw = String(value ?? '').trim();
   if (!raw) return UNCLASSIFIED;
-  if (/^\d+\s*(\+|ou\s*mais)?$/i.test(raw)) return canonicalTypology(raw);
+  if (/^\d+\s*(\+|ou\s*mais|dorm(it[oó]rios?)?|quartos?)?$/i.test(raw)) return canonicalTypology(raw);
   return raw;
 }
 

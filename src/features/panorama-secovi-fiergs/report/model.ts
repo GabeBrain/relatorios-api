@@ -2,7 +2,7 @@ import { buildLaunchModel, periodToQuarter, safeNumber } from '../lib/launches';
 import type { HorizontalSeriesPolicy, LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaClosingFacts, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
 import { editorialWindow, quarterIndex, quarterRange } from '../domain/quarters';
 import { horizontalProjects, mergeCubes, type MarketCube } from '../domain/cube';
-import { classifySecoviTemporalRow } from '../domain/entity-policy';
+import { classifyEntityTemporalRow, type EntityId } from '../domain/entity-policy';
 import {
   cohortMatrix as buildCohortMatrix,
   cohortMatrixParticipation,
@@ -19,12 +19,13 @@ import {
 } from '../domain/aggregations';
 import { STANDARD_ORDER, TYPOLOGY_ORDER, normalizeText } from '../domain/taxonomy';
 import { normalizeCityTemporalRows, type TemporalMetricKind } from '../domain/temporal-normalization';
+import { reconcilePanoramaReport } from '../domain/reconciliation';
 
 type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string };
 type TemporalKey = 'sales' | 'salesTypology' | 'stock' | 'stockTypology' | 'ivv' | 'ivvTypology' | 'ticket' | 'ticketTypology' | 'meter' | 'meterTypology';
 type CityTemporalSources = { city: string; sources: Record<TemporalKey, SourceResult> };
 type AggregateMode = 'sum' | 'average' | 'weighted_average';
-type Accumulator = { sum: number; count: number; weight: number };
+type Accumulator = { sum: number; count: number; weight: number; weightedSum: number };
 
 function semanticGroupOrder(a: string, b: string): number {
   const numberOf = (value: string) => Number((value.match(/\d+/) ?? [])[0]);
@@ -62,17 +63,17 @@ function temporalGroup(row: Record<string, unknown>) {
 }
 
 /** Filtra o contrato municipal por linha antes de somar qualquer total do relatório. */
-function filterSecoviPatternSource(source: SourceResult): SourceResult {
+function filterEntityPatternSource(source: SourceResult, entity: EntityId): SourceResult {
   const rows = source.rows.filter((row) => {
     const rowSegment = segment(row.building_type ?? row.type);
     // Linhas agregadas de fixtures/contratos legados não carregam segmento: não há
     // evidência suficiente para classificá-las como horizontal e removê-las.
-    return rowSegment === null || classifySecoviTemporalRow(rowSegment, temporalGroup(row)) === 'keep';
+    return rowSegment === null || classifyEntityTemporalRow(entity, rowSegment, temporalGroup(row)) === 'keep';
   });
   return {
     ...source,
     rows,
-    source: `${source.source} · horizontal filtrado por Padrão (política Secovi)`,
+    source: `${source.source} · horizontal filtrado por Padrão (política ${entity})`,
   };
 }
 
@@ -82,11 +83,14 @@ function canonical(scope: PanoramaScope): Quarter[] {
 }
 
 function add(target: Map<string, Accumulator>, key: string, value: number, mode: AggregateMode, weight?: number | null) {
-  const current = target.get(key) ?? { sum: 0, count: 0, weight: 0 };
+  const current = target.get(key) ?? { sum: 0, count: 0, weight: 0, weightedSum: 0 };
   const validWeight = typeof weight === 'number' && Number.isFinite(weight) && weight > 0 ? weight : null;
-  current.sum += mode === 'weighted_average' && validWeight !== null ? value * validWeight : value;
+  current.sum += value;
   current.count += 1;
-  if (mode === 'weighted_average' && validWeight !== null) current.weight += validWeight;
+  if (mode === 'weighted_average' && validWeight !== null) {
+    current.weightedSum += value * validWeight;
+    current.weight += validWeight;
+  }
   target.set(key, current);
 }
 
@@ -95,7 +99,9 @@ function result(target: Map<string, Accumulator>, key: string, mode: AggregateMo
   if (!value) return 0;
   if (mode === 'average') return value.sum / Math.max(value.count, 1);
   // Sem estoque correspondente, preserva o dado retornado com mÃ©dia simples em vez de fabricar peso zero.
-  return mode === 'weighted_average' ? value.sum / (value.weight || Math.max(value.count, 1)) : value.sum;
+  return mode === 'weighted_average'
+    ? value.weight > 0 ? value.weightedSum / value.weight : value.sum / Math.max(value.count, 1)
+    : value.sum;
 }
 
 function reportSeries(periods: Quarter[], target: Map<string, Accumulator>, mode: AggregateMode, status: ReportMarketBlock['dataStatus'], source: string): ReportSeries[] {
@@ -159,6 +165,42 @@ function withClosingStockWeight(metric: SourceResult, stock: SourceResult): Sour
   return {
     ...metric,
     rows: metric.rows.map((row) => ({ ...row, temporal_weight: weights.get(temporalDimension(row)) ?? null })),
+  };
+}
+
+/**
+ * Replica a identidade usada pelo Dashboard GeoBrain do Edgar: IVV = vendas líquidas ÷
+ * (estoque final + vendas líquidas). A identidade equivale a vendas ÷ (oferta anterior +
+ * lançamentos) quando o balanço do período fecha, mas evita consolidar percentuais municipais
+ * prontos — inclusive valores anômalos do endpoint — antes de somar numerador e denominador.
+ */
+function ivvFromSalesAndStock(sales: SourceResult, stock: SourceResult): SourceResult {
+  const buckets = new Map<string, { row: Record<string, unknown>; sales: number; stock: number }>();
+  for (const row of sales.rows) {
+    const value = safeNumber(row.liquid_sales);
+    if (value === null) continue;
+    const key = temporalDimension(row);
+    const bucket = buckets.get(key) ?? { row, sales: 0, stock: 0 };
+    bucket.sales += value;
+    buckets.set(key, bucket);
+  }
+  for (const row of stock.rows) {
+    const value = safeNumber(row.stock);
+    if (value === null) continue;
+    const key = temporalDimension(row);
+    const bucket = buckets.get(key) ?? { row, sales: 0, stock: 0 };
+    bucket.stock += value;
+    buckets.set(key, bucket);
+  }
+  const rows = [...buckets.values()].flatMap(({ row, sales: sold, stock: finalStock }) => {
+    const denominator = finalStock + sold;
+    if (denominator <= 0 || sold < 0) return [];
+    return [{ ...row, ivv: sold / denominator * 100, temporal_weight: denominator }];
+  });
+  return {
+    rows,
+    available: sales.available && stock.available,
+    source: 'cálculo Rebrain/Dashboard GeoBrain · vendas líquidas ÷ (estoque final + vendas líquidas)',
   };
 }
 
@@ -252,21 +294,31 @@ export function cubeInLaunchWindow(cube: MarketCube, scope: PanoramaScope): Mark
 
 export function buildGranularBlocks(cube: MarketCube, scope?: PanoramaScope): PanoramaGranularBlocks {
   const launchCube = scope ? cubeInLaunchWindow(cube, scope) : cube;
-  const matrix = buildCohortMatrix(launchCube, 'Vertical');
+  // FIERGS descreve a fotografia do mercado no fechamento. Um empreendimento lançado antes do
+  // início da série continua compondo vendas e oferta atuais; a janela escolhida limita séries de
+  // lançamentos, não o estoque de mercado. No Secovi, a política histórica da janela é preservada.
+  const verticalOfferCube = scope?.entity === 'fiergs-rs' ? cube : launchCube;
+  // O bloco horizontal FIERGS é uma fotografia do universo ativo e possui a coorte editorial
+  // "Até 2022". A janela das séries temporais não pode eliminar essa coorte nem criar um delta.
+  const horizontalCube = scope?.entity === 'fiergs-rs' ? cube : launchCube;
+  const matrix = buildCohortMatrix(verticalOfferCube, 'Vertical');
   return {
-    offerByStandard: offerByStandard(launchCube, 'Vertical'),
+    offerByStandard: offerByStandard(verticalOfferCube, 'Vertical'),
     areaBands: offerByAreaBand(cube),
-    offerByTypology: offerByTypology(launchCube, 'Vertical'),
-    cohortsVertical: offerByCohort(launchCube, 'Vertical'),
-    cohortsHorizontal: offerByCohort(launchCube, 'Horizontal'),
+    offerByTypology: offerByTypology(verticalOfferCube, 'Vertical'),
+    cohortsVertical: offerByCohort(verticalOfferCube, 'Vertical'),
+    cohortsHorizontal: offerByCohort(horizontalCube, 'Horizontal'),
     cohortMatrix: matrix,
     cohortMatrixParticipation: cohortMatrixParticipation(matrix),
-    maturityByStandard: maturityByStandard(launchCube),
-    maturityByTypology: maturityByTypology(launchCube),
-    pricesByStandard: pricesByStandard(launchCube, 'Vertical'),
-    pricesByTypology: pricesByTypology(launchCube),
-    horizontalPricesByStandard: horizontalPricesByStandard(launchCube),
-    vgv: vgvSummary(launchCube),
+    maturityByStandard: maturityByStandard(verticalOfferCube),
+    maturityByTypology: maturityByTypology(verticalOfferCube),
+    pricesByStandard: pricesByStandard(verticalOfferCube, 'Vertical'),
+    pricesByTypology: pricesByTypology(verticalOfferCube),
+    horizontalPricesByStandard: horizontalPricesByStandard(horizontalCube),
+    // O consolidado de mercado atual deve usar o mesmo universo das coortes e do produto.
+    // A janela de lançamentos limita séries de fluxo, não empreendimentos horizontais ainda
+    // pertencentes à fotografia de fechamento FIERGS.
+    vgv: vgvSummary(scope?.entity === 'fiergs-rs' ? cube : launchCube),
     // Nenhum campo de Faixa de Valor foi identificado no payload nem existe regra autoritativa.
     valueRangeAvailable: false,
   };
@@ -323,6 +375,36 @@ function provenanceOf(scope: PanoramaScope, cube: MarketCube, partial?: Partial<
   };
 }
 
+const validMapCoordinate = (latitude: number | null, longitude: number | null) =>
+  latitude !== null && longitude !== null
+  && Number.isFinite(latitude) && Number.isFinite(longitude)
+  && latitude >= -85.05112878 && latitude <= 85.05112878
+  && longitude >= -180 && longitude <= 180;
+
+function mapLocationsOf(cube: MarketCube, records: LaunchRecord[]): PanoramaReportModel['locations'] {
+  if (cube.projects.length) {
+    const unique = new Map<string, PanoramaReportModel['locations'][number]>();
+    for (const project of cube.projects) {
+      if (!validMapCoordinate(project.latitude, project.longitude) || unique.has(project.key)) continue;
+      unique.set(project.key, {
+        projectKey: project.key,
+        name: project.name,
+        segment: project.segment,
+        city: project.city,
+        neighborhood: project.neighborhood,
+        latitude: project.latitude!,
+        longitude: project.longitude!,
+        standard: project.standard,
+        finalUnits: project.finalUnits,
+        averagePricePerMeter: project.averagePricePerMeter,
+      });
+    }
+    return [...unique.values()];
+  }
+  return records.filter((item) => validMapCoordinate(item.latitude ?? null, item.longitude ?? null))
+    .map((item, index) => ({ projectKey: `launch:${index}`, name: item.name ?? 'Empreendimento', segment: item.segment, latitude: item.latitude!, longitude: item.longitude! }));
+}
+
 function normalizeTemporalSource(scope: PanoramaScope, harvests: CityTemporalSources[] | undefined, key: TemporalKey, metric: TemporalMetricKind, fallback: SourceResult): SourceResult {
   if (!harvests?.length) return fallback;
   const sourceRows = harvests.flatMap((harvest) => normalizeCityTemporalRows(harvest.city, harvest.sources[key].rows, metric, metric === 'snapshot' ? canonical(scope) : undefined));
@@ -331,6 +413,52 @@ function normalizeTemporalSource(scope: PanoramaScope, harvests: CityTemporalSou
     rows: sourceRows,
     available,
     source: `${fallback.source} · normalizado por município (${metric === 'flow' ? 'fluxo' : 'fechamento'})`,
+  };
+}
+
+/**
+ * FIERGS 2T2026: o endpoint temporal publica fotografias acumuladas em mais de um mês do mesmo
+ * trimestre. Somá-las como fluxo duplicava 41 vendas em Canoas e 5 em Novo Hamburgo. No fechamento,
+ * padrão e tipologia passam a usar o mesmo fato granular já consumido pela lâmina de área; a série
+ * anterior permanece temporal até que cada trimestre histórico seja reconciliado da mesma forma.
+ */
+function reconcileFiergsClosingSales(source: SourceResult, cube: MarketCube, scope: PanoramaScope, dimension: 'pattern' | 'typology'): SourceResult {
+  if ((scope.entity ?? 'secovi-sp') !== 'fiergs-rs') return source;
+  const granularRows: Record<string, unknown>[] = cube.projects.filter((project) => project.segment === 'Vertical').flatMap<Record<string, unknown>>((project) => {
+    if (dimension === 'pattern') {
+      return project.soldUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: String(project.standard), liquid_sales: project.soldUnits }];
+    }
+    return project.typologies.flatMap<Record<string, unknown>>((typology) => typology.soldUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: String(typology.typology), liquid_sales: typology.soldUnits }]);
+  });
+  // Sem cobertura granular de vendas, preservar a fonte temporal em vez de fabricar fechamento zero.
+  if (!granularRows.length) return source;
+  const historicalAndHorizontal = source.rows.filter((row) => periodToQuarter(row.period) !== scope.endQuarter || segment(row.building_type ?? row.type) !== 'Vertical');
+  return {
+    rows: [...historicalAndHorizontal, ...granularRows],
+    available: true,
+    source: `${source.source} · fechamento vertical reconciliado pelo cubo granular (última fotografia por empreendimento/tipologia)`,
+  };
+}
+
+/**
+ * Oferta final é fotografia. No FIERGS, o endpoint temporal por padrão divergiu do fechamento por
+ * tipologia e do cubo granular (5.459 contra 5.251 no 2T2026). O último snapshot granular passa a
+ * ser o fato do fechamento nas duas dimensões; histórico anterior e horizontal são preservados.
+ */
+function reconcileFiergsClosingStock(source: SourceResult, cube: MarketCube, scope: PanoramaScope, dimension: 'pattern' | 'typology'): SourceResult {
+  if ((scope.entity ?? 'secovi-sp') !== 'fiergs-rs') return source;
+  const granularRows: Record<string, unknown>[] = cube.projects.filter((project) => project.segment === 'Vertical').flatMap<Record<string, unknown>>((project) => {
+    if (dimension === 'pattern') {
+      return project.finalUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: String(project.standard), stock: project.finalUnits }];
+    }
+    return project.typologies.flatMap<Record<string, unknown>>((typology) => typology.finalUnits === null ? [] : [{ city: project.city, period: scope.endQuarter, building_type: 'Vertical', group: String(typology.typology), stock: typology.finalUnits }]);
+  });
+  if (!granularRows.length) return source;
+  const historicalAndHorizontal = source.rows.filter((row) => periodToQuarter(row.period) !== scope.endQuarter || segment(row.building_type ?? row.type) !== 'Vertical');
+  return {
+    rows: [...historicalAndHorizontal, ...granularRows],
+    available: true,
+    source: `${source.source} · fechamento vertical reconciliado pelo cubo granular (última fotografia por empreendimento/tipologia)`,
   };
 }
 
@@ -361,8 +489,12 @@ function buildCityComparisons(scope: PanoramaScope, cube: MarketCube, provenance
   }
 
   const sales = selected.map((city) => {
+    if ((scope.entity ?? 'secovi-sp') === 'fiergs-rs') {
+      const projects = cube.projects.filter((project) => project.city === city && project.segment === 'Vertical');
+      return { city, liquidSales: nullableSum(projects.map((project) => project.soldUnits)) };
+    }
     const source = salesSources.find((item) => item.city === city);
-    const values = filterSecoviPatternSource({ rows: normalizeCityTemporalRows(city, source?.rows ?? [], 'flow'), available: true, source: 'comparativo municipal' }).rows
+    const values = filterEntityPatternSource({ rows: normalizeCityTemporalRows(city, source?.rows ?? [], 'flow'), available: true, source: 'comparativo municipal' }, scope.entity ?? 'secovi-sp').rows
       .filter((row) => periodToQuarter(row.period) === scope.endQuarter)
       .map((row) => safeNumber(row.liquid_sales));
     return { city, liquidSales: nullableSum(values) };
@@ -398,6 +530,7 @@ export function buildPanoramaReportModel(
   cohorts: MarketCohortRow[] = [],
   options: { cubes?: MarketCube[]; provenance?: Partial<PanoramaProvenance>; citySalesSources?: CitySalesSource[]; cityTemporalSources?: CityTemporalSources[]; presentation?: PanoramaPresentationCredits } = {},
 ): PanoramaReportModel {
+  const entity = scope.entity ?? 'secovi-sp';
   const launches = buildLaunchModel(records, canonical(scope));
   const cube = options.cubes?.length
     ? mergeCubes(options.cubes, scope.endQuarter, scope.entity ?? 'secovi-sp')
@@ -406,20 +539,24 @@ export function buildPanoramaReportModel(
   const failedCities = provenance.failedCities.length > 0;
   const granular = buildGranularBlocks(cube, scope);
   const launchCube = scope.startQuarter ? cubeInLaunchWindow(cube, scope) : cube;
-  const closingFacts = closingFactsOf(launchCube, granular);
+  const closingFacts = closingFactsOf(entity === 'fiergs-rs' ? cube : launchCube, granular);
   const cityComparisons = buildCityComparisons(scope, cube, provenance, options.citySalesSources ?? []);
   const temporal = {
-    sales: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales)),
+    sales: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales), entity),
     salesTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'salesTypology', 'flow', sources.salesTypology),
-    stock: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'stock', 'snapshot', sources.stock)),
+    stock: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'stock', 'snapshot', sources.stock), entity),
     stockTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'stockTypology', 'snapshot', sources.stockTypology),
-    ivv: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'ivv', 'snapshot', sources.ivv)),
+    ivv: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'ivv', 'snapshot', sources.ivv), entity),
     ivvTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'ivvTypology', 'snapshot', sources.ivvTypology),
-    ticket: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'ticket', 'snapshot', sources.ticket)),
+    ticket: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'ticket', 'snapshot', sources.ticket), entity),
     ticketTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'ticketTypology', 'snapshot', sources.ticketTypology),
-    meter: filterSecoviPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'meter', 'snapshot', sources.meter)),
+    meter: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'meter', 'snapshot', sources.meter), entity),
     meterTypology: normalizeTemporalSource(scope, options.cityTemporalSources, 'meterTypology', 'snapshot', sources.meterTypology),
   };
+  const closingSales = reconcileFiergsClosingSales(temporal.sales, cube, scope, 'pattern');
+  const closingSalesTypology = reconcileFiergsClosingSales(temporal.salesTypology, cube, scope, 'typology');
+  const closingStock = reconcileFiergsClosingStock(temporal.stock, cube, scope, 'pattern');
+  const closingStockTypology = reconcileFiergsClosingStock(temporal.stockTypology, cube, scope, 'typology');
   // Firewall de fontes: nas versões granulares nenhum contrato municipal fala pelo horizontal do Panorama Secovi.
   const horizontalSeries = horizontalSeriesPolicyOf(cube, scope.engineVersion ?? 'v4');
   const guard = (block: ReportMarketBlock) => (scope.engineVersion ?? 'v4') !== 'v2' ? firewallTemporalBlock(block, horizontalSeries) : block;
@@ -429,22 +566,28 @@ export function buildPanoramaReportModel(
     closingFacts.priceSource,
     scope.endQuarter,
   );
+  const ivvSource = entity === 'fiergs-rs'
+    ? ivvFromSalesAndStock(closingSales, closingStock)
+    : withClosingStockWeight(temporal.ivv, temporal.stock);
+  const sales = {
+    units: guard(marketBlock(scope, closingSales, 'liquid_sales', 'count', 'Soma de vendas líquidas por período, segmento e padrão; no fechamento FIERGS, última fotografia granular por empreendimento.')),
+    vgv: guard(marketBlock(scope, temporal.sales, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido da API.')),
+    unitsByTypology: guard(marketBlock(scope, closingSalesTypology, 'liquid_sales', 'count', 'Soma de vendas líquidas por período e tipologia; no fechamento FIERGS, última fotografia granular por empreendimento.')),
+    vgvByTypology: guard(marketBlock(scope, temporal.salesTypology, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido por tipologia.')),
+  };
+  const stock = {
+    units: guard(marketBlock(scope, closingStock, 'stock', 'count', 'Estoque no fechamento por segmento e padrão; no FIERGS, última fotografia granular por empreendimento.')),
+    vgv: guard(marketBlock(scope, temporal.stock, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por padrão.')),
+    unitsByTypology: guard(marketBlock(scope, closingStockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia; no FIERGS, última fotografia granular por empreendimento.')),
+    vgvByTypology: guard(marketBlock(scope, temporal.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.')),
+  };
+  const locations = mapLocationsOf(cube, records);
 
   return {
     scope, generatedAt: new Date().toISOString(), launches, horizontalSeries,
-    sales: {
-      units: guard(marketBlock(scope, temporal.sales, 'liquid_sales', 'count', 'Soma de vendas líquidas por período, segmento e padrão.')),
-      vgv: guard(marketBlock(scope, temporal.sales, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido da API.')),
-      unitsByTypology: guard(marketBlock(scope, temporal.salesTypology, 'liquid_sales', 'count', 'Soma de vendas líquidas por período e tipologia.')),
-      vgvByTypology: guard(marketBlock(scope, temporal.salesTypology, 'vgv_liquid_sales', 'brl_millions', 'Soma de VGV vendido por tipologia.')),
-    },
-    stock: {
-      units: guard(marketBlock(scope, temporal.stock, 'stock', 'count', 'Estoque no fechamento por segmento e padrão.')),
-      vgv: guard(marketBlock(scope, temporal.stock, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por padrão.')),
-      unitsByTypology: guard(marketBlock(scope, temporal.stockTypology, 'stock', 'count', 'Estoque no fechamento por tipologia.')),
-      vgvByTypology: guard(marketBlock(scope, temporal.stockTypology, 'vgv_stock', 'brl_millions', 'VGV de estoque no fechamento por tipologia.')),
-    },
-    ivv: guard(marketBlock(scope, withClosingStockWeight(temporal.ivv, temporal.stock), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
+    sales,
+    stock,
+    ivv: guard(marketBlock(scope, ivvSource, 'ivv', 'percent', entity === 'fiergs-rs' ? 'IVV consolidado pela identidade do Dashboard GeoBrain: soma das vendas líquidas ÷ soma de (estoque final + vendas líquidas).' : 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
     ivvByTypology: guard(marketBlock(scope, withClosingStockWeight(temporal.ivvTypology, temporal.stockTypology), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average')),
     prices: {
       ticket: guard(marketBlock(scope, withClosingStockWeight(temporal.ticket, temporal.stock), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
@@ -463,12 +606,8 @@ export function buildPanoramaReportModel(
         return matrix;
       }, new Map<string, { year: string; standard: string; vertical: number; horizontal: number; total: number }>()).values()],
     },
-    // O mapa passa a usar o cubo já filtrado pela política de universo quando ele existe.
-    locations: (cube.projects.length
-      ? cube.projects.filter((project) => project.latitude !== null && project.longitude !== null)
-        .map((project) => ({ name: project.name, segment: project.segment, latitude: project.latitude!, longitude: project.longitude! }))
-      : records.filter((row) => row.latitude != null && row.longitude != null)
-        .map((row) => ({ name: row.name ?? 'Empreendimento', segment: row.segment, latitude: row.latitude!, longitude: row.longitude! }))),
+    // Uma chave canônica produz no máximo um marcador, compartilhado pelos três mapas.
+    locations,
     source: 'GeoBrain API',
     // Falha parcial de cidade nunca vira consolidado silencioso: o estado cai para `partial`.
     dataState: !records.length && !cube.projects.length ? 'unavailable'
@@ -484,5 +623,6 @@ export function buildPanoramaReportModel(
     cityComparisons,
     presentation: options.presentation ?? {},
     closingFacts,
+    reconciliation: reconcilePanoramaReport({ scope, cube, sales, stock, granular, cityComparisons, locations }),
   };
 }

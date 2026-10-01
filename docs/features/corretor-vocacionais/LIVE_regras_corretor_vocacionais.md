@@ -16,6 +16,182 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.66 — 2026-09-30 — rodada de Toledo: texto, faixa omitida, raios, lacunas e resumo de acertos (RUNTIME local)
+
+Plano e resultado medido: [PLAN_v066_toledo.md](./PLAN_v066_toledo.md).
+
+- **Revisão de texto (crítico):** o prompt de `analyze-text-batch` nunca incluía o texto dos slides (desde 09/jul); o modelo revisava só as instruções. Agora inclui título, texto e tabelas de cada slide. **Requer deploy da Edge Function.**
+- **Faixa omitida** (`omittedBand`): todas as colunas abaixo do total na mesma proporção vira Provável mesmo com leituras discordantes e não entra no aviso agrupado (Toledo s30: −8,4% em todas as colunas).
+- **Raios:** tempo com distância até ponto de interesse (“2 min 950 m”, “1,8 km | 5 min”) não conta como raio do estudo (Toledo s14).
+- **Totais de lacunas:** além do consenso, um par basta quando só um slide tem a nota de exclusão e a diferença tem forma de exclusão (sem nota = maior, ≤ 20%).
+- **Resumo “O que bateu”:** bloco no topo da lista com tabelas-imagem que fecham, tabelas nativas conferidas, valores iguais às planilhas e cruzamentos que batem; contagens gravadas no snapshot (`relatorio.fonte`, `relatorio.cruzamentos`) e atualizadas quando as planilhas entram depois da análise.
+
+**Verificação:** 188 testes verdes (incl. `toledo-v066.test.ts`), `tsc`, lint e build ok; replay de Toledo, CJ e SJC (tabela no plano); captura local do bloco de acertos no Toledo.
+
+## Versão 0.65 — 2026-09-30 — cabeçalho enxuto, filtros claros, estimativa com releitura, sem barra lateral (RUNTIME local)
+
+**Fonte:** revisão do Gabriel sobre a v0.64 (capturas do estudo de João Pessoa).
+
+- **Cabeçalho:** a faixa de 6 passos, a caixa âmbar e os contadores deram lugar a UMA linha de estado. Na pré-análise ela só aponta para o cartão (sem o botão duplicado “Confirmar cidade e analisar”); com análise pendente e cartão fechado, traz o único botão “Continuar para a pré-análise”; depois da análise diz “Análise completa · N para revisar · M bloqueiam a entrega · sem planilhas” e “o que foi conferido” num tooltip. Planilhas deixaram de ser etapa com alerta antes da decisão.
+- **Filtros:** as abas Completude/Problemas/Por slide viraram um filtro de nível com contagem (Todos · Erros · Prováveis · Verificar) e a organização da lista (Por slide · Por tipo de problema); estrutura e cobertura ficam no topo da lista; nenhuma lista aparece enquanto a análise não roda.
+- **Fim da análise:** nova etapa “Gravando resultados” no banner e aviso “Os alertas aparecem aqui quando a análise terminar” — antes o banner mostrava tudo concluído e a lista ficava vazia por alguns segundos.
+- **Estimativa:** passa a incluir a releitura no gpt-4o de 17% das imagens novas (medido: 60 de 359 leituras); o cartão diz quantas imagens já foram lidas antes e não são cobradas. O R$ 0,03 do teste era correto (138 de 138 imagens em cache, só texto), mas não era explicado.
+- **Visual:** removida a barra lateral colorida dos cartões (achados, grupos, regras, V1); borda neutra e nível só no selo; ícone ⚠ repetido saiu.
+
+**Verificação:** 182 testes verdes, `tsc` do Corretor, lint e build ok; capturas locais de João Pessoa (por slide e por tipo) e de Tijucas (pendente).
+
+## Versão 0.64 — 2026-09-30 — um único upload, pré-análise e planilhas depois (RUNTIME local)
+
+**Fonte:** pedido do Gabriel após o teste de João Pessoa: subir o estudo uma vez, pré-avaliar (cidade,
+outras cidades, planilhas, perfil de imagens) e poder incluir as planilhas depois da análise.
+
+- **Cofre local do PPTX** (`pptx-store.ts`, IndexedDB por sha1, 8 estudos mais recentes): o arquivo não vai ao servidor; retomar a análise e vincular planilhas depois usam o cofre. Em outro navegador a interface pede o arquivo uma vez.
+- **Pré-análise** (`PreAnalysisCard`, substitui o portão): cidade/UF sugeridas; outras cidades citadas com UF no texto (`otherCities`) para confirmar — as confirmadas vão para a regra de contexto (`expected.outras`, lembradas no navegador); **decisão obrigatória sobre planilhas** (vincular agora / não tem / vincular depois); perfil de imagens (`imageProfile`: tabelas nativas, tabelas em imagem, mapas/fotos, ilegíveis) com aviso de que tabela colada como imagem pode gerar alerta falso.
+- **Planilhas depois da análise:** o cruzamento com a fonte (DET e visão) roda sobre as leituras do `vision_cache` (`loadVisionReadings` + `replayVisionPass`), sem IA e sem custo.
+
+**Verificação:** 182 testes verdes (incl. `pre-analise.test.tsx`, que renderiza o cartão), `tsc` do Corretor, lint e build ok. **Não verificado:** o fluxo completo no navegador com upload real (cria estudo e cobra a ata).
+
+## Versão 0.63 — 2026-09-30 — análise resiliente e persistência reconciliada (RUNTIME local)
+
+**Fonte:** rodada de João Pessoa (30/set): erro de edge na imagem 114 de 148 (limite de 30 chamadas/min por IP), 28 somas soltas e 7 alertas de cidade.
+
+- **Visão resiliente:** nova tentativa com espera (2–16 s) em 429/5xx; imagem que falha vira “não lida” no aviso de cobertura em vez de derrubar a análise; `VISION_CONCURRENCY` 5 → 3.
+- **Persistência reconciliada:** os achados de visão só são gravados depois da reconciliação do deck (antes eram gravados brutos na etapa “visão” e a reconciliação da v0.61 não valia no site); ao fim da análise, achados de visão pendentes fora do conjunto final são encerrados.
+- **Pausa** não grava mais o snapshot: o estudo continua “análise pendente”.
+- **Contexto errado (visão):** cidade da mesma UF não é acusada; cidades confirmadas pelo analista também não; cidade única só com âncora no texto transcrito; duas ou mais de outra UF bastam (mapa copiado); um achado por imagem. Caso real: s135 de João Pessoa (Novo Hamburgo, São Leopoldo, Esteio — RS) mantido; s73 (Cabedelo, “São Paulo” inexistente) descartado.
+
+**Diagnóstico registrado:** o custo de R$ 0,10 não inclui a 1ª tentativa (o gasto só era registrado ao fim da análise); o passe de texto parou após 1 de 13 lotes (o laço só é interrompido pelo botão Pausar). Documento de interface: `UX_REVISAO_corretor_2026-09-30.md`.
+
+## Versão 0.62 — 2026-09-30 — fluxo explícito: análise pendente, portão persistente, passos (RUNTIME local)
+
+**Fonte:** estudo de João Pessoa (Ana, 30/set). O painel mostrava “0 erros · 0 prováveis”, barra verde e
+“Entregar” liberado, mas só a triagem inicial tinha rodado: a ata não trouxe a cidade, o portão pedia a
+cidade num campo vazio e a análise paga nunca foi disparada. Na lista, outros dois estudos do dia
+(Francisco Beltrão e Tijucas) estavam no mesmo estado.
+
+- **Estado persistido:** `analysisPending(study)` = geração V3, não entregue e sem `relatorio` (snapshot da fase 2). Enquanto pendente, os contadores e a barra dão lugar à faixa “Análise completa pendente”, “Triar” some e “Entregar” fica bloqueado (também no handler).
+- **Retomada:** o PPTX não fica no servidor; “Selecionar o PPTX e analisar” reabre o portão com o MESMO arquivo (sha1 conferido contra a versão registrada). Arquivo diferente é recusado e orientado para “Reconferir”.
+- **Cidade sugerida:** `city-suggestion.ts` lê “Cidade - UF” do nome do arquivo (maior casamento contra os municípios da UF) ou da capa; o portão chega preenchido e diz de onde veio.
+- **Portão:** título “Falta um passo”, explica que os contadores ainda não valem, avisa quando não há planilhas e permite vinculá-las ali; as planilhas vinculadas no portão entram na fase 2 (inclusive o cruzamento DET com a fonte).
+- **Passos numerados** (Planilhas › Apresentação › Cidade › Análise completa › Revisão › Entrega) e **linha de cobertura** (texto, tabelas nativas, imagens, planilhas) após a análise.
+- **Limpeza:** “Vincular fonte” (fonte.json) virou “Vincular planilhas” (.xlsx/.xlsm, json por compatibilidade); o painel “Ata do projeto (β — teste de extração)” só aparece com `?debug`.
+- **Lista de estudos:** “Análise pendente · só a triagem inicial rodou” no lugar de “Revisar e entregar”.
+
+**Verificação:** 175 testes verdes (170 → 175, `fluxo-analise.test.ts`), `tsc`, lint e `vite build` ok; captura local (Playwright) do estudo de João Pessoa e da lista confirmou faixa, passos, “Entregar” desativado e painel de teste oculto. **Não verificado:** o clique de retomada com o PPTX real e a fase 2 completa pela interface — escrevem no estudo da Ana e têm custo; ficam para o teste manual.
+
+## Versão 0.61 — 2026-09-30 — reconciliação no nível do deck (RUNTIME local)
+
+**Fonte:** triagem manual de Campos do Jordão (38 achados: 6 válidos, 22 FP, 10 avisos de totais não
+conferidos, 5 erros reais não apontados). Medido por **replay sem custo** sobre as leituras cacheadas
+(`__tests__/replay-real.test.ts`, roda só com `CORRETOR_REPLAY_PPTX`), e conferido contra o SJC para
+evitar sobreajuste.
+
+| Estudo | Antes | Depois | FP restantes |
+|---|---|---|---|
+| Campos do Jordão | 38 (22 FP) | 9 | 0 |
+| SJC VAP | 33 | 6 | 0 |
+| SJC v2 | 22 | 8 (7 + 1 aviso de cobertura) | 0 |
+
+### Regras novas ou alteradas
+
+- **Replay puro:** `analyzeVisionPayload`, `replayVisionPass` e `combineVisionFindings` extraídos; o site e o replay rodam o mesmo código.
+- **Costura de fatias por coluna:** tabelas vizinhas com os mesmos rótulos de linha (≥3, não tipologias, sem título de bloco) viram uma tabela larga. Achado de soma em tabela costurada sem releitura fica em “Verificar”.
+- **Faixas:** “Abaixo de X” é faixa aberta; faixa repetida (Absoluto/%) é removida antes da regra de cortes cumulativos; rótulo “Faixa | Absoluto” exibe só a faixa.
+- **Totais compactos alinhados pelo valor** (soma a até 20% ou total dentro do intervalo); acusação vale no máximo “Provável”.
+- **Leitura incompleta:** coluna que falha com célula vazia em linha com outros valores vai para “Verificar”.
+- **Mescla repetida:** só conta uma vez quando a sub-linha tem outra contagem própria diferente (32 unidades em cada tipologia continuam somando).
+- **Deck (`deck-reconcile.ts`):** erro de digitação some se o rótulo aparece escrito certo em outra tabela; furo de faixa some se outra tabela tem a faixa que faltou; o mesmo problema de faixa em vários slides vira um achado; somas de leitura insegura viram UM aviso de cobertura (somas explicadas por nota de exclusão continuam individuais).
+- **Totais entre lacunas (`TOTALS_EQUALITY`):** só dentro do mesmo recorte declarado no slide (“ZI total”, “Compactos”, cidade), total confirmado por uma margem, e por consenso (dois slides concordando contra um). Cita a falta de nota de exclusão quando é o caso. Sem consenso, o total entra como contexto no achado de faixas.
+- **Texto:** a evidência citada pela IA de texto tem de existir no slide; Z.I. não atravessa “)”.
+- **Formato:** “//” repetido em 3+ células é artefato de transcrição; rótulo embaralhado (várias faixas grudadas) não passa pela regra de digitação.
+- **Imagens não lidas:** um aviso único com a lista de slides.
+
+**Limites conhecidos (Campos do Jordão):** “R$ 7.716,00,00” (s37) e “42%” sem casa decimal (s87) não são pegos — a leitura cacheada normalizou o rótulo e entregou o % como número. Os totais 462 × 447 (s86) aparecem como contexto no achado de faixas s86×s88, não como achado próprio, porque só uma outra leitura confirma o 447.
+
+**Verificação:** 170 testes verdes (157 → 170), `tsc`, lint e `vite build` ok. Sem mudança de prompt: **não requer deploy** da Edge Function.
+
+## Versão 0.60 — 2026-09-29 — correções da 2ª rodada do SJC (RUNTIME local)
+
+**Fonte:** reanálise pós-deploy da v0.59 (SJC v2 e VAP). O nível “Erro” ficou confiável (4 de 5 reais),
+mas o prompt de blocos fez a visão cortar tabelas por coluna e repetir células mescladas (perdeu o
+erro real do s60 e criou somas 77+77+77), e o nível “Provável” ganhou ruído. Regras gerais, testadas
+com dados sintéticos (`precisao-generica.test.ts`) para não sobreajustar ao SJC.
+
+- **Prompt:** blocos só quando empilhados na vertical; nunca dividir tabela por colunas; célula mesclada em coluna de quantidade só na 1ª sub-linha (null nas demais). `CACHE_SCHEMA` 9. **Requer deploy da Edge Function.**
+- **Soma:** mesmo rótulo + mesmo valor em linhas seguidas conta uma vez (proteção se a visão repetir a mescla).
+- **Concordância para todos os achados de visão:** `%↔absoluto`, faixas e plausibilidade só são “Erro” com releitura concordante; `%↔absoluto` discordante vai para “Verificar”.
+- **`anomalias_formato`:** só vira achado quando regra fixa confirma (decimal sem % ou símbolo duplicado).
+- **Faixas:** palavra de abertura com erro de digitação é lida pela palavra-chave mais próxima (não desalinha a régua); rótulos quase idênticos com o mesmo número (“3 Dormatórios” × “3 Dormitórios”) não são divergência; mesmo furo em blocos da mesma imagem vira um achado.
+- **Domicílios entre tabelas:** tabela com vários recortes lado a lado não é comparada; o achado cita os dois totais.
+
+**Verificação:** 157 testes verdes (149 → 157), `tsc` e lint limpos, `vite build` ok. **Não verificado:** efeito do prompt com a Edge Function publicada — próximo teste em estudo novo (Campos do Jordão), sem retestar o SJC.
+
+## Versão 0.59 — 2026-09-29 — precisão dos achados após triagem do SJC (RUNTIME local)
+
+**Fonte:** triagem manual das duas rodadas de São José dos Campos (v2 31/jul e VAP 03/ago, 29/set),
+conferindo cada achado contra a imagem do slide e as planilhas. Na VAP, 3 de 15 alertas eram reais;
+3 erros reais não foram apontados. Fixture: `__tests__/fixtures/sjc-vision-readings.json`.
+
+### Falsos positivos removidos (DET)
+
+- **Arredondamento:** percentual da fonte comparado na precisão EXIBIDA (28,85% aceita 28,9% e 29%). `toFixed` foi removido: 0,2885×100 = 28,8499… virava 28,8 (FP s33/s34).
+- **Soma por linha:** linha de taxa/percentual (valores fracionários ≤ 100) e linha cujo total cai entre os valores (média) não são conferidas como soma (FP s76/s82 “Dispon. S/O.L.”).
+- **Tabela nativa de indicadores:** “Total de …” só é linha de total quando é a última linha; “Total”/“Total geral” valem em qualquer posição (FP s127).
+- **Faixas entre lacunas:** títulos de bloco (Oferta Lançada/Final, Dispon., Total) e tipologias repetidas saem da comparação (3 FPs s76×s80, s81×s76, s81×s80).
+
+### Leitura por imagem (IA_visao)
+
+- **“Erro” exige leituras concordantes:** quando mini e 4o falham na soma, o achado só é nível 1 se as duas leituras tiverem a mesma assinatura de divergência; senão vai para “Verificar” dizendo que as leituras discordam. Guardado em `vision_cache.payload.releitura` (`CACHE_SCHEMA` 8: imagens serão relidas uma vez).
+- **Coerência das margens:** se a própria leitura não fecha (soma dos totais de linha ≠ soma dos de coluna ≠ total geral), o achado desce para “Verificar” com a explicação (s80/s81/s82).
+- **Prompt (`analyze-table-image`):** tabela empilhada em blocos vira uma tabela por bloco; célula mesclada e sub-linhas são repetidas; barras coloridas ignoradas; rótulos transcritos literalmente (com erros); novo campo `anomalias_formato`. **Requer deploy da Edge Function.**
+- **BMP:** imagens BMP (colar do Excel) passam a ser convertidas para PNG no navegador. Na v2 do SJC eram 39 tabelas descartadas em silêncio.
+
+### Novas regras (erros reais que passavam)
+
+- `IMAGE_NOT_READ` (DET, Verificar): imagem com cara de tabela em seção numérica que não foi lida (formato não suportado ou conversão falhou), com arquivo e motivo.
+- `BINNING_RULE` nas **linhas** e faixa aberta fora do fim: «Acima de R$ 8.000» antes de «De 9.001 a 10.000» (s82). Rótulos com unidade colada (“9.001/m²”) passam a ser lidos como faixa.
+- `FORMAT_MISMATCH` (Provável): decimal sem % entre percentuais (“0,076” = 7,6%) e casas decimais divergentes (“13%” entre “11,9%”), pelas strings transcritas e pelo campo da visão (s81).
+- `SPELLING` em rótulo de faixa: palavra inicial a uma edição de Até/Acima/Abaixo (“Arté 35 m²”, s76/s80).
+
+### Mensagens explícitas
+
+- Unidade trocada: “O número 75.298.796 está correto, mas o slide o rotula como habitantes (hab.); na planilha ele é de domicílios (dom.)”.
+- Soma: a conta aparece (“44 + 112 + 236 = 392 … diferença de 48”); todas as colunas abaixo na mesma proporção viram “provável linha ou faixa omitida” (s28).
+- Verticalização e oferta: valor do slide, da planilha, arredondado na precisão do slide e diferença em p.p.
+
+**Arquivos:** `audit/engine.ts`, `audit/ir-rules.ts`, `audit/model.ts`, `error-catalog.ts`, `v3/source-crosscheck.ts`, `v3/ia-vision.ts`, `v3/cross-table.ts`, `v3/table-images.ts`, `v3/pptx-media.ts`, `v3/pipeline.ts`, `v3/confidence.ts`, `v3/format-checks.ts` (novo), `supabase/functions/analyze-table-image/index.ts`, testes `sjc-real.test.ts` e `source-crosscheck.test.ts`.
+
+**Verificação:** 149 testes do Corretor verdes (133 → 149), lint sem erros, `vite build` ok; `tsc` acusa só o erro pré-existente de `generation` em `db.ts`. Varredura headless dos PPTX reais: v2 detecta 39 BMP antes invisíveis, VAP sem perdas. **Não verificado:** conversão BMP→PNG no navegador, efeito do prompt novo e as leituras concordantes com a Edge Function publicada — exigem deploy e nova rodada do SJC.
+
+## Versão 0.58 — 2026-09-28 — V1 integrada ao seletor de gerações (RUNTIME local)
+
+O arquivo legado deixou de ocupar um expansor isolado abaixo da lista principal. A landing agora
+apresenta as três gerações no mesmo seletor: `V3 · Atual`, `V2 · Testes anteriores` e
+`V1 · Legado`. A V1 continua estritamente somente leitura e seus registros só são carregados quando
+a aba correspondente é selecionada.
+
+**Arquivos:** `CorretorV3Page.tsx` e `LegacyV1Panel.tsx`.
+
+## Versão 0.57 — 2026-09-27 — gerações V1/V2/V3 e ingestão dos Excel brutos (RUNTIME local)
+
+### Organização do histórico
+
+- **V1 · Legado:** permanece no painel próprio do fluxo anterior.
+- **V2 · Testes anteriores:** os estudos já existentes em `studies_v3` recebem `generation = v2` pela migration.
+- **V3 · Atual:** todo novo estudo criado no fluxo vigente recebe `generation = v3`; a landing alterna entre V3 e V2 sem misturar a fila operacional atual com os aproximadamente 30 ensaios históricos.
+
+`generation` identifica a geração do produto, e não a versão do arquivo PPTX. As versões sucessivas de um mesmo estudo continuam em `study_versions`.
+
+### Planilhas-fonte
+
+O fluxo V3 aceita seleção múltipla de `.xlsx`/`.xlsm` antes do PPTX. A extração acontece no navegador e gera internamente o contrato `fonte_version: 2`; os Excel brutos não são enviados nem persistidos. O banco recebe somente o JSON derivado, com inventário, hash, procedência por arquivo/aba/linha, blocos reconhecidos e avisos explícitos.
+
+Cobertura runtime desta primeira etapa: oferta por padrão/ano/tipologia, sociodemografia e população/domicílios. Absorção é reconhecida e marcada como `cobertura_parcial`; revenda, locação, lazer, anúncios e demais arquivos permanecem inventariados sem serem usados como verdade numérica. O upload manual de `fonte.json` continua disponível apenas como compatibilidade técnica.
+
+**Arquivos:** `src/features/corretor/lib/v3/fonte-extractor-browser.ts`, `fonte.ts`, `source-crosscheck.ts`, `db.ts`, `CorretorV3Page.tsx`, `supabase/migrations/20260927100000_corretor_generations.sql` e `fonte-extractor-browser.test.ts`.
+
+**Verificação:** 133 testes do Corretor aprovados e build de produção aprovado. O smoke test real de Rolândia depende de aplicar a migration de gerações no ambiente publicado e selecionar o PPTX final com as planilhas originais, que não estão versionadas no workspace.
+
 ## Versão 0.56 — 2026-09-17 — identidade Brain no carregamento (RUNTIME local)
 
 O indicador circular de carregamento da área de upload do Corretor foi substituído pela logo Brain pulsante, seguindo o padrão visual de operações longas da plataforma. As mensagens, a barra de progresso dos lotes e a prevenção de reenvio permanecem inalteradas.
@@ -107,7 +283,51 @@ o escopo errado em silêncio.
 **Verificação:** tsc limpo, **131 testes verdes** (117 → 131; 14 de `fonte-real.test.ts` sobre os 3
 pacotes), lint limpo, build ok. Sem migration e sem deploy — nada disso está em runtime ainda.
 
-**Próximo passo:** o `SOURCE_CROSSCHECK` em si, casando `fonte.json` × IR/visão do deck.
+## Versão 0.53 — 2026-09-24 — `SOURCE_CROSSCHECK` no motor e na interface (BETA)
+
+O Corretor agora aceita um `fonte.json` opcional antes da primeira avaliação ou antes de uma
+reconferência. O arquivo passa por validação de schema na fronteira; fonte inválida nunca entra no
+motor como verdade. A camada determinística compara somente métricas com mapeamento semântico
+explícito e se abstém quando o recorte é ausente ou ambíguo.
+
+Primeira cobertura comprovada contra o estudo real de Rolândia: índice de verticalização por recorte,
+séries de população/domicílios e unidade publicada. O motor recupera as duas ocorrências de
+5,7% × 5,16%, o total do PR 4.216.017 × 4.216.107 e o total brasileiro de domicílios rotulado
+incorretamente como habitantes, preservando os valores corretos. Cada achado cita arquivo, aba e
+linha da planilha-fonte. Na reconferência, um achado de fonte só pode ser resolvido quando a fonte é
+anexada novamente; sem ela, permanece aberto em vez de virar falso corrigido.
+
+A fase de visão também cruza oferta por padrão, ano e tipologia quando consegue identificar
+simultaneamente o título, um único recorte, a categoria e as colunas de oferta lançada/atual. O
+resultado conserva a imagem como evidência e recebe confiança 2 porque depende de OCR; qualquer
+ambiguidade faz o motor se abster.
+
+A fonte validada é persistida separadamente em `study_sources_v3` e carregada somente ao abrir o
+estudo, evitando aumentar a resposta da listagem geral. A migration
+`20260924170000_corretor_v3_sources.sql` foi aplicada por Gabriel em 24/09/2026. A interface ainda
+mantém a degradação segura: se a persistência estiver indisponível em outro ambiente, conserva a
+fonte na sessão e segue a análise, exibindo um aviso em vez de interromper o estudo.
+
+**Arquivos:** `lib/v3/fonte.ts`, `lib/v3/source-crosscheck.ts`, `lib/v3/pipeline.ts`,
+`pages/CorretorV3Page.tsx`, `lib/v3/__tests__/source-crosscheck.test.ts`.
+
+**Próxima expansão:** absorção; depois revenda, locação, lazer e anúncios, que ainda não são extraídos. A extração automática dos Excel brutos no
+ambiente publicado continua separada da validação do comparador.
+
+## Versão 0.54 — 2026-09-24 — Landing operacional do Assistente de Projetos
+
+A entrada do Corretor deixa de apresentar uma grade extensa de cards equivalentes e passa a organizar
+o trabalho como painel operacional. O topo resume estudos em correção, prontos, pendências abertas e
+custo acumulado de IA. As ações `Avaliar novo estudo` e `Gerar sugestão de análise` têm hierarquia
+visual própria e preservam os fluxos anteriores.
+
+Os estudos aparecem em lista compacta, com abas Em correção/Prontos/Todos, busca por nome ou cidade
+e ordenação por data, pendências, nome ou custo. Cada linha mostra cidade, versão, número de slides,
+situação, data e custo; estudos ativos com zero pendências são explicitamente apresentados como
+`Revisar e entregar`. A composição possui estados responsivos e estado vazio de busca.
+
+**Verificação:** 131 testes do Corretor aprovados, lint direcionado sem erros e build de produção
+aprovado. Nenhuma migration adicional.
 
 ## Versão 0.51 — 2026-08-12 — Alinhamento da linha de totais e agrupamento tolerante de fatias (RUNTIME)
 

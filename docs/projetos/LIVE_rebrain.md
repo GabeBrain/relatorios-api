@@ -6,6 +6,186 @@
 - **Commits:** pendente nesta sessao.
 - **Monday:** -
 - **Impacto em Etapas/Pendencias:** o tratamento inicial passa a aceitar conversoes comuns do Excel sem desproteger layouts que tenham objetos visiveis.
+### 2026-09-30 — FIERGS-RS: comparativos temporais padronizados — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — comparativos trimestrais, semestrais e móveis do FIERGS.
+- **O quê:** uma função única passa a produzir trimestre equivalente, primeiro semestre comparável e acumulado de 12 meses. Período ausente não vira zero; denominador zero não gera percentual; estoque/IVV usam fotografia do 2T.
+- **Slides:** padrão móvel nos slides 11, 14, 22, 26 e 33; primeiro semestre nos slides 15, 16, 27, 28, 35 e 39.
+- **Verificação:** regressões de domínio, cobertura de rótulos nos onze slides, `tsconfig.app.json`, suíte da feature e build de produção.
+- **Impacto em Etapas/Pendências:** Fase 5 concluída tecnicamente. A próxima frente é a Fase 6, com clareza, arredondamento, slide 41, rótulos e mapas.
+
+### 2026-09-30 — FIERGS-RS: guardas críticas antes da exportação — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — contrato de homologação e auditoria do recorte FIERGS.
+- **O quê:** o modelo passa a verificar vendas, estoque, horizontal por coorte e ausência de chácaras antes da renderização. Divergência ou indisponibilidade crítica bloqueia PDF/PPT; o CSV registra fonte, fórmula, universo, período, totais e delta.
+- **Evidência:** a bancada autenticada das dez cidades aprovou 11/11 invariantes com tolerância zero e delta zero: vendas `1.091`, estoque `5.251`, horizontal `129 / 30.476 / 3.365` e chácaras no runtime `0`.
+- **Verificação:** `tsconfig.app.json`, regressões de falha/bloqueio, suíte da feature e build de produção.
+- **Impacto em Etapas/Pendências:** Fase 4 concluída tecnicamente. A próxima frente é implementar comparativos e regras editoriais da Fase 5.
+
+### 2026-09-30 — FIERGS-RS: universo horizontal sem chácaras — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — política horizontal do recorte FIERGS 2T2026.
+- **O quê:** `Condomínio de Chácaras` passa a ser rejeitado na entrada temporal e granular. Os slides por produto e coorte compartilham o mesmo cubo; `Média dos loteamentos` usa somente loteamentos aberto e fechado.
+- **Evidência:** a bancada autenticada das dez cidades identificou 2 empreendimentos de chácaras em Viamão, com 110 unidades lançadas e 48 finais. O universo homologável fecha em 129 empreendimentos, 30.476 lançamentos e 3.365 unidades finais.
+- **Verificação:** regressões de política, produto × coorte e média de loteamentos; typecheck e build de produção.
+- **Impacto em Etapas/Pendências:** Fase 3 concluída tecnicamente, sem iniciar ajustes visuais. A próxima etapa é introduzir guardas canônicas de reconciliação antes da renderização/exportação.
+
+### 2026-09-30 — FIERGS-RS: oferta final reconciliada em 5.251 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — fechamento de estoque/oferta final do recorte FIERGS 2T2026.
+- **O quê:** o fechamento vertical de estoque por padrão e tipologia passa a usar a última fotografia granular por empreendimento/tipologia. O IVV FIERGS recebe a mesma base reconciliada; histórico temporal anterior e horizontal permanecem preservados.
+- **Evidência:** a bancada autenticada das dez cidades reproduziu `5.459` no temporal por padrão e `5.251` no temporal por tipologia, cubo granular e área. O `4.562` dos slides 36/37 é o caminho dimensional antigo; as linhas do PPTX deixam 689 unidades fora frente ao slide 40.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/model.ts,__tests__/report-model.test.ts}`, `scripts/fiergs-sales-reconciliation.mts` e `docs/features/Relatorios Secovi_FIERGS/EVIDENCIA_FASE_2_ESTOQUE_FIERGS_2T2026_2026-09-30.md`.
+- **Commit:** `d5dd210`.
+- **Verificação:** bancada autenticada, `218/218` testes da feature, typecheck e build de produção aprovados.
+- **Impacto em Etapas/Pendências:** Fase 2 aprovada por Gabriel com `5.251` como fechamento canônico; a Fase 3 passa a tratar a exclusão de chácaras do universo horizontal. Ajustes visuais continuam não iniciados.
+
+### 2026-09-28 — Rebrain: idioma do documento alinhado ao conteúdo — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** shell da plataforma e seletores Radix, incluindo Panorama de Mercado.
+- **O quê:** o idioma raiz do HTML passou de `en` para `pt-BR`, alinhando os metadados ao conteúdo da aplicação e reduzindo a ativação indevida da tradução automática do navegador, associada ao erro DOM `removeChild` observado durante a troca de entidade para FIERGS.
+- **Verificação:** build de produção aprovado; permanecem apenas os avisos conhecidos de Browserslist desatualizado e chunks grandes.
+- **Impacto em Etapas/Pendências:** Juliana deve repetir a homologação com a tradução do navegador desativada e recarregamento forçado; se o erro persistir, o próximo diagnóstico é isolar extensões do navegador.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-30 — FIERGS-RS: fechamento de vendas reconciliado em 1.091 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — fechamento de vendas verticais do recorte FIERGS 2T2026.
+- **O quê:** após o aceite de Gabriel, padrão, tipologia, cidade e área passaram a derivar o fechamento vertical da última fotografia granular por empreendimento/tipologia. O comparativo municipal rejeita o horizontal e a distribuição preserva ajustes negativos, incluindo `−1` em quatro ou mais dormitórios.
+- **Evidência:** a bancada autenticada das dez cidades mantém os totais brutos auditáveis (`1.137`, `1.180`, `2.317`) e confirma `1.091` nas quatro dimensões do runtime, sem ajuste manual.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/model.ts,components/ReportPaginator.tsx,__tests__/report-model.test.ts,__tests__/fiergs-sales-reconciliation.test.ts}`, `scripts/fiergs-sales-reconciliation.mts` e documentos do plano/evidência/decisões.
+- **Commit:** `63a6177`.
+- **Verificação:** `217/217` testes da feature, typecheck e build de produção aprovados; avisos conhecidos de Recharts/JSDOM, Browserslist e tamanho de chunks sem falha.
+- **Impacto em Etapas/Pendências:** recorte de vendas do portão B concluído; auditoria de estoque é a próxima frente. Ajustes visuais/editoriais continuam bloqueados até a reconciliação numérica restante.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-24 — FIERGS-RS: IVV factual, período direto e comparativos em colunas — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — cálculo de IVV, filtro temporal e composição dos comparativos FIERGS.
+- **O quê:** o seletor temporal aplica o intervalo assim que o segundo trimestre é escolhido e fecha automaticamente; clicar fora continua descartando uma seleção incompleta. Os comparativos laterais deixaram de ser caixas iguais e passaram a representar os valores por colunas proporcionais, com eixo-base, rótulos e delta. A tabela de variações anuais no canto superior ganhou tipografia maior para audiência 50+.
+- **Diagnóstico IVV:** chamada autenticada das dez cidades no 1T22 mostrou que o pico consolidado vinha do percentual pronto do endpoint, sobretudo de Canoas (`6.900%` em Econômico, `241,7%` em Standard e `131,3%` em Médio), além de anomalias em Gravataí e Novo Hamburgo. O cálculo próprio do Dashboard GeoBrain resulta em `18,65%` para Canoas e `16,28%` no consolidado das dez cidades. O FIERGS agora calcula `Σ vendas líquidas ÷ Σ (estoque final + vendas líquidas)`; Secovi permanece inalterado.
+- **Verificações:** 6 testes focados aprovados, incluindo aplicação direta do período e rejeição de IVV pronto anômalo; typecheck e build aprovados. Os avisos são apenas do Recharts no JSDOM, Browserslist desatualizado e chunks grandes já conhecidos.
+- **Impacto em Etapas/Pendências:** nova geração publicada deve validar as colunas e o IVV factual. Permanecem a sincronização do Mapbox e a homologação do universo 4T25 com o analista.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-24 — FIERGS-RS: Teste 6 fecha homologação editorial — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — PDF publicado de 75 páginas.
+- **O quê:** o Teste 6 confirmou no arquivo exportado o slide metodológico 5, a matriz de tipologia × 12 faixas de metragem do 57 e a matriz completa de área, R$/m² e oferta do 58. Não foram encontradas novas perdas editoriais ou divergências de exportação.
+- **Achado metodológico:** o IVV de 2.033,3% em 1T22 continua presente apesar da correção do cruzamento de pesos, evidenciando que o número anômalo já chega da série temporal ou decorre do universo histórico. Ele foi encaminhado à bancada do analista, sem teto, ocultação ou ajuste artificial no relatório.
+- **Impacto em Etapas/Pendências:** homologação editorial encerrada. Restam sincronizar e validar o Mapbox nos slides 67–69 e reconciliar com o analista o congelamento, exclusões e anomalias numéricas do 4T25.
+
+### 2026-09-24 — FIERGS-RS: vistoria integral do Teste 5 e contrato de trade-offs — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — comparação das 75 páginas com o deck oficial FIERGS 4T25.
+- **O quê:** a vistoria página a página confirmou a maturidade visual da versão 5 e registrou, em `MAPEAMENTO_TRADEOFFS_AUTOMACAO_FIERGS_TESTE5_2026-09-24.md`, quais diferenças são melhorias deliberadas, concessões aceitáveis ou dependências externas. Comparativos contextuais, rankings horizontais, tabelas auditáveis e estados explícitos de indisponibilidade foram preservados como contrato editorial do sistema.
+- **Correções encontradas pela evidência:** o acumulador de médias misturava numerador ponderado e valores sem peso quando apenas parte das linhas tinha estoque, produzindo o pico incorreto de IVV de 2.033,3%; o cálculo agora mantém soma simples e soma ponderada independentes e possui regressão específica. O slide 57 usa as 12 faixas de área FIERGS; o 58 reúne área mínima/média/máxima, R$/m² mínimo/médio/máximo e oferta final; o 5 ganhou três cartões metodológicos dinâmicos sem perpetuar claims e QR promocionais.
+- **Verificações:** typecheck, build e 21 testes focados aprovados. Um novo PDF é necessário apenas para confirmar visualmente essas correções pós-Teste 5.
+- **Impacto em Etapas/Pendências:** permanecem como travas reais o token Mapbox e homologação dos três mapas (10), relação oficial de IDs/exclusões e regra de congelamento do analista (11/12), e medição do tempo no ambiente publicado (14).
+
+### 2026-09-24 — FIERGS-RS: fechamento visual e componentes semânticos 41/57/58 — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — contrato editorial de 75 slides.
+- **O quê:** paridade visual foi considerada concluída e o Teste 5 virou verificação regressiva. A auditoria do roteamento encontrou três heranças incompatíveis: o slide 41 repetia o IVV trimestral como anual; o 57 reutilizava IVV por área no lugar de tipologia × metragem; o 58 reutilizava preço médio no lugar de mínimo/média/máximo. Os slides 57/58 agora derivam diretamente do cubo granular; o 41 declara a ausência da composição anual por área, sem fabricar ou duplicar números.
+- **Verificações:** typecheck, build e teste editorial dos 75 registros aprovados; a suíte agora falha se qualquer posição voltar ao placeholder genérico.
+- **Impacto em Etapas/Pendências:** etapas 1–9 e 13 concluídas. Permanecem externos: token cartográfico (10), relação oficial de IDs/exclusões e confirmação do universo histórico do 4T25 (11/12), além do registro do tempo real da geração publicada (14).
+
+### 2026-09-23 — FIERGS-RS: paridade preview/PDF e legibilidade 50+ — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — renderização e exportação PDF/PPT do recorte FIERGS.
+- **O quê:** o Teste 4 comprovou que classes CSS dos rótulos SVG customizados do Recharts não eram preservadas integralmente pelo `html-to-image`; placas e texto destacados viravam preto no PDF. Fill, contorno, tipografia e tamanho foram incorporados ao SVG. Eixos, valores, comparativos e distribuições foram ampliados; o KPI superior passou a ser centralizado, sem faixa amarela ou cartão.
+- **Por quê:** preview e arquivo baixado precisam ser visualmente equivalentes, e a audiência 50+ requer números e legendas maiores.
+- **Verificações:** typecheck e build aprovados; 23 testes focados aprovados, incluindo regressão explícita dos atributos SVG usados pela exportação.
+- **Impacto em Etapas/Pendências:** etapa 13 em andamento; requer novo PDF para confirmar visualmente a captura real. Mapas e paridade numérica mantêm seus bloqueios externos.
+
+### 2026-09-23 — FIERGS-RS: Teste 3 e densidade editorial dos blocos vertical/horizontal — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o PDF do Teste 3 foi auditado visualmente. Distribuições receberam cabeçalho estruturado, KPI integrado, barras e rótulos maiores; tabelas simples e gráficos de preço passaram a ocupar a área útil; matrizes de coorte, maturidade e VGV preservam densidade compatível com muitas colunas. A regra é exclusiva do FIERGS.
+- **Por quê:** páginas corretas em conteúdo ainda pareciam vazias e tratavam números principais como notas pequenas, reduzindo conforto de leitura e hierarquia.
+- **Verificações:** typecheck e build aprovados; 17 testes focados de renderização/editorial aprovados.
+- **Impacto em Etapas/Pendências:** etapas 8 e 9 seguem para validação humana no Teste 4. Mapas continuam aguardando token; paridade 4T25 continua aguardando a regra de congelamento/exclusões do analista.
+
+### 2026-09-23 — FIERGS-RS: Teste 2, MCMV, dormitórios e comparações contextuais — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o Sumário foi realinhado; eixos e valores históricos voltaram a exibir todos os pontos com destaque do trimestre equivalente. Pares duplicados foram convertidos em séries MCMV/padrão; vendas municipais usam barras; IVV recebeu a série correta; slides 44–47 usam R$/m² por dormitório. Comparativos laterais agora se adaptam ao fechamento: trimestre mais `1S`, `9M` ou ano, sem acumular snapshots/taxas.
+- **Por quê:** observações visuais do Teste 2 e adoção da diretriz de comparativos gráficos sugerida por Fábio/Marcos.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,lib/chart-labels.ts,print/panorama-print.css,__tests__/chart-labels.test.ts}` e `docs/features/Relatorios Secovi_FIERGS/PLANO_EXECUCAO_FIERGS_RM_POA.md`.
+- **Impacto em Etapas/Pendências:** etapa 7 pronta para teste humano; etapa 8 em execução, com harmonização das tabelas/preços 49–61 ainda pendente. Mapas aguardam token.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-23 — Panoramas: decisão de comparativos gráficos contextuais — Gabriel/Fábio/Marcos/Diego
+- **Ambiente/funcionalidade:** Panorama de Mercado — diretriz editorial para FIERGS e futura revisão do Secovi.
+- **O quê:** o exemplo visual apresentado pelo Sinduscon foi incorporado como referência alternativa: série histórica à esquerda e comparações gráficas do trimestre e do acumulado à direita. No 2T, comparar trimestre e semestre; no 3T, trimestre e nove meses; no 4T, trimestre e ano.
+- **Por quê:** orientação de Fábio e Marcos para facilitar leitura e automação, encaminhada por Diego e validada por Gabriel.
+- **Impacto em Etapas/Pendências:** aplicar ao FIERGS nesta primeira versão depois da leitura do Teste 2. A conversão dos quadros comparativos do Secovi fica como pendência posterior e não altera a entrega atual.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-23 — FIERGS-RS: fechamento de lançamentos e arquitetura de vendas/oferta — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** os slides 10, 13, 15–18 e 21 passaram a usar distribuições FIERGS por padrão e tipologia derivadas do cubo granular. O bloco 23–37 ganhou séries verticais de vendas e VGV, acumulados de 12 meses, distribuições por padrão/tipologia/cidade e oferta final. Estoque é tratado como fotografia: comparações anuais usam o fechamento, sem somar snapshots trimestrais.
+- **Por quê:** concluir as etapas 5 e 6 sem herdar linguagem visual, horizontal ou semântica temporal do Secovi.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css,__tests__/fiergs-editorial-blocks.test.tsx}` e `docs/features/Relatorios Secovi_FIERGS/PLANO_EXECUCAO_FIERGS_RM_POA.md`.
+- **Impacto em Etapas/Pendências:** etapas 5 e 6 seguem para teste humano do PDF; diferenças municipais continuam na bancada metodológica e não foram corrigidas artificialmente.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-23 — FIERGS-RS: legibilidade temporal e correções estruturais do Teste 1 — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o produto FIERGS recebeu tipografia canônica Montserrat/Source Sans 3 e uma política adaptativa para eixos e rótulos de séries: trimestre abreviado, amostragem de ticks, destaque dos fechamentos anuais e dos quatro pontos mais recentes. Acumulados de 12 meses agora começam apenas com quatro trimestres completos. Também foram corrigidos o Sumário duplicado e o roteamento que deixava os três mapas em branco.
+- **Por quê:** o primeiro PDF de 75 páginas comprovou sobreposição dos rótulos temporais, valores pequenos e três posições cartográficas vazias.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,lib/chart-labels.ts,print/panorama-print.css,__tests__/chart-labels.test.ts}` e `docs/features/Relatorios Secovi_FIERGS/PLANO_EXECUCAO_FIERGS_RM_POA.md`.
+- **Impacto em Etapas/Pendências:** etapa 5 permanece em execução até fechar as distribuições específicas; etapa 10 passa a ter fallback visual correto, mas segue dependente do token Mapbox.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-22 — FIERGS-RS: apresentação por entidade, horizontal e mapas — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — renderização e exportação do recorte FIERGS.
+- **O quê:** o renderizador passou a separar identidade por entidade: o FIERGS não recebe mais fundos, textos institucionais ou rótulos horizontais do Secovi. A capa acomoda as 11 cidades. O bloco horizontal ganhou oferta por produto e faixa min/média/máxima, preservando coorte e preço médio por produto. Foram adicionados mapas por padrão, estoque e R$/m². O campo `neighborhood` agora é preservado no cubo granular.
+- **Por quê:** remover falsos positivos editoriais antes da paridade 4T25 e garantir que diferenças do próximo PDF sejam numéricas/metodológicas, não contaminação de template.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,components/MarketSlides.tsx,domain/{entity-policy.ts,cube.ts,aggregations.ts},report/{manifest.ts,model.ts},types.ts,print/panorama-print.css,__tests__/*}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** `12880538203`.
+- **Impacto em Etapas/Pendências:** etapas 6, 9 e 10 avançadas funcionalmente; bairro desbloqueado no contrato. Permanecem MCMV, critério editorial de bairros, paridade 4T25 e fidelidade integral dos 75 slides.
+
+### 2026-09-22 — FIERGS-RS: seletor e inventário oficial de 75 slides — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — preparação do produto `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o fluxo ganhou seletor de entidade; FIERGS aplica automaticamente RS e as 11 cidades do preset, mantendo período editável. O deck oficial de 75 slides foi baixado do Drive e catalogado em um manifesto tipado por família e grau de automação. Os sete fundos institucionais integralmente estáticos foram extraídos e registrados como ativos; o PPTX bruto e as imagens com dados não entraram no bundle. Um plano com portões, estado das etapas 4–12 e limites metodológicos foi registrado.
+- **Por quê:** separar claramente o produto FIERGS da apresentação Secovi e impedir que lacunas como MCMV, bairro e mapas sejam preenchidas por heurística silenciosa.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{pages/PanoramaSecoviFiergsPage.tsx,report/fiergs-manifest.ts,__tests__/fiergs-manifest.test.ts,assets/fiergs/*}`, `docs/features/Relatorios Secovi_FIERGS/PLANO_FIERGS_RM_PORTO_ALEGRE_2026-09-22.md`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** `12880538203`.
+- **Impacto em Etapas/Pendências:** etapas 4 e 5 implementadas; etapa 6 parcialmente concluída (ativos registrados, renderização pendente); etapas 7–12 decompostas com bloqueios objetivos. O produto ainda não deve ser considerado visualmente equivalente ao deck FIERGS.
+
+### 2026-09-22 — FIERGS-RS: política horizontal e preset metropolitano — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — motor compartilhado Secovi/FIERGS.
+- **O quê:** foi criada a política de universo FIERGS-RS com os quatro produtos horizontais observados nos slides 63–66 do estudo 4T25 (`Loteamento Aberto`, `Condomínio de Chácaras`, `Loteamento Fechado` e `Condomínio de Casas/Sobrados`). O filtro temporal agora respeita a entidade, sem alterar a regra restritiva do Secovi-SP. Também foi criado o preset `Recorte FIERGS — RM Porto Alegre`, com as 11 cidades destacadas no mapa do estudo e motor V4.
+- **Por quê:** concluir primeiro a premissa de aquisição e o universo estatístico, antes de expor entidade, fluxo e formatação na interface.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{domain/entity-policy.ts,presets.ts,report/model.ts,__tests__/opus-domain-policy.test.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** `12880538203`.
+- **Impacto em Etapas/Pendências:** etapas 2 e 3 concluídas em código; o preset ainda não está selecionável na interface (etapa 4). A equivalência numérica contra o deck permanece para a etapa 11.
+
+### 2026-09-22 — Nomes de produto orientados pela função — Codex
+- **Ambiente/funcionalidade:** shell, início e cabeçalhos dos geradores de mercado da Rebrain.
+- **O quê:** `Relatório Secovi` passou a se apresentar como `Base de Mercado — Excel`, mantendo `antigo Relatório Secovi` como apoio de transição; `Panorama Secovi/FIERGS` passou a `Panorama de Mercado`, mantendo Secovi/FIERGS na descrição. Rotas e nomes técnicos foram preservados para não quebrar links ou contratos existentes.
+- **Por quê:** diferenciar a extração operacional em Excel do entregável editorial e preparar o Panorama para receber Secovi-SP e FIERGS-RS como entidades, sem criar três produtos com nomes quase idênticos.
+- **Arquivos:** `src/components/layout/{AppLayout.tsx,CommandPalette.tsx}`, `src/pages/{Home.tsx,TestesArquitetura.tsx}`, `src/features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** nomenclatura de transição aplicada; continuam pendentes a política de universo FIERGS, o seletor de entidade e o recorte predefinido da RM de Porto Alegre.
+
+### 2026-09-22 — Relatórios automatizados organizados no menu — Codex
+- **Ambiente/funcionalidade:** shell da Rebrain — menu lateral e busca global.
+- **O quê:** Secovi, Sinduscon Curitiba, AELO e o relatório multicidade existente foram agrupados na pasta expansível `Relatórios Automatizados`; os rótulos internos foram simplificados e o produto anterior passou a aparecer como `Panorama Secovi/FIERGS`, distinguindo-o do novo relatório `FIERGS — RM de Porto Alegre` que ainda será implementado. Validação do Fechamento, Assistente de Projetos e Atualizador VGV permanecem como ferramentas independentes.
+- **Por quê:** separar geradores de relatórios das ferramentas operacionais e eliminar a ambiguidade entre o Panorama Secovi/FIERGS existente e a nova entrega específica para a região metropolitana de Porto Alegre.
+- **Arquivos:** `src/components/layout/{AppLayout.tsx,CommandPalette.tsx}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** primeira etapa de organização concluída; falta criar a rota funcional do novo FIERGS antes de adicioná-lo ao menu e então validar cidades, contrato da API interna v2 e contagem de empreendimentos.
+### 2026-09-20 — Sinduscon Curitiba: ano sem separador de milhar — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás/CVCO.
+- **O quê:** as células da coluna `Ano` recebem formato numérico inteiro `0`, preservando fonte, preenchimento, bordas e faixas alternadas herdadas do arquivo original.
+- **Por quê:** o estilo copiado da planilha de origem aplicava agrupamento de milhar e fazia o Excel exibir `2.026`, embora o valor armazenado fosse corretamente `2026`.
+- **Arquivos:** `src/features/sinduscon-curitiba/lib/{style-preserving-workbook.ts,report-processor.test.ts}`.
+- **Commits:** `e43ec61`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** teste de regressão confirma valor numérico `2026` com formato visual `0`; nenhuma regra de tratamento foi alterada.
+
+### 2026-09-20 — Sinduscon Curitiba: carregamentos alinhados ao padrão Brain — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — processamento das cinco etapas independentes.
+- **O quê:** todos os processamentos usam o overlay canônico `BrainLoadingState`, com logo Brain, fundo bloqueado, cronômetro real e textos específicos para tratamento mensal, atualização da base, tabulação, montagem do relatório e compilação do PDF.
+- **Por quê:** alinhar a experiência do Sinduscon às demais abas de dados e informar claramente qual operação está em andamento, sem estimativas artificiais.
+- **Arquivos:** `src/features/sinduscon-curitiba/{components/WorkflowStagePanels.tsx,pages/SindusconCuritibaPage.tsx}`.
+- **Commits:** `030b1d3`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** mudança somente de estado visual e comunicação; regras de planilha, arquivos gerados e fluxo de download permanecem inalterados.
 
 ### 2026-09-20 — Sinduscon Curitiba: arrastar e soltar em todas as entradas — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — uploads das etapas independentes.
@@ -85,6 +265,26 @@
 - **Impacto em Etapas/Pendencias:** reduzida a infraestrutura necessaria; continua pendente a publicacao/configuracao do processador e a validacao visual em runtime.
 
 # Rebrain (Plataforma) — Documento Vivo
+
+### 2026-09-25 — Validação do Fechamento: tabela de Divergências sem rolagem horizontal — Edgar
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
+- **O quê:** a tabela passou a distribuir as colunas proporcionalmente à largura disponível, com quebra de conteúdo e altura natural das linhas. Itens aprovados não entram no contador da aba e, quando exibidos sob demanda, usam o fundo `#f0e77b`.
+- **Por quê:** eliminar a rolagem horizontal e a sobreposição visual de registros sem remover filtros, ordenação, exportação ou aprovação.
+- **Arquivos:** `src/features/validacao-fechamento/DivergencesGrid.tsx`, `fechamento.css`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; a conferência visual depende da tela autenticada no navegador.
+
+### 2026-09-25 — Validação do Fechamento: regras para Condomínio de Casas/Sobrados — Edgar
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
+- **O quê:** incluídas regras de ticket médio, área privativa, preço/m² máximo, dormitórios e variação de preço para Condomínio de Casas/Sobrados. A variação compara apenas a última fotografia de cada tipologia com seu período imediatamente anterior. A regra existente de preço/m² abaixo de R$ 3.500 foi preservada; a nova faixa abaixo de R$ 4.300 não foi adicionada por sobreposição confirmada.
+- **Por quê:** ampliar a identificação de casos atípicos sem duplicar a regra de preço/m² já adotada.
+- **Arquivos:** `src/features/validacao-fechamento/validation-rules.ts`, `validation-rules.test.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; testes locais cobrem a comparação temporal e a ausência de período anterior.
 
 ### 2026-09-17 — Sinduscon - Curitiba: motor de planilhas com preservação visual — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás e CVCO.
@@ -1858,3 +2058,34 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] Apontamentos Juliana: etapas 4–6 pendentes (ver memória do projeto).
 > **Panorama V2 · correção visual integral concluída · 31/ago/2026:** fundos 16:9 foram exportados e validados dos PPTs locais (capa Baixada Santista; conteúdo, divisória, equipe e fechamentos institucionais), e passaram a ser aplicados pelo mesmo `Sheet` no preview e PDF. A referência 1/capa vermelha e a 4/abertura legada foram retiradas; não há mais rodapé global nem compressão de equipe/consultor. Cidades continuam linha a linha na capa e o trimestre mantém espaçamento da última linha. A coleta exibe percentual por **11 chamadas concluídas por cidade** + consolidação/prévia e ETA apenas após duas observações; a exportação usa ETA observado por página. QA Playwright com API fixture capturou capa, sumário, divisória, tabela, equipe e consultor e gerou PDF de **59 páginas**; build e testes de contrato passaram. Pendente apenas a homologação autenticada com dados produtivos/multicidades. **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — 12517501135.
 > **Panorama V2 · refinamento pós-homologação · 31/ago/2026:** o ETA deixou de recalcular a cada segundo: ele agora é atualizado só após uma nova unidade real concluída e é limitado ao menor valor observado, portanto não cresce durante uma chamada lenta. A superfície clara foi reexportada sem a barra vermelha decorativa; sumário, estáticos, tabelas e gráficos não carregam mais esse traço. Equipe passou a grade central 2×3, com os três perfis fixos maiores e segunda linha vazia para pessoas variáveis. Os três fechamentos usam a lâmina final do estudo Baixada Santista. Build e QA Playwright de preview/PDF passaram. **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — 12517501135.
+### 2026-09-22 — Panorama: fonte granular interna com fallback público — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — aquisição granular dos Panoramas Secovi-SP e FIERGS.
+- **O quê:** bancada autenticada no recorte FIERGS — RM Porto Alegre confirmou as 11 cidades em `monitored-cities`, 2.048 IDs idênticos e 258.557 registros históricos nas rotas interna e pública v2. A rota interna passa a ser a fonte granular padrão, filtrando Ativo/Esgotado e normalizando `number_bedroom` (`0` como ausência; demais valores como texto); a pública v2 permanece como fallback com três tentativas e o contrato legado continua restrito ao motor V2. Falha de todas as fontes interrompe a cidade, sem produzir zeros.
+- **Evidência:** rota pública exigiu 73 tentativas para 55 páginas por falhas transitórias de infraestrutura; a interna concluiu 34 páginas em 34 chamadas. Todos os campos compartilhados usados pelo motor coincidiram; a interna adiciona campos operacionais. A última repetição integral após a normalização final ficou pendente porque o ambiente de aprovação esgotou créditos, sem nova chamada à GeoBrain.
+- **Verificação:** 8 testes direcionados e typecheck aprovados. Na suíte global, 353/354 testes passaram; restaram somente um timeout de 5 s no template real do Sinduscon e a suíte do compilador Sinduscon sem `@pdf-lib/fontkit` instalado. O build também chegou a 1.888 módulos e parou exclusivamente nessa mesma dependência ausente, fora da feature Panorama.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,__tests__/building-source-parity.test.ts}`.
+- **Monday:** [DESAFIO - Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+- **Impacto em Etapas/Pendências:** aquisição granular padronizada antes da validação dos motores; continuam pendentes a robustez/rate limit das séries temporais e a reconciliação numérica do fechamento FIERGS 4T2025 contra o deck.
+### 2026-09-30 — FIERGS-RS: baseline pós-teste explica quatro totais de vendas — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — reconciliação metodológica do recorte FIERGS 2T2026.
+- **O quê:** uma bancada autenticada e reproduzível congelou o recorte das dez cidades e explicou integralmente os totais apontados pela Juliana. `2.317` soma indevidamente `1.137` verticais e `1.180` horizontais; `1.138` descarta uma venda líquida negativa de quatro dormitórios; e o excesso de `46` entre `1.137` e `1.091` vem da soma de fotografias acumuladas em Canoas (`41`) e Novo Hamburgo (`5`). O total tecnicamente recomendado é `1.091`, derivado da última fotografia granular por empreendimento/tipologia.
+- **Por quê:** concluir as Fases 0 e 1 antes de alterar o runtime e impedir correção arbitrária de números ou avanço prematuro para ajustes visuais.
+- **Arquivos:** `scripts/fiergs-sales-reconciliation.mts`, `docs/features/Relatorios Secovi_FIERGS/{PLAN_POS_TESTE_JULIANA_FIERGS_2T2026_2026-09-30.md,EVIDENCIA_FASES_0_1_VENDAS_FIERGS_2T2026_2026-09-30.md}`.
+- **Commits:** `290a5e2`.
+- **Verificação:** consulta autenticada das dez cidades; repetição focal de Canoas/Novo Hamburgo; 64 testes focais e typecheck aprovados.
+- **Impacto em Etapas/Pendências:** portão A passou tecnicamente; a mudança estrutural permanece bloqueada no checkpoint para aprovação da fonte canônica antes das Fases 2–4. Nenhum componente de produção foi alterado.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-30 — FIERGS-RS: clareza visual e mapas da Etapa 6 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — lâminas editoriais e mapas FIERGS.
+- **O quê:** percentuais fecham em 100,0% por rateio determinístico; dormitórios usam nomenclatura completa; ranking municipal ganhou margens próprias; o slide 41 declara indisponibilidade anual auditável; o gráfico de R$/m² reduz colisões; mapas calculam bounds/zoom e exibem legendas por padrão, estoque e R$/m².
+- **Verificação:** `235/235` testes da feature, `tsconfig.app.json` e build de produção aprovados; proporção 16:9 coberta pela regressão existente.
+- **Impacto em Etapas/Pendências:** Fase 6 concluída tecnicamente. A inspeção humana dos novos PDF/PPT permanece na Fase 8; a próxima frente de implementação é a Fase 7.
+
+### 2026-09-30 — FIERGS-RS: pacote de homologação 2T2026 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — validação integrada FIERGS no build de produção.
+- **O quê:** o navegador autenticado encontrou uma diferença entre produto horizontal completo e coorte cortada em `1T2023`; o bloco FIERGS passou a preservar a coorte `Até 2022`. A guarda final aprovou 11/11 invariantes e gerou CSV, PPTX e PDF com 75 páginas.
+- **Evidência:** vendas `1.091`, estoque `5.251`, horizontal `129 / 30.476 / 3.365`, chácaras `0`; `236/236` testes FIERGS e build aprovados.
+- **Impacto em Etapas/Pendências:** Fases 7 e 8 concluídas tecnicamente. O pacote está pronto para Juliana; promoção depende do aceite externo.
+

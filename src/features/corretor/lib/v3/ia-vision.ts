@@ -4,7 +4,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, calculateImageTokens, type ModelId } from '../cost-calculator';
-import { binsFromColumns, checkTableSums, checkPercentConsistency, checkUnitPlausibility, detectBinGap } from '../audit/engine';
+import { binsFromColumns, checkTableSums, checkPercentConsistency, checkUnitPlausibility, detectBinGap, rowLabels } from '../audit/engine';
+import { ufsOfCity } from './city-suggestion';
+import { formatIssues, labelTypos, visionFormatIssues, type FormatIssue, type RawFormatAnomaly } from './format-checks';
 import { toAuditSection } from '../audit/ir';
 import { municipioOficial, sameCity } from '../audit/ir-rules';
 import type { Cell, ColKind, ExtractedTable, Finding } from '../audit/model';
@@ -22,7 +24,8 @@ const db = supabase as any;
 // v6: fonte visível e unidades de fichas técnicas; um único bump para WS6/WS7.
 // v7: valida o formato profundo antes de confiar no cache; uma resposta de modelo
 // malformada nunca pode derrubar a análise inteira via `.map()`.
-const CACHE_SCHEMA = 7;
+// 8: guarda se as duas leituras (mini × 4o) concordaram. 9: prompt de blocos verticais + mesclas.
+const CACHE_SCHEMA = 9;
 
 interface RawTable {
   title?: string;
@@ -32,6 +35,8 @@ interface RawTable {
   col_kinds?: unknown[];
   total_kind?: unknown;
   share_of?: Record<string, unknown>;
+  /** Marcada quando a tabela foi costurada de várias fatias por coluna. */
+  stitched?: boolean;
 }
 export interface RawLocale { texto?: unknown; tipo?: unknown; principal?: unknown }
 export interface RawUnit { tipologia?: unknown; m2?: unknown; vagas?: unknown; preco?: unknown; preco_m2?: unknown }
@@ -40,6 +45,14 @@ export interface CachePayload {
   locais_visiveis?: RawLocale[];
   unidades?: RawUnit[];
   tem_fonte?: boolean;
+  /** Células cujo formato destoa das vizinhas, segundo a própria visão. */
+  anomalias_formato?: RawFormatAnomaly[];
+  /**
+   * Presente quando a imagem precisou de releitura no 4o e AMBAS as leituras
+   * falharam na soma. `concordam` = as duas encontraram exatamente as mesmas
+   * diferenças; só então o achado sustenta “Erro”.
+   */
+  releitura?: { concordam: boolean };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -59,7 +72,14 @@ export function sanitizeVisionPayload(value: unknown): CachePayload {
   const tables = Array.isArray(raw.tables) ? raw.tables.filter(isRawTable) : [];
   const locais = Array.isArray(raw.locais_visiveis) ? raw.locais_visiveis.filter(isRecord) as RawLocale[] : [];
   const unidades = Array.isArray(raw.unidades) ? raw.unidades.filter(isRecord) as RawUnit[] : [];
-  return { tables, locais_visiveis: locais, unidades, tem_fonte: raw.tem_fonte === true };
+  const releitura = isRecord(raw.releitura) && typeof raw.releitura.concordam === 'boolean'
+    ? { concordam: raw.releitura.concordam } : undefined;
+  const anomalias = Array.isArray(raw.anomalias_formato) ? raw.anomalias_formato.filter(isRecord) as RawFormatAnomaly[] : [];
+  return {
+    tables, locais_visiveis: locais, unidades, tem_fonte: raw.tem_fonte === true,
+    ...(anomalias.length ? { anomalias_formato: anomalias } : {}),
+    ...(releitura ? { releitura } : {}),
+  };
 }
 
 /** Cache só é reaproveitável se todos os campos que podem ser iterados forem listas válidas. */
@@ -77,9 +97,18 @@ export interface ExtractedTableRef {
   table: ExtractedTable;
   /** id do achado de soma desta tabela, quando ela sozinha não fechou. */
   sumFindingId?: string;
+  /** Releitura no 4o discordou da 1ª leitura: números desta tabela não servem de régua. */
+  unstable?: boolean;
+  /** Lida pelo gpt-4o sem discordância: pode servir de âncora para regra entre slides. */
+  reliable?: boolean;
 }
 
-export interface ExpectedLocation { cidade: string; uf?: string | null }
+export interface ExpectedLocation {
+  cidade: string;
+  uf?: string | null;
+  /** Outras cidades que o analista confirmou como parte do estudo (não são contexto errado). */
+  outras?: string[];
+}
 
 // ── estimativa (antes de rodar) ───────────────────────────────────────────────
 
@@ -91,6 +120,9 @@ export interface VisionEstimate {
   outputTokens: number;
   costUsd: number;
 }
+
+/** Fração das imagens que termina relida no gpt-4o (medido: 60 de 359 leituras, set/2026). */
+const ESCALATION_RATE = 0.17;
 
 export async function estimateVisionPass(
   candidates: TableImageCandidate[],
@@ -107,13 +139,23 @@ export async function estimateVisionPass(
   const inputTokens = toRun.reduce((a, c) => a + calculateImageTokens(c.w, c.h, model) + 450, 0);
   // Fichas carregam uma lista de unidades; tabela comum agora inclui local/fonte.
   const outputTokens = toRun.reduce((a, c) => a + (c.tipo === 'ficha' ? 2000 : 900), 0);
+  // Releitura no 4o (imagem ampliada até 2×) quando a leitura econômica não fecha.
+  // Sem ela a estimativa subestimava o estudo novo: o 4o custa ~16× o mini.
+  let escalationUsd = 0;
+  if (model === 'gpt-4o-mini') {
+    const upIn = toRun.reduce((a, c) => {
+      const scale = Math.max(1, Math.min(2, 2048 / Math.max(c.w, c.h)));
+      return a + calculateImageTokens(Math.round(c.w * scale), Math.round(c.h * scale), 'gpt-4o') + 450;
+    }, 0);
+    escalationUsd = ESCALATION_RATE * calculateCost(upIn, outputTokens, 'gpt-4o');
+  }
   return {
     candidates: candidates.length,
-    cached: cachedSet.size,
+    cached: candidates.filter((c) => cachedSet.has(c.sha1)).length,
     toRun: toRun.length,
     inputTokens,
     outputTokens,
-    costUsd: calculateCost(inputTokens, outputTokens, model),
+    costUsd: calculateCost(inputTokens, outputTokens, model) + escalationUsd,
   };
 }
 
@@ -195,6 +237,8 @@ export interface VisionPassResult {
   inputTokens: number;
   outputTokens: number;
   costUsd: number;
+  /** imagens que falharam mesmo após novas tentativas (viram aviso de cobertura) */
+  failed: FailedImage[];
 }
 
 export interface VisionPassOpts {
@@ -265,6 +309,9 @@ export function wrongContextFromVisibleLocales(
   const transcribed = transcribedText(payload, candidate);
   const seen = new Set<string>();
   const findings: Finding[] = [];
+  const uf = (expected?.uf ?? '').toUpperCase();
+  const confirmed = new Set((expected?.outras ?? []).map(normalized));
+  const foreign: { text: string; anchored: boolean }[] = [];
 
   for (const raw of Array.isArray(rawLocales) ? rawLocales : []) {
     const text = typeof raw.texto === 'string' ? raw.texto.trim() : '';
@@ -278,23 +325,34 @@ export function wrongContextFromVisibleLocales(
     // A visão devolve qualquer rótulo como "cidade" ("brasileiras", "SP"); só é
     // divergência se o texto for município IBGE — e diferente além de conectivos
     // ("São José do Campos" digitado na ata ≠ FP contra "São José dos Campos").
-    if (!municipioOficial(text) || sameCity(text, city)) continue;
+    if (!municipioOficial(text) || sameCity(text, city) || confirmed.has(found)) continue;
+    // Cidade da MESMA UF do estudo é vizinha/região metropolitana (Cabedelo num
+    // mapa de João Pessoa): aparece legitimamente em mapas e comparativos.
+    if (uf && ufsOfCity(text).includes(uf)) continue;
     // ÂNCORA: o nome precisa estar no texto transcrito da imagem. Sem isso, a
     // "cidade" é inferência do modelo, não leitura — origem de alucinação.
     if (transcribed && !transcribed.includes(found)) continue;
     seen.add(found);
-    findings.push({
-      id: `iavis-context-${candidate.sha1.slice(0, 10)}-${found.replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`,
-      type: 'WRONG_CONTEXT',
-      section: toAuditSection(candidate.secao),
-      slideRef: `s${candidate.slide}`,
-      title: `Cidade divergente na imagem (${text} ≠ ${city})`,
-      detail: `A cidade “${text}” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como ${city}${expected?.uf ? `/${expected.uf}` : ''}. Verifique possível dado de outro estudo.`,
-      ok: false,
-      viz: { kind: 'text', location: candidate.titulo ?? undefined, evidence: text },
-      evidenceSha1: candidate.sha1,
-    });
+    foreign.push({ text, anchored: Boolean(transcribed) && transcribed.includes(found) });
   }
+  // Uma cidade de fora sozinha, sem estar no texto transcrito, é fraca (o "São
+  // Paulo" inexistente do s73 de João Pessoa). Duas ou mais de outra UF na mesma
+  // imagem é o padrão de mapa copiado de outro estudo (s135: Novo Hamburgo,
+  // São Leopoldo, Esteio… num estudo de João Pessoa).
+  if (!foreign.length || (foreign.length < 2 && !foreign[0].anchored)) return findings;
+  const names = foreign.map((f) => f.text);
+  const otherUfs = [...new Set(names.flatMap((n) => ufsOfCity(n)).filter((u) => u !== uf))];
+  findings.push({
+    id: `iavis-context-${candidate.sha1.slice(0, 10)}`,
+    type: 'WRONG_CONTEXT',
+    section: toAuditSection(candidate.secao),
+    slideRef: `s${candidate.slide}`,
+    title: `Imagem com cidade(s) de outro lugar: ${names.slice(0, 3).join(', ')}${names.length > 3 ? ` e mais ${names.length - 3}` : ''}`,
+    detail: `A imagem mostra ${names.join(', ')}${otherUfs.length ? ` (${otherUfs.join('/')})` : ''}, mas o estudo é de ${city}${uf ? `/${uf}` : ''}. Possível mapa ou tabela copiado de outro estudo.`,
+    ok: false,
+    viz: { kind: 'text', location: candidate.titulo ?? undefined, evidence: names.join(', ') },
+    evidenceSha1: candidate.sha1,
+  });
   return findings;
 }
 
@@ -332,24 +390,55 @@ async function extractWithModel(
 ): Promise<{
   payload: CachePayload; inputTokens: number; outputTokens: number;
 }> {
-  const { data, error } = await supabase.functions.invoke<{
-    tables: RawTable[]; locais_visiveis?: RawLocale[]; unidades?: RawUnit[]; tem_fonte?: boolean; inputTokens: number; outputTokens: number; error?: string;
-  }>('analyze-table-image', {
-    body: {
-      base64: imageOverride?.base64 ?? toBase64(c.bytes),
-      mime: imageOverride?.mime ?? c.mime,
-      model,
-      contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
-      tipo: c.tipo,
-    },
-  });
-  if (error) throw new Error(error.message);
-  if (data?.error) throw new Error(data.error);
+  const body = {
+    base64: imageOverride?.base64 ?? toBase64(c.bytes),
+    mime: imageOverride?.mime ?? c.mime,
+    model,
+    contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
+    tipo: c.tipo,
+  };
+  // Limite de requisições (429) e erro temporário (5xx) são esperados num estudo
+  // com 150 imagens: espera e tenta de novo, em vez de derrubar a análise inteira.
+  type Resp = { tables: RawTable[]; locais_visiveis?: RawLocale[]; unidades?: RawUnit[]; tem_fonte?: boolean; inputTokens: number; outputTokens: number; error?: string };
+  let data: Resp | null = null;
+  for (let attempt = 0; ; attempt++) {
+    const res = await supabase.functions.invoke<Resp>('analyze-table-image', { body });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const status: number | undefined = (res.error as any)?.context?.status;
+    const message = res.error?.message ?? res.data?.error ?? '';
+    if (!message) { data = res.data; break; }
+    const retryable = status !== 400 && status !== 413 && !/inválid|não suportad|grande demais/i.test(message);
+    if (!retryable || attempt >= VISION_RETRIES) throw new Error(message);
+    await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt + Math.random() * 1000));
+  }
   return {
     payload: sanitizeVisionPayload(data),
     inputTokens: data?.inputTokens ?? 0,
     outputTokens: data?.outputTokens ?? 0,
   };
+}
+
+/**
+ * Assinatura das divergências de soma de uma leitura: as notas geradas pelo
+ * motor. Duas leituras independentes com a MESMA assinatura acharam a mesma
+ * conta errada; assinaturas diferentes significam que os números lidos mudaram
+ * entre as leituras — sintoma de OCR instável, não de erro do estudo.
+ */
+export function sumFailureSignature(payload: CachePayload): string {
+  const parts: string[] = [];
+  (payload.tables ?? []).forEach((raw, ti) => {
+    const ext = toExtracted(raw);
+    if (!ext?.totals) return;
+    const v = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
+    for (const c of v.badColumns ?? []) parts.push(`${ti}:c${c}:${JSON.stringify(ext.rows.map((r) => r[c]))}:${JSON.stringify(ext.totals[c])}`);
+    for (const r of v.badRows ?? []) parts.push(`${ti}:r${r}:${JSON.stringify(ext.rows[r])}`);
+  });
+  (payload.tables ?? []).forEach((raw, ti) => {
+    const ext = toExtracted(raw);
+    const pc = ext ? checkPercentConsistency(ext) : null;
+    for (const r of pc?.badRows ?? []) parts.push(`${ti}:p${r}:${JSON.stringify(ext?.rows[r])}`);
+  });
+  return parts.sort().join('|');
 }
 
 /** true se TODAS as tabelas do payload passam nas auto-validações (soma + %↔abs). */
@@ -382,9 +471,7 @@ async function processImage(
   tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number;
   outputTokens: number; costUsd: number; escalated: boolean;
 }> {
-  const findings: Finding[] = [];
-  const tables: ExtractedTableRef[] = [];
-  let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0, costUsd = 0;
+  let fromCache = 0, inputTokens = 0, outputTokens = 0, costUsd = 0;
   let escalated = false;
   let usedModel = model;
 
@@ -396,6 +483,8 @@ async function processImage(
     payload = sanitizeVisionPayload(hit.payload);
     usedModel = (hit.model as ModelId) ?? model;
     fromCache = 1;
+    // A releitura aconteceu numa análise anterior; o veredito dela vale igual.
+    if (payload.releitura) escalated = true;
   } else {
     const first = await extractWithModel(c, model);
     inputTokens += first.inputTokens;
@@ -415,6 +504,10 @@ async function processImage(
       // fica com a leitura que fecha; se ambas falham, fica com a do 4o (OCR melhor)
       payload = payloadIsClean(second.payload) || !payloadIsClean(first.payload)
         ? second.payload : first.payload;
+      if (!payloadIsClean(first.payload) && !payloadIsClean(second.payload)) {
+        const a = sumFailureSignature(first.payload), b = sumFailureSignature(second.payload);
+        payload = { ...payload, releitura: { concordam: a !== '' && a === b } };
+      }
     }
 
     await db.from('vision_cache').upsert({
@@ -424,17 +517,45 @@ async function processImage(
     });
   }
 
+  const analysis = analyzeVisionPayload(c, payload, { escalated, usedModel, expected });
+  return {
+    ...analysis, fromCache, inputTokens, outputTokens, costUsd, escalated,
+  };
+}
+
+/**
+ * Leitura → achados. Função PURA (sem rede): o site e o replay dos testes rodam
+ * exatamente o mesmo código sobre a mesma leitura cacheada.
+ */
+export function analyzeVisionPayload(
+  c: TableImageCandidate,
+  payload: CachePayload | null,
+  ctx: { escalated: boolean; usedModel: string; expected?: ExpectedLocation },
+): { findings: Finding[]; tables: ExtractedTableRef[]; hasVisibleSource: boolean; tablesExtracted: number; tablesVerified: number } {
+  const { escalated, usedModel, expected } = ctx;
+  const findings: Finding[] = [];
+  const tables: ExtractedTableRef[] = [];
+  const cellIssues: FormatIssue[] = [];
+  // Blocos da mesma imagem repetem as faixas: o mesmo furo vira UM achado.
+  const binSeen = new Set<string>();
+  const textIssues: FormatIssue[] = [];
+  let tablesExtracted = 0, tablesVerified = 0;
   // fonte da leitura, para o analista saber a confiança
+  const readingsAgree = payload?.releitura?.concordam === true;
+  // Selo de “Erro” para QUALQUER achado desta imagem: releitura que concordou.
+  const trusted = escalated && readingsAgree;
   const origemLeitura = escalated
-    ? 'confirmado no gpt-4o (após divergência no modelo econômico)'
+    ? readingsAgree
+      ? 'confirmado no gpt-4o (após divergência no modelo econômico)'
+      : 'relido no gpt-4o; as duas leituras discordam entre si'
     : `lido pelo modelo ${usedModel}`;
 
   const secao = toAuditSection(c.secao);
   findings.push(...wrongContextFromVisibleLocales(payload?.locais_visiveis, expected, c, payload));
-  (payload?.tables ?? []).forEach((raw, ti) => {
+  (stitchColumnSplits(payload?.tables ?? [])).forEach((raw, ti) => {
     const ext = toExtracted(raw);
     if (!ext) return;
-    const ref: ExtractedTableRef = { slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext };
+    const ref: ExtractedTableRef = { slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext, ...(escalated && !readingsAgree ? { unstable: true } : {}), ...(/gpt-4o(?!-mini)/.test(usedModel) && !(escalated && !readingsAgree) ? { reliable: true } : {}) };
     tables.push(ref);
     tablesExtracted++;
     let flagged = false;
@@ -442,6 +563,7 @@ async function processImage(
     // 1) soma de coluna/linha × total declarado
     if (ext.totals) {
       const viz = checkTableSums(ext, { absTol: Math.max(0.5, ext.rows.length / 2) });
+      if (raw.stitched) viz.stitchedReading = true;
       const bad = (viz.badColumns?.length ?? 0) + (viz.badRows?.length ?? 0);
       if (bad > 0 || viz.unaligned) {
         flagged = true;
@@ -456,13 +578,20 @@ async function processImage(
             : `Tabela não fecha no total (${ext.title.slice(0, 50)})`,
           detail: viz.unaligned
             ? `A linha de totais do slide ${c.slide} não pôde ser casada com as colunas, então a soma não foi conferida — confira na imagem.`
-            : `Números da imagem do slide ${c.slide} (${origemLeitura}). ${escalated ? 'Como o 4o confirmou, é provável bug real do estudo.' : 'Pode ser bug do estudo OU dígito mal lido — confira na imagem.'}`,
+            : `${viz.notes?.[0] ? `${viz.notes[0]}. ` : ''}Números lidos da imagem do slide ${c.slide} (${origemLeitura}). ${sumVerdict(viz, escalated, readingsAgree)}`,
           ok: false,
           viz,
           evidenceSha1: c.sha1,
-          escalated,
-          // Sem alinhamento não há acusação a sustentar: é convite a olhar, não erro.
-          ...(viz.unaligned ? { confidence: 3 as const } : {}),
+          // “escalated” é o selo de Erro na hierarquia de confiança: só quando as
+          // duas leituras concordaram e a leitura é coerente nas margens.
+          escalated: escalated && readingsAgree && !viz.incoherentReading,
+          // Sem alinhamento, com leitura incoerente ou com leituras discordantes
+          // não há acusação a sustentar: é convite a olhar, não erro.
+          ...(viz.omittedBand && !viz.unaligned
+            ? { confidence: 2 as const }
+            : viz.unaligned || viz.incoherentReading || (escalated && !readingsAgree) || (raw.stitched && !trusted)
+              ? { confidence: 3 as const }
+              : viz.totalsByFit ? { confidence: 2 as const } : {}),
         });
       }
     }
@@ -481,7 +610,8 @@ async function processImage(
         ok: false,
         viz: pc,
         evidenceSha1: c.sha1,
-        escalated,
+        escalated: trusted,
+        ...(escalated && !readingsAgree ? { confidence: 3 as const } : {}),
       });
     }
 
@@ -489,7 +619,8 @@ async function processImage(
     const bins = binsFromColumns(ext.columns);
     if (bins.length >= 3) {
       const gap = detectBinGap(bins);
-      if (gap.gapAfterIndex !== undefined) {
+      if (gap.gapAfterIndex !== undefined && !binSeen.has(gap.description ?? '')) {
+        binSeen.add(gap.description ?? '');
         flagged = true;
         findings.push({
           id: `iavis-bin-${c.sha1.slice(0, 10)}-${ti}`,
@@ -504,13 +635,52 @@ async function processImage(
             gapAfterIndex: gap.gapAfterIndex, gapDescription: gap.description,
           },
           evidenceSha1: c.sha1,
-          escalated,
+          escalated: trusted,
         });
       }
     }
 
+    // 4) faixas nas LINHAS (preço × metragem tem faixas de preço como linhas)
+    const rowBins = binsFromColumns([...new Set(rowLabels(ext))]);
+    if (rowBins.length >= 3) {
+      const gap = detectBinGap(rowBins);
+      if (gap.gapAfterIndex !== undefined && !binSeen.has(gap.description ?? '')) {
+        binSeen.add(gap.description ?? '');
+        flagged = true;
+        findings.push({
+          id: `iavis-rowbin-${c.sha1.slice(0, 10)}-${ti}`,
+          type: 'BINNING_RULE',
+          section: secao,
+          slideRef: `s${c.slide}`,
+          title: `Faixas das linhas inconsistentes (${ext.title.slice(0, 40)})`,
+          detail: gap.description ?? 'Sequência de faixas inconsistente.',
+          ok: false,
+          viz: {
+            kind: 'binrange', unit: '', bins: gap.normalizedBins ?? rowBins,
+            gapAfterIndex: gap.gapAfterIndex, gapDescription: gap.description,
+          },
+          evidenceSha1: c.sha1,
+          escalated: trusted,
+        });
+      }
+    }
+
+    // 5) formato divergente nas células transcritas (percentual sem %, casas decimais)
+    const fmtIssues = formatIssues(ext);
+    // 6) erro de digitação nos rótulos de faixa (cabeçalhos e linhas)
+    const typos = labelTypos([...ext.columns, ...rowLabels(ext)]);
+    for (const issue of typos) textIssues.push(issue);
+    for (const issue of fmtIssues) cellIssues.push(issue);
+
     if (!flagged) tablesVerified++;
   });
+
+  // Formato: o que a visão apontou + o que as strings transcritas mostram, sem repetir.
+  for (const issue of visionFormatIssues(payload?.anomalias_formato)) {
+    if (!cellIssues.some((i) => i.text === issue.text)) cellIssues.push(issue);
+  }
+  if (cellIssues.length) findings.push(formatFinding(c, secao, cellIssues));
+  if (textIssues.length) findings.push(labelTypoFinding(c, secao, textIssues));
 
   const unitViz = checkUnitPlausibility(payload?.unidades ?? []);
   if (unitViz && ((unitViz.badRows?.length ?? 0) > 0 || (unitViz.notes?.length ?? 0) > 0)) {
@@ -519,15 +689,103 @@ async function processImage(
       type: 'VALUE_PLAUSIBILITY', section: secao, slideRef: `s${c.slide}`,
       title: 'Valores a conferir na ficha técnica',
       detail: `Plausibilidade das unidades extraídas da ficha: ${unitViz.notes?.[0] ?? 'verifique os valores marcados.'}`,
-      ok: false, viz: unitViz, evidenceSha1: c.sha1, escalated,
+      ok: false, viz: unitViz, evidenceSha1: c.sha1, escalated: trusted,
     });
   }
 
+  return { findings, tables, hasVisibleSource: payload?.tem_fonte === true, tablesExtracted, tablesVerified };
+}
+
+function issuesViz(issues: FormatIssue[]) {
   return {
-    findings, tables, hasVisibleSource: payload?.tem_fonte === true,
-    tablesExtracted, tablesVerified, fromCache, inputTokens, outputTokens, costUsd, escalated,
+    kind: 'table' as const,
+    table: { title: 'Formato', columns: ['Onde', 'Texto na imagem', 'Inconsistência'], rows: issues.map((i) => [i.where, i.text, i.reason]) },
+    badRows: issues.map((_, i) => i),
+    notes: issues.map((i) => `${i.where}: «${i.text}» — ${i.reason}`),
   };
 }
+
+function formatFinding(c: TableImageCandidate, secao: Finding['section'], issues: FormatIssue[]): Finding {
+  const first = issues[0];
+  return {
+    id: `iavis-format-${c.sha1.slice(0, 10)}`,
+    type: 'FORMAT_MISMATCH', section: secao, slideRef: `s${c.slide}`,
+    title: `Formatação divergente na tabela (${issues.length} célula${issues.length > 1 ? 's' : ''})`,
+    detail: `${first.where}: «${first.text}» ${first.reason}.${issues.length > 1 ? ` Mais ${issues.length - 1} ocorrência(s) na tabela.` : ''} Confira na imagem.`,
+    ok: false, origem: 'IA_visao', confidence: 2, viz: issuesViz(issues), evidenceSha1: c.sha1,
+  };
+}
+
+function labelTypoFinding(c: TableImageCandidate, secao: Finding['section'], issues: FormatIssue[]): Finding {
+  return {
+    id: `iavis-labeltypo-${c.sha1.slice(0, 10)}`,
+    type: 'SPELLING', section: secao, slideRef: `s${c.slide}`,
+    title: `Erro de digitação em rótulo de faixa (${issues.map((i) => `«${i.text}»`).join(', ').slice(0, 60)})`,
+    detail: issues.map((i) => i.reason).join('; ') + '.',
+    ok: false, origem: 'IA_visao', confidence: 2, viz: issuesViz(issues), evidenceSha1: c.sha1,
+  };
+}
+
+/**
+ * A visão às vezes devolve UMA tabela larga como várias estreitas, uma por grupo
+ * de colunas, todas com os mesmos rótulos de linha (s53 de Campos do Jordão: 6
+ * tabelas "Município | Absoluto | %"). Separadas, nenhuma fecha e a paginação
+ * não é reconhecida. Tabelas vizinhas com rótulos de linha idênticos (≥ 3) e
+ * totais com o mesmo rótulo são costuradas lado a lado; blocos EMPILHADOS
+ * (Oferta Lançada / Final) têm títulos-bloco e totais próprios e não são unidos,
+ * pois lá os rótulos de linha se repetem mas cada bloco já fecha sozinho.
+ */
+export function stitchColumnSplits(tables: RawTable[]): RawTable[] {
+  const labels = (t: RawTable) => (t.rows ?? []).map((r) => String(r?.[0] ?? '').trim().toLowerCase());
+  const same = (a: RawTable, b: RawTable) => {
+    const la = labels(a), lb = labels(b);
+    if (la.length < 3 || la.length !== lb.length || la.some((x, i) => x !== lb[i])) return false;
+    // Blocos empilhados de lacunas também repetem as tipologias: só costura quando
+    // os rótulos NÃO são tipologias genéricas e os totais têm o mesmo rótulo.
+    if (la.every((x) => /dormit|quarto|studio|loft/.test(x))) return false;
+    // Blocos empilhados têm título de bloco (Oferta Lançada/Final, Dispon., Vendas).
+    const block = /^(oferta|dispon|disp\.|vendas|estoque|total)/i;
+    if (block.test(String(a.title ?? '').trim()) || block.test(String(b.title ?? '').trim())) return false;
+    const ta = String(a.totals?.[0] ?? ''), tb = String(b.totals?.[0] ?? '');
+    return ta === tb;
+  };
+  const out: RawTable[] = [];
+  for (const t of tables) {
+    const prev = out[out.length - 1];
+    if (prev && same(prev, t)) {
+      const group = String(t.title ?? '').trim();
+      const cols = (t.columns ?? []).slice(1).map((c) => (group ? `${group} | ${String(c ?? '')}` : String(c ?? '')));
+      const prevGroup = String(prev.title ?? '').trim();
+      if (!prev.stitched) {
+        prev.columns = [String(prev.columns?.[0] ?? ''), ...(prev.columns ?? []).slice(1).map((c) => (prevGroup ? `${prevGroup} | ${String(c ?? '')}` : String(c ?? '')))];
+        prev.stitched = true;
+      }
+      prev.columns = [...(prev.columns ?? []), ...cols];
+      prev.rows = (prev.rows ?? []).map((r, i) => [...r, ...((t.rows?.[i] ?? []).slice(1))]);
+      prev.totals = prev.totals && t.totals ? [...prev.totals, ...t.totals.slice(1)] : undefined;
+      prev.col_kinds = Array.isArray(prev.col_kinds) && Array.isArray(t.col_kinds) ? [...prev.col_kinds, ...t.col_kinds.slice(1)] : undefined;
+      prev.share_of = undefined;
+      continue;
+    }
+    out.push({ ...t });
+  }
+  return out;
+}
+
+/** Frase final do achado de soma: por que confiar (ou não) na leitura. */
+function sumVerdict(viz: { incoherentReading?: boolean; omittedBand?: boolean }, escalated: boolean, agree: boolean): string {
+  if (viz.omittedBand) return 'Todas as colunas ficam abaixo do total na mesma proporção: isso não depende de um dígito lido. Confira se falta uma faixa ou linha na tabela.';
+  if (viz.incoherentReading) return 'A leitura não fecha nem nas próprias margens: trate como provável erro de leitura e confira na imagem.';
+  if (escalated && agree) return 'Duas leituras independentes (mini e 4o) encontraram a mesma diferença: provável erro real do estudo.';
+  if (escalated) return 'As duas leituras encontraram números diferentes para a mesma tabela: provável erro de leitura. Confira na imagem antes de corrigir.';
+  return 'Pode ser erro do estudo ou dígito mal lido: confira na imagem.';
+}
+
+/** Novas tentativas por imagem antes de desistir dela (2s, 4s, 8s, 16s). */
+const VISION_RETRIES = 4;
+
+/** Imagem que não pôde ser lida mesmo após as novas tentativas. */
+export interface FailedImage { slide: number; secao: string | null; titulo: string | null; name: string; kb: number; motivo: string }
 
 export async function runVisionPass(
   candidates: TableImageCandidate[],
@@ -539,6 +797,7 @@ export async function runVisionPass(
   const concurrency = Math.max(1, o.concurrency ?? 1);
 
   const findings: Finding[] = [], tables: ExtractedTableRef[] = [];
+  const failed: FailedImage[] = [];
   const sourceSlides = new Set<number>(), analyzedSlides = new Set<number>();
   let tablesExtracted = 0, tablesVerified = 0, fromCache = 0, inputTokens = 0, outputTokens = 0;
   let costUsd = 0, escalated = 0, done = 0;
@@ -548,7 +807,16 @@ export async function runVisionPass(
     while (next < candidates.length) {
       if (o.signal?.aborted) return;
       const i = next++;
-      const r = await processImage(candidates[i], model, o.expected);
+      let r: Awaited<ReturnType<typeof processImage>>;
+      try {
+        r = await processImage(candidates[i], model, o.expected);
+      } catch (err) {
+        // Uma imagem com erro vira “não lida” no relatório; as outras seguem.
+        const c = candidates[i];
+        failed.push({ slide: c.slide, secao: c.secao, titulo: c.titulo, name: c.name, kb: c.kb, motivo: `falha na leitura (${err instanceof Error ? err.message.slice(0, 80) : 'erro'})` });
+        o.onProgress?.(++done, candidates.length);
+        continue;
+      }
       findings.push(...r.findings);
       tables.push(...r.tables);
       analyzedSlides.add(candidates[i].slide);
@@ -565,19 +833,64 @@ export async function runVisionPass(
   }
   await Promise.all(Array.from({ length: Math.min(concurrency, candidates.length) }, worker));
 
+  return finalizeVisionPass({
+    findings, tables, sourceSlides, analyzedSlides, tablesExtracted, tablesVerified,
+    fromCache, inputTokens, outputTokens, escalated, costUsd, failed,
+  });
+}
+
+interface PassParts {
+  findings: Finding[]; tables: ExtractedTableRef[]; sourceSlides: Set<number>; analyzedSlides: Set<number>;
+  tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number;
+  outputTokens: number; escalated: number; costUsd: number; failed: FailedImage[];
+}
+
+/** Pós-processamento do passe inteiro (paginação), comum ao site e ao replay. */
+function finalizeVisionPass(p: PassParts): VisionPassResult {
   // Tabela grande fatiada em slides vizinhos: cada fatia repete o total do
   // conjunto e sozinha nunca fecha. Só o conjunto tem veredito (Toledo, jul/2026).
   const paged = resolvePaginatedSums(
-    tables
+    p.tables
       .filter((ref): ref is ExtractedTableRef & { sumFindingId: string } => Boolean(ref.sumFindingId))
       .map((ref) => ({ slide: ref.slide, section: toAuditSection(ref.secao), findingId: ref.sumFindingId, table: ref.table }))
   );
-
   return {
-    findings: findings.filter((f) => !paged.dropIds.has(f.id)).concat(paged.findings),
-    tables, sourceSlides: [...sourceSlides].sort((a, b) => a - b), analyzedSlides: [...analyzedSlides].sort((a, b) => a - b),
-    tablesExtracted, tablesVerified: tablesVerified + paged.verified, fromCache,
-    inputTokens, outputTokens, escalated,
-    costUsd,
+    findings: p.findings.filter((f) => !paged.dropIds.has(f.id)).concat(paged.findings),
+    tables: p.tables, sourceSlides: [...p.sourceSlides].sort((a, b) => a - b), analyzedSlides: [...p.analyzedSlides].sort((a, b) => a - b),
+    tablesExtracted: p.tablesExtracted, tablesVerified: p.tablesVerified + paged.verified, fromCache: p.fromCache,
+    inputTokens: p.inputTokens, outputTokens: p.outputTokens, escalated: p.escalated, costUsd: p.costUsd,
+    failed: p.failed,
   };
+}
+
+/**
+ * Replay SEM rede: refaz o passe de visão a partir de leituras já cacheadas
+ * (vision_cache). Usado para medir mudanças de regra num estudo real sem
+ * pagar nova leitura — e sem que a aleatoriedade do modelo mude o resultado.
+ */
+export function replayVisionPass(
+  candidates: TableImageCandidate[],
+  readings: Map<string, { payload: unknown; model?: string }>,
+  expected?: ExpectedLocation,
+): VisionPassResult {
+  const parts: PassParts = {
+    findings: [], tables: [], sourceSlides: new Set(), analyzedSlides: new Set(), tablesExtracted: 0,
+    tablesVerified: 0, fromCache: 0, inputTokens: 0, outputTokens: 0, escalated: 0, costUsd: 0, failed: [],
+  };
+  for (const c of candidates) {
+    const hit = readings.get(c.sha1);
+    if (!hit) continue;
+    const payload = sanitizeVisionPayload(hit.payload);
+    const escalated = Boolean(payload.releitura);
+    const r = analyzeVisionPayload(c, payload, { escalated, usedModel: hit.model ?? 'gpt-4o-mini', expected });
+    parts.findings.push(...r.findings);
+    parts.tables.push(...r.tables);
+    parts.analyzedSlides.add(c.slide);
+    if (r.hasVisibleSource) parts.sourceSlides.add(c.slide);
+    parts.tablesExtracted += r.tablesExtracted;
+    parts.tablesVerified += r.tablesVerified;
+    parts.fromCache += 1;
+    if (escalated) parts.escalated += 1;
+  }
+  return finalizeVisionPass(parts);
 }

@@ -375,6 +375,18 @@ export function pricesByTypology(cube: MarketCube): PriceRow[] {
  * Casas pela política Secovi, portanto não há loteamento nesta tabela.
  */
 export function horizontalPricesByStandard(cube: MarketCube): PriceRow[] {
+  if (cube.entity === 'fiergs-rs') {
+    const labels: Record<string, string> = {
+      loteamento_aberto: 'Loteamento Aberto',
+      condominio_chacaras: 'Condomínio de Chácaras',
+      loteamento_fechado: 'Loteamento Fechado',
+      condominio_casas: 'Condomínio de Casas/Sobrados',
+    };
+    const universe = horizontalProjects(cube);
+    const groups = groupBy(universe, (project) => project.horizontalSubtype ?? 'indefinido');
+    const rows = [...groups.entries()].map(([subtype, projects]) => priceRow(labels[subtype] ?? 'Não classificado', 'row', projects));
+    return [...rows, priceRow('Média Geral', 'total', universe)];
+  }
   return pricesByStandard(cube, 'Horizontal');
 }
 

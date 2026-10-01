@@ -1,0 +1,510 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { buildCityCube, mergeCubes } from '../src/features/panorama-secovi-fiergs/domain/cube';
+import { normalizeInternalBuilding } from '../src/features/panorama-secovi-fiergs/api';
+import { offerByAreaBand, offerByStandard, offerByTypology } from '../src/features/panorama-secovi-fiergs/domain/aggregations';
+import { normalizeCityTemporalRows } from '../src/features/panorama-secovi-fiergs/domain/temporal-normalization';
+import { FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES } from '../src/features/panorama-secovi-fiergs/presets';
+import { buildPanoramaReportModel } from '../src/features/panorama-secovi-fiergs/report/model';
+import { normalizeText } from '../src/features/panorama-secovi-fiergs/domain/taxonomy';
+import { quarterIndex } from '../src/features/panorama-secovi-fiergs/domain/quarters';
+import type { Quarter } from '../src/features/panorama-secovi-fiergs/types';
+
+type Row = Record<string, unknown>;
+type Segment = 'Vertical' | 'Horizontal' | 'Unknown';
+
+const BASE = 'https://geobrain.com.br/public-api';
+const INTERNAL_V2 = 'https://app.geobrain.com.br/public-api/v2';
+const quarterArg = process.argv[3] ?? '2T2026';
+const startQuarterArg = process.argv[4] ?? '1T2023';
+if (!/^[1-4]T\d{4}$/.test(quarterArg) || !/^[1-4]T\d{4}$/.test(startQuarterArg)) {
+  throw new Error('Uso: tsx scripts/fiergs-sales-reconciliation.mts OUTPUT END_QUARTER START_QUARTER [CIDADES...]');
+}
+const requestedCities = process.argv.slice(5);
+const CITIES = requestedCities.length ? requestedCities : [...FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES];
+const END_QUARTER = quarterArg as Quarter;
+const START_QUARTER = startQuarterArg as Quarter;
+const quarterDates = (quarter: Quarter) => {
+  const match = /^([1-4])T(\d{4})$/.exec(quarter);
+  if (!match) throw new Error(`Trimestre inválido: ${quarter}`);
+  const quarterNumber = Number(match[1]);
+  const year = Number(match[2]);
+  const firstMonth = (quarterNumber - 1) * 3 + 1;
+  const lastMonth = firstMonth + 2;
+  const lastDay = new Date(Date.UTC(year, lastMonth, 0)).getUTCDate();
+  return {
+    start: `${year}-${String(firstMonth).padStart(2, '0')}-01`,
+    end: `${year}-${String(lastMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`,
+    months: [firstMonth, firstMonth + 1, lastMonth].map((month) => `${year}-${String(month).padStart(2, '0')}`),
+  };
+};
+const START_PERIOD = quarterDates(START_QUARTER).start;
+const closingQuarter = quarterDates(END_QUARTER);
+const END_PERIOD = closingQuarter.end;
+const CLOSING_MONTHS = closingQuarter.months;
+const OUTPUT = resolve(process.argv[2] ?? `.tmp/fiergs-sales-reconciliation-${END_QUARTER}.json`);
+
+function parseEnv(text: string): Record<string, string> {
+  return Object.fromEntries(text.split(/\r?\n/).flatMap((line) => {
+    const match = /^\s*([A-Z0-9_]+)\s*=\s*(.*)$/.exec(line);
+    if (!match) return [];
+    return [[match[1], match[2].trim().replace(/^(['"])(.*)\1$/, '$2')]];
+  }));
+}
+
+async function bearerToken(): Promise<string> {
+  const env = parseEnv(await readFile('.secrets/geobrain.env', 'utf8'));
+  if (env.GEOBRAIN_TOKEN) {
+    const probe = await fetch(`${BASE}/monitored-cities`, { headers: { Authorization: `Bearer ${env.GEOBRAIN_TOKEN}`, Accept: 'application/json' } });
+    if (probe.ok) return env.GEOBRAIN_TOKEN;
+  }
+  const response = await fetch(`${BASE}/auth/login`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({ email: env.GEOBRAIN_EMAIL, password: env.GEOBRAIN_PASSWORD }),
+  });
+  const payload = await response.json() as { token?: string; message?: string };
+  if (!response.ok || !payload.token) throw new Error(`GeoBrain login HTTP ${response.status}: ${payload.message ?? 'token ausente'}`);
+  return payload.token;
+}
+
+async function request(token: string, url: string, query: Record<string, string | number | string[]>, method: 'GET' | 'POST' = 'GET'): Promise<Row> {
+  const target = new URL(url);
+  for (const [key, value] of Object.entries(query)) {
+    if (Array.isArray(value)) value.forEach((item) => target.searchParams.append(key, item));
+    else target.searchParams.set(key, String(value));
+  }
+  let lastError = '';
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45_000);
+    try {
+      const response = await fetch(target, { method, headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, signal: controller.signal });
+      const text = await response.text();
+      if (response.ok) return JSON.parse(text) as Row;
+      lastError = `HTTP ${response.status}: ${text.slice(0, 240)}`;
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+    } finally {
+      clearTimeout(timeout);
+    }
+    await new Promise((done) => setTimeout(done, attempt * 500));
+  }
+  throw new Error(`${target.pathname} falhou: ${lastError}`);
+}
+
+async function paginate(token: string, url: string, query: Record<string, string | number | string[]>, method: 'GET' | 'POST' = 'GET'): Promise<Row[]> {
+  const rows: Row[] = [];
+  let page = 1;
+  let lastPage = 1;
+  do {
+    const payload = await request(token, url, { ...query, per_page: 100, page }, method);
+    rows.push(...(Array.isArray(payload.data) ? payload.data as Row[] : []));
+    const meta = payload.meta as Row | undefined;
+    lastPage = Number(meta?.last_page ?? 1);
+    page += 1;
+  } while (page <= lastPage);
+  return rows;
+}
+
+async function salesRows(token: string, city: string, groupBy: 'Padrão' | 'Tipologia'): Promise<Row[]> {
+  return paginate(token, `${BASE}/temporal-analysis-city/sales`, {
+    city,
+    uf: 'RS',
+    start_period: START_PERIOD,
+    end_period: END_PERIOD,
+    group_by: groupBy,
+    'type[]': ['Vertical', 'Horizontal'],
+  });
+}
+
+async function stockRows(token: string, city: string, groupBy: 'Padrão' | 'Tipologia'): Promise<Row[]> {
+  return paginate(token, `${BASE}/temporal-analysis-city/stock`, {
+    city,
+    uf: 'RS',
+    start_period: START_PERIOD,
+    end_period: END_PERIOD,
+    group_by: groupBy,
+    'type[]': ['Vertical', 'Horizontal'],
+  });
+}
+
+async function buildingRows(token: string, city: string): Promise<Row[]> {
+  const rows = (await Promise.all(['Vertical', 'Horizontal'].map((type) => paginate(token, `${INTERNAL_V2}/building-with-history-internal`, {
+    city,
+    uf: 'RS',
+    type,
+  }, 'POST')))).flat();
+  return rows.filter((row) => ['Ativo', 'Esgotado'].includes(String(row.status ?? ''))).map(normalizeInternalBuilding);
+}
+
+function segmentOf(row: Row): Segment {
+  const value = String(row.building_type ?? row.type ?? '').toLowerCase();
+  if (value.includes('vertical')) return 'Vertical';
+  if (value.includes('horizontal') || value.includes('casa') || value.includes('loteamento')) return 'Horizontal';
+  return 'Unknown';
+}
+
+function valueOf(row: Row): number {
+  const parsed = Number(row.liquid_sales ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function granularValueOf(row: Row): number {
+  const parsed = Number(row.sold_in_period ?? row.liquid_sales ?? row.sold ?? row.sales ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function summarizeTemporal(city: string, rows: Row[]) {
+  const normalized = normalizeCityTemporalRows(city, rows, 'flow').filter((row) => row.period === END_QUARTER);
+  const rawClosingRows = rows.filter((row) => {
+    const period = String(row.period ?? '').slice(0, 7);
+    return CLOSING_MONTHS.includes(period);
+  });
+  const totals = { Vertical: 0, Horizontal: 0, Unknown: 0 };
+  const groups = new Map<string, { vertical: number; horizontal: number; unknown: number }>();
+  for (const row of normalized) {
+    const segment = segmentOf(row);
+    totals[segment] += valueOf(row);
+    const label = String(row.group ?? row.pattern ?? row.standard ?? row.typology ?? '(sem grupo)');
+    const current = groups.get(label) ?? { vertical: 0, horizontal: 0, unknown: 0 };
+    if (segment === 'Vertical') current.vertical += valueOf(row);
+    else if (segment === 'Horizontal') current.horizontal += valueOf(row);
+    else current.unknown += valueOf(row);
+    groups.set(label, current);
+  }
+  return {
+    rawRows: rows.length,
+    normalizedClosingRows: normalized.length,
+    rawPeriodKinds: [...new Set(rows.map((row) => String(row.period ?? '')))].filter((period) => period.includes(END_QUARTER.slice(2))).sort(),
+    rawClosingRows: rawClosingRows.map((row) => ({
+      period: String(row.period ?? ''),
+      segment: segmentOf(row),
+      group: String(row.group ?? row.pattern ?? row.standard ?? row.typology ?? '(sem grupo)'),
+      liquidSales: valueOf(row),
+    })),
+    closingRows: normalized.map((row) => ({
+      period: String(row.period ?? ''),
+      observedPeriod: String(row.temporal_observed_period ?? row.period ?? ''),
+      segment: segmentOf(row),
+      group: String(row.group ?? row.pattern ?? row.standard ?? row.typology ?? '(sem grupo)'),
+      liquidSales: valueOf(row),
+    })),
+    totals: { ...totals, allSegments: totals.Vertical + totals.Horizontal + totals.Unknown },
+    groups: [...groups].map(([label, values]) => ({ label, ...values })).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR')),
+  };
+}
+
+function stockValueOf(row: Row): number {
+  const parsed = Number(row.stock ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function summarizeStock(city: string, rows: Row[]) {
+  const normalized = normalizeCityTemporalRows(city, rows, 'snapshot').filter((row) => row.period === END_QUARTER);
+  const totals = { Vertical: 0, Horizontal: 0, Unknown: 0 };
+  const groups = new Map<string, { vertical: number; horizontal: number; unknown: number }>();
+  for (const row of normalized) {
+    const segment = segmentOf(row);
+    totals[segment] += stockValueOf(row);
+    const label = String(row.group ?? row.pattern ?? row.standard ?? row.typology ?? '(sem grupo)');
+    const current = groups.get(label) ?? { vertical: 0, horizontal: 0, unknown: 0 };
+    if (segment === 'Vertical') current.vertical += stockValueOf(row);
+    else if (segment === 'Horizontal') current.horizontal += stockValueOf(row);
+    else current.unknown += stockValueOf(row);
+    groups.set(label, current);
+  }
+  return {
+    rawRows: rows.length,
+    closingRows: normalized.map((row) => ({
+      period: String(row.period ?? ''),
+      observedPeriod: String(row.temporal_observed_period ?? row.period ?? ''),
+      segment: segmentOf(row),
+      group: String(row.group ?? row.pattern ?? row.standard ?? row.typology ?? '(sem grupo)'),
+      stock: stockValueOf(row),
+    })),
+    totals: { ...totals, allSegments: totals.Vertical + totals.Horizontal + totals.Unknown },
+    groups: [...groups].map(([label, values]) => ({ label, ...values })).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR')),
+  };
+}
+
+function granularProjectEvidence(buildings: Row[], cube: ReturnType<typeof buildCityCube>) {
+  const rawById = new Map(buildings.map((row) => [String(row.building_id ?? row.id ?? ''), row]));
+  return cube.projects.filter((project) => project.segment === 'Vertical').flatMap((project) => {
+    const raw = rawById.get(project.buildingId);
+    const history = Array.isArray(raw?.typologies_history) ? raw.typologies_history as Row[] : [];
+    const closing = history.filter((entry) => String(entry.period ?? '').slice(0, 7) <= CLOSING_MONTHS.at(-1)!);
+    const quarter = closing.filter((entry) => {
+      const month = String(entry.period ?? '').slice(0, 7);
+      return CLOSING_MONTHS.includes(month);
+    });
+    const months = Object.fromEntries(CLOSING_MONTHS.map((month) => [month, quarter
+      .filter((entry) => String(entry.period ?? '').slice(0, 7) === month)
+      .reduce((sum, entry) => sum + granularValueOf(entry), 0)]));
+    const quarterSum = Object.values(months).reduce((sum, value) => sum + value, 0);
+    const latestMonth = closing.map((entry) => String(entry.period ?? '').slice(0, 7)).sort().at(-1) ?? null;
+    const latestMonthSold = latestMonth === null ? 0 : closing
+      .filter((entry) => String(entry.period ?? '').slice(0, 7) === latestMonth)
+      .reduce((sum, entry) => sum + granularValueOf(entry), 0);
+    const cubeSold = project.soldUnits ?? 0;
+    if (quarterSum === cubeSold) return [];
+    return [{
+      buildingId: project.buildingId,
+      name: project.name,
+      releaseQuarter: project.releaseQuarter,
+      months,
+      quarterHistorySum: quarterSum,
+      latestObservedMonth: latestMonth,
+      latestObservedMonthSold: latestMonthSold,
+      cubeSold,
+      historySumMinusCube: quarterSum - cubeSold,
+    }];
+  });
+}
+
+function chacaraEvidence(buildings: Row[]) {
+  return buildings.flatMap((building) => {
+    if (!String(building.building_type ?? building.type ?? '').toLowerCase().includes('horizontal')) return [];
+    const history = Array.isArray(building.typologies_history) ? building.typologies_history as Row[] : [];
+    const labels = [building.standard, building.pattern, ...history.map((row) => row.pattern ?? row.standard)].map(normalizeText);
+    if (!labels.includes('condominio de chacaras')) return [];
+    const withinWindow = history.filter((row) => String(row.period ?? '').slice(0, 7) <= CLOSING_MONTHS.at(-1)!);
+    const latestMonth = withinWindow.map((row) => String(row.period ?? '').slice(0, 7)).sort().at(-1) ?? null;
+    const latest = latestMonth ? withinWindow.filter((row) => String(row.period ?? '').slice(0, 7) === latestMonth) : [];
+    const finalUnits = latest.reduce((total, row) => total + Number(row.typology_stock ?? row.stock ?? 0), 0);
+    return [{ buildingId: String(building.building_id ?? building.id ?? ''), name: String(building.name ?? ''), latestMonth, finalUnits }];
+  });
+}
+
+const token = await bearerToken();
+const cities = [];
+const cubes = [];
+const patternSources: { city: string; rows: Row[] }[] = [];
+const typologySources: { city: string; rows: Row[] }[] = [];
+const stockPatternSources: { city: string; rows: Row[] }[] = [];
+const stockTypologySources: { city: string; rows: Row[] }[] = [];
+
+for (const city of CITIES) {
+  process.stdout.write(`${city}… `);
+  const [patternRows, typologyRows, stockPatternRows, stockTypologyRows, buildings] = await Promise.all([
+    salesRows(token, city, 'Padrão'),
+    salesRows(token, city, 'Tipologia'),
+    stockRows(token, city, 'Padrão'),
+    stockRows(token, city, 'Tipologia'),
+    buildingRows(token, city),
+  ]);
+  const pattern = summarizeTemporal(city, patternRows);
+  const typology = summarizeTemporal(city, typologyRows);
+  const stockPattern = summarizeStock(city, stockPatternRows);
+  const stockTypology = summarizeStock(city, stockTypologyRows);
+  patternSources.push({ city, rows: patternRows });
+  typologySources.push({ city, rows: typologyRows });
+  stockPatternSources.push({ city, rows: stockPatternRows });
+  stockTypologySources.push({ city, rows: stockTypologyRows });
+  const cube = buildCityCube(buildings, { city, uf: 'RS', endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' });
+  cubes.push(cube);
+  const areaTotal = offerByAreaBand(cube).find((row) => row.kind === 'total');
+  const verticalProjects = cube.projects.filter((project) => project.segment === 'Vertical');
+  const inLaunchWindow = (releaseQuarter: Quarter) => quarterIndex(releaseQuarter) >= quarterIndex(START_QUARTER)
+    && quarterIndex(releaseQuarter) <= quarterIndex(END_QUARTER);
+  const granularAllSold = verticalProjects.reduce((sum, project) => sum + (project.soldUnits ?? 0), 0);
+  const granularWithAreaSold = areaTotal?.soldUnits ?? 0;
+  const granularAllStock = verticalProjects.reduce((sum, project) => sum + (project.finalUnits ?? 0), 0);
+  const granularWithAreaStock = areaTotal?.finalUnits ?? 0;
+  const projectStockDifferences = verticalProjects.flatMap((project) => {
+    const typologyStock = project.typologies.reduce((total, row) => total + (row.finalUnits ?? 0), 0);
+    const projectStock = project.finalUnits ?? 0;
+    return projectStock === typologyStock ? [] : [{
+      buildingId: project.buildingId,
+      name: project.name,
+      projectStock,
+      typologyStock,
+      difference: projectStock - typologyStock,
+    }];
+  });
+  const projectEvidence = granularProjectEvidence(buildings, cube);
+  const chacaras = chacaraEvidence(buildings);
+  cities.push({
+    city,
+    pattern,
+    typology,
+    stockPattern,
+    stockTypology,
+    currentCitySlide: pattern.totals.allSegments,
+    granular: {
+      acceptedProjects: cube.projects.length,
+      acceptedVerticalProjects: verticalProjects.length,
+      rejectedProjects: cube.rejections.length,
+      allVerticalSold: granularAllSold,
+      areaBandSold: granularWithAreaSold,
+      withoutAreaSold: granularAllSold - granularWithAreaSold,
+      projectsWhereQuarterHistoryDiffersFromCube: projectEvidence,
+      projects: cube.projects.map((project) => ({
+        key: project.key,
+        buildingId: project.buildingId,
+        city: project.city,
+        name: project.name,
+        segment: project.segment,
+        standard: project.standard,
+        horizontalSubtype: project.horizontalSubtype,
+        releaseQuarter: project.releaseQuarter,
+        inLaunchWindow: inLaunchWindow(project.releaseQuarter),
+        launchedUnits: project.launchedUnits,
+        finalUnits: project.finalUnits,
+        soldUnits: project.soldUnits,
+        typologyLaunchedUnits: project.typologies.reduce((total, row) => total + (row.launchedUnits ?? 0), 0),
+        typologyFinalUnits: project.typologies.reduce((total, row) => total + (row.finalUnits ?? 0), 0),
+        typologySoldUnits: project.typologies.reduce((total, row) => total + (row.soldUnits ?? 0), 0),
+        typologies: project.typologies.map((row) => ({
+          typology: row.typology,
+          area: row.area,
+          launchedUnits: row.launchedUnits,
+          finalUnits: row.finalUnits,
+          soldUnits: row.soldUnits,
+        })),
+      })),
+    },
+    stock: {
+      granularAllVertical: granularAllStock,
+      granularAreaBand: granularWithAreaStock,
+      granularWithoutArea: granularAllStock - granularWithAreaStock,
+      byStandard: offerByStandard(cube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
+      byTypology: offerByTypology(cube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
+      projects: verticalProjects.map((project) => ({
+        buildingId: project.buildingId,
+        name: project.name,
+        standard: project.standard,
+        finalUnits: project.finalUnits,
+        typologies: project.typologies.map((row) => ({ typology: row.typology, finalUnits: row.finalUnits })),
+      })),
+      projectStockDifferences,
+    },
+    horizontalPolicy: {
+      rejectedChacaras: chacaras,
+      rejectedChacaraProjects: chacaras.length,
+      rejectedChacaraFinalUnits: chacaras.reduce((total, row) => total + row.finalUnits, 0),
+    },
+    deltas: {
+      typologyMinusPatternVertical: typology.totals.Vertical - pattern.totals.Vertical,
+      citySlideMinusPatternVertical: pattern.totals.allSegments - pattern.totals.Vertical,
+      areaMinusPatternVertical: granularWithAreaSold - pattern.totals.Vertical,
+    },
+  });
+  console.log(`vendas P=${pattern.totals.Vertical} T=${typology.totals.Vertical} A=${granularWithAreaSold}; estoque P=${stockPattern.totals.Vertical} T=${stockTypology.totals.Vertical} G=${granularAllStock} A=${granularWithAreaStock}`);
+}
+
+const mergedCube = mergeCubes(cubes, END_QUARTER, 'fiergs-rs');
+const mergedAreaTotal = offerByAreaBand(mergedCube).find((row) => row.kind === 'total');
+const sum = (pick: (row: typeof cities[number]) => number) => cities.reduce((total, row) => total + pick(row), 0);
+const totals = {
+  patternVertical: sum((row) => row.pattern.totals.Vertical),
+  patternHorizontal: sum((row) => row.pattern.totals.Horizontal),
+  patternUnknown: sum((row) => row.pattern.totals.Unknown),
+  patternAllSegments: sum((row) => row.pattern.totals.allSegments),
+  typologyVertical: sum((row) => row.typology.totals.Vertical),
+  typologyHorizontal: sum((row) => row.typology.totals.Horizontal),
+  typologyUnknown: sum((row) => row.typology.totals.Unknown),
+  currentCitySlide: sum((row) => row.currentCitySlide),
+  granularAllVerticalSold: sum((row) => row.granular.allVerticalSold),
+  granularAreaBandSold: mergedAreaTotal?.soldUnits ?? 0,
+  granularWithoutAreaSold: sum((row) => row.granular.withoutAreaSold),
+};
+const stockTotals = {
+  patternVertical: sum((row) => row.stockPattern.totals.Vertical),
+  patternHorizontal: sum((row) => row.stockPattern.totals.Horizontal),
+  typologyVertical: sum((row) => row.stockTypology.totals.Vertical),
+  typologyHorizontal: sum((row) => row.stockTypology.totals.Horizontal),
+  granularAllVertical: sum((row) => row.stock.granularAllVertical),
+  granularAreaBand: sum((row) => row.stock.granularAreaBand),
+  granularWithoutArea: sum((row) => row.stock.granularWithoutArea),
+};
+const horizontalPolicyTotals = {
+  rejectedChacaraProjects: sum((row) => row.horizontalPolicy.rejectedChacaraProjects),
+  rejectedChacaraFinalUnits: sum((row) => row.horizontalPolicy.rejectedChacaraFinalUnits),
+};
+const source = (rows: Row[], available = true) => ({ rows, available, source: `bancada autenticada FIERGS ${END_QUARTER}` });
+const empty = source([], false);
+const runtimeModel = buildPanoramaReportModel({ uf: 'RS', cities: CITIES, startQuarter: START_QUARTER, endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' }, [], {
+  sales: source(patternSources.flatMap((item) => item.rows)),
+  salesTypology: source(typologySources.flatMap((item) => item.rows)),
+  stock: source(stockPatternSources.flatMap((item) => item.rows)),
+  stockTypology: source(stockTypologySources.flatMap((item) => item.rows)),
+  ivv: empty, ivvTypology: empty,
+  ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty,
+}, [], {
+  cubes,
+  provenance: { requestedCities: CITIES, completedCities: CITIES, failedCities: [] },
+  citySalesSources: patternSources,
+});
+const runtime = {
+  patternVertical: runtimeModel.sales.units.series.at(-1)?.vertical ?? null,
+  typologyVertical: runtimeModel.sales.unitsByTypology.series.at(-1)?.vertical ?? null,
+  cityVertical: runtimeModel.cityComparisons.sales.reduce((total, row) => total + (row.liquidSales ?? 0), 0),
+  areaVertical: runtimeModel.granular.areaBands.find((row) => row.kind === 'total')?.soldUnits ?? null,
+  patternSource: runtimeModel.sales.units.source,
+  typologyGroups: runtimeModel.sales.unitsByTypology.byGroup.map((row) => ({ label: row.label, vertical: row.vertical })),
+  stockPatternVertical: runtimeModel.stock.units.series.at(-1)?.vertical ?? null,
+  stockTypologyVertical: runtimeModel.stock.unitsByTypology.series.at(-1)?.vertical ?? null,
+  stockAreaVertical: runtimeModel.granular.areaBands.find((row) => row.kind === 'total')?.finalUnits ?? null,
+  stockGranularDimensions: {
+    pattern: runtimeModel.granular.offerByStandard.find((row) => row.kind === 'total')?.finalUnits ?? null,
+    typology: runtimeModel.granular.offerByTypology.find((row) => row.kind === 'total')?.finalUnits ?? null,
+    area: runtimeModel.granular.areaBands.find((row) => row.kind === 'total')?.finalUnits ?? null,
+    cohort: runtimeModel.granular.cohortsVertical.find((row) => row.kind === 'total')?.finalUnits ?? null,
+    maturityPattern: runtimeModel.granular.maturityByStandard.find((row) => row.kind === 'total')?.final.total ?? null,
+    maturityTypology: runtimeModel.granular.maturityByTypology.find((row) => row.kind === 'total')?.final.total ?? null,
+    pricePatternProjects: runtimeModel.granular.pricesByStandard.find((row) => row.kind === 'total')?.projects ?? null,
+    priceTypologyProjects: runtimeModel.granular.pricesByTypology.find((row) => row.kind === 'total')?.projects ?? null,
+  },
+  stockByStandard: offerByStandard(mergedCube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
+  stockByTypology: offerByTypology(mergedCube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
+  acceptedHorizontalProjects: runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').length,
+  acceptedHorizontalFinalUnits: runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').reduce((total, project) => total + (project.finalUnits ?? 0), 0),
+  horizontalConsolidated: (() => {
+    const row = runtimeModel.granular.vgv.find((item) => item.kind === 'subtotal' && item.segment === 'Horizontal');
+    return row ? { projects: row.projects, launchedUnits: row.launchedUnits, finalUnits: row.finalUnits } : null;
+  })(),
+  horizontalLabels: [...new Set(runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').map((project) => project.horizontalSubtype))],
+  mapAudit: (() => {
+    const valid = runtimeModel.cube.projects.filter((project) => project.latitude !== null && project.longitude !== null
+      && Number.isFinite(project.latitude) && Number.isFinite(project.longitude)
+      && project.latitude >= -85.05112878 && project.latitude <= 85.05112878
+      && project.longitude >= -180 && project.longitude <= 180);
+    return {
+      cubeRows: runtimeModel.cube.projects.length,
+      uniqueProjects: new Set(runtimeModel.cube.projects.map((project) => project.key)).size,
+      georeferencedProjects: new Set(valid.map((project) => project.key)).size,
+      withoutValidCoordinates: new Set(runtimeModel.cube.projects.map((project) => project.key)).size - new Set(valid.map((project) => project.key)).size,
+      renderedMarkersPerMap: runtimeModel.locations.length,
+      renderedUniqueProjects: new Set(runtimeModel.locations.map((location) => location.projectKey)).size,
+      verticalRendered: runtimeModel.locations.filter((location) => location.segment === 'Vertical').length,
+      horizontalRendered: runtimeModel.locations.filter((location) => location.segment === 'Horizontal').length,
+    };
+  })(),
+  reconciliation: runtimeModel.reconciliation,
+};
+
+const output = {
+  generatedAt: new Date().toISOString(),
+  scope: { uf: 'RS', cities: CITIES, startPeriod: START_PERIOD, endPeriod: END_PERIOD, startQuarter: START_QUARTER, endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' },
+  contracts: {
+    pattern: 'temporal-analysis-city/sales?group_by=Padrão; fluxo normalizado por cidade',
+    typology: 'temporal-analysis-city/sales?group_by=Tipologia; fluxo normalizado por cidade',
+    citySlide: 'fonte Padrão somando todos os segmentos, apesar do título vertical',
+    area: 'building-with-history-internal; último mês disponível por empreendimento/tipologia com área',
+  },
+  totals,
+  stockTotals,
+  horizontalPolicyTotals,
+  runtime,
+  deltas: {
+    typologyMinusPatternVertical: totals.typologyVertical - totals.patternVertical,
+    citySlideMinusPatternVertical: totals.currentCitySlide - totals.patternVertical,
+    areaMinusPatternVertical: totals.granularAreaBandSold - totals.patternVertical,
+  },
+  cities,
+};
+
+await writeFile(OUTPUT, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
+console.log(`\nEvidência salva em ${OUTPUT}`);
+console.log(JSON.stringify({ totals, stockTotals, horizontalPolicyTotals, runtime, deltas: output.deltas }, null, 2));

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import { MultiSelect, type MultiSelectOption } from './MultiSelect';
 import type { Filters } from './types';
-import type { extractOptions, extractRangeOptions } from './aggregate';
+import { bedroomLabel, type extractOptions, type extractRangeOptions } from './aggregate';
 
 type Options = ReturnType<typeof extractOptions>;
 type RangeOptions = ReturnType<typeof extractRangeOptions>;
@@ -27,7 +27,7 @@ export function Sidebar({ open, onClose, filters, onFiltersChange, options, rang
   const set = <K extends keyof Filters>(k: K, v: Filters[K]) => onFiltersChange({ ...filters, [k]: v });
 
   const bedroomOpts = useMemo<MultiSelectOption[]>(
-    () => options.bedrooms.map((b) => ({ value: b, label: b === '0' ? '0 (Studio)' : `${b} dorm${b === '1' ? '' : 's'}` })),
+    () => options.bedrooms.map((b) => ({ value: b, label: bedroomLabel(b) })),
     [options.bedrooms],
   );
   const garageOpts = useMemo<MultiSelectOption[]>(
@@ -63,6 +63,8 @@ export function Sidebar({ open, onClose, filters, onFiltersChange, options, rang
         <div className="flex-1 space-y-3 overflow-y-auto p-3">
           <MultiSelect label="Ano" options={toOpts(options.years)} value={filters.years} onChange={(v) => set('years', v)} />
           <MultiSelect label="Períodos (mês)" options={options.months} value={filters.periods} onChange={(v) => set('periods', v)} />
+          <MultiSelect label="UF" options={toOpts(options.states)} value={filters.states} onChange={(v) => set('states', v)} />
+          <MultiSelect label="Municípios" options={toOpts(options.cities)} value={filters.cities} onChange={(v) => set('cities', v)} />
           <MultiSelect label="Situação" options={statusOpts} value={filters.status} onChange={(v) => set('status', v)} />
           <MultiSelect label="Tipologia" options={toOpts(options.typologies)} value={filters.typologies} onChange={(v) => set('typologies', v)} />
           <MultiSelect label="Padrão" options={toOpts(options.standards)} value={filters.standards} onChange={(v) => set('standards', v)} />

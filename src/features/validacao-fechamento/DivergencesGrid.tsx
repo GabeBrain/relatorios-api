@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as XLSX from 'xlsx';
 import { ArrowDown, ArrowUp, Check, Copy, Download, Eye, EyeOff, Info, Search } from 'lucide-react';
 import { flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable, type ColumnDef, type ColumnFiltersState, type SortingState, type VisibilityState } from '@tanstack/react-table';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useAuthStore } from '@/store/auth-store';
@@ -17,7 +16,7 @@ function approvalDate(value: string | undefined): string {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString('pt-BR');
 }
 
-export function DivergencesGrid({ rows }: { rows: Divergence[] }) {
+export function DivergencesGrid({ rows, onDivergenceCountChange }: { rows: Divergence[]; onDivergenceCountChange?: (count: number) => void }) {
   const token = useAuthStore((state) => state.getToken());
   const email = useAuthStore((state) => state.email);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -62,7 +61,9 @@ export function DivergencesGrid({ rows }: { rows: Divergence[] }) {
     }
   }, [email, token]);
 
-  const visibleRows = useMemo(() => showApproved ? rows : rows.filter((row) => !approvals[approvalKey(row)]), [approvals, rows, showApproved]);
+  const unapprovedRows = useMemo(() => rows.filter((row) => !approvals[approvalKey(row)]), [approvals, rows]);
+  const visibleRows = showApproved ? rows : unapprovedRows;
+  useEffect(() => { onDivergenceCountChange?.(unapprovedRows.length); }, [onDivergenceCountChange, unapprovedRows.length]);
   const columns = useMemo<ColumnDef<Divergence>[]>(() => [
     { accessorKey: 'building_name', header: 'Empreendimento', size: 210 },
     { accessorKey: 'private_area', header: 'Área Privativa', size: 110 },
@@ -84,9 +85,8 @@ export function DivergencesGrid({ rows }: { rows: Divergence[] }) {
 
   const table = useReactTable({ data: visibleRows, columns, state: { sorting, columnFilters, columnVisibility, globalFilter }, onSortingChange: setSorting, onColumnFiltersChange: setColumnFilters, onColumnVisibilityChange: setColumnVisibility, onGlobalFilterChange: setGlobalFilter, getCoreRowModel: getCoreRowModel(), getSortedRowModel: getSortedRowModel(), getFilteredRowModel: getFilteredRowModel(), columnResizeMode: 'onChange' });
   const modelRows = table.getRowModel().rows;
-  const parentRef = useRef<HTMLDivElement>(null);
-  const virtualizer = useVirtualizer({ count: modelRows.length, getScrollElement: () => parentRef.current, estimateSize: () => 42, overscan: 12 });
-  const totalWidth = useMemo(() => table.getVisibleLeafColumns().reduce((sum, column) => sum + column.getSize(), 0), [table, columnVisibility]);
+  const visibleColumnSize = table.getVisibleLeafColumns().reduce((sum, column) => sum + column.getSize(), 0);
+  const widthOf = (size: number) => `${(size / visibleColumnSize) * 100}%`;
 
   function download() {
     const data = rows.map((row) => {
@@ -129,6 +129,6 @@ export function DivergencesGrid({ rows }: { rows: Divergence[] }) {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-    <div className="vf-grid-wrap"><div ref={parentRef} className="overflow-auto" style={{ maxHeight: 640 }}><table className="vf-grid vf-divergences" style={{ width: totalWidth, minWidth: '100%' }}><thead>{table.getHeaderGroups().map((headerGroup) => <tr key={headerGroup.id}>{headerGroup.headers.map((header) => { const sorted = header.column.getIsSorted(); return <th key={header.id} style={{ width: header.getSize(), position: 'sticky', top: 0 }}><div className="flex items-center gap-1"><button type="button" className="flex-1 text-left" onClick={header.column.getToggleSortingHandler()}>{flexRender(header.column.columnDef.header, header.getContext())}{sorted === 'asc' && <ArrowUp className="ml-1 inline h-3 w-3" />}{sorted === 'desc' && <ArrowDown className="ml-1 inline h-3 w-3" />}</button>{header.column.id === 'value' && <Popover><PopoverTrigger asChild><button type="button" className="vf-info" aria-label="Regras de agrupamentos"><Info className="h-3.5 w-3.5" /></button></PopoverTrigger><PopoverContent align="start" className="w-96 text-[10pt] leading-relaxed"><strong>Regras de agrupamentos</strong><p className="mt-1 text-muted-foreground">Regras de empreendimento usam <code>building_id + período</code>, somando as tipologias da fotografia. Regras de cidade usam <code>cidade + tipo do empreendimento + tipo de tipologia + padrão + dormitórios + período</code>. A validação considera a última fotografia disponível de cada empreendimento ou tipologia.</p></PopoverContent></Popover>}<div onMouseDown={header.getResizeHandler()} onTouchStart={header.getResizeHandler()} className="vf-resizer" /></div>{header.column.id !== 'approval_action' && <input className="vf-col-filter mt-1" value={(header.column.getFilterValue() as string) ?? ''} onChange={(event) => header.column.setFilterValue(event.target.value)} placeholder="Filtro…" onClick={(event) => event.stopPropagation()} />}</th>; })}</tr>)}</thead><tbody style={{ display: 'block', height: virtualizer.getTotalSize(), position: 'relative' }}>{virtualizer.getVirtualItems().map((virtualRow) => { const row = modelRows[virtualRow.index]; return <tr key={row.id} style={{ position: 'absolute', top: 0, transform: `translateY(${virtualRow.start}px)`, display: 'table', tableLayout: 'fixed', width: totalWidth }}>{row.getVisibleCells().map((cell) => <td key={cell.id} style={{ width: cell.column.getSize() }}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>)}</tr>; })}</tbody></table>{modelRows.length === 0 && <div className="p-6 text-center text-sm text-[var(--vf-muted)]">Nenhuma divergência para os filtros selecionados.</div>}</div></div>
+    <div className="vf-grid-wrap"><div className="overflow-y-auto overflow-x-hidden" style={{ maxHeight: 640 }}><table className="vf-grid vf-divergences" style={{ width: '100%', minWidth: 0 }}><thead>{table.getHeaderGroups().map((headerGroup) => <tr key={headerGroup.id}>{headerGroup.headers.map((header) => { const sorted = header.column.getIsSorted(); return <th key={header.id} style={{ width: widthOf(header.getSize()), position: 'sticky', top: 0 }}><div className="flex items-center gap-1"><button type="button" className="flex-1 text-left" onClick={header.column.getToggleSortingHandler()}>{flexRender(header.column.columnDef.header, header.getContext())}{sorted === 'asc' && <ArrowUp className="ml-1 inline h-3 w-3" />}{sorted === 'desc' && <ArrowDown className="ml-1 inline h-3 w-3" />}</button>{header.column.id === 'value' && <Popover><PopoverTrigger asChild><button type="button" className="vf-info" aria-label="Regras de agrupamentos"><Info className="h-3.5 w-3.5" /></button></PopoverTrigger><PopoverContent align="start" className="w-96 text-[10pt] leading-relaxed"><strong>Regras de agrupamentos</strong><p className="mt-1 text-muted-foreground">Regras de empreendimento usam <code>building_id + período</code>, somando as tipologias da fotografia. Regras de cidade usam <code>cidade + tipo do empreendimento + tipo de tipologia + padrão + dormitórios + período</code>. A validação considera a última fotografia disponível de cada empreendimento ou tipologia.</p></PopoverContent></Popover>}<div onMouseDown={header.getResizeHandler()} onTouchStart={header.getResizeHandler()} className="vf-resizer" /></div>{header.column.id !== 'approval_action' && <input className="vf-col-filter mt-1" value={(header.column.getFilterValue() as string) ?? ''} onChange={(event) => header.column.setFilterValue(event.target.value)} placeholder="Filtro…" onClick={(event) => event.stopPropagation()} />}</th>; })}</tr>)}</thead><tbody>{modelRows.map((row) => { const approved = Boolean(approvals[approvalKey(row.original)]); return <tr key={row.id} className={approved ? 'vf-div-approved' : undefined}>{row.getVisibleCells().map((cell) => <td key={cell.id} style={{ width: widthOf(cell.column.getSize()) }}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>)}</tr>; })}</tbody></table>{modelRows.length === 0 && <div className="p-6 text-center text-sm text-[var(--vf-muted)]">Nenhuma divergência para os filtros selecionados.</div>}</div></div>
   </div>;
 }

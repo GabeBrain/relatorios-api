@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { SECOVI_SP_POLICY, classifyHorizontalSubtype, classifySecoviTemporalRow, entityPolicy } from '../domain/entity-policy';
+import { FIERGS_RS_POLICY, SECOVI_SP_POLICY, classifyEntityTemporalRow, classifyHorizontalSubtype, classifySecoviTemporalRow, entityPolicy } from '../domain/entity-policy';
+import { FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES, FIERGS_RM_PORTO_ALEGRE_PRESET } from '../presets';
 import {
   UNCLASSIFIED,
   canonicalStandard,
@@ -55,8 +56,8 @@ describe('OP-1 · política de universo Secovi (G-03)', () => {
     expect(SECOVI_SP_POLICY.classify({ segment: 'Horizontal', rawType: 'Horizontal' }).accepted).toBe(false);
   });
 
-  it('mantém a extensão FIERGS explícita, sem herdar a regra Secovi em silêncio', () => {
-    expect(() => entityPolicy('fiergs-rs')).toThrow(/fiergs-rs/);
+  it('mantém a política FIERGS explícita, sem herdar a regra Secovi em silêncio', () => {
+    expect(entityPolicy('fiergs-rs')).toBe(FIERGS_RS_POLICY);
     expect(entityPolicy().id).toBe('secovi-sp');
   });
 
@@ -69,6 +70,51 @@ describe('OP-1 · política de universo Secovi (G-03)', () => {
       expect(classifySecoviTemporalRow('Horizontal', label)).toBe('exclude');
     }
     expect(classifySecoviTemporalRow('Horizontal', 'Produto novo')).toBe('unknown');
+  });
+});
+
+describe('FIERGS-RS · política horizontal e preset', () => {
+  const products = [
+    ['Loteamento Aberto', 'loteamento_aberto'],
+    ['Loteamento Fechado', 'loteamento_fechado'],
+    ['Condomínio de Casas/Sobrados', 'condominio_casas'],
+  ] as const;
+
+  it('aceita os três produtos horizontais homologáveis e os preserva na taxonomia', () => {
+    for (const [standard, subtype] of products) {
+      const decision = FIERGS_RS_POLICY.classify({ segment: 'Horizontal', standard });
+      expect(decision).toMatchObject({ accepted: true, horizontalSubtype: subtype, reason: null });
+      expect(classifyEntityTemporalRow('fiergs-rs', 'Horizontal', standard)).toBe('keep');
+    }
+  });
+
+  it('rejeita Condomínio de Chácaras no cubo e nos contratos temporais FIERGS', () => {
+    expect(FIERGS_RS_POLICY.classify({ segment: 'Horizontal', standard: 'Condomínio de Chácaras' })).toMatchObject({
+      accepted: false,
+      horizontalSubtype: 'condominio_chacaras',
+      reason: 'horizontal_fora_da_politica',
+    });
+    expect(classifyEntityTemporalRow('fiergs-rs', 'Horizontal', 'Condomínio de Chácaras')).toBe('exclude');
+  });
+
+  it('não amplia o universo horizontal por inferência', () => {
+    for (const standard of ['Terreno', 'Produto novo', undefined]) {
+      expect(FIERGS_RS_POLICY.classify({ segment: 'Horizontal', standard }).accepted).toBe(false);
+    }
+    expect(classifyEntityTemporalRow('secovi-sp', 'Horizontal', 'Loteamento Aberto')).toBe('exclude');
+  });
+
+  it('fixa o recorte editorial nas 10 cidades do entorno, sem Porto Alegre', () => {
+    expect(FIERGS_RM_PORTO_ALEGRE_PRESET).toMatchObject({
+      id: 'fiergs-rm-porto-alegre',
+      label: 'Recorte FIERGS — RM Porto Alegre (sem Porto Alegre)',
+      scope: { uf: 'RS', entity: 'fiergs-rs', engineVersion: 'v4' },
+    });
+    expect(FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES).toHaveLength(10);
+    expect(new Set(FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES).size).toBe(10);
+    expect(FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES).toContain('Novo Hamburgo');
+    expect(FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES).not.toContain('Porto Alegre');
+    expect(FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES).not.toContain('Estância Velha');
   });
 });
 

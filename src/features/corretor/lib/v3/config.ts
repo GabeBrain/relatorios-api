@@ -9,7 +9,9 @@ export const FX_BRL_PER_USD = 5.16;
 
 // Quantas imagens de tabela a visão processa em paralelo (corta o tempo de
 // relógio de ~10 min sequenciais p/ ~2-3 min sem estourar rate-limit da edge).
-export const VISION_CONCURRENCY = 5;
+// 3 (era 5): a edge limita 30 chamadas/min por IP; com releituras no 4o, 5 em
+// paralelo estourava o limite no meio do estudo (João Pessoa, 30/set).
+export const VISION_CONCURRENCY = 3;
 
 export function usdToBrl(usd: number): number {
   return usd * FX_BRL_PER_USD;

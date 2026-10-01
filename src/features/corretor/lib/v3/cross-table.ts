@@ -27,7 +27,12 @@ function asCross(refs: ExtractedTableRef[]): CrossTableRef[] {
   return refs.map((r) => ({ ...r, source: 'vision' as const }));
 }
 
+/** Contagem de cruzamentos feitos e dos que bateram — base do resumo de acertos. */
+export interface CrossStats { feitos: number; batem: number }
+let stats: CrossStats | null = null;
+
 function mismatch(id: string, type: 'CROSS_TABLE_MISMATCH' | 'TOTALS_EQUALITY', section: Finding['section'], left: CrossTableRef, right: CrossTableRef, title: string, detail: string, rows: ReturnType<typeof crossBands>): Finding | null {
+  if (stats && rows.length) { stats.feitos++; if (!rows.some((r) => r.mismatch)) stats.batem++; }
   if (!rows.some((r) => r.mismatch)) return null;
   return {
     id, type, section, slideRef: `s${left.slide} × s${right.slide}`, title, detail, ok: false,
@@ -58,6 +63,12 @@ function totalRows(left: CrossTableRef, right: CrossTableRef, matcher: RegExp, l
 function grandTotal(table: ExtractedTable, measure: RegExp): number | null {
   // Nunca pega o “primeiro número”: numa tabela de população ele pode ser o 100%
   // da participação. A ausência de coluna identificável é preferível a um FP.
+  // Tabela com VÁRIOS recortes lado a lado (SP | cidade | 2 km | 4 km) tem várias
+  // colunas de contagem; pegar a primeira comparava SP com a cidade (FP s31×s28
+  // do SJC, set/2026). Só compara quando há um recorte inequívoco.
+  const countCols = table.colKinds?.filter((kind) => kind === 'count').length ?? 0;
+  const measureCols = table.columns.filter((column) => measure.test(norm(column))).length;
+  if (countCols > 1 || measureCols > 1) return null;
   const col = table.colKinds?.findIndex((kind) => kind === 'count') ?? -1;
   const measureCol = table.columns.findIndex((column) => measure.test(norm(column)));
   const target = col >= 1 ? col : measureCol >= 1 ? measureCol : -1;
@@ -107,6 +118,117 @@ export function rowAxis(labels: string[]): RowAxis {
   return best && best[1] > 0 ? best[0] : 'outro';
 }
 
+/**
+ * Rótulos de linha que representam FAIXAS numa tabela de lacunas. A tabela real
+ * empilha blocos (Oferta Lançada / Oferta Final / Dispon. S/O.L.), cada um com as
+ * mesmas tipologias; a visão ora devolve o título do bloco como linha, ora repete
+ * as tipologias. Sem limpar isso, "Oferta Lançada" era comparado com
+ * "1 Dormitório" — os três FPs de faixa do SJC (s76×s80, s81×s76, s81×s80).
+ */
+const BLOCK_HEADER = /^(oferta\s*(lancada|final|atual)|dispon|disp\.?\s|vendas|estoque|total|subtotal)/;
+export function lacunaRowLabels(table: ExtractedTable): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const label of rowLabels(table)) {
+    const key = norm(label).replace(/\s+/g, ' ').trim();
+    if (!key || BLOCK_HEADER.test(key) || seen.has(key)) continue;
+    seen.add(key);
+    out.push(label);
+  }
+  // Tipologia quebrada em duas linhas na imagem ("2" / "Dormitórios") vira um
+  // rótulo solto sem número; se os demais têm número, ele não é faixa.
+  const withDigit = out.filter((l) => /\d/.test(l)).length;
+  return withDigit >= 2 ? out.filter((l) => /\d/.test(l)) : out;
+}
+
+const EXCLUSION_NOTE = /nao sao considerad|desconsider|exclu[ií]d|sem (duplex|garden|cobertura)/;
+
+/**
+ * Total geral de um bloco de lacunas, SÓ se a leitura fecha nas margens (soma
+ * dos totais de linha = total geral). Leitura que não fecha não serve de régua
+ * para acusar outro slide (no SJC, um bloco lido como 450 no lugar de 798).
+ */
+function blockGrandTotal(table: ExtractedTable): number | null {
+  const ti = table.columns.findIndex((c) => norm(c).trim() === 'total');
+  if (ti <= 0) return null;
+  const v = table.totals?.[ti];
+  if (!numeric(v)) return null;
+  // Basta UMA margem confirmar o total geral: a leitura das linhas pode falhar
+  // enquanto a linha de totais fecha (s86 de Campos do Jordão), ou o contrário.
+  const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
+  const rowTotals = table.rows.map((r) => r[ti]).filter(numeric);
+  const colTotals = (table.totals ?? []).slice(1, ti).filter(numeric);
+  const byRows = rowTotals.length >= 2 && Math.abs(sum(rowTotals) - v) <= 0.5;
+  const byCols = colTotals.length >= 2 && Math.abs(sum(colTotals) - v) <= 0.5;
+  return byRows || byCols ? v : null;
+}
+
+/**
+ * Rótulos curtos de recorte no slide ("ZI total", "Compactos", nome da cidade).
+ * Lacunas de recortes diferentes descrevem estoques diferentes e não se comparam.
+ */
+function scopeLabels(ir: Ir, slide: number): Set<string> {
+  const textos = ir.slides.find((s) => s.n === slide)?.textos ?? [];
+  return new Set(textos.map((t) => norm(t).replace(/\s+/g, ' ').trim())
+    .filter((t) => t && t.length <= 30 && !/^(lacuna|legenda|fonte|obs|nota)/.test(t)));
+}
+
+/**
+ * Os blocos Oferta Lançada / Oferta Final das análises de lacunas vizinhas
+ * (tipologia×metragem, tipologia×preço, preço×metragem) descrevem o MESMO
+ * estoque: o total geral tem de ser igual. Caso real s86 de Campos do Jordão
+ * (set/2026): 462/259 contra 447/247 nos s87/s88 — o s86 não trazia a nota de
+ * exclusão (duplex, garden, cobertura, esgotados) que os outros dois traziam.
+ */
+function lacunaTotalsFindings(ir: Ir, lacunas: CrossTableRef[]): Finding[] {
+  const out: Finding[] = [];
+  const noteOf = (slide: number) => EXCLUSION_NOTE.test(norm((ir.slides.find((s) => s.n === slide)?.textos ?? []).join(' ')));
+  for (const block of ['oferta lancada', 'oferta final']) {
+    const refs = lacunas.filter((r) => norm(r.table.title).includes(block) && blockGrandTotal(r.table) !== null && blockGrandTotal(r.table)! % 1 === 0);
+    const bySlide = new Map<number, number>();
+    for (const r of refs) if (!bySlide.has(r.slide)) bySlide.set(r.slide, blockGrandTotal(r.table)!);
+    const slides = [...bySlide.keys()].sort((a, b) => a - b);
+    // CONSENSO: só acusa o slide que destoa quando pelo menos DOIS outros slides do
+    // mesmo recorte, lidos em imagens independentes, concordam num total diferente.
+    // Uma leitura sozinha erra (SJC: um bloco lido como 450 no lugar de 798); duas
+    // leituras independentes batendo no mesmo número não erram juntas por acaso.
+    for (const odd of slides) {
+      const scope = scopeLabels(ir, odd);
+      const peers = slides.filter((s) => s !== odd && Math.abs(s - odd) <= 5 && [...scopeLabels(ir, s)].some((x) => scope.has(x)));
+      const counts = new Map<number, number[]>();
+      for (const s of peers) counts.set(bySlide.get(s)!, [...(counts.get(bySlide.get(s)!) ?? []), s]);
+      if (stats) for (const s of peers) if (s > odd) { stats.feitos++; if (bySlide.get(s) === bySlide.get(odd)) stats.batem++; }
+      const agreed = [...counts.entries()].find(([t, ss]) => ss.length >= 2 && t !== bySlide.get(odd));
+      // Sem consenso, UM par basta quando só um dos dois slides traz a nota de
+      // exclusão: tabela sem exclusão × tabela com exclusão (s67 × s68 do Toledo,
+      // 1.481 × 1.295). Os dois totais já foram confirmados por uma margem.
+      // Com um par só, a diferença tem de ter a FORMA de uma exclusão: o slide sem
+      // a nota é o maior, e por pouco (garden/duplex/cobertura são minoria do
+      // estoque, ≤ 20%). Aceita 462×447 (CJ) e 1.481×1.295 (Toledo); rejeita
+      // 1.060×450 do SJC, que era leitura errada de um bloco.
+      const exclusionShaped = (big: number, small: number) => big > small && (big - small) / big <= 0.2;
+      const lonePeer = !agreed
+        ? peers.find((s) => !noteOf(odd) && noteOf(s) && exclusionShaped(bySlide.get(odd)!, bySlide.get(s)!))
+        : undefined;
+      if (!agreed && lonePeer === undefined) continue;
+      const ref = agreed ? agreed[1][0] : lonePeer!;
+      const id = `lacunas-total-${block.replace(' ', '-')}-${odd}`;
+      const hint = !noteOf(odd) && noteOf(ref)
+        ? ` O s${odd} não traz a nota de exclusão (duplex, garden, cobertura, esgotados) que o s${ref} traz: a diferença pode ser justamente essas unidades.`
+        : '';
+      const label = block === 'oferta lancada' ? 'Oferta Lançada' : 'Oferta Final';
+      out.push({
+        id, type: 'TOTALS_EQUALITY', section: 'LACUNAS', slideRef: `s${odd} × s${ref}`,
+        title: `Total de ${label} diverge entre análises de lacunas`,
+        detail: `O s${odd} soma ${bySlide.get(odd)!.toLocaleString('pt-BR')} unidades em ${label}, e o s${ref} soma ${bySlide.get(ref)!.toLocaleString('pt-BR')}. As quebras por tipologia, metragem e preço descrevem o mesmo estoque.${hint}`,
+        ok: false, origem: 'IA_visao',
+        viz: { kind: 'sidebyside', leftLabel: `s${odd}`, rightLabel: `s${ref}`, rows: [{ label: `Total ${label}`, left: bySlide.get(odd)!, right: bySlide.get(ref)!, mismatch: true }] },
+      });
+    }
+  }
+  return out;
+}
+
 function binRows(left: CrossTableRef, right: CrossTableRef) {
   const a = binsFromColumns(left.table.columns), b = binsFromColumns(right.table.columns);
   if (a.length < 2 || b.length < 2) return [];
@@ -122,7 +244,16 @@ function binRows(left: CrossTableRef, right: CrossTableRef) {
  * A classificação depende de assinatura explícita no título/colunas para não
  * comparar tabelas Brasil/Estado ou grandezas diferentes por acidente.
  */
-export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): Finding[] {
+export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[], counter?: CrossStats): Finding[] {
+  stats = counter ?? null;
+  try {
+    return crossTableFindingsImpl(ir, visionTables);
+  } finally {
+    stats = null;
+  }
+}
+
+function crossTableFindingsImpl(ir: Ir, visionTables: ExtractedTableRef[]): Finding[] {
   const refs = [...nativeTableRefs(ir), ...asCross(visionTables)];
   const out: Finding[] = [];
   const income = refs.filter((r) => /renda/.test(titleOf(r)) && !isMapLegend(r));
@@ -149,7 +280,7 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
       const rows = [{ label: `Total de ${measure.label.toLowerCase()}`, left: a, right: b, mismatch: Math.abs(a - b) > 0.5 && !sameMagnitude(a, b) }];
       const f = mismatch(`cross-${measure.key}-${left.slide}-${right.slide}`, 'CROSS_TABLE_MISMATCH', 'SOCIO', left, right,
         `${measure.label} diverge entre tabelas sociodemográficas`,
-        `O total de ${measure.label.toLowerCase()} deve ser o mesmo nas tabelas da mesma Z.I.; confira escala e origem.`, rows);
+        `${refLabel(left)} mostra ${a.toLocaleString('pt-BR')} ${measure.label.toLowerCase()} e ${refLabel(right)} mostra ${b.toLocaleString('pt-BR')}. O total deve ser o mesmo nas tabelas do mesmo recorte; confira escala e origem.`, rows);
       if (f) out.push(f);
     }
   }
@@ -162,21 +293,24 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
     if (left.slide === right.slide) continue;
     // Só compara tabelas próximas ou da mesma referência textual; evita cruzar Z.I.s diferentes.
     if (Math.abs(left.slide - right.slide) > 5) continue;
-    const axisLeft = rowAxis(rowLabels(left.table)), axisRight = rowAxis(rowLabels(right.table));
+    const labelsLeft = lacunaRowLabels(left.table), labelsRight = lacunaRowLabels(right.table);
+    const axisLeft = rowAxis(labelsLeft), axisRight = rowAxis(labelsRight);
     // 5.1–5.3 têm eixos de linha diferentes por desenho. Quando os eixos batem,
     // comparamos linhas; entre eixos, só faz sentido comparar faixas de coluna da
     // MESMA unidade — metragem (5.1) × preço (5.2) diverge por desenho, não por erro.
     const rows = axisLeft === axisRight && axisLeft !== 'outro'
-      ? crossBands(rowLabels(left.table), rowLabels(right.table), refLabel(left), refLabel(right))
+      ? crossBands(labelsLeft, labelsRight, refLabel(left), refLabel(right))
       : columnBinUnit(left.table.columns) === columnBinUnit(right.table.columns)
         ? binRows(left, right)
         : [];
     if (!rows.length) continue;
     const f = mismatch(`cross-lacunas-bins-${left.slide}-${right.slide}`, 'CROSS_TABLE_MISMATCH', 'LACUNAS', left, right,
       'Faixas de lacunas divergem entre as análises',
-      'A tabela geral e suas quebras devem usar o mesmo conjunto de faixas. Confira a lacuna indicada.', rows);
+      lacunaMismatchDetail(rows) + lacunaTotalsContext(lacunas, left.slide, right.slide), rows);
     if (f) out.push(f);
   }
+
+  out.push(...lacunaTotalsFindings(ir, lacunas));
 
   const consolidated = refs.filter((r) => /consolid/.test(titleOf(r)));
   const offerAnalysis = refs.filter((r) => /oferta/.test(titleOf(r)) && /padrao|tipologia|ano/.test(titleOf(r)));
@@ -192,6 +326,29 @@ export function crossTableFindings(ir: Ir, visionTables: ExtractedTableRef[]): F
     if (f) out.push(f);
   }
   return out;
+}
+
+/**
+ * Contexto, não acusação: se os dois slides também têm total de Oferta Lançada
+ * legível e diferente, o analista vê que a diferença de faixas vem com estoque
+ * diferente (s86 × s88 de Campos do Jordão: 462 × 447).
+ */
+function lacunaTotalsContext(lacunas: CrossTableRef[], a: number, b: number): string {
+  const total = (slide: number) => lacunas
+    .filter((r) => r.slide === slide && norm(r.table.title).includes('oferta lancada'))
+    .map((r) => blockGrandTotal(r.table)).find((v): v is number => v !== null);
+  const ta = total(a), tb = total(b);
+  return ta !== undefined && tb !== undefined && ta !== tb
+    ? ` Os totais de Oferta Lançada também diferem: s${a} = ${ta.toLocaleString('pt-BR')}, s${b} = ${tb.toLocaleString('pt-BR')}.`
+    : '';
+}
+
+/** Diz QUAL faixa diverge, em vez de só pedir para conferir. */
+function lacunaMismatchDetail(rows: ReturnType<typeof crossBands>): string {
+  const bad = rows.filter((r) => r.mismatch);
+  const first = bad[0];
+  const sample = first ? ` Primeira divergência: «${first.left || '—'}» × «${first.right || '—'}».` : '';
+  return `A tabela geral e suas quebras devem usar o mesmo conjunto de faixas; ${bad.length} de ${rows.length} faixas não coincidem.${sample}`;
 }
 
 /** WS5: janela canônica (ano atual+1..+6) e fórmula/ritmo de projeção. */

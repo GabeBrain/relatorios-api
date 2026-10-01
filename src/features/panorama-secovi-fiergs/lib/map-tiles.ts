@@ -2,6 +2,7 @@ export interface GeographicPoint { latitude: number; longitude: number; }
 
 export interface MapTilePlan {
   zoom: number;
+  bounds: { minLatitude: number; maxLatitude: number; minLongitude: number; maxLongitude: number };
   columns: number;
   rows: number;
   tiles: { x: number; y: number; url: string }[];
@@ -25,7 +26,7 @@ const isMappable = (point: GeographicPoint) => Number.isFinite(point.latitude) &
 export function buildMapTilePlan(points: GeographicPoint[], mapboxAccessToken: string): MapTilePlan | null {
   const validPoints = points.filter(isMappable);
   if (!validPoints.length || !mapboxAccessToken.trim()) return null;
-  let zoom = 14;
+  let zoom = validPoints.length === 1 ? 14 : 12;
   let minX = 0; let maxX = 0; let minY = 0; let maxY = 0;
   for (; zoom >= 4; zoom -= 1) {
     const xs = validPoints.map((point) => tileX(point.longitude, zoom));
@@ -48,6 +49,12 @@ export function buildMapTilePlan(points: GeographicPoint[], mapboxAccessToken: s
   });
   return {
     zoom, columns, rows, tiles,
+    bounds: {
+      minLatitude: Math.min(...validPoints.map((point) => point.latitude)),
+      maxLatitude: Math.max(...validPoints.map((point) => point.latitude)),
+      minLongitude: Math.min(...validPoints.map((point) => point.longitude)),
+      maxLongitude: Math.max(...validPoints.map((point) => point.longitude)),
+    },
     positionOf: (point) => ({
       left: clamp((tileX(point.longitude, zoom) - minX) / columns * 100, 3, 97),
       top: clamp((tileY(point.latitude, zoom) - minY) / rows * 100, 3, 97),

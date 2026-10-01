@@ -89,4 +89,4 @@ Mesma geração, **nomes instáveis**:
 |---|---|
 | `calibracao/toledo-2026-08/sum-payloads.json` | ✅ existe — 6 payloads de soma, fixa `toledo-real.test.ts` |
 | `<slug>-erro.ir.json` / `<slug>-final.ir.json` | 🔲 aguarda o PPTX |
-| `<slug>.fonte.json` | 🔲 aguarda o extrator |
+| `calibracao/housi-toledo-2026-07/toledo.fonte.json` | ✅ existe — extraído e coberto por testes reais |

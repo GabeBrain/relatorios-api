@@ -8,6 +8,12 @@ import { cn } from '@/lib/utils';
 import { useGeoApiScope } from './use-geo-api-scope';
 import type { GeoScope } from './types';
 
+export interface GeoLoadRequest {
+  city?: string;
+  uf?: string;
+  ufs?: string[];
+}
+
 interface Props {
   value: GeoScope;
   onChange: (next: GeoScope) => void;
@@ -17,6 +23,10 @@ interface Props {
   cityLabel?: string;
   cityContainerClassName?: string;
   hideCity?: boolean;
+  region?: string;
+  onRegionChange?: (region: string) => void;
+  onLoad?: (request: GeoLoadRequest) => void;
+  onClear?: () => void;
 }
 
 export function GeoApiScopeSelector({
@@ -28,10 +38,14 @@ export function GeoApiScopeSelector({
   cityLabel = 'Município',
   cityContainerClassName,
   hideCity = false,
+  region = '',
+  onRegionChange,
+  onLoad,
+  onClear,
 }: Props) {
   const {
     availableUfs, availableCities, setUf, setCity,
-    isLoading, error, hasToken, reload, citiesByUf,
+    isLoading, error, hasToken, reload, citiesByUf, ufsByRegion, availableRegions,
   } = useGeoApiScope({ value, onChange });
   const [cityOpen, setCityOpen] = useState(false);
 
@@ -39,7 +53,7 @@ export function GeoApiScopeSelector({
     return (
       <div className={cn('flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-50 px-3 py-2 text-xs text-amber-800', className)}>
         <AlertTriangle className="h-4 w-4 shrink-0" />
-        Faça login no cabeçalho para carregar as cidades monitoradas.
+        Faça login no cabeçalho para carregar os municípios monitorados.
       </div>
     );
   }
@@ -58,11 +72,39 @@ export function GeoApiScopeSelector({
     );
   }
 
+  const regionUfs = region ? ufsByRegion?.[region] ?? [] : [];
+  const visibleUfs = region ? regionUfs : availableUfs;
   const ufDisabled = disabled || isLoading || !citiesByUf;
   const cityDisabled = disabled || isLoading || !citiesByUf || !value.uf;
+  const loadRequest: GeoLoadRequest | null = value.city
+    ? { city: value.city }
+    : value.uf
+      ? { uf: value.uf }
+      : regionUfs.length
+        ? { ufs: regionUfs }
+        : null;
+  const changeRegion = (nextRegion: string) => {
+    const next = nextRegion === '__all_regions__' ? '' : nextRegion;
+    onRegionChange?.(next);
+    if (value.uf && next && !(ufsByRegion?.[next] ?? []).includes(value.uf)) {
+      onChange({ uf: '', city: '' });
+    }
+  };
 
   return (
     <div className={cn('flex flex-wrap items-end gap-3', className)}>
+      {onRegionChange && <div className="min-w-[150px] space-y-1.5">
+        <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Região</label>
+        <Select value={region || '__all_regions__'} onValueChange={changeRegion} disabled={ufDisabled}>
+          <SelectTrigger className="h-9 text-sm">
+            <SelectValue placeholder={isLoading ? '…' : 'Região'} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all_regions__">Todas as regiões</SelectItem>
+            {availableRegions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>}
       <div className="w-24 shrink-0 space-y-1.5">
         <label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{ufLabel}</label>
         <Select value={value.uf} onValueChange={setUf} disabled={ufDisabled}>
@@ -70,7 +112,7 @@ export function GeoApiScopeSelector({
             <SelectValue placeholder={isLoading ? '…' : 'UF'} />
           </SelectTrigger>
           <SelectContent>
-            {availableUfs.map((u) => (
+            {visibleUfs.map((u) => (
               <SelectItem key={u} value={u}>{u}</SelectItem>
             ))}
           </SelectContent>
@@ -89,7 +131,7 @@ export function GeoApiScopeSelector({
             >
               <span className="truncate">
                 {isLoading
-                  ? 'Carregando cidades monitoradas…'
+                  ? 'Carregando municípios monitorados…'
                   : value.city
                     ? value.city
                     : value.uf
@@ -125,6 +167,23 @@ export function GeoApiScopeSelector({
           </PopoverContent>
         </Popover>
       </div>}
+      {onLoad && <Button
+        type="button"
+        className="h-9"
+        onClick={() => { if (loadRequest) onLoad(loadRequest); }}
+        disabled={disabled || isLoading || !loadRequest}
+      >
+        Carregar
+      </Button>}
+      {onClear && <Button
+        type="button"
+        variant="outline"
+        className="h-9"
+        onClick={onClear}
+        disabled={disabled || (!region && !value.uf && !value.city)}
+      >
+        Limpar
+      </Button>}
     </div>
   );
 }

@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuthStore } from '@/store/auth-store';
-import { fetchMonitoredCities } from './fetch-monitored-cities';
+import { fetchMonitoredCitiesCatalog, type MonitoredCitiesCatalog } from './fetch-monitored-cities';
 import { GeoApiScopeError, type GeoScope } from './types';
 
 // Session cache keyed by token. Cleared on reload() or when token changes.
-const cache = new Map<string, Promise<Record<string, string[]>>>();
+const cache = new Map<string, Promise<MonitoredCitiesCatalog>>();
 
-function loadCities(token: string): Promise<Record<string, string[]>> {
+function loadCities(token: string): Promise<MonitoredCitiesCatalog> {
   const cached = cache.get(token);
   if (cached) return cached;
-  const p = fetchMonitoredCities(token).catch((err) => {
+  const p = fetchMonitoredCitiesCatalog(token).catch((err) => {
     cache.delete(token);
     throw err;
   });
@@ -29,6 +29,8 @@ interface UseGeoApiScopeOptions {
 
 export interface UseGeoApiScopeResult {
   citiesByUf: Record<string, string[]> | null;
+  ufsByRegion: Record<string, string[]> | null;
+  availableRegions: string[];
   availableUfs: string[];
   availableCities: string[];
   uf: string;
@@ -59,6 +61,7 @@ export function useGeoApiScope({ value, onChange }: UseGeoApiScopeOptions): UseG
   const hasToken = !!token;
 
   const [citiesByUf, setCitiesByUf] = useState<Record<string, string[]> | null>(null);
+  const [ufsByRegion, setUfsByRegion] = useState<Record<string, string[]> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<GeoApiScopeError | null>(null);
   const [reloadTick, setReloadTick] = useState(0);
@@ -66,6 +69,7 @@ export function useGeoApiScope({ value, onChange }: UseGeoApiScopeOptions): UseG
   useEffect(() => {
     if (!token) {
       setCitiesByUf(null);
+      setUfsByRegion(null);
       setError(null);
       setIsLoading(false);
       return;
@@ -74,9 +78,10 @@ export function useGeoApiScope({ value, onChange }: UseGeoApiScopeOptions): UseG
     setIsLoading(true);
     setError(null);
     loadCities(token)
-      .then((data) => {
+      .then(({ citiesByUf: nextCitiesByUf, ufsByRegion: nextUfsByRegion }) => {
         if (cancelled) return;
-        setCitiesByUf(data);
+        setCitiesByUf(nextCitiesByUf);
+        setUfsByRegion(nextUfsByRegion);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -87,6 +92,7 @@ export function useGeoApiScope({ value, onChange }: UseGeoApiScopeOptions): UseG
             : new GeoApiScopeError('network', (err as Error).message ?? 'Erro desconhecido');
         setError(scopeErr);
         setCitiesByUf(null);
+        setUfsByRegion(null);
         setIsLoading(false);
       });
     return () => { cancelled = true; };
@@ -95,6 +101,10 @@ export function useGeoApiScope({ value, onChange }: UseGeoApiScopeOptions): UseG
   const availableUfs = useMemo(
     () => (citiesByUf ? Object.keys(citiesByUf).sort() : []),
     [citiesByUf],
+  );
+  const availableRegions = useMemo(
+    () => (ufsByRegion ? Object.keys(ufsByRegion).sort((a, b) => a.localeCompare(b, 'pt-BR')) : []),
+    [ufsByRegion],
   );
   const availableCities = useMemo(
     () => (citiesByUf && value.uf ? citiesByUf[value.uf] ?? [] : []),
@@ -140,7 +150,9 @@ export function useGeoApiScope({ value, onChange }: UseGeoApiScopeOptions): UseG
 
   return {
     citiesByUf,
+    ufsByRegion,
     availableUfs,
+    availableRegions,
     availableCities,
     uf: value.uf,
     city: value.city,

@@ -22,7 +22,7 @@ export function countLabel(level: Confidence, n: number): string {
   return `${n} ${n === 1 ? meta.label.toLowerCase() : meta.plural}`;
 }
 
-const VERIFY = new Set<ErrorType>(['VALUE_PLAUSIBILITY', 'PROJECTION_FORMULA', 'SOURCE_MISSING', 'ATA_COVERAGE', 'STRUCTURE_MISSING', 'REQUIRED_NOTE', 'EXCLUSION_RULE']);
+const VERIFY = new Set<ErrorType>(['VALUE_PLAUSIBILITY', 'PROJECTION_FORMULA', 'SOURCE_MISSING', 'ATA_COVERAGE', 'STRUCTURE_MISSING', 'REQUIRED_NOTE', 'EXCLUSION_RULE', 'IMAGE_NOT_READ']);
 
 /** Determina o tom pelo tipo, origem e confirmação de leitura da visão. */
 export function confidenceOf(finding: Pick<Finding, 'type' | 'detail' | 'escalated' | 'evidenceSha1' | 'confidence'>, origem = 'DET'): Confidence {

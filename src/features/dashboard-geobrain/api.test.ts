@@ -46,4 +46,22 @@ describe('fetchBuildings', () => {
       headers: { Authorization: 'Bearer token', 'Content-Type': 'application/json' },
     });
   });
+
+  it('consulta cada UF sequencialmente sem enviar city quando o escopo é uma região ou UF', async () => {
+    const requests: URL[] = [];
+    vi.stubGlobal('fetch', vi.fn(async (input: string) => {
+      const url = new URL(input);
+      requests.push(url);
+      return response([{ building_id: `${url.searchParams.get('uf')}-${url.searchParams.get('type')}`, typologies_history: [] }]);
+    }));
+
+    await fetchBuildings({
+      ufs: ['MG', 'SP'], token: 'token', signal: new AbortController().signal,
+    });
+
+    expect(requests).toHaveLength(6);
+    expect(requests.slice(0, 3).every((url) => url.searchParams.get('uf') === 'MG')).toBe(true);
+    expect(requests.slice(3).every((url) => url.searchParams.get('uf') === 'SP')).toBe(true);
+    expect(requests.every((url) => !url.searchParams.has('city'))).toBe(true);
+  });
 });

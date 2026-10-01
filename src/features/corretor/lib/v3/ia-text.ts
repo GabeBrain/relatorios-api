@@ -70,6 +70,19 @@ export interface TextPassResult {
   batches: number;
 }
 
+const flat = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+/**
+ * true se a evidência citada pela IA aparece no texto do slide (sem acento,
+ * caixa ou pontuação). Ortografia sem evidência não tem o que mostrar ao
+ * analista e é descartada; outros tipos sem evidência passam.
+ */
+export function evidenceInSlide(slideText: string, evidence: string | undefined, required: boolean): boolean {
+  if (!evidence?.trim()) return !required;
+  const needle = flat(evidence);
+  return needle.length > 0 && flat(slideText).includes(needle);
+}
+
 export async function runTextPass(
   ir: Ir,
   city: string,
@@ -105,6 +118,11 @@ export async function runTextPass(
 
     for (const raw of data?.findings ?? []) {
       const type = ['SPELLING', 'CITY_NAME', 'COHERENCE'].includes(raw.type) ? raw.type : 'SPELLING';
+      // Âncora: o trecho citado tem de existir no slide apontado. No s12 de Campos
+      // do Jordão (set/2026) o modelo citou uma frase que não está em nenhum slide.
+      const slide = batch.find((s) => s.n === raw.slide);
+      const haystack = [slide?.titulo ?? '', slide ? slideText(slide) : '', JSON.stringify(slide ? slideTables(slide) : [])].join(' ');
+      if (!slide || !evidenceInSlide(haystack, raw.evidence, type === 'SPELLING')) continue;
       const key = djb2(`${raw.type}|${raw.evidence ?? raw.description}`);
       findings.push({
         id: `iatxt-${raw.slide}-${type.toLowerCase()}-${key}`,

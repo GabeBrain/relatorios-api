@@ -34,6 +34,16 @@ interface PanoramaExportState {
 
 const isRunning = (status: PanoramaExportStatus) => status === 'preparing' || status === 'capturing' || status === 'assembling';
 
+/** Decisão única usada pela interface, pelo estado e pelo host imediatamente antes da captura. */
+export function panoramaExportBlockReason(report: Pick<PanoramaReportModel, 'scope' | 'reconciliation'>): string | null {
+  if (report.scope.entity !== 'fiergs-rs') return null;
+  const critical = report.reconciliation?.rows?.filter((row) => row.critical && row.status !== 'match') ?? [];
+  if (report.reconciliation?.homologable && critical.length === 0) return null;
+  const metrics = critical.slice(0, 3).map((row) => row.metricId).join(', ');
+  const detail = critical.length ? ` ${critical.length} invariantes: ${metrics}${critical.length > 3 ? '…' : ''}.` : '';
+  return `Exportação bloqueada: o relatório FIERGS possui invariantes críticas não reconciliadas.${detail}`;
+}
+
 export const usePanoramaExportStore = create<PanoramaExportState>()((set, get) => ({
   status: 'idle',
   progress: 0,
@@ -46,6 +56,11 @@ export const usePanoramaExportStore = create<PanoramaExportState>()((set, get) =
 
   start: (report, format) => {
     if (isRunning(get().status)) return;
+    const blockReason = panoramaExportBlockReason(report);
+    if (blockReason) {
+      set({ status: 'error', progress: 0, total: 0, error: blockReason, format, report: null, result: null, controller: null });
+      return;
+    }
     const previous = get().result;
     if (previous) URL.revokeObjectURL(previous.url);
     set({ status: 'preparing', progress: 0, total: 0, error: '', format, report, result: null, controller: new AbortController() });

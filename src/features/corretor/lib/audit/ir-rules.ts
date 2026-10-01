@@ -20,6 +20,7 @@ const RULES_ENABLED = {
 
 const LEFTOVER = /\b(agrupar|ajustar|revisar|conferir|confirmar|checar|verificar|inserir|colocar|preencher|refazer|corrigir|pendente|trazer|falar com|fale comigo|todo|xxx)\b/i;
 const TOTAL_ROW = /^\s*total/i;
+const PLAIN_TOTAL = /^\s*total(\s+geral)?\s*[:.]?\s*$/i;
 const UFS = new Set(['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']);
 
 function normalized(value: string): string {
@@ -149,7 +150,16 @@ function sourceFindings(ir: Ir, cap = 25): Finding[] {
 export function irTableToExtracted(t: IrTable): ExtractedTable | null {
   if (!t.linhas || t.linhas.length < 2) return null;
   const header = (t.linhas[0] ?? []).map((c) => (c ?? '').toString());
-  const totalIdx = t.linhas.findIndex((r, i) => i > 0 && TOTAL_ROW.test((r?.[0] ?? '').toString()));
+  // "Total" / "Total geral" é linha de soma em qualquer posição. "Total de
+  // anúncios ativos" no MEIO de uma tabela de indicadores é um indicador como os
+  // outros — somar receita + diária + ocupação contra ele foi o FP do s127 de
+  // São José dos Campos (set/2026). Rótulo composto só vale como total no fim.
+  const lastIdx = t.linhas.length - 1;
+  const totalIdx = t.linhas.findIndex((r, i) => {
+    const label = (r?.[0] ?? '').toString();
+    if (i === 0 || !TOTAL_ROW.test(label)) return false;
+    return PLAIN_TOTAL.test(label) || i === lastIdx;
+  });
   const cellAt = (i: number, c: number): Cell => {
     const num = t.linhas_num?.[i]?.[c];
     if (typeof num === 'number') return num;
@@ -217,8 +227,13 @@ function numericFindings(ir: Ir): { findings: Finding[]; verified: number; numer
 // ── RADII (nível 1 DET) — consistência dos raios/zonas de tempo ──────────────
 const MIN_TOKEN = /\b(\d{1,3})\s*min\b/gi;
 
+// Tempo COM distância é deslocamento até ponto de interesse ("Hospital … 2 min
+// 950 m", "1,8 km | 5 min"), não raio do estudo — no Toledo (set/2026) isso
+// acusou o s14 e ainda poluiu o conjunto canônico com 2/4/6 min.
+const TRAVEL_PAIR = /\b\d{1,3}\s*min\s*[|·,-]?\s*\d+(?:[.,]\d+)?\s*(?:km|m)\b|\b\d+(?:[.,]\d+)?\s*(?:km|m)\s*[|·,-]?\s*\d{1,3}\s*min\b/gi;
+
 function radiiOf(s: IrSlide): string[] {
-  const text = [s.titulo ?? '', ...(s.textos ?? [])].join(' ');
+  const text = [s.titulo ?? '', ...(s.textos ?? [])].join(' ').replace(TRAVEL_PAIR, ' ');
   const found = new Set<number>();
   let m: RegExpExecArray | null;
   MIN_TOKEN.lastIndex = 0;
@@ -275,6 +290,48 @@ function radiiFindings(ir: Ir): Finding[] {
       detail: `Todos os ${perSlide.length} slides com legenda de raio são coerentes com o conjunto canônico.`,
       ok: true,
       viz: { kind: 'map', expected: canonical, detected: canonical },
+    });
+  }
+  return out;
+}
+
+// ── Deslocamento fisicamente impossível ─────────────────────────────────────
+// “950 km | 3 min” (Rolândia s17) é 950 m: a velocidade implícita denuncia a
+// unidade trocada sem depender de mapa. Acima de 150 km/h não é trajeto urbano.
+const TRAVEL_DIST_FIRST = /(?<![\d.,])(\d+(?:[.,]\d+)?)\s*(km|m)\b\s*[|·,-]?\s*(\d{1,3})\s*min\b/gi;
+const TRAVEL_MIN_FIRST = /(?<![\d.,])(\d{1,3})\s*min\b\s*[|·,-]?\s*(\d+(?:[.,]\d+)?)\s*(km|m)\b/gi;
+const MAX_KMH = 150;
+
+function distanceKm(raw: string, unit: string): number {
+  // “1.200 m” é milhar; “1,4 km” é decimal.
+  const n = /^\d{1,3}\.\d{3}$/.test(raw) ? Number(raw.replace('.', '')) : Number(raw.replace(',', '.'));
+  return unit.toLowerCase() === 'km' ? n : n / 1000;
+}
+
+export function travelSpeedFindings(ir: Ir): Finding[] {
+  const out: Finding[] = [];
+  for (const s of ir.slides) {
+    // Par só dentro da mesma linha: juntar caixas casava o “3 min” de uma com o
+    // “12 km” da seguinte.
+    const lines = (s.textos ?? []).flatMap((t) => t.split('\n'));
+    const pairs: { raw: string; km: number; min: number }[] = [];
+    for (const line of lines) {
+      for (const m of line.matchAll(TRAVEL_DIST_FIRST)) pairs.push({ raw: m[0], km: distanceKm(m[1], m[2]), min: Number(m[3]) });
+      for (const m of line.matchAll(TRAVEL_MIN_FIRST)) pairs.push({ raw: m[0], km: distanceKm(m[2], m[3]), min: Number(m[1]) });
+    }
+    const bad = pairs.find((p) => p.min > 0 && (p.km / p.min) * 60 > MAX_KMH);
+    if (!bad) continue;
+    const kmh = Math.round((bad.km / bad.min) * 60);
+    out.push({
+      id: `travel-speed-${s.n}`,
+      type: 'FORMAT_MISMATCH',
+      section: toAuditSection(s.secao_canonica),
+      slideRef: slideRef(s.n),
+      title: 'Distância incompatível com o tempo de deslocamento',
+      detail: `«${bad.raw.trim()}» implica ${kmh.toLocaleString('pt-BR')} km/h — a unidade da distância provavelmente está errada (m em vez de km?).`,
+      ok: false,
+      confidence: 2,
+      viz: { kind: 'text', evidence: bad.raw.trim() },
     });
   }
   return out;
@@ -353,7 +410,10 @@ export function ziLabelFindings(ir: Ir): Finding[] {
 
   const out: Finding[] = [];
   // Frases que citam ordinal e raio juntos, incluindo o formato "(até 2 Km)".
-  const usageRx = /z\.?\s*i\.?\s*(primaria|secundaria|terciaria|quaternaria)[^.;]{0,60}?\(?\s*(?:ate|de\s*\d+\s*km\s*a)?\s*(\d+)\s*km/gi;
+  // O trecho entre o ordinal e o raio não atravessa ")": em "raio de 2 km (Z.I.
+  // primária) abrange … e o raio de 4 km" o raio do ordinal vem ANTES, e o 4 km
+  // é da frase seguinte (FP s135 de Campos do Jordão, set/2026).
+  const usageRx = /z\.?\s*i\.?\s*(primaria|secundaria|terciaria|quaternaria)[^.;)]{0,60}?\(?\s*(?:ate|de\s*\d+\s*km\s*a)?\s*(\d+)\s*km/gi;
   for (const slide of ir.slides) {
     const source = normalized([slide.titulo ?? '', ...(slide.textos ?? [])].join('\n'));
     for (const match of source.matchAll(usageRx)) {
@@ -431,6 +491,7 @@ export function irToFindings(ir: Ir, ctx?: { city?: string; uf?: string }): Find
     ...reviewNotesFinding(ir),
     ...(RULES_ENABLED.SOURCE_MISSING ? sourceFindings(ir) : []),
     ...radiiFindings(ir),
+    ...travelSpeedFindings(ir),
     ...num.findings,
     ...wrongCityFindings(ir, ctx?.city),
     ...wrongUfFindings(ir, ctx?.uf),
