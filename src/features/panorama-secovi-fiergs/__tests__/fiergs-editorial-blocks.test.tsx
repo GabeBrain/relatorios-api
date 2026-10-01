@@ -39,9 +39,10 @@ describe('FIERGS · blocos editoriais próprios', () => {
     }
     for (const page of [15, 16, 27, 28, 35, 39]) {
       const text = container.querySelector(`[aria-label^="Página ${page}:"]`)?.textContent ?? '';
-      expect(text).toContain('COMPARATIVO 1º SEMESTRE');
-      expect(text).toContain('1S2024');
-      expect(text).toContain('1S2025');
+      expect(text).toContain('COMPARATIVO ANUAL');
+      expect(text).toContain('2024');
+      expect(text).toContain('2025');
+      expect(text).not.toContain('COMPARATIVO 1º SEMESTRE');
     }
     expect(container.textContent).not.toContain('A posição editorial está preservada no livro FIERGS');
   });

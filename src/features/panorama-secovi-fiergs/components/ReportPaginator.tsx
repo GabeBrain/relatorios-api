@@ -315,7 +315,7 @@ function FiergsQuarterlySlide({ report, officialSlide }: { report: PanoramaRepor
   const visibleLabels = visiblePointLabelIndexes(data);
   const comparisons: FiergsComparisonPair[] = rolling
     ? fiergsPeriodComparisons(data, report.scope.endQuarter, { rolling12Months: true })
-    : fiergsPeriodComparisons(base, report.scope.endQuarter, { quarter: true, firstSemester: Number(report.scope.endQuarter[0]) >= 2 });
+    : fiergsPeriodComparisons(base, report.scope.endQuarter, { quarter: true, contextual: true });
   return <div className="panorama-fiergs-quarterly">
     <header><h2>{config.title}<span>{rolling ? 'ACUMULADO 12 MESES' : 'POR TRIMESTRE'}</span></h2><div><b>VARIAÇÕES ANUAIS</b><section>{annualComparisons.map(({ from, to, delta }) => <span key={to.year}><small>{from.year} × {to.year}</small><strong>{delta === null ? '—' : `${delta >= 0 ? '+' : ''}${pct(delta)}`}</strong></span>)}</section></div></header>
     <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 24, right: 28, top: 42, bottom: 24 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => visibleTicks.has(index) ? compactQuarterLabel(String(value)) : ''} tickLine={false} tickMargin={9} axisLine={{ stroke: '#b8b8b8' }} interval={0} minTickGap={0}/><Tooltip formatter={(value) => format(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as LaunchSeries['quarter'])}/><Line type="monotone" dataKey="vertical" name="RM de Porto Alegre" stroke="#5d7737" strokeWidth={4} dot={{ r: 2.5, fill: '#5d7737' }} isAnimationActive={false} label={(props) => visibleLabels.has(Number(props.index)) ? <FiergsPointValue {...props} data={data} format={format} referenceQuarter={report.scope.endQuarter[0]}/> : null}/></LineChart></ResponsiveContainer><p>RM de Porto Alegre · {config.unit}</p></div><FiergsContextComparisons pairs={comparisons} format={format}/></main>
@@ -374,7 +374,7 @@ function FiergsPatternTemporalSlide({ report, kind, rolling = false }: { report:
   const data = rolling ? rollingSeries(raw) : raw; const ticks = visibleQuarterTickIndexes(data); const closing = report.scope.endQuarter[0];
   const annual = data.filter((row) => row.quarter.startsWith(closing)).slice(-5);
   const share = annual.map((row) => ({ year: row.quarter.slice(2), value: row.total ? row.vertical / row.total * 100 : 0 }));
-  const comparisons = fiergsPeriodComparisons(raw, report.scope.endQuarter, { quarter: true, firstSemester: Number(report.scope.endQuarter[0]) >= 2 });
+  const comparisons = fiergsPeriodComparisons(raw, report.scope.endQuarter, { quarter: true, contextual: true });
   const point = (key: 'vertical' | 'horizontal', color: string, dy: number) => (props: { x?: number; y?: number; value?: number; index?: number }) => {
     if (props.x === undefined || props.y === undefined || props.value === undefined || props.index === undefined) return null;
     const equivalent = data[props.index]?.quarter[0] === closing; const label = n(props.value);
@@ -414,7 +414,7 @@ function FiergsMarketQuarterlySlide({ report, officialSlide }: { report: Panoram
   const format = ivv ? (value: number) => pct(value) : vgv ? decimal : n; const title = ivv ? 'IVV VERTICAL' : stock ? 'OFERTA FINAL VERTICAL' : vgv ? 'VGV VENDIDO VERTICAL' : 'UNIDADES VERTICAIS VENDIDAS';
   const comparisons: FiergsComparisonPair[] = rolling
     ? fiergsPeriodComparisons(data, report.scope.endQuarter, { rolling12Months: true })
-    : fiergsPeriodComparisons(base, report.scope.endQuarter, { quarter: true, firstSemester: Number(report.scope.endQuarter[0]) >= 2, firstSemesterSnapshot: stock || ivv });
+    : fiergsPeriodComparisons(base, report.scope.endQuarter, { quarter: true, contextual: true, snapshot: stock || ivv });
   return <div className="panorama-fiergs-quarterly"><header><h2>{title}<span>{rolling ? 'ACUMULADO 12 MESES' : 'POR TRIMESTRE'}</span></h2><div><b>VARIAÇÕES ANUAIS</b><section>{annualComparisons.map(({ from, to, delta: annualDelta }) => <span key={to.year}><small>{from.year} × {to.year}</small><strong>{annualDelta === null ? '—' : `${annualDelta >= 0 ? '+' : ''}${pct(annualDelta)}`}</strong></span>)}</section></div></header>
     <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 24, right: 28, top: 42, bottom: 24 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => visibleTicks.has(index) ? compactQuarterLabel(String(value)) : ''} tickLine={false} tickMargin={9} axisLine={{ stroke: '#b8b8b8' }} interval={0}/><Tooltip formatter={(value) => format(Number(value))}/><Line type="monotone" dataKey="vertical" name="RM de Porto Alegre" stroke="#5d7737" strokeWidth={4} dot={{ r: 2.5, fill: '#5d7737' }} isAnimationActive={false} label={(props) => visibleLabels.has(Number(props.index)) ? <FiergsPointValue {...props} data={data} format={format} referenceQuarter={report.scope.endQuarter[0]}/> : null}/></LineChart></ResponsiveContainer><p>RM de Porto Alegre · {ivv ? '%' : vgv ? 'R$ milhões' : 'unidades'}</p></div><FiergsContextComparisons pairs={comparisons} format={format}/></main><footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · série temporal GeoBrain</footer></div>;
 }
