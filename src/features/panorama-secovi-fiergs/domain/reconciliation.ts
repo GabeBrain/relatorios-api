@@ -44,6 +44,7 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
   const priceStandardTotal = totalOf(input.granular.pricesByStandard);
   const priceTypologyTotal = totalOf(input.granular.pricesByTypology);
   const cohortTotal = totalOf(input.granular.cohortsHorizontal);
+  const horizontalVgvSubtotal = input.granular.vgv.find((item) => item.kind === 'subtotal' && item.segment === 'Horizontal');
   const horizontalProjects = new Set(horizontal.map((project) => project.key)).size;
   const horizontalLaunched = nullableSum(horizontal.map((project) => project.launchedUnits));
   const horizontalFinal = nullableSum(horizontal.map((project) => project.finalUnits));
@@ -70,6 +71,9 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
     countRow('horizontal.projects.cohort', 'cubo granular / coortes horizontais', 'Empreendimentos distintos por coorte.', horizontalProjects, cohortTotal?.projects ?? null, horizontalUniverse),
     countRow('horizontal.launched.cohort', 'cubo granular / coortes horizontais', 'Soma da oferta lançada horizontal por coorte.', horizontalLaunched, cohortTotal?.launchedUnits ?? null, horizontalUniverse),
     countRow('horizontal.final.cohort', 'cubo granular / coortes horizontais', 'Soma da oferta final horizontal por coorte.', horizontalFinal, cohortTotal?.finalUnits ?? null, horizontalUniverse),
+    countRow('horizontal.projects.consolidated', 'cubo granular / consolidado VGV', 'Empreendimentos distintos no subtotal horizontal consolidado.', horizontalProjects, horizontalVgvSubtotal?.projects ?? null, horizontalUniverse),
+    countRow('horizontal.launched.consolidated', 'cubo granular / consolidado VGV', 'Soma da oferta lançada no subtotal horizontal consolidado.', horizontalLaunched, horizontalVgvSubtotal?.launchedUnits ?? null, horizontalUniverse),
+    countRow('horizontal.final.consolidated', 'cubo granular / consolidado VGV', 'Soma da oferta final no subtotal horizontal consolidado.', horizontalFinal, horizontalVgvSubtotal?.finalUnits ?? null, horizontalUniverse),
     countRow('horizontal.chacaras.runtime', 'política de entidade fiergs-rs', 'Contagem de projetos condominio_chacaras presentes após o filtro.', 0, horizontal.filter((project) => project.horizontalSubtype === 'condominio_chacaras').length, horizontalUniverse),
   ];
   return { homologable: rows.every((item) => !item.critical || item.status === 'match'), rows };

@@ -460,6 +460,10 @@ const runtime = {
   stockByTypology: offerByTypology(mergedCube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
   acceptedHorizontalProjects: runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').length,
   acceptedHorizontalFinalUnits: runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').reduce((total, project) => total + (project.finalUnits ?? 0), 0),
+  horizontalConsolidated: (() => {
+    const row = runtimeModel.granular.vgv.find((item) => item.kind === 'subtotal' && item.segment === 'Horizontal');
+    return row ? { projects: row.projects, launchedUnits: row.launchedUnits, finalUnits: row.finalUnits } : null;
+  })(),
   horizontalLabels: [...new Set(runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').map((project) => project.horizontalSubtype))],
   reconciliation: runtimeModel.reconciliation,
 };

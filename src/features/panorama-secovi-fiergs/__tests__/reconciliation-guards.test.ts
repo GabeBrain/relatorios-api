@@ -25,6 +25,7 @@ const base = () => ({
     pricesByStandard: [{ kind: 'total', projects: 2 }],
     pricesByTypology: [{ kind: 'total', projects: 2 }],
     cohortsHorizontal: [{ kind: 'total', projects: 1, launchedUnits: 100, finalUnits: 40 }],
+    vgv: [{ kind: 'subtotal', segment: 'Horizontal', projects: 1, launchedUnits: 100, finalUnits: 40 }],
   },
   cityComparisons: { enabled: true, sales: [{ city: 'Canoas', liquidSales: 30 }, { city: 'Viamão', liquidSales: 20 }] },
 });
@@ -35,7 +36,7 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
   it('homologa quando vendas, estoque, coorte e política fecham com tolerância zero', () => {
     const reconciliation = reconcilePanoramaReport(base() as never);
     expect(reconciliation.homologable).toBe(true);
-    expect(reconciliation.rows).toHaveLength(18);
+    expect(reconciliation.rows).toHaveLength(21);
     expect(reconciliation.rows.every((row) => row.status === 'match' && row.delta === 0)).toBe(true);
   });
 
@@ -46,6 +47,16 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
     expect(reconciliation.homologable).toBe(false);
     expect(reconciliation.rows.find((row) => row.metricId === 'stock.vertical.maturity_typology')).toMatchObject({
       canonicalTotal: 150, dimensionalTotal: 143, delta: -7, status: 'different', critical: true,
+    });
+  });
+
+  it('bloqueia quando o consolidado horizontal usa uma janela diferente da coorte', () => {
+    const input = base();
+    input.granular.vgv[0].projects = 0;
+    const reconciliation = reconcilePanoramaReport(input as never);
+    expect(reconciliation.homologable).toBe(false);
+    expect(reconciliation.rows.find((row) => row.metricId === 'horizontal.projects.consolidated')).toMatchObject({
+      canonicalTotal: 1, dimensionalTotal: 0, delta: -1, status: 'different', critical: true,
     });
   });
 

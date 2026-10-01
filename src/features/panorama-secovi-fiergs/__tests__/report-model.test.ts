@@ -310,9 +310,11 @@ describe('Panorama FIERGS — fechamento canônico de vendas 2T2026', () => {
     ], { city: 'Canoas', uf: 'RS', endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4' });
     const model = buildPanoramaReportModel(scope, [], sources([]), [], { cubes: [cube] });
     const cohortTotal = model.granular.cohortsHorizontal.find((row) => row.kind === 'total');
+    const consolidatedHorizontal = model.granular.vgv.find((row) => row.kind === 'subtotal' && row.segment === 'Horizontal');
 
     expect(model.granular.cohortsHorizontal.some((row) => row.label === 'Até 2022')).toBe(true);
     expect(cohortTotal).toMatchObject({ projects: 2, launchedUnits: 180, finalUnits: 60 });
+    expect(consolidatedHorizontal).toMatchObject({ projects: 2, launchedUnits: 180, finalUnits: 60 });
     expect(model.reconciliation.rows.filter((row) => row.metricId.startsWith('horizontal.') && row.metricId !== 'horizontal.chacaras.runtime').every((row) => row.status === 'match')).toBe(true);
   });
 });
