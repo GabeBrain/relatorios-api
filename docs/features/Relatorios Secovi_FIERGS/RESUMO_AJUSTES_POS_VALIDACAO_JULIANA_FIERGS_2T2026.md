@@ -29,7 +29,7 @@ As anotações no PowerPoint complementaram esse diagnóstico com solicitações
 - Percentuais, nomenclaturas, rótulos, margens, legendas e mapas foram revisados.
 - O caso 4T2025 passou a reconciliar **1.524 vendas verticais**, **5.855 unidades de oferta final** e o horizontal em **121 / 28.413 / 2.840**.
 - Os mapas foram comprovados por chave única: **626 empreendimentos** em 4T2025 e **648** em 2T2026.
-- A exportação agora é protegida por **23 invariantes críticas** em PDF e PowerPoint.
+- A exportação agora é protegida por **32 invariantes críticas** em PDF e PowerPoint.
 - O relatório mantém o contrato de 75 páginas; a nova geração visual dos dois períodos integra a etapa final de homologação.
 
 ## 3. Apontamentos, correções e comportamento esperado
@@ -327,7 +327,7 @@ A decisão de exportar foi centralizada e passou a ser consultada nos botões, n
 
 **Novo comportamento esperado**
 
-Somente relatórios com as 23 invariantes em `match` podem gerar PDF ou PowerPoint. O CSV de auditoria permanece disponível para investigar o bloqueio.
+Somente relatórios com todas as 32 invariantes em `match` podem gerar PDF ou PowerPoint. O CSV de auditoria permanece disponível para investigar o bloqueio.
 
 ## 4. Controles adicionados
 
@@ -348,16 +348,16 @@ Além das correções visíveis, foram incorporados controles para evitar regres
 
 ## 5. Resultado técnico atual
 
-- **4T2025:** 23 de 23 invariantes críticas aprovadas com delta zero.
-- **2T2026:** 23 de 23 invariantes críticas aprovadas com delta zero.
-- **Testes FIERGS:** 249 de 249 aprovados.
+- **4T2025:** 32 de 32 invariantes críticas aprovadas com delta zero.
+- **2T2026:** 32 de 32 invariantes críticas aprovadas com delta zero.
+- **Testes FIERGS:** 262 de 262 aprovados.
 - **Build de produção:** aprovado.
 - **Contrato editorial:** 75 páginas preservadas.
-- **TypeScript isolado:** a única ocorrência aberta está em teste local não versionado do Corretor (`rolandia-v067.test.ts`), por dependência externa ausente; não pertence ao FIERGS nem foi incluída nos commits.
+- **TypeScript:** aprovado sem erros no projeto.
 
 ## 6. Material técnico preparado para homologação
 
-- código reconciliado e publicado no repositório;
+- código reconciliado e preparado para publicação no repositório;
 - CSV de auditoria e reconciliação;
 - matriz comentário × correção × evidência;
 - registro técnico das decisões e dos testes executados.
@@ -376,4 +376,21 @@ Até a implementação futura de um worker de exportação no servidor, a orient
 
 ## 9. Texto curto sugerido para o anúncio
 
-> Olá, Juliana! Concluímos uma nova rodada de ajustes do Panorama FIERGS com base nas suas observações. Reconciliamos vendas e estoque em todas as dimensões, generalizamos a regra para diferentes fechamentos, alinhamos produto, coorte e consolidado horizontal, adaptamos os comparativos para trimestre, semestre, nove meses ou ano completo e tornamos os mapas auditáveis por empreendimento único. No 2T2026, o relatório fecha em 1.091 vendas verticais, 5.251 unidades finais e 129 empreendimentos horizontais; o 4T2025 também foi validado como regressão, com 1.524 vendas, 5.855 unidades finais e 121 empreendimentos horizontais. PDF e PowerPoint agora só são liberados quando as 23 verificações críticas fecham sem divergência. Seguem os novos arquivos e a auditoria para sua validação visual final.
+> Olá, Juliana! Concluímos uma nova rodada de ajustes do Panorama FIERGS com base nas suas observações. Reconciliamos vendas e estoque em todas as dimensões, generalizamos a regra para diferentes fechamentos, alinhamos produto, coorte e consolidado horizontal, adaptamos os comparativos para trimestre, semestre, nove meses ou ano completo e tornamos os mapas auditáveis por empreendimento único. No 2T2026, o relatório fecha em 1.091 vendas verticais, 5.251 unidades finais e 129 empreendimentos horizontais; o 4T2025 também foi validado como regressão, com 1.524 vendas, 5.855 unidades finais e 121 empreendimentos horizontais. PDF e PowerPoint agora só são liberados quando as 32 verificações críticas fecham sem divergência. Seguem os novos arquivos e a auditoria para sua validação visual final.
+# Complemento pré-homologação final — 01/10/2026
+
+Após a primeira republicação, a auditoria final identificou 63 unidades lançadas sem abertura tipológica. A origem foi comprovada no empreendimento Residencial Santa Bárbara (`building_id 63001`), em Cachoeirinha: 63 lançadas, nenhuma linha tipológica e estoque/vendas ausentes.
+
+As últimas adaptações foram:
+
+- inclusão derivada do residual em `Não classificado`, sem fixar 63 no runtime;
+- guardas sobre as linhas visíveis de lançadas, finais e vendidas, com bloqueio de PDF/PPT;
+- distinção entre sobrecobertura negativa e distrato legítimo;
+- ranking municipal com as dez cidades, incluindo Eldorado do Sul com zero;
+- mapas com enquadramento mais fechado, marcadores menores e separação determinística de coordenadas coincidentes, preservando todas as 648 chaves;
+- metadados internos com preset, período, território, motor e build opcional;
+- orientação para manter a aba visível durante a captura.
+
+O resultado técnico esperado em 2T2026 é: 1.091 vendas verticais, 54.761 unidades lançadas, 5.251 unidades finais, horizontal `129 / 30.476 / 3.365`, 648 empreendimentos nos mapas e 32 invariantes críticas compatíveis. A regressão 4T2025 permanece em 1.524 vendas, 5.855 finais e horizontal `121 / 28.413 / 2.840`.
+
+Antes do envio à Juliana, ainda é obrigatória a geração pós-deploy e inspeção visual do novo PDF/PPT, especialmente das páginas 31, 36, 59 e 67–69.
