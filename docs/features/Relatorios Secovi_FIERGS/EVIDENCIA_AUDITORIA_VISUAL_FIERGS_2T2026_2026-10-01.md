@@ -44,3 +44,20 @@ Avisos de largura zero do Recharts aparecem somente no ambiente JSDOM dos testes
 - O gráfico de R$/m² exibe o valor de cada trimestre e, a partir do segundo, sua variação contra o trimestre imediatamente anterior, sem colisão visual.
 - O resultado continua independente do período selecionado e mantém as regressões numéricas já aprovadas para FIERGS 4T2025 e 2T2026.
 
+## Confirmação no PDF pós-publicação
+
+Artefato: `assets/panorama-fiergs-rs-2T2026 (2).pdf`
+
+SHA-256: `F17168D1702FB9FA4FC50F6D73FDA16F54E2A4C32F80CA4ADAC3390E3765A78C`
+
+Inspeção: 75 de 75 páginas.
+
+Resultado confirmado:
+
+- os comparativos trimestrais e semestrais exibem novamente as duas colunas, valores, períodos e variação;
+- o gráfico de preço por m² exibe as 14 barras do recorte, com valor e variação separados e legíveis;
+- não houve regressão visual nas séries de lançamentos, vendas, oferta e IVV;
+- não foi identificada sobreposição crítica no restante do documento.
+
+**Decisão:** correção visual aprovada no artefato e liberada para homologação funcional.
+

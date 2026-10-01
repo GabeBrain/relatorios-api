@@ -39,7 +39,7 @@ As Fases 0–6 foram implementadas sem números fixos, exceções de período ou
 
 | Verificação | Resultado |
 |---|---|
-| suíte FIERGS | 32 arquivos, 262/262 testes aprovados |
+| suíte FIERGS | 32 arquivos, 263/263 testes aprovados |
 | `npx tsc --noEmit -p tsconfig.app.json` | aprovado |
 | `npm run build` | aprovado |
 | reconciliação autenticada 2T2026 | 32/32 invariantes, homologável |
@@ -69,8 +69,25 @@ O novo PDF e PPT só podem ser produzidos pelo fluxo publicado com acesso às fo
 6. baixar a auditoria CSV e confirmar 32 invariantes em `match`;
 7. executar smoke de 4T2025 antes do envio à Juliana.
 
-## 6. Portão G6
+## 6. Inspeção do artefato pós-publicação
 
-**APROVADO PARA REPUBLICAÇÃO E GERAÇÃO DOS ARTEFATOS.** Não há divergência crítica conhecida no código. O status “pronto para homologação final da Juliana” depende somente da inspeção dos novos PDF/PPT após o deploy, especialmente dos mapas, e não deve ser declarado antes dela.
+| Item | Resultado |
+|---|---|
+| PDF | `assets/panorama-fiergs-rs-2T2026 (2).pdf` |
+| SHA-256 | `F17168D1702FB9FA4FC50F6D73FDA16F54E2A4C32F80CA4ADAC3390E3765A78C` |
+| páginas | 75/75 renderizadas e revisadas |
+| vendas verticais | 1.091, reconciliadas |
+| oferta final vertical | 5.251, reconciliada |
+| oferta lançada vertical | 54.761, com residual 63 em `Não classificado` |
+| ranking municipal | dez cidades, incluindo zero observado |
+| mapas | 648 chaves nos três mapas |
+| comparativos | colunas, valores, períodos e variações íntegros |
+| preço por m² | 14 barras com valor e variação legíveis |
+
+Não foi encontrada divergência crítica nova nem sobreposição bloqueante. A dependência de manter a aba visível durante a geração continua documentada como limitação operacional e não afeta o conteúdo do arquivo concluído.
+
+## 7. Portão G6
+
+**APROVADO PARA HOMOLOGAÇÃO FINAL DA JULIANA.** O PDF pós-publicação foi inspecionado integralmente e não há divergência crítica conhecida no código ou no artefato. A homologação continua sendo funcional: a Juliana deve confirmar se a leitura atende à expectativa de negócio.
 
 **Commit isolado:** registrado no handoff do portão.
