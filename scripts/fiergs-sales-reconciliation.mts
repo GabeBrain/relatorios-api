@@ -7,18 +7,42 @@ import { normalizeCityTemporalRows } from '../src/features/panorama-secovi-fierg
 import { FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES } from '../src/features/panorama-secovi-fiergs/presets';
 import { buildPanoramaReportModel } from '../src/features/panorama-secovi-fiergs/report/model';
 import { normalizeText } from '../src/features/panorama-secovi-fiergs/domain/taxonomy';
+import { quarterIndex } from '../src/features/panorama-secovi-fiergs/domain/quarters';
+import type { Quarter } from '../src/features/panorama-secovi-fiergs/types';
 
 type Row = Record<string, unknown>;
 type Segment = 'Vertical' | 'Horizontal' | 'Unknown';
 
 const BASE = 'https://geobrain.com.br/public-api';
 const INTERNAL_V2 = 'https://app.geobrain.com.br/public-api/v2';
-const requestedCities = process.argv.slice(3);
+const quarterArg = process.argv[3] ?? '2T2026';
+const startQuarterArg = process.argv[4] ?? '1T2023';
+if (!/^[1-4]T\d{4}$/.test(quarterArg) || !/^[1-4]T\d{4}$/.test(startQuarterArg)) {
+  throw new Error('Uso: tsx scripts/fiergs-sales-reconciliation.mts OUTPUT END_QUARTER START_QUARTER [CIDADES...]');
+}
+const requestedCities = process.argv.slice(5);
 const CITIES = requestedCities.length ? requestedCities : [...FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES];
-const END_QUARTER = '2T2026' as const;
-const START_PERIOD = '2022-04-01';
-const END_PERIOD = '2026-06-30';
-const OUTPUT = resolve(process.argv[2] ?? '.tmp/fiergs-sales-reconciliation-2T2026.json');
+const END_QUARTER = quarterArg as Quarter;
+const START_QUARTER = startQuarterArg as Quarter;
+const quarterDates = (quarter: Quarter) => {
+  const match = /^([1-4])T(\d{4})$/.exec(quarter);
+  if (!match) throw new Error(`Trimestre inválido: ${quarter}`);
+  const quarterNumber = Number(match[1]);
+  const year = Number(match[2]);
+  const firstMonth = (quarterNumber - 1) * 3 + 1;
+  const lastMonth = firstMonth + 2;
+  const lastDay = new Date(Date.UTC(year, lastMonth, 0)).getUTCDate();
+  return {
+    start: `${year}-${String(firstMonth).padStart(2, '0')}-01`,
+    end: `${year}-${String(lastMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`,
+    months: [firstMonth, firstMonth + 1, lastMonth].map((month) => `${year}-${String(month).padStart(2, '0')}`),
+  };
+};
+const START_PERIOD = quarterDates(START_QUARTER).start;
+const closingQuarter = quarterDates(END_QUARTER);
+const END_PERIOD = closingQuarter.end;
+const CLOSING_MONTHS = closingQuarter.months;
+const OUTPUT = resolve(process.argv[2] ?? `.tmp/fiergs-sales-reconciliation-${END_QUARTER}.json`);
 
 function parseEnv(text: string): Record<string, string> {
   return Object.fromEntries(text.split(/\r?\n/).flatMap((line) => {
@@ -135,7 +159,7 @@ function summarizeTemporal(city: string, rows: Row[]) {
   const normalized = normalizeCityTemporalRows(city, rows, 'flow').filter((row) => row.period === END_QUARTER);
   const rawClosingRows = rows.filter((row) => {
     const period = String(row.period ?? '').slice(0, 7);
-    return period >= '2026-04' && period <= '2026-06';
+    return CLOSING_MONTHS.includes(period);
   });
   const totals = { Vertical: 0, Horizontal: 0, Unknown: 0 };
   const groups = new Map<string, { vertical: number; horizontal: number; unknown: number }>();
@@ -152,7 +176,7 @@ function summarizeTemporal(city: string, rows: Row[]) {
   return {
     rawRows: rows.length,
     normalizedClosingRows: normalized.length,
-    rawPeriodKinds: [...new Set(rows.map((row) => String(row.period ?? '')))].filter((period) => period.includes('2026')).sort(),
+    rawPeriodKinds: [...new Set(rows.map((row) => String(row.period ?? '')))].filter((period) => period.includes(END_QUARTER.slice(2))).sort(),
     rawClosingRows: rawClosingRows.map((row) => ({
       period: String(row.period ?? ''),
       segment: segmentOf(row),
@@ -209,12 +233,12 @@ function granularProjectEvidence(buildings: Row[], cube: ReturnType<typeof build
   return cube.projects.filter((project) => project.segment === 'Vertical').flatMap((project) => {
     const raw = rawById.get(project.buildingId);
     const history = Array.isArray(raw?.typologies_history) ? raw.typologies_history as Row[] : [];
-    const closing = history.filter((entry) => String(entry.period ?? '').slice(0, 7) <= '2026-06');
+    const closing = history.filter((entry) => String(entry.period ?? '').slice(0, 7) <= CLOSING_MONTHS.at(-1)!);
     const quarter = closing.filter((entry) => {
       const month = String(entry.period ?? '').slice(0, 7);
-      return month >= '2026-04' && month <= '2026-06';
+      return CLOSING_MONTHS.includes(month);
     });
-    const months = Object.fromEntries(['2026-04', '2026-05', '2026-06'].map((month) => [month, quarter
+    const months = Object.fromEntries(CLOSING_MONTHS.map((month) => [month, quarter
       .filter((entry) => String(entry.period ?? '').slice(0, 7) === month)
       .reduce((sum, entry) => sum + granularValueOf(entry), 0)]));
     const quarterSum = Object.values(months).reduce((sum, value) => sum + value, 0);
@@ -244,7 +268,7 @@ function chacaraEvidence(buildings: Row[]) {
     const history = Array.isArray(building.typologies_history) ? building.typologies_history as Row[] : [];
     const labels = [building.standard, building.pattern, ...history.map((row) => row.pattern ?? row.standard)].map(normalizeText);
     if (!labels.includes('condominio de chacaras')) return [];
-    const withinWindow = history.filter((row) => String(row.period ?? '').slice(0, 7) <= '2026-06');
+    const withinWindow = history.filter((row) => String(row.period ?? '').slice(0, 7) <= CLOSING_MONTHS.at(-1)!);
     const latestMonth = withinWindow.map((row) => String(row.period ?? '').slice(0, 7)).sort().at(-1) ?? null;
     const latest = latestMonth ? withinWindow.filter((row) => String(row.period ?? '').slice(0, 7) === latestMonth) : [];
     const finalUnits = latest.reduce((total, row) => total + Number(row.typology_stock ?? row.stock ?? 0), 0);
@@ -281,6 +305,8 @@ for (const city of CITIES) {
   cubes.push(cube);
   const areaTotal = offerByAreaBand(cube).find((row) => row.kind === 'total');
   const verticalProjects = cube.projects.filter((project) => project.segment === 'Vertical');
+  const inLaunchWindow = (releaseQuarter: Quarter) => quarterIndex(releaseQuarter) >= quarterIndex(START_QUARTER)
+    && quarterIndex(releaseQuarter) <= quarterIndex(END_QUARTER);
   const granularAllSold = verticalProjects.reduce((sum, project) => sum + (project.soldUnits ?? 0), 0);
   const granularWithAreaSold = areaTotal?.soldUnits ?? 0;
   const granularAllStock = verticalProjects.reduce((sum, project) => sum + (project.finalUnits ?? 0), 0);
@@ -313,6 +339,30 @@ for (const city of CITIES) {
       areaBandSold: granularWithAreaSold,
       withoutAreaSold: granularAllSold - granularWithAreaSold,
       projectsWhereQuarterHistoryDiffersFromCube: projectEvidence,
+      projects: cube.projects.map((project) => ({
+        key: project.key,
+        buildingId: project.buildingId,
+        city: project.city,
+        name: project.name,
+        segment: project.segment,
+        standard: project.standard,
+        horizontalSubtype: project.horizontalSubtype,
+        releaseQuarter: project.releaseQuarter,
+        inLaunchWindow: inLaunchWindow(project.releaseQuarter),
+        launchedUnits: project.launchedUnits,
+        finalUnits: project.finalUnits,
+        soldUnits: project.soldUnits,
+        typologyLaunchedUnits: project.typologies.reduce((total, row) => total + (row.launchedUnits ?? 0), 0),
+        typologyFinalUnits: project.typologies.reduce((total, row) => total + (row.finalUnits ?? 0), 0),
+        typologySoldUnits: project.typologies.reduce((total, row) => total + (row.soldUnits ?? 0), 0),
+        typologies: project.typologies.map((row) => ({
+          typology: row.typology,
+          area: row.area,
+          launchedUnits: row.launchedUnits,
+          finalUnits: row.finalUnits,
+          soldUnits: row.soldUnits,
+        })),
+      })),
     },
     stock: {
       granularAllVertical: granularAllStock,
@@ -372,9 +422,9 @@ const horizontalPolicyTotals = {
   rejectedChacaraProjects: sum((row) => row.horizontalPolicy.rejectedChacaraProjects),
   rejectedChacaraFinalUnits: sum((row) => row.horizontalPolicy.rejectedChacaraFinalUnits),
 };
-const source = (rows: Row[], available = true) => ({ rows, available, source: 'bancada autenticada FIERGS 2T2026' });
+const source = (rows: Row[], available = true) => ({ rows, available, source: `bancada autenticada FIERGS ${END_QUARTER}` });
 const empty = source([], false);
-const runtimeModel = buildPanoramaReportModel({ uf: 'RS', cities: CITIES, startQuarter: '1T2023', endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' }, [], {
+const runtimeModel = buildPanoramaReportModel({ uf: 'RS', cities: CITIES, startQuarter: START_QUARTER, endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' }, [], {
   sales: source(patternSources.flatMap((item) => item.rows)),
   salesTypology: source(typologySources.flatMap((item) => item.rows)),
   stock: source(stockPatternSources.flatMap((item) => item.rows)),
@@ -406,7 +456,7 @@ const runtime = {
 
 const output = {
   generatedAt: new Date().toISOString(),
-  scope: { uf: 'RS', cities: CITIES, startPeriod: START_PERIOD, endPeriod: END_PERIOD, endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' },
+  scope: { uf: 'RS', cities: CITIES, startPeriod: START_PERIOD, endPeriod: END_PERIOD, startQuarter: START_QUARTER, endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' },
   contracts: {
     pattern: 'temporal-analysis-city/sales?group_by=Padrão; fluxo normalizado por cidade',
     typology: 'temporal-analysis-city/sales?group_by=Tipologia; fluxo normalizado por cidade',

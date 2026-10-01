@@ -1,0 +1,21 @@
+period;source;city;segment;full_projects;window_projects;excluded_projects;full_launched_units;window_launched_units;delta_launched_units;full_final_units;window_final_units;delta_final_units;full_sold_units;window_sold_units;delta_sold_units
+4T2025;building-with-history-internal / cubo granular;Alvorada;Vertical;22;20;2;717;692;25;5;5;0;37;37;0
+4T2025;building-with-history-internal / cubo granular;Alvorada;Horizontal;2;2;0;294;294;0;0;0;0;0;0;0
+4T2025;building-with-history-internal / cubo granular;Cachoeirinha;Vertical;44;20;24;3438;1952;1486;124;124;0;42;42;0
+4T2025;building-with-history-internal / cubo granular;Cachoeirinha;Horizontal;15;5;10;2531;637;1894;76;76;0;8;8;0
+4T2025;building-with-history-internal / cubo granular;Canoas;Vertical;148;68;80;20204;8209;11995;1610;1281;329;431;434;-3
+4T2025;building-with-history-internal / cubo granular;Canoas;Horizontal;15;9;6;2894;1353;1541;359;343;16;26;26;0
+4T2025;building-with-history-internal / cubo granular;Eldorado do Sul;Vertical;4;1;3;22;6;16;3;3;0;0;0;0
+4T2025;building-with-history-internal / cubo granular;Eldorado do Sul;Horizontal;7;2;5;3953;893;3060;169;53;116;6;6;0
+4T2025;building-with-history-internal / cubo granular;Esteio;Vertical;19;4;15;1882;644;1238;315;315;0;90;90;0
+4T2025;building-with-history-internal / cubo granular;Esteio;Horizontal;1;1;0;60;60;0;3;3;0;0;0;0
+4T2025;building-with-history-internal / cubo granular;Gravataí;Vertical;70;27;43;6875;2849;4026;334;301;33;90;86;4
+4T2025;building-with-history-internal / cubo granular;Gravataí;Horizontal;27;10;17;6086;2524;3562;314;247;67;28;31;-3
+4T2025;building-with-history-internal / cubo granular;Guaíba;Vertical;13;6;7;1575;1140;435;24;21;3;15;11;4
+4T2025;building-with-history-internal / cubo granular;Guaíba;Horizontal;10;5;5;4292;2150;2142;950;729;221;799;810;-11
+4T2025;building-with-history-internal / cubo granular;Novo Hamburgo;Vertical;91;49;42;8759;4991;3768;1282;1244;38;304;302;2
+4T2025;building-with-history-internal / cubo granular;Novo Hamburgo;Horizontal;10;5;5;896;317;579;144;144;0;16;16;0
+4T2025;building-with-history-internal / cubo granular;São Leopoldo;Vertical;64;25;39;6053;3376;2677;852;850;2;147;147;0
+4T2025;building-with-history-internal / cubo granular;São Leopoldo;Horizontal;14;4;10;3059;462;2597;150;139;11;5;7;-2
+4T2025;building-with-history-internal / cubo granular;Viamão;Vertical;30;13;17;3770;2827;943;1306;1304;2;368;368;0
+4T2025;building-with-history-internal / cubo granular;Viamão;Horizontal;20;15;5;4348;2873;1475;675;630;45;90;84;6
