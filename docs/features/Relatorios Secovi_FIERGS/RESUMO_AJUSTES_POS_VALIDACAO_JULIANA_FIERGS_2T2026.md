@@ -409,3 +409,14 @@ As últimas adaptações foram:
 O resultado técnico esperado em 2T2026 é: 1.091 vendas verticais, 54.761 unidades lançadas, 5.251 unidades finais, horizontal `129 / 30.476 / 3.365`, 648 empreendimentos nos mapas e 32 invariantes críticas compatíveis. A regressão 4T2025 permanece em 1.524 vendas, 5.855 finais e horizontal `121 / 28.413 / 2.840`.
 
 O PDF pós-deploy foi inspecionado nas 75 páginas, incluindo as páginas 31, 36, 59 e 67–69. O pacote está liberado para homologação funcional da Juliana; a verificação do PPT continua recomendada caso esse formato também seja entregue.
+
+## Complemento — segunda revisão da Juliana, 01/10/2026
+
+Este complemento **substitui o status de homologação acima**: a segunda revisão apontou Oferta Lançada, preços e mudanças editoriais adicionais. Os números antigos descrevem snapshots anteriores da GeoBrain, não metas fixas do runtime.
+
+- Lançamentos nos slides 36–37, 54–56 e 64 passam a respeitar 1T2023–fechamento, enquanto a oferta final continua sendo a fotografia do mercado atual. O histórico permanece auditável, mas não é apresentado como lançamento da janela. Em 2T2026 a fonte atual retornou 134 empreendimentos/16.110 lançadas/5.414 finais; em 4T2025, 120/14.644/6.018. O empreendimento Nápoles, em Canoas, mudou na origem desde o PPTX enviado (+160 lançadas e +163 finais), explicando os novos totais sem ajuste manual.
+- Preço por m² nos slides 51–52 passa a usar a série temporal dos gráficos de evolução por tipologia; a média geral usa a série geral reconciliada. Ticket e área permanecem granulares, com legenda de fontes distintas. Nos 65–66, `Média Loteamentos` exclui Condomínio de Casas.
+- A página anual 41 é omitida sem fonte anual completa; 59–60 são removidas. O antigo 61 vira um quadro horizontal com Casas, Loteamento Aberto e Fechado. A coluna de média permanece `—` até Juliana definir qual indicador quer. O material institucional do slide 4 continua pendente de arte atualizada (23 anos).
+- Estudos locais 2T2026 e 4T2025 gerados em PDF, 72 páginas cada, com CSV de auditoria: 39 verificações por período e nenhuma divergência crítica. Há capturas e matriz metodológica em `EVIDENCIA_SEGUNDA_REVISAO_JULIANA_FIERGS_2T2026_2026-10-01.md`. Esses estudos são **locais, não publicados**; a última redação da legenda de preço foi refinada após a captura e requer nova exportação publicada.
+
+**Status para próxima comunicação:** correções técnicas verificadas localmente, mas ainda não anunciar homologação final. Pedir a arte institucional vigente, confirmar a média pretendida no 61 e submeter o método de preço temporal à Juliana. Não há push autorizado neste ciclo.

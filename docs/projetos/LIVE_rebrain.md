@@ -896,6 +896,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-01 — Panorama FIERGS: segunda revisão da Juliana — Gabriel + Codex
+
+- **Entrega local:** reconciliação da Oferta Lançada pela janela selecionada, mantendo oferta final e vendas no histórico de fechamento; guardas dimensionais para ambos os recortes; gráficos de preço por tipologia alinhados à série temporal; revisão das páginas horizontais e supressão condicionada de páginas sem dados completos.
+- **Evidência:** regressões FIERGS 2T2026 e 4T2025 geradas em PDF, com 72 páginas e 39 verificações por período sem divergência crítica; 264 testes FIERGS, TypeScript e build aprovados. A fonte GeoBrain mudou desde o arquivo revisado pela Juliana, então valores atuais não devem ser comparados diretamente com aquela captura sem controlar o snapshot.
+- **Estado de homologação:** ainda pendem material institucional atualizado, definição sobre a média da página horizontal e confirmação da metodologia de preço por tipologia. Nenhum desses pontos foi declarado homologado. O PDF final deve ser regenerado após a publicação para refletir o último ajuste de legenda.
+- **Código/evidência:** commit local `a16c1e7`; [registro dos portões G0–G5](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_SEGUNDA_REVISAO_JULIANA_FIERGS_2T2026_2026-10-01.md). Sem push até autorização após nova conferência da divergência com o remoto.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-08-31 — Panorama V2: comparativos municipais completos e exportação para homologação — Gabriel + Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — recortes multicidade completos, prévia, PDF e PPT espelho.

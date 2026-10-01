@@ -1,7 +1,7 @@
 # Plano de ação — segunda revisão da Juliana, Panorama FIERGS 2T2026
 
 **Data:** 01/10/2026
-**Estado:** planejado; nenhuma correção deste ciclo implementada
+**Estado:** G0–G3 e verificação local G5 executados; G4 depende de material/decisões da Juliana, publicação depende de autorização e sincronização Git. Evidências em `EVIDENCIA_SEGUNDA_REVISAO_JULIANA_FIERGS_2T2026_2026-10-01.md`.
 **Fonte:** `assets/panorama-fiergs-rs-2T2026.pptx` (75 slides; SHA-256 `9AEAA0C95BF5ABE819F2D1FBA92C1B66A5EFC5E21B10D3104FE5EFB9E1666644`) e e-mail da Juliana. As observações estão em objetos da apresentação, não necessariamente em threads de comentários do PowerPoint.
 
 ## Objetivo e limites
@@ -63,7 +63,7 @@ Resolver **cada apontamento** da segunda revisão, preservar as análises que Ju
 
 1. Omitir 41 quando a matriz anual não estiver disponível; manter a página quando fonte real e completa existir. Remover 59–60 de preview, PDF e PPT.
 2. Reestruturar 61 em três produtos horizontais com contagens e médias comprovadas; confirmar que não replica confusamente o 63. Revisar 64 segundo a matriz do G1.
-3. Refatorar manifesto/paginação de modo condicional, sem confiar em números de página antigos como índice de array. Conferir sumário, links, títulos, IDs estáveis, ordem e contagem gerada: **73 páginas** se 41 indisponível; **74** se disponível, partindo do contrato atual de 75 e retirando 59–60.
+3. Refatorar manifesto/paginação de modo condicional, sem confiar em números de página antigos como índice de array. Conferir sumário, links, títulos, IDs estáveis, ordem e contagem gerada: **72 páginas** se 41 indisponível; **73** se disponível, partindo do contrato atual de 75 e retirando 59–60.
 
 **Portão:** inspeção página a página do preview/PDF/PPT nos dois estados da página 41, sem páginas vazias, saltos ou rótulos obsoletos.
 
