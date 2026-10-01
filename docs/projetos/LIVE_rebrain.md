@@ -1,3 +1,12 @@
+### 2026-10-01 - Sinduscon Curitiba: controles ocultos em XLSX - Codex
+- **Ambiente/funcionalidade:** /rebrain/sinduscon-curitiba - tratamento inicial de Alvaras e CVCO.
+- **O que:** o preservador de estilo agora aceita somente desenhos integralmente ocultos do Excel, como controles ActiveX inseridos na conversao de XLS para XLSX. Graficos e desenhos visiveis continuam bloqueados.
+- **Por que:** o arquivo Alvaras_AGO_2026.xlsx tem um controle oculto que disparava o bloqueio preventivo, embora seus dados sejam compativeis com a base.
+- **Arquivos:** src/features/sinduscon-curitiba/lib/style-preserving-workbook.ts.
+- **Commits:** pendente nesta sessao.
+- **Monday:** -
+- **Impacto em Etapas/Pendencias:** o tratamento inicial passa a aceitar conversoes comuns do Excel sem desproteger layouts que tenham objetos visiveis.
+
 ### 2026-09-20 — Sinduscon Curitiba: arrastar e soltar em todas as entradas — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — uploads das etapas independentes.
 - **O quê:** os campos de base acumulada, mês tratado, tabulação e PDF final agora aceitam arquivos por arrastar e soltar, além do clique; durante o arraste a área recebe destaque e orienta a soltar, e formatos incompatíveis exibem mensagem textual.

@@ -33,6 +33,17 @@ function normalizeWorksheetPath(target: string) {
   return normalized.join('/');
 }
 
+function resolvePackagePath(basePath: string, target: string) {
+  const parts = [...basePath.split('/').slice(0, -1), ...target.split('/')];
+  const normalized: string[] = [];
+  for (const part of parts) {
+    if (!part || part === '.') continue;
+    if (part === '..') normalized.pop();
+    else normalized.push(part);
+  }
+  return normalized.join('/');
+}
+
 function firstWorksheetPath(files: Record<string, Uint8Array>) {
   const workbookXml = files['xl/workbook.xml'];
   const relationshipsXml = files['xl/_rels/workbook.xml.rels'];
@@ -152,7 +163,26 @@ function rebuildColumns(document: XMLDocument, outputHeaders: string[], sourceHe
   });
 }
 
-function assertSupportedStructure(document: XMLDocument) {
+function hiddenDrawingOnly(files: Record<string, Uint8Array>, document: XMLDocument, worksheetPath: string) {
+  const drawing = firstElement(document, 'drawing');
+  if (!drawing) return true;
+  const relationshipId = drawing.getAttributeNS(OFFICE_REL_NS, 'id');
+  const slash = worksheetPath.lastIndexOf('/');
+  const relationshipsPath = `${worksheetPath.slice(0, slash)}/_rels/${worksheetPath.slice(slash + 1)}.rels`;
+  const relationshipsBytes = files[relationshipsPath];
+  if (!relationshipsBytes) return false;
+  const relationships = parseXml(strFromU8(relationshipsBytes), 'os relacionamentos dos desenhos');
+  const relationship = elements(relationships, 'Relationship').find((item) => item.getAttribute('Id') === relationshipId);
+  const target = relationship?.getAttribute('Target');
+  if (!target) return false;
+  const drawingBytes = files[resolvePackagePath(worksheetPath, target)];
+  if (!drawingBytes) return false;
+  const drawingDocument = parseXml(strFromU8(drawingBytes), 'o desenho da planilha');
+  const properties = elements(drawingDocument, 'cNvPr');
+  return properties.length > 0 && !elements(drawingDocument, 'chart').length && properties.every((item) => item.getAttribute('hidden') === '1');
+}
+
+function assertSupportedStructure(document: XMLDocument, files: Record<string, Uint8Array>, worksheetPath: string) {
   const unsupported = [
     ['f', 'fórmulas'],
     ['mergeCell', 'células mescladas'],
@@ -160,7 +190,8 @@ function assertSupportedStructure(document: XMLDocument) {
     ['drawing', 'desenhos ou gráficos'],
     ['conditionalFormatting', 'formatação condicional'],
   ] as const;
-  const found = unsupported.filter(([tag]) => elements(document, tag).length > 0).map(([, label]) => label);
+  const found = unsupported.filter(([tag]) => tag !== 'drawing' && elements(document, tag).length > 0).map(([, label]) => label);
+  if (elements(document, 'drawing').length && !hiddenDrawingOnly(files, document, worksheetPath)) found.push('desenhos ou graficos');
   if (found.length) throw new Error(`Esta planilha contém recursos que ainda não podem ser reposicionados com segurança: ${found.join(', ')}.`);
 }
 
@@ -171,7 +202,7 @@ export function buildStylePreservingWorkbook(buffer: ArrayBuffer, processed: Pro
   if (!worksheetBytes) throw new Error('Não foi possível ler a primeira aba da planilha.');
 
   const document = parseXml(strFromU8(worksheetBytes), 'a primeira aba');
-  assertSupportedStructure(document);
+  assertSupportedStructure(document, files, worksheetPath);
   const sheetData = firstElement(document, 'sheetData');
   if (!sheetData) throw new Error('A primeira aba não possui uma grade de dados válida.');
   const sourceRows = elements(sheetData, 'row');
