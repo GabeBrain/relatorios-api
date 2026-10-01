@@ -22,6 +22,11 @@ describe('FIERGS · blocos editoriais próprios', () => {
     expect(container.querySelectorAll('.panorama-report-page')).toHaveLength(75);
     expect(container.querySelectorAll('.panorama-fiergs-distribution').length).toBeGreaterThanOrEqual(7);
     expect(container.querySelectorAll('.panorama-fiergs-quarterly').length).toBeGreaterThanOrEqual(10);
+    const patternComparisons = container.querySelector('.panorama-fiergs-pattern .panorama-fiergs-context-comparisons');
+    expect(patternComparisons).not.toBeNull();
+    const comparisonColumns = [...(patternComparisons?.querySelectorAll('section span i') ?? [])] as HTMLElement[];
+    expect(comparisonColumns.length).toBeGreaterThan(0);
+    expect(comparisonColumns.every((column) => column.style.height.endsWith('%'))).toBe(true);
     expect(container.querySelectorAll('.panorama-location-slide')).toHaveLength(3);
     expect(container.querySelector('[aria-label^="Página 57:"]')?.textContent).toContain('OFERTA FINAL POR TIPOLOGIA E METRAGEM');
     expect(container.querySelector('[aria-label^="Página 58:"]')?.textContent).toContain('MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA');

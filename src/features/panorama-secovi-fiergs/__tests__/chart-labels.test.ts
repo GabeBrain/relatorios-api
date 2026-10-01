@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { LaunchSeries } from '../types';
-import { compactQuarterLabel, visiblePointLabelIndexes, visibleQuarterTickIndexes } from '../lib/chart-labels';
+import { compactQuarterLabel, visibleBarLabelIndexes, visiblePointLabelIndexes, visibleQuarterTickIndexes } from '../lib/chart-labels';
 
 const series = (count: number): LaunchSeries[] => Array.from({ length: count }, (_, index) => {
   const year = 2021 + Math.floor(index / 4);
@@ -23,5 +23,10 @@ describe('legibilidade adaptativa de séries FIERGS', () => {
     const labels = visiblePointLabelIndexes(data);
     expect(ticks.size).toBe(data.length);
     expect(labels.size).toBe(data.length);
+  });
+
+  it('permite exibir valor e variação em todas as barras da série de preço', () => {
+    const data = series(14);
+    expect(visibleBarLabelIndexes(data, '2', data.length).size).toBe(data.length);
   });
 });
