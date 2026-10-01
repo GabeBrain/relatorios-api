@@ -8,20 +8,20 @@ const base = (endQuarter: '2T2026' | '4T2025' = '2T2026') => ({
   scope: { uf: 'RS', cities: ['Canoas', 'Viamão'], endQuarter, entity: 'fiergs-rs' },
   cube: {
     projects: [
-      { key: 'Canoas::V1', segment: 'Vertical', soldUnits: 30, finalUnits: 70, latitude: -29.9, longitude: -51.1 },
-      { key: 'Viamão::V2', segment: 'Vertical', soldUnits: 20, finalUnits: 80, latitude: -30.0, longitude: -51.0 },
-      { key: 'Viamão::H1', segment: 'Horizontal', horizontalSubtype: 'loteamento_aberto', launchedUnits: 100, finalUnits: 40, latitude: -30.1, longitude: -50.9 },
+      { key: 'Canoas::V1', segment: 'Vertical', launchedUnits: 100, soldUnits: 30, finalUnits: 70, typologies: [], latitude: -29.9, longitude: -51.1 },
+      { key: 'Viamão::V2', segment: 'Vertical', launchedUnits: 100, soldUnits: 20, finalUnits: 80, typologies: [], latitude: -30.0, longitude: -51.0 },
+      { key: 'Viamão::H1', segment: 'Horizontal', horizontalSubtype: 'loteamento_aberto', launchedUnits: 100, finalUnits: 40, typologies: [], latitude: -30.1, longitude: -50.9 },
     ],
   },
   sales: { units: { ...block(50, endQuarter), source: 'padrão' }, unitsByTypology: { ...block(50, endQuarter), source: 'tipologia' } },
   stock: { units: { ...block(150, endQuarter), source: 'padrão' }, unitsByTypology: { ...block(150, endQuarter), source: 'tipologia' } },
   granular: {
     areaBands: [{ kind: 'total', soldUnits: 50, finalUnits: 150 }],
-    offerByStandard: [{ kind: 'total', finalUnits: 150 }],
-    offerByTypology: [{ kind: 'total', finalUnits: 150 }],
+    offerByStandard: [{ kind: 'row', launchedUnits: 200, soldUnits: 50, finalUnits: 150 }, { kind: 'total', launchedUnits: 200, soldUnits: 50, finalUnits: 150 }],
+    offerByTypology: [{ kind: 'row', launchedUnits: 200, soldUnits: 50, finalUnits: 150 }, { kind: 'total', launchedUnits: 200, soldUnits: 50, finalUnits: 150 }],
     cohortsVertical: [{ kind: 'total', finalUnits: 150 }],
-    maturityByStandard: [{ kind: 'total', final: { total: 150 } }],
-    maturityByTypology: [{ kind: 'total', final: { total: 150 } }],
+    maturityByStandard: [{ kind: 'row', launched: { total: 200 }, final: { total: 150 } }, { kind: 'total', launched: { total: 200 }, final: { total: 150 } }],
+    maturityByTypology: [{ kind: 'row', launched: { total: 200 }, final: { total: 150 } }, { kind: 'total', launched: { total: 200 }, final: { total: 150 } }],
     pricesByStandard: [{ kind: 'total', projects: 2 }],
     pricesByTypology: [{ kind: 'total', projects: 2 }],
     cohortsHorizontal: [{ kind: 'total', projects: 1, launchedUnits: 100, finalUnits: 40 }],
@@ -41,7 +41,6 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
   it('homologa quando vendas, estoque, coorte e política fecham com tolerância zero', () => {
     const reconciliation = reconcilePanoramaReport(base() as never);
     expect(reconciliation.homologable).toBe(true);
-    expect(reconciliation.rows).toHaveLength(23);
     expect(reconciliation.rows.every((row) => row.status === 'match' && row.delta === 0)).toBe(true);
   });
 
@@ -53,6 +52,65 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
     expect(reconciliation.rows.find((row) => row.metricId === 'stock.vertical.maturity_typology')).toMatchObject({
       canonicalTotal: 150, dimensionalTotal: 143, delta: -7, status: 'different', critical: true,
     });
+  });
+
+  it('bloqueia quando a linha total fecha, mas as linhas tipológicas visíveis omitem cobertura', () => {
+    const input = base();
+    input.granular.offerByTypology[0].launchedUnits = 137;
+    const reconciliation = reconcilePanoramaReport(input as never);
+    expect(reconciliation.homologable).toBe(false);
+    expect(reconciliation.rows.find((row) => row.metricId === 'launch.vertical.typology_table')).toMatchObject({
+      canonicalTotal: 200, dimensionalTotal: 137, delta: -63, status: 'different', critical: true,
+    });
+  });
+
+  it('libera a completude quando o residual derivado aparece em Não classificado', () => {
+    const input = base();
+    input.granular.offerByTypology = [
+      { kind: 'row', launchedUnits: 137, soldUnits: 50, finalUnits: 150 },
+      { kind: 'row', launchedUnits: 63, soldUnits: null, finalUnits: null },
+      { kind: 'total', launchedUnits: 200, soldUnits: 50, finalUnits: 150 },
+    ];
+    const reconciliation = reconcilePanoramaReport(input as never);
+    expect(reconciliation.rows.find((row) => row.metricId === 'launch.vertical.typology_table')).toMatchObject({
+      canonicalTotal: 200, dimensionalTotal: 200, delta: 0, status: 'match', critical: true,
+    });
+    expect(reconciliation.homologable).toBe(true);
+  });
+
+  it('bloqueia sobrecobertura tipológica mesmo quando a compensação fecha o total', () => {
+    const input = base();
+    input.cube.projects[0].typologies = [{ launchedUnits: 107, soldUnits: 30, finalUnits: 70 }];
+    input.cube.projects[1].typologies = [{ launchedUnits: 100, soldUnits: 20, finalUnits: 80 }];
+    input.granular.offerByTypology = [
+      { kind: 'row', launchedUnits: 207, soldUnits: 50, finalUnits: 150 },
+      { kind: 'row', launchedUnits: -7, soldUnits: null, finalUnits: null },
+      { kind: 'total', launchedUnits: 200, soldUnits: 50, finalUnits: 150 },
+    ];
+    const reconciliation = reconcilePanoramaReport(input as never);
+    expect(reconciliation.rows.find((row) => row.metricId === 'launch.vertical.typology_table')?.status).toBe('match');
+    expect(reconciliation.rows.find((row) => row.metricId === 'residual.vertical.typology.launched.negative')).toMatchObject({
+      canonicalTotal: 0, dimensionalTotal: 7, delta: 7, status: 'different', critical: true,
+    });
+    expect(reconciliation.homologable).toBe(false);
+  });
+
+  it('não confunde distrato tipológico negativo com residual negativo', () => {
+    const input = base();
+    input.cube.projects[0].soldUnits = -1;
+    input.cube.projects[0].typologies = [{ launchedUnits: 100, soldUnits: -1, finalUnits: 70 }];
+    input.cube.projects[1].typologies = [{ launchedUnits: 100, soldUnits: 20, finalUnits: 80 }];
+    input.sales.units.series[0].vertical = 19;
+    input.sales.unitsByTypology.series[0].vertical = 19;
+    input.granular.areaBands[0].soldUnits = 19;
+    input.granular.offerByStandard[0].soldUnits = 19;
+    input.granular.offerByTypology[0].soldUnits = 19;
+    input.cityComparisons.sales[0].liquidSales = -1;
+    const reconciliation = reconcilePanoramaReport(input as never);
+    expect(reconciliation.rows.find((row) => row.metricId === 'residual.vertical.typology.sold.negative')).toMatchObject({
+      canonicalTotal: 0, dimensionalTotal: 0, delta: 0, status: 'match', critical: true,
+    });
+    expect(reconciliation.homologable).toBe(true);
   });
 
   it('bloqueia quando o consolidado horizontal usa uma janela diferente da coorte', () => {
@@ -87,7 +145,7 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
     expect(usePanoramaExportStore.getState()).toMatchObject({ status: 'error', report: null });
   });
 
-  it.each(['2T2026', '4T2025'] as const)('libera PDF e PPT quando as 23 invariantes fecham em %s', (period) => {
+  it.each(['2T2026', '4T2025'] as const)('libera PDF e PPT quando todas as invariantes fecham em %s', (period) => {
     const input = base(period);
     const reconciliation = reconcilePanoramaReport(input as never);
     const report = { scope: input.scope, reconciliation } as never;

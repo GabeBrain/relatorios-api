@@ -19,6 +19,9 @@ const closingVertical = (block: ReportMarketBlock, period: string): number | nul
 
 const totalOf = <T extends { kind: string }>(rows: T[]): T | undefined => rows.find((row) => row.kind === 'total');
 
+const visibleSum = <T extends { kind: string }>(rows: T[], value: (row: T) => number | null | undefined): number | null =>
+  nullableSum(rows.filter((item) => item.kind !== 'total' && item.kind !== 'subtotal').map((item) => value(item) ?? null));
+
 function row(input: Omit<PanoramaReconciliationRow, 'delta' | 'status'>): PanoramaReconciliationRow {
   const delta = input.canonicalTotal === null || input.dimensionalTotal === null ? null : input.dimensionalTotal - input.canonicalTotal;
   const status = delta === null ? 'unavailable' : Math.abs(delta) <= input.tolerance ? 'match' : 'different';
@@ -35,13 +38,17 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
   const vertical = input.cube.projects.filter((project) => project.segment === 'Vertical');
   const horizontal = input.cube.projects.filter((project) => project.segment === 'Horizontal');
   const canonicalSales = nullableSum(vertical.map((project) => project.soldUnits));
+  const canonicalLaunched = nullableSum(vertical.map((project) => project.launchedUnits));
   const canonicalStock = nullableSum(vertical.map((project) => project.finalUnits));
+  const negativeTypologyResidual = (metric: 'launchedUnits' | 'finalUnits' | 'soldUnits') => vertical.reduce((magnitude, project) => {
+    const projectTotal = project[metric];
+    if (projectTotal === null) return magnitude;
+    const typedTotal = nullableSum(project.typologies.map((item) => item[metric])) ?? 0;
+    const residual = projectTotal - typedTotal;
+    return residual < 0 ? magnitude + Math.abs(residual) : magnitude;
+  }, 0);
   const areaTotal = totalOf(input.granular.areaBands);
-  const standardTotal = totalOf(input.granular.offerByStandard);
-  const typologyTotal = totalOf(input.granular.offerByTypology);
   const cohortVerticalTotal = totalOf(input.granular.cohortsVertical);
-  const maturityStandardTotal = totalOf(input.granular.maturityByStandard);
-  const maturityTypologyTotal = totalOf(input.granular.maturityByTypology);
   const priceStandardTotal = totalOf(input.granular.pricesByStandard);
   const priceTypologyTotal = totalOf(input.granular.pricesByTypology);
   const cohortTotal = totalOf(input.granular.cohortsHorizontal);
@@ -67,14 +74,23 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
     countRow('sales.vertical.typology', input.sales.unitsByTypology.source, 'Soma do fechamento vertical por tipologia.', canonicalSales, closingVertical(input.sales.unitsByTypology, period)),
     countRow('sales.vertical.city', 'comparativo municipal derivado do cubo granular', 'Soma das vendas verticais das cidades concluídas.', canonicalSales, input.cityComparisons.enabled ? nullableSum(input.cityComparisons.sales.map((item) => item.liquidSales)) : null),
     countRow('sales.vertical.area', 'cubo granular / faixas de área', 'Soma das vendas por faixa de área útil.', canonicalSales, areaTotal?.soldUnits ?? null),
+    countRow('launch.vertical.pattern_table', 'cubo granular / padrão', 'Soma das linhas visíveis de oferta lançada por padrão.', canonicalLaunched, visibleSum(input.granular.offerByStandard, (item) => item.launchedUnits)),
+    countRow('launch.vertical.typology_table', 'cubo granular / tipologia', 'Soma das linhas visíveis de oferta lançada por tipologia, incluindo Não classificado.', canonicalLaunched, visibleSum(input.granular.offerByTypology, (item) => item.launchedUnits)),
+    countRow('launch.vertical.maturity_pattern', 'cubo granular / maturidade por padrão', 'Soma das linhas visíveis de oferta lançada por estágio e padrão.', canonicalLaunched, visibleSum(input.granular.maturityByStandard, (item) => item.launched.total)),
+    countRow('launch.vertical.maturity_typology', 'cubo granular / maturidade por tipologia', 'Soma das linhas visíveis de oferta lançada por estágio e tipologia, incluindo Não classificado.', canonicalLaunched, visibleSum(input.granular.maturityByTypology, (item) => item.launched.total)),
     countRow('stock.vertical.pattern', input.stock.units.source, 'Soma da oferta final vertical por padrão.', canonicalStock, closingVertical(input.stock.units, period)),
     countRow('stock.vertical.typology', input.stock.unitsByTypology.source, 'Soma da oferta final vertical por tipologia.', canonicalStock, closingVertical(input.stock.unitsByTypology, period)),
     countRow('stock.vertical.area', 'cubo granular / faixas de área', 'Soma da oferta final por faixa de área útil.', canonicalStock, areaTotal?.finalUnits ?? null),
-    countRow('stock.vertical.pattern_table', 'cubo granular / padrão', 'Soma da oferta final da tabela granular por padrão.', canonicalStock, standardTotal?.finalUnits ?? null),
-    countRow('stock.vertical.typology_table', 'cubo granular / tipologia', 'Soma da oferta final da tabela granular por tipologia.', canonicalStock, typologyTotal?.finalUnits ?? null),
+    countRow('stock.vertical.pattern_table', 'cubo granular / padrão', 'Soma das linhas visíveis de oferta final da tabela granular por padrão.', canonicalStock, visibleSum(input.granular.offerByStandard, (item) => item.finalUnits)),
+    countRow('stock.vertical.typology_table', 'cubo granular / tipologia', 'Soma das linhas visíveis de oferta final da tabela granular por tipologia, incluindo Não classificado.', canonicalStock, visibleSum(input.granular.offerByTypology, (item) => item.finalUnits)),
     countRow('stock.vertical.cohort', 'cubo granular / coorte vertical', 'Soma da oferta final por ano de lançamento.', canonicalStock, cohortVerticalTotal?.finalUnits ?? null),
-    countRow('stock.vertical.maturity_pattern', 'cubo granular / maturidade por padrão', 'Soma da oferta final por estágio e padrão.', canonicalStock, maturityStandardTotal?.final.total ?? null),
-    countRow('stock.vertical.maturity_typology', 'cubo granular / maturidade por tipologia', 'Soma da oferta final por estágio e tipologia.', canonicalStock, maturityTypologyTotal?.final.total ?? null),
+    countRow('stock.vertical.maturity_pattern', 'cubo granular / maturidade por padrão', 'Soma das linhas visíveis de oferta final por estágio e padrão.', canonicalStock, visibleSum(input.granular.maturityByStandard, (item) => item.final.total)),
+    countRow('stock.vertical.maturity_typology', 'cubo granular / maturidade por tipologia', 'Soma das linhas visíveis de oferta final por estágio e tipologia, incluindo Não classificado.', canonicalStock, visibleSum(input.granular.maturityByTypology, (item) => item.final.total)),
+    countRow('sales.vertical.pattern_table', 'cubo granular / padrão', 'Soma das linhas visíveis de vendas por padrão.', canonicalSales, visibleSum(input.granular.offerByStandard, (item) => item.soldUnits)),
+    countRow('sales.vertical.typology_table', 'cubo granular / tipologia', 'Soma das linhas visíveis de vendas por tipologia, incluindo Não classificado.', canonicalSales, visibleSum(input.granular.offerByTypology, (item) => item.soldUnits)),
+    countRow('residual.vertical.typology.launched.negative', 'cubo granular / tipologia', 'Magnitude da sobrecobertura tipológica por empreendimento na oferta lançada; esperado zero.', 0, negativeTypologyResidual('launchedUnits')),
+    countRow('residual.vertical.typology.final.negative', 'cubo granular / tipologia', 'Magnitude da sobrecobertura tipológica por empreendimento na oferta final; esperado zero.', 0, negativeTypologyResidual('finalUnits')),
+    countRow('residual.vertical.typology.sold.negative', 'cubo granular / tipologia', 'Magnitude da sobrecobertura tipológica por empreendimento nas vendas; esperado zero.', 0, negativeTypologyResidual('soldUnits')),
     countRow('projects.vertical.price_pattern', 'cubo granular / preços por padrão', 'Empreendimentos usados na ponderação de preços por padrão.', vertical.length, priceStandardTotal?.projects ?? null),
     countRow('projects.vertical.price_typology', 'cubo granular / preços por tipologia', 'Empreendimentos usados na ponderação de preços por tipologia.', vertical.length, priceTypologyTotal?.projects ?? null),
     countRow('horizontal.projects.cohort', 'cubo granular / coortes horizontais', 'Empreendimentos distintos por coorte.', horizontalProjects, cohortTotal?.projects ?? null, horizontalUniverse),
