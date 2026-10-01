@@ -90,3 +90,5 @@ O total canônico permanece o total do empreendimento. A abertura por tipologia 
 ## 9. Portão G0
 
 **APROVADO.** O delta foi integralmente explicado por chave, cidade, empreendimento e ausência de tipologia. A Fase 1 pode começar sem ajuste manual de números.
+
+**Commit isolado:** `baf1fc4` (`test(fiergs): reproduce typology launch coverage residual`).

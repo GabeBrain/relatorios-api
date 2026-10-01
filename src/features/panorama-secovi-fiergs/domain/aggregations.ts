@@ -166,6 +166,37 @@ function typologyOfferRow(label: string, projects: CubeProject[]): OfferRow {
   };
 }
 
+type OfferMetric = 'launchedUnits' | 'finalUnits' | 'soldUnits';
+
+/**
+ * Parte do total do empreendimento que a API não abriu em linhas tipológicas.
+ * `null` no total continua `null`: ausência nunca é convertida em zero. Um valor
+ * negativo permanece visível para que as guardas possam acusar sobrecobertura.
+ */
+function typologyResidual(project: CubeProject, metric: OfferMetric): number | null {
+  const projectValue = project[metric];
+  if (projectValue === null) return null;
+  const typedValue = project.typologies.reduce<number | null>((sum, row) => addNullable(sum, row[metric]), null);
+  return projectValue - (typedValue ?? 0);
+}
+
+function typologyResidualOfferRow(projects: CubeProject[]): OfferRow | null {
+  const residualProjects = projects.filter((project) => (['launchedUnits', 'finalUnits', 'soldUnits'] as const)
+    .some((metric) => (typologyResidual(project, metric) ?? 0) !== 0));
+  if (!residualProjects.length) return null;
+  const launchedUnits = sumOf(residualProjects, (project) => typologyResidual(project, 'launchedUnits'));
+  const finalUnits = sumOf(residualProjects, (project) => typologyResidual(project, 'finalUnits'));
+  return {
+    label: UNCLASSIFIED,
+    kind: 'row',
+    projects: distinctProjects(residualProjects),
+    launchedUnits,
+    finalUnits,
+    soldUnits: sumOf(residualProjects, (project) => typologyResidual(project, 'soldUnits')),
+    availability: availabilityOf(launchedUnits, finalUnits),
+  };
+}
+
 /* -------------------------------------------------------------------------- */
 /* Slides 31, 34, 35 — oferta por padrão e por tipologia                       */
 /* -------------------------------------------------------------------------- */
@@ -183,17 +214,23 @@ export function offerByTypology(cube: MarketCube, segment: 'Vertical' | 'Horizon
   const universe = segment === 'Vertical' ? verticalProjects(cube) : horizontalProjects(cube);
   const groups = projectsByTypology(universe);
   const rows = orderTypologies(groups.keys()).map((label) => typologyOfferRow(label, groups.get(label) ?? []));
-  const launchedUnits = rows.reduce<number | null>((sum, row) => addNullable(sum, row.launchedUnits), null);
-  const finalUnits = rows.reduce<number | null>((sum, row) => addNullable(sum, row.finalUnits), null);
-  return [...rows, {
-    label: 'Total',
-    kind: 'total',
-    projects: distinctProjects(universe),
-    launchedUnits,
-    finalUnits,
-    soldUnits: rows.reduce<number | null>((sum, row) => addNullable(sum, row.soldUnits), null),
-    availability: availabilityOf(launchedUnits, finalUnits),
-  }];
+  const residual = typologyResidualOfferRow(universe);
+  if (residual) {
+    const unclassified = rows.find((row) => row.label === UNCLASSIFIED);
+    if (unclassified) {
+      const unclassifiedProjects = groups.get(UNCLASSIFIED) ?? [];
+      const residualProjects = universe.filter((project) => (['launchedUnits', 'finalUnits', 'soldUnits'] as const)
+        .some((metric) => (typologyResidual(project, metric) ?? 0) !== 0));
+      unclassified.projects = distinctProjects([...unclassifiedProjects, ...residualProjects]);
+      unclassified.launchedUnits = addNullable(unclassified.launchedUnits, residual.launchedUnits);
+      unclassified.finalUnits = addNullable(unclassified.finalUnits, residual.finalUnits);
+      unclassified.soldUnits = addNullable(unclassified.soldUnits, residual.soldUnits);
+      unclassified.availability = availabilityOf(unclassified.launchedUnits, unclassified.finalUnits);
+    } else {
+      rows.push(residual);
+    }
+  }
+  return [...rows, offerRow('Total', 'total', universe)];
 }
 
 /* -------------------------------------------------------------------------- */
@@ -316,24 +353,22 @@ export function maturityByTypology(cube: MarketCube): MaturityRow[] {
   });
   // O total canônico vem do universo por empreendimento, não da soma das tipologias: a API pode
   // omitir a tipologia de parte das unidades. O resíduo fica explícito em uma linha não classificada.
-  const canonical = maturityByStandard(cube).find((row) => row.kind === 'total')!;
   const residual = emptyMaturity();
   const residualFinal = emptyMaturity();
-  for (const key of MATURITY_ORDER) {
-    const typedLaunched = rows.reduce<number>((sum, row) => sum + (row.launched[key] ?? 0), 0);
-    const typedFinal = rows.reduce<number>((sum, row) => sum + (row.final[key] ?? 0), 0);
-    residual[key] = Math.max(0, (canonical.launched[key] ?? 0) - typedLaunched);
-    residualFinal[key] = Math.max(0, (canonical.final[key] ?? 0) - typedFinal);
+  const residualProjects: CubeProject[] = [];
+  for (const project of universe) {
+    if (!project.maturity) continue;
+    const launched = typologyResidual(project, 'launchedUnits');
+    const final = typologyResidual(project, 'finalUnits');
+    if ((launched ?? 0) === 0 && (final ?? 0) === 0) continue;
+    residualProjects.push(project);
+    residual[project.maturity] = addNullable(residual[project.maturity], launched);
+    residualFinal[project.maturity] = addNullable(residualFinal[project.maturity], final);
   }
-  residual.total = MATURITY_ORDER.reduce((sum, key) => sum + (residual[key] ?? 0), 0);
-  residualFinal.total = MATURITY_ORDER.reduce((sum, key) => sum + (residualFinal[key] ?? 0), 0);
-  const residualProjects = universe.filter((project) => {
-    const typed = project.typologies.reduce((sum, row) => sum + (row.launchedUnits ?? 0), 0);
-    const typedFinal = project.typologies.reduce((sum, row) => sum + (row.finalUnits ?? 0), 0);
-    return typed < (project.launchedUnits ?? 0) || typedFinal < (project.finalUnits ?? 0);
-  }).length;
-  const residualRow = residual.total || residualFinal.total
-    ? [{ label: UNCLASSIFIED, kind: 'row' as RowKind, projects: residualProjects, launched: residual, final: residualFinal }]
+  residual.total = MATURITY_ORDER.reduce<number | null>((sum, key) => addNullable(sum, residual[key]), null);
+  residualFinal.total = MATURITY_ORDER.reduce<number | null>((sum, key) => addNullable(sum, residualFinal[key]), null);
+  const residualRow = residualProjects.length
+    ? [{ label: UNCLASSIFIED, kind: 'row' as RowKind, projects: distinctProjects(residualProjects), launched: residual, final: residualFinal }]
     : [];
   return [...rows, ...residualRow, maturityRow('Total', 'total', universe)];
 }
