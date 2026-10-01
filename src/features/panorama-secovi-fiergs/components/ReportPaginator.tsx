@@ -147,7 +147,10 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
   const salesPage = [23, 24, 25, 26].includes(page);
   const hideCompanion = salesPage && !series.pattern && !report.horizontalSeries.attributable;
   const referenceQuarter = report.scope.endQuarter[0];
-  const visibleBarLabels = visibleBarLabelIndexes(data, referenceQuarter);
+  // Preço por m² é a única série em barras e tem no máximo uma leitura trimestral por coluna.
+  // O valor e a variação são parte da informação solicitada, portanto nenhuma barra pode parecer
+  // "sem dado" apenas por causa da regra genérica de redução de densidade.
+  const visibleBarLabels = visibleBarLabelIndexes(data, referenceQuarter, series.bars ? data.length : 9);
   const formatValue = (value: number) => series.unit === 'mi' ? decimal(value) : series.unit === 'sqm' ? `R$ ${n(value)}/m²` : n(value);
   const highlighted = data.filter((row) => row.quarter[0] === referenceQuarter);
   const comparisons = highlighted.slice(-4).slice(1).map((current, index) => ({ previous: highlighted.slice(-4)[index], current }));
@@ -193,10 +196,10 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
     // Rótulo compacto: com 17 barras, `R$ 10.574/m²` por barra se sobrepõe ao vizinho. A unidade já
     // está no título e na legenda da lâmina, então a barra carrega só o número.
     return <g className={emphasized ? 'panorama-bar-label is-reference' : 'panorama-bar-label'}>
-      <text x={centre} y={Math.max(24, props.y - 16)} textAnchor="middle">{n(Number(props.value))}</text>
-      <text x={centre} y={Math.max(36, props.y - 4)} textAnchor="middle" className={delta === null ? 'panorama-bar-delta' : delta >= 0 ? 'panorama-bar-delta panorama-cf-positive' : 'panorama-bar-delta panorama-cf-negative'}>
-        {delta === null ? '—' : `${delta >= 0 ? '▲' : '▼'} ${pct(Math.abs(delta))}`}
-      </text>
+      <text x={centre} y={Math.max(20, props.y - 28)} textAnchor="middle">{n(Number(props.value))}</text>
+      {delta !== null && <text x={centre} y={Math.max(34, props.y - 10)} textAnchor="middle" className={delta >= 0 ? 'panorama-bar-delta panorama-cf-positive' : 'panorama-bar-delta panorama-cf-negative'}>
+        {`${delta >= 0 ? '▲' : '▼'} ${pct(Math.abs(delta))}`}
+      </text>}
     </g>;
   };
 
@@ -289,7 +292,7 @@ function FiergsContextComparisons({ pairs, format }: { pairs: FiergsComparisonPa
     const maximum = Math.max(Math.abs(pair.left ?? 0), Math.abs(pair.right ?? 0), 1);
     const columnHeight = (value: number | null) => `${value === null ? 0 : Math.max(22, Math.abs(value) / maximum * 100)}%`;
     const formatted = (value: number | null) => value === null ? '—' : format(value);
-    return <section key={pair.kind}><h3>{pair.title}</h3><div><span><b>{formatted(pair.left)}</b><i style={{ '--panorama-column-height': columnHeight(pair.left) } as CSSProperties}/><small>{pair.leftLabel}</small></span><em>{pair.variation === null ? '—' : `${pair.variation >= 0 ? '+' : ''}${pct(pair.variation)}`}</em><span><b>{formatted(pair.right)}</b><i style={{ '--panorama-column-height': columnHeight(pair.right) } as CSSProperties}/><small>{pair.rightLabel}</small></span></div>{!pair.complete && <p>Período incompleto</p>}</section>;
+    return <section key={pair.kind}><h3>{pair.title}</h3><div><span><b>{formatted(pair.left)}</b><i style={{ height: columnHeight(pair.left) }}/><small>{pair.leftLabel}</small></span><em>{pair.variation === null ? '—' : `${pair.variation >= 0 ? '+' : ''}${pct(pair.variation)}`}</em><span><b>{formatted(pair.right)}</b><i style={{ height: columnHeight(pair.right) }}/><small>{pair.rightLabel}</small></span></div>{!pair.complete && <p>Período incompleto</p>}</section>;
   })}</aside>;
 }
 
