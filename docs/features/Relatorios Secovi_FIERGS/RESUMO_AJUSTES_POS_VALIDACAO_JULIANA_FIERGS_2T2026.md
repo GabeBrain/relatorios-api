@@ -1,0 +1,292 @@
+# Resumo dos ajustes pós-validação — Panorama FIERGS 2T2026
+
+**Data:** 30/09/2026  
+**Recorte validado:** Alvorada, Cachoeirinha, Canoas, Eldorado do Sul, Esteio, Gravataí, Guaíba, Novo Hamburgo, São Leopoldo e Viamão  
+**Período:** 1T2023 a 2T2026  
+**Material de origem:** PowerPoint comentado enviado pela Juliana e e-mail de validação
+
+## 1. Contexto recebido
+
+No e-mail, Juliana informou que a parte inicial de lançamentos e vendas estava adequada de modo geral, mas destacou dois problemas centrais:
+
+1. as vendas apresentadas em diferentes lâminas não fechavam entre si;
+2. na análise do mercado atual, os estoques/oferta final também não fechavam.
+
+As anotações no PowerPoint complementaram esse diagnóstico com solicitações de comparativos temporais, ajustes de nomenclatura, percentuais, rótulos, legendas, mapas e revisão do universo horizontal.
+
+## 2. Resumo executivo do que foi corrigido
+
+- As vendas verticais passaram a usar um único fechamento canônico de **1.091 unidades**.
+- A oferta final vertical passou a usar uma única fotografia de fechamento de **5.251 unidades**.
+- Padrão, tipologia, cidade e área agora fecham contra o mesmo total de vendas.
+- Padrão, tipologia, área, metragem e preço agora fecham contra o mesmo total de estoque.
+- Condomínios de chácaras foram excluídos transversalmente do universo FIERGS.
+- Produto horizontal e coorte horizontal passaram a fechar em **129 empreendimentos, 30.476 unidades lançadas e 3.365 unidades finais**.
+- Comparativos semestrais, de trimestre equivalente e de 12 meses foram incorporados.
+- Percentuais, nomenclaturas, rótulos, margens, legendas e mapas foram revisados.
+- O relatório mantém 75 páginas e foi novamente exportado em PDF e PowerPoint.
+
+## 3. Apontamentos, correções e comportamento esperado
+
+### 3.1 Vendas não fechavam entre as lâminas
+
+**O que estava fora**
+
+O arquivo recebido apresentava quatro totais concorrentes para vendas verticais no 2T2026:
+
+- padrão: **1.137**;
+- tipologia: **1.138**;
+- área útil/IVV: **1.091**;
+- cidade: **2.317**.
+
+As diferenças vinham do uso de fontes e universos distintos. O total municipal de 2.317 misturava 1.137 vendas verticais com 1.180 horizontais. A base granular apresentava o fechamento vertical auditável de 1.091. Também havia repetição de fotografias mensais e tratamento inconsistente de um distrato.
+
+**O que foi feito**
+
+- Foi definida a última fotografia granular por empreendimento e tipologia como fonte canônica do fechamento vertical.
+- O slide por cidade deixou de somar o segmento horizontal sob um título vertical.
+- Padrão e tipologia passaram a receber o mesmo fechamento reconciliado.
+- O distrato de `−1` unidade em quatro dormitórios foi preservado, sem ser descartado.
+- Foram adicionadas guardas que bloqueiam a exportação se qualquer uma das quatro dimensões divergir.
+
+**Novo comportamento esperado**
+
+Os slides de vendas por padrão, tipologia, cidade e área devem apresentar total de **1.091 unidades**, sempre com delta zero entre as dimensões.
+
+### 3.2 Oferta final/estoque não fechava
+
+**O que estava fora**
+
+O arquivo apresentava três totais de estoque vertical:
+
+- série temporal: **5.459**;
+- algumas dimensões por tipologia/padrão: **4.562**;
+- área, metragem e demais blocos granulares: **5.251**.
+
+A série temporal acumulava fotografias mensais que não deveriam ser somadas, enquanto o caminho dimensional antigo deixava parte das unidades fora.
+
+**O que foi feito**
+
+- A oferta final passou a usar a última fotografia granular válida por empreendimento/tipologia.
+- Padrão, tipologia e área foram reconciliados contra o mesmo total.
+- Os slides de área, tipologia, metragem e faixa de preço passaram a compartilhar esse universo.
+- A exportação é bloqueada se as dimensões críticas não fecharem.
+
+**Novo comportamento esperado**
+
+Todos os blocos de mercado atual devem fechar em **5.251 unidades de oferta final vertical**.
+
+### 3.3 Inclusão das variações solicitadas
+
+**O que estava fora**
+
+Os slides 11, 14, 22, 26 e 33 não apresentavam o mesmo padrão de comparação temporal usado como referência no slide 9.
+
+**O que foi feito**
+
+- Foi criada uma regra única de comparação entre períodos equivalentes.
+- As variações passaram a indicar claramente os períodos comparados e o percentual calculado.
+- Denominador zero e período ausente são exibidos como indisponíveis, nunca como zero ou infinito.
+
+**Novo comportamento esperado**
+
+Os slides indicados mostram comparações equivalentes, como `2T2025 × 2T2026`, com variação rastreável e tratamento seguro de dados ausentes.
+
+### 3.4 Comparativo por semestre
+
+**O que estava fora**
+
+Os slides 15, 16, 27, 28, 35 e 39 não traziam a leitura do primeiro semestre atual contra o primeiro semestre anterior.
+
+**O que foi feito**
+
+- Foi incorporado o comparativo `1S2025 × 1S2026`.
+- Para indicadores de fluxo, o semestre corresponde à soma de 1T e 2T.
+- Para estoque e IVV, o semestre usa a fotografia do fechamento do 2T, sem somar snapshots.
+- O acumulado móvel de 12 meses continua identificado como 12 meses; ele não é renomeado como semestre.
+
+**Novo comportamento esperado**
+
+Os seis slides exibem uma comparação semestral metodologicamente consistente, separada da leitura de 12 meses.
+
+### 3.5 Percentuais fechavam em 99,9%
+
+**O que estava fora**
+
+Nos slides 25 e 30, o arredondamento independente das categorias fazia a soma visual resultar em 99,9%.
+
+**O que foi feito**
+
+Foi implementado um rateio determinístico do resíduo de décimos. O ajuste atua somente no percentual apresentado e não altera valores absolutos ou totais da fonte.
+
+**Novo comportamento esperado**
+
+As participações publicadas fecham visualmente em **100,0%**, inclusive quando existe distrato negativo.
+
+### 3.6 Nomenclatura de dormitórios
+
+**O que estava fora**
+
+O slide 29 exibia categorias numéricas ou grafias inconsistentes, como `2`, sem explicitar que se tratava de dormitórios.
+
+**O que foi feito**
+
+As grafias foram canonizadas para:
+
+- 1 Dormitório;
+- 2 Dormitórios;
+- 3 Dormitórios;
+- 4 ou + Dormitórios.
+
+**Novo comportamento esperado**
+
+As tipologias são exibidas com nomenclatura completa e consistente em todas as lâminas relacionadas.
+
+### 3.7 Legenda e margens no ranking por cidade
+
+**O que estava fora**
+
+No slide 31, a legenda/marcação disputava espaço com o gráfico e prejudicava a leitura.
+
+**O que foi feito**
+
+- A legenda redundante foi removida.
+- O ranking recebeu margens e espaçamentos específicos.
+- Total, barras, valores e participações foram preservados.
+
+**Novo comportamento esperado**
+
+O ranking por cidade é exibido sem sobreposição e fecha em **1.091 unidades**.
+
+### 3.8 Slide anual de IVV por área útil
+
+**O que estava fora**
+
+O slide 41 não deixava claro o método e podia sugerir uma informação anual que a fonte disponível não sustentava.
+
+**O que foi feito**
+
+Foi mantida a posição no relatório com um estado executivo de indisponibilidade. O trimestre de fechamento não é repetido ou multiplicado para simular uma janela anual.
+
+**Novo comportamento esperado**
+
+O slide comunica claramente que o indicador anual por faixa de área está indisponível até existir composição histórica auditável para os quatro trimestres.
+
+### 3.9 Rótulos do gráfico de preço por m²
+
+**O que estava fora**
+
+No slide 43, a quantidade e a posição dos rótulos geravam colisões e dificultavam a leitura.
+
+**O que foi feito**
+
+- A densidade de rótulos foi limitada.
+- Foram preservados os extremos, o fechamento e os trimestres equivalentes relevantes.
+- Os rótulos do eixo foram compactados.
+
+**Novo comportamento esperado**
+
+O gráfico apresenta os valores relevantes sem sobreposição, mantendo a leitura das variações e do fechamento.
+
+### 3.10 Exclusão de condomínios de chácaras
+
+**O que estava fora**
+
+O universo horizontal incluía condomínios de chácaras, embora a orientação fosse desconsiderá-los.
+
+**O que foi feito**
+
+- As diferentes grafias de chácaras passaram a ser rejeitadas na entrada temporal e granular.
+- O filtro foi aplicado antes das agregações, afetando produto, coorte, preço e totais.
+
+**Novo comportamento esperado**
+
+Nenhum condomínio de chácaras aparece nos números ou derivados do Panorama FIERGS. A guarda final confirmou **zero** projetos desse tipo no runtime.
+
+### 3.11 Produto horizontal e coorte não fechavam
+
+**O que estava fora**
+
+Na validação integrada, o produto horizontal usava o universo completo, mas a coorte era cortada em 1T2023, eliminando a linha `Até 2022`. Isso produzia:
+
+- produto completo: **129 / 30.476 / 3.365**;
+- coorte cortada: **39 / 8.402 / 2.482**.
+
+**O que foi feito**
+
+As lâminas horizontais de fotografia e coorte passaram a usar o cubo ativo completo. A janela `1T2023–2T2026` continua válida para séries temporais, mas não elimina empreendimentos anteriores da fotografia de mercado.
+
+**Novo comportamento esperado**
+
+Produto e coorte fecham em **129 empreendimentos, 30.476 unidades lançadas e 3.365 unidades finais**, incluindo a faixa `Até 2022`.
+
+### 3.12 Média dos loteamentos
+
+**O que estava fora**
+
+A média podia incorporar casas/sobrados ou chácaras, alterando o conceito solicitado.
+
+**O que foi feito**
+
+A linha `Média dos loteamentos` passou a considerar somente loteamentos abertos e fechados.
+
+**Novo comportamento esperado**
+
+Casas/sobrados e chácaras não participam da média dos loteamentos.
+
+### 3.13 Zoom, enquadramento e legendas dos mapas
+
+**O que estava fora**
+
+Os mapas 67–69 apresentavam enquadramento amplo, poucos elementos de leitura e ausência de legendas completas.
+
+**O que foi feito**
+
+- Bounds calculados a partir dos pontos válidos.
+- Padding cartográfico e limite de zoom.
+- Mosaico limitado para evitar mapas excessivamente grandes.
+- Cores por padrão e escalas específicas para estoque e R$/m².
+- Coordenadas inválidas continuam fora do mapa.
+
+**Novo comportamento esperado**
+
+As dez cidades e os pontos válidos aparecem enquadrados em zoom 9, com legendas correspondentes a padrão, estoque e preço por m².
+
+## 4. Controles adicionados
+
+Além das correções visíveis, foram incorporados controles para evitar regressões:
+
+- guarda de reconciliação antes da exportação;
+- auditoria CSV com fonte, fórmula, universo, período, totais e delta;
+- testes de fluxo mensal versus trimestral;
+- testes de snapshot de estoque;
+- testes de dimensões não classificadas;
+- testes de exclusão de chácaras;
+- testes de produto versus coorte horizontal;
+- testes de percentuais, nomenclaturas, mapas e 75 posições do relatório;
+- validação do mesmo manifesto no preview, PDF e PowerPoint.
+
+## 5. Resultado da validação final
+
+- **11 de 11 invariantes críticos:** aprovados com delta zero.
+- **Testes FIERGS:** 236 de 236 aprovados.
+- **Build de produção:** aprovado.
+- **PowerPoint:** 75 páginas.
+- **PDF:** 75 páginas.
+- **Lâminas críticas:** inspecionadas no arquivo final.
+
+## 6. Material entregue para homologação
+
+- PowerPoint corrigido;
+- PDF equivalente;
+- CSV de auditoria e reconciliação;
+- matriz comentário × correção × evidência;
+- registro técnico das decisões e dos testes executados.
+
+## 7. Pendência para encerramento
+
+Não há pendência numérica ou técnica para gerar o relatório. O próximo passo é o aceite editorial da Juliana sobre o pacote. O slide 41 permanecerá explicitamente indisponível enquanto não houver uma fonte histórica auditável por faixa de área.
+
+## 8. Texto curto sugerido para o anúncio
+
+> Olá, Juliana! Concluímos os ajustes do Panorama FIERGS com base nas suas observações. Reconciliamos vendas e estoque entre todas as dimensões, incluímos os comparativos trimestrais e semestrais, revisamos o universo horizontal sem chácaras e ajustamos percentuais, nomenclaturas, rótulos, legendas e mapas. As vendas agora fecham em 1.091 unidades, a oferta final vertical em 5.251 unidades e o bloco horizontal em 129 empreendimentos, 30.476 unidades lançadas e 3.365 unidades finais. Seguem o PowerPoint e o PDF atualizados, acompanhados da matriz de ajustes e da auditoria para sua validação.
