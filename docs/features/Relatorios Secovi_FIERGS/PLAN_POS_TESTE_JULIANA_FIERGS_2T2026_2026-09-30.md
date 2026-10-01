@@ -1,7 +1,7 @@
 # Plano de ação pós-teste Juliana — Panorama FIERGS 2T2026
 
 **Data:** 30/09/2026  
-**Estado:** Fases 0 a 6 concluídas tecnicamente; clareza visual validada em testes e build, com inspeção dos arquivos finais reservada à Fase 8
+**Estado:** Fases 0 a 8 concluídas tecnicamente; pacote final gerado e inspecionado, aguardando aceite externo da Juliana
 **Escopo:** correções apontadas por Juliana no arquivo `panorama-alvorada-cachoeirinha-canoas-e-mais-7-2T2026.pptx`  
 **Recorte de homologação:** Alvorada, Cachoeirinha, Canoas, Eldorado do Sul, Esteio, Gravataí, Guaíba, Novo Hamburgo, São Leopoldo e Viamão — fechamento 2T2026  
 **Artefato de referência:** `assets/panorama-alvorada-cachoeirinha-canoas-e-mais-7-2T2026.pptx`
@@ -295,6 +295,8 @@ Quando uma dimensão não tiver cobertura completa, ela deverá ser declarada in
 
 ### Fase 7 — Testes automatizados
 
+**Estado em 30/09/2026:** concluída. Suíte FIERGS com `236/236`, regressão do universo horizontal adicionada, TypeScript e build aprovados.
+
 **Objetivo:** cobrir regra de negócio, agregação e renderização.
 
 **Testes de domínio:**
@@ -325,6 +327,8 @@ Quando uma dimensão não tiver cobertura completa, ela deverá ser declarada in
 **Critério de saída:** suíte focal e build passam sem regressões em Secovi-SP e FIERGS.
 
 ### Fase 8 — Validação integrada e pacote de homologação
+
+**Estado em 30/09/2026:** concluída tecnicamente. CSV, PPTX e PDF de 75 páginas gerados pela aplicação autenticada; evidência em `EVIDENCIA_FASES_7_8_HOMOLOGACAO_FIERGS_2T2026_2026-09-30.md`. Aguarda somente o aceite da Juliana.
 
 **Objetivo:** entregar uma versão verificável pela Juliana.
 
@@ -456,13 +460,13 @@ A execução estará concluída quando todos os itens abaixo forem verdadeiros:
 - [x] média dos loteamentos implementada com universo correto;
 - [x] variações solicitadas adicionadas;
 - [x] comparativos semestrais adicionados;
-- [ ] arredondamento, nomenclaturas, legendas e rótulos corrigidos;
-- [ ] slide 41 resolvido editorial e metodologicamente;
-- [ ] mapas enquadrados nas dez cidades;
-- [ ] testes de domínio, reconciliação, interface e exportação aprovados;
-- [ ] build de produção aprovado;
-- [ ] PowerPoint e PDF finais inspecionados;
-- [ ] matriz de resposta à Juliana preenchida;
+- [x] arredondamento, nomenclaturas, legendas e rótulos corrigidos;
+- [x] slide 41 resolvido editorial e metodologicamente;
+- [x] mapas enquadrados nas dez cidades;
+- [x] testes de domínio, reconciliação, interface e exportação aprovados;
+- [x] build de produção aprovado;
+- [x] PowerPoint e PDF finais inspecionados;
+- [x] matriz de resposta à Juliana preenchida;
 - [ ] versão homologada pela Juliana antes da promoção para produção.
 
 ## 14. CTA de execução

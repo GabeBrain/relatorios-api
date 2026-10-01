@@ -374,7 +374,7 @@ const horizontalPolicyTotals = {
 };
 const source = (rows: Row[], available = true) => ({ rows, available, source: 'bancada autenticada FIERGS 2T2026' });
 const empty = source([], false);
-const runtimeModel = buildPanoramaReportModel({ uf: 'RS', cities: CITIES, endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' }, [], {
+const runtimeModel = buildPanoramaReportModel({ uf: 'RS', cities: CITIES, startQuarter: '1T2023', endQuarter: END_QUARTER, entity: 'fiergs-rs', engineVersion: 'v4' }, [], {
   sales: source(patternSources.flatMap((item) => item.rows)),
   salesTypology: source(typologySources.flatMap((item) => item.rows)),
   stock: source(stockPatternSources.flatMap((item) => item.rows)),

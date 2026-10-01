@@ -294,20 +294,23 @@ export function cubeInLaunchWindow(cube: MarketCube, scope: PanoramaScope): Mark
 
 export function buildGranularBlocks(cube: MarketCube, scope?: PanoramaScope): PanoramaGranularBlocks {
   const launchCube = scope ? cubeInLaunchWindow(cube, scope) : cube;
+  // O bloco horizontal FIERGS é uma fotografia do universo ativo e possui a coorte editorial
+  // "Até 2022". A janela das séries temporais não pode eliminar essa coorte nem criar um delta.
+  const horizontalCube = scope?.entity === 'fiergs-rs' ? cube : launchCube;
   const matrix = buildCohortMatrix(launchCube, 'Vertical');
   return {
     offerByStandard: offerByStandard(launchCube, 'Vertical'),
     areaBands: offerByAreaBand(cube),
     offerByTypology: offerByTypology(launchCube, 'Vertical'),
     cohortsVertical: offerByCohort(launchCube, 'Vertical'),
-    cohortsHorizontal: offerByCohort(launchCube, 'Horizontal'),
+    cohortsHorizontal: offerByCohort(horizontalCube, 'Horizontal'),
     cohortMatrix: matrix,
     cohortMatrixParticipation: cohortMatrixParticipation(matrix),
     maturityByStandard: maturityByStandard(launchCube),
     maturityByTypology: maturityByTypology(launchCube),
     pricesByStandard: pricesByStandard(launchCube, 'Vertical'),
     pricesByTypology: pricesByTypology(launchCube),
-    horizontalPricesByStandard: horizontalPricesByStandard(launchCube),
+    horizontalPricesByStandard: horizontalPricesByStandard(horizontalCube),
     vgv: vgvSummary(launchCube),
     // Nenhum campo de Faixa de Valor foi identificado no payload nem existe regra autoritativa.
     valueRangeAvailable: false,
@@ -499,7 +502,7 @@ export function buildPanoramaReportModel(
   const failedCities = provenance.failedCities.length > 0;
   const granular = buildGranularBlocks(cube, scope);
   const launchCube = scope.startQuarter ? cubeInLaunchWindow(cube, scope) : cube;
-  const closingFacts = closingFactsOf(launchCube, granular);
+  const closingFacts = closingFactsOf(entity === 'fiergs-rs' ? cube : launchCube, granular);
   const cityComparisons = buildCityComparisons(scope, cube, provenance, options.citySalesSources ?? []);
   const temporal = {
     sales: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales), entity),

@@ -2075,3 +2075,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Verificação:** `235/235` testes da feature, `tsconfig.app.json` e build de produção aprovados; proporção 16:9 coberta pela regressão existente.
 - **Impacto em Etapas/Pendências:** Fase 6 concluída tecnicamente. A inspeção humana dos novos PDF/PPT permanece na Fase 8; a próxima frente de implementação é a Fase 7.
 
+### 2026-09-30 — FIERGS-RS: pacote de homologação 2T2026 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — validação integrada FIERGS no build de produção.
+- **O quê:** o navegador autenticado encontrou uma diferença entre produto horizontal completo e coorte cortada em `1T2023`; o bloco FIERGS passou a preservar a coorte `Até 2022`. A guarda final aprovou 11/11 invariantes e gerou CSV, PPTX e PDF com 75 páginas.
+- **Evidência:** vendas `1.091`, estoque `5.251`, horizontal `129 / 30.476 / 3.365`, chácaras `0`; `236/236` testes FIERGS e build aprovados.
+- **Impacto em Etapas/Pendências:** Fases 7 e 8 concluídas tecnicamente. O pacote está pronto para Juliana; promoção depende do aceite externo.
+

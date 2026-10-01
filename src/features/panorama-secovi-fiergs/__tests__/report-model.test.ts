@@ -242,4 +242,26 @@ describe('Panorama FIERGS — fechamento canônico de vendas 2T2026', () => {
     expect(model.granular.areaBands.find((row) => row.kind === 'total')?.finalUnits).toBe(50);
     expect(model.stock.units.source).toContain('fechamento vertical reconciliado pelo cubo granular');
   });
+
+  it('mantém a coorte horizontal Até 2022 fora da janela temporal e reconcilia com o produto', () => {
+    const scope: PanoramaScope = { uf: 'RS', cities: ['Canoas'], startQuarter: '1T2023', endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4' };
+    const horizontal = (id: string, releaseDate: string, units: number, stock: number) => ({
+      building_id: id, name: id, building_type: 'Horizontal', standard: 'Loteamento Fechado',
+      release_date: releaseDate, total_units: units, city: 'Canoas',
+      typologies_history: [
+        { period: releaseDate.slice(0, 7) + '-01', pattern: 'Loteamento Fechado', qty: units, release_price: 200000, private_area: 200 },
+        { period: '2026-06-01', pattern: 'Loteamento Fechado', typology_stock: stock, price: 220000, private_area: 200 },
+      ],
+    });
+    const cube = buildCityCube([
+      horizontal('Anterior', '2021-04-01', 100, 40),
+      horizontal('Janela', '2024-04-01', 80, 20),
+    ], { city: 'Canoas', uf: 'RS', endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4' });
+    const model = buildPanoramaReportModel(scope, [], sources([]), [], { cubes: [cube] });
+    const cohortTotal = model.granular.cohortsHorizontal.find((row) => row.kind === 'total');
+
+    expect(model.granular.cohortsHorizontal.some((row) => row.label === 'Até 2022')).toBe(true);
+    expect(cohortTotal).toMatchObject({ projects: 2, launchedUnits: 180, finalUnits: 60 });
+    expect(model.reconciliation.rows.filter((row) => row.metricId.startsWith('horizontal.') && row.metricId !== 'horizontal.chacaras.runtime').every((row) => row.status === 'match')).toBe(true);
+  });
 });
