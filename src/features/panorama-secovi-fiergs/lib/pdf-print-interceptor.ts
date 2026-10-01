@@ -65,6 +65,16 @@ function panoramaSlides() {
   return [...document.querySelectorAll<HTMLElement>('.print\\:block .panorama-report-page')];
 }
 
+function metadataFromDeck() {
+  const deck = document.querySelector<HTMLElement>('.panorama-export-root');
+  return {
+    title: deck?.dataset.exportTitle || 'Panorama Secovi/FIERGS',
+    author: 'Brain Inteligência Estratégica',
+    subject: deck?.dataset.exportSubject || 'Relatório de mercado',
+    keywords: deck?.dataset.exportKeywords?.split('|').filter(Boolean),
+  };
+}
+
 async function exportFromButton(button: HTMLButtonElement) {
   if (window.__panoramaPdfExporting) return;
   const slides = panoramaSlides();
@@ -77,11 +87,7 @@ async function exportFromButton(button: HTMLButtonElement) {
   button.disabled = true;
   setExportStatus(button, `Preparando PDF: 0 de ${slides.length}`);
   try {
-    const result = await buildPanoramaPdf(slides, {
-      title: 'Panorama Secovi/FIERGS',
-      author: 'Brain Inteligência Estratégica',
-      subject: 'Relatório de mercado',
-    }, ({ current, total }) => setExportStatus(button, `Gerando PDF: ${current} de ${total}`));
+    const result = await buildPanoramaPdf(slides, metadataFromDeck(), ({ current, total }) => setExportStatus(button, `Gerando PDF: ${current} de ${total}`));
     const url = URL.createObjectURL(result.blob);
     if (viewer) viewer.location.href = url;
     setExportStatus(button, `PDF pronto: ${result.pageCount} páginas.`, false, viewer ? undefined : url);
@@ -113,11 +119,7 @@ window.print = () => {
   }
   const viewer = window.open('', '_blank');
   window.__panoramaPdfExporting = true;
-  void buildPanoramaPdf(slides, {
-    title: 'Panorama Secovi/FIERGS',
-    author: 'Brain Inteligência Estratégica',
-    subject: 'Relatório de mercado',
-  }, () => undefined).then((result) => {
+  void buildPanoramaPdf(slides, metadataFromDeck(), () => undefined).then((result) => {
     const url = URL.createObjectURL(result.blob);
     if (viewer) viewer.location.href = url;
     else window.open(url, '_blank');
