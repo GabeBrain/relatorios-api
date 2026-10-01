@@ -191,7 +191,7 @@ function assertSupportedStructure(document: XMLDocument, files: Record<string, U
     ['conditionalFormatting', 'formatação condicional'],
   ] as const;
   const found = unsupported.filter(([tag]) => tag !== 'drawing' && elements(document, tag).length > 0).map(([, label]) => label);
-  if (elements(document, 'drawing').length && !hiddenDrawingOnly(files, document, worksheetPath)) found.push('desenhos ou graficos');
+  if (elements(document, 'drawing').length && !hiddenDrawingOnly(files, document, worksheetPath)) found.push('desenhos ou gráficos');
   if (found.length) throw new Error(`Esta planilha contém recursos que ainda não podem ser reposicionados com segurança: ${found.join(', ')}.`);
 }
 
