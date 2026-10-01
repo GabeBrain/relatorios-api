@@ -9,6 +9,8 @@ export interface MapTilePlan {
   positionOf: (point: GeographicPoint) => { left: number; top: number };
 }
 
+export interface PositionedMapPoint<T extends GeographicPoint> { point: T; left: number; top: number; coincident: number; }
+
 const tileX = (longitude: number, zoom: number) => (longitude + 180) / 360 * 2 ** zoom;
 const tileY = (latitude: number, zoom: number) => {
   const radians = latitude * Math.PI / 180;
@@ -31,8 +33,10 @@ export function buildMapTilePlan(points: GeographicPoint[], mapboxAccessToken: s
   for (; zoom >= 4; zoom -= 1) {
     const xs = validPoints.map((point) => tileX(point.longitude, zoom));
     const ys = validPoints.map((point) => tileY(point.latitude, zoom));
-    minX = Math.floor(Math.min(...xs)) - 1; maxX = Math.floor(Math.max(...xs)) + 1;
-    minY = Math.floor(Math.min(...ys)) - 1; maxY = Math.floor(Math.max(...ys)) + 1;
+    // O próprio marcador recebe margem percentual em `positionOf`; adicionar um tile inteiro em
+    // cada lado abria excessivamente o recorte metropolitano e diminuía a legibilidade.
+    minX = Math.floor(Math.min(...xs)); maxX = Math.floor(Math.max(...xs));
+    minY = Math.floor(Math.min(...ys)); maxY = Math.floor(Math.max(...ys));
     if (maxX - minX + 1 <= 5 && maxY - minY + 1 <= 4) break;
   }
   // A API pode trazer uma coordenada fora do globo; nunca deixe isso produzir um
@@ -60,4 +64,29 @@ export function buildMapTilePlan(points: GeographicPoint[], mapboxAccessToken: s
       top: clamp((tileY(point.latitude, zoom) - minY) / rows * 100, 3, 97),
     }),
   };
+}
+
+/**
+ * Separa somente coordenadas exatamente coincidentes. A posição geográfica original permanece no
+ * modelo e na auditoria; o deslocamento pequeno, estável e circular existe apenas na renderização.
+ */
+export function positionMapPoints<T extends GeographicPoint>(points: T[], plan: MapTilePlan): PositionedMapPoint<T>[] {
+  const groups = new Map<string, number[]>();
+  points.forEach((point, index) => {
+    const key = `${point.latitude.toFixed(6)}:${point.longitude.toFixed(6)}`;
+    groups.set(key, [...(groups.get(key) ?? []), index]);
+  });
+  const positioned: PositionedMapPoint<T>[] = Array(points.length);
+  groups.forEach((indexes) => indexes.forEach((pointIndex, groupIndex) => {
+    const base = plan.positionOf(points[pointIndex]);
+    const radius = indexes.length > 1 ? Math.min(1.4, .42 + Math.floor(groupIndex / 8) * .36) : 0;
+    const angle = groupIndex / Math.min(8, indexes.length) * Math.PI * 2;
+    positioned[pointIndex] = {
+      point: points[pointIndex],
+      left: clamp(base.left + Math.cos(angle) * radius, 2.5, 97.5),
+      top: clamp(base.top + Math.sin(angle) * radius, 2.5, 97.5),
+      coincident: indexes.length,
+    };
+  }));
+  return positioned;
 }

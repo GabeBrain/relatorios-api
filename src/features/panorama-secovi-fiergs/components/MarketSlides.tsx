@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { scopeCityLabel, type PanoramaReportModel, type ReportMarketBlock, type ReportSeries } from '../types';
-import { buildMapTilePlan } from '../lib/map-tiles';
+import { buildMapTilePlan, positionMapPoints } from '../lib/map-tiles';
 import { canonicalStandard, orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
 import { horizontalLabelForEntity } from '../domain/entity-policy';
@@ -441,6 +441,7 @@ export function LocationSlide({ report, mode = 'standard' }: { report: PanoramaR
   const vertical = locations.filter((item) => item.segment === 'Vertical');
   const points = report.scope.entity === 'fiergs-rs' ? locations : vertical.length ? vertical : locations;
   const tiles = buildMapTilePlan(points, mapboxAccessToken);
+  const positionedPoints = tiles ? positionMapPoints(points, tiles) : [];
   const title = mode === 'stock' ? 'MAPA DE LOCALIZAÇÃO POR ESTOQUE' : mode === 'price' ? 'MAPA DE LOCALIZAÇÃO POR R$/M²' : 'MAPA DE LOCALIZAÇÃO POR PADRÃO';
   const values = points.map((item) => mode === 'stock' ? item.finalUnits ?? 0 : mode === 'price' ? item.averagePricePerMeter ?? 0 : 1);
   const maxValue = Math.max(1, ...values);
@@ -449,7 +450,7 @@ export function LocationSlide({ report, mode = 'standard' }: { report: PanoramaR
   const standards = orderStandards(new Set(points.map((item) => canonicalStandard(item.standard))));
   return <Slide title={title} className="panorama-location-slide"><div className="panorama-location-layout">
     <div className="panorama-location-map">{tiles && <><div className="panorama-map-tiles" style={{ gridTemplateColumns: `repeat(${tiles.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${tiles.rows}, minmax(0, 1fr))` }}>{tiles.tiles.map((tile) => <img key={`${tile.x}-${tile.y}`} src={tile.url} crossOrigin="anonymous" alt=""/>)}</div><small className="panorama-map-attribution">© OpenStreetMap contributors · © Mapbox</small></>}
-      {tiles && points.map((item, index) => { const position = tiles.positionOf(item); const value = values[index]; const size = mode === 'standard' ? 2 : 1.4 + value / maxValue * 2.8; const hue = mode === 'price' ? 15 + value / maxValue * 105 : 0; const standard = canonicalStandard(item.standard); return <button className={`panorama-map-marker is-${mode}`} key={item.projectKey ?? `${item.name}-${index}`} title={`${item.name}${mode === 'stock' ? ` · estoque ${integer(item.finalUnits)}` : mode === 'price' ? ` · ${currency(item.averagePricePerMeter)}/m²` : ` · ${standard}`}`} style={{ left: `${position.left}%`, top: `${position.top}%`, width: `${size}cqw`, height: `${size}cqw`, margin: `${-size / 2}cqw`, backgroundColor: mode === 'price' ? `hsl(${hue} 65% 42%)` : mode === 'standard' ? standardPalette[standard] : undefined }}><span>{mode === 'standard' ? index + 1 : ''}</span></button>; })}
+      {tiles && positionedPoints.map(({ point: item, left, top, coincident }, index) => { const value = values[index]; const size = mode === 'standard' ? 1.55 : 1.1 + value / maxValue * 2.1; const hue = mode === 'price' ? 15 + value / maxValue * 105 : 0; const standard = canonicalStandard(item.standard); return <button className={`panorama-map-marker is-${mode}`} data-coincident={coincident > 1 ? coincident : undefined} key={item.projectKey ?? `${item.name}-${index}`} title={`${item.name}${mode === 'stock' ? ` · estoque ${integer(item.finalUnits)}` : mode === 'price' ? ` · ${currency(item.averagePricePerMeter)}/m²` : ` · ${standard}`}${coincident > 1 ? ` · ${coincident} coordenadas coincidentes` : ''}`} style={{ left: `${left}%`, top: `${top}%`, width: `${size}cqw`, height: `${size}cqw`, margin: `${-size / 2}cqw`, backgroundColor: mode === 'price' ? `hsl(${hue} 65% 42%)` : mode === 'standard' ? standardPalette[standard] : undefined }}><span>{mode === 'standard' ? index + 1 : ''}</span></button>; })}
       {!points.length && <div className="panorama-map-empty"><strong>Localização não disponível</strong><span>A API não retornou coordenadas válidas para este recorte.</span></div>}
       {!!points.length && !tiles && <div className="panorama-map-empty"><strong>Mapa base indisponível</strong><span>Configure VITE_MAPBOX_ACCESS_TOKEN para exibir o fundo cartográfico.</span></div>}
     </div>
