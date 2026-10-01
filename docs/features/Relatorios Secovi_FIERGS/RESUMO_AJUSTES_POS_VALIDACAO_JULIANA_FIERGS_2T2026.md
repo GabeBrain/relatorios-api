@@ -186,13 +186,13 @@ No slide 43, a quantidade e a posição dos rótulos geravam colisões e dificul
 
 **O que foi feito**
 
-- A densidade de rótulos foi limitada.
-- Foram preservados os extremos, o fechamento e os trimestres equivalentes relevantes.
-- Os rótulos do eixo foram compactados.
+- Todos os 14 trimestres passaram a exibir valor e, a partir do segundo, variação contra o período anterior.
+- Valor e variação foram separados verticalmente e receberam tratamento de contraste.
+- Os rótulos do eixo foram compactados; o primeiro trimestre não exibe variação artificial.
 
 **Novo comportamento esperado**
 
-O gráfico apresenta os valores relevantes sem sobreposição, mantendo a leitura das variações e do fechamento.
+O gráfico apresenta todos os valores trimestrais e suas variações sem colisão crítica, mantendo clara a leitura do fechamento.
 
 ### 3.10 Exclusão de condomínios de chácaras
 
@@ -329,11 +329,26 @@ A decisão de exportar foi centralizada e passou a ser consultada nos botões, n
 
 Somente relatórios com todas as 32 invariantes em `match` podem gerar PDF ou PowerPoint. O CSV de auditoria permanece disponível para investigar o bloqueio.
 
+### 3.18 Confirmação visual pós-publicação
+
+O PDF final `panorama-fiergs-rs-2T2026 (2).pdf` foi auditado integralmente após a publicação:
+
+- 75 de 75 páginas íntegras;
+- comparativos trimestrais, semestrais e de 12 meses legíveis;
+- vendas verticais reconciliadas em 1.091;
+- oferta final vertical reconciliada em 5.251;
+- oferta lançada vertical fechando em 54.761, com 63 unidades rastreadas em `Não classificado`;
+- dez cidades no ranking, inclusive Eldorado do Sul com zero observado;
+- 648 empreendimentos preservados em cada mapa;
+- nenhuma divergência crítica ou sobreposição bloqueante identificada.
+
+O material está pronto para homologação funcional da Juliana. Permanece apenas a limitação operacional já comunicada: durante a exportação, a aba precisa continuar visível até o download terminar.
+
 ## 4. Controles adicionados
 
 Além das correções visíveis, foram incorporados controles para evitar regressões:
 
-- 23 guardas críticas de reconciliação antes da exportação;
+- 32 guardas críticas de reconciliação antes da exportação;
 - auditoria CSV com fonte, fórmula, universo, período, totais e delta;
 - testes de fluxo mensal versus trimestral;
 - testes de snapshot de estoque;
@@ -350,23 +365,23 @@ Além das correções visíveis, foram incorporados controles para evitar regres
 
 - **4T2025:** 32 de 32 invariantes críticas aprovadas com delta zero.
 - **2T2026:** 32 de 32 invariantes críticas aprovadas com delta zero.
-- **Testes FIERGS:** 262 de 262 aprovados.
+- **Testes FIERGS:** 263 de 263 aprovados.
 - **Build de produção:** aprovado.
 - **Contrato editorial:** 75 páginas preservadas.
 - **TypeScript:** aprovado sem erros no projeto.
 
 ## 6. Material técnico preparado para homologação
 
-- código reconciliado e preparado para publicação no repositório;
+- código reconciliado e publicado no repositório;
 - CSV de auditoria e reconciliação;
 - matriz comentário × correção × evidência;
 - registro técnico das decisões e dos testes executados.
 
-Os novos PDF e PowerPoint de 4T2025 e 2T2026 devem ser gerados após a atualização do ambiente e enviados para a inspeção visual final.
+O PDF pós-publicação de 2T2026 foi gerado e inspecionado integralmente. O PowerPoint e o smoke visual de 4T2025 permanecem como verificações recomendadas de formato/período, sem divergência numérica crítica aberta.
 
-## 7. Pendência para encerramento
+## 7. Situação para encerramento
 
-Não há divergência numérica crítica aberta. A Fase 7 depende da geração dos novos PDF/PPT e do aceite visual/editorial do pacote, especialmente nas páginas 25, 29–31, 35–41, 57–61 e 63–69. O slide 41 permanecerá explicitamente indisponível enquanto não houver uma fonte histórica auditável por faixa de área.
+Não há divergência numérica ou visual crítica aberta no PDF pós-publicação. O material está pronto para o aceite funcional/editorial da Juliana. O slide 41 permanece explicitamente indisponível enquanto não houver uma fonte histórica auditável por faixa de área; isso é uma decisão metodológica, não uma falha de geração.
 
 ## 8. Limitação operacional conhecida da exportação
 
@@ -393,4 +408,4 @@ As últimas adaptações foram:
 
 O resultado técnico esperado em 2T2026 é: 1.091 vendas verticais, 54.761 unidades lançadas, 5.251 unidades finais, horizontal `129 / 30.476 / 3.365`, 648 empreendimentos nos mapas e 32 invariantes críticas compatíveis. A regressão 4T2025 permanece em 1.524 vendas, 5.855 finais e horizontal `121 / 28.413 / 2.840`.
 
-Antes do envio à Juliana, ainda é obrigatória a geração pós-deploy e inspeção visual do novo PDF/PPT, especialmente das páginas 31, 36, 59 e 67–69.
+O PDF pós-deploy foi inspecionado nas 75 páginas, incluindo as páginas 31, 36, 59 e 67–69. O pacote está liberado para homologação funcional da Juliana; a verificação do PPT continua recomendada caso esse formato também seja entregue.

@@ -1,7 +1,7 @@
 # Plano de ação técnico — acabamento pré-homologação final do Panorama FIERGS 2T2026
 
 **Data:** 01/10/2026
-**Estado:** pronto para execução
+**Estado:** concluído — portões G0–G6 aprovados e PDF pós-publicação inspecionado
 **Origem:** auditoria visual e numérica do primeiro PDF gerado após a republicação no Lovable
 **Artefato-base:** `assets/panorama-fiergs-rs-2T2026.pdf`
 **SHA-256:** `FD42A9453481849D74EBD57AA91BF42A2D5D1811539F8CF62694BE198997371D`
@@ -367,3 +367,18 @@ O refinamento cartográfico não deve atrasar a correção numérica, mas deve s
 ## 11. Definição de pronto
 
 O plano estará concluído quando a oferta por tipologia possuir cobertura integral e auditável, o ranking explicitar as dez cidades, os mapas estiverem legíveis sem perda de chaves, os metadados identificarem corretamente o preset, a interface comunicar a limitação da aba e a varredura integral não encontrar outra divergência crítica. Somente depois disso os novos PDF e PPT serão enviados à Juliana para homologação final.
+
+## 12. Encerramento pós-publicação
+
+Em 01/10/2026 foi inspecionado o PDF `panorama-fiergs-rs-2T2026 (2).pdf`, SHA-256 `F17168D1702FB9FA4FC50F6D73FDA16F54E2A4C32F80CA4ADAC3390E3765A78C`.
+
+- 75 de 75 páginas renderizadas e revisadas;
+- vendas verticais em 1.091 nas dimensões críticas;
+- oferta final vertical em 5.251;
+- oferta lançada vertical em 54.761, incluindo 63 unidades derivadas como `Não classificado`;
+- ranking com as dez cidades, inclusive Eldorado do Sul com zero observado;
+- mapas com 648 empreendimentos georreferenciados;
+- cartões comparativos e gráfico trimestral de R$/m² visualmente corrigidos;
+- nenhuma divergência crítica ou sobreposição bloqueante identificada.
+
+**Status final do plano:** concluído e pronto para homologação funcional da Juliana. A geração ainda depende de a aba permanecer visível; o worker de servidor permanece fora do escopo desta rodada.
