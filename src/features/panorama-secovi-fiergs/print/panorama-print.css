@@ -210,8 +210,9 @@
 .panorama-fiergs-distribution main strong { font-size:1.58cqw; text-align:right; }
 .panorama-fiergs-distribution main small { color:#5d7737; font-size:1.3cqw; font-weight:700; }
 .panorama-fiergs-distribution main em { display:flex; width:2.65cqw; height:2.65cqw; align-items:center; justify-content:center; border-radius:50%; background:#ffd200; font-size:1.05cqw; font-style:normal; font-weight:800; }
-.panorama-fiergs-distribution.is-city-ranking main { gap:1.05cqw; margin-top:2cqw; margin-bottom:1.2cqw; }
+.panorama-fiergs-distribution.is-city-ranking main { gap:.72cqw; margin-top:1.45cqw; margin-bottom:.85cqw; }
 .panorama-fiergs-distribution.is-city-ranking main>div { grid-template-columns:15.5cqw minmax(0,1fr) 6cqw 5.2cqw 2.6cqw; }
+.panorama-fiergs-distribution.is-city-ranking main>div.is-zero i b { min-width:0; }
 .panorama-fiergs-distribution footer { color:#5d7737; font-size:.78cqw; font-weight:800; text-align:right; }
 
 /* FIERGS: densidade editorial. A lâmina usa a área disponível como uma página de leitura,

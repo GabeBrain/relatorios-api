@@ -3,8 +3,28 @@ import { roundedPercentages } from '../domain/percentage-rounding';
 import { visibleBarLabelIndexes } from '../lib/chart-labels';
 import type { LaunchSeries } from '../types';
 import { typologyDisplayLabel } from '../domain/taxonomy';
+import { fiergsDistributionData } from '../components/ReportPaginator';
 
 describe('FIERGS · clareza editorial', () => {
+  it('mantém dez cidades no ranking, inclusive zero observado, com desempate alfabético', () => {
+    const rows = [
+      { label: 'Viamão', value: 10 }, { label: 'Canoas', value: 30 }, { label: 'Esteio', value: 20 },
+      { label: 'Alvorada', value: 10 }, { label: 'Guaíba', value: 5 }, { label: 'Gravataí', value: 15 },
+      { label: 'Novo Hamburgo', value: 12 }, { label: 'São Leopoldo', value: 8 },
+      { label: 'Cachoeirinha', value: 7 }, { label: 'Eldorado do Sul', value: 0 },
+    ];
+    const ranking = fiergsDistributionData(rows, { includeZero: true });
+    expect(ranking.visible).toHaveLength(10);
+    expect(ranking.visible.at(-1)).toEqual({ label: 'Eldorado do Sul', value: 0 });
+    expect(ranking.visible.filter((row) => row.value === 10).map((row) => row.label)).toEqual(['Alvorada', 'Viamão']);
+    expect(ranking.shares.at(-1)).toBe(0);
+    expect(ranking.total).toBe(117);
+  });
+
+  it('continua ocultando zero nas distribuições que não são o ranking municipal', () => {
+    expect(fiergsDistributionData([{ label: 'Sem observação positiva', value: 0 }]).visible).toEqual([]);
+  });
+
   it('fecha participações em 100,0% após a formatação', () => {
     const shares = roundedPercentages([1, 1, 1]);
     expect(shares).toEqual([33.4, 33.3, 33.3]);
