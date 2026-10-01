@@ -456,8 +456,14 @@ const runtime = {
     pricePatternProjects: runtimeModel.granular.pricesByStandard.find((row) => row.kind === 'total')?.projects ?? null,
     priceTypologyProjects: runtimeModel.granular.pricesByTypology.find((row) => row.kind === 'total')?.projects ?? null,
   },
+  offerGranularDimensions: {
+    pattern: (() => { const row = runtimeModel.granular.offerByStandard.find((item) => item.kind === 'total'); return { launched: row?.launchedUnits ?? null, final: row?.finalUnits ?? null }; })(),
+    typology: (() => { const row = runtimeModel.granular.offerByTypology.find((item) => item.kind === 'total'); return { launched: row?.launchedUnits ?? null, final: row?.finalUnits ?? null }; })(),
+    maturityPattern: (() => { const row = runtimeModel.granular.maturityByStandard.find((item) => item.kind === 'total'); return { launched: row?.launched.total ?? null, final: row?.final.total ?? null }; })(),
+    maturityTypology: (() => { const row = runtimeModel.granular.maturityByTypology.find((item) => item.kind === 'total'); return { launched: row?.launched.total ?? null, final: row?.final.total ?? null }; })(),
+  },
   stockByStandard: offerByStandard(mergedCube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
-  stockByTypology: offerByTypology(mergedCube).map((row) => ({ label: row.label, kind: row.kind, finalUnits: row.finalUnits })),
+  stockByTypology: offerByTypology(mergedCube).map((row) => ({ label: row.label, kind: row.kind, launchedUnits: row.launchedUnits, finalUnits: row.finalUnits })),
   acceptedHorizontalProjects: runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').length,
   acceptedHorizontalFinalUnits: runtimeModel.cube.projects.filter((project) => project.segment === 'Horizontal').reduce((total, project) => total + (project.finalUnits ?? 0), 0),
   horizontalConsolidated: (() => {
