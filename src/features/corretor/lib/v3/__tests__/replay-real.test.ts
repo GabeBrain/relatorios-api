@@ -6,7 +6,9 @@
 //   CORRETOR_REPLAY_PPTX="C:/…/deck.pptx" CORRETOR_REPLAY_STUDY=<uuid do estudo> \
 //   CORRETOR_REPLAY_CITY="Campos do Jordão" CORRETOR_REPLAY_UF=SP \
 //   CORRETOR_REPLAY_OUT=".tmp/replay.json" npx vitest run replay-real
-import { readFileSync, writeFileSync } from 'node:fs';
+// CORRETOR_REPLAY_FIXTURE=<json> lê leituras e fonte do arquivo (sem banco);
+// CORRETOR_REPLAY_SAVE=<json> grava esse arquivo a partir do banco.
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
 import { pptxToIr } from '../../audit/pptx-to-ir';
 import { irToFindings } from '../../audit/ir-rules';
@@ -40,16 +42,25 @@ describe.skipIf(!PPTX)('replay de estudo real (leituras cacheadas)', () => {
     const ir = await pptxToIr(bytes, PPTX!.split(/[\\/]/).pop() ?? 'deck.pptx');
     const candidates = await findTableImages(bytes, ir);
     const readings = new Map<string, { payload: unknown; model?: string }>();
-    const sha1s = candidates.map((c) => c.sha1);
-    for (let i = 0; i < sha1s.length; i += 40) {
-      const rows = await rest<{ sha1: string; payload: unknown; model: string }[]>(
-        `vision_cache?select=sha1,payload,model&sha1=in.(${sha1s.slice(i, i + 40).join(',')})`);
-      for (const r of rows) readings.set(r.sha1, { payload: r.payload, model: r.model });
-    }
     let fonte: Fonte | null = null;
-    if (env.CORRETOR_REPLAY_STUDY) {
-      const rows = await rest<{ payload: Fonte }[]>(`study_sources_v3?select=payload&study_id=eq.${env.CORRETOR_REPLAY_STUDY}`);
-      fonte = rows[0]?.payload ?? null;
+    // Fixture local (leituras + fonte) dispensa o banco; SAVE grava uma a partir dele.
+    const fixture = env.CORRETOR_REPLAY_FIXTURE;
+    if (fixture && existsSync(fixture)) {
+      const saved = JSON.parse(readFileSync(fixture, 'utf-8')) as { readings: Record<string, { payload: unknown; model?: string }>; fonte: Fonte | null };
+      for (const [sha1, r] of Object.entries(saved.readings)) readings.set(sha1, r);
+      fonte = saved.fonte;
+    } else {
+      const sha1s = candidates.map((c) => c.sha1);
+      for (let i = 0; i < sha1s.length; i += 40) {
+        const rows = await rest<{ sha1: string; payload: unknown; model: string }[]>(
+          `vision_cache?select=sha1,payload,model&sha1=in.(${sha1s.slice(i, i + 40).join(',')})`);
+        for (const r of rows) readings.set(r.sha1, { payload: r.payload, model: r.model });
+      }
+      if (env.CORRETOR_REPLAY_STUDY) {
+        const rows = await rest<{ payload: Fonte }[]>(`study_sources_v3?select=payload&study_id=eq.${env.CORRETOR_REPLAY_STUDY}`);
+        fonte = rows[0]?.payload ?? null;
+      }
+      if (env.CORRETOR_REPLAY_SAVE) writeFileSync(env.CORRETOR_REPLAY_SAVE, JSON.stringify({ readings: Object.fromEntries(readings), fonte }));
     }
     if (env.CORRETOR_REPLAY_DUMP) {
       const want = new Set(env.CORRETOR_REPLAY_DUMP.split(',').map(Number));

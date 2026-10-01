@@ -128,6 +128,10 @@ export async function findTableImages(
         skip(slide, target, kb, 'BMP que não pôde ser convertido para PNG');
         continue;
       }
+      // O teto do BMP é de pixels; depois de comprimido vale o da tabela. Tabela
+      // em BMP vira PNG de 12–35 KB; mapa/foto, de 1 a 5 MB — e os maiores
+      // derrubavam a Edge Function (Rolândia, out/2026: 5 "não lidas" eram mapas).
+      if (png.length / 1024 > MAX_KB) continue;
       bytes = new Uint8Array(png);
       mime = 'image/png';
     }
