@@ -1,9 +1,11 @@
 # Resumo dos ajustes pós-validação — Panorama FIERGS 2T2026
 
-**Data:** 30/09/2026  
+**Data:** 01/10/2026
 **Recorte validado:** Alvorada, Cachoeirinha, Canoas, Eldorado do Sul, Esteio, Gravataí, Guaíba, Novo Hamburgo, São Leopoldo e Viamão  
 **Período:** 1T2023 a 2T2026  
 **Material de origem:** PowerPoint comentado enviado pela Juliana e e-mail de validação
+
+**Regressão adicional:** FIERGS 4T2025, usada para garantir que as correções não dependam de números ou períodos fixos
 
 ## 1. Contexto recebido
 
@@ -23,8 +25,12 @@ As anotações no PowerPoint complementaram esse diagnóstico com solicitações
 - Condomínios de chácaras foram excluídos transversalmente do universo FIERGS.
 - Produto horizontal e coorte horizontal passaram a fechar em **129 empreendimentos, 30.476 unidades lançadas e 3.365 unidades finais**.
 - Comparativos semestrais, de trimestre equivalente e de 12 meses foram incorporados.
+- Comparativos contextuais agora mudam conforme o fechamento: 1T, primeiro semestre, nove meses ou ano completo.
 - Percentuais, nomenclaturas, rótulos, margens, legendas e mapas foram revisados.
-- O relatório mantém 75 páginas e foi novamente exportado em PDF e PowerPoint.
+- O caso 4T2025 passou a reconciliar **1.524 vendas verticais**, **5.855 unidades de oferta final** e o horizontal em **121 / 28.413 / 2.840**.
+- Os mapas foram comprovados por chave única: **626 empreendimentos** em 4T2025 e **648** em 2T2026.
+- A exportação agora é protegida por **23 invariantes críticas** em PDF e PowerPoint.
+- O relatório mantém o contrato de 75 páginas; a nova geração visual dos dois períodos integra a etapa final de homologação.
 
 ## 3. Apontamentos, correções e comportamento esperado
 
@@ -247,16 +253,87 @@ Os mapas 67–69 apresentavam enquadramento amplo, poucos elementos de leitura e
 - Mosaico limitado para evitar mapas excessivamente grandes.
 - Cores por padrão e escalas específicas para estoque e R$/m².
 - Coordenadas inválidas continuam fora do mapa.
+- Cada marcador passou a usar a chave canônica do empreendimento, impedindo duplicidade por tipologia ou snapshot.
+- Os três mapas passaram a compartilhar exatamente a mesma coleção de empreendimentos georreferenciados.
 
 **Novo comportamento esperado**
 
-As dez cidades e os pontos válidos aparecem enquadrados em zoom 9, com legendas correspondentes a padrão, estoque e preço por m².
+As dez cidades e os empreendimentos válidos aparecem enquadrados em zoom 9, com legendas correspondentes a padrão, estoque e preço por m². Em 4T2025, `626 = 505 verticais + 121 horizontais`; em 2T2026, `648 = 519 verticais + 129 horizontais`.
+
+### 3.14 Regressão multiperíodo de vendas e estoque
+
+**O que estava fora**
+
+Ao gerar o fechamento 4T2025, reapareceram dois deltas:
+
+- vendas verticais: **1.524 × 1.517**, diferença de 7;
+- oferta final vertical: **5.855 × 5.448**, diferença de 407.
+
+O filtro da data inicial dos lançamentos estava sendo aplicado também à fotografia de mercado atual. Assim, empreendimentos lançados antes de 1T2021, mas ainda com vendas ou estoque no fechamento, desapareciam de algumas dimensões.
+
+**O que foi feito**
+
+- Séries de lançamentos continuam respeitando a janela selecionada.
+- Vendas, estoque, coorte, maturidade e preço do mercado atual FIERGS passaram a usar a fotografia completa do fechamento.
+- As 407 unidades foram decompostas em 22 empreendimentos e 24 linhas tipológicas, sem alteração manual.
+- 4T2025 e 2T2026 foram transformados em regressões obrigatórias do mesmo algoritmo.
+
+**Novo comportamento esperado**
+
+No 4T2025, todas as dimensões verticais fecham em **1.524 vendas** e **5.855 unidades finais**. No 2T2026, permanecem reconciliadas em **1.091 vendas** e **5.251 unidades finais**.
+
+### 3.15 Consolidado horizontal multiperíodo
+
+**O que estava fora**
+
+Em 4T2025, produto e coorte apresentavam o universo completo, mas o consolidado mantinha apenas os projetos lançados dentro da janela:
+
+- consolidado cortado: **58 / 11.563 / 2.364**;
+- universo completo: **121 / 28.413 / 2.840**.
+
+**O que foi feito**
+
+Os 63 empreendimentos removidos apenas pelo filtro temporal foram identificados por chave. Eles explicam integralmente a diferença de 16.850 unidades lançadas e 476 finais. Produto, coorte, preços e consolidado agora usam o mesmo universo horizontal de fechamento.
+
+**Novo comportamento esperado**
+
+- 4T2025: **121 empreendimentos, 28.413 lançadas e 2.840 finais**;
+- 2T2026: **129 empreendimentos, 30.476 lançadas e 3.365 finais**.
+
+### 3.16 Comparativos contextuais conforme o fechamento
+
+**O que estava fora**
+
+A regra anterior ativava o primeiro semestre para qualquer trimestre maior ou igual a 2. Por isso, um relatório encerrado em 4T2025 continuava destacando `1S2024 × 1S2025`.
+
+**O que foi feito**
+
+- 1T compara o trimestre equivalente;
+- 2T compara o primeiro semestre;
+- 3T compara nove meses;
+- 4T compara o ano completo.
+
+Fluxos são acumulados somente quando todos os trimestres existem. Estoque e IVV usam a fotografia do trimestre final. Ausência não vira zero.
+
+**Novo comportamento esperado**
+
+O 4T2025 apresenta `COMPARATIVO ANUAL — 2024 × 2025`; o 2T2026 preserva `COMPARATIVO 1º SEMESTRE — 1S2025 × 1S2026`.
+
+### 3.17 Bloqueio multiperíodo de exportação
+
+**O que foi feito**
+
+A decisão de exportar foi centralizada e passou a ser consultada nos botões, no início do job e imediatamente antes da captura. PDF e PPT são bloqueados diante de qualquer invariante crítica divergente ou indisponível, inclusive se um manifesto trouxer `homologable: true` de forma inconsistente.
+
+**Novo comportamento esperado**
+
+Somente relatórios com as 23 invariantes em `match` podem gerar PDF ou PowerPoint. O CSV de auditoria permanece disponível para investigar o bloqueio.
 
 ## 4. Controles adicionados
 
 Além das correções visíveis, foram incorporados controles para evitar regressões:
 
-- guarda de reconciliação antes da exportação;
+- 23 guardas críticas de reconciliação antes da exportação;
 - auditoria CSV com fonte, fórmula, universo, período, totais e delta;
 - testes de fluxo mensal versus trimestral;
 - testes de snapshot de estoque;
@@ -265,28 +342,32 @@ Além das correções visíveis, foram incorporados controles para evitar regres
 - testes de produto versus coorte horizontal;
 - testes de percentuais, nomenclaturas, mapas e 75 posições do relatório;
 - validação do mesmo manifesto no preview, PDF e PowerPoint.
+- revalidação no host imediatamente antes da captura de PDF/PPT;
+- regressões autenticadas de 4T2025 e 2T2026;
+- deduplicação dos mapas por chave canônica.
 
-## 5. Resultado da validação final
+## 5. Resultado técnico atual
 
-- **11 de 11 invariantes críticos:** aprovados com delta zero.
-- **Testes FIERGS:** 236 de 236 aprovados.
+- **4T2025:** 23 de 23 invariantes críticas aprovadas com delta zero.
+- **2T2026:** 23 de 23 invariantes críticas aprovadas com delta zero.
+- **Testes FIERGS:** 249 de 249 aprovados.
 - **Build de produção:** aprovado.
-- **PowerPoint:** 75 páginas.
-- **PDF:** 75 páginas.
-- **Lâminas críticas:** inspecionadas no arquivo final.
+- **Contrato editorial:** 75 páginas preservadas.
+- **TypeScript isolado:** a única ocorrência aberta está em teste local não versionado do Corretor (`rolandia-v067.test.ts`), por dependência externa ausente; não pertence ao FIERGS nem foi incluída nos commits.
 
-## 6. Material entregue para homologação
+## 6. Material técnico preparado para homologação
 
-- PowerPoint corrigido;
-- PDF equivalente;
+- código reconciliado e publicado no repositório;
 - CSV de auditoria e reconciliação;
 - matriz comentário × correção × evidência;
 - registro técnico das decisões e dos testes executados.
 
+Os novos PDF e PowerPoint de 4T2025 e 2T2026 devem ser gerados após a atualização do ambiente e enviados para a inspeção visual final.
+
 ## 7. Pendência para encerramento
 
-Não há pendência numérica ou técnica para gerar o relatório. O próximo passo é o aceite editorial da Juliana sobre o pacote. O slide 41 permanecerá explicitamente indisponível enquanto não houver uma fonte histórica auditável por faixa de área.
+Não há divergência numérica crítica aberta. A Fase 7 depende da geração dos novos PDF/PPT e do aceite visual/editorial do pacote, especialmente nas páginas 25, 29–31, 35–41, 57–61 e 63–69. O slide 41 permanecerá explicitamente indisponível enquanto não houver uma fonte histórica auditável por faixa de área.
 
 ## 8. Texto curto sugerido para o anúncio
 
-> Olá, Juliana! Concluímos os ajustes do Panorama FIERGS com base nas suas observações. Reconciliamos vendas e estoque entre todas as dimensões, incluímos os comparativos trimestrais e semestrais, revisamos o universo horizontal sem chácaras e ajustamos percentuais, nomenclaturas, rótulos, legendas e mapas. As vendas agora fecham em 1.091 unidades, a oferta final vertical em 5.251 unidades e o bloco horizontal em 129 empreendimentos, 30.476 unidades lançadas e 3.365 unidades finais. Seguem o PowerPoint e o PDF atualizados, acompanhados da matriz de ajustes e da auditoria para sua validação.
+> Olá, Juliana! Concluímos uma nova rodada de ajustes do Panorama FIERGS com base nas suas observações. Reconciliamos vendas e estoque em todas as dimensões, generalizamos a regra para diferentes fechamentos, alinhamos produto, coorte e consolidado horizontal, adaptamos os comparativos para trimestre, semestre, nove meses ou ano completo e tornamos os mapas auditáveis por empreendimento único. No 2T2026, o relatório fecha em 1.091 vendas verticais, 5.251 unidades finais e 129 empreendimentos horizontais; o 4T2025 também foi validado como regressão, com 1.524 vendas, 5.855 unidades finais e 121 empreendimentos horizontais. PDF e PowerPoint agora só são liberados quando as 23 verificações críticas fecham sem divergência. Seguem os novos arquivos e a auditoria para sua validação visual final.
