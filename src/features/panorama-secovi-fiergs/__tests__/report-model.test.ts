@@ -227,6 +227,46 @@ describe('Panorama FIERGS — fechamento canônico de vendas 2T2026', () => {
     expect(model.sales.units.source).toContain('fechamento vertical reconciliado pelo cubo granular');
   });
 
+  it('no 4T2025 mantém no fechamento projetos lançados antes do início da série', () => {
+    const scope: PanoramaScope = { uf: 'RS', cities: ['Canoas', 'Esteio'], startQuarter: '1T2021', endQuarter: '4T2025', entity: 'fiergs-rs', engineVersion: 'v4' };
+    const beforeWindow = {
+      building_id: 'Anterior', name: 'Anterior', building_type: 'Vertical', standard: 'Standard',
+      release_date: '2020-01-01', total_units: 20, city: 'Canoas',
+      typologies_history: [
+        { period: '2020-01-01', number_bedroom: '2', qty: 20, release_price: 300000, private_area: 50 },
+        { period: '2025-12-01', number_bedroom: '2', typology_stock: 4, sold_in_period: -1, private_area: 50 },
+      ],
+    };
+    const insideWindow = {
+      building_id: 'Janela', name: 'Janela', building_type: 'Vertical', standard: 'Econômico',
+      release_date: '2024-01-01', total_units: 30, city: 'Canoas',
+      typologies_history: [
+        { period: '2024-01-01', number_bedroom: '2', qty: 30, release_price: 250000, private_area: 45 },
+        { period: '2025-12-01', number_bedroom: '2', typology_stock: 6, sold_in_period: 7, private_area: 45 },
+      ],
+    };
+    const cube = buildCityCube([beforeWindow, insideWindow], { city: 'Canoas', uf: 'RS', endQuarter: '4T2025', entity: 'fiergs-rs', engineVersion: 'v4' });
+    const esteioCube = buildCityCube([{ ...insideWindow, building_id: 'Zero', name: 'Zero', city: 'Esteio', typologies_history: [
+      { period: '2024-01-01', number_bedroom: '2', qty: 30, release_price: 250000, private_area: 45 },
+      { period: '2025-12-01', number_bedroom: '2', typology_stock: 0, sold_in_period: 0, private_area: 45 },
+    ] }], { city: 'Esteio', uf: 'RS', endQuarter: '4T2025', entity: 'fiergs-rs', engineVersion: 'v4' });
+    const model = buildPanoramaReportModel(scope, [], sources([]), [], {
+      cubes: [cube, esteioCube],
+      provenance: { requestedCities: scope.cities, completedCities: scope.cities, failedCities: [] },
+      citySalesSources: scope.cities.map((city) => ({ city, rows: [] })),
+    });
+
+    const standardTotal = model.granular.offerByStandard.find((row) => row.kind === 'total');
+    const typologyTotal = model.granular.offerByTypology.find((row) => row.kind === 'total');
+    const areaTotal = model.granular.areaBands.find((row) => row.kind === 'total');
+    expect(standardTotal).toMatchObject({ soldUnits: 6, finalUnits: 10 });
+    expect(typologyTotal).toMatchObject({ soldUnits: 6, finalUnits: 10 });
+    expect(areaTotal).toMatchObject({ soldUnits: 6, finalUnits: 10 });
+    expect(model.sales.units.series.at(-1)?.vertical).toBe(6);
+    expect(model.sales.unitsByTypology.series.at(-1)?.vertical).toBe(6);
+    expect(model.cityComparisons.sales).toEqual([{ city: 'Canoas', liquidSales: 6 }, { city: 'Esteio', liquidSales: 0 }]);
+  });
+
   it('substitui o snapshot temporal divergente de estoque pelo mesmo fechamento granular nas dimensões', () => {
     const scope: PanoramaScope = { uf: 'RS', cities: ['Canoas'], endQuarter: '2T2026', entity: 'fiergs-rs', engineVersion: 'v4' };
     const cube = buildCityCube([building('Estoque', 'Canoas', [

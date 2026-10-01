@@ -294,14 +294,18 @@ export function cubeInLaunchWindow(cube: MarketCube, scope: PanoramaScope): Mark
 
 export function buildGranularBlocks(cube: MarketCube, scope?: PanoramaScope): PanoramaGranularBlocks {
   const launchCube = scope ? cubeInLaunchWindow(cube, scope) : cube;
+  // FIERGS descreve a fotografia do mercado no fechamento. Um empreendimento lançado antes do
+  // início da série continua compondo vendas e oferta atuais; a janela escolhida limita séries de
+  // lançamentos, não o estoque de mercado. No Secovi, a política histórica da janela é preservada.
+  const verticalOfferCube = scope?.entity === 'fiergs-rs' ? cube : launchCube;
   // O bloco horizontal FIERGS é uma fotografia do universo ativo e possui a coorte editorial
   // "Até 2022". A janela das séries temporais não pode eliminar essa coorte nem criar um delta.
   const horizontalCube = scope?.entity === 'fiergs-rs' ? cube : launchCube;
   const matrix = buildCohortMatrix(launchCube, 'Vertical');
   return {
-    offerByStandard: offerByStandard(launchCube, 'Vertical'),
+    offerByStandard: offerByStandard(verticalOfferCube, 'Vertical'),
     areaBands: offerByAreaBand(cube),
-    offerByTypology: offerByTypology(launchCube, 'Vertical'),
+    offerByTypology: offerByTypology(verticalOfferCube, 'Vertical'),
     cohortsVertical: offerByCohort(launchCube, 'Vertical'),
     cohortsHorizontal: offerByCohort(horizontalCube, 'Horizontal'),
     cohortMatrix: matrix,
