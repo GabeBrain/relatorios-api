@@ -1,7 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { scopeCityLabel, type PanoramaReportModel, type ReportMarketBlock, type ReportSeries } from '../types';
 import { buildMapTilePlan, positionMapPoints } from '../lib/map-tiles';
-import { canonicalStandard, canonicalTypology, orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
+import { canonicalStandard, orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
+import { fiergsTemporalTypologyMeter, fiergsTemporalTypologyTotal, granularPriceChartRows } from '../report/price-chart';
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
 import { horizontalLabelForEntity } from '../domain/entity-policy';
 import type { CubeProject } from '../domain/cube';
@@ -322,23 +323,6 @@ export function CohortTableSlide({ report, segment = 'vertical' }: { report: Pan
   return <Slide title="OFERTA LANÇADA E FINAL | POR ANO DE LANÇAMENTO">{rows.length ? <table className="panorama-reference-table"><thead><tr><th>Ano Lançamento</th><th>Nº de<br/>Empreend.</th><th>Em %</th><th>Oferta<br/>Lançada</th><th>Em %</th><th>Oferta<br/>Final</th><th>Em %</th><th>Disponibilidade<br/>s/ O.L.</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={rowClassOf(row.kind)}><td>{row.label}</td><td>{integer(row.projects)}</td><td><CfCell metric="share" value={shareOf(row.projects, projectsTotal)} max={100} format={percent}/></td><td>{integer(row.launched)}</td><td><CfCell metric="share" value={shareOf(row.launched, launchedTotal)} max={100} format={percent}/></td><td>{integer(row.final)}</td><td><CfCell metric="share" value={shareOf(row.final, finalTotal)} max={100} format={percent}/></td><td><CfCell metric="availability" value={shareOf(row.final, row.launched)} reference={windowByLabel ? null : shareOf(finalTotal, launchedTotal)} max={100} format={percent} tone="red"/></td></tr>)}<tr className="panorama-total-row"><td>Total geral</td><td>{integer(projectsTotal)}</td><td>100%</td><td>{integer(launchedTotal)}</td><td>100%</td><td>{integer(finalTotal)}</td><td>100%</td><td>{windowByLabel ? '—' : shareOf(finalTotal, launchedTotal) === null ? '—' : percent(shareOf(finalTotal, launchedTotal))}</td></tr></tbody></table> : <DataUnavailable>{segment === 'horizontal' ? `A API não retornou oferta do ${horizontalLabelForEntity(report.scope.entity)} por ano com valores diferentes de zero neste recorte.` : 'A API não retornou oferta residencial vertical por ano com valores diferentes de zero neste recorte.'}</DataUnavailable>}{windowByLabel && <p className="panorama-coverage-caption">Empreendimentos e lançamentos pertencem à janela selecionada; oferta final inclui o estoque das coortes anteriores no fechamento. A disponibilidade geral entre universos distintos não é calculada.</p>}</Slide>;
 }
 
-function fiergsTemporalTypologyMeter(report: PanoramaReportModel, label: string): number | null {
-  const block = report.prices.meterByTypology;
-  if (block.dataStatus !== 'ready') return null;
-  const series = block.groupSeries.find((group) => canonicalTypology(group.label) === canonicalTypology(label))?.series;
-  const value = series?.find((row) => row.quarter === report.scope.endQuarter)?.vertical;
-  return value !== undefined && Number.isFinite(value) && value > 0 ? value : null;
-}
-
-function fiergsTemporalTypologyTotal(report: PanoramaReportModel): number | null {
-  // O total da série de preço por m² é a mesma referência do slide de evolução geral.
-  // Agregar médias tipológicas produz outro indicador quando cobertura/ponderadores diferem.
-  const block = report.prices.meter;
-  if (block.dataStatus !== 'ready') return null;
-  const value = block.series.find((row) => row.quarter === report.scope.endQuarter)?.vertical;
-  return value !== undefined && Number.isFinite(value) && value > 0 ? value : null;
-}
-
 export function PriceTableSlide({ report, dimension, horizontal = false }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; horizontal?: boolean }) {
   const granularRows = horizontal ? report.granular.horizontalPricesByStandard : dimension === 'pattern' ? report.granular.pricesByStandard : report.granular.pricesByTypology;
   const horizontalProjects = report.cube.projects.filter((project) => project.segment === 'Horizontal');
@@ -378,10 +362,10 @@ export function PriceChartSlide({ report, dimension }: { report: PanoramaReportM
   const granularRows = dimension === 'pattern' ? report.granular.pricesByStandard : report.granular.pricesByTypology;
   if (granularRows.length) {
     const temporalTypology = report.scope.entity === 'fiergs-rs' && dimension === 'typology';
-    const rows = granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, value: temporalTypology ? fiergsTemporalTypologyMeter(report, row.label) : row.averagePricePerMeter }));
+    const { rows } = granularPriceChartRows(report, dimension);
     const average = temporalTypology ? fiergsTemporalTypologyTotal(report) : granularRows.find((row) => row.kind === 'total')?.averagePricePerMeter ?? null;
     const max = Math.max(...rows.map((row) => row.value ?? 0), average ?? 0, 1);
-    return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-chart-slide"><div className="panorama-price-bars">{rows.map((row) => <div key={row.label}><span style={{ height: `${(row.value ?? 0) / max * 100}%` }}><b>{integer(row.value)}</b></span><strong>{row.label}</strong></div>)}{average !== null && <i className="panorama-average-line" style={{ bottom: `${average / max * 100}%` }}><b>{integer(average)}</b></i>}</div><div className="panorama-chart-legend"><span className="green">Preço por {dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</span><span className="yellow">Média Geral</span></div></Slide>;
+    return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-chart-slide"><div className="panorama-price-bars">{rows.map((row) => <div key={row.label}><span className={row.value === 0 ? 'is-zero' : undefined} style={{ height: `${row.value / max * 100}%` }}><b>{integer(row.value)}</b></span><strong>{row.label}</strong></div>)}{average !== null && <i className="panorama-average-line" style={{ bottom: `${average / max * 100}%` }}><b>{integer(average)}</b></i>}</div><div className="panorama-chart-legend"><span className="green">Preço por {dimension === 'pattern' ? 'Padrão' : 'Tipologia'}</span><span className="yellow">Média Geral</span></div></Slide>;
   }
   const meter = dimension === 'pattern' ? report.prices.meter : report.prices.meterByTypology;
   if (meter.dataStatus === 'unavailable') {

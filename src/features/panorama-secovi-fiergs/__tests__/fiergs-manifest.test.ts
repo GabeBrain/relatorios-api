@@ -30,8 +30,8 @@ describe('manifesto FIERGS RM Porto Alegre 4T25', () => {
     const secovi = panoramaManifestFor({ ...base, scope: { entity: 'secovi-sp' } }, 'pk.test');
     const expectedOfficialSlides = Array.from({ length: 75 }, (_, index) => index + 1)
       .filter((slide) => slide !== 41 && !FIERGS_REDUNDANT_OFFICIAL_SLIDES.has(slide));
-    expect(fiergs).toHaveLength(70);
-    expect(fiergs.map((page) => page.page)).toEqual(Array.from({ length: 70 }, (_, index) => index + 1));
+    expect(fiergs).toHaveLength(69);
+    expect(fiergs.map((page) => page.page)).toEqual(Array.from({ length: 69 }, (_, index) => index + 1));
     expect(fiergs.map((page) => page.fiergsOfficialSlide)).toEqual(expectedOfficialSlides);
     expect(fiergs.some((page) => FIERGS_REDUNDANT_OFFICIAL_SLIDES.has(page.fiergsOfficialSlide!))).toBe(false);
     expect(fiergs.find((page) => page.fiergsOfficialSlide === 61)).toMatchObject({ sectionId: 'vgv', visualFamily: 'market-table', contentReferenceSlide: 51 });
@@ -44,7 +44,7 @@ describe('manifesto FIERGS RM Porto Alegre 4T25', () => {
       { kind: 'row', previousUnits: 10, finalUnits: 8, launchedUnits: 1, soldUnits: 3, ivv: 27.27 },
       { kind: 'total', previousUnits: 10, finalUnits: 8, launchedUnits: 1, soldUnits: 3, ivv: 27.27 },
     ] });
-    expect(withAnnual).toHaveLength(71);
+    expect(withAnnual).toHaveLength(70);
     expect(withAnnual.some((page) => page.fiergsOfficialSlide === 41)).toBe(true);
     expect(fiergsWithoutMapToken.some((page) => page.fiergsOfficialSlide === 41)).toBe(false);
   });

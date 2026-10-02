@@ -2136,3 +2136,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Arquivos:** componentes e manifesto em `src/features/panorama-secovi-fiergs/`; resumo e evidência na pasta de documentos FIERGS.
 - **Commit/push:** implementação local `a95e039`; documentação/evidências em commit separado. Nenhum push sem autorização do usuário. A página institucional de 22 anos continua para o marketing.
 
+### 2026-10-02 — Panorama FIERGS: revisão do PDF (6) e aba Avisos — Codex
+- **O quê:** revisão das 70 páginas do PDF gerado; páginas físicas 34/51 idênticas, lâmina “Sobre o estudo” com contagem antiga e categorias sem R$/m² no gráfico por padrão. O manifesto remove a cópia oficial 56; a contagem fica dinâmica; categorias sem preço são omitidas do gráfico, mas zeros observados permanecem. Omissões entram nos Avisos e auditoria. Avisos passa a aba própria entre Relatório e Metodologia; Relatório mantém apenas páginas e controles.
+- **Verificação:** testes de manifesto/renderização aprovados; TypeScript global segue bloqueado exclusivamente por fixtures preexistentes em `src/features/corretor/lib/audit/__tests__/structure-empty-sections.test.ts`. PDF novo após esta alteração e regressão autenticada de 4T2025 ainda pendentes.
+- **Evidência:** `docs/features/Relatorios Secovi_FIERGS/EVIDENCIA_REVISAO_PDF_6_ABA_AVISOS_2026-10-02.md`.
+

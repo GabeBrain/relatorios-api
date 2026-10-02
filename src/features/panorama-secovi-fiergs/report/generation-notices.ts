@@ -1,5 +1,6 @@
 import type { PanoramaReportModel, ReportGenerationNotice } from '../types';
 import { createFiergsReportManifest, FIERGS_REDUNDANT_OFFICIAL_SLIDES, panoramaManifestFor } from './manifest';
+import { granularPriceChartRows } from './price-chart';
 
 type NoticeInput = Omit<ReportGenerationNotice, 'entity' | 'period' | 'affectedPages' | 'affectedOfficialSlides'> & {
   officialSlides?: number[];
@@ -83,6 +84,17 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     add({ code: 'TYPOLOGY_PRICE_PAGES_OMITTED', severity: 'warning', indicator: 'Séries de preço por tipologia',
       reason: 'Não há séries temporais observadas por número de dormitórios.',
       source: report.prices.meterByTypology.source, displayDecision: 'As páginas sem série foram retiradas do arquivo.', officialSlides: [44, 45, 46, 47] });
+  }
+  for (const dimension of ['pattern', 'typology'] as const) {
+    const sourceRows = dimension === 'pattern' ? report.granular.pricesByStandard : report.granular.pricesByTypology;
+    if (!sourceRows.length) continue;
+    const { omittedLabels } = granularPriceChartRows(report, dimension);
+    if (!omittedLabels.length) continue;
+    add({ code: 'PRICE_CHART_GROUPS_OMITTED', severity: 'info', indicator: dimension === 'pattern' ? 'Preço por padrão' : 'Preço por tipologia',
+      reason: `Sem R$/m² observado para: ${omittedLabels.join(', ')}.`,
+      source: dimension === 'typology' && report.scope.entity === 'fiergs-rs' ? 'Série temporal GeoBrain por tipologia' : 'Cubo granular GeoBrain',
+      displayDecision: 'Somente essas categorias são omitidas do gráfico; zeros observados e outros indicadores disponíveis na tabela permanecem.',
+      officialSlides: report.scope.entity === 'fiergs-rs' ? [dimension === 'pattern' ? 50 : 52] : [] });
   }
   if (!report.locations.length) {
     add({ code: 'MAP_PAGES_OMITTED', severity: 'warning', indicator: 'Mapas de localização',

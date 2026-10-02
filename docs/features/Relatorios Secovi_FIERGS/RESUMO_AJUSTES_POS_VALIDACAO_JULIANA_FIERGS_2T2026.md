@@ -1,5 +1,7 @@
 # Resumo dos ajustes pós-validação — Panorama FIERGS 2T2026
 
+> Atualização de 02/10/2026: no PDF `(6)`, os dados e a arte institucional de 23 anos parecem coerentes com os ajustes finos aceitos pela Juliana. A revisão identificou uma página de oferta repetida, uma contagem editorial desatualizada e categorias sem R$/m² no gráfico por padrão. O código agora remove a repetição, calcula a contagem de páginas dinamicamente e omite somente as categorias sem preço observado, registrando-as nos Avisos e na auditoria. Os Avisos ficam em aba própria, entre Relatório e Metodologia. Esta atualização ainda requer nova exportação autenticada antes do reenvio.
+
 **Data:** 01/10/2026
 **Recorte validado:** Alvorada, Cachoeirinha, Canoas, Eldorado do Sul, Esteio, Gravataí, Guaíba, Novo Hamburgo, São Leopoldo e Viamão  
 **Período:** 1T2023 a 2T2026  
@@ -30,7 +32,7 @@ As anotações no PowerPoint complementaram esse diagnóstico com solicitações
 - O caso 4T2025 passou a reconciliar **1.524 vendas verticais**, **5.855 unidades de oferta final** e o horizontal em **121 / 28.413 / 2.840**.
 - Os mapas foram comprovados por chave única: **626 empreendimentos** em 4T2025 e **648** em 2T2026.
 - A exportação agora é protegida por **32 invariantes críticas** em PDF e PowerPoint.
-- O relatório mantém o contrato de 75 páginas; a nova geração visual dos dois períodos integra a etapa final de homologação.
+- O manifesto oficial tem 75 lâminas de referência; a exportação ativa omite repetições editoriais e páginas sem dados, com contagem dinâmica. A nova geração visual dos dois períodos integra a etapa final de homologação.
 
 ## 3. Apontamentos, correções e comportamento esperado
 

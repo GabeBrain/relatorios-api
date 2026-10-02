@@ -150,7 +150,7 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
 const FIERGS_DIVIDERS = new Set([8, 23, 34, 38, 42, 48, 53, 62, 70]);
 const FIERGS_STATIC = new Set([1, 3, 4, 72, 73, 74, 75]);
 /** Editorial repeats removed after comparing the generated deck: keep the first occurrence. */
-export const FIERGS_REDUNDANT_OFFICIAL_SLIDES = new Set([18, 30, 54, 55]);
+export const FIERGS_REDUNDANT_OFFICIAL_SLIDES = new Set([18, 30, 54, 55, 56]);
 const FIERGS_CONTENT_REFERENCE: Readonly<Record<number, number>> = {
   9: 14, 10: 15, 11: 14, 12: 16, 13: 17, 14: 16, 15: 16, 16: 16, 20: 18, 21: 19, 22: 18,
   24: 23, 25: 25, 26: 23, 27: 23, 28: 23, 30: 25, 32: 24, 33: 24,

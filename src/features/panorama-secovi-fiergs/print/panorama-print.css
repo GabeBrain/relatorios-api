@@ -237,6 +237,7 @@
 .panorama-fiergs-page .panorama-price-bars { height:auto; min-height:0; flex:1; margin:0 2cqw; }
 .panorama-fiergs-page .panorama-price-bars>div { width:13cqw; }
 .panorama-fiergs-page .panorama-price-bars>div>span { width:6.1cqw; font-size:1.18cqw; }
+.panorama-fiergs-page .panorama-price-bars>div>span.is-zero { height:2cqw !important; background:transparent; box-shadow:none; color:#5b7537; }
 .panorama-fiergs-page .panorama-price-bars>div>strong { min-height:2.8cqw; padding-top:.7cqw; font-size:1.12cqw; }
 .panorama-fiergs-page .panorama-average-line b { right:-5.1cqw; font-size:1.18cqw; }
 .panorama-fiergs-page .panorama-chart-legend { margin-top:1.2cqw; font-size:1.08cqw; }
