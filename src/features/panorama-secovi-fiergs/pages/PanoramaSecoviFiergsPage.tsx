@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, BarChart3, CircleHelp, Info, RefreshCw } from 'lucide-react';
+import { AlertCircle, BarChart3, CircleHelp, RefreshCw } from 'lucide-react';
 import { useGeoApiScope } from '@/features/shared/geo-api-scope-engine';
 import type { GeoScope } from '@/features/shared/geo-api-scope-engine/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { fetchPanoramaReportModel } from '../api';
 import { ReportPaginator } from '../components/ReportPaginator';
+import { GenerationNoticesPanel } from '../components/GenerationNoticesPanel';
+import { FormulaReference, GlossaryReference, MethodologyReference } from '../components/ReportReferencePanels';
 import { PanoramaCityMultiSelect } from '../components/PanoramaCityMultiSelect';
 import { PanoramaQuarterRangePicker } from '../components/PanoramaQuarterRangePicker';
 import { PanoramaLoadingState } from '../components/PanoramaLoadingState';
@@ -68,6 +70,6 @@ export default function PanoramaSecoviFiergsPage() {
     {report.isPending && submitted && <PanoramaLoadingState label="Consultando APIs e montando o relatório…" progress={generationProgress} />}
     {report.data && report.isFetching && <PanoramaLoadingState compact label="Atualizando relatório…" progress={generationProgress} />}
     {report.isError && <Alert variant="destructive"><AlertCircle className="h-4 w-4"/><AlertTitle>Não foi possível compor o relatório</AlertTitle><AlertDescription><p className="mt-1 break-words">{report.error instanceof Error ? report.error.message : 'A API não retornou um recorte utilizável.'}</p><Button className="mt-3" variant="outline" size="sm" onClick={() => report.refetch()}><RefreshCw/>Tentar novamente</Button></AlertDescription></Alert>}
-    {report.data && <Tabs defaultValue="report"><TabsList><TabsTrigger value="report">Relatório V4 ({reportPageCount} páginas)</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger></TabsList><TabsContent value="report" className="space-y-4"><Alert><Info className="h-4 w-4"/><AlertTitle>IVV por tipologia calculado pelo histórico granular</AlertTitle><AlertDescription>Para este relatório, o IVV por faixa/tipologia é calculado com vendas líquidas, oferta anterior e lançamentos observados no recorte. O documento exportado apresenta apenas o indicador calculado, sem mensagens técnicas.</AlertDescription></Alert><ReportPaginator report={report.data}/></TabsContent><TabsContent value="method"><Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Metodologia do recorte</AlertTitle><AlertDescription>Os lançamentos vêm de `building-with-history`. Vendas, estoque, IVV, preços, coortes e mapa usam as fontes e fórmulas apropriadas ao indicador, com proveniência por município e sem fallback para gabarito ou mock.</AlertDescription></Alert></TabsContent></Tabs>}
+    {report.data && <Tabs defaultValue="report"><TabsList className="flex h-auto flex-wrap justify-start"><TabsTrigger value="report">Relatório ({reportPageCount} páginas)</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger><TabsTrigger value="glossary">Glossário</TabsTrigger><TabsTrigger value="formulas">Fórmulas</TabsTrigger></TabsList><TabsContent value="report" className="space-y-4"><GenerationNoticesPanel report={report.data} idPrefix="report"/><ReportPaginator report={report.data}/></TabsContent><TabsContent value="method" className="space-y-4"><MethodologyReference entity={report.data.scope.entity ?? 'secovi-sp'}/><GenerationNoticesPanel report={report.data} idPrefix="method"/></TabsContent><TabsContent value="glossary"><GlossaryReference/></TabsContent><TabsContent value="formulas"><FormulaReference entity={report.data.scope.entity ?? 'secovi-sp'}/></TabsContent></Tabs>}
   </div>;
 }
