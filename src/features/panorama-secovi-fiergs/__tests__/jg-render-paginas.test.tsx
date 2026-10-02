@@ -152,6 +152,11 @@ describe('JG-01 a JG-04 · tipografia das institucionais', () => {
     expect(rule).not.toContain('clamp(');
   });
 
+  it('não exporta notas explicativas ou metodológicas nas páginas do PDF/PPT', () => {
+    expect(css).toContain('.panorama-export-root .panorama-coverage-caption');
+    expect(css).toContain('.panorama-export-root .panorama-formula { display:none !important; }');
+  });
+
   it('título institucional não volta a ficar menor que o das demais lâminas de conteúdo', () => {
     const heading = css.match(/\.panorama-v2-page \.panorama-corporate h2 \{[^}]*\}/)?.[0] ?? '';
     const size = Number(heading.match(/font-size:([\d.]+)cqw/)?.[1] ?? 0);

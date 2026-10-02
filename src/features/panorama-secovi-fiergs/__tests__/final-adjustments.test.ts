@@ -34,7 +34,8 @@ describe('Panorama V4 — ajustes finais de Juliana', () => {
   it('calcula disponibilidade sobre lançamentos históricos comparáveis e omite razões sem cobertura/plausibilidade', () => {
     expect(fiergsHistoricalAvailability(2, 110)).toBeCloseTo(1.81818, 4);
     expect(fiergsHistoricalAvailability(2, 0)).toBeNull();
-    expect(fiergsHistoricalAvailability(12, 10)).toBeNull();
+    expect(fiergsHistoricalAvailability(12, 10)).toBe(120);
+    expect(fiergsHistoricalAvailability(-2, 10)).toBe(-20);
     expect(fiergsHistoricalAvailability(null, 10)).toBeNull();
   });
 

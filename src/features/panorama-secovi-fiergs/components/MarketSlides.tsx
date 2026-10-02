@@ -65,11 +65,10 @@ const rowClassOf = (kind: 'row' | 'subtotal' | 'total') => kind === 'total' ? 'p
 function hasObservedValue(...values: (number | null | undefined)[]) { return values.some((value) => value !== null && value !== undefined && Number.isFinite(value) && value !== 0); }
 function DataUnavailable({ children }: { children: ReactNode }) { return <p className="panorama-no-data">{children}</p>; }
 
-/** Disponibilidade só é publicada quando numerador/denominador são observados e o resultado é plausível. */
+/** Disponibilidade só é publicada quando numerador/denominador são observados; valores extremos permanecem visíveis. */
 export function fiergsHistoricalAvailability(finalUnits: number | null | undefined, historicalLaunched: number | null | undefined): number | null {
   if (finalUnits === null || finalUnits === undefined || historicalLaunched === null || historicalLaunched === undefined || !Number.isFinite(finalUnits) || !Number.isFinite(historicalLaunched) || historicalLaunched <= 0) return null;
-  const availability = finalUnits / historicalLaunched * 100;
-  return availability >= 0 && availability <= 100 ? availability : null;
+  return finalUnits / historicalLaunched * 100;
 }
 
 function offerRows({ report, dimension, segment = 'vertical' }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; segment?: SegmentKey }) {
@@ -90,7 +89,7 @@ function offerRows({ report, dimension, segment = 'vertical' }: { report: Panora
       };
     }
     return {
-      rows: granular.filter((row) => row.kind === 'row').map((row) => ({ label: row.label, final: row.finalUnits ?? null, launched: row.launchedUnits ?? null, projects: row.projects })),
+      rows: granular.filter((row) => row.kind === 'row').map((row) => ({ label: row.label, final: row.finalUnits ?? null, launched: row.launchedUnits ?? null, availability: null, projects: row.projects })),
       launchedTotal: total?.launchedUnits ?? null,
       finalTotal: total?.finalUnits ?? null,
     };
@@ -104,7 +103,7 @@ function offerRows({ report, dimension, segment = 'vertical' }: { report: Panora
   });
   const launchedTotal = rows.reduce((sum, row) => sum + row.launched, 0);
   const finalTotal = rows.reduce((sum, row) => sum + row.final, 0);
-  return { rows: rows.map((row) => ({ ...row, projects: undefined })), launchedTotal, finalTotal };
+  return { rows: rows.map((row) => ({ ...row, availability: null, projects: undefined })), launchedTotal, finalTotal };
 }
 
 /**

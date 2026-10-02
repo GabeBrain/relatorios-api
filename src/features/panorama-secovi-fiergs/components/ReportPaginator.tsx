@@ -362,8 +362,11 @@ function FiergsDistributionSlide({ title, subtitle, rows, unit, className = '', 
 function groupedValues(values: FiergsDistributionRow[]) { const groups = new Map<string, number>(); values.forEach(({ label, value }) => groups.set(label, (groups.get(label) ?? 0) + value)); return [...groups].map(([label, value]) => ({ label, value })); }
 function launchDistribution(report: PanoramaReportModel, dimension: 'standard-projects' | 'standard-units' | 'typology-units' | 'standard-vgv'): FiergsDistributionRow[] {
   const projects = report.cube.projects.filter((project) => project.segment === 'Vertical' && project.releaseQuarter === report.scope.endQuarter);
-  if (dimension === 'typology-units') return groupedValues(projects.flatMap((project) => project.typologies.map((typology) => ({ label: typology.typology, value: typology.launchedUnits ?? 0 }))));
-  return groupedValues(projects.map((project) => ({ label: project.standard, value: dimension === 'standard-projects' ? 1 : dimension === 'standard-vgv' ? project.launchedVgvMillions ?? 0 : project.launchedUnits ?? 0 })));
+  if (dimension === 'typology-units') return groupedValues(projects.flatMap((project) => project.typologies.flatMap((typology) => typology.launchedUnits === null ? [] : [{ label: typology.typology, value: typology.launchedUnits }])));
+  return groupedValues(projects.flatMap((project) => {
+    const value = dimension === 'standard-projects' ? 1 : dimension === 'standard-vgv' ? project.launchedVgvMillions : project.launchedUnits;
+    return value === null ? [] : [{ label: project.standard, value }];
+  }));
 }
 function temporalDistribution(block: ReportMarketBlock): FiergsDistributionRow[] { return block.groupSeries.map((group) => ({ label: group.label, value: group.series.find((row) => row.quarter === block.series.at(-1)?.quarter)?.vertical ?? group.series.at(-1)?.vertical ?? 0 })); }
 

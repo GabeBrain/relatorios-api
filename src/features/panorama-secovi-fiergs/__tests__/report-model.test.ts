@@ -96,6 +96,7 @@ describe('Panorama Secovi/FIERGS — comparativos municipais V2', () => {
     const model = buildPanoramaReportModel({ uf: 'SP', cities: ['Jundiaí', 'Piracicaba'], endQuarter: '1T2026' }, [], allEmpty, [], { cubes: [buildCityCube([sampleBuilding], { city: 'Jundiaí', uf: 'SP', endQuarter: '1T2026' })], provenance: { requestedCities: ['Jundiaí', 'Piracicaba'], completedCities: ['Jundiaí'], failedCities: [{ city: 'Piracicaba', error: 'HTTP 500' }] } });
     expect(model.cityComparisons.enabled).toBe(false);
     expect(model.cityComparisons.sales).toEqual([]);
+    expect(model.notices).toContainEqual(expect.objectContaining({ code: 'CITY_COLLECTION_PARTIAL', severity: 'warning' }));
   });
 });
 

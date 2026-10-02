@@ -90,6 +90,9 @@ export interface ManifestSubject {
   cube: { projects: { segment: string; finalUnits: number | null }[] };
   locations: GeographicPoint[];
   cityComparisons: { enabled: boolean };
+  sales?: { units: { dataStatus: string } };
+  prices?: { meter: { dataStatus: string }; meterByTypology: { dataStatus: string } };
+  granular?: { offerByTypology?: unknown[]; pricesByTypology?: unknown[]; vgv?: unknown[] };
 }
 
 /**
@@ -117,7 +120,15 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
     const annualRows = report.annualAreaIvv ?? [];
     const annualReady = annualRows.some((row) => row.kind === 'row') && annualRows.some((row) => row.kind === 'total')
       && annualRows.every((row) => [row.previousUnits, row.finalUnits, row.launchedUnits, row.soldUnits, row.ivv].every((value) => value !== null && Number.isFinite(value)));
-    return createFiergsReportManifest(annualReady);
+    const omitted = new Set<number>();
+    if (report.sales?.units.dataStatus === 'unavailable') [24, 26, 27, 28, 29, 31, 32, 33].forEach((slide) => omitted.add(slide));
+    if (report.prices?.meter.dataStatus === 'unavailable') omitted.add(43);
+    if (report.prices?.meterByTypology.dataStatus === 'unavailable') [44, 45, 46, 47].forEach((slide) => omitted.add(slide));
+    if (report.granular?.offerByTypology && report.granular.offerByTypology.length === 0) [36, 57].forEach((slide) => omitted.add(slide));
+    if (report.granular?.pricesByTypology && report.granular.pricesByTypology.length === 0) omitted.add(58);
+    if (report.granular?.vgv && report.granular.vgv.length === 0) omitted.add(61);
+    if (report.locations.length === 0) [67, 68, 69].forEach((slide) => omitted.add(slide));
+    return createFiergsReportManifest(annualReady).filter((page) => !omitted.has(page.fiergsOfficialSlide ?? -1)).map((page, index) => ({ ...page, page: index + 1 }));
   }
   return createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
 }

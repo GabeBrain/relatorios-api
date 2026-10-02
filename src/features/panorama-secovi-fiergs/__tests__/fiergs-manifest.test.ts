@@ -48,4 +48,20 @@ describe('manifesto FIERGS RM Porto Alegre 4T25', () => {
     expect(withAnnual.some((page) => page.fiergsOfficialSlide === 41)).toBe(true);
     expect(fiergsWithoutMapToken.some((page) => page.fiergsOfficialSlide === 41)).toBe(false);
   });
+
+  it('omite páginas sem indicador publicável com base explícita no estado do modelo', () => {
+    const base = {
+      provenance: { engineVersion: 'v4' as const },
+      cube: { projects: [] }, locations: [], cityComparisons: { enabled: false },
+      scope: { entity: 'fiergs-rs' as const },
+      sales: { units: { dataStatus: 'unavailable' } },
+      prices: { meter: { dataStatus: 'unavailable' }, meterByTypology: { dataStatus: 'unavailable' } },
+      granular: { offerByTypology: [], pricesByTypology: [], vgv: [] },
+    };
+    const manifest = panoramaManifestFor(base);
+    for (const omitted of [24, 26, 27, 28, 29, 31, 32, 33, 36, 41, 43, 44, 45, 46, 47, 57, 58, 61, 67, 68, 69]) {
+      expect(manifest.some((page) => page.fiergsOfficialSlide === omitted)).toBe(false);
+    }
+    expect(manifest.map((page) => page.page)).toEqual(Array.from({ length: manifest.length }, (_, index) => index + 1));
+  });
 });

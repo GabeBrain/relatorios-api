@@ -1,6 +1,6 @@
 import type { PanoramaReportModel } from '../types';
 
-const columns = ['tipo_registro','cidade','building_id','empreendimento','segmento','subtipo_horizontal','padrao','trimestre_lancamento','unidades_lancadas','unidades_vendidas','oferta_final','vgv_lancado_milhoes','ticket_medio','area_media','preco_m2','cobertura','motivo_rejeicao','metrica','fonte','formula','universo','periodo_observado','total_canonico','total_dimensional','delta','tolerancia','status','critico'] as const;
+const columns = ['tipo_registro','cidade','building_id','empreendimento','segmento','subtipo_horizontal','padrao','trimestre_lancamento','unidades_lancadas','unidades_vendidas','oferta_final','vgv_lancado_milhoes','ticket_medio','area_media','preco_m2','cobertura','motivo_rejeicao','metrica','fonte','formula','universo','periodo_observado','total_canonico','total_dimensional','delta','tolerancia','status','critico','codigo_aviso','severidade','paginas_afetadas','slides_oficiais_afetados','decisao_exibicao'] as const;
 
 function cell(value: unknown): string {
   if (value === null || value === undefined) return '';
@@ -28,7 +28,14 @@ export function buildFiergsAuditCsv(report: PanoramaReportModel): string {
     total_dimensional: item.dimensionalTotal, delta: item.delta, tolerancia: item.tolerance,
     status: item.status, critico: item.critical,
   }));
-  const rows: Record<string, unknown>[] = [...projectRows, ...rejectionRows, ...reconciliationRows];
+  const noticeRows = (report.notices ?? []).map((notice) => ({
+    tipo_registro: 'aviso_geracao', codigo_aviso: notice.code, severidade: notice.severity,
+    metrica: notice.indicator, fonte: notice.source, periodo_observado: notice.period,
+    motivo_rejeicao: notice.reason, paginas_afetadas: notice.affectedPages.join(','),
+    slides_oficiais_afetados: notice.affectedOfficialSlides.join(','),
+    decisao_exibicao: notice.displayDecision,
+  }));
+  const rows: Record<string, unknown>[] = [...projectRows, ...rejectionRows, ...reconciliationRows, ...noticeRows];
   return `\uFEFF${columns.join(';')}\r\n${rows.map((row) => columns.map((column) => cell(row[column])).join(';')).join('\r\n')}`;
 }
 

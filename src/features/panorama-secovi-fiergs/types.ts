@@ -195,6 +195,19 @@ export interface PanoramaReconciliation {
   rows: PanoramaReconciliationRow[];
 }
 
+export interface ReportGenerationNotice {
+  code: string;
+  severity: 'info' | 'warning' | 'critical';
+  indicator: string;
+  entity: EntityId;
+  period: string;
+  affectedPages: number[];
+  affectedOfficialSlides: number[];
+  reason: string;
+  source: string;
+  displayDecision: string;
+}
+
 /**
  * Créditos de apresentação. A V2 preserva a identidade fixa e recebe pessoas variáveis como
  * slots opcionais — a ausência é intencional para finalização do analista, nunca um nome errado.
@@ -243,6 +256,8 @@ export interface PanoramaReportModel {
   closingFacts: PanoramaClosingFacts;
   /** Guardas críticas calculadas antes da renderização e consultadas novamente no início do export. */
   reconciliation: PanoramaReconciliation;
+  /** Diagnósticos estruturados do resultado atual; mesma fonte para UI e auditoria CSV. */
+  notices: ReportGenerationNotice[];
 }
 
 /**

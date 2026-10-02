@@ -20,6 +20,7 @@ import {
 import { STANDARD_ORDER, TYPOLOGY_ORDER, normalizeText } from '../domain/taxonomy';
 import { normalizeCityTemporalRows, type TemporalMetricKind } from '../domain/temporal-normalization';
 import { reconcilePanoramaReport } from '../domain/reconciliation';
+import { buildGenerationNotices } from './generation-notices';
 
 type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string };
 type TemporalKey = 'sales' | 'salesTypology' | 'stock' | 'stockTypology' | 'ivv' | 'ivvTypology' | 'ticket' | 'ticketTypology' | 'meter' | 'meterTypology';
@@ -591,7 +592,7 @@ export function buildPanoramaReportModel(
   };
   const locations = mapLocationsOf(cube, records);
 
-  return {
+  const report: PanoramaReportModel = {
     scope, generatedAt: new Date().toISOString(), launches, horizontalSeries,
     sales,
     stock,
@@ -632,5 +633,8 @@ export function buildPanoramaReportModel(
     presentation: options.presentation ?? {},
     closingFacts,
     reconciliation: reconcilePanoramaReport({ scope, cube, sales, stock, granular, cityComparisons, locations }),
+    notices: [],
   };
+  report.notices = buildGenerationNotices(report);
+  return report;
 }
