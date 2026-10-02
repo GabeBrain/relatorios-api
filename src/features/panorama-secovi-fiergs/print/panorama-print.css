@@ -158,8 +158,8 @@
 .panorama-fiergs-quarterly header h2 { margin:0; font-size:3.4cqw; line-height:.98; }
 .panorama-fiergs-quarterly header h2 span { display:block; margin-top:.35cqw; color:#5d7737; }
 .panorama-fiergs-quarterly header>div>b { display:block; margin-bottom:.5cqw; font-size:1.2cqw; text-align:center; }
-.panorama-fiergs-quarterly header section { display:grid; grid-template-columns:repeat(4,1fr); }
-.panorama-fiergs-quarterly header section span { display:flex; min-width:0; flex-direction:column; border-left:1px solid #fff; background:#e0e0e0; text-align:center; }
+.panorama-fiergs-quarterly header section { display:flex; }
+.panorama-fiergs-quarterly header section span { display:flex; min-width:0; flex:1; flex-direction:column; border-left:1px solid #fff; background:#e0e0e0; text-align:center; }
 .panorama-fiergs-quarterly header section small { padding:.48cqw .15cqw; font-size:1.02cqw; font-weight:600; white-space:nowrap; }
 .panorama-fiergs-quarterly header section strong { padding:.5cqw .25cqw; background:#5d7737; color:#fff; font-size:1.28cqw; }
 .panorama-fiergs-quarterly main { display:grid; min-height:0; flex:1; grid-template-columns:minmax(0,1fr) 30%; gap:2cqw; margin-top:1.4cqw; }

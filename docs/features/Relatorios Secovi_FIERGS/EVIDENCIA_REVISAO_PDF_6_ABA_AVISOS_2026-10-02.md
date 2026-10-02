@@ -21,3 +21,10 @@
 - Testes de manifesto e renderização FIERGS aprovados. Regressão específica de preço ausente versus zero adicionada.
 - `tsc --noEmit -p tsconfig.app.json` continua falhando apenas por fixtures incompletas preexistentes em `src/features/corretor/lib/audit/__tests__/structure-empty-sections.test.ts` (fora do escopo protegido).
 - Ainda é necessário publicar, gerar e conferir PDF/PPT/CSV autenticados de 2T2026 e 4T2025 antes de declarar homologação editorial final ou enviar a versão atualizada à Juliana.
+
+## Revisão complementar do PDF (7)
+
+- O PDF `(7)` tem 69 páginas, nenhuma página renderizada duplicada e apresenta corretamente 23 anos, 69 páginas e o gráfico de preços sem categorias vazias. Das 69 páginas alinhadas com `(6)`, 66 mantêm imagem idêntica; mudaram a abertura, o sumário e o gráfico.
+- O sumário ainda não exibia as páginas 36–49 (seções IVV e preços) e colocava VGV, página 55, depois do horizontal, páginas 56–60. A correção inclui os rótulos faltantes e ordena as seções pelo início real; teste garante cobertura contínua de 1 a 69.
+- No cabeçalho das séries trimestrais, a tabela de variações reservava quatro colunas mesmo quando só havia duas, enquanto o título estava centralizado em toda a área. O layout passa a distribuir apenas as comparações presentes na largura total, preservando o título centralizado sobre elas.
+- Ainda falta uma nova exportação autenticada para confirmar visualmente estes dois últimos ajustes antes do envio final.

@@ -10,6 +10,7 @@ export interface PanoramaSection { id: string; label: string; start: number; end
 const SECTION_LABELS: Record<string, string> = {
   about: 'Sobre o SECOVI-SP', launches: 'Análise de Lançamentos', sales: 'Análise de Vendas',
   market: 'Análise Geral do Mercado', vertical: 'Análise do Mercado Residencial Vertical',
+  ivv: 'Análise do IVV', prices: 'Análise de Preços',
   horizontal: 'Análise do Mercado Residencial Horizontal', vgv: 'Análise do VGV Geral',
   observations: 'Análises e Observações Sobre o Mercado', location: 'Localização dos Empreendimentos',
   consultants: 'Consultores do Estudo',
@@ -73,7 +74,7 @@ export function createPanoramaSections(manifest: ReportPageDefinition[], entity:
   return Object.entries(labels).flatMap(([id, label]) => {
     const entries = manifest.filter((page) => page.sectionId === id);
     return entries.length ? [{ id, label, start: entries[0].page, end: entries.at(-1)!.page }] : [];
-  });
+  }).sort((left, right) => left.start - right.start);
 }
 
 export const PANORAMA_REPORT_MANIFEST = createPanoramaReportManifest();

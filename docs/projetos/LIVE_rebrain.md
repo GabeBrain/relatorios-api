@@ -2141,3 +2141,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Verificação:** testes de manifesto/renderização aprovados; TypeScript global segue bloqueado exclusivamente por fixtures preexistentes em `src/features/corretor/lib/audit/__tests__/structure-empty-sections.test.ts`. PDF novo após esta alteração e regressão autenticada de 4T2025 ainda pendentes.
 - **Evidência:** `docs/features/Relatorios Secovi_FIERGS/EVIDENCIA_REVISAO_PDF_6_ABA_AVISOS_2026-10-02.md`.
 
+### 2026-10-02 — Panorama FIERGS: sumário e cabeçalho anual — Codex
+- **O quê:** o sumário do PDF passa a incluir IVV e preços (páginas antes ausentes) e a ordenar VGV antes do horizontal pela paginação real. O cabeçalho “Variações anuais” fica alinhado à tabela, cujas colunas passam a ocupar a largura disponível conforme a quantidade de comparações.
+- **Verificação:** regressão do manifesto cobre integralmente as 69 páginas e a ordem das seções; 14 testes focados aprovados. Nova exportação autenticada ainda necessária para aceite visual.
+

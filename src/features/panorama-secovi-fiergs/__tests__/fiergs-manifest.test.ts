@@ -1,8 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { FIERGS_4T25_SLIDE_MANIFEST } from '../report/fiergs-manifest';
-import { FIERGS_REDUNDANT_OFFICIAL_SLIDES, panoramaManifestFor } from '../report/manifest';
+import { createFiergsReportManifest, createPanoramaSections, FIERGS_REDUNDANT_OFFICIAL_SLIDES, panoramaManifestFor } from '../report/manifest';
 
 describe('manifesto FIERGS RM Porto Alegre 4T25', () => {
+  it('ordena o sumário pelas páginas e cobre IVV, preços e VGV sem lacunas', () => {
+    const manifest = createFiergsReportManifest();
+    const sections = createPanoramaSections(manifest, 'fiergs-rs');
+    expect(sections.map(({ id, start, end }) => [id, start, end])).toEqual([
+      ['about', 1, 7], ['launches', 8, 21], ['sales', 22, 31], ['market', 32, 35],
+      ['ivv', 36, 38], ['prices', 39, 49], ['vertical', 50, 54], ['vgv', 55, 55],
+      ['horizontal', 56, 60], ['location', 61, 63], ['consultants', 64, 69],
+    ]);
+    expect(sections.flatMap(({ start, end }) => Array.from({ length: end - start + 1 }, (_, index) => start + index)))
+      .toEqual(manifest.map(({ page }) => page));
+  });
   it('registra os 75 slides sem lacunas', () => {
     expect(FIERGS_4T25_SLIDE_MANIFEST).toHaveLength(75);
     expect(FIERGS_4T25_SLIDE_MANIFEST.map((item) => item.slide)).toEqual(Array.from({ length: 75 }, (_, index) => index + 1));
