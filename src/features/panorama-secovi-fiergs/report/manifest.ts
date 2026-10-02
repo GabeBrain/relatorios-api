@@ -84,15 +84,19 @@ export const PANORAMA_SECTIONS = createPanoramaSections(PANORAMA_REPORT_MANIFEST
 /* -------------------------------------------------------------------------- */
 
 export interface ManifestSubject {
-  scope?: { entity?: 'secovi-sp' | 'fiergs-rs' };
+  scope?: { entity?: 'secovi-sp' | 'fiergs-rs'; endQuarter?: string };
   annualAreaIvv?: { kind: string; previousUnits: number | null; finalUnits: number | null; launchedUnits: number | null; soldUnits: number | null; ivv: number | null }[];
-  provenance: { engineVersion?: 'v2' | 'v3' | 'v4' };
-  cube: { projects: { segment: string; finalUnits: number | null }[] };
+  provenance: { engineVersion?: 'v2' | 'v3' | 'v4'; completedCities?: string[] };
+  cube: { projects: { segment: string; finalUnits: number | null; releaseQuarter?: string; launchedUnits?: number | null; launchedVgvMillions?: number | null; typologies?: { launchedUnits: number | null }[] }[] };
   locations: GeographicPoint[];
   cityComparisons: { enabled: boolean };
   sales?: { units: { dataStatus: string } };
   prices?: { meter: { dataStatus: string }; meterByTypology: { dataStatus: string } };
-  granular?: { offerByTypology?: unknown[]; pricesByTypology?: unknown[]; vgv?: unknown[] };
+  granular?: {
+    offerByTypology?: { launchedUnits: number | null; finalUnits: number | null; soldUnits?: number | null }[];
+    pricesByTypology?: { averageTicket: number | null; averageArea: number | null; averagePricePerMeter: number | null }[];
+    vgv?: { launchedUnits: number | null; finalUnits: number | null; soldUnits: number | null; launchedVgvMillions: number | null; finalVgvMillions: number | null; soldVgvMillions: number | null }[];
+  };
 }
 
 /**
@@ -124,10 +128,20 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
     if (report.sales?.units.dataStatus === 'unavailable') [24, 26, 27, 28, 29, 31, 32, 33].forEach((slide) => omitted.add(slide));
     if (report.prices?.meter.dataStatus === 'unavailable') omitted.add(43);
     if (report.prices?.meterByTypology.dataStatus === 'unavailable') [44, 45, 46, 47].forEach((slide) => omitted.add(slide));
-    if (report.granular?.offerByTypology && report.granular.offerByTypology.length === 0) [36, 57].forEach((slide) => omitted.add(slide));
-    if (report.granular?.pricesByTypology && report.granular.pricesByTypology.length === 0) omitted.add(58);
-    if (report.granular?.vgv && report.granular.vgv.length === 0) omitted.add(61);
+    if (report.granular?.offerByTypology && !report.granular.offerByTypology.some((row) => row.launchedUnits !== null || row.finalUnits !== null || row.soldUnits != null)) [36, 57].forEach((slide) => omitted.add(slide));
+    if (report.granular?.pricesByTypology && !report.granular.pricesByTypology.some((row) => [row.averageTicket, row.averageArea, row.averagePricePerMeter].some((value) => value !== null))) omitted.add(58);
+    if (report.granular?.vgv && !report.granular.vgv.some((row) => [row.launchedUnits, row.finalUnits, row.soldUnits, row.launchedVgvMillions, row.finalVgvMillions, row.soldVgvMillions].some((value) => value !== null))) omitted.add(61);
     if (report.locations.length === 0) [67, 68, 69].forEach((slide) => omitted.add(slide));
+    const launchCoverageKnown = report.cube.projects.some((project) => project.releaseQuarter !== undefined) || (report.provenance.completedCities?.length ?? 0) > 0;
+    if (launchCoverageKnown) {
+      const quarterProjects = report.cube.projects.filter((project) => project.segment === 'Vertical' && project.releaseQuarter === report.scope?.endQuarter);
+      if (!quarterProjects.length) [10, 13, 17].forEach((slide) => omitted.add(slide));
+      else {
+        if (!quarterProjects.some((project) => project.launchedUnits !== null && project.launchedUnits !== undefined)) [13, 17].forEach((slide) => omitted.add(slide));
+        if (!quarterProjects.some((project) => project.typologies?.some((row) => row.launchedUnits !== null))) omitted.add(17);
+      }
+      if (!quarterProjects.some((project) => project.launchedVgvMillions !== null && project.launchedVgvMillions !== undefined)) omitted.add(21);
+    }
     return createFiergsReportManifest(annualReady).filter((page) => !omitted.has(page.fiergsOfficialSlide ?? -1)).map((page, index) => ({ ...page, page: index + 1 }));
   }
   return createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));

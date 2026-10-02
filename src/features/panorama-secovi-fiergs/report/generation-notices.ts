@@ -1,7 +1,7 @@
 import type { PanoramaReportModel, ReportGenerationNotice } from '../types';
 import { createFiergsReportManifest, FIERGS_REDUNDANT_OFFICIAL_SLIDES, panoramaManifestFor } from './manifest';
 
-type NoticeInput = Omit<ReportGenerationNotice, 'entity' | 'period' | 'affectedPages'> & {
+type NoticeInput = Omit<ReportGenerationNotice, 'entity' | 'period' | 'affectedPages' | 'affectedOfficialSlides'> & {
   officialSlides?: number[];
 };
 
@@ -127,13 +127,28 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
       reason: `As lâminas oficiais ${[...FIERGS_REDUNDANT_OFFICIAL_SLIDES].join(', ')} repetiam conteúdo já presente no estudo e foram removidas do manifesto ativo.`,
       source: 'Manifesto editorial FIERGS comparado às páginas do estudo de referência',
       displayDecision: 'Uma ocorrência de cada análise permanece no PDF/PPT; contagens, sumário e auditoria usam a mesma sequência.', officialSlides: [...FIERGS_REDUNDANT_OFFICIAL_SLIDES] });
-    if (report.granular.offerByTypology.length === 0) add({ code: 'TYPOLOGY_OFFER_PAGES_OMITTED', severity: 'warning', indicator: 'Oferta por tipologia',
+    const launchCoverageKnown = report.cube.projects.some((project) => project.releaseQuarter !== undefined) || report.provenance.completedCities.length > 0;
+    if (launchCoverageKnown) {
+      const quarterProjects = report.cube.projects.filter((project) => project.segment === 'Vertical' && project.releaseQuarter === report.scope.endQuarter);
+      const missingSlides: number[] = [];
+      if (!quarterProjects.length) missingSlides.push(10, 13, 17, 21);
+      else {
+        if (!quarterProjects.some((project) => project.launchedUnits !== null)) missingSlides.push(13);
+        if (!quarterProjects.some((project) => project.typologies.some((row) => row.launchedUnits !== null))) missingSlides.push(17);
+        if (!quarterProjects.some((project) => project.launchedVgvMillions !== null)) missingSlides.push(21);
+      }
+      if (missingSlides.length) add({ code: 'LAUNCH_DIMENSION_PAGES_OMITTED', severity: 'warning', indicator: 'Distribuições de lançamentos',
+        reason: `Sem linhas dimensionais observáveis para as lâminas oficiais ${missingSlides.join(', ')} no trimestre final do recorte.`,
+        source: 'Cubo granular GeoBrain e proveniência municipal',
+        displayDecision: 'As páginas de distribuição sem linhas são omitidas; a série trimestral agregada permanece e zero observado não é removido.', officialSlides: missingSlides });
+    }
+    if (!report.granular.offerByTypology.some((row) => row.launchedUnits !== null || row.finalUnits !== null || row.soldUnits !== null)) add({ code: 'TYPOLOGY_OFFER_PAGES_OMITTED', severity: 'warning', indicator: 'Oferta por tipologia',
       reason: 'O cubo do recorte não contém linhas tipológicas publicáveis para oferta.', source: 'Cubo granular GeoBrain',
       displayDecision: 'As páginas sem valores observáveis são omitidas; nenhum zero é inferido.', officialSlides: [36, 57] });
-    if (report.granular.pricesByTypology.length === 0) add({ code: 'TYPOLOGY_PRICE_RANGE_PAGE_OMITTED', severity: 'warning', indicator: 'Faixa de preços por tipologia',
+    if (!report.granular.pricesByTypology.some((row) => [row.averageTicket, row.averageArea, row.averagePricePerMeter].some((value) => value !== null))) add({ code: 'TYPOLOGY_PRICE_RANGE_PAGE_OMITTED', severity: 'warning', indicator: 'Faixa de preços por tipologia',
       reason: 'O cubo do recorte não contém linhas tipológicas com valores para compor esta página.', source: 'Cubo granular GeoBrain',
       displayDecision: 'A página sem valores observáveis é omitida.', officialSlides: [58] });
-    if (report.granular.vgv.length === 0) add({ code: 'VGV_PAGE_OMITTED', severity: 'warning', indicator: 'VGV por padrão',
+    if (!report.granular.vgv.some((row) => [row.launchedUnits, row.finalUnits, row.soldUnits, row.launchedVgvMillions, row.finalVgvMillions, row.soldVgvMillions].some((value) => value !== null))) add({ code: 'VGV_PAGE_OMITTED', severity: 'warning', indicator: 'VGV por padrão',
       reason: 'O cubo do recorte não contém linhas agregadas para compor o quadro de VGV.', source: 'Cubo granular GeoBrain',
       displayDecision: 'A página sem estrutura de dados é omitida.', officialSlides: [61] });
     const annualRows = report.annualAreaIvv ?? [];

@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { GenerationNoticesPanel } from '../components/GenerationNoticesPanel';
+import { VgvSlide } from '../components/MarketSlides';
 import { FormulaReference, GlossaryReference, MethodologyReference } from '../components/ReportReferencePanels';
 import { buildPanoramaReportModel } from '../report/model';
 import { buildCityCube } from '../domain/cube';
@@ -42,5 +43,21 @@ describe('referências e avisos do relatório', () => {
     const report = buildPanoramaReportModel(scope, [], sources, [], { cubes: [cube] });
     expect(report.cube.projects[0]?.soldUnits).toBe(-1);
     expect(report.notices).toContainEqual(expect.objectContaining({ code: 'NEGATIVE_NET_SALES_OBSERVED' }));
+  });
+
+  it('remove colunas de VGV sem observações sem remover as colunas numéricas disponíveis', () => {
+    const scope: PanoramaScope = { uf: 'RS', cities: ['Canoas'], startQuarter: '1T2026', endQuarter: '2T2026', entity: 'fiergs-rs' };
+    const cube = buildCityCube([{ building_id: 'NV1', name: 'Sem preço', building_type: 'Vertical', standard: 'Médio', release_date: '2025-01-01', total_units: 10,
+      typologies_history: [{ period: '2025-01-01', number_bedroom: '2', qty: 10 },
+        { period: '2026-06-01', number_bedroom: '2', typology_stock: 8, liquid_sales: 2 }] }],
+    { city: 'Canoas', uf: 'RS', endQuarter: '2T2026', entity: 'fiergs-rs' });
+    const report = buildPanoramaReportModel(scope, [], sources, [], { cubes: [cube] });
+    const { container } = render(<VgvSlide report={report}/>);
+    const headers = [...container.querySelectorAll('th')].map((header) => header.textContent);
+    expect(headers).toContain('Lançada');
+    expect(headers).toContain('Vendas líquidas');
+    expect(headers).not.toContain('Lançada (R$ mi)');
+    expect(headers).not.toContain('Final (R$ mi)');
+    expect(headers).not.toContain('VGV vendido (R$ mi)');
   });
 });

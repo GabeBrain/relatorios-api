@@ -436,3 +436,11 @@ Os IDs oficiais de maturidade por tipologia e padrão (59–60) e VGV (61) são 
 Foi identificado no CSV um empreendimento vertical sem VGV lançado/final (Residencial Santa Bárbara, Cachoeirinha; 63 unidades lançadas e estoque final não atribuível). Os totais VGV apresentam apenas valores observados, sem imputação, e agora trazem nota de cobertura dinâmica. Valores negativos de vendas líquidas por grupo são preservados com o sinal da fonte e não foram zerados.
 
 Validação final: 32 arquivos/266 testes Vitest aprovados; `npm run build` aprovado; PDFs e PPT espelho de 2T2026 e 4T2025 gerados localmente com 74 páginas/slides cada. Os dois CSVs têm 819 linhas e 39 invariantes críticas em `match`, sem deltas. Páginas 48, 55, 58, 59, 60 e 62 revisadas. Implementação/testes em commit local `a95e039`; a documentação/evidência desta etapa fica em commit separado. Arte institucional de 22 anos segue pendente com marketing. Nenhum push/publicação foi feito; aguarda autorização para sincronização.
+
+## Rodada editorial e metodológica — 02/10/2026
+
+O plano `PLAN_HOMOLOGACAO_FINAL_EDITORIAL_METODOLOGIA_FIERGS_2T2026_2026-10-02.md` foi executado localmente até a integração de manifesto, avisos e novas referências do app. Quatro cópias exatas foram retiradas (IDs oficiais 18, 30, 54 e 55); saídas sem série publicável e colunas monetárias inteiramente sem observação passam a ser omitidas quando o modelo confirma a ausência. O CSV e o painel compartilham códigos; zeros, vendas líquidas negativas, percentuais fora da faixa de referência e divergências não são apagados.
+
+As abas Relatório, Metodologia, Glossário e Fórmulas estão implementadas, com fórmulas e políticas por entidade. Exportação PDF/PPT oculta as notas explicativas; avisos de cobertura ficam no app e na auditoria. A arte institucional permanece pendente até confirmação do Diego.
+
+**Estado de homologação:** evidências G0–G3 registradas; G4 está sob verificação visual e G6 ainda depende da geração autenticada dos PDFs/PPTs e CSVs FIERGS 2T2026 e 4T2025. O navegador local não tinha sessão autenticada, portanto os relatórios atualizados ainda não foram gerados nem aprovados visualmente. Não declarar homologação final. Commits locais desta rodada: `dcc6cc9`, `c5d2474`, `e76345c`; nenhum push.

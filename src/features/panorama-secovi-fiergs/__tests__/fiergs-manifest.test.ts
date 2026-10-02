@@ -64,4 +64,31 @@ describe('manifesto FIERGS RM Porto Alegre 4T25', () => {
     }
     expect(manifest.map((page) => page.page)).toEqual(Array.from({ length: manifest.length }, (_, index) => index + 1));
   });
+
+  it('preserva páginas quando zero é um valor observado', () => {
+    const manifest = panoramaManifestFor({
+      provenance: { engineVersion: 'v4' as const, completedCities: ['Canoas'] }, cube: { projects: [{ segment: 'Vertical', finalUnits: 0, releaseQuarter: '2T2026', launchedUnits: 0, launchedVgvMillions: 0, typologies: [{ launchedUnits: 0 }] }] }, locations: [{ latitude: -30, longitude: -51 }],
+      cityComparisons: { enabled: false }, scope: { entity: 'fiergs-rs' as const, endQuarter: '2T2026' },
+      sales: { units: { dataStatus: 'ready' } }, prices: { meter: { dataStatus: 'ready' }, meterByTypology: { dataStatus: 'ready' } },
+      granular: {
+        offerByTypology: [{ launchedUnits: 0, finalUnits: 0, soldUnits: 0 }],
+        pricesByTypology: [{ averageTicket: 0, averageArea: 0, averagePricePerMeter: 0 }],
+        vgv: [{ launchedUnits: 0, finalUnits: 0, soldUnits: 0, launchedVgvMillions: 0, finalVgvMillions: 0, soldVgvMillions: 0 }],
+      },
+    });
+    for (const slide of [10, 13, 17, 21, 36, 43, 44, 57, 58, 61, 67, 68, 69]) {
+      expect(manifest.some((page) => page.fiergsOfficialSlide === slide)).toBe(true);
+    }
+  });
+
+  it('registra páginas dimensionais sem linhas após coleta concluída, sem inferir zero', () => {
+    const manifest = panoramaManifestFor({
+      provenance: { engineVersion: 'v4' as const, completedCities: ['Canoas'] }, cube: { projects: [] }, locations: [],
+      cityComparisons: { enabled: false }, scope: { entity: 'fiergs-rs' as const, endQuarter: '2T2026' },
+      annualAreaIvv: [], sales: { units: { dataStatus: 'ready' } },
+      prices: { meter: { dataStatus: 'ready' }, meterByTypology: { dataStatus: 'ready' } },
+      granular: { offerByTypology: [], pricesByTypology: [], vgv: [] },
+    });
+    for (const omitted of [10, 13, 17, 21]) expect(manifest.some((page) => page.fiergsOfficialSlide === omitted)).toBe(false);
+  });
 });

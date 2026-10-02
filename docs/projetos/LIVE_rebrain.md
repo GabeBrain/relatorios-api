@@ -1,3 +1,12 @@
+### 2026-10-02 — Panorama FIERGS: avisos, omissões e referências metodológicas — Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — relatório final FIERGS 2T2026 com regressão 4T2025.
+- **O que:** manifesto remove as quatro segundas cópias editoriais; avisos estruturados vêm do modelo e alimentam painel/auditoria; séries sem estado publicável e estruturas tipológicas sem valores são omitidas com código e motivo. Zero continua observado; venda negativa e disponibilidade fora de 0–100% ficam visíveis e geram aviso. PDF/PPT exportado não inclui notas metodológicas longas. App agora tem Relatório, Metodologia, Glossário e Fórmulas com regras distintas para FIERGS e Secovi-SP.
+- **Verificação:** suíte da feature passou (33 arquivos, 274 testes após G4); `vite build` aprovado. TypeScript app ainda acusa fixtures incompletas preexistentes em `src/features/corretor/lib/audit/__tests__/structure-empty-sections.test.ts`; nenhum arquivo Corretor foi alterado. A verificação visual local montou a rota, mas não pôde gerar relatório sem autenticação.
+- **Commits locais:** `dcc6cc9`, `c5d2474`, `e76345c`; sem push.
+- **Pendências:** G4 permanece sem aceite visual até gerar e conferir PDF/PPT/CSV autenticados para 2T2026 e 4T2025. G5 segue pendente de confirmação/aprovação do material institucional do Diego; candidatos locais não foram incorporados. G6 não pode ser considerado concluído até os dois períodos serem gerados e revisados.
+- **Arquivos:** plano/evidências finais em `docs/features/Relatorios Secovi_FIERGS/`; runtime em `src/features/panorama-secovi-fiergs/`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-10-01 — Corretor vocacional v0.67: blocos C e D — Codex
 - **Ambiente/funcionalidade:** `/corretor` — análise de estudos vocacionais.
 - **O que:** fechados localmente E7–E9 e implementados E10–E12. Texto SVG é considerado na revisão; divergências repetidas são agrupadas; formatos literais são verificados; o passe textual usa `gpt-4o` com estimativa independente da visão; símbolos duplicados exigem confirmação em duas leituras; checklist aponta seções sem conteúdo e slide final vazio.

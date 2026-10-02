@@ -15,7 +15,7 @@
 
 ## Verificação
 
-- `npx.cmd vitest run src/features/panorama-secovi-fiergs`: **33 arquivos, 271 testes aprovados**. Inclui testes de ambos os períodos nas guardas de reconciliação, códigos de aviso no CSV, venda negativa, disponibilidade acima de 100%, manifesto condicional e ausência de notas na exportação.
+- `npx.cmd vitest run src/features/panorama-secovi-fiergs`: **33 arquivos, 274 testes aprovados** na rodada final G4. Inclui testes de ambos os períodos nas guardas de reconciliação, códigos de aviso no CSV, venda negativa, disponibilidade acima de 100%, manifesto condicional e ausência de notas na exportação.
 - `npx.cmd vite build`: **aprovado**. Há alertas de bundle grande e dependência Browserslist antiga, não impeditivos para esta alteração.
 - `npx.cmd tsc --noEmit -p tsconfig.app.json`: ainda retorna somente erros preexistentes em `src/features/corretor/lib/audit/__tests__/structure-empty-sections.test.ts` (fixtures `IrSlide` sem cinco campos obrigatórios). Nenhum arquivo Corretor foi alterado.
 - `npx.cmd eslint` dos componentes/runtime da feature: sem erros; sete avisos `react-refresh/only-export-components` já existentes nos módulos grandes `MarketSlides.tsx` e `ReportPaginator.tsx`.

@@ -5,6 +5,7 @@ import { canonicalStandard, canonicalTypology, orderStandards, orderTypologies, 
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
 import { horizontalLabelForEntity } from '../domain/entity-policy';
 import type { CubeProject } from '../domain/cube';
+import type { VgvRow } from '../domain/aggregations';
 
 const integer = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 const decimal = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -445,10 +446,20 @@ export function vgvCoverageNote(projects: CubeProject[]): string {
 }
 
 export function VgvSlide({ report }: { report: PanoramaReportModel }) {
-  const vgvCoverage = vgvCoverageNote(report.cube.projects);
   if (report.granular.vgv.length) {
-    return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th>Padrão</th><th>Empreendimentos</th><th>Ticket Médio</th><th>Lançada</th><th>Final</th><th>Vendas líquidas</th><th>Lançada (R$ mi)</th><th>Final (R$ mi)</th><th>VGV vendido (R$ mi)</th></tr></thead><tbody>{report.granular.vgv.map((row) => <tr key={`${row.segment}-${row.label}`} className={rowClassOf(row.kind)}><td>{row.label}</td><td>{integer(row.projects)}</td><td>{currency(row.averageTicket)}</td><td>{integer(row.launchedUnits)}</td><td>{integer(row.finalUnits)}</td><td>{integer(row.soldUnits)}</td><td>{decimal(row.launchedVgvMillions)}</td><td>{decimal(row.finalVgvMillions)}</td><td>{decimal(row.soldVgvMillions)}</td></tr>)}</tbody></table><p className="panorama-coverage-caption">Unidades de vendas líquidas preservam o sinal informado pela fonte. VGV vendido = VGV lançado − VGV final, calculado na mesma fotografia do cubo; nenhum valor é corrigido manualmente. {vgvCoverage}</p></Slide>;
+    const columns: { key: string; label: string; value: (row: VgvRow) => number | null; format: (value: number | null) => string }[] = [
+      { key: 'projects', label: 'Empreendimentos', value: (row) => row.projects, format: integer },
+      { key: 'averageTicket', label: 'Ticket médio', value: (row) => row.averageTicket, format: currency },
+      { key: 'launchedUnits', label: 'Lançada', value: (row) => row.launchedUnits, format: integer },
+      { key: 'finalUnits', label: 'Final', value: (row) => row.finalUnits, format: integer },
+      { key: 'soldUnits', label: 'Vendas líquidas', value: (row) => row.soldUnits, format: integer },
+      { key: 'launchedVgvMillions', label: 'Lançada (R$ mi)', value: (row) => row.launchedVgvMillions, format: decimal },
+      { key: 'finalVgvMillions', label: 'Final (R$ mi)', value: (row) => row.finalVgvMillions, format: decimal },
+      { key: 'soldVgvMillions', label: 'VGV vendido (R$ mi)', value: (row) => row.soldVgvMillions, format: decimal },
+    ].filter((column) => column.key === 'projects' || report.granular.vgv.some((row) => column.value(row) !== null));
+    return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th scope="col">Padrão</th>{columns.map((column) => <th scope="col" key={column.key}>{column.label}</th>)}</tr></thead><tbody>{report.granular.vgv.map((row) => <tr key={`${row.segment}-${row.label}`} className={rowClassOf(row.kind)}><th scope="row">{row.label}</th>{columns.map((column) => <td key={column.key}>{column.format(column.value(row))}</td>)}</tr>)}</tbody></table></Slide>;
   }
+  const vgvCoverage = vgvCoverageNote(report.cube.projects);
   const rowLabels = orderedLabels(report.stock.units, report.stock.vgv, report.sales.units, report.sales.vgv).slice(0, 8);
   return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th rowSpan={2}>Padrão</th><th rowSpan={2}>Empreendimentos</th><th rowSpan={2}>Ticket Médio</th><th colSpan={3}>UNIDADES EM OFERTA</th><th colSpan={3}>OFERTA EM VGV</th></tr><tr><th>Lançada</th><th>Final</th><th>Vendas líquidas</th><th>Lançada<br/>(R$ MILHÕES)</th><th>Final<br/>(R$ MILHÕES)</th><th>VGV vendido<br/>(R$ MILHÕES)</th></tr></thead><tbody>{rowLabels.map((label) => { const finalUnits = currentGroup(report.stock.units, label, 'total'); const soldUnits = cumulativeGroup(report.sales.units, label, 'total'); const finalVgv = currentGroup(report.stock.vgv, label, 'total'); const soldVgv = cumulativeGroup(report.sales.vgv, label, 'total'); return <tr key={label}><td>{label}</td><td>—</td><td>{currency(currentGroup(report.prices.ticket, label, 'total'))}</td><td>{integer(finalUnits + soldUnits)}</td><td>{integer(finalUnits)}</td><td>{integer(soldUnits)}</td><td>{decimal(finalVgv + soldVgv)}</td><td>{decimal(finalVgv)}</td><td>{decimal(soldVgv)}</td></tr>; })}</tbody></table><p className="panorama-coverage-caption">Unidades de vendas líquidas preservam o sinal informado pela fonte. VGV vendido = VGV lançado − VGV final, sem ajuste manual. {vgvCoverage}</p></Slide>;
 }

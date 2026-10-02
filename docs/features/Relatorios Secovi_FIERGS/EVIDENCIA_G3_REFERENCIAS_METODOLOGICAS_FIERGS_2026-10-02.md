@@ -16,7 +16,7 @@
 ## Revisão e testes
 
 - `report-reference-panels.test.tsx`: valida definições separadas por entidade, termos do glossário, fórmula específica, aviso municipal e sinal negativo observado.
-- Suíte feature: **33 arquivos, 271 testes aprovados** no último run; `vite build` aprovado.
+- Suíte feature: **33 arquivos, 274 testes aprovados** na rodada final G4; `vite build` aprovado.
 - Lint focado dos TSX/runtime: sem erros; sete alertas de Fast Refresh já existentes em módulos que exportam funções utilitárias junto com componentes.
 - Playwright abriu a rota local e confirmou que a página monta. Sem autenticação local para carregar cidades/dados, os painéis condicionados a um relatório gerado não puderam ser inspecionados interativamente; a verificação dos componentes ocorreu nos testes de renderização.
 
