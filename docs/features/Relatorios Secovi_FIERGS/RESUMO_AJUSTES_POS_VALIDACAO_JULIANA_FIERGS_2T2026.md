@@ -444,3 +444,7 @@ O plano `PLAN_HOMOLOGACAO_FINAL_EDITORIAL_METODOLOGIA_FIERGS_2T2026_2026-10-02.m
 As abas Relatório, Metodologia, Glossário e Fórmulas estão implementadas, com fórmulas e políticas por entidade. Exportação PDF/PPT oculta as notas explicativas; avisos de cobertura ficam no app e na auditoria. A arte institucional permanece pendente até confirmação do Diego.
 
 **Estado de homologação:** evidências G0–G3 registradas; G4 está sob verificação visual e G6 ainda depende da geração autenticada dos PDFs/PPTs e CSVs FIERGS 2T2026 e 4T2025. O navegador local não tinha sessão autenticada, portanto os relatórios atualizados ainda não foram gerados nem aprovados visualmente. Não declarar homologação final. Commits locais desta rodada: `dcc6cc9`, `c5d2474`, `e76345c`; nenhum push.
+
+### Complemento — atualização da arte institucional
+
+Em 02/10/2026, a página “Sobre a Brain” do estudo FIERGS foi substituída pela lâmina correspondente de `Slides-Institucionais-Brain-2026.pptx`: 23 anos de empresa, 1.000 cidades, 9.200 estudos, 50.000 entrevistas anuais e R$ 380 bi em VGV pesquisados. A nova imagem foi conferida em 1920 × 1080. As demais páginas não foram trocadas por não haver uma substituição visual direta confirmada; o deck candidato permanece local e não versionado. Gerar novamente os PDFs/PPTs de 2T2026 e 4T2025 para conferir a incorporação. Evidência em `EVIDENCIA_G5_ARTE_INSTITUCIONAL_BRAIN_23_ANOS_2026-10-02.md`.

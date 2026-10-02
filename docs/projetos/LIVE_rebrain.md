@@ -1,9 +1,16 @@
+### 2026-10-02 — Atualização da arte institucional FIERGS — Codex
+- **O quê:** substituída a lâmina institucional “Sobre a Brain” com 22 anos pela composição recebida no `Slides-Institucionais-Brain-2026.pptx`, agora com 23 anos e indicadores correspondentes. O PPTX de origem permaneceu local e fora do commit.
+- **Comparação:** a página de portfólio mantém as mesmas três marcas e contatos; as lâminas novas de produto, coleta, indicadores/cases e documentário não foram inseridas nem substituídas sem equivalência visual direta confirmada. A automação invisível do PowerPoint foi bloqueada pelo Office instalado.
+- **Verificação:** asset confirmado em 1920 × 1080 e inspecionado visualmente; 274 testes da feature e `vite build` aprovados. Ainda é necessário gerar/revisar PDF/PPT autenticados de 2T2026 e 4T2025 para encerrar G4/G6.
+- **Evidência/commit:** `EVIDENCIA_G5_ARTE_INSTITUCIONAL_BRAIN_23_ANOS_2026-10-02.md`; commit local desta substituição a registrar. Nenhum push foi realizado nesta etapa.
+- **Pendências:** manter as lâminas restantes até receber exportação visual do PPTX candidato; regressões autenticadas e checagem remota continuam necessárias antes de publicação.
+
 ### 2026-10-02 — Panorama FIERGS: avisos, omissões e referências metodológicas — Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — relatório final FIERGS 2T2026 com regressão 4T2025.
 - **O que:** manifesto remove as quatro segundas cópias editoriais; avisos estruturados vêm do modelo e alimentam painel/auditoria; séries sem estado publicável e estruturas tipológicas sem valores são omitidas com código e motivo. Zero continua observado; venda negativa e disponibilidade fora de 0–100% ficam visíveis e geram aviso. PDF/PPT exportado não inclui notas metodológicas longas. App agora tem Relatório, Metodologia, Glossário e Fórmulas com regras distintas para FIERGS e Secovi-SP.
 - **Verificação:** suíte da feature passou (33 arquivos, 274 testes após G4); `vite build` aprovado. TypeScript app ainda acusa fixtures incompletas preexistentes em `src/features/corretor/lib/audit/__tests__/structure-empty-sections.test.ts`; nenhum arquivo Corretor foi alterado. A verificação visual local montou a rota, mas não pôde gerar relatório sem autenticação.
 - **Commits locais:** `dcc6cc9`, `c5d2474`, `e76345c`; sem push.
-- **Pendências:** G4 permanece sem aceite visual até gerar e conferir PDF/PPT/CSV autenticados para 2T2026 e 4T2025. G5 segue pendente de confirmação/aprovação do material institucional do Diego; candidatos locais não foram incorporados. G6 não pode ser considerado concluído até os dois períodos serem gerados e revisados.
+- **Pendências (estado antes da atualização institucional abaixo):** G4 permanece sem aceite visual até gerar e conferir PDF/PPT/CSV autenticados para 2T2026 e 4T2025. G5 aguardava a arte institucional; atualização posterior registra a troca de 22 para 23 anos. G6 não pode ser considerado concluído até os dois períodos serem gerados e revisados.
 - **Arquivos:** plano/evidências finais em `docs/features/Relatorios Secovi_FIERGS/`; runtime em `src/features/panorama-secovi-fiergs/`.
 - **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
 

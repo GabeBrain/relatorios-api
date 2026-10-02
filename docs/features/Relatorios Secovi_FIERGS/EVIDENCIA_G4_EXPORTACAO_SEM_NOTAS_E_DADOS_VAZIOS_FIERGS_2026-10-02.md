@@ -14,7 +14,7 @@
 ## Evidências de execução
 
 - `npx.cmd vitest run src/features/panorama-secovi-fiergs`: **33 arquivos, 274 testes aprovados**.
-- `npx.cmd vite build`: havia passado em execução anterior à última rodada de refinamentos. A repetição final nesta sessão foi bloqueada antes da compilação pelo ambiente (`esbuild`: acesso negado ao diretório `../../../..` e impossibilidade de resolver `vite.config.ts`); não atribuir esse resultado ao código sem nova execução em ambiente liberado.
+- `npx.cmd vite build`: **aprovado** em execução autorizada após a troca do asset institucional; permanecem avisos de Browserslist antiga, dependência XLSX compartilhada entre imports e chunks grandes.
 - ESLint focado nos cinco arquivos alterados: zero erros; quatro avisos `react-refresh/only-export-components` já associados às exportações utilitárias em `MarketSlides.tsx`.
 - `npx.cmd tsc --noEmit -p tsconfig.app.json`: falha apenas em fixtures preexistentes de `src/features/corretor/lib/audit/__tests__/structure-empty-sections.test.ts` (campos obrigatórios ausentes). A feature FIERGS não aparece nos erros e nenhum arquivo de Corretor foi modificado.
 - Playwright abriu a rota da aplicação, mas o ambiente local não estava autenticado e não permitiu gerar o relatório. **Não foram gerados nesta rodada PDF, PPT ou CSV atualizados para os dois períodos.** Os artefatos em `.tmp` são de execução anterior e não servem para aprovação visual desta implementação.
