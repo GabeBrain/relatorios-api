@@ -16,7 +16,6 @@ import { PanoramaQuarterRangePicker } from '../components/PanoramaQuarterRangePi
 import { PanoramaLoadingState } from '../components/PanoramaLoadingState';
 import { availableEndQuarters } from '../domain/quarters';
 import { type PanoramaGenerationProgress } from '../domain/generation-progress';
-import { panoramaManifestFor } from '../report/manifest';
 import { FIERGS_RM_PORTO_ALEGRE_PRESET } from '../presets';
 import type { EntityId, PanoramaScope, Quarter } from '../types';
 
@@ -37,7 +36,6 @@ export default function PanoramaSecoviFiergsPage() {
     queryFn: () => fetchPanoramaReportModel(queryScope!, undefined, setGenerationProgress),
     enabled: Boolean(queryScope), staleTime: 5 * 60_000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: 0,
   });
-  const reportPageCount = report.data ? panoramaManifestFor(report.data, import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '').length : 0;
   const ready = Boolean(geoApi.strictReady && cities.length && scope.startQuarter && scope.endQuarter);
   const updateCities = (next: string[]) => { setCities(next); setGeo((current) => ({ ...current, city: next[0] ?? '' })); setScope((current) => ({ ...current, cities: next })); setSubmitted(null); };
   const updateRange = (startQuarter: Quarter, endQuarter: Quarter) => { setScope((current) => ({ ...current, startQuarter, endQuarter })); setSubmitted(null); };
@@ -70,6 +68,6 @@ export default function PanoramaSecoviFiergsPage() {
     {report.isPending && submitted && <PanoramaLoadingState label="Consultando APIs e montando o relatório…" progress={generationProgress} />}
     {report.data && report.isFetching && <PanoramaLoadingState compact label="Atualizando relatório…" progress={generationProgress} />}
     {report.isError && <Alert variant="destructive"><AlertCircle className="h-4 w-4"/><AlertTitle>Não foi possível compor o relatório</AlertTitle><AlertDescription><p className="mt-1 break-words">{report.error instanceof Error ? report.error.message : 'A API não retornou um recorte utilizável.'}</p><Button className="mt-3" variant="outline" size="sm" onClick={() => report.refetch()}><RefreshCw/>Tentar novamente</Button></AlertDescription></Alert>}
-    {report.data && <Tabs defaultValue="report"><TabsList className="flex h-auto flex-wrap justify-start"><TabsTrigger value="report">Relatório ({reportPageCount} páginas)</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger><TabsTrigger value="glossary">Glossário</TabsTrigger><TabsTrigger value="formulas">Fórmulas</TabsTrigger></TabsList><TabsContent value="report" className="space-y-4"><GenerationNoticesPanel report={report.data} idPrefix="report"/><ReportPaginator report={report.data}/></TabsContent><TabsContent value="method" className="space-y-4"><MethodologyReference entity={report.data.scope.entity ?? 'secovi-sp'}/><GenerationNoticesPanel report={report.data} idPrefix="method"/></TabsContent><TabsContent value="glossary"><GlossaryReference/></TabsContent><TabsContent value="formulas"><FormulaReference entity={report.data.scope.entity ?? 'secovi-sp'}/></TabsContent></Tabs>}
+    {report.data && <Tabs defaultValue="report"><TabsList className="flex h-auto flex-wrap justify-start"><TabsTrigger value="report">Relatório</TabsTrigger><TabsTrigger value="notices">Avisos</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger><TabsTrigger value="glossary">Glossário</TabsTrigger><TabsTrigger value="formulas">Fórmulas</TabsTrigger></TabsList><TabsContent value="report"><ReportPaginator report={report.data}/></TabsContent><TabsContent value="notices"><GenerationNoticesPanel report={report.data} idPrefix="notices"/></TabsContent><TabsContent value="method"><MethodologyReference entity={report.data.scope.entity ?? 'secovi-sp'}/></TabsContent><TabsContent value="glossary"><GlossaryReference/></TabsContent><TabsContent value="formulas"><FormulaReference entity={report.data.scope.entity ?? 'secovi-sp'}/></TabsContent></Tabs>}
   </div>;
 }
