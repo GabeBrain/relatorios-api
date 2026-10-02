@@ -26,7 +26,7 @@ describe('FIERGS · blocos editoriais próprios', () => {
     priceTable.unmount();
     priceChart.unmount();
     const { container } = render(React.createElement(PanoramaExportDeck, { report, rootRef: { current: null } }));
-    expect(container.querySelectorAll('.panorama-report-page')).toHaveLength(74);
+    expect(container.querySelectorAll('.panorama-report-page')).toHaveLength(70);
     expect(container.querySelectorAll('.panorama-fiergs-distribution').length).toBeGreaterThanOrEqual(7);
     expect(container.querySelectorAll('.panorama-fiergs-quarterly').length).toBeGreaterThanOrEqual(10);
     const patternComparisons = container.querySelector('.panorama-fiergs-pattern .panorama-fiergs-context-comparisons');
@@ -35,27 +35,27 @@ describe('FIERGS · blocos editoriais próprios', () => {
     expect(comparisonColumns.length).toBeGreaterThan(0);
     expect(comparisonColumns.every((column) => column.style.height.endsWith('%'))).toBe(true);
     expect(container.querySelectorAll('.panorama-location-slide')).toHaveLength(3);
-    expect(container.querySelector('[aria-label^="Página 58:"] .panorama-maturity-slide') ?? container.querySelector('[aria-label^="Página 58:"]')?.querySelector('.panorama-maturity-slide')).not.toBeNull();
-    expect(container.querySelector('[aria-label^="Página 59:"]')?.querySelector('.panorama-maturity-slide')).not.toBeNull();
-    expect(container.querySelector('[aria-label^="Página 60:"]')?.querySelector('.panorama-vgv-slide')).not.toBeNull();
+    expect(container.querySelector('[aria-label^="Página 54:"] .panorama-maturity-slide') ?? container.querySelector('[aria-label^="Página 54:"]')?.querySelector('.panorama-maturity-slide')).not.toBeNull();
+    expect(container.querySelector('[aria-label^="Página 55:"]')?.querySelector('.panorama-maturity-slide')).not.toBeNull();
+    expect(container.querySelector('[aria-label^="Página 56:"]')?.querySelector('.panorama-vgv-slide')).not.toBeNull();
     expect(container.querySelectorAll('.panorama-maturity-slide')).toHaveLength(2);
     expect(container.querySelectorAll('.panorama-vgv-slide')).toHaveLength(1);
     const horizontalConsolidated = [...container.querySelectorAll('.panorama-offer-table-slide')].filter((slide) => slide.textContent?.includes('Média unid. lançadas/emp.'));
     expect(horizontalConsolidated).toHaveLength(1);
-    expect(container.querySelector('[aria-label^="Página 56:"]')?.textContent).toContain('OFERTA FINAL POR TIPOLOGIA E METRAGEM');
-    expect(container.querySelector('[aria-label^="Página 57:"]')?.textContent).toContain('MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA');
+    expect(container.querySelector('[aria-label^="Página 52:"]')?.textContent).toContain('OFERTA FINAL POR TIPOLOGIA E METRAGEM');
+    expect(container.querySelector('[aria-label^="Página 53:"]')?.textContent).toContain('MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA');
     expect(container.textContent).not.toContain('INDISPONÍVEL PARA O ÚLTIMO ANO');
     expect(container.querySelector('.panorama-fiergs-distribution.is-city-ranking')).not.toBeNull();
     expect(container.textContent).toContain('2 Dormitórios');
     expect(container.textContent).toContain('Legenda por padrão');
     expect(container.textContent).toContain('Menor estoque');
     expect(container.textContent).toContain('Menor R$/m²');
-    for (const page of [11, 14, 22, 26, 33]) {
+    for (const page of [11, 14, 21, 25, 31]) {
       const text = container.querySelector(`[aria-label^="Página ${page}:"]`)?.textContent ?? '';
       expect(text).toContain('COMPARATIVO ACUMULADO 12 MESES');
       expect(text).not.toContain('COMPARATIVO 1º SEMESTRE');
     }
-    for (const page of [15, 16, 27, 28, 35, 39]) {
+    for (const page of [15, 16, 26, 27, 33, 37]) {
       const text = container.querySelector(`[aria-label^="Página ${page}:"]`)?.textContent ?? '';
       expect(text).toContain('COMPARATIVO ANUAL');
       expect(text).toContain('2024');
