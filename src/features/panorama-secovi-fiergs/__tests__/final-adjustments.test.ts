@@ -5,6 +5,7 @@ import { buildCityCube } from '../domain/cube';
 import { maturityByStandard, maturityByTypology } from '../domain/aggregations';
 import { buildPanoramaReportModel } from '../report/model';
 import { PanoramaExportDeck } from '../components/ReportPaginator';
+import { fiergsHistoricalAvailability, vgvCoverageNote } from '../components/MarketSlides';
 import { panoramaManifestFor } from '../report/manifest';
 import { PANORAMA_EXPORT_HEIGHT, PANORAMA_EXPORT_WIDTH, PANORAMA_PDF_HEIGHT, PANORAMA_PDF_WIDTH } from '../lib/pdf-export';
 import type { PanoramaScope } from '../types';
@@ -30,6 +31,20 @@ function building(id: string, releaseDate: string, totalUnits: number, stock: nu
 }
 
 describe('Panorama V4 — ajustes finais de Juliana', () => {
+  it('calcula disponibilidade sobre lançamentos históricos comparáveis e omite razões sem cobertura/plausibilidade', () => {
+    expect(fiergsHistoricalAvailability(2, 110)).toBeCloseTo(1.81818, 4);
+    expect(fiergsHistoricalAvailability(2, 0)).toBeNull();
+    expect(fiergsHistoricalAvailability(12, 10)).toBeNull();
+    expect(fiergsHistoricalAvailability(null, 10)).toBeNull();
+  });
+
+  it('identifica cobertura parcial de VGV sem imputar os empreendimentos ausentes', () => {
+    const note = vgvCoverageNote([{ key: 'residual', segment: 'Vertical', launchedUnits: 63, launchedVgvMillions: null, finalVgvMillions: null } as never]);
+    expect(note).toContain('VGV lançado indisponível em 1 empreendimento');
+    expect(note).toContain('63 unidades lançadas');
+    expect(note).toContain('somam somente valores observados');
+  });
+
   it('maturidade usa somente empreendimentos no intervalo editorial', () => {
     const cube = buildCityCube([
       building('fora', '2022-10-01', 400, 100, 400, 100),

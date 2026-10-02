@@ -132,7 +132,7 @@ const FIERGS_CONTENT_REFERENCE: Readonly<Record<number, number>> = {
 };
 
 function fiergsSectionId(slide: number): string {
-  if (slide === 61) return 'horizontal';
+  if (slide === 61) return 'vgv';
   if (slide <= 7) return 'about';
   if (slide <= 22) return 'launches';
   if (slide <= 33) return 'sales';
@@ -160,7 +160,7 @@ function fiergsVisualFamily(slide: number): PanoramaVisualFamily {
 
 /** IDs oficiais permanecem estáveis; a numeração exibida acompanha as páginas realmente exportadas. */
 export function createFiergsReportManifest(includeAnnualAreaIvv = false): ReportPageDefinition[] {
-  return FIERGS_4T25_SLIDE_MANIFEST.filter((slide) => ![59, 60].includes(slide.slide) && (includeAnnualAreaIvv || slide.slide !== 41)).map((slide, index) => {
+  return FIERGS_4T25_SLIDE_MANIFEST.filter((slide) => includeAnnualAreaIvv || slide.slide !== 41).map((slide, index) => {
     const mapMode = slide.slide === 67 ? 'standard' : slide.slide === 68 ? 'stock' : slide.slide === 69 ? 'price' : undefined;
     const fiergsSlide = slide.slide === 63 ? 'horizontal-offer-products' : slide.slide === 66 ? 'horizontal-price-range' : undefined;
     const cityComparison = slide.slide === 31 ? 'sales' : undefined;

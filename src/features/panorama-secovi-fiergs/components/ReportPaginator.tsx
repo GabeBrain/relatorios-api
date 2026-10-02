@@ -559,12 +559,14 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   if (official && [44, 45, 46, 47].includes(official)) return <FiergsDormitoryPriceSlide report={report} bedroom={official - 43}/>;
   if (official === 57) return <FiergsTypologyAreaSlide report={report}/>;
   if (official === 58) return <FiergsTypologyPriceRangeSlide report={report}/>;
-  if (official === 61) return <FiergsHorizontalConsolidatedSlide report={report}/>;
+  if (official === 59) return <MaturitySlide report={report} dimension="typology"/>;
+  if (official === 60) return <MaturitySlide report={report} dimension="pattern"/>;
+  if (official === 61) return <VgvSlide report={report}/>;
   if (official === 71) return <TeamSlide report={report}/>;
   if (official && [1, 3, 4, 72, 73, 74, 75].includes(official)) return <div aria-hidden="true"/>;
   if (official && def.visualFamily === 'divider') return <V2Divider title={title}/>;
   if (def.fiergsSlide === 'city-scope') return <FiergsCityScope report={report}/>;
-  if (def.fiergsSlide === 'horizontal-offer-products') return <FiergsHorizontalOfferSlide report={report}/>;
+  if (def.fiergsSlide === 'horizontal-offer-products') return <FiergsHorizontalConsolidatedSlide report={report}/>;
   if (def.fiergsSlide === 'horizontal-price-range') return <FiergsHorizontalPriceRangeSlide report={report}/>;
   if (def.cityComparison) return <CityComparisonPage kind={def.cityComparison} report={report}/>;
   if (p === 2) return <CityCover report={report}/>;
