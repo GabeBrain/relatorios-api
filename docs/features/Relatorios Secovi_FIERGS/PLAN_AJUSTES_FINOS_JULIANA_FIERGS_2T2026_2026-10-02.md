@@ -2,7 +2,7 @@
 
 **Data:** 02/10/2026
 **Entrada:** `assets/panorama-fiergs-rs-2T2026 (1).pptx` (72 slides) e e-mail: “Segue para ajustes finos. De dados não identifiquei mais nenhum erro.”
-**Estado:** plano; nenhuma alteração de runtime foi executada nesta etapa.
+**Estado:** G0–G4 concluídos localmente em 02/10/2026. Testes, build, PDFs/PPTs de regressão e inspeção concluídos; implementação em `a95e039` e documentação/evidências em commit local separado. Sem push.
 **Escopo:** apresentação e composição do estudo FIERGS, preservando os indicadores já reconciliados e a regressão 4T2025.
 
 ## Leitura rastreável do retorno

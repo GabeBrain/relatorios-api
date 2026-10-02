@@ -2112,3 +2112,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Evidência:** vendas `1.091`, estoque `5.251`, horizontal `129 / 30.476 / 3.365`, chácaras `0`; `236/236` testes FIERGS e build aprovados.
 - **Impacto em Etapas/Pendências:** Fases 7 e 8 concluídas tecnicamente. O pacote está pronto para Juliana; promoção depende do aceite externo.
 
+### 2026-10-02 — Panorama FIERGS: ajustes finos da Juliana
+- **Ambiente/funcionalidade:** Relatórios Automatizados → Panorama de Mercado FIERGS-RS.
+- **O que:** disponibilidade por tipologia/padrão usa oferta final sobre lançamentos históricos da mesma dimensão; lançamento da janela permanece claramente separado. IDs oficiais de tempo/maturidade (59–60) e VGV (61) foram restaurados; ID 63 consolida o horizontal por produto e preserva disponibilidade e média de lançamentos por empreendimento. Linha de preço sem qualquer indicador observado é ocultada.
+- **Decisões:** 63 unidades não classificadas tornam o total de disponibilidade indisponível; não são redistribuídas. Categorias de maturidade existentes não equivalem a média de idade em meses. A página institucional de 22 anos não foi alterada.
+- **Verificação:** 32 arquivos/266 testes Vitest aprovados; build de produção aprovado; PDFs/PPTs 2T2026 e 4T2025 (74 páginas/slides cada); CSVs de 819 linhas com 39 invariantes críticas em `match` e sem deltas. Capturas das páginas tocadas e nota VGV de cobertura parcial inspecionadas; artefatos em `.tmp/fiergs-final-adjustments-regression-20261002/`.
+- **Arquivos:** componentes e manifesto em `src/features/panorama-secovi-fiergs/`; resumo e evidência na pasta de documentos FIERGS.
+- **Commit/push:** implementação local `a95e039`; documentação/evidências em commit separado. Nenhum push sem autorização do usuário. A página institucional de 22 anos continua para o marketing.
+
