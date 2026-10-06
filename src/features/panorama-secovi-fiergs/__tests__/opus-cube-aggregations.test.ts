@@ -113,7 +113,7 @@ describe('OP-4 · cubo granular', () => {
     expect(productRows.reduce((sum, row) => sum + (row.finalUnits ?? 0), 0)).toBe(cohortTotal.finalUnits);
   });
 
-  it('calcula Média Loteamentos apenas com loteamentos aberto e fechado', () => {
+  it('calcula Média Horizontal incluindo condomínio de casas e loteamentos', () => {
     const priced = (id: string, standard: string, pricePerMeter: number) => building({
       building_id: id,
       building_type: 'Horizontal',
@@ -130,14 +130,14 @@ describe('OP-4 · cubo granular', () => {
       priced('H4', 'Condomínio de Chácaras', 11000),
     ], { city: 'Porto Alegre', uf: 'RS', entity: 'fiergs-rs' });
     expect(fiergsHorizontalPriceRangeRows(fiergs.projects)).toContainEqual({
-      label: 'Média Loteamentos', min: 1000, average: 2000, max: 3000,
+      label: 'Média Horizontal', min: 1000, average: 13000 / 3, max: 9000,
     });
     const mean = horizontalPricesByStandard(fiergs).find((row) => row.kind === 'total');
     expect(horizontalPricesByStandard(fiergs).some((row) => row.kind === 'row' && row.label === 'Condomínio de Casas')).toBe(true);
     expect(fiergsHorizontalPriceRangeRows(fiergs.projects).some((row) => row.label === 'Condomínio de Casas' && row.average === 9000)).toBe(true);
-    expect(mean?.label).toBe('Média Loteamentos');
-    expect(mean?.projects).toBe(2);
-    expect(mean?.averagePricePerMeter).toBe(2000);
+    expect(mean?.label).toBe('Média Horizontal');
+    expect(mean?.projects).toBe(3);
+    expect(mean?.averagePricePerMeter).toBeCloseTo(13000 / 3);
   });
 
   it('lê number_bedroom e os nomes oficiais do histórico sem criar Não classificado', () => {

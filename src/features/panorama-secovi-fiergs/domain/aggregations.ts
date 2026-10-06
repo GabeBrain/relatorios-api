@@ -414,8 +414,7 @@ export function horizontalPricesByStandard(cube: MarketCube): PriceRow[] {
     const universe = horizontalProjects(cube);
     const groups = groupBy(universe, (project) => project.horizontalSubtype ?? 'indefinido');
     const rows = [...groups.entries()].map(([subtype, projects]) => priceRow(FIERGS_HORIZONTAL_PRODUCT_LABELS[subtype as keyof typeof FIERGS_HORIZONTAL_PRODUCT_LABELS] ?? 'Não classificado', 'row', projects));
-    const lots = universe.filter((project) => project.horizontalSubtype === 'loteamento_aberto' || project.horizontalSubtype === 'loteamento_fechado');
-    return [...rows, priceRow('Média Loteamentos', 'total', lots)];
+    return [...rows, priceRow('Média Horizontal', 'total', universe)];
   }
   return pricesByStandard(cube, 'Horizontal');
 }

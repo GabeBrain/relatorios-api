@@ -22,6 +22,13 @@ Fonte: `assets/panorama-fiergs-rs-2T2026 versao juliana 6de outubro.pptx` (69 sl
 
 ## Verificação e estado
 
+### Decisão editorial posterior de Gabriel (06/10/2026)
+
+- A frase geral da Juliana — incluir condomínios de casas nas análises horizontais — foi interpretada por Gabriel como inclusão também nas médias consolidadas do segmento, não somente como linha individual por produto.
+- Implementação local: os detalhes de Condomínio de Casas, Loteamento Aberto e Loteamento Fechado permanecem separados; o agregado das páginas de ticket/área/R$/m² e mínimo/média/máximo passa de “Média Loteamentos” para “Média Horizontal” e considera todos os empreendimentos horizontais elegíveis com preço observado. A tabela por ano da imagem é uma coorte horizontal agregada, alimentada pelo cubo horizontal após a classificação FIERGS que aceita condomínios de casas; ela não discrimina produto por linha.
+- Isso substitui a interpretação editorial anterior (média exclusiva dos loteamentos) registrada no plano da segunda revisão. Não há aceite da Juliana para esta nova definição; a resposta por e-mail deve torná-la explícita e convidá-la a confirmar.
+- Testes da alteração foram atualizados, mas não executados nesta rodada por solicitação de Gabriel. A nova saída PDF ainda depende de geração no site.
+
 - Testes focados de política, cubo e reconciliação: 92 aprovados. Suíte da feature: 276 aprovados. `vite build`: aprovado.
 - `tsc --noEmit -p tsconfig.app.json` continua falhando somente em fixtures preexistentes de `src/features/corretor/lib/audit/__tests__/structure-empty-sections.test.ts`; nenhum arquivo do Corretor foi alterado.
 - PDF e CSV novos de 2T2026 foram gerados em `.tmp/fiergs-juliana-oct06-regression/`. O PDF ainda **não contém condomínio de casas** nas páginas 55, 57, 59 e 60; o CSV confirma os sete registros rejeitados. Portanto, a correção visual e a regressão com dados sintéticos **não encerram o pedido da Juliana**. A coleta 4T2025 foi interrompida após longa espera sem avançar na API; não existe nova saída 4T2025 desta rodada. Não enviar esta versão para homologação; a homologação permanece **aberta**, sem aceite da Juliana.

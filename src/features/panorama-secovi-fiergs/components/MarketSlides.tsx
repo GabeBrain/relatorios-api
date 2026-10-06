@@ -235,7 +235,7 @@ export function FiergsHorizontalConsolidatedSlide({ report }: { report: Panorama
 
 export function FiergsHorizontalPriceRangeSlide({ report }: { report: PanoramaReportModel }) {
   const rows = fiergsHorizontalPriceRangeRows(report.cube.projects);
-  return <Slide title="MÍNIMO, MÉDIA E MÁXIMO | MERCADO HORIZONTAL"><table className="panorama-reference-table"><thead><tr><th>Tipo</th><th>Mínimo R$/m²</th><th>Média R$/m²</th><th>Máximo R$/m²</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={row.label === 'Média Loteamentos' ? 'panorama-total-row' : undefined}><td>{row.label}</td><td>{integer(row.min)}</td><td>{integer(row.average)}</td><td>{integer(row.max)}</td></tr>)}</tbody></table></Slide>;
+  return <Slide title="MÍNIMO, MÉDIA E MÁXIMO | MERCADO HORIZONTAL"><table className="panorama-reference-table"><thead><tr><th>Tipo</th><th>Mínimo R$/m²</th><th>Média R$/m²</th><th>Máximo R$/m²</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label} className={row.label === 'Média Horizontal' ? 'panorama-total-row' : undefined}><td>{row.label}</td><td>{integer(row.min)}</td><td>{integer(row.average)}</td><td>{integer(row.max)}</td></tr>)}</tbody></table></Slide>;
 }
 
 export function fiergsHorizontalPriceRangeRows(projects: CubeProject[]) {
@@ -243,13 +243,13 @@ export function fiergsHorizontalPriceRangeRows(projects: CubeProject[]) {
     const values = group.map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
     return { label, min: values.length ? Math.min(...values) : null, average: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null, max: values.length ? Math.max(...values) : null };
   });
-  const loteamentos = projects.filter((item) => item.segment === 'Horizontal' && (item.horizontalSubtype === 'loteamento_aberto' || item.horizontalSubtype === 'loteamento_fechado'))
+  const horizontal = projects.filter((item) => item.segment === 'Horizontal')
     .map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
-  if (loteamentos.length) rows.push({
-    label: 'Média Loteamentos',
-    min: Math.min(...loteamentos),
-    average: loteamentos.reduce((sum, value) => sum + value, 0) / loteamentos.length,
-    max: Math.max(...loteamentos),
+  if (horizontal.length) rows.push({
+    label: 'Média Horizontal',
+    min: Math.min(...horizontal),
+    average: horizontal.reduce((sum, value) => sum + value, 0) / horizontal.length,
+    max: Math.max(...horizontal),
   });
   return rows;
 }
