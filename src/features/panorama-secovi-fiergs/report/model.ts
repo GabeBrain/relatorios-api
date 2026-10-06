@@ -327,7 +327,7 @@ export function buildGranularBlocks(cube: MarketCube, scope?: PanoramaScope): Pa
     // O consolidado de mercado atual deve usar o mesmo universo das coortes e do produto.
     // A janela de lançamentos limita séries de fluxo, não empreendimentos horizontais ainda
     // pertencentes à fotografia de fechamento FIERGS.
-    vgv: vgvSummary(scope?.entity === 'fiergs-rs' ? cube : launchCube),
+    vgv: scope?.entity === 'fiergs-rs' ? vgvSummary(cube, launchCube) : vgvSummary(launchCube),
     // Nenhum campo de Faixa de Valor foi identificado no payload nem existe regra autoritativa.
     valueRangeAvailable: false,
   };

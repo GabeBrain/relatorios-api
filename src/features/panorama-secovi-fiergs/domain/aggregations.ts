@@ -554,7 +554,7 @@ function vgvRow(label: string, kind: RowKind, segment: VgvRow['segment'], projec
  * Slide 51: padrões verticais → `Subtotal vertical` → padrões horizontais permitidos →
  * `Total geral`. A contagem de empreendimentos é de IDs distintos, e por isso deixa de ser zero.
  */
-export function vgvSummary(cube: MarketCube): VgvRow[] {
+export function vgvSummary(cube: MarketCube, launchCube?: MarketCube): VgvRow[] {
   const vertical = verticalProjects(cube);
   const horizontal = horizontalProjects(cube);
   const rowsFor = (projects: CubeProject[], segment: 'Vertical' | 'Horizontal') => {
@@ -581,7 +581,16 @@ export function vgvSummary(cube: MarketCube): VgvRow[] {
   } else rows.push(...rowsFor(horizontal, 'Horizontal'));
   if (horizontal.length) rows.push(vgvRow('Subtotal horizontal', 'subtotal', 'Horizontal', horizontal));
   rows.push(vgvRow(COHORT_TOTAL_LABEL, 'total', 'Total', cube.projects));
-  return rows;
+  if (!launchCube) return rows;
+  const launchedRows = vgvSummary(launchCube);
+  return rows.map((row) => {
+    if (row.kind !== 'row') {
+      const projects = launchCube.projects.filter((project) => row.segment === 'Total' || project.segment === row.segment);
+      return { ...row, launchedUnits: projects.length ? sumOf(projects, (project) => project.launchedUnits) : 0 };
+    }
+    const launched = launchedRows.find((item) => item.segment === row.segment && item.kind === row.kind && item.label === row.label);
+    return { ...row, launchedUnits: launched?.launchedUnits ?? (launched ? null : 0) };
+  });
 }
 
 /* -------------------------------------------------------------------------- */

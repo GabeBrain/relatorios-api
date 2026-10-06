@@ -325,7 +325,8 @@ describe('Panorama FIERGS — fechamento canônico de vendas 2T2026', () => {
 
     expect(model.granular.cohortsHorizontal.some((row) => row.label === 'Até 2022')).toBe(true);
     expect(cohortTotal).toMatchObject({ projects: 2, launchedUnits: 180, finalUnits: 60 });
-    expect(consolidatedHorizontal).toMatchObject({ projects: 2, launchedUnits: 180, finalUnits: 60 });
+    expect(consolidatedHorizontal).toMatchObject({ projects: 2, launchedUnits: 80, finalUnits: 60 });
+    expect(model.reconciliation.rows.filter((row) => row.metricId.startsWith('launch.window.vgv.')).every((row) => row.status === 'match')).toBe(true);
     expect(model.reconciliation.rows.filter((row) => row.metricId.startsWith('horizontal.') && row.metricId !== 'horizontal.chacaras.runtime').every((row) => row.status === 'match')).toBe(true);
   });
 

@@ -1,3 +1,9 @@
+### 2026-10-06 — FIERGS: oferta lançada do quadro VGV na janela — Gabriel / Codex
+- **Problema:** anotação única do PDF (12), slide 55: lançadas históricas 85.373 eram comparadas às 24.488 da janela. Demais análises aceitas por Juliana no e-mail; homologação global aberta.
+- **Mudança:** `vgvSummary` recebe o cubo da janela para unidades lançadas por linha/subtotal/total; mantém estoque, ticket e empreendimentos históricos. VGV monetário permanece histórico e vendido acumulado, com cabeçalhos explícitos para não subtrair universos diferentes. Sem números fixos nem exceções por período. Secovi conserva comportamento.
+- **Guardas:** reconciliação horizontal consolidada passa a exigir a janela; três guardas adicionais comparam linhas VGV vertical/horizontal/total ao cubo filtrado. Teste de coortes atualizado: histórico 180, janela 80, estoque 60. Casos sem produtos na janela retornam zero observado; valor desconhecido de projeto presente continua ausente.
+- **Etapas/pêndencias:** implementação pronta para push autorizado. Testes não executados conforme preferência vigente; ensaio PDF/CSV por Gabriel. Esperado com a mesma base: vertical 16.110, horizontal 8.378, total 24.488, estoque 8.764. Validar cabeçalhos e aceite final da Juliana; VGV parcial continua sinalizado na auditoria.
+
 ### 2026-10-06 — FIERGS: mesma média horizontal nas tabelas de preços — Gabriel / Codex
 - **Mudança:** após `4401512`, as páginas de ticket/área/R$/m² e mínimo/média/máximo passam a compartilhar a mesma função de média ponderada por empreendimento, tanto por produto quanto no total horizontal. Condomínios de casas continuam incluídos. O título horizontal FIERGS passa a “por produto”, inclusive nos estados sem dados.
 - **Regra:** peso = oferta final; somente quando ausente usa oferta lançada. Peso zero permanece zero; preço ausente não vira zero. Sem peso utilizável, média ausente. Extremos continuam os preços observados; não são médias. Nenhuma exceção por período.

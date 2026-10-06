@@ -113,7 +113,12 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
     countRow('horizontal.launched.cohort', 'cubo granular / coortes horizontais', 'Soma da oferta lançada horizontal por coorte.', horizontalLaunched, cohortTotal?.launchedUnits ?? null, horizontalUniverse),
     countRow('horizontal.final.cohort', 'cubo granular / coortes horizontais', 'Soma da oferta final horizontal por coorte.', horizontalFinal, cohortTotal?.finalUnits ?? null, horizontalUniverse),
     countRow('horizontal.projects.consolidated', 'cubo granular / consolidado VGV', 'Empreendimentos distintos no subtotal horizontal consolidado.', horizontalProjects, horizontalVgvSubtotal?.projects ?? null, horizontalUniverse),
-    countRow('horizontal.launched.consolidated', 'cubo granular / consolidado VGV', 'Soma da oferta lançada no subtotal horizontal consolidado.', horizontalLaunched, horizontalVgvSubtotal?.launchedUnits ?? null, horizontalUniverse),
+    countRow('horizontal.launched.consolidated', 'cubo granular / consolidado VGV', 'Oferta lançada no subtotal horizontal na janela selecionada.', window ? (windowHorizontal.length ? windowLaunchHorizontal : 0) : horizontalLaunched, horizontalVgvSubtotal?.launchedUnits ?? null, horizontalUniverse),
+    ...(window ? ['Vertical', 'Horizontal', 'Total'].map((segment) => {
+      const projects = [...windowVertical, ...windowHorizontal].filter((project) => segment === 'Total' || project.segment === segment);
+      const displayed = input.granular.vgv.filter((item) => item.kind === 'row' && (segment === 'Total' || item.segment === segment));
+      return countRow(`launch.window.vgv.${segment.toLowerCase()}`, 'cubo granular / janela / VGV', 'Linhas de oferta lançada do VGV fecham com a janela selecionada.', projects.length ? nullableSum(projects.map((project) => project.launchedUnits)) : 0, displayed.length ? nullableSum(displayed.map((item) => item.launchedUnits)) : 0, `${horizontalUniverse} + Vertical`);
+    }) : []),
     countRow('horizontal.final.consolidated', 'cubo granular / consolidado VGV', 'Soma da oferta final no subtotal horizontal consolidado.', horizontalFinal, horizontalVgvSubtotal?.finalUnits ?? null, horizontalUniverse),
     countRow('horizontal.chacaras.runtime', 'política de entidade fiergs-rs', 'Contagem de projetos condominio_chacaras presentes após o filtro.', 0, horizontal.filter((project) => project.horizontalSubtype === 'condominio_chacaras').length, horizontalUniverse),
     countRow('map.projects.unique', 'cubo granular / chave canônica', 'Cada linha do cubo representa uma única chave de empreendimento.', uniqueProjectKeys, input.cube.projects.length, `${horizontalUniverse} + Vertical`),

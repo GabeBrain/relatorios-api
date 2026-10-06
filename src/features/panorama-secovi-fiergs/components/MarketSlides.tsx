@@ -419,16 +419,17 @@ export function vgvCoverageNote(projects: CubeProject[]): string {
 }
 
 export function VgvSlide({ report }: { report: PanoramaReportModel }) {
+  const windowed = report.scope.entity === 'fiergs-rs' && !!report.granular.launchWindow;
   if (report.granular.vgv.length) {
     const columns: { key: string; label: string; value: (row: VgvRow) => number | null; format: (value: number | null) => string }[] = [
-      { key: 'projects', label: 'Empreendimentos', value: (row) => row.projects, format: integer },
+      { key: 'projects', label: windowed ? 'Empreendimentos históricos' : 'Empreendimentos', value: (row) => row.projects, format: integer },
       { key: 'averageTicket', label: 'Ticket médio', value: (row) => row.averageTicket, format: currency },
-      { key: 'launchedUnits', label: 'Lançada', value: (row) => row.launchedUnits, format: integer },
+      { key: 'launchedUnits', label: windowed ? 'Lançada na janela' : 'Lançada', value: (row) => row.launchedUnits, format: integer },
       { key: 'finalUnits', label: 'Final', value: (row) => row.finalUnits, format: integer },
       { key: 'soldUnits', label: 'Vendas líquidas', value: (row) => row.soldUnits, format: integer },
-      { key: 'launchedVgvMillions', label: 'Lançada (R$ mi)', value: (row) => row.launchedVgvMillions, format: decimal },
+      { key: 'launchedVgvMillions', label: windowed ? 'VGV lançado histórico (R$ mi)' : 'Lançada (R$ mi)', value: (row) => row.launchedVgvMillions, format: decimal },
       { key: 'finalVgvMillions', label: 'Final (R$ mi)', value: (row) => row.finalVgvMillions, format: decimal },
-      { key: 'soldVgvMillions', label: 'VGV vendido (R$ mi)', value: (row) => row.soldVgvMillions, format: decimal },
+      { key: 'soldVgvMillions', label: windowed ? 'VGV vendido acumulado (R$ mi)' : 'VGV vendido (R$ mi)', value: (row) => row.soldVgvMillions, format: decimal },
     ].filter((column) => column.key === 'projects' || report.granular.vgv.some((row) => column.value(row) !== null));
     return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th scope="col">{report.scope.entity === 'fiergs-rs' ? 'Padrão / produto' : 'Padrão'}</th>{columns.map((column) => <th scope="col" key={column.key}>{column.label}</th>)}</tr></thead><tbody>{report.granular.vgv.map((row) => <tr key={`${row.segment}-${row.label}`} className={rowClassOf(row.kind)}><th scope="row">{row.label}</th>{columns.map((column) => <td key={column.key}>{column.format(column.value(row))}</td>)}</tr>)}</tbody></table></Slide>;
   }
