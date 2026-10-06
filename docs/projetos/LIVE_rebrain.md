@@ -3,7 +3,7 @@
 - **Contrato de fontes:** histórico de empreendimentos e vendas/oferta por padrão e tipologia são obrigatórios; demais métricas permanecem opcionais conforme avisos existentes. HTTP 200 vazio em fonte obrigatória não se converte em zero.
 - **Evidência:** [registro G0–G5](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_RECUPERACAO_COLETA_MULTICIDADES_2026-10-06.md); 62 testes focados aprovados em 4 arquivos. `tsc --noEmit -p tsconfig.app.json` ainda falha em 10 fixtures antigos de Corretor, sem alterações naquela pasta. Sem API real, geração PDF ou teste longo.
 - **Estado:** validado localmente nos testes focados; não publicado. Ensaio FIERGS 2T2026 e ensaio multi-cidade Secovi por Gabriel permanecem pendentes; homologação Juliana aberta. Contagem/duração por operação temporal auditável; granular de empreendimentos ainda sem métricas por endpoint.
-- **Git:** HEAD `41c3396`; `origin/main` está um commit à frente (`b49b804`, Sinduscon). Nenhuma integração ou push foi feito; aguarda autorização de Gabriel. Alterações locais alheias preservadas.
+- **Git:** commit local `60ff24a`. Na última conferência, a referência cacheada ficou 1/1 divergente: `60ff24a` local contra `b49b804` (Sinduscon); `git fetch origin` falhou por conexão indisponível ao GitHub, então o estado remoto atual não foi confirmado. Sem integração ou push; aguarda autorização explícita e nova checagem. Alterações locais alheias preservadas.
 
 ### 2026-10-02 — Atualização da arte institucional FIERGS — Codex
 - **O quê:** substituída a lâmina institucional “Sobre a Brain” com 22 anos pela composição recebida no `Slides-Institucionais-Brain-2026.pptx`, agora com 23 anos e indicadores correspondentes. O PPTX de origem permaneceu local e fora do commit.
