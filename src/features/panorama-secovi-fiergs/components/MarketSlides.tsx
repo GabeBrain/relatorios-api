@@ -6,7 +6,7 @@ import { fiergsTemporalTypologyMeter, fiergsTemporalTypologyTotal, granularPrice
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
 import { FIERGS_HORIZONTAL_PRODUCT_LABELS, horizontalLabelForEntity } from '../domain/entity-policy';
 import type { CubeProject } from '../domain/cube';
-import type { VgvRow } from '../domain/aggregations';
+import { projectAveragePricePerMeter, type VgvRow } from '../domain/aggregations';
 
 const integer = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 const decimal = (value: number | null | undefined) => value === null || value === undefined ? '—' : value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -241,14 +241,14 @@ export function FiergsHorizontalPriceRangeSlide({ report }: { report: PanoramaRe
 export function fiergsHorizontalPriceRangeRows(projects: CubeProject[]) {
   const rows = fiergsHorizontalGroups(projects).map(([label, group]) => {
     const values = group.map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
-    return { label, min: values.length ? Math.min(...values) : null, average: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null, max: values.length ? Math.max(...values) : null };
+    return { label, min: values.length ? Math.min(...values) : null, average: projectAveragePricePerMeter(group), max: values.length ? Math.max(...values) : null };
   });
   const horizontal = projects.filter((item) => item.segment === 'Horizontal')
     .map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
   if (horizontal.length) rows.push({
     label: 'Média Horizontal',
     min: Math.min(...horizontal),
-    average: horizontal.reduce((sum, value) => sum + value, 0) / horizontal.length,
+    average: projectAveragePricePerMeter(projects.filter((item) => item.segment === 'Horizontal')),
     max: Math.max(...horizontal),
   });
   return rows;
@@ -312,6 +312,7 @@ export function CohortTableSlide({ report, segment = 'vertical' }: { report: Pan
 }
 
 export function PriceTableSlide({ report, dimension, horizontal = false }: { report: PanoramaReportModel; dimension: 'pattern' | 'typology'; horizontal?: boolean }) {
+  const titleDimension = horizontal && report.scope.entity === 'fiergs-rs' ? 'PRODUTO' : horizontal || dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA';
   const granularRows = horizontal ? report.granular.horizontalPricesByStandard : dimension === 'pattern' ? report.granular.pricesByStandard : report.granular.pricesByTypology;
   const horizontalProjects = report.cube.projects.filter((project) => project.segment === 'Horizontal');
   const eligibleHorizontal = horizontalProjects.length;
@@ -330,14 +331,14 @@ export function PriceTableSlide({ report, dimension, horizontal = false }: { rep
     const rows = granularRows.filter((row) => row.kind !== 'total').map((row) => ({ label: row.label, ticket: row.averageTicket, area: row.averageArea, meter: temporalTypology ? fiergsTemporalTypologyMeter(report, row.label) : row.averagePricePerMeter })).filter((row) => [row.ticket, row.area, row.meter].some((value) => value !== null && value !== undefined && Number.isFinite(value)));
     const total = granularRows.find((row) => row.kind === 'total');
     const totalMeter = temporalTypology ? fiergsTemporalTypologyTotal(report) : total?.averagePricePerMeter ?? null;
-    if (!rows.some((row) => hasObservedValue(row.ticket, row.area, row.meter)) && !hasObservedValue(total?.averageTicket, total?.averageArea, total?.averagePricePerMeter)) return <Slide title={`TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><DataUnavailable>{noPriceMessage}</DataUnavailable></Slide>;
+    if (!rows.some((row) => hasObservedValue(row.ticket, row.area, row.meter)) && !hasObservedValue(total?.averageTicket, total?.averageArea, total?.averagePricePerMeter)) return <Slide title={`TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR ${titleDimension}`} className="panorama-price-table-slide"><DataUnavailable>{noPriceMessage}</DataUnavailable></Slide>;
     // JG-23/24: "inserir formatação condicional no R$/m²". A referência é a média geral ponderada
     // da própria tabela — nunca a média simples das linhas, que não é o preço do recorte.
     const meterReference = totalMeter;
     const meterMax = Math.max(...rows.map((row) => row.meter ?? 0), meterReference ?? 0, 1);
-    return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${horizontal ? 'PADRÃO' : dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipo Imóvel</th><th>Preço Médio</th><th>Área Priv. Média</th><th>R$/m² Privativa</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{dimension === 'typology' && !horizontal ? typologyDisplayLabel(row.label) : row.label}</td><td>{currency(row.ticket)}</td><td>{integer(row.area)}</td><td><CfCell metric="pricePerMeter" value={row.meter} reference={meterReference} max={meterMax} format={integer}/></td></tr>)}{total && <tr className="panorama-total-row"><td>{total.label}</td><td>{currency(total.averageTicket)}</td><td>{integer(total.averageArea)}</td><td>{integer(totalMeter)}</td></tr>}</tbody></table>{temporalTypology && <p className="panorama-coverage-caption">R$/m² por tipologia: série temporal ponderada pelo estoque municipal; média geral: série geral reconciliada ao fechamento granular. Ticket e área: histórico granular por empreendimento. São indicadores independentes.</p>}</Slide>;
+    return <Slide title={`TICKET, ÁREA E R$/m² PRIVATIVO MÉDIO POR ${titleDimension}`} className="panorama-price-table-slide"><table className="panorama-reference-table"><thead><tr><th>Tipo Imóvel</th><th>Preço Médio</th><th>Área Priv. Média</th><th>R$/m² Privativa</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{dimension === 'typology' && !horizontal ? typologyDisplayLabel(row.label) : row.label}</td><td>{currency(row.ticket)}</td><td>{integer(row.area)}</td><td><CfCell metric="pricePerMeter" value={row.meter} reference={meterReference} max={meterMax} format={integer}/></td></tr>)}{total && <tr className="panorama-total-row"><td>{total.label}</td><td>{currency(total.averageTicket)}</td><td>{integer(total.averageArea)}</td><td>{integer(totalMeter)}</td></tr>}</tbody></table>{temporalTypology && <p className="panorama-coverage-caption">R$/m² por tipologia: série temporal ponderada pelo estoque municipal; média geral: série geral reconciliada ao fechamento granular. Ticket e área: histórico granular por empreendimento. São indicadores independentes.</p>}</Slide>;
   }
-  if (horizontal) return <Slide title="TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR PADRÃO" className="panorama-price-table-slide"><DataUnavailable>{noPriceMessage}</DataUnavailable></Slide>;
+  if (horizontal) return <Slide title={`TICKET, ÁREA E R$/M² PRIVATIVO MÉDIO POR ${titleDimension}`} className="panorama-price-table-slide"><DataUnavailable>{noPriceMessage}</DataUnavailable></Slide>;
   const ticket = dimension === 'pattern' ? report.prices.ticket : report.prices.ticketByTypology;
   const meter = dimension === 'pattern' ? report.prices.meter : report.prices.meterByTypology;
   const rowLabels = orderedLabels(ticket, meter).slice(0, 8);

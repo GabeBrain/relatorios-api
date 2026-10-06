@@ -138,6 +138,18 @@ describe('OP-4 · cubo granular', () => {
     expect(mean?.label).toBe('Média Horizontal');
     expect(mean?.projects).toBe(3);
     expect(mean?.averagePricePerMeter).toBeCloseTo(13000 / 3);
+
+    // Pesos desiguais distinguem a regra ponderada da antiga média simples.
+    fiergs.projects.forEach((project, index) => { project.finalUnits = [10, 30, 0][index]; });
+    const weighted = horizontalPricesByStandard(fiergs);
+    const ranges = fiergsHorizontalPriceRangeRows(fiergs.projects);
+    for (const row of weighted) {
+      expect(ranges.find((range) => range.label === row.label)?.average).toBe(row.averagePricePerMeter);
+    }
+    expect(ranges.find((row) => row.label === 'Média Horizontal')?.average).toBe(2500);
+    expect(ranges.find((row) => row.label === 'Condomínio de Casas')?.average).toBeNull();
+    fiergs.projects.forEach((project) => { project.averagePricePerMeter = null; });
+    expect(fiergsHorizontalPriceRangeRows(fiergs.projects).every((row) => row.average === null)).toBe(true);
   });
 
   it('lê number_bedroom e os nomes oficiais do histórico sem criar Não classificado', () => {

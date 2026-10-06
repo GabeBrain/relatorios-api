@@ -115,6 +115,14 @@ function offerRow(label: string, kind: RowKind, projects: CubeProject[]): OfferR
   };
 }
 
+/** Regra compartilhada entre a tabela de preços e a distribuição mínimo/média/máximo. */
+export function projectAveragePricePerMeter(projects: CubeProject[]): number | null {
+  return weightedAverage(projects.map((project) => ({
+    value: project.averagePricePerMeter,
+    weight: project.finalUnits ?? project.launchedUnits,
+  })));
+}
+
 function priceRow(label: string, kind: RowKind, projects: CubeProject[]): PriceRow {
   const weight = (project: CubeProject) => project.finalUnits ?? project.launchedUnits;
   return {
@@ -123,7 +131,7 @@ function priceRow(label: string, kind: RowKind, projects: CubeProject[]): PriceR
     projects: distinctProjects(projects),
     averageTicket: weightedAverage(projects.map((project) => ({ value: project.averageTicket, weight: weight(project) }))),
     averageArea: weightedAverage(projects.map((project) => ({ value: project.averageArea, weight: weight(project) }))),
-    averagePricePerMeter: weightedAverage(projects.map((project) => ({ value: project.averagePricePerMeter, weight: weight(project) }))),
+    averagePricePerMeter: projectAveragePricePerMeter(projects),
   };
 }
 
