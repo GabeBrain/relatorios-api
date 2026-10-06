@@ -6,7 +6,7 @@ interface Props { label?: string; compact?: boolean; progress?: PanoramaGenerati
 /** Estado de carregamento da feature seguindo o padrão de progresso visual da plataforma. */
 export function PanoramaLoadingState({ label = 'Preparando relatório…', compact = false, progress }: Props) {
   const detail = progress ? `${progress.percent}% concluído · ${progress.completed} de ${progress.total} etapas` : null;
-  const phase = progress?.operation ? `${progress.city ? `${progress.city}: ` : ''}${progress.operation}` : null;
+  const phase = progress?.operation ? `${progress.city ? `${progress.city}: ` : ''}${progress.operation} · ${progress.completedCities.length}/${progress.totalCities} cidades${progress.attempt ? ` · tentativa ${progress.attempt}` : ''}` : null;
   return <div className={compact ? 'flex items-center gap-2 py-1' : 'flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-border bg-card/80 px-5'} role="status" aria-live="polite">
     <div className={compact ? 'relative h-7 w-14' : 'relative h-12 w-24'}>
       <img src={brainLogo} alt="" className="absolute inset-0 h-full w-full object-contain opacity-15" />

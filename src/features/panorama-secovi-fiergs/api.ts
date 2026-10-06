@@ -6,9 +6,11 @@ import { aggregateTemporal, buildMarketCells } from './lib/market-calibration';
 import { PIRACICABA_1T26_MARKET_REFERENCE } from './reference/piracicaba-1t26-market';
 import { editorialWindow, quarterEndDate, quarterStartDate } from './domain/quarters';
 import { buildCityCube, type MarketCube } from './domain/cube';
-import { collectByCity, completedValues, type CollectionResult } from './domain/collection';
+import { collectByCity, completedValues, isTransientCityFailure, type CollectionResult } from './domain/collection';
 import { createPanoramaGenerationProgress, type PanoramaProgressListener } from './domain/generation-progress';
 import { requestWithRetry } from './lib/request-with-retry';
+import { useAuthStore } from '@/store/auth-store';
+import type { CollectionFailureAuditRow } from './lib/collection-failure-audit';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const BUILDINGS_V2_BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
@@ -218,10 +220,68 @@ interface CityHarvest {
   sources: Record<TemporalKey, SourceResult>;
 }
 
+interface CollectionSessionState {
+  scopeKey: string;
+  token: string | null;
+  startedAt: number;
+  harvests: Map<string, CityHarvest>;
+  errors: Map<string, string>;
+  attempts: Map<string, number>;
+  durations: Map<string, number>;
+}
+const collectionSessions = new WeakMap<object, CollectionSessionState>();
+const COLLECTION_SESSION_TTL_MS = 15 * 60_000;
+export function createPanoramaCollectionSession(): object { return {}; }
+function collectionScopeKey(scope: PanoramaScope): string {
+  return JSON.stringify({ ...scope, cities: [...scope.cities].map((city) => city.trim()).filter(Boolean).sort() });
+}
+function sessionState(handle: object, scope: PanoramaScope): CollectionSessionState {
+  const token = useAuthStore.getState().getToken();
+  const key = collectionScopeKey(scope);
+  let state = collectionSessions.get(handle);
+  if (!state || state.scopeKey !== key || state.token !== token || Date.now() - state.startedAt > COLLECTION_SESSION_TTL_MS) {
+    state = { scopeKey: key, token, startedAt: Date.now(), harvests: new Map(), errors: new Map(), attempts: new Map(), durations: new Map() };
+    collectionSessions.set(handle, state);
+  }
+  return state;
+}
+
+export class PanoramaCollectionError extends Error {
+  readonly retryable: boolean;
+  constructor(readonly failures: CollectionFailureAuditRow[]) {
+    super(`Coleta incompleta para ${failures.map(({ city, error, attempts }) => `${city} (${error}; ${attempts} tentativa(s))`).join('; ')}. Os dados concluídos foram mantidos nesta tentativa.`);
+    this.name = 'PanoramaCollectionError';
+    this.retryable = failures.some(({ failureClass }) => failureClass === 'transient');
+  }
+}
+
+function collectionFailureRow(city: string, error: string, attempts: number, durationMs: number): CollectionFailureAuditRow {
+  const statusMatch = error.match(/\bHTTP\s+(\d{3})\b/i);
+  const statusCode = statusMatch ? Number(statusMatch[1]) : null;
+  const failureClass: CollectionFailureAuditRow['failureClass'] = /sem (linhas|dados)|vazio/i.test(error) || statusCode === 200
+    ? 'empty'
+    : statusCode === 401 || statusCode === 403 ? 'auth'
+      : statusCode === 400 || statusCode === 404 || statusCode === 405 || statusCode === 422 ? 'contract'
+        : 'transient';
+  const operation = error.match(/^(sales|stock|ivv|medium-prices-meter|medium-prices)\b/i)?.[1]
+    ?? (error.includes('temporal-analysis-city/') ? error.match(/temporal-analysis-city\/([a-z-]+)/)?.[1] : null)
+    ?? 'empreendimentos/histórico';
+  const safeError = error.replace(/Bearer\s+\S+/gi, 'Bearer [redigido]').replace(/https?:\/\/\S+/gi, '[endpoint]');
+  return { city, operation, status: statusCode === null ? 'sem resposta HTTP' : `HTTP ${statusCode}`, failureClass, attempts, durationMs, error: safeError };
+}
+
+function failureLabel(issue: TemporalIssue): string {
+  if (issue.empty || issue.status === 200) return `${issue.endpoint}: resposta sem dados obrigatórios (HTTP 200)`;
+  return `${issue.endpoint}: HTTP ${issue.status ?? 'rede/timeout'}`;
+}
+class RequiredCitySourceError extends Error {
+  constructor(message: string, readonly retryAfterMs?: number | null) { super(message); this.name = 'RequiredCitySourceError'; }
+}
+
 type TemporalKey = 'sales' | 'salesTypology' | 'stock' | 'stockTypology' | 'ivv' | 'ivvTypology' | 'ticket' | 'ticketTypology' | 'meter' | 'meterTypology';
 type TemporalEndpoint = 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-prices-meter';
-export type TemporalIssue = { endpoint: TemporalEndpoint; status: number | null; empty: boolean };
-type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string; issue?: TemporalIssue };
+export type TemporalIssue = { endpoint: TemporalEndpoint; status: number | null; empty: boolean; retryAfterMs?: number | null };
+type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string; issue?: TemporalIssue; requestCount?: number; durationMs?: number };
 
 /** Circuito por geração, exclusivo para a falha 500 confirmada de IVV por Tipologia. */
 export class PanoramaTemporalCircuit {
@@ -274,6 +334,15 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
   // pelo cubo granular, que contém estoque, vendas e lançamentos por tipologia.
   const ivvTypology: SourceResult = { rows: [], available: false, source: 'IVV por tipologia calculado pelo histórico granular do recorte' };
   const sources = { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology };
+  const mandatory = [sales, salesTypology, stock, stockTypology];
+  const unavailableMandatory = mandatory.filter((source) => !source.available);
+  if (unavailableMandatory.length) {
+    const issues = unavailableMandatory.flatMap((source) => source.issue ? [source.issue] : []);
+    const details = issues.map(failureLabel);
+    if (!details.length) details.push('fontes obrigatórias de vendas/oferta indisponíveis');
+    const retryAfterMs = issues.map((issue) => issue.retryAfterMs).find((value) => value != null);
+    throw new RequiredCitySourceError(`${details.join('; ')} em ${scope.city}`, retryAfterMs);
+  }
   if (Object.values(sources).every((source) => !source.available)) {
     const issues = Object.values(sources).flatMap((source) => source.issue ? [source.issue] : []);
     throw new Error(describeTemporalFailure(scope.city, issues));
@@ -293,32 +362,44 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
  * uma cidade que falha aparece nomeada na proveniência e o relatório fica `partial`. Só o
  * cancelamento propaga exceção — falha total devolve modelo `unavailable` com as cidades listadas.
  */
-export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal, onProgress?: PanoramaProgressListener): Promise<PanoramaReportModel> {
+export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal, onProgress?: PanoramaProgressListener, sessionHandle: object = createPanoramaCollectionSession()): Promise<PanoramaReportModel> {
   const scopes = cityScopes(scope);
   if (!scopes.length) throw new Error('Recorte sem cidade: selecione ao menos um município autorizado.');
   const progress = createPanoramaGenerationProgress(scopes.length, onProgress);
   progress.start();
+  const session = sessionState(sessionHandle, scope);
+  for (const { city } of scopes) if (session.harvests.has(city)) progress.cityReused(city);
   const circuit = new PanoramaTemporalCircuit();
   const concurrency = panoramaConcurrencyPolicy(scope.entity);
   const requestGate = createRequestGate(concurrency.requests);
-
+  const missingScopes = scopes.filter(({ city }) => !session.harvests.has(city)
+    && (!session.errors.has(city) || isTransientCityFailure(new Error(session.errors.get(city)!))));
   const collection: CollectionResult<CityHarvest> = await collectByCity(
-    scopes.map((item) => item.city),
+    missingScopes.map((item) => item.city),
     async (city, citySignal) => {
+      session.attempts.set(city, (session.attempts.get(city) ?? 0) + 1);
       const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, scope.engineVersion ?? 'v4', circuit, requestGate, citySignal, progress.unit);
       progress.cityComplete(city);
       return harvest;
     },
-    { concurrency: concurrency.cities, signal },
+    { concurrency: concurrency.cities, attempts: 3, signal, retryDelay: (error, attempt) => {
+      const retryAfter = error instanceof RequiredCitySourceError ? error.retryAfterMs : null;
+      return retryAfter != null ? Math.max(0, retryAfter) : Math.min(5_000, 500 * 2 ** (attempt - 1)) * (0.75 + Math.random() * 0.5);
+    }, onRetry: (city, attempt) => { progress.retry(city, attempt); } },
   );
 
-  collection.failedCities.forEach(({ city }) => progress.cityFailed(city));
-
-  const harvests = completedValues(collection);
-  if (collection.state === 'unavailable') {
-    const details = collection.failedCities.map(({ city, error }) => `${city}: ${error}`).join(' | ');
-    throw new Error(`Nenhuma cidade do recorte foi carregada pela API GeoBrain. ${details}`);
+  for (const outcome of collection.outcomes) {
+    session.durations.set(outcome.city, outcome.durationMs);
+    if (outcome.status === 'completed' && outcome.value) { session.harvests.set(outcome.city, outcome.value); session.errors.delete(outcome.city); }
+    else { session.errors.set(outcome.city, outcome.error ?? 'falha não identificada'); progress.cityFailed(outcome.city); }
   }
+  const failed = scopes.filter(({ city }) => !session.harvests.has(city));
+  if (failed.length) throw new PanoramaCollectionError(failed.map(({ city }) => {
+    const outcome = collection.outcomes.find((item) => item.city === city);
+    return collectionFailureRow(city, session.errors.get(city) ?? 'limite de tentativas atingido', session.attempts.get(city) ?? 0, outcome?.durationMs ?? session.durations.get(city) ?? 0);
+  }));
+  const harvests = scopes.map(({ city }) => session.harvests.get(city)!).filter(Boolean);
+  const collectionRequestedCities = scopes.map(({ city }) => city);
   // Numeradores e denominadores municipais somam ANTES de qualquer percentual ou média.
   const merge = (key: TemporalKey): SourceResult => ({
     rows: harvests.flatMap((harvest) => harvest.sources[key].rows),
@@ -354,9 +435,11 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
     {
       cubes: harvests.map((harvest) => harvest.cube),
       provenance: {
-        requestedCities: collection.requestedCities,
-        completedCities: collection.completedCities,
-        failedCities: collection.failedCities,
+        requestedCities: collectionRequestedCities,
+        completedCities: harvests.map(({ city }) => city),
+        failedCities: [],
+        cityCollectionAttempts: scopes.map(({ city }) => ({ city, attempts: session.attempts.get(city) ?? 1, recovered: (session.attempts.get(city) ?? 1) > 1 })),
+        cityCollectionMetrics: harvests.flatMap(({ city, sources }) => Object.entries(sources).map(([operation, source]) => ({ city, operation, requests: source.requestCount ?? 0, durationMs: source.durationMs ?? 0 }))),
       },
       citySalesSources: harvests.map((harvest) => ({ city: harvest.city, rows: harvest.sources.sales.rows })),
       cityTemporalSources,
@@ -426,20 +509,21 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
 }
 
 async function temporalRows(scope: CityScope, endpoint: TemporalEndpoint, groupBy: 'Padrão' | 'Tipologia' = 'Padrão', signal?: AbortSignal, circuit?: PanoramaTemporalCircuit): Promise<SourceResult> {
-  if (circuit?.isOpen(endpoint, groupBy)) { circuit.avoided += 1; return { rows: [], available: false, source: circuit.source(), issue: { endpoint, status: 500, empty: false } }; }
+  if (circuit?.isOpen(endpoint, groupBy)) { circuit.avoided += 1; return { rows: [], available: false, source: circuit.source(), issue: { endpoint, status: 500, empty: false }, requestCount: 0, durationMs: 0 }; }
   const rows: Record<string, unknown>[] = []; let page = 1; let lastPage = 1;
+  const startedAt = Date.now(); let requestCount = 0;
   const window = temporalWindow(scope);
   do {
-    const response = await requestWithRetry(() => httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: window.start, end_period: window.end, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal }), { signal, attempts: endpoint === 'ivv' && groupBy === 'Tipologia' ? 2 : 1 });
+    const response = await requestWithRetry(() => { requestCount += 1; return httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: window.start, end_period: window.end, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal }); }, { signal, attempts: endpoint === 'ivv' && groupBy === 'Tipologia' ? 2 : 1 });
     if (!response.ok && endpoint === 'ivv' && groupBy === 'Tipologia' && response.status !== null && response.status >= 500) circuit?.open(scope.city, response.status);
-    if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}`, issue: { endpoint, status: response.status, empty: false } };
+    if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}`, issue: { endpoint, status: response.status, empty: false, retryAfterMs: response.retryAfterMs }, requestCount, durationMs: Date.now() - startedAt };
     const pageRows = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
     rows.push(...pageRows);
     lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
   } while (page <= lastPage);
   return rows.length
-    ? { rows, available: true, source: `temporal-analysis-city/${endpoint} · ${groupBy}` }
-    : { rows, available: false, source: `temporal-analysis-city/${endpoint} · HTTP 200 · sem linhas`, issue: { endpoint, status: 200, empty: true } };
+    ? { rows, available: true, source: `temporal-analysis-city/${endpoint} · ${groupBy}`, requestCount, durationMs: Date.now() - startedAt }
+    : { rows, available: false, source: `temporal-analysis-city/${endpoint} · HTTP 200 · sem linhas`, issue: { endpoint, status: 200, empty: true }, requestCount, durationMs: Date.now() - startedAt };
 }
 
 /** Initial T3/T4 bench: direct temporal endpoints only; it cannot silently promote a report contract. */

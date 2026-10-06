@@ -1,6 +1,6 @@
 import type { PanoramaReportModel } from '../types';
 
-const columns = ['tipo_registro','cidade','building_id','empreendimento','segmento','subtipo_horizontal','padrao','trimestre_lancamento','unidades_lancadas','unidades_vendidas','oferta_final','vgv_lancado_milhoes','ticket_medio','area_media','preco_m2','cobertura','motivo_rejeicao','metrica','fonte','formula','universo','periodo_observado','total_canonico','total_dimensional','delta','tolerancia','status','critico','codigo_aviso','severidade','paginas_afetadas','slides_oficiais_afetados','decisao_exibicao'] as const;
+const columns = ['tipo_registro','cidade','building_id','empreendimento','segmento','subtipo_horizontal','padrao','trimestre_lancamento','unidades_lancadas','unidades_vendidas','oferta_final','vgv_lancado_milhoes','ticket_medio','area_media','preco_m2','cobertura','motivo_rejeicao','metrica','fonte','formula','universo','periodo_observado','total_canonico','total_dimensional','delta','tolerancia','status','critico','codigo_aviso','severidade','paginas_afetadas','slides_oficiais_afetados','decisao_exibicao','operacao_coleta','tentativas','requisicoes','duracao_ms'] as const;
 
 function cell(value: unknown): string {
   if (value === null || value === undefined) return '';
@@ -35,7 +35,14 @@ export function buildFiergsAuditCsv(report: PanoramaReportModel): string {
     slides_oficiais_afetados: notice.affectedOfficialSlides.join(','),
     decisao_exibicao: notice.displayDecision,
   }));
-  const rows: Record<string, unknown>[] = [...projectRows, ...rejectionRows, ...reconciliationRows, ...noticeRows];
+  const recoveredRows = (report.provenance?.cityCollectionAttempts ?? []).map((item) => ({
+    tipo_registro: 'coleta_cidade', cidade: item.city, status: item.recovered ? 'recuperada' : 'concluída', tentativas: item.attempts,
+  }));
+  const collectionMetricRows = (report.provenance?.cityCollectionMetrics ?? []).map((item) => ({
+    tipo_registro: 'coleta_operacao', cidade: item.city, operacao_coleta: item.operation,
+    requisicoes: item.requests, duracao_ms: item.durationMs,
+  }));
+  const rows: Record<string, unknown>[] = [...projectRows, ...rejectionRows, ...reconciliationRows, ...noticeRows, ...recoveredRows, ...collectionMetricRows];
   return `\uFEFF${columns.join(';')}\r\n${rows.map((row) => columns.map((column) => cell(row[column])).join(';')).join('\r\n')}`;
 }
 

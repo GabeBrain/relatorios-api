@@ -9,6 +9,8 @@ export interface CityOutcome<T> {
   status: 'completed' | 'failed';
   value: T | null;
   error: string | null;
+  attempts: number;
+  durationMs: number;
 }
 
 export interface CollectionResult<T> {
@@ -23,9 +25,31 @@ export interface CollectionResult<T> {
 export interface CollectOptions {
   concurrency?: number;
   signal?: AbortSignal;
+  /** Total tentativas por cidade, incluindo a inicial. */
+  attempts?: number;
+  shouldRetry?: (error: unknown, attempt: number) => boolean;
+  retryDelay?: (error: unknown, attempt: number) => number;
+  sleep?: (ms: number, signal?: AbortSignal) => Promise<void>;
+  onRetry?: (city: string, attempt: number, error: unknown) => void;
 }
 
 const DEFAULT_CONCURRENCY = 3;
+
+export function isTransientCityFailure(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  const statusMatch = message.match(/\bHTTP\s+(\d{3})\b/i);
+  if (!statusMatch) return true; // timeout/rede sem resposta HTTP
+  const status = Number(statusMatch[1]);
+  return status === 408 || status === 429 || status >= 500;
+}
+
+function abortableSleep(ms: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) return Promise.reject(abortError(signal));
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener('abort', () => { clearTimeout(timer); reject(abortError(signal)); }, { once: true });
+  });
+}
 
 function abortError(signal: AbortSignal): Error {
   const reason = signal.reason;
@@ -46,7 +70,7 @@ export async function collectByCity<T>(
   const { signal } = options;
   if (signal?.aborted) throw abortError(signal);
 
-  const outcomes: CityOutcome<T>[] = requestedCities.map((city) => ({ city, status: 'failed', value: null, error: 'não coletada' }));
+  const outcomes: CityOutcome<T>[] = requestedCities.map((city) => ({ city, status: 'failed', value: null, error: 'não coletada', attempts: 0, durationMs: 0 }));
   const limit = Math.max(1, options.concurrency ?? DEFAULT_CONCURRENCY);
   let cursor = 0;
 
@@ -56,12 +80,23 @@ export async function collectByCity<T>(
       if (index >= requestedCities.length) return;
       if (signal?.aborted) throw abortError(signal);
       const city = requestedCities[index];
-      try {
-        const value = await task(city, signal);
-        outcomes[index] = { city, status: 'completed', value, error: null };
-      } catch (error) {
+      const cityStartedAt = Date.now();
+      const maxAttempts = Math.max(1, options.attempts ?? 1);
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
         if (signal?.aborted) throw abortError(signal);
-        outcomes[index] = { city, status: 'failed', value: null, error: error instanceof Error ? error.message : String(error) };
+        try {
+          const value = await task(city, signal);
+          outcomes[index] = { city, status: 'completed', value, error: null, attempts: attempt, durationMs: Date.now() - cityStartedAt };
+          break;
+        } catch (error) {
+          if (signal?.aborted) throw abortError(signal);
+          outcomes[index] = { city, status: 'failed', value: null, error: error instanceof Error ? error.message : String(error), attempts: attempt, durationMs: Date.now() - cityStartedAt };
+          const retry = attempt < maxAttempts && (options.shouldRetry ?? isTransientCityFailure)(error, attempt);
+          if (!retry) break;
+          options.onRetry?.(city, attempt + 1, error);
+          const delay = options.retryDelay?.(error, attempt) ?? Math.min(5000, 500 * 2 ** (attempt - 1));
+          await (options.sleep ?? abortableSleep)(delay, signal);
+        }
       }
     }
   };

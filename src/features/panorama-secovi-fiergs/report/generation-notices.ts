@@ -46,6 +46,12 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
       reason: `Não foi possível concluir a coleta em: ${report.provenance.failedCities.map((item) => item.city).join(', ')}.`,
       source: 'Proveniência da coleta GeoBrain', displayDecision: 'O relatório permanece parcial; os municípios não concluídos não são preenchidos por estimativa.' });
   }
+  const recoveredCities = report.provenance.cityCollectionAttempts?.filter((item) => item.recovered) ?? [];
+  if (recoveredCities.length) {
+    add({ code: 'CITY_COLLECTION_RECOVERED', severity: 'info', indicator: 'Recuperação da coleta',
+      reason: `A coleta foi recuperada após nova tentativa em: ${recoveredCities.map(({ city, attempts }) => `${city} (${attempts} tentativas)`).join(', ')}.`,
+      source: 'Proveniência das chamadas GeoBrain', displayDecision: 'O município recuperado integra o recorte completo uma única vez.' });
+  }
   for (const warning of report.launches.warnings) {
     add({ code: 'LAUNCH_SOURCE_WARNING', severity: 'warning', indicator: 'Lançamentos', reason: warning,
       source: 'building-with-history / auditoria de lançamentos', displayDecision: 'Preservar os valores observados e consultar a auditoria para o alcance.' });

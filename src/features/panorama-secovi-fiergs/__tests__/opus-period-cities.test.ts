@@ -11,6 +11,8 @@ import {
   shiftQuarter,
 } from '../domain/quarters';
 import { collectByCity, completedValues } from '../domain/collection';
+import { requestWithRetry } from '../lib/request-with-retry';
+import { buildCollectionFailureCsv } from '../lib/collection-failure-audit';
 import { scopeCityLabel, scopeCitySlug, scopeFileSlug } from '../types';
 
 describe('OP-2 · período dinâmico (G-02)', () => {
@@ -158,5 +160,65 @@ describe('OP-3 · coleta multi-cidade (G-01)', () => {
     await expect(collectByCity(['Jundiaí'], async (city) => { calls += 1; return city; }, { signal: controller.signal }))
       .rejects.toThrow(/cancelada/i);
     expect(calls).toBe(0);
+  });
+
+  it.each([1, 2, 4, 10])('recupera apenas a cidade que falhou para N=%i, sem repetir sucessos', async (count) => {
+    const cities = Array.from({ length: count }, (_, index) => `Cidade ${index + 1}`);
+    const calls = new Map<string, number>();
+    const failedOnce = cities.at(-1)!;
+    const result = await collectByCity(cities, async (city) => {
+      const attempt = (calls.get(city) ?? 0) + 1;
+      calls.set(city, attempt);
+      if (city === failedOnce && attempt === 1) throw new Error('HTTP 503 temporário');
+      return `ok:${city}`;
+    }, { concurrency: 2, attempts: 3, retryDelay: () => 0, sleep: async () => {} });
+    expect(result.state).toBe('ready');
+    expect(result.completedCities).toHaveLength(count);
+    expect(calls.get(failedOnce)).toBe(2);
+    expect([...calls.entries()].filter(([city]) => city !== failedOnce).every(([, attempts]) => attempts === 1)).toBe(true);
+    expect(completedValues(result)).toHaveLength(count);
+  });
+
+  it('não repete falhas de autenticação ou contrato', async () => {
+    let calls = 0;
+    const result = await collectByCity(['Cidade A'], async () => {
+      calls += 1;
+      throw new Error('endpoint recusado · HTTP 401');
+    }, { attempts: 3, retryDelay: () => 0, sleep: async () => {} });
+    expect(calls).toBe(1);
+    expect(result.failedCities).toHaveLength(1);
+  });
+
+  it('cancela a espera entre tentativas e não dispara a cidade de novo', async () => {
+    const controller = new AbortController();
+    let calls = 0;
+    const pending = collectByCity(['Cidade A'], async () => {
+      calls += 1;
+      throw new Error('HTTP 503 temporário');
+    }, { attempts: 3, signal: controller.signal, retryDelay: () => 1000, sleep: async (_ms, signal) => {
+      await new Promise<void>((_resolve, reject) => signal?.addEventListener('abort', () => reject(new Error('cancelada')), { once: true }));
+    } });
+    setTimeout(() => controller.abort(new Error('Coleta cancelada.')), 0);
+    await expect(pending).rejects.toThrow(/cancelada/i);
+    expect(calls).toBe(1);
+  });
+
+  it('respeita Retry-After em resposta transitória HTTP 429', async () => {
+    const delays: number[] = [];
+    let calls = 0;
+    await requestWithRetry(async () => {
+      calls += 1;
+      return calls === 1 ? { ok: false, status: 429, retryAfterMs: 1200 } : { ok: true, status: 200, retryAfterMs: null };
+    }, { attempts: 2, sleep: async (ms) => { delays.push(ms); } });
+    expect(calls).toBe(2);
+    expect(delays).toEqual([1200]);
+  });
+
+  it('gera diagnóstico CSV sem expor bearer token nem URL de endpoint', () => {
+    const csv = buildCollectionFailureCsv([{ city: 'Cidade A', operation: 'sales', status: 'HTTP 503', failureClass: 'transient', attempts: 3, durationMs: 1200, error: 'Bearer segredo https://api.exemplo/rota?token=x' }]);
+    expect(csv).toContain('Cidade A;sales;HTTP 503;transient;3;1200;');
+    expect(csv).not.toContain('segredo');
+    expect(csv).not.toContain('https://api.exemplo');
+    expect(csv).toContain('[endpoint]');
   });
 });

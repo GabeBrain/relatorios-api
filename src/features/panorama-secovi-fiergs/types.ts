@@ -54,6 +54,9 @@ export interface PanoramaProvenance {
   requestedCities: string[];
   completedCities: string[];
   failedCities: { city: string; error: string }[];
+  /** Tentativas completas por cidade; não contém payload nem credenciais. */
+  cityCollectionAttempts?: { city: string; attempts: number; recovered: boolean }[];
+  cityCollectionMetrics?: { city: string; operation: string; requests: number; durationMs: number }[];
   entity: EntityId;
   engineVersion?: PanoramaEngineVersion;
   /** Empreendimentos recusados pela política de universo, agrupados por motivo. */

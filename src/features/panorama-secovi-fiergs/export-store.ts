@@ -35,7 +35,14 @@ interface PanoramaExportState {
 const isRunning = (status: PanoramaExportStatus) => status === 'preparing' || status === 'capturing' || status === 'assembling';
 
 /** Decisão única usada pela interface, pelo estado e pelo host imediatamente antes da captura. */
-export function panoramaExportBlockReason(report: Pick<PanoramaReportModel, 'scope' | 'reconciliation'>): string | null {
+export function panoramaExportBlockReason(report: Pick<PanoramaReportModel, 'scope' | 'reconciliation' | 'provenance'>): string | null {
+  if (!report.provenance) return 'Exportação bloqueada: a proveniência de cobertura municipal não está disponível.';
+  const requested = new Set([...report.provenance.requestedCities, ...report.scope.cities]);
+  const completed = new Set(report.provenance.completedCities);
+  const missing = [...requested].filter((city) => !completed.has(city));
+  if (missing.length || report.provenance.failedCities.length) {
+    return `Exportação bloqueada: coleta incompleta para ${missing.join(', ') || report.provenance.failedCities.map(({ city }) => city).join(', ')}.`;
+  }
   if (report.scope.entity !== 'fiergs-rs') return null;
   const critical = report.reconciliation?.rows?.filter((row) => row.critical && row.status !== 'match') ?? [];
   if (report.reconciliation?.homologable && critical.length === 0) return null;

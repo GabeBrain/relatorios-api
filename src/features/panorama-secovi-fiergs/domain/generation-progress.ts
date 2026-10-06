@@ -1,4 +1,4 @@
-export type PanoramaGenerationPhase = 'collecting' | 'consolidating' | 'preparing';
+export type PanoramaGenerationPhase = 'collecting' | 'retrying' | 'consolidating' | 'preparing';
 
 export interface PanoramaGenerationProgress {
   phase: PanoramaGenerationPhase;
@@ -10,6 +10,8 @@ export interface PanoramaGenerationProgress {
   operation?: string;
   completedCities: string[];
   failedCities: string[];
+  totalCities: number;
+  attempt?: number;
 }
 
 export type PanoramaProgressListener = (progress: PanoramaGenerationProgress) => void;
@@ -24,23 +26,26 @@ export function createPanoramaGenerationProgress(cityCount: number, listener?: P
   let phase: PanoramaGenerationPhase = 'collecting';
   let city: string | undefined;
   let operation: string | undefined;
+  let attempt: number | undefined;
   const completedCities = new Set<string>();
   const failedCities = new Set<string>();
 
   const emit = () => listener?.({
     phase, completed, total, percent: Math.round(completed / total * 100), startedAt, city, operation,
-    completedCities: [...completedCities], failedCities: [...failedCities],
+    completedCities: [...completedCities], failedCities: [...failedCities], attempt, totalCities: cityCount,
   });
   const step = (nextPhase: PanoramaGenerationPhase, nextCity?: string, nextOperation?: string) => {
     completed = Math.min(total, completed + 1);
-    phase = nextPhase; city = nextCity; operation = nextOperation;
+    phase = nextPhase; city = nextCity; operation = nextOperation; attempt = undefined;
     emit();
   };
 
   return {
     start: () => emit(),
     unit: (nextCity: string, nextOperation: string) => step('collecting', nextCity, nextOperation),
+    retry: (nextCity: string, nextAttempt: number) => { phase = 'retrying'; city = nextCity; operation = 'tentativa de recuperação'; attempt = nextAttempt; emit(); },
     cityComplete: (nextCity: string) => { completedCities.add(nextCity); city = nextCity; operation = 'cidade concluída'; emit(); },
+    cityReused: (nextCity: string) => { completedCities.add(nextCity); city = nextCity; operation = 'cidade preservada da tentativa anterior'; emit(); },
     cityFailed: (nextCity: string) => { failedCities.add(nextCity); city = nextCity; operation = 'cidade indisponível'; emit(); },
     consolidate: () => step('consolidating', undefined, 'consolidando municípios'),
     prepare: () => step('preparing', undefined, 'preparando páginas'),

@@ -14,6 +14,7 @@ export interface HttpResponse<T = unknown> {
   requestBody: unknown;
   url: string;
   method: string;
+  retryAfterMs?: number | null;
 }
 
 export interface RequestOptions {
@@ -85,6 +86,8 @@ export async function httpRequest<T = unknown>(opts: RequestOptions): Promise<Ht
     clearTimeout(timer);
     const latencyMs = performance.now() - start;
     const contentType = response.headers.get('Content-Type') ?? '';
+    const retryAfter = response.headers.get('Retry-After');
+    const retryAfterMs = retryAfter ? (/^\d+(?:\.\d+)?$/.test(retryAfter.trim()) ? Number(retryAfter) * 1000 : Math.max(0, Date.parse(retryAfter) - Date.now())) : null;
     const raw = await response.arrayBuffer();
     const bytes = raw.byteLength;
     const text = new TextDecoder().decode(raw);
@@ -112,6 +115,7 @@ export async function httpRequest<T = unknown>(opts: RequestOptions): Promise<Ht
       requestBody: opts.body ?? null,
       url: fullUrl,
       method,
+      retryAfterMs,
     };
   } catch (err) {
     clearTimeout(timer);
@@ -131,6 +135,7 @@ export async function httpRequest<T = unknown>(opts: RequestOptions): Promise<Ht
       requestBody: opts.body ?? null,
       url: fullUrl,
       method,
+      retryAfterMs: null,
     };
   }
 }

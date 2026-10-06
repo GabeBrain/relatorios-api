@@ -141,14 +141,14 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
     expect(reconciliation.rows.find((row) => row.metricId === 'sales.vertical.typology')).toMatchObject({
       canonicalTotal: 50, dimensionalTotal: 49, delta: -1, status: 'different', critical: true,
     });
-    usePanoramaExportStore.getState().start({ scope: input.scope, reconciliation } as never, 'pdf');
+    usePanoramaExportStore.getState().start({ scope: input.scope, reconciliation, provenance: { requestedCities: input.scope.cities, completedCities: input.scope.cities, failedCities: [] } } as never, 'pdf');
     expect(usePanoramaExportStore.getState()).toMatchObject({ status: 'error', report: null });
   });
 
   it.each(['2T2026', '4T2025'] as const)('libera PDF e PPT quando todas as invariantes fecham em %s', (period) => {
     const input = base(period);
     const reconciliation = reconcilePanoramaReport(input as never);
-    const report = { scope: input.scope, reconciliation } as never;
+    const report = { scope: input.scope, reconciliation, provenance: { requestedCities: input.scope.cities, completedCities: input.scope.cities, failedCities: [] } } as never;
     for (const format of ['pdf', 'pptx'] as const) {
       usePanoramaExportStore.setState({ status: 'idle', error: '', report: null });
       usePanoramaExportStore.getState().start(report, format);
@@ -161,7 +161,7 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
     const input = base(period);
     input.granular.cohortsHorizontal[0].finalUnits = 39;
     const reconciliation = reconcilePanoramaReport(input as never);
-    const report = { scope: input.scope, reconciliation } as never;
+    const report = { scope: input.scope, reconciliation, provenance: { requestedCities: input.scope.cities, completedCities: input.scope.cities, failedCities: [] } } as never;
     for (const format of ['pdf', 'pptx'] as const) {
       usePanoramaExportStore.setState({ status: 'idle', error: '', report: null });
       usePanoramaExportStore.getState().start(report, format);
@@ -175,7 +175,7 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
     const reconciliation = reconcilePanoramaReport(input as never);
     reconciliation.rows[0] = { ...reconciliation.rows[0], status: 'different', delta: 1 };
     const forged = { ...reconciliation, homologable: true };
-    expect(panoramaExportBlockReason({ scope: input.scope, reconciliation: forged } as never)).toContain('sales.vertical.pattern');
+    expect(panoramaExportBlockReason({ scope: input.scope, reconciliation: forged, provenance: { requestedCities: input.scope.cities, completedCities: input.scope.cities, failedCities: [] } } as never)).toContain('sales.vertical.pattern');
   });
 
   it('bloqueia uma dimensão crítica indisponível em vez de tratá-la como exceção editorial', () => {
@@ -183,15 +183,26 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
     input.granular.offerByTypology = [];
     const reconciliation = reconcilePanoramaReport(input as never);
     expect(reconciliation.rows.find((row) => row.metricId === 'stock.vertical.typology_table')).toMatchObject({ status: 'unavailable', critical: true });
-    expect(panoramaExportBlockReason({ scope: input.scope, reconciliation } as never)).toContain('stock.vertical.typology_table');
+    expect(panoramaExportBlockReason({ scope: input.scope, reconciliation, provenance: { requestedCities: input.scope.cities, completedCities: input.scope.cities, failedCities: [] } } as never)).toContain('stock.vertical.typology_table');
+  });
+
+  it('bloqueia exportação Secovi se qualquer cidade do escopo estiver incompleta', () => {
+    const input = base();
+    const scope = { ...input.scope, entity: 'secovi-sp' as const };
+    const completeReconciliation = reconcilePanoramaReport(input as never);
+    const reason = panoramaExportBlockReason({ scope, reconciliation: completeReconciliation, provenance: { requestedCities: scope.cities, completedCities: ['Canoas'], failedCities: [{ city: 'Viamão', error: 'HTTP 503' }] } } as never);
+    expect(reason).toContain('coleta incompleta');
+    expect(reason).toContain('Viamão');
   });
 
   it('leva fonte, fórmula, universo, período e delta para o CSV de auditoria', () => {
     const reconciliation = reconcilePanoramaReport(base() as never);
-    const csv = buildFiergsAuditCsv({ cube: { projects: [], rejections: [] }, reconciliation } as never);
+    const csv = buildFiergsAuditCsv({ cube: { projects: [], rejections: [] }, reconciliation, provenance: { cityCollectionAttempts: [{ city: 'Canoas', attempts: 2, recovered: true }], cityCollectionMetrics: [{ city: 'Canoas', operation: 'sales', requests: 4, durationMs: 80 }] } } as never);
     expect(csv).toContain('metrica;fonte;formula;universo;periodo_observado;total_canonico;total_dimensional;delta');
     expect(csv).toContain('reconciliacao');
     expect(csv).toContain('sales.vertical.pattern');
     expect(csv).toContain('2T2026;50;50;0;0;match;true');
+    expect(csv).toContain('coleta_cidade;Canoas');
+    expect(csv.split('\r\n').some((line) => line.startsWith('coleta_operacao;Canoas;') && line.includes(';sales;') && line.endsWith(';4;80'))).toBe(true);
   });
 });

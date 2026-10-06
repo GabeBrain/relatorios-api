@@ -92,6 +92,16 @@ describe('Panorama Secovi/FIERGS — comparativos municipais V2', () => {
     expect(model.cityComparisons.market.filter((row) => row.segment === 'Horizontal').map((row) => row.projects)).toEqual([0, 0]);
   });
 
+  it('registra recuperação transitória como aviso informativo sem rebaixar cobertura integral', () => {
+    const scope: PanoramaScope = { uf: 'SP', cities: ['Jundiaí'], endQuarter: '1T2026' };
+    const model = buildPanoramaReportModel(scope, [], allEmpty, [], { provenance: {
+      requestedCities: scope.cities, completedCities: scope.cities, failedCities: [],
+      cityCollectionAttempts: [{ city: 'Jundiaí', attempts: 2, recovered: true }],
+    } });
+    expect(model.provenance.failedCities).toEqual([]);
+    expect(model.notices).toContainEqual(expect.objectContaining({ code: 'CITY_COLLECTION_RECOVERED', severity: 'info' }));
+  });
+
   it('suprime o comparativo em coleta parcial', () => {
     const model = buildPanoramaReportModel({ uf: 'SP', cities: ['Jundiaí', 'Piracicaba'], endQuarter: '1T2026' }, [], allEmpty, [], { cubes: [buildCityCube([sampleBuilding], { city: 'Jundiaí', uf: 'SP', endQuarter: '1T2026' })], provenance: { requestedCities: ['Jundiaí', 'Piracicaba'], completedCities: ['Jundiaí'], failedCities: [{ city: 'Piracicaba', error: 'HTTP 500' }] } });
     expect(model.cityComparisons.enabled).toBe(false);
