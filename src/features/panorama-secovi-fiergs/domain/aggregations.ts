@@ -1,6 +1,6 @@
 import type { CubeProject, MarketCube } from './cube';
 import { addNullable, horizontalProjects, verticalProjects, weightedAverage } from './cube';
-import { SECOVI_HORIZONTAL_LABEL } from './entity-policy';
+import { FIERGS_HORIZONTAL_PRODUCT_LABELS, SECOVI_HORIZONTAL_LABEL } from './entity-policy';
 import {
   COHORT_SUBTOTAL_LABEL,
   COHORT_TOTAL_LABEL,
@@ -411,15 +411,9 @@ export function pricesByTypology(cube: MarketCube): PriceRow[] {
  */
 export function horizontalPricesByStandard(cube: MarketCube): PriceRow[] {
   if (cube.entity === 'fiergs-rs') {
-    const labels: Record<string, string> = {
-      loteamento_aberto: 'Loteamento Aberto',
-      condominio_chacaras: 'Condomínio de Chácaras',
-      loteamento_fechado: 'Loteamento Fechado',
-      condominio_casas: 'Condomínio de Casas/Sobrados',
-    };
     const universe = horizontalProjects(cube);
     const groups = groupBy(universe, (project) => project.horizontalSubtype ?? 'indefinido');
-    const rows = [...groups.entries()].map(([subtype, projects]) => priceRow(labels[subtype] ?? 'Não classificado', 'row', projects));
+    const rows = [...groups.entries()].map(([subtype, projects]) => priceRow(FIERGS_HORIZONTAL_PRODUCT_LABELS[subtype as keyof typeof FIERGS_HORIZONTAL_PRODUCT_LABELS] ?? 'Não classificado', 'row', projects));
     const lots = universe.filter((project) => project.horizontalSubtype === 'loteamento_aberto' || project.horizontalSubtype === 'loteamento_fechado');
     return [...rows, priceRow('Média Loteamentos', 'total', lots)];
   }
@@ -566,7 +560,18 @@ export function vgvSummary(cube: MarketCube): VgvRow[] {
   // Sem horizontal aceito, `Subtotal vertical` repetiria célula a célula o `Total geral`. Duas
   // linhas idênticas em sequência não informam nada e fazem o leitor procurar a diferença.
   if (vertical.length && horizontal.length) rows.push(vgvRow('Subtotal vertical', 'subtotal', 'Vertical', vertical));
-  rows.push(...rowsFor(horizontal, 'Horizontal'));
+  if (cube.entity === 'fiergs-rs') {
+    const groups = groupBy(horizontal, (project) => project.horizontalSubtype ?? 'indefinido');
+    for (const subtype of ['condominio_casas', 'loteamento_aberto', 'loteamento_fechado'] as const) {
+      const projects = groups.get(subtype);
+      if (projects?.length) rows.push(vgvRow(FIERGS_HORIZONTAL_PRODUCT_LABELS[subtype]!, 'row', 'Horizontal', projects));
+    }
+    for (const [subtype, projects] of groups) {
+      if (!FIERGS_HORIZONTAL_PRODUCT_LABELS[subtype as keyof typeof FIERGS_HORIZONTAL_PRODUCT_LABELS]) {
+        rows.push(vgvRow('Produto não classificado', 'row', 'Horizontal', projects));
+      }
+    }
+  } else rows.push(...rowsFor(horizontal, 'Horizontal'));
   if (horizontal.length) rows.push(vgvRow('Subtotal horizontal', 'subtotal', 'Horizontal', horizontal));
   rows.push(vgvRow(COHORT_TOTAL_LABEL, 'total', 'Total', cube.projects));
   return rows;

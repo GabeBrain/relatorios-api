@@ -78,6 +78,8 @@ describe('FIERGS-RS · política horizontal e preset', () => {
     ['Loteamento Aberto', 'loteamento_aberto'],
     ['Loteamento Fechado', 'loteamento_fechado'],
     ['Condomínio de Casas/Sobrados', 'condominio_casas'],
+    ['Condomínio de Casas', 'condominio_casas'],
+    ['Condomínio de Casas e Sobrados', 'condominio_casas'],
   ] as const;
 
   it('aceita os três produtos horizontais homologáveis e os preserva na taxonomia', () => {

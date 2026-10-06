@@ -2,6 +2,7 @@ import type { Quarter, Segment } from '../types';
 import { compareQuarters, parseQuarter, quarterEndMonth, quarterIndex } from './quarters';
 import { canonicalStandard, canonicalTypology, maturityOfMonths, type MaturityLabel, type StandardLabel, type TypologyLabel } from './taxonomy';
 import { entityPolicy, type EntityId, type HorizontalSubtype } from './entity-policy';
+import { reviewedFiergsHorizontalProduct } from '../reference/fiergs-reviewed-horizontal-products';
 
 /**
  * Cubo granular por empreendimento. É a base única de contagem, ponderação e reconciliação: todas
@@ -180,7 +181,7 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
 
   for (const building of raw) {
     const buildingId = String(firstText(building, ['building_id', 'id']) ?? '');
-    const decision = policy.classify({
+    const sourceDecision = policy.classify({
       segment: segmentOf(building.building_type ?? building.type ?? building.segment),
       rawSubtype: firstText(building, ['building_subtype', 'subtype', 'sub_type', 'horizontal_type', 'product_type']),
       rawType: firstText(building, ['building_type', 'type']),
@@ -188,6 +189,14 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
       standard: firstText(building, ['standard', 'pattern']),
       historicalPatterns: (Array.isArray(building.typologies_history) ? building.typologies_history : []).map((entry) => firstText(entry as Record<string, unknown>, ['pattern', 'standard'])),
     });
+    // A fonte pode perder o rótulo de produto de um empreendimento já observado. Nesse caso,
+    // apenas um catálogo granular auditado supre o subtipo; produto explícito atual prevalece.
+    const reviewedSubtype = entity === 'fiergs-rs' && sourceDecision.reason === 'subtipo_horizontal_indefinido'
+      ? reviewedFiergsHorizontalProduct(options.uf, options.city, buildingId)
+      : null;
+    const decision = reviewedSubtype
+      ? { accepted: true, segment: 'Horizontal' as const, horizontalSubtype: reviewedSubtype, reason: null }
+      : sourceDecision;
 
     if (!buildingId) {
       rejections.push({ buildingId: '(sem id)', city: options.city, reason: 'empreendimento sem identificador estável' });

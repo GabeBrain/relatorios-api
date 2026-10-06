@@ -929,6 +929,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-06 — FIERGS: retorno da Juliana sobre condomínios de casas — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs`, análises horizontais de produto, preços e VGV.
+- **Diagnóstico:** o PPT de 69 slides anotado por Juliana pede casas agregadas em 57/59/60 e três produtos no 55. A auditoria anterior de 2T2026 tinha sete condomínios, mas o PPT atual mostra só loteamentos no 57; há também mudança de um loteamento aberto entre as fotografias. O VGV rotulava grupos horizontais por padrão como se todos fossem casas.
+- **Mudança local:** aceitar grafias explícitas adicionais de casas na política FIERGS; usar rótulo único nas páginas horizontais; abrir VGV por condomínio, loteamento aberto e fechado, preservando subtotais. Chácaras continuam excluídas, e “Média Loteamentos” não incorpora casas. “Desconsiderar” no 55 foi interpretado como estrutura antiga, não exclusão da página inteira — decisão editorial a confirmar se Juliana discordar.
+- **Verificação e novo avanço:** 276 testes da feature e build aprovados **antes** da contingência de produto; TypeScript global segue bloqueado apenas por fixtures antigas do Corretor. PDF/CSV autenticados de 2T2026 gerados antes dela em `.tmp/fiergs-juliana-oct06-regression/` mostravam os sete IDs rejeitados por `subtipo_horizontal_indefinido`; consulta pontual ao payload atual falhou por timeout. Foi acrescentado catálogo dos sete produtos observados na auditoria autenticada de 02/10, usado só quando o produto atual é indefinido e nunca para sobrescrever produto explícito. A pedido de Gabriel, não rodamos novos testes nem geramos outro estudo: ele fará a geração no site após a publicação. Evidência em `docs/features/Relatorios Secovi_FIERGS/EVIDENCIA_RETORNO_JULIANA_HORIZONTAL_2026-10-06.md`. Homologação não concluída.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
 ### 2026-10-01 — Panorama FIERGS: média horizontal para nova rodada com Juliana — Gabriel + Codex
 
 - **Decisão:** a coluna do consolidado horizontal passa a mostrar unidades lançadas por empreendimento, derivadas do mesmo cubo histórico e explicitadas no cabeçalho/legenda. Nenhum número é fixado no runtime. A interpretação é editorial e pode ser revista após a validação da Juliana.
@@ -2028,7 +2035,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 | 6g | Corretor v2 — repensar a interface de ponta a ponta | 🟡 (absorvido pela v3 — ver `DESIGN_corretor_v3.md`) |
 | 6h | **Corretor v5** — fluxo operacional unificado | 🟡 **Implementação FECHADA e revisada** (14/jul): WS0–WS5 ✅ no código + revisão de código aprovada (v0.42 do LIVE do Corretor, com pendências P1–P7 e roadmap). Restante: verificar migrations v5 (`relatorio` ✅), deploy `analyze-table-image` (cache v7), homologação real Marka/Itajaí/GO (recall ≥90%, FP ≤15%). WS-F (file watch) = futuro. **Homologação real começou em 22–24/jul** com 4 estudos de analistas (Rolândia/Daniele + Housi/Beatriz e Finoti): 102 achados, ~100% FP nos triados → sprint de 28/jul derrubou Rolândia de 17 achados para 1 (v0.44–0.49, 78 testes verdes). |
 | 7 | Relatórios Secovi (export Excel) | 🟡 (correção trimestral implementada e testada em 04/ago; aguarda homologação manual da exportação) |
-| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (V1 visual testável de ponta a ponta ✅; V2 reúne padrão institucional, multi-cidade, período dinâmico, política Secovi, comparativos condicionais e PDF/PPT espelho. Próximo portão: homologar preview e os dois arquivos em recorte GeoBrain autenticado. PPT editável segue para V3.) |
+| 7a | **Panorama Secovi/FIERGS** — automatização do deck trimestral | 🟡 (retorno horizontal de 06/10: contingência por produto auditado para sete condomínios aplicada no código; falta conferir PDF/CSV 2T2026 da nova versão e obter aceite. Homologação aberta. PPT editável segue para V3.) |
 | 8 | API Explorer (OpenAPI + console) | ✅ |
 | 9 | Qualidade CID / Piemonte | 🟡 (CID em standby) |
 | 10 | Atualizador VGV V1 — operação client-side | 🟡 (motor, UI padronizada, mapa urbano, testes e build ✅; homologação pelo setor usuário pendente) |
@@ -2036,6 +2043,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **FIERGS — retorno de 06/10:** após publicar a contingência auditada, conferir o PDF/CSV 2T2026 gerado por Gabriel: os sete condomínios devem aparecer nas páginas 55/57/59/60 sem alterar loteamentos, preços ou outros totais indevidamente. A consulta ao payload bruto atual continua pendente por timeout, e o aceite explícito da Juliana ainda falta. A página 55 foi mantida com vertical e subtotal; confirmar essa interpretação de “Desconsiderar” se ela esperar exclusão integral.
 
 - [ ] **Plataforma Rebrain — governança de custo BigQuery:** implantar o plano de labels comuns,
   auditoria de produto, agregação administrativa de `INFORMATION_SCHEMA.JOBS_BY_PROJECT`, exportação

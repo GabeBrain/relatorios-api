@@ -71,10 +71,22 @@ describe('OP-4 · cubo granular', () => {
       building({ building_id: 'H4', building_type: 'Horizontal', standard: 'Condomínio de Casas/Sobrados' }),
     ], { city: 'Porto Alegre', uf: 'RS', entity: 'fiergs-rs' });
     expect(horizontalPricesByStandard(fiergs).filter((row) => row.kind === 'row').map((row) => row.label)).toEqual([
-      'Loteamento Aberto', 'Loteamento Fechado', 'Condomínio de Casas/Sobrados',
+      'Loteamento Aberto', 'Loteamento Fechado', 'Condomínio de Casas',
     ]);
     expect(fiergs.rejections).toEqual(expect.arrayContaining([
       expect.objectContaining({ buildingId: 'H2', reason: 'horizontal_fora_da_politica' }),
+    ]));
+  });
+
+  it('recupera produto horizontal previamente auditado quando a API omite subtipo, sem sobrescrever produto explícito', () => {
+    const base = building({ building_id: '66842', name: 'Solar Dos Passáros - Fase 1', building_type: 'Horizontal', standard: 'Econômico' });
+    const recovered = cubeOf([base], { city: 'Alvorada', uf: 'RS', entity: 'fiergs-rs', endQuarter: '2T2026' });
+    expect(recovered.projects[0]?.horizontalSubtype).toBe('condominio_casas');
+    const explicit = cubeOf([{ ...base, standard: 'Loteamento Aberto' }], { city: 'Alvorada', uf: 'RS', entity: 'fiergs-rs', endQuarter: '2T2026' });
+    expect(explicit.projects[0]?.horizontalSubtype).toBe('loteamento_aberto');
+    const unknown = cubeOf([{ ...base, building_id: 'not-reviewed' }], { city: 'Alvorada', uf: 'RS', entity: 'fiergs-rs', endQuarter: '2T2026' });
+    expect(unknown.rejections).toEqual(expect.arrayContaining([
+      expect.objectContaining({ buildingId: 'not-reviewed', reason: 'subtipo_horizontal_indefinido' }),
     ]));
   });
 
@@ -87,11 +99,18 @@ describe('OP-4 · cubo granular', () => {
     ], { city: 'Porto Alegre', uf: 'RS', entity: 'fiergs-rs' });
     const products = fiergsHorizontalOfferRows(fiergs.projects);
     const cohortTotal = totalRowOf(offerByCohort(fiergs, 'Horizontal'))!;
+    expect(products.map((row) => row.label).sort()).toEqual(['Condomínio de Casas', 'Loteamento Aberto', 'Loteamento Fechado']);
     expect(products.reduce((sum, row) => sum + row.projects, 0)).toBe(cohortTotal.projects);
     expect(products.reduce((sum, row) => sum + row.launched, 0)).toBe(cohortTotal.launchedUnits);
     expect(products.reduce((sum, row) => sum + row.final, 0)).toBe(cohortTotal.finalUnits);
     expect(products.every((row) => row.averageLaunchedPerProject === row.launched / row.projects)).toBe(true);
     expect(fiergs.projects.some((project) => project.buildingId === 'H2')).toBe(false);
+    const vgv = vgvSummary(fiergs);
+    const productRows = vgv.filter((row) => row.kind === 'row' && row.segment === 'Horizontal');
+    expect(productRows.map((row) => row.label)).toEqual(['Condomínio de Casas', 'Loteamento Aberto', 'Loteamento Fechado']);
+    expect(productRows.reduce((sum, row) => sum + row.projects, 0)).toBe(cohortTotal.projects);
+    expect(productRows.reduce((sum, row) => sum + (row.launchedUnits ?? 0), 0)).toBe(cohortTotal.launchedUnits);
+    expect(productRows.reduce((sum, row) => sum + (row.finalUnits ?? 0), 0)).toBe(cohortTotal.finalUnits);
   });
 
   it('calcula Média Loteamentos apenas com loteamentos aberto e fechado', () => {
@@ -114,6 +133,8 @@ describe('OP-4 · cubo granular', () => {
       label: 'Média Loteamentos', min: 1000, average: 2000, max: 3000,
     });
     const mean = horizontalPricesByStandard(fiergs).find((row) => row.kind === 'total');
+    expect(horizontalPricesByStandard(fiergs).some((row) => row.kind === 'row' && row.label === 'Condomínio de Casas')).toBe(true);
+    expect(fiergsHorizontalPriceRangeRows(fiergs.projects).some((row) => row.label === 'Condomínio de Casas' && row.average === 9000)).toBe(true);
     expect(mean?.label).toBe('Média Loteamentos');
     expect(mean?.projects).toBe(2);
     expect(mean?.averagePricePerMeter).toBe(2000);

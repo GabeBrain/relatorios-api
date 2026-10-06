@@ -162,7 +162,15 @@ const FIERGS_HORIZONTAL_PRODUCTS = new Map<string, HorizontalSubtype>([
   ['condominio de chacaras', 'condominio_chacaras'],
   ['loteamento fechado', 'loteamento_fechado'],
   ['condominio de casas/sobrados', 'condominio_casas'],
+  ['condominio de casas e sobrados', 'condominio_casas'],
+  ['condominio de casas', 'condominio_casas'],
 ]);
+
+export const FIERGS_HORIZONTAL_PRODUCT_LABELS: Partial<Record<HorizontalSubtype, string>> = {
+  condominio_casas: 'Condomínio de Casas',
+  loteamento_aberto: 'Loteamento Aberto',
+  loteamento_fechado: 'Loteamento Fechado',
+};
 
 export function classifyFiergsTemporalRow(segment: Segment | null, group: unknown): TemporalHorizontalDecision {
   if (segment === 'Vertical') return 'keep';

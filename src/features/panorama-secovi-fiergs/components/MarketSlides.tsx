@@ -4,7 +4,7 @@ import { buildMapTilePlan, positionMapPoints } from '../lib/map-tiles';
 import { canonicalStandard, orderStandards, orderTypologies, typologyDisplayLabel } from '../domain/taxonomy';
 import { fiergsTemporalTypologyMeter, fiergsTemporalTypologyTotal, granularPriceChartRows } from '../report/price-chart';
 import { conditionalFormat, shareOf, type ConditionalMetric } from '../domain/conditional-format';
-import { horizontalLabelForEntity } from '../domain/entity-policy';
+import { FIERGS_HORIZONTAL_PRODUCT_LABELS, horizontalLabelForEntity } from '../domain/entity-policy';
 import type { CubeProject } from '../domain/cube';
 import type { VgvRow } from '../domain/aggregations';
 
@@ -198,17 +198,10 @@ export function OfferChartSlide({ report, dimension }: { report: PanoramaReportM
   return <Slide title={`OFERTA LANÇADA E FINAL | POR ${dimension === 'pattern' ? 'PADRÃO' : 'TIPOLOGIA'}`} className="panorama-column-slide"><div className="panorama-column-chart">{rows.map((row) => { const launched = launchedTotal ? row.launched / launchedTotal * 100 : 0; const final = finalTotal ? row.final / finalTotal * 100 : 0; return <div className="panorama-column-group" key={row.label}><div><span className="panorama-column-green" style={{ height: `${launched / (max * 100) * 100}%` }}><b>{percent(launched)}</b></span><span className="panorama-column-yellow" style={{ height: `${final / (max * 100) * 100}%` }}><b>{percent(final)}</b></span></div><strong>{row.label}</strong></div>; })}</div><div className="panorama-chart-legend"><span className="green">Oferta Lançada</span><span className="yellow">Oferta Final</span></div></Slide>;
 }
 
-const FIERGS_PRODUCT_LABELS: Record<string, string> = {
-  loteamento_aberto: 'Loteamento Aberto',
-  condominio_chacaras: 'Condomínio de Chácaras',
-  loteamento_fechado: 'Loteamento Fechado',
-  condominio_casas: 'Condomínio de Casas/Sobrados',
-};
-
 function fiergsHorizontalGroups(projects: CubeProject[]) {
   const groups = new Map<string, CubeProject[]>();
   for (const project of projects.filter((item) => item.segment === 'Horizontal')) {
-    const label = FIERGS_PRODUCT_LABELS[project.horizontalSubtype ?? ''] ?? 'Não classificado';
+    const label = project.horizontalSubtype ? FIERGS_HORIZONTAL_PRODUCT_LABELS[project.horizontalSubtype] ?? 'Não classificado' : 'Não classificado';
     groups.set(label, [...(groups.get(label) ?? []), project]);
   }
   return [...groups.entries()];
@@ -235,7 +228,7 @@ export function fiergsHorizontalOfferRows(projects: CubeProject[]) {
 
 /** Substitui o antigo consolidado misto do slide oficial 61 por três produtos horizontais. */
 export function FiergsHorizontalConsolidatedSlide({ report }: { report: PanoramaReportModel }) {
-  const order = ['Condomínio de Casas/Sobrados', 'Loteamento Aberto', 'Loteamento Fechado'];
+  const order = ['Condomínio de Casas', 'Loteamento Aberto', 'Loteamento Fechado'];
   const rows = fiergsHorizontalOfferRows(report.cube.projects).sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));
   return <Slide title="MERCADO RESIDENCIAL HORIZONTAL | POR PRODUTO" className="panorama-offer-table-slide"><table className="panorama-reference-table"><thead><tr><th>Produto</th><th>Empreendimentos</th><th>Oferta Lançada</th><th>Oferta Final</th><th>Disponibilidade<br/>s/ O.L. histórica</th><th>Média unid. lançadas/emp.</th></tr></thead><tbody>{rows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{integer(row.projects)}</td><td>{integer(row.launched)}</td><td>{integer(row.final)}</td><td>{row.launched ? percent(row.final / row.launched * 100) : '—'}</td><td>{decimal(row.averageLaunchedPerProject)}</td></tr>)}</tbody></table><p className="panorama-coverage-caption">Fotografia horizontal histórica por produto. Disponibilidade = estoque final ÷ lançamentos históricos; média de unidades lançadas = lançamentos ÷ empreendimentos do produto. Sem quadro adicional para evitar repetição.</p></Slide>;
 }
@@ -246,12 +239,7 @@ export function FiergsHorizontalPriceRangeSlide({ report }: { report: PanoramaRe
 }
 
 export function fiergsHorizontalPriceRangeRows(projects: CubeProject[]) {
-  const groups = new Map<string, CubeProject[]>();
-  for (const project of projects.filter((item) => item.segment === 'Horizontal')) {
-    const label = FIERGS_PRODUCT_LABELS[project.horizontalSubtype ?? ''] ?? 'Não classificado';
-    groups.set(label, [...(groups.get(label) ?? []), project]);
-  }
-  const rows = [...groups].map(([label, group]) => {
+  const rows = fiergsHorizontalGroups(projects).map(([label, group]) => {
     const values = group.map((item) => item.averagePricePerMeter).filter((value): value is number => value !== null && Number.isFinite(value));
     return { label, min: values.length ? Math.min(...values) : null, average: values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null, max: values.length ? Math.max(...values) : null };
   });
@@ -441,7 +429,7 @@ export function VgvSlide({ report }: { report: PanoramaReportModel }) {
       { key: 'finalVgvMillions', label: 'Final (R$ mi)', value: (row) => row.finalVgvMillions, format: decimal },
       { key: 'soldVgvMillions', label: 'VGV vendido (R$ mi)', value: (row) => row.soldVgvMillions, format: decimal },
     ].filter((column) => column.key === 'projects' || report.granular.vgv.some((row) => column.value(row) !== null));
-    return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th scope="col">Padrão</th>{columns.map((column) => <th scope="col" key={column.key}>{column.label}</th>)}</tr></thead><tbody>{report.granular.vgv.map((row) => <tr key={`${row.segment}-${row.label}`} className={rowClassOf(row.kind)}><th scope="row">{row.label}</th>{columns.map((column) => <td key={column.key}>{column.format(column.value(row))}</td>)}</tr>)}</tbody></table></Slide>;
+    return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th scope="col">{report.scope.entity === 'fiergs-rs' ? 'Padrão / produto' : 'Padrão'}</th>{columns.map((column) => <th scope="col" key={column.key}>{column.label}</th>)}</tr></thead><tbody>{report.granular.vgv.map((row) => <tr key={`${row.segment}-${row.label}`} className={rowClassOf(row.kind)}><th scope="row">{row.label}</th>{columns.map((column) => <td key={column.key}>{column.format(column.value(row))}</td>)}</tr>)}</tbody></table></Slide>;
   }
   const vgvCoverage = vgvCoverageNote(report.cube.projects);
   const rowLabels = orderedLabels(report.stock.units, report.stock.vgv, report.sales.units, report.sales.vgv).slice(0, 8);
