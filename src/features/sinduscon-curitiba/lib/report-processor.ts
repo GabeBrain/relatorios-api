@@ -52,7 +52,9 @@ function applyUnitRule(row: Record<string, unknown>, rowNumber: number, reviews:
     finalResidential: numberValue(row[COLUMN.residential]), finalNonResidential: numberValue(row[COLUMN.nonResidential]), decision,
   });
 
-  if (commercial && !residentialUse) {
+  if (commercial && !residentialUse && residential > 0 && residential >= Math.max(1, nonResidential) * 3) {
+    reviews.push({ id: `row-${rowNumber}`, rowNumber, usage, residential, nonResidential, reason: 'Uso exclusivamente comercial com predominância residencial; quantidades preservadas para avaliação humana.' });
+  } else if (commercial && !residentialUse) {
     row[COLUMN.residential] = '';
     if (residential) recordDecision('Uso comercial: unidades residenciais foram excluídas; a quantidade não residencial original foi mantida.');
   } else if (residentialUse && !commercial) {

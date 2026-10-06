@@ -17,6 +17,15 @@ function workbookBuffer(rows: unknown[][]) {
 }
 
 describe('processWorkbook', () => {
+  it.each(['alvaras', 'cvco'] as const)('preserva 168 residenciais e 3 comerciais para revisão em %s', (kind) => {
+    const report = processWorkbook(workbookBuffer([
+      ['Comércio e Serviço de Bairro', 'CONSTRUÇÃO', 17100, 168, 3, 17100, 'Total'],
+    ]), 'Alvaras_AGO_2026.xlsx', kind);
+    expect(report.reviews).toHaveLength(1);
+    expect(report.rows[0]['Quantidade de Unidades Residênciais']).toBe(168);
+    expect(report.rows[0]['Quantidade Unidades Não Residênciais']).toBe(3);
+    expect(report.decisions).toHaveLength(0);
+  });
   it('identifica a competência no nome do arquivo', () => {
     expect(periodFromFileName('RelatorioMensal_ALV_SET_SET2026_17.09.xls')).toEqual({ month: 'Setembro', year: 2026 });
   });

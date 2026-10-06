@@ -2154,3 +2154,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **O quê:** o sumário do PDF passa a incluir IVV e preços (páginas antes ausentes) e a ordenar VGV antes do horizontal pela paginação real. O cabeçalho “Variações anuais” fica alinhado à tabela, cujas colunas passam a ocupar a largura disponível conforme a quantidade de comparações.
 - **Verificação:** regressão do manifesto cobre integralmente as 69 páginas e a ordem das seções; 14 testes focados aprovados. Nova exportação autenticada ainda necessária para aceite visual.
 
+### 2026-10-06 — Sinduscon: quadros mensais e revisão de usos comerciais — Codex
+- **Ambiente/funcionalidade:** Sinduscon Curitiba, Liberados e CVCO.
+- **O quê:** agregações mensais por pavimento nas folhas 04/07; áreas por zona separadas das unidades nas folhas 05/08; restauração de totais mensais ausentes. Uso exclusivamente comercial com quantidade residencial ao menos três vezes maior que a não residencial segue para revisão humana, preservando ambas.
+- **Impacto em Etapas/Pendências:** regenerar a tabulação a partir da base acumulada antes do relatório, pois as novas agregações exigem quatro novas tabelas de dados. Reprocessar o arquivo bruto de agosto para recuperar quantidades excluídas pela regra anterior. Arquivos enviados no navegador não possuem logs centrais de processamento.
+- **Monday:** —
+

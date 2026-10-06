@@ -58,6 +58,10 @@ interface Aggregates {
   neighborhoodAreas: VectorMap;
   residentialZones: Map<string, number[]>;
   nonResidentialZones: Map<string, number[]>;
+  residentialZoneAreas: Map<string, number[]>;
+  nonResidentialZoneAreas: Map<string, number[]>;
+  residentialMonthlyFloors: Map<string, number[]>;
+  nonResidentialMonthlyFloors: Map<string, number[]>;
   history: Map<string, number[]>;
 }
 
@@ -231,6 +235,7 @@ function buildAggregates(headers: unknown[], matrix: unknown[][]): Aggregates {
   const result: Aggregates = {
     residentialArea: new Map(), residentialFloors: new Map(), nonResidentialArea: new Map(), nonResidentialFloors: new Map(),
     neighborhoodAreas: new Map(), residentialZones: new Map(), nonResidentialZones: new Map(), history: new Map(),
+    residentialZoneAreas: new Map(), nonResidentialZoneAreas: new Map(), residentialMonthlyFloors: new Map(), nonResidentialMonthlyFloors: new Map(),
   };
   const objects = rowObjects(headers, matrix);
   const reportYear = Math.max(...objects.map((row) => number(value(row, 'Ano'))).filter(Boolean));
@@ -257,6 +262,10 @@ function buildAggregates(headers: unknown[], matrix: unknown[][]): Aggregates {
       const monthKey = `${year}-${month + 1}`;
       addArray(result.residentialZones, monthKey, zoneBand(value(row, 'Grupo Zoneamento')), residential, 12);
       addArray(result.nonResidentialZones, monthKey, zoneBand(value(row, 'Grupo Zoneamento')), nonResidential, 12);
+      addArray(result.residentialZoneAreas, monthKey, zoneBand(value(row, 'Grupo Zoneamento')), residentialArea, 12);
+      addArray(result.nonResidentialZoneAreas, monthKey, zoneBand(value(row, 'Grupo Zoneamento')), nonResidentialArea, 12);
+      addArray(result.residentialMonthlyFloors, monthKey, floorBand(floors), residential, 3);
+      addArray(result.nonResidentialMonthlyFloors, monthKey, floorBand(floors), nonResidential, 3);
       addArray(result.history, monthKey, 0, residentialArea, 4);
       addArray(result.history, monthKey, 1, nonResidentialArea, 4);
       addArray(result.history, monthKey, 2, residential, 4);
@@ -290,6 +299,11 @@ function buildTabulation(aggregates: Aggregates) {
   const zoneRows = (map: Map<string, number[]>) => [['Período', ...ZONE_BANDS, 'Total'], ...[...map].sort(([a], [b]) => a.localeCompare(b)).map(([key, values]) => [key, ...values.map(blankZero), values.reduce((sum, item) => sum + item, 0)])];
   appendStyledSheet(workbook, 'Residencial por zona', zoneRows(aggregates.residentialZones));
   appendStyledSheet(workbook, 'Não resid. por zona', zoneRows(aggregates.nonResidentialZones));
+  appendStyledSheet(workbook, 'Área residencial por zona', zoneRows(aggregates.residentialZoneAreas));
+  appendStyledSheet(workbook, 'Área não resid. por zona', zoneRows(aggregates.nonResidentialZoneAreas));
+  const floorRows = (map: Map<string, number[]>) => [['Período', ...FLOOR_BANDS], ...[...map].sort(([a], [b]) => a.localeCompare(b)).map(([key, values]) => [key, ...values.map(blankZero)])];
+  appendStyledSheet(workbook, 'Resid. mensal por pavimento', floorRows(aggregates.residentialMonthlyFloors));
+  appendStyledSheet(workbook, 'Não resid. mensal pavimento', floorRows(aggregates.nonResidentialMonthlyFloors));
   appendStyledSheet(workbook, 'Série histórica', [['Período', 'Área residencial', 'Área não residencial', 'Unidades residenciais', 'Unidades não residenciais'], ...[...aggregates.history].sort(([a], [b]) => a.localeCompare(b)).map(([key, values]) => [key, ...values.map(blankZero)])]);
   return XLSX.write(workbook, { type: 'array', bookType: 'xlsx', compression: true }) as ArrayBuffer;
 }
@@ -321,6 +335,10 @@ function aggregatesFromTabulation(buffer: ArrayBuffer) {
     neighborhoodAreas: vectorMapFromSheet(workbook, 'Áreas por bairro', 2),
     residentialZones: periodMapFromSheet(workbook, 'Residencial por zona', 12),
     nonResidentialZones: periodMapFromSheet(workbook, 'Não resid. por zona', 12),
+    residentialZoneAreas: periodMapFromSheet(workbook, 'Área residencial por zona', 12),
+    nonResidentialZoneAreas: periodMapFromSheet(workbook, 'Área não resid. por zona', 12),
+    residentialMonthlyFloors: periodMapFromSheet(workbook, 'Resid. mensal por pavimento', 3),
+    nonResidentialMonthlyFloors: periodMapFromSheet(workbook, 'Não resid. mensal pavimento', 3),
     history: periodMapFromSheet(workbook, 'Série histórica', 4),
   } satisfies Aggregates;
 }
@@ -430,14 +448,28 @@ function updateReport(template: ArrayBuffer, aggregates: Aggregates, month: stri
     }
 
     if (/05.*resid.*zona/.test(name) || /08.*resid.*zona/.test(name)) {
-      const source = /05/.test(name) ? aggregates.residentialZones : aggregates.nonResidentialZones;
       for (const [reference, cell] of Object.entries(sheet)) {
         if (reference.startsWith('!') || typeof (cell as XLSX.CellObject).v !== 'string') continue;
         const monthIndex = MONTHS.findIndex((item) => normalize(item) === normalize((cell as XLSX.CellObject).v));
         if (monthIndex >= 0) {
           const address = XLSX.utils.decode_cell(reference);
+          if (address.c !== 1) continue;
+          const areaBlock = Object.entries(sheet).some(([ref, item]) => !ref.startsWith('!') && XLSX.utils.decode_cell(ref).r < address.r && /soma das areas/.test(normalize((item as XLSX.CellObject).v)));
+          const source = /05/.test(name)
+            ? (areaBlock ? aggregates.residentialZoneAreas : aggregates.residentialZones)
+            : (areaBlock ? aggregates.nonResidentialZoneAreas : aggregates.nonResidentialZones);
           setVector(changes, address.c + 1, address.r + 1, source.get(`${year}-${monthIndex + 1}`) ?? Array(12).fill(0));
         }
+      }
+    }
+
+    if (/04.*resid.*pav/.test(name) || /07.*resid.*pav/.test(name)) {
+      const source = /04/.test(name) ? aggregates.residentialMonthlyFloors : aggregates.nonResidentialMonthlyFloors;
+      for (const [reference, cell] of Object.entries(sheet)) {
+        if (reference.startsWith('!')) continue;
+        const address = XLSX.utils.decode_cell(reference);
+        const monthIndex = MONTHS.findIndex((item) => normalize(item) === normalize((cell as XLSX.CellObject).v));
+        if (address.c === 0 && monthIndex >= 0) setVector(changes, 1, address.r + 1, source.get(`${year}-${monthIndex + 1}`) ?? Array(3).fill(0));
       }
     }
 
@@ -448,6 +480,24 @@ function updateReport(template: ArrayBuffer, aggregates: Aggregates, month: stri
         if (!parsed) continue;
         const values = aggregates.history.get(`${parsed.y}-${parsed.m}`) ?? Array(4).fill(0);
         setVector(changes, 2, XLSX.utils.decode_cell(reference).r + 1, values);
+      }
+    }
+    // Restore the monthly row total if it is absent from a supplied template.
+    if (/0[4578].*resid/.test(name)) {
+      for (const [reference, cell] of Object.entries(sheet)) {
+        if (reference.startsWith('!')) continue;
+        const address = XLSX.utils.decode_cell(reference);
+        if (!MONTHS.some((item) => normalize(item) === normalize((cell as XLSX.CellObject).v))) continue;
+        const isZone = /0[58]/.test(name);
+        if (address.c !== (isZone ? 1 : 0)) continue;
+        const row = address.r + 1;
+        const total = `${isZone ? 'O' : 'E'}${row}`;
+        if (!sheet[total]?.f) {
+          const range = `${isZone ? 'C' : 'B'}${row}:${isZone ? 'N' : 'D'}${row}`;
+          const formula = `IF(SUM(${range}),SUM(${range}),"")`;
+          const values = Array.from({ length: isZone ? 12 : 3 }, (_, offset) => number(changes.get(`${ooxml.columnName(address.c + 1 + offset)}${row}`)));
+          changes.set(total, { formula, formulaCache: blankZero(values.reduce((sum, value) => sum + value, 0)) });
+        }
       }
     }
     refreshFormulaCaches(sheet, changes);
