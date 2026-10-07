@@ -92,3 +92,14 @@ src/features/panorama-secovi-fiergs/assets/correcao_v2/
 .secrets/*
 !.secrets/README.md
 !.secrets/geobrain.env.example
+
+# Materiais brutos e temporarios locais; registrar decisoes e derivados versionaveis.
+/.local-inputs/
+
+# Fontes e saidas locais de homologacao FIERGS; ativos finais do app ficam em src/features.
+/assets/Slides-Institucionais-Brain-2026.pptx
+/assets/panorama-fiergs-rs-*.pptx
+/assets/panorama-fiergs-rs-*.pdf
+
+# Decks brutos de revisao do corretor. As regras derivadas ficam nos docs versionados.
+/src/features/corretor/referencia_ajustes/
