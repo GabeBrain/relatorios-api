@@ -489,7 +489,7 @@ function availability(launched: number | null, final: number | null): number | n
 function buildCityComparisons(scope: PanoramaScope, cube: MarketCube, provenance: PanoramaProvenance, salesSources: CitySalesSource[]): PanoramaCityComparisons {
   const selected = scope.cities.filter(Boolean);
   const completed = new Set(provenance.completedCities);
-  const completeScope = selected.length >= 2 && provenance.failedCities.length === 0 && selected.every((city) => completed.has(city));
+  const completeScope = selected.length >= 1 && provenance.failedCities.length === 0 && selected.every((city) => completed.has(city));
   if (!completeScope) {
     return {
       enabled: false,
@@ -526,7 +526,7 @@ function buildCityComparisons(scope: PanoramaScope, cube: MarketCube, provenance
       return { city, availability: availability(launchedUnits, finalUnits) };
     }),
   }));
-  return { enabled: true, sales, market, availabilityByStandard };
+  return { enabled: selected.length >= 2, ...(selected.length < 2 ? { suppressionReason: 'O comparativo é exibido somente para recortes com duas ou mais cidades; os totais municipais permanecem na auditoria.' } : {}), sales, market, availabilityByStandard };
 }
 
 export function buildPanoramaReportModel(

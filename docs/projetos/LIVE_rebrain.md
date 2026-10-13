@@ -1,6 +1,7 @@
 ### 2026-10-13 — FIERGS: recortes livres — Gabriel / Codex
 - **Ambiente/funcionalidade:** Panorama Secovi/FIERGS; ampliação após aceite do preset informado por Gabriel.
 - **Mudança G0/G1:** identidade por conjunto completo/UF, cidades livres do catálogo autorizado, atalho das dez cidades e invalidação de coleta ao mudar escopo. Quatro testes locais aprovados. Fundação SE v0.1 scoped nos controles; arte do estudo preservada.
+- **G2:** vendas municipais disponíveis para cidade única mesmo sem comparativo visual; contagens de universo vazio somente com cobertura completa do cubo. 43 testes locais aprovados; fixtures sintéticas 2T2026/4T2025 fecham todas as guardas, coleta incompleta/dimensão faltante continuam bloqueadas. Commit G1 `9a04d06`; geração real segue pendente.
 - **Evidência:** [plano](../features/Relatorios%20Secovi_FIERGS/PLAN_FIERGS_RECORTES_LIVRES_2026-10-13.md) e [portões](../features/Relatorios%20Secovi_FIERGS/EVIDENCIAS_FIERGS_RECORTES_LIVRES_2026-10-13.md).
 - **Etapas/Pendências:** implementação local em andamento G2–G4; publicação autorizada e ensaio de Gabriel G5 pendentes. Aceite anterior não implica aceite de novos recortes. Nenhum e-mail enviado.
 - **Monday:** [Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.

@@ -38,6 +38,9 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
   const period = input.scope.endQuarter;
   const vertical = input.cube.projects.filter((project) => project.segment === 'Vertical');
   const horizontal = input.cube.projects.filter((project) => project.segment === 'Horizontal');
+  // Zero só representa universo vazio quando o cubo comprova coleta de todas as cidades.
+  // Não altera valores ausentes de projetos existentes nem preços sem observação.
+  const completeCube = input.scope.cities.length > 0 && input.scope.cities.every((city) => input.cube.cities?.includes(city));
   const canonicalSales = nullableSum(vertical.map((project) => project.soldUnits));
   const canonicalLaunched = nullableSum(vertical.map((project) => project.launchedUnits));
   const canonicalStock = nullableSum(vertical.map((project) => project.finalUnits));
@@ -73,26 +76,31 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
   const renderedProjectKeys = new Set(input.locations.map((location) => location.projectKey).filter(Boolean)).size;
   const universe = `fiergs-rs · ${input.scope.uf} · ${input.scope.cities.join(', ')} · Vertical`;
   const horizontalUniverse = `fiergs-rs · ${input.scope.uf} · ${input.scope.cities.join(', ')} · Horizontal homologável`;
-  const countRow = (metricId: string, source: string, formula: string, canonicalTotal: number | null, dimensionalTotal: number | null, rowUniverse = universe) => row({
-    metricId, source, formula, universe: rowUniverse, period, canonicalTotal, dimensionalTotal, tolerance: 0, critical: true,
+  const countRow = (metricId: string, source: string, formula: string, canonicalTotal: number | null, dimensionalTotal: number | null, rowUniverse = universe, projects = vertical) => row({
+    metricId, source,
+    formula: completeCube && projects.length === 0 ? `${formula} Universo vazio confirmado pelo cubo completo: contagem zero.` : formula,
+    universe: rowUniverse, period,
+    canonicalTotal: canonicalTotal ?? (completeCube && projects.length === 0 ? 0 : null),
+    dimensionalTotal: dimensionalTotal ?? (completeCube && projects.length === 0 ? 0 : null),
+    tolerance: 0, critical: true,
   });
   const rows = [
     countRow('sales.vertical.pattern', input.sales.units.source, 'Soma do fechamento vertical por padrão.', canonicalSales, closingVertical(input.sales.units, period)),
     countRow('sales.vertical.typology', input.sales.unitsByTypology.source, 'Soma do fechamento vertical por tipologia.', canonicalSales, closingVertical(input.sales.unitsByTypology, period)),
-    countRow('sales.vertical.city', 'comparativo municipal derivado do cubo granular', 'Soma das vendas verticais das cidades concluídas.', canonicalSales, input.cityComparisons.enabled ? nullableSum(input.cityComparisons.sales.map((item) => item.liquidSales)) : null),
+    countRow('sales.vertical.city', 'agregado municipal derivado do cubo granular', 'Soma das vendas verticais das cidades concluídas, inclusive cidade única.', canonicalSales, nullableSum(input.cityComparisons.sales.map((item) => item.liquidSales))),
     countRow('sales.vertical.area', 'cubo granular / faixas de área', 'Soma das vendas por faixa de área útil.', canonicalSales, areaTotal?.soldUnits ?? null),
     countRow('launch.vertical.pattern_table', 'cubo granular / padrão', 'Soma das linhas visíveis de oferta lançada por padrão.', canonicalLaunched, visibleSum(input.granular.offerByStandard, (item) => item.launchedUnits)),
     countRow('launch.vertical.typology_table', 'cubo granular / tipologia', 'Soma das linhas visíveis de oferta lançada por tipologia, incluindo Não classificado.', canonicalLaunched, visibleSum(input.granular.offerByTypology, (item) => item.launchedUnits)),
     countRow('launch.vertical.maturity_pattern', 'cubo granular / maturidade por padrão', 'Soma das linhas visíveis de oferta lançada por estágio e padrão.', canonicalLaunched, visibleSum(input.granular.maturityByStandard, (item) => item.launched.total)),
     countRow('launch.vertical.maturity_typology', 'cubo granular / maturidade por tipologia', 'Soma das linhas visíveis de oferta lançada por estágio e tipologia, incluindo Não classificado.', canonicalLaunched, visibleSum(input.granular.maturityByTypology, (item) => item.launched.total)),
     ...(window ? [
-      countRow('launch.window.vertical.pattern', 'cubo granular / janela editorial', 'Soma por padrão dos empreendimentos lançados na janela.', windowLaunchVertical, visibleSum(window.offerByStandard, (item) => item.launchedUnits)),
-      countRow('launch.window.vertical.typology', 'cubo granular / janela editorial', 'Soma por tipologia dos empreendimentos lançados na janela, incluindo residual real.', windowLaunchVertical, visibleSum(window.offerByTypology, (item) => item.launchedUnits)),
-      countRow('launch.window.vertical.maturity_pattern', 'cubo granular / janela editorial', 'Soma por maturidade e padrão dos lançamentos na janela.', windowLaunchVertical, visibleSum(window.maturityByStandard, (item) => item.launched.total)),
-      countRow('launch.window.vertical.maturity_typology', 'cubo granular / janela editorial', 'Soma por maturidade e tipologia dos lançamentos na janela.', windowLaunchVertical, visibleSum(window.maturityByTypology, (item) => item.launched.total)),
-      countRow('launch.window.horizontal.cohort', 'cubo granular / janela editorial', 'Soma dos lançamentos horizontais por coorte na janela.', windowLaunchHorizontal, totalOf(window.cohortsHorizontal)?.launchedUnits ?? null, horizontalUniverse),
-      countRow('projects.window.vertical.pattern', 'cubo granular / janela editorial', 'Empreendimentos verticais lançados na janela.', windowVertical.length, totalOf(window.offerByStandard)?.projects ?? null),
-      countRow('projects.window.horizontal.cohort', 'cubo granular / janela editorial', 'Empreendimentos horizontais lançados na janela.', windowHorizontal.length, totalOf(window.cohortsHorizontal)?.projects ?? null, horizontalUniverse),
+      countRow('launch.window.vertical.pattern', 'cubo granular / janela editorial', 'Soma por padrão dos empreendimentos lançados na janela.', windowLaunchVertical, visibleSum(window.offerByStandard, (item) => item.launchedUnits), universe, windowVertical),
+      countRow('launch.window.vertical.typology', 'cubo granular / janela editorial', 'Soma por tipologia dos empreendimentos lançados na janela, incluindo residual real.', windowLaunchVertical, visibleSum(window.offerByTypology, (item) => item.launchedUnits), universe, windowVertical),
+      countRow('launch.window.vertical.maturity_pattern', 'cubo granular / janela editorial', 'Soma por maturidade e padrão dos lançamentos na janela.', windowLaunchVertical, visibleSum(window.maturityByStandard, (item) => item.launched.total), universe, windowVertical),
+      countRow('launch.window.vertical.maturity_typology', 'cubo granular / janela editorial', 'Soma por maturidade e tipologia dos lançamentos na janela.', windowLaunchVertical, visibleSum(window.maturityByTypology, (item) => item.launched.total), universe, windowVertical),
+      countRow('launch.window.horizontal.cohort', 'cubo granular / janela editorial', 'Soma dos lançamentos horizontais por coorte na janela.', windowLaunchHorizontal, totalOf(window.cohortsHorizontal)?.launchedUnits ?? null, horizontalUniverse, windowHorizontal),
+      countRow('projects.window.vertical.pattern', 'cubo granular / janela editorial', 'Empreendimentos verticais lançados na janela.', windowVertical.length, totalOf(window.offerByStandard)?.projects ?? null, universe, windowVertical),
+      countRow('projects.window.horizontal.cohort', 'cubo granular / janela editorial', 'Empreendimentos horizontais lançados na janela.', windowHorizontal.length, totalOf(window.cohortsHorizontal)?.projects ?? null, horizontalUniverse, windowHorizontal),
     ] : []),
     countRow('stock.vertical.pattern', input.stock.units.source, 'Soma da oferta final vertical por padrão.', canonicalStock, closingVertical(input.stock.units, period)),
     countRow('stock.vertical.typology', input.stock.unitsByTypology.source, 'Soma da oferta final vertical por tipologia.', canonicalStock, closingVertical(input.stock.unitsByTypology, period)),
@@ -109,18 +117,18 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
     countRow('residual.vertical.typology.sold.negative', 'cubo granular / tipologia', 'Magnitude da sobrecobertura tipológica por empreendimento nas vendas; esperado zero.', 0, negativeTypologyResidual('soldUnits')),
     countRow('projects.vertical.price_pattern', 'cubo granular / preços por padrão', 'Empreendimentos usados na ponderação de preços por padrão.', vertical.length, priceStandardTotal?.projects ?? null),
     countRow('projects.vertical.price_typology', 'cubo granular / preços por tipologia', 'Empreendimentos usados na ponderação de preços por tipologia.', vertical.length, priceTypologyTotal?.projects ?? null),
-    countRow('horizontal.projects.cohort', 'cubo granular / coortes horizontais', 'Empreendimentos distintos por coorte.', horizontalProjects, cohortTotal?.projects ?? null, horizontalUniverse),
-    countRow('horizontal.launched.cohort', 'cubo granular / coortes horizontais', 'Soma da oferta lançada horizontal por coorte.', horizontalLaunched, cohortTotal?.launchedUnits ?? null, horizontalUniverse),
-    countRow('horizontal.final.cohort', 'cubo granular / coortes horizontais', 'Soma da oferta final horizontal por coorte.', horizontalFinal, cohortTotal?.finalUnits ?? null, horizontalUniverse),
-    countRow('horizontal.projects.consolidated', 'cubo granular / consolidado VGV', 'Empreendimentos distintos no subtotal horizontal consolidado.', horizontalProjects, horizontalVgvSubtotal?.projects ?? null, horizontalUniverse),
-    countRow('horizontal.launched.consolidated', 'cubo granular / consolidado VGV', 'Oferta lançada no subtotal horizontal na janela selecionada.', window ? (windowHorizontal.length ? windowLaunchHorizontal : 0) : horizontalLaunched, horizontalVgvSubtotal?.launchedUnits ?? null, horizontalUniverse),
+    countRow('horizontal.projects.cohort', 'cubo granular / coortes horizontais', 'Empreendimentos distintos por coorte.', horizontalProjects, cohortTotal?.projects ?? null, horizontalUniverse, horizontal),
+    countRow('horizontal.launched.cohort', 'cubo granular / coortes horizontais', 'Soma da oferta lançada horizontal por coorte.', horizontalLaunched, cohortTotal?.launchedUnits ?? null, horizontalUniverse, horizontal),
+    countRow('horizontal.final.cohort', 'cubo granular / coortes horizontais', 'Soma da oferta final horizontal por coorte.', horizontalFinal, cohortTotal?.finalUnits ?? null, horizontalUniverse, horizontal),
+    countRow('horizontal.projects.consolidated', 'cubo granular / consolidado VGV', 'Empreendimentos distintos no subtotal horizontal consolidado.', horizontalProjects, horizontalVgvSubtotal?.projects ?? null, horizontalUniverse, horizontal),
+    countRow('horizontal.launched.consolidated', 'cubo granular / consolidado VGV', 'Oferta lançada no subtotal horizontal na janela selecionada.', window ? (windowHorizontal.length ? windowLaunchHorizontal : 0) : horizontalLaunched, horizontalVgvSubtotal?.launchedUnits ?? null, horizontalUniverse, horizontal),
     ...(window ? ['Vertical', 'Horizontal', 'Total'].map((segment) => {
       const projects = [...windowVertical, ...windowHorizontal].filter((project) => segment === 'Total' || project.segment === segment);
       const displayed = input.granular.vgv.filter((item) => item.kind === 'row' && (segment === 'Total' || item.segment === segment));
       return countRow(`launch.window.vgv.${segment.toLowerCase()}`, 'cubo granular / janela / VGV', 'Linhas de oferta lançada do VGV fecham com a janela selecionada.', projects.length ? nullableSum(projects.map((project) => project.launchedUnits)) : 0, displayed.length ? nullableSum(displayed.map((item) => item.launchedUnits)) : 0, `${horizontalUniverse} + Vertical`);
     }) : []),
-    countRow('horizontal.final.consolidated', 'cubo granular / consolidado VGV', 'Soma da oferta final no subtotal horizontal consolidado.', horizontalFinal, horizontalVgvSubtotal?.finalUnits ?? null, horizontalUniverse),
-    countRow('horizontal.chacaras.runtime', 'política de entidade fiergs-rs', 'Contagem de projetos condominio_chacaras presentes após o filtro.', 0, horizontal.filter((project) => project.horizontalSubtype === 'condominio_chacaras').length, horizontalUniverse),
+    countRow('horizontal.final.consolidated', 'cubo granular / consolidado VGV', 'Soma da oferta final no subtotal horizontal consolidado.', horizontalFinal, horizontalVgvSubtotal?.finalUnits ?? null, horizontalUniverse, horizontal),
+    countRow('horizontal.chacaras.runtime', 'política de entidade fiergs-rs', 'Contagem de projetos condominio_chacaras presentes após o filtro.', 0, horizontal.filter((project) => project.horizontalSubtype === 'condominio_chacaras').length, horizontalUniverse, horizontal),
     countRow('map.projects.unique', 'cubo granular / chave canônica', 'Cada linha do cubo representa uma única chave de empreendimento.', uniqueProjectKeys, input.cube.projects.length, `${horizontalUniverse} + Vertical`),
     countRow('map.projects.rendered', 'cubo granular / coordenadas válidas', 'Empreendimentos únicos com coordenada válida renderizados nos três mapas.', georeferencedProjectKeys, renderedProjectKeys, `${horizontalUniverse} + Vertical`),
   ];

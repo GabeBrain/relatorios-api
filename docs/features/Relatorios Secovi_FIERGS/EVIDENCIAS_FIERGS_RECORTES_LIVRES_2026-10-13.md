@@ -13,3 +13,11 @@
 Contrato central em `scope-identity.ts`: modo/preset, UF, nomes completos, rótulos, chave territorial e slug determinístico. Outros estados autorizados são permitidos, uma UF por estudo. Seleção depende de autorização de todos os municípios, mantendo atalho regional.
 
 Quatro testes de identidade/autorização aprovados. UF/cidade bloqueadas somente durante coleta/carregamento; troca de UF limpa cidades e sessão; alterações de recorte/período invalidam submissão. Tokens SE v0.1 copiados, raio/foco limitados aos controles, sem redesign do deck. Testes de interface e revisão TypeScript integram G4; não há geração/site verificados neste portão.
+
+## G2 — reconciliação (validado localmente)
+
+Agregados municipais preservados para N=1, separados do sinal visual `enabled`. Ausência de segmento/janela só admite contagem zero quando todas as cidades estão no cubo; dados nulos de empreendimentos existentes continuam indisponíveis. Resposta vazia de API não foi reclassificada como sucesso: falta evidência de contrato para relaxar coleta.
+
+43 testes locais aprovados (modelo, guardas existentes, recortes sintéticos), incluindo períodos 2T2026 e 4T2025. Matriz sintética, por período: cidade Canoas/vertical V = lançadas 100, final 30, vendas 5; municipal 5 × canônico 5, delta 0. Horizontal ausente confirmado = 0 × 0. Preset dez cidades com um V e um H por cidade = 20 projetos, vertical lançado 1.000, horizontal lançado 500, vendas verticais 50, todas as guardas match. Janela vazia com projetos de 2022 preserva estoque histórico e reconcilia lançamentos zero. Venda -2 e estoque 0 preservados. Cidade Esteio faltante mantém bloqueio; dimensão tipológica retirada de projeto presente continua indisponível.
+
+Esses números pertencem à fixture versionada e não à base real da Juliana. Portão numérico local aprovado antes da edição dos slides. Commit G1 `9a04d06`.
