@@ -1,6 +1,6 @@
 # Plano — FIERGS em cidade isolada ou conjunto de cidades
 
-Data: 13/10/2026. Estado: preparado; execução ainda não iniciada.
+Data: 13/10/2026. Estado: G0–G4 implementados e validados localmente; G5 publicação/ensaio real e G6 comunicação pendentes. Typecheck global tem falha externa no Corretor; feature isolada e build aprovados. Evidências em [registro dos portões](EVIDENCIAS_FIERGS_RECORTES_LIVRES_2026-10-13.md).
 
 ## Objetivo e baseline
 

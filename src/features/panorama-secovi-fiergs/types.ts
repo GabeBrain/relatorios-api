@@ -1,6 +1,7 @@
 import type { EntityId } from './domain/entity-policy';
 import type { AreaBandRow, CohortMatrix, MaturityRow, OfferRow, PriceRow, VgvRow } from './domain/aggregations';
 import type { MarketCube } from './domain/cube';
+import { panoramaScopeIdentity } from './scope-identity';
 
 export type { EntityId };
 
@@ -43,10 +44,16 @@ export function scopeCitySlug(scope: Pick<PanoramaScope, 'cities'>): string {
 }
 
 /** Identifica presets institucionais no arquivo exportado; recortes livres mantêm o slug municipal. */
-export function scopeFileSlug(scope: Pick<PanoramaScope, 'cities' | 'entity'>): string {
+export function scopeFileSlug(scope: Pick<PanoramaScope, 'cities' | 'entity'> & Partial<Pick<PanoramaScope, 'uf'>>): string {
   if (scope.entity === 'secovi-sp') return 'secovi-sp';
-  if (scope.entity === 'fiergs-rs') return 'fiergs-rs';
+  if (scope.entity === 'fiergs-rs') return panoramaScopeIdentity({ ...scope, uf: scope.uf ?? '' }).fileSlug;
   return scopeCitySlug(scope);
+}
+
+/** Nome aprovado do preset permanece; recortes personalizados identificam a janela completa. */
+export function scopeExportPeriod(scope: PanoramaScope): string {
+  return scope.entity === 'fiergs-rs' && !panoramaScopeIdentity(scope).official && scope.startQuarter && scope.startQuarter !== scope.endQuarter
+    ? `${scope.startQuarter}-${scope.endQuarter}` : scope.endQuarter;
 }
 
 /** Proveniência do consolidado multi-cidade: o que foi pedido, o que fechou e o que falhou. */

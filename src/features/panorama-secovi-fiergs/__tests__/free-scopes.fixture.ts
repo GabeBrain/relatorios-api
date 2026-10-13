@@ -3,12 +3,12 @@ import { buildPanoramaReportModel } from '../report/model';
 import type { PanoramaScope } from '../types';
 
 /** Fixture sintética: não representa os totais históricos do estudo da Juliana. */
-export function freeScopeReport(scope: PanoramaScope, options: { horizontal?: boolean; vertical?: boolean; failedCity?: string; releaseDate?: string; sold?: number; final?: number; unknownProduct?: boolean } = {}) {
+export function freeScopeReport(scope: PanoramaScope, options: { horizontal?: boolean; vertical?: boolean; failedCity?: string; releaseDate?: string; sold?: number; final?: number; unknownProduct?: boolean; coordinates?: boolean } = {}) {
   const date = scope.endQuarter === '4T2025' ? '2025-12-01' : '2026-06-01';
   const building = (id: string, type: string, standard: string, units: number) => ({
     building_id: id, name: id, building_type: type, standard,
     release_date: options.releaseDate ?? '2025-10-01', total_units: units,
-    latitude: -29.9, longitude: -51.1, neighborhood: 'Centro',
+    latitude: options.coordinates === false ? null : -29.9, longitude: options.coordinates === false ? null : -51.1, neighborhood: 'Centro',
     typologies_history: [
       { period: options.releaseDate ?? '2025-10-01', number_bedroom: '2', qty: units, release_price: 300000, private_area: 50 },
       { period: date, number_bedroom: '2', typology_stock: options.final ?? 30, liquid_sales: options.sold ?? 5, price: 350000, private_area: 50 },

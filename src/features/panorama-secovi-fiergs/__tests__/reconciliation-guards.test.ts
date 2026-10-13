@@ -203,6 +203,11 @@ describe('FIERGS · guardas canônicas de reconciliação', () => {
     expect(csv).toContain('sales.vertical.pattern');
     expect(csv).toContain('2T2026;50;50;0;0;match;true');
     expect(csv).toContain('coleta_cidade;Canoas');
-    expect(csv.split('\r\n').some((line) => line.startsWith('coleta_operacao;Canoas;') && line.includes(';sales;') && line.endsWith(';4;80'))).toBe(true);
+    const lines = csv.replace(/^\uFEFF/, '').split('\r\n').map((line) => line.split(';'));
+    const headers = lines[0];
+    const operation = lines.find((line) => line[0] === 'coleta_operacao');
+    expect(operation?.[headers.indexOf('operacao_coleta')]).toBe('sales');
+    expect(operation?.[headers.indexOf('requisicoes')]).toBe('4');
+    expect(operation?.[headers.indexOf('duracao_ms')]).toBe('80');
   });
 });

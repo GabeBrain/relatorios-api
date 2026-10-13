@@ -5,7 +5,7 @@ import { PanoramaExportDeck } from './ReportPaginator';
 import { synchronizeOfficialCoverCity } from '../lib/official-cover';
 import { buildPanoramaPdf, buildPanoramaPptx, PanoramaExportCancelled } from '../lib/pdf-export';
 import { panoramaExportBlockReason, usePanoramaExportStore, type PanoramaExportFormat } from '../export-store';
-import { scopeCityLabel, scopeFileSlug } from '../types';
+import { scopeCityLabel, scopeFileSlug, scopeExportPeriod } from '../types';
 import { panoramaExportMetadata } from '../lib/export-metadata';
 
 /**
@@ -50,7 +50,7 @@ export default function PanoramaExportHost() {
           if (current === pages) live.markAssembling();
         }, signal);
         if (signal?.aborted) return;
-        const name = `panorama-${scopeFileSlug(report.scope)}-${report.scope.endQuarter}.${format}`;
+        const name = `panorama-${scopeFileSlug(report.scope)}-${scopeExportPeriod(report.scope)}.${format}`;
         const url = URL.createObjectURL(built.blob);
         const link = document.createElement('a');
         link.href = url; link.download = name; link.rel = 'noopener';

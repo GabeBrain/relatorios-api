@@ -47,4 +47,22 @@ describe('FIERGS — cidade única e universos vazios confirmados', () => {
     expect(report.reconciliation.rows.find((row) => row.metricId === 'stock.vertical.typology_table')?.status).toBe('unavailable');
     expect(panoramaExportBlockReason(report)).toContain('stock.vertical.typology_table');
   });
+  it('cidade com apenas horizontal não exige observações de vertical inexistente', () => {
+    const report = freeScopeReport(scope, { vertical: false, horizontal: true });
+    expect(report.reconciliation.rows.filter((row) => row.status !== 'match')).toEqual([]);
+    expect(panoramaExportBlockReason(report)).toBeNull();
+  });
+  it('mantém rejeição de produto desconhecido rastreável, sem inferir casas pelo nome', () => {
+    const report = freeScopeReport(scope, { unknownProduct: true });
+    expect(report.cube.projects.some((project) => project.buildingId === 'UNKNOWN')).toBe(false);
+    expect(report.cube.rejections.find((item) => item.buildingId === 'UNKNOWN')?.reason).toBe('subtipo_horizontal_indefinido');
+    expect(report.notices.some((notice) => notice.code === 'UNCLASSIFIED_PRODUCTS_EXCLUDED')).toBe(true);
+  });
+  it('ausência de coordenadas não altera unidades e fica nos avisos', () => {
+    const report = freeScopeReport(scope, { coordinates: false });
+    expect(report.locations).toEqual([]);
+    expect(report.granular.offerByStandard.at(-1)?.launchedUnits).toBe(100);
+    expect(report.notices.some((notice) => notice.code === 'MAP_PAGES_OMITTED')).toBe(true);
+    expect(report.reconciliation.rows.filter((row) => row.status !== 'match')).toEqual([]);
+  });
 });

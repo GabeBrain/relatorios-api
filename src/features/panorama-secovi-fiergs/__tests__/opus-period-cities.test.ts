@@ -81,7 +81,7 @@ describe('OP-3 · rótulo e slug determinísticos do recorte multi-cidade', () =
 
   it('nomeia downloads dos presets pela entidade, sem expor a lista de cidades', () => {
     expect(scopeFileSlug({ entity: 'secovi-sp', cities: ['Jundiaí'] })).toBe('secovi-sp');
-    expect(scopeFileSlug({ entity: 'fiergs-rs', cities: ['Alvorada', 'Canoas', 'Viamão'] })).toBe('fiergs-rs');
+    expect(scopeFileSlug({ entity: 'fiergs-rs', uf: 'RS', cities: ['Alvorada', 'Canoas', 'Viamão'] })).toBe('fiergs-rs-alvorada-canoas-viamao');
     expect(scopeFileSlug({ cities: ['Jundiaí'] })).toBe('jundiai');
   });
 });

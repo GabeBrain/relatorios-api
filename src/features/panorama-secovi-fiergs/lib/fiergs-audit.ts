@@ -1,6 +1,8 @@
 import type { PanoramaReportModel } from '../types';
+import { scopeExportPeriod, scopeFileSlug } from '../types';
+import { panoramaScopeIdentity } from '../scope-identity';
 
-const columns = ['tipo_registro','cidade','building_id','empreendimento','segmento','subtipo_horizontal','padrao','trimestre_lancamento','unidades_lancadas','unidades_vendidas','oferta_final','vgv_lancado_milhoes','ticket_medio','area_media','preco_m2','cobertura','motivo_rejeicao','metrica','fonte','formula','universo','periodo_observado','total_canonico','total_dimensional','delta','tolerancia','status','critico','codigo_aviso','severidade','paginas_afetadas','slides_oficiais_afetados','decisao_exibicao','operacao_coleta','tentativas','requisicoes','duracao_ms'] as const;
+const columns = ['tipo_registro','cidade','building_id','empreendimento','segmento','subtipo_horizontal','padrao','trimestre_lancamento','unidades_lancadas','unidades_vendidas','oferta_final','vgv_lancado_milhoes','ticket_medio','area_media','preco_m2','cobertura','motivo_rejeicao','metrica','fonte','formula','universo','periodo_observado','total_canonico','total_dimensional','delta','tolerancia','status','critico','codigo_aviso','severidade','paginas_afetadas','slides_oficiais_afetados','decisao_exibicao','operacao_coleta','tentativas','requisicoes','duracao_ms','gerado_em','uf_recorte','modo_recorte','preset_id','cidades_recorte','inicio_recorte','fim_recorte'] as const;
 
 function cell(value: unknown): string {
   if (value === null || value === undefined) return '';
@@ -10,6 +12,13 @@ function cell(value: unknown): string {
 
 /** Evidência operacional para reconciliar o fechamento com o analista, sem alterar o relatório. */
 export function buildFiergsAuditCsv(report: PanoramaReportModel): string {
+  const identity = report.scope ? panoramaScopeIdentity(report.scope) : null;
+  const scopeRows = identity ? [{ tipo_registro: 'escopo_geracao', cidade: identity.cityList,
+    metrica: identity.presetId ?? 'recorte_personalizado', fonte: 'Escopo e proveniência da geração',
+    universo: `${report.scope.entity ?? 'secovi-sp'} · ${identity.uf} · ${identity.cityList}`,
+    periodo_observado: `${report.scope.startQuarter ?? 'histórico'}–${report.scope.endQuarter}`,
+    status: identity.mode, cobertura: report.dataState,
+    formula: 'Seleção explícita de municípios em uma única UF; modo oficial somente por igualdade do conjunto.' }] : [];
   const projectRows = report.cube.projects.map((project) => ({
     tipo_registro: 'empreendimento', cidade: project.city, building_id: project.buildingId, empreendimento: project.name,
     segmento: project.segment, subtipo_horizontal: project.horizontalSubtype, padrao: project.standard,
@@ -42,8 +51,10 @@ export function buildFiergsAuditCsv(report: PanoramaReportModel): string {
     tipo_registro: 'coleta_operacao', cidade: item.city, operacao_coleta: item.operation,
     requisicoes: item.requests, duracao_ms: item.durationMs,
   }));
-  const rows: Record<string, unknown>[] = [...projectRows, ...rejectionRows, ...reconciliationRows, ...noticeRows, ...recoveredRows, ...collectionMetricRows];
-  return `\uFEFF${columns.join(';')}\r\n${rows.map((row) => columns.map((column) => cell(row[column])).join(';')).join('\r\n')}`;
+  const rows: Record<string, unknown>[] = [...scopeRows, ...projectRows, ...rejectionRows, ...reconciliationRows, ...noticeRows, ...recoveredRows, ...collectionMetricRows];
+  const context = identity ? { gerado_em: report.generatedAt, uf_recorte: identity.uf, modo_recorte: identity.mode,
+    preset_id: identity.presetId, cidades_recorte: identity.cityList, inicio_recorte: report.scope.startQuarter, fim_recorte: report.scope.endQuarter } : {};
+  return `\uFEFF${columns.join(';')}\r\n${rows.map((row) => columns.map((column) => cell(({ ...context, ...row } as Record<string, unknown>)[column])).join(';')).join('\r\n')}`;
 }
 
 export function downloadFiergsAudit(report: PanoramaReportModel): void {
@@ -51,7 +62,12 @@ export function downloadFiergsAudit(report: PanoramaReportModel): void {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = `auditoria-fiergs-${report.scope.endQuarter.toLowerCase()}.csv`;
+  anchor.download = fiergsAuditFilename(report);
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+export function fiergsAuditFilename(report: Pick<PanoramaReportModel, 'scope'>): string {
+  return panoramaScopeIdentity(report.scope).official ? `auditoria-fiergs-${report.scope.endQuarter.toLowerCase()}.csv`
+    : `auditoria-${scopeFileSlug(report.scope)}-${scopeExportPeriod(report.scope).toLowerCase()}.csv`;
 }

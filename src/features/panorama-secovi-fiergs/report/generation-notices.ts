@@ -141,6 +141,10 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
   }
 
   if (report.scope.entity === 'fiergs-rs') {
+    const unknownProducts = report.cube.rejections.filter((item) => item.reason === 'subtipo_horizontal_indefinido' || item.reason === 'segmento_desconhecido');
+    if (unknownProducts.length) add({ code: 'UNCLASSIFIED_PRODUCTS_EXCLUDED', severity: 'warning', indicator: 'Classificação de produtos',
+      reason: `${unknownProducts.length} empreendimento(s) recusado(s) por falta de classificação autoritativa, nas cidades ${[...new Set(unknownProducts.map((item) => item.city))].join(', ')}.`,
+      source: 'Política FIERGS e rejeições do cubo', displayDecision: 'Itens não entram em produtos por inferência; IDs e motivos permanecem no CSV para revisão da fonte.' });
     const activeSlides = new Set(panoramaManifestFor(report).map((page) => page.fiergsOfficialSlide));
     const omittedSlides = createFiergsReportManifest(true).filter((page) => !activeSlides.has(page.fiergsOfficialSlide)).map((page) => page.fiergsOfficialSlide!);
     if (omittedSlides.length) add({ code: 'SCOPE_EDITORIAL_PAGES_OMITTED', severity: 'info', indicator: 'Páginas aplicáveis ao recorte',
@@ -149,7 +153,8 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     if (report.scope.cities.length > 10) add({ code: 'CITY_PAGES_PAGINATED', severity: 'info', indicator: 'Recorte municipal',
       reason: `${report.scope.cities.length} municípios: lista territorial e comparativos foram divididos em páginas para preservar todos os municípios.`,
       source: 'Escopo selecionado e manifesto', displayDecision: 'Cada página municipal conserva o denominador do conjunto completo.', officialSlides: [7, 19, 31] });
-    const missingCoordinates = report.cube.projects.filter((project) => !report.locations.some((location) => location.projectKey === project.key));
+    const locationKeys = new Set(report.locations.map((location) => location.projectKey));
+    const missingCoordinates = report.cube.projects.filter((project) => !locationKeys.has(project.key));
     if (report.locations.length && missingCoordinates.length) add({ code: 'MAP_COORDINATE_COVERAGE_PARTIAL', severity: 'warning', indicator: 'Cobertura geográfica',
       reason: `${missingCoordinates.length} empreendimento(s) sem coordenada utilizável; permanecem nos indicadores.`,
       source: 'Cubo e marcadores geográficos', displayDecision: 'Os mapas mostram apenas coordenadas válidas; contagens e estoque mantêm todo o universo.', officialSlides: [67, 68, 69] });
