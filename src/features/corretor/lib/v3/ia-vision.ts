@@ -686,7 +686,13 @@ export function analyzeVisionPayload(
     // 6) erro de digitação nos rótulos de faixa (cabeçalhos e linhas)
     const typos = labelTypos([...ext.columns, ...rowLabels(ext)]);
     for (const issue of typos) textIssues.push(issue);
-    for (const issue of literalFormatIssues([...ext.columns.map(String), ...rowLabels(ext)])) cellIssues.push(issue);
+    const literalIssues = literalFormatIssues([...ext.columns.map(String), ...rowLabels(ext)]);
+    for (const issue of literalIssues) cellIssues.push(issue);
+    ext.columns.forEach((column, index) => {
+      for (const issue of literalFormatIssues(ext.rows.map(row => String(row[index] ?? '')), 'coluna', String(column))) {
+        if (!literalIssues.some(prior => prior.text === issue.text && prior.reason === issue.reason)) cellIssues.push(issue);
+      }
+    });
     for (const issue of fmtIssues) cellIssues.push(issue);
 
     if (!flagged) tablesVerified++;

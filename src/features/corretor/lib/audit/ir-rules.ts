@@ -350,7 +350,7 @@ export function nativeFormatFindings(ir: Ir): Finding[] {
       ...(s.tabelas ?? []).flatMap((t) => {
         const width = Math.max(0, ...t.linhas.map((r) => r.length));
         const columns = Array.from({ length: width }, (_, c) => t.linhas.map((r) => r[c] ?? '').filter(Boolean));
-        return columns.flatMap((col) => literalFormatIssues(col, 'tabela do slide'));
+        return columns.flatMap((col) => literalFormatIssues(col, 'tabela do slide', col[0]));
       }),
     ];
     if (!issues.length) continue;

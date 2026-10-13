@@ -30,7 +30,7 @@ export function fichasOf(ir: Ir): Ficha[] {
   for (const s of ir.slides) for (const text of s.textos ?? []) {
     if (!FICHA_LANCADA.test(text)) continue;
     const nome = text.split('\n')[0].split(/\s[-–]\s/)[0].trim();
-    if (!nome || nome.length > 40) continue;
+    if (!nome || nome.length > 40 || /^(bairro|regiao|zona|total|municipio|cidade)\b/.test(norm(nome))) continue;
     const plantas = [...text.matchAll(FICHA_PLANTA)].map((m) => ({ m2: num(m[1]), precoM2: num(m[2]) }));
     const lancada = FICHA_LANCADA.exec(text)?.[1], final = FICHA_FINAL.exec(text)?.[1];
     out.push({ slide: s.n, nome, lancada: lancada ? num(lancada) : undefined, final: final ? num(final) : undefined, plantas });

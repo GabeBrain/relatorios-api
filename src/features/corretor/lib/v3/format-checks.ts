@@ -109,11 +109,15 @@ const DOUBLED_DECIMAL = /\d,\d{2},\d{2}(?!\d)/;
 const DOUBLE_SPACE_VALUE = /R\$ {2,}\d|\d {2,}\d/;
 const UPPER_BOUND = /\ba\s*R?\$?\s*[\d.]+,(\d{2})\s*$/i;
 
-export function literalFormatIssues(texts: string[], where = 'rótulo'): FormatIssue[] {
+export function literalFormatIssues(texts: string[], where = 'rótulo', context?: string): FormatIssue[] {
   const out: FormatIssue[] = [];
   const years = texts.filter((t) => YEAR_WITH_DOT.test(t));
-  // Um “2.027” solto pode ser quantidade; uma sequência é coluna de anos.
-  if (years.length >= 2) out.push({ where, text: years[0].trim(), reason: `ano escrito com separador de milhar (${years.length} ocorrências, ex.: «${years[0].trim()}» em vez de «${years[0].trim().replace('.', '')}»)` });
+  const temporalHeader = /^(ano|anos|ano de lancamento|exercicio|periodo)$/.test(strip((context ?? '').trim()));
+  const ordered = years.map(t => Number(t.trim().replace('.', '')));
+  // Repetição de quantidades não prova ano. Sem cabeçalho temporal explícito,
+  // exige sequência distinta, ordenada, com três anos consecutivos plausíveis.
+  const sequence = ordered.length >= 3 && ordered.every((n, i) => n >= 1800 && n <= 2200 && (!i || n === ordered[i - 1] + 1));
+  if (years.length && (temporalHeader || sequence)) out.push({ where, text: years[0].trim(), reason: `ano escrito com separador de milhar (${years.length} ocorrências, ex.: «${years[0].trim()}» em vez de «${years[0].trim().replace('.', '')}»)` });
   for (const t of texts) {
     const d = DOUBLED_DECIMAL.exec(t);
     if (d) out.push({ where, text: t.trim(), reason: `decimal duplicado («${d[0]}»)` });

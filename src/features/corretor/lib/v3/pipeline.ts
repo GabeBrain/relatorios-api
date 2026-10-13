@@ -6,6 +6,7 @@
 
 import { nestedRadiiFindings } from './nested-radii';
 import { entityConsistencyFindings } from './entity-consistency';
+import { narrativeTotalFindings } from './narrative-total';
 import type { Ir } from '../audit/ir';
 import type { Finding } from '../audit/model';
 import { irToFindings, reviewNoteBlindSpots } from '../audit/ir-rules';
@@ -318,7 +319,7 @@ export function combineVisionFindings(
   const unread = unreadImageFindings(candidates, vision.failed ?? []);
   const refs = nativeTableRefs(ir).concat(vision.tables.map((table) => ({ ...table, source: 'vision' as const })));
   const cross = crossTableFindings(ir, vision.tables, acertos?.cruzamentos);
-  const projection = projectionFindings(refs);
+  const projection = [...projectionFindings(refs), ...narrativeTotalFindings(ir, refs)];
   const coverage = [
     ...sourceFindingsFromVision(ir, vision.sourceSlides, vision.analyzedSlides),
     ...requiredAndExclusionFindings(ir, refs),

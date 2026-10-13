@@ -1,0 +1,1518 @@
+[
+  {
+    "name": "ushome-context",
+    "studyId": "5de0e62e-559d-4990-8208-e0cbbf80858a",
+    "deckSha1": "fc0c2b42cd54eecfc76a08fbc802224dd89ab8b8",
+    "ruleId": "iavis-context-18db1d310b-sao-paulo",
+    "slide": 35,
+    "secao": "MERCADO",
+    "city": "Curitiba",
+    "original": {
+      "id": "iavis-context-18db1d310b-sao-paulo",
+      "ok": false,
+      "viz": {
+        "kind": "text",
+        "evidence": "São Paulo",
+        "location": "Empreendimentos de Cluster Norteúltimos lançamentos"
+      },
+      "type": "WRONG_CONTEXT",
+      "title": "Cidade divergente na imagem (São Paulo ≠ Curitiba)",
+      "detail": "A cidade “São Paulo” aparece no título, legenda ou cabeçalho da imagem; a ata define o estudo como Curitiba/PR. Verifique possível dado de outro estudo.",
+      "section": "MERCADO",
+      "slideRef": "s35",
+      "evidenceSha1": "18db1d310b9aca7dedb2da164d612fc1b20f465e",
+      "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/18db1d310b9aca7dedb2da164d612fc1b20f465e.png"
+    },
+    "verdict": "fp",
+    "cache": {
+      "sha1": "18db1d310b9aca7dedb2da164d612fc1b20f465e",
+      "model": "gpt-4o-mini",
+      "schema_version": 7,
+      "payload": {
+        "tables": [
+          {
+            "rows": [
+              [
+                "Zurich",
+                53,
+                34,
+                64.2,
+                1,
+                9,
+                "Comercialização",
+                "Padrão",
+                27227.43,
+                23,
+                11704,
+                1,
+                -4.2
+              ],
+              [
+                "Maruá",
+                123,
+                39,
+                31.7,
+                1,
+                31,
+                "Comercialização",
+                "Padrão",
+                28426.23,
+                23,
+                12054,
+                0,
+                -0.7
+              ],
+              [
+                "Suíça Smart Campos Sales",
+                70,
+                32,
+                45.7,
+                1,
+                8,
+                "Comercialização",
+                "Padrão",
+                21986.21,
+                27,
+                10954,
+                0,
+                -12.3
+              ],
+              [
+                "Studios Vêneto",
+                24,
+                21,
+                87.5,
+                1,
+                90,
+                "Comercialização",
+                "Padrão",
+                15877.92,
+                20,
+                10815,
+                0,
+                -12.1
+              ],
+              [
+                "Join Juvevê",
+                33,
+                23,
+                69.7,
+                1,
+                25,
+                "Comercialização",
+                "Padrão",
+                26000,
+                28,
+                11463,
+                0,
+                -1.5
+              ],
+              [
+                "Liv 27.50",
+                49,
+                23,
+                46.9,
+                1,
+                18,
+                "Comercialização",
+                "Padrão",
+                21800,
+                25,
+                8651,
+                0,
+                -29.2
+              ],
+              [
+                "Studios Tingui",
+                53,
+                34,
+                64.2,
+                1,
+                20,
+                "Comercialização",
+                "Padrão",
+                18438.18,
+                18,
+                10536,
+                0,
+                -13.8
+              ]
+            ],
+            "title": "Empreendimentos de Cluster Norte",
+            "totals": [
+              "Total",
+              1024,
+              394,
+              38.5,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "columns": [
+              "Empreendimento",
+              "Ofertas Lançada",
+              "Ofertas Atual",
+              "Disp. (%)",
+              "Quartos",
+              "Unidades por Tipologia",
+              "Status",
+              "Tipo",
+              "Preço (R$)",
+              "m² (priv.)",
+              "R$/m² (priv.)",
+              "Vagas de Garagem",
+              "Abaixo ou acima da média"
+            ]
+          },
+          {
+            "rows": [
+              [
+                "São Paulo",
+                null
+              ]
+            ],
+            "title": "",
+            "totals": [],
+            "columns": [
+              "Cidade",
+              "UF"
+            ]
+          },
+          {
+            "rows": [
+              [
+                "Bacacheri",
+                null
+              ],
+              [
+                "Tingui",
+                null
+              ],
+              [
+                "Alto Da Glória",
+                null
+              ],
+              [
+                "Santa Cândida",
+                null
+              ],
+              [
+                "Juvevê",
+                null
+              ],
+              [
+                "Proa",
+                null
+              ],
+              [
+                "SPE",
+                null
+              ],
+              [
+                "Max",
+                null
+              ]
+            ],
+            "title": "",
+            "totals": [],
+            "columns": [
+              "Bairro",
+              "UF"
+            ]
+          }
+        ],
+        "unidades": [],
+        "tem_fonte": false,
+        "locais_visiveis": [
+          {
+            "tipo": "cidade",
+            "texto": "São Paulo",
+            "principal": true
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Bacacheri",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Tingui",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Alto Da Glória",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Santa Cândida",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Juvevê",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Proa",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "SPE",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Max",
+            "principal": false
+          }
+        ]
+      }
+    },
+    "image": {
+      "url": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/18db1d310b9aca7dedb2da164d612fc1b20f465e.png",
+      "sha256": "20806e94ff5b78ffcf431507830152b9ecf3fde5bf50c8c2b63375cf87c46098",
+      "visualReview": "São Paulo não aparece no print"
+    }
+  },
+  {
+    "name": "ushome-sum",
+    "studyId": "5de0e62e-559d-4990-8208-e0cbbf80858a",
+    "deckSha1": "fc0c2b42cd54eecfc76a08fbc802224dd89ab8b8",
+    "ruleId": "iavis-sum-0466081e4f-0",
+    "slide": 23,
+    "secao": "MERCADO",
+    "city": "Curitiba",
+    "original": {
+      "id": "iavis-sum-0466081e4f-0",
+      "ok": false,
+      "viz": {
+        "kind": "table",
+        "notes": [
+          "Coluna «Oferta Lançada»: soma 2787 ≠ total 13408",
+          "Coluna «Oferta Atual»: soma 720 ≠ total 2991",
+          "Coluna «Unidades por Tipologia»: soma 1347 ≠ total 13408"
+        ],
+        "table": {
+          "rows": [
+            [
+              "Suíça Flats Fernando Amaro",
+              "Alto Da Xv",
+              "Suíça",
+              "mai/25",
+              59,
+              3,
+              5.1,
+              1,
+              "Compacto",
+              37,
+              "Comercialização",
+              "Padrão",
+              318517,
+              23,
+              14112,
+              0,
+              -1.2
+            ],
+            [
+              "Sieg Arenna",
+              "Água Verde",
+              "Welt",
+              "mai/25",
+              46,
+              15,
+              32.6,
+              1,
+              "Compacto",
+              41,
+              "Comercialização",
+              "Padrão",
+              340252,
+              24,
+              14177,
+              0,
+              -0.7
+            ],
+            [
+              "Civitas",
+              "Centro Cívico",
+              "Blue",
+              "jun/25",
+              130,
+              20,
+              15.4,
+              1,
+              "Compacto",
+              126,
+              "Comercialização",
+              "Padrão",
+              359903,
+              20,
+              17668,
+              0,
+              -0.5
+            ],
+            [
+              "Sette Batel Tower",
+              "Cristo Rei",
+              "Bicalho",
+              "jun/25",
+              527,
+              79,
+              15,
+              1,
+              "Compacto",
+              500,
+              "Comercialização",
+              "Padrão",
+              400000,
+              32,
+              12500,
+              0,
+              -3.4
+            ],
+            [
+              "Prado Residence",
+              "Guaira",
+              "Mosaico",
+              "jun/25",
+              37,
+              5,
+              12.9,
+              1,
+              "Compacto",
+              21,
+              "Comercialização",
+              "Padrão",
+              314000,
+              33,
+              9515,
+              0,
+              -4.5
+            ],
+            [
+              "Core Palácio",
+              "Centro",
+              "Gadens",
+              "jul/25",
+              429,
+              102,
+              23.8,
+              1,
+              "Compacto",
+              247,
+              "Comercialização",
+              "Padrão",
+              394940,
+              21,
+              18807,
+              0,
+              1
+            ],
+            [
+              "Cosmo Hype Living",
+              "Alto Da Xv",
+              "Hype",
+              "jul/25",
+              128,
+              37,
+              28.9,
+              1,
+              "Compacto",
+              96,
+              "Comercialização",
+              "Padrão",
+              424431,
+              23,
+              18453,
+              0,
+              0.4
+            ],
+            [
+              "02 Concept Mercês",
+              "Mercês",
+              "O2",
+              "jul/25",
+              56,
+              13,
+              23.2,
+              1,
+              "Compacto",
+              50,
+              "Comercialização",
+              "Padrão",
+              488013,
+              20,
+              24401,
+              0,
+              15.7
+            ],
+            [
+              "Aya Amintas",
+              "Centro",
+              "Blue",
+              "set/25",
+              489,
+              118,
+              24.1,
+              2,
+              "Compacto",
+              52,
+              "Comercialização",
+              "Padrão",
+              436580,
+              16,
+              27286,
+              1,
+              42.9
+            ],
+            [
+              "Core Silva Jardim",
+              "Rebouças",
+              "Gadens",
+              "set/25",
+              241,
+              5,
+              2.1,
+              2,
+              "Compacto",
+              27,
+              "Comercialização",
+              "Padrão",
+              498967,
+              30,
+              16632,
+              0,
+              3.2
+            ],
+            [
+              "An Silva Jardim",
+              "Rebouças",
+              "Anton",
+              "set/25",
+              363,
+              207,
+              57,
+              2,
+              "Compacto",
+              10,
+              "Comercialização",
+              "Padrão",
+              436580,
+              20,
+              21829,
+              1,
+              15.7
+            ],
+            [
+              "Nommad Compact Living Batel",
+              "Batel",
+              "GV",
+              "nov/25",
+              100,
+              21,
+              21,
+              3,
+              "Compacto",
+              95,
+              "Comercialização",
+              "Padrão",
+              508751,
+              16,
+              31749,
+              0,
+              82.6
+            ],
+            [
+              "Quintal Do Paiol",
+              "Rebouças",
+              "Reus",
+              "nov/25",
+              52,
+              33,
+              63.5,
+              1,
+              "Compacto",
+              1,
+              "Comercialização",
+              "Padrão",
+              946580,
+              67,
+              14114,
+              1,
+              -25.8
+            ],
+            [
+              "New Life 19",
+              "Centro",
+              "Bemavi",
+              "dez/25",
+              130,
+              62,
+              47.7,
+              1,
+              "Compacto",
+              44,
+              "Comercialização",
+              "Padrão",
+              382724,
+              24,
+              15964,
+              "Vaga Rotativa",
+              -3.8
+            ]
+          ],
+          "title": "Empreendimentos Cluster Centro últimos lançamentos",
+          "totals": [
+            "Total",
+            null,
+            null,
+            null,
+            13408,
+            2991,
+            22.3,
+            null,
+            null,
+            13408,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "columns": [
+            "Empreendimento",
+            "Bairro",
+            "Incorporadora",
+            "Lançamento",
+            "Oferta Lançada",
+            "Oferta Atual",
+            "Disp. (%)",
+            "Quartos",
+            "Padrão",
+            "Unidades por Tipologia",
+            "Status",
+            "Tipo",
+            "Preço (R$)",
+            "m²",
+            "R$/m²",
+            "Vagas de Garagem",
+            "Abaixo ou acima da média"
+          ],
+          "shareOf": {},
+          "colKinds": [
+            "label",
+            "other",
+            "other",
+            "other",
+            "count",
+            "count",
+            "rate",
+            "other",
+            "other",
+            "count",
+            "other",
+            "other",
+            "measure",
+            "measure",
+            "measure",
+            "other",
+            "rate"
+          ],
+          "totalKind": "mixed"
+        },
+        "badRows": [],
+        "badColumns": [
+          4,
+          5,
+          9
+        ]
+      },
+      "type": "ABSOLUTE_SUM",
+      "title": "Tabela não fecha no total (Empreendimentos Cluster Centro últimos lançamentos)",
+      "detail": "Números da imagem do slide 23 (confirmado no gpt-4o (após divergência no modelo econômico)). Como o 4o confirmou, é provável bug real do estudo. — o slide declara exclusão: “Unidades garden, duplex e coberturas não são apresentadas na análise para evitar distorções de preço e metragem.”. O total pode não fechar por isso (tabela completa costuma ficar no apêndice); confira antes de corrigir.",
+      "section": "MERCADO",
+      "slideRef": "s23",
+      "escalated": true,
+      "confidence": 3,
+      "evidenceSha1": "0466081e4fb51708d8ada36852f2d8eef9afc007",
+      "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/0466081e4fb51708d8ada36852f2d8eef9afc007.png"
+    },
+    "verdict": "fp",
+    "cache": {
+      "sha1": "0466081e4fb51708d8ada36852f2d8eef9afc007",
+      "model": "gpt-4o",
+      "schema_version": 7,
+      "payload": {
+        "tables": [
+          {
+            "rows": [
+              [
+                "Suíça Flats Fernando Amaro",
+                "Alto Da Xv",
+                "Suíça",
+                "mai/25",
+                59,
+                3,
+                5.1,
+                1,
+                "Compacto",
+                37,
+                "Comercialização",
+                "Padrão",
+                318517,
+                23,
+                14112,
+                0,
+                -1.2
+              ],
+              [
+                "Sieg Arenna",
+                "Água Verde",
+                "Welt",
+                "mai/25",
+                46,
+                15,
+                32.6,
+                1,
+                "Compacto",
+                41,
+                "Comercialização",
+                "Padrão",
+                340252,
+                24,
+                14177,
+                0,
+                -0.7
+              ],
+              [
+                "Civitas",
+                "Centro Cívico",
+                "Blue",
+                "jun/25",
+                130,
+                20,
+                15.4,
+                1,
+                "Compacto",
+                126,
+                "Comercialização",
+                "Padrão",
+                359903,
+                20,
+                17668,
+                0,
+                -0.5
+              ],
+              [
+                "Sette Batel Tower",
+                "Cristo Rei",
+                "Bicalho",
+                "jun/25",
+                527,
+                79,
+                15,
+                1,
+                "Compacto",
+                500,
+                "Comercialização",
+                "Padrão",
+                400000,
+                32,
+                12500,
+                0,
+                -3.4
+              ],
+              [
+                "Prado Residence",
+                "Guaira",
+                "Mosaico",
+                "jun/25",
+                37,
+                5,
+                12.9,
+                1,
+                "Compacto",
+                21,
+                "Comercialização",
+                "Padrão",
+                314000,
+                33,
+                9515,
+                0,
+                -4.5
+              ],
+              [
+                "Core Palácio",
+                "Centro",
+                "Gadens",
+                "jul/25",
+                429,
+                102,
+                23.8,
+                1,
+                "Compacto",
+                247,
+                "Comercialização",
+                "Padrão",
+                394940,
+                21,
+                18807,
+                0,
+                1
+              ],
+              [
+                "Cosmo Hype Living",
+                "Alto Da Xv",
+                "Hype",
+                "jul/25",
+                128,
+                37,
+                28.9,
+                1,
+                "Compacto",
+                96,
+                "Comercialização",
+                "Padrão",
+                424431,
+                23,
+                18453,
+                0,
+                0.4
+              ],
+              [
+                "02 Concept Mercês",
+                "Mercês",
+                "O2",
+                "jul/25",
+                56,
+                13,
+                23.2,
+                1,
+                "Compacto",
+                50,
+                "Comercialização",
+                "Padrão",
+                488013,
+                20,
+                24401,
+                0,
+                15.7
+              ],
+              [
+                "Aya Amintas",
+                "Centro",
+                "Blue",
+                "set/25",
+                489,
+                118,
+                24.1,
+                2,
+                "Compacto",
+                52,
+                "Comercialização",
+                "Padrão",
+                436580,
+                16,
+                27286,
+                1,
+                42.9
+              ],
+              [
+                "Core Silva Jardim",
+                "Rebouças",
+                "Gadens",
+                "set/25",
+                241,
+                5,
+                2.1,
+                2,
+                "Compacto",
+                27,
+                "Comercialização",
+                "Padrão",
+                498967,
+                30,
+                16632,
+                0,
+                3.2
+              ],
+              [
+                "An Silva Jardim",
+                "Rebouças",
+                "Anton",
+                "set/25",
+                363,
+                207,
+                57,
+                2,
+                "Compacto",
+                10,
+                "Comercialização",
+                "Padrão",
+                436580,
+                20,
+                21829,
+                1,
+                15.7
+              ],
+              [
+                "Nommad Compact Living Batel",
+                "Batel",
+                "GV",
+                "nov/25",
+                100,
+                21,
+                21,
+                3,
+                "Compacto",
+                95,
+                "Comercialização",
+                "Padrão",
+                508751,
+                16,
+                31749,
+                0,
+                82.6
+              ],
+              [
+                "Quintal Do Paiol",
+                "Rebouças",
+                "Reus",
+                "nov/25",
+                52,
+                33,
+                63.5,
+                1,
+                "Compacto",
+                1,
+                "Comercialização",
+                "Padrão",
+                946580,
+                67,
+                14114,
+                1,
+                -25.8
+              ],
+              [
+                "New Life 19",
+                "Centro",
+                "Bemavi",
+                "dez/25",
+                130,
+                62,
+                47.7,
+                1,
+                "Compacto",
+                44,
+                "Comercialização",
+                "Padrão",
+                382724,
+                24,
+                15964,
+                "Vaga Rotativa",
+                -3.8
+              ]
+            ],
+            "title": "Empreendimentos Cluster Centro últimos lançamentos",
+            "totals": [
+              "Total",
+              null,
+              null,
+              null,
+              13408,
+              2991,
+              22.3,
+              null,
+              null,
+              13408,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "columns": [
+              "Empreendimento",
+              "Bairro",
+              "Incorporadora",
+              "Lançamento",
+              "Oferta Lançada",
+              "Oferta Atual",
+              "Disp. (%)",
+              "Quartos",
+              "Padrão",
+              "Unidades por Tipologia",
+              "Status",
+              "Tipo",
+              "Preço (R$)",
+              "m²",
+              "R$/m²",
+              "Vagas de Garagem",
+              "Abaixo ou acima da média"
+            ],
+            "share_of": {},
+            "col_kinds": [
+              "label",
+              "other",
+              "other",
+              "other",
+              "count",
+              "count",
+              "rate",
+              "other",
+              "other",
+              "count",
+              "other",
+              "other",
+              "measure",
+              "measure",
+              "measure",
+              "other",
+              "rate"
+            ],
+            "total_kind": "mixed"
+          }
+        ],
+        "unidades": [],
+        "tem_fonte": false,
+        "locais_visiveis": [
+          {
+            "tipo": "bairro",
+            "texto": "Centro",
+            "principal": true
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Alto Da Xv",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Água Verde",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Centro Cívico",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Cristo Rei",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Guaira",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Mercês",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Rebouças",
+            "principal": false
+          },
+          {
+            "tipo": "bairro",
+            "texto": "Batel",
+            "principal": false
+          }
+        ]
+      }
+    },
+    "image": {
+      "url": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/0466081e4fb51708d8ada36852f2d8eef9afc007.png",
+      "sha256": "dcd1149dddb5bf1673c64375a3eb143cad191601c31638a3d7080722a5cd7801",
+      "visualReview": "Linhas visíveis 2.781; total global 13.408, possível fatia"
+    }
+  },
+  {
+    "name": "curitiba-sum",
+    "studyId": "4a491b44-f1ac-4ae3-b156-52a3569928ce",
+    "deckSha1": "6597568358594dcaf6896e8c8c32b65f5017ab7d",
+    "ruleId": "iavis-sum-3d5daefc4d-0",
+    "slide": 37,
+    "secao": "ABSORCAO",
+    "city": "Curitiba",
+    "original": {
+      "id": "iavis-sum-3d5daefc4d-0",
+      "ok": false,
+      "viz": {
+        "kind": "table",
+        "notes": [
+          "Todas as 10 colunas conferidas ficam cerca de 14,4% abaixo do total declarado: provável linha ou faixa omitida da tabela.",
+          "Coluna «Cenário BASE | 20%»: soma 1197 ≠ total 1399 — 10 células somam 1.197, diferença de 202",
+          "Coluna «Cenário BASE | 40%»: soma 2393 ≠ total 2798 — 10 células somam 2.393, diferença de 405",
+          "Coluna «Cenário BASE | 60%»: soma 3590 ≠ total 4197 — 10 células somam 3.590, diferença de 607",
+          "Coluna «Cenário BASE | 80%»: soma 4787 ≠ total 5596 — 10 células somam 4.787, diferença de 809",
+          "Coluna «Cenário BASE | 100%»: soma 5984 ≠ total 6996 — 10 células somam 5.984, diferença de 1.012",
+          "Coluna «Cenário OTIMISTA | 20%»: soma 1430 ≠ total 1670 — 10 células somam 1.430, diferença de 240",
+          "Coluna «Cenário OTIMISTA | 40%»: soma 2860 ≠ total 3339 — 10 células somam 2.860, diferença de 479",
+          "Coluna «Cenário OTIMISTA | 60%»: soma 4294 ≠ total 5009 — 10 células somam 4.294, diferença de 715",
+          "Coluna «Cenário OTIMISTA | 80%»: soma 5725 ≠ total 6679 — 10 células somam 5.725, diferença de 954",
+          "Coluna «Cenário OTIMISTA | 100%»: soma 7154 ≠ total 8348 — 10 células somam 7.154, diferença de 1.194"
+        ],
+        "table": {
+          "rows": [
+            [
+              "Acima de R$ 42.267,01",
+              235,
+              471,
+              706,
+              941,
+              1176,
+              284,
+              567,
+              851,
+              1135,
+              1418
+            ],
+            [
+              "R$ 36.511,01 a R$ 42.267,00",
+              50,
+              100,
+              150,
+              200,
+              250,
+              60,
+              120,
+              181,
+              241,
+              301
+            ],
+            [
+              "R$ 27.320,01 a R$ 36.511,00",
+              124,
+              247,
+              371,
+              495,
+              619,
+              149,
+              298,
+              448,
+              597,
+              746
+            ],
+            [
+              "R$ 20.983,01 a R$ 27.320,00",
+              139,
+              278,
+              416,
+              555,
+              694,
+              167,
+              335,
+              502,
+              670,
+              837
+            ],
+            [
+              "R$ 17.147,01 a R$ 20.983,00",
+              108,
+              215,
+              323,
+              431,
+              539,
+              129,
+              258,
+              388,
+              517,
+              646
+            ],
+            [
+              "R$ 14.590,01 a R$ 17.147,00",
+              81,
+              162,
+              243,
+              324,
+              406,
+              97,
+              194,
+              290,
+              387,
+              484
+            ],
+            [
+              "R$ 10.755,01 a R$ 14.590,00",
+              137,
+              273,
+              410,
+              547,
+              683,
+              162,
+              324,
+              486,
+              648,
+              810
+            ],
+            [
+              "R$ 7.716,01 a R$ 10.755,00",
+              141,
+              282,
+              423,
+              564,
+              704,
+              167,
+              334,
+              501,
+              668,
+              835
+            ],
+            [
+              "R$ 6.200,01 a R$ 7.716,00",
+              80,
+              161,
+              241,
+              321,
+              402,
+              95,
+              190,
+              286,
+              381,
+              476
+            ],
+            [
+              "Abaixo de R$ 6.200,00",
+              102,
+              204,
+              307,
+              409,
+              511,
+              120,
+              240,
+              361,
+              481,
+              601
+            ]
+          ],
+          "title": "Cenário BASE",
+          "totals": [
+            "Total",
+            1399,
+            2798,
+            4197,
+            5596,
+            6996,
+            1670,
+            3339,
+            5009,
+            6679,
+            8348
+          ],
+          "columns": [
+            "Faixa de Renda / Média Anual",
+            "Cenário BASE | 20%",
+            "Cenário BASE | 40%",
+            "Cenário BASE | 60%",
+            "Cenário BASE | 80%",
+            "Cenário BASE | 100%",
+            "Cenário OTIMISTA | 20%",
+            "Cenário OTIMISTA | 40%",
+            "Cenário OTIMISTA | 60%",
+            "Cenário OTIMISTA | 80%",
+            "Cenário OTIMISTA | 100%"
+          ],
+          "colKinds": [
+            "label",
+            "count",
+            "count",
+            "count",
+            "count",
+            "count",
+            "count",
+            "count",
+            "count",
+            "count",
+            "count"
+          ],
+          "totalKind": "sum"
+        },
+        "badRows": [],
+        "badColumns": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "omittedBand": true,
+        "stitchedReading": true
+      },
+      "type": "ABSOLUTE_SUM",
+      "title": "Tabela não fecha no total (Cenário BASE)",
+      "detail": "Todas as 10 colunas conferidas ficam cerca de 14,4% abaixo do total declarado: provável linha ou faixa omitida da tabela.. Números lidos da imagem do slide 37 (relido no gpt-4o; as duas leituras discordam entre si). Todas as colunas ficam abaixo do total na mesma proporção: isso não depende de um dígito lido. Confira se falta uma faixa ou linha na tabela. — o slide declara exclusão: “Obs.: Esta análise desconsidera absorção de domicílios para segunda moradia.”. O total pode não fechar por isso (tabela completa costuma ficar no apêndice); confira antes de corrigir.",
+      "section": "ABSORCAO",
+      "slideRef": "s37",
+      "escalated": false,
+      "confidence": 3,
+      "evidenceSha1": "3d5daefc4d87880ac92afb57db7ba61560bb9e2e",
+      "evidenceImage": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/3d5daefc4d87880ac92afb57db7ba61560bb9e2e.png"
+    },
+    "verdict": null,
+    "cache": {
+      "sha1": "3d5daefc4d87880ac92afb57db7ba61560bb9e2e",
+      "model": "gpt-4o",
+      "schema_version": 10,
+      "payload": {
+        "tables": [
+          {
+            "rows": [
+              [
+                "Acima de R$ 42.267,01",
+                235,
+                471,
+                706,
+                941,
+                1176
+              ],
+              [
+                "R$ 36.511,01 a R$ 42.267,00",
+                50,
+                100,
+                150,
+                200,
+                250
+              ],
+              [
+                "R$ 27.320,01 a R$ 36.511,00",
+                124,
+                247,
+                371,
+                495,
+                619
+              ],
+              [
+                "R$ 20.983,01 a R$ 27.320,00",
+                139,
+                278,
+                416,
+                555,
+                694
+              ],
+              [
+                "R$ 17.147,01 a R$ 20.983,00",
+                108,
+                215,
+                323,
+                431,
+                539
+              ],
+              [
+                "R$ 14.590,01 a R$ 17.147,00",
+                81,
+                162,
+                243,
+                324,
+                406
+              ],
+              [
+                "R$ 10.755,01 a R$ 14.590,00",
+                137,
+                273,
+                410,
+                547,
+                683
+              ],
+              [
+                "R$ 7.716,01 a R$ 10.755,00",
+                141,
+                282,
+                423,
+                564,
+                704
+              ],
+              [
+                "R$ 6.200,01 a R$ 7.716,00",
+                80,
+                161,
+                241,
+                321,
+                402
+              ],
+              [
+                "Abaixo de R$ 6.200,00",
+                102,
+                204,
+                307,
+                409,
+                511
+              ]
+            ],
+            "title": "Cenário BASE",
+            "totals": [
+              "Total",
+              1399,
+              2798,
+              4197,
+              5596,
+              6996
+            ],
+            "columns": [
+              "Faixa de Renda / Média Anual",
+              "20%",
+              "40%",
+              "60%",
+              "80%",
+              "100%"
+            ],
+            "share_of": {},
+            "col_kinds": [
+              "label",
+              "count",
+              "count",
+              "count",
+              "count",
+              "count"
+            ],
+            "total_kind": "sum"
+          },
+          {
+            "rows": [
+              [
+                "Acima de R$ 42.267,01",
+                284,
+                567,
+                851,
+                1135,
+                1418
+              ],
+              [
+                "R$ 36.511,01 a R$ 42.267,00",
+                60,
+                120,
+                181,
+                241,
+                301
+              ],
+              [
+                "R$ 27.320,01 a R$ 36.511,00",
+                149,
+                298,
+                448,
+                597,
+                746
+              ],
+              [
+                "R$ 20.983,01 a R$ 27.320,00",
+                167,
+                335,
+                502,
+                670,
+                837
+              ],
+              [
+                "R$ 17.147,01 a R$ 20.983,00",
+                129,
+                258,
+                388,
+                517,
+                646
+              ],
+              [
+                "R$ 14.590,01 a R$ 17.147,00",
+                97,
+                194,
+                290,
+                387,
+                484
+              ],
+              [
+                "R$ 10.755,01 a R$ 14.590,00",
+                162,
+                324,
+                486,
+                648,
+                810
+              ],
+              [
+                "R$ 7.716,01 a R$ 10.755,00",
+                167,
+                334,
+                501,
+                668,
+                835
+              ],
+              [
+                "R$ 6.200,01 a R$ 7.716,00",
+                95,
+                190,
+                286,
+                381,
+                476
+              ],
+              [
+                "Abaixo de R$ 6.200,00",
+                120,
+                240,
+                361,
+                481,
+                601
+              ]
+            ],
+            "title": "Cenário OTIMISTA",
+            "totals": [
+              "Total",
+              1670,
+              3339,
+              5009,
+              6679,
+              8348
+            ],
+            "columns": [
+              "Faixa de Renda / Média Anual",
+              "20%",
+              "40%",
+              "60%",
+              "80%",
+              "100%"
+            ],
+            "share_of": {},
+            "col_kinds": [
+              "label",
+              "count",
+              "count",
+              "count",
+              "count",
+              "count"
+            ],
+            "total_kind": "sum"
+          }
+        ],
+        "unidades": [],
+        "releitura": {
+          "concordam": false
+        },
+        "tem_fonte": false,
+        "locais_visiveis": [],
+        "formatos_confirmados": []
+      }
+    },
+    "image": {
+      "url": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/3d5daefc4d87880ac92afb57db7ba61560bb9e2e.png",
+      "sha256": "005155df89436275df9095e08a383f18b97e0ccc3ff42b967149a3e5b80c7d81",
+      "visualReview": "BASE20 soma 1.197; total 1.399; escopo fora do crop não confirmado"
+    }
+  }
+]

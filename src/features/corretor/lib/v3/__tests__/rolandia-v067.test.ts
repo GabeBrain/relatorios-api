@@ -176,7 +176,7 @@ describe('mesma divergência em vários slides', () => {
 
 describe('formato literal', () => {
   it('anos com ponto, decimal duplicado e limite “,01”', () => {
-    const reasons = literalFormatIssues(['Até 2.022', '2.023', '2.024', 'Abaixo de R$ 7.716,00,00', 'R$ 6.200,01 a R$ 14.590,01', 'R$ 14.590,01 a R$ 17.147,00', 'R$ 17.147,01 a R$ 20.983,00', 'R$ 20.983,01 a R$ 27.320,00']).map((i) => i.reason);
+    const reasons = literalFormatIssues(['Até 2.022', '2.023', '2.024', '2.025', 'Abaixo de R$ 7.716,00,00', 'R$ 6.200,01 a R$ 14.590,01', 'R$ 14.590,01 a R$ 17.147,00', 'R$ 17.147,01 a R$ 20.983,00', 'R$ 20.983,01 a R$ 27.320,00']).map((i) => i.reason);
     expect(reasons.some((r) => r.includes('separador de milhar'))).toBe(true);
     expect(reasons.some((r) => r.includes('decimal duplicado'))).toBe(true);
     expect(reasons.some((r) => r.includes(',01'))).toBe(true);

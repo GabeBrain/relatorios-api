@@ -30,7 +30,7 @@ import { type AtaGateValue } from '../components/AtaGateCard';
 import PreAnalysisCard, { type PreAnalysisValue } from '../components/PreAnalysisCard';
 import { formatUSD, type ModelId } from '../lib/cost-calculator';
 import {
-  runPhase1, runPhase2, estimateFullAnalysis,
+  runPhase1, runPhase2, estimateFullAnalysis, TEXT_REVIEW_MODEL,
   type StageProgress, type FullEstimate, type Phase1Result,
 } from '../lib/v3/pipeline';
 import type { AtaData } from '../lib/v3/ia-ata';
@@ -527,7 +527,7 @@ export default function CorretorV3Page() {
       }
 
       if (res.textCostUsd > 0 || res.textFindings.length) {
-        await registerIaPass(ctx.studyId, 'texto', `${ctx.estimate.textSlides} slides · ${MODEL}`,
+        await registerIaPass(ctx.studyId, 'texto', `${ctx.estimate.textSlides} slides · ${TEXT_REVIEW_MODEL}`,
           res.textCostUsd, res.textTokens.input, res.textTokens.output);
       }
       if (res.visionCostUsd > 0 || res.visionFindings.length) {

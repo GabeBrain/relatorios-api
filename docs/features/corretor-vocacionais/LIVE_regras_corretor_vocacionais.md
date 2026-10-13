@@ -16,6 +16,14 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.68 — 2026-10-13 — evidências persistidas (RUNTIME local, sem publicação confirmada)
+
+- **DET — ano:** exige cabeçalho temporal ou série de pelo menos três anos consecutivos distintos; repetição de quantidades não comprova ano. Contexto de coluna preservado tanto em tabela nativa quanto em leitura de imagem.
+- **DET — conclusão:** `narrative-total.ts`, integrado ao pipeline/rechecagem, compara novos domicílios na conclusão ao total municipal do mesmo slide e janela. Leitura confiável, cidade exata e total único obrigatórios; tolerância de uma unidade. Formulação inicial dirigida ao caso Daniele; não cobre prosa arbitrária nem conclusão somente em imagem.
+- **DET — identidade:** fichas de bairro/região/zona/cidade/total não são empreendimentos.
+- **Rastreabilidade:** registro de novos passes textuais usa TEXT_REVIEW_MODEL; não altera histórico nem prompt.
+- **Evidência:** [antes/depois e limitações](./RESULTADO_CORRECOES_EVIDENCIAS_2026-10-13.md), 28 testes, dez passes de regressão e build aprovados, sem IA nova. Seis negativos Salvador e positivo Daniele controlados; validação visual integral desses casos pendente. Cache UsHome com cidade inventada e soma de fatia continuam sem solução comprovada; controle Curitiba preservado. Nenhuma mudança de Edge Function.
+
 ## Versão 0.67.1 — 2026-10-13 — baseline e Sociodemografia no checklist (validado localmente)
 
 **Plano de correção preparado — 13/10:** [casos e retestes em evidências persistidas](./PLAN_CORRECOES_EVIDENCIAS_PERSISTIDAS_2026-10-13.md). Ordem: corrigir quantidade confundida com ano; implementar igualdade tabela/conclusão; retestar cidade inferida, total de fatia e identidade de entidade nos registros existentes. Três imagens UsHome/Curitiba inspecionadas; controles positivos preservam divergência 1.197×1.399 e Boulevard. Critérios separam regra, OCR, contexto e registro histórico; Salvador/caso Daniele sem print local têm aceite visual pendente. Plano PLANEJADO, sem mudança de regra/prompt ou deploy nesta preparação.

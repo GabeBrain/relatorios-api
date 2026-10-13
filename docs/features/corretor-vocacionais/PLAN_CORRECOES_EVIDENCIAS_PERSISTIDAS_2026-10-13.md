@@ -100,6 +100,12 @@ Executar após 1/2, por evidência, sem tentar corrigir os 71 FP de uma vez.
 
 Se a imagem/original do caso Daniele não estiver disponível em arquivo, concluir a checagem determinística com transcrição e avançar nos prints UsHome/Curitiba já disponíveis. Se o caso exigir IA nova, apresentar lote, modelos, número/dimensão das imagens, estimativa por passe e teto antes de executar. Nenhuma chamada paga é automaticamente autorizada por este plano.
 
+## Execução autorizada — 13/10
+
+Entrega mínima implementada e validada localmente: ano/quantidade, conclusão municipal e exclusão de fichas agregadas; rastreabilidade do modelo textual corrigida. Corpus de três prints/cache congelado. 28 testes, dez passes e build aprovados, sem IA nova ou deploy. [Resultado por caso](./RESULTADO_CORRECOES_EVIDENCIAS_2026-10-13.md).
+
+UsHome cidade/soma ainda pendentes no cache original; transcrição verificada distingue erro de leitura de regra. Salvador/Palmas e Daniele sem reteste de extração original. Ortografia, adjudicação humana e caso completo semanal permanecem abertos. Resultado preparado para revisão antes do push; não marcar plano integral como concluído.
+
 ## CTA de execução
 
 > Execute `PLAN_CORRECOES_EVIDENCIAS_PERSISTIDAS_2026-10-13.md`. Congele primeiro os casos com registros/prints já persistidos; corrija a confusão entre quantidade e ano e a divergência entre tabela e conclusão do caso Daniele. Reteste as evidências disponíveis, elimine falsos positivos comprovados e preserve os erros verdadeiros e os dez passes de regressão. Registre antes/depois e os limites de contexto de cada caso; use a fila de visão/entidade conforme a evidência e o tempo do bloco. Não faça novas chamadas pagas sem apresentar lote e orçamento. Preserve alterações locais de outras frentes, atualize os registros da semana e apresente o resultado antes do push.
