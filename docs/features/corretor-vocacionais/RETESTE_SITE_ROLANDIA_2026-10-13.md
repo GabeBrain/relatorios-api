@@ -2,6 +2,14 @@
 
 Estado: **verificação em produção parcial; quatro alertas restaurados, 13 planilhas cruzadas; proteção da reconferência validada localmente, ainda sem publicação**.
 
+## Push autorizado e conferência posterior — 13/10
+
+Gabriel autorizou envio e repetição da reconferência. `e230070` enviado a origin/main, novo fetch confirma 0/0. Documentos locais FIERGS preservados, sem inclusão no push. `check:live-docs` aprovado antes do envio.
+
+Consultas independentes do site às 15:39, 15:40 e 15:41 (Brasília), cada uma em navegador novo e URL com parâmetro único, ainda carregaram `/assets/CorretorV3Page-C4xyNz2S.js`. Regra v0.68 presente; contrato `evaluatedRule` da proteção v0.68.1 ausente em todos os bundles carregados. **Deploy da proteção não confirmado; reconferência não executada**, evitando repetir a falha conhecida. Nenhuma chamada de IA ou mutação nessas consultas; quatro alertas continuam pendentes nos 15 registros lidos.
+
+Evidências locais: `.local-inputs/rolandia-site-2026-10-13T18-39-37-543Z/`, `2026-10-13T18-40-40-421Z/` e `2026-10-13T18-41-42-906Z/`, cada uma com inspeção/resultado e captura do estudo. Próximo: confirmar atualização do site no Lovable e repetir o script já preparado; aprovação para reteste gratuito permanece válida. Não inferir deploy pelo push.
+
 ## Publicação comprovada
 
 Fetch de todos os remotos: somente origin, main sincronizada 0/0 em `f3bf72c`. Commit do Corretor `47107b2` já incluído no histórico remoto pela publicação de outra frente. Alterações locais FIERGS e LIVE_rebrain preservadas. Nenhum push nesta sessão.
