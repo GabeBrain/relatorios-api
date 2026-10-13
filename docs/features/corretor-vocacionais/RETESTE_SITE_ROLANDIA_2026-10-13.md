@@ -1,6 +1,16 @@
 # Reteste no site — Rolândia — 13/10/2026
 
-Estado: **verificação em produção parcial; quatro alertas restaurados, 13 planilhas cruzadas; proteção da reconferência validada localmente, ainda sem publicação**.
+Estado: **proteção da reconferência verificada em produção; caso integral ainda parcial**. Quatro alertas restaurados, 13 planilhas cruzadas e reteste gratuito posterior à publicação concluído.
+
+## Verificação após publicação no Lovable — 13/10, 15:44 Brasília
+
+Gabriel informou a publicação. Consulta confirmou `/assets/CorretorV3Page-D46qbc_d.js` e `/assets/db-RpgUw7Cm.js`, ambos com contrato `evaluatedRule`; regra tabela/conclusão e guarda de ano também presentes no frontend. Reconferência autorizada executada com o mesmo PPTX de 78 slides, criando versão 4 do estudo.
+
+**Resultado observado:** 15 registros antes e depois, mesmos IDs/payloads/status/versões de resolução; nenhuma exclusão, alteração de achado ou falso corrigido. Os quatro controles (`nested-radii-fonte-Dom.p Cond. Ocup.-1`, `nested-radii-fonte-Dom.p Tipo-0`, `ata-coverage`, `review-notes-blind`) continuam `pendente`, com `resolvido_na_versao=null`. Interface: 13 itens para revisar, 10 bloqueadores; diff 0 resolvidos/6 persistentes/0 novos. FP Sociodemografia permanece removido, duas seções sem conteúdo continuam no checklist.
+
+Mensagem do app: **32 imagens no cache, nenhum passe pago executado**. Nenhuma chamada a Edge Functions; nenhuma falha JavaScript capturada. Custo acumulado permanece US$ 0,2506. Escritas observadas: versão nova (POST 201) e atualizações de conteúdo determinístico (PATCH 204), sem mudança efetiva dos achados nessa rodada.
+
+Evidência: `.local-inputs/rolandia-site-2026-10-13T18-44-43-722Z/result.json`, `inspection.json`, `before.png`, `after.png`. Proteção v0.68.1 comprovada neste caso real; não representa reteste de Daniele, melhoria do OCR UsHome ou reanálise textual integral. Próximo: adjudicar os achados de Rolândia/Boulevard e recuperar contexto dos casos pendentes; IA nova continua sujeita a lote/orçamento.
 
 ## Push autorizado e conferência posterior — 13/10
 

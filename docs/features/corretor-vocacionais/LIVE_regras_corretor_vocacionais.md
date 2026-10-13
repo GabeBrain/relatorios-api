@@ -16,7 +16,9 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
-## Versão 0.68.1 — 2026-10-13 — escopo da reconferência (publicada no Git; deploy pendente)
+## Versão 0.68.1 — 2026-10-13 — escopo da reconferência (RUNTIME — verificada em produção em Rolândia)
+
+**Verificação após publicação no Lovable, 15:44 Brasília:** bundle CorretorV3Page-D46qbc_d e db-RpgUw7Cm contêm a proteção. Reteste real criou v4: 15 achados idênticos antes/depois, quatro controles preservados pendentes, nenhum falso corrigido; 32 imagens em cache, custo novo zero e acumulado US$ 0,2506. [Resultado observável](./RETESTE_SITE_ROLANDIA_2026-10-13.md#verificação-após-publicação-no-lovable--1310-1544-brasília). Caso completo/Daniele/OCR pendentes; não extrapolar este aceite.
 
 **Push autorizado:** `e230070` enviado a origin/main, fetch 0/0. Três consultas posteriores ainda carregam bundle v0.68; proteção nova não identificada no site. Reteste gratuito não iniciado, nenhuma mutação/custo nessas consultas. [Registro de publicação e limite](./RETESTE_SITE_ROLANDIA_2026-10-13.md#push-autorizado-e-conferência-posterior--1310). Próximo: confirmar site atualizado no Lovable e repetir a reconferência para proteger os quatro alertas restaurados.
 
