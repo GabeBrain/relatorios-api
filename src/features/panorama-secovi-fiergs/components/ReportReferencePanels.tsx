@@ -1,10 +1,11 @@
 import { CircleHelp, BookOpen, Sigma } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { EntityId } from '../types';
+import type { EntityId, PanoramaScope } from '../types';
+import { panoramaScopeIdentity } from '../scope-identity';
 
 const methodology = {
   'fiergs-rs': [
-    ['Território', 'Preset FIERGS: municípios do entorno metropolitano definidos no preset; Porto Alegre não integra o recorte.'],
+    ['Território', 'Municípios monitorados selecionados em uma única UF. O preset regional é um atalho; a composição efetiva é a do recorte gerado.'],
     ['Período', 'O intervalo selecionado delimita os fluxos de lançamentos e vendas. Estoque e oferta final são fotografias no fechamento.'],
     ['Elegibilidade', 'O universo segue a política de entidade e os filtros do cubo granular. Empreendimentos recusados permanecem identificados na auditoria.'],
     ['Chave e deduplicação', 'Empreendimentos são consolidados pela chave estável que combina identificador e município; contagens usam IDs distintos.'],
@@ -63,9 +64,12 @@ function ReferenceCard({ icon, title, children }: { icon: ReactNode; title: stri
   return <section className="rounded-xl border bg-card p-4 sm:p-5"><div className="mb-4 flex items-center gap-2"><span className="text-primary">{icon}</span><h2 className="text-base font-semibold">{title}</h2></div>{children}</section>;
 }
 
-export function MethodologyReference({ entity }: { entity: EntityId }) {
+export function MethodologyReference({ entity, scope }: { entity: EntityId; scope?: PanoramaScope }) {
+  const territory = scope ? panoramaScopeIdentity(scope) : null;
+  const rows = methodology[entity].map(([term, definition]) => [term, term === 'Território' && territory
+    ? `${territory.cityList} · ${territory.uf}. ${territory.official ? 'Preset FIERGS do entorno metropolitano; Porto Alegre não integra o recorte.' : 'Recorte personalizado de municípios monitorados; não há exclusão territorial automática pelo modelo.'}` : definition]);
   return <ReferenceCard icon={<CircleHelp className="h-4 w-4"/>} title={`Regras aplicadas · ${entity === 'fiergs-rs' ? 'FIERGS' : 'Secovi-SP'}`}>
-    <dl className="grid gap-4 sm:grid-cols-2">{methodology[entity].map(([term, definition]) => <div key={term}><dt className="text-sm font-semibold">{term}</dt><dd className="mt-1 text-sm leading-6 text-muted-foreground">{definition}</dd></div>)}</dl>
+    <dl className="grid gap-4 sm:grid-cols-2">{rows.map(([term, definition]) => <div key={term}><dt className="text-sm font-semibold">{term}</dt><dd className="mt-1 text-sm leading-6 text-muted-foreground">{definition}</dd></div>)}</dl>
   </ReferenceCard>;
 }
 

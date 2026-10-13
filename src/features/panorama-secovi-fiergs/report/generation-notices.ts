@@ -141,6 +141,18 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
   }
 
   if (report.scope.entity === 'fiergs-rs') {
+    const activeSlides = new Set(panoramaManifestFor(report).map((page) => page.fiergsOfficialSlide));
+    const omittedSlides = createFiergsReportManifest(true).filter((page) => !activeSlides.has(page.fiergsOfficialSlide)).map((page) => page.fiergsOfficialSlide!);
+    if (omittedSlides.length) add({ code: 'SCOPE_EDITORIAL_PAGES_OMITTED', severity: 'info', indicator: 'Páginas aplicáveis ao recorte',
+      reason: `O manifesto omitiu as lâminas oficiais ${omittedSlides.join(', ')} por ausência de estrutura publicável ou comparação municipal não aplicável.`,
+      source: 'Manifesto comparado ao cubo e ao escopo efetivo', displayDecision: 'As omissões constam nos avisos e CSV; zeros observados e divergências não são suprimidos.', officialSlides: omittedSlides });
+    if (report.scope.cities.length > 10) add({ code: 'CITY_PAGES_PAGINATED', severity: 'info', indicator: 'Recorte municipal',
+      reason: `${report.scope.cities.length} municípios: lista territorial e comparativos foram divididos em páginas para preservar todos os municípios.`,
+      source: 'Escopo selecionado e manifesto', displayDecision: 'Cada página municipal conserva o denominador do conjunto completo.', officialSlides: [7, 19, 31] });
+    const missingCoordinates = report.cube.projects.filter((project) => !report.locations.some((location) => location.projectKey === project.key));
+    if (report.locations.length && missingCoordinates.length) add({ code: 'MAP_COORDINATE_COVERAGE_PARTIAL', severity: 'warning', indicator: 'Cobertura geográfica',
+      reason: `${missingCoordinates.length} empreendimento(s) sem coordenada utilizável; permanecem nos indicadores.`,
+      source: 'Cubo e marcadores geográficos', displayDecision: 'Os mapas mostram apenas coordenadas válidas; contagens e estoque mantêm todo o universo.', officialSlides: [67, 68, 69] });
     add({ code: 'EDITORIAL_DUPLICATE_SLIDES_REMOVED', severity: 'info', indicator: 'Sequência editorial',
       reason: `As lâminas oficiais ${[...FIERGS_REDUNDANT_OFFICIAL_SLIDES].join(', ')} repetiam conteúdo já presente no estudo e foram removidas do manifesto ativo.`,
       source: 'Manifesto editorial FIERGS comparado às páginas do estudo de referência',

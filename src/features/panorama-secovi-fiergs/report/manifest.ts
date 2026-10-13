@@ -1,10 +1,11 @@
 import type { MethodStatus } from '../types';
 import { buildMapTilePlan, type GeographicPoint } from '../lib/map-tiles';
 import { FIERGS_4T25_SLIDE_MANIFEST } from './fiergs-manifest';
+import { panoramaScopeIdentity } from '../scope-identity';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
 export type CityComparisonKind = 'sales' | 'market' | 'availability';
-export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'city-scope' | 'horizontal-offer-products' | 'horizontal-price-range'; fiergsOfficialSlide?: number; contentReferenceSlide?: number; mapMode?: 'standard' | 'stock' | 'price'; }
+export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'city-scope' | 'horizontal-offer-products' | 'horizontal-price-range'; fiergsOfficialSlide?: number; contentReferenceSlide?: number; mapMode?: 'standard' | 'stock' | 'price'; scopeCities?: string[]; }
 export interface PanoramaSection { id: string; label: string; start: number; end: number; }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -85,7 +86,7 @@ export const PANORAMA_SECTIONS = createPanoramaSections(PANORAMA_REPORT_MANIFEST
 /* -------------------------------------------------------------------------- */
 
 export interface ManifestSubject {
-  scope?: { entity?: 'secovi-sp' | 'fiergs-rs'; endQuarter?: string };
+  scope?: { entity?: 'secovi-sp' | 'fiergs-rs'; endQuarter?: string; uf?: string; cities?: string[] };
   annualAreaIvv?: { kind: string; previousUnits: number | null; finalUnits: number | null; launchedUnits: number | null; soldUnits: number | null; ivv: number | null }[];
   provenance: { engineVersion?: 'v2' | 'v3' | 'v4'; completedCities?: string[] };
   cube: { projects: { segment: string; finalUnits: number | null; releaseQuarter?: string; launchedUnits?: number | null; launchedVgvMillions?: number | null; typologies?: { launchedUnits: number | null }[] }[] };
@@ -143,7 +144,31 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
       }
       if (!quarterProjects.some((project) => project.launchedVgvMillions !== null && project.launchedVgvMillions !== undefined)) omitted.add(21);
     }
-    return createFiergsReportManifest(annualReady).filter((page) => !omitted.has(page.fiergsOfficialSlide ?? -1)).map((page, index) => ({ ...page, page: index + 1 }));
+    const scope = report.scope;
+    const territory = scope.uf && scope.cities ? panoramaScopeIdentity({ uf: scope.uf, cities: scope.cities, entity: scope.entity }) : null;
+    if (territory?.cities.length === 1) omitted.add(31);
+    if ((report.provenance.completedCities?.length ?? 0) > 0) {
+      if (!report.cube.projects.some((project) => project.segment === 'Horizontal')) [62, 63, 64, 65, 66].forEach((slide) => omitted.add(slide));
+      if (!report.cube.projects.some((project) => project.segment === 'Vertical')) {
+        for (let slide = 8; slide <= 60; slide += 1) omitted.add(slide);
+      }
+    }
+    const pages = createFiergsReportManifest(annualReady).filter((page) => !omitted.has(page.fiergsOfficialSlide ?? -1)).flatMap((page) => {
+      const official = page.fiergsOfficialSlide;
+      const dynamic = { ...page, title: official === 2 && territory ? `${territory.shortLabel} · Mercado Imobiliário · ${scope.endQuarter}`
+        : official === 7 && territory ? territory.official ? 'Região Metropolitana de Porto Alegre' : `Recorte do estudo · ${territory.shortLabel}`
+        : page.title };
+      // Dividir listas/rankings por página preserva todas as cidades em conjuntos maiores.
+      const chunkSize = official === 7 && territory && !territory.official ? 18 : official === 19 || official === 31 ? 10 : 0;
+      if (chunkSize && territory && territory.cities.length > chunkSize) {
+        return Array.from({ length: Math.ceil(territory.cities.length / chunkSize) }, (_, index) => ({ ...dynamic,
+          scopeCities: territory.cities.slice(index * chunkSize, (index + 1) * chunkSize), title: `${dynamic.title} · ${index + 1}/${Math.ceil(territory.cities.length / chunkSize)}` }));
+      }
+      return [dynamic];
+    });
+    const withoutOrphanDividers = pages.filter((page) => !FIERGS_DIVIDERS.has(page.fiergsOfficialSlide ?? -1)
+      || pages.some((other) => other.sectionId === page.sectionId && other.visualFamily !== 'divider'));
+    return withoutOrphanDividers.map((page, index) => ({ ...page, page: index + 1 }));
   }
   return createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
 }

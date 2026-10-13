@@ -13,6 +13,7 @@ import { fiergsPeriodComparisons, type FiergsComparisonPair } from '../domain/pe
 import { roundedPercentages } from '../domain/percentage-rounding';
 import { typologyDisplayLabel } from '../domain/taxonomy';
 import { panoramaExportMetadata } from '../lib/export-metadata';
+import { panoramaScopeIdentity } from '../scope-identity';
 
 /** Token do fundo cartográfico: define, junto das coordenadas, se a lâmina de mapa existe (JG-39). */
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
@@ -57,9 +58,10 @@ class ReportPageBoundary extends Component<{ page: number; fallback: ReactNode; 
 }
 function Corporate({ page, report }: { page: number; report: PanoramaReportModel }) {
   const city = `${scopeCityLabel(report.scope)} - ${report.scope.uf}`;
+  const territory = panoramaScopeIdentity(report.scope);
   if (report.scope.entity === 'fiergs-rs') {
     if ([3, 7].includes(page)) return <div aria-hidden="true"/>;
-    if (page === 8) return <div className="panorama-fiergs-about"><header><p>PANORAMA DO MERCADO IMOBILIÁRIO</p><h2>Sobre o estudo FIERGS</h2><i/></header><main><section><strong>10</strong><span>municípios analisados</span><small>Recorte metropolitano sem Porto Alegre no universo numérico.</small></section><section><strong>2</strong><span>segmentos residenciais</span><small>Mercado vertical e quatro produtos horizontais identificados separadamente.</small></section><section><strong>{panoramaManifestFor(report, MAPBOX_TOKEN).length}</strong><span>páginas neste relatório</span><small>Séries históricas, fechamento, preços, oferta, vendas e localização.</small></section></main><footer>Dados GeoBrain · regras e rastreabilidade preservadas no cubo granular e na auditoria CSV.</footer></div>;
+    if (page === 8) return <div className="panorama-fiergs-about"><header><p>PANORAMA DO MERCADO IMOBILIÁRIO</p><h2>Sobre o estudo FIERGS</h2><i/></header><main><section><strong>{territory.cities.length}</strong><span>{territory.cities.length === 1 ? 'município analisado' : 'municípios analisados'}</span><small>{territory.official ? territory.territoryDescription : `Recorte selecionado · ${territory.uf}`}</small></section><section><strong>{new Set(report.cube.projects.map((project) => project.segment)).size}</strong><span>segmentos observados</span><small>Modelo: mercado vertical, casas em condomínio e loteamentos abertos e fechados.</small></section><section><strong>{panoramaManifestFor(report, MAPBOX_TOKEN).length}</strong><span>páginas neste relatório</span><small>Séries históricas, fechamento, preços, oferta, vendas e localização.</small></section></main><footer>Dados GeoBrain · regras e rastreabilidade preservadas no cubo granular e na auditoria CSV.</footer></div>;
   }
   if (page === 3) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><h3>Nossa visão</h3><p>Ser reconhecido pela sociedade como a entidade mais importante na realização do maior sonho do brasileiro: a casa própria.</p><h3>Nossa missão</h3><p>Desenvolver, representar, promover e defender a atividade imobiliária em seus segmentos, dentro de padrões reconhecidamente éticos e comprometidos com os anseios da coletividade.</p><h3>Nossos valores</h3><ul>{['Presteza','Confiabilidade','Ética','Transparência','Profissionalismo','Eficácia','Inovação','Espírito de equipe'].map((x) => <li key={x}>✓ {x}</li>)}</ul></div>;
   if (page === 7) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><p>O Secovi-SP faz história desde 1946 e cumpre seu compromisso com o Estado de São Paulo por meio do desenvolvimento do setor urbano ao lado de parceiros públicos, corporativos e da grande mídia.</p><p>Seu trabalho representa empresas, viabiliza negócios, incentiva inovação e contribui para a oferta de habitação e o desenvolvimento das cidades.</p><p>O Sindicato mantém diálogo permanente com autoridades e associados, criando propostas e serviços que favorecem a urbanização, a geração de empregos e a segurança nas relações imobiliárias.</p></div>;
@@ -67,19 +69,21 @@ function Corporate({ page, report }: { page: number; report: PanoramaReportModel
   return <div className="panorama-corporate"><h2>Objetivos</h2><i/><p>✓ Analisar a evolução dos principais indicadores do mercado imobiliário local:</p><ol><li>Lançamentos;</li><li>Oferta;</li><li>Vendas;</li><li>Estoque; e</li><li>Evolução de preços.</li></ol><p>✓ Apresentar a evolução analítica do posicionamento das incorporadoras em <strong>{city}</strong>.</p></div>;
 }
 function V2Divider({ title }: { title: string }) { return <div className="panorama-v2-divider"><h2>{title}</h2></div>; }
-function FiergsCityScope({ report }: { report: PanoramaReportModel }) {
-  return <div className="panorama-fiergs-city-scope"><p>RECORTE DO ESTUDO</p><h2>CIDADES ANALISADAS</h2><div>{report.scope.cities.filter(Boolean).map((city) => <span key={city}>{city}</span>)}</div><small>Região Metropolitana de Porto Alegre · município de Porto Alegre não incluído no universo analisado</small></div>;
+function FiergsCityScope({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
+  const territory = panoramaScopeIdentity(report.scope);
+  return <div className="panorama-fiergs-city-scope"><p>RECORTE DO ESTUDO · {territory.uf}</p><h2>{territory.cities.length === 1 ? 'CIDADE ANALISADA' : 'CIDADES ANALISADAS'}</h2><div>{(cities ?? territory.cities).map((city) => <span key={city}>{city}</span>)}</div><small>{territory.cities.length} município(s) no recorte · {quarterLabel(report.scope.endQuarter)}{territory.official ? ' · Região Metropolitana de Porto Alegre, sem Porto Alegre no universo analisado' : ''}</small></div>;
 }
-function FiergsTerritorialCover({ report }: { report: PanoramaReportModel }) {
+function FiergsTerritorialCover({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
+  if (!panoramaScopeIdentity(report.scope).official) return <FiergsCityScope report={report} cities={cities}/>;
   return <div className="panorama-fiergs-territorial"><img src={FIERGS_REGION_MAP} alt="Mapa da Região Metropolitana de Porto Alegre"/><div><p>RECORTE FIERGS</p><h1>REGIÃO<br/>METROPOLITANA<br/>DE PORTO ALEGRE</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong><small>10 municípios analisados · Porto Alegre exibida somente como referência geográfica</small></div></div>;
 }
 function FiergsStudyCover({ report }: { report: PanoramaReportModel }) {
-  return <div className="panorama-fiergs-study-cover"><p>PANORAMA DO MERCADO IMOBILIÁRIO</p><h1>RM PORTO ALEGRE</h1><i/><strong>{quarterLabel(report.scope.endQuarter)}</strong></div>;
+  return <div className="panorama-fiergs-study-cover"><p>PANORAMA DO MERCADO IMOBILIÁRIO · FIERGS</p><h1>{panoramaScopeIdentity(report.scope).coverTitle}</h1><i/><strong>{quarterLabel(report.scope.endQuarter)}</strong></div>;
 }
 function CityCover({ report }: { report: PanoramaReportModel }) {
   const cities = report.scope.cities.filter(Boolean);
   if (report.scope.entity === 'fiergs-rs') return <div aria-label="Capa institucional FIERGS"/>;
-  return <div className={`panorama-v2-city-cover ${(report.scope.entity as string) === 'fiergs-rs' ? 'is-fiergs' : ''}`}><div className="panorama-v2-city-cover-copy"><p>{(report.scope.entity as string) === 'fiergs-rs' ? 'PANORAMA FIERGS · RM PORTO ALEGRE' : 'PANORAMA IMOBILIÁRIO DE'}</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
+  return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DE</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
 function V2Summary({ report }: { report: PanoramaReportModel }) {
   const sections = createPanoramaSections(panoramaManifestFor(report, MAPBOX_TOKEN), report.scope.entity);
@@ -322,12 +326,12 @@ function FiergsQuarterlySlide({ report, officialSlide }: { report: PanoramaRepor
     : fiergsPeriodComparisons(base, report.scope.endQuarter, { quarter: true, contextual: true });
   return <div className="panorama-fiergs-quarterly">
     <header><h2>{config.title}<span>{rolling ? 'ACUMULADO 12 MESES' : 'POR TRIMESTRE'}</span></h2><div><b>VARIAÇÕES ANUAIS</b><section>{annualComparisons.map(({ from, to, delta }) => <span key={to.year}><small>{from.year} × {to.year}</small><strong>{delta === null ? '—' : `${delta >= 0 ? '+' : ''}${pct(delta)}`}</strong></span>)}</section></div></header>
-    <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 24, right: 28, top: 42, bottom: 24 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => visibleTicks.has(index) ? compactQuarterLabel(String(value)) : ''} tickLine={false} tickMargin={9} axisLine={{ stroke: '#b8b8b8' }} interval={0} minTickGap={0}/><Tooltip formatter={(value) => format(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as LaunchSeries['quarter'])}/><Line type="monotone" dataKey="vertical" name="RM de Porto Alegre" stroke="#5d7737" strokeWidth={4} dot={{ r: 2.5, fill: '#5d7737' }} isAnimationActive={false} label={(props) => visibleLabels.has(Number(props.index)) ? <FiergsPointValue {...props} data={data} format={format} referenceQuarter={report.scope.endQuarter[0]}/> : null}/></LineChart></ResponsiveContainer><p>RM de Porto Alegre · {config.unit}</p></div><FiergsContextComparisons pairs={comparisons} format={format}/></main>
+    <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 24, right: 28, top: 42, bottom: 24 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => visibleTicks.has(index) ? compactQuarterLabel(String(value)) : ''} tickLine={false} tickMargin={9} axisLine={{ stroke: '#b8b8b8' }} interval={0} minTickGap={0}/><Tooltip formatter={(value) => format(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as LaunchSeries['quarter'])}/><Line type="monotone" dataKey="vertical" name={panoramaScopeIdentity(report.scope).shortLabel} stroke="#5d7737" strokeWidth={4} dot={{ r: 2.5, fill: '#5d7737' }} isAnimationActive={false} label={(props) => visibleLabels.has(Number(props.index)) ? <FiergsPointValue {...props} data={data} format={format} referenceQuarter={report.scope.endQuarter[0]}/> : null}/></LineChart></ResponsiveContainer><p>{panoramaScopeIdentity(report.scope).shortLabel} · {config.unit}</p></div><FiergsContextComparisons pairs={comparisons} format={format}/></main>
     <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer>
   </div>;
 }
 
-function FiergsLaunchCitySlide({ report }: { report: PanoramaReportModel }) {
+function FiergsLaunchCitySlide({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
   const rows = report.scope.cities.map((city) => {
     const projects = report.cube.projects.filter((project) => project.segment === 'Vertical' && project.city === city && project.releaseQuarter === report.scope.endQuarter);
     return { city, units: projects.reduce((sum, project) => sum + (project.launchedUnits ?? 0), 0), projects };
@@ -337,9 +341,9 @@ function FiergsLaunchCitySlide({ report }: { report: PanoramaReportModel }) {
     const grouped = new Map<string, number>();
     row.projects.forEach((project) => grouped.set(project.neighborhood || 'Bairro não informado', (grouped.get(project.neighborhood || 'Bairro não informado') ?? 0) + (project.launchedUnits ?? 0)));
     return [...grouped].map(([neighborhood, units]) => ({ label: `${neighborhood} — ${row.city}`, units }));
-  }).sort((a, b) => b.units - a.units).slice(0, 7);
+  }).filter((row) => !cities || cities.some((city) => row.label.endsWith(`— ${city}`))).sort((a, b) => b.units - a.units).slice(0, 7);
   const bars = (items: { label: string; units: number }[]) => <div className="panorama-fiergs-share-bars">{items.map((item) => <div key={item.label}><span>{item.label}</span><i><b style={{ width: `${total ? item.units / total * 100 : 0}%` }}/></i><strong>{total ? pct(item.units / total * 100) : '—'}</strong></div>)}</div>;
-  return <div className="panorama-fiergs-city-share"><h2>UNIDADES VERTICAIS LANÇADAS<span>POR BAIRRO E CIDADE</span></h2><main><section>{bars(neighborhoods)}</section><section>{bars(rows.map((row) => ({ label: row.city, units: row.units })))}</section></main><footer>Total do trimestre: {n(total)} unidades · Fonte: cubo granular GeoBrain</footer></div>;
+  return <div className="panorama-fiergs-city-share"><h2>UNIDADES VERTICAIS LANÇADAS<span>{report.scope.cities.length === 1 ? 'POR BAIRRO' : 'POR BAIRRO E CIDADE'}</span></h2><main><section>{bars(neighborhoods)}</section>{report.scope.cities.length > 1 && <section>{bars(rows.filter((row) => !cities || cities.includes(row.city)).map((row) => ({ label: row.city, units: row.units })))}</section>}</main><footer>Total do trimestre: {n(total)} unidades · Fonte: cubo granular GeoBrain</footer></div>;
 }
 
 type FiergsDistributionRow = { label: string; value: number };
@@ -353,10 +357,10 @@ export function fiergsDistributionData(rows: FiergsDistributionRow[], options: {
   const max = Math.max(1, ...visible.map((row) => Math.abs(row.value)));
   return { visible, shares, total, max };
 }
-function FiergsDistributionSlide({ title, subtitle, rows, unit, className = '', includeZero = false, maxRows = 9 }: { title: string; subtitle: string; rows: FiergsDistributionRow[]; unit: string; className?: string; includeZero?: boolean; maxRows?: number }) {
+function FiergsDistributionSlide({ title, subtitle, rows, unit, className = '', includeZero = false, maxRows = 9, labels }: { title: string; subtitle: string; rows: FiergsDistributionRow[]; unit: string; className?: string; includeZero?: boolean; maxRows?: number; labels?: string[] }) {
   const { visible, shares, total, max } = fiergsDistributionData(rows, { includeZero });
   return <div className={`panorama-fiergs-distribution ${className}`.trim()}><header><h2>{title}<span>{subtitle}</span></h2><strong>{n(total)}<small>{unit}</small></strong></header>
-    {visible.length ? <main>{visible.slice(0, maxRows).map((row, index) => <div key={row.label} className={row.value < 0 ? 'is-negative' : row.value === 0 ? 'is-zero' : undefined}><span>{row.label}</span><i><b style={{ width: `${Math.abs(row.value) / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{pct(shares[index])}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
+    {visible.length ? <main>{visible.map((row, index) => ({ row, index })).filter(({ row }) => !labels || labels.includes(row.label)).slice(0, maxRows).map(({ row, index }) => <div key={row.label} className={row.value < 0 ? 'is-negative' : row.value === 0 ? 'is-zero' : undefined}><span>{row.label}</span><i><b style={{ width: `${Math.abs(row.value) / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{pct(shares[index])}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
     <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer></div>;
 }
 function groupedValues(values: FiergsDistributionRow[]) { const groups = new Map<string, number>(); values.forEach(({ label, value }) => groups.set(label, (groups.get(label) ?? 0) + value)); return [...groups].map(([label, value]) => ({ label, value })); }
@@ -393,9 +397,9 @@ function FiergsPatternTemporalSlide({ report, kind, rolling = false }: { report:
     <footer>Participação MCMV destacada nos trimestres equivalentes · Fonte: GeoBrain</footer></div>;
 }
 
-function FiergsSalesCitySlide({ report }: { report: PanoramaReportModel }) {
+function FiergsSalesCitySlide({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
   const rows = report.cityComparisons.sales.filter((row) => row.liquidSales !== null).map((row) => ({ label: row.city, value: row.liquidSales ?? 0 }));
-  return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle={`POR CIDADE · ${quarterLabel(report.scope.endQuarter)}`} rows={rows} unit="unidades" className="is-city-ranking" includeZero maxRows={10}/>;
+  return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle={`POR CIDADE · ${quarterLabel(report.scope.endQuarter)}`} rows={rows} unit="unidades" className="is-city-ranking" includeZero maxRows={10} labels={cities}/>;
 }
 
 function FiergsDormitoryPriceSlide({ report, bedroom }: { report: PanoramaReportModel; bedroom: number }) {
@@ -424,7 +428,7 @@ function FiergsMarketQuarterlySlide({ report, officialSlide }: { report: Panoram
     ? fiergsPeriodComparisons(data, report.scope.endQuarter, { rolling12Months: true })
     : fiergsPeriodComparisons(base, report.scope.endQuarter, { quarter: true, contextual: true, snapshot: stock || ivv });
   return <div className="panorama-fiergs-quarterly"><header><h2>{title}<span>{rolling ? 'ACUMULADO 12 MESES' : 'POR TRIMESTRE'}</span></h2><div><b>VARIAÇÕES ANUAIS</b><section>{annualComparisons.map(({ from, to, delta: annualDelta }) => <span key={to.year}><small>{from.year} × {to.year}</small><strong>{annualDelta === null ? '—' : `${annualDelta >= 0 ? '+' : ''}${pct(annualDelta)}`}</strong></span>)}</section></div></header>
-    <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 24, right: 28, top: 42, bottom: 24 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => visibleTicks.has(index) ? compactQuarterLabel(String(value)) : ''} tickLine={false} tickMargin={9} axisLine={{ stroke: '#b8b8b8' }} interval={0}/><Tooltip formatter={(value) => format(Number(value))}/><Line type="monotone" dataKey="vertical" name="RM de Porto Alegre" stroke="#5d7737" strokeWidth={4} dot={{ r: 2.5, fill: '#5d7737' }} isAnimationActive={false} label={(props) => visibleLabels.has(Number(props.index)) ? <FiergsPointValue {...props} data={data} format={format} referenceQuarter={report.scope.endQuarter[0]}/> : null}/></LineChart></ResponsiveContainer><p>RM de Porto Alegre · {ivv ? '%' : vgv ? 'R$ milhões' : 'unidades'}</p></div><FiergsContextComparisons pairs={comparisons} format={format}/></main><footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · série temporal GeoBrain</footer></div>;
+    <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 24, right: 28, top: 42, bottom: 24 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => visibleTicks.has(index) ? compactQuarterLabel(String(value)) : ''} tickLine={false} tickMargin={9} axisLine={{ stroke: '#b8b8b8' }} interval={0}/><Tooltip formatter={(value) => format(Number(value))}/><Line type="monotone" dataKey="vertical" name={panoramaScopeIdentity(report.scope).shortLabel} stroke="#5d7737" strokeWidth={4} dot={{ r: 2.5, fill: '#5d7737' }} isAnimationActive={false} label={(props) => visibleLabels.has(Number(props.index)) ? <FiergsPointValue {...props} data={data} format={format} referenceQuarter={report.scope.endQuarter[0]}/> : null}/></LineChart></ResponsiveContainer><p>{panoramaScopeIdentity(report.scope).shortLabel} · {ivv ? '%' : vgv ? 'R$ milhões' : 'unidades'}</p></div><FiergsContextComparisons pairs={comparisons} format={format}/></main><footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · série temporal GeoBrain</footer></div>;
 }
 
 function fiergsBackground(def: ReportPageDefinition): string | undefined {
@@ -540,21 +544,21 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
   if (official === 2) return <FiergsStudyCover report={report}/>;
   if (official === 5) return <Corporate page={8} report={report}/>;
   if (official === 6) return <V2Summary report={report}/>;
-  if (official === 7) return <FiergsTerritorialCover report={report}/>;
+  if (official === 7) return <FiergsTerritorialCover report={report} cities={def.scopeCities}/>;
   if (official && [9, 11, 12, 14, 20, 22].includes(official)) return <FiergsQuarterlySlide report={report} officialSlide={official}/>;
   if (official === 10) return <FiergsDistributionSlide title="EMPREENDIMENTOS VERTICAIS LANÇADOS" subtitle="POR PADRÃO" rows={launchDistribution(report, 'standard-projects')} unit="empreendimentos"/>;
   if (official === 13 || official === 18) return <FiergsDistributionSlide title="UNIDADES VERTICAIS LANÇADAS" subtitle="POR PADRÃO" rows={launchDistribution(report, 'standard-units')} unit="unidades"/>;
   if (official === 15) return <FiergsPatternTemporalSlide report={report} kind="launches"/>;
   if (official === 16) return <FiergsPatternTemporalSlide report={report} kind="launches" rolling/>;
   if (official === 17) return <FiergsDistributionSlide title="UNIDADES VERTICAIS LANÇADAS" subtitle="POR TIPOLOGIA" rows={launchDistribution(report, 'typology-units')} unit="unidades"/>;
-  if (official === 19) return <FiergsLaunchCitySlide report={report}/>;
+  if (official === 19) return <FiergsLaunchCitySlide report={report} cities={def.scopeCities}/>;
   if (official === 21) return <FiergsDistributionSlide title="VGV LANÇADO VERTICAL" subtitle="POR PADRÃO" rows={launchDistribution(report, 'standard-vgv')} unit="R$ milhões"/>;
   if (official && [24, 26, 32, 33, 35, 39].includes(official)) return <FiergsMarketQuarterlySlide report={report} officialSlide={official}/>;
   if (official === 27) return <FiergsPatternTemporalSlide report={report} kind="sales"/>;
   if (official === 28) return <FiergsPatternTemporalSlide report={report} kind="sales" rolling/>;
   if (official === 25 || official === 30) return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle="POR PADRÃO" rows={temporalDistribution(report.sales.units)} unit="unidades"/>;
   if (official === 29) return <FiergsDistributionSlide title="UNIDADES VERTICAIS VENDIDAS" subtitle="POR TIPOLOGIA" rows={temporalDistribution(report.sales.unitsByTypology).map((row) => ({ ...row, label: typologyDisplayLabel(row.label) }))} unit="unidades"/>;
-  if (official === 31) return <FiergsSalesCitySlide report={report}/>;
+  if (official === 31) return <FiergsSalesCitySlide report={report} cities={def.scopeCities}/>;
   if (official === 36) return <OfferTableSlide report={report} dimension="typology"/>;
   if (official === 37) return <OfferTableSlide report={report} dimension="pattern"/>;
   if (official === 40) return <AreaIvvSlide report={report}/>;

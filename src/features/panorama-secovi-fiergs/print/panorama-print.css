@@ -122,11 +122,11 @@
 .panorama-fiergs-city-scope p { margin:0 0 .8cqw; color:#5d7737; font-size:1.45cqw; font-weight:800; letter-spacing:.12em; }
 .panorama-fiergs-city-scope h2 { margin:0 0 3.2cqw; font-size:4.4cqw; line-height:1; }
 .panorama-fiergs-city-scope > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.15cqw 6cqw; padding:2.5cqw 3cqw; border-top:.2cqw solid #5d7737; border-bottom:.2cqw solid #5d7737; }
-.panorama-fiergs-city-scope span { font-size:2.15cqw; font-weight:700; }
+.panorama-fiergs-city-scope span { font-size:1.7cqw; font-weight:700; overflow-wrap:anywhere; }
 .panorama-fiergs-city-scope small { margin-top:auto; color:#5b6165; font-size:1.25cqw; }
 .panorama-fiergs-study-cover { display:flex; height:100%; box-sizing:border-box; padding:14cqw 9cqw 7cqw; flex-direction:column; align-items:flex-start; background:linear-gradient(135deg,#f7f8f4 0 55%,#e7eddc 55%); color:#151912; }
 .panorama-fiergs-study-cover p { margin:0 0 1.2cqw; color:#5d7737; font-size:1.55cqw; font-weight:800; letter-spacing:.14em; }
-.panorama-fiergs-study-cover h1 { max-width:64cqw; margin:0; font-size:5.6cqw; line-height:.95; }
+.panorama-fiergs-study-cover h1 { max-width:75cqw; margin:0; font-size:5.6cqw; line-height:1.05; overflow-wrap:anywhere; }
 .panorama-fiergs-study-cover i { width:10cqw; height:.75cqw; margin:2cqw 0; border-radius:2cqw; background:#ffd200; }
 .panorama-fiergs-study-cover strong { font-size:2.6cqw; }
 .panorama-fiergs-about { display:flex; height:100%; box-sizing:border-box; padding:5.5cqw 7.5cqw 4.5cqw; flex-direction:column; background:linear-gradient(145deg,#fff 0 62%,#eef2e8 62%); color:#171a15; }

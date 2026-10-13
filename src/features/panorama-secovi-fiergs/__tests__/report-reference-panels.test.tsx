@@ -6,13 +6,14 @@ import { FormulaReference, GlossaryReference, MethodologyReference } from '../co
 import { buildPanoramaReportModel } from '../report/model';
 import { buildCityCube } from '../domain/cube';
 import type { PanoramaScope } from '../types';
+import { FIERGS_RM_PORTO_ALEGRE_PRESET } from '../presets';
 
 const empty = { rows: [], available: true, source: 'fixture' };
 const sources = { sales: empty, salesTypology: empty, stock: empty, stockTypology: empty, ivv: empty, ivvTypology: empty, ticket: empty, ticketTypology: empty, meter: empty, meterTypology: empty };
 
 describe('referências e avisos do relatório', () => {
   it('distingue regras FIERGS e Secovi-SP e documenta IVV, disponibilidade e unidades', () => {
-    const { unmount } = render(<MethodologyReference entity="fiergs-rs"/>);
+    const { unmount } = render(<MethodologyReference entity="fiergs-rs" scope={{ ...FIERGS_RM_PORTO_ALEGRE_PRESET.scope, endQuarter: '2T2026' }}/>);
     expect(screen.getByText(/Porto Alegre não integra o recorte/)).toBeTruthy();
     expect(screen.getByText(/vendas líquidas ÷ \(estoque final \+ vendas líquidas\)/)).toBeTruthy();
     unmount();
@@ -54,7 +55,7 @@ describe('referências e avisos do relatório', () => {
     const report = buildPanoramaReportModel(scope, [], sources, [], { cubes: [cube] });
     const { container } = render(<VgvSlide report={report}/>);
     const headers = [...container.querySelectorAll('th')].map((header) => header.textContent);
-    expect(headers).toContain('Lançada');
+    expect(headers).toContain('Lançada na janela');
     expect(headers).toContain('Vendas líquidas');
     expect(headers).not.toContain('Lançada (R$ mi)');
     expect(headers).not.toContain('Final (R$ mi)');
