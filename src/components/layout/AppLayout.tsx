@@ -4,7 +4,6 @@ import {
   Map,
   Building2,
   Bot,
-  BrainCircuit,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -290,7 +289,13 @@ export function AppLayout({ children }: AppLayoutProps) {
             aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
             aria-expanded={!collapsed}
           >
-            {collapsed ? <BrainCircuit className="h-6 w-6" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}
+            {collapsed ? (
+              <svg className="h-6 w-6 overflow-hidden" viewBox="650 248 142 100" aria-hidden="true" focusable="false" data-brand="brain-symbol">
+                {/* Enquadramento do símbolo original: mantém pixels e cores do logo. */}
+                <defs><clipPath id="brain-sidebar-symbol-crop"><path d="M650 248H792V348H660V303H650Z" /></clipPath></defs>
+                <image href={brainLogo} width="1024" height="413" clipPath="url(#brain-sidebar-symbol-crop)" />
+              </svg>
+            ) : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}
           </button>
         </div>
 
