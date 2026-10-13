@@ -43,6 +43,12 @@ Listas territoriais paginadas a cada 18 cidades; distribuições municipais a ca
 
 ## G5/G6 — pendentes
 
+### Continuação — publicação autorizada
+
+Gabriel autorizou nesta conversa o envio dos oito commits listados no fechamento, incluindo os quatro do Corretor. Novo fetch confirmou 0/8 e documentação compatível; árvore limpa. Código da ampliação em `e634eb8`. Esta rodada inclui um commit documental de registro da autorização e roteiro G5; envio sem rebase/force e confirmação posterior pela comparação main/origin. Deploy e geração reais permanecem a verificar.
+
+Ensaio de Gabriel: após publicar/atualizar o site, usar modelo FIERGS, RS, janela 1T2023–2T2026, e gerar PDF + Auditoria CSV de (1) preset FIERGS RS completo, (2) Canoas isolada, (3) Canoas + Esteio + São Leopoldo, desde que disponíveis no catálogo. O preset deve manter capa/mapa regional; os dois personalizados devem identificar recorte/UF, sem mapa das dez cidades. Conferir download liberado, avisos e nomes distintos. Guardar os insumos novos em `.local-inputs/fiergs-recortes-livres/` e informar caminhos para análise. Não há novo aceite ou e-mail nesta rodada.
+
 Fechamento: `npm.cmd run check:live-docs -- origin/main HEAD` aprovado. Fetch final confirmou `0/8`: quatro commits FIERGS (seleção, reconciliação, apresentação e exportação/regressão), quatro Corretor (`f5eff70`, `bb3326d`, `74cc572`, `47107b2`). Árvore do repositório limpa no fechamento; nenhum commit FIERGS contém alteração em Corretor ou Sinduscon. Push da main enviaria também os commits paralelos; autorização ainda não recebida.
 
 Sem push/deploy/e-mail. Antes de publicar, apresentar os commits paralelos na main e pedir autorização sobre o histórico a enviar. Após publicação autorizada, Gabriel gera preset, cidade isolada e conjunto com auditorias para conferir dados/arte; só depois anunciar a capacidade à Juliana. O aceite anterior permanece encerrado.

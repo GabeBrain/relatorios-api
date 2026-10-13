@@ -2,6 +2,8 @@
 
 Data: 13/10/2026. Estado: G0–G4 implementados e validados localmente; G5 publicação/ensaio real e G6 comunicação pendentes. Typecheck global tem falha externa no Corretor; feature isolada e build aprovados. Evidências em [registro dos portões](EVIDENCIAS_FIERGS_RECORTES_LIVRES_2026-10-13.md).
 
+Continuação: publicação dos oito commits autorizada por Gabriel; código da ampliação `e634eb8`. Execução do envio e confirmação Git nesta rodada; G5 só fecha após análise do ensaio real de Gabriel (preset, Canoas, conjunto Canoas/Esteio/São Leopoldo, todos 2T2026 com CSV). G6 aguarda essas evidências.
+
 ## Objetivo e baseline
 
 Permitir aplicar o modelo FIERGS a uma cidade ou qualquer conjunto de cidades monitoradas e autorizadas, dentro de uma única UF por estudo. Manter o preset das dez cidades do RS como atalho e preservar o material aceito pela Juliana. A expansão é uma entrega nova; o aceite anterior permanece encerrado.
