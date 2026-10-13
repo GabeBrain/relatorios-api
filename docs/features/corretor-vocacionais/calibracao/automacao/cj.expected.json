@@ -1,0 +1,617 @@
+{
+  "summary": {
+    "candidatas": 57,
+    "leituras": 57,
+    "achados": 10,
+    "tabelas": "28/44",
+    "acertos": {
+      "fonte": {
+        "comparados": 23,
+        "batem": 22
+      },
+      "cruzamentos": {
+        "feitos": 20,
+        "batem": 9
+      }
+    }
+  },
+  "findings": [
+    {
+      "id": "structure",
+      "type": "STRUCTURE_MISSING",
+      "section": "ESTRUTURA",
+      "slideRef": "—",
+      "title": "Checklist estrutural (1 ausente(s) · slide final a conferir)",
+      "detail": "Cobertura por título e texto do slide, fora do sumário. Itens “a conferir” são mapas/prints: o conteúdo pode estar dentro da imagem — confirme visualmente antes de tratar como ausência. Slide final s153 sem conteúdo detectável; confirme visualmente antes de tratar como ausência.",
+      "ok": false,
+      "viz": {
+        "kind": "text",
+        "checklist": [
+          {
+            "label": "1.1 — Endereço",
+            "status": "ok"
+          },
+          {
+            "label": "1.2 — Latitude/longitude",
+            "status": "ok"
+          },
+          {
+            "label": "1.3 — Área do terreno",
+            "status": "ok"
+          },
+          {
+            "label": "1.4 — Acessos",
+            "status": "ok"
+          },
+          {
+            "label": "1.5 — Entorno varejo/serviços",
+            "status": "ok"
+          },
+          {
+            "label": "1.6 — Entorno revendas",
+            "status": "ok"
+          },
+          {
+            "label": "1.7 — Mapeamento físico",
+            "status": "ok"
+          },
+          {
+            "label": "1.9 — Distância ao centro",
+            "status": "ok"
+          },
+          {
+            "label": "2.1 — Dados cidade/estado/Brasil",
+            "status": "ok"
+          },
+          {
+            "label": "2.2 — Variação da população",
+            "status": "ok"
+          },
+          {
+            "label": "2.3 — Variação dos domicílios",
+            "status": "ok"
+          },
+          {
+            "label": "2.4 — População por renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.4.1 — Mapa de densidade populacional",
+            "status": "ok"
+          },
+          {
+            "label": "2.5 — Domicílios por renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.6 — Domicílios por moradores",
+            "status": "ok"
+          },
+          {
+            "label": "2.5.1 — Mapa de renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.7 — Domicílios por tipo",
+            "status": "ok"
+          },
+          {
+            "label": "2.7.1 — Mapa de verticalização",
+            "status": "ok"
+          },
+          {
+            "label": "2.8 — Ocupação/propriedade",
+            "status": "ok"
+          },
+          {
+            "label": "2.8.1 — Mapa de propriedade",
+            "status": "ok"
+          },
+          {
+            "label": "3.1 — Absorção Z.I. total",
+            "status": "ok"
+          },
+          {
+            "label": "3.1.1 — Cenários de absorção",
+            "status": "ok"
+          },
+          {
+            "label": "4.1 — Mapa de localização",
+            "status": "ok"
+          },
+          {
+            "label": "4.2 — Mapa R$/m²",
+            "status": "ok"
+          },
+          {
+            "label": "4.3 — Mapa de estoque",
+            "status": "ok"
+          },
+          {
+            "label": "4.4 — Mapa de área média",
+            "status": "ok"
+          },
+          {
+            "label": "4.5 — Consolidada",
+            "status": "ok"
+          },
+          {
+            "label": "4.6 — Oferta por padrão",
+            "status": "ok"
+          },
+          {
+            "label": "4.7 — Oferta por ano",
+            "status": "ok"
+          },
+          {
+            "label": "4.8 — Oferta por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "4.9 — Preços por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "4.10 — Preços por padrão",
+            "status": "ok"
+          },
+          {
+            "label": "5.1 — Lacunas tipologia × metragem",
+            "status": "ok"
+          },
+          {
+            "label": "5.2 — Lacunas tipologia × preço",
+            "status": "ok"
+          },
+          {
+            "label": "5.3 — Lacunas preço × metragem",
+            "status": "ok"
+          },
+          {
+            "label": "6 — Fichas técnicas",
+            "status": "ok"
+          },
+          {
+            "label": "7.1 — Futuros lançamentos",
+            "status": "missing"
+          },
+          {
+            "label": "8.1 — Revenda",
+            "status": "ok"
+          },
+          {
+            "label": "8.2 — Revenda por bairro",
+            "status": "ok"
+          },
+          {
+            "label": "8.3 — Revenda por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "8.4 — Ticket de revenda",
+            "status": "ok"
+          },
+          {
+            "label": "Slide final s153 sem conteúdo detectável",
+            "status": "na"
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-23-domicilios-brasil-unidade-domicilios",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "SOCIO",
+      "slideRef": "s23",
+      "title": "Unidade trocada no slide — Brasil",
+      "detail": "O número 75.298.796 está correto, mas o slide o rotula como habitantes (hab.); na planilha ele é de domicílios (dom.). Corrija só a unidade. Origem: Campos do Jordão_POPULACAO E DOMICÍLIOS.xlsx › Domicilios › linha 9.",
+      "confidence": 1,
+      "origem": "DET",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slide 23",
+        "rightLabel": "Campos do Jordão_POPULACAO E DOMICÍLIOS.xlsx › Domicilios › linha 9",
+        "rows": [
+          {
+            "label": "Brasil · unidade",
+            "left": "75.298.796 hab.",
+            "right": "75.298.796 dom.",
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "iavis-bin-34bf9eac86-0",
+      "type": "BINNING_RULE",
+      "section": "GLOBAL",
+      "slideRef": "s45",
+      "title": "Furo/sobreposição nas faixas da tabela",
+      "detail": "Sobreposição entre «Abaixo de R$ 27.511,00» e «R$ 27.320,01 a R$ 36.511,00»: os intervalos cobrem valores em comum. O mesmo cabeçalho se repete em 4 slides (s45, s53, s54, s55).",
+      "ok": false,
+      "viz": {
+        "kind": "binrange",
+        "unit": "",
+        "bins": [
+          {
+            "label": "Abaixo de R$ 27.511,00",
+            "from": 0,
+            "to": 27511
+          },
+          {
+            "label": "R$ 27.320,01 a R$ 36.511,00",
+            "from": 27320.01,
+            "to": 36511
+          },
+          {
+            "label": "R$ 36.511,01 a R$ 37.253,00",
+            "from": 36511.01,
+            "to": 37253
+          },
+          {
+            "label": "R$ 37.253,01 a R$ 39.470,00",
+            "from": 37253.01,
+            "to": 39470
+          },
+          {
+            "label": "R$ 39.470,01 a R$ 42.267,00",
+            "from": 39470.01,
+            "to": 42267
+          },
+          {
+            "label": "Acima de R$ 42.267,00",
+            "from": 42267,
+            "to": null
+          }
+        ],
+        "gapAfterIndex": 0,
+        "gapDescription": "Sobreposição entre «Abaixo de R$ 27.511,00» e «R$ 27.320,01 a R$ 36.511,00»: os intervalos cobrem valores em comum."
+      },
+      "evidenceSha1": "34bf9eac868a0f067685ace70ee1554fdd646144",
+      "escalated": false,
+      "origem": "IA_visao"
+    },
+    {
+      "id": "iavis-sum-161b0943d1-0",
+      "type": "ABSOLUTE_SUM",
+      "section": "MERCADO",
+      "slideRef": "s72",
+      "title": "Tabela não fecha no total (MERCADO)",
+      "detail": "Coluna «Unidades por Tipologia»: soma 88 ≠ total 100 — 24 + 32 + 32 = 88, diferença de 12. Números lidos da imagem do slide 72 (lido pelo modelo gpt-4o). Pode ser erro do estudo ou dígito mal lido: confira na imagem. — o slide declara exclusão: “Unidades garden, duplex e coberturas não são apresentadas na análise para evitar distorções de preço e metragem.”. O total pode não fechar por isso (tabela completa costuma ficar no apêndice); confira antes de corrigir.",
+      "ok": false,
+      "viz": {
+        "kind": "table",
+        "table": {
+          "title": "MERCADO",
+          "columns": [
+            "Empreendimento",
+            "Bairro",
+            "Incorporadora",
+            "Lançamento",
+            "Oferta Lançada",
+            "Oferta Atual",
+            "Disp. (%)",
+            "Quartos",
+            "Padrão",
+            "Unidades por Tipologia",
+            "Preço (R$)",
+            "m² (priv.)",
+            "R$/m² (priv.)",
+            "Vagas de Garagem",
+            "Abaixo ou acima da média"
+          ],
+          "rows": [
+            [
+              "Conceito Campos Reserva",
+              "Jardim Embaixador",
+              "Carvalho",
+              "mai/26",
+              36,
+              30,
+              83.3,
+              2,
+              "Médio",
+              24,
+              110250,
+              102,
+              10821,
+              2,
+              6.6
+            ],
+            [
+              "Montclair",
+              "Jardim Manancial",
+              "CDM",
+              "jun/26",
+              64,
+              60,
+              93.8,
+              2,
+              "Standard",
+              32,
+              857945,
+              86,
+              9930,
+              1,
+              -2.2
+            ],
+            [
+              "Montclair",
+              "Jardim Manancial",
+              "CDM",
+              "jun/26",
+              null,
+              null,
+              93.8,
+              2,
+              "Standard",
+              32,
+              892710,
+              91,
+              9810,
+              1,
+              -3.4
+            ]
+          ],
+          "totals": [
+            "Total",
+            100,
+            90,
+            90,
+            null,
+            null,
+            100,
+            1830195,
+            279,
+            30561,
+            null,
+            null
+          ],
+          "colKinds": [
+            "label",
+            "label",
+            "label",
+            "label",
+            "count",
+            "count",
+            "rate",
+            "measure",
+            "label",
+            "count",
+            "measure",
+            "measure",
+            "measure",
+            "count",
+            "rate"
+          ],
+          "totalKind": "mixed",
+          "shareOf": {}
+        },
+        "badColumns": [
+          9
+        ],
+        "badRows": [],
+        "notes": [
+          "Coluna «Unidades por Tipologia»: soma 88 ≠ total 100 — 24 + 32 + 32 = 88, diferença de 12"
+        ],
+        "totalsByFit": true
+      },
+      "evidenceSha1": "161b0943d17b476113ea7f3d27be9112dac04058",
+      "escalated": false,
+      "confidence": 3,
+      "origem": "IA_visao"
+    },
+    {
+      "id": "cross-renda-27-37",
+      "type": "CROSS_TABLE_MISMATCH",
+      "section": "ABSORCAO",
+      "slideRef": "s27 × s37",
+      "title": "Faixas de renda divergem entre sociodemografia e absorção",
+      "detail": "As faixas de renda da absorção devem reproduzir a tabela “Domicílios por faixa de renda”. — o slide declara exclusão: “Obs.: Esta análise desconsidera absorção de domicílios para segunda moradia.”. O total pode não fechar por isso (tabela completa costuma ficar no apêndice); confira antes de corrigir.",
+      "ok": false,
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "s27 — Faixas de Renda",
+        "rightLabel": "s37 — Cenário BASE",
+        "rows": [
+          {
+            "label": "Faixa 1",
+            "left": "Acima de R$36.511,01",
+            "right": "Acima de R$ 27.320,01",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 2",
+            "left": "R$ 27.320,01 a R$ 36.511,00",
+            "right": "R$ 20.983,01 a R$ 27.320,00",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 3",
+            "left": "R$ 20.983,01 a R$ 27.320,00",
+            "right": "R$ 17.147,01 a R$ 20.983,00",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 4",
+            "left": "R$ 17.147,01 a R$ 20.983,00",
+            "right": "R$ 14.590,01 a R$ 17.147,00",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 5",
+            "left": "R$ 14.590,01 a R$ 17.147,00",
+            "right": "R$ 10.755,01 a R$ 14.590,00",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 6",
+            "left": "R$ 10.755,01 a R$ 14.590,00",
+            "right": "R$ 7.716,01 a R$ 10.755,00",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 7",
+            "left": "R$ 7.716,01 a R$ 10.755,00",
+            "right": "Abaixo de R$ 7.716,00",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 8",
+            "left": "Abaixo de R$ 7.716,00",
+            "right": "",
+            "mismatch": true
+          }
+        ]
+      },
+      "evidenceSha1": "0f5e8e5c53927e4b8b45abae92eaeeb3129a65ab",
+      "origem": "IA_visao",
+      "confidence": 3
+    },
+    {
+      "id": "cross-lacunas-bins-86-88",
+      "type": "CROSS_TABLE_MISMATCH",
+      "section": "LACUNAS",
+      "slideRef": "s86 × s88",
+      "title": "Faixas de lacunas divergem entre as análises",
+      "detail": "A tabela geral e suas quebras devem usar o mesmo conjunto de faixas; 10 de 10 faixas não coincidem. Primeira divergência: «Até 40m²» × «Até 65m²». Os totais de Oferta Lançada também diferem: s86 = 462, s88 = 447. — o slide declara exclusão: “Obs.: Não são considerados na análise metragem as unidades duplex, garden, coberturas e esgotados”. O total pode não fechar por isso (tabela completa costuma ficar no apêndice); confira antes de corrigir.",
+      "ok": false,
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "s86 — Oferta Lançada",
+        "rightLabel": "s88 — Oferta Lançada",
+        "rows": [
+          {
+            "label": "Faixa 1",
+            "left": "Até 40m²",
+            "right": "Até 65m²",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 2",
+            "left": "De 41m² a 55m²",
+            "right": "De 66m² a 70m²",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 3",
+            "left": "De 56m² a 60m²",
+            "right": "De 71m² a 75m²",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 4",
+            "left": "De 61m² a 65m²",
+            "right": "De 76m² a 80m²",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 5",
+            "left": "De 66m² a 70m²",
+            "right": "De 81m² a 85m²",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 6",
+            "left": "De 71m² a 80m²",
+            "right": "De 86m² a 95m²",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 7",
+            "left": "De 81m² a 85m²",
+            "right": "De 96m² a 110m²",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 8",
+            "left": "De 86m² a 95m²",
+            "right": "De 111m² a 120m²",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 9",
+            "left": "De 96m² a 110m²",
+            "right": "Acima de 120m²",
+            "mismatch": true
+          },
+          {
+            "label": "Faixa 10",
+            "left": "Acima de 110m²",
+            "right": "—",
+            "mismatch": true
+          }
+        ]
+      },
+      "evidenceSha1": "57d6146effbdf2710c53beeee39fc551d3e8704c",
+      "origem": "IA_visao",
+      "confidence": 3
+    },
+    {
+      "id": "lacunas-total-oferta-lancada-86",
+      "type": "TOTALS_EQUALITY",
+      "section": "LACUNAS",
+      "slideRef": "s86 × s88",
+      "title": "Total de Oferta Lançada diverge entre análises de lacunas",
+      "detail": "O s86 soma 462 unidades em Oferta Lançada, e o s88 soma 447. As quebras por tipologia, metragem e preço descrevem o mesmo estoque. O s86 não traz a nota de exclusão (duplex, garden, cobertura, esgotados) que o s88 traz: a diferença pode ser justamente essas unidades.",
+      "ok": false,
+      "origem": "IA_visao",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "s86",
+        "rightLabel": "s88",
+        "rows": [
+          {
+            "label": "Total Oferta Lançada",
+            "left": 462,
+            "right": 447,
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "src-11",
+      "type": "SOURCE_MISSING",
+      "section": "MERCADO",
+      "slideRef": "s11",
+      "title": "Dado sem fonte identificada",
+      "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+      "ok": false,
+      "viz": {
+        "kind": "text",
+        "location": "Revenda de casas | Condomínio Recanto do Sol"
+      },
+      "origem": "DET"
+    },
+    {
+      "id": "src-12",
+      "type": "SOURCE_MISSING",
+      "section": "MERCADO",
+      "slideRef": "s12",
+      "title": "Dado sem fonte identificada",
+      "detail": "Não há FONTE/ELABORAÇÃO no texto extraído nem nas imagens analisadas. Verificar antes de corrigir.",
+      "ok": false,
+      "viz": {
+        "kind": "text",
+        "location": "Revenda de casas | Condomínio Recanto do Sol"
+      },
+      "origem": "DET"
+    },
+    {
+      "id": "vision-unsafe-sums",
+      "type": "IMAGE_NOT_READ",
+      "section": "GLOBAL",
+      "slideRef": "s27",
+      "title": "Tabelas-imagem sem conferência segura (12 slides)",
+      "detail": "A leitura destas tabelas não permitiu conferir as somas com segurança (totais não alinhados às colunas, leituras discordantes ou incoerentes): s27, s41, s45, s49, s50, s53, s54, s55, s56, s73, s87, s88. Não é acusação de erro; confira manualmente se forem críticas.",
+      "ok": false,
+      "confidence": 3,
+      "origem": "IA_visao",
+      "viz": {
+        "kind": "text",
+        "evidence": "s27, s41, s45, s49, s50, s53, s54, s55, s56, s73, s87, s88"
+      }
+    }
+  ]
+}

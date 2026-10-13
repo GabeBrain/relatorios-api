@@ -18,6 +18,8 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 
 ## Versão 0.67.1 — 2026-10-13 — baseline e Sociodemografia no checklist (validado localmente)
 
+**Automação de validação — 13/10:** [rodada de materiais](./AUTOMACAO_TESTES_CORRETOR.md), cinco decks e dez passes offline (fonte congelada + Excel bruto), comparação integral de achados/cobertura e consulta Playwright de resultados salvos. Fixtures/expectativas versionadas, hashes verificados, relatórios por execução e catálogo de materiais não testados. Sem alterar regras do produto nem acionar IA nova. `pass` significa regressão preservada, não homologação humana; Toledo indisponível na lista V3 e PATCH de reconciliação automática bloqueados pelo teste em SJC deixam o navegador parcial. As falhas de fetch decorrem desses bloqueios; nenhuma mutação ocorreu.
+
 Fonte: [baseline e handoff](./BASELINE_2026-10-13_ROLANDIA.md). Commit C/D anterior: `35c0656`, confirmado em origin/main; bundle público contém C/D. A nota histórica “local” da v0.67 abaixo não descreve mais a sincronização Git atual. Revisão atual das Edge Functions permanece não identificada.
 
 - **DET — checklist:** conteúdo `SOCIO` com população, domicílios, renda ou moradores comprova Sociodemografia sem exigir título literal do capítulo. Sumários e menções em outras seções não bastam. Corrige FP visto no estudo real de Rolândia.

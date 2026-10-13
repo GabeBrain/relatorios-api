@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:corretor:materials": "node scripts/corretor-regression.mjs",
     "check:live-docs": "node scripts/check-live-docs.mjs",
     "test:watch": "vitest"
   },

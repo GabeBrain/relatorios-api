@@ -1,0 +1,553 @@
+{
+  "runId": "2026-10-13T13-57-18.524Z-12612",
+  "scope": "regressão offline de leituras fixas; Excel bruto e browser em pistas separadas",
+  "newPaidCalls": 0,
+  "cases": [
+    {
+      "id": "rol",
+      "baseline": "pass",
+      "raw": "pass",
+      "summary": {
+        "candidatas": 32,
+        "leituras": 44,
+        "achados": 11,
+        "tabelas": "27/30",
+        "acertos": {
+          "fonte": {
+            "comparados": 16,
+            "batem": 9
+          },
+          "cruzamentos": {
+            "feitos": 22,
+            "batem": 22
+          }
+        }
+      },
+      "rawSummary": {
+        "candidatas": 32,
+        "leituras": 44,
+        "achados": 11,
+        "tabelas": "27/30",
+        "acertos": {
+          "fonte": {
+            "comparados": 16,
+            "batem": 9
+          },
+          "cruzamentos": {
+            "feitos": 22,
+            "batem": 22
+          }
+        }
+      },
+      "diff": {
+        "equal": true,
+        "removed": [],
+        "added": [],
+        "changed": [],
+        "summaryChanged": false
+      },
+      "rawDiff": {
+        "equal": true,
+        "removed": [],
+        "added": [],
+        "changed": [],
+        "summaryChanged": false
+      }
+    },
+    {
+      "id": "tol",
+      "baseline": "pass",
+      "raw": "pass",
+      "summary": {
+        "candidatas": 60,
+        "leituras": 60,
+        "achados": 5,
+        "tabelas": "46/52",
+        "acertos": {
+          "fonte": {
+            "comparados": 11,
+            "batem": 10
+          },
+          "cruzamentos": {
+            "feitos": 11,
+            "batem": 11
+          }
+        }
+      },
+      "rawSummary": {
+        "candidatas": 60,
+        "leituras": 60,
+        "achados": 5,
+        "tabelas": "46/52",
+        "acertos": {
+          "fonte": {
+            "comparados": 11,
+            "batem": 10
+          },
+          "cruzamentos": {
+            "feitos": 11,
+            "batem": 11
+          }
+        }
+      },
+      "diff": {
+        "equal": true,
+        "removed": [],
+        "added": [],
+        "changed": [],
+        "summaryChanged": false
+      },
+      "rawDiff": {
+        "equal": true,
+        "removed": [],
+        "added": [],
+        "changed": [],
+        "summaryChanged": false
+      }
+    },
+    {
+      "id": "cj",
+      "baseline": "pass",
+      "raw": "pass",
+      "summary": {
+        "candidatas": 57,
+        "leituras": 57,
+        "achados": 10,
+        "tabelas": "28/44",
+        "acertos": {
+          "fonte": {
+            "comparados": 23,
+            "batem": 22
+          },
+          "cruzamentos": {
+            "feitos": 20,
+            "batem": 9
+          }
+        }
+      },
+      "rawSummary": {
+        "candidatas": 57,
+        "leituras": 57,
+        "achados": 10,
+        "tabelas": "28/44",
+        "acertos": {
+          "fonte": {
+            "comparados": 23,
+            "batem": 22
+          },
+          "cruzamentos": {
+            "feitos": 20,
+            "batem": 9
+          }
+        }
+      },
+      "diff": {
+        "equal": true,
+        "removed": [],
+        "added": [],
+        "changed": [],
+        "summaryChanged": false
+      },
+      "rawDiff": {
+        "equal": true,
+        "removed": [],
+        "added": [],
+        "changed": [],
+        "summaryChanged": false
+      }
+    },
+    {
+      "id": "vap",
+      "baseline": "pass",
+      "raw": "pass",
+      "summary": {
+        "candidatas": 93,
+        "leituras": 93,
+        "achados": 7,
+        "tabelas": "57/67",
+        "acertos": {
+          "fonte": {
+            "comparados": 11,
+            "batem": 10
+          },
+          "cruzamentos": {
+            "feitos": 69,
+            "batem": 65
+          }
+        }
+      },
+      "rawSummary": {
+        "candidatas": 93,
+        "leituras": 93,
+        "achados": 7,
+        "tabelas": "57/67",
+        "acertos": {
+          "fonte": {
+            "comparados": 11,
+            "batem": 10
+          },
+          "cruzamentos": {
+            "feitos": 69,
+            "batem": 65
+          }
+        }
+      },
+      "diff": {
+        "equal": true,
+        "removed": [],
+        "added": [],
+        "changed": [],
+        "summaryChanged": false
+      },
+      "rawDiff": {
+        "equal": true,
+        "removed": [],
+        "added": [],
+        "changed": [],
+        "summaryChanged": false
+      }
+    },
+    {
+      "id": "v2",
+      "baseline": "pass",
+      "raw": "pass",
+      "summary": {
+        "candidatas": 74,
+        "leituras": 86,
+        "achados": 8,
+        "tabelas": "41/45",
+        "acertos": {
+          "fonte": {
+            "comparados": 10,
+            "batem": 4
+          },
+          "cruzamentos": {
+            "feitos": 4,
+            "batem": 4
+          }
+        }
+      },
+      "rawSummary": {
+        "candidatas": 74,
+        "leituras": 86,
+        "achados": 8,
+        "tabelas": "41/45",
+        "acertos": {
+          "fonte": {
+            "comparados": 10,
+            "batem": 4
+          },
+          "cruzamentos": {
+            "feitos": 4,
+            "batem": 4
+          }
+        }
+      },
+      "diff": {
+        "equal": true,
+        "removed": [],
+        "added": [],
+        "changed": [],
+        "summaryChanged": false
+      },
+      "rawDiff": {
+        "equal": true,
+        "removed": [],
+        "added": [],
+        "changed": [],
+        "summaryChanged": false
+      }
+    }
+  ],
+  "catalog": [
+    {
+      "id": "V01",
+      "name": "Housi Toledo / PR",
+      "replayCases": [
+        "tol"
+      ],
+      "sourcePending": [
+        "Confirmar zonas originais ou centro derivado e apresentar a origem; n?o atribuir ?rea do raio ao lote.",
+        "Rodada num?rica completa posterior com per?odo e m?todo fixados; ensaios iniciais sem contexto desconsiderados.",
+        "Identificar diferen?as entre decks antes de escolher vers?o num?rica."
+      ],
+      "materialPresent": true,
+      "reason": "Incluído na rodada selecionada; baseline técnica, não gabarito humano completo"
+    },
+    {
+      "id": "V02",
+      "name": "Housi Rolândia / PR",
+      "replayCases": [
+        "rol"
+      ],
+      "sourcePending": [
+        "Selecionar versão correspondente às planilhas; não presumir que VAP e v1 são o mesmo estudo numérico.",
+        "Separar projeções de Censo 2022 e revisar resíduos de template da Comercialização Mensal.",
+        "vendas=0,74 no derivado é fração em um bloco; não assumir 0,74 unidades."
+      ],
+      "materialPresent": true,
+      "reason": "Incluído na rodada selecionada; baseline técnica, não gabarito humano completo"
+    },
+    {
+      "id": "V03",
+      "name": "Housi Campos do Jordão / SP",
+      "replayCases": [
+        "cj"
+      ],
+      "sourcePending": [
+        "Confirmar centro e período; POC atual não calcula tempos de viagem nem demanda de segunda residência."
+      ],
+      "materialPresent": true,
+      "reason": "Incluído na rodada selecionada; baseline técnica, não gabarito humano completo"
+    },
+    {
+      "id": "V04",
+      "name": "Housi São José dos Campos / SP",
+      "replayCases": [
+        "vap",
+        "v2"
+      ],
+      "sourcePending": [
+        "Não recomendar um raio como lote; confirmar marcador/centro antes de recalcular.",
+        "Validar filtros de produto e diferenças entre versões, sem rotular toda diferença como erro."
+      ],
+      "materialPresent": true,
+      "reason": "Incluído na rodada selecionada; baseline técnica, não gabarito humano completo"
+    },
+    {
+      "id": "V05",
+      "name": "Marka Tancredo / Guarulhos, SP",
+      "replayCases": [],
+      "sourcePending": [
+        "Nome São Paulo no arquivo não confirma município; manifesto indica Guarulhos.",
+        "Não comparar isócrona com círculo nem reutilizar mapa de Brooklin como Tancredo.",
+        "Confirmar datas: pasta 2026 e nome Vfinal 2025 conflitam; diferenças podem ser mudanças de escopo."
+      ],
+      "materialPresent": true,
+      "reason": "Sem replay/gabarito congelado nesta suíte; localizar fonte e rotular antes de gastar IA"
+    },
+    {
+      "id": "V06",
+      "name": "Itajaí / SC — Av. Itaipava",
+      "replayCases": [],
+      "sourcePending": [
+        "Não foi encontrado pacote pareado de planilhas/geometria neste levantamento; não serve ainda como gabarito numérico."
+      ],
+      "materialPresent": true,
+      "reason": "Sem replay/gabarito congelado nesta suíte; localizar fonte e rotular antes de gastar IA"
+    },
+    {
+      "id": "V07",
+      "name": "ECO João Pessoa / PB",
+      "replayCases": [],
+      "sourcePending": [
+        "Sem pacote numérico pareado confirmado; diferença V1/V2 precisa de rótulo humano, não é automaticamente correção."
+      ],
+      "materialPresent": true,
+      "reason": "Sem replay/gabarito congelado nesta suíte; localizar fonte e rotular antes de gastar IA"
+    },
+    {
+      "id": "V08",
+      "name": "Regional / GO — estudo unificado",
+      "replayCases": [],
+      "sourcePending": [
+        "Sem gabarito numérico pareado confirmado; usar para estrutura e perguntas futuras, sem incorporar dados de participantes."
+      ],
+      "materialPresent": true,
+      "reason": "Sem replay/gabarito congelado nesta suíte; localizar fonte e rotular antes de gastar IA"
+    }
+  ],
+  "materialInventory": {
+    "catalogDate": "2026-10-09",
+    "note": "Disponibilidade por caminho; somente decks executados tiveram hash reconferido nesta rodada",
+    "pptxFound": 18,
+    "covered": [
+      {
+        "sha256": "23fd641b3bfac438c75e18af916989ce848fd16a9ddffeee85426b797432e5d9",
+        "path": "_UPLOADS_TESTE/Corretor_V3_Sao_Jose_dos_Campos/03_VERSAO_ANTERIOR_v2_31jul/Brain_Vocacional_Vertical_Housi_Rua Sebastiao F Oliveira-SP _v2.pptx",
+        "replayCase": "v2"
+      },
+      {
+        "sha256": "5858dd71acf59ddf5475aa424d0101f97ed44c5ae9904e6924c5e2d6e42781d8",
+        "path": "_UPLOADS_TESTE/Corretor_V3_Sao_Jose_dos_Campos/02_APRESENTACAO_SELECIONAR_DEPOIS/Brain_Vocacional_Vertical_Housi_Rua Sebastiao F Oliveira-SP _VAP_03ago.pptx",
+        "replayCase": "vap"
+      },
+      {
+        "sha256": "64789a5fdc70051c83e3a875f21e592f1993fddff8e50219f6bf2c70455cb8a6",
+        "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/fontes/housi-rolandia-2026-07/estudo/Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_v1.pptx",
+        "replayCase": "rol"
+      },
+      {
+        "sha256": "8a8cd47f305054ce9814dcabd75731850586e7a60572172698efc9600d7b88c4",
+        "path": "Housi/housi-relatorio-dinamico/_anexos/pptx-drive/Brain_Vocacional_Vertical_Housi_Jardim Monte Bello_Campos do Jordao - SP_vAP_27jul.pptx",
+        "replayCase": "cj"
+      },
+      {
+        "sha256": "c0bbe30e8095cf81a01d898e531b330ad31dfba675db834ac7b0c62dd15b7a08",
+        "path": "Housi/housi-relatorio-dinamico/_anexos/pptx-drive/Brain_Vocacional_Vertical_Housi_Rua Raimundo Leonardi_VAP_03ago_12h.pptx",
+        "replayCase": "tol"
+      }
+    ],
+    "notCovered": [
+      {
+        "sha256": "07f5596da44ee24a296115b6cc49d7d45ca2f6780bced5f7669e4d94fb0f6883",
+        "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/fontes/marka-tancredo-2026-01/estudo/Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_V2_28fev_20h15.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "2c363a4938cf70ba8f6f93197f32786632a165e827b034a6ab4fda04068ae5fc",
+        "path": "Housi/housi-relatorio-dinamico/_anexos/pptx-drive/Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_vap_30jul.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "34c62dfd6b3050eeb83d41fa4f8d6913a06270473be00955696ff417c4a14390",
+        "path": "_backup_estudos/Vocacional_e_Quanti_CONTRUTORA_REGIONAL_GO_Estudo_Unificado_V3_05_maio.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "4715b05e4487470015f99c2780f3fddad505a87addc4dfa22292b82246e2f630",
+        "path": "Relatorios API/relatorios-api/src/features/corretor/referencia_ajustes/Brain_Vocacional_Vertical_ECO_Construcoes_Incorporacoes_Joao_Pessoa - PB_V2.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "4bcdd5571b55e50edad63937e3bc54fe5e80bd4992289ac21fd5931c33240ffb",
+        "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/fontes/marka-tancredo-2026-01/estudo/Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_V1.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "721dd0df05485ee83436b209c2e104c415488ec57a6b525da948d081c12a5784",
+        "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/Vocacional_Marka Prime_Reduzido.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "7e64f7e20debaef02a5b6b284dc042cca98692a39cfd36111d290b5820accad4",
+        "path": "Relatorios API/relatorios-api/src/features/corretor/referencia_ajustes/Brain_Vocacional_Vertical_ECO_Construcoes_Incorporacoes_Joao_Pessoa - PB_V1.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "8f4e1065251045d5f382378dbdc3bb15f432f16df8c6d15ca94c041094cc106d",
+        "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/fontes/housi-toledo-2026-07/estudo/Brain_Vocacional_Vertical_Housi_Rua Raimundo Leonardi_VAP_03ago_12h.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "97616c80e7212500fb8f950b3d22f3d3bdbe3df3ff28be8e383937c2ae5b2024",
+        "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/fontes/marka-tancredo-2026-01/estudo/Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_Vfinal_27abr_2025_8h45.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "cb93055a3e53a54b3c6dac6b9e85f54dcd039d943736a4c83565c081a1cde2dc",
+        "path": "_backup_estudos/Teste IA Masterplan.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "d8aa7b7bfd712c158d80c667f6becba303515bcacd11a5457474eb15581005fc",
+        "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/Vocacionais_parametros_de_correcao.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "e1d3b8bf21a1b0199f458ae222d5b53b2bfdb976fdbcba037c7f4ee2ff2e9ec3",
+        "path": "_backup_estudos/Vocacional_Horizontal(Av. Itaipava)_Elio_Winter_Itajai_SC_estudo exemplo.pptx",
+        "replayCase": null
+      },
+      {
+        "sha256": "febe0500ede90354d3c0d4212003015cf9ae83e2bd6e8ac64b9734a8fbed2927",
+        "path": "_backup_estudos/Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_estudo exemplo.pptx",
+        "replayCase": null
+      }
+    ]
+  },
+  "browser": {
+    "mode": "consulta de resultados já salvos, sem reprocessamento",
+    "results": [
+      {
+        "id": "rol",
+        "status": "read"
+      },
+      {
+        "id": "tol",
+        "status": "unavailable",
+        "reason": "Encontrados 0 estudos desse nome na lista V3"
+      },
+      {
+        "id": "cj",
+        "status": "read"
+      },
+      {
+        "id": "vap",
+        "status": "guard_blocked",
+        "reason": "A abertura tentou atualizar registros; escritas bloqueadas, renderização completa não confirmada"
+      },
+      {
+        "id": "v2",
+        "status": "guard_blocked",
+        "reason": "A abertura tentou atualizar registros; escritas bloqueadas, renderização completa não confirmada"
+      }
+    ],
+    "errors": [
+      {
+        "caseId": "vap",
+        "message": "TypeError: Failed to fetch"
+      },
+      {
+        "caseId": "v2",
+        "message": "TypeError: Failed to fetch"
+      }
+    ],
+    "requestFailures": [
+      {
+        "caseId": "tol",
+        "host": "geobrain-relatorios.lovable.app",
+        "path": "/__l5e/trackevents",
+        "error": "net::ERR_ABORTED"
+      },
+      {
+        "caseId": "cj",
+        "host": "geobrain-relatorios.lovable.app",
+        "path": "/__l5e/trackevents",
+        "error": "net::ERR_ABORTED"
+      },
+      {
+        "caseId": "vap",
+        "host": "geobrain-relatorios.lovable.app",
+        "path": "/__l5e/trackevents",
+        "error": "net::ERR_ABORTED"
+      },
+      {
+        "caseId": "vap",
+        "host": "mxinpvcqzbfbzjodhgtz.supabase.co",
+        "path": "/rest/v1/findings_v3",
+        "error": "net::ERR_FAILED"
+      },
+      {
+        "caseId": "v2",
+        "host": "geobrain-relatorios.lovable.app",
+        "path": "/__l5e/trackevents",
+        "error": "net::ERR_ABORTED"
+      },
+      {
+        "caseId": "v2",
+        "host": "mxinpvcqzbfbzjodhgtz.supabase.co",
+        "path": "/rest/v1/findings_v3",
+        "error": "net::ERR_FAILED"
+      }
+    ],
+    "responseFailures": [],
+    "storedCount": 108,
+    "blocked": [
+      {
+        "caseId": "vap",
+        "path": "/rest/v1/findings_v3",
+        "method": "PATCH"
+      },
+      {
+        "caseId": "v2",
+        "path": "/rest/v1/findings_v3",
+        "method": "PATCH"
+      }
+    ]
+  },
+  "evidence": {
+    "offlineRunId": "2026-10-13T13-57-18.524Z-12612",
+    "browserRunId": "2026-10-13T14-01-30.426Z-21276"
+  }
+}
