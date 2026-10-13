@@ -2,6 +2,8 @@ import type { MethodStatus } from '../types';
 import { buildMapTilePlan, type GeographicPoint } from '../lib/map-tiles';
 import { FIERGS_4T25_SLIDE_MANIFEST } from './fiergs-manifest';
 import { panoramaScopeIdentity } from '../scope-identity';
+import { customTerritoryPages } from './custom-cover-layout';
+import { observedDormitoryPriceGroup, type DormitoryPriceGroup } from './dormitory-price-series';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
 export type CityComparisonKind = 'sales' | 'market' | 'availability';
@@ -93,7 +95,7 @@ export interface ManifestSubject {
   locations: GeographicPoint[];
   cityComparisons: { enabled: boolean };
   sales?: { units: { dataStatus: string } };
-  prices?: { meter: { dataStatus: string }; meterByTypology: { dataStatus: string } };
+  prices?: { meter: { dataStatus: string }; meterByTypology: { dataStatus: string; groupSeries?: DormitoryPriceGroup[] } };
   granular?: {
     offerByTypology?: { launchedUnits: number | null; finalUnits: number | null; soldUnits?: number | null }[];
     pricesByTypology?: { averageTicket: number | null; averageArea: number | null; averagePricePerMeter: number | null }[];
@@ -130,6 +132,9 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
     if (report.sales?.units.dataStatus === 'unavailable') [24, 26, 27, 28, 29, 31, 32, 33].forEach((slide) => omitted.add(slide));
     if (report.prices?.meter.dataStatus === 'unavailable') omitted.add(43);
     if (report.prices?.meterByTypology.dataStatus === 'unavailable') [44, 45, 46, 47].forEach((slide) => omitted.add(slide));
+    if (report.prices?.meterByTypology.groupSeries) {
+      for (const bedroom of [1, 2, 3, 4]) if (!observedDormitoryPriceGroup(report.prices.meterByTypology, bedroom)) omitted.add(43 + bedroom);
+    }
     if (report.granular?.offerByTypology && !report.granular.offerByTypology.some((row) => row.launchedUnits !== null || row.finalUnits !== null || row.soldUnits != null)) [36, 57].forEach((slide) => omitted.add(slide));
     if (report.granular?.pricesByTypology && !report.granular.pricesByTypology.some((row) => [row.averageTicket, row.averageArea, row.averagePricePerMeter].some((value) => value !== null))) omitted.add(58);
     if (report.granular?.vgv && !report.granular.vgv.some((row) => [row.launchedUnits, row.finalUnits, row.soldUnits, row.launchedVgvMillions, row.finalVgvMillions, row.soldVgvMillions].some((value) => value !== null))) omitted.add(61);
@@ -159,7 +164,12 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
         : official === 7 && territory ? territory.official ? 'Região Metropolitana de Porto Alegre' : `Recorte do estudo · ${territory.shortLabel}`
         : page.title };
       // Dividir listas/rankings por página preserva todas as cidades em conjuntos maiores.
-      const chunkSize = official === 7 && territory && !territory.official ? 18 : official === 19 || official === 31 ? 10 : 0;
+      if (official === 7 && territory && !territory.official) {
+        const scopePages = customTerritoryPages(territory);
+        return scopePages.map((cities, index) => ({ ...dynamic, scopeCities: cities,
+          title: scopePages.length > 1 ? `${dynamic.title} · ${index + 1}/${scopePages.length}` : dynamic.title }));
+      }
+      const chunkSize = official === 19 || official === 31 ? 10 : 0;
       if (chunkSize && territory && territory.cities.length > chunkSize) {
         return Array.from({ length: Math.ceil(territory.cities.length / chunkSize) }, (_, index) => ({ ...dynamic,
           scopeCities: territory.cities.slice(index * chunkSize, (index + 1) * chunkSize), title: `${dynamic.title} · ${index + 1}/${Math.ceil(territory.cities.length / chunkSize)}` }));

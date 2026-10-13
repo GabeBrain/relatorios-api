@@ -1,6 +1,7 @@
 import type { PanoramaReportModel, ReportGenerationNotice } from '../types';
 import { createFiergsReportManifest, FIERGS_REDUNDANT_OFFICIAL_SLIDES, panoramaManifestFor } from './manifest';
 import { granularPriceChartRows } from './price-chart';
+import { observedDormitoryPriceGroup } from './dormitory-price-series';
 
 type NoticeInput = Omit<ReportGenerationNotice, 'entity' | 'period' | 'affectedPages' | 'affectedOfficialSlides'> & {
   officialSlides?: number[];
@@ -90,6 +91,14 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     add({ code: 'TYPOLOGY_PRICE_PAGES_OMITTED', severity: 'warning', indicator: 'Séries de preço por tipologia',
       reason: 'Não há séries temporais observadas por número de dormitórios.',
       source: report.prices.meterByTypology.source, displayDecision: 'As páginas sem série foram retiradas do arquivo.', officialSlides: [44, 45, 46, 47] });
+  }
+  if (report.scope.entity === 'fiergs-rs' && report.prices.meterByTypology.dataStatus !== 'unavailable') {
+    for (const bedroom of [1, 2, 3, 4]) {
+      if (observedDormitoryPriceGroup(report.prices.meterByTypology, bedroom)) continue;
+      add({ code: 'DORMITORY_PRICE_SERIES_PAGE_OMITTED', severity: 'info', indicator: `R$/m² · ${bedroom === 4 ? '4 ou mais' : bedroom} dormitórios`,
+        reason: 'Não há observações finitas da própria tipologia na série do intervalo selecionado.', source: report.prices.meterByTypology.source,
+        displayDecision: 'A página sem série foi omitida; não usa dados de outra tipologia nem imprime placeholder no estudo.', officialSlides: [43 + bedroom] });
+    }
   }
   for (const dimension of ['pattern', 'typology'] as const) {
     const sourceRows = dimension === 'pattern' ? report.granular.pricesByStandard : report.granular.pricesByTypology;

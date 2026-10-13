@@ -14,6 +14,8 @@ import { roundedPercentages } from '../domain/percentage-rounding';
 import { typologyDisplayLabel } from '../domain/taxonomy';
 import { panoramaExportMetadata } from '../lib/export-metadata';
 import { panoramaScopeIdentity } from '../scope-identity';
+import { CustomFiergsStudyCover, CustomFiergsTerritoryCover } from './CustomFiergsCovers';
+import { observedDormitoryPriceGroup } from '../report/dormitory-price-series';
 
 /** Token do fundo cartográfico: define, junto das coordenadas, se a lâmina de mapa existe (JG-39). */
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
@@ -71,6 +73,7 @@ function Corporate({ page, report }: { page: number; report: PanoramaReportModel
 function V2Divider({ title }: { title: string }) { return <div className="panorama-v2-divider"><h2>{title}</h2></div>; }
 function FiergsCityScope({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
   const territory = panoramaScopeIdentity(report.scope);
+  if (!territory.official) return <CustomFiergsTerritoryCover scope={report.scope} cities={cities}/>;
   return <div className="panorama-fiergs-city-scope"><p>RECORTE DO ESTUDO · {territory.uf}</p><h2>{territory.cities.length === 1 ? 'CIDADE ANALISADA' : 'CIDADES ANALISADAS'}</h2><div>{(cities ?? territory.cities).map((city) => <span key={city}>{city}</span>)}</div><small>{territory.cities.length} município(s) no recorte · {quarterLabel(report.scope.endQuarter)}{territory.official ? ' · Região Metropolitana de Porto Alegre, sem Porto Alegre no universo analisado' : ''}</small></div>;
 }
 function FiergsTerritorialCover({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
@@ -78,6 +81,7 @@ function FiergsTerritorialCover({ report, cities }: { report: PanoramaReportMode
   return <div className="panorama-fiergs-territorial"><img src={FIERGS_REGION_MAP} alt="Mapa da Região Metropolitana de Porto Alegre"/><div><p>RECORTE FIERGS</p><h1>REGIÃO<br/>METROPOLITANA<br/>DE PORTO ALEGRE</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong><small>10 municípios analisados · Porto Alegre exibida somente como referência geográfica</small></div></div>;
 }
 function FiergsStudyCover({ report }: { report: PanoramaReportModel }) {
+  if (!panoramaScopeIdentity(report.scope).official) return <CustomFiergsStudyCover scope={report.scope}/>;
   return <div className="panorama-fiergs-study-cover"><p>PANORAMA DO MERCADO IMOBILIÁRIO · FIERGS</p><h1>{panoramaScopeIdentity(report.scope).coverTitle}</h1><i/><strong>{quarterLabel(report.scope.endQuarter)}</strong></div>;
 }
 function CityCover({ report }: { report: PanoramaReportModel }) {
@@ -403,9 +407,8 @@ function FiergsSalesCitySlide({ report, cities }: { report: PanoramaReportModel;
 }
 
 function FiergsDormitoryPriceSlide({ report, bedroom }: { report: PanoramaReportModel; bedroom: number }) {
-  const matcher = bedroom === 4 ? /4|mais/i : new RegExp(`(^|\\D)${bedroom}(\\D|$)`);
-  const group = report.prices.meterByTypology.groupSeries.find((item) => matcher.test(item.label));
-  if (!group?.series.length) return <CoveragePage title={`EVOLUÇÃO DO R$/M² · ${bedroom === 4 ? '4 OU MAIS' : bedroom} DORMITÓRIOS`} detail="A série temporal por tipologia não retornou observações para este número de dormitórios."/>;
+  const group = observedDormitoryPriceGroup(report.prices.meterByTypology, bedroom);
+  if (!group) return null;
   const data = group.series.map((row) => ({ ...row, horizontal: 0, total: row.vertical })); const ticks = visibleQuarterTickIndexes(data); const labels = visiblePointLabelIndexes(data);
   return <div className="panorama-fiergs-dormitory"><header><h2>EVOLUÇÃO DO R$/M²<span>{bedroom === 4 ? '4 OU MAIS DORMITÓRIOS' : `${bedroom} DORMITÓRIO${bedroom > 1 ? 'S' : ''}`}</span></h2></header><main><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 38, right: 38, top: 48, bottom: 28 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => ticks.has(index) ? compactQuarterLabel(String(value)) : ''} interval={0} tickLine={false}/><Tooltip formatter={(value) => `R$ ${n(Number(value))}/m²`}/><Line type="monotone" dataKey="vertical" name={group.label} stroke="#5d7737" strokeWidth={4} dot={{ r: 3 }} isAnimationActive={false} label={(props) => labels.has(Number(props.index)) ? <FiergsPointValue {...props} data={data} format={(value) => n(value)} referenceQuarter={report.scope.endQuarter[0]}/> : null}/></LineChart></ResponsiveContainer></main><footer>R$/m² privativo médio · Fonte: GeoBrain</footer></div>;
 }

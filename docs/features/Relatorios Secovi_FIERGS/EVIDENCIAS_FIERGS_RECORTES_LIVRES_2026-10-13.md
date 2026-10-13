@@ -43,6 +43,10 @@ Listas territoriais paginadas a cada 18 cidades; distribuições municipais a ca
 
 ## G5/G6 — pendentes
 
+### Ensaio recebido — capas a refinar
+
+Gabriel trouxe três PDFs (preset 69 páginas, Canoas 68, conjunto 69) e um CSV do conjunto. Revisão visual de todas as páginas por miniaturas e ampliação dos pontos suspeitos; CSV do conjunto fecha 42 guardas, 265 projetos e três cidades concluídas. Os CSVs do preset/Canoas não foram recebidos. Capas personalizadas desequilibradas e placeholder sem preço de 4 dormitórios em Canoas impediram encerrar revisão editorial. [Plano e execução do refinamento](PLAN_REFINAMENTO_CAPAS_CUSTOMIZADAS_FIERGS_2026-10-13.md): ajustes locais, 327 testes e 81 verificações Chromium; publicação e nova saída ainda pendentes. Não declarar G5 integralmente concluído por apenas um CSV.
+
 ### Continuação — publicação autorizada
 
 Gabriel autorizou nesta conversa o envio dos oito commits listados no fechamento, incluindo os quatro do Corretor. Novo fetch confirmou 0/8 e documentação compatível; árvore limpa. Código da ampliação em `e634eb8`. Esta rodada inclui um commit documental de registro da autorização e roteiro G5; envio sem rebase/force e confirmação posterior pela comparação main/origin. Deploy e geração reais permanecem a verificar.

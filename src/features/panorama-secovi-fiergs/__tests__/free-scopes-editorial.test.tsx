@@ -15,7 +15,7 @@ describe('FIERGS — apresentação do recorte real', () => {
     expect(container.textContent).not.toContain('RM de Porto Alegre');
     expect(container.textContent).not.toContain('RM PORTO ALEGRE');
     expect(container.textContent).not.toContain('quatro produtos horizontais');
-    const list = container.querySelector('.panorama-fiergs-city-scope');
+    const list = container.querySelector('.panorama-custom-territory');
     for (const city of scope.cities) expect(list?.textContent).toContain(city);
     expect(list?.textContent).toContain(scope.uf);
     const manifest = panoramaManifestFor(report);
