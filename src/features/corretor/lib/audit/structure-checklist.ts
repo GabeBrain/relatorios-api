@@ -109,12 +109,17 @@ function emptyIndexSections(slides: Ir['slides']): string[] {
   for (const group of repeated) for (const item of group) for (const heading of item.headings) headings.set(heading.number, heading.label);
   if (headings.size < 4) return [];
   const summarySlides = new Set(summaries.map((item) => item.slide.n));
-  const body = slides.filter((slide) => !summarySlides.has(slide.n) && !isIndexSlide(slide))
+  const bodySlides = slides.filter((slide) => !summarySlides.has(slide.n) && !isIndexSlide(slide));
+  const body = bodySlides
     .map((slide) => plain([slide.titulo ?? '', ...(slide.textos ?? []), ...(slide.textos_svg ?? [])].join(' ')));
   return [...headings.entries()].sort((a, b) => a[0] - b[0]).filter(([, label]) => {
     const words = plain(label).split(' ').filter((word) => word.length >= 5);
     if (!words.length) return true;
     const labelKey = plain(label);
+    // O título do capítulo pode existir apenas no índice; slides classificados
+    // como SOCIO com métricas próprias comprovam o conteúdo da seção.
+    if (labelKey === 'sociodemografia' && bodySlides.some((slide, index) =>
+      slide.secao_canonica === 'SOCIO' && /\b(populacao|domicilios|renda|moradores)\b/.test(body[index]))) return false;
     const aliases = labelKey.includes('identificacao do terreno') ? [['identificacao', 'terreno']]
       : labelKey === 'sociodemografia' ? [['sociodemografia']]
         : labelKey.includes('analise do mercado residencial') ? [['mercado', 'oferta'], ['empreendimento'], ['concorrente'], ['preco'], ['locacao']]

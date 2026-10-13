@@ -199,3 +199,7 @@ Ordem: **0 → 5 → 1 → 2 → 3 → 4** (o gerador cedo (5) barateia o teste 
 **Ao final de cada fase**: atualizar `LIVE_regras_corretor_vocacionais.md` (nova versão no
 topo) e, se tocar navegação/plataforma, `docs/projetos/LIVE_rebrain.md` — antes do push
 (regra do CLAUDE.md).
+
+## Retomada semanal — 13/10/2026
+
+Baseline PPTX + 13 Excel brutos de Rolândia e handoff reproduzível: [BASELINE_2026-10-13_ROLANDIA.md](./BASELINE_2026-10-13_ROLANDIA.md). Primeiro bloco validado localmente para replay; produção consultada em modo leitura. C/D v0.67 já no Git (`35c0656`), presença no frontend confirmada; revisão atual das funções não identificada. FP de Sociodemografia corrigido localmente; próximos gates: publicar/retestar, esclarecer Boulevard e leitura das tabelas pequenas, completar adjudicação humana e caso fim a fim antes de encerrar a meta semanal. O plano original acima é histórico, não prova de deploy.

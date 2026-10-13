@@ -16,6 +16,14 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.67.1 — 2026-10-13 — baseline e Sociodemografia no checklist (validado localmente)
+
+Fonte: [baseline e handoff](./BASELINE_2026-10-13_ROLANDIA.md). Commit C/D anterior: `35c0656`, confirmado em origin/main; bundle público contém C/D. A nota histórica “local” da v0.67 abaixo não descreve mais a sincronização Git atual. Revisão atual das Edge Functions permanece não identificada.
+
+- **DET — checklist:** conteúdo `SOCIO` com população, domicílios, renda ou moradores comprova Sociodemografia sem exigir título literal do capítulo. Sumários e menções em outras seções não bastam. Corrige FP visto no estudo real de Rolândia.
+- **Evidência:** replay com PPTX e 13 Excel brutos, sem IA nova: 11 cartões; somente seções 04/05 no alerta dinâmico; outros dez achados idênticos. Quatro replays adicionais preservam linhas anteriores; 21 testes focados, tipos, lint e build aprovados.
+- **Produção observada, sem reprocessamento:** estudo Rolândia de 02/10 possui os dois achados textuais esperados em E10, 15 registros/13 cartões revisáveis e 29/30 tabelas conferidas. Seu checklist ainda traz o FP corrigido localmente. Não declarar v0.67.1 publicada até reteste após publicação.
+
 ## Versão 0.67 — 2026-10-01 — revisão textual, confirmação literal e checklist estrutural (RUNTIME local)
 
 Plano e resultados: [PLAN_v067_rolandia.md](./PLAN_v067_rolandia.md). Alterações locais ainda não publicadas.

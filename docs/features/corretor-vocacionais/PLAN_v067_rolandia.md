@@ -3,6 +3,10 @@
 Para quem mantém o Corretor. Origem: análise `027020ec` de `Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_v1`
 (78 slides, 13 planilhas, regras v0.66, US$ 0,29), triada à mão slide a slide contra as imagens e as planilhas.
 
+## Reconciliação de execução — 13/10/2026
+
+Os estados “sem commit/sem push” de 01/10 abaixo são históricos: C/D estão no commit `35c0656`, integrado em `origin/main`. Frontend público C/D e estudo real de 02/10 inspecionados em 13/10; revisão atual das funções não identificada. Baseline com Excel bruto, matriz, correção local do FP de Sociodemografia e roteiro para Lucas: [BASELINE_2026-10-13_ROLANDIA.md](./BASELINE_2026-10-13_ROLANDIA.md). A correção v0.67.1 ainda não foi publicada. Meta 18/21 permanece sem adjudicação completa.
+
 ## 0. Diagnóstico
 
 | | Quantidade |

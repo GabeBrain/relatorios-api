@@ -7,8 +7,10 @@ SJC VAP, SJC v2, Rolândia). Só avança se nenhum erro real anterior sumir; tod
 |---|---|---|
 | A (E1, E2) | feito e publicado | 44c9242 |
 | B (E3–E6) | feito e publicado | df75819 |
-| C (E7–E9) | validado localmente nos cinco estudos; sem push | — |
-| D (E10–E12) | código e testes locais concluídos; deploy E10 e validação no site pendentes | — |
+| C (E7–E9) | código integrado em origin/main; presença no bundle público confirmada em 13/10 | 35c0656 |
+| D (E10–E12) | código integrado; frontend C/D confirmado; dois achados de E10 observados no resultado real de 02/10; revisão atual das funções ainda não identificada | 35c0656 |
+
+**Reconciliação de 13/10:** o registro de 01/10 abaixo descreve o estado antes do push, já superado no Git. C/D foram enviados nesta conversa e pertencem a `35c0656`. A baseline de [13/10](./BASELINE_2026-10-13_ROLANDIA.md) confirma o mesmo PPTX e 13 Excel no estudo salvo de 02/10; não atribui SHA Git ao deploy nem versão atual às funções. Corrigido localmente o FP de seção Sociodemografia vazia (v0.67.1); ainda sem publicação dessa correção.
 
 **Atualização de execução (01/out/2026):** suíte focada 45/45 e build passaram. Replays finais: Toledo 5 achados (46/52 tabelas), CJ 10 (28/44), SJC VAP 7 (57/67), SJC v2 8 (41/45) e Rolândia 11 (27/30). E10 usa `gpt-4o` no passe textual, mas não foi publicado: o conector Supabase negou permissão. E11 removeu o FP `//` no replay Rolândia; E12 detecta slide final a conferir e 3 seções sem conteúdo. A validação visual das seções e a medição real de texto ainda exigem site/deploy. Nenhum push foi feito. Consulte o registro técnico e handoff na seção “Registro de execução” do plano.
 
@@ -44,7 +46,7 @@ SJC VAP, SJC v2, Rolândia). Só avança se nenhum erro real anterior sumir; tod
 Resultado no fim do bloco B: Rolândia passou de 9 para 14 achados, com 0 falso positivo nos outros 4 estudos e 199
 testes verdes.
 
-## Implementado no bloco C, sem commit
+## Bloco C — implementado em 35c0656
 
 - **E7 — texto de SVG** (`pptx-to-ir.ts`, `ir.ts › textos_svg`, `ia-text.ts`): fica fora de `textos`, porque no SVG
   os valores e os rótulos vêm em listas separadas. Expõe o 5,2% do s31 e "Churrasqueria" do s61.
@@ -56,20 +58,14 @@ testes verdes.
   - Pegou "2.023" na SJC VAP s73, erro real.
   - Em Rolândia não pega: as imagens dos s22, s23 e s36 são estreitas demais para serem lidas, e a visão normaliza
     o ",00,00" do s37.
-- **Para fechar:**
-  - rodar a suíte e o lint (dois testes de `source-crosscheck.test.ts` foram atualizados para o cartão agrupado);
-  - acrescentar os testes do bloco C;
-  - fazer o commit e o push.
+- **Fechamento reconciliado:** testes e lint foram feitos em 01/10; implementação já integrada no Git. Baseline e limites de runtime atualizados em 13/10 no documento acima.
 
-## A fazer
+## Bloco D — código implementado; aceite de runtime parcial
 
-- **E10 — revisão de texto no gpt-4o, com prompt de concordância e nomes digitados errado.** Hoje dá 1 achado em 63
-  slides e deixa passar "são esperado" e "Prsidente". Exige deploy de `analyze-text-batch` e validação no site, porque
-  não há cache de texto.
-- **E11 — "//" só vira achado com duas leituras concordando.** Remove o falso positivo do s67.
-- **E12 — seções vazias pelo nome** (`structure-checklist.ts`). Os s73–s75 são três sumários seguidos e o s78 está em
-  branco, mas hoje o checklist diz só "1 ausente".
-- **Fechamento:** entrada v0.67 no `LIVE_regras…`, tabela final no plano e texto para o Lovable.
+- **E10:** modelo textual separado (`gpt-4o`) e prompt implementados. O estudo real de 02/10 já contém “Prsidente” e “são esperado”; ID/revisão atual da função e modelo histórico não confirmados.
+- **E11:** confirmação de símbolos duplicados implementada; s67 ausente no replay e no conjunto salvo no site.
+- **E12:** seções nomeadas e slide final sinalizados. A falsa ausência de Sociodemografia está corrigida localmente em 13/10; site ainda contém o resultado anterior.
+- **Fechamento:** plano e regras live atualizados; handoff reproduzível em `BASELINE_2026-10-13_ROLANDIA.md`.
 
 ## Pendências registradas
 
@@ -77,8 +73,7 @@ testes verdes.
   Precisa de leitura nova, então só dá para validar no site.
 - **Sub-linhas mescladas:** reler no gpt-4o as tabelas de empreendimento com sub-linhas, para as E5 e E6 usarem
   imagem.
-- **Nível do achado da E5:** não rebaixar para Verificar pela nota de exclusão. A exclusão não explica unidades na
-  faixa errada.
+- **E5:** rebaixamento por nota já corrigido em `35c0656`. Boulevard permanece Provável no replay; sua ausência no conjunto salvo de 02/10 exige investigação das leituras reais.
 - **Planilha `02. SOCIODEMOGRAFIA`:** avisar a equipe que mantém o modelo. A condição de ocupação traz 66,5% / 20,1% /
   13,4% no raio maior em Rolândia, CJ e SJC v2, o que indica fórmula fixa no modelo.
 - **Não commitar:** `src/features/corretor/referencia_ajustes/` (cerca de 430 MB).

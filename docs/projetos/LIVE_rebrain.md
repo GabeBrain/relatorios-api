@@ -1,3 +1,11 @@
+### 2026-10-13 — Corretor V3: baseline Rolândia e correção de checklist — Gabriel / Codex
+- **Prioridade:** primeiro bloco do plano semanal confirmado, 2 h reservadas das 6 h do Corretor; reserva não é tempo executado.
+- **Mudança:** reconciliação documental C/D já em `35c0656`; roteiro de replay com Excel bruto e fixture, snapshot antes/depois/resultado salvo e correção do FP de Sociodemografia vazia. Sumários e texto de outras seções não comprovam conteúdo SOCIO.
+- **Evidência:** [baseline e handoff](../features/corretor-vocacionais/BASELINE_2026-10-13_ROLANDIA.md); 21 testes focados, cinco replays, tipos, lint e build aprovados. Dez achados não estruturais de Rolândia e linhas dos outros quatro estudos idênticos aos anteriores.
+- **Ambiente:** código corrigido validado localmente. Frontend público C/D conferido por bundle e Playwright sem IA nova; estudo real de 02/10 coincide com hashes de PPTX/13 Excel, contém erros textuais esperados, mas mantém FP estrutural e omite Boulevard. Revisão atual das Edge Functions não identificada; sem reprocessamento/deploy na sessão.
+- **Etapas/Pendências:** baseline local e handoff preparados; gate semanal completo continua aberto. Próximo bloco: publicar/retestar checklist, investigar leituras reais de Boulevard/tabelas pequenas, adjudicar gabarito humano; qualquer lote IA novo exige orçamento. Nenhuma escrita no Monday.
+- **Monday:** [V2 Corretor de projetos / objetivo atual V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`.
+
 ### 2026-10-06 — FIERGS: oferta lançada do quadro VGV na janela — Gabriel / Codex
 - **Problema:** anotação única do PDF (12), slide 55: lançadas históricas 85.373 eram comparadas às 24.488 da janela. Demais análises aceitas por Juliana no e-mail; homologação global aberta.
 - **Mudança:** `vgvSummary` recebe o cubo da janela para unidades lançadas por linha/subtotal/total; mantém estoque, ticket e empreendimentos históricos. VGV monetário permanece histórico e vendido acumulado, com cabeçalhos explícitos para não subtrair universos diferentes. Sem números fixos nem exceções por período. Secovi conserva comportamento.

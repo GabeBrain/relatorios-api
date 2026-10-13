@@ -8,7 +8,8 @@
 //   CORRETOR_REPLAY_OUT=".tmp/replay.json" npx vitest run replay-real
 // CORRETOR_REPLAY_FIXTURE=<json> lê leituras e fonte do arquivo (sem banco);
 // CORRETOR_REPLAY_SAVE=<json> grava esse arquivo a partir do banco.
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it } from 'vitest';
 import { pptxToIr } from '../../audit/pptx-to-ir';
 import { irToFindings } from '../../audit/ir-rules';
@@ -19,6 +20,7 @@ import { combineVisionFindings } from '../pipeline';
 import { sourceCrosscheckFindings } from '../source-crosscheck';
 import { confidenceOf } from '../confidence';
 import type { Fonte } from '../fonte';
+import { extractFonteFromExcel } from '../fonte-extractor-browser';
 
 const env = process.env;
 const PPTX = env.CORRETOR_REPLAY_PPTX;
@@ -45,6 +47,7 @@ describe.skipIf(!PPTX)('replay de estudo real (leituras cacheadas)', () => {
     let fonte: Fonte | null = null;
     // Fixture local (leituras + fonte) dispensa o banco; SAVE grava uma a partir dele.
     const fixture = env.CORRETOR_REPLAY_FIXTURE;
+    if (fixture && !existsSync(fixture)) throw new Error(`Fixture não encontrada: ${fixture}. Replay interrompido sem consultar o banco.`);
     if (fixture && existsSync(fixture)) {
       const saved = JSON.parse(readFileSync(fixture, 'utf-8')) as { readings: Record<string, { payload: unknown; model?: string }>; fonte: Fonte | null };
       for (const [sha1, r] of Object.entries(saved.readings)) readings.set(sha1, r);
@@ -67,6 +70,16 @@ describe.skipIf(!PPTX)('replay de estudo real (leituras cacheadas)', () => {
       const dump = candidates.filter((c) => want.has(c.slide)).map((c) => ({ slide: c.slide, sha1: c.sha1, reading: readings.get(c.sha1) }));
       writeFileSync(`${env.CORRETOR_REPLAY_OUT ?? '.tmp/replay.json'}.dump.json`, JSON.stringify(dump, null, 1));
     }
+    // Usa o mesmo extrator do upload do app, sem persistir dados ou chamar IA.
+    if (env.CORRETOR_REPLAY_EXCEL_DIR) {
+      const directory = env.CORRETOR_REPLAY_EXCEL_DIR;
+      const files = readdirSync(directory).filter((name) => /\.xlsx?m?$/i.test(name)).sort().map((name) => ({
+        name, size: readFileSync(join(directory, name)).byteLength,
+        arrayBuffer: async () => Uint8Array.from(readFileSync(join(directory, name))).buffer,
+      } as File));
+      if (!files.length) throw new Error(`Nenhuma planilha em ${directory}`);
+      fonte = await extractFonteFromExcel(files, 'replay-excel-bruto');
+    }
     const city = env.CORRETOR_REPLAY_CITY ?? '';
     const uf = env.CORRETOR_REPLAY_UF ?? undefined;
     const vision = replayVisionPass(candidates, readings, { cidade: city, uf });
@@ -87,7 +100,11 @@ describe.skipIf(!PPTX)('replay de estudo real (leituras cacheadas)', () => {
       detalhe: f.detail.replace(/\s+/g, ' ').slice(0, 240),
     })).sort((a, b) => (parseInt(a.slide?.slice(1) ?? '') || 999) - (parseInt(b.slide?.slice(1) ?? '') || 999));
     const summary = { candidatas: candidates.length, leituras: readings.size, achados: rows.length, tabelas: `${vision.tablesVerified}/${vision.tablesExtracted}`, acertos };
-    if (env.CORRETOR_REPLAY_OUT) writeFileSync(env.CORRETOR_REPLAY_OUT, JSON.stringify({ summary, rows }, null, 1));
+    if (env.CORRETOR_REPLAY_OUT) writeFileSync(env.CORRETOR_REPLAY_OUT, JSON.stringify({
+      summary, rows, findings: all,
+      fonte: fonte ? { inventario: fonte.inventario, avisos: fonte.avisos, blocos: fonte.blocos.length } : null,
+      input: { pptx: PPTX, fixture, excelDir: env.CORRETOR_REPLAY_EXCEL_DIR ?? null, sha1: ir.sha1 },
+    }, null, 1));
     console.log('[replay]', JSON.stringify(summary));
     for (const r of rows) console.log(`[replay] ${r.slide} ${r.tipo} ${r.nivel} | ${r.titulo} | ${r.detalhe.slice(0, 150)}`);
   }, 600_000);
