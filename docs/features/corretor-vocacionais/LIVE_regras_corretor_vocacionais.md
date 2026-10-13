@@ -16,7 +16,13 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
-## Versão 0.68 — 2026-10-13 — evidências persistidas (RUNTIME local, sem publicação confirmada)
+## Versão 0.68.1 — 2026-10-13 — escopo da reconferência (RUNTIME local)
+
+- **DET — persistência:** reconferência direta só pode resolver identificadores das regras efetivamente executadas (IR nativo/fonte direta quando disponível). Ausência de ata, raios da fonte, revisão sem cobertura, visão ou regra futura no diff não comprova correção. Sem escopo informado, preserva DET existentes.
+- **Reteste real v0.68:** [Rolândia no site](./RETESTE_SITE_ROLANDIA_2026-10-13.md), bundle CorretorV3Page-C4xyNz2S confirma v0.68. PPTX/13 Excel reais, 32 imagens reaproveitadas, nenhuma chamada IA. FP Sociodemografia removido, mas reconferência resolveu indevidamente quatro DET de fases não executadas. Registros restaurados com autorização de Gabriel; correção v0.68.1 local protege esse alcance, 19 testes adicionais/47 focados aprovados. Não repetir a reconferência em produção antes de publicar a proteção.
+- **Limites:** regra tabela/conclusão não é executada na reconferência gratuita; confirmação de presença no bundle não substitui teste do caso Daniele extraído do original. Reanálise completa exige orçamento do passe textual.
+
+## Versão 0.68 — 2026-10-13 — evidências persistidas (frontend publicado confirmado no reteste abaixo)
 
 - **DET — ano:** exige cabeçalho temporal ou série de pelo menos três anos consecutivos distintos; repetição de quantidades não comprova ano. Contexto de coluna preservado tanto em tabela nativa quanto em leitura de imagem.
 - **DET — conclusão:** `narrative-total.ts`, integrado ao pipeline/rechecagem, compara novos domicílios na conclusão ao total municipal do mesmo slide e janela. Leitura confiável, cidade exata e total único obrigatórios; tolerância de uma unidade. Formulação inicial dirigida ao caso Daniele; não cobre prosa arbitrária nem conclusão somente em imagem.

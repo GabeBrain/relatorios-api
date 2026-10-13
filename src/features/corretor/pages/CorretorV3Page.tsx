@@ -28,6 +28,7 @@ import AtaTestPanel from '../components/AtaTestPanel';
 import AtaCard from '../components/AtaCard';
 import { type AtaGateValue } from '../components/AtaGateCard';
 import PreAnalysisCard, { type PreAnalysisValue } from '../components/PreAnalysisCard';
+import { directRecheckRuleWasEvaluated } from '../lib/v3/recheck-scope';
 import { formatUSD, type ModelId } from '../lib/cost-calculator';
 import {
   runPhase1, runPhase2, estimateFullAnalysis, TEXT_REVIEW_MODEL,
@@ -872,7 +873,7 @@ export default function CorretorV3Page() {
         newVersion,
         { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: filename },
         findings,
-        { sourceCrosscheckRan: Boolean(fonteInput) },
+        { sourceCrosscheckRan: Boolean(fonteInput), evaluatedRule: id => directRecheckRuleWasEvaluated(id, Boolean(fonteInput)) },
       );
       setLastDiff(diff);
       window.setTimeout(() => diffRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);

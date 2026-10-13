@@ -272,7 +272,7 @@ export async function recheck(
   versionN: number,
   meta: { sha1?: string; nSlides: number; arquivo: string },
   newFindings: Finding[],
-  opts: { sourceCrosscheckRan?: boolean } = {}
+  opts: { sourceCrosscheckRan?: boolean; evaluatedRule?: (ruleId: string) => boolean } = {}
 ): Promise<DiffResult> {
   const current = await loadFindings(studyId);
   // Diff comparado só com achados DET: newFindings vêm do motor determinístico,
@@ -280,6 +280,9 @@ export async function recheck(
   // eles só se resolvem quando um novo passe de IA rodar sobre a versão nova.
   const activeIds = new Set(current.filter((c) => {
     if (c.resolvidoNaVersao !== null || c.origem !== 'DET') return false;
+    // Ausência só prova resolução quando a regra realmente executou nesta rodada.
+    // Origem DET também inclui ata, visão/cache e relações da fonte de outras fases.
+    if (!opts.evaluatedRule?.(c.ruleId)) return false;
     // Sem a fonte anexada nesta reconferência não há evidência para concluir que
     // uma divergência fonte×deck sumiu; o achado permanece, em vez de virar falso corrigido.
     return opts.sourceCrosscheckRan || c.finding.type !== 'SOURCE_CROSSCHECK';
