@@ -1,3 +1,7 @@
+### 2026-10-13 — Rebrain: marca no menu recolhido — Gabriel / Codex
+- **Mudança:** logo completo mantido no menu aberto; recolhido usa BrainCircuit vetorial de 24 px no próprio botão de expandir (32 px), sem disputar 56 px com imagem e seta. Nome acessível, estado expandido e foco por teclado preservados; tokens SE v0.1 já copiados intactos. Rotas/Corretor/Sinduscon inalterados.
+- **Evidência/estado:** `src/components/layout/AppLayout.tsx` e teste de alternância/restauração `AppLayout.test.tsx`; um teste focado e lint aprovados localmente. Sem ensaio browser/produção; próximo: publicar com autorização e conferir claro/escuro no site. Alterações documentais FIERGS anteriores preservadas fora do commit desta correção.
+
 ### 2026-10-13 — FIERGS: refinamento das capas personalizadas — Gabriel / Codex
 - **Problema/evidência:** três PDFs pós-publicação em `assets/pos_aceite_eval/` da feature (69/68/69 páginas), capas desequilibradas e placeholder de preço de 4 dormitórios em Canoas. CSV do conjunto recebido: 265 projetos, 42 guardas match. Faltam os CSVs de Canoas/preset; títulos suspeitos em miniaturas estão completos na ampliação.
 - **Mudança:** capas com nomes reais para conjuntos pequenos, identidade/UF/janela centralizados; lista territorial simétrica com continuações equilibradas e limite por tamanho dos nomes. Preset/mapa regional preservados. Série por dormitório compartilhada entre manifesto/renderer, omitindo página sem observação com aviso, mantendo zero. Política/fórmulas/números não alterados.

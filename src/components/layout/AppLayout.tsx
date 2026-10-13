@@ -4,6 +4,7 @@ import {
   Map,
   Building2,
   Bot,
+  BrainCircuit,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -21,6 +22,7 @@ import { AuthBlock } from './AuthBlock';
 import { CommandPalette } from './CommandPalette';
 import brainLogo from '../../../assets/logoBrain.png';
 import { cn } from '@/lib/utils';
+import '../../styles/geobrain-tokens.css';
 
 interface NavItem {
   type?: 'item';
@@ -276,19 +278,19 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         {/* Logo + collapse toggle */}
         <div className={cn('flex items-center gap-2 px-3 py-3 border-b border-border', collapsed ? 'justify-center px-2' : 'justify-between')}>
-          <div className="flex items-center gap-2 min-w-0">
+          {!collapsed && <div className="flex items-center gap-2 min-w-0">
             <img src={brainLogo} alt="Brain" className="h-7 w-auto shrink-0" />
-            {!collapsed && (
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest truncate">Rebrain</span>
-            )}
-          </div>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest truncate">Rebrain</span>
+          </div>}
           <button
             type="button"
             onClick={() => setCollapsed((v) => !v)}
-            className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            className={cn('shrink-0 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', collapsed && 'flex h-8 w-8 items-center justify-center text-[color:var(--gb-verde-500)]')}
             title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+            aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+            aria-expanded={!collapsed}
           >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {collapsed ? <BrainCircuit className="h-6 w-6" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}
           </button>
         </div>
 
