@@ -2,6 +2,8 @@
 
 ## Preparação por Gabriel/Codex — 14/10/2026
 
+**Publicação confirmada em 14/10:** Gabriel autorizou; `be413e4` e `0bac636` enviados em `ffd8924..0bac636` para origin/main. Fetch posterior 0/0; check:live-docs aprovado. Três alterações documentais FIERGS anteriores permanecem locais, fora da publicação. Lucas já pode atualizar o checkout e acionar o CTA. Recebimento por Lucas, testes na máquina dele e execução do piloto continuam pendentes. Este registro documental não é entrega de um novo relatório.
+
 Complemento de recepção: CTA exige saudação “Olá, Lucas!”, resumo humano/arquitetura/papel do orquestrador e três leituras essenciais. Ativação limitada a leitura/checks offline, sem implementação automática. Área permanente de documentação em `docs/features/relatorios-institucionais/`; código específico ali recomendado na feature correspondente quando aprovado, sem mover motor antigo. Pacote local, ainda sem confirmação de recebimento/publicação.
 
 - Escopo decidido por Gabriel: Lucas recebe relatórios automatizados; Gabriel mantém Corretor V3/Quanti 2026. Férias Lucas a partir de 19/10; retorno não informado.
