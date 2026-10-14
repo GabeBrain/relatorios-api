@@ -213,6 +213,10 @@ por padrão; exceções duradouras (novo primitive, token, fluxo ou desvio de la
 registradas em `docs/architecture/FRONTEND_DECISIONS.md`. No handoff, informe o padrão reutilizado e
 os estados verificados. Essas regras se aplicam a Lovable, Codex do Lucas e qualquer outro autor.
 
+## Handoff de relatórios automatizados — Lucas (14/10/2026)
+
+Para iniciar/retomar essa frente, leia `docs/handoffs/lucas-relatorios-2026-10-14/README.md` na ordem do índice e atualize `STATUS.md` com evidência do ambiente da sessão. O pacote transfere somente relatórios automatizados; Corretor V3 e unificação Quanti 2026 seguem com Gabriel. Preservar políticas Secovi/FIERGS, regressões 2T2026/4T2025 e domínios paralelos. Férias Lucas a partir de 19/10: plano curto propõe um piloto, sem presumir quatro entregas ou execução durante férias. Permissão GitHub confirmada não prova API/Drive/Lovable. Push/ensaios reais continuam sujeitos a autorização conforme protocolo. Fontes brutas no Drive ou `.local-inputs/`, nunca credenciais no pacote.
+
 ## Corretor de Vocacionais
 
 Sempre que alterar qualquer comportamento, regra, prompt, schema, migração, extração ou fluxo relacionado ao **Corretor | Estudos Vocacionais**, atualize também:

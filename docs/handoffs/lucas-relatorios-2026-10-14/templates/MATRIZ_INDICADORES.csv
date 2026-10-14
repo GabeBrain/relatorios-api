@@ -1,0 +1,8 @@
+modelo;bloco;indicador;arquivo_slide;fonte_endpoint;granularidade;universo;filtro;periodicidade;janela;fotografia;numerador;denominador;ponderacao;unidade;cobertura;total_referencia;total_calculado;delta;causa_delta;estado_metodologico;evidencia;decisao
+sp;Lançamentos;Empreendimentos lançados;;;building;;Capital;A confirmar;;;;;;;;;;;Não executado;Pendente;;Não aproximar mês por trimestre
+sp;Lançamentos;Unidades lançadas na janela;;;building/tipologia;;Capital;A confirmar;;;;;;;;;;;Não executado;Pendente;;Separar janela de histórico
+sp;Vendas;Vendas líquidas;;;building/tipologia;;Capital;A confirmar;;;;;;;;;;;Não executado;Pendente;;Preservar sinal e distratos
+sp;Oferta;Oferta final;;;building/tipologia;;Capital;Fechamento;;;;;;;;;;;Não executado;Pendente;;Fotografia canônica por dimensão
+sp;Preços;R$/m² médio;;;unidade ou tipologia a comprovar;;Capital;A confirmar;;;;;;;;;;;Não executado;Pendente;;Não assumir ponderação
+sp;VGV;Correção INCC;;;A confirmar;;Capital;A confirmar;;;;;;;;;;;Não executado;Pendente;;Fonte e data-base obrigatórias
+sp;Preços;Série sem MCMV;;;A confirmar;;Capital;A confirmar;;;;;;;;;;;Não executado;Pendente;;Critério de classificação a comprovar
