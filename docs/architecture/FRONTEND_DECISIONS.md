@@ -51,3 +51,9 @@ Não use para changelog de feature; mudanças funcionais continuam nos documento
   `src/features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx`.
 
 <!-- novas decisões acima desta linha -->
+### 2026-10-14 — Corretor orientado por projetos com revisão compatível
+- **Contexto:** geração do produto e versões do estudo disputavam navegação; originais limitados ao navegador e cadastro incompleto.
+- **Decisão:** carteira lazy em `/corretor`, cadastro/área em `/corretor/projetos/:studyId`; revisão anterior em `/corretor/analise`, query antiga `study` preservada. Primitives existentes e composição scoped com tokens SE, sem mudar o shell geral. Upload TUS importado só ao usar o material.
+- **Consequência:** histórico identifica limites; identidade GeoBrain não se torna permissão Supabase por inferência. Recuperação remota requer migration/acesso confirmado; indisponibilidade é visível. Módulo preserva motores e decisões humanas. Sem novo primitive/token global.
+- **Escopo:** `src/features/corretor/pages/CorretorProjectsPage.tsx`, `lib/projects.ts`, `styles/projects.css` e rotas `App.tsx`. Validação local documentada na execução D0/D1; produção pendente.
+- **Ajuste de composição:** `AppLayout` recolhe a lateral automaticamente abaixo de768px somente nas rotas Corretor, com expansão em sobreposição/Escape; preferência desktop preservada. O teste de overflow sozinho não detectou o conteúdo comprimido; bancada mede também a largura útil e inspeciona capturas. Shell dos demais módulos segue comportamento anterior.

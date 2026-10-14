@@ -38,11 +38,16 @@ export async function savePptx(sha1: string, name: string, bytes: Uint8Array): P
   if (!db) return false;
   try {
     const tx = db.transaction(STORE, 'readwrite');
+    const committed = new Promise<boolean>(resolve => {
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+      tx.onabort = () => resolve(false);
+    });
     const store = tx.objectStore(STORE);
     await done(store.put({ sha1, name, bytes, savedAt: Date.now() } satisfies StoredDeck));
     const all = ((await done(store.getAll())) ?? []) as StoredDeck[];
     for (const old of all.sort((a, b) => b.savedAt - a.savedAt).slice(KEEP)) store.delete(old.sha1);
-    return true;
+    return await committed;
   } catch {
     return false;
   } finally {

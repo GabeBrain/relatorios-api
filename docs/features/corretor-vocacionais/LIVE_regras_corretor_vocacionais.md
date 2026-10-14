@@ -16,6 +16,14 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.70 — 2026-10-14 — carteira e contrato de originais (RUNTIME local / backend preparado)
+
+- **Fluxo:** `/corretor` abre carteira; links antigos com `study` continuam revisão, também disponível em `/corretor/analise`. Cadastro progressivo/área do estudo, materiais por versão e histórico limitado aos registros atuais. Sem alteração de motor/prompt/decisões humanas.
+- **Originais:** armazenamento privado proposto com identidade validada, vínculo SHA-1 à versão e SHA-256/tamanho na recuperação. Upload retomável TUS; RPC confirma objeto/vínculo, retry não sobrescreve original. Cache local confirma commit antes de anunciar disponibilidade.
+- **Persistência:** migration aditiva `20261014210853_corretor_projects_originals.sql`, proprietário/membros leitores; nenhum autor legado inferido. Não aplicada no Lovable; ponte entre token GeoBrain e identidade Supabase não está confirmada. Cadastro/recuperação não declarados funcionando em produção.
+- **Evidência/etapas:** [execução D0/D1](./design/EXECUCAO_D0_D1_CARTEIRA_2026-10-14.md): 262 testes/dez passes, dez controles SQL em Postgres isolado, browser com snapshots e transferência de PPTX sintético em novo contexto. Tipos/lint/build locais aprovados. Custo real do print25,32 créditos do projeto inteiro, período/plano/GB desconhecidos; tarifa Lovable por GB não confirmada. Zero IA nova.
+- **Próximo:** integrar identidade/aplicar migration, verificar duas identidades reais e recuperar um original conhecido por hash; depois fontes brutas/snapshots de execução/entrega. Limites de adjudicação das versões anteriores preservados.
+
 ## Versão 0.69.1 — 2026-10-14 — agrupamento por acusação e revisão ampliada (RUNTIME local)
 
 - **Texto/DET:** conter a mesma evidência não basta para agrupar. Categorias distintas, palavras citadas diferentes e correções explícitas conflitantes permanecem cartões separados; compatibilidade demonstrada da acusação é exigida. Pares reais CJ23/CJ68 continuam agrupados, sem excluir IDs/decisões humanas. Não pretende interpretar toda linguagem livre.

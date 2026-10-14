@@ -1,0 +1,37 @@
+import {resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+const {PGlite}=await import(pathToFileURL(resolve('.local-inputs/pg-verify/node_modules/@electric-sql/pglite/dist/index.js')).href);
+import {readFileSync,writeFileSync} from 'node:fs';
+const db=new PGlite();const results=[];
+await db.exec(`create role anon; create role authenticated; create schema auth; create schema storage;
+create table auth.users(id uuid primary key); create function auth.uid() returns uuid language sql as $$ select nullif(current_setting('test.uid',true),'')::uuid $$;
+create function auth.jwt() returns jsonb language sql as $$ select '{"is_anonymous":false}'::jsonb $$;
+grant usage on schema auth,storage to authenticated,anon;
+create table public.studies_v3(id uuid primary key); create table public.study_versions(id uuid primary key,study_id uuid references public.studies_v3(id),sha1 text);
+grant select on public.study_versions to authenticated;
+create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text,metadata jsonb); alter table storage.objects enable row level security;
+grant select,insert on storage.objects to authenticated;
+create function storage.foldername(name text) returns text[] language sql as $$ select (string_to_array(name,'/'))[1:array_length(string_to_array(name,'/'),1)-1] $$;`);
+await db.exec(readFileSync('supabase/migrations/20261014210853_corretor_projects_originals.sql','utf8'));
+const owner='11111111-1111-4111-8111-111111111111',peer='22222222-2222-4222-8222-222222222222',pid='33333333-3333-4333-8333-333333333333',sid='44444444-4444-4444-8444-444444444444',vid='55555555-5555-4555-8555-555555555555';
+const sha1='a'.repeat(40),sha256='b'.repeat(64),path=`${pid}/${vid}/${sha256}.pptx`;
+await db.query('insert into auth.users values ($1),($2)',[owner,peer]);await db.query('insert into studies_v3 values($1)',[sid]);await db.query('insert into study_versions values($1,$2,$3)',[vid,sid,sha1]);
+async function actor(uid){await db.exec('reset role');await db.query("select set_config('test.uid',$1,false)",[uid]);await db.exec('set role authenticated');}
+async function denied(name,run){let rejected=false;try{await run()}catch{rejected=true}if(!rejected)throw Error(name+' accepted');results.push({name,pass:true});}
+await actor(owner);await db.query('insert into corretor_projects(id,study_id,owner_id,display_name) values($1,$2,$3,$4)',[pid,sid,owner,'Fixture local']);
+await denied('objeto ausente não vira original confirmado',()=>db.query('select register_corretor_original($1,$2,$3,$4,$5,$6,$7)',[pid,vid,path,sha256,sha1,333,'fixture.pptx']));
+await db.query('insert into storage.objects(bucket_id,name,metadata) values($1,$2,$3)', ['corretor-originais',path,{size:333}]);
+const a=await db.query('select register_corretor_original($1,$2,$3,$4,$5,$6,$7) as id',[pid,vid,path,sha256,sha1,333,'fixture.pptx']);
+const b=await db.query('select register_corretor_original($1,$2,$3,$4,$5,$6,$7) as id',[pid,vid,path,sha256,sha1,333,'fixture.pptx']);
+if(a.rows[0].id!==b.rows[0].id)throw Error('Not idempotent');results.push({name:'registro idempotente após upload',pass:true});
+await denied('tamanho incorreto recusado',()=>db.query('insert into corretor_originals(project_id,version_id,path,sha256,sha1,bytes,original_name) values($1,$2,$3,$4,$5,$6,$7)',[pid,vid,path,sha256,sha1,334,'bad.pptx']));
+await denied('transferência de autoria recusada',()=>db.query('update corretor_projects set owner_id=$1 where id=$2',[peer,pid]));
+await actor(peer);if((await db.query('select * from corretor_originals')).rows.length)throw Error('Cross user leaked');if((await db.query('select * from storage.objects')).rows.length)throw Error('Storage leaked');results.push({name:'outro usuário não vê original/projeto',pass:true});
+await denied('outra identidade não registra original',()=>db.query('select register_corretor_original($1,$2,$3,$4,$5,$6,$7)',[pid,vid,path,sha256,sha1,333,'fixture.pptx']));
+await actor(owner);await db.query('insert into corretor_project_members(project_id,user_id,owner_id) values($1,$2,$3)',[pid,peer,owner]);
+await actor(peer);if((await db.query('select * from corretor_originals')).rows.length!==1)throw Error('Shared read failed');results.push({name:'membro explicitamente associado pode ler',pass:true});
+const changed=await db.query("update corretor_projects set display_name='Alterado' where id=$1 returning id",[pid]);if(changed.rows.length)throw Error('Reader changed project');results.push({name:'membro leitor não altera cadastro',pass:true});
+await db.exec('reset role; set role anon');await denied('anon não lê cadastro privado',()=>db.query('select * from corretor_projects'));
+await db.exec('reset role');const bucket=await db.query("select public from storage.buckets where id='corretor-originais'");if(bucket.rows[0].public!==false)throw Error('Public bucket');results.push({name:'bucket privado',pass:true});
+writeFileSync('.local-inputs/launch-d0/migration-test.json',JSON.stringify({engine:'PGlite Postgres isolado, auth/storage simulados; não Supabase real',results},null,2));console.log(JSON.stringify(results));await db.close();

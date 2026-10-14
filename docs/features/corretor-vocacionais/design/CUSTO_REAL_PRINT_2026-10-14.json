@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-14",
+  "source": "print fornecido por Gabriel nesta conversa, Cloud Usage",
+  "unit": "credits",
+  "period": null,
+  "plan": null,
+  "storageGB": null,
+  "databaseGB": null,
+  "scope": "projeto inteiro, inclui módulos além do Corretor",
+  "categories": [
+    {"name":"Database","usage":22,"covered":20.7,"children":{"Database server":22,"Database storage":0}},
+    {"name":"Network","usage":1.77,"covered":1.70},
+    {"name":"Compute","usage":1.45,"covered":1.38},
+    {"name":"Storage","usage":0.10,"covered":0.09},
+    {"name":"AI","usage":0,"covered":null},
+    {"name":"Connectors","usage":0,"covered":null},
+    {"name":"Realtime","usage":0,"covered":null}
+  ],
+  "totalDisplayedCategories":25.32,
+  "coveredDisplayed":23.87,
+  "uncoveredApproximate":1.45,
+  "limitations":["Não somar Database e Database server duas vezes","Arredondamento do painel","Não informa tarifa por GB/conversão contratual para dólar","8GB foi hipótese verbal, não mostrado no print","AI0 não cobre necessariamente chamadas diretas a outros fornecedores"]
+}

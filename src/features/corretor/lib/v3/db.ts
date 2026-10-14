@@ -126,12 +126,12 @@ export async function loadStudyFonte(studyId: string): Promise<StudyFonte | null
   return validated.ok && validated.fonte ? { filename: data.filename, fonte: validated.fonte } : null;
 }
 
-export async function listStudies(): Promise<StudyV3[]> {
+export async function listStudies(strict = false): Promise<StudyV3[]> {
   const { data, error } = await db
     .from('studies_v3')
     .select('*, study_versions(n, n_slides, sha1), findings_v3(status), study_sources_v3(study_id)')
     .order('created_at', { ascending: false });
-  if (error || !data) return [];
+  if (error || !data) { if (strict) throw new Error('Falha ao carregar os estudos.'); return []; }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((s: any) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

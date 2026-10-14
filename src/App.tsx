@@ -1,6 +1,6 @@
 import { Component, lazy, Suspense, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -20,6 +20,11 @@ import ValidacaoFechamento from './pages/ValidacaoFechamento.tsx';
 // O histórico da v1 é lido em modo somente-leitura dentro da própria /corretor
 // (LegacyV1Panel). Componentes v1 preservados no repo, fora do grafo do bundle.
 const CorretorV3Page = lazy(() => import('./features/corretor/pages/CorretorV3Page.tsx'));
+const CorretorProjectsPage = lazy(() => import('./features/corretor/pages/CorretorProjectsPage.tsx'));
+function CorretorEntry() {
+  const location = useLocation();
+  return new URLSearchParams(location.search).has('study') ? <CorretorV3Page /> : <CorretorProjectsPage />;
+}
 const CorretorReportPage = lazy(() => import('./features/corretor/pages/CorretorReportPage.tsx'));
 const CorretorCalibrationPage = lazy(() => import('./features/corretor/pages/CorretorCalibrationPage.tsx'));
 const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/AtualizadorVgvPage.tsx'));
@@ -86,7 +91,10 @@ const App = () => (
                 <Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento />} />
                 <Route path="/rebrain/empresas-empregados" element={<EmpresasEmpregadosPage />} />
                 <Route path="/rebrain/sinduscon-curitiba" element={<SindusconCuritibaPage />} />
-                <Route path="/corretor" element={<CorretorV3Page />} />
+                <Route path="/corretor" element={<CorretorEntry />} />
+                <Route path="/corretor/projetos" element={<CorretorProjectsPage />} />
+                <Route path="/corretor/projetos/:studyId" element={<CorretorProjectsPage />} />
+                <Route path="/corretor/analise" element={<CorretorV3Page />} />
                 <Route path="/corretor/calibracao" element={<CorretorCalibrationPage />} />
                 <Route path="/corretor/:id/relatorio" element={<CorretorReportPage />} />
                 <Route path="/atualizador-vgv" element={<AtualizadorVgvPage />} />

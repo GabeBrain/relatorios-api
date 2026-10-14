@@ -150,17 +150,31 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [{ collapsed, openGroups, openFolders }, setSidebar] = useState<SidebarState>(loadSidebarState);
+  const [{ collapsed: savedCollapsed, openGroups, openFolders }, setSidebar] = useState<SidebarState>(loadSidebarState);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const { dark, toggle } = useDarkMode();
   const location = useLocation();
+  const [compact, setCompact] = useState(() => window.innerWidth < 768);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const corretorMobile = location.pathname.startsWith('/corretor') && compact;
+  const collapsed = corretorMobile ? !mobileMenuOpen : savedCollapsed;
 
   useEffect(() => {
-    localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify({ collapsed, openGroups, openFolders }));
-  }, [collapsed, openGroups, openFolders]);
+    if (!window.matchMedia) return;
+    const media = window.matchMedia('(max-width: 767px)');
+    const update = () => setCompact(media.matches);
+    update(); media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  useEffect(() => { setMobileMenuOpen(false); }, [location.pathname]);
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify({ collapsed: savedCollapsed, openGroups, openFolders }));
+  }, [savedCollapsed, openGroups, openFolders]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setPaletteOpen((v) => !v);
@@ -171,6 +185,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   }, []);
 
   function setCollapsed(fn: (v: boolean) => boolean) {
+    if (corretorMobile) { setMobileMenuOpen(v => !v); return; }
     setSidebar((s) => ({ ...s, collapsed: fn(s.collapsed) }));
   }
 
@@ -267,12 +282,14 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      {corretorMobile && mobileMenuOpen && <button type="button" aria-label="Fechar menu" className="fixed inset-0 z-40 bg-black/40" onClick={() => setMobileMenuOpen(false)} />}
 
       {/* Sidebar */}
       <aside
         className={cn(
           'flex flex-col h-full border-r border-border bg-card transition-all duration-200 shrink-0 print:hidden',
-          collapsed ? 'w-14' : 'w-64'
+          collapsed ? 'w-14' : 'w-64',
+          corretorMobile && mobileMenuOpen && 'fixed inset-y-0 left-0 z-50 shadow-xl'
         )}
       >
         {/* Logo + collapse toggle */}
