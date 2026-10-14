@@ -2,6 +2,8 @@
 
 ## Preparação por Gabriel/Codex — 14/10/2026
 
+Complemento de recepção: CTA exige saudação “Olá, Lucas!”, resumo humano/arquitetura/papel do orquestrador e três leituras essenciais. Ativação limitada a leitura/checks offline, sem implementação automática. Área permanente de documentação em `docs/features/relatorios-institucionais/`; código específico ali recomendado na feature correspondente quando aprovado, sem mover motor antigo. Pacote local, ainda sem confirmação de recebimento/publicação.
+
 - Escopo decidido por Gabriel: Lucas recebe relatórios automatizados; Gabriel mantém Corretor V3/Quanti 2026. Férias Lucas a partir de 19/10; retorno não informado.
 - Conhecimento: pasta indexada, nove referências diretas com links e alertas, documentação original apontada, roteiro de acessos/testes/pausa. Binários não duplicados no Git.
 - Acesso GitHub observado: `Kriptonyano`, `write` em `GabeBrain/relatorios-api` (API read-only, 14/10). Referência de identidade: handoff Quanti setembro. Não houve alteração de permissões.

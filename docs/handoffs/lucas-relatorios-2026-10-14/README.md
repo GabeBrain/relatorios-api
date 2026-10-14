@@ -10,6 +10,8 @@ Lucas inicia férias na segunda-feira **19/10**, segundo Gabriel. Janela dispon�
 
 ## Comece aqui — ordem de leitura
 
+**Lucas abre a raiz do repo no Codex.** Este handoff é o ponto de entrada; os planos/evidências futuros de cada modelo ficam na [área permanente de relatórios institucionais](../../features/relatorios-institucionais/README.md). O acionamento e a saudação humana estão definidos em [06 — CTA](06_CTA_CODEX_E_MENSAGEM.md), antes de qualquer implementação.
+
 1. [Acessos e ambiente](01_ACESSOS_E_AMBIENTE.md): o que foi observado aqui e o que só a máquina do Lucas pode comprovar.
 2. [Baseline e mapa técnico](02_BASELINE_E_MOTOR.md): motor existente, políticas diferentes e documentos históricos.
 3. [Materiais e decisões dos próximos modelos](03_FONTES_E_MODELOS.md): links diretos, períodos, prioridades e lacunas.
