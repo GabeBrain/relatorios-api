@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, type ModelId } from '../cost-calculator';
 import type { Ir, IrSlide } from '../audit/ir';
 import { toAuditSection } from '../audit/ir';
+import { literalTextAnchor } from './text-review';
 import type { Finding } from '../audit/model';
 
 const BATCH_SIZE = 12;
@@ -81,7 +82,7 @@ const flat = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCa
 export function evidenceInSlide(slideText: string, evidence: string | undefined, required: boolean): boolean {
   if (!evidence?.trim()) return !required;
   const needle = flat(evidence);
-  return needle.length > 0 && flat(slideText).includes(needle);
+  return needle.length > 0 && literalTextAnchor(slideText, evidence);
 }
 
 export async function runTextPass(

@@ -16,6 +16,15 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.69 — 2026-10-14 — fechamento delimitado (RUNTIME local, publicação pendente)
+
+- **Custo/fluxo:** reconferência com imagens a reler exige confirmação de lote/estimativa; cancelar mantém DET gratuito. Modal existente/tokens SE preservados, confirmação não é autorização recorrente.
+- **Texto/DET:** apresentação revalida `iatxt` contra PPTX pareado incluindo SVG/tabelas; ausência vira Verificar, não corrigido. Âncora por palavras completas. Agrupa evidências equivalentes/contidas do mesmo slide/tipo sem decisões humanas, preserva IDs/ocorrências e explicita ação do grupo. Acusações editoriais sem demonstração ficam Verificar.
+- **Visão:** percentual incompatível que fecha em outra coluna é associação suspeita, sem mover valores; limites literais sem leituras concordantes ficam Verificar. Guardas na geração/apresentação dos antigos, sem editar status/payload.
+- **Persistência:** reconciliação/diff preservam vereditos/revisão humana. Nenhuma migração ou prompt alterado.
+- **Evidência:** [plano](./PLAN_FECHAMENTO_V3_2026-10-14.md), [resultado](./RESULTADO_FECHAMENTO_V3_2026-10-14.md), 248 testes, dez replays, sete caches/31 textos, Chromium local com APIs simuladas, tipos/lint/build. Sem IA nova. Teste histórico reconciliado com v0.67 publicada, sem alterar expectativas dos dez passes.
+- **Materiais:** 80 arquivos Drive diretos catalogados; GO132 slides/31 imagens e XLSX testados, zero bloco de fonte reconhecido. Novo para suíte, não vocacional/gabarito validado. Daniele original/OCR amplo/aceite integral continuam abertos.
+
 ## Versão 0.68.1 — 2026-10-13 — escopo da reconferência (RUNTIME — verificada em produção em Rolândia)
 
 **Revisão pós-reanálise:** [texto nativo e nove PNG](./REVISAO_POS_REANALISE_2026-10-13.md); quatro FP confirmados (Concorrentes Compactos, dois limites ,01 inventados, percentual 19,2% de coluna errada), dois pares de duplicatas CJ e dois textos legados sem âncora no slide atual. Controles reais preservados: sobreposição de faixas, anos com ponto, Arté, erros textuais literais e soma de renda com divergência real mas OCR errado. Manifesto visual rastreável versionado. Sem mutação de vereditos/IA nova/código; propostas de gate de custo, revalidação textual/deduplicação e âncora de coluna continuam PLANEJADAS. Não declarar todas as somas inseguras ou encerramentos automáticos adjudicados.

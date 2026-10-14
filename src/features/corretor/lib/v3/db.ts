@@ -46,6 +46,8 @@ export function analysisPending(study: Pick<StudyV3, 'generation' | 'analise' | 
 }
 
 export interface FindingV3 {
+  /** IDs agrupados apenas na apresentação; nunca coluna/payload persistido. */
+  duplicateRuleIds?: string[];
   ruleId: string;
   status: FindingStatus;
   origem: string;
@@ -246,6 +248,8 @@ export async function resolveInvalidFindings(studyId: string, ruleIds: string[])
     .update({ status: 'corrigido', resolvido_na_versao: version?.n ?? 1 })
     .eq('study_id', studyId)
     .eq('status', 'pendente')
+    .is('verdict', null)
+    .eq('verdict_revisado', false)
     .in('rule_id', ruleIds);
   if (error) throw new Error(error.message);
 }
@@ -280,6 +284,7 @@ export async function recheck(
   // eles só se resolvem quando um novo passe de IA rodar sobre a versão nova.
   const activeIds = new Set(current.filter((c) => {
     if (c.resolvidoNaVersao !== null || c.origem !== 'DET') return false;
+    if (c.verdict || c.verdictRevisado || c.status === 'ignorado') return false;
     // Ausência só prova resolução quando a regra realmente executou nesta rodada.
     // Origem DET também inclui ata, visão/cache e relações da fonte de outras fases.
     if (!opts.evaluatedRule?.(c.ruleId)) return false;

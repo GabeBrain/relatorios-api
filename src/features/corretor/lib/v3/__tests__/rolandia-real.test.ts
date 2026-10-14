@@ -37,8 +37,11 @@ describe('Rolândia — deck real (baseline: 17 achados, 17 FP)', () => {
     const items = checklist?.viz?.kind === 'text' ? checklist.viz.checklist ?? [] : [];
     const missing = items.filter((i) => i.status === 'missing').map((i) => i.label);
     // Os 15 itens que a analista sublinhou (mapas, endereço, acessos, consolidada…)
-    // saíram de "ausente". Sobra a ausência real de 7.1 — que ela não contestou.
-    expect(missing).toEqual(['7.1 — Futuros lançamentos']);
+    // saíram de "ausente". Sobra 7.1 e, desde 35c0656 (v0.67), os dois
+    // capítulos anunciados em sumários sem conteúdo. Não confundir esses
+    // controles novos com os antigos FPs de mapa. Evidência: reteste Rolândia
+    // 13/10, v4, documentado em RETESTE_SITE_ROLANDIA_2026-10-13.md.
+    expect(missing).toEqual(['7.1 — Futuros lançamentos', 'Seção 04 (Avaliação da Consultoria)', 'Seção 05 (Recomendação)']);
   });
 
   it('o estudo real produz 2 achados (era 17, todos FP)', () => {

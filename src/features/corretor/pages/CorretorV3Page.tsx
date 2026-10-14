@@ -29,6 +29,7 @@ import AtaCard from '../components/AtaCard';
 import { type AtaGateValue } from '../components/AtaGateCard';
 import PreAnalysisCard, { type PreAnalysisValue } from '../components/PreAnalysisCard';
 import { directRecheckRuleWasEvaluated } from '../lib/v3/recheck-scope';
+import { presentTextFindings } from '../lib/v3/text-review';
 import { formatUSD, type ModelId } from '../lib/cost-calculator';
 import {
   runPhase1, runPhase2, estimateFullAnalysis, TEXT_REVIEW_MODEL,
@@ -252,7 +253,7 @@ function AnalysisBanner({ state, onPause }: { state: AnalysisState; onPause: () 
 
 // ─── Modal de confirmação de orçamento (estimativa acima do teto) ────────────
 
-function BudgetModal({ estimate, onConfirm, onCancel }: {
+export function BudgetModal({ estimate, onConfirm, onCancel }: {
   estimate: FullEstimate;
   onConfirm: () => void;
   onCancel: () => void;
@@ -260,26 +261,26 @@ function BudgetModal({ estimate, onConfirm, onCancel }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onCancel}>
       <div
+        role="dialog" aria-modal="true" aria-labelledby="corretor-budget-title"
         className="w-full max-w-md rounded-lg border bg-card p-5 space-y-3 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-amber-500" />
-          <h3 className="text-sm font-semibold">Estimativa acima do teto</h3>
+          <h3 id="corretor-budget-title" className="text-sm font-semibold">Confirmar processamento pago</h3>
         </div>
         <p className="text-xs text-muted-foreground">
           A análise completa deste estudo custa cerca de{' '}
-          <strong className="text-foreground">{formatBRL(estimate.costUsd)}</strong>, acima do teto de{' '}
-          <strong className="text-foreground">R$ {BUDGET_STUDY_BRL.toFixed(2).replace('.', ',')}</strong>{' '}
-          da fase de testes. São {estimate.textSlides} slides de texto e {estimate.visionToRun} imagem(ns) de
+          <strong className="text-foreground">{formatBRL(estimate.costUsd)} ({formatUSD(estimate.costUsd)})</strong>.
+          {' '}O custo efetivo depende das leituras e releituras necessárias. São {estimate.textSlides} slides de texto e {estimate.visionToRun} imagem(ns) de
           tabela a extrair{estimate.visionCached > 0 && ` (${estimate.visionCached} já no cache)`}.
         </p>
         <div className="flex items-center justify-end gap-2 pt-1">
           <button onClick={onCancel} className="text-xs rounded-md px-3 py-1.5 border border-border hover:bg-muted">
-            Cancelar (fica só a triagem grátis)
+            Manter resultado gratuito
           </button>
           <button onClick={onConfirm} className="text-xs rounded-md px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
-            Analisar mesmo assim
+            Confirmar e analisar
           </button>
         </div>
       </div>
@@ -423,6 +424,8 @@ export default function CorretorV3Page() {
   const abortRef = useRef<AbortController | null>(null);
 
   const selected = studies.find((s) => s.id === selectedId) ?? null;
+  const [reviewContext, setReviewContext] = useState<{ studyId: string; ir: Ir } | null>(null);
+  const reviewedItems = useMemo(() => presentTextFindings(items, reviewContext?.studyId === selectedId ? reviewContext.ir : null), [items, reviewContext, selectedId]);
   const pending = selected ? analysisPending(selected) : false;
 
   const refreshList = useCallback(async () => {
@@ -433,6 +436,7 @@ export default function CorretorV3Page() {
 
   const openStudy = useCallback(async (id: string) => {
     setSelectedId(id);
+    setReviewContext(null);
     setLastDiff(null);
     setLoadingStudy(true);
     try {
@@ -446,7 +450,7 @@ export default function CorretorV3Page() {
         .map((item) => item.finding.evidenceSha1).filter((s): s is string => Boolean(s)))];
       const transcribed = shas.length ? await loadTranscribedBySha1(shas) : new Map<string, string>();
       const invalid = loaded.filter((item) => {
-        if (item.status !== 'pendente') return false;
+        if (item.status !== 'pendente' || item.verdict || item.verdictRevisado) return false;
         const { finding } = item;
         if (finding.type === 'BINNING_RULE') {
           const viz = finding.viz;
@@ -465,6 +469,12 @@ export default function CorretorV3Page() {
         await refreshList();
       }
       setItems(loaded);
+      const selectedStudy = studies.find(s => s.id === id);
+      const cachedDeck = await loadPptx(selectedStudy?.lastSha1 ?? null);
+      if (cachedDeck) {
+        const currentIr = await pptxToIr(cachedDeck.bytes, cachedDeck.name);
+        if (currentIr.sha1 === selectedStudy?.lastSha1) setReviewContext({ studyId: id, ir: currentIr });
+      }
     } finally { setLoadingStudy(false); }
   }, [refreshList, studies]);
 
@@ -519,7 +529,7 @@ export default function CorretorV3Page() {
         // brutos por versões anteriores) são encerrados: a lista final é a de agora.
         const finalIds = new Set(res.visionFindings.map((f) => f.id));
         const stale = (await loadFindings(ctx.studyId))
-          .filter((i) => i.origem === 'IA_visao' && i.status === 'pendente' && !finalIds.has(i.ruleId))
+          .filter((i) => i.origem === 'IA_visao' && i.status === 'pendente' && !i.verdict && !i.verdictRevisado && !finalIds.has(i.ruleId))
           .map((i) => i.ruleId);
         if (stale.length) await resolveInvalidFindings(ctx.studyId, stale);
         // Snapshot só de análise COMPLETA: pausada, o estudo continua pendente
@@ -782,6 +792,7 @@ export default function CorretorV3Page() {
         });
         return;
       }
+      setReviewContext({ studyId: selected.id, ir });
       void savePptx(ir.sha1, file.name, bytes);
       setBusy(null);
       if (pendingCrosscheck.current) {
@@ -815,6 +826,7 @@ export default function CorretorV3Page() {
     setBusy('recheck');
     try {
       const ir = await pptxToIr(deck.bytes, deck.name);
+      setReviewContext({ studyId: selected.id, ir });
       const candidates = await findTableImages(deck.bytes, ir);
       const readings = await loadVisionReadings(candidates.map((c) => c.sha1));
       const vision = replayVisionPass(candidates, readings, { cidade: selected.cidade ?? '', uf: selected.uf, outras: readOutras(selected.id) });
@@ -863,6 +875,7 @@ export default function CorretorV3Page() {
     setBusy('recheck');
     try {
       const ir = await pptxToIr(bytes, filename);
+      setReviewContext({ studyId: selected.id, ir });
       void savePptx(ir.sha1, filename, bytes);
       const findings = [
         ...irToFindings(ir, { city: selected.cidade ?? undefined, uf: selected.uf }).filter((f) => !f.ok),
@@ -892,11 +905,17 @@ export default function CorretorV3Page() {
         return;
       }
       // Imagens novas exigem a fase paga; cidade/UF já foram confirmadas no portão.
-      await runPaidAnalysis(
-        { studyId: selected.id, version: newVersion, ir, bytes, estimate, fonte: fonteInput?.fonte },
-        { cidade: selected.cidade ?? '', uf: selected.uf ?? '', ata: selected.ata ?? null },
-        estimate.costUsd,
-      );
+      let confirmed = false;
+      setBudgetPrompt({ estimate, run: () => {
+        if (confirmed) return;
+        confirmed = true;
+        setBudgetPrompt(null);
+        void runPaidAnalysis(
+          { studyId: selected.id, version: newVersion, ir, bytes, estimate, fonte: fonteInput?.fonte },
+          { cidade: selected.cidade ?? '', uf: selected.uf ?? '', ata: selected.ata ?? null },
+          estimate.costUsd,
+        );
+      } });
     } catch (err) {
       toast.error('Falha ao reconferir', { description: err instanceof Error ? err.message : String(err) });
     } finally {
@@ -919,9 +938,10 @@ export default function CorretorV3Page() {
 
   async function handleStatus(ruleId: string, s: FindingStatus) {
     if (!selected) return;
-    setItems((prev) => prev.map((i) => (i.ruleId === ruleId ? { ...i, status: s, verdict: s === 'corrigido' || s === 'pendente' ? null : i.verdict } : i)));
+    const ids = reviewedItems.find(i => i.ruleId === ruleId)?.duplicateRuleIds ?? [ruleId];
+    setItems((prev) => prev.map((i) => (ids.includes(i.ruleId) ? { ...i, status: s, verdict: s === 'corrigido' || s === 'pendente' ? null : i.verdict } : i)));
     try {
-      await setFindingStatus(selected.id, ruleId, s);
+      await Promise.all(ids.map(id => setFindingStatus(selected.id, id, s)));
     } catch (err) {
       toast.error('Falha ao salvar status', { description: err instanceof Error ? err.message : String(err) });
       setItems(await loadFindings(selected.id));
@@ -931,9 +951,10 @@ export default function CorretorV3Page() {
   async function handleVerdict(ruleId: string, verdict: 'bug' | 'fp') {
     if (!selected) return;
     const status: FindingStatus = verdict === 'fp' ? 'ignorado' : 'pendente';
-    setItems((prev) => prev.map((item) => item.ruleId === ruleId ? { ...item, status, verdict } : item));
+    const ids = reviewedItems.find(i => i.ruleId === ruleId)?.duplicateRuleIds ?? [ruleId];
+    setItems((prev) => prev.map((item) => ids.includes(item.ruleId) ? { ...item, status, verdict } : item));
     try {
-      await setFindingVerdict(selected.id, ruleId, verdict);
+      await Promise.all(ids.map(id => setFindingVerdict(selected.id, id, verdict)));
     } catch (err) {
       toast.error('Falha ao registrar falso positivo', { description: err instanceof Error ? err.message : String(err) });
       setItems(await loadFindings(selected.id));
@@ -950,7 +971,7 @@ export default function CorretorV3Page() {
       toast.error('A análise completa ainda não rodou', { description: 'Confirme a cidade e rode a análise antes de entregar.' });
       return;
     }
-    const pendentes = items.filter((item) => item.status === 'pendente');
+    const pendentes = reviewedItems.filter((item) => item.status === 'pendente');
     const erros = pendentes.filter((item) => !isComunicacao(item));
     const blocking = erros.filter((item) => confidenceOf(item.finding, item.origem) <= 2);
     const verify = erros.filter((item) => confidenceOf(item.finding, item.origem) === 3);
@@ -976,7 +997,7 @@ export default function CorretorV3Page() {
   }
 
   const wl = useMemo(() => {
-    const vivos = items.filter((i) => i.resolvidoNaVersao === null || i.status === 'pendente');
+    const vivos = reviewedItems.filter((i) => i.resolvidoNaVersao === null || i.status === 'pendente');
     // Comunicação da revisão não é erro do estudo (31/jul/2026): sai da contagem,
     // dos grupos e da triagem. Tem bloco próprio e vira aviso no portão de entrega.
     const comunicacao = vivos.filter(isComunicacao);
@@ -984,7 +1005,7 @@ export default function CorretorV3Page() {
       .filter((i) => i.status === 'pendente')
       .reduce((total, i) => total + noteCount(i.finding), 0);
     const active = vivos.filter((i) => !isComunicacao(i));
-    const pend = items.filter((i) => i.status === 'pendente' && !isComunicacao(i)).length;
+    const pend = reviewedItems.filter((i) => i.status === 'pendente' && !isComunicacao(i)).length;
     const local = active.filter((i) => isLocal(i.finding));
     const rel = active.filter((i) => !isLocal(i.finding));
     const bySlide = new Map<number, FindingV3[]>();
@@ -1013,12 +1034,12 @@ export default function CorretorV3Page() {
         confidenceOf(a.finding, a.origem) - confidenceOf(b.finding, b.origem) ||
         slideNumOf(a.finding) - slideNumOf(b.finding));
     return {
-      pend, total: items.filter((i) => !isComunicacao(i)).length,
+      pend, total: reviewedItems.filter((i) => !isComunicacao(i)).length,
       slides: [...bySlide.entries()], relational: [...byType.entries()],
       confidence, completude, grouped: [...grouped.entries()], triageQueue,
       comunicacao, comentarios,
     };
-  }, [items]);
+  }, [reviewedItems]);
 
   const blockingPend = wl.confidence.filter(([level]) => level <= 2).reduce((total, [, findings]) => total + findings.length, 0);
 
@@ -1288,7 +1309,7 @@ export default function CorretorV3Page() {
             onClick={() => recheckRef.current?.click()}
             disabled={busy !== null || analysis?.running || selected.status === 'pronto'}
             className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 disabled:opacity-50"
-            title="O diff determinístico é grátis; IA só roda quando houver imagem nova"
+            title="A reconferência é gratuita; qualquer releitura paga exige sua confirmação"
           >
             {busy === 'recheck' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
             Reconferir (DET R$ 0)
@@ -1496,7 +1517,7 @@ export default function CorretorV3Page() {
           queue={wl.triageQueue}
           onStatus={handleStatus}
           onVerdict={handleVerdict}
-          groupOf={(type) => items.filter((i) => i.status === 'pendente' && i.finding.type === type)}
+          groupOf={(type) => reviewedItems.filter((i) => i.status === 'pendente' && i.finding.type === type)}
           onClose={() => { setTriaging(false); setWorkspaceTab('slides'); setConfidenceFilter([1, 2, 3]); }}
         />
       )}

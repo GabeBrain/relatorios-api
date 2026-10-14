@@ -12,6 +12,7 @@ import { municipioOficial, sameCity } from '../audit/ir-rules';
 import type { Cell, ColKind, ExtractedTable, Finding } from '../audit/model';
 import type { TableImageCandidate } from './table-images';
 import { resolvePaginatedSums } from './paginated-tables';
+import { percentageColumnAmbiguities } from './vision-column-review';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -615,19 +616,20 @@ export function analyzeVisionPayload(
     // 2) cross-check %↔absoluto (pega dígito mal lido mesmo com soma fechando)
     const pc = checkPercentConsistency(ext);
     if (pc && (pc.badRows?.length ?? 0) > 0) {
+      const ambiguousColumns = percentageColumnAmbiguities(ext);
       flagged = true;
       findings.push({
         id: `iavis-pct-${c.sha1.slice(0, 10)}-${ti}`,
         type: 'PERCENTAGE_SUM',
         section: secao,
         slideRef: `s${c.slide}`,
-        title: `Coluna % não bate com a absoluta (${ext.title.slice(0, 40)})`,
-        detail: `${pc.notes?.[0] ?? 'Percentual inconsistente com o valor absoluto.'} (${origemLeitura})`,
+        title: ambiguousColumns.length ? `Associação de percentual a conferir (${ext.title.slice(0, 40)})` : `Coluna % não bate com a absoluta (${ext.title.slice(0, 40)})`,
+        detail: `${ambiguousColumns[0] ?? pc.notes?.[0] ?? 'Percentual inconsistente com o valor absoluto.'} (${origemLeitura})`,
         ok: false,
         viz: pc,
         evidenceSha1: c.sha1,
         escalated: trusted,
-        ...(escalated && !readingsAgree ? { confidence: 3 as const } : {}),
+        ...(ambiguousColumns.length || (escalated && !readingsAgree) ? { confidence: 3 as const } : {}),
       });
     }
 
@@ -702,7 +704,16 @@ export function analyzeVisionPayload(
   for (const issue of visionFormatIssues(payload?.anomalias_formato, payload?.formatos_confirmados)) {
     if (!cellIssues.some((i) => i.text === issue.text)) cellIssues.push(issue);
   }
-  if (cellIssues.length) findings.push(formatFinding(c, secao, cellIssues));
+  if (cellIssues.length) {
+    const finding = formatFinding(c, secao, cellIssues);
+    // Literal lido de imagem, sem confirmação independente, não autoriza trocar a faixa.
+    if (!trusted && cellIssues.every(issue => /limite superior/.test(issue.reason))) {
+      finding.confidence = 3;
+      finding.title = 'Limite de faixa a conferir na imagem';
+      finding.detail += ' O literal não foi confirmado por duas leituras concordantes; pode ser erro de leitura.';
+    }
+    findings.push(finding);
+  }
   if (textIssues.length) findings.push(labelTypoFinding(c, secao, textIssues));
 
   const unitViz = checkUnitPlausibility(payload?.unidades ?? []);
