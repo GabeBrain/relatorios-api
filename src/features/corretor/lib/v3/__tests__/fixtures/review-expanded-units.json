@@ -1,0 +1,4 @@
+[
+  {"caseIds":["cj"],"file":"Campos do Jordão_POPULACAO E DOMICÍLIOS.xlsx","sha256":"e7c68877e6a68939a4da105b2050b266c1169a0c5e9d2ece4f4c22b1c9a8dec6","sheet":"Domicilios","cells":{"A9":"Brasil","D9":75298796,"G9":75298796},"method":"Células extraídas do original local por XLSX; valor já identificado como domicílios pelo contrato da fonte."},
+  {"caseIds":["vap","v2"],"file":"1.Populacao de Domicilios.xlsx","sha256":"989f620a0f0fc36b5c1a0d5f9b8bae7444bab88167350a33b9463c580b1d6755","sheet":"Domicilios","cells":{"A9":"Brasil","D9":75298796,"G9":75298796},"method":"Células extraídas do original local por XLSX; valor já identificado como domicílios pelo contrato da fonte."}
+]

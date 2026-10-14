@@ -8,6 +8,33 @@ export function literalTextAnchor(text: string, evidence?: string): boolean {
   const needle = words(evidence ?? '');
   return Boolean(needle && (` ${words(text)} `).includes(` ${needle} `));
 }
+
+/** Evidência contida não prova a mesma acusação; em dúvida, manter cartões separados. */
+function sameTextClaim(a: Finding, b: Finding): boolean {
+  const correction = (f: Finding) => words(f.detail.match(/(?:deveria ser|deve ser|corrigir para)\s*['"“‘]([^'"”’]+)['"”’]/i)?.[1] ?? '');
+  const ca = correction(a), cb = correction(b);
+  if (ca && cb && ca !== cb) return false;
+  const category = (f: Finding) => {
+    const d = words(f.detail);
+    if (/ortografia|digitacao/.test(d)) return 'grafia';
+    if (/concordancia verbal/.test(d)) return 'verbal';
+    if (/concordancia nominal/.test(d)) return 'nominal';
+    if (/duplicacao/.test(d)) return 'duplicacao';
+    return 'outra';
+  };
+  if (category(a) !== category(b)) return false;
+  const targets = (f: Finding) => {
+    const evidence = f.viz?.kind === 'text' ? f.viz.evidence ?? '' : '';
+    return [...f.detail.matchAll(/['"“‘]([^'"”’]+)['"”’]/g)]
+      .map(m => words(m[1])).filter(t => literalTextAnchor(evidence, t));
+  };
+  const ta = targets(a), tb = targets(b);
+  if (ta.length && tb.length) return ta.some(t => tb.includes(t));
+  if (words(a.detail) === words(b.detail)) return true;
+  // Os pares genéricos curtos/longos de concordância não declaram termos entre aspas.
+  const short = [a, b].some(f => f.viz?.kind === 'text' && words(f.viz.evidence ?? '').split(' ').length <= 4);
+  return category(a) === 'verbal' && !ta.length && !tb.length && short;
+}
 export function reviewTextFinding(finding: Finding, ir?: Ir | null): Finding {
   if (!finding.id.startsWith('iatxt-')) return finding;
   const evidence = finding.viz?.kind === 'text' ? finding.viz.evidence : undefined;
@@ -31,7 +58,7 @@ export function presentTextFindings(items: FindingV3[], ir?: Ir | null): Finding
     const duplicate = !untouched && item.finding.id.startsWith('iatxt-') && evidence.length >= 8 ? out.find(prev => {
       if (prev.status !== 'pendente' || prev.verdict || prev.verdictRevisado || prev.finding.type !== item.finding.type || prev.finding.slideRef !== item.finding.slideRef || prev.finding.confidence !== next.finding.confidence || !prev.finding.id.startsWith('iatxt-') || prev.finding.viz?.kind !== 'text') return false;
       const other = words(prev.finding.viz.evidence ?? '');
-      return other.length >= 8 && (literalTextAnchor(other, evidence) || literalTextAnchor(evidence, other));
+      return other.length >= 8 && (literalTextAnchor(other, evidence) || literalTextAnchor(evidence, other)) && sameTextClaim(prev.finding, item.finding);
     }) : undefined;
     if (!duplicate) { out.push(next); continue; }
     const ids = [...(duplicate.duplicateRuleIds ?? [duplicate.ruleId]), item.ruleId];

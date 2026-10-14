@@ -16,6 +16,13 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.69.1 — 2026-10-14 — agrupamento por acusação e revisão ampliada (RUNTIME local)
+
+- **Texto/DET:** conter a mesma evidência não basta para agrupar. Categorias distintas, palavras citadas diferentes e correções explícitas conflitantes permanecem cartões separados; compatibilidade demonstrada da acusação é exigida. Pares reais CJ23/CJ68 continuam agrupados, sem excluir IDs/decisões humanas. Não pretende interpretar toda linguagem livre.
+- **Revisão:** 134 registros históricos inventariados, 43 com classificação delimitada e 91 sem adjudicação (72 encerrados/19 pendentes). 47 PPTX locais pesquisados por hash/texto/SVG; original Daniele não localizado por essa busca limitada. Três erros reais de unidade confirmados com Excel/IR; transcrições por coluna renda VAP, Curitiba e UsHome congeladas com limites explícitos.
+- **Evidência:** [plano](./PLAN_REVISAO_AMPLIADA_2026-10-14.md), [relatório](./RELATORIO_REVISAO_AMPLIADA_2026-10-14.md), 258 testes/dez passes aprovados, tipos/lint/build locais. Três testes novos reproduziram união indevida antes da correção. Nenhum gabarito dos dez passes alterado.
+- **Estado/etapas:** v0.69 em `6073ba3` enviada ao Git; deploy não confirmado nesta sessão. v0.69.1 validada localmente, antes de push. Alertas humanos/banco/prompt/Edge Functions inalterados, custo novo zero. Próximo: publicação/reteste CJ e adjudicar 19 pendentes/72 históricos; aceite integral aberto.
+
 ## Versão 0.69 — 2026-10-14 — fechamento delimitado (RUNTIME local, publicação pendente)
 
 - **Custo/fluxo:** reconferência com imagens a reler exige confirmação de lote/estimativa; cancelar mantém DET gratuito. Modal existente/tokens SE preservados, confirmação não é autorização recorrente.
