@@ -18,12 +18,15 @@ export interface SpCheck { label: string; expected: number; actual: number; delt
 export interface SpPreview {
   entity: typeof SP_INSTITUTIONAL.id;
   quarter: Quarter;
-  status: 'ready' | 'awaiting-closure' | 'incomplete' | 'empty' | 'invalid';
+  status: 'ready' | 'partial' | 'awaiting-closure' | 'incomplete' | 'empty' | 'invalid';
   closingMonth: string | null;
   metrics: SpMetrics;
   issues: string[];
   checks: SpCheck[];
   ignoredHistoryRows: number;
+  source?: 'fixture' | 'api' | 'recorded-api';
+  throughMonth?: string;
+  monthly?: { month: string; launches: number; sales: number; openingStock: number; closingStock: number; delta: number }[];
 }
 const emptyMetrics = (): SpMetrics => ({ projects: null, launches: null, sales: null, stock: null });
 const normalized = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();

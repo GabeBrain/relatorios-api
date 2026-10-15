@@ -1,6 +1,6 @@
 # SP capital — primeiro mapeamento
 
-15/10/2026 · Lucas/Codex · Primeira fatia G2 autorizada por Lucas e implementada localmente com dados fictícios. Sem push.
+15/10/2026 · Lucas/Codex · Estrutura e conferência municipal curta implementadas localmente. Testes com respostas reais de julho/agosto fornecidas por Lucas; execução autenticada do novo botão ainda não observada. Sem push.
 
 **Entrega pretendida:** núcleo vertical do **3T2026 (01/07–30/09)**. O PPTX do **2T2026** é referência histórica, não fonte dos números do próximo trimestre.
 
@@ -13,11 +13,13 @@
 
 Slides identificados pela ordem real do PPTX, não por blocos do texto extraído. Fontes candidatas exigem comprovação de cobertura/método em SP. Valores do gabarito, fórmulas e pendências estão na [matriz](MATRIZ_INDICADORES.csv); referências técnicas em [evidências](EVIDENCIAS.md).
 
-**Disponível localmente:** menu e busca “SP institucional”, rota lazy `/rebrain/relatorios-institucionais/sp`. Reutiliza GeoApiScopeSelector/useGeoApiScope, Select, Alert e Table existentes. Catálogo pessoal autorizado antes de qualquer prévia; somente SP capital. Ação explícita “Ver prévia com dados de teste”; sem coleta de mercado/exportação. Exemplo 2T fechado mostra quatro contagens; exemplo 3T com raiz em agosto mantém indicadores indisponíveis. Troca de UF/cidade/trimestre/identidade invalida o resultado.
+**Disponível localmente:** menu/busca “SP institucional”, rota lazy `/rebrain/relatorios-institucionais/sp`, GeoApiScopeSelector/useGeoApiScope e primitives existentes. Ação principal “Conferir dados reais”: uma amostra de empreendimento e séries municipais paginadas (vendas, lançamentos, estoque); limite de duas páginas por série, cancelamento/retry. Não coleta os milhares de históricos. Ação secundária “Ver prévia com dados de teste” permanece separada. Troca de escopo/identidade/trimestre cancela e invalida resultados; sem exportação.
+
+**Julho/agosto:** consulta municipal aparece como **parcial do 3T até agosto**, com unidades lançadas/vendas/estoque e balanços mensais. Replay das respostas reais recebidas: 24.351 lançadas, 26.824 vendas líquidas, estoque final 124.706; deltas mensais zero. Empreendimentos permanece indisponível: uma amostra não comprova a contagem ou fechamento de toda a cidade. Setembro não entra na soma se a raiz indica agosto; não há liberação por calendário.
 
 **Contrato desta fatia:** histórico limitado ao menor entre o fim selecionado e `period` da raiz, conforme orientação do dev da API transmitida por Lucas. Fechamentos ausentes/divergentes, cobertura insuficiente, falta de observações e deltas bloqueiam indicadores. Contagens por ID, vendas mensais com sinal e estoque histórico no fechamento têm testes sintéticos; o adaptador/API real e o método completo SP continuam por comprovar. Políticas Secovi/FIERGS preservadas, sem renomear suas entidades.
 
-**Próximo portão:** transporte real delimitado, fechamento consistente na cidade e reconciliação 2T com a mesma fonte/fotografia do gabarito. O usuário confirmou São Paulo no catálogo e trouxe consultas manuais; isso não equivale à coleta granular completa. Mensal, recortes MCMV, INCC/preços, IVV, destaques editoriais, gráficos/paginação e exportação ficam para próximas fatias aprovadas.
+**Próximo portão:** executar o novo botão com login pessoal no ambiente autorizado e confrontar seu resultado com o replay. Depois delimitar a coleta granular para os quatro indicadores e fechamento consistente na cidade; não iniciar varredura longa automaticamente. Reconciliação 2T com gabarito da mesma fotografia, recortes MCMV, INCC/preços, IVV, narrativa, gráficos/paginação e exportação seguem abertos. O agente não teve navegador pessoal/credencial para executar a consulta real; o teste usa respostas recebidas via mocks, sem alegação de runtime autenticado validado.
 
 **Previsão operacional informada por Lucas:** operação fecha dia 20 do mês seguinte e analista leva mais 2–3 dias; estimativa de dados de setembro na API em 22–25/10. Informação humana, não SLA ou data de liberação automática. O `period` observado na raiz continua sendo o limite efetivo.
 

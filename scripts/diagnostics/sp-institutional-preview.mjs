@@ -1,6 +1,6 @@
 import { chromium } from '@playwright/test';
 import { spawn } from 'node:child_process';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 
@@ -12,6 +12,7 @@ const server = spawn(process.execPath, [resolve('node_modules/vite/bin/vite.js')
 let browser;
 let page;
 const results = [];
+const recorded = JSON.parse(await readFile(resolve('src/features/relatorios-institucionais/sp/__tests__/fixtures/sp-municipal-2026.json'), 'utf8'));
 try {
   let listening = false;
   for (let i = 0; i < 60; i++) {
@@ -28,11 +29,23 @@ try {
   let catalogFailure = false;
   let catalogCalls = 0;
   const blockedExternal = [];
+  const mockMarketCalls = [];
   await context.route('**/*', route => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith('/monitored-cities')) {
       catalogCalls++;
       return route.fulfill({ status: catalogFailure ? 503 : 200, contentType: 'application/json', body: JSON.stringify({ data: [{ city: 'São Paulo', state: 'SP' }, { city: 'Campinas', state: 'SP' }, { city: 'Rio de Janeiro', state: 'RJ' }], links: { next: null } }) });
+    }
+    if (url.pathname.endsWith('/building-with-history')) {
+      mockMarketCalls.push({ path: url.pathname, query: Object.fromEntries(url.searchParams) });
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: [{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: recorded.sample.root_period }], meta: { current_page: 1, total: 5183, last_page: 5183 }, links: { next: '?page=2' } }) });
+    }
+    const metric = url.pathname.split('/').at(-1);
+    if (url.pathname.includes('/temporal-analysis-city/') && ['sales', 'releases', 'stock'].includes(metric)) {
+      mockMarketCalls.push({ path: url.pathname, query: Object.fromEntries(url.searchParams) });
+      const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
+      const rows = Object.entries(recorded[metric]).flatMap(([month, values]) => values.map((value, index) => ({ period: `${month}-01`, group: recorded.groups[index], building_type: 'Vertical', [field]: value }))).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period'));
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
     }
     if (url.origin === base) return route.continue();
     blockedExternal.push(url.origin + url.pathname);
@@ -59,13 +72,14 @@ try {
   await page.getByText('Trimestre ainda não fechado', { exact: true }).waitFor();
   assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 4);
   results.push({ state: '3T bloqueado pelo fechamento de agosto', passed: true });
-  await page.getByLabel('Trimestre do estudo').focus();
-  assert.equal(await page.getByLabel('Trimestre do estudo').evaluate(element => document.activeElement === element), true);
-  await page.getByLabel('Trimestre do estudo').press('Enter');
-  await page.getByRole('option', { name: '2T2026', exact: true }).press('Enter');
-  assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 0);
-  await page.getByRole('button', { name: 'Ver prévia com dados de teste' }).click();
-  await page.getByText('Prévia reconciliada com dados de teste', { exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Conferir dados reais' }).click();
+  await page.getByText('Conferência parcial de dados da API', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('cell', { name: '26.824', exact: true }).count(), 1);
+  assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 1);
+  assert.equal(await page.getByRole('cell', { name: 'setembro de 2026', exact: true }).count(), 0);
+  assert.equal(mockMarketCalls.length, 4);
+  assert.ok(mockMarketCalls.slice(1).every(call => call.query.end_period === '2026-08-31'));
+  results.push({ state: 'replay API real recebida: julho/agosto parcial e sem contagem de empreendimentos', passed: true });
   for (const [width, theme] of [[1440, 'light'], [1440, 'dark'], [390, 'light'], [390, 'dark']]) {
     await page.setViewportSize({ width, height: 1000 });
     if (width < 640 && await page.getByRole('button', { name: 'Recolher menu', exact: true }).count()) await page.getByRole('button', { name: 'Recolher menu', exact: true }).click();
@@ -74,14 +88,22 @@ try {
     await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), theme === 'dark');
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1 || document.querySelector('main').scrollWidth > document.querySelector('main').clientWidth + 1);
     assert.equal(overflow, false, `${width}/${theme}: sem overflow da página`);
-    await page.screenshot({ path: resolve(output, `sp-${width}-${theme}.png`), fullPage: true, animations: 'disabled' });
+    await page.screenshot({ path: resolve(output, `sp-partial-${width}-${theme}.png`), fullPage: true, animations: 'disabled' });
     if (width < 640) {
       await page.locator('main').evaluate(element => { element.scrollTop = element.scrollHeight; });
-      await page.screenshot({ path: resolve(output, `sp-${width}-${theme}-indicators.png`), fullPage: true, animations: 'disabled' });
+      await page.screenshot({ path: resolve(output, `sp-partial-${width}-${theme}-indicators.png`), fullPage: true, animations: 'disabled' });
       await page.locator('main').evaluate(element => { element.scrollTop = 0; });
     }
-    results.push({ state: '2T reconciliado, dados fictícios', width, theme, passed: true });
+    results.push({ state: 'replay municipal parcial, respostas registradas', width, theme, passed: true });
   }
+  await page.getByLabel('Trimestre do estudo').focus();
+  assert.equal(await page.getByLabel('Trimestre do estudo').evaluate(element => document.activeElement === element), true);
+  await page.getByLabel('Trimestre do estudo').press('Enter');
+  await page.getByRole('option', { name: '2T2026', exact: true }).press('Enter');
+  assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 0);
+  await page.getByRole('button', { name: 'Ver prévia com dados de teste' }).click();
+  await page.getByText('Prévia reconciliada com dados de teste', { exact: true }).waitFor();
+  results.push({ state: 'alternância real/exemplo e trimestre invalida o resultado anterior', passed: true });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.locator('section[aria-label="Seleção do estudo"]').getByText('São Paulo', { exact: true }).click();
   await page.getByPlaceholder('Buscar município…').fill('Campinas');
@@ -96,8 +118,8 @@ try {
   results.push({ state: 'catálogo indisponível, sem fallback', passed: true });
   assert.deepEqual(errors, []);
   assert.equal(blockedExternal.some(url => /temporal-analysis|building-with-history/.test(url)), false);
-  await writeFile(resolve(output, 'ui-results.json'), JSON.stringify({ results, catalogCalls, marketCalls: 0, pageErrors: errors }, null, 2));
-  console.log(JSON.stringify({ results, catalogCalls, marketCalls: 0, pageErrors: errors }, null, 2));
+  await writeFile(resolve(output, 'ui-results.json'), JSON.stringify({ results, catalogCalls, marketCalls: 0, mockMarketCalls, pageErrors: errors }, null, 2));
+  console.log(JSON.stringify({ results, catalogCalls, marketCalls: 0, mockMarketCallCount: mockMarketCalls.length, pageErrors: errors }, null, 2));
 } catch (error) {
   if (page) {
     await writeFile(resolve(output, 'ui-failure.txt'), await page.locator('body').innerText());

@@ -1,0 +1,23 @@
+{
+  "provenance": "Respostas do API Explorer executadas e fornecidas por Lucas em 15/10/2026. Agente nao executou consultas autenticadas. Somente campos de contagem utilizados; sem tokens, nomes ou dados individuais.",
+  "scope": { "city": "São Paulo", "uf": "SP", "type": "Vertical", "group_by": "Padrão" },
+  "sample": { "root_period": "2026-08-01", "sampled_buildings": 1, "total_buildings": 5183 },
+  "groups": ["Alto", "Compacto", "Econômico", "Luxo", "Médio", "Médio-Alto", "Standard"],
+  "sales": {
+    "2026-07": [101, 1428, 8382, 112, 326, 233, 1191],
+    "2026-08": [126, 2133, 10426, 88, 479, 204, 1595],
+    "2026-09": [-4, -214, 822, -21, 172, 60, -137]
+  },
+  "releases": {
+    "2026-07": [191, 886, 11194, 51, 42, 0, 1049],
+    "2026-08": [0, 849, 9134, 88, 335, 50, 482],
+    "2026-09": [0, 0, 0, 0, 0, 0, 0]
+  },
+  "stock": {
+    "2026-06": [2205, 22321, 68234, 2347, 7936, 2403, 21733],
+    "2026-07": [2387, 22059, 69035, 2211, 7613, 2254, 23260],
+    "2026-08": [2317, 20926, 66570, 2253, 7447, 2063, 23130],
+    "2026-09": [1226, 12030, 30747, 894, 2716, 782, 8411]
+  },
+  "pagination_observed": { "sales": { "total": 21, "last_page": 1, "next": null }, "releases": { "total": 21, "last_page": 1, "next": null }, "stock": { "total": 28, "last_page": 1, "next": null } }
+}

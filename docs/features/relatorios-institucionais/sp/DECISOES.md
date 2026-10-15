@@ -1,5 +1,13 @@
 # Decisões e pontos abertos — SP
 
+## Conferência municipal parcial — autorizada em 15/10/2026
+
+- Lucas autorizou integrar e testar julho/agosto com os dados reais já disponíveis. Sem push, exportação ou coleta longa. A conferência é parcial do trimestre; não converte dois meses em trimestre fechado.
+- Novo transporte usa a mesma API pública consultada manualmente: `building-with-history` (uma amostra para a raiz) e `temporal-analysis-city/{sales,releases,stock}`. Não troca silenciosamente para v2/interna ou presume equivalência de contratos. Até duas páginas por série, duas tentativas em falhas transitórias, filtros preservados e cancelamento por ação/escopo/identidade.
+- Replay real recebido: julho e agosto reconciliam, total de 24.351 unidades lançadas, 26.824 vendas e estoque de 124.706. Nenhum número real fixado no código de produto: fixture fica somente nos testes e no diagnóstico local. Datas da consulta real derivam do trimestre e da raiz amostrada, não de agosto fixo.
+- `period` de um registro limita a leitura curta, mas não comprova fechamento uniforme da cidade. Resultado permanece parcial, sem contagem de empreendimentos ou exportação; coleta granular completa exige escopo/custo explícitos. Séries sem mês/padrão, duplicadas, com paginação incompleta ou balanço divergente não liberam os indicadores consolidados.
+- Acesso autenticado ao novo fluxo não observado pelo agente; browser local usa respostas registradas interceptadas. Testes do contrato/transporte não equivalem a homologação do provedor ou do relatório.
+
 ## Primeira fatia G2 — autorizada em 15/10/2026
 
 - Identidade `sp-institucional`, rota lazy e código próprio pequeno; reuso de datas/parse numérico do motor e seleção geográfica compartilhada, sem modificar consumidores/políticas Secovi/FIERGS. Página de dados com primitives/tokens existentes, sem nova exceção de frontend.

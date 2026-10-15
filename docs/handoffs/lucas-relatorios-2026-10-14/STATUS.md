@@ -1,5 +1,12 @@
 # Estado do handoff
 
+## Conferência municipal julho/agosto — 15/10/2026
+
+- **Estado atual:** transporte curto e botão “Conferir dados reais” preparados localmente, com amostra da raiz e três séries municipais. Replay das respostas reais recebidas: julho/agosto fecham e aparecem como **parcial até agosto** (24.351 lançadas, 26.824 vendas, estoque 124.706). Empreendimentos pendente de coleta granular; sem exportação/coleta longa. [Plano e próximo portão](../../features/relatorios-institucionais/sp/PLAN.md).
+- **Evidência:** 369 testes/44 arquivos, tipagem SP/lint/build e dez verificações de UI local aprovados. Browser e requisições interceptados com respostas registradas; agente não executou consulta autenticada ao provedor. Tipagem global conserva três falhas do Corretor, sem edição do domínio alheio.
+- **Retomada:** testar o novo botão com login pessoal no ambiente autorizado; depois delimitar coleta granular/fechamento uniforme e reconciliação com gabarito. Setembro segue fora se a raiz for agosto. Férias desde 19/10, janela 22–25/10 estimada, sem trabalho/retorno presumidos.
+- **Git:** base `387ce41` incorpora os dois commits de Gabriel autorizados. Código/fixture de testes/evidências em commit local próprio; sem push, geração real ou Monday, conforme decisão de Lucas.
+
 ## Primeira estrutura SP autorizada e validada localmente — 15/10/2026
 
 - **Estado atual:** primeira fatia G2 com fixtures sintéticas, em `/rebrain/relatorios-institucionais/sp`; menu “SP institucional”. Quatro indicadores, proteção do fechamento da raiz, escopo autorizado e estados de página. [Plano/retomada](../../features/relatorios-institucionais/sp/PLAN.md) e [validação/limites](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Sem novo estudo real ou homologação.
