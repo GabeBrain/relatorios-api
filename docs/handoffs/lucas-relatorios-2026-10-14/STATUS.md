@@ -17,6 +17,8 @@
 
 ## Montagem local — 15/10/2026
 
+Tipologias autorizadas e implementadas: usar **Conferir dados reais** e depois **Conferir tipologias** na mesma rota. Slides 23/37/47 ocupam as posições 6/7/8 da prévia; conferência mensal/total e raiz alterada impedem mistura de fontes. Provedor real por dormitório ainda não observado; testes têm distribuição sintética explícita. Retomada: validar botão na sessão pessoal, então classificação de padrões e plano histórico. Férias desde 19/10 mantidas; nenhuma coleta longa, exportação, push, publicação ou Monday.
+
 Mapeamento posterior autorizado: [85 slides e fontes](../../features/relatorios-institucionais/sp/MAPA_SLIDES.md), incluindo imagens institucionais, recortes MCMV, janelas históricas, INCC/IVV e mapas. Próximo bloco delimitado: 23/37/47 por tipologia; padrão exige contrato sete→quatro categorias. Somente leitura local/PPTX e diagnóstico nesta rodada, sem novos requests ao GeoBrain, relatório gerado ou publicação. Retomada nas férias permanece documental, sem agendamento.
 
 Correção autorizada após revisão de Lucas: manter formatação do PPTX. Capa e quatro páginas usam artes originais, dados dinâmicos e escala/ampliação 16:9. Conferidas capturas das cinco páginas e ampliação no Edge com replay e zero chamadas reais. Comparações históricas, demais slides e exportação continuam pendentes. Retomada: revisar estas páginas com Lucas; depois delimitar cobertura granular e conteúdo histórico. Pausa desde 19/10 mantida, sem agenda automática. Merge `dbb7330` autorizado, preservando `75ef905` e histórico local; sem push.

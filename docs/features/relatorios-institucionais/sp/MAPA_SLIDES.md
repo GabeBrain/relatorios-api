@@ -1,5 +1,7 @@
 # SP — conteúdo e fontes dos 85 slides
 
+**Atualização 15/10:** bloco 23/37/47 implementado em prévia com consulta curta por Tipologia e comparação contra os totais municipais. O inventário abaixo registra as dependências completas do modelo; séries/comparações anuais continuam pendentes. Respostas reais por dormitório ainda não observadas pelo agente; fixtures de distribuição são sintéticas e exclusivas de testes/diagnóstico.
+
 15/10/2026 · Lucas/Codex. Referência: [PPTX original 2T2026](https://docs.google.com/presentation/d/1WhyrfFEoFeA9dam9w_F8CYWm8y1VotMB/edit). Ordem conferida em `presentation.xml`, textos e caches dos gráficos lidos; os 85 slides foram renderizados em leitura pelo PowerPoint e inspecionados em pranchas. Originais/capturas locais em `.local-inputs/relatorios-lucas/sp/full-reference/`, sem alteração do arquivo. Hash no [catálogo único](../../../handoffs/lucas-relatorios-2026-10-14/fontes/modelos.json).
 
 **Resultado prático:** cinco páginas já têm prévia local (1/13/18/32/46), com julho/agosto. Isso não significa cinco slides completos: gráficos históricos, variações e escoamento ainda não estão preenchidos. O próximo bloco de dados é tipologia (23/37/47); padrão (24/38/48) depende primeiro da correspondência entre os grupos da API e do modelo. Não é necessário aguardar setembro para preparar esses componentes, mas o 3T completo permanece bloqueado pelo fechamento.

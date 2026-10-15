@@ -44,7 +44,15 @@ try {
     if (url.pathname.includes('/temporal-analysis-city/') && ['sales', 'releases', 'stock'].includes(metric)) {
       mockMarketCalls.push({ path: url.pathname, query: Object.fromEntries(url.searchParams) });
       const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
-      const rows = Object.entries(recorded[metric]).flatMap(([month, values]) => values.map((value, index) => ({ period: `${month}-01`, group: recorded.groups[index], building_type: 'Vertical', [field]: value }))).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period'));
+      // Typology split is invented for UI QA. Only pattern rows replay recorded observations.
+      const byTypology = url.searchParams.get('group_by') === 'Tipologia';
+      const rows = Object.entries(recorded[metric]).flatMap(([month, observed]) => {
+        const total = observed.reduce((a, b) => a + b, 0);
+        const split = [.1, .6, .2].map(ratio => Math.floor(total * ratio));
+        split.push(total - split.reduce((a, b) => a + b, 0));
+        const values = byTypology ? split : observed;
+        return values.map((value, index) => ({ period: `${month}-01`, group: byTypology ? `${index + 1} dormitório${index ? 's' : ''}` : recorded.groups[index], building_type: 'Vertical', [field]: value }));
+      }).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period'));
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
     }
     if (url.origin === base) return route.continue();
@@ -95,6 +103,16 @@ try {
   await page.keyboard.press('Escape');
   assert.equal(mockMarketCalls.length, 4, 'Navegar e ampliar slides não consulta o provedor');
   results.push({ state: 'cinco páginas com arte original, escala 16:9 e ampliação sem nova consulta', passed: true });
+  await page.getByRole('button', { name: 'Conferir tipologias', exact: true }).click();
+  await page.getByText(/Tipologias conferidas:/).waitFor();
+  assert.equal(mockMarketCalls.length, 8);
+  assert.ok(mockMarketCalls.slice(5).every(call => call.query.group_by === 'Tipologia' && call.query.end_period === '2026-08-31'));
+  for (const [index, title] of ['Lançamentos por tipologia', 'Vendas por tipologia', 'Oferta por tipologia'].entries()) {
+    await slides.getByRole('button', { name: `${index + 6}. ${title}`, exact: true }).click();
+    await slides.getByRole('article').locator('img').evaluate(image => image.decode());
+    await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${index + 6}-synthetic-typology.png`), animations: 'disabled' });
+  }
+  results.push({ state: 'tipologias fictícias: três slides reconciliados em oito requests mockados, não observações reais por dormitório', passed: true });
   for (const [width, theme] of [[1440, 'light'], [1440, 'dark'], [390, 'light'], [390, 'dark']]) {
     await page.setViewportSize({ width, height: 1000 });
     if (width < 640 && await page.getByRole('button', { name: 'Recolher menu', exact: true }).count()) await page.getByRole('button', { name: 'Recolher menu', exact: true }).click();

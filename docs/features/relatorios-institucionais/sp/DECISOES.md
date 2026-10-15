@@ -1,5 +1,13 @@
 # Decisões e pontos abertos — SP
 
+## Tipologias — implementação autorizada em 15/10/2026
+
+- Reusar o transporte curto existente, optando por `group_by=Tipologia` somente na ação nova. Uma amostra para revalidar raiz, até duas páginas/100 linhas por fonte R/V/O, retry/cancelamento e escopo preservados. Nenhuma coleta automática na navegação dos slides.
+- Liberar distribuições somente se meses, grupos explícitos, balanços e totais mensais/acumulados coincidirem com a conferência municipal por Padrão. Comparar estoque anterior e final; oferta por tipologia é apenas o último mês. Não preencher grupos ausentes com zero, não descartar studios/4+ nem reclassificar rótulos do provedor.
+- Mudança de fechamento entre consultas exige nova conferência municipal. Falha de atualização retira a distribuição anterior e mantém apenas o baseline municipal; alteração de escopo/identidade/trimestre cancela e invalida resultados. Diferenças ficam disponíveis para inspeção.
+- Gráficos usam artes dos slides 23/37/47 e uma distribuição parcial atual, sem coluna/percentuais do trimestre anterior inventados. Vendas negativas mantêm sinal; participação percentual só quando o total é positivo. Mais de 12 grupos ou rótulos acima de 40 caracteres bloqueiam o layout explicitamente.
+- Testes e navegador usam distribuição inventada com totais municipais registrados, identificada como sintética nos arquivos de QA. Isso não comprova observações reais por tipologia; validar com a sessão pessoal, sem pedir token no chat. Sem exportação/homologação/coleta granular.
+
 ## Modelo visual original — correção autorizada em 15/10/2026
 
 - Lucas confirmou que a montagem deve manter a formatação do PowerPoint. Layout genérico anterior substituído pelas artes originais da capa e slides 13/18/32/46, com títulos/rodapé/marca preservados; proporção 12192000×6858000 EMU (16:9), tipografia Tahoma nos novos dados.

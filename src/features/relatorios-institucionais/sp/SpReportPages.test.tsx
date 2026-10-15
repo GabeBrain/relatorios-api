@@ -3,8 +3,26 @@ import { describe, it, expect } from 'vitest';
 import { SpReportPages } from './SpReportPages';
 import { buildSpTemporalPreview } from './temporal';
 import { recordedInput } from './__tests__/recorded';
+import { syntheticTypologyInput } from './__tests__/typology';
+import { buildSpTypologies } from './typologies';
 
 describe('páginas SP', () => {
+  it('preenche os três slides de tipologia só depois de reconciliar as fontes', () => {
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    const view = render(<SpReportPages report={report} />);
+    fireEvent.click(screen.getByRole('button', { name: '6. Lançamentos por tipologia' }));
+    expect(screen.getByText('Dados por tipologia indisponíveis')).toBeInTheDocument();
+    const typologies = buildSpTypologies(syntheticTypologyInput(), report);
+    view.rerender(<SpReportPages report={{ ...report, typologies }} />);
+    for (const title of ['6. Lançamentos por tipologia', '7. Vendas por tipologia', '8. Oferta por tipologia']) {
+      fireEvent.click(screen.getByRole('button', { name: title }));
+      expect(screen.getByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' })).toBeInTheDocument();
+      expect(screen.queryByText('Dados por tipologia indisponíveis')).not.toBeInTheDocument();
+    }
+    view.rerender(<SpReportPages report={{ ...report, typologies: { status: 'blocked', issues: ['test'], rows: [], checks: [] } }} />);
+    expect(screen.getByText('Dados por tipologia indisponíveis')).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' })).not.toBeInTheDocument();
+  });
   it('mantém o período parcial e usa os indicadores conferidos nas páginas', () => {
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     render(<SpReportPages report={report} />);

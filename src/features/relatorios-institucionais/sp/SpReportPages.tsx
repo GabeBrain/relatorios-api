@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import type { SpPreview } from './model';
+import type { SpPreview, SpTypologies } from './model';
 import cover from './assets/cover.png';
 import projectsTemplate from './assets/template-13.png';
 import launchesTemplate from './assets/template-18.png';
 import salesTemplate from './assets/template-32.png';
 import stockTemplate from './assets/template-46.png';
+import launchesTypologyTemplate from './assets/template-23.png';
+import salesTypologyTemplate from './assets/template-37.png';
+import stockTypologyTemplate from './assets/template-47.png';
 
 const quantity = (value: number | null) => value === null ? 'Indisponível' : value.toLocaleString('pt-BR');
 const month = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
-const titles = ['Capa', 'Empreendimentos', 'Unidades lançadas', 'Vendas líquidas', 'Oferta final'];
-const templates = [cover, projectsTemplate, launchesTemplate, salesTemplate, stockTemplate];
+const titles = ['Capa', 'Empreendimentos', 'Unidades lançadas', 'Vendas líquidas', 'Oferta final', 'Lançamentos por tipologia', 'Vendas por tipologia', 'Oferta por tipologia'];
+const templates = [cover, projectsTemplate, launchesTemplate, salesTemplate, stockTemplate, launchesTypologyTemplate, salesTypologyTemplate, stockTypologyTemplate];
 
 function SlideFrame({ children }: { children: ReactNode }) {
   const frame = useRef<HTMLDivElement>(null);
@@ -32,15 +35,15 @@ export function SpReportPages({ report }: { report: SpPreview }) {
   if (!['partial', 'ready'].includes(report.status)) return null;
   const real = report.source === 'api' || report.source === 'recorded-api';
   const period = report.throughMonth ? `Parcial até ${month(report.throughMonth)}` : 'Exemplo com dados fictícios';
-  const metric = page === 1 ? 'projects' : page === 2 ? 'launches' : page === 3 ? 'sales' : 'stock';
+  const metric = page === 1 ? 'projects' : page === 2 || page === 5 ? 'launches' : page === 3 || page === 6 ? 'sales' : 'stock';
   const observations = (report.monthly ?? []).map(row => ({ month: row.month, value: metric === 'stock' ? row.closingStock : metric === 'launches' ? row.launches : row.sales }));
   const slide = <article aria-label={`Página ${page + 1}: ${titles[page]}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
     <img src={templates[page]} alt={page === 0 ? 'Capa original Brain Inteligência Estratégica' : `Layout original: ${titles[page]}`} className="absolute inset-0 h-full w-full" />
     {page > 0 && <>
       <p className="absolute left-[62px] top-[155px] text-[18px]">{report.quarter} · {real ? period : 'Dados fictícios · exemplo de desenvolvimento'}</p>
-      <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity(report.metrics[metric])}</p></div>
-      {page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}
-      <p className="absolute left-[62px] top-[590px] text-[16px]">{page === 1 ? 'Sem estimativa ou preenchimento com zero.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
+      <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity(page >= 5 && report.typologies?.status !== 'ready' ? null : report.metrics[metric])}</p></div>
+      {page >= 5 ? <TypologyChart result={report.typologies} metric={metric as 'launches' | 'sales' | 'stock'} /> : page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}
+      <p className={`absolute left-[62px] text-[16px] ${page >= 5 ? 'top-[605px]' : 'top-[590px]'}`}>{page === 1 ? 'Sem estimativa ou preenchimento com zero.' : page >= 5 ? 'Distribuição nos meses conferidos. Comparação com o ano anterior pendente.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
     </>}
   </article>;
   const navigation = <nav aria-label="Navegação das páginas" className="flex flex-wrap gap-2">{titles.map((title, index) => <Button key={title} variant={page === index ? 'default' : 'outline'} aria-pressed={page === index} onClick={() => setPage(index)}>{index + 1}. {title}</Button>)}</nav>;
@@ -51,6 +54,44 @@ export function SpReportPages({ report }: { report: SpPreview }) {
     {!expanded && <SlideFrame>{slide}</SlideFrame>}
     <Dialog open={expanded} onOpenChange={setExpanded}><DialogContent className="max-h-[95dvh] w-[96vw] max-w-6xl overflow-auto p-4 sm:p-6"><DialogTitle>Prévia dos slides · São Paulo</DialogTitle><DialogDescription>Parcial para revisão. Em telas pequenas, gire o aparelho para ampliar.</DialogDescription>{navigation}<SlideFrame>{slide}</SlideFrame></DialogContent></Dialog>
   </section>;
+}
+
+function TypologyChart({ result, metric }: { result?: SpTypologies; metric: 'launches' | 'sales' | 'stock' }) {
+  if (result?.status !== 'ready') return <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[28px] font-bold">Dados por tipologia indisponíveis</p><p className="mt-4 text-[20px]">{result?.status === 'blocked' ? 'Confira as divergências antes de preencher este slide.' : 'Use Conferir tipologias para consultar e reconciliar os dados.'}</p></div>;
+  const values = result.rows.map(row => row[metric]);
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const minimum = Math.min(0, ...values), maximum = Math.max(0, ...values);
+  const y = (value: number) => 485 - (value - minimum) / Math.max(1, maximum - minimum) * 210;
+  const step = 1100 / result.rows.length;
+  const fontSize = result.rows.length > 6 ? 14 : 18;
+  const colors = ['#5b7638', '#83a83d', '#1d6288', '#ffcf00'];
+  return <svg role="img" aria-label="Distribuição por tipologia em unidades e participação percentual" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
+    <line x1="90" x2="1190" y1={y(0)} y2={y(0)} stroke="#d9d9d9" />
+    {result.rows.map((row, index) => {
+      const x = 90 + step * (index + 0.5), value = row[metric];
+      const labelY = value < 0 ? y(value) + 20 : y(value) - 28;
+      return <g key={row.group}><rect x={x - Math.min(90, step * 0.55) / 2} y={Math.min(y(0), y(value))} width={Math.min(90, step * 0.55)} height={Math.abs(y(value) - y(0))} fill={colors[index % colors.length]} />
+        <text x={x} y={labelY} textAnchor="middle" fontSize={result.rows.length > 6 ? 16 : 22} fontWeight="bold">{quantity(value)}</text>
+        {total > 0 && <text x={x} y={labelY + 19} textAnchor="middle" fontSize="16">{(value / total * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%</text>}
+        <text x={x} y="545" textAnchor="middle" fontSize={fontSize}>{wrapGroup(row.group, Math.max(8, Math.floor(step / (fontSize * .5)) - 1)).map((part, line) => <tspan key={line} x={x} dy={line ? 16 : 0}>{part}</tspan>)}</text>
+      </g>;
+    })}
+  </svg>;
+}
+
+function wrapGroup(label: string, limit: number): string[] {
+  const lines = [''];
+  for (const word of label.split(/\s+/)) {
+    if (lines.at(-1) && `${lines.at(-1)} ${word}`.length > limit) lines.push('');
+    if (word.length > limit) {
+      if (lines.at(-1)) lines.push('');
+      for (let start = 0; start < word.length; start += limit) {
+        if (lines.at(-1)) lines.push('');
+        lines[lines.length - 1] = word.slice(start, start + limit);
+      }
+    } else lines[lines.length - 1] += `${lines.at(-1) ? ' ' : ''}${word}`;
+  }
+  return lines;
 }
 
 function MonthlyChart({ observations }: { observations: { month: string; value: number }[] }) {

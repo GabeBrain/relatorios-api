@@ -5,6 +5,7 @@ import { monthOf, SP_INSTITUTIONAL, type SpPreview } from './model';
 
 export type SpTemporalRow = Record<string, unknown>;
 export interface SpTemporalInput {
+  groupBy?: 'Padrão' | 'Tipologia';
   origin: 'api' | 'recorded-api';
   uf: string;
   city: string;
@@ -64,7 +65,7 @@ export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter)
   if (!stocks || !sales || !releases) return fail('incomplete', 'Há mês ausente, valor inválido ou linha duplicada. Ausência não representa zero.');
   const expectedGroups = [...stocks.get(previous)!.keys()].sort().join('|');
   for (const source of [stocks, sales, releases]) {
-    if ([...source.values()].some(groups => [...groups.keys()].sort().join('|') !== expectedGroups)) return fail('incomplete', 'Os padrões cobertos diferem entre meses ou fontes; confirme o universo antes de somar.');
+    if ([...source.values()].some(groups => [...groups.keys()].sort().join('|') !== expectedGroups)) return fail('incomplete', 'Os grupos cobertos diferem entre meses ou fontes; confirme o universo antes de somar.');
   }
   const total = (source: Map<string, Map<string, number>>, month: string) => [...source.get(month)!.values()].reduce((a, b) => a + b, 0);
   for (const month of months) {

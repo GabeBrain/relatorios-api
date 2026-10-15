@@ -18,16 +18,47 @@ vi.mock('./fixture', async importOriginal => {
 });
 vi.mock('./api', async () => {
   const { recordedInput } = await import('./__tests__/recorded');
-  return { fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal }) => {
+  const { syntheticTypologyInput } = await import('./__tests__/typology');
+  return { fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal; groupBy?: string }) => {
     if (access.apiMode === 'error') throw new Error('private API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
-    return { ...recordedInput(), origin: 'api' };
+    return { ...(options.groupBy === 'Tipologia' ? syntheticTypologyInput() : recordedInput()), origin: 'api' };
   } };
 });
 beforeEach(() => { access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.reload.mockClear(); });
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('confere tipologias sob demanda e mantém o bloqueio de trimestre completo', async () => {
+    render(<SpInstitutionalPage />);
+    expect(screen.queryByRole('button', { name: 'Conferir tipologias' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Conferir tipologias' }));
+    expect(await screen.findByText(/Tipologias conferidas:/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '6. Lançamentos por tipologia' }));
+    expect(screen.getByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /3T2026 · parcial até agosto/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Trocar UF'));
+    expect(screen.queryByRole('button', { name: 'Conferir tipologias' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Páginas do relatório' })).not.toBeInTheDocument();
+  });
+  it('retira tipologias antigas em falha de uma nova consulta e permite tentar novamente', async () => {
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Conferir tipologias' }));
+    await screen.findByText(/Tipologias conferidas:/);
+    access.apiMode = 'error';
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir tipologias' }));
+    expect(await screen.findByText('Não foi possível conferir as tipologias')).toBeInTheDocument();
+    expect(screen.queryByText(/Tipologias conferidas:/)).not.toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: '26.824' })).toBeInTheDocument();
+    expect(screen.queryByText('private API diagnostic')).not.toBeInTheDocument();
+    access.apiMode = 'success';
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir tipologias' }));
+    expect(await screen.findByText(/Tipologias conferidas:/)).toBeInTheDocument();
+  });
   it('bloqueia acesso sem token ou município válido', () => {
     access.token = '';
     render(<SpInstitutionalPage />);

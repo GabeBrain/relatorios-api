@@ -19,6 +19,13 @@ function recordedServer() {
 const noSleep = async () => {};
 
 describe('SP — transporte curto e paginado, sem provedor real', () => {
+  it('usa Tipologia somente quando solicitada e preserva limites e recorte', async () => {
+    const request = recordedServer();
+    const input = await fetchSpTemporalInput('3T2026', { request, groupBy: 'Tipologia' });
+    expect(input.groupBy).toBe('Tipologia');
+    expect(request).toHaveBeenCalledTimes(4);
+    for (const [options] of request.mock.calls.slice(1)) expect(options.query).toMatchObject({ group_by: 'Tipologia', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], end_period: '2026-08-31', per_page: 100 });
+  });
   it('consulta só uma amostra e três fontes municipais até agosto, sem coletar 5183 históricos', async () => {
     const request = recordedServer();
     const data = await fetchSpTemporalInput('3T2026', { request });

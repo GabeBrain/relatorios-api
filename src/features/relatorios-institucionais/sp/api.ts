@@ -8,6 +8,7 @@ const BASE = 'https://geobrain.com.br/public-api';
 interface Envelope { data?: SpTemporalRow[]; meta?: { current_page?: number; last_page?: number; total?: number }; links?: { next?: string | null } }
 type Request = (options: RequestOptions) => Promise<HttpResponse<Envelope>>;
 export interface SpReadOptions {
+  groupBy?: 'Padrão' | 'Tipologia';
   signal?: AbortSignal;
   onProgress?: (label: string) => void;
   request?: Request;
@@ -38,14 +39,14 @@ export async function fetchSpTemporalInput(quarter: Quarter, options: SpReadOpti
   const period = monthOf(building?.period);
   if (sample.data!.length !== 1 || !period || String(building.city) !== 'São Paulo' || String(building.state) !== 'SP' || building.building_type !== 'Vertical' || !Number.isInteger(sample.meta?.total) || sample.meta!.total! < 1) throw new Error('A amostra não comprovou o recorte e o fechamento; nenhuma consulta de mercado foi iniciada.');
   const end = period < months[2] ? period : months[2];
-  const result: SpTemporalInput = { origin: 'api', uf: 'SP', city: 'São Paulo', rootPeriod: building.period, sampledBuildings: 1, totalBuildings: sample.meta!.total!, sales: [], releases: [], stock: [], complete: { sales: true, releases: true, stock: true } };
+  const result: SpTemporalInput = { origin: 'api', groupBy: options.groupBy ?? 'Padrão', uf: 'SP', city: 'São Paulo', rootPeriod: building.period, sampledBuildings: 1, totalBuildings: sample.meta!.total!, sales: [], releases: [], stock: [], complete: { sales: true, releases: true, stock: true } };
   if (end < months[0]) return result;
 
   for (const metric of ['sales', 'releases', 'stock'] as const) {
     options.onProgress?.({ sales: 'Consultando vendas dos meses disponíveis…', releases: 'Consultando lançamentos dos meses disponíveis…', stock: 'Consultando estoque e conferindo a paginação…' }[metric]);
     let expectedTotal: number | null = null;
     for (let page = 1; page <= 2; page++) {
-      const payload = await read(`temporal-analysis-city/${metric}`, { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', start_period: `${metric === 'stock' ? priorMonth(months[0]) : months[0]}-01`, end_period: monthEnd(end), per_page: 100, page });
+      const payload = await read(`temporal-analysis-city/${metric}`, { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: options.groupBy ?? 'Padrão', start_period: `${metric === 'stock' ? priorMonth(months[0]) : months[0]}-01`, end_period: monthEnd(end), per_page: 100, page });
       const meta = payload.meta;
       if (!meta || meta.current_page !== page || !Number.isInteger(meta.total) || meta.total! < 0 || !Number.isInteger(meta.last_page) || meta.last_page! < page || !payload.links || !Object.prototype.hasOwnProperty.call(payload.links, 'next')) throw new Error('A paginação não confirmou a cobertura da consulta.');
       expectedTotal ??= meta.total!;
