@@ -1,3 +1,10 @@
+### 2026-10-15 — Relatórios institucionais: ativação offline do handoff Lucas — Codex, a pedido de Lucas
+- **Ambiente/funcionalidade:** Rebrain / relatórios automatizados — recepção documental, sem mudança de runtime.
+- **O quê/evidência:** main limpa atualizada por fast-forward de `b49b804` a `1afa119` (47 commits), único remote origin, fetch e comparação posterior 0/0. Máquina `LUCAS`, Node 24.19.0/npm 11.17.0, preflight offline e quatro testes do diagnóstico aprovados. Registro detalhado de ambiente, limites e retomada no [STATUS do handoff](../handoffs/lucas-relatorios-2026-10-14/STATUS.md). Commit documental identificável pelo histórico desse arquivo; sem push nesta ativação.
+- **Etapas/Pendências:** G0 parcial, acessos pessoais Drive/GeoBrain/Rebrain/Lovable/GitHub da máquina ainda não testados; Mapbox somente chave declarada. Proposto G1 SP capital/2T2026/núcleo vertical, aguardando confirmação de Lucas antes de aprofundar; G2, geração real e aceite não iniciados. Regressões de produto não repetidas nesta rodada documental.
+- **Pausa:** férias a partir de 19/10, retorno não informado; estado/comandos/pendências registrados sem trabalho presumido na ausência. Gabriel coordena decisões posteriores e mantém Corretor V3/Quanti 2026. Preservados Secovi/FIERGS e domínios paralelos; sem API de dados, estudo real, publicação ou escrita Monday.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 2026-10-15 — Corretor: acesso com qualquer login GeoBrain válido — Gabriel / Codex
 - **Validação:**17 testes focados de autenticação/cliente/material aprovados; teste de acesso sem lista, sem credenciais, login inválido e troca de identidade. Sem conta real usada; ativação/isolamento reais pendentes.
 - **Desenvolvimento:** removida lista adicional de emails da função `corretor-access`, conforme decisão de Gabriel. Credenciais continuam verificadas no GeoBrain antes de emitir sessão; arquivos seguem restritos a proprietário/membros. Sem migration nova, alteração de API/motor/decisão humana ou IA paga.
