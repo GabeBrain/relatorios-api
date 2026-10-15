@@ -2,6 +2,7 @@ import { Component, lazy, Suspense, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { legacyStudyHref, studyHref, portfolioHref } from './features/corretor/lib/study-navigation';
+import GeobrainAccessProvider from './features/corretor/components/GeobrainAccessProvider';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -28,7 +29,7 @@ function CorretorEntry() {
   return id ? <Navigate replace to={studyHref(id, 'revisao', params.get('carteira') ?? '', params.get('version') ?? undefined)} /> : <CorretorProjectsPage />;
 }
 function CorretorLegacyProject() { const { studyId } = useParams(); const location = useLocation(); return <Navigate replace to={studyId ? legacyStudyHref(studyId, new URLSearchParams(location.search)) : portfolioHref(location.search)} />; }
-function CorretorLegacyAnalysis() { const location = useLocation(); const params = new URLSearchParams(location.search), id = params.get('study'); return id ? <Navigate replace to={studyHref(id, 'revisao', params.get('carteira') ?? '', params.get('version') ?? undefined)} /> : <CorretorV3Page />; }
+function CorretorLegacyAnalysis() { const location = useLocation(); const params = new URLSearchParams(location.search), id = params.get('study'); return id ? <Navigate replace to={studyHref(id, 'revisao', params.get('carteira') ?? '', params.get('version') ?? undefined)} /> : <Navigate replace to={`/corretor/novo${location.search}`} />; }
 const CorretorReportPage = lazy(() => import('./features/corretor/pages/CorretorReportPage.tsx'));
 const CorretorCalibrationPage = lazy(() => import('./features/corretor/pages/CorretorCalibrationPage.tsx'));
 const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/AtualizadorVgvPage.tsx'));
@@ -77,7 +78,7 @@ const App = () => (
           <PanoramaExportGate />
           <ErrorBoundary>
             <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando...</div>}>
-              <Routes>
+              <GeobrainAccessProvider><Routes>
                 <Route path="/" element={<Navigate to="/inicio" replace />} />
                 <Route path="/inicio" element={<Home />} />
 
@@ -133,7 +134,7 @@ const App = () => (
                 <Route path="/relatorios/corretor/analise" element={<Navigate to="/corretor" replace />} />
 
                 <Route path="*" element={<NotFound />} />
-              </Routes>
+              </Routes></GeobrainAccessProvider>
             </Suspense>
           </ErrorBoundary>
         </AppLayout>

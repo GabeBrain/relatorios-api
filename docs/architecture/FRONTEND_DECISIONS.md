@@ -1,5 +1,12 @@
 # Decisões de Frontend — Rebrain
 
+### 2026-10-15 — Autenticação contextual e PDF complementar na bancada Corretor
+
+- **Contexto:** token de API não basta para a identidade de escrita; evidências recortadas não representam slide inteiro. PowerPoint local omitiu slides ocultos na exportação padrão.
+- **Decisão:** provider de intenção cancelável usa login Geobrain existente e retoma uma vez; visualizador PDF.js lazy por página, com comparação de contagem de páginas e distinção entre documento/recorte. PDF é prévia fornecida da versão, sem fingir conversão automática PPTX ou localização de erro.
+- **Consequência:** materiais novos independem de cadastro comercial, mas requerem migration/função. Login UI não fecha autorização das tabelas legadas; gate servidor e criação visitante controlada são pendências explícitas. Domínio, tokens e shell existentes reutilizados; snapshot manual não é execução automática.
+- **Escopo:** primeira fatia local A2/A3/A4; sem adoção global de novo visualizador nem mudança dos motores/decisões.
+
 ### 2026-10-15 — Estudo como contexto de rota persistente no Corretor
 
 - **Contexto:** seleção local e parâmetro study divergiam; Voltar limpava seleção e efeito reabria o estudo. Carteira e revisão tinham navegações desconectadas.
