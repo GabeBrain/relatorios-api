@@ -1,5 +1,12 @@
 # Decisões e pontos abertos — SP
 
+## Modelo visual original — correção autorizada em 15/10/2026
+
+- Lucas confirmou que a montagem deve manter a formatação do PowerPoint. Layout genérico anterior substituído pelas artes originais da capa e slides 13/18/32/46, com títulos/rodapé/marca preservados; proporção 12192000×6858000 EMU (16:9), tipografia Tahoma nos novos dados.
+- Cinco páginas locais: capa e quatro indicadores; séries dinâmicas limitadas a julho/agosto, explicitamente mensais/parciais. Sem aproveitar percentuais antigos, tempo de escoamento ou séries históricas sem reconciliação. Empreendimentos permanecem indisponíveis.
+- Prévia com escala e Dialog de ampliação existentes; nenhuma consulta adicional ao navegar. Artes são imagens, dados são DOM/SVG. Isso não constitui motor de edição/exportação PPTX nem reprodução integral dos 85 slides. Proveniência em `src/features/relatorios-institucionais/sp/assets/README.md`.
+- Capturas pessoais enviadas por Lucas comprovaram o retorno do botão no ambiente dele; validação automatizada usa replay interceptado, sem token pessoal.
+
 ## Conferência municipal parcial — autorizada em 15/10/2026
 
 - Lucas autorizou integrar e testar julho/agosto com os dados reais já disponíveis. Sem push, exportação ou coleta longa. A conferência é parcial do trimestre; não converte dois meses em trimestre fechado.

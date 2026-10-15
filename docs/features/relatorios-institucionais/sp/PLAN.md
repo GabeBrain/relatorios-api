@@ -1,5 +1,7 @@
 # SP capital — primeiro mapeamento
 
+**Correção visual 15/10:** prévia substitui os cards genéricos por capa e quatro páginas com artes do PPTX original, escala 16:9 e ampliação. Séries mensais julho/agosto, sem comparativos históricos presumidos. Revisão local no Edge concluída; exportação/PPTX editável e demais slides permanecem pendentes. Merge remoto `dbb7330` autorizado por Lucas preservou `75ef905`, sem push.
+
 **Avanço 15/10 — montagem local:** Lucas confirmou a consulta autenticada por capturas: julho/agosto e balanços com diferença zero. Acrescentada prévia navegável com capa, indicadores e evolução mensal, alimentada pelo resultado da consulta, sem novas chamadas ou exportação. Trimestre permanece parcial; contagem de empreendimentos, cobertura granular, revisão editorial e setembro pendentes. Próximo: revisar as páginas com Lucas e delimitar a cobertura granular. Férias desde 19/10 mantidas, sem execução presumida durante a ausência.
 
 15/10/2026 · Lucas/Codex · Estrutura e conferência municipal curta implementadas localmente. Testes com respostas reais de julho/agosto fornecidas por Lucas; execução autenticada do novo botão ainda não observada. Sem push.

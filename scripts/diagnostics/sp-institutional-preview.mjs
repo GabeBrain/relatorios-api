@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 
 // Local browser test only: own Vite server, synthetic login/catalog, no market API.
-const output = resolve('.local-inputs/relatorios-lucas/sp');
+const output = resolve('.local-inputs/relatorios-lucas/sp', `template-review-${Date.now()}`);
 await mkdir(output, { recursive: true });
 const base = 'http://127.0.0.1:4174';
 const server = spawn(process.execPath, [resolve('node_modules/vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '4174', '--strictPort'], { windowsHide: true, stdio: 'ignore' });
@@ -80,6 +80,21 @@ try {
   assert.equal(mockMarketCalls.length, 4);
   assert.ok(mockMarketCalls.slice(1).every(call => call.query.end_period === '2026-08-31'));
   results.push({ state: 'replay API real recebida: julho/agosto parcial e sem contagem de empreendimentos', passed: true });
+  const slides = page.getByRole('region', { name: 'Páginas do relatório' });
+  for (const [index, title] of ['Capa', 'Empreendimentos', 'Unidades lançadas', 'Vendas líquidas', 'Oferta final'].entries()) {
+    await slides.getByRole('button', { name: `${index + 1}. ${title}`, exact: true }).click();
+    const article = slides.getByRole('article');
+    await article.locator('img').evaluate(image => image.decode());
+    await article.screenshot({ path: resolve(output, `slide-${index + 1}.png`), animations: 'disabled' });
+    assert.equal(await article.evaluate(element => element.scrollHeight > element.clientHeight + 1), false);
+  }
+  await slides.getByRole('button', { name: 'Ampliar slides' }).click();
+  await page.getByRole('dialog').waitFor();
+  await page.getByRole('dialog').getByRole('button', { name: '3. Unidades lançadas', exact: true }).click();
+  await page.getByRole('dialog').screenshot({ path: resolve(output, 'expanded.png'), animations: 'disabled' });
+  await page.keyboard.press('Escape');
+  assert.equal(mockMarketCalls.length, 4, 'Navegar e ampliar slides não consulta o provedor');
+  results.push({ state: 'cinco páginas com arte original, escala 16:9 e ampliação sem nova consulta', passed: true });
   for (const [width, theme] of [[1440, 'light'], [1440, 'dark'], [390, 'light'], [390, 'dark']]) {
     await page.setViewportSize({ width, height: 1000 });
     if (width < 640 && await page.getByRole('button', { name: 'Recolher menu', exact: true }).count()) await page.getByRole('button', { name: 'Recolher menu', exact: true }).click();

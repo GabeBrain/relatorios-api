@@ -1,3 +1,9 @@
+### 2026-10-15 — Relatórios institucionais: prévia com artes do PowerPoint original — Codex, autorizado por Lucas
+- **Desenvolvimento:** substituído layout genérico por capa e quatro páginas com artes dos slides 1/13/18/32/46 do modelo SP. Escala 16:9, Tahoma, cores e posições da referência; Dialog existente amplia o canvas, navegação não consulta API. Séries julho/agosto mensais, sem variações antigas ou setembro presumido.
+- **Evidência:** fonte renderizada em leitura no PowerPoint, original preservado; capturas das cinco páginas e ampliação revisadas no Edge. Onze cenários locais e 43 testes SP aprovados, zero chamadas de mercado e zero erros de página. Tipagem/lint/build aprovados; avisos de bundle preexistentes mantidos.
+- **Etapas/Pendências:** revisão de Lucas; cobertura granular, comparativos históricos, demais slides e exportação/PPTX editável pendentes. Artes estáticas não são exportação. Férias19/10 mantidas. Merge remoto `dbb7330` autorizado preserva `75ef905`; sem push/Monday/coleta longa ou alterações autorais em Secovi/FIERGS/Corretor.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 2026-10-15 — Relatórios institucionais: páginas da prévia SP — Codex, autorizado por Lucas
 - **Desenvolvimento:** capa, indicadores e evolução mensal navegáveis na rota SP; reutiliza Button e tokens do Design System. Consome resultado já conferido, sem nova coleta ou exportação. Lucas apresentou capturas da consulta pessoal com balanços julho/agosto zerados.
 - **Validação:** 43 testes SP, tipagem e lint aprovados; estados parcial e bloqueado cobertos. Base `4ddff67`, sem alterações autorais em Secovi/FIERGS/Corretor.

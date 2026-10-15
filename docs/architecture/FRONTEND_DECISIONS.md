@@ -1,5 +1,11 @@
 # Decisões de Frontend — Rebrain
 
+### 2026-10-15 — Fidelidade ao PowerPoint no canvas SP
+
+- **Contexto:** Lucas pediu a formatação do modelo original na prévia do relatório.
+- **Decisão:** somente o canvas SP usa a paleta e Tahoma do PPTX, com artes originais em 16:9 e dados dinâmicos sobrepostos. Shell e controles continuam com tokens/primitives Brain; ampliação usa Dialog existente.
+- **Consequência:** canvas mantém fundo claro também no tema escuro e escala sem refluír a composição. Artes estáticas não são objetos editáveis de PPTX. Exportação, comparações históricas e demais páginas não são liberadas por essa prévia.
+
 ### 2026-10-15 — Autenticação contextual e PDF complementar na bancada Corretor
 
 - **Contexto:** token de API não basta para a identidade de escrita; evidências recortadas não representam slide inteiro. PowerPoint local omitiu slides ocultos na exportação padrão.
