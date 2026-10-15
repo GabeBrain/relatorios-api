@@ -1,0 +1,95 @@
+{
+  "scope": "A0/A1; fixtures historically persisted, not live full-study backup",
+  "base": "1afa119",
+  "caseSnapshots": [
+    {
+      "studyId": "16cb827e-cec7-4958-8d45-893eb29f3e40",
+      "records": 30,
+      "humanReviewed": 0,
+      "findingsSha256": "342a547d6db1aafbc00c39215a7d519c40d7cac7eaf1237df7d93fa47f999338"
+    },
+    {
+      "studyId": "50e36e0c-02f3-4224-ab4f-cfb522a26801",
+      "records": 15,
+      "humanReviewed": 0,
+      "findingsSha256": "dfa56e8c29acc410cd1c5d6e75f6d31afbf9af456751d83ce557fee3badad83a"
+    },
+    {
+      "studyId": "408b3bce-a7dd-468f-8e91-5ae1b7a2a17f",
+      "records": 38,
+      "humanReviewed": 0,
+      "findingsSha256": "32a178e9e8706885059688187491ed27e69ba7d78298662313371de776872554"
+    },
+    {
+      "studyId": "26808f74-f55e-4af9-9a4b-a5dc37879995",
+      "records": 33,
+      "humanReviewed": 0,
+      "findingsSha256": "480735e4b9825882951d4a28356cf27d5ac0e7e578a4c797451f172ca46ca22d"
+    },
+    {
+      "studyId": "344a7b69-bee9-4899-9ccc-ba1b2ef8efaa",
+      "records": 22,
+      "humanReviewed": 0,
+      "findingsSha256": "d6d50f75e41640bde277cfd09cd803c5489ec53328dc60174ff8ab926c785bab"
+    }
+  ],
+  "offlineMaterials": [
+    {
+      "id": "rol",
+      "baseline": "pass",
+      "raw": "pass"
+    },
+    {
+      "id": "tol",
+      "baseline": "pass",
+      "raw": "pass"
+    },
+    {
+      "id": "cj",
+      "baseline": "pass",
+      "raw": "pass"
+    },
+    {
+      "id": "vap",
+      "baseline": "pass",
+      "raw": "pass"
+    },
+    {
+      "id": "v2",
+      "baseline": "pass",
+      "raw": "pass"
+    }
+  ],
+  "runtimeReadOnly": {
+    "checkedAt": "2026-10-15T14:53:00.322Z",
+    "scope": "somente leitura, papel público, sem dados pessoais",
+    "checks": [
+      {
+        "table": "corretor_projects",
+        "status": 401,
+        "code": "42501",
+        "message": "permission denied for table corretor_projects"
+      },
+      {
+        "table": "corretor_originals",
+        "status": 401,
+        "code": "42501",
+        "message": "permission denied for table corretor_originals"
+      },
+      {
+        "table": "corretor_project_members",
+        "status": 401,
+        "code": "42501",
+        "message": "permission denied for table corretor_project_members"
+      }
+    ],
+    "site": {
+      "status": 200,
+      "js": "/assets/index-BajSB602.js",
+      "projectsChunk": "CorretorProjectsPage-Cz3APDd9.js",
+      "projectsStatus": 200,
+      "originalRecoveryPresent": true
+    }
+  },
+  "paidCalls": 0
+}

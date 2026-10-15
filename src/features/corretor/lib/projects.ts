@@ -13,7 +13,7 @@ export interface OriginalAsset { id: string; project_id: string; version_id: str
 const db = supabase as any;
 export function profileFor(study: StudyV3): ProjectProfile {
   return { id: '', study_id: study.id, display_name: study.nome.replace(/^Brain_Vocacional_Vertical_/i, '').replace(/_/g, ' '),
-    client_name: '', study_type: 'vocacional_vertical', city: study.cidade ?? '', uf: study.uf ?? '', analyst: '', reviewer: '', due_date: null, reference_period: '', notes: '' };
+    client_name: '', study_type: '', city: study.cidade ?? '', uf: study.uf ?? '', analyst: '', reviewer: '', due_date: null, reference_period: '', notes: '' };
 }
 export async function requireProjectIdentity(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
