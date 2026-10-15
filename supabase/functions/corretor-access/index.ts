@@ -14,7 +14,6 @@ Deno.serve(async request => {
     const text = await request.text(); if (text.length > 8192) return reply({ error: 'Solicitação inválida.' }, 413);
     const body = JSON.parse(text);
     const result = await authorizeCorretor(body, {
-      allowedEmails: (Deno.env.get('CORRETOR_ALLOWED_EMAILS') ?? '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
       geoLogin: async (email, password) => {
         // URL fixa do contrato versionado: nunca aceitar destino passado pelo cliente.
         const response = await fetch('https://geobrain.com.br/public-api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ email, password }), signal: AbortSignal.timeout(20000) });
