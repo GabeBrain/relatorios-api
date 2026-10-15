@@ -38,6 +38,127 @@ export type Database = {
         }
         Relationships: []
       }
+      corretor_analysis_snapshots: {
+        Row: {
+          created_at: string
+          created_by: string
+          findings: Json
+          id: string
+          reason: string
+          report: Json | null
+          source_scope: string
+          source_set_id: string | null
+          study_id: string
+          version_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          findings: Json
+          id?: string
+          reason: string
+          report?: Json | null
+          source_scope: string
+          source_set_id?: string | null
+          study_id: string
+          version_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          findings?: Json
+          id?: string
+          reason?: string
+          report?: Json | null
+          source_scope?: string
+          source_set_id?: string | null
+          study_id?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_analysis_snapshots_source_set_id_fkey"
+            columns: ["source_set_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_source_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_analysis_snapshots_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_analysis_snapshots_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "study_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_material_assets: {
+        Row: {
+          bytes: number
+          created_at: string
+          created_by: string
+          id: string
+          kind: string
+          original_name: string
+          path: string
+          sha1: string | null
+          sha256: string
+          slide_n: number | null
+          study_id: string
+          version_id: string
+        }
+        Insert: {
+          bytes: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind: string
+          original_name: string
+          path: string
+          sha1?: string | null
+          sha256: string
+          slide_n?: number | null
+          study_id: string
+          version_id: string
+        }
+        Update: {
+          bytes?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind?: string
+          original_name?: string
+          path?: string
+          sha1?: string | null
+          sha256?: string
+          slide_n?: number | null
+          study_id?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_material_assets_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_material_assets_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "study_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       corretor_originals: {
         Row: {
           bytes: number
@@ -179,6 +300,83 @@ export type Database = {
             foreignKeyName: "corretor_projects_study_id_fkey"
             columns: ["study_id"]
             isOneToOne: true
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_source_sets: {
+        Row: {
+          created_at: string
+          created_by: string
+          file_ids: string[]
+          fingerprint: string
+          id: string
+          payload: Json
+          study_id: string
+          version_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          file_ids: string[]
+          fingerprint: string
+          id?: string
+          payload: Json
+          study_id: string
+          version_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          file_ids?: string[]
+          fingerprint?: string
+          id?: string
+          payload?: Json
+          study_id?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_source_sets_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_source_sets_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "study_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_study_shares: {
+        Row: {
+          created_at: string
+          shared_by: string
+          study_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          shared_by?: string
+          study_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          shared_by?: string
+          study_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_study_shares_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
             referencedRelation: "studies_v3"
             referencedColumns: ["id"]
           },
@@ -985,6 +1183,7 @@ export type Database = {
           cidade: string | null
           concluded_at: string | null
           created_at: string
+          created_by: string | null
           custo_total: number
           generation: string
           id: string
@@ -999,6 +1198,7 @@ export type Database = {
           cidade?: string | null
           concluded_at?: string | null
           created_at?: string
+          created_by?: string | null
           custo_total?: number
           generation?: string
           id?: string
@@ -1013,6 +1213,7 @@ export type Database = {
           cidade?: string | null
           concluded_at?: string | null
           created_at?: string
+          created_by?: string | null
           custo_total?: number
           generation?: string
           id?: string
@@ -1190,6 +1391,18 @@ export type Database = {
       }
     }
     Functions: {
+      activate_corretor_source_set: {
+        Args: {
+          p_files: string[]
+          p_fingerprint: string
+          p_name: string
+          p_payload: Json
+          p_study: string
+          p_version: string
+        }
+        Returns: string
+      }
+      corretor_access_enabled: { Args: never; Returns: boolean }
       rais_claim_history_snapshot: {
         Args: {
           p_lease_seconds?: number
