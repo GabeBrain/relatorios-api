@@ -30,3 +30,7 @@ verify_jwt = false
 [functions.empresas-materialize-request]
 # Solicitação pública: sem Supabase Auth e sem login; protegida por limites por IP (hash) e globais.
 verify_jwt = false
+
+[functions.corretor-material-preview]
+# Biblioteca pública, só derivados PDF/PNG registrados. Originais exigem identidade via Storage/RLS.
+verify_jwt = false

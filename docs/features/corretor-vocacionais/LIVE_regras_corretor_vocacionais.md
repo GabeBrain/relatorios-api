@@ -16,6 +16,15 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.72 — 2026-10-15 — primeira bancada real e materiais A2/A3 (RUNTIME local / backend preparado)
+
+- **Publicação anterior:**416488d enviado com autorização, fetch0/0; A0/A1 no Git, deploy não presumido. [Continuidade e limites](./design/RESULTADO_CONTINUIDADE_A2_A3_BANCADA_2026-10-15.md).
+- **Interface/fluxo:** login contextual Geobrain para decisões/versões/conclusão e materiais; cancelamento/erro/troca de rota não executam ação. Organização pessoal depende da autoria verificada de novos envios; legado sem autoria inventada. Gates na UI não substituem autorização REST legada: A2 permanece parcial.
+- **Materiais:** migration nova `20261015150739_corretor_materials_workspace.sql`, bucket privado independente do cadastro comercial, originais por versão, conjunto imutável de fontes, ativação transacional e snapshot manual. Não aplicada remotamente. Ingestão visitante controlada, snapshots automáticos e deduplicação global são próximas partes de A2/A3.
+- **Bancada:** PDF complementar real renderizado lazy, uma página por vez, observações ao lado, mapa/zoom/reflow e filtro de confiança existente. Sem prévia há recorte parcial rotulado ou pedido do arquivo. PDF com páginas diferentes do estudo é bloqueado; igualdade de páginas não comprova conteúdo. Não há conversão PPTX automática no servidor.
+- **Evidência:**283 testes/2 condicionais pulados,17 controles SQL isolados,11 Excel reais→15 blocos/conjunto/snapshot em browser com armazenamento simulado; PDF real153páginas e slides23/68/153, erro de ocultos146páginas reproduzido/corrigido. Dez passes offline preservados, build/tipos/lint. [Manifesto](./design/EVIDENCIAS_A2_A3_BANCADA_2026-10-15.json). Zero IA paga/alteração de decisões reais.
+- **Próximo:** revisar lote local, aplicar migration/publicar `corretor-material-preview` e retestar material real com conta no site; concluir autorização servidor nas tabelas legadas antes de homologar A2. A5 novos estados/conclusão e A6 entrega continuam abertos, decisões legadas preservadas.
+
 ## Versão 0.71 — 2026-10-15 — carteira, resumo e navegação A0/A1 (RUNTIME local)
 
 - **Fluxo:** carteira compacta abre resumo; áreas Resumo/Revisão/Materiais/Histórico com rotas canônicas e retorno explícito preservando busca/filtro/página. URLs antigas redirecionam sem reabrir estudo após Voltar; novo envio também tem retorno. Revisão legada permanece integrada como transição, não é bancada A4.

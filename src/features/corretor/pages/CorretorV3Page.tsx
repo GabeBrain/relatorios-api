@@ -3,7 +3,10 @@
 // v3.1: estágio "Aprofundar com IA" (texto em batch, custo estimado antes).
 // Navegação sem rail duplo: landing com cards de estudos → workspace com voltar.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useGeobrainAccess } from '../lib/geobrain-access-context';
+import { requireProjectIdentity } from '../lib/projects';
+const ReviewBench = lazy(() => import('../components/ReviewBench'));
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { portfolioHref } from '../lib/study-navigation';
 import { toast } from 'sonner';
@@ -378,7 +381,8 @@ function StudyRow({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function CorretorV3Page() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const ensureAccess = useGeobrainAccess();
   const { studyId: routeStudyId } = useParams();
   const navigate = useNavigate();
   const [studies, setStudies] = useState<StudyV3[]>([]);
@@ -463,7 +467,8 @@ export default function CorretorV3Page() {
         return isStaleVisionContext(finding, studyCity, seen) || isStaleCrossTable(finding)
           || isStaleWrongCity(finding, studyCity) || isStaleReviewNote(finding);
       });
-      if (invalid.length) {
+      const mayReconcile = await requireProjectIdentity().then(() => true).catch(() => false);
+      if (invalid.length && mayReconcile) {
         await resolveInvalidFindings(id, invalid.map((item) => item.ruleId));
         loaded = await loadFindings(id);
         toast.info('Achados reconciliados com as regras atuais', {
@@ -673,6 +678,7 @@ export default function CorretorV3Page() {
   }
 
   async function handleFonte(e: React.ChangeEvent<HTMLInputElement>): Promise<Fonte | null> {
+    if (selected && !await ensureAccess('atualizar a fonte numérica deste estudo')) return null;
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return null;
@@ -700,6 +706,7 @@ export default function CorretorV3Page() {
     const files = Array.from(e.target.files ?? []).filter((file) => /\.(xlsx|xlsm)$/i.test(file.name));
     e.target.value = '';
     if (!files.length) return null;
+    if (selected && !await ensureAccess('atualizar as planilhas deste estudo')) return null;
     setSourceProgress({ done: 0, total: files.length });
     try {
       const slug = files[0].name.replace(/\.(xlsx|xlsm)$/i, '').replace(/\s+/g, '-').toLowerCase();
@@ -874,6 +881,7 @@ export default function CorretorV3Page() {
    */
   async function recheckFromBytes(bytes: Uint8Array, filename: string) {
     if (!selected) return;
+    if (!await ensureAccess('enviar uma versão corrigida deste estudo')) return;
     const newVersion = selected.lastVersion + 1;
     setBusy('recheck');
     try {
@@ -941,6 +949,7 @@ export default function CorretorV3Page() {
 
   async function handleStatus(ruleId: string, s: FindingStatus) {
     if (!selected) return;
+    if (!await ensureAccess('registrar sua decisão de revisão')) return;
     const ids = reviewedItems.find(i => i.ruleId === ruleId)?.duplicateRuleIds ?? [ruleId];
     setItems((prev) => prev.map((i) => (ids.includes(i.ruleId) ? { ...i, status: s, verdict: s === 'corrigido' || s === 'pendente' ? null : i.verdict } : i)));
     try {
@@ -953,6 +962,7 @@ export default function CorretorV3Page() {
 
   async function handleVerdict(ruleId: string, verdict: 'bug' | 'fp') {
     if (!selected) return;
+    if (!await ensureAccess('registrar sua decisão de revisão')) return;
     const status: FindingStatus = verdict === 'fp' ? 'ignorado' : 'pendente';
     const ids = reviewedItems.find(i => i.ruleId === ruleId)?.duplicateRuleIds ?? [ruleId];
     setItems((prev) => prev.map((item) => ids.includes(item.ruleId) ? { ...item, status, verdict } : item));
@@ -970,6 +980,7 @@ export default function CorretorV3Page() {
 
   async function handleConclude() {
     if (!selected) return;
+    if (!await ensureAccess('concluir a revisão deste estudo')) return;
     if (analysisPending(selected)) {
       toast.error('A análise completa ainda não rodou', { description: 'Confirme a cidade e rode a análise antes de entregar.' });
       return;
@@ -1343,7 +1354,7 @@ export default function CorretorV3Page() {
             </button>
           )}
           <button
-            onClick={async () => { await deleteStudy(selected.id); navigate(portfolioHref(searchParams.get('carteira') ?? '')); }}
+            onClick={async () => { if (!await ensureAccess('excluir este estudo')) return; await deleteStudy(selected.id); navigate(portfolioHref(searchParams.get('carteira') ?? '')); }}
             className="text-muted-foreground hover:text-destructive p-1.5"
             title="Excluir estudo"
           >
@@ -1410,14 +1421,14 @@ export default function CorretorV3Page() {
                 );
               })}
             </div>
-            <div className="inline-flex rounded-md border border-border p-0.5" role="group" aria-label="Organizar lista">
+            {searchParams.get('layout')==='list' && <div className="inline-flex rounded-md border border-border p-0.5" role="group" aria-label="Organizar lista">
               {([['slides', 'Por slide'], ['problemas', 'Por tipo de problema']] as const).map(([tab, label]) => (
                 <button key={tab} type="button" onClick={() => setWorkspaceTab(tab)}
                   className={cn('rounded px-2.5 py-1', workspaceTab === tab ? 'bg-foreground text-background font-medium' : 'text-muted-foreground hover:text-foreground')}>
                   {label}
                 </button>
               ))}
-            </div>
+            </div>}
           </div>
         )}
       </div>
@@ -1469,6 +1480,9 @@ export default function CorretorV3Page() {
                 </p>
               )}
               {!pending && !analysis?.running && <>
+                <div className="cp-actions"><button className="cp-inline" aria-pressed={searchParams.get('layout')!=='list'} onClick={()=>setSearchParams(p=>{p.delete('layout');return p;})}>Bancada</button><button className="cp-inline" aria-pressed={searchParams.get('layout')==='list'} onClick={()=>setSearchParams(p=>{p.set('layout','list');return p;})}>Lista de apontamentos</button></div>
+                {searchParams.get('layout')!=='list' && <Suspense fallback={<p role="status">Preparando bancada…</p>}><ReviewBench key={selected.id} study={selected} items={reviewedItems.filter(i=>(i.resolvidoNaVersao===null||i.status==='pendente')&&confidenceFilter.includes(confidenceOf(i.finding,i.origem)))} renderFinding={item=><V3FindingCard item={item} onStatus={status=>void handleStatus(item.ruleId,status)} onVerdict={verdict=>void handleVerdict(item.ruleId,verdict)}/>} /></Suspense>}
+                {searchParams.get('layout')==='list' && <>
                 {selected.analise && <AcertosCard report={selected.analise} temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)} />}
                 {(wl.completude.length > 0 || wl.comunicacao.length > 0 || selected.ata) && (
                   <section className="space-y-3">
@@ -1500,6 +1514,7 @@ export default function CorretorV3Page() {
                 </section>}
               </>}
 
+              </>}
               {/* Card de regras */}
               <section className="pt-4">
                 <RulesCard />

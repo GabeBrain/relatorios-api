@@ -4,6 +4,8 @@
 
 **Atualização de execução em15/10:** A0 e A1 executados e validados localmente; [resultado](./RESULTADO_A0_A1_INTERFACE_V3_2026-10-15.md),279 testes/2 condicionais pulados e dez passes offline. Rotas/carteira/resumo/cadastro neutro prontos para revisão antes de push. Registro inicial abaixo preservado; A2–A6 continuam planejados. Sem nova IA ou migrations.
 
+**Continuidade autorizada em15/10:** A0/A1 enviados em416488d. [Primeira fatia A2/A3 e bancada A4](./RESULTADO_CONTINUIDADE_A2_A3_BANCADA_2026-10-15.md) validada localmente com283 testes/17 verificações SQL e materiais reais em serviços simulados. A2 parcial: UI/login prontos, autorização completa de tabelas legadas/guest controlado pendentes. A3 parcial: armazenamento autenticado sem perfil, fontes imutáveis e snapshot manual; automação por execução/guest/deduplicação pendentes. A4 parcial: render PDF real, não conversão automática PPTX. Nova migration/função preparadas, não ativadas. Sem IA paga.
+
 ## 1. Objetivo e baseline
 
 Incorporar a composição aprovada do Claude Design ao produto React existente, com navegação coerente, materiais rastreáveis e revisão humana ao lado do documento. Preservar motores, evidências, IDs e decisões; não substituir aplicação por HTML de demonstração.
