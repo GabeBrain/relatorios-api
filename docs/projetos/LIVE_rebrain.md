@@ -1,3 +1,9 @@
+### 2026-10-15 — Relatórios institucionais: mapa inicial SP/3T2026 — Codex, a pedido de Lucas
+- **Ambiente/funcionalidade:** Rebrain / relatórios institucionais; G1 documental aprovado, sem implementação. Destino 3T2026, gabarito histórico 2T2026: [plano/matriz/evidências](../features/relatorios-institucionais/sp/PLAN.md). Quatro indicadores vinculados a slides/caches reais e fontes candidatas da API. Cobertura/método SP e reconciliação numérica continuam pendentes; 26 testes offline focados aprovados, sem geração real ou aceite.
+- **Commits/contexto:** merge `bffb3c6` autorizado por Lucas preserva `d360b35` e `416488d` de Gabriel; identidade aditiva do LIVE conferida. Drive acessível pelo conector Suporte Geobrain; token pessoal no site apenas informado por Lucas, não observado pelo agente. Código de produto preservado, sem push ou escrita Monday.
+- **Etapas/Pendências:** mapa entregue, G1 parcial; próxima decisão é leitura delimitada de catálogo/dados e contrato SP próprio antes de G2. Férias 19/10 sem retorno presumido, retomada no STATUS. Corretor V3/Quanti 2026 com Gabriel.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 2026-10-15 — Relatórios institucionais: ativação offline do handoff Lucas — Codex, a pedido de Lucas
 - **Ambiente/funcionalidade:** Rebrain / relatórios automatizados — recepção documental, sem mudança de runtime.
 - **O quê/evidência:** main limpa atualizada por fast-forward de `b49b804` a `1afa119` (47 commits), único remote origin, fetch e comparação posterior 0/0. Máquina `LUCAS`, Node 24.19.0/npm 11.17.0, preflight offline e quatro testes do diagnóstico aprovados. Registro detalhado de ambiente, limites e retomada no [STATUS do handoff](../handoffs/lucas-relatorios-2026-10-14/STATUS.md). Commit documental identificável pelo histórico desse arquivo; sem push nesta ativação.

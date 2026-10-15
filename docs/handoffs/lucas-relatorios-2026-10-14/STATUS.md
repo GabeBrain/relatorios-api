@@ -1,5 +1,14 @@
 # Estado do handoff
 
+## G1 — mapeamento aprovado por Lucas — 15/10/2026
+
+- **Escopo atualizado:** entrega pretendida SP capital/3T2026 (julho–setembro), referência histórica 2T2026. Lucas aprovou mapear quatro indicadores; implementação G2 e ensaio real não autorizados.
+- **Entrega:** [mapa curto e próximo portão](../../features/relatorios-institucionais/sp/PLAN.md), matriz com quatro gabaritos 2T e quatro contratos candidatos 3T, decisões/evidências técnicas vinculadas. Slides reais 13/18/32/46 e caches extraídos do PPTX original; sem delta calculado ou cobertura API presumidos. G1 documental parcial, método/fonte SP ainda a comprovar.
+- **Acesso Drive observado:** pasta listada, texto e original do PPTX SP lidos via conector Suporte Geobrain (`clientebrain@gmail.com`), conta pessoal de Lucas não comprovada. Bruto ignorado em `.local-inputs/relatorios-lucas/sp/`, hash no catálogo existente. Lucas informou token autenticado no site; agente não leu/copiou token nem verificou catálogo/API.
+- **Git:** fetch encontrou divergência 1/1; Lucas autorizou merge sem push. `bffb3c6` preserva `d360b35` e o trabalho remoto de Gabriel `416488d`; LIVE aditivo conferido sem perdas/duplicações de conteúdo. Corretor continua Gabriel, sem alteração autoral nessa frente.
+- **Validação:** 26 testes offline/4 arquivos aprovados após bloqueio inicial de sandbox; detalhes em [EVIDENCIAS](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Sem API de dados, geração real, publicação ou Monday. Código de produto intocado; sem regressão completa/build/site nesta rodada.
+- **Retomada:** ler `sp/PLAN.md`, conferir Git conforme AGENTS, validar catálogo autorizado e obter aprovação para leitura delimitada de dados antes da reconciliação. A decisão principal é fluxo de vendas e fotografia de estoque de SP; guardas atuais FIERGS não são contrato SP. Pausa a partir de 19/10 mantida, retorno não presumido. Registros em commit local, sem push autorizado.
+
 ## Ativação solicitada por Lucas — 15/10/2026
 
 Registro desta sessão substitui os campos históricos “NÃO TESTADO” somente nos itens comprovados abaixo. Histórico de preparação preservado. Handoff localizado e lido neste checkout; ativação documental/offline realizada, G0 parcial. Isso não comprova acessos pessoais, capacidade disponível, aceite do piloto ou validação do produto.
