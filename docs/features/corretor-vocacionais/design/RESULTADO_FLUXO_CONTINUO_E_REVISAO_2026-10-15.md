@@ -47,3 +47,10 @@ Referências técnicas consultadas: [autorização de Edge Functions](https://su
 ## Conferência remota no fechamento
 
 Fetch posterior encontrou `origin/main` em `75ef905`, de Edgar, sobre Validação do Fechamento. Sem sobreposição no código Corretor; ambos atualizam `LIVE_rebrain.md`. Histórico1/1 antes do commit desta implementação. Confirmação para integrar por merge solicitada conforme AGENTS; nenhuma integração ou push presumidos enquanto a resposta estiver pendente. A validação relatada acima é da base local desta entrega.
+
+
+## 15/10 — sincronização e envio autorizados por Gabriel
+
+Autorização explícita para sincronizar e dar push recebida. Integrado `75ef905` de Edgar (Validação do Fechamento) por merge `9f68037`, preservando `178a96b` da implementação e `6cea6e9` do plano. Documento vivo conferido pela identidade de três pontos: todas as linhas substantivas da base e adições dos dois lados preservadas, sem perda/duplicação. Três alterações documentais locais foram guardadas/restauradas; FIERGS e ZIP permanecem fora da entrega.
+
+Validação da base integrada:289 testes aprovados/2 condicionais pulados, Corretor + Validação do Fechamento (`.local-inputs/sync-push-20261015/tests.json`, success=true), tipagem real do projeto e build20,50s aprovados. Dez passes do lote anterior preservados; o merge não mudou código do Corretor. Nenhuma IA paga. `check:live-docs` obrigatório no fechamento. Envio ao Git autorizado; migration, Edge, publicação no Lovable e comportamento em produção ainda dependem da ativação descrita acima.
