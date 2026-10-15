@@ -88,6 +88,13 @@ try {
   assert.equal(mockMarketCalls.length, 4);
   assert.ok(mockMarketCalls.slice(1).every(call => call.query.end_period === '2026-08-31'));
   results.push({ state: 'replay API real recebida: julho/agosto parcial e sem contagem de empreendimentos', passed: true });
+  const patterns = page.getByRole('region', { name: 'Conferência dos padrões' });
+  await patterns.getByText('Ver padrões recebidos da API', { exact: true }).click();
+  assert.equal(await patterns.getByRole('row').count(), 8);
+  assert.equal(await patterns.getByRole('cell', { name: 'MCMV', exact: true }).count(), 0);
+  assert.equal(await patterns.getByRole('cell', { name: '20.328', exact: true }).count(), 1);
+  await patterns.getByText('Ver padrões recebidos da API', { exact: true }).click();
+  results.push({ state: 'sete padrões originais, sem MCMV inferido nem requests extras', passed: true });
   const slides = page.getByRole('region', { name: 'Páginas do relatório' });
   for (const [index, title] of ['Capa', 'Empreendimentos', 'Unidades lançadas', 'Vendas líquidas', 'Oferta final'].entries()) {
     await slides.getByRole('button', { name: `${index + 1}. ${title}`, exact: true }).click();
@@ -113,6 +120,15 @@ try {
     await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${index + 6}-synthetic-typology.png`), animations: 'disabled' });
   }
   results.push({ state: 'tipologias fictícias: três slides reconciliados em oito requests mockados, não observações reais por dormitório', passed: true });
+  for (const [index, title] of ['Lançamentos por segmento', 'Vendas por segmento', 'Oferta por segmento'].entries()) {
+    await slides.getByRole('button', { name: `${index + 9}. ${title}`, exact: true }).click();
+    await slides.getByText('Agrupamento de segmentos pendente', { exact: true }).waitFor();
+    await slides.getByRole('article').locator('img').evaluate(image => image.decode());
+    await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${index + 9}-pending-segment.png`), animations: 'disabled' });
+    assert.equal(await slides.getByRole('article').getByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' }).count(), 0);
+  }
+  assert.equal(mockMarketCalls.length, 8);
+  results.push({ state: 'três layouts por segmento pendentes, sem equivalências ou valores inventados', passed: true });
   for (const [width, theme] of [[1440, 'light'], [1440, 'dark'], [390, 'light'], [390, 'dark']]) {
     await page.setViewportSize({ width, height: 1000 });
     if (width < 640 && await page.getByRole('button', { name: 'Recolher menu', exact: true }).count()) await page.getByRole('button', { name: 'Recolher menu', exact: true }).click();

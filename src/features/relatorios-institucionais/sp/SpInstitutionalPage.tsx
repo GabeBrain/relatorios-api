@@ -135,6 +135,11 @@ export default function SpInstitutionalPage() {
       {report.typologies?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Tipologias ainda não reconciliadas</AlertTitle><AlertDescription>{report.typologies.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
       {!!report.typologies?.checks.length && <details><summary className="cursor-pointer text-sm font-medium">Conferência das somas por tipologia</summary><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{report.typologies.checks.map(check => <li key={check.label}>{check.label}: municipal {check.expected.toLocaleString('pt-BR')}, tipologias {check.actual.toLocaleString('pt-BR')}, diferença {check.delta.toLocaleString('pt-BR')}.</li>)}</ul></details>}
     </section>}
+    {isApi && report?.status === 'partial' && <section aria-label="Conferência dos padrões" className="space-y-3 rounded-lg border border-border bg-card p-4">
+      <h2 className="text-lg font-semibold">Padrões e segmentos do relatório</h2>
+      <p className="text-sm text-muted-foreground">O modelo reúne os padrões em Compactos, MCMV, Médio Padrão e Luxo. A correspondência com os grupos da API precisa ser confirmada pelo analista antes de preencher os slides 24, 38 e 48.</p>
+      {report.patterns?.status === 'ready' ? <details><summary className="cursor-pointer text-sm font-medium">Ver padrões recebidos da API</summary><Table><TableCaption>Grupos originais da consulta municipal, sem reclassificação. Lançamentos e vendas acumulados; oferta somente no último mês conferido.</TableCaption><TableHeader><TableRow><TableHead>Padrão da API</TableHead><TableHead>Lançamentos</TableHead><TableHead>Vendas</TableHead><TableHead>Oferta final</TableHead></TableRow></TableHeader><TableBody>{report.patterns.rows.map(row => <TableRow key={row.group}><TableCell>{row.group}</TableCell><TableCell>{row.launches.toLocaleString('pt-BR')}</TableCell><TableCell>{row.sales.toLocaleString('pt-BR')}</TableCell><TableCell>{row.stock.toLocaleString('pt-BR')}</TableCell></TableRow>)}</TableBody></Table></details> : <p className="text-sm text-muted-foreground">Confira os dados reais novamente para obter o detalhamento por padrão.</p>}
+    </section>}
     {report && <SpReportPages key={`${key}/${report.source}/${report.throughMonth}`} report={report} />}
   </div>;
 }

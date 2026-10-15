@@ -3,6 +3,20 @@ import { recordedInput } from './__tests__/recorded';
 import { buildSpTemporalPreview } from './temporal';
 
 describe('Conferência municipal SP — respostas reais registradas, sem chamada ao provedor', () => {
+  it('mantém os sete padrões originais e usa apenas o estoque de agosto', () => {
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    expect(report.patterns?.status).toBe('ready');
+    expect(report.patterns?.rows).toHaveLength(7);
+    expect(report.patterns?.rows.find(row => row.group === 'Econômico')).toEqual({ group: 'Econômico', launches: 20328, sales: 18808, stock: 66570 });
+    expect(report.patterns?.rows.some(row => row.group === 'MCMV')).toBe(false);
+    for (const field of ['launches', 'sales', 'stock'] as const) expect(report.patterns?.rows.reduce((sum, row) => sum + row[field], 0)).toBe(report.metrics[field]);
+  });
+  it('não entrega padrões quando a cobertura ou balanço são inválidos', () => {
+    const input = recordedInput(); input.complete.sales = false;
+    expect(buildSpTemporalPreview(input, '3T2026').patterns).toBeUndefined();
+    input.complete.sales = true; input.rootPeriod = '2026-09-01';
+    expect(buildSpTemporalPreview(input, '3T2026').patterns).toBeUndefined();
+  });
   it('reproduz julho/agosto e exclui setembro pelo fechamento da raiz', () => {
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     expect(report.status).toBe('partial'); expect(report.source).toBe('recorded-api'); expect(report.throughMonth).toBe('2026-08');

@@ -15,12 +15,13 @@ export interface SpInput {
 }
 export interface SpMetrics { projects: number | null; launches: number | null; sales: number | null; stock: number | null }
 export interface SpCheck { label: string; expected: number; actual: number; delta: number }
-export interface SpTypologies {
+export interface SpDistribution {
   status: 'ready' | 'blocked';
   issues: string[];
   rows: { group: string; launches: number; sales: number; stock: number }[];
   checks: SpCheck[];
 }
+export type SpTypologies = SpDistribution;
 export interface SpPreview {
   entity: typeof SP_INSTITUTIONAL.id;
   quarter: Quarter;
@@ -34,6 +35,7 @@ export interface SpPreview {
   throughMonth?: string;
   monthly?: { month: string; launches: number; sales: number; openingStock: number; closingStock: number; delta: number }[];
   typologies?: SpTypologies;
+  patterns?: SpDistribution;
 }
 const emptyMetrics = (): SpMetrics => ({ projects: null, launches: null, sales: null, stock: null });
 const normalized = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();

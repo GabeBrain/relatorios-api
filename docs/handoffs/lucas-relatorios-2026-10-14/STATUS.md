@@ -17,6 +17,8 @@
 
 ## Montagem local — 15/10/2026
 
+Lucas apresentou as três capturas reais por tipologia, com totais reconciliados. Avanço seguinte autorizado: artes por segmento (24/38/48, posições 9/10/11) preparadas; dados não preenchidos porque Lucas ainda não tem a regra de agrupamento. Tabela dos sete padrões originais reaproveita consulta atual. Retomada depende de regra/fonte/vigência do analista; não assumir Econômico=MCMV. Sem nova coleta/API, geração real, publicação ou Monday; férias19/10 preservadas.
+
 Tipologias autorizadas e implementadas: usar **Conferir dados reais** e depois **Conferir tipologias** na mesma rota. Slides 23/37/47 ocupam as posições 6/7/8 da prévia; conferência mensal/total e raiz alterada impedem mistura de fontes. Provedor real por dormitório ainda não observado; testes têm distribuição sintética explícita. Retomada: validar botão na sessão pessoal, então classificação de padrões e plano histórico. Férias desde 19/10 mantidas; nenhuma coleta longa, exportação, push, publicação ou Monday.
 
 Mapeamento posterior autorizado: [85 slides e fontes](../../features/relatorios-institucionais/sp/MAPA_SLIDES.md), incluindo imagens institucionais, recortes MCMV, janelas históricas, INCC/IVV e mapas. Próximo bloco delimitado: 23/37/47 por tipologia; padrão exige contrato sete→quatro categorias. Somente leitura local/PPTX e diagnóstico nesta rodada, sem novos requests ao GeoBrain, relatório gerado ou publicação. Retomada nas férias permanece documental, sem agendamento.

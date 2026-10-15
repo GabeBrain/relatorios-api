@@ -10,11 +10,14 @@ import stockTemplate from './assets/template-46.png';
 import launchesTypologyTemplate from './assets/template-23.png';
 import salesTypologyTemplate from './assets/template-37.png';
 import stockTypologyTemplate from './assets/template-47.png';
+import launchesSegmentTemplate from './assets/template-24.png';
+import salesSegmentTemplate from './assets/template-38.png';
+import stockSegmentTemplate from './assets/template-48.png';
 
 const quantity = (value: number | null) => value === null ? 'Indisponível' : value.toLocaleString('pt-BR');
 const month = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
-const titles = ['Capa', 'Empreendimentos', 'Unidades lançadas', 'Vendas líquidas', 'Oferta final', 'Lançamentos por tipologia', 'Vendas por tipologia', 'Oferta por tipologia'];
-const templates = [cover, projectsTemplate, launchesTemplate, salesTemplate, stockTemplate, launchesTypologyTemplate, salesTypologyTemplate, stockTypologyTemplate];
+const titles = ['Capa', 'Empreendimentos', 'Unidades lançadas', 'Vendas líquidas', 'Oferta final', 'Lançamentos por tipologia', 'Vendas por tipologia', 'Oferta por tipologia', 'Lançamentos por segmento', 'Vendas por segmento', 'Oferta por segmento'];
+const templates = [cover, projectsTemplate, launchesTemplate, salesTemplate, stockTemplate, launchesTypologyTemplate, salesTypologyTemplate, stockTypologyTemplate, launchesSegmentTemplate, salesSegmentTemplate, stockSegmentTemplate];
 
 function SlideFrame({ children }: { children: ReactNode }) {
   const frame = useRef<HTMLDivElement>(null);
@@ -35,15 +38,15 @@ export function SpReportPages({ report }: { report: SpPreview }) {
   if (!['partial', 'ready'].includes(report.status)) return null;
   const real = report.source === 'api' || report.source === 'recorded-api';
   const period = report.throughMonth ? `Parcial até ${month(report.throughMonth)}` : 'Exemplo com dados fictícios';
-  const metric = page === 1 ? 'projects' : page === 2 || page === 5 ? 'launches' : page === 3 || page === 6 ? 'sales' : 'stock';
+  const metric = page === 1 ? 'projects' : [2, 5, 8].includes(page) ? 'launches' : [3, 6, 9].includes(page) ? 'sales' : 'stock';
   const observations = (report.monthly ?? []).map(row => ({ month: row.month, value: metric === 'stock' ? row.closingStock : metric === 'launches' ? row.launches : row.sales }));
   const slide = <article aria-label={`Página ${page + 1}: ${titles[page]}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
     <img src={templates[page]} alt={page === 0 ? 'Capa original Brain Inteligência Estratégica' : `Layout original: ${titles[page]}`} className="absolute inset-0 h-full w-full" />
     {page > 0 && <>
       <p className="absolute left-[62px] top-[155px] text-[18px]">{report.quarter} · {real ? period : 'Dados fictícios · exemplo de desenvolvimento'}</p>
-      <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity(page >= 5 && report.typologies?.status !== 'ready' ? null : report.metrics[metric])}</p></div>
-      {page >= 5 ? <TypologyChart result={report.typologies} metric={metric as 'launches' | 'sales' | 'stock'} /> : page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}
-      <p className={`absolute left-[62px] text-[16px] ${page >= 5 ? 'top-[605px]' : 'top-[590px]'}`}>{page === 1 ? 'Sem estimativa ou preenchimento com zero.' : page >= 5 ? 'Distribuição nos meses conferidos. Comparação com o ano anterior pendente.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
+      {page < 8 && <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity(page >= 5 && report.typologies?.status !== 'ready' ? null : report.metrics[metric])}</p></div>}
+      {page >= 8 ? <div className="absolute left-[90px] top-[290px] w-[1100px] text-center"><p className="text-[28px] font-bold">Agrupamento de segmentos pendente</p><p className="mt-4 text-[20px]">Aguardando a regra do analista para os padrões da API.</p><p className="mt-3 text-[18px]">Compactos · MCMV · Médio Padrão · Luxo</p></div> : page >= 5 ? <TypologyChart result={report.typologies} metric={metric as 'launches' | 'sales' | 'stock'} /> : page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}
+      <p className={`absolute left-[62px] text-[16px] ${page >= 5 ? 'top-[605px]' : 'top-[590px]'}`}>{page >= 8 ? 'Sem equivalências presumidas entre padrão de preço e enquadramento MCMV.' : page === 1 ? 'Sem estimativa ou preenchimento com zero.' : page >= 5 ? 'Distribuição nos meses conferidos. Comparação com o ano anterior pendente.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
     </>}
   </article>;
   const navigation = <nav aria-label="Navegação das páginas" className="flex flex-wrap gap-2">{titles.map((title, index) => <Button key={title} variant={page === index ? 'default' : 'outline'} aria-pressed={page === index} onClick={() => setPage(index)}>{index + 1}. {title}</Button>)}</nav>;

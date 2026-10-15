@@ -1,5 +1,11 @@
 # Decisões e pontos abertos — SP
 
+## Segmentos — preparação autorizada em 15/10/2026
+
+- Lucas informou que ainda não tem a regra de conversão dos sete padrões da API para quatro segmentos do PPT. Não foi localizada regra SP confirmada no repo; preços/nomes de padrões não comprovam enquadramento MCMV.
+- Preparar artes 24/38/48 com aviso explícito, sem totais ou gráficos por segmento. Exibir separadamente os sete padrões originais com lançamentos/vendas acumulados e estoque final, aproveitando dados já validados da consulta municipal. Sem nova coleta, classificação padrão automática ou configuração de equivalências hipotéticas.
+- Agregação preserva rótulos e período; compartilhada apenas dentro de SP com tipologias. Não alterar taxonomia ou políticas Secovi/FIERGS. Próximo depende de regra/fonte/vigência e validação de totais por segmento; se o recorte MCMV for granular, não prometer que um mapa simples de padrões resolva.
+
 ## Tipologias — implementação autorizada em 15/10/2026
 
 - Reusar o transporte curto existente, optando por `group_by=Tipologia` somente na ação nova. Uma amostra para revalidar raiz, até duas páginas/100 linhas por fonte R/V/O, retry/cancelamento e escopo preservados. Nenhuma coleta automática na navegação dos slides.

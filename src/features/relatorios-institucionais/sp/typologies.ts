@@ -1,6 +1,6 @@
-import { monthOf, type SpPreview, type SpTypologies } from './model';
+import { type SpPreview, type SpTypologies } from './model';
 import { buildSpTemporalPreview, type SpTemporalInput } from './temporal';
-import { safeNumber } from '@/features/panorama-secovi-fiergs/lib/launches';
+import { summarizeSpGroups } from './distribution';
 
 /** Compare independent dimensions before allowing the three new pages to show values. */
 export function buildSpTypologies(input: SpTemporalInput, municipal: SpPreview): SpTypologies {
@@ -21,19 +21,5 @@ export function buildSpTypologies(input: SpTemporalInput, municipal: SpPreview):
     checks.push({ label: `Total · ${labels[field]}`, expected: municipal.metrics[field]!, actual: preview.metrics[field]!, delta: preview.metrics[field]! - municipal.metrics[field]! });
   }
   if (checks.some(check => check.delta !== 0)) return { status: 'blocked', issues: ['As tipologias não somam os mesmos totais municipais. Reconfira as fontes; os gráficos permanecem indisponíveis.'], rows: [], checks };
-  const months = new Set(municipal.monthly.map(row => row.month));
-  const rows = new Map<string, SpTypologies['rows'][number]>();
-  for (const [source, field, target] of [['releases', 'releases_in_period', 'launches'], ['sales', 'liquid_sales', 'sales'], ['stock', 'stock', 'stock']] as const) {
-    for (const item of input[source]) {
-      const period = monthOf(item.period);
-      if (!period || !months.has(period) || target === 'stock' && period !== municipal.throughMonth) continue;
-      // Keep provider labels and groups. Do not collapse studios/4+ or map MCMV here.
-      const label = String(item.group).trim();
-      const key = label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-      const row = rows.get(key) ?? { group: label, launches: 0, sales: 0, stock: 0 };
-      row[target] += safeNumber(item[field])!; rows.set(key, row);
-    }
-  }
-  if (!rows.size || rows.size > 12 || [...rows.values()].some(row => row.group.length > 40)) return blocked('As tipologias retornadas excedem o layout disponível. Confirme os grupos antes de montar os slides.');
-  return { status: 'ready', issues: [], rows: [...rows.values()].sort((a, b) => a.group.localeCompare(b.group, 'pt-BR', { numeric: true })), checks };
+  return summarizeSpGroups(input, municipal.monthly.map(row => row.month), municipal.throughMonth!, checks);
 }

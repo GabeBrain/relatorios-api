@@ -1,5 +1,7 @@
 # SP — conteúdo e fontes dos 85 slides
 
+**Estado atual:** Lucas apresentou as três tipologias reais reconciliadas em capturas. Artes 24/38/48 estão preparadas com classificação pendente; Lucas ainda não possui a regra sete→quatro segmentos. Padrões originais podem ser inspecionados na tela sem nova coleta. O inventário registra dependências completas e não deve ser lido como slides todos implementados.
+
 **Atualização 15/10:** bloco 23/37/47 implementado em prévia com consulta curta por Tipologia e comparação contra os totais municipais. O inventário abaixo registra as dependências completas do modelo; séries/comparações anuais continuam pendentes. Respostas reais por dormitório ainda não observadas pelo agente; fixtures de distribuição são sintéticas e exclusivas de testes/diagnóstico.
 
 15/10/2026 · Lucas/Codex. Referência: [PPTX original 2T2026](https://docs.google.com/presentation/d/1WhyrfFEoFeA9dam9w_F8CYWm8y1VotMB/edit). Ordem conferida em `presentation.xml`, textos e caches dos gráficos lidos; os 85 slides foram renderizados em leitura pelo PowerPoint e inspecionados em pranchas. Originais/capturas locais em `.local-inputs/relatorios-lucas/sp/full-reference/`, sem alteração do arquivo. Hash no [catálogo único](../../../handoffs/lucas-relatorios-2026-10-14/fontes/modelos.json).

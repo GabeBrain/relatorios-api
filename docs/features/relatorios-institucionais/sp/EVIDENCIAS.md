@@ -1,5 +1,11 @@
 # Evidências do mapeamento — 15/10/2026
 
+## Capturas pessoais de tipologia e preparação dos segmentos — 15/10
+
+Lucas apresentou os três slides com dados reais julho/agosto na própria sessão: lançamentos por dormitórios 1/2/3/4 = 7.196/16.192/752/211 (24.351); vendas = 9.274/16.114/1.088/348 (26.824); oferta agosto = 38.999/72.736/9.559/3.412 (124.706). Somas conferidas por leitura das capturas; não é nova coleta pelo agente, validação de todo o provedor ou homologação do estudo completo. Os testes de distribuição continuam sintéticos.
+
+Lucas informou não possuir ainda a regra sete padrões→quatro segmentos. Artes originais 24/38/48 preparadas com aviso de classificação pendente; sem valores inferidos. Consulta municipal existente preserva os padrões originais para inspeção, sem novos endpoints/requests. Busca nas regras SP e taxonomia do motor não demonstrou uma regra institucional reutilizável; nenhuma regra Secovi/FIERGS foi transplantada.
+
 **Base inspecionada:** `bffb3c6`, merge autorizado por Lucas de `d360b35` com `416488d`, mantendo ambos. LIVE validado por multiconjunto de linhas não vazias: base + (local − base) + (remoto − base), zero linhas faltantes/extras. Sem mudança autoral em código de produto.
 
 **Referência:** [PPTX SP 2T2026](https://docs.google.com/presentation/d/1WhyrfFEoFeA9dam9w_F8CYWm8y1VotMB/edit), nome/ID/parent confirmados via Drive; hash e tamanho no [catálogo único](../../../handoffs/lucas-relatorios-2026-10-14/fontes/modelos.json). Bruto em `.local-inputs/relatorios-lucas/sp/2026.06_PANORAMA_SAO_PAULO_VAP_13ago.pptx`, ignorado pelo Git. Download autenticado obtido pelo conector e materializado via PowerShell após bloqueio de rede no ambiente padrão; nenhum bearer URL/segredo versionado.

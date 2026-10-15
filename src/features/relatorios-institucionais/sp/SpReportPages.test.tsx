@@ -7,6 +7,18 @@ import { syntheticTypologyInput } from './__tests__/typology';
 import { buildSpTypologies } from './typologies';
 
 describe('páginas SP', () => {
+  it('mantém os segmentos pendentes mesmo com totais e tipologias disponíveis', () => {
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    render(<SpReportPages report={{ ...report, typologies: buildSpTypologies(syntheticTypologyInput(), report) }} />);
+    for (const title of ['9. Lançamentos por segmento', '10. Vendas por segmento', '11. Oferta por segmento']) {
+      fireEvent.click(screen.getByRole('button', { name: title }));
+      expect(screen.getByText('Agrupamento de segmentos pendente')).toBeInTheDocument();
+      expect(screen.queryByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' })).not.toBeInTheDocument();
+      expect(screen.queryByText('24.351')).not.toBeInTheDocument();
+      expect(screen.queryByText('26.824')).not.toBeInTheDocument();
+      expect(screen.queryByText('124.706')).not.toBeInTheDocument();
+    }
+  });
   it('preenche os três slides de tipologia só depois de reconciliar as fontes', () => {
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     const view = render(<SpReportPages report={report} />);

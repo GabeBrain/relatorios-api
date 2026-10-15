@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import SpInstitutionalPage from './SpInstitutionalPage';
 
 const access = vi.hoisted(() => ({ token: 'synthetic-token', error: false, loading: false, fixtureMode: 'success', apiMode: 'success', aborted: false, reload: vi.fn() }));
@@ -29,6 +29,18 @@ beforeEach(() => { access.token = 'synthetic-token'; access.error = false; acces
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('mostra os padrões recebidos sem converter Econômico em MCMV e limpa ao trocar escopo', async () => {
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    const panel = within(await screen.findByRole('region', { name: 'Conferência dos padrões' }));
+    fireEvent.click(panel.getByText('Ver padrões recebidos da API'));
+    expect(panel.getByRole('cell', { name: 'Econômico' })).toBeInTheDocument();
+    expect(panel.getByRole('cell', { name: '20.328' })).toBeInTheDocument();
+    expect(panel.queryByRole('cell', { name: 'MCMV' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('Trocar UF'));
+    expect(screen.queryByRole('region', { name: 'Conferência dos padrões' })).not.toBeInTheDocument();
+  });
   it('confere tipologias sob demanda e mantém o bloqueio de trimestre completo', async () => {
     render(<SpInstitutionalPage />);
     expect(screen.queryByRole('button', { name: 'Conferir tipologias' })).not.toBeInTheDocument();

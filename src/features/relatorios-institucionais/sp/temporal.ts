@@ -2,6 +2,7 @@ import { quarterEndMonth, isQuarter } from '@/features/panorama-secovi-fiergs/do
 import { safeNumber } from '@/features/panorama-secovi-fiergs/lib/launches';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
 import { monthOf, SP_INSTITUTIONAL, type SpPreview } from './model';
+import { summarizeSpGroups } from './distribution';
 
 export type SpTemporalRow = Record<string, unknown>;
 export interface SpTemporalInput {
@@ -78,6 +79,7 @@ export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter)
   if (result.checks.some(row => row.delta !== 0)) return fail('incomplete', 'Lançamentos, vendas e estoque não reconciliam nos meses fechados.');
   return {
     ...result, status: 'partial',
+    patterns: input.groupBy === 'Tipologia' ? undefined : summarizeSpGroups(input, months, result.throughMonth),
     metrics: { projects: null, launches: result.monthly!.reduce((sum, row) => sum + row.launches, 0), sales: result.monthly!.reduce((sum, row) => sum + row.sales, 0), stock: result.monthly!.at(-1)!.closingStock },
     issues: [
       `Fechamento ${result.closingMonth} observado em ${input.sampledBuildings} de ${input.totalBuildings} empreendimentos; falta confirmar a cobertura granular da cidade.`,
