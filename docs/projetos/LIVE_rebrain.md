@@ -1,3 +1,9 @@
+### 2026-10-15 — Relatórios institucionais: agrupamento SP confirmado e aplicado — Codex, regra de Lucas
+- **Desenvolvimento:** regra SP v1: Compactos←Compacto; MCMV←Econômico; Médio Padrão←Standard/Médio/Médio-Alto; Luxo←Alto/Luxo. Slides 24/38/48 preenchidos sobre padrões já recebidos, sem requests adicionais; desconhecidos/duplicados/ausentes e divergências bloqueiam valores. Sinais preservados; estoque só do fechamento. Reuso do gráfico de distribuição e artes originais existentes.
+- **Validação:** 69 testes SP, tipagem/lint e 14 cenários Edge aprovados com rede de mercado bloqueada. Três gráficos revisados, com totais 24.351/26.824/124.706 preservados. Regra confirmada por Lucas, sem alegar consulta ao analista ou homologação integral.
+- **Etapas/Pendências:** classificação resolvida no piloto; Lucas revisar slides 9/10/11. Histórico/comparações, preços/INCC/IVV, granular, setembro e exportação continuam pendentes. Base `eecad68`; sem push/Monday/coleta longa e sem mudanças autorais em Secovi/FIERGS/Corretor. Férias19/10 e retomada em PLAN/STATUS mantidas.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 2026-10-15 — Relatórios institucionais: segmentos preparados, regra pendente — Codex, autorizado por Lucas
 - **Desenvolvimento:** artes originais 24/38/48 nas posições 9/10/11, sem valores ou agrupamento presumidos. Detalhamento dos padrões originais da API reaproveita a consulta municipal; agregação compartilhada só dentro de SP, preservando fluxos/estoque final e invalidação de escopo.
 - **Evidência/etapa:** Lucas apresentou as três capturas reais de tipologia com somas municipais exatas e informou não ter ainda a regra sete→quatro segmentos. Layouts preparados; preenchimento depende de classificação/fonte/vigência do analista, inclusive se MCMV exigir dados granulares. Não há entrega homologada por segmento.

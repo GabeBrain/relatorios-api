@@ -122,13 +122,14 @@ try {
   results.push({ state: 'tipologias fictícias: três slides reconciliados em oito requests mockados, não observações reais por dormitório', passed: true });
   for (const [index, title] of ['Lançamentos por segmento', 'Vendas por segmento', 'Oferta por segmento'].entries()) {
     await slides.getByRole('button', { name: `${index + 9}. ${title}`, exact: true }).click();
-    await slides.getByText('Agrupamento de segmentos pendente', { exact: true }).waitFor();
+    await slides.getByRole('img', { name: 'Distribuição por segmento em unidades e participação percentual' }).waitFor();
+    for (const group of ['Compactos', 'MCMV', 'Médio Padrão', 'Luxo']) assert.equal(await slides.getByRole('article').getByText(group, { exact: true }).count(), 1);
     await slides.getByRole('article').locator('img').evaluate(image => image.decode());
-    await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${index + 9}-pending-segment.png`), animations: 'disabled' });
+    await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${index + 9}-confirmed-segment.png`), animations: 'disabled' });
     assert.equal(await slides.getByRole('article').getByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' }).count(), 0);
   }
   assert.equal(mockMarketCalls.length, 8);
-  results.push({ state: 'três layouts por segmento pendentes, sem equivalências ou valores inventados', passed: true });
+  results.push({ state: 'três segmentos preenchidos por regra confirmada, somas e grupos preservados sem requests extras', passed: true });
   for (const [width, theme] of [[1440, 'light'], [1440, 'dark'], [390, 'light'], [390, 'dark']]) {
     await page.setViewportSize({ width, height: 1000 });
     if (width < 640 && await page.getByRole('button', { name: 'Recolher menu', exact: true }).count()) await page.getByRole('button', { name: 'Recolher menu', exact: true }).click();

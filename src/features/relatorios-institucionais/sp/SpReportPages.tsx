@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { SpPreview, SpTypologies } from './model';
+import { buildSpSegments } from './segments';
 import cover from './assets/cover.png';
 import projectsTemplate from './assets/template-13.png';
 import launchesTemplate from './assets/template-18.png';
@@ -38,15 +39,17 @@ export function SpReportPages({ report }: { report: SpPreview }) {
   if (!['partial', 'ready'].includes(report.status)) return null;
   const real = report.source === 'api' || report.source === 'recorded-api';
   const period = report.throughMonth ? `Parcial até ${month(report.throughMonth)}` : 'Exemplo com dados fictícios';
+  const segments = buildSpSegments(report);
+  const distribution = page >= 8 ? segments : report.typologies;
   const metric = page === 1 ? 'projects' : [2, 5, 8].includes(page) ? 'launches' : [3, 6, 9].includes(page) ? 'sales' : 'stock';
   const observations = (report.monthly ?? []).map(row => ({ month: row.month, value: metric === 'stock' ? row.closingStock : metric === 'launches' ? row.launches : row.sales }));
   const slide = <article aria-label={`Página ${page + 1}: ${titles[page]}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
     <img src={templates[page]} alt={page === 0 ? 'Capa original Brain Inteligência Estratégica' : `Layout original: ${titles[page]}`} className="absolute inset-0 h-full w-full" />
     {page > 0 && <>
       <p className="absolute left-[62px] top-[155px] text-[18px]">{report.quarter} · {real ? period : 'Dados fictícios · exemplo de desenvolvimento'}</p>
-      {page < 8 && <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity(page >= 5 && report.typologies?.status !== 'ready' ? null : report.metrics[metric])}</p></div>}
-      {page >= 8 ? <div className="absolute left-[90px] top-[290px] w-[1100px] text-center"><p className="text-[28px] font-bold">Agrupamento de segmentos pendente</p><p className="mt-4 text-[20px]">Aguardando a regra do analista para os padrões da API.</p><p className="mt-3 text-[18px]">Compactos · MCMV · Médio Padrão · Luxo</p></div> : page >= 5 ? <TypologyChart result={report.typologies} metric={metric as 'launches' | 'sales' | 'stock'} /> : page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}
-      <p className={`absolute left-[62px] text-[16px] ${page >= 5 ? 'top-[605px]' : 'top-[590px]'}`}>{page >= 8 ? 'Sem equivalências presumidas entre padrão de preço e enquadramento MCMV.' : page === 1 ? 'Sem estimativa ou preenchimento com zero.' : page >= 5 ? 'Distribuição nos meses conferidos. Comparação com o ano anterior pendente.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
+      <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity(page >= 5 && distribution?.status !== 'ready' ? null : report.metrics[metric])}</p></div>
+      {page >= 5 ? <DistributionChart result={distribution} metric={metric as 'launches' | 'sales' | 'stock'} kind={page >= 8 ? 'segmento' : 'tipologia'} /> : page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}
+      <p className={`absolute left-[62px] text-[16px] ${page >= 5 ? 'top-[605px]' : 'top-[590px]'}`}>{page === 1 ? 'Sem estimativa ou preenchimento com zero.' : page >= 5 ? 'Distribuição nos meses conferidos. Comparação com o ano anterior pendente.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
     </>}
   </article>;
   const navigation = <nav aria-label="Navegação das páginas" className="flex flex-wrap gap-2">{titles.map((title, index) => <Button key={title} variant={page === index ? 'default' : 'outline'} aria-pressed={page === index} onClick={() => setPage(index)}>{index + 1}. {title}</Button>)}</nav>;
@@ -59,8 +62,8 @@ export function SpReportPages({ report }: { report: SpPreview }) {
   </section>;
 }
 
-function TypologyChart({ result, metric }: { result?: SpTypologies; metric: 'launches' | 'sales' | 'stock' }) {
-  if (result?.status !== 'ready') return <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[28px] font-bold">Dados por tipologia indisponíveis</p><p className="mt-4 text-[20px]">{result?.status === 'blocked' ? 'Confira as divergências antes de preencher este slide.' : 'Use Conferir tipologias para consultar e reconciliar os dados.'}</p></div>;
+function DistributionChart({ result, metric, kind }: { result?: SpTypologies; metric: 'launches' | 'sales' | 'stock'; kind: 'tipologia' | 'segmento' }) {
+  if (result?.status !== 'ready') return <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[28px] font-bold">Dados por {kind} indisponíveis</p><p className="mt-4 text-[20px]">{kind === 'segmento' ? result?.issues[0] ?? 'Confira os dados reais novamente.' : result?.status === 'blocked' ? 'Confira as divergências antes de preencher este slide.' : 'Use Conferir tipologias para consultar e reconciliar os dados.'}</p></div>;
   const values = result.rows.map(row => row[metric]);
   const total = values.reduce((sum, value) => sum + value, 0);
   const minimum = Math.min(0, ...values), maximum = Math.max(0, ...values);
@@ -68,7 +71,7 @@ function TypologyChart({ result, metric }: { result?: SpTypologies; metric: 'lau
   const step = 1100 / result.rows.length;
   const fontSize = result.rows.length > 6 ? 14 : 18;
   const colors = ['#5b7638', '#83a83d', '#1d6288', '#ffcf00'];
-  return <svg role="img" aria-label="Distribuição por tipologia em unidades e participação percentual" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
+  return <svg role="img" aria-label={`Distribuição por ${kind} em unidades e participação percentual`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
     <line x1="90" x2="1190" y1={y(0)} y2={y(0)} stroke="#d9d9d9" />
     {result.rows.map((row, index) => {
       const x = 90 + step * (index + 0.5), value = row[metric];

@@ -12,6 +12,7 @@ import { buildSpPreview, SP_INSTITUTIONAL, type SpPreview } from './model';
 import { buildSpTemporalPreview } from './temporal';
 import { SpReportPages } from './SpReportPages';
 import { buildSpTypologies } from './typologies';
+import { buildSpSegments, SP_SEGMENT_RULE } from './segments';
 
 const labels = { projects: 'Empreendimentos lançados', launches: 'Unidades lançadas', sales: 'Vendas líquidas', stock: 'Oferta final' } as const;
 const formatMonth = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
@@ -39,6 +40,7 @@ export default function SpInstitutionalPage() {
   const key = `${geo.uf}/${geo.city}/${quarter}`;
   const report = ready && preview?.key === key ? preview.report : null;
   const isApi = report?.source === 'api' || report?.source === 'recorded-api';
+  const segments = report ? buildSpSegments(report) : null;
 
   async function preparePreview(mode: 'api' | 'fixture') {
     if (!ready || loading) return;
@@ -137,7 +139,9 @@ export default function SpInstitutionalPage() {
     </section>}
     {isApi && report?.status === 'partial' && <section aria-label="Conferência dos padrões" className="space-y-3 rounded-lg border border-border bg-card p-4">
       <h2 className="text-lg font-semibold">Padrões e segmentos do relatório</h2>
-      <p className="text-sm text-muted-foreground">O modelo reúne os padrões em Compactos, MCMV, Médio Padrão e Luxo. A correspondência com os grupos da API precisa ser confirmada pelo analista antes de preencher os slides 24, 38 e 48.</p>
+      <p className="text-sm text-muted-foreground">Agrupamento confirmado para este relatório SP: Compactos = Compacto; MCMV = Econômico; Médio Padrão = Standard, Médio e Médio-Alto; Luxo = Alto e Luxo.</p>
+      {segments?.status === 'ready' ? <p role="status" className="text-sm">Segmentos conferidos: os quatro grupos somam os totais municipais. Slides 24, 38 e 48 disponíveis nas posições 9, 10 e 11 da prévia.</p> : <Alert variant="destructive"><AlertTitle>Segmentos ainda não reconciliados</AlertTitle><AlertDescription>{segments?.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
+      <p className="text-xs text-muted-foreground">Regra confirmada por {SP_SEGMENT_RULE.confirmedBy} em 15/10/2026, específica deste modelo.</p>
       {report.patterns?.status === 'ready' ? <details><summary className="cursor-pointer text-sm font-medium">Ver padrões recebidos da API</summary><Table><TableCaption>Grupos originais da consulta municipal, sem reclassificação. Lançamentos e vendas acumulados; oferta somente no último mês conferido.</TableCaption><TableHeader><TableRow><TableHead>Padrão da API</TableHead><TableHead>Lançamentos</TableHead><TableHead>Vendas</TableHead><TableHead>Oferta final</TableHead></TableRow></TableHeader><TableBody>{report.patterns.rows.map(row => <TableRow key={row.group}><TableCell>{row.group}</TableCell><TableCell>{row.launches.toLocaleString('pt-BR')}</TableCell><TableCell>{row.sales.toLocaleString('pt-BR')}</TableCell><TableCell>{row.stock.toLocaleString('pt-BR')}</TableCell></TableRow>)}</TableBody></Table></details> : <p className="text-sm text-muted-foreground">Confira os dados reais novamente para obter o detalhamento por padrão.</p>}
     </section>}
     {report && <SpReportPages key={`${key}/${report.source}/${report.throughMonth}`} report={report} />}

@@ -1,5 +1,7 @@
 # SP — conteúdo e fontes dos 85 slides
 
+**Atualização de classificação:** Lucas confirmou a regra sete→quatro em 15/10; slides 24/38/48 já têm distribuição parcial, reaproveitando os padrões municipais. Regra e autoria em `DECISOES.md`; referências anteriores a agrupamento pendente são o histórico da preparação, não o estado atual. Comparação anual continua pendente.
+
 **Estado atual:** Lucas apresentou as três tipologias reais reconciliadas em capturas. Artes 24/38/48 estão preparadas com classificação pendente; Lucas ainda não possui a regra sete→quatro segmentos. Padrões originais podem ser inspecionados na tela sem nova coleta. O inventário registra dependências completas e não deve ser lido como slides todos implementados.
 
 **Atualização 15/10:** bloco 23/37/47 implementado em prévia com consulta curta por Tipologia e comparação contra os totais municipais. O inventário abaixo registra as dependências completas do modelo; séries/comparações anuais continuam pendentes. Respostas reais por dormitório ainda não observadas pelo agente; fixtures de distribuição são sintéticas e exclusivas de testes/diagnóstico.
@@ -53,7 +55,7 @@ Os endpoints abaixo foram conferidos no [OpenAPI versionado](../../../../src/ass
 | 21 | Unidades lançadas MCMV, móvel 12 meses | R/H | Dados: mesmos critérios do 20 e janela móvel completa. |
 | 22 | Participação anual das unidades lançadas por segmento | R/H | Dados: série anual desde 2021 e agrupamento em quatro segmentos. |
 | 23 | Lançamentos por tipologia, comparação com mesmo trimestre anterior | R | Dados: `group_by=Tipologia`, soma de fluxos; trazer base comparável e reconciliar com total. |
-| 24 | Lançamentos por segmento, comparação anual | R/H | Dados: sete padrões da API versus quatro segmentos do PPT; contrato de conversão e base comparável. |
+| 24 | Lançamentos por segmento, comparação anual | R/H | Prévia: agrupamento confirmado por Lucas aplicado à parcial atual; comparação histórica pendente. |
 | 25 | Top 10 bairros por unidades lançadas | H | Dados: bairro normalizado, lançamentos na janela e denominador de toda a cidade; sem usar só top 10 como total. |
 | 26 | VGL trimestral em R$ milhões, corrigido INCC | R/H/X | Dados: validar `vgv_release` real e método de correção, série/índice/mês-base do INCC. |
 | 27 | VGL corrigido INCC, móvel 12 meses | R/H/X | Dados: corrigir valores conforme contrato antes de acumular, com janela completa. |
@@ -67,7 +69,7 @@ Os endpoints abaixo foram conferidos no [OpenAPI versionado](../../../../src/ass
 | 35 | Vendas MCMV, móvel 12 meses | V/H | Dados: classificação e janela móvel completa. |
 | 36 | Participação anual das vendas por segmento | V/H | Dados: histórico desde 2021, segmentos e denominadores; tratar participação com fluxos negativos explicitamente. |
 | 37 | Vendas por tipologia, comparação anual | V | Dados: `group_by=Tipologia`, soma de vendas líquidas e base equivalente. |
-| 38 | Vendas por segmento, comparação anual | V/H | Dados: correspondência dos sete padrões para quatro segmentos e base equivalente. |
+| 38 | Vendas por segmento, comparação anual | V/H | Prévia: classificação confirmada aplicada, preservando vendas líquidas; comparação histórica pendente. |
 | 39 | Top 10 bairros por vendas líquidas | H | Dados: validar `sold_in_period` versus vendas líquidas municipais; bairro/cobertura/distratos. |
 | 40 | VGV vendido trimestral, corrigido INCC | V/X | Dados: `vgv_liquid_sales` recebido é candidato nominal; corrigir somente com índice/mês-base confirmados. |
 | 41 | VGV vendido corrigido INCC, móvel 12 meses | V/X | Dados: correção validada e janela móvel completa. |
@@ -77,7 +79,7 @@ Os endpoints abaixo foram conferidos no [OpenAPI versionado](../../../../src/ass
 | 45 | Divisória: oferta | A | Arte: atualizar nota de período antiga ao montar. |
 | 46 | Oferta final histórica e escoamento por padrão | O/H/V | Prévia: estoque agosto disponível; curva e escoamento pendentes. Confirmar denominador e janela de vendas do escoamento. |
 | 47 | Oferta por tipologia, comparação anual | O | Dados: `group_by=Tipologia`, fotografia do fechamento e base equivalente anterior. |
-| 48 | Oferta por segmento, comparação anual | O/H | Dados: quatro segmentos validados e fotografia do mês; nunca somar estoques. |
+| 48 | Oferta por segmento, comparação anual | O/H | Prévia: quatro segmentos confirmados, fotografia agosto; comparação histórica pendente. |
 | 49 | Divisória: VSO/IVV | A | Arte: reaproveitar sem números. |
 | 50 | IVV, série trimestral | J/V/O | Dados: contrato de IVV trimestral; não somar nem tirar média simples dos índices mensais automaticamente. |
 | 51 | IVV por área útil, tabela MCMV/demais padrões | H/J | Dados: faixas de área, oferta inicial/final, lançamentos/vendas e fórmula; agregados atuais não cruzam metragem. |

@@ -1,5 +1,18 @@
 # Decisões e pontos abertos — SP
 
+## Classificação confirmada por Lucas — 15/10/2026
+
+Lucas forneceu explicitamente a correspondência abaixo, substituindo a pendência anterior. Regra `sp-institucional-segmentos-v1`, específica do piloto SP/3T2026; não é uma regra geral de enquadramento legal em MCMV nem altera outros modelos.
+
+| Segmento do PPT | Padrões da API |
+|---|---|
+| Compactos | Compacto |
+| MCMV | Econômico |
+| Médio Padrão | Standard, Médio, Médio-Alto |
+| Luxo | Alto, Luxo |
+
+Implementada em `segments.ts`, sobre a distribuição por Padrão já validada, sem nova consulta. Exige os sete padrões explícitos, sem desconhecidos/duplicados, valores inteiros válidos e igualdade dos três totais com o município. Venda negativa conserva sinal; estoque usa somente o fechamento. Divergências bloqueiam todos os valores por segmento. Nenhuma classificação foi aplicada às regras Secovi/FIERGS ou a recortes históricos ainda não validados.
+
 ## Segmentos — preparação autorizada em 15/10/2026
 
 - Lucas informou que ainda não tem a regra de conversão dos sete padrões da API para quatro segmentos do PPT. Não foi localizada regra SP confirmada no repo; preços/nomes de padrões não comprovam enquadramento MCMV.

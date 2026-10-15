@@ -1,5 +1,19 @@
 # Evidências do mapeamento — 15/10/2026
 
+## Segmentos com regra fornecida por Lucas — 15/10
+
+Sobre os padrões municipais recebidos e conferidos, sem nova chamada de API:
+
+| Segmento | Lançamentos julho/agosto | Vendas julho/agosto | Oferta agosto |
+|---|---:|---:|---:|
+| Compactos | 1.735 | 3.561 | 20.926 |
+| MCMV | 20.328 | 18.808 | 66.570 |
+| Médio Padrão | 1.958 | 4.028 | 32.640 |
+| Luxo | 330 | 427 | 4.570 |
+| Total | 24.351 | 26.824 | 124.706 |
+
+69 testes SP, tipagem/lint e 14 cenários Edge aprovados; capturas dos três gráficos revisadas. Testes de segmento usam os padrões reais registrados; os de tipologia continuam com distribuição sintética explicitamente separada. Zero chamadas de mercado pelo agente. Ainda falta Lucas observar estes três slides atualizados na própria sessão; não é aceite do estudo integral.
+
 ## Capturas pessoais de tipologia e preparação dos segmentos — 15/10
 
 Lucas apresentou os três slides com dados reais julho/agosto na própria sessão: lançamentos por dormitórios 1/2/3/4 = 7.196/16.192/752/211 (24.351); vendas = 9.274/16.114/1.088/348 (26.824); oferta agosto = 38.999/72.736/9.559/3.412 (124.706). Somas conferidas por leitura das capturas; não é nova coleta pelo agente, validação de todo o provedor ou homologação do estudo completo. Os testes de distribuição continuam sintéticos.

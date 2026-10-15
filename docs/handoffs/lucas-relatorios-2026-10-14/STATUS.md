@@ -17,6 +17,8 @@
 
 ## Montagem local — 15/10/2026
 
+Classificação posterior confirmada diretamente por Lucas: Compactos=Compacto; MCMV=Econômico; Médio Padrão=Standard/Médio/Médio-Alto; Luxo=Alto/Luxo. Aplicada aos slides 24/38/48, posições 9/10/11, sobre padrões já consultados; três totais preservados e layouts revisados. A pendência anterior de regra está resolvida para este piloto SP. Retomada: conferir na sessão pessoal, delimitar histórico e sua comparabilidade; vigência histórica não presumida. Sem nova coleta, push, publicação ou Monday; férias19/10 mantidas.
+
 Lucas apresentou as três capturas reais por tipologia, com totais reconciliados. Avanço seguinte autorizado: artes por segmento (24/38/48, posições 9/10/11) preparadas; dados não preenchidos porque Lucas ainda não tem a regra de agrupamento. Tabela dos sete padrões originais reaproveita consulta atual. Retomada depende de regra/fonte/vigência do analista; não assumir Econômico=MCMV. Sem nova coleta/API, geração real, publicação ou Monday; férias19/10 preservadas.
 
 Tipologias autorizadas e implementadas: usar **Conferir dados reais** e depois **Conferir tipologias** na mesma rota. Slides 23/37/47 ocupam as posições 6/7/8 da prévia; conferência mensal/total e raiz alterada impedem mistura de fontes. Provedor real por dormitório ainda não observado; testes têm distribuição sintética explícita. Retomada: validar botão na sessão pessoal, então classificação de padrões e plano histórico. Férias desde 19/10 mantidas; nenhuma coleta longa, exportação, push, publicação ou Monday.
