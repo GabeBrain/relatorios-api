@@ -1,3 +1,6 @@
+## 15/10/2026 — revisão do fluxo após uso humano (PLANEJADA)
+Gabriel rejeitou a transição automática após upload, o aviso decorativo amarelo, imagens duplicadas, inglês, achados sem página completa e a triagem estreita. Plano novo `design/PLAN_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md` substitui essas decisões de apresentação. Preparação na mesma página e confirmação de custo antes de toda IA, inclusive ata; visualizador único com texto abaixo; português; catálogo na carteira; retomada persistente. Código de produto não alterado nesta rodada. Simulação local não é aceite do runtime nem conversão automática de PPTX. Preferências de usabilidade e evidências atualizadas, motores/decisões reais preservados.
+
 ## Complemento 0.72.2 — aviso persistente pós-pré-análise — 15/10/2026
 Resumo e revisão sem relatório completo exibem “Este estudo ainda não foi avaliado por completo”, com instrução de confirmar cidade/UF e escolha das planilhas antes de Rodar análise; reabertura orienta retomar. Componente compartilhado sem fechar/ocultar. Não altera motores, custo ou decisões. Preparado localmente, sem push/produção.
 
