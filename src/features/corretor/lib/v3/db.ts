@@ -197,12 +197,12 @@ export async function confirmAta(
   if (error) throw new Error(error.message);
 }
 
-export async function loadFindings(studyId: string): Promise<FindingV3[]> {
+export async function loadFindings(studyId: string, strict = false): Promise<FindingV3[]> {
   const { data, error } = await db
     .from('findings_v3')
     .select('*')
     .eq('study_id', studyId);
-  if (error || !data) return [];
+  if (error || !data) { if (strict) throw new Error('Não foi possível carregar os apontamentos.'); return []; }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((r: any) => ({
     ruleId: r.rule_id,

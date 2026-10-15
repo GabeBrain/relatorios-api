@@ -1,6 +1,7 @@
 import { Component, lazy, Suspense, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { legacyStudyHref, studyHref, portfolioHref } from './features/corretor/lib/study-navigation';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -23,8 +24,11 @@ const CorretorV3Page = lazy(() => import('./features/corretor/pages/CorretorV3Pa
 const CorretorProjectsPage = lazy(() => import('./features/corretor/pages/CorretorProjectsPage.tsx'));
 function CorretorEntry() {
   const location = useLocation();
-  return new URLSearchParams(location.search).has('study') ? <CorretorV3Page /> : <CorretorProjectsPage />;
+  const params = new URLSearchParams(location.search), id = params.get('study');
+  return id ? <Navigate replace to={studyHref(id, 'revisao', params.get('carteira') ?? '', params.get('version') ?? undefined)} /> : <CorretorProjectsPage />;
 }
+function CorretorLegacyProject() { const { studyId } = useParams(); const location = useLocation(); return <Navigate replace to={studyId ? legacyStudyHref(studyId, new URLSearchParams(location.search)) : portfolioHref(location.search)} />; }
+function CorretorLegacyAnalysis() { const location = useLocation(); const params = new URLSearchParams(location.search), id = params.get('study'); return id ? <Navigate replace to={studyHref(id, 'revisao', params.get('carteira') ?? '', params.get('version') ?? undefined)} /> : <CorretorV3Page />; }
 const CorretorReportPage = lazy(() => import('./features/corretor/pages/CorretorReportPage.tsx'));
 const CorretorCalibrationPage = lazy(() => import('./features/corretor/pages/CorretorCalibrationPage.tsx'));
 const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/AtualizadorVgvPage.tsx'));
@@ -92,9 +96,11 @@ const App = () => (
                 <Route path="/rebrain/empresas-empregados" element={<EmpresasEmpregadosPage />} />
                 <Route path="/rebrain/sinduscon-curitiba" element={<SindusconCuritibaPage />} />
                 <Route path="/corretor" element={<CorretorEntry />} />
-                <Route path="/corretor/projetos" element={<CorretorProjectsPage />} />
-                <Route path="/corretor/projetos/:studyId" element={<CorretorProjectsPage />} />
-                <Route path="/corretor/analise" element={<CorretorV3Page />} />
+                <Route path="/corretor/projetos" element={<CorretorLegacyProject />} />
+                <Route path="/corretor/projetos/:studyId" element={<CorretorLegacyProject />} />
+                <Route path="/corretor/estudos/:studyId/:section" element={<CorretorProjectsPage />} />
+                <Route path="/corretor/novo" element={<CorretorV3Page />} />
+                <Route path="/corretor/analise" element={<CorretorLegacyAnalysis />} />
                 <Route path="/corretor/calibracao" element={<CorretorCalibrationPage />} />
                 <Route path="/corretor/:id/relatorio" element={<CorretorReportPage />} />
                 <Route path="/atualizador-vgv" element={<AtualizadorVgvPage />} />

@@ -4,7 +4,8 @@
 // Navegação sem rail duplo: landing com cards de estudos → workspace com voltar.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { portfolioHref } from '../lib/study-navigation';
 import { toast } from 'sonner';
 import brainLogo from '../../../../assets/logoBrain.png';
 import {
@@ -378,6 +379,8 @@ function StudyRow({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
 
 export default function CorretorV3Page() {
   const [searchParams] = useSearchParams();
+  const { studyId: routeStudyId } = useParams();
+  const navigate = useNavigate();
   const [studies, setStudies] = useState<StudyV3[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -479,9 +482,9 @@ export default function CorretorV3Page() {
   }, [refreshList, studies]);
 
   useEffect(() => {
-    const requested = searchParams.get('study');
+    const requested = routeStudyId ?? searchParams.get('study');
     if (requested && requested !== selectedId && studies.some((study) => study.id === requested)) void openStudy(requested);
-  }, [openStudy, searchParams, selectedId, studies]);
+  }, [openStudy, searchParams, selectedId, studies, routeStudyId]);
 
   /**
    * FASE 2 (paga): texto + visão + cruzamentos, com a cidade/UF JÁ confirmadas no
@@ -1044,6 +1047,7 @@ export default function CorretorV3Page() {
   const blockingPend = wl.confidence.filter(([level]) => level <= 2).reduce((total, [, findings]) => total + findings.length, 0);
 
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
+  if (!selected && routeStudyId) return <div className="p-6"><p role="status">{loadingList || loadingStudy ? 'Abrindo revisão…' : 'Estudo não encontrado.'}</p><Link to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>;
   if (!selected) {
     const generationStudies = studies.filter((study) => study.generation === landingGeneration);
     const emCorrecao = generationStudies.filter((s) => s.status !== 'pronto');
@@ -1062,6 +1066,7 @@ export default function CorretorV3Page() {
       });
     return (
       <div className="min-h-screen bg-muted/25">
+        <div className="px-6 py-3"><Link className="text-sm underline" to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>
         <header className="border-b bg-card">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
           <div className="flex min-w-0 items-center gap-3">
@@ -1276,9 +1281,9 @@ export default function CorretorV3Page() {
       <header className="border-b bg-card px-6 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <button
-            onClick={() => { setSelectedId(null); refreshList(); }}
+            onClick={() => navigate(portfolioHref(searchParams.get('carteira') ?? ''))}
             className="text-muted-foreground hover:text-foreground"
-            title="Voltar aos estudos"
+            title="Voltar aos estudos" aria-label="Voltar aos estudos da revisão"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -1338,7 +1343,7 @@ export default function CorretorV3Page() {
             </button>
           )}
           <button
-            onClick={async () => { await deleteStudy(selected.id); setSelectedId(null); refreshList(); }}
+            onClick={async () => { await deleteStudy(selected.id); navigate(portfolioHref(searchParams.get('carteira') ?? '')); }}
             className="text-muted-foreground hover:text-destructive p-1.5"
             title="Excluir estudo"
           >

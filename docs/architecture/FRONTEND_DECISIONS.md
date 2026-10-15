@@ -1,5 +1,12 @@
 # Decisões de Frontend — Rebrain
 
+### 2026-10-15 — Estudo como contexto de rota persistente no Corretor
+
+- **Contexto:** seleção local e parâmetro study divergiam; Voltar limpava seleção e efeito reabria o estudo. Carteira e revisão tinham navegações desconectadas.
+- **Decisão:** rotas canônicas `/corretor/estudos/:studyId/:section`, contexto de carteira sanitizado na URL, áreas por links acessíveis e adaptadores de links legados. Carteira abre resumo; revisão atual lazy dentro de StudyLayout é transição para A4. Estado do resumo reinicia por estudo; consulta estrita trata erro sem falso zero.
+- **Consequência:** back/forward/reload/links diretos reproduzem contexto; nenhum motor ou decisão é alterado. Cadastro opcional não bloqueia leitura/revisão. Composição Claude adapta aos tokens SE v0.1 existentes; sem copiar o runtime do editor ou seus tokens alternativos. Paginação servidor e permissões públicas são etapas posteriores.
+- **Escopo:** somente Corretor A0/A1, validado localmente; outras features e shell preservados.
+
 Registro leve de exceções e decisões duradouras às [Guidelines de Frontend](./FRONTEND_GUIDELINES.md).
 Não use para changelog de feature; mudanças funcionais continuam nos documentos vivos dos projetos.
 

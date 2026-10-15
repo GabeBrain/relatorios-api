@@ -16,6 +16,20 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.71 — 2026-10-15 — carteira, resumo e navegação A0/A1 (RUNTIME local)
+
+- **Fluxo:** carteira compacta abre resumo; áreas Resumo/Revisão/Materiais/Histórico com rotas canônicas e retorno explícito preservando busca/filtro/página. URLs antigas redirecionam sem reabrir estudo após Voltar; novo envio também tem retorno. Revisão legada permanece integrada como transição, não é bancada A4.
+- **Cadastro:** opcional; ausência neutra “Sem cadastro prévio”/completar. Somente campos preenchidos aparecem, cidade desconhecida omitida e tipo de estudo não é inferido por default no cadastro novo. Contrato de originais ainda depende de vínculo autenticado; separar persistência/cadastro é A2/A3.
+- **Resumo/DET:** só leitura de registros atuais, confiança existente (erro/provável/verificar) distinta de gravidade, categorias/slides e cobertura limitada explícita. Falha de leitura gera erro/retry, não zero; `loadFindings` recebe modo estrito opcional, mantendo default das chamadas antigas.
+- **Evidência:** [resultado A0/A1](./design/RESULTADO_A0_A1_INTERFACE_V3_2026-10-15.md),279 testes/2 condicionais pulados, dez passes dos cinco estudos com Excel bruto, browser de snapshots/navegação sem tentativa de escrita/IA e regressão de upload/recuperação sintética. Motores, prompts, decisões e gabaritos preservados. Build/tipos/lint locais.
+- **Estado:** A0 baseline disponível e A1 validados localmente, antes do push; tokens SE idênticos. Paginação ainda cliente/consulta existente, biblioteca pública e escrita autenticada futuras, sem migration. Próximo publicar com autorização e retestar ida/volta no site; A2–A6 planejados.
+
+## Planejamento de assimilação da interface — 2026-10-15 — PLANEJADO
+
+- [Plano A0–A6](./design/PLAN_ASSIMILACAO_INTERFACE_V3_2026-10-15.md) consolida entrevista e conceito Claude: carteira→resumo→bancada, cadastro opcional, biblioteca pública, autoria pelo login Geobrain e escrita de revisões existentes autenticada. Biblioteca pública/compartilhamento organizacional substituem o modelo privado como intenção de produto, ainda não como política aplicada.
+- Materiais/fontes por versão/execução, renderização real, mapa para estudos longos, decisão humana separada de correção confirmada, conclusão atômica e relatório opcional. “Já ajustei” continua provisório e não habilita conclusão. Histórico legado não ganha autoria ou prova de correção por inferência.
+- Primeiro lote proposto A0+A1: navegação e cadastro neutro com carteira/resumo. Sem código, migration, teste ou publicação nesta preparação; motores/regressões preservados. Dependências: Lovable, renderer, schema/políticas e orçamento antes de IA nova. CTA no plano, implementação depende da execução solicitada.
+
 ## Versão 0.70.2 — 2026-10-15 — acesso por login GeoBrain sem lista adicional
 
 - **Fluxo/DET:** por decisão de Gabriel, removida exigência de `CORRETOR_ALLOWED_EMAILS` da função `corretor-access`. Qualquer conta com credenciais validadas no GeoBrain pode obter identidade privada no app. Sem credenciais ou login inválido não há emissão de sessão. Não existe liberação anônima.
