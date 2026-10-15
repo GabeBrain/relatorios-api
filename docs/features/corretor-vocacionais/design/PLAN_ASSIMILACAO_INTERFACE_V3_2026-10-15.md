@@ -144,3 +144,7 @@ Em cada entrega: atualizar este plano, LIVE de regras (versão planejada/runtime
 > Execute o PLAN_ASSIMILACAO_INTERFACE_V3_2026-10-15.md. Comece por A0 e A1: sincronize preservando alterações locais, corrija a navegação de entrada/saída dos estudos, adote cadastro opcional sem alertas artificiais e integre carteira e resumo com a composição aprovada. Prepare os contratos das próximas etapas, preserve motores/decisões e os dez passes de regressão, use materiais existentes e não faça IA paga. Atualize os documentos e apresente a primeira fatia funcionando com evidências antes do push.
 
 As fases A2–A6 são continuidade planejada, não execução presumida ao autorizar apenas o primeiro lote.
+
+
+### 15/10 — retirada da landing legada solicitada por Gabriel
+Carteira única, novo envio assimilado e bancada sem alternância para lista antiga. Validação local e limites em `RETIRADA_LANDING_LEGADA_2026-10-15.md`. Push autorizado; produção a conferir. Escopo A2/A3 anterior permanece parcial.

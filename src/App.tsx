@@ -29,7 +29,7 @@ function CorretorEntry() {
   return id ? <Navigate replace to={studyHref(id, 'revisao', params.get('carteira') ?? '', params.get('version') ?? undefined)} /> : <CorretorProjectsPage />;
 }
 function CorretorLegacyProject() { const { studyId } = useParams(); const location = useLocation(); return <Navigate replace to={studyId ? legacyStudyHref(studyId, new URLSearchParams(location.search)) : portfolioHref(location.search)} />; }
-function CorretorLegacyAnalysis() { const location = useLocation(); const params = new URLSearchParams(location.search), id = params.get('study'); return id ? <Navigate replace to={studyHref(id, 'revisao', params.get('carteira') ?? '', params.get('version') ?? undefined)} /> : <CorretorV3Page />; }
+function CorretorLegacyAnalysis() { const location = useLocation(); const params = new URLSearchParams(location.search), id = params.get('study'); return id ? <Navigate replace to={studyHref(id, 'revisao', params.get('carteira') ?? '', params.get('version') ?? undefined)} /> : <Navigate replace to={`/corretor/novo${location.search}`} />; }
 const CorretorReportPage = lazy(() => import('./features/corretor/pages/CorretorReportPage.tsx'));
 const CorretorCalibrationPage = lazy(() => import('./features/corretor/pages/CorretorCalibrationPage.tsx'));
 const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/AtualizadorVgvPage.tsx'));

@@ -1,3 +1,6 @@
+## Versão 0.72.1 — 15/10/2026 — interface única
+Estado: validado localmente, publicação ainda a conferir. Removida a landing operacional antiga de Novo estudo e a alternância V1/V2/V3. Carteira canônica preserva Arquivo para estudos anteriores. Envio no design SE com Excel opcional, ligado à pré-análise. Revisão sempre na bancada; parâmetros antigos de lista não reabrem composição legada. Sem mudança em regras/decisões humanas/IA. Ver `design/RETIRADA_LANDING_LEGADA_2026-10-15.md`.
+
 # Corretor de Vocacionais — Regras Live
 
 Documento vivo para acompanhar regras determinísticas, regras de LLM, artefatos de extração e decisões operacionais do **Corretor | Estudos Vocacionais**.

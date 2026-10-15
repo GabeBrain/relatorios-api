@@ -1,3 +1,9 @@
+### 2026-10-15 — Corretor: retirada da landing legada — Gabriel / Codex
+- **Mudança:** uma única carteira; Novo estudo usa a composição SE com apresentação e Excel opcional. Retirada a segunda lista e os menus V1/V2/V3. A revisão abre sempre a bancada, inclusive com `layout=list` antigo; decisões e motores preservados. Planilhas escolhidas antes do PPTX seguem à pré-análise e são vinculadas ao estudo.
+- **Evidência:** tipagem aprovada, ESLint zero erros/um aviso anterior, build concluído; Chromium com backend interceptado verifica cinco entradas, retorno com filtro, bancada em link antigo, telas 1440/390/320 e zero escrita/IA. [Registro técnico](../features/corretor-vocacionais/design/RETIRADA_LANDING_LEGADA_2026-10-15.md).
+- **Etapas/Pendências:** composição validada localmente; push autorizado por Gabriel, deploy/aceite de produção ainda não comprovados. A2/A3 continuam parciais conforme checkpoint anterior; nenhum schema/motor alterado nesta fatia.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
 ### 2026-10-15 — Corretor: bancada real e primeira persistência A2/A3 — Gabriel / Codex
 - **Fechamento:** build final21,45s/Deno check aprovados, resultados/limitações apresentados antes do envio; commit isolado e push autorizados nesta sessão. Ativação da migration/função e aceite real não executados pelo agente.
 - **Publicação:**416488d A0/A1 enviado com autorização, fetch0/0. Continuação local acrescenta login Geobrain contextual, materiais independentes do cadastro, conjuntos de fontes/snapshot manual e bancada PDF real com observações ao lado.

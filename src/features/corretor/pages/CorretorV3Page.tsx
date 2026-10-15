@@ -13,8 +13,8 @@ import { toast } from 'sonner';
 import brainLogo from '../../../../assets/logoBrain.png';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
-  Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X, BarChart3,
-  Search, ArrowUpDown, Clock3, ChevronRight, FolderKanban, FileSpreadsheet, PlayCircle,
+  Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X,
+  FileSpreadsheet, PlayCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -27,7 +27,8 @@ import { irToFindings } from '../lib/audit/ir-rules';
 import { detectBinGap } from '../lib/audit/engine';
 import { isStaleCrossTable, isStaleReviewNote, isStaleVisionContext, isStaleWrongCity } from '../lib/v3/reconcile';
 import { VizSwitch } from '../components/audit/FindingCard';
-import LegacyV1Panel from '../components/LegacyV1Panel';
+import '../styles/projects.css';
+import { Button } from '@/components/ui/button';
 import AtaTestPanel from '../components/AtaTestPanel';
 import AtaCard from '../components/AtaCard';
 import { type AtaGateValue } from '../components/AtaGateCard';
@@ -337,51 +338,8 @@ function writeOutras(studyId: string, outras: string[]) {
   try { localStorage.setItem(outrasKey(studyId), JSON.stringify(outras)); } catch { /* sem storage: só nesta análise */ }
 }
 
-function StudyRow({ s, onOpen }: { s: StudyV3; onOpen: (id: string) => void }) {
-  const pronto = s.status === 'pronto';
-  // Sem a análise completa, "0 pendências" não é "revisar e entregar": nada foi lido.
-  const pendente = analysisPending(s);
-  const review = !pronto && !pendente && (s.pendentes ?? 0) === 0;
-  return (
-    <button
-      onClick={() => onOpen(s.id)}
-      className="group grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-border px-4 py-3.5 text-left transition-colors last:border-b-0 hover:bg-muted/45 sm:grid-cols-[minmax(0,1.65fr)_minmax(150px,.75fr)_minmax(135px,.65fr)_auto] sm:items-center"
-    >
-      <div className="flex min-w-0 items-start gap-3">
-        <span className={cn('mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', pronto ? 'bg-emerald-500/10 text-emerald-600' : review ? 'bg-primary/10 text-primary' : 'bg-amber-500/10 text-amber-600')}>
-          {pronto ? <PackageCheck className="h-4 w-4" /> : review ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
-        </span>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium" title={s.nome}>{s.nome}</p>
-          <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-            {s.cidade || 'Cidade não informada'} · v{s.lastVersion} · {s.nSlides} slides
-          </p>
-        </div>
-      </div>
-      <div className="hidden sm:block">
-        <p className={cn('text-xs font-medium', pronto ? 'text-emerald-600 dark:text-emerald-400' : review ? 'text-primary' : 'text-amber-600 dark:text-amber-400')}>
-          {pronto ? 'Pronto para o A&R' : pendente ? 'Análise pendente' : review ? 'Revisar e entregar' : `${s.pendentes ?? 0} pendência(s)`}
-        </p>
-        <p className="mt-0.5 text-[10px] text-muted-foreground">{pronto ? 'Entrega concluída' : pendente ? 'Só a triagem inicial rodou' : review ? 'Sem bloqueios abertos' : 'Correção em andamento'}</p>
-      </div>
-      <div className="hidden sm:block">
-        <p className="flex items-center gap-1 text-[11px] text-muted-foreground"><Clock3 className="h-3 w-3" /> {dateLabel(s.createdAt)}</p>
-        <p className="mt-0.5 text-[10px] text-muted-foreground">{s.custoTotal > 0 ? `IA ${formatUSD(s.custoTotal)}` : 'Sem custo de IA'}</p>
-      </div>
-      <div className="flex items-center gap-2 self-center">
-        <span className={cn('rounded-full px-2 py-1 text-[10px] font-medium sm:hidden', pronto ? 'bg-emerald-500/10 text-emerald-600' : review ? 'bg-primary/10 text-primary' : 'bg-amber-500/10 text-amber-600')}>
-          {pronto ? 'Pronto' : pendente ? 'Analisar' : review ? 'Revisar' : `${s.pendentes ?? 0} pend.`}
-        </span>
-        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
-      </div>
-    </button>
-  );
-}
-
-// ─── Página ───────────────────────────────────────────────────────────────────
-
 export default function CorretorV3Page() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const ensureAccess = useGeobrainAccess();
   const { studyId: routeStudyId } = useParams();
   const navigate = useNavigate();
@@ -391,11 +349,7 @@ export default function CorretorV3Page() {
   const [items, setItems] = useState<FindingV3[]>([]);
   const [loadingStudy, setLoadingStudy] = useState(false);
   const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
-  const [entryMode, setEntryMode] = useState<'evaluate' | 'suggestion' | null>(null);
-  const [landingTab, setLandingTab] = useState<'correction' | 'ready' | 'all'>('correction');
-  const [landingGeneration, setLandingGeneration] = useState<'v3' | 'v2' | 'v1'>('v3');
-  const [landingSearch, setLandingSearch] = useState('');
-  const [landingSort, setLandingSort] = useState<'recent' | 'pending' | 'name' | 'cost'>('recent');
+  const [entryMode, setEntryMode] = useState<'evaluate' | 'suggestion'>('evaluate');
   const [consultingSuggestion, setConsultingSuggestion] = useState<{ filename: string; content: string } | null>(null);
   const [suggestionProgress, setSuggestionProgress] = useState<SuggestionBatchProgress | null>(null);
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
@@ -410,7 +364,6 @@ export default function CorretorV3Page() {
     profile: ImageProfile;
   } | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [workspaceTab, setWorkspaceTab] = useState<'problemas' | 'slides'>('slides');
   const [confidenceFilter, setConfidenceFilter] = useState<Confidence[]>([1, 2, 3]);
   const [triaging, setTriaging] = useState(false);
   const newRef = useRef<HTMLInputElement>(null);
@@ -650,8 +603,8 @@ export default function CorretorV3Page() {
       return;
     }
     setBusy('upload');
-    // Planilhas entram na pré-análise do próprio estudo: nada herdado de outro estudo aberto antes.
-    setFonteInput(null);
+    // Fonte escolhida nesta tela de criação, antes da apresentação.
+    const initialFonte = fonteInput;
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
       const ir = await pptxToIr(bytes, file.name);
@@ -666,11 +619,12 @@ export default function CorretorV3Page() {
       toast.success('Triagem concluída (R$ 0)', {
         description: `${ir.n_slides} slides · ${findings.length} pendências determinísticas`,
       });
+      if (initialFonte) await saveStudyFonte(id, initialFonte.name, initialFonte.fonte);
       await refreshList();
       await openStudy(id);
       setBusy(null);
       // fase 1 (DET + ata) → portão de confirmação → fase 2 (paga)
-      await startPhase1AndGate({ id, version: 1 }, ir, bytes, null);
+      await startPhase1AndGate({ id, version: 1 }, ir, bytes, initialFonte?.fonte ?? null);
     } catch (err) {
       toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
       setBusy(null);
@@ -1060,76 +1014,24 @@ export default function CorretorV3Page() {
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
   if (!selected && routeStudyId) return <div className="p-6"><p role="status">{loadingList || loadingStudy ? 'Abrindo revisão…' : 'Estudo não encontrado.'}</p><Link to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>;
   if (!selected) {
-    const generationStudies = studies.filter((study) => study.generation === landingGeneration);
-    const emCorrecao = generationStudies.filter((s) => s.status !== 'pronto');
-    const prontos = generationStudies.filter((s) => s.status === 'pronto');
-    const totalPendencias = emCorrecao.reduce((total, study) => total + (study.pendentes ?? 0), 0);
-    const totalCost = generationStudies.reduce((total, study) => total + study.custoTotal, 0);
-    const search = landingSearch.trim().toLocaleLowerCase('pt-BR');
-    const visibleStudies = generationStudies
-      .filter((study) => landingTab === 'all' || (landingTab === 'ready' ? study.status === 'pronto' : study.status !== 'pronto'))
-      .filter((study) => !search || `${study.nome} ${study.cidade ?? ''}`.toLocaleLowerCase('pt-BR').includes(search))
-      .sort((left, right) => {
-        if (landingSort === 'pending') return (right.pendentes ?? 0) - (left.pendentes ?? 0);
-        if (landingSort === 'name') return left.nome.localeCompare(right.nome, 'pt-BR');
-        if (landingSort === 'cost') return right.custoTotal - left.custoTotal;
-        return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
-      });
     return (
-      <div className="min-h-screen bg-muted/25">
-        <div className="px-6 py-3"><Link className="text-sm underline" to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>
-        <header className="border-b bg-card">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><FolderKanban className="h-5 w-5" /></span>
-            <div>
-              <h1 className="text-lg font-semibold tracking-tight">Assistente de Projetos</h1>
-              <p className="text-xs text-muted-foreground">Auditoria, correção e apoio consultivo para estudos Brain.</p>
-            </div>
-          </div>
-          <a href="/corretor/calibracao" className="text-xs rounded-md px-3 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 shrink-0">
-            <BarChart3 className="w-3.5 h-3.5" /> Calibração
-          </a>
-          </div>
-        </header>
-
-        <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
+      <div className="corretor-projects cp-new-study">
+        <Link className="cp-back" to={portfolioHref(searchParams.get('carteira') ?? '')}><ArrowLeft size={16} /> Voltar aos estudos</Link>
+        <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>Novo estudo</h1><p className="cp-muted">Escolha o relatório e, se tiver, as planilhas de cálculo.</p></div></header>
+        <div className="cp-new-content">
           {/* Dropzone herói */}
           <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
           <input ref={fonteRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFonte} />
           <input ref={excelRef} type="file" accept=".xlsx,.xlsm" multiple className="hidden" onChange={handleExcelSources} />
-          {landingGeneration !== 'v1' && <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Resumo dos estudos">
-            {[
-              { label: 'Em correção', value: emCorrecao.length, hint: 'estudos ativos', tone: 'text-amber-600' },
-              { label: 'Prontos', value: prontos.length, hint: 'para o A&R', tone: 'text-emerald-600' },
-              { label: 'Pendências', value: totalPendencias, hint: 'itens em aberto', tone: 'text-foreground' },
-              { label: 'IA acumulada', value: formatUSD(totalCost), hint: `${generationStudies.length} estudos`, tone: 'text-foreground' },
-            ].map((metric) => (
-              <div key={metric.label} className="rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
-                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{metric.label}</p>
-                <p className={cn('mt-1 text-xl font-semibold tracking-tight', metric.tone)}>{metric.value}</p>
-                <p className="text-[10px] text-muted-foreground">{metric.hint}</p>
-              </div>
-            ))}
-          </section>}
-          {!entryMode ? (
-            <section className="grid gap-3 rounded-xl border border-border bg-card p-3 shadow-sm sm:grid-cols-2" aria-label="Escolha o tipo de análise">
-              <button onClick={() => setEntryMode('evaluate')} className="group flex items-center gap-3 rounded-lg bg-primary px-4 py-3.5 text-left text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15"><Upload className="h-4 w-4" /></span>
-                <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">Avaliar novo estudo</span><span className="mt-0.5 block text-[11px] text-primary-foreground/75">Auditoria completa de texto, números e estrutura.</span></span>
-                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </button>
-              <button onClick={() => setEntryMode('suggestion')} className="group flex items-center gap-3 rounded-lg border border-violet-500/20 bg-violet-500/5 px-4 py-3.5 text-left transition-colors hover:border-violet-500/40 hover:bg-violet-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600"><Sparkles className="h-4 w-4" /></span>
-                <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">Gerar sugestão de análise</span><span className="mt-0.5 block text-[11px] text-muted-foreground">Leitura consultiva e orientação ao analista.</span></span>
-                <ChevronRight className="h-4 w-4 text-violet-500 transition-transform group-hover:translate-x-0.5" />
-              </button>
-            </section>
-          ) : consultingSuggestion ? (
+          <div className="cp-actions" aria-label="Tipo de análise">
+            <Button variant={entryMode === 'evaluate' ? 'default' : 'outline'} disabled={busy !== null} onClick={() => { setConsultingSuggestion(null); setEntryMode('evaluate'); }}>Revisar estudo</Button>
+            <Button variant={entryMode === 'suggestion' ? 'default' : 'outline'} disabled={busy !== null} onClick={() => { setConsultingSuggestion(null); setEntryMode('suggestion'); }}>Sugestão de análise</Button>
+          </div>
+          {consultingSuggestion ? (
             <section className="rounded-xl border border-border bg-card p-5 space-y-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div><h2 className="text-sm font-semibold">Sugestão de Análise</h2><p className="text-xs text-muted-foreground">{consultingSuggestion.filename}</p></div>
-                <button onClick={() => { setConsultingSuggestion(null); setEntryMode(null); }} className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-muted">Nova análise</button>
+                <button onClick={() => { setConsultingSuggestion(null); setEntryMode('evaluate'); }} className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-muted">Nova análise</button>
               </div>
               <article className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-lg bg-muted/40 p-4 text-sm leading-6 text-foreground">{consultingSuggestion.content}</article>
             </section>
@@ -1146,7 +1048,7 @@ export default function CorretorV3Page() {
                 if (f) void (entryMode === 'suggestion' ? ingestSuggestion(f) : ingestNew(f));
               }}
               disabled={busy !== null}
-              className={cn('w-full rounded-xl border-2 border-dashed px-6 py-10 flex flex-col items-center justify-center gap-3 text-center transition-colors', dragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 bg-card', busy !== null && 'opacity-70 cursor-wait')}
+              className={cn('cp-presentation w-full rounded-xl border-2 border-dashed px-6 py-10 flex flex-col items-center justify-center gap-3 text-center transition-colors', dragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 bg-card', busy !== null && 'opacity-70 cursor-wait')}
             >
               {busy === 'upload' ? (
                 <div className="relative h-10 w-28" aria-hidden="true">
@@ -1164,7 +1066,7 @@ export default function CorretorV3Page() {
                           ? 'Compilando a sugestão final…'
                           : 'Gerando sugestão…')
                       : 'Lendo o estudo…')
-                    : 'Arraste o .pptx aqui ou clique para escolher'}
+                    : 'Escolher apresentação PowerPoint (.pptx)'}
                 </p>
                 {entryMode === 'suggestion' && suggestionProgress ? (
                   <>
@@ -1175,95 +1077,16 @@ export default function CorretorV3Page() {
                   <p className="text-xs text-muted-foreground mt-0.5">{entryMode === 'suggestion' ? 'A IA usa os dados extraídos para estruturar avaliação, recomendação e orientações ao analista.' : <>Primeiro uma pré-análise gratuita; você confirma a cidade e as planilhas antes de rodar a análise completa.</>}</p>
                 )}
               </div>
-              <span className="text-xs text-primary hover:underline" onClick={(event) => { event.stopPropagation(); setEntryMode(null); }}>Voltar às opções</span>
+
             </button>
             </div>
           )}
 
-          {loadingList ? (
-            <div className="flex items-center justify-center py-12 text-muted-foreground gap-2 text-sm">
-              <Loader2 className="w-4 h-4 animate-spin" /> Carregando estudos…
-            </div>
-          ) : (
-            <>
-              <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                <div className="flex border-b border-border bg-muted/20 p-1.5">
-                  {([['v3', 'V3 · Atual'], ['v2', 'V2 · Testes anteriores'], ['v1', 'V1 · Legado']] as const).map(([value, label]) => (
-                    <button key={value} type="button" onClick={() => setLandingGeneration(value)}
-                      className={cn('rounded-md px-3 py-1.5 text-xs font-medium transition-colors', landingGeneration === value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                {landingGeneration === 'v1' ? (
-                  <div className="p-4"><LegacyV1Panel /></div>
-                ) : <>
-                <div className="border-b border-border px-4 pt-4">
-                  <div className="flex flex-wrap items-end justify-between gap-3">
-                    <div>
-                      <h2 className="text-sm font-semibold">Estudos</h2>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">Retome correções, revise entregas e localize estudos anteriores.</p>
-                    </div>
-                    <span className="pb-1 text-[11px] text-muted-foreground">{visibleStudies.length} resultado(s)</span>
-                  </div>
-                  <div className="mt-4 flex gap-5" role="tablist" aria-label="Situação dos estudos">
-                    {([
-                      ['correction', 'Em correção', emCorrecao.length],
-                      ['ready', 'Prontos', prontos.length],
-                      ['all', 'Todos', generationStudies.length],
-                    ] as const).map(([value, label, count]) => (
-                      <button
-                        key={value} type="button" role="tab" aria-selected={landingTab === value}
-                        onClick={() => setLandingTab(value)}
-                        className={cn('border-b-2 pb-2 text-xs font-medium transition-colors', landingTab === value ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground')}
-                      >
-                        {label} <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[9px]">{count}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2 border-b border-border bg-muted/20 p-3 sm:flex-row sm:items-center">
-                  <label className="relative min-w-0 flex-1">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      value={landingSearch} onChange={(event) => setLandingSearch(event.target.value)}
-                      placeholder="Buscar por estudo ou cidade…"
-                      className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-3 text-xs outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-                    />
-                  </label>
-                  <label className="relative flex items-center">
-                    <ArrowUpDown className="pointer-events-none absolute left-3 h-3.5 w-3.5 text-muted-foreground" />
-                    <select
-                      value={landingSort} onChange={(event) => setLandingSort(event.target.value as typeof landingSort)}
-                      className="h-9 appearance-none rounded-md border border-border bg-background pl-9 pr-8 text-xs outline-none focus:border-primary"
-                      aria-label="Ordenar estudos"
-                    >
-                      <option value="recent">Mais recentes</option>
-                      <option value="pending">Mais pendências</option>
-                      <option value="name">Nome</option>
-                      <option value="cost">Maior custo de IA</option>
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                  </label>
-                </div>
-                {visibleStudies.length > 0 ? (
-                  <div>
-                    <div className="hidden grid-cols-[minmax(0,1.65fr)_minmax(150px,.75fr)_minmax(135px,.65fr)_auto] gap-3 border-b border-border bg-muted/10 px-4 py-2 text-[9px] font-medium uppercase tracking-[0.12em] text-muted-foreground sm:grid">
-                      <span>Estudo</span><span>Situação</span><span>Criado em</span><span className="w-4" />
-                    </div>
-                    {visibleStudies.map((study) => <StudyRow key={study.id} s={study} onOpen={openStudy} />)}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center px-6 py-12 text-center">
-                    <Search className="h-6 w-6 text-muted-foreground/50" />
-                    <p className="mt-3 text-sm font-medium">Nenhum estudo encontrado</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Ajuste a busca ou selecione outra situação.</p>
-                  </div>
-                )}
-                </>}
-              </section>
-            </>
-          )}
+          {entryMode === 'evaluate' && <section className="cp-source-upload" aria-label="Planilhas opcionais">
+            <FileSpreadsheet size={28} aria-hidden="true" /><div><h2>Planilhas de cálculo <span className="cp-muted">Opcional</span></h2><p className="cp-muted">Inclua os arquivos Excel para cruzar os números do relatório com a base de cálculo.</p>
+            {fonteInput && <p role="status">{fonteInput.name}</p>}
+            <Button variant="outline" disabled={busy !== null || sourceProgress !== null} onClick={() => excelRef.current?.click()}>{sourceProgress ? `Lendo planilhas ${sourceProgress.done}/${sourceProgress.total}` : fonteInput ? 'Trocar planilhas' : 'Escolher planilhas Excel'}</Button></div>
+          </section>}
         </div>
       </div>
     );
@@ -1272,7 +1095,7 @@ export default function CorretorV3Page() {
   // ─── WORKSPACE ───────────────────────────────────────────────────────────────
   return (
     <div
-      className="min-h-screen bg-background flex flex-col relative"
+      className={cn('min-h-screen bg-background flex flex-col relative', !routeStudyId && 'corretor-projects cp-review-legacy')}
       onDragEnter={(e) => { e.preventDefault(); if (busy === null && !analysis?.running && selected.status !== 'pronto') setDragging(true); }}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }}
       onDragLeave={(e) => {
@@ -1421,14 +1244,7 @@ export default function CorretorV3Page() {
                 );
               })}
             </div>
-            {searchParams.get('layout')==='list' && <div className="inline-flex rounded-md border border-border p-0.5" role="group" aria-label="Organizar lista">
-              {([['slides', 'Por slide'], ['problemas', 'Por tipo de problema']] as const).map(([tab, label]) => (
-                <button key={tab} type="button" onClick={() => setWorkspaceTab(tab)}
-                  className={cn('rounded px-2.5 py-1', workspaceTab === tab ? 'bg-foreground text-background font-medium' : 'text-muted-foreground hover:text-foreground')}>
-                  {label}
-                </button>
-              ))}
-            </div>}
+
           </div>
         )}
       </div>
@@ -1480,40 +1296,7 @@ export default function CorretorV3Page() {
                 </p>
               )}
               {!pending && !analysis?.running && <>
-                <div className="cp-actions"><button className="cp-inline" aria-pressed={searchParams.get('layout')!=='list'} onClick={()=>setSearchParams(p=>{p.delete('layout');return p;})}>Bancada</button><button className="cp-inline" aria-pressed={searchParams.get('layout')==='list'} onClick={()=>setSearchParams(p=>{p.set('layout','list');return p;})}>Lista de apontamentos</button></div>
-                {searchParams.get('layout')!=='list' && <Suspense fallback={<p role="status">Preparando bancada…</p>}><ReviewBench key={selected.id} study={selected} items={reviewedItems.filter(i=>(i.resolvidoNaVersao===null||i.status==='pendente')&&confidenceFilter.includes(confidenceOf(i.finding,i.origem)))} renderFinding={item=><V3FindingCard item={item} onStatus={status=>void handleStatus(item.ruleId,status)} onVerdict={verdict=>void handleVerdict(item.ruleId,verdict)}/>} /></Suspense>}
-                {searchParams.get('layout')==='list' && <>
-                {selected.analise && <AcertosCard report={selected.analise} temFonte={Boolean(fonteInput) || Boolean(selected.temFonte)} />}
-                {(wl.completude.length > 0 || wl.comunicacao.length > 0 || selected.ata) && (
-                  <section className="space-y-3">
-                    <WlHead title="Estrutura e cobertura" count={wl.completude.length} />
-                    {selected.ata && <AtaCard ata={selected.ata} />}
-                    {!selected.ata && debugMode && selected.status !== 'pronto' && <AtaTestPanel studyId={selected.id} />}
-                    {wl.completude.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem))).map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
-                    {wl.comunicacao.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}
-                  </section>
-                )}
-
-                {workspaceTab === 'problemas' && <section className="space-y-3">
-                  <WlHead title="Por tipo de problema" count={wl.grouped.reduce((total, [, group]) => total + group.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem))).length, 0)} />
-                  {wl.grouped
-                    .map(([type, group]) => [type, group.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem)))] as const)
-                    .filter(([, group]) => group.length > 0)
-                    .sort(([, a], [, b]) => confidenceOf(a[0].finding, a[0].origem) - confidenceOf(b[0].finding, b[0].origem) || b.length - a.length)
-                    .map(([type, group]) => <ProblemGroup key={type} type={type as ErrorType} items={[...group]} onStatus={handleStatus} onVerdict={handleVerdict} onGroupStatus={handleGroupStatus} />)}
-                </section>}
-
-                {workspaceTab === 'slides' && <section className="space-y-3">
-                  <DeckRuler slides={selected.nSlides} items={items} onSlide={(slide) => requestAnimationFrame(() => document.getElementById(`slide-${slide}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))} />
-                  <WlHead title="Por slide" count={wl.slides.reduce((total, [, findings]) => total + findings.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem))).length, 0)} />
-                  {wl.slides.map(([n, findings]) => {
-                    const visible = findings.filter((item) => confidenceFilter.includes(confidenceOf(item.finding, item.origem)));
-                    if (!visible.length) return null;
-                    return <div id={`slide-${n}`} key={n} className="space-y-2 scroll-mt-32"><p className="text-xs font-semibold text-muted-foreground">Slide {n}</p>{visible.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => handleStatus(item.ruleId, status)} onVerdict={(verdict) => handleVerdict(item.ruleId, verdict)} />)}</div>;
-                  })}
-                </section>}
-              </>}
-
+                <Suspense fallback={<p role="status">Preparando bancada…</p>}><ReviewBench key={selected.id} study={selected} items={reviewedItems.filter(i=>(i.resolvidoNaVersao===null||i.status==='pendente')&&confidenceFilter.includes(confidenceOf(i.finding,i.origem)))} renderFinding={item=><V3FindingCard item={item} onStatus={status=>void handleStatus(item.ruleId,status)} onVerdict={verdict=>void handleVerdict(item.ruleId,verdict)}/>} /></Suspense>
               </>}
               {/* Card de regras */}
               <section className="pt-4">
