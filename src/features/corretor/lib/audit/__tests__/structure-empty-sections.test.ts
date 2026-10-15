@@ -4,13 +4,13 @@ import type { Ir } from '../ir';
 
 const ir = (slides: Ir['slides']) => ({ slides } as Ir);
 const summary = (n: number) => ({
-  n, titulo: 'Conteúdo', secao_canonica: 'SUMARIO', textos: ['01 - Apresentação', '02 - Dados da cidade', '03 - Mercado', '04 - Avaliação da Consultoria', '05 - Recomendação', '06 - Fichas técnicas'], tabelas: [], n_imagens: 0,
+  n, titulo: 'Conteúdo', secao_canonica: 'SUMARIO', textos: ['01 - Apresentação', '02 - Dados da cidade', '03 - Mercado', '04 - Avaliação da Consultoria', '05 - Recomendação', '06 - Fichas técnicas'], tabelas: [], n_imagens: 0, fontes: [], notas: [], notas_edicao: [], notas_revisao: [], graficos: [],
 });
 
 describe('seções vazias indicadas por sumários consecutivos', () => {
   it('reconhece sociodemografia pelos slides de métricas sem depender do nome do capítulo', () => {
     const indexes = [73, 74, 75].map((n) => ({ ...summary(n), textos: summary(n).textos.map((text) => text.replace('Dados da cidade', 'Sociodemografia')) }));
-    const content = { n: 23, titulo: 'População e domicílios', secao_canonica: 'SOCIO', textos: ['População por renda'], tabelas: [], n_imagens: 0 };
+    const content = { n: 23, titulo: 'População e domicílios', secao_canonica: 'SOCIO', textos: ['População por renda'], tabelas: [], n_imagens: 0, fontes: [], notas: [], notas_edicao: [], notas_revisao: [], graficos: [] };
     const finding = structureChecklistFinding(ir([content, ...indexes]));
     expect(finding.detail).not.toContain('Seção 02 (Sociodemografia)');
     expect(finding.detail).toContain('Seção 04 (Avaliação da Consultoria)');
@@ -21,9 +21,9 @@ describe('seções vazias indicadas por sumários consecutivos', () => {
   it('nomeia as seções sem conteúdo e deixa slide final vazio como conferir', () => {
     const finding = structureChecklistFinding(ir([
       summary(73), summary(74), summary(75),
-      { n: 76, titulo: 'Mercado imobiliário', secao_canonica: 'MERCADO', textos: ['Mercado apresenta empreendimentos'], tabelas: [], n_imagens: 0 },
-      { n: 77, titulo: 'Fichas técnicas', secao_canonica: 'MERCADO', textos: ['Fichas técnicas dos concorrentes'], tabelas: [], n_imagens: 0 },
-      { n: 78, titulo: '', secao_canonica: null, textos: [], tabelas: [], n_imagens: 0 },
+      { n: 76, titulo: 'Mercado imobiliário', secao_canonica: 'MERCADO', textos: ['Mercado apresenta empreendimentos'], tabelas: [], n_imagens: 0, fontes: [], notas: [], notas_edicao: [], notas_revisao: [], graficos: [] },
+      { n: 77, titulo: 'Fichas técnicas', secao_canonica: 'MERCADO', textos: ['Fichas técnicas dos concorrentes'], tabelas: [], n_imagens: 0, fontes: [], notas: [], notas_edicao: [], notas_revisao: [], graficos: [] },
+      { n: 78, titulo: '', secao_canonica: null, textos: [], tabelas: [], n_imagens: 0, fontes: [], notas: [], notas_edicao: [], notas_revisao: [], graficos: [] },
     ]));
     expect(finding.detail).toContain('Seção 04 (Avaliação da Consultoria)');
     expect(finding.detail).toContain('Seção 05 (Recomendação)');
@@ -34,7 +34,7 @@ describe('seções vazias indicadas por sumários consecutivos', () => {
   it('não nomeia seção como vazia quando há conteúdo correspondente', () => {
     const finding = structureChecklistFinding(ir([
       summary(73), summary(74), summary(75),
-      { n: 76, titulo: 'Avaliação da Consultoria', secao_canonica: 'MERCADO', textos: ['Avaliação da Consultoria e recomendação'], tabelas: [], n_imagens: 0 },
+      { n: 76, titulo: 'Avaliação da Consultoria', secao_canonica: 'MERCADO', textos: ['Avaliação da Consultoria e recomendação'], tabelas: [], n_imagens: 0, fontes: [], notas: [], notas_edicao: [], notas_revisao: [], graficos: [] },
     ]));
     expect(finding.detail).not.toContain('Seção 04 (Avaliação da Consultoria)');
   });
