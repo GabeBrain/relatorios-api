@@ -17,6 +17,8 @@
 
 ## Montagem local — 15/10/2026
 
+Mapeamento posterior autorizado: [85 slides e fontes](../../features/relatorios-institucionais/sp/MAPA_SLIDES.md), incluindo imagens institucionais, recortes MCMV, janelas históricas, INCC/IVV e mapas. Próximo bloco delimitado: 23/37/47 por tipologia; padrão exige contrato sete→quatro categorias. Somente leitura local/PPTX e diagnóstico nesta rodada, sem novos requests ao GeoBrain, relatório gerado ou publicação. Retomada nas férias permanece documental, sem agendamento.
+
 Correção autorizada após revisão de Lucas: manter formatação do PPTX. Capa e quatro páginas usam artes originais, dados dinâmicos e escala/ampliação 16:9. Conferidas capturas das cinco páginas e ampliação no Edge com replay e zero chamadas reais. Comparações históricas, demais slides e exportação continuam pendentes. Retomada: revisar estas páginas com Lucas; depois delimitar cobertura granular e conteúdo histórico. Pausa desde 19/10 mantida, sem agenda automática. Merge `dbb7330` autorizado, preservando `75ef905` e histórico local; sem push.
 
 Lucas enviou capturas da consulta autenticada com 24.351 lançamentos, 26.824 vendas e estoque 124.706; balanços julho/agosto zerados. Acrescentadas três páginas de prévia (capa, indicadores, evolução mensal) sem coleta adicional ou exportação. Testes SP: 43 aprovados; tipagem e lint aprovados. Próximo: revisão visual com Lucas, depois contrato de cobertura granular. Setembro continua condicionado ao fechamento real; previsão humana 22–25/10 não substitui `data.period`. Férias desde 19/10, sem trabalho/retorno presumidos. Sem push ou Monday; Secovi/FIERGS e Corretor preservados.

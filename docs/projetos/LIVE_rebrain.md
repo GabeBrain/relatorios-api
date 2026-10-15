@@ -1,3 +1,9 @@
+### 2026-10-15 — Relatórios institucionais: mapa de conteúdo dos 85 slides SP — Codex, autorizado por Lucas
+- **Desenvolvimento:** [mapa completo](../features/relatorios-institucionais/sp/MAPA_SLIDES.md) com conteúdo, fontes candidatas, disponibilidade e sequência de montagem. OOXML/caches conferidos, todos os slides renderizados em leitura e inspecionados em pranchas; nenhuma mudança de produto nesta rodada.
+- **Etapas/Pendências:** próximo bloco 23/37/47 por tipologia; conversão sete padrões→quatro segmentos, MCMV/INCC/IVV, séries históricas e cobertura granular continuam por validar. Consulta pessoal comprovada pelas capturas de Lucas, sem credencial acessada pelo agente. Cinco páginas atuais não equivalem a cinco slides completos/homologados.
+- **Limites:** sem nova coleta/API, geração real, push ou Monday. Base `17f9d0b`, Corretor/Quanti e Secovi/FIERGS preservados; férias19/10 sem trabalho presumido, retomada em PLAN/STATUS.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 2026-10-15 — Relatórios institucionais: prévia com artes do PowerPoint original — Codex, autorizado por Lucas
 - **Desenvolvimento:** substituído layout genérico por capa e quatro páginas com artes dos slides 1/13/18/32/46 do modelo SP. Escala 16:9, Tahoma, cores e posições da referência; Dialog existente amplia o canvas, navegação não consulta API. Séries julho/agosto mensais, sem variações antigas ou setembro presumido.
 - **Evidência:** fonte renderizada em leitura no PowerPoint, original preservado; capturas das cinco páginas e ampliação revisadas no Edge. Onze cenários locais e 43 testes SP aprovados, zero chamadas de mercado e zero erros de página. Tipagem/lint/build aprovados; avisos de bundle preexistentes mantidos.

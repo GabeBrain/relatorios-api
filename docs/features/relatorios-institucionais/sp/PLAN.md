@@ -1,10 +1,12 @@
 # SP capital — primeiro mapeamento
 
+**Próximo conteúdo — 15/10:** [mapa dos 85 slides](MAPA_SLIDES.md) concluído por leitura OOXML e inspeção visual do modelo completo. Próximo bloco: lançamentos/vendas/oferta por tipologia (23/37/47), com layout original e contrato de dados a conferir. Padrões 24/38/48 dependem da conversão dos sete grupos da API para quatro segmentos do PPT; não presumir Econômico=MCMV. Históricos, INCC, IVV e mapas têm fontes e limites explicitados no mapa. Nenhuma nova coleta nesta rodada.
+
 **Correção visual 15/10:** prévia substitui os cards genéricos por capa e quatro páginas com artes do PPTX original, escala 16:9 e ampliação. Séries mensais julho/agosto, sem comparativos históricos presumidos. Revisão local no Edge concluída; exportação/PPTX editável e demais slides permanecem pendentes. Merge remoto `dbb7330` autorizado por Lucas preservou `75ef905`, sem push.
 
 **Avanço 15/10 — montagem local:** Lucas confirmou a consulta autenticada por capturas: julho/agosto e balanços com diferença zero. Acrescentada prévia navegável com capa, indicadores e evolução mensal, alimentada pelo resultado da consulta, sem novas chamadas ou exportação. Trimestre permanece parcial; contagem de empreendimentos, cobertura granular, revisão editorial e setembro pendentes. Próximo: revisar as páginas com Lucas e delimitar a cobertura granular. Férias desde 19/10 mantidas, sem execução presumida durante a ausência.
 
-15/10/2026 · Lucas/Codex · Estrutura e conferência municipal curta implementadas localmente. Testes com respostas reais de julho/agosto fornecidas por Lucas; execução autenticada do novo botão ainda não observada. Sem push.
+15/10/2026 · Lucas/Codex · Estrutura e conferência municipal curta implementadas localmente. Lucas apresentou capturas da consulta autenticada com julho/agosto e balanços zerados; testes do agente continuam com replay, sem acesso ao token pessoal. Sem push.
 
 **Entrega pretendida:** núcleo vertical do **3T2026 (01/07–30/09)**. O PPTX do **2T2026** é referência histórica, não fonte dos números do próximo trimestre.
 
@@ -23,7 +25,7 @@ Slides identificados pela ordem real do PPTX, não por blocos do texto extraído
 
 **Contrato desta fatia:** histórico limitado ao menor entre o fim selecionado e `period` da raiz, conforme orientação do dev da API transmitida por Lucas. Fechamentos ausentes/divergentes, cobertura insuficiente, falta de observações e deltas bloqueiam indicadores. Contagens por ID, vendas mensais com sinal e estoque histórico no fechamento têm testes sintéticos; o adaptador/API real e o método completo SP continuam por comprovar. Políticas Secovi/FIERGS preservadas, sem renomear suas entidades.
 
-**Próximo portão:** executar o novo botão com login pessoal no ambiente autorizado e confrontar seu resultado com o replay. Depois delimitar a coleta granular para os quatro indicadores e fechamento consistente na cidade; não iniciar varredura longa automaticamente. Reconciliação 2T com gabarito da mesma fotografia, recortes MCMV, INCC/preços, IVV, narrativa, gráficos/paginação e exportação seguem abertos. O agente não teve navegador pessoal/credencial para executar a consulta real; o teste usa respostas recebidas via mocks, sem alegação de runtime autenticado validado.
+**Próximo portão:** implementar o bloco por tipologia conforme o mapa, com leitura curta delimitada e reconciliação dos totais. Consulta pessoal atual já foi apresentada por Lucas em capturas; cobertura granular e fechamento consistente da cidade continuam pendentes. Não iniciar varredura longa automaticamente. Reconciliação 2T com gabarito da mesma fotografia, recortes MCMV, INCC/preços, IVV, narrativa, gráficos completos e exportação seguem abertos. O agente não acessou navegador pessoal/credencial; não confundir replay com homologação autenticada integral.
 
 **Previsão operacional informada por Lucas:** operação fecha dia 20 do mês seguinte e analista leva mais 2–3 dias; estimativa de dados de setembro na API em 22–25/10. Informação humana, não SLA ou data de liberação automática. O `period` observado na raiz continua sendo o limite efetivo.
 
