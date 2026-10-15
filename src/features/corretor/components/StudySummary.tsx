@@ -14,7 +14,7 @@ export default function StudySummary({ study, context }: { study: StudyV3; conte
   }, [study.id, retry]);
   const summary = summarizeStudy(items), pre = analysisPending(study);
   return <div className="cp-summary">
-    <section className="cp-summary-lead"><div><p className="cp-eyebrow">Resumo da análise</p><h2>{pre ? 'Pré-análise disponível' : study.status === 'pronto' ? 'Entrega registrada' : 'Continue a revisão'}</h2><p className="cp-muted">{study.nSlides} slides · registro de versão {study.lastVersion}</p></div>
+    <section className="cp-summary-lead"><div><p className="cp-eyebrow">Resumo da análise</p><h2>{pre ? 'Análise completa pendente' : study.status === 'pronto' ? 'Entrega registrada' : 'Continue a revisão'}</h2><p className="cp-muted">{study.nSlides} slides · registro de versão {study.lastVersion}</p></div>
       <Button asChild><Link to={studyHref(study.id, 'revisao', context)}>{pre ? 'Continuar análise' : 'Revisar pendências'}</Link></Button>
     </section>
     {loading ? <p role="status">Carregando apontamentos…</p> : error ? <p role="alert">Não foi possível carregar os apontamentos. <Button variant="outline" onClick={() => setRetry(n => n + 1)}>Tentar novamente</Button></p> : <>

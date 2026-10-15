@@ -113,26 +113,23 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
   const confidenceMeta = comunicacao
     ? { label: 'Comunicação', icon: '💬', className: 'border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-300' }
     : CONFIDENCE_META[confidence];
-  const [evidenceOpen, setEvidenceOpen] = useState(confidence === 1 || comunicacao);
 
   return (
     <div className={cn(
       // Borda neutra: o nível já está no selo. A barra lateral colorida saiu (30/set).
-      'rounded-lg border border-border bg-card transition-opacity',
+      'cf-card',
       item.resolvidoNaVersao && 'animate-in fade-in zoom-in-95 duration-300',
       done && 'opacity-60',
     )}>
-      <div className="flex items-start gap-3 px-4 py-3">
+      <div className="cf-body">
         {item.status === 'corrigido' && (
           <div className="mt-0.5 shrink-0"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
-            <span className={cn('text-[10px] rounded px-1.5 py-0.5 border font-medium', confidenceMeta.className)}>{confidenceMeta.icon} {confidenceMeta.label}</span>
-            <span className="text-sm font-medium">{f.title}</span>
-            {f.slideRef.split('×').map((ref) => <span key={ref} className="text-[10px] font-mono rounded border border-border px-1 text-muted-foreground">{ref.trim()}</span>)}
-          </div>
-          <div className="flex flex-wrap items-center gap-1.5 mb-1">
+          <div className="cf-title"><h3>{f.title}</h3></div>
+          <div className="cf-tags">
+            <span className={cn('border font-medium', confidenceMeta.className)}>{confidenceMeta.label}</span>
+            {f.slideRef.split('×').map((ref) => <span key={ref} className="border border-border text-muted-foreground">{ref.trim()}</span>)}
             <span className="text-[10px] rounded px-1.5 py-0.5 border bg-muted/50 text-muted-foreground">
               {errorLabel(f.type as ErrorType)}
             </span>
@@ -153,7 +150,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
               <span className="text-[10px] text-muted-foreground">resolvido na v{item.resolvidoNaVersao}</span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">{f.detail}</p>
+          <p className="cf-detail">{f.detail}</p>
           {f.gabarito && (
             <p className="mt-1.5 text-[11px] text-muted-foreground flex items-start gap-1 italic">
               <Quote className="w-3 h-3 mt-0.5 shrink-0" /> Nota do analista: “{f.gabarito}”
@@ -161,12 +158,9 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
           )}
         </div>
       </div>
-      {(f.evidenceImage || f.viz) && !done && (
+      {(f.evidenceImage || f.viz) && (
         <div className="px-4 pb-2">
-          <button onClick={() => setEvidenceOpen((open) => !open)} className="text-[11px] text-primary hover:underline mb-2">
-            {evidenceOpen ? 'Ocultar' : 'Ver'} {comunicacao ? 'comentários' : 'evidência'}
-          </button>
-          {evidenceOpen && <div className="space-y-2">
+          <div className="space-y-2">
           {f.evidenceImage && <>
           <a href={f.evidenceImage} target="_blank" rel="noreferrer" className="block">
             <img
@@ -181,11 +175,11 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
           </p>
           </>}
           {f.viz && <VizSwitch finding={f} />}
-          </div>}
+          </div>
         </div>
       )}
-      <div className="flex items-center gap-1.5 border-t border-border px-4 py-2">
-        <span className="text-[10px] text-muted-foreground mr-1">Marcar:</span>
+      <div className="cf-actions">
+        <span className="sr-only">Decisão:</span>
         {(['corrigido', 'ignorado', 'pendente'] as FindingStatus[]).map((s) => (
           <button
             key={s}
@@ -1194,7 +1188,7 @@ export default function CorretorV3Page() {
             <p className="text-muted-foreground">Pré-análise: confirme a cidade e as planilhas no cartão abaixo para rodar a análise.</p>
           ) : pending ? (
             <>
-              <p className="text-foreground"><strong>A análise completa ainda não rodou.</strong> <span className="text-muted-foreground">Nada abaixo representa o estudo.</span></p>
+              <p className="text-foreground"><strong>A análise completa ainda não rodou.</strong> <span className="text-muted-foreground">O envio foi guardado, mas a análise completa não foi concluída.</span></p>
               <button
                 type="button"
                 disabled={busy !== null}
@@ -1203,7 +1197,7 @@ export default function CorretorV3Page() {
                 title="Usa o PPTX guardado neste navegador; se não houver, pede o arquivo uma vez"
               >
                 {busy === 'upload' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlayCircle className="w-3.5 h-3.5" />}
-                Continuar para a pré-análise
+                Retomar análise completa
               </button>
             </>
           ) : (
@@ -1331,7 +1325,6 @@ export default function CorretorV3Page() {
 // ─── Card expansivo com todas as regras ───────────────────────────────────
 
 function RulesCard() {
-  const [open, setOpen] = useState(false);
 
   const detRules = Object.entries(ERROR_CATALOG).filter(
     ([_, meta]) => meta.motor === 'DET'
@@ -1364,24 +1357,10 @@ function RulesCard() {
   );
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
+    <section aria-label="Regras aplicadas">
       <div className="rounded-lg border bg-card p-4">
-        <CollapsibleTrigger asChild>
-          <button className="w-full flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-sm font-semibold">Regras aplicadas</h3>
-              <span className="text-[10px] text-muted-foreground">
-                {detRules.length} determinísticas · {iaRules.length} de IA
-              </span>
-            </div>
-            <ChevronDown
-              className={cn('w-4 h-4 text-muted-foreground transition-transform', open && 'rotate-180')}
-            />
-          </button>
-        </CollapsibleTrigger>
-
-        <CollapsibleContent className="mt-4 space-y-4">
+        <h3 className="text-sm font-semibold">Catálogo de verificações</h3><p className="cp-muted">Verificações disponíveis no motor; a cobertura deste estudo depende dos materiais e da execução registrada.</p>
+        <div className="mt-4 space-y-4">
           {/* Regras Determinísticas */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -1407,9 +1386,9 @@ function RulesCard() {
               ))}
             </div>
           </div>
-        </CollapsibleContent>
+        </div>
       </div>
-    </Collapsible>
+    </section>
   );
 }
 
