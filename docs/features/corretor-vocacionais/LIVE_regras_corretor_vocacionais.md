@@ -16,6 +16,13 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.70.2 — 2026-10-15 — acesso por login GeoBrain sem lista adicional
+
+- **Fluxo/DET:** por decisão de Gabriel, removida exigência de `CORRETOR_ALLOWED_EMAILS` da função `corretor-access`. Qualquer conta com credenciais validadas no GeoBrain pode obter identidade privada no app. Sem credenciais ou login inválido não há emissão de sessão. Não existe liberação anônima.
+- **Arquivos:** proprietário/membros, permissão assinada com validade e políticas privadas preservados. Não muda autenticação das APIs, schema, motores ou decisões humanas. Nenhuma migration nova necessária; secret antigo, se configurado, deixa de ser consultado.
+- **Evidência local:**17 testes focados aprovados (núcleo Edge, cliente de sessão, AuthBlock e materiais): conta fora da antiga lista aceita após login upstream, credenciais ausentes/inválidas não emitem sessão e identidade divergente é rejeitada. Políticas reais não foram retestadas nesta alteração sem schema.
+- **Publicação/aceite:** requer republicar `corretor-access` após sincronizar este código. Registro de deploy Lovable `8ae0338` anterior não prova execução desta mudança. Validar login e isolamento com identidades reais segue pendente; sem IA paga.
+
 ## Versão 0.70.1 — 2026-10-15 — identidade e navegação (RUNTIME local / ativação pendente)
 
 - **Fechamento para push autorizado em 15/10:** Gabriel informou migration complementar aplicada; políticas reais não verificadas. Três commits Lovable sincronizados com autorização por fast-forward, sem conflito. Validação final desbloqueada: build/tipagem,276 testes/2 pulados e Chromium local aprovados, recuperação apenas sintética. Registro histórico do bloqueio abaixo preservado. Próximo publicar `corretor-access`/frontend e verificar original real/isolamento. Nenhuma IA paga.

@@ -1,5 +1,9 @@
 # Continuidade — acesso e materiais — 15/10/2026
 
+## Atualização de decisão — acesso geral autenticado
+
+Gabriel dispensou a lista de emails: v0.70.2 remove `CORRETOR_ALLOWED_EMAILS` do código. Para ativar, sincronizar e republicar `corretor-access`, sem informar esse secret e sem migration nova. Login GeoBrain válido permanece obrigatório; políticas privadas de cada projeto continuam. Esta decisão substitui a exigência de lista nos passos históricos abaixo. Validar produção com uma conta real e isolamento de outro usuário permanece necessário; sem IA paga.
+
 ## Estado verificável
 
 Gabriel autorizou o push após informar a aplicação da migration inicial. `08d70dd` e `eb0faa1` foram enviados a origin/main; fetch posterior 0/0. Consulta remota encontrou as três tabelas privadas e recusou o papel público (401/42501). Isso não substitui teste das políticas com identidades reais. O frontend público consultado ainda não apresentou o chunk da carteira; Git não comprova deploy.

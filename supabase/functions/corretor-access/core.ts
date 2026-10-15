@@ -1,5 +1,4 @@
 export interface AccessDependencies {
-  allowedEmails: string[];
   geoLogin(email: string, password: string): Promise<string | null>;
   exchange(email: string): Promise<{ access_token: string; refresh_token: string; userEmail: string } | null>;
 }
@@ -10,8 +9,7 @@ export async function authorizeCorretor(body: unknown, deps: AccessDependencies)
   if (typeof email !== 'string' || typeof password !== 'string' || !password || password.length > 1000) return { status: 400, data: { error: 'Informe e-mail e senha.' } };
   const identity = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity) || identity.length > 254) return { status: 400, data: { error: 'E-mail inválido.' } };
-  // Lista exata administrada no servidor: não liberar todos os clientes da API GeoBrain.
-  if (!deps.allowedEmails.includes(identity)) return { status: 403, data: { error: 'Acesso aos projetos ainda não habilitado para esta conta.' } };
+  // Qualquer conta autenticada pelo GeoBrain pode entrar; acesso aos arquivos segue as políticas por projeto.
   const token = await deps.geoLogin(identity, password);
   if (!token) return { status: 401, data: { error: 'E-mail ou senha não autorizados pelo GeoBrain.' } };
   const session = await deps.exchange(identity);
