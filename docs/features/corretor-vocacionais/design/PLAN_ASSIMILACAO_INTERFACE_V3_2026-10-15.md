@@ -154,3 +154,11 @@ Carteira única, novo envio assimilado e bancada sem alternância para lista ant
 Mapa sem expander/células preenchidas, evidências abertas e cartões SE; sem prévia vazia. Inventário real17V3,13 com relatório/4 incompletos, não processados. Evidência e limites em REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md. A4 ajuste local; A2/A3 precisam de checkpoint durável de execução/erro/custo por versão. Gate de custo não removido, nenhum lote pago autorizado por inferência.
 
 15/10 — complemento pré-push: aviso persistente de avaliação incompleta em resumo/revisão, confirmando cidade/UF e escolha das planilhas para iniciar. Componente compartilhado; estado preparado localmente, sem push, critérios/motores preservados.
+
+
+### 15/10 — replanejamento por teste humano após publicação
+O teste de Gabriel rejeitou a preparação que muda de tela ao selecionar PPTX, aviso com filete amarelo, duplicação da imagem, inglês, falta de página para achados textuais e largura da triagem. O plano complementar [fluxo contínuo e revisão](PLAN_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md) é a referência vigente para corrigir essas partes de A2/A3/A4. Não usar validação local anterior como aceite de usabilidade. F0 diagnóstico/protótipo feito; F1–F6 planejadas. Sem novo código de produto, IA paga ou push. Critério novo: jornada PPTX primeiro e Excel opcional antes de análise, imagem completa correta e decisão legível. Baseline de motores preservada; seis horas planejadas não ampliadas por inferência.
+
+
+### 15/10 — execução do fluxo contínuo após teste humano
+Preparação F1, visualizador/triagem/português/catálogo implementados e validados localmente. Registro de lotes/orçamento F2 preparado com migration e Edge; A2/A3 globais continuam parciais. F3 tem prova de conversão local e PDF153páginas correto, sem conversor hospedado. [Resultado e sequência de ativação](RESULTADO_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md):288 testes/2 pulados, dez passes,13 SQL e9 Edge/banco, browser com serviços interceptados. Código local não prova deploy. Sem IA paga/escrita remota/push. Próximo revisar diff, ativar migration/funções/frontend coordenadamente após autorização e retestar o site; serviço automático de prévias exige definição de infraestrutura e orçamento.

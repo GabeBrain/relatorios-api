@@ -1,3 +1,14 @@
+## Versão 0.73 — 15/10/2026 — preparação contínua e evidência única
+
+Estado **validado localmente, antes de push**. Preparar PPTX/Excel/cidade/custo na mesma página; selecionar arquivo não executa IA nem cria estudo. Criação atômica por hash, rascunho local e confirmação anterior à ata/texto/imagem. Novo registro privado de execução reserva custo por lote, persiste respostas e bloqueia retorno desconhecido; funções pagas passam a chamada interna pelo controlador. Nenhuma migration/Edge ativada nesta sessão.
+
+Bancada e triagem compartilham uma prévia, com texto/decisões abaixo. PDF local por hash/manifesto e confirmação de versão; conversão local real153páginas com ocultos, não serviço automático hospedado. Português em padrões legados/prompt, literal e payload bruto preservados; triagem aguarda salvamento, login cancelado não avança, progresso por itens únicos, sem comando genérico de grupo. Catálogo acessível pela carteira. Ordem interna incompatível é recusada antes da análise, até remapeamento geral dos leitores.
+
+Evidência: [resultado F1–F6](design/RESULTADO_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md),288 testes/2 pulados, dez passes,13 controles SQL e9 Edge/banco local, jornada com PPTX/11Excel/PDF reais e serviços interceptados; build/tipos/lint aprovados. Zero IA real ou alteração remota de decisões. F2/F3/ativação e suíte geral têm limites explícitos no relatório; redução de contadores não foi usada como melhoria.
+
+## 15/10/2026 — revisão do fluxo após uso humano (PLANEJADA)
+Gabriel rejeitou a transição automática após upload, o aviso decorativo amarelo, imagens duplicadas, inglês, achados sem página completa e a triagem estreita. Plano novo `design/PLAN_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md` substitui essas decisões de apresentação. Preparação na mesma página e confirmação de custo antes de toda IA, inclusive ata; visualizador único com texto abaixo; português; catálogo na carteira; retomada persistente. Código de produto não alterado nesta rodada. Simulação local não é aceite do runtime nem conversão automática de PPTX. Preferências de usabilidade e evidências atualizadas, motores/decisões reais preservados.
+
 ## Complemento 0.72.2 — aviso persistente pós-pré-análise — 15/10/2026
 Resumo e revisão sem relatório completo exibem “Este estudo ainda não foi avaliado por completo”, com instrução de confirmar cidade/UF e escolha das planilhas antes de Rodar análise; reabertura orienta retomar. Componente compartilhado sem fechar/ocultar. Não altera motores, custo ou decisões. Preparado localmente, sem push/produção.
 

@@ -5,6 +5,7 @@
 // e a análise do estudo de João Pessoa nunca rodou (30/set).
 
 import { useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, PlayCircle, FileSpreadsheet, Image as ImageIcon, Table2, Plus, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AtaData } from '../lib/v3/ia-ata';
@@ -33,13 +34,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Stat({ icon, n, label, tone }: { icon: React.ReactNode; n: number; label: string; tone?: 'warn' | 'muted' }) {
-  return (
-    <div className={cn('rounded-md border px-2.5 py-1.5', tone === 'warn' ? 'border-amber-500/50 bg-amber-500/5' : 'border-border')}>
-      <p className="flex items-center gap-1.5 text-sm font-semibold tabular-nums">{icon}{n}</p>
-      <p className="text-[10px] text-muted-foreground leading-tight">{label}</p>
-    </div>
-  );
+function Stat({ n, label }: {icon: React.ReactNode; n: number; label: string; tone?: 'warn'|'muted'}) {
+  return <p className="cp-muted"><strong>{n}</strong> {label}</p>;
 }
 
 export default function PreAnalysisCard({
@@ -85,10 +81,10 @@ export default function PreAnalysisCard({
   }
 
   return (
-    <div className="rounded-xl border-2 border-primary/40 bg-card shadow-sm">
+    <div className="cp-panel cp-prepare-existing">
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
-        <h3 className="text-sm font-semibold">Confirmar e iniciar análise completa</h3>
-        <span className="text-[11px] text-muted-foreground">custo da próxima etapa</span>
+        <h3 className="text-sm font-semibold">Preparar avaliação</h3>
+        <span className="text-[11px] text-muted-foreground">conferência de materiais e custo</span>
       </div>
 
       <div className="grid gap-5 px-4 py-4 md:grid-cols-2">
@@ -99,13 +95,8 @@ export default function PreAnalysisCard({
                 value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="ex.: Guarulhos"
                 className={cn('h-9 flex-1 rounded-md border bg-background px-2.5 text-sm', cidadeOk ? 'border-border' : 'border-amber-500/60')}
               />
-              <select
-                value={uf} onChange={(e) => setUf(e.target.value)}
-                className={cn('h-9 rounded-md border bg-background px-2 text-sm', ufOk ? 'border-border' : 'border-amber-500/60')}
-              >
-                <option value="">UF</option>
-                {UFS.map((u) => <option key={u} value={u}>{u}</option>)}
-              </select>
+              <Select value={uf} onValueChange={setUf}><SelectTrigger aria-label="Estado do estudo"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{UFS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent></Select>
+
             </div>
             {suggested && <p className="text-[11px] text-emerald-700 dark:text-emerald-400">Sugerida pelo {suggestion!.origem === 'arquivo' ? 'nome do arquivo' : 'texto da capa'}.</p>}
             {(ata?.cidades_candidatas?.length ?? 0) > 1 && (
@@ -153,12 +144,12 @@ export default function PreAnalysisCard({
         </div>
 
         <div className="space-y-5">
-          <Section title="Planilhas de processamento">
+          <Section title="Planilhas de cálculo">
             {temFonte ? (
               <p className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400"><FileSpreadsheet className="h-4 w-4" /> {sourceLabel ?? 'Planilhas vinculadas'}</p>
             ) : (
-              <div className="grid grid-cols-3 gap-1.5">
-                {([['agora', 'Vincular agora'], ['nao-tem', 'Não tem'], ['depois', 'Vincular depois']] as const).map(([key, label]) => (
+              <div className="flex flex-wrap gap-3">
+                {([['agora', 'Adicionar planilhas Excel'], ['nao-tem', 'Continuar sem planilhas']] as const).map(([key, label]) => (
                   <button key={key} type="button"
                     onClick={() => { setPlanilhas(key); if (key === 'agora') onAttachSources(); }}
                     className={cn('rounded-md border px-2 py-1.5 text-xs', planilhas === key && key !== 'agora' ? 'border-primary bg-primary/10 font-medium' : 'border-border hover:bg-muted')}>
@@ -170,8 +161,8 @@ export default function PreAnalysisCard({
             {!temFonte && choice === 'depois' && <p className="text-[11px] text-muted-foreground">O cruzamento com as planilhas roda quando você vinculá-las, sem nova leitura nem custo.</p>}
           </Section>
 
-          <Section title="O que será lido">
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+          <Section title="Conteúdo disponível para avaliação">
+            <div className="space-y-1">
               <Stat icon={<Table2 className="h-3.5 w-3.5 text-emerald-600" />} n={profile.tabelasNativas} label="tabelas nativas" />
               <Stat icon={<ImageIcon className="h-3.5 w-3.5 text-amber-600" />} n={profile.tabelasImagem + profile.fichas} label="tabelas em imagem" tone={profile.tabelasImagem + profile.fichas > 0 ? 'warn' : undefined} />
               <Stat icon={<ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />} n={profile.outras} label="mapas e fotos" />
@@ -185,11 +176,11 @@ export default function PreAnalysisCard({
           </Section>
 
           {ata && (
-            <details className="text-xs">
-              <summary className="cursor-pointer text-muted-foreground">Pedidos da ata ({pedidos.split('\n').filter((l) => l.trim()).length})</summary>
+            <section className="text-xs">
+              <h3 className="text-muted-foreground">Pedidos da ata ({pedidos.split('\n').filter((l) => l.trim()).length})</h3>
               <textarea value={pedidos} onChange={(e) => setPedidos(e.target.value)} rows={4}
                 className="mt-1.5 w-full rounded-md border border-border bg-background px-2.5 py-1.5 font-mono text-xs" />
-            </details>
+            </section>
           )}
         </div>
       </div>
@@ -198,18 +189,18 @@ export default function PreAnalysisCard({
         <button onClick={confirm} disabled={!ready}
           className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-40">
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
-          Rodar análise ({costBrl})
+          Conferir orçamento e iniciar
         </button>
-        <span className="text-[11px] text-muted-foreground">
+        <span className="text-sm text-muted-foreground">Estimativa: {costBrl}.
           {!cidadeOk || !ufOk ? 'Falta confirmar a cidade e a UF.' : choice === null ? 'Falta dizer se o estudo tem planilhas.' : 'Tudo pronto.'}
         </span>
         {cache && cache.total > 0 && (
           <span className="ml-auto text-[11px] text-muted-foreground" title="Leituras de imagem ficam guardadas; só as novas são cobradas">
             {cache.cached === cache.total
-              ? `As ${cache.total} imagens já foram lidas antes: custo só do texto.`
+              ? `As ${cache.total} imagens já foram lidas antes: nenhuma nova leitura de imagem estimada.`
               : cache.cached > 0
                 ? `${cache.cached} de ${cache.total} imagens já lidas antes (sem custo).`
-                : 'Estimativa inclui releituras no gpt-4o.'}
+                : 'Estimativa inclui releituras de imagem.'}
           </span>
         )}
       </div>

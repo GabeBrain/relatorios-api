@@ -73,6 +73,12 @@ const isLocal = (f: Finding) => /^s\d+$/.test(f.slideRef.trim());
 
 // ── criação / listagem ────────────────────────────────────────────────────────
 
+export async function prepareStudyAtomic(nome: string, meta: {sha1: string; nSlides: number; arquivo: string}, findings: Finding[]): Promise<{id: string; created: boolean}> {
+  const {data,error} = await db.rpc('corretor_prepare_study', {p_name: nome,p_sha1: meta.sha1,p_slides:meta.nSlides,p_file:meta.arquivo,p_findings:findings});
+  if(error||!data?.id)throw new Error('Não foi possível registrar a apresentação. Confira a atualização do banco e tente novamente; os materiais continuam selecionados.');
+  return data;
+}
+
 export async function createStudy(
   nome: string,
   meta: { sha1?: string; nSlides: number; arquivo: string },
@@ -412,7 +418,8 @@ export async function concludeStudy(studyId: string): Promise<void> {
 }
 
 export async function deleteStudy(studyId: string): Promise<void> {
-  await db.from('studies_v3').delete().eq('id', studyId);
+  const {error} = await db.from('studies_v3').delete().eq('id', studyId);
+  if (error) throw new Error('Não foi possível excluir este estudo. Ele continua disponível.');
 }
 
 // ── WS-2: relatório de entrega ────────────────────────────────────────────────

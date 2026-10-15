@@ -47,11 +47,11 @@ describe('cartão de pré-análise', () => {
     const onConfirm = vi.fn();
     render(<PreAnalysisCard {...props} onConfirm={onConfirm} />);
     expect((screen.getByPlaceholderText('ex.: Guarulhos') as HTMLInputElement).value).toBe('João Pessoa');
-    const run = screen.getByRole('button', { name: /Rodar análise/ });
+    const run = screen.getByRole('button', { name: /Conferir orçamento e iniciar/ });
     expect(run).toBeDisabled();
-    expect(screen.getByText('Falta dizer se o estudo tem planilhas.')).toBeTruthy();
+    expect(screen.getByText(/Falta dizer se o estudo tem planilhas/)).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: /Recife\/PE/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Não tem' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar sem planilhas' }));
     expect(run).not.toBeDisabled();
     fireEvent.click(run);
     expect(onConfirm).toHaveBeenCalledWith(expect.objectContaining({ cidade: 'João Pessoa', uf: 'PB', outras: ['Recife'], planilhas: 'nao-tem' }));

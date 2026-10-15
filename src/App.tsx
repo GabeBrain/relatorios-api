@@ -21,6 +21,7 @@ import ValidacaoFechamento from './pages/ValidacaoFechamento.tsx';
 // v1/v2 do corretor aposentadas (v3.3): rotas antigas redirecionam p/ /corretor.
 // O histórico da v1 é lido em modo somente-leitura dentro da própria /corretor
 // (LegacyV1Panel). Componentes v1 preservados no repo, fora do grafo do bundle.
+const CorretorCatalog = lazy(() => import('./features/corretor/pages/VerificationCatalog').then(m => ({ default: m.CatalogPage })));
 const CorretorV3Page = lazy(() => import('./features/corretor/pages/CorretorV3Page.tsx'));
 const CorretorProjectsPage = lazy(() => import('./features/corretor/pages/CorretorProjectsPage.tsx'));
 function CorretorEntry() {
@@ -102,6 +103,7 @@ const App = () => (
                 <Route path="/corretor/projetos" element={<CorretorLegacyProject />} />
                 <Route path="/corretor/projetos/:studyId" element={<CorretorLegacyProject />} />
                 <Route path="/corretor/estudos/:studyId/:section" element={<CorretorProjectsPage />} />
+                <Route path="/corretor/verificacoes" element={<CorretorCatalog />} />
                 <Route path="/corretor/novo" element={<CorretorV3Page />} />
                 <Route path="/corretor/analise" element={<CorretorLegacyAnalysis />} />
                 <Route path="/corretor/calibracao" element={<CorretorCalibrationPage />} />

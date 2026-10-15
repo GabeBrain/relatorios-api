@@ -209,12 +209,29 @@ export async function pptxToIr(
   }
 
   // decompacta só os XMLs de slide/rels e os SVGs (ignora as imagens pesadas)
-  const files = unzipSync(bytes, { filter: (f) => /^ppt\/slides\//.test(f.name) || /^ppt\/media\/[^/]+\.svg$/i.test(f.name) });
+  const files = unzipSync(bytes, { filter: (f) => /^ppt\/slides\//.test(f.name) || /^ppt\/media\/[^/]+\.svg$/i.test(f.name) || /^ppt\/(?:presentation.xml|_rels\/presentation.xml.rels)$/.test(f.name) });
   const dec = new TextDecoder('utf-8');
 
   const slideNames = Object.keys(files)
     .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
     .sort((a, b) => slideNum(a) - slideNum(b));
+
+  // Os leitores de imagem legados usam slideN.xml como referência. Falhar de
+  // forma explícita é necessário até todos aceitarem o mapa da apresentação.
+  // Não atribuir silenciosamente o texto de uma página à imagem de outra.
+  if (files['ppt/presentation.xml'] && files['ppt/_rels/presentation.xml.rels']) {
+    const presentation = parser.parseFromString(dec.decode(files['ppt/presentation.xml']), 'application/xml');
+    const relationships = parser.parseFromString(dec.decode(files['ppt/_rels/presentation.xml.rels']), 'application/xml');
+    const targets = new Map(Array.from(relationships.getElementsByTagNameNS('http://schemas.openxmlformats.org/package/2006/relationships','Relationship')).map(r => [r.getAttribute('Id'), r.getAttribute('Target') ?? '']));
+    const list = presentation.getElementsByTagNameNS('http://schemas.openxmlformats.org/presentationml/2006/main','sldIdLst')[0];
+    const order = list ? Array.from(list.children).filter(e => e.localName === 'sldId').map(e => {
+      const target = targets.get(e.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id')) ?? '';
+      return target.startsWith('/ppt/') ? target.slice(1) : `ppt/${target.replace(/^\.\//,'')}`;
+    }) : [];
+    if (order.length !== slideNames.length || order.some((name,index) => name !== slideNames[index])) {
+      throw new Error('A ordem interna deste PowerPoint exige uma conversão de referências antes da avaliação. Nenhuma análise foi iniciada. Preserve o original e encaminhe este arquivo para conferência.');
+    }
+  }
 
   const slides: IrSlide[] = slideNames.map((n) => {
     const slide = parseSlide(dec.decode(files[n]), slideNum(n), parser);

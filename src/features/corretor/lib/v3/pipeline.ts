@@ -114,7 +114,7 @@ export interface RunFullOpts {
   /** candidata da ata já localizada na estimativa */
   ataCandidate?: AtaImageCandidate | null;
   signal?: AbortSignal;
-  onStage?: (p: StageProgress) => void;
+  onStage?: (p: StageProgress) => void | Promise<void>;
 }
 
 // ── FASE 1 — DET + ata (barata; roda antes do portão de confirmação) ──────────
@@ -135,7 +135,7 @@ export interface RunPhase1Opts {
   candidates?: TableImageCandidate[];
   ataCandidate?: AtaImageCandidate | null;
   signal?: AbortSignal;
-  onStage?: (p: StageProgress) => void;
+  onStage?: (p: StageProgress) => void | Promise<void>;
 }
 
 /**
@@ -164,11 +164,9 @@ export async function runPhase1(
   let ataCostUsd = 0, ataIn = 0, ataOut = 0;
   if (ataCand && !signal?.aborted) {
     onStage?.({ stage: 'ata', done: 0, total: 1 });
-    try {
-      const res = await extractAtaFromImage(ataCand, model);
-      ata = res.ata;
-      ataCostUsd = res.costUsd; ataIn = res.inputTokens; ataOut = res.outputTokens;
-    } catch { /* segue sem ata */ }
+    const res = await extractAtaFromImage(ataCand, model);
+    ata = res.ata;
+    ataCostUsd = res.costUsd; ataIn = res.inputTokens; ataOut = res.outputTokens;
     onStage?.({ stage: 'ata', done: 1, total: 1, spentUsd: ataCostUsd });
   }
 
@@ -226,7 +224,7 @@ export interface RunPhase2Opts {
   /** Mesma fonte validada usada na fase 1, quando disponível. */
   fonte?: Fonte | null;
   signal?: AbortSignal;
-  onStage?: (p: StageProgress) => void;
+  onStage?: (p: StageProgress) => void | Promise<void>;
 }
 
 /**
@@ -253,8 +251,8 @@ export async function runPhase2(
     ir, cityUsed, opts.textModel ?? TEXT_REVIEW_MODEL,
     (done, total) => onStage?.({ stage: 'texto', done, total }),
     signal
-  ).then((res) => {
-    onStage?.({ stage: 'texto', done: res.batches, total: res.batches, findings: res.findings, spentUsd: res.costUsd });
+  ).then(async (res) => {
+    await onStage?.({ stage: 'texto', done: res.batches, total: res.batches, findings: res.findings, spentUsd: res.costUsd });
     return res;
   });
 
@@ -271,15 +269,20 @@ export async function runPhase2(
     // Sem achados aqui: os de visão só são gravados depois da reconciliação do
     // deck (etapa “cruzamento”). Gravar os brutos aqui deixou 28 somas soltas no
     // estudo de João Pessoa (30/set).
-    onStage?.({ stage: 'visao', done: candidates.length, total: candidates.length, spentUsd: res.costUsd });
+    await onStage?.({ stage: 'visao', done: candidates.length, total: candidates.length, spentUsd: res.costUsd });
     return res;
   });
 
-  const [text, vision] = await Promise.all([textPromise, visionPromise]);
+  // Aguarda os lotes já enviados antes de encerrar a execução e suas reservas.
+  const results = await Promise.allSettled([textPromise, visionPromise]);
+  const [textResult, visionResult] = results;
+  if (textResult.status === 'rejected') throw textResult.reason;
+  if (visionResult.status === 'rejected') throw visionResult.reason;
+  const text = textResult.value, vision = visionResult.value;
   const combined = combineVisionFindings(ir, vision, candidates, opts.fonte, acertos);
   const visionFindings = combined.visionFindings;
   await attachEvidenceImages(combined.crossFindings, candidates);
-  onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: visionFindings });
+  await onStage?.({ stage: 'cruzamento', done: 1, total: 1, findings: visionFindings });
 
   // Pista dirigida: slide com comentário da revisão e nenhum achado do motor é
   // candidato a regra faltante. Só faz sentido com texto e visão já concluídos.
@@ -303,7 +306,7 @@ export async function runPhase2(
     textTokens: { input: text.inputTokens, output: text.outputTokens },
     visionTokens: { input: vision.inputTokens, output: vision.outputTokens },
     visionEscalated: vision.escalated,
-    aborted: signal?.aborted ?? false,
+    aborted: Boolean(signal?.aborted || vision.failed.length),
   };
 }
 

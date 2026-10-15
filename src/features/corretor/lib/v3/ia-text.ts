@@ -1,3 +1,4 @@
+import { invokeAnalysis } from './execution';
 // Corretor v3.1 — passe de IA de TEXTO sobre o IR (ortografia/cidade/coerência).
 // Batches de N slides por chamada à edge function analyze-text-batch.
 // Custo estimado ANTES de rodar; IDs de achado estáveis por conteúdo.
@@ -103,14 +104,12 @@ export async function runTextPass(
   for (let bi = 0; bi < batches.length; bi++) {
     if (signal?.aborted) break;
     const batch = batches[bi];
-    const { data, error } = await supabase.functions.invoke<{
+    const { data, error } = await invokeAnalysis<{
       findings: RawIaFinding[]; inputTokens: number; outputTokens: number; error?: string;
     }>('analyze-text-batch', {
-      body: {
         city,
         model,
         slides: batch.map((s) => ({ n: s.n, titulo: s.titulo ?? '', texto: slideText(s), tabelas: slideTables(s) })),
-      },
     });
     if (error) throw new Error(error.message);
     if (data?.error) throw new Error(data.error);

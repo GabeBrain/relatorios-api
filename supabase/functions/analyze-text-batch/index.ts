@@ -27,7 +27,7 @@ function corsHeadersFor(req: Request): Record<string, string> {
 }
 
 // --- Rate limiting (best-effort, em memória) -----------------------------
-const RATE_LIMIT = 20;
+const RATE_LIMIT = 180;
 const RATE_WINDOW_MS = 60_000;
 const hits = new Map<string, { count: number; resetAt: number }>();
 
@@ -108,6 +108,7 @@ Em "evidence", copie o trecho EXATO do texto abaixo; não reporte o que não est
 
 ${blocks}
 
+Escreva todos os campos description em português do Brasil. Preserve evidence literalmente, mesmo em outro idioma. Não use títulos ou explicações em inglês.
 Responda EXATAMENTE este JSON (sem markdown):
 {"findings": [{"slide": 12, "type": "SPELLING", "description": "…", "evidence": "trecho exato", "severity": "LOW|MEDIUM|HIGH"}]}`;
 }
@@ -145,8 +146,11 @@ Deno.serve(async (req) => {
 
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
+  if (!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || req.headers.get('authorization') !== `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`) return json({ error: 'Confirme a execução pelo corretor antes de processar.' }, 403);
 
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  // Chamadas internas compartilham IP. O orçamento é por execução, assim como este limite.
+  const ip = req.headers.get('x-corretor-execution');
+  if (!ip || !/^[a-f0-9-]{36}$/i.test(ip)) return json({ error: 'Execução não identificada.' }, 403);
   if (rateLimited(ip)) return json({ error: 'Limite de requisições excedido.' }, 429);
 
   try {
@@ -168,6 +172,6 @@ Deno.serve(async (req) => {
       outputTokens: response.usage?.completion_tokens ?? 0,
     });
   } catch (err) {
-    return json({ error: err instanceof Error ? err.message : 'Erro desconhecido' }, 500);
+    return json({ error: 'Não foi possível concluir este lote. Confira a execução antes de retomar.' }, 500);
   }
 });
