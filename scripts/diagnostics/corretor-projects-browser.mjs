@@ -6,26 +6,30 @@ import {resolve} from 'node:path';
 const bank=JSON.parse(readFileSync('.local-inputs/audit-20261013/bank.json','utf8'));
 const samples=bank.filter(c=>/Jardim Monte Bello|VAP_03ago|Castro Alves/.test(c.study.nome));
 const selected=samples.find(c=>c.study.nome.includes('Jardim Monte Bello'));
+const paginationFixtures=Array.from({length:22},(_,i)=>({...selected,study:{...selected.study,id:`pagination-fixture-${i}`,nome:`Projeto sintético de paginação ${i+1}`}}));
 if(!selected)throw Error('Snapshot CJ necessário');
 const file=resolve('src/features/corretor/lib/v3/__tests__/teste_corretor.pptx'),raw=readFileSync(file);
 const sha1=createHash('sha1').update(raw).digest('hex'),sha256=createHash('sha256').update(raw).digest('hex');
 const out=resolve('.local-inputs/projects-browser-'+Date.now());mkdirSync(out,{recursive:true});
 const owner='11111111-1111-4111-8111-111111111111',host='mxinpvcqzbfbzjodhgtz.supabase.co';
 const session={access_token:[Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url'),Buffer.from(JSON.stringify({sub:owner,role:'authenticated',exp:Math.floor(Date.now()/1000)+3600})).toString('base64url'),'fixture'].join('.'),refresh_token:'fixture',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user:{id:owner,email:'fixture@example.invalid',app_metadata:{},user_metadata:{},aud:'authenticated',created_at:'2026-10-14T00:00:00Z'}};
+session.user.app_metadata={corretor_enabled:true,corretor_geo_until:new Date(Date.now()+3600000).toISOString()};
 const versions=selected.study.study_versions.map((v,i)=>({...v,...(i===0?{sha1,arquivo:'teste_corretor.pptx'}:{})}));
 versions.sort((a,b)=>b.n-a.n);versions[0].sha1=sha1;versions[0].arquivo='teste_corretor.pptx';
-let profiles=[],originals=[],stored=false,offset=0,writes=[],functions=[],errors=[],requests=[],toasts=[];
+let profiles=[],originals=[],stored=false,offset=0,writes=[],functions=[],errors=[],requests=[],toasts=[],authExchanges=0;
 const browser=await chromium.launch({headless:true});
-async function context(){const ctx=await browser.newContext();await ctx.addInitScript(({session,host})=>localStorage.setItem('sb-'+host.split('.')[0]+'-auth-token',JSON.stringify(session)),{session,host});
+async function context(authenticate=true){const ctx=await browser.newContext();if(authenticate)await ctx.addInitScript(({session,host})=>localStorage.setItem('sb-'+host.split('.')[0]+'-auth-token',JSON.stringify(session)),{session,host});
  await ctx.route('**/*',async route=>{
   const req=route.request(),url=new URL(req.url());if(['127.0.0.1','localhost'].includes(url.hostname))return route.continue();
   if(url.hostname!==host)return route.abort();
   const path=url.pathname,method=req.method();let data=[];const headers={'access-control-allow-origin':'*','access-control-expose-headers':'Location,Upload-Offset,Tus-Resumable','tus-resumable':'1.0.0'};
   requests.push({path,method});
   if(method==='OPTIONS')return route.fulfill({status:204,headers:{...headers,'access-control-allow-headers':'*','access-control-allow-methods':'GET,POST,PATCH,HEAD,OPTIONS'}});
+  if(path.endsWith('/functions/v1/corretor-access')){const body=req.postDataJSON();if(body.email!=='fixture@example.invalid'||body.password!=='fixture-password')return route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({error:'Credenciais fixture inválidas'})});authExchanges++;return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({token:'geo-fixture',session:{access_token:session.access_token,refresh_token:session.refresh_token}})});}
   if(path.includes('/functions/v1/')){functions.push(path);return route.abort();}
+  if(path.endsWith('/corretor_projects')&&req.headers().authorization!==`Bearer ${session.access_token}`)return route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({code:'42501',message:'permission denied fixture'})});
   if(path.endsWith('/auth/v1/user'))data=session.user;
-  else if(path.endsWith('/studies_v3'))data=samples.map(c=>({...c.study,study_versions:c===selected?versions:c.study.study_versions,findings_v3:c.findings.map(f=>({status:f.status})),study_sources_v3:[]}));
+  else if(path.endsWith('/studies_v3'))data=[...samples,...paginationFixtures].map(c=>({...c.study,study_versions:c===selected?versions:c.study.study_versions,findings_v3:c.findings.map(f=>({status:f.status})),study_sources_v3:[]}));
   else if(path.endsWith('/corretor_projects')){
    if(method==='GET')data=profiles;
    else {const body=req.postDataJSON();const row={...body,id:profiles[0]?.id??'33333333-3333-4333-8333-333333333333',updated_at:new Date().toISOString()};profiles=[row];data=row;writes.push({path,method});}
@@ -49,15 +53,21 @@ await page.goto('http://127.0.0.1:5176/corretor',{waitUntil:'networkidle'});
 const measurements=[];
 for(const width of [1440,1024,390,320]){await page.setViewportSize({width,height:1000});await page.waitForFunction(()=>document.querySelector('.corretor-projects').clientWidth>200);measurements.push({width,overflow:await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),contentWidth:await page.locator('.corretor-projects').evaluate(el=>el.clientWidth)});await page.screenshot({path:resolve(out,`portfolio-${width}.png`),fullPage:true});}
 await page.getByRole('button',{name:'Expandir menu',exact:true}).click();await page.getByRole('button',{name:'Fechar menu',exact:true}).waitFor();await page.keyboard.press('Escape');await page.getByRole('button',{name:'Fechar menu',exact:true}).waitFor({state:'hidden'});
+await page.getByRole('button',{name:'Próxima',exact:true}).click();if(new URL(page.url()).searchParams.get('page')!=='2')throw Error('Paginação não vai à URL');await page.reload({waitUntil:'networkidle'});if(!await page.getByRole('button',{name:'Próxima',exact:true}).isDisabled())throw Error('Última página não recuperada');
 await page.setViewportSize({width:1440,height:1000});await page.getByLabel('Buscar projetos').fill('Monte Bello');await page.getByRole('link',{name:'Abrir projeto'}).click();
 await page.getByRole('button',{name:'Completar cadastro'}).click();await page.getByRole('dialog').waitFor();await page.keyboard.press('Escape');await page.getByRole('dialog').waitFor({state:'hidden'});
 if(!await page.getByRole('button',{name:'Completar cadastro'}).evaluate(el=>el===document.activeElement))throw Error('Foco não restaurado ao cancelar cadastro');
 await page.getByRole('button',{name:'Completar cadastro'}).click();await page.getByLabel('Nome do projeto',{exact:true}).fill('Jardim Monte Bello · cadastro fixture');await page.getByLabel('Cliente',{exact:true}).fill('Cliente de demonstração');await page.getByRole('button',{name:'Salvar cadastro',exact:true}).click();await page.getByRole('dialog').waitFor({state:'hidden'});
 await page.getByRole('tab',{name:'Materiais',exact:true}).click();await page.locator('input[type=file]').setInputFiles(file);await page.getByText('Original guardado no projeto.',{exact:true}).waitFor({timeout:30000});await page.screenshot({path:resolve(out,'materials-upload.png'),fullPage:true});
+await page.getByRole('link',{name:'Voltar aos projetos',exact:true}).click();if(await page.getByLabel('Buscar projetos').inputValue()!=='Monte Bello')throw Error('Filtro da carteira perdido');
 const fresh=await context(),p2=await fresh.newPage();p2.on('pageerror',e=>errors.push(e.message));
 await p2.goto(`http://127.0.0.1:5176/corretor/projetos/${selected.study.id}`,{waitUntil:'networkidle'});await p2.getByRole('tab',{name:'Materiais',exact:true}).click();await p2.getByText('Original indisponível neste navegador.',{exact:true}).waitFor();await p2.getByRole('button',{name:'Recuperar neste navegador'}).click();await p2.getByText('Original disponível neste navegador.',{exact:true}).waitFor({timeout:15000});await p2.screenshot({path:resolve(out,'materials-new-browser.png'),fullPage:true});
 await p2.getByRole('tab',{name:'Histórico',exact:true}).click();await p2.screenshot({path:resolve(out,'history.png'),fullPage:true});
 await p2.evaluate(()=>document.documentElement.classList.add('dark'));await p2.waitForFunction(()=>getComputedStyle(document.querySelector('.cp-tabs [role=tab][data-state=active]')).color==='rgb(46, 56, 32)');await p2.screenshot({path:resolve(out,'history-dark.png'),fullPage:true});
+await p2.reload({waitUntil:'networkidle'});if(new URL(p2.url()).searchParams.get('tab')!=='history'||!await p2.getByRole('heading',{name:'Versões registradas'}).isVisible())throw Error('Aba não recuperada pela URL');
+const unsigned=await context(false),p3=await unsigned.newPage();p3.on('pageerror',e=>errors.push(e.message));await p3.goto('http://127.0.0.1:5176/corretor',{waitUntil:'networkidle'});
+await p3.getByLabel('Email',{exact:true}).fill('fixture@example.invalid');await p3.getByLabel('Senha',{exact:true}).fill('fixture-password');await p3.getByRole('button',{name:'Gerar token',exact:true}).click();await p3.getByRole('button',{name:'Reemitir',exact:true}).waitFor();
+if(authExchanges!==1)throw Error('Ponte de login não usada');await p3.screenshot({path:resolve(out,'login-single-account.png'),fullPage:true});
 if(functions.length||errors.length||measurements.some(m=>m.overflow))throw Error(JSON.stringify({functions,errors,measurements}));
-writeFileSync(resolve(out,'result.json'),JSON.stringify({scope:'snapshot de estudos existentes; serviços/identidade simulados; PPTX sintético explícito para transferência',measurements,writes,functions,errors,uploadedBytes:offset,recovery:'novo contexto, cofre vazio → hash confirmado → disponível'},null,2));
+writeFileSync(resolve(out,'result.json'),JSON.stringify({scope:'três snapshots reais e 22 projetos sintéticos de paginação; serviços/identidade simulados; PPTX sintético explícito para transferência',measurements,writes,functions,errors,authExchanges,historyReload:true,paginationReload:true,listFilterPreserved:true,uploadedBytes:offset,recovery:'novo contexto, cofre vazio → hash confirmado → disponível'},null,2));
 await browser.close();console.log(out);

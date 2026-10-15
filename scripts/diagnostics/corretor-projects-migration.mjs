@@ -5,7 +5,7 @@ import {readFileSync,writeFileSync} from 'node:fs';
 const db=new PGlite();const results=[];
 await db.exec(`create role anon; create role authenticated; create schema auth; create schema storage;
 create table auth.users(id uuid primary key); create function auth.uid() returns uuid language sql as $$ select nullif(current_setting('test.uid',true),'')::uuid $$;
-create function auth.jwt() returns jsonb language sql as $$ select '{"is_anonymous":false}'::jsonb $$;
+create function auth.jwt() returns jsonb language sql as $$ select jsonb_build_object('is_anonymous',false,'user_metadata',jsonb_build_object('corretor_enabled',true),'app_metadata',jsonb_build_object('corretor_enabled',coalesce(current_setting('test.enabled',true),'true')='true','corretor_geo_until',case when current_setting('test.expired',true)='true' then now()-interval '1 hour' else now()+interval '3 hours' end)) $$;
 grant usage on schema auth,storage to authenticated,anon;
 create table public.studies_v3(id uuid primary key); create table public.study_versions(id uuid primary key,study_id uuid references public.studies_v3(id),sha1 text);
 grant select on public.study_versions to authenticated;
@@ -14,6 +14,8 @@ create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,na
 grant select,insert on storage.objects to authenticated;
 create function storage.foldername(name text) returns text[] language sql as $$ select (string_to_array(name,'/'))[1:array_length(string_to_array(name,'/'),1)-1] $$;`);
 await db.exec(readFileSync('supabase/migrations/20261014210853_corretor_projects_originals.sql','utf8'));
+const claims=process.argv.includes('--claims');
+if(claims)await db.exec(readFileSync('supabase/migrations/20261014213854_corretor_access_claims.sql','utf8'));
 const owner='11111111-1111-4111-8111-111111111111',peer='22222222-2222-4222-8222-222222222222',pid='33333333-3333-4333-8333-333333333333',sid='44444444-4444-4444-8444-444444444444',vid='55555555-5555-4555-8555-555555555555';
 const sha1='a'.repeat(40),sha256='b'.repeat(64),path=`${pid}/${vid}/${sha256}.pptx`;
 await db.query('insert into auth.users values ($1),($2)',[owner,peer]);await db.query('insert into studies_v3 values($1)',[sid]);await db.query('insert into study_versions values($1,$2,$3)',[vid,sid,sha1]);
@@ -34,4 +36,12 @@ await actor(peer);if((await db.query('select * from corretor_originals')).rows.l
 const changed=await db.query("update corretor_projects set display_name='Alterado' where id=$1 returning id",[pid]);if(changed.rows.length)throw Error('Reader changed project');results.push({name:'membro leitor não altera cadastro',pass:true});
 await db.exec('reset role; set role anon');await denied('anon não lê cadastro privado',()=>db.query('select * from corretor_projects'));
 await db.exec('reset role');const bucket=await db.query("select public from storage.buckets where id='corretor-originais'");if(bucket.rows[0].public!==false)throw Error('Public bucket');results.push({name:'bucket privado',pass:true});
-writeFileSync('.local-inputs/launch-d0/migration-test.json',JSON.stringify({engine:'PGlite Postgres isolado, auth/storage simulados; não Supabase real',results},null,2));console.log(JSON.stringify(results));await db.close();
+if(claims){
+ await db.exec("select set_config('test.enabled','false',false)");await actor(owner);
+ if((await db.query('select * from corretor_originals')).rows.length)throw Error('Disabled account leaked');
+ results.push({name:'user_metadata não autoriza conta sem permissão administrativa',pass:true});
+ await db.exec("select set_config('test.enabled','true',false); select set_config('test.expired','true',false)");
+ if((await db.query('select * from storage.objects')).rows.length)throw Error('Expired access leaked');
+ results.push({name:'permissão expirada não lê objetos privados',pass:true});
+}
+writeFileSync(`.local-inputs/launch-d0/migration${claims?'-access':''}-test.json`,JSON.stringify({engine:'PGlite Postgres isolado, auth/storage simulados; não Supabase real',results},null,2));console.log(JSON.stringify(results));await db.close();

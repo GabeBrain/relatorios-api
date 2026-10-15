@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { loginCorretor, CorretorAccessUnavailable } from '@/features/corretor/lib/project-access';
 import { LogIn, LogOut, RefreshCw, ShieldCheck, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth-store';
@@ -9,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export function AuthBlock() {
+  const corretor = useLocation().pathname.startsWith('/corretor');
   const { data: docs } = useOpenAPIDocs();
   const { token, email, hasValidToken, setToken, clearToken, minutesRemaining, expiryLabel } = useAuthStore();
 
@@ -32,12 +36,27 @@ export function AuthBlock() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (!loginUrl) { toast.error('Endpoint /auth/login não encontrado nas specs.'); return; }
+    if (!loginUrl && !corretor) { toast.error('Endpoint /auth/login não encontrado nas specs.'); return; }
     if (!loginEmail.trim() || !loginPassword.trim()) { toast.error('Preencha email e senha.'); return; }
 
     setLoading(true);
     try {
-      const result = await loginRequest(loginUrl, loginEmail.trim(), loginPassword);
+      if (corretor) {
+        try {
+          const projectToken = await loginCorretor(loginEmail.trim(), loginPassword);
+          setToken(projectToken, loginEmail.trim()); setLoginEmail(''); setLoginPassword('');
+          toast.success('Acesso ao GeoBrain e aos projetos confirmado.'); return;
+        } catch (e) {
+          // Função ainda não publicada: preservar acesso às APIs existentes, com aviso explícito.
+          if (!(e instanceof CorretorAccessUnavailable) || !loginUrl) throw e;
+          const legacy = await loginRequest(loginUrl, loginEmail.trim(), loginPassword);
+          const body = legacy.data as { token?: string } | null;
+          if (!legacy.ok || !body?.token) throw new Error('Não foi possível autenticar no GeoBrain.');
+          setToken(body.token, loginEmail.trim()); setLoginEmail(''); setLoginPassword('');
+          toast.warning('GeoBrain conectado. O acesso aos materiais ainda precisa ser publicado no Lovable.'); return;
+        }
+      }
+      const result = await loginRequest(loginUrl!, loginEmail.trim(), loginPassword);
       if (result.ok && typeof result.data === 'object' && result.data !== null) {
         const d = result.data as Record<string, unknown>;
         const t = typeof d.token === 'string' ? d.token.trim() : '';
@@ -52,13 +71,15 @@ export function AuthBlock() {
       } else {
         toast.error(`Falha na autenticação. Status: ${result.status ?? 'sem status'}.`);
       }
-    } finally {
+    } catch (e) { toast.error(e instanceof Error ? e.message : 'Falha no acesso.'); }
+    finally {
       setLoading(false);
     }
   }
 
   function handleReissue() {
     clearToken();
+    void supabase.auth.signOut({ scope: 'local' });
     toast.info('Token removido. Gere um novo.');
   }
 
@@ -132,12 +153,13 @@ export function AuthBlock() {
           variant="outline"
           size="sm"
           className="flex-1 h-7 text-xs gap-1"
-          onClick={() => { clearToken(); toast.info('Token removido.'); }}
+          onClick={() => { clearToken(); void supabase.auth.signOut({ scope: 'local' }); toast.info('Acesso removido.'); }}
         >
           <LogOut className="h-3 w-3" />
           Remover
         </Button>
       </div>
+      {corretor && <p className="text-[11px] text-muted-foreground">Para habilitar o acesso aos materiais com esta conta, use Reemitir.</p>}
     </div>
   );
 }

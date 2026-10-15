@@ -16,6 +16,16 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.70.1 — 2026-10-15 — identidade e navegação (RUNTIME local / ativação pendente)
+
+- **Fechamento para push autorizado em 15/10:** Gabriel informou migration complementar aplicada; políticas reais não verificadas. Três commits Lovable sincronizados com autorização por fast-forward, sem conflito. Validação final desbloqueada: build/tipagem,276 testes/2 pulados e Chromium local aprovados, recuperação apenas sintética. Registro histórico do bloqueio abaixo preservado. Próximo publicar `corretor-access`/frontend e verificar original real/isolamento. Nenhuma IA paga.
+
+- **Fluxo/DET:** login GeoBrain integrado à sessão privada por `corretor-access`, lista de emails no servidor e permissão assinada/expirável em app_metadata. Migration complementar `20261014213854_corretor_access_claims.sql` preparada, não aplicada. Função ausente preserva login legado com aviso; autorização recusada não tem fallback.
+- **Navegação:** busca/filtro/página/aba/versão na URL; paginação cliente20. Motores/decisões humanas preservados.
+- **Publicação anterior:** `08d70dd`/`eb0faa1` enviados, fetch0/0; migration inicial informada aplicada e tabelas privadas existentes/restritas ao papel público. Deploy do frontend e acesso real de duas identidades não comprovados.
+- **Evidência/limites:** [continuidade](./design/CONTINUIDADE_ACESSO_E_MATERIAIS_2026-10-15.md), 270 testes/2 pulados na suíte registrada, oito testes focados posteriores,12 controles SQL isolados e browser simulado. Repetição final de build/browser bloqueada por falta de créditos do serviço de aprovação; último ajuste de versão na URL passou tipos/lint. Sem IA paga. Continuação sem commit/push.
+- **Próximo:** concluir validação final, ativar função/permissão no Lovable e recuperar original real por hash em outro contexto com isolamento comprovado. Custos em GB/tarifa ainda abertos.
+
 ## Versão 0.70 — 2026-10-14 — carteira e contrato de originais (RUNTIME local / backend preparado)
 
 - **Fluxo:** `/corretor` abre carteira; links antigos com `study` continuam revisão, também disponível em `/corretor/analise`. Cadastro progressivo/área do estudo, materiais por versão e histórico limitado aos registros atuais. Sem alteração de motor/prompt/decisões humanas.

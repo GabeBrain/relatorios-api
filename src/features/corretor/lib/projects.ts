@@ -18,6 +18,7 @@ export function profileFor(study: StudyV3): ProjectProfile {
 export async function requireProjectIdentity(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user || data.user.is_anonymous) throw new Error('Seu acesso aos arquivos do projeto ainda não está habilitado. Os estudos existentes continuam disponíveis para consulta.');
+  if (data.user.app_metadata?.corretor_enabled !== true || Date.parse(data.user.app_metadata?.corretor_geo_until ?? '') <= Date.now() || !Number.isFinite(Date.parse(data.user.app_metadata?.corretor_geo_until ?? ''))) throw new Error('Reemita o acesso no menu para guardar ou recuperar os materiais do projeto.');
   return data.user.id;
 }
 export async function loadProfiles(): Promise<ProjectProfile[]> {

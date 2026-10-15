@@ -3,6 +3,13 @@
 Registro leve de exceções e decisões duradouras às [Guidelines de Frontend](./FRONTEND_GUIDELINES.md).
 Não use para changelog de feature; mudanças funcionais continuam nos documentos vivos dos projetos.
 
+### 2026-10-15 — Identidade privada do Corretor e navegação recuperável
+
+- **Contexto:** token GeoBrain não representa automaticamente identidade Supabase para originais privados; carteira perde contexto se estado ficar só no componente.
+- **Decisão:** mesmo formulário habitual usa ponte no servidor somente em rotas Corretor, com permissão assinada e lista explícita; manter busca/filtro/página/aba/versão na URL. Reusar primitives e tokens SE existentes.
+- **Consequência:** ativação depende de função e migration complementar; 404 informa indisponibilidade e mantém acesso GeoBrain legado, sem fabricar identidade. Paginação atual é cliente, com consulta existente; evolução de servidor continua pendente.
+- **Escopo:** `/corretor/*`, sem mudança nos motores ou regras humanas. Continuação local, produção não verificada.
+
 ## Modelo
 
 ```md
