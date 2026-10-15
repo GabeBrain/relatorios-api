@@ -1,6 +1,6 @@
 # SP capital — primeiro mapeamento
 
-15/10/2026 · Lucas/Codex · G1 documental em andamento; G2 não autorizado.
+15/10/2026 · Lucas/Codex · Primeira fatia G2 autorizada por Lucas e implementada localmente com dados fictícios. Sem push.
 
 **Entrega pretendida:** núcleo vertical do **3T2026 (01/07–30/09)**. O PPTX do **2T2026** é referência histórica, não fonte dos números do próximo trimestre.
 
@@ -13,8 +13,12 @@
 
 Slides identificados pela ordem real do PPTX, não por blocos do texto extraído. Fontes candidatas exigem comprovação de cobertura/método em SP. Valores do gabarito, fórmulas e pendências estão na [matriz](MATRIZ_INDICADORES.csv); referências técnicas em [evidências](EVIDENCIAS.md).
 
-**Próximo portão:** conferir catálogo autorizado para São Paulo e, com autorização de leitura delimitada de dados, provar cobertura julho/agosto/setembro, natureza das vendas e fechamento de estoque. Comparar 2T2026 com o gabarito da mesma janela/fotografia, explicando diferenças; não comparar os números de 3T com os de 2T como se fossem deltas de reconciliação.
+**Disponível localmente:** menu e busca “SP institucional”, rota lazy `/rebrain/relatorios-institucionais/sp`. Reutiliza GeoApiScopeSelector/useGeoApiScope, Select, Alert e Table existentes. Catálogo pessoal autorizado antes de qualquer prévia; somente SP capital. Ação explícita “Ver prévia com dados de teste”; sem coleta de mercado/exportação. Exemplo 2T fechado mostra quatro contagens; exemplo 3T com raiz em agosto mantém indicadores indisponíveis. Troca de UF/cidade/trimestre/identidade invalida o resultado.
 
-**Antes de G2:** decidir contrato próprio SP, cobertura de ausências, deduplicação, fonte canônica e guardas. Sem copiar a política FIERGS ou usar `fiergs-rs` como SP. Mensal, recortes MCMV, INCC/preços, IVV, narrativa, acumulados e apêndices ficam fora desta primeira fatia; portanto não é o relatório integral.
+**Contrato desta fatia:** histórico limitado ao menor entre o fim selecionado e `period` da raiz, conforme orientação do dev da API transmitida por Lucas. Fechamentos ausentes/divergentes, cobertura insuficiente, falta de observações e deltas bloqueiam indicadores. Contagens por ID, vendas mensais com sinal e estoque histórico no fechamento têm testes sintéticos; o adaptador/API real e o método completo SP continuam por comprovar. Políticas Secovi/FIERGS preservadas, sem renomear suas entidades.
+
+**Próximo portão:** transporte real delimitado, fechamento consistente na cidade e reconciliação 2T com a mesma fonte/fotografia do gabarito. O usuário confirmou São Paulo no catálogo e trouxe consultas manuais; isso não equivale à coleta granular completa. Mensal, recortes MCMV, INCC/preços, IVV, destaques editoriais, gráficos/paginação e exportação ficam para próximas fatias aprovadas.
+
+**Previsão operacional informada por Lucas:** operação fecha dia 20 do mês seguinte e analista leva mais 2–3 dias; estimativa de dados de setembro na API em 22–25/10. Informação humana, não SLA ou data de liberação automática. O `period` observado na raiz continua sendo o limite efetivo.
 
 **Pausa:** férias a partir de 19/10, retorno não informado. Retomar por este plano e pelo [STATUS](../../../handoffs/lucas-relatorios-2026-10-14/STATUS.md), conferindo Git antes de alterar. Gabriel coordena decisões durante a ausência, sem entrega presumida.

@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## Primeira estrutura SP autorizada e validada localmente — 15/10/2026
+
+- **Estado atual:** primeira fatia G2 com fixtures sintéticas, em `/rebrain/relatorios-institucionais/sp`; menu “SP institucional”. Quatro indicadores, proteção do fechamento da raiz, escopo autorizado e estados de página. [Plano/retomada](../../features/relatorios-institucionais/sp/PLAN.md) e [validação/limites](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Sem novo estudo real ou homologação.
+- **Validação:** 351 testes/43 arquivos, tipos isolados SP, lint/build e oito verificações de UI local (desktop/mobile, claro/escuro) aprovados. Typecheck global com três erros paralelos no Corretor preservados; ver evidência. API de mercado não chamada pelo agente. Dados recebidos nas consultas manuais não substituem reconciliação integral.
+- **Regra confirmada pelo dev via Lucas:** cortar histórico por `typologies_history[].period <= period` da raiz. Exemplo recebido tem raiz agosto e histórico setembro; sistema não pode liberar 3T completo com esse limite. Não inferir fechamento pelo dia 01, máximo do histórico ou calendário.
+- **Pausa:** operação informa fechamento dia 20 do mês seguinte +2–3 dias de analista; setembro estimado 22–25/10, sem garantia/API observada. Férias desde 19/10, sem retorno/trabalho presumidos. Gabriel coordena decisão durante ausência; não atribuído trabalho novo automaticamente.
+- **Git/escopo:** merge `e29460d` autorizado preserva oito commits remotos e quatro locais. Código novo SP e links de shell; nenhuma alteração autoral em Corretor/Quanti/Secovi/FIERGS. Commit local da fatia identificável pelo histórico do plano. **Sem push**, conforme decisão mantida por Lucas; sem publicação, geração real ou Monday.
+
 ## G1 — mapeamento aprovado por Lucas — 15/10/2026
 
 - **Continuação:** Lucas autorizou seguir o plano e manteve sem push. Navegadores indisponíveis nesta sessão e credenciais de diagnóstico não configuradas; login informado no site não acessível ao agente. API de dados/catálogo ainda não verificados. Alternativa de acesso e balanço histórico em [EVIDENCIAS](../../features/relatorios-institucionais/sp/EVIDENCIAS.md): 2T26 fecha exatamente; seis de 16 intervalos históricos têm deltas sem causa demonstrada. Próximo depende de token pessoal local ou disponibilização da sessão do navegador, sem segredo no chat. Nenhuma geração/implementação iniciada.

@@ -26,6 +26,7 @@ interface Destination {
 }
 
 const PAGES: Destination[] = [
+  { label: 'Relatórios Automatizados — SP institucional', path: '/rebrain/relatorios-institucionais/sp', icon: <BarChart2 className="h-4 w-4" />, keywords: 'sao paulo capital institucional relatorio trimestre' },
   { label: 'Início', path: '/inicio', icon: <Home className="h-4 w-4" /> },
   { label: 'Relatórios Automatizados — Base de Mercado — Excel', path: '/rebrain/secovi', icon: <Building2 className="h-4 w-4" />, keywords: 'rebrain antigo relatorio secovi barretos excel mercado' },
   { label: 'Relatórios Automatizados — Sinduscon Curitiba', path: '/rebrain/sinduscon-curitiba', icon: <Building2 className="h-4 w-4" />, keywords: 'rebrain alvaras cvco excel curitiba construcao' },

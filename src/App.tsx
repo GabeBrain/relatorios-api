@@ -35,6 +35,7 @@ const CorretorCalibrationPage = lazy(() => import('./features/corretor/pages/Cor
 const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/AtualizadorVgvPage.tsx'));
 const RelatorioAeloPage = lazy(() => import('./pages/RelatorioAelo.tsx'));
 const PanoramaSecoviFiergsPage = lazy(() => import('./features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx'));
+const SpInstitutionalPage = lazy(() => import('./features/relatorios-institucionais/sp/SpInstitutionalPage'));
 const EmpresasEmpregadosPage = lazy(() => import('./features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx'));
 const SindusconCuritibaPage = lazy(() => import('./features/sinduscon-curitiba/pages/SindusconCuritibaPage.tsx'));
 
@@ -85,6 +86,7 @@ const App = () => (
                 {/* Rebrain */}
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
                 <Route path="/rebrain/panorama-secovi-fiergs" element={<PanoramaSecoviFiergsPage />} />
+                <Route path="/rebrain/relatorios-institucionais/sp" element={<Suspense fallback={<div className="p-6 text-sm" role="status">Carregando SP institucional…</div>}><SpInstitutionalPage /></Suspense>} />
                 <Route
                   path="/rebrain/aelo"
                   element={(
