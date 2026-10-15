@@ -15,6 +15,10 @@
 - **Pausa:** operação informa fechamento dia 20 do mês seguinte +2–3 dias de analista; setembro estimado 22–25/10, sem garantia/API observada. Férias desde 19/10, sem retorno/trabalho presumidos. Gabriel coordena decisão durante ausência; não atribuído trabalho novo automaticamente.
 - **Git/escopo:** merge `e29460d` autorizado preserva oito commits remotos e quatro locais. Código novo SP e links de shell; nenhuma alteração autoral em Corretor/Quanti/Secovi/FIERGS. Commit local da fatia identificável pelo histórico do plano. **Sem push**, conforme decisão mantida por Lucas; sem publicação, geração real ou Monday.
 
+## Montagem local — 15/10/2026
+
+Lucas enviou capturas da consulta autenticada com 24.351 lançamentos, 26.824 vendas e estoque 124.706; balanços julho/agosto zerados. Acrescentadas três páginas de prévia (capa, indicadores, evolução mensal) sem coleta adicional ou exportação. Testes SP: 43 aprovados; tipagem e lint aprovados. Próximo: revisão visual com Lucas, depois contrato de cobertura granular. Setembro continua condicionado ao fechamento real; previsão humana 22–25/10 não substitui `data.period`. Férias desde 19/10, sem trabalho/retorno presumidos. Sem push ou Monday; Secovi/FIERGS e Corretor preservados.
+
 ## G1 — mapeamento aprovado por Lucas — 15/10/2026
 
 - **Continuação:** Lucas autorizou seguir o plano e manteve sem push. Navegadores indisponíveis nesta sessão e credenciais de diagnóstico não configuradas; login informado no site não acessível ao agente. API de dados/catálogo ainda não verificados. Alternativa de acesso e balanço histórico em [EVIDENCIAS](../../features/relatorios-institucionais/sp/EVIDENCIAS.md): 2T26 fecha exatamente; seis de 16 intervalos históricos têm deltas sem causa demonstrada. Próximo depende de token pessoal local ou disponibilização da sessão do navegador, sem segredo no chat. Nenhuma geração/implementação iniciada.

@@ -1,5 +1,7 @@
 # SP capital — primeiro mapeamento
 
+**Avanço 15/10 — montagem local:** Lucas confirmou a consulta autenticada por capturas: julho/agosto e balanços com diferença zero. Acrescentada prévia navegável com capa, indicadores e evolução mensal, alimentada pelo resultado da consulta, sem novas chamadas ou exportação. Trimestre permanece parcial; contagem de empreendimentos, cobertura granular, revisão editorial e setembro pendentes. Próximo: revisar as páginas com Lucas e delimitar a cobertura granular. Férias desde 19/10 mantidas, sem execução presumida durante a ausência.
+
 15/10/2026 · Lucas/Codex · Estrutura e conferência municipal curta implementadas localmente. Testes com respostas reais de julho/agosto fornecidas por Lucas; execução autenticada do novo botão ainda não observada. Sem push.
 
 **Entrega pretendida:** núcleo vertical do **3T2026 (01/07–30/09)**. O PPTX do **2T2026** é referência histórica, não fonte dos números do próximo trimestre.

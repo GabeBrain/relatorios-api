@@ -10,6 +10,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { buildSpPreview, SP_INSTITUTIONAL, type SpPreview } from './model';
 import { buildSpTemporalPreview } from './temporal';
+import { SpReportPages } from './SpReportPages';
 
 const labels = { projects: 'Empreendimentos lançados', launches: 'Unidades lançadas', sales: 'Vendas líquidas', stock: 'Oferta final' } as const;
 const formatMonth = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
@@ -103,5 +104,6 @@ export default function SpInstitutionalPage() {
       {report.monthly && report.monthly.length > 0 && <div className="space-y-2"><p id="sp-monthly-label" className="text-sm text-muted-foreground">Balanço mensal: estoque anterior + lançamentos − vendas líquidas = estoque final.</p><p className="text-xs text-muted-foreground sm:hidden">Deslize a tabela para conferir estoque e diferenças.</p><Table aria-labelledby="sp-monthly-label" tabIndex={0}><TableHeader><TableRow><TableHead>Mês</TableHead><TableHead>Lançamentos</TableHead><TableHead>Vendas</TableHead><TableHead>Estoque final</TableHead><TableHead>Diferença</TableHead></TableRow></TableHeader><TableBody>{report.monthly.map(row => <TableRow key={row.month}><TableCell>{formatMonth(row.month)}</TableCell><TableCell>{row.launches.toLocaleString('pt-BR')}</TableCell><TableCell>{row.sales.toLocaleString('pt-BR')}</TableCell><TableCell>{row.closingStock.toLocaleString('pt-BR')}</TableCell><TableCell>{row.delta.toLocaleString('pt-BR')}</TableCell></TableRow>)}</TableBody></Table></div>}
       {report.checks.length > 0 && <details><summary className="cursor-pointer text-sm font-medium">{isApi ? 'Conferência das fontes municipais' : 'Conferência dos números do exemplo'}</summary><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{report.checks.map(check => <li key={check.label}>{check.label}: diferença de {check.delta.toLocaleString('pt-BR')} unidades.</li>)}</ul></details>}
     </section>}
+    {report && <SpReportPages key={`${key}/${report.source}/${report.throughMonth}`} report={report} />}
   </div>;
 }

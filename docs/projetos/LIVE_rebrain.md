@@ -1,3 +1,9 @@
+### 2026-10-15 — Relatórios institucionais: páginas da prévia SP — Codex, autorizado por Lucas
+- **Desenvolvimento:** capa, indicadores e evolução mensal navegáveis na rota SP; reutiliza Button e tokens do Design System. Consome resultado já conferido, sem nova coleta ou exportação. Lucas apresentou capturas da consulta pessoal com balanços julho/agosto zerados.
+- **Validação:** 43 testes SP, tipagem e lint aprovados; estados parcial e bloqueado cobertos. Base `4ddff67`, sem alterações autorais em Secovi/FIERGS/Corretor.
+- **Etapas/Pendências:** revisar as páginas com Lucas; cobertura granular, contagem de empreendimentos, narrativa e fechamento setembro pendentes. Sem push, publicação ou Monday; férias19/10 preservadas.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 2026-10-15 — Relatórios institucionais: conferência parcial julho/agosto — Codex, autorizado por Lucas
 - **Ambiente/funcionalidade:** SP institucional, mesma rota lazy; novo botão consulta uma amostra da raiz e séries municipais com paginação curta, retry, cancelamento/progresso. Exibe parcial até o mês permitido, separada da fixture. Empreendimentos e exportação não liberados sem cobertura granular; sem varredura longa.
 - **Evidência:** replay de respostas reais fornecidas por Lucas fecha julho/agosto: 24.351 lançadas, 26.824 vendas, estoque 124.706. 369 testes/44 arquivos, tipagem SP/lint/build e dez verificações locais Edge aprovados. Zero novas chamadas ao provedor pelo agente; sessão pessoal/retorno atual ainda não observados. [Plano e limites](../features/relatorios-institucionais/sp/PLAN.md).
