@@ -59,6 +59,15 @@
 
 # Rebrain (Plataforma) — Documento Vivo
 
+### 2026-10-15 — Validação do Fechamento: filtros aplicados à guia Divergências — Claude (sessão de Diego Cabrero)
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências e contador da aba.
+- **O quê:** os filtros da sidebar e a cidade ativa do cabeçalho (Tipo, Padrão, Empreendimento, Cidade, Ano, Trimestre e Período) passam a filtrar a lista de divergências, com a mesma regra usada pelas demais guias (`applyVFFilters`). A contagem da aba `Divergências (n)` passa a refletir o resultado filtrado. A validação continua rodando sobre o conjunto completo, para que medianas e médias de cidade não mudem ao filtrar.
+- **Por quê:** a guia recebia todas as divergências calculadas, ignorando os filtros aplicados; só os filtros de coluna e a busca global funcionavam.
+- **Arquivos:** `src/features/validacao-fechamento/{aggregate.ts,aggregate.test.ts,validation-rules.ts}`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** pendente (alteração não commitada).
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** coberto por teste unitário dos filtros sobre linhas de divergência e por typecheck sem erros novos e lint limpo. Não verificado no navegador, pois exige login na API GeoBrain; validar na tela com os filtros do print.
+
 ### 2026-09-17 — Sinduscon - Curitiba: motor de planilhas com preservação visual — Codex
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás e CVCO.
 - **O quê:** o frontend passa a enviar a planilha ao processador dedicado; o novo serviço Cloud Run converte `.xls` com LibreOffice e aplica as alterações em `.xlsx` com `openpyxl`, preservando estilos, preenchimentos, bordas, filtros, larguras e alturas da aba original. O arquivo é tratado em diretório temporário e não é persistido.

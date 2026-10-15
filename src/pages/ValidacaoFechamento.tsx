@@ -54,6 +54,8 @@ export default function ValidacaoFechamento() {
   const { status, buildings, loadedCities, failures, error, progress, load, reset } = useVFData();
 
   const allRows = useMemo(() => flattenBuildings(buildings ?? []), [buildings]);
+  // Validação roda sobre o conjunto completo (medianas e médias de cidade dependem dele);
+  // os filtros são aplicados depois, sobre as divergências encontradas.
   const divergences = useMemo(() => status === 'ready' ? validateBuildings(buildings ?? []) : [], [buildings, status]);
   const options = useMemo(() => extractVFOptions(allRows), [allRows]);
 
@@ -63,6 +65,7 @@ export default function ValidacaoFechamento() {
     [filters, activeCity],
   );
 
+  const filteredDivergences = useMemo(() => applyVFFilters(divergences, effectiveFilters), [divergences, effectiveFilters]);
   const filtered = useMemo(() => applyVFFilters(allRows, effectiveFilters), [allRows, effectiveFilters]);
 
   // Para AA/PA usamos filtros de dimensão apenas (sem temporais)
@@ -148,7 +151,7 @@ export default function ValidacaoFechamento() {
             <button type="button" className="vf-tab" data-active={tab === 'resumo-cidade'} onClick={() => setTab('resumo-cidade')}>Resumo por cidade</button>
             <button type="button" className="vf-tab" data-active={tab === 'resumo-email'} onClick={() => setTab('resumo-email')}>Resumo email</button>
             <button type="button" className="vf-tab" data-active={tab === 'detalhamento'} onClick={() => setTab('detalhamento')}>Detalhamento</button>
-            <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências ({divergences.length})</button>
+            <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências ({filteredDivergences.length})</button>
           </div>
         </div>
 
@@ -184,7 +187,7 @@ export default function ValidacaoFechamento() {
             <ResumoPorCidade rows={allRows} filters={filters} granularity={granularity} cities={cityBlocks} />
           )}
           {tab === 'detalhamento' && <DetalhamentoGrid rows={filtered} />}
-          {tab === 'divergencias' && <DivergencesGrid rows={divergences} />}
+          {tab === 'divergencias' && <DivergencesGrid rows={filteredDivergences} />}
         </div>
       </main>
     </div>

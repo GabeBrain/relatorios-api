@@ -133,7 +133,10 @@ export function flattenBuildings(buildings: Building[]): ClosureRow[] {
   return out;
 }
 
-export function applyVFFilters(rows: ClosureRow[], f: VFFilters): ClosureRow[] {
+/** Campos necessários para aplicar os filtros da sidebar a qualquer linha (ClosureRow, Divergence). */
+export type VFFilterKeys = Pick<ClosureRow, 'city' | 'building_id' | 'building_type' | 'standard' | 'periodKey' | 'bucketYear' | 'bucketQuarter'>;
+
+export function applyVFFilters<T extends VFFilterKeys>(rows: T[], f: VFFilters): T[] {
   return rows.filter((r) => {
     if (f.cities.length && !f.cities.includes(r.city)) return false;
     if (f.years.length && !f.years.includes(r.bucketYear)) return false;
