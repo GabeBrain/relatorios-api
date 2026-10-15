@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import PreAnalysisNotice from './PreAnalysisNotice';
 import { Link } from 'react-router-dom';
 import { FileSpreadsheet, Presentation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ export default function StudySummary({ study, context }: { study: StudyV3; conte
       <Button asChild><Link to={studyHref(study.id, 'revisao', context)}>{pre ? 'Continuar análise' : 'Revisar pendências'}</Link></Button>
     </section>
     {loading ? <p role="status">Carregando apontamentos…</p> : error ? <p role="alert">Não foi possível carregar os apontamentos. <Button variant="outline" onClick={() => setRetry(n => n + 1)}>Tentar novamente</Button></p> : <>
-      {pre ? <p className="cp-notice">A análise completa ainda não foi registrada. Os apontamentos da pré-análise não representam toda a cobertura do estudo.</p> : <>
+      {pre ? <PreAnalysisNotice resume /> : <>
         <div className="cp-metrics" aria-label="Apontamentos por confiança">{['Erros apontados', 'Prováveis', 'A verificar'].map((label, i) => <div key={label}><strong>{summary.levels[i]}</strong><span>{label}</span></div>)}</div>
         <p className="cp-muted">{summary.pending} apontamentos pendentes · {summary.slides.length} slides com referência. Contagens por confiança da análise, não por gravidade. A revisão revalida os apontamentos antigos contra as evidências disponíveis.</p>
         {summary.categories.length ? <section className="cp-category-list"><h2>O que precisa de atenção</h2>{summary.categories.map(([name, count]) => <div key={name}><span>{name}</span><strong>{count}</strong></div>)}{summary.slides.length > 0 && <p className="cp-muted">Slides: {summary.slides.join(', ')}</p>}</section> : <p>Nenhum apontamento pendente nos registros disponíveis. Isso não comprova cobertura integral nem correção do arquivo.</p>}

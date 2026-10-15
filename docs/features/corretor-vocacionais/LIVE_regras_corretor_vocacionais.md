@@ -1,3 +1,6 @@
+## Complemento 0.72.2 — aviso persistente pós-pré-análise — 15/10/2026
+Resumo e revisão sem relatório completo exibem “Este estudo ainda não foi avaliado por completo”, com instrução de confirmar cidade/UF e escolha das planilhas antes de Rodar análise; reabertura orienta retomar. Componente compartilhado sem fechar/ocultar. Não altera motores, custo ou decisões. Preparado localmente, sem push/produção.
+
 ## Versão 0.72.2 — 15/10/2026 — revisão visível
 Validado localmente: mapa e evidências sempre abertos, preenchimento por confiança em toda a célula, sem placeholder de prévia quando não há conteúdo. Achados sem imagem preservados. Cartões SE, primeira pendência na entrada e continuação explícita. Nenhuma alteração de motores/decisões. Inventário publicado17V3/4 incompletos, somente ata/DET registrados; não iniciada IA paga. Ver `design/REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md`. Retomada durável de execução continua pendente.
 

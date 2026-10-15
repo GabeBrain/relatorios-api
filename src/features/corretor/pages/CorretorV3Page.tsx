@@ -4,6 +4,7 @@
 // Navegação sem rail duplo: landing com cards de estudos → workspace com voltar.
 
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import PreAnalysisNotice from '../components/PreAnalysisNotice';
 import { useGeobrainAccess } from '../lib/geobrain-access-context';
 import { requireProjectIdentity } from '../lib/projects';
 const ReviewBench = lazy(() => import('../components/ReviewBench'));
@@ -1185,10 +1186,10 @@ export default function CorretorV3Page() {
           {analysis?.running ? (
             <p className="inline-flex items-center gap-2 text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Análise em andamento — os resultados aparecem ao final.</p>
           ) : pending && gate && gate.studyId === selected.id ? (
-            <p className="text-muted-foreground">Pré-análise: confirme a cidade e as planilhas no cartão abaixo para rodar a análise.</p>
+            <PreAnalysisNotice />
           ) : pending ? (
             <>
-              <p className="text-foreground"><strong>A análise completa ainda não rodou.</strong> <span className="text-muted-foreground">O envio foi guardado, mas a análise completa não foi concluída.</span></p>
+              <PreAnalysisNotice resume />
               <button
                 type="button"
                 disabled={busy !== null}

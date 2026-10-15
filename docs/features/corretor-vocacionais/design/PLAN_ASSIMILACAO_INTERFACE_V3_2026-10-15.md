@@ -152,3 +152,5 @@ Carteira única, novo envio assimilado e bancada sem alternância para lista ant
 
 ### 15/10 — revisão sempre visível e retomada
 Mapa sem expander/células preenchidas, evidências abertas e cartões SE; sem prévia vazia. Inventário real17V3,13 com relatório/4 incompletos, não processados. Evidência e limites em REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md. A4 ajuste local; A2/A3 precisam de checkpoint durável de execução/erro/custo por versão. Gate de custo não removido, nenhum lote pago autorizado por inferência.
+
+15/10 — complemento pré-push: aviso persistente de avaliação incompleta em resumo/revisão, confirmando cidade/UF e escolha das planilhas para iniciar. Componente compartilhado; estado preparado localmente, sem push, critérios/motores preservados.

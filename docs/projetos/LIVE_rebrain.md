@@ -1,3 +1,9 @@
+### 2026-10-15 — Corretor: aviso pós-pré-análise antes do push — Gabriel / Codex
+- **Mudança:** aviso persistente em resumo/revisão explica que o estudo ainda não foi avaliado por completo, orienta confirmar cidade/UF e escolha das planilhas antes de Rodar análise; reabertura orienta retomar. Componente compartilhado, sem modal/fechamento, sem alterar motores ou aprovação de custo.
+- **Evidência:** PreAnalysisNotice.tsx, tipos aprovados e complemento em [revisão visível](../features/corretor-vocacionais/design/REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md). Sem testes adicionais, IA ou alterações remotas.
+- **Etapas/Pendências:** preparado localmente para envio junto da revisão visual; sem push, produção não verificada. Retomada durável continua aberta.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
 ### 2026-10-15 — Corretor: revisão visível e inventário de estudos incompletos — Gabriel / Codex
 - **Desenvolvimento:** mapa sempre aberto/células preenchidas, prévia somente com conteúdo, evidências sem expander e cartões no padrão SE. Retomar análise completa explícito; removido aviso enganoso de nenhum custo na pré-análise. Motores e decisões inalterados.
 - **Evidência:** [relatório](../features/corretor-vocacionais/design/REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md), leitura pública52 estudos/17V3/4 incompletos, todos quatro apenas passe ata/DET;13V3 com relatório. Browser interceptado1440/390/320, hash igual, sem IA/escrita; tipos/lint/build aprovados. Seis commits Lovable sincronizados com autorização, documentos paralelos restaurados.
