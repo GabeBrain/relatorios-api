@@ -10,6 +10,11 @@
 - **Evidência:** leitura do código48949a7/fetch0/0; PPTX real153páginas/ordem conferida, slide23 com concordância e66/68 com literal OBSERTÓRIO. Simulação sem backend em1440/1024/390; área/barra1392px de1440, imagem única. Não é implementação ou homologação do app; zero IA paga/escrita remota.
 - **Etapas/Pendências:** plano preparado para autorização de execução, código de produto inalterado. F1/F2 primeiro, prova de render F3 necessária, F4/F5 reaproveitam evidências; F6 aceita percurso real. Sem push. Restrições/critério de aceite detalhados no plano; não prometer render automático nem consumo sem orçamento.
 - **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+### 2026-10-15 — Validação do Fechamento: filtros de divergências e tipo de empreendimento — Edgar / Codex
+- **Mudança:** divergências respeitam os filtros de Tipo, Padrão, Empreendimento, Ano, Trimestre, Período e cidade ativa. A seleção ocorre após a validação, preservando as médias dos grupos. A contagem exclui aprovadas e acompanha o recorte. Incluída a coluna Tipo Empreendimento antes de Status, oculta por padrão na grade e presente no Excel.
+- **Evidência:** dois testes direcionados de filtros e typecheck aprovados; validação local da tela confirmada pelo usuário.
+- **Etapas/Pendências:** implementação concluída; publicação da revisão pelo fluxo Git. Persistência das aprovações segue dependente do serviço Supabase existente.
+- **Monday:** —
 
 ### 2026-10-15 — Corretor: aviso pós-pré-análise antes do push — Gabriel / Codex
 - **Mudança:** aviso persistente em resumo/revisão explica que o estudo ainda não foi avaliado por completo, orienta confirmar cidade/UF e escolha das planilhas antes de Rodar análise; reabertura orienta retomar. Componente compartilhado, sem modal/fechamento, sem alterar motores ou aprovação de custo.
