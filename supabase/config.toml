@@ -1,5 +1,9 @@
 project_id = "mxinpvcqzbfbzjodhgtz"
 
+[functions.corretor-access]
+# Credenciais GeoBrain verificadas pela função; lista de contas habilitadas no servidor.
+verify_jwt = false
+
 [functions.analyze-slide]
 verify_jwt = false
 

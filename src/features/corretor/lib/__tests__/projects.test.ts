@@ -3,7 +3,7 @@ import { webcrypto } from 'node:crypto';
 const mocks = vi.hoisted(() => ({ user: vi.fn(), download: vi.fn(), session: vi.fn(), exists: vi.fn(), rpc: vi.fn(), from: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { getUser: mocks.user, getSession: mocks.session }, storage: { from: () => ({ download: mocks.download, exists: mocks.exists }) }, from: mocks.from, rpc: mocks.rpc } }));
 import { matchOriginal, digest, downloadOriginal, requireProjectIdentity, uploadOriginal, type OriginalAsset } from '../projects';
-beforeEach(() => { vi.clearAllMocks(); vi.stubGlobal('crypto', webcrypto); mocks.user.mockResolvedValue({ data: { user: { id: 'owner', is_anonymous: false } }, error: null }); });
+beforeEach(() => { vi.clearAllMocks(); vi.stubGlobal('crypto', webcrypto); mocks.user.mockResolvedValue({ data: { user: { id: 'owner', is_anonymous: false, app_metadata: { corretor_enabled: true, corretor_geo_until: new Date(Date.now() + 3600000).toISOString() } } }, error: null }); });
 describe('originais sem IA, com identidade e vínculo exatos', () => {
   it('recusa identidade ausente/anonima antes de ler storage', async () => {
     mocks.user.mockResolvedValue({ data: { user: null }, error: null });
