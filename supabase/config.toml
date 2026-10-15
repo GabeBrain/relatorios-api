@@ -34,3 +34,7 @@ verify_jwt = false
 [functions.corretor-material-preview]
 # Biblioteca pública, só derivados PDF/PNG registrados. Originais exigem identidade via Storage/RLS.
 verify_jwt = false
+
+[functions.corretor-execution]
+# Entrada pública com orçamento confirmado e lotes registrados no servidor.
+verify_jwt = false

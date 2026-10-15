@@ -1,6 +1,6 @@
 # Plano — preparação contínua, evidências e revisão legível
 
-**Data:** 15/10/2026. **Responsável:** Gabriel. **Estado:** proposta técnica preparada com simulação local; nenhuma alteração de produto nesta rodada. **Base conferida:** `48949a7`, `main`/`origin/main`0/0 após fetch. Alterações FIERGS e ZIP preservadas. O usuário pediu plano e CTA, não sua execução nem push.
+**Data:** 15/10/2026. **Responsável:** Gabriel. **Estado atual:** execução autorizada; preparação/revisão e controle de lotes implementados e validados localmente, antes de push. Ativação remota e render automático no servidor pendentes. **Base conferida:** `48949a7`, `main`/`origin/main`0/0 após fetch. Alterações FIERGS e ZIP preservadas. Registro inicial: pedido de plano/CTA; posteriormente Gabriel autorizou sua implementação, com resultado antes do push.
 
 Este plano complementa A2/A3/A4 do `PLAN_ASSIMILACAO_INTERFACE_V3_2026-10-15.md` e substitui as decisões de apresentação rejeitadas no teste humano. A validação local anterior não significou aceite de usabilidade. A sessão anterior publicou interface e aviso; os prints atuais mostram problemas reais que precisam ser tratados no fluxo.
 
@@ -145,3 +145,10 @@ Não transformar este plano em promessa de execução dentro das seis horas sema
 ## 7. CTA
 
 > Execute o PLAN_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md. Comece pela preparação contínua: PowerPoint e planilhas na mesma página, conferência e orçamento antes de qualquer IA, sem transição automática nem avisos decorativos. Implemente retomada confiável, uma única prévia real do slide com texto abaixo, interface em português e revisão rápida ampla. Leve o catálogo para a carteira. Use Campos do Jordão e os materiais existentes, preserve decisões e os dez passes, valide a jornada completa e registre limitações reais. Não faça IA ou infraestrutura paga sem lote e orçamento. Apresente o resultado antes do push.
+
+
+## 8. Execução autorizada — checkpoint local de15/10
+
+[Resultado, evidências e ativação](RESULTADO_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md). F1 implementado; F2 com rascunho local e registro/reserva/retorno de lotes preparado e testado em banco isolado; F3 com visualizador único, PDF real por versão e prova de conversão local; F4/F5/F6 implementados para apresentação/revisão/catálogo e validados com serviços interceptados. 288 testes/2 pulados, dez passes reais,13 controles SQL e9 Edge/banco local, build/tipos/lint aprovados. Novos estudos só iniciam mediante confirmação; documentos repetidos não reprocessam automaticamente.
+
+F2 não encerra autenticação das tabelas legadas nem recuperação de execução em outro navegador. F3 não encerra conversão automática hospedada: serviço/infraestrutura e orçamento continuam dependências. F6 publicação e reteste real pendentes. Suíte geral teve três falhas Sinduscon sob execução conjunta; arquivo isolado passou5/5, sem correção naquela frente. Nenhuma IA paga, escrita remota, migração aplicada ou push. Relatório distingue simulação de produção e preserva decisões/gabaritos.

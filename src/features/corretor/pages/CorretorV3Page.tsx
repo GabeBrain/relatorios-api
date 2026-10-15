@@ -4,6 +4,10 @@
 // Navegação sem rail duplo: landing com cards de estudos → workspace com voltar.
 
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { beginExecution, finishExecution, hasActiveExecution } from '../lib/v3/execution';
+import StudyPreparationPage, { type PreparedStudy } from '../components/StudyPreparationPage';
+import StudyQuickReview from '../components/StudyQuickReview';
+import { presentFindingPt } from '../lib/v3/present-finding-pt';
 import PreAnalysisNotice from '../components/PreAnalysisNotice';
 import { useGeobrainAccess } from '../lib/geobrain-access-context';
 import { requireProjectIdentity } from '../lib/projects';
@@ -11,7 +15,6 @@ const ReviewBench = lazy(() => import('../components/ReviewBench'));
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { portfolioHref } from '../lib/study-navigation';
 import { toast } from 'sonner';
-import brainLogo from '../../../../assets/logoBrain.png';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
   Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X,
@@ -19,7 +22,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { errorLabel, ERROR_CATALOG, isCommunication, MODE_META, type ErrorType } from '../lib/error-catalog';
 import type { Finding } from '../lib/audit/model';
 import type { Ir } from '../lib/audit/ir';
@@ -44,13 +46,10 @@ import {
 import type { AtaData } from '../lib/v3/ia-ata';
 import { BUDGET_STUDY_BRL, formatBRL, usdToBrl } from '../lib/v3/config';
 import { confidenceOf, CONFIDENCE_META, type Confidence } from '../lib/v3/confidence';
+
 import {
-  consultingSuggestionBatchCount, generateConsultingSuggestion,
-  type SuggestionBatchProgress,
-} from '../lib/v3/consulting-suggestion';
-import {
-  createStudy, listStudies, loadFindings, setFindingStatus, recheck,
-  concludeStudy, deleteStudy, insertIaFindings, registerIaPass, saveAta, confirmAta,
+  prepareStudyAtomic, listStudies, loadFindings, setFindingStatus, recheck,
+  concludeStudy, deleteStudy, insertIaFindings, saveAta, confirmAta,
   saveReport, setFindingVerdict, resolveInvalidFindings, loadTranscribedBySha1,
   saveStudyFonte, loadStudyFonte, analysisPending, loadVisionReadings,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
@@ -94,7 +93,7 @@ const noteCount = (f: Finding) => (f.viz?.kind === 'text' && f.viz.checklist?.le
 
 const STATUS_META: Record<FindingStatus, { label: string; className: string }> = {
   pendente: { label: 'Pendente', className: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30' },
-  corrigido: { label: 'Corrigido', className: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' },
+  corrigido: { label: 'Ajuste declarado', className: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' },
   ignorado: { label: 'Ignorado', className: 'bg-muted text-muted-foreground border-border' },
 };
 
@@ -103,9 +102,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
   onStatus: (s: FindingStatus) => void;
   onVerdict: (v: 'bug' | 'fp') => void;
 }) {
-  const f = item.finding;
-  const meta = ERROR_CATALOG[f.type as ErrorType];
-  const mode = meta ? MODE_META[meta.mode] : null;
+  const f = presentFindingPt(item.finding);
   const done = item.status !== 'pendente';
   const confidence = confidenceOf(f, item.origem);
   // Recado da revisão não usa a escala de erro: chip próprio, e o checklist —
@@ -134,16 +131,6 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
             <span className="text-[10px] rounded px-1.5 py-0.5 border bg-muted/50 text-muted-foreground">
               {errorLabel(f.type as ErrorType)}
             </span>
-            {item.origem !== 'DET' && (
-              <span className="text-[10px] rounded px-1.5 py-0.5 border bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/30">
-                IA
-              </span>
-            )}
-            {mode && item.origem === 'DET' && (
-              <span className={cn('text-[10px] rounded px-1.5 py-0.5 border', mode.className)} title={mode.hint}>
-                {mode.label}
-              </span>
-            )}
             <span className={cn('text-[10px] rounded px-1.5 py-0.5 border', STATUS_META[item.status].className)}>
               {STATUS_META[item.status].label}
             </span>
@@ -151,7 +138,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
               <span className="text-[10px] text-muted-foreground">resolvido na v{item.resolvidoNaVersao}</span>
             )}
           </div>
-          <p className="cf-detail">{f.detail}</p>
+          {f.detail !== f.title && <p className="cf-detail">{f.detail}</p>}
           {f.gabarito && (
             <p className="mt-1.5 text-[11px] text-muted-foreground flex items-start gap-1 italic">
               <Quote className="w-3 h-3 mt-0.5 shrink-0" /> Nota do analista: “{f.gabarito}”
@@ -162,19 +149,6 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
       {(f.evidenceImage || f.viz) && (
         <div className="px-4 pb-2">
           <div className="space-y-2">
-          {f.evidenceImage && <>
-          <a href={f.evidenceImage} target="_blank" rel="noreferrer" className="block">
-            <img
-              src={f.evidenceImage}
-              alt={`Tabela original do slide ${f.slideRef}`}
-              loading="lazy"
-              className="w-full max-h-[440px] object-contain rounded-md border border-border bg-white"
-            />
-          </a>
-          <p className="text-[10px] text-muted-foreground">
-            Imagem original do {f.slideRef} — clique para ampliar. A prova abaixo mostra qual número não fecha.
-          </p>
-          </>}
           {f.viz && <VizSwitch finding={f} />}
           </div>
         </div>
@@ -199,7 +173,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
           onClick={() => onVerdict('fp')}
           className={cn('text-[11px] rounded-full px-2.5 py-0.5 border transition-colors', item.verdict === 'fp' ? 'bg-slate-500/15 text-slate-600 border-slate-500/30' : 'bg-background border-border hover:border-slate-500/50 text-muted-foreground')}
         >
-          Não é erro (FP)
+          Não é erro
         </button>
       </div>
     </div>
@@ -216,15 +190,18 @@ interface AnalysisState {
 }
 
 function AnalysisBanner({ state, onPause }: { state: AnalysisState; onPause: () => void }) {
+  const [startedAt] = useState(Date.now);
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => { const timer = window.setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 1000); return () => window.clearInterval(timer); }, [startedAt]);
   const order = STAGE_ORDER;
   return (
-    <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 px-4 py-3 space-y-2">
+    <div className="cp-panel space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <Sparkles className="w-4 h-4 text-violet-500 shrink-0 animate-pulse" />
           <h3 className="text-sm font-semibold truncate">{state.stages.gravando ? 'Gravando os resultados…' : 'Analisando o estudo…'}</h3>
           <span className="text-xs text-muted-foreground">
-            ~{formatBRL(state.estimateUsd)} estimado · {formatBRL(state.spentUsd)} gasto
+            {Math.floor(elapsed / 60)}min {elapsed % 60}s · ~{formatBRL(state.estimateUsd)} estimado · {formatBRL(state.spentUsd)} gasto nesta etapa
           </span>
         </div>
         <button
@@ -272,12 +249,12 @@ export function BudgetModal({ estimate, onConfirm, onCancel }: {
         <p className="text-xs text-muted-foreground">
           A análise completa deste estudo custa cerca de{' '}
           <strong className="text-foreground">{formatBRL(estimate.costUsd)} ({formatUSD(estimate.costUsd)})</strong>.
-          {' '}O custo efetivo depende das leituras e releituras necessárias. São {estimate.textSlides} slides de texto e {estimate.visionToRun} imagem(ns) de
+          {' '}O limite autorizado será de {formatBRL(Math.ceil((estimate.costUsd * 2 + 1) * 100) / 100)}, incluindo margem para releituras e reservas por lote. O servidor interrompe antes de exceder esse limite. O custo efetivo depende das leituras e releituras necessárias. São {estimate.textSlides} slides de texto e {estimate.visionToRun} imagem(ns) de
           tabela a extrair{estimate.visionCached > 0 && ` (${estimate.visionCached} já no cache)`}.
         </p>
         <div className="flex items-center justify-end gap-2 pt-1">
           <button onClick={onCancel} className="text-xs rounded-md px-3 py-1.5 border border-border hover:bg-muted">
-            Manter resultado gratuito
+            Cancelar avaliação paga
           </button>
           <button onClick={onConfirm} className="text-xs rounded-md px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
             Confirmar e analisar
@@ -300,30 +277,6 @@ function dateLabel(value: string): string {
  * “O que bateu”: dimensão do que foi conferido e está certo, em contrapartida aos
  * erros (que continuam sendo o foco). Só números, cor neutra, uma linha de cartões.
  */
-function AcertosCard({ report, temFonte }: { report: AnalysisReport; temFonte: boolean }) {
-  const tiles: { n: string; label: string }[] = [
-    { n: `${report.tabelasVerificadas} de ${report.tabelasExtraidas}`, label: 'tabelas-imagem fecham na soma' },
-    { n: String(report.tabelasNativas), label: 'tabelas nativas conferidas' },
-  ];
-  // Snapshot anterior à v0.66 não tem a contagem: omite em vez de afirmar zero.
-  if (report.fonte && report.fonte.comparados > 0) tiles.push({ n: `${report.fonte.batem} de ${report.fonte.comparados}`, label: 'valores iguais às planilhas' });
-  else if (!temFonte) tiles.push({ n: 'sem planilhas', label: 'cruzamento com a fonte desligado' });
-  if (report.cruzamentos && report.cruzamentos.feitos > 0) tiles.push({ n: `${report.cruzamentos.batem} de ${report.cruzamentos.feitos}`, label: 'cruzamentos entre tabelas batem' });
-  return (
-    <section className="space-y-2">
-      <WlHead title="O que bateu" />
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {tiles.map((t) => (
-          <div key={t.label} className="rounded-lg border border-border bg-card px-3 py-2">
-            <p className="text-sm font-semibold tabular-nums">{t.n}</p>
-            <p className="text-[11px] leading-tight text-muted-foreground">{t.label}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 const outrasKey = (studyId: string) => `corretor-outras-${studyId}`;
 /** Outras cidades confirmadas para o estudo, lembradas neste navegador (reconferências). */
 function readOutras(studyId: string): string[] {
@@ -344,9 +297,6 @@ export default function CorretorV3Page() {
   const [items, setItems] = useState<FindingV3[]>([]);
   const [loadingStudy, setLoadingStudy] = useState(false);
   const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
-  const [entryMode, setEntryMode] = useState<'evaluate' | 'suggestion'>('evaluate');
-  const [consultingSuggestion, setConsultingSuggestion] = useState<{ filename: string; content: string } | null>(null);
-  const [suggestionProgress, setSuggestionProgress] = useState<SuggestionBatchProgress | null>(null);
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisState | null>(null);
   const [budgetPrompt, setBudgetPrompt] = useState<{ estimate: FullEstimate; run: () => void } | null>(null);
@@ -361,9 +311,7 @@ export default function CorretorV3Page() {
   const [dragging, setDragging] = useState(false);
   const [confidenceFilter, setConfidenceFilter] = useState<Confidence[]>([1, 2, 3]);
   const [triaging, setTriaging] = useState(false);
-  const newRef = useRef<HTMLInputElement>(null);
   const fonteRef = useRef<HTMLInputElement>(null);
-  const excelRef = useRef<HTMLInputElement>(null);
   const [fonteInput, setFonteInput] = useState<{ name: string; fonte: Fonte } | null>(null);
   const [sourceProgress, setSourceProgress] = useState<{ done: number; total: number } | null>(null);
   const recheckRef = useRef<HTMLInputElement>(null);
@@ -452,6 +400,8 @@ export default function CorretorV3Page() {
     abortRef.current = ac;
     setAnalysis({ running: true, stages: { det: { done: 1, total: 1 }, ata: { done: 1, total: 1 } }, spentUsd: 0, estimateUsd: phase2Usd });
     try {
+      if (!hasActiveExecution()) await beginExecution({ studyId: ctx.studyId, version: ctx.version, documentSha1: ctx.ir.sha1, budgetUsd: Math.ceil((ctx.estimate.costUsd * 2 + 1) * 100) / 100,
+        context: { cidade: confirmed.cidade, uf: confirmed.uf, outras: confirmed.outras ?? [], fonte: ctx.fonte ?? null } });
       // grava a ata confirmada + cidade/UF validadas (a régua da revisão)
       await confirmAta(ctx.studyId, confirmed.ata, confirmed.cidade, confirmed.uf);
 
@@ -493,39 +443,29 @@ export default function CorretorV3Page() {
         await saveReport(ctx.studyId, res.report);
       }
 
-      if (res.textCostUsd > 0 || res.textFindings.length) {
-        await registerIaPass(ctx.studyId, 'texto', `${ctx.estimate.textSlides} slides · ${TEXT_REVIEW_MODEL}`,
-          res.textCostUsd, res.textTokens.input, res.textTokens.output);
-      }
-      if (res.visionCostUsd > 0 || res.visionFindings.length) {
-        await registerIaPass(ctx.studyId, 'visao_tabela', `${ctx.estimate.candidates.length} imagens · ${MODEL}`,
-          res.visionCostUsd, res.visionTokens.input, res.visionTokens.output);
-      }
-
       const nIa = res.textFindings.length + res.visionFindings.length;
       const custo = res.textCostUsd + res.visionCostUsd;
       if (res.aborted) {
         toast.warning('Análise pausada — continua pendente', { description: `${formatBRL(custo)} gastos até aqui. O que já foi lido ficou no cache: ao retomar, só o restante é cobrado.` });
       } else {
         toast.success(`Análise completa — ${formatBRL(custo)}`, {
-          description: `${nIa} achado(s) de IA na worklist` +
-            (res.visionEscalated > 0 ? ` · ${res.visionEscalated} tabela(s) reconferida(s) no gpt-4o` : ''),
+          description: `${nIa} apontamento(s) na revisão` +
+            (res.visionEscalated > 0 ? ` · ${res.visionEscalated} tabela(s) com segunda leitura` : ''),
         });
       }
+      await finishExecution(res.aborted ? 'interrupted' : 'completed');
       await refreshList();
       setItems(await loadFindings(ctx.studyId));
     } catch (err) {
-      toast.error('Falha na análise', { description: err instanceof Error ? err.message : String(err) });
+      await finishExecution('failed').catch(() => {});
+      toast.error('Avaliação interrompida', { description: err instanceof Error ? err.message : 'Retome a preparação para conferir o estado.' });
     } finally {
       abortRef.current = null;
       setAnalysis(null);
     }
   }, [refreshList]);
 
-  /**
-   * FASE 1 (barata): DET + ata. Persiste a ata bruta e os DET, depois ABRE O PORTÃO
-   * (setGate) — nada de texto/visão paga roda antes da confirmação do analista.
-   */
+  /** Preparação de estudo existente: estimativa e escolha de materiais, sem IA. */
   const startPhase1AndGate = useCallback(async (
     study: { id: string; version: number }, ir: Ir, bytes: Uint8Array, fonte?: Fonte | null,
   ) => {
@@ -534,30 +474,7 @@ export default function CorretorV3Page() {
     setAnalysis({ running: true, stages: { det: { done: 1, total: 1 } }, spentUsd: 0, estimateUsd: 0 });
     try {
       const estimate = await estimateFullAnalysis(ir, bytes, MODEL);
-      const p1: Phase1Result = await runPhase1(ir, bytes, {
-        model: MODEL,
-        fonte,
-        candidates: estimate.candidates,
-        ataCandidate: estimate.ataCandidate,
-        signal: ac.signal,
-        onStage: async (p) => {
-          setAnalysis((prev) => prev && {
-            ...prev,
-            stages: { ...prev.stages, [p.stage]: { done: p.done, total: p.total } },
-            spentUsd: prev.spentUsd + (p.spentUsd ?? 0),
-          });
-        },
-      });
-
-      // persiste a ata bruta (card) e o custo da ata; DET já entrou no createStudy
-      if (p1.ata !== null || p1.ataCandidate) await saveAta(study.id, p1.ata);
-      if (p1.ataCostUsd > 0) {
-        await registerIaPass(study.id, 'visao_ata', `ata · ${MODEL}`, p1.ataCostUsd, p1.ataTokens.input, p1.ataTokens.output);
-      }
-      await insertIaFindings(study.id, p1.detFindings, 'DET', study.version);
-      await refreshList();
-      setItems(await loadFindings(study.id));
-
+      const p1: Phase1Result = { detFindings: [], ata: null, ataCostUsd: 0, ataTokens: { input: 0, output: 0 }, candidates: estimate.candidates, ataCandidate: estimate.ataCandidate };
       const phase2Usd = Math.max(0, estimate.costUsd - p1.ataCostUsd);
       setGate({
         studyId: study.id, version: study.version, ir, bytes,
@@ -573,7 +490,7 @@ export default function CorretorV3Page() {
       abortRef.current = null;
       setAnalysis(null);
     }
-  }, [refreshList]);
+  }, []);
 
   /** Portão confirmado: valida orçamento da fase 2 e a executa. */
   const confirmGate = useCallback((value: PreAnalysisValue) => {
@@ -584,46 +501,58 @@ export default function CorretorV3Page() {
     // A ata já foi paga na fase 1; o orçamento restante é texto + visão.
     const phase2Usd = Math.max(0, gate.estimate.costUsd - gate.estimate.vision.costUsd) + gate.estimate.vision.costUsd;
     setGate(null);
-    const run = () => void runPaidAnalysis(ctx, value, gate.estimate.costUsd);
-    if (usdToBrl(phase2Usd) > BUDGET_STUDY_BRL) {
-      setBudgetPrompt({ estimate: gate.estimate, run: () => { setBudgetPrompt(null); run(); } });
-      return;
-    }
-    run();
+    const run = () => void (async () => {
+      await beginExecution({ studyId: ctx.studyId, version: ctx.version, documentSha1: ctx.ir.sha1, budgetUsd: Math.ceil((ctx.estimate.costUsd * 2 + 1) * 100) / 100, context: { cidade: value.cidade, uf: value.uf, outras: value.outras ?? [], fonte: ctx.fonte ?? null } });
+      if (!value.ata && gate.estimate.ataCandidate) {
+        const p1 = await runPhase1(ctx.ir, ctx.bytes, { model: MODEL, fonte: ctx.fonte, candidates: ctx.estimate.candidates, ataCandidate: ctx.estimate.ataCandidate });
+        value = { ...value, ata: p1.ata };
+      }
+      await runPaidAnalysis(ctx, value, gate.estimate.costUsd);
+    })().catch(async () => { await finishExecution('failed').catch(() => {}); toast.error('Não foi possível iniciar. Retome a preparação para conferir o custo.'); });
+    setBudgetPrompt({ estimate: gate.estimate, run: () => { setBudgetPrompt(null); run(); } });
   }, [gate, runPaidAnalysis, fonteInput]);
 
-  async function ingestNew(file: File) {
-    if (!/\.pptx$/i.test(file.name)) {
-      toast.error('Formato não suportado', { description: 'O corretor recebe estudos em .pptx.' });
+  async function ingestNew(prepared: PreparedStudy) {
+    const { file, bytes, ir, estimate, fonte, city, uf, outras } = prepared;
+    const duplicate = studies.find(s => s.lastSha1 === ir.sha1);
+    if (duplicate) {
+      if (window.confirm('Este arquivo já está registrado. Abrir o estudo existente sem nova avaliação?')) navigate(`/corretor/estudos/${duplicate.id}/resumo`);
       return;
     }
     setBusy('upload');
-    // Fonte escolhida nesta tela de criação, antes da apresentação.
-    const initialFonte = fonteInput;
+    let registeredId: string | null = null;
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const ir = await pptxToIr(bytes, file.name);
-      // Cofre local: retomar e vincular planilhas depois sem subir o PPTX de novo.
-      void savePptx(ir.sha1, file.name, bytes);
-      const findings = irToFindings(ir).filter((f) => !f.ok);
-      const id = await createStudy(
-        file.name.replace(/\.pptx$/i, ''),
-        { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name },
-        findings
-      );
-      toast.success('Triagem concluída (R$ 0)', {
-        description: `${ir.n_slides} slides · ${findings.length} pendências determinísticas`,
-      });
-      if (initialFonte) await saveStudyFonte(id, initialFonte.name, initialFonte.fonte);
-      await refreshList();
-      await openStudy(id);
-      setBusy(null);
-      // fase 1 (DET + ata) → portão de confirmação → fase 2 (paga)
-      await startPhase1AndGate({ id, version: 1 }, ir, bytes, initialFonte?.fonte ?? null);
-    } catch (err) {
-      toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
-      setBusy(null);
-    }
+      const saved = await savePptx(ir.sha1, file.name, bytes);
+      if (!saved) toast.info('O PowerPoint ficará disponível nesta aba. Guarde o original em Materiais para recuperá-lo depois.');
+      const findings = irToFindings(ir).filter(f => !f.ok);
+      const registered = await prepareStudyAtomic(file.name.replace(/\.pptx$/i, ''), { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name }, findings);
+      const id = registered.id;
+      registeredId = id;
+      if (!registered.created) { await refreshList(); await openStudy(id); return; }
+      if (fonte) await saveStudyFonte(id, `${prepared.sheets.length} planilhas`, fonte);
+      writeOutras(id, outras);
+      await confirmAta(id, null, city, uf);
+      await refreshList(); await openStudy(id);
+      await beginExecution({ studyId: id, version: 1, documentSha1: ir.sha1, budgetUsd: prepared.budgetUsd,
+        context: { cidade: city, uf, outras, fonte } });
+      // A intenção e o orçamento já foram confirmados na preparação, inclusive ata.
+      const ac = new AbortController(); abortRef.current = ac;
+      setAnalysis({ running: true, stages: {}, spentUsd: 0, estimateUsd: estimate.costUsd });
+      const p1 = await runPhase1(ir, bytes, { model: MODEL, fonte, candidates: estimate.candidates, ataCandidate: estimate.ataCandidate, signal: ac.signal,
+        onStage: p => setAnalysis(prev => prev && { ...prev, stages: { ...prev.stages, [p.stage]: { done: p.done, total: p.total } }, spentUsd: prev.spentUsd + (p.spentUsd ?? 0) }) });
+      if (p1.ata !== null) await saveAta(id, p1.ata);
+      await insertIaFindings(id, p1.detFindings, 'DET', 1);
+      if (ac.signal.aborted) { await finishExecution('interrupted'); return; }
+      if (p1.ata?.cidade && p1.ata?.uf && (p1.ata.cidade.toLocaleLowerCase() !== city.toLocaleLowerCase() || p1.ata.uf.toUpperCase() !== uf)) {
+        setGate({ studyId: id, version: 1, ir, bytes, ata: p1.ata, estimate, phase2Brl: formatBRL(Math.max(0, estimate.costUsd - p1.ataCostUsd)), fonte,
+          suggestion: { cidade: city, uf, origem: 'arquivo' }, cities: otherCities(ir, { cidade: city, uf }), profile: imageProfile(ir, estimate.candidates) });
+        await finishExecution('interrupted');
+        toast.info('A ata indicou outra localização. Confira antes de continuar.');
+        return;
+      }
+      await runPaidAnalysis({ studyId: id, version: 1, ir, bytes, estimate, fonte }, { cidade: city, uf, outras, ata: p1.ata }, Math.max(0, estimate.costUsd - p1.ataCostUsd));
+    } catch (error) { await finishExecution('failed').catch(() => {}); toast.error('Não foi possível concluir a avaliação', { description: error instanceof Error ? error.message : 'Retome a preparação para conferir o estado.' }); throw error; }
+    finally { setBusy(null); setAnalysis(null); abortRef.current = null; if (registeredId) navigate(`/corretor/estudos/${registeredId}/revisao`); }
   }
 
   async function handleFonte(e: React.ChangeEvent<HTMLInputElement>): Promise<Fonte | null> {
@@ -681,35 +610,6 @@ export default function CorretorV3Page() {
     }
   }
 
-  async function ingestSuggestion(file: File) {
-    if (!/\.pptx$/i.test(file.name)) {
-      toast.error('Formato não suportado', { description: 'A sugestão de análise recebe estudos em .pptx.' });
-      return;
-    }
-    setBusy('upload');
-    try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const ir = await pptxToIr(bytes, file.name);
-      const batchCount = consultingSuggestionBatchCount(ir);
-      if (batchCount > 1) setSuggestionProgress({ current: 0, total: batchCount, phase: 'batch' });
-      const content = await generateConsultingSuggestion(ir, setSuggestionProgress);
-      setConsultingSuggestion({ filename: file.name, content });
-      toast.success('Sugestão de análise gerada');
-    } catch (err) {
-      toast.error('Falha ao gerar sugestão', { description: err instanceof Error ? err.message : String(err) });
-    } finally {
-      setBusy(null);
-      setSuggestionProgress(null);
-    }
-  }
-
-  function handleNew(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = '';
-    if (entryMode === 'suggestion') void ingestSuggestion(file);
-    else void ingestNew(file);
-  }
 
   /**
    * Retoma a análise completa de um estudo que parou na triagem inicial (portão
@@ -897,29 +797,33 @@ export default function CorretorV3Page() {
   }
 
   async function handleStatus(ruleId: string, s: FindingStatus) {
-    if (!selected) return;
-    if (!await ensureAccess('registrar sua decisão de revisão')) return;
+    if (!selected) return false;
+    if (!await ensureAccess('registrar sua decisão de revisão')) return false;
     const ids = reviewedItems.find(i => i.ruleId === ruleId)?.duplicateRuleIds ?? [ruleId];
     setItems((prev) => prev.map((i) => (ids.includes(i.ruleId) ? { ...i, status: s, verdict: s === 'corrigido' || s === 'pendente' ? null : i.verdict } : i)));
     try {
       await Promise.all(ids.map(id => setFindingStatus(selected.id, id, s)));
+      return true;
     } catch (err) {
       toast.error('Falha ao salvar status', { description: err instanceof Error ? err.message : String(err) });
       setItems(await loadFindings(selected.id));
+      return false;
     }
   }
 
   async function handleVerdict(ruleId: string, verdict: 'bug' | 'fp') {
-    if (!selected) return;
-    if (!await ensureAccess('registrar sua decisão de revisão')) return;
+    if (!selected) return false;
+    if (!await ensureAccess('registrar sua decisão de revisão')) return false;
     const status: FindingStatus = verdict === 'fp' ? 'ignorado' : 'pendente';
     const ids = reviewedItems.find(i => i.ruleId === ruleId)?.duplicateRuleIds ?? [ruleId];
     setItems((prev) => prev.map((item) => ids.includes(item.ruleId) ? { ...item, status, verdict } : item));
     try {
       await Promise.all(ids.map(id => setFindingVerdict(selected.id, id, verdict)));
+      return true;
     } catch (err) {
       toast.error('Falha ao registrar falso positivo', { description: err instanceof Error ? err.message : String(err) });
       setItems(await loadFindings(selected.id));
+      return false;
     }
   }
 
@@ -1006,86 +910,15 @@ export default function CorretorV3Page() {
 
   const blockingPend = wl.confidence.filter(([level]) => level <= 2).reduce((total, [, findings]) => total + findings.length, 0);
 
+  if (analysis?.running && selected) return <main className="corretor-projects cp-preparation">
+    <header className="cp-heading"><div><p className="cp-eyebrow">Avaliação em andamento</p><h1>{selected.nome}</h1><p className="cp-muted">{selected.nSlides} slides · {fonteInput ? fonteInput.name : 'Sem planilhas vinculadas'}</p></div></header>
+    <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} />
+    <p className="cp-muted">Mantenha esta aba aberta. Os lotes com retorno confirmado ficam guardados; uma interrupção pode ser retomada após conferir o orçamento.</p>
+  </main>;
+
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
   if (!selected && routeStudyId) return <div className="p-6"><p role="status">{loadingList || loadingStudy ? 'Abrindo revisão…' : 'Estudo não encontrado.'}</p><Link to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>;
-  if (!selected) {
-    return (
-      <div className="corretor-projects cp-new-study">
-        <Link className="cp-back" to={portfolioHref(searchParams.get('carteira') ?? '')}><ArrowLeft size={16} /> Voltar aos estudos</Link>
-        <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>Novo estudo</h1><p className="cp-muted">Escolha o relatório e, se tiver, as planilhas de cálculo.</p></div></header>
-        <div className="cp-new-content">
-          {/* Dropzone herói */}
-          <input ref={newRef} type="file" accept=".pptx" className="hidden" onChange={handleNew} />
-          <input ref={fonteRef} type="file" accept=".json,application/json" className="hidden" onChange={handleFonte} />
-          <input ref={excelRef} type="file" accept=".xlsx,.xlsm" multiple className="hidden" onChange={handleExcelSources} />
-          <div className="cp-actions" aria-label="Tipo de análise">
-            <Button variant={entryMode === 'evaluate' ? 'default' : 'outline'} disabled={busy !== null} onClick={() => { setConsultingSuggestion(null); setEntryMode('evaluate'); }}>Revisar estudo</Button>
-            <Button variant={entryMode === 'suggestion' ? 'default' : 'outline'} disabled={busy !== null} onClick={() => { setConsultingSuggestion(null); setEntryMode('suggestion'); }}>Sugestão de análise</Button>
-          </div>
-          {consultingSuggestion ? (
-            <section className="rounded-xl border border-border bg-card p-5 space-y-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div><h2 className="text-sm font-semibold">Sugestão de Análise</h2><p className="text-xs text-muted-foreground">{consultingSuggestion.filename}</p></div>
-                <button onClick={() => { setConsultingSuggestion(null); setEntryMode('evaluate'); }} className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-muted">Nova análise</button>
-              </div>
-              <article className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-lg bg-muted/40 p-4 text-sm leading-6 text-foreground">{consultingSuggestion.content}</article>
-            </section>
-          ) : (
-            <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() => busy === null && newRef.current?.click()}
-              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={(e) => {
-                e.preventDefault(); setDragging(false);
-                const f = e.dataTransfer.files?.[0];
-                if (f) void (entryMode === 'suggestion' ? ingestSuggestion(f) : ingestNew(f));
-              }}
-              disabled={busy !== null}
-              className={cn('cp-presentation w-full rounded-xl border-2 border-dashed px-6 py-10 flex flex-col items-center justify-center gap-3 text-center transition-colors', dragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 bg-card', busy !== null && 'opacity-70 cursor-wait')}
-            >
-              {busy === 'upload' ? (
-                <div className="relative h-10 w-28" aria-hidden="true">
-                  <img src={brainLogo} alt="" className="absolute inset-0 h-full w-full object-contain opacity-15" />
-                  <img src={brainLogo} alt="" className="absolute inset-0 h-full w-full animate-pulse object-contain" />
-                </div>
-              ) : <Upload className={cn('w-8 h-8', dragging ? 'text-primary' : 'text-muted-foreground')} />}
-              <div className="w-full max-w-lg">
-                <p className="text-sm font-medium">
-                  {busy === 'upload'
-                    ? (entryMode === 'suggestion'
-                      ? (suggestionProgress?.phase === 'batch'
-                        ? `Processando lote ${suggestionProgress.current} de ${suggestionProgress.total}`
-                        : suggestionProgress?.phase === 'compile'
-                          ? 'Compilando a sugestão final…'
-                          : 'Gerando sugestão…')
-                      : 'Lendo o estudo…')
-                    : 'Escolher apresentação PowerPoint (.pptx)'}
-                </p>
-                {entryMode === 'suggestion' && suggestionProgress ? (
-                  <>
-                    <p className="mt-0.5 text-xs text-muted-foreground">Este arquivo será processado em lotes e pode demorar um pouco mais que o habitual devido ao tamanho.</p>
-                    <Progress className="mt-3 h-2" value={suggestionProgress.phase === 'compile' ? 100 : Math.round((suggestionProgress.current / suggestionProgress.total) * 100)} />
-                  </>
-                ) : (
-                  <p className="text-xs text-muted-foreground mt-0.5">{entryMode === 'suggestion' ? 'A IA usa os dados extraídos para estruturar avaliação, recomendação e orientações ao analista.' : <>Primeiro uma pré-análise gratuita; você confirma a cidade e as planilhas antes de rodar a análise completa.</>}</p>
-                )}
-              </div>
-
-            </button>
-            </div>
-          )}
-
-          {entryMode === 'evaluate' && <section className="cp-source-upload" aria-label="Planilhas opcionais">
-            <FileSpreadsheet size={28} aria-hidden="true" /><div><h2>Planilhas de cálculo <span className="cp-muted">Opcional</span></h2><p className="cp-muted">Inclua os arquivos Excel para cruzar os números do relatório com a base de cálculo.</p>
-            {fonteInput && <p role="status">{fonteInput.name}</p>}
-            <Button variant="outline" disabled={busy !== null || sourceProgress !== null} onClick={() => excelRef.current?.click()}>{sourceProgress ? `Lendo planilhas ${sourceProgress.done}/${sourceProgress.total}` : fonteInput ? 'Trocar planilhas' : 'Escolher planilhas Excel'}</Button></div>
-          </section>}
-        </div>
-      </div>
-    );
-  }
+  if (!selected) return <StudyPreparationPage back={portfolioHref(searchParams.get('carteira') ?? '')} onStart={ingestNew} />;
 
   // ─── WORKSPACE ───────────────────────────────────────────────────────────────
   return (
@@ -1172,7 +1005,7 @@ export default function CorretorV3Page() {
             </button>
           )}
           <button
-            onClick={async () => { if (!await ensureAccess('excluir este estudo')) return; await deleteStudy(selected.id); navigate(portfolioHref(searchParams.get('carteira') ?? '')); }}
+            onClick={async () => { if (!await ensureAccess('excluir este estudo') || !window.confirm(`Excluir o estudo “${selected.nome}” e seu histórico? Esta ação não pode ser desfeita.`)) return; try { await deleteStudy(selected.id); navigate(portfolioHref(searchParams.get('carteira') ?? '')); } catch { toast.error('Não foi possível excluir. O estudo continua disponível.'); } }}
             className="text-muted-foreground hover:text-destructive p-1.5"
             title="Excluir estudo"
           >
@@ -1254,7 +1087,7 @@ export default function CorretorV3Page() {
       )}
 
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-6 py-5 space-y-5">
+        <div className="w-full px-4 md:px-6 py-5 space-y-5">
           {/* Passo único: análise completa dispara sozinha no upload/reconferir */}
           {analysis?.running && (
             <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} />
@@ -1293,10 +1126,7 @@ export default function CorretorV3Page() {
               {!pending && !analysis?.running && <>
                 <Suspense fallback={<p role="status">Preparando bancada…</p>}><ReviewBench key={selected.id} study={selected} items={reviewedItems.filter(i=>(i.resolvidoNaVersao===null||i.status==='pendente')&&confidenceFilter.includes(confidenceOf(i.finding,i.origem)))} renderFinding={item=><V3FindingCard item={item} onStatus={status=>void handleStatus(item.ruleId,status)} onVerdict={verdict=>void handleVerdict(item.ruleId,verdict)}/>} /></Suspense>
               </>}
-              {/* Card de regras */}
-              <section className="pt-4">
-                <RulesCard />
-              </section>
+
             </>
           )}
         </div>
@@ -1310,267 +1140,10 @@ export default function CorretorV3Page() {
         />
       )}
 
-      {triaging && wl.triageQueue.length > 0 && (
-        <TriageOverlay
-          queue={wl.triageQueue}
-          onStatus={handleStatus}
-          onVerdict={handleVerdict}
-          groupOf={(type) => reviewedItems.filter((i) => i.status === 'pendente' && i.finding.type === type)}
-          onClose={() => { setTriaging(false); setWorkspaceTab('slides'); setConfidenceFilter([1, 2, 3]); }}
-        />
-      )}
+      {triaging && wl.triageQueue.length > 0 && <StudyQuickReview study={selected} queue={wl.triageQueue} onStatus={handleStatus} onVerdict={handleVerdict} onClose={() => { setTriaging(false); setConfidenceFilter([1, 2, 3]); }} />}
+
     </div>
   );
 }
 
 // ─── Card expansivo com todas as regras ───────────────────────────────────
-
-function RulesCard() {
-
-  const detRules = Object.entries(ERROR_CATALOG).filter(
-    ([_, meta]) => meta.motor === 'DET'
-  );
-  const iaRules = Object.entries(ERROR_CATALOG).filter(
-    ([_, meta]) => meta.motor === 'IA' || meta.motor === 'DET+IA'
-  );
-
-  const RuleItem = ({ type, meta }: { type: string; meta: typeof ERROR_CATALOG['PERCENTAGE_SUM'] }) => (
-    <div className="py-2">
-      <div className="flex items-start justify-between gap-2 mb-1">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium">{meta.label}</span>
-            <span className={cn('text-[10px] rounded px-1.5 py-0.5 border', MODE_META[meta.mode].className)}>
-              {MODE_META[meta.mode].label}
-            </span>
-            <span className="text-[10px] rounded px-1.5 py-0.5 border bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/30">
-              {meta.motor}
-            </span>
-          </div>
-        </div>
-        <span className="text-[10px] font-mono text-muted-foreground shrink-0">{type}</span>
-      </div>
-      <p className="text-xs text-muted-foreground">{meta.description}</p>
-      <span className="text-[10px] text-muted-foreground italic mt-1 block">
-        Padrão: {meta.viz}
-      </span>
-    </div>
-  );
-
-  return (
-    <section aria-label="Regras aplicadas">
-      <div className="rounded-lg border bg-card p-4">
-        <h3 className="text-sm font-semibold">Catálogo de verificações</h3><p className="cp-muted">Verificações disponíveis no motor; a cobertura deste estudo depende dos materiais e da execução registrada.</p>
-        <div className="mt-4 space-y-4">
-          {/* Regras Determinísticas */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-foreground">Determinísticas (DET)</span>
-              <span className="text-[10px] text-muted-foreground">{detRules.length}</span>
-            </div>
-            <div className="space-y-1">
-              {detRules.map(([type, meta]) => (
-                <RuleItem key={type} type={type as ErrorType} meta={meta} />
-              ))}
-            </div>
-          </div>
-
-          {/* Regras de IA */}
-          <div className="space-y-2 border-t border-border pt-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-foreground">Com IA (IA · DET+IA)</span>
-              <span className="text-[10px] text-muted-foreground">{iaRules.length}</span>
-            </div>
-            <div className="space-y-1">
-              {iaRules.map(([type, meta]) => (
-                <RuleItem key={type} type={type as ErrorType} meta={meta} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function DeckRuler({ slides, items, onSlide }: { slides: number; items: FindingV3[]; onSlide: (slide: number) => void }) {
-  const pinned = new Set<number>();
-  for (const item of items.filter((item) => item.status === 'pendente')) {
-    for (const match of item.finding.slideRef.matchAll(/s(\d+)/g)) pinned.add(Number(match[1]));
-  }
-  return (
-    <div className="rounded-lg border bg-card p-3 space-y-2">
-      <div className="text-xs font-semibold">Vista geral do estudo</div>
-      <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(26px, 1fr))' }}>
-        {Array.from({ length: slides }, (_, index) => index + 1).map((slide) => <button key={slide} onClick={() => onSlide(slide)} title={`Slide ${slide}${pinned.has(slide) ? ' — possui pendência' : ''}`} className={cn('h-5 rounded text-[9px] font-mono border', pinned.has(slide) ? 'bg-amber-500/20 border-amber-500/50 text-amber-700 dark:text-amber-300' : 'bg-muted/40 border-border text-muted-foreground hover:border-primary/50')}>{slide}</button>)}
-      </div>
-      <p className="text-[10px] text-muted-foreground">Pinos âmbar indicam slides com pendência; clique para abrir a varredura daquele ponto.</p>
-    </div>
-  );
-}
-
-function ProblemGroup({ type, items, onStatus, onVerdict, onGroupStatus }: {
-  type: ErrorType; items: FindingV3[];
-  onStatus: (ruleId: string, status: FindingStatus) => void;
-  onVerdict: (ruleId: string, verdict: 'bug' | 'fp') => void;
-  onGroupStatus: (items: FindingV3[], status: FindingStatus) => void;
-}) {
-  const level = confidenceOf(items[0].finding, items[0].origem);
-  const [open, setOpen] = useState(level !== 3);
-  return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <div className="rounded-lg border border-border bg-card">
-        <div className="flex items-center gap-2 px-3 py-2">
-          <CollapsibleTrigger className="text-left flex-1 min-w-0 inline-flex items-center gap-2">
-            <span className={cn('text-[10px] rounded px-1.5 py-0.5 border font-medium', CONFIDENCE_META[level].className)}>{CONFIDENCE_META[level].label}</span>
-            <span className="text-xs font-semibold">{errorLabel(type)} ({items.length})</span>
-            <span className="text-[10px] text-muted-foreground">{open ? 'ocultar' : 'ver grupo'}</span>
-          </CollapsibleTrigger>
-          <button onClick={() => void onGroupStatus(items, 'corrigido')} className="text-[10px] rounded border border-border px-2 py-1 hover:bg-muted">Corrigir grupo</button>
-          <button onClick={() => void onGroupStatus(items, 'ignorado')} className="text-[10px] rounded border border-border px-2 py-1 hover:bg-muted">Ignorar grupo</button>
-        </div>
-        <CollapsibleContent className="border-t border-border p-2 space-y-2">
-          {items.map((item) => <V3FindingCard key={item.ruleId} item={item} onStatus={(status) => onStatus(item.ruleId, status)} onVerdict={(verdict) => onVerdict(item.ruleId, verdict)} />)}
-        </CollapsibleContent>
-      </div>
-    </Collapsible>
-  );
-}
-
-function WlHead({ title, count, hint }: { title: string; count?: number; hint?: string }) {
-  return (
-    <div className="flex items-center gap-2 pt-1">
-      <h3 className="text-sm font-semibold">{title}</h3>
-      {count !== undefined && <span className="text-[10px] text-muted-foreground">{count} achado(s)</span>}
-      {hint && <span className="text-[10px] text-muted-foreground italic">· {hint}</span>}
-      <div className="flex-1 border-t border-border" />
-    </div>
-  );
-}
-
-// ─── WS-3: modo triage por teclado ────────────────────────────────────────────
-// Um card por vez, decisão rápida com o teclado. A fila é congelada na abertura para
-// não reembaralhar a cada decisão; o resumo aparece ao fim.
-
-function TriageOverlay({ queue, onStatus, onVerdict, groupOf, onClose }: {
-  queue: FindingV3[];
-  onStatus: (ruleId: string, status: FindingStatus) => void;
-  onVerdict: (ruleId: string, verdict: 'bug' | 'fp') => void;
-  groupOf: (type: string) => FindingV3[];
-  onClose: () => void;
-}) {
-  // A fila nasce congelada. Aceitar grupo remove as ocorrências futuras apenas
-  // desta sessão; os achados continuam pendentes para a correção de verdade.
-  const [frozen, setFrozen] = useState(queue);
-  const [total] = useState(queue.length);
-  const [i, setI] = useState(0);
-  const [tally, setTally] = useState({ aceitos: 0, corrigidos: 0, fp: 0, ignorados: 0 });
-
-  const advance = useCallback(() => setI((n) => n + 1), []);
-  const item = frozen[i];
-
-  const act = useCallback((kind: 'aceitar' | 'corrigido' | 'fp' | 'ignorar' | 'grupo') => {
-    if (!item) return;
-    if (kind === 'aceitar') { setTally((t) => ({ ...t, aceitos: t.aceitos + 1 })); advance(); return; }
-    if (kind === 'corrigido') { onStatus(item.ruleId, 'corrigido'); setTally((t) => ({ ...t, corrigidos: t.corrigidos + 1 })); advance(); return; }
-    if (kind === 'ignorar') { onStatus(item.ruleId, 'ignorado'); setTally((t) => ({ ...t, ignorados: t.ignorados + 1 })); advance(); return; }
-    if (kind === 'fp') { onVerdict(item.ruleId, 'fp'); setTally((t) => ({ ...t, fp: t.fp + 1 })); advance(); return; }
-    if (kind === 'grupo') {
-      const remaining = frozen.slice(i).filter((candidate) => candidate.finding.type === item.finding.type).length;
-      setTally((t) => ({ ...t, aceitos: t.aceitos + remaining }));
-      setFrozen((current) => current.filter((candidate, index) => index <= i || candidate.finding.type !== item.finding.type));
-      advance();
-    }
-  }, [item, advance, onStatus, onVerdict, groupOf, frozen, i]);
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      const el = e.target as HTMLElement | null;
-      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable)) return;
-      switch (e.key) {
-        case 'Enter': case 'ArrowRight': e.preventDefault(); act('aceitar'); break;
-        case 'c': case 'C': act('corrigido'); break;
-        case 'f': case 'F': act('fp'); break;
-        case 'i': case 'I': act('ignorar'); break;
-        case 'g': case 'G': act('grupo'); break;
-        case 'ArrowLeft': setI((n) => Math.max(0, n - 1)); break;
-        case 'Escape': onClose(); break;
-      }
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [act, onClose]);
-
-  const done = i >= frozen.length;
-  const groupSize = item ? groupOf(item.finding.type).length : 0;
-  const conf = item ? confidenceOf(item.finding, item.origem) : 1;
-
-  return (
-    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur flex flex-col">
-      <div className="border-b bg-card px-6 py-3 flex items-center gap-4">
-        <Zap className="w-4 h-4 text-primary" />
-        <h2 className="text-sm font-semibold">Triagem rápida</h2>
-        <span className="text-xs text-muted-foreground">{done ? 'concluída' : `${Math.min(tally.aceitos + tally.corrigidos + tally.fp + tally.ignorados + 1, total)} de ${total}`}</span>
-        <div className="flex-1"><Progress value={total ? ((tally.aceitos + tally.corrigidos + tally.fp + tally.ignorados) / total) * 100 : 100} className="h-1.5 max-w-md" /></div>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1"><X className="w-4 h-4" /></button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-6 py-8">
-          {done ? (
-            <div className="text-center space-y-4 py-12">
-              <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-              <div>
-                <p className="text-lg font-semibold">Triagem concluída</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {tally.aceitos} aceito(s) · {tally.corrigidos} corrigido(s) · {tally.fp} FP · {tally.ignorados} ignorado(s)
-                </p>
-              </div>
-              <button onClick={onClose} className="text-sm rounded-md px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90">Voltar à worklist</button>
-            </div>
-          ) : item ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <span className={cn('text-[11px] rounded px-2 py-0.5 border font-medium', CONFIDENCE_META[conf].className)}>{CONFIDENCE_META[conf].icon} {CONFIDENCE_META[conf].label}</span>
-                <span className="text-xs font-medium">{errorLabel(item.finding.type as ErrorType)}</span>
-                {item.finding.slideRef.split('×').map((ref) => <span key={ref} className="text-[10px] font-mono rounded border border-border px-1 text-muted-foreground">{ref.trim()}</span>)}
-              </div>
-              <div className="rounded-lg border bg-card p-4 space-y-3">
-                <p className="text-sm font-medium">{item.finding.title}</p>
-                <p className="text-xs text-muted-foreground">{item.finding.detail}</p>
-                {item.finding.evidenceImage && (
-                  <a href={item.finding.evidenceImage} target="_blank" rel="noreferrer" className="block">
-                    <img src={item.finding.evidenceImage} alt={`Evidência do ${item.finding.slideRef}`} className="max-h-64 rounded border border-border object-contain" />
-                  </a>
-                )}
-                {item.finding.viz && <VizSwitch finding={item.finding} />}
-              </div>
-              {groupSize > 1 && (
-                <p className="text-[11px] text-amber-600">
-                  Há {groupSize} itens do tipo “{errorLabel(item.finding.type as ErrorType)}”. <kbd className="rounded border px-1">G</kbd> decide todos de uma vez.
-                </p>
-              )}
-              <div className="flex flex-wrap items-center gap-2">
-                <TriageKey k="Enter" label="Aceitar" onClick={() => act('aceitar')} />
-                <TriageKey k="C" label="Já corrigi" onClick={() => act('corrigido')} />
-                <TriageKey k="F" label="Não é erro" onClick={() => act('fp')} />
-                <TriageKey k="I" label="Ignorar" onClick={() => act('ignorar')} />
-                {groupSize > 1 && <TriageKey k="G" label={`Aceitar grupo (${groupSize})`} onClick={() => act('grupo')} />}
-                <div className="flex-1" />
-                <button onClick={() => setI((n) => Math.max(0, n - 1))} disabled={i === 0} className="text-[11px] text-muted-foreground hover:text-foreground disabled:opacity-40">← anterior</button>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TriageKey({ k, label, onClick }: { k: string; label: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} className="inline-flex items-center gap-1.5 text-xs rounded-md border border-border px-3 py-1.5 hover:border-primary/50">
-      <kbd className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono">{k}</kbd> {label}
-    </button>
-  );
-}

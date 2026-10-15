@@ -1,3 +1,9 @@
+### 2026-10-15 — Corretor: preparação contínua, execução controlada e revisão legível — Gabriel / Codex
+- **Mudança:** upload prepara materiais antes de toda IA; orçamento explícito inclui ata, rascunho recuperável e criação por hash. Registro privado de execução/reservas/respostas por lote, sem repetição automática de retorno desconhecido. Visualizador único e texto abaixo, triagem ampla/assíncrona, português e catálogo na carteira.
+- **Evidência/estado:** [resultado F1–F6](../features/corretor-vocacionais/design/RESULTADO_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md),288 testes/2 pulados, dez passes reais,13 controles SQL e9 Edge/banco local, jornada Chromium com PPTX/11Excel/PDF reais e serviços simulados, build/tipos/lint. Conversão PowerPoint local153páginas/ocultos/manifesto, original intacto. **Validado localmente**, sem IA paga/escrita remota/push. Três falhas na suíte geral Sinduscon; arquivo isolado5/5, sem alterar aquela frente.
+- **Etapas/Pendências:** A2/A3 continuam parciais; ativar migration/`corretor-execution`/três funções pagas/frontend coordenadamente após revisão. F3 servidor e recuperação em outro navegador permanecem abertas; não confundir prova local de conversão com serviço hospedado. Próximo publicar com autorização e conferir runtime, materiais e retomada no site.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
 ### 2026-10-15 — Corretor: plano de fluxo contínuo após teste humano — Gabriel / Codex
 - **Diagnóstico:** upload ainda abre revisão/leitura de ata antes da escolha de Excel; prévia duplicada; descrições do modelo sem apresentação em português; triagem limitada por max-width. Prévia integral depende de render/material da mesma versão. Capturas de Gabriel constituem rejeição de usabilidade da fatia publicada, não mudança de gabarito.
 - **Entrega:** [plano técnico F0–F6](../features/corretor-vocacionais/design/PLAN_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md) e [protótipo navegável](../features/corretor-vocacionais/design/PROTOTIPO_FLUXO_CONTINUO_2026-10-15.html). Preparação contínua/decisão Excel, custo antes de toda IA inclusive ata, retomada, slide único grande/texto abaixo, português, triagem ampla e catálogo na carteira.
@@ -2179,6 +2185,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**15/10 — Corretor F1–F6:** preparação/revisão validadas localmente; registro de execução e prévias têm limites de ativação/infraestrutura no resultado F1–F6. A2/A3/F3 servidor não encerradas.
+
 | # | Etapa | Status |
 |---|---|---|
 | 1 | Migração Streamlit → React V1 (paridade) | ✅ |
@@ -2205,6 +2213,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **Corretor v0.73:** revisar/publicar lote de fluxo contínuo, ativar migration/Edge/frontend e conferir produção. Conversão automática hospedada e recuperação da execução em outro navegador permanecem abertas; sem IA paga sem lote/orçamento.
 
 - [ ] **FIERGS — retorno de 06/10:** após publicar a contingência auditada, conferir o PDF/CSV 2T2026 gerado por Gabriel: os sete condomínios devem aparecer nas páginas 55/57/59/60 sem alterar loteamentos, preços ou outros totais indevidamente. A consulta ao payload bruto atual continua pendente por timeout, e o aceite explícito da Juliana ainda falta. A página 55 foi mantida com vertical e subtotal; confirmar essa interpretação de “Desconsiderar” se ela esperar exclusão integral.
 

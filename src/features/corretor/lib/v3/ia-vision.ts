@@ -1,3 +1,4 @@
+import { invokeAnalysis } from './execution';
 // Corretor v3.2 — passe de VISÃO sobre as imagens de tabela (Fase C produtizada).
 // Cache por sha1 no Supabase (vision_cache): cada imagem é paga UMA vez.
 // A redundância linha×coluna×total auto-valida a extração (fase_c_visao.md).
@@ -412,20 +413,10 @@ async function extractWithModel(
     contexto: `slide ${c.slide} · ${c.titulo ?? ''} · seção ${c.secao ?? '?'}`,
     tipo: c.tipo,
   };
-  // Limite de requisições (429) e erro temporário (5xx) são esperados num estudo
-  // com 150 imagens: espera e tenta de novo, em vez de derrubar a análise inteira.
+  // Retorno desconhecido não recebe retry no cliente: a execução reconcilia o lote.
   type Resp = { tables: RawTable[]; locais_visiveis?: RawLocale[]; unidades?: RawUnit[]; tem_fonte?: boolean; inputTokens: number; outputTokens: number; error?: string };
-  let data: Resp | null = null;
-  for (let attempt = 0; ; attempt++) {
-    const res = await supabase.functions.invoke<Resp>('analyze-table-image', { body });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const status: number | undefined = (res.error as any)?.context?.status;
-    const message = res.error?.message ?? res.data?.error ?? '';
-    if (!message) { data = res.data; break; }
-    const retryable = status !== 400 && status !== 413 && !/inválid|não suportad|grande demais/i.test(message);
-    if (!retryable || attempt >= VISION_RETRIES) throw new Error(message);
-    await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt + Math.random() * 1000));
-  }
+  const {data,error} = await invokeAnalysis<Resp>('analyze-table-image', body);
+  if (error || data?.error) throw new Error(error?.message ?? data?.error);
   return {
     payload: sanitizeVisionPayload(data),
     inputTokens: data?.inputTokens ?? 0,

@@ -11,6 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { pptxToIr } from '../../audit/pptx-to-ir';
 import { irToFindings } from '../../audit/ir-rules';
 import { findTableImages } from '../table-images';
+import { unzipSync, zipSync } from 'fflate';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PPTX = join(HERE, 'teste_corretor.pptx');
@@ -23,6 +24,14 @@ const gab: Gabarito = JSON.parse(readFileSync(GAB, 'utf-8'));
 const bytes = new Uint8Array(readFileSync(PPTX));
 
 describe('Corretor v3 — pipeline DET sobre estudo sintético', () => {
+  it('não associa imagem e texto por posição quando a ordem interna diverge', async () => {
+    const files = unzipSync(bytes), decoder = new TextDecoder(), encoder = new TextEncoder();
+    const xml = decoder.decode(files['ppt/presentation.xml']);
+    const ids = xml.match(/<p:sldId\s[^>]*\/>/g)!;
+    expect(ids.length).toBeGreaterThan(1);
+    files['ppt/presentation.xml'] = encoder.encode(xml.replace(ids[0], '__FIRST__').replace(ids[1], ids[0]).replace('__FIRST__', ids[1]));
+    await expect(pptxToIr(zipSync(files), 'ordem-alterada.pptx')).rejects.toThrow('ordem interna');
+  });
   it('recupera todos os erros DET injetados, sem falso positivo nos controles', async () => {
     const ir = await pptxToIr(bytes, 'teste_corretor.pptx');
     const findings = irToFindings(ir).filter((f) => !f.ok); // só problemas

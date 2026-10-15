@@ -1,5 +1,13 @@
 # Decisões de Frontend — Rebrain
 
+### 2026-10-15 — Preparação contínua e visualizador único no Corretor
+
+- **Contexto:** upload iniciava ata/transição antes dos Excel; imagens duplicadas e triagem estreita prejudicavam decisão.
+- **Decisão:** página de preparação local com comando único/limite confirmado; registro de lotes no servidor antes de IA; `StudySlideViewer` compartilhado, página sob demanda e texto abaixo; diálogo amplo de revisão com decisões assíncronas. Catálogo em rota lazy de referência. Reutiliza Button/Input/Select/Dialog/Progress e tokens SE idênticos.
+- **Consequência:** novo protocolo exige migration e publicação coordenada das funções/frontend; arquivo completo antigo continua dependência real para prévias. Conversor local não é serviço hospedado. Decisões e motores conservados; tabela de execução não ganha acesso público. O texto acessível de fechar do primitive Dialog foi traduzido para português.
+- **Estado:** validado localmente, limites/ativação em `docs/features/corretor-vocacionais/design/RESULTADO_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md`; não produção.
+
+
 ### 2026-10-15 — Autenticação contextual e PDF complementar na bancada Corretor
 
 - **Contexto:** token de API não basta para a identidade de escrita; evidências recortadas não representam slide inteiro. PowerPoint local omitiu slides ocultos na exportação padrão.

@@ -1,0 +1,25 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { vi, it, expect } from 'vitest';
+import StudyPreparationPage from './StudyPreparationPage';
+vi.mock('../lib/v3/local-materials',()=>({loadLocalMaterial:async()=>null,saveLocalMaterial:async()=>{}}));
+vi.mock('../lib/audit/pptx-to-ir',()=>({pptxToIr:async()=>({sha1:'a'.repeat(40),n_slides:3,arquivo:'estudo.pptx',slides:[]})}));
+vi.mock('../lib/v3/pipeline',()=>({estimateFullAnalysis:async()=>({costUsd:0.1,candidates:[],textSlides:3})}));
+vi.mock('../lib/v3/city-suggestion',()=>({suggestCity:()=>({cidade:'Curitiba',uf:'PR',origem:'arquivo'})}));
+vi.mock('../lib/v3/pre-analysis',()=>({imageProfile:()=>({tabelasNativas:0,tabelasImagem:0,fichas:0})}));
+vi.mock('../lib/v3/fonte-extractor-browser',()=>({extractFonteFromExcel:async()=>({blocos:[]})}));
+it('cancelar seletor não escolhe sem planilhas; clique duplo inicia uma única vez',async()=>{
+ const onStart=vi.fn(()=>new Promise<void>(()=>{}));
+ const {container}=render(<MemoryRouter><StudyPreparationPage back="/corretor" onStart={onStart}/></MemoryRouter>);
+ await waitFor(()=>expect(screen.getByRole('button',{name:'Escolher PowerPoint'})).not.toBeDisabled());
+ const file=new File(['mock'],'estudo.pptx');Object.defineProperty(file,'arrayBuffer',{value:async()=>new ArrayBuffer(1)});
+ fireEvent.change(container.querySelector('input[accept=".pptx"]')!,{target:{files:[file]}});
+ await screen.findByLabelText('Cidade do estudo');
+ const start=screen.getByRole('button',{name:'Iniciar avaliação'});
+ expect(start).toBeDisabled();expect(onStart).not.toHaveBeenCalled();
+ fireEvent.change(container.querySelector('input[accept=".xlsx,.xlsm"]')!,{target:{files:[]}});
+ expect(start).toBeDisabled();
+ fireEvent.click(screen.getByRole('button',{name:'Continuar sem planilhas'}));expect(start).not.toBeDisabled();
+ fireEvent.click(start);fireEvent.click(start);await waitFor(()=>expect(onStart).toHaveBeenCalledOnce());
+ expect(onStart).toHaveBeenCalledWith(expect.objectContaining({city:'Curitiba',uf:'PR',sheets:[],budgetUsd:1.2}));
+});

@@ -1,3 +1,4 @@
+import { invokeAnalysis } from './execution';
 // Corretor v3.3 (Fase A da ata) — extração da ata de abertura para JSON estruturado.
 // Cache-first no vision_cache (sha1 da imagem, ou do texto no caso DOCX); cada ata é
 // paga uma vez. Extração da LLM é HIPÓTESE — o analista revisa (fases B/C).
@@ -94,9 +95,9 @@ function toBase64(bytes: Uint8Array): string {
 }
 
 async function callEdge(body: Record<string, unknown>): Promise<{ ata: AtaData | null; inputTokens: number; outputTokens: number }> {
-  const { data, error } = await supabase.functions.invoke<{
+  const { data, error } = await invokeAnalysis<{
     ata: AtaData | null; inputTokens: number; outputTokens: number; error?: string;
-  }>('analyze-ata-image', { body });
+  }>('analyze-ata-image', body);
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
   return { ata: data?.ata ?? null, inputTokens: data?.inputTokens ?? 0, outputTokens: data?.outputTokens ?? 0 };

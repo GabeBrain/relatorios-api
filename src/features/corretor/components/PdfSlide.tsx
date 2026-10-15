@@ -5,7 +5,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.m
 
 export default function PdfSlide({url,slide,zoom=1,expectedPages}:{url:string;slide:number;zoom?:number;expectedPages?:number}){
  const canvas=useRef<HTMLCanvasElement>(null),[doc,setDoc]=useState<PDFDocumentProxy|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(true);
- useEffect(()=>{let active=true;setDoc(null);setError('');setBusy(true);const task=pdfjs.getDocument({url,isEvalSupported:false});task.promise.then(d=>{if(active)setDoc(d);}).catch(()=>{if(active){setError('Não foi possível abrir a prévia PDF. Tente anexar novamente.');setBusy(false);}});return()=>{active=false;void task.destroy();};},[url]);
+ useEffect(()=>{let active=true;setDoc(null);setError('');setBusy(true);const task=pdfjs.getDocument({url});task.promise.then(d=>{if(active)setDoc(d);}).catch(()=>{if(active){setError('Não foi possível abrir a prévia PDF. Tente anexar novamente.');setBusy(false);}});return()=>{active=false;void task.destroy();};},[url]);
  useEffect(()=>{if(!doc)return;let active=true;let render:RenderTask|undefined;setBusy(true);setError('');
   if(expectedPages&&doc.numPages!==expectedPages){setError(`A prévia tem ${doc.numPages} páginas, mas o estudo tem ${expectedPages} slides. Exporte novamente incluindo os slides ocultos para manter as referências corretas.`);setBusy(false);return;}
   if(slide>doc.numPages){setError('Este slide não está disponível na prévia anexada.');setBusy(false);return;}
