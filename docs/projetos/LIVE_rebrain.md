@@ -1,3 +1,9 @@
+### 2026-10-15 — Validação do Fechamento: filtros de divergências e tipo de empreendimento — Edgar / Codex
+- **Mudança:** divergências respeitam os filtros de Tipo, Padrão, Empreendimento, Ano, Trimestre, Período e cidade ativa. A seleção ocorre após a validação, preservando as médias dos grupos. A contagem exclui aprovadas e acompanha o recorte. Incluída a coluna Tipo Empreendimento antes de Status, oculta por padrão na grade e presente no Excel.
+- **Evidência:** dois testes direcionados de filtros e typecheck aprovados; validação local da tela confirmada pelo usuário.
+- **Etapas/Pendências:** implementação concluída; publicação da revisão pelo fluxo Git. Persistência das aprovações segue dependente do serviço Supabase existente.
+- **Monday:** —
+
 ### 2026-10-15 — Corretor: aviso pós-pré-análise antes do push — Gabriel / Codex
 - **Mudança:** aviso persistente em resumo/revisão explica que o estudo ainda não foi avaliado por completo, orienta confirmar cidade/UF e escolha das planilhas antes de Rodar análise; reabertura orienta retomar. Componente compartilhado, sem modal/fechamento, sem alterar motores ou aprovação de custo.
 - **Evidência:** PreAnalysisNotice.tsx, tipos aprovados e complemento em [revisão visível](../features/corretor-vocacionais/design/REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md). Sem testes adicionais, IA ou alterações remotas.
