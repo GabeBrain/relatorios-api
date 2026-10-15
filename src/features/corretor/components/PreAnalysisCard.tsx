@@ -87,8 +87,8 @@ export default function PreAnalysisCard({
   return (
     <div className="rounded-xl border-2 border-primary/40 bg-card shadow-sm">
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
-        <h3 className="text-sm font-semibold">Pré-análise — confirme e rode</h3>
-        <span className="text-[11px] text-muted-foreground">nada foi cobrado ainda</span>
+        <h3 className="text-sm font-semibold">Confirmar e iniciar análise completa</h3>
+        <span className="text-[11px] text-muted-foreground">custo da próxima etapa</span>
       </div>
 
       <div className="grid gap-5 px-4 py-4 md:grid-cols-2">

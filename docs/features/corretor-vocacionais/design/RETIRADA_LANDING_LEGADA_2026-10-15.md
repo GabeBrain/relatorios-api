@@ -14,3 +14,6 @@ Tipagem aprovada. ESLint sem erros, um aviso preexistente de dependência groupO
 Push autorizado por Gabriel; após atualização Lovable, conferir Novo estudo e reabrir estudo existente, inclusive por favorito antigo. Ativação dos componentes de persistência preparados na sessão anterior segue dependência separada.
 
 Evidência local ignorada: `.local-inputs/a1-browser-1792079484681/unified-result.json` e capturas `new-1440.png`, `new-390.png`, `new-320.png`. Largura útil móvel conferida após animação do shell, sem depender apenas de ausência de overflow.
+
+## Diagnóstico posterior — dependência SQL ausente
+Gabriel recebeu42883 ao executar materiais_workspace: `public.corretor_access_enabled()` não existe no banco remoto. A função é definida pela migration anterior `20261014213854_corretor_access_claims.sql`; não é criada pelo frontend ou pelo deploy da Edge Function. Conferida definição exata com app_metadata emitido pelo servidor e prazo de validade, compatível com requireProjectIdentity. Orientado instalar a função com privilégios originais antes de repetir a migration de materiais. Nenhuma execução remota feita pelo agente; se objetos já existem, conferir execução parcial antes de repetir. Diagnóstico não altera motores nem publica migrações.

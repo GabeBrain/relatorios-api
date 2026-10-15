@@ -1,3 +1,9 @@
+## Complemento 0.72.2 — aviso persistente pós-pré-análise — 15/10/2026
+Resumo e revisão sem relatório completo exibem “Este estudo ainda não foi avaliado por completo”, com instrução de confirmar cidade/UF e escolha das planilhas antes de Rodar análise; reabertura orienta retomar. Componente compartilhado sem fechar/ocultar. Não altera motores, custo ou decisões. Preparado localmente, sem push/produção.
+
+## Versão 0.72.2 — 15/10/2026 — revisão visível
+Validado localmente: mapa e evidências sempre abertos, preenchimento por confiança em toda a célula, sem placeholder de prévia quando não há conteúdo. Achados sem imagem preservados. Cartões SE, primeira pendência na entrada e continuação explícita. Nenhuma alteração de motores/decisões. Inventário publicado17V3/4 incompletos, somente ata/DET registrados; não iniciada IA paga. Ver `design/REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md`. Retomada durável de execução continua pendente.
+
 ## Versão 0.72.1 — 15/10/2026 — interface única
 Estado: validado localmente, publicação ainda a conferir. Removida a landing operacional antiga de Novo estudo e a alternância V1/V2/V3. Carteira canônica preserva Arquivo para estudos anteriores. Envio no design SE com Excel opcional, ligado à pré-análise. Revisão sempre na bancada; parâmetros antigos de lista não reabrem composição legada. Sem mudança em regras/decisões humanas/IA. Ver `design/RETIRADA_LANDING_LEGADA_2026-10-15.md`.
 

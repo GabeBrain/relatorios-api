@@ -17,6 +17,18 @@
 - **Etapas/Pendências:** G0 parcial, acessos pessoais Drive/GeoBrain/Rebrain/Lovable/GitHub da máquina ainda não testados; Mapbox somente chave declarada. Proposto G1 SP capital/2T2026/núcleo vertical, aguardando confirmação de Lucas antes de aprofundar; G2, geração real e aceite não iniciados. Regressões de produto não repetidas nesta rodada documental.
 - **Pausa:** férias a partir de 19/10, retorno não informado; estado/comandos/pendências registrados sem trabalho presumido na ausência. Gabriel coordena decisões posteriores e mantém Corretor V3/Quanti 2026. Preservados Secovi/FIERGS e domínios paralelos; sem API de dados, estudo real, publicação ou escrita Monday.
 - **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+### 2026-10-15 — Corretor: aviso pós-pré-análise antes do push — Gabriel / Codex
+- **Mudança:** aviso persistente em resumo/revisão explica que o estudo ainda não foi avaliado por completo, orienta confirmar cidade/UF e escolha das planilhas antes de Rodar análise; reabertura orienta retomar. Componente compartilhado, sem modal/fechamento, sem alterar motores ou aprovação de custo.
+- **Evidência:** PreAnalysisNotice.tsx, tipos aprovados e complemento em [revisão visível](../features/corretor-vocacionais/design/REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md). Sem testes adicionais, IA ou alterações remotas.
+- **Etapas/Pendências:** preparado localmente para envio junto da revisão visual; sem push, produção não verificada. Retomada durável continua aberta.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-15 — Corretor: revisão visível e inventário de estudos incompletos — Gabriel / Codex
+- **Desenvolvimento:** mapa sempre aberto/células preenchidas, prévia somente com conteúdo, evidências sem expander e cartões no padrão SE. Retomar análise completa explícito; removido aviso enganoso de nenhum custo na pré-análise. Motores e decisões inalterados.
+- **Evidência:** [relatório](../features/corretor-vocacionais/design/REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md), leitura pública52 estudos/17V3/4 incompletos, todos quatro apenas passe ata/DET;13V3 com relatório. Browser interceptado1440/390/320, hash igual, sem IA/escrita; tipos/lint/build aprovados. Seis commits Lovable sincronizados com autorização, documentos paralelos restaurados.
+- **Etapas/Pendências:** validado localmente; produção a conferir. Retomada ainda depende do PPTX e contexto React não equivale a checkpoint persistido. Quatro incompletos não foram processados; orçamento/lote e originais necessários para nova IA. A2/A3 parcial, próxima fatia persistência de execução/erro/retomada idempotente.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
 ### 2026-10-15 — Corretor: retirada da landing legada — Gabriel / Codex
 - **Mudança:** uma única carteira; Novo estudo usa a composição SE com apresentação e Excel opcional. Retirada a segunda lista e os menus V1/V2/V3. A revisão abre sempre a bancada, inclusive com `layout=list` antigo; decisões e motores preservados. Planilhas escolhidas antes do PPTX seguem à pré-análise e são vinculadas ao estudo.
 - **Evidência:** tipagem aprovada, ESLint zero erros/um aviso anterior, build concluído; Chromium com backend interceptado verifica cinco entradas, retorno com filtro, bancada em link antigo, telas 1440/390/320 e zero escrita/IA. [Registro técnico](../features/corretor-vocacionais/design/RETIRADA_LANDING_LEGADA_2026-10-15.md).
