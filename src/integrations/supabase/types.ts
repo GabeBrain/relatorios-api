@@ -38,6 +38,152 @@ export type Database = {
         }
         Relationships: []
       }
+      corretor_originals: {
+        Row: {
+          bytes: number
+          created_at: string
+          id: string
+          original_name: string
+          path: string
+          project_id: string
+          sha1: string
+          sha256: string
+          version_id: string
+        }
+        Insert: {
+          bytes: number
+          created_at?: string
+          id?: string
+          original_name: string
+          path: string
+          project_id: string
+          sha1: string
+          sha256: string
+          version_id: string
+        }
+        Update: {
+          bytes?: number
+          created_at?: string
+          id?: string
+          original_name?: string
+          path?: string
+          project_id?: string
+          sha1?: string
+          sha256?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_originals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_originals_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "study_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_project_members: {
+        Row: {
+          owner_id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          owner_id: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          owner_id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_project_members_project_id_owner_id_fkey"
+            columns: ["project_id", "owner_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_projects"
+            referencedColumns: ["id", "owner_id"]
+          },
+        ]
+      }
+      corretor_projects: {
+        Row: {
+          analyst: string
+          city: string
+          client_name: string
+          created_at: string
+          display_name: string
+          due_date: string | null
+          id: string
+          notes: string
+          owner_id: string
+          reference_period: string
+          reviewer: string
+          study_id: string | null
+          study_type: string
+          uf: string
+          updated_at: string
+        }
+        Insert: {
+          analyst?: string
+          city?: string
+          client_name?: string
+          created_at?: string
+          display_name: string
+          due_date?: string | null
+          id?: string
+          notes?: string
+          owner_id: string
+          reference_period?: string
+          reviewer?: string
+          study_id?: string | null
+          study_type?: string
+          uf?: string
+          updated_at?: string
+        }
+        Update: {
+          analyst?: string
+          city?: string
+          client_name?: string
+          created_at?: string
+          display_name?: string
+          due_date?: string | null
+          id?: string
+          notes?: string
+          owner_id?: string
+          reference_period?: string
+          reviewer?: string
+          study_id?: string | null
+          study_type?: string
+          uf?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_projects_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: true
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas_estab_manifesto: {
         Row: {
           bytes_processados: number | null
@@ -1111,6 +1257,18 @@ export type Database = {
           p_total_links_in_year: number
         }
         Returns: undefined
+      }
+      register_corretor_original: {
+        Args: {
+          p_bytes: number
+          p_name: string
+          p_path: string
+          p_project: string
+          p_sha1: string
+          p_sha256: string
+          p_version: string
+        }
+        Returns: string
       }
     }
     Enums: {
