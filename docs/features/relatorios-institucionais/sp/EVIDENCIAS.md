@@ -1,5 +1,9 @@
 # Evidências do mapeamento — 15/10/2026
 
+## Pós-merge para publicação — 16/10/2026
+
+Merge autorizado `c5b1d6a`, sem conflitos, mantém `103e3df` e os quatro commits remotos até `07ca8bb`. LIVE e decisões conferidos por identidade de três pontos, sem linhas perdidas/extras. 108 testes SP e build pós-merge aprovados (3473 módulos), check-live-docs aprovado. Publicação ainda a conferir: antes do push o domínio servia `index-v7U-Wb1K.js`, sem rota/chunk SP; HTTP 200 na rota sozinho não prova atualização. Nenhuma alteração autoral nos motores de Gabriel.
+
 ## Vinte complementos e acesso por rota — 16/10/2026
 
 108 testes em 10 arquivos, tipagem, lint do escopo e build local aprovados. Dezoito cenários Edge offline aprovados, zero chamadas reais/erros, 16 requests mockados no ensaio inteiro. Testes verificam reconciliação por padrão/mês/janela, seis quadros, bloqueio em ausência/divergência, preservação de negativos, ausência de porcentagem com total não positivo, navegação das 20 páginas e retirada em invalidação. Menu e busca global não oferecem SP; rota direta carrega, sem afrouxar autenticação.

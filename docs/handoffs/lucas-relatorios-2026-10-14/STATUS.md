@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## Integração autorizada e envio — 16/10/2026
+
+Lucas respondeu **Sim, integrar e publicar após validar**. Merge `c5b1d6a` integrou os quatro remotos de Gabriel/Lovable sem conflitos, mantendo ambos os históricos. Lidas as novas entradas de Corretor/recomendador; não alterar essas regras nesta frente. Identidade de merge dos documentos LIVE_rebrain e FRONTEND_DECISIONS conferida por multiconjunto: zero linhas faltantes/extras. Build pós-merge e 108 testes SP aprovados, check-live-docs aprovado. Árvore limpa, 25 commits locais antes deste registro; push da main autorizado nesta sessão. Publicação deve ser verificada pelo bundle/rota efetivamente servido; o site antes do push ainda não continha a rota SP. Acesso permanece só pela rota, sem menu/busca. Sem coleta real/Monday/exportação, férias desde 19/10 preservadas.
+
 ## Lote de 20 e publicação solicitada — 16/10/2026
 
 - **Implementado:** páginas 27–40 com lançamentos/vendas dos sete padrões originais; 41–46 com quadros R/V/O por padrão e tipologia. Complementares, mesmas fontes/janelas, sem novos requests. Total de 46 posições, sem alegar 46 dos 85 originais completos. Quadros reconciliados, oferta do último mês, negativos preservados, base não positiva sem percentual.

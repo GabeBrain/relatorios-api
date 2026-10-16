@@ -1,3 +1,8 @@
+### 2026-10-16 — Relatórios institucionais: integração e envio autorizados — Codex, Lucas
+- **Integração:** Lucas aprovou merge/publicação após validação. `c5b1d6a` integra os quatro commits de Gabriel/Lovable até `07ca8bb`, sem conflitos e sem mudanças autorais no Corretor. LIVE/decisões preservados integralmente por conferência de três pontos. Novas entradas remotas de recomendador/métricas lidas; permanecem sob Gabriel.
+- **Validação/etapa:** 108 testes SP, build pós-merge (3473 módulos) e check-live-docs aprovados. Push da main autorizado; verificar o bundle publicado antes de declarar deploy. Site anterior ainda sem rota SP. Prévia tem 46 posições, incluindo complementos/pendências; acesso só pela rota, sem menu/busca. Sem dados reais novos/Monday/exportação; férias 19/10 e retomada em STATUS preservadas.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 2026-10-16 — Relatórios institucionais: vinte páginas e acesso somente por rota — Codex, autorizado por Lucas
 - **Desenvolvimento:** páginas 27–40 de lançamentos/vendas por sete padrões originais da API e 41–46 de quadros R/V/O por padrão/tipologia; complementos, sem consulta adicional. Totais reconciliados e estoque do último mês. Menu e busca deixam de oferecer SP; rota lazy/login/escopo preservados. Reuso de canvas/artes/gráfico histórico/Button/Dialog, navegação com rolagem limitada; estados vazio, falha, atual e histórico cobertos.
 - **Validação:** 108 testes/10 arquivos, tipagem/lint/build locais e 18 cenários Edge offline aprovados. Vinte capturas revisadas, zero chamadas reais/erros; todo 2025 e tipologias de QA fictícios. Não é homologação nem conclusão de vinte slides originais.
