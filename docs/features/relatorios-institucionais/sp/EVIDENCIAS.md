@@ -1,5 +1,11 @@
 # Evidências do mapeamento — 15/10/2026
 
+## Vinte complementos e acesso por rota — 16/10/2026
+
+108 testes em 10 arquivos, tipagem, lint do escopo e build local aprovados. Dezoito cenários Edge offline aprovados, zero chamadas reais/erros, 16 requests mockados no ensaio inteiro. Testes verificam reconciliação por padrão/mês/janela, seis quadros, bloqueio em ausência/divergência, preservação de negativos, ausência de porcentagem com total não positivo, navegação das 20 páginas e retirada em invalidação. Menu e busca global não oferecem SP; rota direta carrega, sem afrouxar autenticação.
+
+Revisadas as 20 capturas em `.local-inputs/relatorios-lucas/sp/template-review-1792181464193/`: `slide-{27..40}-pattern-synthetic-2025.png` e `slide-{41..46}-table.png`. Todo 2025 e as distribuições por tipologia do diagnóstico são fictícios; os totais municipais/padrões 2026 reproduzem respostas fornecidas por Lucas. Isso não é validação de dados históricos reais ou homologação do relatório. Build anterior à integração remota; build pós-merge/publicação ainda pendentes.
+
 ## Doze detalhes por segmento — 16/10/2026
 
 Build final pós-merge aprovado (3466 módulos); tipagem e lint finais sem erros. Constante de navegação movida para o domínio de segmentos para manter Fast Refresh. Checkpoint não libera exportação nem homologação.

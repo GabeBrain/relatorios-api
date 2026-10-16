@@ -36,6 +36,7 @@ export interface SpHistoryBatch {
   comparisons: Partial<Record<SpHistoryMetric, SpLaunchHistory>>;
   segments?: { current: SpDistribution; previous: SpDistribution; currentMonth: string; previousMonth: string };
   segmentDetails?: Record<string, Record<SpHistoryMetric, SpLaunchHistory>>;
+  patternDetails?: Record<string, Record<SpHistoryMetric, SpLaunchHistory>>;
   checks: SpCheck[];
 }
 export interface SpPreview {

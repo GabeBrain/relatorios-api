@@ -86,5 +86,21 @@ export function buildSpHistoryBatch(input: SpHistoryBatchInput, municipal: SpPre
     }
     segmentDetails[segment.group] = details;
   }
-  return { status: 'ready', issues: [], comparisons, checks, segmentDetails, segments: { current: currentSegments, previous: previousSegments, currentMonth: months.current.at(-1)!, previousMonth: months.previous.at(-1)! } };
+  const monthlyPatterns = windows.map((source, year) => (year === 0 ? current : previous).monthly!.map(row => summarizeSpGroups(source, [row.month], row.month)));
+  const patternDetails: NonNullable<SpHistoryBatch['patternDetails']> = {};
+  for (const pattern of current.patterns.rows) {
+    const details = {} as Record<SpHistoryMetric, SpLaunchHistory>;
+    const before = previous.patterns.rows.find(row => normalize(row.group) === normalize(pattern.group))!;
+    for (const metric of metrics) {
+      const rows = months.current.map((currentMonth, index) => ({ currentMonth, previousMonth: months.previous[index],
+        ...compare(monthlyPatterns[0][index].rows.find(row => normalize(row.group) === normalize(pattern.group))![metric], monthlyPatterns[1][index].rows.find(row => normalize(row.group) === normalize(pattern.group))![metric]),
+      }));
+      const totals = compare(pattern[metric], before[metric]);
+      const aggregate = (field: 'current' | 'previous') => metric === 'stock' ? rows.at(-1)![field] : rows.reduce((sum, row) => sum + row[field], 0);
+      if (aggregate('current') !== totals.current || aggregate('previous') !== totals.previous) return blocked('O detalhe mensal diverge dos totais por padrão.');
+      details[metric] = { status: 'ready', issues: [], rows, totals, checks };
+    }
+    patternDetails[normalize(pattern.group)] = details;
+  }
+  return { status: 'ready', issues: [], comparisons, checks, segmentDetails, patternDetails, segments: { current: currentSegments, previous: previousSegments, currentMonth: months.current.at(-1)!, previousMonth: months.previous.at(-1)! } };
 }

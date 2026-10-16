@@ -11,6 +11,9 @@ export const SP_SEGMENT_RULE = {
   },
 } as const;
 export const SP_DETAIL_PAGES = Object.keys(SP_SEGMENT_RULE.groups).flatMap(segment => (['launches', 'sales', 'stock'] as SpHistoryMetric[]).map(metric => ({ segment, metric, title: `${{ launches: 'Lançamentos', sales: 'Vendas', stock: 'Oferta' }[metric]} · ${segment}` })));
+export const SP_API_PATTERNS = ['Alto', 'Compacto', 'Econômico', 'Luxo', 'Médio', 'Médio-Alto', 'Standard'] as const;
+export const SP_PATTERN_PAGES = SP_API_PATTERNS.flatMap(pattern => (['launches', 'sales'] as const).map(metric => ({ pattern, metric, title: `${metric === 'launches' ? 'Lançamentos' : 'Vendas'} · padrão ${pattern}` })));
+export const SP_TABLE_PAGES = (['patterns', 'typologies'] as const).flatMap(dimension => (['launches', 'sales', 'stock'] as const).map(metric => ({ dimension, metric, title: `Quadro de ${{ launches: 'lançamentos', sales: 'vendas', stock: 'oferta' }[metric]} por ${dimension === 'patterns' ? 'padrão' : 'tipologia'}` })));
 const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 
 export function buildSpSegments(report: SpPreview): SpDistribution {

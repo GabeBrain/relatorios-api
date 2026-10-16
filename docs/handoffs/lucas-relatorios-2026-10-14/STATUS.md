@@ -1,5 +1,14 @@
 # Estado do handoff
 
+## Lote de 20 e publicação solicitada — 16/10/2026
+
+- **Implementado:** páginas 27–40 com lançamentos/vendas dos sete padrões originais; 41–46 com quadros R/V/O por padrão e tipologia. Complementares, mesmas fontes/janelas, sem novos requests. Total de 46 posições, sem alegar 46 dos 85 originais completos. Quadros reconciliados, oferta do último mês, negativos preservados, base não positiva sem percentual.
+- **Acesso:** rota lazy `/rebrain/relatorios-institucionais/sp` mantida; acesso removido do menu e busca global. Login/escopo autorizado existentes preservados.
+- **Validação:** 108 testes/10 arquivos, tipagem/lint/build locais aprovados, 18 cenários Edge offline, zero chamadas reais/erros. Todas as 20 capturas revisadas. Histórico 2025 e tipologias de QA fictícios; dados reais continuam dependentes da sessão pessoal.
+- **Git/publicação:** Lucas autorizou push e publicação. Fetch encontrou 4 remotos (`bb0f22a`, `73624ab`, `3cf4e55`, `07ca8bb`) e 23 locais sobre origin; decisão específica de merge solicitada, ainda pendente neste checkpoint. Trabalho salvo isoladamente antes de integrar. Não fazer push enquanto a divergência não for resolvida conforme resposta. Não há navegador autenticado disponível para Lovable (inventário vazio), e deploy ainda não verificado.
+- **Retomar:** integrar preservando ambos após resposta, ler LIVE remoto, validar build pós-merge/check-live-docs, push autorizado, verificar versão no domínio `geobrain-relatorios.lovable.app` e publicar via Lovable se necessário/acessível. Rota de produção com HTTP 200 sozinha não prova que esse código foi publicado.
+- **Limites:** sem coleta real, geração real, exportação ou Monday. Preservar Secovi/FIERGS, Corretor e Quanti/Gabriel; férias desde 19/10 sem execução agendada.
+
 ## Lote de 12 páginas complementares — 16/10/2026
 
 Build final pós-merge aprovado; tipagem e lint finais sem erros. As 26 páginas da navegação incluem prévias e pendências; a contagem não é percentual de conclusão do modelo de 85 slides.

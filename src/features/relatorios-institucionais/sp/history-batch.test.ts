@@ -6,6 +6,19 @@ import { syntheticHistoryBatch } from './__tests__/history-batch';
 
 const baseline = () => buildSpTemporalPreview(recordedInput(), '3T2026');
 describe('SP — lote histórico com 2025 fictício, sem consultas reais', () => {
+  it('reconcilia os sete padrões sem reclassificar os nomes da API', () => {
+    const result = buildSpHistoryBatch(syntheticHistoryBatch(), baseline());
+    const patterns = Object.values(result.patternDetails!);
+    expect(patterns).toHaveLength(7);
+    expect(result.patternDetails!.economico.launches.totals!.current).toBe(20328);
+    expect(result.patternDetails!.alto.sales.totals!.current).toBe(227);
+    for (const metric of ['launches', 'sales', 'stock'] as const) for (const year of ['current', 'previous'] as const) {
+      expect(patterns.reduce((sum, group) => sum + group[metric].totals![year], 0)).toBe(result.comparisons[metric]!.totals![year]);
+      result.comparisons[metric]!.rows.forEach((row, index) => expect(patterns.reduce((sum, group) => sum + group[metric].rows[index][year], 0)).toBe(row[year]));
+    }
+    const input = syntheticHistoryBatch(); input.previous.complete.stock = false;
+    expect(buildSpHistoryBatch(input, baseline()).patternDetails).toBeUndefined();
+  });
   it('reconcilia as doze páginas de detalhes por mês e janela, sem somar estoques', () => {
     const result = buildSpHistoryBatch(syntheticHistoryBatch(), baseline());
     const segments = Object.values(result.segmentDetails!);

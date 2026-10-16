@@ -1,5 +1,9 @@
 # Decisões e pontos abertos — SP
 
+## Vinte páginas e publicação por rota — 16/10/2026
+
+Lucas solicitou mais 20 páginas possíveis e autorizou push/publicação, mantendo apenas a rota. Escolhidos 14 históricos por padrão original e seis quadros atuais por padrão/tipologia, reaproveitando fontes e artes existentes. Não inventar equivalências adicionais, fontes de preços, INCC, IVV ou coordenadas para atingir contagem. Menu lateral e busca global removem o acesso SP; rota lazy e autenticação existentes preservadas. Navegação do relatório tem rolagem limitada para acomodar 46 botões sem empurrar indefinidamente o canvas. Publicação só pode ser declarada após verificação do domínio; push e sincronização Git não bastam como evidência de runtime.
+
 ## Lote de 12 detalhes — autorizado em 16/10/2026
 
 Lucas pediu lotes de 10–12 páginas. Escolhido detalhamento de três indicadores × quatro segmentos com dados já consultados, sem novos endpoints ou ampliação de janela. Páginas 15–26 são complementares no visual do modelo, não doze slides originais homologados. Classificação SP confirmada por Lucas aplicada aos dois anos, vigência histórica a revisar. Detalhes só são publicados após lote histórico reconciliado; agrupamento mensal deve somar totais municipais e seus acumulados devem reproduzir os segmentos. Estoque final não é soma; valores ausentes não viram zero, sinais negativos são preservados e base anterior não positiva não gera porcentagem. Reuso do gráfico histórico e canvas existentes, sem nova regra de UI global ou exportação.

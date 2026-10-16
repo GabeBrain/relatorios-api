@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { SpReportPages } from './SpReportPages';
-import { SP_DETAIL_PAGES } from './segments';
+import { SP_DETAIL_PAGES, SP_PATTERN_PAGES, SP_TABLE_PAGES } from './segments';
 import { buildSpTemporalPreview } from './temporal';
 import { recordedInput } from './__tests__/recorded';
 import { syntheticTypologyInput } from './__tests__/typology';
@@ -12,6 +12,26 @@ import { syntheticHistoryBatch } from './__tests__/history-batch';
 import { buildSpHistoryBatch } from './history-batch';
 
 describe('páginas SP', () => {
+  it('monta as vinte páginas por padrão e quadros, sem reaproveitar histórico inválido', () => {
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);
+    const typologies = buildSpTypologies(syntheticTypologyInput(), report);
+    const view = render(<SpReportPages report={{ ...report, historyBatch, typologies }} />);
+    expect(SP_PATTERN_PAGES.length + SP_TABLE_PAGES.length).toBe(20);
+    for (const [index, detail] of SP_PATTERN_PAGES.entries()) {
+      fireEvent.click(screen.getByRole('button', { name: `${index + 27}. ${detail.title}` }));
+      expect(screen.getByText(`Padrão da API: ${detail.pattern}`)).toBeInTheDocument();
+      expect(screen.getByText('julho / agosto · 2025 × 2026')).toBeInTheDocument();
+    }
+    for (const [index, table] of SP_TABLE_PAGES.entries()) {
+      fireEvent.click(screen.getByRole('button', { name: `${index + 41}. ${table.title}` }));
+      expect(screen.getByRole('img', { name: `Quadro reconciliado por ${table.dimension === 'patterns' ? 'padrão' : 'tipologia'}` })).toBeInTheDocument();
+    }
+    view.rerender(<SpReportPages report={report} />);
+    expect(screen.getByText('Quadro por tipologia indisponível')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: `27. ${SP_PATTERN_PAGES[0].title}` }));
+    expect(screen.getByText('Comparativo de lançamentos indisponível')).toBeInTheDocument();
+  });
   it('monta doze detalhes complementares e invalida todos com o lote', () => {
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);

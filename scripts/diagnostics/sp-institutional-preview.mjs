@@ -71,6 +71,12 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(`${base}/rebrain/relatorios-institucionais/sp`);
   await page.getByRole('heading', { name: 'SP institucional', exact: true }).waitFor();
+  assert.equal(await page.locator('aside a[href="/rebrain/relatorios-institucionais/sp"]').count(), 0);
+  await page.keyboard.press('Control+k');
+  await page.getByPlaceholder('Ir para… (páginas e projetos)').fill('SP institucional');
+  await page.getByText('Nada encontrado.', { exact: true }).waitFor();
+  await page.keyboard.press('Escape');
+  results.push({ state: 'rota direta disponível sem item no menu ou busca global', passed: true });
   await page.getByText('Faça login no cabeçalho para carregar os municípios monitorados.').waitFor();
   assert.equal(catalogCalls, 0);
   assert.equal(await page.getByRole('button', { name: 'Ver prévia com dados de teste' }).isDisabled(), true);
@@ -179,6 +185,23 @@ try {
     }
   }
   results.push({ state: 'doze detalhes complementares por segmento, rótulos sem sobreposição, 2025 fictício e nenhuma consulta extra', passed: true });
+  for (const [patternIndex, pattern] of ['Alto', 'Compacto', 'Econômico', 'Luxo', 'Médio', 'Médio-Alto', 'Standard'].entries()) {
+    for (const [metricIndex, metric] of ['Lançamentos', 'Vendas'].entries()) {
+      const number = 27 + patternIndex * 2 + metricIndex;
+      await slides.getByRole('button', { name: `${number}. ${metric} · padrão ${pattern}`, exact: true }).click();
+      await slides.getByText(`Padrão da API: ${pattern}`, { exact: true }).waitFor();
+      await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${number}-pattern-synthetic-2025.png`), animations: 'disabled' });
+    }
+  }
+  for (const [dimensionIndex, dimension] of ['padrão', 'tipologia'].entries()) {
+    for (const [metricIndex, metric] of ['lançamentos', 'vendas', 'oferta'].entries()) {
+      const number = 41 + dimensionIndex * 3 + metricIndex;
+      await slides.getByRole('button', { name: `${number}. Quadro de ${metric} por ${dimension}`, exact: true }).click();
+      await slides.getByRole('img', { name: `Quadro reconciliado por ${dimension}`, exact: true }).waitFor();
+      await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${number}-table.png`), animations: 'disabled' });
+    }
+  }
+  results.push({ state: 'vinte páginas por padrão e quadros, dados reconciliados, sem coleta adicional', passed: true });
   assert.equal(mockMarketCalls.length, 16);
   results.push({ state: 'três históricos em lote com 2025 fictício, oito requests adicionais mockados, balanços dos dois anos e navegação sem nova rede', passed: true });
   for (const [width, theme] of [[1440, 'light'], [1440, 'dark'], [390, 'light'], [390, 'dark']]) {
