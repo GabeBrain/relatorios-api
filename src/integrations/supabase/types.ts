@@ -99,6 +99,106 @@ export type Database = {
           },
         ]
       }
+      corretor_execution_batches: {
+        Row: {
+          batch_hash: string
+          cost_usd: number | null
+          created_at: string
+          execution_id: string
+          function_name: string
+          reserved_usd: number
+          response: Json | null
+          state: string
+        }
+        Insert: {
+          batch_hash: string
+          cost_usd?: number | null
+          created_at?: string
+          execution_id: string
+          function_name: string
+          reserved_usd: number
+          response?: Json | null
+          state: string
+        }
+        Update: {
+          batch_hash?: string
+          cost_usd?: number | null
+          created_at?: string
+          execution_id?: string
+          function_name?: string
+          reserved_usd?: number
+          response?: Json | null
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_execution_batches_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_executions: {
+        Row: {
+          budget_usd: number
+          confirmed_context: Json
+          context_hash: string
+          created_at: string
+          document_sha1: string
+          engine: string
+          id: string
+          owner_hash: string
+          reserved_usd: number
+          spent_usd: number
+          state: string
+          study_id: string
+          updated_at: string
+          version_n: number
+        }
+        Insert: {
+          budget_usd: number
+          confirmed_context?: Json
+          context_hash: string
+          created_at?: string
+          document_sha1: string
+          engine?: string
+          id?: string
+          owner_hash: string
+          reserved_usd?: number
+          spent_usd?: number
+          state?: string
+          study_id: string
+          updated_at?: string
+          version_n: number
+        }
+        Update: {
+          budget_usd?: number
+          confirmed_context?: Json
+          context_hash?: string
+          created_at?: string
+          document_sha1?: string
+          engine?: string
+          id?: string
+          owner_hash?: string
+          reserved_usd?: number
+          spent_usd?: number
+          state?: string
+          study_id?: string
+          updated_at?: string
+          version_n?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_executions_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       corretor_material_assets: {
         Row: {
           bytes: number
@@ -1403,6 +1503,35 @@ export type Database = {
         Returns: string
       }
       corretor_access_enabled: { Args: never; Returns: boolean }
+      corretor_claim_batch: {
+        Args: {
+          p_execution: string
+          p_function: string
+          p_hash: string
+          p_owner: string
+          p_reserve: number
+        }
+        Returns: Json
+      }
+      corretor_finish_batch: {
+        Args: {
+          p_cost: number
+          p_execution: string
+          p_hash: string
+          p_response: Json
+        }
+        Returns: undefined
+      }
+      corretor_prepare_study: {
+        Args: {
+          p_file: string
+          p_findings: Json
+          p_name: string
+          p_sha1: string
+          p_slides: number
+        }
+        Returns: Json
+      }
       rais_claim_history_snapshot: {
         Args: {
           p_lease_seconds?: number
