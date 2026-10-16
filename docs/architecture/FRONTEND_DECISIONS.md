@@ -1,5 +1,12 @@
 # Decisões de Frontend — Rebrain
 
+### 2026-10-16 — Preparação compartilhada e recomendação por versão
+
+- **Contexto:** recomendador existente perdeu acionamento na troca da landing; materiais sem confirmação visual, geração sem histórico/contabilidade de custo integrada.
+- **Decisão:** dois objetivos na mesma preparação, materiais preservados e preenchimento oliva/check só após entrada válida; Recomendação lazy dentro de StudyLayout, por versão. Previsão/limite antes da geração; resultado público salvo permite copiar/baixar/reabrir sem original ou IA. Button/Input/Select/Progress e tokens SE intactos, sem biblioteca ou primitive novo.
+- **Consequência:** custo e resultado persistidos pelo servidor; pausa não perde memos e desconhecido não repete. Consulta de histórico falha explicitamente; recomendação não substitui revisão nem interpreta Excel/raster. Métricas financeiras na calibração, separadas dos falsos positivos. Loading de versões encerrado também em falha; troca de arquivo/objetivo bloqueada durante geração na preparação.
+- **Estado:** validado localmente com materiais reais e serviços simulados; ativação coordenada de migration/duas funções/frontend e qualidade consultiva real pendentes. [Evidências](../features/corretor-vocacionais/design/RESULTADO_RECOMENDADOR_E_METRICAS_2026-10-16.md).
+
 ### 2026-10-16 — Rascunho separado da carteira pessoal do Corretor
 
 - **Complemento posterior de Gabriel (v0.73.2):** apresentação válida preparada com conta já registra estudo pendente, sem exigir cadastro/cidade/planilhas ou executar IA. Reutiliza a operação atômica existente e o ID no início explícito, com nova conferência de identidade/hash/versão/estado. Isso substitui a decisão anterior de só registrar o envio no início da avaliação para usuários autenticados; visitante continua local. Cancelar formulário não publica seus campos. Originais remotos não são prometidos por esse registro.

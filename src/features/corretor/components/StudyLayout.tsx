@@ -11,7 +11,7 @@ export default function StudyLayout({ id, name, location, section, context, vers
     <Link className="cp-back" to={portfolioHref(context)}><ArrowLeft size={16} aria-hidden="true" /> Voltar aos estudos</Link>
     <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>{name}</h1>{location && <p className="cp-muted">{location}</p>}</div><div className="cp-actions">{actions}</div></header>
     <nav className="cp-study-nav" aria-label="Áreas do estudo">
-      {([['resumo', 'Resumo'], ['revisao', 'Revisão'], ['materiais', 'Materiais'], ['historico', 'Histórico']] as const).map(([key, label]) => <Link key={key} to={studyHref(id, key, context, version)} aria-current={section === key ? 'page' : undefined}>{label}</Link>)}
+      {([['resumo', 'Resumo'], ['revisao', 'Revisão'], ['recomendacao','Recomendação'], ['materiais', 'Materiais'], ['historico', 'Histórico']] as const).map(([key, label]) => <Link key={key} to={studyHref(id, key, context, version)} aria-current={section === key ? 'page' : undefined}>{label}</Link>)}
     </nav>
     {children}
   </>;

@@ -10,7 +10,7 @@ import StudyQuickReview from '../components/StudyQuickReview';
 import { presentFindingPt } from '../lib/v3/present-finding-pt';
 import PreAnalysisNotice from '../components/PreAnalysisNotice';
 import { useGeobrainAccess } from '../lib/geobrain-access-context';
-import { requireProjectIdentity } from '../lib/projects';
+import { requireProjectIdentity, loadVersions } from '../lib/projects';
 const ReviewBench = lazy(() => import('../components/ReviewBench'));
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { portfolioHref } from '../lib/study-navigation';
@@ -568,6 +568,17 @@ export default function CorretorV3Page() {
     finally { setBusy(null); setAnalysis(null); abortRef.current = null; if (registeredId) navigate(`/corretor/estudos/${registeredId}/revisao`); }
   }
 
+  async function prepareRecommendation(prepared: PreparedStudy) {
+    const {file,ir,bytes}=prepared;
+    await savePptx(ir.sha1,file.name,bytes);
+    const registered=await prepareStudyAtomic(file.name.replace(/\.pptx$/i,''),{sha1:ir.sha1,nSlides:ir.n_slides,arquivo:file.name},irToFindings(ir).filter(f=>!f.ok));
+    const [current,versions]=await Promise.all([listStudies(true),loadVersions(registered.id)]);
+    const study=current.find(s=>s.id===registered.id),version=versions.find(v=>v.sha1===ir.sha1);
+    if(!study||!version)throw new Error('Não foi possível confirmar o vínculo com a versão do estudo.');
+    await clearPreparationDraft(ir.sha1,prepared.sheets.map(f=>`preparation:sheet:${f.name}:${f.size}:${f.lastModified}`));
+    return {study,version};
+  }
+
   async function handleFonte(e: React.ChangeEvent<HTMLInputElement>): Promise<Fonte | null> {
     if (selected && !await ensureAccess('atualizar a fonte numérica deste estudo')) return null;
     const file = e.target.files?.[0];
@@ -931,7 +942,7 @@ export default function CorretorV3Page() {
 
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
   if (!selected && routeStudyId) return <div className="p-6"><p role="status">{loadingList || loadingStudy ? 'Abrindo revisão…' : 'Estudo não encontrado.'}</p><Link to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>;
-  if (!selected) return <StudyPreparationPage back={portfolioHref(searchParams.get('carteira') ?? '')} onStart={ingestNew} />;
+  if (!selected) return <StudyPreparationPage back={portfolioHref(searchParams.get('carteira') ?? '')} onStart={ingestNew} onRecommendation={prepareRecommendation} />;
 
   // ─── WORKSPACE ───────────────────────────────────────────────────────────────
   return (

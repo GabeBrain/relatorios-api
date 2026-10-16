@@ -13,6 +13,7 @@ await db.exec(readFileSync('supabase/migrations/20260709110000_corretor_v3_ia.sq
 await db.exec(readFileSync('supabase/migrations/20260711120000_ia_passes_visao_ata.sql','utf8'));
 await db.exec("alter table studies_v3 add column generation text default 'v3';alter table studies_v3 add column relatorio jsonb;");
 await db.exec(readFileSync('supabase/migrations/20261015193000_corretor_execution_ledger.sql','utf8'));
+await db.exec(readFileSync('supabase/migrations/20261016153609_corretor_recommendation_metrics.sql','utf8'));
 const id='11111111-1111-4111-8111-111111111111',sha='a'.repeat(40),owner='b'.repeat(64);
 await db.query("insert into studies_v3(id,nome) values($1,'Referência')",[id]);
 await db.query("insert into study_versions(study_id,n,sha1,n_slides) values($1,1,$2,3)",[id,sha]);
