@@ -1,5 +1,9 @@
 # Evidências do mapeamento — 15/10/2026
 
+## Comparativos por segmento — 16/10/2026
+
+100 testes SP, tipagem/lint/build aprovados. Quinze cenários Edge offline aprovados, 16 requests mockados no ensaio inteiro (nenhum adicional para segmentos), zero chamadas reais/erros. Capturas 9/10/11 revisadas em `.local-inputs/relatorios-lucas/sp/template-review-1792162365508/slide-{9,10,11}-segment-history-synthetic-2025.png`: barras, rótulos e rodapé sem sobreposição. Todos os valores 2025 são fictícios; não representam resultados de mercado. Primeira tentativa visual corrigiu um seletor do diagnóstico; ensaio final completo aprovado. Regra de Lucas aplicada aos dois anos, vigência histórica ainda requer revisão humana; retorno real não observado pelo agente.
+
 ## Lote de históricos — 16/10/2026
 
 Tipagem SP, ESLint do escopo e build final aprovados; git diff --check sem erros.

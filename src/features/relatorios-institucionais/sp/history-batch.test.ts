@@ -13,6 +13,10 @@ describe('SP — lote histórico com 2025 fictício, sem consultas reais', () =>
     expect(result.comparisons.sales?.totals).toMatchObject({ current: 26824, previous: 20000, delta: 6824 });
     expect(result.comparisons.stock?.totals).toMatchObject({ current: 124706, previous: 101000, delta: 23706 });
     expect(result.comparisons.stock?.rows.map(row => row.current)).toEqual([128819, 124706]);
+    expect(result.segments?.current.rows.find(row => row.group === 'MCMV')?.launches).toBe(20328);
+    for (const metric of ['launches', 'sales', 'stock'] as const) {
+      expect(result.segments?.previous.rows.reduce((sum, row) => sum + row[metric], 0)).toBe(result.comparisons[metric]?.totals?.previous);
+    }
     expect(result.checks).toHaveLength(36);
     expect(result.checks.every(check => check.delta === 0)).toBe(true);
   });

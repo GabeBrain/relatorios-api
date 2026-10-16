@@ -142,3 +142,4 @@ Os endpoints abaixo foram conferidos no [OpenAPI versionado](../../../../src/ass
 ## Retomada
 
 Mapeamento concluído; nenhuma nova coleta de API, geração de relatório, publicação ou Monday nesta rodada. O próximo trabalho de implementação é o bloco 23/37/47 com contrato de tipologia e leitura curta delimitada; MCMV/INCC/IVV permanecem decisões metodológicas abertas. Férias de Lucas desde 19/10, retorno não informado: este mapa e `PLAN.md` guardam a retomada, sem trabalho agendado durante a ausência. Previsão humana de setembro em 22–25/10 não substitui a raiz observada.
+**Atualização 16/10 — segmentos:** páginas locais 9/10/11, artes originais 24/38/48, agora com comparação dos mesmos meses de dois anos após **Conferir históricos**. Sem requests adicionais; classificação SP de Lucas e totais reconciliados. Vigência histórica a revisar; retorno real de 2025 pendente. Não equivale a séries anuais completas desde 2021.

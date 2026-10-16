@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { SpPreview, SpTypologies } from './model';
 import { buildSpSegments } from './segments';
+import { SpSegmentHistorySlide } from './SpSegmentHistorySlide';
 import { SpLaunchHistorySlide } from './SpLaunchHistorySlide';
 import cover from './assets/cover.png';
 import projectsTemplate from './assets/template-13.png';
@@ -49,8 +50,8 @@ export function SpReportPages({ report }: { report: SpPreview }) {
     {page >= 11 ? <SpLaunchHistorySlide report={report} metric={page === 11 ? 'launches' : page === 12 ? 'sales' : 'stock'} /> : page > 0 && <>
       <p className="absolute left-[62px] top-[155px] text-[18px]">{report.quarter} · {real ? period : 'Dados fictícios · exemplo de desenvolvimento'}</p>
       <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity(page >= 5 && distribution?.status !== 'ready' ? null : report.metrics[metric])}</p></div>
-      {page >= 5 ? <DistributionChart result={distribution} metric={metric as 'launches' | 'sales' | 'stock'} kind={page >= 8 ? 'segmento' : 'tipologia'} /> : page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}
-      <p className={`absolute left-[62px] text-[16px] ${page >= 5 ? 'top-[605px]' : 'top-[590px]'}`}>{page === 1 ? 'Sem estimativa ou preenchimento com zero.' : page >= 5 ? 'Distribuição nos meses conferidos. Comparação com o ano anterior pendente.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
+      {page >= 8 && report.historyBatch?.status === 'ready' && report.historyBatch.segments ? <SpSegmentHistorySlide batch={report.historyBatch} metric={metric as 'launches' | 'sales' | 'stock'} /> : page >= 5 ? <DistributionChart result={distribution} metric={metric as 'launches' | 'sales' | 'stock'} kind={page >= 8 ? 'segmento' : 'tipologia'} /> : page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}
+      <p className={`absolute left-[62px] text-[16px] ${page >= 5 ? 'top-[605px]' : 'top-[590px]'}`}>{page === 1 ? 'Sem estimativa ou preenchimento com zero.' : page >= 8 && report.historyBatch?.status === 'ready' && report.historyBatch.segments ? 'Mesmos meses nos dois anos · regra de segmentos confirmada por Lucas.' : page >= 5 ? 'Distribuição nos meses conferidos. Comparação com o ano anterior pendente.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
     </>}
   </article>;
   const navigation = <nav aria-label="Navegação das páginas" className="flex flex-wrap gap-2">{titles.map((title, index) => <Button key={title} variant={page === index ? 'default' : 'outline'} aria-pressed={page === index} onClick={() => setPage(index)}>{index + 1}. {title}</Button>)}</nav>;

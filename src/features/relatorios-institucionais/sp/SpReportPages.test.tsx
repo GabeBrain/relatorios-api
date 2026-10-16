@@ -11,6 +11,20 @@ import { syntheticHistoryBatch } from './__tests__/history-batch';
 import { buildSpHistoryBatch } from './history-batch';
 
 describe('páginas SP', () => {
+  it('compara segmentos e remove o comparativo bloqueado', () => {
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);
+    const view = render(<SpReportPages report={{ ...report, historyBatch }} />);
+    for (const title of ['9. Lançamentos por segmento', '10. Vendas por segmento', '11. Oferta por segmento']) {
+      fireEvent.click(screen.getByRole('button', { name: title }));
+      expect(screen.getByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' })).toBeInTheDocument();
+      for (const group of ['Compactos', 'MCMV', 'Médio Padrão', 'Luxo']) expect(screen.getByText(group)).toBeInTheDocument();
+    }
+    expect(screen.getByText('2025 · 101.000 unidades')).toBeInTheDocument();
+    view.rerender(<SpReportPages report={{ ...report, historyBatch: { status: 'blocked', issues: ['Divergência'], comparisons: {}, checks: [] } }} />);
+    expect(screen.queryByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' })).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Distribuição por segmento em unidades e participação percentual' })).toBeInTheDocument();
+  });
   it('preenche o lote completo e mantém a oferta como fotografia, com bases negativas explícitas', () => {
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);

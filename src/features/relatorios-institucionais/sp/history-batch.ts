@@ -1,3 +1,4 @@
+import { buildSpSegments } from './segments';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
 import { monthOf, type SpHistoryBatch, type SpHistoryMetric, type SpLaunchHistory, type SpPreview } from './model';
 import { matchedLaunchMonths } from './history';
@@ -60,5 +61,7 @@ export function buildSpHistoryBatch(input: SpHistoryBatchInput, municipal: SpPre
     if (![totals.current, totals.previous, ...rows.flatMap(row => [row.current, row.previous])].every(Number.isSafeInteger)) return blocked('Os valores excedem a precisão segura do comparativo.');
     comparisons[metric] = { status: 'ready', issues: [], rows, totals, checks } satisfies SpLaunchHistory;
   }
-  return { status: 'ready', issues: [], comparisons, checks };
+  const currentSegments = buildSpSegments(current), previousSegments = buildSpSegments(previous);
+  if (currentSegments.status !== 'ready' || previousSegments.status !== 'ready') return blocked('A classificação dos segmentos não foi reconciliada nos dois anos.');
+  return { status: 'ready', issues: [], comparisons, checks, segments: { current: currentSegments, previous: previousSegments, currentMonth: months.current.at(-1)!, previousMonth: months.previous.at(-1)! } };
 }

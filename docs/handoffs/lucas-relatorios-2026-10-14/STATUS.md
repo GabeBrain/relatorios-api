@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## Comparativos por segmento — 16/10/2026
+
+Lucas pediu o próximo lote. Páginas 9/10/11 recebem barras dos dois anos a partir da mesma consulta **Conferir históricos** usada em 12–14, sem nova coleta. Regra SP de Lucas aplicada aos dois anos, com vigência histórica a confirmar pelo analista. Totais dos segmentos reconciliados; estoque somente no último mês, base não positiva sem percentual. Em falha da consulta, gráfico atual permanece sem histórico. Reuso das artes 24/38/48, canvas e navegação existentes. 100 testes SP, tipagem/lint/build aprovados; QA 2025 fictício, retorno real ainda não observado pelo agente.
+
+Retomar: Conferir dados reais → Conferir históricos → Ampliar slides → 9–14. Revisar o retorno real e classificação antes de séries longas ou novos indicadores. Férias a partir de 19/10 sem agenda ou retorno presumido. Abertura: main limpa, fetch sem novidade, 20 commits locais sobre origin desde 15/10 às 11h55. Sem push, publicação, geração real, Monday ou alteração em Corretor/Quanti/Secovi/FIERGS.
+
 ## Lote de históricos — 16/10/2026
 
 - **Pedido atual:** Lucas aprovou entregar/revisar blocos completos. Lançamentos/vendas/oferta agora têm uma ação **Conferir históricos**, substituindo a ação isolada visível do checkpoint abaixo. Páginas12/13/14 usam as artes originais18/32/46.

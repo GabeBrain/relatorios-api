@@ -34,6 +34,7 @@ export interface SpHistoryBatch {
   status: 'ready' | 'blocked';
   issues: string[];
   comparisons: Partial<Record<SpHistoryMetric, SpLaunchHistory>>;
+  segments?: { current: SpDistribution; previous: SpDistribution; currentMonth: string; previousMonth: string };
   checks: SpCheck[];
 }
 export interface SpPreview {

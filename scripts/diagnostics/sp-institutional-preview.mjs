@@ -155,6 +155,11 @@ try {
     }
     await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${index + 12}-synthetic-2025.png`), animations: 'disabled' });
   }
+  for (const [index, title] of ['Lançamentos por segmento', 'Vendas por segmento', 'Oferta por segmento'].entries()) {
+    await slides.getByRole('button', { name: `${index + 9}. ${title}`, exact: true }).click();
+    await slides.getByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' }).waitFor();
+    await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${index + 9}-segment-history-synthetic-2025.png`), animations: 'disabled' });
+  }
   await slides.getByRole('button', { name: 'Ampliar slides' }).click();
   await page.getByRole('dialog').getByRole('button', { name: '13. Comparativo de vendas', exact: true }).click();
   await page.getByRole('dialog').screenshot({ path: resolve(output, 'batch-expanded-synthetic-2025.png'), animations: 'disabled' });
