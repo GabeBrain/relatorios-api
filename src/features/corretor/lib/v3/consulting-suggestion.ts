@@ -1,4 +1,3 @@
-import { supabase } from '@/integrations/supabase/client';
 import type { Ir, IrSlide } from '../audit/ir';
 
 const MAX_CHARS_PER_SLIDE = 6_000;
@@ -55,40 +54,13 @@ export function consultingSuggestionBatchCount(ir: Ir): number {
   return partitionConsultingSuggestionSlides(suggestionSlides(ir)).length;
 }
 
-async function invokeSuggestion<T extends { error?: string }>(body: unknown): Promise<T> {
-  const { data, error } = await supabase.functions.invoke<T>('analyze-consulting-suggestion', { body });
-  if (error) throw new Error(error.message);
-  if (data?.error) throw new Error(data.error);
-  return data;
-}
-
-export async function generateConsultingSuggestion(
-  ir: Ir,
-  onProgress?: (progress: SuggestionBatchProgress) => void,
-): Promise<string> {
-  const slides = suggestionSlides(ir);
-  if (slides.length === 0) {
-    throw new Error('Não foi possível extrair conteúdo suficiente do PPTX para gerar a análise.');
-  }
-
-  const batches = partitionConsultingSuggestionSlides(slides);
-  if (batches.length === 1) {
-    const data = await invokeSuggestion<{ suggestion?: string; error?: string }>({ slides });
-    if (!data.suggestion?.trim()) throw new Error('A IA não retornou uma sugestão de análise.');
-    return data.suggestion;
-  }
-
-  const memos: Array<{ firstSlide: number; lastSlide: number; content: string }> = [];
-  for (let index = 0; index < batches.length; index += 1) {
-    const batch = batches[index];
-    onProgress?.({ current: index + 1, total: batches.length, phase: 'batch' });
-    const data = await invokeSuggestion<{ batch?: string; error?: string }>({ mode: 'batch', slides: batch });
-    if (!data.batch?.trim()) throw new Error(`A IA não retornou a análise do lote ${index + 1}.`);
-    memos.push({ firstSlide: batch[0].n, lastSlide: batch[batch.length - 1].n, content: data.batch });
-  }
-
-  onProgress?.({ current: batches.length, total: batches.length, phase: 'compile' });
-  const final = await invokeSuggestion<{ suggestion?: string; error?: string }>({ mode: 'compile', batches: memos });
-  if (!final.suggestion?.trim()) throw new Error('A IA não retornou a síntese final da análise.');
-  return final.suggestion;
+/** Cobertura textual explícita; Excel, PDF e imagens não entram neste motor. */
+export function recommendationSource(ir: Ir) {
+  let limitedSlides = 0;
+  const slides = ir.slides.map(slide => {
+    const full = [...(slide.textos ?? []), ...(slide.tabelas ?? []).map(t => t.linhas.map(r => r.join(' | ')).join('\n'))].join('\n');
+    if (full.length > MAX_CHARS_PER_SLIDE) limitedSlides++;
+    return { n: slide.n, titulo: (slide.titulo ?? '').slice(0,200), conteudo: full.slice(0, MAX_CHARS_PER_SLIDE) };
+  }).filter(s => s.conteudo.trim().length > 40);
+  return { slides, limitedSlides, totalSlides: ir.n_slides, withoutText: ir.n_slides-slides.length };
 }

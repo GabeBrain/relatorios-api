@@ -1,3 +1,13 @@
+## Versão 0.74 — 16/10/2026 — recomendação consultiva com custo e histórico
+
+**RUNTIME local; backend preparado, publicação pendente.** Novo estudo compartilha materiais entre Revisar estudo e Gerar recomendação. Arquivos preparados têm preenchimento oliva/check; não significam armazenamento remoto. Aba Recomendação guarda resultado por versão, com reabertura gratuita, cobertura, previsão/limite e uso real; originais e Excel locais por hash preservados.
+
+Prompt Brain preservado. Somente textos/tabelas nativas: Excel/PDF/raster não entram na recomendação. Contrato compartilhado de lotes/bytes/janela e preço versionado; confirmação antes do provedor. `corretor-execution` orquestra/reserva e `analyze-consulting-suggestion` aceita só servidor; replay/memos retomados sem repetir IA, desconhecido retém reserva. Resultado, tokens/cache/custo/latência/modelo/prompt contabilizados atomicamente em execução, `ia_passes` e custo do estudo. Não modifica relatório/achados/decisões ou conclui revisão.
+
+Migration `20261016153609_corretor_recommendation_metrics.sql`, resultados com leitura da biblioteca pública e escrita pelo servidor; contexto intermediário privado. Métricas dos últimos 30 dias integradas à calibração, sem falso zero em erro e sem misturar gasto com acurácia. 320 testes/2 pulados, dez passes reais gratuitos,13 novos controles SQL/Edge e13+9 legados com schema novo, jornadas9+15+8 com serviços simulados; app/Deno/lint/build aprovados. [Plano e relatório](design/RESULTADO_RECOMENDADOR_E_METRICAS_2026-10-16.md).
+
+Zero IA real ou escrita remota. Próximo: revisão/push autorizado, migration e duas funções/frontend no Lovable, disponibilidade do GPT-4o mini (documentação o marca Deprecated) e lote real previamente orçado. Qualidade consultiva/produção não homologadas; demais pendências A2/A3 preservadas.
+
 ## Versão 0.73.2 — 16/10/2026 — Meus estudos desde a preparação autenticada
 
 Por orientação de Gabriel, apresentar PowerPoint válido com identidade Geobrain verificada registra o estudo V3 pendente, com autoria da conta, **antes** de exigir cidade, planilhas, cadastro comercial ou confirmação de IA. Selecionar materiais continua sem executar IA; o registro inicial autenticado substitui a regra anterior de só criar estudo ao iniciar avaliação. Visitante continua com preparação local, sem autoria inventada.

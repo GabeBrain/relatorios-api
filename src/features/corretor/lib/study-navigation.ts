@@ -1,5 +1,5 @@
-export type StudySection = 'resumo' | 'revisao' | 'materiais' | 'historico';
-const sections: StudySection[] = ['resumo', 'revisao', 'materiais', 'historico'];
+export type StudySection = 'resumo' | 'revisao' | 'recomendacao' | 'materiais' | 'historico';
+const sections: StudySection[] = ['resumo', 'revisao', 'recomendacao', 'materiais', 'historico'];
 export function studySection(value?: string): StudySection { return sections.includes(value as StudySection) ? value as StudySection : 'resumo'; }
 /** Retorno só para a carteira local e com parâmetros conhecidos, nunca uma URL arbitrária. */
 export function portfolioSearch(value = ''): string {
