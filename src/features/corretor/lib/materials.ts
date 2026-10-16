@@ -57,6 +57,14 @@ export async function recordReviewSnapshot(studyId:string,versionId:string):Prom
  const {error}=await db.from('corretor_analysis_snapshots').insert({study_id:studyId,version_id:versionId,source_set_id:set?.id??null,source_scope:set?'persisted_set':source?'legacy_derived':'no_source',report:study.data?.relatorio??null,findings,reason:'manual_review_snapshot'});fail(error);
 }
 export async function personalStudyIds():Promise<{mine:string[];shared:string[]}|null>{
- try{const uid=await requireProjectIdentity();const [mine,shared]=await Promise.all([db.from('studies_v3').select('id').eq('created_by',uid),db.from('corretor_study_shares').select('study_id').eq('user_id',uid)]);fail(mine.error);fail(shared.error);return {mine:(mine.data??[]).map((r:{id:string})=>r.id),shared:(shared.data??[]).map((r:{study_id:string})=>r.study_id)};}
- catch(e){if(e instanceof MaterialsUnavailable)throw e;return null;}
+ let uid:string;
+ try{uid=await requireProjectIdentity();}catch{return null;}
+ const [mine,owned,shared]=await Promise.all([
+  db.from('studies_v3').select('id').eq('created_by',uid),
+  db.from('corretor_projects').select('study_id').eq('owner_id',uid),
+  db.from('corretor_study_shares').select('study_id').eq('user_id',uid),
+ ]);
+ fail(mine.error);fail(owned.error);fail(shared.error);
+ // Organização da carteira, sem reatribuir autoria ou ampliar permissões no banco.
+ return {mine:[...new Set<string>([...(mine.data??[]).map((r:{id:string})=>r.id),...(owned.data??[]).map((r:{study_id:string|null})=>r.study_id).filter(Boolean)])],shared:(shared.data??[]).map((r:{study_id:string})=>r.study_id)};
 }

@@ -1,5 +1,12 @@
 # Decisões de Frontend — Rebrain
 
+### 2026-10-16 — Rascunho separado da carteira pessoal do Corretor
+
+- **Contexto:** rascunho sobrevivia ao registro; autoria imutável não incluía cadastro salvo posteriormente na conta.
+- **Decisão:** consumir preparação após vínculo durável, conservando planilhas por hash; rascunho antigo analisado abre resultado. Carteira pessoal une autoria e propriedade do cadastro; salvar/retornar atualizam consulta sem editar autoria. Campos com ícones Lucide e primitives/tokens existentes.
+- **Consequência:** visitante não recebe autor inventado; vínculo posterior exige cadastro salvo. PDF é complementar; cache local não promete acesso entre dispositivos. Correção só frontend, sem mudar motores ou decisões.
+- **Estado:** validado localmente com serviços simulados, produção pendente. Evidência `docs/features/corretor-vocacionais/design/RESULTADO_RASCUNHO_CARTEIRA_2026-10-16.md`.
+
 ### 2026-10-15 — Preparação contínua e visualizador único no Corretor
 
 - **Contexto:** upload iniciava ata/transição antes dos Excel; imagens duplicadas e triagem estreita prejudicavam decisão.

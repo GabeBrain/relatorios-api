@@ -1,3 +1,11 @@
+## Versão 0.73.1 — 16/10/2026 — rascunho consumido e carteira atualizada
+
+Estado **validado localmente, antes de push**. Registro durável/abertura confirmada de duplicata consomem somente o rascunho; planilhas selecionadas conservadas por hash com download em Materiais, prévias/originais existentes preservados. Rascunho antigo já analisado oferece resultado. Descarte explícito tem confirmação; V2 não substitui avaliação V3.
+
+Meus estudos une autoria autenticada e cadastro pertencente à conta, sem reatribuir autoria/permissões. Salvar cadastro/retornar atualiza consultas. Filtro inicial inclui concluídos; vazios distinguem filtro e vínculo ausente. PPTX/Excel têm ícones e superfície clicável; PDF continua prévia complementar. Motores/decisões intactos; nenhuma IA paga, migration ou função nova.
+
+Evidência: [resultado rascunho/carteira](design/RESULTADO_RASCUNHO_CARTEIRA_2026-10-16.md),289 testes/2 pulados, dez passes, jornadas de materiais/carteira com serviços simulados, tipos/lint/build. Produção/conta real a retestar após publicação do frontend. Deploy anterior e análise funcionando foram informados por Lovable/Gabriel, sem verificação independente desta correção.
+
 ## Versão 0.73 — 15/10/2026 — preparação contínua e evidência única
 
 Estado **validado localmente, antes de push**. Preparar PPTX/Excel/cidade/custo na mesma página; selecionar arquivo não executa IA nem cria estudo. Criação atômica por hash, rascunho local e confirmação anterior à ata/texto/imagem. Novo registro privado de execução reserva custo por lote, persiste respostas e bloqueia retorno desconhecido; funções pagas passam a chamada interna pelo controlador. Nenhuma migration/Edge ativada nesta sessão.
