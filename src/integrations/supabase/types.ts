@@ -148,8 +148,10 @@ export type Database = {
           created_at: string
           document_sha1: string
           engine: string
+          estimated_usd: number | null
           id: string
           owner_hash: string
+          purpose: string
           reserved_usd: number
           spent_usd: number
           state: string
@@ -164,8 +166,10 @@ export type Database = {
           created_at?: string
           document_sha1: string
           engine?: string
+          estimated_usd?: number | null
           id?: string
           owner_hash: string
+          purpose?: string
           reserved_usd?: number
           spent_usd?: number
           state?: string
@@ -180,8 +184,10 @@ export type Database = {
           created_at?: string
           document_sha1?: string
           engine?: string
+          estimated_usd?: number | null
           id?: string
           owner_hash?: string
+          purpose?: string
           reserved_usd?: number
           spent_usd?: number
           state?: string
@@ -401,6 +407,118 @@ export type Database = {
             columns: ["study_id"]
             isOneToOne: true
             referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_recommendations: {
+        Row: {
+          budget_usd: number
+          cached_tokens: number
+          completed_at: string | null
+          content: string | null
+          coverage: Json
+          created_at: string
+          document_sha1: string
+          error_message: string | null
+          estimated_usd: number
+          execution_id: string
+          has_truncated_memo: boolean
+          id: string
+          input_tokens: number
+          model: string
+          output_tokens: number
+          price_version: string
+          prompt_version: string
+          provider_calls: number
+          provider_latency_ms: number
+          reserved_usd: number
+          spent_usd: number
+          state: string
+          study_id: string
+          total_requests: number
+          updated_at: string
+          version_id: string
+          version_n: number
+        }
+        Insert: {
+          budget_usd: number
+          cached_tokens?: number
+          completed_at?: string | null
+          content?: string | null
+          coverage: Json
+          created_at?: string
+          document_sha1: string
+          error_message?: string | null
+          estimated_usd: number
+          execution_id: string
+          has_truncated_memo?: boolean
+          id?: string
+          input_tokens?: number
+          model: string
+          output_tokens?: number
+          price_version: string
+          prompt_version: string
+          provider_calls?: number
+          provider_latency_ms?: number
+          reserved_usd?: number
+          spent_usd?: number
+          state?: string
+          study_id: string
+          total_requests: number
+          updated_at?: string
+          version_id: string
+          version_n: number
+        }
+        Update: {
+          budget_usd?: number
+          cached_tokens?: number
+          completed_at?: string | null
+          content?: string | null
+          coverage?: Json
+          created_at?: string
+          document_sha1?: string
+          error_message?: string | null
+          estimated_usd?: number
+          execution_id?: string
+          has_truncated_memo?: boolean
+          id?: string
+          input_tokens?: number
+          model?: string
+          output_tokens?: number
+          price_version?: string
+          prompt_version?: string
+          provider_calls?: number
+          provider_latency_ms?: number
+          reserved_usd?: number
+          spent_usd?: number
+          state?: string
+          study_id?: string
+          total_requests?: number
+          updated_at?: string
+          version_id?: string
+          version_n?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_recommendations_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: true
+            referencedRelation: "corretor_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_recommendations_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_recommendations_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "study_versions"
             referencedColumns: ["id"]
           },
         ]
@@ -689,36 +807,70 @@ export type Database = {
       }
       ia_passes: {
         Row: {
+          batch_hash: string | null
+          cached_tokens: number
           created_at: string
           custo_usd: number
           escopo: string | null
+          execution_id: string | null
           id: string
           input_tokens: number
+          latency_ms: number | null
+          model: string | null
           output_tokens: number
+          price_version: string | null
+          prompt_version: string | null
+          provider_request_id: string | null
+          requested_model: string | null
           study_id: string
           tipo: string
         }
         Insert: {
+          batch_hash?: string | null
+          cached_tokens?: number
           created_at?: string
           custo_usd?: number
           escopo?: string | null
+          execution_id?: string | null
           id?: string
           input_tokens?: number
+          latency_ms?: number | null
+          model?: string | null
           output_tokens?: number
+          price_version?: string | null
+          prompt_version?: string | null
+          provider_request_id?: string | null
+          requested_model?: string | null
           study_id: string
           tipo: string
         }
         Update: {
+          batch_hash?: string | null
+          cached_tokens?: number
           created_at?: string
           custo_usd?: number
           escopo?: string | null
+          execution_id?: string | null
           id?: string
           input_tokens?: number
+          latency_ms?: number | null
+          model?: string | null
           output_tokens?: number
+          price_version?: string | null
+          prompt_version?: string | null
+          provider_request_id?: string | null
+          requested_model?: string | null
           study_id?: string
           tipo?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ia_passes_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_executions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ia_passes_study_id_fkey"
             columns: ["study_id"]
@@ -1503,6 +1655,7 @@ export type Database = {
         Returns: string
       }
       corretor_access_enabled: { Args: never; Returns: boolean }
+      corretor_ai_usage: { Args: never; Returns: Json }
       corretor_claim_batch: {
         Args: {
           p_execution: string
