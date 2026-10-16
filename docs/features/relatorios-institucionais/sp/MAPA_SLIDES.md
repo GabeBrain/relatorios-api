@@ -1,5 +1,7 @@
 # SP — conteúdo e fontes dos 85 slides
 
+**Lote complementar de 12 páginas — 16/10:** posições locais 15–17 Compactos; 18–20 MCMV; 21–23 Médio Padrão; 24–26 Luxo. Em cada trio: lançamentos, vendas e oferta, com evolução mensal e comparação da mesma janela anual. Reuso das artes originais 18/32/46 e dados Padrão já consultados. São detalhamentos complementares, sem correspondência um-para-um com doze slides do PPTX; não substituem séries trimestrais completas, móveis de 12 meses ou páginas de preços/INCC/mapas. Vigência histórica da classificação e retorno real de 2025 ainda por revisar. Preenchimento conjunto pelo botão **Conferir históricos**, sem consultas extras.
+
 **Lote16/10:** comparativos de lançamentos/vendas/oferta preparados nas páginas12/13/14, com artes18/32/46 e ação única **Conferir históricos**. Usam os mesmos meses nos dois anos e estoque no fechamento. São comparativos de janela curta, não preenchimento das curvas longas/móveis do modelo inteiro. Dados históricos reais ainda por testar na sessão pessoal;2025 de QA é fictício.
 
 **Atualização de classificação:** Lucas confirmou a regra sete→quatro em 15/10; slides 24/38/48 já têm distribuição parcial, reaproveitando os padrões municipais. Regra e autoria em `DECISOES.md`; referências anteriores a agrupamento pendente são o histórico da preparação, não o estado atual. Comparação anual continua pendente.

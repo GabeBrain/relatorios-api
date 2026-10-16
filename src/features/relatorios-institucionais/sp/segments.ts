@@ -1,4 +1,4 @@
-import type { SpDistribution, SpPreview } from './model';
+import type { SpDistribution, SpHistoryMetric, SpPreview } from './model';
 
 /** Confirmed by Lucas on 2026-10-15 for this SP institutional report only. */
 export const SP_SEGMENT_RULE = {
@@ -10,6 +10,7 @@ export const SP_SEGMENT_RULE = {
     Luxo: ['Alto', 'Luxo'],
   },
 } as const;
+export const SP_DETAIL_PAGES = Object.keys(SP_SEGMENT_RULE.groups).flatMap(segment => (['launches', 'sales', 'stock'] as SpHistoryMetric[]).map(metric => ({ segment, metric, title: `${{ launches: 'Lançamentos', sales: 'Vendas', stock: 'Oferta' }[metric]} · ${segment}` })));
 const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 
 export function buildSpSegments(report: SpPreview): SpDistribution {

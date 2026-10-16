@@ -1,5 +1,9 @@
 # Decisões e pontos abertos — SP
 
+## Lote de 12 detalhes — autorizado em 16/10/2026
+
+Lucas pediu lotes de 10–12 páginas. Escolhido detalhamento de três indicadores × quatro segmentos com dados já consultados, sem novos endpoints ou ampliação de janela. Páginas 15–26 são complementares no visual do modelo, não doze slides originais homologados. Classificação SP confirmada por Lucas aplicada aos dois anos, vigência histórica a revisar. Detalhes só são publicados após lote histórico reconciliado; agrupamento mensal deve somar totais municipais e seus acumulados devem reproduzir os segmentos. Estoque final não é soma; valores ausentes não viram zero, sinais negativos são preservados e base anterior não positiva não gera porcentagem. Reuso do gráfico histórico e canvas existentes, sem nova regra de UI global ou exportação.
+
 ## Lote de três históricos — autorizado em 16/10/2026
 
 - Lucas pediu entregas por blocos e aprovou lançamentos/vendas/oferta juntos. A ação única substitui a ação visível isolada de lançamentos; páginas12/13/14 reutilizam artes18/32/46. Nenhuma série2022–2026, preço/INCC ou coleta granular incluída.

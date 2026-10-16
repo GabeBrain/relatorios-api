@@ -164,6 +164,21 @@ try {
   await page.getByRole('dialog').getByRole('button', { name: '13. Comparativo de vendas', exact: true }).click();
   await page.getByRole('dialog').screenshot({ path: resolve(output, 'batch-expanded-synthetic-2025.png'), animations: 'disabled' });
   await page.keyboard.press('Escape');
+  for (const [segmentIndex, segment] of ['Compactos', 'MCMV', 'Médio Padrão', 'Luxo'].entries()) {
+    for (const [metricIndex, metric] of ['Lançamentos', 'Vendas', 'Oferta'].entries()) {
+      const number = 15 + segmentIndex * 3 + metricIndex;
+      await slides.getByRole('button', { name: `${number}. ${metric} · ${segment}`, exact: true }).click();
+      await slides.getByText(`${segment} · classificação SP de Lucas`, { exact: true }).waitFor();
+      await slides.getByRole('article').locator('img').evaluate(image => image.decode());
+      const boxes = await slides.locator('[data-history-value]').evaluateAll(elements => elements.map(element => {
+        const { left, top, right, bottom } = element.getBoundingClientRect(); return { left, top, right, bottom };
+      }));
+      assert.equal(boxes.length, 4);
+      for (let a = 0; a < boxes.length; a++) for (let b = a + 1; b < boxes.length; b++) assert.equal(boxes[a].left < boxes[b].right && boxes[a].right > boxes[b].left && boxes[a].top < boxes[b].bottom && boxes[a].bottom > boxes[b].top, false);
+      await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${number}-segment-detail-synthetic-2025.png`), animations: 'disabled' });
+    }
+  }
+  results.push({ state: 'doze detalhes complementares por segmento, rótulos sem sobreposição, 2025 fictício e nenhuma consulta extra', passed: true });
   assert.equal(mockMarketCalls.length, 16);
   results.push({ state: 'três históricos em lote com 2025 fictício, oito requests adicionais mockados, balanços dos dois anos e navegação sem nova rede', passed: true });
   for (const [width, theme] of [[1440, 'light'], [1440, 'dark'], [390, 'light'], [390, 'dark']]) {

@@ -1,5 +1,13 @@
 # Evidências do mapeamento — 15/10/2026
 
+## Doze detalhes por segmento — 16/10/2026
+
+Build final pós-merge aprovado (3466 módulos); tipagem e lint finais sem erros. Constante de navegação movida para o domínio de segmentos para manter Fast Refresh. Checkpoint não libera exportação nem homologação.
+
+103 testes SP/9 arquivos aprovados. Verificam soma dos segmentos por mês e janela, oferta somente no último mês, doze rotas de navegação do canvas, classificação, base negativa e retirada de detalhes em falha. Tipagem e ESLint do escopo aprovados. Dezesseis cenários Edge offline aprovados, 16 requests mockados no ensaio inteiro, zero chamadas de mercado e zero erros de página. As doze capturas `slide-{15..26}-segment-detail-synthetic-2025.png` foram revisadas em `.local-inputs/relatorios-lucas/sp/template-review-1792171153214/`; asserção de não sobreposição dos rótulos passou. Todo 2025 é fictício, não observação do provedor. Navegação não acrescenta chamadas; mesmos limites de paginação, abort e janela existentes. Dados reais e vigência histórica da classificação permanecem pendentes da revisão humana.
+
+Merge `c4ac909`, autorizado por Lucas, preserva os 21 commits locais e os dois remotos de Gabriel (`15e5efc`, `e36c591`, Corretor). Conflito em FRONTEND_DECISIONS resolvido preservando integralmente as duas entradas; LIVE recebeu ambos os lados. `check:live-docs` pós-merge aprovado. Nenhuma alteração autoral no código do Corretor.
+
 ## Comparativos por segmento — 16/10/2026
 
 100 testes SP, tipagem/lint/build aprovados. Quinze cenários Edge offline aprovados, 16 requests mockados no ensaio inteiro (nenhum adicional para segmentos), zero chamadas reais/erros. Capturas 9/10/11 revisadas em `.local-inputs/relatorios-lucas/sp/template-review-1792162365508/slide-{9,10,11}-segment-history-synthetic-2025.png`: barras, rótulos e rodapé sem sobreposição. Todos os valores 2025 são fictícios; não representam resultados de mercado. Primeira tentativa visual corrigiu um seletor do diagnóstico; ensaio final completo aprovado. Regra de Lucas aplicada aos dois anos, vigência histórica ainda requer revisão humana; retorno real não observado pelo agente.

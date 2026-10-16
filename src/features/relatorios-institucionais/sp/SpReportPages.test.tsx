@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { SpReportPages } from './SpReportPages';
+import { SP_DETAIL_PAGES } from './segments';
 import { buildSpTemporalPreview } from './temporal';
 import { recordedInput } from './__tests__/recorded';
 import { syntheticTypologyInput } from './__tests__/typology';
@@ -11,6 +12,21 @@ import { syntheticHistoryBatch } from './__tests__/history-batch';
 import { buildSpHistoryBatch } from './history-batch';
 
 describe('páginas SP', () => {
+  it('monta doze detalhes complementares e invalida todos com o lote', () => {
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);
+    const view = render(<SpReportPages report={{ ...report, historyBatch }} />);
+    expect(SP_DETAIL_PAGES).toHaveLength(12);
+    for (const [index, detail] of SP_DETAIL_PAGES.entries()) {
+      fireEvent.click(screen.getByRole('button', { name: `${index + 15}. ${detail.title}` }));
+      expect(screen.getByText(`${detail.segment} · classificação SP de Lucas`)).toBeInTheDocument();
+      expect(screen.getByText('julho / agosto · 2025 × 2026')).toBeInTheDocument();
+      expect(screen.getByText(`2026: ${historyBatch.segmentDetails![detail.segment][detail.metric].totals!.current.toLocaleString('pt-BR')} unidades`)).toBeInTheDocument();
+    }
+    view.rerender(<SpReportPages report={{ ...report, historyBatch: undefined }} />);
+    expect(screen.getByText('Comparativo de oferta indisponível')).toBeInTheDocument();
+    expect(screen.queryByText('julho / agosto · 2025 × 2026')).not.toBeInTheDocument();
+  });
   it('compara segmentos e remove o comparativo bloqueado', () => {
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);

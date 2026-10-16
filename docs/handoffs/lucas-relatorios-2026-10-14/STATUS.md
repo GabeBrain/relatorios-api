@@ -1,5 +1,15 @@
 # Estado do handoff
 
+## Lote de 12 páginas complementares — 16/10/2026
+
+Build final pós-merge aprovado; tipagem e lint finais sem erros. As 26 páginas da navegação incluem prévias e pendências; a contagem não é percentual de conclusão do modelo de 85 slides.
+
+- **Pedido:** Lucas solicitou 10–12 páginas por lote. Páginas 15–26 detalham lançamentos, vendas e oferta dos quatro segmentos, com os mesmos meses dos dois anos, totais e diferenças. Reuso de artes/canvas/consulta existente, sem coleta adicional. Não representam doze slides originais concluídos; série longa/12 meses, mapas, preços/INCC, IVV, granular e exportação continuam abertos.
+- **Reconciliação:** quatro segmentos devem somar município em cada mês e janela; acumulados coincidem com o segmento, estoque somente do último mês. Falha retira todos os detalhes. Base zero/negativa sem percentual; regra SP de Lucas, vigência histórica a confirmar.
+- **Validação/limite:** 103 testes SP, tipagem/lint e 16 cenários Edge offline aprovados, zero chamadas reais/erros. Todas as 12 capturas revisadas; 2025 fictício. Consulta real só na sessão pessoal, sem acesso ao token pelo agente.
+- **Git:** fetch encontrou 2 remotos e 21 locais; Lucas autorizou merge sem push. `c4ac909` preserva Gabriel/Corretor e a frente SP; conflito de decisões resolvido somando entradas, LIVE preservado, check-live-docs aprovado. Base do lote após merge: 22 commits locais desde 15/10 às 11h55. Nenhuma alteração autoral em Corretor/Quanti/Secovi/FIERGS.
+- **Retomar:** rota SP → Conferir dados reais → Conferir históricos → Ampliar slides → páginas 15–26. Revisar retorno real e classificação antes de ampliar fontes. Férias desde 19/10 sem agenda/retorno presumido; sem push, publicação, geração real, coleta longa ou Monday.
+
 ## Comparativos por segmento — 16/10/2026
 
 Lucas pediu o próximo lote. Páginas 9/10/11 recebem barras dos dois anos a partir da mesma consulta **Conferir históricos** usada em 12–14, sem nova coleta. Regra SP de Lucas aplicada aos dois anos, com vigência histórica a confirmar pelo analista. Totais dos segmentos reconciliados; estoque somente no último mês, base não positiva sem percentual. Em falha da consulta, gráfico atual permanece sem histórico. Reuso das artes 24/38/48, canvas e navegação existentes. 100 testes SP, tipagem/lint/build aprovados; QA 2025 fictício, retorno real ainda não observado pelo agente.

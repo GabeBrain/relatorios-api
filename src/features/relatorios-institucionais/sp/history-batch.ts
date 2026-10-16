@@ -1,4 +1,5 @@
 import { buildSpSegments } from './segments';
+import { summarizeSpGroups } from './distribution';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
 import { monthOf, type SpHistoryBatch, type SpHistoryMetric, type SpLaunchHistory, type SpPreview } from './model';
 import { matchedLaunchMonths } from './history';
@@ -63,5 +64,27 @@ export function buildSpHistoryBatch(input: SpHistoryBatchInput, municipal: SpPre
   }
   const currentSegments = buildSpSegments(current), previousSegments = buildSpSegments(previous);
   if (currentSegments.status !== 'ready' || previousSegments.status !== 'ready') return blocked('A classificação dos segmentos não foi reconciliada nos dois anos.');
-  return { status: 'ready', issues: [], comparisons, checks, segments: { current: currentSegments, previous: previousSegments, currentMonth: months.current.at(-1)!, previousMonth: months.previous.at(-1)! } };
+  const monthlySegments = windows.map((source, year) => {
+    const preview = year === 0 ? current : previous;
+    return preview.monthly!.map(row => buildSpSegments({ ...preview,
+      patterns: summarizeSpGroups(source, [row.month], row.month),
+      metrics: { projects: null, launches: row.launches, sales: row.sales, stock: row.closingStock },
+    }));
+  });
+  if (monthlySegments.flat().some(result => result.status !== 'ready')) return blocked('Os segmentos mensais não reconciliaram com os totais das duas janelas.');
+  const segmentDetails: NonNullable<SpHistoryBatch['segmentDetails']> = {};
+  for (const segment of currentSegments.rows) {
+    const details = {} as Record<SpHistoryMetric, SpLaunchHistory>;
+    for (const metric of metrics) {
+      const rows = months.current.map((currentMonth, index) => ({ currentMonth, previousMonth: months.previous[index],
+        ...compare(monthlySegments[0][index].rows.find(row => row.group === segment.group)![metric], monthlySegments[1][index].rows.find(row => row.group === segment.group)![metric]),
+      }));
+      const totals = compare(segment[metric], previousSegments.rows.find(row => row.group === segment.group)![metric]);
+      const aggregate = (field: 'current' | 'previous') => metric === 'stock' ? rows.at(-1)![field] : rows.reduce((sum, row) => sum + row[field], 0);
+      if (aggregate('current') !== totals.current || aggregate('previous') !== totals.previous) return blocked('O detalhamento mensal diverge do segmento acumulado.');
+      details[metric] = { status: 'ready', issues: [], rows, totals, checks };
+    }
+    segmentDetails[segment.group] = details;
+  }
+  return { status: 'ready', issues: [], comparisons, checks, segmentDetails, segments: { current: currentSegments, previous: previousSegments, currentMonth: months.current.at(-1)!, previousMonth: months.previous.at(-1)! } };
 }

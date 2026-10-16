@@ -1,8 +1,8 @@
 import type { SpPreview, SpHistoryMetric } from './model';
 
 const quantity = (value: number) => value.toLocaleString('pt-BR');
-export function SpLaunchHistorySlide({ report, metric = 'launches' }: { report: SpPreview; metric?: SpHistoryMetric }) {
-  const history = report.historyBatch ? report.historyBatch.comparisons[metric] : metric === 'launches' ? report.launchHistory : undefined;
+export function SpLaunchHistorySlide({ report, metric = 'launches', segment }: { report: SpPreview; metric?: SpHistoryMetric; segment?: string }) {
+  const history = segment ? report.historyBatch?.segmentDetails?.[segment]?.[metric] : report.historyBatch ? report.historyBatch.comparisons[metric] : metric === 'launches' ? report.launchHistory : undefined;
   const labels = { launches: 'lançamentos', sales: 'vendas', stock: 'oferta' };
   if (report.historyBatch?.status === 'blocked' || history?.status !== 'ready' || !history.totals || !history.rows.length) return <div className="absolute left-[90px] top-[280px] w-[1100px] text-center"><p className="text-[28px] font-bold">Comparativo de {labels[metric]} indisponível</p><p className="mt-4 text-[20px]">{report.historyBatch?.issues[0] ?? history?.issues[0] ?? 'Use Conferir históricos para buscar os mesmos meses do ano anterior.'}</p></div>;
   const currentYear = history.rows[0].currentMonth.slice(0, 4), previousYear = history.rows[0].previousMonth.slice(0, 4);
@@ -15,7 +15,7 @@ export function SpLaunchHistorySlide({ report, metric = 'launches' }: { report: 
   const variation = history.totals.variation === null ? `Variação não calculável: base anterior ${history.totals.previous < 0 ? 'negativa' : 'zero'}` : `Variação: ${history.totals.variation.toLocaleString('pt-BR', { maximumFractionDigits: 1, signDisplay: 'exceptZero' })}%`;
   return <>
     <p className="absolute left-[62px] top-[155px] text-[20px]">{period} · {previousYear} × {currentYear}</p>
-    <p className="absolute left-[62px] top-[190px] text-[16px]">Mesmos meses nos dois anos · {report.quarter} em validação</p>
+    <p className="absolute left-[62px] top-[190px] text-[18px]">{segment ? `${segment} · classificação SP de Lucas` : `Mesmos meses nos dois anos · ${report.quarter} em validação`}</p>
     <div className="absolute right-[100px] top-[130px] text-right"><p className="text-[20px]">{previousYear}: {quantity(history.totals.previous)} unidades</p><p className="text-[28px] font-bold text-[#5b7638]">{currentYear}: {quantity(history.totals.current)} unidades</p><p className="text-[18px]">{variation}</p><p className="text-[16px]">Diferença: {history.totals.delta.toLocaleString('pt-BR', { signDisplay: 'exceptZero' })} unidades</p></div>
     <svg role="img" aria-label={metric === 'launches' ? 'Lançamentos nos mesmos meses do ano atual e anterior' : metric === 'sales' ? 'Vendas nos mesmos meses do ano atual e anterior' : 'Oferta nos mesmos meses do ano atual e anterior'} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
       <line x1="90" x2="1190" y1="540" y2="540" stroke="#d9d9d9" />

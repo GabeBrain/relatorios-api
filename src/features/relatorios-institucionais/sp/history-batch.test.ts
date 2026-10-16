@@ -6,6 +6,27 @@ import { syntheticHistoryBatch } from './__tests__/history-batch';
 
 const baseline = () => buildSpTemporalPreview(recordedInput(), '3T2026');
 describe('SP — lote histórico com 2025 fictício, sem consultas reais', () => {
+  it('reconcilia as doze páginas de detalhes por mês e janela, sem somar estoques', () => {
+    const result = buildSpHistoryBatch(syntheticHistoryBatch(), baseline());
+    const segments = Object.values(result.segmentDetails!);
+    expect(segments).toHaveLength(4);
+    for (const metric of ['launches', 'sales', 'stock'] as const) {
+      for (const year of ['current', 'previous'] as const) {
+        expect(segments.reduce((sum, segment) => sum + segment[metric].totals![year], 0)).toBe(result.comparisons[metric]!.totals![year]);
+        result.comparisons[metric]!.rows.forEach((row, index) => expect(segments.reduce((sum, segment) => sum + segment[metric].rows[index][year], 0)).toBe(row[year]));
+      }
+    }
+    expect(result.segmentDetails!.MCMV.launches.totals!.current).toBe(20328);
+    expect(result.segmentDetails!.MCMV.stock.totals!.current).toBe(66570);
+    for (const segment of segments) expect(segment.stock.totals!.current).toBe(segment.stock.rows.at(-1)!.current);
+  });
+  it('não publica detalhes quando uma janela falha, nem porcentagem com base negativa', () => {
+    const input = syntheticHistoryBatch(); input.previous.complete.sales = false;
+    expect(buildSpHistoryBatch(input, baseline()).segmentDetails).toBeUndefined();
+    const negative = buildSpHistoryBatch(syntheticHistoryBatch([-700, -1400]), baseline());
+    expect(negative.status).toBe('ready');
+    for (const segment of Object.values(negative.segmentDetails!)) expect(segment.sales.totals!.variation).toBeNull();
+  });
   it('libera três comparativos juntos, somando fluxos e usando somente a oferta final', () => {
     const result = buildSpHistoryBatch(syntheticHistoryBatch(), baseline());
     expect(result.status).toBe('ready');
