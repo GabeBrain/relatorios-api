@@ -2,6 +2,8 @@
 
 ## Checkpoint retomado — 16/10/2026
 
+**Fechamento da retomada:** checkpoint salvo em `0c6e3c2`; merge autorizado `1ca206a` integrou os três remotos sem conflitos. Tipagem SP/lint aprovados, build final pós-merge aprovado e15cenários Edge refeitos com zero chamadas reais/erros e rótulos sem sobreposição. Os83testes SP passaram na retomada. Captura final `.local-inputs/relatorios-lucas/sp/template-review-1792160752992/slide-12-synthetic-2025.png`; continua com2025 fictício. Próximo passo imediato é a ação autenticada abaixo, não uma nova implementação. Sem push.
+
 - **Interrupção:** o pedido de pausa de 15/10 interrompeu a gravação do checkpoint; código do comparativo ficou em arquivos locais, sem commit, e foi recuperado em 16/10. Base publicada/local anterior desta entrega: commit local `95519cf`, sem push.
 - **Preparado:** botão **Conferir histórico de lançamentos**, reconferência da raiz, releitura dos lançamentos atuais e consulta dos mesmos meses do ano anterior; página 12 reutiliza a arte do slide 18. Hoje a janela é julho/agosto2025 × julho/agosto2026; datas derivam do trimestre e mês efetivamente conferido.
 - **Guardas:** até duas páginas por janela, filtros/paginação preservados, retry/cancelamento, ausência diferente de zero, mesmos grupos, releitura atual igual ao município por mês e padrão. Mudança de fechamento/delta bloqueia o comparativo. Base anterior zero não gera porcentagem. Troca de escopo/identidade/trimestre invalida o resultado.

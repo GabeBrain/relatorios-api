@@ -2,6 +2,8 @@
 
 ## Retomada do comparativo curto — 16/10/2026
 
+**Validação final:** `0c6e3c2` salva a entrega; `1ca206a` integra os remotos autorizados. Build e tipagem SP pós-merge aprovados; lint aprovado na retomada. Quinze cenários Edge refeitos, zero chamadas reais e zero erros de página; asserção de não sobreposição e captura final revisadas em `.local-inputs/relatorios-lucas/sp/template-review-1792160752992/`. Nenhum valor2025 deixa de ser fictício por passar nesses testes. Este resultado substitui a pendência de build final do registro abaixo.
+
 83 testes SP aprovados com os arquivos recuperados da interrupção. Histórico atual nos testes reproduz julho/agosto recebidos; base2025 é fictícia (10.000/mês, somente QA), portanto +21,8% não é um resultado de mercado. Diagnóstico Edge anterior finalizou15cenários,11requests mockados para todas as ações da página, zero chamadas reais e zero erros; a ação histórica acrescenta uma amostra e duas janelas. Captura local de revisão: `.local-inputs/relatorios-lucas/sp/template-review-1792095410752/slide-12-synthetic-2025.png`. Alteração final separou os rótulos das duas séries; asserção de não sobreposição passou. Build final pós-integração ainda a registrar; não tratar build anterior ao ajuste como prova da versão final.
 
 ## Segmentos com regra fornecida por Lucas — 15/10
