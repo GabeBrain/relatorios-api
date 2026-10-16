@@ -1,5 +1,15 @@
 # Estado do handoff
 
+## Checkpoint retomado — 16/10/2026
+
+- **Interrupção:** o pedido de pausa de 15/10 interrompeu a gravação do checkpoint; código do comparativo ficou em arquivos locais, sem commit, e foi recuperado em 16/10. Base publicada/local anterior desta entrega: commit local `95519cf`, sem push.
+- **Preparado:** botão **Conferir histórico de lançamentos**, reconferência da raiz, releitura dos lançamentos atuais e consulta dos mesmos meses do ano anterior; página 12 reutiliza a arte do slide 18. Hoje a janela é julho/agosto2025 × julho/agosto2026; datas derivam do trimestre e mês efetivamente conferido.
+- **Guardas:** até duas páginas por janela, filtros/paginação preservados, retry/cancelamento, ausência diferente de zero, mesmos grupos, releitura atual igual ao município por mês e padrão. Mudança de fechamento/delta bloqueia o comparativo. Base anterior zero não gera porcentagem. Troca de escopo/identidade/trimestre invalida o resultado.
+- **Evidência:** 83 testes SP aprovados na retomada. Diagnóstico anterior: 15 cenários Edge, zero chamadas reais e rótulos sem sobreposição após ajuste. Histórico2025 de teste é fictício; os 20.000 e +21,8% de QA não são observações de mercado. Resposta histórica real ainda depende do login pessoal de Lucas. Build anterior ao último ajuste de rótulos aprovado; concluir verificação final após integração.
+- **Git:** fetch de 16/10 encontrou 3 remotos novos e 16 locais desde15/10 às11h55; Lucas autorizou merge preservando ambos, sem push. Remotos `22352d6`/`5a3075a`/`b6cf823` alteram tipos gerados Supabase e cache de compilação. Mensagem de deploy não comprova execução pelo agente; nenhuma função/migration será publicada nesta retomada.
+- **Próxima ação humana:** na rota SP, selecionar SP/São Paulo/3T2026 → Conferir dados reais → Conferir histórico de lançamentos → Ampliar slides → página12. Conferir o retorno ou o bloqueio, sem compartilhar token. Depois delimitar histórico de vendas/oferta; curva longa desde2022 e móvel12meses continuam pendentes.
+- **Limites/pausa:** sem coleta longa, geração de estudo, push, publicação ou Monday. Secovi/FIERGS/Corretor/Quanti preservados. Férias desde19/10, sem trabalho/retorno presumidos; retomar por este checkpoint e `sp/PLAN.md`.
+
 ## Conferência municipal julho/agosto — 15/10/2026
 
 - **Estado atual:** transporte curto e botão “Conferir dados reais” preparados localmente, com amostra da raiz e três séries municipais. Replay das respostas reais recebidas: julho/agosto fecham e aparecem como **parcial até agosto** (24.351 lançadas, 26.824 vendas, estoque 124.706). Empreendimentos pendente de coleta granular; sem exportação/coleta longa. [Plano e próximo portão](../../features/relatorios-institucionais/sp/PLAN.md).

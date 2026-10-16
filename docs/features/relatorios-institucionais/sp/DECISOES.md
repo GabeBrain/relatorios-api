@@ -1,5 +1,13 @@
 # Decisões e pontos abertos — SP
 
+## Primeira janela histórica de lançamentos — autorizada em 15/10, retomada16/10
+
+- Comparar os mesmos meses nos dois anos: janela atual do trimestre até o mês conferido e os meses correspondentes do ano anterior. Não buscar2022–2026 para esta fatia nem comparar parcial com trimestre anterior completo.
+- Reusar transporte curto SP: uma amostra de fechamento e duas janelas `releases`, `group_by=Padrão`, SP/São Paulo/Vertical; até100linhas ×2páginas por janela, retry limitado e cancelamento. URLs de paginação nunca substituem os filtros fixos. Vendas/estoque/históricos granulares não são consultados nessa ação.
+- Antes de comparar, exigir raiz idêntica à consulta municipal, meses/grupos explícitos em ambos os anos, valores inteiros não negativos, cobertura completa e releitura atual igual por mês e agregado de padrão. Falha limpa o comparativo anterior, preservando o baseline municipal; trocar escopo/identidade/trimestre invalida tudo.
+- Calcular variação pela soma da janela, não média das variações mensais. Se a base anterior for zero, manter diferença absoluta mas não calcular porcentagem. A comparação da API atual não comprova a mesma fotografia usada no PPT histórico.
+- Arte do slide18 reaproveitada na página12, com anos/meses explícitos, legenda de duas séries e rótulos separados. Dados2025 de QA são inventados; somente o botão autenticado poderá fornecer observações históricas reais. Nenhuma regra de segmento é retroaplicada a este comparativo total.
+
 ## Classificação confirmada por Lucas — 15/10/2026
 
 Lucas forneceu explicitamente a correspondência abaixo, substituindo a pendência anterior. Regra `sp-institucional-segmentos-v1`, específica do piloto SP/3T2026; não é uma regra geral de enquadramento legal em MCMV nem altera outros modelos.

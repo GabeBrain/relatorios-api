@@ -22,6 +22,13 @@ export interface SpDistribution {
   checks: SpCheck[];
 }
 export type SpTypologies = SpDistribution;
+export interface SpLaunchHistory {
+  status: 'ready' | 'blocked';
+  issues: string[];
+  rows: { currentMonth: string; previousMonth: string; current: number; previous: number; delta: number; variation: number | null }[];
+  totals: { current: number; previous: number; delta: number; variation: number | null } | null;
+  checks: SpCheck[];
+}
 export interface SpPreview {
   entity: typeof SP_INSTITUTIONAL.id;
   quarter: Quarter;
@@ -36,6 +43,7 @@ export interface SpPreview {
   monthly?: { month: string; launches: number; sales: number; openingStock: number; closingStock: number; delta: number }[];
   typologies?: SpTypologies;
   patterns?: SpDistribution;
+  launchHistory?: SpLaunchHistory;
 }
 const emptyMetrics = (): SpMetrics => ({ projects: null, launches: null, sales: null, stock: null });
 const normalized = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();

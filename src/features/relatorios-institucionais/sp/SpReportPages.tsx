@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { SpPreview, SpTypologies } from './model';
 import { buildSpSegments } from './segments';
+import { SpLaunchHistorySlide } from './SpLaunchHistorySlide';
 import cover from './assets/cover.png';
 import projectsTemplate from './assets/template-13.png';
 import launchesTemplate from './assets/template-18.png';
@@ -17,8 +18,8 @@ import stockSegmentTemplate from './assets/template-48.png';
 
 const quantity = (value: number | null) => value === null ? 'Indisponível' : value.toLocaleString('pt-BR');
 const month = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
-const titles = ['Capa', 'Empreendimentos', 'Unidades lançadas', 'Vendas líquidas', 'Oferta final', 'Lançamentos por tipologia', 'Vendas por tipologia', 'Oferta por tipologia', 'Lançamentos por segmento', 'Vendas por segmento', 'Oferta por segmento'];
-const templates = [cover, projectsTemplate, launchesTemplate, salesTemplate, stockTemplate, launchesTypologyTemplate, salesTypologyTemplate, stockTypologyTemplate, launchesSegmentTemplate, salesSegmentTemplate, stockSegmentTemplate];
+const titles = ['Capa', 'Empreendimentos', 'Unidades lançadas', 'Vendas líquidas', 'Oferta final', 'Lançamentos por tipologia', 'Vendas por tipologia', 'Oferta por tipologia', 'Lançamentos por segmento', 'Vendas por segmento', 'Oferta por segmento', 'Comparativo de lançamentos'];
+const templates = [cover, projectsTemplate, launchesTemplate, salesTemplate, stockTemplate, launchesTypologyTemplate, salesTypologyTemplate, stockTypologyTemplate, launchesSegmentTemplate, salesSegmentTemplate, stockSegmentTemplate, launchesTemplate];
 
 function SlideFrame({ children }: { children: ReactNode }) {
   const frame = useRef<HTMLDivElement>(null);
@@ -45,7 +46,7 @@ export function SpReportPages({ report }: { report: SpPreview }) {
   const observations = (report.monthly ?? []).map(row => ({ month: row.month, value: metric === 'stock' ? row.closingStock : metric === 'launches' ? row.launches : row.sales }));
   const slide = <article aria-label={`Página ${page + 1}: ${titles[page]}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
     <img src={templates[page]} alt={page === 0 ? 'Capa original Brain Inteligência Estratégica' : `Layout original: ${titles[page]}`} className="absolute inset-0 h-full w-full" />
-    {page > 0 && <>
+    {page === 11 ? <SpLaunchHistorySlide report={report} /> : page > 0 && <>
       <p className="absolute left-[62px] top-[155px] text-[18px]">{report.quarter} · {real ? period : 'Dados fictícios · exemplo de desenvolvimento'}</p>
       <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity(page >= 5 && distribution?.status !== 'ready' ? null : report.metrics[metric])}</p></div>
       {page >= 5 ? <DistributionChart result={distribution} metric={metric as 'launches' | 'sales' | 'stock'} kind={page >= 8 ? 'segmento' : 'tipologia'} /> : page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}

@@ -13,6 +13,7 @@ import { buildSpTemporalPreview } from './temporal';
 import { SpReportPages } from './SpReportPages';
 import { buildSpTypologies } from './typologies';
 import { buildSpSegments, SP_SEGMENT_RULE } from './segments';
+import { buildSpLaunchHistory } from './history';
 
 const labels = { projects: 'Empreendimentos lançados', launches: 'Unidades lançadas', sales: 'Vendas líquidas', stock: 'Oferta final' } as const;
 const formatMonth = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
@@ -25,13 +26,14 @@ export default function SpInstitutionalPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [typologyError, setTypologyError] = useState(false);
+  const [historyError, setHistoryError] = useState(false);
   const version = useRef(0);
   const controller = useRef(new AbortController());
   const lastMode = useRef<'api' | 'fixture'>('api');
   const [progress, setProgress] = useState('Preparando consulta…');
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const token = useAuthStore(state => state.getToken());
-  const invalidate = useCallback(() => { controller.current.abort(); controller.current = new AbortController(); version.current += 1; setPreview(null); setLoading(false); setError(false); setTypologyError(false); setStartedAt(null); }, []);
+  const invalidate = useCallback(() => { controller.current.abort(); controller.current = new AbortController(); version.current += 1; setPreview(null); setLoading(false); setError(false); setTypologyError(false); setHistoryError(false); setStartedAt(null); }, []);
   useEffect(() => { invalidate(); return () => { controller.current.abort(); version.current += 1; }; }, [token, invalidate]);
   const changeGeo = (next: GeoScope) => { invalidate(); setGeo(next); };
   const scope = useGeoApiScope({ value: geo, onChange: changeGeo });
@@ -48,7 +50,7 @@ export default function SpInstitutionalPage() {
     const signal = controller.current.signal;
     lastMode.current = mode;
     const requestVersion = ++version.current;
-    setLoading(true); setError(false); setTypologyError(false); setPreview(null); setStartedAt(Date.now()); setProgress(mode === 'api' ? 'Conferindo os meses disponíveis…' : 'Preparando o exemplo do estudo…');
+    setLoading(true); setError(false); setTypologyError(false); setHistoryError(false); setPreview(null); setStartedAt(Date.now()); setProgress(mode === 'api' ? 'Conferindo os meses disponíveis…' : 'Preparando o exemplo do estudo…');
     try {
       let next: SpPreview;
       if (mode === 'api') {
@@ -88,6 +90,25 @@ export default function SpInstitutionalPage() {
     }
   }
 
+  async function prepareLaunchHistory() {
+    if (!ready || loading || !isApi || report?.status !== 'partial' || report.patterns?.status !== 'ready') return;
+    controller.current.abort(); controller.current = new AbortController();
+    const requestVersion = ++version.current, signal = controller.current.signal;
+    setLoading(true); setHistoryError(false); setStartedAt(Date.now()); setProgress('Conferindo os períodos do comparativo…');
+    const baseline = { ...report, launchHistory: undefined };
+    setPreview({ key, report: baseline });
+    try {
+      const { fetchSpLaunchHistory } = await import('./api');
+      const input = await fetchSpLaunchHistory(baseline, { signal, onProgress: message => { if (requestVersion === version.current) setProgress(message); } });
+      const launchHistory = buildSpLaunchHistory(input, baseline);
+      if (requestVersion === version.current) setPreview({ key, report: { ...baseline, launchHistory } });
+    } catch {
+      if (requestVersion === version.current) setHistoryError(true);
+    } finally {
+      if (requestVersion === version.current) setLoading(false);
+    }
+  }
+
   return <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
     <header className="space-y-2">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Relatórios institucionais</p>
@@ -118,6 +139,7 @@ export default function SpInstitutionalPage() {
     {loading && <div className="space-y-3"><BrainLoadingState title={progress} startedAt={startedAt} /><Button variant="outline" onClick={invalidate}>Cancelar consulta</Button></div>}
     {error && <Alert variant="destructive"><AlertTitle>Não foi possível preparar a prévia</AlertTitle><AlertDescription><p>A consulta não foi concluída. Confira sua autenticação e tente novamente mantendo o recorte.</p><Button className="mt-3" variant="outline" onClick={() => preparePreview(lastMode.current)} disabled={!ready || loading}>Tentar novamente</Button></AlertDescription></Alert>}
     {typologyError && <Alert variant="destructive"><AlertTitle>Não foi possível conferir as tipologias</AlertTitle><AlertDescription>A consulta não terminou. Os totais municipais foram mantidos; tente novamente em Conferir tipologias.</AlertDescription></Alert>}
+    {historyError && <Alert variant="destructive"><AlertTitle>Não foi possível conferir o histórico</AlertTitle><AlertDescription>A consulta não terminou. Os totais atuais foram mantidos; tente novamente em Conferir histórico de lançamentos.</AlertDescription></Alert>}
     {!report && !loading && !error && <p className="text-sm text-muted-foreground">Nenhuma prévia preparada. Selecione o recorte e o trimestre para visualizar o exemplo.</p>}
     {report && <section aria-label="Prévia do estudo" className="space-y-4 rounded-lg border border-border bg-card p-4">
       <div><h2 className="text-lg font-semibold">São Paulo / SP · {report.quarter}{isApi && report.throughMonth ? ` · parcial até ${formatMonth(report.throughMonth)}` : ''}</h2><p className="text-sm text-muted-foreground">{isApi ? 'Dados da API · fechamento informado na amostra' : 'Dados fictícios · fechamento do exemplo'}: {report.closingMonth ? formatMonth(report.closingMonth) : 'não informado'}.</p></div>
@@ -143,6 +165,13 @@ export default function SpInstitutionalPage() {
       {segments?.status === 'ready' ? <p role="status" className="text-sm">Segmentos conferidos: os quatro grupos somam os totais municipais. Slides 24, 38 e 48 disponíveis nas posições 9, 10 e 11 da prévia.</p> : <Alert variant="destructive"><AlertTitle>Segmentos ainda não reconciliados</AlertTitle><AlertDescription>{segments?.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
       <p className="text-xs text-muted-foreground">Regra confirmada por {SP_SEGMENT_RULE.confirmedBy} em 15/10/2026, específica deste modelo.</p>
       {report.patterns?.status === 'ready' ? <details><summary className="cursor-pointer text-sm font-medium">Ver padrões recebidos da API</summary><Table><TableCaption>Grupos originais da consulta municipal, sem reclassificação. Lançamentos e vendas acumulados; oferta somente no último mês conferido.</TableCaption><TableHeader><TableRow><TableHead>Padrão da API</TableHead><TableHead>Lançamentos</TableHead><TableHead>Vendas</TableHead><TableHead>Oferta final</TableHead></TableRow></TableHeader><TableBody>{report.patterns.rows.map(row => <TableRow key={row.group}><TableCell>{row.group}</TableCell><TableCell>{row.launches.toLocaleString('pt-BR')}</TableCell><TableCell>{row.sales.toLocaleString('pt-BR')}</TableCell><TableCell>{row.stock.toLocaleString('pt-BR')}</TableCell></TableRow>)}</TableBody></Table></details> : <p className="text-sm text-muted-foreground">Confira os dados reais novamente para obter o detalhamento por padrão.</p>}
+    </section>}
+    {isApi && report?.status === 'partial' && <section aria-label="Comparativo histórico de lançamentos" className="space-y-3 rounded-lg border border-border bg-card p-4">
+      <h2 className="text-lg font-semibold">Histórico de lançamentos</h2><p className="text-sm text-muted-foreground">Comparação dos meses disponíveis com os mesmos meses do ano anterior. Reconferimos os lançamentos atuais antes de calcular a diferença; não buscamos a série histórica completa.</p>
+      <Button variant="outline" onClick={prepareLaunchHistory} disabled={!ready || loading || report.patterns?.status !== 'ready'}>Conferir histórico de lançamentos</Button>
+      {report.launchHistory?.status === 'ready' && <p role="status" className="text-sm">Comparativo de lançamentos conferido para meses equivalentes. Veja a página 12 da prévia.</p>}
+      {report.launchHistory?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Comparativo ainda não reconciliado</AlertTitle><AlertDescription>{report.launchHistory.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
+      {!!report.launchHistory?.checks.length && <details><summary className="cursor-pointer text-sm font-medium">Conferência da releitura de lançamentos</summary><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{report.launchHistory.checks.map(check => <li key={check.label}>{check.label}: municipal {check.expected.toLocaleString('pt-BR')}, releitura {check.actual.toLocaleString('pt-BR')}, diferença {check.delta.toLocaleString('pt-BR')}.</li>)}</ul></details>}
     </section>}
     {report && <SpReportPages key={`${key}/${report.source}/${report.throughMonth}`} report={report} />}
   </div>;

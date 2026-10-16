@@ -5,8 +5,26 @@ import { buildSpTemporalPreview } from './temporal';
 import { recordedInput } from './__tests__/recorded';
 import { syntheticTypologyInput } from './__tests__/typology';
 import { buildSpTypologies } from './typologies';
+import { buildSpLaunchHistory } from './history';
+import { syntheticLaunchHistory } from './__tests__/history';
 
 describe('páginas SP', () => {
+  it('mostra meses equivalentes e remove o comparativo quando a validação bloqueia', () => {
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    const view = render(<SpReportPages report={report} />);
+    fireEvent.click(screen.getByRole('button', { name: '12. Comparativo de lançamentos' }));
+    expect(screen.getByText('Comparativo de lançamentos indisponível')).toBeInTheDocument();
+    const launchHistory = buildSpLaunchHistory(syntheticLaunchHistory(), report);
+    view.rerender(<SpReportPages report={{ ...report, launchHistory }} />);
+    expect(screen.getByText('julho / agosto · 2025 × 2026')).toBeInTheDocument();
+    expect(screen.getByText('Variação: +21,8%')).toBeInTheDocument();
+    const zero = syntheticLaunchHistory(); zero.previous.forEach(row => { row.releases_in_period = 0; });
+    view.rerender(<SpReportPages report={{ ...report, launchHistory: buildSpLaunchHistory(zero, report) }} />);
+    expect(screen.getByText('Variação não calculável: base anterior zero')).toBeInTheDocument();
+    view.rerender(<SpReportPages report={{ ...report, launchHistory: { status: 'blocked', issues: ['Fonte divergente'], totals: null, rows: [], checks: [] } }} />);
+    expect(screen.getByText('Fonte divergente')).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Lançamentos nos mesmos meses do ano atual e anterior' })).not.toBeInTheDocument();
+  });
   it('preenche os três segmentos com a regra confirmada e bloqueia padrões inválidos', () => {
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     const view = render(<SpReportPages report={{ ...report, typologies: buildSpTypologies(syntheticTypologyInput(), report) }} />);

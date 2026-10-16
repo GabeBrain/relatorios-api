@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { RequestOptions } from '@/lib/http-client';
-import { fetchSpTemporalInput, type SpReadOptions } from './api';
+import { fetchSpTemporalInput, fetchSpLaunchHistory, type SpReadOptions } from './api';
 import { buildSpTemporalPreview } from './temporal';
 import { recordedInput } from './__tests__/recorded';
+import { syntheticLaunchHistory } from './__tests__/history';
 
 type Response = Awaited<ReturnType<NonNullable<SpReadOptions['request']>>>;
 const reply = (data: unknown, status = 200): Response => ({ ok: status === 200, status, data } as Response);
@@ -19,6 +20,31 @@ function recordedServer() {
 const noSleep = async () => {};
 
 describe('SP — transporte curto e paginado, sem provedor real', () => {
+  it('histórico usa só amostra e dois intervalos de lançamentos, sem setembro ou vendas/estoque', async () => {
+    const source = syntheticLaunchHistory(), base = recordedServer();
+    const request = vi.fn(async (options: RequestOptions) => {
+      if (options.url.endsWith('/building-with-history')) return base(options);
+      return reply(envelope(String(options.query?.start_period).startsWith('2025') ? source.previous : source.current));
+    });
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    const result = await fetchSpLaunchHistory(report, { request });
+    expect(request).toHaveBeenCalledTimes(3);
+    const windows = request.mock.calls.slice(1).map(([options]) => options);
+    expect(windows.map(options => [options.query?.start_period, options.query?.end_period])).toEqual([['2026-07-01', '2026-08-31'], ['2025-07-01', '2025-08-31']]);
+    for (const options of windows) {
+      expect(options.url).toMatch(/\/releases$/);
+      expect(options.query).toMatchObject({ city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', per_page: 100 });
+    }
+    expect(result.complete).toEqual({ current: true, previous: true });
+  });
+  it('histórico não busca séries se o fechamento mudou nem inicia sem baseline válido', async () => {
+    const request = vi.fn(async () => reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-09-01' }], 1, 5183, 5183)));
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    const input = await fetchSpLaunchHistory(report, { request });
+    expect(request).toHaveBeenCalledOnce(); expect(input.current).toEqual([]);
+    await expect(fetchSpLaunchHistory({ ...report, source: 'fixture' }, { request })).rejects.toThrow('totais municipais');
+    expect(request).toHaveBeenCalledOnce();
+  });
   it('usa Tipologia somente quando solicitada e preserva limites e recorte', async () => {
     const request = recordedServer();
     const input = await fetchSpTemporalInput('3T2026', { request, groupBy: 'Tipologia' });

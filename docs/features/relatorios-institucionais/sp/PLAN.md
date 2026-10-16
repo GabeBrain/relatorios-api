@@ -1,5 +1,9 @@
 # SP capital — primeiro mapeamento
 
+**Retomada do histórico — 16/10:** comparativo curto de unidades lançadas implementado (página12), recuperado da interrupção de15/10. Usar **Conferir histórico de lançamentos** após a conferência municipal: uma nova amostra da raiz, releitura atual e mesmos meses do ano anterior (normalmente3requests, máximo2páginas por janela). Julho/agosto2025 × julho/agosto2026; não é curva completa desde2022 nem comparação de trimestres completos. [Checkpoint e comandos](../../../handoffs/lucas-relatorios-2026-10-14/STATUS.md).
+
+**Estado de dados:** releitura atual deve igualar os totais por mês e padrão; raiz alterada, cobertura incompleta ou universo diferente bloqueiam. Histórico2025 ainda não recebido da sessão pessoal, fixtures anteriores são fictícias. Próximo portão imediato: validar essa ação autenticada e avaliar eventuais divergências, sem pedir token no chat. Exportação, série longa e móvel12meses continuam pendentes.
+
 **Regra confirmada e aplicada — 15/10:** Lucas informou Compactos=Compacto; MCMV=Econômico; Médio Padrão=Standard+Médio+Médio-Alto; Luxo=Alto+Luxo. Os slides 24/38/48 (posições 9/10/11) agora recebem gráficos com essa regra SP, preservando os três totais e a parcial julho/agosto. Sem consulta nova. Próximo conteúdo: planejar a janela/cobertura das séries históricas, antes de qualquer coleta adicional. Comparações anuais, setembro e exportação seguem pendentes.
 
 **Segmentos — 15/10:** Lucas confirmou os três slides por tipologia com capturas reais; somas batem com os totais municipais. Slides 24/38/48 preparados com artes originais nas posições 9/10/11, explicitamente pendentes. Lucas ainda não tem a regra dos sete padrões→quatro segmentos; aguardar analista para preencher. O detalhamento original da API está em **Ver padrões recebidos da API**, reaproveitando a consulta municipal sem nova coleta.

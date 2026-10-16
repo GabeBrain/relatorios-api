@@ -43,6 +43,11 @@ try {
     const metric = url.pathname.split('/').at(-1);
     if (url.pathname.includes('/temporal-analysis-city/') && ['sales', 'releases', 'stock'].includes(metric)) {
       mockMarketCalls.push({ path: url.pathname, query: Object.fromEntries(url.searchParams) });
+      // No real 2025 payload supplied: previous-year history is explicitly fictitious QA data.
+      if (metric === 'releases' && url.searchParams.get('start_period')?.startsWith('2025')) {
+        const data = ['2025-07-01', '2025-08-01'].flatMap(period => recorded.groups.map((group, index) => ({ period, group, building_type: 'Vertical', releases_in_period: index === 6 ? 1432 : 1428 })));
+        return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: data.length }, links: { next: null } }) });
+      }
       const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
       // Typology split is invented for UI QA. Only pattern rows replay recorded observations.
       const byTypology = url.searchParams.get('group_by') === 'Tipologia';
@@ -130,6 +135,20 @@ try {
   }
   assert.equal(mockMarketCalls.length, 8);
   results.push({ state: 'três segmentos preenchidos por regra confirmada, somas e grupos preservados sem requests extras', passed: true });
+  await page.getByRole('button', { name: 'Conferir histórico de lançamentos', exact: true }).click();
+  await page.getByText(/Comparativo de lançamentos conferido/).waitFor();
+  assert.equal(mockMarketCalls.length, 11);
+  const historicalCalls = mockMarketCalls.slice(-2);
+  assert.deepEqual(historicalCalls.map(call => [call.query.start_period, call.query.end_period]), [['2026-07-01', '2026-08-31'], ['2025-07-01', '2025-08-31']]);
+  await slides.getByRole('button', { name: '12. Comparativo de lançamentos', exact: true }).click();
+  await slides.getByRole('img', { name: 'Lançamentos nos mesmos meses do ano atual e anterior' }).waitFor();
+  const historyLabels = await slides.locator('[data-history-value]').evaluateAll(nodes => nodes.map(node => { const box = node.getBoundingClientRect(); return { left: box.left, right: box.right, top: box.top, bottom: box.bottom }; }));
+  for (let i = 0; i < historyLabels.length; i++) for (let j = i + 1; j < historyLabels.length; j++) {
+    const a = historyLabels[i], b = historyLabels[j];
+    assert.equal(a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top, false, 'Rótulos históricos não se sobrepõem');
+  }
+  await slides.getByRole('article').screenshot({ path: resolve(output, 'slide-12-synthetic-2025.png'), animations: 'disabled' });
+  results.push({ state: 'histórico com anterior 2025 fictício: mesmos meses, três requests adicionais mockados e releitura atual reconciliada', passed: true });
   for (const [width, theme] of [[1440, 'light'], [1440, 'dark'], [390, 'light'], [390, 'dark']]) {
     await page.setViewportSize({ width, height: 1000 });
     if (width < 640 && await page.getByRole('button', { name: 'Recolher menu', exact: true }).count()) await page.getByRole('button', { name: 'Recolher menu', exact: true }).click();

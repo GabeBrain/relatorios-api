@@ -19,16 +19,56 @@ vi.mock('./fixture', async importOriginal => {
 vi.mock('./api', async () => {
   const { recordedInput } = await import('./__tests__/recorded');
   const { syntheticTypologyInput } = await import('./__tests__/typology');
+  const { syntheticLaunchHistory } = await import('./__tests__/history');
   return { fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal; groupBy?: string }) => {
     if (access.apiMode === 'error') throw new Error('private API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
     return { ...(options.groupBy === 'Tipologia' ? syntheticTypologyInput() : recordedInput()), origin: 'api' };
+  }, fetchSpLaunchHistory: async (_report: unknown, options: { signal: AbortSignal }) => {
+    if (access.apiMode === 'error') throw new Error('private historical API diagnostic');
+    if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
+    return syntheticLaunchHistory();
   } };
 });
 beforeEach(() => { access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.reload.mockClear(); });
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('busca o comparativo sob demanda, mantém a parcial e retira histórico antigo após falha', async () => {
+    render(<SpInstitutionalPage />);
+    expect(screen.queryByRole('button', { name: 'Conferir histórico de lançamentos' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Conferir histórico de lançamentos' }));
+    await screen.findByText(/Comparativo de lançamentos conferido/);
+    fireEvent.click(screen.getByRole('button', { name: '12. Comparativo de lançamentos' }));
+    expect(screen.getByRole('img', { name: 'Lançamentos nos mesmos meses do ano atual e anterior' })).toBeInTheDocument();
+    access.apiMode = 'error';
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir histórico de lançamentos' }));
+    expect(await screen.findByText('Não foi possível conferir o histórico')).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Lançamentos nos mesmos meses do ano atual e anterior' })).not.toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: '24.351' })).toBeInTheDocument();
+    expect(screen.queryByText('private historical API diagnostic')).not.toBeInTheDocument();
+    access.apiMode = 'success';
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir histórico de lançamentos' }));
+    await screen.findByText(/Comparativo de lançamentos conferido/);
+    fireEvent.click(screen.getByText('Trocar UF'));
+    expect(screen.queryByRole('region', { name: 'Páginas do relatório' })).not.toBeInTheDocument();
+  });
+  it('cancela a consulta histórica e não mantém um resultado de outro escopo', async () => {
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByRole('button', { name: 'Conferir histórico de lançamentos' });
+    access.apiMode = 'pending';
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir histórico de lançamentos' }));
+    await screen.findByRole('button', { name: 'Cancelar consulta' });
+    await new Promise(resolve => setTimeout(resolve, 0));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar consulta' }));
+    expect(access.aborted).toBe(true);
+    expect(screen.queryByRole('region', { name: 'Páginas do relatório' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Não foi possível conferir o histórico')).not.toBeInTheDocument();
+  });
   it('mostra os padrões recebidos sem converter Econômico em MCMV e limpa ao trocar escopo', async () => {
     render(<SpInstitutionalPage />);
     fireEvent.click(screen.getByText('Escolher capital'));
