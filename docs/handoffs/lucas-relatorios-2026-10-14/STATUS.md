@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## Lote de históricos — 16/10/2026
+
+- **Pedido atual:** Lucas aprovou entregar/revisar blocos completos. Lançamentos/vendas/oferta agora têm uma ação **Conferir históricos**, substituindo a ação isolada visível do checkpoint abaixo. Páginas12/13/14 usam as artes originais18/32/46.
+- **Escopo:** mesmos meses dos dois anos, duas amostras e seis séries municipais curtas; normalmente8requests, até2páginas por série. Releitura igual ao baseline e balanços dos dois anos obrigatórios. Uma falha bloqueia o lote inteiro. Fluxos acumulados e estoque somente no último mês; sinais negativos preservados e base não positiva sem porcentagem.
+- **Validação:** 99 testes SP e15cenários Edge aprovados com zero chamadas reais. Gráficos e ampliação revisados.2025 de QA inteiramente fictício; não é observação do provedor. Tipagem/lint/build finais registrados na entrega.
+- **Retomar/testar:** na rota SP selecionar capital/3T2026, Conferir dados reais → Conferir históricos → Ampliar slides → páginas12–14. Enviar resultado ou divergência sem credenciais. Ampliar histórico longo/móvel/preços só depois de avaliar essa janela real. Férias desde19/10 e retorno não presumido, sem agenda automática.
+- **Git/limites:** base `047e5bf`, origin em dia com a base e19commits locais desde15/10 às11h55 na abertura. Sem push, publicação, estudo real, coleta longa ou Monday. Nenhuma mudança autoral nos domínios Secovi/FIERGS/Corretor/Quanti.
+
 ## Checkpoint retomado — 16/10/2026
 
 **Fechamento da retomada:** checkpoint salvo em `0c6e3c2`; merge autorizado `1ca206a` integrou os três remotos sem conflitos. Tipagem SP/lint aprovados, build final pós-merge aprovado e15cenários Edge refeitos com zero chamadas reais/erros e rótulos sem sobreposição. Os83testes SP passaram na retomada. Captura final `.local-inputs/relatorios-lucas/sp/template-review-1792160752992/slide-12-synthetic-2025.png`; continua com2025 fictício. Próximo passo imediato é a ação autenticada abaixo, não uma nova implementação. Sem push.

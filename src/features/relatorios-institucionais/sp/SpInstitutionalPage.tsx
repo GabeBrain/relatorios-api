@@ -13,7 +13,7 @@ import { buildSpTemporalPreview } from './temporal';
 import { SpReportPages } from './SpReportPages';
 import { buildSpTypologies } from './typologies';
 import { buildSpSegments, SP_SEGMENT_RULE } from './segments';
-import { buildSpLaunchHistory } from './history';
+import { buildSpHistoryBatch } from './history-batch';
 
 const labels = { projects: 'Empreendimentos lançados', launches: 'Unidades lançadas', sales: 'Vendas líquidas', stock: 'Oferta final' } as const;
 const formatMonth = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
@@ -90,18 +90,18 @@ export default function SpInstitutionalPage() {
     }
   }
 
-  async function prepareLaunchHistory() {
+  async function prepareHistories() {
     if (!ready || loading || !isApi || report?.status !== 'partial' || report.patterns?.status !== 'ready') return;
     controller.current.abort(); controller.current = new AbortController();
     const requestVersion = ++version.current, signal = controller.current.signal;
     setLoading(true); setHistoryError(false); setStartedAt(Date.now()); setProgress('Conferindo os períodos do comparativo…');
-    const baseline = { ...report, launchHistory: undefined };
+    const baseline = { ...report, launchHistory: undefined, historyBatch: undefined };
     setPreview({ key, report: baseline });
     try {
-      const { fetchSpLaunchHistory } = await import('./api');
-      const input = await fetchSpLaunchHistory(baseline, { signal, onProgress: message => { if (requestVersion === version.current) setProgress(message); } });
-      const launchHistory = buildSpLaunchHistory(input, baseline);
-      if (requestVersion === version.current) setPreview({ key, report: { ...baseline, launchHistory } });
+      const { fetchSpHistoryBatch } = await import('./api');
+      const input = await fetchSpHistoryBatch(baseline, { signal, onProgress: message => { if (requestVersion === version.current) setProgress(message); } });
+      const historyBatch = buildSpHistoryBatch(input, baseline);
+      if (requestVersion === version.current) setPreview({ key, report: { ...baseline, historyBatch } });
     } catch {
       if (requestVersion === version.current) setHistoryError(true);
     } finally {
@@ -139,7 +139,7 @@ export default function SpInstitutionalPage() {
     {loading && <div className="space-y-3"><BrainLoadingState title={progress} startedAt={startedAt} /><Button variant="outline" onClick={invalidate}>Cancelar consulta</Button></div>}
     {error && <Alert variant="destructive"><AlertTitle>Não foi possível preparar a prévia</AlertTitle><AlertDescription><p>A consulta não foi concluída. Confira sua autenticação e tente novamente mantendo o recorte.</p><Button className="mt-3" variant="outline" onClick={() => preparePreview(lastMode.current)} disabled={!ready || loading}>Tentar novamente</Button></AlertDescription></Alert>}
     {typologyError && <Alert variant="destructive"><AlertTitle>Não foi possível conferir as tipologias</AlertTitle><AlertDescription>A consulta não terminou. Os totais municipais foram mantidos; tente novamente em Conferir tipologias.</AlertDescription></Alert>}
-    {historyError && <Alert variant="destructive"><AlertTitle>Não foi possível conferir o histórico</AlertTitle><AlertDescription>A consulta não terminou. Os totais atuais foram mantidos; tente novamente em Conferir histórico de lançamentos.</AlertDescription></Alert>}
+    {historyError && <Alert variant="destructive"><AlertTitle>Não foi possível conferir os históricos</AlertTitle><AlertDescription>A consulta não terminou. Os totais atuais foram mantidos; tente novamente em Conferir históricos.</AlertDescription></Alert>}
     {!report && !loading && !error && <p className="text-sm text-muted-foreground">Nenhuma prévia preparada. Selecione o recorte e o trimestre para visualizar o exemplo.</p>}
     {report && <section aria-label="Prévia do estudo" className="space-y-4 rounded-lg border border-border bg-card p-4">
       <div><h2 className="text-lg font-semibold">São Paulo / SP · {report.quarter}{isApi && report.throughMonth ? ` · parcial até ${formatMonth(report.throughMonth)}` : ''}</h2><p className="text-sm text-muted-foreground">{isApi ? 'Dados da API · fechamento informado na amostra' : 'Dados fictícios · fechamento do exemplo'}: {report.closingMonth ? formatMonth(report.closingMonth) : 'não informado'}.</p></div>
@@ -166,12 +166,12 @@ export default function SpInstitutionalPage() {
       <p className="text-xs text-muted-foreground">Regra confirmada por {SP_SEGMENT_RULE.confirmedBy} em 15/10/2026, específica deste modelo.</p>
       {report.patterns?.status === 'ready' ? <details><summary className="cursor-pointer text-sm font-medium">Ver padrões recebidos da API</summary><Table><TableCaption>Grupos originais da consulta municipal, sem reclassificação. Lançamentos e vendas acumulados; oferta somente no último mês conferido.</TableCaption><TableHeader><TableRow><TableHead>Padrão da API</TableHead><TableHead>Lançamentos</TableHead><TableHead>Vendas</TableHead><TableHead>Oferta final</TableHead></TableRow></TableHeader><TableBody>{report.patterns.rows.map(row => <TableRow key={row.group}><TableCell>{row.group}</TableCell><TableCell>{row.launches.toLocaleString('pt-BR')}</TableCell><TableCell>{row.sales.toLocaleString('pt-BR')}</TableCell><TableCell>{row.stock.toLocaleString('pt-BR')}</TableCell></TableRow>)}</TableBody></Table></details> : <p className="text-sm text-muted-foreground">Confira os dados reais novamente para obter o detalhamento por padrão.</p>}
     </section>}
-    {isApi && report?.status === 'partial' && <section aria-label="Comparativo histórico de lançamentos" className="space-y-3 rounded-lg border border-border bg-card p-4">
-      <h2 className="text-lg font-semibold">Histórico de lançamentos</h2><p className="text-sm text-muted-foreground">Comparação dos meses disponíveis com os mesmos meses do ano anterior. Reconferimos os lançamentos atuais antes de calcular a diferença; não buscamos a série histórica completa.</p>
-      <Button variant="outline" onClick={prepareLaunchHistory} disabled={!ready || loading || report.patterns?.status !== 'ready'}>Conferir histórico de lançamentos</Button>
-      {report.launchHistory?.status === 'ready' && <p role="status" className="text-sm">Comparativo de lançamentos conferido para meses equivalentes. Veja a página 12 da prévia.</p>}
-      {report.launchHistory?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Comparativo ainda não reconciliado</AlertTitle><AlertDescription>{report.launchHistory.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
-      {!!report.launchHistory?.checks.length && <details><summary className="cursor-pointer text-sm font-medium">Conferência da releitura de lançamentos</summary><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{report.launchHistory.checks.map(check => <li key={check.label}>{check.label}: municipal {check.expected.toLocaleString('pt-BR')}, releitura {check.actual.toLocaleString('pt-BR')}, diferença {check.delta.toLocaleString('pt-BR')}.</li>)}</ul></details>}
+    {isApi && report?.status === 'partial' && <section aria-label="Comparativos históricos" className="space-y-3 rounded-lg border border-border bg-card p-4">
+      <h2 className="text-lg font-semibold">Históricos de lançamentos, vendas e oferta</h2><p className="text-sm text-muted-foreground">Uma consulta para os três comparativos dos mesmos meses nos dois anos. Lançamentos e vendas são acumulados; oferta é a posição no último mês. Os balanços mensais das duas janelas precisam fechar.</p>
+      <Button variant="outline" onClick={prepareHistories} disabled={!ready || loading || report.patterns?.status !== 'ready'}>Conferir históricos</Button>
+      {report.historyBatch?.status === 'ready' && <p role="status" className="text-sm">Três comparativos conferidos para meses equivalentes. Veja as páginas 12, 13 e 14 da prévia.</p>}
+      {report.historyBatch?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Lote histórico ainda não reconciliado</AlertTitle><AlertDescription>{report.historyBatch.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
+      {!!report.historyBatch?.checks.length && <details><summary className="cursor-pointer text-sm font-medium">Conferência dos balanços e da releitura</summary><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{report.historyBatch.checks.map(check => <li key={check.label}>{check.label}: esperado {check.expected.toLocaleString('pt-BR')}, observado {check.actual.toLocaleString('pt-BR')}, diferença {check.delta.toLocaleString('pt-BR')}.</li>)}</ul></details>}
     </section>}
     {report && <SpReportPages key={`${key}/${report.source}/${report.throughMonth}`} report={report} />}
   </div>;

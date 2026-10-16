@@ -44,8 +44,10 @@ try {
     if (url.pathname.includes('/temporal-analysis-city/') && ['sales', 'releases', 'stock'].includes(metric)) {
       mockMarketCalls.push({ path: url.pathname, query: Object.fromEntries(url.searchParams) });
       // No real 2025 payload supplied: previous-year history is explicitly fictitious QA data.
-      if (metric === 'releases' && url.searchParams.get('start_period')?.startsWith('2025')) {
-        const data = ['2025-07-01', '2025-08-01'].flatMap(period => recorded.groups.map((group, index) => ({ period, group, building_type: 'Vertical', releases_in_period: index === 6 ? 1432 : 1428 })));
+      if (url.searchParams.get('start_period')?.startsWith('2025')) {
+        const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
+        const totals = metric === 'stock' ? { '2025-06-01': 100000, '2025-07-01': 100500, '2025-08-01': 101000 } : metric === 'sales' ? { '2025-07-01': 9500, '2025-08-01': 10500 } : { '2025-07-01': 10000, '2025-08-01': 11000 };
+        const data = Object.entries(totals).flatMap(([period, total]) => recorded.groups.map((group, index) => ({ period, group, building_type: 'Vertical', [field]: index === recorded.groups.length - 1 ? total - Math.floor(total / recorded.groups.length) * (recorded.groups.length - 1) : Math.floor(total / recorded.groups.length) })));
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: data.length }, links: { next: null } }) });
       }
       const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
@@ -135,20 +137,30 @@ try {
   }
   assert.equal(mockMarketCalls.length, 8);
   results.push({ state: 'três segmentos preenchidos por regra confirmada, somas e grupos preservados sem requests extras', passed: true });
-  await page.getByRole('button', { name: 'Conferir histórico de lançamentos', exact: true }).click();
-  await page.getByText(/Comparativo de lançamentos conferido/).waitFor();
-  assert.equal(mockMarketCalls.length, 11);
-  const historicalCalls = mockMarketCalls.slice(-2);
-  assert.deepEqual(historicalCalls.map(call => [call.query.start_period, call.query.end_period]), [['2026-07-01', '2026-08-31'], ['2025-07-01', '2025-08-31']]);
-  await slides.getByRole('button', { name: '12. Comparativo de lançamentos', exact: true }).click();
-  await slides.getByRole('img', { name: 'Lançamentos nos mesmos meses do ano atual e anterior' }).waitFor();
-  const historyLabels = await slides.locator('[data-history-value]').evaluateAll(nodes => nodes.map(node => { const box = node.getBoundingClientRect(); return { left: box.left, right: box.right, top: box.top, bottom: box.bottom }; }));
-  for (let i = 0; i < historyLabels.length; i++) for (let j = i + 1; j < historyLabels.length; j++) {
-    const a = historyLabels[i], b = historyLabels[j];
-    assert.equal(a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top, false, 'Rótulos históricos não se sobrepõem');
+  await page.getByRole('button', { name: 'Conferir históricos', exact: true }).click();
+  await page.getByText(/Três comparativos conferidos/).waitFor();
+  assert.equal(mockMarketCalls.length, 16);
+  const historicalCalls = mockMarketCalls.slice(-8).filter(call => !call.path.endsWith('/building-with-history'));
+  assert.equal(historicalCalls.length, 6);
+  assert.deepEqual(historicalCalls.filter(call => call.path.endsWith('/stock')).map(call => [call.query.start_period, call.query.end_period]), [['2026-06-01', '2026-08-31'], ['2025-06-01', '2025-08-31']]);
+  assert.ok(historicalCalls.every(call => call.query.city === 'São Paulo' && call.query.uf === 'SP' && call.query.group_by === 'Padrão'));
+  for (const [index, title] of ['lançamentos', 'vendas', 'oferta'].entries()) {
+    await slides.getByRole('button', { name: `${index + 12}. Comparativo de ${title}`, exact: true }).click();
+    const graph = `${title[0].toUpperCase()}${title.slice(1)} nos mesmos meses do ano atual e anterior`;
+    await slides.getByRole('img', { name: graph }).waitFor();
+    const historyLabels = await slides.locator('[data-history-value]').evaluateAll(nodes => nodes.map(node => { const box = node.getBoundingClientRect(); return { left: box.left, right: box.right, top: box.top, bottom: box.bottom }; }));
+    for (let i = 0; i < historyLabels.length; i++) for (let j = i + 1; j < historyLabels.length; j++) {
+      const a = historyLabels[i], b = historyLabels[j];
+      assert.equal(a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top, false, 'Rótulos históricos não se sobrepõem');
+    }
+    await slides.getByRole('article').screenshot({ path: resolve(output, `slide-${index + 12}-synthetic-2025.png`), animations: 'disabled' });
   }
-  await slides.getByRole('article').screenshot({ path: resolve(output, 'slide-12-synthetic-2025.png'), animations: 'disabled' });
-  results.push({ state: 'histórico com anterior 2025 fictício: mesmos meses, três requests adicionais mockados e releitura atual reconciliada', passed: true });
+  await slides.getByRole('button', { name: 'Ampliar slides' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: '13. Comparativo de vendas', exact: true }).click();
+  await page.getByRole('dialog').screenshot({ path: resolve(output, 'batch-expanded-synthetic-2025.png'), animations: 'disabled' });
+  await page.keyboard.press('Escape');
+  assert.equal(mockMarketCalls.length, 16);
+  results.push({ state: 'três históricos em lote com 2025 fictício, oito requests adicionais mockados, balanços dos dois anos e navegação sem nova rede', passed: true });
   for (const [width, theme] of [[1440, 'light'], [1440, 'dark'], [390, 'light'], [390, 'dark']]) {
     await page.setViewportSize({ width, height: 1000 });
     if (width < 640 && await page.getByRole('button', { name: 'Recolher menu', exact: true }).count()) await page.getByRole('button', { name: 'Recolher menu', exact: true }).click();

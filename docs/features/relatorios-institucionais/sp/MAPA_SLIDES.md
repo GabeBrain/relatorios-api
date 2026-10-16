@@ -1,5 +1,7 @@
 # SP — conteúdo e fontes dos 85 slides
 
+**Lote16/10:** comparativos de lançamentos/vendas/oferta preparados nas páginas12/13/14, com artes18/32/46 e ação única **Conferir históricos**. Usam os mesmos meses nos dois anos e estoque no fechamento. São comparativos de janela curta, não preenchimento das curvas longas/móveis do modelo inteiro. Dados históricos reais ainda por testar na sessão pessoal;2025 de QA é fictício.
+
 **Atualização de classificação:** Lucas confirmou a regra sete→quatro em 15/10; slides 24/38/48 já têm distribuição parcial, reaproveitando os padrões municipais. Regra e autoria em `DECISOES.md`; referências anteriores a agrupamento pendente são o histórico da preparação, não o estado atual. Comparação anual continua pendente.
 
 **Estado atual:** Lucas apresentou as três tipologias reais reconciliadas em capturas. Artes 24/38/48 estão preparadas com classificação pendente; Lucas ainda não possui a regra sete→quatro segmentos. Padrões originais podem ser inspecionados na tela sem nova coleta. O inventário registra dependências completas e não deve ser lido como slides todos implementados.

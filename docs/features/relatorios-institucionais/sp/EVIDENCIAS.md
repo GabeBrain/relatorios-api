@@ -1,5 +1,13 @@
 # Evidências do mapeamento — 15/10/2026
 
+## Lote de históricos — 16/10/2026
+
+Tipagem SP, ESLint do escopo e build final aprovados; git diff --check sem erros.
+
+99 testes SP/9arquivos aprovados: balanços de ambos os anos, igualdade de releitura, fluxos versus estoque final, bases zero/negativas, ausência/duplicação, fechamento/escopo alterado, limite de consulta, cancelamento/retry e bloqueio conjunto das três páginas. Quinze cenários Edge aprovados,16requests mockados para todo o ensaio (8do lote histórico), zero rede real/erros de página. Tipologia e todo2025 de QA são fictícios; município2026 reproduz dados fornecidos por Lucas.
+
+Capturas revisadas de lançamentos/vendas/oferta e diálogo ampliado em `.local-inputs/relatorios-lucas/sp/template-review-1792161598576/` (`slide-{12,13,14}-synthetic-2025.png`, `batch-expanded-synthetic-2025.png`). Sem sobreposição dos rótulos e sem overflow nos temas claro/escuro em1440/390px. Um ensaio anterior foi reiniciado após recarregamento durante edição de teste; o resultado final acima foi executado com arquivos estáveis. Respostas reais históricas permanecem pendentes, sem token pessoal acessado.
+
 ## Retomada do comparativo curto — 16/10/2026
 
 **Validação final:** `0c6e3c2` salva a entrega; `1ca206a` integra os remotos autorizados. Build e tipagem SP pós-merge aprovados; lint aprovado na retomada. Quinze cenários Edge refeitos, zero chamadas reais e zero erros de página; asserção de não sobreposição e captura final revisadas em `.local-inputs/relatorios-lucas/sp/template-review-1792160752992/`. Nenhum valor2025 deixa de ser fictício por passar nesses testes. Este resultado substitui a pendência de build final do registro abaixo.

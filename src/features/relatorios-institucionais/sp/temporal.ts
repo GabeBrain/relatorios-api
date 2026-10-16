@@ -6,6 +6,8 @@ import { summarizeSpGroups } from './distribution';
 
 export type SpTemporalRow = Record<string, unknown>;
 export interface SpTemporalInput {
+  /** Requested window limit; never a substitute for the provider root closing. */
+  windowEnd?: string;
   groupBy?: 'Padrão' | 'Tipologia';
   origin: 'api' | 'recorded-api';
   uf: string;
@@ -39,7 +41,9 @@ export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter)
   const fail = (status: SpPreview['status'], message: string) => ({ ...result, status, issues: [message] });
   if (!isQuarter(quarter) || input.uf !== 'SP' || normalize(input.city) !== 'sao paulo') return fail('invalid', 'Selecione São Paulo capital e um trimestre válido.');
   if (!result.closingMonth || input.sampledBuildings < 1 || input.totalBuildings < input.sampledBuildings) return fail('incomplete', 'A amostra não informou um fechamento válido na raiz.');
-  const months = quarterMonths(quarter).filter(month => month <= result.closingMonth!);
+  const quarterPeriods = quarterMonths(quarter);
+  if (input.windowEnd !== undefined && !quarterPeriods.includes(input.windowEnd)) return fail('invalid', 'O limite da janela não pertence ao trimestre selecionado.');
+  const months = quarterPeriods.filter(month => month <= result.closingMonth! && (!input.windowEnd || month <= input.windowEnd));
   if (!months.length) return fail('awaiting-closure', 'Nenhum mês do trimestre está dentro do fechamento informado na amostra.');
   result.throughMonth = months.at(-1)!;
   if (!input.complete.sales || !input.complete.releases || !input.complete.stock) return fail('incomplete', 'A paginação das fontes municipais não foi concluída.');
@@ -53,7 +57,7 @@ export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter)
       const group = normalize(row.group);
       const raw = row[field];
       const value = typeof raw === 'number' || typeof raw === 'string' && raw.trim() ? safeNumber(raw) : null;
-      if (!group || normalize(row.building_type) !== 'vertical' || value === null || !Number.isInteger(value) || !negative && value < 0) return null;
+      if (!group || normalize(row.building_type) !== 'vertical' || value === null || !Number.isSafeInteger(value) || !negative && value < 0) return null;
       const groups = values.get(period) ?? new Map<string, number>();
       if (groups.has(group)) return null;
       groups.set(group, value); values.set(period, groups);

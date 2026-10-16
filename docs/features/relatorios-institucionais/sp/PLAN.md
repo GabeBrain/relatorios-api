@@ -1,5 +1,9 @@
 # SP capital — primeiro mapeamento
 
+**Lote de históricos — 16/10:** ação única **Conferir históricos** prepara lançamentos/vendas/oferta nas páginas12/13/14. Consulta curta nas duas janelas equivalentes, com amostra em cada janela e R/V/O (estoque inclui mês anterior para balanço); não busca série longa. Releitura atual deve igualar município por mês/padrão/total, e os balanços dos dois anos precisam fechar. O lote inteiro fica indisponível se qualquer verificação falhar. Lançamentos/vendas acumulam fluxos; oferta compara somente o último mês.
+
+**Teste humano do conjunto:** selecionar SP/São Paulo/3T2026 → Conferir dados reais → Conferir históricos → Ampliar slides → páginas12–14. Não precisa executar uma ação por slide. Histórico2025 ainda não observado; nos testes é fictício. Comparação mensal/mesma janela não substitui curva desde2022, móvel12meses, fechamento completo de setembro ou homologação/exportação. Próximo: revisar retorno real do lote e suas eventuais divergências antes de ampliar a janela.
+
 **Retomada do histórico — 16/10:** comparativo curto de unidades lançadas implementado (página12), recuperado da interrupção de15/10. Usar **Conferir histórico de lançamentos** após a conferência municipal: uma nova amostra da raiz, releitura atual e mesmos meses do ano anterior (normalmente3requests, máximo2páginas por janela). Julho/agosto2025 × julho/agosto2026; não é curva completa desde2022 nem comparação de trimestres completos. [Checkpoint e comandos](../../../handoffs/lucas-relatorios-2026-10-14/STATUS.md).
 
 **Estado de dados:** releitura atual deve igualar os totais por mês e padrão; raiz alterada, cobertura incompleta ou universo diferente bloqueiam. Histórico2025 ainda não recebido da sessão pessoal, fixtures anteriores são fictícias. Próximo portão imediato: validar essa ação autenticada e avaliar eventuais divergências, sem pedir token no chat. Exportação, série longa e móvel12meses continuam pendentes.

@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { RequestOptions } from '@/lib/http-client';
-import { fetchSpTemporalInput, fetchSpLaunchHistory, type SpReadOptions } from './api';
+import { fetchSpTemporalInput, fetchSpLaunchHistory, fetchSpHistoryBatch, type SpReadOptions } from './api';
 import { buildSpTemporalPreview } from './temporal';
 import { recordedInput } from './__tests__/recorded';
 import { syntheticLaunchHistory } from './__tests__/history';
+import { syntheticHistoryBatch } from './__tests__/history-batch';
 
 type Response = Awaited<ReturnType<NonNullable<SpReadOptions['request']>>>;
 const reply = (data: unknown, status = 200): Response => ({ ok: status === 200, status, data } as Response);
@@ -20,6 +21,37 @@ function recordedServer() {
 const noSleep = async () => {};
 
 describe('SP — transporte curto e paginado, sem provedor real', () => {
+  it('lote usa oito requests curtos, duas janelas iguais e estoque inicial em cada ano', async () => {
+    const fixture = syntheticHistoryBatch(), base = recordedServer();
+    const request = vi.fn(async (options: RequestOptions) => {
+      if (options.url.endsWith('/building-with-history')) return base(options);
+      const name = options.url.split('/').at(-1) as 'sales' | 'releases' | 'stock';
+      const source = String(options.query?.start_period).startsWith('2025') ? fixture.previous : fixture.current;
+      return reply(envelope(source[name].filter(row => String(row.period) >= String(options.query?.start_period) && String(row.period) <= String(options.query?.end_period))));
+    });
+    const input = await fetchSpHistoryBatch(buildSpTemporalPreview(recordedInput(), '3T2026'), { request });
+    expect(request).toHaveBeenCalledTimes(8);
+    const series = request.mock.calls.map(([options]) => options).filter(options => !options.url.endsWith('/building-with-history'));
+    expect(series).toHaveLength(6);
+    for (const options of series) expect(options.query).toMatchObject({ city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', per_page: 100, page: 1 });
+    expect(series.filter(options => options.url.endsWith('/stock')).map(options => [options.query?.start_period, options.query?.end_period])).toEqual([['2026-06-01', '2026-08-31'], ['2025-06-01', '2025-08-31']]);
+    expect(series.filter(options => !options.url.endsWith('/stock')).map(options => [options.query?.start_period, options.query?.end_period])).toEqual([['2026-07-01', '2026-08-31'], ['2026-07-01', '2026-08-31'], ['2025-07-01', '2025-08-31'], ['2025-07-01', '2025-08-31']]);
+    expect(input.current.rootPeriod).toBe(input.previous?.rootPeriod);
+    expect(input.previous?.windowEnd).toBe('2025-08');
+  });
+  it('lote interrompe antes das séries se a primeira raiz muda e valida limites antes da rede', async () => {
+    const request = vi.fn(async () => reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-09-01' }], 1, 5183, 5183)));
+    const result = await fetchSpHistoryBatch(buildSpTemporalPreview(recordedInput(), '3T2026'), { request });
+    expect(request).toHaveBeenCalledOnce(); expect(result.previous).toBeUndefined(); expect(result.current.sales).toEqual([]);
+    await expect(fetchSpTemporalInput('3T2026', { request, windowEnd: '2026-12' })).rejects.toThrow('Limite');
+    expect(request).toHaveBeenCalledOnce();
+  });
+  it('lote respeita cancelamento antes de buscar a janela do ano anterior', async () => {
+    const controller = new AbortController(), base = recordedServer();
+    const request = vi.fn(async (options: RequestOptions) => { const result = await base(options); if (options.url.endsWith('/stock')) controller.abort(); return result; });
+    await expect(fetchSpHistoryBatch(buildSpTemporalPreview(recordedInput(), '3T2026'), { request, signal: controller.signal })).rejects.toMatchObject({ name: 'AbortError' });
+    expect(request).toHaveBeenCalledTimes(4);
+  });
   it('histórico usa só amostra e dois intervalos de lançamentos, sem setembro ou vendas/estoque', async () => {
     const source = syntheticLaunchHistory(), base = recordedServer();
     const request = vi.fn(async (options: RequestOptions) => {

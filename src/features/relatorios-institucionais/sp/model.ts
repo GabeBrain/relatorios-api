@@ -29,6 +29,13 @@ export interface SpLaunchHistory {
   totals: { current: number; previous: number; delta: number; variation: number | null } | null;
   checks: SpCheck[];
 }
+export type SpHistoryMetric = 'launches' | 'sales' | 'stock';
+export interface SpHistoryBatch {
+  status: 'ready' | 'blocked';
+  issues: string[];
+  comparisons: Partial<Record<SpHistoryMetric, SpLaunchHistory>>;
+  checks: SpCheck[];
+}
 export interface SpPreview {
   entity: typeof SP_INSTITUTIONAL.id;
   quarter: Quarter;
@@ -44,6 +51,7 @@ export interface SpPreview {
   typologies?: SpTypologies;
   patterns?: SpDistribution;
   launchHistory?: SpLaunchHistory;
+  historyBatch?: SpHistoryBatch;
 }
 const emptyMetrics = (): SpMetrics => ({ projects: null, launches: null, sales: null, stock: null });
 const normalized = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();

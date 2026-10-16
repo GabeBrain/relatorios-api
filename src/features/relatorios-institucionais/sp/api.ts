@@ -4,11 +4,14 @@ import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
 import { monthOf, type SpPreview } from './model';
 import { monthEnd, priorMonth, quarterMonths, type SpTemporalInput, type SpTemporalRow } from './temporal';
 import { matchedLaunchMonths, type SpLaunchHistoryInput } from './history';
+import { priorYearQuarter, type SpHistoryBatchInput } from './history-batch';
 
 const BASE = 'https://geobrain.com.br/public-api';
 interface Envelope { data?: SpTemporalRow[]; meta?: { current_page?: number; last_page?: number; total?: number }; links?: { next?: string | null } }
 type Request = (options: RequestOptions) => Promise<HttpResponse<Envelope>>;
 export interface SpReadOptions {
+  windowEnd?: string;
+  expectedClosingMonth?: string;
   groupBy?: 'Padrão' | 'Tipologia';
   signal?: AbortSignal;
   onProgress?: (label: string) => void;
@@ -66,10 +69,13 @@ async function readSpSeries(read: ReturnType<typeof createSpRead>, metric: 'sale
 export async function fetchSpTemporalInput(quarter: Quarter, options: SpReadOptions = {}): Promise<SpTemporalInput> {
   const months = quarterMonths(quarter);
   if (!months.length) throw new Error('Trimestre inválido.');
+  if (options.windowEnd !== undefined && !months.includes(options.windowEnd)) throw new Error('Limite da janela inválido.');
   const read = createSpRead(options);
   const { rootPeriod, period, total } = await readSpClosing(read, options);
-  const end = period < months[2] ? period : months[2];
-  const result: SpTemporalInput = { origin: 'api', groupBy: options.groupBy ?? 'Padrão', uf: 'SP', city: 'São Paulo', rootPeriod, sampledBuildings: 1, totalBuildings: total, sales: [], releases: [], stock: [], complete: { sales: true, releases: true, stock: true } };
+  const requestedEnd = options.windowEnd ?? months[2];
+  const end = period < requestedEnd ? period : requestedEnd;
+  const result: SpTemporalInput = { origin: 'api', windowEnd: options.windowEnd, groupBy: options.groupBy ?? 'Padrão', uf: 'SP', city: 'São Paulo', rootPeriod, sampledBuildings: 1, totalBuildings: total, sales: [], releases: [], stock: [], complete: { sales: true, releases: true, stock: true } };
+  if (options.expectedClosingMonth && period !== options.expectedClosingMonth) { result.complete = { sales: false, releases: false, stock: false }; return result; }
   if (end < months[0]) return result;
 
   for (const metric of ['sales', 'releases', 'stock'] as const) {
@@ -93,4 +99,15 @@ export async function fetchSpLaunchHistory(report: SpPreview, options: SpReadOpt
     result.complete[source] = true;
   }
   return result;
+}
+
+/** Two short windows, each with one closure sample and three bounded municipal series. */
+export async function fetchSpHistoryBatch(report: SpPreview, options: SpReadOptions = {}): Promise<SpHistoryBatchInput> {
+  const months = matchedLaunchMonths(report);
+  if (!months || report.patterns?.status !== 'ready') throw new Error('Confira os totais municipais antes dos históricos.');
+  const readOptions = { ...options, groupBy: 'Padrão' as const, expectedClosingMonth: report.closingMonth! };
+  const current = await fetchSpTemporalInput(report.quarter, { ...readOptions, windowEnd: months.current.at(-1)! });
+  if (monthOf(current.rootPeriod) !== report.closingMonth) return { current };
+  const previous = await fetchSpTemporalInput(priorYearQuarter(report.quarter), { ...readOptions, windowEnd: months.previous.at(-1)! });
+  return { current, previous };
 }

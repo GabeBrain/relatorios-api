@@ -1,5 +1,14 @@
 # Decisões e pontos abertos — SP
 
+## Lote de três históricos — autorizado em 16/10/2026
+
+- Lucas pediu entregas por blocos e aprovou lançamentos/vendas/oferta juntos. A ação única substitui a ação visível isolada de lançamentos; páginas12/13/14 reutilizam artes18/32/46. Nenhuma série2022–2026, preço/INCC ou coleta granular incluída.
+- Duas janelas, cada uma com uma amostra oficial de raiz e três séries por Padrão. Normalmente8requests; máximo2páginas/100linhas por série, até14requests antes dos retries já limitados. Preservar filtros/autorização e cancelamento, sem seguir URLs arbitrárias. Raiz diferente da consulta municipal interrompe antes de buscar as séries daquela janela.
+- O fim solicitado da janela (`windowEnd`) é separado de `rootPeriod`. Para julho/agosto2025, a raiz observada continua2026-08; não fabricar uma raiz2025. Estoque começa no mês anterior para provar os balanços das duas janelas. Extras fora da janela, meses/grupos ausentes, duplicação, valores inválidos, universo diferente ou diferenças na releitura bloqueiam o lote todo.
+- Reconciliar fluxos e estoque atual por mês e padrão com o baseline municipal e conferir ambos os anos. Publicar os três resultados na tela somente após todas as fontes e verificações; falha/retry retira os resultados anteriores do lote e mantém dados municipais. Troca de escopo/identidade/trimestre cancela e invalida tudo.
+- Lançamentos/vendas: soma dos meses equivalentes. Oferta: fotografia do último mês, com curva mensal exibida separadamente. Vendas negativas preservadas; base anterior zero ou negativa mostra diferença absoluta e não calcula variação percentual. Esta política não altera Secovi/FIERGS.
+- Validação do provedor histórico ainda depende da sessão pessoal. Toda base2025 de QA é fictícia; não interpretar os percentuais das capturas como mercado real.
+
 ## Primeira janela histórica de lançamentos — autorizada em 15/10, retomada16/10
 
 - Comparar os mesmos meses nos dois anos: janela atual do trimestre até o mês conferido e os meses correspondentes do ano anterior. Não buscar2022–2026 para esta fatia nem comparar parcial com trimestre anterior completo.

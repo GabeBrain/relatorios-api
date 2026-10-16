@@ -7,8 +7,28 @@ import { syntheticTypologyInput } from './__tests__/typology';
 import { buildSpTypologies } from './typologies';
 import { buildSpLaunchHistory } from './history';
 import { syntheticLaunchHistory } from './__tests__/history';
+import { syntheticHistoryBatch } from './__tests__/history-batch';
+import { buildSpHistoryBatch } from './history-batch';
 
 describe('páginas SP', () => {
+  it('preenche o lote completo e mantém a oferta como fotografia, com bases negativas explícitas', () => {
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);
+    const view = render(<SpReportPages report={{ ...report, historyBatch }} />);
+    for (const [button, graph] of [['12. Comparativo de lançamentos', 'Lançamentos'], ['13. Comparativo de vendas', 'Vendas'], ['14. Comparativo de oferta', 'Oferta']]) {
+      fireEvent.click(screen.getByRole('button', { name: button }));
+      expect(screen.getByRole('img', { name: `${graph} nos mesmos meses do ano atual e anterior` })).toBeInTheDocument();
+      expect(screen.getByText('julho / agosto · 2025 × 2026')).toBeInTheDocument();
+    }
+    expect(screen.getByText('2026: 124.706 unidades')).toBeInTheDocument();
+    expect(screen.getByText('Oferta: fotografia do último mês, sem somar estoques.')).toBeInTheDocument();
+    view.rerender(<SpReportPages report={{ ...report, historyBatch: buildSpHistoryBatch(syntheticHistoryBatch([-700, -1400]), report) }} />);
+    fireEvent.click(screen.getByRole('button', { name: '13. Comparativo de vendas' }));
+    expect(screen.getByText('Variação não calculável: base anterior negativa')).toBeInTheDocument();
+    view.rerender(<SpReportPages report={{ ...report, historyBatch: { status: 'blocked', issues: ['Fonte divergente'], comparisons: {}, checks: [] } }} />);
+    expect(screen.getByText('Fonte divergente')).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Vendas nos mesmos meses do ano atual e anterior' })).not.toBeInTheDocument();
+  });
   it('mostra meses equivalentes e remove o comparativo quando a validação bloqueia', () => {
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     const view = render(<SpReportPages report={report} />);
