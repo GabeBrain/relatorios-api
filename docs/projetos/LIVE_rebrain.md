@@ -1,3 +1,8 @@
+### 2026-10-16 — Relatórios institucionais: push concluído, deploy público a verificar — Codex, Lucas
+- **Envio:** origin/main recebeu `00b5599`, incluindo merge `c5b1d6a` e lote `103e3df`; refs 0/0 e árvore limpa após push. Validações pós-merge aprovadas. Menu/busca removidos do código enviado, rota SP preservada.
+- **Pendência concreta:** site ainda servindo `index-v7U-Wb1K.js` sem rota/chunk SP após push; deploy NÃO confirmado. Navegador integrado indisponível; revisão automática bloqueou leitura de janela Opera de outro assunto. Solicitada autorização para aba Lovable específica sem leitura da aba atual. Nenhuma alteração/consulta de mercado no site; falta publicar e conferir bundle/rota. Retomada em STATUS, sem trabalho agendado nas férias.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 2026-10-16 — Relatórios institucionais: integração e envio autorizados — Codex, Lucas
 - **Integração:** Lucas aprovou merge/publicação após validação. `c5b1d6a` integra os quatro commits de Gabriel/Lovable até `07ca8bb`, sem conflitos e sem mudanças autorais no Corretor. LIVE/decisões preservados integralmente por conferência de três pontos. Novas entradas remotas de recomendador/métricas lidas; permanecem sob Gabriel.
 - **Validação/etapa:** 108 testes SP, build pós-merge (3473 módulos) e check-live-docs aprovados. Push da main autorizado; verificar o bundle publicado antes de declarar deploy. Site anterior ainda sem rota SP. Prévia tem 46 posições, incluindo complementos/pendências; acesso só pela rota, sem menu/busca. Sem dados reais novos/Monday/exportação; férias 19/10 e retomada em STATUS preservadas.

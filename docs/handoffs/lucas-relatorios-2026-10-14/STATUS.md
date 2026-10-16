@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## Push concluído; publicação Lovable pendente — 16/10/2026
+
+`git push origin main` enviou `07ca8bb..00b5599`; comparação posterior 0/0 e árvore limpa. Build pós-merge/108 testes/check-live-docs aprovados. Sondagem pública após o push: HTTP 200, mas ainda `index-v7U-Wb1K.js`, sem rota ou chunk SP; publicação NÃO confirmada. Status GitHub pending sem contextos de deploy. Leitura da janela Opera foi bloqueada pela revisão automática por estar em conteúdo não relacionado; nenhuma leitura dessa página realizada. Solicitado a Lucas abrir/autorizar nova aba específica Lovable para concluir publicação, sem ler a aba atual. Push autorizado já executado; falta somente publicar/verificar no Lovable. Não presumir que push equivale a deploy público.
+
 ## Integração autorizada e envio — 16/10/2026
 
 Lucas respondeu **Sim, integrar e publicar após validar**. Merge `c5b1d6a` integrou os quatro remotos de Gabriel/Lovable sem conflitos, mantendo ambos os históricos. Lidas as novas entradas de Corretor/recomendador; não alterar essas regras nesta frente. Identidade de merge dos documentos LIVE_rebrain e FRONTEND_DECISIONS conferida por multiconjunto: zero linhas faltantes/extras. Build pós-merge e 108 testes SP aprovados, check-live-docs aprovado. Árvore limpa, 25 commits locais antes deste registro; push da main autorizado nesta sessão. Publicação deve ser verificada pelo bundle/rota efetivamente servido; o site antes do push ainda não continha a rota SP. Acesso permanece só pela rota, sem menu/busca. Sem coleta real/Monday/exportação, férias desde 19/10 preservadas.

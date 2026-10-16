@@ -1,5 +1,9 @@
 # Evidências do mapeamento — 15/10/2026
 
+## Envio confirmado; runtime ainda antigo — 16/10/2026
+
+Push `07ca8bb..00b5599` confirmado pelo Git, refs 0/0 e árvore limpa. Depois do envio, a rota pública retornou HTTP 200 com `index-v7U-Wb1K.js`, sem literal da rota SP e sem chunk SpInstitutionalPage: não é publicação desta entrega. Nenhuma consulta de mercado executada. GitHub status pending/sem checks de deploy; acesso à aba específica Lovable solicitado após revisão automática bloquear inspeção de janela não relacionada. Não contornar o bloqueio nem afirmar publicação por plausibilidade.
+
 ## Pós-merge para publicação — 16/10/2026
 
 Merge autorizado `c5b1d6a`, sem conflitos, mantém `103e3df` e os quatro commits remotos até `07ca8bb`. LIVE e decisões conferidos por identidade de três pontos, sem linhas perdidas/extras. 108 testes SP e build pós-merge aprovados (3473 módulos), check-live-docs aprovado. Publicação ainda a conferir: antes do push o domínio servia `index-v7U-Wb1K.js`, sem rota/chunk SP; HTTP 200 na rota sozinho não prova atualização. Nenhuma alteração autoral nos motores de Gabriel.
