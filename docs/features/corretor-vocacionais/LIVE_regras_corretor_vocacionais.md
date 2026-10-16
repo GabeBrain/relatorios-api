@@ -1,3 +1,11 @@
+## Versão 0.73.2 — 16/10/2026 — Meus estudos desde a preparação autenticada
+
+Por orientação de Gabriel, apresentar PowerPoint válido com identidade Geobrain verificada registra o estudo V3 pendente, com autoria da conta, **antes** de exigir cidade, planilhas, cadastro comercial ou confirmação de IA. Selecionar materiais continua sem executar IA; o registro inicial autenticado substitui a regra anterior de só criar estudo ao iniciar avaliação. Visitante continua com preparação local, sem autoria inventada.
+
+Meus estudos inclui registros pendentes/interrompidos e cadastros parciais, sem depender da conclusão. Ao confirmar o início, a mesma preparação autenticada é reutilizada e identidade/hash/versão/ausência de análise completa são reconferidos; não se cria versão adicional nem se repete análise concluída. Dupla abertura de arquivo preserva deduplicação global e decisões. Original continua local por hash, sem promessa de cópia remota automática.
+
+Estado **validado localmente, sem push/IA real**:295 testes/2 pulados, oito verificações de carteira incluindo preparação sem cidade/cadastro/IA e falha simulada de início, quinze controles do percurso anterior; tipos/lint/build aprovados. Sem migration/Edge nova, dez passes da entrega anterior preservados sem alteração de gabaritos ou motores. Evidências no complemento do [resultado da carteira](design/RESULTADO_RASCUNHO_CARTEIRA_2026-10-16.md). Conta real/produção a conferir após publicar frontend.
+
 ## Versão 0.73.1 — 16/10/2026 — rascunho consumido e carteira atualizada
 
 Estado **validado localmente, antes de push**. Registro durável/abertura confirmada de duplicata consomem somente o rascunho; planilhas selecionadas conservadas por hash com download em Materiais, prévias/originais existentes preservados. Rascunho antigo já analisado oferece resultado. Descarte explícito tem confirmação; V2 não substitui avaliação V3.

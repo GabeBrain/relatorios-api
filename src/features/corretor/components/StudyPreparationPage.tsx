@@ -15,10 +15,13 @@ import { clearPreparationDraft, loadLocalMaterial, saveLocalMaterial } from '../
 import { analysisPending, listStudies } from '../lib/v3/db';
 import type { Fonte } from '../lib/v3/fonte';
 import { formatBRL } from '../lib/v3/config';
+import { irToFindings } from '../lib/audit/ir-rules';
+import { registerAccountPreparation, type AccountPreparation } from '../lib/account-preparation';
 
 export interface PreparedStudy {
   file: File; bytes: Uint8Array; ir: Ir; estimate: FullEstimate;
   sheets: File[]; fonte: Fonte | null; city: string; uf: string; outras: string[]; budgetUsd: number;
+  accountPreparation?: AccountPreparation | null;
 }
 interface Props { back: string; onStart: (prepared: PreparedStudy) => Promise<void> }
 const UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ');
@@ -31,12 +34,13 @@ export default function StudyPreparationPage({ back, onStart }: Props) {
   const [loading, setLoading] = useState('Restaurando preparação…'), [starting, setStarting] = useState(false), [error, setError] = useState(''), [storage, setStorage] = useState('');
   const [previousStudy, setPreviousStudy] = useState<string | null>(null), [restored, setRestored] = useState(false);
   const [savingSheets, setSavingSheets] = useState(false);
+  const [accountPreparation, setAccountPreparation] = useState<AccountPreparation | null>(null);
   const pptxInput = useRef<HTMLInputElement>(null), excelInput = useRef<HTMLInputElement>(null);
   const generation = useRef(0), lock = useRef(false), hydrated = useRef(false);
   const mounted = useRef(true);
   async function prepare(next: File, restore = false) {
     const current = ++generation.current;
-    setFile(next); setPrepared(null); setError(''); setLoading('Preparando apresentação…');
+    setFile(next); setPrepared(null); setAccountPreparation(null); setError(''); setLoading('Preparando apresentação…');
     if (!restore) { setCity(''); setUf(''); if (file && sheets.length) setChoice(false); }
     try {
       if (!/\.pptx$/i.test(next.name)) throw new Error('Selecione uma apresentação PowerPoint (.pptx).');
@@ -56,6 +60,9 @@ export default function StudyPreparationPage({ back, onStart }: Props) {
       }
       const estimate = await estimateFullAnalysis(ir, bytes, 'gpt-4o-mini');
       if (!mounted.current || current !== generation.current) return;
+      const account = await registerAccountPreparation({ name: next.name, sha1: ir.sha1, nSlides: ir.n_slides, bytes, findings: irToFindings(ir).filter(f => !f.ok) });
+      if (!mounted.current || current !== generation.current) return;
+      setAccountPreparation(account);
       setPrepared({ ir, bytes, estimate }); setBudgetUsd(Math.ceil((estimate.costUsd * 2 + 1) * 100) / 100);
       if (!restore) { const suggestion = suggestCity(next.name, ir); setCity(suggestion?.cidade ?? ''); setUf(suggestion?.uf ?? ''); }
       try { await saveLocalMaterial({ key: 'preparation:pptx', name: next.name, bytes }); }
@@ -108,7 +115,7 @@ export default function StudyPreparationPage({ back, onStart }: Props) {
     lock.current = true; setStarting(true); setError('');
     try {
       const fonte = sheets.length ? await extractFonteFromExcel(sheets, prepared.ir.sha1) : null;
-      await onStart({ file, ...prepared, sheets, fonte, city: city.trim(), uf, outras: outras.split(',').map(c => c.trim()).filter(Boolean), budgetUsd });
+      await onStart({ file, ...prepared, sheets, fonte, city: city.trim(), uf, outras: outras.split(',').map(c => c.trim()).filter(Boolean), budgetUsd, accountPreparation });
     } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível iniciar. Seus materiais continuam selecionados.'); }
     finally { lock.current = false; setStarting(false); }
   }
@@ -117,7 +124,7 @@ export default function StudyPreparationPage({ back, onStart }: Props) {
     lock.current = true;
     try {
       await clearPreparationDraft(); generation.current++;
-      setFile(null); setPrepared(null); setSheets([]); setChoice(false); setCity(''); setUf(''); setOutras(''); setBudgetUsd(0);
+      setFile(null); setPrepared(null); setAccountPreparation(null); setSheets([]); setChoice(false); setCity(''); setUf(''); setOutras(''); setBudgetUsd(0);
       setError(''); setStorage(''); setRestored(false); setPreviousStudy(null);
     } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível limpar a preparação.'); }
     finally { lock.current = false; }
@@ -136,6 +143,7 @@ export default function StudyPreparationPage({ back, onStart }: Props) {
       </Button>
       <p className="cp-format-note cp-muted"><FileText size={18} aria-hidden="true"/>Tem um PDF? Você poderá incluí-lo como prévia dos slides na revisão. A análise usa o PowerPoint original.</p>
       {loading && <p role="status">{loading}</p>}
+      {accountPreparation && <p className="cp-muted">Guardado em Meus estudos · análise ainda não iniciada.</p>}
     </section>
     <section className="cp-panel cp-upload-panel cp-upload-sheets"><h2>Planilhas de cálculo <span className="cp-muted">opcional</span></h2><p className="cp-muted">Inclua os arquivos Excel para comparar os números do estudo com os cálculos de origem.</p>
       <input ref={excelInput} type="file" accept=".xlsx,.xlsm" multiple hidden onChange={e => { const files = Array.from(e.target.files ?? []); e.target.value = ''; void addSheets(files); }} />

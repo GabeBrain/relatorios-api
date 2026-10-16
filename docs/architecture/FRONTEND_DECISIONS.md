@@ -2,6 +2,8 @@
 
 ### 2026-10-16 — Rascunho separado da carteira pessoal do Corretor
 
+- **Complemento posterior de Gabriel (v0.73.2):** apresentação válida preparada com conta já registra estudo pendente, sem exigir cadastro/cidade/planilhas ou executar IA. Reutiliza a operação atômica existente e o ID no início explícito, com nova conferência de identidade/hash/versão/estado. Isso substitui a decisão anterior de só registrar o envio no início da avaliação para usuários autenticados; visitante continua local. Cancelar formulário não publica seus campos. Originais remotos não são prometidos por esse registro.
+
 - **Contexto:** rascunho sobrevivia ao registro; autoria imutável não incluía cadastro salvo posteriormente na conta.
 - **Decisão:** consumir preparação após vínculo durável, conservando planilhas por hash; rascunho antigo analisado abre resultado. Carteira pessoal une autoria e propriedade do cadastro; salvar/retornar atualizam consulta sem editar autoria. Campos com ícones Lucide e primitives/tokens existentes.
 - **Consequência:** visitante não recebe autor inventado; vínculo posterior exige cadastro salvo. PDF é complementar; cache local não promete acesso entre dispositivos. Correção só frontend, sem mudar motores ou decisões.

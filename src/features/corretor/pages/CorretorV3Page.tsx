@@ -60,6 +60,7 @@ import type { AnalysisReport } from '../lib/v3/pipeline';
 import { otherCities, imageProfile, type CityMention, type ImageProfile } from '../lib/v3/pre-analysis';
 import { savePptx, loadPptx } from '../lib/v3/pptx-store';
 import { clearPreparationDraft } from '../lib/v3/local-materials';
+import { canStartAccountPreparation } from '../lib/account-preparation';
 import { findTableImages } from '../lib/v3/table-images';
 import { replayVisionPass } from '../lib/v3/ia-vision';
 import { sourceCrosscheckFindings as crosscheckDet, sourceCrosscheckVisionFindings } from '../lib/v3/source-crosscheck';
@@ -520,7 +521,7 @@ export default function CorretorV3Page() {
       try { await clearPreparationDraft(ir.sha1, prepared.sheets.map(f => `preparation:sheet:${f.name}:${f.size}:${f.lastModified}`)); }
       catch { toast.warning('O estudo foi registrado, mas o navegador não conseguiu encerrar o rascunho. Você pode limpá-lo em Novo estudo.'); }
     };
-    if (duplicate) {
+    if (duplicate && duplicate.id !== prepared.accountPreparation?.studyId) {
       if (window.confirm('Este arquivo já está registrado. Abrir o estudo existente sem nova avaliação?')) {
         await consumeDraft(); navigate(`/corretor/estudos/${duplicate.id}/resumo`);
       }
@@ -535,7 +536,11 @@ export default function CorretorV3Page() {
       const registered = await prepareStudyAtomic(file.name.replace(/\.pptx$/i, ''), { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name }, findings);
       const id = registered.id;
       registeredId = id;
-      if (!registered.created) { await consumeDraft(); await refreshList(); await openStudy(id); return; }
+      if (!registered.created) {
+        const ownPreparation = id === prepared.accountPreparation?.studyId
+          && await canStartAccountPreparation(prepared.accountPreparation, ir.sha1);
+        if (!ownPreparation) { await consumeDraft(); await refreshList(); await openStudy(id); return; }
+      }
       if (fonte) await saveStudyFonte(id, `${prepared.sheets.length} planilhas`, fonte);
       writeOutras(id, outras);
       await confirmAta(id, null, city, uf);

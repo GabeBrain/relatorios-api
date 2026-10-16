@@ -10,6 +10,8 @@ vi.mock('../lib/v3/pipeline',()=>({estimateFullAnalysis:async()=>({costUsd:0.1,c
 vi.mock('../lib/v3/city-suggestion',()=>({suggestCity:()=>({cidade:'Curitiba',uf:'PR',origem:'arquivo'})}));
 vi.mock('../lib/v3/pre-analysis',()=>({imageProfile:()=>({tabelasNativas:0,tabelasImagem:0,fichas:0})}));
 vi.mock('../lib/v3/fonte-extractor-browser',()=>({extractFonteFromExcel:async()=>({blocos:[]})}));
+vi.mock('../lib/account-preparation',()=>({registerAccountPreparation:async()=>null}));
+vi.mock('../lib/audit/ir-rules',()=>({irToFindings:()=>[]}));
 beforeEach(()=>{vi.clearAllMocks();Object.defineProperty(File.prototype,'arrayBuffer',{configurable:true,value:async()=>new ArrayBuffer(1)});mocks.load.mockResolvedValue(null);mocks.save.mockResolvedValue(undefined);mocks.clear.mockResolvedValue(undefined);mocks.studies.mockResolvedValue([]);});
 it('cancelar seletor não escolhe sem planilhas; clique duplo inicia uma única vez',async()=>{
  const onStart=vi.fn(()=>new Promise<void>(()=>{}));
