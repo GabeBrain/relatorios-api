@@ -61,14 +61,23 @@ try{
  assert(page.url().includes('/corretor/novo'));assert.equal(result.paidCalls.length,0);assert.equal(created,0);result.checks.push('PowerPoint prepara na mesma página, sem IA nem criar estudo');
  await page.getByLabel('Cidade do estudo',{exact:true}).fill('Campos do Jordão');
  for(const width of [1440,1024,390,320]){
-   await page.setViewportSize({width,height:1000}); await page.screenshot({path:join(out,`prepare-${width}.png`),fullPage:true});
+   await page.setViewportSize({width,height:1000}); await page.waitForTimeout(350);await page.locator('main').first().evaluate(el=>el.scrollTop=0);await page.screenshot({path:join(out,`prepare-${width}.png`),fullPage:true});
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`overflow preparação ${width}`);
  }
- await page.reload({waitUntil:'networkidle'}); await page.getByLabel('Cidade do estudo',{exact:true}).waitFor({timeout:120000});
- assert.equal(await page.locator('.cs-files li').count(),11);assert.equal(result.paidCalls.length,0);result.checks.push('reload recupera PowerPoint, 11 Excel e cidade, sem IA');
+ await page.reload({waitUntil:'networkidle'}); await page.getByRole('link',{name:'Abrir resultado',exact:true}).waitFor({timeout:120000});
+ assert.equal(await page.getByLabel('Cidade do estudo',{exact:true}).count(),0);assert.equal(result.paidCalls.length,0);result.checks.push('reload encerra rascunho legado já analisado e oferece resultado, sem IA');
+ await page.locator('input[accept=".xlsx,.xlsm"]').setInputFiles(excels);
+ await page.locator('input[accept=".pptx"]').setInputFiles(pptx);
+ await page.getByLabel('Cidade do estudo',{exact:true}).waitFor({timeout:120000});
  // Duplicata não reprocessa o arquivo nem altera decisões.
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Iniciar avaliação',exact:true}).click();
  await page.waitForURL('**/resumo');assert.equal(result.paidCalls.length,0);result.checks.push('arquivo idêntico abre o estudo existente, sem pagar');
+ await page.getByRole('link',{name:'Materiais',exact:true}).click();
+ await page.getByRole('region',{name:'Planilhas neste navegador'}).waitFor();
+ assert.equal(await page.locator('.cp-local-materials .cs-files li').count(),11);result.checks.push('11 Excel conservados por hash e recuperáveis em Materiais após consumo do rascunho');
+ await page.goto('http://127.0.0.1:5184/corretor/novo',{waitUntil:'networkidle'});
+ await page.getByRole('button',{name:'Escolher PowerPoint',exact:true}).waitFor();
+ assert.equal(await page.getByLabel('Cidade do estudo',{exact:true}).count(),0);assert.equal(await page.locator('.cs-files li').count(),0);result.checks.push('Novo estudo abre vazio depois de retornar do resultado');
  await page.goto(`http://127.0.0.1:5184/corretor/estudos/${cj.study.id}/revisao?slide=23`,{waitUntil:'networkidle'});
  assert.equal(await page.getByText('Catálogo de verificações',{exact:true}).count(),0);
  page.once('dialog',d=>d.accept()); await page.locator('.cs-viewer input[type=file]').setInputFiles(resolve('.local-inputs/cj-real-preview/Campos-do-Jordao-previa.pdf'));
@@ -105,6 +114,8 @@ try{
  // Novo envio em ambiente isolado: fornecedor simulado, nenhum dado do site alterado.
  cases=[];
  await page.goto('http://127.0.0.1:5184/corretor/novo',{waitUntil:'networkidle'});
+ await page.locator('input[accept=".xlsx,.xlsm"]').setInputFiles(excels);
+ await page.locator('input[accept=".pptx"]').setInputFiles(pptx);
  await page.getByLabel('Cidade do estudo',{exact:true}).waitFor({timeout:120000});
  assert.equal(result.paidCalls.length,0);
  await page.getByRole('button',{name:'Iniciar avaliação',exact:true}).click();
@@ -114,6 +125,9 @@ try{
  assert.equal(result.paidCalls[0].action,'start');
  assert(result.paidCalls.every(c=>c.path.endsWith('/corretor-execution')));
  result.checks.push('confirmação explícita cria uma execução, percorre ata/texto/imagem simulados e chega à revisão');
+ await page.goto('http://127.0.0.1:5184/corretor/novo',{waitUntil:'networkidle'});
+ await page.getByRole('button',{name:'Escolher PowerPoint',exact:true}).waitFor();
+ assert.equal(await page.getByLabel('Cidade do estudo',{exact:true}).count(),0);assert.equal(await page.locator('.cs-files li').count(),0);result.checks.push('concluir nova análise simulada consome rascunho; Novo estudo continua vazio');
  result.status='pass';
 }catch(e){result.status='failed';result.failure=e.stack;result.lastText=await page.locator('body').innerText();await page.screenshot({path:join(out,'failure.png'),fullPage:true});}
 finally{writeFileSync(join(out,'result.json'),JSON.stringify(result,null,2));await browser.close();}

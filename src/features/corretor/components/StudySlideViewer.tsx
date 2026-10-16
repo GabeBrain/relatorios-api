@@ -4,6 +4,7 @@ import { listMaterials, previewUrl } from '../lib/materials';
 import { digest, loadVersions } from '../lib/projects';
 import { loadLocalMaterial, saveLocalMaterial } from '../lib/v3/local-materials';
 import type { StudyV3 } from '../lib/v3/db';
+import { FileText } from 'lucide-react';
 const PdfSlide = lazy(() => import('./PdfSlide'));
 
 export default function StudySlideViewer({ study, slide, evidence }: {
@@ -55,7 +56,7 @@ export default function StudySlideViewer({ study, slide, evidence }: {
     finally { setBusy(false); }
   }
   return <section className="cs-viewer" aria-label={`Visualização do slide ${slide}`}>
-    <div className="cs-viewer-tools"><Button variant="outline" disabled={busy} onClick={() => input.current?.click()}>{busy ? 'Conferindo PDF…' : preview ? 'Trocar prévia PDF' : 'Abrir PDF desta versão'}</Button>
+    <div className="cs-viewer-tools"><Button variant="outline" disabled={busy} onClick={() => input.current?.click()}><FileText size={18} aria-hidden="true"/>{busy ? 'Conferindo PDF…' : preview ? 'Trocar prévia PDF' : 'Abrir PDF desta versão'}</Button>
       {preview && <Button variant="outline" onClick={() => setZoom(z => z === 1 ? 1.4 : 1)}>Zoom {Math.round(zoom * 100)}%</Button>}
       {preview?.kind === 'image' && <a href={preview.url} target="_blank" rel="noreferrer">Ampliar imagem</a>}
     </div>

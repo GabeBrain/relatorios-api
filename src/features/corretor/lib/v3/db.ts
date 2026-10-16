@@ -14,6 +14,7 @@ export type FindingStatus = 'pendente' | 'corrigido' | 'ignorado';
 
 export interface StudyV3 {
   id: string;
+  createdBy?: string | null;
   nome: string;
   cidade: string | null;
   uf: string | null;
@@ -144,6 +145,7 @@ export async function listStudies(strict = false): Promise<StudyV3[]> {
     const versions = (s.study_versions ?? []).sort((a: any, b: any) => b.n - a.n);
     return {
       id: s.id,
+      createdBy: s.created_by ?? null,
       nome: s.nome,
       cidade: s.cidade,
       uf: s.uf ?? null,

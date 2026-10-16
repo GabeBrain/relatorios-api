@@ -59,6 +59,8 @@ import { suggestCity, type CitySuggestion } from '../lib/v3/city-suggestion';
 import type { AnalysisReport } from '../lib/v3/pipeline';
 import { otherCities, imageProfile, type CityMention, type ImageProfile } from '../lib/v3/pre-analysis';
 import { savePptx, loadPptx } from '../lib/v3/pptx-store';
+import { clearPreparationDraft } from '../lib/v3/local-materials';
+import { canStartAccountPreparation } from '../lib/account-preparation';
 import { findTableImages } from '../lib/v3/table-images';
 import { replayVisionPass } from '../lib/v3/ia-vision';
 import { sourceCrosscheckFindings as crosscheckDet, sourceCrosscheckVisionFindings } from '../lib/v3/source-crosscheck';
@@ -514,9 +516,15 @@ export default function CorretorV3Page() {
 
   async function ingestNew(prepared: PreparedStudy) {
     const { file, bytes, ir, estimate, fonte, city, uf, outras } = prepared;
-    const duplicate = studies.find(s => s.lastSha1 === ir.sha1);
-    if (duplicate) {
-      if (window.confirm('Este arquivo já está registrado. Abrir o estudo existente sem nova avaliação?')) navigate(`/corretor/estudos/${duplicate.id}/resumo`);
+    const duplicate = studies.find(s => s.generation === 'v3' && s.lastSha1 === ir.sha1);
+    const consumeDraft = async () => {
+      try { await clearPreparationDraft(ir.sha1, prepared.sheets.map(f => `preparation:sheet:${f.name}:${f.size}:${f.lastModified}`)); }
+      catch { toast.warning('O estudo foi registrado, mas o navegador não conseguiu encerrar o rascunho. Você pode limpá-lo em Novo estudo.'); }
+    };
+    if (duplicate && duplicate.id !== prepared.accountPreparation?.studyId) {
+      if (window.confirm('Este arquivo já está registrado. Abrir o estudo existente sem nova avaliação?')) {
+        await consumeDraft(); navigate(`/corretor/estudos/${duplicate.id}/resumo`);
+      }
       return;
     }
     setBusy('upload');
@@ -528,10 +536,15 @@ export default function CorretorV3Page() {
       const registered = await prepareStudyAtomic(file.name.replace(/\.pptx$/i, ''), { sha1: ir.sha1, nSlides: ir.n_slides, arquivo: file.name }, findings);
       const id = registered.id;
       registeredId = id;
-      if (!registered.created) { await refreshList(); await openStudy(id); return; }
+      if (!registered.created) {
+        const ownPreparation = id === prepared.accountPreparation?.studyId
+          && await canStartAccountPreparation(prepared.accountPreparation, ir.sha1);
+        if (!ownPreparation) { await consumeDraft(); await refreshList(); await openStudy(id); return; }
+      }
       if (fonte) await saveStudyFonte(id, `${prepared.sheets.length} planilhas`, fonte);
       writeOutras(id, outras);
       await confirmAta(id, null, city, uf);
+      await consumeDraft();
       await refreshList(); await openStudy(id);
       await beginExecution({ studyId: id, version: 1, documentSha1: ir.sha1, budgetUsd: prepared.budgetUsd,
         context: { cidade: city, uf, outras, fonte } });

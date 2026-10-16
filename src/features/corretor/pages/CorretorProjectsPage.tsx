@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { Presentation, Search } from 'lucide-react';
+import { Plus, Presentation, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,7 +31,7 @@ export default function CorretorProjectsPage() {
   const [studies, setStudies] = useState<StudyV3[]>([]), [profiles, setProfiles] = useState<ProjectProfile[]>([]);
   const [personal,setPersonal]=useState<{mine:string[];shared:string[]}|null>(null),[personalError,setPersonalError]=useState('');
   const [loading, setLoading] = useState(true), [error, setError] = useState(''), [availability, setAvailability] = useState('');
-  const query = params.get('q') ?? '', filter = ['active', 'all', 'archive'].includes(params.get('filter') ?? '') ? params.get('filter')! : 'active';
+  const query = params.get('q') ?? '', filter = ['active', 'all', 'archive'].includes(params.get('filter') ?? '') ? params.get('filter')! : 'all';
   const scope=['mine','shared'].includes(params.get('scope')??'')?params.get('scope')!:'all';
   function parameter(key: string, value: string) { setParams(p => { p.set(key, value); if (key !== 'page') p.delete('page'); return p; }, { replace: key === 'q' }); }
   const setQuery = (value: string) => parameter('q', value), setFilter = (value: string) => parameter('filter', value);
@@ -55,16 +55,16 @@ export default function CorretorProjectsPage() {
     return () => data.subscription.unsubscribe();
   }, []);
   useEffect(() => { let active = true; (async () => {
-    setError('');
+    setError(''); setLoading(true);
     const [current, registered,identity] = await Promise.allSettled([listStudies(true), loadProfiles(),personalStudyIds()]);
     if (!active) return;
     if (current.status === 'fulfilled') setStudies(current.value);
     else setError('Não foi possível carregar os estudos. Tente novamente.');
     if (registered.status === 'fulfilled') { setProfiles(registered.value); setAvailability(''); }
     else setAvailability(registered.reason instanceof Error ? registered.reason.message : 'Cadastro indisponível.');
-    if(identity.status==='fulfilled'){setPersonal(identity.value);setPersonalError('');}else setPersonalError('A organização por conta aguarda a atualização do banco.');
+    if(identity.status==='fulfilled'){setPersonal(identity.value);setPersonalError('');}else {setPersonal(null);setPersonalError('Não foi possível atualizar seus estudos. Tente novamente.');}
     setLoading(false);
-  })(); return () => { active = false; }; }, [identityRevision]);
+  })(); return () => { active = false; }; }, [identityRevision, studyId]);
   useEffect(() => { let active = true; setVersions([]); setAssets([]); setMaterialError(''); setLocalAvailable(false);
     if (!studyId) return;
     loadVersions(studyId).then(v => { if (active) setVersions(v); }).catch(() => { if (active) setMaterialError('As versões não puderam ser carregadas.'); });
@@ -78,11 +78,13 @@ export default function CorretorProjectsPage() {
   const pageCount = Math.max(1, Math.ceil(visible.length / 20));
   const page = Math.min(pageCount, Math.max(1, Number.parseInt(params.get('page') ?? '1', 10) || 1));
   const pageItems = visible.slice((page - 1) * 20, page * 20);
+  const hasScopedStudies = studies.some(s => s.generation === 'v3' && (scope === 'all' || personal?.[scope === 'mine' ? 'mine' : 'shared'].includes(s.id)));
+  function clearFilters() { setParams(p => { p.delete('q'); p.set('filter', 'all'); p.delete('page'); return p; }); }
 
   async function save() {
     if (!await ensureAccess('guardar o cadastro deste estudo')) return;
     if (!editing || busyRef.current) return; busyRef.current = true; setSaving(true);
-    try { const p = await saveProfile(editing); setProfiles(rows => [...rows.filter(r => r.id !== p.id && (!p.study_id || r.study_id !== p.study_id)), p]); setEditing(null); setAvailability(''); toast.success('Cadastro guardado.'); }
+    try { const p = await saveProfile(editing); setProfiles(rows => [...rows.filter(r => r.id !== p.id && (!p.study_id || r.study_id !== p.study_id)), p]); setEditing(null); setAvailability(''); setIdentityRevision(n => n + 1); toast.success('Cadastro guardado e associado à sua conta.'); }
     catch (e) { toast.error(e instanceof Error ? e.message : 'Falha ao salvar.'); }
     finally { busyRef.current = false; setSaving(false); }
   }
@@ -102,7 +104,7 @@ export default function CorretorProjectsPage() {
   }
   const input = (key: keyof ProjectProfile, label: string, type = 'text') => <div><Label htmlFor={key}>{label}</Label><Input id={key} type={type} value={String(editing?.[key] ?? '')} onChange={e => setEditing(p => p ? { ...p, [key]: e.target.value || (key === 'due_date' ? null : '') } : p)} /></div>;
   return <div className="corretor-projects">
-    {!studyId && <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><Link className="cp-muted" to="/corretor/verificacoes">O que o corretor verifica</Link><h1>Estudos <span className="cp-count">{loading ? '' : visible.length}</span></h1></div><Button asChild><Link to={`/corretor/novo?carteira=${encodeURIComponent(context)}`}>Novo estudo</Link></Button></header>}
+    {!studyId && <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><Link className="cp-muted" to="/corretor/verificacoes">O que o corretor verifica</Link><h1>Estudos <span className="cp-count">{loading ? '' : visible.length}</span></h1></div><Button asChild><Link to={`/corretor/novo?carteira=${encodeURIComponent(context)}`}><Plus size={18} aria-hidden="true"/>Novo estudo</Link></Button></header>}
     {loading ? <p role="status">Carregando estudos…</p> : error ? <p role="alert">{error} <Button onClick={() => location.reload()}>Tentar novamente</Button></p> : studyId && !study ? <p>Estudo não encontrado. <Link to={portfolioHref(context)}>Voltar aos estudos</Link></p> : study ? <StudyLayout id={study.id} name={profile?.display_name || profileFor(study).display_name} location={[profile?.city || study.cidade, profile?.uf || study.uf].filter(Boolean).join(' · ')} section={tab} context={context} version={params.get('version') ?? undefined} actions={<Button variant="outline" onClick={() => editProfile(profile ?? profileFor(study))}>{profile ? 'Editar cadastro' : 'Completar cadastro'}</Button>}>
       {tab === 'resumo' && <><StudySummary key={study.id} study={study} context={context} /><section className="cp-registration" aria-label="Cadastro do estudo">{profile ? <><h2>Cadastro</h2><dl className="cp-context">{([['Cliente', profile.client_name], ['Analista', profile.analyst], ['Revisor', profile.reviewer], ['Referência da base', profile.reference_period]] as const).filter(([,value]) => value).map(([label,value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><p className="cp-muted">Informações complementares opcionais.</p></> : <p className="cp-muted">Sem cadastro prévio</p>}{availability && <p className="cp-muted" role="status">{availability}</p>}</section></>}
       {tab === 'revisao' && <section className="cp-review-legacy" aria-label="Revisão do estudo"><Suspense fallback={<p role="status">Abrindo revisão…</p>}><ReviewPage key={study.id} /></Suspense></section>}
@@ -117,9 +119,9 @@ export default function CorretorProjectsPage() {
         </section></>}
       {tab === 'historico' && <section className="cp-panel"><h2>Versões registradas</h2><p>Este histórico contém os registros disponíveis. Reanálises antigas podem ter usado os mesmos bytes; não são necessariamente correções do analista.</p>{materialError && <p role="alert">{materialError}</p>}{versions.map(v => <div className="cp-version" key={v.id}><strong>Registro {v.n} · {v.n_slides} slides</strong><p>{v.arquivo || 'Arquivo sem nome'} · {new Date(v.created_at).toLocaleDateString('pt-BR')}</p><p className="cp-muted">{assets.some(a => a.version_id === v.id) ? 'Original remoto vinculado' : 'Original remoto não confirmado'}</p></div>)}<p className="cp-muted">Comparação de execuções e linha do tempo de decisões estão previstas para a próxima fatia.</p></section>}
     </StudyLayout> : <>
-      <div className="cp-actions" role="group" aria-label="Biblioteca de estudos"><Button variant="ghost" aria-pressed={scope==='all'} onClick={()=>parameter('scope','all')}>Todos os estudos</Button>{personal?<><Button variant="ghost" aria-pressed={scope==='mine'} onClick={()=>parameter('scope','mine')}>Meus estudos</Button><Button variant="ghost" aria-pressed={scope==='shared'} onClick={()=>parameter('scope','shared')}>Compartilhados comigo</Button></>:<Button variant="outline" onClick={()=>void ensureAccess('encontrar seus estudos associados à conta')}>Entrar com Geobrain</Button>}</div>{personalError&&<p className="cp-muted">{personalError}</p>}
+      <div className="cp-actions cp-library-tabs" role="group" aria-label="Biblioteca de estudos"><Button variant="ghost" aria-pressed={scope==='all'} onClick={()=>parameter('scope','all')}>Todos os estudos</Button>{personal?<><Button variant="ghost" aria-pressed={scope==='mine'} onClick={()=>parameter('scope','mine')}>Meus estudos</Button><Button variant="ghost" aria-pressed={scope==='shared'} onClick={()=>parameter('scope','shared')}>Compartilhados comigo</Button></>:<Button variant="outline" onClick={()=>void ensureAccess('encontrar seus estudos associados à conta')}>Entrar com Geobrain</Button>}</div>{personalError&&<p role="alert" className="cp-muted">{personalError} <Button variant="ghost" onClick={()=>setIdentityRevision(n=>n+1)}>Tentar novamente</Button></p>}
       <div className="cp-toolbar"><div className="cp-search"><Label className="sr-only" htmlFor="project-search">Buscar estudos</Label><Search aria-hidden="true" size={20}/><Input id="project-search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Buscar estudo, cidade ou cliente" /></div><Select value={filter} onValueChange={setFilter}><SelectTrigger aria-label="Situação da carteira"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Em andamento</SelectItem><SelectItem value="all">Todos os atuais</SelectItem><SelectItem value="archive">Arquivo · análises anteriores</SelectItem></SelectContent></Select></div>
-      <div className="cp-list"><div className="cp-list-heading" aria-hidden="true"><span>Estudo</span><span>Situação</span><span>Pendências</span><span>Recebido</span></div>{visible.length ? pageItems.map(s => { const p = profiles.find(x => x.study_id === s.id); return <article className="cp-row" key={s.id}><div className="cp-study-identity"><Presentation size={24} aria-hidden="true"/><div><h2><Link aria-label={`Abrir estudo ${p?.display_name || profileFor(s).display_name}`} to={studyHref(s.id, 'resumo', context)}><FriendlyName study={s} profile={p} /></Link></h2><p>{[s.cidade, s.uf, p?.client_name].filter(Boolean).join(' · ')}</p>{!p && <p className="cp-muted">Sem cadastro prévio · <button className="cp-inline" onClick={() => editProfile(profileFor(s))}>Completar cadastro</button></p>}</div></div><div className="cp-state">{stateOf(s)}</div><div className="cp-pending">{analysisPending(s) ? 'Pré-análise' : `${s.pendentes ?? 0} pendentes`}</div><time dateTime={s.createdAt}>{new Date(s.createdAt).toLocaleDateString('pt-BR')}</time></article>; }) : <p className="cp-panel">Nenhum estudo corresponde aos filtros.</p>}</div>
+      <div className="cp-list"><div className="cp-list-heading" aria-hidden="true"><span>Estudo</span><span>Situação</span><span>Pendências</span><span>Recebido</span></div>{visible.length ? pageItems.map(s => { const p = profiles.find(x => x.study_id === s.id); return <article className="cp-row" key={s.id}><div className="cp-study-identity"><Presentation size={24} aria-hidden="true"/><div><h2><Link aria-label={`Abrir estudo ${p?.display_name || profileFor(s).display_name}`} to={studyHref(s.id, 'resumo', context)}><FriendlyName study={s} profile={p} /></Link></h2><p>{[s.cidade, s.uf, p?.client_name].filter(Boolean).join(' · ')}</p>{!p && <p className="cp-muted">Sem cadastro prévio · <button className="cp-inline" onClick={() => editProfile(profileFor(s))}>Completar cadastro</button></p>}</div></div><div className="cp-state">{stateOf(s)}</div><div className="cp-pending">{analysisPending(s) ? 'Pré-análise' : `${s.pendentes ?? 0} pendentes`}</div><time dateTime={s.createdAt}>{new Date(s.createdAt).toLocaleDateString('pt-BR')}</time></article>; }) : <section className="cp-panel cp-empty"><Presentation size={28} aria-hidden="true"/><h2>{hasScopedStudies || filter==='archive' ? 'Nenhum estudo corresponde aos filtros' : scope==='mine' ? 'Nenhum estudo associado à sua conta' : scope==='shared' ? 'Nenhum estudo compartilhado com você' : 'Sua lista de estudos começa aqui'}</h2>{hasScopedStudies || filter==='archive' ? <Button variant="outline" onClick={clearFilters}>Limpar filtros e mostrar estudos</Button> : scope==='mine' ? <><p className="cp-muted">Envios feitos com login e estudos cujo cadastro você salvou aparecem aqui. Estudos enviados sem conta continuam em Todos os estudos.</p><Button variant="outline" onClick={()=>parameter('scope','all')}>Ver todos os estudos</Button></> : <p className="cp-muted">{scope==='shared' ? 'Os estudos compartilhados diretamente com esta conta aparecerão aqui.' : 'Use Novo estudo para incluir uma apresentação.'}</p>}</section>}</div>
       <div className="cp-actions"><span>{visible.length} estudos · página {page} de {pageCount}</span><Button variant="outline" disabled={page === 1} onClick={() => parameter('page', String(page - 1))}>Anterior</Button><Button variant="outline" disabled={page === pageCount} onClick={() => parameter('page', String(page + 1))}>Próxima</Button></div>
       {profiles.filter(p => !p.study_id).map(p => <section className="cp-panel" key={p.id}><h2>{p.display_name}</h2>{p.client_name && <p>{p.client_name}</p>}<Button variant="outline" onClick={() => editProfile(p)}>Editar cadastro</Button><p className="cp-muted">Cadastro sem estudo vinculado.</p></section>)}
       <p className="cp-muted"><Link to="/corretor/analise">Análises anteriores e histórico V1</Link></p>

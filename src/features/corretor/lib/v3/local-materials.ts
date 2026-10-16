@@ -29,3 +29,38 @@ export async function loadLocalMaterial(key: string): Promise<LocalMaterial | nu
     req.onerror = () => reject(new Error('Não foi possível recuperar o material local.'));
   }); } finally { db.close(); }
 }
+
+/** Consome só o rascunho de envio; originais por hash e prévias continuam disponíveis. */
+export async function clearPreparationDraft(documentSha1?: string, sheetKeys?: string[]): Promise<void> {
+  const db = await open();
+  try { await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction('materials', 'readwrite');
+    const fields = tx.objectStore('materials').get('preparation:fields');
+    fields.onsuccess = () => {
+      let selected: Set<string>;
+      try { selected = new Set(sheetKeys ?? (fields.result ? JSON.parse(new TextDecoder().decode(fields.result.bytes)).sheets ?? [] : [])); }
+      catch { tx.abort(); return; }
+      const request = tx.objectStore('materials').openCursor(IDBKeyRange.bound('preparation:', 'preparation:\uffff'));
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) return;
+        if (documentSha1 && selected.has(String(cursor.key)) && String(cursor.key).startsWith('preparation:sheet:')) {
+          tx.objectStore('materials').put({ ...cursor.value, key: `study:${documentSha1}:sheet:${String(cursor.key).slice('preparation:sheet:'.length)}` });
+        }
+        cursor.delete(); cursor.continue();
+      };
+    };
+    tx.oncomplete = () => resolve();
+    tx.onabort = tx.onerror = () => reject(new Error('Não foi possível limpar o rascunho deste navegador.'));
+  }); } finally { db.close(); }
+}
+
+export async function loadLocalStudySheets(documentSha1: string): Promise<LocalMaterial[]> {
+  const db = await open();
+  try { return await new Promise<LocalMaterial[]>((resolve, reject) => {
+    const prefix = `study:${documentSha1}:sheet:`;
+    const request = db.transaction('materials', 'readonly').objectStore('materials').getAll(IDBKeyRange.bound(prefix, `${prefix}\uffff`));
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(new Error('Não foi possível recuperar as planilhas deste navegador.'));
+  }); } finally { db.close(); }
+}
