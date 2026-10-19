@@ -301,6 +301,8 @@ export default function CorretorV3Page() {
   const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisState | null>(null);
+  // Keep preparation hidden throughout registration, execution setup and report refresh.
+  const [launching, setLaunching] = useState<{ name: string; slides: number } | null>(null);
   const [budgetPrompt, setBudgetPrompt] = useState<{ estimate: FullEstimate; run: () => void } | null>(null);
   // WS-1: portão da ata — fase 1 pronta, aguardando o analista confirmar cidade/UF.
   const [gate, setGate] = useState<{
@@ -528,6 +530,7 @@ export default function CorretorV3Page() {
     }
     setBusy('upload');
     let registeredId: string | null = null;
+    setLaunching({ name: file.name.replace(/\.pptx$/i, ''), slides: ir.n_slides });
     try {
       const saved = await savePptx(ir.sha1, file.name, bytes);
       if (!saved) toast.info('O PowerPoint ficará disponível nesta aba. Guarde o original em Materiais para recuperá-lo depois.');
@@ -564,13 +567,14 @@ export default function CorretorV3Page() {
       }
       await runPaidAnalysis({ studyId: id, version: 1, ir, bytes, estimate, fonte }, { cidade: city, uf, outras, ata: p1.ata }, Math.max(0, estimate.costUsd - p1.ataCostUsd));
     } catch (error) { await finishExecution('failed').catch(() => {}); toast.error('Não foi possível concluir a avaliação', { description: processingMessage(error) }); throw error; }
-    finally { setBusy(null); setAnalysis(null); abortRef.current = null; if (registeredId) navigate(`/corretor/estudos/${registeredId}/revisao`); }
+    finally { setBusy(null); setAnalysis(null); setLaunching(null); abortRef.current = null; if (registeredId) navigate(`/corretor/estudos/${registeredId}/revisao`); }
   }
 
   async function resumePrepared(prepared: PreparedStudy) {
     if (!selected || prepared.ir.sha1 !== selected.lastSha1) throw new Error('Arquivo diferente da versão registrada.');
     const {ir, bytes, estimate, fonte, city, uf, outras, budgetUsd} = prepared;
     setBusy('upload');
+    setLaunching({ name: selected.nome, slides: ir.n_slides });
     try {
       await savePptx(ir.sha1, prepared.file.name, bytes);
       if (fonte) await saveStudyFonte(selected.id, prepared.sheets.length ? `${prepared.sheets.length} planilhas` : fonteInput?.name ?? 'Fonte preservada', fonte);
@@ -582,7 +586,7 @@ export default function CorretorV3Page() {
       if (ac.signal.aborted) { await finishExecution('interrupted'); return; }
       await runPaidAnalysis({studyId:selected.id,version:selected.lastVersion,ir,bytes,estimate,fonte},{cidade:city,uf,outras,ata:p1.ata},Math.max(0,estimate.costUsd-p1.ataCostUsd));
     } catch(e) { await finishExecution('failed').catch(()=>{}); throw e; }
-    finally {setBusy(null);setAnalysis(null);abortRef.current=null;}
+    finally {setBusy(null);setAnalysis(null);setLaunching(null);abortRef.current=null;}
   }
 
   async function prepareRecommendation(prepared: PreparedStudy) {
@@ -952,9 +956,9 @@ export default function CorretorV3Page() {
   const summary = summarizeStudy(reviewedItems);
   const blockingPend = wl.confidence.filter(([level]) => level <= 2).reduce((total, [, findings]) => total + findings.length, 0);
 
-  if (analysis?.running && selected) return <main className="corretor-projects cp-preparation">
-    <header className="cp-heading"><div><p className="cp-eyebrow">Avaliação em andamento</p><h1>{selected.nome}</h1><p className="cp-muted">{selected.nSlides} slides · {fonteInput ? fonteInput.name : 'Sem planilhas vinculadas'}</p></div></header>
-    <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} />
+  if (launching || (analysis?.running && selected)) return <main className="corretor-projects cp-preparation">
+    <header className="cp-heading"><div><p className="cp-eyebrow">Avaliação em andamento</p><h1>{launching?.name ?? selected?.nome}</h1><p className="cp-muted">{launching?.slides ?? selected?.nSlides} slides</p></div></header>
+    {analysis?.running ? <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} /> : <p role="status">{selected?.analise ? 'Abrindo os resultados…' : 'Preparando a avaliação…'}</p>}
     <p className="cp-muted">Mantenha esta aba aberta. Os lotes com retorno confirmado ficam guardados; uma interrupção pode ser retomada após conferir os materiais.</p>
   </main>;
 

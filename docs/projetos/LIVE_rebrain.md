@@ -1,3 +1,7 @@
+## 19/10/2026 — Transição contínua no início da avaliação
+
+Gabriel confirmou aplicação da migration de exclusão, Publish e teste positivo (relato, sem verificação independente). Novo problema: preparação reaparecia entre registro e indicador de análise. Estado visual independente agora cobre registro, processamento e finalização, em envio novo e retomada. Erros/pausa mantêm tratamento existente; motores, decisões e controles preservados. Browser com PPTX real e11 Excel, registro atrasado e serviços simulados aprovado em duas verificações, sem erros ou IA paga. TypeScript aprovado. Sem migration/Edge nova. Falta Publish e conferir em produção. Diagnóstico: `CORRECAO_TRANSICAO_INICIO_AVALIACAO_2026-10-19.md`, na pasta de design do Corretor.
+
 ## 19/10/2026 — Exclusão acessível para estudos incompletos
 
 Gabriel pediu mapear a exclusão e dar acesso por lixeira antes de concluir análise. Diagnóstico: preparação incompleta retornava antes do cabeçalho com lixeira; carteira não oferecia a ação. DELETE antigo podia falhar por referências de cadastro/materiais ou apagar consumo em cascade. Implementada exclusão lógica preservando materiais, decisões e registros de uso. Lixeira na carteira/cabeçalho e na preparação autenticada; rascunho apenas local tem descarte local com confirmação. Login e confirmação obrigatórios para registro salvo; estudo só some após true do banco. Execuções prepared/running bloqueiam remoção. Limpeza local compara hash para preservar rascunho de outro estudo. Reenvio idêntico inicia outro registro ativo, sem ressuscitar o removido.
