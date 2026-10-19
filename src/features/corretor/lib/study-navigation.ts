@@ -4,7 +4,7 @@ export function studySection(value?: string): StudySection { return sections.inc
 /** Retorno só para a carteira local e com parâmetros conhecidos, nunca uma URL arbitrária. */
 export function portfolioSearch(value = ''): string {
   const input = new URLSearchParams(value), output = new URLSearchParams();
-  for (const key of ['q', 'filter', 'page', 'scope']) { const v = input.get(key); if (v) output.set(key, v); }
+  for (const key of ['q', 'filter', 'page', 'scope', 'group', 'groupKey', 'received']) { const v = input.get(key); if (v) output.set(key, v); }
   return output.toString();
 }
 export function portfolioHref(context = ''): string {

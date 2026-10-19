@@ -72,6 +72,7 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
       const account = resume ? null : await registerAccountPreparation({ name: next.name, sha1: ir.sha1, nSlides: ir.n_slides, bytes, findings: irToFindings(ir).filter(f => !f.ok) });
       if (!mounted.current || current !== generation.current) return;
       setAccountPreparation(account);
+      if (account) window.dispatchEvent(new Event('corretor-library-refresh'));
       setPrepared({ ir, bytes, estimate }); setBudgetUsd(Math.ceil((estimate.costUsd * 2 + 1) * 100) / 100);
       if (!restore) { const suggestion = suggestCity(next.name, ir); setCity(suggestion?.cidade ?? ''); setUf(suggestion?.uf ?? ''); }
       try { if (!resume) await saveLocalMaterial({ key: 'preparation:pptx', name: next.name, bytes }); }
