@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.105.3';
-import { recommendationContext, ensureRecommendation, recommendationStep } from './recommendation.ts';
+import { recommendationContext, ensureRecommendation, recommendationStep, requireRecommendationProfileSchema } from './recommendation.ts';
+import { executionRecommendationProfile } from '../_shared/recommendation.ts';
 
 const allowed = new Set(['analyze-text-batch','analyze-table-image','analyze-ata-image']);
 const hash = async (value: string) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -24,7 +25,9 @@ Deno.serve(async req => {
       if(versionError||!version?.sha1||version.sha1!==body.documentSha1)return json({error:'O arquivo não corresponde à versão registrada.'},409);
       const consult=body.context?.purpose==='recommendation';
       let context=body.context;
-      if(consult){try{context=recommendationContext(context,version);}catch{return json({error:'Conteúdo consultivo inválido ou grande demais.'},400);}
+      if(consult){try{context=recommendationContext(context,version);await requireRecommendationProfileSchema(db);
+          context.usageOrigin=Deno.env.get('CORRETOR_USAGE_ORIGIN')==='development'?'development':'production';
+        }catch(error){return json({error:error instanceof Error?error.message:'Conteúdo consultivo inválido ou grande demais.'},400);}
         if(body.budgetUsd<context.quote.maximumUsd)return json({error:'O limite precisa cobrir a reserva máxima da recomendação.'},400);}
       const contextHash = await hash(canonical(context));
       const {error:insertError} = await db.from('corretor_executions').insert({study_id:body.studyId,version_n:body.version,document_sha1:version.sha1,context_hash:contextHash,confirmed_context:context,owner_hash:owner,budget_usd:body.budgetUsd,...(consult?{purpose:'recommendation',engine:'recommendation-v1',estimated_usd:context.quote.estimateUsd}:{})});
@@ -40,17 +43,21 @@ Deno.serve(async req => {
         const {error:updateError}=await db.from('corretor_executions').update({budget_usd:body.budgetUsd,state:'prepared',updated_at:new Date().toISOString()}).eq('id',run.id);
         if(updateError)throw updateError;
       }
-      return json({id:run.id,state:run.state,spentUsd:Number(run.spent_usd),reservedUsd:Number(run.reserved_usd)});
+      return json({id:run.id,state:run.state,...(consult?{profileId:executionRecommendationProfile(run.confirmed_context).id}:{}),spentUsd:Number(run.spent_usd),reservedUsd:Number(run.reserved_usd)});
     }
     const {data:run,error} = await db.from('corretor_executions').select('*').eq('id',body.executionId).eq('owner_hash',owner).single();
     if(error||!run)return json({error:'Execução não autorizada.'},403);
     if(body.action==='recommendation_step')return await recommendationStep(db,run,owner,url,key,json,hash,canonical);
     if(body.action==='recommendation_resume'){
+      if(run.purpose!=='recommendation')return json({error:'Esta execução não é consultiva.'},400);
+      let profile;
+      try{profile=executionRecommendationProfile(run.confirmed_context);if(run.confirmed_context.profile)await requireRecommendationProfileSchema(db);}
+      catch(error){return json({error:error instanceof Error?error.message:'Confira a configuração da geração.'},409);}
       if(run.state==='failed')return json({error:'Esta tentativa não pode ser retomada. Confira o histórico e autorize uma nova geração se necessário.'},409);
       if(run.purpose!=='recommendation'||!Number.isFinite(body.budgetUsd)||body.budgetUsd>100||body.budgetUsd<Number(run.confirmed_context.quote.maximumUsd)||Number(run.reserved_usd)>0)return json({error:'Confira limite e chamadas com retorno pendente antes de retomar.'},409);
-      if(run.state==='completed')return json({id:run.id,state:run.state});
+      if(run.state==='completed')return json({id:run.id,state:run.state,profileId:profile.id});
       const {error:updateError}=await db.from('corretor_executions').update({state:'prepared',budget_usd:body.budgetUsd,updated_at:new Date().toISOString()}).eq('id',run.id);
-      if(updateError)throw updateError;return json({id:run.id,state:'prepared'});
+      if(updateError)throw updateError;return json({id:run.id,state:'prepared',profileId:profile.id});
     }
     if(body.action==='status')return json({state:run.state,spentUsd:Number(run.spent_usd),reservedUsd:Number(run.reserved_usd)});
     if(body.action==='finish') {

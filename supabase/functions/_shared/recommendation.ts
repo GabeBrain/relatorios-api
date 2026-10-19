@@ -1,8 +1,55 @@
 // Contrato compartilhado, sem credenciais ou dependência do runtime Deno.
-export const RECOMMENDATION_MODEL = 'gpt-4o-mini';
 export const PROMPT_VERSION = 'brain-2026-09-15-v1';
-export const PRICE_VERSION = 'openai-2026-10-16';
-export const PRICES = { input: 0.15, cached: 0.075, output: 0.6 };
+export interface RecommendationProfile {
+  id: string; configVersion: string; model: string; promptVersion: string; priceVersion: string;
+  provider: 'openai'; endpoint: 'chat/completions'; serviceTier: 'default';
+  reasoningEffort: 'high' | null;
+  prices: { input: number; cached: number; output: number };
+  maxOutput: { single: number; batch: number; compile: number };
+  contextWindow: number; hashNamespace: string;
+}
+export const LEGACY_RECOMMENDATION_PROFILE: RecommendationProfile = {
+  id: 'mini-legacy-2026-10-16', configVersion: 'recommendation-v1', model: 'gpt-4o-mini',
+  promptVersion: PROMPT_VERSION, priceVersion: 'openai-2026-10-16', provider: 'openai',
+  endpoint: 'chat/completions', serviceTier: 'default', reasoningEffort: null,
+  prices: { input: 0.15, cached: 0.075, output: 0.6 },
+  maxOutput: { single: 3500, batch: 1200, compile: 3500 }, contextWindow: 128000, hashNamespace: 'recommendation-v1',
+};
+const PROFILES: Record<string, RecommendationProfile> = {
+  [LEGACY_RECOMMENDATION_PROFILE.id]: LEGACY_RECOMMENDATION_PROFILE,
+  'luna-high-2026-10-19': {
+    id: 'luna-high-2026-10-19', configVersion: 'recommendation-profiles-v2', model: 'gpt-6-luna',
+    promptVersion: PROMPT_VERSION, priceVersion: 'openai-standard-2026-10-19', provider: 'openai',
+    endpoint: 'chat/completions', serviceTier: 'default', reasoningEffort: 'high',
+    prices: { input: 0.10, cached: 0.01, output: 0.50 },
+    maxOutput: { single: 32768, batch: 32768, compile: 32768 }, contextWindow: 128000, hashNamespace: 'recommendation-profiles-v2',
+  },
+};
+/** Flag técnica versionada. Afeta só novas gerações; nunca troca uma execução iniciada. */
+export const ACTIVE_RECOMMENDATION_PROFILE = 'luna-high-2026-10-19';
+export function recommendationProfile(id = ACTIVE_RECOMMENDATION_PROFILE): RecommendationProfile {
+  if (typeof id !== 'string' || !Object.prototype.hasOwnProperty.call(PROFILES,id)) throw new Error('Configuração de geração indisponível. Procure a equipe de suporte.');
+  const profile = PROFILES[id];
+  if (!profile) throw new Error('Configuração de geração indisponível. Procure a equipe de suporte.');
+  return structuredClone(profile);
+}
+const stable = (value: unknown) => JSON.stringify(value, (_key, v) => v && typeof v === 'object' && !Array.isArray(v)
+  ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b))) : v);
+/** Valida o retrato persistido contra contratos conhecidos, sem confiar em taxas do cliente. */
+export function executionRecommendationProfile(context: Record<string, unknown>): RecommendationProfile {
+  if (context.profile && typeof context.profile === 'object') {
+    const snapshot = context.profile as RecommendationProfile;
+    const profile = recommendationProfile(snapshot.id);
+    if (stable(snapshot) === stable(profile) && context.model === profile.model
+      && context.promptVersion === profile.promptVersion && context.priceVersion === profile.priceVersion) return profile;
+  } else if (context.model === LEGACY_RECOMMENDATION_PROFILE.model
+    && context.promptVersion === LEGACY_RECOMMENDATION_PROFILE.promptVersion
+    && context.priceVersion === LEGACY_RECOMMENDATION_PROFILE.priceVersion) return recommendationProfile(LEGACY_RECOMMENDATION_PROFILE.id);
+  throw new Error('A configuração desta execução precisa de conferência técnica. O histórico foi preservado.');
+}
+export const RECOMMENDATION_MODEL = recommendationProfile().model;
+export const PRICE_VERSION = recommendationProfile().priceVersion;
+export const PRICES = recommendationProfile().prices;
 export const MAX_MEMO_BYTES = 8000;
 export const MAX_BATCHES = 10;
 export interface SlidePayload { n: number; titulo: string; conteudo: string }
@@ -31,12 +78,12 @@ export function validateRecommendationSlides(value: unknown): SlidePayload[] {
   if (partitionSlides(slides).length > MAX_BATCHES) throw new Error('Este estudo excede os dez lotes suportados. Nenhuma IA foi iniciada.');
   return slides;
 }
-export interface RecommendationQuote { estimateUsd: number; maximumUsd: number; requests: number; batches: number; slides: number; inputTokensEstimated: number; outputTokensMaximum: number; model: string; promptVersion: string; priceVersion: string }
-export function recommendationCost(input: number, output: number, cached = 0): number {
+export interface RecommendationQuote { estimateUsd: number; maximumUsd: number; requests: number; batches: number; slides: number; inputTokensEstimated: number; outputTokensMaximum: number; model: string; promptVersion: string; priceVersion: string; profileId: string; configVersion: string }
+export function recommendationCost(input: number, output: number, cached = 0, profile = recommendationProfile()): number {
   if (![input,output,cached].every(n=>Number.isInteger(n)&&n>=0) || cached > input) throw new Error('Uso de tokens inválido.');
-  return ((input-cached)*PRICES.input+cached*PRICES.cached+output*PRICES.output)/1e6;
+  return ((input-cached)*profile.prices.input+cached*profile.prices.cached+output*profile.prices.output)/1e6;
 }
-export function prepareRequest(payload: { mode?: string; slides?: unknown; batches?: BatchMemoPayload[] }): { prompt: string; maxOutputTokens: number; mode: string; reserveUsd: number } {
+export function prepareRequest(payload: { mode?: string; slides?: unknown; batches?: BatchMemoPayload[] }, profile = recommendationProfile()): { prompt: string; maxOutputTokens: number; mode: string; reserveUsd: number } {
   const mode = payload.mode ?? 'single'; let prompt: string;
   if (mode === 'compile') {
     if (!Array.isArray(payload.batches) || !payload.batches.length || payload.batches.length > MAX_BATCHES || payload.batches.some(b=>!Number.isInteger(b.firstSlide)||!Number.isInteger(b.lastSlide)||b.firstSlide<1||b.lastSlide<b.firstSlide||typeof b.content!=='string'||!b.content.trim()||utf8(b.content)>MAX_MEMO_BYTES)) throw new Error('Memos de compilação inválidos.');
@@ -47,17 +94,17 @@ export function prepareRequest(payload: { mode?: string; slides?: unknown; batch
     if (partitionSlides(slides).length !== 1) throw new Error('O conteúdo precisa ser dividido em lotes antes de gerar.');
     prompt = mode === 'batch' ? batchPrompt(slides) : finalPrompt(studyText(slides));
   }
-  const inputBound = utf8(prompt) + 64, maxOutputTokens = mode === 'batch' ? 1200 : 3500;
-  if (inputBound + maxOutputTokens > 128000) throw new Error('Conteúdo acima da janela permitida.');
-  return { prompt, maxOutputTokens, mode, reserveUsd: recommendationCost(inputBound,maxOutputTokens) };
+  const inputBound = utf8(prompt) + 64, maxOutputTokens = profile.maxOutput[mode as keyof RecommendationProfile['maxOutput']];
+  if (inputBound + maxOutputTokens > profile.contextWindow) throw new Error('Conteúdo acima da janela permitida.');
+  return { prompt, maxOutputTokens, mode, reserveUsd: recommendationCost(inputBound,maxOutputTokens,0,profile) };
 }
-export function quoteRecommendation(value: unknown): RecommendationQuote {
+export function quoteRecommendation(value: unknown, profile = recommendationProfile()): RecommendationQuote {
   const slides = validateRecommendationSlides(value), batches = partitionSlides(slides);
-  const requests = batches.map(batch=>prepareRequest({mode:batches.length===1?'single':'batch',slides:batch}));
-  if (batches.length>1) requests.push(prepareRequest({mode:'compile',batches:batches.map(b=>({firstSlide:b[0].n,lastSlide:b.at(-1)!.n,content:'x'.repeat(MAX_MEMO_BYTES)}))}));
+  const requests = batches.map(batch=>prepareRequest({mode:batches.length===1?'single':'batch',slides:batch},profile));
+  if (batches.length>1) requests.push(prepareRequest({mode:'compile',batches:batches.map(b=>({firstSlide:b[0].n,lastSlide:b.at(-1)!.n,content:'x'.repeat(MAX_MEMO_BYTES)}))},profile));
   const inputTokensEstimated = requests.reduce((n,r)=>n+Math.ceil(utf8(r.prompt)/3)+64,0);
   const outputTokensMaximum = requests.reduce((n,r)=>n+r.maxOutputTokens,0);
-  return {estimateUsd:recommendationCost(inputTokensEstimated,outputTokensMaximum),maximumUsd:requests.reduce((n,r)=>n+r.reserveUsd,0),requests:requests.length,batches:batches.length,slides:slides.length,inputTokensEstimated,outputTokensMaximum,model:RECOMMENDATION_MODEL,promptVersion:PROMPT_VERSION,priceVersion:PRICE_VERSION};
+  return {estimateUsd:recommendationCost(inputTokensEstimated,outputTokensMaximum,0,profile),maximumUsd:requests.reduce((n,r)=>n+r.reserveUsd,0),requests:requests.length,batches:batches.length,slides:slides.length,inputTokensEstimated,outputTokensMaximum,model:profile.model,promptVersion:profile.promptVersion,priceVersion:profile.priceVersion,profileId:profile.id,configVersion:profile.configVersion};
 }
 export const CONSULTING_RULES = `Você é um consultor imobiliário da Brain. Use SOMENTE as evidências recebidas. Não invente números, localização, produto ou premissas ausentes.
 
