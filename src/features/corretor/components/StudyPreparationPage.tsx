@@ -1,3 +1,4 @@
+import { processingMessage } from '../lib/processing-message';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,6 @@ import { loadPptx } from '../lib/v3/pptx-store';
 import { loadLocalStudySheets } from '../lib/v3/local-materials';
 import { analysisPending, listStudies, type StudyV3 } from '../lib/v3/db';
 import type { Fonte } from '../lib/v3/fonte';
-import { formatBRL } from '../lib/v3/config';
 import { irToFindings } from '../lib/audit/ir-rules';
 import { registerAccountPreparation, type AccountPreparation } from '../lib/account-preparation';
 import type { RecommendationStudy } from './StudyRecommendation';
@@ -136,7 +136,7 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
     try {
       const fonte = sheets.length ? await extractFonteFromExcel(sheets, prepared.ir.sha1) : resume?.fonte ?? null;
       await onStart({ file, ...prepared, sheets, fonte, city: city.trim(), uf, outras: outras.split(',').map(c => c.trim()).filter(Boolean), budgetUsd, accountPreparation });
-    } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível iniciar. Seus materiais continuam selecionados.'); }
+    } catch (e) { setError(processingMessage(e)); }
     finally { lock.current = false; setStarting(false); }
   }
   async function reset() {
@@ -179,9 +179,7 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
     {prepared && intent==='review' && <section className="cp-panel"><h2>Conferir antes de iniciar</h2><div className="cs-fields"><div><Label htmlFor="prepare-city">Cidade do estudo</Label><Input id="prepare-city" value={city} disabled={starting || recommendationBusy} onChange={e => setCity(e.target.value)} /></div><div><Label htmlFor="prepare-uf">Estado</Label><Select value={uf} disabled={starting || recommendationBusy} onValueChange={setUf}><SelectTrigger id="prepare-uf"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{UFS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent></Select></div></div>
       <Label htmlFor="prepare-others">Outras cidades que fazem parte do estudo (opcional)</Label><Input id="prepare-others" value={outras} disabled={starting || recommendationBusy} onChange={e => setOutras(e.target.value)} placeholder="Separe por vírgulas" />
       <p className="cp-muted">{prepared.ir.n_slides} slides · {profile?.tabelasNativas} tabelas nativas · {(profile?.tabelasImagem ?? 0) + (profile?.fichas ?? 0)} tabelas em imagem. Estes conteúdos ainda não foram avaliados.</p>
-      <p>Estimativa da avaliação: <strong>{formatBRL(prepared.estimate.costUsd)}</strong> · inclui ata, texto e imagens ainda sem leitura salva.</p>
-      <Label htmlFor="prepare-budget">Limite autorizado em dólares (US$)</Label><Input id="prepare-budget" type="number" min="0.01" max="100" step="0.01" value={budgetUsd} disabled={starting || recommendationBusy} onChange={e => setBudgetUsd(Number(e.target.value))} />
-      <p className="cp-muted">Limite de {formatBRL(budgetUsd)}, incluindo margem para releituras. O servidor interrompe antes de exceder esse valor. A confirmação autoriza somente este lote; retomar exige conferir o limite novamente.</p>
+      {budgetUsd>100&&<p role="status">Este estudo precisa de apoio da equipe para continuar. Seus materiais estão preservados.</p>}
       <Button disabled={!ready} onClick={() => void start()}>{starting ? 'Iniciando avaliação…' : 'Iniciar avaliação'}</Button>
       {(!city.trim() || !uf) && <p>Confirme a cidade e o estado para iniciar.</p>}
     </section>}

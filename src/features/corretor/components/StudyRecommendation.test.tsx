@@ -13,22 +13,28 @@ const record={id:'rec',execution_id:'run',version_n:1,prompt_version:'brain-2026
 beforeEach(()=>{vi.clearAllMocks();mocks.list.mockResolvedValue([]);mocks.load.mockResolvedValue(null);mocks.run.mockResolvedValue(undefined);});
 it('selecionar objetivo prepara previsão sem criar estudo ou chamar IA',async()=>{
  const ensure=vi.fn();render(<MemoryRouter><StudyRecommendation preparedIr={ir} ensureStudy={ensure}/></MemoryRouter>);
- expect(screen.getByText(/Previsão conservadora/)).toBeInTheDocument();expect(screen.getByRole('button',{name:'Confirmar custo e preparar sugestões'})).toBeEnabled();expect(ensure).not.toHaveBeenCalled();expect(mocks.run).not.toHaveBeenCalled();
- fireEvent.change(screen.getByLabelText('Limite autorizado em dólares (US$)'),{target:{value:'0'}});expect(screen.getByRole('button',{name:'Confirmar custo e preparar sugestões'})).toBeDisabled();
+ expect(screen.queryByText(/US\$|R\$|Previsão conservadora|tokens de entrada/)).not.toBeInTheDocument();expect(screen.getByRole('button',{name:'Preparar sugestões'})).toBeEnabled();expect(ensure).not.toHaveBeenCalled();expect(mocks.run).not.toHaveBeenCalled();
+ expect(screen.queryByLabelText('Limite autorizado em dólares (US$)')).not.toBeInTheDocument();
 });
 it('reabre texto salvo mesmo sem original neste navegador',async()=>{
  mocks.list.mockResolvedValue([record]);render(<MemoryRouter><StudyRecommendation study={study} version={version}/></MemoryRouter>);
- expect(await screen.findByText('Texto consultivo salvo.')).toBeInTheDocument();expect(screen.getByRole('button',{name:'Copiar texto'})).toBeInTheDocument();expect(mocks.run).not.toHaveBeenCalled();expect(screen.queryByRole('button',{name:'Confirmar custo e preparar sugestões'})).not.toBeInTheDocument();
+ expect(await screen.findByText('Texto consultivo salvo.')).toBeInTheDocument();expect(screen.getByRole('button',{name:'Copiar texto'})).toBeInTheDocument();expect(mocks.run).not.toHaveBeenCalled();expect(screen.queryByRole('button',{name:'Preparar sugestões'})).not.toBeInTheDocument();
 });
 it('retorno desconhecido impede iniciar novamente',async()=>{
  mocks.list.mockResolvedValue([{...record,state:'unknown',content:null,reserved_usd:.01}]);
- render(<MemoryRouter><StudyRecommendation study={study} version={version}/></MemoryRouter>);await screen.findByText(/Reserva com retorno pendente/);expect(mocks.run).not.toHaveBeenCalled();
+ render(<MemoryRouter><StudyRecommendation study={study} version={version}/></MemoryRouter>);await screen.findByText(/Uma etapa ainda aguarda confirmação/);expect(mocks.run).not.toHaveBeenCalled();
 });
 it('arquivo repetido com recomendação salva é aberto sem nova geração',async()=>{
  mocks.list.mockResolvedValue([record]);const ensure=vi.fn().mockResolvedValue({study,version});
- render(<MemoryRouter><StudyRecommendation preparedIr={ir} ensureStudy={ensure}/></MemoryRouter>);fireEvent.click(screen.getByRole('button',{name:'Confirmar custo e preparar sugestões'}));await screen.findByText('Texto consultivo salvo.');expect(ensure).toHaveBeenCalledOnce();expect(mocks.run).not.toHaveBeenCalled();
+ render(<MemoryRouter><StudyRecommendation preparedIr={ir} ensureStudy={ensure}/></MemoryRouter>);fireEvent.click(screen.getByRole('button',{name:'Preparar sugestões'}));await screen.findByText('Texto consultivo salvo.');expect(ensure).toHaveBeenCalledOnce();expect(mocks.run).not.toHaveBeenCalled();
 });
 it('indisponibilidade do histórico não inicia IA e conserva a preparação',async()=>{
  mocks.list.mockRejectedValue(new Error('Histórico indisponível'));const ensure=vi.fn().mockResolvedValue({study,version});
- render(<MemoryRouter><StudyRecommendation preparedIr={ir} ensureStudy={ensure}/></MemoryRouter>);fireEvent.click(screen.getByRole('button',{name:'Confirmar custo e preparar sugestões'}));await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('Histórico indisponível'));expect(mocks.run).not.toHaveBeenCalled();expect(screen.getByRole('button',{name:'Confirmar custo e preparar sugestões'})).toBeEnabled();
+ render(<MemoryRouter><StudyRecommendation preparedIr={ir} ensureStudy={ensure}/></MemoryRouter>);fireEvent.click(screen.getByRole('button',{name:'Preparar sugestões'}));await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('Histórico indisponível'));expect(mocks.run).not.toHaveBeenCalled();expect(screen.getByRole('button',{name:'Preparar sugestões'})).toBeEnabled();
+});
+
+it('gera com limite interno positivo sem pedir valor ao analista',async()=>{
+ const ensure=vi.fn().mockResolvedValue({study,version});render(<MemoryRouter><StudyRecommendation preparedIr={ir} ensureStudy={ensure}/></MemoryRouter>);
+ fireEvent.click(screen.getByRole('button',{name:'Preparar sugestões'}));await waitFor(()=>expect(mocks.run).toHaveBeenCalledOnce());
+ expect(mocks.run.mock.calls[0][0].budgetUsd).toBeGreaterThan(0);expect(mocks.run.mock.calls[0][0].budgetUsd).toBeLessThanOrEqual(100);
 });

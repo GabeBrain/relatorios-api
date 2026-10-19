@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { errorLabel, ERROR_CATALOG, type ErrorType } from '../lib/error-catalog';
 import { VizSwitch } from '../components/audit/FindingCard';
-import AiUsagePanel from '../components/AiUsagePanel';
 import {
   acknowledgeCalibrationFinding,
   acknowledgeCalibrationType,
@@ -132,7 +131,6 @@ export default function CorretorCalibrationPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-6 space-y-8">
-        <AiUsagePanel />
         {loading ? (
           <div className="py-20 flex items-center justify-center gap-2 text-sm text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Carregando calibração…</div>
         ) : (

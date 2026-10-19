@@ -39,7 +39,7 @@ function Stat({ n, label }: {icon: React.ReactNode; n: number; label: string; to
 }
 
 export default function PreAnalysisCard({
-  ata, suggestion, cities, profile, costBrl, running, temFonte, sourceLabel, onAttachSources, onConfirm, cache,
+  ata, suggestion, cities, profile, running, temFonte, sourceLabel, onAttachSources, onConfirm, cache,
 }: {
   ata: AtaData | null;
   suggestion: CitySuggestion | null;
@@ -84,7 +84,7 @@ export default function PreAnalysisCard({
     <div className="cp-panel cp-prepare-existing">
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
         <h3 className="text-sm font-semibold">Preparar avaliação</h3>
-        <span className="text-[11px] text-muted-foreground">conferência de materiais e custo</span>
+        <span className="text-[11px] text-muted-foreground">conferência dos materiais</span>
       </div>
 
       <div className="grid gap-5 px-4 py-4 md:grid-cols-2">
@@ -158,7 +158,7 @@ export default function PreAnalysisCard({
                 ))}
               </div>
             )}
-            {!temFonte && choice === 'depois' && <p className="text-[11px] text-muted-foreground">O cruzamento com as planilhas roda quando você vinculá-las, sem nova leitura nem custo.</p>}
+            {!temFonte && choice === 'depois' && <p className="text-[11px] text-muted-foreground">O cruzamento com as planilhas roda quando você vinculá-las, reaproveitando as leituras existentes.</p>}
           </Section>
 
           <Section title="Conteúdo disponível para avaliação">
@@ -189,18 +189,18 @@ export default function PreAnalysisCard({
         <button onClick={confirm} disabled={!ready}
           className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-40">
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
-          Conferir orçamento e iniciar
+          Iniciar avaliação
         </button>
-        <span className="text-sm text-muted-foreground">Estimativa: {costBrl}.
+        <span className="text-sm text-muted-foreground">
           {!cidadeOk || !ufOk ? 'Falta confirmar a cidade e a UF.' : choice === null ? 'Falta dizer se o estudo tem planilhas.' : 'Tudo pronto.'}
         </span>
         {cache && cache.total > 0 && (
-          <span className="ml-auto text-[11px] text-muted-foreground" title="Leituras de imagem ficam guardadas; só as novas são cobradas">
+          <span className="ml-auto text-[11px] text-muted-foreground" title="As leituras anteriores ficam guardadas">
             {cache.cached === cache.total
               ? `As ${cache.total} imagens já foram lidas antes: nenhuma nova leitura de imagem estimada.`
               : cache.cached > 0
-                ? `${cache.cached} de ${cache.total} imagens já lidas antes (sem custo).`
-                : 'Estimativa inclui releituras de imagem.'}
+                ? `${cache.cached} de ${cache.total} imagens já lidas antes.`
+                : 'As imagens ainda precisam ser conferidas.'}
           </span>
         )}
       </div>

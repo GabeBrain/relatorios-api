@@ -45,7 +45,7 @@ describe('fechamento v0.69 com corpus de revisão',()=>{
   const run=vi.fn(),cancel=vi.fn();const estimate={costUsd:.5,textSlides:12,visionToRun:3,visionCached:29} as FullEstimate;
   render(<BudgetModal estimate={estimate} onConfirm={run} onCancel={cancel}/>);
   expect(screen.getByRole('dialog')).toBeTruthy();expect(screen.getByText(/12 slides de texto e 3/)).toBeTruthy();expect(run).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByText('Cancelar avaliação paga'));expect(cancel).toHaveBeenCalledOnce();expect(run).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByText('Cancelar'));expect(cancel).toHaveBeenCalledOnce();expect(run).not.toHaveBeenCalled();
   fireEvent.click(screen.getByText('Confirmar e analisar'));expect(run).toHaveBeenCalledOnce();cleanup();
  });
 });

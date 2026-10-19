@@ -87,7 +87,7 @@ export default function LegacyV1Panel() {
           <Archive className="w-4 h-4 text-muted-foreground" />
           <h2 className="text-sm font-semibold">Estudos anteriores</h2>
           <span className="text-[10px] text-muted-foreground">
-            versão antiga · somente leitura
+            somente leitura
             {projects && ` · ${projects.length}`}
           </span>
           <div className="flex-1 border-t border-border" />
@@ -115,7 +115,6 @@ export default function LegacyV1Panel() {
                         </div>
                         <p className="text-[11px] text-muted-foreground">
                           {p.cityName} · {fmtDate(p.savedAt)} · {p.totalSlides} slides · {p.totalErrors} erro(s)
-                          {p.totalCost > 0 && ` · $${p.totalCost.toFixed(2)}`}
                         </p>
                       </div>
                       <ChevronDown className={cn('w-4 h-4 text-muted-foreground shrink-0 transition-transform', isOpen && 'rotate-180')} />

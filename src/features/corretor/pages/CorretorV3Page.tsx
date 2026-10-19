@@ -1,3 +1,4 @@
+import { processingMessage } from '../lib/processing-message';
 // Corretor v3 — fluxo unificado de correção (DESIGN_corretor_v3.md).
 // v3.0: Triagem DET (R$ 0) → Corrigir → Reconferir (diff) → Entregar.
 // v3.1: estágio "Aprofundar com IA" (texto em batch, custo estimado antes).
@@ -39,7 +40,7 @@ import { type AtaGateValue } from '../components/AtaGateCard';
 import PreAnalysisCard, { type PreAnalysisValue } from '../components/PreAnalysisCard';
 import { directRecheckRuleWasEvaluated } from '../lib/v3/recheck-scope';
 import { presentTextFindings } from '../lib/v3/text-review';
-import { formatUSD, type ModelId } from '../lib/cost-calculator';
+import { type ModelId } from '../lib/cost-calculator';
 import {
   runPhase1, runPhase2, estimateFullAnalysis, TEXT_REVIEW_MODEL,
   type StageProgress, type FullEstimate, type Phase1Result,
@@ -204,7 +205,7 @@ function AnalysisBanner({ state, onPause }: { state: AnalysisState; onPause: () 
           <Sparkles className="w-4 h-4 text-violet-500 shrink-0 animate-pulse" />
           <h3 className="text-sm font-semibold truncate">{state.stages.gravando ? 'Gravando os resultados…' : 'Analisando o estudo…'}</h3>
           <span className="text-xs text-muted-foreground">
-            {Math.floor(elapsed / 60)}min {elapsed % 60}s · ~{formatBRL(state.estimateUsd)} estimado · {formatBRL(state.spentUsd)} gasto nesta etapa
+            {Math.floor(elapsed / 60)}min {elapsed % 60}s
           </span>
         </div>
         <button
@@ -247,17 +248,15 @@ export function BudgetModal({ estimate, onConfirm, onCancel }: {
       >
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-amber-500" />
-          <h3 id="corretor-budget-title" className="text-sm font-semibold">Confirmar processamento pago</h3>
+          <h3 id="corretor-budget-title" className="text-sm font-semibold">Iniciar avaliação</h3>
         </div>
         <p className="text-xs text-muted-foreground">
-          A análise completa deste estudo custa cerca de{' '}
-          <strong className="text-foreground">{formatBRL(estimate.costUsd)} ({formatUSD(estimate.costUsd)})</strong>.
-          {' '}O limite autorizado será de {formatBRL(Math.ceil((estimate.costUsd * 2 + 1) * 100) / 100)}, incluindo margem para releituras e reservas por lote. O servidor interrompe antes de exceder esse limite. O custo efetivo depende das leituras e releituras necessárias. São {estimate.textSlides} slides de texto e {estimate.visionToRun} imagem(ns) de
-          tabela a extrair{estimate.visionCached > 0 && ` (${estimate.visionCached} já no cache)`}.
+          Serão avaliados {estimate.textSlides} slides de texto e {estimate.visionToRun} imagens ainda sem leitura salva. Confira os materiais antes de iniciar.
+
         </p>
         <div className="flex items-center justify-end gap-2 pt-1">
           <button onClick={onCancel} className="text-xs rounded-md px-3 py-1.5 border border-border hover:bg-muted">
-            Cancelar avaliação paga
+            Cancelar
           </button>
           <button onClick={onConfirm} className="text-xs rounded-md px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
             Confirmar e analisar
@@ -447,11 +446,10 @@ export default function CorretorV3Page() {
       }
 
       const nIa = res.textFindings.length + res.visionFindings.length;
-      const custo = res.textCostUsd + res.visionCostUsd;
       if (res.aborted) {
-        toast.warning('Análise pausada — continua pendente', { description: `${formatBRL(custo)} gastos até aqui. O que já foi lido ficou no cache: ao retomar, só o restante é cobrado.` });
+        toast.warning('Análise pausada — continua pendente', { description: 'Os resultados confirmados ficaram guardados. Retome para concluir as etapas pendentes.' });
       } else {
-        toast.success(`Análise completa — ${formatBRL(custo)}`, {
+        toast.success('Análise completa', {
           description: `${nIa} apontamento(s) na revisão` +
             (res.visionEscalated > 0 ? ` · ${res.visionEscalated} tabela(s) com segunda leitura` : ''),
         });
@@ -461,7 +459,7 @@ export default function CorretorV3Page() {
       setItems(await loadFindings(ctx.studyId));
     } catch (err) {
       await finishExecution('failed').catch(() => {});
-      toast.error('Avaliação interrompida', { description: err instanceof Error ? err.message : 'Retome a preparação para conferir o estado.' });
+      toast.error('Avaliação interrompida', { description: processingMessage(err) });
     } finally {
       abortRef.current = null;
       setAnalysis(null);
@@ -488,7 +486,7 @@ export default function CorretorV3Page() {
       });
       window.setTimeout(() => document.getElementById('analysis-gate')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
     } catch (err) {
-      toast.error('Falha na triagem', { description: err instanceof Error ? err.message : String(err) });
+      toast.error('Falha na triagem', { description: processingMessage(err) });
     } finally {
       abortRef.current = null;
       setAnalysis(null);
@@ -511,7 +509,7 @@ export default function CorretorV3Page() {
         value = { ...value, ata: p1.ata };
       }
       await runPaidAnalysis(ctx, value, gate.estimate.costUsd);
-    })().catch(async () => { await finishExecution('failed').catch(() => {}); toast.error('Não foi possível iniciar. Retome a preparação para conferir o custo.'); });
+    })().catch(async () => { await finishExecution('failed').catch(() => {}); toast.error('Não foi possível iniciar. Retome a preparação para conferir os materiais.'); });
     setBudgetPrompt({ estimate: gate.estimate, run: () => { setBudgetPrompt(null); run(); } });
   }, [gate, runPaidAnalysis, fonteInput]);
 
@@ -565,7 +563,7 @@ export default function CorretorV3Page() {
         return;
       }
       await runPaidAnalysis({ studyId: id, version: 1, ir, bytes, estimate, fonte }, { cidade: city, uf, outras, ata: p1.ata }, Math.max(0, estimate.costUsd - p1.ataCostUsd));
-    } catch (error) { await finishExecution('failed').catch(() => {}); toast.error('Não foi possível concluir a avaliação', { description: error instanceof Error ? error.message : 'Retome a preparação para conferir o estado.' }); throw error; }
+    } catch (error) { await finishExecution('failed').catch(() => {}); toast.error('Não foi possível concluir a avaliação', { description: processingMessage(error) }); throw error; }
     finally { setBusy(null); setAnalysis(null); abortRef.current = null; if (registeredId) navigate(`/corretor/estudos/${registeredId}/revisao`); }
   }
 
@@ -612,7 +610,7 @@ export default function CorretorV3Page() {
       try { await saveStudyFonte(selected.id, file.name, parsed.fonte); }
       catch (error) {
         toast.warning('Fonte vinculada somente nesta sessão', {
-          description: error instanceof Error ? error.message : String(error),
+          description: processingMessage(error),
         });
       }
     }
@@ -637,7 +635,7 @@ export default function CorretorV3Page() {
       if (selected) {
         try { await saveStudyFonte(selected.id, label, fonte); }
         catch (error) {
-          toast.warning('Fonte vinculada somente nesta sessão', { description: error instanceof Error ? error.message : String(error) });
+          toast.warning('Fonte vinculada somente nesta sessão', { description: processingMessage(error) });
         }
       }
       setFonteInput({ name: label, fonte });
@@ -646,7 +644,7 @@ export default function CorretorV3Page() {
       });
       return fonte;
     } catch (error) {
-      toast.error('Falha ao processar as planilhas', { description: error instanceof Error ? error.message : String(error) });
+      toast.error('Falha ao processar as planilhas', { description: processingMessage(error) });
       return null;
     } finally {
       setSourceProgress(null);
@@ -670,7 +668,7 @@ export default function CorretorV3Page() {
       setBusy(null);
       await startPhase1AndGate({ id: selected.id, version: selected.lastVersion }, ir, cached.bytes, fonteInput?.fonte);
     } catch (err) {
-      toast.error('Falha ao preparar a análise', { description: err instanceof Error ? err.message : String(err) });
+      toast.error('Falha ao preparar a análise', { description: processingMessage(err) });
     } finally {
       setBusy(null);
     }
@@ -705,7 +703,7 @@ export default function CorretorV3Page() {
       }
       await startPhase1AndGate({ id: selected.id, version: selected.lastVersion }, ir, bytes, fonteInput?.fonte);
     } catch (err) {
-      toast.error('Falha ao preparar a análise', { description: err instanceof Error ? err.message : String(err) });
+      toast.error('Falha ao preparar a análise', { description: processingMessage(err) });
     } finally {
       setBusy(null);
     }
@@ -740,11 +738,11 @@ export default function CorretorV3Page() {
       if (vis.length) await insertIaFindings(selected.id, vis, 'IA_visao', selected.lastVersion);
       setItems(await loadFindings(selected.id));
       await refreshList();
-      toast.success('Cruzamento com as planilhas concluído (R$ 0)', {
+      toast.success('Cruzamento com as planilhas concluído', {
         description: `${det.length + vis.length} divergência(s) com a fonte · ${readings.size} leitura(s) reaproveitada(s).`,
       });
     } catch (err) {
-      toast.error('Falha no cruzamento com as planilhas', { description: err instanceof Error ? err.message : String(err) });
+      toast.error('Falha no cruzamento com as planilhas', { description: processingMessage(err) });
     } finally {
       setBusy(null);
     }
@@ -802,8 +800,8 @@ export default function CorretorV3Page() {
       // antigos permanecem intactos e não são falsamente dados como resolvidos.
       const estimate = await estimateFullAnalysis(ir, bytes, MODEL);
       if (estimate.visionToRun === 0) {
-        toast.info('Reconferência gratuita concluída', {
-          description: `${estimate.visionCached} imagem(ns) no cache · nenhum passe pago executado.`,
+        toast.info('Reconferência concluída', {
+          description: `${estimate.visionCached} leituras de imagem reaproveitadas.`,
         });
         return;
       }
@@ -820,7 +818,7 @@ export default function CorretorV3Page() {
         );
       } });
     } catch (err) {
-      toast.error('Falha ao reconferir', { description: err instanceof Error ? err.message : String(err) });
+      toast.error('Falha ao reconferir', { description: processingMessage(err) });
     } finally {
       setBusy(null);
     }
@@ -848,7 +846,7 @@ export default function CorretorV3Page() {
       await Promise.all(ids.map(id => setFindingStatus(selected.id, id, s)));
       return true;
     } catch (err) {
-      toast.error('Falha ao salvar status', { description: err instanceof Error ? err.message : String(err) });
+      toast.error('Falha ao salvar status', { description: processingMessage(err) });
       setItems(await loadFindings(selected.id));
       return false;
     }
@@ -864,7 +862,7 @@ export default function CorretorV3Page() {
       await Promise.all(ids.map(id => setFindingVerdict(selected.id, id, verdict)));
       return true;
     } catch (err) {
-      toast.error('Falha ao registrar falso positivo', { description: err instanceof Error ? err.message : String(err) });
+      toast.error('Falha ao registrar falso positivo', { description: processingMessage(err) });
       setItems(await loadFindings(selected.id));
       return false;
     }
@@ -902,7 +900,7 @@ export default function CorretorV3Page() {
       toast.success('Estudo pronto para o A&R 🎉');
       await refreshList();
     } catch (err) {
-      toast.error('Falha ao concluir', { description: err instanceof Error ? err.message : String(err) });
+      toast.error('Falha ao concluir', { description: processingMessage(err) });
     }
   }
 
@@ -957,7 +955,7 @@ export default function CorretorV3Page() {
   if (analysis?.running && selected) return <main className="corretor-projects cp-preparation">
     <header className="cp-heading"><div><p className="cp-eyebrow">Avaliação em andamento</p><h1>{selected.nome}</h1><p className="cp-muted">{selected.nSlides} slides · {fonteInput ? fonteInput.name : 'Sem planilhas vinculadas'}</p></div></header>
     <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} />
-    <p className="cp-muted">Mantenha esta aba aberta. Os lotes com retorno confirmado ficam guardados; uma interrupção pode ser retomada após conferir o orçamento.</p>
+    <p className="cp-muted">Mantenha esta aba aberta. Os lotes com retorno confirmado ficam guardados; uma interrupção pode ser retomada após conferir os materiais.</p>
   </main>;
 
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
@@ -999,7 +997,6 @@ export default function CorretorV3Page() {
             <h2 className="text-sm font-semibold truncate">{selected.nome}</h2>
             <p className="text-xs text-muted-foreground">
               versão {selected.lastVersion} · {selected.nSlides} slides
-              {selected.custoTotal > 0 && <> · IA acumulada {formatUSD(selected.custoTotal)}</>}
             </p>
           </div>
         </div>
@@ -1022,10 +1019,10 @@ export default function CorretorV3Page() {
             onClick={() => recheckRef.current?.click()}
             disabled={busy !== null || analysis?.running || selected.status === 'pronto'}
             className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 disabled:opacity-50"
-            title="A reconferência é gratuita; qualquer releitura paga exige sua confirmação"
+            title="Reconferir o arquivo corrigido com os registros anteriores"
           >
             {busy === 'recheck' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-            Reconferir (DET R$ 0)
+            Reconferir
           </button>
           {selected.status === 'pronto' ? (
             <div className="flex items-center gap-2">

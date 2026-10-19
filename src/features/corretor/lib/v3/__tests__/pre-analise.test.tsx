@@ -47,7 +47,7 @@ describe('cartão de pré-análise', () => {
     const onConfirm = vi.fn();
     render(<PreAnalysisCard {...props} onConfirm={onConfirm} />);
     expect((screen.getByPlaceholderText('ex.: Guarulhos') as HTMLInputElement).value).toBe('João Pessoa');
-    const run = screen.getByRole('button', { name: /Conferir orçamento e iniciar/ });
+    const run = screen.getByRole('button', { name: /Iniciar avaliação/ });
     expect(run).toBeDisabled();
     expect(screen.getByText(/Falta dizer se o estudo tem planilhas/)).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: /Recife\/PE/ }));

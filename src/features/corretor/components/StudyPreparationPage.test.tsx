@@ -23,6 +23,8 @@ it('cancelar seletor não escolhe sem planilhas; clique duplo inicia uma única 
  await screen.findByLabelText('Cidade do estudo');
  const start=screen.getByRole('button',{name:'Iniciar avaliação'});
  expect(start).toBeDisabled();expect(onStart).not.toHaveBeenCalled();
+ expect(screen.queryByLabelText('Limite autorizado em dólares (US$)')).not.toBeInTheDocument();
+ expect(container.textContent).not.toMatch(/US\$|R\$|Estimativa da avaliação/);
  fireEvent.change(container.querySelector('input[accept=".xlsx,.xlsm"]')!,{target:{files:[]}});
  expect(start).toBeDisabled();
  fireEvent.click(screen.getByRole('button',{name:'Continuar sem planilhas'}));expect(start).not.toBeDisabled();

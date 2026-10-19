@@ -18,7 +18,7 @@ export interface AtaGateValue {
   ata: AtaData | null;
 }
 
-export default function AtaGateCard({ ata, costBrl, running, onConfirm, suggestion, temFonte, onAttachSources, sourceLabel }: {
+export default function AtaGateCard({ ata, running, onConfirm, suggestion, temFonte, onAttachSources, sourceLabel }: {
   ata: AtaData | null;
   /** custo estimado da fase 2 (texto + visão), já em R$ */
   costBrl: string;
@@ -170,7 +170,7 @@ export default function AtaGateCard({ ata, costBrl, running, onConfirm, suggesti
           className="text-sm rounded-md px-3.5 py-2 bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-2 disabled:opacity-40"
         >
           {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          Confirmar e analisar ({costBrl})
+          Confirmar e analisar
         </button>
         {!cidadeOk && <span className="text-[11px] text-amber-600">informe a cidade</span>}
         {cidadeOk && !ufOk && <span className="text-[11px] text-amber-600">selecione a UF</span>}
