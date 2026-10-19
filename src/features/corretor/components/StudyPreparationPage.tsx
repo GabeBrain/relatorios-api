@@ -42,6 +42,7 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
   const [loading, setLoading] = useState('Restaurando preparação…'), [starting, setStarting] = useState(false), [error, setError] = useState(''), [storage, setStorage] = useState('');
   const [previousStudy, setPreviousStudy] = useState<string | null>(null), [restored, setRestored] = useState(false);
   const [savingSheets, setSavingSheets] = useState(false);
+  const [animateSourceNotice,setAnimateSourceNotice] = useState(false);
   const [accountPreparation, setAccountPreparation] = useState<AccountPreparation | null>(null);
   const pptxInput = useRef<HTMLInputElement>(null), excelInput = useRef<HTMLInputElement>(null);
   const generation = useRef(0), lock = useRef(false), hydrated = useRef(false);
@@ -169,18 +170,22 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
     <section className="cp-panel cp-upload-panel cp-upload-sheets"><h2>Planilhas de cálculo <span className="cp-muted">opcional</span></h2><p className="cp-muted">Inclua os arquivos Excel para comparar os números do estudo com os cálculos de origem.</p>
       <input ref={excelInput} type="file" accept=".xlsx,.xlsm" multiple hidden onChange={e => { const files = Array.from(e.target.files ?? []); e.target.value = ''; void addSheets(files); }} />
       <Button className="cp-file-picker" data-ready={sheets.length>0&&!savingSheets} variant="outline" disabled={starting || recommendationBusy || Boolean(loading)} onClick={() => excelInput.current?.click()} aria-label="Adicionar planilhas Excel"><span className="cp-file-symbol" aria-hidden="true"><FileSpreadsheet size={30}/><span>EXCEL</span></span><span className="cp-file-copy"><strong>{sheets.length ? `${sheets.length} planilhas adicionadas` : 'Adicionar planilhas Excel'}</strong><span>{sheets.length ? 'Adicionar ou substituir arquivos do conjunto' : 'Selecione todos os arquivos de cálculo · .xlsx ou .xlsm'}</span></span>{sheets.length>0&&!savingSheets?<Check size={20} aria-hidden="true"/>:<Upload size={20} aria-hidden="true"/>}</Button>
-      {!sheets.length && !resume?.fonte && <div className="cp-actions"><Button variant="outline" aria-pressed={choice} disabled={starting || recommendationBusy || Boolean(loading)} onClick={() => setChoice(true)}>{choice && <Check size={16} aria-hidden="true"/>}Continuar sem planilhas</Button>{choice && <span className="cp-muted">A comparação com os cálculos de origem não será feita.</span>}</div>}
-      {sheets.length > 0 && !choice && <Button variant="outline" disabled={starting || recommendationBusy} onClick={() => setChoice(true)}>Usar estas planilhas nesta apresentação</Button>}
       {sheets.length > 0 && <ul className="cs-files">{sheets.map(f => <li key={f.name}><FileSpreadsheet size={18} aria-hidden="true"/><span>{f.name}</span><Button variant="ghost" disabled={starting || recommendationBusy} aria-label={`Remover ${f.name}`} onClick={() => { setSheets(s => s.filter(x => x !== f)); if (sheets.length === 1) setChoice(false); }}><X size={16} /></Button></li>)}</ul>}
       {resume?.fonte && !sheets.length && <p className="cp-muted">Fonte numérica anterior preservada. Você pode substituir as planilhas antes de continuar.</p>}
-      {!choice && file && <p>Adicione as planilhas ou escolha continuar sem elas.</p>}
+      {!choice && file && intent==='review' && <p className="cp-muted">Adicione as planilhas ou confirme a opção sem planilhas no botão abaixo.</p>}
     </section>
     {prepared && intent==='recommendation' && onRecommendation && file && !savingSheets && <Suspense fallback={<p role="status">Preparando recomendação…</p>}><Recommendation key={prepared.ir.sha1} onBusyChange={setRecommendationBusy} preparedIr={prepared.ir} ensureStudy={()=>onRecommendation({file,...prepared,sheets,fonte:null,city,uf,outras:[],budgetUsd:0,accountPreparation})}/></Suspense>}
     {prepared && intent==='review' && <section className="cp-panel"><h2>Conferir antes de iniciar</h2><div className="cs-fields"><div><Label htmlFor="prepare-city">Cidade do estudo</Label><Input id="prepare-city" value={city} disabled={starting || recommendationBusy} onChange={e => setCity(e.target.value)} /></div><div><Label htmlFor="prepare-uf">Estado</Label><Select value={uf} disabled={starting || recommendationBusy} onValueChange={setUf}><SelectTrigger id="prepare-uf"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{UFS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent></Select></div></div>
       <Label htmlFor="prepare-others">Outras cidades que fazem parte do estudo (opcional)</Label><Input id="prepare-others" value={outras} disabled={starting || recommendationBusy} onChange={e => setOutras(e.target.value)} placeholder="Separe por vírgulas" />
       <p className="cp-muted">{prepared.ir.n_slides} slides · {profile?.tabelasNativas} tabelas nativas · {(profile?.tabelasImagem ?? 0) + (profile?.fichas ?? 0)} tabelas em imagem. Estes conteúdos ainda não foram avaliados.</p>
       {budgetUsd>100&&<p role="status">Este estudo precisa de apoio da equipe para continuar. Seus materiais estão preservados.</p>}
-      <Button disabled={!ready} onClick={() => void start()}>{starting ? 'Iniciando avaliação…' : 'Iniciar avaliação'}</Button>
+      <div className="cp-analysis-start">
+        <Button disabled={choice ? !ready : Boolean(loading)||starting||recommendationBusy||savingSheets} aria-describedby={choice&&!sheets.length&&!resume?.fonte?'source-comparison-notice':undefined} onClick={() => {
+          if (!choice) { setChoice(true); setAnimateSourceNotice(!sheets.length&&!resume?.fonte); return; }
+          void start();
+        }}>{starting ? 'Iniciando avaliação…' : !choice ? sheets.length ? 'Usar estas planilhas' : resume?.fonte ? 'Usar planilhas anteriores' : 'Continuar sem planilhas' : 'Iniciar avaliação'}</Button>
+        {choice&&!sheets.length&&!resume?.fonte&&<p id="source-comparison-notice" role="status" className={animateSourceNotice?'cp-source-notice cp-source-notice-enter':'cp-source-notice'}>A comparação com os cálculos de origem não será feita.</p>}
+      </div>
       {(!city.trim() || !uf) && <p>Confirme a cidade e o estado para iniciar.</p>}
     </section>}
     {error && <p role="alert">{error}</p>}{storage && <p role="status" className="cp-muted">{storage}</p>}

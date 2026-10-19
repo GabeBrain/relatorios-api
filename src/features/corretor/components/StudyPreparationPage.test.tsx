@@ -21,13 +21,13 @@ it('cancelar seletor não escolhe sem planilhas; clique duplo inicia uma única 
  const file=new File(['mock'],'estudo.pptx');Object.defineProperty(file,'arrayBuffer',{value:async()=>new ArrayBuffer(1)});
  fireEvent.change(container.querySelector('input[accept=".pptx"]')!,{target:{files:[file]}});
  await screen.findByLabelText('Cidade do estudo');
- const start=screen.getByRole('button',{name:'Iniciar avaliação'});
- expect(start).toBeDisabled();expect(onStart).not.toHaveBeenCalled();
+ const start=screen.getByRole('button',{name:'Continuar sem planilhas'});
+ expect(start).toBeEnabled();expect(onStart).not.toHaveBeenCalled();
  expect(screen.queryByLabelText('Limite autorizado em dólares (US$)')).not.toBeInTheDocument();
  expect(container.textContent).not.toMatch(/US\$|R\$|Estimativa da avaliação/);
  fireEvent.change(container.querySelector('input[accept=".xlsx,.xlsm"]')!,{target:{files:[]}});
- expect(start).toBeDisabled();
- fireEvent.click(screen.getByRole('button',{name:'Continuar sem planilhas'}));expect(start).not.toBeDisabled();
+ expect(start).toBeEnabled();
+ fireEvent.click(screen.getByRole('button',{name:'Continuar sem planilhas'}));expect(start).toHaveAccessibleName('Iniciar avaliação');expect(onStart).not.toHaveBeenCalled();
  fireEvent.click(start);fireEvent.click(start);await waitFor(()=>expect(onStart).toHaveBeenCalledOnce());
  expect(onStart).toHaveBeenCalledWith(expect.objectContaining({city:'Curitiba',uf:'PR',sheets:[],budgetUsd:1.2}));
 });
