@@ -19,7 +19,7 @@ import { portfolioHref } from '../lib/study-navigation';
 import { toast } from 'sonner';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
-  Trash2, FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X,
+  FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X,
   FileSpreadsheet, PlayCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -51,7 +51,7 @@ import { confidenceOf, CONFIDENCE_META, type Confidence } from '../lib/v3/confid
 
 import {
   prepareStudyAtomic, listStudies, loadFindings, setFindingStatus, recheck,
-  concludeStudy, deleteStudy, insertIaFindings, saveAta, confirmAta,
+  concludeStudy, insertIaFindings, saveAta, confirmAta,
   saveReport, setFindingVerdict, resolveInvalidFindings, loadTranscribedBySha1,
   saveStudyFonte, loadStudyFonte, analysisPending, loadVisionReadings,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
@@ -1047,13 +1047,7 @@ export default function CorretorV3Page() {
               <PackageCheck className="w-3.5 h-3.5" /> Entregar
             </button>
           )}
-          <button
-            onClick={async () => { if (!await ensureAccess('excluir este estudo') || !window.confirm(`Excluir o estudo “${selected.nome}” e seu histórico? Esta ação não pode ser desfeita.`)) return; try { await deleteStudy(selected.id); navigate(portfolioHref(searchParams.get('carteira') ?? '')); } catch { toast.error('Não foi possível excluir. O estudo continua disponível.'); } }}
-            className="text-muted-foreground hover:text-destructive p-1.5"
-            title="Excluir estudo"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+
         </div>
       </header>
 

@@ -140,7 +140,7 @@ export async function listStudies(strict = false): Promise<StudyV3[]> {
     .order('created_at', { ascending: false });
   if (error || !data) { if (strict) throw new Error('Falha ao carregar os estudos.'); return []; }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return data.map((s: any) => {
+  return data.filter((s: any) => !s.deleted_at).map((s: any) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const versions = (s.study_versions ?? []).sort((a: any, b: any) => b.n - a.n);
     return {
@@ -420,8 +420,11 @@ export async function concludeStudy(studyId: string): Promise<void> {
 }
 
 export async function deleteStudy(studyId: string): Promise<void> {
-  const {error} = await db.from('studies_v3').delete().eq('id', studyId);
-  if (error) throw new Error('Não foi possível excluir este estudo. Ele continua disponível.');
+  const {data,error} = await db.rpc('corretor_trash_study',{p_study_id:studyId});
+  if (error || data !== true) {
+    if (error?.code === 'PGRST202' || error?.code === '42883') throw new Error('A exclusão aguarda a atualização do banco. O estudo continua preservado.');
+    throw new Error(error?.message || 'Não foi possível excluir este estudo. Ele continua disponível.');
+  }
 }
 
 // ── WS-2: relatório de entrega ────────────────────────────────────────────────
@@ -445,7 +448,7 @@ export async function loadDeliveryReport(studyId: string): Promise<DeliveryRepor
     .select('*, study_versions(n, n_slides, sha1)')
     .eq('id', studyId)
     .maybeSingle();
-  if (!s) return null;
+  if (!s || s.deleted_at) return null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const versions = (s.study_versions ?? []).sort((a: any, b: any) => b.n - a.n);
   const study: StudyV3 = {

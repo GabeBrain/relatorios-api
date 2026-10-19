@@ -30,6 +30,16 @@ export async function loadLocalMaterial(key: string): Promise<LocalMaterial | nu
   }); } finally { db.close(); }
 }
 
+/** Nunca apaga a preparação de outro arquivo ao excluir um estudo na carteira. */
+export async function clearPreparationForDocument(sha1?: string | null): Promise<void> {
+  if (!sha1) return;
+  const draft = await loadLocalMaterial('preparation:pptx');
+  if (!draft) return;
+  const digest = await crypto.subtle.digest('SHA-1', draft.bytes.slice().buffer);
+  const current = [...new Uint8Array(digest)].map(n=>n.toString(16).padStart(2,'0')).join('');
+  if (current === sha1) await clearPreparationDraft();
+}
+
 /** Consome só o rascunho de envio; originais por hash e prévias continuam disponíveis. */
 export async function clearPreparationDraft(documentSha1?: string, sheetKeys?: string[]): Promise<void> {
   const db = await open();

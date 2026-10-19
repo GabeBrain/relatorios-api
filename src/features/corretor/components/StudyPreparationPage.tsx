@@ -1,3 +1,4 @@
+import DeleteStudyButton from './DeleteStudyButton';
 import { processingMessage } from '../lib/processing-message';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Check, FileSpreadsheet, FileText, Presentation, RotateCcw, Upload, X } from 'lucide-react';
+import { Check, FileSpreadsheet, FileText, Presentation, RotateCcw, Trash2, Upload, X } from 'lucide-react';
 import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import type { Ir } from '../lib/audit/ir';
 import { estimateFullAnalysis, type FullEstimate } from '../lib/v3/pipeline';
@@ -140,8 +141,8 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
     } catch (e) { setError(processingMessage(e)); }
     finally { lock.current = false; setStarting(false); }
   }
-  async function reset() {
-    if (lock.current || loading || starting || recommendationBusy || savingSheets || !window.confirm('Limpar esta preparação e selecionar outro estudo? Os estudos já registrados serão preservados.')) return;
+  async function reset(skipConfirmation=false) {
+    if (lock.current || loading || starting || recommendationBusy || savingSheets || (!skipConfirmation && !window.confirm('Limpar esta preparação e selecionar outro estudo? Os estudos já registrados serão preservados.'))) return;
     lock.current = true;
     try {
       await clearPreparationDraft(); generation.current++;
@@ -154,7 +155,7 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
   const ready = Boolean(prepared && choice && city.trim().length >= 2 && UFS.includes(uf) && !loading && !starting && !recommendationBusy && !savingSheets && budgetUsd > 0 && budgetUsd <= 100);
   return <main className="corretor-projects cp-preparation">
     <Link className="cp-back" to={back}>← Voltar aos estudos</Link>
-    <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>{resume ? 'Continuar avaliação' : intent === 'recommendation' ? 'Sugestão de análise' : 'Revisar estudo'}</h1><p className="cp-muted">Apresentação, cálculos e informações. Você decide quando iniciar a avaliação.</p></div></header>
+    <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>{resume ? 'Continuar avaliação' : intent === 'recommendation' ? 'Sugestão de análise' : 'Revisar estudo'}</h1><p className="cp-muted">Apresentação, cálculos e informações. Você decide quando iniciar a avaliação.</p></div><div className="cp-actions">{!resume && (accountPreparation ? <DeleteStudyButton id={accountPreparation.studyId} name={file?.name??'Preparação'} sha1={prepared?.ir.sha1} disabled={starting||recommendationBusy||Boolean(loading)||savingSheets} onDeleted={async()=>{await reset(true);}}/> : (file||sheets.length>0||error) && <Button variant="ghost" size="icon" title="Descartar prepara??o" aria-label="Descartar prepara??o deste navegador" disabled={starting||recommendationBusy||Boolean(loading)||savingSheets} onClick={()=>void reset()}><Trash2 size={18} aria-hidden="true"/></Button>)}</div></header>
 
     {previousStudy && <p className="cp-muted">O estudo anterior já foi analisado. <Link className="cp-inline" to={`/corretor/estudos/${previousStudy}/resumo`}>Abrir resultado</Link></p>}
     {!resume && (file || sheets.length > 0) && <div className="cp-draft-bar"><span className="cp-muted">{restored ? 'Preparação recuperada deste navegador' : 'Materiais desta preparação'}</span><Button variant="ghost" disabled={starting || recommendationBusy || Boolean(loading)} onClick={() => void reset()}><RotateCcw size={16} aria-hidden="true"/>Limpar e começar outro</Button></div>}
