@@ -1,3 +1,9 @@
+## 19/10/2026 — Sugestão em blocos e cópia limpa
+
+Feedback Diego/Gabriel: saída com tamanhos inconsistentes e espaço vazio. Referência a901df2 tinha texto único; parser posterior promovia parágrafo inteiro a heading quando título e texto vinham sem linha vazia, além de max-width85ch. Substituído por blocos por título, contexto, corpo uniforme16px e largura útil inteira. Copiar bloco, Copiar tudo e TXT em texto simples removem Markdown sem editar o original persistido. Aplica ao histórico carregado, sem nova geração/migração; resultados sem divisões ficam em um bloco, sem inventar estrutura.
+
+337 testes aprovados/zero falhas/2 ignorados;12 focados; quatro verificações browser com serviços simulados, incluindo clipboard real/TXT, registro bruto inalterado e reabertura sem novas chamadas. Quatro larguras1440/1024/390/320, sem overflow e fonte16px; captura1440 inspecionada. Tipos/lint/build34,27s aprovados. Sem IA paga/banco remoto/Edge/prompt/controle de custo alterados. [Diagnóstico e evidências](../features/corretor-vocacionais/design/SAIDA_SUGESTAO_BLOCOS_2026-10-19.md). Estado validado localmente, push autorizado; Publish frontend e conferência em produção pendentes. Limite automático/intervenção técnica mantidos.
+
 ## 19/10/2026 — Custos somente no controle interno
 
 Por sugestão de Diego e autorização de Gabriel, removida apresentação de gastos/consumo do percurso dos analistas: preparo/limite editável, confirmações, progresso, avisos, sugestões salvas, cabeçalho/relatório, arquivo antigo, teste de ata e painel financeiro da calibração. Ações continuam explícitas; limite calculado automaticamente pela mesma fórmula anterior. Gasto, tokens, reservas, replays, bloqueios e persistência continuam nos módulos/servidor existentes. Valores do estudo preservados. Mensagens financeiras do processamento recebem orientação operacional no frontend, sem editar registros do servidor.

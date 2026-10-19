@@ -1,3 +1,5 @@
+import RecommendationResult from './RecommendationResult';
+import { plainRecommendation } from '../lib/recommendation-presentation';
 import { processingMessage } from '../lib/processing-message';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -15,7 +17,6 @@ import { studyHref } from '../lib/study-navigation';
 
 export interface RecommendationStudy { study:StudyV3; version:VersionRecord }
 interface Props {study?:StudyV3;version?:VersionRecord;preparedIr?:Ir;ensureStudy?:()=>Promise<RecommendationStudy>;context?:string;onBusyChange?:(busy:boolean)=>void}
-function TextResult({text}:{text:string}){return <article className="cr-text">{text.split(/\n\s*\n/).map((p,i)=>p.startsWith('## ')?<h2 key={i}>{p.slice(3)}</h2>:p.startsWith('### ')?<h3 key={i}>{p.slice(4)}</h3>:<p key={i}>{p}</p>)}</article>;}
 export default function StudyRecommendation({study,version,preparedIr,ensureStudy,context='',onBusyChange}:Props){
  const [linked,setLinked]=useState<RecommendationStudy|null>(study&&version?{study,version}:null);
  const [ir,setIr]=useState<Ir|null>(preparedIr??null),[records,setRecords]=useState<RecommendationRecord[]>([]),[selected,setSelected]=useState<RecommendationRecord|null>(null);
@@ -55,13 +56,13 @@ export default function StudyRecommendation({study,version,preparedIr,ensureStud
   finally{lock.current=false;onBusyChange?.(false);if(mounted.current)setRunning(false);}
  }
  const unknown=records.some(r=>Number(r.reserved_usd)>0),hasResult=records.some(r=>r.content),showForm=!hasResult||wantNew;
- function download(){if(!selected?.content)return;const url=URL.createObjectURL(new Blob([selected.content],{type:'text/markdown;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`recomendacao-versao-${selected.version_n}.md`;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
+ function download(){if(!selected?.content)return;const url=URL.createObjectURL(new Blob([plainRecommendation(selected.content)],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`sugestao-analise-versao-${selected.version_n}.txt`;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
  return <section className="cp-panel cr-workspace" aria-label="Sugestão de análise">
   <h2><Sparkles size={20} aria-hidden="true"/> Sugestão de análise</h2>
   {historyLoading&&<p role="status">Consultando recomendações guardadas…</p>}
   {records.length>0&&<div className="cr-history" aria-label="Histórico de recomendações">{records.map(r=><Button key={r.id} variant="outline" aria-pressed={selected?.id===r.id} disabled={running} onClick={()=>setSelected(r)}>{RECOMMENDATION_STATES[r.state]} · {new Date(r.created_at).toLocaleString('pt-BR')}</Button>)}</div>}
   {selected&&<div className="cr-state"><strong>{RECOMMENDATION_STATES[selected.state]} · versão {selected.version_n}</strong>{Number(selected.reserved_usd)>0&&<p role="status">Uma etapa ainda aguarda confirmação. Atualize o histórico antes de tentar novamente.</p>}{selected.error_message&&<p role="alert">Não foi possível concluir esta etapa. Atualize o histórico ou procure a equipe de suporte.</p>}</div>}
-  {selected?.content&&<><div className="cp-actions"><Button variant="outline" onClick={()=>void navigator.clipboard.writeText(selected.content!).then(()=>setCopied(true)).catch(()=>setError('Não foi possível copiar. Você pode baixar o texto.'))}>{copied?<Check size={16}/>:<Copy size={16}/>}Copiar texto</Button><Button variant="outline" onClick={download}><Download size={16}/>Baixar texto</Button><Button variant="outline" disabled={running||unknown} onClick={()=>setWantNew(true)}>Preparar outras sugestões</Button></div>{selected.state==='partial'&&<p role="status">Resultado parcial: uma etapa não foi concluída por inteiro. Confira a cobertura antes de utilizar.</p>}<TextResult text={selected.content}/></>}
+  {selected?.content&&<><div className="cp-actions"><Button variant="outline" onClick={()=>void navigator.clipboard.writeText(plainRecommendation(selected.content!)).then(()=>setCopied(true)).catch(()=>setError('Não foi possível copiar. Você pode baixar o texto.'))}>{copied?<Check size={16}/>:<Copy size={16}/>}Copiar tudo</Button><Button variant="outline" onClick={download}><Download size={16}/>Baixar texto</Button><Button variant="outline" disabled={running||unknown} onClick={()=>setWantNew(true)}>Preparar outras sugestões</Button></div>{selected.state==='partial'&&<p role="status">Resultado parcial: uma etapa não foi concluída por inteiro. Confira a cobertura antes de utilizar.</p>}<RecommendationResult key={selected.id} text={selected.content}/></>}
   {showForm&&<>
    {loading?<p role="status">Preparando conteúdo…</p>:!ir?<><p>Selecione o PowerPoint desta versão para preparar a recomendação.</p><Button variant="outline" onClick={()=>fileInput.current?.click()}><FileUp size={18}/>Selecionar PowerPoint da versão</Button></>:quote?.error?<p role="alert">{quote.error}</p>:quote?.value&&<>
     <div className="cr-estimate"><h3>Conferir antes de gerar</h3><p>{quote.value.slides} slides úteis</p><p className="cp-muted">Leitura de textos e tabelas nativas do PowerPoint. Planilhas, PDF e conteúdo só em imagem não entram nesta recomendação. {source?.withoutText??0} slides sem texto suficiente; {source?.limitedSlides??0} slides com texto limitado a 6.000 caracteres.</p>

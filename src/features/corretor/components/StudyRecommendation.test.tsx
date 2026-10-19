@@ -18,7 +18,7 @@ it('selecionar objetivo prepara previsão sem criar estudo ou chamar IA',async()
 });
 it('reabre texto salvo mesmo sem original neste navegador',async()=>{
  mocks.list.mockResolvedValue([record]);render(<MemoryRouter><StudyRecommendation study={study} version={version}/></MemoryRouter>);
- expect(await screen.findByText('Texto consultivo salvo.')).toBeInTheDocument();expect(screen.getByRole('button',{name:'Copiar texto'})).toBeInTheDocument();expect(mocks.run).not.toHaveBeenCalled();expect(screen.queryByRole('button',{name:'Preparar sugestões'})).not.toBeInTheDocument();
+ expect(await screen.findByText('Texto consultivo salvo.')).toBeInTheDocument();expect(screen.getByRole('button',{name:'Copiar tudo'})).toBeInTheDocument();expect(mocks.run).not.toHaveBeenCalled();expect(screen.queryByRole('button',{name:'Preparar sugestões'})).not.toBeInTheDocument();
 });
 it('retorno desconhecido impede iniciar novamente',async()=>{
  mocks.list.mockResolvedValue([{...record,state:'unknown',content:null,reserved_usd:.01}]);
