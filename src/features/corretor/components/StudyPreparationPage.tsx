@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Check, FileSpreadsheet, FileText, Presentation, RotateCcw, Sparkles, Upload, X } from 'lucide-react';
+import { Check, FileSpreadsheet, FileText, Presentation, RotateCcw, Upload, X } from 'lucide-react';
 import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import type { Ir } from '../lib/audit/ir';
 import { estimateFullAnalysis, type FullEstimate } from '../lib/v3/pipeline';
@@ -153,8 +153,8 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
   const ready = Boolean(prepared && choice && city.trim().length >= 2 && UFS.includes(uf) && !loading && !starting && !recommendationBusy && !savingSheets && budgetUsd > 0 && budgetUsd <= 100);
   return <main className="corretor-projects cp-preparation">
     <Link className="cp-back" to={back}>← Voltar aos estudos</Link>
-    <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>{resume ? 'Continuar avaliação' : 'Preparar estudo'}</h1><p className="cp-muted">Apresentação, cálculos e informações. Você decide quando iniciar a avaliação.</p></div></header>
-    {!resume&&onRecommendation&&<div className="cp-actions cp-intents" role="group" aria-label="Objetivo do estudo"><Button variant="outline" aria-pressed={intent==='review'} disabled={starting || recommendationBusy} onClick={()=>setIntent('review')}><Presentation size={18} aria-hidden="true"/>Revisar estudo</Button><Button variant="outline" aria-pressed={intent==='recommendation'} disabled={starting || recommendationBusy} onClick={()=>setIntent('recommendation')}><Sparkles size={18} aria-hidden="true"/>Sugestão de análise</Button></div>}
+    <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>{resume ? 'Continuar avaliação' : intent === 'recommendation' ? 'Sugestão de análise' : 'Revisar estudo'}</h1><p className="cp-muted">Apresentação, cálculos e informações. Você decide quando iniciar a avaliação.</p></div></header>
+
     {previousStudy && <p className="cp-muted">O estudo anterior já foi analisado. <Link className="cp-inline" to={`/corretor/estudos/${previousStudy}/resumo`}>Abrir resultado</Link></p>}
     {!resume && (file || sheets.length > 0) && <div className="cp-draft-bar"><span className="cp-muted">{restored ? 'Preparação recuperada deste navegador' : 'Materiais desta preparação'}</span><Button variant="ghost" disabled={starting || recommendationBusy || Boolean(loading)} onClick={() => void reset()}><RotateCcw size={16} aria-hidden="true"/>Limpar e começar outro</Button></div>}
     <section className="cp-panel cp-upload-panel"><h2>Apresentação do estudo</h2><input ref={pptxInput} type="file" accept=".pptx" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) {setPreviousStudy(null);setRestored(false);void prepare(f);} }} />

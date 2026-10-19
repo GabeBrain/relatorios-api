@@ -1,6 +1,6 @@
 import { Fragment, lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { Presentation, Search } from 'lucide-react';
+import { Presentation, Search, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -126,7 +126,11 @@ export default function CorretorProjectsPage() {
   }
   const input = (key: keyof ProjectProfile, label: string, type = 'text') => <div><Label htmlFor={key}>{label}</Label><Input id={key} type={type} value={String(editing?.[key] ?? '')} onChange={e => setEditing(p => p ? { ...p, [key]: e.target.value || (key === 'due_date' ? null : '') } : p)} /></div>;
   return <div className="corretor-projects">
-    {!studyId && <><section className="cp-home-preparation" aria-label="Preparar estudo"><Suspense fallback={<p role="status">Abrindo preparação…</p>}><ReviewPage /></Suspense></section><h2 className="cp-library-title" id="estudos-salvos">Estudos salvos <span className="cp-count">{loading ? '' : visible.length}</span></h2></>}
+    {!studyId && <><header className="cp-heading"><div><h1>Assistente de Projetos</h1></div></header>
+      <div className="cp-entry-actions" aria-label="O que deseja fazer?">
+        <Link className="cp-entry-card" to={`/corretor/novo?intent=review&carteira=${encodeURIComponent(context)}`}><Presentation size={28} aria-hidden="true"/><span>Revisar estudo</span><span aria-hidden="true">→</span></Link>
+        <Link className="cp-entry-card" to={`/corretor/novo?intent=recommendation&carteira=${encodeURIComponent(context)}`}><Sparkles size={28} aria-hidden="true"/><span>Sugestão de análise</span><span aria-hidden="true">→</span></Link>
+      </div><h2 className="cp-library-title" id="estudos-salvos">Estudos salvos <span className="cp-count">{loading ? '' : visible.length}</span></h2></>}
 
     {loading ? <p role="status">Carregando estudos…</p> : error ? <p role="alert">{error} <Button onClick={() => location.reload()}>Tentar novamente</Button></p> : studyId && !study ? <p>Estudo não encontrado. <Link to={portfolioHref(context)}>Voltar aos estudos</Link></p> : study ? <StudyLayout id={study.id} name={profile?.display_name || profileFor(study).display_name} location={[profile?.city || study.cidade, profile?.uf || study.uf].filter(Boolean).join(' · ')} section={tab} context={context} version={params.get('version') ?? undefined} actions={<Button variant="outline" onClick={() => editProfile(profile ?? profileFor(study))}>Dados do estudo</Button>}>
       {(tab === 'revisao' || tab === 'resumo') && <section className="cp-review-legacy" aria-label="Revisão do estudo"><Suspense fallback={<p role="status">Abrindo revisão…</p>}>{params.has('version') && versionsLoading ? <p role="status">Carregando versão…</p> : params.has('version') && !version ? <p>Versão não encontrada. Escolha um registro em Arquivos e histórico.</p> : version && version.n !== study.lastVersion ? <p>Este registro não possui uma cópia histórica dos apontamentos. Selecione a versão atual para revisar.</p> : <ReviewPage key={study.id} />}</Suspense></section>}
