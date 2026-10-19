@@ -7,6 +7,7 @@ import { presentFindingPt } from '../lib/v3/present-finding-pt';
 import type { FindingV3, FindingStatus, StudyV3 } from '../lib/v3/db';
 import StudySlideViewer from './StudySlideViewer';
 import { VizSwitch } from './audit/FindingCard';
+import { useGeobrainSession } from '@/features/shared/geobrain-session/context';
 
 type Decision = 'pendente' | 'corrigido' | 'fp' | 'ignorado';
 export default function StudyQuickReview({ study, queue, onStatus, onVerdict, onClose }: {
@@ -15,6 +16,7 @@ export default function StudyQuickReview({ study, queue, onStatus, onVerdict, on
   onVerdict: (id: string, verdict: 'bug' | 'fp') => Promise<boolean>;
   onClose: () => void;
 }) {
+  const session = useGeobrainSession();
   const [frozen] = useState(queue), [index, setIndex] = useState(0);
   const [decisions, setDecisions] = useState<Record<string, Decision>>({});
   const [saving, setSaving] = useState(false), [error, setError] = useState('');
@@ -46,7 +48,7 @@ export default function StudyQuickReview({ study, queue, onStatus, onVerdict, on
   const [selectedSlide, setSelectedSlide] = useState<number | null>(null);
   useEffect(() => { setSelectedSlide(null); }, [index]);
   const processed = Object.keys(decisions).length;
-  return <Dialog open onOpenChange={open => { if (!open && !saving) onClose(); }}>
+  return <Dialog open modal={!session.action} onOpenChange={open => { if (!open && !saving) onClose(); }}>
     <DialogContent aria-describedby={undefined} className="cq-dialog" onEscapeKeyDown={e => { if (saving) e.preventDefault(); }}>
       <header className="cq-header"><DialogTitle>Triagem rápida</DialogTitle><span>{item ? `${index + 1} de ${frozen.length}` : 'Percurso concluído'}</span></header>
       <Progress className="cq-progress" aria-label={`${processed} de ${frozen.length} apontamentos percorridos`} value={100 * processed / Math.max(1, frozen.length)} />

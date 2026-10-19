@@ -17,6 +17,7 @@ import {
   Search,
   TrendingUp,
 } from 'lucide-react';
+import { useGeobrainSession } from '@/features/shared/geobrain-session/context';
 import { AuthBlock } from './AuthBlock';
 import { CommandPalette } from './CommandPalette';
 import brainLogo from '../../../assets/logoBrain.png';
@@ -154,6 +155,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const { dark, toggle } = useDarkMode();
   const location = useLocation();
+  const session = useGeobrainSession();
   const [compact, setCompact] = useState(() => window.innerWidth < 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const corretorMobile = location.pathname.startsWith('/corretor') && compact;
@@ -167,6 +169,9 @@ export function AppLayout({ children }: AppLayoutProps) {
     return () => media.removeEventListener('change', update);
   }, []);
   useEffect(() => { setMobileMenuOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    if (session.request) { setMobileMenuOpen(true); setSidebar(s => ({ ...s, collapsed: false })); }
+  }, [session.request]);
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify({ collapsed: savedCollapsed, openGroups, openFolders }));
@@ -289,7 +294,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         className={cn(
           'flex flex-col h-full border-r border-border bg-card transition-all duration-200 shrink-0 print:hidden',
           collapsed ? 'w-14' : 'w-64',
-          corretorMobile && mobileMenuOpen && 'fixed inset-y-0 left-0 z-50 shadow-xl'
+          corretorMobile && mobileMenuOpen && 'fixed inset-y-0 left-0 z-50 shadow-xl',
+          session.action && 'z-[60]'
         )}
       >
         {/* Logo + collapse toggle */}

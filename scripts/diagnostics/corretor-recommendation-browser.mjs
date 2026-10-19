@@ -13,7 +13,7 @@ const out=resolve('.local-inputs/recommendation-flow-'+Date.now());mkdirSync(out
 const result={checks:[],errors:[],measurements:[],functionCalls:0,simulatedProfileWrites:0,simulatedDrafts:0,simulatedStartActions:[]};
 const browser=await chromium.launch(),ctx=await browser.newContext({viewport:{width:1440,height:1000}}),page=await ctx.newPage();
 let profiles=[],studyReads=0,visibleStudies=[study],recommendations=[],version={...study.study_versions[0],id:'fixture-version',study_id:study.id,n:4,sha1:'e6a5fa03d2a189c86a59d70d5eb515e0dd3cd36f',n_slides:153,created_at:new Date().toISOString()};study.study_versions=[version];
-await ctx.addInitScript(s=>localStorage.setItem('sb-mxinpvcqzbfbzjodhgtz-auth-token',JSON.stringify(s)),session);
+await ctx.addInitScript(s=>{localStorage.setItem('sb-mxinpvcqzbfbzjodhgtz-auth-token',JSON.stringify(s));localStorage.setItem('brain-auth',JSON.stringify({state:{token:'fixture-api',email:s.user.email,issuedAt:Date.now(),expiresAt:Date.now()+3600000},version:0}));},session);
 await ctx.route('**/*',async route=>{
  const req=route.request(),url=new URL(req.url());
  if(url.hostname==='127.0.0.1')return route.continue();
@@ -82,7 +82,7 @@ try{
  await page.locator('html').evaluate(el=>el.classList.add('dark'));await page.waitForTimeout(350);
  const readyDark=await page.locator('.cp-file-picker').first().evaluate(el=>({bg:getComputedStyle(el).backgroundColor,text:getComputedStyle(el).color}));assert.equal(readyDark.bg,'rgb(74, 85, 48)');assert.equal(readyDark.text,'rgb(243, 244, 239)');
  await page.screenshot({path:join(out,'ready-dark-320.png'),fullPage:true});await page.locator('html').evaluate(el=>el.classList.remove('dark'));
- await page.getByRole('button',{name:'Gerar recomendação',exact:true}).click();
+ await page.getByRole('button',{name:'Sugestão de análise',exact:true}).click();
  await page.getByRole('heading',{name:'Conferir antes de gerar',exact:true}).waitFor();
  result.estimateText=await page.locator('.cr-estimate').innerText();
  assert.equal(result.functionCalls,0);assert.equal(await page.locator('.cs-files li').count(),11);
@@ -90,12 +90,12 @@ try{
  result.checks.push('alternar objetivo conserva materiais e mostra cobertura, lotes, previsão e limite antes da confirmação');
  await page.getByRole('button',{name:'Revisar estudo',exact:true}).click();await page.getByLabel('Cidade do estudo',{exact:true}).waitFor();
  assert.equal(await page.locator('.cs-files li').count(),11);assert.equal(result.functionCalls,0);
- await page.getByRole('button',{name:'Gerar recomendação',exact:true}).click();
- await page.getByRole('button',{name:'Confirmar custo e gerar recomendação',exact:true}).focus();await page.keyboard.press('Enter');
+ await page.getByRole('button',{name:'Sugestão de análise',exact:true}).click();
+ await page.getByRole('button',{name:'Confirmar custo e preparar sugestões',exact:true}).focus();await page.keyboard.press('Enter');
  await page.locator('.cr-text').waitFor({timeout:30000});
  assert.deepEqual(result.simulatedStartActions,['start','recommendation_step']);assert.equal(visibleStudies.length,1);assert.equal(result.simulatedDrafts,0);
  assert.equal(await page.getByRole('button',{name:'Copiar texto',exact:true}).count(),1);
- await page.getByRole('link',{name:'Abrir recomendações do estudo',exact:true}).click();
+ await page.getByRole('link',{name:'Abrir sugestões do estudo',exact:true}).click();
  await page.locator('.cr-text').waitFor({timeout:30000});
  await page.reload({waitUntil:'networkidle'});await page.locator('.cr-text').waitFor({timeout:30000});
  assert.equal(result.functionCalls,2);result.checks.push('geração controlada vincula versão existente, salva resultado e reabre após reload sem cobrança');
@@ -106,13 +106,13 @@ try{
  }
  await page.locator('html').evaluate(el=>el.classList.add('dark'));await page.waitForTimeout(350);await page.screenshot({path:join(out,'recommendation-dark-320.png'),fullPage:true});
  result.checks.push('resultado e histórico legíveis em 1440/1024/390/320 e tema escuro, sem estouro interno');
- await page.getByRole('link',{name:'Materiais',exact:true}).click();
+ await page.getByRole('link',{name:'Arquivos e histórico',exact:true}).click();
  await page.getByText('Disponíveis neste navegador.',{exact:false}).waitFor({timeout:30000});
  result.checks.push('consumo da preparação conserva 11 planilhas vinculadas ao hash local');
  await page.getByRole('link',{name:'Revisão',exact:true}).click();await page.locator('.cb-map').waitFor({timeout:30000});
  assert.equal(result.functionCalls,2);result.checks.push('revisão existente continua disponível sem chamada paga');
  await page.getByRole('link',{name:'Voltar aos estudos',exact:true}).first().click();
- await page.getByRole('link',{name:'Novo estudo',exact:true}).click();await page.getByRole('button',{name:'Escolher PowerPoint',exact:true}).waitFor();
+ await page.getByRole('link',{name:'Revisar estudo',exact:true}).click();await page.getByRole('button',{name:'Escolher PowerPoint',exact:true}).waitFor();
  assert.equal(await page.locator('.cp-file-picker[data-ready=true]').count(),0);result.checks.push('Novo estudo volta vazio depois de gerar, sem ressuscitar preparação anterior');
  await page.goto('http://127.0.0.1:5184/corretor/calibracao',{waitUntil:'networkidle'});
  await page.getByRole('heading',{name:'Uso e custo de IA',exact:true}).waitFor();await page.getByText('Recomendação · gpt-4o-mini',{exact:true}).waitFor();

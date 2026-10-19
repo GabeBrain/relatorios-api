@@ -3,7 +3,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { vi, it, expect, beforeEach } from 'vitest';
 import StudyPreparationPage from './StudyPreparationPage';
 const mocks=vi.hoisted(()=>({load:vi.fn(),save:vi.fn(),clear:vi.fn(),studies:vi.fn()}));
-vi.mock('../lib/v3/local-materials',()=>({loadLocalMaterial:mocks.load,saveLocalMaterial:mocks.save,clearPreparationDraft:mocks.clear}));
+vi.mock('../lib/v3/local-materials',()=>({loadLocalStudySheets:async()=>[],loadLocalMaterial:mocks.load,saveLocalMaterial:mocks.save,clearPreparationDraft:mocks.clear}));
+vi.mock('../lib/v3/pptx-store',()=>({loadPptx:async()=>({name:'estudo.pptx',bytes:new Uint8Array([1])})}));
 vi.mock('../lib/v3/db',()=>({listStudies:mocks.studies,analysisPending:(s:{analise?:unknown;status:string})=>!s.analise&&s.status!=='pronto'}));
 vi.mock('../lib/audit/pptx-to-ir',()=>({pptxToIr:async()=>({sha1:'a'.repeat(40),n_slides:3,arquivo:'estudo.pptx',slides:[]})}));
 vi.mock('../lib/v3/pipeline',()=>({estimateFullAnalysis:async()=>({costUsd:0.1,candidates:[],textSlides:3})}));
@@ -32,6 +33,16 @@ it('cancelar seletor não escolhe sem planilhas; clique duplo inicia uma única 
 function savedDraft(){
  mocks.load.mockImplementation(async(key:string)=>key==='preparation:fields'?{bytes:new TextEncoder().encode(JSON.stringify({city:'Curitiba',uf:'PR',choice:true,sheets:[]}))}:key==='preparation:pptx'?{name:'estudo.pptx',bytes:new Uint8Array([1])}:null);
 }
+it('retomada usa o mesmo arquivo e conserva fonte sem criar outro registro',async()=>{
+ const onStart=vi.fn().mockResolvedValue(undefined),fonte={blocos:[]};
+ const study={id:'existing',lastSha1:'a'.repeat(40),cidade:'Curitiba',uf:'PR'};
+ render(<MemoryRouter><StudyPreparationPage back="/corretor" resume={{study:study as never,fonte:fonte as never}} onStart={onStart}/></MemoryRouter>);
+ await screen.findByLabelText('Cidade do estudo');
+ fireEvent.click(screen.getByRole('button',{name:'Iniciar avaliação'}));
+ await waitFor(()=>expect(onStart).toHaveBeenCalledOnce());
+ expect(onStart).toHaveBeenCalledWith(expect.objectContaining({fonte,city:'Curitiba',uf:'PR'}));
+ expect(mocks.clear).not.toHaveBeenCalled();
+});
 it('rascunho antigo de estudo analisado é consumido e oferece o resultado, sem reiniciar',async()=>{
  savedDraft();mocks.studies.mockResolvedValue([{id:'analisado',generation:'v3',lastSha1:'a'.repeat(40),analise:{},status:'em_correcao'}]);
  const onStart=vi.fn();render(<MemoryRouter><StudyPreparationPage back="/corretor" onStart={onStart}/></MemoryRouter>);

@@ -76,11 +76,11 @@ const App = () => (
       <Toaster />
       <Sonner richColors closeButton />
       <BrowserRouter>
-        <AppLayout>
+        <GeobrainAccessProvider><AppLayout>
           <PanoramaExportGate />
           <ErrorBoundary>
             <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando...</div>}>
-              <GeobrainAccessProvider><Routes>
+              <Routes>
                 <Route path="/" element={<Navigate to="/inicio" replace />} />
                 <Route path="/inicio" element={<Home />} />
 
@@ -138,10 +138,10 @@ const App = () => (
                 <Route path="/relatorios/corretor/analise" element={<Navigate to="/corretor" replace />} />
 
                 <Route path="*" element={<NotFound />} />
-              </Routes></GeobrainAccessProvider>
+              </Routes>
             </Suspense>
           </ErrorBoundary>
-        </AppLayout>
+        </AppLayout></GeobrainAccessProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

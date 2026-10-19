@@ -14,6 +14,14 @@ export interface RecommendationRecord {
  content:string|null;error_message:string|null;created_at:string;updated_at:string;completed_at:string|null;
 }
 export const RECOMMENDATION_STATES:Record<RecommendationRecord['state'],string>={prepared:'Preparada',running:'Em geração',interrupted:'Interrompida',failed:'Não concluída',unknown:'Retorno a conferir',completed:'Gerada',partial:'Resultado parcial'};
+export type RecommendationSummary = Pick<RecommendationRecord, 'study_id' | 'version_n' | 'state'>;
+/** Somente metadados dos estudos visíveis; nenhum texto de sugestão na carteira. */
+export async function listRecommendationSummaries(ids: string[]): Promise<RecommendationSummary[]> {
+ if (!ids.length) return [];
+ const {data,error}=await db.from('corretor_recommendations').select('study_id,version_n,state').in('study_id',ids);
+ if(error) throw new Error('As sugestões não puderam ser consultadas. A revisão continua disponível.');
+ return data??[];
+}
 export async function listRecommendations(studyId:string):Promise<RecommendationRecord[]> {
  const {data,error}=await db.from('corretor_recommendations').select('*').eq('study_id',studyId).order('created_at',{ascending:false});
  if(error)throw new Error('O histórico de recomendações está indisponível. Confira a atualização do banco.');return data??[];

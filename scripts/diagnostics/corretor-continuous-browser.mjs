@@ -72,7 +72,7 @@ try{
  // Duplicata não reprocessa o arquivo nem altera decisões.
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Iniciar avaliação',exact:true}).click();
  await page.waitForURL('**/resumo');assert.equal(result.paidCalls.length,0);result.checks.push('arquivo idêntico abre o estudo existente, sem pagar');
- await page.getByRole('link',{name:'Materiais',exact:true}).click();
+ await page.getByRole('link',{name:'Arquivos e histórico',exact:true}).click();
  await page.getByRole('region',{name:'Planilhas neste navegador'}).waitFor();
  assert.equal(await page.locator('.cp-local-materials .cs-files li').count(),11);result.checks.push('11 Excel conservados por hash e recuperáveis em Materiais após consumo do rascunho');
  await page.goto('http://127.0.0.1:5184/corretor/novo',{waitUntil:'networkidle'});
@@ -93,8 +93,10 @@ try{
  await page.setViewportSize({width:1440,height:1000});
  await page.waitForFunction(()=>document.querySelector('.cq-content').getBoundingClientRect().width>=.9*innerWidth);
  const dimensions=await page.evaluate(()=>({viewport:innerWidth,content:document.querySelector('.cq-content').getBoundingClientRect().width,progress:document.querySelector('[role=progressbar]').getBoundingClientRect().width}));result.measurements.push(dimensions);assert(dimensions.content>=.9*dimensions.viewport);assert(dimensions.progress>=.9*dimensions.viewport);
- await page.getByRole('button',{name:'Já ajustei · C'}).click();await page.getByRole('dialog').filter({has:page.getByText('Entrar com Geobrain',{exact:true})}).waitFor({timeout:3000}).catch(()=>{});
- await page.keyboard.press('Escape');await page.getByRole('alert').filter({hasText:'A decisão não foi salva'}).waitFor();result.checks.push('cancelar login mantém o item da triagem');
+ await page.getByRole('button',{name:'Já ajustei · C'}).click();
+ await page.locator('#auth-email').waitFor();
+ await page.getByRole('button',{name:'Cancelar',exact:true}).click();
+ await page.getByRole('alert').filter({hasText:'A decisão não foi salva'}).waitFor();result.checks.push('cancelar login no menu mantém o item da triagem');
  await page.screenshot({path:join(out,'quick-1440.png'),fullPage:true});
  await page.keyboard.press('Escape'); await page.reload({waitUntil:'networkidle'});await page.getByText('Prévia PDF fornecida · página 66 de 153').waitFor({timeout:30000});result.checks.push('prévia recuperada por hash após reload');
  for(const width of [390,320]){await page.setViewportSize({width,height:1000});await page.screenshot({path:join(out,`review-${width}.png`),fullPage:true});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`overflow revisão ${width}`);}
@@ -107,9 +109,9 @@ try{
  await page.locator('.cb-map button').last().click();
  result.checks.push('Rolândia abre e navega até o último slide sem executar IA');
  await page.goto(`http://127.0.0.1:5184/corretor/estudos/${long.study.id}/revisao`,{waitUntil:'networkidle'});
- await page.getByRole('button',{name:'Retomar análise completa',exact:true}).waitFor();
+ await page.getByRole('heading',{name:'Continuar avaliação',exact:true}).waitFor();
  assert.equal(result.paidCalls.length,0);
- assert((await page.locator('body').innerText()).includes('214 slides'));
+ assert.equal(await page.getByRole('button',{name:'Escolher PowerPoint',exact:true}).count(),1);
  result.checks.push('Tijucas214 permanece incompleto com retomada explícita; não simula relatório nem imagem ausente');
  // Novo envio em ambiente isolado: fornecedor simulado, nenhum dado do site alterado.
  cases=[];

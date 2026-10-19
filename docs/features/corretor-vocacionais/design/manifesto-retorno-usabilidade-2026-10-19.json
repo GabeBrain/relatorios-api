@@ -1,0 +1,30 @@
+{
+  "base": "d3463d7",
+  "state": "validated_locally",
+  "paid_ai": false,
+  "remote_mutations": false,
+  "deploy": false,
+  "tests": {
+    "passed": 327,
+    "skipped": 2,
+    "failed": 0,
+    "materials": 10,
+    "browser_checks": [
+      15,
+      9,
+      8
+    ]
+  },
+  "limits": [
+    "real_login_pending",
+    "production_pending"
+  ],
+  "evidence": [
+    ".local-inputs/retorno-usabilidade-tests.json",
+    ".local-inputs/retorno-final-focused.json",
+    ".local-inputs/retorno-materials.log",
+    ".local-inputs/retorno-continuous.log",
+    ".local-inputs/retorno-recommendation.log",
+    ".local-inputs/retorno-portfolio.log"
+  ]
+}

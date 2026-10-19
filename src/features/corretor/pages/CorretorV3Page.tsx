@@ -6,6 +6,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { beginExecution, finishExecution, hasActiveExecution } from '../lib/v3/execution';
 import StudyPreparationPage, { type PreparedStudy } from '../components/StudyPreparationPage';
+import { summarizeStudy } from '../lib/study-summary';
 import StudyQuickReview from '../components/StudyQuickReview';
 import { presentFindingPt } from '../lib/v3/present-finding-pt';
 import PreAnalysisNotice from '../components/PreAnalysisNotice';
@@ -568,6 +569,24 @@ export default function CorretorV3Page() {
     finally { setBusy(null); setAnalysis(null); abortRef.current = null; if (registeredId) navigate(`/corretor/estudos/${registeredId}/revisao`); }
   }
 
+  async function resumePrepared(prepared: PreparedStudy) {
+    if (!selected || prepared.ir.sha1 !== selected.lastSha1) throw new Error('Arquivo diferente da versão registrada.');
+    const {ir, bytes, estimate, fonte, city, uf, outras, budgetUsd} = prepared;
+    setBusy('upload');
+    try {
+      await savePptx(ir.sha1, prepared.file.name, bytes);
+      if (fonte) await saveStudyFonte(selected.id, prepared.sheets.length ? `${prepared.sheets.length} planilhas` : fonteInput?.name ?? 'Fonte preservada', fonte);
+      writeOutras(selected.id, outras);
+      await beginExecution({studyId:selected.id, version:selected.lastVersion, documentSha1:ir.sha1, budgetUsd, context:{cidade:city, uf, outras, fonte}});
+      setAnalysis({running:true, stages:{}, spentUsd:0, estimateUsd:estimate.costUsd});
+      const ac = new AbortController(); abortRef.current=ac;
+      const p1 = await runPhase1(ir, bytes, {model:MODEL, fonte, candidates:estimate.candidates, ataCandidate:estimate.ataCandidate, signal:ac.signal});
+      if (ac.signal.aborted) { await finishExecution('interrupted'); return; }
+      await runPaidAnalysis({studyId:selected.id,version:selected.lastVersion,ir,bytes,estimate,fonte},{cidade:city,uf,outras,ata:p1.ata},Math.max(0,estimate.costUsd-p1.ataCostUsd));
+    } catch(e) { await finishExecution('failed').catch(()=>{}); throw e; }
+    finally {setBusy(null);setAnalysis(null);abortRef.current=null;}
+  }
+
   async function prepareRecommendation(prepared: PreparedStudy) {
     const {file,ir,bytes}=prepared;
     await savePptx(ir.sha1,file.name,bytes);
@@ -932,6 +951,7 @@ export default function CorretorV3Page() {
     };
   }, [reviewedItems]);
 
+  const summary = summarizeStudy(reviewedItems);
   const blockingPend = wl.confidence.filter(([level]) => level <= 2).reduce((total, [, findings]) => total + findings.length, 0);
 
   if (analysis?.running && selected) return <main className="corretor-projects cp-preparation">
@@ -943,6 +963,8 @@ export default function CorretorV3Page() {
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
   if (!selected && routeStudyId) return <div className="p-6"><p role="status">{loadingList || loadingStudy ? 'Abrindo revisão…' : 'Estudo não encontrado.'}</p><Link to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>;
   if (!selected) return <StudyPreparationPage back={portfolioHref(searchParams.get('carteira') ?? '')} onStart={ingestNew} onRecommendation={prepareRecommendation} />;
+
+  if (pending && !loadingStudy) return <StudyPreparationPage key={selected.id} back={portfolioHref(searchParams.get('carteira') ?? '')} resume={{study:selected, fonte:fonteInput?.fonte ?? null}} onStart={resumePrepared}/>;
 
   // ─── WORKSPACE ───────────────────────────────────────────────────────────────
   return (
@@ -964,8 +986,8 @@ export default function CorretorV3Page() {
           </div>
         </div>
       )}
-      <header className="border-b bg-card px-6 py-3 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
+      <header className="cp-review-tools border-b bg-card px-6 py-3 flex items-center justify-between gap-4">
+        <div className={cn("flex items-center gap-3 min-w-0", routeStudyId && "sr-only")}>
           <button
             onClick={() => navigate(portfolioHref(searchParams.get('carteira') ?? ''))}
             className="text-muted-foreground hover:text-foreground"
@@ -1038,6 +1060,7 @@ export default function CorretorV3Page() {
         </div>
       </header>
 
+      {!pending && <section className="cp-review-summary" aria-label="Resumo da revisão"><h2>Resumo da revisão</h2><p>{selected.nSlides} slides · versão {selected.lastVersion} · {summary.pending} apontamentos pendentes</p><div className="cp-actions">{['Erros apontados','Prováveis','A verificar'].map((label,i)=><span key={label}><strong>{summary.levels[i]}</strong> {label}</span>)}</div>{summary.categories.length > 0 && <p className="cp-muted">{summary.categories.map(([label,n])=>`${label}: ${n}`).join(' · ')}</p>}</section>}
       <div className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur px-6 py-2.5 space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs min-h-[32px]">
           {analysis?.running ? (

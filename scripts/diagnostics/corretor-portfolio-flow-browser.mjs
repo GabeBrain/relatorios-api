@@ -13,7 +13,7 @@ const out=resolve('.local-inputs/portfolio-flow-'+Date.now());mkdirSync(out,{rec
 const result={checks:[],errors:[],measurements:[],functionCalls:0,simulatedProfileWrites:0,simulatedDrafts:0,simulatedStartActions:[]};
 const browser=await chromium.launch(),ctx=await browser.newContext({viewport:{width:1440,height:1000}}),page=await ctx.newPage();
 let profiles=[],studyReads=0,visibleStudies=[study];
-await ctx.addInitScript(s=>localStorage.setItem('sb-mxinpvcqzbfbzjodhgtz-auth-token',JSON.stringify(s)),session);
+await ctx.addInitScript(s=>{localStorage.setItem('sb-mxinpvcqzbfbzjodhgtz-auth-token',JSON.stringify(s));localStorage.setItem('brain-auth',JSON.stringify({state:{token:'fixture-api',email:s.user.email,issuedAt:Date.now(),expiresAt:Date.now()+3600000},version:0}));},session);
 await ctx.route('**/*',async route=>{
  const req=route.request(),url=new URL(req.url());
  if(url.hostname==='127.0.0.1')return route.continue();
@@ -44,9 +44,11 @@ try{
  await page.goto('http://127.0.0.1:5184/corretor?scope=mine',{waitUntil:'networkidle'});
  await page.getByRole('heading',{name:'Nenhum estudo associado à sua conta'}).waitFor();
  await page.getByRole('button',{name:'Ver todos os estudos',exact:true}).click();
- await page.getByRole('button',{name:'Completar cadastro',exact:true}).click();
+ await page.locator('.cp-row h2 a').click();
+ await page.getByRole('button',{name:'Dados do estudo',exact:true}).click();
  await page.getByRole('button',{name:'Salvar cadastro',exact:true}).click();
  await page.getByRole('dialog').waitFor({state:'hidden'});
+ await page.getByRole('link',{name:'Voltar aos estudos',exact:true}).first().click();
  await page.getByRole('button',{name:'Meus estudos',exact:true}).click();
  await page.locator('.cp-row').waitFor();assert.equal(await page.locator('.cp-row').count(),1);
  assert.equal(study.created_by,null);assert.equal(result.simulatedProfileWrites,1);result.checks.push('salvar cadastro associa à carteira pessoal sem reatribuir autoria');
@@ -61,7 +63,7 @@ try{
   await page.setViewportSize({width,height:1000});await page.waitForTimeout(350);
   await page.screenshot({path:join(out,`portfolio-${width}.png`),fullPage:true});
  }
- await page.getByRole('link',{name:'Novo estudo',exact:true}).click();await page.getByRole('button',{name:'Escolher PowerPoint',exact:true}).waitFor();
+ await page.getByRole('link',{name:'Revisar estudo',exact:true}).click();await page.getByRole('button',{name:'Escolher PowerPoint',exact:true}).waitFor();
  for(const width of [1440,1024,390,320]){
   await page.setViewportSize({width,height:1000});await page.waitForTimeout(350);
   result.measurements.push(await page.evaluate(()=>({viewport:innerWidth,aside:document.querySelector('aside').getBoundingClientRect().width,main:document.querySelector('main').getBoundingClientRect().width,picker:document.querySelector('.cp-file-picker').getBoundingClientRect().width,icon:document.querySelector('.cp-file-symbol svg').getBoundingClientRect().width})));
@@ -81,10 +83,10 @@ try{
  await page.getByLabel('Cidade do estudo',{exact:true}).fill('');
  assert.equal(result.simulatedDrafts,1);assert.equal(result.functionCalls,0);
  await page.getByRole('link',{name:/Voltar aos estudos/}).click();await page.getByRole('button',{name:'Meus estudos',exact:true}).click();
- await page.locator('.cp-row').waitFor();await page.getByText('Análise pendente',{exact:true}).waitFor();await page.getByRole('button',{name:'Completar cadastro',exact:true}).waitFor();
+ await page.locator('.cp-row').waitFor();await page.getByText('Análise pendente',{exact:true}).waitFor();assert.equal(await page.getByText('Sem cadastro prévio',{exact:false}).count(),0);
  result.checks.push('apresentação preparada sem cidade/cadastro/IA já aparece em Meus estudos como pendente');
  await page.reload({waitUntil:'networkidle'});await page.locator('.cp-row').waitFor();result.checks.push('preparação incompleta permanece na conta após reload');
- await page.getByRole('link',{name:'Novo estudo',exact:true}).click();await page.getByLabel('Cidade do estudo',{exact:true}).waitFor({timeout:120000});
+ await page.getByRole('link',{name:'Revisar estudo',exact:true}).click();await page.getByLabel('Cidade do estudo',{exact:true}).waitFor({timeout:120000});
  await page.getByLabel('Cidade do estudo',{exact:true}).fill('Campos do Jordão');await page.getByRole('button',{name:'Continuar sem planilhas',exact:true}).click();
  await page.getByRole('button',{name:'Iniciar avaliação',exact:true}).click();await page.waitForURL('**/revisao',{timeout:120000});
  assert.equal(result.simulatedDrafts,1);assert.deepEqual(result.simulatedStartActions,['start']);assert.equal(visibleStudies[0].relatorio,null);
