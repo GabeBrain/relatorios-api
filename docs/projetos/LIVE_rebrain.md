@@ -1,3 +1,7 @@
+## 19/10/2026 — Preparação do comunicado e remoção de rótulos de release
+
+Gabriel pediu rollout sem número de versão na interface/comunicado. Busca no código local encontrou V1 no link/histórico e v2 na demonstração antiga; rótulos trocados por Análises anteriores/Estudos anteriores/Demonstração. Comentários, tipos, rotas internas e versões dos arquivos preservados para rastreabilidade. Revisão textual estática, sem teste novo ou conferência em produção. Email curto preparado na conversa para A&R, sem envio: interface unificada, Excel opcional antes da avaliação, evidências e histórico, organização/Meus estudos pela conta Geobrain e Sugestão de análise. Publicação/aceite real ainda pendentes: enviar comunicado só depois de confirmar frontend publicado. Nenhuma IA paga, migration, Edge ou mensagem externa. Lote preparado localmente, sem novo push autorizado nesta solicitação.
+
 ## 19/10/2026 — Consolidação do fechamento e mudança de entrada
 
 **Estado atual:** código enviado ao Git até `96f19f0`, main/origin0–0 na conferência desta sessão. Publicação e comportamento em produção ainda não verificados. Este registro atualiza os estados anteriores de preparado/sem push; preserva-os como histórico.

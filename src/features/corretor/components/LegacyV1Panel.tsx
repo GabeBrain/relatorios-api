@@ -85,7 +85,7 @@ export default function LegacyV1Panel() {
       <section className="space-y-3">
         <div className="flex items-center gap-2">
           <Archive className="w-4 h-4 text-muted-foreground" />
-          <h2 className="text-sm font-semibold">Estudos da V1</h2>
+          <h2 className="text-sm font-semibold">Estudos anteriores</h2>
           <span className="text-[10px] text-muted-foreground">
             versão antiga · somente leitura
             {projects && ` · ${projects.length}`}
@@ -94,10 +94,10 @@ export default function LegacyV1Panel() {
         </div>
           {loading ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground py-6">
-              <Loader2 className="w-4 h-4 animate-spin" /> Carregando estudos da v1…
+              <Loader2 className="w-4 h-4 animate-spin" /> Carregando estudos anteriores…
             </div>
           ) : !projects || projects.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-2">Nenhum estudo v1 arquivado.</p>
+            <p className="text-xs text-muted-foreground py-2">Nenhum estudo anterior arquivado.</p>
           ) : (
             <div className="space-y-2">
               {projects.map((p) => {

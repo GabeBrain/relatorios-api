@@ -415,7 +415,7 @@ function ProjectDetail({ project }: { project: ArchivedProject }) {
             <div className="p-4 space-y-2">
               {slides.length === 0 ? (
                 <div className="text-center text-muted-foreground py-16 text-sm italic">
-                  Detalhes por slide não disponíveis (projeto analisado antes desta versão).
+                  Detalhes por slide não disponíveis nesta análise anterior.
                 </div>
               ) : filteredSlides.length === 0 ? (
                 <div className="text-center text-muted-foreground py-16 flex flex-col items-center gap-2">
@@ -803,7 +803,7 @@ export default function CorretorPage() {
                 className="mt-3 inline-flex items-center gap-1.5 text-xs rounded-md border border-primary/30 bg-primary/5 px-2.5 py-1.5 text-primary hover:bg-primary/10 transition-colors"
               >
                 <FileText className="w-3.5 h-3.5" />
-                Ver a Auditoria v2 (demo com estudos reais, sem custo de IA)
+                Ver demonstração da auditoria (estudos reais, sem custo de IA)
               </Link>
             </div>
             {loading ? (
