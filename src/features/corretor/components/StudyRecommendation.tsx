@@ -1,3 +1,4 @@
+import LoadingSurface from './LoadingSurface';
 import RecommendationResult from './RecommendationResult';
 import { plainRecommendation } from '../lib/recommendation-presentation';
 import { processingMessage } from '../lib/processing-message';
@@ -18,6 +19,7 @@ import { studyHref } from '../lib/study-navigation';
 export interface RecommendationStudy { study:StudyV3; version:VersionRecord }
 interface Props {study?:StudyV3;version?:VersionRecord;preparedIr?:Ir;ensureStudy?:()=>Promise<RecommendationStudy>;context?:string;onBusyChange?:(busy:boolean)=>void}
 export default function StudyRecommendation({study,version,preparedIr,ensureStudy,context='',onBusyChange}:Props){
+ const [refreshing,setRefreshing]=useState(false);
  const [linked,setLinked]=useState<RecommendationStudy|null>(study&&version?{study,version}:null);
  const [ir,setIr]=useState<Ir|null>(preparedIr??null),[records,setRecords]=useState<RecommendationRecord[]>([]),[selected,setSelected]=useState<RecommendationRecord|null>(null);
  const [loading,setLoading]=useState(!preparedIr),[historyLoading,setHistoryLoading]=useState(Boolean(study)),[running,setRunning]=useState(false),[error,setError]=useState(''),[wantNew,setWantNew]=useState(false),[copied,setCopied]=useState(false);
@@ -34,7 +36,12 @@ export default function StudyRecommendation({study,version,preparedIr,ensureStud
   loadPptx(version.sha1??'').then(async file=>file?pptxToIr(file.bytes,file.name):null).then(value=>{if(active)setIr(value);}).catch(()=>{if(active)setError('Não foi possível preparar o original deste navegador. Selecione o PowerPoint da versão.');}).finally(()=>{if(active)setLoading(false);});
   return()=>{active=false;};
  },[study,version]);
- async function refresh(target=linked){if(!target)return;const current=(await listRecommendations(target.study.id)).filter(r=>r.version_n===target.version.n);if(mounted.current){setRecords(current);setSelected(current.find(r=>r.content)??current[0]??null);}return current;}
+ async function refresh(target=linked){
+  if(!target)return;setRefreshing(true);
+  try{const current=(await listRecommendations(target.study.id)).filter(r=>r.version_n===target.version.n);if(mounted.current){setRecords(current);setSelected(current.find(r=>r.content)??current[0]??null);}return current;}
+  finally{if(mounted.current)setRefreshing(false);}
+ }
+
  async function attach(file?:File){if(!file||!linked||lock.current)return;setLoading(true);setError('');try{const bytes=new Uint8Array(await file.arrayBuffer());const value=await pptxToIr(bytes,file.name);if(value.sha1!==linked.version.sha1)throw new Error('O arquivo não corresponde à versão selecionada.');await savePptx(value.sha1,file.name,bytes);setIr(value);}catch(e){setError(e instanceof Error?e.message:'Não foi possível ler o original.');}finally{setLoading(false);}}
  async function generate(){
   if(lock.current||!ir||!quote?.value||budget<quote.value.maximumUsd||budget>100)return;
@@ -59,7 +66,7 @@ export default function StudyRecommendation({study,version,preparedIr,ensureStud
  function download(){if(!selected?.content)return;const url=URL.createObjectURL(new Blob([plainRecommendation(selected.content)],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`sugestao-analise-versao-${selected.version_n}.txt`;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
  return <section className="cp-panel cr-workspace" aria-label="Sugestão de análise">
   <h2><Sparkles size={20} aria-hidden="true"/> Sugestão de análise</h2>
-  {historyLoading&&<p role="status">Consultando recomendações guardadas…</p>}
+  <LoadingSurface busy={historyLoading||refreshing} initial={historyLoading&&!records.length} label="Atualizando sugestões…">
   {records.length>0&&<div className="cr-history" aria-label="Histórico de recomendações">{records.map(r=><Button key={r.id} variant="outline" aria-pressed={selected?.id===r.id} disabled={running} onClick={()=>setSelected(r)}>{RECOMMENDATION_STATES[r.state]} · {new Date(r.created_at).toLocaleString('pt-BR')}</Button>)}</div>}
   {selected&&<div className="cr-state"><strong>{RECOMMENDATION_STATES[selected.state]} · versão {selected.version_n}</strong>{Number(selected.reserved_usd)>0&&<p role="status">Uma etapa ainda aguarda confirmação. Atualize o histórico antes de tentar novamente.</p>}{selected.error_message&&<p role="alert">Não foi possível concluir esta etapa. Atualize o histórico ou procure a equipe de suporte.</p>}</div>}
   {selected?.content&&<><div className="cp-actions"><Button variant="outline" onClick={()=>void navigator.clipboard.writeText(plainRecommendation(selected.content!)).then(()=>setCopied(true)).catch(()=>setError('Não foi possível copiar. Você pode baixar o texto.'))}>{copied?<Check size={16}/>:<Copy size={16}/>}Copiar tudo</Button><Button variant="outline" onClick={download}><Download size={16}/>Baixar texto</Button><Button variant="outline" disabled={running||unknown} onClick={()=>setWantNew(true)}>Preparar outras sugestões</Button></div>{selected.state==='partial'&&<p role="status">Resultado parcial: uma etapa não foi concluída por inteiro. Confira a cobertura antes de utilizar.</p>}<RecommendationResult key={selected.id} text={selected.content}/></>}
@@ -74,5 +81,5 @@ export default function StudyRecommendation({study,version,preparedIr,ensureStud
   {running&&<div role="status"><p>Geração em andamento · {elapsed}s</p><Progress value={selected?Math.round(selected.provider_calls/selected.total_requests*100):0}/><Button variant="outline" onClick={()=>{stop.current=true;}}><Pause size={16}/>Pausar após a chamada atual</Button></div>}
   {error&&<p role="alert">{error}</p>}
   {linked&&<div className="cp-actions"><Button variant="ghost" disabled={running} onClick={()=>void refresh().catch(e=>setError(processingMessage(e)))}><RefreshCw size={16}/>Atualizar histórico</Button><Link className="cp-inline" to={studyHref(linked.study.id,'recomendacao',context,linked.version.id)}>Abrir sugestões do estudo</Link></div>}
- </section>;
+ </LoadingSurface></section>;
 }

@@ -1,3 +1,4 @@
+import LoadingSurface from './LoadingSurface';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -13,10 +14,11 @@ import { Download, FileSpreadsheet, FileText, Presentation } from 'lucide-react'
 export default function StudyMaterials({study,version,onSourcesChanged}:{study:StudyV3;version?:VersionRecord;onSourcesChanged:()=>void}){
  const access=useGeobrainAccess(), input=useRef<HTMLInputElement>(null),kind=useRef<MaterialKind>('pptx');
  const [assets,setAssets]=useState<MaterialAsset[]>([]),[sets,setSets]=useState<SourceSet[]>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[revision,setRevision]=useState(0);
+ const [loading,setLoading]=useState(true),[loaded,setLoaded]=useState(false);
  const [localSheets,setLocalSheets]=useState<Awaited<ReturnType<typeof loadLocalStudySheets>>>([]);
  useEffect(()=>{let active=true;setLocalSheets([]);if(study.lastSha1)loadLocalStudySheets(study.lastSha1).then(files=>{if(active)setLocalSheets(files);}).catch(()=>{});return()=>{active=false;};},[study.lastSha1]);
  function downloadLocal(bytes:Uint8Array,name:string){const url=URL.createObjectURL(new Blob([bytes.slice().buffer]));const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
- useEffect(()=>{let active=true;setError('');setAssets([]);Promise.all([listMaterials(study.id),listSourceSets(study.id)]).then(([a,s])=>{if(active){setAssets(a);setSets(s);}}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[study.id,revision]);
+ useEffect(()=>{let active=true;setError('');setLoading(true);Promise.all([listMaterials(study.id),listSourceSets(study.id)]).then(([a,s])=>{if(active){setAssets(a);setSets(s);}}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active){setLoaded(true);setLoading(false);}});return()=>{active=false;};},[study.id,revision]);
  async function pick(value:MaterialKind){if(!version||!await access('guardar os materiais deste estudo'))return;kind.current=value;if(input.current){input.current.accept=value==='pptx'?'.pptx':value==='sheet'?'.xlsx,.xlsm':'.pdf';input.current.multiple=value==='sheet';input.current.click();}}
  async function send(files:File[]){if(!version||!files.length||busy)return;setBusy(true);setError('');setProgress(0);
   try{
@@ -40,6 +42,7 @@ export default function StudyMaterials({study,version,onSourcesChanged}:{study:S
  async function snapshot(){if(!version||busy||!await access('guardar o estado desta revisão'))return;setBusy(true);try{await recordReviewSnapshot(study.id,version.id);toast.success('Estado atual registrado com fontes e decisões disponíveis.');}catch(e){setError(e instanceof Error?e.message:'Falha ao registrar.');}finally{setBusy(false);}}
  const current=assets.filter(a=>a.version_id===version?.id);
  return <section className="cp-panel" aria-label="Materiais persistidos"><h2>Materiais do estudo</h2><p>Guarde a apresentação e as planilhas utilizadas nesta versão. Informações de cadastro são opcionais.</p>
+  <LoadingSurface busy={loading} initial={!loaded} label="Atualizando materiais…">
   {error&&<p role="status" className="cp-notice">{error}</p>}
   <input ref={input} type="file" hidden onChange={e=>{const files=Array.from(e.target.files??[]);e.target.value='';void send(files);}}/>
   <div className="cp-actions"><Button disabled={!version||busy} onClick={()=>void pick('pptx')}><Presentation size={18} aria-hidden="true"/>Guardar apresentação</Button><Button variant="outline" disabled={!version||busy} onClick={()=>void pick('sheet')}><FileSpreadsheet size={18} aria-hidden="true"/>Adicionar planilhas</Button><Button variant="outline" disabled={!version||busy} onClick={()=>void pick('preview_pdf')}><FileText size={18} aria-hidden="true"/>Adicionar prévia PDF</Button></div>
@@ -49,5 +52,5 @@ export default function StudyMaterials({study,version,onSourcesChanged}:{study:S
   {current.map(a=><div className="cp-version" key={a.id}><strong>{a.original_name}</strong><p className="cp-muted">{a.kind==='sheet'?'Planilha':a.kind==='pptx'?'Apresentação':'Prévia'} · {(a.bytes/1024/1024).toFixed(1)} MB</p><Button variant="outline" disabled={busy} onClick={()=>void recover(a)}>{a.kind==='pptx'?'Recuperar apresentação':'Baixar arquivo'}</Button></div>)}
   {sets.filter(s=>s.version_id!==version?.id).slice(0,1).map(s=><div key={s.id} className="cp-notice"><p>As planilhas mudaram nesta versão?</p><Button variant="outline" disabled={busy} onClick={()=>void reuse(s)}>Usar planilhas anteriores</Button><Button variant="outline" disabled={busy} onClick={()=>void pick('sheet')}>Atualizar planilhas</Button></div>)}
   <Button variant="outline" disabled={!version||busy} onClick={()=>void snapshot()}>Guardar estado atual da revisão</Button>
- </section>;
+ </LoadingSurface></section>;
 }
