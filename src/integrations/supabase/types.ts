@@ -416,10 +416,12 @@ export type Database = {
           budget_usd: number
           cached_tokens: number
           completed_at: string | null
+          config_version: string | null
           content: string | null
           coverage: Json
           created_at: string
           document_sha1: string
+          endpoint: string | null
           error_message: string | null
           estimated_usd: number
           execution_id: string
@@ -429,15 +431,22 @@ export type Database = {
           model: string
           output_tokens: number
           price_version: string
+          pricing_snapshot: Json | null
+          profile_id: string | null
           prompt_version: string
           provider_calls: number
           provider_latency_ms: number
+          reasoning_effort: string | null
+          reasoning_reported_calls: number
+          reasoning_tokens: number | null
           reserved_usd: number
+          service_tier: string | null
           spent_usd: number
           state: string
           study_id: string
           total_requests: number
           updated_at: string
+          usage_origin: string | null
           version_id: string
           version_n: number
         }
@@ -445,10 +454,12 @@ export type Database = {
           budget_usd: number
           cached_tokens?: number
           completed_at?: string | null
+          config_version?: string | null
           content?: string | null
           coverage: Json
           created_at?: string
           document_sha1: string
+          endpoint?: string | null
           error_message?: string | null
           estimated_usd: number
           execution_id: string
@@ -458,15 +469,22 @@ export type Database = {
           model: string
           output_tokens?: number
           price_version: string
+          pricing_snapshot?: Json | null
+          profile_id?: string | null
           prompt_version: string
           provider_calls?: number
           provider_latency_ms?: number
+          reasoning_effort?: string | null
+          reasoning_reported_calls?: number
+          reasoning_tokens?: number | null
           reserved_usd?: number
+          service_tier?: string | null
           spent_usd?: number
           state?: string
           study_id: string
           total_requests: number
           updated_at?: string
+          usage_origin?: string | null
           version_id: string
           version_n: number
         }
@@ -474,10 +492,12 @@ export type Database = {
           budget_usd?: number
           cached_tokens?: number
           completed_at?: string | null
+          config_version?: string | null
           content?: string | null
           coverage?: Json
           created_at?: string
           document_sha1?: string
+          endpoint?: string | null
           error_message?: string | null
           estimated_usd?: number
           execution_id?: string
@@ -487,15 +507,22 @@ export type Database = {
           model?: string
           output_tokens?: number
           price_version?: string
+          pricing_snapshot?: Json | null
+          profile_id?: string | null
           prompt_version?: string
           provider_calls?: number
           provider_latency_ms?: number
+          reasoning_effort?: string | null
+          reasoning_reported_calls?: number
+          reasoning_tokens?: number | null
           reserved_usd?: number
+          service_tier?: string | null
           spent_usd?: number
           state?: string
           study_id?: string
           total_requests?: number
           updated_at?: string
+          usage_origin?: string | null
           version_id?: string
           version_n?: number
         }
@@ -809,59 +836,86 @@ export type Database = {
         Row: {
           batch_hash: string | null
           cached_tokens: number
+          config_version: string | null
           created_at: string
           custo_usd: number
           escopo: string | null
           execution_id: string | null
+          finish_reason: string | null
           id: string
           input_tokens: number
           latency_ms: number | null
           model: string | null
           output_tokens: number
           price_version: string | null
+          pricing_snapshot: Json | null
+          profile_id: string | null
           prompt_version: string | null
           provider_request_id: string | null
+          reasoning_effort: string | null
+          reasoning_tokens: number | null
           requested_model: string | null
+          requested_service_tier: string | null
+          service_tier: string | null
           study_id: string
           tipo: string
+          usage_origin: string | null
         }
         Insert: {
           batch_hash?: string | null
           cached_tokens?: number
+          config_version?: string | null
           created_at?: string
           custo_usd?: number
           escopo?: string | null
           execution_id?: string | null
+          finish_reason?: string | null
           id?: string
           input_tokens?: number
           latency_ms?: number | null
           model?: string | null
           output_tokens?: number
           price_version?: string | null
+          pricing_snapshot?: Json | null
+          profile_id?: string | null
           prompt_version?: string | null
           provider_request_id?: string | null
+          reasoning_effort?: string | null
+          reasoning_tokens?: number | null
           requested_model?: string | null
+          requested_service_tier?: string | null
+          service_tier?: string | null
           study_id: string
           tipo: string
+          usage_origin?: string | null
         }
         Update: {
           batch_hash?: string | null
           cached_tokens?: number
+          config_version?: string | null
           created_at?: string
           custo_usd?: number
           escopo?: string | null
           execution_id?: string | null
+          finish_reason?: string | null
           id?: string
           input_tokens?: number
           latency_ms?: number | null
           model?: string | null
           output_tokens?: number
           price_version?: string | null
+          pricing_snapshot?: Json | null
+          profile_id?: string | null
           prompt_version?: string | null
           provider_request_id?: string | null
+          reasoning_effort?: string | null
+          reasoning_tokens?: number | null
           requested_model?: string | null
+          requested_service_tier?: string | null
+          service_tier?: string | null
           study_id?: string
           tipo?: string
+          usage_origin?: string | null
         }
         Relationships: [
           {
@@ -1437,6 +1491,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           custo_total: number
+          deleted_at: string | null
+          deleted_by: string | null
           generation: string
           id: string
           nome: string
@@ -1452,6 +1508,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custo_total?: number
+          deleted_at?: string | null
+          deleted_by?: string | null
           generation?: string
           id?: string
           nome: string
@@ -1467,6 +1525,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custo_total?: number
+          deleted_at?: string | null
+          deleted_by?: string | null
           generation?: string
           id?: string
           nome?: string
@@ -1685,6 +1745,12 @@ export type Database = {
         }
         Returns: Json
       }
+      corretor_recommendation_profile_schema: { Args: never; Returns: number }
+      corretor_recommendation_usage: {
+        Args: { p_since?: string; p_until?: string }
+        Returns: Json
+      }
+      corretor_trash_study: { Args: { p_study_id: string }; Returns: boolean }
       rais_claim_history_snapshot: {
         Args: {
           p_lease_seconds?: number
