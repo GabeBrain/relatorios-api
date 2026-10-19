@@ -190,3 +190,7 @@ Não é preciso pedir aprovação entre T1–T6 para decisões rotineiras já de
 ## Estado de execução
 
 19/10: T0–T5 implementados e T6 validado localmente; T7 documentado para revisão antes do push. Ver RESULTADO_RETORNO_USABILIDADE_ASSISTENTE_2026-10-19.md para evidências, limites e publicação. Sem IA paga, banco remoto ou deploy. Autenticação real e produção permanecem pendentes da publicação autorizada.
+
+### Atualização do fechamento e decisão posterior
+
+Lote T0–T7 enviado em `5dbdd85`/`02af50d`. Ajustes posteriores autorizados: `034e3f4` (aviso/foco do login) e `96f19f0` (preparação diretamente na entrada, estudos agrupados abaixo). Esta última decisão substitui a apresentação de dois cards de T3; não desfaz objetivos, Excel, fluxo contínuo ou preservação dos motores. Consulte o resultado consolidado para os motivos e a validação específica de cada lote. Publish e aceite em produção pendentes; nenhum novo processamento pago ou backend remoto executado.

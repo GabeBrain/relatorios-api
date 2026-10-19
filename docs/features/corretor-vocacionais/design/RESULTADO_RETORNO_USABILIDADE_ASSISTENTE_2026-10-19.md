@@ -1,5 +1,16 @@
 # Retorno de usabilidade — resultado local de 19/10/2026
 
+## 19/10/2026 — Consolidação do fechamento e mudança de entrada
+
+**Estado atual:** código enviado ao Git até `96f19f0`, main/origin0–0 na conferência desta sessão. Publicação e comportamento em produção ainda não verificados. Este registro atualiza os estados anteriores de preparado/sem push; preserva-os como histórico.
+
+**Motivos e decisões:** feedback de Diego levou à comunicação somente Sugestão de análise, login único no menu e simplificação da revisão, preservando avanços do Excel e custo. O teste posterior de Gabriel mostrou login pouco perceptível: `034e3f4` adicionou aviso na carteira e botão de foco no formulário existente. Depois, as duas entradas levavam à mesma preparação e criavam uma passagem redundante: **a decisão vigente substitui os cards separados pela preparação diretamente na entrada**, com estudos salvos abaixo (`96f19f0`). Objetivos Revisar estudo/Sugestão de análise permanecem na preparação, sem outro formulário de acesso. Carteira oferece Recentes/Por cidade/Por mês, grupos/contagens e calendário de recebimento, sem exigir cadastro ou inventar tags.
+
+**Evidências por lote:** `5dbdd85`/`02af50d` retorno de usabilidade:327 testes aprovados/2 ignorados, dez passes materiais e32 verificações browser com serviços simulados; tipos/lint/build. `034e3f4` indicador: revisão de código/documentação, sem teste novo. `96f19f0` entrada/carteira: TypeScript e lint aprovados; sem novo browser/regressão. Não atribuir os32 percursos anteriores à entrada mais recente. Motores, prompts, custos, versões, materiais e decisões preservados; sem IA paga ou banco remoto. Relatório consolidado: `docs/features/corretor-vocacionais/design/RESULTADO_RETORNO_USABILIDADE_ASSISTENTE_2026-10-19.md`.
+
+**Pendências/próximo passo:** Publish frontend no Lovable e conferir entrada unificada, agrupamentos/calendário, aviso de acesso, login real pelo menu, Meus estudos incompletos e ida/volta de estudo. Sem iniciar IA paga nesse aceite. Nenhuma migration ou Edge nova exigida por estes lotes; ponte existente corretor-access segue dependência do acesso autenticado. Planejamento19–23 continua provisório; esta execução foi solicitada por Gabriel e não aprova a ordem integral/novas reservas. Sem horas retroativas, Monday ou atribuições a Lucas/Edgar. Documentação desta consolidação preparada localmente.
+
+
 ## Estado
 
 Implementação T0–T5 e validação local T6 concluídas; fechamento documental T7 preparado antes do push. Não publicado nem verificado em produção. Sem IA paga, deploy ou mudança no banco remoto. Base sincronizada por fast-forward `bb0f22a` → `d3463d7` (30 commits), com alterações FIERGS e ZIP de referência preservados.
