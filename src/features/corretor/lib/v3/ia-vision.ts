@@ -1,4 +1,5 @@
-import { invokeAnalysis } from './execution';
+import { invokeAnalysis, executionReviewModel } from './execution';
+import { reviewCacheKey } from '../../../../../supabase/functions/_shared/reviewer';
 // Corretor v3.2 — passe de VISÃO sobre as imagens de tabela (Fase C produtizada).
 // Cache por sha1 no Supabase (vision_cache): cada imagem é paga UMA vez.
 // A redundância linha×coluna×total auto-valida a extração (fase_c_visao.md).
@@ -144,14 +145,14 @@ export async function estimateVisionPass(
   candidates: TableImageCandidate[],
   model: ModelId
 ): Promise<VisionEstimate> {
-  const shas = candidates.map((c) => c.sha1);
+  const shas = candidates.map((c) => reviewCacheKey(c.sha1,'vision',model));
   const { data } = await db.from('vision_cache').select('sha1, schema_version').in('sha1', shas);
   // só conta como cache o que foi gerado pela versão ATUAL da lógica (senão reprocessa)
   const cachedSet = new Set(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (data ?? []).filter((r: any) => (r.schema_version ?? 1) >= CACHE_SCHEMA).map((r: any) => r.sha1 as string)
   );
-  const toRun = candidates.filter((c) => !cachedSet.has(c.sha1));
+  const toRun = candidates.filter((c) => !cachedSet.has(reviewCacheKey(c.sha1,'vision',model)));
   const inputTokens = toRun.reduce((a, c) => a + calculateImageTokens(c.w, c.h, model) + 450, 0);
   // Fichas carregam uma lista de unidades; tabela comum agora inclui local/fonte.
   const outputTokens = toRun.reduce((a, c) => a + (c.tipo === 'ficha' ? 2000 : 900), 0);
@@ -167,7 +168,7 @@ export async function estimateVisionPass(
   }
   return {
     candidates: candidates.length,
-    cached: candidates.filter((c) => cachedSet.has(c.sha1)).length,
+    cached: candidates.filter((c) => cachedSet.has(reviewCacheKey(c.sha1,'vision',model))).length,
     toRun: toRun.length,
     inputTokens,
     outputTokens,
@@ -404,7 +405,7 @@ async function extractWithModel(
   model: ModelId,
   imageOverride?: { base64: string; mime: string } | null
 ): Promise<{
-  payload: CachePayload; inputTokens: number; outputTokens: number;
+  payload: CachePayload; inputTokens: number; outputTokens: number; costUsd?: number;
 }> {
   const body = {
     base64: imageOverride?.base64 ?? toBase64(c.bytes),
@@ -414,11 +415,11 @@ async function extractWithModel(
     tipo: c.tipo,
   };
   // Retorno desconhecido não recebe retry no cliente: a execução reconcilia o lote.
-  type Resp = { tables: RawTable[]; locais_visiveis?: RawLocale[]; unidades?: RawUnit[]; tem_fonte?: boolean; inputTokens: number; outputTokens: number; error?: string };
+  type Resp = { tables: RawTable[]; locais_visiveis?: RawLocale[]; unidades?: RawUnit[]; tem_fonte?: boolean; inputTokens: number; outputTokens: number; costUsd?: number; error?: string };
   const {data,error} = await invokeAnalysis<Resp>('analyze-table-image', body);
   if (error || data?.error) throw new Error(error?.message ?? data?.error);
   return {
-    payload: sanitizeVisionPayload(data),
+    payload: sanitizeVisionPayload(data),costUsd:data?.costUsd,
     inputTokens: data?.inputTokens ?? 0,
     outputTokens: data?.outputTokens ?? 0,
   };
@@ -477,6 +478,8 @@ async function processImage(
   tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number;
   outputTokens: number; costUsd: number; escalated: boolean;
 }> {
+  model=executionReviewModel('analyze-table-image',model);
+  const cacheKey=reviewCacheKey(c.sha1,'vision',model);
   let fromCache = 0, inputTokens = 0, outputTokens = 0, costUsd = 0;
   let escalated = false;
   let usedModel = model;
@@ -484,7 +487,7 @@ async function processImage(
   // cache primeiro — só vale se foi gerado pela versão ATUAL da lógica
   let payload: CachePayload | null = null;
   const { data: hit } = await db.from('vision_cache')
-    .select('payload, schema_version, model').eq('sha1', c.sha1).maybeSingle();
+    .select('payload, schema_version, model').eq('sha1', cacheKey).maybeSingle();
   if (hit?.payload && (hit.schema_version ?? 1) >= CACHE_SCHEMA && isUsableCachePayload(hit.payload)) {
     payload = sanitizeVisionPayload(hit.payload);
     usedModel = (hit.model as ModelId) ?? model;
@@ -495,7 +498,7 @@ async function processImage(
     const first = await extractWithModel(c, model);
     inputTokens += first.inputTokens;
     outputTokens += first.outputTokens;
-    costUsd += calculateCost(first.inputTokens, first.outputTokens, model);
+    costUsd += first.costUsd ?? calculateCost(first.inputTokens, first.outputTokens, model);
     payload = first.payload;
 
     // escalonamento: extração barata que não fecha → confirma no 4o (preço próprio),
@@ -504,7 +507,7 @@ async function processImage(
       const second = await extractWithModel(c, 'gpt-4o', await upscaleForRetry(c));
       inputTokens += second.inputTokens;
       outputTokens += second.outputTokens;
-      costUsd += calculateCost(second.inputTokens, second.outputTokens, 'gpt-4o');
+      costUsd += second.costUsd ?? calculateCost(second.inputTokens, second.outputTokens, 'gpt-4o');
       escalated = true;
       usedModel = 'gpt-4o';
       const formatosConfirmados = matchingFormatAnomalies(first.payload.anomalias_formato, second.payload.anomalias_formato);
@@ -519,7 +522,7 @@ async function processImage(
     }
 
     await db.from('vision_cache').upsert({
-      sha1: c.sha1, payload,
+      sha1: cacheKey, payload,
       input_tokens: inputTokens, output_tokens: outputTokens,
       schema_version: CACHE_SCHEMA, model: usedModel,
     });
@@ -551,7 +554,7 @@ export function analyzeVisionPayload(
   // fonte da leitura, para o analista saber a confiança
   const readingsAgree = payload?.releitura?.concordam === true;
   // Selo de “Erro” para QUALQUER achado desta imagem: releitura que concordou.
-  const trusted = escalated && readingsAgree;
+  const trusted = usedModel !== 'gpt-6-luna' && escalated && readingsAgree;
   const origemLeitura = escalated
     ? readingsAgree
       ? 'confirmado no gpt-4o (após divergência no modelo econômico)'
@@ -563,7 +566,7 @@ export function analyzeVisionPayload(
   (stitchColumnSplits(payload?.tables ?? [])).forEach((raw, ti) => {
     const ext = toExtracted(raw);
     if (!ext) return;
-    const ref: ExtractedTableRef = { slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext, ...(escalated && !readingsAgree ? { unstable: true } : {}), ...(/gpt-4o(?!-mini)/.test(usedModel) && !(escalated && !readingsAgree) ? { reliable: true } : {}) };
+    const ref: ExtractedTableRef = { slide: c.slide, secao: c.secao, titulo: c.titulo, sha1: c.sha1, table: ext, ...(escalated && !readingsAgree ? { unstable: true } : {}), ...((usedModel==='gpt-6-luna' ? payloadIsClean(payload) : /gpt-4o(?!-mini)/.test(usedModel) && !(escalated && !readingsAgree)) ? { reliable: true } : {}) };
     tables.push(ref);
     tablesExtracted++;
     let flagged = false;

@@ -24,6 +24,14 @@ export function compareResults(expected, actual) {
   return { equal: !removed.length && !added.length && !changed.length && !summaryChanged, removed, added, changed, summaryChanged };
 }
 
+// Evolução explícita de regra: baseline original intocada, antes/depois exatos revisados.
+export function resultFingerprint(value) {
+  return createHash('sha256').update(JSON.stringify(canonical({summary:value.summary,findings:[...value.findings].sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0)}))).digest('hex');
+}
+export function approvedRuleDelta(expected,actual,approval) {
+  return Boolean(approval?.reason && approval.before===resultFingerprint(expected) && approval.after===resultFingerprint(actual));
+}
+
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = path => JSON.parse(readFileSync(path, 'utf8'));
 const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
@@ -111,6 +119,8 @@ async function main() {
   const args = process.argv.slice(2);
   const selected = args.find(a => a.startsWith('--only='))?.slice(7).split(',');
   const manifest = readJson(resolve(repo, 'docs/features/corretor-vocacionais/calibracao/automacao/cases.json'));
+  const approvalPath=args.find(a=>a.startsWith('--review-deltas='))?.slice('--review-deltas='.length);
+  const approvals=approvalPath?readJson(resolve(repo,approvalPath)):null;
   const cases = selected ? manifest.cases.filter(c => selected.includes(c.id)) : manifest.cases;
   if (!cases.length || selected?.some(id => !manifest.cases.some(c => c.id === id))) throw new Error('Caso desconhecido em --only');
   const seRoot = resolve(repo, '..', '..');
@@ -132,6 +142,9 @@ async function main() {
       const result = await replay(c, false, join(outputDir,c.id+'.fixture.json'));
       entry.diff = compareResults(expected,result); entry.summary = result.summary;
       entry.baseline = entry.diff.equal ? 'pass' : 'review';
+      if(!entry.diff.equal && approvedRuleDelta(expected,result,approvals?.cases?.[c.id])) {
+        entry.baseline='pass';entry.approvedDelta=approvals.cases[c.id];
+      }
       if (!existsSync(c.excelPath)) throw new Error(`Excel bruto ausente: ${c.excelPath}`);
       const names = readdirSync(c.excelPath).filter(n => /\.xls[xm]$/i.test(n)).sort();
       if (JSON.stringify(names) !== JSON.stringify(c.excelFiles.map(f=>f.name))) throw new Error('Conjunto de Excel mudou: revisar material antes de comparar');

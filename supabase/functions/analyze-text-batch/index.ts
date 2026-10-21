@@ -1,3 +1,4 @@
+import { callReviewProvider } from '../_shared/review-provider.ts';
 // Edge Function: analyze-text-batch (Corretor v3.1)
 // Revisão de TEXTO em lote sobre o IR do estudo — ortografia (SPELLING),
 // cidade/contexto (CITY_NAME) e coerência texto×tabela (COHERENCE).
@@ -43,7 +44,7 @@ function rateLimited(ip: string): boolean {
 }
 
 // --- Validação ------------------------------------------------------------
-const MODELS = ['gpt-4o', 'gpt-4o-mini'] as const;
+const MODELS = ['gpt-4o', 'gpt-4o-mini', 'gpt-6-luna'] as const;
 type ModelId = (typeof MODELS)[number];
 
 const MAX_SLIDES_PER_BATCH = 20;
@@ -113,27 +114,8 @@ Responda EXATAMENTE este JSON (sem markdown):
 {"findings": [{"slide": 12, "type": "SPELLING", "description": "…", "evidence": "trecho exato", "severity": "LOW|MEDIUM|HIGH"}]}`;
 }
 
-async function callOpenAI(apiKey: string, body: RequestBody, retries = 3) {
-  const payload = {
-    model: body.model,
-    max_tokens: 1500,
-    messages: [{ role: 'user', content: buildPrompt(body.city, body.slides) }],
-    response_format: { type: 'json_object' },
-  };
-  for (let attempt = 0; attempt < retries; attempt++) {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify(payload),
-    });
-    if (res.status === 429 && attempt < retries - 1) {
-      await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
-      continue;
-    }
-    if (!res.ok) throw new Error(`OpenAI ${res.status}: ${await res.text()}`);
-    return await res.json();
-  }
-  throw new Error('Max retries exceeded');
+async function callOpenAI(apiKey: string, body: RequestBody) {
+  return callReviewProvider(apiKey,body.model,'analyze-text-batch',[{role:'user',content:buildPrompt(body.city,body.slides)}]);
 }
 
 Deno.serve(async (req) => {
@@ -163,14 +145,7 @@ Deno.serve(async (req) => {
     if (!parsed.ok) return json({ error: parsed.error }, parsed.status);
 
     const response = await callOpenAI(apiKey, parsed.value);
-    let content: { findings?: unknown[] } = {};
-    try { content = JSON.parse(response.choices?.[0]?.message?.content ?? '{}'); } catch { content = { findings: [] }; }
-
-    return json({
-      findings: Array.isArray(content.findings) ? content.findings : [],
-      inputTokens: response.usage?.prompt_tokens ?? 0,
-      outputTokens: response.usage?.completion_tokens ?? 0,
-    });
+    return json({findings: response.content?.findings ?? [], ...response.meta});
   } catch (err) {
     return json({ error: 'Não foi possível concluir este lote. Confira a execução antes de retomar.' }, 500);
   }

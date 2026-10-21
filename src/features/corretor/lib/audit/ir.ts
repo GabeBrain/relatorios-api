@@ -25,6 +25,8 @@ export interface IrGrafico {
 }
 
 export interface IrSlide {
+  /** Retrato da classificação anterior: somente para retomar lotes legados sem mudar payloads. */
+  legacy_review?: Pick<IrSlide,'titulo'|'secao_canonica'|'textos'|'fontes'|'notas'|'notas_edicao'|'notas_revisao'|'flags'>;
   n: number;
   titulo: string | null;
   secao_canonica: string | null;

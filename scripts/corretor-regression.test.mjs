@@ -1,7 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { compareResults } from './corretor-regression.mjs';
+import { compareResults, approvedRuleDelta, resultFingerprint } from './corretor-regression.mjs';
 const before = { summary: { achados: 2, tabelas: '1/2' }, findings: [{ id: 'real', detail: '87 ≠ 184', type: 'SOURCE_CROSSCHECK' }, { id: 'format', detail: 'ano 2.023' }] };
+
+test('aprovação de evolução vale só para o antes/depois exato, com justificativa',()=>{
+ const after={...before,findings:[...before.findings,{id:'unit',detail:'Unidade a conferir'}]};
+ const approval={before:resultFingerprint(before),after:resultFingerprint(after),reason:'Nova regra de unidade, achados antigos preservados'};
+ assert.equal(approvedRuleDelta(before,after,approval),true);
+ assert.equal(approvedRuleDelta(before,{...after,findings:after.findings.slice(1)},approval),false);
+ assert.equal(approvedRuleDelta(before,{...after,summary:{achados:99}},approval),false);
+ assert.equal(approvedRuleDelta(before,after,{...approval,reason:''}),false);
+});
 test('não perde erro real quando a contagem permanece igual', () => {
   const diff = compareResults(before,{ ...before,findings:[before.findings[1],{id:'new'}] });
   assert.deepEqual(diff.removed,['real']); assert.deepEqual(diff.added,['new']); assert.equal(diff.equal,false);

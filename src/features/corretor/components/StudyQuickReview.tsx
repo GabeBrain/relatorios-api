@@ -35,7 +35,7 @@ export default function StudyQuickReview({ study, queue, onStatus, onVerdict, on
   }, [item, onStatus, onVerdict]);
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
+      const target = event.target instanceof Element ? event.target : null;
       if (target?.closest('input,textarea,button,a,[role="combobox"],[contenteditable="true"]') || lock.current) return;
       const command: Record<string, Decision> = { c: 'corrigido', f: 'fp', i: 'ignorado', ArrowRight: 'pendente' };
       if (command[event.key]) { event.preventDefault(); void act(command[event.key]); }

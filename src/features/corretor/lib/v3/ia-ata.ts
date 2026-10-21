@@ -1,4 +1,5 @@
-import { invokeAnalysis } from './execution';
+import { invokeAnalysis, executionReviewModel } from './execution';
+import { reviewCacheKey } from '../../../../../supabase/functions/_shared/reviewer';
 // Corretor v3.3 (Fase A da ata) — extração da ata de abertura para JSON estruturado.
 // Cache-first no vision_cache (sha1 da imagem, ou do texto no caso DOCX); cada ata é
 // paga uma vez. Extração da LLM é HIPÓTESE — o analista revisa (fases B/C).
@@ -76,7 +77,7 @@ export async function estimateAtaPass(
   model: ModelId
 ): Promise<AtaEstimate> {
   if (!candidate) return { hasAta: false, cached: false, inputTokens: 0, outputTokens: 0, costUsd: 0 };
-  const { data } = await db.from('vision_cache').select('sha1, schema_version').eq('sha1', `ata:${candidate.sha1}`).maybeSingle();
+  const { data } = await db.from('vision_cache').select('sha1, schema_version').eq('sha1', reviewCacheKey(candidate.sha1,'ata',model)).maybeSingle();
   if (data && (data.schema_version ?? 1) >= ATA_CACHE_SCHEMA) {
     return { hasAta: true, cached: true, inputTokens: 0, outputTokens: 0, costUsd: 0 };
   }
@@ -94,18 +95,19 @@ function toBase64(bytes: Uint8Array): string {
   return btoa(bin);
 }
 
-async function callEdge(body: Record<string, unknown>): Promise<{ ata: AtaData | null; inputTokens: number; outputTokens: number }> {
+async function callEdge(body: Record<string, unknown>): Promise<{ ata: AtaData | null; inputTokens: number; outputTokens: number; costUsd?: number }> {
   const { data, error } = await invokeAnalysis<{
-    ata: AtaData | null; inputTokens: number; outputTokens: number; error?: string;
+    ata: AtaData | null; inputTokens: number; outputTokens: number; costUsd?: number; error?: string;
   }>('analyze-ata-image', body);
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
-  return { ata: data?.ata ?? null, inputTokens: data?.inputTokens ?? 0, outputTokens: data?.outputTokens ?? 0 };
+  return { ata: data?.ata ?? null, inputTokens: data?.inputTokens ?? 0, outputTokens: data?.outputTokens ?? 0, costUsd: data?.costUsd };
 }
 
 /** Extrai a ata de uma IMAGEM (print colado no slide). Cache por sha1. */
 export async function extractAtaFromImage(c: AtaImageCandidate, model: ModelId): Promise<AtaExtractResult> {
-  const cacheKey = `ata:${c.sha1}`;
+  model=executionReviewModel('analyze-ata-image',model);
+  const cacheKey = reviewCacheKey(c.sha1,'ata',model);
   const { data: hit } = await db.from('vision_cache').select('payload, schema_version').eq('sha1', cacheKey).maybeSingle();
   // Uma resposta nula pode ter vindo de uma candidata errada; nunca a reutilize.
   if (hit?.payload?.ata && (hit.schema_version ?? 1) >= ATA_CACHE_SCHEMA) {
@@ -119,12 +121,13 @@ export async function extractAtaFromImage(c: AtaImageCandidate, model: ModelId):
       schema_version: ATA_CACHE_SCHEMA, model,
     });
   }
-  return { ata: res.ata, fromCache: false, inputTokens: res.inputTokens, outputTokens: res.outputTokens, costUsd: calculateCost(res.inputTokens, res.outputTokens, model) };
+  return { ata: res.ata, fromCache: false, inputTokens: res.inputTokens, outputTokens: res.outputTokens, costUsd: res.costUsd ?? calculateCost(res.inputTokens, res.outputTokens, model) };
 }
 
 /** Extrai a ata de um TEXTO (DOCX) — ~10× mais barato, sem visão. Cache por sha1 do texto. */
 export async function extractAtaFromText(texto: string, sha1: string, model: ModelId): Promise<AtaExtractResult> {
-  const cacheKey = `ata:${sha1}`;
+  model=executionReviewModel('analyze-ata-image',model);
+  const cacheKey = reviewCacheKey(sha1,'ata',model);
   const { data: hit } = await db.from('vision_cache').select('payload, schema_version').eq('sha1', cacheKey).maybeSingle();
   if (hit?.payload?.ata && (hit.schema_version ?? 1) >= ATA_CACHE_SCHEMA) {
     return { ata: hit.payload.ata as AtaData | null, fromCache: true, inputTokens: 0, outputTokens: 0, costUsd: 0 };
@@ -137,5 +140,5 @@ export async function extractAtaFromText(texto: string, sha1: string, model: Mod
       schema_version: ATA_CACHE_SCHEMA, model,
     });
   }
-  return { ata: res.ata, fromCache: false, inputTokens: res.inputTokens, outputTokens: res.outputTokens, costUsd: calculateCost(res.inputTokens, res.outputTokens, model) };
+  return { ata: res.ata, fromCache: false, inputTokens: res.inputTokens, outputTokens: res.outputTokens, costUsd: res.costUsd ?? calculateCost(res.inputTokens, res.outputTokens, model) };
 }

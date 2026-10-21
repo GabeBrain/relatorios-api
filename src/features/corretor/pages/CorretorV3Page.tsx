@@ -6,6 +6,7 @@ import { processingMessage } from '../lib/processing-message';
 
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { beginExecution, finishExecution, hasActiveExecution } from '../lib/v3/execution';
+import { reviewProfile } from '../../../../supabase/functions/_shared/reviewer';
 import StudyPreparationPage, { type PreparedStudy } from '../components/StudyPreparationPage';
 import { summarizeStudy } from '../lib/study-summary';
 import StudyQuickReview from '../components/StudyQuickReview';
@@ -69,7 +70,7 @@ import { sourceCrosscheckFindings as crosscheckDet, sourceCrosscheckVisionFindin
 import { extractFonteFromExcel } from '../lib/v3/fonte-extractor-browser';
 import { sourceCrosscheckFindings } from '../lib/v3/source-crosscheck';
 
-const MODEL: ModelId = 'gpt-4o-mini'; // econômico por padrão; visão cai p/ R$ 0 após cache
+const MODEL: ModelId = reviewProfile().models['analyze-table-image'];
 
 // Rótulo humano de cada etapa do pipeline de passo único
 type BannerStage = StageProgress['stage'] | 'gravando';
@@ -732,7 +733,7 @@ export default function CorretorV3Page() {
       const ir = await pptxToIr(deck.bytes, deck.name);
       setReviewContext({ studyId: selected.id, ir });
       const candidates = await findTableImages(deck.bytes, ir);
-      const readings = await loadVisionReadings(candidates.map((c) => c.sha1));
+      const readings = await loadVisionReadings(candidates.map((c) => c.sha1), selected.analise?.reviewProfileId);
       const vision = replayVisionPass(candidates, readings, { cidade: selected.cidade ?? '', uf: selected.uf, outras: readOutras(selected.id) });
       const tally = { comparados: 0, batem: 0 };
       const det = crosscheckDet(ir, fonte, tally);

@@ -7,7 +7,7 @@ export type { ErrorType };
 export type Severity = 'HIGH' | 'MEDIUM' | 'LOW';
 export type SlideStatus = 'pending' | 'processing' | 'done' | 'skipped' | 'error';
 export type AnalysisStatus = 'idle' | 'processing' | 'done' | 'cancelled';
-export type ModelId = 'gpt-4o' | 'gpt-4o-mini';
+export type ModelId = 'gpt-4o' | 'gpt-4o-mini' | 'gpt-6-luna';
 
 /** Veredito da analista na revisão: bug real ou falso positivo. */
 export type Verdict = 'bug' | 'fp';

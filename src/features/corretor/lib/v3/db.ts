@@ -2,6 +2,7 @@
 // Requer a migration 20260709100000_corretor_v3.sql.
 
 import { supabase } from '@/integrations/supabase/client';
+import { reviewCacheKey, LUNA_REVIEW_PROFILE } from '../../../../../supabase/functions/_shared/reviewer';
 import type { Finding } from '../audit/model';
 import type { AtaData } from './ia-ata';
 import type { AnalysisReport } from './pipeline';
@@ -598,11 +599,12 @@ export async function loadTranscribedBySha1(shas: string[]): Promise<Map<string,
  * cruzamento com planilhas DEPOIS da análise: refaz as tabelas lidas sem nova
  * chamada de IA e sem custo.
  */
-export async function loadVisionReadings(shas: string[]): Promise<Map<string, { payload: unknown; model?: string }>> {
+export async function loadVisionReadings(shas: string[], profileId?: string): Promise<Map<string, { payload: unknown; model?: string }>> {
   const out = new Map<string, { payload: unknown; model?: string }>();
   for (let i = 0; i < shas.length; i += 50) {
-    const { data } = await db.from('vision_cache').select('sha1, payload, model').in('sha1', shas.slice(i, i + 50));
-    for (const row of data ?? []) out.set(row.sha1 as string, { payload: row.payload, model: (row.model as string) ?? undefined });
+    const keys = shas.slice(i,i+50).map(sha=>profileId===LUNA_REVIEW_PROFILE?reviewCacheKey(sha,'vision','gpt-6-luna'):sha);
+    const { data } = await db.from('vision_cache').select('sha1, payload, model').in('sha1', keys);
+    for (const row of data ?? []) { const index=keys.indexOf(row.sha1); if(index>=0)out.set(shas[i+index], { payload: row.payload, model: (row.model as string) ?? undefined }); }
   }
   return out;
 }

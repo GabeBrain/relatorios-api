@@ -1,0 +1,57 @@
+// PostgreSQL em memória; usa somente migrations reais e dados técnicos descartáveis.
+import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import assert from 'node:assert/strict';
+const {PGlite}=await import(pathToFileURL(resolve(process.env.CORRETOR_PGLITE_MODULE??'.local-inputs/pg-verify/node_modules/@electric-sql/pglite/dist/index.js')).href);
+const db=new PGlite(),checks=[];
+await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;
+ create schema auth;create function auth.uid() returns uuid language sql as $$select null::uuid$$;
+ create table public.studies_v3(id uuid primary key default gen_random_uuid(),nome text,generation text,custo_total numeric default 0);
+ create table public.study_versions(id uuid primary key default gen_random_uuid(),study_id uuid references studies_v3(id),n integer,sha1 text,n_slides integer,arquivo text,created_at timestamptz default now());
+ create table public.ia_passes(id uuid primary key default gen_random_uuid(),study_id uuid references studies_v3(id),tipo text,escopo text,custo_usd numeric,input_tokens integer,output_tokens integer,created_at timestamptz default now());`);
+for(const name of ['20261015193000_corretor_execution_ledger.sql','20261016153609_corretor_recommendation_metrics.sql','20261019203600_corretor_recommendation_model_profiles.sql','20261021223119_corretor_review_model_profiles.sql'])await db.exec(readFileSync('supabase/migrations/'+name,'utf8'));
+const sid='11111111-1111-4111-8111-111111111111';
+await db.query('insert into studies_v3(id) values($1)',[sid]);
+const profile={id:'luna-high-review-2026-10-21',configVersion:'review-profiles-v1',reasoningEffort:'high',promptVersion:'review-2026-10-21',rulesVersion:'review-guajajaras-2026-10-21',extractionVersion:'review-evidence-v1',priceVersion:'openai-standard-2026-10-21',serviceTier:'default',prices:{'gpt-6-luna':{input:0.1,cached:0.01,output:0.5}}};
+async function execution(context,hash,budget=3,validation=null){return (await db.query('insert into corretor_executions(study_id,version_n,document_sha1,context_hash,confirmed_context,owner_hash,budget_usd,validation_budget_id) values($1,1,$2,$3,$4,$5,$6,$7) returning id',[sid,'a'.repeat(40),hash,context,'owner',budget,validation])).rows[0].id;}
+async function claim(id,hash,reserve=0.3){return(await db.query('select corretor_claim_batch($1,$2,$3,$4,$5) v',[id,'owner',hash,'analyze-text-batch',reserve])).rows[0].v;}
+async function finish(id,hash,response,cost){return db.query('select corretor_finish_batch($1,$2,$3,$4)',[id,hash,response,cost]);}
+async function denied(label,run){await assert.rejects(run);checks.push(label);}
+const response={profileId:profile.id,configVersion:profile.configVersion,reasoningEffort:'high',promptVersion:profile.promptVersion,rulesVersion:profile.rulesVersion,extractionVersion:profile.extractionVersion,priceVersion:profile.priceVersion,requestedModel:'gpt-6-luna',model:'gpt-6-luna',requestedServiceTier:'default',serviceTier:'default',promptHash:'b'.repeat(64),inputTokens:1000,cachedTokens:200,outputTokens:500,reasoningTokens:400,finishReason:'stop',findings:[]};
+const id=await execution({reviewProfile:profile,usageOrigin:'validation'},'first',3,'amanda-review-2026-10-21');
+await claim(id,'one');
+await denied('perfil divergente não é contabilizado',()=>finish(id,'one',{...response,reasoningEffort:null},0.000332));
+await denied('preço divergente não é contabilizado',()=>finish(id,'one',response,0.001));
+await finish(id,'one',response,0.000332);
+const usage=(await db.query('select * from ia_passes where execution_id=$1',[id])).rows;
+assert.equal(usage.length,1);assert.equal(usage[0].reasoning_tokens,400);assert.equal(usage[0].profile_id,profile.id);assert.equal(usage[0].usage_origin,'validation');
+checks.push('custo/cache/raciocínio/perfil persistidos uma única vez');
+assert.equal((await claim(id,'one')).cached,true);
+assert.equal((await db.query('select count(*) n from ia_passes where execution_id=$1',[id])).rows[0].n,1);
+checks.push('replay não repete provedor nem contabilização');
+await denied('finish duplicado rejeitado',()=>finish(id,'one',response,0.000332));
+await claim(id,'invalid-json');await finish(id,'invalid-json',{...response,error:'Leitura incompleta',finishReason:'length'},0.000332);
+assert.equal((await db.query('select state from corretor_executions where id=$1',[id])).rows[0].state,'failed');checks.push('uso com JSON inválido contabilizado, execução falha');
+const other=await execution({reviewProfile:profile,usageOrigin:'validation'},'second',3,'amanda-review-2026-10-21');
+await claim(other,'unknown',2.5);
+await db.query("update corretor_execution_batches set state='unknown' where execution_id=$1",[other]);
+const third=await execution({reviewProfile:profile,usageOrigin:'validation'},'third',3,'amanda-review-2026-10-21');
+await denied('reservas desconhecidas de outro lote contam no teto global US$3',()=>claim(third,'over',0.5));
+await denied('lote desconhecido não é repetido',()=>claim(other,'unknown',2.5));
+const old=await execution({},'legacy');await claim(old,'legacy');await finish(old,'legacy',{inputTokens:100,outputTokens:10},0.000021);
+checks.push('execução antiga sem perfil conserva finalizador legado');
+const rec=await execution({},'consultive-legacy');
+const vid='22222222-2222-4222-8222-222222222222';
+await db.query('insert into study_versions(id,study_id,n,sha1) values($1,$2,1,$3)',[vid,sid,'a'.repeat(40)]);
+await db.query("update corretor_executions set purpose='recommendation' where id=$1",[rec]);
+await db.query("insert into corretor_recommendations(execution_id,study_id,version_id,version_n,document_sha1,model,prompt_version,price_version,estimated_usd,budget_usd,total_requests,coverage) values($1,$2,$3,1,$4,'gpt-4o-mini','legacy','legacy',0.1,3,1,'{}')",[rec,sid,vid,'a'.repeat(40)]);
+await db.query('select corretor_claim_batch($1,$2,$3,$4,$5)',[rec,'owner','consult','analyze-consulting-suggestion',0.3]);
+await finish(rec,'consult',{inputTokens:100,outputTokens:10,suggestion:'Sugestão preservada',finishReason:'stop'},0.000021);
+const saved=(await db.query('select state,content,provider_calls from corretor_recommendations where execution_id=$1',[rec])).rows[0];
+assert.equal(saved.state,'completed');assert.equal(saved.content,'Sugestão preservada');assert.equal(saved.provider_calls,1);
+checks.push('recomendação delegada mantém conteúdo, estado e contabilização');
+await db.exec('set role anon');await denied('visitante não consulta nem altera orçamento técnico',()=>db.query('select * from corretor_review_validation_budgets'));
+await denied('visitante não executa finalizador privilegiado',()=>finish(id,'one',response,0.000332));await db.exec('reset role');
+const out=resolve('.local-inputs/review-luna-20261021');mkdirSync(out,{recursive:true});writeFileSync(out+'/sql-result.json',JSON.stringify({engine:'PGlite/PostgreSQL',remoteWrites:0,paidCalls:0,passed:checks.length,checks},null,2));
+console.log(JSON.stringify({passed:checks.length,checks}));await db.close();

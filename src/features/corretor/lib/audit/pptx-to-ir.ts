@@ -56,9 +56,18 @@ function isReviewNoteShape(shape: Element): boolean {
 const VOCATIVE_RX = /^\s*[A-ZÀ-Ú][a-zà-ú]{2,}(?:\s[A-ZÀ-Ú][a-zà-ú]+)?\s*,/;
 const CHAT_RX = /(?<![\p{L}])(?:fiquei|eu\s+(?:fiz|coloquei|deixei|n[ãa]o|achei|acho|vi)|conforme\s+(?:falei|conversamos|combinamos)|na\s+d[úu]vida|n[ãa]o\s+sei\s+se|voc[êe]|te\s+(?:mandei|passei|falei)|me\s+(?:avisa|fala|diz))(?![\p{L}])/giu;
 
-export function isConversationalNote(text: string): boolean {
+function legacyConversationalNote(text: string): boolean {
   const marks = text.match(CHAT_RX)?.length ?? 0;
   return marks >= 2 || (marks >= 1 && VOCATIVE_RX.test(text));
+}
+export function isConversationalNote(text: string): boolean {
+  // Respostas curtas e pedidos editoriais em caixas comuns, preservando os dados em vermelho.
+  const flat = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  if (/^(?:ajustad[oa]s?(?:\b|$)|reajustado\b|ajustei\b|eu retirei\b|nao e o mesmo[.!\s]*$)/.test(flat)) return true;
+  if (/^(?:conseguimos adicionar|me manda|trazer tabela|ajustar tabela|inserir metragem|melhorar (?:o |a )?(?:mapa|qualidade))\b/.test(flat)) return true;
+  if (/^sobre o\b/.test(flat) && /ainda nao|segundo o site|tmb|existe mesmo/.test(flat)) return true;
+  if (/^mapa ajustado\b/.test(flat) || /^[^\n]{3,100}\s[–—-]\s*incluir\s*\(/.test(flat)) return true;
+  return legacyConversationalNote(text);
 }
 
 export function parseNumPtbr(raw: string): number | null {
@@ -146,11 +155,14 @@ function parseSlide(xml: string, num: number, parser: DOMParser): IrSlide {
 
   const shapesParas: string[][] = [];
   const notasRevisao: string[] = [];
+  const legacyShapes: string[][] = [], legacyNotes: string[] = [];
   for (const sp of els(root, NS.p, 'sp')) {
     const tx = els(sp, NS.p, 'txBody')[0];
     if (tx) {
       const paras = txbodyParagraphs(tx);
       if (!paras.length) continue;
+      if (isReviewNoteShape(sp) || legacyConversationalNote(paras.join(' '))) legacyNotes.push(paras.join('\n'));
+      else legacyShapes.push(paras);
       if (isReviewNoteShape(sp) || isConversationalNote(paras.join(' '))) notasRevisao.push(paras.join('\n'));
       else shapesParas.push(paras);
     }
@@ -163,9 +175,17 @@ function parseSlide(xml: string, num: number, parser: DOMParser): IrSlide {
   // slides com fonte visível viravam SOURCE_MISSING. Ver CH-4 do sprint.
   const tabelas = els(root, NS.a, 'tbl').map(parseTable);
   const cellParas = tabelas.flatMap((t) => t.linhas.flat()).filter((c) => c.trim());
+  const legacyParas=legacyShapes.flat();
+  const legacySnapshot: IrSlide['legacy_review']=shapesParas.length===legacyShapes.length ? undefined : {
+    titulo:slideTitle(root,legacyShapes),secao_canonica:secaoCanonica(slideTitle(root,legacyShapes)),textos:legacyShapes.map(p=>p.join('\n')),
+    fontes:[...legacyParas,...cellParas].filter(p=>FONTE_RX.test(p)),notas:legacyParas.filter(p=>NOTA_RX.test(p)&&!FONTE_RX.test(p)),
+    notas_edicao:legacyParas.filter(p=>p.length>3&&p.length<80&&LEFTOVER_RX.test(p)),notas_revisao:legacyNotes,
+    flags:{resposta_multipla:MULTI_RESP_RX.test(legacyParas.join(' '))},
+  };
 
   return {
     n: num,
+    ...(legacySnapshot ? {legacy_review:legacySnapshot} : {}),
     titulo: slideTitle(root, shapesParas),
     secao_canonica: secaoCanonica(slideTitle(root, shapesParas)),
     textos: shapesParas.map((paras) => paras.join('\n')),

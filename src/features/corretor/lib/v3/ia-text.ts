@@ -1,4 +1,4 @@
-import { invokeAnalysis } from './execution';
+import { invokeAnalysis, executionReviewModel } from './execution';
 // Corretor v3.1 — passe de IA de TEXTO sobre o IR (ortografia/cidade/coerência).
 // Batches de N slides por chamada à edge function analyze-text-batch.
 // Custo estimado ANTES de rodar; IDs de achado estáveis por conteúdo.
@@ -93,19 +93,20 @@ export async function runTextPass(
   onProgress?: (done: number, total: number) => void,
   signal?: AbortSignal
 ): Promise<TextPassResult> {
+  model=executionReviewModel('analyze-text-batch',model);
   const slides = reviewableSlides(ir);
   const secao = new Map(ir.slides.map((s) => [s.n, toAuditSection(s.secao_canonica)]));
   const batches: IrSlide[][] = [];
   for (let i = 0; i < slides.length; i += BATCH_SIZE) batches.push(slides.slice(i, i + BATCH_SIZE));
 
   const findings: Finding[] = [];
-  let inputTokens = 0, outputTokens = 0;
+  let inputTokens = 0, outputTokens = 0, costUsd = 0;
 
   for (let bi = 0; bi < batches.length; bi++) {
     if (signal?.aborted) break;
     const batch = batches[bi];
     const { data, error } = await invokeAnalysis<{
-      findings: RawIaFinding[]; inputTokens: number; outputTokens: number; error?: string;
+      findings: RawIaFinding[]; inputTokens: number; outputTokens: number; costUsd?: number; error?: string;
     }>('analyze-text-batch', {
         city,
         model,
@@ -116,6 +117,7 @@ export async function runTextPass(
 
     inputTokens += data?.inputTokens ?? 0;
     outputTokens += data?.outputTokens ?? 0;
+    costUsd += data?.costUsd ?? calculateCost(data?.inputTokens ?? 0,data?.outputTokens ?? 0,model);
 
     for (const raw of data?.findings ?? []) {
       const type = ['SPELLING', 'CITY_NAME', 'COHERENCE'].includes(raw.type) ? raw.type : 'SPELLING';
@@ -139,5 +141,5 @@ export async function runTextPass(
     onProgress?.(bi + 1, batches.length);
   }
 
-  return { findings, inputTokens, outputTokens, costUsd: calculateCost(inputTokens, outputTokens, model), batches: batches.length };
+  return { findings, inputTokens, outputTokens, costUsd, batches: batches.length };
 }

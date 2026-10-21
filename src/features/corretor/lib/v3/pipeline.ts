@@ -5,6 +5,9 @@
 // estimativa passar do teto (config.BUDGET_STUDY_BRL).
 
 import { nestedRadiiFindings } from './nested-radii';
+import { semanticReviewFindings, categoryCoverageFindings } from './semantic-review';
+import { activeReviewProfileId, executionReviewIr } from './execution';
+import { reviewProfile } from '../../../../../supabase/functions/_shared/reviewer';
 import { entityConsistencyFindings } from './entity-consistency';
 import { narrativeTotalFindings } from './narrative-total';
 import type { Ir } from '../audit/ir';
@@ -28,7 +31,7 @@ import type { Fonte } from './fonte';
 import { sourceCrosscheckFindings, sourceCrosscheckVisionFindings, type SourceStats } from './source-crosscheck';
 
 /** Revisão textual usa o modelo mais preciso; visão e ata continuam seguindo a seleção do analista. */
-export const TEXT_REVIEW_MODEL: ModelId = 'gpt-4o';
+export const TEXT_REVIEW_MODEL: ModelId = reviewProfile().models['analyze-text-batch'];
 
 // ── estimativa combinada (antes de gastar) ────────────────────────────────────
 
@@ -149,6 +152,7 @@ export async function runPhase1(
   bytes: Uint8Array,
   opts: RunPhase1Opts
 ): Promise<Phase1Result> {
+  ir=executionReviewIr(ir);
   const { model, signal, onStage } = opts;
 
   const detFindings = [
@@ -184,6 +188,7 @@ export async function runPhase1(
  * aqui para o relatório de entrega mostrar "o que foi verificado".
  */
 export interface AnalysisReport {
+  reviewProfileId?: string;
   tabelasExtraidas: number;
   tabelasVerificadas: number;   // extraídas sem achado de soma/%/faixa
   imagensAnalisadas: number;
@@ -237,12 +242,13 @@ export async function runPhase2(
   ir: Ir,
   opts: RunPhase2Opts
 ): Promise<Phase2Result> {
+  ir=executionReviewIr(ir);
   const { city, uf, ata, model, candidates, signal, onStage } = opts;
   const cityUsed = city.trim() || ata?.cidade?.trim() || '';
 
   // DET com a UF confirmada + cobertura da ata editada.
   let detFindings = irToFindings(ir, { city: cityUsed, uf }).filter((f) => !f.ok);
-  detFindings = detFindings.concat(ataCoverageFindings(ir, ata).filter((f) => !f.ok));
+  detFindings = detFindings.concat(ataCoverageFindings(ir, ata, activeReviewProfileId()==='review-legacy-continuous-v1').filter((f) => !f.ok));
   // Fonte vinculada depois da triagem (no portão): o cruzamento DET roda aqui também.
   const acertos = { fonte: { comparados: 0, batem: 0 }, cruzamentos: { feitos: 0, batem: 0 } };
   if (opts.fonte) detFindings = detFindings.concat(sourceCrosscheckFindings(ir, opts.fonte, acertos.fonte));
@@ -291,6 +297,7 @@ export async function runPhase2(
   );
 
   const report: AnalysisReport = {
+    ...(activeReviewProfileId() ? {reviewProfileId: activeReviewProfileId()} : {}),
     ...(opts.fonte ? { fonte: acertos.fonte } : {}),
     cruzamentos: acertos.cruzamentos,
     tabelasExtraidas: vision.tablesExtracted,
@@ -321,6 +328,8 @@ export function combineVisionFindings(
 ): { visionFindings: Finding[]; crossFindings: Finding[] } {
   const unread = unreadImageFindings(candidates, vision.failed ?? []);
   const refs = nativeTableRefs(ir).concat(vision.tables.map((table) => ({ ...table, source: 'vision' as const })));
+  const legacy=activeReviewProfileId()==='review-legacy-continuous-v1';
+  const categories = legacy ? {findings:[],replacedSumIds:new Set<string>()} : categoryCoverageFindings(refs);
   const cross = crossTableFindings(ir, vision.tables, acertos?.cruzamentos);
   const projection = [...projectionFindings(refs), ...narrativeTotalFindings(ir, refs)];
   const coverage = [
@@ -328,9 +337,9 @@ export function combineVisionFindings(
     ...requiredAndExclusionFindings(ir, refs),
   ];
   const sourceCrosscheck = fonte ? sourceCrosscheckVisionFindings(ir, fonte, vision.tables, acertos?.fonte) : [];
-  const nested = [...nestedRadiiFindings(refs, fonte), ...entityConsistencyFindings(ir, refs)];
+  const nested = [...nestedRadiiFindings(refs, fonte), ...entityConsistencyFindings(ir, refs), ...(legacy?[]:semanticReviewFindings(ir, refs)), ...categories.findings];
   const crossFindings = applyDeclaredExclusions(ir, [...cross, ...projection, ...coverage, ...sourceCrosscheck, ...nested].filter((f) => !f.ok));
-  const visionFindings = reconcileDeckFindings([...vision.findings.filter((f) => !f.ok), ...crossFindings, ...unread], vision.tables);
+  const visionFindings = reconcileDeckFindings([...vision.findings.filter((f) => !f.ok && !categories.replacedSumIds.has(f.id)), ...crossFindings, ...unread], vision.tables);
   const kept = new Set(visionFindings.map((f) => f.id));
   return { visionFindings, crossFindings: [...crossFindings, ...unread].filter((f) => kept.has(f.id)).concat(visionFindings.filter((f) => f.id === 'vision-unsafe-sums')) };
 }

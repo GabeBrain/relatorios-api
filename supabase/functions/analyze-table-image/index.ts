@@ -1,3 +1,4 @@
+import { callReviewProvider } from '../_shared/review-provider.ts';
 // Edge Function: analyze-table-image (Corretor v3.2 — Fase C produtizada)
 // Extrai a(s) tabela(s) numérica(s) de UMA imagem para JSON estruturado.
 // O chamador cacheia por sha1 (vision_cache) — cada imagem é paga uma vez só.
@@ -41,7 +42,7 @@ function rateLimited(ip: string): boolean {
 }
 
 // --- Validação -------------------------------------------------------------
-const MODELS = ['gpt-4o', 'gpt-4o-mini'] as const;
+const MODELS = ['gpt-4o', 'gpt-4o-mini', 'gpt-6-luna'] as const;
 type ModelId = (typeof MODELS)[number];
 const MAX_BASE64_CHARS = 7_000_000;
 
@@ -142,33 +143,8 @@ Responda EXATAMENTE este JSON (sem markdown):
  "unidades": [], "anomalias_formato": [], "tem_fonte": false}
 Se não houver tabela numérica: {"tables": [], "locais_visiveis": [], "unidades": [], "anomalias_formato": [], "tem_fonte": false}`;
 
-async function callOpenAI(apiKey: string, body: RequestBody, retries = 3) {
-  const payload = {
-    model: body.model,
-    max_tokens: 4000,
-    messages: [{
-      role: 'user',
-      content: [
-        { type: 'text', text: PROMPT(body.contexto, body.tipo) },
-        { type: 'image_url', image_url: { url: `data:${body.mime};base64,${body.base64}`, detail: 'high' } },
-      ],
-    }],
-    response_format: { type: 'json_object' },
-  };
-  for (let attempt = 0; attempt < retries; attempt++) {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify(payload),
-    });
-    if (res.status === 429 && attempt < retries - 1) {
-      await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
-      continue;
-    }
-    if (!res.ok) throw new Error(`OpenAI ${res.status}: ${await res.text()}`);
-    return await res.json();
-  }
-  throw new Error('Max retries exceeded');
+async function callOpenAI(apiKey: string, body: RequestBody) {
+  return callReviewProvider(apiKey,body.model,'analyze-table-image',[{role:'user',content:[{type:'text',text:PROMPT(body.contexto,body.tipo)},{type:'image_url',image_url:{url:`data:${body.mime};base64,${body.base64}`,detail:'high'}}]}]);
 }
 
 Deno.serve(async (req) => {
@@ -198,18 +174,7 @@ Deno.serve(async (req) => {
     if (!parsed.ok) return json({ error: parsed.error }, parsed.status);
 
     const response = await callOpenAI(apiKey, parsed.value);
-    let content: { tables?: unknown[]; locais_visiveis?: unknown[]; unidades?: unknown[]; anomalias_formato?: unknown[]; tem_fonte?: unknown } = {};
-    try { content = JSON.parse(response.choices?.[0]?.message?.content ?? '{}'); } catch { content = { tables: [], locais_visiveis: [], unidades: [], tem_fonte: false }; }
-
-    return json({
-      tables: Array.isArray(content.tables) ? content.tables : [],
-      locais_visiveis: Array.isArray(content.locais_visiveis) ? content.locais_visiveis : [],
-      unidades: Array.isArray(content.unidades) ? content.unidades : [],
-      anomalias_formato: Array.isArray(content.anomalias_formato) ? content.anomalias_formato : [],
-      tem_fonte: content.tem_fonte === true,
-      inputTokens: response.usage?.prompt_tokens ?? 0,
-      outputTokens: response.usage?.completion_tokens ?? 0,
-    });
+    return json({...response.content, ...response.meta});
   } catch (err) {
     return json({ error: 'Não foi possível concluir este lote. Confira a execução antes de retomar.' }, 500);
   }
