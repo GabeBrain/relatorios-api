@@ -1301,6 +1301,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-21 — Estimativas de vendas Finotti: pacote técnico inicial — Gabriel / Codex
+- **Ambiente/funcionalidade:** Rebrain/SID, futura feature Estimativas de vendas; status PLANEJADA, sem motor/rota runtime.
+- **O quê/por quê:** contexto da reunião19/10, email21/10, equação horizontal, coeficientes, dados dos slides, regras históricas Monday, contrato candidato e roteiro de validação reunidos para conversa técnica dedicada. Rebrain é o destino do exercício; Edgar conduz/Gabriel apoia, integração Geobrain posterior.
+- **Arquivos:** [índice](../features/estimativas-vendas/README.md), [manifesto](../features/estimativas-vendas/MANIFESTO.md), fontes, contrato/validação e CTA. PPTX copiado com hash verificado para `.local-inputs/estimativas-vendas/2026-10-21/`, ignorada; original preservado.
+- **Evidência/estado:** dez slides e caches de quatro gráficos extraídos, links internos/manifesto verificados. Somente preparação documental; MD/código original, bandas, vertical, contrato oficial e teste retrospectivo real pendentes. Nenhuma UI, matemática executada, base real processada, escrita Monday, banco ou deploy. Commit isolado desta entrada e pacote; hash consultável pelo histórico da pasta.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`; leitura apenas.
+- **Impacto em Etapas/Pendências:** documentação inicial preparada; implementação e homologação não iniciadas. Próximo: recuperar insumos/contrato e reproduzir o caso fechado300/150/6 com as limitações descritas.
+
 ### 2026-10-21 — Empresas: fallback mensal com competência explícita — Gabriel / Codex
 - **Mudança:** proxy BigQuery passa a informar disponibilidade e vínculos entre estabelecimentos e empresas; materializador tenta até seis competências em ordem decrescente e publica somente carga íntegra. Cargas já publicadas são preservadas. Interface e exportações mostram a competência efetiva e aviso quando anterior ao alvo; rechecagem da fonte em até 24 horas.
 - **Evidência/estado:** código em `supabase/functions/empresas-*`, `src/features/empresas-empregados/` e `Sistema-Quanti/Sistema Novo/gcp/bigquery-proxy/`; testes focados, tipagem e build locais. Acesso de julho a maio/2026 sem linhas visíveis e abril disponível em consulta agregada de São Paulo (2.702.140 estabelecimentos com vínculo); sem materialização remota nesta etapa. Estado validado localmente; deploy do Cloud Run antes das três Edge Functions e Publish frontend, seguido de teste em São Paulo e cidade já publicada, pendentes.
@@ -2394,6 +2402,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**21/10 — Estimativas de vendas Finotti:** documentação inicial preparada em [estimativas-vendas](../features/estimativas-vendas/README.md); motor horizontal, contrato oficial, comparação retrospectiva e exercício de retorno ainda não iniciados. PLANEJADA; sem alteração runtime.
+
 **15/10 — Corretor F1–F6:** preparação/revisão validadas localmente; registro de execução e prévias têm limites de ativação/infraestrutura no resultado F1–F6. A2/A3/F3 servidor não encerradas.
 
 | # | Etapa | Status |
@@ -2422,6 +2432,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **Estimativas de vendas Finotti:** recuperar MD/código original e contrato Geobrain com Edgar; reproduzir equação horizontal/caso300-150-6 e comparar base real no horizonte mensal/trimestral. Confirmar cauda95%, faixas, modelo vertical e regras de alternância/coleta. [Manifesto e plano técnico](../features/estimativas-vendas/MANIFESTO.md). Pacote documental preparado, sem aceite operacional.
 
 - [ ] **Corretor v0.73:** revisar/publicar lote de fluxo contínuo, ativar migration/Edge/frontend e conferir produção. Conversão automática hospedada e recuperação da execução em outro navegador permanecem abertas; sem IA paga sem lote/orçamento.
 
