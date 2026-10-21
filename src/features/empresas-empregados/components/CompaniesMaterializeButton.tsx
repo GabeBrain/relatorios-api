@@ -45,7 +45,7 @@ export default function CompaniesMaterializeButton({ municipality, onSuccess }: 
     <div className="space-y-2">
       <Button type="button" variant="outline" onClick={handleClick} disabled={pending} className="gap-2">
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-        Atualizar dados deste município
+        Verificar dados mais recentes deste município
       </Button>
       {pending && (
         <p className="flex items-center gap-2 text-xs text-muted-foreground">

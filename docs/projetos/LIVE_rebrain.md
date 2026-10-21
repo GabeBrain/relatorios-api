@@ -1301,6 +1301,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-21 — Empresas: fallback mensal com competência explícita — Gabriel / Codex
+- **Mudança:** proxy BigQuery passa a informar disponibilidade e vínculos entre estabelecimentos e empresas; materializador tenta até seis competências em ordem decrescente e publica somente carga íntegra. Cargas já publicadas são preservadas. Interface e exportações mostram a competência efetiva e aviso quando anterior ao alvo; rechecagem da fonte em até 24 horas.
+- **Evidência/estado:** código em `supabase/functions/empresas-*`, `src/features/empresas-empregados/` e `Sistema-Quanti/Sistema Novo/gcp/bigquery-proxy/`; testes focados, tipagem e build locais. Acesso de julho a maio/2026 sem linhas visíveis e abril disponível em consulta agregada de São Paulo (2.702.140 estabelecimentos com vínculo); sem materialização remota nesta etapa. Estado validado localmente; deploy do Cloud Run antes das três Edge Functions e Publish frontend, seguido de teste em São Paulo e cidade já publicada, pendentes.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`; sem escrita no card.
+
 ### 2026-10-06 — FIERGS: retorno da Juliana sobre condomínios de casas — Gabriel + Codex
 - **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs`, análises horizontais de produto, preços e VGV.
 - **Diagnóstico:** o PPT de 69 slides anotado por Juliana pede casas agregadas em 57/59/60 e três produtos no 55. A auditoria anterior de 2T2026 tinha sete condomínios, mas o PPT atual mostra só loteamentos no 57; há também mudança de um loteamento aberto entre as fotografias. O VGV rotulava grupos horizontais por padrão como se todos fossem casas.

@@ -1,5 +1,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
+const DEFAULT_COMPETENCIA = '2026-07-01';
+
 const DEV_ORIGINS = ['http://localhost:8080', 'http://localhost:5173'];
 const PRODUCTION_ORIGIN = 'https://geobrain-relatorios.lovable.app';
 
@@ -32,7 +34,8 @@ Deno.serve(async (req) => {
     if (!(data ?? []).length) return json({ available: false, message: 'Ainda não há competência de Empresas publicada para este município.' }, 200, headers);
     const latest = data![0];
     const rows = data!.filter((row: any) => row.manifesto_id === latest.manifesto_id);
-    return json({ available: true, meta: { competencia: latest.competencia, source: latest.fonte, queryVersion: latest.query_version, methodologyVersion: latest.methodology_version, simplesReadAt: latest.simples_lido_em }, rows }, 200, headers);
+    const targetCompetencia = Deno.env.get('EMPRESAS_TARGET_COMPETENCIA')?.trim() || DEFAULT_COMPETENCIA;
+    return json({ available: true, meta: { competencia: latest.competencia, targetCompetencia, source: latest.fonte, queryVersion: latest.query_version, methodologyVersion: latest.methodology_version, simplesReadAt: latest.simples_lido_em }, rows }, 200, headers);
   } catch (error) {
     const code = error instanceof Error ? error.message : 'INTERNAL_ERROR';
     const status = code === 'UNAUTHORIZED' ? 401 : 500;

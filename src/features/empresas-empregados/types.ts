@@ -112,6 +112,7 @@ export interface CompaniesAggregatedRow {
 
 export interface CompaniesReportMeta {
   competencia: string;
+  targetCompetencia: string;
   source: string;
   queryVersion: string;
   methodologyVersion: string;

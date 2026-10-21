@@ -2,12 +2,22 @@
 // Interno: exige o segredo EMPRESAS_MATERIALIZER_SECRET no header x-empresas-materializer-secret.
 // Grava somente agregados; nunca CNPJ, razão social, CPF ou payload bruto.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { empresasMonths, proxyMonthUnavailable } from '../_shared/empresas-fallback.ts';
 
-const COMPETENCIA = '2026-07-01';
+const DEFAULT_COMPETENCIA = '2026-07-01';
+const MAX_MONTHS = 6;
+const MAX_PROCESSING_MS = 110_000;
+const PROXY_CALL_TIMEOUT_MS = 35_000;
 const QUERY_VERSION = 'empresas-pilot-v1';
 const METHODOLOGY_VERSION = 'empresas-pilot-methodology-v1';
 const SIMPLES_NOTE =
-  'Simples/MEI representa o estado cadastral atual da fonte, não uma foto histórica de julho/2026.';
+  'Simples/MEI representa o estado cadastral atual da fonte, não uma foto histórica da competência.';
+
+function targetCompetencia(): string {
+  const value = Deno.env.get('EMPRESAS_TARGET_COMPETENCIA')?.trim() || DEFAULT_COMPETENCIA;
+  if (!/^\d{4}-(0[1-9]|1[0-2])-01$/.test(value)) throw new SafeError('INVALID_TARGET_COMPETENCIA', 500, 'Competência alvo de Empresas inválida.');
+  return value;
+}
 
 const CORS = {
   'Access-Control-Allow-Origin': 'https://geobrain-relatorios.lovable.app',
@@ -240,7 +250,7 @@ function mergeAggregatedRows(rows: AggregatedRow[]): AggregatedRow[] {
   return [...merged.values()];
 }
 
-async function callProxy(scope: Scope) {
+async function callProxy(scope: Scope, timeoutMs: number) {
   const proxyUrl = Deno.env.get('BIGQUERY_PROXY_URL')?.replace(/\/$/, '');
   const secret = Deno.env.get('BIGQUERY_PROXY_HMAC_SECRET')?.trim();
   if (!proxyUrl || !secret) throw new SafeError('PROXY_CONFIGURATION', 500, 'Ponte BigQuery não configurada.');
@@ -260,6 +270,7 @@ async function callProxy(scope: Scope) {
         'X-Quanti-Signature': await proxySignature(secret, timestamp, body),
       },
       body,
+      signal: AbortSignal.timeout(timeoutMs),
     });
   } catch {
     throw new SafeError('PROXY_NETWORK', 502, 'Não foi possível alcançar a ponte BigQuery.');
@@ -291,60 +302,84 @@ Deno.serve(async (req) => {
 
   try {
     const scope = parseScope(await req.json().catch(() => null));
-
-    const manifestoPayload = {
-      id_municipio: scope.municipality.ibgeCode,
-      competencia: COMPETENCIA,
-      estabelecimentos_particao: scope.establishmentsPartition,
-      empresas_particao: scope.companiesPartition,
-      query_version: QUERY_VERSION,
-      methodology_version: METHODOLOGY_VERSION,
-      status: 'staging',
-      erro_codigo: null,
-      publicado_em: null,
-      gerado_em: new Date().toISOString(),
-    };
-    const upserted = await db
-      .from('empresas_estab_manifesto')
-      .upsert(manifestoPayload, { onConflict: 'id_municipio,competencia,query_version,methodology_version' })
-
-      .select('id')
-      .single();
-    if (upserted.error || !upserted.data) throw new SafeError('MANIFEST_WRITE', 500, 'Não foi possível preparar o manifesto.');
-    manifestoId = upserted.data.id as string;
-
-    const started = Date.now();
-    const result = await callProxy(scope);
-    const rawRows =
-      result.rows ??
-      result.data ??
-      result.aggregates ??
-      result.results ??
-      result.items ??
-      result.aggregatedRows ??
-      (result.data as Record<string, any> | undefined)?.rows;
-    const normalized = normalizeRows(rawRows, scope.municipality.ibgeCode);
-    const rows = mergeAggregatedRows(normalized.rows);
-    const linhasDescartadas = normalized.discarded;
-    const discardReasons = normalized.discardReasons;
-
-    const cleanup = await db.from('empresas_estab_municipio').delete().eq('manifesto_id', manifestoId).eq('id_municipio', scope.municipality.ibgeCode);
-    if (cleanup.error) throw new SafeError('STAGING_CLEANUP', 500, 'Não foi possível limpar a carga anterior.');
-
-    for (let index = 0; index < rows.length; index += 500) {
-      const chunk = rows.slice(index, index + 500).map((row) => ({ ...row, manifesto_id: manifestoId }));
-      const inserted = await db.from('empresas_estab_municipio').insert(chunk);
-      if (inserted.error) throw new SafeError('FACT_WRITE', 500, 'Não foi possível gravar as linhas agregadas.');
+    const target = targetCompetencia();
+    if (scope.establishmentsPartition.slice(0, 7) !== target.slice(0, 7) || scope.companiesPartition.slice(0, 7) !== target.slice(0, 7)) {
+      throw new SafeError('INVALID_PARTITION', 400, 'As partições não correspondem à competência configurada.');
     }
+    const started = Date.now();
+    const attemptedCompetencias: string[] = [];
 
-    const totalEstabelecimentos = rows.reduce((sum, row) => sum + row.quantidade, 0);
-    const source = (result.source ?? {}) as Record<string, any>;
-    const published = await db
-      .from('empresas_estab_manifesto')
-      .update({
-        status: 'ok',
+    for (const month of empresasMonths(target, MAX_MONTHS)) {
+      const remaining = MAX_PROCESSING_MS - (Date.now() - started);
+      if (remaining < 5_000) throw new SafeError('PROCESSING_BUDGET', 503, 'Tempo de consulta de Empresas esgotado.');
+      const candidate = { ...scope, establishmentsPartition: month.establishmentsPartition, companiesPartition: month.companiesPartition };
+      const existing = await db.from('empresas_estab_manifesto')
+        .select('id, status, linhas_geradas')
+        .eq('id_municipio', scope.municipality.ibgeCode)
+        .eq('competencia', month.competencia)
+        .eq('query_version', QUERY_VERSION)
+        .eq('methodology_version', METHODOLOGY_VERSION)
+        .maybeSingle();
+      if (existing.error) throw new SafeError('LOOKUP', 500, 'Não foi possível verificar o manifesto.');
+      if (existing.data?.status === 'ok') {
+        return json({
+          ok: true, reused: true,
+          manifesto: { id: existing.data.id, competencia: month.competencia, status: 'ok' },
+          municipality: scope.municipality,
+          aggregatedRows: existing.data.linhas_geradas,
+          targetCompetencia: target,
+          attemptedCompetencias,
+          methodologyNote: SIMPLES_NOTE,
+        }, 200);
+      }
+
+      const upserted = await db.from('empresas_estab_manifesto').upsert({
+        id_municipio: scope.municipality.ibgeCode,
+        competencia: month.competencia,
+        estabelecimentos_particao: month.establishmentsPartition,
+        empresas_particao: month.companiesPartition,
+        query_version: QUERY_VERSION,
+        methodology_version: METHODOLOGY_VERSION,
+        status: 'staging',
         erro_codigo: null,
-        linhas_geradas: rows.length,
+        publicado_em: null,
+        gerado_em: new Date().toISOString(),
+      }, { onConflict: 'id_municipio,competencia,query_version,methodology_version' }).select('id').single();
+      if (upserted.error || !upserted.data) throw new SafeError('MANIFEST_WRITE', 500, 'Não foi possível preparar o manifesto.');
+      manifestoId = upserted.data.id as string;
+
+      const result = await callProxy(candidate, Math.min(PROXY_CALL_TIMEOUT_MS, remaining));
+      let unavailable: boolean;
+      try { unavailable = proxyMonthUnavailable(result); }
+      catch { throw new SafeError('PROXY_CONTRACT', 502, 'A ponte retornou um formato inesperado.'); }
+      if (unavailable) {
+        attemptedCompetencias.push(month.competencia);
+        console.info(`empresas-materialize-pilot: fonte indisponível em ${month.competencia}: ${String(result.unavailableReason ?? 'empty')}`);
+        const failed = await db.from('empresas_estab_manifesto')
+          .update({ status: 'falha', erro_codigo: 'SOURCE_UNAVAILABLE', publicado_em: null })
+          .eq('id', manifestoId);
+        if (failed.error) throw new SafeError('MANIFEST_WRITE', 500, 'Não foi possível registrar a indisponibilidade da fonte.');
+        manifestoId = null;
+        continue;
+      }
+
+      const normalized = normalizeRows(result.rows, scope.municipality.ibgeCode);
+      const rows = mergeAggregatedRows(normalized.rows);
+      const sourceCount = Number((result.source as Record<string, unknown>).establishmentsRows);
+      const normalizedCount = rows.reduce((sum, row) => sum + row.quantidade, 0);
+      if (normalized.discarded > 0 || normalizedCount !== sourceCount) {
+        throw new SafeError('PROXY_CONTRACT', 502, 'A ponte retornou agregados incompletos.');
+      }
+      const cleanup = await db.from('empresas_estab_municipio').delete().eq('manifesto_id', manifestoId).eq('id_municipio', scope.municipality.ibgeCode);
+      if (cleanup.error) throw new SafeError('STAGING_CLEANUP', 500, 'Não foi possível limpar a carga anterior.');
+      for (let index = 0; index < rows.length; index += 500) {
+        const chunk = rows.slice(index, index + 500).map((row) => ({ ...row, manifesto_id: manifestoId }));
+        const inserted = await db.from('empresas_estab_municipio').insert(chunk);
+        if (inserted.error) throw new SafeError('FACT_WRITE', 500, 'Não foi possível gravar as linhas agregadas.');
+      }
+      const source = (result.source ?? {}) as Record<string, any>;
+      const published = await db.from('empresas_estab_manifesto').update({
+        status: 'ok', erro_codigo: null, linhas_geradas: rows.length,
         bytes_processados: integerOrNull(result.bytesProcessed ?? result.bytes_processed),
         simples_lido_em: new Date().toISOString(),
         origem_estabelecimentos_modificado_em: source.establishmentsModifiedAt ?? null,
@@ -354,34 +389,36 @@ Deno.serve(async (req) => {
         origem_empresas_linhas: integerOrNull(source.companiesRows),
         origem_empresas_bytes: integerOrNull(source.companiesBytes),
         publicado_em: new Date().toISOString(),
-      })
-      .eq('id', manifestoId)
-      .select('id')
-      .single();
-    if (published.error) throw new SafeError('PUBLISH', 500, 'As linhas foram gravadas, mas o manifesto não pôde ser publicado.');
+      }).eq('id', manifestoId).select('id').single();
+      if (published.error) throw new SafeError('PUBLISH', 500, 'As linhas foram gravadas, mas o manifesto não pôde ser publicado.');
 
-    const jobIds = Array.isArray(result.jobIds) ? result.jobIds.filter((item: unknown) => typeof item === 'string') : [];
-    return json({
-      ok: true,
-      manifesto: {
-        id: manifestoId,
-        competencia: COMPETENCIA,
-        estabelecimentosParticao: scope.establishmentsPartition,
-        empresasParticao: scope.companiesPartition,
-        queryVersion: QUERY_VERSION,
-        methodologyVersion: METHODOLOGY_VERSION,
-        status: 'ok',
-      },
-      municipality: scope.municipality,
-      aggregatedRows: rows.length,
-      linhasDescartadas,
-      motivosDescarte: discardReasons,
-      totalEstabelecimentos,
-      bytesProcessed: integerOrNull(result.bytesProcessed ?? result.bytes_processed),
-      jobIds,
-      durationMs: Date.now() - started,
-      methodologyNote: SIMPLES_NOTE,
-    }, 200);
+      const selectedManifestoId = manifestoId;
+      manifestoId = null;
+      return json({
+        ok: true,
+        manifesto: {
+          id: selectedManifestoId,
+          competencia: month.competencia,
+          estabelecimentosParticao: month.establishmentsPartition,
+          empresasParticao: month.companiesPartition,
+          queryVersion: QUERY_VERSION,
+          methodologyVersion: METHODOLOGY_VERSION,
+          status: 'ok',
+        },
+        municipality: scope.municipality,
+        aggregatedRows: rows.length,
+        linhasDescartadas: normalized.discarded,
+        motivosDescarte: normalized.discardReasons,
+        totalEstabelecimentos: rows.reduce((sum, row) => sum + row.quantidade, 0),
+        bytesProcessed: integerOrNull(result.bytesProcessed ?? result.bytes_processed),
+        jobIds: Array.isArray(result.jobIds) ? result.jobIds.filter((item: unknown) => typeof item === 'string') : [],
+        targetCompetencia: target,
+        attemptedCompetencias,
+        durationMs: Date.now() - started,
+        methodologyNote: SIMPLES_NOTE,
+      }, 200);
+    }
+    throw new SafeError('SOURCE_UNAVAILABLE', 503, 'Nenhuma competência recente de Empresas retornou dados para este município.');
   } catch (error) {
     const safe = error instanceof SafeError ? error : new SafeError('INTERNAL_ERROR', 500, 'Falha inesperada na materialização.');
     if (manifestoId) {
