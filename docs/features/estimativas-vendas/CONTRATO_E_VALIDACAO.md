@@ -1,6 +1,6 @@
 # Contrato candidato e plano de validação
 
-**PLANEJADA,21/10/2026.** Este contrato é interno/proposto. Não são nomes de campos nem formato de retorno confirmados do Geobrain. Consultar MANIFESTO.md e reconciliar com Edgar/MD antes de automatizar.
+**CONTRATO EXTERNO PENDENTE,21/10/2026.** Motor e ensaio em memória implementados localmente; contrato de arquivo ainda interno/proposto. Não são nomes de campos nem formato de retorno confirmados do Geobrain. Consultar MANIFESTO.md e [reprodução](REPRODUCAO_E_HANDOFF.md); reconciliar com Edgar/MD antes de automatizar.
 
 ## Entradas mínimas do cálculo horizontal
 

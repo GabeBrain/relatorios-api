@@ -1,6 +1,6 @@
 # Manifesto técnico — Estimativas de vendas por empreendimento
 
-**Data:**21/10/2026. **Ambiente:**Rebrain, processo SID/Geobrain. **Estado:**PLANEJADA; contexto preparado, sem implementação runtime. **Responsável por esta preparação:**Gabriel/Codex. Este documento reúne fatos, resultados relatados pelo autor e propostas de implementação, identificando cada categoria.
+**Data:**21/10/2026. **Ambiente:**Rebrain, processo SID/Geobrain. **Estado:**motor horizontal local implementado, sem interface, base real ou homologação. **Responsável pelo apoio técnico:**Gabriel/Codex. Este documento reúne fatos, resultados relatados pelo autor e propostas de implementação, identificando cada categoria. A [reprodução desta sessão](REPRODUCAO_E_HANDOFF.md) complementa o pacote inicial; as afirmações históricas de preparação abaixo se referem ao commit `30ab046`.
 
 ## 1. Problema e resultado esperado
 

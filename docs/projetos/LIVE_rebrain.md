@@ -1301,6 +1301,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-21 — Estimativas Finotti: motor horizontal e ensaio de corte — Gabriel / Codex
+- **Ambiente/funcionalidade:** Rebrain/SID, código local em `src/features/estimativas-vendas/`, sem rota ou integração Geobrain.
+- **O quê/por quê:** coeficientes do slide 7 versionados à parte do motor puro; caso fechado 300/150/6 reproduzido (`k=0,632035`, 65,84% no mês 12, 75,04% no 18, cruzamento de 95% no 61 e contagem ilustrativa até 67). Ensaio em memória congela origem e compara curva com médias de 3/12 meses, omitindo cauda e extrapolação da métrica.
+- **Evidência/estado:** [reprodução e handoff](../features/estimativas-vendas/REPRODUCAO_E_HANDOFF.md), testes focados de matemática e corte, tipagem e lint locais; nenhum dado real processado, nenhuma regra da cauda mensal ou banda inventada. Estado validado localmente apenas para a reprodução matemática; teste retrospectivo real pendente.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`; sem escrita.
+- **Impacto em Etapas/Pendências:** M1 parcial e estrutura de M2 preparados; próximo obter MD/código e exportação/retorno Geobrain com Edgar, confirmar domínio/cauda/bandas e avaliar um recorte observado. Push/deploy pendentes de autorização.
+
 ### 2026-10-21 — Estimativas de vendas Finotti: pacote técnico inicial — Gabriel / Codex
 - **Ambiente/funcionalidade:** Rebrain/SID, futura feature Estimativas de vendas; status PLANEJADA, sem motor/rota runtime.
 - **O quê/por quê:** contexto da reunião19/10, email21/10, equação horizontal, coeficientes, dados dos slides, regras históricas Monday, contrato candidato e roteiro de validação reunidos para conversa técnica dedicada. Rebrain é o destino do exercício; Edgar conduz/Gabriel apoia, integração Geobrain posterior.
@@ -2402,7 +2409,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-**21/10 — Estimativas de vendas Finotti:** documentação inicial preparada em [estimativas-vendas](../features/estimativas-vendas/README.md); motor horizontal, contrato oficial, comparação retrospectiva e exercício de retorno ainda não iniciados. PLANEJADA; sem alteração runtime.
+**21/10 — Estimativas de vendas Finotti:** documentação inicial e motor horizontal local preparados em [estimativas-vendas](../features/estimativas-vendas/README.md). Reprodução do caso publicado validada localmente; ensaio de corte em memória pronto para receber série observada. Contrato oficial, retrospectiva real, cauda mensal, bandas, UI e retorno continuam pendentes. Sem runtime publicado.
 
 **15/10 — Corretor F1–F6:** preparação/revisão validadas localmente; registro de execução e prévias têm limites de ativação/infraestrutura no resultado F1–F6. A2/A3/F3 servidor não encerradas.
 
@@ -2433,7 +2440,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **Estimativas de vendas Finotti:** recuperar MD/código original e contrato Geobrain com Edgar; reproduzir equação horizontal/caso300-150-6 e comparar base real no horizonte mensal/trimestral. Confirmar cauda95%, faixas, modelo vertical e regras de alternância/coleta. [Manifesto e plano técnico](../features/estimativas-vendas/MANIFESTO.md). Pacote documental preparado, sem aceite operacional.
+- [ ] **Estimativas de vendas Finotti:** reprodução matemática do caso300-150-6 feita localmente; recuperar MD/código original, contrato Geobrain e série observada com Edgar para comparação mensal/trimestral real. Confirmar domínio, cauda95%, faixas, modelo vertical e alternância/coleta. [Manifesto e handoff](../features/estimativas-vendas/REPRODUCAO_E_HANDOFF.md). Sem aceite operacional.
 
 - [ ] **Corretor v0.73:** revisar/publicar lote de fluxo contínuo, ativar migration/Edge/frontend e conferir produção. Conversão automática hospedada e recuperação da execução em outro navegador permanecem abertas; sem IA paga sem lote/orçamento.
 
