@@ -1,3 +1,7 @@
+## 21/10/2026 — Revisor: push autorizado e CI aprovado
+
+Gabriel autorizou expressamente incluir os dois commits Finotti anteriores. Enviados `30ab046`, `a199e7e`, `829f862` e `fe5c7f9` à main. [CI técnico do último SHA aprovado](https://github.com/GabeBrain/relatorios-api/actions/runs/39693170276), junto de documentação viva e contrato do protocolo. Alterações locais FIERGS e referência de interface preservadas fora do envio. Estado publicado no Git e validado localmente/CI; backend correto ainda sem acesso administrativo, migration/deploy e lotes reais R6/R8 pendentes no pacote único. US$0 gasto sob teto global US$3; nenhum email enviado. Próximo: aplicar o pacote e retomar a verificação real antes do convite à Amanda.
+
 ## 21/10/2026 — Revisor: fechamento local, envio ainda condicionado
 
 Principal no commit local829f862, com retenção de falhas/metadados e proteção contra sobrescrever finish confirmado complementadas.25 testes focados/Deno aprovados; PostgreSQL13verificações. Suíte355 e dez passes da entrega mantidos. Decisão sobre os dois commits Finotti de saída solicitada antes do push; FIERGS local excluído do commit. Backend correto segue sem acesso administrativo, US$0 gasto, sem deploy/email. [Resultado e pacote de retomada](../features/corretor-vocacionais/RESULTADO_REVISAO_REGRAS_LUNA_2026-10-21.md); estado validado localmente, CI remoto e produção pendentes.

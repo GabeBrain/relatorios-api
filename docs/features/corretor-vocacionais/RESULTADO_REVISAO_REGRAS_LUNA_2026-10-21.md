@@ -2,6 +2,8 @@
 
 ## Estado da entrega
 
+Fechamento Git de 21/10: push concluído até `fe5c7f9`, incluindo `829f862` e os commits Finotti `30ab046`/`a199e7e`, estes autorizados expressamente por Gabriel. [CI técnico aprovado](https://github.com/GabeBrain/relatorios-api/actions/runs/39693170276): tipos da aplicação, testes focados, build e Deno das quatro funções. Documentação viva e contrato do protocolo também aprovados nesse SHA. Arquivos locais FIERGS e referência de interface permaneceram fora do envio. Isso comprova o código enviado, não aplicação da migration ou funcionamento em produção.
+
 Implementação e validação local concluídas no escopo demonstrado. **Não verificado em produção.** O backend correto não aparece nem no conector nem na CLI administrativa disponíveis; sem chave de serviço local para os lotes. Nenhuma migration remota, deploy, alteração de estudo real, decisão humana ou geração paga executados. Gasto desta sessão: **US$0,00**. Teto autorizado: **US$3,00**, substituindo os US$5 do planejamento inicial.
 
 Publicação e reteste real seguem o pacote `PUBLICACAO_REVISOR_LUNA_2026-10-21.md`. Implementação principal no commit local **829f862**, com complemento de retenção de falhas e documentação neste fechamento. Há dois commits anteriores de Finotti na main local; não são implicitamente autorizados para envio por este trabalho. **Push aguarda a decisão específica solicitada sobre esses dois commits; CI remoto desta entrega ainda não executado.**
