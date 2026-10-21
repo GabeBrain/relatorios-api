@@ -4,7 +4,7 @@
 
 Implementação e validação local concluídas no escopo demonstrado. **Não verificado em produção.** O backend correto não aparece nem no conector nem na CLI administrativa disponíveis; sem chave de serviço local para os lotes. Nenhuma migration remota, deploy, alteração de estudo real, decisão humana ou geração paga executados. Gasto desta sessão: **US$0,00**. Teto autorizado: **US$3,00**, substituindo os US$5 do planejamento inicial.
 
-Publicação e reteste real seguem o pacote `PUBLICACAO_REVISOR_LUNA_2026-10-21.md`. Há dois commits anteriores de Finotti na main local; não são implicitamente autorizados para envio por este trabalho. Estado Git e CI final serão registrados no fechamento.
+Publicação e reteste real seguem o pacote `PUBLICACAO_REVISOR_LUNA_2026-10-21.md`. Implementação principal no commit local **829f862**, com complemento de retenção de falhas e documentação neste fechamento. Há dois commits anteriores de Finotti na main local; não são implicitamente autorizados para envio por este trabalho. **Push aguarda a decisão específica solicitada sobre esses dois commits; CI remoto desta entrega ainda não executado.**
 
 ## Etapas
 
@@ -44,7 +44,7 @@ Diretório de execução: `.local-inputs/review-luna-20261021/`; brutos e saída
 - Suíte Corretor: **355 testes aprovados / 2 ignorados**, 52 arquivos aprovados, `suite-release.log`, código de saída 0. Inclui restauração do texto legado. Casos ignorados dependem de insumos/execução não configurados e não contam como aprovação.
 - Regressão de materiais: dez passes aprovados, cinco baseline + cinco Excel bruto, rodada final `.local-inputs/corretor-regression/2026-10-21T23-01-56.651Z-23844/report.json`. Nenhum achado antigo removido/alterado; sete novos alertas justificados e fixados por hash em `review-deltas-2026-10-21.json`. Baseline original intocada.
 - Comparador de regressão: quatro testes Node aprovados; qualquer diferença fora do antes/depois exato continua bloqueada.
-- PostgreSQL em memória: 12 verificações aprovadas em `sql-result.json`, incluindo preço/perfil, idempotência, erro com uso, reserva desconhecida sob teto global, legado, recomendação delegada e permissões.
+- PostgreSQL em memória: **13 verificações aprovadas** em `sql-result.json`, incluindo preço/perfil, idempotência, erro com uso, reserva desconhecida sob teto global, legado, recomendação delegada, permissões e proteção contra sobrescrever um finish confirmado depois de falha da resposta de rede.
 - Deno: quatro funções checadas com configuração strict. Aplicação: `tsc -p tsconfig.app.json --noEmit`; a chamada sem `-p` no tsconfig raiz não é prova suficiente e não foi usada isoladamente como aceite.
 - Build final `npm run build` concluído em 27,69s, código de saída 0, com aviso preexistente de tamanho de chunk. Lint dirigido aprovado; tipos explícitos da aplicação e quatro funções Deno aprovados.
 - Navegador automatizado isolado: `.local-inputs/review-luna-browser-1792623135033/result.json`, quatro verificações aprovadas, zero erros e escrita remota/IA zero. PPTX + 11 Excel reais, registro simulado atrasado, chegada ao resultado, perfil/modelos enviados e saída/reabertura. Backend e provedor simulados, não qualidade da extração real.
@@ -52,6 +52,8 @@ Diretório de execução: `.local-inputs/review-luna-20261021/`; brutos e saída
 - Lotes A/B: manifests locais e hashes conferidos em dry-run; A tem 12 tarefas, B prepara estudo técnico de Rolândia e exige percurso completo real posteriormente.
 
 Os testes encontraram um confronto percentual/absoluto incorreto na primeira implementação; corrigido antes de aprovar a nova regra, com teste negativo específico. Falhas iniciais do roteiro de navegador eram seletores de controle legado oculto/nome bruto; o roteiro final usa saída visível e link amigável. Não foram usadas ações forçadas para contornar interface.
+
+Fechamento de retenção: resultado inválido ou com perfil/tier divergente fica guardado no lote privado para reconciliação, mantendo a reserva e sem repetir provedor. A atualização para unknown só afeta lote ainda running; não sobrescreve um finish já confirmado. Texto visível inválido do provedor é preservado como evidência privada, sem persistir raciocínio interno. Deno e os 25 testes focados foram revalidados após esse complemento (`focused-retention.log`).
 
 ## Migration e publicação
 

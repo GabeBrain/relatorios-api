@@ -1,3 +1,7 @@
+## 21/10/2026 — Fechamento local e retenção de evidências do revisor
+
+Implementação principal no commit local829f862, documentação viva aprovada. Complemento guarda resposta inválida/metadados divergentes no lote privado, com reserva desconhecida; só muda running para unknown, preservando finish já confirmado. Texto visível inválido pode ser auditado sem conteúdo interno de raciocínio.25 testes focados e Deno revalidados; PostgreSQL local agora13 verificações, incluindo proteção do finish confirmado. Suíte355 e dez passes da entrega preservados. Nenhum provedor/SQL remoto/deploy/email, gasto US$0. Push/CI remoto aguardam decisão específica sobre dois commits Finotti anteriores; pacote de publicação e R6/R8 reais continuam pendentes. Estado validado localmente, não produção.
+
 ## 21/10/2026 — Revisor Luna/high e regras Guajajaras validados localmente
 
 Executado por Gabriel/sessão o recorte local R0–R5 do plano, com teto posterior autorizado US$3 globais (não US$5 da proposta). Matriz liga regra/entrada/evidência/resultado e distingue transcrição derivada de leitura real. Novos conflitos entre páginas, unidade título/trecho e categoria possivelmente omitida; faixas/somas existentes preservadas. Extração separa51 caixas, mantendo snapshot de texto/notas anteriores para retomada legada. Ata não comprova atendimento pela própria repetição. Nenhum valor ou decisão humana corrigido automaticamente.

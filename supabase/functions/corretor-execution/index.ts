@@ -122,21 +122,23 @@ Deno.serve(async req => {
     const {data:claim,error:claimError} = await db.rpc('corretor_claim_batch',{p_execution:run.id,p_owner:owner,p_hash:batchHash,p_function:body.functionName,p_reserve:reserve});
     if(claimError)return json({error:'Lote bloqueado: confira o limite autorizado, outra execução em andamento ou um retorno ainda desconhecido.'},409);
     if(claim.cached)return json({...claim.response,replayed:true});
+    const unknown=async(evidence:unknown=null)=>{
+      // Não sobrescrever um finish já confirmado caso apenas sua resposta de rede tenha falhado.
+      await db.from('corretor_execution_batches').update({state:'unknown',response:evidence}).eq('execution_id',run.id).eq('batch_hash',batchHash).eq('state','running');
+      return json({error:safeError},409);
+    };
     let response: Response;
     try { response = await fetch(`${url}/functions/v1/${body.functionName}`,{method:'POST',headers:{Authorization:`Bearer ${key}`,apikey:key,'Content-Type':'application/json','x-corretor-execution':run.id},body:serialized,signal:AbortSignal.timeout(130000)}); }
-    catch { return json({error:safeError},409); }
-    const result = await response.json();
-    if(!response.ok || !Number.isSafeInteger(result.inputTokens) || !Number.isSafeInteger(result.outputTokens)) {
-      // Reserva mantida: uma falha após envio pode já ter consumido tokens.
-      await db.from('corretor_execution_batches').update({state:'unknown'}).eq('execution_id',run.id).eq('batch_hash',batchHash);
-      return json({error:safeError},409);
-    }
-    if(!Number.isFinite(result.inputTokens)||!Number.isFinite(result.outputTokens))return json({error:safeError},409);
-    if(profiled && (result.profileId!==profile.id || result.configVersion!==profile.configVersion || result.requestedModel!==model || result.reasoningEffort!==profile.reasoningEffort || result.promptVersion!==profile.promptVersion || result.priceVersion!==profile.priceVersion || result.serviceTier!==profile.serviceTier))return json({error:safeError},409);
-    if(profiled && (result.inputTokens>profile.inputMax || result.outputTokens>profile.maxOutput[task] || typeof result.model!=='string' || !result.model.startsWith(model)))return json({error:safeError},409);
-    const cost=profiled?reviewCost(result.inputTokens,result.outputTokens,result.cachedTokens??0,model,profile):(result.inputTokens*(model==='gpt-4o'?2.5:0.15)+result.outputTokens*(model==='gpt-4o'?10:0.6))/1e6;
+    catch { return await unknown(); }
+    const result = await response.json().catch(()=>null);
+    if(!result || !response.ok || !Number.isSafeInteger(result.inputTokens) || !Number.isSafeInteger(result.outputTokens))return await unknown(result);
+    if(profiled && (result.profileId!==profile.id || result.configVersion!==profile.configVersion || result.requestedModel!==model || result.reasoningEffort!==profile.reasoningEffort || result.promptVersion!==profile.promptVersion || result.priceVersion!==profile.priceVersion || result.serviceTier!==profile.serviceTier))return await unknown(result);
+    if(profiled && (result.inputTokens>profile.inputMax || result.outputTokens>profile.maxOutput[task] || typeof result.model!=='string' || !result.model.startsWith(model)))return await unknown(result);
+    let cost: number;
+    try { cost=profiled?reviewCost(result.inputTokens,result.outputTokens,result.cachedTokens??0,model,profile):(result.inputTokens*(model==='gpt-4o'?2.5:0.15)+result.outputTokens*(model==='gpt-4o'?10:0.6))/1e6; }
+    catch { return await unknown(result); }
     const {error:finishError} = await db.rpc('corretor_finish_batch',{p_execution:run.id,p_hash:batchHash,p_response:result,p_cost:cost});
-    if(finishError)return json({error:safeError},409);
+    if(finishError)return await unknown(result);
     return json({...result,costUsd:cost},result.error?422:200);
   } catch { return json({error:'O controle de execução ainda não está disponível. Confira a publicação da função e da atualização do banco.'},503); }
 });

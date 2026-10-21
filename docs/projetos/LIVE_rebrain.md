@@ -1,3 +1,7 @@
+## 21/10/2026 — Revisor: fechamento local, envio ainda condicionado
+
+Principal no commit local829f862, com retenção de falhas/metadados e proteção contra sobrescrever finish confirmado complementadas.25 testes focados/Deno aprovados; PostgreSQL13verificações. Suíte355 e dez passes da entrega mantidos. Decisão sobre os dois commits Finotti de saída solicitada antes do push; FIERGS local excluído do commit. Backend correto segue sem acesso administrativo, US$0 gasto, sem deploy/email. [Resultado e pacote de retomada](../features/corretor-vocacionais/RESULTADO_REVISAO_REGRAS_LUNA_2026-10-21.md); estado validado localmente, CI remoto e produção pendentes.
+
 ## 21/10/2026 — Revisor Luna/high e Guajajaras preparados para publicação
 
 Gabriel/sessão: R0–R5 locais implementados, regras/evidências confrontadas, novas execuções de texto/ata/visão em Luna/high com flag/snapshot, cache/retomadas legadas, materiais, decisões e Sugestão preservados. JSON inválido não vira ausência de erro; consumo confirmado/raciocínio/perfil e teto global de validação US$3 protegidos na migration aditiva. Suíte355/2 ignorados, dez passes com deltas intencionais exatos sem apagar baseline, PostgreSQL12checks, tipos/Deno/lint/build e percurso isolado PPTX+11Excel aprovados. Corrigido evento de teclado na triagem; aparência/tokens preservados.

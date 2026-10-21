@@ -105,7 +105,7 @@ describe('contrato Luna/high e compatibilidade',()=>{
   const fetcher=vi.fn().mockResolvedValue(new Response(JSON.stringify({model:'gpt-6-luna',service_tier:'default',usage:{prompt_tokens:100,completion_tokens:300,completion_tokens_details:{reasoning_tokens:250}},choices:[{finish_reason:'length',message:{content:'{bad'}}]}),{headers:{'x-request-id':'test-request'}}));
   vi.stubGlobal('fetch',fetcher);
   const result=await callReviewProvider('fake-not-a-secret','gpt-6-luna','analyze-text-batch',[{role:'user',content:'fixture'}]);
-  expect(fetcher).toHaveBeenCalledTimes(1);expect(result.content).toBeNull();expect(result.meta.error).toBeTruthy();expect(result.meta.reasoningTokens).toBe(250);expect(result.meta.outputTokens).toBe(300);
+  expect(fetcher).toHaveBeenCalledTimes(1);expect(result.content).toBeNull();expect(result.meta.error).toBeTruthy();expect(result.meta.invalidOutput).toBe('{bad');expect(result.meta.reasoningTokens).toBe(250);expect(result.meta.outputTokens).toBe(300);
   const request=JSON.parse(fetcher.mock.calls[0][1].body);expect(request.reasoning_effort).toBe('high');expect(request.max_tokens).toBeUndefined();expect(result.meta.promptHash).toHaveLength(64);
  });
 });

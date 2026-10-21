@@ -27,6 +27,6 @@ export async function callReviewProvider(apiKey: string, model: ReviewModel, tas
     priceVersion:p.priceVersion,requestedServiceTier:p.serviceTier,serviceTier:raw.service_tier??null,
     latencyMs:Date.now()-started,requestId:response.headers.get('x-request-id')??raw.id??null,promptHash,
     finishReason:choice?.finish_reason??null,
-    ...(valid?{}:{error:'O provedor retornou uso, mas a leitura está incompleta ou inválida. Confira antes de retomar.'}),
+    ...(valid?{}:{error:'O provedor retornou uso, mas a leitura está incompleta ou inválida. Confira antes de retomar.',invalidOutput:choice?.message?.content??null,refusal:choice?.message?.refusal??null}),
   }};
 }
