@@ -157,6 +157,7 @@ export type Database = {
           state: string
           study_id: string
           updated_at: string
+          validation_budget_id: string | null
           version_n: number
         }
         Insert: {
@@ -175,6 +176,7 @@ export type Database = {
           state?: string
           study_id: string
           updated_at?: string
+          validation_budget_id?: string | null
           version_n: number
         }
         Update: {
@@ -193,6 +195,7 @@ export type Database = {
           state?: string
           study_id?: string
           updated_at?: string
+          validation_budget_id?: string | null
           version_n?: number
         }
         Relationships: [
@@ -201,6 +204,13 @@ export type Database = {
             columns: ["study_id"]
             isOneToOne: false
             referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_executions_validation_budget_id_fkey"
+            columns: ["validation_budget_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_review_validation_budgets"
             referencedColumns: ["id"]
           },
         ]
@@ -550,6 +560,57 @@ export type Database = {
           },
         ]
       }
+      corretor_review_validation_budgets: {
+        Row: {
+          budget_usd: number
+          created_at: string
+          id: string
+        }
+        Insert: {
+          budget_usd: number
+          created_at?: string
+          id: string
+        }
+        Update: {
+          budget_usd?: number
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      corretor_review_validation_studies: {
+        Row: {
+          budget_id: string
+          owner_hash: string
+          study_id: string
+        }
+        Insert: {
+          budget_id: string
+          owner_hash: string
+          study_id: string
+        }
+        Update: {
+          budget_id?: string
+          owner_hash?: string
+          study_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_review_validation_studies_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_review_validation_budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_review_validation_studies_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: true
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       corretor_source_sets: {
         Row: {
           created_at: string
@@ -841,6 +902,7 @@ export type Database = {
           custo_usd: number
           escopo: string | null
           execution_id: string | null
+          extraction_version: string | null
           finish_reason: string | null
           id: string
           input_tokens: number
@@ -850,12 +912,14 @@ export type Database = {
           price_version: string | null
           pricing_snapshot: Json | null
           profile_id: string | null
+          prompt_hash: string | null
           prompt_version: string | null
           provider_request_id: string | null
           reasoning_effort: string | null
           reasoning_tokens: number | null
           requested_model: string | null
           requested_service_tier: string | null
+          rules_version: string | null
           service_tier: string | null
           study_id: string
           tipo: string
@@ -869,6 +933,7 @@ export type Database = {
           custo_usd?: number
           escopo?: string | null
           execution_id?: string | null
+          extraction_version?: string | null
           finish_reason?: string | null
           id?: string
           input_tokens?: number
@@ -878,12 +943,14 @@ export type Database = {
           price_version?: string | null
           pricing_snapshot?: Json | null
           profile_id?: string | null
+          prompt_hash?: string | null
           prompt_version?: string | null
           provider_request_id?: string | null
           reasoning_effort?: string | null
           reasoning_tokens?: number | null
           requested_model?: string | null
           requested_service_tier?: string | null
+          rules_version?: string | null
           service_tier?: string | null
           study_id: string
           tipo: string
@@ -897,6 +964,7 @@ export type Database = {
           custo_usd?: number
           escopo?: string | null
           execution_id?: string | null
+          extraction_version?: string | null
           finish_reason?: string | null
           id?: string
           input_tokens?: number
@@ -906,12 +974,14 @@ export type Database = {
           price_version?: string | null
           pricing_snapshot?: Json | null
           profile_id?: string | null
+          prompt_hash?: string | null
           prompt_version?: string | null
           provider_request_id?: string | null
           reasoning_effort?: string | null
           reasoning_tokens?: number | null
           requested_model?: string | null
           requested_service_tier?: string | null
+          rules_version?: string | null
           service_tier?: string | null
           study_id?: string
           tipo?: string
@@ -1726,7 +1796,26 @@ export type Database = {
         }
         Returns: Json
       }
+      corretor_claim_batch_pre_review: {
+        Args: {
+          p_execution: string
+          p_function: string
+          p_hash: string
+          p_owner: string
+          p_reserve: number
+        }
+        Returns: Json
+      }
       corretor_finish_batch: {
+        Args: {
+          p_cost: number
+          p_execution: string
+          p_hash: string
+          p_response: Json
+        }
+        Returns: undefined
+      }
+      corretor_finish_batch_pre_review: {
         Args: {
           p_cost: number
           p_execution: string
@@ -1750,6 +1839,7 @@ export type Database = {
         Args: { p_since?: string; p_until?: string }
         Returns: Json
       }
+      corretor_review_profile_schema: { Args: never; Returns: number }
       corretor_trash_study: { Args: { p_study_id: string }; Returns: boolean }
       rais_claim_history_snapshot: {
         Args: {
