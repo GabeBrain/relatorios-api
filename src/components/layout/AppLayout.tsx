@@ -70,7 +70,6 @@ const NAV_GROUPS: NavGroup[] = [
           { path: '/rebrain/sinduscon-curitiba', label: 'Sinduscon — Curitiba', icon: <Building2 className="h-4 w-4" /> },
           { path: '/rebrain/aelo', label: 'AELO', icon: <Building2 className="h-4 w-4" /> },
           { path: '/rebrain/panorama-secovi-fiergs', label: 'Panorama de Mercado', icon: <BarChart2 className="h-4 w-4" />, standbyLabel: '(Secovi/FIERGS)' },
-          { path: '/rebrain/estimativas-vendas', label: 'Estimativas de Vendas', icon: <TrendingUp className="h-4 w-4" />, standbyLabel: '(em implementação)' },
         ],
       },
       { path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList className="h-4 w-4" /> },
@@ -92,6 +91,14 @@ const NAV_GROUPS: NavGroup[] = [
     icon: <BarChart2 className="h-4 w-4" />,
     items: [
       { path: '/dash-geobrain', label: 'Dashboard', icon: <BarChart2 className="h-4 w-4" /> },
+    ],
+  },
+  {
+    id: 'estimativas-vendas',
+    label: 'Estimativas de Vendas',
+    icon: <TrendingUp className="h-4 w-4" />,
+    items: [
+      { path: '/rebrain/estimativas-vendas', label: 'Simulador de Vendas', icon: <TrendingUp className="h-4 w-4" />, standbyLabel: '(em implementação)' },
     ],
   },
   {

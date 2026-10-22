@@ -2672,3 +2672,6 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 **22/10 — Gabriel/sessão, Estimativas: correção após teste de usuário.** Seleção de três empreendimentos mostrou 0 elegíveis e gráfico vazio. Adaptador de elegibilidade ignora fase Futuro ao definir produto e origem da curva; motivos de exclusão aparecem no seletor e junto ao gráfico. Domínio 1–48 meses e ausência/negativos preservados. 11 testes focados, tipos e lint aprovados localmente. Reteste dos IDs da captura pendente; sem alegação de acurácia observada. [Registro técnico](../features/estimativas-vendas/README.md).
 
+
+**22/10 — Gabriel/sessão, navegação Estimativas de Vendas.** Ferramenta saiu da pasta Relatórios Automatizados e ganhou grupo próprio acima de Área Quanti; item Simulador de Vendas mantém aviso em implementação e a mesma rota. Typecheck, lint e teste do menu aprovados localmente. Próximo confirmar posição no site publicado.
+
