@@ -277,3 +277,8 @@ export function recoverCompletedAtaResponse(response: unknown, profileId: string
     recoveredFromStoredResponse: true,
   };
 }
+/** Projeção de retomada: não altera lotes, reservas ou perfil. */
+export function reviewRecoveryState(state: string, completedBatches: number, pendingBatches: number, hasReservation: boolean) {
+  return { state, completedBatches, pendingBatches,
+    canResume: ['not_started', 'prepared', 'interrupted', 'failed'].includes(state) && pendingBatches === 0 && !hasReservation };
+}

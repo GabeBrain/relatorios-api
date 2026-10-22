@@ -10,6 +10,6 @@ export function analysisInterruption(pausedByUser: boolean, failedSlides: readon
   return {
     kind: 'image_failures' as const,
     title: 'Avaliação incompleta',
-    message: `A leitura não foi confirmada nos slides ${slides.join(', ')}. Os resultados das outras etapas estão guardados. Confira os registros técnicos antes de retomar; não é necessário reenviar os documentos.`,
+    message: `A leitura não foi confirmada nos slides ${slides.join(', ')}. Os resultados das outras etapas estão guardados e podem ser revisados. A equipe precisa conferir esta tentativa antes da retomada; não é necessário reenviar os documentos.`,
   };
 }

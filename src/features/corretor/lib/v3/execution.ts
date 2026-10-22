@@ -4,6 +4,21 @@ let active: { id: string; owner: string; profile: ReviewProfile | null } | null 
 let starting = false;
 export const hasActiveExecution = () => Boolean(active);
 export const activeReviewProfileId = () => active?.profile?.id;
+export interface ReviewRecovery { id: string | null; state: string; completedBatches: number; pendingBatches: number; canResume: boolean }
+/** Consulta somente leitura; não inicia execução nem chama provedor. */
+export async function loadReviewRecovery(study: { id: string; lastVersion: number; lastSha1: string | null }): Promise<ReviewRecovery> {
+  const {data,error} = await supabase.functions.invoke('corretor-execution', {body:{
+    action:'review_status', owner:owner(), studyId:study.id, version:study.lastVersion, documentSha1:study.lastSha1,
+  }});
+  if(error || data?.error || typeof data?.canResume !== 'boolean' || typeof data?.state !== 'string'
+    || !Number.isSafeInteger(data.completedBatches) || data.completedBatches < 0
+    || !Number.isSafeInteger(data.pendingBatches) || data.pendingBatches < 0
+    || (data.id !== null && typeof data.id !== 'string'))
+    throw await responseError(data,error,'Não foi possível conferir a retomada. Seus resultados salvos continuam disponíveis.');
+  // Recupera o ponteiro da mesma execução verificada, inclusive após perder o marcador local.
+  if (data.id) localStorage.setItem(`corretor-execution:${study.id}`,JSON.stringify({id:data.id,state:data.state,version:study.lastVersion}));
+  return data;
+}
 export function executionReviewIr(ir: import('../audit/ir').Ir): import('../audit/ir').Ir {
   return irForReviewProfile(ir,active?.profile?.id);
 }

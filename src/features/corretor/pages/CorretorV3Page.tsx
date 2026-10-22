@@ -7,7 +7,8 @@ import CorretorLoadingState from '../components/CorretorLoadingState';
 // Navegação sem rail duplo: landing com cards de estudos → workspace com voltar.
 
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { beginExecution, finishExecution, hasActiveExecution } from '../lib/v3/execution';
+import { beginExecution, finishExecution, hasActiveExecution, loadReviewRecovery, type ReviewRecovery } from '../lib/v3/execution';
+import StudyRecoveryPanel from '../components/StudyRecoveryPanel';
 import { reviewProfile } from '../../../../supabase/functions/_shared/reviewer';
 import StudyPreparationPage, { type PreparedStudy } from '../components/StudyPreparationPage';
 import { summarizeStudy } from '../lib/study-summary';
@@ -289,6 +290,9 @@ export default function CorretorV3Page() {
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisState | null>(null);
   const [preparationFailure, setPreparationFailure] = useState<{studyId:string;message:string}|null>(null);
+  const [preparingStudyId, setPreparingStudyId] = useState<string | null>(null);
+  const [recovery, setRecovery] = useState<{studyId:string;data:ReviewRecovery|null;error?:string;loading:boolean}|null>(null);
+  const [recoveryRefresh, setRecoveryRefresh] = useState(0);
   // Keep preparation hidden throughout registration, execution setup and report refresh.
   const [launching, setLaunching] = useState<{ name: string; slides: number } | null>(null);
   const [budgetPrompt, setBudgetPrompt] = useState<{ estimate: FullEstimate; run: () => void } | null>(null);
@@ -322,6 +326,17 @@ export default function CorretorV3Page() {
   const [reviewContext, setReviewContext] = useState<{ studyId: string; ir: Ir } | null>(null);
   const reviewedItems = useMemo(() => presentTextFindings(items, reviewContext?.studyId === selectedId ? reviewContext.ir : null), [items, reviewContext, selectedId]);
   const pending = selected ? analysisPending(selected) : false;
+  const recoveryId = selected?.id, recoveryVersion = selected?.lastVersion, recoverySha = selected?.lastSha1;
+  useEffect(() => {
+    if (!pending || !recoveryId || !recoveryVersion || !recoverySha || analysis?.running) return;
+    let current = true;
+    setRecovery({studyId:recoveryId,data:null,loading:true});
+    void loadReviewRecovery({id:recoveryId,lastVersion:recoveryVersion,lastSha1:recoverySha}).then(
+      data => {if(current)setRecovery({studyId:recoveryId,data,loading:false});},
+      error => {if(current)setRecovery({studyId:recoveryId,data:null,loading:false,error:processingMessage(error)});},
+    );
+    return () => {current=false;};
+  },[pending,recoveryId,recoveryVersion,recoverySha,analysis?.running,recoveryRefresh]);
 
   const refreshList = useCallback(async () => {
     setLoadingList(true);
@@ -427,7 +442,7 @@ export default function CorretorV3Page() {
         // brutos por versões anteriores) são encerrados: a lista final é a de agora.
         const finalIds = new Set(res.visionFindings.map((f) => f.id));
         const stale = (await loadFindings(ctx.studyId))
-          .filter((i) => i.origem === 'IA_visao' && i.status === 'pendente' && !i.verdict && !i.verdictRevisado && !finalIds.has(i.ruleId))
+          .filter((i) => (i.origem === 'IA_visao' || i.ruleId === 'image-not-read') && i.status === 'pendente' && !i.verdict && !i.verdictRevisado && !finalIds.has(i.ruleId))
           .map((i) => i.ruleId);
         if (stale.length) await resolveInvalidFindings(ctx.studyId, stale);
         // Snapshot só de análise COMPLETA: pausada, o estudo continua pendente
@@ -460,6 +475,7 @@ export default function CorretorV3Page() {
     } finally {
       abortRef.current = null;
       setAnalysis(null);
+      setPreparingStudyId(null);
     }
   }, [refreshList]);
 
@@ -574,6 +590,8 @@ export default function CorretorV3Page() {
     setBusy('upload');
     setLaunching({ name: selected.nome, slides: ir.n_slides });
     try {
+      const previous = await loadReviewRecovery(selected);
+      if (!previous.canResume) throw new Error('Uma leitura anterior precisa de conferência técnica. Seus resultados salvos continuam disponíveis.');
       await savePptx(ir.sha1, prepared.file.name, bytes);
       if (fonte) await saveStudyFonte(selected.id, prepared.sheets.length ? `${prepared.sheets.length} planilhas` : fonteInput?.name ?? 'Fonte preservada', fonte);
       writeOutras(selected.id, outras);
@@ -582,9 +600,9 @@ export default function CorretorV3Page() {
       const ac = new AbortController(); abortRef.current=ac;
       const p1 = await runPhase1(ir, bytes, {model:MODEL, fonte, candidates:estimate.candidates, ataCandidate:estimate.ataCandidate, signal:ac.signal});
       if (ac.signal.aborted) { await finishExecution('interrupted'); return; }
-      await runPaidAnalysis({studyId:selected.id,version:selected.lastVersion,ir,bytes,estimate,fonte},{cidade:city,uf,outras,ata:p1.ata},Math.max(0,estimate.costUsd-p1.ataCostUsd));
+      await runPaidAnalysis({studyId:selected.id,version:selected.lastVersion,ir,bytes,estimate,fonte},{cidade:city,uf,outras,ata:selected.ataConfirmada ? selected.ata ?? null : p1.ata},Math.max(0,estimate.costUsd-p1.ataCostUsd));
     } catch(e) { await finishExecution('failed').catch(()=>{}); setPreparationFailure({studyId:selected.id,message:processingMessage(e)}); throw e; }
-    finally {setBusy(null);setAnalysis(null);setLaunching(null);abortRef.current=null;}
+    finally {setBusy(null);setAnalysis(null);setLaunching(null);setPreparingStudyId(null);abortRef.current=null;}
   }
 
   async function prepareRecommendation(prepared: PreparedStudy) {
@@ -964,23 +982,32 @@ export default function CorretorV3Page() {
   if (!selected && routeStudyId) return <div className="p-6">{loadingList || loadingStudy ? <CorretorLoadingState title="Abrindo revisão…" /> : <p>Estudo não encontrado.</p>}<Link to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>;
   if (!selected) return <StudyPreparationPage failure={preparationFailure?.message} back={portfolioHref(searchParams.get('carteira') ?? '')} onStart={ingestNew} onRecommendation={prepareRecommendation} />;
 
-  if (pending && !loadingStudy) {
-    const unread = items.find(item => item.ruleId === 'image-not-read');
-    const failedSlides = unread ? [...(unread.finding.detail ?? '').matchAll(/\bs(\d+)\b/g)].map(match => Number(match[1])) : [];
-    const persistedFailure = analysisInterruption(false, failedSlides)?.message;
-    return <StudyPreparationPage key={selected.id} failure={preparationFailure?.studyId===selected.id?preparationFailure.message:persistedFailure} back={portfolioHref(searchParams.get('carteira') ?? '')} resume={{study:selected, fonte:fonteInput?.fonte ?? null}} onStart={resumePrepared}/>;
+  const currentRecovery = recovery?.studyId === selected.id ? recovery : null;
+  const recoveryLoading = !currentRecovery || currentRecovery.loading;
+  const recoveryBlocked = recoveryLoading ? 'Conferindo a tentativa anterior antes de liberar a retomada…'
+    : currentRecovery?.error ?? (!currentRecovery?.data?.canResume ? 'Uma leitura anterior precisa de conferência técnica pela equipe. Você pode revisar os resultados salvos.' : undefined);
+  const unread = items.find(item => item.ruleId === 'image-not-read');
+  const failedSlides = unread ? [...(unread.finding.detail ?? '').matchAll(/\bs(\d+)\b/g)].map(match => Number(match[1])) : [];
+  const failure = preparationFailure?.studyId===selected.id ? preparationFailure.message : analysisInterruption(false, failedSlides)?.message;
+  const preparing = preparingStudyId === selected.id || items.length === 0;
+  const recoveryPanel = <StudyRecoveryPanel recovery={currentRecovery?.data ?? null} loading={recoveryLoading} error={currentRecovery?.error}
+    savedCount={items.length} message={failure} preparing={preparing}
+    onPrepare={()=>setPreparingStudyId(selected.id)} onReview={()=>setPreparingStudyId(null)} onRefresh={()=>setRecoveryRefresh(n=>n+1)}/>;
+
+  if (pending && !loadingStudy && preparing) {
+    return <><div className="corretor-projects cp-preparation">{recoveryPanel}</div><StudyPreparationPage key={selected.id} resumeBlocked={recoveryBlocked} back={portfolioHref(searchParams.get('carteira') ?? '')} resume={{study:selected, fonte:fonteInput?.fonte ?? null, outras:readOutras(selected.id)}} onStart={resumePrepared}/></>;
   }
 
   // ─── WORKSPACE ───────────────────────────────────────────────────────────────
   return (
     <div
       className={cn('min-h-screen bg-background flex flex-col relative', !routeStudyId && 'corretor-projects cp-review-legacy')}
-      onDragEnter={(e) => { e.preventDefault(); if (busy === null && !analysis?.running && selected.status !== 'pronto') setDragging(true); }}
+      onDragEnter={(e) => { e.preventDefault(); if (!pending && busy === null && !analysis?.running && selected.status !== 'pronto') setDragging(true); }}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }}
       onDragLeave={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false);
       }}
-      onDrop={(e) => void handleWorkspaceDrop(e)}
+      onDrop={(e) => {if(pending){e.preventDefault();return;}void handleWorkspaceDrop(e);}}
     >
       {dragging && (
         <div className="fixed inset-0 z-40 pointer-events-none bg-background/85 backdrop-blur-sm flex items-center justify-center p-6">
@@ -991,6 +1018,7 @@ export default function CorretorV3Page() {
           </div>
         </div>
       )}
+      {pending && <div className="px-4 md:px-6 pt-5">{recoveryPanel}</div>}
       <header className="cp-review-tools border-b bg-card px-6 py-3 flex items-center justify-between gap-4">
         <div className={cn("flex items-center gap-3 min-w-0", routeStudyId && "sr-only")}>
           <button
@@ -1015,7 +1043,7 @@ export default function CorretorV3Page() {
           <button
             type="button"
             onClick={() => studySourcesRef.current?.click()}
-            disabled={sourceProgress !== null}
+            disabled={pending || sourceProgress !== null}
             className={cn('text-xs rounded-md px-2.5 py-1.5 border inline-flex items-center gap-1.5 disabled:opacity-50', fonteInput ? 'border-emerald-500/50 text-emerald-700 dark:text-emerald-400' : 'border-border hover:border-primary/50')}
             title={fonteInput ? `${fonteInput.name} — clique para trocar` : 'Vincular as planilhas-fonte (.xlsx/.xlsm) do estudo'}
           >
@@ -1024,7 +1052,7 @@ export default function CorretorV3Page() {
           </button>
           <button
             onClick={() => recheckRef.current?.click()}
-            disabled={busy !== null || analysis?.running || selected.status === 'pronto'}
+            disabled={pending || busy !== null || analysis?.running || selected.status === 'pronto'}
             className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-primary/50 inline-flex items-center gap-1.5 disabled:opacity-50"
             title="Reconferir o arquivo corrigido com os registros anteriores"
           >
@@ -1060,7 +1088,7 @@ export default function CorretorV3Page() {
 
       {sourceProgress && <CorretorLoadingState compact title="Lendo planilhas de cálculo…" description={`${sourceProgress.done}/${sourceProgress.total} arquivos preparados`} />}
       {busy === 'recheck' && !analysis?.running && <CorretorLoadingState title="Preparando a reconferência…" />}
-      {!pending && <section className="cp-review-summary" aria-label="Resumo da revisão"><h2>Resumo da revisão</h2><p>{selected.nSlides} slides · versão {selected.lastVersion} · {summary.pending} apontamentos pendentes</p><div className="cp-actions">{['Erros apontados','Prováveis','A verificar'].map((label,i)=><span key={label}><strong>{summary.levels[i]}</strong> {label}</span>)}</div>{summary.categories.length > 0 && <p className="cp-muted">{summary.categories.map(([label,n])=>`${label}: ${n}`).join(' · ')}</p>}</section>}
+      <section className="cp-review-summary" aria-label="Resumo da revisão"><h2>{pending ? 'Resultados salvos até aqui' : 'Resumo da revisão'}</h2><p>{selected.nSlides} slides · {summary.pending} apontamentos pendentes{pending ? ' · cobertura ainda incompleta' : ''}</p><div className="cp-actions">{['Erros apontados','Prováveis','A verificar'].map((label,i)=><span key={label}><strong>{summary.levels[i]}</strong> {label}</span>)}</div>{summary.categories.length > 0 && <p className="cp-muted">{summary.categories.map(([label,n])=>`${label}: ${n}`).join(' · ')}</p>}</section>
       <div className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur px-6 py-2.5 space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs min-h-[32px]">
           {analysis?.running ? (
@@ -1069,17 +1097,8 @@ export default function CorretorV3Page() {
             <PreAnalysisNotice />
           ) : pending ? (
             <>
-              <PreAnalysisNotice resume />
-              <button
-                type="button"
-                disabled={busy !== null}
-                onClick={() => void resumeAnalysis()}
-                className="rounded-md bg-primary text-primary-foreground px-3 py-1.5 font-medium hover:bg-primary/90 inline-flex items-center gap-1.5 disabled:opacity-50"
-                title="Usa o PPTX guardado neste navegador; se não houver, pede o arquivo uma vez"
-              >
-                {busy === 'upload' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlayCircle className="w-3.5 h-3.5" />}
-                Retomar análise completa
-              </button>
+              <p className="cp-muted">Revisão parcial · {wl.pend} apontamentos para conferir. A entrega depende da avaliação completa.</p>
+              {wl.pend > 0 && <Button variant="outline" onClick={()=>setTriaging(true)}>Revisar um a um</Button>}
             </>
           ) : (
             <>
@@ -1101,7 +1120,7 @@ export default function CorretorV3Page() {
             </>
           )}
         </div>
-        {!pending && !analysis?.running && (
+        {!analysis?.running && (
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <div className="inline-flex rounded-md border border-border p-0.5" role="group" aria-label="Filtrar por nível">
               {([
@@ -1170,7 +1189,7 @@ export default function CorretorV3Page() {
                   Os alertas aparecem aqui quando a análise terminar.
                 </p>
               )}
-              {!pending && !analysis?.running && <>
+              {!analysis?.running && <>
                 <Suspense fallback={<CorretorLoadingState title="Preparando bancada…" />}><ReviewBench key={selected.id} study={selected} items={reviewedItems.filter(i=>(i.resolvidoNaVersao===null||i.status==='pendente')&&confidenceFilter.includes(confidenceOf(i.finding,i.origem)))} renderFinding={item=><V3FindingCard item={item} onStatus={status=>void handleStatus(item.ruleId,status)} onVerdict={verdict=>void handleVerdict(item.ruleId,verdict)}/>} /></Suspense>
               </>}
 

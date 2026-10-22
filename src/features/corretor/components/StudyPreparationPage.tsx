@@ -29,10 +29,10 @@ export interface PreparedStudy {
   sheets: File[]; fonte: Fonte | null; city: string; uf: string; outras: string[]; budgetUsd: number;
   accountPreparation?: AccountPreparation | null;
 }
-interface Props { resume?: { study: StudyV3; fonte: Fonte | null }; failure?: string; back: string; onStart: (prepared: PreparedStudy) => Promise<void>; onRecommendation?: (prepared: PreparedStudy) => Promise<RecommendationStudy> }
+interface Props { resume?: { study: StudyV3; fonte: Fonte | null; outras?: string[] }; resumeBlocked?: string; failure?: string; back: string; onStart: (prepared: PreparedStudy) => Promise<void>; onRecommendation?: (prepared: PreparedStudy) => Promise<RecommendationStudy> }
 const UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ');
 const encoder = new TextEncoder(), decoder = new TextDecoder();
-export default function StudyPreparationPage({ back, onStart, onRecommendation, resume, failure }: Props) {
+export default function StudyPreparationPage({ back, onStart, onRecommendation, resume, resumeBlocked, failure }: Props) {
   const [params] = useSearchParams();
   const requestedIntent = params.get('intent');
   const [recommendationBusy,setRecommendationBusy]=useState(false);
@@ -92,6 +92,7 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
           const [deck, saved] = await Promise.all([loadPptx(resume.study.lastSha1), loadLocalStudySheets(resume.study.lastSha1 ?? '')]);
           if (!active) return;
           setCity(resume.study.cidade ?? ''); setUf(resume.study.uf ?? '');
+          setOutras((resume.outras ?? []).join(', '));
           setSheets(saved.map(s => new File([s.bytes.slice().buffer], s.name)));
           setChoice(Boolean(saved.length || resume.fonte));
           if (deck) await prepare(new File([deck.bytes.slice().buffer], deck.name), true);
@@ -134,7 +135,7 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
     finally { setSavingSheets(false); }
   }
   async function start() {
-    if (!file || !prepared || savingSheets || lock.current || !choice || !city.trim() || !UFS.includes(uf)) return;
+    if (!file || !prepared || resumeBlocked || savingSheets || lock.current || !choice || !city.trim() || !UFS.includes(uf)) return;
     lock.current = true; setStarting(true); setError('');
     try {
       const fonte = sheets.length ? await extractFonteFromExcel(sheets, prepared.ir.sha1) : resume?.fonte ?? null;
@@ -153,7 +154,7 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
     finally { lock.current = false; }
   }
   const profile = prepared ? imageProfile(prepared.ir, prepared.estimate.candidates) : null;
-  const ready = Boolean(prepared && choice && city.trim().length >= 2 && UFS.includes(uf) && !loading && !starting && !recommendationBusy && !savingSheets && budgetUsd > 0 && budgetUsd <= 100);
+  const ready = Boolean(prepared && choice && !resumeBlocked && city.trim().length >= 2 && UFS.includes(uf) && !loading && !starting && !recommendationBusy && !savingSheets && budgetUsd > 0 && budgetUsd <= 100);
   return <main className="corretor-projects cp-preparation">
     <Link className="cp-back" to={back}>← Voltar aos estudos</Link>
     <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>{resume ? failure ? 'Avaliação interrompida' : 'Continuar avaliação' : intent === 'recommendation' ? 'Sugestão de análise' : 'Revisar estudo'}</h1><p className="cp-muted">Apresentação, cálculos e informações. Você decide quando iniciar a avaliação.</p></div><div className="cp-actions">{!resume && (accountPreparation ? <DeleteStudyButton id={accountPreparation.studyId} name={file?.name??'Preparação'} sha1={prepared?.ir.sha1} disabled={starting||recommendationBusy||Boolean(loading)||savingSheets} onDeleted={async()=>{await reset(true);}}/> : (file||sheets.length>0||error) && <Button variant="ghost" size="icon" title="Descartar prepara??o" aria-label="Descartar prepara??o deste navegador" disabled={starting||recommendationBusy||Boolean(loading)||savingSheets} onClick={()=>void reset()}><Trash2 size={18} aria-hidden="true"/></Button>)}</div></header>
@@ -183,13 +184,14 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
     {prepared && intent==='recommendation' && onRecommendation && file && !savingSheets && <Suspense fallback={<CorretorLoadingState title="Preparando sugestão de análise…" />}><Recommendation key={prepared.ir.sha1} onBusyChange={setRecommendationBusy} preparedIr={prepared.ir} ensureStudy={()=>onRecommendation({file,...prepared,sheets,fonte:null,city,uf,outras:[],budgetUsd:0,accountPreparation})}/></Suspense>}
     {prepared && intent==='review' && <section className="cp-panel"><h2>Conferir antes de iniciar</h2><div className="cs-fields"><div><Label htmlFor="prepare-city">Cidade do estudo</Label><Input id="prepare-city" value={city} disabled={starting || recommendationBusy} onChange={e => setCity(e.target.value)} /></div><div><Label htmlFor="prepare-uf">Estado</Label><Select value={uf} disabled={starting || recommendationBusy} onValueChange={setUf}><SelectTrigger id="prepare-uf"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{UFS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent></Select></div></div>
       <Label htmlFor="prepare-others">Outras cidades que fazem parte do estudo (opcional)</Label><Input id="prepare-others" value={outras} disabled={starting || recommendationBusy} onChange={e => setOutras(e.target.value)} placeholder="Separe por vírgulas" />
-      <p className="cp-muted">{prepared.ir.n_slides} slides · {profile?.tabelasNativas} tabelas nativas · {(profile?.tabelasImagem ?? 0) + (profile?.fichas ?? 0)} tabelas em imagem. Estes conteúdos ainda não foram avaliados.</p>
+      <p className="cp-muted">{prepared.ir.n_slides} slides · {profile?.tabelasNativas} tabelas nativas · {(profile?.tabelasImagem ?? 0) + (profile?.fichas ?? 0)} tabelas em imagem. {resume ? 'As etapas com retorno confirmado serão reaproveitadas. Mantenha os mesmos materiais e informações.' : 'Estes conteúdos ainda não foram avaliados.'}</p>
+      {resumeBlocked && <p role="status">{resumeBlocked}</p>}
       {budgetUsd>100&&<p role="status">Este estudo precisa de apoio da equipe para continuar. Seus materiais estão preservados.</p>}
       <div className="cp-analysis-start">
-        <Button disabled={choice ? !ready : Boolean(loading)||starting||recommendationBusy||savingSheets} aria-describedby={choice&&!sheets.length&&!resume?.fonte?'source-comparison-notice':undefined} onClick={() => {
+        <Button disabled={Boolean(resumeBlocked)||(choice ? !ready : Boolean(loading)||starting||recommendationBusy||savingSheets)} aria-describedby={choice&&!sheets.length&&!resume?.fonte?'source-comparison-notice':undefined} onClick={() => {
           if (!choice) { setChoice(true); setAnimateSourceNotice(!sheets.length&&!resume?.fonte); return; }
           void start();
-        }}>{starting ? 'Iniciando avaliação…' : !choice ? sheets.length ? 'Usar estas planilhas' : resume?.fonte ? 'Usar planilhas anteriores' : 'Continuar sem planilhas' : 'Iniciar avaliação'}</Button>
+        }}>{starting ? 'Iniciando avaliação…' : !choice ? sheets.length ? 'Usar estas planilhas' : resume?.fonte ? 'Usar planilhas anteriores' : 'Continuar sem planilhas' : resume ? 'Continuar avaliação' : 'Iniciar avaliação'}</Button>
         {choice&&!sheets.length&&!resume?.fonte&&<p id="source-comparison-notice" role="status" className={animateSourceNotice?'cp-source-notice cp-source-notice-enter':'cp-source-notice'}>A comparação com os cálculos de origem não será feita.</p>}
       </div>
       {(!city.trim() || !uf) && <p>Confirme a cidade e o estado para iniciar.</p>}
