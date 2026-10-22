@@ -1,3 +1,20 @@
+## 22/10/2026 — Validação do Fechamento: migration aplicada manualmente no Supabase — Edgar / Codex
+
+- **Ambiente/funcionalidade:** aprovações de divergências da Validação do Fechamento.
+- **Estado:** migration `20261022090000_validacao_fechamento_exclusao_administrativa.sql` aplicada manualmente pelo usuário no SQL Editor do projeto `mxinpvcqzbfbzjodhgtz`.
+- **Evidência informada pelo usuário:** consulta de permissões retornou `usuario = postgres` e `aplicacao_pode_excluir = false`. Nenhuma exclusão de aprovação foi necessária para essa verificação.
+- **Etapas/Pendências:** aplicação manual do SQL concluída. O registro de `20261022090000` no histórico remoto do CLI permanece pendente: CLI sem autenticação e checkout sem vínculo. Antes de futuro `db push`, conferir o histórico e registrar a versão como aplicada, sem executar novamente o SQL. Esta anotação documenta a aplicação manual; não altera o histórico remoto.
+- **Monday:** —
+
+## 22/10/2026 — Validação do Fechamento: regras Farol por cluster — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
+- **O quê:** motor substituído pelas regras ativas do Python Farol de 21/10/2026. Backup das regras anteriores em `src/features/validacao-fechamento/backups/validation-rules-20261022.ts`. Cluster: cidade, tipo, tipologia, padrão atual, dormitórios, CEP5, período e ano de lançamento. Preço/área usam média ponderada; vendas usam mediana. Garagem compara com as unidades sem vagas do mesmo cluster; área abaixo de 10 exige menos de três empreendimentos. Python corrigido e comparador disponíveis em `src/features/validacao-fechamento/reference/`.
+- **Evidência:** base local de Sinop/MT de 19/10/2026, 174 empreendimentos e 395 tipologias no último período; Python e TypeScript produzem as mesmas 123 divergências por empreendimento/tipologia/período/campo/regra/categoria: Estoque 32, Preço 67, Metragem 23, Vagas 1. Excel gerado e reaberto headless com 123 registros. Sem nova consulta autenticada à API.
+- **Supabase:** migration `20261022090000_validacao_fechamento_exclusao_administrativa.sql` permite DELETE somente ao administrador SQL `postgres`, mantém bloqueio de UPDATE e revoga DELETE de anon/authenticated/service_role. O botão Aprovar e a Edge Function seguem sem operação de exclusão.
+- **Monday:** —
+- **Etapas/Pendências:** implementação e comparação local concluídas; aplicar a nova migration no Supabase para habilitar exclusão administrativa. SQL remoto e interface autenticada não verificados nesta sessão. Backup não é importado pelo app.
+
 ## 22/10/2026 — Corretor e Sugestão: tema escuro com superfícies contínuas
 
 Gabriel solicitou suavizar as mudanças bruscas de cor e faixas brancas. Causa: cards recebiam aliases escuros, mas rodapés usavam Papel claro fixo; a triagem em portal não herdava o escopo da página. CSS local agora reutiliza superfícies/bordas semânticas da plataforma e tokens Geobrain para texto acinzentado, rodapés e cabeçalhos próximos ao card, mapa menos luminoso, seleção/hover discretos e verde suave nos materiais enviados. Inclui resultados da Sugestão e triagem em tela cheia. Estado selecionado dos botões de decisão exposto por aria-pressed, sem mudar a ação ou persistência.
