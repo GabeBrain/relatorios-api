@@ -1384,6 +1384,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`; leitura de referência, sem escrita.
 - **Impacto em Etapas/Pendências:** fonte API viável; próximo adaptar payload bruto sem trocar nulo por zero, fechar origem por período, revisar vendas negativas, rodar comparação pareada e só então habilitar simulador de teste. Push/deploy não feitos nesta sessão.
 
+**Complemento documental de22/10 — Gabriel/sessão, estado preparado.** Diego encaminhou resposta de Evandro: `bases.estimation` é a única flag da base/período estimado; `bases.ivv_batch_id` rastreia atualizações IVV em lote. A API sondada não mostra a flag por linha mensal, portanto o histórico continua sem gabarito confirmado. Gabriel buscará exportação real para confrontar esquema e API; enquanto isso, pediu primeira página editorial funcional só com leitura da API, empreendimento isolado/carteira, gráfico interativo e responsivo, explicação recolhível e exportação **de revisão**. [Plano de implementação e CTA](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md); nenhuma UI ou upload executado neste complemento. Monday de referência acima, sem escrita.
+
 ### 2026-10-21 — Estimativas Finotti: motor horizontal e ensaio de corte — Gabriel / Codex
 - **Ambiente/funcionalidade:** Rebrain/SID, código local em `src/features/estimativas-vendas/`, sem rota ou integração Geobrain.
 - **O quê/por quê:** coeficientes do slide 7 versionados à parte do motor puro; caso fechado 300/150/6 reproduzido (`k=0,632035`, 65,84% no mês 12, 75,04% no 18, cruzamento de 95% no 61 e contagem ilustrativa até 67). Ensaio em memória congela origem e compara curva com médias de 3/12 meses, omitindo cauda e extrapolação da métrica.
@@ -2492,7 +2494,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-**22/10 — Estimativas de vendas Finotti:** reprodução matemática local e acesso API somente leitura confirmados em duas cidades; [plano do dossiê](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md) define recortes, métricas, conjunto e interface. Linhagem observado/estimado por mês, contrato oficial, retrospectiva real, cauda mensal, bandas, UI e retorno continuam pendentes. Sem runtime publicado nesta etapa.
+**22/10 — Estimativas de vendas Finotti:** reprodução matemática local e acesso API somente leitura confirmados em duas cidades; [plano do dossiê](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md) e [plano da página editorial](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) definem recortes, métricas, carteira e interface. `bases.estimation` confirmado para a base/período por mensagem encaminhada, mas linhagem ainda ausente da série API. Contrato oficial, retrospectiva real, cauda mensal, bandas, UI e retorno continuam pendentes. Sem runtime publicado nesta etapa.
 
 **15/10 — Corretor F1–F6:** preparação/revisão validadas localmente; registro de execução e prévias têm limites de ativação/infraestrutura no resultado F1–F6. A2/A3/F3 servidor não encerradas.
 
@@ -2523,7 +2525,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **Estimativas de vendas Finotti:** API de histórico acessível; confirmar origem observado/estimado por competência e adaptar série bruta com meses negativos/lacunas antes do backtest. Depois comparar empreendimento e carteira, gerar dossiê e simulador Rebrain. Contrato de retorno, domínio, cauda95%, bandas, vertical e alternância/coleta seguem abertos. [Plano e evidência](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md). Sem aceite operacional.
+- [ ] **Estimativas de vendas Finotti:** API de histórico acessível; implementar [página editorial por API](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) para empreendimento/carteira e exportação de revisão. `bases.estimation` marca a base/período, mas a API sondada ainda não comprova origem por competência; confrontar exportação real quando chegar e adaptar série com negativos/lacunas antes do backtest válido. Contrato de retorno, domínio, cauda95%, bandas, vertical e alternância/coleta seguem abertos. Sem aceite operacional.
 
 - [ ] **Corretor v0.73:** revisar/publicar lote de fluxo contínuo, ativar migration/Edge/frontend e conferir produção. Conversão automática hospedada e recuperação da execução em outro navegador permanecem abertas; sem IA paga sem lote/orçamento.
 

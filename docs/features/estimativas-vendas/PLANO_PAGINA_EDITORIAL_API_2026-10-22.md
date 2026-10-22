@@ -1,0 +1,69 @@
+# Plano de execução — Estimativas de vendas, página editorial por API
+
+**Estado:** preparado em 22/10/2026 por Gabriel/Codex. Este documento é o roteiro para implementar uma primeira página funcional em uma sessão de execução. Nenhuma tela, importação de arquivo ou backtest real foi entregue por este plano. Gabriel conduz; Edgar apoia, em paralelo, as dúvidas de acesso e contrato. Relaciona-se ao [plano estatístico anterior](PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md) e ao [card histórico de IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074), sem escrita no Monday.
+
+## Decisão e fronteiras
+
+1. **Entrada v1:** somente leitura autenticada das APIs Geobrain, por cidade monitorada e busca paginada de históricos horizontais. Não criar upload, importação, banco ou cópia remota nesta versão. Manter uma porta de adaptador para snapshot/arquivo futuro, sem definir formato ausente.
+2. **Saída v1:** gráficos, tabela e exportação de **resultado de revisão** com escopo, filtros, data da consulta, versão da equação, denominadores, previsões e alertas. Esse arquivo não é importável no Geobrain e não preenche `bases.estimation`.
+3. **Comprovação de contrato:** quando Gabriel trouxer uma exportação real, guardá-la em `.local-inputs/estimativas-vendas/` e confrontar ID, competência, tipo, estoque, vendas e `bases.estimation` com a API. Documentar divergências e só então desenhar o adaptador de ida/retorno; não pressupor que a planilha do Monday seja o contrato atual.
+4. **Semântica confirmada por mensagem encaminhada:** `bases.estimation` marca a base/período estimado e é a única flag indicada para isso. `bases.ivv_batch_id` rastreia atualizações IVV em lote. A resposta não demonstra que o objeto `estimation` da API de histórico refira-se a todas as competências. Observado/estimado fica `unknown` quando não houver linhagem mensal verificável.
+5. **Domínio v1:** só loteamentos horizontais abertos/fechados com categoria explicitamente identificada e origem de 1–48 meses, percentual vendido entre 0 e 95%, `k>0`. Horizonte calibrado: até 36 meses após o corte; pontos a partir do primeiro mês inteiro de 95% ficam sem previsão mensal até a regra de cauda. Bandas central/ampla do slide, vertical, casas, INCC e retorno operacional não são implementados por inferência.
+
+## Critério da primeira versão funcional
+
+A página permite selecionar uma cidade autorizada, um empreendimento horizontal elegível ou uma carteira de vários, escolher a competência de corte, rodar a curva e as médias comparadoras onde cabíveis, inspecionar série, indicadores e alertas, mudar filtros sem recarregar manualmente a página e baixar um relatório de revisão. A carteira soma **unidades previstas empreendimento a empreendimento** nas competências comuns; não aplica a equação ao percentual agregado. Dados sem origem mensal comprovada aparecem como análise exploratória. A comparação retrospectiva com rótulo **observado versus previsto** só é habilitada para competências com origem confirmada. Se a API não trouxer essa prova, a página continua funcional como simulador/projeção, mas não apresenta métricas como validação real.
+
+## Implementação planejada, em ordem de dependência
+
+### 0. Abertura e congelamento de escopo
+
+- Ler AGENTS da raiz SE/repo, este pacote, `System Design/README.md`, `FUNDAMENTOS.md`, `ESTUDOS_ANALITICOS.md`, tokens, `MAPA_SISTEMAS.md`, `FRONTEND_GUIDELINES.md` e `DESIGN_SYSTEM.md`. Fazer `git fetch --all`, comparar cada remoto e preservar edições paralelas; trabalhar em `main` e com commits de caminhos explícitos.
+- Congelar versão dos coeficientes e comportamento do motor atual; manter o exemplo 300/150/6 como referência. Registrar se o arquivo Geobrain chegou durante a sessão, sem mudar o escopo API v1 silenciosamente.
+
+### 1. Contratos e adaptador de leitura
+
+- Criar tipos de transporte da API e um modelo normalizado específico da feature em `src/features/estimativas-vendas/`, separados do motor. Consumir `POST /public-api/v2/building-with-history-internal` com `type=Horizontal`, UF/cidade autorizadas, paginação, limite configurado de páginas/empreendimentos, timeout, cancelamento e erro por página explícito. Reusar token da sessão existente; nunca embutir email, senha ou Bearer no bundle, URL, log ou arquivo exportado.
+- Reusar `GeoApiScopeSelector` + `useGeoApiScope`: `/public-api/monitored-cities` paginado, UF antes de cidade, invalidar seleção e cancelar requisição anterior ao trocar escopo. Não usar lista IBGE como fallback. Buscar históricos somente após escopo válido e comando do usuário; indicar progresso real de páginas/empreendimentos.
+- Preservar ausência como `null` e distinguir zero, ausente, erro e linha duplicada. Não reutilizar o normalizador de Validação de Fechamento que converte parte dos nulos em zero. Registrar identificação estável, período, tipologia, lançamento, oferta, vendas brutas, distratos, líquidas, estoque, categoria e proveniência. Deduplicar apenas quando houver regra verificável; caso contrário, sinalizar e excluir da métrica.
+- Tratar `estimation` no objeto de empreendimento como **metadado de escopo desconhecido**. Não transportá-lo para cada competência. Prever adaptador futuro `periodOrigin` com `observed | estimated | unknown` e fonte de evidência; até o contrato por base estar disponível, usar `unknown` para o histórico da API.
+
+### 2. Elegibilidade, matemática e comparadores
+
+- Criar função pura que produza `eligible | excluded | pending-origin` e motivos estruturados por empreendimento e corte: classe aberto/fechado, oferta e revisões, sequência mensal, idade, venda acumulada, estoque, faltas, negativos, duplicatas e histórico posterior. Exibir o funil por cidade e por carteira; a lista de excluídos é revisável.
+- Manter `horizontal.ts` e `parameters.ts` puros. Evoluir o avaliador mensal para admitir estados de mês ausente, líquido negativo e revisão de oferta sem converter ou limitar valores silenciosamente; se a política não estiver definida, excluir o caso da métrica com motivo. Não consultar dados após o corte para definir entrada, parâmetros ou seleção.
+- Implementar médias dos últimos 3/12 meses com a mesma informação do corte e política explícita de elegibilidade. A regra operacional antiga do IVV entra apenas após contrato e reconciliação com Finotti. Para cortes válidos, exibir curva e comparadores até horizonte compartilhado, omitindo a cauda e pontos fora de calibração com motivo.
+- No ensaio retrospectivo, computar erros somente para períodos **comprovadamente observados** e pares avaliáveis pelos métodos comparados. Métricas: absoluto acumulado em pontos percentuais das unidades lançadas, erro em unidades, viés, mediana, percentil 90, cobertura e tamanho da amostra. Reportar por empreendimento, conjunto, cidade, tipo, estágio e horizonte, com denominadores e exclusões. Usar coeficientes publicados fixos; nenhuma recalibração no teste.
+
+### 3. Página editorial e comportamento
+
+- Criar rota lazy `/rebrain/estimativas-vendas` e item sob Rebrain no shell atual. Usar tokens Geobrain já copiados sem alterá-los, primitives existentes, paleta e tipografia do System Design. Atualizar `System Design/MAPA_SISTEMAS.md` ao implementar a UI. Evitar refatorar o shell ou outras páginas.
+- Estrutura da página: abertura curta com método e estado da fonte; barra de recorte (UF, cidade, tipo e competência); seletor pesquisável de empreendimento/carteira; resumo de cobertura e qualidade; cartões de indicadores; painel analítico principal; tabela mensal; metodologia, exclusões e proveniência; ação de exportar relatório. A página deve ser clara sem exigir leitura da documentação técnica.
+- Seletor de carteira: pesquisa por nome/ID, seleção múltipla com chips removíveis, seleção limpa ao mudar cidade, contagem de membros e limite explícito para evitar carga acidental. Permitir comparar empreendimentos isolados e a soma da carteira no mesmo recorte temporal; quando lançamentos têm idades distintas, calcular cada origem individualmente e alinhar por **competência calendário** para a soma, mantendo estágio individual na ficha.
+- Gráfico principal em largura confortável, sem miniaturas comprimidas: eixo X em competência/mês e Y com unidade e escala indicada; **histórico informado pela API** até o corte, projeção, médias e eventual observado posterior comprovado identificados por cor **e** traço/rótulo. Marcador visível do corte e áreas de omissão para 95%/36 meses. Foco/hover/teclado mostram valor, competência, método e origem. Legenda interativa liga/desliga séries sem alterar o conjunto de avaliação. Escolhas de filtro atualizam gráfico, KPIs, tabela e exportação juntos.
+- Explicação ao lado do gráfico em desktop, recolhível com título e estado acessível; no móvel, abaixo do gráfico. Conteúdo contextual explica fórmula em linguagem simples, o que está sendo comparado, origem dos dados e por que há lacunas. A explicação não encobre nem reduz o gráfico além de uma largura útil; usar reflow/scroll controlado para séries longas, mantendo altura saudável e eixos legíveis em 1440, 1024, 390 e 320 px.
+- Estado da página: carregamento da rota, catálogo de cidades, consulta longa com progresso/tempo decorrido real, vazio, escopo inválido, erro de API com retry, parcial por falha de página, ausência de dados elegíveis, resultado exploratório e resultado retrospectivo validável. Desabilitar envio duplicado; cancelar requisição obsoleta. Texto de erro humano sem expor token/payload.
+- Acessibilidade: controles com rótulo, foco visível, teclado e `aria-expanded` na explicação; resumo textual e tabela equivalentes ao gráfico; tema claro/escuro e contraste. Cores da marca não são a única codificação de observado/estimado/projetado.
+
+### 4. Exportação de revisão e futura entrada de arquivos
+
+- Na v1, exportar CSV da tabela mensal e JSON de manifesto/resultado em memória, com versão do motor/parâmetros, instante da leitura, filtros, IDs, unidades, origem conhecida/desconhecida, alertas, membros da carteira, método, denominadores e exclusões. Usar nome de arquivo identificável e escaping correto; nunca exportar token. Não gerar coluna `bases.estimation` para importação operacional sem contrato. A exportação reflete exatamente filtros/legendas de dados, mas desabilitar uma linha visual não remove método do cálculo sem ação explícita.
+- Deixar interfaces internas para `ApiHistorySource` e `FileSnapshotSource`/`GeobrainReturnWriter`, mas **implementar apenas a primeira**. Nenhum botão de upload inerte, endpoint novo ou persistência até chegar o exemplo de arquivo e uma decisão de armazenamento. Quando chegar, avaliar processamento local em memória como padrão inicial; considerar armazenamento autenticado com retenção/acesso definidos apenas se houver necessidade real de colaboração, volume ou auditoria central.
+
+### 5. Verificação e entrega
+
+- Testar matemática e contratos que afetam decisão: referência 300/150/6, limites do domínio, omissão de cauda/36 meses, negativa/null/revisão/duplicata, corte sem vazamento, pares e agregação de carteira. Testar adaptador com payload representativo e falhas/paginação/cancelamento; sem gravar dados brutos reais no Git.
+- Rodar testes focados, `npm run typecheck`, lint dos arquivos tocados, build e `npm run check:live-docs -- <base> <head>`. Conferir uma cidade real com sessão Geobrain em ambiente local: seleção, um empreendimento, carteira, filtros, progresso, falhas, gráfico e exportação. Capturar somente evidência agregada/pequena; dados brutos e screenshots de homologação em `.local-inputs/`.
+- Inspecionar interface em 1440/1024/390/320 px, temas claro/escuro e teclado; verificar gráfico e painel recolhível, sem overflow ou texto truncado. Se a API ainda não tiver linhagem por base, registrar que **não houve backtest validado** e testar apenas o bloqueio correto dessa afirmação.
+- Atualizar documentação da feature, LIVE Rebrain, mapa do System Design, plano semanal e diário pessoal. Commit isolado na `main`, preservar alterações de outros fluxos. Push e deploy só com autorização; depois verificar a rota publicada com sessão real, sem equiparar build/CI a produção.
+
+## Questões que não impedem a página exploratória
+
+- Exportação real: esquema, IDs, competência, arredondamento, tipologias, unidade de análise, periodicidade, `bases.estimation` por período, campos preservados e formato de retorno.
+- Regra mensal após 95%, bandas central/ampla, casos já acima de 95%, líquidos negativos e revisões de oferta; política de casos sem mês de lançamento claro.
+- Coleta alternada, tratamento de estoque 0–5 e acima 30, correção INCC e reconciliação de diferenças: regras operacionais do card anterior, separadas da equação Finotti.
+- Corpus, snapshot e protocolo originais do estudo Finotti para reproduzir os 9,1 pontos percentuais relatados. O dossiê da API será validação independente, com população e denominadores próprios.
+
+## Aceite da primeira sessão de execução
+
+Uma página local funcional e responsiva com API autenticada, seleção isolada/carteira, cálculo determinístico, comparadores admissíveis, gráfico/tabela sincronizados, explicação recolhível e exportação de revisão; testes e limites documentados. O aceite **não** inclui homologação estatística, formato de retorno Geobrain, upload, produção ou integração nativa. Se houver evidência de origem mensal na API/exportação durante a execução, acrescentar um backtest real revisável sem enfraquecer o gate de proveniência.

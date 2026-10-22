@@ -22,7 +22,7 @@ Mensalmente: mês/calendário, unidades vendidas previstas, acumulado, estoque e
 
 ## Decisões em aberto antes de aceitar o motor
 
-1. Nomes/tipos/semântica de `estimation` e transcrição `IVV BET`, nível geográfico e temporal, arredondamentos, identidade e contrato oficial de exportação/importação.
+1. `bases.estimation` foi confirmado, por resposta de Evandro encaminhada por Diego em20/10, como única flag da base/período estimado; `bases.ivv_batch_id` rastreia atualização IVV em lote. Permanecem abertos a materialização dessa flag na API de histórico, arredondamentos, identidade, granularidade e contrato oficial de exportação/importação. O `estimation` visto no objeto retornado da API não prova origem dos meses anteriores.
 2. Regrasn=0, vendas zero, esgotado, lançadas zero, percentuais inválidos, `k<=0`, distratos e vendas líquidas negativas; não fabricar resultados com clamp/epsilon silencioso.
 3. Regra exata de cruzamento95%, cauda5/6meses e cenários já acima95%; conservação de unidades quando resultado é fracionário. Coeficientes arredondados do PPT podem diferir do código original.
 4. Meses corridos versus observados, competência faltante, revisão de lançamentos, distinção de tipologias e janela de calibração.

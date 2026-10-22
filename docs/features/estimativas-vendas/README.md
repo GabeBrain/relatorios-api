@@ -15,6 +15,8 @@ Pacote inicial de contexto técnico e continuidade, preparado em **21/10/2026** 
 5. [CTA_NOVA_SESSAO.md](CTA_NOVA_SESSAO.md): texto para iniciar a conversa técnica.
 6. [REPRODUCAO_E_HANDOFF.md](REPRODUCAO_E_HANDOFF.md): resultado numérico, limites do motor e recorte revisável para Edgar.
 7. [PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md](PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md): sondagem autenticada, plano estatístico e interface de testes.
+8. [PLANO_PAGINA_EDITORIAL_API_2026-10-22.md](PLANO_PAGINA_EDITORIAL_API_2026-10-22.md): execução técnica da primeira página funcional só por API, com visual editorial, seleção individual/carteira e exportação de revisão.
+9. [CTA_IMPLEMENTACAO_PAGINA_API.md](CTA_IMPLEMENTACAO_PAGINA_API.md): comando para iniciar essa implementação.
 
 ## Onde avançar
 
@@ -26,6 +28,6 @@ Antes da implementação, ler `AGENTS.md` do repo e da raiz SE. Manter `docs/pro
 
 ## Próxima entrega
 
-Revisar a reprodução local com Edgar; obter MD/código original e contratos de entrada/retorno; comparar retrospectivamente uma base real com o método atual. Parâmetros, motor e ensaio ficam independentes de adaptadores de importação/exportação e da futura interface; estes ainda não foram implementados porque o contrato externo não chegou. Intervalos estatísticos e modelo vertical também pendem. O PPT não comprova qualidade na base corrente nem autoriza retorno automático ao Geobrain.
+Implementar a página editorial por API conforme o plano novo, mantendo o resultado exploratório quando a origem por competência for desconhecida. Gabriel buscará uma exportação real do Geobrain para conferir o contrato de entrada/retorno e `bases.estimation`; `bases.ivv_batch_id` só rastreia atualizações IVV em lote, conforme resposta de Evandro encaminhada por Diego. Parâmetros, motor, leitura API, futura importação/exportação operacional e interface são camadas separadas. Intervalos estatísticos e modelo vertical ainda pendem. O PPT não comprova qualidade na base corrente nem autoriza retorno automático ao Geobrain.
 
 Monday: [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074). Esta documentação não alterou o card.

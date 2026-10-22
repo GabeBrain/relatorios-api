@@ -34,6 +34,16 @@ Comentário5610817039:
 
 **Planilhas não baixadas nem abertas nesta preparação.** Recuperar no card se Edgar indicar que representam o contrato atual; não presumir equivalência com a curva nova. Metadados registram fonte, não homologação do conteúdo.
 
+## 19–20/10/2026 — Esclarecimento encaminhado por Gabriel em22/10
+
+Fonte: transcrição de mensagens de Edgar (19/10,15h59) e Diego (20/10,09h34) fornecida por Gabriel nesta conversa. Diego identificou sua mensagem como resposta de Evandro; não foi consultado o registro original no Geobrain. A pergunta de Edgar usou `bases.estimation` e `bases.ivv_batch_id`; a resposta transcrita alterna `base`/`bases`.
+
+- `bases.estimation` é a **única flag** indicada para identificar que os valores de um empreendimento foram estimados **naquela base/período**.
+- `bases.ivv_batch_id` rastreia as bases alteradas em uma atualização de valores por IVV em lote. Não é a flag de estimativa.
+- A resposta não define como a API de histórico materializa bases/competências, nem o contrato de exportação e retorno. Na sondagem de22/10, `estimation` apareceu no objeto de empreendimento, sem flag em cada linha mensal. Não inferir que o valor atual descreve todos os meses do histórico.
+
+Gabriel decidiu usar uma exportação real do Geobrain como amostra do **formato** e reconciliá-la com as séries amplas da API. Até essa amostra chegar, a implementação planejada da página usa leitura por API e exportação de resultados de revisão, sem importação/upload nem arquivo de retorno operacional.
+
 ## 21/10/2026,12h18 — Email Finotti
 
 Fonte: captura fornecida por Gabriel. Assunto “Re: Dados Curva de Vendas”; remetente Lucas Finoti. Corpo:

@@ -55,6 +55,10 @@ O histórico inclui `period`, `typology_id`, `pattern`, `qty`, `typology_stock`,
 2. **Simulador de teste na Rebrain:** cálculo e observação claramente separados, estados de erro/ausência, testes matemáticos e de contrato, tipagem/lint/build, verificação local desktop/mobile e tema claro/escuro. Atualizar `System Design/MAPA_SISTEMAS.md` ao criar a UI.
 3. **Publicação e retorno operacional:** revisão de Gabriel, push e deploy autorizados separadamente; depois verificar sessão, escopo territorial, resultados reais e exportação em ambiente publicado. Retorno importável e integração nativa são gates posteriores.
 
+## Esclarecimento posterior em22/10
+
+Diego encaminhou resposta de Evandro de20/10: `bases.estimation` é a única flag do empreendimento estimado na base/período; `bases.ivv_batch_id` rastreia atualizações de valores por IVV em lote. Isso resolve a função dos campos, **mas não mostra a flag por competência na API de histórico sondada**. A proposta de Gabriel é conferir uma exportação real do Geobrain contra a API numerosa. A primeira UI será apenas de leitura por API e exportação de revisão; upload e arquivo de retorno aguardam o exemplo. Ver [plano detalhado da página](PLANO_PAGINA_EDITORIAL_API_2026-10-22.md).
+
 ## Dependências objetivas
 
 Edgar pode esclarecer em paralelo: fonte/semântica do marcador **por competência** observado/estimado; contrato do arquivo de ida/volta; distinção de rótulos horizontal aberto/fechado e revisões de oferta; código/MD do Finotti e regra da cauda/bandas se disponíveis. O restante — adaptador, auditoria, comparação, dossiê e UI — segue nesta frente sem aguardar acesso novo, respeitando os gates acima.
