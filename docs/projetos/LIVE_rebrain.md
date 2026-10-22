@@ -2678,3 +2678,6 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 **22/10 — correção do menu Estimativas, Gabriel/sessão:** por pedido do usuário, Estimativas de Vendas virou link lateral direto acima de Banco Quanti, sem submenu Simulador de Vendas. Rota e aviso em implementação preservados. Dois testes de menu, tipos e lint aprovados; publicação e conferência visual pendentes.
 
+
+**22/10 — Gabriel/sessão, curva Finotti em Rio Branco.** Diagnóstico API: 21 empreendimentos, 13 horizontais com lacunas; regra anterior impedia todas as curvas. Motor agora ancora a curva em estoque por tipologia no corte apenas quando conciliado com vendas acumuladas, mantendo médias 3/12 ausentes sem cadência mensal adequada. Ecovillage 52093 é caso local avaliável (348/276 no mês39); proveniência mensal desconhecida, sem backtest. 13 testes, tipos/lint aprovados. [Evidência](../features/estimativas-vendas/README.md).
+
