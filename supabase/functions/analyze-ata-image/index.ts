@@ -1,5 +1,5 @@
 import { normalizeAtaLocation } from "../_shared/reviewer.ts";
-import { callReviewProvider } from "../_shared/review-provider.ts";
+import { callReviewProvider, reviewFailureResponse } from "../_shared/review-provider.ts";
 // Edge Function: analyze-ata-image (Corretor v3.3 — Fase A do PLAN_ata_estrela_guia)
 // Extrai a ATA/BRIEFING de abertura para JSON estruturado fechado. Aceita a ata como
 // IMAGEM (base64, print colado no slide) OU como TEXTO (extraído de um DOCX — ~10× mais
@@ -182,6 +182,6 @@ Deno.serve(async (req) => {
     const response = await callOpenAI(apiKey, parsed.value);
     return json({ ata: normalizeAtaLocation(response.content?.ata ?? null), ...response.meta });
   } catch (err) {
-    return json({ error: "Não foi possível concluir este lote. Confira a execução antes de retomar." }, 500);
+    return json(reviewFailureResponse(err, "analyze-ata-image", ip), 500);
   }
 });

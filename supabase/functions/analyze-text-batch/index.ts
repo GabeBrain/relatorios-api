@@ -1,4 +1,4 @@
-import { callReviewProvider } from '../_shared/review-provider.ts';
+import { callReviewProvider, reviewFailureResponse } from '../_shared/review-provider.ts';
 // Edge Function: analyze-text-batch (Corretor v3.1)
 // Revisão de TEXTO em lote sobre o IR do estudo — ortografia (SPELLING),
 // cidade/contexto (CITY_NAME) e coerência texto×tabela (COHERENCE).
@@ -147,6 +147,6 @@ Deno.serve(async (req) => {
     const response = await callOpenAI(apiKey, parsed.value);
     return json({findings: response.content?.findings ?? [], ...response.meta});
   } catch (err) {
-    return json({ error: 'Não foi possível concluir este lote. Confira a execução antes de retomar.' }, 500);
+    return json(reviewFailureResponse(err, 'analyze-text-batch', ip), 500);
   }
 });

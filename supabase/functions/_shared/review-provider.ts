@@ -10,6 +10,34 @@ import {
   type ReviewTask,
 } from "./reviewer.ts";
 
+type FailurePhase = "provider_transport" | "provider_http" | "provider_envelope" | "provider_usage";
+type FailureDetail = { phase: FailurePhase; latencyMs: number; httpStatus: number | null; requestId: string | null; errorName: string };
+
+// Não serializar a exceção original: pode conter conteúdo do estudo ou credenciais.
+function safeErrorName(error: unknown): string {
+  return error instanceof Error && ["TimeoutError", "AbortError", "TypeError", "SyntaxError", "Error"].includes(error.name)
+    ? error.name : "UnknownError";
+}
+
+class ReviewProviderFailure extends Error {
+  constructor(readonly errorCode: string, readonly diagnostic: FailureDetail) {
+    super("Não foi possível confirmar a leitura deste lote. A equipe precisa conferir esta tentativa antes de retomar.");
+    this.name = "ReviewProviderFailure";
+  }
+}
+
+export function reviewFailureResponse(error: unknown, task: ReviewTask, executionId: string) {
+  const failure = error instanceof ReviewProviderFailure ? {
+    error: error.message, errorCode: error.errorCode, diagnostic: error.diagnostic,
+  } : {
+    error: "Não foi possível concluir este lote. Confira a execução antes de retomar.",
+    errorCode: "REVIEW_INTERNAL_ERROR",
+    diagnostic: { phase: "leaf_internal", errorName: safeErrorName(error) },
+  };
+  console.error(JSON.stringify({ event: "corretor_review_failure", task, executionId, ...failure }));
+  return failure;
+}
+
 // Uma chamada por lote. Timeout/erro de transporte é desconhecido e não é repetido.
 export async function callReviewProvider(apiKey: string, model: ReviewModel, task: ReviewTask, messages: unknown[]) {
   const started = Date.now();
@@ -29,22 +57,41 @@ export async function callReviewProvider(apiKey: string, model: ReviewModel, tas
   )
     .map((x) => x.toString(16).padStart(2, "0"))
     .join("");
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model,
-      ...reviewParameters(model, task),
-      messages: effectiveMessages,
-      response_format: { type: "json_object" },
-    }),
-    signal: AbortSignal.timeout(110000),
+  let response: Response;
+  try {
+    response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        ...reviewParameters(model, task),
+        messages: effectiveMessages,
+        response_format: { type: "json_object" },
+      }),
+      signal: AbortSignal.timeout(110000),
+    });
+  } catch (error) {
+    const name = safeErrorName(error);
+    throw new ReviewProviderFailure(name === "TimeoutError" ? "REVIEW_PROVIDER_TIMEOUT" : "REVIEW_PROVIDER_TRANSPORT", {
+      phase: "provider_transport", latencyMs: Date.now() - started, httpStatus: null, requestId: null, errorName: name,
+    });
+  }
+  const requestId = response.headers.get("x-request-id");
+  const detail = (phase: FailurePhase, error: unknown = null): FailureDetail => ({
+    phase, latencyMs: Date.now() - started, httpStatus: response.status,
+    requestId: requestId && /^[A-Za-z0-9_-]{1,200}$/.test(requestId) ? requestId : null,
+    errorName: safeErrorName(error),
   });
-  if (!response.ok) throw new Error(`Provedor recusou a chamada (${response.status}).`);
-  const raw = await response.json();
-  const usage = raw.usage;
+  if (!response.ok) throw new ReviewProviderFailure("REVIEW_PROVIDER_HTTP", detail("provider_http"));
+  let raw;
+  try {
+    raw = await response.json();
+  } catch (error) {
+    throw new ReviewProviderFailure("REVIEW_PROVIDER_ENVELOPE", detail("provider_envelope", error));
+  }
+  const usage = raw?.usage;
   if (!usage || !Number.isSafeInteger(usage.prompt_tokens) || !Number.isSafeInteger(usage.completion_tokens))
-    throw new Error("Uso não confirmado pelo provedor.");
+    throw new ReviewProviderFailure("REVIEW_PROVIDER_USAGE_UNCONFIRMED", detail("provider_usage"));
   const choice = raw.choices?.[0];
   let content: unknown;
   let parsed = false;

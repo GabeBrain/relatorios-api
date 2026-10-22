@@ -1,7 +1,7 @@
 import {afterEach,describe,expect,it,vi} from 'vitest';
 import {webcrypto} from 'node:crypto';
 import {reviewProfile,executionReviewProfile,reviewCacheKey,reviewCost,reviewParameters,validateReviewContent,normalizeAtaLists,normalizeAtaLocation,recoverCompletedAtaResponse,reviewMaterialContext,stableReview} from '../../../../../../supabase/functions/_shared/reviewer';
-import {callReviewProvider} from '../../../../../../supabase/functions/_shared/review-provider';
+import {callReviewProvider,reviewFailureResponse} from '../../../../../../supabase/functions/_shared/review-provider';
 import {isConversationalNote} from '../../audit/pptx-to-ir';
 import {binsFromColumns,detectBinGap,checkTableSums} from '../../audit/engine';
 import type {Ir,IrSlide} from '../../audit/ir';
@@ -107,6 +107,45 @@ describe('contrato Luna/high e compatibilidade',()=>{
   const result=await callReviewProvider('fake-not-a-secret','gpt-6-luna','analyze-text-batch',[{role:'user',content:'fixture'}]);
   expect(fetcher).toHaveBeenCalledTimes(1);expect(result.content).toBeNull();expect(result.meta.error).toBeTruthy();expect(result.meta.invalidOutput).toBe('{bad');expect(result.meta.reasoningTokens).toBe(250);expect(result.meta.outputTokens).toBe(300);
   const request=JSON.parse(fetcher.mock.calls[0][1].body);expect(request.reasoning_effort).toBe('high');expect(request.max_tokens).toBeUndefined();expect(result.meta.promptHash).toHaveLength(64);
+ });
+});
+
+describe('falha sem uso confirmado: diagnóstico seguro, sem retry',()=>{
+ afterEach(()=>{vi.unstubAllGlobals();vi.restoreAllMocks();});
+ it.each([
+  ['timeout','REVIEW_PROVIDER_TIMEOUT','provider_transport',null],
+  ['transport','REVIEW_PROVIDER_TRANSPORT','provider_transport',null],
+  ['http','REVIEW_PROVIDER_HTTP','provider_http',429],
+  ['envelope','REVIEW_PROVIDER_ENVELOPE','provider_envelope',200],
+  ['usage','REVIEW_PROVIDER_USAGE_UNCONFIRMED','provider_usage',200],
+ ] as const)('%s conserva fase/status sem expor conteúdo ou inventar consumo',async(kind,code,phase,status)=>{
+  vi.stubGlobal('crypto',webcrypto);
+  vi.stubGlobal('AbortSignal',{timeout:()=>new AbortController().signal});
+  const secret='segredo-ou-documento-na-excecao';
+  const fetcher=vi.fn();
+  if(kind==='timeout'||kind==='transport'){
+   const error=new Error(secret);error.name=kind==='timeout'?'TimeoutError':'TypeError';fetcher.mockRejectedValue(error);
+  }else{
+   const body=kind==='http'?JSON.stringify({error:{message:secret}}):kind==='envelope'?secret:JSON.stringify({choices:[]});
+   fetcher.mockResolvedValue(new Response(body,{status:status!,headers:{'x-request-id':'req_fixture'}}));
+  }
+  vi.stubGlobal('fetch',fetcher);
+  const logger=vi.spyOn(console,'error').mockImplementation(()=>{});
+  const error=await callReviewProvider(secret,'gpt-6-luna','analyze-table-image',[{role:'user',content:secret}]).then(()=>null,error=>error);
+  expect(error).toBeInstanceOf(Error);
+  const result=reviewFailureResponse(error,'analyze-table-image','execution-fixture');
+  expect(result).toMatchObject({errorCode:code,diagnostic:{phase,httpStatus:status}});
+  expect(JSON.stringify(result)).not.toContain(secret);
+  expect(result).not.toHaveProperty('inputTokens');expect(result).not.toHaveProperty('outputTokens');
+  expect(fetcher).toHaveBeenCalledTimes(1);expect(logger).toHaveBeenCalledTimes(1);
+  expect(logger.mock.calls[0][0]).not.toContain(secret);
+  if(status!==null)expect(result.diagnostic).toMatchObject({requestId:'req_fixture'});
+ });
+ it('exceção interna também é identificada sem vazar a mensagem',()=>{
+  const logger=vi.spyOn(console,'error').mockImplementation(()=>{});
+  const result=reviewFailureResponse(new Error('segredo'),'analyze-ata-image','execution-fixture');
+  expect(result).toMatchObject({errorCode:'REVIEW_INTERNAL_ERROR',diagnostic:{phase:'leaf_internal'}});
+  expect(JSON.stringify(logger.mock.calls)).not.toContain('segredo');
  });
 });
 

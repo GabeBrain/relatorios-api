@@ -341,7 +341,12 @@ Deno.serve(async (req) => {
       p_function: body.functionName,
       p_reserve: reserve,
     });
-    if (claimError)
+    if (claimError) {
+      // Somente log técnico: não expor mensagem SQL, materiais ou saldos ao analista.
+      const reason = /retorno desconhecido|em andamento/i.test(claimError.message) ? "pending_batch"
+        : /limite|orçamento|saldo|reserva/i.test(claimError.message) ? "execution_limit"
+        : /estado|encerrada|preparada/i.test(claimError.message) ? "execution_state" : "claim_rejected";
+      console.error(JSON.stringify({ event: "corretor_batch_blocked", executionId: run.id, batchHash, task, reason }));
       return json(
         {
           error:
@@ -349,16 +354,22 @@ Deno.serve(async (req) => {
         },
         409,
       );
+    }
     if (claim.cached) {
       const recovered = task === "analyze-ata-image" ? recoverCompletedAtaResponse(claim.response, profile.id) : null;
       // O lote original e seu custo ficam intactos. Não chama folha, provedor ou finish de novo.
       return json({ ...(recovered ?? claim.response), replayed: true });
     }
-    const unknown = async (evidence: unknown = null) => {
+    const unknown = async (evidence: unknown = null, reason = "unconfirmed_result", httpStatus: number | null = null) => {
+      const diagnostic = { reason, httpStatus, executionId: run.id, batchHash, task };
+      console.error(JSON.stringify({ event: "corretor_batch_unknown", ...diagnostic }));
       // Não sobrescrever um finish já confirmado caso apenas sua resposta de rede tenha falhado.
       await db
         .from("corretor_execution_batches")
-        .update({ state: "unknown", response: evidence })
+        .update({ state: "unknown", response: {
+          ...(evidence && typeof evidence === "object" ? evidence : {}),
+          executionDiagnostic: diagnostic,
+        } })
         .eq("execution_id", run.id)
         .eq("batch_hash", batchHash)
         .eq("state", "running");
@@ -378,7 +389,7 @@ Deno.serve(async (req) => {
         signal: AbortSignal.timeout(130000),
       });
     } catch {
-      return await unknown();
+      return await unknown(null, "leaf_transport");
     }
     const result = await response.json().catch(() => null);
     if (
@@ -387,7 +398,7 @@ Deno.serve(async (req) => {
       !Number.isSafeInteger(result.inputTokens) ||
       !Number.isSafeInteger(result.outputTokens)
     )
-      return await unknown(result);
+      return await unknown(result, !response.ok ? "leaf_http" : !result ? "leaf_envelope" : "leaf_usage", response.status);
     if (
       profiled &&
       (result.profileId !== profile.id ||

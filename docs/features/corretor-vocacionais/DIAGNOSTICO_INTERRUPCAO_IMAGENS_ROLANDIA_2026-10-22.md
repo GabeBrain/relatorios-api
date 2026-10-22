@@ -1,5 +1,27 @@
 # Rolândia: avaliação incompleta apresentada como pausa
 
+## Complemento: lote privado e logs enviados por Gabriel
+
+O SQL administrativo fornecido em22/10 confirma **um lote unknown**, hash685e75a9…15321b7, analyze-table-image, criado2026-10-22T03:27:18.776715Z, execução5ef5c1a9. Response contém somente o erro genérico do catch da folha; sem uso, finishReason, errorCode ou campos inválidos. A execução está interrupted, com **US$0,0360202 contabilizados** e **US$0,2280224 reservados**. Reserva não é cobrança confirmada nem prova de consumo zero do lote desconhecido. Não foi alterada ou liberada.
+
+Essa mensagem específica localiza a falha no catch da folha, que descartava a exceção. Não comprova erro de schema, timeout, HTTP específico do provedor ou causa interna. A resposta anterior do controlador conservou corretamente a incerteza, porém não conservou o status HTTP recebido. O segundo slide pendente não gerou outro lote na consulta: seu bloqueio ocorreu antes de uma nova chamada autorizada, com motivo SQL também mascarado. Não atribuir bloqueio a orçamento ou ao primeiro unknown sem registro específico.
+
+Os logs colados em seguida trazem Boot/Shutdown da função05dc9b30, sem reason, execution_id da invocação ou status HTTP. O primeiro Boot informado é03:27:13.537Z, e há encerramentos posteriores; proximidade temporal não vincula um worker ao lote. Shutdown isolado não significa falha de requisição. A [documentação Supabase](https://supabase.com/docs/guides/troubleshooting/edge-function-shutdown-reasons-explained) distingue término natural de limite de tempo/CPU/memória pelo reason ausente nesses registros. Não foi possível recuperar a causa original a partir desse recorte.
+
+### Correção de diagnóstico, sem reconstruir consumo
+
+Preparado no shared/review-provider: códigos para falha de transporte, timeout identificado pela exceção, HTTP do provedor, envelope JSON ilegível e uso ausente. A folha registra fase/status/request-id/duração quando disponíveis, vinculados à execução, sem serializar mensagens arbitrárias, imagens, prompts, credenciais ou resposta de erro do provedor. Exceções internas têm código próprio. Texto/ata/visão compartilham o mesmo tratamento.
+
+Controlador conserva diagnóstico/status da folha no response privado do lote unknown e registra motivo técnico do bloqueio de claim por classes conhecidas, sem expor SQL ou saldos ao analista. Não repete chamada, não inventa tokens/custo, não muda reserva, modelo, limites, prompt, validação ou cache; não altera resposta de lote já concluído. O snapshot completo continua bloqueado se houver falha de imagem. Esses registros ajudam nas próximas falhas, **não recuperam retroativamente a exceção descartada**.
+
+### Publicação deste complemento
+
+Nenhuma migration. Atualizar `supabase/functions/_shared/review-provider.ts`, as folhas `analyze-text-batch/index.ts`, `analyze-ata-image/index.ts`, `analyze-table-image/index.ts` e `corretor-execution/index.ts`. Shared é dependência empacotada, não função separada: as três folhas precisam ser publicadas com o shared atualizado; depois o controlador. O frontend do36ebc7a também aguarda Publish. Salvar arquivo/Git e deploy ativo são evidências distintas; não afirmar vigência só por push.
+
+Checagens locais:37testes focados, **369aprovados/2ignorados** na suíte Corretor (52arquivos aprovados,20,21s), TypeScript aplicação, Deno quatro funções e ESLint dirigido aprovados. Log privado `.local-inputs/review-luna-20261021/suite-provider-diagnostics.log`. Sem provedor real, dez passes materiais novos, SQL de alteração, deploy ou IA nesta rodada. Estado validado localmente, não causa histórica corrigida/homologação de produção.
+
+Próximo: obter detalhe HTTP/erro da invocação histórica ou registro do provedor correlacionado à janela03:27–03:30Z, sem reenviar o estudo. Sem isso, não autorizar repetição do unknown ou liberação da reserva por suposição. A consulta de suporte inclui agora budget_usd para eventual investigação do bloqueio, mas saldo atual não reconstrói sozinho o saldo no instante do claim.
+
 ## Conclusão observada em 22/10
 
 Gabriel publicou e relatou aproximadamente sete minutos de processamento, depois aviso amarelo de estudo pausado e volta à preparação, sem pedir pausa. Consulta pública REST somente leitura ao backend correto confirmou o estudo ativo **edda49da-3f0e-4fdf-add8-64e771840b19** (novo envio do mesmo arquivo),13planilhas salvas, sem relatório final. Os estudos anteriores5b389531/32a2234c estão excluídos logicamente conforme leitura, sem alteração pelo agente.

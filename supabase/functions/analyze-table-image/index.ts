@@ -1,4 +1,4 @@
-import { callReviewProvider } from '../_shared/review-provider.ts';
+import { callReviewProvider, reviewFailureResponse } from '../_shared/review-provider.ts';
 // Edge Function: analyze-table-image (Corretor v3.2 — Fase C produtizada)
 // Extrai a(s) tabela(s) numérica(s) de UMA imagem para JSON estruturado.
 // O chamador cacheia por sha1 (vision_cache) — cada imagem é paga uma vez só.
@@ -176,6 +176,6 @@ Deno.serve(async (req) => {
     const response = await callOpenAI(apiKey, parsed.value);
     return json({...response.content, ...response.meta});
   } catch (err) {
-    return json({ error: 'Não foi possível concluir este lote. Confira a execução antes de retomar.' }, 500);
+    return json(reviewFailureResponse(err, 'analyze-table-image', ip), 500);
   }
 });

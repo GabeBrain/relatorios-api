@@ -2,6 +2,7 @@
 -- SOMENTE LEITURA. Não reinicia IA, não encerra execuções nem libera reservas.
 -- Estudo atual edda49da / execução confirmada pelas 37 linhas de ia_passes.
 select e.id as execution_id, e.state as execution_state,
+       e.budget_usd as execution_budget_usd,
        e.spent_usd as execution_spent_usd,
        e.reserved_usd as execution_reserved_usd,
        b.batch_hash, b.function_name, b.state as batch_state, b.created_at,
