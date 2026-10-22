@@ -61,3 +61,110 @@
 .cp-delete-study{flex:none;color:var(--gb-texto-3);min-width:40px;min-height:40px}.cp-delete-study:hover{color:var(--gb-erro);background:var(--gb-nevoa)}.cp-study-identity>.cp-delete-study{margin-left:auto}.cp-study-identity>div{flex:1}
 @media(max-width:600px){.cp-entry-actions{grid-template-columns:1fr;gap:12px;margin-bottom:28px}.cp-entry-card{min-height:84px;padding:18px;font-size:16px}.cp-study-nav{flex-wrap:wrap}.cp-study-nav a{padding:12px 8px}.cp-review-tools{padding:16px}.cp-review-legacy .cp-preparation{padding:16px 0}}
 @media(max-width:600px){.cp-file-picker{padding:18px;gap:16px;min-height:108px}.cp-preparation .cp-upload-panel{padding:18px}.cp-file-copy strong{font-size:15px}.cp-file-picker>svg{display:none}.cp-format-note{align-items:flex-start}.cp-library-tabs{gap:4px}.cp-library-tabs button{padding:8px;font-size:13px}.cp-empty{padding:20px}}
+
+/* Tema escuro: adaptar os tokens locais, sem alterar a fundação Geobrain.
+   A triagem é um portal e precisa receber o mesmo escopo da página. */
+.dark :is(.corretor-projects, .cq-dialog) {
+  --gb-superficie: hsl(var(--card));
+  --gb-tinta: color-mix(in srgb, var(--gb-papel) 88%, hsl(var(--card)));
+  --gb-texto-2: color-mix(in srgb, var(--gb-papel) 75%, hsl(var(--card)));
+  --gb-texto-3: color-mix(in srgb, var(--gb-papel) 68%, hsl(var(--card)));
+  --gb-nevoa: hsl(var(--muted));
+  --gb-divisor: hsl(var(--border));
+  --gb-borda: hsl(var(--border));
+  color: var(--gb-tinta);
+}
+
+/* Rodapés e cabeçalhos são extensões do card, sem faixas claras. */
+.dark :is(.corretor-projects, .cq-dialog) .cf-actions,
+.dark .corretor-projects .cr-result-heading {
+  background: color-mix(in srgb, var(--gb-superficie) 76%, var(--gb-nevoa));
+}
+.dark .corretor-projects .cr-result-block { color: var(--gb-tinta); }
+.dark .cq-dialog { background: hsl(var(--background)); }
+.dark .cq-dialog .cb-document { background: var(--gb-superficie); }
+.dark .cq-progress > div { background: var(--gb-verde-500); }
+
+/* Controles neutros: hover discreto e rótulos legíveis. */
+.dark :is(.corretor-projects, .cq-dialog) .text-muted-foreground {
+  color: var(--gb-texto-3);
+}
+.dark :is(.corretor-projects, .cq-dialog) .text-foreground { color: var(--gb-tinta); }
+.dark :is(.corretor-projects, .cq-dialog) :is(button.bg-background, input, textarea, [role="combobox"]) {
+  background: var(--gb-superficie);
+  color: var(--gb-tinta);
+  border-color: var(--gb-borda);
+}
+.dark :is(.corretor-projects, .cq-dialog) :is(input, textarea)::placeholder {
+  color: var(--gb-texto-3);
+  opacity: 1;
+}
+.dark :is(.corretor-projects, .cq-dialog) button:not(:disabled):is(.bg-background, .hover\:bg-accent, .cf-actions button):hover {
+  background: var(--gb-nevoa);
+  color: var(--gb-tinta);
+  border-color: var(--gb-texto-3);
+}
+.dark :is(.corretor-projects, .cq-dialog) :is(button, a, input, textarea, [role="combobox"]):focus-visible {
+  outline-color: var(--gb-verde-500);
+  --ring: var(--primary);
+}
+.dark :is(.corretor-projects, .cq-dialog) .cf-actions button[aria-pressed="true"] {
+  box-shadow: inset 0 -2px currentColor;
+}
+.dark :is(.corretor-projects, .cq-dialog) .cf-actions button[aria-pressed="false"] {
+  color: var(--gb-texto-2);
+}
+.dark :is(.corretor-projects, .cq-dialog) .cf-actions button[aria-pressed="true"].text-slate-600 {
+  color: var(--gb-texto-2);
+}
+
+/* Seleções e arquivos enviados usam cor como detalhe, sem grandes chapas. */
+.dark .corretor-projects .cp-tabs { background: var(--gb-superficie); }
+.dark .corretor-projects :is(.cp-tabs [role="tab"][data-state="active"], .cp-library-tabs button[aria-pressed="true"], .cp-organization button[aria-pressed="true"], .cp-group-tags button[aria-pressed="true"], .cr-history button[aria-pressed="true"]) {
+  background: color-mix(in srgb, var(--gb-verde-500) 16%, var(--gb-superficie));
+  color: var(--gb-tinta);
+  box-shadow: inset 0 -2px var(--gb-verde-500);
+}
+.dark .corretor-projects :is(.cp-entry-card > svg, .cp-file-symbol, .cp-brain-stages span[data-complete="true"]) {
+  color: color-mix(in srgb, var(--gb-verde-500) 75%, var(--gb-papel));
+}
+.dark .corretor-projects button.cp-file-picker[data-ready="true"] {
+  background: color-mix(in srgb, var(--gb-verde-500) 16%, var(--gb-superficie));
+  border-color: color-mix(in srgb, var(--gb-verde-500) 65%, var(--gb-superficie));
+  color: var(--gb-tinta);
+}
+.dark .corretor-projects button.cp-file-picker[data-ready="true"]:hover {
+  background: color-mix(in srgb, var(--gb-verde-500) 23%, var(--gb-superficie));
+}
+.dark .corretor-projects .cp-file-picker[data-ready="true"] :is(.cp-file-symbol, .cp-file-copy span, svg) {
+  color: var(--gb-texto-2);
+}
+.dark .corretor-projects :is(.cp-pre-analysis-notice, .cp-notice, .cp-group-heading) {
+  background: color-mix(in srgb, var(--gb-superficie) 85%, var(--gb-nevoa));
+}
+
+/* O mapa mantém níveis e rótulos, com menos luminosidade por célula. */
+.dark .corretor-projects :is(.cb-map button, .cb-legend span)[data-tone="error"] {
+  background: color-mix(in srgb, var(--gb-erro) 22%, var(--gb-superficie));
+  color: color-mix(in srgb, hsl(var(--destructive)) 68%, var(--gb-papel));
+  border-color: color-mix(in srgb, var(--gb-erro) 65%, var(--gb-superficie));
+}
+.dark .corretor-projects :is(.cb-map button, .cb-legend span)[data-tone="probable"] {
+  background: color-mix(in srgb, var(--gb-amarelo-400) 16%, var(--gb-superficie));
+  color: var(--gb-amarelo-200);
+  border-color: color-mix(in srgb, var(--gb-amarelo-400) 45%, var(--gb-superficie));
+}
+.dark .corretor-projects :is(.cb-map button, .cb-legend span)[data-tone="verify"] {
+  background: color-mix(in srgb, var(--gb-amarelo-200) 8%, var(--gb-superficie));
+  color: color-mix(in srgb, var(--gb-amarelo-200) 75%, var(--gb-papel));
+  border-color: color-mix(in srgb, var(--gb-amarelo-200) 28%, var(--gb-superficie));
+}
+.dark .corretor-projects :is(.cb-map button, .cb-legend span)[data-tone="decided"] {
+  background: color-mix(in srgb, var(--gb-verde-500) 14%, var(--gb-superficie));
+  color: var(--gb-texto-2);
+  border-color: color-mix(in srgb, var(--gb-verde-500) 45%, var(--gb-superficie));
+}
+.dark :is(.corretor-projects, .cq-dialog) .cf-card .text-destructive {
+  color: color-mix(in srgb, hsl(var(--destructive)) 68%, var(--gb-papel));
+}
+.dark .corretor-projects .cp-study-nav a[aria-current="page"] { border-bottom-color: var(--gb-verde-500); }

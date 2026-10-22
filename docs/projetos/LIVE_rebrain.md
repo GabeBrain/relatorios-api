@@ -1,3 +1,9 @@
+## 22/10/2026 — Corretor e Sugestão: tema escuro com superfícies contínuas
+
+Gabriel solicitou suavizar as mudanças bruscas de cor e faixas brancas. Causa: cards recebiam aliases escuros, mas rodapés usavam Papel claro fixo; a triagem em portal não herdava o escopo da página. CSS local agora reutiliza superfícies/bordas semânticas da plataforma e tokens Geobrain para texto acinzentado, rodapés e cabeçalhos próximos ao card, mapa menos luminoso, seleção/hover discretos e verde suave nos materiais enviados. Inclui resultados da Sugestão e triagem em tela cheia. Estado selecionado dos botões de decisão exposto por aria-pressed, sem mudar a ação ou persistência.
+
+**Estado/evidência:** validado localmente; `styles/projects.css` e duas propriedades acessíveis em `CorretorV3Page.tsx`. Compilação/TypeScript e lint dirigidos aprovados; prévia isolada com card extraído do código real, VizSwitch, RecommendationResult, StudyQuickReview, Button e carregamento Brain, dados fictícios/rede externa bloqueada, em1440/390px e claro/escuro. Sem erros de página ou overflow móvel; tokens canônicos idênticos à fundação. Evidências pequenas e capturas em `.local-inputs/dark-interface-20261022/` (ignoradas). Sem suíte de regressão nesta rodada, IA ou banco remoto. Etapa de publicação depende do Publish do frontend e aceite real; nenhuma migration ou atualização de Edge necessária. Alterações FIERGS locais preservadas fora deste envio.
+
 ## 22/10/2026 — Remoção da trava excessiva na retomada
 
 Validação final:392aprovados/2ignorados,56arquivos aprovados; tipos/lint/Deno/build24,67s aprovados. Novo cenário testa o controlador real transpilado com banco/fetch simulados, além da preservação de histórico/decisões na cobertura. Sem avaliação paga ou confirmação de produção nesta rodada.

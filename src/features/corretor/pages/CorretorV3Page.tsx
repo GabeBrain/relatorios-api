@@ -167,6 +167,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
         {(['corrigido', 'ignorado', 'pendente'] as FindingStatus[]).map((s) => (
           <button
             key={s}
+            aria-pressed={item.status === s}
             onClick={() => onStatus(s)}
             className={cn(
               'text-[11px] rounded-full px-2.5 py-0.5 border transition-colors',
@@ -179,6 +180,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
           </button>
         ))}
         <button
+          aria-pressed={item.verdict === 'fp'}
           onClick={() => onVerdict('fp')}
           className={cn('text-[11px] rounded-full px-2.5 py-0.5 border transition-colors', item.verdict === 'fp' ? 'bg-slate-500/15 text-slate-600 border-slate-500/30' : 'bg-background border-border hover:border-slate-500/50 text-muted-foreground')}
         >

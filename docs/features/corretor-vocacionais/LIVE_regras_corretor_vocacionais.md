@@ -1,3 +1,9 @@
+## 22/10/2026 — Ajuste visual do tema escuro, sem mudança nas regras
+
+Rodapé de apontamentos deixava uma faixa Papel clara no modo escuro; triagem em portal não herdava aliases locais. Corrigida adaptação escura da carteira/preparação, bancada, carregamento, materiais, Sugestão em blocos e triagem: superfícies neutras próximas, texto menos luminoso, bordas discretas e preenchimentos de estado suaves. Botões de decisão indicam seleção com aria-pressed/filete, mantendo callbacks e decisões existentes. Tokens da fundação copiados sem alteração; nenhum motor, prompt, perfil, limite, retomada, material ou registro de consumo alterado.
+
+Build23,80s/TypeScript e lint aprovados; prévia visual isolada dos componentes reais com dados ilustrativos,1440/390px, claro/escuro, portal com390×844px após estabilizar transição. Sem erro de página/overflow, rede externa bloqueada. Evidências locais ignoradas em `.local-inputs/dark-interface-20261022/`. Sem testes de regressão ou IA nesta rodada; estado validado localmente, Publish do frontend e aceite em produção pendentes. Não exige migration nem republicação de funções.
+
 ## 22/10/2026 — Unknown isolado não exige parar outras etapas
 
 Validação final local:392aprovados/2ignorados,56arquivos; tipos/lint/Deno/build24,67s aprovados. Sem dezpasses materiais ou chamadas reais nesta rodada; não equivale a análise real concluída.
