@@ -10,14 +10,17 @@ export function projectBuilding(b: Building, cutoff: string): Decision {
   const id = buildingId(b), name = buildingName(b);
   const fail = (reason: string): Decision => ({ id, name, reason, projection: null });
   if (!id) return fail('ID ausente');
-  const rows = (b.typologies_history ?? []).filter(r => monthKey(r.period) <= cutoff);
-  const labels = [...new Set(rows.map(r => r.pattern).filter(Boolean))];
+  const history = (b.typologies_history ?? []).filter(r => monthKey(r.period) <= cutoff);
+  // A API inclui fases "Futuro" e rótulos de faixa de preço na mesma série.
+  // Só competências explicitamente marcadas como loteamento pertencem ao domínio da equação.
+  const rows = history.filter(r => ['Loteamento Aberto', 'Loteamento Fechado'].includes(r.pattern));
+  const labels = [...new Set(rows.map(r => r.pattern))];
   if (labels.length !== 1 || !['Loteamento Aberto', 'Loteamento Fechado'].includes(labels[0])) return fail('Padrão aberto/fechado não identificado de forma única');
   const pattern: HorizontalPattern = labels[0] === 'Loteamento Aberto' ? 'aberto' : 'fechado';
   const seen = new Set<string>();
   for (const row of rows) { const key = `${row.typology_id}|${monthKey(row.period)}`; if (seen.has(key)) return fail('Tipologia/competência duplicada'); seen.add(key); }
   const months = [...new Set(rows.map(r => monthKey(r.period)))].sort();
-  if (!months.length) return fail('Sem histórico até o corte');
+  if (!months.length) return fail('Sem histórico de loteamento até o corte');
   if (months.at(-1) !== cutoff) return fail('Sem competência no corte');
   const first = months[0];
   const [fy, fm] = first.split('-').map(Number), [cy, cm] = cutoff.split('-').map(Number);

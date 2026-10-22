@@ -2669,3 +2669,6 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 **22/10/2026 — Gabriel/sessão, estimativas Finotti, estado preparado localmente.** Rota editorial /rebrain/estimativas-vendas com consulta paginada Horizontal, seleção de empreendimento/carteira, projeção conservadora e laboratório; conferência opcional do Excel no navegador separada do cálculo. Typecheck, ESLint, 10 testes focados e build aprovados localmente. Sem backtest observado por falta de bases.estimation mensal. Teste autenticado da página, paridade das fixtures na nova interface e inspeção visual ainda pendentes; nenhum push/deploy. [Pacote técnico](../features/estimativas-vendas/README.md).
 
+
+**22/10 — Gabriel/sessão, Estimativas: correção após teste de usuário.** Seleção de três empreendimentos mostrou 0 elegíveis e gráfico vazio. Adaptador de elegibilidade ignora fase Futuro ao definir produto e origem da curva; motivos de exclusão aparecem no seletor e junto ao gráfico. Domínio 1–48 meses e ausência/negativos preservados. 11 testes focados, tipos e lint aprovados localmente. Reteste dos IDs da captura pendente; sem alegação de acurácia observada. [Registro técnico](../features/estimativas-vendas/README.md).
+
