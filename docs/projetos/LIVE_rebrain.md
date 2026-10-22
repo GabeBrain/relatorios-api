@@ -1414,6 +1414,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-22 — Finotti: API confirmada e plano do dossiê/simulador — Gabriel / Codex
+- **Ambiente/funcionalidade:** Rebrain/SID, Estimativas de vendas; diagnóstico somente leitura, sem interface ou backtest real.
+- **O quê/por quê:** autenticação local e histórico horizontal Geobrain confirmados em Fortaleza e Blumenau. Auditoria agregada identifica campos, reconciliação brutas−distratos, meses negativos, rótulos de produto e ausência de flag observado/estimado por competência na resposta. Gabriel/Codex passam a conduzir implementação/dossiê; Edgar apoia esclarecimento de acesso/contrato em paralelo, conforme direção de Gabriel.
+- **Evidência/estado:** [plano e números da sondagem](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md), `scripts/diagnostics/estimativas-api-audit.mjs`; HTTP 200 para cidades monitoradas/histórico, 43 empreendimentos e 2.965 linhas em Fortaleza, 38 e 1.754 em Blumenau. Estado **preparado** para retrospectiva; nenhum mês tratado como gabarito observado sem linhagem confirmada.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`; leitura de referência, sem escrita.
+- **Impacto em Etapas/Pendências:** fonte API viável; próximo adaptar payload bruto sem trocar nulo por zero, fechar origem por período, revisar vendas negativas, rodar comparação pareada e só então habilitar simulador de teste. Push/deploy não feitos nesta sessão.
+
+**Complemento documental de22/10 — Gabriel/sessão, estado preparado.** Diego encaminhou resposta de Evandro: `bases.estimation` é a única flag da base/período estimado; `bases.ivv_batch_id` rastreia atualizações IVV em lote. A API sondada não mostra a flag por linha mensal, portanto o histórico continua sem gabarito confirmado. Gabriel buscará exportação real para confrontar esquema e API; enquanto isso, pediu primeira página editorial funcional só com leitura da API, empreendimento isolado/carteira, gráfico interativo e responsivo, explicação recolhível e exportação **de revisão**. [Plano de implementação e CTA](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md); nenhuma UI ou upload executado neste complemento. Monday de referência acima, sem escrita.
+
+**Auditoria posterior de22/10 — mesma frente, estado preparado.** Exportação real da Análise Temporal Geobrain tem seis abas agregadas/84 competências e não contém ID/flag da base; `NaN` em linhas de variação e zeros sem prova de coleta mensal. Segunda exportação recebida contém cadastro de204 empreendimentos **verticais**, sem histórico ou flag. Manual Linkages explica a tela, ficha individual e download detalhado do Mapa, mas não fornece contrato de retorno. API autorizada retornou Guarapuava29 horizontais/1.167 linhas; Guaratuba não consta nas355 cidades do token e retornou HTTP422. Brutos preservados em `.local-inputs/` com hashes; [auditoria](../features/estimativas-vendas/AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md), plano e CTA atualizados para paridade apenas com recorte idêntico e próxima amostra horizontal por competência. Sem UI/backtest homologado/push/deploy ou escrita Monday.
+
 ### 2026-10-21 — Estimativas Finotti: motor horizontal e ensaio de corte — Gabriel / Codex
 - **Ambiente/funcionalidade:** Rebrain/SID, código local em `src/features/estimativas-vendas/`, sem rota ou integração Geobrain.
 - **O quê/por quê:** coeficientes do slide 7 versionados à parte do motor puro; caso fechado 300/150/6 reproduzido (`k=0,632035`, 65,84% no mês 12, 75,04% no 18, cruzamento de 95% no 61 e contagem ilustrativa até 67). Ensaio em memória congela origem e compara curva com médias de 3/12 meses, omitindo cauda e extrapolação da métrica.
@@ -2522,7 +2533,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-**21/10 — Estimativas de vendas Finotti:** documentação inicial e motor horizontal local preparados em [estimativas-vendas](../features/estimativas-vendas/README.md). Reprodução do caso publicado validada localmente; ensaio de corte em memória pronto para receber série observada. Contrato oficial, retrospectiva real, cauda mensal, bandas, UI e retorno continuam pendentes. Sem runtime publicado.
+**22/10 — Estimativas de vendas Finotti:** reprodução matemática local e acesso API somente leitura confirmados; [plano do dossiê](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md), [auditoria das exportações](../features/estimativas-vendas/AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md) e [plano da página editorial](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) definem fontes, recortes, carteira e interface. Guarapuava/Maringá conciliou 72 empreendimentos/124 tipologias horizontais e oito trimestres com a API/Série Histórica. Curitiba ampliou a evidência: 371 empreendimentos/693 tipologias horizontais, 14.154 vendas e 14.154 estoques numéricos comparáveis iguais à API em 11/2024–09/2026. A API preenche posições `-` do Excel, e um vertical exportado falta na API; completude não é idêntica. `bases.estimation` foi confirmado para a base/período por mensagem encaminhada, mas a linhagem ainda não aparece por competência na série API nem no Excel. Contrato oficial, retrospectiva observada, cauda mensal, bandas, UI e retorno continuam pendentes. A página horizontal poderá usar API direta, com auditoria de cobertura separada. Sem runtime publicado nesta etapa.
+
+**22/10 — direção visual/funcional adicional de Gabriel, ainda preparada:** a primeira página API terá editorial amplo inspirado nas capturas dos slides Finotti, gráficos grandes, laboratório da equação e conferência **opcional** por Excel já na interface. O usuário verá os filtros necessários e o [exportador Análise Temporal Excel](https://app.geobrain.com.br/analise-temporal-excel); o arquivo será lido localmente para paridade por ID/competência, sem substituir a API nem enviar dados. [Plano](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) e [CTA](../features/estimativas-vendas/CTA_IMPLEMENTACAO_PAGINA_API.md) atualizados. Nenhuma tela ou teste estatístico real entregue neste refinamento.
 
 **15/10 — Corretor F1–F6:** preparação/revisão validadas localmente; registro de execução e prévias têm limites de ativação/infraestrutura no resultado F1–F6. A2/A3/F3 servidor não encerradas.
 
@@ -2553,7 +2566,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **Estimativas de vendas Finotti:** reprodução matemática do caso300-150-6 feita localmente; recuperar MD/código original, contrato Geobrain e série observada com Edgar para comparação mensal/trimestral real. Confirmar domínio, cauda95%, faixas, modelo vertical e alternância/coleta. [Manifesto e handoff](../features/estimativas-vendas/REPRODUCAO_E_HANDOFF.md). Sem aceite operacional.
+- [ ] **Estimativas de vendas Finotti:** implementar [página editorial por API](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) para empreendimento/carteira, laboratório da equação, gráficos amplos e exportação de revisão. Incluir conferência **opcional** por Excel na própria tela, com link/instruções do exportador Geobrain e validador de paridade para Guarapuava/Maringá e Curitiba; uso normal não depende de arquivo. Obter `bases.estimation` **por base/competência** e periodicidade real; a API/planilhas ainda não comprovam origem observada. Adaptar série com negativos/lacunas antes do backtest válido. Contrato de retorno, domínio, cauda95%, bandas, vertical e alternância/coleta seguem abertos. Sem aceite operacional.
 
 - [ ] **Corretor v0.73:** revisar/publicar lote de fluxo contínuo, ativar migration/Edge/frontend e conferir produção. Conversão automática hospedada e recuperação da execução em outro navegador permanecem abertas; sem IA paga sem lote/orçamento.
 
@@ -2672,4 +2685,19 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **O quê:** agregações mensais por pavimento nas folhas 04/07; áreas por zona separadas das unidades nas folhas 05/08; restauração de totais mensais ausentes. Uso exclusivamente comercial com quantidade residencial ao menos três vezes maior que a não residencial segue para revisão humana, preservando ambas.
 - **Impacto em Etapas/Pendências:** regenerar a tabulação a partir da base acumulada antes do relatório, pois as novas agregações exigem quatro novas tabelas de dados. Reprocessar o arquivo bruto de agosto para recuperar quantidades excluídas pela regra anterior. Arquivos enviados no navegador não possuem logs centrais de processamento.
 - **Monday:** —
+
+
+**22/10/2026 — Gabriel/sessão, estimativas Finotti, estado preparado localmente.** Rota editorial /rebrain/estimativas-vendas com consulta paginada Horizontal, seleção de empreendimento/carteira, projeção conservadora e laboratório; conferência opcional do Excel no navegador separada do cálculo. Typecheck, ESLint, 10 testes focados e build aprovados localmente. Sem backtest observado por falta de bases.estimation mensal. Teste autenticado da página, paridade das fixtures na nova interface e inspeção visual ainda pendentes; nenhum push/deploy. [Pacote técnico](../features/estimativas-vendas/README.md).
+
+
+**22/10 — Gabriel/sessão, Estimativas: correção após teste de usuário.** Seleção de três empreendimentos mostrou 0 elegíveis e gráfico vazio. Adaptador de elegibilidade ignora fase Futuro ao definir produto e origem da curva; motivos de exclusão aparecem no seletor e junto ao gráfico. Domínio 1–48 meses e ausência/negativos preservados. 11 testes focados, tipos e lint aprovados localmente. Reteste dos IDs da captura pendente; sem alegação de acurácia observada. [Registro técnico](../features/estimativas-vendas/README.md).
+
+
+**22/10 — Gabriel/sessão, navegação Estimativas de Vendas.** Ferramenta saiu da pasta Relatórios Automatizados e ganhou grupo próprio acima de Área Quanti; item Simulador de Vendas mantém aviso em implementação e a mesma rota. Typecheck, lint e teste do menu aprovados localmente. Próximo confirmar posição no site publicado.
+
+
+**22/10 — correção do menu Estimativas, Gabriel/sessão:** por pedido do usuário, Estimativas de Vendas virou link lateral direto acima de Banco Quanti, sem submenu Simulador de Vendas. Rota e aviso em implementação preservados. Dois testes de menu, tipos e lint aprovados; publicação e conferência visual pendentes.
+
+
+**22/10 — Gabriel/sessão, curva Finotti em Rio Branco.** Diagnóstico API: 21 empreendimentos, 13 horizontais com lacunas; regra anterior impedia todas as curvas. Motor agora ancora a curva em estoque por tipologia no corte apenas quando conciliado com vendas acumuladas, mantendo médias 3/12 ausentes sem cadência mensal adequada. Ecovillage 52093 é caso local avaliável (348/276 no mês39); proveniência mensal desconhecida, sem backtest. 13 testes, tipos/lint aprovados. [Evidência](../features/estimativas-vendas/README.md).
 

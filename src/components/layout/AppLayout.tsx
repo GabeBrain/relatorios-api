@@ -95,6 +95,14 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    id: 'estimativas-vendas',
+    label: 'Estimativas de Vendas',
+    icon: <TrendingUp className="h-4 w-4" />,
+    items: [
+      { path: '/rebrain/estimativas-vendas', label: 'Estimativas de Vendas', icon: <TrendingUp className="h-4 w-4" />, standbyLabel: '(em implementação)' },
+    ],
+  },
+  {
     id: 'quanti',
     label: 'Área Quanti',
     icon: <Database className="h-4 w-4" />,
@@ -381,6 +389,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                   })}
                 </div>
               );
+            }
+
+            if (group.id === 'estimativas-vendas') {
+              return <div key={group.id} className="mt-2">{group.items.map(renderNavEntry)}</div>;
             }
 
             if (group.id === 'quanti') {

@@ -2,6 +2,8 @@
 
 **CONTRATO EXTERNO PENDENTE,21/10/2026.** Motor e ensaio em memória implementados localmente; contrato de arquivo ainda interno/proposto. Não são nomes de campos nem formato de retorno confirmados do Geobrain. Consultar MANIFESTO.md e [reprodução](REPRODUCAO_E_HANDOFF.md); reconciliar com Edgar/MD antes de automatizar.
 
+**Atualização22/10:** uma exportação real da Análise Temporal foi [auditada](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md), mas agrega tipologias/padrões/cidades e não contém ID ou flag da base por período. Portanto não preenche este contrato candidato. O manual do Geobrain, preservado no repo Linkages, descreve essa exportação e uma opção de download detalhado do Mapa; esta última é só um caminho candidato para obter granularidade, sem confirmação de `bases.estimation` ou retorno importável.
+
 ## Entradas mínimas do cálculo horizontal
 
 - Categoria explicitamente mapeada: loteamento aberto ou fechado. Não inferir por texto parcial nem habilitar casas/vertical com coeficientes horizontais sem validação.
@@ -22,7 +24,7 @@ Mensalmente: mês/calendário, unidades vendidas previstas, acumulado, estoque e
 
 ## Decisões em aberto antes de aceitar o motor
 
-1. Nomes/tipos/semântica de `estimation` e transcrição `IVV BET`, nível geográfico e temporal, arredondamentos, identidade e contrato oficial de exportação/importação.
+1. `bases.estimation` foi confirmado, por resposta de Evandro encaminhada por Diego em20/10, como única flag da base/período estimado; `bases.ivv_batch_id` rastreia atualização IVV em lote. Permanecem abertos a materialização dessa flag na API de histórico, arredondamentos, identidade, granularidade e contrato oficial de exportação/importação. O `estimation` visto no objeto retornado da API não prova origem dos meses anteriores.
 2. Regrasn=0, vendas zero, esgotado, lançadas zero, percentuais inválidos, `k<=0`, distratos e vendas líquidas negativas; não fabricar resultados com clamp/epsilon silencioso.
 3. Regra exata de cruzamento95%, cauda5/6meses e cenários já acima95%; conservação de unidades quando resultado é fracionário. Coeficientes arredondados do PPT podem diferir do código original.
 4. Meses corridos versus observados, competência faltante, revisão de lançamentos, distinção de tipologias e janela de calibração.
