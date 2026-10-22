@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { read, utils, write } from 'xlsx';
-import { buildReport, createWorkbook, dateBounds, FIXED_COLUMNS, isoDate, MEASURES, selectedReport, type ReportOptions } from './report';
+import { buildReport, createWorkbook, dateBounds, exportValue, FIXED_COLUMNS, isoDate, MEASURES, REPORT_FIELDS, selectReportFields, selectedReport, type ReportOptions } from './report';
 import type { RawBuilding } from './api';
 
 const building: RawBuilding = {
@@ -188,5 +188,71 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     const result = report({ to: '2026-01-31' }, [multiTypology, other]);
     expect(result.series[0]['Preço Médio Empreendimento']).toBe(600);
     expect(result.series[0]['Preço Atual']).toBe(466.67);
+  });
+
+  it('filtra município e tipo apenas na geração e restringe também os períodos', () => {
+    const other = { ...building, building_id: 11, city: 'Outra', building_type: 'Hotel', typologies_history: [
+      { typology_id: 1, period: '2026-05-31', gross_sales: 1 },
+    ] };
+    const result = report({ to: '2026-06-30', municipalities: ['Outra/MT'], buildingTypes: ['Hotel'] }, [building, other]);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0]['ID Empreendimento']).toBe('11');
+    expect(result.periods.map((period) => period.label)).toEqual(['mai/2026']);
+    expect(report({ buildingTypes: [] }).rows).toEqual([]);
+    expect(report({ municipalities: ['Outra/MT'] }).rows).toEqual([]);
+  });
+
+  it('concatena incorporadoras, distingue região/área administrativa/tipo/padrão e usa a tipologia até o corte', () => {
+    const data = [{ ...building, region: 'Centro-Oeste', administrative_area: 'Norte',
+      incorporators: [{ name: 'Empresa 1' }, { name: 'Empresa 2' }, { name: '' }, { name: 'Empresa 3' }],
+      typologies_history: [{ typology_id: 20, period: '2026-01-31', qty: 10, private_area: 50,
+        type_of_typology: 'Padrao', number_bedroom: 2, garage: 0 }],
+    }];
+    const row = report({}, data).rows[0];
+    expect(row.Incorporadoras).toBe('Empresa 1, Empresa 2, Empresa 3');
+    expect(row.Região).toBe('Centro-Oeste');
+    expect(row['Região Administrativa']).toBe('Norte');
+    expect(row.Tipo).toBe('Vertical');
+    expect(row.Padrão).toBe('Alto');
+    expect(row.Tipologia).toBe('Padrao');
+    expect(row.Quartos).toBe(2);
+    expect(row.Garagem).toBe(0);
+    expect(row['Unidades por Tipologia']).toBe(10);
+    expect(row['M² Lançado']).toBe(500);
+    expect(exportValue('Data de Lançamento', row['Data de Lançamento'])).toBe('01/01/2026');
+  });
+
+  it('usa preço e área da data exata de lançamento, mesmo fora do intervalo de vendas', () => {
+    const data = [{ ...building, typologies_history: [
+      { typology_id: 20, period: '2026-01-01', qty: 10, price: 100_000, private_area: 50 },
+      { typology_id: 20, period: '2026-02-28', qty: 12, price: 250_000, private_area: 60 },
+    ] }];
+    const row = report({ from: '2026-02-01' }, data).rows[0];
+    expect(row['Preço de Lançamento']).toBe(100_000);
+    expect(row['R$/m² Lançado']).toBe(2_000);
+    expect(row['M² Lançado']).toBe(720);
+    const absent = report({ from: '2026-02-01' }, [{ ...data[0], release_date: '2026-01-02' }]).rows[0];
+    expect(absent['Preço de Lançamento']).toBeNull();
+    expect(absent['R$/m² Lançado']).toBeNull();
+  });
+
+  it('mantém os campos novos nas posições solicitadas, sem nomes antigos duplicados', () => {
+    const after = (field: string, length: number) => FIXED_COLUMNS.slice(FIXED_COLUMNS.indexOf(field) + 1, FIXED_COLUMNS.indexOf(field) + 1 + length);
+    expect(after('Região', 1)).toEqual(['Região Administrativa']);
+    expect(after('Cidade/UF', 1)).toEqual(['Tipo']);
+    expect(after('Padrão', 1)).toEqual(['Tipologia']);
+    expect(after('Tipologia', 3)).toEqual(['Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado']);
+    expect(after('Data de Entrega', 2)).toEqual(['Quartos', 'Garagem']);
+    for (const obsolete of ['Urbanizadora', 'Lançamento', 'Entrega', 'Oferta por Lotes', 'm² Lançado']) expect(FIXED_COLUMNS).not.toContain(obsolete);
+  });
+
+  it.each(['columns', 'rows'] as const)('expande seleção por nome do campo apenas no resultado %s', (layout) => {
+    expect(REPORT_FIELDS.some((field) => /\dT\/|\/2026/.test(field))).toBe(false);
+    const result = selectReportFields(report({ layout }), ['Incorporadoras', 'Vendas Líquidas', 'Estoque']);
+    expect(result.columns).toEqual(layout === 'columns' ? ['Incorporadoras',
+      'Vendas Líquidas jan/2026', 'Vendas Líquidas fev/2026', 'Vendas Líquidas mar/2026',
+      'Estoque jan/2026', 'Estoque fev/2026', 'Estoque mar/2026',
+    ] : ['Incorporadoras', 'Vendas Líquidas', 'Estoque']);
+    expect(Object.keys(result.rows[0])).toEqual(result.columns);
   });
 });

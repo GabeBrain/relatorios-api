@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Download, X } from 'lucide-react';
+import { ChevronsUpDown, Download, Play, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAuthStore } from '@/store/auth-store';
@@ -7,17 +7,20 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { GeoApiScopeSelector, useGeoApiScope } from '@/features/shared/geo-api-scope-engine';
 import type { GeoLoadRequest } from '@/features/shared/geo-api-scope-engine/GeoApiScopeSelector';
 import { fetchBuildings, type FetchProgress, type RawBuilding } from '@/features/relatorio-api-excel/api';
-import { buildReport, createWorkbook, dateBounds, exportValue, MEASURES, PERCENT_COLUMNS, selectedReport,
-  type Cell, type Granularity, type Layout, type PriceMode, type BuildingAverageMode } from '@/features/relatorio-api-excel/report';
+import { buildReport, createWorkbook, dateBounds, exportValue, MEASURES, PERCENT_COLUMNS, REPORT_FIELDS, municipalityKey, selectReportFields,
+  type Cell, type Granularity, type Layout, type PriceMode, type BuildingAverageMode, type Report, type ReportOptions } from '@/features/relatorio-api-excel/report';
 
 const PAGE_SIZE = 100;
-const EMPTY: RawBuilding[] = [];
+const EMPTY_REPORT: Report = { columns: [], rows: [], periods: [], series: [], typologyCount: 0 };
+const BUILDING_TYPES = ['Vertical', 'Comercial', 'Horizontal', 'Hotel'];
 function display(column: string, value: Cell) {
   const result = exportValue(column, value);
   if (result === null) return '';
@@ -32,6 +35,13 @@ export default function RelatorioApiExcel() {
   const [region, setRegion] = useState('');
   const [buildings, setBuildings] = useState<RawBuilding[] | null>(null);
   const [loadedScope, setLoadedScope] = useState('');
+  const [municipality, setMunicipality] = useState('');
+  const [municipalityOpen, setMunicipalityOpen] = useState(false);
+  const [buildingTypes, setBuildingTypes] = useState<string[]>(BUILDING_TYPES);
+  const [generating, setGenerating] = useState(false);
+  const [generated, setGenerated] = useState<{ report: Report; options: ReportOptions; signature: string } | null>(null);
+  const revision = useRef(0);
+  const generationLock = useRef(false);
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -51,31 +61,34 @@ export default function RelatorioApiExcel() {
   const [distribution, setDistribution] = useState('Cidade/UF');
   const controller = useRef<AbortController | null>(null);
   const changeScope = useCallback((next: { uf: string; city: string }) => {
-    setScope(next); setBuildings(null); setError('');
+    revision.current++;
+    setScope(next); setBuildings(null); setGenerated(null); setError('');
   }, []);
   const geo = useGeoApiScope({ value: scope, onChange: changeScope });
   useEffect(() => {
-    setBuildings(null); setError(''); setLoading(false);
-    return () => { controller.current?.abort(); controller.current = null; };
+    const generationRevision = revision;
+    generationRevision.current++;
+    setBuildings(null); setGenerated(null); setError(''); setLoading(false);
+    return () => { generationRevision.current++; controller.current?.abort(); controller.current = null; };
   }, [token]);
 
   const load = async (request: GeoLoadRequest) => {
-    if (loading || !token || !useAuthStore.getState().hasValidToken()) return;
+    if (loading || generating || exporting || !token || !useAuthStore.getState().hasValidToken()) return;
     if (geo.error || geo.isLoading || !geo.citiesByUf) return;
     if (request.city && !geo.availableCities.includes(request.city)) return;
     if (request.uf && !geo.availableUfs.includes(request.uf)) return;
     if (request.ufs?.some((uf) => !geo.availableUfs.includes(uf))) return;
     controller.current?.abort();
     const current = new AbortController(); controller.current = current;
-    setBuildings(null); setError(''); setProgress(null); setLoading(true); setStartedAt(Date.now());
+    revision.current++;
+    setBuildings(null); setGenerated(null); setError(''); setProgress(null); setLoading(true); setStartedAt(Date.now());
     try {
       const complete = await fetchBuildings({ ...request, token, signal: current.signal,
         onProgress: (next) => { if (controller.current === current && !current.signal.aborted) setProgress(next); },
       });
       if (controller.current !== current || current.signal.aborted) return;
-      // Filtros e transformações só começam após a coleta completa.
-      const bounds = dateBounds(complete);
-      setFrom(bounds.from); setTo(bounds.to);
+      // Guarda a resposta bruta. Históricos e cálculos só são percorridos em Gerar relatório.
+      setFrom(''); setTo(''); setMunicipality(''); setBuildingTypes(BUILDING_TYPES);
       setStatuses([...new Set(complete.map((building) => String(building.status ?? '')))]);
       setSelected(null); setPage(0);
       setLoadedScope(request.city || request.uf || request.ufs?.join(', ') || '');
@@ -85,33 +98,64 @@ export default function RelatorioApiExcel() {
       if (controller.current === current && !current.signal.aborted) setError(cause instanceof Error ? cause.message : 'Não foi possível carregar os dados.');
     } finally { if (controller.current === current) setLoading(false); }
   };
-  const options = useMemo(() => ({ granularity, layout, priceMode, buildingAverageMode, from, to, statuses }), [granularity, layout, priceMode, buildingAverageMode, from, to, statuses]);
-  const report = useMemo(() => buildReport(buildings ?? EMPTY, options), [buildings, options]);
-  const filtered = useMemo(() => selectedReport(report, selected), [report, selected]);
+  const options = useMemo(() => ({ granularity, layout, priceMode, buildingAverageMode, from, to, statuses,
+    municipalities: municipality ? [municipality] : [], buildingTypes }),
+  [granularity, layout, priceMode, buildingAverageMode, from, to, statuses, municipality, buildingTypes]);
+  const signature = JSON.stringify({ options, selected });
+  const stale = generated !== null && generated.signature !== signature;
+  const filtered = generated?.report ?? EMPTY_REPORT;
+  const report = filtered;
   const availableStatuses = useMemo(() => [...new Set((buildings ?? []).map((building) => String(building.status ?? '')))], [buildings]);
+  const municipalities = useMemo(() => [...new Set((buildings ?? []).map(municipalityKey))].sort((a, b) => a.localeCompare(b, 'pt-BR')), [buildings]);
+  const fields = REPORT_FIELDS.filter((field) => layout === 'rows' || field !== 'Período');
+  const selectedFields = selected === null ? fields : fields.filter((field) => selected.includes(field));
   const maxPage = Math.max(0, Math.ceil(filtered.rows.length / PAGE_SIZE) - 1);
   const currentPage = Math.min(page, maxPage);
   const pageRows = filtered.rows.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
-  const chartData = report.series.map((row) => ({ period: row['Período'], value: exportValue(metric, row[metric] ?? null) }));
+  const chartData = useMemo(() => report.series.map((row) => ({ period: row['Período'], value: exportValue(metric, row[metric] ?? null) })), [report, metric]);
   const distributionData = useMemo(() => {
-    const wide = layout === 'columns' ? report : buildReport(buildings ?? EMPTY, { ...options, layout: 'columns' });
     const counts = new Map<string, number>();
-    for (const row of wide.rows) { const name = String(row[distribution] || 'Não informado'); counts.set(name, (counts.get(name) ?? 0) + 1); }
+    for (const row of filtered.typologyRows ?? []) {
+      const name = String(row[distribution] || 'Não informado'); counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
     return [...counts].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 20);
-  }, [buildings, distribution, layout, options, report]);
+  }, [distribution, filtered]);
+  const generate = async () => {
+    if (!buildings || generationLock.current || loading || exporting || !selectedFields.length) return;
+    generationLock.current = true;
+    const currentRevision = revision.current;
+    setGenerating(true); setStartedAt(Date.now());
+    try {
+      // Permite pintar o estado de processamento antes do trabalho de CPU.
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      if (revision.current !== currentRevision) return;
+      const bounds = !from || !to ? dateBounds(buildings) : null;
+      const effective = { ...options, from: from || bounds?.from || '', to: to || bounds?.to || '' };
+      const complete = buildReport(buildings, effective);
+      const output = selectReportFields(complete, selected);
+      if (revision.current !== currentRevision) return;
+      setGenerated({ report: output, options: effective, signature }); setPage(0);
+      if (output.rows.length) toast.success('Relatório gerado. O Excel está pronto para baixar.');
+      else toast.warning('Nenhum histórico encontrado para os filtros selecionados.');
+    } catch (cause) {
+      setGenerated(null);
+      toast.error(cause instanceof Error ? cause.message : 'Falha ao gerar relatório.');
+    } finally { generationLock.current = false; setGenerating(false); }
+  };
   const download = async () => {
-    if (exporting) return;
+    if (exporting || generating || !generated || stale) return;
     setExporting(true);
     try {
       const workbook = await createWorkbook(filtered);
       const { writeFile } = await import('xlsx');
+      const { from, to, granularity, layout } = generated.options;
       const suffix = loadedScope.replace(/[^\p{L}\p{N}_-]+/gu, '_');
       writeFile(workbook, `Relatorio_API_Excel_${suffix}_${from}_${to}_${granularity === 'month' ? 'Mensal' : 'Trimestral'}_${layout === 'rows' ? 'Tabular' : 'Colunas'}.xlsx`);
     } catch (cause) { toast.error(cause instanceof Error ? cause.message : 'Falha ao exportar Excel.'); }
     finally { setExporting(false); }
   };
   const ready = buildings !== null && !loading;
-  const validDates = Boolean(from && to && from <= to);
+  const validDates = (!from || !to || from <= to);
   return <div className="flex min-w-0 flex-col">
     <header className="border-b border-border bg-card px-5 py-4 sm:px-6">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Relatórios Automatizados</p>
@@ -122,7 +166,7 @@ export default function RelatorioApiExcel() {
       <section className="space-y-3 rounded-xl border border-border bg-card p-4" aria-label="Coleta da API">
         <h2 className="font-semibold">1. Carregar dados</h2>
         <p className="text-xs text-muted-foreground">Comercial, Horizontal, Vertical e Hotel. Todos os históricos disponíveis no escopo autorizado, sem restrição a cidades ou padrões do AELO.</p>
-        <GeoApiScopeSelector value={scope} onChange={changeScope} region={region} onRegionChange={(next) => { setRegion(next); setBuildings(null); }} disabled={loading || exporting} onLoad={load} />
+        <GeoApiScopeSelector value={scope} onChange={changeScope} region={region} onRegionChange={(next) => { revision.current++; setRegion(next); setBuildings(null); setGenerated(null); }} disabled={loading || exporting || generating} onLoad={load} />
         {loading && <><BrainLoadingState title="Carregando todas as páginas da API" startedAt={startedAt}
           description={progress ? `${progress.pagesDone} páginas · ${progress.buildingsFound} registros · ${progress.lanesDone}/${progress.lanesTotal} consultas concluídas` : 'Iniciando consulta…'} />
           <Button variant="outline" onClick={() => { controller.current?.abort(); setLoading(false); }}><X className="mr-2 h-4 w-4" />Cancelar coleta</Button></>}
@@ -131,17 +175,19 @@ export default function RelatorioApiExcel() {
         {ready && <p role="status" className="text-sm">Coleta completa: <strong>{buildings.length}</strong> registros · {loadedScope}.</p>}
       </section>
       {ready && <>
-        <section className="space-y-4 rounded-xl border border-border bg-card p-4" aria-label="Filtros do relatório">
+        <fieldset disabled={generating || exporting} className="contents"><section className="space-y-4 rounded-xl border border-border bg-card p-4" aria-label="Filtros do relatório">
           <h2 className="font-semibold">2. Configurar relatório</h2>
-          <p className="text-xs text-muted-foreground">Estes filtros atuam somente nos dados carregados. Não fazem novas consultas à API.</p>
+          <p className="text-xs text-muted-foreground">Configure os filtros e clique em Gerar relatório. Alterar seleções não processa os dados nem faz novas consultas à API. Datas vazias incluem todo o histórico disponível.</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <div className="space-y-1.5"><Label htmlFor="api-excel-view">Visão</Label><Select value={granularity} onValueChange={(next: Granularity) => { setGranularity(next); setSelected(null); setPage(0); }}><SelectTrigger id="api-excel-view"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="month">Mensal</SelectItem><SelectItem value="quarter">Trimestral</SelectItem></SelectContent></Select></div>
-            <div className="space-y-1.5"><Label htmlFor="api-excel-layout">Layout do Excel</Label><Select value={layout} onValueChange={(next: Layout) => { setLayout(next); setSelected(null); setPage(0); }}><SelectTrigger id="api-excel-layout"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="columns">Valores em colunas</SelectItem><SelectItem value="rows">Tabular — períodos em linhas</SelectItem></SelectContent></Select></div>
+            <div className="space-y-1.5"><Label htmlFor="api-excel-view">Visão</Label><Select value={granularity} onValueChange={(next: Granularity) => { setGranularity(next); }}><SelectTrigger id="api-excel-view"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="month">Mensal</SelectItem><SelectItem value="quarter">Trimestral</SelectItem></SelectContent></Select></div>
+            <div className="space-y-1.5"><Label htmlFor="api-excel-layout">Layout do Excel</Label><Select value={layout} onValueChange={(next: Layout) => { setLayout(next); }}><SelectTrigger id="api-excel-layout"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="columns">Valores em colunas</SelectItem><SelectItem value="rows">Tabular — períodos em linhas</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="api-excel-price">Cálculo monetário</Label><Select value={priceMode} onValueChange={(next: PriceMode) => setPriceMode(next)}><SelectTrigger id="api-excel-price"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="current">Valor atual</SelectItem><SelectItem value="period">Valor do período</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="api-excel-average">Preço Médio Empreendimento</Label><Select value={buildingAverageMode} onValueChange={(next: BuildingAverageMode) => setBuildingAverageMode(next)}><SelectTrigger id="api-excel-average"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="simple">Média simples</SelectItem><SelectItem value="quantity">Ponderada pela quantidade</SelectItem><SelectItem value="stock">Ponderada pelo estoque</SelectItem></SelectContent></Select></div>
-            <div className="space-y-1.5"><Label htmlFor="api-excel-from">Data inicial</Label><Input id="api-excel-from" type="date" value={from} onChange={(event) => { setFrom(event.target.value); setPage(0); }} /></div>
-            <div className="space-y-1.5"><Label htmlFor="api-excel-to">Data final</Label><Input id="api-excel-to" type="date" value={to} onChange={(event) => { setTo(event.target.value); setPage(0); }} /></div>
+            <div className="space-y-1.5"><Label htmlFor="api-excel-from">Data inicial</Label><Input id="api-excel-from" type="date" value={from} onChange={(event) => { setFrom(event.target.value); }} /></div>
+            <div className="space-y-1.5"><Label htmlFor="api-excel-to">Data final</Label><Input id="api-excel-to" type="date" value={to} onChange={(event) => { setTo(event.target.value); }} /></div>
           </div>
+          <div className="max-w-md space-y-1.5"><Label htmlFor="api-excel-municipality">Município</Label><Popover open={municipalityOpen} onOpenChange={setMunicipalityOpen}><PopoverTrigger asChild><Button id="api-excel-municipality" variant="outline" role="combobox" aria-expanded={municipalityOpen} className="w-full justify-between font-normal"><span className="truncate">{municipality || 'Todos os municípios carregados'}</span><ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /></Button></PopoverTrigger><PopoverContent className="w-[min(300px,calc(100vw-32px))] p-0"><Command><CommandInput placeholder="Buscar município carregado…" /><CommandList><CommandEmpty>Nenhum município encontrado.</CommandEmpty><CommandGroup><CommandItem value="Todos os municípios carregados" onSelect={() => { setMunicipality(''); setMunicipalityOpen(false); }}>Todos os municípios carregados</CommandItem>{municipalities.map((item) => <CommandItem key={item} value={item} onSelect={() => { setMunicipality(item); setMunicipalityOpen(false); }}>{item}</CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover></div>
+          <fieldset className="flex flex-wrap gap-4"><legend className="mb-2 text-sm font-medium">Tipo Empreendimento</legend>{BUILDING_TYPES.map((type) => <label key={type} className="flex items-center gap-2 text-sm"><Checkbox checked={buildingTypes.includes(type)} onCheckedChange={(checked) => setBuildingTypes((old) => checked ? [...old, type] : old.filter((item) => item !== type))} />{type}</label>)}</fieldset>
           {!validDates && <p role="alert" className="text-sm text-destructive">Informe datas válidas, com a data inicial anterior ou igual à final.</p>}
           <fieldset className="flex flex-wrap gap-4"><legend className="mb-2 text-sm font-medium">Status do empreendimento</legend>{availableStatuses.map((status) => <label key={status} className="flex items-center gap-2 text-sm"><Checkbox checked={statuses.includes(status)} onCheckedChange={(checked) => { setStatuses((old) => checked ? [...old, status] : old.filter((item) => item !== status)); setPage(0); }} />{status || 'Não informado'}</label>)}</fieldset>
           <p className="text-xs text-muted-foreground">{priceMode === 'current' ? 'Valor atual: último preço disponível da tipologia até a data final, aplicado à série histórica.' : 'Valor do período: estoque e VGV lançado usam quantidade e preço do último fechamento de cada mês/trimestre. VGV de vendas soma venda × preço de cada fechamento.'} VGV em milhões de reais. Vendas Brutas = gross_sales; Distratos = distractions; Vendas Líquidas = Vendas Brutas − Distratos.</p>
@@ -150,20 +196,29 @@ export default function RelatorioApiExcel() {
         </section>
         <section className="space-y-3 rounded-xl border border-border bg-card p-4" aria-label="Colunas de exportação">
           <h2 className="font-semibold">3. Selecionar colunas</h2>
-          <div className="flex flex-wrap items-end gap-3"><div className="w-full space-y-1 sm:w-72"><Label htmlFor="api-excel-column-search">Buscar coluna</Label><Input id="api-excel-column-search" value={columnSearch} onChange={(event) => setColumnSearch(event.target.value)} placeholder="Nome da coluna" /></div><Button variant="outline" onClick={() => setSelected(null)}>Selecionar todas</Button><Button variant="outline" onClick={() => setSelected([])}>Limpar seleção</Button><span className="text-xs text-muted-foreground">{filtered.columns.length}/{report.columns.length} colunas</span></div>
-          <div className="grid max-h-60 grid-cols-1 gap-2 overflow-auto sm:grid-cols-2 xl:grid-cols-3">{report.columns.filter((column) => column.toLocaleLowerCase('pt-BR').includes(columnSearch.toLocaleLowerCase('pt-BR'))).map((column) => <label key={column} className="flex items-center gap-2 text-xs"><Checkbox checked={filtered.columns.includes(column)} onCheckedChange={(checked) => setSelected((old) => checked ? [...(old ?? report.columns), column] : (old ?? report.columns).filter((item) => item !== column))} />{column}</label>)}</div>
-          <p className="text-xs text-muted-foreground">Ao trocar visão ou layout, todas as colunas da nova estrutura são selecionadas.</p>
+          <div className="flex flex-wrap items-end gap-3"><div className="w-full space-y-1 sm:w-72"><Label htmlFor="api-excel-column-search">Buscar coluna</Label><Input id="api-excel-column-search" value={columnSearch} onChange={(event) => setColumnSearch(event.target.value)} placeholder="Nome da coluna" /></div><Button variant="outline" onClick={() => setSelected(null)}>Selecionar todas</Button><Button variant="outline" onClick={() => setSelected([])}>Limpar seleção</Button><span className="text-xs text-muted-foreground">{selectedFields.length}/{fields.length} campos</span></div>
+          <div className="grid max-h-60 grid-cols-1 gap-2 overflow-auto sm:grid-cols-2 xl:grid-cols-3">{fields.filter((column) => column.toLocaleLowerCase('pt-BR').includes(columnSearch.toLocaleLowerCase('pt-BR'))).map((column) => <label key={column} className="flex items-center gap-2 text-xs"><Checkbox checked={selectedFields.includes(column)} onCheckedChange={(checked) => setSelected((old) => checked ? [...(old ?? REPORT_FIELDS), column] : (old ?? REPORT_FIELDS).filter((item) => item !== column))} />{column}</label>)}</div>
+          <p className="text-xs text-muted-foreground">Selecione os campos uma vez. As colunas de mês/trimestre só serão expandidas ao gerar a visão horizontal; a seleção é mantida ao trocar visão ou layout.</p>
         </section>
-        <section className="min-w-0 space-y-3" aria-label="Resultado do relatório">
-          <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm">{report.typologyCount} registros de tipologia · {filtered.rows.length} linhas · {report.periods.length} períodos</p><Button onClick={download} disabled={exporting || !validDates || !filtered.rows.length || !filtered.columns.length}><Download className="mr-2 h-4 w-4" />{exporting ? 'Gerando Excel…' : 'Baixar Excel'}</Button></div>
-          {!filtered.rows.length ? <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">Nenhum histórico encontrado para os filtros. Ajuste as datas ou os status.</p> : <Tabs defaultValue="table">
+        </fieldset><section className="min-w-0 space-y-3" aria-label="Resultado do relatório">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm">{generated ? `${report.typologyCount} registros de tipologia · ${filtered.rows.length} linhas · ${report.periods.length} períodos` : 'Configure os campos antes de gerar o relatório.'}</p>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={generate} disabled={generating || exporting || !validDates || !selectedFields.length || !statuses.length || !buildingTypes.length}><Play className="mr-2 h-4 w-4" />{generating ? 'Gerando relatório…' : 'Gerar relatório'}</Button>
+              <Button variant="outline" onClick={download} disabled={exporting || generating || !generated || stale || !filtered.rows.length || !filtered.columns.length}><Download className="mr-2 h-4 w-4" />{exporting ? 'Gerando Excel…' : 'Baixar Excel'}</Button>
+            </div>
+          </div>
+          {generating && <BrainLoadingState title="Processando relatório" startedAt={startedAt} description="Aplicando filtros, cálculos e colunas selecionados." />}
+          {stale && <p role="status" className="text-sm text-muted-foreground">Seleções alteradas. Clique em Gerar relatório para atualizar o resultado antes de baixar.</p>}
+          {generated && <p className="text-xs text-muted-foreground">Resultado gerado: {generated.options.from} a {generated.options.to}. {stale ? 'A prévia abaixo corresponde à geração anterior.' : ''}</p>}
+          {!generated ? <p className="text-sm text-muted-foreground">Os dados foram carregados. O processamento começa somente ao clicar em Gerar relatório.</p> : !filtered.rows.length ? <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">Nenhum histórico encontrado para os filtros. Ajuste as datas ou os status.</p> : <Tabs defaultValue="table">
             <TabsList><TabsTrigger value="table">Tabela</TabsTrigger><TabsTrigger value="history">Série histórica</TabsTrigger><TabsTrigger value="distribution">Distribuição</TabsTrigger></TabsList>
             <TabsContent value="table">
               {!filtered.columns.length ? <p className="py-4 text-sm text-muted-foreground">Selecione ao menos uma coluna para visualizar e exportar.</p> : <div className="max-h-[55vh] overflow-auto rounded-xl border border-border"><table className="w-full border-collapse text-xs"><caption className="sr-only">Prévia do Excel com filtros aplicados. Valores de VGV em milhões de reais.</caption><thead className="sticky top-0 bg-muted"><tr>{filtered.columns.map((column) => <th key={column} className="whitespace-nowrap border-b border-border p-2 text-left font-medium">{column}</th>)}</tr></thead><tbody>{pageRows.map((row, index) => <tr key={index} className="border-b border-border hover:bg-muted/50">{filtered.columns.map((column) => <td key={column} className="whitespace-nowrap p-2">{display(column, row[column])}</td>)}</tr>)}</tbody></table></div>}
               <div className="mt-3 flex flex-wrap items-center gap-3"><Button variant="outline" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</Button><span className="text-xs">Página {currentPage + 1} de {maxPage + 1}. A exportação inclui todas as linhas.</span><Button variant="outline" disabled={currentPage >= maxPage} onClick={() => setPage(currentPage + 1)}>Próxima</Button></div>
             </TabsContent>
             <TabsContent value="history" className="rounded-xl border border-border bg-card p-4"><div className="mb-4 max-w-xs space-y-1"><Label htmlFor="api-excel-metric">Métrica da série</Label><Select value={metric} onValueChange={setMetric}><SelectTrigger id="api-excel-metric"><SelectValue /></SelectTrigger><SelectContent>{MEASURES.map((item) => <SelectItem key={item} value={item}>{item}{item.startsWith('VGV') ? ' (R$ milhões)' : item.startsWith('Preço') ? item === 'Preço m²' ? ' (R$/m²)' : ' (R$)' : ' (unidades)'}</SelectItem>)}</SelectContent></Select></div><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={chartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="period" /><YAxis /><Tooltip /><Line type="monotone" dataKey="value" name={metric} stroke="hsl(var(--primary))" connectNulls={false} /></LineChart></ResponsiveContainer></div></TabsContent>
-            <TabsContent value="distribution" className="rounded-xl border border-border bg-card p-4"><div className="mb-4 max-w-xs space-y-1"><Label htmlFor="api-excel-distribution">Distribuição de tipologias (até 20 grupos)</Label><Select value={distribution} onValueChange={setDistribution}><SelectTrigger id="api-excel-distribution"><SelectValue /></SelectTrigger><SelectContent>{['Cidade/UF', 'Tipo', 'Status Empreendimento', 'Tempo de Vendas', 'Urbanizadora'].map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></div><div className="h-80"><ResponsiveContainer width="100%" height="100%"><BarChart data={distributionData}><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="count" name="Tipologias" fill="hsl(var(--primary))" /></BarChart></ResponsiveContainer></div></TabsContent>
+            <TabsContent value="distribution" className="rounded-xl border border-border bg-card p-4"><div className="mb-4 max-w-xs space-y-1"><Label htmlFor="api-excel-distribution">Distribuição de tipologias (até 20 grupos)</Label><Select value={distribution} onValueChange={setDistribution}><SelectTrigger id="api-excel-distribution"><SelectValue /></SelectTrigger><SelectContent>{['Cidade/UF', 'Tipo', 'Status Empreendimento', 'Padrão', 'Tempo de Vendas', 'Incorporadoras'].map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></div><div className="h-80"><ResponsiveContainer width="100%" height="100%"><BarChart data={distributionData}><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="count" name="Tipologias" fill="hsl(var(--primary))" /></BarChart></ResponsiveContainer></div></TabsContent>
           </Tabs>}
         </section>
       </>}

@@ -14,13 +14,16 @@ export interface ReportOptions {
   from: string;
   to: string;
   statuses: string[];
+  municipalities?: string[];
+  buildingTypes?: string[];
 }
 export const FIXED_COLUMNS = [
   'ID Empreendimento', 'ID Tipologia', 'Status Empreendimento', 'Status Tipologia',
-  'Região Administrativa', 'Cidade/UF', 'Tipo', 'Tempo de Vendas', 'Empreendimentos',
-  'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Urbanizadora', 'Oferta por Lotes',
-  'Lançamento', 'Ano', 'Entrega', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
-  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'm2 Priv.', 'm² Lançado',
+  'Região', 'Região Administrativa', 'Cidade/UF', 'Tipo', 'Padrão', 'Tipologia',
+  'Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado', 'Tempo de Vendas', 'Empreendimentos',
+  'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Incorporadoras', 'Unidades por Tipologia',
+  'Data de Lançamento', 'Ano', 'Data de Entrega', 'Quartos', 'Garagem', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
+  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'm2 Priv.',
 ];
 export const MEASURES = [
   'Vendas Brutas', 'Distratos', 'Vendas Líquidas', 'Estoque', 'Preço Atual',
@@ -28,6 +31,7 @@ export const MEASURES = [
   'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque',
 ] as const;
 export const PRICE_MEASURES = new Set(['Preço Atual', 'Preço Médio Empreendimento', 'Preço m²']);
+export const REPORT_FIELDS = [...FIXED_COLUMNS, 'Período', ...MEASURES];
 export const PERCENT_COLUMNS = new Set(['Entrada', '% de Juros Mensal', 'Desconto à Vista']);
 export interface Period { key: string; label: string }
 export interface Report {
@@ -36,6 +40,7 @@ export interface Report {
   periods: Period[];
   series: Row[];
   typologyCount: number;
+  typologyRows?: Row[];
 }
 
 export function numeric(value: unknown): number | null {
@@ -87,9 +92,20 @@ function entriesOf(building: RawBuilding): DatedEntry[] {
 }
 
 export function dateBounds(buildings: RawBuilding[]) {
-  const dates = buildings.flatMap((building) => entriesOf(building).map(({ date }) => date)).sort();
-  return { from: dates[0] ?? '', to: dates.at(-1) ?? '' };
+  let from = '', to = '';
+  for (const building of buildings) {
+    const history = Array.isArray(building.typologies_history) ? building.typologies_history : [];
+    for (const entry of history) {
+      const date = isoDate(entry.period);
+      if (!date) continue;
+      if (!from || date < from) from = date;
+      if (!to || date > to) to = date;
+    }
+  }
+  return { from, to };
 }
+
+export const municipalityKey = (building: RawBuilding) => `${String(building.city ?? '')}/${String(building.state ?? '')}`;
 
 const rounded = (value: number) => Math.round(value * 100) / 100;
 const product = (a: number | null, b: number | null) => a === null || b === null ? null : rounded(a * b);
@@ -98,10 +114,13 @@ const asRecord = (value: unknown): RawBuilding => value && typeof value === 'obj
 
 function fixedRow(building: RawBuilding, id: string, entries: DatedEntry[]): Row {
   const last = entries.at(-1)!.entry;
-  const qty = numeric(last.qty) ?? numeric(entries[0].entry.qty);
+  const qty = numeric(last.qty);
   const stock = numeric(last.typology_stock);
   const area = numeric(last.private_area);
   const launch = isoDate(building.release_date);
+  const launchEntry = launch ? entries.find(({ date }) => date === launch)?.entry : undefined;
+  const launchPrice = numeric(launchEntry?.price);
+  const launchArea = numeric(launchEntry?.private_area);
   const lastActive = entries.filter(({ entry }) => entry.building_status === 'Ativo').at(-1)?.date;
   const months = launch && lastActive ? Math.max(0,
     (Number(lastActive.slice(0, 4)) - Number(launch.slice(0, 4))) * 12 + Number(lastActive.slice(5, 7)) - Number(launch.slice(5, 7))) : null;
@@ -109,18 +128,23 @@ function fixedRow(building: RawBuilding, id: string, entries: DatedEntry[]): Row
   return {
     'ID Empreendimento': text(building.building_id), 'ID Tipologia': id,
     'Status Empreendimento': text(building.status), 'Status Tipologia': stock === null ? '' : stock > 0 ? 'Ativo' : 'Esgotado',
-    'Região Administrativa': text(building.administrative_region ?? building.region),
-    'Cidade/UF': `${text(building.city)}/${text(building.state)}`, 'Tipo': text(building.standard || building.building_type),
+    'Região': text(building.region ?? building.administrative_region),
+    'Região Administrativa': text(building.administrative_area),
+    'Cidade/UF': municipalityKey(building), 'Tipo': text(building.building_type), 'Padrão': text(building.standard),
+    'Tipologia': text(last.type_of_typology), 'Preço de Lançamento': launchPrice,
+    'M² Lançado': product(qty, area),
+    'R$/m² Lançado': launchPrice !== null && launchArea !== null && launchArea > 0 ? rounded(launchPrice / launchArea) : null,
     'Tempo de Vendas': months === null ? '' : months <= 6 ? 'Até 6 Meses' : months <= 24 ? 'De 7 a 24 Meses' : months <= 48 ? 'De 25 a 48 Meses' : 'Acima de 49 Meses',
     'Empreendimentos': text(building.name), 'Taxa Administrativa': numeric(last.taxa_associativa),
     'Bairro': text(building.neighborhood), 'Endereço': text(building.address), 'Número': text(building.address_number),
-    'Urbanizadora': text(asRecord(incorporators[0]).name), 'Oferta por Lotes': numeric(last.qty),
-    'Lançamento': text(building.release_date), 'Ano': launch?.slice(0, 4) ?? '', 'Entrega': text(building.delivery_date),
+    'Incorporadoras': incorporators.map((incorporator) => text(asRecord(incorporator).name).trim()).filter(Boolean).join(', '),
+    'Unidades por Tipologia': qty,
+    'Data de Lançamento': text(building.release_date), 'Ano': launch?.slice(0, 4) ?? '', 'Data de Entrega': text(building.delivery_date),
+    'Quartos': numeric(last.number_bedroom), 'Garagem': numeric(last.garage),
     'Entrada': numeric(building.down_payment_percentage), 'Nº de Parcelas': numeric(building.number_of_installments),
     'Valor da parcela': numeric(building.installment_value), '% de Juros Mensal': numeric(building.interest_rate_tax),
     'Indíce de Juros': text(building.interest_rate_index), 'Desconto à Vista': numeric(building.discount_percentage),
     'm2 Priv.': area || null,
-    'm² Lançado': qty && area ? product(qty, area) : null,
   };
 }
 
@@ -155,6 +179,9 @@ function buildingAverage(snapshots: RawBuilding[], mode: BuildingAverageMode): n
 export function buildReport(buildings: RawBuilding[], options: ReportOptions): Report {
   const empty: Report = { columns: [], rows: [], periods: [], series: [], typologyCount: 0 };
   if (!options.from || !options.to || options.from > options.to) return empty;
+  buildings = buildings.filter((building) => options.statuses.includes(text(building.status))
+    && (!options.municipalities?.length || options.municipalities.includes(municipalityKey(building)))
+    && (options.buildingTypes === undefined || options.buildingTypes.includes(text(building.building_type))));
   const periodsMap = new Map<string, Period>();
   // Apenas períodos observados na coleta dentro das datas inclusivas, sem inventar fechamentos.
   for (const building of buildings) for (const { date } of entriesOf(building)) {
@@ -240,14 +267,23 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
   }
   const compare = (a: Row, b: Row) => {
     const active = (row: Row) => row['Status Empreendimento'] === 'Ativo' ? 0 : 1;
-    return active(a) - active(b) || (isoDate(a['Lançamento']) ?? '').localeCompare(isoDate(b['Lançamento']) ?? '')
+    return active(a) - active(b) || (isoDate(a['Data de Lançamento']) ?? '').localeCompare(isoDate(b['Data de Lançamento']) ?? '')
       || text(a.Empreendimentos).localeCompare(text(b.Empreendimentos))
       || text(a['ID Tipologia']).localeCompare(text(b['ID Tipologia']), undefined, { numeric: true });
   };
   const columns = options.layout === 'columns'
     ? [...FIXED_COLUMNS, ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
     : [...FIXED_COLUMNS, 'Período', ...MEASURES];
-  return { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length };
+  return { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length, typologyRows: wideRows };
+}
+
+/** Expande nomes de campos somente na geração, preservando a ordem das métricas. */
+export function selectReportFields(report: Report, fields: string[] | null): Report {
+  if (fields === null) return report;
+  const selected = new Set(fields);
+  const columns = report.columns.filter((column) => selected.has(column)
+    || MEASURES.some((measure) => selected.has(measure) && column.startsWith(`${measure} `)));
+  return selectedReport(report, columns);
 }
 
 export function selectedReport(report: Report, selected: string[] | null): Report {
@@ -260,7 +296,7 @@ export function exportValue(column: string, value: Cell): Cell {
   if (value === null || value === undefined || value === '') return null;
   if (column.startsWith('VGV')) return numeric(value) === null ? null : rounded(Number(value) / 1_000_000);
   if (PERCENT_COLUMNS.has(column)) return numeric(value) === null ? null : Number(value) / 100;
-  if (column === 'Lançamento' || column === 'Entrega') {
+  if (column === 'Data de Lançamento' || column === 'Data de Entrega') {
     const date = isoDate(value);
     if (date) return `${date.slice(8, 10)}/${date.slice(5, 7)}/${date.slice(0, 4)}`;
   }
