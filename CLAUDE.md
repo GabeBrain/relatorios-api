@@ -202,6 +202,10 @@ Quando a interação começar com uma **saudação** ("oi", "olá", "bom dia", "
 
 ## Guidelines de frontend — Rebrain
 
+### Carregamento obrigatório com identidade Brain
+
+Toda ferramenta nova e todo fluxo de carregamento alterado no Rebrain, inclusive POC e funcionalidades em implementação, deve usar `src/components/feedback/BrainLoadingState.tsx`. Consultas que impedem a análise usam a variante `overlay`, logo Brain visível, etapa e tempo real; processamento local usa a mesma identidade e permite cancelar. Campos usam a variante apropriada, preservando a identidade visual. Não substituir por texto, spinner genérico ou progresso fictício. Verificar o estado carregando no navegador com resposta deliberadamente lenta, além dos estados de sucesso, vazio e erro. Esta obrigação vale para todos os autores.
+
 Antes de desenvolver ou alterar interface React, leia
 `docs/architecture/FRONTEND_GUIDELINES.md` e o `DESIGN_SYSTEM.md`. Classifique o pedido, reutilize
 o padrão/componente existente e cubra os estados de página aplicáveis. Páginas de feature são lazy

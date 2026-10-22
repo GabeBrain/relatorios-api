@@ -1,5 +1,7 @@
 # CTA — expansão e comparação de empreendimentos
 
+**Revisão após materiais do Finotti e falha em Goiânia:** aplicar primeiro [REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md](REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md). Consulta paralela limitada a oito, seleção inicial de todos os cadastros com contagem, modelos preparados juntos e histórico sempre preservado passam a ser o fluxo vigente. Faixas originais recebidas podem ser exibidas como dispersão da referência; não se confundem com as novas faixas 50%/80% cuja calibração independente segue obrigatória. O método vertical fornecido substitui a ideia de reaplicar coeficientes horizontais. Logo Brain obrigatória em AGENTS/CLAUDE. Esta revisão foi implementada localmente; evidências e limites no documento vinculado. A expansão anterior foi enviada até `88dd256`; nenhuma publicação da revisão atual presumida.
+
 **Execução local em 22/10:** bancada e motores implementados; testes, auditoria real e condicionantes de faixas/comercial estão no [resultado da execução](RESULTADO_EXPANSAO_LOCAL_2026-10-22.md). Estado validado localmente, sem push/deploy. O texto de preparação abaixo preserva o protocolo original.
 
 Estado: preparado em 22/10/2026, por solicitação de Gabriel. Executar junto de `PLANO_EXPANSAO_MODELOS_E_FAIXAS_2026-10-22.md`. Esta direção substitui a composição centrada em um único empreendimento; detalhes individuais permanecem acessíveis.

@@ -15,6 +15,7 @@ export type Origin = {
     name: string;
     cutoff: string;
     segment: Segment;
+    pattern?: string;
     age: number | null;
     units: number;
     sold: number;
@@ -67,10 +68,9 @@ export function normalizeOrigin(b: Building, cutoff: string, measurement: Measur
     const release = String(b.release_date ?? '').slice(0, 7);
     const releaseAge = periodValid(release) && release <= cutoff ? monthIndex(cutoff) - monthIndex(release) + 1 : null;
     const ages = [...new Set(atCutoff.map(r => finite(r.time_on_sale)).filter((v): v is number => v !== null && Number.isInteger(v) && v > 0))];
-    let age: number | null = releaseAge;
+    const age: number | null = releaseAge;
     if (releaseAge !== null && ages.some(a => a !== releaseAge)) {
-        age = null;
-        warnings.push('Lançamento e tempo de venda divergem; idade não confirmada.');
+        warnings.push('Tempo em venda diverge do lançamento; idade usa lançamento, conforme referência Finotti.');
     }
     if (releaseAge === null)
         warnings.push('Sem lançamento válido; não inferir idade pela primeira linha histórica.');
@@ -83,7 +83,7 @@ export function normalizeOrigin(b: Building, cutoff: string, measurement: Measur
         warnings.push('Soma de vendas não concilia com estoque; origem usa somente a posição no corte.');
     if (measurement === 'unknown')
         warnings.push('Duração das vendas do período não confirmada; modelos mensais indisponíveis.');
-    return { id, name, reason: 'Posição no corte disponível.', origin: { id, name, cutoff, segment, age, units, sold: units - stock, stock, history, provenance, measurement, warnings } };
+    return { id, name, reason: 'Posição no corte disponível.', origin: { id, name, cutoff, segment, pattern: [...atCutoff].sort((a,b) => Number(b.qty)-Number(a.qty))[0]?.pattern, age, units, sold: units - stock, stock, history, provenance, measurement, warnings } };
 }
 export function monthlyWindow(o: Origin, length: number): Observation[] | null {
     if (o.measurement !== 'monthly-confirmed')

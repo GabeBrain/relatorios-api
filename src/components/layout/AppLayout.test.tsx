@@ -11,6 +11,18 @@ beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 
 describe('marca do menu lateral', () => {
+  it('recolhe em Estimativas no celular, abre em sobreposição e fecha com Escape', () => {
+    const media=vi.spyOn(window,'matchMedia').mockImplementation(() => ({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()} as unknown as MediaQueryList));
+    try {
+      render(<MemoryRouter initialEntries={['/rebrain/estimativas-vendas']}><AppLayout><p>Conteúdo</p></AppLayout></MemoryRouter>);
+      fireEvent.click(screen.getByRole('button',{name:'Expandir menu'}));
+      expect(screen.getByRole('complementary')).toHaveClass('fixed');
+      fireEvent.keyDown(window,{key:'Escape'});
+      expect(screen.getByRole('button',{name:'Expandir menu'})).toHaveAttribute('aria-expanded','false');
+      expect(screen.getByRole('complementary')).toHaveClass('w-14');
+      expect(JSON.parse(localStorage.getItem('brain-sidebar-state')!).collapsed).toBe(false);
+    } finally {media.mockRestore();}
+  });
   it('mostra Estimativas como link direto antes do Banco Quanti', () => {
     render(<MemoryRouter><AppLayout><p>Conteúdo</p></AppLayout></MemoryRouter>);
     const estimates = screen.getByRole('link', { name: /Estimativas de Vendas/i });

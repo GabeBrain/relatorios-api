@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { AlertTriangle, ChevronsUpDown, Loader2, RefreshCw } from 'lucide-react';
+import { AlertTriangle, ChevronsUpDown, RefreshCw } from 'lucide-react';
+import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -139,7 +140,7 @@ export function GeoApiScopeSelector({
                       : 'Selecione a UF primeiro'}
               </span>
               {isLoading
-                ? <Loader2 className="ml-1 h-3.5 w-3.5 shrink-0 animate-spin opacity-60" />
+                ? <BrainLoadingState variant="field" title="Consultando municípios" className="ml-1 shrink-0 [&>span]:sr-only" />
                 : <ChevronsUpDown className="ml-1 h-3.5 w-3.5 shrink-0 opacity-50" />}
             </Button>
           </PopoverTrigger>

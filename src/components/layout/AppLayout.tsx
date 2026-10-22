@@ -167,8 +167,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const session = useGeobrainSession();
   const [compact, setCompact] = useState(() => window.innerWidth < 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const corretorMobile = location.pathname.startsWith('/corretor') && compact;
-  const collapsed = corretorMobile ? !mobileMenuOpen : savedCollapsed;
+  const responsiveMobile = (location.pathname.startsWith('/corretor') || location.pathname.startsWith('/rebrain/estimativas-vendas')) && compact;
+  const collapsed = responsiveMobile ? !mobileMenuOpen : savedCollapsed;
 
   useEffect(() => {
     if (!window.matchMedia) return;
@@ -199,7 +199,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   }, []);
 
   function setCollapsed(fn: (v: boolean) => boolean) {
-    if (corretorMobile) { setMobileMenuOpen(v => !v); return; }
+    if (responsiveMobile) { setMobileMenuOpen(v => !v); return; }
     setSidebar((s) => ({ ...s, collapsed: fn(s.collapsed) }));
   }
 
@@ -296,14 +296,14 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
-      {corretorMobile && mobileMenuOpen && <button type="button" aria-label="Fechar menu" className="fixed inset-0 z-40 bg-black/40" onClick={() => setMobileMenuOpen(false)} />}
+      {responsiveMobile && mobileMenuOpen && <button type="button" aria-label="Fechar menu" className="fixed inset-0 z-40 bg-black/40" onClick={() => setMobileMenuOpen(false)} />}
 
       {/* Sidebar */}
       <aside
         className={cn(
           'flex flex-col h-full border-r border-border bg-card transition-all duration-200 shrink-0 print:hidden',
           collapsed ? 'w-14' : 'w-64',
-          corretorMobile && mobileMenuOpen && 'fixed inset-y-0 left-0 z-50 shadow-xl',
+          responsiveMobile && mobileMenuOpen && 'fixed inset-y-0 left-0 z-50 shadow-xl',
           session.action && 'z-[60]'
         )}
       >

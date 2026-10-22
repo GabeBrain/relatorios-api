@@ -4,6 +4,8 @@ import { buildingId, type Building } from '../source';
 export type Trial = {
     id: string;
     model: ModelId;
+    effectiveModel?: ModelId;
+    modelVersion?: string;
     cutoff: string;
     target: string;
     horizon: number;
@@ -26,7 +28,8 @@ export function retrospective(buildings: Building[], cutoffs: string[], models: 
             for (const model of models) {
                 const normalized = normalizeOrigin(b, cutoff, measurement, provenance);
                 const artifact = artifacts.find(a => a.model === model && a.segment === normalized.origin?.segment && a.trainedThrough <= cutoff && !a.trainingIds.includes(buildingId(b)));
-                const result = normalized.origin ? forecast(normalized.origin, model, Math.max(...horizons), artifact) : null;
+                const futureReference = ['finotti', 'finotti-extra'].includes(model) && cutoff < '2026-09';
+                const result = futureReference ? {forecast: null, reason: 'Coeficientes da referência posterior ao corte; retrospectiva independente indisponível.'} : normalized.origin ? forecast(normalized.origin, model, Math.max(...horizons), artifact) : null;
                 for (const horizon of horizons) {
                     const target = shiftMonth(cutoff, horizon);
                     const actualOrigin = normalizeOrigin(b, target, measurement, provenance).origin;
@@ -34,7 +37,7 @@ export function retrospective(buildings: Building[], cutoffs: string[], models: 
                     // Future revisions make the fixed-denominator target incomparable.
                     const actual = actualOrigin && normalized.origin && actualOrigin.units === normalized.origin.units ? actualOrigin.sold : null;
                     const error = predicted === null || actual === null ? null : predicted - actual;
-                    trials.push({ id: buildingId(b), model, cutoff, target, horizon, segment: normalized.origin?.segment ?? 'unknown', units: normalized.origin?.units ?? 0, predicted, actual, error, absolutePp: error === null ? null : 100 * Math.abs(error) / normalized.origin!.units, reason: !normalized.origin ? normalized.reason : !result?.forecast ? result?.reason ?? 'Sem modelo' : actual === null ? 'Sem alvo comparável no corte futuro' : 'Comparação com posição de estoque reportada', provenance });
+                    trials.push({ id: buildingId(b), model, effectiveModel: result?.forecast?.model, modelVersion: result?.forecast?.version, cutoff, target, horizon, segment: normalized.origin?.segment ?? 'unknown', units: normalized.origin?.units ?? 0, predicted, actual, error, absolutePp: error === null ? null : 100 * Math.abs(error) / normalized.origin!.units, reason: !normalized.origin ? normalized.reason : !result?.forecast ? result?.reason ?? 'Sem modelo' : actual === null ? 'Sem alvo comparável no corte futuro' : 'Comparação com posição de estoque reportada', provenance });
                 }
             }
     return trials;

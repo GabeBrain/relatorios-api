@@ -31,24 +31,44 @@ export type ReadResult = {
 export async function readHorizontalHistory(uf: string, city: string, signal?: AbortSignal, progress?: (page: number, total: number) => void, type: SourceType = 'Horizontal'): Promise<ReadResult> {
     if (!uf || !city)
         throw new Error('Selecione UF e cidade monitorada.');
-    const buildings: Building[] = [];
-    let total = 1;
-    for (let page = 1; page <= total; page += 1) {
-        if(signal?.aborted)throw new DOMException('Consulta cancelada','AbortError');
-        const response = await httpRequest<{
-            data: Building[];
-            meta: {
-                last_page: number;
-            };
-        }>({ method: 'POST', url: 'https://app.geobrain.com.br/public-api/v2/building-with-history-internal', query: { type, uf, city, per_page: 100, page }, signal });
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    signal?.addEventListener('abort', abort, { once: true });
+    const pages = new Map<number, Building[]>();
+    let total = 1, completed = 0;
+    const read = async (page: number) => {
+        if (signal?.aborted || controller.signal.aborted) throw new DOMException('Consulta cancelada', 'AbortError');
+        const response = await httpRequest<{data: Building[]; meta: {last_page: number}}>({
+            method: 'POST', url: 'https://app.geobrain.com.br/public-api/v2/building-with-history-internal',
+            query: {type, uf, city, per_page: 100, page}, signal: controller.signal,
+        });
         if (!response.ok || !response.data || !Array.isArray(response.data.data))
             throw new Error(`Falha no histórico, página ${page}: ${response.error ?? response.status ?? 'resposta inválida'}`);
-        total = Number(response.data.meta?.last_page ?? 1);
-        if (!Number.isSafeInteger(total) || total < 1 || total > 30)
-            throw new Error('Paginação fora do limite de 30 páginas.');
-        buildings.push(...response.data.data.map(b => ({ ...b, sourceType: type })));
-        progress?.(page, total);
+        const count = Number(response.data.meta?.last_page ?? 1);
+        if (!Number.isSafeInteger(count) || count < 1 || count > 30) throw new Error('Paginação fora do limite de 30 páginas.');
+        if (page === 1) total = count;
+        else if (count !== total) throw new Error('A paginação mudou durante a consulta. Consulte novamente.');
+        if (controller.signal.aborted) throw new DOMException('Consulta cancelada', 'AbortError');
+        pages.set(page, response.data.data.map(b => ({...b, sourceType: type})));
+        progress?.(++completed, total);
+    };
+    try {
+        await read(1);
+        let next = 2;
+        await Promise.all(Array.from({length: Math.min(8, total - 1)}, async () => {
+            while (next <= total) { const page = next++; await read(page); }
+        }));
+        if (signal?.aborted) throw new DOMException('Consulta cancelada', 'AbortError');
+    } catch (error) {
+        controller.abort();
+        throw error;
+    } finally {
+        signal?.removeEventListener('abort', abort);
     }
+    const buildings = [...pages.entries()].sort(([a], [b]) => a - b).flatMap(([, rows]) => rows);
+    const identifiers = buildings.map(buildingId);
+    if (identifiers.some(id => !id) || new Set(identifiers).size !== identifiers.length)
+        throw new Error('Cadastros sem identificador ou repetidos entre páginas. Consulte novamente.');
     return { buildings, pages: total, fetchedAt: new Date().toISOString() };
 }
 export const buildingId = (b: Building) => String(b.building_id ?? b.id ?? '');

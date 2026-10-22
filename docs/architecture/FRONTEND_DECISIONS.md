@@ -154,6 +154,13 @@ Não use para changelog de feature; mudanças funcionais continuam nos documento
   `src/features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx`.
 
 <!-- novas decisões acima desta linha -->
+### 2026-10-22 — Estimativas: gráficos automáticos e modelos preparados na consulta
+
+- **Contexto:** Goiânia tinha 641 cadastros e nenhum gráfico inicial porque a seleção começava vazia e o modelo horizontal filtrava verticais. Formulários técnicos antecediam a análise.
+- **Decisão:** consulta completa com até oito páginas simultâneas, cache local de todos os modelos por corte/horizonte, seleção inicial explícita de todos os cadastros e grade12. Histórico não depende de elegibilidade para previsão; método automático identifica Finotti por tipo ou ritmo recente. Filtros recolhem após sucesso, modelos/modos são botões e metodologia usa Dialog editorial. Nenhum novo token ou primitive. Artefato de referência vertical importado sob demanda, sem a base bruta da API no bundle.
+- **Carregamento:** BrainLoadingState compartilhado, incluindo logo na variante de campo. A bancada compõe Dialog para conter foco/Escape/cancelamento durante consulta bloqueante e cálculo. Regra para ferramentas novas e fluxos alterados, inclusive POC, registrada em AGENTS/CLAUDE; não se declara migração de todas as telas antigas.
+- **Mobile:** inspeção real mostrou conteúdo comprimido pela lateral apesar de não haver overflow da janela. Rota de Estimativas reutiliza menu móvel recolhido/sobreposto existente, sem alterar a preferência desktop ou outras rotas. Testes medem área útil (334px em viewport390) e grade usa uma coluna conforme largura do conteúdo.
+- **Verificação:** API real na página local retornou sete páginas/641 cadastros e gráficos em16,18s; oito ensaios responsivos de snapshot, temas, faixas e troca de modelos sem API. Referência: `docs/features/estimativas-vendas/REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md`. Sem publicação nesta revisão.
 ### 2026-10-14 — Corretor orientado por projetos com revisão compatível
 - **Contexto:** geração do produto e versões do estudo disputavam navegação; originais limitados ao navegador e cadastro incompleto.
 - **Decisão:** carteira lazy em `/corretor`, cadastro/área em `/corretor/projetos/:studyId`; revisão anterior em `/corretor/analise`, query antiga `study` preservada. Primitives existentes e composição scoped com tokens SE, sem mudar o shell geral. Upload TUS importado só ao usar o material.

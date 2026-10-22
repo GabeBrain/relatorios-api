@@ -1,3 +1,11 @@
+## 22/10/2026 — Estimativas: referência Finotti completa e gráficos automáticos em Goiânia — Gabriel / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/estimativas-vendas`, bancada local de comparação.
+- **Mudança:** Drive fornecido por Gabriel destravou cauda/faixas horizontais e modelo vertical por30 comparáveis; 22 casos originais reproduzidos. Transporte com até8 chamadas simultâneas, seleção inicial completa, modelos preparados em cache, gráficos de histórico mesmo sem projeção, recorte compacto, metodologia em Dialog e modelos/modos em botões. Referência Finotti ou ritmo de estoque identificados separadamente. Logo Brain obrigatória em AGENTS/CLAUDE, no campo geográfico compartilhado e no carregamento bloqueante com foco/Escape/cancelamento. Menu móvel da ferramenta reutiliza o comportamento existente; grade responde à largura útil, sem mudar tokens.
+- **Evidência:** página local usando API real, sem respostas simuladas:641 cadastros/7 páginas200,640 projeções automáticas,12 cartões iniciais,16,18s até gráficos e zero erro de página.185 têm suporte Finotti; os demais usam ritmo recente quando disponível.108 testes integrados/11 arquivos, tipos completos, lint dirigido e build; oito ensaios responsivos com snapshot separado da medição real. Fontes, hashes, reprodução e limites em `docs/features/estimativas-vendas/REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md` e evidência JSON associada.
+- **Monday:** [Estimativas de vendas por empreendimento](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`; somente referência, sem escrita.
+- **Estado/pendências:** validado localmente; nenhuma precisão observada ou cobertura local de faixas comprovada. Treino até setembro/2026 bloqueia retrospectiva independente anterior para os parâmetros de referência. Origem por período, calibração independente, comercial e retorno Geobrain seguem pendentes. Fontes brutas ignoradas e artefato derivado de inferência versionado com IDs anônimos. Alterações FIERGS/Corretor paralelas preservadas. Revisão atual sem push/deploy; próxima etapa é revisão/publicação autorizada e teste no ambiente publicado.
+
 ## 22/10/2026 — Relatório API Excel: publicação autorizada do conjunto local — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Relatórios Automatizados.

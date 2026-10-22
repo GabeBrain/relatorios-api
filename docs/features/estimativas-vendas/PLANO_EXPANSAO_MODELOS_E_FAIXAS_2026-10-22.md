@@ -1,5 +1,7 @@
 # Expansão das curvas e faixas de previsão
 
+**Revisão vigente após leitura do Drive Finotti:** ver [inventário e decisões implementadas](REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md). O pacote recebido resolve epsilon/piso de k, cauda horizontal, parâmetros Geral, faixas de referência e modelo vertical por 30 comparáveis. Essas regras agora têm fonte e casos de regressão; a descrição abaixo de ausência desses insumos é histórica. Não anular idade de lançamento por divergência de tempo em venda. Inferência e faixas da fonte não constituem validação independente na API. Treino até setembro/2026 não pode avaliar previsões anteriores como se fosse informação disponível no corte. Seguem abertas calibração local, linhagem observada e identificação comercial/contrato de retorno.
+
 **Execução local em 22/10:** bancada e motores implementados; testes, auditoria real e condicionantes de faixas/comercial estão no [resultado da execução](RESULTADO_EXPANSAO_LOCAL_2026-10-22.md). Estado validado localmente, sem push/deploy. O texto de preparação abaixo preserva o protocolo original.
 
 Data: 22/10/2026. Responsável pela frente: Gabriel/sessão; Edgar apoia contratos quando necessário. Estado: plano preparado, modelos e testes abaixo ainda não executados. Pedido: ampliar a bancada para horizontais, verticais, comerciais e outras derivações, com parâmetros próprios e sombra de incerteza. Este documento complementa o plano API/dossiê e o plano editorial; não altera o motor publicado nesta etapa.

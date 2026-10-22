@@ -7,6 +7,7 @@ const {build}=await import('esbuild');
 const path='.local-inputs/estimativas-vendas/expanded';await mkdir(path,{recursive:true});
 await build({entryPoints:['scripts/diagnostics/estimativas-expanded-entry.ts'],bundle:true,platform:'node',format:'esm',outfile:`${path}/engine.mjs`});
 const engine=await import(new URL(`../../${path}/engine.mjs`,import.meta.url));
+await engine.prepareReferenceModels();
 const key=`${uf}-${city.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/gi,'')}-${type}`;
 let buildings=[],pages=0;
 if(process.argv.includes('--replay')){buildings=JSON.parse(await readFile(`${path}/${key}-snapshot.json`,'utf8'));pages=Math.ceil(buildings.length/100);}else{
@@ -38,13 +39,17 @@ if(cities.ok)await cities.json();
 if (!cities.ok) throw new Error(`Cidades monitoradas HTTP ${cities.status}`);
 
 pages=1;
-for(let page=1;page<=pages;page++){
+const fetched=new Map();const start=performance.now();
+async function pageRead(page){
  const query=new URLSearchParams({uf,city,type,per_page:'100',page:String(page)});
- const r=await fetch(`https://app.geobrain.com.br/public-api/v2/building-with-history-internal?${query}`,{method:'POST',headers:{Authorization:`Bearer ${token}`,Accept:'application/json'},signal:AbortSignal.timeout(30000)});
+ const r=await fetch(`https://app.geobrain.com.br/public-api/v2/building-with-history-internal?${query}`,{method:'POST',headers:{Authorization:`Bearer ${token}`,Accept:'application/json'},signal:AbortSignal.timeout(60000)});
  if(!r.ok)throw new Error(`History ${r.status}`);
- const b=await r.json();pages=Number(b.meta?.last_page??1);if(pages>30)throw new Error('Page ceiling');
- buildings.push(...b.data.map(x=>({...x,sourceType:type})));
+ const b=await r.json();if(page===1)pages=Number(b.meta?.last_page??1);if(pages>30)throw new Error('Page ceiling');
+ fetched.set(page,b.data.map(x=>({...x,sourceType:type})));
 }
+await pageRead(1);let next=2;await Promise.all(Array.from({length:Math.min(8,pages-1)},async()=>{while(next<=pages)await pageRead(next++);}));
+buildings=[...fetched].sort(([a],[b])=>a-b).flatMap(([,b])=>b);
+console.log(JSON.stringify({scope:`${uf}/${city}/${type}`,pages,buildings:buildings.length,elapsedSeconds:(performance.now()-start)/1000}));
 }
 const snapshot=JSON.stringify(buildings),hash=createHash('sha256').update(snapshot).digest('hex');
 

@@ -1,7 +1,11 @@
+import { referenceForecast } from './referenceModels';
 import { HORIZONTAL_PARAMETERS } from '../parameters';
 import { calculateHorizontalShape } from '../horizontal';
 import { monthlyWindow, shiftMonth, type Origin, type Segment } from './contract';
 export const MODELS = [
+    { id: 'auto', label: 'Leitura automática', version: 'auto-reference-stock-v1' },
+    { id: 'finotti-reference', label: 'Finotti por tipo · referência completa', version: 'finotti-drive-2026-10-22' },
+    { id: 'stock-trend', label: 'Ritmo recente de estoque', version: 'stock-trend-v1' },
     { id: 'constant', label: 'Estoque constante', version: 'constant-v1' },
     { id: 'last', label: 'Último mês', version: 'last-month-v1' },
     { id: 'mean3', label: 'Média de 3 meses', version: 'mean3-v1' },
@@ -31,6 +35,8 @@ export type ForecastPoint = {
     predicted: number | null;
     stock: number | null;
     boundary: boolean;
+    sourceWide?: [number, number];
+    sourceCentral?: [number, number];
 };
 export type Forecast = {
     origin: Origin;
@@ -53,9 +59,22 @@ export function forecast(o: Origin, model: ModelId, horizon = 24, artifact?: Fit
         return fail('Horizonte permitido: 1 a 36 meses.');
     if (![o.units, o.sold, o.stock].every(Number.isFinite) || o.units <= 0 || o.sold < 0 || o.sold > o.units || o.stock !== o.units - o.sold)
         return fail('Posição de origem inválida.');
+    if (model === 'finotti-reference') return referenceForecast(o, horizon);
+    if (model === 'auto') {
+        const reference = referenceForecast(o, horizon);
+        if (reference.forecast) return reference;
+        const recent = forecast(o, 'stock-trend', horizon);
+        if (recent.forecast) {
+            recent.forecast.warnings.push(`Referência Finotti indisponível: ${reference.reason}`);
+            return recent;
+        }
+        return {id: o.id, name: o.name, forecast: null, reason: `${reference.reason} ${recent.reason}`};
+    }
     let k: number | null = null, rate = 0, grossRate = 0, cancelRate = 0;
     const parameters: Record<string, number | string> = {};
     const warnings = [...o.warnings];
+    if (['finotti', 'finotti-extra'].includes(model) && o.cutoff < '2026-09')
+        warnings.push('Coeficientes publicados depois deste corte: visualização histórica ilustrativa, sem retrospectiva independente.');
     if (model === 'finotti' || model === 'finotti-extra' || model === 'absorption') {
         if (o.age === null || o.age < 1 || o.sold <= 0 || o.sold >= o.units)
             return fail('Absorção exige idade confirmada e vendas entre 0% e 100%.');
@@ -85,6 +104,15 @@ export function forecast(o: Origin, model: ModelId, horizon = 24, artifact?: Fit
             }
         }
         parameters.k = k;
+    }
+    if (model === 'stock-trend') {
+        const previous = o.history.find(r => r.period === shiftMonth(o.cutoff, -3));
+        if (!previous || previous.units !== o.units || previous.stock === null || previous.stock < 0 || previous.stock > o.units)
+            return fail('Ritmo recente exige estoque comparável três meses antes do corte.');
+        rate = (previous.stock - o.stock) / 3;
+        parameters.windowMonths = 3;
+        parameters.netRate = rate;
+        warnings.push('Prolongamento linear do saldo de estoque em três meses; admite distratos. Sem faixa calibrada.');
     }
     if (model === 'last' || model === 'mean3' || model === 'mean12' || model === 'flows') {
         const n = model === 'last' ? 1 : model === 'mean12' ? 12 : 3;

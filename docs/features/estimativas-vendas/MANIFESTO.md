@@ -1,5 +1,7 @@
 # Manifesto técnico — Estimativas de vendas por empreendimento
 
+**Atualização vigente em 22/10 — Drive Finotti/Goiânia:** referência recebida fornece método vertical, cauda horizontal e faixas. [Inventário e decisões](REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md) substituem as pendências de reprodução desses itens. Linhagem por período, calibração independente local, comercial e contrato de retorno continuam pendentes. Gabriel/sessão implementam e verificam a bancada; não se presume execução de Edgar. O estado de 21/10 abaixo permanece como histórico.
+
 **Data:**21/10/2026. **Ambiente:**Rebrain, processo SID/Geobrain. **Estado:**motor horizontal local implementado, sem interface, base real ou homologação. **Responsável pelo apoio técnico:**Gabriel/Codex. Este documento reúne fatos, resultados relatados pelo autor e propostas de implementação, identificando cada categoria. A [reprodução desta sessão](REPRODUCAO_E_HANDOFF.md) complementa o pacote inicial; as afirmações históricas de preparação abaixo se referem ao commit `30ab046`.
 
 ## 1. Problema e resultado esperado

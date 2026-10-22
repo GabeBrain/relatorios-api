@@ -1,0 +1,137 @@
+{
+  "source": "https://drive.google.com/drive/folders/1ENVF8iZmP2hqaeiPNLIkVAcn4dWwBpAR",
+  "retrievedOn": "2026-10-22",
+  "rawInputs": "ignored .local-inputs/estimativas-vendas/finotti-drive-20261022",
+  "files": [
+    {
+      "path": "horizontal/01_contexto_resultados_decisoes.md",
+      "bytes": 6569,
+      "sha256": "6082e021f6017c3b361d734210db50a6c0eba1487d2bb6fe0e59f7173a722dd8"
+    },
+    {
+      "path": "horizontal/02_dados_entrada_e_preparacao.md",
+      "bytes": 5102,
+      "sha256": "769c44e5a5e7479f7d491c495627598d1eb0f9fb2f097a6e9ae0611d9d3e8a6d"
+    },
+    {
+      "path": "horizontal/03_equacao_e_calibracao.md",
+      "bytes": 7464,
+      "sha256": "eed855d7cad0eed9c6f6af60392a1b9c4ade608c0f11d4e11eb78a4fe0091f95"
+    },
+    {
+      "path": "horizontal/04_aplicacao_simulador.md",
+      "bytes": 6765,
+      "sha256": "c1999ad584357009b3544f2ab347c8631bbf7483a79dc9e2e4e215c145b4c0e2"
+    },
+    {
+      "path": "horizontal/05_validacao_e_testes.md",
+      "bytes": 7361,
+      "sha256": "702d55694e963946d6d5a6c66b4542abf26dfc0cca188075742f3865ee74faa3"
+    },
+    {
+      "path": "horizontal/06_arquitetura_e_roteiro.md",
+      "bytes": 7271,
+      "sha256": "d4214a5ce025af1584ba865a4fd328b6848a0e3979a22bcef85b5332a322c609"
+    },
+    {
+      "path": "horizontal/casos_teste.json",
+      "bytes": 6890,
+      "sha256": "a54ef02785678443a53a461306aa310702464ef88200b797527b7af4351a1229"
+    },
+    {
+      "path": "horizontal/CLAUDE.md",
+      "bytes": 3476,
+      "sha256": "fee07738565f754f53fdb1b8ecfcc0b6a4777d4daabc2bed7bc2ee7bde597127"
+    },
+    {
+      "path": "horizontal/parametros.json",
+      "bytes": 12322,
+      "sha256": "b201a20d2be544c8e0545db91fb291362f1a0c60a785c666b3bc3306e03729fd"
+    },
+    {
+      "path": "horizontal/README.md",
+      "bytes": 4758,
+      "sha256": "d1b40335443eafc6bbd6a4c2265ddc9eb5a8de09bc2e338962972428c5f0fa52"
+    },
+    {
+      "path": "horizontal/sim.js",
+      "bytes": 4112,
+      "sha256": "6cfba73b2c8de5c36edf4e4842ec328ddc36d542d7fe2e655ac08477b8c4299f"
+    },
+    {
+      "path": "vertical/01_contexto_resultados_decisoes.md",
+      "bytes": 4437,
+      "sha256": "a9fb4186b840dc4decb1c12463ca255e6da1aff6486394e0764e1b5ebaefce3b"
+    },
+    {
+      "path": "vertical/02_dados_entrada_e_preparacao.md",
+      "bytes": 6517,
+      "sha256": "4f5c18891e0569b4a1433dc928852fd9c6320964b27e9af0a68c804e390789eb"
+    },
+    {
+      "path": "vertical/03_algoritmo_simulador.md",
+      "bytes": 6520,
+      "sha256": "fa9ee4e2fe27da4d637e24d7b64e069894bf0fa6ad46e95136631d891005a3bd"
+    },
+    {
+      "path": "vertical/04_curvas_e_equacoes.md",
+      "bytes": 6003,
+      "sha256": "bd4edf8184713492fda37d94df7400288a0749cb8ce7251060d43bcf98ddefd0"
+    },
+    {
+      "path": "vertical/05_validacao_e_testes.md",
+      "bytes": 5092,
+      "sha256": "ff8c647928ebe941725c09aa7a184c1443b82fd5832dcfdae28554970144ef3e"
+    },
+    {
+      "path": "vertical/06_arquitetura_e_roteiro.md",
+      "bytes": 5465,
+      "sha256": "2bb241ac843b8d40733bfc08bab27bfadde563f8cf99e5a7a7b4671e8fafbd77"
+    },
+    {
+      "path": "vertical/CLAUDE.md",
+      "bytes": 2774,
+      "sha256": "a713b427f67300f5f134fdc1e0520b49cb9e778bad74a642a83c2ff743bc2eab"
+    },
+    {
+      "path": "vertical/README.md",
+      "bytes": 3151,
+      "sha256": "894dff5b63010f19db1a72ea4db237c5c055e3a8276e7c18784334ee533caadb"
+    },
+    {
+      "path": "vertical/referencia/analises.py",
+      "bytes": 3819,
+      "sha256": "38952bf2234fe35821e9b8cb119f2932c68a6ac50e32acd9340bf4b746b3a179"
+    },
+    {
+      "path": "vertical/referencia/casos_teste.json",
+      "bytes": 2696,
+      "sha256": "44f0f5c8f3318ced20cdfa654f278facee4e25676718f34001bb00bf146eb45c"
+    },
+    {
+      "path": "vertical/referencia/construir_base.py",
+      "bytes": 5322,
+      "sha256": "a6de8200a4efccc5ef29e70fce6c342a411c97334767be3beea0caefc224084b"
+    },
+    {
+      "path": "vertical/referencia/sim.js",
+      "bytes": 2599,
+      "sha256": "9423cd35f469a6af390e0f427f97f65bfa1f89137e66081046b540a46461cf54"
+    },
+    {
+      "path": "vertical/referencia/simdata.json",
+      "bytes": 906490,
+      "sha256": "5f3c949be0ea1b669b4b801ccaf90256e8c90aaabdcc85b237b352a643b97c0f"
+    },
+    {
+      "path": "vertical/referencia/simulador.py",
+      "bytes": 4506,
+      "sha256": "9a2ce3fdb0662a4f8f57403da73cf0fdaf010254c8336fc204755d2bbc908c29"
+    },
+    {
+      "path": "vertical/source.zip",
+      "bytes": 150009,
+      "sha256": "37cbaf290e7476f6c16441dcce326d4a1b238085869b79157c027d966722ee1a"
+    }
+  ]
+}
