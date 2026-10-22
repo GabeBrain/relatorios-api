@@ -541,8 +541,8 @@ function shiftMonth(periodKey: string, months: number): string {
 }
 
 /**
- * As três colunas de períodos acompanham a visualização. Variações e acumulados
- * preservam o cálculo mensal original e o último mês selecionado como referência.
+ * As três colunas de períodos e a variação anual acompanham a visualização.
+ * Os acumulados preservam o cálculo mensal e o último mês selecionado como referência.
  */
 export function computeResumoEmail(selectedRows: ClosureRow[], dimensionRows: ClosureRow[], granularity: Granularity = 'month'): ResumoEmailResult | null {
   const selectedKey = selectedRows.reduce((latest, row) => row.periodKey > latest ? row.periodKey : latest, '');

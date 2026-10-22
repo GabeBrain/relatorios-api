@@ -1,3 +1,11 @@
+## 22/10/2026 — Validação do Fechamento: variação anual do Resumo email por visualização — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — Resumo email.
+- **O quê:** complemento solicitado: cálculo, cabeçalho e dica da variação anual agora usam o período atual e o mesmo período do ano anterior conforme Ano, Trimestre ou Mês/ano. Acumulados e variação acumulada permanecem mensais, com o mesmo corte já existente.
+- **Evidência:** seis testes de agregação/renderização aprovados; conferem percentuais distintos por visualização e a conservação da variação acumulada. Sem consulta autenticada ou verificação visual no navegador.
+- **Monday:** —
+- **Etapas/Pendências:** implementação local concluída; publicação depende de autorização de envio.
+
 ## 22/10/2026 — Validação do Fechamento: períodos do Resumo email por visualização — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — Resumo email.

@@ -35,7 +35,6 @@ function Help({ label, text }: { label: string; text: string }) {
     </Popover>
   );
 }
-
 function VariationCell({ value }: { value: number | null }) {
   if (value == null || !Number.isFinite(value)) return <td className="vf-email-var vf-zero">—</td>;
   const positive = value >= 0;
@@ -51,7 +50,7 @@ function VariationCell({ value }: { value: number | null }) {
 
 function MetricRow({ metric, resumo }: { metric: MetricDef; resumo: ResumoEmailResult }) {
   const key: MetricKey = metric.key;
-  const annualVariation = metric.noVariation ? null : varPct(resumo.selected[key], resumo.previousYear[key]);
+  const annualVariation = metric.noVariation ? null : varPct(resumo.displayPeriods.selected[key], resumo.displayPeriods.previousYear[key]);
   const accumulatedVariation = metric.noVariation ? null : varPct(resumo.selectedAccum[key], resumo.previousYearAccum[key]);
 
   return (
@@ -78,8 +77,6 @@ export function ResumoEmailTable({ resumo }: Props) {
   const [copyState, setCopyState] = useState<'idle' | 'done' | 'error'>('idle');
   if (!resumo) return <div className="vf-card p-6 text-center text-sm text-[var(--vf-muted)]">Nenhum período mensal disponível para os filtros selecionados.</div>;
 
-  const selectedLabel = resumo.selectedKey;
-  const previousYearMonth = resumo.previousYearKey ? resumo.previousYearKey : 'período anterior';
 
   async function copyTableImage() {
     const table = tableRef.current;
@@ -144,7 +141,7 @@ export function ResumoEmailTable({ resumo }: Props) {
             <th>{resumo.displayPeriods.previousLabel}</th>
             <th>{resumo.displayPeriods.selectedLabel}</th>
             <th>
-              <span className="inline-flex items-center justify-center gap-1">Var. {toMonthLabel(previousYearMonth)} x {toMonthLabel(selectedLabel)}<Help label="Variação anual" text="(último período selecionado ÷ mesmo período do ano anterior) − 1." /></span>
+              <span className="inline-flex items-center justify-center gap-1">Var. {resumo.displayPeriods.previousYearLabel} x {resumo.displayPeriods.selectedLabel}<Help label="Variação anual" text="(último período selecionado ÷ mesmo período do ano anterior) − 1, conforme a Visualização: ano, trimestre ou mês/ano." /></span>
             </th>
             <th><span className="inline-flex items-center justify-center gap-1">{resumo.previousYearAccumLabel}<Help label="Acumulado do ano anterior" text="Recalcula o indicador de janeiro até o mesmo mês do ano anterior, respeitando os filtros de cidade e dimensões." /></span></th>
             <th><span className="inline-flex items-center justify-center gap-1">{resumo.selectedAccumLabel}<Help label="Acumulado do ano atual" text="Recalcula o indicador de janeiro até o último período selecionado, respeitando os filtros de cidade e dimensões." /></span></th>
@@ -156,11 +153,4 @@ export function ResumoEmailTable({ resumo }: Props) {
       </div>
     </div>
   );
-}
-
-function toMonthLabel(periodKey: string): string {
-  const [year, month] = periodKey.split('-');
-  const labels = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-  const index = Number(month) - 1;
-  return Number.isInteger(index) && labels[index] && year ? `${labels[index]}/${year.slice(-2)}` : periodKey;
 }

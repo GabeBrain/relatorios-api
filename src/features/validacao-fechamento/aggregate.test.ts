@@ -16,7 +16,7 @@ function row(periodKey: string, sold: number, status = 'Ativo', releaseQty = 1):
 }
 
 describe('computeResumoEmail', () => {
-  it('altera apenas as três colunas conforme ano/trimestre, preservando variações e acumulados mensais', () => {
+  it('agrupa as três colunas conforme ano/trimestre e preserva as referências mensais dos acumulados', () => {
     const data = [row('2025-01', 20), row('2025-07', 30), row('2025-08', 40), row('2026-01', 50), row('2026-04', 60), row('2026-07', 70), row('2026-08', 80)];
     const selected = [data[6]];
     const monthly = computeResumoEmail(selected, data)!;
