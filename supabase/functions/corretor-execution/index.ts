@@ -63,29 +63,60 @@ Deno.serve(async (req) => {
       if (typeof body.studyId !== "string" || !Number.isInteger(body.version) || typeof body.documentSha1 !== "string")
         return json({ error: "Estudo ou versão inválidos." }, 400);
       // Só consulta a execução de revisão deste proprietário, documento e versão.
-      const { data: prior, error: priorError } = await db.from("corretor_executions")
+      const { data: prior, error: priorError } = await db
+        .from("corretor_executions")
         .select("id,state,reserved_usd")
-        .eq("owner_hash", owner).eq("study_id", body.studyId).eq("version_n", body.version)
-        .eq("document_sha1", body.documentSha1).eq("purpose", "review")
-        .order("created_at", { ascending: false }).limit(1).maybeSingle();
-      if (priorError) return json({ error: "Não foi possível conferir a retomada. Os resultados salvos continuam disponíveis." }, 503);
+        .eq("owner_hash", owner)
+        .eq("study_id", body.studyId)
+        .eq("version_n", body.version)
+        .eq("document_sha1", body.documentSha1)
+        .eq("purpose", "review")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (priorError)
+        return json(
+          { error: "Não foi possível conferir a retomada. Os resultados salvos continuam disponíveis." },
+          503,
+        );
       if (!prior) {
-        const { count, error: otherError } = await db.from("corretor_executions")
-          .select("id", { count: "exact", head: true }).eq("study_id", body.studyId)
-          .eq("version_n", body.version).eq("document_sha1", body.documentSha1).eq("purpose", "review");
-        if (otherError || count === null) return json({ error: "Não foi possível conferir a tentativa anterior." }, 503);
-        if (count > 0) return json({ error: "A tentativa anterior pertence a outro navegador. A equipe precisa conferir a retomada; os resultados salvos continuam disponíveis." }, 403);
+        const { count, error: otherError } = await db
+          .from("corretor_executions")
+          .select("id", { count: "exact", head: true })
+          .eq("study_id", body.studyId)
+          .eq("version_n", body.version)
+          .eq("document_sha1", body.documentSha1)
+          .eq("purpose", "review");
+        if (otherError || count === null)
+          return json({ error: "Não foi possível conferir a tentativa anterior." }, 503);
+        if (count > 0)
+          return json(
+            {
+              error:
+                "A tentativa anterior pertence a outro navegador. A equipe precisa conferir a retomada; os resultados salvos continuam disponíveis.",
+            },
+            403,
+          );
         return json({ id: null, ...reviewRecoveryState("not_started", 0, 0, false) });
       }
       const [completed, pending] = await Promise.all([
-        db.from("corretor_execution_batches").select("batch_hash", { count: "exact", head: true })
-          .eq("execution_id", prior.id).eq("state", "completed"),
-        db.from("corretor_execution_batches").select("batch_hash", { count: "exact", head: true })
-          .eq("execution_id", prior.id).in("state", ["running", "unknown"]),
+        db
+          .from("corretor_execution_batches")
+          .select("batch_hash", { count: "exact", head: true })
+          .eq("execution_id", prior.id)
+          .eq("state", "completed"),
+        db
+          .from("corretor_execution_batches")
+          .select("batch_hash", { count: "exact", head: true })
+          .eq("execution_id", prior.id)
+          .in("state", ["running", "unknown"]),
       ]);
       if (completed.error || pending.error || completed.count === null || pending.count === null)
         return json({ error: "Não foi possível conferir os lotes anteriores. Confira antes de retomar." }, 503);
-      return json({ id: prior.id, ...reviewRecoveryState(prior.state, completed.count, pending.count, Number(prior.reserved_usd) > 0) });
+      return json({
+        id: prior.id,
+        ...reviewRecoveryState(prior.state, completed.count, pending.count, Number(prior.reserved_usd) > 0),
+      });
     }
     if (body.action === "start") {
       if (
@@ -254,13 +285,24 @@ Deno.serve(async (req) => {
       if (run.state === "running" && (Number(run.reserved_usd) > 0 || !consult))
         return json({ error: "Há um lote em andamento ou com resultado desconhecido. Confira antes de retomar." }, 409);
       if (!consult && run.state !== "completed") {
-        const { count, error: pendingError } = await db.from("corretor_execution_batches")
-          .select("batch_hash", { count: "exact", head: true }).eq("execution_id", run.id)
+        const { count, error: pendingError } = await db
+          .from("corretor_execution_batches")
+          .select("batch_hash", { count: "exact", head: true })
+          .eq("execution_id", run.id)
           .in("state", ["running", "unknown"]);
         if (pendingError || count === null)
-          return json({ error: "Não foi possível conferir a tentativa anterior. Os resultados salvos estão preservados." }, 503);
+          return json(
+            { error: "Não foi possível conferir a tentativa anterior. Os resultados salvos estão preservados." },
+            503,
+          );
         if (count > 0 || Number(run.reserved_usd) > 0)
-          return json({ error: "Uma leitura anterior precisa de conferência técnica antes da retomada. Você pode revisar os resultados já salvos, sem reenviar os documentos." }, 409);
+          return json(
+            {
+              error:
+                "Uma leitura anterior precisa de conferência técnica antes da retomada. Você pode revisar os resultados já salvos, sem reenviar os documentos.",
+            },
+            409,
+          );
       }
       if (run.state !== "completed") {
         // O novo limite inclui o gasto anterior. Reservas desconhecidas permanecem retidas.
@@ -381,9 +423,13 @@ Deno.serve(async (req) => {
     });
     if (claimError) {
       // Somente log técnico: não expor mensagem SQL, materiais ou saldos ao analista.
-      const reason = /retorno desconhecido|em andamento/i.test(claimError.message) ? "pending_batch"
-        : /limite|orçamento|saldo|reserva/i.test(claimError.message) ? "execution_limit"
-        : /estado|encerrada|preparada/i.test(claimError.message) ? "execution_state" : "claim_rejected";
+      const reason = /retorno desconhecido|em andamento/i.test(claimError.message)
+        ? "pending_batch"
+        : /limite|orçamento|saldo|reserva/i.test(claimError.message)
+          ? "execution_limit"
+          : /estado|encerrada|preparada/i.test(claimError.message)
+            ? "execution_state"
+            : "claim_rejected";
       console.error(JSON.stringify({ event: "corretor_batch_blocked", executionId: run.id, batchHash, task, reason }));
       return json(
         {
@@ -398,16 +444,23 @@ Deno.serve(async (req) => {
       // O lote original e seu custo ficam intactos. Não chama folha, provedor ou finish de novo.
       return json({ ...(recovered ?? claim.response), replayed: true });
     }
-    const unknown = async (evidence: unknown = null, reason = "unconfirmed_result", httpStatus: number | null = null) => {
+    const unknown = async (
+      evidence: unknown = null,
+      reason = "unconfirmed_result",
+      httpStatus: number | null = null,
+    ) => {
       const diagnostic = { reason, httpStatus, executionId: run.id, batchHash, task };
       console.error(JSON.stringify({ event: "corretor_batch_unknown", ...diagnostic }));
       // Não sobrescrever um finish já confirmado caso apenas sua resposta de rede tenha falhado.
       await db
         .from("corretor_execution_batches")
-        .update({ state: "unknown", response: {
-          ...(evidence && typeof evidence === "object" ? evidence : {}),
-          executionDiagnostic: diagnostic,
-        } })
+        .update({
+          state: "unknown",
+          response: {
+            ...(evidence && typeof evidence === "object" ? evidence : {}),
+            executionDiagnostic: diagnostic,
+          },
+        })
         .eq("execution_id", run.id)
         .eq("batch_hash", batchHash)
         .eq("state", "running");
@@ -436,7 +489,11 @@ Deno.serve(async (req) => {
       !Number.isSafeInteger(result.inputTokens) ||
       !Number.isSafeInteger(result.outputTokens)
     )
-      return await unknown(result, !response.ok ? "leaf_http" : !result ? "leaf_envelope" : "leaf_usage", response.status);
+      return await unknown(
+        result,
+        !response.ok ? "leaf_http" : !result ? "leaf_envelope" : "leaf_usage",
+        response.status,
+      );
     if (
       profiled &&
       (result.profileId !== profile.id ||
