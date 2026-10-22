@@ -1,3 +1,13 @@
+## 22/10/2026 — Integração do Relatório API Excel com a main do time — Edgar / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — Relatório API Excel e integração das Estimativas de Vendas recebidas de Gabriel.
+- **O quê:** merge autorizado de `upstream/main` (`c0b7be8`) na `main`, preservando as duas entregas, rotas, menus e histórico publicado. Sem alterações adicionais de regra no relatório, AELO ou Dashboard durante a integração.
+- **Commits:** `ff6ae69` (cópia), `794f8fe` (configuração do relatório), `73e6a58` (merge com 14 commits do time).
+- **Evidência:** merge automático sem conflitos; documento vivo conferido pela identidade base + (local − base) + (upstream − base), sem perda ou duplicação de linhas não vazias. Build, TypeScript, 39 testes em oito arquivos (relatório, AELO, consulta Dashboard, Estimativas e menu) e checagem dos documentos vivos contra ambos os remotes aprovados. A consulta autenticada e o deploy continuam sem verificação nesta integração.
+- **Autor/origem:** Edgar / Codex para o relatório e a integração; Gabriel para os commits recebidos de Estimativas de Vendas.
+- **Monday:** —
+- **Etapas/Pendências:** integração local concluída; envio da `main` a `origin` e `upstream` autorizado nesta sessão. Aceite do relatório com dados reais permanece pendente.
+
 ## 22/10/2026 — Relatório API Excel: coleta completa e exportação configurável — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Relatórios Automatizados.
