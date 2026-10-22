@@ -5,6 +5,22 @@
 - **Evidência:** página local usando API real, sem respostas simuladas:641 cadastros/7 páginas200,640 projeções automáticas,12 cartões iniciais,16,18s até gráficos e zero erro de página.185 têm suporte Finotti; os demais usam ritmo recente quando disponível.108 testes integrados/11 arquivos, tipos completos, lint dirigido e build; oito ensaios responsivos com snapshot separado da medição real. Fontes, hashes, reprodução e limites em `docs/features/estimativas-vendas/REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md` e evidência JSON associada.
 - **Monday:** [Estimativas de vendas por empreendimento](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`; somente referência, sem escrita.
 - **Estado/pendências:** validado localmente; nenhuma precisão observada ou cobertura local de faixas comprovada. Treino até setembro/2026 bloqueia retrospectiva independente anterior para os parâmetros de referência. Origem por período, calibração independente, comercial e retorno Geobrain seguem pendentes. Fontes brutas ignoradas e artefato derivado de inferência versionado com IDs anônimos. Alterações FIERGS/Corretor paralelas preservadas. Revisão atual sem push/deploy; próxima etapa é revisão/publicação autorizada e teste no ambiente publicado.
+## 22/10/2026 — Validação do Fechamento: variação anual do Resumo email por visualização — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — Resumo email.
+- **O quê:** complemento solicitado: cálculo, cabeçalho e dica da variação anual agora usam o período atual e o mesmo período do ano anterior conforme Ano, Trimestre ou Mês/ano. Acumulados e variação acumulada permanecem mensais, com o mesmo corte já existente.
+- **Evidência:** seis testes de agregação/renderização aprovados; conferem percentuais distintos por visualização e a conservação da variação acumulada. Sem consulta autenticada ou verificação visual no navegador.
+- **Monday:** —
+- **Etapas/Pendências:** implementação local concluída; publicação depende de autorização de envio.
+
+## 22/10/2026 — Validação do Fechamento: períodos do Resumo email por visualização — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — Resumo email.
+- **O quê:** somente as três colunas de períodos passam a acompanhar Ano, Trimestre ou Mês/ano. Em trimestre, mostram mesmo trimestre do ano anterior, trimestre anterior e trimestre atual; em ano, ano anterior, ano anterior e ano atual. A agregação anual/trimestral reutiliza o motor de Resumo. O comportamento mensal permanece igual.
+- **Preservado:** cálculos, cabeçalhos e barras das variações anuais mensais, acumulados de janeiro até o último mês selecionado e variação acumulada; nenhum ajuste nas demais guias ou na API.
+- **Evidência:** três testes direcionados cobrem as granularidades, a passagem de ano e a igualdade dos cálculos preservados. Validação visual autenticada não executada nesta sessão.
+- **Monday:** —
+- **Etapas/Pendências:** implementação local concluída; publicação depende de autorização de envio.
 
 ## 22/10/2026 — Relatório API Excel: publicação autorizada do conjunto local — Edgar / Codex
 
