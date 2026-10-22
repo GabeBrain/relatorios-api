@@ -1,3 +1,4 @@
+import { normalizeAtaLocation } from '../_shared/reviewer.ts';
 import { callReviewProvider } from '../_shared/review-provider.ts';
 // Edge Function: analyze-ata-image (Corretor v3.3 — Fase A do PLAN_ata_estrela_guia)
 // Extrai a ATA/BRIEFING de abertura para JSON estruturado fechado. Aceita a ata como
@@ -55,26 +56,6 @@ interface RequestBody {
   texto?: string;  // ata como texto (DOCX)
 }
 
-/**
- * Cidade/UF é dado de alto impacto. Quando a LLM devolve a citação literal da ata,
- * a aplicação deriva esses dois campos dela em vez de confiar numa interpretação solta.
- */
-const UF_LIST = 'AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SE|SP|TO';
-
-function normalizeAtaLocation(ata: unknown): unknown {
-  if (!ata || typeof ata !== 'object') return ata;
-  const data = ata as Record<string, unknown>;
-  const source = typeof data.localizacao_fonte === 'string' ? data.localizacao_fonte.trim() : '';
-  if (!source) return ata;
-  // Separador entre cidade e UF varia por ata: "Guarulhos/SP", "Rolândia - PR"
-  // e "Rolândia PR" (lista de cidades da ata multi-estudo da Housi, jul/2026).
-  // A sigla é validada contra a lista de UFs para não capturar palavra solta.
-  const match = source.match(new RegExp(`([^|,/\\n]+?)\\s*(?:[/\\-–—]\\s*|\\s)(${UF_LIST})\\b`, 'i'));
-  if (!match) return ata;
-  const city = match[1].trim().replace(/^[|,\-–—\s]+/, '').replace(/\s+(?:pr|sp|mg|rs|sc|go|ba|pe|ce)$/i, '');
-  if (!city) return ata;
-  return { ...data, cidade: city, uf: match[2].toUpperCase() };
-}
 
 function validate(body: unknown): { ok: true; value: RequestBody } | { ok: false; error: string; status: number } {
   if (!body || typeof body !== 'object') return { ok: false, error: 'Corpo inválido.', status: 400 };

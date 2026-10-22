@@ -1,5 +1,9 @@
 # Falha de início e exclusão — Rolândia, 21/10/2026
 
+## Incidente posterior de leitura: causa confirmada
+
+Depois da publicação/reconciliação abaixo, o fluxo chegou ao provedor e outro erro ocorreu na leitura da ata. JSON real fornecido por Gabriel confirmou três listas null permitidas pelo prompt, rejeitadas pelo validador. Correção/recuperação local e publicação descritas em CARREGAMENTO_BRAIN_E_FALHA_ATA_2026-10-21.md. Distinguir esse incidente do start sem perfil e das três execuções vazias antigas. Os dois lotes de ata têm uso contabilizado; não são zero consumo. A recuperação de resposta completed é local ao replay e não altera consumo/decisões/histórico do banco.
+
 ## Atualização: retorno Lovable e correção local
 
 **Reconciliação posterior informada por Gabriel via retorno Lovable:** execuções `3b975f4f-e726-464e-b3fa-8045367e390e`, `a059b088-9c75-4953-b8db-93da22cd92a2` e `ef9c3c41-0189-42fd-b2bb-2e47631fdceb` foram reconferidas e marcadas `failed`. Lovable reportou estados finais verificados, zero lotes/gastos/reservas/ia_passes, sem exclusão ou IA. Supera a pendência de reconciliação descrita abaixo; evidência é o retorno administrativo fornecido pelo usuário, sem nova leitura privilegiada nesta sessão. A correção de código permanece nos commits locais f345adb/c9bd1c6; envio, republicação do controlador e frontend e homologação do início real continuam pendentes. Não reclassificar essas tentativas como legadas nem remover seus registros.

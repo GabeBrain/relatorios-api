@@ -1,4 +1,4 @@
-import {reviewParameters,reviewProfile,LUNA_REVIEW_PROFILE,validateReviewContent,reviewContentIssues,type ReviewModel,type ReviewTask} from './reviewer.ts';
+import {reviewParameters,reviewProfile,LUNA_REVIEW_PROFILE,validateReviewContent,reviewContentIssues,normalizeAtaLists,ATA_NULL_LISTS_VERSION,type ReviewModel,type ReviewTask} from './reviewer.ts';
 
 // Uma chamada por lote. Timeout/erro de transporte é desconhecido e não é repetido.
 export async function callReviewProvider(apiKey: string, model: ReviewModel, task: ReviewTask, messages: unknown[]) {
@@ -18,6 +18,8 @@ export async function callReviewProvider(apiKey: string, model: ReviewModel, tas
   let content: unknown;
   let parsed=false;
   try{content=JSON.parse(choice?.message?.content??'');parsed=true;}catch{content=null;}
+  const normalization=task==='analyze-ata-image'?normalizeAtaLists(content):{content,fields:[]};
+  content=normalization.content;
   const valid=choice?.finish_reason==='stop'&&!choice?.message?.refusal&&validateReviewContent(task,content);
   const failureCode=valid?null:choice?.message?.refusal?'REVIEW_REFUSED':choice?.finish_reason==='length'?'REVIEW_TRUNCATED':choice?.finish_reason!=='stop'?'REVIEW_UNFINISHED':!parsed?'REVIEW_JSON_INVALID':'REVIEW_SCHEMA_INVALID';
   const subject=task==='analyze-ata-image'?'da ata':task==='analyze-table-image'?'da tabela em imagem':'do texto';
@@ -31,6 +33,7 @@ export async function callReviewProvider(apiKey: string, model: ReviewModel, tas
     priceVersion:p.priceVersion,requestedServiceTier:p.serviceTier,serviceTier:raw.service_tier??null,
     latencyMs:Date.now()-started,requestId:response.headers.get('x-request-id')??raw.id??null,promptHash,
     finishReason:choice?.finish_reason??null,
+    ...(normalization.fields.length?{normalizationVersion:ATA_NULL_LISTS_VERSION,normalizedFields:normalization.fields}:{}),
     ...(valid?{}:{error:`A leitura ${subject} ${failureDetail}. A equipe precisa conferir esta tentativa antes de retomar.`,errorCode:failureCode,validationErrors:reviewContentIssues(task,content),invalidOutput:choice?.message?.content??null,refusal:choice?.message?.refusal??null}),
   }};
 }

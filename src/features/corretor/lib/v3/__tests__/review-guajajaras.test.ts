@@ -1,6 +1,6 @@
 import {afterEach,describe,expect,it,vi} from 'vitest';
 import {webcrypto} from 'node:crypto';
-import {reviewProfile,executionReviewProfile,reviewCacheKey,reviewCost,reviewParameters,validateReviewContent} from '../../../../../../supabase/functions/_shared/reviewer';
+import {reviewProfile,executionReviewProfile,reviewCacheKey,reviewCost,reviewParameters,validateReviewContent,normalizeAtaLists,normalizeAtaLocation,recoverCompletedAtaResponse,reviewMaterialContext,stableReview} from '../../../../../../supabase/functions/_shared/reviewer';
 import {callReviewProvider} from '../../../../../../supabase/functions/_shared/review-provider';
 import {isConversationalNote} from '../../audit/pptx-to-ir';
 import {binsFromColumns,detectBinGap,checkTableSums} from '../../audit/engine';
@@ -107,5 +107,56 @@ describe('contrato Luna/high e compatibilidade',()=>{
   const result=await callReviewProvider('fake-not-a-secret','gpt-6-luna','analyze-text-batch',[{role:'user',content:'fixture'}]);
   expect(fetcher).toHaveBeenCalledTimes(1);expect(result.content).toBeNull();expect(result.meta.error).toBeTruthy();expect(result.meta.invalidOutput).toBe('{bad');expect(result.meta.reasoningTokens).toBe(250);expect(result.meta.outputTokens).toBe(300);
   const request=JSON.parse(fetcher.mock.calls[0][1].body);expect(request.reasoning_effort).toBe('high');expect(request.max_tokens).toBeUndefined();expect(result.meta.promptHash).toHaveLength(64);
+ });
+});
+
+describe('ata com listas ausentes explícitas — incidente Rolândia',()=>{
+ afterEach(()=>vi.unstubAllGlobals());
+ const ata={cidade:null,uf:null,localizacao_fonte:'Toledo PR\nRolândia PR\nSão José dos Campos SP',produto:{dorms:null},observacoes_localizacao:null,cidades_candidatas:['Toledo/PR','Rolândia/PR','São José dos Campos/SP'],comentarios_sobrepostos:null,duvidas_cliente:null,pedidos_analista:['Análise sociodemográfica','Análise de locação']};
+ it('converte somente as três listas null e preserva conteúdo e objeto original',()=>{
+  const source={ata:structuredClone(ata)},before=JSON.stringify(source);
+  expect(validateReviewContent('analyze-ata-image',source)).toBe(false);
+  const result=normalizeAtaLists(source);
+  expect(validateReviewContent('analyze-ata-image',result.content)).toBe(true);
+  expect(result.fields).toEqual(['ata.observacoes_localizacao','ata.comentarios_sobrepostos','ata.duvidas_cliente']);
+  expect(JSON.stringify(source)).toBe(before);
+  expect(result.content).toMatchObject({ata:{observacoes_localizacao:[],comentarios_sobrepostos:[],duvidas_cliente:[],pedidos_analista:ata.pedidos_analista,cidades_candidatas:ata.cidades_candidatas,produto:{dorms:null}}});
+  expect(normalizeAtaLists(result.content).fields).toEqual([]);
+ });
+ it('não corrige string, número, lista malformada ou campo ausente por suposição',()=>{
+  for(const value of ['sem informação',0,[null],{}])expect(validateReviewContent('analyze-ata-image',normalizeAtaLists({ata:{...ata,duvidas_cliente:value}}).content)).toBe(false);
+  const missing={...ata} as Record<string,unknown>;delete missing.duvidas_cliente;
+  expect(validateReviewContent('analyze-ata-image',normalizeAtaLists({ata:missing}).content)).toBe(false);
+  expect(normalizeAtaLists({ata:null})).toEqual({content:{ata:null},fields:[]});
+ });
+ it('não escolhe cidade em ata multi-estudo e mantém derivação única',()=>{
+  expect(normalizeAtaLocation(ata)).toMatchObject({cidade:null,uf:null,cidades_candidatas:ata.cidades_candidatas});
+  expect(normalizeAtaLocation({...ata,cidade:'Toledo',uf:'PR'})).toMatchObject({cidade:null,uf:null});
+  expect(normalizeAtaLocation({...ata,localizacao_fonte:'Rolândia PR',cidades_candidatas:['Rolândia/PR']})).toMatchObject({cidade:'Rolândia',uf:'PR'});
+ });
+ it('retoma planilhas idênticas reextraídas em outra data, mas bloqueia mudança de conteúdo',()=>{
+  const first={cidade:'Rolândia',uf:'PR',fonte:{gerado_em:'2026-10-21T10:00:00Z',blocos:[{valores:[1,2]}]}};
+  const later={...first,fonte:{...first.fonte,gerado_em:'2026-10-21T11:00:00Z'}};
+  expect(stableReview(reviewMaterialContext(first))).toBe(stableReview(reviewMaterialContext(later)));
+  expect(first.fonte.gerado_em).toBe('2026-10-21T10:00:00Z');
+  expect(stableReview(reviewMaterialContext(first))).not.toBe(stableReview(reviewMaterialContext({...later,fonte:{...later.fonte,blocos:[{valores:[1,3]}]}})));
+  expect(stableReview(reviewMaterialContext(first))).not.toBe(stableReview(reviewMaterialContext({...later,cidade:'Toledo'})));
+ });
+ it('normaliza a resposta antes de validar sem repetir a chamada ou perder o uso',async()=>{
+  vi.stubGlobal('crypto',webcrypto);
+  vi.stubGlobal('AbortSignal',{timeout:()=>new AbortController().signal});
+  const fetcher=vi.fn().mockResolvedValue(new Response(JSON.stringify({model:'gpt-6-luna',service_tier:'default',usage:{prompt_tokens:100,completion_tokens:1779,completion_tokens_details:{reasoning_tokens:1521}},choices:[{finish_reason:'stop',message:{content:JSON.stringify({ata})}}]})));
+  vi.stubGlobal('fetch',fetcher);
+  const result=await callReviewProvider('fake-not-a-secret','gpt-6-luna','analyze-ata-image',[{role:'user',content:'fixture JSON'}]);
+  expect(fetcher).toHaveBeenCalledTimes(1);expect(result.meta).not.toHaveProperty('error');
+  expect(result.meta).toMatchObject({normalizationVersion:'ata-null-lists-v1',inputTokens:100,outputTokens:1779,reasoningTokens:1521});
+  expect(result.content).toMatchObject({ata:{duvidas_cliente:[],pedidos_analista:ata.pedidos_analista,cidades_candidatas:ata.cidades_candidatas}});
+ });
+ it('reapresenta somente resposta concluída compatível; consumo e erro originais intactos',()=>{
+  const response={error:'O provedor retornou uso, mas a leitura está incompleta ou inválida. Confira antes de retomar.',finishReason:'stop',refusal:null,profileId:reviewProfile().id,invalidOutput:JSON.stringify({ata}),inputTokens:100,outputTokens:1779,costUsd:0.0010786};
+  const before=JSON.stringify(response),result=recoverCompletedAtaResponse(response,reviewProfile().id);
+  expect(result).toMatchObject({recoveredFromStoredResponse:true,normalizationVersion:'ata-null-lists-v1',inputTokens:100,outputTokens:1779,costUsd:0.0010786,ata:{cidade:null,uf:null}});
+  expect(result).not.toHaveProperty('error');expect(result).not.toHaveProperty('invalidOutput');expect(JSON.stringify(response)).toBe(before);
+  for(const patch of [{finishReason:'length'},{refusal:'recusado'},{profileId:'outro'},{error:'Falha de transporte'},{invalidOutput:'{bad'},{invalidOutput:JSON.stringify({ata:{...ata,duvidas_cliente:'errado'}})}])expect(recoverCompletedAtaResponse({...response,...patch},reviewProfile().id)).toBeNull();
  });
 });

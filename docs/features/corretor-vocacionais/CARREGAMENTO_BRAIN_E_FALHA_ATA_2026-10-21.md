@@ -1,5 +1,31 @@
 # Carregamento Brain e falha na leitura de ata
 
+## Causa confirmada e correção posterior — 21/10
+
+Gabriel forneceu o resultado SQL de dois lotes de analyze-ata-image: execuções `4b341e7f-6625-4c26-8143-8be1453b3286` (estudo novo32a2234c) e `8d52e8e7-9048-4721-81fe-cc50995a8f76` (estudo anterior5b389531). Ambos lotes completed, execuções failed, término stop e sem recusa; custos individuais0,0010786/0,0010231USD já registrados. O estado completed do lote significa retorno contabilizado, não relatório concluído. reserved_usd da linha do lote é a reserva histórica; não equivale ao saldo atual da execução.
+
+O JSON real do lote novo, fornecido depois pelo usuário, tem ata válida e três campos explicitamente null: `observacoes_localizacao`, `comentarios_sobrepostos` e `duvidas_cliente`. O prompt permite null para campo ausente, enquanto o validador exigia cinco listas. **Causa confirmada para esse lote: incompatibilidade de representação no nosso validador**, não truncamento, recusa ou ausência de conteúdo. O outro lote tem metadados compatíveis, mas seu JSON não foi inspecionado; não afirmar equivalência integral. Nenhum provedor foi chamado pelo agente.
+
+Correção: normalização pura `ata-null-lists-v1` converte somente null explícito nas cinco listas conhecidas em []; mantém pedidos, candidatos, valores escalares e conteúdo original. Campo ausente, string/número/lista inválida e JSON malformado continuam recusados. A normalização ocorre antes de validar a resposta do provedor e deixa versão/caminhos em metadados. Não altera prompt, modelo, limites, preços ou hashes dos lotes.
+
+Recuperação sem nova IA da ata: quando o claim transacional, já autorizado pelo proprietário, devolve **cached de lote completed**, o controlador pode reler invalidOutput privado, exigindo mesmo perfil, stop, ausência de recusa e erro de schema conhecido. Se apenas corrigir null nas listas torna a ata válida, reapresenta-a em memória com `recoveredFromStoredResponse`, sem alterar o lote original, chamar provedor, chamar finish de novo ou duplicar custo. Frontend já zera uso/custo de replay. Lotes unknown/running nunca entram nesse caminho. O reaproveitamento depende de retomar a mesma execução/material no mesmo navegador; não excluir e reenviar como outro estudo.
+
+Outro impedimento demonstrado no código: reextrair os mesmos Excel atualiza `fonte.gerado_em`, e a comparação anterior recusava retomada por esse horário. Agora a comparação de retomada ignora **só esse metadado**; todo o restante do contexto e dos materiais continua comparado. A retomada usa o snapshot/context_hash original, sem reescrever histórico ou criar nova tentativa. Alterações de números/cidade continuam bloqueadas.
+
+Ata multi-estudo real lista Toledo, Rolândia e São José dos Campos. A normalização de localização foi compartilhada entre folha e recuperação, com proteção para mais de uma candidata: cidade/UF continuam null, sem escolher a primeira cidade ou substituir a confirmação humana. Não afeta as listas de candidatos/pedidos. Derivação da localização única permanece coberta.
+
+Validação posterior: **33 testes focados aprovados**, reprodução derivada da resposta real, normalização sem mutação/idempotente, casos malformados, multi-cidade, recuperação/consumo intactos e fornecedor simulado com uma chamada. TypeScript/lint dirigido e Deno das quatro funções aprovados. Nenhum teste pago, SQL remoto, deploy ou limpeza pelo agente. Primeiro roteiro de impressão do log teve falha de encoding depois do processo Vitest retornar0; o teste adicional simulado precisou adaptar AbortSignal.timeout ao ambiente jsdom. Rodada final33/33 e log privado `ata-null-lists.log` prevalecem.
+
+### Publicação acumulada do carregamento e da correção
+
+Build final do complemento20,97s, código0, com os avisos de bundles/Browserslist já existentes. Documentação viva e diff --check conferidos antes do commit.
+
+Suíte completa do Corretor reexecutada após o complemento: **361 testes aprovados / 2 ignorados**,52 arquivos aprovados; código0,16,85s, log privado `suite-ata-null-lists.log`. Os dois ignorados não contam como validação; dez passes de materiais não foram reexecutados nesta rodada. Isso supera, para esta rodada posterior, os limites de testes das seções históricas abaixo. Sem provedor real ou escrita remota.
+
+Não há migration nova. Atualizar **analyze-ata-image** com `_shared/review-provider.ts` e `_shared/reviewer.ts`; depois **corretor-execution** com reviewer compartilhado; Publish frontend para o carregamento já preparado no00e0bb5. As outras duas folhas só precisam de republicação para receber os novos motivos diagnósticos do00e0bb5; não dependem da correção específica de listas da ata. A pasta shared é empacotada, não uma função separada. Guardar/sincronizar código não é prova do pacote ativo. Usar edição/publicação manual disponível, sem pedir execução de IA ao Lovable.
+
+Depois da publicação, retomar o estudo novo existente no mesmo navegador com as mesmas planilhas. A ata recuperada não chama IA novamente; as etapas seguintes ainda não executadas podem usar IA normalmente mediante início explícito. Não prometer que todo o estudo será concluído sem custo ou que a execução inteira já foi homologada.
+
 ## Entrega local
 
 Aplicado o preenchimento horizontal da logo usado pelo dashboard Quanti, sem alterar a fundação ou as ferramentas fora do Corretor/Sugestão. Componente CorretorLoadingState com logo de fundo opaca, camada preenchida, texto da etapa, tempo real e movimento reduzido. A animação é atividade indeterminada; os contadores externos são o progresso efetivamente confirmado.

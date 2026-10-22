@@ -3,7 +3,9 @@ import {
   executionReviewProfile,
   ACTIVE_REVIEW_PROFILE,
   stableReview,
+  reviewMaterialContext,
   reviewCost,
+  recoverCompletedAtaResponse,
   type ReviewTask,
   type ReviewModel,
 } from "../_shared/reviewer.ts";
@@ -164,7 +166,7 @@ Deno.serve(async (req) => {
             delete oldBase.reviewProfile;
             delete oldBase.usageOrigin;
             delete oldBase.validationBudgetId;
-            if (stableReview(oldBase) !== stableReview(rawContext))
+            if (stableReview(reviewMaterialContext(oldBase)) !== stableReview(reviewMaterialContext(rawContext)))
               return json(
                 { error: "Os materiais ou dados diferem da tentativa anterior. Confira antes de retomar." },
                 409,
@@ -349,7 +351,11 @@ Deno.serve(async (req) => {
         },
         409,
       );
-    if (claim.cached) return json({ ...claim.response, replayed: true });
+    if (claim.cached) {
+      const recovered=task==='analyze-ata-image'?recoverCompletedAtaResponse(claim.response,profile.id):null;
+      // O lote original e seu custo ficam intactos. Não chama folha, provedor ou finish de novo.
+      return json({ ...(recovered ?? claim.response), replayed: true });
+    }
     const unknown = async (evidence: unknown = null) => {
       // Não sobrescrever um finish já confirmado caso apenas sua resposta de rede tenha falhado.
       await db
