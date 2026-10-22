@@ -194,21 +194,19 @@ Deno.serve(async (req) => {
         } else if (!resumed) context = rawContext;
       }
       const contextHash = await hash(canonical(context));
-      const { error: insertError } = await db
-        .from("corretor_executions")
-        .insert({
-          study_id: body.studyId,
-          version_n: body.version,
-          document_sha1: version.sha1,
-          context_hash: contextHash,
-          confirmed_context: context,
-          owner_hash: owner,
-          budget_usd: body.budgetUsd,
-          ...(validationBudgetId ? { validation_budget_id: validationBudgetId } : {}),
-          ...(consult
-            ? { purpose: "recommendation", engine: "recommendation-v1", estimated_usd: context.quote.estimateUsd }
-            : {}),
-        });
+      const { error: insertError } = await db.from("corretor_executions").insert({
+        study_id: body.studyId,
+        version_n: body.version,
+        document_sha1: version.sha1,
+        context_hash: contextHash,
+        confirmed_context: context,
+        owner_hash: owner,
+        budget_usd: body.budgetUsd,
+        ...(validationBudgetId ? { validation_budget_id: validationBudgetId } : {}),
+        ...(consult
+          ? { purpose: "recommendation", engine: "recommendation-v1", estimated_usd: context.quote.estimateUsd }
+          : {}),
+      });
       if (insertError && insertError.code !== "23505") throw insertError;
       const { data: run, error } = await db
         .from("corretor_executions")
@@ -352,7 +350,7 @@ Deno.serve(async (req) => {
         409,
       );
     if (claim.cached) {
-      const recovered=task==='analyze-ata-image'?recoverCompletedAtaResponse(claim.response,profile.id):null;
+      const recovered = task === "analyze-ata-image" ? recoverCompletedAtaResponse(claim.response, profile.id) : null;
       // O lote original e seu custo ficam intactos. Não chama folha, provedor ou finish de novo.
       return json({ ...(recovered ?? claim.response), replayed: true });
     }
