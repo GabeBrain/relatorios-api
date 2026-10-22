@@ -14,7 +14,7 @@ import { GeoApiScopeSelector, useGeoApiScope } from '@/features/shared/geo-api-s
 import type { GeoLoadRequest } from '@/features/shared/geo-api-scope-engine/GeoApiScopeSelector';
 import { fetchBuildings, type FetchProgress, type RawBuilding } from '@/features/relatorio-api-excel/api';
 import { buildReport, createWorkbook, dateBounds, exportValue, MEASURES, PERCENT_COLUMNS, selectedReport,
-  type Cell, type Granularity, type Layout, type PriceMode } from '@/features/relatorio-api-excel/report';
+  type Cell, type Granularity, type Layout, type PriceMode, type BuildingAverageMode } from '@/features/relatorio-api-excel/report';
 
 const PAGE_SIZE = 100;
 const EMPTY: RawBuilding[] = [];
@@ -40,13 +40,14 @@ export default function RelatorioApiExcel() {
   const [granularity, setGranularity] = useState<Granularity>('month');
   const [layout, setLayout] = useState<Layout>('columns');
   const [priceMode, setPriceMode] = useState<PriceMode>('current');
+  const [buildingAverageMode, setBuildingAverageMode] = useState<BuildingAverageMode>('simple');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [statuses, setStatuses] = useState<string[]>([]);
   const [selected, setSelected] = useState<string[] | null>(null);
   const [columnSearch, setColumnSearch] = useState('');
   const [page, setPage] = useState(0);
-  const [metric, setMetric] = useState<string>('Vendas líquidas');
+  const [metric, setMetric] = useState<string>('Vendas Líquidas');
   const [distribution, setDistribution] = useState('Cidade/UF');
   const controller = useRef<AbortController | null>(null);
   const changeScope = useCallback((next: { uf: string; city: string }) => {
@@ -84,7 +85,7 @@ export default function RelatorioApiExcel() {
       if (controller.current === current && !current.signal.aborted) setError(cause instanceof Error ? cause.message : 'Não foi possível carregar os dados.');
     } finally { if (controller.current === current) setLoading(false); }
   };
-  const options = useMemo(() => ({ granularity, layout, priceMode, from, to, statuses }), [granularity, layout, priceMode, from, to, statuses]);
+  const options = useMemo(() => ({ granularity, layout, priceMode, buildingAverageMode, from, to, statuses }), [granularity, layout, priceMode, buildingAverageMode, from, to, statuses]);
   const report = useMemo(() => buildReport(buildings ?? EMPTY, options), [buildings, options]);
   const filtered = useMemo(() => selectedReport(report, selected), [report, selected]);
   const availableStatuses = useMemo(() => [...new Set((buildings ?? []).map((building) => String(building.status ?? '')))], [buildings]);
@@ -120,7 +121,7 @@ export default function RelatorioApiExcel() {
     <div className="min-w-0 space-y-5 p-4 sm:p-6">
       <section className="space-y-3 rounded-xl border border-border bg-card p-4" aria-label="Coleta da API">
         <h2 className="font-semibold">1. Carregar dados</h2>
-        <p className="text-xs text-muted-foreground">Comercial, Horizontal e Vertical. Todos os históricos disponíveis no escopo autorizado, sem restrição a cidades ou padrões do AELO.</p>
+        <p className="text-xs text-muted-foreground">Comercial, Horizontal, Vertical e Hotel. Todos os históricos disponíveis no escopo autorizado, sem restrição a cidades ou padrões do AELO.</p>
         <GeoApiScopeSelector value={scope} onChange={changeScope} region={region} onRegionChange={(next) => { setRegion(next); setBuildings(null); }} disabled={loading || exporting} onLoad={load} />
         {loading && <><BrainLoadingState title="Carregando todas as páginas da API" startedAt={startedAt}
           description={progress ? `${progress.pagesDone} páginas · ${progress.buildingsFound} registros · ${progress.lanesDone}/${progress.lanesTotal} consultas concluídas` : 'Iniciando consulta…'} />
@@ -133,17 +134,19 @@ export default function RelatorioApiExcel() {
         <section className="space-y-4 rounded-xl border border-border bg-card p-4" aria-label="Filtros do relatório">
           <h2 className="font-semibold">2. Configurar relatório</h2>
           <p className="text-xs text-muted-foreground">Estes filtros atuam somente nos dados carregados. Não fazem novas consultas à API.</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <div className="space-y-1.5"><Label htmlFor="api-excel-view">Visão</Label><Select value={granularity} onValueChange={(next: Granularity) => { setGranularity(next); setSelected(null); setPage(0); }}><SelectTrigger id="api-excel-view"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="month">Mensal</SelectItem><SelectItem value="quarter">Trimestral</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="api-excel-layout">Layout do Excel</Label><Select value={layout} onValueChange={(next: Layout) => { setLayout(next); setSelected(null); setPage(0); }}><SelectTrigger id="api-excel-layout"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="columns">Valores em colunas</SelectItem><SelectItem value="rows">Tabular — períodos em linhas</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="api-excel-price">Cálculo monetário</Label><Select value={priceMode} onValueChange={(next: PriceMode) => setPriceMode(next)}><SelectTrigger id="api-excel-price"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="current">Valor atual</SelectItem><SelectItem value="period">Valor do período</SelectItem></SelectContent></Select></div>
+            <div className="space-y-1.5"><Label htmlFor="api-excel-average">Preço Médio Empreendimento</Label><Select value={buildingAverageMode} onValueChange={(next: BuildingAverageMode) => setBuildingAverageMode(next)}><SelectTrigger id="api-excel-average"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="simple">Média simples</SelectItem><SelectItem value="quantity">Ponderada pela quantidade</SelectItem><SelectItem value="stock">Ponderada pelo estoque</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="api-excel-from">Data inicial</Label><Input id="api-excel-from" type="date" value={from} onChange={(event) => { setFrom(event.target.value); setPage(0); }} /></div>
             <div className="space-y-1.5"><Label htmlFor="api-excel-to">Data final</Label><Input id="api-excel-to" type="date" value={to} onChange={(event) => { setTo(event.target.value); setPage(0); }} /></div>
           </div>
           {!validDates && <p role="alert" className="text-sm text-destructive">Informe datas válidas, com a data inicial anterior ou igual à final.</p>}
           <fieldset className="flex flex-wrap gap-4"><legend className="mb-2 text-sm font-medium">Status do empreendimento</legend>{availableStatuses.map((status) => <label key={status} className="flex items-center gap-2 text-sm"><Checkbox checked={statuses.includes(status)} onCheckedChange={(checked) => { setStatuses((old) => checked ? [...old, status] : old.filter((item) => item !== status)); setPage(0); }} />{status || 'Não informado'}</label>)}</fieldset>
-          <p className="text-xs text-muted-foreground">{priceMode === 'current' ? 'Valor atual: último preço disponível da tipologia até a data final, aplicado à série histórica.' : 'Valor do período: estoque e VGV lançado usam quantidade e preço do último fechamento de cada mês/trimestre. VGV de vendas soma venda × preço de cada fechamento.'} VGV em milhões de reais. “Vendas líquidas” contém vendas brutas da API, sem desconto de distratos.</p>
-          <p className="text-xs text-muted-foreground">Datas inclusivas: meses e trimestres nas extremidades podem ser parciais. VGV Lançado histórico representa o valor da oferta total de cada período; não é o fluxo de novos lançamentos.</p>
+          <p className="text-xs text-muted-foreground">{priceMode === 'current' ? 'Valor atual: último preço disponível da tipologia até a data final, aplicado à série histórica.' : 'Valor do período: estoque e VGV lançado usam quantidade e preço do último fechamento de cada mês/trimestre. VGV de vendas soma venda × preço de cada fechamento.'} VGV em milhões de reais. Vendas Brutas = gross_sales; Distratos = distractions; Vendas Líquidas = Vendas Brutas − Distratos.</p>
+          <p className="text-xs text-muted-foreground">Preço Médio Empreendimento considera o último fechamento de cada tipologia no período e se repete nas linhas do mesmo empreendimento. {buildingAverageMode === 'simple' ? 'Média simples dos preços válidos.' : buildingAverageMode === 'quantity' ? 'Soma de preço × quantidade, dividida pela soma das quantidades.' : 'Soma de preço × estoque, dividida pela soma dos estoques.'} Pesos ausentes ou não positivos são excluídos; sem base válida, o valor fica vazio.</p>
+          <p className="text-xs text-muted-foreground">Preço Atual e Preço m² mostram a posição de cada período; a opção Valor atual/Valor do período governa os VGV. Datas inclusivas: meses e trimestres nas extremidades podem ser parciais. VGV Lançado histórico representa o valor da oferta total de cada período; não é o fluxo de novos lançamentos.</p>
         </section>
         <section className="space-y-3 rounded-xl border border-border bg-card p-4" aria-label="Colunas de exportação">
           <h2 className="font-semibold">3. Selecionar colunas</h2>
@@ -159,7 +162,7 @@ export default function RelatorioApiExcel() {
               {!filtered.columns.length ? <p className="py-4 text-sm text-muted-foreground">Selecione ao menos uma coluna para visualizar e exportar.</p> : <div className="max-h-[55vh] overflow-auto rounded-xl border border-border"><table className="w-full border-collapse text-xs"><caption className="sr-only">Prévia do Excel com filtros aplicados. Valores de VGV em milhões de reais.</caption><thead className="sticky top-0 bg-muted"><tr>{filtered.columns.map((column) => <th key={column} className="whitespace-nowrap border-b border-border p-2 text-left font-medium">{column}</th>)}</tr></thead><tbody>{pageRows.map((row, index) => <tr key={index} className="border-b border-border hover:bg-muted/50">{filtered.columns.map((column) => <td key={column} className="whitespace-nowrap p-2">{display(column, row[column])}</td>)}</tr>)}</tbody></table></div>}
               <div className="mt-3 flex flex-wrap items-center gap-3"><Button variant="outline" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</Button><span className="text-xs">Página {currentPage + 1} de {maxPage + 1}. A exportação inclui todas as linhas.</span><Button variant="outline" disabled={currentPage >= maxPage} onClick={() => setPage(currentPage + 1)}>Próxima</Button></div>
             </TabsContent>
-            <TabsContent value="history" className="rounded-xl border border-border bg-card p-4"><div className="mb-4 max-w-xs space-y-1"><Label htmlFor="api-excel-metric">Métrica da série</Label><Select value={metric} onValueChange={setMetric}><SelectTrigger id="api-excel-metric"><SelectValue /></SelectTrigger><SelectContent>{MEASURES.map((item) => <SelectItem key={item} value={item}>{item}{item.startsWith('VGV') ? ' (R$ milhões)' : ' (unidades)'}</SelectItem>)}</SelectContent></Select></div><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={chartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="period" /><YAxis /><Tooltip /><Line type="monotone" dataKey="value" name={metric} stroke="hsl(var(--primary))" connectNulls={false} /></LineChart></ResponsiveContainer></div></TabsContent>
+            <TabsContent value="history" className="rounded-xl border border-border bg-card p-4"><div className="mb-4 max-w-xs space-y-1"><Label htmlFor="api-excel-metric">Métrica da série</Label><Select value={metric} onValueChange={setMetric}><SelectTrigger id="api-excel-metric"><SelectValue /></SelectTrigger><SelectContent>{MEASURES.map((item) => <SelectItem key={item} value={item}>{item}{item.startsWith('VGV') ? ' (R$ milhões)' : item.startsWith('Preço') ? item === 'Preço m²' ? ' (R$/m²)' : ' (R$)' : ' (unidades)'}</SelectItem>)}</SelectContent></Select></div><div className="h-72"><ResponsiveContainer width="100%" height="100%"><LineChart data={chartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="period" /><YAxis /><Tooltip /><Line type="monotone" dataKey="value" name={metric} stroke="hsl(var(--primary))" connectNulls={false} /></LineChart></ResponsiveContainer></div></TabsContent>
             <TabsContent value="distribution" className="rounded-xl border border-border bg-card p-4"><div className="mb-4 max-w-xs space-y-1"><Label htmlFor="api-excel-distribution">Distribuição de tipologias (até 20 grupos)</Label><Select value={distribution} onValueChange={setDistribution}><SelectTrigger id="api-excel-distribution"><SelectValue /></SelectTrigger><SelectContent>{['Cidade/UF', 'Tipo', 'Status Empreendimento', 'Tempo de Vendas', 'Urbanizadora'].map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></div><div className="h-80"><ResponsiveContainer width="100%" height="100%"><BarChart data={distributionData}><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="count" name="Tipologias" fill="hsl(var(--primary))" /></BarChart></ResponsiveContainer></div></TabsContent>
           </Tabs>}
         </section>

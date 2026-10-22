@@ -29,16 +29,18 @@ describe('Relatorio API Excel - contrato copiado do Dashboard', () => {
       uf: 'SP', city: ['Cidade A', 'Cidade B'], token: 'token', signal: new AbortController().signal,
     });
 
-    expect(buildings).toHaveLength(12);
+    expect(buildings).toHaveLength(14);
     expect(buildings.filter((building) => building.building_id === 'repetido')).toHaveLength(2);
     expect(requests.map((url) => url.pathname)).toEqual(
-      Array.from({ length: 12 }, () => '/public-api/v2/building-with-history-internal'),
+      Array.from({ length: 14 }, () => '/public-api/v2/building-with-history-internal'),
     );
     expect(requests[0].searchParams.get('city')).toBe('Cidade A');
     expect(requests[0].searchParams.get('type')).toBe('Comercial');
     expect(requests[0].searchParams.get('page')).toBe('1');
     expect(requests.slice(1, 6).map((url) => url.searchParams.get('page'))).toEqual(['2', '3', '4', '5', '6']);
     expect(requests[6].searchParams.get('page')).toBe('7');
+    expect(requests.filter((url) => url.searchParams.get('city') === 'Cidade A' && url.searchParams.get('page') === '1')
+      .map((url) => url.searchParams.get('type'))).toEqual(['Comercial', 'Horizontal', 'Vertical', 'Hotel']);
     expect(requests.every((url) => url.searchParams.get('per_page') === '100')).toBe(true);
     expect(requests.every((url) => !url.searchParams.has('uf'))).toBe(true);
     expect(fetchMock.mock.calls[0][1]).toMatchObject({
@@ -59,9 +61,9 @@ describe('Relatorio API Excel - contrato copiado do Dashboard', () => {
       ufs: ['MG', 'SP'], token: 'token', signal: new AbortController().signal,
     });
 
-    expect(requests).toHaveLength(6);
-    expect(requests.slice(0, 3).every((url) => url.searchParams.get('uf') === 'MG')).toBe(true);
-    expect(requests.slice(3).every((url) => url.searchParams.get('uf') === 'SP')).toBe(true);
+    expect(requests).toHaveLength(8);
+    expect(requests.slice(0, 4).every((url) => url.searchParams.get('uf') === 'MG')).toBe(true);
+    expect(requests.slice(4).every((url) => url.searchParams.get('uf') === 'SP')).toBe(true);
     expect(requests.every((url) => !url.searchParams.has('city'))).toBe(true);
   });
 
@@ -82,14 +84,14 @@ describe('Relatorio API Excel - contrato copiado do Dashboard', () => {
     const pending = new Promise<void>((resolve) => { finish = resolve; });
     let complete = false;
     vi.stubGlobal('fetch', vi.fn(async (input: string) => {
-      if (new URL(input).searchParams.get('type') === 'Vertical') await pending;
+      if (new URL(input).searchParams.get('type') === 'Hotel') await pending;
       return response([{ building_id: 1 }]);
     }));
     const result = fetchBuildings({ uf: 'MT', token: 'token', signal: new AbortController().signal }).then((data) => { complete = true; return data; });
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(complete).toBe(false);
     finish();
-    expect(await result).toHaveLength(3);
+    expect(await result).toHaveLength(4);
   });
 
   it('não resolve uma coleta cancelada nem aceita lista de dados inválida', async () => {

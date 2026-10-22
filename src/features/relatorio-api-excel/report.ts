@@ -4,10 +4,12 @@ export type Cell = string | number | null;
 export type Row = Record<string, Cell>;
 export type Granularity = 'month' | 'quarter';
 export type PriceMode = 'current' | 'period';
+export type BuildingAverageMode = 'simple' | 'quantity' | 'stock';
 export type Layout = 'columns' | 'rows';
 export interface ReportOptions {
   granularity: Granularity;
   priceMode: PriceMode;
+  buildingAverageMode: BuildingAverageMode;
   layout: Layout;
   from: string;
   to: string;
@@ -18,10 +20,14 @@ export const FIXED_COLUMNS = [
   'Região Administrativa', 'Cidade/UF', 'Tipo', 'Tempo de Vendas', 'Empreendimentos',
   'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Urbanizadora', 'Oferta por Lotes',
   'Lançamento', 'Ano', 'Entrega', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
-  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'Valor m2 Priv.', 'Preço atual',
-  'm2 Priv.', 'VGV Lançado', 'm² Lançado',
+  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'm2 Priv.', 'm² Lançado',
 ];
-export const MEASURES = ['Estoque', 'Vendas líquidas', 'VGV', 'VGV Estoque', 'VGV Lançado'] as const;
+export const MEASURES = [
+  'Vendas Brutas', 'Distratos', 'Vendas Líquidas', 'Estoque', 'Preço Atual',
+  'Preço Médio Empreendimento', 'Preço m²', 'VGV Lançado', 'VGV Vendas Brutas',
+  'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque',
+] as const;
+export const PRICE_MEASURES = new Set(['Preço Atual', 'Preço Médio Empreendimento', 'Preço m²']);
 export const PERCENT_COLUMNS = new Set(['Entrada', '% de Juros Mensal', 'Desconto à Vista']);
 export interface Period { key: string; label: string }
 export interface Report {
@@ -90,7 +96,7 @@ const product = (a: number | null, b: number | null) => a === null || b === null
 const text = (value: unknown) => String(value ?? '');
 const asRecord = (value: unknown): RawBuilding => value && typeof value === 'object' ? value as RawBuilding : {};
 
-function fixedRow(building: RawBuilding, id: string, entries: DatedEntry[], price: number | null, mode: PriceMode): Row {
+function fixedRow(building: RawBuilding, id: string, entries: DatedEntry[]): Row {
   const last = entries.at(-1)!.entry;
   const qty = numeric(last.qty) ?? numeric(entries[0].entry.qty);
   const stock = numeric(last.typology_stock);
@@ -113,10 +119,36 @@ function fixedRow(building: RawBuilding, id: string, entries: DatedEntry[], pric
     'Entrada': numeric(building.down_payment_percentage), 'Nº de Parcelas': numeric(building.number_of_installments),
     'Valor da parcela': numeric(building.installment_value), '% de Juros Mensal': numeric(building.interest_rate_tax),
     'Indíce de Juros': text(building.interest_rate_index), 'Desconto à Vista': numeric(building.discount_percentage),
-    'Valor m2 Priv.': numeric(last.price_private_area), 'Preço atual': price, 'm2 Priv.': area || null,
-    'VGV Lançado': qty ? product(qty, mode === 'current' ? price : numeric(last.price)) : null,
+    'm2 Priv.': area || null,
     'm² Lançado': qty && area ? product(qty, area) : null,
   };
+}
+
+/** Ausência de qualquer fechamento impede publicar um fluxo parcial como total. */
+function sumField(entries: DatedEntry[], field: string): number | null {
+  if (!entries.length) return null;
+  const values = entries.map(({ entry }) => numeric(entry[field]));
+  return values.some((value) => value === null) ? null : values.reduce<number>((sum, value) => sum + value!, 0);
+}
+
+function flowVgv(entries: DatedEntry[], field: string, mode: PriceMode, currentPrice: number | null): number | null {
+  const units = sumField(entries, field);
+  if (units === null) return null;
+  if (mode === 'current') return product(units, currentPrice);
+  if (entries.some(({ entry }) => numeric(entry[field]) !== 0 && numeric(entry.price) === null)) return null;
+  return rounded(entries.reduce((sum, { entry }) => sum + numeric(entry[field])! * (numeric(entry.price) ?? 0), 0));
+}
+
+/** Uma posição por tipologia, nunca uma média dos fechamentos mensais do trimestre. */
+function buildingAverage(snapshots: RawBuilding[], mode: BuildingAverageMode): number | null {
+  let numerator = 0, denominator = 0;
+  for (const entry of snapshots) {
+    const price = numeric(entry.price);
+    const weight = mode === 'simple' ? 1 : numeric(mode === 'quantity' ? entry.qty : entry.typology_stock);
+    if (price === null || weight === null || weight <= 0) continue;
+    numerator += price * weight; denominator += weight;
+  }
+  return denominator > 0 ? rounded(numerator / denominator) : null;
 }
 
 /** Função pura: recebe exclusivamente a coleta completa; nunca consulta a API. */
@@ -134,6 +166,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
   const wideRows: Row[] = [];
   const longRows: Row[] = [];
   const series = periods.map((period) => ({ 'Período': period.label } as Row));
+  const priceCounts = periods.map(() => new Map<string, number>());
   // Não deduplicar building_id: o contrato do Dashboard preserva cada registro.
   for (const building of buildings) {
     if (!options.statuses.includes(text(building.status))) continue;
@@ -148,41 +181,62 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       history.push(item);
       typologies.set(id, history);
     }
+    const averages = periods.map((period, index) => {
+      const snapshots = [...typologies.values()].flatMap((history) => {
+        const snapshot = history.filter(({ date }) => date >= options.from && periodOf(date, options.granularity).key === period.key).at(-1);
+        return snapshot ? [snapshot.entry] : [];
+      });
+      const average = buildingAverage(snapshots, options.buildingAverageMode);
+      if (average !== null) {
+        series[index]['Preço Médio Empreendimento'] = (numeric(series[index]['Preço Médio Empreendimento']) ?? 0) + average;
+        priceCounts[index].set('Preço Médio Empreendimento', (priceCounts[index].get('Preço Médio Empreendimento') ?? 0) + 1);
+      }
+      return average;
+    });
     for (const [id, history] of typologies) {
       const inRange = history.filter(({ date }) => date >= options.from);
       if (!inRange.length) continue;
       const currentPrice = numeric(history.at(-1)!.entry.price);
-      const fixed = fixedRow(building, id, history, currentPrice, options.priceMode);
+      const fixed = fixedRow(building, id, history);
       const wide: Row = { ...fixed };
       for (const [index, period] of periods.entries()) {
         const entries = inRange.filter(({ date }) => periodOf(date, options.granularity).key === period.key);
         const last = entries.at(-1)?.entry;
         const beforeRelease = releaseKey !== null && period.key < releaseKey;
-        const soldValues = entries.map(({ entry }) => numeric(entry.sold_in_period));
-        const sales = soldValues.some((value) => value !== null)
-          ? soldValues.reduce<number>((sum, value) => sum + (value ?? 0), 0) : null;
+        const gross = sumField(entries, 'gross_sales');
+        const cancellations = sumField(entries, 'distractions');
+        const net = gross === null || cancellations === null ? null : gross - cancellations;
         const stock = numeric(last?.typology_stock);
         const price = options.priceMode === 'current' ? currentPrice : numeric(last?.price);
         const qty = numeric(last?.qty);
-        // Vendas são fluxo; no modo histórico, cada fechamento usa seu próprio preço.
-        const salesVgv = options.priceMode === 'current' ? product(sales, currentPrice)
-          : sales === null || entries.some(({ entry }) => numeric(entry.sold_in_period) !== null
-            && numeric(entry.sold_in_period) !== 0 && numeric(entry.price) === null) ? null
-          : rounded(entries.reduce((sum, { entry }) => sum + (numeric(entry.sold_in_period) ?? 0) * (numeric(entry.price) ?? 0), 0));
+        const grossVgv = flowVgv(entries, 'gross_sales', options.priceMode, currentPrice);
+        const cancellationsVgv = flowVgv(entries, 'distractions', options.priceMode, currentPrice);
         const values: Row = {
-          'Estoque': stock, 'Vendas líquidas': sales, 'VGV': salesVgv,
-          'VGV Estoque': product(stock, price), 'VGV Lançado': product(qty, price),
+          'Vendas Brutas': gross, 'Distratos': cancellations, 'Vendas Líquidas': net,
+          'Estoque': stock, 'Preço Atual': numeric(last?.price),
+          'Preço Médio Empreendimento': last ? averages[index] : null,
+          'Preço m²': numeric(last?.price_private_area),
+          'VGV Lançado': product(qty, price), 'VGV Vendas Brutas': grossVgv,
+          'VGV Distratos': cancellationsVgv,
+          'VGV Vendas Líquidas': grossVgv === null || cancellationsVgv === null ? null : rounded(grossVgv - cancellationsVgv),
+          'VGV Estoque': product(stock, price),
         };
         for (const metric of MEASURES) {
-          const value = beforeRelease ? 0 : values[metric];
+          const value = beforeRelease ? PRICE_MEASURES.has(metric) ? null : 0 : values[metric];
           values[metric] = value;
           wide[`${metric} ${period.label}`] = value;
-          if (typeof value === 'number') series[index][metric] = (numeric(series[index][metric]) ?? 0) + value;
+          if (typeof value === 'number' && metric !== 'Preço Médio Empreendimento') {
+            series[index][metric] = (numeric(series[index][metric]) ?? 0) + value;
+            if (PRICE_MEASURES.has(metric)) priceCounts[index].set(metric, (priceCounts[index].get(metric) ?? 0) + 1);
+          }
         }
         if (options.layout === 'rows') longRows.push({ ...fixed, 'Período': period.label, ...values });
       }
       wideRows.push(wide);
     }
+  }
+  for (const [index, row] of series.entries()) for (const [metric, count] of priceCounts[index]) {
+    row[metric] = rounded(Number(row[metric]) / count);
   }
   const compare = (a: Row, b: Row) => {
     const active = (row: Row) => row['Status Empreendimento'] === 'Ativo' ? 0 : 1;
@@ -192,7 +246,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
   };
   const columns = options.layout === 'columns'
     ? [...FIXED_COLUMNS, ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
-    : [...FIXED_COLUMNS.filter((column) => column !== 'VGV Lançado'), 'Período', ...MEASURES];
+    : [...FIXED_COLUMNS, 'Período', ...MEASURES];
   return { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length };
 }
 

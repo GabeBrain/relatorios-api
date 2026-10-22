@@ -1,3 +1,15 @@
+## 22/10/2026 — Relatório API Excel: Hotel, vendas reais e seletor de preço médio — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Relatórios Automatizados.
+- **O quê:** Hotel incluído exclusivamente no coletor deste relatório. Séries mensais/trimestrais com 12 métricas na ordem solicitada: Vendas Brutas, Distratos, Vendas Líquidas, Estoque, Preço Atual, Preço Médio Empreendimento, Preço m², VGV Lançado, VGV Vendas Brutas, VGV Distratos, VGV Vendas Líquidas e VGV Estoque. Preços e VGV Lançado deixam de ter resumo fixo duplicado; horizontal pivota as mesmas séries usadas no tabular.
+- **Regras:** Vendas Brutas = soma de `gross_sales`; Distratos = soma de `distractions`; Vendas Líquidas = diferença, preservando negativos. Sem fallback para `sold_in_period` nem estimativa de distratos; ausência em um fechamento impede total parcial. VGV brutas/distratos usam os campos próprios e o modo monetário escolhido; VGV líquido é a diferença. Preços históricos usam o último fechamento de cada período.
+- **Novo filtro:** Preço Médio Empreendimento por média simples (padrão), ponderada por `qty` ou ponderada por estoque. Última posição de cada tipologia por mês/trimestre, cálculo por registro de empreendimento; preço ausente e pesos ausentes/não positivos excluídos, sem base válida fica vazio. Média repetida nas linhas de tipologia do empreendimento; gráfico conta cada registro de empreendimento uma vez, sem somar preços.
+- **Escopo:** somente `src/features/relatorio-api-excel/`, `src/pages/RelatorioApiExcel.tsx` e documentação. Filtros continuam posteriores a todas as respostas da API, incluindo Hotel. Dashboard e AELO intactos.
+- **Autor/origem:** Edgar / Codex. **Commits:** commit desta entrada; evolução de `794f8fe`.
+- **Monday:** —
+- **Validação:** TypeScript, lint dirigido, build e 28 testes próprios aprovados. Cobertura: Hotel/espera pela última resposta, novos campos, líquido negativo, ausência de fallback, 12 métricas ordenadas e paridade mensal/trimestral entre layouts, três médias, pesos inválidos, preços nos gráficos e Excel reaberto. Navegador 1440/390 px, claro/escuro, com dados fictícios/rede externa interceptada: troca de média sem novas requisições; ponderação por estoque exportada em quatro colunas/duas linhas, média 163.500 e VGV lançados de 18/12 milhões, reabertos do download. Sem erros de página ou overflow da janela; mobile com menu recolhido. Evidência local ignorada em `.local-inputs/api-excel-check/verify-temporal.cjs` e arquivos associados.
+- **Etapas/Pendências:** implementação e validação local concluídas; consulta autenticada/aceite com dados reais e publicação pendentes. Padrões reutilizados: Select/Checkbox/Input/Tabs Brain, GeoApiScopeEngine e motor puro após coleta. Estados de carregamento, sucesso, erro e seleção vazia verificados no navegador; ausências e lacunas verificadas nos testes. Nenhum push automático nesta entrega.
+
 ## 22/10/2026 — Integração do Relatório API Excel com a main do time — Edgar / Codex
 
 - **Ambiente/funcionalidade:** Rebrain — Relatório API Excel e integração das Estimativas de Vendas recebidas de Gabriel.
