@@ -1,3 +1,7 @@
+## 21/10/2026 — Reconciliação Rolândia confirmada pelo retorno Lovable
+
+Gabriel forneceu confirmação administrativa: três tentativas3b975f4f/a059b088/ef9c3c41 reconferidas e marcadas failed, sem lotes/gastos/reservas/ia_passes, exclusão ou IA. IDs completos no diagnóstico. Supera a pendência de reconciliação abaixo; não substitui homologação da correção. Código local f345adb/c9bd1c6, sem envio ou nova publicação nesta etapa. Próximo enviar correção, publicar corretor-execution+shared e frontend e conferir início real; nenhuma migration adicional.
+
 ## 21/10/2026 — Correção local de início/retomada incompleta
 
 Retorno Lovable recebido por Gabriel: três prepared sem lotes/gasto/reserva e com reviewProfileId Luna sem snapshot; quatro funções publicadas, sem start real de homologação. Corrigidos rejeição de retomada moderna sem snapshot (legado válido preservado), retenção de id antes de validar perfil, causa HTTP operacional, erro persistente no topo da preparação e navegação somente após sucesso. Sem nova migration, IA, alteração remota ou reconciliação das órfãs. Checagens estáticas locais; próximo enviar commit e republicar controlador com shared + frontend, reconciliar tentativas e homologar. [Diagnóstico atualizado](../features/corretor-vocacionais/DIAGNOSTICO_INICIO_ROLANDIA_2026-10-21.md).
