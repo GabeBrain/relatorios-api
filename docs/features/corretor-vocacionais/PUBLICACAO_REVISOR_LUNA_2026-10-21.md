@@ -2,6 +2,8 @@
 
 ## Estado
 
+**Complemento de início/retomada,21/10:** após o relato de três execuções prepared sem lotes/uso/reservas e com perfil incompleto, preparada correção em controlador/shared e frontend. Publicação adicional: somente **corretor-execution** com dependências compartilhadas + **Publish frontend**. Nenhuma migration adicional para este complemento. Reconciliação administrativa das três execuções antigas continua separada e condicionada à reconferência do consumo; não houve limpeza automática. Ver diagnóstico DIAGNOSTICO_INICIO_ROLANDIA_2026-10-21.md. Essa atualização supera a leitura de que a publicação anterior já homologava o start real.
+
 Código e migration preparados e validados localmente. O backend correto é **mxinpvcqzbfbzjodhgtz**. Tanto conector quanto CLI administrativa acessam outros três projetos; este não aparece. Não aplicar em Brain Apps, Quanti ou Sistema Administrativo como alternativa.
 
 Nenhum SQL remoto, deploy ou IA paga foi executado. A autorização vigente é **US$3,00 globais**, incluindo saldo reservado/desconhecido dos dois lotes e verificações em produção. Os estudos, materiais e decisões reais não foram alterados.
@@ -34,6 +36,10 @@ select column_name from information_schema.columns
 > No backend mxinpvcqzbfbzjodhgtz, confira se a migration 20261021223119_corretor_review_model_profiles.sql foi aplicada; não reaplique migrations antigas. Publique, com as dependências compartilhadas do repositório, analyze-ata-image, analyze-text-batch e analyze-table-image; depois corretor-execution. Não altere prompts, segredos, permissões ou outras funções. Não processe estudos nem chame IA nos testes. Verifique apenas recusas de pedidos inválidos antes do provedor e informe o resultado de cada deploy. O frontend será publicado depois.
 
 ## Retomada dos lotes, sem aumentar o orçamento
+
+### Pacote manual separado, preparado em 21/10
+
+Para o reteste solicitado por Gabriel, disponível em `.local-inputs/testes/TESTE_LUNA_ROLANDIA_2026-10-21/`: PPTX de 78 slides e 13 Excel, copiados de `_UPLOADS_TESTE/Corretor_V3_Rolandia`. Apenas `docProps/core.xml` (título interno) mudou; todas as demais entradas do PPTX e os Excel foram preservados. SHA-1 de teste `3c29b01ad65beea417aabf8fe394f01d2a95cd46`, distinto do original; registro por `corretor_prepare_study` compara o hash completo, logo o primeiro envio dessa cópia deve criar estudo separado. Usar novo envio, não adicionar versão. Não garante cache vazio de evidências do mesmo perfil nem ausência do arquivo no banco remoto, que não foi consultado. Reenviar essa cópia reconhece o mesmo teste. Manifesto/hash e instruções locais acompanham os brutos ignorados. Nenhuma IA executada; migration/publicação confirmadas pelo usuário, sem verificação técnica independente de produção nesta preparação.
 
 Preparação local congelada em `.local-inputs/review-luna-20261021/`:
 

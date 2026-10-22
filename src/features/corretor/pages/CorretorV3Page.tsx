@@ -302,6 +302,7 @@ export default function CorretorV3Page() {
   const [busy, setBusy] = useState<'upload' | 'recheck' | null>(null);
   const [lastDiff, setLastDiff] = useState<DiffResult | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisState | null>(null);
+  const [preparationFailure, setPreparationFailure] = useState<{studyId:string;message:string}|null>(null);
   // Keep preparation hidden throughout registration, execution setup and report refresh.
   const [launching, setLaunching] = useState<{ name: string; slides: number } | null>(null);
   const [budgetPrompt, setBudgetPrompt] = useState<{ estimate: FullEstimate; run: () => void } | null>(null);
@@ -460,9 +461,12 @@ export default function CorretorV3Page() {
       await finishExecution(res.aborted ? 'interrupted' : 'completed');
       await refreshList();
       setItems(await loadFindings(ctx.studyId));
+      return !res.aborted;
     } catch (err) {
       await finishExecution('failed').catch(() => {});
+      setPreparationFailure({studyId:ctx.studyId,message:processingMessage(err)});
       toast.error('Avaliação interrompida', { description: processingMessage(err) });
+      return false;
     } finally {
       abortRef.current = null;
       setAnalysis(null);
@@ -517,6 +521,7 @@ export default function CorretorV3Page() {
   }, [gate, runPaidAnalysis, fonteInput]);
 
   async function ingestNew(prepared: PreparedStudy) {
+    setPreparationFailure(null);
     const { file, bytes, ir, estimate, fonte, city, uf, outras } = prepared;
     const duplicate = studies.find(s => s.generation === 'v3' && s.lastSha1 === ir.sha1);
     const consumeDraft = async () => {
@@ -566,12 +571,14 @@ export default function CorretorV3Page() {
         toast.info('A ata indicou outra localização. Confira antes de continuar.');
         return;
       }
-      await runPaidAnalysis({ studyId: id, version: 1, ir, bytes, estimate, fonte }, { cidade: city, uf, outras, ata: p1.ata }, Math.max(0, estimate.costUsd - p1.ataCostUsd));
-    } catch (error) { await finishExecution('failed').catch(() => {}); toast.error('Não foi possível concluir a avaliação', { description: processingMessage(error) }); throw error; }
-    finally { setBusy(null); setAnalysis(null); setLaunching(null); abortRef.current = null; if (registeredId) navigate(`/corretor/estudos/${registeredId}/revisao`); }
+      const completed = await runPaidAnalysis({ studyId: id, version: 1, ir, bytes, estimate, fonte }, { cidade: city, uf, outras, ata: p1.ata }, Math.max(0, estimate.costUsd - p1.ataCostUsd));
+      if (completed) navigate(`/corretor/estudos/${id}/revisao`);
+    } catch (error) { await finishExecution('failed').catch(() => {}); if (registeredId) setPreparationFailure({studyId:registeredId,message:processingMessage(error)}); toast.error('Não foi possível concluir a avaliação', { description: processingMessage(error) }); throw error; }
+    finally { setBusy(null); setAnalysis(null); setLaunching(null); abortRef.current = null; }
   }
 
   async function resumePrepared(prepared: PreparedStudy) {
+    setPreparationFailure(null);
     if (!selected || prepared.ir.sha1 !== selected.lastSha1) throw new Error('Arquivo diferente da versão registrada.');
     const {ir, bytes, estimate, fonte, city, uf, outras, budgetUsd} = prepared;
     setBusy('upload');
@@ -586,7 +593,7 @@ export default function CorretorV3Page() {
       const p1 = await runPhase1(ir, bytes, {model:MODEL, fonte, candidates:estimate.candidates, ataCandidate:estimate.ataCandidate, signal:ac.signal});
       if (ac.signal.aborted) { await finishExecution('interrupted'); return; }
       await runPaidAnalysis({studyId:selected.id,version:selected.lastVersion,ir,bytes,estimate,fonte},{cidade:city,uf,outras,ata:p1.ata},Math.max(0,estimate.costUsd-p1.ataCostUsd));
-    } catch(e) { await finishExecution('failed').catch(()=>{}); throw e; }
+    } catch(e) { await finishExecution('failed').catch(()=>{}); setPreparationFailure({studyId:selected.id,message:processingMessage(e)}); throw e; }
     finally {setBusy(null);setAnalysis(null);setLaunching(null);abortRef.current=null;}
   }
 
@@ -965,9 +972,9 @@ export default function CorretorV3Page() {
 
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
   if (!selected && routeStudyId) return <div className="p-6"><p role="status">{loadingList || loadingStudy ? 'Abrindo revisão…' : 'Estudo não encontrado.'}</p><Link to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>;
-  if (!selected) return <StudyPreparationPage back={portfolioHref(searchParams.get('carteira') ?? '')} onStart={ingestNew} onRecommendation={prepareRecommendation} />;
+  if (!selected) return <StudyPreparationPage failure={preparationFailure?.message} back={portfolioHref(searchParams.get('carteira') ?? '')} onStart={ingestNew} onRecommendation={prepareRecommendation} />;
 
-  if (pending && !loadingStudy) return <StudyPreparationPage key={selected.id} back={portfolioHref(searchParams.get('carteira') ?? '')} resume={{study:selected, fonte:fonteInput?.fonte ?? null}} onStart={resumePrepared}/>;
+  if (pending && !loadingStudy) return <StudyPreparationPage key={selected.id} failure={preparationFailure?.studyId===selected.id?preparationFailure.message:undefined} back={portfolioHref(searchParams.get('carteira') ?? '')} resume={{study:selected, fonte:fonteInput?.fonte ?? null}} onStart={resumePrepared}/>;
 
   // ─── WORKSPACE ───────────────────────────────────────────────────────────────
   return (

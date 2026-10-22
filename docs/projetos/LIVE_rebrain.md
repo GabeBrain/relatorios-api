@@ -1,3 +1,15 @@
+## 21/10/2026 — Correção local de início/retomada incompleta
+
+Retorno Lovable recebido por Gabriel: três prepared sem lotes/gasto/reserva e com reviewProfileId Luna sem snapshot; quatro funções publicadas, sem start real de homologação. Corrigidos rejeição de retomada moderna sem snapshot (legado válido preservado), retenção de id antes de validar perfil, causa HTTP operacional, erro persistente no topo da preparação e navegação somente após sucesso. Sem nova migration, IA, alteração remota ou reconciliação das órfãs. Checagens estáticas locais; próximo enviar commit e republicar controlador com shared + frontend, reconciliar tentativas e homologar. [Diagnóstico atualizado](../features/corretor-vocacionais/DIAGNOSTICO_INICIO_ROLANDIA_2026-10-21.md).
+
+## 21/10/2026 — Reteste Rolândia: início falhou, registro preservado
+
+Gabriel relatou retorno à preparação e bloqueio de exclusão após publicar. REST somente leitura confirma estudo5b389531 e fonte13planilhas persistidos, sem relatório, três DET. Exclusão rejeita execução prepared/running; hipótese principal controlador antigo sem reviewProfileId, com janela comprovada de órfã no cliente e navegação no finally apagando contexto do erro. CORS/recusa400 operacionais; versão das funções/consumo ainda não acessíveis administrativamente. [Diagnóstico e verificação única Lovable](../features/corretor-vocacionais/DIAGNOSTICO_INICIO_ROLANDIA_2026-10-21.md). Sem IA, deploy, limpeza ou correção aplicada; não declarar resolvido.
+
+## 21/10/2026 — Material para reteste manual separado
+
+Gabriel informou migration/publicação concluídas e pediu pacote de teste. Preparado Rolândia em `.local-inputs/testes/TESTE_LUNA_ROLANDIA_2026-10-21/`, 78 slides e 13 Excel. Só título interno do PPTX alterado, hash próprio para novo cadastro sem substituir avaliação antiga; demais entradas e Excel preservados, manifesto local. Cache por perfil pode ser compartilhado, reenvio da mesma cópia reconhece o mesmo teste. Sem IA ou consulta ao banco; produção informada pelo usuário, qualidade real pendente. Proveniência no pacote de publicação. Nenhum push adicional solicitado nesta preparação.
+
 ## 21/10/2026 — Revisor: push autorizado e CI aprovado
 
 Gabriel autorizou expressamente incluir os dois commits Finotti anteriores. Enviados `30ab046`, `a199e7e`, `829f862` e `fe5c7f9` à main. [CI técnico do último SHA aprovado](https://github.com/GabeBrain/relatorios-api/actions/runs/39693170276), junto de documentação viva e contrato do protocolo. Alterações locais FIERGS e referência de interface preservadas fora do envio. Estado publicado no Git e validado localmente/CI; backend correto ainda sem acesso administrativo, migration/deploy e lotes reais R6/R8 pendentes no pacote único. US$0 gasto sob teto global US$3; nenhum email enviado. Próximo: aplicar o pacote e retomar a verificação real antes do convite à Amanda.

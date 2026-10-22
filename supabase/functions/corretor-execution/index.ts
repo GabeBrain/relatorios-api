@@ -51,6 +51,8 @@ Deno.serve(async req => {
         if(typeof body.resumeExecutionId==='string') {
           const {data:prior}=await db.from('corretor_executions').select('*').eq('id',body.resumeExecutionId).eq('owner_hash',owner).eq('study_id',body.studyId).eq('version_n',body.version).eq('document_sha1',body.documentSha1).maybeSingle();
           if(!prior)return json({error:'A tentativa anterior não pôde ser confirmada. Confira antes de iniciar outra.'},409);
+          try { executionReviewProfile(prior.confirmed_context); }
+          catch(error) { return json({error:error instanceof Error?error.message:'Confira o perfil da tentativa anterior antes de retomar.'},409); }
           if(prior.state==='completed')return json({id:prior.id,state:'completed',reviewProfileId:executionReviewProfile(prior.confirmed_context).id});
           if(prior && prior.state!=='completed' && prior.purpose!=='recommendation') {
             const oldBase={...prior.confirmed_context};delete oldBase.reviewProfile;delete oldBase.usageOrigin;delete oldBase.validationBudgetId;

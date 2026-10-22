@@ -28,10 +28,10 @@ export interface PreparedStudy {
   sheets: File[]; fonte: Fonte | null; city: string; uf: string; outras: string[]; budgetUsd: number;
   accountPreparation?: AccountPreparation | null;
 }
-interface Props { resume?: { study: StudyV3; fonte: Fonte | null }; back: string; onStart: (prepared: PreparedStudy) => Promise<void>; onRecommendation?: (prepared: PreparedStudy) => Promise<RecommendationStudy> }
+interface Props { resume?: { study: StudyV3; fonte: Fonte | null }; failure?: string; back: string; onStart: (prepared: PreparedStudy) => Promise<void>; onRecommendation?: (prepared: PreparedStudy) => Promise<RecommendationStudy> }
 const UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ');
 const encoder = new TextEncoder(), decoder = new TextDecoder();
-export default function StudyPreparationPage({ back, onStart, onRecommendation, resume }: Props) {
+export default function StudyPreparationPage({ back, onStart, onRecommendation, resume, failure }: Props) {
   const [params] = useSearchParams();
   const requestedIntent = params.get('intent');
   const [recommendationBusy,setRecommendationBusy]=useState(false);
@@ -157,6 +157,7 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
     <Link className="cp-back" to={back}>← Voltar aos estudos</Link>
     <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>{resume ? 'Continuar avaliação' : intent === 'recommendation' ? 'Sugestão de análise' : 'Revisar estudo'}</h1><p className="cp-muted">Apresentação, cálculos e informações. Você decide quando iniciar a avaliação.</p></div><div className="cp-actions">{!resume && (accountPreparation ? <DeleteStudyButton id={accountPreparation.studyId} name={file?.name??'Preparação'} sha1={prepared?.ir.sha1} disabled={starting||recommendationBusy||Boolean(loading)||savingSheets} onDeleted={async()=>{await reset(true);}}/> : (file||sheets.length>0||error) && <Button variant="ghost" size="icon" title="Descartar prepara??o" aria-label="Descartar prepara??o deste navegador" disabled={starting||recommendationBusy||Boolean(loading)||savingSheets} onClick={()=>void reset()}><Trash2 size={18} aria-hidden="true"/></Button>)}</div></header>
 
+    {failure && <p role="alert">{failure}</p>}
     {previousStudy && <p className="cp-muted">O estudo anterior já foi analisado. <Link className="cp-inline" to={`/corretor/estudos/${previousStudy}/resumo`}>Abrir resultado</Link></p>}
     {!resume && (file || sheets.length > 0) && <div className="cp-draft-bar"><span className="cp-muted">{restored ? 'Preparação recuperada deste navegador' : 'Materiais desta preparação'}</span><Button variant="ghost" disabled={starting || recommendationBusy || Boolean(loading)} onClick={() => void reset()}><RotateCcw size={16} aria-hidden="true"/>Limpar e começar outro</Button></div>}
     <section className="cp-panel cp-upload-panel"><h2>Apresentação do estudo</h2><input ref={pptxInput} type="file" accept=".pptx" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) {setPreviousStudy(null);setRestored(false);void prepare(f);} }} />
@@ -189,6 +190,6 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
       </div>
       {(!city.trim() || !uf) && <p>Confirme a cidade e o estado para iniciar.</p>}
     </section>}
-    {error && <p role="alert">{error}</p>}{storage && <p role="status" className="cp-muted">{storage}</p>}
+    {error && error!==failure && <p role="alert">{error}</p>}{storage && <p role="status" className="cp-muted">{storage}</p>}
   </main>;
 }

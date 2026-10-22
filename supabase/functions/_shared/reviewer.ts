@@ -35,9 +35,13 @@ export function stableReview(value: unknown): string {
   return JSON.stringify(value,(_k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
 }
 export function executionReviewProfile(context: Record<string,unknown>): ReviewProfile {
-  if(!context.reviewProfile)return reviewProfile(legacy.id);
+  if(!context.reviewProfile) {
+    if(context.reviewProfileId && context.reviewProfileId!==legacy.id)throw new Error('A tentativa anterior não confirmou o perfil da revisão. A equipe técnica precisa conferir essa tentativa antes de retomar.');
+    return reviewProfile(legacy.id);
+  }
   const snapshot=context.reviewProfile as ReviewProfile;
   const known=reviewProfile(snapshot.id);
+  if(context.reviewProfileId && context.reviewProfileId!==snapshot.id)throw new Error('Identificação do perfil da revisão divergente.');
   if(stableReview(snapshot)!==stableReview(known))throw new Error('Configuração da revisão divergente.');
   return known;
 }
