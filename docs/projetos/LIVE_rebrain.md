@@ -1,3 +1,14 @@
+## 22/10/2026 — Relatório API Excel: filtros múltiplos e grade uniforme — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — 2. Configurar relatório.
+- **O quê:** Município convertido em seleção múltipla; Tipo Empreendimento e Status do Empreendimento passam ao mesmo componente local Popover/Command, com busca, marcação, selecionar todos, limpar e resumo. A lista permanece aberta ao alternar opções. Os três campos iniciam a configuração na ordem pedida; todos os controles seguem uma única grade de três colunas no desktop e uma coluna em telas menores.
+- **Regra local:** municípios escolhidos combinados por OU, todos selecionados após a carga; lista vazia significa nenhum, sem fallback para todos. O motor mantém comportamento sem restrição somente quando o filtro municipal é omitido. Limpar qualquer filtro principal bloqueia geração até nova seleção. Mantidos Hotel, aplicação somente em Gerar relatório e bloqueio do download desatualizado; nenhuma nova consulta provocada pelos filtros.
+- **Escopo:** `src/pages/RelatorioApiExcel.tsx`, componente local `ReportMultiSelect.tsx`, condição municipal/teste do motor e documentação. Sem alterações no AELO, Dashboard ou primitives compartilhados.
+- **Autor/origem:** Edgar / Codex. **Commits:** commit desta entrada; evolução de `3ed0152`.
+- **Monday:** —
+- **Validação:** TypeScript, lint dirigido e build aprovados; suíte anterior de 44 testes aprovada e novo cenário de seleção municipal múltipla/vazia aprovado com os 36 testes do motor (45 cenários distintos no total). Navegador em 1440/390 px, claro/escuro, com API simulada: seleção de dois municípios, dois tipos e dois status sem fechar a lista, seleção vazia bloqueando geração, ordem e alinhamento dos três filtros medidos por bounding boxes, nenhum cabeçalho antes de Gerar e quatro chamadas de coleta mantidas. Downloads reabertos nas três escalas de VGV, sem erro de página ou overflow da janela; mobile com menu recolhido. Evidências locais ignoradas em `.local-inputs/api-excel-check/verify-multiselect.cjs` e arquivos associados.
+- **Etapas/Pendências:** ajuste local concluído; consulta autenticada/aceite com dados reais pendentes. Padrão visual Brain reutilizado; estados nenhum/um/vários/todos selecionados, configuração, geração, rascunho e erro de coleta verificados. Mantido sem push conforme determinação anterior.
+
 ## 22/10/2026 — Relatório API Excel: competências pt-BR e escala do VGV — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Relatórios Automatizados.

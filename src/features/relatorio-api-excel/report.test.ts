@@ -202,6 +202,16 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     expect(report({ municipalities: ['Outra/MT'] }).rows).toEqual([]);
   });
 
+  it('aceita múltiplos municípios sem duplicar registros e não trata seleção vazia como todos', () => {
+    const second = { ...building, building_id: 11, city: 'Outra' };
+    const third = { ...building, building_id: 12, city: 'Terceira' };
+    const data = [building, second, third];
+    const result = report({ municipalities: ['Cidade fora do catálogo AELO/MT', 'Outra/MT'] }, data);
+    expect(result.rows.map((row) => row['ID Empreendimento'])).toEqual(['10', '11']);
+    expect(report({ municipalities: [] }, data).rows).toEqual([]);
+    expect(report({}, data).rows).toHaveLength(3);
+  });
+
   it('concatena incorporadoras, distingue região/área administrativa/tipo/padrão e usa a tipologia até o corte', () => {
     const data = [{ ...building, region: 'Centro-Oeste', administrative_area: 'Norte',
       incorporators: [{ name: 'Empresa 1' }, { name: 'Empresa 2' }, { name: '' }, { name: 'Empresa 3' }],

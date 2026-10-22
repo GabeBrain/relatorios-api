@@ -195,7 +195,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
   const empty: Report = { columns: [], rows: [], periods: [], series: [], typologyCount: 0, vgvScale: options.vgvScale ?? 'standard' };
   if (!options.from || !options.to || options.from > options.to) return empty;
   buildings = buildings.filter((building) => options.statuses.includes(text(building.status))
-    && (!options.municipalities?.length || options.municipalities.includes(municipalityKey(building)))
+    && (options.municipalities === undefined || options.municipalities.includes(municipalityKey(building)))
     && (options.buildingTypes === undefined || options.buildingTypes.includes(text(building.building_type))));
   const periodsMap = new Map<string, Period>();
   // Apenas períodos observados na coleta dentro das datas inclusivas, sem inventar fechamentos.

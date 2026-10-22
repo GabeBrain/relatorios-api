@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronsUpDown, Download, Play, X } from 'lucide-react';
+import { Download, Play, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAuthStore } from '@/store/auth-store';
@@ -7,13 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { GeoApiScopeSelector, useGeoApiScope } from '@/features/shared/geo-api-scope-engine';
 import type { GeoLoadRequest } from '@/features/shared/geo-api-scope-engine/GeoApiScopeSelector';
+import { ReportMultiSelect } from '@/features/relatorio-api-excel/ReportMultiSelect';
 import { MonthField } from '@/features/relatorio-api-excel/MonthField';
 import { fetchBuildings, type FetchProgress, type RawBuilding } from '@/features/relatorio-api-excel/api';
 import { buildReport, createWorkbook, dateBounds, exportValue, monthStart, MEASURES, VGV_UNITS, PERCENT_COLUMNS, REPORT_FIELDS, municipalityKey, selectReportFields,
@@ -36,8 +35,7 @@ export default function RelatorioApiExcel() {
   const [region, setRegion] = useState('');
   const [buildings, setBuildings] = useState<RawBuilding[] | null>(null);
   const [loadedScope, setLoadedScope] = useState('');
-  const [municipality, setMunicipality] = useState('');
-  const [municipalityOpen, setMunicipalityOpen] = useState(false);
+  const [selectedMunicipalities, setSelectedMunicipalities] = useState<string[]>([]);
   const [buildingTypes, setBuildingTypes] = useState<string[]>(BUILDING_TYPES);
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState<{ report: Report; options: ReportOptions; signature: string } | null>(null);
@@ -90,7 +88,7 @@ export default function RelatorioApiExcel() {
       });
       if (controller.current !== current || current.signal.aborted) return;
       // Guarda a resposta bruta. Históricos e cálculos só são percorridos em Gerar relatório.
-      setFrom(''); setTo(''); setMunicipality(''); setBuildingTypes(BUILDING_TYPES);
+      setFrom(''); setTo(''); setSelectedMunicipalities([...new Set(complete.map(municipalityKey))]); setBuildingTypes(BUILDING_TYPES);
       setStatuses([...new Set(complete.map((building) => String(building.status ?? '')))]);
       setSelected(null); setPage(0);
       setLoadedScope(request.city || request.uf || request.ufs?.join(', ') || '');
@@ -101,8 +99,8 @@ export default function RelatorioApiExcel() {
     } finally { if (controller.current === current) setLoading(false); }
   };
   const options = useMemo(() => ({ granularity, layout, priceMode, buildingAverageMode, vgvScale, periodRange: 'month' as const, from, to, statuses,
-    municipalities: municipality ? [municipality] : [], buildingTypes }),
-  [granularity, layout, priceMode, buildingAverageMode, vgvScale, from, to, statuses, municipality, buildingTypes]);
+    municipalities: selectedMunicipalities, buildingTypes }),
+  [granularity, layout, priceMode, buildingAverageMode, vgvScale, from, to, statuses, selectedMunicipalities, buildingTypes]);
   const signature = JSON.stringify({ options, selected });
   const stale = generated !== null && generated.signature !== signature;
   const filtered = generated?.report ?? EMPTY_REPORT;
@@ -181,7 +179,10 @@ export default function RelatorioApiExcel() {
         <fieldset disabled={generating || exporting} className="contents"><section className="space-y-4 rounded-xl border border-border bg-card p-4" aria-label="Filtros do relatório">
           <h2 className="font-semibold">2. Configurar relatório</h2>
           <p className="text-xs text-muted-foreground">Configure os filtros e clique em Gerar relatório. Alterar seleções não processa os dados nem faz novas consultas à API. Datas vazias incluem todo o histórico disponível.</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <ReportMultiSelect id="api-excel-municipality" label="Município" options={municipalities} value={selectedMunicipalities} onChange={setSelectedMunicipalities} disabled={generating || exporting} />
+            <ReportMultiSelect id="api-excel-building-types" label="Tipo Empreendimento" options={BUILDING_TYPES} value={buildingTypes} onChange={setBuildingTypes} disabled={generating || exporting} />
+            <ReportMultiSelect id="api-excel-statuses" label="Status do Empreendimento" options={availableStatuses} value={statuses} onChange={setStatuses} disabled={generating || exporting} />
             <div className="space-y-1.5"><Label htmlFor="api-excel-view">Visão</Label><Select value={granularity} onValueChange={(next: Granularity) => { setGranularity(next); }}><SelectTrigger id="api-excel-view"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="month">Mensal</SelectItem><SelectItem value="quarter">Trimestral</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="api-excel-layout">Layout do Excel</Label><Select value={layout} onValueChange={(next: Layout) => { setLayout(next); }}><SelectTrigger id="api-excel-layout"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="columns">Valores em colunas</SelectItem><SelectItem value="rows">Tabular — períodos em linhas</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="api-excel-price">Cálculo monetário</Label><Select value={priceMode} onValueChange={(next: PriceMode) => setPriceMode(next)}><SelectTrigger id="api-excel-price"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="current">Valor atual</SelectItem><SelectItem value="period">Valor do período</SelectItem></SelectContent></Select></div>
@@ -190,10 +191,7 @@ export default function RelatorioApiExcel() {
             <MonthField id="api-excel-to" label="Data final" value={to} onChange={setTo} />
             <div className="space-y-1.5"><Label htmlFor="api-excel-vgv-scale">Visualização do VGV</Label><Select value={vgvScale} onValueChange={(next: VgvScale) => setVgvScale(next)}><SelectTrigger id="api-excel-vgv-scale"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="standard">Padrão — valor calculado</SelectItem><SelectItem value="thousand">Milhar — dividir por 1.000</SelectItem><SelectItem value="million">Milhão — dividir por 1.000.000</SelectItem></SelectContent></Select></div>
           </div>
-          <div className="max-w-md space-y-1.5"><Label htmlFor="api-excel-municipality">Município</Label><Popover open={municipalityOpen} onOpenChange={setMunicipalityOpen}><PopoverTrigger asChild><Button id="api-excel-municipality" variant="outline" role="combobox" aria-expanded={municipalityOpen} className="w-full justify-between font-normal"><span className="truncate">{municipality || 'Todos os municípios carregados'}</span><ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /></Button></PopoverTrigger><PopoverContent className="w-[min(300px,calc(100vw-32px))] p-0"><Command><CommandInput placeholder="Buscar município carregado…" /><CommandList><CommandEmpty>Nenhum município encontrado.</CommandEmpty><CommandGroup><CommandItem value="Todos os municípios carregados" onSelect={() => { setMunicipality(''); setMunicipalityOpen(false); }}>Todos os municípios carregados</CommandItem>{municipalities.map((item) => <CommandItem key={item} value={item} onSelect={() => { setMunicipality(item); setMunicipalityOpen(false); }}>{item}</CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent></Popover></div>
-          <fieldset className="flex flex-wrap gap-4"><legend className="mb-2 text-sm font-medium">Tipo Empreendimento</legend>{BUILDING_TYPES.map((type) => <label key={type} className="flex items-center gap-2 text-sm"><Checkbox checked={buildingTypes.includes(type)} onCheckedChange={(checked) => setBuildingTypes((old) => checked ? [...old, type] : old.filter((item) => item !== type))} />{type}</label>)}</fieldset>
           {!validDates && <p role="alert" className="text-sm text-destructive">Informe datas válidas, com a data inicial anterior ou igual à final.</p>}
-          <fieldset className="flex flex-wrap gap-4"><legend className="mb-2 text-sm font-medium">Status do empreendimento</legend>{availableStatuses.map((status) => <label key={status} className="flex items-center gap-2 text-sm"><Checkbox checked={statuses.includes(status)} onCheckedChange={(checked) => { setStatuses((old) => checked ? [...old, status] : old.filter((item) => item !== status)); setPage(0); }} />{status || 'Não informado'}</label>)}</fieldset>
           <p className="text-xs text-muted-foreground">{priceMode === 'current' ? 'Valor atual: último preço disponível da tipologia até a data final, aplicado à série histórica.' : 'Valor do período: estoque e VGV lançado usam quantidade e preço do último fechamento de cada mês/trimestre. VGV de vendas soma venda × preço de cada fechamento.'} A escala escolhida para VGV será aplicada à prévia, aos gráficos e ao Excel. Vendas Brutas = gross_sales; Distratos = distractions; Vendas Líquidas = Vendas Brutas − Distratos.</p>
           <p className="text-xs text-muted-foreground">Preço Médio Empreendimento considera o último fechamento de cada tipologia no período e se repete nas linhas do mesmo empreendimento. {buildingAverageMode === 'simple' ? 'Média simples dos preços válidos.' : buildingAverageMode === 'quantity' ? 'Soma de preço × quantidade, dividida pela soma das quantidades.' : 'Soma de preço × estoque, dividida pela soma dos estoques.'} Pesos ausentes ou não positivos são excluídos; sem base válida, o valor fica vazio.</p>
           <p className="text-xs text-muted-foreground">Preço Atual e Preço m² mostram a posição de cada período; a opção Valor atual/Valor do período governa os VGV. As datas filtram os meses de typologies_history[].period, incluindo o mês final inteiro; o dia exibido é sempre 01. VGV Lançado histórico representa o valor da oferta total de cada período; não é o fluxo de novos lançamentos.</p>
@@ -208,7 +206,7 @@ export default function RelatorioApiExcel() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm">{generated ? `${report.typologyCount} registros de tipologia · ${filtered.rows.length} linhas · ${report.periods.length} períodos` : 'Configure os campos antes de gerar o relatório.'}</p>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={generate} disabled={generating || exporting || !validDates || !selectedFields.length || !statuses.length || !buildingTypes.length}><Play className="mr-2 h-4 w-4" />{generating ? 'Gerando relatório…' : 'Gerar relatório'}</Button>
+              <Button onClick={generate} disabled={generating || exporting || !validDates || !selectedFields.length || !selectedMunicipalities.length || !statuses.length || !buildingTypes.length}><Play className="mr-2 h-4 w-4" />{generating ? 'Gerando relatório…' : 'Gerar relatório'}</Button>
               <Button variant="outline" onClick={download} disabled={exporting || generating || !generated || stale || !filtered.rows.length || !filtered.columns.length}><Download className="mr-2 h-4 w-4" />{exporting ? 'Gerando Excel…' : 'Baixar Excel'}</Button>
             </div>
           </div>
