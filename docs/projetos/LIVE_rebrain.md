@@ -2666,3 +2666,6 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Impacto em Etapas/Pendências:** regenerar a tabulação a partir da base acumulada antes do relatório, pois as novas agregações exigem quatro novas tabelas de dados. Reprocessar o arquivo bruto de agosto para recuperar quantidades excluídas pela regra anterior. Arquivos enviados no navegador não possuem logs centrais de processamento.
 - **Monday:** —
 
+
+**22/10/2026 — Gabriel/sessão, estimativas Finotti, estado preparado localmente.** Rota editorial /rebrain/estimativas-vendas com consulta paginada Horizontal, seleção de empreendimento/carteira, projeção conservadora e laboratório; conferência opcional do Excel no navegador separada do cálculo. Typecheck, ESLint, 10 testes focados e build aprovados localmente. Sem backtest observado por falta de bases.estimation mensal. Teste autenticado da página, paridade das fixtures na nova interface e inspeção visual ainda pendentes; nenhum push/deploy. [Pacote técnico](../features/estimativas-vendas/README.md).
+
