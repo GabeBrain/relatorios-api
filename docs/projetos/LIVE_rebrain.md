@@ -1,3 +1,11 @@
+## 22/10/2026 — Estimativas: auditoria das bases IVV e envio autorizado — Gabriel / Codex
+
+- **Ambiente:** Rebrain/Estimativas. Gabriel pediu conferir os arquivos enviados por Edgar antes de publicar `a2480df` e autorizou push se as premissas fossem corroboradas.
+- **Resultado:** cinco bases,475.058 linhas, uma aba/26 campos e granularidade tipologia×mês. Horizontal de18 cidades, sem Curitiba; filtros publicados reproduziram366 projetos/15.164 meses. API real Cuiabá:6.727 chaves comuns/166 projetos, quantidade/estoque/venda líquida iguais nas20.181 comparações; zero diferenças.72 chaves exclusivas Excel e243 API impedem afirmar completude idêntica.98.563 linhas marcadas estimadas reforçam separar fonte reportada de observação comprovada. Nenhum ajuste de motor necessário.
+- **Evidência:** `docs/features/estimativas-vendas/AUDITORIA_BASES_EDGAR_2026-10-22.md`, JSON de hashes/contagens/paridade e três scripts diagnósticos. Brutos ignorados; não foi adicionado importador IVV à interface. Conferidor atual continua Análise Temporal Excel/Colunas.
+- **Integração:** merge `3e87e6d` preserva `1709128`/`0e7bc71` de Edgar sobre períodos/variação anual do Resumo email.114 testes/13 arquivos e tipos completos aprovados; build integrado conferido antes do envio. Alterações paralelas FIERGS/Corretor fora do commit. Monday: [Estimativas](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`, sem escrita.
+- **Estado/próximo:** validado localmente, envio autorizado; usuário publicará no Lovable e testará a ferramenta. Git não comprova produção. Linhagem histórica API, teste independente posterior ao treino e contrato de retorno continuam pendentes. A auditoria valida estrutura e conjunto comum, não acurácia ou recalibração integral.
+
 ## 22/10/2026 — Estimativas: referência Finotti completa e gráficos automáticos em Goiânia — Gabriel / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/estimativas-vendas`, bancada local de comparação.
