@@ -48,7 +48,10 @@ describe('Relatório API Excel — geração explícita', () => {
     expect(within(columns).getByText('Estoque', { exact: true })).toBeVisible();
     expect(within(columns).queryByText(/Estoque .*2026/)).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Buscar coluna'), { target: { value: 'Estoque' } });
-    fireEvent.change(screen.getByLabelText('Data inicial'), { target: { value: '2026-02-01' } });
+    fireEvent.click(screen.getByLabelText('Data inicial'));
+    fireEvent.change(screen.getByLabelText('Ano', { exact: true }), { target: { value: '2026' } });
+    fireEvent.click(screen.getByRole('button', { name: 'fevereiro de 2026', exact: true }));
+    expect(screen.getByLabelText('Data inicial')).toHaveTextContent('01/02/2026');
     expect(engine.buildReport).not.toHaveBeenCalled();
     expect(engine.dateBounds).not.toHaveBeenCalled();
     fireEvent.click(generate);

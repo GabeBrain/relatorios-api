@@ -1,3 +1,14 @@
+## 22/10/2026 — Relatório API Excel: competências pt-BR e escala do VGV — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Relatórios Automatizados.
+- **O quê:** Data inicial/final usam calendário local de mês/ano, com dia fixo 01, texto pt-BR e armazenamento ISO. O filtro incide em `typologies_history[].period` e inclui todos os dias dos meses escolhidos, inclusive o mês final e fevereiro bissexto. Não filtra `release_date`. Datas vazias continuam inferidas somente em Gerar relatório; resumo em pt-BR.
+- **VGV:** adicionado Visualização do VGV em Configurar relatório: Padrão (inicial, valor calculado), Milhar (/1.000) e Milhão (/1.000.000). Mesma escala na prévia, gráfico e Excel; preços/quantidades/áreas/percentuais intactos. Valores de base em reais preservados; conversão única sem arredondar o quociente numérico, formato visual de duas casas. Escala faz parte da geração; alterar a opção bloqueia download até gerar novamente.
+- **Escopo:** somente componente mensal local, motor/página/testes e documentação do Relatório API Excel. Nenhuma mudança no AELO, Dashboard ou módulos compartilhados. Padrões reutilizados: Popover, Button, Input, Label e Select Brain; não há seletor diário nativo nem novo primitive global.
+- **Autor/origem:** Edgar / Codex. **Commits:** commit desta entrada; evolução de `670f3d3`.
+- **Monday:** —
+- **Validação:** 44 testes em quatro arquivos aprovados, incluindo calendário pt-BR/dia 01/limpeza/ano inválido, recorte mensal completo nos dois agrupamentos e fevereiro bissexto, escala nas duas estruturas de Excel reaberto, valores negativos, preços preservados e nenhuma mutação no cálculo. TypeScript, lint dirigido e build aprovados. Navegador 1440/390 px, claro/escuro, com API simulada: datas `01/02/2026` incluem fechamento de 28/02; Excel baixado/reaberto nas três escalas com VGV de 18.000.000, 18.000 e 18, preço médio 163.500 preservado, sem novas consultas durante filtros/gerações e sem erros de página/overflow da janela. Mobile com menu recolhido. Evidências locais ignoradas em `.local-inputs/api-excel-check/verify-month-scale.cjs` e arquivos associados.
+- **Etapas/Pendências:** implementação e validação local concluídas; consulta autenticada/aceite com dados reais pendentes. Carga/configuração, calendário, geração, sucesso, rascunho, bloqueio de download e erro de coleta verificados. Mantido local, sem push conforme determinação anterior do usuário.
+
 ## 22/10/2026 — Relatório API Excel: geração sob comando e cadastro ampliado — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Relatórios Automatizados.

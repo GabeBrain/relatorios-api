@@ -16,7 +16,9 @@ Implementação exclusiva em `src/features/relatorio-api-excel/` e `src/pages/Re
 
 ## Visão, datas e agregação
 
-Padrão **Mensal** (`jan/2026`, `fev/2026`); alternativa **Trimestral** (`1T/2026`, `2T/2026`). Datas inicial e final são inclusivas e filtram a data do fechamento, não a data de lançamento do empreendimento. Datas começam vazias; cada limite vazio é inferido do histórico somente ao clicar em Gerar relatório. Datas no meio do mês/trimestre geram períodos parciais, informados na interface. Os períodos gerados respeitam também município, tipo e status selecionados.
+Padrão **Mensal** (`jan/2026`, `fev/2026`); alternativa **Trimestral** (`1T/2026`, `2T/2026`). Data inicial e Data final usam calendário de competências em pt-BR, com apenas mês/ano selecionáveis, sempre exibindo `01/mm/aaaa` e armazenando `aaaa-mm-01`. O filtro incide em `typologies_history[].period`, não em `release_date`. Ambos os meses são inclusivos: a competência final inclui todos os seus dias, inclusive fevereiro bissexto. Ex.: inicial/final `01/02/2026` inclui o fechamento `2026-02-28`, sem incluir março. No trimestral, somente os fechamentos dos meses escolhidos entram na soma/posição; trimestre pode ser parcial em meses.
+
+Datas começam vazias; cada limite vazio é inferido do histórico e normalizado para competência somente ao clicar em Gerar relatório. Não há processamento de histórico ao abrir o calendário ou trocar mês/ano. O resumo do resultado mostra as competências em pt-BR. Os períodos gerados respeitam também município, tipo e status selecionados. O motor conserva o recorte diário para seus consumidores explícitos que não usam `periodRange: month`; a interface deste relatório sempre usa competência mensal.
 
 Somente períodos observados dentro das datas escolhidas geram colunas/linhas. Cada registro de empreendimento é preservado, agrupando seu histórico por tipologia. Vendas Brutas somam `gross_sales`; Distratos somam `distractions`; Vendas Líquidas = Vendas Brutas − Distratos. Não há fallback para `sold_in_period` nem estimativa de distratos. Vendas líquidas negativas são preservadas. Se algum fechamento do período não tem um dos campos, seu respectivo total fica vazio; a venda líquida exige ambos completos. Estoque, quantidade, preço e área usam o último fechamento de cada período. Tipologia sem fechamento no intervalo não gera linha. Não há preenchimento por carregamento de posição de meses anteriores.
 
@@ -38,7 +40,17 @@ O preço atual é `price` do último fechamento da tipologia até a data final s
 
 VGV Lançado, Preço Atual e Preço m² passaram a ser exclusivamente temporais nos dois layouts, sem resumo fixo duplicado. Preço Atual = `price` e Preço m² = `price_private_area` do último fechamento do período. O modo monetário controla os VGV, não substitui essas posições de preço pelo último preço global.
 
-Produtos monetários são arredondados a centavos. Todos os VGV da prévia/Excel são divididos por 1.000.000 e arredondados a duas casas, como números Excel `0.00`. Preço ausente gera VGV vazio. VGV de vendas por preço do período fica vazio se alguma venda não nula/não zero não tem preço. Sem dado de vendas, fica vazio; venda explícita zero permanece zero.
+Produtos monetários são arredondados a centavos. Em **2. Configurar relatório**, Visualização do VGV oferece:
+
+| Opção | Valor apresentado na prévia, gráficos e Excel |
+|---|---|
+| Padrão (inicial) | valor calculado, sem divisão |
+| Milhar | valor calculado ÷ 1.000 |
+| Milhão | valor calculado ÷ 1.000.000 |
+
+A escala se aplica a todas as métricas cujo nome começa com VGV, inclusive líquidos negativos. Não altera preço, área, quantidade ou percentual. O motor conserva os valores calculados em reais; a conversão é única na apresentação/serialização, sem arredondar o quociente armazenado. Formatação visual de VGV/Excel `0.00` mantém duas casas para leitura. Prévia, legenda/unidade do gráfico e arquivo usam a escala da geração, não o rascunho atual: mudar a opção exige Gerar relatório novamente e bloqueia download antigo. Não faz nova consulta à API.
+
+Preço ausente gera VGV vazio. VGV de vendas por preço do período fica vazio se alguma venda não nula/não zero não tem preço. Sem dado de vendas, fica vazio; venda explícita zero permanece zero.
 
 VGV Vendas Brutas usa `gross_sales`; VGV Distratos usa `distractions`. No modo Valor atual, cada total é multiplicado pelo preço até o corte; em Valor do período, soma-se campo × preço de cada fechamento. VGV Vendas Líquidas = VGV Vendas Brutas − VGV Distratos, exigindo os dois valores completos e preservando negativos. Estes campos substituem o antigo VGV genérico. Gráficos históricos consomem a mesma série do motor da planilha.
 

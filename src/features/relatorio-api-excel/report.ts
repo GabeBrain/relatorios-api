@@ -6,6 +6,8 @@ export type Granularity = 'month' | 'quarter';
 export type PriceMode = 'current' | 'period';
 export type BuildingAverageMode = 'simple' | 'quantity' | 'stock';
 export type Layout = 'columns' | 'rows';
+export type VgvScale = 'standard' | 'thousand' | 'million';
+export const VGV_UNITS: Record<VgvScale, string> = { standard: 'R$', thousand: 'R$ mil', million: 'R$ milhões' };
 export interface ReportOptions {
   granularity: Granularity;
   priceMode: PriceMode;
@@ -16,6 +18,8 @@ export interface ReportOptions {
   statuses: string[];
   municipalities?: string[];
   buildingTypes?: string[];
+  periodRange?: 'day' | 'month';
+  vgvScale?: VgvScale;
 }
 export const FIXED_COLUMNS = [
   'ID Empreendimento', 'ID Tipologia', 'Status Empreendimento', 'Status Tipologia',
@@ -41,6 +45,7 @@ export interface Report {
   series: Row[];
   typologyCount: number;
   typologyRows?: Row[];
+  vgvScale?: VgvScale;
 }
 
 export function numeric(value: unknown): number | null {
@@ -80,6 +85,15 @@ export function periodOf(date: string, granularity: Granularity): Period {
   }
   const months = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
   return { key: date.slice(0, 7), label: `${months[month - 1]}/${year}` };
+}
+
+export function monthStart(date: string): string {
+  return date ? `${date.slice(0, 7)}-01` : '';
+}
+
+export function monthEnd(date: string): string {
+  if (!date) return '';
+  return new Date(Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)), 0)).toISOString().slice(0, 10);
 }
 
 type DatedEntry = { date: string; entry: RawBuilding };
@@ -177,7 +191,8 @@ function buildingAverage(snapshots: RawBuilding[], mode: BuildingAverageMode): n
 
 /** Função pura: recebe exclusivamente a coleta completa; nunca consulta a API. */
 export function buildReport(buildings: RawBuilding[], options: ReportOptions): Report {
-  const empty: Report = { columns: [], rows: [], periods: [], series: [], typologyCount: 0 };
+  if (options.periodRange === 'month') options = { ...options, from: monthStart(options.from), to: monthEnd(options.to) };
+  const empty: Report = { columns: [], rows: [], periods: [], series: [], typologyCount: 0, vgvScale: options.vgvScale ?? 'standard' };
   if (!options.from || !options.to || options.from > options.to) return empty;
   buildings = buildings.filter((building) => options.statuses.includes(text(building.status))
     && (!options.municipalities?.length || options.municipalities.includes(municipalityKey(building)))
@@ -274,7 +289,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
   const columns = options.layout === 'columns'
     ? [...FIXED_COLUMNS, ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
     : [...FIXED_COLUMNS, 'Período', ...MEASURES];
-  return { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length, typologyRows: wideRows };
+  return { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length, typologyRows: wideRows, vgvScale: options.vgvScale ?? 'standard' };
 }
 
 /** Expande nomes de campos somente na geração, preservando a ordem das métricas. */
@@ -291,10 +306,10 @@ export function selectedReport(report: Report, selected: string[] | null): Repor
   return { ...report, columns, rows: report.rows.map((row) => Object.fromEntries(columns.map((column) => [column, row[column] ?? null]))) };
 }
 
-/** Excel e prévia usam a mesma conversão: VGV em milhões, percentuais em proporção. */
-export function exportValue(column: string, value: Cell): Cell {
+/** Escala só na apresentação/serialização; o motor conserva os valores monetários calculados. */
+export function exportValue(column: string, value: Cell, scale: VgvScale = 'standard'): Cell {
   if (value === null || value === undefined || value === '') return null;
-  if (column.startsWith('VGV')) return numeric(value) === null ? null : rounded(Number(value) / 1_000_000);
+  if (column.startsWith('VGV')) return numeric(value) === null ? null : Number(value) / (scale === 'thousand' ? 1_000 : scale === 'million' ? 1_000_000 : 1);
   if (PERCENT_COLUMNS.has(column)) return numeric(value) === null ? null : Number(value) / 100;
   if (column === 'Data de Lançamento' || column === 'Data de Entrega') {
     const date = isoDate(value);
@@ -307,7 +322,7 @@ export async function createWorkbook(report: Report) {
   if (!report.columns.length || !report.rows.length) throw new Error('Selecione colunas e um recorte com dados para exportar.');
   if (report.columns.length > 16_384 || report.rows.length + 1 > 1_048_576) throw new Error('O recorte excede o limite do Excel. Reduza o período ou as colunas.');
   const { utils } = await import('xlsx');
-  const worksheet = utils.aoa_to_sheet([report.columns, ...report.rows.map((row) => report.columns.map((column) => exportValue(column, row[column])))]);
+  const worksheet = utils.aoa_to_sheet([report.columns, ...report.rows.map((row) => report.columns.map((column) => exportValue(column, row[column], report.vgvScale)))]);
   for (const [index, column] of report.columns.entries()) {
     const z = PERCENT_COLUMNS.has(column) ? '0.00%' : column.startsWith('VGV') ? '0.00' : undefined;
     if (!z) continue;

@@ -15,7 +15,7 @@ const building: RawBuilding = {
   ],
 };
 const options: ReportOptions = { from: '2026-01-01', to: '2026-03-31', granularity: 'month',
-  priceMode: 'current', buildingAverageMode: 'simple', layout: 'columns', statuses: ['Ativo', 'Esgotado'] };
+  vgvScale: 'million', priceMode: 'current', buildingAverageMode: 'simple', layout: 'columns', statuses: ['Ativo', 'Esgotado'] };
 const report = (changes: Partial<ReportOptions> = {}, data = [building]) => buildReport(data, { ...options, ...changes });
 
 describe('Relatório API Excel — regras posteriores à coleta', () => {
@@ -254,5 +254,45 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
       'Estoque jan/2026', 'Estoque fev/2026', 'Estoque mar/2026',
     ] : ['Incorporadoras', 'Vendas Líquidas', 'Estoque']);
     expect(Object.keys(result.rows[0])).toEqual(result.columns);
+  });
+
+  it.each(['month', 'quarter'] as const)('filtra period por competências completas na visão %s, sem usar release_date como recorte', (granularity) => {
+    const result = report({ from: '2026-02-01', to: '2026-02-01', periodRange: 'month', granularity });
+    expect(result.rows).toHaveLength(1);
+    const label = granularity === 'month' ? 'fev/2026' : '1T/2026';
+    expect(result.periods.map((period) => period.label)).toEqual([label]);
+    expect(result.rows[0][`Vendas Brutas ${label}`]).toBe(4);
+    expect(result.rows[0][`Preço Atual ${label}`]).toBe(120_000);
+    expect(result.rows[0][`Estoque ${label}`]).toBe(91);
+  });
+
+  it('inclui o dia 29 de fevereiro em ano bissexto e exclui março', () => {
+    const data = [{ ...building, release_date: '2024-01-01', typologies_history: [
+      { typology_id: 1, period: '2024-02-29', gross_sales: 5, distractions: 1 },
+      { typology_id: 1, period: '2024-03-01', gross_sales: 99, distractions: 0 },
+    ] }];
+    const result = report({ from: '2024-02-01', to: '2024-02-01', periodRange: 'month' }, data);
+    expect(result.rows[0]['Vendas Brutas fev/2024']).toBe(5);
+    expect(result.periods).toHaveLength(1);
+  });
+
+  it.each([
+    ['standard', 1], ['thousand', 1_000], ['million', 1_000_000],
+  ] as const)('aplica escala %s só ao VGV na prévia e no Excel, mantendo os cálculos originais', async (vgvScale, divisor) => {
+    for (const layout of ['columns', 'rows'] as const) {
+      const complete = report({ vgvScale, layout, priceMode: 'period' });
+      const column = layout === 'columns' ? 'VGV Lançado jan/2026' : 'VGV Lançado';
+      const price = layout === 'columns' ? 'Preço Atual jan/2026' : 'Preço Atual';
+      expect(complete.rows[0][column]).toBe(11_000_000);
+      expect(exportValue(column, complete.rows[0][column], vgvScale)).toBe(11_000_000 / divisor);
+      expect(exportValue(price, 110_000, vgvScale)).toBe(110_000);
+      expect(exportValue(column, null, vgvScale)).toBeNull();
+      expect(exportValue(column, -1_234_567.89, vgvScale)).toBe(-1_234_567.89 / divisor);
+      const workbook = await createWorkbook(selectedReport(complete, [column]));
+      const reopened = read(write(workbook, { bookType: 'xlsx', type: 'array' }), { type: 'array' });
+      const sheet = reopened.Sheets[reopened.SheetNames[0]];
+      expect(sheet.A2.v).toBe(11_000_000 / divisor);
+      expect(complete.rows[0][column]).toBe(11_000_000);
+    }
   });
 });
