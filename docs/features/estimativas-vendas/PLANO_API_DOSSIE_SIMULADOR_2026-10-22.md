@@ -45,7 +45,7 @@ O histórico inclui `period`, `typology_id`, `pattern`, `qty`, `typology_stock`,
 
 ### D. Interface de teste na Rebrain
 
-- Rota candidata `/rebrain/estimativas-vendas`, lazy, dentro do shell e autenticação existentes. Etapas na tela: escolher cidade autorizada ou importar snapshot local, revisar qualidade/elegibilidade, selecionar empreendimento ou carteira e mês de corte, executar comparação, inspecionar gráfico/tabela/dossiê e exportar resultado de revisão.
+- Rota candidata `/rebrain/estimativas-vendas`, lazy, dentro do shell e autenticação existentes. Etapas na tela: escolher cidade autorizada via API, revisar qualidade/elegibilidade, selecionar empreendimento ou carteira e mês de corte, executar curva/laboratório, inspecionar gráficos/tabela/dossiê e exportar resultado de revisão. **Opcionalmente**, escolher Excel exportado do Geobrain para conferir paridade local com a API, com instruções e link ao exportador; o arquivo não alimenta a curva nem vai ao servidor.
 - Usar tokens Geobrain já copiados no projeto, primitives shadcn e estados de carregamento, vazio, erro, escopo inválido e dado de origem desconhecida. A interface distingue observado, estimado e projeção por texto e legenda. Sem bandas central/ampla do slide até receber método; uma banda empírica futura teria rótulo e versão próprios.
 - Não criar arquivo importável no Geobrain até confirmar com Edgar IDs, competência, arredondamento, flags e contrato de retorno. A primeira exportação é só relatório de revisão, sem escrita na origem.
 
@@ -57,7 +57,7 @@ O histórico inclui `period`, `typology_id`, `pattern`, `qty`, `typology_stock`,
 
 ## Esclarecimento posterior em22/10
 
-Diego encaminhou resposta de Evandro de20/10: `bases.estimation` é a única flag do empreendimento estimado na base/período; `bases.ivv_batch_id` rastreia atualizações de valores por IVV em lote. Isso resolve a função dos campos, **mas não mostra a flag por competência na API de histórico sondada**. A proposta de Gabriel é conferir uma exportação real do Geobrain contra a API numerosa. A primeira UI será apenas de leitura por API e exportação de revisão; upload e arquivo de retorno aguardam o exemplo. Ver [plano detalhado da página](PLANO_PAGINA_EDITORIAL_API_2026-10-22.md).
+Diego encaminhou resposta de Evandro de20/10: `bases.estimation` é a única flag do empreendimento estimado na base/período; `bases.ivv_batch_id` rastreia atualizações de valores por IVV em lote. Isso resolve a função dos campos, **mas não mostra a flag por competência na API de histórico sondada**. Gabriel agora pediu **leitura local opcional de Excel na primeira UI** para conferir os valores API, com instruções e [link ao exportador Geobrain](https://app.geobrain.com.br/analise-temporal-excel). O arquivo não substitui a API nem é enviado/persistido; arquivo de retorno e escrita operacional ainda aguardam contrato. Ver [plano detalhado da página](PLANO_PAGINA_EDITORIAL_API_2026-10-22.md).
 
 **Exportação recebida depois:** o Excel da Análise Temporal é agregado, sem IDs de empreendimento ou `bases.estimation`, e mistura dois municípios/tipos na captura. É útil para checagem de apresentação, produto e futuro controle agregado, não para o contrato de retorno nem para o retrospectivo individual. Guarapuava está no catálogo API do token (29 horizontais/1.167 linhas); Guaratuba não está e retornou HTTP 422. [Auditoria e manual](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md) detalham zeros, periodicidade, IVV e o recorte necessário para comparação justa.
 
