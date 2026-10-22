@@ -1,0 +1,233 @@
+import type { RawBuilding } from './api';
+
+export type Cell = string | number | null;
+export type Row = Record<string, Cell>;
+export type Granularity = 'month' | 'quarter';
+export type PriceMode = 'current' | 'period';
+export type Layout = 'columns' | 'rows';
+export interface ReportOptions {
+  granularity: Granularity;
+  priceMode: PriceMode;
+  layout: Layout;
+  from: string;
+  to: string;
+  statuses: string[];
+}
+export const FIXED_COLUMNS = [
+  'ID Empreendimento', 'ID Tipologia', 'Status Empreendimento', 'Status Tipologia',
+  'Região Administrativa', 'Cidade/UF', 'Tipo', 'Tempo de Vendas', 'Empreendimentos',
+  'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Urbanizadora', 'Oferta por Lotes',
+  'Lançamento', 'Ano', 'Entrega', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
+  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'Valor m2 Priv.', 'Preço atual',
+  'm2 Priv.', 'VGV Lançado', 'm² Lançado',
+];
+export const MEASURES = ['Estoque', 'Vendas líquidas', 'VGV', 'VGV Estoque', 'VGV Lançado'] as const;
+export const PERCENT_COLUMNS = new Set(['Entrada', '% de Juros Mensal', 'Desconto à Vista']);
+export interface Period { key: string; label: string }
+export interface Report {
+  columns: string[];
+  rows: Row[];
+  periods: Period[];
+  series: Row[];
+  typologyCount: number;
+}
+
+export function numeric(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const result = Number(value);
+  return Number.isFinite(result) ? result : null;
+}
+
+/** ISO, dd/mm/aaaa e mm/aaaa; datas sem dia representam o primeiro dia do mês. */
+export function isoDate(value: unknown): string | null {
+  const raw = String(value ?? '').trim();
+  let match = /^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?(?:$|T|\s)/.exec(raw);
+  let year: number, month: number, day: number;
+  if (match) {
+      year = Number(match[1]); month = Number(match[2]); day = Number(match[3] ?? 1);
+  } else {
+    match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(raw);
+    if (match) {
+      year = Number(match[3]); month = Number(match[2]); day = Number(match[1]);
+    } else {
+      match = /^(\d{1,2})\/(\d{4})$/.exec(raw);
+      if (!match) return null;
+      year = Number(match[2]); month = Number(match[1]); day = 1;
+    }
+  }
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() + 1 !== month || date.getUTCDate() !== day) return null;
+  return date.toISOString().slice(0, 10);
+}
+
+export function periodOf(date: string, granularity: Granularity): Period {
+  const month = Number(date.slice(5, 7));
+  const year = date.slice(0, 4);
+  if (granularity === 'quarter') {
+    const q = Math.ceil(month / 3);
+    return { key: `${year}-${String((q - 1) * 3 + 1).padStart(2, '0')}`, label: `${q}T/${year}` };
+  }
+  const months = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  return { key: date.slice(0, 7), label: `${months[month - 1]}/${year}` };
+}
+
+type DatedEntry = { date: string; entry: RawBuilding };
+function entriesOf(building: RawBuilding): DatedEntry[] {
+  const history = Array.isArray(building.typologies_history) ? building.typologies_history : [];
+  return history.flatMap((entry: RawBuilding) => {
+    const date = isoDate(entry.period);
+    return date ? [{ date, entry }] : [];
+  }).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+export function dateBounds(buildings: RawBuilding[]) {
+  const dates = buildings.flatMap((building) => entriesOf(building).map(({ date }) => date)).sort();
+  return { from: dates[0] ?? '', to: dates.at(-1) ?? '' };
+}
+
+const rounded = (value: number) => Math.round(value * 100) / 100;
+const product = (a: number | null, b: number | null) => a === null || b === null ? null : rounded(a * b);
+const text = (value: unknown) => String(value ?? '');
+const asRecord = (value: unknown): RawBuilding => value && typeof value === 'object' ? value as RawBuilding : {};
+
+function fixedRow(building: RawBuilding, id: string, entries: DatedEntry[], price: number | null, mode: PriceMode): Row {
+  const last = entries.at(-1)!.entry;
+  const qty = numeric(last.qty) ?? numeric(entries[0].entry.qty);
+  const stock = numeric(last.typology_stock);
+  const area = numeric(last.private_area);
+  const launch = isoDate(building.release_date);
+  const lastActive = entries.filter(({ entry }) => entry.building_status === 'Ativo').at(-1)?.date;
+  const months = launch && lastActive ? Math.max(0,
+    (Number(lastActive.slice(0, 4)) - Number(launch.slice(0, 4))) * 12 + Number(lastActive.slice(5, 7)) - Number(launch.slice(5, 7))) : null;
+  const incorporators = Array.isArray(building.incorporators) ? building.incorporators : [];
+  return {
+    'ID Empreendimento': text(building.building_id), 'ID Tipologia': id,
+    'Status Empreendimento': text(building.status), 'Status Tipologia': stock === null ? '' : stock > 0 ? 'Ativo' : 'Esgotado',
+    'Região Administrativa': text(building.administrative_region ?? building.region),
+    'Cidade/UF': `${text(building.city)}/${text(building.state)}`, 'Tipo': text(building.standard || building.building_type),
+    'Tempo de Vendas': months === null ? '' : months <= 6 ? 'Até 6 Meses' : months <= 24 ? 'De 7 a 24 Meses' : months <= 48 ? 'De 25 a 48 Meses' : 'Acima de 49 Meses',
+    'Empreendimentos': text(building.name), 'Taxa Administrativa': numeric(last.taxa_associativa),
+    'Bairro': text(building.neighborhood), 'Endereço': text(building.address), 'Número': text(building.address_number),
+    'Urbanizadora': text(asRecord(incorporators[0]).name), 'Oferta por Lotes': numeric(last.qty),
+    'Lançamento': text(building.release_date), 'Ano': launch?.slice(0, 4) ?? '', 'Entrega': text(building.delivery_date),
+    'Entrada': numeric(building.down_payment_percentage), 'Nº de Parcelas': numeric(building.number_of_installments),
+    'Valor da parcela': numeric(building.installment_value), '% de Juros Mensal': numeric(building.interest_rate_tax),
+    'Indíce de Juros': text(building.interest_rate_index), 'Desconto à Vista': numeric(building.discount_percentage),
+    'Valor m2 Priv.': numeric(last.price_private_area), 'Preço atual': price, 'm2 Priv.': area || null,
+    'VGV Lançado': qty ? product(qty, mode === 'current' ? price : numeric(last.price)) : null,
+    'm² Lançado': qty && area ? product(qty, area) : null,
+  };
+}
+
+/** Função pura: recebe exclusivamente a coleta completa; nunca consulta a API. */
+export function buildReport(buildings: RawBuilding[], options: ReportOptions): Report {
+  const empty: Report = { columns: [], rows: [], periods: [], series: [], typologyCount: 0 };
+  if (!options.from || !options.to || options.from > options.to) return empty;
+  const periodsMap = new Map<string, Period>();
+  // Apenas períodos observados na coleta dentro das datas inclusivas, sem inventar fechamentos.
+  for (const building of buildings) for (const { date } of entriesOf(building)) {
+    if (date < options.from || date > options.to) continue;
+    const period = periodOf(date, options.granularity);
+    periodsMap.set(period.key, period);
+  }
+  const periods = [...periodsMap.values()].sort((a, b) => a.key.localeCompare(b.key));
+  const wideRows: Row[] = [];
+  const longRows: Row[] = [];
+  const series = periods.map((period) => ({ 'Período': period.label } as Row));
+  // Não deduplicar building_id: o contrato do Dashboard preserva cada registro.
+  for (const building of buildings) {
+    if (!options.statuses.includes(text(building.status))) continue;
+    const typologies = new Map<string, DatedEntry[]>();
+    const release = isoDate(building.release_date);
+    const releaseKey = release ? periodOf(release, options.granularity).key : null;
+    for (const item of entriesOf(building)) {
+      if (item.date > options.to || (releaseKey && periodOf(item.date, options.granularity).key < releaseKey)) continue;
+      const id = text(item.entry.typology_id);
+      if (!id) continue;
+      const history = typologies.get(id) ?? [];
+      history.push(item);
+      typologies.set(id, history);
+    }
+    for (const [id, history] of typologies) {
+      const inRange = history.filter(({ date }) => date >= options.from);
+      if (!inRange.length) continue;
+      const currentPrice = numeric(history.at(-1)!.entry.price);
+      const fixed = fixedRow(building, id, history, currentPrice, options.priceMode);
+      const wide: Row = { ...fixed };
+      for (const [index, period] of periods.entries()) {
+        const entries = inRange.filter(({ date }) => periodOf(date, options.granularity).key === period.key);
+        const last = entries.at(-1)?.entry;
+        const beforeRelease = releaseKey !== null && period.key < releaseKey;
+        const soldValues = entries.map(({ entry }) => numeric(entry.sold_in_period));
+        const sales = soldValues.some((value) => value !== null)
+          ? soldValues.reduce<number>((sum, value) => sum + (value ?? 0), 0) : null;
+        const stock = numeric(last?.typology_stock);
+        const price = options.priceMode === 'current' ? currentPrice : numeric(last?.price);
+        const qty = numeric(last?.qty);
+        // Vendas são fluxo; no modo histórico, cada fechamento usa seu próprio preço.
+        const salesVgv = options.priceMode === 'current' ? product(sales, currentPrice)
+          : sales === null || entries.some(({ entry }) => numeric(entry.sold_in_period) !== null
+            && numeric(entry.sold_in_period) !== 0 && numeric(entry.price) === null) ? null
+          : rounded(entries.reduce((sum, { entry }) => sum + (numeric(entry.sold_in_period) ?? 0) * (numeric(entry.price) ?? 0), 0));
+        const values: Row = {
+          'Estoque': stock, 'Vendas líquidas': sales, 'VGV': salesVgv,
+          'VGV Estoque': product(stock, price), 'VGV Lançado': product(qty, price),
+        };
+        for (const metric of MEASURES) {
+          const value = beforeRelease ? 0 : values[metric];
+          values[metric] = value;
+          wide[`${metric} ${period.label}`] = value;
+          if (typeof value === 'number') series[index][metric] = (numeric(series[index][metric]) ?? 0) + value;
+        }
+        if (options.layout === 'rows') longRows.push({ ...fixed, 'Período': period.label, ...values });
+      }
+      wideRows.push(wide);
+    }
+  }
+  const compare = (a: Row, b: Row) => {
+    const active = (row: Row) => row['Status Empreendimento'] === 'Ativo' ? 0 : 1;
+    return active(a) - active(b) || (isoDate(a['Lançamento']) ?? '').localeCompare(isoDate(b['Lançamento']) ?? '')
+      || text(a.Empreendimentos).localeCompare(text(b.Empreendimentos))
+      || text(a['ID Tipologia']).localeCompare(text(b['ID Tipologia']), undefined, { numeric: true });
+  };
+  const columns = options.layout === 'columns'
+    ? [...FIXED_COLUMNS, ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
+    : [...FIXED_COLUMNS.filter((column) => column !== 'VGV Lançado'), 'Período', ...MEASURES];
+  return { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length };
+}
+
+export function selectedReport(report: Report, selected: string[] | null): Report {
+  const columns = selected === null ? report.columns : report.columns.filter((column) => selected.includes(column));
+  return { ...report, columns, rows: report.rows.map((row) => Object.fromEntries(columns.map((column) => [column, row[column] ?? null]))) };
+}
+
+/** Excel e prévia usam a mesma conversão: VGV em milhões, percentuais em proporção. */
+export function exportValue(column: string, value: Cell): Cell {
+  if (value === null || value === undefined || value === '') return null;
+  if (column.startsWith('VGV')) return numeric(value) === null ? null : rounded(Number(value) / 1_000_000);
+  if (PERCENT_COLUMNS.has(column)) return numeric(value) === null ? null : Number(value) / 100;
+  if (column === 'Lançamento' || column === 'Entrega') {
+    const date = isoDate(value);
+    if (date) return `${date.slice(8, 10)}/${date.slice(5, 7)}/${date.slice(0, 4)}`;
+  }
+  return value;
+}
+
+export async function createWorkbook(report: Report) {
+  if (!report.columns.length || !report.rows.length) throw new Error('Selecione colunas e um recorte com dados para exportar.');
+  if (report.columns.length > 16_384 || report.rows.length + 1 > 1_048_576) throw new Error('O recorte excede o limite do Excel. Reduza o período ou as colunas.');
+  const { utils } = await import('xlsx');
+  const worksheet = utils.aoa_to_sheet([report.columns, ...report.rows.map((row) => report.columns.map((column) => exportValue(column, row[column])))]);
+  for (const [index, column] of report.columns.entries()) {
+    const z = PERCENT_COLUMNS.has(column) ? '0.00%' : column.startsWith('VGV') ? '0.00' : undefined;
+    if (!z) continue;
+    for (let row = 1; row <= report.rows.length; row++) {
+      const cell = worksheet[utils.encode_cell({ r: row, c: index })];
+      if (cell?.t === 'n') cell.z = z;
+    }
+  }
+  worksheet['!autofilter'] = { ref: worksheet['!ref']! };
+  const workbook = utils.book_new();
+  utils.book_append_sheet(workbook, worksheet, 'RELATÓRIO API EXCEL');
+  return workbook;
+}

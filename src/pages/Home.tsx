@@ -44,7 +44,7 @@ const JOURNEYS: Journey[] = [
       { title: 'Base de Mercado — Excel', description: 'O antigo Relatório Secovi: consolide o mercado de uma cidade e exporte os dados para Excel.', to: '/rebrain/secovi', audiences: ['Analistas', 'Gestão'], study: 'Base municipal' },
       { title: 'Panorama de Mercado', description: 'Monte o panorama editorial Secovi/FIERGS por praça e período.', to: '/rebrain/panorama-secovi-fiergs', audiences: ['Analistas', 'Gestão'], study: 'Panorama executivo' },
       { title: 'Relatório AELO', description: 'Analise loteamentos abertos e fechados nas regiões atendidas.', to: '/rebrain/aelo', audiences: ['Analistas', 'Gestão'], study: 'Loteamentos' },
-      { title: 'Relatório API Excel', description: 'Analise loteamentos abertos e fechados nas regiões atendidas.', to: '/rebrain/relatorio-api-excel', audiences: ['Analistas', 'Gestão'], study: 'Loteamentos' },
+      { title: 'Relatório API Excel', description: 'Exporte dados GeoBrain por mês ou trimestre, com colunas e cálculos configuráveis.', to: '/rebrain/relatorio-api-excel', audiences: ['Analistas', 'Gestão'], study: 'API Excel' },
       { title: 'Empresas e Empregados', description: 'Explore vínculos formais da RAIS por município, setor e ocupação.', to: '/rebrain/empresas-empregados', audiences: ['Analistas', 'Pesquisa', 'Gestão'], study: 'Emprego formal' },
     ],
   },

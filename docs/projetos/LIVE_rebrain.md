@@ -1,3 +1,14 @@
+## 22/10/2026 — Relatório API Excel: coleta completa e exportação configurável — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Relatórios Automatizados.
+- **O quê:** removidos catálogo de cidades e filtros de loteamentos AELO. Contrato de consulta copiado do Dashboard (Comercial/Horizontal/Vertical, POST interno v2, páginas de 100, lotes de cinco, timeout 60 s e registros repetidos preservados), mantendo dados brutos. Todas as respostas precisam terminar antes de habilitar filtros; erro/cancelamento não libera planilha parcial.
+- **Relatório:** mensal por padrão ou trimestral; datas inclusivas e status locais; seleção individual de colunas; layout em colunas ou tabular; preço atual ou preço do período. Conforme definição do usuário, VGV Lançado histórico = quantidade × preço do último fechamento de cada mês/trimestre. Vendas somam o fluxo; estoque conserva a última posição. Prévia e gráficos usam o motor do relatório.
+- **Arquivos:** `src/pages/RelatorioApiExcel.tsx`, `src/features/relatorio-api-excel/`, somente a entrada deste relatório em `Home.tsx`/`CommandPalette.tsx` e `docs/features/relatorio-api-excel.md`. Nenhuma alteração no AELO ou Dashboard.
+- **Autor/origem:** Edgar / Codex. **Commits:** commit desta entrada; evolução da cópia `ff6ae69`.
+- **Monday:** —
+- **Validação:** build, typecheck e lint dirigido aprovados; 24 testes aprovados (17 próprios, sete de regressão AELO/consulta Dashboard). Excel criado e reaberto headless nos dois layouts. Navegador em 1440/390 px, claro/escuro, com API simulada e rede externa interceptada: espera pela última resposta, filtros sem nova consulta, seleção de três colunas, download tabular reaberto com VGV de 18 milhões, gráficos e bloqueio após erro. Sem erros de página ou overflow da janela; celular com menu recolhido pelo controle existente. Evidências locais ignoradas em `.local-inputs/api-excel-check/`.
+- **Etapas/Pendências:** implementação e validação local concluídas. Consulta autenticada à API e aceite com dados reais pendentes; nenhum acesso real à API nesta sessão. Publicação depende de autorização. Padrões reutilizados: GeoApiScopeSelector/useGeoApiScope, BrainLoadingState, primitives Brain, rota lazy existente. Estados observados: escopo/carregamento/sucesso/erro; vazio, datas inválidas, ausência de valores e exportação sem colunas cobertos pelo motor.
+
 ## 22/10/2026 ? Relatório API Excel ? Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` ? Relatórios Automatizados.
