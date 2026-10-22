@@ -1,3 +1,7 @@
+## 21/10/2026 — Logo Brain nas etapas e diagnóstico da resposta recusada
+
+Gabriel relatou nova falha após chamada real na ata e pediu carregamento padronizado. Sincronizado af04ed9 (edição manual do controlador) preservando locais. Logo opaca/preenchida e etapa aplicada no Corretor/Sugestão, documentos, execução, histórico/materiais/PDF; redução de movimento, contadores confirmados e pausa mantidos. Agora erro informa avaliação interrompida/documentos preservados. Tipo/lint/Deno/build e prévia desktop/mobile isolada aprovados, sem IA ou testes nesta rodada. Causa exata de produção ainda não lida: mensagem antiga mistura truncamento/recusa/JSON/schema; hipótese null versus listas na ata documentada. Adicionados motivos/field paths privados sem relaxar validação ou retry, consulta SQL somente leitura e [resultado/limites](../features/corretor-vocacionais/CARREGAMENTO_BRAIN_E_FALHA_ATA_2026-10-21.md). Próximo conferir lote real e publicar frontend/três folhas com shared; sem migration nova ou push nesta etapa.
+
 ## 21/10/2026 — Reconciliação Rolândia confirmada pelo retorno Lovable
 
 Gabriel forneceu confirmação administrativa: três tentativas3b975f4f/a059b088/ef9c3c41 reconferidas e marcadas failed, sem lotes/gastos/reservas/ia_passes, exclusão ou IA. IDs completos no diagnóstico. Supera a pendência de reconciliação abaixo; não substitui homologação da correção. Código local f345adb/c9bd1c6, sem envio ou nova publicação nesta etapa. Próximo enviar correção, publicar corretor-execution+shared e frontend e conferir início real; nenhuma migration adicional.

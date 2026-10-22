@@ -68,3 +68,17 @@ export function validateReviewContent(task: ReviewTask, value: unknown): boolean
   if(task==='analyze-ata-image') { const ata=v.ata; return ata===null||record(ata)&&['observacoes_localizacao','cidades_candidatas','comentarios_sobrepostos','duvidas_cliente','pedidos_analista'].every(k=>Array.isArray(ata[k])&&(ata[k] as unknown[]).every(x=>typeof x==='string')); }
   return Array.isArray(v.tables)&&v.tables.every(t=>record(t)&&Array.isArray(t.columns)&&t.columns.every(x=>typeof x==='string')&&Array.isArray(t.rows)&&t.rows.every(r=>Array.isArray(r)&&r.every(c=>c===null||typeof c==='string'||typeof c==='number'&&Number.isFinite(c)))&&(!('totals'in t)||t.totals===null||Array.isArray(t.totals)))&&['locais_visiveis','unidades','anomalias_formato'].every(k=>Array.isArray(v[k]))&&typeof v.tem_fonte==='boolean';
 }
+
+/** Caminhos de campos inválidos, sem copiar conteúdo do documento para o diagnóstico. */
+export function reviewContentIssues(task: ReviewTask, value: unknown): string[] {
+  if(validateReviewContent(task,value))return [];
+  if(!value||typeof value!=='object'||Array.isArray(value))return ['$'];
+  const data=value as Record<string,unknown>;
+  if(task==='analyze-ata-image') {
+    if(!data.ata||typeof data.ata!=='object'||Array.isArray(data.ata))return ['ata'];
+    const ata=data.ata as Record<string,unknown>;
+    return ['observacoes_localizacao','cidades_candidatas','comentarios_sobrepostos','duvidas_cliente','pedidos_analista'].filter(key=>!Array.isArray(ata[key])||!(ata[key] as unknown[]).every(item=>typeof item==='string')).map(key=>`ata.${key}`);
+  }
+  if(task==='analyze-text-batch')return ['findings'];
+  return ['tables','locais_visiveis','unidades','anomalias_formato','tem_fonte'].filter(key=>key==='tem_fonte'?typeof data[key]!=='boolean':key==='tables'? !validateReviewContent(task,{...data,locais_visiveis:[],unidades:[],anomalias_formato:[],tem_fonte:false}):!Array.isArray(data[key]));
+}

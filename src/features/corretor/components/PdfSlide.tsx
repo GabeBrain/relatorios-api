@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import CorretorLoadingState from './CorretorLoadingState';
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import * as pdfjs from 'pdfjs-dist';
 pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs',import.meta.url).toString();
@@ -12,5 +13,5 @@ export default function PdfSlide({url,slide,zoom=1,expectedPages}:{url:string;sl
   doc.getPage(slide).then(page=>{if(!active||!canvas.current)return;const viewport=page.getViewport({scale:1.5*zoom});canvas.current.width=viewport.width;canvas.current.height=viewport.height;render=page.render({canvas:canvas.current,viewport});return render.promise;}).then(()=>{if(active)setBusy(false);}).catch(e=>{if(active&&e?.name!=='RenderingCancelledException'){setError('Não foi possível renderizar este slide.');setBusy(false);}});
   return()=>{active=false;render?.cancel();};
  },[doc,slide,zoom,expectedPages]);
- return <div className="cb-pdf">{busy&&<p role="status">Abrindo slide…</p>}{error&&<p role="alert">{error}</p>}<canvas ref={canvas} style={{width:`${zoom*100}%`}} aria-label={`Prévia PDF do slide ${slide}`} hidden={Boolean(error)}/>{doc&&!error&&!busy&&<p className="cp-muted">Prévia PDF fornecida · página {slide} de {doc.numPages}</p>}</div>;
+ return <div className="cb-pdf">{busy&&<CorretorLoadingState compact title="Abrindo slide…" />}{error&&<p role="alert">{error}</p>}<canvas ref={canvas} style={{width:`${zoom*100}%`}} aria-label={`Prévia PDF do slide ${slide}`} hidden={Boolean(error)}/>{doc&&!error&&!busy&&<p className="cp-muted">Prévia PDF fornecida · página {slide} de {doc.numPages}</p>}</div>;
 }

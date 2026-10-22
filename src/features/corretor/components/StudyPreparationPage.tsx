@@ -1,4 +1,5 @@
 import DeleteStudyButton from './DeleteStudyButton';
+import CorretorLoadingState from './CorretorLoadingState';
 import { processingMessage } from '../lib/processing-message';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -155,9 +156,10 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
   const ready = Boolean(prepared && choice && city.trim().length >= 2 && UFS.includes(uf) && !loading && !starting && !recommendationBusy && !savingSheets && budgetUsd > 0 && budgetUsd <= 100);
   return <main className="corretor-projects cp-preparation">
     <Link className="cp-back" to={back}>← Voltar aos estudos</Link>
-    <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>{resume ? 'Continuar avaliação' : intent === 'recommendation' ? 'Sugestão de análise' : 'Revisar estudo'}</h1><p className="cp-muted">Apresentação, cálculos e informações. Você decide quando iniciar a avaliação.</p></div><div className="cp-actions">{!resume && (accountPreparation ? <DeleteStudyButton id={accountPreparation.studyId} name={file?.name??'Preparação'} sha1={prepared?.ir.sha1} disabled={starting||recommendationBusy||Boolean(loading)||savingSheets} onDeleted={async()=>{await reset(true);}}/> : (file||sheets.length>0||error) && <Button variant="ghost" size="icon" title="Descartar prepara??o" aria-label="Descartar prepara??o deste navegador" disabled={starting||recommendationBusy||Boolean(loading)||savingSheets} onClick={()=>void reset()}><Trash2 size={18} aria-hidden="true"/></Button>)}</div></header>
+    <header className="cp-heading"><div><p className="cp-eyebrow">Geobrain · Corretor</p><h1>{resume ? failure ? 'Avaliação interrompida' : 'Continuar avaliação' : intent === 'recommendation' ? 'Sugestão de análise' : 'Revisar estudo'}</h1><p className="cp-muted">Apresentação, cálculos e informações. Você decide quando iniciar a avaliação.</p></div><div className="cp-actions">{!resume && (accountPreparation ? <DeleteStudyButton id={accountPreparation.studyId} name={file?.name??'Preparação'} sha1={prepared?.ir.sha1} disabled={starting||recommendationBusy||Boolean(loading)||savingSheets} onDeleted={async()=>{await reset(true);}}/> : (file||sheets.length>0||error) && <Button variant="ghost" size="icon" title="Descartar prepara??o" aria-label="Descartar prepara??o deste navegador" disabled={starting||recommendationBusy||Boolean(loading)||savingSheets} onClick={()=>void reset()}><Trash2 size={18} aria-hidden="true"/></Button>)}</div></header>
 
     {failure && <p role="alert">{failure}</p>}
+    {resume && failure && <p className="cp-muted">Os documentos continuam guardados. Esta tentativa não concluiu a avaliação.</p>}
     {previousStudy && <p className="cp-muted">O estudo anterior já foi analisado. <Link className="cp-inline" to={`/corretor/estudos/${previousStudy}/resumo`}>Abrir resultado</Link></p>}
     {!resume && (file || sheets.length > 0) && <div className="cp-draft-bar"><span className="cp-muted">{restored ? 'Preparação recuperada deste navegador' : 'Materiais desta preparação'}</span><Button variant="ghost" disabled={starting || recommendationBusy || Boolean(loading)} onClick={() => void reset()}><RotateCcw size={16} aria-hidden="true"/>Limpar e começar outro</Button></div>}
     <section className="cp-panel cp-upload-panel"><h2>Apresentação do estudo</h2><input ref={pptxInput} type="file" accept=".pptx" hidden onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) {setPreviousStudy(null);setRestored(false);void prepare(f);} }} />
@@ -166,7 +168,7 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
         <span className="cp-file-copy"><strong>{file ? file.name : 'Escolher PowerPoint'}</strong><span>{prepared&&!loading ? `Apresentação preparada · ${prepared.ir.n_slides} slides · trocar arquivo` : file ? loading ? 'Preparando apresentação…' : 'Não foi possível preparar · selecione outro arquivo' : 'Apresentação original do estudo · .pptx'}</span></span>{prepared&&!loading?<Check size={20} aria-hidden="true"/>:<Upload size={20} aria-hidden="true"/>}
       </Button>
       <p className="cp-format-note cp-muted"><FileText size={18} aria-hidden="true"/>Tem um PDF? Você poderá incluí-lo como prévia dos slides na revisão. A análise usa o PowerPoint original.</p>
-      {loading && <p role="status">{loading}</p>}
+      {loading && <CorretorLoadingState compact title={loading} />}
       {accountPreparation && <p className="cp-muted">Guardado em Meus estudos · análise ainda não iniciada.</p>}
     </section>
     <section className="cp-panel cp-upload-panel cp-upload-sheets"><h2>Planilhas de cálculo <span className="cp-muted">opcional</span></h2><p className="cp-muted">Inclua os arquivos Excel para comparar os números do estudo com os cálculos de origem.</p>
@@ -176,7 +178,9 @@ export default function StudyPreparationPage({ back, onStart, onRecommendation, 
       {resume?.fonte && !sheets.length && <p className="cp-muted">Fonte numérica anterior preservada. Você pode substituir as planilhas antes de continuar.</p>}
       {!choice && file && intent==='review' && <p className="cp-muted">Adicione as planilhas ou confirme a opção sem planilhas no botão abaixo.</p>}
     </section>
-    {prepared && intent==='recommendation' && onRecommendation && file && !savingSheets && <Suspense fallback={<p role="status">Preparando recomendação…</p>}><Recommendation key={prepared.ir.sha1} onBusyChange={setRecommendationBusy} preparedIr={prepared.ir} ensureStudy={()=>onRecommendation({file,...prepared,sheets,fonte:null,city,uf,outras:[],budgetUsd:0,accountPreparation})}/></Suspense>}
+    {savingSheets && <CorretorLoadingState compact title="Guardando planilhas…" />}
+    {starting && <CorretorLoadingState title="Conferindo materiais para a avaliação…" description="Lendo as planilhas e vinculando os documentos ao estudo." />}
+    {prepared && intent==='recommendation' && onRecommendation && file && !savingSheets && <Suspense fallback={<CorretorLoadingState title="Preparando sugestão de análise…" />}><Recommendation key={prepared.ir.sha1} onBusyChange={setRecommendationBusy} preparedIr={prepared.ir} ensureStudy={()=>onRecommendation({file,...prepared,sheets,fonte:null,city,uf,outras:[],budgetUsd:0,accountPreparation})}/></Suspense>}
     {prepared && intent==='review' && <section className="cp-panel"><h2>Conferir antes de iniciar</h2><div className="cs-fields"><div><Label htmlFor="prepare-city">Cidade do estudo</Label><Input id="prepare-city" value={city} disabled={starting || recommendationBusy} onChange={e => setCity(e.target.value)} /></div><div><Label htmlFor="prepare-uf">Estado</Label><Select value={uf} disabled={starting || recommendationBusy} onValueChange={setUf}><SelectTrigger id="prepare-uf"><SelectValue placeholder="UF" /></SelectTrigger><SelectContent>{UFS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent></Select></div></div>
       <Label htmlFor="prepare-others">Outras cidades que fazem parte do estudo (opcional)</Label><Input id="prepare-others" value={outras} disabled={starting || recommendationBusy} onChange={e => setOutras(e.target.value)} placeholder="Separe por vírgulas" />
       <p className="cp-muted">{prepared.ir.n_slides} slides · {profile?.tabelasNativas} tabelas nativas · {(profile?.tabelasImagem ?? 0) + (profile?.fichas ?? 0)} tabelas em imagem. Estes conteúdos ainda não foram avaliados.</p>

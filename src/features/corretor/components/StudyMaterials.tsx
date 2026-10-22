@@ -2,7 +2,7 @@ import LoadingSurface from './LoadingSurface';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import CorretorLoadingState from './CorretorLoadingState';
 import { useGeobrainAccess } from '../lib/geobrain-access-context';
 import { activateSources, listMaterials, listSourceSets, recordReviewSnapshot, recoverMaterial, uploadMaterial, type MaterialAsset, type MaterialKind, type SourceSet } from '../lib/materials';
 import type { VersionRecord } from '../lib/projects';
@@ -47,7 +47,7 @@ export default function StudyMaterials({study,version,onSourcesChanged}:{study:S
   <input ref={input} type="file" hidden onChange={e=>{const files=Array.from(e.target.files??[]);e.target.value='';void send(files);}}/>
   <div className="cp-actions"><Button disabled={!version||busy} onClick={()=>void pick('pptx')}><Presentation size={18} aria-hidden="true"/>Guardar apresentação</Button><Button variant="outline" disabled={!version||busy} onClick={()=>void pick('sheet')}><FileSpreadsheet size={18} aria-hidden="true"/>Adicionar planilhas</Button><Button variant="outline" disabled={!version||busy} onClick={()=>void pick('preview_pdf')}><FileText size={18} aria-hidden="true"/>Adicionar prévia PDF</Button></div>
   <p className="cp-muted">Inclua as planilhas para conferir os números contra os cálculos de origem. O PDF é uma prévia complementar exportada do mesmo PPTX, não um novo estudo.</p>
-  {busy&&<div role="status"><p>Guardando e conferindo materiais…</p><Progress value={progress}/></div>}
+  {busy&&<CorretorLoadingState title="Guardando e conferindo materiais…" description={`${progress}% do envio confirmado`} />}
   {localSheets.length>0&&<section className="cp-local-materials" aria-label="Planilhas neste navegador"><h3>Planilhas desta análise</h3><p className="cp-muted">Disponíveis neste navegador. Para acesso em outro computador, guarde-as em Adicionar planilhas.</p><ul className="cs-files">{localSheets.map(f=><li key={f.key}><FileSpreadsheet size={18} aria-hidden="true"/><span>{f.name}</span><Button variant="ghost" onClick={()=>downloadLocal(f.bytes,f.name)} aria-label={`Baixar ${f.name}`}><Download size={18} aria-hidden="true"/></Button></li>)}</ul></section>}
   {current.map(a=><div className="cp-version" key={a.id}><strong>{a.original_name}</strong><p className="cp-muted">{a.kind==='sheet'?'Planilha':a.kind==='pptx'?'Apresentação':'Prévia'} · {(a.bytes/1024/1024).toFixed(1)} MB</p><Button variant="outline" disabled={busy} onClick={()=>void recover(a)}>{a.kind==='pptx'?'Recuperar apresentação':'Baixar arquivo'}</Button></div>)}
   {sets.filter(s=>s.version_id!==version?.id).slice(0,1).map(s=><div key={s.id} className="cp-notice"><p>As planilhas mudaram nesta versão?</p><Button variant="outline" disabled={busy} onClick={()=>void reuse(s)}>Usar planilhas anteriores</Button><Button variant="outline" disabled={busy} onClick={()=>void pick('sheet')}>Atualizar planilhas</Button></div>)}

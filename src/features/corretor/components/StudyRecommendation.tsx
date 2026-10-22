@@ -1,4 +1,5 @@
 import LoadingSurface from './LoadingSurface';
+import CorretorLoadingState from './CorretorLoadingState';
 import RecommendationResult from './RecommendationResult';
 import { plainRecommendation } from '../lib/recommendation-presentation';
 import { processingMessage } from '../lib/processing-message';
@@ -6,7 +7,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Copy, Download, FileUp, Pause, RefreshCw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { loadPptx, savePptx } from '../lib/v3/pptx-store';
 import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import type { Ir } from '../lib/audit/ir';
@@ -23,13 +23,12 @@ export default function StudyRecommendation({study,version,preparedIr,ensureStud
  const [linked,setLinked]=useState<RecommendationStudy|null>(study&&version?{study,version}:null);
  const [ir,setIr]=useState<Ir|null>(preparedIr??null),[records,setRecords]=useState<RecommendationRecord[]>([]),[selected,setSelected]=useState<RecommendationRecord|null>(null);
  const [loading,setLoading]=useState(!preparedIr),[historyLoading,setHistoryLoading]=useState(Boolean(study)),[running,setRunning]=useState(false),[error,setError]=useState(''),[wantNew,setWantNew]=useState(false),[copied,setCopied]=useState(false);
- const [budget,setBudget]=useState(0),[elapsed,setElapsed]=useState(0);
+ const [budget,setBudget]=useState(0);
  const stop=useRef(false),lock=useRef(false),mounted=useRef(true),fileInput=useRef<HTMLInputElement>(null);
  const quote=useMemo(()=>{try{return ir?{value:quoteRecommendation(recommendationSource(ir).slides),error:''}:null;}catch(e){return {value:null,error:e instanceof Error?e.message:'Conteúdo insuficiente para recomendar.'};}},[ir]);
  const source=useMemo(()=>ir?recommendationSource(ir):null,[ir]);
  useEffect(()=>{if(quote?.value)setBudget(Math.ceil(quote.value.maximumUsd*100)/100);},[quote]);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;stop.current=true;};},[]);
- useEffect(()=>{if(!running)return;const start=Date.now();setElapsed(0);const timer=setInterval(()=>setElapsed(Math.floor((Date.now()-start)/1000)),1000);return()=>clearInterval(timer);},[running]);
  useEffect(()=>{let active=true;if(!study||!version)return;
   setLoading(true);setHistoryLoading(true);
   listRecommendations(study.id).then(rows=>{if(active){const current=rows.filter(r=>r.version_n===version.n);setRecords(current);setSelected(current.find(r=>r.content)??current[0]??null);}}).catch(e=>{if(active)setError(processingMessage(e));}).finally(()=>{if(active)setHistoryLoading(false);});
@@ -71,14 +70,14 @@ export default function StudyRecommendation({study,version,preparedIr,ensureStud
   {selected&&<div className="cr-state"><strong>{RECOMMENDATION_STATES[selected.state]} · versão {selected.version_n}</strong>{Number(selected.reserved_usd)>0&&<p role="status">Uma etapa ainda aguarda confirmação. Atualize o histórico antes de tentar novamente.</p>}{selected.error_message&&<p role="alert">Não foi possível concluir esta etapa. Atualize o histórico ou procure a equipe de suporte.</p>}</div>}
   {selected?.content&&<><div className="cp-actions"><Button variant="outline" onClick={()=>void navigator.clipboard.writeText(plainRecommendation(selected.content!)).then(()=>setCopied(true)).catch(()=>setError('Não foi possível copiar. Você pode baixar o texto.'))}>{copied?<Check size={16}/>:<Copy size={16}/>}Copiar tudo</Button><Button variant="outline" onClick={download}><Download size={16}/>Baixar texto</Button><Button variant="outline" disabled={running||unknown} onClick={()=>setWantNew(true)}>Preparar outras sugestões</Button></div>{selected.state==='partial'&&<p role="status">Resultado parcial: uma etapa não foi concluída por inteiro. Confira a cobertura antes de utilizar.</p>}<RecommendationResult key={selected.id} text={selected.content}/></>}
   {showForm&&<>
-   {loading?<p role="status">Preparando conteúdo…</p>:!ir?<><p>Selecione o PowerPoint desta versão para preparar a recomendação.</p><Button variant="outline" onClick={()=>fileInput.current?.click()}><FileUp size={18}/>Selecionar PowerPoint da versão</Button></>:quote?.error?<p role="alert">{quote.error}</p>:quote?.value&&<>
+   {loading?<CorretorLoadingState title="Preparando conteúdo da apresentação…" />:!ir?<><p>Selecione o PowerPoint desta versão para preparar a recomendação.</p><Button variant="outline" onClick={()=>fileInput.current?.click()}><FileUp size={18}/>Selecionar PowerPoint da versão</Button></>:quote?.error?<p role="alert">{quote.error}</p>:quote?.value&&<>
     <div className="cr-estimate"><h3>Conferir antes de gerar</h3><p>{quote.value.slides} slides úteis</p><p className="cp-muted">Leitura de textos e tabelas nativas do PowerPoint. Planilhas, PDF e conteúdo só em imagem não entram nesta recomendação. {source?.withoutText??0} slides sem texto suficiente; {source?.limitedSlides??0} slides com texto limitado a 6.000 caracteres.</p>
     {budget>100&&<p role="status">Este estudo precisa de apoio da equipe para continuar. Seus materiais estão preservados.</p>}
     <Button disabled={running||historyLoading||unknown||budget<quote.value.maximumUsd||budget>100||!Number.isFinite(budget)} onClick={()=>void generate()}>{running?'Preparando sugestões…':records.some(r=>['prepared','interrupted','running'].includes(r.state))?'Retomar sugestões':'Preparar sugestões'}</Button></div>
    </>}
   </>}
   <input ref={fileInput} hidden type="file" accept=".pptx" onChange={e=>{const f=e.target.files?.[0];e.target.value='';void attach(f);}}/>
-  {running&&<div role="status"><p>Geração em andamento · {elapsed}s</p><Progress value={selected?Math.round(selected.provider_calls/selected.total_requests*100):0}/><Button variant="outline" onClick={()=>{stop.current=true;}}><Pause size={16}/>Pausar após a chamada atual</Button></div>}
+  {running&&<div><CorretorLoadingState title={selected?'Preparando sugestões de análise…':'Vinculando apresentação ao estudo…'} description="Organizando a leitura do estudo e a síntese.">{selected&&selected.total_requests>0&&<p className="cp-brain-stages">Etapas confirmadas · {selected.provider_calls}/{selected.total_requests}</p>}</CorretorLoadingState><Button variant="outline" onClick={()=>{stop.current=true;}}><Pause size={16}/>Pausar após a chamada atual</Button></div>}
   {error&&<p role="alert">{error}</p>}
   {linked&&<div className="cp-actions"><Button variant="ghost" disabled={running} onClick={()=>void refresh().catch(e=>setError(processingMessage(e)))}><RefreshCw size={16}/>Atualizar histórico</Button><Link className="cp-inline" to={studyHref(linked.study.id,'recomendacao',context,linked.version.id)}>Abrir sugestões do estudo</Link></div>}
  </LoadingSurface></section>;

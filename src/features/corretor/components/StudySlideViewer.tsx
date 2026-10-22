@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import CorretorLoadingState from './CorretorLoadingState';
 import { Button } from '@/components/ui/button';
 import { listMaterials, previewUrl } from '../lib/materials';
 import { digest, loadVersions } from '../lib/projects';
@@ -61,9 +62,10 @@ export default function StudySlideViewer({ study, slide, evidence }: {
       {preview?.kind === 'image' && <a href={preview.url} target="_blank" rel="noreferrer">Ampliar imagem</a>}
     </div>
     <input ref={input} type="file" accept=".pdf" hidden onChange={e => { const file = e.target.files?.[0]; e.target.value = ''; void attach(file); }} />
+    {busy && <CorretorLoadingState compact title="Conferindo prévia PDF…" />}
     {error && <p role="status" className="cp-muted">{error}</p>}
     {preview ? <div className="cb-document">{preview.kind === 'pdf'
-      ? <Suspense fallback={<p role="status">Preparando slide…</p>}><PdfSlide url={preview.url} slide={slide} zoom={zoom} expectedPages={study.nSlides} /></Suspense>
+      ? <Suspense fallback={<CorretorLoadingState compact title="Preparando slide…" />}><PdfSlide url={preview.url} slide={slide} zoom={zoom} expectedPages={study.nSlides} /></Suspense>
       : <img src={preview.url} alt={`Slide ${slide} da versão ${study.lastVersion}`} />}</div>
       : evidence ? <div className="cb-document"><a href={evidence} target="_blank" rel="noreferrer"><img src={evidence} alt={`Recorte de evidência do slide ${slide}`} /></a><p className="cp-muted">Recorte salvo do slide {slide} · clique para ampliar.</p></div> : null}
   </section>;

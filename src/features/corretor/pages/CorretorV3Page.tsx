@@ -1,4 +1,5 @@
 import { processingMessage } from '../lib/processing-message';
+import CorretorLoadingState from '../components/CorretorLoadingState';
 // Corretor v3 — fluxo unificado de correção (DESIGN_corretor_v3.md).
 // v3.0: Triagem DET (R$ 0) → Corrigir → Reconferir (diff) → Entregar.
 // v3.1: estágio "Aprofundar com IA" (texto em batch, custo estimado antes).
@@ -20,7 +21,7 @@ import { portfolioHref } from '../lib/study-navigation';
 import { toast } from 'sonner';
 import {
   Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, PackageCheck,
-  FileUp, ArrowLeft, Quote, Sparkles, ChevronDown, BookOpen, Pause, FileText, Zap, X,
+  FileUp, ArrowLeft, Quote, ChevronDown, BookOpen, Pause, FileText, Zap, X,
   FileSpreadsheet, PlayCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -195,39 +196,23 @@ interface AnalysisState {
 }
 
 function AnalysisBanner({ state, onPause }: { state: AnalysisState; onPause: () => void }) {
-  const [startedAt] = useState(Date.now);
-  const [elapsed, setElapsed] = useState(0);
-  useEffect(() => { const timer = window.setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 1000); return () => window.clearInterval(timer); }, [startedAt]);
   const order = STAGE_ORDER;
+  const current = order.find(stage => { const p = state.stages[stage]; return p && p.done < p.total; });
   return (
     <div className="cp-panel space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <Sparkles className="w-4 h-4 text-violet-500 shrink-0 animate-pulse" />
-          <h3 className="text-sm font-semibold truncate">{state.stages.gravando ? 'Gravando os resultados…' : 'Analisando o estudo…'}</h3>
-          <span className="text-xs text-muted-foreground">
-            {Math.floor(elapsed / 60)}min {elapsed % 60}s
-          </span>
-        </div>
+      <CorretorLoadingState title={state.stages.gravando ? 'Salvando os resultados…' : current ? `${STAGE_LABEL[current]} em andamento…` : 'Preparando a próxima etapa…'} description="Os resultados confirmados ficam guardados no estudo.">
+        <div className="cp-brain-stages">{order.map(stage => {
+          const p = state.stages[stage];
+          return p ? <span key={stage} data-complete={p.done >= p.total}>{p.done >= p.total && <CheckCircle2 size={13} aria-hidden="true" />}{STAGE_LABEL[stage]} · {p.done}/{p.total}</span> : null;
+        })}</div>
+      </CorretorLoadingState>
+      <div className="cp-analysis-actions">
         <button
           onClick={onPause}
           className="text-xs rounded-md px-2.5 py-1.5 border border-border hover:border-destructive/50 inline-flex items-center gap-1.5 shrink-0"
         >
           <Pause className="w-3.5 h-3.5" /> Pausar IA
         </button>
-      </div>
-      <div className="flex flex-wrap gap-x-4 gap-y-1">
-        {order.map((st) => {
-          const p = state.stages[st];
-          if (!p) return null;
-          const pct = p.total > 0 ? Math.round((p.done / p.total) * 100) : 0;
-          return (
-            <span key={st} className="text-[11px] text-muted-foreground inline-flex items-center gap-1.5">
-              {pct >= 100 ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <Loader2 className="w-3 h-3 animate-spin" />}
-              {STAGE_LABEL[st]} <span className="font-mono">{p.done}/{p.total}</span>
-            </span>
-          );
-        })}
       </div>
     </div>
   );
@@ -966,12 +951,12 @@ export default function CorretorV3Page() {
 
   if (launching || (analysis?.running && selected)) return <main className="corretor-projects cp-preparation">
     <header className="cp-heading"><div><p className="cp-eyebrow">Avaliação em andamento</p><h1>{launching?.name ?? selected?.nome}</h1><p className="cp-muted">{launching?.slides ?? selected?.nSlides} slides</p></div></header>
-    {analysis?.running ? <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} /> : <p role="status">{selected?.analise ? 'Abrindo os resultados…' : 'Preparando a avaliação…'}</p>}
+    {analysis?.running ? <AnalysisBanner state={analysis} onPause={() => abortRef.current?.abort()} /> : <CorretorLoadingState title={selected?.analise ? 'Abrindo os resultados…' : 'Preparando a avaliação…'} description="Vinculando os materiais e confirmando o início da revisão." />}
     <p className="cp-muted">Mantenha esta aba aberta. Os lotes com retorno confirmado ficam guardados; uma interrupção pode ser retomada após conferir os materiais.</p>
   </main>;
 
   // ─── HOMEPAGE (dropzone herói + seções) ─────────────────────────────────────
-  if (!selected && routeStudyId) return <div className="p-6"><p role="status">{loadingList || loadingStudy ? 'Abrindo revisão…' : 'Estudo não encontrado.'}</p><Link to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>;
+  if (!selected && routeStudyId) return <div className="p-6">{loadingList || loadingStudy ? <CorretorLoadingState title="Abrindo revisão…" /> : <p>Estudo não encontrado.</p>}<Link to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>;
   if (!selected) return <StudyPreparationPage failure={preparationFailure?.message} back={portfolioHref(searchParams.get('carteira') ?? '')} onStart={ingestNew} onRecommendation={prepareRecommendation} />;
 
   if (pending && !loadingStudy) return <StudyPreparationPage key={selected.id} failure={preparationFailure?.studyId===selected.id?preparationFailure.message:undefined} back={portfolioHref(searchParams.get('carteira') ?? '')} resume={{study:selected, fonte:fonteInput?.fonte ?? null}} onStart={resumePrepared}/>;
@@ -1063,11 +1048,13 @@ export default function CorretorV3Page() {
         </div>
       </header>
 
+      {sourceProgress && <CorretorLoadingState compact title="Lendo planilhas de cálculo…" description={`${sourceProgress.done}/${sourceProgress.total} arquivos preparados`} />}
+      {busy === 'recheck' && !analysis?.running && <CorretorLoadingState title="Preparando a reconferência…" />}
       {!pending && <section className="cp-review-summary" aria-label="Resumo da revisão"><h2>Resumo da revisão</h2><p>{selected.nSlides} slides · versão {selected.lastVersion} · {summary.pending} apontamentos pendentes</p><div className="cp-actions">{['Erros apontados','Prováveis','A verificar'].map((label,i)=><span key={label}><strong>{summary.levels[i]}</strong> {label}</span>)}</div>{summary.categories.length > 0 && <p className="cp-muted">{summary.categories.map(([label,n])=>`${label}: ${n}`).join(' · ')}</p>}</section>}
       <div className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur px-6 py-2.5 space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs min-h-[32px]">
           {analysis?.running ? (
-            <p className="inline-flex items-center gap-2 text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Análise em andamento — os resultados aparecem ao final.</p>
+            <CorretorLoadingState compact title="Avaliação em andamento…" />
           ) : pending && gate && gate.studyId === selected.id ? (
             <PreAnalysisNotice />
           ) : pending ? (
@@ -1164,7 +1151,7 @@ export default function CorretorV3Page() {
 
           {loadingStudy ? (
             <div className="flex items-center justify-center py-16 text-muted-foreground gap-2 text-sm">
-              <Loader2 className="w-4 h-4 animate-spin" /> Carregando achados…
+              <CorretorLoadingState title="Carregando apontamentos…" />
             </div>
           ) : (
             <>
@@ -1174,7 +1161,7 @@ export default function CorretorV3Page() {
                 </p>
               )}
               {!pending && !analysis?.running && <>
-                <Suspense fallback={<p role="status">Preparando bancada…</p>}><ReviewBench key={selected.id} study={selected} items={reviewedItems.filter(i=>(i.resolvidoNaVersao===null||i.status==='pendente')&&confidenceFilter.includes(confidenceOf(i.finding,i.origem)))} renderFinding={item=><V3FindingCard item={item} onStatus={status=>void handleStatus(item.ruleId,status)} onVerdict={verdict=>void handleVerdict(item.ruleId,verdict)}/>} /></Suspense>
+                <Suspense fallback={<CorretorLoadingState title="Preparando bancada…" />}><ReviewBench key={selected.id} study={selected} items={reviewedItems.filter(i=>(i.resolvidoNaVersao===null||i.status==='pendente')&&confidenceFilter.includes(confidenceOf(i.finding,i.origem)))} renderFinding={item=><V3FindingCard item={item} onStatus={status=>void handleStatus(item.ruleId,status)} onVerdict={verdict=>void handleVerdict(item.ruleId,verdict)}/>} /></Suspense>
               </>}
 
             </>

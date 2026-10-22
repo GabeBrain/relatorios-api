@@ -1,4 +1,4 @@
-import {reviewParameters,reviewProfile,LUNA_REVIEW_PROFILE,validateReviewContent,type ReviewModel,type ReviewTask} from './reviewer.ts';
+import {reviewParameters,reviewProfile,LUNA_REVIEW_PROFILE,validateReviewContent,reviewContentIssues,type ReviewModel,type ReviewTask} from './reviewer.ts';
 
 // Uma chamada por lote. Timeout/erro de transporte é desconhecido e não é repetido.
 export async function callReviewProvider(apiKey: string, model: ReviewModel, task: ReviewTask, messages: unknown[]) {
@@ -16,8 +16,12 @@ export async function callReviewProvider(apiKey: string, model: ReviewModel, tas
   if(!usage||!Number.isSafeInteger(usage.prompt_tokens)||!Number.isSafeInteger(usage.completion_tokens))throw new Error('Uso não confirmado pelo provedor.');
   const choice=raw.choices?.[0];
   let content: unknown;
-  try{content=JSON.parse(choice?.message?.content??'');}catch{content=null;}
+  let parsed=false;
+  try{content=JSON.parse(choice?.message?.content??'');parsed=true;}catch{content=null;}
   const valid=choice?.finish_reason==='stop'&&!choice?.message?.refusal&&validateReviewContent(task,content);
+  const failureCode=valid?null:choice?.message?.refusal?'REVIEW_REFUSED':choice?.finish_reason==='length'?'REVIEW_TRUNCATED':choice?.finish_reason!=='stop'?'REVIEW_UNFINISHED':!parsed?'REVIEW_JSON_INVALID':'REVIEW_SCHEMA_INVALID';
+  const subject=task==='analyze-ata-image'?'da ata':task==='analyze-table-image'?'da tabela em imagem':'do texto';
+  const failureDetail=failureCode==='REVIEW_TRUNCATED'?'foi interrompida antes de terminar':failureCode==='REVIEW_REFUSED'?'não foi concluída pelo modelo':failureCode==='REVIEW_JSON_INVALID'?'não retornou um resultado estruturado válido':failureCode==='REVIEW_SCHEMA_INVALID'?'retornou campos fora do formato esperado':'não terminou com um resultado confirmado';
   const p=reviewProfile(model==='gpt-6-luna'?LUNA_REVIEW_PROFILE:'review-legacy-continuous-v1');
   return {content:valid?content as Record<string,unknown>:null,meta:{
     inputTokens:usage.prompt_tokens,outputTokens:usage.completion_tokens,
@@ -27,6 +31,6 @@ export async function callReviewProvider(apiKey: string, model: ReviewModel, tas
     priceVersion:p.priceVersion,requestedServiceTier:p.serviceTier,serviceTier:raw.service_tier??null,
     latencyMs:Date.now()-started,requestId:response.headers.get('x-request-id')??raw.id??null,promptHash,
     finishReason:choice?.finish_reason??null,
-    ...(valid?{}:{error:'O provedor retornou uso, mas a leitura está incompleta ou inválida. Confira antes de retomar.',invalidOutput:choice?.message?.content??null,refusal:choice?.message?.refusal??null}),
+    ...(valid?{}:{error:`A leitura ${subject} ${failureDetail}. A equipe precisa conferir esta tentativa antes de retomar.`,errorCode:failureCode,validationErrors:reviewContentIssues(task,content),invalidOutput:choice?.message?.content??null,refusal:choice?.message?.refusal??null}),
   }};
 }
