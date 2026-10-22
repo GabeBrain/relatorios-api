@@ -39,6 +39,7 @@ const PanoramaSecoviFiergsPage = lazy(() => import('./features/panorama-secovi-f
 const SpInstitutionalPage = lazy(() => import('./features/relatorios-institucionais/sp/SpInstitutionalPage'));
 const EmpresasEmpregadosPage = lazy(() => import('./features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx'));
 const SindusconCuritibaPage = lazy(() => import('./features/sinduscon-curitiba/pages/SindusconCuritibaPage.tsx'));
+const EstimativasPage = lazy(() => import('./features/estimativas-vendas/EstimativasPage.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -87,6 +88,7 @@ const App = () => (
                 {/* Rebrain */}
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
                 <Route path="/rebrain/panorama-secovi-fiergs" element={<PanoramaSecoviFiergsPage />} />
+                <Route path="/rebrain/estimativas-vendas" element={<EstimativasPage />} />
                 <Route path="/rebrain/relatorios-institucionais/sp" element={<Suspense fallback={<div className="p-6 text-sm" role="status">Carregando SP institucional…</div>}><SpInstitutionalPage /></Suspense>} />
                 <Route
                   path="/rebrain/aelo"
