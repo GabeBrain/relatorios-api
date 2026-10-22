@@ -1377,6 +1377,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-22 — Finotti: API confirmada e plano do dossiê/simulador — Gabriel / Codex
+- **Ambiente/funcionalidade:** Rebrain/SID, Estimativas de vendas; diagnóstico somente leitura, sem interface ou backtest real.
+- **O quê/por quê:** autenticação local e histórico horizontal Geobrain confirmados em Fortaleza e Blumenau. Auditoria agregada identifica campos, reconciliação brutas−distratos, meses negativos, rótulos de produto e ausência de flag observado/estimado por competência na resposta. Gabriel/Codex passam a conduzir implementação/dossiê; Edgar apoia esclarecimento de acesso/contrato em paralelo, conforme direção de Gabriel.
+- **Evidência/estado:** [plano e números da sondagem](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md), `scripts/diagnostics/estimativas-api-audit.mjs`; HTTP 200 para cidades monitoradas/histórico, 43 empreendimentos e 2.965 linhas em Fortaleza, 38 e 1.754 em Blumenau. Estado **preparado** para retrospectiva; nenhum mês tratado como gabarito observado sem linhagem confirmada.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`; leitura de referência, sem escrita.
+- **Impacto em Etapas/Pendências:** fonte API viável; próximo adaptar payload bruto sem trocar nulo por zero, fechar origem por período, revisar vendas negativas, rodar comparação pareada e só então habilitar simulador de teste. Push/deploy não feitos nesta sessão.
+
 ### 2026-10-21 — Estimativas Finotti: motor horizontal e ensaio de corte — Gabriel / Codex
 - **Ambiente/funcionalidade:** Rebrain/SID, código local em `src/features/estimativas-vendas/`, sem rota ou integração Geobrain.
 - **O quê/por quê:** coeficientes do slide 7 versionados à parte do motor puro; caso fechado 300/150/6 reproduzido (`k=0,632035`, 65,84% no mês 12, 75,04% no 18, cruzamento de 95% no 61 e contagem ilustrativa até 67). Ensaio em memória congela origem e compara curva com médias de 3/12 meses, omitindo cauda e extrapolação da métrica.
@@ -2485,7 +2492,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-**21/10 — Estimativas de vendas Finotti:** documentação inicial e motor horizontal local preparados em [estimativas-vendas](../features/estimativas-vendas/README.md). Reprodução do caso publicado validada localmente; ensaio de corte em memória pronto para receber série observada. Contrato oficial, retrospectiva real, cauda mensal, bandas, UI e retorno continuam pendentes. Sem runtime publicado.
+**22/10 — Estimativas de vendas Finotti:** reprodução matemática local e acesso API somente leitura confirmados em duas cidades; [plano do dossiê](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md) define recortes, métricas, conjunto e interface. Linhagem observado/estimado por mês, contrato oficial, retrospectiva real, cauda mensal, bandas, UI e retorno continuam pendentes. Sem runtime publicado nesta etapa.
 
 **15/10 — Corretor F1–F6:** preparação/revisão validadas localmente; registro de execução e prévias têm limites de ativação/infraestrutura no resultado F1–F6. A2/A3/F3 servidor não encerradas.
 
@@ -2516,7 +2523,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **Estimativas de vendas Finotti:** reprodução matemática do caso300-150-6 feita localmente; recuperar MD/código original, contrato Geobrain e série observada com Edgar para comparação mensal/trimestral real. Confirmar domínio, cauda95%, faixas, modelo vertical e alternância/coleta. [Manifesto e handoff](../features/estimativas-vendas/REPRODUCAO_E_HANDOFF.md). Sem aceite operacional.
+- [ ] **Estimativas de vendas Finotti:** API de histórico acessível; confirmar origem observado/estimado por competência e adaptar série bruta com meses negativos/lacunas antes do backtest. Depois comparar empreendimento e carteira, gerar dossiê e simulador Rebrain. Contrato de retorno, domínio, cauda95%, bandas, vertical e alternância/coleta seguem abertos. [Plano e evidência](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md). Sem aceite operacional.
 
 - [ ] **Corretor v0.73:** revisar/publicar lote de fluxo contínuo, ativar migration/Edge/frontend e conferir produção. Conversão automática hospedada e recuperação da execução em outro navegador permanecem abertas; sem IA paga sem lote/orçamento.
 

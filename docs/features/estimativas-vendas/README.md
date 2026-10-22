@@ -4,6 +4,8 @@ Pacote inicial de contexto técnico e continuidade, preparado em **21/10/2026** 
 
 **Estado em 21/10: motor horizontal e ensaio retrospectivo em memória preparados localmente.** O exemplo 300/150/6 foi reproduzido matematicamente. Não há rota, arquivo Geobrain importado, comparação em base real ou homologação.
 
+**Atualização em 22/10:** o pacote e o motor já estão em `origin/main`; acesso autenticado somente leitura à API confirmado em Fortaleza e Blumenau. O [plano do dossiê e simulador](PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md) registra qualidade da fonte, cortes retrospectivos e gates da interface. Gabriel/Codex conduzem esta frente; Edgar apoia dúvidas de acesso/contrato em paralelo. Nenhum backtest real ou tela foi entregue nesta atualização.
+
 ## Ordem de leitura
 
 1. [MANIFESTO.md](MANIFESTO.md): objetivo, escopo, responsáveis, metodologia, arquitetura, evidências e pendências.
@@ -12,6 +14,7 @@ Pacote inicial de contexto técnico e continuidade, preparado em **21/10/2026** 
 4. [CONTRATO_E_VALIDACAO.md](CONTRATO_E_VALIDACAO.md): contrato candidato, lacunas e critérios do primeiro teste.
 5. [CTA_NOVA_SESSAO.md](CTA_NOVA_SESSAO.md): texto para iniciar a conversa técnica.
 6. [REPRODUCAO_E_HANDOFF.md](REPRODUCAO_E_HANDOFF.md): resultado numérico, limites do motor e recorte revisável para Edgar.
+7. [PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md](PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md): sondagem autenticada, plano estatístico e interface de testes.
 
 ## Onde avançar
 
