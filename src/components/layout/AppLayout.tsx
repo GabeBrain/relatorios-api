@@ -69,6 +69,7 @@ const NAV_GROUPS: NavGroup[] = [
           { path: '/rebrain/secovi', label: 'Base de Mercado — Excel', icon: <Building2 className="h-4 w-4" />, standbyLabel: '(antigo Relatório Secovi)' },
           { path: '/rebrain/sinduscon-curitiba', label: 'Sinduscon — Curitiba', icon: <Building2 className="h-4 w-4" /> },
           { path: '/rebrain/aelo', label: 'AELO', icon: <Building2 className="h-4 w-4" /> },
+          { path: '/rebrain/relatorio-api-excel', label: 'Relatório API Excel', icon: <Building2 className="h-4 w-4" /> },
           { path: '/rebrain/panorama-secovi-fiergs', label: 'Panorama de Mercado', icon: <BarChart2 className="h-4 w-4" />, standbyLabel: '(Secovi/FIERGS)' },
         ],
       },

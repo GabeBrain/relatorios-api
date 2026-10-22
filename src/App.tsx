@@ -34,6 +34,7 @@ function CorretorLegacyAnalysis() { const location = useLocation(); const params
 const CorretorReportPage = lazy(() => import('./features/corretor/pages/CorretorReportPage.tsx'));
 const CorretorCalibrationPage = lazy(() => import('./features/corretor/pages/CorretorCalibrationPage.tsx'));
 const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/AtualizadorVgvPage.tsx'));
+const RelatorioApiExcelPage = lazy(() => import('./pages/RelatorioApiExcel.tsx'));
 const RelatorioAeloPage = lazy(() => import('./pages/RelatorioAelo.tsx'));
 const PanoramaSecoviFiergsPage = lazy(() => import('./features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx'));
 const SpInstitutionalPage = lazy(() => import('./features/relatorios-institucionais/sp/SpInstitutionalPage'));
@@ -93,6 +94,14 @@ const App = () => (
                   element={(
                     <Suspense fallback={<div className="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">Carregando o Relatório AELO...</div>}>
                       <RelatorioAeloPage />
+                    </Suspense>
+                  )}
+                />
+                <Route
+                  path="/rebrain/relatorio-api-excel"
+                  element={(
+                    <Suspense fallback={<div className="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">Carregando o Relatório API Excel...</div>}>
+                      <RelatorioApiExcelPage />
                     </Suspense>
                   )}
                 />

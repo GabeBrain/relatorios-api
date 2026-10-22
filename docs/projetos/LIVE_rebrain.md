@@ -1,3 +1,12 @@
+## 22/10/2026 ? Relatório API Excel ? Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` ? Relatórios Automatizados.
+- **O quê:** cópia independente do AELO com nome próprio, rota lazy, menu, busca, início e nome de arquivo Excel; preservados filtros AELO, coleta, tabelas e gráficos.
+- **Regras/layout:** `docs/features/relatorio-api-excel.md` documenta VGV, colunas, formatos e limitações herdadas.
+- **Autor/origem:** Edgar / Codex. **Commits:** commit desta entrada.
+- **Monday:** ?
+- **Etapas/Pendências:** implementação local concluída; 12 testes existentes de percentuais/agregação e typecheck aprovados. Consulta autenticada e interface em navegador (desktop/mobile, claro/escuro) pendentes; publicação depende de autorização. Padrões reutilizados: página AELO, primitives Brain e GeoApiScopeSelector; estados de carregamento, vazio, erro, escopo e sucesso preservados por cópia.
+
 ## 22/10/2026 — Validação do Fechamento: migration aplicada manualmente no Supabase — Edgar / Codex
 
 - **Ambiente/funcionalidade:** aprovações de divergências da Validação do Fechamento.
