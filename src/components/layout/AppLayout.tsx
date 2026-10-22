@@ -98,7 +98,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Estimativas de Vendas',
     icon: <TrendingUp className="h-4 w-4" />,
     items: [
-      { path: '/rebrain/estimativas-vendas', label: 'Simulador de Vendas', icon: <TrendingUp className="h-4 w-4" />, standbyLabel: '(em implementação)' },
+      { path: '/rebrain/estimativas-vendas', label: 'Estimativas de Vendas', icon: <TrendingUp className="h-4 w-4" />, standbyLabel: '(em implementação)' },
     ],
   },
   {
@@ -388,6 +388,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                   })}
                 </div>
               );
+            }
+
+            if (group.id === 'estimativas-vendas') {
+              return <div key={group.id} className="mt-2">{group.items.map(renderNavEntry)}</div>;
             }
 
             if (group.id === 'quanti') {

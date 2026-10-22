@@ -2675,3 +2675,6 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 **22/10 — Gabriel/sessão, navegação Estimativas de Vendas.** Ferramenta saiu da pasta Relatórios Automatizados e ganhou grupo próprio acima de Área Quanti; item Simulador de Vendas mantém aviso em implementação e a mesma rota. Typecheck, lint e teste do menu aprovados localmente. Próximo confirmar posição no site publicado.
 
+
+**22/10 — correção do menu Estimativas, Gabriel/sessão:** por pedido do usuário, Estimativas de Vendas virou link lateral direto acima de Banco Quanti, sem submenu Simulador de Vendas. Rota e aviso em implementação preservados. Dois testes de menu, tipos e lint aprovados; publicação e conferência visual pendentes.
+

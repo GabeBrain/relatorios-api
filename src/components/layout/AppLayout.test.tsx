@@ -11,6 +11,14 @@ beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 
 describe('marca do menu lateral', () => {
+  it('mostra Estimativas como link direto antes do Banco Quanti', () => {
+    render(<MemoryRouter><AppLayout><p>Conteúdo</p></AppLayout></MemoryRouter>);
+    const estimates = screen.getByRole('link', { name: /Estimativas de Vendas/i });
+    const quanti = screen.getByRole('link', { name: /Banco Quanti/i });
+    expect(estimates).toHaveAttribute('href', '/rebrain/estimativas-vendas');
+    expect(estimates.compareDocumentPosition(quanti) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByText('Simulador de Vendas')).not.toBeInTheDocument();
+  });
   it('enquadra o símbolo do logo original ao recolher e restaura a marca ao expandir', () => {
     render(<MemoryRouter><AppLayout><p>Conteúdo</p></AppLayout></MemoryRouter>);
     expect(screen.getByAltText('Brain')).toBeInTheDocument();
