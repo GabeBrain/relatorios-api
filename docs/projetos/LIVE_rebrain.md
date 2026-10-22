@@ -1,3 +1,11 @@
+## 22/10/2026 — Validação do Fechamento: migration aplicada manualmente no Supabase — Edgar / Codex
+
+- **Ambiente/funcionalidade:** aprovações de divergências da Validação do Fechamento.
+- **Estado:** migration `20261022090000_validacao_fechamento_exclusao_administrativa.sql` aplicada manualmente pelo usuário no SQL Editor do projeto `mxinpvcqzbfbzjodhgtz`.
+- **Evidência informada pelo usuário:** consulta de permissões retornou `usuario = postgres` e `aplicacao_pode_excluir = false`. Nenhuma exclusão de aprovação foi necessária para essa verificação.
+- **Etapas/Pendências:** aplicação manual do SQL concluída. O registro de `20261022090000` no histórico remoto do CLI permanece pendente: CLI sem autenticação e checkout sem vínculo. Antes de futuro `db push`, conferir o histórico e registrar a versão como aplicada, sem executar novamente o SQL. Esta anotação documenta a aplicação manual; não altera o histórico remoto.
+- **Monday:** —
+
 ## 22/10/2026 — Validação do Fechamento: regras Farol por cluster — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
