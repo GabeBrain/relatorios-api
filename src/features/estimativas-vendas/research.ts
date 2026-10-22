@@ -25,12 +25,12 @@ export function projectBuilding(b: Building, cutoff: string): Decision {
   const first = months[0];
   const [fy, fm] = first.split('-').map(Number), [cy, cm] = cutoff.split('-').map(Number);
   const age = (cy - fy) * 12 + cm - fm + 1;
-  if (age < 1 || age > 48) return fail('Idade fora de 1–48 meses');
+  if (age < 1 || age > 48) return fail(`Mês ${age} fora do ajuste (1–48). Último corte dentro do domínio: ${addMonths(first, 47)}; confirme também a cadência e as vendas nesse corte.`);
   const qty = new Map<string, number>();
   for (const row of rows) { const n = finite(row.qty); if (n === null || n <= 0 || !Number.isInteger(n)) return fail('Unidades por tipologia ausentes/inválidas'); const key = String(row.typology_id); if (qty.has(key) && qty.get(key) !== n) return fail('Revisão de unidades sem regra'); qty.set(key, n); }
   const launchedUnits = [...qty.values()].reduce((a, n) => a + n, 0);
   const sales = months.map(month => { const current = rows.filter(r => monthKey(r.period) === month); return current.reduce((sum, r) => sum + (finite(r.sold_in_period) ?? 0), 0); });
-  if (months.some((m, i) => m !== addMonths(first, i))) return fail('Lacuna mensal');
+  if (months.some((m, i) => m !== addMonths(first, i))) return fail(`Histórico com ${months.length} competências em ${age} meses; não há regra para preencher as lacunas.`);
   if (rows.some(r => finite(r.sold_in_period) === null)) return fail('Vendas ausentes');
   if (sales.some(n => n < 0)) return fail('Venda líquida negativa sem regra');
   const netSoldUnits = sales.reduce((a, n) => a + n, 0);
