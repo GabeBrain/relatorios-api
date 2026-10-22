@@ -7,6 +7,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { PanoramaExportGate } from './features/panorama-secovi-fiergs/components/PanoramaExportGate.tsx';
 import MapaLegado from './pages/MapaLegado.tsx';
 import Home from './pages/Home.tsx';
@@ -81,7 +82,7 @@ const App = () => (
         <GeobrainAccessProvider><AppLayout>
           <PanoramaExportGate />
           <ErrorBoundary>
-            <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando...</div>}>
+            <Suspense fallback={<div className="p-6"><BrainLoadingState variant="page" title="Carregando ferramenta Rebrain" /></div>}>
               <Routes>
                 <Route path="/" element={<Navigate to="/inicio" replace />} />
                 <Route path="/inicio" element={<Home />} />
@@ -90,11 +91,11 @@ const App = () => (
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
                 <Route path="/rebrain/panorama-secovi-fiergs" element={<PanoramaSecoviFiergsPage />} />
                 <Route path="/rebrain/estimativas-vendas" element={<EstimativasPage />} />
-                <Route path="/rebrain/relatorios-institucionais/sp" element={<Suspense fallback={<div className="p-6 text-sm" role="status">Carregando SP institucional…</div>}><SpInstitutionalPage /></Suspense>} />
+                <Route path="/rebrain/relatorios-institucionais/sp" element={<Suspense fallback={<div className="p-6"><BrainLoadingState variant="page" title="Carregando SP institucional" /></div>}><SpInstitutionalPage /></Suspense>} />
                 <Route
                   path="/rebrain/aelo"
                   element={(
-                    <Suspense fallback={<div className="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">Carregando o Relatório AELO...</div>}>
+                    <Suspense fallback={<div className="p-6"><BrainLoadingState variant="page" title="Carregando Relatório AELO" /></div>}>
                       <RelatorioAeloPage />
                     </Suspense>
                   )}

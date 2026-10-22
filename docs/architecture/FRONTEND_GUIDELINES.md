@@ -75,6 +75,11 @@ tempo decorrido real e prevenção de duplicidade). Quando a operação bloqueia
 `BrainLoadingState` na variante `overlay` usa véu opaco, fundo desfocado e logo Brain central;
 use-o em vez de um card estático. Skeletons preservam a estrutura que será entregue.
 
+Em todas as rotas Rebrain, inclusive POCs e ferramentas em implementação, a espera da rota lazy
+e a consulta de dados usam `BrainLoadingState` ou um carregamento existente com o mesmo logo Brain,
+etapa e estado acessível. O fallback compartilhado em `App.tsx` cobre a navegação lazy; cada ferramenta
+continua responsável pelo progresso de suas operações internas.
+
 Não prometa ETA sem métrica observada. Use cronômetro real ou texto honesto como “pode levar alguns
 instantes”. Erro e retry preservam o escopo já escolhido.
 
