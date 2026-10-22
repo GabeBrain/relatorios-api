@@ -1,0 +1,1212 @@
+{
+  "date": "2026-10-22",
+  "status": "validated locally; no push or deploy",
+  "reports": [
+    {
+      "activeTest": {
+        "constant": {
+          "attempted": 24,
+          "evaluated": 23,
+          "buildings": 6,
+          "coverage": 0.9583333333333334,
+          "maeUnits": 1.2608695652173914,
+          "biasUnits": -1.2608695652173914,
+          "medianPp": 0.7407407407407407,
+          "p90Pp": 5.149019607843138
+        },
+        "last": {
+          "attempted": 24,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean3": {
+          "attempted": 24,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean12": {
+          "attempted": 24,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti": {
+          "attempted": 24,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti-extra": {
+          "attempted": 24,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "absorption": {
+          "attempted": 24,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "flows": {
+          "attempted": 24,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "cohort": {
+          "attempted": 24,
+          "evaluated": 23,
+          "buildings": 6,
+          "coverage": 0.9583333333333334,
+          "maeUnits": 1.2608695652173914,
+          "biasUnits": -1.2608695652173914,
+          "medianPp": 0.7407407407407407,
+          "p90Pp": 5.149019607843138
+        }
+      },
+      "composition": {
+        "originsWithStock": 75,
+        "nonzeroStock": 6,
+        "withAge": 0
+      },
+      "bandResults": [],
+      "paired": {
+        "constant": {
+          "attempted": 299,
+          "evaluated": 299,
+          "buildings": 75,
+          "coverage": 1,
+          "maeUnits": 0.09698996655518395,
+          "biasUnits": -0.09698996655518395,
+          "medianPp": 0,
+          "p90Pp": 0
+        },
+        "last": {
+          "attempted": 299,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean3": {
+          "attempted": 299,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean12": {
+          "attempted": 299,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti": {
+          "attempted": 299,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti-extra": {
+          "attempted": 299,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "absorption": {
+          "attempted": 299,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "flows": {
+          "attempted": 299,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "cohort": {
+          "attempted": 299,
+          "evaluated": 299,
+          "buildings": 75,
+          "coverage": 1,
+          "maeUnits": 0.09698996655518395,
+          "biasUnits": -0.09698996655518395,
+          "medianPp": 0,
+          "p90Pp": 0
+        }
+      },
+      "scope": "PR/Curitiba/Horizontal",
+      "analyzedAt": "2026-10-22T17:45:25.094Z",
+      "snapshotReadMode": "local-replay",
+      "hash": "077ff975c1c0c8e435a47257bd0e1cdae581de4ef70cb5f3cd5d739a26806a8f",
+      "buildings": 371,
+      "pages": 4,
+      "provenance": "unknown",
+      "measurement": "unknown",
+      "split": {
+        "seed": 1701,
+        "training": 222,
+        "calibration": 74,
+        "test": 75
+      },
+      "trainingPairs": 614,
+      "artifacts": [
+        {
+          "model": "cohort",
+          "segment": "unknown",
+          "projects": 176,
+          "monthlyFraction": 0
+        },
+        {
+          "model": "absorption",
+          "segment": "fechado",
+          "projects": 3,
+          "k": 0.3944269239282809
+        },
+        {
+          "model": "cohort",
+          "segment": "fechado",
+          "projects": 37,
+          "monthlyFraction": 0
+        },
+        {
+          "model": "cohort",
+          "segment": "aberto",
+          "projects": 4,
+          "monthlyFraction": 0.014384920634920634
+        }
+      ],
+      "latestEligibility": {
+        "constant": 329,
+        "last": 0,
+        "mean3": 0,
+        "mean12": 0,
+        "finotti": 6,
+        "finotti-extra": 6,
+        "absorption": 5,
+        "flows": 0,
+        "cohort": 139
+      },
+      "test": {
+        "constant": {
+          "attempted": 300,
+          "evaluated": 299,
+          "buildings": 75,
+          "coverage": 0.9966666666666667,
+          "maeUnits": 0.09698996655518395,
+          "biasUnits": -0.09698996655518395,
+          "medianPp": 0,
+          "p90Pp": 0
+        },
+        "last": {
+          "attempted": 300,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean3": {
+          "attempted": 300,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean12": {
+          "attempted": 300,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti": {
+          "attempted": 300,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti-extra": {
+          "attempted": 300,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "absorption": {
+          "attempted": 300,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "flows": {
+          "attempted": 300,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "cohort": {
+          "attempted": 300,
+          "evaluated": 299,
+          "buildings": 75,
+          "coverage": 0.9966666666666667,
+          "maeUnits": 0.09698996655518395,
+          "biasUnits": -0.09698996655518395,
+          "medianPp": 0,
+          "p90Pp": 0
+        }
+      },
+      "bands": "Exploratory constant-model coverage evaluated; no interval promoted to UI",
+      "note": "Comparison with reported stock; no observed accuracy claim. Monthly models intentionally unavailable without cadence confirmation."
+    },
+    {
+      "activeTest": {
+        "constant": {
+          "attempted": 12,
+          "evaluated": 12,
+          "buildings": 3,
+          "coverage": 1,
+          "maeUnits": 3.25,
+          "biasUnits": -3.25,
+          "medianPp": 6.521739130434782,
+          "p90Pp": 13.000000000000002
+        },
+        "last": {
+          "attempted": 12,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean3": {
+          "attempted": 12,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean12": {
+          "attempted": 12,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti": {
+          "attempted": 12,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti-extra": {
+          "attempted": 12,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "absorption": {
+          "attempted": 12,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "flows": {
+          "attempted": 12,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "cohort": {
+          "attempted": 12,
+          "evaluated": 12,
+          "buildings": 3,
+          "coverage": 1,
+          "maeUnits": 1.71746311989956,
+          "biasUnits": -1.71746311989956,
+          "medianPp": 2.566322770817981,
+          "p90Pp": 9.327683615819211
+        }
+      },
+      "composition": {
+        "originsWithStock": 322,
+        "nonzeroStock": 3,
+        "withAge": 2
+      },
+      "bandResults": [
+        {
+          "segment": "vertical",
+          "horizon": 1,
+          "calibrationProjects": 321,
+          "test": {
+            "n": 322,
+            "coverage80": 0.9906832298136646,
+            "coverage50": 0.9906832298136646,
+            "width80": 0,
+            "intervalScore80": 0.15527950310559005
+          },
+          "promoted": false,
+          "reason": "Exploratory reported-stock interval; observed lineage and business tolerance pending."
+        },
+        {
+          "segment": "vertical",
+          "horizon": 3,
+          "calibrationProjects": 321,
+          "test": {
+            "n": 322,
+            "coverage80": 0.9906832298136646,
+            "coverage50": 0.9906832298136646,
+            "width80": 0,
+            "intervalScore80": 0.3105590062111801
+          },
+          "promoted": false,
+          "reason": "Exploratory reported-stock interval; observed lineage and business tolerance pending."
+        },
+        {
+          "segment": "vertical",
+          "horizon": 6,
+          "calibrationProjects": 321,
+          "test": {
+            "n": 322,
+            "coverage80": 0.9906832298136646,
+            "coverage50": 0.9906832298136646,
+            "width80": 0,
+            "intervalScore80": 0.3416149068322981
+          },
+          "promoted": false,
+          "reason": "Exploratory reported-stock interval; observed lineage and business tolerance pending."
+        },
+        {
+          "segment": "vertical",
+          "horizon": 12,
+          "calibrationProjects": 321,
+          "test": {
+            "n": 322,
+            "coverage80": 0.9906832298136646,
+            "coverage50": 0.9906832298136646,
+            "width80": 0,
+            "intervalScore80": 0.40372670807453415
+          },
+          "promoted": false,
+          "reason": "Exploratory reported-stock interval; observed lineage and business tolerance pending."
+        }
+      ],
+      "paired": {
+        "constant": {
+          "attempted": 1288,
+          "evaluated": 1288,
+          "buildings": 322,
+          "coverage": 1,
+          "maeUnits": 0.030279503105590064,
+          "biasUnits": -0.030279503105590064,
+          "medianPp": 0,
+          "p90Pp": 0
+        },
+        "last": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean3": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean12": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti-extra": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "absorption": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "flows": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "cohort": {
+          "attempted": 1288,
+          "evaluated": 1288,
+          "buildings": 322,
+          "coverage": 1,
+          "maeUnits": 0.016001209191610806,
+          "biasUnits": -0.016001209191610806,
+          "medianPp": 0,
+          "p90Pp": 0
+        }
+      },
+      "scope": "PR/Curitiba/Vertical",
+      "analyzedAt": "2026-10-22T17:45:46.645Z",
+      "snapshotReadMode": "local-replay",
+      "hash": "6a4b8396cece84f311bd4ac6eefe451d0c83c2f08e11eeafea88e069b089c547",
+      "buildings": 1606,
+      "pages": 17,
+      "provenance": "unknown",
+      "measurement": "unknown",
+      "split": {
+        "seed": 1701,
+        "training": 963,
+        "calibration": 321,
+        "test": 322
+      },
+      "trainingPairs": 2179,
+      "artifacts": [
+        {
+          "model": "absorption",
+          "segment": "vertical",
+          "projects": 45,
+          "k": 0.7680692161088233
+        },
+        {
+          "model": "cohort",
+          "segment": "vertical",
+          "projects": 796,
+          "monthlyFraction": 0.005602636534839925
+        }
+      ],
+      "latestEligibility": {
+        "constant": 1546,
+        "last": 0,
+        "mean3": 0,
+        "mean12": 0,
+        "finotti": 0,
+        "finotti-extra": 0,
+        "absorption": 49,
+        "flows": 0,
+        "cohort": 784
+      },
+      "test": {
+        "constant": {
+          "attempted": 1288,
+          "evaluated": 1288,
+          "buildings": 322,
+          "coverage": 1,
+          "maeUnits": 0.030279503105590064,
+          "biasUnits": -0.030279503105590064,
+          "medianPp": 0,
+          "p90Pp": 0
+        },
+        "last": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean3": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean12": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti-extra": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "absorption": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "flows": {
+          "attempted": 1288,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "cohort": {
+          "attempted": 1288,
+          "evaluated": 1288,
+          "buildings": 322,
+          "coverage": 1,
+          "maeUnits": 0.016001209191610806,
+          "biasUnits": -0.016001209191610806,
+          "medianPp": 0,
+          "p90Pp": 0
+        }
+      },
+      "bands": "Exploratory constant-model coverage evaluated; no interval promoted to UI",
+      "note": "Comparison with reported stock; no observed accuracy claim. Monthly models intentionally unavailable without cadence confirmation."
+    },
+    {
+      "activeTest": {
+        "constant": {
+          "attempted": 156,
+          "evaluated": 118,
+          "buildings": 39,
+          "coverage": 0.7564102564102564,
+          "maeUnits": 17.694915254237287,
+          "biasUnits": -14.423728813559322,
+          "medianPp": 7.453703703703704,
+          "p90Pp": 34.63095238095237
+        },
+        "last": {
+          "attempted": 156,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean3": {
+          "attempted": 156,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean12": {
+          "attempted": 156,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti": {
+          "attempted": 156,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti-extra": {
+          "attempted": 156,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "absorption": {
+          "attempted": 156,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "flows": {
+          "attempted": 156,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "cohort": {
+          "attempted": 156,
+          "evaluated": 118,
+          "buildings": 39,
+          "coverage": 0.7564102564102564,
+          "maeUnits": 17.694915254237287,
+          "biasUnits": -14.423728813559322,
+          "medianPp": 7.453703703703704,
+          "p90Pp": 34.63095238095237
+        }
+      },
+      "composition": {
+        "originsWithStock": 51,
+        "nonzeroStock": 39,
+        "withAge": 6
+      },
+      "bandResults": [
+        {
+          "segment": "vertical",
+          "horizon": 3,
+          "calibrationProjects": 56,
+          "test": {
+            "n": 51,
+            "coverage80": 0.7647058823529411,
+            "coverage50": 0.5686274509803921,
+            "width80": 7.806996940517773,
+            "intervalScore80": 71.6634612884494
+          },
+          "promoted": false,
+          "reason": "Exploratory reported-stock interval; observed lineage and business tolerance pending."
+        },
+        {
+          "segment": "vertical",
+          "horizon": 6,
+          "calibrationProjects": 56,
+          "test": {
+            "n": 51,
+            "coverage80": 0.6078431372549019,
+            "coverage50": 0.45098039215686275,
+            "width80": 9.223817762399074,
+            "intervalScore80": 89.87952710495959
+          },
+          "promoted": false,
+          "reason": "Exploratory reported-stock interval; observed lineage and business tolerance pending."
+        },
+        {
+          "segment": "vertical",
+          "horizon": 12,
+          "calibrationProjects": 56,
+          "test": {
+            "n": 51,
+            "coverage80": 0.7843137254901961,
+            "coverage50": 0.43137254901960786,
+            "width80": 13.907882331754958,
+            "intervalScore80": 86.90905110468464
+          },
+          "promoted": false,
+          "reason": "Exploratory reported-stock interval; observed lineage and business tolerance pending."
+        }
+      ],
+      "paired": {
+        "constant": {
+          "attempted": 154,
+          "evaluated": 154,
+          "buildings": 51,
+          "coverage": 1,
+          "maeUnits": 13.681818181818182,
+          "biasUnits": -10.928571428571429,
+          "medianPp": 4.537037037037037,
+          "p90Pp": 28.10179869881363
+        },
+        "last": {
+          "attempted": 154,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean3": {
+          "attempted": 154,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean12": {
+          "attempted": 154,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti": {
+          "attempted": 154,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti-extra": {
+          "attempted": 154,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "absorption": {
+          "attempted": 154,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "flows": {
+          "attempted": 154,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "cohort": {
+          "attempted": 154,
+          "evaluated": 154,
+          "buildings": 51,
+          "coverage": 1,
+          "maeUnits": 13.681818181818182,
+          "biasUnits": -10.928571428571429,
+          "medianPp": 4.537037037037037,
+          "p90Pp": 28.10179869881363
+        }
+      },
+      "scope": "SC/Blumenau/Vertical",
+      "analyzedAt": "2026-10-22T17:45:26.235Z",
+      "snapshotReadMode": "local-replay",
+      "hash": "818e6f960d1f73b84035383742caa3556e8d4f5fbfc2f1407f0b2d1d32a2fd19",
+      "buildings": 280,
+      "pages": 3,
+      "provenance": "unknown",
+      "measurement": "unknown",
+      "split": {
+        "seed": 1701,
+        "training": 168,
+        "calibration": 56,
+        "test": 56
+      },
+      "trainingPairs": 504,
+      "artifacts": [
+        {
+          "model": "cohort",
+          "segment": "vertical",
+          "projects": 168,
+          "monthlyFraction": 0
+        }
+      ],
+      "latestEligibility": {
+        "constant": 280,
+        "last": 0,
+        "mean3": 0,
+        "mean12": 0,
+        "finotti": 0,
+        "finotti-extra": 0,
+        "absorption": 0,
+        "flows": 0,
+        "cohort": 112
+      },
+      "test": {
+        "constant": {
+          "attempted": 224,
+          "evaluated": 154,
+          "buildings": 51,
+          "coverage": 0.6875,
+          "maeUnits": 13.681818181818182,
+          "biasUnits": -10.928571428571429,
+          "medianPp": 4.537037037037037,
+          "p90Pp": 28.10179869881363
+        },
+        "last": {
+          "attempted": 224,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean3": {
+          "attempted": 224,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "mean12": {
+          "attempted": 224,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti": {
+          "attempted": 224,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "finotti-extra": {
+          "attempted": 224,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "absorption": {
+          "attempted": 224,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "flows": {
+          "attempted": 224,
+          "evaluated": 0,
+          "buildings": 0,
+          "coverage": 0,
+          "maeUnits": null,
+          "biasUnits": null,
+          "medianPp": null,
+          "p90Pp": null
+        },
+        "cohort": {
+          "attempted": 224,
+          "evaluated": 154,
+          "buildings": 51,
+          "coverage": 0.6875,
+          "maeUnits": 13.681818181818182,
+          "biasUnits": -10.928571428571429,
+          "medianPp": 4.537037037037037,
+          "p90Pp": 28.10179869881363
+        }
+      },
+      "bands": "Exploratory constant-model coverage evaluated; no interval promoted to UI",
+      "note": "Comparison with reported stock; no observed accuracy claim. Monthly models intentionally unavailable without cadence confirmation."
+    }
+  ],
+  "browser": {
+    "checks": [
+      {
+        "selectionAndFlowMs": 2752,
+        "width": 390,
+        "theme": "light",
+        "selected": 100,
+        "visible": 12,
+        "pagination": true,
+        "portfolio": true,
+        "retrospective": true,
+        "focus": true,
+        "overflow": false,
+        "dialogOverflow": false
+      },
+      {
+        "selectionAndFlowMs": 2581,
+        "width": 390,
+        "theme": "dark",
+        "selected": 100,
+        "visible": 12,
+        "pagination": true,
+        "portfolio": true,
+        "retrospective": true,
+        "focus": true,
+        "overflow": false,
+        "dialogOverflow": false
+      },
+      {
+        "selectionAndFlowMs": 2845,
+        "width": 768,
+        "theme": "light",
+        "selected": 100,
+        "visible": 12,
+        "pagination": true,
+        "portfolio": true,
+        "retrospective": true,
+        "focus": true,
+        "overflow": false,
+        "dialogOverflow": false
+      },
+      {
+        "selectionAndFlowMs": 2661,
+        "width": 768,
+        "theme": "dark",
+        "selected": 100,
+        "visible": 12,
+        "pagination": true,
+        "portfolio": true,
+        "retrospective": true,
+        "focus": true,
+        "overflow": false,
+        "dialogOverflow": false
+      },
+      {
+        "selectionAndFlowMs": 3966,
+        "width": 1440,
+        "theme": "light",
+        "selected": 100,
+        "visible": 12,
+        "pagination": true,
+        "portfolio": true,
+        "retrospective": true,
+        "focus": true,
+        "overflow": false,
+        "dialogOverflow": false
+      },
+      {
+        "selectionAndFlowMs": 2879,
+        "width": 1440,
+        "theme": "dark",
+        "selected": 100,
+        "visible": 12,
+        "pagination": true,
+        "portfolio": true,
+        "retrospective": true,
+        "focus": true,
+        "overflow": false,
+        "dialogOverflow": false
+      },
+      {
+        "selectionAndFlowMs": 2723,
+        "width": 1920,
+        "theme": "light",
+        "selected": 100,
+        "visible": 12,
+        "pagination": true,
+        "portfolio": true,
+        "retrospective": true,
+        "focus": true,
+        "overflow": false,
+        "dialogOverflow": false
+      },
+      {
+        "selectionAndFlowMs": 2815,
+        "width": 1920,
+        "theme": "dark",
+        "selected": 100,
+        "visible": 12,
+        "pagination": true,
+        "portfolio": true,
+        "retrospective": true,
+        "focus": true,
+        "overflow": false,
+        "dialogOverflow": false
+      }
+    ],
+    "failures": []
+  },
+  "realBrowser": {
+    "parity": "ANALISE_TEMPORAL_ca27939959c1244d00731095dee5654b.xlsx: 28308 iguais; 0 diferentes; 181 exclusivos de uma fonte.",
+    "source": "Authenticated live API; read-only",
+    "summary": "FECHADO · 87338\n\nYbá Village\n\n14 / 63 vendidas · mês 4\n\n2026-09\n2027-03\n2027-09\n2028-03\n2028-09\n0%\n25%\n50%\n75%\n100%\nCorte\nHistórico reportadoPrevisão\nVer detalhe · Ybá Village",
+    "retrospective": "0/5 alvos comparáveis · 0 empreendimentos · erro médio — unidades · mediana — pontos percentuais.",
+    "errors": []
+  },
+  "tests": {
+    "vitestPassed": 37,
+    "fullAppTypes": "passed",
+    "build": "passed; existing chunk warnings"
+  },
+  "rawArtifacts": ".local-inputs/estimativas-vendas/expanded (gitignored)"
+}

@@ -2713,3 +2713,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 **22/10 — Gabriel/sessão, seleção Curitiba e carregamento Brain.** Consulta real de 371 empreendimentos em quatro páginas; filtro e corte em 09/2026 identificam 22 elegíveis. A lista agora expõe os 371, permite busca por ID/nome e filtro opcional de elegibilidade. Texto explica que o corte define a origem da previsão. `BrainLoadingState` cobre consulta e Excel da ferramenta e o fallback lazy compartilhado; demais operações Rebrain seguem para revisão individual. Ensaio local autenticado confirmou curva 1/1 para ID 87338; 16 testes focados, tipos/lint/build aprovados. Estado validado localmente, sem publicação nem retrospectivo comprovado nesta evidência. [Detalhe](../features/estimativas-vendas/README.md).
 
+
+**22/10 — Gabriel/sessão, plano de expansão das estimativas.** Preparado plano de seis etapas para modelos por tipo, tratamento de dados incompletos, retrospectiva independente e sombra de previsão calibrada. Cobertura total do catálogo não equivale a previsão identificável para todos; cenários manuais permanecem explícitos. Evidência: docs/features/estimativas-vendas/PLANO_EXPANSAO_MODELOS_E_FAIXAS_2026-10-22.md. Estado preparado; próximos passos: inventário de tipo/idade/periodicidade e motor retrospectivo. Sem implementação, testes novos, push ou publicação nesta etapa.
+
+## 22/10/2026 — Estimativas: bancada multiempreendimento local — Gabriel/sessão
+
+**Desenvolvimento:** grade paginada de 12 gráficos, carteira de todos os membros, sobreposição de cinco, detalhe acessível, Horizontal/Vertical, Excel opcional, modelos versionados e retrospectiva. Fontes, contrato, motores, ajuste, calibração e interface separados. Cenário manual cobre hipóteses sem dados; comercial/mistos aguardam contrato da API.
+
+**Etapa/evidência:** validado localmente; 37 testes focados, tipos explícitos da aplicação, lint e build. Oito ensaios de viewport/tema sem overflow/erro e com foco restaurado. Ensaio autenticado local e Excel Curitiba: 28.308 iguais/0 diferentes/181 exclusivos. Auditoria de 2.257 cadastros em três recortes, com snapshots ignorados e agregados versionados. [Dossiê](../features/estimativas-vendas/RESULTADO_EXPANSAO_LOCAL_2026-10-22.md).
+
+**Pendências:** faixas reais não promovidas por cobertura/composição inadequadas; origem mensal, cadência, idade/revisões e contrato comercial continuam abertos. Próximo revisar localmente e esclarecer fonte; sem push ou deploy nesta etapa, conforme Gabriel. Alterações FIERGS/Corretor preservadas. Não equivale a acurácia observada ou ferramenta ampliada publicada.

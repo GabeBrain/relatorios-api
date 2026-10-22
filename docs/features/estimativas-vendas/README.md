@@ -1,5 +1,7 @@
 # Estimativas de vendas — Finotti / SID / Geobrain
 
+**Estado local em 22/10 — expansão executada:** bancada de comparação simultânea, carteira, detalhe, Horizontal/Vertical, motores experimentais e retrospectiva implementados. [Resultado, testes e limites](RESULTADO_EXPANSAO_LOCAL_2026-10-22.md) e [evidências agregadas](EVIDENCIAS_EXPANSAO_2026-10-22.json). Sem push/deploy da expansão. Faixas reais permanecem sem promoção; a estrutura estatística foi testada, mas a calibração reportada não sustenta a sombra na interface. As atualizações anteriores abaixo são histórico.
+
 Pacote inicial de contexto técnico e continuidade, preparado em **21/10/2026** por Gabriel/Codex.
 
 **Estado em 21/10: motor horizontal e ensaio retrospectivo em memória preparados localmente.** O exemplo 300/150/6 foi reproduzido matematicamente. Não há rota, arquivo Geobrain importado, comparação em base real ou homologação.
@@ -59,3 +61,5 @@ Verificação: `npm.cmd run typecheck` e ESLint dos arquivos tocados passaram; t
 
 Ensaio local no navegador, com a API real e sem escrita: 371/371 na lista; filtro 22/371; busca pelo ID 87338 (Ybá Village) e seleção geraram 1/1 curva elegível. A consulta e a leitura de Excel opcional usam o componente de carregamento com logo Brain; o fallback de navegação lazy da Rebrain também usa o componente compartilhado. Captura e script de ensaio ficam em `.local-inputs/estimativas-vendas/`, ignorados pelo Git. Typecheck, ESLint, 16 testes focados e build passaram. Esta evidência confirma a operação local da página, não a publicação nem a precisão retrospectiva da equação.
 
+
+**22/10 — expansão solicitada por Gabriel:** [Plano de modelos, retrospectiva e faixas de previsão](PLANO_EXPANSAO_MODELOS_E_FAIXAS_2026-10-22.md) preparado para horizontais, verticais, comerciais e mistos. Distingue limites do ajuste Finotti de proteções do adaptador; prevê extrapolação identificada, parâmetros próprios, modelos de fluxos e faixas calibradas de 50%/80%. Plano com testes e critérios de promoção; nenhuma nova curva ou banda implementada nesta etapa.
