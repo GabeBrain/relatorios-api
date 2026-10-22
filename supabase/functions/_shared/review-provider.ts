@@ -11,29 +11,47 @@ import {
 } from "./reviewer.ts";
 
 type FailurePhase = "provider_transport" | "provider_http" | "provider_envelope" | "provider_usage";
-type FailureDetail = { phase: FailurePhase; latencyMs: number; httpStatus: number | null; requestId: string | null; errorName: string };
+type FailureDetail = {
+  phase: FailurePhase;
+  latencyMs: number;
+  httpStatus: number | null;
+  requestId: string | null;
+  errorName: string;
+};
 
 // Não serializar a exceção original: pode conter conteúdo do estudo ou credenciais.
 function safeErrorName(error: unknown): string {
-  return error instanceof Error && ["TimeoutError", "AbortError", "TypeError", "SyntaxError", "Error"].includes(error.name)
-    ? error.name : "UnknownError";
+  return error instanceof Error &&
+    ["TimeoutError", "AbortError", "TypeError", "SyntaxError", "Error"].includes(error.name)
+    ? error.name
+    : "UnknownError";
 }
 
 class ReviewProviderFailure extends Error {
-  constructor(readonly errorCode: string, readonly diagnostic: FailureDetail) {
-    super("Não foi possível confirmar a leitura deste lote. A equipe precisa conferir esta tentativa antes de retomar.");
+  constructor(
+    readonly errorCode: string,
+    readonly diagnostic: FailureDetail,
+  ) {
+    super(
+      "Não foi possível confirmar a leitura deste lote. A equipe precisa conferir esta tentativa antes de retomar.",
+    );
     this.name = "ReviewProviderFailure";
   }
 }
 
 export function reviewFailureResponse(error: unknown, task: ReviewTask, executionId: string) {
-  const failure = error instanceof ReviewProviderFailure ? {
-    error: error.message, errorCode: error.errorCode, diagnostic: error.diagnostic,
-  } : {
-    error: "Não foi possível concluir este lote. Confira a execução antes de retomar.",
-    errorCode: "REVIEW_INTERNAL_ERROR",
-    diagnostic: { phase: "leaf_internal", errorName: safeErrorName(error) },
-  };
+  const failure =
+    error instanceof ReviewProviderFailure
+      ? {
+          error: error.message,
+          errorCode: error.errorCode,
+          diagnostic: error.diagnostic,
+        }
+      : {
+          error: "Não foi possível concluir este lote. Confira a execução antes de retomar.",
+          errorCode: "REVIEW_INTERNAL_ERROR",
+          diagnostic: { phase: "leaf_internal", errorName: safeErrorName(error) },
+        };
   console.error(JSON.stringify({ event: "corretor_review_failure", task, executionId, ...failure }));
   return failure;
 }
@@ -73,12 +91,18 @@ export async function callReviewProvider(apiKey: string, model: ReviewModel, tas
   } catch (error) {
     const name = safeErrorName(error);
     throw new ReviewProviderFailure(name === "TimeoutError" ? "REVIEW_PROVIDER_TIMEOUT" : "REVIEW_PROVIDER_TRANSPORT", {
-      phase: "provider_transport", latencyMs: Date.now() - started, httpStatus: null, requestId: null, errorName: name,
+      phase: "provider_transport",
+      latencyMs: Date.now() - started,
+      httpStatus: null,
+      requestId: null,
+      errorName: name,
     });
   }
   const requestId = response.headers.get("x-request-id");
   const detail = (phase: FailurePhase, error: unknown = null): FailureDetail => ({
-    phase, latencyMs: Date.now() - started, httpStatus: response.status,
+    phase,
+    latencyMs: Date.now() - started,
+    httpStatus: response.status,
     requestId: requestId && /^[A-Za-z0-9_-]{1,200}$/.test(requestId) ? requestId : null,
     errorName: safeErrorName(error),
   });
