@@ -1,4 +1,4 @@
-import { callReviewProvider, reviewFailureResponse } from '../_shared/review-provider.ts';
+import { callReviewProvider, reviewFailureResponse } from "../_shared/review-provider.ts";
 // Edge Function: analyze-table-image (Corretor v3.2 — Fase C produtizada)
 // Extrai a(s) tabela(s) numérica(s) de UMA imagem para JSON estruturado.
 // O chamador cacheia por sha1 (vision_cache) — cada imagem é paga uma vez só.
@@ -6,22 +6,25 @@ import { callReviewProvider, reviewFailureResponse } from '../_shared/review-pro
 // Deploy: supabase functions deploy analyze-table-image
 
 // --- CORS (mesmo modelo do analyze-slide) --------------------------------
-const DEV_ORIGINS = ['http://localhost:8080', 'http://localhost:5173'];
+const DEV_ORIGINS = ["http://localhost:8080", "http://localhost:5173"];
 
 function allowedOrigins(): string[] {
-  const env = Deno.env.get('ALLOWED_ORIGINS') ?? '';
-  const fromEnv = env.split(',').map((o) => o.trim()).filter(Boolean);
+  const env = Deno.env.get("ALLOWED_ORIGINS") ?? "";
+  const fromEnv = env
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
   return [...DEV_ORIGINS, ...fromEnv];
 }
 
 function corsHeadersFor(req: Request): Record<string, string> {
-  const origin = req.headers.get('Origin') ?? '';
+  const origin = req.headers.get("Origin") ?? "";
   const list = allowedOrigins();
   const allow = list.includes(origin) ? origin : list[0];
   return {
-    'Access-Control-Allow-Origin': allow,
-    'Vary': 'Origin',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    "Access-Control-Allow-Origin": allow,
+    Vary: "Origin",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   };
 }
 
@@ -42,7 +45,7 @@ function rateLimited(ip: string): boolean {
 }
 
 // --- Validação -------------------------------------------------------------
-const MODELS = ['gpt-4o', 'gpt-4o-mini', 'gpt-6-luna'] as const;
+const MODELS = ["gpt-4o", "gpt-4o-mini", "gpt-6-luna"] as const;
 type ModelId = (typeof MODELS)[number];
 const MAX_BASE64_CHARS = 7_000_000;
 
@@ -51,29 +54,32 @@ interface RequestBody {
   mime: string;
   model: ModelId;
   contexto: string; // "slide 121 · TABELA DE LACUNAS · seção LACUNAS"
-  tipo: 'tabela' | 'ficha';
+  tipo: "tabela" | "ficha";
 }
 
 function validate(body: unknown): { ok: true; value: RequestBody } | { ok: false; error: string; status: number } {
-  if (!body || typeof body !== 'object') return { ok: false, error: 'Corpo inválido.', status: 400 };
+  if (!body || typeof body !== "object") return { ok: false, error: "Corpo inválido.", status: 400 };
   const b = body as Record<string, unknown>;
-  if (typeof b.base64 !== 'string' || !b.base64) return { ok: false, error: 'base64 é obrigatório.', status: 400 };
-  if (b.base64.length > MAX_BASE64_CHARS) return { ok: false, error: 'Imagem grande demais.', status: 413 };
+  if (typeof b.base64 !== "string" || !b.base64) return { ok: false, error: "base64 é obrigatório.", status: 400 };
+  if (b.base64.length > MAX_BASE64_CHARS) return { ok: false, error: "Imagem grande demais.", status: 413 };
   const model = b.model as ModelId;
-  if (!MODELS.includes(model)) return { ok: false, error: 'model não suportado.', status: 400 };
+  if (!MODELS.includes(model)) return { ok: false, error: "model não suportado.", status: 400 };
   return {
     ok: true,
     value: {
       base64: b.base64,
-      mime: typeof b.mime === 'string' && b.mime.startsWith('image/') ? b.mime : 'image/png',
+      mime: typeof b.mime === "string" && b.mime.startsWith("image/") ? b.mime : "image/png",
       model,
-      contexto: String(b.contexto ?? '').slice(0, 300),
-      tipo: b.tipo === 'ficha' ? 'ficha' : 'tabela',
+      contexto: String(b.contexto ?? "").slice(0, 300),
+      tipo: b.tipo === "ficha" ? "ficha" : "tabela",
     },
   };
 }
 
-const PROMPT = (contexto: string, tipo: RequestBody['tipo']) => `Você transcreve dados de estudos imobiliários brasileiros a partir de imagens.
+const PROMPT = (
+  contexto: string,
+  tipo: RequestBody["tipo"],
+) => `Você transcreve dados de estudos imobiliários brasileiros a partir de imagens.
 Contexto: ${contexto}.
 
 Transcreva TODAS as tabelas numéricas da imagem, fielmente:
@@ -119,9 +125,13 @@ Se não houver, "anomalias_formato": [].
 Também informe "tem_fonte": true somente se for possível ler FONTE:, Fonte:, Elaboração:
 ou equivalente na imagem; caso contrário false. Não deduza.
 
-${tipo === 'ficha' ? `Esta imagem é uma FICHA TÉCNICA. Além das tabelas, extraia cada unidade legível em
+${
+  tipo === "ficha"
+    ? `Esta imagem é uma FICHA TÉCNICA. Além das tabelas, extraia cada unidade legível em
 "unidades": [{"tipologia":"2 dorms","m2":65,"vagas":1,"preco":550000,"preco_m2":8461}].
-Use null para valor ilegível e não invente unidades.` : 'Esta imagem é uma tabela; responda "unidades": [].'}
+Use null para valor ilegível e não invente unidades.`
+    : 'Esta imagem é uma tabela; responda "unidades": [].'
+}
 
 CLASSIFIQUE a semântica (o verificador confere a aritmética; classificar errado é pego):
 - "col_kinds": um rótulo por coluna, na ordem —
@@ -144,7 +154,15 @@ Responda EXATAMENTE este JSON (sem markdown):
 Se não houver tabela numérica: {"tables": [], "locais_visiveis": [], "unidades": [], "anomalias_formato": [], "tem_fonte": false}`;
 
 async function callOpenAI(apiKey: string, body: RequestBody) {
-  return callReviewProvider(apiKey,body.model,'analyze-table-image',[{role:'user',content:[{type:'text',text:PROMPT(body.contexto,body.tipo)},{type:'image_url',image_url:{url:`data:${body.mime};base64,${body.base64}`,detail:'high'}}]}]);
+  return callReviewProvider(apiKey, body.model, "analyze-table-image", [
+    {
+      role: "user",
+      content: [
+        { type: "text", text: PROMPT(body.contexto, body.tipo) },
+        { type: "image_url", image_url: { url: `data:${body.mime};base64,${body.base64}`, detail: "high" } },
+      ],
+    },
+  ]);
 }
 
 Deno.serve(async (req) => {
@@ -152,30 +170,38 @@ Deno.serve(async (req) => {
   const json = (data: unknown, status = 200) =>
     new Response(JSON.stringify(data), {
       status,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
-  if (req.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
-  if (!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || req.headers.get('authorization') !== `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`) return json({ error: 'Confirme a execução pelo corretor antes de processar.' }, 403);
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
+  if (
+    !Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
+    req.headers.get("authorization") !== `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`
+  )
+    return json({ error: "Confirme a execução pelo corretor antes de processar." }, 403);
 
   // Chamadas internas compartilham IP. O orçamento é por execução, assim como este limite.
-  const ip = req.headers.get('x-corretor-execution');
-  if (!ip || !/^[a-f0-9-]{36}$/i.test(ip)) return json({ error: 'Execução não identificada.' }, 403);
-  if (rateLimited(ip)) return json({ error: 'Limite de requisições excedido.' }, 429);
+  const ip = req.headers.get("x-corretor-execution");
+  if (!ip || !/^[a-f0-9-]{36}$/i.test(ip)) return json({ error: "Execução não identificada." }, 403);
+  if (rateLimited(ip)) return json({ error: "Limite de requisições excedido." }, 429);
 
   try {
-    const apiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!apiKey) return json({ error: 'OPENAI_API_KEY não configurada nos secrets.' }, 500);
+    const apiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!apiKey) return json({ error: "OPENAI_API_KEY não configurada nos secrets." }, 500);
 
     let raw: unknown;
-    try { raw = await req.json(); } catch { return json({ error: 'JSON inválido.' }, 400); }
+    try {
+      raw = await req.json();
+    } catch {
+      return json({ error: "JSON inválido." }, 400);
+    }
     const parsed = validate(raw);
     if (!parsed.ok) return json({ error: parsed.error }, parsed.status);
 
     const response = await callOpenAI(apiKey, parsed.value);
-    return json({...response.content, ...response.meta});
+    return json({ ...response.content, ...response.meta });
   } catch (err) {
-    return json(reviewFailureResponse(err, 'analyze-table-image', ip), 500);
+    return json(reviewFailureResponse(err, "analyze-table-image", ip), 500);
   }
 });
