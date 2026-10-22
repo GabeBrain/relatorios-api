@@ -3,7 +3,7 @@
 export type RawBuilding = Record<string, unknown>;
 const BASE_URL = 'https://app.geobrain.com.br/public-api/v2';
 const BUILDING_HISTORY_ENDPOINT = '/building-with-history-internal';
-const ALL_TYPES = ['Comercial', 'Horizontal', 'Vertical'];
+const ALL_TYPES = ['Comercial', 'Horizontal', 'Vertical', 'Hotel'];
 const PER_PAGE = 100;
 const PAGE_BATCH_SIZE = 5;
 const REQUEST_TIMEOUT_MS = 60_000;
