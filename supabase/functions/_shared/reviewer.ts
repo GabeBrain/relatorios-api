@@ -283,12 +283,16 @@ export function reviewRecoveryState(
   completedBatches: number,
   pendingBatches: number,
   hasReservation: boolean,
+  unknownBatches = 0,
 ) {
+  const runningBatches = Math.max(0, pendingBatches - unknownBatches);
   return {
     state,
     completedBatches,
     pendingBatches,
+    unknownBatches,
+    runningBatches,
     canResume:
-      ["not_started", "prepared", "interrupted", "failed"].includes(state) && pendingBatches === 0 && !hasReservation,
+      ["not_started", "prepared", "interrupted", "failed"].includes(state) && runningBatches === 0 && (!hasReservation || unknownBatches > 0),
   };
 }

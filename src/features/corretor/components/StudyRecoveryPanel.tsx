@@ -13,7 +13,8 @@ export default function StudyRecoveryPanel({ recovery, loading, error, savedCoun
     {message && <p className="cp-muted">{message}</p>}
     {loading ? <CorretorLoadingState compact title="Conferindo a retomada…"/> : error ? <p role="alert">{error}</p> : recovery && <div role="status">
       <p className="cp-muted">{recovery.completedBatches} lote(s) com retorno confirmado. Esses resultados serão reaproveitados na retomada.</p>
-      {!recovery.canResume && <p>Uma tentativa anterior precisa de conferência pela equipe antes de continuar. Seus resultados e documentos estão preservados.</p>}
+      {Boolean(recovery.unknownBatches) && <p>Uma leitura anterior ficou sem resposta confirmada. Você pode continuar as outras etapas; essa leitura aparecerá como pendente na revisão.</p>}
+      {!recovery.canResume && <p>{recovery.state === 'running' || Boolean(recovery.runningBatches) ? 'Há uma leitura em andamento. Aguarde o retorno antes de continuar.' : 'Não foi possível liberar a continuação neste momento. Seus resultados salvos continuam disponíveis.'}</p>}
     </div>}
     <div className="cp-actions">
       {preparing ? savedCount > 0 && <Button variant="outline" onClick={onReview}>Ver resultados salvos</Button> : <Button variant="outline" onClick={onPrepare}>{recovery?.canResume ? 'Continuar avaliação' : 'Conferir materiais'}</Button>}

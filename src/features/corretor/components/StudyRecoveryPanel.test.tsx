@@ -2,13 +2,18 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { expect, it, vi } from 'vitest';
 import StudyRecoveryPanel from './StudyRecoveryPanel';
 const props=()=>({recovery:null,loading:false,savedCount:22,preparing:false,onPrepare:vi.fn(),onReview:vi.fn(),onRefresh:vi.fn()});
-it('retorno desconhecido mantém resultados acessíveis e não oferece execução direta',()=>{
- const p=props();const {container}=render(<StudyRecoveryPanel {...p} recovery={{id:'run',state:'interrupted',completedBatches:37,pendingBatches:1,canResume:false}}/>);
+it('retorno desconhecido não bloqueia a continuação das outras etapas',()=>{
+ const p=props();const {container}=render(<StudyRecoveryPanel {...p} recovery={{id:'run',state:'interrupted',completedBatches:37,pendingBatches:1,unknownBatches:1,runningBatches:0,canResume:true}}/>);
  expect(screen.getByText(/22 apontamento/)).toBeInTheDocument();
- expect(screen.getByText(/conferência pela equipe/)).toBeInTheDocument();
- expect(screen.queryByRole('button',{name:'Continuar avaliação'})).not.toBeInTheDocument();
- fireEvent.click(screen.getByRole('button',{name:'Conferir materiais'}));expect(p.onPrepare).toHaveBeenCalledOnce();
+ expect(screen.getByText(/continuar as outras etapas/)).toBeInTheDocument();
+ expect(container.textContent).not.toMatch(/conferência pela equipe|conferência técnica/);
+ fireEvent.click(screen.getByRole('button',{name:'Continuar avaliação'}));expect(p.onPrepare).toHaveBeenCalledOnce();
  expect(container.textContent).not.toMatch(/US\$|R\$|\b(?:custo|tokens|gasto|reserva)\b/);
+});
+it('uma chamada em andamento continua impedindo execução paralela',()=>{
+ const p=props();render(<StudyRecoveryPanel {...p} recovery={{id:'run',state:'running',completedBatches:37,pendingBatches:1,unknownBatches:0,runningBatches:1,canResume:false}}/>);
+ expect(screen.getByText(/Há uma leitura em andamento/)).toBeInTheDocument();
+ expect(screen.queryByRole('button',{name:'Continuar avaliação'})).not.toBeInTheDocument();
 });
 it('preparação pode voltar aos resultados e reconsultar sem executar IA',()=>{
  const p=props();render(<StudyRecoveryPanel {...p} preparing recovery={{id:'run',state:'interrupted',completedBatches:37,pendingBatches:0,canResume:true}}/>);

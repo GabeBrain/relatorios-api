@@ -4,7 +4,7 @@ let active: { id: string; owner: string; profile: ReviewProfile | null } | null 
 let starting = false;
 export const hasActiveExecution = () => Boolean(active);
 export const activeReviewProfileId = () => active?.profile?.id;
-export interface ReviewRecovery { id: string | null; state: string; completedBatches: number; pendingBatches: number; canResume: boolean }
+export interface ReviewRecovery { id: string | null; state: string; completedBatches: number; pendingBatches: number; unknownBatches?: number; runningBatches?: number; canResume: boolean }
 /** Consulta somente leitura; não inicia execução nem chama provedor. */
 export async function loadReviewRecovery(study: { id: string; lastVersion: number; lastSha1: string | null }): Promise<ReviewRecovery> {
   const {data,error} = await supabase.functions.invoke('corretor-execution', {body:{

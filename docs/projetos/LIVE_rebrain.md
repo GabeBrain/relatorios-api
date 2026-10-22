@@ -1,3 +1,9 @@
+## 22/10/2026 — Remoção da trava excessiva na retomada
+
+Validação final:392aprovados/2ignorados,56arquivos aprovados; tipos/lint/Deno/build24,67s aprovados. Novo cenário testa o controlador real transpilado com banco/fetch simulados, além da preservação de histórico/decisões na cobertura. Sem avaliação paga ou confirmação de produção nesta rodada.
+
+Gabriel rejeitou conferência técnica como requisito. Causa: recuperação86de30f bloqueava toda execução com unknown/reserva; requisito criado pelo agente, sem nova avaliação humana de negócio. Status/start agora permitem outras etapas se não há running, preservando reserva/orçamento e bloqueando apenas o hash unknown no claim. Completed reapresentado, novos lotes seguem controle existente. Cobertura automática atualiza pendências sem sobrescrever decisões e guarda evidência anterior. Cenários do controlador real com banco/rede simulados comprovam retomada, skip unknown sem provedor, replay e novo lote; CI ampliado. [Causa, escopo e publicação](../features/corretor-vocacionais/DIAGNOSTICO_INTERRUPCAO_IMAGENS_ROLANDIA_2026-10-22.md). Sem IA/migration/banco remoto; publicar somente controlador com reviewer.ts e frontend. Não confundir remoção da trava com resolução da falha original ou análise completa real.
+
 ## 22/10/2026 — Recuperação de revisão incompleta sem ocultar resultados
 
 Fechamento local deste complemento:380testes aprovados/2ignorados,54arquivos aprovados,19,97s; tipos/lint/Deno/build e prévia isolada aprovados. Não equivale a conclusão do estudo Rolândia ou runtime atualizado; aguardando publicação manual e reconciliação da leitura desconhecida.

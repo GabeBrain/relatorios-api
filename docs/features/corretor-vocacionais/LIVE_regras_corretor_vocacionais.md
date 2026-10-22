@@ -1,3 +1,9 @@
+## 22/10/2026 — Unknown isolado não exige parar outras etapas
+
+Validação final local:392aprovados/2ignorados,56arquivos; tipos/lint/Deno/build24,67s aprovados. Sem dezpasses materiais ou chamadas reais nesta rodada; não equivale a análise real concluída.
+
+Correção do86de30f após rejeição de Gabriel: unknown e running deixam de ter o mesmo efeito global. Prepared/interrupted/failed sem running podem continuar os outros lotes; reserva unknown mantida, orçamento não ampliado e claim do mesmo hash continua recusado antes do provedor, com REVIEW_BATCH_UNCONFIRMED. Completed é replay; novo lote segue reserva/finish normais. UI remove requisito de conferência pela equipe, preserva resultados e informa a leitura pendente. Sem fingir cobertura completa/entrega autorizada. Aviso image-not-read só atualiza se automático pendente/sem veredicto, com histórico do payload e condição contra concorrência. Testes do controlador real e cobertura são simulados, sem IA, e entram em CI. Nenhuma regra de análise, modelo/prompt/cache/material/decisão ou migration alterada. Publicar controlador+reviewer e frontend; falha histórica não reconciliada por suposição.
+
 ## 22/10/2026 — Resultados parciais disponíveis e retomada consultada antes de iniciar
 
 Validação final:380aprovados/2ignorados na suíte,54arquivos aprovados; tipos/lint/Deno/build e prévia isolada aprovados. Estado validado localmente, sem execução real/migration/deploy nesta sessão.

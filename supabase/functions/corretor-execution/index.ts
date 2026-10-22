@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
           );
         return json({ id: null, ...reviewRecoveryState("not_started", 0, 0, false) });
       }
-      const [completed, pending] = await Promise.all([
+      const [completed, pending, unknown] = await Promise.all([
         db
           .from("corretor_execution_batches")
           .select("batch_hash", { count: "exact", head: true })
@@ -110,12 +110,14 @@ Deno.serve(async (req) => {
           .select("batch_hash", { count: "exact", head: true })
           .eq("execution_id", prior.id)
           .in("state", ["running", "unknown"]),
+        db.from("corretor_execution_batches").select("batch_hash", { count: "exact", head: true })
+          .eq("execution_id", prior.id).eq("state", "unknown"),
       ]);
-      if (completed.error || pending.error || completed.count === null || pending.count === null)
+      if (completed.error || pending.error || unknown.error || completed.count === null || pending.count === null || unknown.count === null)
         return json({ error: "Não foi possível conferir os lotes anteriores. Confira antes de retomar." }, 503);
       return json({
         id: prior.id,
-        ...reviewRecoveryState(prior.state, completed.count, pending.count, Number(prior.reserved_usd) > 0),
+        ...reviewRecoveryState(prior.state, completed.count, pending.count, Number(prior.reserved_usd) > 0, unknown.count),
       });
     }
     if (body.action === "start") {
@@ -289,20 +291,26 @@ Deno.serve(async (req) => {
           .from("corretor_execution_batches")
           .select("batch_hash", { count: "exact", head: true })
           .eq("execution_id", run.id)
-          .in("state", ["running", "unknown"]);
+          .eq("state", "running");
         if (pendingError || count === null)
           return json(
             { error: "Não foi possível conferir a tentativa anterior. Os resultados salvos estão preservados." },
             503,
           );
-        if (count > 0 || Number(run.reserved_usd) > 0)
+        if (count > 0)
           return json(
             {
               error:
-                "Uma leitura anterior precisa de conferência técnica antes da retomada. Você pode revisar os resultados já salvos, sem reenviar os documentos.",
+                "Uma leitura ainda está em andamento. Aguarde o retorno antes de continuar; seus resultados estão salvos.",
             },
             409,
           );
+        if (Number(run.reserved_usd) > 0) {
+          const {count: unknownCount, error: unknownError} = await db.from("corretor_execution_batches")
+            .select("batch_hash", {count:"exact", head:true}).eq("execution_id", run.id).eq("state", "unknown");
+          if (unknownError || unknownCount === null || unknownCount === 0)
+            return json({error:"O estado da tentativa anterior não pôde ser confirmado. Seus resultados continuam salvos."}, 409);
+        }
       }
       if (run.state !== "completed") {
         // O novo limite inclui o gasto anterior. Reservas desconhecidas permanecem retidas.
@@ -422,6 +430,10 @@ Deno.serve(async (req) => {
       p_reserve: reserve,
     });
     if (claimError) {
+      const {data: existing, error: existingError} = await db.from("corretor_execution_batches")
+        .select("state").eq("execution_id", run.id).eq("batch_hash", batchHash).maybeSingle();
+      if (!existingError && existing?.state === "unknown")
+        return json({ error: "Esta leitura não teve retorno confirmado e foi mantida como pendente. As outras etapas podem continuar.", errorCode: "REVIEW_BATCH_UNCONFIRMED" }, 409);
       // Somente log técnico: não expor mensagem SQL, materiais ou saldos ao analista.
       const reason = /retorno desconhecido|em andamento/i.test(claimError.message)
         ? "pending_batch"

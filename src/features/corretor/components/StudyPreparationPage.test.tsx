@@ -45,13 +45,13 @@ it('retomada usa o mesmo arquivo e conserva fonte sem criar outro registro',asyn
  expect(onStart).toHaveBeenCalledWith(expect.objectContaining({fonte,city:'Curitiba',uf:'PR',outras:['Pinhais','Colombo']}));
  expect(mocks.clear).not.toHaveBeenCalled();
 });
-it('retorno desconhecido bloqueia início mesmo com materiais restaurados',async()=>{
+it('leitura em andamento bloqueia início paralelo mesmo com materiais restaurados',async()=>{
  const onStart=vi.fn(),study={id:'existing',lastSha1:'a'.repeat(40),cidade:'Curitiba',uf:'PR'};
- render(<MemoryRouter><StudyPreparationPage back="/corretor" resume={{study:study as never,fonte:{blocos:[]} as never}} resumeBlocked="Uma leitura precisa de conferência técnica." onStart={onStart}/></MemoryRouter>);
+ render(<MemoryRouter><StudyPreparationPage back="/corretor" resume={{study:study as never,fonte:{blocos:[]} as never}} resumeBlocked="Há uma leitura em andamento." onStart={onStart}/></MemoryRouter>);
  await screen.findByLabelText('Cidade do estudo');
  const start=screen.getByRole('button',{name:'Continuar avaliação'});
  expect(start).toBeDisabled();fireEvent.click(start);expect(onStart).not.toHaveBeenCalled();
- expect(screen.getByText('Uma leitura precisa de conferência técnica.')).toBeInTheDocument();
+ expect(screen.getByText('Há uma leitura em andamento.')).toBeInTheDocument();
 });
 it('rascunho antigo de estudo analisado é consumido e oferece o resultado, sem reiniciar',async()=>{
  savedDraft();mocks.studies.mockResolvedValue([{id:'analisado',generation:'v3',lastSha1:'a'.repeat(40),analise:{},status:'em_correcao'}]);

@@ -394,6 +394,25 @@ export async function insertIaFindings(
   return count ?? findings.length;
 }
 
+/** Atualiza só cobertura automática ainda não decidida; mantém a evidência anterior no payload. */
+export async function refreshUnreadCoverage(studyId: string, findings: Finding[]): Promise<void> {
+  const finding = findings.find(f => f.id === 'image-not-read');
+  if (!finding) return;
+  const {data: row, error} = await db.from('findings_v3').select('payload,status,verdict,verdict_revisado')
+    .eq('study_id',studyId).eq('rule_id',finding.id).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!row || row.status !== 'pendente' || row.verdict || row.verdict_revisado) return;
+  const previous = row.payload ?? {};
+  if (previous.detail === finding.detail && previous.title === finding.title && previous.slideRef === finding.slideRef) return;
+  const {readCoverageHistory = [], ...snapshot} = previous;
+  const payload = {...finding, readCoverageHistory:[...(Array.isArray(readCoverageHistory) ? readCoverageHistory : []), snapshot]};
+  const {error: updateError} = await db.from('findings_v3')
+    .update({titulo:finding.title,detalhe:finding.detail,slide_ref:finding.slideRef,payload})
+    .eq('study_id',studyId).eq('rule_id',finding.id).eq('status','pendente').is('verdict',null).eq('verdict_revisado',false)
+    .eq('detalhe',previous.detail ?? '');
+  if (updateError) throw new Error(updateError.message);
+}
+
 /** Registra um passe de IA e acumula o custo no estudo. */
 export async function registerIaPass(
   studyId: string,

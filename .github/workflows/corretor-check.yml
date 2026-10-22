@@ -18,7 +18,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx tsc -p tsconfig.app.json --noEmit
-      - run: npx vitest run src/features/corretor/lib/v3/__tests__/review-guajajaras.test.ts
+      - run: >-
+          npx vitest run
+          src/features/corretor/lib/v3/__tests__/review-guajajaras.test.ts
+          src/features/corretor/lib/v3/__tests__/review-recovery.test.ts
+          src/features/corretor/lib/v3/__tests__/review-controller-resume.test.ts
+          src/features/corretor/lib/v3/__tests__/unread-coverage-resume.test.ts
+          src/features/corretor/components/StudyRecoveryPanel.test.tsx
       - run: npm run build
       # O replay de dez passes usa materiais locais grandes e não roda IA em CI.
       - uses: denoland/setup-deno@v2

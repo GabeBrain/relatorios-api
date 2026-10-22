@@ -58,6 +58,7 @@ import {
   concludeStudy, insertIaFindings, saveAta, confirmAta,
   saveReport, setFindingVerdict, resolveInvalidFindings, loadTranscribedBySha1,
   saveStudyFonte, loadStudyFonte, analysisPending, loadVisionReadings,
+  refreshUnreadCoverage,
   type StudyV3, type FindingV3, type FindingStatus, type DiffResult,
 } from '../lib/v3/db';
 import { parseFonteJson, type Fonte } from '../lib/v3/fonte';
@@ -437,6 +438,7 @@ export default function CorretorV3Page() {
       setAnalysis((prev) => prev && { ...prev, stages: { ...prev.stages, gravando: { done: 0, total: 1 } } });
       // DET pós-ata (UF + cobertura) por upsert — IDs estáveis evitam duplicata.
       await insertIaFindings(ctx.studyId, res.detFindings, 'DET', ctx.version);
+      await refreshUnreadCoverage(ctx.studyId, res.visionFindings);
       if (!res.aborted) {
         // Achados de visão que não sobreviveram à reconciliação do deck (gravados
         // brutos por versões anteriores) são encerrados: a lista final é a de agora.
@@ -591,7 +593,7 @@ export default function CorretorV3Page() {
     setLaunching({ name: selected.nome, slides: ir.n_slides });
     try {
       const previous = await loadReviewRecovery(selected);
-      if (!previous.canResume) throw new Error('Uma leitura anterior precisa de conferência técnica. Seus resultados salvos continuam disponíveis.');
+      if (!previous.canResume) throw new Error('Não foi possível continuar agora. Aguarde as leituras em andamento; seus resultados salvos continuam disponíveis.');
       await savePptx(ir.sha1, prepared.file.name, bytes);
       if (fonte) await saveStudyFonte(selected.id, prepared.sheets.length ? `${prepared.sheets.length} planilhas` : fonteInput?.name ?? 'Fonte preservada', fonte);
       writeOutras(selected.id, outras);
@@ -985,7 +987,7 @@ export default function CorretorV3Page() {
   const currentRecovery = recovery?.studyId === selected.id ? recovery : null;
   const recoveryLoading = !currentRecovery || currentRecovery.loading;
   const recoveryBlocked = recoveryLoading ? 'Conferindo a tentativa anterior antes de liberar a retomada…'
-    : currentRecovery?.error ?? (!currentRecovery?.data?.canResume ? 'Uma leitura anterior precisa de conferência técnica pela equipe. Você pode revisar os resultados salvos.' : undefined);
+    : currentRecovery?.error ?? (!currentRecovery?.data?.canResume ? 'Há uma leitura em andamento ou a continuação não pôde ser confirmada. Seus resultados salvos continuam disponíveis.' : undefined);
   const unread = items.find(item => item.ruleId === 'image-not-read');
   const failedSlides = unread ? [...(unread.finding.detail ?? '').matchAll(/\bs(\d+)\b/g)].map(match => Number(match[1])) : [];
   const failure = preparationFailure?.studyId===selected.id ? preparationFailure.message : analysisInterruption(false, failedSlides)?.message;

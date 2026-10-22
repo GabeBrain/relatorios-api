@@ -12,6 +12,8 @@ describe('retomada sem repetir retorno desconhecido',()=>{
   expect(reviewRecoveryState(state,37,1,false).canResume).toBe(false);
   expect(reviewRecoveryState(state,37,0,true).canResume).toBe(false);
   expect(reviewRecoveryState(state,37,0,false)).toMatchObject({canResume:true,completedBatches:37});
+  expect(reviewRecoveryState(state,37,1,true,1)).toMatchObject({canResume:true,unknownBatches:1,runningBatches:0});
+  expect(reviewRecoveryState(state,37,2,true,1)).toMatchObject({canResume:false,runningBatches:1});
  });
  it('concluída não é retomada e estudo novo pode ser preparado',()=>{
   expect(reviewRecoveryState('completed',37,0,false).canResume).toBe(false);
@@ -20,9 +22,9 @@ describe('retomada sem repetir retorno desconhecido',()=>{
   expect(reviewRecoveryState('not_started',0,0,false).canResume).toBe(true);
  });
  it('consulta só o controlador, recupera o ponteiro e não inicia processamento',async()=>{
-  mocks.invoke.mockResolvedValue({data:{id:'previous-run',...reviewRecoveryState('interrupted',37,1,true)},error:null});
+  mocks.invoke.mockResolvedValue({data:{id:'previous-run',...reviewRecoveryState('interrupted',37,1,true,1)},error:null});
   const result=await loadReviewRecovery(study);
-  expect(result.canResume).toBe(false);expect(mocks.invoke).toHaveBeenCalledOnce();
+  expect(result.canResume).toBe(true);expect(mocks.invoke).toHaveBeenCalledOnce();
   expect(mocks.invoke.mock.calls[0]).toEqual(['corretor-execution',{body:expect.objectContaining({action:'review_status',studyId:study.id,version:1,documentSha1:study.lastSha1})}]);
   expect(JSON.parse(localStorage.getItem('corretor-execution:study')!)).toMatchObject({id:'previous-run',version:1});
  });

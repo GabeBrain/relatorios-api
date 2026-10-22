@@ -1,5 +1,21 @@
 # Rolândia: avaliação incompleta apresentada como pausa
 
+## Correção do bloqueio excessivo introduzido na recuperação
+
+Gabriel rejeitou a trava de “conferência técnica pela equipe” ao tentar continuar. Esse requisito foi introduzido pelo agente no86de30f: `reviewRecoveryState` exigia zero pending/reserva, e start impedia qualquer revisão interrupted com unknown. Não era uma nova avaliação humana do negócio. Essa proteção impedia trabalho independente e contradizia a solicitação de continuar de onde parou. Testes anteriores validavam o bloqueio excessivo; não demonstravam a retomada útil de outro lote.
+
+Corrigido: status distingue unknown de running. Prepared/interrupted/failed podem continuar se não há chamada running; a reserva de unknown fica intacta e no teto vigente. Reserva sem lote que a explique continua falhando fechada. Start não precisa resolver um unknown para autorizar outros hashes. Claim transacional continua proibindo repetir o lote desconhecido; o controlador retorna REVIEW_BATCH_UNCONFIRMED para esse hash, sem chamar folha/provedor ou tocar no registro. Lotes completed usam replay/cache; lotes novos seguem o controle de orçamento existente. Não há liberação de reserva, aumento automático do orçamento, limpeza de consumo ou duplicação autorizada.
+
+Interface remove a exigência de conferência por equipe, libera continuar as demais etapas e informa que a leitura sem retorno aparece como pendência da revisão. Não declara que a imagem foi lida ou que a análise integral terminou; entrega/snapshot completo mantêm seus critérios. A exceção original permanece sem causa recuperada, e este complemento **não conclui a análise real por execução do agente**.
+
+Cobertura image-not-read atualiza só aviso automático pendente/sem veredicto, mantendo payload anterior em readCoverageHistory. Filtro de update também verifica status/veredicto e detalhe anterior, para não sobrescrever decisão ou cobertura concorrente. Assim, uma retomada que confirma s45 passa a listar apenas s4, sem perder a evidência anterior; achados ignorados/corrigidos/revisados por humano não são alterados.
+
+Teste do controlador real transpilado, com banco e fetch totalmente simulados, comprova: review_status libera restante com37completed/1unknown; start reaproveita execução com reserva; unknown retorna409 sem folha/finish/escrita; completed retorna replay sem provedor; novo hash chama folha uma vez e finish uma vez. Testes de cobertura verificam histórico e proteção de decisões. CI passou a incluir esses cenários, sem rede/IA nesses testes. Logs privados em `.local-inputs/review-luna-20261021/suite-resume-remaining.log`.
+
+**Publicação necessária deste complemento:** apenas `corretor-execution` com `_shared/reviewer.ts` atualizado e frontend Publish. As três folhas e review-provider não mudaram. Push leva os arquivos ao Code; não é preciso colar os mesmos códigos novamente. A publicação ativa do backend continua separada. Nenhuma migration. Estado local até envio/publicação confirmados; lote histórico permanece preservado.
+
+Validação final deste complemento: **392testes aprovados/2ignorados**,56arquivos aprovados,20,49s; TypeScript aplicação/lint/Deno aprovados; build24,67s com avisos preexistentes. São testes locais/simulados, não uma nova avaliação do estudo ou prova de causa do retorno antigo. Nenhuma chamada paga ou alteração remota de dados/deploy pelo agente.
+
 ## Continuidade solicitada: resultados parciais e retomada protegida
 
 Gabriel autorizou envio de36ebc7a/8c2f799, realizado para origin/main; CI técnico/documental39719712840/39719712792 aprovados. Em seguida pediu alternativa para concluir a avaliação daqui ou oferecer fallback/retomada no produto. O agente continua sem credencial administrativa do backend correto ou do provedor; **não concluiu a análise real, não reconciliou o unknown e não chamou IA**.
