@@ -2,6 +2,8 @@
 
 **CONTRATO EXTERNO PENDENTE,21/10/2026.** Motor e ensaio em memória implementados localmente; contrato de arquivo ainda interno/proposto. Não são nomes de campos nem formato de retorno confirmados do Geobrain. Consultar MANIFESTO.md e [reprodução](REPRODUCAO_E_HANDOFF.md); reconciliar com Edgar/MD antes de automatizar.
 
+**Atualização22/10:** uma exportação real da Análise Temporal foi [auditada](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md), mas agrega tipologias/padrões/cidades e não contém ID ou flag da base por período. Portanto não preenche este contrato candidato. O manual do Geobrain, preservado no repo Linkages, descreve essa exportação e uma opção de download detalhado do Mapa; esta última é só um caminho candidato para obter granularidade, sem confirmação de `bases.estimation` ou retorno importável.
+
 ## Entradas mínimas do cálculo horizontal
 
 - Categoria explicitamente mapeada: loteamento aberto ou fechado. Não inferir por texto parcial nem habilitar casas/vertical com coeficientes horizontais sem validação.

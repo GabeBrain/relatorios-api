@@ -59,6 +59,8 @@ O histórico inclui `period`, `typology_id`, `pattern`, `qty`, `typology_stock`,
 
 Diego encaminhou resposta de Evandro de20/10: `bases.estimation` é a única flag do empreendimento estimado na base/período; `bases.ivv_batch_id` rastreia atualizações de valores por IVV em lote. Isso resolve a função dos campos, **mas não mostra a flag por competência na API de histórico sondada**. A proposta de Gabriel é conferir uma exportação real do Geobrain contra a API numerosa. A primeira UI será apenas de leitura por API e exportação de revisão; upload e arquivo de retorno aguardam o exemplo. Ver [plano detalhado da página](PLANO_PAGINA_EDITORIAL_API_2026-10-22.md).
 
+**Exportação recebida depois:** o Excel da Análise Temporal é agregado, sem IDs de empreendimento ou `bases.estimation`, e mistura dois municípios/tipos na captura. É útil para checagem de apresentação, produto e futuro controle agregado, não para o contrato de retorno nem para o retrospectivo individual. Guarapuava está no catálogo API do token (29 horizontais/1.167 linhas); Guaratuba não está e retornou HTTP 422. [Auditoria e manual](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md) detalham zeros, periodicidade, IVV e o recorte necessário para comparação justa.
+
 ## Dependências objetivas
 
 Edgar pode esclarecer em paralelo: fonte/semântica do marcador **por competência** observado/estimado; contrato do arquivo de ida/volta; distinção de rótulos horizontal aberto/fechado e revisões de oferta; código/MD do Finotti e regra da cauda/bandas se disponíveis. O restante — adaptador, auditoria, comparação, dossiê e UI — segue nesta frente sem aguardar acesso novo, respeitando os gates acima.

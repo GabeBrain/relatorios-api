@@ -17,6 +17,7 @@ Pacote inicial de contexto técnico e continuidade, preparado em **21/10/2026** 
 7. [PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md](PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md): sondagem autenticada, plano estatístico e interface de testes.
 8. [PLANO_PAGINA_EDITORIAL_API_2026-10-22.md](PLANO_PAGINA_EDITORIAL_API_2026-10-22.md): execução técnica da primeira página funcional só por API, com visual editorial, seleção individual/carteira e exportação de revisão.
 9. [CTA_IMPLEMENTACAO_PAGINA_API.md](CTA_IMPLEMENTACAO_PAGINA_API.md): comando para iniciar essa implementação.
+10. [AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md): estrutura e limites do Excel real da Análise Temporal, consulta ao manual Geobrain e contraste de escopo com a API.
 
 ## Onde avançar
 
@@ -24,10 +25,12 @@ Repositório: `Relatorios API/relatorios-api`, dentro da raiz SE. Motor e ensaio
 
 Fontes brutas locais: `.local-inputs/estimativas-vendas/2026-10-21/`, na raiz do repo. Contém PPTX, cópia do manifesto de integridade, extração JSON e transcrição do corpo do email. O diretório já é ignorado pelo `.gitignore`. Um clone remoto recebe os derivados/documentação, mas precisa receber o PPTX local separadamente.
 
+Exportações Geobrain recebidas em22/10 e preservadas em `.local-inputs/estimativas-vendas/2026-10-22-geobrain-temporal/`, com hashes na [auditoria](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md): `relatorio_analitico.xlsx` é relatório agregado da Análise Temporal; `empreendimentos_export_22-10-2026T10_37_55.xlsx` é cadastro de204 verticais. Nenhum contém base horizontal por competência/flag ou contrato de retorno. O manual da plataforma pode ser consultado no repo `Assistente IA - Linkages/manual-assistant-web/content/manual/`.
+
 Antes da implementação, ler `AGENTS.md` do repo e da raiz SE. Manter `docs/projetos/LIVE_rebrain.md`, diário pessoal e plano semanal de Gabriel atualizados. UI nova exige System Design Geobrain e diretrizes frontend do repo. Filtros/API geográficos devem seguir GeoApiScopeEngine. Não criar AGENTS/CLAUDE paralelos para substituir essas regras.
 
 ## Próxima entrega
 
-Implementar a página editorial por API conforme o plano novo, mantendo o resultado exploratório quando a origem por competência for desconhecida. Gabriel buscará uma exportação real do Geobrain para conferir o contrato de entrada/retorno e `bases.estimation`; `bases.ivv_batch_id` só rastreia atualizações IVV em lote, conforme resposta de Evandro encaminhada por Diego. Parâmetros, motor, leitura API, futura importação/exportação operacional e interface são camadas separadas. Intervalos estatísticos e modelo vertical ainda pendem. O PPT não comprova qualidade na base corrente nem autoriza retorno automático ao Geobrain.
+Implementar a página editorial por API conforme o plano novo, mantendo o resultado exploratório quando a origem por competência for desconhecida. A exportação temporal recebida ajuda a conferir métricas agregadas, mas não contém `bases.estimation` ou identidade por empreendimento; Gabriel poderá buscar uma exportação detalhada de base para o contrato de entrada/retorno. `bases.ivv_batch_id` só rastreia atualizações IVV em lote, conforme resposta de Evandro encaminhada por Diego. Parâmetros, motor, leitura API, futura importação/exportação operacional e interface são camadas separadas. Intervalos estatísticos e modelo vertical ainda pendem. O PPT não comprova qualidade na base corrente nem autoriza retorno automático ao Geobrain.
 
 Monday: [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074). Esta documentação não alterou o card.

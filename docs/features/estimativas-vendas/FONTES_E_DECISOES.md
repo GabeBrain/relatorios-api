@@ -44,6 +44,8 @@ Fonte: transcrição de mensagens de Edgar (19/10,15h59) e Diego (20/10,09h34) f
 
 Gabriel decidiu usar uma exportação real do Geobrain como amostra do **formato** e reconciliá-la com as séries amplas da API. Até essa amostra chegar, a implementação planejada da página usa leitura por API e exportação de resultados de revisão, sem importação/upload nem arquivo de retorno operacional.
 
+**Resultado da amostra recebida:** [auditoria da Análise Temporal](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md). O arquivo demonstra o formato do relatório agregado, não o esquema das bases individuais nem do retorno. O manual do Geobrain no repo Linkages esclarece a finalidade da tela e aponta exportação detalhada do Mapa como próxima fonte candidata. A página API segue independente desse arquivo.
+
 ## 21/10/2026,12h18 — Email Finotti
 
 Fonte: captura fornecida por Gabriel. Assunto “Re: Dados Curva de Vendas”; remetente Lucas Finoti. Corpo:

@@ -6,9 +6,11 @@
 
 1. **Entrada v1:** somente leitura autenticada das APIs Geobrain, por cidade monitorada e busca paginada de históricos horizontais. Não criar upload, importação, banco ou cópia remota nesta versão. Manter uma porta de adaptador para snapshot/arquivo futuro, sem definir formato ausente.
 2. **Saída v1:** gráficos, tabela e exportação de **resultado de revisão** com escopo, filtros, data da consulta, versão da equação, denominadores, previsões e alertas. Esse arquivo não é importável no Geobrain e não preenche `bases.estimation`.
-3. **Comprovação de contrato:** quando Gabriel trouxer uma exportação real, guardá-la em `.local-inputs/estimativas-vendas/` e confrontar ID, competência, tipo, estoque, vendas e `bases.estimation` com a API. Documentar divergências e só então desenhar o adaptador de ida/retorno; não pressupor que a planilha do Monday seja o contrato atual.
+3. **Comprovação de contrato:** a [primeira exportação real](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md) já chegou, mas é um relatório agregado da Análise Temporal, sem IDs ou `bases.estimation`. Usá-la como referência de apresentação e controle agregado; não como modelo de entrada por empreendimento nem contrato de retorno. Quando houver exportação detalhada da base/empreendimento, confrontar ID, competência, tipo, estoque, vendas e flag com a API antes de desenhar o adaptador de ida/retorno; não pressupor que a planilha do Monday seja o contrato atual.
 4. **Semântica confirmada por mensagem encaminhada:** `bases.estimation` marca a base/período estimado e é a única flag indicada para isso. `bases.ivv_batch_id` rastreia atualizações IVV em lote. A resposta não demonstra que o objeto `estimation` da API de histórico refira-se a todas as competências. Observado/estimado fica `unknown` quando não houver linhagem mensal verificável.
 5. **Domínio v1:** só loteamentos horizontais abertos/fechados com categoria explicitamente identificada e origem de 1–48 meses, percentual vendido entre 0 e 95%, `k>0`. Horizonte calibrado: até 36 meses após o corte; pontos a partir do primeiro mês inteiro de 95% ficam sem previsão mensal até a regra de cauda. Bandas central/ampla do slide, vertical, casas, INCC e retorno operacional não são implementados por inferência.
+
+**Evidência nova que muda o roteiro:** o Excel temporal recebido tem seis abas agregadas e 84 colunas mensais (2020–2026), com variações intercaladas, 185 rótulos `NaN` e zeros em meses sem comprovação de coleta. Não o importar como 84 observações nem tentar extrair uma curva individual. A captura combina Guarapuava e Guaratuba, Vertical e Horizontal. O token API atual lista Guarapuava, mas não Guaratuba; a consulta desta última retornou HTTP 422. Portanto, paridade de totais Excel↔API requer uma **nova exportação do mesmo recorte autorizado**, preferencialmente só Guarapuava/Horizontal, e ainda assim será apenas paridade agregada. Um segundo Excel recebido lista 204 empreendimentos, mas todos são **verticais** e sem IDs/histórico/flag por base; serve apenas para entender o cadastro exportado. O manual local do Geobrain explica a tela temporal e aponta o download detalhado do Mapa como candidato, ainda sem prova de contrato. Ver [auditoria](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md).
 
 ## Critério da primeira versão funcional
 
@@ -18,15 +20,16 @@ A página permite selecionar uma cidade autorizada, um empreendimento horizontal
 
 ### 0. Abertura e congelamento de escopo
 
-- Ler AGENTS da raiz SE/repo, este pacote, `System Design/README.md`, `FUNDAMENTOS.md`, `ESTUDOS_ANALITICOS.md`, tokens, `MAPA_SISTEMAS.md`, `FRONTEND_GUIDELINES.md` e `DESIGN_SYSTEM.md`. Fazer `git fetch --all`, comparar cada remoto e preservar edições paralelas; trabalhar em `main` e com commits de caminhos explícitos.
-- Congelar versão dos coeficientes e comportamento do motor atual; manter o exemplo 300/150/6 como referência. Registrar se o arquivo Geobrain chegou durante a sessão, sem mudar o escopo API v1 silenciosamente.
+- Ler AGENTS da raiz SE/repo, este pacote, a auditoria da exportação, o manual Geobrain no repo Linkages, `System Design/README.md`, `FUNDAMENTOS.md`, `ESTUDOS_ANALITICOS.md`, tokens, `MAPA_SISTEMAS.md`, `FRONTEND_GUIDELINES.md` e `DESIGN_SYSTEM.md`. Fazer `git fetch --all`, comparar cada remoto e preservar edições paralelas; trabalhar em `main` e com commits de caminhos explícitos.
+- Congelar versão dos coeficientes e comportamento do motor atual; manter o exemplo 300/150/6 como referência. A exportação temporal já chegou, mas seu esquema agregado não muda o escopo API v1.
 
 ### 1. Contratos e adaptador de leitura
 
 - Criar tipos de transporte da API e um modelo normalizado específico da feature em `src/features/estimativas-vendas/`, separados do motor. Consumir `POST /public-api/v2/building-with-history-internal` com `type=Horizontal`, UF/cidade autorizadas, paginação, limite configurado de páginas/empreendimentos, timeout, cancelamento e erro por página explícito. Reusar token da sessão existente; nunca embutir email, senha ou Bearer no bundle, URL, log ou arquivo exportado.
-- Reusar `GeoApiScopeSelector` + `useGeoApiScope`: `/public-api/monitored-cities` paginado, UF antes de cidade, invalidar seleção e cancelar requisição anterior ao trocar escopo. Não usar lista IBGE como fallback. Buscar históricos somente após escopo válido e comando do usuário; indicar progresso real de páginas/empreendimentos.
+- Reusar `GeoApiScopeSelector` + `useGeoApiScope`: `/public-api/monitored-cities` paginado, UF antes de cidade, invalidar seleção e cancelar requisição anterior ao trocar escopo. Não usar lista IBGE como fallback. Buscar históricos somente após escopo válido e comando do usuário; indicar progresso real de páginas/empreendimentos. Se uma cidade da exportação Geobrain estiver fora do catálogo do token, como Guaratuba nesta sessão, mostrar indisponibilidade de escopo; não omiti-la silenciosamente de uma comparação ou carteira.
 - Preservar ausência como `null` e distinguir zero, ausente, erro e linha duplicada. Não reutilizar o normalizador de Validação de Fechamento que converte parte dos nulos em zero. Registrar identificação estável, período, tipologia, lançamento, oferta, vendas brutas, distratos, líquidas, estoque, categoria e proveniência. Deduplicar apenas quando houver regra verificável; caso contrário, sinalizar e excluir da métrica.
 - Tratar `estimation` no objeto de empreendimento como **metadado de escopo desconhecido**. Não transportá-lo para cada competência. Prever adaptador futuro `periodOrigin` com `observed | estimated | unknown` e fonte de evidência; até o contrato por base estar disponível, usar `unknown` para o histórico da API.
+- Manter a série da Análise Temporal agregada fora do adaptador individual. Seus zeros podem representar ausência de atualização e o IVV exportado não deve ser recalculado a partir de Vendas/Oferta Final sem entender o denominador. Se vier um recorte idêntico da API e do Excel, criar verificação agregada separada, com filtros, competência e cobertura explícitos.
 
 ### 2. Elegibilidade, matemática e comparadores
 
@@ -59,7 +62,7 @@ A página permite selecionar uma cidade autorizada, um empreendimento horizontal
 
 ## Questões que não impedem a página exploratória
 
-- Exportação real: esquema, IDs, competência, arredondamento, tipologias, unidade de análise, periodicidade, `bases.estimation` por período, campos preservados e formato de retorno.
+- Exportação detalhada **horizontal e com bases/períodos**: IDs, competência, arredondamento, tipologias, unidade de análise, periodicidade, `bases.estimation` por período, campos preservados e formato de retorno. Nem o relatório agregado temporal nem o cadastro vertical recebido respondem a esses itens.
 - Regra mensal após 95%, bandas central/ampla, casos já acima de 95%, líquidos negativos e revisões de oferta; política de casos sem mês de lançamento claro.
 - Coleta alternada, tratamento de estoque 0–5 e acima 30, correção INCC e reconciliação de diferenças: regras operacionais do card anterior, separadas da equação Finotti.
 - Corpus, snapshot e protocolo originais do estudo Finotti para reproduzir os 9,1 pontos percentuais relatados. O dossiê da API será validação independente, com população e denominadores próprios.
