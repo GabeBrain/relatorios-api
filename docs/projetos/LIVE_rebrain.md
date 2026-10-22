@@ -1,3 +1,12 @@
+## 22/10/2026 — Validação do Fechamento: períodos do Resumo email por visualização — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — Resumo email.
+- **O quê:** somente as três colunas de períodos passam a acompanhar Ano, Trimestre ou Mês/ano. Em trimestre, mostram mesmo trimestre do ano anterior, trimestre anterior e trimestre atual; em ano, ano anterior, ano anterior e ano atual. A agregação anual/trimestral reutiliza o motor de Resumo. O comportamento mensal permanece igual.
+- **Preservado:** cálculos, cabeçalhos e barras das variações anuais mensais, acumulados de janeiro até o último mês selecionado e variação acumulada; nenhum ajuste nas demais guias ou na API.
+- **Evidência:** três testes direcionados cobrem as granularidades, a passagem de ano e a igualdade dos cálculos preservados. Validação visual autenticada não executada nesta sessão.
+- **Monday:** —
+- **Etapas/Pendências:** implementação local concluída; publicação depende de autorização de envio.
+
 ## 22/10/2026 — Relatório API Excel: publicação autorizada do conjunto local — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Relatórios Automatizados.

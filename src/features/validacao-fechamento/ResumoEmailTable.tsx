@@ -62,9 +62,9 @@ function MetricRow({ metric, resumo }: { metric: MetricDef; resumo: ResumoEmailR
           <Help label={metric.label} text={metric.info} />
         </span>
       </td>
-      <td>{formatValue(resumo.previousYear[key], metric.format)}</td>
-      <td>{formatValue(resumo.previousMonth[key], metric.format)}</td>
-      <td>{formatValue(resumo.selected[key], metric.format)}</td>
+      <td>{formatValue(resumo.displayPeriods.previousYear[key], metric.format)}</td>
+      <td>{formatValue(resumo.displayPeriods.previous[key], metric.format)}</td>
+      <td>{formatValue(resumo.displayPeriods.selected[key], metric.format)}</td>
       <VariationCell value={annualVariation} />
       <td>{metric.noVariation ? '—' : formatValue(resumo.previousYearAccum[key], metric.format)}</td>
       <td>{metric.noVariation ? '—' : formatValue(resumo.selectedAccum[key], metric.format)}</td>
@@ -78,8 +78,6 @@ export function ResumoEmailTable({ resumo }: Props) {
   const [copyState, setCopyState] = useState<'idle' | 'done' | 'error'>('idle');
   if (!resumo) return <div className="vf-card p-6 text-center text-sm text-[var(--vf-muted)]">Nenhum período mensal disponível para os filtros selecionados.</div>;
 
-  const previousYearLabel = resumo.previousYearKey ? resumo.previousYearKey : 'Ano anterior';
-  const previousMonthLabel = resumo.previousMonthKey ? resumo.previousMonthKey : 'Mês anterior';
   const selectedLabel = resumo.selectedKey;
   const previousYearMonth = resumo.previousYearKey ? resumo.previousYearKey : 'período anterior';
 
@@ -142,9 +140,9 @@ export function ResumoEmailTable({ resumo }: Props) {
         <thead>
           <tr>
             <th className="vf-label">Indicador</th>
-            <th>{toMonthLabel(previousYearLabel)}</th>
-            <th>{toMonthLabel(previousMonthLabel)}</th>
-            <th>{toMonthLabel(selectedLabel)}</th>
+            <th>{resumo.displayPeriods.previousYearLabel}</th>
+            <th>{resumo.displayPeriods.previousLabel}</th>
+            <th>{resumo.displayPeriods.selectedLabel}</th>
             <th>
               <span className="inline-flex items-center justify-center gap-1">Var. {toMonthLabel(previousYearMonth)} x {toMonthLabel(selectedLabel)}<Help label="Variação anual" text="(último período selecionado ÷ mesmo período do ano anterior) − 1." /></span>
             </th>

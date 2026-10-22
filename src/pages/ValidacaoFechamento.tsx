@@ -79,8 +79,8 @@ export default function ValidacaoFechamento() {
     [filtered, filteredDimOnly, granularity],
   );
   const resumoEmail = useMemo(
-    () => computeResumoEmail(filtered, filteredDimOnly),
-    [filtered, filteredDimOnly],
+    () => computeResumoEmail(filtered, filteredDimOnly, granularity),
+    [filtered, filteredDimOnly, granularity],
   );
 
   // Cidades exibidas na guia "Resumo por cidade"
