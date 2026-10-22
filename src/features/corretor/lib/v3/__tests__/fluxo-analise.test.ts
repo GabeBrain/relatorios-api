@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { cityFromText, suggestCity } from '../city-suggestion';
 import { analysisPending } from '../db';
+import { analysisInterruption } from '../analysis-interruption';
 import type { Ir } from '../../audit/ir';
 
 describe('sugestão de cidade', () => {
@@ -35,5 +36,19 @@ describe('análise pendente', () => {
     expect(analysisPending({ generation: 'v3', status: 'em_correcao', analise: report })).toBe(false);
     expect(analysisPending({ generation: 'v3', status: 'pronto', analise: null })).toBe(false);
     expect(analysisPending({ generation: 'v2', status: 'em_correcao', analise: null })).toBe(false);
+  });
+});
+
+describe('falha de leitura não é pausa manual', () => {
+  it('mantém imagens falhas como avaliação incompleta, com slides e sem pedir reenvio', () => {
+    const result = analysisInterruption(false, [45, 4, 45]);
+    expect(result?.kind).toBe('image_failures');
+    expect(result?.title).toBe('Avaliação incompleta');
+    expect(result?.message).toContain('slides 4, 45');
+    expect(result?.message).toContain('não é necessário reenviar');
+  });
+  it('usa pausa apenas quando houve cancelamento e não fabrica falha para sucesso', () => {
+    expect(analysisInterruption(true, [])?.kind).toBe('paused');
+    expect(analysisInterruption(false, [])).toBeNull();
   });
 });

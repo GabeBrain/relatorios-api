@@ -1,3 +1,7 @@
+## 22/10/2026 — Cobertura incompleta distingue falha de pausa
+
+Incidente real Rolândia após37chamadas contabilizadas: cobertura registra duas falhas s4/s45 e não há relatório completo. Aborted agregava falha de imagem com pausa; mantida a regra de não concluir relatório, acrescentados failedImages/pausedByUser e contagem de tentativas/falhas. Frontend comunica avaliação incompleta com slides em estado persistente; sucesso não é sinalizado só por total tentado.363 testes/2ignorados e tipos/lint aprovados; nenhum motor/prompt/cache/custo/decisão alterado, sem IA. Consulta administrativa de lotes unknown/erro preparada; causa específica da resposta desconhecida e bloqueio ainda não confirmada. Detalhes no DIAGNOSTICO_INTERRUPCAO_IMAGENS_ROLANDIA_2026-10-22.md.
+
 ## 21/10/2026 — Listas null da ata: causa real corrigida localmente
 
 Fechamento posterior: suíte completa361aprovados/2ignorados,52arquivos aprovados e build20,97s; Deno quatro funções, tipos/lint e documentação viva aprovados. Sem dezpasses materiais nesta rodada, IA ou escrita remota; homologação de produção continua pendente após publicação.

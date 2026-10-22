@@ -240,6 +240,7 @@ export function toExtracted(raw: RawTable): ExtractedTable | null {
 }
 
 export interface VisionPassResult {
+  attemptedImages?: number;
   findings: Finding[];
   tables: ExtractedTableRef[];
   /** Slides com fonte/elaboração detectada na própria imagem. */
@@ -259,7 +260,7 @@ export interface VisionPassResult {
 }
 
 export interface VisionPassOpts {
-  onProgress?: (done: number, total: number) => void;
+  onProgress?: (done: number, total: number, failed?: number) => void;
   /** Imagens processadas simultaneamente (default 1 = sequencial). */
   concurrency?: number;
   /** Pausar/cancelar o passe — o que já foi extraído fica no cache. */
@@ -842,7 +843,7 @@ export async function runVisionPass(
         // Uma imagem com erro vira “não lida” no relatório; as outras seguem.
         const c = candidates[i];
         failed.push({ slide: c.slide, secao: c.secao, titulo: c.titulo, name: c.name, kb: c.kb, motivo: `falha na leitura (${err instanceof Error ? err.message.slice(0, 80) : 'erro'})` });
-        o.onProgress?.(++done, candidates.length);
+        o.onProgress?.(++done, candidates.length, failed.length);
         continue;
       }
       findings.push(...r.findings);
@@ -856,18 +857,19 @@ export async function runVisionPass(
       outputTokens += r.outputTokens;
       costUsd += r.costUsd;
       if (r.escalated) escalated += 1;
-      o.onProgress?.(++done, candidates.length);
+      o.onProgress?.(++done, candidates.length, failed.length);
     }
   }
   await Promise.all(Array.from({ length: Math.min(concurrency, candidates.length) }, worker));
 
   return finalizeVisionPass({
     findings, tables, sourceSlides, analyzedSlides, tablesExtracted, tablesVerified,
-    fromCache, inputTokens, outputTokens, escalated, costUsd, failed,
+    fromCache, inputTokens, outputTokens, escalated, costUsd, failed, attemptedImages: done,
   });
 }
 
 interface PassParts {
+  attemptedImages?: number;
   findings: Finding[]; tables: ExtractedTableRef[]; sourceSlides: Set<number>; analyzedSlides: Set<number>;
   tablesExtracted: number; tablesVerified: number; fromCache: number; inputTokens: number;
   outputTokens: number; escalated: number; costUsd: number; failed: FailedImage[];
@@ -888,6 +890,7 @@ function finalizeVisionPass(p: PassParts): VisionPassResult {
     tablesExtracted: p.tablesExtracted, tablesVerified: p.tablesVerified + paged.verified, fromCache: p.fromCache,
     inputTokens: p.inputTokens, outputTokens: p.outputTokens, escalated: p.escalated, costUsd: p.costUsd,
     failed: p.failed,
+    ...(p.attemptedImages !== undefined ? { attemptedImages: p.attemptedImages } : {}),
   };
 }
 

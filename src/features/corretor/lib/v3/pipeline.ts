@@ -85,6 +85,8 @@ export interface StageProgress {
   stage: Stage;
   done: number;
   total: number;
+  /** Leituras tentadas sem retorno válido; done inclui tentativas, não apenas acertos. */
+  failed?: number;
   /** achados novos desta etapa, para pingar na worklist assim que chegam */
   findings?: Finding[];
   spentUsd?: number;
@@ -211,6 +213,8 @@ export interface Phase2Result {
   textTokens: { input: number; output: number };
   visionTokens: { input: number; output: number };
   visionEscalated: number;
+  failedImages?: FailedImage[];
+  pausedByUser?: boolean;
   aborted: boolean;
 }
 
@@ -266,7 +270,7 @@ export async function runPhase2(
     concurrency: VISION_CONCURRENCY,
     signal,
     expected: { cidade: cityUsed, uf: uf ?? undefined, outras: opts.outras ?? [] },
-    onProgress: (done, total) => onStage?.({ stage: 'visao', done, total }),
+    onProgress: (done, total, failed) => onStage?.({ stage: 'visao', done, total, failed }),
   }).then(async (res) => {
     // CH-6: o slide que declara exclusão (esgotados, garden, cobertura) explica o
     // total aberto — o achado desce para “Verificar” citando a nota, nunca “Erro”.
@@ -275,7 +279,7 @@ export async function runPhase2(
     // Sem achados aqui: os de visão só são gravados depois da reconciliação do
     // deck (etapa “cruzamento”). Gravar os brutos aqui deixou 28 somas soltas no
     // estudo de João Pessoa (30/set).
-    await onStage?.({ stage: 'visao', done: candidates.length, total: candidates.length, spentUsd: res.costUsd });
+    await onStage?.({ stage: 'visao', done: res.attemptedImages ?? candidates.length, total: candidates.length, failed: res.failed.length, spentUsd: res.costUsd });
     return res;
   });
 
@@ -313,6 +317,8 @@ export async function runPhase2(
     textTokens: { input: text.inputTokens, output: text.outputTokens },
     visionTokens: { input: vision.inputTokens, output: vision.outputTokens },
     visionEscalated: vision.escalated,
+    failedImages: vision.failed,
+    pausedByUser: Boolean(signal?.aborted),
     aborted: Boolean(signal?.aborted || vision.failed.length),
   };
 }

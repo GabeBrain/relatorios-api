@@ -1,4 +1,5 @@
 import { processingMessage } from '../lib/processing-message';
+import { analysisInterruption } from '../lib/v3/analysis-interruption';
 import CorretorLoadingState from '../components/CorretorLoadingState';
 // Corretor v3 — fluxo unificado de correção (DESIGN_corretor_v3.md).
 // v3.0: Triagem DET (R$ 0) → Corrigir → Reconferir (diff) → Entregar.
@@ -190,7 +191,7 @@ function V3FindingCard({ item, onStatus, onVerdict }: {
 
 interface AnalysisState {
   running: boolean;
-  stages: Partial<Record<BannerStage, { done: number; total: number }>>;
+  stages: Partial<Record<BannerStage, { done: number; total: number; failed?: number }>>;
   spentUsd: number;
   estimateUsd: number;
 }
@@ -203,7 +204,7 @@ function AnalysisBanner({ state, onPause }: { state: AnalysisState; onPause: () 
       <CorretorLoadingState title={state.stages.gravando ? 'Salvando os resultados…' : current ? `${STAGE_LABEL[current]} em andamento…` : 'Preparando a próxima etapa…'} description="Os resultados confirmados ficam guardados no estudo.">
         <div className="cp-brain-stages">{order.map(stage => {
           const p = state.stages[stage];
-          return p ? <span key={stage} data-complete={p.done >= p.total}>{p.done >= p.total && <CheckCircle2 size={13} aria-hidden="true" />}{STAGE_LABEL[stage]} · {p.done}/{p.total}</span> : null;
+          return p ? <span key={stage} data-complete={p.done >= p.total && !p.failed}>{p.done >= p.total && !p.failed && <CheckCircle2 size={13} aria-hidden="true" />}{STAGE_LABEL[stage]} · {Math.max(0, p.done - (p.failed ?? 0))}/{p.total}{p.failed ? ` · ${p.failed} pendente(s)` : ''}</span> : null;
         })}</div>
       </CorretorLoadingState>
       <div className="cp-analysis-actions">
@@ -408,7 +409,7 @@ export default function CorretorV3Page() {
         onStage: async (p) => {
           setAnalysis((prev) => prev && {
             ...prev,
-            stages: { ...prev.stages, [p.stage]: { done: p.done, total: p.total } },
+            stages: { ...prev.stages, [p.stage]: { done: p.done, total: p.total, failed: p.failed } },
             spentUsd: prev.spentUsd + (p.spentUsd ?? 0),
           });
           if (p.findings?.length && (p.stage === 'texto' || p.stage === 'visao' || p.stage === 'cruzamento')) {
@@ -436,7 +437,11 @@ export default function CorretorV3Page() {
 
       const nIa = res.textFindings.length + res.visionFindings.length;
       if (res.aborted) {
-        toast.warning('Análise pausada — continua pendente', { description: 'Os resultados confirmados ficaram guardados. Retome para concluir as etapas pendentes.' });
+        const interruption = analysisInterruption(res.pausedByUser ?? ac.signal.aborted, (res.failedImages ?? []).map(image => image.slide));
+        const message = interruption?.message ?? 'A avaliação não foi concluída. Os resultados confirmados estão guardados; confira as etapas pendentes antes de retomar.';
+        setPreparationFailure({ studyId: ctx.studyId, message });
+        if (interruption?.kind === 'paused') toast.warning(interruption.title, { description: message });
+        else toast.error(interruption?.title ?? 'Avaliação incompleta', { description: message });
       } else {
         toast.success('Análise completa', {
           description: `${nIa} apontamento(s) na revisão` +
@@ -959,7 +964,12 @@ export default function CorretorV3Page() {
   if (!selected && routeStudyId) return <div className="p-6">{loadingList || loadingStudy ? <CorretorLoadingState title="Abrindo revisão…" /> : <p>Estudo não encontrado.</p>}<Link to={portfolioHref(searchParams.get('carteira') ?? '')}>Voltar aos estudos</Link></div>;
   if (!selected) return <StudyPreparationPage failure={preparationFailure?.message} back={portfolioHref(searchParams.get('carteira') ?? '')} onStart={ingestNew} onRecommendation={prepareRecommendation} />;
 
-  if (pending && !loadingStudy) return <StudyPreparationPage key={selected.id} failure={preparationFailure?.studyId===selected.id?preparationFailure.message:undefined} back={portfolioHref(searchParams.get('carteira') ?? '')} resume={{study:selected, fonte:fonteInput?.fonte ?? null}} onStart={resumePrepared}/>;
+  if (pending && !loadingStudy) {
+    const unread = items.find(item => item.ruleId === 'image-not-read');
+    const failedSlides = unread ? [...(unread.finding.detail ?? '').matchAll(/\bs(\d+)\b/g)].map(match => Number(match[1])) : [];
+    const persistedFailure = analysisInterruption(false, failedSlides)?.message;
+    return <StudyPreparationPage key={selected.id} failure={preparationFailure?.studyId===selected.id?preparationFailure.message:persistedFailure} back={portfolioHref(searchParams.get('carteira') ?? '')} resume={{study:selected, fonte:fonteInput?.fonte ?? null}} onStart={resumePrepared}/>;
+  }
 
   // ─── WORKSPACE ───────────────────────────────────────────────────────────────
   return (
