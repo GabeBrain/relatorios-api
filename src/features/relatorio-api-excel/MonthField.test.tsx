@@ -12,7 +12,7 @@ describe('MonthField — competência em pt-BR', () => {
     const calendar = screen.getByRole('dialog', { name: 'Escolher mês — Data inicial' });
     expect(within(calendar).getAllByRole('button', { name: / de 2026$/ })).toHaveLength(12);
     fireEvent.change(within(calendar).getByLabelText('Ano'), { target: { value: '2024' } });
-    fireEvent.click(within(calendar).getByRole('button', { name: 'fevereiro de 2024', exact: true }));
+    fireEvent.click(within(calendar).getByRole('button', { name: 'fevereiro de 2024' }));
     expect(onChange).toHaveBeenCalledWith('2024-02-01');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
@@ -21,8 +21,8 @@ describe('MonthField — competência em pt-BR', () => {
     render(<MonthField id="to" label="Data final" value="" onChange={onChange} />);
     fireEvent.click(screen.getByLabelText('Data final'));
     fireEvent.change(screen.getByLabelText('Ano'), { target: { value: '' } });
-    expect(screen.getByRole('button', { name: 'fevereiro de', exact: true })).toBeDisabled();
-    fireEvent.click(screen.getByRole('button', { name: 'Limpar data', exact: true }));
+    expect(screen.getByRole('button', { name: 'fevereiro de' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Limpar data' }));
     expect(onChange).toHaveBeenCalledWith('');
   });
 });

@@ -1208,5 +1208,17 @@
     "fullAppTypes": "passed",
     "build": "passed; existing chunk warnings"
   },
-  "rawArtifacts": ".local-inputs/estimativas-vendas/expanded (gitignored)"
+  "rawArtifacts": ".local-inputs/estimativas-vendas/expanded (gitignored)",
+  "integration": {
+    "localFeatureCommit": "60d4989",
+    "localMergeCommit": "5a02fb9",
+    "remoteIntegratedThrough": "448cad3",
+    "passedTests": 82,
+    "files": 11,
+    "fullAppTypes": "passed after correcting invalid exact option in two remote tests",
+    "affectedTestsRechecked": 4,
+    "build": "passed",
+    "push": false,
+    "deploy": false
+  }
 }

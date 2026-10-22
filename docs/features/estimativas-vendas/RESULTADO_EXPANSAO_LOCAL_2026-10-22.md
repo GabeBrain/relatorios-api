@@ -53,3 +53,7 @@ Ensaio autenticado com a API real no navegador local: Ybá Village87338 abriu de
 5. Carregar o arquivo local `*-artifacts.json` no mesmo escopo e selecionar modelo compatível; IDs de treino continuam excluídos de teste independente.
 
 Gates que permanecem condicionais: contrato comercial/misto, linhagem por competência, periodicidade dos fluxos, idade e revisões cadastrais, população ativa representativa e tolerâncias de negócio. Só depois avaliar distribuições de contagem, compartilhamento hierárquico, logísticas/Gompertz, generalização por cidade e promoção de faixas. Essas extensões condicionais do plano não foram simuladas como entregas. Esta bancada é funcional e revisável localmente; modelo ampliado homologado e retorno operacional são etapas posteriores. Próximo passo: revisão local de Gabriel e esclarecimento do contrato de fonte, mantendo push/deploy sem autorização nesta etapa.
+
+## Integração de fechamento
+
+Commit local da bancada `60d4989`, seguido do merge local `5a02fb9` com seis commits remotos de API Excel até `448cad3`. Ambos históricos e alterações paralelas preservados. A integração passou82testes/11arquivos e build. O check explícito de TypeScript encontrou opção `exact` incompatível com `getByRole/queryByRole` nos dois testes novos remotos; removida somente essa opção nesses métodos, cuja correspondência pelo nome já é exata por padrão. Nenhum comportamento de produto API Excel alterado. Tipagem completa e os quatro testes afetados revalidados após a correção. Entrega continua somente local.

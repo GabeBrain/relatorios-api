@@ -34,13 +34,13 @@ describe('Relatório API Excel — geração explícita', () => {
     let finish!: (result: typeof sample) => void;
     vi.mocked(fetchBuildings).mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
     render(<RelatorioApiExcel />);
-    fireEvent.click(screen.getByRole('button', { name: 'Carregar', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Carregar' }));
     expect(engine.buildReport).not.toHaveBeenCalled();
     expect(engine.dateBounds).not.toHaveBeenCalled();
-    expect(screen.queryByRole('button', { name: 'Gerar relatório', exact: true })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Gerar relatório' })).not.toBeInTheDocument();
     await act(async () => finish(sample));
-    const generate = screen.getByRole('button', { name: 'Gerar relatório', exact: true });
-    const download = screen.getByRole('button', { name: 'Baixar Excel', exact: true });
+    const generate = screen.getByRole('button', { name: 'Gerar relatório' });
+    const download = screen.getByRole('button', { name: 'Baixar Excel' });
     expect(download).toBeDisabled();
     expect(engine.buildReport).not.toHaveBeenCalled();
     expect(engine.dateBounds).not.toHaveBeenCalled();
@@ -50,7 +50,7 @@ describe('Relatório API Excel — geração explícita', () => {
     fireEvent.change(screen.getByLabelText('Buscar coluna'), { target: { value: 'Estoque' } });
     fireEvent.click(screen.getByLabelText('Data inicial'));
     fireEvent.change(screen.getByLabelText('Ano', { exact: true }), { target: { value: '2026' } });
-    fireEvent.click(screen.getByRole('button', { name: 'fevereiro de 2026', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'fevereiro de 2026' }));
     expect(screen.getByLabelText('Data inicial')).toHaveTextContent('01/02/2026');
     expect(engine.buildReport).not.toHaveBeenCalled();
     expect(engine.dateBounds).not.toHaveBeenCalled();
@@ -58,8 +58,8 @@ describe('Relatório API Excel — geração explícita', () => {
     await waitFor(() => expect(download).toBeEnabled());
     expect(engine.buildReport).toHaveBeenCalledTimes(1);
     expect(engine.dateBounds).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole('columnheader', { name: 'Estoque fev/2026', exact: true })).toBeVisible();
-    fireEvent.click(within(columns).getByRole('button', { name: 'Limpar seleção', exact: true }));
+    expect(screen.getByRole('columnheader', { name: 'Estoque fev/2026' })).toBeVisible();
+    fireEvent.click(within(columns).getByRole('button', { name: 'Limpar seleção' }));
     fireEvent.click(within(columns).getByText('Estoque', { exact: true }));
     expect(download).toBeDisabled();
     expect(engine.buildReport).toHaveBeenCalledTimes(1);
@@ -75,9 +75,9 @@ describe('Relatório API Excel — geração explícita', () => {
   it('não gera relatório quando a coleta falha', async () => {
     vi.mocked(fetchBuildings).mockRejectedValueOnce(new Error('HTTP 503'));
     render(<RelatorioApiExcel />);
-    fireEvent.click(screen.getByRole('button', { name: 'Carregar', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Carregar' }));
     await screen.findByText(/Nenhum relatório parcial foi liberado/);
     expect(engine.buildReport).not.toHaveBeenCalled();
-    expect(screen.queryByRole('button', { name: 'Gerar relatório', exact: true })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Gerar relatório' })).not.toBeInTheDocument();
   });
 });
