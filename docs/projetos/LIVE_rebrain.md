@@ -1,3 +1,12 @@
+## 22/10/2026 — Relatório API Excel: publicação autorizada do conjunto local — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Relatórios Automatizados.
+- **Autorização:** usuário autorizou o push nesta sessão, superando a orientação anterior de manter o conjunto local. Pacote preparado para sincronizar a mesma `main` em `origin` e `upstream`, sem reescrever histórico.
+- **Commits:** `841e173` (Hotel/métricas reais/média), `670f3d3` (geração explícita/filtros/cadastro), `3ed0152` (competências pt-BR/escala VGV), `2526863` (comboboxes múltiplos/grade); merge autorizado `1b3e0b0` preserva `6c4ccf6` de Gabriel.
+- **Evidência:** fetch de ambos os remotes sem novidade ou divergência; documentação viva compatível com o pacote contra cada remote. Build, TypeScript, lint, testes e navegador com dados fictícios registrados nas entradas específicas abaixo; nenhuma alteração de runtime adicional nesta anotação.
+- **Monday:** —
+- **Etapas/Pendências:** conjunto local validado e envio autorizado; consulta autenticada à API, aceite com dados reais e deploy continuam sem confirmação nesta sessão. Arquivo local de auditoria permanece fora dos commits.
+
 ## 22/10/2026 — Relatório API Excel: filtros múltiplos e grade uniforme — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — 2. Configurar relatório.
