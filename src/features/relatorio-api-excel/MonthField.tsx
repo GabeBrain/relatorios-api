@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ReportFieldLabel } from './ReportFieldLabel';
 
 const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
 /** Calendário de competências: seleciona só mês/ano e sempre emite o dia 01. */
-export function MonthField({ id, label, value, onChange }: {
-  id: string; label: string; value: string; onChange: (value: string) => void;
+export function MonthField({ id, label, value, onChange, help }: {
+  id: string; label: string; value: string; onChange: (value: string) => void; help?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [year, setYear] = useState(String(new Date().getFullYear()));
@@ -20,7 +21,7 @@ export function MonthField({ id, label, value, onChange }: {
     setOpen(next);
   };
   return <div className="space-y-1.5">
-    <Label htmlFor={id}>{label}</Label>
+    <ReportFieldLabel htmlFor={id} help={help}>{label}</ReportFieldLabel>
     <Popover open={open} onOpenChange={changeOpen}>
       <PopoverTrigger asChild>
         <Button id={id} aria-label={label} variant="outline" className="w-full justify-between font-normal">

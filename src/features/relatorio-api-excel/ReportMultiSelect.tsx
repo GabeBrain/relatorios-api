@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { ReportFieldLabel } from './ReportFieldLabel';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 
 /** Mesmo padrão Popover/Command dos filtros Brain, com seleção múltipla local. */
-export function ReportMultiSelect({ id, label, options, value, onChange, disabled }: {
+export function ReportMultiSelect({ id, label, options, value, onChange, disabled, help }: {
   id: string;
   label: string;
   options: string[];
   value: string[];
   onChange: (value: string[]) => void;
   disabled?: boolean;
+  help?: string;
 }) {
   const [open, setOpen] = useState(false);
   const selected = options.filter((option) => value.includes(option));
@@ -20,7 +21,7 @@ export function ReportMultiSelect({ id, label, options, value, onChange, disable
   const summary = all ? 'Todos selecionados' : selected.length === 1 ? selected[0] || 'Não informado'
     : selected.length ? `${selected.length} selecionados` : 'Nenhum selecionado';
   return <div className="min-w-0 space-y-1.5">
-    <Label htmlFor={id}>{label}</Label>
+    <ReportFieldLabel htmlFor={id} help={help}>{label}</ReportFieldLabel>
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild><Button id={id} aria-label={label} variant="outline" role="combobox" aria-expanded={open} disabled={disabled}
         className="h-10 w-full min-w-0 justify-between text-sm font-normal"><span className="truncate">{summary}</span><ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /></Button></PopoverTrigger>

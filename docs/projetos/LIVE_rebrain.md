@@ -1,3 +1,13 @@
+## 23/10/2026 — Relatório API Excel: ajuda contextual nos campos — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — 2. Configurar relatório.
+- **O quê:** ícone de informação ao lado dos 11 campos, com tooltip por hover ou foco. Explica filtros, períodos, layouts e fórmulas; textos de cálculo monetário, média e escala acompanham a seleção atual. Reutiliza Tooltip/Label do design system, sem modificar primitives compartilhados ou regras de processamento.
+- **AELO, análise somente:** endpoint principal confirmado no código como POST `https://app.geobrain.com.br/public-api/v2/building-with-history-internal`, com tipo Horizontal, UF, status e paginação. Catálogo geográfico usa endpoint separado. Nenhuma alteração ou consulta real ao AELO.
+- **Autor/origem:** Edgar / Codex. **Commits:** commit desta entrada; base `38c10a8`.
+- **Monday:** —
+- **Validação:** TypeScript, lint dirigido, build, quatro testes em dois arquivos e diff sem erros. Navegador com API simulada em 1440/390 px e temas claro/escuro: 11 tooltips, hover, foco, conteúdo dinâmico e posicionamento dentro da janela; quatro chamadas de coleta preservadas, sem processamento automático ou erro de página. Evidências locais ignoradas em `.local-inputs/api-excel-check/verify-tooltips.cjs` e capturas associadas. AELO/Dashboard intactos.
+- **Etapas/Pendências:** implementação e verificação local concluídas; aceite com API autenticada e publicação pendentes. Sem push nesta entrega.
+
 ## 23/10/2026 — Relatório API Excel: filtro de padrão e médias por tipologia Padrão — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Configurar relatório.
