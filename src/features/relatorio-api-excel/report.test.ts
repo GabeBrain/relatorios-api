@@ -212,6 +212,49 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     expect(report({}, data).rows).toHaveLength(3);
   });
 
+  it('filtra o padrão cadastral combinado com os tipos, sem misturar tipologia ou padrão histórico', () => {
+    const second = { ...building, building_id: 11, building_type: 'Horizontal', standard: 'Loteamento Aberto' };
+    const third = { ...building, building_id: 12, building_type: 'Vertical', standard: 'Médio' };
+    const data = [building, second, third];
+    expect(report({ standards: ['Alto', 'Loteamento Aberto'], buildingTypes: ['Vertical'] }, data).rows.map((row) => row['ID Empreendimento'])).toEqual(['10']);
+    expect(report({ standards: ['Loteamento Aberto'] }, data).rows.map((row) => row['ID Empreendimento'])).toEqual(['11']);
+    expect(report({ standards: [] }, data).rows).toEqual([]);
+  });
+
+  it.each([
+    ['simple', 850, 'simple-standard', 200],
+    ['quantity', 750, 'quantity-standard', 250],
+    ['stock', 820, 'stock-standard', 140],
+  ] as const)('preserva média %s com Garden/Cobertura e restringe somente %s na opção nova', (mode, expectedAll, restricted, expectedStandard) => {
+    const data = [{ ...building, typologies_history: [
+      { typology_id: 1, period: '2026-01-31', type_of_typology: 'Padrão', price: 100, qty: 10, typology_stock: 8 },
+      { typology_id: 2, period: '2026-01-31', type_of_typology: ' Padrao ', price: 300, qty: 30, typology_stock: 2 },
+      { typology_id: 3, period: '2026-01-31', type_of_typology: 'Garden', price: 1000, qty: 5, typology_stock: 5 },
+      { typology_id: 4, period: '2026-01-31', type_of_typology: 'Cobertura', price: 2000, qty: 15, typology_stock: 5 },
+    ] }];
+    for (const granularity of ['month', 'quarter'] as const) {
+      const label = granularity === 'month' ? 'jan/2026' : '1T/2026';
+      const all = report({ buildingAverageMode: mode, granularity }, data);
+      const standard = report({ buildingAverageMode: restricted, granularity }, data);
+      expect(all.rows).toHaveLength(4);
+      expect(standard.rows).toHaveLength(4);
+      for (const row of all.rows) expect(row[`Preço Médio Empreendimento ${label}`]).toBe(expectedAll);
+      for (const row of standard.rows) expect(row[`Preço Médio Empreendimento ${label}`]).toBe(expectedStandard);
+    }
+  });
+
+  it('não faz fallback para Garden ou tipologia ausente nas médias restritas', () => {
+    const data = [{ ...building, typologies_history: [
+      { typology_id: 1, period: '2026-01-31', type_of_typology: 'Garden', price: 100, qty: 10, typology_stock: 5 },
+      { typology_id: 2, period: '2026-01-31', price: 1000, qty: 10, typology_stock: 5 },
+    ] }];
+    for (const mode of ['simple-standard', 'quantity-standard', 'stock-standard'] as const) {
+      const result = report({ buildingAverageMode: mode }, data);
+      expect(result.rows).toHaveLength(2);
+      expect(result.rows[0]['Preço Médio Empreendimento jan/2026']).toBeNull();
+    }
+  });
+
   it('concatena incorporadoras, distingue região/área administrativa/tipo/padrão e usa a tipologia até o corte', () => {
     const data = [{ ...building, region: 'Centro-Oeste', administrative_area: 'Norte',
       incorporators: [{ name: 'Empresa 1' }, { name: 'Empresa 2' }, { name: '' }, { name: 'Empresa 3' }],

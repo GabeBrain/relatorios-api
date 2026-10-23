@@ -15,7 +15,7 @@ import type { GeoLoadRequest } from '@/features/shared/geo-api-scope-engine/GeoA
 import { ReportMultiSelect } from '@/features/relatorio-api-excel/ReportMultiSelect';
 import { MonthField } from '@/features/relatorio-api-excel/MonthField';
 import { fetchBuildings, type FetchProgress, type RawBuilding } from '@/features/relatorio-api-excel/api';
-import { buildReport, createWorkbook, dateBounds, exportValue, monthStart, MEASURES, VGV_UNITS, PERCENT_COLUMNS, REPORT_FIELDS, municipalityKey, selectReportFields,
+import { buildReport, createWorkbook, dateBounds, exportValue, monthStart, BUILDING_AVERAGE_OPTIONS, MEASURES, VGV_UNITS, PERCENT_COLUMNS, REPORT_FIELDS, municipalityKey, selectReportFields,
   type Cell, type Granularity, type Layout, type PriceMode, type BuildingAverageMode, type Report, type ReportOptions, type VgvScale } from '@/features/relatorio-api-excel/report';
 
 const PAGE_SIZE = 100;
@@ -37,6 +37,7 @@ export default function RelatorioApiExcel() {
   const [loadedScope, setLoadedScope] = useState('');
   const [selectedMunicipalities, setSelectedMunicipalities] = useState<string[]>([]);
   const [buildingTypes, setBuildingTypes] = useState<string[]>(BUILDING_TYPES);
+  const [selectedStandards, setSelectedStandards] = useState<string[] | null>(null);
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState<{ report: Report; options: ReportOptions; signature: string } | null>(null);
   const revision = useRef(0);
@@ -88,7 +89,7 @@ export default function RelatorioApiExcel() {
       });
       if (controller.current !== current || current.signal.aborted) return;
       // Guarda a resposta bruta. Históricos e cálculos só são percorridos em Gerar relatório.
-      setFrom(''); setTo(''); setSelectedMunicipalities([...new Set(complete.map(municipalityKey))]); setBuildingTypes(BUILDING_TYPES);
+      setFrom(''); setTo(''); setSelectedMunicipalities([...new Set(complete.map(municipalityKey))]); setBuildingTypes(BUILDING_TYPES); setSelectedStandards(null);
       setStatuses([...new Set(complete.map((building) => String(building.status ?? '')))]);
       setSelected(null); setPage(0);
       setLoadedScope(request.city || request.uf || request.ufs?.join(', ') || '');
@@ -98,9 +99,18 @@ export default function RelatorioApiExcel() {
       if (controller.current === current && !current.signal.aborted) setError(cause instanceof Error ? cause.message : 'Não foi possível carregar os dados.');
     } finally { if (controller.current === current) setLoading(false); }
   };
+  const standards = useMemo(() => [...new Set((buildings ?? [])
+    .filter((building) => buildingTypes.includes(String(building.building_type ?? '')))
+    .map((building) => String(building.standard ?? '')))].sort((a, b) => a.localeCompare(b, 'pt-BR')), [buildings, buildingTypes]);
+  const chosenStandards = useMemo(() => selectedStandards === null ? standards : selectedStandards.filter((standard) => standards.includes(standard)), [selectedStandards, standards]);
+  const changeBuildingTypes = (next: string[]) => {
+    const allowed = new Set((buildings ?? []).filter((building) => next.includes(String(building.building_type ?? ''))).map((building) => String(building.standard ?? '')));
+    setBuildingTypes(next);
+    setSelectedStandards((current) => current === null ? null : current.filter((standard) => allowed.has(standard)));
+  };
   const options = useMemo(() => ({ granularity, layout, priceMode, buildingAverageMode, vgvScale, periodRange: 'month' as const, from, to, statuses,
-    municipalities: selectedMunicipalities, buildingTypes }),
-  [granularity, layout, priceMode, buildingAverageMode, vgvScale, from, to, statuses, selectedMunicipalities, buildingTypes]);
+    municipalities: selectedMunicipalities, buildingTypes, standards: chosenStandards }),
+  [granularity, layout, priceMode, buildingAverageMode, vgvScale, from, to, statuses, selectedMunicipalities, buildingTypes, chosenStandards]);
   const signature = JSON.stringify({ options, selected });
   const stale = generated !== null && generated.signature !== signature;
   const filtered = generated?.report ?? EMPTY_REPORT;
@@ -181,19 +191,20 @@ export default function RelatorioApiExcel() {
           <p className="text-xs text-muted-foreground">Configure os filtros e clique em Gerar relatório. Alterar seleções não processa os dados nem faz novas consultas à API. Datas vazias incluem todo o histórico disponível.</p>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <ReportMultiSelect id="api-excel-municipality" label="Município" options={municipalities} value={selectedMunicipalities} onChange={setSelectedMunicipalities} disabled={generating || exporting} />
-            <ReportMultiSelect id="api-excel-building-types" label="Tipo Empreendimento" options={BUILDING_TYPES} value={buildingTypes} onChange={setBuildingTypes} disabled={generating || exporting} />
+            <ReportMultiSelect id="api-excel-building-types" label="Tipo Empreendimento" options={BUILDING_TYPES} value={buildingTypes} onChange={changeBuildingTypes} disabled={generating || exporting} />
             <ReportMultiSelect id="api-excel-statuses" label="Status do Empreendimento" options={availableStatuses} value={statuses} onChange={setStatuses} disabled={generating || exporting} />
+            <ReportMultiSelect id="api-excel-standards" label="Padrão" options={standards} value={chosenStandards} onChange={setSelectedStandards} disabled={generating || exporting || !buildingTypes.length} />
             <div className="space-y-1.5"><Label htmlFor="api-excel-view">Visão</Label><Select value={granularity} onValueChange={(next: Granularity) => { setGranularity(next); }}><SelectTrigger id="api-excel-view"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="month">Mensal</SelectItem><SelectItem value="quarter">Trimestral</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="api-excel-layout">Layout do Excel</Label><Select value={layout} onValueChange={(next: Layout) => { setLayout(next); }}><SelectTrigger id="api-excel-layout"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="columns">Valores em colunas</SelectItem><SelectItem value="rows">Tabular — períodos em linhas</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="api-excel-price">Cálculo monetário</Label><Select value={priceMode} onValueChange={(next: PriceMode) => setPriceMode(next)}><SelectTrigger id="api-excel-price"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="current">Valor atual</SelectItem><SelectItem value="period">Valor do período</SelectItem></SelectContent></Select></div>
-            <div className="space-y-1.5"><Label htmlFor="api-excel-average">Preço Médio Empreendimento</Label><Select value={buildingAverageMode} onValueChange={(next: BuildingAverageMode) => setBuildingAverageMode(next)}><SelectTrigger id="api-excel-average"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="simple">Média simples</SelectItem><SelectItem value="quantity">Ponderada pela quantidade</SelectItem><SelectItem value="stock">Ponderada pelo estoque</SelectItem></SelectContent></Select></div>
+            <div className="space-y-1.5"><Label htmlFor="api-excel-average">Preço Médio Empreendimento</Label><Select value={buildingAverageMode} onValueChange={(next: BuildingAverageMode) => setBuildingAverageMode(next)}><SelectTrigger id="api-excel-average"><SelectValue /></SelectTrigger><SelectContent>{BUILDING_AVERAGE_OPTIONS.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></div>
             <MonthField id="api-excel-from" label="Data inicial" value={from} onChange={setFrom} />
             <MonthField id="api-excel-to" label="Data final" value={to} onChange={setTo} />
             <div className="space-y-1.5"><Label htmlFor="api-excel-vgv-scale">Visualização do VGV</Label><Select value={vgvScale} onValueChange={(next: VgvScale) => setVgvScale(next)}><SelectTrigger id="api-excel-vgv-scale"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="standard">Padrão — valor calculado</SelectItem><SelectItem value="thousand">Milhar — dividir por 1.000</SelectItem><SelectItem value="million">Milhão — dividir por 1.000.000</SelectItem></SelectContent></Select></div>
           </div>
           {!validDates && <p role="alert" className="text-sm text-destructive">Informe datas válidas, com a data inicial anterior ou igual à final.</p>}
           <p className="text-xs text-muted-foreground">{priceMode === 'current' ? 'Valor atual: último preço disponível da tipologia até a data final, aplicado à série histórica.' : 'Valor do período: estoque e VGV lançado usam quantidade e preço do último fechamento de cada mês/trimestre. VGV de vendas soma venda × preço de cada fechamento.'} A escala escolhida para VGV será aplicada à prévia, aos gráficos e ao Excel. Vendas Brutas = gross_sales; Distratos = distractions; Vendas Líquidas = Vendas Brutas − Distratos.</p>
-          <p className="text-xs text-muted-foreground">Preço Médio Empreendimento considera o último fechamento de cada tipologia no período e se repete nas linhas do mesmo empreendimento. {buildingAverageMode === 'simple' ? 'Média simples dos preços válidos.' : buildingAverageMode === 'quantity' ? 'Soma de preço × quantidade, dividida pela soma das quantidades.' : 'Soma de preço × estoque, dividida pela soma dos estoques.'} Pesos ausentes ou não positivos são excluídos; sem base válida, o valor fica vazio.</p>
+          <p className="text-xs text-muted-foreground">Preço Médio Empreendimento considera o último fechamento de cada tipologia no período e se repete nas linhas do mesmo empreendimento. {buildingAverageMode.startsWith('simple') ? 'Média simples dos preços válidos.' : buildingAverageMode.startsWith('quantity') ? 'Soma de preço × quantidade, dividida pela soma das quantidades.' : 'Soma de preço × estoque, dividida pela soma dos estoques.'} {buildingAverageMode.endsWith('-standard') ? 'Somente tipologias Padrão participam desta média; Garden, Cobertura e demais tipologias continuam nas linhas do relatório.' : 'Inclui todas as tipologias com dados válidos, inclusive Garden e Cobertura.'} Pesos ausentes ou não positivos são excluídos; sem base válida, o valor fica vazio.</p>
           <p className="text-xs text-muted-foreground">Preço Atual e Preço m² mostram a posição de cada período; a opção Valor atual/Valor do período governa os VGV. As datas filtram os meses de typologies_history[].period, incluindo o mês final inteiro; o dia exibido é sempre 01. VGV Lançado histórico representa o valor da oferta total de cada período; não é o fluxo de novos lançamentos.</p>
         </section>
         <section className="space-y-3 rounded-xl border border-border bg-card p-4" aria-label="Colunas de exportação">
@@ -206,7 +217,7 @@ export default function RelatorioApiExcel() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm">{generated ? `${report.typologyCount} registros de tipologia · ${filtered.rows.length} linhas · ${report.periods.length} períodos` : 'Configure os campos antes de gerar o relatório.'}</p>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={generate} disabled={generating || exporting || !validDates || !selectedFields.length || !selectedMunicipalities.length || !statuses.length || !buildingTypes.length}><Play className="mr-2 h-4 w-4" />{generating ? 'Gerando relatório…' : 'Gerar relatório'}</Button>
+              <Button onClick={generate} disabled={generating || exporting || !validDates || !selectedFields.length || !selectedMunicipalities.length || !statuses.length || !buildingTypes.length || !chosenStandards.length}><Play className="mr-2 h-4 w-4" />{generating ? 'Gerando relatório…' : 'Gerar relatório'}</Button>
               <Button variant="outline" onClick={download} disabled={exporting || generating || !generated || stale || !filtered.rows.length || !filtered.columns.length}><Download className="mr-2 h-4 w-4" />{exporting ? 'Gerando Excel…' : 'Baixar Excel'}</Button>
             </div>
           </div>

@@ -14,6 +14,7 @@ Implementação exclusiva em `src/features/relatorio-api-excel/` e `src/pages/Re
 - **Gerar relatório**, à esquerda de **Baixar Excel**, é o único ponto que percorre os históricos, aplica filtros, calcula séries e expande os campos escolhidos. Baixar Excel apenas serializa o resultado já gerado. Alterar uma seleção mantém a prévia anterior identificada como antiga e desabilita o download até gerar novamente; não recalcula automaticamente. Nova coleta ou troca de escopo/token limpa o resultado anterior. Geração duplicada é bloqueada e o estado Brain informa o processamento.
 - A configuração começa, nesta ordem, por **Município**, **Tipo Empreendimento** e **Status do Empreendimento**. Os três usam o mesmo combobox de múltipla escolha com busca, marcação, Selecionar todos, Limpar e resumo da seleção; permanecem abertos ao marcar/desmarcar opções. Todos os controles de configuração estão em uma única grade de três colunas no desktop e uma coluna em telas menores.
 - Município filtra uma ou várias chaves `city/state` dos registros já carregados, combinadas por OU. Todos os municípios são selecionados na carga; limpar a seleção significa nenhum município, nunca todos, e bloqueia a geração até escolher uma opção. Tipo Empreendimento filtra `building_type`; Vertical, Comercial, Horizontal e Hotel permanecem disponíveis. Status filtra os valores presentes na coleta. Esses filtros não alteram a coleta nem fazem novas requisições; mudanças exigem Gerar relatório novamente. No motor puro, município omitido mantém o escopo completo, enquanto lista explicitamente vazia não retorna registros.
+- Após Status do Empreendimento aparece **Padrão**, no mesmo combobox múltiplo. Opções = `data.standard` dos registros cujo `building_type` pertence aos tipos selecionados, sem percorrer históricos. O padrão cadastral é distinto da tipologia (`type_of_typology`). Inicialmente todos os padrões compatíveis participam; seleção explícita é preservada por interseção ao mudar tipos, removendo valores incompatíveis. Se essa interseção ficar vazia, geração bloqueada até selecionar um padrão, sem fallback silencioso. O motor aplica esse filtro junto com município, tipo e status somente em Gerar relatório.
 
 ## Visão, datas e agregação
 
@@ -57,13 +58,30 @@ VGV Vendas Brutas usa `gross_sales`; VGV Distratos usa `distractions`. No modo V
 
 ## Preço Médio Empreendimento
 
-Filtro local aplicado após a coleta completa. Três opções, com **Média simples** como padrão:
+Filtro local aplicado na geração do relatório após a coleta completa. As três opções originais incluem todas as tipologias válidas, inclusive Garden e Cobertura; **Média simples** permanece como padrão:
 
 - **Média simples:** soma dos preços válidos ÷ número de tipologias com preço válido.
-- **Ponderada pela quantidade:** soma de preço × `qty` ÷ soma de `qty` das tipologias com preço válido e quantidade positiva.
+- **Ponderado pela oferta lançada:** soma de preço × `qty` ÷ soma de `qty` das tipologias com preço válido e quantidade positiva. Mesmo cálculo da opção anteriormente chamada Ponderada pela quantidade; mudou somente o rótulo.
 - **Ponderada pelo estoque:** soma de preço × `typology_stock` ÷ soma de `typology_stock` das tipologias com preço válido e estoque positivo.
 
-Cada tipologia contribui com seu último fechamento dentro do mês/trimestre e do intervalo de datas, não com todos os fechamentos do trimestre. O cálculo é por registro de empreendimento/período e se repete nas linhas de suas tipologias com fechamento nesse período. Preços ausentes são excluídos; pesos ausentes, zero ou negativos são excluídos das opções ponderadas. Sem base válida, a média fica vazia, sem fallback para outro cálculo. Mudar o filtro recalcula a prévia e o Excel sem consultar a API.
+Três opções adicionais aplicam as mesmas fórmulas somente às tipologias cujo `type_of_typology`, normalizado por caixa, acentos e espaços externos, seja **Padrão/Padrao**:
+
+- Média simples (somente tip. Padrão).
+- Ponderado pela oferta lançada (somente tip. Padrão).
+- Ponderada pelo estoque (somente tip. Padrão).
+
+O filtro adicional restringe apenas a composição do Preço Médio Empreendimento: linhas de Garden, Cobertura e demais tipologias continuam no relatório e recebem a média do empreendimento. Tipologia ausente não é presumida como Padrão; se não houver tipologia Padrão com dados/pesos válidos, a média fica vazia. Nenhum fallback para Garden/Cobertura ou média geral. Isso não altera os VGV nem os outros preços das linhas.
+
+Cada tipologia contribui com seu último fechamento dentro do mês/trimestre e do intervalo de datas, não com todos os fechamentos do trimestre. O cálculo é por registro de empreendimento/período e se repete nas linhas de suas tipologias com fechamento nesse período. Preços ausentes são excluídos; pesos ausentes, zero ou negativos são excluídos das opções ponderadas. Sem base válida, a média fica vazia, sem fallback para outro cálculo. Mudar o filtro apenas altera o rascunho e bloqueia download; Gerar relatório recalcula a prévia e o Excel sem consultar a API.
+
+### AELO: conferência informativa de 23/10/2026, sem alteração
+
+O AELO continua usando a implementação de `RelatorioAelo.tsx` e `aggregateTypologyHistoryByQuarter`:
+
+- Vendas: soma `sold_in_period` dos fechamentos da tipologia no trimestre; não usa `gross_sales`.
+- Distratos estimados por intervalo: `estoque atual − estoque anterior + sold_in_period`, somados no trimestre. Se falta estoque anterior/atual ou venda, ou se a estimativa fica negativa em algum intervalo, o total estimado do trimestre fica vazio. Não usa `distractions` nem corta estimativas negativas para zero.
+- A coluna chamada Vendas líquidas recebe a mesma soma de `sold_in_period`; não subtrai os distratos estimados. Antes do trimestre de lançamento, séries de vendas/estoque/VGV ficam zero.
+- VGV Distratos e Vendas Líquidas monetárias internos ficam nulos porque `vgvDistratos` é fixado em null. Essa lógica não foi migrada para o Relatório API Excel, que preserva as regras reais de gross_sales/distractions já definidas pelo usuário. Nenhum arquivo do AELO ou da agregação compartilhada foi modificado.
 
 Nos gráficos, quantidades/VGV são somados. Preço Atual e Preço m² são médias simples das posições válidas por tipologia; Preço Médio Empreendimento é a média simples das médias dos registros de empreendimento, contando cada registro uma vez por período. Não se somam preços nem se multiplicam médias pela quantidade de linhas da tipologia.
 
