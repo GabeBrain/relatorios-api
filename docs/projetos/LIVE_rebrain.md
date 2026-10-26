@@ -1,3 +1,12 @@
+## 26/10/2026 — Validação do Fechamento: contexto para conferência na coluna Valor — Edgar / Codex
+
+- **Ambiente/funcionalidade:** Divergências da Validação do Fechamento; Edgar / Codex.
+- **O quê:** revisão dos textos frente ao Python: restauradas área/padrão nas regras de vagas e corrigida a identificação do padrão, que no anexo aparecia rotulado como M2. Valores agora incluem, conforme a regra, desvio percentual absoluto, limite de desvio/preço, quantidade de empreendimentos, preço/m² calculado, diferença e tolerância de R$ 0,01/m², status histórico, datas, critérios de cluster unitário e unidades/área usadas nas referências de garagem/Garden/Cobertura. Taxas de venda exibidas como percentuais e mediana de vendas identificada em unidades, sem acrescentar médias de outras métricas.
+- **Preservado:** critérios, prioridade, agrupamentos, identidades e aprovações. Apenas o conteúdo de `value` mudou; tabela e Excel já consomem esse mesmo conteúdo. Python fornecido/gerado não foi sobrescrito nesta revisão da apresentação.
+- **Evidência:** 41 testes/8 arquivos aprovados; comparador atual confirma os mesmos 52 achados entre Python e aplicação na base local Sinop/MT de 22/10. Sem nova consulta autenticada ou validação visual.
+- **Etapas/Pendências:** revisão local implementada; conferência humana e publicação pendentes. Sem alterações em Supabase ou demais projetos.
+- **Monday:** —
+
 ## 26/10/2026 — Validação do Fechamento: prioridade de preços e tolerância de arredondamento — Edgar / Codex
 
 - **Ambiente/funcionalidade:** motor de Divergências da Validação do Fechamento; Edgar / Codex.

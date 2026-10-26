@@ -54,6 +54,21 @@ describe('Farol 20261021', () => {
     const old = validateBuildings([building('1', { sold: 3 }, { release_date: '2020-01-01', total_stock: 8 })]).find((r) => r.field === 'total_stock');
     expect(old?.isBuildingRule).toBe(true);
     expect(old?.typology_id).toBe('0');
+    expect(old?.value).toContain('% Vendido: 30%');
+    expect(old?.value).toContain('Critério: mais de 24 meses e vendido ≤ 30%');
     expect(validateBuildings([building('1', { sold: 8 }, { total_stock: 2 })]).some((r) => r.error.includes('Vendido ≥ 80%'))).toBe(true);
+  });
+
+  it('mostra área e padrão nas regras de vagas', () => {
+    const row = validateBuildings([building('1', { garage_label: '2 vagas', private_area: 80 }, { standard: 'Econômico' })]).find((r) => r.error === 'Vertical Econômico com mais de 1 vaga');
+    expect(row?.value).toBe('Vagas: 2 vagas | M²: 80 | Padrão: Econômico | Tipo: Vertical');
+  });
+
+  it('mostra o desvio e o limite da mediana, sem acrescentar média de outra métrica', () => {
+    const row = validateBuildings([building('1', { price: 400000 }), building('2', { price: 200000 })]).find((r) => r.building_id === '1' && r.field === 'price');
+    expect(row?.value).toContain('Mediana cluster: 300.000');
+    expect(row?.value).toContain('Desvio absoluto: 33,33% | Limite de desvio: ≥ 30%');
+    expect(row?.value).toContain('Empreendimentos: 2');
+    expect(row?.value).not.toContain('Média cidade');
   });
 });

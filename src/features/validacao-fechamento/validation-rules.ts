@@ -14,6 +14,7 @@ const n = (value: number | null | undefined) => value ?? 0;
 const emptyTotals = (): Totals => ({ qty: 0, sold: 0, price: 0, area: 0, standardQty: 0, standardPrice: 0 });
 const key = (...values: string[]) => JSON.stringify(values);
 const fmt = (value: number) => value.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+const percent = (value: number) => Number.isFinite(value) ? `${fmt(value * 100)}%` : value === Infinity ? '∞ (referência zero)' : 'não calculável';
 
 /** pandas/numpy round: empates para o inteiro par. */
 function round(value: number, digits = 0): number {
@@ -92,11 +93,11 @@ export function validateBuildings(buildings: ValidationBuilding[]): Divergence[]
     const months = round((Date.parse(row.h.period) - Date.parse(row.b.release_date)) / 86400000 / 30.44) || 0;
     const stock = n(row.b.total_stock);
     const salesRate = ratio(totals.sold, totals.qty);
-    const salesValue = `Tempo venda: ${months} | Estoque atual: ${fmt(stock)} | Total vendido: ${fmt(totals.sold)} | Oferta lançada: ${fmt(totals.qty)} | % Vendido: ${fmt(salesRate)}`;
+    const salesValue = `Tempo venda: ${months} meses | Estoque atual: ${fmt(stock)} | Total vendido: ${fmt(totals.sold)} | Oferta lançada: ${fmt(totals.qty)} | % Vendido: ${percent(salesRate)} | Status empreendimento: ${row.b.status} | Lançamento: ${row.b.release_date} | Período: ${row.h.period}`;
     const buildingGroup = `Empreendimento: building_id=${row.b.building_id} | período=${row.h.period}`;
-    if (months > 24 && row.b.status === 'Ativo' && salesRate <= .3) emit(row, 'total_stock', '> 24 meses, Ativo, Vendido ≤ 30% das unidades', salesValue, 'Estoque - Empreendimento', buildingGroup, true);
-    if (months <= 24 && row.b.status === 'Ativo' && salesRate >= .8) emit(row, 'total_stock', '≤ 24 meses, Ativo, Vendido ≥ 80% das unidades', salesValue, 'Estoque - Empreendimento', buildingGroup, true);
-    if (cluster && cluster.buildings.size > 1 && deviation(salesRate, ratio(cluster.sold, cluster.qty)) > .5) emit(row, 'sold', 'Taxa de vendas com desvio > 50% da taxa do cluster', `Vendas: ${fmt(totals.sold)} | Oferta lançada: ${fmt(totals.qty)} | % Vendido: ${fmt(salesRate)} | Empreendimentos: ${cluster.buildings.size} | Mediana cluster: ${fmt(round(median(cluster.soldValues)))} | % Vendido cluster: ${fmt(ratio(cluster.sold, cluster.qty))}`, 'Estoque - Tipologia', row.cluster, true);
+    if (months > 24 && row.b.status === 'Ativo' && salesRate <= .3) emit(row, 'total_stock', '> 24 meses, Ativo, Vendido ≤ 30% das unidades', `${salesValue} | Critério: mais de 24 meses e vendido ≤ 30%`, 'Estoque - Empreendimento', buildingGroup, true);
+    if (months <= 24 && row.b.status === 'Ativo' && salesRate >= .8) emit(row, 'total_stock', '≤ 24 meses, Ativo, Vendido ≥ 80% das unidades', `${salesValue} | Critério: até 24 meses e vendido ≥ 80%`, 'Estoque - Empreendimento', buildingGroup, true);
+    if (cluster && cluster.buildings.size > 1 && deviation(salesRate, ratio(cluster.sold, cluster.qty)) > .5) emit(row, 'sold', 'Taxa de vendas com desvio > 50% da taxa do cluster', `Vendas: ${fmt(totals.sold)} | Oferta lançada: ${fmt(totals.qty)} | % Vendido: ${percent(salesRate)} | Empreendimentos: ${cluster.buildings.size} | Mediana de vendas do cluster: ${fmt(round(median(cluster.soldValues)))} unidades | % Vendido cluster: ${percent(ratio(cluster.sold, cluster.qty))} | Desvio absoluto: ${percent(deviation(salesRate, ratio(cluster.sold, cluster.qty)))} | Limite de desvio: > 50%`, 'Estoque - Tipologia', row.cluster, true);
   }
 
   for (const row of latestTypologies.values()) {
@@ -111,34 +112,37 @@ export function validateBuildings(buildings: ValidationBuilding[]): Divergence[]
     const lowPriceLimit = b.building_type === 'Horizontal' ? 40000 : 100000;
     const lowPrice = price > 0 && price <= lowPriceLimit && deviation(price, priceMedian) >= .3;
     const suffix = ` | Empreendimentos: ${count}`;
-    if (b.building_type === 'Vertical' && b.standard === 'Compacto' && area >= 50 && n(h.number_bedroom) <= 1) emit(row, 'private_area', 'Compacto ≥ 50 m² com até 1 quarto', `M²: ${fmt(area)} | Quartos: ${n(h.number_bedroom)} dorms`, 'Metragem - Tipologia');
+    const priceDeviation = ` | Desvio absoluto: ${percent(deviation(price, priceMedian))} | Limite de desvio: ≥ 30%`;
+    const priceM2Median = median(cluster?.pricesM2 ?? []);
+    const priceM2Deviation = ` | Desvio absoluto: ${percent(deviation(priceM2, priceM2Median))} | Limite de desvio: ≥ 30%`;
+    if (b.building_type === 'Vertical' && b.standard === 'Compacto' && area >= 50 && n(h.number_bedroom) <= 1) emit(row, 'private_area', 'Compacto ≥ 50 m² com até 1 quarto', `M²: ${fmt(area)} | Quartos: ${n(h.number_bedroom)} dorms | Padrão: ${b.standard} | Tipo: ${b.building_type} | Critério: área ≥ 50 m² e até 1 quarto`, 'Metragem - Tipologia');
     // Prioridade apenas nesta família: zerado > limite específico > desvio geral.
-    if (lowPrice) emit(row, 'price', `Preço abaixo de R$ ${fmt(lowPriceLimit)}`, `Preço: ${fmt(price)} | Mediana cluster: ${fmt(priceMedian)}`, 'Preço', row.cluster);
-    else if (!zeroPrice && cluster && count > 1 && deviation(price, priceMedian) >= .3) emit(row, 'price', 'Desvio ≥ 30% da mediana do cluster', `Preço: ${fmt(price)} | Mediana cluster: ${fmt(priceMedian)}${suffix}`, 'Preço - Tipologia', row.cluster);
-    else if (!zeroPrice && price < 1000 && count === 1) emit(row, 'price', 'Desvio ≥ 30% da mediana do cluster', `Preço: ${fmt(price)}${suffix}`, 'Preço', row.cluster);
-    if (cluster && count > 1 && deviation(priceM2, median(cluster.pricesM2)) >= .3) emit(row, 'price_private_area', 'Desvio ≥ 30% da mediana do cluster', `Preço/m²: ${fmt(priceM2)} | Mediana cluster: ${fmt(median(cluster.pricesM2))}${suffix}`, 'Preço', row.cluster);
-    if (priceM2 < 10 && count === 1) emit(row, 'price_private_area', 'Desvio ≥ 30% da mediana do cluster', `Preço/m²: ${fmt(priceM2)}${suffix}`, 'Preço', row.cluster);
-    if (hasGarage(h) && round(price) <= round(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageQty ?? 0))) emit(row, 'price', 'Preço com vaga ≤ Preço sem vaga', `Com vagas: ${fmt(price)} | Sem vagas: ${fmt(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageQty ?? 0))}${suffix}`, 'Preço', row.cluster);
-    if (hasGarage(h) && round(priceM2) <= round(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageArea ?? 0))) emit(row, 'price_private_area', 'Preço/m² com vaga ≤ Preço/m² sem vaga', `Com vagas: ${fmt(priceM2)} | Sem vagas: ${fmt(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageArea ?? 0))}${suffix}`, 'Preço', row.cluster);
+    if (lowPrice) emit(row, 'price', `Preço abaixo de R$ ${fmt(lowPriceLimit)}`, `Preço: ${fmt(price)} | Mediana cluster: ${fmt(priceMedian)} | Limite de preço: ≤ R$ ${fmt(lowPriceLimit)} | Tipo: ${b.building_type}${priceDeviation}${suffix}`, 'Preço', row.cluster);
+    else if (!zeroPrice && cluster && count > 1 && deviation(price, priceMedian) >= .3) emit(row, 'price', 'Desvio ≥ 30% da mediana do cluster', `Preço: ${fmt(price)} | Mediana cluster: ${fmt(priceMedian)}${priceDeviation}${suffix}`, 'Preço - Tipologia', row.cluster);
+    else if (!zeroPrice && price < 1000 && count === 1) emit(row, 'price', 'Desvio ≥ 30% da mediana do cluster', `Preço: ${fmt(price)} | Critério de cluster unitário: preço < R$ 1.000${suffix}`, 'Preço', row.cluster);
+    if (cluster && count > 1 && deviation(priceM2, median(cluster.pricesM2)) >= .3) emit(row, 'price_private_area', 'Desvio ≥ 30% da mediana do cluster', `Preço/m²: ${fmt(priceM2)} | Mediana cluster: ${fmt(priceM2Median)}${priceM2Deviation}${suffix}`, 'Preço', row.cluster);
+    if (priceM2 < 10 && count === 1) emit(row, 'price_private_area', 'Desvio ≥ 30% da mediana do cluster', `Preço/m²: ${fmt(priceM2)} | Critério de cluster unitário: preço/m² < R$ 10${suffix}`, 'Preço', row.cluster);
+    if (hasGarage(h) && round(price) <= round(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageQty ?? 0))) emit(row, 'price', 'Preço com vaga ≤ Preço sem vaga', `Com vagas: ${fmt(price)} | Sem vagas: ${fmt(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageQty ?? 0))} | Vagas: ${h.garage_label} | Unidades sem vagas: ${fmt(cluster?.noGarageQty ?? 0)} | Referência: média ponderada pela oferta lançada das unidades sem vagas${suffix}`, 'Preço', row.cluster);
+    if (hasGarage(h) && round(priceM2) <= round(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageArea ?? 0))) emit(row, 'price_private_area', 'Preço/m² com vaga ≤ Preço/m² sem vaga', `Com vagas: ${fmt(priceM2)} | Sem vagas: ${fmt(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageArea ?? 0))} | Vagas: ${h.garage_label} | Área total sem vagas: ${fmt(cluster?.noGarageArea ?? 0)} m² | Referência: preço total ÷ área total das unidades sem vagas${suffix}`, 'Preço', row.cluster);
     const standardTicket = ratio(totals.standardPrice, totals.standardQty);
     const buildingGroup = `Empreendimento: building_id=${b.building_id} | período=${h.period}`;
-    if (h.type_of_typology === 'Garden' && round(price) >= round(standardTicket)) emit(row, 'price', 'Ticket Garden ≥ Ticket Padrão', `Garden: ${fmt(price)} | Padrão: ${fmt(standardTicket)}`, 'Preço', buildingGroup);
-    if (h.type_of_typology === 'Cobertura' && round(price) <= round(standardTicket)) emit(row, 'price', 'Ticket Cobertura ≤ Ticket Padrão', `Cobertura: ${fmt(price)} | Padrão: ${fmt(standardTicket)}`, 'Preço', buildingGroup);
-    if (b.building_type === 'Vertical' && b.standard === 'Econômico' && !/0|1\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical Econômico com mais de 1 vaga', `Vagas: ${h.garage_label}`, 'Vagas');
-    if (b.building_type === 'Vertical' && area >= 150 && /0|1\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical ≥ 150 m² com menos de 2 vagas', `Vagas: ${h.garage_label}`, 'Vagas');
-    if (b.building_type === 'Vertical' && b.standard === 'Compacto' && area >= 40 && /0\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical Compacto ≥ 40 m² sem vaga', `Vagas: ${h.garage_label}`, 'Vagas');
+    if (h.type_of_typology === 'Garden' && round(price) >= round(standardTicket)) emit(row, 'price', 'Ticket Garden ≥ Ticket Padrão', `Garden: ${fmt(price)} | Padrão: ${fmt(standardTicket)} | Referência Padrão: média ponderada pela oferta lançada | Unidades Padrão: ${fmt(totals.standardQty)}`, 'Preço', buildingGroup);
+    if (h.type_of_typology === 'Cobertura' && round(price) <= round(standardTicket)) emit(row, 'price', 'Ticket Cobertura ≤ Ticket Padrão', `Cobertura: ${fmt(price)} | Padrão: ${fmt(standardTicket)} | Referência Padrão: média ponderada pela oferta lançada | Unidades Padrão: ${fmt(totals.standardQty)}`, 'Preço', buildingGroup);
+    if (b.building_type === 'Vertical' && b.standard === 'Econômico' && !/0|1\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical Econômico com mais de 1 vaga', `Vagas: ${h.garage_label} | M²: ${fmt(area)} | Padrão: ${b.standard} | Tipo: ${b.building_type}`, 'Vagas');
+    if (b.building_type === 'Vertical' && area >= 150 && /0|1\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical ≥ 150 m² com menos de 2 vagas', `Vagas: ${h.garage_label} | M²: ${fmt(area)} | Padrão: ${b.standard} | Tipo: ${b.building_type}`, 'Vagas');
+    if (b.building_type === 'Vertical' && b.standard === 'Compacto' && area >= 40 && /0\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical Compacto ≥ 40 m² sem vaga', `Vagas: ${h.garage_label} | M²: ${fmt(area)} | Padrão: ${b.standard} | Tipo: ${b.building_type}`, 'Vagas');
 
     // Farol 26/10/2026: integridade cadastral, sem duplicar os desvios de preço do cluster.
     const releasePrice = n(h.release_price);
     const monthLabel = (date: string) => /^\d{4}-\d{2}-\d{2}/.test(date) && Number.isFinite(Date.parse(date)) ? `${date.slice(5, 7)}/${date.slice(0, 4)}` : '';
     const releaseDay = b.release_date.slice(0, 10);
     const sameReleasePeriod = Boolean(releaseDay && Number.isFinite(Date.parse(releaseDay)) && releaseDay === h.period.slice(0, 10));
-    if (area === 0 && h.building_status !== 'Futuro') emit(row, 'private_area', 'Área privativa zerada', `M2: ${fmt(area)}`, 'Metragem');
-    if (round(Math.abs(round(priceM2, 2) - ratio(price, area)), 2) > .01) emit(row, 'price_private_area', 'Preço M2 diferente de (Preço / Área Privativa)', `Preço M2 gravado: ${fmt(priceM2)} | Preço: ${fmt(price)} | M2: ${fmt(area)}`, 'Preço');
-    if (releasePrice === 0 && launched) emit(row, 'release_price', 'Preço de lançamento zerado', `Preço: ${fmt(releasePrice)} | Período: ${monthLabel(b.release_date)}`, 'Preço');
-    if (price === 0 && launched) emit(row, 'price', 'Preço do período zerado', `Preço: ${fmt(price)} | Período: ${monthLabel(h.period)}`, 'Preço');
-    if (sameReleasePeriod && n(h.qty) === 0) emit(row, 'qty', 'Quantidade lançada zerada', `Quantidade lançada: ${fmt(n(h.qty))}`, 'Estoque');
-    if (sameReleasePeriod && round(releasePrice, 2) !== round(price, 2)) emit(row, 'release_price', 'Preço de lançamento diferente do preço do período', `Preço lançamento: ${fmt(releasePrice)} | Preço: ${fmt(price)}`, 'Preço');
+    if (area === 0 && h.building_status !== 'Futuro') emit(row, 'private_area', 'Área privativa zerada', `M2: ${fmt(area)} | Status tipologia: ${h.building_status || 'não informado'} | Período: ${h.period} | Critério: área zero e status diferente de Futuro`, 'Metragem');
+    if (round(Math.abs(round(priceM2, 2) - ratio(price, area)), 2) > .01) emit(row, 'price_private_area', 'Preço M2 diferente de (Preço / Área Privativa)', `Preço M2 gravado: ${fmt(priceM2)} | Preço: ${fmt(price)} | M2: ${fmt(area)} | Preço/m² calculado: ${fmt(ratio(price, area))} | Diferença absoluta: ${fmt(round(Math.abs(round(priceM2, 2) - ratio(price, area)), 2))} | Tolerância: R$ 0,01/m²${area === 0 ? ' | Área zero: cálculo tratado como zero' : ''}`, 'Preço');
+    if (releasePrice === 0 && launched) emit(row, 'release_price', 'Preço de lançamento zerado', `Preço: ${fmt(releasePrice)} | Período: ${monthLabel(b.release_date)} | Lançamento: ${b.release_date} | Status tipologia: ${h.building_status}`, 'Preço');
+    if (price === 0 && launched) emit(row, 'price', 'Preço do período zerado', `Preço: ${fmt(price)} | Período: ${monthLabel(h.period)} | Status tipologia: ${h.building_status}`, 'Preço');
+    if (sameReleasePeriod && n(h.qty) === 0) emit(row, 'qty', 'Quantidade lançada zerada', `Quantidade lançada: ${fmt(n(h.qty))} | Lançamento: ${b.release_date} | Período: ${h.period} | Critério: quantidade zero no período de lançamento`, 'Estoque');
+    if (sameReleasePeriod && round(releasePrice, 2) !== round(price, 2)) emit(row, 'release_price', 'Preço de lançamento diferente do preço do período', `Preço lançamento: ${fmt(releasePrice)} | Preço: ${fmt(price)} | Diferença absoluta: ${fmt(round(Math.abs(round(releasePrice, 2) - round(price, 2)), 2))} | Lançamento: ${b.release_date} | Período: ${h.period}`, 'Preço');
   }
   return out;
 }

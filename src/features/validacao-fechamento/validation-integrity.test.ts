@@ -99,4 +99,18 @@ describe('Integridade Farol 26/10/2026', () => {
     b.typologies[0].history.unshift({ ...b.typologies[0].history[0], period: '2026-08-01', private_area: 0, price: 0, release_price: 0 });
     expect(validateBuildings([b])).toEqual([]);
   });
+
+  it('explica preço/m² calculado, diferença e tolerância sem omitir os valores de origem', () => {
+    const row = findings({ price: 100, private_area: 3, price_private_area: 33.35 }).find((r) => r.error === 'Preço M2 diferente de (Preço / Área Privativa)')!;
+    expect(row.value).toContain('Preço M2 gravado: 33,35 | Preço: 100 | M2: 3');
+    expect(row.value).toContain('Preço/m² calculado: 33,33');
+    expect(row.value).toContain('Diferença absoluta: 0,02');
+    expect(row.value).toContain('Tolerância: R$ 0,01/m²');
+  });
+
+  it('explica o status histórico e as datas nas verificações de lançamento', () => {
+    const result = findings({ release_price: 0, qty: 0 });
+    expect(result.find((r) => r.error === 'Preço de lançamento zerado')?.value).toContain('Status tipologia: Ativo');
+    expect(result.find((r) => r.error === 'Quantidade lançada zerada')?.value).toContain('Lançamento: 2026-09-01 | Período: 2026-09-01');
+  });
 });
