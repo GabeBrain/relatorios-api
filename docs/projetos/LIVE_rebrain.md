@@ -1,3 +1,12 @@
+## 26/10/2026 — Validação do Fechamento: medianas e faixas de área nos clusters — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — regras de Divergências.
+- **O quê:** adotado o Python anexo atualizado: último registro por tipologia antes dos agrupamentos, cluster sem período, CEP ausente convertido a 00000, desvios de preço pela mediana com ao menos dois empreendimentos e regras isoladas de baixo preço somente em cluster unitário. Preço/m² compara o campo da API com a mediana de `price/private_area`. Regras antigas de desvio de área removidas; estoque compara percentuais vendidos e vendas comparam taxas. Mensagens alinhadas aos cálculos efetivos. Para padrões contendo loteamento, a dimensão dormitórios passa a ser a faixa de área privativa.
+- **Faixas:** algoritmo isolado na Validação reproduz o Dashboard, sem alterações naquele projeto: por cidade/tipo, uma última área positiva por tipologia, até seis faixas por posições empíricas, cortes arredondados para dois algarismos significativos, limite inferior inclusivo e superior exclusivo. Python anexo em `validacao_geobrain` atualizado e cópia idêntica mantida em `src/features/validacao-fechamento/reference/`.
+- **Evidência:** teste offline da base Sinop/MT salva em 22/10/2026 (174 empreendimentos, 395 tipologias). Python e TypeScript coincidem nas 52 divergências e nos clusters usados. Excel gerado e reaberto com 52 registros. Sem consulta autenticada à API.
+- **Monday:** —
+- **Etapas/Pendências:** implementação local e comparação automatizada concluídas; validação autenticada/visual e publicação pendentes de aceite. Nenhuma alteração de Supabase nesta entrega.
+
 ## 23/10/2026 — Relatório API Excel: ajuda contextual nos campos — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — 2. Configurar relatório.
