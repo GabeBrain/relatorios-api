@@ -23,14 +23,14 @@ describe('Farol 20261021', () => {
   });
 
   it('usa mediana sem ponderar por qty, inclui dois empreendimentos e separa CEP e ano de lançamento', () => {
-    const a = building('1', { qty: 1, price: 200000 });
-    const b = building('2');
-    const c = building('3');
+    const a = building('1', { qty: 1, price: 400000 });
+    const b = building('2', { price: 200000 });
+    const c = building('3', { price: 200000 });
     const priceRule = (data: ValidationBuilding[]) => validateBuildings(data).filter((r) => r.field === 'price' && r.error.includes('30%'));
     expect(priceRule([a, b])).toHaveLength(2);
     const matches = priceRule([a, b, c]);
     expect(matches).toHaveLength(1);
-    expect(matches[0].value).toContain('Mediana cluster: 100.000');
+    expect(matches[0].value).toContain('Mediana cluster: 200.000');
     expect(priceRule([a, { ...b, zipcode: '78560000' }])).toHaveLength(0);
     expect(priceRule([a, { ...b, release_date: '2024-01-01' }])).toHaveLength(0);
   });

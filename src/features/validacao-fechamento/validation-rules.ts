@@ -105,10 +105,17 @@ export function validateBuildings(buildings: ValidationBuilding[]): Divergence[]
     const count = cluster?.buildings.size ?? 0;
     const totals = buildingTotals.get(key(b.building_id, h.period))!;
     const area = n(h.private_area), price = n(h.price), priceM2 = n(h.price_private_area);
+    const launched = /Ativo|Esgotado|Lançado/i.test(h.building_status ?? '');
+    const zeroPrice = price === 0 && launched;
+    const priceMedian = median(cluster?.prices ?? []);
+    const lowPriceLimit = b.building_type === 'Horizontal' ? 40000 : 100000;
+    const lowPrice = price > 0 && price <= lowPriceLimit && deviation(price, priceMedian) >= .3;
     const suffix = ` | Empreendimentos: ${count}`;
     if (b.building_type === 'Vertical' && b.standard === 'Compacto' && area >= 50 && n(h.number_bedroom) <= 1) emit(row, 'private_area', 'Compacto ≥ 50 m² com até 1 quarto', `M²: ${fmt(area)} | Quartos: ${n(h.number_bedroom)} dorms`, 'Metragem - Tipologia');
-    if (cluster && count > 1 && deviation(price, median(cluster.prices)) >= .3) emit(row, 'price', 'Desvio ≥ 30% da mediana do cluster', `Preço: ${fmt(price)} | Mediana cluster: ${fmt(median(cluster.prices))}${suffix}`, 'Preço - Tipologia', row.cluster);
-    if (price < 1000 && count === 1) emit(row, 'price', 'Desvio ≥ 30% da mediana do cluster', `Preço: ${fmt(price)}${suffix}`, 'Preço', row.cluster);
+    // Prioridade apenas nesta família: zerado > limite específico > desvio geral.
+    if (lowPrice) emit(row, 'price', `Preço abaixo de R$ ${fmt(lowPriceLimit)}`, `Preço: ${fmt(price)} | Mediana cluster: ${fmt(priceMedian)}`, 'Preço', row.cluster);
+    else if (!zeroPrice && cluster && count > 1 && deviation(price, priceMedian) >= .3) emit(row, 'price', 'Desvio ≥ 30% da mediana do cluster', `Preço: ${fmt(price)} | Mediana cluster: ${fmt(priceMedian)}${suffix}`, 'Preço - Tipologia', row.cluster);
+    else if (!zeroPrice && price < 1000 && count === 1) emit(row, 'price', 'Desvio ≥ 30% da mediana do cluster', `Preço: ${fmt(price)}${suffix}`, 'Preço', row.cluster);
     if (cluster && count > 1 && deviation(priceM2, median(cluster.pricesM2)) >= .3) emit(row, 'price_private_area', 'Desvio ≥ 30% da mediana do cluster', `Preço/m²: ${fmt(priceM2)} | Mediana cluster: ${fmt(median(cluster.pricesM2))}${suffix}`, 'Preço', row.cluster);
     if (priceM2 < 10 && count === 1) emit(row, 'price_private_area', 'Desvio ≥ 30% da mediana do cluster', `Preço/m²: ${fmt(priceM2)}${suffix}`, 'Preço', row.cluster);
     if (hasGarage(h) && round(price) <= round(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageQty ?? 0))) emit(row, 'price', 'Preço com vaga ≤ Preço sem vaga', `Com vagas: ${fmt(price)} | Sem vagas: ${fmt(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageQty ?? 0))}${suffix}`, 'Preço', row.cluster);
@@ -124,11 +131,10 @@ export function validateBuildings(buildings: ValidationBuilding[]): Divergence[]
     // Farol 26/10/2026: integridade cadastral, sem duplicar os desvios de preço do cluster.
     const releasePrice = n(h.release_price);
     const monthLabel = (date: string) => /^\d{4}-\d{2}-\d{2}/.test(date) && Number.isFinite(Date.parse(date)) ? `${date.slice(5, 7)}/${date.slice(0, 4)}` : '';
-    const launched = /Ativo|Esgotado|Lançado/i.test(h.building_status ?? '');
     const releaseDay = b.release_date.slice(0, 10);
     const sameReleasePeriod = Boolean(releaseDay && Number.isFinite(Date.parse(releaseDay)) && releaseDay === h.period.slice(0, 10));
     if (area === 0 && h.building_status !== 'Futuro') emit(row, 'private_area', 'Área privativa zerada', `M2: ${fmt(area)}`, 'Metragem');
-    if (priceM2 !== ratio(price, area)) emit(row, 'price_private_area', 'Preço M2 diferente de (Preço / Área Privativa)', `Preço M2 gravado: ${fmt(priceM2)} | Preço: ${fmt(price)} | M2: ${fmt(area)}`, 'Preço');
+    if (round(Math.abs(round(priceM2, 2) - ratio(price, area)), 2) > .01) emit(row, 'price_private_area', 'Preço M2 diferente de (Preço / Área Privativa)', `Preço M2 gravado: ${fmt(priceM2)} | Preço: ${fmt(price)} | M2: ${fmt(area)}`, 'Preço');
     if (releasePrice === 0 && launched) emit(row, 'release_price', 'Preço de lançamento zerado', `Preço: ${fmt(releasePrice)} | Período: ${monthLabel(b.release_date)}`, 'Preço');
     if (price === 0 && launched) emit(row, 'price', 'Preço do período zerado', `Preço: ${fmt(price)} | Período: ${monthLabel(h.period)}`, 'Preço');
     if (sameReleasePeriod && n(h.qty) === 0) emit(row, 'qty', 'Quantidade lançada zerada', `Quantidade lançada: ${fmt(n(h.qty))}`, 'Estoque');

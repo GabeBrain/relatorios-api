@@ -1,3 +1,12 @@
+## 26/10/2026 — Validação do Fechamento: prioridade de preços e tolerância de arredondamento — Edgar / Codex
+
+- **Ambiente/funcionalidade:** motor de Divergências da Validação do Fechamento; Edgar / Codex.
+- **O quê:** habilitadas as duas regras específicas de preço baixo, preservando seus limites inclusivos (Horizontal ≤ R$ 40.000; demais tipos ≤ R$ 100.000) e desvio ≥30% da mediana. Prioridade exclusiva na mesma família/campo: preço zerado (status histórico Ativo/Esgotado/Lançado), depois preço baixo, depois desvio geral. Comparações independentes de garagem/Garden/Cobertura e demais campos não foram suprimidas. Preço/m² gravado versus calculado aceita diferença de até R$ 0,01/m², após arredondamento a duas casas e sem falso positivo de ponto flutuante.
+- **Python:** criado `farol_rebrain_20261026_corrigido.py` na pasta do anexo (`validacao_geobrain`), com o original preservado; cópia de referência idêntica nesta feature. Priorização e tolerância replicadas, com datas de exibição tratadas como texto. Comparador atual em `reference/compare-current.py`; comparadores anteriores permanecem referências históricas.
+- **Evidência:** testes incluem os três casos reais de arredondamento, diferença acima da tolerância, tipos de empreendimento, preço zerado e supressão do desvio genérico. Na base offline Sinop/MT salva em 22/10 (174 empreendimentos/395 tipologias), os três alertas de arredondamento desaparecem e restam 52 achados idênticos entre Python e TypeScript.
+- **Etapas/Pendências:** 37 testes/8 arquivos, TypeScript e diff aprovados. Implementação local concluída; sem nova consulta autenticada ou validação visual. Publicação depende de autorização. Sem alterações em Supabase, Dashboard ou outros projetos.
+- **Monday:** —
+
 ## 26/10/2026 — Validação do Fechamento: integridade cadastral do Farol — Edgar / Codex
 
 - **Ambiente/funcionalidade:** Validação do Fechamento, motor da guia Divergências. Autor/origem: Edgar / Codex, novas regras do Python fornecido após `# Adicionado regras 26/10/2026`.

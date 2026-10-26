@@ -32,7 +32,8 @@ describe('Integridade Farol 26/10/2026', () => {
   it('compara preço/m² gravado com divisão arredondada a duas casas, inclusive área zero', () => {
     const error = 'Preço M2 diferente de (Preço / Área Privativa)';
     expect(has({ price: 100, private_area: 3, price_private_area: 33.33 }, error)).toBe(false);
-    expect(has({ price: 100, private_area: 3, price_private_area: 33.34 }, error)).toBe(true);
+    expect(has({ price: 100, private_area: 3, price_private_area: 33.34 }, error)).toBe(false);
+    expect(has({ price: 100, private_area: 3, price_private_area: 33.35 }, error)).toBe(true);
     expect(has({ private_area: 0, price_private_area: 0 }, error)).toBe(false);
     expect(has({ private_area: 0, price_private_area: 1 }, error)).toBe(true);
   });
@@ -58,14 +59,39 @@ describe('Integridade Farol 26/10/2026', () => {
     expect(has({ release_price: 100001 }, error, '2026-08-01')).toBe(false);
   });
 
-  it('não adiciona as duas regras de preço baixo redundantes com o desvio da mediana', () => {
+  it('preço baixo tem prioridade sobre o desvio geral, sem eliminar a divergência do outro empreendimento', () => {
     const a = fixture({ price: 30000, price_private_area: 600 });
     const b = fixture({ price: 100000 });
     b.building_id = '2';
     b.typologies[0].typology_id = '20';
     const result = validateBuildings([a, b]);
     expect(result.some((r) => r.field === 'price' && r.error === 'Desvio ≥ 30% da mediana do cluster')).toBe(true);
-    expect(result.some((r) => /Preço abaixo de R\$ (40|100)\.000/.test(r.error))).toBe(false);
+    expect(result.filter((r) => r.building_id === '1' && r.field === 'price').map((r) => r.error)).toEqual(['Preço abaixo de R$ 40.000']);
+  });
+
+  it.each([[154954, 400, 387.39], [449000, 64, 7015.63], [189890, 400, 474.73]])('aceita arredondamento: preço %s / área %s', (price, private_area, price_private_area) => {
+    expect(has({ price, private_area, price_private_area }, 'Preço M2 diferente de (Preço / Área Privativa)')).toBe(false);
+  });
+
+  it.each(['Vertical', 'Comercial'])('usa limite de 100 mil para %s e mantém a condição de desvio', (building_type) => {
+    const a = fixture({ price: 100000 });
+    a.building_type = building_type;
+    const b = fixture({ price: 300000 });
+    b.building_type = building_type;
+    b.building_id = '2';
+    b.typologies[0].typology_id = '20';
+    expect(validateBuildings([a, b]).filter((r) => r.building_id === '1' && r.field === 'price').map((r) => r.error)).toEqual(['Preço abaixo de R$ 100.000']);
+    expect(validateBuildings([a]).some((r) => r.error.startsWith('Preço abaixo'))).toBe(false);
+  });
+
+  it('preço zerado tem prioridade sobre o desvio inclusive em cluster unitário', () => {
+    const a = fixture({ price: 0 });
+    const priceErrors = (data: ValidationBuilding[]) => validateBuildings(data).filter((r) => r.building_id === '1' && r.field === 'price').map((r) => r.error);
+    expect(priceErrors([a])).toEqual(['Preço do período zerado']);
+    const b = fixture({ price: 100000 });
+    b.building_id = '2';
+    b.typologies[0].typology_id = '20';
+    expect(priceErrors([a, b])).toEqual(['Preço do período zerado']);
   });
 
   it('processa somente o último registro da tipologia', () => {
