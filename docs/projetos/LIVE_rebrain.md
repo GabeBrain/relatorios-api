@@ -1,3 +1,12 @@
+## 26/10/2026 — Validação do Fechamento: integridade cadastral do Farol — Edgar / Codex
+
+- **Ambiente/funcionalidade:** Validação do Fechamento, motor da guia Divergências. Autor/origem: Edgar / Codex, novas regras do Python fornecido após `# Adicionado regras 26/10/2026`.
+- **O quê:** seis verificações acrescentadas: área privativa zerada fora de Futuro; preço/m² gravado diferente de preço/área (divisão arredondada a duas casas, área zero resulta em zero); preço de lançamento ou período zerado para status histórico contendo Ativo/Esgotado/Lançado; quantidade lançada zerada e preços de lançamento/período diferentes apenas quando as datas coincidem. Grupo vazio para estas regras, sem agregação. Motor anterior, aprovações, interface e demais projetos preservados.
+- **Conflitos excluídos:** Preço abaixo de R$ 100.000 (não Horizontal) e Preço abaixo de R$ 40.000 (Horizontal). Exigem o mesmo desvio ≥30% da mediana já validado pela regra geral; duplicariam achados nos clusters com múltiplos empreendimentos. No cluster unitário válido, a própria mediana coincide com o preço, logo o desvio não se verifica.
+- **Evidência:** 31 testes/8 arquivos aprovados, incluindo dez casos de integridade e a normalização da base local Sinop/MT (174 empreendimentos/395 tipologias, salva em 22/10). Total de 55 achados, sendo três das novas regras. Comparação direta com o Python fornecido confirmou os três, sem exclusivos em nenhuma implementação. TypeScript aprovado. Comparador reproduzível em `src/features/validacao-fechamento/reference/compare-integrity.py`.
+- **Etapas/Pendências:** implementação e verificação headless locais concluídas; sem consulta autenticada nova nem validação visual nesta sessão. Publicação aguarda autorização. Anexo original e referência histórica preservados, sem alteração de Supabase.
+- **Monday:** —
+
 ## 26/10/2026 — Validação do Fechamento: rótulos da coluna Regra — Edgar / Codex
 
 - **Ambiente/funcionalidade:** Divergências da Validação do Fechamento.

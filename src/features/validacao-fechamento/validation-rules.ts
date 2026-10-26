@@ -120,6 +120,19 @@ export function validateBuildings(buildings: ValidationBuilding[]): Divergence[]
     if (b.building_type === 'Vertical' && b.standard === 'Econômico' && !/0|1\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical Econômico com mais de 1 vaga', `Vagas: ${h.garage_label}`, 'Vagas');
     if (b.building_type === 'Vertical' && area >= 150 && /0|1\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical ≥ 150 m² com menos de 2 vagas', `Vagas: ${h.garage_label}`, 'Vagas');
     if (b.building_type === 'Vertical' && b.standard === 'Compacto' && area >= 40 && /0\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical Compacto ≥ 40 m² sem vaga', `Vagas: ${h.garage_label}`, 'Vagas');
+
+    // Farol 26/10/2026: integridade cadastral, sem duplicar os desvios de preço do cluster.
+    const releasePrice = n(h.release_price);
+    const monthLabel = (date: string) => /^\d{4}-\d{2}-\d{2}/.test(date) && Number.isFinite(Date.parse(date)) ? `${date.slice(5, 7)}/${date.slice(0, 4)}` : '';
+    const launched = /Ativo|Esgotado|Lançado/i.test(h.building_status ?? '');
+    const releaseDay = b.release_date.slice(0, 10);
+    const sameReleasePeriod = Boolean(releaseDay && Number.isFinite(Date.parse(releaseDay)) && releaseDay === h.period.slice(0, 10));
+    if (area === 0 && h.building_status !== 'Futuro') emit(row, 'private_area', 'Área privativa zerada', `M2: ${fmt(area)}`, 'Metragem');
+    if (priceM2 !== ratio(price, area)) emit(row, 'price_private_area', 'Preço M2 diferente de (Preço / Área Privativa)', `Preço M2 gravado: ${fmt(priceM2)} | Preço: ${fmt(price)} | M2: ${fmt(area)}`, 'Preço');
+    if (releasePrice === 0 && launched) emit(row, 'release_price', 'Preço de lançamento zerado', `Preço: ${fmt(releasePrice)} | Período: ${monthLabel(b.release_date)}`, 'Preço');
+    if (price === 0 && launched) emit(row, 'price', 'Preço do período zerado', `Preço: ${fmt(price)} | Período: ${monthLabel(h.period)}`, 'Preço');
+    if (sameReleasePeriod && n(h.qty) === 0) emit(row, 'qty', 'Quantidade lançada zerada', `Quantidade lançada: ${fmt(n(h.qty))}`, 'Estoque');
+    if (sameReleasePeriod && round(releasePrice, 2) !== round(price, 2)) emit(row, 'release_price', 'Preço de lançamento diferente do preço do período', `Preço lançamento: ${fmt(releasePrice)} | Preço: ${fmt(price)}`, 'Preço');
   }
   return out;
 }
