@@ -1,3 +1,10 @@
+## 26/10/2026 — Validação do Fechamento: rótulos da coluna Regra — Edgar / Codex
+
+- **Ambiente/funcionalidade:** Divergências da Validação do Fechamento.
+- **O quê:** removidos os sufixos ` - Empreendimento` e ` - Tipologia` da apresentação da coluna Regra, incluindo filtros, ordenação, cópia e Excel. Reutilizada a grade existente; critérios de validação e identificadores internos de aprovação preservados.
+- **Etapas/Pendências:** ajuste local; teste do formatador e TypeScript aprovados. Validação visual e publicação pendentes. Sem alterações em outros projetos.
+- **Monday:** —
+
 ## 26/10/2026 — Validação do Fechamento: medianas e faixas de área nos clusters — Edgar / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — regras de Divergências.

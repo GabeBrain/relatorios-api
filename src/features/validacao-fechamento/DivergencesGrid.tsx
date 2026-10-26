@@ -7,6 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useAuthStore } from '@/store/auth-store';
 import { approvalKey, approveDivergence, listApprovals, type DivergenceApproval } from './approvals';
 import type { Divergence } from './validation-rules';
+import { ruleLabel } from './rule-label';
 
 const fieldLabel: Record<string, string> = { builder_name: 'Incorporadora', total_stock: 'Estoque total', standard: 'Padrão', price_private_area: 'Preço por m²', qty: 'Quantidade de unidades', down_payment_percentage: 'Percentual de entrada', number_of_installments: 'Número de parcelas', bank_financing: 'Financiamento bancário', interest_rate_tax: 'Taxa de juros', total_units: 'Total de unidades', sold: 'Unidades vendidas', release_price: 'Preço de lançamento', sold_in_period: 'Vendas no período', release_date: 'Data de lançamento', distractions: 'Distratos', private_area: 'Área privativa', price: 'Preço', number_bedroom: 'Número de dormitórios', garage: 'Vagas de garagem' };
 
@@ -74,7 +75,7 @@ export function DivergencesGrid({ rows, onDivergenceCountChange }: { rows: Diver
     { accessorKey: 'field', header: 'Campo', size: 155, cell: (cell) => fieldLabel[cell.getValue<string>()] ?? cell.getValue<string>() },
     { accessorKey: 'error', header: 'Divergência', size: 320 },
     { accessorKey: 'value', header: 'Valor', size: 360 },
-    { accessorKey: 'rule', header: 'Regra', size: 230 },
+    { id: 'rule', accessorFn: (row) => ruleLabel(row.rule), header: 'Regra', size: 230 },
     { accessorKey: 'group', header: 'Grupo', size: 360 },
     { id: 'approval_action', header: 'Ação', size: 110, enableHiding: false, enableSorting: false, cell: (cell) => {
       const key = approvalKey(cell.row.original);
@@ -92,7 +93,7 @@ export function DivergencesGrid({ rows, onDivergenceCountChange }: { rows: Diver
   function download() {
     const data = rows.map((row) => {
       const approval = approvals[approvalKey(row)];
-      return { 'ID Empreendimento': row.building_id, 'ID Tipologia': row.isBuildingRule ? 0 : row.typology_id, Empreendimento: row.building_name, 'Área Privativa': row.isBuildingRule ? 'Empreendimento' : row.private_area, Cidade: row.city, 'Tipo Empreendimento': row.building_type, Status: row.status, Período: row.period, Campo: fieldLabel[row.field] ?? row.field, Divergência: row.error, Valor: row.value, Regra: row.rule, Grupo: row.group, 'Aprovado por': approval?.approved_by_email ?? '', 'Aprovado em': approvalDate(approval?.approved_at) };
+      return { 'ID Empreendimento': row.building_id, 'ID Tipologia': row.isBuildingRule ? 0 : row.typology_id, Empreendimento: row.building_name, 'Área Privativa': row.isBuildingRule ? 'Empreendimento' : row.private_area, Cidade: row.city, 'Tipo Empreendimento': row.building_type, Status: row.status, Período: row.period, Campo: fieldLabel[row.field] ?? row.field, Divergência: row.error, Valor: row.value, Regra: ruleLabel(row.rule), Grupo: row.group, 'Aprovado por': approval?.approved_by_email ?? '', 'Aprovado em': approvalDate(approval?.approved_at) };
     });
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(data), 'Divergências');
