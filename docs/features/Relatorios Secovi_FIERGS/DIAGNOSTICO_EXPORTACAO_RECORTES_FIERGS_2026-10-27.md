@@ -1,6 +1,6 @@
 # FIERGS — diagnóstico do bloqueio em novos recortes — 27/10/2026
 
-Estado: diagnóstico reproduzido com API real e proposta preparada. Nenhuma alteração no motor, integração remota, push ou publicação. PDF/PPT no navegador ainda não verificados. O aceite anterior não homologa os novos recortes.
+Estado inicial: diagnóstico reproduzido com API real e proposta preparada, sem alteração no motor ou publicação. A integração remota autorizada posteriormente e a comparação com a referência de Edgar estão registradas no complemento ao final. PDF/PPT no navegador ainda não verificados. O aceite anterior não homologa os novos recortes.
 
 ## Conclusão
 
@@ -107,3 +107,15 @@ SHA-256 dos CSV:
 Validações: `summarize.mjs` aprovou contagens, deltas, coletas, fotografias dos cinco empreendimentos e experimento de duplicatas. `npx.cmd vitest run src/features/panorama-secovi-fiergs/__tests__/reconciliation-guards.test.ts --silent`: 17 testes aprovados. Não houve build completo, suíte extensa nem geração PDF/PPT.
 
 Git na abertura: main `622b34b`, origin/main com sete commits exclusivos e main com um exclusivo; fetch conferido. Nenhuma diferença remota no motor Panorama, transporte HTTP ou autenticação consultados. As mudanças remotas são de outras funcionalidades e não foram integradas. Alterações locais prévias FIERGS/estimativas/LIVE/Corretor preservadas. Este documento não declara produção corrigida.
+
+## Complemento — referência Dashboard/Validação e amostra de Edgar
+
+Por solicitação posterior de Gabriel, integrado o remoto em `21edc3d`, sem conflitos e sem push. Alteração LIVE prévia preservada por stash de caminho explícito e reapplication com conferência da diferença original. Dashboard não sofreu alterações nesta sessão; Validação/Excel receberam somente os commits remotos de seus autores. Mudanças locais paralelas continuaram fora dos commits desta entrega.
+
+Comparação do código sincronizado confirma que os três motores já usam a mesma rota interna v2. O Dashboard organiza por typology_id, mas conserva repetições no histórico; não fornece normalização automática comprovada para Solaris. Busca do último valor preenchido também não limita por si só o fechamento histórico. Validação possui captura de falhas por tipo que não deve substituir as guardas do Panorama.
+
+Quatro chamadas reais no padrão do Dashboard, documentadas no plano: Solaris continua com seis linhas/três conteúdos, soma18, tanto comcity apenas quanto comcity+uf. Porto Alegre páginas10/11 mantém as quatro diferenças20/4/57/6. Os quatro retornosHTTP200 foram preservados e seus hashes conferidos. Portanto, trocar somente a forma de chamada não resolveu os casos afetados.
+
+A amostra `sample_interna.json` tem cinco empreendimentos de Curitiba,785linhas sem repetição exata e nenhum dos cinco IDs do incidente. Confirma formato, não resolução nem versão nova da API. Origem e SHA preservados; bruto copiado para diretório ignorado.
+
+[Plano técnico G0–G6 e CTA](PLAN_MODERNIZACAO_COLETA_E_HISTORICO_FIERGS_2026-10-27.md) preparado: contrato local, identidade tipológica, deduplicação com linhagem, fotografias compatíveis e controles independentes, auditoria/regressões, ensaio de site autorizado e aceite. Sete testes locais existentes de fonte/consulta aprovados, dois arquivos; não houve implementação, estudo completo ou exportação real. Não extrapolar a correção de Gramado à questão temporal de Porto Alegre.

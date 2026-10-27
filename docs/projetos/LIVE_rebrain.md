@@ -1,3 +1,12 @@
+## 27/10/2026 — FIERGS: referência Dashboard, sincronização e plano de ingestão — Gabriel / Codex
+
+- **Ambiente/objetivo:** Rebrain/Panorama; orientação de Edgar para consultar conforme Dashboard, sem modificar o Dashboard. Gabriel pediu sincronizar, confrontar o JSON e preparar plano/CTA antes da implementação.
+- **Integração:** `21edc3d` incorpora sete commits remotos de Validação/Excel sobre três locais, sem reescrever histórico. Hunk LIVE anterior guardado/reaplicado e conferido; demais mudanças locais FIERGS/estimativas/Corretor preservadas. Nenhum push. A integração supera o estado de divergência registrado na entrada anterior.
+- **Evidência:** mesma rota POST interna v2 nos três motores. Quatro consultas200 no padrão Dashboard ainda reproduzem Solaris18×9 e Porto Alegre240×153. A amostra recebida tem cinco projetos de Curitiba/785linhas sem duplicatas, não os casos afetados; formato confirmado, resolução não demonstrada. Brutos/scripts e hashes em `.local-inputs/fiergs-incidente-20261027/`.
+- **Plano:** [modernização de coleta e histórico G0–G6](../features/Relatorios%20Secovi_FIERGS/PLAN_MODERNIZACAO_COLETA_E_HISTORICO_FIERGS_2026-10-27.md), além do diagnóstico atualizado. Copiar contrato/identidade como referência; não importar zeros artificiais, busca futura, duplicatas preservadas ou captura silenciosa de falhas de outros produtos.
+- **Validação/estado:** sete testes locais de consulta/fonte aprovados, hashes/matriz e gate documental conferidos. Preparado, não implementação do motor nem nova exportação. Próximo autorizar G0–G4, resolver coerência temporal e conflitos sem afrouxar guardas, depois publicação autorizada/ensaio humano G5 e aceite G6. Novos recortes ainda não homologados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência, sem escrita.
+
 ## 27/10/2026 — FIERGS: diagnóstico do bloqueio em novos municípios — Gabriel / Codex
 
 - **Ambiente:** Rebrain/Panorama FIERGS, incidente Teresa/Juliana de26/10. Prioridade confirmada hoje: FIERGS antes do estimador. Escopo desta rodada: diagnóstico e proposta, sem implementar ainda.
