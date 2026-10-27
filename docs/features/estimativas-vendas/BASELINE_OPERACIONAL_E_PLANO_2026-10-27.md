@@ -2,6 +2,33 @@
 Data: 27/10/2026. Responsável pela consolidação: Gabriel / sessão de estratégia.
 Estado: preparado; não constitui homologação do motor, aceite de preço ou contrato Belogic.
 
+## Decisões de experiência confirmadas no grill — continuação27/10
+
+Esta seção é a fonte das decisões do grill do estimador; os demais planos apontam para ela. O levantamento e a amostra anteriores abaixo permanecem histórico. A [referência de formato candidato](CONTRATO_E_VALIDACAO.md#referência-de-saída-escolhida-para-detalhamento--ivvqlik2710) concentra o contrato, sem duplicá-lo aqui.
+
+- Público: qualquer usuário autorizado daRebrain, respeitando as cidades disponíveis para sua sessãoGeobrain. Essa escolha não amplia licenças daAPI nem concede escrita/importação.
+- Trabalho principal: Xperíodos históricos entram e Yperíodos estimados saem na estruturaIVV escolhida, com nova competência explicitamente estimada. A experiência intermediária deve permitir compreender e revisar essa transformação.
+- Entradas independentes por região/UF/cidades/IDs. Região/UF expande a seleção de cidades autorizadas; não aplica fórmula a uma curva territorial agregada. IDs sem rota individual confirmada são localizados no universo autorizado, com custo de consulta explícito.
+- Próximo período operacional como padrão, segundo a cadência oficial. Horizontes maiores são cenários deexploração separados, não autorização de estimativas consecutivas. Se cadência/origem estiverem ausentes, mostrar pendência, não inventar a próxima competência.
+- Classificar todos: candidatos, coleta, pendências e situações sem modelo. Resumo do lote seguido da lista; gráfico/detalhe ao selecionar empreendimento. Filtro só explora. Incluir/Retirar muda composição por ação explícita; revisão mostra toda a proposta, inclusive registros ocultos porfiltros.
+- Saída principal: novascompetências; histórico usado e conferência em arquivos separados. Formato operacional aguarda dados/regras necessárias; CSV/JSON derevisão não recebem rótulo deimportação.
+- Origem/cadência desconhecidas ficam visíveis e fora do lote operacional, com exploração identificada quando hádados suficientes. Multitipologias podem ser analisadas no empreendimento; distribuição/exportação granular permanece pendente.
+- Divisão da metade: Gabriel pediu a fundamentação; a origem históricaEdgar21/09 e26/10 foi explicada. **Não houve aprovação de algoritmo ou proposta manual para formar os grupos.** Regra de operação não é uma condição matemáticaFinotti.
+- Rigor: manter motores/parâmetrosFinotti e declarar condições de uso. Referência calculável não comprova equivalência de preparação/amostra. Novas situações recebem modelos próprios versionados e validados; prioridade por frequência de ocorrência, considerando qualidade/disponibilidade de dados para validar. Não generalizar automaticamente pela existência de curva.
+- Comparar métodos permitido; **sem edição de entradas ou parâmetros nesta primeira versão**. Esta escolha substitui a recomendação anterior de cenários editáveis. Alternativas ficam identificadas e não entram automaticamente no lote; nenhum fallback silencioso para aumentar cobertura.
+
+### Primeira fatia executável local
+
+`EstimativasPage.tsx` aponta para `operational/OperationalPage.tsx`. Jornada de seleção territorial, carregamento dos dois tipos, resumo/lista, composição explícita, revisão e detalhe com comparação é implementada localmente. CatálogoGeoApiScopeEngine, BrainLoadingState/WorkbenchLoading, Select/Dialog e tokensGeobrain são reutilizados. Carga por cidade/tipo sequencial com até8páginas paralelas porconsulta; não multiplica pools. Mudanças de método, busca e horizonte de exploração reutilizam a base; mudança docorte recalcula localmente e zera proposta para nova revisão. Falha ou cancelamento não promove resposta parcial. Sessão alterada descarta o recorte preparado.
+
+ReferênciaFinotti, ritmo recente e estoque constante são calculados separadamente. Inventário descreve frequência por tipo/padrão/idade/estágio/tipologias, sem extrapolar a população consultada e sem converter frequência em probabilidade de venda. Não há nova calibração ou teste de precisão. Origem/cadência ainda desconhecidas naAPI: candidatos operacionais não são liberados. A saídaIVV26colunas, a linhagem complementarQlik, o algoritmo da metade e o retorno/reconciliação continuam abertos.
+
+ConferênciaExcel opcional preservada emDados e conferência, por cidade/tipo, com o leitorAnáliseTemporal existente e instruções deexportação. Não é importadorIVV/XLSB. Cenário manual/laboratório técnico não está na nova jornada; código da bancada antiga permanece preservado como export nomeado, sem rota nova.
+
+Validação desta fatia:70testesVitest (62existentes+8novos), tipos explícitos/lint e build. Quatro percursosChromium controlados390/1440 claro/escuro conferem carregamentoBrain, composição preservada porfiltro, modal/comparação local, ausência deedição, downloadCSV, paginação/foco e ausência deoverflow/errosJS. Dados sintéticos explicitamente identificados em `.local-inputs/estimativas-vendas/operacional-ui-20261027/result.json`; imagensprivadas inspecionadas. Não confundir essa prova com API real ou publicação.
+
+Ensaio real complementar: página local8083 com autenticaçãoGeobrain e nenhuma interceptação, Campinas/SP,417empreendimentos;1páginaHorizontal+4Vertical, todasHTTP200;8,00s entre Preparar análise e detalhe aberto em uma medição, zeroerroJS e zerochamada adicional no detalhe. Resultado/captura em `.local-inputs/estimativas-vendas/operacional-ui-20261027/live/`. Essa evidência confirma leitura/preparação local e não precisão, cadência, linhagem ou importabilidade. Primeira tentativa do script falhou ao ler título que o modal havia tornado inacessível; corrigido o seletor/ordem do teste e repetido com sucesso, sem alteração do motor.15testesNode da seleção candidata também permanecem aprovados.
+
 ## 1. Missão entendida
 Produzir estimativas temporárias, identificadas e auditáveis de vendas líquidas e estoque para empreendimentos/períodos sem coleta real, reduzindo o esforço de monitoramento do mercado. Entregar um arquivo que Nicolas/Belogic possa importar no Geobrain. Quando a coleta real retornar, reconciliar a diferença segundo procedimento acordado, preservando a origem e o histórico.
 A curva até esgotamento é ferramenta de cálculo/análise; o primeiro produto operacional deve cobrir a competência necessária, não carregar automaticamente anos de previsões no Geobrain.

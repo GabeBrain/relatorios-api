@@ -384,6 +384,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+### 27/10/2026 — Estimativas: primeira jornada após o grill — Gabriel / Codex
+
+- **Entrega:** [premissas confirmadas e fatia local](../features/estimativas-vendas/BASELINE_OPERACIONAL_E_PLANO_2026-10-27.md#decisões-de-experiência-confirmadas-no-grill--continuação2710). Entradas região/UF/cidades/IDs autorizados, dois tipos juntos, resumo/lista, proposta com Incluir/Retirar, filtros independentes e detalhe amplo. Comparação de métodos sem edição de entradas/parâmetros, sem fallback automático; inventário de situações por frequência. Conferência Excel existente em diálogo próprio.
+- **Evidência:** 70 testesVitest, tipos/lint/build; quatro percursos locais390/1440 claro/escuro com fontes sintéticas, foco/Escape/paginação/download/composição e Brain sem overflow/erro. Scripts estimativas-operational-browser/live em diagnostics; fontes/capturas ignoradas. Consulta real e limites registrados na baseline.
+- **Etapas/pendências:** preparado/validado localmente conforme evidência, sem push/deploy. Referência calculável não é aprovação operacional; cadência/origem por competência, equivalência da preparação, granularidade, partição da metade, preço e saídaIVV ainda impedem lote importável. CSV/JSON são conferência, não retornoBelogic. Próximo revisão humana da jornada e completar contratos, sem inventar nova modelagem.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — leitura/referência, nenhuma escrita.
 
 ### 2026-10-22 — Finotti: API confirmada e plano do dossiê/simulador — Gabriel / Codex
 - **Ambiente/funcionalidade:** Rebrain/SID, Estimativas de vendas; diagnóstico somente leitura, sem interface ou backtest real.

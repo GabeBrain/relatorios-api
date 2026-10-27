@@ -1,5 +1,7 @@
 # Plano de execução — Estimativas de vendas, página editorial por API
 
+**Direção vigente27/10:** as [decisões confirmadas do grill e a fatia operacional](BASELINE_OPERACIONAL_E_PLANO_2026-10-27.md#decisões-de-experiência-confirmadas-no-grill--continuação2710) substituem a organização de laboratório/cenários editáveis deste plano histórico. Resumo/lista primeiro, detalhe por seleção, composição explícita e comparação sem edição. Contrato de saída continua na fonte própria CONTRATO_E_VALIDACAO.md.
+
 **Estado:** plano revisto em 22/10/2026 por Gabriel/Codex. Roteiro para uma primeira página funcional em uma sessão de execução, agora com **API como fonte principal e conferência opcional de um Excel Geobrain na própria interface**. Nenhuma tela, importação ou backtest observado foi entregue por este documento. Gabriel conduz; Edgar apoia em paralelo as dúvidas de acesso e contrato. Relaciona-se ao [plano estatístico](PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md) e ao [card histórico de IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074), sem escrita no Monday.
 
 ## Decisão e fronteiras
