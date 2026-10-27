@@ -1,3 +1,11 @@
+## 27/10/2026 — FIERGS G3: capacidade por competência e guardas independentes — Gabriel / Codex
+
+- **Mudança:** cubo FIERGS identificado separa original de lançamento, capacidade derivada no fechamento e cadastro/competência. Campo de compatibilidade launchedUnits usa a capacidade dos empreendimentos classificados pela data original; não soma meses ou usa cadastro futuro. Preços/estoque/vendas mantêm a fotografia e política de representação; Secovi preserva sua base anterior.
+- **Guardas:**42controles dimensionais anteriores preservados, integridade crítica adicional e confronto cadastral somente em competência compatível; controle indisponível fica explícito, sem match fabricado. Conflito de ID, medida ausente, fotografia incompleta e total70×distribuição127 na mesma competência continuam impedindo exportação.
+- **Evidência:** dezreplays congelados, cinco recortes em2T2026/4T2025, sem críticos abertos. Em2T2026 estoque/vendas/preços/VGVfinal e referência266projetos preservados; Miradero36cadastroago×18tipologiajun separa18unidades, e SolarisVGVoriginal10,602→5,301milhões após remover as cópias. [Matriz e limites](../features/Relatorios%20Secovi_FIERGS/EVIDENCIAS_CONTRATOS_HISTORICO_FIERGS_2026-10-27.md).
+- **Estado/próximo:** validado localmente; G4auditoria/avisos em fechamento, sem chamada de negócio nova/PDF/PPT/push. Ensaio do site/presetintegral e aceite continuam pendentes. Não equivale a correção na base Geobrain.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
 ## 27/10/2026 — FIERGS G0–G2: entrada validada e identidade histórica — Gabriel / Codex
 
 - **Mudança:** `building-source.ts` valida envelope, paginação/total, território e repetição de empreendimentos; erro de contrato não dispara fallback nem retry transitório. `building-history.ts` implementa identidade/competência, deduplicação idempotente com índices de origem e detecção de conflito/incompletude; zero/nulo/venda negativa preservados. API/sessão conserva rota, concorrência e recuperação; sem mudanças nos outros motores.

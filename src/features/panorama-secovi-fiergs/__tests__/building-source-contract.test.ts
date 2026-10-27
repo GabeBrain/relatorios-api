@@ -8,7 +8,8 @@ describe('Panorama source contract', () => {
       expect(() => readBuildingPage(p, scope, 1, 'internal-v2')).toThrow(BuildingSourceContractError);
   });
   it('rejects geographic leakage and attaches non-secret source lineage', () => {
-    expect(() => readBuildingPage(payload([{ city: 'Canela', state: 'RS' }]), scope, 1, 'internal-v2')).toThrow();
+    expect(() => readBuildingPage(payload([{ building_id: 1, city: 'Canela', state: 'RS' }]), scope, 1, 'internal-v2')).toThrow();
+    expect(() => readBuildingPage(payload([{ status: 'Ativo' }]), scope, 1, 'internal-v2')).toThrow('sem ID');
     expect(readBuildingPage(payload([{ building_id: 1, city: 'Gramado', state: 'RS' }]), scope, 1, 'internal-v2').buildings[0].__panoramaSource)
       .toMatchObject({ page: 1, city: 'Gramado', contract: 'building-history-v2' });
   });

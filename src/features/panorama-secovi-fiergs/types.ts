@@ -188,6 +188,7 @@ export interface PanoramaClosingFacts {
 
 export type PanoramaReconciliationStatus = 'match' | 'different' | 'unavailable';
 export interface PanoramaReconciliationRow {
+  checkKind?: 'source_integrity' | 'dimensional_conservation' | 'independent_comparison';
   metricId: string;
   source: string;
   formula: string;

@@ -36,6 +36,33 @@ const base = (endQuarter: '2T2026' | '4T2025' = '2T2026') => ({
 });
 
 describe('FIERGS · guardas canônicas de reconciliação', () => {
+  it('bloqueia conflito de identidade mesmo quando todos os totais dimensionais fecham', () => {
+    const input = base();
+    Object.assign(input.cube.projects[0], { historyAudit: { identityMode: 'identified', issues: [{ code: 'conflicting_identity' }], registryComparable: false, capacityAtClosing: 100 } });
+    const result = reconcilePanoramaReport(input as never);
+    expect(result.homologable).toBe(false);
+    expect(result.rows.find((r) => r.metricId === 'history.source.integrity')).toMatchObject({ critical: true, delta: 1, status: 'different' });
+  });
+
+  it('bloqueia cadastro70 contra distribuição127 quando pertencem à mesma fotografia', () => {
+    const input = base();
+    Object.assign(input.cube.projects[0], { historyAudit: { identityMode: 'identified', issues: [], registryComparable: true,
+      registryMonth: '2026-06', closingMonth: '2026-06', registryTotalUnits: 70, capacityAtClosing: 127 } });
+    const result = reconcilePanoramaReport(input as never);
+    expect(result.homologable).toBe(false);
+    expect(result.rows.find((r) => r.metricId.startsWith('capacity.registry.'))).toMatchObject({
+      checkKind: 'independent_comparison', canonicalTotal: 70, dimensionalTotal: 127, delta: 57, critical: true, status: 'different' });
+  });
+
+  it('não inventa igualdade de controle externo para cadastro posterior ao corte', () => {
+    const input = base();
+    Object.assign(input.cube.projects[0], { historyAudit: { identityMode: 'identified', issues: [], registryComparable: false,
+      registryMonth: '2026-08', closingMonth: '2026-06', registryTotalUnits: 127, capacityAtClosing: 70 } });
+    const result = reconcilePanoramaReport(input as never);
+    expect(result.homologable).toBe(true);
+    expect(result.rows.find((r) => r.metricId.startsWith('capacity.registry.'))).toMatchObject({
+      status: 'unavailable', canonicalTotal: null, delta: null, critical: false });
+  });
   beforeEach(() => usePanoramaExportStore.setState({ status: 'idle', error: '', report: null }));
 
   it('homologa quando vendas, estoque, coorte e política fecham com tolerância zero', () => {

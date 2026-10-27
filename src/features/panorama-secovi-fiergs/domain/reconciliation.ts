@@ -132,5 +132,22 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
     countRow('map.projects.unique', 'cubo granular / chave canônica', 'Cada linha do cubo representa uma única chave de empreendimento.', uniqueProjectKeys, input.cube.projects.length, `${horizontalUniverse} + Vertical`),
     countRow('map.projects.rendered', 'cubo granular / coordenadas válidas', 'Empreendimentos únicos com coordenada válida renderizados nos três mapas.', georeferencedProjectKeys, renderedProjectKeys, `${horizontalUniverse} + Vertical`),
   ];
-  return { homologable: rows.every((item) => !item.critical || item.status === 'match'), rows };
+  const identified = input.cube.projects.filter((p) => p.historyAudit?.identityMode === 'identified');
+  if (identified.length) {
+    rows.push(row({ metricId: 'history.source.integrity', checkKind: 'source_integrity',
+      source: 'history-identity-v1 / period-capacity-v1', formula: 'Identidades, conflitos, quantidades e fotografia comum; esperado zero problemas.',
+      universe: `${input.scope.uf} · ${input.scope.cities.join(', ')}`, period,
+      canonicalTotal: 0, dimensionalTotal: identified.reduce((sum, p) => sum + p.historyAudit!.issues.length, 0), tolerance: 0, critical: true }));
+    for (const project of identified) {
+      const audit = project.historyAudit!;
+      rows.push(row({ metricId: `capacity.registry.${project.key}`, checkKind: 'independent_comparison',
+        source: 'Cadastro por competência × qty único da fotografia',
+        formula: audit.registryComparable ? 'Cadastro e distribuição da mesma competência; tolerância zero.'
+          : `Controle independente indisponível: cadastro ${audit.registryMonth ?? 'sem competência'}, fotografia ${audit.closingMonth ?? 'ausente'}; capacidade derivada, sem presumir igualdade.`,
+        universe: project.key, period, canonicalTotal: audit.registryComparable ? audit.registryTotalUnits : null,
+        dimensionalTotal: audit.capacityAtClosing, tolerance: 0, critical: audit.registryComparable }));
+    }
+  }
+  return { homologable: rows.every((item) => !item.critical || item.status === 'match'),
+    rows: rows.map((item) => ({ ...item, checkKind: item.checkKind ?? 'dimensional_conservation' })) };
 }

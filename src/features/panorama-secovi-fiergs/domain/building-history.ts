@@ -92,7 +92,9 @@ export function normalizeBuildingHistory(building: HistoryRow, closing: string, 
     }
     rows.push(variants[0].row);
   }
-  rows.sort((a, b) => String(a.period).localeCompare(String(b.period)) || String(a.typology_id).localeCompare(String(b.typology_id)));
+  // Keep source order among distinct IDs in the same month: existing price/VGV consumers
+  // have their own representative-row policy. Deduplication must not change that policy.
+  rows.sort((a, b) => String(a.period).localeCompare(String(b.period)));
   audit.retained = rows.length;
   const releaseRows = rows.filter((r) => month(r.period) === releaseMonth);
   audit.closingMonth = rows.map((r) => month(r.period)!).sort().at(-1) ?? null;

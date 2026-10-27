@@ -17,6 +17,7 @@ export function readBuildingPage(payload: Record<string, unknown>, scope: { city
   const buildings: Record<string, unknown>[] = payload.data.map((item) => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) throw new BuildingSourceContractError('Empreendimento inválido na resposta.');
     const building = item as Record<string, unknown>;
+    if (!String(building.building_id ?? building.id ?? '').trim()) throw new BuildingSourceContractError('Empreendimento sem ID na resposta.');
     if (building.city && geographicKey(building.city) !== geographicKey(scope.city)
       || (building.state ?? building.uf) && geographicKey(building.state ?? building.uf) !== geographicKey(scope.uf))
       throw new BuildingSourceContractError(`Resposta fora do recorte autorizado ${scope.city}/${scope.uf}.`);
