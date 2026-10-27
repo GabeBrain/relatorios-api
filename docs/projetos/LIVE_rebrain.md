@@ -384,6 +384,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+### 27/10/2026 — Estimativas: explicar curvas de Rio Branco com dados reais — Gabriel / Codex
+
+- **Diagnóstico:** [exemplos e limites das contagens](../features/estimativas-vendas/BASELINE_OPERACIONAL_E_PLANO_2026-10-27.md#explicação-com-rio-branco--reprodução2710). Consulta somenteleitura reproduz29/23coleta/4pendência/2semmodelo e11resultados da referência;5jáesgotados/6comestoque. Coleta não impede cálculo. ExemplosEcovillage/PortalViaVerde/Orquídeas/BosquePrimavera/IlhaDeCreta/SwissPark documentados; sem extrapolar coeficientes ou inferir tipo pelo nome.
+- **Evidência/estado:** script `estimativas-rio-branco-explain.mjs`, replay e hashes na baseline;2respostas200, mesmoscontratos e motores da página. Diagnóstico validado localmente, não precisão comercial. Nenhuma interface/regra alterada ou escrita naAPI.
+- **Pendências:** melhorar comunicação de suporte matemático versus decisãooperacional e distinguir esgotados na contagem; origem/cadência/granularidade continuam abertas. Sem push/deploy desta revisão.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — referência, sem escrita.
 ### 27/10/2026 — Estimativas: primeira jornada após o grill — Gabriel / Codex
 
 - **Entrega:** [premissas confirmadas e fatia local](../features/estimativas-vendas/BASELINE_OPERACIONAL_E_PLANO_2026-10-27.md#decisões-de-experiência-confirmadas-no-grill--continuação2710). Entradas região/UF/cidades/IDs autorizados, dois tipos juntos, resumo/lista, proposta com Incluir/Retirar, filtros independentes e detalhe amplo. Comparação de métodos sem edição de entradas/parâmetros, sem fallback automático; inventário de situações por frequência. Conferência Excel existente em diálogo próprio.
