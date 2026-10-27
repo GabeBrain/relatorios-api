@@ -1,3 +1,12 @@
+## 27/10/2026 — FIERGS: diagnóstico do bloqueio em novos municípios — Gabriel / Codex
+
+- **Ambiente:** Rebrain/Panorama FIERGS, incidente Teresa/Juliana de26/10. Prioridade confirmada hoje: FIERGS antes do estimador. Escopo desta rodada: diagnóstico e proposta, sem implementar ainda.
+- **Evidência:** Porto Alegre e Gramado+Canela,1T2021–2T2026, reproduzidos com o coletor/modelo/CSV reais.150 respostas de dados HTTP200, cidades na primeira tentativa; guarda crítica `residual.vertical.typology.launched.negative`:87 emPorto e9 emGramado. Canela isolada e referência Canoas+Esteio+SãoLeopoldo,1T2023–2T2026,42/42 guardas aprovadas. IndividuaisGramado/Canela usam respostas congeladas da coleta conjunta.
+- **Causa:** Solaris/Gramado traz três linhas históricas duplicadas exatamente; experimento offline de deduplicação faz o conjunto passar42/42. Porto mistura cadastro atual e quantidades tipológicas originais em quatro empreendimentos revisados:153×240, diferença87; tipologiasjun/2026 somam153. Não é prova de indisponibilidade passada nem justificativa para afrouxar guardas.
+- **Documentação:** [diagnóstico e proposta G0–G4](../features/Relatorios%20Secovi_FIERGS/DIAGNOSTICO_EXPORTACAO_RECORTES_FIERGS_2026-10-27.md); brutos/CSV/scripts ignorados em `.local-inputs/fiergs-incidente-20261027/`.17 testes focados da reconciliação aprovados; manifesto e conferência offline aprovados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência, nenhuma escrita.
+- **Etapas/pendências:** diagnóstico validado localmente com API real; correção proposta de identidade/duplicação e coerência temporal, ainda não implementada. PDF/PPT no site não verificados, produção não corrigida e novos recortes não homologados. Git diverge7remotos/1local na abertura; nenhuma integração/push. Próximo: aprovação da proposta, implementação com regressões e exportação pareada, depois autorização para sincronizar/publicar. Alterações paralelas preservadas.
+
 ## 22/10/2026 — Estimativas: auditoria das bases IVV e envio autorizado — Gabriel / Codex
 
 - **Ambiente:** Rebrain/Estimativas. Gabriel pediu conferir os arquivos enviados por Edgar antes de publicar `a2480df` e autorizou push se as premissas fossem corroboradas.
