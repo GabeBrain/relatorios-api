@@ -1,3 +1,11 @@
+## 27/10/2026 — FIERGS: contratos de deduplicação/competência e revisão do plano — Gabriel / Codex
+
+- **Objetivo/decisão:** Gabriel informou conversa pessoal com Edgar, que seguirá investigando a origem. Plano revisado para avançar no consumidor sem esperar esse diagnóstico; implementação ainda será acionada pelo CTA.
+- **Contrato proposto:** `history-identity-v1`, remoção idempotente somente de duplicatas equivalentes com linhagem; conflito de mesmo ID/mês permanece impeditivo. `period-capacity-v1`, capacidade derivada de qty de fotografia comum até o fechamento, separada do lançamento original, sem dado futuro ou reconstrução por vendas/distratos. Origem derivada não é validação independente.
+- **Escopo:** [plano revisão2 e CTA](../features/Relatorios%20Secovi_FIERGS/PLAN_MODERNIZACAO_COLETA_E_HISTORICO_FIERGS_2026-10-27.md), diagnóstico atualizado. Separar integridade, conservação dimensional e confronto externo; total70/distribuição127 na mesma competência continua crítico. Sem otimização de transporte, alterações de outros motores ou exceções municipais.
+- **Estado/próximo:** preparado/documental; nenhum runtime, nova consulta ou exportação nesta revisão. Testes anteriores não são evidência de implementação futura. Próximo G0–G4 com regressões2T2026/4T2025, envio autorizado/ensaioG5, rascunhos para Teresa/Juliana e novo aceiteG6. Prioridade FIERGS→estimador preservada; sem push ou homologação antecipada.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência, sem escrita.
+
 ## 27/10/2026 — FIERGS: referência Dashboard, sincronização e plano de ingestão — Gabriel / Codex
 
 - **Ambiente/objetivo:** Rebrain/Panorama; orientação de Edgar para consultar conforme Dashboard, sem modificar o Dashboard. Gabriel pediu sincronizar, confrontar o JSON e preparar plano/CTA antes da implementação.
