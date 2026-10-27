@@ -1,3 +1,10 @@
+## 27/10/2026 — Estimativas: seleção e Excel candidato para Belogic — Gabriel / Codex
+
+- **Entrega:** seleção operacional isolada, reaproveitando referências Finotti; motivos por ID/cadência, cálculo sem rateio para uma tipologia e mapa de entrada/saída. [Resultado, amostra e perguntas](../features/estimativas-vendas/ENTREGA_CANDIDATA_OPERACIONAL_2026-10-27.md). Três fontes congeladas/2.305empreendimentos, duas hipóteses de cadência:1candidato condicional,10exemplos revisáveis. Excel interno NÃO IMPORTAR; nenhum contrato externo aceito localizado.
+- **Validação:**15testes novos e62existentes aprovados; leitura de retorno do Excel confere chaves, conservação, fórmulas e valores. Sem ensaio visual Excel ou importação. Nenhuma API nova ou escrita na origem.
+- **Etapas/pendências:** validado localmente para revisão; bloquear importação até exemplarNicolas, granularidade/cadência/origem, política da metade, preço e reconciliação. Quatro posições consecutivas não estimadas é política conservadora proposta, não aceite operacional. Sem push/deploy/mensagens, alterações paralelas preservadas.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — referência, leitura apenas.
+
 ## 27/10/2026 — FIERGS: alertas agrupados por tipo — Gabriel / Codex
 
 - **Mudança:** controles cadastrais agrupados em um aviso; ajustes e divergências repetidos agrupados por categoria, com detalhes recolhidos por padrão. Contagem do botão representa grupos. Nenhum número, guarda, exclusão de produto ou CSV alterado; 29 empreendimentos sem classificação continuam explicitados. Avisos críticos não s?o duplicados entre notificações e conferências.

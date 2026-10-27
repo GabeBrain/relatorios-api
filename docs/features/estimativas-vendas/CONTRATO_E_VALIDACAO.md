@@ -1,5 +1,7 @@
 # Contrato candidato e plano de validação
 
+**Atualização vigente27/10:** [seleção operacional, mapa de entrada/saída, amostra Excel e perguntas Belogic](ENTREGA_CANDIDATA_OPERACIONAL_2026-10-27.md). Motores horizontal/vertical, caudas e faixas já reproduzidos; as pendências antigas desses itens abaixo são históricas. Contrato externo continua aberto. AnexosIVV06/10 agora foram inspecionados: dicionário ajuda na semântica, mas não é layout de importação aceito. Um candidato numérico e10exemplos de seleção preparados; nenhum registro autorizado/importável.
+
 **CONTRATO EXTERNO PENDENTE,21/10/2026.** Motor e ensaio em memória implementados localmente; contrato de arquivo ainda interno/proposto. Não são nomes de campos nem formato de retorno confirmados do Geobrain. Consultar MANIFESTO.md e [reprodução](REPRODUCAO_E_HANDOFF.md); reconciliar com Edgar/MD antes de automatizar.
 
 **Atualização22/10:** uma exportação real da Análise Temporal foi [auditada](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md), mas agrega tipologias/padrões/cidades e não contém ID ou flag da base por período. Portanto não preenche este contrato candidato. O manual do Geobrain, preservado no repo Linkages, descreve essa exportação e uma opção de download detalhado do Mapa; esta última é só um caminho candidato para obter granularidade, sem confirmação de `bases.estimation` ou retorno importável.
