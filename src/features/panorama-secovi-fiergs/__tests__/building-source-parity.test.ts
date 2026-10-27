@@ -12,6 +12,12 @@ const response = (data: Record<string, unknown>[], ok = true, status = 200) => (
 describe('fonte granular do Panorama', () => {
   beforeEach(() => httpRequest.mockReset());
 
+  it('não esconde contrato inválido com fallback público ou coleção vazia', async () => {
+    httpRequest.mockResolvedValue({ ok: true, data: { data: [], meta: { last_page: 1.5 } } });
+    await expect(fetchPanoramaBuildings({ uf: 'RS', city: 'Gramado', endQuarter: '2T2026' })).rejects.toThrow('Contrato da fonte:');
+    expect(httpRequest.mock.calls.every(([request]) => request.url.endsWith('/building-with-history-internal'))).toBe(true);
+  });
+
   it('normaliza o sentinel e o tipo de dormitórios da rota interna', () => {
     const normalized = normalizeInternalBuilding({
       building_id: 1,

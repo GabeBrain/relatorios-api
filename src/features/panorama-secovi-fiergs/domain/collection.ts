@@ -36,6 +36,7 @@ export interface CollectOptions {
 const DEFAULT_CONCURRENCY = 3;
 
 export function isTransientCityFailure(error: unknown): boolean {
+  if (error instanceof Error && error.name === 'BuildingSourceContractError') return false;
   const message = error instanceof Error ? error.message : String(error);
   const statusMatch = message.match(/\bHTTP\s+(\d{3})\b/i);
   if (!statusMatch) return true; // timeout/rede sem resposta HTTP

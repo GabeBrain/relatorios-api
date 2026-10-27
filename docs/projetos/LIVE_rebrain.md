@@ -1,3 +1,10 @@
+## 27/10/2026 — FIERGS G0–G2: entrada validada e identidade histórica — Gabriel / Codex
+
+- **Mudança:** `building-source.ts` valida envelope, paginação/total, território e repetição de empreendimentos; erro de contrato não dispara fallback nem retry transitório. `building-history.ts` implementa identidade/competência, deduplicação idempotente com índices de origem e detecção de conflito/incompletude; zero/nulo/venda negativa preservados. API/sessão conserva rota, concorrência e recuperação; sem mudanças nos outros motores.
+- **Evidência:** [execução e matriz](../features/Relatorios%20Secovi_FIERGS/EVIDENCIAS_CONTRATOS_HISTORICO_FIERGS_2026-10-27.md), respostas congeladas originais preservadas; nenhuma chamada de negócio nova. Fixtures anonimizadas nos testes. Testes de identidade/fonte aprovados; integração temporal/auditoria em verificação na mesma sessão.
+- **Estado:** validado localmente no domínio/contrato de entrada, não publicação/homologação ou PDF/PPT. Próximo concluir G3/G4 e matriz numérica, depois ensaio autorizado do site. Registro não atribui correção da origem ao backend.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
 ## 27/10/2026 — FIERGS: contratos de deduplicação/competência e revisão do plano — Gabriel / Codex
 
 - **Objetivo/decisão:** Gabriel informou conversa pessoal com Edgar, que seguirá investigando a origem. Plano revisado para avançar no consumidor sem esperar esse diagnóstico; implementação ainda será acionada pelo CTA.

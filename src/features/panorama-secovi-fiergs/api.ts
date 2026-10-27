@@ -11,6 +11,8 @@ import { createPanoramaGenerationProgress, type PanoramaProgressListener } from 
 import { requestWithRetry } from './lib/request-with-retry';
 import { useAuthStore } from '@/store/auth-store';
 import type { CollectionFailureAuditRow } from './lib/collection-failure-audit';
+import { BuildingSourceContractError, insertBuilding, readBuildingPage } from './domain/building-source';
+import { HISTORY_CONTRACT_KEY } from './domain/building-history';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const BUILDINGS_V2_BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
@@ -93,19 +95,25 @@ async function fetchBuildingsInternalV2(scope: CityScope, signal?: AbortSignal, 
   const byId = new Map<string, Record<string, unknown>>();
   await Promise.all(['Vertical', 'Horizontal'].map(async (type) => {
     let page = 1; let lastPage = 1;
+    let expectedLast: number | null = null; let total: number | null = null; let received = 0;
     do {
       const response = await gate(() => requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_INTERNAL_V2_BASE_URL}/building-with-history-internal`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal }));
       if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain interna v2 em ${scope.city} (${response.status ?? 'rede'}).`);
-      const entries = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
+      const payload = readBuildingPage(response.data, scope, page, 'internal-v2');
+      if (expectedLast !== null && (payload.lastPage !== expectedLast || payload.total !== total))
+        throw new BuildingSourceContractError(`Paginação mudou durante a coleta de ${scope.city}/${type}.`);
+      expectedLast = payload.lastPage; total = payload.total; received += payload.buildings.length;
+      const entries = payload.buildings;
       for (const raw of entries) {
         const building = normalizeInternalBuilding(raw);
         if (!BUILDING_STATUSES.includes(String(building.status ?? ''))) continue;
         const id = String(building.building_id ?? building.id ?? '');
-        if (id && !byId.has(id)) byId.set(id, building);
+        if (id) insertBuilding(byId, building);
       }
-      lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
+      lastPage = payload.lastPage;
       page += 1;
     } while (page <= lastPage);
+    if (total !== null && received !== total) throw new BuildingSourceContractError(`Coleta incompleta de ${scope.city}/${type}: ${received} de ${total} registros.`);
   }));
   return [...byId.values()];
 }
@@ -115,17 +123,23 @@ async function fetchBuildingsPublicV2(scope: CityScope, signal?: AbortSignal, ga
   const lanes = ['Vertical', 'Horizontal'].flatMap((type) => BUILDING_STATUSES.map((status) => ({ type, status })));
   await Promise.all(lanes.map(async ({ type, status }) => {
     let page = 1; let lastPage = 1;
+    let expectedLast: number | null = null; let total: number | null = null; let received = 0;
     do {
       const response = await gate(() => requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_V2_BASE_URL}/building-with-history`, query: { type, status, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal }));
       if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain v2 em ${scope.city} (${response.status ?? 'rede'}).`);
-      const entries = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
+      const payload = readBuildingPage(response.data, scope, page, 'public-v2');
+      if (expectedLast !== null && (payload.lastPage !== expectedLast || payload.total !== total))
+        throw new BuildingSourceContractError(`Paginação mudou durante a coleta de ${scope.city}/${type}.`);
+      expectedLast = payload.lastPage; total = payload.total; received += payload.buildings.length;
+      const entries = payload.buildings;
       for (const building of entries) {
         const id = String(building.building_id ?? building.id ?? '');
-        if (id && !byId.has(id)) byId.set(id, building);
+        if (id) insertBuilding(byId, building);
       }
-      lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
+      lastPage = payload.lastPage;
       page += 1;
     } while (page <= lastPage);
+    if (total !== null && received !== total) throw new BuildingSourceContractError(`Coleta incompleta de ${scope.city}/${type}: ${received} de ${total} registros.`);
   }));
   return [...byId.values()];
 }
@@ -154,9 +168,11 @@ export async function fetchPanoramaBuildings(scope: CityScope, signal?: AbortSig
   try {
     return await fetchBuildingsInternalV2(scope, signal, gate);
   } catch (internalError) {
+    if (internalError instanceof BuildingSourceContractError) throw internalError;
     try {
       return await fetchBuildingsPublicV2(scope, signal, gate);
     } catch (publicError) {
+      if (publicError instanceof BuildingSourceContractError) throw publicError;
       if (engineVersion !== 'v2') {
         const internalMessage = internalError instanceof Error ? internalError.message : String(internalError);
         const publicMessage = publicError instanceof Error ? publicError.message : String(publicError);
@@ -233,7 +249,7 @@ const collectionSessions = new WeakMap<object, CollectionSessionState>();
 const COLLECTION_SESSION_TTL_MS = 15 * 60_000;
 export function createPanoramaCollectionSession(): object { return {}; }
 function collectionScopeKey(scope: PanoramaScope): string {
-  return JSON.stringify({ ...scope, cities: [...scope.cities].map((city) => city.trim()).filter(Boolean).sort() });
+  return JSON.stringify({ ...scope, historyContract: HISTORY_CONTRACT_KEY, cities: [...scope.cities].map((city) => city.trim()).filter(Boolean).sort() });
 }
 function sessionState(handle: object, scope: PanoramaScope): CollectionSessionState {
   const token = useAuthStore.getState().getToken();
@@ -261,7 +277,7 @@ function collectionFailureRow(city: string, error: string, attempts: number, dur
   const failureClass: CollectionFailureAuditRow['failureClass'] = /sem (linhas|dados)|vazio/i.test(error) || statusCode === 200
     ? 'empty'
     : statusCode === 401 || statusCode === 403 ? 'auth'
-      : statusCode === 400 || statusCode === 404 || statusCode === 405 || statusCode === 422 ? 'contract'
+      : /Contrato da fonte:/.test(error) || statusCode === 400 || statusCode === 404 || statusCode === 405 || statusCode === 422 ? 'contract'
         : 'transient';
   const operation = error.match(/^(sales|stock|ivv|medium-prices-meter|medium-prices)\b/i)?.[1]
     ?? (error.includes('temporal-analysis-city/') ? error.match(/temporal-analysis-city\/([a-z-]+)/)?.[1] : null)
