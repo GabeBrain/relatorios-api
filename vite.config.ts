@@ -5,6 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Scientific workers load the frozen comparables only when needed.
+  worker: { format: 'es' },
   server: {
     host: "::",
     port: 8080,

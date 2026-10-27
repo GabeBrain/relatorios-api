@@ -10,6 +10,7 @@ export type HistoryRow = {
     time_on_sale?: number | null;
     gross_sales?: number | null;
     distractions?: number | null;
+    building_status?: string;
 };
 export type Building = {
     building_id?: number | string;
@@ -38,10 +39,22 @@ export async function readHorizontalHistory(uf: string, city: string, signal?: A
     let total = 1, completed = 0;
     const read = async (page: number) => {
         if (signal?.aborted || controller.signal.aborted) throw new DOMException('Consulta cancelada', 'AbortError');
-        const response = await httpRequest<{data: Building[]; meta: {last_page: number}}>({
+        const requestPage = () => httpRequest<{data: Building[]; meta: {last_page: number}}>({
             method: 'POST', url: 'https://app.geobrain.com.br/public-api/v2/building-with-history-internal',
             query: {type, uf, city, per_page: 100, page}, signal: controller.signal,
         });
+        let response = await requestPage();
+        for (let attempt = 0; !response.ok && [429, 502, 503, 504].includes(response.status ?? 0) && attempt < 2; attempt++) {
+            const wait = Math.min(5000, Math.max(250, response.retryAfterMs ?? 500 * (attempt + 1)));
+            await new Promise<void>((resolve, reject) => {
+                const abortWait = () => { clearTimeout(timer); reject(new DOMException('Consulta cancelada', 'AbortError')); };
+                const timer = setTimeout(() => { controller.signal.removeEventListener('abort', abortWait); resolve(); }, wait);
+                controller.signal.addEventListener('abort', abortWait, { once: true });
+                if (controller.signal.aborted) abortWait();
+            });
+            if (controller.signal.aborted) throw new DOMException('Consulta cancelada', 'AbortError');
+            response = await requestPage();
+        }
         if (!response.ok || !response.data || !Array.isArray(response.data.data))
             throw new Error(`Falha no histórico, página ${page}: ${response.error ?? response.status ?? 'resposta inválida'}`);
         const count = Number(response.data.meta?.last_page ?? 1);

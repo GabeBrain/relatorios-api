@@ -7,6 +7,7 @@ Começar por [BASELINE_OPERACIONAL_E_PLANO_2026-10-27.md](BASELINE_OPERACIONAL_E
 4. CONTRATO_E_VALIDACAO.md: candidato histórico; conciliar com baseline27.
 5. FONTES_E_DECISOES.md, MANIFESTO.md e fontes/EXTRACAO_PPTX_2026-10-21.md: cronologia e material inicial.
 6. README, RESULTADO_EXPANSAO_LOCAL e REPRODUCAO_E_HANDOFF: evolução; não tomar estados antigos como situação atual.
+7. [Bancada científica Curitiba](PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md): jornada local, censo, retrospectiva exploratória, limites e evidências agregadas; briefing Claude Design vinculado pela baseline.
 ## Fontes externas conferidas
 Monday13096757074: atualizações5565425384,5610817039,5664089049,5664124795,5664210781. URLs/pastas na baseline.
 Anexos3298910827 e3298910845: Cálculo IVV Produção/homologação, localizados, conteúdo não aberto. Não constituem contrato atualBelogic confirmado.

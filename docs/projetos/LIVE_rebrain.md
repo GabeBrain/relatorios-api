@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 27/10 — Bancada científica Curitiba local — Gabriel/sessão
+- Estado: validado localmente, sem push/deploy. [Execução, testes e limites](../features/estimativas-vendas/PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md#9-execução-local-em-2710--evidência-e-limites); evidência agregada vinculada ali, brutos ignorados.
+- Entrada por estudos/condições, retrospectiva em worker, métricas pareadas, gráficos amplos, detalhe/equação, carteira/sobreposição e ZIP de evidências. Preparar lote e motores Finotti preservados; Excel opcional reutilizado. Sem edição de parâmetros ou ampliação silenciosa do domínio.
+- API Curitiba: 1.996 empreendimentos/413.279 linhas, 21 páginas200; 37 horizontais/347 verticais nas condições consideradas, 186 estoques antigos e 1.313 esgotados (grupos podem se sobrepor). Comparação com estoque reportado, não coleta comprovada ou validação independente Finotti.
+- 98 Vitest + 15 Node, tipos/lint/build; Chromium390/768/1440 claro/escuro e preview compilado; API real na UI, zero erroJS e zero consulta adicional na análise/exportação. Preview com API real: carga76,27s/cálculo19,40s numa medição; contagens37/347 confirmadas no ZIP.
+- Próximo: ZIP/aceite visual, proveniência/cadência e protocolo independente antes de ajustar modelos ou calibrar faixas. Contrato/importação/reconciliação continuam pendentes.
+- Monday: [Estimativas de vendas](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`. Nenhuma escrita.
+
 ### 27/10 — Plano da bancada científica Curitiba e handoff visual — Gabriel/sessão
 - Estado: preparado; documentação local, sem nova UI, consulta Curitiba, backtest, push ou deploy.
 - Plano/CTA técnico: [bancada científica](../features/estimativas-vendas/PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md). Briefing/CTA Claude Design vinculado pela baseline; contratos e testes de temporalidade, amostra comum, origem e estados de interface definidos.
@@ -450,6 +458,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**27/10 — Estimativas:** primeira bancada científica Curitiba validada localmente; plano e evidências no pacote da feature. Área operacional preservada. Não é publicação nem homologação de previsão/importação; avanço científico não comprova cumprimento dos prazos operacionais.
+
 **22/10 — Estimativas de vendas Finotti:** reprodução matemática local e acesso API somente leitura confirmados; [plano do dossiê](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md), [auditoria das exportações](../features/estimativas-vendas/AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md) e [plano da página editorial](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) definem fontes, recortes, carteira e interface. Guarapuava/Maringá conciliou 72 empreendimentos/124 tipologias horizontais e oito trimestres com a API/Série Histórica. Curitiba ampliou a evidência: 371 empreendimentos/693 tipologias horizontais, 14.154 vendas e 14.154 estoques numéricos comparáveis iguais à API em 11/2024–09/2026. A API preenche posições `-` do Excel, e um vertical exportado falta na API; completude não é idêntica. `bases.estimation` foi confirmado para a base/período por mensagem encaminhada, mas a linhagem ainda não aparece por competência na série API nem no Excel. Contrato oficial, retrospectiva observada, cauda mensal, bandas, UI e retorno continuam pendentes. A página horizontal poderá usar API direta, com auditoria de cobertura separada. Sem runtime publicado nesta etapa.
 
 **22/10 — direção visual/funcional adicional de Gabriel, ainda preparada:** a primeira página API terá editorial amplo inspirado nas capturas dos slides Finotti, gráficos grandes, laboratório da equação e conferência **opcional** por Excel já na interface. O usuário verá os filtros necessários e o [exportador Análise Temporal Excel](https://app.geobrain.com.br/analise-temporal-excel); o arquivo será lido localmente para paridade por ID/competência, sem substituir a API nem enviar dados. [Plano](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) e [CTA](../features/estimativas-vendas/CTA_IMPLEMENTACAO_PAGINA_API.md) atualizados. Nenhuma tela ou teste estatístico real entregue neste refinamento.
@@ -482,6 +492,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- **Estudos Curitiba:** receber ZIP aprovado do Claude Design; confirmar origem/duração por período e limites de revisão histórica; preparar avaliação independente e candidatos apenas depois do protocolo. Publicação não autorizada nesta execução. Contrato e reconciliação operacional seguem no documento próprio.
 
 - [ ] **Estimativas de vendas Finotti:** implementar [página editorial por API](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) para empreendimento/carteira, laboratório da equação, gráficos amplos e exportação de revisão. Incluir conferência **opcional** por Excel na própria tela, com link/instruções do exportador Geobrain e validador de paridade para Guarapuava/Maringá e Curitiba; uso normal não depende de arquivo. Obter `bases.estimation` **por base/competência** e periodicidade real; a API/planilhas ainda não comprovam origem observada. Adaptar série com negativos/lacunas antes do backtest válido. Contrato de retorno, domínio, cauda95%, bandas, vertical e alternância/coleta seguem abertos. Sem aceite operacional.
 

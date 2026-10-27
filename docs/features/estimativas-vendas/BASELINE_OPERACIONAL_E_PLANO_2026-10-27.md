@@ -4,7 +4,7 @@ Estado: preparado; não constitui homologação do motor, aceite de preço ou co
 
 ## Próxima frente — estudos científicos Curitiba
 
-Plano solicitado em 27/10: [bancada científica e CTA técnico](PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md); [CTA Claude Design](CTA_CLAUDE_DESIGN_ESTUDOS_2026-10-27.md). Estado preparado, sem novo censo ou backtest. Preservar entrega operacional e contratos abaixo. A nova prioridade de pesquisa não cumpre nem cancela os prazos anteriores.
+Frente solicitada e executada localmente em 27/10: [bancada científica e evidências da execução](PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md#9-execução-local-em-2710--evidência-e-limites); [CTA Claude Design](CTA_CLAUDE_DESIGN_ESTUDOS_2026-10-27.md). Censo Curitiba e comparação exploratória com histórico reportado disponíveis; sem avaliação independente Finotti, publicação ou homologação. A jornada operacional permanece em “Preparar lote”; contratos abaixo continuam vigentes. A nova prioridade de pesquisa não cumpre nem cancela os prazos anteriores.
 
 ## Decisões de experiência confirmadas no grill — continuação27/10
 

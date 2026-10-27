@@ -1,3 +1,9 @@
+## 27/10/2026 — Estudos de estimativas e processamento local
+
+Rota lazy de Estimativas passa à jornada de estudos científicos; a preparação operacional é carregada sob demanda em acesso secundário, preservando o estado da bancada ao voltar. Primitives Select/Dialog/Button, GeoApiScopeEngine, BrainLoadingState e tokens Geobrain v0.1 intactos. Novo conteúdo usa Archivo/JetBrains conforme fundação SE; shell legado mantido. Sem novo primitive ou token.
+
+Inventário/retrospectiva em worker dedicado por operação, encerrado no cancelamento/troca de sessão; cache em memória por snapshot+protocolo. Vite `worker.format='es'` permite chunks dinâmicos dos comparáveis Finotti: o formato IIFE padrão rejeita code splitting. Worker é criado como módulo; demais workers também passam a sair como ES, sem alteração de seus contratos. Build e jornada do estimador em preview local8084 conferidos; não declara QA funcional de outros módulos. Regressões/gates e estados cobertos no [plano científico](../features/estimativas-vendas/PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md). Sem push/deploy; acabamento visual aguarda ZIP aprovado.
+
 ## 22/10/2026 — Correção: proteção por lote sem exigir conferência humana extra
 
 A decisão anterior bloqueava continuação por unknown/reserva, excedendo o pedido de recuperação. Gabriel rejeitou esse requisito. A interface agora permite continuar as outras etapas quando o servidor confirma ausência de leitura em andamento; desconhecida fica indicada, sem repetição automática e sem exigência de avaliação pela equipe. Não muda identidade/tokens ou bancada parcial. Erro de consulta e chamada ainda running continuam impedindo início paralelo. Entrega não passa a significar cobertura completa por inferência. Estado/publicação no diagnóstico Rolândia22/10; publicar controlador+reviewer/frontend, sem migration.

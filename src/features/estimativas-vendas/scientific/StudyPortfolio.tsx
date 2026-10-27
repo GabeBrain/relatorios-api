@@ -1,0 +1,30 @@
+import { useState } from 'react';
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { METHODS, type StudyMethod, type StudyResult } from './study';
+import { portfolioRows } from './portfolio';
+import { formatNumber, methodColor } from './format';
+
+export function StudyPortfolio({ result, onClose }: { result: StudyResult; onClose: () => void }) {
+  const [cutoff, setCutoff] = useState(result.protocol.cutoffs.at(-1)!);
+  const [method, setMethod] = useState<StudyMethod>('constant');
+  const [view, setView] = useState<'portfolio' | 'overlay'>('portfolio');
+  const available = result.cases.filter(c => c.cutoff === cutoff);
+  const [selected, setSelected] = useState<string[]>(available.filter(c => c.methods.constant.forecast).slice(0, 8).map(c => c.id));
+  const [search, setSearch] = useState('');
+  const members = available.filter(c => selected.includes(c.id));
+  const rows = portfolioRows(result, members, method);
+  const overlay = rows.map((r, offset) => Object.fromEntries([['month', r.month], ...members.map(c => [c.id, c.methods[method].forecast?.points[offset]?.stock === null || !c.methods[method].forecast ? null : 100 * c.methods[method].forecast!.points[offset].stock! / c.inventory.units!])]));
+  const filtered = available.filter(c => `${c.inventory.name} ${c.id}`.toLocaleLowerCase('pt-BR').includes(search.toLocaleLowerCase('pt-BR')));
+  return <Dialog open onOpenChange={open => { if (!open) onClose(); }}><DialogContent className="ev-modal ev-science-detail"><DialogTitle>Carteira e sobreposição</DialogTitle><DialogDescription>Leitura secundária da retrospectiva. A seleção abaixo muda apenas este gráfico; preserva o estudo e o lote operacional. Até oito empreendimentos por leitura.</DialogDescription>
+    <div className="ev-science-controls"><label>Data da previsão<Select value={cutoff} onValueChange={v => { setCutoff(v); setSelected([]); }}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent>{result.protocol.cutoffs.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></label><label>Método<Select value={method} onValueChange={v => setMethod(v as StudyMethod)}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent>{METHODS.map(m => <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>)}</SelectContent></Select></label></div>
+    <div className="ev-toolbar"><Button variant={view === 'portfolio' ? 'default' : 'outline'} onClick={() => setView('portfolio')}>Carteira · unidades</Button><Button variant={view === 'overlay' ? 'default' : 'outline'} onClick={() => setView('overlay')}>Sobrepor · % em estoque</Button></div>
+    <p className="ev-note">{members.length} selecionados. A carteira soma previsões individuais na mesma data. Componente sem previsão torna a soma indisponível; o histórico posterior só aparece nos horizontes comparáveis de estoque. Sem faixas calibradas.</p>
+    {!members.length ? <p role="status">Escolha os empreendimentos abaixo para esta leitura.</p> : <div className="ev-science-plot" role="img" aria-label="Carteira ou sobreposição dos empreendimentos selecionados; tabela equivalente abaixo"><ResponsiveContainer><LineChart data={view === 'portfolio' ? rows : overlay} margin={{ top: 20, right: 20, left: 0, bottom: 10 }}><CartesianGrid strokeDasharray="3 5"/><XAxis dataKey="month" minTickGap={45} tick={{ fontSize: 11 }}/><YAxis width={48} domain={view === 'overlay' ? [0, 100] : ['auto', 'auto']} tick={{ fontSize: 11 }}/><Tooltip contentStyle={{ background: 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))', fontSize: 12 }} formatter={formatNumber}/><Legend/>{view === 'portfolio' ? <><Line dataKey="predicted" name="Carteira prevista" stroke={methodColor(method)} strokeWidth={3} dot={false} connectNulls={false} isAnimationActive={false}/><Line dataKey="actual" name="Carteira reportada" stroke="var(--gb-erro)" strokeDasharray="3 4" dot={{ r: 3 }} connectNulls={false} isAnimationActive={false}/></> : members.map((c, i) => <Line key={c.id} dataKey={c.id} name={`${c.inventory.name} · ${c.id}`} stroke={methodColor(method)} strokeDasharray={['', '7 4', '2 3', '12 4', '7 2 2 2', '10 3 2 3', '4 6', '15 3'][i]} strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false}/>)}</LineChart></ResponsiveContainer></div>}
+    <div className="ev-table"><table><caption>{view === 'portfolio' ? 'Carteira · estoque em unidades' : 'Sobreposição · percentual em estoque'}</caption><thead><tr><th>Mês</th>{view === 'portfolio' ? <><th>Previsto</th><th>Reportado</th><th>Sem previsão</th></> : members.map(c => <th key={c.id}>{c.inventory.name}</th>)}</tr></thead><tbody>{rows.map((r, i) => <tr key={r.month}><td>{r.month}</td>{view === 'portfolio' ? <><td>{formatNumber(r.predicted)}</td><td>{formatNumber(r.actual)}</td><td>{r.missing}/{r.members}</td></> : members.map(c => <td key={c.id}>{formatNumber(overlay[i][c.id] as number | null)}</td>)}</tr>)}</tbody></table></div>
+    <label className="grid gap-2 text-sm">Selecionar empreendimentos para esta leitura<Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar na amostra desta data"/></label><p className="ev-note">{filtered.length} encontrados; exibindo até 40. Refine a busca para localizar outros.</p><div className="ev-science-members">{filtered.slice(0, 40).map(c => <label key={c.id} className="ev-science-method-choice"><input type="checkbox" checked={selected.includes(c.id)} disabled={!selected.includes(c.id) && selected.length >= 8} onChange={e => setSelected(ids => e.target.checked ? [...ids, c.id] : ids.filter(id => id !== c.id))}/><span>{c.inventory.name}<span className="ev-note block">ID {c.id} · {c.inventory.type} · estoque {formatNumber(c.inventory.stock)}</span></span></label>)}</div>
+  </DialogContent></Dialog>;
+}

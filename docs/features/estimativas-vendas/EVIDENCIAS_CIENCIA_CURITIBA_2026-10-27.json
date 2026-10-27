@@ -1,0 +1,429 @@
+{
+  "purpose": "Evidência agregada da primeira bancada científica, sem IDs ou dados brutos privados.",
+  "source": {
+    "source": "Geobrain API, read-only",
+    "hash": "e9318db6449f1f7cf8dac04ecf8c057d6e2f8b93a5c2a34f3c1a8ec39c6cc3f9",
+    "fetchedAt": "2026-10-27T19:56:22.169Z",
+    "buildings": 1996,
+    "historyRows": 413279,
+    "byType": {
+      "Horizontal": 375,
+      "Vertical": 1621
+    },
+    "inventoryCutoff": "2026-09"
+  },
+  "conditions": {
+    "all": 1996,
+    "finotti-horizontal": 37,
+    "finotti-vertical": 347,
+    "old-stock": 186,
+    "short-history": 27,
+    "other-pattern": 316,
+    "data-issues": 1295,
+    "sold-out": 1313
+  },
+  "horizontalWithinOriginalAge": 37,
+  "horizontalAgeExtension": 0,
+  "protocol": {
+    "schema": "curitiba-study-v1",
+    "datasetHash": "e9318db6449f1f7cf8dac04ecf8c057d6e2f8b93a5c2a34f3c1a8ec39c6cc3f9",
+    "study": "all",
+    "cutoffs": [
+      "2025-09",
+      "2026-03",
+      "2026-06"
+    ],
+    "horizons": [
+      3,
+      6,
+      12
+    ],
+    "methods": [
+      "constant",
+      "stock-trend",
+      "finotti-reference"
+    ],
+    "target": "stock",
+    "rounding": "unrounded-baselines-reference-original",
+    "purpose": "exploratory-reported-history",
+    "trainingThrough": "2026-09",
+    "calibration": "none",
+    "split": "no-fitting-development-only"
+  },
+  "threeMonthComparisons": {
+    "full": [
+      {
+        "provenance": "unknown",
+        "horizon": 3,
+        "method": "constant",
+        "attempted": 5988,
+        "evaluated": 2040,
+        "buildings": 784,
+        "coverage": 0.3406813627254509,
+        "maeUnits": 3.626488095238096,
+        "biasUnits": 3.381164965986394,
+        "medianUnits": 1,
+        "p90Units": 7,
+        "medianPp": 2.8304405874499334,
+        "totalAttempted": 5988
+      },
+      {
+        "provenance": "unknown",
+        "horizon": 3,
+        "method": "stock-trend",
+        "attempted": 5988,
+        "evaluated": 1919,
+        "buildings": 749,
+        "coverage": 0.32047428189712757,
+        "maeUnits": 3.468402314196708,
+        "biasUnits": -0.33444592790387173,
+        "medianUnits": 1,
+        "p90Units": 7,
+        "medianPp": 3.8461538461538463,
+        "totalAttempted": 5988
+      },
+      {
+        "provenance": "unknown",
+        "horizon": 3,
+        "method": "finotti-reference",
+        "attempted": 5988,
+        "evaluated": 0,
+        "buildings": 0,
+        "coverage": 0,
+        "maeUnits": null,
+        "biasUnits": null,
+        "medianUnits": null,
+        "p90Units": null,
+        "medianPp": null,
+        "totalAttempted": 5988
+      }
+    ],
+    "paired": [
+      {
+        "provenance": "unknown",
+        "horizon": 3,
+        "method": "constant",
+        "attempted": 1919,
+        "evaluated": 1919,
+        "buildings": 749,
+        "coverage": 1,
+        "maeUnits": 2.8618157543391196,
+        "biasUnits": 2.6050289274588345,
+        "medianUnits": 1,
+        "p90Units": 6,
+        "medianPp": 2.6315789473684212,
+        "totalAttempted": 5988
+      },
+      {
+        "provenance": "unknown",
+        "horizon": 3,
+        "method": "stock-trend",
+        "attempted": 1919,
+        "evaluated": 1919,
+        "buildings": 749,
+        "coverage": 1,
+        "maeUnits": 3.468402314196708,
+        "biasUnits": -0.33444592790387173,
+        "medianUnits": 1,
+        "p90Units": 7,
+        "medianPp": 3.8461538461538463,
+        "totalAttempted": 5988
+      },
+      {
+        "provenance": "unknown",
+        "horizon": 3,
+        "method": "finotti-reference",
+        "attempted": 0,
+        "evaluated": 0,
+        "buildings": 0,
+        "coverage": 0,
+        "maeUnits": null,
+        "biasUnits": null,
+        "medianUnits": null,
+        "p90Units": null,
+        "medianPp": null,
+        "totalAttempted": 5988
+      }
+    ]
+  },
+  "checks": {
+    "vitest": 98,
+    "operationalNode": 15,
+    "typecheck": true,
+    "lintErrors": 0,
+    "build": true,
+    "browserViewports": [
+      390,
+      768,
+      1440
+    ],
+    "browserThemes": [
+      "light",
+      "dark"
+    ],
+    "browserStates": [
+      "success",
+      "empty",
+      "unauthorized",
+      "failure-and-retry",
+      "cancel",
+      "no-future-target",
+      "sold-out",
+      "uncalibrated"
+    ],
+    "browserEvidence": ".local-inputs/estimativas-vendas/curitiba-ciencia-20261027/browser/result.json",
+    "compiledPreviewUrl": "http://127.0.0.1:8084/rebrain/estimativas-vendas"
+  },
+  "liveUI": {
+    "transport": "API real autenticada, sem interceptação",
+    "loadSeconds": 76.27222080000001,
+    "runSeconds": 19.398828899999994,
+    "requestsDuringAnalysis": 0,
+    "network": [
+      {
+        "type": "Horizontal",
+        "page": "1",
+        "status": 200
+      },
+      {
+        "type": "Horizontal",
+        "page": "4",
+        "status": 200
+      },
+      {
+        "type": "Horizontal",
+        "page": "2",
+        "status": 200
+      },
+      {
+        "type": "Horizontal",
+        "page": "3",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "1",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "3",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "2",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "4",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "7",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "6",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "8",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "9",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "5",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "10",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "11",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "12",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "13",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "14",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "15",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "17",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "16",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "evidenceZip": true,
+    "runtime": "compiled-preview-8084",
+    "exportedDatasetHash": "3e0c8b9e6961394942d386723ef592b39a1a59ab2c0dc24921163ebedea0745b",
+    "exportedConditions": {
+      "all": 1996,
+      "finotti-horizontal": 37,
+      "finotti-vertical": 347,
+      "old-stock": 186,
+      "short-history": 27,
+      "other-pattern": 316,
+      "data-issues": 1295,
+      "sold-out": 1313
+    }
+  },
+  "limitations": [
+    "Origem por período e duração oficial dos fluxos não confirmadas na API.",
+    "Snapshot atual pode conter revisões de dados históricos.",
+    "Finotti congelado treinado até setembro/2026; retrospectivas anteriores bloqueadas.",
+    "Estudo exploratório sem ajuste, calibração ou seleção de vencedor no teste final.",
+    "Cartões se sobrepõem; estoques já zerados separados da avaliação principal.",
+    "Universo atual não comprova cobertura integral do mercado histórico."
+  ],
+  "rawFolder": ".local-inputs/estimativas-vendas/curitiba-ciencia-20261027",
+  "replayCommand": "node scripts/diagnostics/estimativas-curitiba-study.mjs --replay",
+  "liveUIDevelopment": {
+    "transport": "API real autenticada, sem interceptação",
+    "loadSeconds": 68.77652400000001,
+    "runSeconds": 14.400501300000004,
+    "requestsDuringAnalysis": 0,
+    "network": [
+      {
+        "type": "Horizontal",
+        "page": "1",
+        "status": 200
+      },
+      {
+        "type": "Horizontal",
+        "page": "4",
+        "status": 200
+      },
+      {
+        "type": "Horizontal",
+        "page": "2",
+        "status": 200
+      },
+      {
+        "type": "Horizontal",
+        "page": "3",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "1",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "2",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "3",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "4",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "5",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "7",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "6",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "9",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "8",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "10",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "11",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "12",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "13",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "14",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "15",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "17",
+        "status": 200
+      },
+      {
+        "type": "Vertical",
+        "page": "16",
+        "status": 200
+      }
+    ],
+    "errors": [],
+    "evidenceZip": true
+  }
+}
