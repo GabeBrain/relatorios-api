@@ -1,0 +1,2342 @@
+# Histórico de LIVE_rebrain — até 19/10/2026
+
+Entradas movidas sem edição de `LIVE_rebrain.md` em 27/10/2026, na ordem original.
+
+## 19/10/2026 — Luna/high e consumo por modelo preparados para produção
+
+Executado plano L0–L6 e handoff L7 por autorização de Gabriel: flag técnica seleciona gpt-6-luna/high para novas sugestões, teto total32.768 tokens por chamada e retrato imutável de perfil/preços no contexto. Mini legado conserva contrato, limites e hashes na retomada. Prompts de negócio idênticos; motores de correção, materiais, versões, decisões e UI preservados. Guarda de schema/contrato e timeout110s/130s; desconhecidos conservam reserva/evidência, sem repetção ou fallback automático.
+
+Migration aditiva `20261019203600_corretor_recommendation_model_profiles.sql` preparada, não aplicada: esforço/raciocínio, perfil, preços, origem e consumo por chamada/geração; agregado técnico service_role e consulta SQL versionada. Tokens de raciocínio não são cobrados duas vezes. Modelo solicitado e efetivo preservados; custos continuam fora da jornada do analista. Tipos app/Edge, lint, build41,14s e parser SQL/PLpgSQL aprovados. Nenhuma suíte, browser, IA paga, SQL remoto ou deploy executado. Qualidade, latência real e produção não verificados. Publicação: Gabriel aplica migration, depois deploy analyze-consulting-suggestion, corretor-execution e Publish frontend. Relatório: `design/RESULTADO_LUNA_METRICAS_PRODUCAO_2026-10-19.md` na documentação do Corretor. Estado preparado e checado estaticamente; push autorizado nesta rodada, não equivale a ativação remota.
+
+## 19/10/2026 — Plano de adoção Luna com consumo por modelo
+
+Gabriel decidiu adotar Luna na Sugestão de análise sem comparação prévia, priorizando utilidade para A&R. Plano técnico L0–L7 preparado em `PLAN_LUNA_SUGESTAO_METRICAS_PRODUCAO_2026-10-19.md`: padrão proposto gpt-6-luna/high, flag técnica versionada, retrato imutável de modelo/esforço/preços por execução, compatibilidade de retomadas legadas e migration aditiva para detalhar consumo. Comparativos observacionais nos envios reais, sem executar os dois modelos ou exibir custos ao analista. Duas Edge Functions mais frontend exigem publicação; SQL remoto fica com Gabriel. Estado preparado, sem código/migration implementados, sem teste/IA paga/deploy/push nesta rodada. CTA de execução integral incluído no plano. Chat indicado continua indisponível pela consulta e não há navegador conectado para o login atual; texto copiado utilizado, sem afirmar acesso à base integral de Diego.
+
+## 19/10/2026 — Transição contínua no início da avaliação
+
+Gabriel confirmou aplicação da migration de exclusão, Publish e teste positivo (relato, sem verificação independente). Novo problema: preparação reaparecia entre registro e indicador de análise. Estado visual independente agora cobre registro, processamento e finalização, em envio novo e retomada. Erros/pausa mantêm tratamento existente; motores, decisões e controles preservados. Browser com PPTX real e11 Excel, registro atrasado e serviços simulados aprovado em duas verificações, sem erros ou IA paga. TypeScript aprovado. Sem migration/Edge nova. Falta Publish e conferir em produção. Diagnóstico: `CORRECAO_TRANSICAO_INICIO_AVALIACAO_2026-10-19.md`, na pasta de design do Corretor.
+
+## 19/10/2026 — Exclusão acessível para estudos incompletos
+
+Gabriel pediu mapear a exclusão e dar acesso por lixeira antes de concluir análise. Diagnóstico: preparação incompleta retornava antes do cabeçalho com lixeira; carteira não oferecia a ação. DELETE antigo podia falhar por referências de cadastro/materiais ou apagar consumo em cascade. Implementada exclusão lógica preservando materiais, decisões e registros de uso. Lixeira na carteira/cabeçalho e na preparação autenticada; rascunho apenas local tem descarte local com confirmação. Login e confirmação obrigatórios para registro salvo; estudo só some após true do banco. Execuções prepared/running bloqueiam remoção. Limpeza local compara hash para preservar rascunho de outro estudo. Reenvio idêntico inicia outro registro ativo, sem ressuscitar o removido.
+
+**Dependência nova:** aplicar manualmente `supabase/migrations/20261019182241_corretor_study_trash.sql` antes do Publish. RPC invoker com helper privado para ler execuções protegidas, validando identidade; sem expor tabelas de consumo ou ampliar leitura. Sem migration aplicada, exclusão informa pendência e preserva o estudo. Nenhum SQL remoto ou registro real excluído. Não requer Edge nova. [Mapeamento, segurança e limites](../features/corretor-vocacionais/design/EXCLUSAO_ESTUDOS_INCOMPLETOS_2026-10-19.md).
+
+Validação local:341 testes aprovados/zero falhas/2 ignorados;8 focados;7 casos PostgreSQL em memória com migration real;4 percursos browser simulados sem erros/IA. Tipos/lint/build46,84s aprovados. Push solicitado também inclui e333a25 (decisão sem planilhas na ação principal). Estado validado localmente, pronto para envio; aplicação SQL, Publish e teste de estudo descartável em produção pendentes. Exclusão lógica não libera storage nem representa eliminação física dos originais. Outras frentes preservadas.
+
+## 19/10/2026 — Decisão sem planilhas na ação principal
+
+Gabriel relatou que o botão separado Continuar sem planilhas escondia o requisito para iniciar. Removido do painel Excel. Ação principal mostra Continuar sem planilhas enquanto a escolha estiver pendente; primeiro clique só confirma a escolha, sem onStart/processamento. Depois vira Iniciar avaliação; validações de cidade/UF e controles internos preservados. Aviso A comparação com os cálculos de origem não será feita aparece ao lado, entrada suave pela esquerda e vermelho breve passando à cor de texto, sem animação quando movimento reduzido. Rascunho restaurado mostra aviso estático; fonte anterior na retomada preservada e não gera aviso falso de ausência. Remover todas as planilhas pede nova escolha; planilhas selecionadas continuam no fluxo normal.
+
+TypeScript e ESLint dirigidos aprovados. Expectativas do teste existente ajustadas ao botão único, sem executar nova suíte ou teste browser nesta rodada. Estado preparado localmente, sem push/produção; próximo publicar com autorização e conferir duas etapas, envio/remoção de Excel e retomada. Sem IA paga, migration, Edge ou alteração de motores/custos/decisões. Documentação e outras frentes preservadas.
+
+## 19/10/2026 — Carregamento estável e atenuado
+
+Gabriel relatou listas/componentes surgindo em momentos distintos, com impressão de travamento. Aplicado LoadingSurface reutilizável na carteira/versões, sugestões e materiais: esqueleto estático na primeira leitura, conteúdo anterior atenuado nas atualizações, indicador operacional sobreposto sem deslocar a altura, aria-busy/status e inert para não clicar/teclar em ações com dados em atualização. Estado anterior não é apagado durante refresh; resumo da carteira aguarda metadados de sugestão para liberar os destinos. Contagem não some em toda atualização. Busca/filtros permanecem operacionais durante atualização de metadados; só links de abertura aguardam destino confirmado. Troca de conta limpa dados pessoais, e materiais são remontados por estudo para não reaproveitar contexto de outro estudo.
+
+Transição curta de opacidade180ms, sem shimmer/pulsação ou atraso artificial de rede; respeita redução de movimento. Tokens Geobrain preservados. Sem alteração de motor/custo/prompt/banco/decisões. TypeScript e lint dirigidos aprovados; compilação local registrada em `.local-inputs/loading-build.log`. Sem nova suíte de testes ou ensaio browser nesta mudança; não reutilizar337 testes da rodada anterior como validação deste lote. Estado preparado para teste humano após push/Publish; observar primeira abertura, agrupamento/paginação, atualização de sugestão e materiais em rede lenta. Sem IA paga, migration ou Edge nova. Outras frentes preservadas.
+
+## 19/10/2026 — Sugestão em blocos e cópia limpa
+
+Feedback Diego/Gabriel: saída com tamanhos inconsistentes e espaço vazio. Referência a901df2 tinha texto único; parser posterior promovia parágrafo inteiro a heading quando título e texto vinham sem linha vazia, além de max-width85ch. Substituído por blocos por título, contexto, corpo uniforme16px e largura útil inteira. Copiar bloco, Copiar tudo e TXT em texto simples removem Markdown sem editar o original persistido. Aplica ao histórico carregado, sem nova geração/migração; resultados sem divisões ficam em um bloco, sem inventar estrutura.
+
+337 testes aprovados/zero falhas/2 ignorados;12 focados; quatro verificações browser com serviços simulados, incluindo clipboard real/TXT, registro bruto inalterado e reabertura sem novas chamadas. Quatro larguras1440/1024/390/320, sem overflow e fonte16px; captura1440 inspecionada. Tipos/lint/build34,27s aprovados. Sem IA paga/banco remoto/Edge/prompt/controle de custo alterados. [Diagnóstico e evidências](../features/corretor-vocacionais/design/SAIDA_SUGESTAO_BLOCOS_2026-10-19.md). Estado validado localmente, push autorizado; Publish frontend e conferência em produção pendentes. Limite automático/intervenção técnica mantidos.
+
+## 19/10/2026 — Custos somente no controle interno
+
+Por sugestão de Diego e autorização de Gabriel, removida apresentação de gastos/consumo do percurso dos analistas: preparo/limite editável, confirmações, progresso, avisos, sugestões salvas, cabeçalho/relatório, arquivo antigo, teste de ata e painel financeiro da calibração. Ações continuam explícitas; limite calculado automaticamente pela mesma fórmula anterior. Gasto, tokens, reservas, replays, bloqueios e persistência continuam nos módulos/servidor existentes. Valores do estudo preservados. Mensagens financeiras do processamento recebem orientação operacional no frontend, sem editar registros do servidor.
+
+Evidência: [mapa completo e validação](../features/corretor-vocacionais/design/REVISAO_CUSTOS_INTERFACE_2026-10-19.md).331 testes aprovados/zero falhas/2 ignorados; dez passes materiais; seis verificações browser com PPTX real e serviços simulados, zero erros, zero IA real. Teste afirma limite positivo e gasto/tokens mantidos no resultado simulado sem exibição; reabrir não duplica execução. Tipos/lint aprovados; build local. Sem diff em supabase, prompts, preços, execution/db/recommendations. Nenhuma migration/Edge nova/banco remoto. Estado validado localmente, push solicitado; Publish e conferência do site ainda pendentes. Registros de gestão permanecem preservados; não se trata de restringir leitura da API nem de criar novo acesso administrativo.
+
+## 19/10/2026 — Escolha grande na entrada e preparação focada
+
+Direção posterior de Gabriel substitui a entrada unificada de96f19f0: home com dois cards grandes Revisar estudo/Sugestão de análise e estudos salvos agrupados abaixo. Escolher card abre preparação no objetivo indicado; carteira sai da tela e não há repetição de botões pequenos para selecionar novamente. Título identifica o objetivo; voltar aos estudos conserva organização da carteira. Rascunho/material preservados pelo mecanismo existente, sem alterar motor/custo/prompt/decisões. Removida montagem desnecessária do preparador na home. ESLint dos dois componentes aprovado; sem novo teste browser/IA/produção. Estado preparado localmente para aprovação, sem push nesta rodada. Nenhuma migration/Edge. Anotações anteriores preservam o histórico; esta é a composição vigente.
+
+## 19/10/2026 — Preparação do comunicado e remoção de rótulos de release
+
+Gabriel pediu rollout sem número de versão na interface/comunicado. Busca no código local encontrou V1 no link/histórico e v2 na demonstração antiga; rótulos trocados por Análises anteriores/Estudos anteriores/Demonstração. Comentários, tipos, rotas internas e versões dos arquivos preservados para rastreabilidade. Revisão textual estática, sem teste novo ou conferência em produção. Email curto preparado na conversa para A&R, sem envio: interface unificada, Excel opcional antes da avaliação, evidências e histórico, organização/Meus estudos pela conta Geobrain e Sugestão de análise. Publicação/aceite real ainda pendentes: enviar comunicado só depois de confirmar frontend publicado. Nenhuma IA paga, migration, Edge ou mensagem externa. Lote preparado localmente, sem novo push autorizado nesta solicitação.
+
+## 19/10/2026 — Consolidação do fechamento e mudança de entrada
+
+**Estado atual:** código enviado ao Git até `96f19f0`, main/origin0–0 na conferência desta sessão. Publicação e comportamento em produção ainda não verificados. Este registro atualiza os estados anteriores de preparado/sem push; preserva-os como histórico.
+
+**Motivos e decisões:** feedback de Diego levou à comunicação somente Sugestão de análise, login único no menu e simplificação da revisão, preservando avanços do Excel e custo. O teste posterior de Gabriel mostrou login pouco perceptível: `034e3f4` adicionou aviso na carteira e botão de foco no formulário existente. Depois, as duas entradas levavam à mesma preparação e criavam uma passagem redundante: **a decisão vigente substitui os cards separados pela preparação diretamente na entrada**, com estudos salvos abaixo (`96f19f0`). Objetivos Revisar estudo/Sugestão de análise permanecem na preparação, sem outro formulário de acesso. Carteira oferece Recentes/Por cidade/Por mês, grupos/contagens e calendário de recebimento, sem exigir cadastro ou inventar tags.
+
+**Evidências por lote:** `5dbdd85`/`02af50d` retorno de usabilidade:327 testes aprovados/2 ignorados, dez passes materiais e32 verificações browser com serviços simulados; tipos/lint/build. `034e3f4` indicador: revisão de código/documentação, sem teste novo. `96f19f0` entrada/carteira: TypeScript e lint aprovados; sem novo browser/regressão. Não atribuir os32 percursos anteriores à entrada mais recente. Motores, prompts, custos, versões, materiais e decisões preservados; sem IA paga ou banco remoto. Relatório consolidado: `docs/features/corretor-vocacionais/design/RESULTADO_RETORNO_USABILIDADE_ASSISTENTE_2026-10-19.md`.
+
+**Pendências/próximo passo:** Publish frontend no Lovable e conferir entrada unificada, agrupamentos/calendário, aviso de acesso, login real pelo menu, Meus estudos incompletos e ida/volta de estudo. Sem iniciar IA paga nesse aceite. Nenhuma migration ou Edge nova exigida por estes lotes; ponte existente corretor-access segue dependência do acesso autenticado. Planejamento19–23 continua provisório; esta execução foi solicitada por Gabriel e não aprova a ordem integral/novas reservas. Sem horas retroativas, Monday ou atribuições a Lucas/Edgar. Documentação desta consolidação preparada localmente.
+
+## 19/10/2026 — Entrada unificada e estudos agrupados
+
+Gabriel pediu eliminar a passagem redundante pelos dois cards. A carteira agora incorpora a preparação existente (PowerPoint, Excel e objetivo), seguida dos estudos salvos. Organização Recentes/Por cidade/Por mês com grupos visíveis, seletores de grupo/contagens e calendário nativo para data de recebimento. Busca, escopo pessoal/compartilhado, paginação e filtros preservados; retorno ao estudo conserva grupo e data na URL. Preparar com conta atualiza a carteira na mesma página. Cidade ausente/data ausente não são inventadas; tags derivam dos registros existentes. Sem nova taxonomia persistida ou cadastro obrigatório. Reutiliza preparação e pipeline, sem alterar motores/prompts/decisões/custos. Tipos TypeScript e ESLint dirigidos aprovados; sem novo ensaio browser ou regressão de materiais nesta mudança. Não transferir os resultados da rodada anterior para este recorte. Push autorizado; frontend no Lovable e verificação visual em produção pendentes. Sem migration, Edge nova ou IA paga.
+
+## 19/10/2026 — Login pendente vis?vel na carteira
+
+Ajuste solicitado por Gabriel: ao pedir Meus estudos sem autenticação, aviso na própria carteira informa que falta entrar, orienta ao menu esquerdo e oferece Ir ao login no menu (rola/foca o campo existente). Desaparece ao cancelar ou concluir; não cria segundo formulário. Fundação Geobrain, sem barra amarela decorativa; adaptação mobile. Somente apresentação, sem motor/prompt/banco/Edge/IA. Revisão de código, sem testes novos ou verificação em produção nesta alteração. Push autorizado; Publish Lovable e conferência visual continuam pendentes.
+
+## 19/10/2026 — Retorno de usabilidade do Assistente: validado localmente
+
+T0–T7 executados no recorte local: duas entradas diretas, somente Sugestão de análise, autenticação compartilhada no menu, Meus estudos incompletos, Excel antes da análise e retomada contínua, revisão direta e três áreas. Base d3463d7 sincronizada preservando documentos FIERGS/ZIP. 327 testes aprovados/2 ignorados, dez passes materiais, navegador15+9+8 verificações com serviços simulados, tipos/lint/build aprovados. Teste adicional de retomada com fonte preservada aprovado. Motores/prompts/servidor intactos. Sem IA paga, banco remoto, deploy ou push. Login real e produção pendentes; nenhuma migration/Edge nova para este lote. Evidência: docs/features/corretor-vocacionais/design/RESULTADO_RETORNO_USABILIDADE_ASSISTENTE_2026-10-19.md. Próximo: revisar resultado, autorizar push e publicar frontend; retestar acesso real sem processamento pago. Reservas não são horas medidas; não aprova a ordem integral da semana provisória.
+
+### 2026-10-16 — Relatórios institucionais: push concluído, deploy público a verificar — Codex, Lucas
+- **Envio:** origin/main recebeu `00b5599`, incluindo merge `c5b1d6a` e lote `103e3df`; refs 0/0 e árvore limpa após push. Validações pós-merge aprovadas. Menu/busca removidos do código enviado, rota SP preservada.
+- **Pendência concreta:** site ainda servindo `index-v7U-Wb1K.js` sem rota/chunk SP após push; deploy NÃO confirmado. Navegador integrado indisponível; revisão automática bloqueou leitura de janela Opera de outro assunto. Solicitada autorização para aba Lovable específica sem leitura da aba atual. Nenhuma alteração/consulta de mercado no site; falta publicar e conferir bundle/rota. Retomada em STATUS, sem trabalho agendado nas férias.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-16 — Relatórios institucionais: integração e envio autorizados — Codex, Lucas
+- **Integração:** Lucas aprovou merge/publicação após validação. `c5b1d6a` integra os quatro commits de Gabriel/Lovable até `07ca8bb`, sem conflitos e sem mudanças autorais no Corretor. LIVE/decisões preservados integralmente por conferência de três pontos. Novas entradas remotas de recomendador/métricas lidas; permanecem sob Gabriel.
+- **Validação/etapa:** 108 testes SP, build pós-merge (3473 módulos) e check-live-docs aprovados. Push da main autorizado; verificar o bundle publicado antes de declarar deploy. Site anterior ainda sem rota SP. Prévia tem 46 posições, incluindo complementos/pendências; acesso só pela rota, sem menu/busca. Sem dados reais novos/Monday/exportação; férias 19/10 e retomada em STATUS preservadas.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-16 — Relatórios institucionais: vinte páginas e acesso somente por rota — Codex, autorizado por Lucas
+- **Desenvolvimento:** páginas 27–40 de lançamentos/vendas por sete padrões originais da API e 41–46 de quadros R/V/O por padrão/tipologia; complementos, sem consulta adicional. Totais reconciliados e estoque do último mês. Menu e busca deixam de oferecer SP; rota lazy/login/escopo preservados. Reuso de canvas/artes/gráfico histórico/Button/Dialog, navegação com rolagem limitada; estados vazio, falha, atual e histórico cobertos.
+- **Validação:** 108 testes/10 arquivos, tipagem/lint/build locais e 18 cenários Edge offline aprovados. Vinte capturas revisadas, zero chamadas reais/erros; todo 2025 e tipologias de QA fictícios. Não é homologação nem conclusão de vinte slides originais.
+- **Etapas/pendências:** Lucas autorizou push/publicação. Divergência de 4 remotos/23 locais exige resposta específica de merge, solicitada; lote local salvo enquanto aguarda. Após integração, build/check-live-docs/push e conferência real da versão publicada. Sem sessão Lovable autenticada disponível no navegador; runtime ainda não verificado. Retomada em STATUS, férias 19/10, sem Monday/coleta longa ou mudanças autorais em Secovi/FIERGS/Corretor/Quanti.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-16 — Relatórios institucionais: lote de 12 detalhes por segmento — Codex, autorizado por Lucas
+- **Fechamento técnico:** build final pós-merge aprovado, tipagem/lint sem erros; 26 posições navegáveis incluem prévias/pendências e não representam percentual dos 85 slides.
+- **Desenvolvimento:** páginas 15–26 complementares: quatro segmentos × lançamentos/vendas/oferta, com dois anos mensais, totais e diferenças. Reuso de artes 18/32/46, gráfico histórico, Button/Dialog/canvas e consulta existente; nenhuma chamada adicional. Soma mensal dos segmentos e acumulados reconciliados; estoque apenas do último mês. Falha retira lote e base não positiva não recebe porcentagem.
+- **Validação/etapas:** 103 testes SP, tipagem/lint, 16 cenários Edge offline, zero chamadas reais/erros. As 12 capturas revisadas; 2025 fictício. Não são doze slides originais concluídos. Próximo: revisão autenticada e vigência histórica da regra SP de Lucas; ainda pendentes série longa/móvel, preços/INCC/IVV, granular, mapas, setembro e exportação.
+- **Integração/limites:** merge autorizado `c4ac909` integra `15e5efc`/`e36c591` de Gabriel/Corretor, preservando ambos históricos e todas as entradas documentais; sem mudanças autorais no Corretor. Base do lote com 22 commits locais desde 15/10 às 11h55, sem push/Monday/publicação/coleta longa. Férias 19/10 e retomada em STATUS preservadas.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-16 — Relatórios institucionais: três comparativos por segmento — Codex, autorizado por Lucas
+- **Desenvolvimento:** páginas 9/10/11 com dois anos lado a lado, reaproveitando as janelas e arte existentes; nenhuma chamada adicional. Regra SP confirmada por Lucas, somas reconciliadas nos dois anos e oferta somente do último mês. Bases não positivas sem percentual; falha remove histórico e mantém distribuição atual com pendência explícita.
+- **Validação/etapas:** 100 testes SP, tipagem, lint e build aprovados. Dados 2025 de testes fictícios; retorno autenticado e vigência histórica da classificação ainda precisam de revisão. Próximo portão é revisar 9–14 na sessão pessoal antes de ampliar coleta; setembro, granular, INCC/preços, IVV e exportação pendentes. Reuso de canvas, artes 24/38/48, Dialog/Button; estados atual, histórico e falha cobertos.
+- **Limites:** base f0f6ac0, fetch sem novidade, 20 commits locais na abertura; sem push/Monday, publicação ou coleta longa. Férias 19/10 preservadas, retomada em STATUS; sem alterações autorais em Corretor/Quanti/Secovi/FIERGS.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-16 — Relatórios institucionais: lote de históricos lançamentos/vendas/oferta — Codex, autorizado por Lucas
+- **Desenvolvimento:** uma ação Conferir históricos e páginas12/13/14, com artes18/32/46. Mesmos meses nos dois anos, raiz oficial separada do fim solicitado; balanços das duas janelas, releitura por mês/padrão e totais obrigatórios. Lote inteiro bloqueado em falha; fluxos somados, estoque só do fechamento, vendas negativas e bases não positivas explícitas. Reuso de escopo/primitives/canvas/transportes SP, sem política externa transplantada.
+- **Validação:** 99 testes SP e15cenários Edge aprovados,16requests mockados no ensaio (8do lote), zero chamadas de mercado/erros. Capturas dos três comparativos e ampliação revisadas;2025 de QA é fictício. Dados reais históricos ainda pendentes da sessão pessoal de Lucas.
+- **Etapas/Pendências:** usuário revisa o conjunto em uma rodada, por ação única. Depois avaliar divergências e delimitar série longa/móvel/preços. Base `047e5bf`, sem push/Monday/coleta longa/publicação ou alterações autorais em Secovi/FIERGS/Corretor. Férias19/10 preservadas, retomada em PLAN/STATUS.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-16 — Relatórios institucionais: checkpoint e comparativo curto de lançamentos — Codex, autorizado por Lucas
+- **Fechamento da retomada:** entrega salva em `0c6e3c2`, merge autorizado `1ca206a` sem conflitos. Build/tipagem SP pós-merge e lint aprovados;15cenários Edge refeitos com zero rede real/erros e rótulos sem sobreposição. Janela2025 de QA segue fictícia; aguardando observação autenticada de Lucas. Sem push.
+- **Desenvolvimento:** recuperada a entrega interrompida em15/10; ação histórica curta, mesma janela nos dois anos, releitura atual por mês/padrão e página12 com arte original do slide18. Fechamento alterado/ausência/duplicação/universo/delta bloqueiam o resultado; base anterior zero não produz variação percentual. Primitives/escopo/canvas existentes reutilizados.
+- **Evidência:** 83 testes SP aprovados na retomada; diagnóstico anterior com15cenários Edge e zero rede real. Base2025 de QA é fictícia; dados históricos autenticados ainda não observados. [Checkpoint](../handoffs/lucas-relatorios-2026-10-14/STATUS.md) registra os limites e a validação final pendente após integração.
+- **Git/pendências:** base local `95519cf`; 3 commits remotos de tipos Supabase/cache recebidos sem doc vivo próprio, merge autorizado por Lucas após salvar este trabalho. Mensagem remota de deploy não é comprovação de runtime; sem publicação pelo agente. Próximo: validar botão histórico na sessão pessoal, depois delimitar vendas/oferta/histórico longo. Sem push/Monday/coleta longa; férias19/10 preservadas.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-15 — Relatórios institucionais: agrupamento SP confirmado e aplicado — Codex, regra de Lucas
+- **Desenvolvimento:** regra SP v1: Compactos←Compacto; MCMV←Econômico; Médio Padrão←Standard/Médio/Médio-Alto; Luxo←Alto/Luxo. Slides 24/38/48 preenchidos sobre padrões já recebidos, sem requests adicionais; desconhecidos/duplicados/ausentes e divergências bloqueiam valores. Sinais preservados; estoque só do fechamento. Reuso do gráfico de distribuição e artes originais existentes.
+- **Validação:** 69 testes SP, tipagem/lint e 14 cenários Edge aprovados com rede de mercado bloqueada. Três gráficos revisados, com totais 24.351/26.824/124.706 preservados. Regra confirmada por Lucas, sem alegar consulta ao analista ou homologação integral.
+- **Etapas/Pendências:** classificação resolvida no piloto; Lucas revisar slides 9/10/11. Histórico/comparações, preços/INCC/IVV, granular, setembro e exportação continuam pendentes. Base `eecad68`; sem push/Monday/coleta longa e sem mudanças autorais em Secovi/FIERGS/Corretor. Férias19/10 e retomada em PLAN/STATUS mantidas.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-15 — Relatórios institucionais: segmentos preparados, regra pendente — Codex, autorizado por Lucas
+- **Desenvolvimento:** artes originais 24/38/48 nas posições 9/10/11, sem valores ou agrupamento presumidos. Detalhamento dos padrões originais da API reaproveita a consulta municipal; agregação compartilhada só dentro de SP, preservando fluxos/estoque final e invalidação de escopo.
+- **Evidência/etapa:** Lucas apresentou as três capturas reais de tipologia com somas municipais exatas e informou não ter ainda a regra sete→quatro segmentos. Layouts preparados; preenchimento depende de classificação/fonte/vigência do analista, inclusive se MCMV exigir dados granulares. Não há entrega homologada por segmento.
+- **Validação:** 61 testes SP, tipagem/lint/build e 14 cenários Edge aprovados com replay, zero chamadas reais e zero erros de página. Capturas das três artes pendentes revisadas; fontes do provedor preservadas, sem inferir MCMV. Primitives Table/Details e canvas existente reutilizados; estado pendente, limpeza por escopo e ausência de dados cobertos.
+- **Limites:** base `1239b51`; sem nova coleta/API, exportação, push ou Monday. Secovi/FIERGS/Corretor preservados; férias19/10 e retomada em PLAN/STATUS mantidas.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-15 — Relatórios institucionais: três slides por tipologia SP — Codex, autorizado por Lucas
+- **Desenvolvimento:** ação Conferir tipologias, consulta curta por Tipologia e slides 23/37/47 com artes originais na prévia (posições 6/7/8). Só libera valores após fechamento, meses, balanços e somas coincidirem com os totais municipais; auditáveis em detalhes. Alteração de escopo/identidade/trimestre cancela; falha remove distribuição antiga. Padrões/MCMV não reclassificados.
+- **Validação:** 57 testes SP e doze cenários Edge com rede externa bloqueada, oito requests mockados e zero chamadas reais. Dados por dormitório de QA são sintéticos, distintos do replay municipal real recebido; runtime autenticado novo ainda pendente. Reuso Button/Alert/Dialog, canvas 16:9 e GeoApiScopeEngine existentes; estados sem dados, erro, retry, divergência e sucesso parcial previstos.
+- **Etapas/Pendências:** Lucas validar a ação autenticada; classificação de padrões, histórico, cobertura granular, setembro e exportação pendentes. Base `910aed3`, sem push/Monday/coleta longa ou alterações autorais em Secovi/FIERGS/Corretor. Férias19/10, retomada em PLAN/STATUS, sem execução programada.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-15 — Relatórios institucionais: mapa de conteúdo dos 85 slides SP — Codex, autorizado por Lucas
+- **Desenvolvimento:** [mapa completo](../features/relatorios-institucionais/sp/MAPA_SLIDES.md) com conteúdo, fontes candidatas, disponibilidade e sequência de montagem. OOXML/caches conferidos, todos os slides renderizados em leitura e inspecionados em pranchas; nenhuma mudança de produto nesta rodada.
+- **Etapas/Pendências:** próximo bloco 23/37/47 por tipologia; conversão sete padrões→quatro segmentos, MCMV/INCC/IVV, séries históricas e cobertura granular continuam por validar. Consulta pessoal comprovada pelas capturas de Lucas, sem credencial acessada pelo agente. Cinco páginas atuais não equivalem a cinco slides completos/homologados.
+- **Limites:** sem nova coleta/API, geração real, push ou Monday. Base `17f9d0b`, Corretor/Quanti e Secovi/FIERGS preservados; férias19/10 sem trabalho presumido, retomada em PLAN/STATUS.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-15 — Relatórios institucionais: prévia com artes do PowerPoint original — Codex, autorizado por Lucas
+- **Desenvolvimento:** substituído layout genérico por capa e quatro páginas com artes dos slides 1/13/18/32/46 do modelo SP. Escala 16:9, Tahoma, cores e posições da referência; Dialog existente amplia o canvas, navegação não consulta API. Séries julho/agosto mensais, sem variações antigas ou setembro presumido.
+- **Evidência:** fonte renderizada em leitura no PowerPoint, original preservado; capturas das cinco páginas e ampliação revisadas no Edge. Onze cenários locais e 43 testes SP aprovados, zero chamadas de mercado e zero erros de página. Tipagem/lint/build aprovados; avisos de bundle preexistentes mantidos.
+- **Etapas/Pendências:** revisão de Lucas; cobertura granular, comparativos históricos, demais slides e exportação/PPTX editável pendentes. Artes estáticas não são exportação. Férias19/10 mantidas. Merge remoto `dbb7330` autorizado preserva `75ef905`; sem push/Monday/coleta longa ou alterações autorais em Secovi/FIERGS/Corretor.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-15 — Relatórios institucionais: páginas da prévia SP — Codex, autorizado por Lucas
+- **Desenvolvimento:** capa, indicadores e evolução mensal navegáveis na rota SP; reutiliza Button e tokens do Design System. Consome resultado já conferido, sem nova coleta ou exportação. Lucas apresentou capturas da consulta pessoal com balanços julho/agosto zerados.
+- **Validação:** 43 testes SP, tipagem e lint aprovados; estados parcial e bloqueado cobertos. Base `4ddff67`, sem alterações autorais em Secovi/FIERGS/Corretor.
+- **Etapas/Pendências:** revisar as páginas com Lucas; cobertura granular, contagem de empreendimentos, narrativa e fechamento setembro pendentes. Sem push, publicação ou Monday; férias19/10 preservadas.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-15 — Relatórios institucionais: conferência parcial julho/agosto — Codex, autorizado por Lucas
+- **Ambiente/funcionalidade:** SP institucional, mesma rota lazy; novo botão consulta uma amostra da raiz e séries municipais com paginação curta, retry, cancelamento/progresso. Exibe parcial até o mês permitido, separada da fixture. Empreendimentos e exportação não liberados sem cobertura granular; sem varredura longa.
+- **Evidência:** replay de respostas reais fornecidas por Lucas fecha julho/agosto: 24.351 lançadas, 26.824 vendas, estoque 124.706. 369 testes/44 arquivos, tipagem SP/lint/build e dez verificações locais Edge aprovados. Zero novas chamadas ao provedor pelo agente; sessão pessoal/retorno atual ainda não observados. [Plano e limites](../features/relatorios-institucionais/sp/PLAN.md).
+- **Etapas/Pendências:** validar o botão com login pessoal, depois delimitar coleta granular e fechar contrato de cidade/relatório. Três erros globais do Corretor preservados, sem alterações autorais nessa frente ou Secovi/FIERGS. Base `387ce41`, sem push conforme Lucas; férias19/10 e previsão humana22–25/10 preservadas, sem agendamento ou Monday.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-15 — Relatórios institucionais: primeira estrutura SP com fechamento protegido — Codex, autorizado por Lucas
+- **Ambiente/funcionalidade:** Rebrain, `/rebrain/relatorios-institucionais/sp`, identidade `sp-institucional`; rota lazy, menu/busca e prévia explícita com dados fictícios. Quatro contagens, corte do histórico pelo `period` da raiz, bloqueio de trimestre aberto/ausência/divergência, seleção GeoApiScopeEngine existente. Sem mudança de políticas Secovi/FIERGS ou coleta/exportação real.
+- **Validação:** 351 testes/43 arquivos, tipagem isolada SP versionada, lint/build e oito verificações Edge local desktop/mobile/claro/escuro aprovados; catálogo/login simulados, zero chamadas de mercado. Typecheck global tem três erros em arquivos paralelos do Corretor não editados. [Plano, evidências e limites](../features/relatorios-institucionais/sp/PLAN.md).
+- **Etapas/Pendências:** primeira fatia local concluída, transporte/método real SP e relatório integral abertos. Setembro previsto pelo operacional para 22–25/10, estimativa humana; `period` da raiz continua autoridade. Férias Lucas desde19/10, retomada no STATUS sem retorno presumido. Merge `e29460d` autorizado preservou commits de Gabriel/Lovable; sem push conforme decisão de Lucas. Corretor V3/Quanti 2026 seguem Gabriel; sem escrita Monday.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-15 — Relatórios institucionais: mapa inicial SP/3T2026 — Codex, a pedido de Lucas
+- **Continuação G1:** balanço interno do PPTX 2T26 fecha (120.458 + 40.179 − 42.275 = 118.362); seis de 16 intervalos históricos têm diferenças sem causa comprovada. API/catálogo bloqueados por indisponibilidade do navegador e ausência de credencial local, sem tentativa autenticada de dados. [Evidência e alternativa](../features/relatorios-institucionais/sp/EVIDENCIAS.md). Lucas manteve sem push; G2 não iniciado.
+- **Ambiente/funcionalidade:** Rebrain / relatórios institucionais; G1 documental aprovado, sem implementação. Destino 3T2026, gabarito histórico 2T2026: [plano/matriz/evidências](../features/relatorios-institucionais/sp/PLAN.md). Quatro indicadores vinculados a slides/caches reais e fontes candidatas da API. Cobertura/método SP e reconciliação numérica continuam pendentes; 26 testes offline focados aprovados, sem geração real ou aceite.
+- **Commits/contexto:** merge `bffb3c6` autorizado por Lucas preserva `d360b35` e `416488d` de Gabriel; identidade aditiva do LIVE conferida. Drive acessível pelo conector Suporte Geobrain; token pessoal no site apenas informado por Lucas, não observado pelo agente. Código de produto preservado, sem push ou escrita Monday.
+- **Etapas/Pendências:** mapa entregue, G1 parcial; próxima decisão é leitura delimitada de catálogo/dados e contrato SP próprio antes de G2. Férias 19/10 sem retorno presumido, retomada no STATUS. Corretor V3/Quanti 2026 com Gabriel.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-15 — Relatórios institucionais: ativação offline do handoff Lucas — Codex, a pedido de Lucas
+- **Ambiente/funcionalidade:** Rebrain / relatórios automatizados — recepção documental, sem mudança de runtime.
+- **O quê/evidência:** main limpa atualizada por fast-forward de `b49b804` a `1afa119` (47 commits), único remote origin, fetch e comparação posterior 0/0. Máquina `LUCAS`, Node 24.19.0/npm 11.17.0, preflight offline e quatro testes do diagnóstico aprovados. Registro detalhado de ambiente, limites e retomada no [STATUS do handoff](../handoffs/lucas-relatorios-2026-10-14/STATUS.md). Commit documental identificável pelo histórico desse arquivo; sem push nesta ativação.
+- **Etapas/Pendências:** G0 parcial, acessos pessoais Drive/GeoBrain/Rebrain/Lovable/GitHub da máquina ainda não testados; Mapbox somente chave declarada. Proposto G1 SP capital/2T2026/núcleo vertical, aguardando confirmação de Lucas antes de aprofundar; G2, geração real e aceite não iniciados. Regressões de produto não repetidas nesta rodada documental.
+- **Pausa:** férias a partir de 19/10, retorno não informado; estado/comandos/pendências registrados sem trabalho presumido na ausência. Gabriel coordena decisões posteriores e mantém Corretor V3/Quanti 2026. Preservados Secovi/FIERGS e domínios paralelos; sem API de dados, estudo real, publicação ou escrita Monday.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+### 2026-10-16 — Corretor: recomendação, custo e materiais confirmados — Gabriel / Codex
+- **Mudança:** Novo estudo une materiais para revisão/recomendação; entrada válida preenchida em oliva/check. Recomendação por versão com histórico, cobertura, previsão/limite, uso real e reabertura gratuita. Prompt Brain preservado; controlador reserva e registra lotes/resultados/tokens/cache/modelo/latência em ia_passes e custo do estudo, sem alterar decisões/relatório de revisão. Painel Uso e custo de IA integrado à calibração.
+- **Evidência/estado:** [resultado R0–R5](../features/corretor-vocacionais/design/RESULTADO_RECOMENDADOR_E_METRICAS_2026-10-16.md),320 testes/2 condicionais pulados, dez passes materiais,13 novos controles SQL/Edge e22 legados com migration nova, jornadas9+15+8 e app/Deno/lint/build. **Validado localmente**, sem IA real ou escrita no site; FIERGS/ZIP preservados.
+- **Etapas/Pendências:** revisar antes do push; aplicar migration20261016153609, publicar corretor-execution/analyze-consulting-suggestion e frontend no Lovable. Modelo existente GPT-4o mini marcado Deprecated na documentação; disponibilidade real e qualidade humana pendentes. Lote pago exige orçamento/confirmação, sem chamada paga nesta entrega. Pendências gerais A2/A3 conservadas.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-16 — Corretor: Meus estudos desde a preparação autenticada — Gabriel / Codex
+- **Mudança:** por orientação de Gabriel, validar apresentação com conta registra estudo pendente antes de cidade/planilhas/cadastro/início de IA. Conta vê também preparação abandonada, análise interrompida e cadastro parcial. Início explícito reaproveita ID e reconfere conta/hash/versão/estado. Visitante continua local, sem reatribuir autoria ou decisões.
+- **Evidência/estado:** [complemento v0.73.2](../features/corretor-vocacionais/design/RESULTADO_RASCUNHO_CARTEIRA_2026-10-16.md),295 testes/2 pulados, oito verificações de carteira com apresentação real e banco/identidade simulados, quinze controles de fluxo anterior repetidos, tipos/lint/build. **Validado localmente**, sem IA real ou escrita no site. Dez passes anteriores preservados, motores/gabaritos intactos.
+- **Etapas/Pendências:** publicar somente frontend após revisão, incluindo commit local anterior15e5efc; conferir envio abandonado na conta real. Sem migration/Edge nova. Original local por hash não é armazenamento remoto automático; render/compartilhamento/permissões legadas continuam abertos.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-16 — Corretor: Novo estudo, carteira pessoal e campos de envio — Gabriel / Codex
+- **Mudança:** rascunho consumido após registro/duplicata confirmada; preparação antiga analisada oferece resultado. Planilhas locais por hash recuperáveis em Materiais. Meus estudos considera autoria e dono do cadastro sem reatribuição; salvar/retornar atualizam carteira. Filtros recuperáveis e ícones PPTX/Excel/PDF, tokens intactos.
+- **Evidência/estado:** [resultado v0.73.1](../features/corretor-vocacionais/design/RESULTADO_RASCUNHO_CARTEIRA_2026-10-16.md),289 testes/2 pulados, dez passes gratuitos, jornadas locais com materiais reais/conta simulada, tipos/lint/build. Base sincronizada b6cf823 com autorização, FIERGS/ZIP preservados. **Validado localmente**, sem IA paga, escrita remota ou push desta entrega.
+- **Etapas/Pendências:** publicar somente frontend após revisão e conferir conta real, carteira e Novo estudo. Nenhuma nova migration/Edge. Render hospedado, compartilhamento completo/permissões legadas abertos. Deploy anterior e análise funcionando informados por Lovable/Gabriel, sem teste independente em produção.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-15 — Corretor: preparação contínua, execução controlada e revisão legível — Gabriel / Codex
+- **Sincronização/envio autorizados em15/10:** merge `9f68037` integra `75ef905` de Edgar, preservando implementação `178a96b`/plano `6cea6e9` e entradas dos dois lados.289 testes/2 pulados, tipos e build20,50s na base integrada. Alterações FIERGS/ZIP restauradas e excluídas da entrega. Push autorizado; ativação Lovable/migration/Edge e reteste de produção continuam pendentes.
+- **Mudança:** upload prepara materiais antes de toda IA; orçamento explícito inclui ata, rascunho recuperável e criação por hash. Registro privado de execução/reservas/respostas por lote, sem repetição automática de retorno desconhecido. Visualizador único e texto abaixo, triagem ampla/assíncrona, português e catálogo na carteira.
+- **Evidência/estado:** [resultado F1–F6](../features/corretor-vocacionais/design/RESULTADO_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md),288 testes/2 pulados, dez passes reais,13 controles SQL e9 Edge/banco local, jornada Chromium com PPTX/11Excel/PDF reais e serviços simulados, build/tipos/lint. Conversão PowerPoint local153páginas/ocultos/manifesto, original intacto. **Validado localmente**, sem IA paga/escrita remota/push. Três falhas na suíte geral Sinduscon; arquivo isolado5/5, sem alterar aquela frente.
+- **Etapas/Pendências:** A2/A3 continuam parciais; ativar migration/`corretor-execution`/três funções pagas/frontend coordenadamente após revisão. F3 servidor e recuperação em outro navegador permanecem abertas; não confundir prova local de conversão com serviço hospedado. Próximo publicar com autorização e conferir runtime, materiais e retomada no site.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-15 — Corretor: plano de fluxo contínuo após teste humano — Gabriel / Codex
+- **Diagnóstico:** upload ainda abre revisão/leitura de ata antes da escolha de Excel; prévia duplicada; descrições do modelo sem apresentação em português; triagem limitada por max-width. Prévia integral depende de render/material da mesma versão. Capturas de Gabriel constituem rejeição de usabilidade da fatia publicada, não mudança de gabarito.
+- **Entrega:** [plano técnico F0–F6](../features/corretor-vocacionais/design/PLAN_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md) e [protótipo navegável](../features/corretor-vocacionais/design/PROTOTIPO_FLUXO_CONTINUO_2026-10-15.html). Preparação contínua/decisão Excel, custo antes de toda IA inclusive ata, retomada, slide único grande/texto abaixo, português, triagem ampla e catálogo na carteira.
+- **Evidência:** leitura do código48949a7/fetch0/0; PPTX real153páginas/ordem conferida, slide23 com concordância e66/68 com literal OBSERTÓRIO. Simulação sem backend em1440/1024/390; área/barra1392px de1440, imagem única. Não é implementação ou homologação do app; zero IA paga/escrita remota.
+- **Etapas/Pendências:** plano preparado para autorização de execução, código de produto inalterado. F1/F2 primeiro, prova de render F3 necessária, F4/F5 reaproveitam evidências; F6 aceita percurso real. Sem push. Restrições/critério de aceite detalhados no plano; não prometer render automático nem consumo sem orçamento.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+### 2026-10-15 — Validação do Fechamento: filtros de divergências e tipo de empreendimento — Edgar / Codex
+- **Mudança:** divergências respeitam os filtros de Tipo, Padrão, Empreendimento, Ano, Trimestre, Período e cidade ativa. A seleção ocorre após a validação, preservando as médias dos grupos. A contagem exclui aprovadas e acompanha o recorte. Incluída a coluna Tipo Empreendimento antes de Status, oculta por padrão na grade e presente no Excel.
+- **Evidência:** dois testes direcionados de filtros e typecheck aprovados; validação local da tela confirmada pelo usuário.
+- **Etapas/Pendências:** implementação concluída; publicação da revisão pelo fluxo Git. Persistência das aprovações segue dependente do serviço Supabase existente.
+- **Monday:** —
+
+### 2026-10-15 — Corretor: aviso pós-pré-análise antes do push — Gabriel / Codex
+- **Mudança:** aviso persistente em resumo/revisão explica que o estudo ainda não foi avaliado por completo, orienta confirmar cidade/UF e escolha das planilhas antes de Rodar análise; reabertura orienta retomar. Componente compartilhado, sem modal/fechamento, sem alterar motores ou aprovação de custo.
+- **Evidência:** PreAnalysisNotice.tsx, tipos aprovados e complemento em [revisão visível](../features/corretor-vocacionais/design/REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md). Sem testes adicionais, IA ou alterações remotas.
+- **Etapas/Pendências:** preparado localmente para envio junto da revisão visual; sem push, produção não verificada. Retomada durável continua aberta.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-15 — Corretor: revisão visível e inventário de estudos incompletos — Gabriel / Codex
+- **Desenvolvimento:** mapa sempre aberto/células preenchidas, prévia somente com conteúdo, evidências sem expander e cartões no padrão SE. Retomar análise completa explícito; removido aviso enganoso de nenhum custo na pré-análise. Motores e decisões inalterados.
+- **Evidência:** [relatório](../features/corretor-vocacionais/design/REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md), leitura pública52 estudos/17V3/4 incompletos, todos quatro apenas passe ata/DET;13V3 com relatório. Browser interceptado1440/390/320, hash igual, sem IA/escrita; tipos/lint/build aprovados. Seis commits Lovable sincronizados com autorização, documentos paralelos restaurados.
+- **Etapas/Pendências:** validado localmente; produção a conferir. Retomada ainda depende do PPTX e contexto React não equivale a checkpoint persistido. Quatro incompletos não foram processados; orçamento/lote e originais necessários para nova IA. A2/A3 parcial, próxima fatia persistência de execução/erro/retomada idempotente.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-15 — Corretor: retirada da landing legada — Gabriel / Codex
+- **Mudança:** uma única carteira; Novo estudo usa a composição SE com apresentação e Excel opcional. Retirada a segunda lista e os menus V1/V2/V3. A revisão abre sempre a bancada, inclusive com `layout=list` antigo; decisões e motores preservados. Planilhas escolhidas antes do PPTX seguem à pré-análise e são vinculadas ao estudo.
+- **Evidência:** tipagem aprovada, ESLint zero erros/um aviso anterior, build concluído; Chromium com backend interceptado verifica cinco entradas, retorno com filtro, bancada em link antigo, telas 1440/390/320 e zero escrita/IA. [Registro técnico](../features/corretor-vocacionais/design/RETIRADA_LANDING_LEGADA_2026-10-15.md).
+- **Etapas/Pendências:** composição validada localmente; push autorizado por Gabriel, deploy/aceite de produção ainda não comprovados. A2/A3 continuam parciais conforme checkpoint anterior; nenhum schema/motor alterado nesta fatia.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-15 — Corretor: bancada real e primeira persistência A2/A3 — Gabriel / Codex
+- **Fechamento:** build final21,45s/Deno check aprovados, resultados/limitações apresentados antes do envio; commit isolado e push autorizados nesta sessão. Ativação da migration/função e aceite real não executados pelo agente.
+- **Publicação:**416488d A0/A1 enviado com autorização, fetch0/0. Continuação local acrescenta login Geobrain contextual, materiais independentes do cadastro, conjuntos de fontes/snapshot manual e bancada PDF real com observações ao lado.
+- **Evidência:** [resultado/limites/ativação](../features/corretor-vocacionais/design/RESULTADO_CONTINUIDADE_A2_A3_BANCADA_2026-10-15.md),283 testes/2 pulados,17 controles SQL isolados,11 Excel brutos reais/15 blocos e snapshot com servidor simulado, PDF real153páginas/mapeamento23/68/153 e dez passes offline preservados. Export padrão omitia sete slides ocultos; corrigido sem salvar PPTX e produto bloqueia quantidade divergente. Build/tipagem/lint locais; zero IA paga/alteração de achados reais.
+- **Etapas/Pendências:** A2/A3/A4 primeira fatia local, não conclusão integral. Nova migration15150739 e função `corretor-material-preview` preparadas, não aplicadas/publicadas. Autorização REST legada, guest upload controlado, snapshots automáticos, compartilhamento operacional e render servidor faltam. Próximo ativar/retestar conta/material real após revisão; A5/A6 abertos. FIERGS preservado; sem horas presumidas.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-15 — Corretor: A0/A1 carteira, resumo e retorno — Gabriel / Codex
+- **Desenvolvimento:** assimilação inicial Claude à fundação SE com carteira compacta, resumo de confiança/categorias/cobertura e áreas persistentes. Corrigido retorno que reabria estudo pela URL; filtros/página mantidos entre carteira/revisão, links antigos adaptados. Cadastro ausente neutro, complementos opcionais e tipo não presumido. Motores/decisões preservados; revisão antiga em transição.
+- **Evidência:** [resultado e limites](../features/corretor-vocacionais/design/RESULTADO_A0_A1_INTERFACE_V3_2026-10-15.md), [manifesto](../features/corretor-vocacionais/design/EVIDENCIAS_A0_A1_2026-10-15.json),279 testes/2 pulados, dez passes de cinco estudos/Excel bruto, browser/navegação simulados sem escrita/IA e regressão de materiais sintéticos. Tipos/lint/build locais. Frontend público anterior conferido, A1 ainda sem deploy.
+- **Etapas/Pendências:** A0 sincronizado1afa119 preservando FIERGS; A1 validado localmente, apresentar antes de push. A2/A3 identidade/persistência, A4 bancada/render e A5/A6 decisões/entrega abertos. Paginação cliente e limites de perfil privado explicitados. Sem IA paga, horas inferidas ou escrita Monday; Corretor segue Gabriel.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`.
+
+### 2026-10-15 — Corretor: plano de assimilação da interface e fluxos — Gabriel / Codex
+- **Decisão/entrega:** [plano A0–A6](../features/corretor-vocacionais/design/PLAN_ASSIMILACAO_INTERFACE_V3_2026-10-15.md) combina composição Claude, fundação SE, navegação canônica, cadastro neutro, biblioteca pública/autoria opcional, materiais imutáveis por execução, bancada e conclusão com reconferência. Biblioteca pública difere das políticas privadas atuais; mudança explicitamente planejada, não aplicada.
+- **Etapas/Pendências:** primeiro lote A0+A1 proposto; seguintes dependem de identidade/schema/renderização/validação. Plano preparado localmente, sem código/testes/IA paga/push. Fonte ZIP identificada por SHA256, insumos locais preservados; FIERGS intacto. Baseline local1f61fa5, origin1afa119 após fetch, três commits remotos ainda não incorporados nesta sessão de planejamento.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita. Reservas semanais não ampliadas por inferência; Corretor segue Gabriel.
+
+### 2026-10-15 — Corretor: acesso com qualquer login GeoBrain válido — Gabriel / Codex
+- **Validação:**17 testes focados de autenticação/cliente/material aprovados; teste de acesso sem lista, sem credenciais, login inválido e troca de identidade. Sem conta real usada; ativação/isolamento reais pendentes.
+- **Desenvolvimento:** removida lista adicional de emails da função `corretor-access`, conforme decisão de Gabriel. Credenciais continuam verificadas no GeoBrain antes de emitir sessão; arquivos seguem restritos a proprietário/membros. Sem migration nova, alteração de API/motor/decisão humana ou IA paga.
+- **Etapas/Pendências:** sincronizados cinco commits Lovable até `8ae0338` por fast-forward com alterações FIERGS preservadas. Publicação da função corrigida e teste com identidades reais pendentes; Git/registro anterior de deploy não comprovam novo comportamento. Secret `CORRETOR_ALLOWED_EMAILS` não é mais necessário nem consultado. Ver [regra v0.70.2](../features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md).
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-15 — Corretor: push da carteira e continuidade de acesso — Gabriel / Codex
+- **Fechamento para push autorizado:** sincronizados três commits Lovable por fast-forward com autorização; FIERGS restaurado sem conflito. Gabriel informou migration complementar aplicada, sem verificação de políticas reais. Build/tipagem,276 testes/2 pulados e Chromium local final aprovados, sem IA paga; bloqueio de validação anterior superado. Função `corretor-access` pronta para envio; ativação no Lovable/recuperação real ainda pendentes. Entrada histórica abaixo preserva o diagnóstico anterior.
+- **Desenvolvimento:** `08d70dd`/`eb0faa1` enviados com autorização, fetch0/0. Migration inicial informada aplicada; três tabelas existentes recusam papel público. Continuação local integra login GeoBrain, permissão privada assinada/expirável e navegação com estado na URL/paginação cliente20. Motores e decisões preservados.
+- **Evidência:** [resultado e ativação](../features/corretor-vocacionais/design/CONTINUIDADE_ACESSO_E_MATERIAIS_2026-10-15.md), suíte270/2 pulados, oito testes focados posteriores,12 controles SQL e browser simulados. Último ajuste passou tipos/lint; repetição final build/browser bloqueada pelo serviço de aprovação sem créditos, não executada.
+- **Etapas/Pendências:** continuação sem commit/push; D2/D3 parcial local. Conector sem permissão administrativa; ativar função/lista de emails e migration complementar no Lovable, publicar frontend e verificar original real/duas identidades. D0 tarifa/ocupação e D4–D6 abertos. Zero IA paga; alterações FIERGS preservadas, sem horas presumidas.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`, sem escrita.
+
+### 2026-10-14 — Corretor: D0/D1 e primeira carteira v0.70 — Gabriel / Codex
+- **Desenvolvimento:** carteira/cadastro progressivo, materiais por versão/histórico, links legados preservados e contrato de recuperação remota por hash. Migração aditiva privada, membro leitor/proprietário, upload TUS e confirmação no servidor; cofre local espera commit. Motores/decisões humanos preservados.
+- **Diagnóstico/custo real:** consulta somente leitura encontrou50 estudos/58 versões/15V3; backend do app não acessível por administração no conector. Token lateral é GeoBrain, sessão Supabase não comprovada; integração e aplicação da migration pendentes. Print de Gabriel:25,32 créditos de consumo do projeto inteiro,23,87 cobertos/≈1,45 restantes, período/GB/plano não mostrados. Não equivalente a fatura específica do Corretor.
+- **Evidência:** [execução e limitações](../features/corretor-vocacionais/design/EXECUCAO_D0_D1_CARTEIRA_2026-10-14.md),262 testes/dez passes, dez verificações Postgres local/auth-storage simulados, browser com três estudos congelados e recuperação de PPTX sintético em novo contexto. Sem IA paga, escrita real de achados ou publicação.
+- **Etapas/Pendências:** primeira fatia validada localmente, backend preparado; D0 integração/tarifa/ocupação e produção abertos. Próximo: revisar antes de push, integrar identidade e aplicar migration no Lovable, recuperar um original real com duas identidades verificadas. Banco completo de planilhas, snapshots de runs e entrega são próximas fatias. FIERGS preservado; reservas semanais/tempo não medido intactos.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — sem escrita.
+
+### 2026-10-14 — Corretor: proposta de lançamento, carteira e histórico — Gabriel / Codex
+- **Diagnóstico/proposta:** [plano de lançamento e arquitetura](../features/corretor-vocacionais/design/PROPOSTA_LANCAMENTO_2026-10-14.md) e [protótipo navegável](../features/corretor-vocacionais/design/prototipo-lancamento.html). Projeto reúne contexto/revisão/materiais/histórico/entrega; V1/V2 em Arquivo. Modelo distingue arquivo, execução e decisão; originais hoje limitados ao cofre local de oito arquivos. Referências SE/POC/Linkages e Linear/Figma/Carbon consultadas.
+- **Capacidade:** cinco PPTX média120,1MB, planilhas8,1MB; hipótese450MB/projeto com três versões →240,3GB no ano1 a dez novos/semana e14 registros iniciais modelados. Referência Supabase US$2,99/mês excedente se100GB disponíveis, não fatura Lovable. Tarifas reais/identidade/acesso do backend a confirmar; sem custo novo/alteração de banco.
+- **Etapas/Pendências:** proposta preparada, protótipo local verificado em1440/1024/390/320, busca/abas/modal/Escape/custo; sem execução D0–D6, deploy ou adoção de interface no runtime. Hipóteses de equipe interna compartilhada e retenção36meses aguardam confirmação. Próximo: aprovar direção e executar D0/D1, depois carteira/cadastro/armazenamento. Reservas semanais não ampliadas por inferência, Corretor com Gabriel; FIERGS preservado.
+- **Monday:** [Corretor V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — sem escrita.
+
+### 2026-10-14 — Corretor V3: revisão ampliada e proteção de agrupamento v0.69.1 — Gabriel / Codex
+- **Mudança:** evidência contida agora exige compatibilidade da acusação para agrupar. Três contraexemplos reproduzidos/corrigidos; dois pares reais mantidos, decisões/IDs humanos preservados. Sem IA nova, escrita em banco, migração ou prompt.
+- **Revisão/evidência:** [plano](../features/corretor-vocacionais/PLAN_REVISAO_AMPLIADA_2026-10-14.md) e [relatório final](../features/corretor-vocacionais/RELATORIO_REVISAO_AMPLIADA_2026-10-14.md): 134 registros inventariados, 43 classificados no recorte; 91 sem adjudicação (72 encerrados históricos/19 pendentes). 47 PPTX pesquisados, três erros de unidade confirmados e três transcrições numéricas rastreáveis. 258 testes/dez passes/tipos/lint/build locais aprovados.
+- **Etapas/Pendências:** revisão offline concluída e proteção validada localmente, sem push desta rodada. v0.69 `6073ba3` já enviada com autorização, sem novo comprovante de deploy. Próximo: publicar/retestar CJ; Daniele original, escopo das somas/versão da fonte v2 e aceite integral abertos. FIERGS preservado; Corretor com Gabriel. Custo novo zero, nenhuma hora retroativa.
+- **Monday:** [V2 Corretor de projetos / objetivo atual V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`.
+
+### 2026-10-14 — Corretor V3: fechamento delimitado v0.69 — Gabriel / Codex
+- **Desenvolvimento:** confirmação de custo na reconferência, revalidação de texto antigo, duplicatas explícitas por slide, acusações editoriais Verificar e associação suspeita de percentual/limite literal; apresentação sem apagar registros. Reconciliação/diff preservam decisões humanas. Sem prompt/migração/IA nova.
+- **Evidência:** [plano](../features/corretor-vocacionais/PLAN_FECHAMENTO_V3_2026-10-14.md) e [resultado](../features/corretor-vocacionais/RESULTADO_FECHAMENTO_V3_2026-10-14.md): 248 testes, dez replays, 31 textos/sete caches, Chromium local com backend de fixtures e cancelamento sem IA, tipos/lint/build. Pasta Drive 80 arquivos; GO132 slides/XLSX testados gratuitamente, fonte regional não reconhecida.
+- **Etapas/Pendências:** validado localmente, resultado antes do push. Publicação/reteste real e aceite integral abertos; Daniele original/OCR amplo não encerrados. Corretor continua com Gabriel; documentos FIERGS preservados. Próximo: revisar/publicar e observar comportamento num caso conhecido.
+- **Monday:** [V2 Corretor de projetos / objetivo atual V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`.
+
+### 2026-10-14 — Relatórios automatizados: handoff delimitado ao Lucas — Gabriel / Codex
+- **Publicação autorizada confirmada:** commits be413e4/0bac636 enviados para origin/main em 14/10, fetch posterior 0/0 e check:live-docs aprovado. Pacote disponível para pull/ativação; recebimento/ambiente do Lucas e piloto ainda não executados. Documentos FIERGS preexistentes mantidos locais, fora do push. Este complemento registra publicação, não execução do Lucas ou homologação.
+- **Recepção complementada:** CTA inicia saudação/resumo humano, explica fluxo do motor e papel de Lucas como orquestrador; ativação somente leitura/preflight, pedindo escolha da fatia antes da implementação. Área documental permanente em `docs/features/relatorios-institucionais/`, sem mover/duplicar históricos Secovi/FIERGS; raiz do repo é workspace do Codex. WhatsApp preparado, não enviado. Pacote local/publicação pendente, documentos anteriores preservados.
+- **Decisão de Gabriel:** transferir somente relatórios automatizados; Corretor V3 e Quanti 2026 permanecem com Gabriel. Lucas inicia férias 19/10; janela 14–16 propõe acessos/matriz/piloto pequeno, sem prometer quatro entregas nem trabalho na ausência. Não alterados Corretor/Sinduscon/CID/ADM.
+- **Pacote:** [índice de recebimento](../handoffs/lucas-relatorios-2026-10-14/README.md), oito documentos ordenados, catálogo de nove PPTX, matriz CSV inicial, CTA e diagnóstico seguro `scripts/handoffs/relatorios-preflight.mjs`. Conhecimento Secovi/FIERGS por ponteiros, matérias brutas no Drive/.local-inputs, sem cópia de credenciais ou binários. Documentos históricos preservados; checkout/evidência/aceite prevalecem sobre premissas antigas.
+- **Acesso observado:** API GitHub confirmou Kriptonyano/write no relatorios-api em 14/10; sem concessão/teste de push. Ambiente pessoal Lucas/Drive/API/Rebrain/Lovable não testados. ADM V2 confirmado por comentários/status no Monday, repo não identificado nos acessos disponíveis; não clonado. Handoff Quanti de setembro usado como padrão de comprovação, não fonte de credenciais/autorizações.
+- **Validação/estado:** quatro testes Node, catálogo/links locais e lint dos scripts aprovados; preflight offline na máquina de Gabriel, zero chamada de API de dados/geração real. Pacote preparado localmente, sem nova implementação ou aceite. Recebimento/publicação e G0/G1 do Lucas pendentes; docs FIERGS locais anteriores preservados fora deste commit. Próximo: autorizar publicação do pacote e Lucas executar checklist/matriz antes de G2.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem reassignment, comentário, mensagem ou status alterado por agente.
+
+### 2026-10-13 — Corretor V3: reteste real e proteção de reconferência — Gabriel / Codex
+- **Revisão solicitada após lote:** push autorizado 1573258/b159c3c confirmado, 0/0. [Texto nativo/nove PNG revisados](../features/corretor-vocacionais/REVISAO_POS_REANALISE_2026-10-13.md): quatro FP confirmados, dois pares de duplicatas, legados sem evidência atual e controles verdadeiros. Renda VAP/v2 não fecha no print, mas cache erra a magnitude; preservar alerta condicionado ao escopo. Sem IA nova/vereditos/código. Próximo: implementar gate de custo e revalidação/deduplicação textual com corpus positivo/negativo; somas inseguras ainda parciais.
+- **Lote pago autorizado US$ 2:** CJ/SJC VAP/v2 concluídos, relatórios novos e achados confirmados por GET; total conservador US$ 1,462849 (tokens US$ 1,397146 + reservas US$ 0,065703). [Resultados/limites](../features/corretor-vocacionais/REANALISE_ORCAMENTO_2USD_2026-10-13.md). 53/49/32 registros, sem exclusões, 22/22/18 pendentes; encerramentos automáticos não equivalem a correção do PPTX. Nenhuma regra nova. Próximo: gate de custo no app, revisão de novos FP/duplicatas com prints e preservação de erros literais; caso completo semanal ainda sem aceite humano.
+- **Ampliação autorizada CJ/SJC:** três PPTX e 11/12/12 planilhas pareados por hash ao banco; cruzamentos gratuitos concluídos no site, 57/93/74 leituras reaproveitadas, 38/33/22 registros preservados e nenhuma decisão humana alterada. [Antes/depois](../features/corretor-vocacionais/RETESTE_CJ_SJC_2026-10-13.md). CJ DET v2 encerra FP de rótulo Z.I.; SJC encerra dois cruzamentos de mesmo slide ao abrir. Reconferência CJ tentou fase paga por cache legado: 43 chamadas bloqueadas, custo zero. Próximo: confirmação explícita de custo antes de iniciar releitura, depois reteste; caso integral ainda aberto. Nenhum código alterado nesta ampliação.
+- **Verificação posterior em produção:** após publicação informada por Gabriel, v0.68.1 identificada em CorretorV3Page-D46qbc_d/db-RpgUw7Cm. Rolândia v4 reconferida: 15 registros idênticos antes/depois, quatro controles pendentes preservados, zero falso corrigido, 32 imagens reaproveitadas e custo novo zero. Proteção verificada neste caso; Daniele/OCR/caso integral e adjudicação continuam pendentes. [Evidência](../features/corretor-vocacionais/RETESTE_SITE_ROLANDIA_2026-10-13.md#verificação-após-publicação-no-lovable--1310-1544-brasília).
+- **Produção observada:** v0.68 identificada no bundle CorretorV3Page-C4xyNz2S. Rolândia: PPTX/13 Excel originais, 32 imagens reaproveitadas, custo novo zero. FP Sociodemografia removido; custo acumulado US$ 0,2506 preservado. [Evidência e limitações](../features/corretor-vocacionais/RETESTE_SITE_ROLANDIA_2026-10-13.md).
+- **Falha descoberta/restauração:** reconferência marcou quatro DET de fases não executadas como corrigidos; Gabriel autorizou restauração exata e cruzamento. Quatro registros confirmados pendentes, nenhum veredito editado. Versões 2/3 são retestes do mesmo arquivo, não correções do analista.
+- **Desenvolvimento local:** v0.68.1 exige escopo explícito das regras executadas antes de resolver DET; ata/raios da fonte/visão/lacunas de revisão preservados. 47 testes focados e dez passes aprovados, lint sem erros. Publicação da proteção e novo reteste ainda pendentes; caso integral/Daniele/Boulevard e revisão das funções não concluídos.
+- **Monday:** [V2 Corretor de projetos / objetivo atual V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`.
+
+### 2026-10-13 — Rebrain: símbolo original no menu recolhido — Gabriel / Codex
+- **Mudança:** BrainCircuit genérico substituído pelo elemento verde/amarelo integrado ao logo original `assets/logoBrain.png`, usando enquadramento SVG e clipPath, sem redesenho/recoloração/novo bitmap. Logo completo e botão acessível preservados no menu aberto; expansão de 32 px no menu de 56 px.
+- **Validação/publicação:** teste focado e lint aprovados; Chromium local claro/escuro com rede bloqueada verificou recorte/legibilidade e motivou exclusão de fragmentos das letras vizinhas. Capturas em `.local-inputs/sidebar-brand/`. Gabriel autorizou commit/push desta correção e do commit local anterior `597d554`; fetch confirmou 0/1 antes da mudança. Sem deploy/produção verificados, documentos FIERGS anteriores excluídos da publicação. Próximo: conferir menu no site após atualização.
+
+### 2026-10-13 — Rebrain: marca no menu recolhido — Gabriel / Codex
+- **Mudança:** logo completo mantido no menu aberto; recolhido usa BrainCircuit vetorial de 24 px no próprio botão de expandir (32 px), sem disputar 56 px com imagem e seta. Nome acessível, estado expandido e foco por teclado preservados; tokens SE v0.1 já copiados intactos. Rotas/Corretor/Sinduscon inalterados.
+- **Evidência/estado:** `src/components/layout/AppLayout.tsx` e teste de alternância/restauração `AppLayout.test.tsx`; um teste focado e lint aprovados localmente. Sem ensaio browser/produção; próximo: publicar com autorização e conferir claro/escuro no site. Alterações documentais FIERGS anteriores preservadas fora do commit desta correção.
+
+### 2026-10-13 — FIERGS: refinamento das capas personalizadas — Gabriel / Codex
+- **Reteste real após publicação:** PDF/CSV novos do conjunto Canoas/Esteio/São Leopoldo conferidos (69 páginas; geração 17:47 UTC); capas 2/7 simétricas, 3 cidades concluídas, 265 projetos e 42 guardas com delta zero, sem novo bloqueio. Sete avisos/29 exclusões preservados; ticket/área ausentes em 4+ dormitórios e proximidade pontual de rótulos MCMV não tratados como números incorretos. [Hashes e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_REFINAMENTO_CAPAS_CUSTOMIZADAS_FIERGS_2026-10-13.md#reteste-recebido-após-publicação--1310). Código publicado `b9cc1e8`, fetch 0/0; esta revisão apenas documental, sem testes/API/push. Conjunto verificado na saída real; G5 integral ainda depende dos outros CSVs/nova saída isolada, G6 sem e-mail.
+- **Problema/evidência:** três PDFs pós-publicação em `assets/pos_aceite_eval/` da feature (69/68/69 páginas), capas desequilibradas e placeholder de preço de 4 dormitórios em Canoas. CSV do conjunto recebido: 265 projetos, 42 guardas match. Faltam os CSVs de Canoas/preset; títulos suspeitos em miniaturas estão completos na ampliação.
+- **Mudança:** capas com nomes reais para conjuntos pequenos, identidade/UF/janela centralizados; lista territorial simétrica com continuações equilibradas e limite por tamanho dos nomes. Preset/mapa regional preservados. Série por dormitório compartilhada entre manifesto/renderer, omitindo página sem observação com aviso, mantendo zero. Política/fórmulas/números não alterados.
+- **Validação:** 327 testes/39 arquivos, tipos da feature e build aprovados; 81 verificações visuais Chromium em 480/960/1920 px sem corte/assimetria/sobreposição, usando componentes e CSS reais com rede bloqueada. Script reprodutível `scripts/diagnostics/fiergs-custom-cover-visual.mjs`; brutos/derivados locais ignorados.
+- **Plano/resultado:** [refinamento das capas](../features/Relatorios%20Secovi_FIERGS/PLAN_REFINAMENTO_CAPAS_CUSTOMIZADAS_FIERGS_2026-10-13.md). R0–R3 validados localmente; publicação, nova exportação real e CSVs faltantes pendentes. Não confundir screenshots locais com estudo publicado; G5/G6 continuam abertos.
+- **Monday:** [Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-13 — FIERGS: recortes livres — Gabriel / Codex
+- **Continuação — publicação autorizada:** Gabriel autorizou o envio da main com oito commits, incluindo quatro do Corretor; fetch confirmou 0/8, árvore limpa e docs compatíveis. Código FIERGS `e634eb8`; esta rodada registra a autorização e envia o histórico sem reescrita. G5 permanece em andamento para deploy/ensaio de Gabriel: preset, Canoas isolada e conjunto Canoas/Esteio/São Leopoldo com PDF/CSV 2T2026. Não comunicar nova capacidade como verificada antes de analisar essas saídas; G6 e e-mail pendentes.
+- **Ambiente/funcionalidade:** Panorama Secovi/FIERGS; ampliação após aceite do preset informado por Gabriel.
+- **Mudança G0/G1:** identidade por conjunto completo/UF, cidades livres do catálogo autorizado, atalho das dez cidades e invalidação de coleta ao mudar escopo. Quatro testes locais aprovados. Fundação SE v0.1 scoped nos controles; arte do estudo preservada.
+- **G2:** vendas municipais disponíveis para cidade única mesmo sem comparativo visual; contagens de universo vazio somente com cobertura completa do cubo. 43 testes locais aprovados; fixtures sintéticas 2T2026/4T2025 fecham todas as guardas, coleta incompleta/dimensão faltante continuam bloqueadas. Commit G1 `9a04d06`; geração real segue pendente.
+- **G3:** capa/mapa regional exclusivos do conjunto oficial; recortes personalizados com cidade/conjunto/UF, legendas/metodologia dinâmicas e omissões auditáveis. Listas e rankings paginados para cobrir N cidades. Testes DOM/manifesto aprovados; arte real G5 pendente. Commit G2 `21147bc`. Typecheck global revelou fixture do Corretor incompleta, preservada; checagem isolada da feature será registrada em G4.
+- **G4/fechamento local:** nomes PDF/PPT/CSV e títulos por território/janela; preset mantém nome aprovado; CSV inclui contexto de geração e avisos. 313 testes/38 arquivos, tipos isolados da feature e build aprovados. Typecheck app global ainda falha na fixture preexistente Corretor `structure-empty-sections.test.ts`; não alterada. G0–G4 validados localmente, sem API/estudos reais/publicação; G5/G6 pendentes. Commits FIERGS `9a04d06`, `21147bc`, `a552cba` e fechamento de exportação nesta sessão; Corretor paralelo `47107b2` preservado.
+- **Evidência:** [plano](../features/Relatorios%20Secovi_FIERGS/PLAN_FIERGS_RECORTES_LIVRES_2026-10-13.md) e [portões](../features/Relatorios%20Secovi_FIERGS/EVIDENCIAS_FIERGS_RECORTES_LIVRES_2026-10-13.md).
+- **Etapas/Pendências:** G0–G4 concluídos localmente; publicação autorizada e ensaio de Gabriel G5 pendentes. Conferir histórico a enviar e falha externa de tipos antes da publicação; aceite anterior não implica aceite de novos recortes. Nenhum e-mail enviado.
+- **Monday:** [Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 2026-10-13 — Corretor V3: correções sobre evidências persistidas — Gabriel / Codex
+- **Desenvolvimento:** v0.68 local: quantidade não implica ano, total municipal comparado à conclusão dirigida ao caso Daniele, fichas agregadas excluídas da identidade de empreendimento. Novos passes textuais registram modelo correto; sem alteração de prompt/Edge Function.
+- **Evidência:** [antes/depois](../features/corretor-vocacionais/RESULTADO_CORRECOES_EVIDENCIAS_2026-10-13.md); 28 testes, dez passes de regressão, tipos/build aprovados; três PNG/cache preservados em fixture rastreável. Nenhuma IA paga ou escrita no banco.
+- **Etapas/Pendências:** entrega mínima validada localmente, revisão antes do push. Salvador/Daniele dependem de material original para aceite de extração; cache UsHome ainda inventa cidade e soma de fatia permanece indeterminada. Controle de soma Curitiba e Boulevard offline preservados. Ortografia e caso completo/handoff semanal abertos; deploy/reteste real não comprovados.
+- **Monday:** [V2 Corretor de projetos / objetivo atual V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`.
+
+### 2026-10-13 — Corretor V3: baseline Rolândia e correção de checklist — Gabriel / Codex
+- **Plano solicitado de correções/retese visual:** [execução com evidências persistidas](../features/corretor-vocacionais/PLAN_CORRECOES_EVIDENCIAS_PERSISTIDAS_2026-10-13.md), preparado após leitura de três PNG reais UsHome/Curitiba. Prioriza seis FP Salvador de ano e omissão Daniele tabela/conclusão; fila seguinte cidade inferida, soma de tabela parcial e bairro tratado como empreendimento. Define reteste de imagem/cache/transcrição separados, controle de soma visível 1.197×1.399, dez passes de regressão, orçamento para IA nova e resultado antes do push. Etapa planejamento com evidência; nenhuma correção nova implementada nesta preparação, ausência de print/original permanece explícita.
+- **Auditoria solicitada por Gabriel:** [resultados por estudo e persistência](../features/corretor-vocacionais/REVISAO_RESULTADOS_E_PERSISTENCIA_2026-10-13.md); GET do banco V3 recuperou 14 estudos/269 achados, 71 FP registrados, sem veredito bug. Contexto parcial dos projetos de 05–09/10 recuperado: achados, cache por imagens referenciadas e três evidências PNG verificadas HTTP 200. Original completo não é salvo no banco pelo app; arquivo local do lote recente não encontrado nas pastas pesquisadas. SP/Salvador têm planilhas vinculadas mas zero blocos extraídos; redução Curitiba 47→7 compara arquivos de 156/105 slides distintos, não prova melhoria. Caso Daniele (56.808 na tabela × 17.566 na conclusão) congelado como omissão humana; plano prioriza quantidade×ano em Salvador e igualdade tabela×conclusão. Estado diagnóstico documentado/preparado, sem nova regra, IA ou mutação; adjudicação/caso inteiro continuam abertos.
+- **Continuação — automação pedida por Gabriel:** rodada única `npm run test:corretor:materials -- --browser`, hashes/achados/cobertura e Excel bruto, quatro fixtures antigas recuperadas de `.tmp` para versionamento e expectativas congeladas. Cinco decks/dez passes offline aprovados; consulta Playwright captura resultados persistidos e falhas sem acionar IA ou escrita. [Operação e limites](../features/corretor-vocacionais/AUTOMACAO_TESTES_CORRETOR.md). Relatórios brutos locais ignorados. Três testes do comparador aprovados; pista browser não homologada (Toledo ausente na lista V3, falhas de fetch em SJC). Automatiza repetição técnica; mantém adjudicação humana para dados/escopo e aprovação de gasto novo. Handoff ampliado, gate semanal fim a fim aberto.
+- **Prioridade:** primeiro bloco do plano semanal confirmado, 2 h reservadas das 6 h do Corretor; reserva não é tempo executado.
+- **Mudança:** reconciliação documental C/D já em `35c0656`; roteiro de replay com Excel bruto e fixture, snapshot antes/depois/resultado salvo e correção do FP de Sociodemografia vazia. Sumários e texto de outras seções não comprovam conteúdo SOCIO.
+- **Evidência:** [baseline e handoff](../features/corretor-vocacionais/BASELINE_2026-10-13_ROLANDIA.md); 21 testes focados, cinco replays, tipos, lint e build aprovados. Dez achados não estruturais de Rolândia e linhas dos outros quatro estudos idênticos aos anteriores.
+- **Ambiente:** código corrigido validado localmente. Frontend público C/D conferido por bundle e Playwright sem IA nova; estudo real de 02/10 coincide com hashes de PPTX/13 Excel, contém erros textuais esperados, mas mantém FP estrutural e omite Boulevard. Revisão atual das Edge Functions não identificada; sem reprocessamento/deploy na sessão.
+- **Etapas/Pendências:** baseline local e handoff preparados; gate semanal completo continua aberto. Próximo bloco: publicar/retestar checklist, investigar leituras reais de Boulevard/tabelas pequenas, adjudicar gabarito humano; qualquer lote IA novo exige orçamento. Nenhuma escrita no Monday.
+- **Monday:** [V2 Corretor de projetos / objetivo atual V3](https://brain381753.monday.com/boards/18398428946/pulses/12700802102) — `12700802102`.
+
+### 2026-10-06 — FIERGS: oferta lançada do quadro VGV na janela — Gabriel / Codex
+- **Problema:** anotação única do PDF (12), slide 55: lançadas históricas 85.373 eram comparadas às 24.488 da janela. Demais análises aceitas por Juliana no e-mail; homologação global aberta.
+- **Mudança:** `vgvSummary` recebe o cubo da janela para unidades lançadas por linha/subtotal/total; mantém estoque, ticket e empreendimentos históricos. VGV monetário permanece histórico e vendido acumulado, com cabeçalhos explícitos para não subtrair universos diferentes. Sem números fixos nem exceções por período. Secovi conserva comportamento.
+- **Guardas:** reconciliação horizontal consolidada passa a exigir a janela; três guardas adicionais comparam linhas VGV vertical/horizontal/total ao cubo filtrado. Teste de coortes atualizado: histórico 180, janela 80, estoque 60. Casos sem produtos na janela retornam zero observado; valor desconhecido de projeto presente continua ausente.
+- **Etapas/pêndencias:** implementação pronta para push autorizado. Testes não executados conforme preferência vigente; ensaio PDF/CSV por Gabriel. Esperado com a mesma base: vertical 16.110, horizontal 8.378, total 24.488, estoque 8.764. Validar cabeçalhos e aceite final da Juliana; VGV parcial continua sinalizado na auditoria.
+
+### 2026-10-06 — FIERGS: mesma média horizontal nas tabelas de preços — Gabriel / Codex
+- **Mudança:** após `4401512`, as páginas de ticket/área/R$/m² e mínimo/média/máximo passam a compartilhar a mesma função de média ponderada por empreendimento, tanto por produto quanto no total horizontal. Condomínios de casas continuam incluídos. O título horizontal FIERGS passa a “por produto”, inclusive nos estados sem dados.
+- **Regra:** peso = oferta final; somente quando ausente usa oferta lançada. Peso zero permanece zero; preço ausente não vira zero. Sem peso utilizável, média ausente. Extremos continuam os preços observados; não são médias. Nenhuma exceção por período.
+- **Evidência:** `domain/aggregations.ts`, `components/MarketSlides.tsx` e regressão com pesos desiguais/estoque zero/preço ausente em `opus-cube-aggregations.test.ts`. Testes preparados, sem execução por preferência de Gabriel; revisão estática e diff. Mantidos componentes/tabelas existentes.
+- **Etapa e pendências:** implementação preparada para publicação autorizada; Gabriel fará ensaio PDF/CSV 2T2026. Com a mesma base do PDF (10), ambas as médias totais devem mostrar 1.305. Aceite da Juliana permanece pendente; não declarar homologação.
+
+### 2026-10-06 — Panorama Secovi/FIERGS: recuperação segura da coleta multicidades — Codex
+- **O quê:** executada a implementação do plano de recuperação em código local. Coleta genérica aceita qualquer N, tenta até duas vezes adicionais só para falhas transitórias, respeita `Retry-After`, mantém cidades concluídas na mesma sessão e coleta novamente somente as faltantes. Fontes obrigatórias incompletas interrompem a geração antes de montar páginas; guarda de exportação agora verifica cobertura para Secovi e FIERGS, mantendo as invariantes críticas FIERGS. Interface oferece progresso por rodada, retry das falhas transitórias, reinício e CSV diagnóstico sanitizado; recuperações são registradas em avisos/proveniência e auditoria. Cada geração tem cache próprio; troca de filtro, nova geração ou saída da rota aborta a tentativa anterior.
+- **Contrato de fontes:** histórico de empreendimentos e vendas/oferta por padrão e tipologia são obrigatórios; demais métricas permanecem opcionais conforme avisos existentes. HTTP 200 vazio em fonte obrigatória não se converte em zero.
+- **Evidência:** [registro G0–G5](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_RECUPERACAO_COLETA_MULTICIDADES_2026-10-06.md); 62 testes focados aprovados em 4 arquivos. `tsc --noEmit -p tsconfig.app.json` ainda falha em 10 fixtures antigos de Corretor, sem alterações naquela pasta. Sem API real, geração PDF ou teste longo.
+- **Estado:** publicado em `origin/main` após 62 testes focados aprovados. Ensaio FIERGS 2T2026 e ensaio multi-cidade Secovi por Gabriel permanecem pendentes; homologação Juliana aberta. Nenhum PDF/API real foi gerado nesta implementação. Contagem/duração por operação temporal auditável; granular de empreendimentos ainda sem métricas por endpoint.
+- **Git:** commits publicados `a3e859b` (implementação) e `d9ab4fa` (registro), sobre o commit Sinduscon já existente `b49b804`. Após push e fetch de confirmação, `main...origin/main = 0/0`. As mudanças publicadas neste envio foram apenas Panorama/FIERGS/documentação; `src/features/sinduscon-curitiba` e Corretor não foram alterados. Alterações locais alheias preservadas.
+
+### 2026-10-02 — Atualização da arte institucional FIERGS — Codex
+- **O quê:** substituída a lâmina institucional “Sobre a Brain” com 22 anos pela composição recebida no `Slides-Institucionais-Brain-2026.pptx`, agora com 23 anos e indicadores correspondentes. O PPTX de origem permaneceu local e fora do commit.
+- **Comparação:** a página de portfólio mantém as mesmas três marcas e contatos; as lâminas novas de produto, coleta, indicadores/cases e documentário não foram inseridas nem substituídas sem equivalência visual direta confirmada. A automação invisível do PowerPoint foi bloqueada pelo Office instalado.
+- **Verificação:** asset confirmado em 1920 × 1080 e inspecionado visualmente; 274 testes da feature e `vite build` aprovados. Ainda é necessário gerar/revisar PDF/PPT autenticados de 2T2026 e 4T2025 para encerrar G4/G6.
+- **Evidência/commit:** `EVIDENCIA_G5_ARTE_INSTITUCIONAL_BRAIN_23_ANOS_2026-10-02.md`; commit local desta substituição a registrar. Nenhum push foi realizado nesta etapa.
+- **Pendências:** manter as lâminas restantes até receber exportação visual do PPTX candidato; regressões autenticadas e checagem remota continuam necessárias antes de publicação.
+
+### 2026-10-02 — Panorama FIERGS: avisos, omissões e referências metodológicas — Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — relatório final FIERGS 2T2026 com regressão 4T2025.
+- **O que:** manifesto remove as quatro segundas cópias editoriais; avisos estruturados vêm do modelo e alimentam painel/auditoria; séries sem estado publicável e estruturas tipológicas sem valores são omitidas com código e motivo. Zero continua observado; venda negativa e disponibilidade fora de 0–100% ficam visíveis e geram aviso. PDF/PPT exportado não inclui notas metodológicas longas. App agora tem Relatório, Metodologia, Glossário e Fórmulas com regras distintas para FIERGS e Secovi-SP.
+- **Verificação:** suíte da feature passou (33 arquivos, 274 testes após G4); `vite build` aprovado. TypeScript app ainda acusa fixtures incompletas preexistentes em `src/features/corretor/lib/audit/__tests__/structure-empty-sections.test.ts`; nenhum arquivo Corretor foi alterado. A verificação visual local montou a rota, mas não pôde gerar relatório sem autenticação.
+- **Commits locais:** `dcc6cc9`, `c5d2474`, `e76345c`; sem push.
+- **Pendências (estado antes da atualização institucional abaixo):** G4 permanece sem aceite visual até gerar e conferir PDF/PPT/CSV autenticados para 2T2026 e 4T2025. G5 aguardava a arte institucional; atualização posterior registra a troca de 22 para 23 anos. G6 não pode ser considerado concluído até os dois períodos serem gerados e revisados.
+- **Arquivos:** plano/evidências finais em `docs/features/Relatorios Secovi_FIERGS/`; runtime em `src/features/panorama-secovi-fiergs/`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-10-01 — Corretor vocacional v0.67: blocos C e D — Codex
+- **Ambiente/funcionalidade:** `/corretor` — análise de estudos vocacionais.
+- **O que:** fechados localmente E7–E9 e implementados E10–E12. Texto SVG é considerado na revisão; divergências repetidas são agrupadas; formatos literais são verificados; o passe textual usa `gpt-4o` com estimativa independente da visão; símbolos duplicados exigem confirmação em duas leituras; checklist aponta seções sem conteúdo e slide final vazio.
+- **Verificação:** cinco replays com fixture, 45 testes focados e build aprovados. Rolândia: 11 achados; 3 seções sem conteúdo e slide final a conferir. Deploy da Edge Function e aceite visual no site pendentes por falta de permissão no conector Supabase.
+- **Arquivos:** plano e regra viva em `docs/features/corretor-vocacionais/`; implementação em `src/features/corretor/` e `supabase/functions/analyze-text-batch/`.
+- **Commit:** pendente nesta sessão; nenhum push.
+- **Monday:** -
+- **Impacto em Etapas/Pendências:** os blocos ficam prontos para revisão local; publicação depende de deploy de `analyze-text-batch` e validação em runtime dos cinco estudos.
+
+### 2026-10-01 - Sinduscon Curitiba: controles ocultos em XLSX - Codex
+- **Ambiente/funcionalidade:** /rebrain/sinduscon-curitiba - tratamento inicial de Alvaras e CVCO.
+- **O que:** o preservador de estilo agora aceita somente desenhos integralmente ocultos do Excel, como controles ActiveX inseridos na conversao de XLS para XLSX. Graficos e desenhos visiveis continuam bloqueados.
+- **Por que:** o arquivo Alvaras_AGO_2026.xlsx tem um controle oculto que disparava o bloqueio preventivo, embora seus dados sejam compativeis com a base.
+- **Arquivos:** src/features/sinduscon-curitiba/lib/style-preserving-workbook.ts.
+- **Commits:** pendente nesta sessao.
+- **Monday:** -
+- **Impacto em Etapas/Pendencias:** o tratamento inicial passa a aceitar conversoes comuns do Excel sem desproteger layouts que tenham objetos visiveis.
+### 2026-09-30 — FIERGS-RS: comparativos temporais padronizados — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — comparativos trimestrais, semestrais e móveis do FIERGS.
+- **O quê:** uma função única passa a produzir trimestre equivalente, primeiro semestre comparável e acumulado de 12 meses. Período ausente não vira zero; denominador zero não gera percentual; estoque/IVV usam fotografia do 2T.
+- **Slides:** padrão móvel nos slides 11, 14, 22, 26 e 33; primeiro semestre nos slides 15, 16, 27, 28, 35 e 39.
+- **Verificação:** regressões de domínio, cobertura de rótulos nos onze slides, `tsconfig.app.json`, suíte da feature e build de produção.
+- **Impacto em Etapas/Pendências:** Fase 5 concluída tecnicamente. A próxima frente é a Fase 6, com clareza, arredondamento, slide 41, rótulos e mapas.
+
+### 2026-09-30 — FIERGS-RS: guardas críticas antes da exportação — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — contrato de homologação e auditoria do recorte FIERGS.
+- **O quê:** o modelo passa a verificar vendas, estoque, horizontal por coorte e ausência de chácaras antes da renderização. Divergência ou indisponibilidade crítica bloqueia PDF/PPT; o CSV registra fonte, fórmula, universo, período, totais e delta.
+- **Evidência:** a bancada autenticada das dez cidades aprovou 11/11 invariantes com tolerância zero e delta zero: vendas `1.091`, estoque `5.251`, horizontal `129 / 30.476 / 3.365` e chácaras no runtime `0`.
+- **Verificação:** `tsconfig.app.json`, regressões de falha/bloqueio, suíte da feature e build de produção.
+- **Impacto em Etapas/Pendências:** Fase 4 concluída tecnicamente. A próxima frente é implementar comparativos e regras editoriais da Fase 5.
+
+### 2026-09-30 — FIERGS-RS: universo horizontal sem chácaras — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — política horizontal do recorte FIERGS 2T2026.
+- **O quê:** `Condomínio de Chácaras` passa a ser rejeitado na entrada temporal e granular. Os slides por produto e coorte compartilham o mesmo cubo; `Média dos loteamentos` usa somente loteamentos aberto e fechado.
+- **Evidência:** a bancada autenticada das dez cidades identificou 2 empreendimentos de chácaras em Viamão, com 110 unidades lançadas e 48 finais. O universo homologável fecha em 129 empreendimentos, 30.476 lançamentos e 3.365 unidades finais.
+- **Verificação:** regressões de política, produto × coorte e média de loteamentos; typecheck e build de produção.
+- **Impacto em Etapas/Pendências:** Fase 3 concluída tecnicamente, sem iniciar ajustes visuais. A próxima etapa é introduzir guardas canônicas de reconciliação antes da renderização/exportação.
+
+### 2026-09-30 — FIERGS-RS: oferta final reconciliada em 5.251 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — fechamento de estoque/oferta final do recorte FIERGS 2T2026.
+- **O quê:** o fechamento vertical de estoque por padrão e tipologia passa a usar a última fotografia granular por empreendimento/tipologia. O IVV FIERGS recebe a mesma base reconciliada; histórico temporal anterior e horizontal permanecem preservados.
+- **Evidência:** a bancada autenticada das dez cidades reproduziu `5.459` no temporal por padrão e `5.251` no temporal por tipologia, cubo granular e área. O `4.562` dos slides 36/37 é o caminho dimensional antigo; as linhas do PPTX deixam 689 unidades fora frente ao slide 40.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/model.ts,__tests__/report-model.test.ts}`, `scripts/fiergs-sales-reconciliation.mts` e `docs/features/Relatorios Secovi_FIERGS/EVIDENCIA_FASE_2_ESTOQUE_FIERGS_2T2026_2026-09-30.md`.
+- **Commit:** `d5dd210`.
+- **Verificação:** bancada autenticada, `218/218` testes da feature, typecheck e build de produção aprovados.
+- **Impacto em Etapas/Pendências:** Fase 2 aprovada por Gabriel com `5.251` como fechamento canônico; a Fase 3 passa a tratar a exclusão de chácaras do universo horizontal. Ajustes visuais continuam não iniciados.
+
+### 2026-09-28 — Rebrain: idioma do documento alinhado ao conteúdo — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** shell da plataforma e seletores Radix, incluindo Panorama de Mercado.
+- **O quê:** o idioma raiz do HTML passou de `en` para `pt-BR`, alinhando os metadados ao conteúdo da aplicação e reduzindo a ativação indevida da tradução automática do navegador, associada ao erro DOM `removeChild` observado durante a troca de entidade para FIERGS.
+- **Verificação:** build de produção aprovado; permanecem apenas os avisos conhecidos de Browserslist desatualizado e chunks grandes.
+- **Impacto em Etapas/Pendências:** Juliana deve repetir a homologação com a tradução do navegador desativada e recarregamento forçado; se o erro persistir, o próximo diagnóstico é isolar extensões do navegador.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-30 — FIERGS-RS: fechamento de vendas reconciliado em 1.091 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — fechamento de vendas verticais do recorte FIERGS 2T2026.
+- **O quê:** após o aceite de Gabriel, padrão, tipologia, cidade e área passaram a derivar o fechamento vertical da última fotografia granular por empreendimento/tipologia. O comparativo municipal rejeita o horizontal e a distribuição preserva ajustes negativos, incluindo `−1` em quatro ou mais dormitórios.
+- **Evidência:** a bancada autenticada das dez cidades mantém os totais brutos auditáveis (`1.137`, `1.180`, `2.317`) e confirma `1.091` nas quatro dimensões do runtime, sem ajuste manual.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/model.ts,components/ReportPaginator.tsx,__tests__/report-model.test.ts,__tests__/fiergs-sales-reconciliation.test.ts}`, `scripts/fiergs-sales-reconciliation.mts` e documentos do plano/evidência/decisões.
+- **Commit:** `63a6177`.
+- **Verificação:** `217/217` testes da feature, typecheck e build de produção aprovados; avisos conhecidos de Recharts/JSDOM, Browserslist e tamanho de chunks sem falha.
+- **Impacto em Etapas/Pendências:** recorte de vendas do portão B concluído; auditoria de estoque é a próxima frente. Ajustes visuais/editoriais continuam bloqueados até a reconciliação numérica restante.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-24 — FIERGS-RS: IVV factual, período direto e comparativos em colunas — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — cálculo de IVV, filtro temporal e composição dos comparativos FIERGS.
+- **O quê:** o seletor temporal aplica o intervalo assim que o segundo trimestre é escolhido e fecha automaticamente; clicar fora continua descartando uma seleção incompleta. Os comparativos laterais deixaram de ser caixas iguais e passaram a representar os valores por colunas proporcionais, com eixo-base, rótulos e delta. A tabela de variações anuais no canto superior ganhou tipografia maior para audiência 50+.
+- **Diagnóstico IVV:** chamada autenticada das dez cidades no 1T22 mostrou que o pico consolidado vinha do percentual pronto do endpoint, sobretudo de Canoas (`6.900%` em Econômico, `241,7%` em Standard e `131,3%` em Médio), além de anomalias em Gravataí e Novo Hamburgo. O cálculo próprio do Dashboard GeoBrain resulta em `18,65%` para Canoas e `16,28%` no consolidado das dez cidades. O FIERGS agora calcula `Σ vendas líquidas ÷ Σ (estoque final + vendas líquidas)`; Secovi permanece inalterado.
+- **Verificações:** 6 testes focados aprovados, incluindo aplicação direta do período e rejeição de IVV pronto anômalo; typecheck e build aprovados. Os avisos são apenas do Recharts no JSDOM, Browserslist desatualizado e chunks grandes já conhecidos.
+- **Impacto em Etapas/Pendências:** nova geração publicada deve validar as colunas e o IVV factual. Permanecem a sincronização do Mapbox e a homologação do universo 4T25 com o analista.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-24 — FIERGS-RS: Teste 6 fecha homologação editorial — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — PDF publicado de 75 páginas.
+- **O quê:** o Teste 6 confirmou no arquivo exportado o slide metodológico 5, a matriz de tipologia × 12 faixas de metragem do 57 e a matriz completa de área, R$/m² e oferta do 58. Não foram encontradas novas perdas editoriais ou divergências de exportação.
+- **Achado metodológico:** o IVV de 2.033,3% em 1T22 continua presente apesar da correção do cruzamento de pesos, evidenciando que o número anômalo já chega da série temporal ou decorre do universo histórico. Ele foi encaminhado à bancada do analista, sem teto, ocultação ou ajuste artificial no relatório.
+- **Impacto em Etapas/Pendências:** homologação editorial encerrada. Restam sincronizar e validar o Mapbox nos slides 67–69 e reconciliar com o analista o congelamento, exclusões e anomalias numéricas do 4T25.
+
+### 2026-09-24 — FIERGS-RS: vistoria integral do Teste 5 e contrato de trade-offs — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — comparação das 75 páginas com o deck oficial FIERGS 4T25.
+- **O quê:** a vistoria página a página confirmou a maturidade visual da versão 5 e registrou, em `MAPEAMENTO_TRADEOFFS_AUTOMACAO_FIERGS_TESTE5_2026-09-24.md`, quais diferenças são melhorias deliberadas, concessões aceitáveis ou dependências externas. Comparativos contextuais, rankings horizontais, tabelas auditáveis e estados explícitos de indisponibilidade foram preservados como contrato editorial do sistema.
+- **Correções encontradas pela evidência:** o acumulador de médias misturava numerador ponderado e valores sem peso quando apenas parte das linhas tinha estoque, produzindo o pico incorreto de IVV de 2.033,3%; o cálculo agora mantém soma simples e soma ponderada independentes e possui regressão específica. O slide 57 usa as 12 faixas de área FIERGS; o 58 reúne área mínima/média/máxima, R$/m² mínimo/médio/máximo e oferta final; o 5 ganhou três cartões metodológicos dinâmicos sem perpetuar claims e QR promocionais.
+- **Verificações:** typecheck, build e 21 testes focados aprovados. Um novo PDF é necessário apenas para confirmar visualmente essas correções pós-Teste 5.
+- **Impacto em Etapas/Pendências:** permanecem como travas reais o token Mapbox e homologação dos três mapas (10), relação oficial de IDs/exclusões e regra de congelamento do analista (11/12), e medição do tempo no ambiente publicado (14).
+
+### 2026-09-24 — FIERGS-RS: fechamento visual e componentes semânticos 41/57/58 — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — contrato editorial de 75 slides.
+- **O quê:** paridade visual foi considerada concluída e o Teste 5 virou verificação regressiva. A auditoria do roteamento encontrou três heranças incompatíveis: o slide 41 repetia o IVV trimestral como anual; o 57 reutilizava IVV por área no lugar de tipologia × metragem; o 58 reutilizava preço médio no lugar de mínimo/média/máximo. Os slides 57/58 agora derivam diretamente do cubo granular; o 41 declara a ausência da composição anual por área, sem fabricar ou duplicar números.
+- **Verificações:** typecheck, build e teste editorial dos 75 registros aprovados; a suíte agora falha se qualquer posição voltar ao placeholder genérico.
+- **Impacto em Etapas/Pendências:** etapas 1–9 e 13 concluídas. Permanecem externos: token cartográfico (10), relação oficial de IDs/exclusões e confirmação do universo histórico do 4T25 (11/12), além do registro do tempo real da geração publicada (14).
+
+### 2026-09-23 — FIERGS-RS: paridade preview/PDF e legibilidade 50+ — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — renderização e exportação PDF/PPT do recorte FIERGS.
+- **O quê:** o Teste 4 comprovou que classes CSS dos rótulos SVG customizados do Recharts não eram preservadas integralmente pelo `html-to-image`; placas e texto destacados viravam preto no PDF. Fill, contorno, tipografia e tamanho foram incorporados ao SVG. Eixos, valores, comparativos e distribuições foram ampliados; o KPI superior passou a ser centralizado, sem faixa amarela ou cartão.
+- **Por quê:** preview e arquivo baixado precisam ser visualmente equivalentes, e a audiência 50+ requer números e legendas maiores.
+- **Verificações:** typecheck e build aprovados; 23 testes focados aprovados, incluindo regressão explícita dos atributos SVG usados pela exportação.
+- **Impacto em Etapas/Pendências:** etapa 13 em andamento; requer novo PDF para confirmar visualmente a captura real. Mapas e paridade numérica mantêm seus bloqueios externos.
+
+### 2026-09-23 — FIERGS-RS: Teste 3 e densidade editorial dos blocos vertical/horizontal — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o PDF do Teste 3 foi auditado visualmente. Distribuições receberam cabeçalho estruturado, KPI integrado, barras e rótulos maiores; tabelas simples e gráficos de preço passaram a ocupar a área útil; matrizes de coorte, maturidade e VGV preservam densidade compatível com muitas colunas. A regra é exclusiva do FIERGS.
+- **Por quê:** páginas corretas em conteúdo ainda pareciam vazias e tratavam números principais como notas pequenas, reduzindo conforto de leitura e hierarquia.
+- **Verificações:** typecheck e build aprovados; 17 testes focados de renderização/editorial aprovados.
+- **Impacto em Etapas/Pendências:** etapas 8 e 9 seguem para validação humana no Teste 4. Mapas continuam aguardando token; paridade 4T25 continua aguardando a regra de congelamento/exclusões do analista.
+
+### 2026-09-23 — FIERGS-RS: Teste 2, MCMV, dormitórios e comparações contextuais — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o Sumário foi realinhado; eixos e valores históricos voltaram a exibir todos os pontos com destaque do trimestre equivalente. Pares duplicados foram convertidos em séries MCMV/padrão; vendas municipais usam barras; IVV recebeu a série correta; slides 44–47 usam R$/m² por dormitório. Comparativos laterais agora se adaptam ao fechamento: trimestre mais `1S`, `9M` ou ano, sem acumular snapshots/taxas.
+- **Por quê:** observações visuais do Teste 2 e adoção da diretriz de comparativos gráficos sugerida por Fábio/Marcos.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,lib/chart-labels.ts,print/panorama-print.css,__tests__/chart-labels.test.ts}` e `docs/features/Relatorios Secovi_FIERGS/PLANO_EXECUCAO_FIERGS_RM_POA.md`.
+- **Impacto em Etapas/Pendências:** etapa 7 pronta para teste humano; etapa 8 em execução, com harmonização das tabelas/preços 49–61 ainda pendente. Mapas aguardam token.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-23 — Panoramas: decisão de comparativos gráficos contextuais — Gabriel/Fábio/Marcos/Diego
+- **Ambiente/funcionalidade:** Panorama de Mercado — diretriz editorial para FIERGS e futura revisão do Secovi.
+- **O quê:** o exemplo visual apresentado pelo Sinduscon foi incorporado como referência alternativa: série histórica à esquerda e comparações gráficas do trimestre e do acumulado à direita. No 2T, comparar trimestre e semestre; no 3T, trimestre e nove meses; no 4T, trimestre e ano.
+- **Por quê:** orientação de Fábio e Marcos para facilitar leitura e automação, encaminhada por Diego e validada por Gabriel.
+- **Impacto em Etapas/Pendências:** aplicar ao FIERGS nesta primeira versão depois da leitura do Teste 2. A conversão dos quadros comparativos do Secovi fica como pendência posterior e não altera a entrega atual.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-23 — FIERGS-RS: fechamento de lançamentos e arquitetura de vendas/oferta — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** os slides 10, 13, 15–18 e 21 passaram a usar distribuições FIERGS por padrão e tipologia derivadas do cubo granular. O bloco 23–37 ganhou séries verticais de vendas e VGV, acumulados de 12 meses, distribuições por padrão/tipologia/cidade e oferta final. Estoque é tratado como fotografia: comparações anuais usam o fechamento, sem somar snapshots trimestrais.
+- **Por quê:** concluir as etapas 5 e 6 sem herdar linguagem visual, horizontal ou semântica temporal do Secovi.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css,__tests__/fiergs-editorial-blocks.test.tsx}` e `docs/features/Relatorios Secovi_FIERGS/PLANO_EXECUCAO_FIERGS_RM_POA.md`.
+- **Impacto em Etapas/Pendências:** etapas 5 e 6 seguem para teste humano do PDF; diferenças municipais continuam na bancada metodológica e não foram corrigidas artificialmente.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-23 — FIERGS-RS: legibilidade temporal e correções estruturais do Teste 1 — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o produto FIERGS recebeu tipografia canônica Montserrat/Source Sans 3 e uma política adaptativa para eixos e rótulos de séries: trimestre abreviado, amostragem de ticks, destaque dos fechamentos anuais e dos quatro pontos mais recentes. Acumulados de 12 meses agora começam apenas com quatro trimestres completos. Também foram corrigidos o Sumário duplicado e o roteamento que deixava os três mapas em branco.
+- **Por quê:** o primeiro PDF de 75 páginas comprovou sobreposição dos rótulos temporais, valores pequenos e três posições cartográficas vazias.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,lib/chart-labels.ts,print/panorama-print.css,__tests__/chart-labels.test.ts}` e `docs/features/Relatorios Secovi_FIERGS/PLANO_EXECUCAO_FIERGS_RM_POA.md`.
+- **Impacto em Etapas/Pendências:** etapa 5 permanece em execução até fechar as distribuições específicas; etapa 10 passa a ter fallback visual correto, mas segue dependente do token Mapbox.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-22 — FIERGS-RS: apresentação por entidade, horizontal e mapas — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — renderização e exportação do recorte FIERGS.
+- **O quê:** o renderizador passou a separar identidade por entidade: o FIERGS não recebe mais fundos, textos institucionais ou rótulos horizontais do Secovi. A capa acomoda as 11 cidades. O bloco horizontal ganhou oferta por produto e faixa min/média/máxima, preservando coorte e preço médio por produto. Foram adicionados mapas por padrão, estoque e R$/m². O campo `neighborhood` agora é preservado no cubo granular.
+- **Por quê:** remover falsos positivos editoriais antes da paridade 4T25 e garantir que diferenças do próximo PDF sejam numéricas/metodológicas, não contaminação de template.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,components/MarketSlides.tsx,domain/{entity-policy.ts,cube.ts,aggregations.ts},report/{manifest.ts,model.ts},types.ts,print/panorama-print.css,__tests__/*}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** `12880538203`.
+- **Impacto em Etapas/Pendências:** etapas 6, 9 e 10 avançadas funcionalmente; bairro desbloqueado no contrato. Permanecem MCMV, critério editorial de bairros, paridade 4T25 e fidelidade integral dos 75 slides.
+
+### 2026-09-22 — FIERGS-RS: seletor e inventário oficial de 75 slides — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — preparação do produto `Recorte FIERGS — RM Porto Alegre`.
+- **O quê:** o fluxo ganhou seletor de entidade; FIERGS aplica automaticamente RS e as 11 cidades do preset, mantendo período editável. O deck oficial de 75 slides foi baixado do Drive e catalogado em um manifesto tipado por família e grau de automação. Os sete fundos institucionais integralmente estáticos foram extraídos e registrados como ativos; o PPTX bruto e as imagens com dados não entraram no bundle. Um plano com portões, estado das etapas 4–12 e limites metodológicos foi registrado.
+- **Por quê:** separar claramente o produto FIERGS da apresentação Secovi e impedir que lacunas como MCMV, bairro e mapas sejam preenchidas por heurística silenciosa.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{pages/PanoramaSecoviFiergsPage.tsx,report/fiergs-manifest.ts,__tests__/fiergs-manifest.test.ts,assets/fiergs/*}`, `docs/features/Relatorios Secovi_FIERGS/PLANO_FIERGS_RM_PORTO_ALEGRE_2026-09-22.md`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** `12880538203`.
+- **Impacto em Etapas/Pendências:** etapas 4 e 5 implementadas; etapa 6 parcialmente concluída (ativos registrados, renderização pendente); etapas 7–12 decompostas com bloqueios objetivos. O produto ainda não deve ser considerado visualmente equivalente ao deck FIERGS.
+
+### 2026-09-22 — FIERGS-RS: política horizontal e preset metropolitano — Codex
+- **Ambiente/funcionalidade:** Panorama de Mercado — motor compartilhado Secovi/FIERGS.
+- **O quê:** foi criada a política de universo FIERGS-RS com os quatro produtos horizontais observados nos slides 63–66 do estudo 4T25 (`Loteamento Aberto`, `Condomínio de Chácaras`, `Loteamento Fechado` e `Condomínio de Casas/Sobrados`). O filtro temporal agora respeita a entidade, sem alterar a regra restritiva do Secovi-SP. Também foi criado o preset `Recorte FIERGS — RM Porto Alegre`, com as 11 cidades destacadas no mapa do estudo e motor V4.
+- **Por quê:** concluir primeiro a premissa de aquisição e o universo estatístico, antes de expor entidade, fluxo e formatação na interface.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{domain/entity-policy.ts,presets.ts,report/model.ts,__tests__/opus-domain-policy.test.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** `12880538203`.
+- **Impacto em Etapas/Pendências:** etapas 2 e 3 concluídas em código; o preset ainda não está selecionável na interface (etapa 4). A equivalência numérica contra o deck permanece para a etapa 11.
+
+### 2026-09-22 — Nomes de produto orientados pela função — Codex
+- **Ambiente/funcionalidade:** shell, início e cabeçalhos dos geradores de mercado da Rebrain.
+- **O quê:** `Relatório Secovi` passou a se apresentar como `Base de Mercado — Excel`, mantendo `antigo Relatório Secovi` como apoio de transição; `Panorama Secovi/FIERGS` passou a `Panorama de Mercado`, mantendo Secovi/FIERGS na descrição. Rotas e nomes técnicos foram preservados para não quebrar links ou contratos existentes.
+- **Por quê:** diferenciar a extração operacional em Excel do entregável editorial e preparar o Panorama para receber Secovi-SP e FIERGS-RS como entidades, sem criar três produtos com nomes quase idênticos.
+- **Arquivos:** `src/components/layout/{AppLayout.tsx,CommandPalette.tsx}`, `src/pages/{Home.tsx,TestesArquitetura.tsx}`, `src/features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** nomenclatura de transição aplicada; continuam pendentes a política de universo FIERGS, o seletor de entidade e o recorte predefinido da RM de Porto Alegre.
+
+### 2026-09-22 — Relatórios automatizados organizados no menu — Codex
+- **Ambiente/funcionalidade:** shell da Rebrain — menu lateral e busca global.
+- **O quê:** Secovi, Sinduscon Curitiba, AELO e o relatório multicidade existente foram agrupados na pasta expansível `Relatórios Automatizados`; os rótulos internos foram simplificados e o produto anterior passou a aparecer como `Panorama Secovi/FIERGS`, distinguindo-o do novo relatório `FIERGS — RM de Porto Alegre` que ainda será implementado. Validação do Fechamento, Assistente de Projetos e Atualizador VGV permanecem como ferramentas independentes.
+- **Por quê:** separar geradores de relatórios das ferramentas operacionais e eliminar a ambiguidade entre o Panorama Secovi/FIERGS existente e a nova entrega específica para a região metropolitana de Porto Alegre.
+- **Arquivos:** `src/components/layout/{AppLayout.tsx,CommandPalette.tsx}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** primeira etapa de organização concluída; falta criar a rota funcional do novo FIERGS antes de adicioná-lo ao menu e então validar cidades, contrato da API interna v2 e contagem de empreendimentos.
+### 2026-09-20 — Sinduscon Curitiba: ano sem separador de milhar — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás/CVCO.
+- **O quê:** as células da coluna `Ano` recebem formato numérico inteiro `0`, preservando fonte, preenchimento, bordas e faixas alternadas herdadas do arquivo original.
+- **Por quê:** o estilo copiado da planilha de origem aplicava agrupamento de milhar e fazia o Excel exibir `2.026`, embora o valor armazenado fosse corretamente `2026`.
+- **Arquivos:** `src/features/sinduscon-curitiba/lib/{style-preserving-workbook.ts,report-processor.test.ts}`.
+- **Commits:** `e43ec61`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** teste de regressão confirma valor numérico `2026` com formato visual `0`; nenhuma regra de tratamento foi alterada.
+
+### 2026-09-20 — Sinduscon Curitiba: carregamentos alinhados ao padrão Brain — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — processamento das cinco etapas independentes.
+- **O quê:** todos os processamentos usam o overlay canônico `BrainLoadingState`, com logo Brain, fundo bloqueado, cronômetro real e textos específicos para tratamento mensal, atualização da base, tabulação, montagem do relatório e compilação do PDF.
+- **Por quê:** alinhar a experiência do Sinduscon às demais abas de dados e informar claramente qual operação está em andamento, sem estimativas artificiais.
+- **Arquivos:** `src/features/sinduscon-curitiba/{components/WorkflowStagePanels.tsx,pages/SindusconCuritibaPage.tsx}`.
+- **Commits:** `030b1d3`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** mudança somente de estado visual e comunicação; regras de planilha, arquivos gerados e fluxo de download permanecem inalterados.
+
+### 2026-09-20 — Sinduscon Curitiba: arrastar e soltar em todas as entradas — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — uploads das etapas independentes.
+- **O quê:** os campos de base acumulada, mês tratado, tabulação e PDF final agora aceitam arquivos por arrastar e soltar, além do clique; durante o arraste a área recebe destaque e orienta a soltar, e formatos incompatíveis exibem mensagem textual.
+- **Por quê:** reduzir cliques no fluxo mensal e tornar consistente o upload das etapas 2 a 5 com o tratamento inicial, que já aceitava arraste.
+- **Arquivos:** `src/features/sinduscon-curitiba/components/WorkflowStagePanels.tsx`.
+- **Commits:** `fafb305`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** mantidos clique, foco por teclado e validação de `.xlsx`/`.pdf`; typecheck, lint focado e build de produção aprovados. O lint global continua com erros preexistentes fora desta alteração.
+
+### 2026-09-20 — Sinduscon Curitiba: acumulado limitado ao ano da competência — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tabulação e relatório final de Liberados/Concluídos.
+- **O quê:** as tabelas acumuladas por bairro, faixa de área e pavimentos passaram a considerar somente o ano da competência mais recente; registros de anos anteriores permanecem disponíveis na série histórica. Unidades com área zerada também passam a integrar os totais e a primeira faixa de área.
+- **Por quê:** a base completa de julho continha 22.586 unidades residenciais de 2025 e 13.293 de 2026; a tabulação somava os dois anos e produzia 35.877, enquanto o relatório anual correto de 2026 totaliza 13.293.
+- **Arquivos:** `src/features/sinduscon-curitiba/lib/{monthly-workflow.ts,monthly-workflow.test.ts}`.
+- **Commits:** `77a0a90`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** correção validada na base real `Liberados_JULHO_2026.xlsx` com 5.274 registros e total residencial final exatamente igual a 13.293; regressão automatizada cobre anos anteriores e unidades com área zero.
+
+### 2026-09-19 — Sinduscon Curitiba: recálculo dos totais no relatório final — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — geração dos relatórios finais de Liberados/Concluídos.
+- **O quê:** a geração agora recalcula e grava os resultados em cache das fórmulas de subtotais, totais e divisões após preencher cada tabela, mantendo as fórmulas originais no `.xlsx` e preservando integralmente estilos, dimensões, desenhos e gráficos.
+- **Por quê:** o relatório recebia os dados da nova competência, mas mantinha nos resultados armazenados das fórmulas o total do modelo de junho; por isso leitores sem recálculo imediato exibiam `10987` mesmo com o acumulado maior.
+- **Arquivos:** `src/features/sinduscon-curitiba/lib/{monthly-workflow.ts,monthly-workflow.test.ts,ooxml-patcher.ts}`.
+- **Commits:** `bcef918`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** regressão coberta no modelo sintético e no template real de Liberados, incluindo a fórmula total da primeira tabela (`U70`); arquivos já gerados antes desta correção precisam ser gerados novamente.
+
+### 2026-09-19 — Sinduscon Curitiba: equivalência de cabeçalhos na alimentação mensal — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — alimentação da base acumulada de Liberados/CVCO.
+- **O quê:** o pareamento de colunas passou a reconhecer como equivalentes `Uso Alvará`/`Uso(s) Alvará`, `Sub-Uso Alvará`/`Sub-Uso(s) Alvará` e `Material`/`Material(is)`, preservando no arquivo acumulado os nomes originais da base e copiando os valores da coluna correspondente do mês tratado.
+- **Por quê:** pequenas variações de nomenclatura entre a base histórica e a saída do tratamento inicial geravam uma falsa mensagem de colunas ausentes, embora os campos estivessem presentes.
+- **Arquivos:** `src/features/sinduscon-curitiba/lib/{monthly-workflow.ts,monthly-workflow.test.ts}`.
+- **Commits:** `8c620c0`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** erro reproduzido pelo contrato dos cabeçalhos e coberto por regressão automatizada; as seis validações focadas do Sinduscon permanecem aprovadas.
+
+### 2026-09-19 — Sinduscon Curitiba: compilação do PDF final — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — etapa 5, entrega externa em PDF.
+- **O quê:** adicionada uma etapa independente que recebe o PDF de oito páginas exportado pelo analista a partir do Excel final e compila, no navegador, um arquivo de dez páginas: capa dinâmica de Liberados ou Concluídos, mapa setorial de Curitiba e as oito páginas originais do relatório, sem redimensioná-las ou re-renderizá-las. Mês e ano são escolhidos na tela; a capa preserva o modelo fornecido e atualiza a competência com a fonte aberta Righteous. Arquivos com quantidade diferente de oito páginas são recusados para impedir uma entrega incompleta.
+- **Por quê:** o fluxo operacional salva cada resultado separadamente e só monta o PDF externo depois da conferência e exportação manual do Excel, mantendo a ordem e o formato do modelo oficial.
+- **Arquivos:** `public/sinduscon-templates/{capa-liberados.pdf,capa-concluidos.pdf,mapa-curitiba.pdf,righteous-regular.ttf,Righteous-OFL.txt}`, `src/features/sinduscon-curitiba/{api.ts,components/WorkflowStagePanels.tsx,lib/pdf-compiler.ts,lib/pdf-compiler.test.ts,pages/SindusconCuritibaPage.tsx}`, `package.json`, `package-lock.json`.
+- **Commits:** `f9ed43e`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** etapa PDF concluída localmente; composição real validada com dez páginas e dimensões idênticas à referência (capa 540×785,28 pt, mapa A4 e oito páginas 595,2×841,68 pt). Capa, mapa, primeira e última página do relatório foram renderizados e inspecionados visualmente. A exportação do Excel para PDF continua deliberadamente no Excel, que é o motor responsável por recalcular fórmulas e gráficos com fidelidade antes da compilação.
+
+### 2026-09-18 — Sinduscon Curitiba: fluxo mensal independente e relatórios-clientes preservados — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — alimentação mensal, tabulação estatística e geração dos relatórios finais.
+- **O quê:** o módulo passa a apresentar quatro etapas independentes: tratamento inicial, alimentação da base acumulada, tabulação substituta do SPSS e geração do relatório final. A alimentação recebe somente base + mês tratado e estende as fórmulas de Área Unidade, Área Residencial e Área Não Residencial. A tabulação recebe somente a base atualizada e gera oito abas estatísticas. A etapa final recebe somente essa tabulação e usa os modelos internos de Liberados/Concluídos armazenados em `public/sinduscon-templates/`.
+- **Por quê:** as operações acontecem em momentos diferentes e seus arquivos precisam ser baixados, conferidos e reutilizados separadamente; o analista não deve reenviar o relatório-modelo a cada competência.
+- **Arquivos:** `public/sinduscon-templates/*.xlsx`, `src/features/sinduscon-curitiba/{api.ts,components/WorkflowStagePanels.tsx,lib/monthly-workflow.ts,lib/monthly-workflow.test.ts,lib/ooxml-patcher.ts,pages/SindusconCuritibaPage.tsx}`.
+- **Commits:** `5876846`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** alimentação, tabulação e relatório Excel concluídos e validados nas amostras reais de Liberados e CVCO. A geração final altera somente células de entrada/títulos e bloqueia a entrega se estilos, tema, gráficos, desenhos, imagens, impressão ou estrutura de layout forem modificados. TypeScript, lint focado e quatro testes automatizados aprovados; o build geral continua bloqueado pela dependência local `pdf-lib` ausente, fora desta feature. A exportação PDF fiel continua pendente e exige um motor Excel/LibreOffice para recalcular e renderizar os gráficos.
+
+### 2026-09-18 — Sinduscon - Curitiba: processamento local com preservação OOXML — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás e CVCO.
+- **O quê:** o arquivo passa a ser processado integralmente no navegador, sem Cloud Run. O motor mantém as regras de exclusão, padronização e cálculo, enquanto um novo exportador remonta somente a grade da primeira aba dentro do pacote OOXML, preservando `styles.xml`, tema, fontes, preenchimentos, bordas, larguras e alturas. A coluna `Mês` permanece no início e `Ano` passa a ser a última coluna.
+- **Por quê:** o fallback anterior recriava a planilha com `json_to_sheet` e descartava a estrutura estética; o round-trip do SheetJS também reduzia os estilos do arquivo real.
+- **Arquivos:** `src/features/sinduscon-curitiba/{api.ts,lib/report-processor.ts,lib/report-processor.test.ts,lib/style-preserving-workbook.ts,pages/SindusconCuritibaPage.tsx}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** substitui a dependência operacional do Cloud Run para esta tela; validação automatizada passou no arquivo real de Alvarás de setembro/2026, preservando integralmente os XMLs de estilos e tema. Arquivos com fórmulas, mesclagens, tabelas, desenhos ou formatação condicional são recusados de forma explícita até receberem suporte seguro.
+
+### 2026-09-17 - Sinduscon - Curitiba: fallback local de processamento - Codex
+- **Ambiente/funcionalidade:** /rebrain/sinduscon-curitiba.
+- **O que:** quando VITE_SINDUSCON_PROCESSOR_URL nao estiver configurada, a interface tenta processar o .xlsx localmente com SheetJS, permitindo validar o fluxo sem Cloud Run. O backend continua disponivel para a preservacao visual mais fiel.
+- **Impacto em Etapas/Pendencias:** fallback pronto para teste; comparar a formatacao gerada localmente antes de decidir se o Cloud Run sera necessario.
+
+### 2026-09-17 - Sinduscon - Curitiba: entrada somente em XLSX - Codex
+- **Ambiente/funcionalidade:** /rebrain/sinduscon-curitiba - tratamento inicial de Alvaras e CVCO.
+- **O que:** a interface e o processador passam a aceitar exclusivamente arquivos .xlsx; arquivos .xls sao rejeitados com orientacao para usar Salvar como no Excel. Removida a dependencia de conversao LibreOffice do conteiner.
+- **Por que:** o openpyxl preserva a formatacao do formato .xlsx, mas nao le .xls.
+- **Arquivos:** src/features/sinduscon-curitiba/pages/SindusconCuritibaPage.tsx, gcp/sinduscon-workbook-processor/{app.py,Dockerfile,README.md}.
+- **Commits:** pendente nesta sessao.
+- **Monday:** -
+- **Impacto em Etapas/Pendencias:** reduzida a infraestrutura necessaria; continua pendente a publicacao/configuracao do processador e a validacao visual em runtime.
+
+### 2026-09-25 — Validação do Fechamento: tabela de Divergências sem rolagem horizontal — Edgar
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
+- **O quê:** a tabela passou a distribuir as colunas proporcionalmente à largura disponível, com quebra de conteúdo e altura natural das linhas. Itens aprovados não entram no contador da aba e, quando exibidos sob demanda, usam o fundo `#f0e77b`.
+- **Por quê:** eliminar a rolagem horizontal e a sobreposição visual de registros sem remover filtros, ordenação, exportação ou aprovação.
+- **Arquivos:** `src/features/validacao-fechamento/DivergencesGrid.tsx`, `fechamento.css`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; a conferência visual depende da tela autenticada no navegador.
+
+### 2026-09-25 — Validação do Fechamento: regras para Condomínio de Casas/Sobrados — Edgar
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
+- **O quê:** incluídas regras de ticket médio, área privativa, preço/m² máximo, dormitórios e variação de preço para Condomínio de Casas/Sobrados. A variação compara apenas a última fotografia de cada tipologia com seu período imediatamente anterior. A regra existente de preço/m² abaixo de R$ 3.500 foi preservada; a nova faixa abaixo de R$ 4.300 não foi adicionada por sobreposição confirmada.
+- **Por quê:** ampliar a identificação de casos atípicos sem duplicar a regra de preço/m² já adotada.
+- **Arquivos:** `src/features/validacao-fechamento/validation-rules.ts`, `validation-rules.test.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; testes locais cobrem a comparação temporal e a ausência de período anterior.
+
+### 2026-09-17 — Sinduscon - Curitiba: motor de planilhas com preservação visual — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — tratamento inicial de Alvarás e CVCO.
+- **O quê:** o frontend passa a enviar a planilha ao processador dedicado; o novo serviço Cloud Run converte `.xls` com LibreOffice e aplica as alterações em `.xlsx` com `openpyxl`, preservando estilos, preenchimentos, bordas, filtros, larguras e alturas da aba original. O arquivo é tratado em diretório temporário e não é persistido.
+- **Por quê:** o processamento exclusivamente no navegador descartava os estilos internos de arquivos `.xls` ao regravar os dados.
+- **Arquivos:** `gcp/sinduscon-workbook-processor/{app.py,Dockerfile,requirements.txt,README.md}`, `src/features/sinduscon-curitiba/{api.ts,pages/SindusconCuritibaPage.tsx,types.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** frontend e serviço estão implementados localmente. Falta publicar o Cloud Run e configurar a variável pública `VITE_SINDUSCON_PROCESSOR_URL`; o ambiente atual não possui `gcloud` configurado para realizar esse deploy.
+
+### 2026-09-17 — Sinduscon - Curitiba: exclusão sem transferência de unidades — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — regras de padronização de unidades.
+- **O quê:** corrigida a regra de uso comercial ou residencial exclusivo: o valor da coluna que não deve ser mantida é apagado, sem somá-lo ou transferi-lo para a outra coluna. O resumo passa a descrever a exclusão e preserva os valores originais/finais para auditoria.
+- **Por quê:** a padronização define qual categoria permanece, não uma reclassificação da quantidade de unidades.
+- **Arquivos:** `src/features/sinduscon-curitiba/{lib/report-processor.ts,lib/report-processor.test.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** correção determinística local; typecheck pendente nesta sessão.
+
+### 2026-09-17 — Sinduscon - Curitiba: preservação do layout de origem — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — exportação das planilhas tratadas.
+- **O quê:** a aba original agora é reconstruída célula a célula, mantendo estilos, formatos numéricos, larguras e alturas das colunas/linhas existentes. As colunas Mês, Ano e áreas novas copiam o padrão visual da coluna de referência. O resumo da tela registra linha, valores originais, valores finais e a regra aplicada em toda padronização automática; o arquivo processado mantém apenas a aba `Revisão humana` para pendências.
+- **Por quê:** impedir que o tratamento altere a apresentação já definida no arquivo de alvarás ou CVCO.
+- **Arquivos:** `src/features/sinduscon-curitiba/{lib/report-processor.ts,lib/report-processor.test.ts,types.ts}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** typecheck aprovado. O teste focado de exportação está temporariamente bloqueado pela instalação local incompleta do Tailwind (`corePluginList` ausente), fora da feature.
+
+### 2026-09-17 — Sinduscon - Curitiba: tratamento inicial de alvarás e CVCO — Codex
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — nova aba lateral independente para preparação mensal de planilhas.
+- **O quê:** criada a rota lazy e a entrada no menu lateral/busca. A página recebe `.xls`/`.xlsx`, identifica mês e ano pelo nome, cria as colunas Mês/Ano e de área, remove demolições e áreas liberadas zeradas, reorganiza Área Vistoria/Tipo Vistoria do CVCO, converte zeros em vazio e normaliza unidades por uso. Casos mistos sem margem segura ficam visíveis e também seguem para a aba `Revisão humana` do Excel exportado.
+- **Por quê:** iniciar o fluxo de tratamento dos insumos do relatório Sinduscon Curitiba sem afetar outras áreas do Rebrain.
+- **Arquivos:** `src/features/sinduscon-curitiba/{pages/SindusconCuritibaPage.tsx,lib/report-processor.ts,lib/report-processor.test.ts,types.ts}`, `src/{App.tsx,components/layout/{AppLayout.tsx,CommandPalette.tsx}}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** primeira etapa concluída localmente; a revisão humana para usos mistos permanece explícita. Typecheck e testes focados aprovados. Build visual segue bloqueado por dependências pré-existentes ausentes (`maplibre-gl`, `pdf-lib`, `html-to-image`, `pptxgenjs`).
+
+### 2026-09-17 — Corretor: logo Brain no carregamento — Codex
+
+- **Ambiente/funcionalidade:** `/corretor` — upload e Sugestão de Análise.
+- **O quê:** o ícone circular de carregamento do upload foi substituído pela logo Brain pulsante, aproveitando o mesmo ativo e linguagem visual dos carregamentos da plataforma; textos e barra de progresso continuam iguais.
+- **Por quê:** tornar a espera de processamento consistente com as demais áreas do sistema.
+- **Arquivos:** `src/features/corretor/pages/CorretorV3Page.tsx`, `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** não altera a análise, a Edge Function, o fluxo de lotes nem a persistência; TypeScript aprovado. O empacotamento Vite segue bloqueado por `maplibre-gl` ausente em `atualizador-vgv/ProjectMap.tsx`, fora deste escopo.
+
+### 2026-09-17 — Corretor: sugestão consultiva em lotes — Codex
+
+- **Ambiente/funcionalidade:** `/corretor` — Sugestão de Análise.
+- **O quê:** estudos cujo conteúdo extraído excede 180 slides ou 180.000 caracteres passam a ser enviados em lotes sequenciais. A função retorna um memo conciso por lote e compila os memos em uma única sugestão final, preservando os critérios consultivos já calibrados. A interface avisa que o processamento pode demorar mais e mostra a barra “Processando lote N de M”, seguida da compilação final.
+- **Por quê:** o cliente antes enviava o estudo inteiro em uma única requisição, enquanto a Edge Function recusava acima dos limites, causando falha em apresentações grandes.
+- **Arquivos:** `src/features/corretor/lib/v3/consulting-suggestion.ts`, `src/features/corretor/pages/CorretorV3Page.tsx`, `supabase/functions/analyze-consulting-suggestion/index.ts`, `src/features/corretor/lib/v3/__tests__/consulting-suggestion.test.ts`, `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** divisão unitariamente testada em 180/181 slides e no limite de caracteres; build de produção aprovado. Ainda é necessário publicar a Edge Function e testar um PPTX grande real no ambiente integrado.
+
+### 2026-09-17 — Empresas: solicitação pública de materialização — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba Empresas e nova Edge Function `empresas-materialize-request`.
+- **O quê:** nova função pública (sem Supabase Auth e sem login) recebe apenas `{ municipality: { ibgeCode, name, uf }, establishmentsPartition, companiesPartition }`, valida IBGE de 7 dígitos, UF de duas letras e datas `YYYY-MM-DD`, e chama internamente `empresas-materialize-pilot` com `EMPRESAS_MATERIALIZER_SECRET` — a secret nunca chega ao navegador. Município já publicado retorna `published` sem custo; manifesto em `staging` recente retorna `processing` sem segunda execução. Proteção de abuso/custo: nova tabela `empresas_materialize_pedido` (RLS ativo, sem policy; somente `service_role`) guarda apenas hash SHA-256 do IP com sal de servidor, com limite de 3 pedidos/30 min por IP, 12 pedidos/10 min globais e 2 execuções simultâneas, respondendo `429` com mensagem clara. Frontend: botão "Atualizar dados deste município" visível a qualquer visitante, usando o município do `GeoApiScopeEngine`, chamando somente `empresas-materialize-request` e recarregando `empresas-report` após sucesso; estados de publicado, processamento, limite, vazio, erro e sucesso; nota Simples/MEI mantida.
+- **Por quê:** permitir que qualquer visitante solicite a competência do município selecionado sem expor secret, SQL, HMAC ou dados brutos, e sem risco de custo descontrolado no BigQuery.
+- **Arquivos:** migration `empresas_materialize_pedido`; `supabase/functions/empresas-materialize-request/index.ts`; `supabase/config.toml`; `src/features/empresas-empregados/{materialize-request-api.ts,use-companies-report.ts,components/CompaniesMaterializeButton.tsx,pages/EmpresasEmpregadosPage.tsx}`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** testado payload inválido (400 `INVALID_SCOPE`) e Blumenau/SC (200 `published`, sem nova materialização). Cloud Run, ponte BigQuery, HMAC, RAIS, RLS, tabelas existentes e `empresas-report` intactos.
+
+
+### 2026-09-16 — Empresas: piloto generalizado para qualquer município — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — banco, materializador e aba Empresas.
+- **O quê:** nova migration adiciona `id_municipio` em `empresas_estab_manifesto` (backfill a partir de `empresas_estab_municipio`, coluna obrigatória), remove a unicidade antiga `(competencia, query_version, methodology_version)` e cria `(id_municipio, competencia, query_version, methodology_version)`; RLS, revokes e a view `empresas_estab_municipio_publicado` (somente `status = 'ok'`) preservados. `empresas-materialize-pilot` passou a gravar `id_municipio` no manifesto e usar o novo `onConflict`, com limpeza restrita ao manifesto do município — falha de uma cidade não altera nem oculta carga publicada de outra; sem allowlist e sem carga nacional. Aba Empresas lê exclusivamente `empresas-report` com Bearer GeoBrain e escopo do `GeoApiScopeEngine`, com estados de carregamento, vazio ("Dados de Empresas ainda não materializados para este município."), erro real de token/permissão e sucesso.
+- **Por quê:** o manifesto único por competência faria a carga de uma nova cidade sobrescrever a de Blumenau.
+- **Arquivos:** migration `id_municipio` no manifesto; `supabase/functions/empresas-materialize-pilot/index.ts`; `src/features/empresas-empregados/*`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** verificado que Blumenau/SC segue publicada (197 linhas, 84.382 estabelecimentos, `status = ok`, `id_municipio = 4202404`). RAIS, Cloud Run, HMAC, secrets e `empresas-report` intactos.
+
+### 2026-09-16 — Empresas: aba habilitada no frontend via `empresas-report` — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba Empresas.
+- **O quê:** a aba Empresas deixou de ser placeholder. O escopo geográfico vem do `GeoApiScopeEngine` (`GeoApiScopeSelector` + `useGeoApiScope`, `strictReady`); o código IBGE é resolvido no backend (`rais-employees-report`, ação `resolveMunicipality`) e os agregados vêm exclusivamente da Edge Function `empresas-report`. A aba fica habilitada apenas quando a função responde `available: true`; sem competência publicada, aparece estado vazio orientando que a competência ainda não está disponível. Recortes por seção CNAE (rótulos A–U/ND), porte (códigos da Receita), matriz/filial e regime Simples/MEI, com total de estabelecimentos ativos e a nota "Simples/MEI representa o estado cadastral atual da fonte, não uma foto histórica da competência".
+- **Por quê:** a materialização piloto de Blumenau/SC (competência julho/2026) foi publicada.
+- **Arquivos:** `src/features/empresas-empregados/{companies-api.ts,companies-domain.ts,use-companies-report.ts,types.ts}`, `src/features/empresas-empregados/components/CompaniesWorkspace.tsx`, `src/features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** nenhuma migration, RLS, Edge Function, Cloud Run, RAIS, secret ou modelagem alterada; o navegador não acessa tabelas ou views diretamente.
+
+
+### 2026-09-16 — Empresas: materializador piloto tolerante a linhas malformadas — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — materializador do piloto Empresas.
+- **O quê:** `empresas-materialize-pilot` passou a consumir o contrato real da ponte `POST /v1/empresas-pilot` sem falhar campo a campo: `matriz_filial` aceita número ou string (`1`/"1", `2`/"2") e grava inteiro; divisão CNAE vira seção A–U/`ND`; porte aceita os quatro códigos da Receita com fallback `"00"`. Linha malformada é descartada de modo seguro (contabilizada em `linhasDescartadas` na resposta) em vez de abortar a carga; se nenhuma linha válida restar, a materialização falha sem publicar carga parcial. Divergência de município continua erro fatal. Payload externo, HMAC, RLS, tabelas, `empresas-report`, RAIS, frontend e Cloud Run intactos.
+- **Por quê:** uma única linha fora do padrão derrubava a materialização inteira com `INVALID_ROW`.
+- **Arquivos:** `supabase/functions/empresas-materialize-pilot/index.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** testes reais seguem em ambiente externo do Gabriel.
+
+### 2026-09-16 — Empresas: aceite dos códigos de porte da Receita no materializador piloto — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — materializador do piloto Empresas.
+- **O quê:** `empresas-materialize-pilot` passou a aceitar os códigos de porte da Receita Federal normalizados pela ponte BigQuery (`"00"`, `"01"`, `"03"`, `"05"`), gravando o valor canônico char(2) em `empresas_estab_municipio.porte`. Códigos de um dígito são normalizados com zero à esquerda; valores ausentes ou desconhecidos viram `"00"` (não informado), sem rejeitar a carga. Mapeamento verificado com 11 casos de teste.
+- **Por quê:** a validação anterior exigia qualquer string de 2 caracteres, mas falhava com `INVALID_ROW` / "Porte inválido" em cenários da ponte; o novo mapeamento é explícito e alinhado ao schema da tabela.
+- **Arquivos:** `supabase/functions/empresas-materialize-pilot/index.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** destrava mais uma etapa da materialização de teste (Blumenau/SC, partições 2026-07-12); migration, RLS, tabelas, `empresas-report`, RAIS, frontend, HMAC e secrets intactos.
+
+### 2026-09-16 — Empresas: conversão divisão→seção CNAE no materializador piloto — Lovable (Gabriel)
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — materializador do piloto Empresas.
+- **O quê:** `empresas-materialize-pilot` passou a converter a divisão CNAE (dois dígitos, ex.: "01", "47") retornada pela ponte BigQuery para a seção CNAE 2.0 (A–U) antes de validar e gravar `cnae_secao`. Seções A–U já vindas da ponte continuam aceitas; divisão "ND", nula ou fora das faixas oficiais grava seção "ND". A validação passa a aceitar apenas `A`–`U` e `ND`.
+- **Por quê:** a ponte retorna divisão e não seção; sem a conversão, toda carga falhava com `INVALID_ROW` / "Seção CNAE inválida".
+- **Arquivos:** `supabase/functions/empresas-materialize-pilot/index.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** destrava a materialização de teste (Blumenau/SC, partições 2026-07-12), que antes falharia na normalização das linhas; nada foi alterado em migration, RLS, tabelas, `empresas-report`, RAIS, frontend ou secrets.
+
+### 2026-09-16 — Empresas: fundação local do piloto CNPJ pré-agregado — Codex
+
+
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba Empresas.
+- **O quê:** criada a migration local do agregado municipal de estabelecimentos, com manifesto versionado, fatos sem CNPJ individual, publicação atômica por status `ok` e bloqueio de leitura direta por `anon`/`authenticated`.
+- **Por quê:** preparar a persistência do piloto BigQuery sem expor carga parcial, lista de CNPJs ou consultas diretas do cliente.
+- **Fonte validada:** `estabelecimentos` e `empresas` possuem 53 partições sincronizadas (2021-11-23 a 2026-07-12). `simples` existe, mas não é particionada; no piloto seu estado atual será registrado separadamente, sem alegação de competência histórica.
+- **Arquivos:** `supabase/migrations/20260916113000_empresas_estabelecimentos_piloto.sql`, `supabase/functions/empresas-report/index.ts`, `gcp/empresas-materializer/{query.sql,README.md,package.json}`.
+- **Commits:** pendente nesta sessão; sem push por solicitação do Lucas.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** falta implementar e publicar o materializador Cloud Run, aplicar a migration e habilitar a leitura protegida para a interface; nenhuma aba foi ativada ainda.
+
+### 2026-09-16 — Validação do Fechamento: aprovações persistentes de divergências — Edgar
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências.
+- **O quê:** incluída aprovação irreversível por linha, com confirmação, e-mail da autenticação GeoBrain e data/hora. Registros aprovados ficam ocultos por padrão, podem ser exibidos sob demanda e continuam no Excel com os campos de auditoria. Criados migration, tabela e Edge Function exclusivos para persistência.
+- **Por quê:** permitir que exceções conhecidas sejam aprovadas sem removê-las da auditoria ou das exportações.
+- **Arquivos:** `src/features/validacao-fechamento/{DivergencesGrid,approvals}.ts`, `supabase/migrations/20260916090000_validacao_fechamento_aprovacoes.sql`, `supabase/functions/validacao-fechamento-approvals/`, `supabase/config.toml`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** PENDENTE DE DEPLOY; o checkout ainda não está vinculado ao Supabase CLI. Antes do primeiro uso, aplicar a migration e publicar `validacao-fechamento-approvals`. A pendência é exclusiva desta funcionalidade.
+
+### 2026-09-15 — Corretor: calibração da Sugestão de Análise — Codex
+
+- **Ambiente/funcionalidade:** `/corretor` — Sugestão de Análise.
+- **O quê:** revisado o prompt consultivo a partir da base atualizada pela equipe. Estudos multiuso passam a exigir tese por componente; estoque recente não é saturação automática; compactos premium, Medical Center/Offices, short stay, preço por m², ticket, locação e absorção ganharam regras explícitas.
+- **Por quê:** reduzir divergências entre análises geradas e recomendações Brain observadas nos estudos de referência.
+- **Arquivos:** `supabase/functions/analyze-consulting-suggestion/index.ts`, `docs/features/corretor-vocacionais/BASE_CONHECIMENTO_SUGESTAO_ANALISE.md`, `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** requer teste controlado com estudo multiuso e publicação da revisão da Edge Function antes de entrar em runtime remoto.
+
+### 2026-09-15 — Corretor: sugestão consultiva de análise — Codex
+
+- **Ambiente/funcionalidade:** `/corretor` — escolha de fluxo antes do upload.
+- **O quê:** incluídas as opções **Avaliar erros** e **Sugestão de Análise**. A segunda extrai o conteúdo do `.pptx` e apresenta uma análise em Avaliação da Consultoria, Recomendação e Orientação ao analista, guiada pela base de critérios fornecida; não cria worklist de correção.
+- **Por quê:** separar a auditoria de erros da elaboração consultiva de produto e recomendação.
+- **Arquivos:** `src/features/corretor/pages/CorretorV3Page.tsx`, `src/features/corretor/lib/v3/consulting-suggestion.ts`, `supabase/functions/analyze-consulting-suggestion/index.ts`, `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`.
+- **Commits:** pendente nesta sessão; sem push por solicitação.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** requer teste local com `OPENAI_API_KEY` configurada na Edge Function; o endpoint não foi implantado.
+
+### 2026-09-10 — Validação do Fechamento: Resumo email e tabela de divergências — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guias Resumo email e Divergências.
+- **O quê:** renomeada a guia para **Resumo email** e incluída a cópia da tabela como imagem PNG. A tabela de Divergências abre com Empreendimento, Área Privativa, Status, Período, Divergência e Valor; as demais colunas seguem disponíveis no seletor e na exportação Excel. As regras de agrupamento foram movidas para o popover de ajuda da coluna Valor.
+- **Por quê:** oferecer uma tabela pronta para compartilhamento e reduzir a densidade visual inicial sem remover informações de auditoria.
+- **Arquivos:** `src/features/validacao-fechamento/ResumoEmailTable.tsx`, `DivergencesGrid.tsx`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; a cópia de imagem depende da permissão de área de transferência do navegador.
+
+### 2026-09-10 — Validação do Fechamento: coleta interna determinística — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — consulta interna por cidade.
+- **O quê:** alinhada a consulta ao endpoint `https://app.geobrain.com.br/public-api/v2`; a coleta usa somente Comercial, Horizontal e Vertical, envia `city` sem `uf` quando há município selecionado e acumula os retornos sem deduplicação. Para cada cidade e tipologia, consulta a página inicial, obtém `meta.last_page` e busca as páginas restantes em blocos de até cinco.
+- **Por quê:** reproduzir a consulta validada externamente, evitar fotografia variável por concorrência e exibir páginas obtidas versus páginas esperadas.
+- **Arquivos:** `src/features/validacao-fechamento/api.ts`, `use-vf-data.ts`.
+- **Commits:** pendente nesta sessão.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; Sinop passa a usar o recorte de três tipologias e deve totalizar quatro páginas esperadas (Comercial 1, Horizontal 2, Vertical 1).
+
+### 2026-09-10 — Validação do Fechamento: controle de páginas e timeout — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — consulta interna.
+- **O quê:** removido o parâmetro `status` das consultas; cada requisição possui timeout de 60 segundos; o progresso mostra páginas retornadas e esperadas, agregado por cidade e tipo.
+- **Por quê:** reduzir duplicidade na coleta, evitar requisições penduradas e tornar a completude da base observável.
+- **Arquivos:** `src/features/validacao-fechamento/api.ts`, `use-vf-data.ts`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** `8828e9d`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; a conferência de completude passa a ser visível no resumo da consulta.
+
+### 2026-09-09 — Validação do Fechamento: quantidade de lançamento da Oferta ativa — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — indicador Oferta ativa.
+- **O quê:** o indicador passou a usar `typologies_history[].qty` da fotografia de lançamento (`qty_release`), em vez da quantidade mais recente da tipologia; mantém o recorte até o período de referência e `status = Ativo` somente nessa métrica.
+- **Por quê:** reproduzir a semântica da medida DAX e evitar subcontagem quando a quantidade da tipologia foi alterada após o lançamento.
+- **Arquivos:** `src/features/validacao-fechamento/aggregate.ts`, `aggregate.test.ts`.
+- **Commits:** `8707cd0`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; validação local cobre quantidades de lançamento distintas e exclusão de empreendimento esgotado.
+
+### 2026-09-09 — Validação do Fechamento: isolamento de Oferta ativa — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — indicadores compartilhados das três abas de resumo.
+- **O quê:** renomeada a métrica para **Oferta ativa** e reforçado o isolamento do filtro `status = Ativo`: ele se aplica somente a essa métrica; os demais indicadores mantêm seus cálculos originais.
+- **Por quê:** medir tudo que foi lançado até o período de referência e ainda pertence a empreendimentos ativos, sem alterar os demais resultados.
+- **Arquivos:** `src/features/validacao-fechamento/aggregate.ts`, `aggregate.test.ts`.
+- **Commits:** `d047b0e`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; teste cobre a inclusão de lançamento esgotado em Unidades lançadas e sua exclusão exclusiva de Oferta ativa.
+
+### 2026-09-09 — Validação do Fechamento: indicador Oferta Ativa — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — Resumo, Resumo por cidade e Resumo Email.
+- **O quê:** incluído o indicador **Oferta Ativa**, que acumula a quantidade de lançamento até o período de referência apenas para empreendimentos com status atual `Ativo`.
+- **Por quê:** distinguir a oferta originalmente lançada que permanece ativa da oferta final em estoque.
+- **Arquivos:** `src/features/validacao-fechamento/aggregate.ts`, `aggregate.test.ts`.
+- **Commits:** `a957339`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; o popover exibe “Tudo que foi lançado e está ativo”.
+
+### 2026-09-09 — Validação do Fechamento: correção do Resumo Email — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — tabela Resumo Email.
+- **O quê:** corrigida a variação acumulada para `(acumulado atual ÷ acumulado anterior) − 1`; removido o fundo amarelo das linhas e aplicado o cabeçalho verde também à coluna Indicador.
+- **Por quê:** alinhar o cálculo e o visual à validação de planilha e ao modelo aprovado.
+- **Arquivos:** `src/features/validacao-fechamento/ResumoEmailTable.tsx`, `aggregate.test.ts`, `fechamento.css`.
+- **Commits:** `4d8a71e`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; homologação visual depende de consulta autenticada no navegador.
+
+### 2026-09-09 — Validação do Fechamento: Resumo Email — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — nova síntese mensal para envio por email.
+- **O quê:** adicionada a aba **Resumo Email**, antes de Detalhamento, com uma linha por indicador, último mês selecionado, mês anterior, mesmo mês do ano anterior, variação anual, acumulados de janeiro até o mês de referência e variação acumulada. As colunas calculadas possuem ajuda contextual e barras proporcionais.
+- **Por quê:** disponibilizar uma leitura pronta para comunicação mensal, sem modificar a guia Resumo existente.
+- **Arquivos:** `src/pages/ValidacaoFechamento.tsx`, `src/features/validacao-fechamento/ResumoEmailTable.tsx`, `aggregate.ts`, `fechamento.css`, `aggregate.test.ts`.
+- **Commits:** `5f440e2`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; homologação visual depende de consulta autenticada no navegador.
+### 2026-09-04 — Empresas: fonte Receita validada sem batch — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** futura aba Empresas em `/rebrain/empresas-empregados`.
+- **O que:** a sonda WebDAV de leitura confirmou que a fonte pública CNPJ está disponível e que a
+  competência mais recente é `2026-08`; o manifesto contém os 22 ZIPs mínimos. A medição de
+  metadados aponta 6,52 GiB compactados, sendo 4,97 GiB de estabelecimentos. `Municipios.zip`
+  confirmou os códigos Receita `8047` (Blumenau) e `9571` (Rio Verde), reforçando que IBGE não
+  pode ser usado diretamente e que UF é necessária para desambiguar nomes.
+- **Evidência local:** somente `PROPFIND` e leitura em memória de `Municipios.zip` (43 KB); nenhum
+  ZIP nacional foi persistido, nenhum batch, Edge, banco ou UI de Empresas foi criado.
+- **Arquivos:** `docs/features/empresas-empregados/TESTE_INICIAL_FONTE_RECEITA_2026-09-04.md`.
+- **Commits:** `fe5dfa5`.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** a próxima reprodução depende de recuperar `cnpj_blumenau.py`
+  e `exportar_xlsx.py` ou uma especificação fechada do mapeamento setorial e da regra de porte;
+  não inferir regras para forçar paridade com os resultados de Diego.
+
+### 2026-09-04 — Empregados: evolução histórica RAIS V1 sob demanda — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — aba `Evolução histórica` após um relatório anual.
+- **O que:** implementada a série municipal anual de vínculos ativos em 31/12 (1985–2025): uma única
+  consulta agregada, autenticada pelo Bearer GeoBrain, com teto de 3 GiB, cache compartilhado por
+  município + versões e auditoria técnica isolada. A interface expõe primeiro/último ano, variação,
+  crescimento acumulado e gráfico de linha; a série é disparada apenas por clique. Empresas segue sem
+  rede, banco, batch ou dados.
+- **Evidência local:** `npm run typecheck`, build de produção e 10 testes direcionados de Empregados
+  aprovados. A rota do proxy foi coberta por 9 testes locais; não houve consulta BigQuery real nesta entrega.
+- **Arquivos:** `src/features/empresas-empregados/{api,domain,types}.ts`,
+  `components/{EmployeesReportWorkspace,EmployeeHistoryPanel}.tsx`,
+  `supabase/functions/rais-employees-report/index.ts`,
+  `supabase/migrations/20260904180000_rais_employee_history.sql` e documentação da feature.
+- **Commits:** `e949e01` (Rebrain) e `c169492` (proxy Quanti); ambos precisam ser publicados e a
+  revisão do proxy implantada no Cloud Run antes do smoke test.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** aplicar a migration, publicar a Edge e publicar a revisão do proxy
+  com `action: history`; então executar uma primeira consulta de cidade pequena/média e conferir job,
+  bytes e reutilização de cache. Fase 2 preservada para salários, setores, ocupações, comparação e batch.
+
+### 2026-09-04 — Empregados: cabeçalho editorial comum de relatórios — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — contexto de página.
+- **O que:** o card hero provisório foi substituído pela faixa leve usada como referência nos
+  relatórios AELO/Secovi: categoria, título, subtítulo de recorte e sessão GeoBrain discreta.
+  Badges “Rebrain”/“Dados agregados” não competem mais com o título. O Design System e as decisões
+  de frontend passam a documentar esse cabeçalho como padrão incremental para relatórios.
+- **Evidência local:** `npm run typecheck` aprovado; `git diff --check` sem erro.
+- **Arquivos:** `src/features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx`,
+  `docs/architecture/{DESIGN_SYSTEM,FRONTEND_DECISIONS}.md`.
+- **Commits:** `a847e13`.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** o padrão de cabeçalho pode ser aplicado gradualmente ao tocar
+  outros relatórios; não houve alteração de dados, autorização ou Empresas.
+
+### 2026-09-04 — Empregados: overlay Brain para consulta e aviso técnico removido — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — geração do relatório RAIS.
+- **O que:** a geração passou do card inline para o `BrainLoadingState` em variante `overlay`:
+  véu opaco, fundo desfocado, logo Brain central, etapa e tempo real. O padrão foi recuperado da
+  composição de overlay já existente no Relatório AELO. O card “Consulta protegida” foi removido,
+  pois descrevia infraestrutura/autorização, não uma decisão que o usuário precisasse tomar.
+- **Evidência local:** `npm run typecheck` aprovado e `git diff --check` sem erro. Verificação
+  visual automatizada segue indisponível nesta máquina (executor de navegador ausente).
+- **Arquivos:** `src/components/feedback/BrainLoadingState.tsx`,
+  `src/features/empresas-empregados/components/EmployeesReportWorkspace.tsx` e
+  `docs/architecture/FRONTEND_GUIDELINES.md`.
+- **Commits:** `908ac2a`.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** a espera longa deixa de parecer um aviso estático e passa a
+  ter feedback de aplicação; Empresas continua sem rede, banco, batch ou dados.
+
+### 2026-09-04 — Empregados: feedback de consulta e controles Brain padronizados — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — experiência de carregamento e filtros do relatório RAIS.
+- **O que:** criado `BrainLoadingState` compartilhado para a reserva lazy, carregamentos dependentes
+  e geração do relatório; a operação longa passa a exibir etapa e cronômetro real, sem ETA
+  inventado. Os primitives `Select`, `Popover` e `Command` ganharam superfície Brain (borda verde
+  sutil, cantos amplos, sombra/foco coesos), e a ordenação de ocupações deixou de usar `<select>`
+  nativo. Guidelines, Design System e decisões de frontend agora tornam esse contrato reproduzível
+  em novas ferramentas.
+- **Histórico RAIS:** três `dryRun` gratuitos da série anual básica (1985–2025) mediram 212,5 MiB
+  em Acrelândia, 1.003,4 MiB em Rio Verde e 1.929,6 MiB em Blumenau. A proposta documentada é
+  permitir somente sob demanda, com teto inicial de 3 GiB e cache compartilhado por município +
+  versão; nenhuma interface ou consulta histórica foi implementada.
+- **Evidência local:** `npm run typecheck`, build de produção e 9 testes direcionados da feature
+  aprovados; `git diff --check` aprovado. O executor `agent-browser` não está instalado nesta
+  máquina e o Vite local não inicia dentro do sandbox por permissão do esbuild, portanto não há
+  inspeção visual automatizada declarada nesta entrega.
+- **Arquivos:** `src/components/feedback/BrainLoadingState.tsx`, `src/components/ui/{select,popover,command}.tsx`,
+  `src/features/empresas-empregados/{pages/EmpresasEmpregadosPage.tsx,components/EmployeesReportWorkspace.tsx}`,
+  `docs/architecture/{FRONTEND_GUIDELINES,DESIGN_SYSTEM,FRONTEND_DECISIONS}.md` e plano da feature.
+- **Commits:** `535382d`.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** acabamento de Empregados está pronto para publicação e teste
+  humano visual; a evolução histórica permanece uma decisão de produto/custo pendente de aprovação
+  explícita. Empresas segue sem rede, banco, batch ou dados.
+
+### 2026-09-04 — Empregados: reserva de snapshot RAIS corrigida e diagnóstico do RPC — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Edge `rais-employees-report` e cache/auditoria RAIS no Supabase.
+- **O que:** preparada migração que faz a primeira criação do snapshot retornar `acquired=true` para a própria requisição geradora; antes ela ficava em `processing` sem uma execução responsável por gerar os agregados. A Edge passou a registrar de forma limitada e sem segredos o código/mensagem/detalhe/hint do PostgREST caso `rais_claim_snapshot` volte a falhar.
+- **Evidência local:** build TypeScript/Vite aprovado fora do sandbox; `git diff --check` aprovado. O export dos logs remotos recebido contém apenas eventos `booted`/`shutdown`, sem log de requisição ou exceção, por isso não permite atribuir a causa operacional da primeira falha.
+- **Arquivos:** `supabase/migrations/20260904143854_fix_rais_snapshot_claim.sql`, `supabase/functions/rais-employees-report/index.ts` e este documento.
+- **Commits:** `26372ca`, `0a41820`.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** requer aplicar a migração e redeploy da Edge para ativar a correção; a primeira nova geração mostrará o diagnóstico efetivo se ainda houver falha de schema/permissão.
+
+### 2026-09-03 — Empregados: diagnóstico explícito de assinatura da ponte — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** Edge `rais-employees-report` — erro operacional da ponte RAIS/Cloud Run.
+- **O que:** a Edge agora distingue a resposta `401 invalid_signature` da ponte e informa que `BIGQUERY_PROXY_HMAC_SECRET` deve ter exatamente o mesmo valor de `PROXY_HMAC_SECRET` do Cloud Run. A análise dos logs confirmou que a revisão Cloud Run ativa recebeu chamadas e as rejeitou por HMAC antes de iniciar uma consulta BigQuery.
+- **Evidência local:** build TypeScript/Vite aprovado. Sem consulta RAIS, dado sensível ou alteração de secret nesta execução.
+- **Arquivos:** `supabase/functions/rais-employees-report/index.ts` e este documento.
+- **Commits:** `933f400` local; publicação pendente.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** atualizar o secret HMAC do Supabase com o valor do Secret Manager efetivamente referenciado pelo Cloud Run e testar metadata novamente.
+
+### 2026-09-03 — Empregados: ponte RAIS via Cloud Run do Sistema Quanti — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — substituição da credencial privada GCP pela identidade de workload existente.
+- **O que:** a Edge `rais-employees-report` passa a chamar a rota HMAC fechada `/v1/rais-employees` do `bigquery-proxy` do Sistema Quanti para metadata e agregado RAIS municipal. O proxy executa apenas consultas fixas/parametrizadas, sob a service account vinculada ao Cloud Run; não recebe SQL do navegador ou do Rebrain. Foram removidos do caminho ativo `GCP_SERVICE_ACCOUNT_EMAIL` e `GCP_PRIVATE_KEY`.
+- **Evidência local:** build do Rebrain e 9 testes da feature aprovados; proxy Cloud Run com 8 testes aprovados, incluindo HMAC, metadata, relatório RAIS e rejeição de SQL/escopo inválido.
+- **Limite de verificação:** a ponte não foi publicada nem recebeu secrets nesta execução; o teste real depende de URL do Cloud Run, HMAC igual nos dois lados e revisão do proxy publicada.
+- **Arquivos:** `supabase/functions/rais-employees-report/index.ts`, documentação da feature e `Sistema-Quanti/Sistema Novo/gcp/bigquery-proxy/{src/server.mjs,test/server.test.mjs,README.md}`.
+- **Commits:** pendente de commits locais coordenados nos dois repositórios.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** ativação deixa de exigir chave JSON de service account no Supabase; resta publicar Cloud Run e cadastrar os dois secrets de integração no Rebrain.
+
+### 2026-09-03 — Empregados: catálogo RAIS nacional e resolução protegida de IBGE — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — correção do escopo municipal e da falha de rede após validação publicada.
+- **O que:** removido o uso indevido de `/monitored-cities`: a seleção agora usa o catálogo nacional de municípios, por UF e combobox pesquisável desde a primeira letra. A escolha não chama serviços externos no navegador. A Edge Function recebe nome/UF, resolve o código IBGE no servidor e só então libera ano/geração RAIS. O CORS também reflete origens de preview `*.lovable.app`, além das origens configuradas, evitando o bloqueio de `fetch` nos previews do Lovable.
+- **Evidência local:** build TypeScript/Vite aprovado; 4 arquivos/9 testes da feature passam. O teste cobre que o Acre não fica limitado a Rio Branco.
+- **Limite de verificação:** esta alteração de Edge Function exige publicação junto ao próximo push/deploy para a resolução protegida e o CORS entrarem em produção. Não foram executados deploy, migration nem escrita no Monday.
+- **Arquivos:** `src/features/empresas-empregados/{api.ts,components/EmployeesReportWorkspace.tsx,components/RaisMunicipalitySelector.tsx,__tests__/api.test.ts}`, `supabase/functions/rais-employees-report/index.ts` e documentação da feature.
+- **Commits:** pendente de commit local desta execução.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** o Bearer GeoBrain segue protegendo o relatório, mas não limita o universo RAIS. Após publicar, validar Rio Branco e Cruzeiro do Sul no AC e um preview Lovable autenticado.
+
+### 2026-09-03 — Empregados: abas lazy e municípios monitorados — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — refinamento da experiência inicial do relatório RAIS.
+- **O que:** removido o texto introdutório redundante; Empregados e Empresas passaram a ser abas de produto com conteúdo carregado sob demanda. Empregados reutiliza o `GeoApiScopeEngine`: UF e combobox pesquisável mostram exclusivamente cidades de `/public-api/monitored-cities` autorizadas para o Bearer. A lista nacional do IBGE permanece interna apenas para resolver o código que a RAIS exige depois da escolha; não funciona como fallback. Empresas mantém placeholder/contrato fantasma, sem rede, banco, batch ou dados simulados.
+- **Evidência local:** build com TypeScript aprovado; 4 arquivos/10 testes da feature passam, incluindo a garantia de não haver fallback para município não monitorado. A build gerou chunks separados para página, Empregados e Empresas.
+- **Estado remoto informado:** Gabriel aplicou a migration, configurou a Edge Function/secrets e realizou teste do fluxo; esta entrada não executou deploy, migration nem escrita no Monday.
+- **Arquivos:** `src/features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx`, `components/EmployeesReportWorkspace.tsx`, `components/CompaniesPlaceholder.tsx`, `api.ts`, testes e documentação da feature.
+- **Commits:** pendente de commit local desta execução.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** seleção de cidade fica alinhada ao controle de acesso GeoBrain apesar da fonte RAIS/Base dos Dados. A próxima verificação humana recomendada é conferir visualmente a tela autenticada e uma cidade que não esteja na lista monitorada.
+
+### 2026-09-03 — Empregados V1 implementado localmente; ativação remota pendente — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — primeira versão do relatório municipal de vínculos RAIS.
+- **O que:** criada a rota lazy, entrada na navegação/home/busca, seleção de UF/município IBGE/ano, abas de visão geral, setores, ocupações virtualizadas e metodologia, exportação XLSX somente no computador do usuário, autenticação pelo Bearer GeoBrain, Edge Function BigQuery e cache/auditoria no Supabase. Empresas está presente apenas como contrato/provider fantasma que retorna `FEATURE_DISABLED`; não há chamada, tabela, batch ou dado de CNPJ.
+- **Evidência local:** typecheck, build, lint direcionado, suíte completa (44 arquivos/336 testes) e 8 testes da feature passam; as fixtures confirmam Rio Verde/GO 2025 (81.601 vínculos, 1.115 ocupações) e Blumenau/SC 2025 (154.664 vínculos, 1.390 ocupações). A execução da suíte precisou ocorrer fora da restrição inicial do sandbox.
+- **Limite de verificação:** migration e Edge Function ainda não foram aplicadas ao Supabase remoto; secrets GCP/GeoBrain não estão disponíveis nesta execução. Portanto não foi afirmado runtime autenticado, custo real ou consulta BigQuery ao vivo.
+- **Arquivos:** `src/features/empresas-empregados/`, `supabase/functions/rais-employees-report/index.ts`, `supabase/migrations/20260903160000_rais_employees_report.sql`, `supabase/config.toml` e documentação da feature.
+- **Commits:** pendente de commit local desta execução.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** implementação local concluída até T5; T6 depende de secrets/deploy/migration autorizados. Próximo passo humano: revisar SQL, cadastrar secrets, aplicar migration e executar smoke test autenticado de Rio Verde/Blumenau. Sem push, deploy ou escrita no Monday.
+
+### 2026-09-03 — Plano terminal Luna para Empregados V1 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/empresas-empregados` — relatório municipal e anual de vínculos formais RAIS.
+- **O que:** requisitos do Grill-me foram consolidados em um plano terminal T0–T7. A V1 entrega somente Empregados, com Bearer GeoBrain validado no backend, BigQuery/Base dos Dados, cache agregado compartilhado no Supabase, auditoria técnica sem histórico visível, exploração web e XLSX gerado exclusivamente na máquina do usuário. Empresas fica como contrato fantasma desabilitado, sem rede, banco ou batch.
+- **Referências de aceite:** Rio Verde/GO 2025 possui 81.601 vínculos e 1.115 ocupações; Blumenau/SC 2025 possui 154.664 vínculos e 1.390 ocupações na amostra disponível. Diferenças por retificação da fonte deverão ser explicadas, nunca mascaradas.
+- **Arquivos:** `docs/features/empresas-empregados/PLAN_LUNA_EMPREGADOS_V1_2026-09-03.md`, README e materiais de referência da feature.
+- **Commits:** pendente de commit local desta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** descoberta encerrada e implementação pronta para ativação da Luna. Permanecem fora do escopo: pipeline Receita/CNPJ, interface de histórico, deploy, migrations remotas e publicação. Sem escrita no Monday.
+
+### 2026-09-03 — Empresas e Empregados: descoberta e área documental iniciadas — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** nova página planejada em `/rebrain/empresas-empregados`.
+- **O que:** criada a área documental da feature para receber o `DEVELOPMENT.md` de Diego, os workbooks de Blumenau/Rio Verde e demais insumos. O gerador RAIS do Sistema Quanti foi identificado apenas como protótipo técnico; a nova entrega pertencerá ao Rebrain e usará seu Supabase/Lovable.
+- **Decisões pendentes:** contrato de “empresa” versus estabelecimento, autenticação para consultas pagas, anos/recortes suportados, cache/histórico, conteúdo do workbook e fluxo humano da página.
+- **Arquivos:** `docs/features/empresas-empregados/README.md` e este documento.
+- **Commits:** pendente de commit local desta sessão.
+- **Monday:** [reBrain — Empresas e Empregados](https://brain381753.monday.com/boards/18398428946/pulses/12880655319) — `12880655319`.
+- **Impacto em Etapas/Pendências:** etapa de descoberta iniciada; implementação bloqueada deliberadamente até leitura dos materiais e fechamento do Grill-me. Sem escrita no Monday.
+
+### 2026-09-03 — Panorama V4: plano terminal T0–T7 implementado — Luna/Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento do estudo V4 após revisão de Juliana.
+- **O que:** o modelo agora publica `closingFacts` canônicos por segmento e total; maturidade por padrão/tipologia e preços de fechamento usam o cubo do recorte; o preço final do gráfico é reconciliado com o preço granular; unidades sem tipologia recebem a categoria explícita `Não classificado`; resumo e narrativa consomem os mesmos fatos, sem hardcode de Jundiaí ou correção textual no JSX.
+- **Evidência:** testes direcionados cobrem janela editorial, residual tipológico, reconciliação do preço final e paridade estrutural do deck/exportação. Suíte completa, typecheck e build aprovados. Lint dos arquivos alterados sem erro; lint global permanece bloqueado por erros preexistentes fora desta entrega.
+- **Limite de verificação:** a geração visual autenticada do novo PDF/PPT não foi executada neste ambiente; a paridade real de artefatos aguarda a nova geração por Gabriel. A validação automatizada estrutural preview/PDF/PPT passou.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/types.ts`, `report/model.ts`, `domain/aggregations.ts`, `components/MarketSlides.tsx`, `__tests__/final-adjustments.test.ts` e este documento.
+- **Commits:** pendente de commit local desta sessão.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** T0–T7 concluídos localmente; pronto para `LUNA_READY_FOR_GABRIEL` e geração de nova amostra autenticada. Sem push, deploy ou escrita no Monday.
+
+### 2026-09-03 — Plano Luna para os quatro ajustes finais do Panorama V4 — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — revisão do PDF V4 anotado por Juliana.
+- **O quê:** diagnóstico fechou quatro divergências: preço de 2T2026 vindo de fonte temporal diferente das tabelas granulares; maturidade por padrão e tipologia ignorando o início `1T2023`; cobertura tipológica 208 unidades abaixo do total por empreendimento; e narrativa somando o cubo completo em vez do recorte. Foi criado plano terminal para Luna centralizar fatos de fechamento, reconciliar o último preço, aplicar a janela às maturidades e representar unidades sem tipologia como cobertura não informada.
+- **Evidência:** no PDF recebido, p.38 mostra R$ 10.558/m² contra R$ 10.240/m² nos slides correntes; p.41/p.43 mostram 22.561/22.353 lançadas contra 6.642 no vertical do recorte; p.51 mostra 23.391 lançadas e 1.561 finais contra 7.070 e 1.433 no resumo/VGV.
+- **Arquivos:** [`PLAN_LUNA_AJUSTES_FINAIS_PANORAMA_V4_2026-09-03.md`](../features/Relatorios%20Secovi_FIERGS/opus-v3-closure/PLAN_LUNA_AJUSTES_FINAIS_PANORAMA_V4_2026-09-03.md).
+- **Commits:** pendente de commit local desta sessão.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** V4 permanece em QA. Próximo portão: Luna implementar o plano, emitir `LUNA_READY_FOR_GABRIEL` e Gabriel gerar novo PDF autenticado para comparação. Sem push, deploy ou escrita no Monday.
+
+### 2026-09-02 — Panorama Secovi/FIERGS V4: fechamento do teste Jundiaí — Terra/Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — correções decorrentes da leitura do primeiro PDF V4 de Jundiaí.
+- **O quê:** a tabela anual de vendas passou a agregar `sales.units.series` e `sales.vgv.series`; ela não reutiliza mais a série anual de lançamentos. Os blocos que publicam Oferta Lançada (resumo geral, padrão, tipologia, coortes e VGV) agora filtram o cubo pelo intervalo selecionado. O padrão da tela passa a ser 1T2023–2T2026, alinhado ao recorte de Juliana. IVV por área preserva seu histórico granular completo, necessário à fórmula de absorção no fechamento.
+- **Evidência:** a revisão do PDF V4 encontrou a cópia incorreta dos lançamentos na página anual de vendas e 830 unidades horizontais por incluir 402 anteriores ao recorte. Novos testes fixam a agregação anual e a exclusão de lançamentos pré-1T2023; regressão completa: 40 arquivos / 324 testes; `tsc --noEmit` e build aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/report/model.ts`, `components/ReportPaginator.tsx`, `components/MarketSlides.tsx`, `pages/PanoramaSecoviFiergsPage.tsx`, testes V4.
+- **Commits:** pendente de commit local desta sessão.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** pronto para gerar uma nova amostra V4 de Jundiaí; a conferência visual do PDF/PPT regenerado permanece o próximo portão. Sem push, deploy ou escrita no Monday.
+
+### 2026-09-02 — Panorama Secovi/FIERGS V4: IVV granular sem erro técnico no material — Gabriel Hxg + Terra/Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — primeira versão V4 para teste de Jundiaí.
+- **O que:** V4 mantém a reconciliação horizontal por `Padrão` da V3.1 e deixa de consultar `ivv?group_by=Tipologia` durante a geração: o endpoint retorna HTTP 500 mesmo para Vertical isolado e um trimestre. A lâmina de IVV por área/tipologia passa a assumir formalmente o cálculo granular `vendas líquidas / (oferta anterior + lançamentos)`, usando `sold_in_period`, `typology_stock` e histórico por empreendimento.
+- **Experiência:** PDF/PPT/preview não mencionam API, HTTP, circuito ou indisponibilidade. A tela geradora, fora do material exportado, apresenta a nota: “IVV por tipologia calculado pelo histórico granular”, com a fórmula em linguagem de negócio.
+- **Evidência:** sonda autenticada em Jundiaí: IVV por `Padrão` respondeu 200 (inclusive Horizontal); IVV por `Tipologia` respondeu 500 para ambos os segmentos, Vertical, Horizontal e um trimestre; vendas e estoque por Tipologia responderam 200; `building-with-history` trouxe os campos granulares necessários. Regressão: 38 arquivos / 322 testes; typecheck e build aprovados.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** V4 pronta localmente para Gabriel gerar Jundiaí e conferir o primeiro material. Sem push, deploy ou escrita no Monday.
+
+### 2026-09-02 — V3.1: horizontal de Jundiai reconciliado com Juliana — Terra/Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — versao de teste V3.1.
+- **O que:** a classificacao temporal passou a aceitar explicitamente os Padroes socioeconomicos horizontais permitidos (`Economico`, `Standard`, `Medio`, `Medio-Alto`, `Alto`, `Luxo` e `Compacto`) e a excluir, antes de qualquer agregacao, produto de loteamento/chacara/terreno. Um produto explicitamente excluido prevalece sobre qualquer rotulo socioeconomico. O cubo V3 e os contratos temporais por Padrao agora seguem a mesma decisao.
+- **IVV por Tipologia:** HTTP 500 do GeoBrain permanece tratado como indisponibilidade explicita pelo circuito existente; nao gera timeout nem preenche zeros. IVV por Padrao continua disponivel quando o endpoint responde 200.
+- **Evidencia:** fixture T0/T6 de Jundiai fixa **428 unidades lancadas** e **369 vendidas** entre 1T2023 e 2T2026, com loteamento de alto volume no mesmo contrato e zero contaminacao. Regressao: 38 arquivos / 321 testes; `npm run typecheck`; `npm run build`. Playwright gerou preview, PDF e PPT espelho em Jundiai (55 paginas), Praia Grande (58) e Baixada com IVV/Tipologia 500 (61); manifestos e artefatos em `.tmp/opus-panorama-v3/evidencias/`.
+- **Arquivos:** politica/cubo temporal em `src/features/panorama-secovi-fiergs/`; plano [`PLAN_TERRA_CORRECAO_HORIZONTAL_JUNDIAI_V3_1_2026-09-02.md`](../features/Relatorios%20Secovi_FIERGS/opus-v3-closure/PLAN_TERRA_CORRECAO_HORIZONTAL_JUNDIAI_V3_1_2026-09-02.md).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendencias:** pronto para Gabriel gerar Jundiai no ambiente autenticado e bater com o email da Juliana; sem push, deploy ou escrita no Monday.
+
+### 2026-09-02 — Plano terminal V3.1 para corrigir o horizontal de Jundiaí — Gabriel Hxg + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — nova rodada de teste para Juliana.
+- **O quê:** diagnóstico autenticado reproduziu exatamente o Relatório de Acompanhamento enviado por Juliana (`428` unidades horizontais lançadas e `369` vendidas de 1T2023 a 2T2026). Foi criado um plano terminal para o Terra corrigir a política que zerava horizontais sem `building_subtype`, filtrar os contratos temporais por `Padrão`, preservar a exclusão de loteamentos/chácaras e manter o IVV por Tipologia em degradação explícita diante do HTTP 500.
+- **Evidência:** `releases`, `sales`, `stock`, `ivv`, `medium-prices` e `medium-prices-meter` por Padrão responderam 200 no recorte filtrado; o 500 de IVV por Tipologia foi isolado independentemente de período e tipo. Baseline local: 56 testes direcionados e build aprovados antes da implementação.
+- **Arquivos:** [`PLAN_TERRA_CORRECAO_HORIZONTAL_JUNDIAI_V3_1_2026-09-02.md`](../features/Relatorios%20Secovi_FIERGS/opus-v3-closure/PLAN_TERRA_CORRECAO_HORIZONTAL_JUNDIAI_V3_1_2026-09-02.md).
+- **Commits:** — (plano desta sessão).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA. Próximo portão: Terra entregar `TERRA_READY_FOR_GABRIEL`; após publicação autorizada, Gabriel gera Jundiaí e compara o PDF com o e-mail de Juliana antes da resposta.
+
+### 2026-09-01 — Panorama V3: firewall de fontes e correções pós-Jundiaí — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — procedência dos números.
+- **Origem:** comparação página a página do `panorama-jundiai-2T2026- pos correcoes.pdf` (53 páginas, gerado por Gabriel) contra o PDF anotado pela Juliana. A camada editorial/visual tinha fechado; a de procedência, não.
+- **Defeito principal:** o firewall de fontes só protegia os **lançamentos**. Vendas, estoque, IVV e preços continuavam vindo dos contratos `temporal-analysis-city/*`, que são municipais, agregam todo o horizontal e devolvem `Loteamento Fechado` como se fosse padrão socioeconômico. Resultado no PDF entregue: p27 com **0 empreendimentos ao lado de 6.055 unidades lançadas**, p19–p24 com "Condomínio de Casas" vendendo 224/389/126/286/82 unidades onde não há nenhum aceito, p48 se contradizendo na mesma frase e p49 imprimindo **"o padrão com maior oferta final é Loteamento Fechado"** — a palavra que a analista mandou excluir. Agravado por mim: ao renomear o rótulo para `Condomínio de Casas`, o número de loteamento passou a se apresentar com o nome do universo aceito.
+- **O quê:** `firewallTemporalBlock` no modelo remove grupos de produto horizontal fora da política de `byGroup`/`groupSeries` e lê o contrato municipal **como Vertical**; `model.horizontalSeries` declara se a série horizontal é atribuível (só é quando o universo aceito é vazio, caso em que zero é valor verdadeiro). Resumo geral (p27) e narrativa (p48/49) foram reconstruídos sobre o cubo; as vendas por segmento (p19–24) imprimem zero quando o universo é vazio e indisponibilidade declarada quando há condomínio aceito. As quatro divergências entre páginas (empreendimentos 109 vs 45, oferta 22.561 vs 16.642, disponibilidade 6,3% vs 14,8%, IVV 20,9% vs 22,9%) desapareceram.
+- **Também corrigido:** venda líquida negativa deixou de virar taxa (`−1,2%` de IVV → `—`, com o número preservado na coluna de vendas); a faixa anual do gráfico de preço passou a **ponderar** em vez de somar (`R$ 17.173/m² R$/m²` → `R$ 6.330/m² · média do ano`); a caixa `VARIAÇÕES` adotou a regra semântica (`−66,7%` não é mais verde); rótulos do gráfico de barras ficaram compactos, acabando com a sobreposição; `Subtotal vertical` não é criado quando duplicaria o `Total geral`; participação deixou de ser comparada com a fatia média, acabando com o mar de vermelho.
+- **Evidência:** 182 testes da feature e 318 do repositório; `tsc` e build aprovados. Novo `__tests__/firewall-fontes.test.tsx` (10 casos) com o contrato municipal **contendo** loteamento — o caminho que os fixtures anteriores não exercitavam e por onde o defeito passou. Os fixtures da spec Playwright também passaram a conter loteamento; os três cenários foram regerados e mantêm paridade preview = PDF = PPT (55 / 58 / 61).
+- **Arquivos:** [`PLANO_ACAO_POS_CORRECOES_JUNDIAI_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/opus-v3-closure/PLANO_ACAO_POS_CORRECOES_JUNDIAI_2026-09-01.md) traz o diagnóstico e o resultado de cada etapa.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** pendem (1) configurar `VITE_MAPBOX_ACCESS_TOKEN` no build, sem o qual o Panorama sai sem a lâmina de mapa — decisão de produto com a Juliana; (2) regerar Jundiaí no ambiente autenticado e reconferir, já que estas correções foram validadas com API interceptada; (3) diagnosticar com a manutenção da API a falha de `group_by=Padrão` medida nas três coletas.
+
+### 2026-09-01 — Panorama V3: fechamento dos 40 comentários de Juliana — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento editorial, dados e evidência de página.
+- **Gate de banco:** o Supabase do Corretor foi consultado em modo somente leitura (`studies_v3`, `study_versions`, `projects`, `activity_log`, storage). **Não existe** estudo Secovi/FIERGS/Jundiaí no banco — ele indexa vocacionais e censos em PPTX, e o retorno da analista é um PDF que nunca passou por esse pipeline. A fonte usada foi o arquivo já versionado em `assets/correcao_v2/panorama-jundiai-2T2026 - corrigido.pdf` (SHA1 `4f8a7ef1…`), do qual as 40 anotações foram extraídas com PyMuPDF. A sequência de páginas extraída é **idêntica** à de JG-01–JG-40: zero divergência, zero comentário novo, nenhum item fundido.
+- **Defeito bloqueante corrigido:** `SECOVI_SP_V3_POLICY` não aceitava a grafia real da API — `Condomínio de Casas/Sobrados`, com barra. Com isso **nenhum** dos 11 condomínios existentes entraria, e Praia Grande teria o bloco horizontal suprimido por engano. O teste que existia passava por usar uma grafia inexistente na fonte. O vocabulário passou a ser explícito por eixo (produto aceito, produto excluído, socioeconômico, desconhecido), com alerta ruidoso em rótulo novo e sem qualquer inferência por nome.
+- **O quê:** JG-01–04 (institucionais medidas em `cqw`, não `vw`); JG-05–18 (rótulo zero sempre visível — era o que apagava o 2T26 —, placa branca só no trimestre de fechamento, tabela comparativa com superfície uniforme e sem cinza isolado no rótulo horizontal); JG-19 (faixas de área útil do gabarito 1T26 no lugar do número de dormitórios, e IVV calculado do cubo pela PRE-009 em vez do endpoint que responde 500); JG-20–24/28–31 (`domain/conditional-format.ts`: regra semântica única, cinco estados, cor nunca como único sinal; participação de maturidade passou a dividir cada coluna pelo próprio total — antes **todas** as colunas usavam o total final, e era esse o "percentual bem errado"); JG-22/26/27 (subtotal soma os lançados **após** 2024 e vem **depois** de 2026); JG-25 (gráfico de barras com variação entre períodos); JG-32–35 (universo PRE-026, tabela horizontal no formato da vertical, supressão por ausência de oferta ativa, condomínios após o subtotal vertical); JG-36–38 (narrativa sem loteamento e sem "API GeoBrain", tipologia por extenso, preços de vertical e Condomínio de Casas calculados e apresentados em separado); JG-39 (lâmina de mapa restaurada ao manifesto, entrando só com tiles e marcadores prontos — antes o divisor ficava órfão); JG-40 (encerramento sem placeholder de foto).
+- **Evidência:** 171 testes da feature e 307 do repositório passando; `tsc --noEmit` limpo; `npm run build` aprovado. `tests/panorama-v3-jg.spec.ts` dirige a aplicação real com a API interceptada e captura **todas** as páginas dos cenários Jundiaí, Praia Grande e Baixada, mais PDF e PPT espelho — os três passam em 2,1 min, com paridade medida entre preview, PDF e PPT (55 / 58 / 61 páginas). Replay do dataset autenticado de 01/set (924 horizontais, 24 municípios) pela política do produto: **divergência zero**, 11/11 aceitos, nenhum rótulo sem mapear. Coleta autenticada reconfirmou `ivv?group_by=Tipologia` em HTTP 500 nas 4 cidades da Baixada.
+- **Três defeitos achados pela própria evidência:** oferta anterior negativa (−35) na lâmina de área útil, corrigida com piso em zero e total somando as linhas impressas; coluna de IVV visualmente apagada porque o estado neutro repintava a barra de cinza; e — o mais grave — **o PPT espelho nunca era gerado depois do PDF**: o guard de execução do `PanoramaExportHost` usava só a identidade do relatório, então pedir o PPT do mesmo recorte reencontrava a chave anterior e a exportação ficava presa em "Preparando…", sem erro e sem timeout. O guard passou a considerar formato e relatório. Antes de concluir, a hipótese de que o custo estava em `pptx.write({compression:true})` foi medida e **descartada** (0,4 s com e sem compressão em 55 lâminas).
+- **Limites declarados:** conferência visual manual em desktop/mobile e claro/escuro **não** foi executada — a rota é uma lâmina 16:9 de largura fixa e o equivalente headless (captura de todas as páginas + PDF + PPT reais) foi usado no lugar. A reverificação ao vivo do contrato v2 ficou bloqueada no fim da sessão porque `POST /auth/login` passou a responder HTTP 422 sem emitir token; leituras posteriores a esse ponto foram descartadas por não distinguirem defeito de produto de ausência de credencial. Nas três coletas, `group_by=Padrão` falhou no transporte em todas as séries enquanto `group_by=Tipologia` respondeu 200 — registrado como medição, não diagnosticado.
+- **Arquivos:** [`DOSSIER_V3_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/opus-v3-closure/DOSSIER_V3_2026-09-01.md) e [`MATRIZ_40_40_PANORAMA_V3_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/opus-v3-closure/MATRIZ_40_40_PANORAMA_V3_2026-09-01.md).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** 40/40 endereçados, nenhum `blocked`. A V3 **não** foi promovida a padrão e nada foi enviado ao remoto. Pendências: conferência visual humana antes da homologação com a analista; investigação, com a manutenção da API, da falha de `group_by=Padrão` e do 500 sistemático de `ivv` por Tipologia.
+
+### 2026-09-01 — Plano Opus para fechamento total da V3 — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento editorial, dados e homologação.
+- **O quê:** criado plano terminal para o Opus começar pela leitura, em modo somente leitura, do último estudo de correção V2 carregado no banco; guardar fonte e comentários extraídos em `.tmp/opus-panorama-v3/`, reconciliar com JG-01–JG-40 e corrigir cada página com evidência individual. O plano preserva as regras horizontais já implementadas e exige preview/PDF/PPT/dossiê/matriz 40/40 antes de qualquer promoção.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-01 — Panorama: correção fina do alinhamento do botão — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — controles de recorte.
+- **O quê:** a captura de homologação mostrou que a reserva de rótulo ainda deixava o botão acima dos selects. A coluna da ação passou a usar deslocamento explícito de 30px, alinhando o topo do botão ao topo dos campos.
+- **Evidência:** build de produção concluído; validação visual automatizada segue indisponível neste ambiente.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-01 — Panorama: alinhamento do botão de geração — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — controles de recorte.
+- **O quê:** o botão de gerar passou a reservar a mesma altura de rótulo dos filtros. Ele não é mais empurrado pela mensagem de estado abaixo do seletor de municípios e permanece alinhado aos inputs.
+- **Evidência:** build de produção concluído.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-09-01 — Panorama: V3 única na tela e evidência autenticada resiliente — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — controle de recorte e diagnóstico autenticado.
+- **O quê:** removido o seletor de motor: a tela envia exclusivamente V3. O botão primário recebeu largura mínima e alinhamento no grid para manter “Consultando APIs…” legível. O coletor autenticado passou a ter timeout de 12s por chamada, progresso por série e checkpoint JSON/Markdown a cada resultado em `.tmp`, preservando evidência parcial em vez de travar a sessão.
+- **Evidência:** Jundiaí autenticada confirmou alternância do contrato granular V2 (`200` e `500` em tentativas distintas), legado com 165 empreendimentos e séries temporais parcialmente registradas antes do limite de execução. Build e testes do núcleo foram aprovados antes do ajuste do coletor; `node --check scripts/panorama-evidence.mjs` aprovou depois dele. Automação visual não pôde rodar porque o binário `agent-browser` não está instalado no ambiente.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** V3 é a única opção produtiva; a V2 fica somente no código de compatibilidade. Preview/PDF/PPT e a evidência 40/40 seguem pendentes de verificação renderizada/autenticada.
+
+### 2026-09-01 — Panorama V3: PRE-027 e circuito de IVV por tipologia — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — continuidade da V3 paralela à V2.
+- **O quê:** o cubo V3 resolve padrão em ordem cronológica, marca a origem como `observed`, `inherited` ou `unclassified`, ignora o marcador `Futuro` e não consulta `building.standard` como look-ahead. IVV por Tipologia recebe uma repetição de confirmação; um 5xx confirmado abre circuito no restante da geração, preservando as demais séries e registrando cidade/status/chamadas evitadas na fonte indisponível.
+- **Evidência:** 58 testes de domínio/modelo passaram e `npm run build` concluiu com sucesso.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** PRE-027 e o comportamento técnico inicial do circuito estão implementados; falta gerar a evidência autenticada e finalizar JG-01–JG-40, sem promoção da V3.
+
+### 2026-09-01 — Panorama V3: trilho oficial de universo e resiliência — Gabriel Hxg
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — V3 paralela à V2, sem promoção de padrão.
+- **O quê:** V3 usa `building-with-history` v2 com retry limitado para falhas transitórias (rede, 408, 429 e 5xx), sem fallback legado; horizontais só passam por rótulo oficial do payload, nunca por nome. Lançamentos e coortes V3 são emitidos pelo cubo já filtrado. A tela mantém V2 como padrão e expõe o seletor V3; manifesto suprime bloco horizontal vazio e mapa sem coordenadas.
+- **Evidência:** 72 testes direcionados aprovados (incluindo resiliência e política V3). A compilação TypeScript/Vite foi iniciada; o ambiente não devolveu o término do Vite após `transforming`, portanto preview/PDF/PPT e cenários autenticados continuam pendentes de homologação com token.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a segue em QA. Faltam circuit breaker explícito, herança PRE-027 por período, os 40 fechamentos visuais individualizados e os artefatos autenticados; nenhum deles foi marcado como concluído sem evidência.
+
+### 2026-09-01 — Matriz terminal dos 40 comentários de Juliana para a V3 — Gabriel
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento editorial e visual da V3.
+- **O quê:** as 40 anotações do PDF corrigido foram convertidas em requisitos `JG-01` a `JG-40`, preservando comentários repetidos por página e separando as duas anotações de p40, p42 e p52. A matriz cobre fontes, universo horizontal, rótulo zero/2T26, fundos trimestrais, IVV/metragens, formatação condicional, subtotais, percentuais, gráfico de barras, tabelas, páginas condicionais, narrativas, dormitórios, preços, mapa e consultor.
+- **Plano:** executar conjuntamente [`PLAN_TERRA_PANORAMA_V3_UNIVERSO_HORIZONTAL_TERMINAL_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_TERRA_PANORAMA_V3_UNIVERSO_HORIZONTAL_TERMINAL_2026-09-01.md) e [`MATRIZ_TERMINAL_40_COMENTARIOS_JULIANA_PANORAMA_V3_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/MATRIZ_TERMINAL_40_COMENTARIOS_JULIANA_PANORAMA_V3_2026-09-01.md).
+- **Commits:** — (registro desta sessão).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA; o aceite da V3 agora exige evidência individual 40/40, além dos portões técnicos do universo horizontal.
+
+### 2026-09-01 — Plano terminal da V3 do Panorama: universo horizontal oficial — Gabriel
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preparação da V3 para homologação interna.
+- **O quê:** fechadas as decisões de produto após o retorno de Juliana: somente `Condomínio de Casas/Sobrados` entra; produto não informado fica fora; quando o histórico trouxer produto em vez de padrão socioeconômico, herda-se o último padrão anterior. Cinco matrizes autenticadas registraram 79 respostas 500 transitórias do v2, todas recuperadas na segunda tentativa. Nova auditoria confirmou `ivv` por Tipologia em HTTP 500 nas quatro cidades da Baixada.
+- **Plano:** [`PLAN_TERRA_PANORAMA_V3_UNIVERSO_HORIZONTAL_TERMINAL_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_TERRA_PANORAMA_V3_UNIVERSO_HORIZONTAL_TERMINAL_2026-09-01.md) cobre retry limitado, circuit breaker, política pura, herança temporal, firewall de fontes, manifesto condicional, comentários de Juliana e disponibilização V2/V3 para testes.
+- **Arquivos:** mapeamento do universo, premissas PRE-002/PRE-026/PRE-027, script de taxonomia e plano terminal.
+- **Commits:** — (registro desta sessão).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA; o próximo passo é o Terra executar o plano e disponibilizar a V3 sem promovê-la a padrão antes da homologação.
+
+### 2026-09-01 — Diagnóstico do universo horizontal do Panorama Secovi/FIERGS — Gabriel
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — correção da V2 após retorno de Juliana e orientação de Edgar.
+- **O quê:** documentado o diagnóstico autenticado que cruza as 40 anotações da analista com a taxonomia de `standard`/`typologies_history[].pattern` em 24 municípios. A regra estrita identifica apenas `Condomínio de Casas/Sobrados`, encontra 11 empreendimentos elegíveis e suprime o bloco horizontal quando o universo é vazio.
+- **Achado crítico:** `pattern` só aparece no contrato v2; a coleta v2 teve `500` intermitente recuperável com retry, não indisponibilidade permanente. A implementação da correção ainda não começou.
+- **Arquivos:** [`MAPEAMENTO_UNIVERSO_HORIZONTAL_SECOVI_2026-09-01.md`](../features/Relatorios%20Secovi_FIERGS/MAPEAMENTO_UNIVERSO_HORIZONTAL_SECOVI_2026-09-01.md), `scripts/panorama-horizontal-taxonomy.mjs`, `scripts/panorama-evidence.mjs`.
+- **Commits:** — (registro desta sessão).
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA/homologação autenticada; antes de implementar, é necessário decidir o tratamento do padrão socioeconômico ausente, aceitar explicitamente a redução do universo e confirmar a regra com Juliana.
+
+### 2026-09-01 — Validação do Fechamento: regra desativada e nomenclatura de divergências — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — validação pós-consulta.
+- **O quê:** desativada a regra de baixa disponibilidade para novos empreendimentos e renomeada a coluna/exportação de `Erro` para `Divergência`.
+- **Por quê:** manter a regra temporariamente fora do processamento e alinhar a nomenclatura exibida ao resultado da validação.
+- **Arquivos:** `src/features/validacao-fechamento/validation-rules.ts`, `src/features/validacao-fechamento/DivergencesGrid.tsx`.
+- **Commits:** `44717c1`.
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME; regra de baixa disponibilidade permanece desativada até eventual reativação solicitada.
+
+### 2026-08-31 — Validação do Fechamento: consulta interna e divergências — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — validação pós-consulta de empreendimentos e tipologias.
+- **O quê:** a feature consulta exclusivamente `building-with-history-internal`, preserva os campos internos necessários e executa as tratativas v3 somente depois de concluídas todas as requisições. A guia **Divergências** inclui cidade, status, período e grupo aplicado, quebra o conteúdo da tabela, apresenta Campo em PT-BR, mantém Valor visível durante a rolagem, explica os agrupamentos das comparações, restringe Erro pela Regra selecionada, permite limpar os filtros locais e exporta o recorte completo em Excel.
+- **Por quê:** disponibilizar no produto as regras já definidas para conferência de fechamento, sem alterar o Dashboard GeoBrain.
+- **Arquivos:** `src/features/validacao-fechamento/api.ts`, `validation-rules.ts`, `DivergencesGrid.tsx`, `use-vf-data.ts`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** — (alterações locais ainda não commitadas).
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** RUNTIME pendente de homologação funcional com token e amostra produtiva.
+
+> **Panorama V2 · revisão visual pós-deploy · 31/ago/2026:** produção confirmou quatro resíduos da V1: capa vermelha ainda é a primeira página, fundos 2026 foram aproximados em CSS, rodapé legado é injetado globalmente e comprime inclusive equipe/consultor, e o carregamento não informa percentual/ETA. A inspeção dos PPTX mostrou fundos vazios canônicos nos slides 1–4 do deck institucional, correspondentes a capa, divisória, equipe e conteúdo do estudo da Baixada. Plano terminal: [`PLAN_TERMINAL_CORRECAO_VISUAL_V2_POS_DEPLOY_2026-08-31.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_TERMINAL_CORRECAO_VISUAL_V2_POS_DEPLOY_2026-08-31.md). **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — 12517501135.
+
+> **Panorama V2 · ponderação e horizontais multicidades · 31/ago/2026:** IVV, ticket e preço por m² agora consolidam municípios por **média ponderada pelo estoque final** no mesmo fechamento, segmento e recorte; quando o endpoint não oferece estoque correspondente, o relatório preserva o valor disponível com média simples e não inventa peso zero. Testes do motor: **16/16 aprovados**. Auditoria autenticada do fallback legado `building-with-history` para Guarujá, Praia Grande, Santos e São Vicente encontrou 75 horizontais: somente 3 Condomínios de Casas (todos em Praia Grande) entram no universo Secovi; 72 outros horizontais ficam excluídos. O endpoint v2 respondeu 401 com esse token e permanece sob fallback legado explícito até paridade de autenticação. **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — 12517501135.
+
+> **Panorama V2 · 31/ago/2026:** base visual implementada (capa multicidade, sumário/divisórias dinâmicos e créditos híbridos); `official_v2/` guarda os três perfis fixos aprovados. O modelo calcula comparativos municipais apenas quando toda a coleta fecha; falta posicionar as três lâminas condicionais no manifesto e homologar preview/PDF multicidades.
+
+> **Panorama V2 · consistência temporal multicidades · 31/ago/2026:** antes de homologar comparativos, validar a mistura de séries mensais e trimestrais por cidade. O código atual concatena linhas e agrega por trimestre sem contrato de frequência; ele também não reconhece período explícito `1T2026`. Mapeamento e portão de aceite: [`MAPEAMENTO_V2_MULTICIDADES_2026-08-31.md`](../features/Relatorios%20Secovi_FIERGS/MAPEAMENTO_V2_MULTICIDADES_2026-08-31.md). **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — 12517501135.
+
+> **Panorama V2 · evidência autenticada · 31/ago/2026:** token efêmero GeoBrain validado em leitura. `sales` de Guarujá trouxe 22 períodos distintos na janela de 17 trimestres, combinando fechamento trimestral e meses intermediários; a normalização temporal é portão obrigatório. Plano terminal para a Luna: [`PLAN_LUNA_VALIDACAO_TEMPORAL_MULTICIDADES_V2.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_LUNA_VALIDACAO_TEMPORAL_MULTICIDADES_V2.md). **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — 12517501135.
+
+> **Panorama V2 · correção temporal multicidades · 31/ago/2026:** implementado normalizador por município antes do consolidado: fluxos preservam meses, total trimestral explícito tem precedência e snapshots/taxas usam o último ponto disponível até o fechamento. Cobertura: 5 testes novos + 14 regressões existentes e build de produção aprovados. A Luna deve executar a auditoria autenticada e gerar o preview/PDF das quatro cidades; não reimplementar o motor. **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — 12517501135.
+
+**Responsável:** Gabriel · **Rotas:** `/inicio`, `/rebrain/secovi`, `/corretor`, `/atualizador-vgv`, `/qualidade/*`, `/apis/explorer`
+
+Doc vivo do projeto que abriga a **plataforma/shell** (o "Studio Brain" → Rebrain) e as
+features que rodam sobre ela. Ver a convenção e a regra de atualização em [`README.md`](./README.md).
+Atualize **Desenvolvimentos / Etapas / Pendências** sempre que sincronizar uma alteração relevante.
+
+> **Corretor \| Estudos Vocacionais** é parte do Rebrain mas tem doc vivo próprio e detalhado:
+> [`../features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`](../features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md).
+> Mudanças de **regra/prompt/schema/extração** do Corretor vão lá; aqui registramos só o marco.
+
+---
+
+### 2026-10-06 — FIERGS: retorno da Juliana sobre condomínios de casas — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs`, análises horizontais de produto, preços e VGV.
+- **Diagnóstico:** o PPT de 69 slides anotado por Juliana pede casas agregadas em 57/59/60 e três produtos no 55. A auditoria anterior de 2T2026 tinha sete condomínios, mas o PPT atual mostra só loteamentos no 57; há também mudança de um loteamento aberto entre as fotografias. O VGV rotulava grupos horizontais por padrão como se todos fossem casas.
+- **Mudança local:** aceitar grafias explícitas adicionais de casas na política FIERGS; usar rótulo único nas páginas horizontais; abrir VGV por condomínio, loteamento aberto e fechado, preservando subtotais. Chácaras continuam excluídas, e “Média Loteamentos” não incorpora casas. “Desconsiderar” no 55 foi interpretado como estrutura antiga, não exclusão da página inteira — decisão editorial a confirmar se Juliana discordar.
+- **Verificação e novo avanço:** 276 testes da feature e build aprovados **antes** da contingência de produto; TypeScript global segue bloqueado apenas por fixtures antigas do Corretor. PDF/CSV autenticados de 2T2026 gerados antes dela em `.tmp/fiergs-juliana-oct06-regression/` mostravam os sete IDs rejeitados por `subtipo_horizontal_indefinido`; consulta pontual ao payload atual falhou por timeout. Foi acrescentado catálogo dos sete produtos observados na auditoria autenticada de 02/10, usado só quando o produto atual é indefinido e nunca para sobrescrever produto explícito. A pedido de Gabriel, não rodamos novos testes nem geramos outro estudo: ele fará a geração no site após a publicação. Evidência em `docs/features/Relatorios Secovi_FIERGS/EVIDENCIA_RETORNO_JULIANA_HORIZONTAL_2026-10-06.md`. Homologação não concluída.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-10-01 — Panorama FIERGS: média horizontal para nova rodada com Juliana — Gabriel + Codex
+
+- **Decisão:** a coluna do consolidado horizontal passa a mostrar unidades lançadas por empreendimento, derivadas do mesmo cubo histórico e explicitadas no cabeçalho/legenda. Nenhum número é fixado no runtime. A interpretação é editorial e pode ser revista após a validação da Juliana.
+- **Conferência:** o PDF publicado `(3)` tem 72 páginas; os quadros auditados fecham 16.110 lançadas, 134 empreendimentos e 5.414 finais; tipologias de preço coincidem entre tabela e gráfico. O PDF `(3)` antecede a nova média e precisa ser regenerado. A arte institucional ainda mostra 22 anos; substituição será tratada com o marketing, conforme informado pelo usuário.
+- **Rastreabilidade:** [evidência da segunda revisão](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_SEGUNDA_REVISAO_JULIANA_FIERGS_2T2026_2026-10-01.md) e [resumo de homologação](../features/Relatorios%20Secovi_FIERGS/RESUMO_AJUSTES_POS_VALIDACAO_JULIANA_FIERGS_2T2026.md). A próxima validação é funcional/editorial, não homologação institucional final.
+
+### 2026-10-01 — Panorama FIERGS: segunda revisão da Juliana — Gabriel + Codex
+
+- **Entrega local:** reconciliação da Oferta Lançada pela janela selecionada, mantendo oferta final e vendas no histórico de fechamento; guardas dimensionais para ambos os recortes; gráficos de preço por tipologia alinhados à série temporal; revisão das páginas horizontais e supressão condicionada de páginas sem dados completos.
+- **Evidência:** regressões FIERGS 2T2026 e 4T2025 geradas em PDF, com 72 páginas e 39 verificações por período sem divergência crítica; 264 testes FIERGS, TypeScript e build aprovados. A fonte GeoBrain mudou desde o arquivo revisado pela Juliana, então valores atuais não devem ser comparados diretamente com aquela captura sem controlar o snapshot.
+- **Estado de homologação:** ainda pendem material institucional atualizado, definição sobre a média da página horizontal e confirmação da metodologia de preço por tipologia. Nenhum desses pontos foi declarado homologado. O PDF final deve ser regenerado após a publicação para refletir o último ajuste de legenda.
+- **Código/evidência:** commit local `a16c1e7`; [registro dos portões G0–G5](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_SEGUNDA_REVISAO_JULIANA_FIERGS_2T2026_2026-10-01.md). Sem push até autorização após nova conferência da divergência com o remoto.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-08-31 — Panorama V2: comparativos municipais completos e exportação para homologação — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — recortes multicidade completos, prévia, PDF e PPT espelho.
+- **Estado de entrega:** os três comparativos municipais quantitativos da referência Baixada Santista estão implementados e condicionados a coleta completa de todas as cidades: **vendas líquidas por cidade**, **mercado por cidade e segmento** e **disponibilidade vertical por padrão × cidade**. Sumário, paginação, leitura contínua, PDF e PPT consomem o mesmo manifesto (60 páginas no multicidade completo; 57 no recorte simples).
+- **Exportação:** PDF e PPT espelho usam a mesma captura 1920×1080; os rótulos de todos os trimestres, inclusive `1T`, são forçados no eixo dos gráficos temporais. O PPT é visualmente fiel, mas permanece não editável internamente.
+- **Aceite restante:** homologar em produção um recorte GeoBrain autenticado, conferindo valores e os dois arquivos. Não há pendência de implementação para os comparativos; PPT editável é escopo V3.
+- **Commits:** `3277b0b`, `cff0bf8`, `fd8c69a`, `fa89567`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+
+### 2026-08-31 — Panorama V2: PPT espelho e rótulos temporais completos — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — exportação de entregáveis e gráficos temporais.
+- **O quê:** incluído o botão **Baixar PPT espelho**. Ele usa a mesma captura JPEG 1920×1080 do PDF e monta uma lâmina 16:9 por página no `.pptx`, preservando visual, paginação e fundos; por definição, os elementos do relatório não são editáveis individualmente. A exportação informa o formato em andamento e mantém download, cancelamento e nova tentativa do fluxo atual.
+- **Correção PDF/PPT:** o `XAxis` dos gráficos temporais agora força todos os trimestres e reserva respiro nas extremidades, impedindo que a legenda de `1T` seja descartada pelo algoritmo automático do Recharts na prévia, no PDF e no PPT espelho.
+- **Verificação:** typecheck, build de produção e 257 testes/33 suítes aprovados. O PPTX foi gerado em memória com Blob válido (44.761 bytes); preview sem autenticação confirmou a rota, mas o aceite visual de um recorte real continua pendente por não haver sessão GeoBrain neste ambiente.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{lib/pdf-export.ts,export-store.ts,components/{PanoramaExportHost.tsx,ReportPaginator.tsx},__tests__/pdf-export.test.ts}`, `package.json`.
+- **Commits:** `fd8c69a`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** PPT espelho passa a estar em runtime; PowerPoint editável permanece explicitamente como escopo V3. Falta apenas homologar os dois downloads com um recorte autenticado real.
+
+### 2026-08-31 — Panorama V2: enquadramento integral e mercado municipal por segmento — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capa, institucional, encerramento e comparativos multicidade.
+- **O quê:** a capa passou a usar “Panorama imobiliário de”; os conteúdos institucionais ganharam área segura inferior para não cortar a lista de valores; e os fundos V2 passam a preencher o canvas 16:9 sem `cover`, preservando integralmente a arte do encerramento institucional. O comparativo de mercado deixou de somar cada cidade em uma linha: agora reproduz a referência com linhas distintas de residencial vertical e Condomínio de Casas por município, seguidas do total geral.
+- **Cobertura multicidade:** a referência Baixada possui três comparativos quantitativos por cidade: vendas líquidas, mercado por segmento e disponibilidade vertical por padrão. Os três estão no manifesto condicional; as demais páginas daquele bloco são consolidadas ou narrativas, não tabelas municipais adicionais.
+- **Verificação:** 58 testes direcionados e build de produção aprovados. O aceite visual autenticado em preview/PDF permanece pendente neste ambiente sem runner de navegador.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/{ReportPaginator.tsx,MarketSlides.tsx},print/panorama-print.css,report/model.ts,types.ts,__tests__/report-model.test.ts}`, `docs/features/Relatorios Secovi_FIERGS/MAPEAMENTO_V2_MULTICIDADES_2026-08-31.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** conteúdo e enquadramento seguem o deck de referência; falta somente a homologação visual e numérica autenticada no recorte real.
+
+### 2026-08-31 — Panorama V2: encerramento único e comparativos condicionais — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — manifesto, sumário, leitura contínua e exportação PDF.
+- **O quê:** removidas as referências finais duplicadas 61 e 62; a referência 60 é o único encerramento institucional do livro. Em recortes com todas as cidades concluídas, o manifesto passa a inserir após o resumo de mercado três páginas: vendas líquidas por município, oferta/disponibilidade por município e disponibilidade vertical por padrão × cidade. Sumário, paginação, leitura contínua e PDF consomem o mesmo manifesto: 57 páginas no recorte simples e 60 no multicidade completo. Coleta parcial continua sem comparativos.
+- **Unidades e preço horizontal:** a correção de VGV municipal em R$ milhões permanece aplicada antes da normalização. Para Condomínio de Casas, preço/área/R$/m² vêm do `building-with-history`, única fonte que permite filtrar o subtipo Secovi; o endpoint temporal agrega todos os horizontais e não pode substituir essa fonte sem reintroduzir loteamentos. Ausência desses campos no payload permanece indisponibilidade explícita, não zero.
+- **Verificação:** 60 testes direcionados aprovados e build de produção aprovou. O runner visual autenticado não está disponível neste ambiente; conferir em produção o recorte real e o PDF continua sendo o aceite visual.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/manifest.ts,components/ReportPaginator.tsx,pages/PanoramaSecoviFiergsPage.tsx,__tests__/pdf-export.test.ts}`, `docs/features/Relatorios Secovi_FIERGS/MAPEAMENTO_V2_MULTICIDADES_2026-08-31.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** as páginas comparativas deixam de ser pendência de implementação; resta homologar, com sessão GeoBrain autenticada, os valores reais de vendas e preços e a composição visual do PDF.
+
+### 2026-08-31 — Panorama V2: estabilidade multicidade, unidades monetárias e margens — Gabriel + Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração, séries temporais, preview e PDF.
+- **O quê:** removida a previsão de tempo instável, preservando o percentual por chamadas realmente concluídas; limitada a coleta a uma cidade e quatro requisições simultâneas para evitar o cancelamento do fallback de empreendimentos observado em recortes de três cidades. Vendas e R$/m² sem fonte temporal passam a declarar indisponibilidade, sem preencher tabelas/gráficos com zeros. O VGV das fontes municipais agora é convertido de reais para **R$ milhões antes da normalização**, corrigindo séries e faixas anuais que exibiam valores em reais sob legenda de milhões. As páginas V2 receberam margem interna segura, sem comprimir fundos, capa ou rodapé.
+- **Verificação:** 29 testes direcionados aprovados e build de produção aprovado; preview local com fixtures confirmou margem de sumário, divisória, página institucional, tabela e PDF. O runner `agent-browser` não está instalado e o Playwright compartilhado aponta dependência ausente; a homologação autenticada do recorte real segue pendente.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,pages/PanoramaSecoviFiergsPage.tsx,components/PanoramaLoadingState.tsx,components/ReportPaginator.tsx,components/MarketSlides.tsx,print/panorama-print.css,__tests__/report-model.test.ts}`, `docs/features/Relatorios Secovi_FIERGS/MAPEAMENTO_V2_MULTICIDADES_2026-08-31.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** comparativos municipais continuam calculados, mas ainda precisam das três páginas condicionais e da homologação autenticada de vendas/R$/m²; nenhuma ausência de fonte deve voltar a se passar por resultado numérico.
+
+### 2026-08-28 — Teste headless da exportação percentual do AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — exportação Excel.
+- **O quê:** adicionada cobertura Vitest para a conversão dos percentuais, o tipo numérico das células, o formato `0.00%` e a preservação de valores nulos/vazios.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`, `src/pages/__tests__/RelatorioAelo.test.ts`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
+### 2026-08-28 — Landing de entrada orientada por objetivo — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/inicio` — página de entrada da plataforma Rebrain.
+- **O quê:** substituído o painel operacional de KPIs de auditoria e atividade recente por uma landing de direcionamento. A página agora organiza os ambientes por três objetivos (gerar relatório de mercado, analisar mercado/pesquisa e validar/atualizar dados), identifica o tipo de estudo em cada destino e permite destacar os fluxos por público (Analistas, Pesquisa, Gestão, Operação ou Técnico). Todos os módulos ativos possuem acesso direto; API Explorer ficou como ferramenta de apoio.
+- **Verificação:** build de produção e typecheck aprovados. Conferência local em navegador confirmou conteúdo, rota `/inicio` e ausência de overlay de erro; o ambiente bloqueou somente o carregamento das fontes externas do Google.
+- **Arquivos:** `src/pages/Home.tsx`, `src/App.css`.
+- **Impacto em Etapas/Pendências:** a entrada deixa de depender de métricas que não orientavam a escolha do usuário. O próximo aceite é validar com os públicos reais a nomenclatura dos objetivos e o encaixe de cada fluxo.
+
+### 2026-08-28 — Panorama: remoção da abertura residual — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — composição do livro, prévia e exportação PDF.
+- **O quê:** retirada da V1 a abertura estática `Panorama imobiliário de {cidade}` (referência 4), pois ela não recebe com segurança os municípios do recorte. A capa dinâmica da página 2 continua sendo a única capa com cidades; a máscara CSS experimental foi removida integralmente, sem afetar os slides institucionais.
+- **Verificação:** o manifesto agora contém 60 páginas ativas, sem as referências 4 e 56; 108 testes da feature, typecheck e build de produção aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/manifest.ts,components/ReportPaginator.tsx,print/panorama-print.css,__tests__/pdf-export.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** a abertura só deve retornar numa V2 com composição dinâmica aprovada; o mapa permanece suspenso até configuração e homologação Mapbox no deploy.
+
+### 2026-08-28 — Panorama: mapa de empreendimentos temporariamente desativado — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slide de mapa de empreendimentos verticais.
+- **O quê:** removido o slide de mapa da composição do preview e do PDF enquanto o ambiente publicado não recebe `VITE_MAPBOX_ACCESS_TOKEN`. O livro passa a ter 61 páginas e os controles usam a contagem real; a abertura de Localização permanece como peça editorial, sem exibir um mapa indisponível.
+- **Verificação:** manifesto e contrato de exportação atualizados; testes da feature, typecheck real e build de produção aprovados nesta entrega.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/manifest.ts,components/ReportPaginator.tsx,__tests__/pdf-export.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** mapa passa a ser V2 até a chave Mapbox estar configurada no deploy e o PDF autenticado ser homologado.
+
+### 2026-08-28 — Panorama: erros da GeoBrain em linguagem de produto — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração do panorama quando séries temporais não podem ser consultadas.
+- **O quê:** a falha técnica dos endpoints temporais passou a ser traduzida para quatro orientações práticas: sessão expirada/sem permissão, indisponibilidade momentânea da GeoBrain, consulta recusada que exige ajuste da integração do relatório, ou ausência de dados publicados para o recorte. A mensagem informa de quem é a próxima ação e confirma que o relatório foi bloqueado para não representar a indisponibilidade como zero.
+- **Verificação:** 108 testes do Panorama, typecheck real e build de produção aprovados; testes dedicados cobrem acesso, provedor indisponível, requisição inválida e resposta vazia.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,__tests__/api-error-messages.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** usuários não técnicos passam a receber uma orientação acionável sem códigos HTTP; a investigação autenticada de Jundiaí continua necessária se a API não publicar séries para o recorte.
+
+### 2026-08-28 — Panorama: impedir séries temporais vazias de virarem zeros — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — vendas, preços, estoque e IVV por trimestre.
+- **O quê:** corrigido o fallback que aceitava `HTTP 200` com lista temporal vazia como fonte disponível e, por consequência, compunha gráficos e tabelas inteiros com zero. Uma resposta sem linhas agora é identificada na proveniência; quando todos os endpoints temporais de uma cidade estão indisponíveis, a geração é interrompida com os endpoints e seus status, em vez de produzir um relatório numérico falso.
+- **Verificação:** 105 testes do Panorama, typecheck real e build de produção aprovados. Próximo aceite: executar Jundiaí autenticado e registrar a mensagem retornada para corrigir o contrato/parâmetro que estiver sem dados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/api.ts`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** nenhuma lâmina temporal deve voltar a representar indisponibilidade da API como valor zero; permanece necessária a evidência autenticada de Jundiaí para fechar a causa no endpoint.
+
+### 2026-08-28 — Panorama: mapa do slide 56 passa a usar Mapbox — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — mapa de empreendimentos verticais (slide 56).
+- **O quê:** substituído o mosaico CARTO, que passou a inserir marca d’água sem chave, por tiles Mapbox no mesmo planejador limitado e testado. A chave pública é lida exclusivamente de `VITE_MAPBOX_ACCESS_TOKEN`; sem ela, o slide informa que o fundo cartográfico não está configurado e não faz requisição incompleta. O arquivo de exemplo documenta a variável sem registrar valor.
+- **Verificação:** 105 testes do Panorama, typecheck real e build de produção aprovados. Próximo aceite: conferir o PDF autenticado com a variável também configurada no ambiente de deploy.
+- **Arquivos:** `.env.example`, `src/features/panorama-secovi-fiergs/{lib/map-tiles.ts,components/MarketSlides.tsx,__tests__/map-tiles.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** eliminada a dependência de tiles CARTO sem credencial; manter a chave Mapbox restrita aos domínios da aplicação e cadastrada no ambiente publicado.
+
+### 2026-08-28 — Panorama: capa estática consistente e rótulos de preço legíveis — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slide 3 e série histórica de preço por m².
+- **O quê:** o texto residual `Panorama imobiliário de` da arte estática foi neutralizado no slide 3, pois o nome do recorte pertence exclusivamente à capa dinâmica da página 2; a máscara foi calibrada pela posição real do canvas, sem alterar a capa PMI. No gráfico de preço por m², os rótulos trimestrais agora alternam quatro patamares, preservam proximidade com o ponto e desenham guia fina sempre que precisam ser deslocados.
+- **Verificação:** 105 testes do Panorama, typecheck real e build de produção aprovados. Ajuste visual deve ser conferido no próximo PDF autenticado.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** o mapa do slide 56 não usa mais uma fonte de tiles sem credencial: a CARTO passou a exigir chave para remover a marca d’água. A alternativa recomendada é uma chave pública gratuita configurada por ambiente; migrar para provedor vetorial sem chave é uma tarefa separada porque muda a captura do PDF.
+
+### 2026-08-28 — Panorama: nunca exportar relatório zerado por falha de coleta — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração de relatório e coleta de empreendimentos.
+- **O quê:** a primeira tentativa de migração do contrato granular para v2 fez a coleta municipal falhar e o fluxo anterior ainda renderizava o modelo indisponível como tabelas zeradas. A coleta v2 agora possui fallback explícito para o contrato legado já funcional; se ambos falharem, nenhuma cidade concluída gera erro humano com cidade e causas dos dois contratos, sem exibir nem permitir exportar um PDF fictício de zeros.
+- **Verificação:** testes da feature, typecheck real e build executados nesta entrega. Próximo aceite: recorte autenticado de Jundiaí deve voltar a apresentar dados legados; caso v2 falhe, a tela explicará o status sem ocultá-lo.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,pages/PanoramaSecoviFiergsPage.tsx}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** nenhum relatório vazio será apresentado como resultado; a promoção definitiva para v2 continua dependente de evidência autenticada de paridade.
+
+### 2026-08-27 — Panorama: contrato granular v2 e geocoordenadas decimais — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — coleta de empreendimentos, slide 49 e slide 56.
+- **O quê:** identificado e corrigido o parser que removia o ponto decimal de coordenadas retornadas como string pelo contrato v2 (por exemplo, `-23.1857` virava `-231857` e era descartado como fora do globo). A coleta granular do Panorama foi alinhada ao endpoint `POST api.geobrain.com.br/public-api/v2/building-with-history`, já utilizado pelo Dashboard GeoBrain, cobrindo status Ativo/Esgotado e deduplicando por empreendimento. O vazio do slide 49 agora separa claramente ausência de Condomínio de Casas elegível da ausência de preço no universo permitido; a política Secovi continua sem assumir que todo horizontal é condomínio.
+- **Verificação:** 105 testes do Panorama, typecheck real e build aprovados. Os dois endpoints respondem 401 sem JWT neste ambiente; validar o payload v2 autenticado de Jundiaí é o próximo aceite para confirmar campos de subtipo/preço e a recuperação dos pontos no mapa.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,domain/cube.ts,components/MarketSlides.tsx,__tests__/opus-cube-aggregations.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** o erro determinístico de geolocalização foi removido; a pendência restante é evidência autenticada para mapear o subtipo horizontal oficial e confirmar a cobertura real de preços.
+
+### 2026-08-27 — Panorama: capa central, ausência de dados explícita e isolamento por página — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capa 2, slides 48–49, leitura contínua e exportação.
+- **O quê:** a composição da capa 2 foi centralizada no canvas inteiro: cidade, faixa amarela e trimestre ocupam o mesmo eixo vertical, com a faixa entre o nome e o período. As lâminas de coorte e preço agora removem anos integralmente zerados e mostram uma mensagem objetiva quando a API não devolve dados observados; em especial, o slide 49 não apresenta mais a tabela enganosa `Média Geral —`. A renderização de cada página foi isolada por um error boundary: uma lâmina com falha passa a apresentar seu estado local, preservando a leitura e a exportação das demais. O planejador de tiles tem teste adicional para extremos geográficos válidos, mas inviáveis.
+- **Verificação:** testes da feature, typecheck real e build de produção pendentes desta entrega; a QA autenticada deve confirmar a leitura de 62 páginas e distinguir mensagem de ausência de dado de falha da API.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/{ReportPaginator.tsx,MarketSlides.tsx},print/panorama-print.css,__tests__/map-tiles.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** leitura contínua deixa de ter uma única falha global; falta o aceite visual autenticado da capa e a investigação de origem para qualquer ausência de dado que persista na API.
+
+### 2026-08-27 — Panorama: leitura contínua protegida contra coordenadas inválidas — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — ação `Ver as 62 páginas`, slide 56.
+- **O quê:** corrigido o `Invalid array length` que interrompia a leitura contínua: o gerador de tiles agora descarta latitude/longitude fora do globo, limita o mosaico a 20 tiles e não monta o fundo cartográfico quando o recorte é impossível. A contagem de pontos do slide 56 passou a considerar apenas coordenadas válidas.
+- **Verificação:** typecheck real, build e 103 testes do Panorama aprovados, incluindo coordenada extrema e `NaN`.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{lib/map-tiles.ts,components/MarketSlides.tsx,__tests__/map-tiles.test.ts}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** a leitura de 62 páginas não deve mais depender da validade geográfica completa do retorno da API; validar manualmente no recorte que reportou a falha.
+
+### 2026-08-27 — Panorama: tipologia real da API, capa sem corte e mapa base — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 2, 14–27, 34–37 e 56.
+- **O quê:** a inspeção do contrato `BuildingWithHistoricResource` identificou que a API entrega a tipologia em `number_bedroom` (com `type_of_typology` como alternativa), enquanto o adaptador lia apenas aliases inexistentes; isso criava a linha espúria `Não classificado`. O cubo agora lê os campos oficiais também para vendas por período e preço/m². A capa municipal usa a arte inteira sem recorte, centraliza melhor o título e exibe o trimestre uma única vez. Labels históricos ficam próximos ao ponto, recebem fundo que evita invasão da curva e linha-guia somente quando afastados. O mapa ganhou mosaico CARTO/OSM sem chave, com atribuição e pontos projetados nas coordenadas reais.
+- **Verificação:** endpoint sem JWT retornou HTTP 401 neste ambiente; contrato OpenAPI local revisado. Typecheck real, build e 102 testes do Panorama aprovados. Falta a confirmação visual autenticada e a exportação PDF com tiles carregados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{domain/cube.ts,lib/map-tiles.ts,components/{ReportPaginator.tsx,MarketSlides.tsx},print/panorama-print.css,__tests__/{opus-cube-aggregations.test.ts,map-tiles.test.ts}}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a mantém QA autenticado como próximo portão; o dado de tipologia deixa de depender do fallback visível. A infraestrutura de tiles gratuita precisa apenas ser validada na geração real antes do aceite final.
+
+### 2026-08-27 — Panorama: capa municipal única, carregamento com marca e rótulos protegidos — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — geração e apresentação do deck.
+- **O quê:** a posição 2 passou a ser a única capa com o nome das cidades, usando `secovi-cover.jpg` e composição responsiva; capas/aberturas restantes não repetem o nome do recorte. O carregamento inicial e as atualizações em segundo plano usam o componente visual com a marca Brain. Rótulos das séries históricas agora ficam acima dos pontos, omitem zeros e recebem margem adicional do eixo X para impedir colisões; o painel de filtros ganhou coluna de UF independente e botão verticalmente centralizado.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{pages/PanoramaSecoviFiergsPage.tsx,components/PanoramaLoadingState.tsx,components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Verificação:** typecheck real, testes da feature, build e QA visual local devem ser repetidos após a integração; PDF autenticado de 62 páginas permanece o aceite final.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a segue em QA autenticado; falta confirmar a capa e a não sobreposição em dados reais. Layout novo de tabelas e exportação PPTX continuam V2.
+
+### 2026-08-27 — Panorama: plano visual até o slide 33 a partir dos prints — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — filtros, geração e slides 1–33.
+- **O quê:** os dez primeiros apontamentos visuais foram diagnosticados e transformados em plano: multi-select pesquisável com chips, range inicial/final, bloqueio de refetch pesado, correção da capa 2, rodapé dinâmico, legibilidade/colisão de labels, tag vertical compacta e ordenação semântica. O plano inclui causas no código, sequência e matriz de prints para aceite.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/PLAN_CORRECOES_VISUAIS_ATE_SLIDE33_2026-08-27.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em QA; próximo portão é implementar P0–P7 e comparar os prints até o slide 33 antes da inspeção integral do novo PDF.
+
+### 2026-08-27 — Panorama: execução das correções visuais e de fluxo até o slide 33 — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — filtros, geração, capa 2, rodapé e gráficos dos slides 1–33.
+- **O quê:** implementado multi-select pesquisável com chips, período inicial/final inclusivo (`1T2022`–`2T2026` sugerido), query sem refetch automático/skeleton de background, overlay semântico da capa municipal, grid de rodapé dinâmico, tipografia maior, supressão de labels zero, tag vertical compacta e ordenação semântica antes dos cortes.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{pages/PanoramaSecoviFiergsPage.tsx,components/PanoramaCityMultiSelect.tsx,components/PanoramaQuarterRangePicker.tsx,components/ReportPaginator.tsx,components/MarketSlides.tsx,print/panorama-print.css,api.ts,domain/quarters.ts,lib/launches.ts,report/model.ts,types.ts}`.
+- **Verificação:** typecheck real (`tsconfig.app.json`), build de produção e 99 testes da feature aprovados; QA Playwright headless confirmou rota, período padrão e abertura do range picker sem token. QA autenticado, PDF real de 62 páginas e comparação visual completa permanecem pendentes.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a segue em QA autenticado; novo portão é validar multi-cidade, chamadas únicas, rodapé/capa e slides 14–33 com dados reais. Tabela Rebrain e PPTX continuam V2.
+
+### 2026-08-27 — Panorama: refinamento do painel de filtros e confirmação do período — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — painel de seleção antes da geração.
+- **O quê:** reorganizada a grade responsiva para alinhar UF, municípios, período e ação; textos e chips ganham áreas controladas para não deslocar o cabeçalho. O range picker agora mantém um rascunho visual e só aplica início/fim após `Confirmar período`; `Cancelar` descarta a alteração.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx`, `src/features/panorama-secovi-fiergs/components/PanoramaQuarterRangePicker.tsx`, `src/features/panorama-secovi-fiergs/components/PanoramaCityMultiSelect.tsx`.
+- **Verificação:** typecheck, suíte da feature e QA Playwright do fluxo de confirmação aprovados.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** geração/API permanecem inalteradas; falta repetir o aceite com token e cidades reais.
+
+### 2026-08-27 — Panorama: verificação antes × agora de Jundiaí — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — auditoria pós-integração da V1.
+- **O quê:** criado relatório operacional que compara comportamento anterior e atual de cada requisito, reúne evidências de código/testes e cruza individualmente as 28 anotações do PDF de Jundiaí por slide. Itens dependentes de token/PDF real e itens V2 ficaram explicitamente separados.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/VERIFICACAO_ANTES_AGORA_JUNDIAI_V1.md`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a ganha checklist operacional para QA autenticado, PDF de 62 páginas e nova homologação da Juliana.
+
+### 2026-08-27 — Panorama: integração Luna + Opus concluída para validação final — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — V1 Jundiaí.
+- **O quê:** handoff `OPUS_READY` revisado; contrato `cities[]`, política Secovi, período dinâmico e agregações granulares foram conectados à UI/PDF. O manifesto mantém a referência 3 na posição 7, a seleção de municípios é multi-cidade, e os slides 31–51 consomem linhas prontas do cubo com nulos explícitos e remoção da Faixa de Valor sem fonte.
+- **Verificação:** typecheck real (`tsconfig.app.json`) aprovado; suíte 230/230; build de produção gerado; rota local HTTP 200. QA visual autenticado e PDF real de 62 páginas ainda precisam ser executados no ambiente com token/agent-browser.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{domain,types.ts,api.ts,report/model.ts,components,pages,report/manifest.ts,lib/pdf-export.ts}` e testes/documentação associados.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a aguarda somente QA autenticado, PDF final e homologação; G-04/G-05 permanecem V2.
+
+### 2026-08-27 — Panorama: execução da V1 dividida entre Luna e Opus — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — estratégia de execução paralela das correções de Jundiaí.
+- **O quê:** o plano terminal foi separado em duas trilhas com propriedade de arquivos: Opus implementa domínio/API/agregações sem staging ou commit; Luna implementa UI/PDF, aguarda o handoff `OPUS_READY`, revisa o conjunto e cria o único commit integrado após a verificação das 62 páginas. Foram incluídos protocolo contra interferência, contrato congelado, marcadores de handoff e CTAs independentes.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/{PLAN_LUNA_CORRECOES_V1_JUNDIAI.md,PLAN_OPUS_CORRECOES_V1_JUNDIAI.md}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a permanece em andamento; próximo portão é iniciar as duas trilhas na mesma base e concluir a integração única pelo Luna.
+
+### 2026-08-27 — Panorama: feedback de Jundiaí mapeado e plano terminal da V1 — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — fechamento da V1 após retorno da analista.
+- **O quê:** inspecionados os 62 slides e as 28 anotações internas do PDF corrigido de Jundiaí; cada comentário foi resolvido em requisito, ponto técnico e critério de aceite. O mapa incorpora também multi-cidade, períodos posteriores a 1T/26 e a política Secovi de verticais + somente Condomínio de Casas no horizontal. Criado plano terminal para o Luna executar código, QA das 62 páginas, PDF final e resposta de e-mail à Juliana.
+- **Escopo:** novo padrão visual de tabelas e exportação PPTX foram formalmente adiados para V2 por ausência de referência/decisão do card; resumo/narrativas permanecem não homologados porque Juliana declarou não tê-los revisado nesta rodada.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/{MAPEAMENTO_CORRECOES_JUNDIAI_V1_2026-08-27.md,PLAN_LUNA_CORRECOES_V1_JUNDIAI.md}`.
+- **Monday:** [Panorama | Secovi e FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/12517501135) — `12517501135`.
+- **Impacto em Etapas/Pendências:** etapa 7a continua em andamento; o portão agora é executar o plano, gerar novo PDF de Jundiaí e obter a segunda validação da analista.
+### 2026-08-28 — Percentuais numéricos no Excel AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — exportação Excel.
+- **O quê:** campos percentuais passam a ser gravados como números, sem símbolo no valor da célula; o formato numérico `0,00%` é aplicado diretamente nas células.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
+### 2026-08-28 — Preservação de nulos na exportação AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** campos numéricos continuam sendo exportados como números; valores sem informação permanecem nulos, sem preenchimento artificial com zero. Zeros anteriores ao `release_date` continuam sendo aplicados pela regra histórica definida.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
+### 2026-08-28 — Conversão dos percentuais do AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** Entrada, % de Juros Mensal e Desconto à Vista passam a usar o valor original da API dividido por 100 antes da exibição percentual, com duas casas decimais.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
+### 2026-08-26 — Ajuste dos gráficos do AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — resumos gráficos.
+- **O quê:** `Tipo` permanece representando o `Padrão` (`data[].standard`); o primeiro gráfico passa a resumir `Ativos x Esgotados`, e o segundo continua resumindo o tipo de empreendimento.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
+### 2026-08-26 — IDs e organização das colunas do AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** adicionados `ID Empreendimento` e `ID Tipologia`; colunas principais reorganizadas conforme o layout solicitado; colunas trimestrais agora são agrupadas por Estoque, Vendas líquidas, VGV e VGV Estoque.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
+### 2026-08-26 — Valor da parcela e precisão do VGV no AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** adicionada a coluna `Valor da parcela` após `Nº de Parcelas`, preparada para o campo futuro `data[].installment_value`; valores de VGV em milhões passam a ser apresentados com duas casas decimais, mantendo tipo numérico no Excel.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
+### 2026-08-25 — Corte histórico pelo lançamento no AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — séries trimestrais de vendas e estoque.
+- **O quê:** históricos anteriores ao trimestre de `release_date` passam a ser zerados para Vendas líquidas, Estoque e seus VGVs; esses períodos também deixam de influenciar a agregação a partir do lançamento.
+- **Interface:** a regra também é apresentada no informativo visível “Regra da consulta AELO”.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Monday:** [Backlogs & Roadmaps](https://brain381753.monday.com/boards/18398428946) — card não informado.
+
+### 2026-08-19 — Panorama: export 12x mais rápido e leitura contínua das 62 páginas — Gabriel + Claude
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — exportação de PDF e navegação do livro.
+- **Causa medida:** o custo do export não estava nas páginas estáticas, e sim nas webfonts. O `html-to-image` re-baixava e re-embutia Montserrat/Source Sans 3 **a cada lâmina** — ~950 ms por página. Resolvendo o CSS das fontes uma única vez (415 ms) e reaproveitando-o, o export caiu de **87,4 s para 7,3 s** na bancada e ~13 s no fluxo real, com saída **byte a byte idêntica** (mesmos 9.923.588 bytes).
+- **Detalhe do contrato:** `getFontEmbedCSS` filtra pelas fontes usadas no nó recebido. Resolver a partir de uma lâmina isolada devolve vazio quando ela é só imagem, o que alterava a renderização das demais; por isso o CSS é resolvido a partir da **raiz do deck**.
+- **Leitura contínua:** novo modo “Ver as 62 páginas”, que exibe o livro inteiro em rolagem sem gerar arquivo — 0,38 s para montar, reutilizando as mesmas lâminas. O Sumário passa a rolar até a página, com busca restrita ao container do preview (o deck de exportação usa os mesmos rótulos e vem antes no DOM).
+- **Estimativa corrigida:** a ideia de embutir os 21 PNGs oficiais direto no PDF foi **descartada**. A medição por tipo de página mostrou que as estáticas custavam 17,6% do tempo (e não ~1/3, número que vinha de contagem de páginas, não de tempo); depois da correção das fontes o ganho residual seria de poucos segundos, em troca de ~4 MB a mais no arquivo.
+- **Evidência:** bancada Playwright com o `ReportPaginator` real — tempo por página por tipo, comparação byte a byte entre baseline e otimizado em 8 lâminas amostradas, e o fluxo completo com o usuário saindo da página aos 2,5 s. Typecheck, 143 testes, ESLint e build de produção aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{lib/pdf-export.ts,components/ReportPaginator.tsx}`.
+- **Impacto em Etapas/Pendências:** fecha as duas melhorias que estavam previstas para a próxima etapa e torna o reteste autenticado da etapa 7a bem mais barato de repetir.
+
+### 2026-08-19 — Panorama: exportação de PDF passa a rodar em segundo plano — Gabriel + Claude
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — exportação do livro de 62 páginas.
+- **Pedido:** a rasterização leva ~90 s e prendia o usuário na página; ela deveria correr em paralelo com o resto da navegação.
+- **O quê:** o job saiu da árvore da rota. Um store leve (`export-store.ts`) guarda o snapshot do modelo no clique e um host montado pelo `AppLayout` monta as 62 lâminas e executa a captura — o usuário navega para qualquer página sem interromper. O progresso vira um card fixo com barra, ação de **Cancelar** e, ao fim, download automático mais links de baixar novamente/abrir em nova aba. O botão da página virou **“Baixar PDF”**, refletindo o estado global.
+- **Aba oculta:** `waitForSlide` deixou de esperar por `requestAnimationFrame`, que o Chrome não dispara em aba de fundo e congelaria o export justamente quando o usuário troca de aba; quando o documento está oculto, cede o event loop.
+- **Lazy-loading preservado:** o shell monta apenas um portão que assina o store; o host é `lazy()` e só carrega quando há job ativo. O build confirma `ReportPaginator` em chunk próprio (49 kB).
+- **Evidência:** Playwright com o `ReportPaginator` real e a aba se declarando oculta o tempo todo — export iniciado, usuário navegado para fora aos 6 s (paginador desmontado), job concluído e download entregue com os **mesmos 9.923.588 bytes** da execução em primeiro plano. Cancelamento testado: card e deck removidos do DOM, zero downloads, reinício normal. Typecheck, 143 testes, ESLint e build de produção aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{export-store.ts,components/PanoramaExportHost.tsx,components/PanoramaExportGate.tsx,components/ReportPaginator.tsx,lib/pdf-export.ts,lib/official-cover.ts}`, `src/App.tsx`.
+- **Padrão registrado:** [`FRONTEND_DECISIONS.md`](../architecture/FRONTEND_DECISIONS.md) — trabalho longo de feature roda no shell, não na rota.
+- **Impacto em Etapas/Pendências:** a etapa 7a ganha ergonomia para o reteste autenticado. Seguem em aberto, por decisão do Gabriel de testar depois: preview instantâneo das 62 lâminas sem gerar arquivo e o corte de ~1/3 do tempo embutindo os 21 PNGs oficiais direto no PDF.
+
+### 2026-08-19 — Panorama: exportação de PDF deixa de depender de popup — Gabriel + Claude
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — botão de exportação do livro de 62 páginas.
+- **Sintoma:** o clique abria uma aba `about:blank`, a rasterização levava ~90 s e ao final nada acontecia — sem arquivo baixado, sem pré-visualização e sem mensagem de erro.
+- **Causa:** a aba era aberta no clique e só recebia o arquivo minutos depois, via `popup.location.href = blobUrl`. Quando essa navegação não acontece, o código não tinha plano B — o caminho de download só rodava se `window.open` tivesse retornado `null`. Somado a isso, o `catch {}` descartava o erro sem `console.error`, tornando falha e sucesso indistinguíveis para o usuário.
+- **O quê:** a entrega passou a ser por download direto (`<a download>` com nome `panorama-<cidade>-<trimestre>.pdf`), sem abrir aba nenhuma. Ao final aparece “PDF pronto: N páginas” com links para **baixar novamente** e **abrir em nova aba** (agora por gesto real do usuário). O erro passou a ser logado e exibido com a mensagem real. A espera por imagens em `waitForSlide` ganhou teto de 10 s, para que um asset preso não trave a exportação inteira em silêncio.
+- **Evidência:** reprodução com Playwright montando o `ReportPaginator` real — antes: PDF gerado com sucesso e aba presa em `about:blank`, sem download; depois: download de `panorama-piracicaba-1T2026.pdf` com 9,9 MB e 62 imagens embutidas, nenhuma aba extra. Typecheck, 143 testes e ESLint aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,lib/pdf-export.ts}`.
+- **Impacto em Etapas/Pendências:** destrava o reteste visual autenticado da etapa 7a — agora o PDF chega ao disco do analista. Fica registrada a pendência de remover `lib/pdf-print-interceptor.ts`, que não é importado por ninguém e ainda carrega a estratégia antiga de popup e o override de `window.print`.
+
+### 2026-08-18 — Panorama: V1 visual recomposta até o fechamento do livro — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preview e PDF paginado de 62 páginas.
+- **O quê:** os slides 14–26 deixam de compartilhar séries incorretas: famílias por segmento usam verde/amarelo e famílias por padrão usam econômico/demais padrões em vermelho/cinza, com títulos, resumos anuais, variações e cartões MCMV próprios. Os slides 27 e 29–56 passam a ter componentes dedicados para área/IVV, resumo de mercado, oferta por padrão/tipologia/coorte, preços, matrizes, maturidade, VGV, análises editoriais e localização. O slide 10 foi neutralizado sem o nome da cidade.
+- **Contratos:** a coleta temporal passou a consultar também `Padrão` e `Tipologia`; o modelo preserva séries por grupo, diferencia soma de média simples e utiliza os campos oficiais de ticket e preço por metro. Onde a API não cobre cruzamentos de oferta lançada ou maturidade, a estrutura permanece visível com travessão e explicação metodológica, sem inventar valores.
+- **Evidência:** inspeção direta dos objetos e imagens do PPTX Piracicaba 1T26; QA Chromium dos slides-chave 10, 14–19, 25, 27, 29, 31–46, 48, 49, 51, 53 e 56 sem overflow; 143 testes e build de produção aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,types.ts,report/model.ts,components/ReportPaginator.tsx,components/MarketSlides.tsx,print/panorama-print.css}`.
+- **Impacto em Etapas/Pendências:** a V1 fica visualmente testável de ponta a ponta; o portão seguinte é o reteste com dados autenticados e a calibração residual registrada por slide, mantendo inconsistências metodológicas para a Fase 2.
+
+### 2026-08-18 — Panorama: tabelas e gráficos assumem a estrutura integral do gabarito — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — famílias dinâmicas de lançamentos, vendas e séries temporais no preview/PDF.
+- **O que:** as tabelas 12/13/21/22 passam a exibir os dois períodos comparativos do deck, grupos com células mescladas, unidade monetária no cabeçalho e barras percentuais proporcionais em verde/vermelho. Os gráficos 14–19, 23–26 e 40 recebem matriz de três comparações por segmento, resumo anual, rótulos em todos os pontos e destaques do trimestre comparável. O rodapé oficial completo passa a reservar sua altura real e a mostrar a fonte Brain sem recorte.
+- **Premissa:** valores e divergências permanecem originados pelos contratos da API; o gabarito define estrutura, linguagem visual e conceito, não números de runtime.
+- **Limpeza editorial:** removidos os selos e textos visuais “Dados da API em validação”; ausência real de cobertura continua tratada pela página/contrato correspondente.
+- **Evidência:** QA Chromium com modelo interceptado em 960×540 confirmou 9 linhas, 5 períodos + 2 deltas, 6 células na matriz de variações, 10 rótulos de série, rodapé e ausência de overflow interno. Typecheck, 141 testes e build aprovados.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Impacto em Etapas/Pendências:** fecha a estrutura transversal desta família; próximo portão é o reteste visual slide a slide com dados autenticados, registrando apenas deltas residuais de geometria ou componentes específicos.
+
+### 2026-08-18 — Panorama: escala 16:9 calibrada para capas, tabelas e graficos — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capas dinamicas e familias variaveis 12–27.
+- **O que:** tipografia e espacamento deixam de depender do viewport externo (`vw`, `clamp` e minimos em px) e passam a usar unidades relativas ao proprio slide (`cqw`). As capas 1 e 2 centralizam cidade/ano pela largura do painel vermelho; tabelas usam Tahoma e proporcoes de titulo, marcador, cabecalho e linhas do deck; graficos recuperam titulo em duas linhas, painel de variacoes, faixa anual e area util sem corte.
+- **Evidencia:** fontes e caixas de texto extraidas do PPTX (Tahoma 32 pt nas tabelas, Tahoma 25 pt nos graficos e 10 pt nos resumos anuais) e QA Chromium em 840x472, alem do canvas de exportacao 1920x1080.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/print/panorama-print.css`.
+- **Impacto em Etapas/Pendencias:** corrige a escala responsiva comum; a proxima etapa estrutural continua sendo reproduzir os dois deltas das tabelas e as tres comparacoes dos graficos.
+
+### 2026-08-18 — Panorama: capas automatizaveis passam a usar artes neutras — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 1, 2 e 4 no preview e PDF.
+- **Correcao de estrategia:** removida a camada DOM imperativa que permanecia no conteiner ao navegar e fazia o municipio aparecer sobre slides institucionais e tabelas.
+- **O que:** o PowerPoint de referencia exportou tres bases neutras, sem os textos variaveis, e os PNGs antigos com Piracicaba sairam do bundle automatizado. Cidade, UF, ano e trimestre agora sao compostos por seletores exclusivos de cada slide, com fonte Tahoma, coordenadas extraidas do PPTX e reducao tipografica para nomes longos.
+- **Evidencia:** QA em Chromium a 1280x720 com Americana confirmou que o texto aparece apenas nas tres paginas previstas; demais slides nao recebem pseudo-elementos.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{assets/official/panorama-0{1,2,4}-neutral.png,components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Impacto em Etapas/Pendencias:** capas deixam de depender de termos rasterizados de Piracicaba; a proxima familia continua sendo a estrutura fiel de tabelas e graficos variaveis.
+
+### 2026-08-18 — Panorama: UF inicial fixada em SP — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — filtros de consulta.
+- **O que:** o escopo inicial passa a abrir com UF `SP`, coerente com o produto Secovi-SP; o municipio continua vazio ate o usuario escolher uma cidade autorizada pela API.
+- **Impacto em Etapas/Pendencias:** nao dispara consulta pesada automaticamente e preserva o contrato GeoApiScopeEngine de limpar o municipio em toda troca de UF.
+
+### 2026-08-18 — Panorama: municipio dinamico na capa oficial — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — capa de pesquisa, slide 1.
+- **O que:** a arte oficial permanece como base visual, mas a regiao que continha Piracicaba recebeu uma camada de texto dinamica sincronizada ao municipio do recorte. Assim, Araçatuba e as demais cidades usam a mesma capa sem manter o nome do gabarito.
+- **Cobertura:** preview no browser e as 62 paginas renderizadas para o PDF recebem a mesma camada.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Impacto em Etapas/Pendencias:** corrige a paridade funcional da capa; a calibracao estrutural de tabelas/graficos variaveis segue como proxima familia.
+
+### 2026-08-18 — Panorama: primeira calibracao visual das tabelas e graficos variaveis — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — lancamentos e vendas, slides 12–27.
+- **O que:** a regua visual passou a ser a exportacao direta do deck Piracicaba 1T26; o CSS das paginas dinamicas agora replica a hierarquia tipografica, espacos, tabela cinza, celulas de variacao com barra vermelho/verde e painel de variacao dos graficos.
+- **Premissa:** os dados continuam dinamicos e os assets PNG ficam restritos aos slides efetivamente estaticos; esta etapa nao converte tabelas/graficos em imagens.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/print/panorama-print.css`.
+- **Impacto em Etapas/Pendencias:** a proxima calibracao e estrutural: os dois deltas das tabelas e a matriz de tres comparacoes dos graficos devem ser modelados como componentes, apos validar este primeiro ajuste no browser/PDF.
+
+### 2026-08-18 — Panorama: slides institucionais passam a usar o deck oficial — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — identidade visual do preview/PDF.
+- **O quê:** PowerPoint exportou os 62 slides da referência; 24 páginas estáticas prioritárias foram incorporadas como PNGs oficiais (capas, sumário, institucional, objetivos, divisores, créditos e encerramentos). O paginador resolve o asset oficial por referência de slide e o usa tanto no preview quanto no PDF, substituindo os layouts CSS genéricos nessas páginas.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/assets/official/panorama-*.png`, `components/ReportPaginator.tsx`.
+- **Verificação:** build de produção aprovado com todos os assets no bundle.
+- **Impacto em Etapas/Pendências:** paridade visual dos blocos estáticos alcançada; próximas famílias a reproduzir fielmente são tabelas e gráficos variáveis, com o PPTX como régua visual.
+
+### 2026-08-18 — Panorama: cubo de coorte passa a alimentar slides de lançamento — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 33, 41, 42 e 48.
+- **O quê:** o modelo passa a coletar o último snapshot de `typologies_history` até o fechamento selecionado e a agrupá-lo por ano de `release_date` e segmento. As páginas de coorte e sua participação agora consomem o contrato granular, em vez de aviso genérico ou estoque reutilizado.
+- **Premissa:** método `ASSUMED` até confronto autenticado com Piracicaba; maturidade segue separada porque a regra Planta/Construção/Pronto ainda não foi homologada.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{api.ts,report/model.ts,types.ts,components/ReportPaginator.tsx}`.
+- **Verificação:** typecheck e 141 testes aprovados.
+- **Impacto em Etapas/Pendências:** próximo contrato é maturidade — comparar `building_status`, `time_on_sale` e idade desde lançamento com o gabarito antes de liberar 43–46.
+
+### 2026-08-18 — Panorama: páginas de mercado deixam de reutilizar tabela genérica — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — slides 27–56.
+- **O quê:** resumo, participação, preços e VGV passam a ter apresentações próprias; coortes e maturidade deixam de receber estoque como fallback e exibem a cobertura metodológica pendente no desenho reservado. O mapa também passa a tratar corretamente recorte sem coordenadas, sem calcular limites inválidos.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{components/ReportPaginator.tsx,print/panorama-print.css}`.
+- **Verificação:** typecheck e 141 testes aprovados.
+- **Impacto em Etapas/Pendências:** a repetição semântica foi removida; próxima implementação natural é o cubo granular/contratos de coorte e maturidade, que substituirão os avisos por tabelas, matrizes e participações reais.
+
+### 2026-08-18 — Panorama: livro de 62 slides, sumário e PDF direto integrados — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preview e exportação da V1.
+- **O quê:** o manifesto agora mantém os 62 slides da referência, incluindo a capa municipal 2, com seção, família visual, contratos e estado metodológico por página. O preview recebeu sumário navegável por seção e o botão `Visualizar PDF` passou a gerar um Blob paginado diretamente, sem `window.print()`. Slides oficiais 58–62 entram como assets integrais e o exportador captura o mesmo registry do preview.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/{report/manifest.ts,components/ReportPaginator.tsx,print/panorama-print.css,lib/pdf-export.ts,__tests__/pdf-export.test.ts}`.
+- **Verificação:** typecheck, 141 testes e build de produção aprovados.
+- **Impacto em Etapas/Pendências:** fundação de navegação/exportação concluída; falta migrar as famílias visuais/contratos específicos de mercado para eliminar o `MetricTable` genérico das páginas 29–56 e executar QA visual slide a slide.
+
+### 2026-08-18 — Panorama: Fase 0 fecha o mapa de paridade Piracicaba 1T26 — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — especificação da V1.
+- **O quê:** definido o escopo de 62 slides (incluindo a segunda capa), preview/sumário por seção e PDF paginado como artefato V1; o mapa integral associa cada família visual aos contratos, fórmulas e estados metodológicos. Páginas sem método preservam estrutura e sinalização, sem repetir tabelas ou inventar dados.
+- **Evidência:** consulta direta ao PPTX de referência (62 slides, 13,333 × 7,5 pol.; objetos, textos, imagens, tabelas e gráficos nativos) e ao gabarito congelado. O PowerPoint COM não pôde exportar imagens nesta sessão por falta de logon interativo; QA visual final segue previsto em ambiente com PowerPoint.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/MAPEAMENTO_FASE0_PIRACICABA_1T26.md`, `PLAN_TERRA_V1_PARIDADE_APRESENTACAO_E_PDF_v5.md`, `DECISOES_E_PREMISSAS_PANORAMA.md`.
+- **Impacto em Etapas/Pendências:** mapa e plano terminal fechados; próximo portão é executar registry de 62 slides/sumário + PDF direto, seguido da reconstrução visual/contratual. Divergências residuais ficam isoladas para a Fase 2 metodológica.
+
+### 2026-08-18 — Carregamento e tipos numéricos na exportação AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — busca de empreendimentos e exportação Excel.
+- **O quê:** restaurada a renderização do estado de carregamento antes do processamento da busca; campos numéricos permanecem numéricos no Excel, incluindo VGV convertido para milhões.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+
+### 2026-08-18 — Formato numérico dos valores de VGV AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** os valores de VGV deixam de usar os sufixos `R$` e `M` e passam a ser exibidos no formato numérico padrão, com a informação de que estão convertidos para milhões pela divisão por `1.000.000`.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+
+### 2026-08-18 — Ajuste da exportação AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** registros ativos e esgotados passam a ser exportados juntos na mesma planilha; percentuais mantêm o valor original da API e recebem apenas o símbolo `%`; valores de VGV são exibidos em milhões, sem casas decimais.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+
+### 2026-08-18 — Formatação percentual do Excel AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela e exportação Excel.
+- **O quê:** os campos Entrada, % de Juros Mensal e Desconto à Vista passam a exibir sempre duas casas no padrão `0,00%`, normalizando os valores percentuais da API.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+
+### 2026-08-18 — Correção dos cálculos de VGV no Excel AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — tabela resumo e exportação Excel
+- **O quê:** restauradas as colunas solicitadas “VGV Lançado” e “m² Lançado”; VGV histórico, VGV Estoque histórico e VGV Lançado passam a usar o Preço atual do último período da tipologia, com a regra informada também na interface.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** cálculos ajustados; homologar os valores exportados com a planilha AELO de referência.
+
+### 2026-08-18 — Correções da consulta e prévia do Relatório AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — consulta API e escopo geográfico
+- **O quê:** incluído informativo da regra de consulta; registros da prévia passam a ser reutilizados na busca final, corrigindo o resultado vazio após uma prévia com empreendimentos; o seletor de Município fica oculto somente no AELO e a consulta usa exclusivamente UF.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`, `src/features/shared/geo-api-scope-engine/GeoApiScopeSelector.tsx`.
+- **Impacto em Etapas/Pendências:** prévia e busca final alinhadas; validar a resposta real do endpoint interno com os quantitativos de SP.
+
+### 2026-08-18 — Relatório AELO: endpoint interno e catálogo de municípios — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — coleta, escopo e exportação do relatório AELO
+- **O quê:** migração para `POST /public-api/v2/building-with-history-internal` por UF, tipo Horizontal fixo, filtro de padrões de loteamento e municípios do catálogo AELO; inclusão do de-para de Região Administrativa, início do período em 4T2017, status atual/tipologia e formatação de datas/percentuais na tabela e Excel.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`, `src/features/relatorios-aelo/municipios-aelo.ts`.
+- **Impacto em Etapas/Pendências:** coleta e estrutura do AELO ajustadas ao catálogo oficial; homologar resposta do endpoint interno, paginação e valores exportados com o usuário.
+
+### 2026-08-17 — Medidas trimestrais e campos do Relatório AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — relatório AELO
+- **O quê:** removida a duplicidade entre “Unidades por Tipologia” e “Oferta por lotes”; corrigida a segmentação de tempo de vendas para aceitar `time_on_sale`/`time_on_sales`; adicionadas colunas trimestrais de VGV (`sold_in_period × price`), Estoque (último snapshot disponível do trimestre) e VGV Estoque (`estoque × preço`).
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** medidas trimestrais disponíveis no AELO; validar os recortes com a base AELO e homologar os valores com o usuário.
+
+### 2026-08-17 — Panorama: dossiê de status para retomada — Gabriel + Codex
+- **Estado real:** a demonstração tem coleta/estrutura parcial e slides corporativos finais fiéis, mas não está pronta como reprodução integral: PDF do recorte real e contratos das páginas 29–56 seguem bloqueadores.
+- **Evidência:** `ReportPaginator` continua roteando coorte, participação e maturidade para `stock.units`/`MetricTable`; o PDF atual rasteriza DOM por ponte sobre `window.print`, abrindo a aba antes de existir Blob.
+- **Próximo passo:** seguir a ordem fixa do [`DOSSIER_STATUS_PANORAMA_2026-08-17.md`](../features/Relatorios%20Secovi_FIERGS/DOSSIER_STATUS_PANORAMA_2026-08-17.md): PDF direto, registry antirrepetição, cubo granular e contratos 29–56.
+
+### 2026-08-17 — Panorama: recuperação visível do exportador PDF — Gabriel + Codex
+- **Ambiente/funcionalidade:** ação `Visualizar PDF` do Panorama.
+- **O quê:** o clique passa a abrir a aba antes da geração, mostrar progresso página a página e expor erro recuperável na interface. O fluxo não depende mais de falha silenciosa no console; se o visualizador for bloqueado, a geração mantém um link explícito para abrir o Blob PDF.
+- **Verificações:** suite de 141 testes e build concluídos após o ajuste.
+
+### 2026-08-17 — Panorama: seis lâminas corporativas oficiais no preview e PDF — Gabriel + Codex
+- **Ambiente/funcionalidade:** páginas finais 57–62 de `/rebrain/panorama-secovi-fiergs`.
+- **O quê:** exporta diretamente do `Panorama_Secovi_SP_Piracicaba_1T26_vApres_28MAI_13h50.pptx` as seis páginas finais em PNG 1920×1080 e substitui os placeholders por suas imagens integrais. Equipe, consultores, peças institucionais, QR code e encerramentos passam a preservar composição, fotos, logos e rodapé do material aprovado, tanto no preview quanto no PDF rasterizado.
+- **Verificações:** typecheck, 141 testes e build concluídos. A correção dos contratos dinâmicos 29–56 continua como próximo bloco obrigatório do plano v4.
+
+### 2026-08-17 — Panorama: plano v4 de fidelidade total e slides estáticos — Gabriel + Codex
+- **Diagnóstico:** placeholders corporativos e reaproveitamento de `stock.units` persistem em páginas de coorte, participação e maturidade; ambos contradizem o deck oficial e o gabarito congelado.
+- **Decisão:** o plano v4 obriga exportar e usar os slides estáticos oficiais como imagem integral, cria registry auditável por página e separa os contratos/visuais das referências 29–56. Página sem dimensão coberta deve declarar ausência, nunca reutilizar outra tabela.
+- **Próximo passo:** executar [`PLAN_TERRA_FIDELIDADE_TOTAL_SLIDES_E_STATICOS_v4.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_TERRA_FIDELIDADE_TOTAL_SLIDES_E_STATICOS_v4.md) na `main`.
+
+### 2026-08-17 — Panorama: PDF rasterizado de uma página por slide — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — visualização/exportação do relatório.
+- **O quê:** a exportação deixa de depender do layout de impressão para compor o arquivo. O gerador captura cada slide ativo isoladamente em 1920×1080 e monta um Blob PDF com página 16:9 correspondente; o arquivo abre em nova aba no visualizador nativo do navegador. A capa municipal redundante foi removida do manifesto de saída, deixando 61 páginas ativas.
+- **Verificações:** testes validam a proporção 16:9 e a contagem/ordem sem a capa duplicada; typecheck, suite de testes e build foram executados com sucesso.
+- **Pendência real:** a validação visual autenticada do PDF completo publicado continua necessária, assim como a implementação dos contratos específicos de Mercado Imobiliário previstos no plano v3.
+
+### 2026-08-17 — Panorama: revisão do exportador PDF e contrato rasterizado — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — ação `Exportar PDF`.
+- **Diagnóstico:** o botão atual executa `window.print()` e depende de uma árvore `hidden print:block`; no teste publicado o navegador imprimiu o shell, somente a página corrente e uma folha residual, totalizando duas páginas desconfiguradas.
+- **Decisão:** o plano v3 passa a exigir geração explícita de um Blob PDF rasterizado, com uma página 16:9 por slide ativo, abertura no visualizador nativo do navegador, progresso, fallback de download e validação via `pdfjs-dist`. PDF editável e PPTX ficam fora desta fase.
+- **Próximo passo:** Terra deve implementar e testar o exportador antes de considerar o relatório publicável.
+
+### 2026-08-17 — Panorama: plano v3 para corrigir Mercado Imobiliário e encerramento — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — páginas 29–56 e encerramento corporativo.
+- **O quê:** diagnóstico confirmou que páginas de padrão, coorte, tipologia, maturidade e horizontais reutilizam indevidamente a mesma tabela de `stock.units`. O plano v3 define contratos e visuais próprios por intenção, uma única capa, validação antirrepetição no manifesto e incorporação integral dos seis slides corporativos finais exportados do deck oficial.
+- **Regra de dados:** números continuam exclusivamente derivados das APIs; metodologia aberta gera selo e rastreabilidade, nunca valor substituto ou cópia de outra dimensão.
+- **Próximo passo:** executar [`PLAN_TERRA_CORRECAO_MERCADO_E_ENCERRAMENTO_v3.md`](../features/Relatorios%20Secovi_FIERGS/PLAN_TERRA_CORRECAO_MERCADO_E_ENCERRAMENTO_v3.md) direto na `main`, validar visualmente as referências 29–56, rodar testes/build e publicar.
+
+### 2026-08-17 — Panorama: bases oficiais, coleta ampliada e páginas quantitativas — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — preview/PDF 16:9.
+- **O quê:** extrai e incorpora assets autorizados dos dois PPTX oficiais (capa e assinatura), substitui o paginador genérico por composição editorial Secovi, páginas institucionais, divisórias, encerramentos, matrizes trimestrais/anuais e gráficos com 17 trimestres, curva monotônica, destaques comparáveis e variações. O relatório passa a coletar em paralelo lançamentos, vendas, estoque, IVV, ticket, preço/m² e coordenadas.
+- **Regra de dados:** status metodológico aberto não oculta mais dado retornado. As páginas mostram os valores e a fórmula/fonte da API com selo “Em validação”; ausência somente aparece quando a fonte não cobre o recorte.
+- **Impacto em Etapas/Pendências:** assets e estrutura visual estão no produto; restam QA autenticado lado a lado do PDF e homologação de universos/agregações com analistas, especialmente VGV lançado, grupos e IVV por área.
+
+### 2026-08-17 — Panorama: plano v2 de reprodução fiel e dados visíveis — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — reconstrução integral do relatório/PDF.
+- **O quê:** novo plano terminal corrige a interpretação de metodologia aberta: valores disponíveis nas APIs devem continuar visíveis com selo de validação. Define uso obrigatório dos decks Panorama e `PPT Institucional_2026 - Widescreen_NOVO (1)`, reprodução fiel das páginas institucionais/divisórias, tabelas comparativas oficiais, gráficos de 17 trimestres, coleta completa, textos determinísticos e QA visual das 62 páginas.
+- **Impacto em Etapas/Pendências:** a próxima execução substitui o esqueleto genérico atual por layout reconhecível e amplia o `PanoramaReportModel` para Vendas, Estoque, IVV, preços, coortes, maturidade e mapa; analistas permanecem responsáveis apenas pela homologação dos tratamentos sinalizados.
+
+### 2026-08-17 — Panorama: PDF editorial de 62 páginas com fonte única — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — livro paginado e impressão 16:9.
+- **O quê:** implementa `PanoramaReportModel`, manifesto versionado das 62 intenções editoriais e templates reutilizáveis para capa, divisória, tabela, gráfico, narrativa, metodologia e encerramento. Uma coleta de `building-with-history` por recorte alimenta os lançamentos do PDF; não há valores do gabarito, mock ou hardcode em runtime.
+- **Estados e pendências:** lançamentos observados recebem visualizações reais; Vendas, Estoque, IVV, preços, coortes, mapa e horizontais mantêm página e intenção, mas comunicam metodologia aberta até homologação. Impressão nativa preserva todas as páginas 16:9.
+- **Impacto:** a demonstração passa a mostrar a estrutura completa do produto, isolando com transparência as fórmulas e filtros que dependem da próxima rodada com analistas.
+
+### 2026-08-17 — Panorama: plano terminal do PDF para demonstração — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — relatório paginado/PDF.
+- **O quê:** define a implementação do `PanoramaReportModel`, manifesto das 62 intenções editoriais, templates e visualizações alimentadas exclusivamente pela API, estados metodológicos sem mocks, impressão 16:9, QA visual e roteiro de demonstração ao Diego.
+- **Impacto em Etapas/Pendências:** Terra pode executar o PDF completo em paralelo à calibração metodológica; a demo evidencia a fábrica pronta e isola filtros/fórmulas ainda dependentes dos analistas.
+
+### 2026-08-17 — Panorama: diagnóstico único e dossiê de calibração — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Diagnóstico.
+- **O quê:** substitui a tabela operacional longa por resumo de status por bloco, uma única ação para executar Lançamentos/Vendas/Estoque/IVV e um dossiê completo de calibração. A tela passa a consumir o contrato granular promovido de lançamentos, eliminando a soma indevida de snapshots históricos. IVV deixa de somar percentuais por padrão.
+- **Impacto em Etapas/Pendências:** próximo teste verifica o diagnóstico consolidado e o XLSX; a próxima implementação é a bancada granular concorrente de Vendas/Estoque e o IVV ponderado.
+
+### 2026-08-17 — Panorama: dossiê copiado em Markdown — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Diagnóstico.
+- **O quê:** substitui o download XLSX por uma área de texto Markdown gerada sob demanda e um botão de cópia. O conteúdo completo da calibração fica na sessão para ser colado diretamente na conversa de análise.
+- **Impacto em Etapas/Pendências:** teste seguinte passa a enviar o texto copiado, sem artefato de arquivo intermediário.
+
+### 2026-08-17 — Panorama: início das bancadas Vendas, Estoque e IVV — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Validação.
+- **O quê:** o resultado pós-publicação consolida os três métodos granulares de lançamentos verticais; o endpoint `releases` permanece apenas diagnóstico. A revisão manual de universo sai da UI sem apagar o mecanismo auditável. Entram gabarito executável dos slides 21–24/29, adaptadores dos endpoints `sales`, `stock` e `ivv`, e bancada separada que não promove contratos silenciosamente.
+- **Impacto em Etapas/Pendências:** próxima coleta autenticada compara os endpoints e adiciona a derivação granular concorrente; só então Vendas/Estoque/IVV passam ao modelo/PDF/XLSX.
+
+### 2026-08-17 — Panorama: T0–T2 de calibração e curadoria operacional — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — modo Validação.
+- **O quê:** adiciona revisão do universo horizontal com IDs, trimestre/unidades, seleção em lote, motivo obrigatório e exclusão `release_only` persistida localmente por recorte. Corrige os parâmetros de `releases` (`per_page` e tipos) e marca empreendimentos/unidades verticais como contratos `reconciled`, mantendo horizontais como hipótese auditável.
+- **Impacto em Etapas/Pendências:** analista pode agora identificar e explicar os horizontais excedentes sem alterar o relatório; próxima etapa é medir o retorno da fonte `releases` e iniciar as bancadas de Vendas, Estoque e IVV.
+
+### 2026-08-17 — Panorama: plano de calibração integral e curadoria do universo — Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` — evolução planejada do modo Validação.
+- **O quê:** define bancadas análogas para Lançamentos, Vendas, Estoque, IVV, Preços, Coortes/Maturidade, VGV e Mapa; introduz exclusões auditáveis por empreendimento/grupo, com escopo global, lançamento, período ou métrica e prévia antes × depois.
+- **Decisão:** divergências não bloqueiam o PDF quando o contrato tem semântica, reconciliação interna, cobertura e estado explícitos. Exclusões em lote congelam IDs e nunca alteram o gabarito congelado.
+- **Arquivos:** `docs/features/Relatorios Secovi_FIERGS/PLAN_TERRA_CALIBRACAO_TODOS_BLOCOS_v1.md` e log de premissas.
+- **Impacto em Etapas/Pendências:** próximo slice técnico é T0–T2: framework compartilhado, curadoria, auditoria horizontal e promoção dos contratos verticais; depois Vendas/Estoque/IVV.
+
+### 2026-08-17 â€” Panorama Secovi/FIERGS: bancada de calibraÃ§Ã£o de LanÃ§amentos â€” Gabriel + Codex
+- **Ambiente/funcionalidade:** `/rebrain/panorama-secovi-fiergs` â€” modo ValidaÃ§Ã£o.
+- **O quÃª:** adiciona a aÃ§Ã£o explÃ­cita **Executar calibraÃ§Ã£o**, que confronta o gabarito de Piracicaba com quatro candidatos: empreendimentos por `release_date`, unidades por `total_units`, unidades pelo `qty` do mÃªs de lanÃ§amento e `temporal-analysis-city/releases`. A tabela mostra fonte, resultado, diferenÃ§a e status de cada cÃ©lula; nenhum candidato altera o relatÃ³rio automaticamente.
+- **Por quÃª:** corrigir a leitura anterior de `typologies_history.period` como lanÃ§amento e fechar o contrato com evidÃªncia antes de expandir os demais blocos.
+- **Impacto em Etapas/PendÃªncias:** a homologaÃ§Ã£o Piracicaba 1T26 passa a escolher, por mÃ©trica, o mÃ©todo que reconcilia os 17 trimestres.
+
+### 2026-08-17 — Panorama Secovi/FIERGS: primeiro slice executável de Lançamentos — Gabriel + Codex
+- **Ambiente/funcionalidade:** nova rota lazy `/rebrain/panorama-secovi-fiergs` dentro de Rebrain, independente do Relatório Secovi existente.
+- **O quê:** cria o modo de **Validação** (gabarito Piracicaba 1T26 × API, com valor esperado/calculado/diferença/status) e o modo **Relatório** com 11 páginas 16:9 navegáveis, tabelas e gráficos de Lançamentos, premissas/fonte e exportação por impressão nativa para PDF. A rota usa `GeoApiScopeSelector`, faz a coleta pesada somente após **Comparar dados** e não possui fallback geográfico.
+- **Motor/dados:** nove contratos versionados, fixture de referência dos 17 trimestres de Piracicaba, agregação pura, comparação com tolerância e adaptador autenticado de `building-with-history`, consolidando tipologias por empreendimento/trimestre para não duplicar projetos. VGV e MCMV permanecem metodologias abertas, explicitamente comunicadas.
+- **Arquivos:** `src/features/panorama-secovi-fiergs/`, `src/{App.tsx,components/layout/AppLayout.tsx,components/layout/CommandPalette.tsx,pages/Home.tsx}`, `docs/features/Relatorios Secovi_FIERGS/{GABARITO_CONGELADO_PANORAMA_PIRACICABA_1T26_v1.md,PLAN_TERRA_PANORAMA_SECOVI_FIERGS_V1.md,DECISOES_E_PREMISSAS_PANORAMA.md}`.
+- **Verificação:** typecheck, 135 testes e build de produção aprovados. Lint global continua bloqueado por erros legados fora desta feature; homologação visual autenticada/Playwright e aderência à API real são pendências.
+- **Impacto em Etapas/Pendências:** a etapa 7a sai de análise para protótipo funcional, mas o portão de aderência com analistas permanece obrigatório antes de chamar o PDF de relatório final.
+
+### 2026-08-14 — Correção de codificação visual no Relatório AELO — Gabriel
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — textos e rótulos do relatório.
+- **O quê:** corrigida a codificação UTF-8 que fazia acentos, símbolos e mensagens aparecerem corrompidos na tela e na exportação; a lógica do relatório, seus campos comerciais e o escopo GeoApi permanecem inalterados.
+- **Por quê:** restaurar legibilidade dos textos no runtime após a cópia inicial da página.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** AELO segue pendente apenas de homologação específica da base SP 1T26 e da formatação/unidade dos percentuais.
+
+### 2026-08-14 — Relatório AELO no menu — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — navegação e relatório AELO
+- **O quê:** novo item lateral e destino AELO com uma cópia independente da implementação do Relatório Secovi; a página inicia com os mesmos filtros, escopo GeoBrain, coleta, estados e exportação, mas possui código próprio para evoluir sem afetar o Secovi.
+- **Por quê:** disponibilizar uma entrada própria para o relatório AELO sem duplicar a implementação funcional.
+- **Arquivos:** `src/components/layout/AppLayout.tsx`, `src/components/layout/CommandPalette.tsx`, `src/App.tsx`, `src/pages/TestesArquitetura.tsx`, `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** amplia a etapa de Relatórios Secovi para uma segunda entrada de relatório com paridade funcional; homologação específica do AELO permanece pendente.
+
+### 2026-08-14 — Segmentação do tempo de vendas no AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — coluna de tempo de vendas
+- **O quê:** adicionada a segmentação do campo `time_on_sales` da API em “Até 6 Meses”, “De 7 a 24 Meses”, “De 25 a 48 Meses” e “Acima de 49 Meses”.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** coluna disponível no relatório AELO; validar os valores contra a base AELO SP 1T26.
+
+### 2026-08-14 — Mapeamento de campos comerciais no AELO — Edgar
+- **Ambiente/funcionalidade:** `/rebrain/aelo` — colunas comerciais da base AELO
+- **O quê:** adicionadas as colunas Taxa administrativa, Oferta por lotes, Entrada, Nº de Parcelas, % de Juros Mensal, Indíce de Juros e Desconto à Vista, mapeadas para os campos informados da API.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+- **Impacto em Etapas/Pendências:** esses campos deixam de ser lacunas do relatório; permanece pendente validar a unidade/formatação dos percentuais com a base AELO.
+
+### 2026-08-13 — Corretor: `fonte_extractor` — verdade numérica das planilhas do analista — Gabriel + Claude
+- **Ambiente/funcionalidade:** Corretor | Estudos Vocacionais — extração de material-fonte (POC, fora do runtime).
+- **O quê:** `fonte_extractor.py` transforma as planilhas do analista em JSON versionável para o futuro `SOURCE_CROSSCHECK`; três pacotes reais de Rolândia, Toledo e Marka foram calibrados e receberam fixtures/testes de regressão.
+- **Arquivos:** `docs/features/corretor-vocacionais/{fonte_extractor.py,fontes/,calibracao/}`, `src/features/corretor/lib/v3/__tests__/fonte-real.test.ts`.
+- **Impacto em Etapas/Pendências:** abre a etapa de `SOURCE_CROSSCHECK`; descarte do material bruto continua condicionado à cobertura de revenda, locação, lazer e anúncios.
+
+### 2026-08-12 — Corretor: sessão de calibração de FPs no banco + consulta por terminal — Gabriel + Claude
+- **Ambiente/funcionalidade:** Corretor | Estudos Vocacionais — regras de soma e ferramenta de apoio.
+- **O quê:** corrige o alinhamento de linhas de totais e o agrupamento de fatias paginadas, com testes de regressão sobre Toledo; adiciona `scripts/corretor-db.mjs` e sua skill para investigar achados e payloads diretamente no banco.
+- **Arquivos:** `src/features/corretor/lib/{audit,v3}/`, `src/features/corretor/lib/v3/__tests__/toledo-real.test.ts`, `scripts/corretor-db.mjs`, `docs/features/corretor-vocacionais/{FP_sessao_2026-08-12.md,calibracao/toledo-2026-08/sum-payloads.json}`.
+- **Impacto em Etapas/Pendências:** preserva o aceite de calibração do Toledo e abre a necessidade de reprocessar estudos parados no portão da ata.
+
+### 2026-08-11 — Governança de documentação viva e frontend — Gabriel
+- **Ambiente/funcionalidade:** plataforma Rebrain — regras compartilhadas de desenvolvimento e revisão.
+- **O quê:** formalizado o controle de documentos vivos em PR/push, com validação automatizada, e publicado o contrato de frontend para componentes, estados de página, acessibilidade, responsividade e registro de decisões duradouras.
+- **Por quê:** manter as mudanças de cada ambiente rastreáveis e preservar padrões consistentes nas próximas evoluções da plataforma.
+- **Arquivos:** `AGENTS.md`, `CLAUDE.md`, `docs/architecture/{FRONTEND_GUIDELINES.md,FRONTEND_DECISIONS.md}`, `docs/projetos/README.md`, `.github/{pull_request_template.md,workflows/live-docs-check.yml}`, `scripts/check-live-docs.mjs`.
+- **Commits:** `4b2eb4a`.
+- **Impacto em Etapas/Pendências:** sem alteração de runtime; a documentação viva passa a ser verificada no fluxo de integração.
+
+### 2026-08-11 — Corte temporal explícito no Relatório Secovi — Gabriel
+- **Ambiente/funcionalidade:** `/rebrain/secovi` — geração de relatórios trimestrais para cidades mensais.
+- **O que:** o antigo seletor "Análise temporal desde" virou o intervalo **Período de análise** (início e fim, padrão 1T2021 até o trimestre corrente). O bloco foi posicionado após os filtros de tipo/status e antes das ações de coleta, para tornar o recorte explícito no fluxo do analista. O corte final agora filtra o histórico antes da agregação trimestral: vendas, colunas exportadas, estoque e demais snapshots usam exclusivamente competências até o trimestre selecionado.
+- **Por quê:** impedir que uma competência mensal já aberta do trimestre seguinte, como 07/2026, apareça ou altere a fotografia de um relatório fechado em 2T2026.
+- **Arquivos:** `src/pages/TestesArquitetura.tsx`, `src/features/relatorios-secovi/quarterly-history.ts`, `src/features/relatorios-secovi/__tests__/quarterly-history.test.ts`.
+- **Commits:** `ac8ef83`, `cbfedf3`.
+- **Impacto em Etapas/Pendências:** Relatórios Secovi mantém a etapa de homologação manual; adicionada cobertura de regressão para o corte de competências futuras.
+
+### 2026-08-10 — Exportações e identificação visual dos índices no Atualizador VGV — Lucas
+- **Ambiente/funcionalidade:** `/atualizador-vgv` — exportação da base/recorte e comparador de índices.
+- **O quê:** as exportações foram separadas por escopo (**base completa** ou **recorte selecionado**) e por formato (**XLSX** ou **CSV**). O CSV usa `;` e BOM para abrir corretamente no Excel. As séries antes azuis passaram a usar o amarelo da interface; no comparador, cada índice mantém uma cor própria e o VGV nominal não disputa a mesma cor das séries corrigidas.
+- **Por quê:** tornar explícito o conjunto exportado e evitar a leitura ambígua das séries do gráfico.
+- **Arquivos:** `src/features/atualizador-vgv/{AtualizadorVgvPage.tsx,atualizador-vgv.css,engine.ts}`.
+- **Commits:** `508744f`, `646d5bb`, `767b0c4`, `b91173b`.
+- **Impacto em Etapas/Pendências:** amplia a etapa 10 em runtime; a homologação do setor usuário e a rotina de atualização dos índices permanecem abertas.
+
+### 2026-08-05 — Mapa urbano operacional no Atualizador VGV — Codex
+- **O quê:** o mapa nacional estático de `/atualizador-vgv` foi substituído por um mapa urbano MapLibre
+  com ruas, bairros, rótulos cartográficos, zoom, tela cheia, escala e enquadramento automático nos
+  empreendimentos do recorte.
+- **Navegação:** uma lista lateral permite localizar cada empreendimento; o marcador abre nome,
+  bairro, cidade/UF, endereço, status e VGV da oferta antes da ação explícita de focar toda a análise.
+  Recortes com uma única localização aproximam o endereço, e o botão `Ver todos` recompõe os limites.
+- **Resiliência:** a tela informa empreendimentos sem latitude/longitude e mantém a lista de endereços
+  utilizável enquanto a base cartográfica externa carrega ou em caso de falha de conexão.
+- **Limpeza:** removido do cabeçalho o selo `Processamento local / Nenhum arquivo é armazenado`.
+- **Arquivos:** `src/features/atualizador-vgv/{AtualizadorVgvPage.tsx,ProjectMap.tsx,atualizador-vgv.css}`,
+  `package.json` e `package-lock.json` (`maplibre-gl`).
+
+### 2026-08-05 — Atualizador VGV alinhado à interface compartilhada — Codex
+- **O quê:** a abertura de `/atualizador-vgv` foi reorganizada para seguir o padrão visual dos demais
+  módulos da plataforma, com cabeçalho compacto, barra de arquivo, navegação por abas, filtros e cards
+  em superfícies neutras, bordas discretas e verde reservado aos estados ativos.
+- **Preservado:** os quatro KPIs originais do Atualizador VGV, o upload/drag-and-drop, filtros encadeados,
+  visão geral, comparador de índices, gráficos, mapa, ficha, amenidades e exportações continuam com as
+  mesmas regras e dados; a mudança é apenas de hierarquia e acabamento visual.
+- **Responsividade/tema:** estilos claro e escuro e quebras para tablet/mobile foram atualizados junto
+  da nova composição; tipagem, 5 testes do motor e build de produção passaram.
+- **Arquivos:** `src/features/atualizador-vgv/{AtualizadorVgvPage.tsx,atualizador-vgv.css}`.
+
+### 2026-08-04 — Atualizador VGV V1 client-side — Codex
+- **O quê:** migração da aplicação Streamlit `AtualizadorVGV` para uma feature React/TypeScript na rota
+  `/atualizador-vgv`, com item próprio no menu Rebrain e na busca global. A V1 inclui upload/drag-and-drop
+  de XLS/XLSX, base de demonstração, filtros encadeados, KPIs, séries de VGV, estoque × vendas, mapa
+  clicável, ficha do empreendimento, amenidades, comparador INCC-DI/IPCA/IGP-DI e exportação XLSX.
+- **Arquitetura:** processamento integral no navegador, sem persistência ou envio do arquivo. O parser de
+  blocos mensais, a conversão wide→long e a correção direta para base 12/2025 foram portados para
+  `src/features/atualizador-vgv/engine.ts`; os quatro XLSX de demonstração/índices ficam em
+  `public/atualizador-vgv/`.
+- **Interface:** página responsiva com identidade Brain, visualizações interativas e suporte aos temas claro
+  e escuro globais. A feature é carregada por lazy route para isolar seu bundle.
+- **Paridade/verificação:** teste contra os arquivos reais confirma 19 registros, 57 linhas mensais,
+  66 amenidades e séries INCC-DI/IPCA/IGP-DI com 378/385/378 pontos. Typecheck e build de produção
+  aprovados; suíte total com os 5 testes do motor VGV.
+- **Pendências V1:** homologação visual pelo setor usuário e definição da atualização futura dos índices
+  locais, atualmente encerrados em 01/2026.
+
+### 2026-08-06 — API Explorer: ponte server-side para Sociodemografia
+- **O quê:** criada a Edge Function `socio-proxy`, com allowlist dos endpoints Socio, que encaminha o Bearer token para `sociodemografia.geobrain.com.br` e devolve a resposta ao Explorer com CORS para o domínio Lovable.
+- **Motivo:** a API Socio funcionava via terminal, mas o host não devolvia cabeçalhos CORS no preflight do browser. A API GeoBrain principal permanece com chamada direta.
+- **Arquivos:** `supabase/functions/socio-proxy/index.ts`, `supabase/config.toml`, `src/lib/openapi-engine.ts`.
+- **Pendente:** publicar `socio-proxy` no projeto Supabase `mxinpvcqzbfbzjodhgtz` e redeployar o front-end.
+
+### 2026-08-04 — Relatório Secovi: vendas trimestrais passam a somar todos os fechamentos — Terra
+- **O quê:** `sold_in_period` deixou de ser sobrescrito pelo último mês do trimestre. A nova
+  agregação separa fluxo de snapshot: soma vendas e VGV por fechamento; mantém estoque, preço e
+  disponibilidade no fechamento mais recente.
+- **Regressão coberta:** Rubi passa de `300` para `349` no 4T/2025 (`49` em novembro + `300` em
+  dezembro), preservando `100` no 1T/2026, `18` no 2T/2026 e estoque `189`.
+- **Qualidade:** helper isolado cobre ordem irregular, mês zerado/ausente, venda negativa, preço
+  ausente, período inválido e distrato parcial. **103 testes verdes** e build tipado aprovado.
+- **Arquivos:** `src/features/relatorios-secovi/quarterly-history.ts`,
+  `src/features/relatorios-secovi/__tests__/quarterly-history.test.ts`,
+  `src/pages/TestesArquitetura.tsx`.
+- **Pendente:** homologação manual da exportação no ambiente da área antes de encerrar o ticket.
+
+### 2026-07-31 — Corretor: decisões A/B tomadas + fila implementada (paginação, CH-6, comunicação) — Gabriel + Claude
+- **As 2 decisões de produto que travavam a fila foram tomadas** (Gabriel seguiu as recomendações):
+  **(A)** exclusão declarada **rebaixa para “Verificar”**, não apaga o achado; **(B)** comentário de
+  revisão no arquivo final **avisa e pede confirmação** na entrega, não bloqueia.
+- **Tabela paginada** (`v3/paginated-tables.ts`): fatias da mesma tabela em slides vizinhos repetem o
+  total do conjunto (Toledo: `1099/702/397` em s42 e s43) e nenhuma fecha sozinha. Agora as fatias são
+  agrupadas por cabeçalho + assinatura de totais, somadas e conferidas **como conjunto** — fecha,
+  encerra os achados por fatia; não fecha, sai **um** achado `s42 × s43` em “Verificar”. Roda nas
+  tabelas nativas e nas tabelas-imagem.
+- **CH-6** (`v3/declared-exclusions.ts`): antes de sustentar soma, procura a frase que declara a
+  exclusão (“garden, duplex e coberturas não são apresentadas…”, “ocultamos os esgotados”) e rebaixa
+  citando a nota. Exige **verbo de exclusão** — citar “cobertura” como tipologia não silencia nada.
+  Era o último item aberto do sprint de 28/jul (dependia do Housi v2; resolvido com o caso do Toledo).
+- **“Comunicação da revisão”:** `LEFTOVER_NOTE` sai do catálogo de erros — fora da contagem
+  Erro/Provável/Verificar, **um item agregado** com checklist expansível no lugar de 32, chip próprio
+  na UI, aviso no portão de entrega e **pista dirigida** (`review-notes-blind`: slide comentado onde o
+  motor não achou nada = candidato a regra faltante). Estudos antigos são reconciliados ao reabrir.
+- **Verificação:** 97 testes verdes (78 → 97), tsc limpo, lint e build ok. Sem migration. Detalhe na
+  **v0.50** do [LIVE do Corretor](../features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md).
+
+### 2026-07-28 — Corretor: checkpoint do dia + 2 ajustes desenhados aguardando decisão — Gabriel + Claude
+- **Checkpoint:** [`CHECKPOINT_2026-07-28.md`](../features/corretor-vocacionais/CHECKPOINT_2026-07-28.md)
+  consolida o dia (v0.44→v0.49, 6 commits, 78 testes) e o ponto de retomada de 29/jul.
+- **Ajuste A — somas que não fecham** (estudo Raimundo Leonardi V3/Toledo): investigado, o
+  comentário da analista sobre garden/cobertura **não explica** os 6 achados. São 3 causas:
+  **tabela paginada** (total geral repetido em cada fatia — dominante), **leitura ruim da visão**
+  e **exclusão declarada** (o CH-6 de fato). Decisão pendente: com exclusão declarada, o achado
+  some ou vira "Verificar"?
+- **Ajuste B — notas de edição** (32 dos 39 achados do estudo): deixam de ser "Erro" e viram
+  categoria própria agregada ("Comunicação da revisão"), usada também como **pista dirigida**
+  para o motor. Decisão pendente: na entrega, comentário bloqueia, avisa ou só informa?
+- **Pendente:** deploy de `analyze-ata-image`; Housi v2 do Finoti (FN-1/FN-2).
+
+### 2026-07-28 — Corretor: ancoragem textual contra cidade alucinada pela visão — Gabriel + Claude
+- **Novo tipo de FP:** no s45 a visão devolveu “São Paulo” como cidade principal de uma tabela
+  onde o nome não existe — inferiu dos bairros “Centro”/“Jardim Das Américas”. Diferente dos FPs
+  anteriores: aqui a **entrada** é falsa, não o julgamento da regra.
+- **Âncora:** cidade só vira achado se o nome estiver no texto que a visão transcreveu (título,
+  colunas, células, totais). Preserva o caso legítimo de **cidade escrita dentro da
+  tabela-imagem**; sem tabela extraída (mapa/arte), a regra segue como antes.
+- **Medição no banco:** dos 5 achados com tabela extraída, os 5 eram cidade inferida.
+- **Verificação:** tsc limpo, **78 testes verdes**, build ok. Ver v0.49 do LIVE do Corretor.
+
+### 2026-07-28 — Corretor: slide de mapa deixa de ser cobrado por fonte — Gabriel + Claude
+- **Regra da área (Gabriel):** mapa usa base cartográfica de terceiro (Google Maps) e **não leva
+  FONTE/ELABORAÇÃO**. Confirmado no estudo real: os 8 slides em questão têm 100% do conteúdo
+  tabular em LEGENDA (raios/terreno/faixas) — inclusive os s28/s29 que pareciam erro legítimo.
+- **`isMapSlide`:** exige imagem + todas as tabelas serem LEGENDA + menção a raios/terreno, para
+  não isentar slide de dados com uma legenda avulsa.
+- **Efeito:** 15 slides isentos; `SOURCE_MISSING` cai a **zero** no cenário real da Rolândia.
+- **Verificação:** tsc limpo, 75 testes verdes, build ok. Ver v0.48 do LIVE do Corretor.
+
+### 2026-07-28 — Corretor: fonte cobrada de forma inconsistente entre slides iguais — Gabriel + Claude
+- **Sintoma (feedback no uso real):** s28/s29 acusados por falta de fonte, mas s20/s25/s26 não —
+  nenhum deles tem FONTE (confirmado abrindo a imagem do s25: só o rodapé do Google Maps).
+- **Causa:** dicionário de **seção canônica** não conhecia títulos do template novo
+  (“Densidade demográfica”, “Índice de verticalização”, “Análise de locação”) → seção `null` →
+  a regra de fonte, que filtra por seção, ignorava o slide. Corrigido nos dois extratores
+  (29 → 21 slides sem seção no estudo real).
+- **Também:** MERCADO passa a exigir fonte (oferta/revenda/locação) e slide cujo único conteúdo
+  tabular é legenda de mapa deixa de ser candidato.
+- **Verificação:** tsc limpo, **75 testes verdes**, build ok. Ver v0.47 do LIVE do Corretor.
+
+### 2026-07-28 — Corretor: ata da Rolândia não era lida no upload — 3 correções — Gabriel + Claude
+- **Sintoma:** subindo o estudo do zero, o portão dizia “sem ata detectada”, embora a ata esteja
+  no slide 1. O **localizador estava certo**; a falha era na leitura.
+- **Causa principal:** a derivação de cidade/UF exigia barra (`Guarulhos/SP`) e a ata escreve
+  **“Rolândia PR”**. Padrão passou a aceitar `/ - – —` e espaço, validando a sigla contra as 27 UFs.
+- **Ata multi-estudo:** a ata abre 3 estudos (Toledo, Rolândia, SJC). A LLM devolve
+  `cidades_candidatas` e o **analista escolhe no portão** (chips), em vez de a IA chutar.
+- **Comentários sobrepostos:** caixa de recado sobre a ata agora é lida à parte
+  (`comentarios_sobrepostos`) e exibida como contexto, não como conteúdo da ata.
+- **Também:** busca da ata vai até o 5º slide; cache de ata v6 → v7 (força releitura).
+- **Requer deploy:** `analyze-ata-image`. tsc limpo, **73 testes verdes**, build ok. Ver v0.46 do LIVE.
+
+### 2026-07-28 — Corretor: sprint Fase 2 com o deck real da Rolândia (17 achados → 1) — Gabriel + Claude
+- **Aceite medido:** rodando o motor sobre o IR real do PPTX da Daniele, os **17 achados (100% FP)
+  caíram para 1** — e o restante ("7.1 Futuros lançamentos") é ausência legítima do deck.
+- **CH-4 — hipótese corrigida:** o rodapé `FONTE: … | ELABORAÇÃO: …` **não** vinha do master; está
+  no slide, dentro de uma **tabela 1×1**. Os dois extratores (`pptx-to-ir.ts` e `ir_extractor.py`)
+  varriam só caixas de texto. Corrigido: 25 → 34 slides com fonte, 11 `SOURCE_MISSING` zerados.
+- **CH-1:** checklist ganhou itens `visual` e o terceiro estado “a conferir em imagem”; padrões
+  calibrados nos títulos do template novo. Bug colateral: "**Índice** de verticalização" era
+  descartado como slide de sumário.
+- **FN-3 (Finoti):** nova regra DET `ziLabelFindings` — o deck declara a convenção de Z.I. e a
+  regra confere o uso dos rótulos; conservadora (abstém-se sem convenção declarada).
+- **Reteste sem PPTX:** `rolandia-v1.ir.json` versionado no corpus (62 KB, o deck tem 162 MB).
+- **Verificação:** tsc limpo, **71 testes verdes**, build ok. Detalhes na v0.45 do LIVE do Corretor.
+
+### 2026-07-28 — Corretor: 1ª homologação real (feedback analistas) + sprint Fase 1 — Gabriel + Claude
+- **Diagnóstico:** primeiros 4 estudos reais (Daniele/Rolândia, Beatriz e Lucas Finoti/Housi)
+  triaram **~100% dos achados como FP**; consulta direta ao `findings_v3`/`vision_cache` ancorou
+  cada família na causa-raiz do código. 3 falsos negativos reais apontados pelo Lucas.
+- **Fase 1 implementada (offline, custo de IA R$ 0):** CH-2 (WRONG_CONTEXT: escopo de seção +
+  validação IBGE + `sameCity` p/ typo de ata + UF no DET), CH-3 (legendas de mapa, unidade das
+  faixas, guard same-slide), CH-5 (linha de total desalinhada do OCR) e **auto-reconciliação**
+  (`lib/v3/reconcile.ts`) que limpa os FPs legados ao abrir o estudo.
+- **Corpus versionado:** `calibracao/feedback-2026-07/` (102 achados + 34 payloads de visão do
+  banco) vira suíte de regressão permanente — reteste sem PPTX e sem token.
+- **Verificação:** tsc limpo, 64 testes verdes, build ok. Sem migration/deploy de função.
+- **Fase 2 (aguarda PPTXs Rolândia + Housi v2):** CH-1/CH-4/CH-6 + FN-1..3. Detalhes:
+  `SPRINT_feedback_analistas_2026-07-28.md` + v0.43–0.44 do LIVE do Corretor.
+
+### 2026-07-26 — Panorama Secovi/FIERGS: análise de automatização (pré-plano de ação) — Gabriel
+- **O quê:** análise técnica do deck `Panorama_Secovi_SP_Piracicaba_1T26` (62 slides) + inventário
+  de slides + template institucional, para subsidiar a conversa com o head da área.
+- **Anatomia:** ~24 slides institucionais/estáticos, 11 gráficos/tabelas **nativos** do PowerPoint e
+  **~25 colados como imagem** (prints de Excel) — ou seja, ~40% do conteúdo quantitativo vive como
+  imagem, e esse é o maior custo de atualização e o maior obstáculo à automação plena.
+- **Cobertura pela API GeoBrain:** essencialmente **todo o conteúdo quantitativo é obtível**
+  (direto por `temporal-analysis-city/*` ou derivado de `building-with-history`), com 2 lacunas de
+  metodologia: **VGV lançado** (não vem em `releases`) e **% MCMV** (sem flag na API, exige critério
+  oficial do analista). Sem dependência obrigatória de exportação manual identificada.
+- **Camadas propostas:** (1) XLSX "dados prontos" reusando o padrão `GeoApiScopeEngine`/
+  `TestesArquitetura.tsx`; (2) visualização web para QA; (3) geração do PPTX (pré-requisito one-off:
+  reconstruir os ~25 slides-imagem como objetos nativos no template); (4) textos analíticos.
+- **1º passo definido:** **teste de aderência** — reproduzir Piracicaba 1T26 via API e comparar
+  número a número com o deck, antes de qualquer UI. Sem isso, automatizar industrializa divergências
+  (risco já visto nos apontamentos da Juliana).
+- **Arquivos:** [`docs/features/Relatorios Secovi_FIERGS/ANALISE_automatizacao_panorama.md`](../features/Relatorios%20Secovi_FIERGS/ANALISE_automatizacao_panorama.md);
+  `.gitignore` passa a excluir os `.pptx`/`.pdf` pesados dessa pasta (os `.md` e o xlsx de inventário sobem).
+
+### 2026-07-26 — Limpeza de espaço: estudos pesados fora do repo — Gabriel
+- **O quê:** movidos ~673 MB de PPTX/PDF-fonte do Corretor para `C:\Users\GaloD\Desktop\SE\_backup_estudos\`
+  (fora do repo). Nenhum estava versionado (cobertos pelo `.gitignore`), logo **não há cópia no histórico**.
+- **Preservado no repo:** os derivados que o pipeline usa (`ir/*.ir.json`, `calibracao/*.csv` +
+  `*.labels.json`, `visao/`), o gabarito Marka/Tancredo (congelado desde 13/jul) e as duas fixtures
+  versionadas de propósito (`Marka Prime_Reduzido.pptx`, `Vocacionais_parametros_de_correcao.pptx`).
+- **Arquivos:** [`docs/features/corretor-vocacionais/ARQUIVOS_REMOVIDOS.md`](../features/corretor-vocacionais/ARQUIVOS_REMOVIDOS.md).
+
+### 2026-07-14 — Corretor v5: revisão final aprovada e fatia FECHADA — Gabriel + Claude
+- **Revisão de código** dos commits que completaram o plano v5 (`75ad627` WS-3 triagem,
+  `62a0276` WS-4 recheck sem atrito, `0c48924` WS-5 calibradora, `273c0e4` cidade IBGE +
+  visão defensiva, `f9f3cf6` faixas cumulativas): **aprovada** — typecheck limpo e 52 testes
+  verdes na main integrada.
+- **Fechamento:** implementação do `PLAN_corretor_v5_fluxo.md` concluída. As 7 pendências
+  técnicas da revisão (P1 custo de visão sem filtro de seção; P2 FP de cidade legítima em
+  slides de acessos; P3 recheck não re-roda texto; P4–P7 menores) e o **roadmap** (deploy →
+  homologação real → pendências humanas → ajustes finos → WS-F file watch) estão consolidados
+  na **v0.42 do LIVE do Corretor** — acompanhamento continua lá.
+- **Próximo marco:** homologação real (Marka/Itajaí/GO) — é o portão para declarar a meta de
+  recall ≥90% / FP ≤15%. Roteiro completo em `OPERACAO_coverage_90.md`.
+
+### 2026-07-13 — Validação do Fechamento: ajustes de UX no segmentador, filtros e tabela resumo — Rebrain
+- **Segmentador:** adicionada a label `Visualização` acima do grupo de chips de granularidade
+  (Ano / Trimestre / Mês/Ano), envolvida no container `flex flex-wrap items-end gap-3 flex-1 min-w-[320px]`.
+- **Filtros temporais:** opções de ano, trimestre e período agora são exibidas do mais recente para
+  o mais antigo (ordem decrescente), facilitando a seleção dos dados atuais.
+- **Tabela resumo:** a barra de rolagem inicia no máximo à direita, exibindo a coluna **% Var. Total**
+  por padrão ao carregar ou trocar a granularidade.
+- **Arquivos:** `src/features/validacao-fechamento/{VFHeader.tsx,aggregate.ts,ResumoTable.tsx}`.
+- **Verificação:** build (`tsc --noEmit && vite build`) aprovado.
+
+### 2026-07-13 — Corretor: guardrail contra falsos positivos de faixas — Gabriel
+- **Correção:** `BINNING_RULE` não confunde mais raios cumulativos (`Até 5/10/15 min`) com
+  faixas exclusivas; sequências ambíguas com múltiplos intervalos partindo de zero são
+  ignoradas de forma conservadora.
+- **Faixas reais:** comparação normaliza tabelas crescentes/decrescentes e respeita centavos,
+  mantendo a detecção de furos verdadeiros. A evidência passa a seguir a ordem comparada.
+- **Legado:** ao abrir o estudo, falsos positivos pendentes comprovados pelo novo guardrail
+  são encerrados e retirados da worklist, preservando o histórico no banco.
+- **Validação:** 53 testes verdes e build tipado aprovado. Mudança somente no app; não requer
+  migration nem publicação de Edge Function.
+- **Ambiente:** `studies_v3.relatorio` estava ausente e interrompia o fechamento da análise;
+  a migration `20260713170000` foi aplicada e o cache do PostgREST recarregado. Coluna
+  `relatorio` confirmada no Supabase em 13/jul/2026.
+
+### 2026-07-13 — Corretor: contexto de cidade e resiliência da visão — Gabriel
+- **Contexto:** regra DET pós-Ata passou a identificar município IBGE no padrão explícito
+  `Cidade – UF`; cobre vazamento como `Curitiba – MG` em estudo de Brumadinho/MG, que a regra
+  anterior de UF não podia detectar.
+- **Visão:** cache v7 valida profundamente payloads antes de reutilizar e não deixa formato
+  inválido causar `.map is not a function`; cabeçalhos de tabela entram na leitura de locais e
+  o localizador deixa de excluir tabelas somente por seção.
+- **Operação:** publicar `analyze-table-image`, pois o prompt mudou e o cache será relido uma
+  vez. Testes locais: 50 verdes e build tipado aprovado.
+
+### 2026-07-13 — Corretor v5: fluxo operacional WS-0–WS-5 — Gabriel
+- **Confiabilidade e portão:** build agora inclui typecheck; análise foi dividida em DET/Ata e
+  passes pagos, com confirmação obrigatória de cidade, UF e pedidos antes do gasto.
+- **Entrega e correção:** relatório read-only registra o trabalho positivo; triagem por teclado
+  acelera a worklist; drop no workspace reconfere a versão e encerra em R$ 0 quando não há
+  imagem nova fora do cache.
+- **Calibração:** `/corretor/calibracao` consolida FPs, saúde por regra, reconhecimento de
+  item/grupo e CSV. Migrations v5: `20260713160000`, `20260713170000` e `20260713180000`.
+- **Validação local:** 48 testes verdes e `tsc --noEmit && vite build` aprovado. File watch
+  permanece explicitamente futuro; falta aplicar/verificar migrations e homologar no navegador.
+
+### 2026-07-13 — Corretor v4: precisão antes da homologação + UI por confiança — Gabriel
+- **Precisão:** corrigidos os quatro geradores de falso positivo apontados na revisão do
+  Coverage 90 (projeção histórica, eixos de lacunas, totais de participação e mapas não
+  analisados), além de faixas numéricas, fichas, checklist e custo/progresso da visão.
+- **Interface:** o workspace agora diferencia **Erro / Provável / Verificar**, organiza a
+  correção em Completude, Problemas e Por slide, permite ação em lote e registra “Não é erro
+  (FP)” para calibrar o motor. Entrega bloqueia níveis 1–2; nível 3 pede confirmação.
+- **Banco:** nova migration `20260713150000_corretor_v4_verdict.sql` adiciona o veredito aos
+  achados v3. Roteiro de deploy/homologação atualizado no doc operacional do Corretor.
+
+### 2026-07-13 — Corretor Coverage 90: WS2–WS8 concluídos em BETA — Gabriel
+- **Motor:** cruzamentos entre tabelas, checklist de cobertura da Ata, estrutura granular,
+  projeções, fichas técnicas, fonte/notas/exclusões e regras de consolidada/VSO entraram no
+  passo único. Regras usam o IR e o payload de visão já cacheado, sem novo passe de IA.
+- **Visão:** `analyze-table-image` evoluiu para cache v6, com unidades de ficha e fonte visível.
+  A função precisa ser publicada; não há migration nova.
+- **Operação:** [lista de deploy e homologação](../features/corretor-vocacionais/OPERACAO_coverage_90.md)
+  separa a publicação obrigatória das validações Marka, Itajaí e GO. A meta continua condicionada
+  ao harness com IR real: >=90% recall e <=15% FP.
+
+### 2026-07-13 — Corretor Coverage 90: WS0+WS1 (recall e contexto) — Gabriel
+- **WS0:** o extrator PPTX→IR agora separa notas internas de revisão (forma com fundo amarelo e
+  texto vermelho) em `notas_revisao`, fora do texto auditável, e continua apontando-as como
+  `LEFTOVER_NOTE`. Entraram o gabarito Marca/Tancredo (96 labels) e o harness com 57 alvos
+  ancorados para medir recall DET assim que o IR real local for informado.
+- **WS1:** a visão de tabelas passou a devolver localidades visíveis (`locais_visiveis`), com
+  cache v5, e compara cidade/UF contra a Ata; o motor também detecta UF divergente em títulos
+  textuais. Isso cobre erros de contexto sem inferir localidade a partir de números.
+- **Validação:** testes de nota, contexto e harness passaram; build passou. A aferição real de
+  recall ainda depende de rodar o harness com o IR do Marka e, depois do deploy, calibrar
+  Marka/Itajaí (meta: >=90% recall e <=15% FP).
+- **Próximo:** deploy de `analyze-table-image` e WS2 (`CROSS_TABLE_MISMATCH`) somente após a
+  medição-base. Detalhes e regras: doc vivo do Corretor v0.29/v0.30.
+
+### 2026-07-09 — Corretor v3.2: números das imagens no app (Fase C produtizada) — Gabriel
+- **O quê:** o reconhecimento numérico das tabelas-imagem saiu do piloto e entrou no fluxo:
+  localizador de candidatas no navegador (porte do scan_imagens.py; Marka 46/Itajaí 32,
+  inclui as do piloto), edge `analyze-table-image` (JSON estrito, nunca inventa dígito),
+  **`vision_cache` por sha1** (imagem paga 1× para sempre), auto-validação linha×coluna×total
+  e achados `ABSOLUTE_SUM`/`BINNING_RULE` na worklist com selo IA. Custo ~R$ 0,7–1/estudo
+  na 1ª vez; ~R$ 0 depois.
+- **Pendências:** aplicar migration `20260709120000_corretor_v3_vision.sql` + deploy
+  `supabase functions deploy analyze-table-image`.
+- **Arquivos:** `supabase/functions/analyze-table-image/`, `lib/v3/{table-images,ia-vision}.ts`,
+  `pages/CorretorV3Page.tsx`, migration; LIVE v0.16.
+
+### 2026-07-09 — Corretor v3.1: IA de texto + feedback do 1º teste — Gabriel
+- **Feedback aplicado:** (1) `/corretor` sem rail duplo — landing com cards → workspace com
+  voltar; (2) `SOURCE_MISSING` desativada por flag (na prática ninguém preenche fonte;
+  Marka 35→17 achados).
+- **v3.1:** edge `analyze-text-batch` (texto do IR, batch, JSON estrito) + painel "Aprofundar
+  com IA" com custo estimado antes (Marka: ~R$ 0,02 no mini vs ~R$ 6 da visão v1), achados IA
+  na worklist com selo, custo acumulado (`ia_passes`). Fix: diff do recheck escopo DET.
+- **Pendências:** aplicar migration `20260709110000_corretor_v3_ia.sql` + deploy
+  `supabase functions deploy analyze-text-batch`.
+- **Arquivos:** `supabase/functions/analyze-text-batch/`, `lib/v3/{ia-text.ts,db.ts}`,
+  `pages/CorretorV3Page.tsx`, `lib/audit/ir-rules.ts`, migration; LIVE v0.15.
+
+### 2026-07-09 — Corretor v3.0 no ar em `/corretor` (fluxo completo, R$ 0) — Gabriel
+- **O quê:** primeira fatia da v3 implementada: rail de estudos (sessões retomáveis via
+  Supabase) → upload .pptx → triagem DET instantânea → worklist com status
+  pendente/corrigido/ignorado e progresso rumo a zero → **Reconferir** (sobe a versão
+  corrigida; diff por rule_id: resolvidos/persistem/novos; correção manual que não pegou
+  volta a pendente) → **Entregar** (só com 0 pendentes; selo "pronto p/ A&R").
+- **Decisões:** rota `/corretor`; IA liberada p/ analista (v3.1+); calibração bug/fp separada.
+- **⚠ Pendência:** aplicar a migration `20260709100000_corretor_v3.sql` no Supabase.
+- **Verificação:** tsc/eslint/build ok. Fluxo contra Supabase real não exercido nesta sessão
+  (depende da migration) — validar no navegador após aplicar.
+- **Arquivos:** `supabase/migrations/20260709100000_corretor_v3.sql`, `lib/v3/db.ts`,
+  `pages/CorretorV3Page.tsx`, `App.tsx`, `AppLayout.tsx`; LIVE v0.14.
+
+### 2026-07-09 — Corretor v3: design da unificação (v1+v2 → um fluxo) — Gabriel
+- **O quê:** decidida a v3, que absorve v1 (IA/custo/persistência/arquivo) e v2 (PPTX→IR,
+  motor DET, worklist) num fluxo único de 5 estágios: Triagem (DET, R$0) → Aprofundar (IA por
+  demanda com orçamento: texto-batch + visão cirúrgica) → Corrigir (worklist) → Reconferir
+  (re-upload/diff) → Entregar (0 pendentes = pronto p/ A&R). Decisões: **só PPTX**, IA por
+  demanda, **Supabase desde o início** (schema `*_v3`), **v3 substitui v1**.
+- **Insight:** com o IR entregando o texto, ortografia/cidade/coerência viram IA de TEXTO
+  (~10× mais barata) e a visão fica só para tabelas-imagem/mapas (mídia do zip, sem render).
+- **Status Fase C registrado:** pilotada e validada; extração numérica automática ainda NÃO
+  está no app — produtiza na v3.2 (edge + vision_cache).
+- **Arquivos:** `docs/features/corretor-vocacionais/DESIGN_corretor_v3.md`.
+
+### 2026-07-09 — PPTX → IR no navegador (upload direto do estudo na v2) — Gabriel
+- **O quê:** extrator portado do Python para TS (`lib/audit/pptx-to-ir.ts`, zip via `fflate` +
+  `DOMParser`). A Auditoria v2 agora aceita o **`.pptx` padrão do estudo** (além do `.ir.json`):
+  o IR é gerado no navegador, sem servidor, custo zero. Gráficos ficam p/ 2ª rodada.
+- **Verificação:** IR do TS **idêntico ao do `ir_extractor.py`** nos 2 estudos reais (slides,
+  tabelas, notas de edição, fontes e distribuição de seções batem exatamente). tsc/eslint/build ok.
+- **Próximas frentes (a pedido do Gabriel):** (1) estratégia de testes reproduzindo o fluxo de
+  trabalho do analista na plataforma (melhor que "avaliar o arquivo todo"); (2) repensar a
+  interface do Corretor de ponta a ponta (2ª aba lateral de projetos → forma de comunicar erros).
+- **Arquivos:** `lib/audit/pptx-to-ir.ts`, `pages/AuditoriaV2Page.tsx`, `package.json` (fflate); LIVE v0.13.
+
+### 2026-07-09 — Mapas/raios (nível 1) + persistência de thumbnails — Gabriel
+- **Item 1 (mapas/raios):** regra `RADII` DET sobre o IR (raio estranho ao conjunto canônico;
+  subconjuntos passam) + padrão de visualização "mapa" (chips esperado×detectado). No IR real:
+  Itajaí acha 3 slides "15 min" num estudo 10/20/30; Marka consistente.
+- **Item 2 (thumbnails):** migration `20260709` (`projects.reviewed_at`); persistência da
+  thumbnail de **todos** os slides; `getThumbnailUrl` (URL assinada); `markProjectReviewedInDb`
+  **poda as imagens dos slides OK** ao concluir a revisão. UI: thumbnail no card de erro +
+  botão "Concluir revisão" + selo. Serve para auditar **falso negativo**.
+- **Atenção:** migration `20260709` precisa ser aplicada no Supabase; o caminho DB/storage foi
+  verificado por tsc/eslint/build, não em runtime contra o Supabase.
+- **Arquivos:** `lib/audit/{model.ts,ir-rules.ts,fixtures.ts}`, `components/audit/FindingCard.tsx`,
+  `lib/archive-db.ts`, `store/archive-store.ts`, `pages/{CorretorPage,CorretorAnalysisPage}.tsx`,
+  `supabase/migrations/20260709000000_project_reviewed.sql`; LIVE v0.12.
+
+### 2026-07-09 — Auditoria v2: ingestão de IR real no navegador — Gabriel
+- **O quê:** a v2 agora carrega o `.ir.json` de qualquer estudo (botão "Carregar .ir.json") e
+  roda o motor DET no browser (`lib/audit/ir.ts` + `ir-rules.ts`, porte do `rules_ir.py`):
+  notas de edição, fonte ausente, soma de tabelas nativas, cobertura de seções, diagnóstico de
+  números-em-imagem. Estudo carregado entra no seletor com veredito/export próprios.
+- **Verificação:** parser TS sobre os 2 IR reais **reproduz a Fase A** (Itajaí 22+23; Marka
+  14+19); se houver tabela nativa, a soma DET acende sozinha. tsc/eslint/build ok.
+- **Arquivos:** `src/features/corretor/lib/audit/{ir.ts, ir-rules.ts}`, `pages/AuditoriaV2Page.tsx`; LIVE v0.11.
+
+### 2026-07-09 — Auditoria v2 vira instrumento de validação (vereditos + export + recall) — Gabriel
+- **O quê:** a demo `/auditoria/v2` ganhou persistência de vereditos (localStorage), botão
+  **Exportar revisão (CSV)** com o dataset rotulado (achados + veredito + nota-gabarito) e um
+  painel de **calibração ao vivo** (recall vs gabarito + falsos positivos). Fecha o loop:
+  analista revê → dá veredito → exporta → medimos o corretor contra o trabalho humano.
+- **Verificação:** tsc/eslint/build ok; calibração checada via tsx (3/3 gabarito → recall 100%).
+- **Arquivos:** `src/features/corretor/lib/audit/session.ts`, `pages/AuditoriaV2Page.tsx`; LIVE v0.10.
+
+### 2026-07-09 — Fase E 1ª iteração: Auditoria v2 no app (`/auditoria/v2`) — Gabriel
+- **O quê:** interface v2 do corretor implementada e funcional sobre **fixtures reais do
+  piloto** (custo de IA R$ 0). Catálogo central de 21 tipos de erro (retrocompatível com a v1),
+  motor DET portado para TS (verificado: reproduz o piloto Python), 4 visualizações (tabela com
+  células marcadas, lado-a-lado, régua de faixas, texto/checklist), página com sumário +
+  cobertura dos 21 tipos + veredito por achado. Cada achado mostra seu modo (pleno/β/demo).
+- **Verificação:** `tsc --noEmit` ok, eslint ok, `npm run build` ok; engine rodado via tsx
+  reproduz os achados (s41/s121 fecham; faixas/janelas/binning disparam com as notas-gabarito).
+- **Falta (próxima sessão):** persistência de thumbnails (todas até veredito→poda), mapas
+  nível 1-2, ingestão de PPTX/IR no browser, migração `slide_errors.type`.
+- **Arquivos:** `src/features/corretor/lib/error-catalog.ts`, `lib/audit/*`,
+  `components/audit/FindingCard.tsx`, `pages/AuditoriaV2Page.tsx`, rota em `App.tsx`, LIVE v0.9.
+
+### 2026-07-09 — Handoff da Fase E pronto (interface + 20 tipos de erro) — Gabriel
+- **O quê:** criado `HANDOFF_fase_e_interface.md` — plano completo para a próxima sessão
+  implementar a interface v2 **sem depender desta conversa**: enum de 20 tipos com modos
+  PLENO/β(degradado)/mock, 6 padrões de visualização por tipo de erro, persistência de
+  thumbnails "todas até o veredito, depois poda", mapas/raios em 3 níveis (DET textual →
+  visão pontual β → MAP_CHART_MISMATCH), ordem de implementação e critério de pronto
+  (analista vê os 20 tipos na tela com fixtures reais do piloto, sem custo de IA novo).
+  **Sem código ainda — só o plano.**
+- **Arquivos:** `docs/features/corretor-vocacionais/HANDOFF_fase_e_interface.md`.
+
+### 2026-07-09 — Decisão do gestor: imagem é o padrão; foco vira UI — Gabriel
+- **O quê:** gestor orientou seguir os testes **com tabelas em imagem** (padrão por enquanto).
+  Médio prazo: conversas com a área de elaboração (tabelas nativas ou, alternativa, pré-análise
+  dos **Excels de trabalho** antes dos prints). Próximos passos focam **aparência do app e
+  visualização de erros (Fase E)**. Criado o inventário completo de regras em linguagem
+  natural (`regras_em_linguagem_natural.md`): 24 regras + 11 bases de conhecimento.
+- **Arquivos:** `docs/features/corretor-vocacionais/regras_em_linguagem_natural.md`,
+  LIVE do Corretor (v0.8).
+
+### 2026-07-09 — Corretor v2: piloto reproduz as notas da analista + custos em R$ — Gabriel
+- **O quê:** piloto expandido para 6 complementos (pares cruzados). `crosscheck_piloto.py`
+  **reproduziu as notas da analista a partir dos números crus**: faixa de renda divergente
+  (s59×s41/s60), lacunas 12.143≠5.478 (s121×s122), janelas 2026-31×2025-30 — **+ 1 bug bônus
+  não anotado** (furo de faixa 9501-10000). Calibração aprendida: arredondamento de exibição
+  pede tolerância ±n/2 em projeções.
+- **Custos em R$** (`custos_visao_reais.md`): visão ≈ R$ 0,02–0,08/imagem → R$ 1,50–6,80/estudo
+  → R$ 380–4.100/ano; tabela nativa = R$ 0. Argumento decisivo: exatidão + pipeline zero.
+- **Arquivos:** `docs/features/corretor-vocacionais/{crosscheck_piloto.py, custos_visao_reais.md,
+  visao/piloto/*(6)}`, LIVE do Corretor (v0.7).
+
+### 2026-07-09 — Corretor v2 Fase C: piloto de visão validado de ponta a ponta — Gabriel
+- **O quê:** pipeline da extração de números em imagem desenhado e pilotado. `scan_imagens.py`
+  gera o manifest com sha1 (cache): 487 refs → 334 únicas → **154 únicas em seções numéricas**.
+  2 extrações-piloto (Ita s41 renda; Mrk s121 lacunas — ambas de slides com nota-gabarito) no
+  schema `ir_complemento_visao/v0`, validadas por `valida_complemento.py`: **48 checagens DET
+  OK, 0 inconsistências**. Redundância linha×coluna×total auto-valida a extração.
+- **Argumento econômico documentado** (`fase_c_visao.md`) para o time de analistas migrar a
+  tabelas nativas no PPT: ~75–115 chamadas de visão/estudo → 0 para sempre, exatidão por
+  construção; transição gradual começando por lacunas/renda/absorção (mapas continuam imagem).
+- **Arquivos:** `docs/features/corretor-vocacionais/{scan_imagens.py, valida_complemento.py,
+  fase_c_visao.md, visao/piloto/*.json}`, LIVE do Corretor (v0.6).
+
+### 2026-07-08 — Corretor v2: virada conceitual — notas = especificação + gabarito — Gabriel
+- **O quê:** reinterpretação das notas de revisão. Elas **não são bugs**: são as instruções do
+  analista humano, que o corretor substitui — e não virão nos estudos reais. Passam a ser
+  (1) **especificação do catálogo de regras** (36 notas mineradas em `taxonomia_notas.md` →
+  tipos `CROSS_TABLE_MISMATCH`, `PROJECTION_FORMULA`, `VALUE_PLAUSIBILITY`, `WRONG_CONTEXT`,
+  `BINNING_RULE`; layout fora de escopo) e (2) **gabarito de validação** (recall/precisão).
+- **Impacto:** a maioria das correções humanas depende de **números presos em imagem** → a
+  **extração de visão dos números (Fase C) vira caminho crítico**. `LEFTOVER_NOTE` rebaixada a
+  rede de segurança. Estratégia reordenada (Fase 0→E) no `DESIGN_corretor_v2.md`.
+- **Arquivos:** `docs/features/corretor-vocacionais/{taxonomia_notas.md, DESIGN_corretor_v2.md}`,
+  LIVE do Corretor (v0.5).
+
+### 2026-07-08 — Corretor v2 Fase A: motor DET rodando nos estudos reais — Gabriel
+- **O quê:** `rules_ir.py` (motor de regras determinísticas puro sobre o IR, zero IA) rodado
+  nos 2 estudos reais. **81 achados a custo zero**: Itajaí 48 (22 notas de edição vazadas,
+  23 fonte-ausente, 3 janela de projeção fora de 2027–2032), Marka 33. Ouro: notas internas
+  esquecidas no deck ("dados do estudo do Brooklin, corrigir"; "verificar, está estranho").
+- **Achado estrutural:** números presos em imagem (0 tabelas com número parseado; 264/225
+  imagens) → regras numéricas sem material nestes 2 estudos; destrava na Fase C (visão pontual).
+- **Entregáveis:** `rules_ir.py`, `achados_fase_a.md` (relatório), `calibracao/*.secao.csv`
+  (tabela para a analista da Fase B).
+- **Arquivos:** `docs/features/corretor-vocacionais/{rules_ir.py, achados_fase_a.md, calibracao/}`,
+  LIVE do Corretor (v0.4).
+
+### 2026-07-08 — Corretor v2: estudos reais + estratégia de testes — Gabriel
+- **O quê:** recebidos 2 estudos vocacionais reais e completos (Itajaí/SC 143 slides;
+  Marka Prime/Guarulhos 165 slides). IR extraído de ambos sem erro. Achados: as **atas estão
+  no slide 1 como imagem** (invisíveis ao IR v1) e a seção canônica v0 regrediu em estudos
+  reais (64/143 e 48/165 slides sem seção). Definida a **estratégia de testes com economia de
+  créditos** (fases A-E: DET-first → calibração de seção → ata one-shot com cache → IA em
+  porções/batch/amostragem → interface v2) — ver `DESIGN_corretor_v2.md`.
+- **Por quê:** tornar o corretor funcional testando com material real, expandindo tipos de
+  erro e reorganizando a interface, sem estourar créditos de IA.
+- **Decisões:** estudos = **PPTX** (não PDF); atas futuras = **DOCX separado** (alinhar com o
+  time); PPTX pesados ficam **locais/gitignored** (157/93 MB — acima do limite do GitHub).
+- **Arquivos:** `.gitignore`, `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`
+  (v0.3), `docs/features/corretor-vocacionais/DESIGN_corretor_v2.md` (estratégia + log).
+
+### 2026-07-08 — Base zero documentada — Gabriel
+- **O quê:** criação deste doc vivo consolidando plataforma + features do Rebrain.
+- **Por quê:** estabelecer a linha de base de desenvolvimento para colaboração via git.
+- **Arquivos:** transversal (`src/`, `supabase/`, `docs/`).
+
+<!-- novas entradas acima desta linha, mais recente no topo -->
+
+---
+

@@ -85,35 +85,35 @@
       "danieleCandidateParts": []
     },
     {
-      "path": "Housi/housi-relatorio-dinamico/_anexos/pptx-drive/Brain_Vocacional_Vertical_Housi_Rua Raimundo Leonardi_VAP_03ago_12h.pptx",
+      "path": "Plataforma/sandbox-brain/_anexos/pptx-drive/Brain_Vocacional_Vertical_Housi_Rua Raimundo Leonardi_VAP_03ago_12h.pptx",
       "sha1": "deec5144f8b113adf504c8ff2e5a91513b690c43",
       "sha256": "c0bbe30e8095cf81a01d898e531b330ad31dfba675db834ac7b0c62dd15b7a08",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Housi/housi-relatorio-dinamico/_anexos/pptx-drive/Brain_Vocacional_Vertical_Housi_Jardim Monte Bello_Campos do Jordao - SP_vAP_27jul.pptx",
+      "path": "Plataforma/sandbox-brain/_anexos/pptx-drive/Brain_Vocacional_Vertical_Housi_Jardim Monte Bello_Campos do Jordao - SP_vAP_27jul.pptx",
       "sha1": "e6a5fa03d2a189c86a59d70d5eb515e0dd3cd36f",
       "sha256": "8a8cd47f305054ce9814dcabd75731850586e7a60572172698efc9600d7b88c4",
       "studyMatch": "Brain_Vocacional_Vertical_Housi_Jardim Monte Bello_Campos do Jordao - SP_vAP_27jul",
       "danieleCandidateParts": []
     },
     {
-      "path": "Housi/housi-relatorio-dinamico/_anexos/pptx-drive/Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_vap_30jul.pptx",
+      "path": "Plataforma/sandbox-brain/_anexos/pptx-drive/Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_vap_30jul.pptx",
       "sha1": "5425ce101b352e090e03aa6559b806e49235e2fa",
       "sha256": "2c363a4938cf70ba8f6f93197f32786632a165e827b034a6ab4fda04068ae5fc",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Dashboard Bolivia/geobrain-bolivia/docs/features/corretor-vocacionais/Vocacional_Marka Prime_Reduzido.pptx",
+      "path": "Rebrain/geobrain-bolivia/docs/features/corretor-vocacionais/Vocacional_Marka Prime_Reduzido.pptx",
       "sha1": "a72fd3eafc1860f8c4e6542ebe67cd76dcf24f7c",
       "sha256": "721dd0df05485ee83436b209c2e104c415488ec57a6b525da948d081c12a5784",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Dashboard Bolivia/geobrain-bolivia/docs/features/corretor-vocacionais/Vocacionais_parametros_de_correcao.pptx",
+      "path": "Rebrain/geobrain-bolivia/docs/features/corretor-vocacionais/Vocacionais_parametros_de_correcao.pptx",
       "sha1": "baa396f08b5ae191007423b680ce6a8f460decfc",
       "sha256": "d8aa7b7bfd712c158d80c667f6becba303515bcacd11a5457474eb15581005fc",
       "studyMatch": null,
@@ -148,203 +148,203 @@
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/src/features/panorama-secovi-fiergs/assets/nova ref/PPT Institucional_2026 - Widescreen_NOVO (1).pptx",
+      "path": "Rebrain/relatorios-api/src/features/panorama-secovi-fiergs/assets/nova ref/PPT Institucional_2026 - Widescreen_NOVO (1).pptx",
       "sha1": "5424e12d8036db1cfbff023d8dc34a75511db833",
       "sha256": "faa3e2c7f108d4fc5c4bd2519a5b75ea275e5ffeeedc4aea0aec2c141f921423",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/src/features/panorama-secovi-fiergs/assets/nova ref/Brain_Panorama_Secovi_SP_Baixada Santista_2T26_VAP_06Ago_16h40.pptx",
+      "path": "Rebrain/relatorios-api/src/features/panorama-secovi-fiergs/assets/nova ref/Brain_Panorama_Secovi_SP_Baixada Santista_2T26_VAP_06Ago_16h40.pptx",
       "sha1": "70bb5c90746c09cac4688016b1021e445183ea2c",
       "sha256": "897a4c38677b987b69dab3f433bef40ed62bb60fbb9a744ddc2b13aaa5f3979b",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/src/features/corretor/referencia_ajustes/Brain_Vocacional_Vertical_ECO_Construcoes_Incorporacoes_Joao_Pessoa - PB_V2.pptx",
+      "path": "Rebrain/relatorios-api/src/features/corretor/referencia_ajustes/Brain_Vocacional_Vertical_ECO_Construcoes_Incorporacoes_Joao_Pessoa - PB_V2.pptx",
       "sha1": "5b10eac0a93dc309d73528112520c1346bb911fe",
       "sha256": "4715b05e4487470015f99c2780f3fddad505a87addc4dfa22292b82246e2f630",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/src/features/corretor/referencia_ajustes/Brain_Vocacional_Vertical_ECO_Construcoes_Incorporacoes_Joao_Pessoa - PB_V1.pptx",
+      "path": "Rebrain/relatorios-api/src/features/corretor/referencia_ajustes/Brain_Vocacional_Vertical_ECO_Construcoes_Incorporacoes_Joao_Pessoa - PB_V1.pptx",
       "sha1": "d446ad266e0d12769e9cedfe8163f5b7ceeaf1d4",
       "sha256": "7e64f7e20debaef02a5b6b284dc042cca98692a39cfd36111d290b5820accad4",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/src/features/corretor/lib/v3/__tests__/teste_corretor.pptx",
+      "path": "Rebrain/relatorios-api/src/features/corretor/lib/v3/__tests__/teste_corretor.pptx",
       "sha1": "c4ef8ab7f79d90956144866840182ff62134a838",
       "sha256": "c492144791268697dc8f91866acbfb80c4cdc13aa03a5c3beaf65aca8438c00f",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/src/features/corretor/lib/v3/__tests__/teste_ata.pptx",
+      "path": "Rebrain/relatorios-api/src/features/corretor/lib/v3/__tests__/teste_ata.pptx",
       "sha1": "ef88f33d29202018cbbf8815e4aa0a20bc215e99",
       "sha256": "e029375d4e6d0827c537fc08de38cd42d7d68d8bf4889245ddeed4efff666f2c",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/docs/features/Relatorios Secovi_FIERGS/PPT Institucional_2026 - Widescreen_NOVO (1).pptx",
+      "path": "Rebrain/relatorios-api/docs/features/Relatorios Secovi_FIERGS/PPT Institucional_2026 - Widescreen_NOVO (1).pptx",
       "sha1": "5424e12d8036db1cfbff023d8dc34a75511db833",
       "sha256": "faa3e2c7f108d4fc5c4bd2519a5b75ea275e5ffeeedc4aea0aec2c141f921423",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/docs/features/Relatorios Secovi_FIERGS/Panorama_Secovi_SP_Piracicaba_1T26_vApres_28MAI_13h50.pptx",
+      "path": "Rebrain/relatorios-api/docs/features/Relatorios Secovi_FIERGS/Panorama_Secovi_SP_Piracicaba_1T26_vApres_28MAI_13h50.pptx",
       "sha1": "7a12a52053f97ae3bcb3371ff00c44586ea471d5",
       "sha256": "fa318ee7562bf838beb57d6c4be8fcc533274968e8145929ca6953459964288b",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/docs/features/Relatorios Secovi_FIERGS/Panorama_FIERGS_RM_Porto_Alegre_4T25.pptx",
+      "path": "Rebrain/relatorios-api/docs/features/Relatorios Secovi_FIERGS/Panorama_FIERGS_RM_Porto_Alegre_4T25.pptx",
       "sha1": "53bb175c9c3d7a1d40fb541d1372b53b2bea4eec",
       "sha256": "b2f6bfff4f645dcd97ac023216515f9ea02e50970d753ffe042f5d92de02c129",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/Vocacional_Marka Prime_Reduzido.pptx",
+      "path": "Rebrain/relatorios-api/docs/features/corretor-vocacionais/Vocacional_Marka Prime_Reduzido.pptx",
       "sha1": "a72fd3eafc1860f8c4e6542ebe67cd76dcf24f7c",
       "sha256": "721dd0df05485ee83436b209c2e104c415488ec57a6b525da948d081c12a5784",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/Vocacionais_parametros_de_correcao.pptx",
+      "path": "Rebrain/relatorios-api/docs/features/corretor-vocacionais/Vocacionais_parametros_de_correcao.pptx",
       "sha1": "baa396f08b5ae191007423b680ce6a8f460decfc",
       "sha256": "d8aa7b7bfd712c158d80c667f6becba303515bcacd11a5457474eb15581005fc",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/fontes/marka-tancredo-2026-01/estudo/Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_Vfinal_27abr_2025_8h45.pptx",
+      "path": "Rebrain/relatorios-api/docs/features/corretor-vocacionais/fontes/marka-tancredo-2026-01/estudo/Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_Vfinal_27abr_2025_8h45.pptx",
       "sha1": "8c3930d5712ab7210740e6e41aa869f1ddd5831c",
       "sha256": "97616c80e7212500fb8f950b3d22f3d3bdbe3df3ff28be8e383937c2ae5b2024",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/fontes/marka-tancredo-2026-01/estudo/Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_V2_28fev_20h15.pptx",
+      "path": "Rebrain/relatorios-api/docs/features/corretor-vocacionais/fontes/marka-tancredo-2026-01/estudo/Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_V2_28fev_20h15.pptx",
       "sha1": "a91cf194070ee47ad5933721e9848b92026d0439",
       "sha256": "07f5596da44ee24a296115b6cc49d7d45ca2f6780bced5f7669e4d94fb0f6883",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/fontes/marka-tancredo-2026-01/estudo/Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_V1.pptx",
+      "path": "Rebrain/relatorios-api/docs/features/corretor-vocacionais/fontes/marka-tancredo-2026-01/estudo/Vocacional_Marka Prime_Tancredo_Sao Paulo - SP_V1.pptx",
       "sha1": "a60e4730a83ef810d8c2c9afa4eceddb80586e28",
       "sha256": "4bcdd5571b55e50edad63937e3bc54fe5e80bd4992289ac21fd5931c33240ffb",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/fontes/housi-toledo-2026-07/estudo/Brain_Vocacional_Vertical_Housi_Rua Raimundo Leonardi_VAP_03ago_12h.pptx",
+      "path": "Rebrain/relatorios-api/docs/features/corretor-vocacionais/fontes/housi-toledo-2026-07/estudo/Brain_Vocacional_Vertical_Housi_Rua Raimundo Leonardi_VAP_03ago_12h.pptx",
       "sha1": "c99440357bf0559c12d97c64cd2212d35c24611a",
       "sha256": "8f4e1065251045d5f382378dbdc3bb15f432f16df8c6d15ca94c041094cc106d",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/docs/features/corretor-vocacionais/fontes/housi-rolandia-2026-07/estudo/Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_v1.pptx",
+      "path": "Rebrain/relatorios-api/docs/features/corretor-vocacionais/fontes/housi-rolandia-2026-07/estudo/Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_v1.pptx",
       "sha1": "736dc564c1dcc68a567c5c37f8a63f3d5857f779",
       "sha256": "64789a5fdc70051c83e3a875f21e592f1993fddff8e50219f6bf2c70455cb8a6",
       "studyMatch": "Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_v1",
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/.local-inputs/drive-20261014/goiania-junho.pptx",
+      "path": "Rebrain/relatorios-api/.local-inputs/drive-20261014/goiania-junho.pptx",
       "sha1": "4e48f65e93257173d602783632ff0da3a2b178b8",
       "sha256": "0ea1f769c33184940820435adc203c91ac3e6d7bc957a7fbd027947c465b8179",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/assets/Slides-Institucionais-Brain-2026.pptx",
+      "path": "Rebrain/relatorios-api/assets/Slides-Institucionais-Brain-2026.pptx",
       "sha1": "328abf8e4729cdd0a6d683164c5c01df15cf075a",
       "sha256": "8e1e61f0dcb26b876ee846cf66c412b29e373fe7ceb2b12546cd3a4a71d77854",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/assets/Panorama_FIERGS_desenvolvimento_executivo.pptx",
+      "path": "Rebrain/relatorios-api/assets/Panorama_FIERGS_desenvolvimento_executivo.pptx",
       "sha1": "5d91dc6e6913284a3d3b158fed1a3ff67ac57375",
       "sha256": "1b5c00ab9eff4b076ad7f3e2a4be3a8d05d6ea69176320230a7b79f603dc3a3e",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/assets/panorama-fiergs-rs-2T2026 versao juliana 6de outubro.pptx",
+      "path": "Rebrain/relatorios-api/assets/panorama-fiergs-rs-2T2026 versao juliana 6de outubro.pptx",
       "sha1": "bf75711cb4ff0ca15cf8338c6c702a213f2478f0",
       "sha256": "4c28cf7377bd92b31934b5c68e3d2a35dc34923ef8b0c9d24d1ed645ee4fd369",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/.tmp/opus-panorama-v3/evidencias/praia-grande/panorama-v3.pptx",
+      "path": "Rebrain/relatorios-api/.tmp/opus-panorama-v3/evidencias/praia-grande/panorama-v3.pptx",
       "sha1": "ed9da9477bc919f8f9d048cbe581176434145bfb",
       "sha256": "1151d9a9e30fdb9a5a4b91e12dc2142e4db9404c47b3e6ac4374a3e96e9fa086",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/.tmp/opus-panorama-v3/evidencias/jundiai/panorama-v3.pptx",
+      "path": "Rebrain/relatorios-api/.tmp/opus-panorama-v3/evidencias/jundiai/panorama-v3.pptx",
       "sha1": "71adf8a2da147dbd3abb2645da8ff9a0f1e681ef",
       "sha256": "50d964f190af57fe76e21bc1ea06514a5f9b1d0521aed32e800297db89e104de",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/.tmp/opus-panorama-v3/evidencias/baixada/panorama-v3.pptx",
+      "path": "Rebrain/relatorios-api/.tmp/opus-panorama-v3/evidencias/baixada/panorama-v3.pptx",
       "sha1": "e2bf86e80a2e1a600e82ae2c268beca68be51028",
       "sha256": "cf3d47fa6118a3734244f5da1158defdc14df57e565f375526088697843c0660",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/.tmp/fiergs-homologacao-2T2026/panorama-fiergs-2T2026-homologacao.pptx",
+      "path": "Rebrain/relatorios-api/.tmp/fiergs-homologacao-2T2026/panorama-fiergs-2T2026-homologacao.pptx",
       "sha1": "5683b1ffa43e3b821728e3cb4fa4dd1b333b5c23",
       "sha256": "4d36effba053fe90b473cafc255830e7dfe2cb54743d754dd0b2e7fc202ffecd",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/.tmp/fiergs-final-adjustments-regression-20261002/panorama-fiergs-rs-4T2025.pptx",
+      "path": "Rebrain/relatorios-api/.tmp/fiergs-final-adjustments-regression-20261002/panorama-fiergs-rs-4T2025.pptx",
       "sha1": "25ab36b6644bb834960fd81f39fb8e84b8e5b178",
       "sha256": "91f2836511fd5253e3906b00c0be5ed6345dd7fcb9aca352b029aee2228395a0",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/.tmp/fiergs-final-adjustments-regression-20261002/panorama-fiergs-rs-2T2026.pptx",
+      "path": "Rebrain/relatorios-api/.tmp/fiergs-final-adjustments-regression-20261002/panorama-fiergs-rs-2T2026.pptx",
       "sha1": "97d9dfd291e1cbbb8f1491e442648d45d74bd0f8",
       "sha256": "86191951e66fca2251ab7c8c28132f234b11a9731af09d03ce2d3cd2a71ceee7",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Relatorios API/relatorios-api/.tmp/fiergs-rm-porto-alegre-4t25.pptx",
+      "path": "Rebrain/relatorios-api/.tmp/fiergs-rm-porto-alegre-4t25.pptx",
       "sha1": "53bb175c9c3d7a1d40fb541d1372b53b2bea4eec",
       "sha256": "b2f6bfff4f645dcd97ac023216515f9ea02e50970d753ffe042f5d92de02c129",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Sistema-Quanti/Sistema Novo/Detalhes de Desenvolvimento/Docs/parciais/fontes/parâmetros parciais.pptx",
+      "path": "Quanti/quanti-system-hub/Detalhes de Desenvolvimento/Docs/parciais/fontes/parâmetros parciais.pptx",
       "sha1": "80be2ca98d838d381816167a67cf7eaec177e6fd",
       "sha256": "1dd0d68f70e6045d0ff291989b15082d561c7e38afb3d4d07513c88b8a096125",
       "studyMatch": null,
       "danieleCandidateParts": []
     },
     {
-      "path": "Agenda Brain/agenda_brain/exemplos_sistema_quanti/Detalhes de Desenvolvimento/Docs/parciais/fontes/parâmetros parciais.pptx",
+      "path": "Agenda/agenda_brain/exemplos_sistema_quanti/Detalhes de Desenvolvimento/Docs/parciais/fontes/parâmetros parciais.pptx",
       "sha1": "80be2ca98d838d381816167a67cf7eaec177e6fd",
       "sha256": "1dd0d68f70e6045d0ff291989b15082d561c7e38afb3d4d07513c88b8a096125",
       "studyMatch": null,

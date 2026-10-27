@@ -1,3 +1,21 @@
+# Corretor de Vocacionais — Regras Live
+
+Documento vivo para acompanhar regras determinísticas, regras de LLM, artefatos de extração e decisões operacionais do **Corretor | Estudos Vocacionais**.
+
+Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, renomeada, reclassificada entre `DET`/`IA`, ou quando o fluxo do corretor mudar em `src/features/corretor/`, `supabase/functions/analyze-slide/`, `supabase/migrations/` ou `docs/features/corretor-vocacionais/`.
+
+## Como atualizar
+
+1. Nunca apagar o histórico de versões anteriores sem motivo explícito.
+2. Para mudanças novas, criar uma seção `Versão X.Y — data` no topo do histórico.
+3. Marcar cada regra com um status:
+   - `RUNTIME`: aplicada hoje pelo app.
+   - `POC`: existe como prova de conceito/script, mas não está integrada ao app.
+   - `PLANEJADA`: documentada para v2, ainda sem implementação runtime.
+   - `REMOVIDA`: existia antes e foi retirada.
+4. Informar a fonte técnica/documental da mudança.
+5. Separar regras `DET` de regras `IA/LLM`.
+
 ## 22/10/2026 — Ajuste visual do tema escuro, sem mudança nas regras
 
 Rodapé de apontamentos deixava uma faixa Papel clara no modo escuro; triagem em portal não herdava aliases locais. Corrigida adaptação escura da carteira/preparação, bancada, carregamento, materiais, Sugestão em blocos e triagem: superfícies neutras próximas, texto menos luminoso, bordas discretas e preenchimentos de estado suaves. Botões de decisão indicam seleção com aria-pressed/filete, mantendo callbacks e decisões existentes. Tokens da fundação copiados sem alteração; nenhum motor, prompt, perfil, limite, retomada, material ou registro de consumo alterado.
@@ -193,24 +211,6 @@ Validado localmente: mapa e evidências sempre abertos, preenchimento por confia
 
 ## Versão 0.72.1 — 15/10/2026 — interface única
 Estado: validado localmente, publicação ainda a conferir. Removida a landing operacional antiga de Novo estudo e a alternância V1/V2/V3. Carteira canônica preserva Arquivo para estudos anteriores. Envio no design SE com Excel opcional, ligado à pré-análise. Revisão sempre na bancada; parâmetros antigos de lista não reabrem composição legada. Sem mudança em regras/decisões humanas/IA. Ver `design/RETIRADA_LANDING_LEGADA_2026-10-15.md`.
-
-# Corretor de Vocacionais — Regras Live
-
-Documento vivo para acompanhar regras determinísticas, regras de LLM, artefatos de extração e decisões operacionais do **Corretor | Estudos Vocacionais**.
-
-Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, renomeada, reclassificada entre `DET`/`IA`, ou quando o fluxo do corretor mudar em `src/features/corretor/`, `supabase/functions/analyze-slide/`, `supabase/migrations/` ou `docs/features/corretor-vocacionais/`.
-
-## Como atualizar
-
-1. Nunca apagar o histórico de versões anteriores sem motivo explícito.
-2. Para mudanças novas, criar uma seção `Versão X.Y — data` no topo do histórico.
-3. Marcar cada regra com um status:
-   - `RUNTIME`: aplicada hoje pelo app.
-   - `POC`: existe como prova de conceito/script, mas não está integrada ao app.
-   - `PLANEJADA`: documentada para v2, ainda sem implementação runtime.
-   - `REMOVIDA`: existia antes e foi retirada.
-4. Informar a fonte técnica/documental da mudança.
-5. Separar regras `DET` de regras `IA/LLM`.
 
 ## Versão 0.72 — 2026-10-15 — primeira bancada real e materiais A2/A3 (RUNTIME local / backend preparado)
 

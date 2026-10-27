@@ -36,6 +36,18 @@ introduziu a mudança. Na prática:
 - **Depois de um `pull`/merge**: leia as entradas novas do(s) doc(s) para se situar sobre o
   que mudou no trabalho dos colegas.
 
+## Rotação (tamanho do doc vivo)
+
+O doc vivo guarda o **estado atual** (Etapas, Pendências, arquitetura) e o **registro recente**.
+Quando passar de ~120 KB, ou no fechamento semanal, entradas de Desenvolvimentos com mais de 7 dias
+são **movidas sem edição** para `historico/<doc>_ate_<data>.md`. O mesmo vale para entradas
+inseridas fora do lugar. Rotação não é descarte nem resumo: a entrada continua no Git, só sai da
+leitura diária. Seções de estado nunca são rotacionadas. Entrada nova vai no topo de
+**Desenvolvimentos**, nunca acima do título do documento.
+
+Ferramenta local de Gabriel, `SE/.local-tools/rotacionar_live.py <doc> --corte AAAA-MM-DD`: roda
+em ensaio, grava só com `--aplicar` e comprova que nenhuma linha se perdeu.
+
 ## Fluxo de trabalho e publicação
 
 A publicação é validada a partir da **`main`**. Assim, o repositório adota fluxo direto: cada

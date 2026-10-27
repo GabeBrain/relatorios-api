@@ -67,7 +67,8 @@ qualquer trabalho paralelo mesmo sem ninguém discordar. Onde houver `.gitattrib
 
 Se ainda assim conflitar, **a resolução é somativa**: preserve todas as entradas dos dois lados,
 em ordem decrescente de data. Nenhuma entrada é descartada, resumida ou reescrita — não existe
-"escolher um lado" num log.
+"escolher um lado" num log. Rotação também não descarta: entradas antigas são movidas sem edição
+para `docs/projetos/historico/`, conforme a seção *Rotação* de `docs/projetos/README.md`.
 
 Para conferir que nada se perdeu, use a identidade do merge de três pontos:
 
