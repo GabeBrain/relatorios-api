@@ -50,7 +50,7 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     source: 'history-identity-v1', displayDecision: 'Uma observação por identidade/conteúdo; originais e referências disponíveis na Auditoria CSV.' });
   if (issues) add({ code: 'HISTORY_INTEGRITY_BLOCKED', severity: 'warning', indicator: 'Integridade do histórico',
     reason: `${issues} ocorrência(s) de conflito, identidade, quantidade ou fotografia incompleta.`, source: 'history-identity-v1 / period-capacity-v1',
-    displayDecision: 'Exportação protegida; consultar os registros impeditivos na Auditoria CSV.' });
+    displayDecision: 'Ocorrências preservadas para conferência nos alertas de consistência e na Auditoria CSV.' });
   if (report.scope.entity === 'fiergs-rs' && identified.length) {
     const unavailable = identified.filter((p) => !p.historyAudit!.registryComparable).length;
     add({ code: 'HISTORICAL_CAPACITY_DERIVED', severity: 'info', indicator: 'Capacidade no fechamento',
@@ -170,7 +170,7 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     add({ code: row.critical ? 'CRITICAL_RECONCILIATION' : 'RECONCILIATION_DIFFERENCE',
       severity: row.critical ? 'critical' : 'warning', indicator: row.metricId,
       reason: `Reconciliação ${row.status}: total canônico ${row.canonicalTotal ?? 'indisponível'}, dimensional ${row.dimensionalTotal ?? 'indisponível'}, delta ${row.delta ?? 'indisponível'} (tolerância ${row.tolerance}).`,
-      source: row.source, displayDecision: row.critical ? 'Exportação bloqueada até a divergência crítica ser resolvida.' : 'A diferença permanece explícita na auditoria.',
+      source: row.source, displayDecision: row.critical ? 'Confira o alerta de consistência antes de continuar o download; a diferença permanece na auditoria.' : 'A diferença permanece explícita na auditoria.',
       officialSlides: [] });
   }
 

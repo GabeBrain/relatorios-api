@@ -13,22 +13,22 @@ import { panoramaExportMetadata } from '../lib/export-metadata';
  * navegação do usuário entre páginas. O deck só existe enquanto o job está ativo.
  */
 export default function PanoramaExportHost() {
-  const { status, progress, total, error, report, result, format } = usePanoramaExportStore();
+  const { status, progress, total, error, report, result, format, controller, consistencyAcknowledged } = usePanoramaExportStore();
   const deckRef = useRef<HTMLDivElement>(null);
   const startedFor = useRef<PanoramaExportRunKey>(null);
 
   useEffect(() => {
     if (status !== 'preparing' || !report) return;
     const store = usePanoramaExportStore.getState();
-    const signal = store.controller?.signal;
+    const signal = controller?.signal;
     // O guard existe para o efeito não disparar duas vezes o mesmo trabalho quando React reexecuta
     // o commit. Ele precisa considerar **formato e relatório**: com a chave só no relatório, pedir o
     // PPT logo depois do PDF do mesmo recorte reencontrava a chave anterior, o efeito retornava sem
     // nada fazer e a exportação ficava presa em "Preparando…" para sempre — que é exatamente o
     // caminho do PPT espelho pedido na homologação.
-    if (startedFor.current?.report === report && startedFor.current.format === format) return;
-    startedFor.current = { report, format };
-    const initialBlockReason = panoramaExportBlockReason(report);
+    if (startedFor.current?.report === report && startedFor.current.format === format && startedFor.current.signal === signal) return;
+    startedFor.current = { report, format, signal };
+    const initialBlockReason = panoramaExportBlockReason(report, { consistencyAcknowledged });
     if (initialBlockReason) { store.fail(initialBlockReason); return; }
     const cityLabel = scopeCityLabel(report.scope);
     synchronizeOfficialCoverCity(cityLabel, report.scope.uf, report.scope.endQuarter);
@@ -36,11 +36,12 @@ export default function PanoramaExportHost() {
     // Aguarda o deck pintar antes de capturar; o efeito roda no mesmo commit que o monta.
     const run = async () => {
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      if (signal?.aborted || usePanoramaExportStore.getState().controller !== controller) return;
       const slides = [...(deckRef.current?.querySelectorAll<HTMLElement>('.panorama-report-page') ?? [])];
       if (!slides.length) { usePanoramaExportStore.getState().fail('Não foi possível montar as páginas do relatório.'); return; }
       usePanoramaExportStore.getState().markCapturing(slides.length);
       try {
-        const blockReason = panoramaExportBlockReason(report);
+        const blockReason = panoramaExportBlockReason(report, { consistencyAcknowledged });
         if (blockReason) { usePanoramaExportStore.getState().fail(blockReason); return; }
         const metadata = panoramaExportMetadata(report.scope, import.meta.env.VITE_BUILD_ID);
         const builder = format === 'pptx' ? buildPanoramaPptx : buildPanoramaPdf;
@@ -63,7 +64,7 @@ export default function PanoramaExportHost() {
       }
     };
     void run();
-  }, [status, report, format]);
+  }, [status, report, format, controller, consistencyAcknowledged]);
 
   const running = status === 'preparing' || status === 'capturing' || status === 'assembling';
   const formatLabel = format === 'pptx' ? 'PPT espelho' : 'PDF';
@@ -116,4 +117,4 @@ export default function PanoramaExportHost() {
   );
 }
 
-type PanoramaExportRunKey = { report: object; format: PanoramaExportFormat } | null;
+type PanoramaExportRunKey = { report: object; format: PanoramaExportFormat; signal?: AbortSignal } | null;

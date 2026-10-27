@@ -84,6 +84,22 @@ Resumo pequeno versionado, com escopos, contagens e SHA-256 dos dezCSV: `EVIDENC
 
 ## Rascunhos G6 — não enviados
 
+## Complemento posterior — Miradero e alertas de consistência
+
+Por solicitação de Gabriel, nova política de interface/exportação: botão Alertas abre modal, descreve ajustes e diferenças sem rótulos de confiabilidade ou aprovação. Resultados reconciliados baixam diretamente. Divergências numéricas remanescentes podem ser revistas no modal e o usuário pode continuar o download por formato/geração; resultado das guardas e auditoria permanecem intactos. Isso substitui o bloqueio numérico absoluto da etapa anterior por uma decisão explícita de exportação, não por um match artificial. Falha de coleta municipal/proveniência continua impedindo montar um recorte completo, sem bypass de cobertura.
+
+Diagnóstico adicional solicitado antes do modal: duas consultas autenticadas individuais, somente leitura, HTTP200, `GET https://geobrain.com.br/public-api/building/63297` e `GET https://geobrain.com.br/public-api/building-with-history/63297`. Brutos/scripts ignorados em `.local-inputs/fiergs-incidente-20261027/miradero-probe/` e `miradero-probe.mjs`.
+
+Fato novo: o cadastro Miradero informa36unidades e o histórico agregado informaestoque16 emago/2026, mas a única tipologia retornada,87033, informa18unidades/estoque8 na mesma competência. O endpointsemhistórico também devolve somente essa tipologia18/8 e total36. Portanto não se trata apenas de comparar junho com agosto: a resposta de agosto possui divergência interna de totais. Todas as39competências históricas retornadas contêm uma linha desse únicoID,qty18; junho contém18unidades/estoque8. Não há duplicata tipológica que o consumidor possa remover para obter36.
+
+Hipóteses ainda não comprovadas: agregação do total multiplicada porJOIN, tipologia não exposta ou diferença de universo. O fator2 é pista, não prova de causaSQL. Nenhuma origem foi corrigida, nenhuma quantidade adicional imputada; mantém-se18derivado observado emjunho, total36separado e alerta nominal. Pedido técnico pronto aoEdgar: “No building63297, competênciaago/2026, total_units36 e total_stock16 contra única tipologia87033 comqty18/stock8 nos endpointsindividuais. Conferir agregação e cobertura das tipologias do mesmo mês; qual universo produz os totais?” Não enviado pelo agente.
+
+Implementação: `report/consistency-alerts.ts` produz alertas nominais; `ReportConsistencyAlertsDialog.tsx` reutilizaDialog/Button padrão, seçõesajustes/consistência/avisos, rolagem e fechamentoEscape/foco. Barra deRelatório contémAlertas comcontagem; abaAvisos mantida. Confirmação decontinuação vale somente para ojob atual e não altera `reconciliation.homologable`. Host reconfere cobertura com a decisão atual e distingue novas tentativas peloAbortSignal; cancelamento não reutiliza aceite nem deixa jobantigo avançar. Alertas não são inseridos nos slides/PDF/PPT.
+
+Validação local:35testes distintos entre modal/barra/guardas/referências/chave deexportação; fluxo real da barra abre modal e inicia store ao continuar, sem renderizararquivo. Escape, fechamento, nomes/quantidades, confirmação por job, preservação da reconciliação e impossibilidade decontornar cobertura aprovados. Lintsem erros, trêsavisosFastRefreshpreexistentes doReportPaginator. Sem ensaio visual em navegador ou capturaPDF/PPT nesta fatia; validação do modal físico/teclado/foco no site integraG5. Outros motores e alterações paralelas preservados. Esta política posterior prevalece sobre o texto anterior que exigia resolver toda divergência numérica antes de qualquer download.
+
+## Rascunhos G6 — não enviados (continuação)
+
 ### Andamento, se necessário antes do teste publicado
 
 Oi, Juliana e Teresa!

@@ -1,3 +1,11 @@
+## 27/10/2026 — FIERGS: modal de alertas e diagnóstico adicional Miradero — Gabriel / Codex
+
+- **Solicitação:** Gabriel definiu alertas objetivos e material disponível, sem rótulos de confiabilidade/aprovação; pediu diagnosticarMiradero antes. Duas consultas individuais200 confirmam divergência interna na competênciaago/2026: cadastro36/estoque16 contra única tipologia87033com18/8. Não é só diferença temporal; causa do backend ainda semprova. Brutos ignorados, nenhuma escrita na origem.
+- **Mudança:** botãoAlertas noRelatório abreDialogpadrão com ajustesnominais/diferenças/avisos. Casos reconciliados baixamdireto; divergência numérica oferece continuar após leitura porjob/formato, sem alterar verificações ou auditoria. Cobertura/proveniência municipal continuam protegidas. Host trata novatentativa/cancelamento, sem reutilizar confirmação. Sem texto nos slides.
+- **Evidência/estado:** [complementoMiradero/alertas e roteiro](../features/Relatorios%20Secovi_FIERGS/EVIDENCIAS_CONTRATOS_HISTORICO_FIERGS_2026-10-27.md);35testes distintos focados aprovados, lint0erros/3avisosanteriores. Validação local decomponentes/store; navegador/exportaçãofísica pendentes. Sem push/mensagens; política posterior substitui bloqueionuméricoabsoluto anterior, não fabrica reconciliação ou aceite.
+- **Próximo:** publicar com autorização e testar modal/download no site com os recortes afetados/preset. ExplicarMiradero como divergência na resposta, não correção confirmada da fonte; investigaçãoEdgar permanece independente.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
 ## 27/10/2026 — FIERGS G4: auditoria, regressões e preparação do ensaio — Gabriel / Codex
 
 - **Mudança:** CSV distingue original/capacidade/cadastro/competências, classes de guarda e índices de duplicatas/conflitos. Avisos dinâmicos e Metodologia/Glossário existentes explicam a origem; sem notas no PDF/PPT, CSS ou tokens novos. Query/sessão versionam os contratos para não reaproveitar modelo anterior. G0–G2 em25258d8 eG3 em67869e3.

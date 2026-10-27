@@ -1,5 +1,5 @@
 import { Component, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle, Presentation } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle, Presentation } from 'lucide-react';
 import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
@@ -16,6 +16,9 @@ import { panoramaExportMetadata } from '../lib/export-metadata';
 import { panoramaScopeIdentity } from '../scope-identity';
 import { CustomFiergsStudyCover, CustomFiergsTerritoryCover } from './CustomFiergsCovers';
 import { observedDormitoryPriceGroup } from '../report/dormitory-price-series';
+import { reportConsistencyAlerts } from '../report/consistency-alerts';
+import { ReportConsistencyAlertsDialog } from './ReportConsistencyAlertsDialog';
+import type { PanoramaExportFormat } from '../export-store';
 
 /** Token do fundo cartográfico: define, junto das coordenadas, se a lâmina de mapa existe (JG-39). */
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
@@ -616,6 +619,11 @@ export function PanoramaExportDeck({ report, rootRef }: { report: PanoramaReport
 }
 
 export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
+  const [alertsOpen, setAlertsOpen] = useState(false);
+  const alertsButtonRef = useRef<HTMLButtonElement>(null);
+  const [pendingExport, setPendingExport] = useState<{ report: PanoramaReportModel; format: PanoramaExportFormat } | null>(null);
+  const alerts = useMemo(() => reportConsistencyAlerts(report), [report]);
+  useEffect(() => { setAlertsOpen(false); setPendingExport(null); }, [report]);
   const [current, setCurrent] = useState(0); const [view, setView] = useState<'page' | 'all'>('page');
   const allPagesRef = useRef<HTMLDivElement>(null);
   const exportStatus = usePanoramaExportStore((state) => state.status);
@@ -623,7 +631,8 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const exportProgress = usePanoramaExportStore((state) => state.progress);
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
-  const exportBlocked = Boolean(panoramaExportBlockReason(report));
+  const coverageBlockReason = panoramaExportBlockReason(report, { consistencyAcknowledged: true });
+  const exportBlocked = Boolean(coverageBlockReason);
   const pages = useMemo(() => panoramaManifestFor(report, MAPBOX_TOKEN), [report]);
   const sections = useMemo(() => createPanoramaSections(pages, report.scope.entity), [pages, report.scope.entity]);
   useEffect(() => setCurrent((value) => Math.min(value, pages.length - 1)), [pages.length]);
@@ -633,7 +642,18 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
     if (view === 'all') allPagesRef.current?.querySelector(`[aria-label^="Página ${number}:"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   // O trabalho pesado roda no host montado pelo shell: o usuário pode sair desta página.
-  const exportPdf = () => usePanoramaExportStore.getState().start(report, 'pdf');
-  const exportPptx = () => usePanoramaExportStore.getState().start(report, 'pptx');
-  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver todas as páginas</>}</Button>{report.scope.entity === 'fiergs-rs' && <Button variant="outline" size="sm" onClick={() => downloadFiergsAudit(report)}><Download/>Auditoria CSV</Button>}<Button variant="outline" size="sm" disabled={exporting || exportBlocked} title={exportBlocked ? 'Reconciliação crítica pendente' : undefined} onClick={exportPptx}><Presentation/>{exporting && exportFormat === 'pptx' && exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Baixar PPT espelho'}</Button><Button size="sm" disabled={exporting || exportBlocked} title={exportBlocked ? 'Reconciliação crítica pendente' : undefined} onClick={exportPdf}>{exporting && exportFormat === 'pdf' ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting && exportFormat === 'pdf' ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exportBlocked && <p role="alert" className="text-sm text-destructive">Exportação bloqueada: existem invariantes críticas não reconciliadas. Baixe a Auditoria CSV para consultar os deltas.</p>}{exporting && <p className="text-sm text-muted-foreground">Mantenha esta aba visível até o download; navegar dentro da plataforma é possível, mas trocar de aba pode pausar a captura.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{sections.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} pages={pages} containerRef={allPagesRef}/> : <SafeSheet def={page} report={report}/>}</div></div>;
+  const requestExport = (format: PanoramaExportFormat) => {
+    if (!exportBlocked && panoramaExportBlockReason(report)) { setPendingExport({ report, format }); setAlertsOpen(true); return; }
+    usePanoramaExportStore.getState().start(report, format);
+  };
+  const exportPdf = () => requestExport('pdf');
+  const exportPptx = () => requestExport('pptx');
+  const changeAlertsOpen = (open: boolean) => { setAlertsOpen(open); if (!open) setPendingExport(null); };
+  const continueExport = () => {
+    if (!pendingExport || pendingExport.report !== report) { changeAlertsOpen(false); return; }
+    const { format } = pendingExport;
+    changeAlertsOpen(false);
+    usePanoramaExportStore.getState().start(report, format, { consistencyAcknowledged: true });
+  };
+  return <div className="space-y-4"><ReportConsistencyAlertsDialog report={report} alerts={alerts} open={alertsOpen} onOpenChange={changeAlertsOpen} pendingFormat={pendingExport?.report === report ? pendingExport.format : undefined} onContinue={continueExport} restoreFocus={() => alertsButtonRef.current?.focus()}/><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver todas as páginas</>}</Button>{report.scope.entity === 'fiergs-rs' && <Button variant="outline" size="sm" onClick={() => downloadFiergsAudit(report)}><Download/>Auditoria CSV</Button>}{alerts.length > 0 && <Button variant="outline" size="sm" ref={alertsButtonRef} className="text-primary" onClick={() => { setPendingExport(null); setAlertsOpen(true); }}><AlertTriangle/>Alertas ({alerts.length})</Button>}<Button variant="outline" size="sm" disabled={exporting || exportBlocked} title={coverageBlockReason ?? undefined} onClick={exportPptx}><Presentation/>{exporting && exportFormat === 'pptx' && exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Baixar PPT espelho'}</Button><Button size="sm" disabled={exporting || exportBlocked} title={coverageBlockReason ?? undefined} onClick={exportPdf}>{exporting && exportFormat === 'pdf' ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting && exportFormat === 'pdf' ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exportBlocked && <p role="alert" className="text-sm text-destructive">{coverageBlockReason}</p>}{exporting && <p className="text-sm text-muted-foreground">Mantenha esta aba visível até o download; navegar dentro da plataforma é possível, mas trocar de aba pode pausar a captura.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{sections.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} pages={pages} containerRef={allPagesRef}/> : <SafeSheet def={page} report={report}/>}</div></div>;
 }

@@ -9,7 +9,7 @@ const methodology = {
     ['Período', 'O intervalo selecionado delimita os fluxos de lançamentos e vendas. Estoque e oferta final são fotografias no fechamento.'],
     ['Elegibilidade', 'O universo segue a política de entidade e os filtros do cubo granular. Empreendimentos recusados permanecem identificados na auditoria.'],
     ['Chave e deduplicação', 'Empreendimentos são consolidados pela chave estável que combina identificador e município; contagens usam IDs distintos.'],
-    ['Histórico tipológico', 'Cada ID tipológico e competência é conferido antes das somas. Cópias equivalentes são removidas com rastreabilidade; conteúdos conflitantes ou fotografias incompletas impedem exportar.'],
+    ['Histórico tipológico', 'Cada ID tipológico e competência é conferido antes das somas. Cópias equivalentes são removidas com rastreabilidade; conflitos e informações incompletas são explicitados nos alertas e na auditoria, sem criar valores para preencher diferenças.'],
     ['Capacidade e lançamento original', 'A capacidade FIERGS deriva das quantidades tipológicas de uma fotografia comum até o fechamento. A data original classifica os empreendimentos na janela; a quantidade observada no lançamento permanece separada na auditoria. Dados futuros não preenchem o passado.'],
     ['Controles da capacidade', 'Conservação dimensional confere as transformações do cubo. O cadastro é um controle independente somente na competência compatível; sua ausência não é apresentada como igualdade. Vendas e distratos não reconstroem sozinhos a capacidade histórica.'],
     ['Dimensões', 'Padrão, tipologia e segmento são preservados conforme a abertura disponível na fonte. Resíduos não são redistribuídos.'],
