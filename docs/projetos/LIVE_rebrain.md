@@ -12,7 +12,7 @@
 
 ## 27/10/2026 — FIERGS: alertas agrupados por tipo — Gabriel / Codex
 
-- **Mudança:** controles cadastrais agrupados em um aviso; ajustes e divergências repetidos agrupados por categoria, com detalhes recolhidos por padrão. Contagem do botão representa grupos. Nenhum número, guarda, exclusão de produto ou CSV alterado; 29 empreendimentos sem classificação continuam explicitados. Avisos críticos não s?o duplicados entre notificações e conferências.
+- **Mudança:** controles cadastrais agrupados em um aviso; ajustes e divergências repetidos agrupados por categoria, com detalhes recolhidos por padrão. Contagem do botão representa grupos. Nenhum número, guarda, exclusão de produto ou CSV alterado; 29 empreendimentos sem classificação continuam explicitados. Avisos críticos não são duplicados entre notificações e conferências.
 - **Validação:** 11 testes focados do modal/fluxo aprovados; cenário de 18 controles verifica um grupo, preservação dos 18 detalhes e imutabilidade do relatório. Verificação de tipos e lint dirigidos antes da publicação. Sem API ou geração real; ensaio no site e exportações seguem pendentes.
 - **Etapas/pendências:** ajuste editorial preparado para publicação autorizada por Gabriel; nova conferência dos recortes no site e retorno da Juliana continuam necessários.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — somente referência.
@@ -384,6 +384,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+
+### 27/10 — Plano da bancada científica Curitiba e handoff visual — Gabriel/sessão
+- Estado: preparado; documentação local, sem nova UI, consulta Curitiba, backtest, push ou deploy.
+- Plano/CTA técnico: [bancada científica](../features/estimativas-vendas/PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md). Briefing/CTA Claude Design vinculado pela baseline; contratos e testes de temporalidade, amostra comum, origem e estados de interface definidos.
+- Próximo: prototipação por Gabriel/Claude Design; implementação local via CTA, preservando operação. Homologação/importação e cadência/origem continuam pendentes.
+- Monday: [Estimativas de vendas](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) ? `13096757074`. Nenhuma escrita no Monday.
+
 ### 27/10/2026 — Estimativas: explicar curvas de Rio Branco com dados reais — Gabriel / Codex
 
 - **Diagnóstico:** [exemplos e limites das contagens](../features/estimativas-vendas/BASELINE_OPERACIONAL_E_PLANO_2026-10-27.md#explicação-com-rio-branco--reprodução2710). Consulta somenteleitura reproduz29/23coleta/4pendência/2semmodelo e11resultados da referência;5jáesgotados/6comestoque. Coleta não impede cálculo. ExemplosEcovillage/PortalViaVerde/Orquídeas/BosquePrimavera/IlhaDeCreta/SwissPark documentados; sem extrapolar coeficientes ou inferir tipo pelo nome.

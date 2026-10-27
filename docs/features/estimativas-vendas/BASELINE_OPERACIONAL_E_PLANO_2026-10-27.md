@@ -2,6 +2,10 @@
 Data: 27/10/2026. Responsável pela consolidação: Gabriel / sessão de estratégia.
 Estado: preparado; não constitui homologação do motor, aceite de preço ou contrato Belogic.
 
+## Próxima frente — estudos científicos Curitiba
+
+Plano solicitado em 27/10: [bancada científica e CTA técnico](PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md); [CTA Claude Design](CTA_CLAUDE_DESIGN_ESTUDOS_2026-10-27.md). Estado preparado, sem novo censo ou backtest. Preservar entrega operacional e contratos abaixo. A nova prioridade de pesquisa não cumpre nem cancela os prazos anteriores.
+
 ## Decisões de experiência confirmadas no grill — continuação27/10
 
 Esta seção é a fonte das decisões do grill do estimador; os demais planos apontam para ela. O levantamento e a amostra anteriores abaixo permanecem histórico. A [referência de formato candidato](CONTRATO_E_VALIDACAO.md#referência-de-saída-escolhida-para-detalhamento--ivvqlik2710) concentra o contrato, sem duplicá-lo aqui.
