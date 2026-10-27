@@ -42,6 +42,31 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
   const noticeInputs: NoticeInput[] = [];
   const add = (notice: NoticeInput) => noticeInputs.push(notice);
 
+  const identified = report.cube.projects.filter((p) => p.historyAudit?.identityMode === 'identified');
+  const removed = identified.reduce((sum, p) => sum + p.historyAudit!.duplicates.reduce((n, d) => n + d.removed, 0), 0);
+  const issues = identified.reduce((sum, p) => sum + p.historyAudit!.issues.length, 0);
+  if (removed) add({ code: 'HISTORY_DUPLICATES_REMOVED', severity: 'info', indicator: 'Integridade do histórico',
+    reason: `${removed} linha(s) histórica(s) equivalente(s) removida(s) antes das somas, preservando a identidade tipológica.`,
+    source: 'history-identity-v1', displayDecision: 'Uma observação por identidade/conteúdo; originais e referências disponíveis na Auditoria CSV.' });
+  if (issues) add({ code: 'HISTORY_INTEGRITY_BLOCKED', severity: 'warning', indicator: 'Integridade do histórico',
+    reason: `${issues} ocorrência(s) de conflito, identidade, quantidade ou fotografia incompleta.`, source: 'history-identity-v1 / period-capacity-v1',
+    displayDecision: 'Exportação protegida; consultar os registros impeditivos na Auditoria CSV.' });
+  if (report.scope.entity === 'fiergs-rs' && identified.length) {
+    const unavailable = identified.filter((p) => !p.historyAudit!.registryComparable).length;
+    add({ code: 'HISTORICAL_CAPACITY_DERIVED', severity: 'info', indicator: 'Capacidade no fechamento',
+      reason: `Capacidade derivada das quantidades tipológicas da fotografia até o fechamento; ${unavailable} controle(s) cadastral(is) sem competência compatível.`,
+      source: 'period-capacity-v1', displayDecision: 'Total derivado identificado na auditoria; conservação dimensional não substitui controle externo.' });
+    const revised = identified.filter((p) => p.historyAudit!.releaseObservedUnits !== null
+      && p.historyAudit!.capacityAtClosing !== null && p.historyAudit!.releaseObservedUnits !== p.historyAudit!.capacityAtClosing).length;
+    if (revised) add({ code: 'CAPACITY_DIFFERS_FROM_ORIGINAL', severity: 'info', indicator: 'Competências da oferta',
+      reason: `${revised} empreendimento(s) com quantidades diferentes entre o lançamento original e a fotografia de fechamento.`,
+      source: 'period-capacity-v1', displayDecision: 'Bases temporais separadas; diferença não significa edição do histórico ou mudança desde a geração anterior.' });
+    const lagged = identified.filter((p) => p.historyAudit!.closingMonth !== p.historyAudit!.requestedMonth).length;
+    if (lagged) add({ code: 'CAPACITY_SNAPSHOT_LAGGED', severity: 'warning', indicator: 'Competência observada',
+      reason: `${lagged} empreendimento(s) utilizam a última fotografia comum disponível anterior ao mês de fechamento.`,
+      source: 'period-capacity-v1', displayDecision: 'Competência efetiva registrada por empreendimento na auditoria; sem preencher quantidades com dados futuros.' });
+  }
+
   if (report.provenance.failedCities.length) {
     add({ code: 'CITY_COLLECTION_PARTIAL', severity: 'warning', indicator: 'Cobertura municipal',
       reason: `Não foi possível concluir a coleta em: ${report.provenance.failedCities.map((item) => item.city).join(', ')}.`,

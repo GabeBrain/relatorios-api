@@ -1,5 +1,7 @@
 # FIERGS — diagnóstico do bloqueio em novos recortes — 27/10/2026
 
+Atualização posterior: revisão2 implementada e validada localmente emG0–G4; [evidências antes/depois, limites, roteiro do site e rascunhos](EVIDENCIAS_CONTRATOS_HISTORICO_FIERGS_2026-10-27.md). Dezreplays de cinco recortes em2T2026/4T2025 sem críticos; nada publicado ou homologado por inferência. O texto abaixo preserva o diagnóstico original, anterior à implementação.
+
 Estado inicial: diagnóstico reproduzido com API real e proposta preparada, sem alteração no motor ou publicação. A integração remota autorizada posteriormente e a comparação com a referência de Edgar estão registradas no complemento ao final. PDF/PPT no navegador ainda não verificados. O aceite anterior não homologa os novos recortes.
 
 ## Conclusão

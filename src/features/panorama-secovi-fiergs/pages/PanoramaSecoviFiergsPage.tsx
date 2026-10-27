@@ -20,6 +20,7 @@ import { FIERGS_RM_PORTO_ALEGRE_PRESET } from '../presets';
 import { downloadCollectionFailureCsv } from '../lib/collection-failure-audit';
 import type { EntityId, PanoramaScope, Quarter } from '../types';
 import { panoramaCitiesAuthorized } from '../scope-identity';
+import { HISTORY_CONTRACT_KEY } from '../domain/building-history';
 import '@/styles/geobrain-tokens.css';
 import '../scope-controls.css';
 
@@ -42,7 +43,7 @@ export default function PanoramaSecoviFiergsPage() {
   const quarters = useMemo(() => availableEndQuarters('1T2019'), []);
   const queryScope = submitted ? { ...submitted, cities: [...submitted.cities].sort((a, b) => a.localeCompare(b, 'pt-BR')) } : null;
   const report = useQuery({
-    queryKey: ['panorama-report', generationId, queryScope?.uf, queryScope?.cities, queryScope?.startQuarter, queryScope?.endQuarter, queryScope?.entity, queryScope?.engineVersion],
+    queryKey: ['panorama-report', HISTORY_CONTRACT_KEY, generationId, queryScope?.uf, queryScope?.cities, queryScope?.startQuarter, queryScope?.endQuarter, queryScope?.entity, queryScope?.engineVersion],
     // O recorte só muda por uma nova geração (o botão fica bloqueado durante a coleta).
     // Não repassamos o sinal efêmero do React Query: ele vinha cancelando o fallback legado de
     // todas as cidades quando uma das requisições paralelas era descartada pelo navegador.

@@ -1,0 +1,278 @@
+[
+  {
+    "case": "porto-alegre",
+    "scope": {
+      "uf": "RS",
+      "entity": "fiergs-rs",
+      "engineVersion": "v4",
+      "cities": [
+        "Porto Alegre"
+      ],
+      "startQuarter": "1T2021",
+      "endQuarter": "2T2026"
+    },
+    "mode": "offline-frozen-archive",
+    "homologable": true,
+    "projects": 1204,
+    "totals": {
+      "capacity": 111029,
+      "stock": 8600,
+      "sales": 943
+    },
+    "failures": [],
+    "criticalChecks": 43,
+    "unavailableIndependent": 1204,
+    "removed": 2,
+    "issues": [],
+    "auditSha256": "56080734fb703e94752dafbdf13a4de4bec2a0082d73d645a99834b879e7df10"
+  },
+  {
+    "case": "gramado-canela",
+    "scope": {
+      "uf": "RS",
+      "entity": "fiergs-rs",
+      "engineVersion": "v4",
+      "cities": [
+        "Gramado",
+        "Canela"
+      ],
+      "startQuarter": "1T2021",
+      "endQuarter": "2T2026"
+    },
+    "mode": "offline-frozen-archive",
+    "homologable": true,
+    "projects": 328,
+    "totals": {
+      "capacity": 10623,
+      "stock": 1802,
+      "sales": 237
+    },
+    "failures": [],
+    "criticalChecks": 353,
+    "unavailableIndependent": 18,
+    "removed": 3,
+    "issues": [],
+    "auditSha256": "fb8ddae7b7d2f5cd65dc76616a3c2906e928732cb900ab842c5fac36bc47280b"
+  },
+  {
+    "case": "gramado",
+    "scope": {
+      "uf": "RS",
+      "entity": "fiergs-rs",
+      "engineVersion": "v4",
+      "cities": [
+        "Gramado"
+      ],
+      "startQuarter": "1T2021",
+      "endQuarter": "2T2026"
+    },
+    "mode": "offline-frozen-archive",
+    "homologable": true,
+    "projects": 226,
+    "totals": {
+      "capacity": 6804,
+      "stock": 1372,
+      "sales": 165
+    },
+    "failures": [],
+    "criticalChecks": 257,
+    "unavailableIndependent": 12,
+    "removed": 3,
+    "issues": [],
+    "auditSha256": "aa6e6166a0704891698033410f716e39e0bcb6bbe115212804a5ce02b69694cd"
+  },
+  {
+    "case": "canela",
+    "scope": {
+      "uf": "RS",
+      "entity": "fiergs-rs",
+      "engineVersion": "v4",
+      "cities": [
+        "Canela"
+      ],
+      "startQuarter": "1T2021",
+      "endQuarter": "2T2026"
+    },
+    "mode": "offline-frozen-archive",
+    "homologable": true,
+    "projects": 102,
+    "totals": {
+      "capacity": 3819,
+      "stock": 430,
+      "sales": 72
+    },
+    "failures": [],
+    "criticalChecks": 139,
+    "unavailableIndependent": 6,
+    "removed": 0,
+    "issues": [],
+    "auditSha256": "b2bb3e304673976ee035c3e1a37d07748bb4a33f5435cd738472816b15d8e52a"
+  },
+  {
+    "case": "baseline-conjunto",
+    "scope": {
+      "uf": "RS",
+      "entity": "fiergs-rs",
+      "engineVersion": "v4",
+      "cities": [
+        "Canoas",
+        "Esteio",
+        "São Leopoldo"
+      ],
+      "startQuarter": "1T2023",
+      "endQuarter": "2T2026"
+    },
+    "mode": "offline-frozen-archive",
+    "homologable": true,
+    "projects": 266,
+    "totals": {
+      "capacity": 35616,
+      "stock": 3371,
+      "sales": 554
+    },
+    "failures": [],
+    "criticalChecks": 302,
+    "unavailableIndependent": 7,
+    "removed": 0,
+    "issues": [],
+    "auditSha256": "ca9883d5369c8d5c2a2eb9d79f763ce47f761180f427e7f2b86259e4624c8d21"
+  },
+  {
+    "case": "porto-alegre",
+    "scope": {
+      "uf": "RS",
+      "entity": "fiergs-rs",
+      "engineVersion": "v4",
+      "cities": [
+        "Porto Alegre"
+      ],
+      "startQuarter": "1T2021",
+      "endQuarter": "4T2025"
+    },
+    "mode": "offline-frozen-archive",
+    "homologable": true,
+    "projects": 1163,
+    "totals": {
+      "capacity": 106233,
+      "stock": 8141,
+      "sales": 835
+    },
+    "failures": [],
+    "criticalChecks": 43,
+    "unavailableIndependent": 1163,
+    "removed": 2,
+    "issues": [],
+    "auditSha256": "9aa39a6c7cdc21a72084054a8d1be9ff80cd7197580c274dfe5c7e09642e8739"
+  },
+  {
+    "case": "gramado-canela",
+    "scope": {
+      "uf": "RS",
+      "entity": "fiergs-rs",
+      "engineVersion": "v4",
+      "cities": [
+        "Gramado",
+        "Canela"
+      ],
+      "startQuarter": "1T2021",
+      "endQuarter": "4T2025"
+    },
+    "mode": "offline-frozen-archive",
+    "homologable": true,
+    "projects": 317,
+    "totals": {
+      "capacity": 10342,
+      "stock": 2092,
+      "sales": 456
+    },
+    "failures": [],
+    "criticalChecks": 43,
+    "unavailableIndependent": 317,
+    "removed": 3,
+    "issues": [],
+    "auditSha256": "63ce927afdd94077adb3f4147d09f506473a71318b39cf977307c12f03b99bf0"
+  },
+  {
+    "case": "gramado",
+    "scope": {
+      "uf": "RS",
+      "entity": "fiergs-rs",
+      "engineVersion": "v4",
+      "cities": [
+        "Gramado"
+      ],
+      "startQuarter": "1T2021",
+      "endQuarter": "4T2025"
+    },
+    "mode": "offline-frozen-archive",
+    "homologable": true,
+    "projects": 219,
+    "totals": {
+      "capacity": 6622,
+      "stock": 1517,
+      "sales": 276
+    },
+    "failures": [],
+    "criticalChecks": 43,
+    "unavailableIndependent": 219,
+    "removed": 3,
+    "issues": [],
+    "auditSha256": "5824e7adbf673ba2f7e93dcaf162a32e0fc2a6092988486466cf339a52116b02"
+  },
+  {
+    "case": "canela",
+    "scope": {
+      "uf": "RS",
+      "entity": "fiergs-rs",
+      "engineVersion": "v4",
+      "cities": [
+        "Canela"
+      ],
+      "startQuarter": "1T2021",
+      "endQuarter": "4T2025"
+    },
+    "mode": "offline-frozen-archive",
+    "homologable": true,
+    "projects": 98,
+    "totals": {
+      "capacity": 3720,
+      "stock": 575,
+      "sales": 180
+    },
+    "failures": [],
+    "criticalChecks": 43,
+    "unavailableIndependent": 98,
+    "removed": 0,
+    "issues": [],
+    "auditSha256": "8cc3de4cef4ca7bc2920dec8b1bc2a26e50da33be3f863a49a650f320c918948"
+  },
+  {
+    "case": "baseline-conjunto",
+    "scope": {
+      "uf": "RS",
+      "entity": "fiergs-rs",
+      "engineVersion": "v4",
+      "cities": [
+        "Canoas",
+        "Esteio",
+        "São Leopoldo"
+      ],
+      "startQuarter": "1T2023",
+      "endQuarter": "4T2025"
+    },
+    "mode": "offline-frozen-archive",
+    "homologable": true,
+    "projects": 263,
+    "totals": {
+      "capacity": 35020,
+      "stock": 3992,
+      "sales": 709
+    },
+    "failures": [],
+    "criticalChecks": 43,
+    "unavailableIndependent": 263,
+    "removed": 0,
+    "issues": [],
+    "auditSha256": "f29d732b50ed3d4b96cdad1d797090cf0e51c1856b56090f71a0c79038483977"
+  }
+]

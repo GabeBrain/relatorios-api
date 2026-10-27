@@ -1,3 +1,11 @@
+## 27/10/2026 — FIERGS G4: auditoria, regressões e preparação do ensaio — Gabriel / Codex
+
+- **Mudança:** CSV distingue original/capacidade/cadastro/competências, classes de guarda e índices de duplicatas/conflitos. Avisos dinâmicos e Metodologia/Glossário existentes explicam a origem; sem notas no PDF/PPT, CSS ou tokens novos. Query/sessão versionam os contratos para não reaproveitar modelo anterior. G0–G2 em25258d8 eG3 em67869e3.
+- **Validação:**66testes distintos focados, tipos completos doapp e lint dirigido aprovados. Dezreplays locais de2T2026/4T2025, hashesCSV e decisão central de exportação conferidos; zero críticos nos recortes congelados. Estoque/vendas/preços/VGVfinal preservados; Miradero capacidade−18, SolarisVGVoriginal−5,301milhões têm linhagem. [Matriz, ressalvas, roteiroG5 e rascunhosG6](../features/Relatorios%20Secovi_FIERGS/EVIDENCIAS_CONTRATOS_HISTORICO_FIERGS_2026-10-27.md); resumo pequeno versionado e script offline reproduzível.
+- **Limites/estado:** G0–G4 validados localmente, não publicação ou aceite. Sem consultaGeoBrain, PDF/PPTreal ou envio de mensagens nesta execução. Preset integral de dez cidades e exportações físicas aguardamG5; Miradero18tipologia×36cadastro posterior permanece limitação auditada, em investigação de origem conforme Gabriel. Não alegar controle externo aprovado quando indisponível.
+- **Próximo:** autorização de push/publicação, Gabriel gera recortes afetados e baseline/preset e traz PDF/PPT/CSV da mesma geração. Conferir antes de enviar pedido de aceite; estimador é a próxima atividade, sem encerrar incidente por inferência. Alterações paralelas e outros motores preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
 ## 27/10/2026 — FIERGS G3: capacidade por competência e guardas independentes — Gabriel / Codex
 
 - **Mudança:** cubo FIERGS identificado separa original de lançamento, capacidade derivada no fechamento e cadastro/competência. Campo de compatibilidade launchedUnits usa a capacidade dos empreendimentos classificados pela data original; não soma meses ou usa cadastro futuro. Preços/estoque/vendas mantêm a fotografia e política de representação; Secovi preserva sua base anterior.

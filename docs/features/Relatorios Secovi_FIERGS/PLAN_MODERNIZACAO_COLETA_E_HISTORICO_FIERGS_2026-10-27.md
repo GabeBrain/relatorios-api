@@ -1,6 +1,6 @@
 # FIERGS — modernização da coleta e do histórico tipológico
 
-Data: 27/10/2026. Responsável pela sessão: Gabriel/Codex. Estado: plano preparado, implementação pendente de autorização pelo CTA. Publicação e aceite dos novos recortes continuam pendentes.
+Data: 27/10/2026. Responsável pela sessão: Gabriel/Codex. Estado: revisão2 autorizada e G0–G4 executados/validados localmente nos recortes congelados. Publicação, ensaio do site/preset integral e aceite dos novos recortes continuam pendentes. [Execução, matriz, roteiro e rascunhos](EVIDENCIAS_CONTRATOS_HISTORICO_FIERGS_2026-10-27.md).
 
 Revisão 2, após conversa pessoal de Gabriel com Edgar: investigar a origem no Geobrain em paralelo, sem fazer dessa investigação uma dependência para deduplicar e corrigir a comparação temporal já demonstradas. O CTA desta revisão autoriza implementar os contratos de consumo descritos abaixo; não pressupõe confirmação do backend nem publicação. Esta revisão substitui a prioridade anterior de modernizar o transporte.
 
