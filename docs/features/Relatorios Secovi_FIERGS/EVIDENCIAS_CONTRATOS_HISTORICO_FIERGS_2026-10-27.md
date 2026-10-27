@@ -119,3 +119,8 @@ Ficamos à disposição para novos ajustes.
 Atenciosamente,
 
 Ressalva a incluir no envio dePortoAlegre se o achado permanecer na saída real: “No Miradero, o cadastro informa36unidades, enquanto o histórico tipológico da competência informa18. O estudo utiliza essa base observada, e a diferença permanece identificada na auditoria e em verificação na origem.” Não afirmar que a base doGeobrain foi corrigida nem que todos os novos recortes já foram aceitos. Evidência explícita de aceite das revisoras continua necessária.
+
+
+### Refinamento posterior ? alertas por tipo (27/10)
+
+A lista fornecida por Gabriel repetia 18 controles cadastrais sem competência compatível. O modal agora agrupa esses controles e outras ocorrências por tipo, com detalhes expansíveis; o botão conta grupos. Diverg?ncias, exclusões por classificação (29 na geração informada), valores negativos e omissões editoriais continuam explícitos. CSV/modelo/guardas intactos. Onze testes focados aprovados, incluindo preservação de cada controle e separação entre ajustes e inconsist?ncias. Publica??o autorizada; verifica??o da nova apresentação no site pendente.

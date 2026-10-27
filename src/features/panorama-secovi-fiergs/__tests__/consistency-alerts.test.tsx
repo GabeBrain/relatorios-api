@@ -19,6 +19,29 @@ const report = () => ({
 
 afterEach(() => { cleanup(); usePanoramaExportStore.setState({ status: 'idle', report: null, consistencyAcknowledged: false, controller: null }); });
 describe('Alertas de consistência e exportação', () => {
+  it('groups registry controls by type, keeping every detail and original audit data', () => {
+    const r = report(); r.cube.projects = [];
+    r.notices = Array.from({ length: 18 }, (_, i) => ({ code: 'RECONCILIATION_DIFFERENCE', severity: 'warning',
+      indicator: `capacity.registry.RS/Gramado#${i}`, reason: `Controle ${i}`, source: 'fixture', displayDecision: 'audit',
+      entity: 'fiergs-rs', period: '2T2026', affectedPages: [], affectedOfficialSlides: [] }));
+    const before = JSON.stringify(r);
+    const alerts = reportConsistencyAlerts(r);
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0].title).toBe('Comparação com o cadastro');
+    expect(alerts[0].details).toHaveLength(18);
+    expect(JSON.stringify(r)).toBe(before);
+    render(<ReportConsistencyAlertsDialog report={r} alerts={alerts} open onOpenChange={vi.fn()}/>);
+    expect(screen.getByText('Ver detalhes (18)').closest('details')).not.toHaveAttribute('open');
+  });
+  it('groups adjustments without combining them with numeric inconsistencies', () => {
+    const r = report(); const p = r.cube.projects[0];
+    p.historyAudit!.duplicates = [{ identity: 'P|T|2024-07', indices: [0, 1], removed: 3 }];
+    r.cube.projects.push({ ...p, key: 'Q', name: 'Outro' });
+    const alerts = reportConsistencyAlerts(r);
+    expect(alerts).toHaveLength(2);
+    expect(alerts.find((a) => a.kind === 'adjustment')?.details).toHaveLength(2);
+    expect(alerts.find((a) => a.kind === 'consistency')?.details).toHaveLength(2);
+  });
   it('keeps the real toolbar download enabled and starts it after the dialog continuation', () => {
     const lean = report(); const empty = { rows: [], available: true, source: 'fixture' };
     const full = buildPanoramaReportModel(lean.scope, [], { sales: empty, salesTypology: empty, stock: empty, stockTypology: empty,

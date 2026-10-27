@@ -25,6 +25,12 @@ export function ReportConsistencyAlertsDialog({ report, alerts, open, onOpenChan
             <h3 className="mb-2 text-sm font-semibold">{kind === 'adjustment' ? 'Ajustes aplicados' : kind === 'consistency' ? 'Pontos de consistência' : 'Outros avisos'}</h3>
             <ul className="space-y-2">{items.map((item) => <li key={item.id} className="rounded-lg border bg-muted/30 p-3 text-sm">
               <p className="font-medium">{item.title}</p><p className="mt-1 break-words text-muted-foreground">{item.description}</p>
+              {item.details?.length ? <details className="mt-2">
+                <summary className="cursor-pointer font-medium">Ver detalhes ({item.details.length})</summary>
+                <ul className="mt-2 space-y-2">{item.details.map((detail, index) => <li key={index}>
+                  <p className="font-medium">{detail.title}</p><p className="break-words text-muted-foreground">{detail.description}</p>
+                </li>)}</ul>
+              </details> : null}
             </li>)}</ul>
           </section>;
         })}

@@ -1,3 +1,10 @@
+## 27/10/2026 — FIERGS: alertas agrupados por tipo — Gabriel / Codex
+
+- **Mudança:** controles cadastrais agrupados em um aviso; ajustes e divergências repetidos agrupados por categoria, com detalhes recolhidos por padrão. Contagem do botão representa grupos. Nenhum número, guarda, exclusão de produto ou CSV alterado; 29 empreendimentos sem classificação continuam explicitados. Avisos críticos não s?o duplicados entre notificações e conferências.
+- **Validação:** 11 testes focados do modal/fluxo aprovados; cenário de 18 controles verifica um grupo, preservação dos 18 detalhes e imutabilidade do relatório. Verificação de tipos e lint dirigidos antes da publicação. Sem API ou geração real; ensaio no site e exportações seguem pendentes.
+- **Etapas/pendências:** ajuste editorial preparado para publicação autorizada por Gabriel; nova conferência dos recortes no site e retorno da Juliana continuam necessários.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — somente referência.
+
 ## 27/10/2026 — FIERGS: modal de alertas e diagnóstico adicional Miradero — Gabriel / Codex
 
 - **Solicitação:** Gabriel definiu alertas objetivos e material disponível, sem rótulos de confiabilidade/aprovação; pediu diagnosticarMiradero antes. Duas consultas individuais200 confirmam divergência interna na competênciaago/2026: cadastro36/estoque16 contra única tipologia87033com18/8. Não é só diferença temporal; causa do backend ainda semprova. Brutos ignorados, nenhuma escrita na origem.

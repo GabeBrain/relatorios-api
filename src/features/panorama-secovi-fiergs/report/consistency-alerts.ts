@@ -1,6 +1,6 @@
 import type { PanoramaReportModel } from '../types';
 
-export interface ConsistencyAlert { id: string; title: string; description: string; kind: 'adjustment' | 'consistency' | 'notice'; }
+export interface ConsistencyAlert { id: string; title: string; description: string; kind: 'adjustment' | 'consistency' | 'notice'; details?: { title: string; description: string }[]; }
 const period = (value: string | null) => value ? `${value.slice(5, 7)}/${value.slice(0, 4)}` : 'competência não informada';
 const number = (value: number | null) => value === null ? 'não informado' : value.toLocaleString('pt-BR', { maximumFractionDigits: 4 });
 
@@ -23,7 +23,7 @@ export function reportConsistencyAlerts(report: PanoramaReportModel): Consistenc
     if (h.issues.length) alerts.push({ id: `issues:${project.key}`, title: name, kind: 'consistency',
       description: `${h.issues.length} ocorrência(s) de conflito, identidade ou informação histórica incompleta. Os detalhes estão na auditoria; não foram criados valores para preencher essas diferenças.` });
   }
-  const represented = new Set(['HISTORY_DUPLICATES_REMOVED', 'CAPACITY_DIFFERS_FROM_ORIGINAL', 'HISTORY_INTEGRITY_BLOCKED']);
+  const represented = new Set(['HISTORY_DUPLICATES_REMOVED', 'CAPACITY_DIFFERS_FROM_ORIGINAL', 'HISTORY_INTEGRITY_BLOCKED', 'CRITICAL_RECONCILIATION']);
   for (const notice of report.notices ?? []) if (!represented.has(notice.code))
     alerts.push({ id: `${notice.code}:${notice.indicator}`, title: notice.indicator, description: notice.reason,
       kind: notice.severity === 'critical' ? 'consistency' : 'notice' });
@@ -33,5 +33,32 @@ export function reportConsistencyAlerts(report: PanoramaReportModel): Consistenc
   if (report.scope.entity === 'fiergs-rs' && !report.reconciliation?.homologable && !critical.length)
     alerts.push({ id: 'checks-unavailable', title: 'Conferência de consistência', kind: 'consistency',
       description: 'A conferência de consistência não retornou um resultado completo para esta geração. Consulte a auditoria para os dados disponíveis.' });
-  return alerts;
+  return groupConsistencyAlerts(alerts);
+}
+
+/** Group presentation only: original checks, values and CSV remain untouched. */
+function groupConsistencyAlerts(alerts: ConsistencyAlert[]): ConsistencyAlert[] {
+  const groups = new Map<string, ConsistencyAlert[]>();
+  for (const alert of alerts) {
+    const key = alert.title.startsWith('capacity.registry.')
+      ? 'registry-controls' : `${alert.kind}:${alert.id.split(':')[0]}`;
+    const group = groups.get(key) ?? [];
+    group.push(alert);
+    groups.set(key, group);
+  }
+  return [...groups.entries()].map(([key, items]) => {
+    const first = items[0];
+    if (key === 'registry-controls') return {
+      id: key, kind: first.kind, title: 'Comparação com o cadastro',
+      description: `${items.length} comparação(ões) cadastral(is) sem competência compatível com o fechamento. A capacidade observada permanece disponível; os controles estão detalhados na auditoria.`,
+      details: items.map(({ title, description }) => ({ title, description })),
+    };
+    if (items.length === 1) return first;
+    const titles: Record<string, string> = { dedup: 'Registros históricos repetidos', period: 'Quantidades em competências diferentes',
+      registry: 'Diferenças entre cadastro e histórico', issues: 'Integridade do histórico', check: 'Conferências numéricas' };
+    return { ...first, id: key, title: titles[first.id.split(':')[0]] ?? first.title,
+      description: `${items.length} ocorrência(s) deste tipo. Consulte os detalhes abaixo ou a Auditoria CSV.`,
+      details: items.map(({ title, description }) => ({ title, description })),
+    };
+  });
 }
