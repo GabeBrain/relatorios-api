@@ -2,6 +2,27 @@
 
 **Atualização vigente27/10:** [seleção operacional, mapa de entrada/saída, amostra Excel e perguntas Belogic](ENTREGA_CANDIDATA_OPERACIONAL_2026-10-27.md). Motores horizontal/vertical, caudas e faixas já reproduzidos; as pendências antigas desses itens abaixo são históricas. Contrato externo continua aberto. AnexosIVV06/10 agora foram inspecionados: dicionário ajuda na semântica, mas não é layout de importação aceito. Um candidato numérico e10exemplos de seleção preparados; nenhum registro autorizado/importável.
 
+## Referência de saída escolhida para detalhamento — IVV/Qlik,27/10
+
+Gabriel orientou usar como melhor referência disponível a estrutura que Edgar enviou ao Finoti, deixando a adaptação final a Nicolas/Belogic. Isso permite avançar o contrato candidato sem presumir que exportação e importação sejam simétricas. A mensagem de Edgar22/10 fornecida por Gabriel confirma que o horizontal é o encaminhado ao Finoti; separação dos verticais por cidade foi motivada por volume, não por uma regra diferente de cálculo.
+
+Reconsulta ao [Drive Bases_Qlik](https://drive.google.com/drive/folders/1p9bDnqLdfgBfvgDovIT4Nvp5lnzNCeP6)27/10 confirmou horizontal16/10 e quatro verticais: Cuiabá, Florianópolis, Belo Horizonte e Rio de Janeiro. Horizontal e Cuiabá foram reabertos localmente; hashes conferem com a auditoria22/10 e os26cabeçalhos são iguais. As demais três estruturas já foram verificadas naquela [auditoria](AUDITORIA_BASES_EDGAR_2026-10-22.md), sem nova leitura integral nesta rodada.
+
+Histórico dos pedidos (cadeia13–23/10 preservada localmente): Finoti13/10 pediu IDs/nome, cidade/padrão, lançamento/oferta, competência e vendas brutas/líquidas, primeiro esgotados e depois ativos no mesmo modelo. Edgar15/10 acrescentou lançamento/dormitórios/tipologia; Finoti16/10 pediu horizontais, preço e padrões separados; Edgar acrescentou flags de lançamento/esgotamento. São pedidos de **base para estudo**, sem declaração de layout de importação. A origem exata da extração desses cinco arquivos (API/Qlik/exportador) não é comprovada pela mensagem; os arquivos representam dados Geobrain, não necessariamente o download padrão da AnáliseTemporal.
+
+Ordem conferida: `ID Empreendimento`, `Empreendimento`, `ID Tipologia`, `M2`, `Dormitórios`, `Cidade`, `Tipo`, `Padrão`, `Tipologia`, `Status`, `Data de lançamento`, `Mês de referência`, `Foi estimado?`, `Qtd Lançada`, `Venda Bruta`, `Distrato`, `Venda Líquida`, `Estoque Final`, `Tempo em venda`, `INCC-DI`, `INCC-M`, `IVV Atual`, `IVV Dash`, `Preço`, `Flag Esgotamento`, `Flag Lançamento`.
+
+Contrato candidato a detalhar:
+- Uma linha porIDempreendimento/IDtipologia/competência; cabeçalhos/ordem preservados. IDs estáveis e datasDD/MM/AAAA eMM/AAAA normalizados internamente sem perder os originais. O pedido inicial usavaAAAA-MM, mas a referência efetiva usaMM/AAAA.
+- Novos períodos explicitamente estimados, sem sobrescrever histórico. Possíveis entregas: conjunto histórico+continuação e arquivo apenas de novas linhas para Nicolas, derivados da mesma execução; escolha final desse empacotamento ainda aberta.
+- Cadastro imutável de referência acompanha os novos períodos sem alegar que foi coletado novamente. Quantidade constante é premissa a validar; mudança de oferta/tipologia exige revisão. Modelo de empreendimento não autoriza rateio pelas tipologias.
+- `Venda Líquida` e `Estoque Final` recebem previsões do intervalo/posição correspondente à cadência. `Foi estimado?` recebeSim no candidato; tradução para `bases.estimation` e autoria da gravação continuam externas.
+- `Preço` depende da política em discussão. `Venda Bruta`/`Distrato` futuros não recebemzero nem cópia do período anterior. `INCC-DI`, `INCC-M`, `IVV Atual`, `IVV Dash`, `Tempo em venda`, `Status` e `Flag Esgotamento` exigem definição própria de atualização; não copiar índices ou derivar rótulos silenciosamente. `Flag Lançamento` descreve a coorte histórica, não muda com a projeção.
+- Manter26colunas não significa preencher26valores sem fundamento. Células pendentes devem ter convenção explícita e motivo no arquivo acompanhante; essa convenção ainda precisa ser fechada antes da exportação automática. Manifesto com método/versão/corte/fontes/avisos fica separado para preservar o layout.
+- Formato físico propostoXLSX, inclusive para fontesXLSB, sujeito ao aceite; não prometer escritaXLSB. Necessários ainda: chave/base_id e criação de base, obrigatoriedade/nulos, periodicidade oficial, reconciliação, repetição de lote e teste deimportação.
+
+Esta atualização define a direção do contrato candidato. Nenhum exportador de26colunas ou conversão da amostra anterior foi implementado nesta rodada; o arquivo de revisão anterior mantém seu propósito e layout próprios.
+
 **CONTRATO EXTERNO PENDENTE,21/10/2026.** Motor e ensaio em memória implementados localmente; contrato de arquivo ainda interno/proposto. Não são nomes de campos nem formato de retorno confirmados do Geobrain. Consultar MANIFESTO.md e [reprodução](REPRODUCAO_E_HANDOFF.md); reconciliar com Edgar/MD antes de automatizar.
 
 **Atualização22/10:** uma exportação real da Análise Temporal foi [auditada](AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md), mas agrega tipologias/padrões/cidades e não contém ID ou flag da base por período. Portanto não preenche este contrato candidato. O manual do Geobrain, preservado no repo Linkages, descreve essa exportação e uma opção de download detalhado do Mapa; esta última é só um caminho candidato para obter granularidade, sem confirmação de `bases.estimation` ou retorno importável.
