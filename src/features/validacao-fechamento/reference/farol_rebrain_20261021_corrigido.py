@@ -1,5 +1,4 @@
 import argparse
-import json
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -10,9 +9,7 @@ hora_atual = datetime.now(timezone(timedelta(hours=-3)))
 timestamp_arquivo = datetime.now(timezone(timedelta(hours=-3))).strftime("%Y%m%d")
 
 REGEX_CARACTERE_INVALIDO = r"[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]"
-REGEX_DATAS = (
-    r"^(?:19[0-9]{2}|20[0-4][0-9]|2050)-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$"
-)
+REGEX_DATAS = r"^(?:19[0-9]{2}|20[0-4][0-9]|2050)-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$"
 REGEX_NUMERO_POSITIVO = r"^\d+(?:[.,]\d+)?$"
 REGEX_ENDERECO = r"(?i)^(?:$|sem\s*nr[o\.]?|s\s*\/\s*n[º°\.]?|s\.n\.|sn|nro[\.]?|0+$)"
 REGEX_INTEIRO = r"^-?\d+$"
@@ -26,6 +23,46 @@ def limpar_caracteres_ilegais(texto):
     if isinstance(texto, str):
         return re.sub(r"[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]", "", texto)
     return texto
+
+
+
+def faixas_area_privativa(valores):
+    """Replica os cortes dinâmicos do Dashboard: até 6 faixas por cidade/tipo."""
+    import math
+    valores = sorted(float(v) for v in valores if pd.notna(v) and math.isfinite(float(v)) and float(v) > 0)
+    if not valores:
+        return []
+    cortes = []
+    for i in range(1, 6):
+        valor = valores[min(len(valores) - 1, len(valores) * i // 6)]
+        magnitude = 10 ** (math.floor(math.log10(valor)) - 1)
+        corte = math.floor(valor / magnitude + 0.5) * magnitude
+        if corte > 0 and (not cortes or corte > cortes[-1]):
+            cortes.append(corte)
+    limites = [0, *cortes]
+    return [(inicio, limites[i + 1] if i + 1 < len(limites) else math.inf) for i, inicio in enumerate(limites)]
+
+
+def adicionar_faixas_area_privativa(df):
+    """Uma observação por tipologia; última área positiva, antes do corte temporal."""
+    import math
+    coluna = "area_privativa_representativa"
+    if coluna not in df:
+        df[coluna] = df["private_area"]
+    df["faixa_area_privativa"] = "Área não informada"
+    for _, escopo in df.groupby(["city", "building_type"], dropna=False):
+        unicas = escopo.drop_duplicates(["building_id", "typology_id"], keep="last")
+        faixas = faixas_area_privativa(pd.to_numeric(unicas[coluna], errors="coerce").tolist())
+        for indice, linha in escopo.iterrows():
+            area = pd.to_numeric(linha[coluna], errors="coerce")
+            if pd.isna(area):
+                continue
+            for inicio, fim in faixas:
+                if inicio <= area < fim:
+                    fim_texto = "∞" if math.isinf(fim) else f"{fim:g}"
+                    df.loc[indice, "faixa_area_privativa"] = f"Área: [{inicio:g}, {fim_texto}) m²"
+                    break
+    return df
 
 
 def converter_tipos(df: pd.DataFrame) -> pd.DataFrame:
@@ -96,270 +133,109 @@ def converter_tipos(df: pd.DataFrame) -> pd.DataFrame:
     # Tratativas específicas
     df["private_area_str"] = df["private_area"].astype(str) + " m2"
     df["number_bedroom_str"] = df["number_bedroom"].fillna(0).astype(str) + " dorms"
-    df["zipcode5"] = (
-        df["zipcode"].astype(str).str.split(".").str[0].str.zfill(8).str[:5]
-    )
+    df["zipcode5"] = df["zipcode"].fillna(0).astype(str).str.split(".").str[0].str.zfill(8).str[:5]
     df["has_garage"] = df["garage"].fillna("0").str[:1] != "0"
-    df["months_from_release"] = (
-        (
-            (pd.to_datetime(df["period"]) - pd.to_datetime(df["release_date"])).dt.days
-            / 30.44
-        )
-        .fillna(0)
-        .round(0)
-    )
-    df["total_price"] = df["qty"].fillna(0) * df["price"].fillna(0)
-    df["total_area"] = df["qty"].fillna(0) * df["private_area"].fillna(0)
+    df["months_from_release"] = ((pd.to_datetime(df["period"]) - pd.to_datetime(df["release_date"])).dt.days / 30.44).fillna(0).round(0)
+    df["total_price"] = (df["qty"].fillna(0) * df["price"].fillna(0)).fillna(0).round(2)
+    df["total_area"] = (df["qty"].fillna(0) * df["private_area"].fillna(0)).fillna(0).round(2)
+    df["price_m2"] = (df["price"].fillna(0) / df["private_area"].replace(0, pd.NA)).fillna(0).round(2)
+    df["sales_rate"] = (df["sold"].fillna(0) / df["qty"].replace(0, pd.NA)).fillna(0).round(2)
 
     grupo_empreendimento = ["building_id", "period"]
-    df["building_units"] = (
-        df.groupby(grupo_empreendimento)["qty"].transform("sum").fillna(0).round(2)
-    )
-    df["building_sold"] = (
-        df.groupby(grupo_empreendimento)["sold"].transform("sum").fillna(0).round(2)
-    )
-    df["building_units_20"] = df["building_units"].fillna(0) * 0.2
-    df["building_units_70"] = df["building_units"].fillna(0) * 0.7
-    df["building_area"] = (
-        df.groupby(grupo_empreendimento)["total_area"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    df["building_price"] = (
-        df.groupby(grupo_empreendimento)["total_price"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    df["building_price_m2"] = (
-        (df["building_price"].fillna(0) / df["building_area"].replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
-    df["building_ticket"] = (
-        (df["building_price"].fillna(0) / df["building_units"].replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
-    df["building_avg_area"] = (
-        (df["building_area"].fillna(0) / df["building_units"].replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
-    df["building_sales_rate"] = (
-        (df["building_sold"].fillna(0) / df["building_units"].replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
+    df["building_price"] = df.groupby(grupo_empreendimento)["total_price"].transform("sum").fillna(0).round(2)
+    df["building_m2"] = df.groupby(grupo_empreendimento)["total_area"].transform("sum").fillna(0).round(2)
+    df["building_qty"] = df.groupby(grupo_empreendimento)["qty"].transform("sum").fillna(0).round(0)
+    df["building_sold"] = df.groupby(grupo_empreendimento)["sold"].transform("sum").fillna(0).round(0)
+    df["building_stock"] = (df["building_qty"].fillna(0) - df["building_sold"].replace(0, pd.NA)).fillna(0).round(0)
+    df["building_qty_20"] = (df["building_qty"].fillna(0) * 0.2).fillna(0).round(0)
+    df["building_qty_70"] = (df["building_qty"].fillna(0) * 0.7).fillna(0).round(0)
+    df["building_price_m2"] = (df["building_price"].fillna(0) / df["building_m2"].replace(0, pd.NA)).fillna(0).round(2)
+    df["building_ticket"] = (df["building_price"].fillna(0) / df["building_qty"].replace(0, pd.NA)).fillna(0).round(2)
+    df["building_m2_avg"] = (df["building_m2"].fillna(0) / df["building_qty"].replace(0, pd.NA)).fillna(0).round(2)
+    df["building_sales_rate"] = (df["building_sold"].fillna(0) / df["building_qty"].replace(0, pd.NA)).fillna(0).round(2)
 
     # Adicionado em 02/09/2026
     df_temp = df.copy()
     df_temp.loc[df["number_bedroom"] != 1, ["qty", "total_area", "total_price"]] = 0
-    df["building_units_one_bedroom"] = df_temp.groupby(grupo_empreendimento)[
-        "qty"
-    ].transform("sum")
-    df["one_bedroom_percent"] = (
-        (
-            df["building_units_one_bedroom"].fillna(0)
-            / df["building_units"].replace(0, pd.NA)
-        )
-        .fillna(0)
-        .round(2)
-    )
+    df["building_units_one_bedroom"] = df_temp.groupby(grupo_empreendimento)["qty"].transform("sum")
+    df["one_bedroom_percent"] = (df["building_units_one_bedroom"].fillna(0) / df["building_qty"].replace(0, pd.NA)).fillna(0).round(2)
 
+    # Calculo para tipologia "Padrão"
     df_temp = df.copy()
-    df_temp.loc[
-        df["type_of_typology"] != "Padrão", ["qty", "total_area", "total_price"]
-    ] = 0
-    standard_qty = (
-        df_temp.groupby(grupo_empreendimento)["qty"].transform("sum").fillna(0).round(2)
-    )
-    standard_price = (
-        df_temp.groupby(grupo_empreendimento)["total_price"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    standard_m2 = (
-        df_temp.groupby(grupo_empreendimento)["total_area"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    df["standard_price_m2"] = (
-        (standard_price.fillna(0) / standard_m2.replace(0, pd.NA)).fillna(0).round(2)
-    )
-    df["standard_ticket"] = (
-        (standard_price.fillna(0) / standard_qty.replace(0, pd.NA)).fillna(0).round(2)
-    )
+    df_temp.loc[df["type_of_typology"] != "Padrão", ["qty", "total_area", "total_price"]] = 0
+    df["standard_price"] = df_temp.groupby(grupo_empreendimento)["total_price"].transform("sum").fillna(0).round(2)
+    df["standard_qty"] = df_temp.groupby(grupo_empreendimento)["qty"].transform("sum").fillna(0).round(2)
+    df["standard_m2"] = df_temp.groupby(grupo_empreendimento)["total_area"].transform("sum").fillna(0).round(2)
+    df["standard_ticket"] = (df["standard_price"].fillna(0) / df["standard_qty"].replace(0, pd.NA)).fillna(0).round(2)
+    df["standard_price_m2"] = (df["standard_price"].fillna(0) / df["standard_m2"].replace(0, pd.NA)).fillna(0).round(2)
 
+    # Cálculo para tipologia "Cobertura"
     df_temp = df.copy()
-    df_temp.loc[
-        df["type_of_typology"] != "Cobertura", ["qty", "total_area", "total_price"]
-    ] = 0
-    roof_qty = (
-        df_temp.groupby(grupo_empreendimento)["qty"].transform("sum").fillna(0).round(2)
-    )
-    roof_price = (
-        df_temp.groupby(grupo_empreendimento)["total_price"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    roof_m2 = (
-        df_temp.groupby(grupo_empreendimento)["total_area"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    df["roof_price_m2"] = (
-        (roof_price.fillna(0) / roof_m2.replace(0, pd.NA)).fillna(0).round(2)
-    )
-    df["roof_ticket"] = (
-        (roof_price.fillna(0) / roof_qty.replace(0, pd.NA)).fillna(0).round(2)
-    )
+    df_temp.loc[df["type_of_typology"] != "Cobertura", ["qty", "total_area", "total_price"]] = 0
+    df["roof_price"] = df_temp.groupby(grupo_empreendimento)["total_price"].transform("sum").fillna(0).round(2)
+    df["roof_qty"] = df_temp.groupby(grupo_empreendimento)["qty"].transform("sum").fillna(0).round(2)
+    df["roof_m2"] = df_temp.groupby(grupo_empreendimento)["total_area"].transform("sum").fillna(0).round(2)
+    df["roof_ticket"] = (df["roof_price"].fillna(0) / df["roof_qty"].replace(0, pd.NA)).fillna(0).round(2)
+    df["roof_price_m2"] = (df["roof_price"].fillna(0) / df["roof_m2"].replace(0, pd.NA)).fillna(0).round(2)
 
+    # Cálculo para tipologia "Garden"
     df_temp = df.copy()
-    df_temp.loc[
-        df["type_of_typology"] != "Garden", ["qty", "total_area", "total_price"]
-    ] = 0
-    garden_qty = (
-        df_temp.groupby(grupo_empreendimento)["qty"].transform("sum").fillna(0).round(2)
-    )
-    garden_price = (
-        df_temp.groupby(grupo_empreendimento)["total_price"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    garden_m2 = (
-        df_temp.groupby(grupo_empreendimento)["total_area"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    df["garden_price_m2"] = (
-        (garden_price.fillna(0) / garden_m2.replace(0, pd.NA)).fillna(0).round(2)
-    )
-    df["garden_ticket"] = (
-        (garden_price.fillna(0) / garden_qty.replace(0, pd.NA)).fillna(0).round(2)
-    )
+    df_temp.loc[df["type_of_typology"] != "Garden", ["qty", "total_area", "total_price"]] = 0
+    df["garden_price"] = df_temp.groupby(grupo_empreendimento)["total_price"].transform("sum").fillna(0).round(2)
+    df["garden_qty"] = df_temp.groupby(grupo_empreendimento)["qty"].transform("sum").fillna(0).round(2)
+    df["garden_m2"] = df_temp.groupby(grupo_empreendimento)["total_area"].transform("sum").fillna(0).round(2)
+    df["garden_ticket"] = (df["garden_price"].fillna(0) / df["garden_qty"].replace(0, pd.NA)).fillna(0).round(2)
+    df["garden_price_m2"] = (df["garden_price"].fillna(0) / df["garden_m2"].replace(0, pd.NA)).fillna(0).round(2)
+
+    df = adicionar_faixas_area_privativa(df)
+    df["dimensao_cluster"] = df["number_bedroom_str"]
+    loteamento = df["standard"].fillna("").str.contains("loteamento", case=False, regex=False)
+    df.loc[loteamento, "dimensao_cluster"] = df.loc[loteamento, "faixa_area_privativa"]
 
     agrupamento_cidade = [
         "city",
         "building_type",
         "type_of_typology",
         "standard",
-        "number_bedroom_str",
+        "dimensao_cluster",
         "zipcode5",
-        "period",
         "release_date_year",
     ]
 
     df["cluster"] = df[agrupamento_cidade].fillna("").astype(str).agg("|".join, axis=1)
-    df["cluster_buildings"] = (
-        df.groupby(agrupamento_cidade)["building_id"]
-        .transform("nunique")
-        .fillna(0)
-        .astype(int)
-    )
-    df["city_units"] = (
-        df.groupby(agrupamento_cidade)["qty"].transform("sum").fillna(0).round(2)
-    )
-    df["city_sold"] = (
-        df.groupby(agrupamento_cidade)["sold"].transform("sum").fillna(0).round(2)
-    )
-    df["city_sold_median"] = (
-        df.groupby(agrupamento_cidade)["sold"].transform("median").fillna(0).round(2)
-    )
-    df["city_m2"] = (
-        df.groupby(agrupamento_cidade)["total_area"].transform("sum").fillna(0).round(2)
-    )
-    df["city_price"] = (
-        df.groupby(agrupamento_cidade)["total_price"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    df["city_building_units"] = (
-        df.groupby(agrupamento_cidade)["building_units"]
-        .transform("median")
-        .fillna(0)
-        .round(2)
-    )
-    df["city_sales_rate"] = (
-        (df["city_sold"].fillna(0) / df["city_units"].replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
-    df["city_avg_m2"] = (
-        (df["city_m2"].fillna(0) / df["city_units"].replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
-    df["city_price_m2"] = (
-        (df["city_price"].fillna(0) / df["city_m2"].replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
-    df["city_price_ticket"] = (
-        (df["city_price"].fillna(0) / df["city_units"].replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
+    df["cluster_buildings"] = df.groupby(agrupamento_cidade)["building_id"].transform("nunique").fillna(0).round(0)
 
-    df_temp = df.copy()
+    # agrupamento_cidade = ["cluster", "period"]
+    df["city_units"] = df.groupby(agrupamento_cidade)["qty"].transform("sum").fillna(0).round(0)
+    df["city_units_median"] = df.groupby(agrupamento_cidade)["qty"].transform("median").fillna(0).round(0)
+    df["city_sold"] = df.groupby(agrupamento_cidade)["sold"].transform("sum").fillna(0).round(0)
+    df["city_sold_median"] = df.groupby(agrupamento_cidade)["sold"].transform("median").fillna(0).round(0)
+    df["city_price"] = df.groupby(agrupamento_cidade)["total_price"].transform("sum").fillna(0).round(2)
+    df["city_price_median"] = df.groupby(agrupamento_cidade)["price"].transform("median").fillna(0).round(2)
+    df["city_price_ticket"] = (df["city_price"].fillna(0) / df["city_units"].replace(0, pd.NA)).fillna(0).round(2)
+    df["city_m2"] = df.groupby(agrupamento_cidade)["total_area"].transform("sum").fillna(0).round(2)
+    df["city_m2_median"] = df.groupby(agrupamento_cidade)["private_area"].transform("median").fillna(0).round(2)
+    df["city_m2_avg"] = (df["city_m2"].fillna(0) / df["city_units"].replace(0, pd.NA)).fillna(0).round(2)
+    df["city_sales_rate"] = (df["city_sold"].fillna(0) / df["city_units"].replace(0, pd.NA)).fillna(0).round(2)
+    df["city_price_m2"] = (df["city_price"].fillna(0) / df["city_m2"].replace(0, pd.NA)).fillna(0).round(2)
+    df["city_price_m2_median"] = df.groupby(agrupamento_cidade)["price_m2"].transform("median").fillna(0).round(2)
+
     # Referência formada somente por unidades sem vagas, dentro do cluster.
+    df_temp = df.copy()
     df_temp.loc[df["has_garage"], ["qty", "total_price", "total_area"]] = 0
-    df["qty_no_garage"] = (
-        df_temp.groupby(agrupamento_cidade)["qty"].transform("sum").fillna(0).round(2)
-    )
-    df["price_no_garage"] = (
-        df_temp.groupby(agrupamento_cidade)["total_price"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    df["area_no_garage"] = (
-        df_temp.groupby(agrupamento_cidade)["total_area"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    df["avg_ticket_no_garage"] = (
-        (df["price_no_garage"].fillna(0) / df["qty_no_garage"].replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
-    df["avg_price_m2_no_garage"] = (
-        (df["price_no_garage"].fillna(0) / df["area_no_garage"].replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
+    df["qty_no_garage"] = df_temp.groupby(agrupamento_cidade)["qty"].transform("sum").fillna(0).round(0)
+    df["price_no_garage"] = df_temp.groupby(agrupamento_cidade)["total_price"].transform("sum").fillna(0).round(2)
+    df["area_no_garage"] = df_temp.groupby(agrupamento_cidade)["total_area"].transform("sum").fillna(0).round(2)
+    df["avg_ticket_no_garage"] = (df["price_no_garage"].fillna(0) / df["qty_no_garage"].replace(0, pd.NA)).fillna(0).round(2)
+    df["avg_price_m2_no_garage"] = (df["price_no_garage"].fillna(0) / df["area_no_garage"].replace(0, pd.NA)).fillna(0).round(2)
 
+    # Replica o valor para toda a cidade para ser utilizada na comparacao linha x linha
     agrupamento_cidade = ["city", "period"]
     df_temp = df.copy()
-    df_temp.loc[
-        df["pattern"] != "Loteamento Fechado", ["total_area", "total_price"]
-    ] = 0
-    area_total_cidade_lote = (
-        df_temp.groupby(agrupamento_cidade)["total_area"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    vgv_total_cidade_lote = (
-        df_temp.groupby(agrupamento_cidade)["total_price"]
-        .transform("sum")
-        .fillna(0)
-        .round(2)
-    )
-    df["city_price_m2_lote_fechado"] = (
-        (vgv_total_cidade_lote.fillna(0) / area_total_cidade_lote.replace(0, pd.NA))
-        .fillna(0)
-        .round(2)
-    )
+    df_temp.loc[df["pattern"] != "Loteamento Fechado", ["total_area", "total_price"]] = 0
+    df["area_lote_fechado"] = df_temp.groupby(agrupamento_cidade)["total_area"].transform("sum").fillna(0).round(2)
+    df["vgv_lote_fechado"] = df_temp.groupby(agrupamento_cidade)["total_price"].transform("sum").fillna(0).round(2)
+    df["city_price_m2_lote_fechado"] = (df["vgv_lote_fechado"].fillna(0) / df["area_lote_fechado"].replace(0, pd.NA)).fillna(0).round(2)
     df["datarel"] = hora_atual.date()
 
     return df
@@ -458,6 +334,7 @@ def obter_campos_depara():
         "no_leisure_area": "Não possui áreas de lazer",
         "areas": "Áreas de lazer",
         "incorporators": "Incorporadora",
+        "faixa_area_privativa": "Faixa Área Privativa",
         "cluster": "Cluster",
         "cluster_buildings": "Qtd Empreendimentos",
     }
@@ -466,15 +343,14 @@ def obter_campos_depara():
 
 
 def obter_ultimo_periodo(df: pd.DataFrame):
+    # df_ultimo = df.loc[df["period"] == df["database"]].copy()
     df_ultimo = df.copy()
     df_ultimo.sort_values(
         by=["database", "period", "building_id", "typology_id"],
         inplace=True,
         ignore_index=True,
     )
-    df_ultimo.drop_duplicates(
-        subset=["typology_id"], keep="last", inplace=True, ignore_index=True
-    )
+    df_ultimo.drop_duplicates(subset=["typology_id"], keep="last", inplace=True, ignore_index=True)
     return df_ultimo
 
 
@@ -496,6 +372,7 @@ def converter_dataframes(lista_df: list):
         "number_bedroom_str",
         "period_str",
         "release_date_year",
+        "faixa_area_privativa",
         "cluster",
         "cluster_buildings",
         "garage",
@@ -561,11 +438,7 @@ def expandir_tipologias(todos_dados: list) -> pd.DataFrame:
 
     # Filtra apenas os metadados que realmente existem no primeiro registro para evitar KeyError
     primeiro_reg = todos_dados[0] if isinstance(todos_dados[0], dict) else {}
-    cols_meta = [
-        chave
-        for chave in primeiro_reg
-        if chave != col_historico and chave not in cols_para_remover
-    ]
+    cols_meta = [chave for chave in primeiro_reg if chave != col_historico and chave not in cols_para_remover]
 
     try:
         # Extrai typologies_history para cada linha e repete os campos de meta
@@ -576,12 +449,14 @@ def expandir_tipologias(todos_dados: list) -> pd.DataFrame:
             errors="ignore",
         )
 
+        # Preserva a última área positiva de todo o histórico para reproduzir o Dashboard.
+        df_expandido["area_privativa_representativa"] = pd.to_numeric(df_expandido["private_area"], errors="coerce")
+        df_expandido = df_expandido.sort_values("period")
+        df_expandido["area_privativa_representativa"] = df_expandido.groupby(["building_id", "typology_id"], dropna=False)["area_privativa_representativa"].transform(lambda valores: valores[valores.gt(0)].iloc[-1] if valores.gt(0).any() else float("nan"))
         return df_expandido
 
     except (KeyError, ValueError) as e:
-        print(
-            f"⚠️ Erro ao expandir '{col_historico}': + {e}. Retornando formato padrão."
-        )
+        print(f"⚠️ Erro ao expandir '{col_historico}': + {e}. Retornando formato padrão.")
         return pd.json_normalize(todos_dados)
 
 
@@ -597,13 +472,13 @@ def ler_arquivos_json(analise_historica: bool):
     df_concatenado = expandir_tipologias(df_agrupado.to_dict(orient="records"))
     print(f"✅ Total de linhas (tipologias): {len(df_concatenado)}")
 
-    print("🔃 Convertendo tipos dos dados")
-    df_concatenado = converter_tipos(df_concatenado)
-
     # analisar somente o último período, comentar esse trecho se for analisar o histórico
     if not analise_historica:
         df_concatenado = obter_ultimo_periodo(df_concatenado)
         print(f"✅ Total de linhas (último período): {len(df_concatenado)}")
+
+    print("🔃 Convertendo tipos dos dados")
+    df_concatenado = converter_tipos(df_concatenado)
 
     # print(df_concatenado.columns)
     # print(df_concatenado.info())
@@ -615,13 +490,9 @@ def ler_arquivos_json(analise_historica: bool):
 def validar_empreendimentos_grupos(df: pd.DataFrame) -> list[pd.DataFrame]:
     print(f"🟢 Validando empreendimentos: {len(df)}")
 
-    df.sort_values(
-        by=["database", "period", "building_id", "typology_id"], inplace=True
-    )
+    df.sort_values(by=["database", "period", "building_id", "typology_id"], inplace=True)
 
-    df.drop_duplicates(
-        subset=["building_id"], keep="last", inplace=True, ignore_index=True
-    )
+    df.drop_duplicates(subset=["building_id"], keep="last", inplace=True, ignore_index=True)
 
     df["private_area_str"] = "Empreendimento"
     df["typology_id"] = 0
@@ -632,61 +503,74 @@ def validar_empreendimentos_grupos(df: pd.DataFrame) -> list[pd.DataFrame]:
 
     filtro1 = df["months_from_release"] > 24
     filtro2 = df["status"] == "Ativo"
-    filtro3 = df["total_stock"] > df["building_units_70"]
+    filtro3 = df["building_sales_rate"].fillna(0) <= 0.30
     filtro = (filtro1) & (filtro2) & (filtro3)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
-        df_erros["erro"] = "> 24 meses, Ativo, Estoque > 70% das unidades"
+        df_erros["erro"] = "> 24 meses, Ativo, Vendido ≤ 30% das unidades"
         df_erros["campo"] = "total_stock"
         df_erros["valor"] = (
             "Tempo venda: "
-            + df_erros["months_from_release"].astype(str)
+            + df_erros["months_from_release"].fillna(0).round(0).astype(str)
             + " | Estoque atual: "
-            + df_erros["total_stock"].astype(str)
-            + " | 70% das unidades: "
-            + df_erros["building_units_70"].fillna(0).round(0).astype(str)
+            + df_erros["total_stock"].fillna(0).round(0).astype(str)
+            + " | Total vendido: "
+            + df_erros["building_sold"].fillna(0).round(0).astype(str)
+            + " | Oferta lançada: "
+            + df["building_qty"].fillna(0).round(0).astype(str)
+            + " | % Vendido: "
+            + df["building_sales_rate"].astype(str)
         )
-        df_erros["grupo"] = "Estoque"
+        df_erros["grupo"] = "Estoque - Empreendimento"
         dados_errados.append(df_erros)
 
     filtro1 = df["months_from_release"] <= 24
     filtro2 = df["status"] == "Ativo"
-    filtro3 = df["total_stock"] <= df["building_units_20"]
+    filtro3 = df["building_sales_rate"].fillna(0) >= 0.80
     filtro = (filtro1) & (filtro2) & (filtro3)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
-        df_erros["erro"] = "≤ 24 meses, Ativo, Estoque ≤ 20% das unidades"
+        df_erros["erro"] = "≤ 24 meses, Ativo, Vendido ≥ 80% das unidades"
         df_erros["campo"] = "total_stock"
         df_erros["valor"] = (
             "Tempo venda: "
-            + df_erros["months_from_release"].astype(str)
+            + df_erros["months_from_release"].fillna(0).round(0).astype(str)
             + " | Estoque atual: "
-            + df_erros["total_stock"].astype(str)
-            + " | 20% das unidades: "
-            + df_erros["building_units_20"].fillna(0).round(0).astype(str)
+            + df_erros["total_stock"].fillna(0).round(0).astype(str)
+            + " | Total vendido: "
+            + df_erros["building_sold"].fillna(0).round(0).astype(str)
+            + " | Oferta lançada: "
+            + df["building_qty"].fillna(0).round(0).astype(str)
+            + " | % Vendido: "
+            + df["building_sales_rate"].astype(str)
         )
-        df_erros["grupo"] = "Estoque"
+        df_erros["grupo"] = "Estoque - Empreendimento"
         dados_errados.append(df_erros)
 
-    filtro1 = (
-        abs((df["building_sold"].fillna(0) / df["city_sold_median"].fillna(0)) - 1)
-        > 0.5
-    )
-    filtro2 = df["cluster_buildings"].fillna(0) > 2
+    # filtro1 = abs((df["building_sold"].fillna(0) / df["city_sold_median"].fillna(0)) - 1) > 0.5
+    filtro1 = abs((df["building_sales_rate"].fillna(0) / df["city_sales_rate"].fillna(0)) - 1) > 0.5
+    filtro2 = df["cluster_buildings"].fillna(0) > 1
     filtro = (filtro1) & (filtro2)
+    # filtro = filtro1
     if filtro.any():
         df_erros = df.loc[filtro].copy()
-        df_erros["erro"] = "Quantidade vendida com desvio > 50% da mediana do cluster"
+        df_erros["erro"] = "Taxa de vendas com desvio > 50% da taxa do cluster"
         df_erros["campo"] = "sold"
         df_erros["valor"] = (
-            "Vendas Empreendimento: "
+            "Vendas: "
             + df_erros["building_sold"].fillna(0).round(0).astype(str)
+            + " | Oferta lançada: "
+            + df["building_qty"].fillna(0).round(0).astype(str)
+            + " | % Vendido: "
+            + df["building_sales_rate"].astype(str)
+            + " | Empreendimentos: "
+            + df["cluster_buildings"].fillna(0).round(0).astype(str)
             + " | Mediana cluster: "
             + df_erros["city_sold_median"].fillna(0).round(0).astype(str)
-            + " | Empreendimentos: "
-            + df["cluster_buildings"].astype(str)
+            + " | % Vendido cluster: "
+            + df["city_sales_rate"].astype(str)
         )
-        df_erros["grupo"] = "Estoque"
+        df_erros["grupo"] = "Estoque - Tipologia"
         dados_errados.append(df_erros)
 
     return dados_errados
@@ -696,49 +580,11 @@ def validar_tipologias_grupos(df: pd.DataFrame) -> list[pd.DataFrame]:
     print(f"🟢 Validando tipologias: {len(df)}")
 
     df.sort_values(by=["period", "typology_id"], inplace=True)
-    df.drop_duplicates(
-        subset=["typology_id"], keep="last", inplace=True, ignore_index=True
-    )
+    df.drop_duplicates(subset=["typology_id"], keep="last", inplace=True, ignore_index=True)
 
     print(f"🔵 Distintos [typology_id]: {len(df)}")
 
     dados_errados = []
-
-    filtro1 = (
-        abs((df["private_area"].fillna(0) / df["city_avg_m2"].fillna(0)) - 1) >= 0.4
-    )
-    filtro2 = df["cluster_buildings"].fillna(0) > 2
-    filtro = (filtro1) & (filtro2)
-    if filtro.any():
-        df_erros = df.loc[filtro].copy()
-        df_erros["erro"] = "Desvio ≥ 40% da média ponderada do cluster"
-        df_erros["campo"] = "private_area"
-        df_erros["valor"] = (
-            "M²: "
-            + df_erros["private_area"].fillna(0).round(2).astype(str)
-            + " | Média ponderada cluster: "
-            + df_erros["city_avg_m2"].fillna(0).round(2).astype(str)
-            + " | Empreendimentos: "
-            + df["cluster_buildings"].astype(str)
-        )
-        df_erros["grupo"] = "Metragem"
-        dados_errados.append(df_erros)
-
-    filtro1 = df["private_area"].fillna(0) < 10
-    filtro2 = df["cluster_buildings"].fillna(0) < 3
-    filtro = (filtro1) & (filtro2)
-    if filtro.any():
-        df_erros = df.loc[filtro].copy()
-        df_erros["erro"] = "Desvio ≥ 40% da média do cluster"
-        df_erros["campo"] = "private_area"
-        df_erros["valor"] = (
-            "M²: "
-            + df_erros["private_area"].fillna(0).round(2).astype(str)
-            + " | Empreendimentos: "
-            + df["cluster_buildings"].astype(str)
-        )
-        df_erros["grupo"] = "Metragem"
-        dados_errados.append(df_erros)
 
     filtro1 = df["building_type"] == "Vertical"
     filtro2 = df["standard"] == "Compacto"
@@ -749,207 +595,133 @@ def validar_tipologias_grupos(df: pd.DataFrame) -> list[pd.DataFrame]:
         df_erros = df.loc[filtro].copy()
         df_erros["erro"] = "Compacto ≥ 50 m² com até 1 quarto"
         df_erros["campo"] = "private_area"
-        df_erros["valor"] = (
-            "M²: "
-            + df_erros["private_area"].fillna("").astype(str)
-            + " | Quartos: "
-            + df_erros["number_bedroom_str"].fillna("").astype(str)
-        )
+        df_erros["valor"] = "M²: " + df_erros["private_area"].fillna(0).astype(str) + " | Quartos: " + df_erros["number_bedroom_str"].fillna("").astype(str)
         df_erros["grupo"] = "Erro"
-        df_erros["grupo"] = "Metragem"
+        df_erros["grupo"] = "Metragem - Tipologia"
         dados_errados.append(df_erros)
 
-    filtro1 = (
-        abs((df["price"].fillna(0) / df["city_price_ticket"].fillna(0)) - 1) >= 0.30
-    )
-    filtro2 = df["cluster_buildings"].fillna(0) > 2
+    filtro1 = abs((df["price"].fillna(0) / df["city_price_median"].fillna(0)) - 1) >= 0.30
+    filtro2 = df["cluster_buildings"].fillna(0) > 1
     filtro = (filtro1) & (filtro2)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
-        df_erros["erro"] = "Desvio ≥ 30% da média ponderada do cluster"
+        df_erros["erro"] = "Desvio ≥ 30% da mediana do cluster"
         df_erros["campo"] = "price"
-        df_erros["valor"] = (
-            "Preço: "
-            + df_erros["price"].fillna(0).round(2).astype(str)
-            + " | Média ponderada cluster: "
-            + df_erros["city_price_ticket"].fillna(0).round(2).astype(str)
-            + " | Empreendimentos: "
-            + df["cluster_buildings"].astype(str)
-        )
-        df_erros["grupo"] = "Preço"
+        df_erros["valor"] = "Preço: " + df_erros["price"].fillna(0).round(2).astype(str) + " | Mediana cluster: " + df_erros["city_price_median"].fillna(0).round(2).astype(str) + " | Empreendimentos: " + df["cluster_buildings"].astype(str)
+        df_erros["grupo"] = "Preço - Tipologia"
         dados_errados.append(df_erros)
 
     filtro1 = df["price"].fillna(0) < 1000
-    filtro2 = df["cluster_buildings"].fillna(0) < 3
+    filtro2 = df["cluster_buildings"].fillna(0) == 1
     filtro = (filtro1) & (filtro2)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
-        df_erros["erro"] = "Desvio ≥ 30% da média ponderada do cluster"
+        df_erros["erro"] = "Desvio ≥ 30% da mediana do cluster"
         df_erros["campo"] = "price"
-        df_erros["valor"] = (
-            "Preço: "
-            + df_erros["price"].fillna(0).round(2).astype(str)
-            + " | Empreendimentos: "
-            + df["cluster_buildings"].astype(str)
-        )
+        df_erros["valor"] = "Preço: " + df_erros["price"].fillna(0).round(2).astype(str) + " | Empreendimentos: " + df["cluster_buildings"].astype(str)
         df_erros["grupo"] = "Preço"
         dados_errados.append(df_erros)
 
-    filtro1 = (
-        abs((df["price_private_area"].fillna(0) / df["city_price_m2"].fillna(0)) - 1)
-        >= 0.30
-    )
-    filtro2 = df["cluster_buildings"].fillna(0) > 2
+    filtro1 = abs((df["price_private_area"].fillna(0) / df["city_price_m2_median"].fillna(0)) - 1) >= 0.30
+    filtro2 = df["cluster_buildings"].fillna(0) > 1
     filtro = (filtro1) & (filtro2)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
-        df_erros["erro"] = "Desvio ≥ 30% da média ponderada do cluster"
+        df_erros["erro"] = "Desvio ≥ 30% da mediana do cluster"
         df_erros["campo"] = "price_private_area"
-        df_erros["valor"] = (
-            "Preço/m²: "
-            + df_erros["price_private_area"].fillna(0).round(2).astype(str)
-            + " | Média ponderada cluster: "
-            + df_erros["city_price_m2"].fillna(0).round(2).astype(str)
-            + " | Empreendimentos: "
-            + df["cluster_buildings"].astype(str)
-        )
+        df_erros["valor"] = "Preço/m²: " + df_erros["price_private_area"].fillna(0).round(2).astype(str) + " | Mediana cluster: " + df_erros["city_price_m2_median"].fillna(0).round(2).astype(str) + " | Empreendimentos: " + df["cluster_buildings"].astype(str)
         df_erros["grupo"] = "Preço"
         dados_errados.append(df_erros)
 
     filtro1 = df["price_private_area"].fillna(0) < 10
-    filtro2 = df["cluster_buildings"].fillna(0) < 3
+    filtro2 = df["cluster_buildings"].fillna(0) == 1
     filtro = (filtro1) & (filtro2)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
-        df_erros["erro"] = "Desvio ≥ 30% da média ponderada do cluster"
+        df_erros["erro"] = "Desvio ≥ 30% da mediana do cluster"
         df_erros["campo"] = "price_private_area"
-        df_erros["valor"] = (
-            "Preço/m²: "
-            + df_erros["price_private_area"].fillna(0).round(2).astype(str)
-            + " | Empreendimentos: "
-            + df["cluster_buildings"].astype(str)
-        )
+        df_erros["valor"] = "Preço/m²: " + df_erros["price_private_area"].fillna(0).round(2).astype(str) + " | Empreendimentos: " + df["cluster_buildings"].astype(str)
         df_erros["grupo"] = "Preço"
         dados_errados.append(df_erros)
 
     filtro1 = df["has_garage"] == True
-    filtro2 = df["price"].fillna(0).round(0) <= df["avg_ticket_no_garage"].fillna(
-        0
-    ).round(0)
-    # filtro3 = df["cluster_buildings"].fillna(0) > 2
-    # filtro = (filtro1) & (filtro2) & (filtro3)
+    filtro2 = df["price"].fillna(0).round(0) <= df["avg_ticket_no_garage"].fillna(0).round(0)
     filtro = (filtro1) & (filtro2)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
         df_erros["erro"] = "Preço com vaga ≤ Preço sem vaga"
         df_erros["campo"] = "price"
-        df_erros["valor"] = (
-            "Com vagas: "
-            + df_erros["price"].astype(str)
-            + " | Sem vagas: "
-            + df_erros["avg_ticket_no_garage"].astype(str)
-            + " | Empreendimentos: "
-            + df["cluster_buildings"].astype(str)
-        )
+        df_erros["valor"] = "Com vagas: " + df_erros["price"].astype(str) + " | Sem vagas: " + df_erros["avg_ticket_no_garage"].astype(str) + " | Empreendimentos: " + df["cluster_buildings"].astype(str)
         df_erros["grupo"] = "Preço"
         dados_errados.append(df_erros)
 
     filtro1 = df["has_garage"] == True
-    filtro2 = df["price_private_area"].fillna(0).round(0) <= df[
-        "avg_price_m2_no_garage"
-    ].fillna(0).round(0)
-    # filtro3 = df["cluster_buildings"].fillna(0) > 2
-    # filtro = (filtro1) & (filtro2) & (filtro3)
+    filtro2 = df["price_private_area"].fillna(0).round(0) <= df["avg_price_m2_no_garage"].fillna(0).round(0)
     filtro = (filtro1) & (filtro2)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
         df_erros["erro"] = "Preço/m² com vaga ≤ Preço/m² sem vaga"
         df_erros["campo"] = "price_private_area"
-        df_erros["valor"] = (
-            "Com vagas: "
-            + df_erros["price_private_area"].astype(str)
-            + " | Sem vagas: "
-            + df_erros["avg_price_m2_no_garage"].astype(str)
-            + " | Empreendimentos: "
-            + df["cluster_buildings"].astype(str)
-        )
+        df_erros["valor"] = "Com vagas: " + df_erros["price_private_area"].astype(str) + " | Sem vagas: " + df_erros["avg_price_m2_no_garage"].astype(str) + " | Empreendimentos: " + df["cluster_buildings"].astype(str)
         df_erros["grupo"] = "Preço"
         dados_errados.append(df_erros)
 
     filtro1 = df["type_of_typology"] == "Garden"
     filtro2 = df["price"].fillna(0).round(0) >= df["standard_ticket"].fillna(0).round(0)
-    # filtro3 = df["cluster_buildings"].fillna(0) > 2
-    # filtro = (filtro1) & (filtro2) & (filtro3)
     filtro = (filtro1) & (filtro2)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
         df_erros["erro"] = "Ticket Garden ≥ Ticket Padrão"
         df_erros["campo"] = "price"
-        df_erros["valor"] = (
-            "Garden: "
-            + df_erros["price"].fillna(0).round(2).astype(str)
-            + " | Padrão: "
-            + df_erros["standard_ticket"].fillna(0).round(2).astype(str)
-        )
+        df_erros["valor"] = "Garden: " + df_erros["price"].fillna(0).round(2).astype(str) + " | Padrão: " + df_erros["standard_ticket"].fillna(0).round(2).astype(str)
         df_erros["grupo"] = "Preço"
         dados_errados.append(df_erros)
 
     filtro1 = df["type_of_typology"] == "Cobertura"
     filtro2 = df["price"].fillna(0).round(0) <= df["standard_ticket"].fillna(0).round(0)
-    # filtro3 = df["cluster_buildings"].fillna(0) > 2
-    # filtro = (filtro1) & (filtro2) & (filtro3)
     filtro = (filtro1) & (filtro2)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
         df_erros["erro"] = "Ticket Cobertura ≤ Ticket Padrão"
         df_erros["campo"] = "price"
-        df_erros["valor"] = (
-            "Cobertura: "
-            + df_erros["price"].fillna(0).round(2).astype(str)
-            + " | Padrão: "
-            + df_erros["standard_ticket"].fillna(0).round(2).astype(str)
-        )
+        df_erros["valor"] = "Cobertura: " + df_erros["price"].fillna(0).round(2).astype(str) + " | Padrão: " + df_erros["standard_ticket"].fillna(0).round(2).astype(str)
         df_erros["grupo"] = "Preço"
         dados_errados.append(df_erros)
 
     filtro1 = df["building_type"] == "Vertical"
-    filtro2 = df["pattern"] == "Econômico"
-    filtro3 = ~df["garage"].str.contains(
-        r"0|1\s*vagas?", case=False, na=False, regex=True
-    )
+    filtro2 = df["standard"] == "Econômico"
+    filtro3 = ~df["garage"].str.contains(r"0|1\s*vagas?", case=False, na=False, regex=True)
     filtro = (filtro1) & (filtro2) & (filtro3)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
         df_erros["erro"] = "Vertical Econômico com mais de 1 vaga"
         df_erros["campo"] = "garage"
-        df_erros["valor"] = "Vagas: " + df_erros["garage"].fillna(0).astype(str)
+        df_erros["valor"] = "Vagas: " + df_erros["garage"].fillna(0).astype(str) + " | M2: " + df["standard"].fillna("").astype(str)
         df_erros["grupo"] = "Vagas"
         dados_errados.append(df_erros)
 
     filtro1 = df["building_type"] == "Vertical"
     filtro2 = df["private_area"] >= 150
-    filtro3 = df["garage"].str.contains(
-        r"0|1\s*vagas?", case=False, na=False, regex=True
-    )
+    filtro3 = df["garage"].str.contains(r"0|1\s*vagas?", case=False, na=False, regex=True)
     filtro = (filtro1) & (filtro2) & (filtro3)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
         df_erros["erro"] = "Vertical ≥ 150 m² com menos de 2 vagas"
         df_erros["campo"] = "garage"
-        df_erros["valor"] = "Vagas: " + df_erros["garage"].fillna(0).astype(str)
+        df_erros["valor"] = "Vagas: " + df_erros["garage"].fillna(0).astype(str) + " | M2: " + df["private_area"].fillna(0).round(2).astype(str)
         df_erros["grupo"] = "Vagas"
         dados_errados.append(df_erros)
 
     filtro1 = df["building_type"] == "Vertical"
-    filtro2 = df["pattern"] == "Compacto"
-    filtro3 = df["private_area"] >= 40
+    filtro2 = df["standard"] == "Compacto"
+    filtro3 = df["private_area"].fillna(0) >= 40
     filtro4 = df["garage"].str.contains(r"0\s*vagas?", case=False, na=False, regex=True)
     filtro = (filtro1) & (filtro2) & (filtro3) & (filtro4)
     if filtro.any():
         df_erros = df.loc[filtro].copy()
         df_erros["erro"] = "Vertical Compacto ≥ 40 m² sem vaga"
         df_erros["campo"] = "garage"
-        df_erros["valor"] = "Vagas: " + df_erros["garage"].fillna(0).astype(str)
+        df_erros["valor"] = "Vagas: " + df_erros["garage"].fillna(0).astype(str) + " | M2: " + df["private_area"].fillna(0).round(2).astype(str)
         df_erros["grupo"] = "Vagas"
         dados_errados.append(df_erros)
 
@@ -959,7 +731,8 @@ def validar_tipologias_grupos(df: pd.DataFrame) -> list[pd.DataFrame]:
 def gerar_relatorio(analise_historica: bool):
     df_convertido = ler_arquivos_json(analise_historica)
 
-    # df_convertido.to_excel("./convertido.xlsx", index=False)
+    Path(ARQ_DIVERGENCIAS).parent.mkdir(parents=True, exist_ok=True)
+    df_convertido.to_excel(f"./output/farol/convertido_{PARAM_CIDADE.lower()}_{timestamp_arquivo}.xlsx", index=False)
     # return 0
 
     dados_errados = []
@@ -981,9 +754,7 @@ def gerar_relatorio(analise_historica: bool):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Gera relatório de divergências por cidade ou UF."
-    )
+    parser = argparse.ArgumentParser(description="Gera relatório de divergências por cidade ou UF.")
 
     parser.add_argument(
         "--cidades",
@@ -992,9 +763,7 @@ if __name__ == "__main__":
         help="Uma ou mais cidades ou UFs para processar.",
     )
 
-    parser.add_argument(
-        "--historico", type=bool, default=False, help="Analise histórica da tipologia"
-    )
+    parser.add_argument("--historico", type=bool, default=False, help="Analise histórica da tipologia")
 
     parser.add_argument("--iqr", type=float, default=1.5, help="Parâmetro do IQR")
     parser.add_argument("--q1", type=float, default=0.25, help="Percentil Q1")

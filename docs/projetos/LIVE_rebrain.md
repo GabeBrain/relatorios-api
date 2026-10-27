@@ -7,6 +7,69 @@
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência, nenhuma escrita.
 - **Complemento de reprodução por ID:** GET `https://geobrain.com.br/public-api/building-with-history/73632` testado 200: um Solaris, histórico jul/2024 com seis linhas/três objetos distintos e soma 18. Os filtros query `building_id`/`id`/`building_ids` não restringiram a listagem interna nas três chamadas testadas. Evidência bruta/script no mesmo diretório ignorado; diagnóstico atualizado, sem alteração de motor ou nova geração. Commit inicial documental `3e2f5d4`; este complemento não resolve o produto.
 - **Etapas/pendências:** diagnóstico validado localmente com API real; correção proposta de identidade/duplicação e coerência temporal, ainda não implementada. PDF/PPT no site não verificados, produção não corrigida e novos recortes não homologados. Git diverge7remotos/1local na abertura; nenhuma integração/push. Próximo: aprovação da proposta, implementação com regressões e exportação pareada, depois autorização para sincronizar/publicar. Alterações paralelas preservadas.
+## 26/10/2026 — Validação do Fechamento: contexto para conferência na coluna Valor — Edgar / Codex
+
+- **Ambiente/funcionalidade:** Divergências da Validação do Fechamento; Edgar / Codex.
+- **O quê:** revisão dos textos frente ao Python: restauradas área/padrão nas regras de vagas e corrigida a identificação do padrão, que no anexo aparecia rotulado como M2. Valores agora incluem, conforme a regra, desvio percentual absoluto, limite de desvio/preço, quantidade de empreendimentos, preço/m² calculado, diferença e tolerância de R$ 0,01/m², status histórico, datas, critérios de cluster unitário e unidades/área usadas nas referências de garagem/Garden/Cobertura. Taxas de venda exibidas como percentuais e mediana de vendas identificada em unidades, sem acrescentar médias de outras métricas.
+- **Preservado:** critérios, prioridade, agrupamentos, identidades e aprovações. Apenas o conteúdo de `value` mudou; tabela e Excel já consomem esse mesmo conteúdo. Python fornecido/gerado não foi sobrescrito nesta revisão da apresentação.
+- **Evidência:** 41 testes/8 arquivos aprovados; comparador atual confirma os mesmos 52 achados entre Python e aplicação na base local Sinop/MT de 22/10. Sem nova consulta autenticada ou validação visual.
+- **Etapas/Pendências:** revisão local implementada; conferência humana e publicação pendentes. Sem alterações em Supabase ou demais projetos.
+- **Monday:** —
+
+## 26/10/2026 — Validação do Fechamento: prioridade de preços e tolerância de arredondamento — Edgar / Codex
+
+- **Ambiente/funcionalidade:** motor de Divergências da Validação do Fechamento; Edgar / Codex.
+- **O quê:** habilitadas as duas regras específicas de preço baixo, preservando seus limites inclusivos (Horizontal ≤ R$ 40.000; demais tipos ≤ R$ 100.000) e desvio ≥30% da mediana. Prioridade exclusiva na mesma família/campo: preço zerado (status histórico Ativo/Esgotado/Lançado), depois preço baixo, depois desvio geral. Comparações independentes de garagem/Garden/Cobertura e demais campos não foram suprimidas. Preço/m² gravado versus calculado aceita diferença de até R$ 0,01/m², após arredondamento a duas casas e sem falso positivo de ponto flutuante.
+- **Python:** criado `farol_rebrain_20261026_corrigido.py` na pasta do anexo (`validacao_geobrain`), com o original preservado; cópia de referência idêntica nesta feature. Priorização e tolerância replicadas, com datas de exibição tratadas como texto. Comparador atual em `reference/compare-current.py`; comparadores anteriores permanecem referências históricas.
+- **Evidência:** testes incluem os três casos reais de arredondamento, diferença acima da tolerância, tipos de empreendimento, preço zerado e supressão do desvio genérico. Na base offline Sinop/MT salva em 22/10 (174 empreendimentos/395 tipologias), os três alertas de arredondamento desaparecem e restam 52 achados idênticos entre Python e TypeScript.
+- **Etapas/Pendências:** 37 testes/8 arquivos, TypeScript e diff aprovados. Implementação local concluída; sem nova consulta autenticada ou validação visual. Publicação depende de autorização. Sem alterações em Supabase, Dashboard ou outros projetos.
+- **Monday:** —
+
+## 26/10/2026 — Validação do Fechamento: integridade cadastral do Farol — Edgar / Codex
+
+- **Ambiente/funcionalidade:** Validação do Fechamento, motor da guia Divergências. Autor/origem: Edgar / Codex, novas regras do Python fornecido após `# Adicionado regras 26/10/2026`.
+- **O quê:** seis verificações acrescentadas: área privativa zerada fora de Futuro; preço/m² gravado diferente de preço/área (divisão arredondada a duas casas, área zero resulta em zero); preço de lançamento ou período zerado para status histórico contendo Ativo/Esgotado/Lançado; quantidade lançada zerada e preços de lançamento/período diferentes apenas quando as datas coincidem. Grupo vazio para estas regras, sem agregação. Motor anterior, aprovações, interface e demais projetos preservados.
+- **Conflitos excluídos:** Preço abaixo de R$ 100.000 (não Horizontal) e Preço abaixo de R$ 40.000 (Horizontal). Exigem o mesmo desvio ≥30% da mediana já validado pela regra geral; duplicariam achados nos clusters com múltiplos empreendimentos. No cluster unitário válido, a própria mediana coincide com o preço, logo o desvio não se verifica.
+- **Evidência:** 31 testes/8 arquivos aprovados, incluindo dez casos de integridade e a normalização da base local Sinop/MT (174 empreendimentos/395 tipologias, salva em 22/10). Total de 55 achados, sendo três das novas regras. Comparação direta com o Python fornecido confirmou os três, sem exclusivos em nenhuma implementação. TypeScript aprovado. Comparador reproduzível em `src/features/validacao-fechamento/reference/compare-integrity.py`.
+- **Etapas/Pendências:** implementação e verificação headless locais concluídas; sem consulta autenticada nova nem validação visual nesta sessão. Publicação aguarda autorização. Anexo original e referência histórica preservados, sem alteração de Supabase.
+- **Monday:** —
+
+## 26/10/2026 — Validação do Fechamento: rótulos da coluna Regra — Edgar / Codex
+
+- **Ambiente/funcionalidade:** Divergências da Validação do Fechamento.
+- **O quê:** removidos os sufixos ` - Empreendimento` e ` - Tipologia` da apresentação da coluna Regra, incluindo filtros, ordenação, cópia e Excel. Reutilizada a grade existente; critérios de validação e identificadores internos de aprovação preservados.
+- **Etapas/Pendências:** ajuste local; teste do formatador e TypeScript aprovados. Validação visual e publicação pendentes. Sem alterações em outros projetos.
+- **Monday:** —
+
+## 26/10/2026 — Validação do Fechamento: medianas e faixas de área nos clusters — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — regras de Divergências.
+- **O quê:** adotado o Python anexo atualizado: último registro por tipologia antes dos agrupamentos, cluster sem período, CEP ausente convertido a 00000, desvios de preço pela mediana com ao menos dois empreendimentos e regras isoladas de baixo preço somente em cluster unitário. Preço/m² compara o campo da API com a mediana de `price/private_area`. Regras antigas de desvio de área removidas; estoque compara percentuais vendidos e vendas comparam taxas. Mensagens alinhadas aos cálculos efetivos. Para padrões contendo loteamento, a dimensão dormitórios passa a ser a faixa de área privativa.
+- **Faixas:** algoritmo isolado na Validação reproduz o Dashboard, sem alterações naquele projeto: por cidade/tipo, uma última área positiva por tipologia, até seis faixas por posições empíricas, cortes arredondados para dois algarismos significativos, limite inferior inclusivo e superior exclusivo. Python anexo em `validacao_geobrain` atualizado e cópia idêntica mantida em `src/features/validacao-fechamento/reference/`.
+- **Evidência:** teste offline da base Sinop/MT salva em 22/10/2026 (174 empreendimentos, 395 tipologias). Python e TypeScript coincidem nas 52 divergências e nos clusters usados. Excel gerado e reaberto com 52 registros. Sem consulta autenticada à API.
+- **Monday:** —
+- **Etapas/Pendências:** implementação local e comparação automatizada concluídas; validação autenticada/visual e publicação pendentes de aceite. Nenhuma alteração de Supabase nesta entrega.
+
+## 23/10/2026 — Relatório API Excel: ajuda contextual nos campos — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — 2. Configurar relatório.
+- **O quê:** ícone de informação ao lado dos 11 campos, com tooltip por hover ou foco. Explica filtros, períodos, layouts e fórmulas; textos de cálculo monetário, média e escala acompanham a seleção atual. Reutiliza Tooltip/Label do design system, sem modificar primitives compartilhados ou regras de processamento.
+- **AELO, análise somente:** endpoint principal confirmado no código como POST `https://app.geobrain.com.br/public-api/v2/building-with-history-internal`, com tipo Horizontal, UF, status e paginação. Catálogo geográfico usa endpoint separado. Nenhuma alteração ou consulta real ao AELO.
+- **Autor/origem:** Edgar / Codex. **Commits:** commit desta entrada; base `38c10a8`.
+- **Monday:** —
+- **Validação:** TypeScript, lint dirigido, build, quatro testes em dois arquivos e diff sem erros. Navegador com API simulada em 1440/390 px e temas claro/escuro: 11 tooltips, hover, foco, conteúdo dinâmico e posicionamento dentro da janela; quatro chamadas de coleta preservadas, sem processamento automático ou erro de página. Evidências locais ignoradas em `.local-inputs/api-excel-check/verify-tooltips.cjs` e capturas associadas. AELO/Dashboard intactos.
+- **Etapas/Pendências:** implementação e verificação local concluídas; aceite com API autenticada e publicação pendentes. Sem push nesta entrega.
+
+## 23/10/2026 — Relatório API Excel: filtro de padrão e médias por tipologia Padrão — Edgar / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorio-api-excel` — Configurar relatório.
+- **O quê:** Padrão adicionado após Status do Empreendimento, com o mesmo combobox múltiplo. Opções de `data.standard` limitadas aos `building_type` selecionados; escolhas explícitas incompatíveis removidas ao trocar tipos. Sem padrão compatível escolhido, geração bloqueada até nova seleção. Dados cadastrais apenas; nenhuma agregação automática ou chamada extra de API.
+- **Preço Médio Empreendimento:** as três fórmulas existentes incluem todas as tipologias válidas (Garden/Cobertura preservados). Rótulo ponderado por quantidade renomeado para Ponderado pela oferta lançada, mantendo peso `qty`. Acrescentadas as mesmas três fórmulas somente para `type_of_typology` Padrão/Padrao, com normalização de acentos/caixa/espaços. Restringe a média, sem excluir linhas de outras tipologias; sem Padrão válido, média vazia, sem fallback. Seleção continua aplicada somente em Gerar relatório.
+- **AELO, apenas informativo:** usa soma de `sold_in_period`; distratos estimados por estoque atual − anterior + vendas, com total vazio se algum intervalo for incalculável/negativo; coluna chamada Vendas líquidas repete `sold_in_period`, sem subtração. Não usa gross_sales/distractions. Conferência detalhada em `docs/features/relatorio-api-excel.md`; AELO e agregação compartilhada intactos.
+- **Autor/origem:** Edgar / Codex. **Commits:** commit desta entrada; base `5daefda`.
+- **Monday:** —
+- **Validação:** TypeScript, lint dirigido e build aprovados. 62 testes em seis arquivos, incluindo padrões/tipos, seis médias, normalização Padrão/Padrao, preservação de Garden/Cobertura, agrupamentos mensal/trimestral, ausência de Padrão e regressões AELO/trimestres. Navegador 1440/390 px, claro/escuro, com rede externa interceptada: opção Padrão após Status, opções Alto/Econômico conforme Hotel/Vertical, remoção de padrão incompatível e bloqueio até selecionar, seis opções de média, três versões restritas produzindo 150.000 nas duas linhas (incluindo Garden) e versão geral preservando 163.500. Gerações/filtros não fizeram novas requisições; downloads reabertos nas três escalas. Sem erro de página/overflow da janela; mobile com menu recolhido. Evidências locais ignoradas em `.local-inputs/api-excel-check/verify-standards-average.cjs` e arquivos associados.
+- **Etapas/Pendências:** ajustes locais concluídos; API autenticada/aceite com dados reais e publicação ainda pendentes. Padrões reutilizados: ReportMultiSelect, Select/Popover/Command Brain e geração explícita existente; carregamento deliberadamente lento, sucesso, vazio de seleção, rascunho, erro e download verificados. Nenhuma escrita Monday ou push nesta entrega.
 
 ## 22/10/2026 — Estimativas: auditoria das bases IVV e envio autorizado — Gabriel / Codex
 

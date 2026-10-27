@@ -4,7 +4,15 @@ export type Cell = string | number | null;
 export type Row = Record<string, Cell>;
 export type Granularity = 'month' | 'quarter';
 export type PriceMode = 'current' | 'period';
-export type BuildingAverageMode = 'simple' | 'quantity' | 'stock';
+export type BuildingAverageMode = 'simple' | 'quantity' | 'stock' | 'simple-standard' | 'quantity-standard' | 'stock-standard';
+export const BUILDING_AVERAGE_OPTIONS: { value: BuildingAverageMode; label: string }[] = [
+  { value: 'simple', label: 'Média simples' },
+  { value: 'quantity', label: 'Ponderado pela oferta lançada' },
+  { value: 'stock', label: 'Ponderada pelo estoque' },
+  { value: 'simple-standard', label: 'Média simples (somente tip. Padrão)' },
+  { value: 'quantity-standard', label: 'Ponderado pela oferta lançada (somente tip. Padrão)' },
+  { value: 'stock-standard', label: 'Ponderada pelo estoque (somente tip. Padrão)' },
+];
 export type Layout = 'columns' | 'rows';
 export type VgvScale = 'standard' | 'thousand' | 'million';
 export const VGV_UNITS: Record<VgvScale, string> = { standard: 'R$', thousand: 'R$ mil', million: 'R$ milhões' };
@@ -18,6 +26,7 @@ export interface ReportOptions {
   statuses: string[];
   municipalities?: string[];
   buildingTypes?: string[];
+  standards?: string[];
   periodRange?: 'day' | 'month';
   vgvScale?: VgvScale;
 }
@@ -181,8 +190,9 @@ function flowVgv(entries: DatedEntry[], field: string, mode: PriceMode, currentP
 function buildingAverage(snapshots: RawBuilding[], mode: BuildingAverageMode): number | null {
   let numerator = 0, denominator = 0;
   for (const entry of snapshots) {
+    if (mode.endsWith('-standard') && text(entry.type_of_typology).normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase() !== 'padrao') continue;
     const price = numeric(entry.price);
-    const weight = mode === 'simple' ? 1 : numeric(mode === 'quantity' ? entry.qty : entry.typology_stock);
+    const weight = mode.startsWith('simple') ? 1 : numeric(mode.startsWith('quantity') ? entry.qty : entry.typology_stock);
     if (price === null || weight === null || weight <= 0) continue;
     numerator += price * weight; denominator += weight;
   }
@@ -196,7 +206,8 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
   if (!options.from || !options.to || options.from > options.to) return empty;
   buildings = buildings.filter((building) => options.statuses.includes(text(building.status))
     && (options.municipalities === undefined || options.municipalities.includes(municipalityKey(building)))
-    && (options.buildingTypes === undefined || options.buildingTypes.includes(text(building.building_type))));
+    && (options.buildingTypes === undefined || options.buildingTypes.includes(text(building.building_type)))
+    && (options.standards === undefined || options.standards.includes(text(building.standard))));
   const periodsMap = new Map<string, Period>();
   // Apenas períodos observados na coleta dentro das datas inclusivas, sem inventar fechamentos.
   for (const building of buildings) for (const { date } of entriesOf(building)) {
