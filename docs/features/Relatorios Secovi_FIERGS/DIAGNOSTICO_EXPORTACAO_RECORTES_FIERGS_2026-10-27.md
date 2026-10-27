@@ -38,6 +38,14 @@ O cubo soma 18 contra 9, gerando o excesso 9. As três áreas são tipologias le
 
 Experimento controlado, exclusivamente em cópias das respostas congeladas: remover somente repetições JSON idênticas faz Gramado + Canela passar de 41/42 para 42/42. Os mesmos filtros não resolvem Porto Alegre, que mantém delta 87. Nenhum arquivo de fonte, banco, API ou código de produto foi alterado pelo experimento.
 
+### Complemento: reprodução individual do Solaris
+
+Verificação autenticada de 27/10, sem nova geração do estudo: `GET https://geobrain.com.br/public-api/building-with-history/73632`, cabeçalhos `Authorization: Bearer <TOKEN>` e `Accept: application/json`, retorna HTTP 200 e um único empreendimento em `data`. Dentro de `data.typologies_history`, julho/2024 contém seis linhas/três objetos distintos, soma 18; cada ID 109859/109860/109861 aparece duas vezes com qty 3. O empreendimento não está duplicado neste retorno individual: a duplicação é interna ao histórico.
+
+Testados `building_id=73632`, `id=73632` e `building_ids=73632` na query de `POST /public-api/v2/building-with-history-internal`, com type=Vertical, city=Gramado, uf=RS, per_page=2, page=1: os três retornaram os mesmos dois empreendimentos 87621/87576 e total 218. Esses parâmetros não restringiram por ID nas chamadas testadas; não recomendar como filtro confirmado. A rota GET individual acima é a reprodução por ID comprovada e consta no OpenAPI local.
+
+Evidências ignoradas: `probe-id-filter.mjs`, `probe-id-filter-summary.json`, `probe-public-detail.json` e três respostas de listagem em `.local-inputs/fiergs-incidente-20261027/`. Quatro consultas de negócio, todas 200; nenhuma escrita na origem, segredo exportado ou mudança de motor. Sem nova suíte necessária para consulta diagnóstica.
+
 ## Porto Alegre — causa confirmada
 
 `domain/cube.ts` prefere `building.total_units` para a quantidade do empreendimento, mas soma `qty` das linhas do mês original de lançamento para a quantidade tipológica. Quatro projetos possuem revisões posteriores de quantidade, sem duplicatas JSON idênticas responsáveis pelo excesso:
