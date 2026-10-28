@@ -33,11 +33,11 @@ export interface ReportOptions {
 }
 export const FIXED_COLUMNS = [
   'ID Empreendimento', 'ID Tipologia', 'Status Empreendimento', 'Status Tipologia',
-  'Região', 'Região Administrativa', 'Cidade/UF', 'Tipo', 'Padrão', 'Tipologia',
+  'Região', 'Região Administrativa', 'Cidade/UF', 'Tipo', 'Padrão', 'Faixa MCMV', 'Tipologia',
   'Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado', 'Tempo de Vendas', 'Empreendimentos',
   'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Incorporadoras', 'Unidades por Tipologia',
   'Data de Lançamento', 'Ano', 'Data de Entrega', 'Quartos', 'Garagem', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
-  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'm2 Priv.', 'Faixa MCMV',
+  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'm2 Priv.',
 ];
 export const MEASURES = [
   'Vendas Brutas', 'Distratos', 'Vendas Líquidas', 'Estoque', 'Preço Atual',
@@ -109,9 +109,10 @@ export function monthEnd(date: string): string {
 type DatedEntry = { date: string; entry: RawBuilding };
 function entriesOf(building: RawBuilding): DatedEntry[] {
   const history = Array.isArray(building.typologies_history) ? building.typologies_history : [];
+  const release = isoDate(building.release_date);
   return history.flatMap((entry: RawBuilding) => {
     const date = isoDate(entry.period);
-    return date ? [{ date, entry }] : [];
+    return date && (!release || date.slice(0, 7) >= release.slice(0, 7)) ? [{ date, entry }] : [];
   }).sort((a, b) => a.date.localeCompare(b.date));
 }
 
@@ -119,9 +120,10 @@ export function dateBounds(buildings: RawBuilding[]) {
   let from = '', to = '';
   for (const building of buildings) {
     const history = Array.isArray(building.typologies_history) ? building.typologies_history : [];
+    const release = isoDate(building.release_date);
     for (const entry of history) {
       const date = isoDate(entry.period);
-      if (!date) continue;
+      if (!date || (release && date.slice(0, 7) < release.slice(0, 7))) continue;
       if (!from || date < from) from = date;
       if (!to || date > to) to = date;
     }
@@ -237,12 +239,14 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
     }
     const mcmvAverage = buildingAverage([...typologies.values()].map((history) => history.at(-1)!.entry), 'quantity-standard');
     const mcmv = mcmvBand(building, mcmvAverage);
+    const historicalMcmv: string[] = [];
     const averages = periods.map((period, index) => {
       const snapshots = [...typologies.values()].flatMap((history) => {
         const snapshot = history.filter(({ date }) => date >= options.from && periodOf(date, options.granularity).key === period.key).at(-1);
         return snapshot ? [snapshot.entry] : [];
       });
       const average = buildingAverage(snapshots, options.buildingAverageMode);
+      historicalMcmv.push(mcmvBand(building, buildingAverage(snapshots, 'quantity-standard')));
       if (average !== null) {
         series[index]['Preço Médio Empreendimento'] = (numeric(series[index]['Preço Médio Empreendimento']) ?? 0) + average;
         priceCounts[index].set('Preço Médio Empreendimento', (priceCounts[index].get('Preço Médio Empreendimento') ?? 0) + 1);
@@ -260,6 +264,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
         const entries = inRange.filter(({ date }) => periodOf(date, options.granularity).key === period.key);
         const last = entries.at(-1)?.entry;
         const beforeRelease = releaseKey !== null && period.key < releaseKey;
+        wide[`Faixa MCMV ${period.label}`] = last ? historicalMcmv[index] : '';
         const gross = sumField(entries, 'gross_sales');
         const cancellations = sumField(entries, 'distractions');
         const net = gross === null || cancellations === null ? null : gross - cancellations;
@@ -279,7 +284,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
           'VGV Estoque': product(stock, price),
         };
         for (const metric of MEASURES) {
-          const value = beforeRelease ? PRICE_MEASURES.has(metric) ? null : 0 : values[metric];
+          const value = beforeRelease ? null : values[metric];
           values[metric] = value;
           wide[`${metric} ${period.label}`] = value;
           if (typeof value === 'number' && metric !== 'Preço Médio Empreendimento') {
@@ -287,7 +292,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
             if (PRICE_MEASURES.has(metric)) priceCounts[index].set(metric, (priceCounts[index].get(metric) ?? 0) + 1);
           }
         }
-        if (options.layout === 'rows') longRows.push({ ...fixed, 'Período': period.label, ...values });
+        if (options.layout === 'rows' && last && !beforeRelease) longRows.push({ ...fixed, 'Faixa MCMV': historicalMcmv[index], 'Período': period.label, ...values });
       }
       wideRows.push(wide);
     }
@@ -302,7 +307,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       || text(a['ID Tipologia']).localeCompare(text(b['ID Tipologia']), undefined, { numeric: true });
   };
   const columns = options.layout === 'columns'
-    ? [...FIXED_COLUMNS, ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
+    ? [...FIXED_COLUMNS.flatMap((column) => column === 'Faixa MCMV' ? [column, ...periods.map((period) => `Faixa MCMV ${period.label}`)] : [column]), ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
     : [...FIXED_COLUMNS, 'Período', ...MEASURES];
   return { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length, typologyRows: wideRows, vgvScale: options.vgvScale ?? 'standard' };
 }
@@ -312,6 +317,7 @@ export function selectReportFields(report: Report, fields: string[] | null): Rep
   if (fields === null) return report;
   const selected = new Set(fields);
   const columns = report.columns.filter((column) => selected.has(column)
+    || (selected.has('Faixa MCMV') && column.startsWith('Faixa MCMV '))
     || MEASURES.some((measure) => selected.has(measure) && column.startsWith(`${measure} `)));
   return selectedReport(report, columns);
 }

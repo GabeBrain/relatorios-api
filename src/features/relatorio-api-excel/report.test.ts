@@ -77,13 +77,13 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     expect(row['Vendas Líquidas jan/2026']).toBeNull();
     expect(row['Estoque jan/2026']).toBeNull();
   });
-  it('zera períodos anteriores ao lançamento e deixa períodos sem fechamento vazios', () => {
+  it('deixa períodos anteriores ao lançamento e sem fechamento vazios no horizontal', () => {
     const data = [building, { ...building, building_id: 11, release_date: '2026-02-01', typologies_history: [
       { typology_id: 30, period: '2026-02-28', qty: 50, price: 100, gross_sales: 2, distractions: 0, sold_in_period: 999, typology_stock: 48 },
     ] }];
     const row = report({}, data).rows.find((item) => item['ID Empreendimento'] === '11')!;
-    expect(row['VGV Lançado jan/2026']).toBe(0);
-    expect(row['VGV Vendas Brutas jan/2026']).toBe(0);
+    expect(row['VGV Lançado jan/2026']).toBeNull();
+    expect(row['VGV Vendas Brutas jan/2026']).toBeNull();
     expect(row['Estoque mar/2026']).toBeNull();
   });
   it('aplica status localmente e identifica os limites do histórico bruto', () => {
@@ -144,7 +144,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
       'Preço Médio Empreendimento', 'Preço m²', 'VGV Lançado', 'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'];
     expect([...MEASURES]).toEqual(expected);
     const wide = report({ granularity });
-    expect(wide.columns.slice(FIXED_COLUMNS.length)).toEqual(expected.flatMap((metric) => wide.periods.map(({ label }) => `${metric} ${label}`)));
+    expect(wide.columns.slice(FIXED_COLUMNS.length + wide.periods.length)).toEqual(expected.flatMap((metric) => wide.periods.map(({ label }) => `${metric} ${label}`)));
     const tabular = report({ granularity, layout: 'rows' });
     expect(tabular.columns.slice(FIXED_COLUMNS.length)).toEqual(['Período', ...expected]);
     expect(FIXED_COLUMNS).not.toContain('VGV Lançado');
@@ -293,7 +293,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     const after = (field: string, length: number) => FIXED_COLUMNS.slice(FIXED_COLUMNS.indexOf(field) + 1, FIXED_COLUMNS.indexOf(field) + 1 + length);
     expect(after('Região', 1)).toEqual(['Região Administrativa']);
     expect(after('Cidade/UF', 1)).toEqual(['Tipo']);
-    expect(after('Padrão', 1)).toEqual(['Tipologia']);
+    expect(after('Padrão', 2)).toEqual(['Faixa MCMV', 'Tipologia']);
     expect(after('Tipologia', 3)).toEqual(['Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado']);
     expect(after('Data de Entrega', 2)).toEqual(['Quartos', 'Garagem']);
     for (const obsolete of ['Urbanizadora', 'Lançamento', 'Entrega', 'Oferta por Lotes', 'm² Lançado']) expect(FIXED_COLUMNS).not.toContain(obsolete);
