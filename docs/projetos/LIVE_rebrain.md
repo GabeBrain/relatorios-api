@@ -389,6 +389,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Mudança:** entrada só com território hierárquico (vários estados/cidades), sem banner/IDs/modalidades. Finotti primeiro, card selecionável com destaque oliva, exploração separada e origem no último dado de cada empreendimento. Períodos disponíveis com anterior/próximo substituem calendários/sliders. Comparação padrão em percentual/tempo relativo, detalhe em acumulado de unidades e Excel direto após revisão.
 - **Código:** retiradas as jornadas UI Preparar lote/Estudos científicos e seus componentes exclusivos, por decisão explícita de Gabriel. Motores, políticas e testes de cálculo preservados. Origem/cadência/importação continuam sem semântica inventada.
 - **Validação:** 109 testes da feature e 15 contratos operacionais; tipos/lint/build e matriz Chromium local 1440/768/390 claro/escuro, Excel reaberto com origens diferentes, sem consulta adicional na exploração. [Decisões e evidências](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md#9-simplificação-após-grill--decisões-e-execução-em-2810). Sem nova consulta autenticada nesta revisão e sem push/deploy.
+- **Envio autorizado em 28/10:** Gabriel autorizou o push da simplificação `a2b73d8`, acompanhada de `c9366a7` (tipagem de teste Excel). Fetch conferido sem novidades e gate documental aprovado. Publicação da nova revisão e verificação de produção ainda não confirmadas.
 - **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`, referência somente.
 
 ### 28/10 — Estimativas: fluxo essencial V1 e integração da main — Gabriel / Codex
@@ -574,7 +575,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- **Estimativas:** obter autorização de envio da simplificação posterior ao grill e conferir a nova jornada/Excel em produção. V1 anterior enviada em `ece2a76`, com exibição relatada por Gabriel; esta revisão só foi verificada localmente. Origem/duração por período, contrato Belogic, preço, rateio e reconciliação permanecem externos; avaliação Finotti independente necessária.
+- **Estimativas:** envio da simplificação posterior ao grill autorizado em 28/10; conferir a nova jornada/Excel em produção após publicação. V1 anterior enviada em `ece2a76`, com exibição relatada por Gabriel; esta revisão só foi verificada localmente. Origem/duração por período, contrato Belogic, preço, rateio e reconciliação permanecem externos; avaliação Finotti independente necessária.
 
 - [ ] **Estimativas de vendas Finotti:** implementar [página editorial por API](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) para empreendimento/carteira, laboratório da equação, gráficos amplos e exportação de revisão. Incluir conferência **opcional** por Excel na própria tela, com link/instruções do exportador Geobrain e validador de paridade para Guarapuava/Maringá e Curitiba; uso normal não depende de arquivo. Obter `bases.estimation` **por base/competência** e periodicidade real; a API/planilhas ainda não comprovam origem observada. Adaptar série com negativos/lacunas antes do backtest válido. Contrato de retorno, domínio, cauda95%, bandas, vertical e alternância/coleta seguem abertos. Sem aceite operacional.
 
