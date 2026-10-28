@@ -3,6 +3,8 @@
 Data: 27/10/2026. Estado: primeira versão implementada e validada localmente; API real consultada, sem push/deploy. Responsável: Gabriel.
 Propósito: fonte única da próxima versão científica e seus critérios de aceite. O contrato operacional permanece em CONTRATO_E_VALIDACAO.md; a baseline operacional aponta para este plano.
 
+> Próxima experiência proposta em 28/10: [briefing consolidado](CTA_CLAUDE_DESIGN_ESTUDOS_2026-10-27.md), com lista de curvas, backtest temporal integrado e exportação de conjuntos. Aguarda ZIP e aceite; não altera os contratos científicos ou operacionais.
+
 ## 1. Direção e limites
 
 Na rota existente /rebrain/estimativas-vendas, manter o nome Estimativas de vendas e a introdução: “Transformar o histórico de um empreendimento em uma projeção de vendas compreensível, verificável e pronta para revisão.” A entrada principal passa a Estudos de previsão, começando em Curitiba. Preservar a jornada operacional em acesso secundário “Preparar lote”, sem apagar motores, regras, auditorias ou contratos.
