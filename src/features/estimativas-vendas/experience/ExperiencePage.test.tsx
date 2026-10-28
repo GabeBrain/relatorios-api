@@ -28,6 +28,9 @@ describe('jornada essencial', () => {
     render(<ExperiencePage />); fireEvent.click(screen.getByRole('button', { name: 'Carregar empreendimentos' }));
     await screen.findByRole('button', { name: 'Explorar curva de Caso de revisão' });
     await screen.findByRole('img', { name: 'Curva de vendas de Caso de revisão' });
+    expect(document.querySelectorAll('main.evx-page > details').length).toBe(0);
+    expect(screen.getByRole('group', { name: 'Tipo de empreendimento' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Explorar curva de Caso de revisão' }).closest('.evm-card')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Selecionar Caso de revisão' }));
     fireEvent.change(screen.getByPlaceholderText('Nome ou ID'), { target: { value: 'ausente' } });
     expect(screen.getByText('1 selecionados · 1 fora do filtro atual')).toBeTruthy();

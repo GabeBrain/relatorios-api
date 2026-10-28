@@ -44,16 +44,18 @@ export function CurveMap({ runtime, universe, rows, allIds, spec, selection, onT
     {!complete && !error && <BrainLoadingState variant="field" title={`Preparando mapa: ${Object.keys(tiles).length}/${allIds.length}`} description="Cálculo local; nenhum novo acesso à API." />}
     {error && <p role="alert">Não foi possível preparar o mapa: {error}</p>}
     <div className="evm-legend"><span>Cor: vendas previstas em {spec.duration} meses · {complete ? `0 a ${number(ceiling)} unidades` : 'escala em preparação'}</span><span className="evm-gradient" aria-hidden="true" /><span className="evm-hatch-sample">Sem Finotti</span><span>Histórico até 36 meses · previsão tracejada · início marcado · escalas iguais</span></div>
-    {active && <div className="evm-inspector" aria-live="polite"><div><strong>{active.name}</strong><span>ID {active.id} · {universe.locations[active.id]?.city} · dados até {active.cutoff}</span><span>{tile ? tile.finotti ? `${number(tile.sales)} un. previstas · estoque ${number(tile.stock)} → ${number(tile.finalStock)} un.` : `Sem Finotti · ${tile.reason}` : 'Preparando curva'}</span></div><Button variant="outline" onClick={() => onExplore(active.id)} aria-label={`Explorar curva de ${active.name}`}>Explorar curva</Button></div>}
+    {active && <div className="evm-inspector" aria-live="polite"><div><strong>{active.name}</strong><span>ID {active.id} · {universe.locations[active.id]?.city} · dados até {active.cutoff}</span><span>{tile ? tile.finotti ? `${number(tile.sales)} un. previstas · estoque ${number(tile.stock)} → ${number(tile.finalStock)} un.` : `Sem Finotti · ${tile.reason}` : 'Preparando curva'}</span></div></div>}
     <div className="evm-grid" aria-label="Empreendimentos e minicurvas">
       {visible.map(r => {
         const t = tiles[r.id], colored = complete && t?.finotti && t.sales !== null, intensity = colored && ceiling > 0 ? Math.max(0, Math.min(1, t.sales! / ceiling)) : 0;
         const start = -36, originX = 4 + 192 * -start / (spec.duration - start);
-        return <button key={r.id} className={`evm-tile ${t && !t.finotti ? 'evm-unavailable' : ''} ${selection.has(r.id) ? 'evx-selected' : ''}`} style={{ '--evm-intensity': `${Math.round(12 + intensity * 77)}%` } as CSSProperties} aria-label={`Selecionar ${r.name}`} aria-pressed={selection.has(r.id)} onFocus={() => setInspected(r.id)} onPointerEnter={() => setInspected(r.id)} onClick={() => { setInspected(r.id); onToggle(r.id); }}>
+        return <article key={r.id} className={`evm-card ${t && !t.finotti ? 'evm-unavailable' : ''} ${selection.has(r.id) ? 'evx-selected' : ''}`} style={{ '--evm-intensity': `${Math.round(12 + intensity * 77)}%` } as CSSProperties} onPointerEnter={() => setInspected(r.id)}>
+          <button className="evm-tile" aria-label={`Selecionar ${r.name}`} aria-pressed={selection.has(r.id)} onFocus={() => setInspected(r.id)} onClick={() => { setInspected(r.id); onToggle(r.id); }}>
           <span className="evm-name">{r.name} · {r.id}</span><strong>{t ? t.finotti ? `${number(t.sales)} un.` : 'Sem Finotti' : 'Preparando'}</strong>
           <svg viewBox="0 0 200 64" role="img" aria-label={`Curva de vendas de ${r.name}`}><line x1={originX} x2={originX} y1="4" y2="60" className="evm-origin" /><path d={t ? tilePath(t.history, start, spec.duration) : ''} />{t?.history.filter((p, i, ps) => p.percent !== null && ps[i - 1]?.offset !== p.offset - 1 && ps[i + 1]?.offset !== p.offset + 1).map(p => <circle key={p.offset} cx={4 + 192 * (p.offset - start) / (spec.duration - start)} cy={58 - 52 * p.percent! / 100} r="1.5" fill="currentColor" />)}<path d={t ? tilePath(t.forecast, start, spec.duration) : ''} strokeDasharray="4 3" /></svg>
           <span className="evm-detail">{t?.finotti ? `Estoque ${number(t.stock)} → ${number(t.finalStock)} un. · ${t.cutoff}` : t?.reason ?? 'Calculando referência'}</span>
-        </button>;
+          </button><Button variant="ghost" className="evm-explore" onFocus={() => setInspected(r.id)} onClick={() => onExplore(r.id)} aria-label={`Explorar curva de ${r.name}`}>Explorar curva ↗</Button>
+        </article>;
       })}
     </div>
     {!rows.length && <p role="status">Nenhum empreendimento corresponde aos filtros.</p>}

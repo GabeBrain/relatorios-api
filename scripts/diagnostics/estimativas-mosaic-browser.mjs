@@ -18,12 +18,19 @@ try {
   await page.goto(base); await page.getByRole('combobox', { name: 'Estados', exact: true }).click(); await page.getByRole('option', { name: 'PR', exact: true }).click(); await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Carregar empreendimentos', exact: true }).click(); const started = Date.now();
   const map = page.getByRole('region', { name: 'Mapa de curvas', exact: true }); await map.waitFor({ timeout: 90000 });
+  assert.equal(await page.locator('main.evx-page > details').count(), 0, 'ações e filtros sem expanders');
+  assert.equal(await page.getByRole('group', { name: 'Tipo de empreendimento', exact: true }).isVisible(), true);
   await page.getByRole('button', { name: 'Por vendas previstas', exact: true }).waitFor();
   await page.waitForFunction(() => document.querySelector('.evm-map')?.getAttribute('aria-busy') === 'false', { timeout: 90000 });
   const elapsedMs = Date.now() - started;
   const finotti = count - Math.ceil(count / 7); assert.equal(await page.locator('.evm-tile').count(), Math.min(500, finotti));
   await page.evaluate(t => document.documentElement.classList.toggle('dark', t === 'dark'), theme);
+  await page.locator('.evx-header').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `${folder}/${count}-${width}-${theme}-controls.png` });
   const first = page.locator('.evm-tile').first(); await first.click(); assert.equal(await first.getAttribute('aria-pressed'), 'true');
+  await page.locator('.evm-card').first().getByRole('button', { name: /Explorar curva de/ }).click();
+  await page.getByRole('dialog').getByRole('img', { name: 'Histórico, previsão e dados posteriores' }).waitFor();
+  await page.keyboard.press('Escape'); assert.equal(await first.getAttribute('aria-pressed'), 'true', 'explorar dentro do card não altera seleção');
   await page.getByRole('button', { name: 'Cards detalhados', exact: true }).click(); assert.equal(await page.locator('.evm-tile').count(), Math.min(60, finotti));
   assert.equal(await page.locator('.evm-tile').first().getAttribute('aria-pressed'), 'true');
   await map.scrollIntoViewIfNeeded(); await page.screenshot({ path: `${folder}/${count}-${width}-${theme}-detail.png`, fullPage: true });
@@ -31,7 +38,7 @@ try {
   assert.equal(await page.locator('.evm-tile').count(), Math.min(500, count));
   if (count > 500) { await page.getByRole('button', { name: 'Próxima página do mapa', exact: true }).click(); assert.equal(await page.locator('.evm-tile').count(), 1); await page.getByRole('button', { name: 'Página anterior do mapa', exact: true }).click(); }
   await page.getByRole('button', { name: 'Por vendas previstas', exact: true }).click();
-  assert.equal(await page.locator('.evm-tile').first().getAttribute('class').then(s => s.includes('evm-unavailable')), false);
+  assert.equal(await page.locator('.evm-card').first().getAttribute('class').then(s => s.includes('evm-unavailable')), false);
   await page.getByRole('button', { name: 'Marcar todos os Finotti', exact: true }).click();
   assert.equal(await page.locator('.evm-unavailable').count(), 0); assert.equal(await page.locator('.evm-tile[aria-pressed=true]').count(), Math.min(500, finotti));
   await page.getByRole('button', { name: 'Lista de curvas', exact: true }).click(); assert.equal(await page.locator('.evx-open-row[aria-pressed=true]').count(), Math.min(15, finotti));

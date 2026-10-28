@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 28/10/2026 — Estimativas: controles abertos e exploração dentro do card
+
+- **Pedido/entrega:** Gabriel testou o mapa e pediu menos caixas e expanders. Resumo aberto e grupos de busca, duração, disponibilidade e tipo expostos; cidade só quando necessário. Listas extensas de outros/esgotados usam Dialog. Mapa sem moldura, ações com estado sublinhado e cards arredondados localmente em8px, conforme solicitação explícita; tokens globais intactos.
+- **Interação:** card contém botões irmãos para selecionar e explorar, sem aninhamento; abrir curva preserva seleção e fechar devolve foco ao acionador. Cor, hachura, motores e contratos preservados. Detalhes no refinamento editorial da seção10 do [plano](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md).
+- **Evidência:**23testes da experiência, tipos/lint/build e quatro cenários de mosaico +seis de jornada completa aprovados em Chromium local, com dados sintéticos. Sem errosJS/overflow ou chamadas extras; Excel24linhas reaberto. [Registro](../features/estimativas-vendas/EVIDENCIAS_MAPA_CURVAS_2026-10-28.json), campo `editorialRefinement`.
+- **Estado/próximo:** validado localmente, entrega destinada àmain conforme autorização de envio vigente. Publicação e aceite desta revisão em produção pendentes; sem nova API autenticada, alteração de motores ou homologação de importação. Alterações paralelas preservadas.
+
 ### 28/10/2026 — Estimativas: mapa mini/detalhado implementado
 
 - **Entrega:** mosaico inicial com miniaturas SVG percentuais, modos mini/detalhado, faixa de inspeção e lista alternativa. Seleção compartilhada, destaque oliva, Finotti primeiro, ordenação por nome/vendas, paginação 500/60. Cor significa unidades previstas, hachura ausência de referência; eixos comuns e lacunas preservadas. Motores, detalhe/backtest e Excel reutilizados.

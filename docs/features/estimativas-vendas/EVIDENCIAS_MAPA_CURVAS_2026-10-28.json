@@ -20,5 +20,16 @@
   "rawArtifacts": ".local-inputs/estimativas-vendas/mosaico-20261028/ e simplificacao-20261028/; ignorados pelo Git",
   "scripts": ["scripts/diagnostics/estimativas-mosaic-browser.mjs", "scripts/diagnostics/estimativas-simple-browser.mjs"],
   "tokensSha256": "0802b707b8c511e3367b1e4a235cea6a268edb9ac8f217a2beb965fc30874eac",
-  "limitations": ["tempos sintéticos não são SLA da API", "sem validação independente de precisão", "sem faixa calibrada", "sem mudança de motores ou homologação Geobrain", "última linha do grid pode ficar incompleta para preservar áreas comparáveis"]
+  "limitations": ["tempos sintéticos não são SLA da API", "sem validação independente de precisão", "sem faixa calibrada", "sem mudança de motores ou homologação Geobrain", "última linha do grid pode ficar incompleta para preservar áreas comparáveis"],
+  "editorialRefinement": {
+    "date": "2026-10-28",
+    "scope": "Controles expostos sem expanders, grupos sem perímetro, Explorar curva dentro do card, raio local 8px",
+    "experienceTestsPassed": 23,
+    "typecheckLintBuild": "passed",
+    "mosaicBrowserScenariosPassed": 4,
+    "fullJourneyBrowserScenariosPassed": 6,
+    "assertions": ["filtros visíveis sem abrir expander", "Explorar curva dentro de cada card", "explorar não altera seleção", "paginação e troca de densidade preservadas", "zero erros JavaScript ou overflow", "Excel reaberto com 24 linhas", "duas chamadas sintéticas iniciais e nenhuma extra na exploração"],
+    "data": "sintética controlada; sem nova chamada autenticada à API real",
+    "production": "nova revisão ainda não conferida no site"
+  }
 }

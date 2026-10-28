@@ -1,3 +1,7 @@
+## 28/10/2026 — Estimativas: controles abertos e ação dentro do card
+
+Pedido explícito de Gabriel: menos caixas, sem expanders para acessar filtros/ações e cantos mais suaves nos minicards. Resumo e grupos de controles passam a usar espaço e divisores, sem perímetro; filtros/duração/tipo ficam visíveis. Listas extensas de motivos usam Dialog. Card é artigo com botões irmãos para selecionar e explorar; foco retorna ao acionador. Raio8px somente nos cards do mapa, exceção local autorizada ao raio2px canônico, registrada no mapa SE sem editar tokens. `AnalysisFilters` é composição da feature com primitives existentes, sem novo primitive compartilhado. Motores e contratos intactos. Fonte: refinamento editorial da seção10 do plano essencial.
+
 ## 28/10/2026 — Estimativas: mapa de curvas como panorama
 
 Mapa SVG leve como vista inicial, com densidades mini/detalhada e lista alternativa. Mesma seleção central, detalhe e exportação; card seleciona e faixa de inspeção oferece Explorar curva separadamente. Resumos em worker, blocos de 16, prioridade inferior às interações; nenhuma chamada adicional à API por vista. Cor indica quantidade prevista, sem interpretação de confiança; hachura representa ausência de referência Finotti. Miniaturas percentuais com escalas temporais iguais e lacunas preservadas; detalhe absoluto existente. Tokens canônicos intactos e BrainLoadingState reutilizado. Plano técnico e aceite na seção 10 do [plano vigente](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md).
