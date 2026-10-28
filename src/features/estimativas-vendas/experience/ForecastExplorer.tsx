@@ -1,61 +1,66 @@
 import { useEffect, useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
-import { shiftMonth } from '../expanded/contract';
-import { METHODS, sourcePeriods } from '../scientific/study';
+import { METHODS, sourcePeriods, type StudyMethod } from '../scientific/study';
 import type { AnalysisRuntime } from './runtime';
-import { ALL_METHODS, chartRows, cleanReason, measureLabel, operationStatus, present, type AnalysisSpec, type CaseAnalysis, type Measure, type Universe } from './domain';
-import { Choice, TimeControls } from './Controls';
+import { ALL_METHODS, chartRows, cleanReason, measureLabel, observations, operationStatus, present, type AnalysisSpec, type CaseAnalysis, type Measure, type Universe } from './domain';
+import { Choice } from './Controls';
 import { ForecastChart } from './ForecastChart';
 import { BacktestCard } from './BacktestCard';
 import { OtherDates } from './OtherDates';
+import './explorer.css';
 
+const fmt = (v: number | null | undefined) => v == null ? '—' : v.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 export function ForecastExplorer({ universe, runtime, id, navigation, initialSpec, onClose, onNavigate, onExport }: { universe: Universe; runtime: AnalysisRuntime; id: string; navigation: string[]; initialSpec: AnalysisSpec; onClose: () => void; onNavigate: (id: string) => void; onExport: (ids: string[], spec: AnalysisSpec) => void }) {
   const building = universe.buildings.find(b => String(b.building_id ?? b.id) === id)!;
   const periods = useMemo(() => sourcePeriods([building]), [building]);
+  const latest = periods.at(-1) ?? initialSpec.cutoff;
   const [spec, setSpec] = useState(initialSpec), [analysis, setAnalysis] = useState<CaseAnalysis | null>(null), [busy, setBusy] = useState(true), [error, setError] = useState(''), [retry, setRetry] = useState(0);
-  const [measure, setMeasure] = useState<Measure>('sold'), [step, setStep] = useState<1 | 3 | 12>(1), [percent, setPercent] = useState(false), [shown, setShown] = useState(ALL_METHODS), [showLater, setShowLater] = useState(true), [zoom, setZoom] = useState('36'), [pastDuration, setPastDuration] = useState(initialSpec.duration);
+  const [measure, setMeasure] = useState<Measure>('sold'), [percent, setPercent] = useState(false), [shown, setShown] = useState<StudyMethod[] | null>(null);
+  const [panel, setPanel] = useState<'curve' | 'method' | 'table' | 'backtest'>('curve');
   useEffect(() => {
     let live = true; setError('');
     const cached = runtime.peek(id, spec);
     if (cached) { setAnalysis(cached); setBusy(false); return; }
     setBusy(true);
     const timer = window.setTimeout(() => {
-      runtime.analyze(id, spec, 0).then(next => { if (live) { setAnalysis(next); setBusy(false); }
-        // Two neighboring dates only. Their results never replace the active request.
-        for (const offset of [-1, 1]) { const cutoff = periods[periods.indexOf(spec.cutoff) + offset]; if (cutoff) void runtime.analyze(id, { ...spec, cutoff }, 4).catch(() => {}); }
-      }, e => { if (live) { setError(String(e.message)); setBusy(false); } });
-    }, 300);
+      void runtime.analyze(id, spec, 0).then(next => { if (live) { setAnalysis(next); setBusy(false); } }, e => { if (live) { setError(String(e.message)); setBusy(false); } });
+    }, 150);
     return () => { live = false; clearTimeout(timer); };
-  }, [runtime, id, spec, periods, retry]);
-  const latest = periods.at(-1) ?? initialSpec.cutoff, first = periods[0] ?? initialSpec.cutoff;
-  const historical = spec.cutoff < latest;
-  const current = analysis?.id === id && analysis.spec.cutoff === spec.cutoff && analysis.spec.duration === spec.duration;
-  const stale = busy || !current;
+  }, [runtime, id, spec, retry]);
+  const current = analysis?.id === id && analysis.spec.cutoff === spec.cutoff && analysis.spec.duration === spec.duration, stale = busy || !current;
   const p = analysis ? present(analysis) : null;
-  const rows = useMemo(() => {
-    if (!analysis || analysis.id !== id) return [];
-    const start = zoom === 'all' ? first : shiftMonth(analysis.spec.cutoff, -Number(zoom));
-    return chartRows(building, analysis, measure, step).filter(r => r.month >= start).map(r => showLater ? r : { ...r, reported: null });
-  }, [analysis, id, building, measure, step, showLater, zoom, first]);
-  function change(next: AnalysisSpec) { if (!historical && next.cutoff < latest) setPastDuration(spec.duration); setSpec(next); }
-  const index = navigation.indexOf(id);
-  return <Dialog open onOpenChange={open => { if (!open) onClose(); }}><DialogContent className="evx-explorer"><DialogTitle>{building.name ?? id}</DialogTitle><DialogDescription>{universe.locations[id]?.city}/{universe.locations[id]?.uf} · {building.sourceType} · ID {id}</DialogDescription>
-    <div className="evx-actions"><Button variant="outline" disabled={index <= 0} onClick={() => onNavigate(navigation[index - 1])}>Anterior</Button><Button variant="outline" disabled={index < 0 || index >= navigation.length - 1} onClick={() => onNavigate(navigation[index + 1])}>Próximo</Button><Button variant="outline" disabled={stale || !!error} onClick={() => onExport([id], spec)}>Exportar empreendimento</Button></div>
-    {historical && <div className="evx-notice"><strong>Comparação histórica</strong><p>A previsão usa apenas dados até {spec.cutoff}; a linha posterior mostra dados informados quando comparáveis.</p><Button variant="ghost" onClick={() => setSpec({ ...spec, cutoff: latest, duration: pastDuration })}>Voltar à previsão atual</Button></div>}
-    {!periods.includes(spec.cutoff) && <p role="status">Sem registro na data escolhida. <Button variant="link" onClick={() => change({ ...spec, cutoff: periods.filter(p => p <= spec.cutoff).at(-1) ?? first })}>Usar último mês disponível anterior</Button></p>}
-    <div className="evx-view-controls"><Choice label="Medida" value={measure} onChange={v => setMeasure(v as Measure)} items={(['stock', 'sold', 'net'] as Measure[]).map(v => ({ value: v, label: measureLabel(v) }))} /><Choice label="Agrupar a cada" value={String(step)} onChange={v => setStep(Number(v) as 1 | 3 | 12)} items={[{ value: '1', label: 'Mês' }, { value: '3', label: '3 meses desde o início' }, { value: '12', label: '12 meses desde o início' }]} /><Choice label="Histórico visível" value={zoom} onChange={setZoom} items={[{ value: '12', label: '1 ano' }, { value: '36', label: '3 anos' }, { value: 'all', label: 'Histórico disponível (até 10 anos)' }]} /><Button variant={percent ? 'secondary' : 'outline'} aria-pressed={percent} onClick={() => setPercent(v => !v)}>Percentual das unidades</Button><Button variant={showLater ? 'secondary' : 'outline'} aria-pressed={showLater} onClick={() => setShowLater(v => !v)}>Dados posteriores</Button></div>
-    <div className="evx-graph-layout"><section aria-busy={stale} className={stale ? 'evx-updating' : ''}>
-      {busy && <><BrainLoadingState variant="field" title="Atualizando previsão" description={analysis ? `Gráfico anterior: ${analysis.spec.cutoff}` : 'Calculando o empreendimento'} /><Button variant="ghost" onClick={onClose}>Cancelar e voltar às curvas</Button></>}
-      {error && <div role="alert">{error}<Button variant="outline" onClick={() => setRetry(v => v + 1)}>Tentar novamente</Button></div>}
-      {analysis && analysis.id === id ? <><p className="evx-chart-caption">{measureLabel(measure)} · {percent ? '% das unidades' : 'unidades'} · início {analysis.spec.cutoff} · {analysis.spec.duration} meses{stale ? ' · resultado anterior, em atualização' : ''}</p><ForecastChart rows={rows} cutoff={analysis.spec.cutoff} methods={shown.filter(m => !!analysis.stock.cases[0].methods[m].forecast)} percent={percent} units={p?.row.units} label="Histórico, previsão e dados posteriores" /></> : <div className="evx-chart-placeholder">Preparando o gráfico</div>}
-    </section><aside className="evx-reading"><h3>Como ler</h3><p>Traço escuro: histórico informado. Linha verde: Finotti, quando disponível. Tracejados: métodos exploratórios. Pontos: dados informados depois.</p><p>A linha vertical separa os dados usados da previsão. Use os períodos disponíveis abaixo para voltar no tempo.</p><p>{p?.status}. {p?.reason}</p><small>Sem faixa calibrada nesta análise. A origem de coleta dos meses da API não está confirmada.</small></aside></div>
-    <TimeControls spec={spec} periods={periods} onChange={change} />
-    <details className="evx-panel"><summary>Comparar m?todos</summary><div className="evx-actions">{METHODS.map(m => { const result = analysis?.stock.cases[0].methods[m.id]; return <div key={m.id}><Button variant={shown.includes(m.id) && result?.forecast ? 'secondary' : 'outline'} disabled={!result?.forecast} aria-pressed={shown.includes(m.id) && !!result?.forecast} onClick={() => setShown(v => v.includes(m.id) ? v.filter(x => x !== m.id) : [...v, m.id])}>{m.label}</Button><small>{!result?.forecast && cleanReason(result?.reason ?? 'Calculando')}</small></div>; })}</div></details>
-    {historical && analysis && current && <BacktestCard analyses={[analysis]} measure={measure} step={step} disabled={stale} />}
-    {analysis && <details className="evx-panel"><summary>Como foi calculado</summary>{METHODS.map(m => { const f = analysis.stock.cases[0].methods[m.id].forecast; return <section key={m.id}><h4>{m.label}</h4><p>{m.explanation}</p><p>{cleanReason(analysis.stock.cases[0].methods[m.id].reason)}</p>{f && <><p>Versão {f.version} · unidades {f.origin.units} · estoque {f.origin.stock} · idade {f.origin.age} meses.</p><dl>{Object.entries(f.parameters).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{String(value)}</dd></div>)}</dl><p>{f.warnings.map(cleanReason).join(' ')}</p></>}</section>; })}<p>Elegibilidade operacional: {operationStatus(universe, analysis).status}. {operationStatus(universe, analysis).reasons.map(cleanReason).join(' ')}</p></details>}
-    <details className="evx-panel"><summary>Tabela equivalente do gráfico</summary><div className="evx-table-wrap"><table><thead><tr><th>Mês</th><th>Histórico</th><th>Informado depois</th>{shown.map(m => <th key={m}>{METHODS.find(x => x.id === m)?.label}</th>)}</tr></thead><tbody>{rows.map(r => <tr key={r.month}><td>{r.month}</td><td>{r.history ?? '—'}</td><td>{r.reported ?? '—'}</td>{shown.map(m => <td key={m}>{typeof r[m] === 'number' ? Number(r[m]).toFixed(2) : '—'}</td>)}</tr>)}</tbody></table></div><small>Tabela em unidades; percentual no gráfico usa a quantidade de unidades na data da previsão. Estoque é saldo; vendas são somadas apenas em intervalos completos.</small></details>
-    <OtherDates key={`${id}|${spec.duration}`} id={id} runtime={runtime} spec={spec} periods={periods} measure={measure} step={step} />
+  const available = ALL_METHODS.filter(m => !!analysis?.stock.cases[0].methods[m].forecast);
+  const methods = shown === null ? available.slice(0, 1) : shown.filter(m => available.includes(m));
+  const rows = useMemo(() => analysis && analysis.id === id ? chartRows(building, analysis, measure) : [], [analysis, id, building, measure]);
+  const validHistory = useMemo(() => observations(building).filter(r => r.month <= spec.cutoff && r.stock !== null), [building, spec.cutoff]);
+  const historical = spec.cutoff < latest, index = navigation.indexOf(id);
+  const primary = methods[0], model = primary && analysis?.stock.cases[0].methods[primary].forecast;
+  const predictedStock = model ? model.points.at(-1)?.stock : null;
+  function switchPanel(next: typeof panel) { setPanel(next); if (next === 'curve' && historical) setSpec(s => ({ ...s, cutoff: latest })); }
+  function toggleMethod(m: StudyMethod) { setShown(methods.includes(m) ? methods.length > 1 ? methods.filter(x => x !== m) : methods : [...methods, m]); }
+  return <Dialog open onOpenChange={open => { if (!open) onClose(); }}><DialogContent className="evx-explorer evx-explorer-focus">
+    <header className="evf-header"><div><DialogTitle>{building.name ?? id}</DialogTitle><DialogDescription>{universe.locations[id]?.city}/{universe.locations[id]?.uf} · {building.sourceType} · ID {id}</DialogDescription></div><Button variant="ghost" disabled={stale || !!error} onClick={() => onExport([id], spec)}>Baixar previsão ↗</Button></header>
+    <Button variant="ghost" className="evf-carousel evf-previous" aria-label="Empreendimento anterior" disabled={index <= 0} onClick={() => onNavigate(navigation[index - 1])}><ChevronLeft /></Button>
+    <Button variant="ghost" className="evf-carousel evf-next" aria-label="Próximo empreendimento" disabled={index < 0 || index >= navigation.length - 1} onClick={() => onNavigate(navigation[index + 1])}><ChevronRight /></Button>
+    <nav className="evf-tabs" aria-label="Exploração do empreendimento">{([{ id: 'curve', label: 'Curva de vendas' }, { id: 'backtest', label: 'Backtest' }, { id: 'method', label: 'Como foi calculado' }, { id: 'table', label: 'Dados do gráfico' }] as const).map(tab => <Button key={tab.id} variant="ghost" aria-pressed={panel === tab.id} onClick={() => switchPanel(tab.id)}>{tab.label}</Button>)}</nav>
+    <div className="evf-statline"><span>Histórico disponível<strong>{validHistory[0]?.month ?? '—'} → {spec.cutoff}</strong><small>{validHistory.length} registros válidos · origem de coleta não confirmada</small></span><span>Vendas acumuladas<strong>{fmt(p?.row.sold)} un.</strong></span><span>Estoque informado<strong>{fmt(p?.row.stock)} un.</strong></span><span>Vendas previstas · {spec.duration} meses<strong className="evf-green">{fmt(p?.row.stock != null && predictedStock != null ? p.row.stock - predictedStock : null)} un.</strong></span></div>
+    {(panel === 'curve' || panel === 'backtest') && <>
+      <div className="evf-controls"><div className="evx-actions" role="group" aria-label="Medida da curva">{(['sold', 'stock', 'net'] as Measure[]).map(m => <Button variant="ghost" key={m} aria-pressed={measure === m} onClick={() => setMeasure(m)}>{measureLabel(m)}</Button>)}<Button variant="ghost" aria-pressed={percent} onClick={() => setPercent(v => !v)}>% das unidades</Button></div><div className="evx-actions" role="group" aria-label="Duração da previsão">{[3, 6, 12, 24, 36].map(n => <Button key={n} variant="ghost" aria-pressed={spec.duration === n} onClick={() => setSpec(s => ({ ...s, duration: n }))}>{n} meses</Button>)}</div></div>
+      {panel === 'backtest' && <div className="evf-backtest-controls"><Choice label="Usar somente os dados até" value={spec.cutoff} onChange={cutoff => setSpec(s => ({ ...s, cutoff }))} items={[...periods].reverse().map(value => ({ value, label: value }))} /><Button variant="ghost" aria-label="Período anterior" disabled={periods.indexOf(spec.cutoff) <= 0} onClick={() => setSpec(s => ({ ...s, cutoff: periods[periods.indexOf(s.cutoff) - 1] }))}>← Período anterior</Button><small>Escolha uma data passada para comparar a previsão com os registros posteriores, sem usar o futuro no cálculo.</small></div>}
+      <section aria-busy={stale} className={`evf-chart-area ${stale ? 'evx-updating' : ''}`}>
+        {busy && <BrainLoadingState variant="field" title="Atualizando previsão" />}
+        {error && <div role="alert">{error}<Button onClick={() => setRetry(v => v + 1)}>Tentar novamente</Button></div>}
+        {analysis && <><p className="evx-chart-caption">{measureLabel(measure)} · {percent ? '% das unidades' : 'unidades'} · previsão a partir de {analysis.spec.cutoff} · {analysis.spec.duration} meses{stale ? ' · resultado anterior, atualizando' : ''}</p><ForecastChart rows={rows} cutoff={analysis.spec.cutoff} methods={methods} percent={percent} units={p?.row.units} label="Histórico, previsão e dados posteriores" /></>}
+      </section>
+      <div className="evf-methods" role="group" aria-label="Modelos no gráfico">{METHODS.map(m => <Button key={m.id} variant="ghost" disabled={!available.includes(m.id)} aria-pressed={methods.includes(m.id)} onClick={() => toggleMethod(m.id)}>{m.label}</Button>)}</div>
+      <p className="evf-note">Pontos escuros: registros informados. O pontilhado entre registros orienta a leitura; não cria dados nos meses vazios. Verde: referência Finotti. Linha vertical: início da previsão.</p>
+      {panel === 'backtest' && historical && analysis && current && <BacktestCard analyses={[analysis]} measure={measure} step={1} disabled={stale} />}
+    </>}
+    {panel === 'method' && analysis && <section className="evf-method-detail"><h3>{p?.status}</h3><p>{p?.reason}</p>{METHODS.map(m => { const f = analysis.stock.cases[0].methods[m.id].forecast; return <section key={m.id}><h4>{m.label}</h4><p>{m.explanation}</p><p>{cleanReason(analysis.stock.cases[0].methods[m.id].reason)}</p>{f && <><p>Versão {f.version} · idade {f.origin.age} meses · estoque {f.origin.stock} un.</p><dl>{Object.entries(f.parameters).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{String(value)}</dd></div>)}</dl><p>{f.warnings.map(cleanReason).join(' ')}</p></>}</section>; })}<p>Elegibilidade operacional: {operationStatus(universe, analysis).status}. {operationStatus(universe, analysis).reasons.map(cleanReason).join(' ')}</p><small>Sem faixa calibrada. A origem de coleta de cada registro ainda não foi confirmada.</small></section>}
+    {panel === 'table' && <div className="evx-table-wrap"><table><thead><tr><th>Mês</th><th>Histórico</th><th>Informado depois</th>{methods.map(m => <th key={m}>{METHODS.find(x => x.id === m)?.label}</th>)}</tr></thead><tbody>{rows.map(r => <tr key={r.month}><td>{r.month}</td><td>{r.history ?? '—'}</td><td>{r.reported ?? '—'}</td>{methods.map(m => <td key={m}>{typeof r[m] === 'number' ? Number(r[m]).toFixed(2) : '—'}</td>)}</tr>)}</tbody></table></div>}
+    {panel === 'backtest' && <OtherDates key={`${id}|${spec.duration}`} id={id} runtime={runtime} spec={spec} periods={periods} measure={measure} step={1} />}
   </DialogContent></Dialog>;
 }

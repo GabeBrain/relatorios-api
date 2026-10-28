@@ -11,7 +11,7 @@ describe('interação do mapa', () => {
     const tile: CurveTile = { id: '1', cutoff: '2026-09', finotti: true, reason: '', sales: 6, stock: 50, finalStock: 44, history: [], forecast: [] };
     const tiles = vi.fn().mockImplementationOnce(() => new Promise<CurveTile[]>(r => { resolveOld = r; })).mockResolvedValueOnce([tile]);
     const runtime = { tiles } as unknown as AnalysisRuntime;
-    const props = { universe: data, rows: summarizeInventory(data.buildings, 'latest'), allIds: ['1'], runtime, selection: new Set(['1']), onToggle: vi.fn(), onExplore: vi.fn() };
+    const props = { universe: data, rows: summarizeInventory(data.buildings, 'latest'), allIds: ['1'], runtime, comparisonMode: true, selection: new Set(['1']), onToggle: vi.fn(), onExplore: vi.fn() };
     const spec = { cutoff: 'latest', duration: 12, methods: ALL_METHODS };
     const view = render(<CurveMap {...props} spec={spec} />);
     await waitFor(() => expect(tiles).toHaveBeenCalledTimes(1));
@@ -22,6 +22,6 @@ describe('interação do mapa', () => {
     expect(screen.getByRole('button', { name: 'Selecionar Teste' }).getAttribute('aria-pressed')).toBe('true');
     fireEvent.click(screen.getByRole('button', { name: 'Cards detalhados' }));
     fireEvent.click(screen.getByRole('button', { name: 'Explorar curva de Teste' }));
-    expect(props.onExplore).toHaveBeenCalledWith('1'); expect(props.onToggle).not.toHaveBeenCalled();
+    expect(props.onExplore).toHaveBeenCalledWith('1', ['1']); expect(props.onToggle).not.toHaveBeenCalled();
   });
 });

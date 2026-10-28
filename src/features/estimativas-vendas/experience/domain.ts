@@ -69,7 +69,7 @@ export function observations(building: Building) {
 export function chartRows(building: Building, analysis: CaseAnalysis, measure: Measure, step: 1 | 3 | 12 = 1): ChartRow[] {
   const { cutoff, duration } = analysis.spec, item = analysis.stock.cases[0];
   const obs = observations(building), first = obs[0]?.month ?? cutoff;
-  const start = Math.max(monthIndex(first), monthIndex(cutoff) - 120);
+  const start = monthIndex(first);
   const rows: ChartRow[] = [];
   for (let n = start; n <= monthIndex(cutoff) + duration; n++) {
     const month = shiftMonth(cutoff, n - monthIndex(cutoff)), offset = n - monthIndex(cutoff);

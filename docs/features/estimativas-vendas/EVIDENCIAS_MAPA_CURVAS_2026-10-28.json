@@ -21,6 +21,22 @@
   "scripts": ["scripts/diagnostics/estimativas-mosaic-browser.mjs", "scripts/diagnostics/estimativas-simple-browser.mjs"],
   "tokensSha256": "0802b707b8c511e3367b1e4a235cea6a268edb9ac8f217a2beb965fc30874eac",
   "limitations": ["tempos sintéticos não são SLA da API", "sem validação independente de precisão", "sem faixa calibrada", "sem mudança de motores ou homologação Geobrain", "última linha do grid pode ficar incompleta para preservar áreas comparáveis"],
+  "directExploration": {
+    "date": "2026-10-28",
+    "vitestPassed": 115,
+    "files": 16,
+    "liveReadOnlyApi": { "city": "Maragogi/AL", "requests": 2, "httpStatus": [200, 200], "buildings": 25 },
+    "snapshotSha256": "c46b2742f82d3b787229c78a9d71515328b2dfe2b04d4405ba0b9a2d4e55bb49",
+    "example": { "id": "75803", "name": "Max Tulum - Bloco B", "validHistoricalRecords": 13, "first": "2023-10", "last": "2026-09", "historicalDotsRendered": 13 },
+    "diagnosis": "Série espaçada válida, invisível quando a grade mensal ocultava pontos isolados; dados não estavam ausentes.",
+    "fix": "Pontos visíveis e guia pontilhado visual; lacunas permanecem nulas em dados e métricas. Histórico inteiro; previsão atual após o último dado.",
+    "replayWidths": [1440, 390],
+    "desktopMainViewVerticalScroll": false,
+    "mobileVerticalScrollForLegibility": true,
+    "assertions": ["clique abre curva sem seleção automática", "comparação exige dois itens", "barra inferior removida", "carrossel segue ordem por vendas", "sem expanders no detalhe principal", "backtest preservado", "zero erros JavaScript", "zero overflow horizontal", "zero chamadas extras na exploração"],
+    "syntheticRegression": { "mosaicScenarios": 4, "completeJourneyScenarios": 6, "excelRows": 24 },
+    "production": "nova revisão não conferida no site"
+  },
   "editorialRefinement": {
     "date": "2026-10-28",
     "scope": "Controles expostos sem expanders, grupos sem perímetro, Explorar curva dentro do card, raio local 8px",

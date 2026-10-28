@@ -27,6 +27,7 @@ try {
   await page.evaluate(t => document.documentElement.classList.toggle('dark', t === 'dark'), theme);
   await page.locator('.evx-header').scrollIntoViewIfNeeded();
   await page.screenshot({ path: `${folder}/${count}-${width}-${theme}-controls.png` });
+  await page.getByRole('button', { name: 'Compara\u00e7\u00e3o', exact: true }).click();
   const first = page.locator('.evm-tile').first(); await first.click(); assert.equal(await first.getAttribute('aria-pressed'), 'true');
   await page.locator('.evm-card').first().getByRole('button', { name: /Explorar curva de/ }).click();
   await page.getByRole('dialog').getByRole('img', { name: 'Histórico, previsão e dados posteriores' }).waitFor();

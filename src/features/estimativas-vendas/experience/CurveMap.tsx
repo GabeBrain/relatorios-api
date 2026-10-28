@@ -8,7 +8,7 @@ import { orderTiles, tilePath, type CurveTile } from './mosaic';
 import './mosaic.css';
 
 const number = (v: number | null | undefined) => v === null || v === undefined ? '—' : v.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
-export function CurveMap({ runtime, universe, rows, allIds, spec, selection, onToggle, onExplore }: { runtime: AnalysisRuntime; universe: Universe; rows: InventoryRow[]; allIds: string[]; spec: AnalysisSpec; selection: Set<string>; onToggle: (id: string) => void; onExplore: (id: string) => void }) {
+export function CurveMap({ runtime, universe, rows, allIds, spec, selection, comparisonMode = false, onToggle, onExplore }: { runtime: AnalysisRuntime; universe: Universe; rows: InventoryRow[]; allIds: string[]; spec: AnalysisSpec; selection: Set<string>; comparisonMode?: boolean; onToggle: (id: string) => void; onExplore: (id: string, order?: string[]) => void }) {
   const [density, setDensity] = useState<'mini' | 'detailed'>('mini'), [sort, setSort] = useState<'name' | 'sales'>('name'), [page, setPage] = useState(0), [inspected, setInspected] = useState<string | null>(null);
   const [batch, setBatch] = useState<{ key: string; tiles: Record<string, CurveTile>; complete: boolean }>({ key: '', tiles: {}, complete: false }), [error, setError] = useState('');
   const idsKey = allIds.join('|'), key = JSON.stringify([universe.hash, spec.cutoff, spec.duration, idsKey]);
@@ -50,11 +50,11 @@ export function CurveMap({ runtime, universe, rows, allIds, spec, selection, onT
         const t = tiles[r.id], colored = complete && t?.finotti && t.sales !== null, intensity = colored && ceiling > 0 ? Math.max(0, Math.min(1, t.sales! / ceiling)) : 0;
         const start = -36, originX = 4 + 192 * -start / (spec.duration - start);
         return <article key={r.id} className={`evm-card ${t && !t.finotti ? 'evm-unavailable' : ''} ${selection.has(r.id) ? 'evx-selected' : ''}`} style={{ '--evm-intensity': `${Math.round(12 + intensity * 77)}%` } as CSSProperties} onPointerEnter={() => setInspected(r.id)}>
-          <button className="evm-tile" aria-label={`Selecionar ${r.name}`} aria-pressed={selection.has(r.id)} onFocus={() => setInspected(r.id)} onClick={() => { setInspected(r.id); onToggle(r.id); }}>
+          <button className="evm-tile" aria-label={`${comparisonMode ? 'Selecionar' : 'Explorar curva de'} ${r.name}`} aria-pressed={comparisonMode ? selection.has(r.id) : undefined} onFocus={() => setInspected(r.id)} onClick={() => { setInspected(r.id); if (comparisonMode) onToggle(r.id); else onExplore(r.id, ordered.map(row => row.id)); }}>
           <span className="evm-name">{r.name} · {r.id}</span><strong>{t ? t.finotti ? `${number(t.sales)} un.` : 'Sem Finotti' : 'Preparando'}</strong>
           <svg viewBox="0 0 200 64" role="img" aria-label={`Curva de vendas de ${r.name}`}><line x1={originX} x2={originX} y1="4" y2="60" className="evm-origin" /><path d={t ? tilePath(t.history, start, spec.duration) : ''} />{t?.history.filter((p, i, ps) => p.percent !== null && ps[i - 1]?.offset !== p.offset - 1 && ps[i + 1]?.offset !== p.offset + 1).map(p => <circle key={p.offset} cx={4 + 192 * (p.offset - start) / (spec.duration - start)} cy={58 - 52 * p.percent! / 100} r="1.5" fill="currentColor" />)}<path d={t ? tilePath(t.forecast, start, spec.duration) : ''} strokeDasharray="4 3" /></svg>
           <span className="evm-detail">{t?.finotti ? `Estoque ${number(t.stock)} → ${number(t.finalStock)} un. · ${t.cutoff}` : t?.reason ?? 'Calculando referência'}</span>
-          </button><Button variant="ghost" className="evm-explore" onFocus={() => setInspected(r.id)} onClick={() => onExplore(r.id)} aria-label={`Explorar curva de ${r.name}`}>Explorar curva ↗</Button>
+          {!comparisonMode && <span className="evm-open-hint">Explorar curva ↗</span>}</button>{comparisonMode && <Button variant="ghost" className="evm-explore" onFocus={() => setInspected(r.id)} onClick={() => onExplore(r.id, ordered.map(row => row.id))} aria-label={`Explorar curva de ${r.name}`}>Explorar curva ↗</Button>}
         </article>;
       })}
     </div>

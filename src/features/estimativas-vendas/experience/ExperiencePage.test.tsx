@@ -13,6 +13,7 @@ vi.mock('./runtime', async () => {
   const M = await import('./mosaic');
   return { AnalysisRuntime: class {
     constructor(readonly dataset: Universe) {}
+    peek() { return undefined; }
     inventory(cutoff: string) { return Promise.resolve(D.summarizeInventory(this.dataset.buildings, cutoff)); }
     analyze(id: string, spec: Parameters<typeof D.analyzeCase>[2]) { access.calls++; return D.analyzeCase(this.dataset, id, D.buildingSpec(this.dataset, id, spec)); }
     capabilities(ids: string[], cutoff: string) { return D.capabilities(this.dataset, ids, cutoff); }
@@ -31,6 +32,8 @@ describe('jornada essencial', () => {
     expect(document.querySelectorAll('main.evx-page > details').length).toBe(0);
     expect(screen.getByRole('group', { name: 'Tipo de empreendimento' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Explorar curva de Caso de revisão' }).closest('.evm-card')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Selecionar Caso de revisão' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Comparação', exact: true }));
     fireEvent.click(screen.getByRole('button', { name: 'Selecionar Caso de revisão' }));
     fireEvent.change(screen.getByPlaceholderText('Nome ou ID'), { target: { value: 'ausente' } });
     expect(screen.getByText('1 selecionados · 1 fora do filtro atual')).toBeTruthy();
@@ -41,6 +44,7 @@ describe('jornada essencial', () => {
   it('falha em atualização conserva universo anterior e troca de token elimina dados/seleção', async () => {
     const view = render(<ExperiencePage />); fireEvent.click(screen.getByRole('button', { name: 'Carregar empreendimentos' }));
     await screen.findByRole('button', { name: 'Explorar curva de Caso de revisão' });
+    fireEvent.click(screen.getByRole('button', { name: 'Comparação', exact: true }));
     fireEvent.click(screen.getByRole('button', { name: 'Selecionar Caso de revisão' }));
     vi.mocked(loadUniverse).mockRejectedValueOnce(new Error('Segunda página indisponível'));
     fireEvent.click(screen.getByRole('button', { name: 'Atualizar dados' }));

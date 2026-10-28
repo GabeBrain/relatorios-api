@@ -14,6 +14,12 @@ function building(id = '001', multi = false): Building {
 function dataset(buildings = [building()]): Universe { return { schema: 'forecast-universe-v1', complete: true, areas: [{ city: 'Curitiba', uf: 'PR' }], locations: Object.fromEntries(buildings.map(b => [String(b.building_id), { city: 'Curitiba', uf: 'PR' }])), requests: [], missingIds: [], hash: 'fixture-hash', fetchedAt: '2026-10-28T12:00:00Z', city: 'Curitiba', uf: 'PR', buildings }; }
 const spec: AnalysisSpec = { cutoff: '2026-09', duration: 3, methods: ALL_METHODS };
 describe('experiência: rigor temporal e exportação do conjunto', () => {
+  it('mostra todo o histórico sem preencher meses vazios ou truncar registros antigos', async () => {
+    const b = building(); b.typologies_history.unshift({ ...b.typologies_history[0], period: '2010-01-01', typology_stock: 99 });
+    const a = await analyzeCase(dataset([b]), '001', spec), rows = chartRows(b, a, 'sold');
+    expect(rows[0].month).toBe('2010-01'); expect(rows[0].history).toBe(1);
+    expect(rows.find(r => r.month === '2010-02')?.history).toBeNull();
+  });
   it('recorte mais específico prevalece sem completar estados implicitamente', () => {
     const catalog = { PR: ['Curitiba', 'Londrina'], SC: ['Florianópolis'] };
     expect(resolveAreas(catalog, ['PR', 'SC'], ['PR', 'SC'], [{ city: 'Curitiba', uf: 'PR' }])).toEqual([{ city: 'Curitiba', uf: 'PR' }]);

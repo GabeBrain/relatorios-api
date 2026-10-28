@@ -13,7 +13,8 @@ export function ForecastChart({ rows, cutoff, methods, compact = false, percent 
       {!compact && <Tooltip formatter={(v: number, name: string) => [v === null ? 'Sem dado' : `${Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}${percent ? '%' : ' un.'}`, name]} />}
       {!compact && <Legend wrapperStyle={{ fontSize: 11 }} />}
       <ReferenceLine x={cutoff} stroke="hsl(var(--foreground))" strokeDasharray="2 3" label={compact ? undefined : { value: 'Previsão começa aqui', position: 'insideTopLeft', fontSize: 11 }} />
-      <Line dataKey="history" name="Histórico informado" stroke="hsl(var(--foreground))" strokeWidth={compact ? 1.5 : 2} dot={false} isAnimationActive={false} connectNulls={false} />
+      <Line dataKey="history" name="Histórico informado" stroke="hsl(var(--foreground))" strokeWidth={compact ? 1.5 : 2} dot={{ r: compact ? 1.5 : 3, strokeWidth: 1 }} isAnimationActive={false} connectNulls={false} />
+      {!compact && <Line dataKey="history" name="Ligação visual entre registros" legendType="none" tooltipType="none" stroke="hsl(var(--foreground))" strokeWidth={1} strokeOpacity={0.4} strokeDasharray="2 5" dot={false} isAnimationActive={false} connectNulls />}
       {methods.map(m => <Line key={m} dataKey={m} name={methodLabel(m)} stroke={COLORS[m]} strokeWidth={m === 'finotti-reference' ? 3 : 2} strokeDasharray={m === 'finotti-reference' ? undefined : '6 4'} dot={false} isAnimationActive={false} connectNulls={false} />)}
       <Line dataKey="reported" name="Informado depois" stroke="hsl(var(--foreground))" strokeWidth={2} strokeDasharray="1 4" dot={compact ? false : { r: 3 }} isAnimationActive={false} connectNulls={false} />
     </LineChart></ResponsiveContainer>
