@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { read, utils, write } from 'xlsx';
-import { buildReport, createWorkbook, dateBounds, exportValue, FIXED_COLUMNS, isoDate, MEASURES, REPORT_FIELDS, selectReportFields, selectedReport, type ReportOptions } from './report';
+import { buildReport, createWorkbook, dateBounds, exportValue, FIXED_COLUMNS, isoDate, MEASURES, REPORT_FIELDS, reportFields, selectReportFields, selectedReport, type ReportOptions } from './report';
 import type { RawBuilding } from './api';
 
 const building: RawBuilding = {
@@ -19,6 +19,46 @@ const options: ReportOptions = { from: '2026-01-01', to: '2026-03-31', granulari
 const report = (changes: Partial<ReportOptions> = {}, data = [building]) => buildReport(data, { ...options, ...changes });
 
 describe('Relatório API Excel — regras posteriores à coleta', () => {
+  it.each(['columns', 'rows'] as const)('agrupa apenas campos de empreendimento em %s, sem somar totais e sem perder períodos', async (layout) => {
+    const data = [{ ...building, total_units: 500, typologies_history: [
+      ...building.typologies_history as Record<string, unknown>[],
+      { typology_id: 21, period: '2026-02-28', price: 220000, qty: 30 },
+    ] }];
+    const complete = report({ layout, level: 'building' }, data);
+    const original = JSON.stringify(complete);
+    const fields = ['ID Empreendimento', 'Empreendimentos', 'Unidades Totais do Empreendimento', 'Preço Médio Empreendimento', 'Período'];
+    const grouped = selectReportFields(complete, fields);
+    expect(grouped.rows).toHaveLength(layout === 'rows' ? 3 : 1);
+    expect(grouped.rows.every((row) => row['Unidades Totais do Empreendimento'] === 500)).toBe(true);
+    if (layout === 'rows') {
+      expect(grouped.rows.map((row) => row['Período'])).toEqual(['jan/2026', 'fev/2026', 'mar/2026']);
+      expect(grouped.rows[1]['Preço Médio Empreendimento']).toBe(170000);
+      expect(selectReportFields(complete, ['ID Empreendimento']).rows).toHaveLength(3);
+    } else expect(grouped.rows[0]['Preço Médio Empreendimento fev/2026']).toBe(170000);
+    expect(selectReportFields(complete, [...fields, 'ID Tipologia']).rows).toHaveLength(complete.rows.length);
+    expect(selectReportFields(complete, [...fields, 'Garagem']).rows).toHaveLength(complete.rows.length);
+    expect(selectReportFields(complete, [...fields, 'Vendas Brutas']).rows).toHaveLength(complete.rows.length);
+    expect(selectReportFields(complete, ['Empreendimentos']).rows).toHaveLength(complete.rows.length);
+    expect(selectReportFields(complete, null).rows).toHaveLength(complete.rows.length);
+    const workbook = await createWorkbook(grouped);
+    const reopened = read(write(workbook, { type: 'array', bookType: 'xlsx' }), { type: 'array' });
+    expect(utils.sheet_to_json(reopened.Sheets[reopened.SheetNames[0]])).toHaveLength(grouped.rows.length);
+    expect(JSON.stringify(complete)).toBe(original);
+    const detailed = report({ layout, level: 'typology' }, data);
+    expect(detailed.rows).toHaveLength(layout === 'rows' ? 4 : 2);
+    expect(selectReportFields(detailed, ['ID Empreendimento']).rows).toHaveLength(detailed.rows.length);
+    expect(selectReportFields(complete, ['Empreendimentos']).rows).toHaveLength(layout === 'rows' ? 3 : 1);
+    const all = selectReportFields(complete, null);
+    for (const forbidden of ['ID Tipologia', 'Garagem', 'Unidades por Tipologia', 'VGV Lançado', 'Preço Atual']) {
+      expect(all.columns.some((column) => column === forbidden || column.startsWith(`${forbidden} `))).toBe(false);
+      expect(reportFields('building', layout)).not.toContain(forbidden);
+    }
+  });
+  it('não mistura IDs e bloqueia dados cadastrais conflitantes ao agrupar', () => {
+    const complete = report({ level: 'building' }, [building, { ...building, building_id: 11, name: 'Outro' }]);
+    expect(selectReportFields(complete, ['ID Empreendimento', 'Empreendimentos']).rows).toHaveLength(2);
+    expect(() => report({ level: 'building' }, [building, { ...building, name: 'Divergente' }])).toThrow('divergentes');
+  });
   it('preserva cidades/padrões de fora do AELO, registros repetidos e valores mensais', () => {
     const result = report({}, [building, building]);
     expect(result.typologyCount).toBe(2);
@@ -144,7 +184,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
       'Preço Médio Empreendimento', 'Preço m²', 'VGV Lançado', 'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'];
     expect([...MEASURES]).toEqual(expected);
     const wide = report({ granularity });
-    expect(wide.columns.slice(FIXED_COLUMNS.length + wide.periods.length)).toEqual(expected.flatMap((metric) => wide.periods.map(({ label }) => `${metric} ${label}`)));
+    expect(wide.columns.slice(FIXED_COLUMNS.length + 2 * wide.periods.length)).toEqual(expected.flatMap((metric) => wide.periods.map(({ label }) => `${metric} ${label}`)));
     const tabular = report({ granularity, layout: 'rows' });
     expect(tabular.columns.slice(FIXED_COLUMNS.length)).toEqual(['Período', ...expected]);
     expect(FIXED_COLUMNS).not.toContain('VGV Lançado');
@@ -304,11 +344,27 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     }
   });
 
+  it.each(['columns', 'rows'] as const)('exporta unidades totais cadastrais sem somar tipologias ou meses em %s', async (layout) => {
+    const field = 'Unidades Totais do Empreendimento';
+    for (const [raw, expected] of [[500, 500], ['500', 500], [0, 0], [null, null], [undefined, null]] as const) {
+      const result = selectReportFields(report({ layout }, [{ ...building, total_units: raw }]), [field]);
+      expect(result.rows.length).toBeGreaterThan(0);
+      expect(result.rows.every((row) => row[field] === expected)).toBe(true);
+      const workbook = await createWorkbook(result);
+      const reopened = read(write(workbook, { bookType: 'xlsx', type: 'array' }), { type: 'array' });
+      const sheet = reopened.Sheets[reopened.SheetNames[0]];
+      expect(sheet.A1.v).toBe(field);
+      if (expected !== null) { expect(sheet.A2.v).toBe(expected); expect(sheet.A2.t).toBe('n'); }
+      else expect(sheet.A2).toBeUndefined();
+    }
+  });
+
   it('mantém os campos novos nas posições solicitadas, sem nomes antigos duplicados', () => {
     const after = (field: string, length: number) => FIXED_COLUMNS.slice(FIXED_COLUMNS.indexOf(field) + 1, FIXED_COLUMNS.indexOf(field) + 1 + length);
     expect(after('Região', 1)).toEqual(['Região Administrativa']);
     expect(after('Cidade/UF', 1)).toEqual(['Tipo']);
-    expect(after('Padrão', 2)).toEqual(['Faixa MCMV', 'Tipologia']);
+    expect(after('Padrão', 3)).toEqual(['Faixa MCMV', 'Preço Médio para Faixa MCMV', 'Tipologia']);
+    expect(after('Unidades por Tipologia', 1)).toEqual(['Unidades Totais do Empreendimento']);
     expect(after('Tipologia', 3)).toEqual(['Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado']);
     expect(after('Data de Entrega', 2)).toEqual(['Quartos', 'Garagem']);
     for (const obsolete of ['Urbanizadora', 'Lançamento', 'Entrega', 'Oferta por Lotes', 'm² Lançado']) expect(FIXED_COLUMNS).not.toContain(obsolete);

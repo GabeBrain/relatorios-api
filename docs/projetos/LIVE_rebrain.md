@@ -392,6 +392,41 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Commit da implementação:** `d683df3`. Gate `check:live-docs origin/main HEAD` aprovado; tamanho LIVE permanece com aviso, e ensaio de rotação não encontrou entradas anteriores a21/10 elegíveis. Nenhuma entrada histórica foi descartada.
 - **Validação:** 113 testes do estimador, 15 operacionais e 57 de Excel integrado aprovados; tipos/build/lint conferidos. API real local: 1.996 empreendimentos/21 páginas200, 76,17s carga e 78,06s primeira curva; 20 interações p50 95,80ms/p95 546,42ms, sem nova consulta de histórico ou erro JS. Pacote real reaberto com 26 colunas/12 linhas candidatas, IDs texto e campos pendentes vazios; nenhuma linha importável. Matriz visual e fonte de cada evidência no plano.
 - **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`; referência somente, sem escrita.
+### 28/10 — Relatório API Excel: totais históricos por empreendimento — Edgar / Codex
+
+- **Mudança exclusiva:** oito métricas disponíveis Por empreendimento: estoque, distratos, vendas brutas/líquidas e respectivos VGVs. Soma todas as tipologias observadas por período, incluindo Garden/Cobertura; trimestre soma fluxos e última posição de estoque por tipologia. VGV preserva preços próprios/regras atual-período e escala só na exportação. Campo ausente em fechamento deixa total vazio; tipologia sem fechamento não contribui. Mesma tipologia repetida idêntica não duplica total; divergência bloqueia. Cadastro/unidades totais/médias/MCMV não somados; Por tipologia intacto.
+- **Validação:**81 testes em seis arquivos aprovados; mensal/trimestral nos dois modos monetários e layouts, escala XLSX reaberto, zero/saldo negativo, lacunas, campo ausente e duplicação/conflito. Tipos/lint/build aprovados. Navegador1440/390 claro/escuro com API simulada: duas tipologias geram uma linha, estoque25, vendas9, distratos2, VGV estoque10.400.000 na escala padrão, prévia/download com quatro chamadas de coleta e zero erro de página. Evidência local ignorada verify-building-totals.cjs em .local-inputs/api-excel-check. Sem consulta autenticada ou alteração no coletor/AELO/Dashboard.
+- **Etapas/Pendências:** implementação local, publicação/aceite real dependem de autorização; base d027157, commit desta entrada. Fetch sem novidades; quatro commits anteriores preservados. Sem push/Monday.
+- **Monday:** —
+
+### 28/10 — Relatório API Excel: nível explícito e colunas compatíveis — Edgar / Codex
+
+- **Mudança exclusiva:** seletor Nível do relatório com Por empreendimento/Por tipologia (padrão), reutilizando Select e ReportFieldLabel/Tooltip Brain. Substitui agrupamento automático por campos. Motor agrupa por ID/período ou ID antes da projeção; não exige exportar ID. Seleção apenas exporta, removendo campos incompatíveis ao trocar nível e invalidando download. Por empreendimento oferece só cadastro, total de unidades, médias e MCMV; campos específicos e métricas de tipologia não constam nem no motor/Excel. Nome do arquivo informa nível.
+- **Validação:**74 testes em cinco arquivos; motor nos dois layouts, período oculto, ID não exportado, seleção todas, ausências, conflitos, preservação dos dados, reabertura XLSX e interface alternando nível sem consulta extra. Tipos/lint/build aprovados. Navegador1440/390 claro/escuro com API simulada: tipologia padrão, mudança de nível, remoção dos campos incompatíveis, download invalidado/regerado, prévia e XLSX com uma linha/30unidades sem soma, nome identificando nível, quatro chamadas de coleta e zero erro de página. Evidência local ignorada verify-level.cjs/capturas em .local-inputs/api-excel-check. Sem API autenticada/aceite real. Padrões de carregamento existentes preservados.
+- **Etapas/Pendências:** implementação local, publicação/aceite real pendentes; base1d6ad7e, commit desta entrada. Fetch de ambos sem novidades, três commits locais anteriores preservados. AELO/Dashboard/coletor intactos; sem push/Monday.
+- **Monday:** —
+
+### 28/10 — Relatório API Excel: agrupamento por seleção de cadastro — Edgar / Codex
+
+- **Mudança exclusiva:** selecionar ID Empreendimento com campos apenas de empreendimento agrupa por ID/período no tabular e ID no horizontal. Campos de tipologia/métricas de vendas/estoque mantêm detalhe. Ocultar Período não elimina meses distintos. Médias/totais não são somados; lacunas usam valor disponível do mesmo grupo; valores preenchidos conflitantes bloqueiam com orientação. Regra descrita em Selecionar colunas, aplicada só ao gerar, prévia/XLSX iguais.
+- **Validação:**64 testes de motor/MCMV aprovados; casos agrupados e detalhados nos dois layouts, períodos ocultos, duas identidades, lacunas, conflitos, preservação dos brutos e XLSX reaberto. Tipos/lint dirigidos. Sem consulta autenticada/regeneração integral de Campinas ou novo ensaio visual.
+- **Etapas/Pendências:** implementação local concluída; publicação depende de autorização. Base4053ca4; commit desta entrada. Fetch desta etapa recusado pelo ambiente: comparações usam últimas referências disponíveis; sem push, merge ou alegação de remotes atualizados. Auditoria local preservada.
+- **Monday:** —
+
+### 28/10 — Relatório API Excel: preço usado na Faixa MCMV — Edgar / Codex
+
+- **Mudança exclusiva:** campo selecionável Preço Médio para Faixa MCMV após Faixa MCMV, com o mesmo resultado quantity-standard passado ao classificador. Tabular usa período da linha; horizontal conserva posição final e série histórica. Não altera fórmula/limites/elegibilidade. Reais com duas casas em prévia/XLSX, sem escala VGV; sem base válida fica vazio.
+- **Validação:** testes dos dois layouts com janeiro100.000/fevereiro275.000, exclusão de Garden, independência da média geral/escala VGV, seleção e XLSX reaberto com valor numérico e duas casas. Tipos/lint dirigidos; sem API autenticada ou ensaio visual novo.
+- **Etapas/Pendências:** implementado localmente, publicação aguarda autorização; base66cce08, commit desta entrada. Sem push/Monday. AELO/Dashboard intactos.
+- **Monday:** —
+
+### 28/10 — Relatório API Excel: unidades totais e conferência da base MCMV — Edgar / Codex
+
+- **Análise:** confirmado que MCMV atual e histórico usam quantity-standard: soma price×qty / soma qty somente tipologias Padrão, excluindo Garden/Cobertura. Mantida regra anterior até confirmação explícita de incluir todas as tipologias.
+- **Mudança exclusiva:** coluna selecionável Unidades Totais do Empreendimento após Unidades por Tipologia, usando data.total_units cadastral (campo também mapeado no Dashboard, sem alterá-lo). Repetido por linha, sem somar históricos/tipologias e sem fallback quando ausente.
+- **Validação:** testes de prévia e reabertura XLSX nos dois layouts para número/texto numérico, zero e ausências; tipos/lint dirigidos. Sem consulta autenticada. AELO/Dashboard e fórmula MCMV intactos.
+- **Etapas/Pendências:** coluna implementada localmente; confirmação de eventual mudança da média MCMV para todas as tipologias e publicação pendentes. Base1a82104; commit desta entrada. Sem push/Monday.
+- **Monday:** —
 
 ### 28/10 — Relatório API Excel: Garagem textual — Edgar / Codex
 

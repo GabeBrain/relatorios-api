@@ -4,6 +4,16 @@ Rota: `/rebrain/relatorio-api-excel`. Menu: **Relatórios Automatizados → Rela
 
 ## Coleta completa antes das regras
 
+### Nível explícito do relatório
+
+Nível do relatório, padrão Por tipologia, define a granularidade antes de selecionar colunas. Por empreendimento agrupa por ID + período no tabular ou por ID no horizontal, mesmo quando ID/Período não são exportados. Disponibiliza cadastro de empreendimento, unidades totais, médias do empreendimento/MCMV, faixas e os oito totais históricos descritos abaixo. Atributos específicos como Garagem/Quartos/ID Tipologia, Preço Atual, Preço m² e VGV Lançado não são oferecidos nesse nível. Por tipologia mantém todas as opções e o detalhamento, mesmo exportando somente ID Empreendimento. Selecionar colunas apenas projeta campos, sem alterar agrupamento. Ao trocar nível, remove escolhas incompatíveis, limpa busca e invalida download; Gerar relatório aplica a mudança sem novas chamadas de coleta. Arquivo identifica o nível no nome.
+
+Por empreendimento preserva cadastro/média único, combina lacunas cadastrais com valor disponível no mesmo grupo e bloqueia valores cadastrais preenchidos conflitantes, orientando conferir Por tipologia. Usa IDs internos, não nomes ou igualdade visual das colunas; não elimina períodos distintos nem modifica dados brutos. Selecionar todas respeita o nível. A antiga regra automática por combinação de campos foi substituída.
+
+Totais históricos por empreendimento: Vendas Brutas, Distratos, Vendas Líquidas, Estoque, VGV Vendas Brutas, VGV Distratos, VGV Vendas Líquidas e VGV Estoque somam os resultados de todas as tipologias do período (inclusive Garden/Cobertura; a restrição Padrão permanece exclusiva do MCMV). No trimestre, vendas/distratos acumulam os fechamentos e estoque usa a última posição de cada tipologia, sem somar estoques dos meses. VGV soma o valor já calculado de cada tipologia, respeitando Valor atual/Valor do período; nunca aplica preço médio do empreendimento ao total. Escala VGV só na apresentação/Excel. Campo ausente em fechamento existente torna o total vazio, sem publicar soma parcial; tipologia sem fechamento naquele período não contribui. Zero e saldo negativo são preservados. Registro idêntico da mesma tipologia não soma duas vezes no nível empreendimento; divergência numérica para o mesmo ID de tipologia bloqueia a geração. O detalhe Por tipologia preserva a coleta original. Médias/MCMV e unidades totais cadastrais continuam sem soma. Paridade dos dois layouts validada com lacunas temporais.
+
+Unidades Totais do Empreendimento usa `data[].total_units` cadastral, ao lado de Unidades por Tipologia. Disponível na seleção e nos dois layouts, repete o total em cada linha do empreendimento; não deve ser somado entre linhas. Sem valor na API, fica vazio, sem estimativa por soma de tipologias ou períodos. A Faixa MCMV permanece ponderada pela oferta lançada somente das tipologias Padrão, sem incluir Garden/Cobertura.
+
 Garagem preserva o texto de `data[].typologies_history[].garage` no último fechamento de cada tipologia até o corte, sem conversão numérica ou limpeza do conteúdo. Valores ausentes ficam vazios; a prévia e o Excel mantêm descrições como “1 vaga” e “1 a 2 vagas”.
 
 Implementação exclusiva em `src/features/relatorio-api-excel/` e `src/pages/RelatorioApiExcel.tsx`. AELO e Dashboard GeoBrain não são alterados. A consulta usa o contrato copiado do Dashboard, acrescentando Hotel somente neste relatório e mantendo os objetos brutos para não perder campos e nulos na normalização:
@@ -120,6 +130,8 @@ Uma aba `RELATÓRIO API EXCEL`, autofiltro e arquivo `Relatorio_API_Excel_<escop
 Testes do coletor cobrem contrato copiado, registros repetidos, escopos, falha de página, payload inválido, cancelamento e espera pela última resposta. Testes do motor cobrem os dois modos monetários e temporais, datas inclusivas, lacunas, status, seleção e ambos os layouts; Excel gravado em memória e reaberto para conferir cabeçalhos, células numéricas e formatos. Sem comprovação de API autenticada em produção nesta sessão. Exemplos de teste usam dados fictícios, não dados do cliente.
 
 ## Faixa MCMV — base municipal 2026
+
+Preço Médio para Faixa MCMV expõe exatamente o valor utilizado na classificação, ponderado pela oferta lançada somente das tipologias Padrão, independente da opção geral de média. Fica após Faixa MCMV, disponível em Selecionar colunas. Tabular: preço do período da linha. Horizontal: preço final e série por mês/trimestre, expandida somente ao gerar. Valores em reais com duas casas, sem escala VGV; ausência de base válida fica vazia. A média pode existir sem classificação quando o produto/padrão não for elegível ou o preço ultrapassar o teto.
 
 Exclusiva deste relatório, calculada em Gerar relatório após coleta completa. Campo selecionável ao lado de Padrão, preservando o original. No tabular, Faixa MCMV corresponde ao período da linha. No horizontal, a coluna final e as colunas Faixa MCMV mês/trimestre ficam imediatamente após Padrão, antes de Tipologia. Selecionar Faixa MCMV inclui a série histórica sem abrir períodos no seletor. Resultado: `Econômico - Faixa 2`, `Standard - Faixa 3`, etc.
 

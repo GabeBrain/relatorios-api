@@ -15,9 +15,11 @@ export const BUILDING_AVERAGE_OPTIONS: { value: BuildingAverageMode; label: stri
   { value: 'stock-standard', label: 'Ponderada pelo estoque (somente tip. Padrão)' },
 ];
 export type Layout = 'columns' | 'rows';
+export type ReportLevel = 'building' | 'typology';
 export type VgvScale = 'standard' | 'thousand' | 'million';
 export const VGV_UNITS: Record<VgvScale, string> = { standard: 'R$', thousand: 'R$ mil', million: 'R$ milhões' };
 export interface ReportOptions {
+  level?: ReportLevel;
   granularity: Granularity;
   priceMode: PriceMode;
   buildingAverageMode: BuildingAverageMode;
@@ -33,9 +35,9 @@ export interface ReportOptions {
 }
 export const FIXED_COLUMNS = [
   'ID Empreendimento', 'ID Tipologia', 'Status Empreendimento', 'Status Tipologia',
-  'Região', 'Região Administrativa', 'Cidade/UF', 'Tipo', 'Padrão', 'Faixa MCMV', 'Tipologia',
+  'Região', 'Região Administrativa', 'Cidade/UF', 'Tipo', 'Padrão', 'Faixa MCMV', 'Preço Médio para Faixa MCMV', 'Tipologia',
   'Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado', 'Tempo de Vendas', 'Empreendimentos',
-  'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Incorporadoras', 'Unidades por Tipologia',
+  'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Incorporadoras', 'Unidades por Tipologia', 'Unidades Totais do Empreendimento',
   'Data de Lançamento', 'Ano', 'Data de Entrega', 'Quartos', 'Garagem', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
   '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'm2 Priv.',
 ];
@@ -165,6 +167,7 @@ function fixedRow(building: RawBuilding, id: string, entries: DatedEntry[]): Row
     'Bairro': text(building.neighborhood), 'Endereço': text(building.address), 'Número': text(building.address_number),
     'Incorporadoras': incorporators.map((incorporator) => text(asRecord(incorporator).name).trim()).filter(Boolean).join(', '),
     'Unidades por Tipologia': qty,
+    'Unidades Totais do Empreendimento': numeric(building.total_units),
     'Data de Lançamento': text(building.release_date), 'Ano': launch?.slice(0, 4) ?? '', 'Data de Entrega': text(building.delivery_date),
     'Quartos': numeric(last.number_bedroom), 'Garagem': text(last.garage),
     'Entrada': numeric(building.down_payment_percentage), 'Nº de Parcelas': numeric(building.number_of_installments),
@@ -220,6 +223,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
   }
   const periods = [...periodsMap.values()].sort((a, b) => a.key.localeCompare(b.key));
   const wideRows: Row[] = [];
+  const observations = new WeakMap<Row, Set<string>>();
   const longRows: Row[] = [];
   const series = periods.map((period) => ({ 'Período': period.label } as Row));
   const priceCounts = periods.map(() => new Map<string, number>());
@@ -240,13 +244,16 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
     const mcmvAverage = buildingAverage([...typologies.values()].map((history) => history.at(-1)!.entry), 'quantity-standard');
     const mcmv = mcmvBand(building, mcmvAverage);
     const historicalMcmv: string[] = [];
+    const historicalMcmvPrices: (number | null)[] = [];
     const averages = periods.map((period, index) => {
       const snapshots = [...typologies.values()].flatMap((history) => {
         const snapshot = history.filter(({ date }) => date >= options.from && periodOf(date, options.granularity).key === period.key).at(-1);
         return snapshot ? [snapshot.entry] : [];
       });
       const average = buildingAverage(snapshots, options.buildingAverageMode);
-      historicalMcmv.push(mcmvBand(building, buildingAverage(snapshots, 'quantity-standard')));
+      const mcmvPrice = buildingAverage(snapshots, 'quantity-standard');
+      historicalMcmvPrices.push(mcmvPrice);
+      historicalMcmv.push(mcmvBand(building, mcmvPrice));
       if (average !== null) {
         series[index]['Preço Médio Empreendimento'] = (numeric(series[index]['Preço Médio Empreendimento']) ?? 0) + average;
         priceCounts[index].set('Preço Médio Empreendimento', (priceCounts[index].get('Preço Médio Empreendimento') ?? 0) + 1);
@@ -259,12 +266,15 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       const currentPrice = numeric(history.at(-1)!.entry.price);
       const fixed = fixedRow(building, id, history);
       fixed['Faixa MCMV'] = mcmv;
+      fixed['Preço Médio para Faixa MCMV'] = mcmvAverage;
       const wide: Row = { ...fixed };
+      observations.set(wide, new Set(inRange.map(({ date }) => periodOf(date, options.granularity).label)));
       for (const [index, period] of periods.entries()) {
         const entries = inRange.filter(({ date }) => periodOf(date, options.granularity).key === period.key);
         const last = entries.at(-1)?.entry;
         const beforeRelease = releaseKey !== null && period.key < releaseKey;
         wide[`Faixa MCMV ${period.label}`] = last ? historicalMcmv[index] : '';
+        wide[`Preço Médio para Faixa MCMV ${period.label}`] = last ? historicalMcmvPrices[index] : null;
         const gross = sumField(entries, 'gross_sales');
         const cancellations = sumField(entries, 'distractions');
         const net = gross === null || cancellations === null ? null : gross - cancellations;
@@ -292,7 +302,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
             if (PRICE_MEASURES.has(metric)) priceCounts[index].set(metric, (priceCounts[index].get(metric) ?? 0) + 1);
           }
         }
-        if (options.layout === 'rows' && last && !beforeRelease) longRows.push({ ...fixed, 'Faixa MCMV': historicalMcmv[index], 'Período': period.label, ...values });
+        if (options.layout === 'rows' && last && !beforeRelease) longRows.push({ ...fixed, 'Faixa MCMV': historicalMcmv[index], 'Preço Médio para Faixa MCMV': historicalMcmvPrices[index], 'Período': period.label, ...values });
       }
       wideRows.push(wide);
     }
@@ -307,19 +317,80 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       || text(a['ID Tipologia']).localeCompare(text(b['ID Tipologia']), undefined, { numeric: true });
   };
   const columns = options.layout === 'columns'
-    ? [...FIXED_COLUMNS.flatMap((column) => column === 'Faixa MCMV' ? [column, ...periods.map((period) => `Faixa MCMV ${period.label}`)] : [column]), ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
+    ? [...FIXED_COLUMNS.flatMap((column) => ['Faixa MCMV', 'Preço Médio para Faixa MCMV'].includes(column) ? [column, ...periods.map((period) => `${column} ${period.label}`)] : [column]), ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
     : [...FIXED_COLUMNS, 'Período', ...MEASURES];
-  return { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length, typologyRows: wideRows, vgvScale: options.vgvScale ?? 'standard' };
+  const result = { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length, typologyRows: wideRows, vgvScale: options.vgvScale ?? 'standard' };
+  return options.level === 'building' ? buildingReport(result, observations) : result;
 }
 
 /** Expande nomes de campos somente na geração, preservando a ordem das métricas. */
+export const BUILDING_TOTALS = ['Vendas Brutas', 'Distratos', 'Vendas Líquidas', 'Estoque',
+  'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'] as const;
+const totalMeasure = (column: string) => BUILDING_TOTALS.find((field) => column === field || column.startsWith(`${field} `));
+const BUILDING_FIELDS = new Set<string>([
+  ...BUILDING_TOTALS,
+  'ID Empreendimento', 'Status Empreendimento', 'Região', 'Região Administrativa', 'Cidade/UF',
+  'Tipo', 'Padrão', 'Faixa MCMV', 'Preço Médio para Faixa MCMV', 'Preço Médio Empreendimento',
+  'Empreendimentos', 'Bairro', 'Endereço', 'Número', 'Incorporadoras',
+  'Unidades Totais do Empreendimento', 'Data de Lançamento', 'Ano', 'Data de Entrega',
+  'Entrada', 'Nº de Parcelas', 'Valor da parcela', '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'Período',
+]);
+
+export function reportFields(level: ReportLevel = 'typology', layout: Layout = 'columns'): string[] {
+  return REPORT_FIELDS.filter((field) => (level === 'typology' || BUILDING_FIELDS.has(field)) && (layout === 'rows' || field !== 'Período'));
+}
+
+function buildingReport(report: Report, observations: WeakMap<Row, Set<string>>): Report {
+  const columns = report.columns.filter((column) => [...BUILDING_FIELDS].some((field) => column === field || column.startsWith(`${field} `)));
+  const grouped = groupBuildingRows(report.rows, columns, observations);
+  return { ...selectedReport({ ...report, rows: grouped }, columns), typologyRows: groupBuildingRows(report.typologyRows ?? [], columns, observations) };
+}
+
 export function selectReportFields(report: Report, fields: string[] | null): Report {
   if (fields === null) return report;
   const selected = new Set(fields);
   const columns = report.columns.filter((column) => selected.has(column)
     || (selected.has('Faixa MCMV') && column.startsWith('Faixa MCMV '))
+    || (selected.has('Preço Médio para Faixa MCMV') && column.startsWith('Preço Médio para Faixa MCMV '))
     || MEASURES.some((measure) => selected.has(measure) && column.startsWith(`${measure} `)));
   return selectedReport(report, columns);
+}
+
+function groupBuildingRows(rows: Row[], columns: string[], observations: WeakMap<Row, Set<string>>): Row[] {
+  // Agrupa antes da projeção: mesmo sem exportar Período, mantém meses/trimestres distintos.
+  const grouped = new Map<string, Row>();
+  const contributors = new Map<string, Map<string, Row>>();
+  const totals = columns.filter((column) => totalMeasure(column));
+  for (const row of rows) {
+    const id = text(row['ID Empreendimento']);
+    if (!id) throw new Error('Não é possível agrupar empreendimento sem ID.');
+    const key = JSON.stringify([id, row['Período'] ?? null]);
+    const previous = grouped.get(key);
+    const typology = text(row['ID Tipologia']);
+    if (!contributors.has(key)) contributors.set(key, new Map());
+    const sources = contributors.get(key)!;
+    const duplicate = sources.get(typology);
+    if (duplicate && totals.some((column) => (duplicate[column] ?? null) !== (row[column] ?? null))) {
+      throw new Error(`Históricos divergentes para a tipologia ${typology} do empreendimento ${id}. Selecione Por tipologia para conferir.`);
+    }
+    if (!duplicate) sources.set(typology, row);
+    if (!previous) grouped.set(key, { ...row });
+    else for (const column of columns) {
+      if (totalMeasure(column)) continue;
+      const value = row[column];
+      if (value === null || value === undefined || value === '') continue;
+      if (previous[column] === null || previous[column] === undefined || previous[column] === '') previous[column] = value;
+      else if (previous[column] !== value) throw new Error(`Dados de empreendimento divergentes para o ID ${id}${row['Período'] ? ` em ${row['Período']}` : ''}. Selecione Por tipologia para conferir os registros.`);
+    }
+  }
+  for (const [key, row] of grouped) for (const column of totals) {
+    const measure = totalMeasure(column)!;
+    const label = column.slice(measure.length + 1);
+    const sourceRows = [...contributors.get(key)!.values()].filter((source) => !label || observations.get(source)?.has(label));
+    const values = sourceRows.map((source) => numeric(source[column]));
+    row[column] = !values.length || values.some((value) => value === null) ? null : rounded(values.reduce<number>((sum, value) => sum + value!, 0));
+  }
+  return [...grouped.values()];
 }
 
 export function selectedReport(report: Report, selected: string[] | null): Report {
@@ -345,7 +416,7 @@ export async function createWorkbook(report: Report) {
   const { utils } = await import('xlsx');
   const worksheet = utils.aoa_to_sheet([report.columns, ...report.rows.map((row) => report.columns.map((column) => exportValue(column, row[column], report.vgvScale)))]);
   for (const [index, column] of report.columns.entries()) {
-    const z = PERCENT_COLUMNS.has(column) ? '0.00%' : column.startsWith('VGV') ? '0.00' : undefined;
+    const z = PERCENT_COLUMNS.has(column) ? '0.00%' : column.startsWith('VGV') || column.startsWith('Preço Médio para Faixa MCMV') ? '0.00' : undefined;
     if (!z) continue;
     for (let row = 1; row <= report.rows.length; row++) {
       const cell = worksheet[utils.encode_cell({ r: row, c: index })];
