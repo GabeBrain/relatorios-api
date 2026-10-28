@@ -269,7 +269,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     expect(row.Padrão).toBe('Alto');
     expect(row.Tipologia).toBe('Padrao');
     expect(row.Quartos).toBe(2);
-    expect(row.Garagem).toBe(0);
+    expect(row.Garagem).toBe('0');
     expect(row['Unidades por Tipologia']).toBe(10);
     expect(row['M² Lançado']).toBe(500);
     expect(exportValue('Data de Lançamento', row['Data de Lançamento'])).toBe('01/01/2026');
@@ -287,6 +287,21 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     const absent = report({ from: '2026-02-01' }, [{ ...data[0], release_date: '2026-01-02' }]).rows[0];
     expect(absent['Preço de Lançamento']).toBeNull();
     expect(absent['R$/m² Lançado']).toBeNull();
+  });
+
+  it.each(['columns', 'rows'] as const)('preserva Garagem como texto na prévia e no Excel %s', async (layout) => {
+    for (const value of ['1 vaga', '1 a 2 vagas', 'Coberta / descoberta', '  2 vagas  ', '0', 0, null, undefined]) {
+      const data = [{ ...building, typologies_history: [{ typology_id: 20, period: '2026-01-31', garage: value }] }];
+      const result = selectedReport(report({ layout }, data), ['Garagem']);
+      const expected = value === null || value === undefined ? '' : String(value);
+      expect(result.rows[0].Garagem).toBe(expected);
+      const workbook = await createWorkbook(result);
+      const reopened = read(write(workbook, { bookType: 'xlsx', type: 'array' }), { type: 'array' });
+      const sheet = reopened.Sheets[reopened.SheetNames[0]];
+      expect(sheet.A1.v).toBe('Garagem');
+      if (expected) { expect(sheet.A2.v).toBe(expected); expect(sheet.A2.t).toBe('s'); }
+      else expect(sheet.A2?.v ?? '').toBe('');
+    }
   });
 
   it('mantém os campos novos nas posições solicitadas, sem nomes antigos duplicados', () => {

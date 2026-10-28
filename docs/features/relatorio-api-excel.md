@@ -4,6 +4,8 @@ Rota: `/rebrain/relatorio-api-excel`. Menu: **Relatórios Automatizados → Rela
 
 ## Coleta completa antes das regras
 
+Garagem preserva o texto de `data[].typologies_history[].garage` no último fechamento de cada tipologia até o corte, sem conversão numérica ou limpeza do conteúdo. Valores ausentes ficam vazios; a prévia e o Excel mantêm descrições como “1 vaga” e “1 a 2 vagas”.
+
 Implementação exclusiva em `src/features/relatorio-api-excel/` e `src/pages/RelatorioApiExcel.tsx`. AELO e Dashboard GeoBrain não são alterados. A consulta usa o contrato copiado do Dashboard, acrescentando Hotel somente neste relatório e mantendo os objetos brutos para não perder campos e nulos na normalização:
 
 - GeoApiScopeSelector + useGeoApiScope: catálogo paginado `/monitored-cities`, sem fallback IBGE. Escopo por município, UF ou UFs da região, sempre autorizado pelo token. Não existe whitelist de cidades AELO nem filtro de padrões de loteamento.

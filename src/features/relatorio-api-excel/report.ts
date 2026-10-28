@@ -166,7 +166,7 @@ function fixedRow(building: RawBuilding, id: string, entries: DatedEntry[]): Row
     'Incorporadoras': incorporators.map((incorporator) => text(asRecord(incorporator).name).trim()).filter(Boolean).join(', '),
     'Unidades por Tipologia': qty,
     'Data de Lançamento': text(building.release_date), 'Ano': launch?.slice(0, 4) ?? '', 'Data de Entrega': text(building.delivery_date),
-    'Quartos': numeric(last.number_bedroom), 'Garagem': numeric(last.garage),
+    'Quartos': numeric(last.number_bedroom), 'Garagem': text(last.garage),
     'Entrada': numeric(building.down_payment_percentage), 'Nº de Parcelas': numeric(building.number_of_installments),
     'Valor da parcela': numeric(building.installment_value), '% de Juros Mensal': numeric(building.interest_rate_tax),
     'Indíce de Juros': text(building.interest_rate_index), 'Desconto à Vista': numeric(building.discount_percentage),

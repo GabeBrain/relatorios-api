@@ -384,6 +384,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+### 28/10 — Relatório API Excel: Garagem textual — Edgar / Codex
+
+- **Correção:** Garagem passa a preservar o texto de typologies_history[].garage no último fechamento da tipologia até o corte. Removida a conversão numérica que descartava descrições como “1 vaga” e “1 a 2 vagas”. Nulo/ausente permanece vazio; zero é conservado como texto. Sem mudança de API, histórico, AELO ou Dashboard.
+- **Validação:** teste de prévia e XLSX reaberto nos dois layouts com descrições, espaços, zero e ausências; tipos e lint dirigidos. Consulta autenticada não executada; a correção usa o contrato textual confirmado pelo usuário.
+- **Etapas/Pendências:** correção local, publicação aguarda autorização; base079bdcd, commit desta entrada. Sem push/Monday.
+- **Monday:** —
+
 ### 28/10 — Relatório API Excel: histórico desde lançamento e Faixa MCMV por período — Edgar / Codex
 
 - **Diagnóstico:** planilha Campinas fornecida com132.427 linhas/151 períodos/877 pares empreendimento-tipologia.82.118 linhas anteriores ao lançamento e22.081 posteriores com todas as métricas vazias; preços presentes em28.228. O tabular cruzava todos os períodos globais com todas as tipologias. Exemplo Midtown Aquidaban: lançado ago/2014, exportado desde mai/2002. Sem payload bruto não se atribui cada lacuna à API.
