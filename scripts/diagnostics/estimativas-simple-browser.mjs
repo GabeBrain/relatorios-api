@@ -18,6 +18,7 @@ try {
   await page.getByRole('combobox', { name: 'Cidades', exact: true }).click(); await page.getByRole('option', { name: 'Curitiba/PR', exact: true }).click(); await page.keyboard.press('Escape');
   await page.evaluate(t => document.documentElement.classList.toggle('dark', t === 'dark'), theme); await page.screenshot({ path: `${folder}/${width}-${theme}-entry.png`, fullPage: true });
   await page.getByRole('button', { name: 'Carregar empreendimentos', exact: true }).click();
+  await page.getByRole('button', { name: 'Lista de curvas', exact: true }).click();
   await page.getByRole('button', { name: 'Explorar curva de Projeto 1', exact: true }).waitFor({ timeout: 90000 });
   await page.getByRole('img', { name: 'Curva de vendas de Projeto 1' }).waitFor();
   await page.evaluate(t => document.documentElement.classList.toggle('dark', t === 'dark'), theme);

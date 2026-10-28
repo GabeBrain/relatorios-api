@@ -10,11 +10,13 @@ vi.mock('./Controls', async original => ({ ...await original<typeof import('./Co
 vi.mock('./ForecastChart', () => ({ ForecastChart: ({ label }: { label: string }) => <div role="img" aria-label={label} /> }));
 vi.mock('./runtime', async () => {
   const D = await import('./domain');
+  const M = await import('./mosaic');
   return { AnalysisRuntime: class {
     constructor(readonly dataset: Universe) {}
     inventory(cutoff: string) { return Promise.resolve(D.summarizeInventory(this.dataset.buildings, cutoff)); }
     analyze(id: string, spec: Parameters<typeof D.analyzeCase>[2]) { access.calls++; return D.analyzeCase(this.dataset, id, D.buildingSpec(this.dataset, id, spec)); }
     capabilities(ids: string[], cutoff: string) { return D.capabilities(this.dataset, ids, cutoff); }
+    tiles(ids: string[], spec: Parameters<typeof D.analyzeCase>[2]) { return M.buildTiles(this.dataset, ids, spec); }
     cancelQueued() {}
     dispose() { access.disposed++; }
   } };

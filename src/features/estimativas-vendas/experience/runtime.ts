@@ -1,6 +1,7 @@
 import { buildingSpec, specKey, type AnalysisSpec, type CaseAnalysis, type Universe } from './domain';
+import type { CurveTile } from './mosaic';
 import type { InventoryRow, StudyMethod } from '../scientific/study';
-type Task = { key: string; priority: number; kind: 'case' | 'inventory' | 'capabilities'; buildingId?: string; buildingIds?: string[]; spec?: AnalysisSpec; cutoff?: string; resolve: (v: unknown) => void; reject: (e: Error) => void };
+type Task = { key: string; priority: number; kind: 'case' | 'inventory' | 'capabilities' | 'tiles'; buildingId?: string; buildingIds?: string[]; spec?: AnalysisSpec; cutoff?: string; resolve: (v: unknown) => void; reject: (e: Error) => void };
 export class AnalysisRuntime {
   private worker: Worker;
   private queue: Task[] = [];
@@ -48,6 +49,7 @@ export class AnalysisRuntime {
   peek(id: string, spec: AnalysisSpec) { return this.cache.get(specKey(this.dataset.hash, id, buildingSpec(this.dataset, id, spec))) as CaseAnalysis | undefined; }
   inventory(cutoff: string) { return this.request<InventoryRow[]>(`inventory|${cutoff}`, { kind: 'inventory', cutoff, priority: 0 }); }
   capabilities(ids: string[], cutoff: string) { return this.request<Record<string, StudyMethod[]>>(`capabilities|${cutoff}|${ids.join(',')}`, { kind: 'capabilities', buildingIds: ids, cutoff, priority: 3 }); }
+  tiles(ids: string[], spec: AnalysisSpec) { return this.request<CurveTile[]>(`tiles|${specKey(this.dataset.hash, ids.join(','), spec)}`, { kind: 'tiles', buildingIds: ids, spec, priority: 4 }); }
   cancelQueued() { for (const t of this.queue.splice(0)) { this.pending.delete(t.key); t.reject(new DOMException('Cálculo substituído', 'AbortError')); } }
   dispose(error: Error = new DOMException('Cálculo cancelado', 'AbortError')) {
     this.disposed = true; this.worker.terminate(); this.active?.reject(error); this.active = null;

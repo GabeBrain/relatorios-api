@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-28",
+  "scope": "Mosaico mini/detalhado, lista compartilhada e regressão da jornada essencial",
+  "state": "validado localmente; push autorizado; produção não verificada",
+  "data": "Fontes sintéticas identificadas. Nenhuma nova consulta autenticada à API real nesta revisão.",
+  "vitest": { "files": 16, "passed": 114 },
+  "operationalNodeTests": { "passed": 15 },
+  "typecheck": "passed",
+  "eslintExperience": "passed, zero warnings",
+  "build": "passed; avisos preexistentes Browserslist, XLSX e tamanho de chunks",
+  "mosaicBrowser": [
+    { "syntheticBuildings": 146, "width": 1440, "theme": "light", "loadToMapMs": 903 },
+    { "syntheticBuildings": 478, "width": 1440, "theme": "dark", "loadToMapMs": 1590 },
+    { "syntheticBuildings": 501, "width": 390, "theme": "light", "loadToMapMs": 1505 },
+    { "syntheticBuildings": 146, "width": 768, "theme": "dark", "loadToMapMs": 1120 }
+  ],
+  "mosaicAssertions": ["densidade mini/detalhada", "paginação acima de 500", "seleção compartilhada com lista", "marcar todos substitui e filtra Finotti", "ordenar por vendas", "zero erros JavaScript", "zero overflow horizontal", "duas chamadas sintéticas de coleta por cenário e zero extras durante exploração"],
+  "fullJourneyBrowser": { "view": "lista alternativa", "widths": [1440, 768, 390], "themes": ["light", "dark"], "passed": 6, "excelRowsEach": 24, "differentOrigins": ["2026-09", "2026-08"], "includes": ["detalhe", "backtest", "comparação relativa", "Excel reaberto e marcado não importável"] },
+  "browserSurface": "Chromium headless local; navegador conectado indisponível",
+  "rawArtifacts": ".local-inputs/estimativas-vendas/mosaico-20261028/ e simplificacao-20261028/; ignorados pelo Git",
+  "scripts": ["scripts/diagnostics/estimativas-mosaic-browser.mjs", "scripts/diagnostics/estimativas-simple-browser.mjs"],
+  "tokensSha256": "0802b707b8c511e3367b1e4a235cea6a268edb9ac8f217a2beb965fc30874eac",
+  "limitations": ["tempos sintéticos não são SLA da API", "sem validação independente de precisão", "sem faixa calibrada", "sem mudança de motores ou homologação Geobrain", "última linha do grid pode ficar incompleta para preservar áreas comparáveis"]
+}

@@ -11,6 +11,7 @@ import { ALL_METHODS, buildingSpec, chartRows, methodLabel, present, type Analys
 import { loadUniverse } from './universe';
 import { AnalysisRuntime } from './runtime';
 import { Choice, UniverseSelector } from './Controls';
+import { CurveMap } from './CurveMap';
 import { ForecastChart } from './ForecastChart';
 import { ForecastExplorer } from './ForecastExplorer';
 import { PortfolioExplorer } from './PortfolioExplorer';
@@ -24,6 +25,7 @@ export default function ExperiencePage() {
   const [loading, setLoading] = useState(false), [started, setStarted] = useState<number | null>(null), [progress, setProgress] = useState(''), [error, setError] = useState(''), [showSource, setShowSource] = useState(true);
   const [spec, setSpec] = useState<AnalysisSpec>({ cutoff: '', duration: 12, methods: ALL_METHODS });
   const [inventory, setInventory] = useState<InventoryRow[]>([]), [inventoryDate, setInventoryDate] = useState(''), [results, setResults] = useState<Record<string, CaseAnalysis>>({});
+  const [view, setView] = useState<'map' | 'list'>('map');
   const [search, setSearch] = useState(''), [type, setType] = useState('all'), [city, setCity] = useState('all'), [showSold, setShowSold] = useState(false), [page, setPage] = useState(0);
   const [availability, setAvailability] = useState('finotti'), [capabilities, setCapabilities] = useState<Record<string, AnalysisSpec['methods']>>({}), [capDate, setCapDate] = useState('');
   const [selection, setSelection] = useState<Set<string>>(new Set()), [focused, setFocused] = useState<string | null>(null), [portfolio, setPortfolio] = useState<string[] | null>(null), [exportRequest, setExportRequest] = useState<{ ids: string[]; spec: AnalysisSpec } | null>(null), [dataOpen, setDataOpen] = useState(false), [selectBusy, setSelectBusy] = useState(false);
@@ -58,11 +60,11 @@ export default function ExperiencePage() {
   useEffect(() => setPage(0), [search, availability, type, city, showSold, spec]);
   const visible = filtered.slice(page * 15, page * 15 + 15), visibleKey = visible.map(r => r.id).join('|');
   useEffect(() => {
-    if (!runtime || inventoryDate !== spec.cutoff || !visibleKey) return;
+    if (view !== 'list' || !runtime || inventoryDate !== spec.cutoff || !visibleKey) return;
     let live = true;
     for (const id of visibleKey.split('|')) void runtime.analyze(id, spec, 1).then(a => { if (live) setResults(v => { const next = { ...v, [id]: a }; const keys = Object.keys(next); if (keys.length > 256) delete next[keys.find(key => key !== id)!]; return next; }); }, e => { if (live && e.name !== 'AbortError') setError(e.message); });
     return () => { live = false; };
-  }, [runtime, spec, visibleKey, inventoryDate]);
+  }, [runtime, spec, visibleKey, inventoryDate, view]);
   useEffect(() => {
     if (!runtime || inventoryDate !== spec.cutoff) return;
     let live = true; setCapabilities({}); setCapDate(''); setAvailability('finotti');
@@ -105,11 +107,13 @@ export default function ExperiencePage() {
         <div className="evx-title-row"><div><p className="evx-eyebrow">02 · Curvas</p><h2>{filtered.length} empreendimentos no recorte</h2></div><div className="evx-actions"><Button variant="ghost" disabled={capDate !== spec.cutoff || selectBusy} onClick={() => void selectFinotti()}>Marcar todos os Finotti</Button></div></div>
         {progress && !loading && <p role="status" className="evx-muted">{progress}</p>}
         {inventoryDate !== spec.cutoff && <BrainLoadingState variant="field" title="Classificando empreendimentos na data escolhida" />}
-        <section className="evx-list" aria-label="Empreendimentos e curvas" aria-busy={inventoryDate !== spec.cutoff}>
+        <div className="evx-actions"><Button variant={view === 'map' ? 'secondary' : 'outline'} aria-pressed={view === 'map'} onClick={() => setView('map')}>Mapa de curvas</Button><Button variant={view === 'list' ? 'secondary' : 'outline'} aria-pressed={view === 'list'} onClick={() => setView('list')}>Lista de curvas</Button></div>
+        {view === 'map' && runtime && capDate === spec.cutoff && <CurveMap runtime={runtime} universe={universe} rows={filtered} allIds={inventory.map(r => r.id)} spec={spec} selection={selection} onToggle={toggle} onExplore={setFocused} />}
+        {view === 'list' && <><section className="evx-list" aria-label="Empreendimentos e curvas" aria-busy={inventoryDate !== spec.cutoff}>
           {visible.map(r => { const a = results[r.id], ready = current(a), p = ready ? present(a) : null, b = universe.buildings.find(b => buildingId(b) === r.id)!; return <article key={r.id} className={`evx-forecast-row ${selection.has(r.id) ? 'evx-selected' : ''}`}><button className="evx-open-row" ref={el => { if (el) rowButtons.current.set(r.id, el); else rowButtons.current.delete(r.id); }} onClick={() => toggle(r.id)} aria-label={`Selecionar ${r.name}`} aria-pressed={selection.has(r.id)}><div className="evx-row-title"><h3>{r.name}</h3><p>{universe.locations[r.id]?.city} · {r.type} · {r.pattern ?? 'Padrão ausente'}</p><small>{selection.has(r.id) ? 'Selecionado / ' : ''}{p?.method ? methodLabel(p.method) : p?.status ?? 'Preparando curva'} · ID {r.id} / dados até {r.cutoff}</small></div><div className="evx-mini-wrap">{ready ? <ForecastChart compact percent units={r.units} rows={chartRows(b, a, 'sold')} cutoff={a.spec.cutoff} methods={p?.method ? [p.method] : []} label={`Curva de vendas de ${r.name}`} /> : <BrainLoadingState variant="field" title="Calculando curva" />}</div><div className="evx-row-numbers"><span>Unidades vendidas<strong>{r.sold ?? '—'}</strong></span><span>Vendas previstas<strong>{p?.method ? (() => { const points = a.stock.cases[0].methods[p.method!].forecast?.points; const stock = points?.at(-1)?.stock; return stock !== null && stock !== undefined && r.stock !== null ? (r.stock - stock).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : '—'; })() : '—'}</strong></span><small>{spec.duration} meses</small></div></button><Button variant="outline" onClick={() => setFocused(r.id)} aria-label={`Explorar curva de ${r.name}`}>Explorar curva</Button></article>; })}
           {!filtered.length && capDate === spec.cutoff && <p role="status">Nenhum empreendimento corresponde aos filtros. Revise as condições ou inclua os esgotados.</p>}
         </section>
-        <div className="evx-actions"><Button variant="outline" disabled={page === 0} onClick={() => setPage(v => v - 1)}>Página anterior</Button><span>{page + 1}/{Math.max(1, Math.ceil(filtered.length / 15))}</span><Button variant="outline" disabled={(page + 1) * 15 >= filtered.length} onClick={() => setPage(v => v + 1)}>Próxima página</Button></div>
+        <div className="evx-actions"><Button variant="outline" disabled={page === 0} onClick={() => setPage(v => v - 1)}>Página anterior</Button><span>{page + 1}/{Math.max(1, Math.ceil(filtered.length / 15))}</span><Button variant="outline" disabled={(page + 1) * 15 >= filtered.length} onClick={() => setPage(v => v + 1)}>Próxima página</Button></div></>}
       </>}
       {selection.size > 0 && <section className="evx-selection" aria-label="Seleção para exportação"><strong>{selection.size} selecionados · {[...selection].filter(id => !filtered.some(r => r.id === id)).length} fora do filtro atual</strong><div className="evx-actions"><Button variant="outline" onClick={() => setPortfolio([...selection])}>Comparar seleção</Button><Button onClick={() => exportIds([...selection])}>Baixar previsões</Button><Button variant="ghost" onClick={() => setSelection(new Set())}>Limpar seleção</Button></div></section>}
     </>}
