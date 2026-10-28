@@ -384,6 +384,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+### 28/10 — Relatório API Excel: unidades totais e conferência da base MCMV — Edgar / Codex
+
+- **Análise:** confirmado que MCMV atual e histórico usam quantity-standard: soma price×qty / soma qty somente tipologias Padrão, excluindo Garden/Cobertura. Mantida regra anterior até confirmação explícita de incluir todas as tipologias.
+- **Mudança exclusiva:** coluna selecionável Unidades Totais do Empreendimento após Unidades por Tipologia, usando data.total_units cadastral (campo também mapeado no Dashboard, sem alterá-lo). Repetido por linha, sem somar históricos/tipologias e sem fallback quando ausente.
+- **Validação:** testes de prévia e reabertura XLSX nos dois layouts para número/texto numérico, zero e ausências; tipos/lint dirigidos. Sem consulta autenticada. AELO/Dashboard e fórmula MCMV intactos.
+- **Etapas/Pendências:** coluna implementada localmente; confirmação de eventual mudança da média MCMV para todas as tipologias e publicação pendentes. Base1a82104; commit desta entrada. Sem push/Monday.
+- **Monday:** —
+
 ### 28/10 — Relatório API Excel: Garagem textual — Edgar / Codex
 
 - **Correção:** Garagem passa a preservar o texto de typologies_history[].garage no último fechamento da tipologia até o corte. Removida a conversão numérica que descartava descrições como “1 vaga” e “1 a 2 vagas”. Nulo/ausente permanece vazio; zero é conservado como texto. Sem mudança de API, histórico, AELO ou Dashboard.

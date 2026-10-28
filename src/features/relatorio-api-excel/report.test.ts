@@ -304,11 +304,27 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     }
   });
 
+  it.each(['columns', 'rows'] as const)('exporta unidades totais cadastrais sem somar tipologias ou meses em %s', async (layout) => {
+    const field = 'Unidades Totais do Empreendimento';
+    for (const [raw, expected] of [[500, 500], ['500', 500], [0, 0], [null, null], [undefined, null]] as const) {
+      const result = selectReportFields(report({ layout }, [{ ...building, total_units: raw }]), [field]);
+      expect(result.rows.length).toBeGreaterThan(0);
+      expect(result.rows.every((row) => row[field] === expected)).toBe(true);
+      const workbook = await createWorkbook(result);
+      const reopened = read(write(workbook, { bookType: 'xlsx', type: 'array' }), { type: 'array' });
+      const sheet = reopened.Sheets[reopened.SheetNames[0]];
+      expect(sheet.A1.v).toBe(field);
+      if (expected !== null) { expect(sheet.A2.v).toBe(expected); expect(sheet.A2.t).toBe('n'); }
+      else expect(sheet.A2).toBeUndefined();
+    }
+  });
+
   it('mantém os campos novos nas posições solicitadas, sem nomes antigos duplicados', () => {
     const after = (field: string, length: number) => FIXED_COLUMNS.slice(FIXED_COLUMNS.indexOf(field) + 1, FIXED_COLUMNS.indexOf(field) + 1 + length);
     expect(after('Região', 1)).toEqual(['Região Administrativa']);
     expect(after('Cidade/UF', 1)).toEqual(['Tipo']);
     expect(after('Padrão', 2)).toEqual(['Faixa MCMV', 'Tipologia']);
+    expect(after('Unidades por Tipologia', 1)).toEqual(['Unidades Totais do Empreendimento']);
     expect(after('Tipologia', 3)).toEqual(['Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado']);
     expect(after('Data de Entrega', 2)).toEqual(['Quartos', 'Garagem']);
     for (const obsolete of ['Urbanizadora', 'Lançamento', 'Entrega', 'Oferta por Lotes', 'm² Lançado']) expect(FIXED_COLUMNS).not.toContain(obsolete);

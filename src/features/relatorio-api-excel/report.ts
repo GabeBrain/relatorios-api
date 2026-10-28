@@ -35,7 +35,7 @@ export const FIXED_COLUMNS = [
   'ID Empreendimento', 'ID Tipologia', 'Status Empreendimento', 'Status Tipologia',
   'Região', 'Região Administrativa', 'Cidade/UF', 'Tipo', 'Padrão', 'Faixa MCMV', 'Tipologia',
   'Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado', 'Tempo de Vendas', 'Empreendimentos',
-  'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Incorporadoras', 'Unidades por Tipologia',
+  'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Incorporadoras', 'Unidades por Tipologia', 'Unidades Totais do Empreendimento',
   'Data de Lançamento', 'Ano', 'Data de Entrega', 'Quartos', 'Garagem', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
   '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'm2 Priv.',
 ];
@@ -165,6 +165,7 @@ function fixedRow(building: RawBuilding, id: string, entries: DatedEntry[]): Row
     'Bairro': text(building.neighborhood), 'Endereço': text(building.address), 'Número': text(building.address_number),
     'Incorporadoras': incorporators.map((incorporator) => text(asRecord(incorporator).name).trim()).filter(Boolean).join(', '),
     'Unidades por Tipologia': qty,
+    'Unidades Totais do Empreendimento': numeric(building.total_units),
     'Data de Lançamento': text(building.release_date), 'Ano': launch?.slice(0, 4) ?? '', 'Data de Entrega': text(building.delivery_date),
     'Quartos': numeric(last.number_bedroom), 'Garagem': text(last.garage),
     'Entrada': numeric(building.down_payment_percentage), 'Nº de Parcelas': numeric(building.number_of_installments),

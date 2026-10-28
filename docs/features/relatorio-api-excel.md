@@ -4,6 +4,8 @@ Rota: `/rebrain/relatorio-api-excel`. Menu: **Relatórios Automatizados → Rela
 
 ## Coleta completa antes das regras
 
+Unidades Totais do Empreendimento usa `data[].total_units` cadastral, ao lado de Unidades por Tipologia. Disponível na seleção e nos dois layouts, repete o total em cada linha do empreendimento; não deve ser somado entre linhas. Sem valor na API, fica vazio, sem estimativa por soma de tipologias ou períodos. A Faixa MCMV permanece ponderada pela oferta lançada somente das tipologias Padrão, sem incluir Garden/Cobertura.
+
 Garagem preserva o texto de `data[].typologies_history[].garage` no último fechamento de cada tipologia até o corte, sem conversão numérica ou limpeza do conteúdo. Valores ausentes ficam vazios; a prévia e o Excel mantêm descrições como “1 vaga” e “1 a 2 vagas”.
 
 Implementação exclusiva em `src/features/relatorio-api-excel/` e `src/pages/RelatorioApiExcel.tsx`. AELO e Dashboard GeoBrain não são alterados. A consulta usa o contrato copiado do Dashboard, acrescentando Hotel somente neste relatório e mantendo os objetos brutos para não perder campos e nulos na normalização:
