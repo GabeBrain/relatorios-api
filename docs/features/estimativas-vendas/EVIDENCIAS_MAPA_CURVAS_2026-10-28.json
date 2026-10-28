@@ -1,7 +1,7 @@
 {
   "date": "2026-10-28",
   "scope": "Mosaico mini/detalhado, lista compartilhada e regressão da jornada essencial",
-  "state": "validado localmente; push autorizado; produção não verificada",
+  "state": "implementação 8ae89a3 enviada a origin/main; validado localmente; produção não verificada",
   "data": "Fontes sintéticas identificadas. Nenhuma nova consulta autenticada à API real nesta revisão.",
   "vitest": { "files": 16, "passed": 114 },
   "operationalNodeTests": { "passed": 15 },
