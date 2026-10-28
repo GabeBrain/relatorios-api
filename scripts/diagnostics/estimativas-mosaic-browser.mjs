@@ -40,7 +40,7 @@ try {
   if (count > 500) { await page.getByRole('button', { name: 'Próxima página do mapa', exact: true }).click(); assert.equal(await page.locator('.evm-tile').count(), 1); await page.getByRole('button', { name: 'Página anterior do mapa', exact: true }).click(); }
   await page.getByRole('button', { name: 'Ordenar por vendas previstas', exact: true }).click();
   assert.equal(await page.locator('.evm-card').first().getAttribute('class').then(s => s.includes('evm-unavailable')), false);
-  await page.getByRole('button', { name: 'Marcar todos os Finotti', exact: true }).click();
+  await page.getByRole('button', { name: 'Marcar estimativas aprovadas', exact: true }).click();
   assert.equal(await page.locator('.evm-unavailable').count(), 0); assert.equal(await page.locator('.evm-tile[aria-pressed=true]').count(), Math.min(500, finotti));
   await page.getByRole('button', { name: 'Abrir configura\u00e7\u00f5es', exact: true }).click(); await page.getByRole('button', { name: 'Lista de curvas', exact: true }).click(); await page.getByRole('button', { name: 'Voltar \u00e0s curvas', exact: true }).click(); assert.equal(await page.locator('.evx-open-row[aria-pressed=true]').count(), Math.min(15, finotti));
   await page.getByRole('button', { name: 'Abrir configura\u00e7\u00f5es', exact: true }).click(); await page.getByRole('button', { name: 'Mapa de curvas', exact: true }).click(); await page.getByRole('button', { name: 'Voltar \u00e0s curvas', exact: true }).click();

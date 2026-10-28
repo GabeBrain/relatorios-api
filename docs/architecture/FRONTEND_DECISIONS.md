@@ -1,3 +1,7 @@
+## 28/10/2026 — Estimativas: ações junto ao cabeçalho
+
+Refinamento pedido por Gabriel: comparar/baixar/marcar/configurar agrupados ao lado do título das curvas, sem faixa exclusiva vazia. Fundo transparente inclusive em hover, sem sombra; varredura verde breve somente no texto, desativada com movimento reduzido. `Estimativas aprovadas` substitui Finotti nos rótulos de navegação, mantendo autoria técnica/IDs/modelos/contratos e explicitação de que disponibilidade matemática não homologa importação. Usa os mesmos primitives/tokens. Fonte: refinamento da seção12 do plano essencial e evidência `compactActions`.
+
 ## 28/10/2026 — Estimativas: painel lateral e quadro atômico
 
 Conceito aprovado por Gabriel: configurações no Sheet direito existente; página principal centrada na busca/curvas e nas ações de comparar/baixar. Galerias informativas amplas e paginadas substituem listas estreitas; raio12px local autorizado, mantendo os tokens globais. Esgotados somente informativos, sem ação de inclusão no mapa. Dois controles de apresentação empilhados alternam o próprio estado. Comparação anuncia a tarefa e a quantidade selecionada. Detalhe persistente publica identidade e resultados como um quadro único, mantém o anterior esmaecido até concluir, rejeita respostas antigas e prepara até dois vizinhos em cache. Primitives Button/Sheet/Dialog/Input e BrainLoadingState existentes, sem alterações de motores ou biblioteca gráfica. Fonte: seção12 do plano essencial e `settingsAndBuffer` na evidência do mapa.

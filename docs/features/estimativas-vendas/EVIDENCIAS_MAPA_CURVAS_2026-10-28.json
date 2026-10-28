@@ -21,6 +21,18 @@
   "scripts": ["scripts/diagnostics/estimativas-mosaic-browser.mjs", "scripts/diagnostics/estimativas-simple-browser.mjs"],
   "tokensSha256": "0802b707b8c511e3367b1e4a235cea6a268edb9ac8f217a2beb965fc30874eac",
   "limitations": ["tempos sintéticos não são SLA da API", "sem validação independente de precisão", "sem faixa calibrada", "sem mudança de motores ou homologação Geobrain", "última linha do grid pode ficar incompleta para preservar áreas comparáveis"],
+  "compactActions": {
+    "date": "2026-10-28",
+    "experienceTestsPassed": 28,
+    "testFiles": 9,
+    "typecheckLintBuild": "passed",
+    "browserScenarios": 3,
+    "completeJourneyScenarios": 6,
+    "assertions": ["quatro ações agrupadas no cabeçalho", "fundo transparente e sem sombra em hover", "faixa antiga de comparação removida", "rótulos de navegação Estimativas aprovadas", "carrossel e galerias preservados", "Excel reaberto com 24 linhas", "zero erros JS e overflow horizontal", "sem chamadas extras durante exploração"],
+    "semantics": "Rótulo solicitado para o conjunto matematicamente calculável; não constitui homologação de importação ou nova validação estatística.",
+    "data": "sintética controlada, sem nova consulta real",
+    "production": "nova revisão não conferida no site"
+  },
   "settingsAndBuffer": {
     "date": "2026-10-28",
     "implementationCommitSentToOriginMain": "b0757b2",

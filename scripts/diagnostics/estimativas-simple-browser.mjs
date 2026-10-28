@@ -43,7 +43,7 @@ try {
   await page.keyboard.press('Escape'); assert.equal(await page.getByRole('button', { name: 'Selecionar Projeto 1', exact: true }).getAttribute('aria-pressed'), 'true');
   await page.getByRole('button', { name: 'Abrir configura\u00e7\u00f5es', exact: true }).click(); await page.getByRole('button', { name: 'Mostrar todos', exact: true }).click(); await page.getByRole('button', { name: 'Voltar \u00e0s curvas', exact: true }).click();
   await page.getByRole('button', { name: 'Selecionar Projeto 3', exact: true }).click();
-  await page.getByRole('button', { name: 'Marcar todos os Finotti', exact: true }).click();
+  await page.getByRole('button', { name: 'Marcar estimativas aprovadas', exact: true }).click();
   assert.equal(await page.getByRole('button', { name: 'Selecionar Projeto 3', exact: true }).count(), 0);
   // Projeto 2 ends in August, so the frozen reference is blocked: it must not be selected as Finotti.
   await page.getByRole('button', { name: 'Abrir configura\u00e7\u00f5es', exact: true }).click(); await page.getByRole('button', { name: 'Mostrar todos', exact: true }).click(); await page.getByRole('button', { name: 'Voltar \u00e0s curvas', exact: true }).click();
@@ -53,7 +53,7 @@ try {
   dialog = page.getByRole('dialog'); await dialog.getByRole('img', { name: 'Comparação de curvas' }).waitFor();
   assert.match(await dialog.getByRole('combobox', { name: 'Alinhar comparação' }).innerText(), /Tempo após/);
   await page.screenshot({ path: `${folder}/${width}-${theme}-compare.png` }); await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: /Baixar previs.*selecionadas/ }).click();
+  await page.getByRole('button', { name: /Baixar selecionadas/ }).click();
   const downloadWait = page.waitForEvent('download'); await page.getByRole('dialog').getByRole('button', { name: 'Baixar previsões em Excel', exact: true }).click();
   const path = `${folder}/${width}-${theme}-previsoes.xlsx`; await (await downloadWait).saveAs(path);
   const wb = XLSX.read(await readFile(path), { type: 'array' }); const rows = XLSX.utils.sheet_to_json(wb.Sheets.previsoes);

@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 28/10/2026 — Estimativas: ações compactas e rótulos aprovados pelo usuário
+
+- **Entrega:** comparar/baixar/marcar/configurar reunidos junto ao cabeçalho das curvas, removendo a faixa vazia. Sem preenchimento amarelo/verde no hover; destaque breve apenas nas letras, respeitando movimento reduzido. Nome de navegação `Estimativas aprovadas` solicitado por Gabriel; o conjunto calculável e a identificação técnica Finotti permanecem, sem nova homologação ou validação estatística. [Fonte](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md), refinamento seção12.
+- **Validação:**28testes da experiência/9arquivos, tipos/lint/build aprovados; três cenários de navegador1440 claro/escuro e390, transparência/sombra dos botões verificadas, seis jornadas completas/backtest/comparação/Excel24linhas preservadas. Zero errosJS/overflow horizontal ou chamadas adicionais. Dados sintéticos, sem nova API real; [evidência](../features/estimativas-vendas/EVIDENCIAS_MAPA_CURVAS_2026-10-28.json) `compactActions`. Retomada após bloqueio temporário da revisão automática por limite de uso, sem contornar a revisão.
+- **Estado/próximo:** validado localmente, envio conforme autorização vigente; nova publicação/aceite no site pendentes. Alterações paralelas preservadas e contratos científicos/operacionais intactos.
+- **Monday:** [Estimativas de vendas por empreendimento](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`; somente referência.
+
 ### 28/10/2026 — Estimativas: ajustes laterais, galerias e carrossel estável
 
 - **Entrega:** conceito aprovado por Gabriel implementado: Sheet direito agrupa projeção/disponibilidade/tipo/cidade/apresentação e informações do universo. Busca/curvas/ações no centro, marcar todos como link discreto. Comparação orienta escolher dois ou mais e informa `Comparar N curvas`. Controles mini/detalhado e nome/vendas alternáveis e empilhados. Outros/esgotados em grid paginado amplo, busca e cantos12px locais; sem `Incluir esgotados`. [Plano vigente, seção12](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md).

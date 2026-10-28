@@ -37,7 +37,7 @@ try {
   await page.keyboard.press('Escape'); await page.getByPlaceholder('Nome ou ID').fill(''); await page.getByRole('button', { name: 'Comparar curvas', exact: true }).click();
   await page.locator('.evm-tile').nth(0).click(); assert.equal(await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).isEnabled(), false);
   await page.locator('.evm-tile').nth(1).click(); assert.equal(await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).isEnabled(), true);
-  assert.match(await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).getAttribute('class'), /evx-compare-ready/);
+  assert.match(await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).getAttribute('class'), /evs-text-ready/);
   await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).click(); await page.getByRole('dialog').getByRole('img', { name: 'Comparação de curvas' }).waitFor();
   assert.deepEqual(errors, []); assert.equal(calls, 2); results.push({ width, source: 'authenticated snapshot replay', buildings: buildings.length, historicalDots: dots, overflow, errors, calls }); await context.close();
  }

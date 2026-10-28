@@ -19,6 +19,14 @@ try {
   await page.goto(process.env.ESTIMATIVAS_LOCAL_URL ?? 'http://127.0.0.1:8087/rebrain/estimativas-vendas'); await page.getByRole('combobox', { name: 'Estados', exact: true }).click(); await page.getByRole('option', { name: 'PR', exact: true }).click(); await page.keyboard.press('Escape'); await page.getByRole('button', { name: 'Carregar empreendimentos', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('.evm-map')?.getAttribute('aria-busy') === 'false');
   await page.evaluate(t => document.documentElement.classList.toggle('dark', t === 'dark'), theme);
+  const actions = page.locator('.evs-curve-actions');
+  assert.equal(await actions.getByRole('button').count(), 4);
+  const download = actions.getByRole('button', { name: 'Baixar estimativas aprovadas', exact: true });
+  await download.hover();
+  const actionStyle = await download.evaluate(el => ({ background: getComputedStyle(el).backgroundColor, shadow: getComputedStyle(el).boxShadow }));
+  assert.equal(actionStyle.background, 'rgba(0, 0, 0, 0)'); assert.equal(actionStyle.shadow, 'none');
+  assert.equal(await page.locator('.evx-comparison-tools').count(), 0);
+  assert.equal(await page.getByRole('button', { name: /Finotti/ }).count(), 0);
   assert.equal(await page.getByRole('group', { name: 'Duração da previsão' }).count(), 0); assert.equal(await page.getByRole('button', { name: 'Incluir esgotados' }).count(), 0);
   await page.locator('.evx-header').scrollIntoViewIfNeeded(); await page.screenshot({ path: `${folder}/${width}-${theme}-main.png` });
   await page.getByRole('button', { name: 'Abrir configurações', exact: true }).click(); await page.getByRole('button', { name: '6 meses', exact: true }).click();
