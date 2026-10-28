@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { MCMV_HELP } from '@/features/relatorio-api-excel/mcmv';
 import { Download, Play, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -204,6 +205,8 @@ export default function RelatorioApiExcel() {
             <MonthField help={FIELD_HELP.to} id="api-excel-to" label="Data final" value={to} onChange={setTo} />
             <div className="space-y-1.5"><ReportFieldLabel htmlFor="api-excel-vgv-scale" help={scaleHelp(vgvScale)}>Visualização do VGV</ReportFieldLabel><Select value={vgvScale} onValueChange={(next: VgvScale) => setVgvScale(next)}><SelectTrigger id="api-excel-vgv-scale"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="standard">Padrão — valor calculado</SelectItem><SelectItem value="thousand">Milhar — dividir por 1.000</SelectItem><SelectItem value="million">Milhão — dividir por 1.000.000</SelectItem></SelectContent></Select></div>
           </div>
+          <p className="text-xs text-muted-foreground">{MCMV_HELP}</p>
+          <p className="text-xs text-muted-foreground">O histórico começa no mês de lançamento. No formato tabular, só aparecem períodos com fechamento da tipologia. Dados ausentes continuam vazios, sem inventar preços, vendas ou estoques.</p>
           {!validDates && <p role="alert" className="text-sm text-destructive">Informe datas válidas, com a data inicial anterior ou igual à final.</p>}
           <p className="text-xs text-muted-foreground">{priceMode === 'current' ? 'Valor atual: último preço disponível da tipologia até a data final, aplicado à série histórica.' : 'Valor do período: estoque e VGV lançado usam quantidade e preço do último fechamento de cada mês/trimestre. VGV de vendas soma venda × preço de cada fechamento.'} A escala escolhida para VGV será aplicada à prévia, aos gráficos e ao Excel. Vendas Brutas = gross_sales; Distratos = distractions; Vendas Líquidas = Vendas Brutas − Distratos.</p>
           <p className="text-xs text-muted-foreground">Preço Médio Empreendimento considera o último fechamento de cada tipologia no período e se repete nas linhas do mesmo empreendimento. {buildingAverageMode.startsWith('simple') ? 'Média simples dos preços válidos.' : buildingAverageMode.startsWith('quantity') ? 'Soma de preço × quantidade, dividida pela soma das quantidades.' : 'Soma de preço × estoque, dividida pela soma dos estoques.'} {buildingAverageMode.endsWith('-standard') ? 'Somente tipologias Padrão participam desta média; Garden, Cobertura e demais tipologias continuam nas linhas do relatório.' : 'Inclui todas as tipologias com dados válidos, inclusive Garden e Cobertura.'} Pesos ausentes ou não positivos são excluídos; sem base válida, o valor fica vazio.</p>

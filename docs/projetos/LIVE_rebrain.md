@@ -384,6 +384,29 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+### 28/10 — Relatório API Excel: Garagem textual — Edgar / Codex
+
+- **Correção:** Garagem passa a preservar o texto de typologies_history[].garage no último fechamento da tipologia até o corte. Removida a conversão numérica que descartava descrições como “1 vaga” e “1 a 2 vagas”. Nulo/ausente permanece vazio; zero é conservado como texto. Sem mudança de API, histórico, AELO ou Dashboard.
+- **Validação:** teste de prévia e XLSX reaberto nos dois layouts com descrições, espaços, zero e ausências; tipos e lint dirigidos. Consulta autenticada não executada; a correção usa o contrato textual confirmado pelo usuário.
+- **Etapas/Pendências:** correção local, publicação aguarda autorização; base079bdcd, commit desta entrada. Sem push/Monday.
+- **Monday:** —
+
+### 28/10 — Relatório API Excel: histórico desde lançamento e Faixa MCMV por período — Edgar / Codex
+
+- **Diagnóstico:** planilha Campinas fornecida com132.427 linhas/151 períodos/877 pares empreendimento-tipologia.82.118 linhas anteriores ao lançamento e22.081 posteriores com todas as métricas vazias; preços presentes em28.228. O tabular cruzava todos os períodos globais com todas as tipologias. Exemplo Midtown Aquidaban: lançado ago/2014, exportado desde mai/2002. Sem payload bruto não se atribui cada lacuna à API.
+- **Mudança exclusiva:** histórico a partir do mês de release_date, inclusive em trimestre parcial; períodos anteriores excluídos da coleta local de históricos/limites, sem alterar requisições. Tabular só emite períodos com fechamento; horizontal mantém união de períodos com lacunas vazias. Não inventa preços/vendas/estoques nem preenche ausência com zero.
+- **MCMV:** campo imediatamente após Padrão. Tabular calcula por mês/trimestre, ponderação quantity-standard exclusiva; horizontal conserva faixa final e acrescenta série histórica no mesmo bloco após Padrão. Seleção Faixa MCMV expande períodos somente na geração. Tetos do JSON original2026 também usados no histórico, sem afirmar tetos normativos passados. Regras e ausência de lançamento descritas na interface/doc da feature. Atualização por upload/Supabase cancelada permanece ausente.
+- **Validação/limites:**64 testes em cinco arquivos, tipos/lint/build aprovados; limites MCMV, mudança de faixa mensal, trimestre de lançamento, seleção, exportação e reabertura XLSX. Navegador desktop1440/claro com rede simulada: coluna selecionável, descrição MCMV, hover/foco e quatro chamadas de coleta, sem erro de página. Ensaio de vários temas/larguras interrompido por timeout de hover; smoke desktop repetido aprovado. Mobile/escuro desta revisão e consulta autenticada/regeneração integral de Campinas com dados brutos não concluídos. Padrões de seleção/descrições existentes reutilizados, sem alterar carregamento ou componentes compartilhados. AELO/Dashboard intactos.
+- **Etapas/Pendências:** ajuste local concluído, aguarda publicação autorizada e nova geração pelo usuário. Base0e01278; commit desta entrada. Sem push/Monday. Auditoria local preservada.
+- **Monday:** —
+
+### 28/10 — Relatório API Excel: Faixa MCMV — Edgar / Codex
+
+- **Mudança:** nova coluna fixa selecionável Faixa MCMV, exclusiva de Vertical Econômico/Standard; acrescenta o sufixo da faixa e preserva Padrão. Média exclusiva ponderada pela oferta lançada somente tipologias Padrão, na última posição até o mês final, independente das opções gerais de média, visão e VGV. Calculado somente em Gerar relatório após coleta completa. Coletor/AELO/Dashboard intactos.
+- **Fonte:** planilha municipal fornecida, 5.571 chaves únicas UF/cidade, tetos positivos. Faixa2 até teto; Faixa3 até400.000; Faixa4 de400.000,01 até600.000, conforme confirmação. Sem teto conhecido, elegibilidade ou média válida: vazio. Tabela derivada/SHA-256 e regras em docs/features/relatorio-api-excel.md; descrições na seção2 da interface.
+- **Validação:** 61 testes em cinco arquivos, incluindo limites em centavos, correspondência municipal, média exclusiva, ausência de Padrão, corte temporal e reabertura XLSX nos dois layouts. TypeScript, lint dirigido e build aprovados. Navegador com rede simulada; consulta autenticada e aceite com dados reais não executados.
+- **Etapas/Pendências:** implementação local concluída; publicação aguarda autorização. Base atualizada por fast-forward para7cacaf8, preservando auditoria local. Padrões de seleção de colunas e descrições existentes reutilizados; sem novo controle/carregamento. Sem push/Monday.
+- **Monday:** —
 
 ### 27/10 — Estimativas: protótipo Claude Design adaptado — Gabriel/sessão
 - Estado: validado localmente; push autorizado por Gabriel. [Fonte, decisões e limites](../features/estimativas-vendas/PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md#10-adaptação-do-zip-claude-design-e-envio-autorizado--2710).
