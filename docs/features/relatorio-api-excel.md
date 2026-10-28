@@ -123,6 +123,8 @@ Testes do coletor cobrem contrato copiado, registros repetidos, escopos, falha d
 
 ## Faixa MCMV — base municipal 2026
 
+Preço Médio para Faixa MCMV expõe exatamente o valor utilizado na classificação, ponderado pela oferta lançada somente das tipologias Padrão, independente da opção geral de média. Fica após Faixa MCMV, disponível em Selecionar colunas. Tabular: preço do período da linha. Horizontal: preço final e série por mês/trimestre, expandida somente ao gerar. Valores em reais com duas casas, sem escala VGV; ausência de base válida fica vazia. A média pode existir sem classificação quando o produto/padrão não for elegível ou o preço ultrapassar o teto.
+
 Exclusiva deste relatório, calculada em Gerar relatório após coleta completa. Campo selecionável ao lado de Padrão, preservando o original. No tabular, Faixa MCMV corresponde ao período da linha. No horizontal, a coluna final e as colunas Faixa MCMV mês/trimestre ficam imediatamente após Padrão, antes de Tipologia. Selecionar Faixa MCMV inclui a série histórica sem abrir períodos no seletor. Resultado: `Econômico - Faixa 2`, `Standard - Faixa 3`, etc.
 
 - Elegíveis: building_type Vertical e standard Econômico/Standard, normalizando acentos/caixa/espaços.

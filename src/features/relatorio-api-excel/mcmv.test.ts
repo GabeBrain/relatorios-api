@@ -57,6 +57,27 @@ describe('Faixa MCMV — regras locais do Relatório API Excel', () => {
       ['2', 'fev/2026', 'Econômico - Faixa 3'], ['3', 'fev/2026', 'Econômico - Faixa 3'],
     ]);
   });
+  it.each(['columns', 'rows'] as const)('exporta o preço exato usado na faixa MCMV no layout %s, sem escala VGV', async (layout) => {
+    const field = 'Preço Médio para Faixa MCMV';
+    const result = buildReport([building], { ...options, layout, buildingAverageMode: 'simple', vgvScale: 'million' });
+    expect(result.rows[0][field]).toBe(layout === 'rows' ? 100000 : 275000);
+    if (layout === 'columns') {
+      expect(result.rows[0][`${field} jan/2026`]).toBe(100000);
+      expect(result.rows[0][`${field} fev/2026`]).toBe(275000);
+    } else {
+      expect(result.rows.find((row) => row['Período'] === 'fev/2026')![field]).toBe(275000);
+    }
+    const selected = selectReportFields(result, [field]);
+    const workbook = await createWorkbook(selected);
+    const reopened = read(write(workbook, { bookType: 'xlsx', type: 'array' }), { type: 'array', cellNF: true });
+    const sheet = reopened.Sheets[reopened.SheetNames[0]];
+    expect(sheet.A2.v).toBe(layout === 'rows' ? 100000 : 275000);
+    expect(sheet.A2.t).toBe('n');
+    expect(sheet.A2.z).toBe('0.00');
+    expect(selected.columns).toEqual(layout === 'rows' ? [field] : [field, `${field} jan/2026`, `${field} fev/2026`]);
+    const absent = { ...building, typologies_history: [{ typology_id: 1, type_of_typology: 'Garden', period: '2026-02-28', price: 200000, qty: 10 }] };
+    expect(buildReport([absent], { ...options, layout }).rows[0][field]).toBeNull();
+  });
   it.each(['month', 'quarter'] as const)('exclui históricos anteriores ao mês de lançamento e linhas sem fechamento em %s', (granularity) => {
     const data = { ...building, release_date: '2026-02-15' };
     const result = buildReport([data], { ...options, granularity, layout: 'rows' });

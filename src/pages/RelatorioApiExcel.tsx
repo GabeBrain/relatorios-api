@@ -29,7 +29,7 @@ function display(column: string, value: Cell, scale: VgvScale = 'standard') {
   if (result === null) return '';
   if (typeof result !== 'number') return result;
   if (PERCENT_COLUMNS.has(column)) return result.toLocaleString('pt-BR', { style: 'percent', minimumFractionDigits: 2 });
-  return result.toLocaleString('pt-BR', { maximumFractionDigits: 2, minimumFractionDigits: column.startsWith('VGV') ? 2 : 0 });
+  return result.toLocaleString('pt-BR', { maximumFractionDigits: 2, minimumFractionDigits: column.startsWith('VGV') || column.startsWith('Preço Médio para Faixa MCMV') ? 2 : 0 });
 }
 
 export default function RelatorioApiExcel() {

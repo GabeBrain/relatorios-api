@@ -33,7 +33,7 @@ export interface ReportOptions {
 }
 export const FIXED_COLUMNS = [
   'ID Empreendimento', 'ID Tipologia', 'Status Empreendimento', 'Status Tipologia',
-  'Região', 'Região Administrativa', 'Cidade/UF', 'Tipo', 'Padrão', 'Faixa MCMV', 'Tipologia',
+  'Região', 'Região Administrativa', 'Cidade/UF', 'Tipo', 'Padrão', 'Faixa MCMV', 'Preço Médio para Faixa MCMV', 'Tipologia',
   'Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado', 'Tempo de Vendas', 'Empreendimentos',
   'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Incorporadoras', 'Unidades por Tipologia', 'Unidades Totais do Empreendimento',
   'Data de Lançamento', 'Ano', 'Data de Entrega', 'Quartos', 'Garagem', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
@@ -241,13 +241,16 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
     const mcmvAverage = buildingAverage([...typologies.values()].map((history) => history.at(-1)!.entry), 'quantity-standard');
     const mcmv = mcmvBand(building, mcmvAverage);
     const historicalMcmv: string[] = [];
+    const historicalMcmvPrices: (number | null)[] = [];
     const averages = periods.map((period, index) => {
       const snapshots = [...typologies.values()].flatMap((history) => {
         const snapshot = history.filter(({ date }) => date >= options.from && periodOf(date, options.granularity).key === period.key).at(-1);
         return snapshot ? [snapshot.entry] : [];
       });
       const average = buildingAverage(snapshots, options.buildingAverageMode);
-      historicalMcmv.push(mcmvBand(building, buildingAverage(snapshots, 'quantity-standard')));
+      const mcmvPrice = buildingAverage(snapshots, 'quantity-standard');
+      historicalMcmvPrices.push(mcmvPrice);
+      historicalMcmv.push(mcmvBand(building, mcmvPrice));
       if (average !== null) {
         series[index]['Preço Médio Empreendimento'] = (numeric(series[index]['Preço Médio Empreendimento']) ?? 0) + average;
         priceCounts[index].set('Preço Médio Empreendimento', (priceCounts[index].get('Preço Médio Empreendimento') ?? 0) + 1);
@@ -260,12 +263,14 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       const currentPrice = numeric(history.at(-1)!.entry.price);
       const fixed = fixedRow(building, id, history);
       fixed['Faixa MCMV'] = mcmv;
+      fixed['Preço Médio para Faixa MCMV'] = mcmvAverage;
       const wide: Row = { ...fixed };
       for (const [index, period] of periods.entries()) {
         const entries = inRange.filter(({ date }) => periodOf(date, options.granularity).key === period.key);
         const last = entries.at(-1)?.entry;
         const beforeRelease = releaseKey !== null && period.key < releaseKey;
         wide[`Faixa MCMV ${period.label}`] = last ? historicalMcmv[index] : '';
+        wide[`Preço Médio para Faixa MCMV ${period.label}`] = last ? historicalMcmvPrices[index] : null;
         const gross = sumField(entries, 'gross_sales');
         const cancellations = sumField(entries, 'distractions');
         const net = gross === null || cancellations === null ? null : gross - cancellations;
@@ -293,7 +298,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
             if (PRICE_MEASURES.has(metric)) priceCounts[index].set(metric, (priceCounts[index].get(metric) ?? 0) + 1);
           }
         }
-        if (options.layout === 'rows' && last && !beforeRelease) longRows.push({ ...fixed, 'Faixa MCMV': historicalMcmv[index], 'Período': period.label, ...values });
+        if (options.layout === 'rows' && last && !beforeRelease) longRows.push({ ...fixed, 'Faixa MCMV': historicalMcmv[index], 'Preço Médio para Faixa MCMV': historicalMcmvPrices[index], 'Período': period.label, ...values });
       }
       wideRows.push(wide);
     }
@@ -308,7 +313,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       || text(a['ID Tipologia']).localeCompare(text(b['ID Tipologia']), undefined, { numeric: true });
   };
   const columns = options.layout === 'columns'
-    ? [...FIXED_COLUMNS.flatMap((column) => column === 'Faixa MCMV' ? [column, ...periods.map((period) => `Faixa MCMV ${period.label}`)] : [column]), ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
+    ? [...FIXED_COLUMNS.flatMap((column) => ['Faixa MCMV', 'Preço Médio para Faixa MCMV'].includes(column) ? [column, ...periods.map((period) => `${column} ${period.label}`)] : [column]), ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
     : [...FIXED_COLUMNS, 'Período', ...MEASURES];
   return { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length, typologyRows: wideRows, vgvScale: options.vgvScale ?? 'standard' };
 }
@@ -319,6 +324,7 @@ export function selectReportFields(report: Report, fields: string[] | null): Rep
   const selected = new Set(fields);
   const columns = report.columns.filter((column) => selected.has(column)
     || (selected.has('Faixa MCMV') && column.startsWith('Faixa MCMV '))
+    || (selected.has('Preço Médio para Faixa MCMV') && column.startsWith('Preço Médio para Faixa MCMV '))
     || MEASURES.some((measure) => selected.has(measure) && column.startsWith(`${measure} `)));
   return selectedReport(report, columns);
 }
@@ -346,7 +352,7 @@ export async function createWorkbook(report: Report) {
   const { utils } = await import('xlsx');
   const worksheet = utils.aoa_to_sheet([report.columns, ...report.rows.map((row) => report.columns.map((column) => exportValue(column, row[column], report.vgvScale)))]);
   for (const [index, column] of report.columns.entries()) {
-    const z = PERCENT_COLUMNS.has(column) ? '0.00%' : column.startsWith('VGV') ? '0.00' : undefined;
+    const z = PERCENT_COLUMNS.has(column) ? '0.00%' : column.startsWith('VGV') || column.startsWith('Preço Médio para Faixa MCMV') ? '0.00' : undefined;
     if (!z) continue;
     for (let row = 1; row <= report.rows.length; row++) {
       const cell = worksheet[utils.encode_cell({ r: row, c: index })];

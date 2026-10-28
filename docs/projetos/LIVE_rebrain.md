@@ -384,6 +384,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+### 28/10 — Relatório API Excel: preço usado na Faixa MCMV — Edgar / Codex
+
+- **Mudança exclusiva:** campo selecionável Preço Médio para Faixa MCMV após Faixa MCMV, com o mesmo resultado quantity-standard passado ao classificador. Tabular usa período da linha; horizontal conserva posição final e série histórica. Não altera fórmula/limites/elegibilidade. Reais com duas casas em prévia/XLSX, sem escala VGV; sem base válida fica vazio.
+- **Validação:** testes dos dois layouts com janeiro100.000/fevereiro275.000, exclusão de Garden, independência da média geral/escala VGV, seleção e XLSX reaberto com valor numérico e duas casas. Tipos/lint dirigidos; sem API autenticada ou ensaio visual novo.
+- **Etapas/Pendências:** implementado localmente, publicação aguarda autorização; base66cce08, commit desta entrada. Sem push/Monday. AELO/Dashboard intactos.
+- **Monday:** —
+
 ### 28/10 — Relatório API Excel: unidades totais e conferência da base MCMV — Edgar / Codex
 
 - **Análise:** confirmado que MCMV atual e histórico usam quantity-standard: soma price×qty / soma qty somente tipologias Padrão, excluindo Garden/Cobertura. Mantida regra anterior até confirmação explícita de incluir todas as tipologias.

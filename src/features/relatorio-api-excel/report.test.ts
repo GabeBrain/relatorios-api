@@ -144,7 +144,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
       'Preço Médio Empreendimento', 'Preço m²', 'VGV Lançado', 'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'];
     expect([...MEASURES]).toEqual(expected);
     const wide = report({ granularity });
-    expect(wide.columns.slice(FIXED_COLUMNS.length + wide.periods.length)).toEqual(expected.flatMap((metric) => wide.periods.map(({ label }) => `${metric} ${label}`)));
+    expect(wide.columns.slice(FIXED_COLUMNS.length + 2 * wide.periods.length)).toEqual(expected.flatMap((metric) => wide.periods.map(({ label }) => `${metric} ${label}`)));
     const tabular = report({ granularity, layout: 'rows' });
     expect(tabular.columns.slice(FIXED_COLUMNS.length)).toEqual(['Período', ...expected]);
     expect(FIXED_COLUMNS).not.toContain('VGV Lançado');
@@ -323,7 +323,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     const after = (field: string, length: number) => FIXED_COLUMNS.slice(FIXED_COLUMNS.indexOf(field) + 1, FIXED_COLUMNS.indexOf(field) + 1 + length);
     expect(after('Região', 1)).toEqual(['Região Administrativa']);
     expect(after('Cidade/UF', 1)).toEqual(['Tipo']);
-    expect(after('Padrão', 2)).toEqual(['Faixa MCMV', 'Tipologia']);
+    expect(after('Padrão', 3)).toEqual(['Faixa MCMV', 'Preço Médio para Faixa MCMV', 'Tipologia']);
     expect(after('Unidades por Tipologia', 1)).toEqual(['Unidades Totais do Empreendimento']);
     expect(after('Tipologia', 3)).toEqual(['Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado']);
     expect(after('Data de Entrega', 2)).toEqual(['Quartos', 'Garagem']);
