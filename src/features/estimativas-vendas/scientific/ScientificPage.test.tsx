@@ -40,6 +40,10 @@ describe('jornada de estudos', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Executar retrospectiva' }));
     await screen.findByRole('region', { name: 'Resultados da retrospectiva' });
     expect(screen.getByText(/não constituem validação independente/)).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Desenho do estudo' })).toHaveAttribute('data-collapsed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'Rever desenho do estudo' }));
+    expect(screen.getByRole('region', { name: 'Desenho do estudo' })).toHaveAttribute('data-collapsed', 'false');
+    expect(screen.getByRole('region', { name: 'Nível de evidência' })).toBeTruthy();
     fireEvent.change(screen.getByPlaceholderText('Nome ou ID'), { target: { value: 'não existe' } });
     expect(screen.getByText(/Nenhum empreendimento corresponde/)).toBeTruthy();
     expect(screen.getByRole('region', { name: 'Resultados da retrospectiva' })).toBeTruthy();

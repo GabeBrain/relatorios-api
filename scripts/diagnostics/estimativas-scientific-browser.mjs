@@ -2,7 +2,7 @@ import { chromium } from '@playwright/test';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { unzipSync, strFromU8 } from 'fflate';
 import assert from 'node:assert/strict';
-const folder = '.local-inputs/estimativas-vendas/curitiba-ciencia-20261027/browser';
+const folder = process.env.ESTIMATIVAS_EVIDENCE_DIR ?? '.local-inputs/estimativas-vendas/curitiba-ciencia-20261027/browser';
 await mkdir(folder, { recursive: true });
 const base = process.env.ESTIMATIVAS_LOCAL_URL ?? 'http://127.0.0.1:8083/rebrain/estimativas-vendas';
 function fixture(i, type) {
@@ -48,11 +48,16 @@ try {
     await page.getByRole('region', { name: 'Catálogo de estudos' }).waitFor({ timeout: 90000 });
     await page.evaluate(t => document.documentElement.classList.toggle('dark', t === 'dark'), theme);
     assert.equal(test.calls(), 4);
+    await page.getByText('Por que as contagens não se somam?', { exact: true }).click();
+    await page.getByRole('table', { name: 'Empreendimentos em comum entre condições' }).waitFor();
     await page.screenshot({ path: `${folder}/${width}-${theme}-catalog.png`, fullPage: true });
     await page.getByRole('button', { name: /Panorama de Curitiba/ }).click();
+    await page.getByRole('region', { name: 'Período explicado' }).waitFor();
     await page.getByRole('button', { name: 'Executar retrospectiva', exact: true }).click();
     await page.getByRole('region', { name: 'Resultados da retrospectiva' }).waitFor({ timeout: 90000 });
     await page.getByRole('img', { name: /Erro médio em unidades/ }).waitFor();
+    await page.getByRole('region', { name: 'Nível de evidência' }).waitFor();
+    await page.getByRole('navigation', { name: 'Jornada do estudo' }).getByRole('button', { name: /Investigar casos/ }).click();
     const callCount = test.calls();
     await page.getByPlaceholder('Nome ou ID').fill('ausente'); await page.getByText(/Nenhum empreendimento corresponde/).waitFor();
     await page.getByPlaceholder('Nome ou ID').fill('');

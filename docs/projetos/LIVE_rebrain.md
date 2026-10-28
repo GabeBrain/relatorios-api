@@ -385,6 +385,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 27/10 — Estimativas: protótipo Claude Design adaptado — Gabriel/sessão
+- Estado: validado localmente; push autorizado por Gabriel. [Fonte, decisões e limites](../features/estimativas-vendas/PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md#10-adaptação-do-zip-claude-design-e-envio-autorizado--2710).
+- Jornada em etapas, período/timeline, amostra/métodos, cartões/proporções/sobreposição, níveis de evidência, explicações dos gráficos, painel de ajustes e premissas recolhidas após cálculo. Dados/motores/guardas e Preparar lote preservados.
+- ZIP original ignorado; textura de marca incorporada. Tokens SE intactos; não transportar cálculos, limites, cores/tokens ou backend fictícios do protótipo.98testes/tipos/lint/build e QA responsiva do preview; nenhuma nova alegação estatística. Publicação/site ainda exigem conferência após envio.
+- Monday: [Estimativas de vendas](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`. Nenhuma escrita.
+
 ### 27/10 — Bancada científica Curitiba local — Gabriel/sessão
 - Estado: validado localmente, sem push/deploy. [Execução, testes e limites](../features/estimativas-vendas/PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md#9-execução-local-em-2710--evidência-e-limites); evidência agregada vinculada ali, brutos ignorados.
 - Entrada por estudos/condições, retrospectiva em worker, métricas pareadas, gráficos amplos, detalhe/equação, carteira/sobreposição e ZIP de evidências. Preparar lote e motores Finotti preservados; Excel opcional reutilizado. Sem edição de parâmetros ou ampliação silenciosa do domínio.
