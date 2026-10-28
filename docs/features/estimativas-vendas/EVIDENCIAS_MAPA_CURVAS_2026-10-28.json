@@ -23,6 +23,7 @@
   "limitations": ["tempos sintéticos não são SLA da API", "sem validação independente de precisão", "sem faixa calibrada", "sem mudança de motores ou homologação Geobrain", "última linha do grid pode ficar incompleta para preservar áreas comparáveis"],
   "settingsAndBuffer": {
     "date": "2026-10-28",
+    "implementationCommitSentToOriginMain": "b0757b2",
     "vitestPassed": 119,
     "testFiles": 18,
     "settingsBrowser": [{ "width": 1440, "theme": "light", "galleryPerPage": 12 }, { "width": 1440, "theme": "dark", "galleryPerPage": 12 }, { "width": 390, "theme": "light", "galleryPerPage": 4 }],
