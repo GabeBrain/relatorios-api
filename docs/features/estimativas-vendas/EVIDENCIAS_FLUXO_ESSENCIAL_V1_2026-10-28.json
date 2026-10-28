@@ -1,0 +1,191 @@
+{
+  "schema": "essential-flow-v1-verification",
+  "date": "2026-10-28",
+  "state": "validated-locally",
+  "published": false,
+  "productionVerified": false,
+  "importHomologated": false,
+  "merge": "86b716e",
+  "zipSha256": "dc961e4201b9b72ad1898a047871e2fee3695e544c0c149e5de16ba7dfd89da1",
+  "tokensSha256": "0802b707b8c511e3367b1e4a235cea6a268edb9ac8f217a2beb965fc30874eac",
+  "tests": {
+    "feature": {
+      "files": 15,
+      "passed": 113
+    },
+    "operational": {
+      "passed": 15
+    },
+    "mergedExcel": {
+      "files": 2,
+      "passed": 57
+    },
+    "appTypecheck": "passed",
+    "lint": "0 errors, 0 warnings",
+    "buildStatus": 0
+  },
+  "browser": {
+    "surface": "standalone Chromium headless; no connected browser available",
+    "matrix": [
+      {
+        "width": 1440,
+        "theme": "light",
+        "success": true,
+        "calls": 4,
+        "peak": 1,
+        "errors": []
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "success": true,
+        "calls": 4,
+        "peak": 1,
+        "errors": []
+      },
+      {
+        "width": 768,
+        "theme": "light",
+        "success": true,
+        "calls": 4,
+        "peak": 1,
+        "errors": []
+      },
+      {
+        "width": 768,
+        "theme": "dark",
+        "success": true,
+        "calls": 4,
+        "peak": 1,
+        "errors": []
+      },
+      {
+        "width": 390,
+        "theme": "light",
+        "success": true,
+        "calls": 4,
+        "peak": 1,
+        "errors": []
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "success": true,
+        "calls": 4,
+        "peak": 1,
+        "errors": []
+      },
+      {
+        "mode": "empty",
+        "success": true
+      },
+      {
+        "mode": "fail",
+        "success": true
+      },
+      {
+        "mode": "cancel",
+        "success": true
+      },
+      {
+        "mode": "unauthorized",
+        "success": true
+      }
+    ],
+    "localFolder": ".local-inputs/estimativas-vendas/essencial-v1-20261028/browser-final",
+    "finalLayout": "chart before rulers; unavailable methods absent from legend"
+  },
+  "realApi": {
+    "readOnly": true,
+    "buildPreview": "http://127.0.0.1:8086/rebrain/estimativas-vendas",
+    "buildings": 1996,
+    "requests": 21,
+    "allHttp200": true,
+    "sourceHash": "30b1a66d859342503bebc9848de60440caa4535a08e01553a13f140e7f9590a9",
+    "loadSeconds": 76.1682629,
+    "firstCurveSeconds": 78.06201,
+    "interactions": 20,
+    "p50Ms": 95.8012000000017,
+    "p95Ms": 546.4199999999983,
+    "requestsDuringAnalysis": 0,
+    "javascriptErrors": 0,
+    "localResult": ".local-inputs/estimativas-vendas/essencial-v1-20261028/live/result.json",
+    "note": "API measurements precede only final ruler placement/legend changes; same mathematical engine, worker/cache and package generation."
+  },
+  "machine": {
+    "platform": "win32",
+    "arch": "x64",
+    "cpu": "AMD Ryzen 7 4800H with Radeon Graphics         ",
+    "node": "v24.14.1"
+  },
+  "sample": {
+    "rawSnapshotSha256": "e9318db6449f1f7cf8dac04ecf8c057d6e2f8b93a5c2a34f3c1a8ec39c6cc3f9",
+    "cutoff": "2026-09",
+    "buildings": 1996,
+    "selectedConditions": [
+      {
+        "condition": "tipologia_unica_finotti",
+        "available": true,
+        "method": "finotti-reference",
+        "typologies": 1,
+        "start": "2026-09",
+        "candidateStructure": true
+      },
+      {
+        "condition": "varias_tipologias_finotti",
+        "available": true,
+        "method": "finotti-reference",
+        "typologies": 4,
+        "start": "2026-09",
+        "candidateStructure": false
+      },
+      {
+        "condition": "estoque_antigo",
+        "available": true,
+        "method": "stock-trend",
+        "typologies": 5,
+        "start": "2026-09",
+        "candidateStructure": false
+      },
+      {
+        "condition": "esgotado_atual_com_estoque_passado",
+        "available": true,
+        "method": "stock-trend",
+        "typologies": 1,
+        "start": "2026-08",
+        "candidateStructure": true
+      },
+      {
+        "condition": "historico_curto",
+        "available": true,
+        "method": "constant",
+        "typologies": 2,
+        "start": "2026-09",
+        "candidateStructure": false
+      }
+    ],
+    "noImportableRows": true
+  },
+  "realWorkbook": {
+    "columns": 26,
+    "rows": 12,
+    "idsAsText": true,
+    "pendingFieldsBlank": true,
+    "estimatedFlag": true,
+    "importable": false
+  },
+  "limitations": [
+    "Per-period provenance and official cadence unknown",
+    "Finotti before reference training remains blocked",
+    "No independent statistical validation or new calibration",
+    "No typology allocation, price policy or real-data reconciliation invented",
+    "Candidate is not homologated for Geobrain import"
+  ],
+  "artifacts": {
+    "sample": ".local-inputs/estimativas-vendas/essencial-v1-20261028/amostra-revisavel.json",
+    "realPackage": ".local-inputs/estimativas-vendas/essencial-v1-20261028/live/package.zip",
+    "buildLog": ".local-inputs/estimativas-vendas/essencial-v1-20261028/build.log",
+    "testsLog": ".local-inputs/estimativas-vendas/essencial-v1-20261028/tests.log",
+    "lintLog": ".local-inputs/estimativas-vendas/essencial-v1-20261028/lint.log"
+  }
+}

@@ -1,5 +1,7 @@
 # Contrato candidato e plano de validação
 
+**Estado de implementação em 28/10:** a [V1 do fluxo essencial](PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md#8-execução-em-2810--implementação-e-limites-concretos) implementa pacote analítico e XLSX candidato com as 26 colunas abaixo, apenas onde há tipologia única identificada e período ainda ausente. Campos sem regra ficam vazios, com pendências no manifesto; cadência desconhecida gera somente linhas mensais analíticas explicitamente NÃO IMPORTAR. Comparações históricas não geram linhas candidatas sobre dados existentes. O exportador não resolve elegibilidade operacional, homologação, nulos aceitos ou contrato externo; nenhuma linha é declarada importável. Evidências de reabertura dos arquivos estão vinculadas ao plano.
+
 **Atualização vigente27/10:** [seleção operacional, mapa de entrada/saída, amostra Excel e perguntas Belogic](ENTREGA_CANDIDATA_OPERACIONAL_2026-10-27.md). Motores horizontal/vertical, caudas e faixas já reproduzidos; as pendências antigas desses itens abaixo são históricas. Contrato externo continua aberto. AnexosIVV06/10 agora foram inspecionados: dicionário ajuda na semântica, mas não é layout de importação aceito. Um candidato numérico e10exemplos de seleção preparados; nenhum registro autorizado/importável.
 
 ## Referência de saída escolhida para detalhamento — IVV/Qlik,27/10

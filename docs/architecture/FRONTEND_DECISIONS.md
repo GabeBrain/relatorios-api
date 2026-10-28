@@ -1,3 +1,11 @@
+## 28/10/2026 — Estimativas: exploração temporal e exportação revisada
+
+Contexto: a jornada científica exigia escolher estudo e executar antes de ver curvas. A nova entrada apresenta empreendimentos após a carga e usa o mesmo gráfico para projeção e comparação histórica.
+
+Escolha: `experience/` orquestra universo completo, controles e seleção explícita; motores e políticas continuam em seus módulos. Worker ES persistente recebe snapshot uma vez, prioriza detalhe/lista e usa cache limitado; resultados antigos são identificados durante atualização e nunca recebem rótulo da configuração nova. O cache quente é exibido diretamente. Não há persistência de base privada/token na URL ou armazenamento adicional.
+
+Consequência: filtros e zoom não consultam novamente a API nem alteram a seleção; revisão de exportação congela IDs/período e recalcula o que falta. Arquivos candidatos permanecem NÃO IMPORTAR enquanto contrato externo estiver pendente. GeoApiScopeEngine, BrainLoadingState, Dialog/Select/Input/Button, Recharts e tokens SE v0.1 preservados. Preparação operacional e estudos anteriores acessíveis secundariamente. [Plano e evidências](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md).
+
 ## 27/10/2026 — Estudos de estimativas e processamento local
 
 Rota lazy de Estimativas passa à jornada de estudos científicos; a preparação operacional é carregada sob demanda em acesso secundário, preservando o estado da bancada ao voltar. Primitives Select/Dialog/Button, GeoApiScopeEngine, BrainLoadingState e tokens Geobrain v0.1 intactos. Novo conteúdo usa Archivo/JetBrains conforme fundação SE; shell legado mantido. Sem novo primitive ou token.

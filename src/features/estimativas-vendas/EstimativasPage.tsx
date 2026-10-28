@@ -39,7 +39,7 @@ function Scenario({ cutoff }: {
     const result = forecast(origin, 'absorption', 24, { version: 'manual-k-v1', model: 'absorption', segment: 'unknown', trainedThrough: origin.cutoff, trainingIds: [], k: v.k, scope: 'manual', provenance: 'unknown' });
     return <details className="ev-panel"><summary className="cursor-pointer font-medium">Criar cenário com parâmetros informados</summary><p className="ev-note my-4">Pode representar horizontal, vertical ou comercial. Estes valores são hipóteses suas; não substituem dados da API.</p><div className="ev-controls">{(['units', 'sold', 'age', 'k'] as const).map(key => <label key={key}>{{ units: 'Unidades', sold: 'Vendidas', age: 'Meses no mercado', k: 'Forma k' }[key]}<Input type="number" step={key === 'k' ? .01 : 1} value={v[key]} onChange={e => setV({ ...v, [key]: Number(e.target.value) })}/></label>)}</div>{result.forecast ? <ForecastChart rows={result.forecast.points.map(p => ({ x: p.period, predicted: p.predicted }))}/> : <p role="alert">{result.reason}</p>}</details>;
 }
-export { default } from './scientific/ScientificPage';
+export { default } from './experience/ExperiencePage';
 export function EstimativasExploration() {
     const [geo, setGeo] = useState<GeoScope>({ uf: '', city: '' });
     const scope = useGeoApiScope({ value: geo, onChange: setGeo });
