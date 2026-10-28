@@ -187,5 +187,7 @@
     "buildLog": ".local-inputs/estimativas-vendas/essencial-v1-20261028/build.log",
     "testsLog": ".local-inputs/estimativas-vendas/essencial-v1-20261028/tests.log",
     "lintLog": ".local-inputs/estimativas-vendas/essencial-v1-20261028/lint.log"
-  }
+  },
+  "implementationCommit": "d683df3",
+  "liveDocsGate": "passed; non-blocking size warnings, no eligible entries before 2026-10-21"
 }
