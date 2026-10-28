@@ -72,6 +72,29 @@ describe('Relatório API Excel — geração explícita', () => {
     expect(resultButtons.indexOf(generate)).toBeLessThan(resultButtons.indexOf(download));
   });
 
+  it('separa nível de seleção, remove campos incompatíveis e exige nova geração ao trocar', async () => {
+    render(<RelatorioApiExcel />);
+    fireEvent.click(screen.getByRole('button', { name: 'Carregar' }));
+    const columns = await screen.findByRole('region', { name: 'Colunas de exportação' });
+    expect(within(columns).getByText('ID Tipologia', { exact: true })).toBeVisible();
+    expect(screen.getByLabelText('Nível do relatório')).toHaveTextContent('Por tipologia');
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Baixar Excel' })).toBeEnabled());
+    fireEvent.click(screen.getByLabelText('Nível do relatório'));
+    fireEvent.click(screen.getByRole('option', { name: 'Por empreendimento', exact: true }));
+    for (const field of ['ID Tipologia', 'Garagem', 'Vendas Brutas', 'Unidades por Tipologia']) expect(within(columns).queryByText(field, { exact: true })).not.toBeInTheDocument();
+    expect(within(columns).getByText('Faixa MCMV', { exact: true })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Baixar Excel' })).toBeDisabled();
+    expect(engine.buildReport).toHaveBeenCalledTimes(1);
+    fireEvent.click(within(columns).getByRole('button', { name: 'Limpar seleção' }));
+    fireEvent.click(within(columns).getByText('Empreendimentos', { exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
+    await waitFor(() => expect(engine.buildReport).toHaveBeenCalledTimes(2));
+    expect(vi.mocked(engine.buildReport).mock.calls[1][1].level).toBe('building');
+    expect(screen.getAllByRole('columnheader').map((node) => node.textContent)).toEqual(['Empreendimentos']);
+    expect(fetchBuildings).toHaveBeenCalledTimes(1);
+  });
+
   it('não gera relatório quando a coleta falha', async () => {
     vi.mocked(fetchBuildings).mockRejectedValueOnce(new Error('HTTP 503'));
     render(<RelatorioApiExcel />);

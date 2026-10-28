@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { read, utils, write } from 'xlsx';
-import { buildReport, createWorkbook, dateBounds, exportValue, FIXED_COLUMNS, isoDate, MEASURES, REPORT_FIELDS, selectReportFields, selectedReport, type ReportOptions } from './report';
+import { buildReport, createWorkbook, dateBounds, exportValue, FIXED_COLUMNS, isoDate, MEASURES, REPORT_FIELDS, reportFields, selectReportFields, selectedReport, type ReportOptions } from './report';
 import type { RawBuilding } from './api';
 
 const building: RawBuilding = {
@@ -24,7 +24,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
       ...building.typologies_history as Record<string, unknown>[],
       { typology_id: 21, period: '2026-02-28', price: 220000, qty: 30 },
     ] }];
-    const complete = report({ layout }, data);
+    const complete = report({ layout, level: 'building' }, data);
     const original = JSON.stringify(complete);
     const fields = ['ID Empreendimento', 'Empreendimentos', 'Unidades Totais do Empreendimento', 'Preço Médio Empreendimento', 'Período'];
     const grouped = selectReportFields(complete, fields);
@@ -44,12 +44,20 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     const reopened = read(write(workbook, { type: 'array', bookType: 'xlsx' }), { type: 'array' });
     expect(utils.sheet_to_json(reopened.Sheets[reopened.SheetNames[0]])).toHaveLength(grouped.rows.length);
     expect(JSON.stringify(complete)).toBe(original);
+    const detailed = report({ layout, level: 'typology' }, data);
+    expect(detailed.rows).toHaveLength(layout === 'rows' ? 4 : 2);
+    expect(selectReportFields(detailed, ['ID Empreendimento']).rows).toHaveLength(detailed.rows.length);
+    expect(selectReportFields(complete, ['Empreendimentos']).rows).toHaveLength(layout === 'rows' ? 3 : 1);
+    const all = selectReportFields(complete, null);
+    for (const forbidden of ['ID Tipologia', 'Garagem', 'Unidades por Tipologia', 'Vendas Brutas', 'Estoque', 'VGV Lançado', 'Preço Atual']) {
+      expect(all.columns.some((column) => column === forbidden || column.startsWith(`${forbidden} `))).toBe(false);
+      expect(reportFields('building', layout)).not.toContain(forbidden);
+    }
   });
   it('não mistura IDs e bloqueia dados cadastrais conflitantes ao agrupar', () => {
-    const complete = report({}, [building, { ...building, building_id: 11, name: 'Outro' }]);
+    const complete = report({ level: 'building' }, [building, { ...building, building_id: 11, name: 'Outro' }]);
     expect(selectReportFields(complete, ['ID Empreendimento', 'Empreendimentos']).rows).toHaveLength(2);
-    const conflicting = report({}, [building, { ...building, name: 'Divergente' }]);
-    expect(() => selectReportFields(conflicting, ['ID Empreendimento', 'Empreendimentos'])).toThrow('divergentes');
+    expect(() => report({ level: 'building' }, [building, { ...building, name: 'Divergente' }])).toThrow('divergentes');
   });
   it('preserva cidades/padrões de fora do AELO, registros repetidos e valores mensais', () => {
     const result = report({}, [building, building]);

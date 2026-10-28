@@ -15,9 +15,11 @@ export const BUILDING_AVERAGE_OPTIONS: { value: BuildingAverageMode; label: stri
   { value: 'stock-standard', label: 'Ponderada pelo estoque (somente tip. Padrão)' },
 ];
 export type Layout = 'columns' | 'rows';
+export type ReportLevel = 'building' | 'typology';
 export type VgvScale = 'standard' | 'thousand' | 'million';
 export const VGV_UNITS: Record<VgvScale, string> = { standard: 'R$', thousand: 'R$ mil', million: 'R$ milhões' };
 export interface ReportOptions {
+  level?: ReportLevel;
   granularity: Granularity;
   priceMode: PriceMode;
   buildingAverageMode: BuildingAverageMode;
@@ -315,7 +317,8 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
   const columns = options.layout === 'columns'
     ? [...FIXED_COLUMNS.flatMap((column) => ['Faixa MCMV', 'Preço Médio para Faixa MCMV'].includes(column) ? [column, ...periods.map((period) => `${column} ${period.label}`)] : [column]), ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
     : [...FIXED_COLUMNS, 'Período', ...MEASURES];
-  return { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length, typologyRows: wideRows, vgvScale: options.vgvScale ?? 'standard' };
+  const result = { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length, typologyRows: wideRows, vgvScale: options.vgvScale ?? 'standard' };
+  return options.level === 'building' ? buildingReport(result) : result;
 }
 
 /** Expande nomes de campos somente na geração, preservando a ordem das métricas. */
@@ -327,6 +330,16 @@ const BUILDING_FIELDS = new Set([
   'Entrada', 'Nº de Parcelas', 'Valor da parcela', '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'Período',
 ]);
 
+export function reportFields(level: ReportLevel = 'typology', layout: Layout = 'columns'): string[] {
+  return REPORT_FIELDS.filter((field) => (level === 'typology' || BUILDING_FIELDS.has(field)) && (layout === 'rows' || field !== 'Período'));
+}
+
+function buildingReport(report: Report): Report {
+  const columns = report.columns.filter((column) => [...BUILDING_FIELDS].some((field) => column === field || column.startsWith(`${field} `)));
+  const grouped = groupBuildingRows(report.rows, columns);
+  return { ...selectedReport({ ...report, rows: grouped }, columns), typologyRows: groupBuildingRows(report.typologyRows ?? [], columns) };
+}
+
 export function selectReportFields(report: Report, fields: string[] | null): Report {
   if (fields === null) return report;
   const selected = new Set(fields);
@@ -334,10 +347,13 @@ export function selectReportFields(report: Report, fields: string[] | null): Rep
     || (selected.has('Faixa MCMV') && column.startsWith('Faixa MCMV '))
     || (selected.has('Preço Médio para Faixa MCMV') && column.startsWith('Preço Médio para Faixa MCMV '))
     || MEASURES.some((measure) => selected.has(measure) && column.startsWith(`${measure} `)));
-  if (!selected.has('ID Empreendimento') || !fields.every((field) => BUILDING_FIELDS.has(field))) return selectedReport(report, columns);
+  return selectedReport(report, columns);
+}
+
+function groupBuildingRows(rows: Row[], columns: string[]): Row[] {
   // Agrupa antes da projeção: mesmo sem exportar Período, mantém meses/trimestres distintos.
   const grouped = new Map<string, Row>();
-  for (const row of report.rows) {
+  for (const row of rows) {
     const id = text(row['ID Empreendimento']);
     if (!id) throw new Error('Não é possível agrupar empreendimento sem ID.');
     const key = JSON.stringify([id, row['Período'] ?? null]);
@@ -347,10 +363,10 @@ export function selectReportFields(report: Report, fields: string[] | null): Rep
       const value = row[column];
       if (value === null || value === undefined || value === '') continue;
       if (previous[column] === null || previous[column] === undefined || previous[column] === '') previous[column] = value;
-      else if (previous[column] !== value) throw new Error(`Dados de empreendimento divergentes para o ID ${id}${row['Período'] ? ` em ${row['Período']}` : ''}. Inclua ID Tipologia para conferir os registros.`);
+      else if (previous[column] !== value) throw new Error(`Dados de empreendimento divergentes para o ID ${id}${row['Período'] ? ` em ${row['Período']}` : ''}. Selecione Por tipologia para conferir os registros.`);
     }
   }
-  return selectedReport({ ...report, rows: [...grouped.values()] }, columns);
+  return [...grouped.values()];
 }
 
 export function selectedReport(report: Report, selected: string[] | null): Report {

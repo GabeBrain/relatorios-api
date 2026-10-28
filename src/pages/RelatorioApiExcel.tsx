@@ -18,8 +18,8 @@ import { FIELD_HELP, averageHelp, monetaryHelp, scaleHelp } from '@/features/rel
 import { ReportMultiSelect } from '@/features/relatorio-api-excel/ReportMultiSelect';
 import { MonthField } from '@/features/relatorio-api-excel/MonthField';
 import { fetchBuildings, type FetchProgress, type RawBuilding } from '@/features/relatorio-api-excel/api';
-import { buildReport, createWorkbook, dateBounds, exportValue, monthStart, BUILDING_AVERAGE_OPTIONS, MEASURES, VGV_UNITS, PERCENT_COLUMNS, REPORT_FIELDS, municipalityKey, selectReportFields,
-  type Cell, type Granularity, type Layout, type PriceMode, type BuildingAverageMode, type Report, type ReportOptions, type VgvScale } from '@/features/relatorio-api-excel/report';
+import { buildReport, createWorkbook, dateBounds, exportValue, monthStart, BUILDING_AVERAGE_OPTIONS, MEASURES, VGV_UNITS, PERCENT_COLUMNS, reportFields, municipalityKey, selectReportFields,
+  type Cell, type Granularity, type Layout, type ReportLevel, type PriceMode, type BuildingAverageMode, type Report, type ReportOptions, type VgvScale } from '@/features/relatorio-api-excel/report';
 
 const PAGE_SIZE = 100;
 const EMPTY_REPORT: Report = { columns: [], rows: [], periods: [], series: [], typologyCount: 0 };
@@ -52,6 +52,7 @@ export default function RelatorioApiExcel() {
   const [error, setError] = useState('');
   const [granularity, setGranularity] = useState<Granularity>('month');
   const [layout, setLayout] = useState<Layout>('columns');
+  const [level, setLevel] = useState<ReportLevel>('typology');
   const [priceMode, setPriceMode] = useState<PriceMode>('current');
   const [vgvScale, setVgvScale] = useState<VgvScale>('standard');
   const [buildingAverageMode, setBuildingAverageMode] = useState<BuildingAverageMode>('simple');
@@ -111,9 +112,9 @@ export default function RelatorioApiExcel() {
     setBuildingTypes(next);
     setSelectedStandards((current) => current === null ? null : current.filter((standard) => allowed.has(standard)));
   };
-  const options = useMemo(() => ({ granularity, layout, priceMode, buildingAverageMode, vgvScale, periodRange: 'month' as const, from, to, statuses,
+  const options = useMemo(() => ({ level, granularity, layout, priceMode, buildingAverageMode, vgvScale, periodRange: 'month' as const, from, to, statuses,
     municipalities: selectedMunicipalities, buildingTypes, standards: chosenStandards }),
-  [granularity, layout, priceMode, buildingAverageMode, vgvScale, from, to, statuses, selectedMunicipalities, buildingTypes, chosenStandards]);
+  [level, granularity, layout, priceMode, buildingAverageMode, vgvScale, from, to, statuses, selectedMunicipalities, buildingTypes, chosenStandards]);
   const signature = JSON.stringify({ options, selected });
   const stale = generated !== null && generated.signature !== signature;
   const filtered = generated?.report ?? EMPTY_REPORT;
@@ -121,7 +122,7 @@ export default function RelatorioApiExcel() {
   const vgvUnit = VGV_UNITS[report.vgvScale ?? 'standard'];
   const availableStatuses = useMemo(() => [...new Set((buildings ?? []).map((building) => String(building.status ?? '')))], [buildings]);
   const municipalities = useMemo(() => [...new Set((buildings ?? []).map(municipalityKey))].sort((a, b) => a.localeCompare(b, 'pt-BR')), [buildings]);
-  const fields = REPORT_FIELDS.filter((field) => layout === 'rows' || field !== 'Período');
+  const fields = reportFields(level, layout);
   const selectedFields = selected === null ? fields : fields.filter((field) => selected.includes(field));
   const maxPage = Math.max(0, Math.ceil(filtered.rows.length / PAGE_SIZE) - 1);
   const currentPage = Math.min(page, maxPage);
@@ -146,7 +147,7 @@ export default function RelatorioApiExcel() {
       const bounds = !from || !to ? dateBounds(buildings) : null;
       const effective = { ...options, from: monthStart(from || bounds?.from || ''), to: monthStart(to || bounds?.to || '') };
       const complete = buildReport(buildings, effective);
-      const output = selectReportFields(complete, selected);
+      const output = selectReportFields(complete, selectedFields);
       if (revision.current !== currentRevision) return;
       setGenerated({ report: output, options: effective, signature }); setPage(0);
       if (output.rows.length) toast.success('Relatório gerado. O Excel está pronto para baixar.');
@@ -164,7 +165,7 @@ export default function RelatorioApiExcel() {
       const { writeFile } = await import('xlsx');
       const { from, to, granularity, layout } = generated.options;
       const suffix = loadedScope.replace(/[^\p{L}\p{N}_-]+/gu, '_');
-      writeFile(workbook, `Relatorio_API_Excel_${suffix}_${from}_${to}_${granularity === 'month' ? 'Mensal' : 'Trimestral'}_${layout === 'rows' ? 'Tabular' : 'Colunas'}.xlsx`);
+      writeFile(workbook, `Relatorio_API_Excel_${suffix}_${from}_${to}_${granularity === 'month' ? 'Mensal' : 'Trimestral'}_${layout === 'rows' ? 'Tabular' : 'Colunas'}_${generated.options.level === 'building' ? 'Empreendimento' : 'Tipologia'}.xlsx`);
     } catch (cause) { toast.error(cause instanceof Error ? cause.message : 'Falha ao exportar Excel.'); }
     finally { setExporting(false); }
   };
@@ -199,6 +200,7 @@ export default function RelatorioApiExcel() {
             <ReportMultiSelect help={FIELD_HELP.standards} id="api-excel-standards" label="Padrão" options={standards} value={chosenStandards} onChange={setSelectedStandards} disabled={generating || exporting || !buildingTypes.length} />
             <div className="space-y-1.5"><ReportFieldLabel htmlFor="api-excel-view" help={FIELD_HELP.view}>Visão</ReportFieldLabel><Select value={granularity} onValueChange={(next: Granularity) => { setGranularity(next); }}><SelectTrigger id="api-excel-view"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="month">Mensal</SelectItem><SelectItem value="quarter">Trimestral</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><ReportFieldLabel htmlFor="api-excel-layout" help={FIELD_HELP.layout}>Layout do Excel</ReportFieldLabel><Select value={layout} onValueChange={(next: Layout) => { setLayout(next); }}><SelectTrigger id="api-excel-layout"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="columns">Valores em colunas</SelectItem><SelectItem value="rows">Tabular — períodos em linhas</SelectItem></SelectContent></Select></div>
+            <div className="space-y-1.5"><ReportFieldLabel htmlFor="api-excel-level" help="Por empreendimento: uma linha por empreendimento e período no tabular, ou por empreendimento no horizontal, com cadastro e médias. Por tipologia: preserva o detalhamento e disponibiliza todos os campos. As colunas escolhidas só definem o que exportar; não alteram o nível. Gere novamente após trocar.">Nível do relatório</ReportFieldLabel><Select value={level} onValueChange={(next: ReportLevel) => { setLevel(next); setSelected((current) => current === null ? null : current.filter((field) => reportFields(next, layout).includes(field))); setColumnSearch(''); }}><SelectTrigger id="api-excel-level"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="building">Por empreendimento</SelectItem><SelectItem value="typology">Por tipologia</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><ReportFieldLabel htmlFor="api-excel-price" help={monetaryHelp(priceMode)}>Cálculo monetário</ReportFieldLabel><Select value={priceMode} onValueChange={(next: PriceMode) => setPriceMode(next)}><SelectTrigger id="api-excel-price"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="current">Valor atual</SelectItem><SelectItem value="period">Valor do período</SelectItem></SelectContent></Select></div>
             <div className="space-y-1.5"><ReportFieldLabel htmlFor="api-excel-average" help={averageHelp(buildingAverageMode)}>Preço Médio Empreendimento</ReportFieldLabel><Select value={buildingAverageMode} onValueChange={(next: BuildingAverageMode) => setBuildingAverageMode(next)}><SelectTrigger id="api-excel-average"><SelectValue /></SelectTrigger><SelectContent>{BUILDING_AVERAGE_OPTIONS.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></div>
             <MonthField help={FIELD_HELP.from} id="api-excel-from" label="Data inicial" value={from} onChange={setFrom} />
@@ -214,9 +216,9 @@ export default function RelatorioApiExcel() {
         </section>
         <section className="space-y-3 rounded-xl border border-border bg-card p-4" aria-label="Colunas de exportação">
           <h2 className="font-semibold">3. Selecionar colunas</h2>
-          <p className="text-xs text-muted-foreground">Ao selecionar ID Empreendimento e somente campos do empreendimento, o resultado agrupa por empreendimento e período no tabular, ou por empreendimento no horizontal. Incluir campos de tipologia ou métricas como vendas e estoque mantém o detalhamento por tipologia. Totais e preços médios do empreendimento não são somados entre linhas.</p>
+          <p className="text-xs text-muted-foreground">{level === 'building' ? 'Somente campos do empreendimento estão disponíveis. Uma linha por empreendimento e período no tabular, ou por empreendimento no horizontal. Totais e médias não são somados entre tipologias.' : 'Detalhamento por tipologia. A seleção de colunas não agrupa linhas, mesmo quando ID Tipologia não é exportado.'}</p>
           <div className="flex flex-wrap items-end gap-3"><div className="w-full space-y-1 sm:w-72"><Label htmlFor="api-excel-column-search">Buscar coluna</Label><Input id="api-excel-column-search" value={columnSearch} onChange={(event) => setColumnSearch(event.target.value)} placeholder="Nome da coluna" /></div><Button variant="outline" onClick={() => setSelected(null)}>Selecionar todas</Button><Button variant="outline" onClick={() => setSelected([])}>Limpar seleção</Button><span className="text-xs text-muted-foreground">{selectedFields.length}/{fields.length} campos</span></div>
-          <div className="grid max-h-60 grid-cols-1 gap-2 overflow-auto sm:grid-cols-2 xl:grid-cols-3">{fields.filter((column) => column.toLocaleLowerCase('pt-BR').includes(columnSearch.toLocaleLowerCase('pt-BR'))).map((column) => <label key={column} className="flex items-center gap-2 text-xs"><Checkbox checked={selectedFields.includes(column)} onCheckedChange={(checked) => setSelected((old) => checked ? [...(old ?? REPORT_FIELDS), column] : (old ?? REPORT_FIELDS).filter((item) => item !== column))} />{column}</label>)}</div>
+          <div className="grid max-h-60 grid-cols-1 gap-2 overflow-auto sm:grid-cols-2 xl:grid-cols-3">{fields.filter((column) => column.toLocaleLowerCase('pt-BR').includes(columnSearch.toLocaleLowerCase('pt-BR'))).map((column) => <label key={column} className="flex items-center gap-2 text-xs"><Checkbox checked={selectedFields.includes(column)} onCheckedChange={(checked) => setSelected((old) => checked ? [...(old ?? fields), column] : (old ?? fields).filter((item) => item !== column))} />{column}</label>)}</div>
           <p className="text-xs text-muted-foreground">Selecione os campos uma vez. As colunas de mês/trimestre só serão expandidas ao gerar a visão horizontal; a seleção é mantida ao trocar visão ou layout.</p>
         </section>
         </fieldset><section className="min-w-0 space-y-3" aria-label="Resultado do relatório">

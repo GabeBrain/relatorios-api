@@ -384,6 +384,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+### 28/10 — Relatório API Excel: nível explícito e colunas compatíveis — Edgar / Codex
+
+- **Mudança exclusiva:** seletor Nível do relatório com Por empreendimento/Por tipologia (padrão), reutilizando Select e ReportFieldLabel/Tooltip Brain. Substitui agrupamento automático por campos. Motor agrupa por ID/período ou ID antes da projeção; não exige exportar ID. Seleção apenas exporta, removendo campos incompatíveis ao trocar nível e invalidando download. Por empreendimento oferece só cadastro, total de unidades, médias e MCMV; campos específicos e métricas de tipologia não constam nem no motor/Excel. Nome do arquivo informa nível.
+- **Validação:**74 testes em cinco arquivos; motor nos dois layouts, período oculto, ID não exportado, seleção todas, ausências, conflitos, preservação dos dados, reabertura XLSX e interface alternando nível sem consulta extra. Tipos/lint/build aprovados. Navegador1440/390 claro/escuro com API simulada: tipologia padrão, mudança de nível, remoção dos campos incompatíveis, download invalidado/regerado, prévia e XLSX com uma linha/30unidades sem soma, nome identificando nível, quatro chamadas de coleta e zero erro de página. Evidência local ignorada verify-level.cjs/capturas em .local-inputs/api-excel-check. Sem API autenticada/aceite real. Padrões de carregamento existentes preservados.
+- **Etapas/Pendências:** implementação local, publicação/aceite real pendentes; base1d6ad7e, commit desta entrada. Fetch de ambos sem novidades, três commits locais anteriores preservados. AELO/Dashboard/coletor intactos; sem push/Monday.
+- **Monday:** —
+
 ### 28/10 — Relatório API Excel: agrupamento por seleção de cadastro — Edgar / Codex
 
 - **Mudança exclusiva:** selecionar ID Empreendimento com campos apenas de empreendimento agrupa por ID/período no tabular e ID no horizontal. Campos de tipologia/métricas de vendas/estoque mantêm detalhe. Ocultar Período não elimina meses distintos. Médias/totais não são somados; lacunas usam valor disponível do mesmo grupo; valores preenchidos conflitantes bloqueiam com orientação. Regra descrita em Selecionar colunas, aplicada só ao gerar, prévia/XLSX iguais.
