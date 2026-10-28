@@ -21,6 +21,19 @@
   "scripts": ["scripts/diagnostics/estimativas-mosaic-browser.mjs", "scripts/diagnostics/estimativas-simple-browser.mjs"],
   "tokensSha256": "0802b707b8c511e3367b1e4a235cea6a268edb9ac8f217a2beb965fc30874eac",
   "limitations": ["tempos sintéticos não são SLA da API", "sem validação independente de precisão", "sem faixa calibrada", "sem mudança de motores ou homologação Geobrain", "última linha do grid pode ficar incompleta para preservar áreas comparáveis"],
+  "settingsAndBuffer": {
+    "date": "2026-10-28",
+    "vitestPassed": 119,
+    "testFiles": 18,
+    "settingsBrowser": [{ "width": 1440, "theme": "light", "galleryPerPage": 12 }, { "width": 1440, "theme": "dark", "galleryPerPage": 12 }, { "width": 390, "theme": "light", "galleryPerPage": 4 }],
+    "controlledCalculationDelayMs": 400,
+    "assertions": ["filtros apenas no painel lateral", "sem incluir esgotados", "galerias paginadas com busca", "controles alternáveis empilhados", "comparação com orientação e quantidade", "quadro anterior identificado e opaco ao navegar rapidamente", "nome e resultados promovidos juntos", "resposta antiga ignorada", "identidade divergente rejeitada", "zero erros JS ou overflow horizontal", "duas chamadas iniciais por cenário e nenhuma extra na exploração"],
+    "regression": { "completeJourneyScenarios": 6, "excelRows": 24, "maragogiReplayWidths": [1440, 390], "maragogiHistoricalDots": 13 },
+    "artifacts": ".local-inputs/estimativas-vendas/configuracoes-20261028/",
+    "script": "scripts/diagnostics/estimativas-settings-browser.mjs",
+    "source": "cenários sintéticos e replay do snapshot autenticado anterior; nenhuma nova consulta real nesta revisão",
+    "production": "nova revisão não conferida no site"
+  },
   "directExploration": {
     "date": "2026-10-28",
     "vitestPassed": 115,

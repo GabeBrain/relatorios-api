@@ -30,10 +30,14 @@ describe('jornada essencial', () => {
     await screen.findByRole('button', { name: 'Explorar curva de Caso de revisão' });
     await screen.findByRole('img', { name: 'Curva de vendas de Caso de revisão' });
     expect(document.querySelectorAll('main.evx-page > details').length).toBe(0);
+    expect(screen.queryByRole('group', { name: 'Tipo de empreendimento' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir configura\u00e7\u00f5es' }));
     expect(screen.getByRole('group', { name: 'Tipo de empreendimento' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Incluir esgotados' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar \u00e0s curvas' }));
     expect(screen.getByRole('button', { name: 'Explorar curva de Caso de revisão' }).closest('.evm-card')).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Selecionar Caso de revisão' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Comparação', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Comparar curvas' }));
     fireEvent.click(screen.getByRole('button', { name: 'Selecionar Caso de revisão' }));
     fireEvent.change(screen.getByPlaceholderText('Nome ou ID'), { target: { value: 'ausente' } });
     expect(screen.getByText('1 selecionados · 1 fora do filtro atual')).toBeTruthy();
@@ -44,7 +48,7 @@ describe('jornada essencial', () => {
   it('falha em atualização conserva universo anterior e troca de token elimina dados/seleção', async () => {
     const view = render(<ExperiencePage />); fireEvent.click(screen.getByRole('button', { name: 'Carregar empreendimentos' }));
     await screen.findByRole('button', { name: 'Explorar curva de Caso de revisão' });
-    fireEvent.click(screen.getByRole('button', { name: 'Comparação', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Comparar curvas' }));
     fireEvent.click(screen.getByRole('button', { name: 'Selecionar Caso de revisão' }));
     vi.mocked(loadUniverse).mockRejectedValueOnce(new Error('Segunda página indisponível'));
     fireEvent.click(screen.getByRole('button', { name: 'Atualizar dados' }));

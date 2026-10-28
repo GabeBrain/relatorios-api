@@ -20,7 +20,7 @@ describe('interação do mapa', () => {
     await act(async () => resolveOld([{ ...tile, sales: 999 }]));
     expect(screen.queryByText('999 un.')).toBeNull();
     expect(screen.getByRole('button', { name: 'Selecionar Teste' }).getAttribute('aria-pressed')).toBe('true');
-    fireEvent.click(screen.getByRole('button', { name: 'Cards detalhados' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Mostrar cards detalhados' }));
     fireEvent.click(screen.getByRole('button', { name: 'Explorar curva de Teste' }));
     expect(props.onExplore).toHaveBeenCalledWith('1', ['1']); expect(props.onToggle).not.toHaveBeenCalled();
   });

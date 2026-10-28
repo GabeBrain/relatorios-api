@@ -18,7 +18,7 @@ try {
   await page.goto(process.env.ESTIMATIVAS_LOCAL_URL ?? 'http://127.0.0.1:8087/rebrain/estimativas-vendas');
   await page.getByRole('combobox', { name: 'Estados', exact: true }).click(); await page.getByRole('option', { name: 'AL', exact: true }).click(); await page.keyboard.press('Escape'); await page.getByRole('button', { name: 'Carregar empreendimentos', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('.evm-map')?.getAttribute('aria-busy') === 'false', { timeout: 90000 });
-  await page.getByRole('button', { name: 'Por vendas previstas', exact: true }).click();
+  await page.getByRole('button', { name: 'Ordenar por vendas previstas', exact: true }).click();
   const names = await page.locator('.evm-tile').evaluateAll(els => els.map(el => el.getAttribute('aria-label').replace('Explorar curva de ', '')));
   await page.locator('.evm-tile').first().click(); let dialog = page.getByRole('dialog');
   await dialog.getByRole('img', { name: 'Histórico, previsão e dados posteriores' }).waitFor();
@@ -34,11 +34,11 @@ try {
   const overflow = await dialog.evaluate(el => ({ horizontal: el.scrollWidth > el.clientWidth + 2, vertical: el.scrollHeight > el.clientHeight + 2 })); assert.equal(overflow.horizontal, false); if (width === 1440) assert.equal(overflow.vertical, false);
   await page.screenshot({ path: `${folder}/${width}-max-tulum.png` });
   await dialog.getByRole('button', { name: 'Backtest', exact: true }).click(); await dialog.getByRole('button', { name: 'Período anterior', exact: true }).click(); await dialog.getByRole('region', { name: 'Resumo do backtest' }).waitFor();
-  await page.keyboard.press('Escape'); await page.getByPlaceholder('Nome ou ID').fill(''); await page.getByRole('button', { name: 'Comparação', exact: true }).click();
-  await page.locator('.evm-tile').nth(0).click(); assert.equal(await page.getByRole('button', { name: 'Comparar seleção', exact: true }).isEnabled(), false);
-  await page.locator('.evm-tile').nth(1).click(); assert.equal(await page.getByRole('button', { name: 'Comparar seleção', exact: true }).isEnabled(), true);
-  assert.match(await page.getByRole('button', { name: 'Comparar seleção', exact: true }).getAttribute('class'), /evx-compare-ready/);
-  await page.getByRole('button', { name: 'Comparar seleção', exact: true }).click(); await page.getByRole('dialog').getByRole('img', { name: 'Comparação de curvas' }).waitFor();
+  await page.keyboard.press('Escape'); await page.getByPlaceholder('Nome ou ID').fill(''); await page.getByRole('button', { name: 'Comparar curvas', exact: true }).click();
+  await page.locator('.evm-tile').nth(0).click(); assert.equal(await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).isEnabled(), false);
+  await page.locator('.evm-tile').nth(1).click(); assert.equal(await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).isEnabled(), true);
+  assert.match(await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).getAttribute('class'), /evx-compare-ready/);
+  await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).click(); await page.getByRole('dialog').getByRole('img', { name: 'Comparação de curvas' }).waitFor();
   assert.deepEqual(errors, []); assert.equal(calls, 2); results.push({ width, source: 'authenticated snapshot replay', buildings: buildings.length, historicalDots: dots, overflow, errors, calls }); await context.close();
  }
  await writeFile(`${folder}/browser-result.json`, JSON.stringify(results, null, 2)); console.log(JSON.stringify(results));

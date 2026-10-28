@@ -18,14 +18,14 @@ try {
   await page.getByRole('combobox', { name: 'Cidades', exact: true }).click(); await page.getByRole('option', { name: 'Curitiba/PR', exact: true }).click(); await page.keyboard.press('Escape');
   await page.evaluate(t => document.documentElement.classList.toggle('dark', t === 'dark'), theme); await page.screenshot({ path: `${folder}/${width}-${theme}-entry.png`, fullPage: true });
   await page.getByRole('button', { name: 'Carregar empreendimentos', exact: true }).click();
-  await page.getByRole('button', { name: 'Lista de curvas', exact: true }).click();
+  await page.getByRole('button', { name: 'Abrir configura\u00e7\u00f5es', exact: true }).click(); await page.getByRole('button', { name: 'Lista de curvas', exact: true }).click(); await page.getByRole('button', { name: 'Voltar \u00e0s curvas', exact: true }).click();
   await page.getByRole('button', { name: 'Explorar curva de Projeto 1', exact: true }).waitFor({ timeout: 90000 });
   await page.getByRole('img', { name: 'Curva de vendas de Projeto 1' }).waitFor();
   await page.evaluate(t => document.documentElement.classList.toggle('dark', t === 'dark'), theme);
   assert.equal(calls, 2, 'cidades escolhidas não completam SC implicitamente');
   assert.equal(await page.getByRole('button', { name: 'Selecionar Projeto 3', exact: true }).count(), 0);
   assert.equal(await page.getByRole('region', { name: 'Seleção para exportação' }).count(), 0);
-  await page.getByRole('button', { name: 'Compara\u00e7\u00e3o', exact: true }).click();
+  await page.getByRole('button', { name: 'Comparar curvas', exact: true }).click();
   await page.getByRole('button', { name: 'Selecionar Projeto 1', exact: true }).click();
   assert.equal(await page.getByRole('button', { name: 'Selecionar Projeto 1', exact: true }).getAttribute('aria-pressed'), 'true');
   await page.getByRole('button', { name: 'Explorar curva de Projeto 1', exact: true }).click();
@@ -41,15 +41,15 @@ try {
   await dialog.locator('.evf-chart-area').scrollIntoViewIfNeeded(); await page.screenshot({ path: `${folder}/${width}-${theme}-detail.png` });
   assert.equal(await dialog.evaluate(el => el.scrollWidth > el.clientWidth + 2), false);
   await page.keyboard.press('Escape'); assert.equal(await page.getByRole('button', { name: 'Selecionar Projeto 1', exact: true }).getAttribute('aria-pressed'), 'true');
-  await page.getByRole('button', { name: 'Mostrar todos', exact: true }).click();
+  await page.getByRole('button', { name: 'Abrir configura\u00e7\u00f5es', exact: true }).click(); await page.getByRole('button', { name: 'Mostrar todos', exact: true }).click(); await page.getByRole('button', { name: 'Voltar \u00e0s curvas', exact: true }).click();
   await page.getByRole('button', { name: 'Selecionar Projeto 3', exact: true }).click();
   await page.getByRole('button', { name: 'Marcar todos os Finotti', exact: true }).click();
   assert.equal(await page.getByRole('button', { name: 'Selecionar Projeto 3', exact: true }).count(), 0);
   // Projeto 2 ends in August, so the frozen reference is blocked: it must not be selected as Finotti.
-  await page.getByRole('button', { name: 'Mostrar todos', exact: true }).click();
+  await page.getByRole('button', { name: 'Abrir configura\u00e7\u00f5es', exact: true }).click(); await page.getByRole('button', { name: 'Mostrar todos', exact: true }).click(); await page.getByRole('button', { name: 'Voltar \u00e0s curvas', exact: true }).click();
   assert.equal(await page.getByRole('button', { name: 'Selecionar Projeto 3', exact: true }).getAttribute('aria-pressed'), 'false');
   await page.getByRole('button', { name: 'Selecionar Projeto 2', exact: true }).click();
-  await page.getByRole('button', { name: 'Comparar seleção', exact: true }).click();
+  await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).click();
   dialog = page.getByRole('dialog'); await dialog.getByRole('img', { name: 'Comparação de curvas' }).waitFor();
   assert.match(await dialog.getByRole('combobox', { name: 'Alinhar comparação' }).innerText(), /Tempo após/);
   await page.screenshot({ path: `${folder}/${width}-${theme}-compare.png` }); await page.keyboard.press('Escape');

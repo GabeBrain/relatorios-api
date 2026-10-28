@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 28/10/2026 — Estimativas: ajustes laterais, galerias e carrossel estável
+
+- **Entrega:** conceito aprovado por Gabriel implementado: Sheet direito agrupa projeção/disponibilidade/tipo/cidade/apresentação e informações do universo. Busca/curvas/ações no centro, marcar todos como link discreto. Comparação orienta escolher dois ou mais e informa `Comparar N curvas`. Controles mini/detalhado e nome/vendas alternáveis e empilhados. Outros/esgotados em grid paginado amplo, busca e cantos12px locais; sem `Incluir esgotados`. [Plano vigente, seção12](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md).
+- **Transição:** detalhe permanece montado; quadro publicado associa hash/ID/data/duração/métodos/versões. Nome, valores e curva continuam juntos e opacos até o próximo resultado correto. Respostas atrasadas/divergentes descartadas, até dois vizinhos preparados em cache, prioridade do detalhe preservada. Exportação/controles desabilitados enquanto pendente, setas e identidade Brain disponíveis; movimento reduzido respeitado. Motores e dados matemáticos intactos.
+- **Validação:**119Vitest/18arquivos, tipos/lint/build aprovados. Novos testes de A→B→C atrasado, duração, identidade divergente e galeria. Navegador local1440 claro/escuro e390 com cálculo atrasado400ms, paginação12/4itens e seleção orientada aprovados, sem errosJS/overflow ou consultas extras. Seis jornadas completas/Excel24linhas e replay Maragogi com13pontos preservados. [Evidência](../features/estimativas-vendas/EVIDENCIAS_MAPA_CURVAS_2026-10-28.json), campo `settingsAndBuffer`. Capturas revisadas visualmente; dados sintéticos e replay, sem nova coleta autenticada.
+- **Estado/próximo:** validado localmente; envio conforme autorização vigente da frente. Publicação e aceite da revisão no site pendentes. Contratos Belogic, origem/cadência por período, preço/rateio/reconciliação e precisão independente permanecem abertos; nenhuma homologação de importação. Alterações paralelas preservadas.
+- **Monday:** [Estimativas de vendas por empreendimento](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074`; somente referência, sem escrita.
+
 ### 28/10/2026 — Estimativas: exploração direta, carrossel e histórico Maragogi
 
 - **Entrega:** clique abre curva; modo Comparação explícito seleciona. Ações/contagem acima dos cards, barra inferior retirada, comparar habilitado com dois ou mais itens e pulso reduzível. Download coletivo conserva revisão explícita. Detalhe com gráfico dominante, histórico completo e controles abertos; método/dados/backtest em vistas próprias. Setas laterais seguem a ordenação efetiva do mapa. [Plano vigente, seção11](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md).
@@ -562,7 +570,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-**28/10 — Estimativas:** simplificação/mosaico/refinamento enviados até `20c7402`, com uso e aprovação visual relatados por Gabriel. Revisão posterior de exploração direta, comparação explícita, carrossel e histórico espaçado de Maragogi validada localmente, em envio. Estado e critérios na seção11 do plano essencial. Importação e validação independente seguem pendentes; avanço da interface não comprova cumprimento dos prazos operacionais.
+**28/10 — Estimativas:** exploração direta e histórico Maragogi enviados em `3ac4874`, com refinamento conceitual posterior aprovado por Gabriel. Nova organização com ajustes laterais, galerias e quadro estável validada localmente (119testes), em envio. Estado e critérios na seção12 do plano essencial. Importação e validação independente seguem pendentes; avanço da interface não comprova cumprimento dos prazos operacionais.
 
 **22/10 — Estimativas de vendas Finotti:** reprodução matemática local e acesso API somente leitura confirmados; [plano do dossiê](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md), [auditoria das exportações](../features/estimativas-vendas/AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md) e [plano da página editorial](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) definem fontes, recortes, carteira e interface. Guarapuava/Maringá conciliou 72 empreendimentos/124 tipologias horizontais e oito trimestres com a API/Série Histórica. Curitiba ampliou a evidência: 371 empreendimentos/693 tipologias horizontais, 14.154 vendas e 14.154 estoques numéricos comparáveis iguais à API em 11/2024–09/2026. A API preenche posições `-` do Excel, e um vertical exportado falta na API; completude não é idêntica. `bases.estimation` foi confirmado para a base/período por mensagem encaminhada, mas a linhagem ainda não aparece por competência na série API nem no Excel. Contrato oficial, retrospectiva observada, cauda mensal, bandas, UI e retorno continuam pendentes. A página horizontal poderá usar API direta, com auditoria de cobertura separada. Sem runtime publicado nesta etapa.
 
@@ -597,7 +605,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- **Estimativas:** publicar/conferir exploração direta e histórico Maragogi após esta revisão. Refinamento anterior enviado em `20c7402`, com uso relatado por Gabriel; a nova revisão só foi verificada localmente. Origem/duração por período, contrato Belogic, preço, rateio e reconciliação permanecem externos; avaliação Finotti independente necessária.
+- **Estimativas:** publicar/conferir configurações laterais, galerias e transição estável após esta revisão. Exploração direta anterior enviada em `3ac4874`; a nova revisão só foi verificada localmente. Origem/duração por período, contrato Belogic, preço, rateio e reconciliação permanecem externos; avaliação Finotti independente necessária.
 
 - [ ] **Estimativas de vendas Finotti:** concluir contrato de retorno/aceite operacional e avaliação independente. Página API, conferência opcional Excel, motores horizontal/vertical e reprodução de caudas/faixas já avançaram; estado vigente no [plano essencial](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md), sem manter o plano editorial antigo como lista de implementação pendente. Obter origem histórica por período e periodicidade real; comparações com saldos reportados não comprovam coleta observada. Regras de alternância/coleta, granularidade, preço e reconciliação continuam externas. Sem homologação de importação.
 
