@@ -384,6 +384,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+### 28/10 — Relatório API Excel: totais históricos por empreendimento — Edgar / Codex
+
+- **Mudança exclusiva:** oito métricas disponíveis Por empreendimento: estoque, distratos, vendas brutas/líquidas e respectivos VGVs. Soma todas as tipologias observadas por período, incluindo Garden/Cobertura; trimestre soma fluxos e última posição de estoque por tipologia. VGV preserva preços próprios/regras atual-período e escala só na exportação. Campo ausente em fechamento deixa total vazio; tipologia sem fechamento não contribui. Mesma tipologia repetida idêntica não duplica total; divergência bloqueia. Cadastro/unidades totais/médias/MCMV não somados; Por tipologia intacto.
+- **Validação:**81 testes em seis arquivos aprovados; mensal/trimestral nos dois modos monetários e layouts, escala XLSX reaberto, zero/saldo negativo, lacunas, campo ausente e duplicação/conflito. Tipos/lint/build aprovados. Navegador1440/390 claro/escuro com API simulada: duas tipologias geram uma linha, estoque25, vendas9, distratos2, VGV estoque10.400.000 na escala padrão, prévia/download com quatro chamadas de coleta e zero erro de página. Evidência local ignorada verify-building-totals.cjs em .local-inputs/api-excel-check. Sem consulta autenticada ou alteração no coletor/AELO/Dashboard.
+- **Etapas/Pendências:** implementação local, publicação/aceite real dependem de autorização; base d027157, commit desta entrada. Fetch sem novidades; quatro commits anteriores preservados. Sem push/Monday.
+- **Monday:** —
+
 ### 28/10 — Relatório API Excel: nível explícito e colunas compatíveis — Edgar / Codex
 
 - **Mudança exclusiva:** seletor Nível do relatório com Por empreendimento/Por tipologia (padrão), reutilizando Select e ReportFieldLabel/Tooltip Brain. Substitui agrupamento automático por campos. Motor agrupa por ID/período ou ID antes da projeção; não exige exportar ID. Seleção apenas exporta, removendo campos incompatíveis ao trocar nível e invalidando download. Por empreendimento oferece só cadastro, total de unidades, médias e MCMV; campos específicos e métricas de tipologia não constam nem no motor/Excel. Nome do arquivo informa nível.

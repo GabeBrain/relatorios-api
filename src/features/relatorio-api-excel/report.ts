@@ -223,6 +223,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
   }
   const periods = [...periodsMap.values()].sort((a, b) => a.key.localeCompare(b.key));
   const wideRows: Row[] = [];
+  const observations = new WeakMap<Row, Set<string>>();
   const longRows: Row[] = [];
   const series = periods.map((period) => ({ 'Período': period.label } as Row));
   const priceCounts = periods.map(() => new Map<string, number>());
@@ -267,6 +268,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       fixed['Faixa MCMV'] = mcmv;
       fixed['Preço Médio para Faixa MCMV'] = mcmvAverage;
       const wide: Row = { ...fixed };
+      observations.set(wide, new Set(inRange.map(({ date }) => periodOf(date, options.granularity).label)));
       for (const [index, period] of periods.entries()) {
         const entries = inRange.filter(({ date }) => periodOf(date, options.granularity).key === period.key);
         const last = entries.at(-1)?.entry;
@@ -318,11 +320,15 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
     ? [...FIXED_COLUMNS.flatMap((column) => ['Faixa MCMV', 'Preço Médio para Faixa MCMV'].includes(column) ? [column, ...periods.map((period) => `${column} ${period.label}`)] : [column]), ...MEASURES.flatMap((metric) => periods.map((period) => `${metric} ${period.label}`))]
     : [...FIXED_COLUMNS, 'Período', ...MEASURES];
   const result = { columns, rows: (options.layout === 'columns' ? wideRows : longRows).sort(compare), periods, series, typologyCount: wideRows.length, typologyRows: wideRows, vgvScale: options.vgvScale ?? 'standard' };
-  return options.level === 'building' ? buildingReport(result) : result;
+  return options.level === 'building' ? buildingReport(result, observations) : result;
 }
 
 /** Expande nomes de campos somente na geração, preservando a ordem das métricas. */
-const BUILDING_FIELDS = new Set([
+export const BUILDING_TOTALS = ['Vendas Brutas', 'Distratos', 'Vendas Líquidas', 'Estoque',
+  'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'] as const;
+const totalMeasure = (column: string) => BUILDING_TOTALS.find((field) => column === field || column.startsWith(`${field} `));
+const BUILDING_FIELDS = new Set<string>([
+  ...BUILDING_TOTALS,
   'ID Empreendimento', 'Status Empreendimento', 'Região', 'Região Administrativa', 'Cidade/UF',
   'Tipo', 'Padrão', 'Faixa MCMV', 'Preço Médio para Faixa MCMV', 'Preço Médio Empreendimento',
   'Empreendimentos', 'Bairro', 'Endereço', 'Número', 'Incorporadoras',
@@ -334,10 +340,10 @@ export function reportFields(level: ReportLevel = 'typology', layout: Layout = '
   return REPORT_FIELDS.filter((field) => (level === 'typology' || BUILDING_FIELDS.has(field)) && (layout === 'rows' || field !== 'Período'));
 }
 
-function buildingReport(report: Report): Report {
+function buildingReport(report: Report, observations: WeakMap<Row, Set<string>>): Report {
   const columns = report.columns.filter((column) => [...BUILDING_FIELDS].some((field) => column === field || column.startsWith(`${field} `)));
-  const grouped = groupBuildingRows(report.rows, columns);
-  return { ...selectedReport({ ...report, rows: grouped }, columns), typologyRows: groupBuildingRows(report.typologyRows ?? [], columns) };
+  const grouped = groupBuildingRows(report.rows, columns, observations);
+  return { ...selectedReport({ ...report, rows: grouped }, columns), typologyRows: groupBuildingRows(report.typologyRows ?? [], columns, observations) };
 }
 
 export function selectReportFields(report: Report, fields: string[] | null): Report {
@@ -350,21 +356,39 @@ export function selectReportFields(report: Report, fields: string[] | null): Rep
   return selectedReport(report, columns);
 }
 
-function groupBuildingRows(rows: Row[], columns: string[]): Row[] {
+function groupBuildingRows(rows: Row[], columns: string[], observations: WeakMap<Row, Set<string>>): Row[] {
   // Agrupa antes da projeção: mesmo sem exportar Período, mantém meses/trimestres distintos.
   const grouped = new Map<string, Row>();
+  const contributors = new Map<string, Map<string, Row>>();
+  const totals = columns.filter((column) => totalMeasure(column));
   for (const row of rows) {
     const id = text(row['ID Empreendimento']);
     if (!id) throw new Error('Não é possível agrupar empreendimento sem ID.');
     const key = JSON.stringify([id, row['Período'] ?? null]);
     const previous = grouped.get(key);
+    const typology = text(row['ID Tipologia']);
+    if (!contributors.has(key)) contributors.set(key, new Map());
+    const sources = contributors.get(key)!;
+    const duplicate = sources.get(typology);
+    if (duplicate && totals.some((column) => (duplicate[column] ?? null) !== (row[column] ?? null))) {
+      throw new Error(`Históricos divergentes para a tipologia ${typology} do empreendimento ${id}. Selecione Por tipologia para conferir.`);
+    }
+    if (!duplicate) sources.set(typology, row);
     if (!previous) grouped.set(key, { ...row });
     else for (const column of columns) {
+      if (totalMeasure(column)) continue;
       const value = row[column];
       if (value === null || value === undefined || value === '') continue;
       if (previous[column] === null || previous[column] === undefined || previous[column] === '') previous[column] = value;
       else if (previous[column] !== value) throw new Error(`Dados de empreendimento divergentes para o ID ${id}${row['Período'] ? ` em ${row['Período']}` : ''}. Selecione Por tipologia para conferir os registros.`);
     }
+  }
+  for (const [key, row] of grouped) for (const column of totals) {
+    const measure = totalMeasure(column)!;
+    const label = column.slice(measure.length + 1);
+    const sourceRows = [...contributors.get(key)!.values()].filter((source) => !label || observations.get(source)?.has(label));
+    const values = sourceRows.map((source) => numeric(source[column]));
+    row[column] = !values.length || values.some((value) => value === null) ? null : rounded(values.reduce<number>((sum, value) => sum + value!, 0));
   }
   return [...grouped.values()];
 }

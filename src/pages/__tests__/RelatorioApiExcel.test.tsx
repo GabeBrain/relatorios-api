@@ -82,7 +82,9 @@ describe('Relatório API Excel — geração explícita', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Baixar Excel' })).toBeEnabled());
     fireEvent.click(screen.getByLabelText('Nível do relatório'));
     fireEvent.click(screen.getByRole('option', { name: 'Por empreendimento', exact: true }));
-    for (const field of ['ID Tipologia', 'Garagem', 'Vendas Brutas', 'Unidades por Tipologia']) expect(within(columns).queryByText(field, { exact: true })).not.toBeInTheDocument();
+    for (const field of ['ID Tipologia', 'Garagem', 'Unidades por Tipologia']) expect(within(columns).queryByText(field, { exact: true })).not.toBeInTheDocument();
+    expect(within(columns).getByText('Vendas Brutas', { exact: true })).toBeVisible();
+    expect(within(columns).getByText('VGV Estoque', { exact: true })).toBeVisible();
     expect(within(columns).getByText('Faixa MCMV', { exact: true })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Baixar Excel' })).toBeDisabled();
     expect(engine.buildReport).toHaveBeenCalledTimes(1);

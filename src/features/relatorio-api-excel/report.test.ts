@@ -49,7 +49,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     expect(selectReportFields(detailed, ['ID Empreendimento']).rows).toHaveLength(detailed.rows.length);
     expect(selectReportFields(complete, ['Empreendimentos']).rows).toHaveLength(layout === 'rows' ? 3 : 1);
     const all = selectReportFields(complete, null);
-    for (const forbidden of ['ID Tipologia', 'Garagem', 'Unidades por Tipologia', 'Vendas Brutas', 'Estoque', 'VGV Lançado', 'Preço Atual']) {
+    for (const forbidden of ['ID Tipologia', 'Garagem', 'Unidades por Tipologia', 'VGV Lançado', 'Preço Atual']) {
       expect(all.columns.some((column) => column === forbidden || column.startsWith(`${forbidden} `))).toBe(false);
       expect(reportFields('building', layout)).not.toContain(forbidden);
     }
