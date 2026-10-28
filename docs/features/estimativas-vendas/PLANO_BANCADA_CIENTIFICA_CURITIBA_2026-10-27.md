@@ -5,6 +5,8 @@ Propósito: fonte única da próxima versão científica e seus critérios de ac
 
 > Próxima experiência proposta em 28/10: [briefing consolidado](CTA_CLAUDE_DESIGN_ESTUDOS_2026-10-27.md), com lista de curvas, backtest temporal integrado e exportação de conjuntos. Aguarda ZIP e aceite; não altera os contratos científicos ou operacionais.
 
+> **Execução da próxima V1:** [plano técnico do fluxo essencial, 28/10](PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md). Substitui a organização de interface anterior, preservando os contratos científicos deste documento. ZIP v2 inspecionado estaticamente; implementação ainda não iniciada.
+
 ## 1. Direção e limites
 
 Na rota existente /rebrain/estimativas-vendas, manter o nome Estimativas de vendas e a introdução: “Transformar o histórico de um empreendimento em uma projeção de vendas compreensível, verificável e pronta para revisão.” A entrada principal passa a Estudos de previsão, começando em Curitiba. Preservar a jornada operacional em acesso secundário “Preparar lote”, sem apagar motores, regras, auditorias ou contratos.
