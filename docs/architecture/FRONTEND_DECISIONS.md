@@ -1,3 +1,7 @@
+## 28/10/2026 — Estimativas: experiência única após grill
+
+Decisão posterior: remover as jornadas científicas/operacionais separadas e suas páginas, preservando lógica pura e contratos usados na versão única. Universo hierárquico com seleção múltipla; card é botão `aria-pressed` para seleção, com Explorar curva separado. Pulso breve e sombra oliva usam tokens atuais, com movimento reduzido respeitado. Datas vêm dos registros disponíveis; sliders/calendário e arraste do início foram retirados. Cada empreendimento inicia no seu último período; comparação usa percentual e tempo relativo, enquanto carteira exige data comum. Excel analítico direto é a ação principal, evidências secundárias. Não há novo primitive compartilhado, token ou motor gráfico. A decisão de fluxo anterior abaixo é registro da versão substituída. [Plano vigente, seção 9](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md#9-simplificação-após-grill--decisões-e-execução-em-2810).
+
 ## 28/10/2026 — Estimativas: exploração temporal e exportação revisada
 
 Contexto: a jornada científica exigia escolher estudo e executar antes de ver curvas. A nova entrada apresenta empreendimentos após a carga e usa o mesmo gráfico para projeção e comparação histórica.

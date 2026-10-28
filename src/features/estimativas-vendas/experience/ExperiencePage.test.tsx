@@ -13,30 +13,30 @@ vi.mock('./runtime', async () => {
   return { AnalysisRuntime: class {
     constructor(readonly dataset: Universe) {}
     inventory(cutoff: string) { return Promise.resolve(D.summarizeInventory(this.dataset.buildings, cutoff)); }
-    analyze(id: string, spec: Parameters<typeof D.analyzeCase>[2]) { access.calls++; return D.analyzeCase(this.dataset, id, spec); }
+    analyze(id: string, spec: Parameters<typeof D.analyzeCase>[2]) { access.calls++; return D.analyzeCase(this.dataset, id, D.buildingSpec(this.dataset, id, spec)); }
     capabilities(ids: string[], cutoff: string) { return D.capabilities(this.dataset, ids, cutoff); }
     cancelQueued() {}
     dispose() { access.disposed++; }
   } };
 });
-function dataset(): Universe { return { schema: 'forecast-universe-v1', complete: true, areas: [{ city: 'Curitiba', uf: 'PR' }], locations: { '1': { city: 'Curitiba', uf: 'PR' } }, requests: [], missingIds: [], hash: 'fixture', fetchedAt: '2026-10-28T12:00:00Z', city: 'Curitiba', uf: 'PR', buildings: [{ building_id: '1', name: 'Caso de revisão', release_date: '2025-01-01', sourceType: 'Horizontal', typologies_history: ['2026-06', '2026-07', '2026-08', '2026-09'].map((period, i) => ({ period, typology_id: '10', pattern: 'Standard', qty: 100, typology_stock: 50 - i, sold_in_period: 1 })) }] }; }
+function dataset(): Universe { return { schema: 'forecast-universe-v1', complete: true, areas: [{ city: 'Curitiba', uf: 'PR' }], locations: { '1': { city: 'Curitiba', uf: 'PR' } }, requests: [], missingIds: [], hash: 'fixture', fetchedAt: '2026-10-28T12:00:00Z', city: 'Curitiba', uf: 'PR', buildings: [{ building_id: '1', name: 'Caso de revisão', release_date: '2025-01-01', sourceType: 'Horizontal', typologies_history: ['2026-06', '2026-07', '2026-08', '2026-09'].map((period, i) => ({ period, typology_id: '10', pattern: 'Loteamento Fechado', qty: 100, typology_stock: 50 - i, sold_in_period: 1 })) }] }; }
 beforeEach(() => { access.token = 'fixture'; access.disposed = 0; access.calls = 0; vi.mocked(loadUniverse).mockReset().mockResolvedValue(dataset()); });
 describe('jornada essencial', () => {
   it('abre curvas direto, mantém seleção fora do filtro e não consulta API ao mudar views', async () => {
     render(<ExperiencePage />); fireEvent.click(screen.getByRole('button', { name: 'Carregar empreendimentos' }));
-    await screen.findByRole('button', { name: 'Explorar Caso de revisão' });
-    await screen.findByRole('img', { name: 'Curva de estoque de Caso de revisão' });
-    fireEvent.click(screen.getByLabelText('Selecionar Caso de revisão'));
+    await screen.findByRole('button', { name: 'Explorar curva de Caso de revisão' });
+    await screen.findByRole('img', { name: 'Curva de vendas de Caso de revisão' });
+    fireEvent.click(screen.getByRole('button', { name: 'Selecionar Caso de revisão' }));
     fireEvent.change(screen.getByPlaceholderText('Nome ou ID'), { target: { value: 'ausente' } });
     expect(screen.getByText('1 selecionados · 1 fora do filtro atual')).toBeTruthy();
     expect(loadUniverse).toHaveBeenCalledTimes(1);
     fireEvent.change(screen.getByPlaceholderText('Nome ou ID'), { target: { value: '' } });
-    expect(screen.getByRole('button', { name: 'Explorar Caso de revisão' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Explorar curva de Caso de revisão' })).toBeTruthy();
   });
   it('falha em atualização conserva universo anterior e troca de token elimina dados/seleção', async () => {
     const view = render(<ExperiencePage />); fireEvent.click(screen.getByRole('button', { name: 'Carregar empreendimentos' }));
-    await screen.findByRole('button', { name: 'Explorar Caso de revisão' });
-    fireEvent.click(screen.getByLabelText('Selecionar Caso de revisão'));
+    await screen.findByRole('button', { name: 'Explorar curva de Caso de revisão' });
+    fireEvent.click(screen.getByRole('button', { name: 'Selecionar Caso de revisão' }));
     vi.mocked(loadUniverse).mockRejectedValueOnce(new Error('Segunda página indisponível'));
     fireEvent.click(screen.getByRole('button', { name: 'Atualizar dados' }));
     await screen.findByRole('alert'); expect(screen.getByRole('region', { name: 'Universo carregado' })).toBeTruthy();

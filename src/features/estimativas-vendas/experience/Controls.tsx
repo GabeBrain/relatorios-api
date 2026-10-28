@@ -1,48 +1,38 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { GeoApiScopeSelector, useGeoApiScope, type GeoScope } from '@/features/shared/geo-api-scope-engine';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandInput, CommandList, CommandEmpty, CommandItem } from '@/components/ui/command';
+import { useGeoApiScope, type GeoScope } from '@/features/shared/geo-api-scope-engine';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
-import { monthIndex, shiftMonth } from '../expanded/contract';
-import type { AnalysisSpec, Area } from './domain';
+import { shiftMonth } from '../expanded/contract';
+import { resolveAreas, type AnalysisSpec, type Area } from './domain';
 
 export function Choice({ label, value, onChange, items, disabled = false }: { label: string; value: string; onChange: (s: string) => void; items: { value: string; label: string }[]; disabled?: boolean }) {
   return <label className="evx-field"><span>{label}</span><Select value={value} onValueChange={onChange} disabled={disabled}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{items.map(i => <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>)}</SelectContent></Select></label>;
 }
+export function MultiChoice({ label, values, items, onChange, disabled = false }: { label: string; values: string[]; items: { value: string; label: string }[]; onChange: (v: string[]) => void; disabled?: boolean }) {
+  return <div className="evx-field"><span>{label}</span><Popover><PopoverTrigger asChild><Button role="combobox" aria-label={label} variant="outline" disabled={disabled} className="evx-multi-trigger">{values.length ? values.map(v => items.find(i => i.value === v)?.label).join(', ') : `Selecionar ${label.toLocaleLowerCase('pt-BR')}`}</Button></PopoverTrigger><PopoverContent className="w-[min(90vw,420px)] p-0"><Command><CommandInput placeholder={`Buscar ${label.toLocaleLowerCase('pt-BR')}`} /><CommandList><CommandEmpty>Nenhuma opção autorizada.</CommandEmpty>{items.map(i => <CommandItem key={i.value} value={i.label} onSelect={() => onChange(values.includes(i.value) ? values.filter(v => v !== i.value) : [...values, i.value])}><span aria-hidden="true">{values.includes(i.value) ? '✓' : '+'}</span> {i.label}<span className="sr-only">{values.includes(i.value) ? ' selecionado' : ''}</span></CommandItem>)}</CommandList></Command><Button variant="ghost" disabled={!values.length} onClick={() => onChange([])}>Limpar {label.toLocaleLowerCase('pt-BR')}</Button></PopoverContent></Popover></div>;
+}
 export function UniverseSelector({ onLoad }: { onLoad: (areas: Area[], ids: string[]) => void }) {
   const [geo, setGeo] = useState<GeoScope>({ uf: '', city: '' });
   const scope = useGeoApiScope({ value: geo, onChange: setGeo });
-  const [mode, setMode] = useState('cities'), [cities, setCities] = useState<Area[]>([]), [uf, setUf] = useState(''), [region, setRegion] = useState(''), [idsText, setIdsText] = useState('');
-  const ids = useMemo(() => [...new Set(idsText.split(/[\s,;]+/).filter(Boolean))], [idsText]);
-  const areas = useMemo(() => {
-    if (mode === 'cities') return cities.filter(a => scope.citiesByUf?.[a.uf]?.includes(a.city));
-    const ufs = mode === 'uf' ? [uf] : mode === 'region' ? scope.ufsByRegion?.[region] ?? [] : scope.availableUfs;
-    return ufs.flatMap(uf => (scope.citiesByUf?.[uf] ?? []).map(city => ({ uf, city })));
-  }, [mode, cities, scope.citiesByUf, scope.ufsByRegion, scope.availableUfs, uf, region]);
-  const valid = scope.hasToken && !scope.error && !scope.isLoading && areas.length > 0 && (mode !== 'ids' || ids.length > 0 && ids.every(id => /^\d+$/.test(id)));
-  function changeMode(next: string) { setMode(next); }
-  return <section className="evx-panel evx-universe" aria-label="Escolher universo"><p className="evx-eyebrow">01 · Universo</p><h2>Onde vamos analisar as vendas?</h2><p>Escolha o recorte. Depois da consulta, datas, gráficos e filtros usam os dados já carregados.</p>
-    <div className="evx-actions" role="group" aria-label="Entrada territorial">{[['cities', 'Cidades'], ['uf', 'Estado'], ['region', 'Região'], ['ids', 'Lista de empreendimentos']].map(([id, label]) => <Button key={id} variant={mode === id ? 'secondary' : 'ghost'} aria-pressed={mode === id} onClick={() => changeMode(id)}>{label}</Button>)}</div>
-    {mode === 'cities' && <><GeoApiScopeSelector value={geo} onChange={setGeo} /><Button variant="outline" disabled={!scope.strictReady || cities.some(a => a.uf === geo.uf && a.city === geo.city)} onClick={() => setCities(v => [...v, geo])}>Adicionar cidade</Button><div className="evx-actions">{cities.map(a => <Button variant="secondary" key={`${a.uf}/${a.city}`} onClick={() => setCities(v => v.filter(x => x !== a))} aria-label={`Remover ${a.city}`}>{a.city}/{a.uf} ×</Button>)}</div></>}
-    {mode === 'uf' && <Choice label="Estado autorizado" value={uf} onChange={setUf} items={scope.availableUfs.map(value => ({ value, label: value }))} />}
-    {mode === 'region' && <Choice label="Região autorizada" value={region} onChange={setRegion} items={scope.availableRegions.map(value => ({ value, label: value }))} />}
-    {mode === 'ids' && <label className="evx-field">IDs dos empreendimentos<Input value={idsText} onChange={e => setIdsText(e.target.value)} placeholder="IDs separados por vírgula ou espaço" /><small>A busca percorre as cidades autorizadas; pode exigir muitas consultas.</small></label>}
-    {scope.isLoading && <BrainLoadingState variant="field" title="Carregando cidades autorizadas" />}
-    {!scope.hasToken && <p role="status">Entre com sua conta Geobrain pelo cabeçalho para consultar.</p>}
-    {scope.error && <div role="alert"><p>Não foi possível carregar cidades autorizadas.</p><Button onClick={scope.reload}>Tentar novamente</Button></div>}
-    <div className="evx-actions"><Button disabled={!valid} onClick={() => onLoad(areas, mode === 'ids' ? ids : [])}>Carregar empreendimentos</Button><small>{areas.length} cidades autorizadas no recorte · horizontais e verticais</small></div>
+  const [region, setRegion] = useState('all'), [states, setStates] = useState<string[]>([]), [cities, setCities] = useState<Area[]>([]);
+  const catalog = scope.citiesByUf;
+  const availableUfs = useMemo(() => region === 'all' ? scope.availableUfs : scope.ufsByRegion?.[region] ?? [], [region, scope.availableUfs, scope.ufsByRegion]);
+  const cityOptions = useMemo(() => (states.length ? states : availableUfs).flatMap(uf => (catalog?.[uf] ?? []).map(city => ({ uf, city }))), [states, availableUfs, catalog]);
+  const areas = resolveAreas(catalog ?? {}, region === 'all' ? [] : availableUfs, states, cities);
+  function changeRegion(value: string) { setRegion(value); setStates([]); setCities([]); }
+  function changeStates(values: string[]) { setStates(values); setCities(v => v.filter(a => !values.length || values.includes(a.uf))); }
+  return <section className="evx-panel evx-universe" aria-label="Escolher universo"><div className="evx-geography">
+    <Choice label="Região" value={region} onChange={changeRegion} disabled={scope.isLoading || !scope.hasToken} items={[{ value: 'all', label: 'Todas as regiões' }, ...scope.availableRegions.map(value => ({ value, label: value }))]} />
+    <MultiChoice label="Estados" values={states} onChange={changeStates} disabled={scope.isLoading || !scope.hasToken} items={availableUfs.map(value => ({ value, label: value }))} />
+    <MultiChoice label="Cidades" values={cities.map(a => `${a.uf}|${a.city}`)} onChange={v => setCities(cityOptions.filter(a => v.includes(`${a.uf}|${a.city}`)))} disabled={scope.isLoading || !scope.hasToken || !availableUfs.length} items={cityOptions.map(a => ({ value: `${a.uf}|${a.city}`, label: `${a.city}/${a.uf}` }))} />
+  </div>{scope.isLoading && <BrainLoadingState variant="field" title="Carregando cidades autorizadas" />}{!scope.hasToken && <p role="status">Entre com sua conta Geobrain pelo cabeçalho para consultar.</p>}{scope.error && <div role="alert"><p>Não foi possível carregar os territórios autorizados.</p><Button onClick={scope.reload}>Tentar novamente</Button></div>}
+    <div className="evx-actions"><Button disabled={!scope.hasToken || !!scope.error || scope.isLoading || !areas.length} onClick={() => onLoad(areas, [])}>Carregar empreendimentos</Button><small>{areas.length ? `${areas.length} cidades · ${cities.length ? 'cidades escolhidas' : states.length ? 'estados completos' : 'região completa'}` : 'Escolha uma região, estados ou cidades'}</small></div>
   </section>;
 }
-
-export function TimeControls({ spec, first, latest, onChange }: { spec: AnalysisSpec; first: string; latest: string; onChange: (s: AnalysisSpec) => void }) {
-  const min = monthIndex(first), max = monthIndex(latest), current = monthIndex(spec.cutoff), end = current + spec.duration;
-  function start(value: string) { if (value >= first && value <= latest) onChange({ ...spec, cutoff: value }); }
-  function finish(value: string) { const months = monthIndex(value) - current; if (months >= 1 && months <= 36) onChange({ ...spec, duration: months }); }
-  return <section className="evx-time" aria-label="Período da previsão">
-    <div className="evx-time-fields"><label className="evx-field">Prever a partir de<Input type="month" min={first} max={latest} value={spec.cutoff} onChange={e => start(e.target.value)} /></label><label className="evx-field">Final da previsão<Input type="month" min={shiftMonth(spec.cutoff, 1)} max={shiftMonth(spec.cutoff, 36)} value={shiftMonth(spec.cutoff, spec.duration)} onChange={e => finish(e.target.value)} /></label><span>{spec.duration} meses · dados usados até {spec.cutoff}</span></div>
-    <label className="evx-field">Início da previsão · {spec.cutoff}<input aria-label="Início da previsão" type="range" min={min} max={max} value={current} onChange={e => start(shiftMonth(first, Number(e.target.value) - min))} aria-valuetext={spec.cutoff} /></label>
-    <label className="evx-field">Duração da previsão · {spec.duration} meses<input aria-label="Duração da previsão" type="range" min={current + 1} max={current + 36} value={end} onChange={e => finish(shiftMonth(spec.cutoff, Number(e.target.value) - current))} aria-valuetext={`${spec.duration} meses; final ${shiftMonth(spec.cutoff, spec.duration)}`} /></label>
-    <small>Mover o início mantém a duração. O final altera a duração, de 1 a 36 meses. O zoom do gráfico só muda a visualização.</small>
-  </section>;
+export function TimeControls({ spec, periods, onChange }: { spec: AnalysisSpec; periods: string[]; onChange: (s: AnalysisSpec) => void }) {
+  const index = periods.indexOf(spec.cutoff);
+  return <section className="evx-time" aria-label="Período da previsão"><div className="evx-period-nav"><Button variant="outline" aria-label="Período anterior" disabled={index <= 0} onClick={() => onChange({ ...spec, cutoff: periods[index - 1] })}>←</Button><Choice label="Começar a previsão" value={spec.cutoff} onChange={cutoff => onChange({ ...spec, cutoff })} items={[...periods].reverse().map((value, i) => ({ value, label: `${value.slice(5)}/${value.slice(0, 4)}${i === 0 ? ' · último dado' : ''}` }))} /><Button variant="outline" aria-label="Próximo período" disabled={index < 0 || index >= periods.length - 1} onClick={() => onChange({ ...spec, cutoff: periods[index + 1] })}>→</Button></div><div className="evx-actions" role="group" aria-label="Duração da previsão">{[3, 6, 12, 24, 36].map(duration => <Button key={duration} variant={spec.duration === duration ? 'secondary' : 'ghost'} aria-pressed={spec.duration === duration} onClick={() => onChange({ ...spec, duration })}>{duration} meses</Button>)}</div><small>Somente períodos disponíveis · previsão até {shiftMonth(spec.cutoff, spec.duration)}. Escolher um período passado ativa a comparação histórica.</small></section>;
 }

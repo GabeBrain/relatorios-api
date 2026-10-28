@@ -5,6 +5,10 @@ import { defaultProtocol, describeBuilding, METHODS, predictCase, runStudy, type
 import { prepareReferenceModels } from '../expanded/referenceModels';
 
 export type Area = { city: string; uf: string };
+export function resolveAreas(catalog: Record<string, string[]>, regionUfs: string[], states: string[], cities: Area[]): Area[] {
+  if (cities.length) return cities.filter(a => catalog[a.uf]?.includes(a.city));
+  return [...new Set(states.length ? states : regionUfs)].flatMap(uf => (catalog[uf] ?? []).map(city => ({ uf, city })));
+}
 export type Universe = StudyDataset & {
   schema: 'forecast-universe-v1'; complete: true; areas: Area[];
   locations: Record<string, Area>; requests: (Area & { type: string; pages: number })[]; missingIds: string[];
@@ -16,6 +20,14 @@ export type CaseAnalysis = { id: string; spec: AnalysisSpec; hash: string; stock
 export type Presentation = { row: InventoryRow; method: StudyMethod | null; reason: string; status: string };
 export type ChartRow = { month: string; history: number | null; reported: number | null; [key: string]: string | number | null };
 export const ALL_METHODS: StudyMethod[] = ['finotti-reference', 'stock-trend', 'constant'];
+export function latestPeriod(building: Building) { return [...new Set(building.typologies_history.map(r => r.period.slice(0, 7)))].filter(periodValid).sort().at(-1) ?? ''; }
+export function buildingSpec(universe: Universe, id: string, spec: AnalysisSpec): AnalysisSpec {
+  if (spec.cutoff !== 'latest') return spec;
+  const building = universe.buildings.find(b => buildingId(b) === id);
+  // A record with no history stays unavailable, but must not abort a whole export review.
+  // The fallback is only an evaluation date: no observation or last-record claim is fabricated.
+  return { ...spec, cutoff: (building ? latestPeriod(building) : '') || universe.buildings.map(latestPeriod).sort().at(-1) || '' };
+}
 export const methodLabel = (id: StudyMethod) => METHODS.find(m => m.id === id)!.label;
 export const cleanReason = (s: string) => s.replace(/competência/gi, 'mês dos dados').replace(/posição/gi, 'registro').replace(/corte/gi, 'data escolhida');
 export const specKey = (hash: string, id: string, spec: AnalysisSpec) => JSON.stringify([hash, id, spec.cutoff, spec.duration, [...spec.methods].sort(), METHODS.map(m => m.version)]);
@@ -126,14 +138,14 @@ export function pairedTrials(trials: StudyTrial[], methods: StudyMethod[]) {
 }
 export function summarizeInventory(buildings: Building[], cutoff: string) {
   // The list needs classification, not a second copy of every historical series.
-  return buildings.map(b => ({ ...describeBuilding(b, cutoff), origin: null }));
+  return buildings.map(b => ({ ...describeBuilding(b, cutoff === 'latest' ? latestPeriod(b) : cutoff), origin: null }));
 }
 export async function capabilities(dataset: StudyDataset, ids: string[], cutoff: string) {
-  if (cutoff >= '2026-09') await prepareReferenceModels();
+  if (cutoff === 'latest' || cutoff >= '2026-09') await prepareReferenceModels();
   return Object.fromEntries(ids.map(id => {
     const b = dataset.buildings.find(b => buildingId(b) === id);
     if (!b) throw new Error('Cadastro ausente da classificação.');
-    const c = predictCase(b, cutoff, [1], ALL_METHODS);
+    const c = predictCase(b, cutoff === 'latest' ? latestPeriod(b) : cutoff, [1], ALL_METHODS);
     return [id, ALL_METHODS.filter(m => !!c.methods[m].forecast)];
   }));
 }

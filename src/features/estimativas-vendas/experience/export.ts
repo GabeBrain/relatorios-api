@@ -2,7 +2,7 @@ import { strToU8, zipSync } from 'fflate';
 import { buildingId } from '../source';
 import { periodValid, shiftMonth } from '../expanded/contract';
 import { studyMetrics, type StudyTrial } from '../scientific/study';
-import { methodLabel, metricTrials, operationStatus, pairedTrials, present, provenanceLabel, type AnalysisSpec, type CaseAnalysis, type Measure, type Universe } from './domain';
+import { buildingSpec, methodLabel, metricTrials, operationStatus, pairedTrials, present, provenanceLabel, type AnalysisSpec, type CaseAnalysis, type Measure, type Universe } from './domain';
 
 export const IVV_HEADERS = ['ID Empreendimento', 'Empreendimento', 'ID Tipologia', 'M2', 'Dormitórios', 'Cidade', 'Tipo', 'Padrão', 'Tipologia', 'Status', 'Data de lançamento', 'Mês de referência', 'Foi estimado?', 'Qtd Lançada', 'Venda Bruta', 'Distrato', 'Venda Líquida', 'Estoque Final', 'Tempo em venda', 'INCC-DI', 'INCC-M', 'IVV Atual', 'IVV Dash', 'Preço', 'Flag Esgotamento', 'Flag Lançamento'];
 export const htmlEscape = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -31,30 +31,31 @@ export type ExportPlan = ReturnType<typeof buildExportPlan>;
 export function buildExportPlan(universe: Universe, ids: string[], analyses: CaseAnalysis[], spec: AnalysisSpec) {
   if (!universe.complete || !ids.length || new Set(ids).size !== ids.length) throw new Error('Revise o conjunto completo antes de exportar.');
   const map = new Map(analyses.map(a => [a.id, a]));
-  if (ids.some(id => { const a = map.get(id); return !a || a.hash !== universe.hash || JSON.stringify(a.spec) !== JSON.stringify(spec); })) throw new Error('Resultados desatualizados ou ausentes para a seleção.');
+  if (ids.some(id => { const a = map.get(id); return !a || a.hash !== universe.hash || JSON.stringify(a.spec) !== JSON.stringify(buildingSpec(universe, id, spec)); })) throw new Error('Resultados desatualizados ou ausentes para a seleção.');
   const forecasts: Record<string, unknown>[] = [], history: Record<string, unknown>[] = [], exclusions: Record<string, unknown>[] = [];
   const candidates: Record<string, unknown>[] = [], trials: StudyTrial[] = [];
   const methods: Record<string, number> = {};
   for (const id of ids) {
     const a = map.get(id)!, p = present(a), b = universe.buildings.find(b => buildingId(b) === id)!;
+    const start = a.spec.cutoff;
     const area = universe.locations[id], operational = operationStatus(universe, a);
-    const rows = b.typologies_history.filter(r => r.period.slice(0, 7) <= spec.cutoff);
+    const rows = b.typologies_history.filter(r => r.period.slice(0, 7) <= start);
     for (const r of rows) history.push({ id_empreendimento: id, id_tipologia: String(r.typology_id), cidade: area.city, uf: area.uf, mes: r.period.slice(0, 7), unidades: r.qty, estoque: r.typology_stock, venda_liquida_informada: r.sold_in_period, origem: universe.evidence?.[`${id}|${r.period.slice(0, 7)}`]?.provenance ?? 'unknown' });
     trials.push(...a.stock.trials, ...a.net.trials);
     if (!p.method) { exclusions.push({ id, nome: p.row.name, arquivo: 'previsoes.csv', motivo: p.status + ': ' + p.reason }); continue; }
     methods[p.method] = (methods[p.method] ?? 0) + 1;
     const f = a.stock.cases[0].methods[p.method].forecast!;
-    const at = b.typologies_history.filter(r => r.period.slice(0, 7) === spec.cutoff);
+    const at = b.typologies_history.filter(r => r.period.slice(0, 7) === start);
     const one = at.length === 1 && /^\d+$/.test(String(at[0].typology_id)) && /^\d+$/.test(id);
     const targetExists = new Set(b.typologies_history.map(r => r.period.slice(0, 7)));
     // Unknown cadence permits analytical monthly paths, never an approved operational interval.
-    const cadence = universe.evidence?.[`${id}|${spec.cutoff}`]?.intervalMonths;
+    const cadence = universe.evidence?.[`${id}|${start}`]?.intervalMonths;
     if (!one) exclusions.push({ id, nome: p.row.name, arquivo: 'CANDIDATO_NAO_IMPORTAR.xlsx', motivo: 'ID único de tipologia e distribuição de unidades não resolvidos.' });
     let previous = p.row.stock!;
     for (const point of f.points.filter(p => p.offset > 0)) {
       if (point.stock === null || point.predicted === null) { exclusions.push({ id, mes: point.period, arquivo: 'previsoes.csv', motivo: 'Previsão sem valor; não convertida em zero.' }); break; }
       const net = previous - point.stock;
-      forecasts.push({ id_empreendimento: id, empreendimento: p.row.name, cidade: area.city, uf: area.uf, inicio: spec.cutoff, mes: point.period, unidades: p.row.units, vendas_liquidas_estimadas: net, estoque_estimado: point.stock, metodo: p.method, versao: f.version, estimado: 'Sim', finalidade: targetExists.has(point.period) ? 'comparacao_historica' : 'projecao', elegibilidade_operacional: operational.status, importavel: false });
+      forecasts.push({ id_empreendimento: id, empreendimento: p.row.name, cidade: area.city, uf: area.uf, inicio: start, mes: point.period, unidades: p.row.units, vendas_liquidas_estimadas: net, estoque_estimado: point.stock, metodo: p.method, versao: f.version, estimado: 'Sim', finalidade: targetExists.has(point.period) ? 'comparacao_historica' : 'projecao', elegibilidade_operacional: operational.status, importavel: false });
       if (one && !targetExists.has(point.period) && (!cadence || point.offset % cadence === 0)) {
         const prevStock = cadence && point.offset > cadence ? f.points.find(p => p.offset === point.offset - cadence)?.stock : p.row.stock;
         // With unknown cadence these are explicitly monthly analytical candidate lines.
@@ -77,9 +78,9 @@ export function buildExportPlan(universe: Universe, ids: string[], analyses: Cas
     selectedIds: [...ids], spec, methods, selected: ids.length, included: Object.values(methods).reduce((s, n) => s + n, 0), forecastRows: forecasts.length, candidateRows: candidates.length,
     importable: false, candidateCadence: 'Linhas mensais analíticas quando cadência oficial é desconhecida; NÃO IMPORTAR.', pendingFields: IVV_HEADERS.filter(h => candidates.every(r => r[h] === null)),
     reconciliation: 'Não sobrescrever histórico. Reconciliação quando a coleta real chegar depende de definição externa.',
-    appliedMethods: selected.map(a => { const m = present(a).method; return { id: a.id, method: m, version: m ? a.stock.cases[0].methods[m].forecast?.version : null }; }),
+    appliedMethods: selected.map(a => { const m = present(a).method; return { id: a.id, start: a.spec.cutoff, method: m, version: m ? a.stock.cases[0].methods[m].forecast?.version : null }; }),
     backtest: { validComparisons: trials.filter(t => t.error !== null).length, origin: [...new Set(trials.filter(t => t.error !== null).map(t => t.provenance))], metricsPurpose: 'exploratory-reported-history' } };
-  const summary = htmlPage('Resumo do conjunto para revisão', `<p><strong>Arquivo candidato para revisão — NÃO IMPORTAR.</strong></p><p>${ids.length} selecionados; ${manifest.included} com previsão; ${forecasts.length} linhas analíticas; ${candidates.length} linhas candidatas estruturais.</p><p>Início ${htmlEscape(spec.cutoff)} · duração ${spec.duration} meses. O arquivo corresponde a esse intervalo; períodos existentes permanecem apenas em comparação histórica.</p><p>Métodos: ${htmlEscape(JSON.stringify(methods))}.</p><p>${manifest.backtest.validComparisons ? manifest.backtest.validComparisons + ' comparações válidas de métodos/alvos; detalhes no arquivo de backtests.' : 'Nenhum backtest válido realizado neste conjunto/intervalo.'}</p><p>Cadência, origem por período, preço, tipologias e reconciliação podem impedir uso operacional. Valores vazios são pendências, não zeros.</p><p>Identificação dos dados: ${htmlEscape(universe.hash)}. Consulte manifesto, exclusões e histórico acompanhantes.</p>`);
+  const summary = htmlPage('Resumo do conjunto para revisão', `<p><strong>Arquivo candidato para revisão — NÃO IMPORTAR.</strong></p><p>${ids.length} selecionados; ${manifest.included} com previsão; ${forecasts.length} linhas analíticas; ${candidates.length} linhas candidatas estruturais.</p><p>Início ${htmlEscape(spec.cutoff === 'latest' ? 'datas individuais: ' + selected.map(a => a.spec.cutoff).filter((v, i, all) => all.indexOf(v) === i).join(', ') : spec.cutoff)} · duração ${spec.duration} meses. O arquivo corresponde a esse intervalo; períodos existentes permanecem apenas em comparação histórica.</p><p>Métodos: ${htmlEscape(JSON.stringify(methods))}.</p><p>${manifest.backtest.validComparisons ? manifest.backtest.validComparisons + ' comparações válidas de métodos/alvos; detalhes no arquivo de backtests.' : 'Nenhum backtest válido realizado neste conjunto/intervalo.'}</p><p>Cadência, origem por período, preço, tipologias e reconciliação podem impedir uso operacional. Valores vazios são pendências, não zeros.</p><p>Identificação dos dados: ${htmlEscape(universe.hash)}. Consulte manifesto, exclusões e histórico acompanhantes.</p>`);
   return { manifest, forecasts, history, exclusions, candidates, trials, summary, report: backtestHtml(selected, 'stock', 1) };
 }
 export async function packageFiles(plan: ExportPlan) {
@@ -105,4 +106,12 @@ export function downloadFile(bytes: BlobPart, filename: string, type: string) {
   const url = URL.createObjectURL(new Blob([bytes], { type })); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 export async function downloadPackage(plan: ExportPlan) { const files = await packageFiles(plan); downloadFile(zipSync(files) as BlobPart, `estimativas-revisao-${plan.manifest.spec.cutoff}.zip`, 'application/zip'); }
+export async function forecastWorkbook(plan: ExportPlan) {
+  const XLSX = await import('xlsx');
+  const wb = XLSX.utils.book_new();
+  const columns = ['id_empreendimento', 'empreendimento', 'cidade', 'uf', 'inicio', 'mes', 'unidades', 'vendas_liquidas_estimadas', 'estoque_estimado', 'metodo', 'versao', 'estimado', 'importavel'];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([columns, ...plan.forecasts.map(r => columns.map(k => r[k] ?? null))]), 'previsoes');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Estado', 'Previsões analíticas para revisão; importação não homologada'], ['Dados', plan.manifest.snapshotHash], ['Duração', plan.manifest.spec.duration], ['Início', plan.manifest.spec.cutoff === 'latest' ? 'Último período de cada empreendimento; ver coluna inicio' : plan.manifest.spec.cutoff], ['Aviso', 'Vendas e estoque previstos; não substituem coleta. Cadência e origem histórica podem estar pendentes.']]), 'leia_me');
+  return new Uint8Array(XLSX.write(wb, { type: 'array', bookType: 'xlsx' }));
+}
 export function finalMonth(spec: AnalysisSpec) { return periodValid(spec.cutoff) ? shiftMonth(spec.cutoff, spec.duration) : ''; }

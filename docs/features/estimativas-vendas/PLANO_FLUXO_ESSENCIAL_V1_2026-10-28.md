@@ -2,6 +2,8 @@
 
 Data: 28/10/2026. Responsável: Gabriel. Executor previsto: Sol light. Estado: implementado e validado localmente; ensaio autenticado com API real concluído. Objetivo: fluxo integrado preparado para testes em produção após autorização final. V1 de interface não significa importação homologada.
 
+**Direção vigente após grill de simplificação em 28/10:** a seção 9 substitui as escolhas de navegação, seleção, datas e saída das seções anteriores. A V1 anterior foi enviada em `ece2a76`; a simplificação está local e exige nova autorização de push. Regras matemáticas e limites científicos continuam válidos.
+
 ## 1. Resultado e limites
 
 Na rota `/rebrain/estimativas-vendas`: selecionar universo autorizado, ver empreendimentos com curvas, explorar previsão/backtest, selecionar conjunto e baixar pacote rastreável. Preservar a jornada operacional e os motores existentes. Não substituir trabalho real por demonstrações do ZIP.
@@ -170,3 +172,26 @@ Ensaio autenticado local: 1.996 empreendimentos/21 páginas HTTP200, carga em 76
 Falhas de instrumentação tratadas: seletor de município sem nome acessível esperado pelo teste; tentativa de data anterior ao histórico disponível; leitura de elemento de fundo por role durante modal. As duas últimas chegaram às 21 respostas200, sem erro JavaScript; a terceira também gerou pacote, mas só a execução final com `result.json` é considerada completa. Avisos do npm em stderr provocaram status de PowerShell enganoso; build final capturado por subprocesso nativo confirmou saída0. Avisos existentes: Browserslist desatualizado, XLSX com imports estáticos/dinâmicos e chunks grandes. Não foram alterados módulos paralelos para suprimi-los.
 
 Pendências externas preservadas: contrato Belogic, origem por período, cadência oficial, rateio por tipologia, preço, reconciliação e validação independente Finotti. Não bloqueiam exploração honesta ou pacote analítico; impedem declarar lote homologado. A disponibilidade no ambiente de produção depende de autorização final e verificação após publicação.
+
+## 9. Simplificação após grill — decisões e execução em 28/10
+
+### Decisões confirmadas por Gabriel
+
+- Entrada contém título, seletor geográfico único e ação Carregar empreendimentos. Retirados banner, texto promocional, abas de modalidades e entrada de IDs. Região opcional, vários estados e várias cidades; cidades prevalecem sobre todos os estados, estados prevalecem sobre região. Não completar silenciosamente estados sem cidades selecionadas.
+- Antes da carga, nenhum parâmetro temporal. Depois da carga, usar o último período disponível de cada empreendimento e previsão de 12 meses. Data inicial individual visível no card, gráfico, comparação e planilha. Falta de histórico continua indisponível; não vira dado novo.
+- Finotti calculável aparece primeiro, sem seleção automática. Demais empreendimentos aparecem num resumo acessível e em Mostrar todos. O domínio de Finotti permanece o auditado; não flexibilizado para aumentar a lista.
+- Card é botão de seleção com `aria-pressed`, pulso breve e destaque oliva persistente; redução de movimento desativa animação. Explorar curva é ação separada, não muda seleção. Marcar todos os Finotti substitui a seleção pelo conjunto inteiro do território carregado e deixa visíveis apenas esses registros. Mostrar todos restaura visualização sem desmarcar. Busca/filtros comuns não alteram seleção.
+- Comparações começam em percentual acumulado vendido e tempo após a previsão, mês0/+1/+2 etc.; cada origem permanece visível. Calendário é alternativa. Detalhe individual começa em vendas líquidas acumuladas em unidades, conversão direta da fração acumulada da equação; fluxo mensal e estoque permanecem leituras alternativas.
+- Sliders, arraste de início e campos de calendário removidos. Anterior/próximo percorrem apenas os registros disponíveis, inclusive intervalos trimestrais não civis. Lista de períodos e durações rápidas alteram a análise; zoom é independente. Backtest continua no mesmo gráfico, sem inventar observações em intervalos ausentes.
+- Saída principal é Baixar previsões: revisão curta e download de `previsoes.xlsx`, aba previsoes com uma linha por empreendimento/mês futuro, IDs, local, data inicial, mês previsto, método/versão, vendas líquidas e estoque. Relatório/histórico/evidências em ação secundária. Nenhuma planilha é declarada homologada para importação.
+- Preparar lote e Estudos científicos deixam de ser jornadas separadas. Gabriel autorizou retirar também seu código de interface. Foram removidos os componentes dessas páginas, detalhes/CSS exclusivos, exploração legada de EstimativasPage e worker antigo sem consumidor. Mantidos motores, estudo puro, políticas de seleção, rastreabilidade, conferência Excel e seus testes reutilizados pela versão única.
+
+### Implementação e evidência
+
+`buildingSpec` resolve origem individual para worker/cache/exportação; o manifesto identifica as datas de cada membro. Comparação relativa tem função pura própria; não soma trajetórias com origens distintas como se fossem uma carteira no mesmo calendário. A leitura Carteira na mesma data exige registros em uma data comum, escolhida explicitamente; sem data comum, fica indisponível.
+
+`forecastWorkbook` gera Excel analítico direto, independente de número de tipologias. Isso não distribui previsões entre tipologias: cada linha é do empreendimento. O candidato antigo de 26 colunas permanece apenas na evidência secundária, com restrições e rótulo NÃO IMPORTAR. Histórico e resultados existentes não são sobrescritos.
+
+Testes atualizados: 109 Vitest em 14 arquivos, 15 Node operacionais; tipos, lint e build aprovados. Sete testes das páginas retiradas deixaram de existir; três testes novos cobrem escopo geográfico, origem individual/Excel e navegação por datas reais. Golden tests horizontal/vertical e contratos científicos não foram removidos. Corrigida também uma opção `exact` não aceita pelo tipo `getByRole` num teste do Excel recebido da main, sem alteração de runtime desse módulo.
+
+Diagnóstico reproduzível: `scripts/diagnostics/estimativas-simple-browser.mjs`; fonte sintética controlada, 1440/768/390 claro/escuro, seleção e substituição do conjunto, detalhe/backtest sem calendários ou sliders, comparação relativa e reabertura de Excel com 24 linhas para dois empreendimentos cujos históricos terminam em meses diferentes. Duas chamadas de coleta e zero adicionais durante exploração/exportação, zero erros JS ou overflow. Evidências brutas ignoradas em `.local-inputs/estimativas-vendas/simplificacao-20261028/`; [registro agregado](EVIDENCIAS_SIMPLIFICACAO_2026-10-28.json). API real não foi reconsultada nesta revisão; as medições autenticadas da seção 8 pertencem à versão anterior. Navegador conectado indisponível; usado Chromium automatizado local. Sem push/deploy desta revisão.

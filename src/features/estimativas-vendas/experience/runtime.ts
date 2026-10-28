@@ -1,4 +1,4 @@
-import { specKey, type AnalysisSpec, type CaseAnalysis, type Universe } from './domain';
+import { buildingSpec, specKey, type AnalysisSpec, type CaseAnalysis, type Universe } from './domain';
 import type { InventoryRow, StudyMethod } from '../scientific/study';
 type Task = { key: string; priority: number; kind: 'case' | 'inventory' | 'capabilities'; buildingId?: string; buildingIds?: string[]; spec?: AnalysisSpec; cutoff?: string; resolve: (v: unknown) => void; reject: (e: Error) => void };
 export class AnalysisRuntime {
@@ -44,8 +44,8 @@ export class AnalysisRuntime {
     const promise = new Promise<T>((resolve, reject) => { this.queue.push({ ...task, key, resolve: v => resolve(v as T), reject }); });
     this.pending.set(key, promise); this.pump(); return promise;
   }
-  analyze(id: string, spec: AnalysisSpec, priority = 1) { return this.request<CaseAnalysis>(specKey(this.dataset.hash, id, spec), { kind: 'case', buildingId: id, spec, priority }); }
-  peek(id: string, spec: AnalysisSpec) { return this.cache.get(specKey(this.dataset.hash, id, spec)) as CaseAnalysis | undefined; }
+  analyze(id: string, requested: AnalysisSpec, priority = 1) { const spec = buildingSpec(this.dataset, id, requested); return this.request<CaseAnalysis>(specKey(this.dataset.hash, id, spec), { kind: 'case', buildingId: id, spec, priority }); }
+  peek(id: string, spec: AnalysisSpec) { return this.cache.get(specKey(this.dataset.hash, id, buildingSpec(this.dataset, id, spec))) as CaseAnalysis | undefined; }
   inventory(cutoff: string) { return this.request<InventoryRow[]>(`inventory|${cutoff}`, { kind: 'inventory', cutoff, priority: 0 }); }
   capabilities(ids: string[], cutoff: string) { return this.request<Record<string, StudyMethod[]>>(`capabilities|${cutoff}|${ids.join(',')}`, { kind: 'capabilities', buildingIds: ids, cutoff, priority: 3 }); }
   cancelQueued() { for (const t of this.queue.splice(0)) { this.pending.delete(t.key); t.reject(new DOMException('Cálculo substituído', 'AbortError')); } }

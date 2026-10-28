@@ -3,8 +3,9 @@ import { unzipSync, strFromU8 } from 'fflate';
 import * as XLSX from 'xlsx';
 import { shiftMonth } from '../expanded/contract';
 import type { Building } from '../source';
-import { aggregatePortfolio, ALL_METHODS, analyzeCase, capabilities, chartRows, metricTrials, pairedTrials, present, type AnalysisSpec, type Universe } from './domain';
-import { buildExportPlan, csv, IVV_HEADERS, packageFiles } from './export';
+import { aggregatePortfolio, ALL_METHODS, analyzeCase, buildingSpec, capabilities, chartRows, metricTrials, pairedTrials, present, resolveAreas, type AnalysisSpec, type Universe } from './domain';
+import { buildExportPlan, csv, forecastWorkbook, IVV_HEADERS, packageFiles } from './export';
+import { comparisonRows } from './comparison';
 import { zipSync } from 'fflate';
 
 function building(id = '001', multi = false): Building {
@@ -13,6 +14,29 @@ function building(id = '001', multi = false): Building {
 function dataset(buildings = [building()]): Universe { return { schema: 'forecast-universe-v1', complete: true, areas: [{ city: 'Curitiba', uf: 'PR' }], locations: Object.fromEntries(buildings.map(b => [String(b.building_id), { city: 'Curitiba', uf: 'PR' }])), requests: [], missingIds: [], hash: 'fixture-hash', fetchedAt: '2026-10-28T12:00:00Z', city: 'Curitiba', uf: 'PR', buildings }; }
 const spec: AnalysisSpec = { cutoff: '2026-09', duration: 3, methods: ALL_METHODS };
 describe('experiência: rigor temporal e exportação do conjunto', () => {
+  it('recorte mais específico prevalece sem completar estados implicitamente', () => {
+    const catalog = { PR: ['Curitiba', 'Londrina'], SC: ['Florianópolis'] };
+    expect(resolveAreas(catalog, ['PR', 'SC'], ['PR', 'SC'], [{ city: 'Curitiba', uf: 'PR' }])).toEqual([{ city: 'Curitiba', uf: 'PR' }]);
+    expect(resolveAreas(catalog, [], ['PR', 'SC'], [])).toHaveLength(3);
+    expect(resolveAreas(catalog, ['SC'], [], [])).toEqual([{ city: 'Florianópolis', uf: 'SC' }]);
+    expect(resolveAreas(catalog, [], [], [])).toEqual([]);
+  });
+  it('última data por empreendimento acompanha comparação relativa e Excel direto', async () => {
+    const data = dataset([building(), building('002')]); data.buildings[1].typologies_history.pop();
+    const latest = { ...spec, cutoff: 'latest' };
+    const a = await analyzeCase(data, '001', buildingSpec(data, '001', latest));
+    const b = await analyzeCase(data, '002', buildingSpec(data, '002', latest));
+    expect(a.spec.cutoff).toBe('2026-12'); expect(b.spec.cutoff).toBe('2026-11');
+    const rows = comparisonRows([a, b], 'sold', 'elapsed', true);
+    expect(rows[0].label).toBe('Início'); expect(rows[0]['001']).toBe(43); expect(rows[0]['002']).toBe(40);
+    expect(comparisonRows([a, b], 'sold', 'calendar', true).map(r => r.x)).toContain('2026-11');
+    const plan = buildExportPlan(data, ['001', '002'], [a, b], latest);
+    expect(plan.forecasts.filter(r => r.id_empreendimento === '002')[0].inicio).toBe('2026-11');
+    const wb = XLSX.read(await forecastWorkbook(plan), { type: 'array' });
+    const records = XLSX.utils.sheet_to_json(wb.Sheets.previsoes);
+    expect(records).toHaveLength(6); expect(records[0]).toMatchObject({ id_empreendimento: '001', inicio: '2026-12', importavel: false });
+    expect(wb.SheetNames).toEqual(['previsoes', 'leia_me']);
+  });
   it('classifica disponibilidade no universo inteiro sem promover origem desconhecida', async () => {
     const data = dataset([building(), building('002')]); data.buildings[1].typologies_history = [];
     const available = await capabilities(data, ['001', '002'], spec.cutoff);

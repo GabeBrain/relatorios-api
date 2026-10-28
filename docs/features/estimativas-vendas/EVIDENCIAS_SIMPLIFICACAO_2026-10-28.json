@@ -1,0 +1,99 @@
+{
+  "schema": "estimativas-simplified-flow-v1",
+  "date": "2026-10-28",
+  "state": "validated-locally",
+  "published": false,
+  "productionVerified": false,
+  "source": "Controlled synthetic API for browser QA; real API not re-read in this revision",
+  "tests": {
+    "feature": 109,
+    "files": 14,
+    "operational": 15,
+    "excelUiRegression": 3,
+    "build": "passed",
+    "appTypes": "passed",
+    "lintErrors": 0,
+    "lintWarnings": 0
+  },
+  "removedPageTests": 7,
+  "newContractTests": 3,
+  "browser": [
+    {
+      "width": 1440,
+      "theme": "light",
+      "success": true,
+      "calls": 2,
+      "excelRows": 24,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "success": true,
+      "calls": 2,
+      "excelRows": 24,
+      "errors": []
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "success": true,
+      "calls": 2,
+      "excelRows": 24,
+      "errors": []
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "success": true,
+      "calls": 2,
+      "excelRows": 24,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "success": true,
+      "calls": 2,
+      "excelRows": 24,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "success": true,
+      "calls": 2,
+      "excelRows": 24,
+      "errors": []
+    }
+  ],
+  "tokensSha256": "0802b707b8c511e3367b1e4a235cea6a268edb9ac8f217a2beb965fc30874eac",
+  "acceptedBehavior": [
+    "hierarchical geographic multi-selection",
+    "Finotti first, no initial selection",
+    "card selection and separate exploration",
+    "per-building latest origin",
+    "available periods, no calendar or slider",
+    "relative percentage comparison; absolute cumulative individual view",
+    "direct Excel, one building/month per row"
+  ],
+  "excel": {
+    "filename": "previsoes.xlsx",
+    "rows": 24,
+    "buildings": 2,
+    "differentOrigins": [
+      "2026-09",
+      "2026-08"
+    ],
+    "idsAsText": true,
+    "importable": false
+  },
+  "localArtifacts": ".local-inputs/estimativas-vendas/simplificacao-20261028",
+  "diagnostic": "scripts/diagnostics/estimativas-simple-browser.mjs",
+  "limitations": [
+    "No import homologation",
+    "No new scientific model or calibration",
+    "Historical provenance and official cadence remain unknown",
+    "Portfolio requires a common date"
+  ]
+}
