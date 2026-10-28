@@ -4,6 +4,10 @@ Rota: `/rebrain/relatorio-api-excel`. Menu: **Relatórios Automatizados → Rela
 
 ## Coleta completa antes das regras
 
+### Agrupamento pela seleção de campos
+
+Ao selecionar ID Empreendimento e somente campos de empreendimento (cadastro, unidades totais, médias do empreendimento/MCMV, faixas e período), o resultado agrupa por ID + período no tabular ou por ID no horizontal. O período continua compondo a chave mesmo se sua coluna não for exportada. Campos de tipologia, vendas/estoque/VGV/preços da tipologia mantêm o detalhamento original; sem ID Empreendimento ou com todas as colunas, também não agrupa. Seleção de campos não soma valores: preserva o total/média único, combina lacunas com valor disponível no mesmo grupo e bloqueia valores preenchidos conflitantes, solicitando ID Tipologia para conferência. Agrupamento acontece em Gerar relatório e é o mesmo na prévia/Excel. Não remove períodos distintos nem modifica dados brutos.
+
 Unidades Totais do Empreendimento usa `data[].total_units` cadastral, ao lado de Unidades por Tipologia. Disponível na seleção e nos dois layouts, repete o total em cada linha do empreendimento; não deve ser somado entre linhas. Sem valor na API, fica vazio, sem estimativa por soma de tipologias ou períodos. A Faixa MCMV permanece ponderada pela oferta lançada somente das tipologias Padrão, sem incluir Garden/Cobertura.
 
 Garagem preserva o texto de `data[].typologies_history[].garage` no último fechamento de cada tipologia até o corte, sem conversão numérica ou limpeza do conteúdo. Valores ausentes ficam vazios; a prévia e o Excel mantêm descrições como “1 vaga” e “1 a 2 vagas”.

@@ -384,6 +384,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+### 28/10 — Relatório API Excel: agrupamento por seleção de cadastro — Edgar / Codex
+
+- **Mudança exclusiva:** selecionar ID Empreendimento com campos apenas de empreendimento agrupa por ID/período no tabular e ID no horizontal. Campos de tipologia/métricas de vendas/estoque mantêm detalhe. Ocultar Período não elimina meses distintos. Médias/totais não são somados; lacunas usam valor disponível do mesmo grupo; valores preenchidos conflitantes bloqueiam com orientação. Regra descrita em Selecionar colunas, aplicada só ao gerar, prévia/XLSX iguais.
+- **Validação:**64 testes de motor/MCMV aprovados; casos agrupados e detalhados nos dois layouts, períodos ocultos, duas identidades, lacunas, conflitos, preservação dos brutos e XLSX reaberto. Tipos/lint dirigidos. Sem consulta autenticada/regeneração integral de Campinas ou novo ensaio visual.
+- **Etapas/Pendências:** implementação local concluída; publicação depende de autorização. Base4053ca4; commit desta entrada. Fetch desta etapa recusado pelo ambiente: comparações usam últimas referências disponíveis; sem push, merge ou alegação de remotes atualizados. Auditoria local preservada.
+- **Monday:** —
+
 ### 28/10 — Relatório API Excel: preço usado na Faixa MCMV — Edgar / Codex
 
 - **Mudança exclusiva:** campo selecionável Preço Médio para Faixa MCMV após Faixa MCMV, com o mesmo resultado quantity-standard passado ao classificador. Tabular usa período da linha; horizontal conserva posição final e série histórica. Não altera fórmula/limites/elegibilidade. Reais com duas casas em prévia/XLSX, sem escala VGV; sem base válida fica vazio.

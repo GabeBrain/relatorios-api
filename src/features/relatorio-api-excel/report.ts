@@ -319,6 +319,14 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
 }
 
 /** Expande nomes de campos somente na geração, preservando a ordem das métricas. */
+const BUILDING_FIELDS = new Set([
+  'ID Empreendimento', 'Status Empreendimento', 'Região', 'Região Administrativa', 'Cidade/UF',
+  'Tipo', 'Padrão', 'Faixa MCMV', 'Preço Médio para Faixa MCMV', 'Preço Médio Empreendimento',
+  'Empreendimentos', 'Bairro', 'Endereço', 'Número', 'Incorporadoras',
+  'Unidades Totais do Empreendimento', 'Data de Lançamento', 'Ano', 'Data de Entrega',
+  'Entrada', 'Nº de Parcelas', 'Valor da parcela', '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'Período',
+]);
+
 export function selectReportFields(report: Report, fields: string[] | null): Report {
   if (fields === null) return report;
   const selected = new Set(fields);
@@ -326,7 +334,23 @@ export function selectReportFields(report: Report, fields: string[] | null): Rep
     || (selected.has('Faixa MCMV') && column.startsWith('Faixa MCMV '))
     || (selected.has('Preço Médio para Faixa MCMV') && column.startsWith('Preço Médio para Faixa MCMV '))
     || MEASURES.some((measure) => selected.has(measure) && column.startsWith(`${measure} `)));
-  return selectedReport(report, columns);
+  if (!selected.has('ID Empreendimento') || !fields.every((field) => BUILDING_FIELDS.has(field))) return selectedReport(report, columns);
+  // Agrupa antes da projeção: mesmo sem exportar Período, mantém meses/trimestres distintos.
+  const grouped = new Map<string, Row>();
+  for (const row of report.rows) {
+    const id = text(row['ID Empreendimento']);
+    if (!id) throw new Error('Não é possível agrupar empreendimento sem ID.');
+    const key = JSON.stringify([id, row['Período'] ?? null]);
+    const previous = grouped.get(key);
+    if (!previous) grouped.set(key, { ...row });
+    else for (const column of columns) {
+      const value = row[column];
+      if (value === null || value === undefined || value === '') continue;
+      if (previous[column] === null || previous[column] === undefined || previous[column] === '') previous[column] = value;
+      else if (previous[column] !== value) throw new Error(`Dados de empreendimento divergentes para o ID ${id}${row['Período'] ? ` em ${row['Período']}` : ''}. Inclua ID Tipologia para conferir os registros.`);
+    }
+  }
+  return selectedReport({ ...report, rows: [...grouped.values()] }, columns);
 }
 
 export function selectedReport(report: Report, selected: string[] | null): Report {
