@@ -384,6 +384,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+### 28/10 — Relatório API Excel: Faixa MCMV — Edgar / Codex
+
+- **Mudança:** nova coluna fixa selecionável Faixa MCMV, exclusiva de Vertical Econômico/Standard; acrescenta o sufixo da faixa e preserva Padrão. Média exclusiva ponderada pela oferta lançada somente tipologias Padrão, na última posição até o mês final, independente das opções gerais de média, visão e VGV. Calculado somente em Gerar relatório após coleta completa. Coletor/AELO/Dashboard intactos.
+- **Fonte:** planilha municipal fornecida, 5.571 chaves únicas UF/cidade, tetos positivos. Faixa2 até teto; Faixa3 até400.000; Faixa4 de400.000,01 até600.000, conforme confirmação. Sem teto conhecido, elegibilidade ou média válida: vazio. Tabela derivada/SHA-256 e regras em docs/features/relatorio-api-excel.md; descrições na seção2 da interface.
+- **Validação:** 61 testes em cinco arquivos, incluindo limites em centavos, correspondência municipal, média exclusiva, ausência de Padrão, corte temporal e reabertura XLSX nos dois layouts. TypeScript, lint dirigido e build aprovados. Navegador com rede simulada; consulta autenticada e aceite com dados reais não executados.
+- **Etapas/Pendências:** implementação local concluída; publicação aguarda autorização. Base atualizada por fast-forward para7cacaf8, preservando auditoria local. Padrões de seleção de colunas e descrições existentes reutilizados; sem novo controle/carregamento. Sem push/Monday.
+- **Monday:** —
 
 ### 27/10 — Estimativas: protótipo Claude Design adaptado — Gabriel/sessão
 - Estado: validado localmente; push autorizado por Gabriel. [Fonte, decisões e limites](../features/estimativas-vendas/PLANO_BANCADA_CIENTIFICA_CURITIBA_2026-10-27.md#10-adaptação-do-zip-claude-design-e-envio-autorizado--2710).

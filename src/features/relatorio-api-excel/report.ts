@@ -1,4 +1,5 @@
 import type { RawBuilding } from './api';
+import { mcmvBand } from './mcmv';
 
 export type Cell = string | number | null;
 export type Row = Record<string, Cell>;
@@ -36,7 +37,7 @@ export const FIXED_COLUMNS = [
   'Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado', 'Tempo de Vendas', 'Empreendimentos',
   'Taxa Administrativa', 'Bairro', 'Endereço', 'Número', 'Incorporadoras', 'Unidades por Tipologia',
   'Data de Lançamento', 'Ano', 'Data de Entrega', 'Quartos', 'Garagem', 'Entrada', 'Nº de Parcelas', 'Valor da parcela',
-  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'm2 Priv.',
+  '% de Juros Mensal', 'Indíce de Juros', 'Desconto à Vista', 'm2 Priv.', 'Faixa MCMV',
 ];
 export const MEASURES = [
   'Vendas Brutas', 'Distratos', 'Vendas Líquidas', 'Estoque', 'Preço Atual',
@@ -234,6 +235,8 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       history.push(item);
       typologies.set(id, history);
     }
+    const mcmvAverage = buildingAverage([...typologies.values()].map((history) => history.at(-1)!.entry), 'quantity-standard');
+    const mcmv = mcmvBand(building, mcmvAverage);
     const averages = periods.map((period, index) => {
       const snapshots = [...typologies.values()].flatMap((history) => {
         const snapshot = history.filter(({ date }) => date >= options.from && periodOf(date, options.granularity).key === period.key).at(-1);
@@ -251,6 +254,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       if (!inRange.length) continue;
       const currentPrice = numeric(history.at(-1)!.entry.price);
       const fixed = fixedRow(building, id, history);
+      fixed['Faixa MCMV'] = mcmv;
       const wide: Row = { ...fixed };
       for (const [index, period] of periods.entries()) {
         const entries = inRange.filter(({ date }) => periodOf(date, options.granularity).key === period.key);

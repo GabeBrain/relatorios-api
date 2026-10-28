@@ -116,3 +116,13 @@ Uma aba `RELATÓRIO API EXCEL`, autofiltro e arquivo `Relatorio_API_Excel_<escop
 ## Validação local
 
 Testes do coletor cobrem contrato copiado, registros repetidos, escopos, falha de página, payload inválido, cancelamento e espera pela última resposta. Testes do motor cobrem os dois modos monetários e temporais, datas inclusivas, lacunas, status, seleção e ambos os layouts; Excel gravado em memória e reaberto para conferir cabeçalhos, células numéricas e formatos. Sem comprovação de API autenticada em produção nesta sessão. Exemplos de teste usam dados fictícios, não dados do cliente.
+
+## Faixa MCMV — base municipal 2026
+
+Exclusiva deste relatório, calculada em Gerar relatório após coleta completa. Coluna fixa selecionável nos dois layouts, preservando Padrão. Resultado: `Econômico - Faixa 2`, `Standard - Faixa 3`, etc.
+
+- Elegíveis: building_type Vertical e standard Econômico/Standard, normalizando acentos/caixa/espaços.
+- Média exclusiva: soma de price × qty / soma de qty, somente type_of_typology Padrão/Padrao; última posição de cada tipologia até o mês final (e após lançamento quando informado). Garden/Cobertura não entram no cálculo, mas permanecem nas linhas. Independente de visão mensal/trimestral, escala VGV e modo de média escolhido. A classificação fixa se repete nas linhas do empreendimento.
+- Faixa 2: média até o teto municipal. Faixa 3: teto + R$ 0,01 até R$ 400.000,00. Faixa 4: R$ 400.000,01 até R$ 600.000,00 (limite aprovado pelo usuário). Comparação em centavos.
+- Fora da elegibilidade, média ausente/não positiva, município/UF não encontrado ou preço acima de R$ 600.000: célula vazia, sem inferir teto de outra cidade.
+- Fonte: MCMV_Faixa_2_Municipios_2026.xlsx, aba MCMV Faixa 2 - 2026, colunas Estado/Cidade/Teto do MCMV faixa 2. 5.571 chaves únicas, tetos numéricos positivos. SHA-256 c904f1bd2aedc8ac1d9556ce38d37d7f855564c1704e14fcd2129b78ba22932f. Tabela derivada em mcmv-ceilings-2026.json; arquivo original permanece fora do Git. Não é consulta/validação normativa externa.
