@@ -1,153 +1,76 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
+import { afterEach, describe, it, expect } from 'vitest';
 import { SpReportPages } from './SpReportPages';
-import { SP_DETAIL_PAGES, SP_PATTERN_PAGES, SP_TABLE_PAGES } from './segments';
+import { SP_ORIGINAL_SLIDES } from './original-slides';
 import { buildSpTemporalPreview } from './temporal';
 import { recordedInput } from './__tests__/recorded';
+import { syntheticLaunchSeries } from './__tests__/launch-series';
 import { syntheticTypologyInput } from './__tests__/typology';
-import { buildSpTypologies } from './typologies';
-import { buildSpLaunchHistory } from './history';
-import { syntheticLaunchHistory } from './__tests__/history';
 import { syntheticHistoryBatch } from './__tests__/history-batch';
+import { buildSpTypologies } from './typologies';
 import { buildSpHistoryBatch } from './history-batch';
+import { buildSpProjects } from './projects';
+import { buildSpLaunchSeries } from './launch-series';
 
-describe('páginas SP', () => {
-  it('monta as vinte páginas por padrão e quadros, sem reaproveitar histórico inválido', () => {
-    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
-    const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);
-    const typologies = buildSpTypologies(syntheticTypologyInput(), report);
-    const view = render(<SpReportPages report={{ ...report, historyBatch, typologies }} />);
-    expect(SP_PATTERN_PAGES.length + SP_TABLE_PAGES.length).toBe(20);
-    for (const [index, detail] of SP_PATTERN_PAGES.entries()) {
-      fireEvent.click(screen.getByRole('button', { name: `${index + 27}. ${detail.title}` }));
-      expect(screen.getByText(`Padrão da API: ${detail.pattern}`)).toBeInTheDocument();
-      expect(screen.getByText('julho / agosto · 2025 × 2026')).toBeInTheDocument();
-    }
-    for (const [index, table] of SP_TABLE_PAGES.entries()) {
-      fireEvent.click(screen.getByRole('button', { name: `${index + 41}. ${table.title}` }));
-      expect(screen.getByRole('img', { name: `Quadro reconciliado por ${table.dimension === 'patterns' ? 'padrão' : 'tipologia'}` })).toBeInTheDocument();
-    }
-    view.rerender(<SpReportPages report={report} />);
-    expect(screen.getByText('Quadro por tipologia indisponível')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: `27. ${SP_PATTERN_PAGES[0].title}` }));
-    expect(screen.getByText('Comparativo de lançamentos indisponível')).toBeInTheDocument();
+afterEach(cleanup);
+const current = () => buildSpTemporalPreview(recordedInput(), '3T2026');
+const open = (number: number) => fireEvent.click(screen.getByRole('button', { name: `${number}. ${SP_ORIGINAL_SLIDES[number - 1].title}` }));
+function reportWithTrends() {
+  const report = current();
+  const buildings = [2021, 2022, 2023, 2024, 2025, 2026].flatMap(year => ['Compacto', 'Econômico', 'Standard', 'Luxo'].map((standard, index) => ({ building_id: `${year}-${index}`, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: `${year}-07-01`, standard })));
+  return { ...report, projects: buildSpProjects(buildings, report), launchSeries: buildSpLaunchSeries(syntheticLaunchSeries(), report) };
+}
+describe('SP — estrutura original e dez slides de lançamentos', () => {
+  it('preserva as 85 posições e todos os títulos originais, sem inserir complementos', () => {
+    render(<SpReportPages report={current()} />);
+    expect(SP_ORIGINAL_SLIDES).toHaveLength(85);
+    expect(within(screen.getByRole('navigation', { name: 'Navegação dos slides originais' })).getAllByRole('button').map(button => button.textContent)).toEqual(SP_ORIGINAL_SLIDES.map(item => `${item.number}. ${item.title}`));
+    open(2); expect(screen.getByRole('img', { name: 'Sobre este relatório' })).toBeInTheDocument();
+    expect(screen.getByRole('article')).toHaveTextContent('São Paulo capital');
+    open(6); expect(screen.getByRole('img', { name: 'Sumário original' })).toBeInTheDocument();
+    open(12); expect(screen.getByRole('article')).toHaveTextContent('LANÇAMENTOS VERTICAIS');
+    open(85); expect(screen.getByRole('img', { name: 'Conteúdo pendente: slide 85' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Quadro de lançamentos por padrão/ })).not.toBeInTheDocument();
   });
-  it('monta doze detalhes complementares e invalida todos com o lote', () => {
-    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
-    const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);
-    const view = render(<SpReportPages report={{ ...report, historyBatch }} />);
-    expect(SP_DETAIL_PAGES).toHaveLength(12);
-    for (const [index, detail] of SP_DETAIL_PAGES.entries()) {
-      fireEvent.click(screen.getByRole('button', { name: `${index + 15}. ${detail.title}` }));
-      expect(screen.getByText(`${detail.segment} · classificação SP de Lucas`)).toBeInTheDocument();
-      expect(screen.getByText('julho / agosto · 2025 × 2026')).toBeInTheDocument();
-      expect(screen.getByText(`2026: ${historyBatch.segmentDetails![detail.segment][detail.metric].totals!.current.toLocaleString('pt-BR')} unidades`)).toBeInTheDocument();
+  it('preenche exatamente os dez slides 13 a 22 e preserva a parcial', () => {
+    render(<SpReportPages report={reportWithTrends()} />);
+    for (let number = 13; number <= 22; number++) {
+      open(number);
+      expect(screen.getByRole('article')).toHaveAttribute('aria-label', `Slide ${number}: ${SP_ORIGINAL_SLIDES[number - 1].title}`);
+      expect(screen.getByRole('article')).not.toHaveTextContent('Dados em conferência');
+      expect(screen.getByRole('article')).toHaveTextContent('Parcial até agosto de 2026');
     }
-    view.rerender(<SpReportPages report={{ ...report, historyBatch: undefined }} />);
-    expect(screen.getByText('Comparativo de oferta indisponível')).toBeInTheDocument();
-    expect(screen.queryByText('julho / agosto · 2025 × 2026')).not.toBeInTheDocument();
+    open(13); expect(screen.getByRole('article')).toHaveTextContent('3T2026*');
+    open(14); expect(screen.getByRole('article')).toHaveTextContent('ACUMULADO 12 MESES');
+    open(15); expect(screen.getByRole('article')).toHaveTextContent('MCMV');
+    open(22); expect(screen.getByRole('article')).toHaveTextContent('PARTICIPAÇÃO ANUAL POR SEGMENTO');
   });
-  it('compara segmentos e remove o comparativo bloqueado', () => {
-    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
-    const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);
-    const view = render(<SpReportPages report={{ ...report, historyBatch }} />);
-    for (const title of ['9. Lançamentos por segmento', '10. Vendas por segmento', '11. Oferta por segmento']) {
-      fireEvent.click(screen.getByRole('button', { name: title }));
-      expect(screen.getByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' })).toBeInTheDocument();
-      for (const group of ['Compactos', 'MCMV', 'Médio Padrão', 'Luxo']) expect(screen.getByText(group)).toBeInTheDocument();
-    }
-    expect(screen.getByText('2025 · 101.000 unidades')).toBeInTheDocument();
-    view.rerender(<SpReportPages report={{ ...report, historyBatch: { status: 'blocked', issues: ['Divergência'], comparisons: {}, checks: [] } }} />);
-    expect(screen.queryByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' })).not.toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'Distribuição por segmento em unidades e participação percentual' })).toBeInTheDocument();
-  });
-  it('preenche o lote completo e mantém a oferta como fotografia, com bases negativas explícitas', () => {
-    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
-    const historyBatch = buildSpHistoryBatch(syntheticHistoryBatch(), report);
-    const view = render(<SpReportPages report={{ ...report, historyBatch }} />);
-    for (const [button, graph] of [['12. Comparativo de lançamentos', 'Lançamentos'], ['13. Comparativo de vendas', 'Vendas'], ['14. Comparativo de oferta', 'Oferta']]) {
-      fireEvent.click(screen.getByRole('button', { name: button }));
-      expect(screen.getByRole('img', { name: `${graph} nos mesmos meses do ano atual e anterior` })).toBeInTheDocument();
-      expect(screen.getByText('julho / agosto · 2025 × 2026')).toBeInTheDocument();
-    }
-    expect(screen.getByText('2026: 124.706 unidades')).toBeInTheDocument();
-    expect(screen.getByText('Oferta: fotografia do último mês, sem somar estoques.')).toBeInTheDocument();
-    view.rerender(<SpReportPages report={{ ...report, historyBatch: buildSpHistoryBatch(syntheticHistoryBatch([-700, -1400]), report) }} />);
-    fireEvent.click(screen.getByRole('button', { name: '13. Comparativo de vendas' }));
-    expect(screen.getByText('Variação não calculável: base anterior negativa')).toBeInTheDocument();
-    view.rerender(<SpReportPages report={{ ...report, historyBatch: { status: 'blocked', issues: ['Fonte divergente'], comparisons: {}, checks: [] } }} />);
-    expect(screen.getByText('Fonte divergente')).toBeInTheDocument();
-    expect(screen.queryByRole('img', { name: 'Vendas nos mesmos meses do ano atual e anterior' })).not.toBeInTheDocument();
-  });
-  it('mostra meses equivalentes e remove o comparativo quando a validação bloqueia', () => {
-    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+  it('não usa um total municipal como substituto de histórico ausente', () => {
+    const report = current();
     const view = render(<SpReportPages report={report} />);
-    fireEvent.click(screen.getByRole('button', { name: '12. Comparativo de lançamentos' }));
-    expect(screen.getByText('Comparativo de lançamentos indisponível')).toBeInTheDocument();
-    const launchHistory = buildSpLaunchHistory(syntheticLaunchHistory(), report);
-    view.rerender(<SpReportPages report={{ ...report, launchHistory }} />);
-    expect(screen.getByText('julho / agosto · 2025 × 2026')).toBeInTheDocument();
-    expect(screen.getByText('Variação: +21,8%')).toBeInTheDocument();
-    const zero = syntheticLaunchHistory(); zero.previous.forEach(row => { row.releases_in_period = 0; });
-    view.rerender(<SpReportPages report={{ ...report, launchHistory: buildSpLaunchHistory(zero, report) }} />);
-    expect(screen.getByText('Variação não calculável: base anterior zero')).toBeInTheDocument();
-    view.rerender(<SpReportPages report={{ ...report, launchHistory: { status: 'blocked', issues: ['Fonte divergente'], totals: null, rows: [], checks: [] } }} />);
-    expect(screen.getByText('Fonte divergente')).toBeInTheDocument();
-    expect(screen.queryByRole('img', { name: 'Lançamentos nos mesmos meses do ano atual e anterior' })).not.toBeInTheDocument();
+    open(18); expect(screen.getByRole('article')).toHaveTextContent('Dados em conferência');
+    view.rerender(<SpReportPages report={{ ...report, launchSeries: { status: 'blocked', issues: ['Falta um mês.'] } }} />);
+    expect(screen.getByRole('article')).toHaveTextContent('Falta um mês.');
+    expect(screen.getByRole('article')).not.toHaveTextContent('24.351');
   });
-  it('preenche os três segmentos com a regra confirmada e bloqueia padrões inválidos', () => {
-    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
-    const view = render(<SpReportPages report={{ ...report, typologies: buildSpTypologies(syntheticTypologyInput(), report) }} />);
-    for (const title of ['9. Lançamentos por segmento', '10. Vendas por segmento', '11. Oferta por segmento']) {
-      fireEvent.click(screen.getByRole('button', { name: title }));
-      expect(screen.getByRole('img', { name: 'Distribuição por segmento em unidades e participação percentual' })).toBeInTheDocument();
-      for (const group of ['Compactos', 'MCMV', 'Médio Padrão', 'Luxo']) expect(screen.getByText(group)).toBeInTheDocument();
-      expect(screen.queryByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' })).not.toBeInTheDocument();
-    }
-    view.rerender(<SpReportPages report={{ ...report, patterns: undefined }} />);
-    expect(screen.getByText('Dados por segmento indisponíveis')).toBeInTheDocument();
-    expect(screen.queryByRole('img', { name: 'Distribuição por segmento em unidades e participação percentual' })).not.toBeInTheDocument();
-    expect(screen.queryByText('124.706')).not.toBeInTheDocument();
-  });
-  it('preenche os três slides de tipologia só depois de reconciliar as fontes', () => {
-    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
-    const view = render(<SpReportPages report={report} />);
-    fireEvent.click(screen.getByRole('button', { name: '6. Lançamentos por tipologia' }));
-    expect(screen.getByText('Dados por tipologia indisponíveis')).toBeInTheDocument();
-    const typologies = buildSpTypologies(syntheticTypologyInput(), report);
-    view.rerender(<SpReportPages report={{ ...report, typologies }} />);
-    for (const title of ['6. Lançamentos por tipologia', '7. Vendas por tipologia', '8. Oferta por tipologia']) {
-      fireEvent.click(screen.getByRole('button', { name: title }));
-      expect(screen.getByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' })).toBeInTheDocument();
-      expect(screen.queryByText('Dados por tipologia indisponíveis')).not.toBeInTheDocument();
-    }
-    view.rerender(<SpReportPages report={{ ...report, typologies: { status: 'blocked', issues: ['test'], rows: [], checks: [] } }} />);
-    expect(screen.getByText('Dados por tipologia indisponíveis')).toBeInTheDocument();
-    expect(screen.queryByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' })).not.toBeInTheDocument();
-  });
-  it('mantém o período parcial e usa os indicadores conferidos nas páginas', () => {
-    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+  it('mantém gerais quando classificação falta e bloqueia só o recorte', () => {
+    const report = reportWithTrends(); report.projects.breakdown = { status: 'blocked', issues: ['Padrão ausente.'] };
     render(<SpReportPages report={report} />);
-    expect(screen.getByText(/Modelo original do PowerPoint/)).toHaveTextContent('Parcial até agosto de 2026');
-    expect(screen.getByRole('img', { name: 'Capa original Brain Inteligência Estratégica' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '2. Empreendimentos' }));
-    expect(screen.getByText('Indisponível')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '3. Unidades lançadas' }));
-    expect(screen.getByText('24.351')).toBeInTheDocument();
-    expect(screen.getByText('julho de 2026')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '4. Vendas líquidas' }));
-    expect(screen.getByText('26.824')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '5. Oferta final' }));
-    expect(screen.getAllByText('124.706')).toHaveLength(2);
-    expect(screen.getByText('julho de 2026')).toBeInTheDocument();
-    expect(screen.queryByText('setembro de 2026')).not.toBeInTheDocument();
+    open(13); expect(screen.getByRole('article')).not.toHaveTextContent('Dados em conferência');
+    open(15); expect(screen.getByRole('article')).toHaveTextContent('Padrão ausente.');
+  });
+  it('preserva tipologias e segmentos nas posições 23/24,37/38,47/48', () => {
+    const report = current();
+    render(<SpReportPages report={{ ...report, typologies: buildSpTypologies(syntheticTypologyInput(), report), historyBatch: buildSpHistoryBatch(syntheticHistoryBatch(), report) }} />);
+    for (const number of [23, 37, 47]) { open(number); expect(screen.getByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' })).toBeInTheDocument(); }
+    for (const number of [24, 38, 48]) { open(number); expect(screen.getByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' })).toBeInTheDocument(); }
+    open(46); expect(screen.getByRole('article')).toHaveTextContent('124.706');
     fireEvent.click(screen.getByRole('button', { name: 'Ampliar slides' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '5. Oferta final' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: `46. ${SP_ORIGINAL_SLIDES[45].title}` })).toHaveAttribute('aria-pressed', 'true');
   });
-  it('não monta páginas quando os dados estão bloqueados', () => {
-    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
-    render(<SpReportPages report={{ ...report, status: 'incomplete' }} />);
+  it('não monta o relatório com dados municipais bloqueados', () => {
+    render(<SpReportPages report={{ ...current(), status: 'incomplete' }} />);
     expect(screen.queryByRole('region', { name: 'Páginas do relatório' })).not.toBeInTheDocument();
   });
 });

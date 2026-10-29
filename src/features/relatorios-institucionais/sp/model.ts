@@ -2,6 +2,7 @@ import { isQuarter, quarterEndMonth } from '@/features/panorama-secovi-fiergs/do
 import { safeNumber } from '@/features/panorama-secovi-fiergs/lib/launches';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
 import type { SpProjects } from './projects';
+import type { SpLaunchSeries } from './launch-series';
 
 export const SP_INSTITUTIONAL = { id: 'sp-institucional', label: 'SP institucional', uf: 'SP', city: 'São Paulo' } as const;
 type Raw = Record<string, unknown>;
@@ -56,6 +57,7 @@ export interface SpPreview {
   typologies?: SpTypologies;
   patterns?: SpDistribution;
   projects?: SpProjects;
+  launchSeries?: SpLaunchSeries;
   launchHistory?: SpLaunchHistory;
   historyBatch?: SpHistoryBatch;
 }

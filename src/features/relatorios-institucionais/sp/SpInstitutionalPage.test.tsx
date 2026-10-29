@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import SpInstitutionalPage from './SpInstitutionalPage';
 
-const access = vi.hoisted(() => ({ token: 'synthetic-token', error: false, loading: false, fixtureMode: 'success', apiMode: 'success', aborted: false, projectsPending: false, finishProjects: null as (() => void) | null, reload: vi.fn() }));
+const access = vi.hoisted(() => ({ token: 'synthetic-token', error: false, loading: false, fixtureMode: 'success', apiMode: 'success', aborted: false, seriesPending: false, projectsPending: false, finishProjects: null as (() => void) | null, reload: vi.fn() }));
 vi.mock('@/store/auth-store', () => ({ useAuthStore: (selector: (state: { getToken: () => string }) => unknown) => selector({ getToken: () => access.token }) }));
 vi.mock('@/features/shared/geo-api-scope-engine', () => ({
   GeoApiScopeSelector: ({ onChange }: { onChange: (geo: { uf: string; city: string }) => void }) => <div><button onClick={() => onChange({ uf: 'SP', city: 'São Paulo' })}>Escolher capital</button><button onClick={() => onChange({ uf: 'SP', city: 'Campinas' })}>Escolher Campinas</button><button onClick={() => onChange({ uf: 'RJ', city: '' })}>Trocar UF</button></div>,
@@ -22,10 +22,16 @@ vi.mock('./api', async () => {
   const { userSeptemberReplay } = await import('./__tests__/user-september');
   const { syntheticTypologyInput } = await import('./__tests__/typology');
   const { syntheticHistoryBatch } = await import('./__tests__/history-batch');
+  const { syntheticLaunchSeries } = await import('./__tests__/launch-series');
   return { fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal; groupBy?: string }) => {
     if (access.apiMode === 'error') throw new Error('private API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
     return { ...(['closed', 'user-september'].includes(access.apiMode) ? { ...(access.apiMode === 'user-september' ? userSeptemberReplay() : syntheticWindow('09')), groupBy: options.groupBy ?? 'Padrão' } : options.groupBy === 'Tipologia' ? syntheticTypologyInput() : recordedInput()), origin: 'api' };
+  }, fetchSpLaunchSeriesRows: async (_report: unknown, options: { signal: AbortSignal }) => {
+    if (access.seriesPending) await new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => reject(new DOMException('cancelled', 'AbortError'))); });
+    if (access.apiMode === 'error') throw new Error('private long series diagnostic');
+    const input = access.apiMode === 'user-september' ? userSeptemberReplay() : access.apiMode === 'closed' ? syntheticWindow('09') : recordedInput();
+    return syntheticLaunchSeries(input);
   }, fetchSpHistoryBatch: async (_report: unknown, options: { signal: AbortSignal }) => {
     if (access.apiMode === 'error') throw new Error('private historical API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
@@ -42,10 +48,25 @@ vi.mock('./projects', async importOriginal => {
     return original.buildSpProjects([{ building_id: 1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: '2026-07-01' }], report);
   } };
 });
-beforeEach(() => { access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.projectsPending = false; access.finishProjects = null; access.reload.mockClear(); });
+beforeEach(() => { access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.seriesPending = false; access.projectsPending = false; access.finishProjects = null; access.reload.mockClear(); });
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('série longa não bloqueia municipal ou empreendimentos, pode cancelar e repetir isoladamente', async () => {
+    access.seriesPending = true;
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText(/Cobertura conferida:/);
+    expect(screen.queryByRole('dialog', { name: 'Consulta do relatório' })).not.toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: '26.824' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar série de lançamentos' }));
+    await screen.findByText('Séries de lançamentos indisponíveis');
+    expect(screen.getByText(/Cobertura conferida:/)).toBeInTheDocument();
+    access.seriesPending = false;
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir séries de lançamentos' }));
+    await screen.findByText(/Séries de unidades lançadas conferidas desde janeiro de 2021/);
+  });
   it('libera municipal antes da contagem, permite cancelar e repetir somente empreendimentos', async () => {
     access.projectsPending = true;
     render(<SpInstitutionalPage />);
@@ -91,8 +112,8 @@ describe('Página SP institucional', () => {
     fireEvent.click(screen.getByText('Escolher capital'));
     fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
     await screen.findByText(/Cobertura conferida:/);
-    fireEvent.click(screen.getByRole('button', { name: '2. Empreendimentos' }));
-    expect(screen.getByRole('article')).toHaveTextContent('cobertura paginada conferida');
+    fireEvent.click(screen.getByRole('button', { name: '13. Empreendimentos lançados, série trimestral' }));
+    expect(screen.getByRole('article')).toHaveTextContent('Reconstituição do cadastro atual');
     expect(screen.getByRole('article')).not.toHaveTextContent('Contagem de empreendimentos pendente');
     access.fixtureMode = 'granular-error';
     fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
@@ -112,7 +133,7 @@ describe('Página SP institucional', () => {
     fireEvent.click(screen.getByText('Diferenças de balanço por grupo'));
     expect(screen.getAllByRole('cell', { name: '126.307' }).length).toBeGreaterThan(0);
     expect(screen.getByText(/não comprovam sua causa/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '5. Oferta final' }));
+    fireEvent.click(screen.getByRole('button', { name: '46. Oferta final histórica e escoamento por padrão' }));
     expect(screen.getByRole('article')).toHaveTextContent('126.307');
   });
   it('nova geração substitui a parcial pelo trimestre fechado e mantém os detalhamentos disponíveis', async () => {
@@ -128,8 +149,8 @@ describe('Página SP institucional', () => {
     expect(screen.getByRole('button', { name: 'Conferir históricos' })).toBeEnabled();
     fireEvent.click(screen.getByRole('button', { name: 'Conferir tipologias' }));
     await screen.findByText(/Tipologias conferidas:/);
-    fireEvent.click(screen.getByRole('button', { name: '41. Quadro de lançamentos por padrão' }));
-    expect(screen.getByRole('img', { name: 'Quadro reconciliado por padrão' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '24. Lançamentos por segmento, comparação anual' }));
+    expect(screen.getByRole('img', { name: 'Distribuição por segmento em unidades e participação percentual' })).toBeInTheDocument();
     expect(screen.queryAllByRole('cell', { name: 'Indisponível' })).toHaveLength(0);
   });
   it('um balanço anterior divergente não oculta comparativos presentes', async () => {
@@ -140,9 +161,9 @@ describe('Página SP institucional', () => {
     access.apiMode = 'unbalanced';
     fireEvent.click(screen.getByRole('button', { name: 'Conferir históricos' }));
     await screen.findByText(/Três comparativos conferidos/);
-    for (const title of ['12. Comparativo de lançamentos', '13. Comparativo de vendas', '14. Comparativo de oferta']) {
+    for (const title of ['24. Lançamentos por segmento, comparação anual', '38. Vendas por segmento, comparação anual', '48. Oferta por segmento, comparação anual']) {
       fireEvent.click(screen.getByRole('button', { name: title }));
-      expect(screen.getByRole('img', { name: /nos mesmos meses do ano atual e anterior/ })).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: /por segmento nos mesmos meses dos dois anos/ })).toBeInTheDocument();
     }
     expect(screen.getAllByRole('cell', { name: '124.706' })).toHaveLength(2);
   });
@@ -153,12 +174,12 @@ describe('Página SP institucional', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Conferir históricos' }));
     await screen.findByText(/Três comparativos conferidos/);
-    fireEvent.click(screen.getByRole('button', { name: '12. Comparativo de lançamentos' }));
-    expect(screen.getByRole('img', { name: 'Lançamentos nos mesmos meses do ano atual e anterior' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '24. Lançamentos por segmento, comparação anual' }));
+    expect(screen.getByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' })).toBeInTheDocument();
     access.apiMode = 'error';
     fireEvent.click(screen.getByRole('button', { name: 'Conferir históricos' }));
     expect(await screen.findByText('Não foi possível conferir os históricos')).toBeInTheDocument();
-    expect(screen.queryByRole('img', { name: 'Lançamentos nos mesmos meses do ano atual e anterior' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' })).not.toBeInTheDocument();
     expect(screen.getByRole('cell', { name: '24.351' })).toBeInTheDocument();
     expect(screen.queryByText('private historical API diagnostic')).not.toBeInTheDocument();
     access.apiMode = 'success';
@@ -200,7 +221,7 @@ describe('Página SP institucional', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Conferir tipologias' }));
     expect(await screen.findByText(/Tipologias conferidas:/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '6. Lançamentos por tipologia' }));
+    fireEvent.click(screen.getByRole('button', { name: '23. Lançamentos por tipologia, comparação com mesmo trimestre anterior' }));
     expect(screen.getByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /3T2026 · parcial até agosto/ })).toBeInTheDocument();
     fireEvent.click(screen.getByText('Trocar UF'));

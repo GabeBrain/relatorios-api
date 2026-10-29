@@ -1,5 +1,15 @@
 # SP capital — primeiro mapeamento
 
+## 29/10/2026 — estrutura original de 85 slides e lote analítico 13–22
+
+Usuário pediu dez slides e corrigiu a organização: o relatório deve seguir a estrutura original. A navegação agora preserva as 85 posições/títulos do inventário, sem inserir páginas complementares em sequência própria. Posições ainda não desenvolvidas exibem pendência em seu lugar. Slide2 é apresentação do estudo; contagem de empreendimentos pertence ao13. Capa, introdução, sumário e divisórias mantêm capítulos; tipologias/segmentos ficam em23/24,37/38,47/48. Vendas32/oferta46 preservam dados mensais disponíveis, explicitando curva trimestral/escoamento pendentes. Não alegar85slides concluídos.
+
+**Lote13–22:** para empreendimentos e unidades, cinco páginas cada: série trimestral, móvel12meses, trimestralMCMV, móvelMCMV e participação anual por segmento.17trimestres terminando no selecionado,37pontos mensais móveis e participações desde2021. Trimestre/ano atual indicam parcial; comparativos usam três pares de anos consecutivos e meses equivalentes. Base anterior zero tem variação indisponível. Anual conserva totais dos quatro segmentos; nenhum padrão desconhecido é classificado automaticamente.
+
+Empreendimentos reutilizam exclusivamente a coleta `/building`, reconstituindo lançamentos pela data; segmentos usam padrão atual e exibem ressalva de vigência histórica. Unidades usam uma série municipal `/releases`, jan/2021 até o mês municipal conferido, até6páginas100, com dados válidos/sem duplicatas/todos os meses e padrões e releitura atual igual ao município. Não buscar históricos por empreendimento. Consulta automática independente, Brain`operation`/tempo/cancelamento/retry próprios; não bloqueia municipal nem empreendimentos, não apaga tipologias/históricos. Falta de cobertura deixa os cinco slides de unidades indisponíveis, sem zero inventado.
+
+Autoria Codex/Codex Test; base limpa`eb2b666`, único origin, fetch0/0. Implementação e QA locais; API histórica real/adequação do cadastro à reconstituição antiga, classificação histórica, publicação e aceite permanecem por observar. Este registro supera as contagens/posições próprias de46/56páginas dos checkpoints anteriores.
+
 ## 29/10/2026 — correção de desempenho após ensaio real
 
 Usuário observou 4:24 na página15/52 da coleta integral de históricos. A contagem passa a usar `GET /public-api/building`, documentado no OpenAPI versionado com ID, cidade/UF, tipo e `release_date`, sem histórico mensal. Preserva paginação/cobertura e IDs distintos; após primeira página, busca até três páginas ao mesmo tempo. Sem filtros de data inventados, sem alterar o coletor Secovi/FIERGS.

@@ -1,5 +1,9 @@
 # SP — conteúdo e fontes dos 85 slides
 
+**Estado vigente29/10 — estrutura original:** pedido explícito do usuário de manter ordem/numeração originais. Visualizador com85posições, das quais várias continuam pendentes, sem inserir os antigos complementos no fluxo. Slide2apresentação;13contagem/histórico de empreendimentos;23/24,37/38,47/48tipologias/segmentos. Os logs abaixo sobre46posições/complementos são histórico superado, não a navegação vigente.
+
+**Lote13–22:** dez componentes analíticos: empreendimentos/unidades × trimestral,12meses,trimestralMCMV,12mesesMCMV,participaçãoanual. Cadastro reaproveitado para empreendimentos, séries municipais de lançamentos jan2021…mês disponível para unidades.17trimestres/37pontos móveis; anual2021…atual, parciais e meses equivalentes explícitos. Recortes ficam pendentes se padrão/cobertura faltar. Reconstrução cadastral e vigência histórica dos segmentos exigem revisão real; implementação local não é homologação. [Decisão vigente](DECISOES.md).
+
 **Lote de 20 complementos — 16/10:** posições 27/28 Alto; 29/30 Compacto; 31/32 Econômico; 33/34 Luxo; 35/36 Médio; 37/38 Médio-Alto; 39/40 Standard. Em cada dupla, lançamentos/vendas nos mesmos meses dos dois anos. Posições 41–43 são quadros por padrão e 44–46 quadros por tipologia, em lançamentos/vendas/oferta. Usam as artes 18/32/46 e os dados existentes, sem consultas adicionais. Os sete padrões não são renomeados pelos quatro segmentos. Não correspondem a vinte novos slides do PPTX original. Sem preços/INCC, mapas, IVV ou granular presumidos. Navegação total de 46 inclui pendências e complementos; não traduzir para percentual dos 85 slides originais.
 
 **Lote complementar de 12 páginas — 16/10:** posições locais 15–17 Compactos; 18–20 MCMV; 21–23 Médio Padrão; 24–26 Luxo. Em cada trio: lançamentos, vendas e oferta, com evolução mensal e comparação da mesma janela anual. Reuso das artes originais 18/32/46 e dados Padrão já consultados. São detalhamentos complementares, sem correspondência um-para-um com doze slides do PPTX; não substituem séries trimestrais completas, móveis de 12 meses ou páginas de preços/INCC/mapas. Vigência histórica da classificação e retorno real de 2025 ainda por revisar. Preenchimento conjunto pelo botão **Conferir históricos**, sem consultas extras.
@@ -50,16 +54,16 @@ Os endpoints abaixo foram conferidos no [OpenAPI versionado](../../../../src/ass
 | 10 | Destaque: vendas MCMV e comparação anual | V/H/E | Editorial: universo MCMV e janelas equivalentes; revisão do analista. |
 | 11 | Destaque: recorde de lançamentos em 12 meses | R/H/E | Editorial: série completa, IDs distintos e prova do recorde antes de redigir. |
 | 12 | Divisória: lançamentos verticais | A | Arte: reaproveitar sem números. |
-| 13 | Empreendimentos lançados, série trimestral | H | Prévia: indisponível; coletar cobertura completa, IDs distintos e histórico desde 2T2022. |
-| 14 | Empreendimentos lançados, móvel 12 meses | H | Dados: janela de 12 meses em cada ponto mensal; não somar IDs repetidos como novos projetos. |
-| 15 | Empreendimentos lançados MCMV, trimestral | H | Dados: mesma contagem do 13 com classificação MCMV comprovada. |
-| 16 | Empreendimentos MCMV, móvel 12 meses | H | Dados: classificação e histórico completo do 14. |
-| 17 | Participação anual dos empreendimentos por segmento | H | Dados: 2021–2026 parcial, quatro segmentos do PPT; denominador e regra de agrupamento pendentes. |
-| 18 | Unidades lançadas, série trimestral | R/H | Prévia: julho/agosto disponíveis; faltam curva histórica, comparativos e setembro para trimestre completo. |
-| 19 | Unidades lançadas, móvel 12 meses | R | Dados: 12 observações por ponto e histórico até o mês fechado; não tratar julho/agosto como 12 meses. |
-| 20 | Unidades lançadas MCMV, trimestral | R/H | Dados: classificação MCMV e histórico; não presumir que grupo Econômico seja equivalente. |
-| 21 | Unidades lançadas MCMV, móvel 12 meses | R/H | Dados: mesmos critérios do 20 e janela móvel completa. |
-| 22 | Participação anual das unidades lançadas por segmento | R/H | Dados: série anual desde 2021 e agrupamento em quatro segmentos. |
+| 13 | Empreendimentos lançados, série trimestral | Cadastro /building por ID/data/padrao atual | Previa implementada: Trimestral. Cobertura/segmentos historicos reais em revisao; parcial e falhas explicitas. |
+| 14 | Empreendimentos lançados, móvel 12 meses | Cadastro /building por ID/data/padrao atual | Previa implementada: Movel 12 meses. Cobertura/segmentos historicos reais em revisao; parcial e falhas explicitas. |
+| 15 | Empreendimentos lançados MCMV, trimestral | Cadastro /building por ID/data/padrao atual | Previa implementada: Trimestral MCMV. Cobertura/segmentos historicos reais em revisao; parcial e falhas explicitas. |
+| 16 | Empreendimentos MCMV, móvel 12 meses | Cadastro /building por ID/data/padrao atual | Previa implementada: Movel 12 meses MCMV. Cobertura/segmentos historicos reais em revisao; parcial e falhas explicitas. |
+| 17 | Participação anual dos empreendimentos por segmento | Cadastro /building por ID/data/padrao atual | Previa implementada: Participacao anual por segmento. Cobertura/segmentos historicos reais em revisao; parcial e falhas explicitas. |
+| 18 | Unidades lançadas, série trimestral | R municipal por mes/padrao | Previa implementada: Trimestral. Cobertura/segmentos historicos reais em revisao; parcial e falhas explicitas. |
+| 19 | Unidades lançadas, móvel 12 meses | R municipal por mes/padrao | Previa implementada: Movel 12 meses. Cobertura/segmentos historicos reais em revisao; parcial e falhas explicitas. |
+| 20 | Unidades lançadas MCMV, trimestral | R municipal por mes/padrao | Previa implementada: Trimestral MCMV. Cobertura/segmentos historicos reais em revisao; parcial e falhas explicitas. |
+| 21 | Unidades lançadas MCMV, móvel 12 meses | R municipal por mes/padrao | Previa implementada: Movel 12 meses MCMV. Cobertura/segmentos historicos reais em revisao; parcial e falhas explicitas. |
+| 22 | Participação anual das unidades lançadas por segmento | R municipal por mes/padrao | Previa implementada: Participacao anual por segmento. Cobertura/segmentos historicos reais em revisao; parcial e falhas explicitas. |
 | 23 | Lançamentos por tipologia, comparação com mesmo trimestre anterior | R | Dados: `group_by=Tipologia`, soma de fluxos; trazer base comparável e reconciliar com total. |
 | 24 | Lançamentos por segmento, comparação anual | R/H | Prévia: agrupamento confirmado por Lucas aplicado à parcial atual; comparação histórica pendente. |
 | 25 | Top 10 bairros por unidades lançadas | H | Dados: bairro normalizado, lançamentos na janela e denominador de toda a cidade; sem usar só top 10 como total. |

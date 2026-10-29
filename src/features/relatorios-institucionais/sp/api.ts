@@ -1,7 +1,7 @@
 import { httpRequest, type HttpResponse, type RequestOptions } from '@/lib/http-client';
 import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-with-retry';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
-import { type SpPreview } from './model';
+import { isSpMunicipalPreview, type SpPreview } from './model';
 import { buildSpTemporalPreview, monthEnd, priorMonth, quarterMonths, type SpTemporalInput, type SpTemporalRow } from './temporal';
 import { matchedLaunchMonths, type SpLaunchHistoryInput } from './history';
 import { priorYearQuarter, type SpHistoryBatchInput } from './history-batch';
@@ -43,24 +43,34 @@ async function readSpSample(read: ReturnType<typeof createSpRead>, options: SpRe
   return { rootPeriod: building.period, total: sample.meta!.total! };
 }
 
-async function readSpSeries(read: ReturnType<typeof createSpRead>, metric: 'sales' | 'releases' | 'stock', query: Record<string, unknown>): Promise<SpTemporalRow[]> {
+async function readSpSeries(read: ReturnType<typeof createSpRead>, metric: 'sales' | 'releases' | 'stock', query: Record<string, unknown>, maxPages = 2, onPage?: (page: number) => void): Promise<SpTemporalRow[]> {
   const rows: SpTemporalRow[] = [];
   let expectedTotal: number | null = null;
-  for (let page = 1; page <= 2; page++) {
+  let expectedLast: number | null = null;
+  for (let page = 1; page <= maxPages; page++) {
+    onPage?.(page);
     const payload = await read(`temporal-analysis-city/${metric}`, { ...query, per_page: 100, page });
     const meta = payload.meta;
     if (!meta || meta.current_page !== page || !Number.isInteger(meta.total) || meta.total! < 0 || !Number.isInteger(meta.last_page) || meta.last_page! < page || !payload.links || !Object.prototype.hasOwnProperty.call(payload.links, 'next')) throw new Error('A paginação não confirmou a cobertura da consulta.');
     expectedTotal ??= meta.total!;
-    if (meta.total !== expectedTotal) throw new Error('A base mudou durante a paginação. Recomece a consulta.');
+    expectedLast ??= meta.last_page!;
+    if (meta.total !== expectedTotal || meta.last_page !== expectedLast) throw new Error('A base mudou durante a paginação. Recomece a consulta.');
     rows.push(...payload.data!);
     if (!payload.links.next) {
       if (page !== meta.last_page || rows.length !== meta.total) throw new Error('A fonte retornou uma página incompleta.');
       return rows;
     }
-    if (page === meta.last_page || page === 2) throw new Error('A consulta excede o limite curto de duas páginas por fonte. A coleta completa precisa ser delimitada separadamente.');
+    if (page === meta.last_page || page === maxPages) throw new Error(maxPages === 2 ? 'A consulta excede o limite curto de duas páginas por fonte. A coleta completa precisa ser delimitada separadamente.' : 'A série histórica excedeu a janela paginada permitida.');
     // Preserve original filters; never follow a provider URL that can drop scope.
   }
   throw new Error('A consulta curta não foi concluída.');
+}
+
+/** One bounded municipal releases series; no building histories or other metrics. */
+export async function fetchSpLaunchSeriesRows(report: SpPreview, options: SpReadOptions = {}): Promise<SpTemporalRow[]> {
+  if (!isSpMunicipalPreview(report) || !report.throughMonth) throw new Error('Confira os meses municipais antes das séries históricas.');
+  options.onProgress?.('Consultando o histórico de unidades lançadas…');
+  return readSpSeries(createSpRead(options), 'releases', { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', start_period: '2021-01-01', end_period: monthEnd(report.throughMonth) }, 6, page => options.onProgress?.(`Conferindo unidades lançadas: página ${page}…`));
 }
 
 /** One contextual building sample + up to two pages per municipal source through the requested window. The sample period never limits municipal availability. */

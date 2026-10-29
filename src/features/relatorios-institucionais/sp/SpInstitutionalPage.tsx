@@ -15,6 +15,7 @@ import { buildSpTypologies } from './typologies';
 import { buildSpSegments, SP_SEGMENT_RULE } from './segments';
 import { buildSpHistoryBatch } from './history-batch';
 import { blockedSpProjects, fetchSpProjects } from './projects';
+import { blockedSpLaunchSeries, buildSpLaunchSeries } from './launch-series';
 
 const labels = { projects: 'Empreendimentos lançados', launches: 'Unidades lançadas', sales: 'Vendas líquidas', stock: 'Oferta final' } as const;
 const formatMonth = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
@@ -33,6 +34,11 @@ export default function SpInstitutionalPage() {
   const [projectsStartedAt, setProjectsStartedAt] = useState<number | null>(null);
   const projectsController = useRef(new AbortController());
   const projectsVersion = useRef(0);
+  const [seriesLoading, setSeriesLoading] = useState(false);
+  const [seriesProgress, setSeriesProgress] = useState('Preparando séries de lançamentos…');
+  const [seriesStartedAt, setSeriesStartedAt] = useState<number | null>(null);
+  const seriesController = useRef(new AbortController());
+  const seriesVersion = useRef(0);
   const version = useRef(0);
   const controller = useRef(new AbortController());
   const lastMode = useRef<'api' | 'fixture'>('api');
@@ -40,8 +46,9 @@ export default function SpInstitutionalPage() {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const token = useAuthStore(state => state.getToken());
   const stopProjects = useCallback(() => { projectsController.current.abort(); projectsVersion.current++; }, []);
-  const invalidate = useCallback(() => { stopProjects(); setProjectsLoading(false); controller.current.abort(); controller.current = new AbortController(); version.current += 1; setPreview(null); setLoading(false); setError(false); setTypologyError(false); setHistoryError(false); setStartedAt(null); }, [stopProjects]);
-  useEffect(() => { invalidate(); return () => { stopProjects(); controller.current.abort(); version.current += 1; }; }, [token, invalidate, stopProjects]);
+  const stopSeries = useCallback(() => { seriesController.current.abort(); seriesVersion.current++; }, []);
+  const invalidate = useCallback(() => { stopSeries(); setSeriesLoading(false); stopProjects(); setProjectsLoading(false); controller.current.abort(); controller.current = new AbortController(); version.current += 1; setPreview(null); setLoading(false); setError(false); setTypologyError(false); setHistoryError(false); setStartedAt(null); }, [stopProjects, stopSeries]);
+  useEffect(() => { invalidate(); return () => { stopSeries(); stopProjects(); controller.current.abort(); version.current += 1; }; }, [token, invalidate, stopProjects, stopSeries]);
   const changeGeo = (next: GeoScope) => { invalidate(); setGeo(next); };
   const scope = useGeoApiScope({ value: geo, onChange: changeGeo });
   const supported = geo.uf === 'SP' && sameCity(geo.city);
@@ -66,9 +73,24 @@ export default function SpInstitutionalPage() {
     }
   }
 
+  async function prepareLaunchSeries(baseline: SpPreview) {
+    seriesController.current.abort(); seriesController.current = new AbortController();
+    const signal = seriesController.current.signal, requestVersion = ++seriesVersion.current;
+    setSeriesLoading(true); setSeriesStartedAt(Date.now()); setSeriesProgress('Preparando séries de unidades lançadas…');
+    setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, launchSeries: undefined } } : previous);
+    try {
+      const { fetchSpLaunchSeriesRows } = await import('./api');
+      const rows = await fetchSpLaunchSeriesRows(baseline, { signal, onProgress: message => { if (requestVersion === seriesVersion.current) setSeriesProgress(message); } });
+      const launchSeries = buildSpLaunchSeries(rows, baseline);
+      if (requestVersion === seriesVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, launchSeries } } : previous);
+    } catch {
+      if (requestVersion === seriesVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, launchSeries: blockedSpLaunchSeries(signal.aborted ? 'Série histórica cancelada. Os dados municipais foram mantidos.' : 'Não foi possível concluir a série histórica de unidades lançadas. Tente novamente.') } } : previous);
+    } finally { if (requestVersion === seriesVersion.current) setSeriesLoading(false); }
+  }
+
   async function preparePreview(mode: 'api' | 'fixture') {
     if (!ready || loading) return;
-    stopProjects(); setProjectsLoading(false);
+    stopSeries(); setSeriesLoading(false); stopProjects(); setProjectsLoading(false);
     controller.current.abort(); controller.current = new AbortController();
     const signal = controller.current.signal;
     lastMode.current = mode;
@@ -86,7 +108,7 @@ export default function SpInstitutionalPage() {
       }
       if (requestVersion === version.current) {
         setPreview({ key, report: next });
-        if (mode === 'api' && isSpMunicipalPreview(next)) void prepareProjects(next);
+        if (mode === 'api' && isSpMunicipalPreview(next)) { void prepareProjects(next); void prepareLaunchSeries(next); }
       }
     } catch {
       if (requestVersion === version.current) setError(true);
@@ -142,7 +164,7 @@ export default function SpInstitutionalPage() {
       <p className="text-sm text-muted-foreground">Núcleo residencial vertical de São Paulo capital.</p>
     </header>
     <Alert><AlertTitle>{report && !isApi ? 'Prévia de desenvolvimento · dados fictícios' : 'Conferência municipal · relatório em validação'}</AlertTitle><AlertDescription>
-      {report && !isApi ? 'Os números do exemplo não representam o mercado.' : 'A consulta curta busca lançamentos, vendas e estoque do trimestre selecionado e identifica os meses disponíveis nas três fontes. A contagem de empreendimentos continua em paralelo e preenche o slide 2 quando terminar.'} Não há exportação disponível nesta etapa.
+      {report && !isApi ? 'Os números do exemplo não representam o mercado.' : 'A consulta curta busca lançamentos, vendas e estoque do trimestre selecionado e identifica os meses disponíveis nas três fontes. A contagem de empreendimentos continua em paralelo e preenche os slides 13–17 quando terminar.'} Não há exportação disponível nesta etapa.
     </AlertDescription></Alert>
     <section aria-label="Seleção do estudo" className="space-y-4 rounded-lg border border-border bg-card p-4">
       {scope.error ? <Alert variant="destructive"><AlertTitle>Não foi possível carregar as cidades autorizadas</AlertTitle><AlertDescription><p>Confira sua autenticação e tente novamente. O estudo permanece bloqueado.</p><Button className="mt-3" variant="outline" onClick={scope.reload}>Tentar carregar cidades novamente</Button></AlertDescription></Alert>
@@ -172,10 +194,14 @@ export default function SpInstitutionalPage() {
       {isSpMunicipalPreview(report) ? <Alert><AlertTitle>{report.status === 'quarter-closed' ? 'Trimestre completo nas séries municipais da API' : 'Conferência parcial de dados da API'}</AlertTitle><AlertDescription>{report.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>
         : report.status === 'ready' ? <Alert><AlertTitle>Prévia reconciliada com dados de teste</AlertTitle><AlertDescription>As verificações do exemplo fecharam. Isso não comprova dados reais, publicação ou homologação do relatório.</AlertDescription></Alert>
         : <Alert variant={report.status === 'awaiting-closure' ? 'default' : 'destructive'}><AlertTitle>{report.status === 'awaiting-closure' ? 'Trimestre ainda não fechado' : 'Dados insuficientes para concluir o estudo'}</AlertTitle><AlertDescription>{report.issues.map(issue => <p key={issue}>{issue}</p>)}<p className="mt-2">Os indicadores permanecem indisponíveis; meses ausentes não são preenchidos com zero.</p></AlertDescription></Alert>}
-      {projectsLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={projectsProgress} startedAt={projectsStartedAt} description="Os dados municipais já estão disponíveis. A contagem preenche o slide 2 quando terminar." /><Button variant="outline" onClick={() => projectsController.current.abort()}>Cancelar contagem</Button></div>}
+      {projectsLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={projectsProgress} startedAt={projectsStartedAt} description="Os dados municipais já estão disponíveis. A contagem preenche os slides 13–17 quando terminar." /><Button variant="outline" onClick={() => projectsController.current.abort()}>Cancelar contagem</Button></div>}
       {report.projects?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Contagem de empreendimentos indisponível</AlertTitle><AlertDescription>{report.projects.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
       {isSpMunicipalPreview(report) && !projectsLoading && report.projects?.status !== 'ready' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareProjects(report)}>Conferir empreendimentos</Button>}
       {report.projects?.status === 'ready' && <p role="status" className="text-sm">Cobertura conferida: {report.projects.distinct.toLocaleString('pt-BR')} empreendimentos verticais de São Paulo/SP. Contagem por ID distinto e data de lançamento nos meses do relatório.</p>}
+      {seriesLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={seriesProgress} startedAt={seriesStartedAt} description="Os slides 18–22 de unidades lançadas serão preenchidos ao concluir a conferência." /><Button variant="outline" onClick={() => seriesController.current.abort()}>Cancelar série de lançamentos</Button></div>}
+      {report.launchSeries?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Séries de lançamentos indisponíveis</AlertTitle><AlertDescription>{report.launchSeries.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
+      {isSpMunicipalPreview(report) && !seriesLoading && report.launchSeries?.status !== 'ready' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareLaunchSeries(report)}>Conferir séries de lançamentos</Button>}
+      {report.launchSeries?.status === 'ready' && <p role="status" className="text-sm">Séries de unidades lançadas conferidas desde janeiro de 2021. Cinco páginas históricas disponíveis.</p>}
       <Table><TableCaption>{isApi ? 'Lançamentos e vendas somados somente nos meses conferidos; oferta final no último mês. Empreendimentos por ID distinto e data de lançamento, após conferir toda a paginação.' : 'Contagens do trimestre selecionado; oferta final no fechamento. Todos os valores desta prévia são fictícios.'}</TableCaption><TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead className="text-right">Quantidade</TableHead></TableRow></TableHeader><TableBody>
         {Object.entries(labels).map(([metric, label]) => <TableRow key={metric}><TableCell>{label}</TableCell><TableCell className="text-right tabular-nums">{report.metrics[metric as keyof typeof labels]?.toLocaleString('pt-BR') ?? 'Indisponível'}</TableCell></TableRow>)}
       </TableBody></Table>
@@ -193,14 +219,14 @@ export default function SpInstitutionalPage() {
     {isApi && isSpMunicipalPreview(report) && <section aria-label="Conferência dos padrões" className="space-y-3 rounded-lg border border-border bg-card p-4">
       <h2 className="text-lg font-semibold">Padrões e segmentos do relatório</h2>
       <p className="text-sm text-muted-foreground">Agrupamento confirmado para este relatório SP: Compactos = Compacto; MCMV = Econômico; Médio Padrão = Standard, Médio e Médio-Alto; Luxo = Alto e Luxo.</p>
-      {segments?.status === 'ready' ? <p role="status" className="text-sm">Segmentos conferidos: os quatro grupos somam os totais municipais. Slides 24, 38 e 48 disponíveis nas posições 9, 10 e 11 da prévia.</p> : <Alert variant="destructive"><AlertTitle>Segmentos ainda não reconciliados</AlertTitle><AlertDescription>{segments?.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
+      {segments?.status === 'ready' ? <p role="status" className="text-sm">Segmentos conferidos: os quatro grupos somam os totais municipais. Slides 24, 38 e 48 disponíveis nas posições originais.</p> : <Alert variant="destructive"><AlertTitle>Segmentos ainda não reconciliados</AlertTitle><AlertDescription>{segments?.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
       <p className="text-xs text-muted-foreground">Regra confirmada por {SP_SEGMENT_RULE.confirmedBy} em 15/10/2026, específica deste modelo.</p>
       {report.patterns?.status === 'ready' ? <details><summary className="cursor-pointer text-sm font-medium">Ver padrões recebidos da API</summary><Table><TableCaption>Grupos originais da consulta municipal, sem reclassificação. Lançamentos e vendas acumulados; oferta somente no último mês conferido.</TableCaption><TableHeader><TableRow><TableHead>Padrão da API</TableHead><TableHead>Lançamentos</TableHead><TableHead>Vendas</TableHead><TableHead>Oferta final</TableHead></TableRow></TableHeader><TableBody>{report.patterns.rows.map(row => <TableRow key={row.group}><TableCell>{row.group}</TableCell><TableCell>{row.launches.toLocaleString('pt-BR')}</TableCell><TableCell>{row.sales.toLocaleString('pt-BR')}</TableCell><TableCell>{row.stock.toLocaleString('pt-BR')}</TableCell></TableRow>)}</TableBody></Table></details> : <p className="text-sm text-muted-foreground">Confira os dados reais novamente para obter o detalhamento por padrão.</p>}
     </section>}
     {isApi && isSpMunicipalPreview(report) && <section aria-label="Comparativos históricos" className="space-y-3 rounded-lg border border-border bg-card p-4">
       <h2 className="text-lg font-semibold">Históricos de lançamentos, vendas e oferta</h2><p className="text-sm text-muted-foreground">Uma consulta para os três comparativos dos mesmos meses nos dois anos. Lançamentos e vendas são acumulados; oferta é a posição no último mês. As duas janelas devem cobrir meses equivalentes e a releitura deve coincidir com os dados atuais. Diferenças de balanço permanecem no diagnóstico.</p>
       <Button variant="outline" onClick={prepareHistories} disabled={!ready || loading || report.patterns?.status !== 'ready'}>Conferir históricos</Button>
-      {report.historyBatch?.status === 'ready' && <p role="status" className="text-sm">Três comparativos conferidos para meses equivalentes. Veja as páginas 9–14 e os 12 detalhes por segmento nas páginas 15–26.</p>}
+      {report.historyBatch?.status === 'ready' && <p role="status" className="text-sm">Três comparativos conferidos para meses equivalentes. Veja os slides 24, 38 e 48, nas posições originais.</p>}
       {report.historyBatch?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Lote histórico ainda não reconciliado</AlertTitle><AlertDescription>{report.historyBatch.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
       {!!report.historyBatch?.checks.length && <details><summary className="cursor-pointer text-sm font-medium">Conferência dos balanços e da releitura</summary><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{report.historyBatch.checks.map(check => <li key={check.label}>{check.label}: esperado {check.expected.toLocaleString('pt-BR')}, observado {check.actual.toLocaleString('pt-BR')}, diferença {check.delta.toLocaleString('pt-BR')}.</li>)}</ul></details>}
     </section>}

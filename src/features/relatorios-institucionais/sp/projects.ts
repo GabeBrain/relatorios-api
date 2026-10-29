@@ -3,6 +3,7 @@ import { insertBuilding, readBuildingPage } from '@/features/panorama-secovi-fie
 import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-with-retry';
 import { isSpMunicipalPreview, type SpPreview } from './model';
 import { quarterMonths } from './temporal';
+import { buildSpProjectTrends, buildSpTrendBreakdown, type SpProjectTrends, type SpTrendBreakdown } from './project-trends';
 
 type Building = Record<string, unknown>;
 export interface SpProjects {
@@ -13,6 +14,8 @@ export interface SpProjects {
   distinct: number;
   monthly: { month: string; value: number }[];
   total: number | null;
+  trends?: SpProjectTrends;
+  breakdown?: SpTrendBreakdown;
 }
 export const blockedSpProjects = (message: string): SpProjects => ({ status: 'blocked', issues: [message], source: 'building', received: 0, distinct: 0, monthly: [], total: null });
 const normalized = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
@@ -23,6 +26,8 @@ export function buildSpProjects(buildings: Building[], report: SpPreview, receiv
   const months = quarterMonths(report.quarter).filter(month => month <= report.throughMonth!);
   const monthly = months.map(month => ({ month, value: 0 }));
   const byId = new Map<string, Building>();
+  const launchesByMonth = new Map<string, number>();
+  const launchesByPattern: { month: string; group: unknown; value: number }[] = [];
   for (const building of buildings) {
     if (normalized(building.city) !== 'sao paulo' || normalized(building.state ?? building.uf) !== 'sp' || normalized(building.building_type) !== 'vertical') throw new Error('A coleta contém empreendimento fora de São Paulo/SP vertical.');
     insertBuilding(byId, { ...building, __panoramaSource: { source: 'building', page: 1 } });
@@ -31,10 +36,13 @@ export function buildSpProjects(buildings: Building[], report: SpPreview, receiv
     const date = String(building.release_date ?? '');
     const day = date.slice(0, 10);
     if (!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(date) || !Number.isFinite(Date.parse(day)) || new Date(day).toISOString().slice(0, 10) !== day) throw new Error('Há empreendimento sem data de lançamento válida; a contagem permanece indisponível.');
+    const launchMonth = day.slice(0, 7);
+    launchesByMonth.set(launchMonth, (launchesByMonth.get(launchMonth) ?? 0) + 1);
+    launchesByPattern.push({ month: launchMonth, group: building.standard, value: 1 });
     const row = monthly.find(row => row.month === day.slice(0, 7));
     if (row) row.value++;
   }
-  return { status: 'ready', issues: [], source: 'building', received, distinct: byId.size, monthly, total: monthly.reduce((sum, row) => sum + row.value, 0) };
+  return { status: 'ready', issues: [], source: 'building', received, distinct: byId.size, monthly, total: monthly.reduce((sum, row) => sum + row.value, 0), trends: buildSpProjectTrends(launchesByMonth, report.quarter, report.throughMonth), breakdown: buildSpTrendBreakdown(launchesByPattern, report.quarter, report.throughMonth) };
 }
 
 interface Options {

@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 29/10/2026 — estrutura original85 e dez analíticos13–22
+
+Usuário pediu10slides e corrigiu a estrutura: manter ordem do PPTX. Implementação retorna85posições originais, pendentes explícitos; contagem anteschamada2passa13,2apresentação. Lote13–22: cinco recortes de empreendimentos e cinco de unidades (trimestral,12meses,MCMV e participaçãoanual). Empreendimentos reutilizam cadastro; unidades consultam só releasesdesde2021, até6páginas e mês municipal disponível, com cobertura/releitura. Consulta longa independente e cancelável, sem bloquear municipal/contagem ou apagar outros resultados. Windows/PowerShell, Codex Test, main limpaeb2b666/origin0/0apósfetch.149testes SP na rodada, tipos/lint e comparações consecutivas conferidos; QA/build finais conforme [evidências](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Sem APIreal; retestar cobertura histórica/cadastro/classificação no site e revisar com analista. Não confundir85posições com85slides concluídos, nem implementação com homologação/exportação.
+
 ## 29/10/2026 — correção da demora do slide2
 
 Main limpa em5751424, único origin, fetch0/0. Usuário relatou4:24na página15/52 e autorizou corrigir. Contagem passa do histórico interno completo para cadastro GET`/public-api/building`, conforme OpenAPI local; até3páginas paralelas. Municipal aparece antes; operação Brain de contagem possui cancelamento/retry próprios e mescla resultado com tipologias/históricos. Guardas mantidas, sem mudanças nos motores Secovi/FIERGS. [Decisão vigente](../../features/relatorios-institucionais/sp/DECISOES.md), [evidências](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Ambiente Windows/PowerShell, Codex Test, sem API autenticada pelo agente. Retestar duração/cobertura da nova fonte no site; não afirmar segundos ou homologação integral.

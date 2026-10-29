@@ -385,6 +385,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-29 — SP: estrutura original85 e dez slides analíticos13–22 — Codex
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, autoria Codex/Codex Test, baseeb2b666, main limpa/origin0/0apósfetch. Usuário pediu10slides e exigiu mesma estrutura original.
+- **Estrutura:** navegação preserva85posições/títulos do inventário, pendentes explícitos; remove sequência própria de complementos. Slide2apresentação,13empreendimentos; capítulos/sumário e23/24,37/38,47/48nas posições corretas.85posições não significam85conteúdos finalizados.
+- **Lote13–22:** empreendimentos e unidades, cinco cada: trimestral,12meses,trimestralMCMV,12mesesMCMV,participaçãoanual.17trimestres e37pontos móveis; anualdesde2021, mês/ano/trimestre parcial explícitos, variações em pares anuais consecutivos e meses equivalentes, basezero sem percentual. Empreendimentos reutilizam cadastro completo, unidades usam série releasesjan2021…throughMonth, até6páginas100 com validação de grupos/meses/valores/releitura. Guardas desconhecidas bloqueiam recorte, sem zero inventado ou política FIERGS transplantada.
+- **UX/padrão:** artes/gráficos SVG e primitives existentes, rota lazy/GeoApiScopeEngine preservados. Consulta de unidades independente com Brain`operation`, progresso/tempo/cancelamento/retry; não bloqueia municipal/contagem. Atualizações mesclam resultados e descartam escopo/token/geração antigos.
+- **Validação/limites:**149testes SP na rodada, tipos/lint aprovados e comparações consecutivas retestadas; build final e QA Edge1440/390 claro/escuro com os dez gráficos aprovados, zero errosJS/chamadas reais; [evidências](../features/relatorios-institucionais/sp/EVIDENCIAS.md). Fontes simuladas; sem APIreal/aceite. Reconstituição pelo cadastro atual e vigência histórica dos segmentos explicitamente em revisão.
+- **Arquivos/commit:** móduloSP, diagnóstico dinâmico, mapa/matriz/plano/decisões/evidências/status; entrega sobre`eb2b666`, commit desta entrada.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência, sem escrita.
+- **Etapas/pendências:** estrutura corrigida e10componentes implementados; validar cobertura/classificação históricas reais e revisar slides. Preços/INCC, IVV, mapas, curva completa de vendas/oferta, editorial e exportação/homologação integral continuam abertos.
+
 ### 2026-10-29 — SP: cadastro sem históricos e contagem sem bloquear municipal — Codex
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, desempenho da geração; identidade Codex Test. Usuário relatou4:24na página15/52 da coleta de5751424 e autorizou corrigir.
 - **Mudança:** contagem usa GET`/public-api/building`, cujo contrato local inclui ID/data/tipo/território sem históricos mensais; após primeira página, até3em paralelo. Primitivas de integridade Panorama preservadas, sem alterar seus motores. Mesmos meses municipais e contagem de IDs, sem filtros de lançamento inventados ou cache silencioso.
@@ -627,9 +637,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-**29/10 — SP, correção após teste e coleta granular:** setembro confirmado nas três séries por respostas do usuário, apesar da raiz de agosto. Descoberta do período pelas séries; diferença de balanço diagnóstica. Coleta granular/slide2 implementados e validados localmente; reteste publicado e cobertura da fonte real pendentes. Supera o uso da raiz como limite nas etapas anteriores.
+**29/10 — SP, correção após teste e coleta granular:** setembro confirmado nas três séries por respostas do usuário, apesar da raiz de agosto. Descoberta do período pelas séries; diferença de balanço diagnóstica. Contagem do cadastro leve implementada sem bloquear municipal; agora no slide13original. Reteste publicado/cobertura real pendentes; raiz não limita séries.
 
-**29/10 — SP Institucional:** cobertura dinâmica parcial/fechada e coleta granular/slide2 implementadas localmente; reconsulta a cada geração sem cache HTTP. Confirmação da cobertura real da fonte, homologação integral e publicação verificada seguem pendentes.
+**29/10 — SP Institucional:** estrutura original85restaurada, com pendentes explícitos; lote analítico13–22implementado localmente, usando cadastro existente e série municipal de unidades.149testes e QA local; validar cobertura histórica/classificação/valores reais.85posições não são85conteúdos prontos. Publicação verificada/exportação/homologação integral permanecem pendentes.
 
 **29/10 — Estimativas:** Gabriel reabriu a frente para prévia configurável no modal:50linhas, ordem/ocultação aplicadas ao Excel completo. Implementada e validada localmente (122testes), publicação/aceite desta revisão pendentes. Interface anterior aceita em produção por Gabriel em28/10 após envio`9d14f2a`. Fonte/limites na seção13 do plano essencial. Contrato final de saída Nicolas/Belogic, importação e avaliação independente continuam abertos.
 
@@ -666,7 +676,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **SP Institucional — validação publicada:** gerar com sessão pessoal e conferir setembro e o slide2, agora integrado ao cadastro leve /building paginado, sem bloquear os dados municipais. Medir o tempo e confirmar acesso, cobertura/datas reais e contagem de IDs; testes locais usam empreendimentos sintéticos. Diferença municipal +22 é diagnóstico, causa/contrato líquido em aberto. Preços/INCC, IVV, exportação e homologação integral seguem pendentes.
+- [ ] **SP Institucional — validação publicada:** conferir ordem85e lote13–22, séries de unidades desde2021, cobertura do cadastro por ID/data, padrão/classificação histórica e parciais; dados locais inventados não são aceite. Contagem anteschamada2agora13original, sem bloquear municipal. Medir tempo real; diferença municipal+22/contrato líquido continuam em aberto. Preços/INCC, IVV, mapas, curva trimestral completa de vendas/oferta, editorial, exportação/homologação integral seguem pendentes.
 
 - **Estimativas:** conferir a nova prévia de exportação em produção e aguardar comprovação do formato final de saída Nicolas/Belogic. Interface anterior aceita em28/10; revisão29/10 validada somente localmente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 
