@@ -1,3 +1,7 @@
+## 29/10/2026 — Estimativas: prévia de exportação configurável
+
+Modal ampliado com tabela compacta de50linhas, cabeçalhos fixos e colunas ocultáveis/restauráveis, inspirado no BasePreviewPanel das coletas Quanti (somente leitura). Arraste nos cabeçalhos e alternativas por teclado/menu, com semântica de tabela HTML e anúncio de mudanças. Estado de colunas compartilhado pela prévia e exportador; Excel completo e CSV analítico seguem a ordem/omissões, sem mudar valores/linhas. Contrato estrutural candidato permanece intacto. Primitives Button/Dialog/DropdownMenu e tokens SE existentes; sem biblioteca nova. Fonte: seção13 do plano essencial e evidência de29/10. Nenhuma mudança do aceite anterior implica aprovação deste novo formato.
+
 ## 28/10/2026 — Estimativas: ações junto ao cabeçalho
 
 Refinamento pedido por Gabriel: comparar/baixar/marcar/configurar agrupados ao lado do título das curvas, sem faixa exclusiva vazia. Fundo transparente inclusive em hover, sem sombra; varredura verde breve somente no texto, desativada com movimento reduzido. `Estimativas aprovadas` substitui Finotti nos rótulos de navegação, mantendo autoria técnica/IDs/modelos/contratos e explicitação de que disponibilidade matemática não homologa importação. Usa os mesmos primitives/tokens. Fonte: refinamento da seção12 do plano essencial e evidência `compactActions`.

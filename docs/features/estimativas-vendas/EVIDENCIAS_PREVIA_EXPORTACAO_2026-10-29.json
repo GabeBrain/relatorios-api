@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-29",
+  "feature": "Prévia de exportação com ordem/visibilidade de colunas aplicada ao arquivo completo",
+  "reference": "Quanti/quanti-system-hub/src/routes/projetos.$id.tsx — BasePreviewPanel/useColumnVisibility; somente leitura",
+  "state": "validado localmente; produção desta revisão não conferida",
+  "experienceTests": { "files": 11, "passed": 31 },
+  "integratedEstimatorTests": { "files": 20, "passed": 122 },
+  "typecheck": "passed",
+  "eslintExperience": "passed",
+  "build": "passed; avisos existentes de Browserslist, XLSX e chunks",
+  "browser": [
+    { "width": 1440, "theme": "light", "previewRows": 50, "workbookRows": 72, "columnsExported": 12, "reorder": "drag" },
+    { "width": 1440, "theme": "dark", "previewRows": 50, "workbookRows": 72, "columnsExported": 12, "reorder": "drag" },
+    { "width": 390, "theme": "light", "previewRows": 50, "workbookRows": 72, "columnsExported": 12, "reorder": "keyboard" }
+  ],
+  "assertions": ["colunas padrão idênticas ao Excel anterior", "arrastar reordena", "alternativas de teclado/menu", "ocultar omite do arquivo", "restaurar individual e padrão", "50 linhas visíveis e 72 exportadas", "headers e valores da prévia iguais às primeiras 50 linhas do XLSX", "IDs em texto e booleanos preservados", "CSV de previsões acompanha layout e manifesto registra omissões", "histórico/contrato candidato completos preservados", "zero erros JS/overflow horizontal", "duas chamadas iniciais por cenário e zero adicionais por personalização/download"],
+  "data": "sintética controlada; nenhuma nova leitura autenticada de API real",
+  "browserSurface": "Chromium headless local; navegador conectado indisponível",
+  "script": "scripts/diagnostics/estimativas-export-preview-browser.mjs",
+  "rawArtifacts": ".local-inputs/estimativas-vendas/export-preview-20261029/; ignorados",
+  "tokensSha256": "0802b707b8c511e3367b1e4a235cea6a268edb9ac8f217a2beb965fc30874eac",
+  "limitations": ["formato analítico provisório", "sem homologação de importação Geobrain", "última coluna não pode ser ocultada", "personalização não altera arquivo estrutural candidato de 26 colunas", "ordem de linhas e valores não são editáveis"]
+}

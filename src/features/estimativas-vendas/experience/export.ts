@@ -3,6 +3,7 @@ import { buildingId } from '../source';
 import { periodValid, shiftMonth } from '../expanded/contract';
 import { studyMetrics, type StudyTrial } from '../scientific/study';
 import { buildingSpec, methodLabel, metricTrials, operationStatus, pairedTrials, present, provenanceLabel, type AnalysisSpec, type CaseAnalysis, type Measure, type Universe } from './domain';
+import { FORECAST_COLUMNS, forecastTable, validateForecastColumns, type ForecastColumn } from './exportColumns';
 
 export const IVV_HEADERS = ['ID Empreendimento', 'Empreendimento', 'ID Tipologia', 'M2', 'Dormitórios', 'Cidade', 'Tipo', 'Padrão', 'Tipologia', 'Status', 'Data de lançamento', 'Mês de referência', 'Foi estimado?', 'Qtd Lançada', 'Venda Bruta', 'Distrato', 'Venda Líquida', 'Estoque Final', 'Tempo em venda', 'INCC-DI', 'INCC-M', 'IVV Atual', 'IVV Dash', 'Preço', 'Flag Esgotamento', 'Flag Lançamento'];
 export const htmlEscape = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -83,13 +84,18 @@ export function buildExportPlan(universe: Universe, ids: string[], analyses: Cas
   const summary = htmlPage('Resumo do conjunto para revisão', `<p><strong>Arquivo candidato para revisão — NÃO IMPORTAR.</strong></p><p>${ids.length} selecionados; ${manifest.included} com previsão; ${forecasts.length} linhas analíticas; ${candidates.length} linhas candidatas estruturais.</p><p>Início ${htmlEscape(spec.cutoff === 'latest' ? 'datas individuais: ' + selected.map(a => a.spec.cutoff).filter((v, i, all) => all.indexOf(v) === i).join(', ') : spec.cutoff)} · duração ${spec.duration} meses. O arquivo corresponde a esse intervalo; períodos existentes permanecem apenas em comparação histórica.</p><p>Métodos: ${htmlEscape(JSON.stringify(methods))}.</p><p>${manifest.backtest.validComparisons ? manifest.backtest.validComparisons + ' comparações válidas de métodos/alvos; detalhes no arquivo de backtests.' : 'Nenhum backtest válido realizado neste conjunto/intervalo.'}</p><p>Cadência, origem por período, preço, tipologias e reconciliação podem impedir uso operacional. Valores vazios são pendências, não zeros.</p><p>Identificação dos dados: ${htmlEscape(universe.hash)}. Consulte manifesto, exclusões e histórico acompanhantes.</p>`);
   return { manifest, forecasts, history, exclusions, candidates, trials, summary, report: backtestHtml(selected, 'stock', 1) };
 }
-export async function packageFiles(plan: ExportPlan) {
+export async function packageFiles(plan: ExportPlan, columns?: readonly ForecastColumn[]) {
+  const selectedColumns = columns ? validateForecastColumns(columns) : undefined;
   const files: Record<string, Uint8Array> = {
     'previsoes.csv': strToU8(csv(plan.forecasts, ['id_empreendimento', 'empreendimento', 'cidade', 'uf', 'inicio', 'mes', 'unidades', 'vendas_liquidas_estimadas', 'estoque_estimado', 'metodo', 'versao', 'estimado', 'finalidade', 'elegibilidade_operacional', 'importavel'])),
     'historico_utilizado.csv': strToU8(csv(plan.history, ['id_empreendimento', 'id_tipologia', 'cidade', 'uf', 'mes', 'unidades', 'estoque', 'venda_liquida_informada', 'origem'])), 'resumo.html': strToU8(plan.summary), 'manifesto.json': strToU8(JSON.stringify(plan.manifest, null, 2)),
     'backtests.csv': strToU8(csv(plan.trials as unknown as Record<string, unknown>[], ['id', 'cutoff', 'targetMonth', 'horizon', 'method', 'modelVersion', 'target', 'predicted', 'actual', 'error', 'provenance', 'reason'])),
     'exclusoes.csv': strToU8(csv(plan.exclusions, ['id', 'nome', 'mes', 'arquivo', 'motivo'])), 'comparacao_historica.html': strToU8(plan.report),
   };
+  if (selectedColumns) {
+    files['previsoes.csv'] = strToU8(csv(plan.forecasts, selectedColumns));
+    files['manifesto.json'] = strToU8(JSON.stringify({ ...plan.manifest, analyticalExportColumns: selectedColumns, omittedAnalyticalColumns: FORECAST_COLUMNS.filter(c => !selectedColumns.includes(c)) }, null, 2));
+  }
   if (plan.candidates.length) {
     const XLSX = await import('xlsx');
     const wb = XLSX.utils.book_new();
@@ -105,13 +111,16 @@ export async function packageFiles(plan: ExportPlan) {
 export function downloadFile(bytes: BlobPart, filename: string, type: string) {
   const url = URL.createObjectURL(new Blob([bytes], { type })); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-export async function downloadPackage(plan: ExportPlan) { const files = await packageFiles(plan); downloadFile(zipSync(files) as BlobPart, `estimativas-revisao-${plan.manifest.spec.cutoff}.zip`, 'application/zip'); }
-export async function forecastWorkbook(plan: ExportPlan) {
+export async function downloadPackage(plan: ExportPlan, columns?: readonly ForecastColumn[]) { const files = await packageFiles(plan, columns); downloadFile(zipSync(files) as BlobPart, `estimativas-revisao-${plan.manifest.spec.cutoff}.zip`, 'application/zip'); }
+export async function forecastWorkbook(plan: ExportPlan, selected: readonly ForecastColumn[] = FORECAST_COLUMNS) {
+  const columns = validateForecastColumns(selected);
   const XLSX = await import('xlsx');
   const wb = XLSX.utils.book_new();
-  const columns = ['id_empreendimento', 'empreendimento', 'cidade', 'uf', 'inicio', 'mes', 'unidades', 'vendas_liquidas_estimadas', 'estoque_estimado', 'metodo', 'versao', 'estimado', 'importavel'];
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([columns, ...plan.forecasts.map(r => columns.map(k => r[k] ?? null))]), 'previsoes');
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Estado', 'Previsões analíticas para revisão; importação não homologada'], ['Dados', plan.manifest.snapshotHash], ['Duração', plan.manifest.spec.duration], ['Início', plan.manifest.spec.cutoff === 'latest' ? 'Último período de cada empreendimento; ver coluna inicio' : plan.manifest.spec.cutoff], ['Aviso', 'Vendas e estoque previstos; não substituem coleta. Cadência e origem histórica podem estar pendentes.']]), 'leia_me');
+  const ws = XLSX.utils.aoa_to_sheet(forecastTable(plan.forecasts, columns));
+  ws['!cols'] = columns.map(c => ({ wch: Math.max(14, Math.min(32, c.length + 2)) }));
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({ r: 0, c: 0 }, { r: plan.forecasts.length, c: columns.length - 1 }) };
+  XLSX.utils.book_append_sheet(wb, ws, 'previsoes');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Estado', 'Previsões analíticas para revisão; importação não homologada'], ['Dados', plan.manifest.snapshotHash], ['Duração', plan.manifest.spec.duration], ['Início', plan.manifest.spec.cutoff === 'latest' ? 'Último período de cada empreendimento; ver coluna inicio' : plan.manifest.spec.cutoff], ['Colunas exportadas', columns.join(' | ')], ['Colunas omitidas', FORECAST_COLUMNS.filter(c => !columns.includes(c)).join(' | ') || 'Nenhuma'], ['Aviso', 'Vendas e estoque previstos; não substituem coleta. Cadência e origem histórica podem estar pendentes.']]), 'leia_me');
   return new Uint8Array(XLSX.write(wb, { type: 'array', bookType: 'xlsx' }));
 }
 export function finalMonth(spec: AnalysisSpec) { return periodValid(spec.cutoff) ? shiftMonth(spec.cutoff, spec.duration) : ''; }
