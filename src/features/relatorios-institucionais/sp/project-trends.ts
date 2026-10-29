@@ -26,7 +26,7 @@ export function buildSpTrendBreakdown(rows: { month: string; group: unknown; val
     const year = 2021 + index;
     const segments = Object.keys(SP_SEGMENT_RULE.groups).map(name => ({ name, value: relevant.filter(row => row.month.startsWith(String(year)) && spTrendSegment(row.group) === name).reduce((sum, row) => sum + row.value, 0), share: null as number | null }));
     const total = segments.reduce((sum, row) => sum + row.value, 0);
-    for (const segment of segments) segment.share = total > 0 ? segment.value / total * 100 : null;
+    for (const segment of segments) segment.share = total > 0 && segments.every(row => row.value >= 0) ? segment.value / total * 100 : null;
     return { year, partial: year === Number(throughMonth.slice(0, 4)) && !throughMonth.endsWith('-12'), total, segments };
   });
   return { status: 'ready', issues: [], mcmv: buildSpProjectTrends(mcmv, quarter, throughMonth), annual };

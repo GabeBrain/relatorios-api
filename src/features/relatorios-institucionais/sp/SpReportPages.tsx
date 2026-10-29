@@ -5,6 +5,8 @@ import { spPeriodLabel, type SpPreview, type SpTypologies } from './model';
 import { buildSpSegments } from './segments';
 import { SP_ORIGINAL_SLIDES } from './original-slides';
 import { SpTrendSlide } from './SpTrendSlide';
+import { SpComparisonSlide } from './SpComparisonSlide';
+import { SpNeighborhoodSlide } from './SpNeighborhoodSlide';
 import { SpSegmentHistorySlide } from './SpSegmentHistorySlide';
 import cover from './assets/cover.png';
 import projectsTemplate from './assets/template-13.png';
@@ -47,8 +49,8 @@ export function SpReportPages({ report }: { report: SpPreview }) {
   const distribution = [24, 38, 48].includes(page) ? segments : report.typologies;
   const observations = (report.monthly ?? []).map(row => ({ month: row.month, value: metric === 'stock' ? row.closingStock : row.sales }));
   const slide = <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
-    <img src={templates[page] ?? projectsTemplate} alt={page === 1 ? 'Capa original Brain Inteligência Estratégica' : `Layout: ${definition.title}`} className="absolute inset-0 h-full w-full" />
-    {page >= 13 && page <= 22 ? <SpTrendSlide report={report} number={page} /> : [23, 24, 32, 37, 38, 46, 47, 48].includes(page) ? <>
+    <img src={templates[page] ?? (page >= 32 && page <= 36 ? salesTemplate : projectsTemplate)} alt={page === 1 ? 'Capa original Brain Inteligência Estratégica' : `Layout: ${definition.title}`} className="absolute inset-0 h-full w-full" />
+    {page >= 13 && page <= 22 || page >= 26 && page <= 30 || page >= 32 && page <= 36 ? <SpTrendSlide key={page} report={report} number={page} /> : [23, 24, 37, 38].includes(page) ? <SpComparisonSlide key={page} report={report} number={page} /> : page === 25 ? <SpNeighborhoodSlide report={report} /> : [46, 47, 48].includes(page) ? <>
       <p className="absolute left-[62px] top-[155px] text-[18px]">{report.quarter} · {real ? period : 'Dados fictícios'}</p>
       <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity([23, 24, 37, 38, 47, 48].includes(page) && distribution?.status !== 'ready' ? null : report.metrics[metric])}</p></div>
       {[24, 38, 48].includes(page) && report.historyBatch?.status === 'ready' && report.historyBatch.segments ? <SpSegmentHistorySlide batch={report.historyBatch} metric={metric} /> : [23, 24, 37, 38, 47, 48].includes(page) ? <DistributionChart result={distribution} metric={metric} kind={[24, 38, 48].includes(page) ? 'segmento' : 'tipologia'} /> : <MonthlyChart observations={observations} />}
@@ -57,7 +59,7 @@ export function SpReportPages({ report }: { report: SpPreview }) {
   </article>;
   const navigation = <nav aria-label="Navegação dos slides originais" className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">{SP_ORIGINAL_SLIDES.map(item => <Button className="h-auto min-h-10 max-w-full whitespace-normal py-2 text-left" key={item.number} variant={page === item.number ? 'default' : 'outline'} aria-pressed={page === item.number} onClick={() => setPage(item.number)}>{item.number}. {item.title}</Button>)}</nav>;
   return <section aria-label="Páginas do relatório" className="space-y-4">
-    <div><h2 className="text-lg font-semibold">Montagem do relatório</h2><p className="text-sm text-muted-foreground">Ordem e numeração dos 85 slides do modelo original · {report.quarter} · {real ? period : 'Dados fictícios'}. Conteúdos ainda não implementados ficam indicados na posição original. Exportação e homologação pendentes.</p><p className="text-sm text-muted-foreground">Slides 13–22: séries de empreendimentos e unidades lançadas. Tipologias e comparativos por segmento usam as conferências da página.</p></div>
+    <div><h2 className="text-lg font-semibold">Montagem do relatório</h2><p className="text-sm text-muted-foreground">Ordem e numeração dos 85 slides do modelo original · {report.quarter} · {real ? period : 'Dados fictícios'}. Conteúdos ainda não implementados ficam indicados na posição original. Exportação e homologação pendentes.</p><p className="text-sm text-muted-foreground">Séries e comparativos são preenchidos automaticamente após a conferência das fontes. Ranking de bairros depende da reconciliação do cadastro com os lançamentos. VGL usa INCC-DI e base única no último mês disponível do período.</p></div>
     {!expanded && navigation}
     <Button variant="outline" onClick={() => setExpanded(true)}>Ampliar slides</Button>
     {!expanded && <SlideFrame>{slide}</SlideFrame>}
@@ -67,7 +69,7 @@ export function SpReportPages({ report }: { report: SpPreview }) {
 
 function OriginalTextSlide({ number, title, report }: { number: number; title: string; report: SpPreview }) {
   const divider = title.startsWith('Divisória:');
-  const text = number === 2 ? [`São Paulo capital · Empreendimentos residenciais verticais`, report.quarter, spPeriodLabel(report)] : number === 6 ? SP_ORIGINAL_SLIDES.filter(item => item.title.startsWith('Divisória:')).map(item => `${item.number}. ${item.title.replace('Divisória: ', '')}`) : divider ? [] : ['Conteúdo pendente', 'Esta posição segue o modelo original.', 'Os dados ou a revisão editorial ainda não foram concluídos.'];
+  const text = number === 2 ? [`São Paulo capital · Empreendimentos residenciais verticais`, report.quarter, spPeriodLabel(report)] : number === 6 ? SP_ORIGINAL_SLIDES.filter(item => item.title.startsWith('Divisória:')).map(item => `${item.number}. ${item.title.replace('Divisória: ', '')}`) : number >= 26 && number <= 30 ? ['Metodologia do INCC em definição', 'Aguardando série do índice, mês-base e critério de atualização.', 'Valores nominais não são exibidos como corrigidos.'] : divider ? [] : ['Conteúdo pendente', 'Esta posição segue o modelo original.', 'Os dados ou a revisão editorial ainda não foram concluídos.'];
   const words = title.replace('Divisória: ', '').split(' '), lines = [''];
   for (const word of words) { if (`${lines.at(-1)} ${word}`.length > 58) lines.push(''); lines[lines.length - 1] += `${lines.at(-1) ? ' ' : ''}${word}`; }
   return <svg role="img" aria-label={divider ? title : number === 2 ? 'Sobre este relatório' : number === 6 ? 'Sumário original' : `Conteúdo pendente: slide ${number}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">

@@ -3,6 +3,7 @@ import { safeNumber } from '@/features/panorama-secovi-fiergs/lib/launches';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
 import { monthOf, SP_INSTITUTIONAL, type SpPreview } from './model';
 import { summarizeSpGroups } from './distribution';
+import { readSpMoney } from './currency';
 
 export type SpTemporalRow = Record<string, unknown>;
 export interface SpTemporalInput {
@@ -93,6 +94,10 @@ export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter)
   }
   return {
     ...result, status: months.length === 3 ? 'quarter-closed' : 'partial',
+    nominalLaunchVgv: input.groupBy === 'Tipologia' ? undefined : (() => {
+      const rows = input.releases.filter(row => months.includes(monthOf(row.period) ?? ''));
+      return rows.every(row => readSpMoney(row.vgv_release) !== null) ? rows.map(row => ({ month: monthOf(row.period)!, group: String(row.group), value: readSpMoney(row.vgv_release)! })) : undefined;
+    })(),
     patterns: input.groupBy === 'Tipologia' ? undefined : summarizeSpGroups(input, months, result.throughMonth),
     metrics: { projects: null, launches: result.monthly!.reduce((sum, row) => sum + row.launches, 0), sales: result.monthly!.reduce((sum, row) => sum + row.sales, 0), stock: result.monthly!.at(-1)!.closingStock },
     issues: [

@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-29 — SP Institucional: comparativos, bairros, vendas e VGL corrigido — Codex
+
+- **Ambiente/funcionalidade:** Rebrain, `/rebrain/relatorios-institucionais/sp`. Base `26bcfb6`, main limpa e único origin em 0/0 após fetch. Autoria Codex/Codex Test, a pedido do usuário; commit desta entrega identificado no histórico Git pelo título desta entrada.
+- **Mudança:** quinze conteúdos nas posições originais 23–30 e 32–38: comparativos anuais por tipologia/segmento de lançamentos/vendas, Top 10 bairros, cinco tendências de vendas e cinco de VGL corrigido. Meses equivalentes, vendas negativas preservadas, ranking com denominador municipal integral e soma cadastral reconciliada. Mantém as 85 posições, com outros conteúdos ainda pendentes.
+- **INCC:** usuário confirmou INCC-DI e delegou escolha de base após receber diferenças da planilha. Critério adotado: último mês municipal disponível como base única para todos os anos e recortes, inclusive MCMV; corrigir cada mês antes de somar. Snapshot público SindusconPR/FGV de jan/2021 a set/2026 com proveniência/hash, sem copiar índices divergentes ou bases abril/março da planilha. Falta de nominal/índice deixa apenas VGL indisponível. Não há sincronização automática de novos índices; atualizar o snapshot quando publicados. [Contrato e evidências](../features/relatorios-institucionais/sp/DECISOES.md).
+- **Desempenho/UX:** bairros reutilizam `/building`; VGL reutiliza `releases`; vendas usam série municipal paginada e tipologias consultam duas janelas. Consultas independentes com BrainLoadingState, tempo, cancelamento e retry; municipal permanece acessível. GeoApiScopeEngine e rota lazy preservados; Secovi/FIERGS não alterados.
+- **Validação/limites:** 173 testes SP, tipos completos do app, lint e build aprovados. QA Edge local com tráfego externo bloqueado verifica 1440/390, claro/escuro, parcial de um/dois meses, trimestre completo, erro/vazio/cancelamento e páginas originais. Fontes locais monetárias/bairros/tipologias são sintéticas; API autenticada e aceite do analista não observados. Revisão da base INCC, cobertura histórica real, publicação observável, demais conteúdos e exportação seguem pendentes.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência, sem escrita.
+
 ### 2026-10-29 — SP: estrutura original85 e dez slides analíticos13–22 — Codex
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, autoria Codex/Codex Test, baseeb2b666, main limpa/origin0/0apósfetch. Usuário pediu10slides e exigiu mesma estrutura original.
 - **Estrutura:** navegação preserva85posições/títulos do inventário, pendentes explícitos; remove sequência própria de complementos. Slide2apresentação,13empreendimentos; capítulos/sumário e23/24,37/38,47/48nas posições corretas.85posições não significam85conteúdos finalizados.
@@ -637,6 +646,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**29/10 — SP, segundo lote:** implementados localmente 23–30 e 32–38, incluindo INCC-DI com base única no mês disponível; 173 testes aprovados. Soma ao lote 13–22 e preserva 85 posições. Revisar cobertura real, classificação histórica e critério INCC com analista; publicação observada e exportação integral continuam pendentes.
+
 **29/10 — SP, correção após teste e coleta granular:** setembro confirmado nas três séries por respostas do usuário, apesar da raiz de agosto. Descoberta do período pelas séries; diferença de balanço diagnóstica. Contagem do cadastro leve implementada sem bloquear municipal; agora no slide13original. Reteste publicado/cobertura real pendentes; raiz não limita séries.
 
 **29/10 — SP Institucional:** estrutura original85restaurada, com pendentes explícitos; lote analítico13–22implementado localmente, usando cadastro existente e série municipal de unidades.149testes e QA local; validar cobertura histórica/classificação/valores reais.85posições não são85conteúdos prontos. Publicação verificada/exportação/homologação integral permanecem pendentes.
@@ -676,7 +687,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **SP Institucional — validação publicada:** conferir ordem85e lote13–22, séries de unidades desde2021, cobertura do cadastro por ID/data, padrão/classificação histórica e parciais; dados locais inventados não são aceite. Contagem anteschamada2agora13original, sem bloquear municipal. Medir tempo real; diferença municipal+22/contrato líquido continuam em aberto. Preços/INCC, IVV, mapas, curva trimestral completa de vendas/oferta, editorial, exportação/homologação integral seguem pendentes.
+- [ ] **SP — segundo lote e INCC:** validar no site os comparativos 23/24/37/38, ranking 25, vendas 32–36 e VGL 26–30; confirmar a base comum com o analista e nominais históricos `vgv_release`. Atualizar snapshot de índices após set/2026; falta de índice bloqueia só VGL. Testes sintéticos não são aceite de mercado. Demais posições originais, oferta histórica, IVV, mapas, editorial e exportação ainda exigem implementação/revisão.
+
+- [ ] **SP Institucional — validação publicada:** conferir a ordem original de 85 posições e os lotes 13–30/32–38, séries municipais desde 2021, cobertura do cadastro por ID/data, padrão/classificação histórica e parciais; dados locais inventados não são aceite. Contagem anteschamada2agora13original, sem bloquear municipal. Medir tempo real; diferença municipal+22/contrato líquido continuam em aberto. Preços, IVV, mapas, curva trimestral completa de oferta, editorial e exportação/homologação integral seguem pendentes; VGL/INCC e vendas longas implementados no segundo lote, aguardando revisão real.
 
 - **Estimativas:** conferir a nova prévia de exportação em produção e aguardar comprovação do formato final de saída Nicolas/Belogic. Interface anterior aceita em28/10; revisão29/10 validada somente localmente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 

@@ -68,9 +68,15 @@ async function readSpSeries(read: ReturnType<typeof createSpRead>, metric: 'sale
 
 /** One bounded municipal releases series; no building histories or other metrics. */
 export async function fetchSpLaunchSeriesRows(report: SpPreview, options: SpReadOptions = {}): Promise<SpTemporalRow[]> {
+  return fetchSpFlowSeriesRows(report, 'releases', options);
+}
+export async function fetchSpSalesSeriesRows(report: SpPreview, options: SpReadOptions = {}): Promise<SpTemporalRow[]> {
+  return fetchSpFlowSeriesRows(report, 'sales', options);
+}
+async function fetchSpFlowSeriesRows(report: SpPreview, metric: 'releases' | 'sales', options: SpReadOptions): Promise<SpTemporalRow[]> {
   if (!isSpMunicipalPreview(report) || !report.throughMonth) throw new Error('Confira os meses municipais antes das séries históricas.');
-  options.onProgress?.('Consultando o histórico de unidades lançadas…');
-  return readSpSeries(createSpRead(options), 'releases', { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', start_period: '2021-01-01', end_period: monthEnd(report.throughMonth) }, 6, page => options.onProgress?.(`Conferindo unidades lançadas: página ${page}…`));
+  options.onProgress?.(metric === 'releases' ? 'Consultando o histórico de unidades lançadas…' : 'Consultando o histórico de vendas líquidas…');
+  return readSpSeries(createSpRead(options), metric, { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', start_period: '2021-01-01', end_period: monthEnd(report.throughMonth) }, 6, page => options.onProgress?.(`Conferindo ${metric === 'releases' ? 'lançamentos' : 'vendas'}: página ${page}…`));
 }
 
 /** One contextual building sample + up to two pages per municipal source through the requested window. The sample period never limits municipal availability. */

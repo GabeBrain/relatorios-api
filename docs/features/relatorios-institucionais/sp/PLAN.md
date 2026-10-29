@@ -1,5 +1,13 @@
 # SP capital — primeiro mapeamento
 
+## 29/10/2026 — lote de dez: originais23–25 e32–38
+
+**Ampliação autorizada após recebimento do INCC:**26–30também implementados, totalizando15conteúdos nesta entrega (23–30/32–38). Critério autorizado pelo usuário: último mês municipal disponível como base única, correção mensal antes das somas, mesma base total/MCMV/anuais. SnapshotDIjan2021–set2026obtido diretamente do SindusconPR/FGV; ausência de índice/nominal bloqueia VGL sem afetar unidades. Sem nova consulta pesada. Revisão do analista e atualização dos índices apósset2026 continuam pendentes; as notas de pendência26–30abaixo descrevem o momento anterior dessa mesma rodada.
+
+Implementados comparativos anuais por tipologia/segmento de lançamentos e vendas (23/24/37/38), ranking de bairros25 reconciliado contra toda a cidade e cinco tendências de vendas32–36. Meses equivalentes nas parciais, sinais negativos preservados e fontes independentes canceláveis sem bloquear municipal. Cadastro existente alimenta bairros; série salesjan2021…mês conferido alimenta vendas e segmentos; tipologias dos dois anos conferidas automaticamente. Estrutura85preservada. [Contrato e referência INCC](DECISOES.md), [validação](EVIDENCIAS.md).
+
+INCC-DI/fonte confirmados pelo usuário com planilha local; leitura revela bases diferentes (abr/mar2026), índices divergentes do site e uma data duplicada. Fórmula identificada, pergunta de base única set2026 pendente.26–30 continuam aguardando esse fechamento e implementação própria. Próximas pendências: validar fontes reais/meses/grupos/cadastro e metodologia com analista, demais blocos originais, exportação e aceite. Não declarar85slides concluídos.
+
 ## 29/10/2026 — estrutura original de 85 slides e lote analítico 13–22
 
 Usuário pediu dez slides e corrigiu a organização: o relatório deve seguir a estrutura original. A navegação agora preserva as 85 posições/títulos do inventário, sem inserir páginas complementares em sequência própria. Posições ainda não desenvolvidas exibem pendência em seu lugar. Slide2 é apresentação do estudo; contagem de empreendimentos pertence ao13. Capa, introdução, sumário e divisórias mantêm capítulos; tipologias/segmentos ficam em23/24,37/38,47/48. Vendas32/oferta46 preservam dados mensais disponíveis, explicitando curva trimestral/escoamento pendentes. Não alegar85slides concluídos.

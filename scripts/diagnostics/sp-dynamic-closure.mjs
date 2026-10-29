@@ -38,7 +38,7 @@ try {
       if (slow) await new Promise(done => setTimeout(done, 1500));
       if (granularFailure) return route.fulfill({ status: 403, body: '{}' });
       const pageNumber = Number(url.searchParams.get('page'));
-      const rows = (pageNumber === 1 ? ['2026-07-10', '2026-08-20'] : ['2026-09-15', '2026-06-01']).map((date, i) => ({ building_id: (pageNumber - 1) * 2 + i + 1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: date, standard: ['Compacto', 'Econ\u00f4mico', 'Standard', 'Luxo'][(pageNumber - 1) * 2 + i], period: '2026-08-01' }));
+      const rows = (pageNumber === 1 ? ['2026-07-10', '2026-08-20'] : ['2026-09-15', '2026-06-01']).map((date, i) => ({ building_id: (pageNumber - 1) * 2 + i + 1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: date, neighborhood: `Bairro ${(pageNumber - 1) * 2 + i + 1}`, total_units: (() => { const month = date.slice(0, 7); const values = month === '2026-09' ? observed.septemberReleases : recorded.releases[month]; return values?.reduce((a, b) => a + b, 0) ?? 0; })(), standard: ['Compacto', 'Econ\u00f4mico', 'Standard', 'Luxo'][(pageNumber - 1) * 2 + i], period: '2026-08-01' }));
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: pageNumber, last_page: 2, total: 4 } }) });
     }
     if (url.pathname.endsWith('/building-with-history')) {
@@ -52,18 +52,30 @@ try {
       const months = Object.fromEntries(Object.entries(recorded[metric]).filter(([month]) => month < '2026-09'));
       months['2026-09'] = metric === 'stock' ? observed.septemberStock : metric === 'sales' ? observed.septemberSales : observed.septemberReleases;
       if (metric === 'stock') months['2026-08'] = observed.augustStock;
-      if (metric === 'releases' && url.searchParams.get('start_period') === '2021-01-01') {
+      if (metric !== 'stock' && url.searchParams.get('start_period') === '2021-01-01') {
         const all = [];
         for (let year = 2021; year <= 2026; year++) for (let m = 1; m <= 12; m++) {
           const month = `${year}-${String(m).padStart(2, '0')}`;
           if (month > `2026-${closing}`) continue;
-          for (const [i, group] of recorded.groups.entries()) all.push({ period: `${month}-01`, group, building_type: 'Vertical', releases_in_period: months[month]?.[i] ?? 100 + i * 5 + m });
+          for (const [i, group] of recorded.groups.entries()) all.push({ period: `${month}-01`, group, building_type: 'Vertical', [field]: months[month]?.[i] ?? 100 + i * 5 + m, ...(metric === 'releases' ? { vgv_release: (months[month]?.[i] ?? 100 + i * 5 + m) * 100000.25 } : {}) });
         }
         const p = Number(url.searchParams.get('page')), last = Math.ceil(all.length / 100);
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: all.slice((p - 1) * 100, p * 100), meta: { current_page: p, last_page: last, total: all.length }, links: { next: p < last ? `?page=${p + 1}` : null } }) });
       }
 
-      return reply(Object.entries(months).flatMap(([month, values]) => values.map((value, index) => ({ period: `${month}-01`, group: recorded.groups[index], building_type: 'Vertical', [field]: value }))).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period') && row.period <= `2026-${closing}-31`));
+      if (url.searchParams.get('group_by') === 'Tipologia') {
+        const start = url.searchParams.get('start_period').slice(0, 7), end = url.searchParams.get('end_period').slice(0, 7);
+        const rows = [];
+        for (let year = 2025; year <= 2026; year++) for (let m = 1; m <= 12; m++) {
+          const month = `${year}-${String(m).padStart(2, '0')}`;
+          if (month < start || month > end || month > `2026-${closing}`) continue;
+          const total = months[month]?.reduce((a, b) => a + b, 0) ?? recorded.groups.reduce((sum, _, i) => sum + (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m), 0);
+          const values = [.1, .6, .2].map(share => Math.floor(total * share)); values.push(total - values.reduce((a,b) => a+b,0));
+          rows.push(...values.map((value, i) => ({ period: `${month}-01`, group: `${i+1} dormit\u00f3rio${i ? 's' : ''}`, building_type: 'Vertical', [field]: value })));
+        }
+        return reply(rows);
+      }
+      return reply(Object.entries(months).flatMap(([month, values]) => values.map((value, index) => ({ period: `${month}-01`, group: recorded.groups[index], building_type: 'Vertical', [field]: value, ...(metric === 'releases' ? { vgv_release: value * 100000.25 } : {}) }))).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period') && row.period <= `2026-${closing}-31`));
     }
     if (url.origin === base) return route.continue();
     return route.abort();
@@ -102,9 +114,14 @@ try {
       await page.getByRole('article').screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-${month}.png`) });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1 || document.querySelector('main').scrollWidth > document.querySelector('main').clientWidth + 1), false);
       if (month === '09') {
-        for (let slide = 13; slide <= 22; slide++) {
+        await page.getByText(/Séries de vendas líquidas conferidas desde janeiro/).waitFor();
+        await page.getByText(/Tipologias conferidas:/).waitFor();
+        await page.getByText(/VGL corrigido pelo INCC-DI para 2026-09/).waitFor();
+        for (const slide of [13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,32,33,34,35,36,37,38]) {
           await openSlide(slide);
-          assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em confer\u00eancia/);
+          await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+          if (slide === 23) await writeFile(resolve(output, 'comparison-dom.json'), JSON.stringify(await page.getByRole('article').evaluate(el => Array.from(el.querySelectorAll('svg text')).slice(0, 4).map(e => ({ text: e.textContent, html: e.outerHTML, box: e.getBoundingClientRect().toJSON(), fill: getComputedStyle(e).fill }))), null, 2));
+          assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em confer\u00eancia|Comparativo em confer\u00eancia|Bairros em confer\u00eancia/);
           await page.getByRole('article').screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-original-${slide}.png`) });
         }
         await page.getByText('Diferenças de balanço por grupo', { exact: true }).click();

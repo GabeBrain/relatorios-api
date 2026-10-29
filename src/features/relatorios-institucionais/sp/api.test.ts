@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { RequestOptions } from '@/lib/http-client';
-import { fetchSpTemporalInput, fetchSpLaunchHistory, fetchSpHistoryBatch, fetchSpLaunchSeriesRows, type SpReadOptions } from './api';
-import { syntheticLaunchSeries } from './__tests__/launch-series';
+import { fetchSpTemporalInput, fetchSpLaunchHistory, fetchSpHistoryBatch, fetchSpLaunchSeriesRows, fetchSpSalesSeriesRows, type SpReadOptions } from './api';
+import { syntheticLaunchSeries, syntheticSalesSeries } from './__tests__/launch-series';
 import { buildSpTemporalPreview } from './temporal';
 import { userSeptemberReplay } from './__tests__/user-september';
 import { syntheticWindow } from './__tests__/synthetic-window';
@@ -34,6 +34,17 @@ describe('SP — transporte curto e paginado, sem provedor real', () => {
     expect(await fetchSpLaunchSeriesRows(report, { request })).toEqual(rows);
     expect(request).toHaveBeenCalledTimes(5);
     for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/releases', cache: 'no-store', query: { start_period: '2021-01-01', end_period: '2026-08-31', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
+  });
+  it('delimita o histórico de vendas desde 2021 e pagina somente sales até o mês conferido', async () => {
+    const rows = syntheticSalesSeries();
+    const request = vi.fn(async (options: RequestOptions) => {
+      const page = Number(options.query?.page), last = Math.ceil(rows.length / 100);
+      return reply(envelope(rows.slice((page - 1) * 100, page * 100), page, rows.length, last, page < last ? `?page=${page + 1}` : null));
+    });
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    expect(await fetchSpSalesSeriesRows(report, { request })).toEqual(rows);
+    expect(request).toHaveBeenCalledTimes(5);
+    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/sales', cache: 'no-store', query: { start_period: '2021-01-01', end_period: '2026-08-31', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
   });
   it('histórico longo tem teto de seis páginas sem ampliar as consultas curtas', async () => {
     const request = vi.fn(async (options: RequestOptions) => reply(envelope(Array.from({ length: 100 }, () => ({})), Number(options.query?.page), 700, 7, '?next')));

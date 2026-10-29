@@ -4,6 +4,7 @@ import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-
 import { isSpMunicipalPreview, type SpPreview } from './model';
 import { quarterMonths } from './temporal';
 import { buildSpProjectTrends, buildSpTrendBreakdown, type SpProjectTrends, type SpTrendBreakdown } from './project-trends';
+import { buildSpLaunchNeighborhoods, type SpLaunchNeighborhoods } from './neighborhoods';
 
 type Building = Record<string, unknown>;
 export interface SpProjects {
@@ -16,6 +17,7 @@ export interface SpProjects {
   total: number | null;
   trends?: SpProjectTrends;
   breakdown?: SpTrendBreakdown;
+  neighborhoods?: SpLaunchNeighborhoods;
 }
 export const blockedSpProjects = (message: string): SpProjects => ({ status: 'blocked', issues: [message], source: 'building', received: 0, distinct: 0, monthly: [], total: null });
 const normalized = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
@@ -42,7 +44,7 @@ export function buildSpProjects(buildings: Building[], report: SpPreview, receiv
     const row = monthly.find(row => row.month === day.slice(0, 7));
     if (row) row.value++;
   }
-  return { status: 'ready', issues: [], source: 'building', received, distinct: byId.size, monthly, total: monthly.reduce((sum, row) => sum + row.value, 0), trends: buildSpProjectTrends(launchesByMonth, report.quarter, report.throughMonth), breakdown: buildSpTrendBreakdown(launchesByPattern, report.quarter, report.throughMonth) };
+  return { status: 'ready', issues: [], source: 'building', received, distinct: byId.size, monthly, total: monthly.reduce((sum, row) => sum + row.value, 0), trends: buildSpProjectTrends(launchesByMonth, report.quarter, report.throughMonth), breakdown: buildSpTrendBreakdown(launchesByPattern, report.quarter, report.throughMonth), neighborhoods: buildSpLaunchNeighborhoods([...byId.values()], report) };
 }
 
 interface Options {

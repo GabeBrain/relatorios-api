@@ -3,6 +3,8 @@ import { safeNumber } from '@/features/panorama-secovi-fiergs/lib/launches';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
 import type { SpProjects } from './projects';
 import type { SpLaunchSeries } from './launch-series';
+import type { SpTypologyHistory } from './typology-history';
+import type { SpVglSeries } from './vgl-series';
 
 export const SP_INSTITUTIONAL = { id: 'sp-institucional', label: 'SP institucional', uf: 'SP', city: 'São Paulo' } as const;
 type Raw = Record<string, unknown>;
@@ -55,9 +57,13 @@ export interface SpPreview {
   throughMonth?: string;
   monthly?: { month: string; launches: number; sales: number; openingStock: number; closingStock: number; delta: number }[];
   typologies?: SpTypologies;
+  typologyHistory?: SpTypologyHistory;
   patterns?: SpDistribution;
   projects?: SpProjects;
   launchSeries?: SpLaunchSeries;
+  salesSeries?: SpLaunchSeries;
+  nominalLaunchVgv?: { month: string; group: string; value: number }[];
+  vglSeries?: SpVglSeries;
   launchHistory?: SpLaunchHistory;
   historyBatch?: SpHistoryBatch;
 }
