@@ -73,6 +73,10 @@ export async function fetchSpLaunchSeriesRows(report: SpPreview, options: SpRead
 export async function fetchSpSalesSeriesRows(report: SpPreview, options: SpReadOptions = {}): Promise<SpTemporalRow[]> {
   return fetchSpFlowSeriesRows(report, 'sales', options);
 }
+export async function fetchSpStockSeriesRows(report: SpPreview, options: SpReadOptions = {}): Promise<SpTemporalRow[]> {
+  if (!isSpMunicipalPreview(report) || !report.throughMonth) throw new Error('Confira os meses municipais antes da oferta histórica.');
+  return readSpSeries(createSpRead(options), 'stock', { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', start_period: '2021-01-01', end_period: monthEnd(report.throughMonth) }, 6, page => options.onProgress?.(`Conferindo oferta: página ${page}…`));
+}
 async function fetchSpFlowSeriesRows(report: SpPreview, metric: 'releases' | 'sales', options: SpReadOptions): Promise<SpTemporalRow[]> {
   if (!isSpMunicipalPreview(report) || !report.throughMonth) throw new Error('Confira os meses municipais antes das séries históricas.');
   options.onProgress?.(metric === 'releases' ? 'Consultando o histórico de unidades lançadas…' : 'Consultando o histórico de vendas líquidas…');

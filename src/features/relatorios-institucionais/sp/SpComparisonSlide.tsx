@@ -6,16 +6,17 @@ const colors = ['#5b7638', '#83a83d', '#1d6288', '#ffcf00', '#86b7d5', '#89713a'
 const count = (value: number) => value.toLocaleString('pt-BR');
 const percent = (value: number) => `${value.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 export function SpComparisonSlide({ report, number }: { report: SpPreview; number: number }) {
-  const sales = number >= 37, typology = number === 23 || number === 37;
-  const result = typology ? resolveSpTypologyComparison(report, sales ? 'sales' : 'launches') : (sales ? report.salesSeries : report.launchSeries)?.comparison;
-  const title = `UNIDADES VERTICAIS ${sales ? 'VENDIDAS' : 'LANÇADAS'}`;
-  return <svg role="img" aria-label={`Comparação anual por ${typology ? 'tipologia' : 'segmento'} · ${sales ? 'vendas' : 'lançamentos'}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
+  const stock = number >= 47, sales = !stock && number >= 37, typology = [23,37,47].includes(number);
+  const metric = stock ? 'stock' : sales ? 'sales' : 'launches';
+  const result = typology ? resolveSpTypologyComparison(report, metric) : (stock ? report.stockSeries : sales ? report.salesSeries : report.launchSeries)?.comparison;
+  const title = stock ? 'OFERTA FINAL VERTICAL' : `UNIDADES VERTICAIS ${sales ? 'VENDIDAS' : 'LANÇADAS'}`;
+  return <svg role="img" aria-label={`Comparação anual por ${typology ? 'tipologia' : 'segmento'} · ${stock ? 'oferta' : sales ? 'vendas' : 'lançamentos'}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
     <rect x="40" y="10" width="1000" height="140" fill="#f8f8f8" />
     <text x="62" y="62" fontSize="31" fontWeight="bold">{title}</text><text x="62" y="101" fontSize="27" fontWeight="bold" fill="#5b7638">POR {typology ? 'TIPOLOGIA' : 'SEGMENTO'}</text>
     <rect x="62" y="117" width="85" height="9" rx="4" fill="#ffcf00" />
     <text x="62" y="158" fontSize="17">{report.quarter} · {spPeriodLabel(report)}</text>
     {result?.status === 'ready' ? <ComparisonChart result={result} report={report} /> : <><text x="640" y="335" textAnchor="middle" fontSize="28" fontWeight="bold">Comparativo em conferência</text><text x="640" y="380" textAnchor="middle" fontSize="18">{result?.issues[0] ?? (typology ? 'A conferência das tipologias nos dois anos preencherá este slide.' : 'A série municipal dos dois anos preencherá este slide.')}</text></>}
-    <text x="62" y="621" fontSize="13">Mesmos meses nos dois anos. Vendas negativas preservadas; base anterior não positiva sem variação percentual.</text>
+    <text x="62" y="621" fontSize="13">{stock ? 'Fotografia do último mês disponível nos dois anos. Estoques mensais não são somados.' : 'Mesmos meses nos dois anos. Vendas negativas preservadas; base anterior não positiva sem variação percentual.'}</text>
   </svg>;
 }
 function ComparisonChart({ result, report }: { result: SpGroupComparison; report: SpPreview }) {

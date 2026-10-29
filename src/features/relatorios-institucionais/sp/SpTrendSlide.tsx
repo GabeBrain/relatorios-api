@@ -8,14 +8,15 @@ const percentage = (value: number | null) => value === null ? '—' : `${value >
 
 export function SpTrendSlide({ report, number }: { report: SpPreview; number: number }) {
   const sales = number >= 32 && number <= 36;
-  const monetary = number >= 26 && number <= 30;
+  const vgv = number >= 40 && number <= 44;
+  const monetary = number >= 26 && number <= 30 || vgv;
   const format = monetary ? (value: number) => (value / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : fmt;
-  const projects = number < 18, index = number - (projects ? 13 : sales ? 32 : monetary ? 26 : 18);
-  const source = projects ? report.projects : sales ? report.salesSeries : monetary ? report.vglSeries : report.launchSeries;
+  const projects = number < 18, index = number - (projects ? 13 : sales ? 32 : vgv ? 40 : monetary ? 26 : 18);
+  const source = projects ? report.projects : sales ? report.salesSeries : vgv ? report.vgvSeries : monetary ? report.vglSeries : report.launchSeries;
   const mcmv = index === 2 || index === 3, rolling = index === 1 || index === 3, annual = index === 4;
   const trends = mcmv ? source?.breakdown?.mcmv : source?.trends;
   const ready = source?.status === 'ready' && (annual ? source.breakdown?.status === 'ready' && !!source.breakdown.annual : !!trends);
-  const metric = projects ? 'EMPREENDIMENTOS VERTICAIS LANÇADOS' : sales ? 'UNIDADES VERTICAIS VENDIDAS' : monetary ? 'VGL VERTICAL · R$ MILHÕES · INCC-DI' : 'UNIDADES VERTICAIS LANÇADAS';
+  const metric = projects ? 'EMPREENDIMENTOS VERTICAIS LANÇADOS' : sales ? 'UNIDADES VERTICAIS VENDIDAS' : monetary ? `${vgv ? 'VGV VENDIDO' : 'VGL VERTICAL'} · R$ MILHÕES · INCC-DI` : 'UNIDADES VERTICAIS LANÇADAS';
   const subtitle = annual ? 'PARTICIPAÇÃO ANUAL POR SEGMENTO' : `${mcmv ? 'MCMV · ' : ''}${rolling ? 'ACUMULADO 12 MESES' : 'SÉRIE TRIMESTRAL'}`;
   const comparisons = trends ? rolling ? trends.rollingComparisons : trends.quarterlyComparisons : [];
   const points = trends ? rolling ? trends.rolling.map(row => ({ label: month(row.month), value: row.value, partial: false })) : trends.quarterly.map(row => ({ label: `${row.label.slice(0, 2)} ${row.label.slice(2)}${row.partial ? '*' : ''}`, value: row.value, partial: row.partial })) : [];
@@ -30,7 +31,7 @@ export function SpTrendSlide({ report, number }: { report: SpPreview; number: nu
     <rect x="62" y="116" width="85" height="9" rx="4" fill="#ffcf00" />
     <text x="62" y="157" fontSize="17">{report.quarter} · {spPeriodLabel(report)}</text>
     {!ready ? <><text x="640" y="335" textAnchor="middle" fontSize="28" fontWeight="bold">Dados em conferência</text>{wrap(message, 88).map((line, i) => <text key={i} x="640" y={380 + i * 28} textAnchor="middle" fontSize="19">{line}</text>)}</> : annual ? <AnnualChart rows={source!.breakdown!.annual!} throughMonth={report.throughMonth!} format={format} /> : <>
-      <text x="90" y="202" fontSize="16">{rolling ? 'Acumulado nos últimos 12 meses' : `${sales ? 'Vendas líquidas' : monetary ? 'VGL corrigido' : 'Lançamentos'} no trimestre selecionado`}</text>
+      <text x="90" y="202" fontSize="16">{rolling ? 'Acumulado nos últimos 12 meses' : `${sales ? 'Vendas líquidas' : vgv ? 'VGV vendido corrigido' : monetary ? 'VGL corrigido' : 'Lançamentos'} no trimestre selecionado`}</text>
       <text x="90" y="240" fontSize="32" fontWeight="bold" fill="#5b7638">{format(points.at(-1)!.value)}{!rolling && points.at(-1)!.partial ? '*' : ''}</text>
       <ComparisonTable rows={comparisons} />
       <line x1="75" x2="1205" y1="530" y2="530" stroke="#d9d9d9" />
@@ -42,7 +43,7 @@ export function SpTrendSlide({ report, number }: { report: SpPreview; number: nu
       </g>)}
       <text x="62" y="588" fontSize="14">{rolling ? 'Cada ponto reúne 12 meses completos, incluindo o mês indicado.' : '* Trimestre atual parcial quando indicado; comparações anuais usam os mesmos meses.'} Base anterior zero: variação —.</text>
     </>}
-    <text x="62" y="606" fontSize="12">{monetary ? `VGL mensal × INCC-DI da base / INCC-DI do mês. Base única: ${report.throughMonth}. Fonte: SindusconPR/FGV.` : projects ? 'Reconstituição do cadastro atual pela data de lançamento; cobertura histórica sujeita à revisão.' : `Fonte: séries municipais de ${sales ? 'vendas líquidas, com sinais preservados' : 'lançamentos'} · releitura do período atual conferida.`}</text>
+    <text x="62" y="606" fontSize="12">{monetary ? `${vgv ? 'VGV vendido' : 'VGL'} mensal × INCC-DI da base / INCC-DI do mês. Base única: ${report.throughMonth}. Fonte: SindusconPR/FGV.` : projects ? 'Reconstituição do cadastro atual pela data de lançamento; cobertura histórica sujeita à revisão.' : `Fonte: séries municipais de ${sales ? 'vendas líquidas, com sinais preservados' : 'lançamentos'} · releitura do período atual conferida.`}</text>
     {(annual || mcmv) && <text x="62" y="621" fontSize="12">{projects ? 'Segmentos pela classificação atual do cadastro; vigência histórica em revisão.' : 'Segmentos pela regra SP: MCMV = Econômico. Vigência histórica em revisão.'}</text>}
   </svg>;
 }
@@ -56,7 +57,7 @@ function ComparisonTable({ rows }: { rows: SpProjectComparison[] }) {
 }
 
 function AnnualChart({ rows, throughMonth, format = fmt }: { rows: SpAnnualSegments[]; throughMonth: string; format?: (value: number) => string }) {
-  if (rows.some(row => row.segments.some(segment => segment.value < 0))) return <AnnualSignedTable rows={rows} throughMonth={throughMonth} />;
+  if (rows.some(row => row.segments.some(segment => segment.value < 0))) return <AnnualSignedTable rows={rows} throughMonth={throughMonth} format={format} />;
   const order = ['Luxo', 'Médio Padrão', 'MCMV', 'Compactos'];
   const points = rows.map((row, i) => {
     let cumulative = 0;
@@ -81,11 +82,11 @@ function AnnualChart({ rows, throughMonth, format = fmt }: { rows: SpAnnualSegme
     <text x="62" y="588" fontSize="14">* Ano atual até {month(throughMonth)}. Totais anuais no topo; participação calculada sobre o total da cidade.</text>
   </g>;
 }
-function AnnualSignedTable({ rows, throughMonth }: { rows: SpAnnualSegments[]; throughMonth: string }) {
+function AnnualSignedTable({ rows, throughMonth, format }: { rows: SpAnnualSegments[]; throughMonth: string; format: (value: number) => string }) {
   const labels = ['Ano', 'Compactos', 'MCMV', 'Médio Padrão', 'Luxo', 'Total líquido'];
   return <g aria-label="Quadro anual de vendas líquidas com valores negativos">
     {labels.map((label, i) => <text key={label} x={110 + i * 205} y="255" fontSize="19" fontWeight="bold">{label}</text>)}
-    {rows.map((row, i) => <g key={row.year}><line x1="80" x2="1200" y1={275 + i * 42} y2={275 + i * 42} stroke="#d9d9d9" />{[`${row.year}${row.partial ? '*' : ''}`, ...labels.slice(1, 5).map(label => fmt(row.segments.find(item => item.name === label)!.value)), fmt(row.total)].map((value, col) => <text key={col} x={110 + col * 205} y={303 + i * 42} fontSize="19">{value}</text>)}</g>)}
+    {rows.map((row, i) => <g key={row.year}><line x1="80" x2="1200" y1={275 + i * 42} y2={275 + i * 42} stroke="#d9d9d9" />{[`${row.year}${row.partial ? '*' : ''}`, ...labels.slice(1, 5).map(label => format(row.segments.find(item => item.name === label)!.value)), format(row.total)].map((value, col) => <text key={col} x={110 + col * 205} y={303 + i * 42} fontSize="19">{value}</text>)}</g>)}
     <text x="62" y="574" fontSize="14">Vendas líquidas negativas preservadas. Participações omitidas quando há grupo negativo ou total não positivo.</text>
     <text x="62" y="590" fontSize="13">* Ano atual até {month(throughMonth)}. O quadro substitui a área percentual nestes casos.</text>
   </g>;

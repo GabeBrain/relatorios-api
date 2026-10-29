@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-29 — SP Institucional: VGV vendido, oferta, IVV e vendas por bairro — Codex
+
+- **Ambiente/funcionalidade:** Rebrain, `/rebrain/relatorios-institucionais/sp`. Codex/Codex Test a pedido do usuário; abertura em `main` limpa `dbd887d`, único origin em 0/0 após fetch. Terceiro lote de dez posições originais: 39–44, 46–48 e 50. Ordem de 85 e divisórias preservadas; os demais blocos continuam pendentes.
+- **Mudança:** cinco páginas de VGV vendido corrigido pelo INCC-DI, oferta como fotografia trimestral e comparativos anuais por tipologia/segmento, escoamento e IVV trimestral. Reutiliza vendas e tipologias existentes; adiciona série municipal de estoque. Valores monetários negativos preservados, mesma base de INCC do VGL, sem nova chamada para dinheiro. IVV = vendas/(oferta inicial+lançamentos); escoamento = estoque final/média mensal de vendas, com arredondamento para cima e indisponível quando vendas não positivas. Critérios coerentes com o original, adotados sob delegação do usuário e sujeitos à revisão do analista.
+- **Bairros/desempenho:** históricos completos só ao abrir39, depois das operações leves, com até três páginas simultâneas, progresso Brain, tempo, cancelamento e retry próprios. Contagem básica continua sem histórico. Exige identidade por empreendimento/tipologia/mês, deduplicação, cobertura e soma igual aos totais municipais por mês/padrão; negativos não somem nem viram percentuais enganosos. Oferta automática aguarda cadastro básico, mantendo até seis consultas leves simultâneas. Nenhum motor Secovi/FIERGS alterado.
+- **Evidência/limites:** 186 testes SP aprovados, tipos do app, lint e build passando; QA Edge local em 1440/390, claro/escuro, parciais, trimestre completo e estados de cancelamento/erro/vazio. Somente fontes interceptadas/sintéticas, sem API de negócio real. [Contratos e evidências](../features/relatorios-institucionais/sp/DECISOES.md). Validar cobertura histórica, semântica das vendas por bairro, números e fórmulas com analista; índices futuros, publicação observada e exportação integral continuam pendentes.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência, sem escrita.
+
 ### 2026-10-29 — SP Institucional: comparativos, bairros, vendas e VGL corrigido — Codex
 
 - **Ambiente/funcionalidade:** Rebrain, `/rebrain/relatorios-institucionais/sp`. Base `26bcfb6`, main limpa e único origin em 0/0 após fetch. Autoria Codex/Codex Test, a pedido do usuário; implementação e evidências no commit `7f6a259`.
@@ -646,6 +654,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**29/10 — SP, terceiro lote:** implementados 39–44,46–48 e50, somando dez conteúdos ao lote anterior. VGV vendido usa o INCC já definido; oferta, IVV e escoamento com fórmulas explícitas e ranking sob demanda, sem prender a prévia. 186 testes locais aprovados; validação autenticada e aceite metodológico seguem abertos. Próxima frente:51 e bloco de preços, preservando posições originais.
+
 **29/10 — SP, segundo lote:** implementados localmente 23–30 e 32–38, incluindo INCC-DI com base única no mês disponível; 173 testes aprovados. Soma ao lote 13–22 e preserva 85 posições. Revisar cobertura real, classificação histórica e critério INCC com analista; publicação observada e exportação integral continuam pendentes.
 
 **29/10 — SP, correção após teste e coleta granular:** setembro confirmado nas três séries por respostas do usuário, apesar da raiz de agosto. Descoberta do período pelas séries; diferença de balanço diagnóstica. Contagem do cadastro leve implementada sem bloquear municipal; agora no slide13original. Reteste publicado/cobertura real pendentes; raiz não limita séries.
@@ -687,9 +697,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **SP — segundo lote e INCC:** validar no site os comparativos 23/24/37/38, ranking 25, vendas 32–36 e VGL 26–30; confirmar a base comum com o analista e nominais históricos `vgv_release`. Atualizar snapshot de índices após set/2026; falta de índice bloqueia só VGL. Testes sintéticos não são aceite de mercado. Demais posições originais, oferta histórica, IVV, mapas, editorial e exportação ainda exigem implementação/revisão.
+- [ ] **SP — terceiro lote:** testar 39–44,46–48 e50 com o token real e revisar IVV/escoamento com analista. Conferir cobertura mensal de `sold_in_period` e sua soma por padrão; falta de histórico bloqueia somente39. Rever limites/requisições se a fonte não cobrir a cidade. Preços/áreas a partir de51, mapas, editorial e exportação integral continuam pendentes; implementação dos 85 conteúdos ainda não concluída.
 
-- [ ] **SP Institucional — validação publicada:** conferir a ordem original de 85 posições e os lotes 13–30/32–38, séries municipais desde 2021, cobertura do cadastro por ID/data, padrão/classificação histórica e parciais; dados locais inventados não são aceite. Contagem anteschamada2agora13original, sem bloquear municipal. Medir tempo real; diferença municipal+22/contrato líquido continuam em aberto. Preços, IVV, mapas, curva trimestral completa de oferta, editorial e exportação/homologação integral seguem pendentes; VGL/INCC e vendas longas implementados no segundo lote, aguardando revisão real.
+- [ ] **SP — segundo lote e INCC:** validar no site os comparativos 23/24/37/38, ranking 25, vendas 32–36 e VGL 26–30; confirmar a base comum com o analista e nominais históricos `vgv_release`. Atualizar snapshot de índices após set/2026; falta de índice bloqueia só VGL. Testes sintéticos não são aceite de mercado. Demais posições originais, mapas, editorial e exportação ainda exigem implementação/revisão; oferta histórica e IVV foram implementados no terceiro lote e aguardam revisão real.
+
+- [ ] **SP Institucional — validação publicada:** conferir a ordem original de 85 posições e os lotes 13–30/32–38, séries municipais desde 2021, cobertura do cadastro por ID/data, padrão/classificação histórica e parciais; dados locais inventados não são aceite. Contagem anteschamada2agora13original, sem bloquear municipal. Medir tempo real; diferença municipal+22/contrato líquido continuam em aberto. Preços, mapas, editorial e exportação/homologação integral seguem pendentes; IVV e oferta histórica implementados no terceiro lote aguardam revisão real; VGL/INCC e vendas longas implementados no segundo lote, aguardando revisão real.
 
 - **Estimativas:** conferir a nova prévia de exportação em produção e aguardar comprovação do formato final de saída Nicolas/Belogic. Interface anterior aceita em28/10; revisão29/10 validada somente localmente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 

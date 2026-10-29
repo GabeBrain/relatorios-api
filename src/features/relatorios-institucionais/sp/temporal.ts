@@ -98,6 +98,10 @@ export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter)
       const rows = input.releases.filter(row => months.includes(monthOf(row.period) ?? ''));
       return rows.every(row => readSpMoney(row.vgv_release) !== null) ? rows.map(row => ({ month: monthOf(row.period)!, group: String(row.group), value: readSpMoney(row.vgv_release)! })) : undefined;
     })(),
+    nominalSalesVgv: input.groupBy === 'Tipologia' ? undefined : (() => {
+      const rows = input.sales.filter(row => months.includes(monthOf(row.period) ?? ''));
+      return rows.every(row => readSpMoney(row.vgv_liquid_sales, true) !== null) ? rows.map(row => ({ month: monthOf(row.period)!, group: String(row.group), value: readSpMoney(row.vgv_liquid_sales, true)! })) : undefined;
+    })(),
     patterns: input.groupBy === 'Tipologia' ? undefined : summarizeSpGroups(input, months, result.throughMonth),
     metrics: { projects: null, launches: result.monthly!.reduce((sum, row) => sum + row.launches, 0), sales: result.monthly!.reduce((sum, row) => sum + row.sales, 0), stock: result.monthly!.at(-1)!.closingStock },
     issues: [

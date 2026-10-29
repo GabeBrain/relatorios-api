@@ -25,7 +25,7 @@ try {
   browser = await chromium.launch({ headless: true, channel: 'msedge' });
   const context = await browser.newContext();
   await context.addInitScript(() => localStorage.setItem('brain-auth', JSON.stringify({ state: { token: 'synthetic-only', email: 'fixture@example.invalid', issuedAt: Date.now(), expiresAt: Date.now() + 3600000 }, version: 0 })));
-  let closing = '07', slow = false, failure = false, empty = false, granularFailure = false, calls = 0, granularCalls = 0;
+  let closing = '07', slow = false, failure = false, empty = false, granularFailure = false, slowNeighborhood = false, slowStock = false, negativeSales = false, neighborhoodCalls = 0, calls = 0, granularCalls = 0;
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
     const reply = data => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: data.length }, links: { next: null } }) });
@@ -42,22 +42,31 @@ try {
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: pageNumber, last_page: 2, total: 4 } }) });
     }
     if (url.pathname.endsWith('/building-with-history')) {
+      if (Number(url.searchParams.get('per_page')) === 100) {
+        neighborhoodCalls++;
+        if (slowNeighborhood) await new Promise(done => setTimeout(done, 1500));
+        const rows = recorded.groups.map((standard, i) => ({ building_id: i+1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: '2020-01-01', neighborhood: `Bairro ${i+1}`, standard,
+          typologies_history: ['07','08','09'].filter(month => month <= closing).map(month => ({ typology_id: i+1, period: `2026-${month}-01`, sold_in_period: negativeSales && month === '07' && i === 0 ? -10000 : month === '09' ? observed.septemberSales[i] : recorded.sales[`2026-${month}`][i] })) }));
+        return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: 7 }, links: { next: null } }) });
+      }
       calls++;
       if (failure) return route.fulfill({ status: 403, body: '{}' });
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: empty ? [] : [{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-08-01' }], meta: { total: 5183 }, links: { next: null } }) });
     }
     if (url.pathname.includes('/temporal-analysis-city/')) {
+      if (slowStock && url.pathname.endsWith('/stock') && url.searchParams.get('start_period') === '2021-01-01') await new Promise(done => setTimeout(done, 1500));
       const metric = url.pathname.split('/').at(-1);
       const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
-      const months = Object.fromEntries(Object.entries(recorded[metric]).filter(([month]) => month < '2026-09'));
+      const months = Object.fromEntries(Object.entries(recorded[metric]).filter(([month]) => month < '2026-09').map(([month, values]) => [month, [...values]]));
       months['2026-09'] = metric === 'stock' ? observed.septemberStock : metric === 'sales' ? observed.septemberSales : observed.septemberReleases;
+      if (negativeSales && metric === 'sales') months['2026-07'][0] = -10000;
       if (metric === 'stock') months['2026-08'] = observed.augustStock;
-      if (metric !== 'stock' && url.searchParams.get('start_period') === '2021-01-01') {
+      if (url.searchParams.get('start_period') === '2021-01-01') {
         const all = [];
         for (let year = 2021; year <= 2026; year++) for (let m = 1; m <= 12; m++) {
           const month = `${year}-${String(m).padStart(2, '0')}`;
           if (month > `2026-${closing}`) continue;
-          for (const [i, group] of recorded.groups.entries()) all.push({ period: `${month}-01`, group, building_type: 'Vertical', [field]: months[month]?.[i] ?? 100 + i * 5 + m, ...(metric === 'releases' ? { vgv_release: (months[month]?.[i] ?? 100 + i * 5 + m) * 100000.25 } : {}) });
+          for (const [i, group] of recorded.groups.entries()) all.push({ period: `${month}-01`, group, building_type: 'Vertical', [field]: months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m), ...(metric === 'releases' ? { vgv_release: (months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m)) * 100000.25 } : metric === 'sales' ? { vgv_liquid_sales: (months[month]?.[i] ?? 100 + i * 5 + m) * 100000.25 } : {}) });
         }
         const p = Number(url.searchParams.get('page')), last = Math.ceil(all.length / 100);
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: all.slice((p - 1) * 100, p * 100), meta: { current_page: p, last_page: last, total: all.length }, links: { next: p < last ? `?page=${p + 1}` : null } }) });
@@ -75,7 +84,7 @@ try {
         }
         return reply(rows);
       }
-      return reply(Object.entries(months).flatMap(([month, values]) => values.map((value, index) => ({ period: `${month}-01`, group: recorded.groups[index], building_type: 'Vertical', [field]: value, ...(metric === 'releases' ? { vgv_release: value * 100000.25 } : {}) }))).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period') && row.period <= `2026-${closing}-31`));
+      return reply(Object.entries(months).flatMap(([month, values]) => values.map((value, index) => ({ period: `${month}-01`, group: recorded.groups[index], building_type: 'Vertical', [field]: value, ...(metric === 'releases' ? { vgv_release: value * 100000.25 } : metric === 'sales' ? { vgv_liquid_sales: value * 100000.25 } : {}) }))).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period') && row.period <= `2026-${closing}-31`));
     }
     if (url.origin === base) return route.continue();
     return route.abort();
@@ -116,12 +125,15 @@ try {
       if (month === '09') {
         await page.getByText(/Séries de vendas líquidas conferidas desde janeiro/).waitFor();
         await page.getByText(/Tipologias conferidas:/).waitFor();
+        await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+        await page.getByText(/VGV vendido corrigido pelo INCC-DI/).waitFor();
         await page.getByText(/VGL corrigido pelo INCC-DI para 2026-09/).waitFor();
-        for (const slide of [13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,32,33,34,35,36,37,38]) {
+        for (const slide of [13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,32,33,34,35,36,37,38,39,40,41,42,43,44,46,47,48,50]) {
           await openSlide(slide);
+          if (slide === 39) await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
           await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
           if (slide === 23) await writeFile(resolve(output, 'comparison-dom.json'), JSON.stringify(await page.getByRole('article').evaluate(el => Array.from(el.querySelectorAll('svg text')).slice(0, 4).map(e => ({ text: e.textContent, html: e.outerHTML, box: e.getBoundingClientRect().toJSON(), fill: getComputedStyle(e).fill }))), null, 2));
-          assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em confer\u00eancia|Comparativo em confer\u00eancia|Bairros em confer\u00eancia/);
+          assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em confer\u00eancia|Comparativo em confer\u00eancia|Bairros em confer\u00eancia|Ranking de bairros em confer\u00eancia|Hist\u00f3rico em confer\u00eancia/);
           await page.getByRole('article').screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-original-${slide}.png`) });
         }
         await page.getByText('Diferenças de balanço por grupo', { exact: true }).click();
@@ -148,6 +160,48 @@ try {
     slow = false;
     results.push({ width, dark, transitions: ['partial-1', 'partial-2', 'quarter-closed'], municipalVisibleDuringSlowCountAndCancel: true });
   }
+  slowNeighborhood = true;
+  await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  const beforeNeighborhood = neighborhoodCalls;
+  await openSlide(39);
+  await page.getByRole('button', { name: 'Cancelar vendas por bairro', exact: true }).waitFor();
+  await page.getByLabel('0:01 decorridos').waitFor();
+  assert.equal(neighborhoodCalls, beforeNeighborhood + 1);
+  assert.equal(await page.getByRole('dialog', { name: 'Consulta do relatório' }).count(), 0);
+  await page.getByRole('button', { name: 'Cancelar vendas por bairro', exact: true }).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: resolve(output, 'neighborhood-loading.png') });
+  await page.getByRole('button', { name: 'Cancelar vendas por bairro', exact: true }).click();
+  await page.getByText('Vendas por bairro indisponíveis', { exact: true }).waitFor();
+  slowNeighborhood = false;
+  await page.getByRole('button', { name: 'Conferir vendas por bairro', exact: true }).click();
+  await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
+  slowStock = true;
+  await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+  await page.getByRole('button', { name: 'Cancelar oferta histórica', exact: true }).waitFor();
+  await page.getByLabel('0:01 decorridos').waitFor();
+  assert.equal(await page.getByRole('dialog', { name: 'Consulta do relatório' }).count(), 0);
+  await page.getByRole('button', { name: 'Cancelar oferta histórica', exact: true }).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: resolve(output, 'stock-loading.png') });
+  await page.getByRole('button', { name: 'Cancelar oferta histórica', exact: true }).click();
+  await page.getByText('Oferta histórica indisponível', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('cell', { name: '126.307', exact: true }).count() > 0, true);
+  slowStock = false;
+  await page.getByRole('button', { name: 'Conferir oferta histórica', exact: true }).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  negativeSales = true;
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+  await page.getByText(/VGV vendido corrigido pelo INCC-DI/).waitFor();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  for (const slide of [39,44,50]) {
+    await openSlide(slide);
+    if (slide === 39) await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
+    await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+    await page.getByRole('article').screenshot({ path: resolve(output, `negative-${slide}.png`) });
+    if (slide === 44) assert.match(await page.getByRole('article').innerText(), /negativas preservadas/);
+  }
+  negativeSales = false;
   granularFailure = true;
   await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
   await page.getByText('Contagem de empreendimentos indisponível', { exact: true }).waitFor();
@@ -161,7 +215,7 @@ try {
   await page.getByText('Não foi possível preparar a prévia', { exact: true }).waitFor();
   assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 0);
   assert.deepEqual(errors, []);
-  const result = { results, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, pageErrors: errors, realApiCalls: 0, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
+  const result = { results, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, pageErrors: errors, realApiCalls: 0, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
   await writeFile(resolve(output, 'result.json'), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 } finally {

@@ -14,12 +14,14 @@ import { SpReportPages } from './SpReportPages';
 import { buildSpTypologies } from './typologies';
 import { buildSpSegments, SP_SEGMENT_RULE } from './segments';
 import { buildSpHistoryBatch } from './history-batch';
-import { blockedSpProjects, fetchSpProjects } from './projects';
+import { blockedSpProjects, fetchSpProjects, fetchSpBuildingRecords } from './projects';
 import { blockedSpLaunchSeries, buildSpLaunchSeries, buildSpSalesSeries } from './launch-series';
 import { buildSpTypologyHistory, blockedSpTypologyHistory } from './typology-history';
 import { priorYearQuarter } from './history-batch';
-import { fetchSpTemporalInput, fetchSpLaunchSeriesRows, fetchSpSalesSeriesRows, fetchSpHistoryBatch } from './api';
-import { buildSpVglSeries } from './vgl-series';
+import { fetchSpTemporalInput, fetchSpLaunchSeriesRows, fetchSpSalesSeriesRows, fetchSpStockSeriesRows, fetchSpHistoryBatch } from './api';
+import { buildSpVglSeries, buildSpVgvSeries } from './vgl-series';
+import { buildSpStockSeries, blockedSpStockSeries } from './stock-series';
+import { buildSpSalesNeighborhoods, blockedSpSalesNeighborhoods } from './sales-neighborhoods';
 
 const labels = { projects: 'Empreendimentos lançados', launches: 'Unidades lançadas', sales: 'Vendas líquidas', stock: 'Oferta final' } as const;
 const formatMonth = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
@@ -53,6 +55,14 @@ export default function SpInstitutionalPage() {
   const [typologiesStartedAt, setTypologiesStartedAt] = useState<number | null>(null);
   const typologiesController = useRef(new AbortController());
   const typologiesVersion = useRef(0);
+  const [stockLoading, setStockLoading] = useState(false);
+  const [stockProgress, setStockProgress] = useState('Conferindo oferta histórica…');
+  const [stockStartedAt, setStockStartedAt] = useState<number | null>(null);
+  const stockController = useRef(new AbortController()), stockVersion = useRef(0);
+  const [neighborhoodsLoading, setNeighborhoodsLoading] = useState(false);
+  const [neighborhoodsProgress, setNeighborhoodsProgress] = useState('Conferindo vendas por bairro…');
+  const [neighborhoodsStartedAt, setNeighborhoodsStartedAt] = useState<number | null>(null);
+  const neighborhoodsController = useRef(new AbortController()), neighborhoodsVersion = useRef(0);
   const version = useRef(0);
   const controller = useRef(new AbortController());
   const lastMode = useRef<'api' | 'fixture'>('api');
@@ -63,8 +73,10 @@ export default function SpInstitutionalPage() {
   const stopSeries = useCallback(() => { seriesController.current.abort(); seriesVersion.current++; }, []);
   const stopSales = useCallback(() => { salesController.current.abort(); salesVersion.current++; }, []);
   const stopTypologies = useCallback(() => { typologiesController.current.abort(); typologiesVersion.current++; }, []);
-  const invalidate = useCallback(() => { stopSales(); stopTypologies(); setSalesLoading(false); setTypologiesLoading(false); stopSeries(); setSeriesLoading(false); stopProjects(); setProjectsLoading(false); controller.current.abort(); controller.current = new AbortController(); version.current += 1; setPreview(null); setLoading(false); setError(false); setTypologyError(false); setHistoryError(false); setStartedAt(null); }, [stopProjects, stopSeries, stopSales, stopTypologies]);
-  useEffect(() => { invalidate(); return () => { stopSales(); stopTypologies(); stopSeries(); stopProjects(); controller.current.abort(); version.current += 1; }; }, [token, invalidate, stopProjects, stopSeries, stopSales, stopTypologies]);
+  const stopStock = useCallback(() => { stockController.current.abort(); stockVersion.current++; }, []);
+  const stopNeighborhoods = useCallback(() => { neighborhoodsController.current.abort(); neighborhoodsVersion.current++; }, []);
+  const invalidate = useCallback(() => { stopStock(); stopNeighborhoods(); setStockLoading(false); setNeighborhoodsLoading(false); stopSales(); stopTypologies(); setSalesLoading(false); setTypologiesLoading(false); stopSeries(); setSeriesLoading(false); stopProjects(); setProjectsLoading(false); controller.current.abort(); controller.current = new AbortController(); version.current += 1; setPreview(null); setLoading(false); setError(false); setTypologyError(false); setHistoryError(false); setStartedAt(null); }, [stopProjects, stopSeries, stopSales, stopTypologies, stopStock, stopNeighborhoods]);
+  useEffect(() => { invalidate(); return () => { stopStock(); stopNeighborhoods(); stopSales(); stopTypologies(); stopSeries(); stopProjects(); controller.current.abort(); version.current += 1; }; }, [token, invalidate, stopProjects, stopSeries, stopSales, stopTypologies, stopStock, stopNeighborhoods]);
   const changeGeo = (next: GeoScope) => { invalidate(); setGeo(next); };
   const scope = useGeoApiScope({ value: geo, onChange: changeGeo });
   const supported = geo.uf === 'SP' && sameCity(geo.city);
@@ -108,6 +120,7 @@ export default function SpInstitutionalPage() {
 
   async function preparePreview(mode: 'api' | 'fixture') {
     if (!ready || loading) return;
+    stopStock(); stopNeighborhoods(); setStockLoading(false); setNeighborhoodsLoading(false);
     stopSales(); stopTypologies(); setSalesLoading(false); setTypologiesLoading(false); stopSeries(); setSeriesLoading(false); stopProjects(); setProjectsLoading(false);
     controller.current.abort(); controller.current = new AbortController();
     const signal = controller.current.signal;
@@ -167,15 +180,48 @@ export default function SpInstitutionalPage() {
     salesController.current.abort(); salesController.current = new AbortController();
     const signal = salesController.current.signal, requestVersion = ++salesVersion.current;
     setSalesLoading(true); setSalesStartedAt(Date.now()); setSalesProgress('Preparando séries de vendas líquidas…');
-    setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesSeries: undefined } } : previous);
+    setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesSeries: undefined, vgvSeries: undefined } } : previous);
     try {
 
       const rows = await fetchSpSalesSeriesRows(baseline, { signal, onProgress: message => { if (requestVersion === salesVersion.current) setSalesProgress(message); } });
       const salesSeries = buildSpSalesSeries(rows, baseline);
-      if (requestVersion === salesVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesSeries } } : previous);
+      const vgvSeries = buildSpVgvSeries(rows, baseline);
+      if (requestVersion === salesVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesSeries, vgvSeries } } : previous);
     } catch {
-      if (requestVersion === salesVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesSeries: blockedSpLaunchSeries(signal.aborted ? 'Série de vendas cancelada. Os dados municipais foram mantidos.' : 'Não foi possível concluir a série de vendas. Tente novamente.') } } : previous);
+      const message = signal.aborted ? 'Série de vendas cancelada. Os dados municipais foram mantidos.' : 'Não foi possível concluir a série de vendas. Tente novamente.';
+      if (requestVersion === salesVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesSeries: blockedSpLaunchSeries(message), vgvSeries: blockedSpLaunchSeries(message) } } : previous);
     } finally { if (requestVersion === salesVersion.current) setSalesLoading(false); }
+  }
+
+  const prepareStockSeries = useCallback(async (baseline: SpPreview) => {
+    stockController.current.abort(); stockController.current = new AbortController();
+    const signal = stockController.current.signal, requestVersion = ++stockVersion.current;
+    setStockLoading(true); setStockStartedAt(Date.now()); setStockProgress('Conferindo oferta histórica…');
+    setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, stockSeries: undefined } } : previous);
+    try {
+      const rows = await fetchSpStockSeriesRows(baseline, { signal, onProgress: message => { if (requestVersion === stockVersion.current) setStockProgress(message); } });
+      const stockSeries = buildSpStockSeries(rows, baseline);
+      if (requestVersion === stockVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, stockSeries } } : previous);
+    } catch {
+      if (requestVersion === stockVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, stockSeries: blockedSpStockSeries(signal.aborted ? 'Oferta histórica cancelada. Os demais dados foram mantidos.' : 'Não foi possível conferir a oferta histórica. Tente novamente.') } } : previous);
+    } finally { if (requestVersion === stockVersion.current) setStockLoading(false); }
+  }, [key]);
+  useEffect(() => {
+    if (report && isApi && isSpMunicipalPreview(report) && report.projects && !projectsLoading && !stockLoading && !report.stockSeries) void prepareStockSeries(report);
+  }, [report, isApi, projectsLoading, stockLoading, prepareStockSeries]);
+
+  async function prepareSalesNeighborhoods(baseline: SpPreview) {
+    neighborhoodsController.current.abort(); neighborhoodsController.current = new AbortController();
+    const signal = neighborhoodsController.current.signal, requestVersion = ++neighborhoodsVersion.current;
+    setNeighborhoodsLoading(true); setNeighborhoodsStartedAt(Date.now()); setNeighborhoodsProgress('Conferindo vendas por bairro…');
+    setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods: undefined } } : previous);
+    try {
+      const buildings = await fetchSpBuildingRecords(baseline, { signal, onProgress: message => { if (requestVersion === neighborhoodsVersion.current) setNeighborhoodsProgress(message); } });
+      const salesNeighborhoods = buildSpSalesNeighborhoods(buildings, baseline);
+      if (requestVersion === neighborhoodsVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods } } : previous);
+    } catch {
+      if (requestVersion === neighborhoodsVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods: blockedSpSalesNeighborhoods(signal.aborted ? 'Vendas por bairro canceladas. Os demais dados foram mantidos.' : 'Não foi possível conferir os históricos completos dos bairros. Tente novamente.') } } : previous);
+    } finally { if (requestVersion === neighborhoodsVersion.current) setNeighborhoodsLoading(false); }
   }
 
   async function prepareHistories() {
@@ -246,6 +292,15 @@ export default function SpInstitutionalPage() {
       {report.salesSeries?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Séries de vendas indisponíveis</AlertTitle><AlertDescription>{report.salesSeries.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
       {isSpMunicipalPreview(report) && !salesLoading && report.salesSeries?.status !== 'ready' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareSalesSeries(report)}>Conferir séries de vendas</Button>}
       {report.salesSeries?.status === 'ready' && <p role="status" className="text-sm">Séries de vendas líquidas conferidas desde janeiro de 2021, com valores negativos preservados.</p>}
+      {report.vgvSeries?.status === 'ready' && <p role="status" className="text-sm">VGV vendido corrigido pelo INCC-DI para {report.vgvSeries.baseMonth}, com sinais preservados e a mesma base no MCMV.</p>}
+      {stockLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={stockProgress} startedAt={stockStartedAt} description="Conferindo fotografias de estoque para oferta e IVV, sem bloquear os demais slides." /><Button variant="outline" onClick={() => stockController.current.abort()}>Cancelar oferta histórica</Button></div>}
+      {report.stockSeries?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Oferta histórica indisponível</AlertTitle><AlertDescription>{report.stockSeries.issues[0]}</AlertDescription></Alert>}
+      {isSpMunicipalPreview(report) && !stockLoading && report.stockSeries?.status !== 'ready' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareStockSeries(report)}>Conferir oferta histórica</Button>}
+      {report.stockSeries?.status === 'ready' && <p role="status" className="text-sm">Oferta histórica conferida desde janeiro de 2021. Fotografias mensais preservadas.</p>}
+      {neighborhoodsLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={neighborhoodsProgress} startedAt={neighborhoodsStartedAt} description="Conferindo a cobertura dos históricos para as vendas por bairro. Os demais slides permanecem disponíveis." /><Button variant="outline" onClick={() => neighborhoodsController.current.abort()}>Cancelar vendas por bairro</Button></div>}
+      {report.salesNeighborhoods?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Vendas por bairro indisponíveis</AlertTitle><AlertDescription>{report.salesNeighborhoods.issues[0]}</AlertDescription></Alert>}
+      {isSpMunicipalPreview(report) && !neighborhoodsLoading && report.salesNeighborhoods?.status === 'blocked' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareSalesNeighborhoods(report)}>Conferir vendas por bairro</Button>}
+      {report.salesNeighborhoods?.status === 'ready' && <p role="status" className="text-sm">Vendas por bairro conferidas por mês e padrão contra os totais municipais.</p>}
       {report.vglSeries?.status === 'ready' && <p role="status" className="text-sm">VGL corrigido pelo INCC-DI para {report.vglSeries.baseMonth}, com a mesma base no total e no MCMV. Índices: SindusconPR/FGV.</p>}
       <Table><TableCaption>{isApi ? 'Lançamentos e vendas somados somente nos meses conferidos; oferta final no último mês. Empreendimentos por ID distinto e data de lançamento, após conferir toda a paginação.' : 'Contagens do trimestre selecionado; oferta final no fechamento. Todos os valores desta prévia são fictícios.'}</TableCaption><TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead className="text-right">Quantidade</TableHead></TableRow></TableHeader><TableBody>
         {Object.entries(labels).map(([metric, label]) => <TableRow key={metric}><TableCell>{label}</TableCell><TableCell className="text-right tabular-nums">{report.metrics[metric as keyof typeof labels]?.toLocaleString('pt-BR') ?? 'Indisponível'}</TableCell></TableRow>)}
@@ -276,6 +331,6 @@ export default function SpInstitutionalPage() {
       {report.historyBatch?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Lote histórico ainda não reconciliado</AlertTitle><AlertDescription>{report.historyBatch.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
       {!!report.historyBatch?.checks.length && <details><summary className="cursor-pointer text-sm font-medium">Conferência dos balanços e da releitura</summary><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{report.historyBatch.checks.map(check => <li key={check.label}>{check.label}: esperado {check.expected.toLocaleString('pt-BR')}, observado {check.actual.toLocaleString('pt-BR')}, diferença {check.delta.toLocaleString('pt-BR')}.</li>)}</ul></details>}
     </section>}
-    {report && <SpReportPages key={`${key}/${report.source}/${report.throughMonth}`} report={report} />}
+    {report && <SpReportPages key={`${key}/${report.source}/${report.throughMonth}`} report={report} onSelectSlide={number => { if (number === 39 && isApi && !loading && !projectsLoading && !seriesLoading && !salesLoading && !stockLoading && !typologiesLoading && !neighborhoodsLoading && !report.salesNeighborhoods) void prepareSalesNeighborhoods(report); }} />}
   </div>;
 }

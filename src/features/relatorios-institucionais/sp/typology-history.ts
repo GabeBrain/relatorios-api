@@ -20,9 +20,9 @@ export function buildSpTypologyHistory(current: SpTemporalInput, previous: SpTem
   return Object.fromEntries((['launches', 'sales', 'stock'] as const).map(metric => [metric, compareSpGroups(now.rows.map(row => ({ group: row.group, value: row[metric] })), groups.rows.map(row => ({ group: row.group, value: row[metric] })))])) as SpTypologyHistory;
 }
 /** If independent long series are available, also check the previous-year denominator. */
-export function resolveSpTypologyComparison(report: SpPreview, metric: 'launches' | 'sales'): SpGroupComparison | undefined {
+export function resolveSpTypologyComparison(report: SpPreview, metric: 'launches' | 'sales' | 'stock'): SpGroupComparison | undefined {
   const result = report.typologyHistory?.[metric];
-  const independent = (metric === 'launches' ? report.launchSeries : report.salesSeries)?.comparison;
+  const independent = (metric === 'launches' ? report.launchSeries : metric === 'sales' ? report.salesSeries : report.stockSeries)?.comparison;
   if (result?.status === 'ready' && independent?.status === 'ready' && (result.currentTotal !== independent.currentTotal || result.previousTotal !== independent.previousTotal)) return blockedSpComparison('A soma por tipologia diverge da série municipal em um dos dois anos.');
   return result;
 }

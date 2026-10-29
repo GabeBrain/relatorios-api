@@ -56,6 +56,12 @@ interface Options {
 
 /** Panorama pagination/integrity primitives, adapted to SP vertical without status exclusions. */
 export async function fetchSpProjects(report: SpPreview, options: Options = {}): Promise<SpProjects> {
+  const buildings = await fetchSpBuildingRecords(report, options, 'building');
+  return buildSpProjects(buildings, report, buildings.length);
+}
+
+/** Complete source collection, reused only when opening the sales-by-neighborhood slide. */
+export async function fetchSpBuildingRecords(report: SpPreview, options: Options = {}, source: 'building' | 'building-with-history' = 'building-with-history'): Promise<Building[]> {
   if (!isSpMunicipalPreview(report)) throw new Error('Período municipal indisponível.');
   const request = options.request ?? (value => httpRequest<Record<string, unknown>>(value));
   const byId = new Map<string, Building>();
@@ -65,20 +71,20 @@ export async function fetchSpProjects(report: SpPreview, options: Options = {}):
     checkAbort();
     const response = await requestWithRetry(async () => {
       checkAbort();
-      const value = await request({ method: 'GET', url: 'https://geobrain.com.br/public-api/building', query: { type: 'Vertical', city: 'São Paulo', uf: 'SP', per_page: 100, page }, signal: options.signal, timeoutMs: 60_000, cache: 'no-store' });
+      const value = await request({ method: 'GET', url: `https://geobrain.com.br/public-api/${source}`, query: { type: 'Vertical', city: 'São Paulo', uf: 'SP', per_page: 100, page }, signal: options.signal, timeoutMs: 60_000, cache: 'no-store' });
       return { ...value, retryAfterMs: Math.min(value.retryAfterMs ?? 0, 3000) || null };
     }, { signal: options.signal, attempts: 2, sleep: options.sleep });
     checkAbort();
     if (!response.ok || !response.data) throw new Error('A coleta de empreendimentos não foi concluída.');
-    const payload = readBuildingPage(response.data, { city: 'São Paulo', uf: 'SP' }, page, 'building');
-    if (payload.total === null || payload.total === 0 || (expectedLast !== null && (expectedLast !== payload.lastPage || expectedTotal !== payload.total))) throw new Error('A paginação mudou ou não confirmou o total de empreendimentos.');
+    const payload = readBuildingPage(response.data, { city: 'São Paulo', uf: 'SP' }, page, source);
+    if (payload.lastPage > 100 || payload.total === null || payload.total === 0 || (expectedLast !== null && (expectedLast !== payload.lastPage || expectedTotal !== payload.total))) throw new Error('A paginação mudou ou não confirmou o total de empreendimentos.');
     expectedLast = payload.lastPage; expectedTotal = payload.total;
     if (page < expectedLast && !payload.buildings.length) throw new Error('A coleta retornou uma página intermediária vazia.');
     received += payload.buildings.length;
     if (received > expectedTotal) throw new Error('A coleta excedeu o total informado pela fonte.');
     for (const building of payload.buildings) insertBuilding(byId, building);
     completed++;
-    options.onProgress?.(`Conferindo empreendimentos: ${completed} de ${expectedLast} páginas concluídas…`);
+    options.onProgress?.(`Conferindo ${source === 'building' ? 'empreendimentos' : 'vendas por bairro'}: ${completed} de ${expectedLast} páginas concluídas…`);
   }
   await readPage(1);
   // At most three requests in flight; drain a failed batch before leaving the collector.
@@ -90,5 +96,5 @@ export async function fetchSpProjects(report: SpPreview, options: Options = {}):
   }
   checkAbort();
   if (received !== expectedTotal || byId.size !== expectedTotal) throw new Error('A coleta não comprovou a cobertura de IDs distintos; recomece a consulta.');
-  return buildSpProjects([...byId.values()], report, received);
+  return [...byId.values()];
 }

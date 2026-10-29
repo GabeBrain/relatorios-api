@@ -5,6 +5,8 @@ import type { SpProjects } from './projects';
 import type { SpLaunchSeries } from './launch-series';
 import type { SpTypologyHistory } from './typology-history';
 import type { SpVglSeries } from './vgl-series';
+import type { SpStockSeries } from './stock-series';
+import type { SpLaunchNeighborhoods } from './neighborhoods';
 
 export const SP_INSTITUTIONAL = { id: 'sp-institucional', label: 'SP institucional', uf: 'SP', city: 'São Paulo' } as const;
 type Raw = Record<string, unknown>;
@@ -64,6 +66,10 @@ export interface SpPreview {
   salesSeries?: SpLaunchSeries;
   nominalLaunchVgv?: { month: string; group: string; value: number }[];
   vglSeries?: SpVglSeries;
+  nominalSalesVgv?: { month: string; group: string; value: number }[];
+  vgvSeries?: SpVglSeries;
+  stockSeries?: SpStockSeries;
+  salesNeighborhoods?: SpLaunchNeighborhoods;
   launchHistory?: SpLaunchHistory;
   historyBatch?: SpHistoryBatch;
 }

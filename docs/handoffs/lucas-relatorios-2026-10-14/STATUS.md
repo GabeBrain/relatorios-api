@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 29/10/2026 — terceiro lote SP: 39–44, 46–48 e 50
+
+Resultado local: 186 testes SP, tipos completos do app, lint, build e QA Edge1440/390 claro/escuro aprovados. Estados lentos de bairros/oferta, cancelamento/retry, parciais, erro/vazio e sinais negativos observados em fontes interceptadas; nenhuma API real. Evidências no documento da feature.
+
+Ambiente observado: Windows/PowerShell, Git Codex Test, `main` limpa em`dbd887d`, único origin em0/0 após fetch. Usuário autorizou próximo lote; decisões coerentes com o original continuam delegadas conforme conversa. Dez conteúdos implementados localmente, mantendo85posições: bairros de vendas, VGV vendido corrigido, oferta/escoamento, comparativos e IVV. Coleta pesada só ao abrir39, com cancelamento próprio; séries municipais não bloqueiam a prévia. Critérios e limites em [DECISOES](../../features/relatorios-institucionais/sp/DECISOES.md). API autenticada e números reais não acessados nesta rodada; QA com fixtures/inventados, sem alteração Secovi/FIERGS, Corretor ou Quanti. Publicação observada, revisão do analista, áreas/preços/mapas/editorial e exportação integral continuam pendentes.
+
 ## 29/10/2026 — segundo lote SP:23–25 e32–38
 
 **Atualização na mesma rodada:** usuário delegou a escolha da base após receber a explicação das diferenças da planilha.26–30também implementados: INCC-DI, último mês municipal como base única, total/MCMV/anuais na mesma base, correção mensal antes das somas. Snapshot público69mesesjan2021–set2026com proveniência/hash emDECISOES.15conteúdos nesta entrega, não85concluídos.173testes SP aprovados; tipos/lint/build e QA finais emEVIDENCIAS. Critério sujeito à revisão do analista e novos índices precisam atualizar snapshot; não há pergunta pendente impedindo implementação.

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import SpInstitutionalPage from './SpInstitutionalPage';
 
-const access = vi.hoisted(() => ({ token: 'synthetic-token', error: false, loading: false, fixtureMode: 'success', apiMode: 'success', aborted: false, seriesPending: false, salesPending: false, typologiesPending: false, projectsPending: false, finishProjects: null as (() => void) | null, reload: vi.fn() }));
+const access = vi.hoisted(() => ({ token: 'synthetic-token', error: false, loading: false, fixtureMode: 'success', apiMode: 'success', aborted: false, seriesPending: false, salesPending: false, stockPending: false, neighborhoodsPending: false, neighborhoodCalls: 0, typologiesPending: false, projectsPending: false, finishProjects: null as (() => void) | null, reload: vi.fn() }));
 vi.mock('@/store/auth-store', () => ({ useAuthStore: (selector: (state: { getToken: () => string }) => unknown) => selector({ getToken: () => access.token }) }));
 vi.mock('@/features/shared/geo-api-scope-engine', () => ({
   GeoApiScopeSelector: ({ onChange }: { onChange: (geo: { uf: string; city: string }) => void }) => <div><button onClick={() => onChange({ uf: 'SP', city: 'São Paulo' })}>Escolher capital</button><button onClick={() => onChange({ uf: 'SP', city: 'Campinas' })}>Escolher Campinas</button><button onClick={() => onChange({ uf: 'RJ', city: '' })}>Trocar UF</button></div>,
@@ -22,7 +22,7 @@ vi.mock('./api', async () => {
   const { userSeptemberReplay } = await import('./__tests__/user-september');
   const { syntheticTypologyInput, syntheticPreviousTypology } = await import('./__tests__/typology');
   const { syntheticHistoryBatch } = await import('./__tests__/history-batch');
-  const { syntheticLaunchSeries, syntheticSalesSeries, syntheticVglInput } = await import('./__tests__/launch-series');
+  const { syntheticLaunchSeries, syntheticSalesSeries, syntheticVglInput, syntheticStockSeries } = await import('./__tests__/launch-series');
   return { fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal; groupBy?: 'Padrão' | 'Tipologia' }) => {
     if (access.apiMode === 'error') throw new Error('private API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
@@ -41,6 +41,10 @@ vi.mock('./api', async () => {
     if (access.salesPending) await new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => reject(new DOMException('cancelled', 'AbortError'))); });
     if (access.apiMode === 'error') throw new Error('private sales series diagnostic');
     return syntheticSalesSeries(access.apiMode === 'user-september' ? userSeptemberReplay() : access.apiMode === 'closed' ? syntheticWindow('09') : recordedInput());
+  }, fetchSpStockSeriesRows: async (_report: unknown, options: { signal: AbortSignal }) => {
+    if (access.stockPending) await new Promise((_resolve, reject) => options.signal.addEventListener('abort', () => reject(new DOMException('cancelled', 'AbortError'))));
+    if (access.apiMode === 'error') throw new Error('private stock diagnostic');
+    return syntheticStockSeries(access.apiMode === 'user-september' ? userSeptemberReplay() : access.apiMode === 'closed' ? syntheticWindow('09') : recordedInput());
   }, fetchSpHistoryBatch: async (_report: unknown, options: { signal: AbortSignal }) => {
     if (access.apiMode === 'error') throw new Error('private historical API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
@@ -51,16 +55,62 @@ vi.mock('./api', async () => {
 });
 vi.mock('./projects', async importOriginal => {
   const original = await importOriginal<typeof import('./projects')>();
-  return { ...original, fetchSpProjects: async (report: import('./model').SpPreview, options: { signal: AbortSignal }) => {
+  const { syntheticSalesBuildings } = await import('./__tests__/sales-buildings');
+  return { ...original, fetchSpBuildingRecords: async (_report: unknown, options: { signal: AbortSignal }) => {
+    access.neighborhoodCalls++;
+    if (access.neighborhoodsPending) await new Promise((_resolve, reject) => options.signal.addEventListener('abort', () => reject(new DOMException('cancelled', 'AbortError'))));
+    return syntheticSalesBuildings();
+  }, fetchSpProjects: async (report: import('./model').SpPreview, options: { signal: AbortSignal }) => {
     if (access.fixtureMode === 'granular-error') throw new Error('private granular diagnostic');
     if (access.projectsPending) await new Promise<void>((resolve, reject) => { access.finishProjects = resolve; options.signal.addEventListener('abort', () => reject(new DOMException('cancelled', 'AbortError'))); });
     return original.buildSpProjects([{ building_id: 1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: '2026-07-01' }], report);
   } };
 });
-beforeEach(() => { access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.seriesPending = false; access.salesPending = false; access.typologiesPending = false; access.projectsPending = false; access.finishProjects = null; access.reload.mockClear(); });
+beforeEach(() => { access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.seriesPending = false; access.salesPending = false; access.stockPending = false; access.neighborhoodsPending = false; access.neighborhoodCalls = 0; access.typologiesPending = false; access.projectsPending = false; access.finishProjects = null; access.reload.mockClear(); });
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('só coleta históricos de bairros ao abrir39, mantém demais slides e permite cancelar/repetir', async () => {
+    access.neighborhoodsPending = true;
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText(/Oferta histórica conferida desde janeiro/);
+    expect(access.neighborhoodCalls).toBe(0);
+    fireEvent.click(screen.getByRole('button', { name: '39. Top 10 bairros por vendas líquidas' }));
+    await screen.findByRole('button', { name: 'Cancelar vendas por bairro' });
+    expect(access.neighborhoodCalls).toBe(1);
+    fireEvent.click(screen.getByRole('button', { name: '39. Top 10 bairros por vendas líquidas' }));
+    expect(access.neighborhoodCalls).toBe(1);
+    fireEvent.click(screen.getByRole('button', { name: '40. VGV vendido trimestral, corrigido INCC' }));
+    expect(screen.queryByRole('dialog', { name: 'Consulta do relatório' })).not.toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: '26.824' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar vendas por bairro' }));
+    await screen.findByText('Vendas por bairro indisponíveis');
+    access.neighborhoodsPending = false;
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir vendas por bairro' }));
+    await screen.findByText(/Vendas por bairro conferidas por mês/);
+    expect(access.neighborhoodCalls).toBe(2);
+    fireEvent.click(screen.getByRole('button', { name: '39. Top 10 bairros por vendas líquidas' }));
+    expect(screen.getByRole('article')).not.toHaveTextContent('em conferência');
+    fireEvent.click(screen.getByText('Trocar UF'));
+    expect(screen.queryByRole('region', { name: 'Páginas do relatório' })).not.toBeInTheDocument();
+  });
+  it('oferta pode cancelar e repetir sem retirar vendas, moeda ou totais municipais', async () => {
+    access.stockPending = true;
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByRole('button', { name: 'Cancelar oferta histórica' });
+    await screen.findByText(/VGV vendido corrigido pelo INCC-DI/);
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar oferta histórica' }));
+    await screen.findByText('Oferta histórica indisponível');
+    expect(screen.getByRole('cell', { name: '26.824' })).toBeInTheDocument();
+    access.stockPending = false;
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir oferta histórica' }));
+    await screen.findByText(/Oferta histórica conferida desde janeiro/);
+    expect(screen.getByText(/VGV vendido corrigido pelo INCC-DI/)).toBeInTheDocument();
+  });
   it('série longa não bloqueia municipal ou empreendimentos, pode cancelar e repetir isoladamente', async () => {
     access.seriesPending = true;
     render(<SpInstitutionalPage />);
@@ -191,11 +241,11 @@ describe('Página SP institucional', () => {
     await screen.findByText(/Três comparativos conferidos/);
     for (const title of ['24. Lançamentos por segmento, comparação anual', '38. Vendas por segmento, comparação anual', '48. Oferta por segmento, comparação anual']) {
       fireEvent.click(screen.getByRole('button', { name: title }));
-      expect(within(screen.getByRole('article')).getByRole('img', { name: title.startsWith('48.') ? 'Comparação por segmento nos mesmos meses dos dois anos' : `Comparação anual por segmento · ${title.startsWith('24.') ? 'lançamentos' : 'vendas'}` })).toBeInTheDocument();
+      expect(within(screen.getByRole('article')).getByRole('img', { name: title.startsWith('48.') ? 'Comparação anual por segmento · oferta' : `Comparação anual por segmento · ${title.startsWith('24.') ? 'lançamentos' : 'vendas'}` })).toBeInTheDocument();
     }
     expect(screen.getAllByRole('cell', { name: '124.706' })).toHaveLength(2);
   });
-  it('busca o comparativo sob demanda, mantém a parcial e retira histórico antigo após falha', async () => {
+  it('busca o comparativo sob demanda, mantém a parcial e preserva a oferta independente após falha', async () => {
     render(<SpInstitutionalPage />);
     expect(screen.queryByRole('button', { name: 'Conferir históricos' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('Escolher capital'));
@@ -203,11 +253,11 @@ describe('Página SP institucional', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Conferir históricos' }));
     await screen.findByText(/Três comparativos conferidos/);
     fireEvent.click(screen.getByRole('button', { name: '48. Oferta por segmento, comparação anual' }));
-    expect(screen.getByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Comparação anual por segmento · oferta' })).toBeInTheDocument();
     access.apiMode = 'error';
     fireEvent.click(screen.getByRole('button', { name: 'Conferir históricos' }));
     expect(await screen.findByText('Não foi possível conferir os históricos')).toBeInTheDocument();
-    expect(screen.queryByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' })).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Comparação anual por segmento · oferta' })).toBeInTheDocument();
     expect(screen.getByRole('cell', { name: '24.351' })).toBeInTheDocument();
     expect(screen.queryByText('private historical API diagnostic')).not.toBeInTheDocument();
     access.apiMode = 'success';

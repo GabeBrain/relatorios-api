@@ -4,13 +4,14 @@ import { SpReportPages } from './SpReportPages';
 import { SP_ORIGINAL_SLIDES } from './original-slides';
 import { buildSpTemporalPreview } from './temporal';
 import { recordedInput } from './__tests__/recorded';
-import { syntheticLaunchSeries, syntheticSalesSeries } from './__tests__/launch-series';
+import { syntheticLaunchSeries, syntheticSalesSeries, syntheticStockSeries } from './__tests__/launch-series';
 import { syntheticTypologyInput, syntheticPreviousTypology } from './__tests__/typology';
 import { syntheticHistoryBatch } from './__tests__/history-batch';
 import { buildSpTypologies } from './typologies';
 import { buildSpHistoryBatch } from './history-batch';
 import { buildSpProjects } from './projects';
 import { buildSpLaunchSeries, buildSpSalesSeries } from './launch-series';
+import { buildSpStockSeries } from './stock-series';
 import { buildSpTypologyHistory } from './typology-history';
 
 afterEach(cleanup);
@@ -62,11 +63,11 @@ describe('SP — estrutura original e dez slides de lançamentos', () => {
   });
   it('preserva tipologias e segmentos nas posições 23/24,37/38,47/48', () => {
     const report = current();
-    render(<SpReportPages report={{ ...report, typologies: buildSpTypologies(syntheticTypologyInput(), report), typologyHistory: buildSpTypologyHistory(syntheticTypologyInput(), syntheticPreviousTypology(), report), launchSeries: buildSpLaunchSeries(syntheticLaunchSeries(), report), salesSeries: buildSpSalesSeries(syntheticSalesSeries(), report), historyBatch: buildSpHistoryBatch(syntheticHistoryBatch(), report) }} />);
+    render(<SpReportPages report={{ ...report, typologies: buildSpTypologies(syntheticTypologyInput(), report), typologyHistory: buildSpTypologyHistory(syntheticTypologyInput(), syntheticPreviousTypology(), report), launchSeries: buildSpLaunchSeries(syntheticLaunchSeries(), report), salesSeries: buildSpSalesSeries(syntheticSalesSeries(), report), stockSeries: buildSpStockSeries(syntheticStockSeries(), report), historyBatch: buildSpHistoryBatch(syntheticHistoryBatch(), report) }} />);
     for (const number of [23, 37]) { open(number); expect(screen.getByRole('img', { name: `Comparação anual por tipologia · ${number === 23 ? 'lançamentos' : 'vendas'}` })).toBeInTheDocument(); }
-    open(47); expect(screen.getByRole('img', { name: 'Distribuição por tipologia em unidades e participação percentual' })).toBeInTheDocument();
+    open(47); expect(screen.getByRole('img', { name: 'Comparação anual por tipologia · oferta' })).toBeInTheDocument();
     for (const number of [24, 38]) { open(number); expect(screen.getByRole('img', { name: `Comparação anual por segmento · ${number === 24 ? 'lançamentos' : 'vendas'}` })).toBeInTheDocument(); }
-    open(48); expect(screen.getByRole('img', { name: 'Comparação por segmento nos mesmos meses dos dois anos' })).toBeInTheDocument();
+    open(48); expect(screen.getByRole('img', { name: 'Comparação anual por segmento · oferta' })).toBeInTheDocument();
     open(46); expect(screen.getByRole('article')).toHaveTextContent('124.706');
     fireEvent.click(screen.getByRole('button', { name: 'Ampliar slides' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();

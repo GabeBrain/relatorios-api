@@ -1,5 +1,11 @@
 # SP capital — primeiro mapeamento
 
+## 29/10/2026 — terceiro lote de dez: 39–44, 46–48 e 50
+
+Implementados localmente: Top 10 bairros por vendas, cinco páginas de VGV vendido corrigido, oferta histórica com escoamento, dois comparativos anuais de oferta e IVV trimestral. Referências originais 39/40/46/47/48/50 inspecionadas. Mantém todas as 85 posições e as divisórias; não significa relatório integral pronto.
+
+Reutiliza vendas/INCC e tipologias existentes; adiciona série municipal de estoque e coleta granular só ao abrir39, com cancelamento e retry independentes. Base/identidade/cobertura e fórmulas em [DECISOES](DECISOES.md). Validar no token real campos monetários, cobertura mensal de bairros, fotografias e aderência metodológica; fontes locais de QA não são gabarito de mercado. Próximo lote começa no bloco de área/preços (51 em diante), preservando a estrutura. Exportação e aceite integral seguem pendentes.
+
 ## 29/10/2026 — lote de dez: originais23–25 e32–38
 
 **Ampliação autorizada após recebimento do INCC:**26–30também implementados, totalizando15conteúdos nesta entrega (23–30/32–38). Critério autorizado pelo usuário: último mês municipal disponível como base única, correção mensal antes das somas, mesma base total/MCMV/anuais. SnapshotDIjan2021–set2026obtido diretamente do SindusconPR/FGV; ausência de índice/nominal bloqueia VGL sem afetar unidades. Sem nova consulta pesada. Revisão do analista e atualização dos índices apósset2026 continuam pendentes; as notas de pendência26–30abaixo descrevem o momento anterior dessa mesma rodada.
