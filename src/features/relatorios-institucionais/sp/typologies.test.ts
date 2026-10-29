@@ -64,9 +64,9 @@ describe('SP — tipologias: distribuição sintética, totais municipais regist
     data.sales[4].liquid_sales = Number(data.sales[4].liquid_sales) - 1;
     expect(buildSpTypologies(data, baseline()).status).toBe('blocked');
   });
-  it('bloqueia se o fechamento muda entre as duas consultas', () => {
+  it('não bloqueia a tipologia por mudança isolada na raiz da amostra', () => {
     const data = syntheticTypologyInput(); data.rootPeriod = '2026-09-01';
-    expect(buildSpTypologies(data, baseline()).status).toBe('blocked');
+    expect(buildSpTypologies(data, baseline()).status).toBe('ready');
   });
   it('mantém nomes de grupos não mapeados e não modifica as fontes', () => {
     const data = syntheticTypologyInput();

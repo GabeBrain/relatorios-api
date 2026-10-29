@@ -1,5 +1,13 @@
 # SP capital — primeiro mapeamento
 
+## 29/10/2026 — correção após respostas reais: séries determinam disponibilidade
+
+**Estado vigente:** cada geração consulta a janela trimestral completa e usa o prefixo consecutivo comum às três séries. A raiz de uma amostra não limita setembro. Um/dois meses = parcial; três = trimestre completo nas séries, sem implicar homologação ou fechamento oficial. Diferenças de balanço são diagnósticas, preservando números da API. [Contrato vigente](DECISOES.md), [evidências](EVIDENCIAS.md).
+
+120 testes SP, tipos/lint/build e QA Edge local1440/390 claro/escuro aprovados. Regressão usa setembro fornecido pelo usuário, raiz agosto e residual+22. Não houve nova consulta autenticada pelo agente. Lacunas intermediárias, paginação/dados inválidos, grupos incompatíveis e divergência de releitura/dimensões continuam bloqueando. Reteste publicado e slide2/granular pendentes. Esta regra supera o limite pela raiz e o balanço zero registrados anteriormente.
+
+
+
 **29/10/2026 — fechamento dinâmico por geração (estado vigente):** a consulta relê `period` na API, sem cache HTTP, a cada clique em **Conferir dados reais**. O trimestre selecionado usa apenas os meses consecutivos até esse limite: um/dois meses = parcial; três meses completos e reconciliados = trimestre fechado nas séries municipais (`quarter-closed`). Nova geração substitui a prévia anterior e retira os detalhamentos antigos; não há consulta agendada ou em segundo plano. Meses ausentes, duplicatas, falha de paginação, grupos incompatíveis e balanços divergentes continuam bloqueando. Tipologias, segmentos, quadros e históricos aceitam ambos os estados, sempre comparando meses equivalentes. Os rótulos da página e slides acompanham a cobertura real. Fechamento trimestral municipal não comprova a contagem granular de empreendimentos nem homologa/exporta o relatório integral. As notas antigas de “sempre parcial” são superadas por esta regra.
 
 **Ambiente:** base `c62e41e`, `main` limpa e 0/0 com único remote `origin` após fetch. Identidade Git `Codex Test`; autoria desta entrega Codex a pedido do usuário. Navegador pessoal indisponível para a leitura real: controle interrompido por não identificar a URL com segurança. Setembro real não foi confirmado. Ensaio equivalente com Edge headless local e fontes simuladas; nenhuma credencial pessoal extraída ou chamada real iniciada. Publicação e revisão autenticada continuam pendentes.

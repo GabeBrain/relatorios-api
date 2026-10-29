@@ -15,9 +15,6 @@ export function buildSpHistoryBatch(input: SpHistoryBatchInput, municipal: SpPre
   const blocked = (message: string): SpHistoryBatch => ({ status: 'blocked', issues: [message], comparisons: {}, checks: [] });
   const months = matchedLaunchMonths(municipal);
   if (!months || municipal.patterns?.status !== 'ready') return blocked('Confira os totais municipais e seus padrões antes dos históricos.');
-  for (const source of [input.current, input.previous]) {
-    if (source && monthOf(source.rootPeriod) !== municipal.closingMonth) return blocked('O fechamento mudou entre consultas. Confira os dados reais novamente antes dos históricos.');
-  }
   if (!input.previous) return blocked('A janela do ano anterior não foi concluída.');
   const windows = [input.current, input.previous];
   for (let index = 0; index < windows.length; index++) {
@@ -51,7 +48,7 @@ export function buildSpHistoryBatch(input: SpHistoryBatchInput, municipal: SpPre
     if (municipal.metrics[field] === null || current.metrics[field] === null || previous.metrics[field] === null) return blocked('Os totais das janelas ainda não foram comprovados.');
     checks.push({ label: `Total atual · ${labels[field]}`, expected: municipal.metrics[field]!, actual: current.metrics[field]!, delta: current.metrics[field]! - municipal.metrics[field]! });
   }
-  if (checks.some(check => check.delta !== 0 || !Number.isSafeInteger(check.actual))) return { ...blocked('A releitura diverge dos totais municipais. Confira os dados reais novamente; o lote não mistura resultados de consultas diferentes.'), checks };
+  if (checks.some(check => check.kind !== 'balance' && check.delta !== 0 || !Number.isSafeInteger(check.actual))) return { ...blocked('A releitura diverge dos totais municipais. Confira os dados reais novamente; o lote não mistura resultados de consultas diferentes.'), checks };
   const compare = (now: number, before: number) => ({ current: now, previous: before, delta: now - before, variation: before > 0 ? (now - before) / before * 100 : null });
   const comparisons: SpHistoryBatch['comparisons'] = {};
   for (const metric of metrics) {

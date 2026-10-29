@@ -19,12 +19,13 @@ vi.mock('./fixture', async importOriginal => {
 vi.mock('./api', async () => {
   const { recordedInput } = await import('./__tests__/recorded');
   const { syntheticWindow } = await import('./__tests__/synthetic-window');
+  const { userSeptemberReplay } = await import('./__tests__/user-september');
   const { syntheticTypologyInput } = await import('./__tests__/typology');
   const { syntheticHistoryBatch } = await import('./__tests__/history-batch');
   return { fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal; groupBy?: string }) => {
     if (access.apiMode === 'error') throw new Error('private API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
-    return { ...(access.apiMode === 'closed' ? { ...syntheticWindow('09'), groupBy: options.groupBy ?? 'Padrão' } : options.groupBy === 'Tipologia' ? syntheticTypologyInput() : recordedInput()), origin: 'api' };
+    return { ...(['closed', 'user-september'].includes(access.apiMode) ? { ...(access.apiMode === 'user-september' ? userSeptemberReplay() : syntheticWindow('09')), groupBy: options.groupBy ?? 'Padrão' } : options.groupBy === 'Tipologia' ? syntheticTypologyInput() : recordedInput()), origin: 'api' };
   }, fetchSpHistoryBatch: async (_report: unknown, options: { signal: AbortSignal }) => {
     if (access.apiMode === 'error') throw new Error('private historical API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
@@ -37,6 +38,20 @@ beforeEach(() => { access.token = 'synthetic-token'; access.error = false; acces
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('exibe setembro e o diagnóstico de 22 unidades sem zerar os valores da fonte', async () => {
+    access.apiMode = 'user-september';
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText('Trimestre completo nas séries municipais da API');
+    expect(screen.getByText(/Balanço 2026-09: diferença de 22 unidades entre estoque/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /trimestre completo até setembro/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Diferenças de balanço por grupo'));
+    expect(screen.getAllByRole('cell', { name: '126.307' }).length).toBeGreaterThan(0);
+    expect(screen.getByText(/não comprovam sua causa/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '5. Oferta final' }));
+    expect(screen.getByRole('article')).toHaveTextContent('126.307');
+  });
   it('nova geração substitui a parcial pelo trimestre fechado e mantém os detalhamentos disponíveis', async () => {
     render(<SpInstitutionalPage />);
     fireEvent.click(screen.getByText('Escolher capital'));
@@ -44,8 +59,8 @@ describe('Página SP institucional', () => {
     await screen.findByText('Conferência parcial de dados da API');
     access.apiMode = 'closed';
     fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
-    await screen.findByText('Trimestre fechado nas séries municipais da API');
-    expect(screen.getByRole('heading', { name: /3T2026 · trimestre fechado até setembro/ })).toBeInTheDocument();
+    await screen.findByText('Trimestre completo nas séries municipais da API');
+    expect(screen.getByRole('heading', { name: /3T2026 · trimestre completo até setembro/ })).toBeInTheDocument();
     expect(screen.queryByText('Conferência parcial de dados da API')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Conferir históricos' })).toBeEnabled();
     fireEvent.click(screen.getByRole('button', { name: 'Conferir tipologias' }));
@@ -54,17 +69,17 @@ describe('Página SP institucional', () => {
     expect(screen.getByRole('img', { name: 'Quadro reconciliado por padrão' })).toBeInTheDocument();
     expect(screen.getAllByRole('cell', { name: 'Indisponível' })).toHaveLength(1);
   });
-  it('um balanço anterior divergente mantém os três comparativos indisponíveis', async () => {
+  it('um balanço anterior divergente não oculta comparativos presentes', async () => {
     render(<SpInstitutionalPage />);
     fireEvent.click(screen.getByText('Escolher capital'));
     fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
     await screen.findByRole('button', { name: 'Conferir históricos' });
     access.apiMode = 'unbalanced';
     fireEvent.click(screen.getByRole('button', { name: 'Conferir históricos' }));
-    await screen.findByText('Lote histórico ainda não reconciliado');
+    await screen.findByText(/Três comparativos conferidos/);
     for (const title of ['12. Comparativo de lançamentos', '13. Comparativo de vendas', '14. Comparativo de oferta']) {
       fireEvent.click(screen.getByRole('button', { name: title }));
-      expect(screen.queryByRole('img', { name: /nos mesmos meses do ano atual e anterior/ })).not.toBeInTheDocument();
+      expect(screen.getByRole('img', { name: /nos mesmos meses do ano atual e anterior/ })).toBeInTheDocument();
     }
     expect(screen.getAllByRole('cell', { name: '124.706' })).toHaveLength(2);
   });

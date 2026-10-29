@@ -1,0 +1,10 @@
+{
+  "provenance": "Aggregated responses pasted by the user on 2026-10-29, Sao Paulo/SP Vertical by Padrao. No authenticated request executed by the agent. Does not establish the cause of balance differences or a full quarterly baseline.",
+  "rootPeriod": "2026-08-01",
+  "groups": ["Alto", "Compacto", "Econômico", "Luxo", "Médio", "Médio-Alto", "Standard"],
+  "augustStock": [2317, 21317, 68865, 2389, 7403, 2097, 22984],
+  "septemberSales": [1, 694, 7177, 54, 237, 52, 697],
+  "septemberReleases": [0, 1265, 5487, 45, 225, 132, 671],
+  "septemberStock": [2127, 22200, 68182, 2461, 7089, 2296, 21952],
+  "pagination": { "total": 7, "last_page": 1, "next": null }
+}

@@ -1,5 +1,15 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 29/10/2026 — correção após respostas reais: séries determinam disponibilidade
+
+- **Respostas recebidas em29/10:** usuário executou consultas e forneceu raiz agosto e sete linhas/paginação completa por série de setembro: vendas8.912, lançamentos7.825, estoque126.307; estoque agosto127.372. Residual+22 e deltas por grupo−189/+312/+1.007/+81/−302/+119/−1.006. Causa dos resíduos e contrato exato de líquido não demonstrados. Sem consulta autenticada pelo agente.
+- **Regressão:** fixture agregada `src/features/relatorios-institucionais/sp/__tests__/fixtures/sp-september-user-2026-10-29.json`, sem credenciais/dados individuais. Replay combina setembro/agosto atuais e outros meses antigos: prova do mecanismo, não baseline trimestral pareado. Original15/10 preservado; helper da parcial explicita o recorte até agosto.
+- **Resultado:**120testes/10arquivos, tipos completos, lint e build aprovados. Casos de raiz agosto/ausente com setembro disponível, prefixo comum e aviso de fontes defasadas, lacunas intermediárias, paginação, duplicatas, valores inválidos, balanço diagnóstico e releitura divergente nos históricos. Nenhuma alteração Secovi/FIERGS.
+- **Visual:** `node scripts/diagnostics/sp-dynamic-closure.mjs`: Edge local1440/390 claro/escuro, raiz fixa agosto e transições1/2/3meses, alerta22/estoque126.307 preservados, overlayBrain com tempo real/resposta lenta/cancelamento, erro/vazio. Zero errosJS,18amostras simuladas e zero chamadas reais. Capturas em `.local-inputs/relatorios-lucas/sp/dynamic-closure/`, revisadas na viewport de rolagem; menu móvel recolhido pelo controle existente. GeoApiScopeEngine, Table/Alert e BrainLoadingState reutilizados.
+- **Limites:** não comprova produção, aceite, contagem granular nem fechamento oficial. [Decisão](DECISOES.md) separa disponibilidade e diagnóstico. Retestar no site após publicação com sessão pessoal. Diagnóstico antigo agora simula explicitamente fontes apenas até agosto.
+
+
+
 ## 29/10/2026 — fechamento dinâmico por nova geração
 
 - **Validação 29/10:** 115 testes SP/10 arquivos, TypeScript explícito do app, lint dirigido e build final aprovados. Diagnóstico Edge headless local cobre 1440/390 px, claro/escuro, transições de um/dois/três meses, fonte vazia/erro e resposta lenta com overlay/cronômetro/cancelamento; zero erros JS e zero chamadas reais. Setembro sintético, sem alegação de disponibilidade real. Evidência local ignorada em `.local-inputs/relatorios-lucas/sp/dynamic-closure/`; reprodução por `node scripts/diagnostics/sp-dynamic-closure.mjs`.

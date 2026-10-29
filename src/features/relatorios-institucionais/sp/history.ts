@@ -22,7 +22,6 @@ export function buildSpLaunchHistory(input: SpLaunchHistoryInput, municipal: SpP
   const blocked = (message: string): SpLaunchHistory => ({ status: 'blocked', issues: [message], rows: [], totals: null, checks: [] });
   const months = matchedLaunchMonths(municipal);
   if (!months || input.city !== 'São Paulo' || input.uf !== 'SP' || municipal.patterns?.status !== 'ready') return blocked('Confira os totais municipais e seus padrões antes do histórico.');
-  if (monthOf(input.rootPeriod) !== municipal.closingMonth) return blocked('O fechamento mudou entre consultas. Confira os dados municipais novamente antes do histórico.');
   if (!input.complete.current || !input.complete.previous) return blocked('A paginação do comparativo não foi concluída.');
   const normalize = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
   const expectedGroups = municipal.patterns.rows.map(row => normalize(row.group)).sort().join('|');

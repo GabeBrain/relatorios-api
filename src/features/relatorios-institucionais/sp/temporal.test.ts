@@ -6,16 +6,48 @@ import { buildSpSegments } from './segments';
 import { buildSpTable } from './tables';
 import { buildSpTypologies } from './typologies';
 import { buildSpHistoryBatch } from './history-batch';
+import { userSeptemberReplay } from './__tests__/user-september';
 import { spPeriodLabel } from './model';
 
 describe('Conferência municipal SP — respostas reais registradas, sem chamada ao provedor', () => {
+  it('reproduz setembro fornecido pelo usuário com raiz de agosto e diferença diagnóstica de 22', () => {
+    const input = userSeptemberReplay(), snapshot = JSON.stringify(input);
+    const report = buildSpTemporalPreview(input, '3T2026');
+    expect(report.status).toBe('quarter-closed');
+    expect(report.closingMonth).toBe('2026-09');
+    expect(report.monthly!.at(-1)).toEqual({ month: '2026-09', launches: 7825, sales: 8912, openingStock: 127372, closingStock: 126307, delta: 22 });
+    expect(report.balanceByGroup!.filter(row => row.month === '2026-09').map(row => row.delta)).toEqual([-189, 312, 1007, 81, -302, 119, -1006]);
+    expect(report.issues.join(' ')).toContain('22 unidades');
+    expect(report.metrics.stock).toBe(126307);
+    expect(report.metrics.projects).toBeNull();
+    expect(JSON.stringify(input)).toBe(snapshot);
+  });
+  it('parcial usa o prefixo comum e avisa quando só algumas fontes possuem setembro', () => {
+    const input = syntheticWindow('09');
+    input.releases = input.releases.filter(row => row.period !== '2026-09-01');
+    const report = buildSpTemporalPreview(input, '3T2026');
+    expect(report.status).toBe('partial'); expect(report.throughMonth).toBe('2026-08');
+    expect(report.issues.join(' ')).toContain('As séries ainda não cobrem os mesmos meses');
+    input.stock = input.stock.filter(row => row.period !== '2026-08-01');
+    expect(buildSpTemporalPreview(input, '3T2026').status).toBe('incomplete');
+  });
+  it('nenhum mês comum não vira zero, nem permite fontes incompletas ou inválidas', () => {
+    const input = syntheticWindow('09'); input.sales = [];
+    expect(buildSpTemporalPreview(input, '3T2026').status).toBe('awaiting-closure');
+    for (const value of [null, '', 'bad', false, .5, NaN]) {
+      const invalid = userSeptemberReplay(); invalid.sales.at(-1)!.liquid_sales = value;
+      expect(buildSpTemporalPreview(invalid, '3T2026').status).toBe('incomplete');
+    }
+    const unpaged = userSeptemberReplay(); unpaged.complete.stock = false;
+    expect(buildSpTemporalPreview(unpaged, '3T2026').status).toBe('incomplete');
+  });
   it.each(['07', '08', '09'] as const)('reconhece automaticamente a janela até %s e mantém a contagem granular pendente', month => {
     const report = buildSpTemporalPreview(syntheticWindow(month), '3T2026');
     expect(report.status).toBe(month === '09' ? 'quarter-closed' : 'partial');
     expect(report.monthly).toHaveLength(Number(month) - 6);
     expect(report.throughMonth).toBe(`2026-${month}`);
     expect(report.metrics.projects).toBeNull();
-    expect(spPeriodLabel(report)).toContain(month === '09' ? 'Trimestre fechado' : 'Parcial');
+    expect(spPeriodLabel(report)).toContain(month === '09' ? 'Trimestre completo' : 'Parcial');
   });
   it('trimestre fechado permite dimensões e comparações sem liberar homologação', () => {
     const input = syntheticWindow('09');
@@ -34,11 +66,10 @@ describe('Conferência municipal SP — respostas reais registradas, sem chamada
     input.rootPeriod = '2026-10-01';
     expect(buildSpTemporalPreview(input, '3T2026').throughMonth).toBe('2026-09');
   });
-  it('não fecha trimestre por raiz de setembro se falta mês, padrão ou há divergência', () => {
+  it('não fecha trimestre por raiz de setembro se falta mês ou padrão', () => {
     for (const mutate of [
       (input: ReturnType<typeof syntheticWindow>) => { input.sales = input.sales.filter(row => row.period !== '2026-08-01'); },
       (input: ReturnType<typeof syntheticWindow>) => { input.releases.pop(); },
-      (input: ReturnType<typeof syntheticWindow>) => { input.stock.at(-1)!.stock = 0; },
     ]) {
       const input = syntheticWindow('09'); mutate(input);
       const report = buildSpTemporalPreview(input, '3T2026');
@@ -54,13 +85,13 @@ describe('Conferência municipal SP — respostas reais registradas, sem chamada
     expect(report.patterns?.rows.some(row => row.group === 'MCMV')).toBe(false);
     for (const field of ['launches', 'sales', 'stock'] as const) expect(report.patterns?.rows.reduce((sum, row) => sum + row[field], 0)).toBe(report.metrics[field]);
   });
-  it('não entrega padrões quando a cobertura ou balanço são inválidos', () => {
+  it('não entrega padrões quando a cobertura ou valores são inválidos', () => {
     const input = recordedInput(); input.complete.sales = false;
     expect(buildSpTemporalPreview(input, '3T2026').patterns).toBeUndefined();
-    input.complete.sales = true; input.rootPeriod = '2026-09-01';
+    input.complete.sales = true; input.sales[0].liquid_sales = null;
     expect(buildSpTemporalPreview(input, '3T2026').patterns).toBeUndefined();
   });
-  it('reproduz julho/agosto e exclui setembro pelo fechamento da raiz', () => {
+  it('reproduz a janela explicitamente limitada a julho/agosto', () => {
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     expect(report.status).toBe('partial'); expect(report.source).toBe('recorded-api'); expect(report.throughMonth).toBe('2026-08');
     expect(report.metrics).toEqual({ projects: null, launches: 24351, sales: 26824, stock: 124706 });
@@ -68,17 +99,19 @@ describe('Conferência municipal SP — respostas reais registradas, sem chamada
       { month: '2026-07', launches: 13413, sales: 11773, openingStock: 127179, closingStock: 128819, delta: 0 },
       { month: '2026-08', launches: 10938, sales: 15051, openingStock: 128819, closingStock: 124706, delta: 0 },
     ]);
-    expect(report.issues.join(' ')).toContain('1 de 5183');
+    expect(report.issues.join(' ')).toContain('Dados municipais disponíveis até 2026-08');
   });
-  it('mesmo com raiz posterior, não aceita setembro inconsistente', () => {
-    const input = recordedInput(); input.rootPeriod = '2026-09-01';
-    const report = buildSpTemporalPreview(input, '3T2026');
-    expect(report.status).toBe('incomplete'); expect(report.metrics.stock).toBeNull();
+  it('setembro nas séries não é cortado pela raiz de agosto e o balanço fica diagnóstico', () => {
+    const report = buildSpTemporalPreview(recordedInput('2026-09'), '3T2026');
+    expect(report.status).toBe('quarter-closed');
+    expect(report.throughMonth).toBe('2026-09');
+    expect(report.metrics.stock).toBe(56806);
     expect(report.checks.at(-1)?.delta).toBe(-67222);
+    expect(report.issues.join(' ')).toContain('causa não confirmada');
   });
-  it('não deixa linhas posteriores ao fechamento contaminarem meses conferidos', () => {
+  it('não deixa linhas fora do trimestre contaminarem os meses selecionados', () => {
     const input = recordedInput();
-    input.sales.push({ ...input.sales.at(-1)!, liquid_sales: null });
+    input.sales.push({ ...input.sales.at(-1)!, period: '2026-10-01', liquid_sales: null });
     expect(buildSpTemporalPreview(input, '3T2026').metrics.sales).toBe(26824);
   });
   it('não libera a contagem de empreendimentos com uma amostra', () => {
@@ -104,10 +137,10 @@ describe('Conferência municipal SP — respostas reais registradas, sem chamada
     input.sales.pop(); input.sales[0].liquid_sales = null;
     expect(buildSpTemporalPreview(input, '3T2026').status).toBe('incomplete');
   });
-  it('não infere a raiz pelo maior mês do histórico ou pelo calendário', () => {
+  it('não usa a raiz nem o calendário para limitar meses presentes nas séries', () => {
     const input = recordedInput(); input.rootPeriod = null;
-    expect(buildSpTemporalPreview(input, '3T2026').status).toBe('incomplete');
+    expect(buildSpTemporalPreview(input, '3T2026').throughMonth).toBe('2026-08');
     input.rootPeriod = '2026-06-01';
-    expect(buildSpTemporalPreview(input, '3T2026').status).toBe('awaiting-closure');
+    expect(buildSpTemporalPreview(input, '3T2026').throughMonth).toBe('2026-08');
   });
 });

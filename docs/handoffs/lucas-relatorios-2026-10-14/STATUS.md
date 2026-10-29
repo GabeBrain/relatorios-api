@@ -1,5 +1,14 @@
 # Estado do handoff
 
+## 29/10/2026 — correção após respostas reais: séries determinam disponibilidade
+
+- **Ambiente:**Windows/PowerShell; Git Codex Test (não atribuir essa identidade a Lucas). Main inicialmente limpa, único remote origin, fetch0/0 sobre97caa21. Nenhuma credencial extraída ou permissão alterada.
+- **Evidência:** usuário forneceu raiz agosto e três séries com setembro; residual+22 sem causa comprovada. Autorizou seguir após comparação de código Secovi/FIERGS.
+- **Entrega:** disponibilidade pelo prefixo comum das séries, sem corte pela raiz; balanços total/grupo são diagnósticos. Guardas de entrada, cobertura, releitura e dimensões preservadas. [Plano](../../features/relatorios-institucionais/sp/PLAN.md), [evidências](../../features/relatorios-institucionais/sp/EVIDENCIAS.md).120testes SP, tipos/lint/build e QA Edge1440/390 claro/escuro aprovados; zero chamadas reais pelo agente.
+- **Retomar:** conferir a versão publicada com sessão pessoal; depois slide2/granular. Replay local com datas diferentes não é aceite trimestral. Contrato de líquido/causa do residual, preços/INCC, IVV e homologação/exportação integral permanecem abertos. Supera os checkpoints que limitavam os meses pela raiz.
+
+
+
 ## Retomada — fechamento dinâmico SP — 29/10/2026
 
 - **Ambiente da sessão:** Windows/PowerShell neste checkout, identidade Git `Codex Test` (não atribuir esta identidade a Lucas); `main`, base `c62e41e`, árvore limpa e `origin/main...main = 0/0` após `git fetch --all`, sem upstream. Nenhuma mudança de acesso/conta. Autoria Codex a pedido do usuário nesta sessão.

@@ -51,7 +51,8 @@ try {
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: data.length }, links: { next: null } }) });
       }
       const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
-      // Typology split is invented for UI QA. Only pattern rows replay recorded observations.
+      // Deliberately simulate sources available only through August for this partial-window scenario.
+      // Typology split is invented for UI QA. Raw September observations remain in the fixture.
       const byTypology = url.searchParams.get('group_by') === 'Tipologia';
       const rows = Object.entries(recorded[metric]).flatMap(([month, observed]) => {
         const total = observed.reduce((a, b) => a + b, 0);
@@ -59,7 +60,7 @@ try {
         split.push(total - split.reduce((a, b) => a + b, 0));
         const values = byTypology ? split : observed;
         return values.map((value, index) => ({ period: `${month}-01`, group: byTypology ? `${index + 1} dormitório${index ? 's' : ''}` : recorded.groups[index], building_type: 'Vertical', [field]: value }));
-      }).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period'));
+      }).filter(row => row.period <= '2026-08-31' && row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period'));
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
     }
     if (url.origin === base) return route.continue();
@@ -126,7 +127,7 @@ try {
   await page.getByRole('button', { name: 'Conferir tipologias', exact: true }).click();
   await page.getByText(/Tipologias conferidas:/).waitFor();
   assert.equal(mockMarketCalls.length, 8);
-  assert.ok(mockMarketCalls.slice(5).every(call => call.query.group_by === 'Tipologia' && call.query.end_period === '2026-08-31'));
+  assert.ok(mockMarketCalls.slice(5).every(call => call.query.group_by === 'Tipologia' && call.query.end_period === '2026-09-30'));
   for (const [index, title] of ['Lançamentos por tipologia', 'Vendas por tipologia', 'Oferta por tipologia'].entries()) {
     await slides.getByRole('button', { name: `${index + 6}. ${title}`, exact: true }).click();
     await slides.getByRole('article').locator('img').evaluate(image => image.decode());

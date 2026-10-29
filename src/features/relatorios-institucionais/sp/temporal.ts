@@ -6,7 +6,7 @@ import { summarizeSpGroups } from './distribution';
 
 export type SpTemporalRow = Record<string, unknown>;
 export interface SpTemporalInput {
-  /** Requested window limit; never a substitute for the provider root closing. */
+  /** Requested window limit; availability is discovered independently in all three municipal sources. */
   windowEnd?: string;
   groupBy?: 'Padrão' | 'Tipologia';
   origin: 'api' | 'recorded-api';
@@ -37,16 +37,22 @@ export function monthEnd(month: string): string {
 
 /** Municipal comparison only. It never claims a complete city-wide granular report. */
 export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter): SpPreview {
-  const result: SpPreview = { entity: SP_INSTITUTIONAL.id, source: input.origin, quarter, status: 'incomplete', closingMonth: monthOf(input.rootPeriod), metrics: { projects: null, launches: null, sales: null, stock: null }, issues: [], checks: [], ignoredHistoryRows: 0, monthly: [] };
+  const result: SpPreview = { entity: SP_INSTITUTIONAL.id, source: input.origin, quarter, status: 'incomplete', closingMonth: null, metrics: { projects: null, launches: null, sales: null, stock: null }, issues: [], checks: [], ignoredHistoryRows: 0, monthly: [], balanceByGroup: [] };
   const fail = (status: SpPreview['status'], message: string) => ({ ...result, status, issues: [message] });
   if (!isQuarter(quarter) || input.uf !== 'SP' || normalize(input.city) !== 'sao paulo') return fail('invalid', 'Selecione São Paulo capital e um trimestre válido.');
-  if (!result.closingMonth || input.sampledBuildings < 1 || input.totalBuildings < input.sampledBuildings) return fail('incomplete', 'A amostra não informou um fechamento válido na raiz.');
   const quarterPeriods = quarterMonths(quarter);
   if (input.windowEnd !== undefined && !quarterPeriods.includes(input.windowEnd)) return fail('invalid', 'O limite da janela não pertence ao trimestre selecionado.');
-  const months = quarterPeriods.filter(month => month <= result.closingMonth! && (!input.windowEnd || month <= input.windowEnd));
-  if (!months.length) return fail('awaiting-closure', 'Nenhum mês do trimestre está dentro do fechamento informado na amostra.');
-  result.throughMonth = months.at(-1)!;
   if (!input.complete.sales || !input.complete.releases || !input.complete.stock) return fail('incomplete', 'A paginação das fontes municipais não foi concluída.');
+  const requested = quarterPeriods.filter(month => !input.windowEnd || month <= input.windowEnd);
+  const available = (['sales', 'releases', 'stock'] as const).map(source => new Set(input[source].map(row => monthOf(row.period)).filter((month): month is string => Boolean(month && requested.includes(month)))));
+  // Each source must cover a consecutive prefix. Never hide a hole by returning an earlier partial.
+  for (const periods of available) {
+    const present = requested.filter(month => periods.has(month));
+    if (present.join('|') !== requested.slice(0, present.length).join('|')) return fail('incomplete', 'Há mês ausente entre observações da série municipal. Ausência não representa zero.');
+  }
+  const months = requested.filter(month => available.every(periods => periods.has(month)));
+  if (!months.length) return fail('awaiting-closure', 'Nenhum mês do trimestre está disponível nas três séries municipais.');
+  result.closingMonth = result.throughMonth = months.at(-1)!;
   const previous = priorMonth(months[0]);
 
   function read(rows: SpTemporalRow[], field: string, periods: string[], negative: boolean) {
@@ -78,16 +84,23 @@ export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter)
     const launches = total(releases, month), sold = total(sales, month), closingStock = total(stocks, month);
     const expected = openingStock + launches - sold;
     result.monthly!.push({ month, launches, sales: sold, openingStock, closingStock, delta: closingStock - expected });
-    result.checks.push({ label: `Balanço ${month}`, expected, actual: closingStock, delta: closingStock - expected });
+    result.checks.push({ label: `Balanço ${month}`, expected, actual: closingStock, delta: closingStock - expected, kind: 'balance' });
+    for (const [group, actual] of stocks.get(month)!) {
+      const expectedGroup = stocks.get(priorMonth(month))!.get(group)! + releases.get(month)!.get(group)! - sales.get(month)!.get(group)!;
+      const groupLabel = String(input.stock.find(row => normalize(row.group) === group)?.group ?? group);
+      result.balanceByGroup!.push({ label: `Balanço ${month} · ${groupLabel}`, month, group: groupLabel, expected: expectedGroup, actual, delta: actual - expectedGroup, kind: 'balance' });
+    }
   }
-  if (result.checks.some(row => row.delta !== 0)) return fail('incomplete', 'Lançamentos, vendas e estoque não reconciliam nos meses fechados.');
   return {
     ...result, status: months.length === 3 ? 'quarter-closed' : 'partial',
     patterns: input.groupBy === 'Tipologia' ? undefined : summarizeSpGroups(input, months, result.throughMonth),
     metrics: { projects: null, launches: result.monthly!.reduce((sum, row) => sum + row.launches, 0), sales: result.monthly!.reduce((sum, row) => sum + row.sales, 0), stock: result.monthly!.at(-1)!.closingStock },
     issues: [
-      `Fechamento ${result.closingMonth} observado em ${input.sampledBuildings} de ${input.totalBuildings} empreendimentos; falta confirmar a cobertura granular da cidade.`,
-      ...(result.throughMonth < quarterEndMonth(quarter) ? ['O trimestre não está completo; somente os meses até o limite informado foram conferidos.'] : []),
+      `Dados municipais disponíveis até ${result.throughMonth}; a cobertura granular de empreendimentos permanece pendente.`,
+      ...result.monthly!.filter(row => row.delta !== 0).map(row => `Balanço ${row.month}: diferença de ${row.delta.toLocaleString('pt-BR')} unidades entre estoque informado e esperado. Valores da API preservados; causa não confirmada.`),
+      ...(result.balanceByGroup!.some(row => row.delta !== 0) ? ['Há diferenças no balanço por grupo. Elas não são atribuídas automaticamente a distratos ou reclassificações; confira os detalhes.'] : []),
+      ...(available.some(periods => periods.size !== months.length) ? ['As séries ainda não cobrem os mesmos meses; a parcial usa apenas os meses disponíveis nas três fontes.'] : []),
+      ...(result.throughMonth < quarterEndMonth(quarter) ? ['O trimestre não está completo; somente os meses disponíveis nas três séries foram incluídos.'] : []),
       'Contagem de empreendimentos e reconciliação granular pendentes. Esta conferência municipal não libera exportação ou homologação.',
     ],
   };

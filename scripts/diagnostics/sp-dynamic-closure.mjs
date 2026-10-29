@@ -4,10 +4,11 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 
-// Own local app, synthetic authentication and September, all external traffic blocked.
+// Own local app, synthetic authentication and mixed-date replays, all external traffic blocked.
 const output = resolve('.local-inputs/relatorios-lucas/sp/dynamic-closure');
 await mkdir(output, { recursive: true });
 const recorded = JSON.parse(await readFile('src/features/relatorios-institucionais/sp/__tests__/fixtures/sp-municipal-2026.json', 'utf8'));
+const observed = JSON.parse(await readFile('src/features/relatorios-institucionais/sp/__tests__/fixtures/sp-september-user-2026-10-29.json', 'utf8'));
 const base = 'http://127.0.0.1:4176';
 const server = spawn(process.execPath, [resolve('node_modules/vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '4176', '--strictPort'], { windowsHide: true, stdio: 'ignore' });
 let browser;
@@ -32,14 +33,15 @@ try {
       calls++;
       if (slow) await new Promise(done => setTimeout(done, 1500));
       if (failure) return route.fulfill({ status: 403, body: '{}' });
-      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: empty ? [] : [{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: `2026-${closing}-01` }], meta: { total: 5183 }, links: { next: null } }) });
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: empty ? [] : [{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-08-01' }], meta: { total: 5183 }, links: { next: null } }) });
     }
     if (url.pathname.includes('/temporal-analysis-city/')) {
       const metric = url.pathname.split('/').at(-1);
       const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
       const months = Object.fromEntries(Object.entries(recorded[metric]).filter(([month]) => month < '2026-09'));
-      months['2026-09'] = metric === 'stock' ? recorded.stock['2026-08'].map(value => value + 6) : recorded.groups.map(() => metric === 'sales' ? 4 : 10);
-      return reply(Object.entries(months).flatMap(([month, values]) => values.map((value, index) => ({ period: `${month}-01`, group: recorded.groups[index], building_type: 'Vertical', [field]: value }))).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period')));
+      months['2026-09'] = metric === 'stock' ? observed.septemberStock : metric === 'sales' ? observed.septemberSales : observed.septemberReleases;
+      if (metric === 'stock') months['2026-08'] = observed.augustStock;
+      return reply(Object.entries(months).flatMap(([month, values]) => values.map((value, index) => ({ period: `${month}-01`, group: recorded.groups[index], building_type: 'Vertical', [field]: value }))).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period') && row.period <= `2026-${closing}-31`));
     }
     if (url.origin === base) return route.continue();
     return route.abort();
@@ -62,13 +64,24 @@ try {
     for (const month of ['07', '08', '09']) {
       closing = month;
       await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
-      await page.getByText(month === '09' ? 'Trimestre fechado nas séries municipais da API' : 'Conferência parcial de dados da API', { exact: true }).waitFor();
+      await page.getByText(month === '09' ? 'Trimestre completo nas séries municipais da API' : 'Conferência parcial de dados da API', { exact: true }).waitFor();
+      if (month === '09') { await page.getByText(/Balanço 2026-09: diferença de 22 unidades entre estoque/).waitFor(); await page.getByRole('cell', { name: '126.307', exact: true }).first().waitFor(); }
       const heading = page.getByRole('heading', { name: /São Paulo \/ SP/ });
-      assert.match(await heading.innerText(), month === '09' ? /trimestre fechado até setembro/ : /parcial até/);
+      assert.match(await heading.innerText(), month === '09' ? /trimestre completo até setembro/ : /parcial até/);
       assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 1);
       await page.getByRole('button', { name: '3. Unidades lançadas', exact: true }).click();
       await page.getByRole('article').screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-${month}.png`) });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1 || document.querySelector('main').scrollWidth > document.querySelector('main').clientWidth + 1), false);
+      if (month === '09') {
+        await page.getByText('Diferenças de balanço por grupo', { exact: true }).click();
+        await page.getByText('Diferenças de balanço por grupo', { exact: true }).scrollIntoViewIfNeeded();
+        await page.screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-balance-details.png`) });
+        await page.locator('main').evaluate(element => { element.scrollTop = 0; });
+        await page.screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-summary.png`) });
+        await page.getByRole('button', { name: '5. Oferta final', exact: true }).click();
+        assert.match(await page.getByRole('article').innerText(), /126.307/);
+      }
+
     }
     slow = true;
     await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
@@ -90,7 +103,7 @@ try {
   await page.getByText('Não foi possível preparar a prévia', { exact: true }).waitFor();
   assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 0);
   assert.deepEqual(errors, []);
-  const result = { results, errorAndEmptyBlocked: true, rootCalls: calls, pageErrors: errors, realApiCalls: 0, september: 'synthetic' };
+  const result = { results, errorAndEmptyBlocked: true, rootCalls: calls, pageErrors: errors, realApiCalls: 0, september: 'user-provided-2026-10-29; other months from earlier fixtures, not a quarterly baseline' };
   await writeFile(resolve(output, 'result.json'), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 } finally {

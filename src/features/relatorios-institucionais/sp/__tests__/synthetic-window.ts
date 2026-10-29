@@ -14,5 +14,6 @@ export function syntheticWindow(month: '07' | '08' | '09'): SpTemporalInput {
     input.sales.push({ ...row, period: '2026-09-01', liquid_sales: 4 });
     input.stock.push({ ...row, period: '2026-09-01', stock: Number(row.stock) + 6 });
   }
+  for (const metric of ['sales', 'releases', 'stock'] as const) input[metric] = input[metric].filter(row => String(row.period) <= `2026-${month}-31`);
   return input;
 }

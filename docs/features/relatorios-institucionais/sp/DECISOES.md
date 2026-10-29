@@ -1,5 +1,18 @@
 # Decisões e pontos abertos — SP
 
+## 29/10/2026 — correção após respostas reais: séries determinam disponibilidade
+
+**Estado vigente:** a geração consulta toda a janela selecionada nas três séries municipais e usa o prefixo consecutivo comum. Não limita setembro pelo `period` de uma amostra. Raiz antiga/ausente não define cobertura municipal; amostra permanece apenas para contexto territorial. Um/dois meses = parcial; três = trimestre completo nas séries, sem implicar fechamento oficial, reconciliação ou homologação. Se apenas algumas fontes avançam, a parcial explicita a diferença de cobertura. Lacunas intermediárias, fonte incompleta, valor inválido, duplicação e grupos incompatíveis continuam impeditivos.
+
+**Balanço:** estoque anterior + lançamentos − vendas líquidas é diagnóstico, não identidade comprovada do contrato municipal. Diferenças totais e por grupo ficam visíveis, preservando os números da API; não atribuir o residual a distratos ou reclassificações sem prova. Históricos/tipologias mantêm as comparações mensais e dimensões do mesmo recorte; mudança no número da releitura continua impeditiva, mudança isolada na raiz não.
+
+**Evidência do usuário:** consulta de 29/10: raiz agosto, séries com setembro; lançamentos7.825, vendas8.912, estoque agosto127.372 e setembro126.307, residual+22. Fixture agregada versionada em `__tests__/fixtures/sp-september-user-2026-10-29.json`. Não contém credenciais/dados individuais. Agente não executou consulta autenticada. Replay com outros meses antigos testa mecanismo, sem alegação de uma fotografia trimestral única.
+
+**Validação:** 120 testes SP, tipos completos, lint dirigido e build aprovados. Diagnóstico `node scripts/diagnostics/sp-dynamic-closure.mjs`: quatro combinações1440/390 claro/escuro, raiz fixa agosto e série setembro, alerta22, dados preservados, carregamento lento/cancelamento/erro/vazio; zero errosJS e zero chamadas reais. Evidência local em `.local-inputs/relatorios-lucas/sp/dynamic-closure/`. Padrões reutilizados: GeoApiScopeEngine, BrainLoadingState overlay, Table/Alert/primitives Brain e rota lazy existente. Sem nova exceção de frontend.
+
+**Ambiente/retomar:** main inicialmente limpa, único remote origin, fetch0/0 sobre97caa21. Git Codex Test; não atribuir essa identidade a Lucas. Mesma sessão Windows/PowerShell, sem credencial pessoal extraída. Revisão de código Secovi/FIERGS, sem alterar suas políticas/motores. Retestar no site após envio/publicação; slide2/granular, contrato líquido e homologação integral continuam pendentes. Esta decisão supera as exigências de raiz idêntica e balanço zero dos registros históricos abaixo.
+
+
 ## Vinte páginas e publicação por rota — 16/10/2026
 
 Lucas solicitou mais 20 páginas possíveis e autorizou push/publicação, mantendo apenas a rota. Escolhidos 14 históricos por padrão original e seis quadros atuais por padrão/tipologia, reaproveitando fontes e artes existentes. Não inventar equivalências adicionais, fontes de preços, INCC, IVV ou coordenadas para atingir contagem. Menu lateral e busca global removem o acesso SP; rota lazy e autenticação existentes preservadas. Navegação do relatório tem rolagem limitada para acomodar 46 botões sem empurrar indefinidamente o canvas. Publicação só pode ser declarada após verificação do domínio; push e sincronização Git não bastam como evidência de runtime.

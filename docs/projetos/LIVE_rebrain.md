@@ -385,6 +385,18 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-29 — SP: disponibilidade municipal independente da raiz e balanço diagnóstico — Codex
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — correção após o teste autenticado do usuário; autoria Codex, identidade Git `Codex Test`.
+- **Evidência recebida:** usuário consultou a API e forneceu raiz `2026-08-01`, históricos com setembro e respostas completas de `sales`, `releases` e `stock` por Padrão. Setembro: 7.825 lançamentos, 8.912 vendas líquidas e 126.307 estoque; agosto: 127.372 estoque. Balanço residual +22, com diferenças maiores por grupo; causa não demonstrada. Disponibilidade confirmada pelas respostas fornecidas, não por consulta autenticada do agente.
+- **Mudança:** solicita a janela trimestral completa e descobre o prefixo consecutivo comum das três séries, sem corte pelo `period` de uma amostra. Um/dois meses produzem parcial; três, trimestre completo nas séries. Raiz continua só contexto territorial. Balanços total/por grupo viram diagnóstico explícito sem alterar números ou inferir distratos. Histórico conserva meses equivalentes e bloqueio por releitura/dimensão divergente; diferenças de balanço são separadas dessas guardas.
+- **Guardas preservadas:** catálogo/escopo autorizado, limite de duas páginas por fonte, retry/cancelamento, sem cache HTTP, cobertura/paginação, lacunas intermediárias, grupos incompatíveis, duplicatas, valores inválidos, negativo líquido observado e estoque do último mês. Sem fallback para zero ou liberação de coleta/exportação integral. Slide 2 segue dependente da coleta granular.
+- **Referência revisada:** normalização temporal e reconciliação do Panorama Secovi/FIERGS. Reaproveitado o princípio de distinguir fluxo/fotografia e separar diagnósticos de integridade; nenhuma política de vendas granulares FIERGS foi transplantada ou alterada.
+- **Arquivos:** módulo SP, diagnósticos locais em `scripts/diagnostics/sp-*.mjs`, fixture agregada recebida em 29/10 e plano/decisões/evidências/status do piloto.
+- **Validação:** 120 testes SP/10 arquivos, tipos completos do app, lint dirigido e build aprovados. Edge headless local 1440/390, claro/escuro: raiz fixa em agosto, transições de um/dois/três meses, setembro preservado e alerta +22; carregamento lento Brain com tempo real/cancelamento, erro e vazio. Zero erros JS/chamadas reais. Replay combina setembro/agosto recebidos hoje com outros meses de fixtures anteriores: comprova mecanismo, não baseline trimestral pareado nem causa dos resíduos.
+- **Commits:** commit desta entrada; base `97caa21`.
+- **Monday:** [SP — Institucional mensal/trimestral](https://brain381753.monday.com/boards/18398638577/pulses/13149411648) — `13149411648`; referência apenas, sem escrita.
+- **Etapas/Pendências:** correção validada localmente; aceite da versão publicada permanece pendente. Retestar geração no site após envio/publicação. Contagem granular, contrato exato de `liquid_sales`, preços/INCC, IVV, exportação e homologação integral continuam abertos. Sem confirmação de produção nesta evidência.
+
 ### 2026-10-29 — SP Institucional: fechamento dinâmico a cada geração — Codex
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — cobertura temporal da prévia municipal; autoria Codex, identidade Git `Codex Test`, solicitação do usuário nesta sessão.
 - **O quê:** releitura do fechamento sem cache HTTP em cada geração; um/dois meses consecutivos reconciliados mantêm parcial, três produzem `quarter-closed`. Rótulos da página/slides e liberação de tipologias, segmentos, quadros e históricos reconhecem ambos os estados. Nova geração retira detalhes anteriores; consultas bloqueantes usam overlay Brain com tempo real e cancelamento por botão/Escape. Nenhuma consulta agendada ou ampliação granular.
@@ -598,6 +610,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**29/10 — SP, correção após teste:** setembro confirmado nas três séries por respostas do usuário, apesar da raiz de agosto. Descoberta do período agora pelas séries; diferença de balanço é diagnóstica. Implementação local validada; reteste publicado e cobertura granular pendentes. Esta entrada supera o uso da raiz como limite nas etapas anteriores.
+
 **29/10 — SP Institucional:** cobertura dinâmica parcial/fechada implementada localmente; reconsulta a cada geração sem cache HTTP. Cobertura granular, homologação integral e publicação desta revisão seguem pendentes.
 
 **29/10 — Estimativas:** Gabriel reabriu a frente para prévia configurável no modal:50linhas, ordem/ocultação aplicadas ao Excel completo. Implementada e validada localmente (122testes), publicação/aceite desta revisão pendentes. Interface anterior aceita em produção por Gabriel em28/10 após envio`9d14f2a`. Fonte/limites na seção13 do plano essencial. Contrato final de saída Nicolas/Belogic, importação e avaliação independente continuam abertos.
@@ -635,7 +649,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **SP Institucional — fechamento dinâmico:** publicar esta revisão com autorização e conferir na sessão pessoal se setembro/2026 já está disponível e reconciliado. Setembro do QA é sintético; seguir com granular, preços/INCC, IVV e exportação após os portões do piloto.
+- [ ] **SP Institucional — descoberta municipal:** retestar a correção publicada com a sessão pessoal: setembro existe nas três séries, mas a raiz do empreendimento consultado indica agosto. Diferença +22 é diagnóstico, causa/contrato de vendas ainda em aberto. Avançar depois para contagem granular do slide 2, preços/INCC, IVV, exportação e homologação integral.
 
 - **Estimativas:** conferir a nova prévia de exportação em produção e aguardar comprovação do formato final de saída Nicolas/Belogic. Interface anterior aceita em28/10; revisão29/10 validada somente localmente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 

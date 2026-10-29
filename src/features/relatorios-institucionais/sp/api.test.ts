@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { RequestOptions } from '@/lib/http-client';
 import { fetchSpTemporalInput, fetchSpLaunchHistory, fetchSpHistoryBatch, type SpReadOptions } from './api';
 import { buildSpTemporalPreview } from './temporal';
+import { userSeptemberReplay } from './__tests__/user-september';
 import { syntheticWindow } from './__tests__/synthetic-window';
 import { recordedInput } from './__tests__/recorded';
 import { syntheticLaunchHistory } from './__tests__/history';
@@ -22,11 +23,26 @@ function recordedServer() {
 const noSleep = async () => {};
 
 describe('SP — transporte curto e paginado, sem provedor real', () => {
-  it('cada geração relê a raiz e avança de um para dois e três meses sem cache de parcial', async () => {
+  it('consulta até setembro com raiz em agosto e preserva os números fornecidos pelo usuário', async () => {
+    const observed = userSeptemberReplay();
+    const request = vi.fn(async (options: RequestOptions): Promise<Response> => {
+      if (options.url.endsWith('/building-with-history')) return reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-08-01' }], 1, 5195, 5195));
+      const metric = options.url.split('/').at(-1) as 'sales' | 'releases' | 'stock';
+      return reply(envelope(observed[metric].filter(row => String(row.period) >= String(options.query?.start_period) && String(row.period) <= String(options.query?.end_period))));
+    });
+    const input = await fetchSpTemporalInput('3T2026', { request });
+    expect(input.rootPeriod).toBe('2026-08-01');
+    const report = buildSpTemporalPreview(input, '3T2026');
+    expect(report.status).toBe('quarter-closed');
+    expect(report.monthly!.at(-1)).toMatchObject({ launches: 7825, sales: 8912, closingStock: 126307, delta: 22 });
+    for (const [options] of request.mock.calls.slice(1)) expect(options.query?.end_period).toBe('2026-09-30');
+    expect(request).toHaveBeenCalledTimes(4);
+  });
+  it('cada geração relê as séries e avança de um para dois e três meses sem cache de parcial', async () => {
     let closing: '07' | '08' | '09' = '07';
     const request = vi.fn(async (options: RequestOptions): Promise<Response> => {
       const input = syntheticWindow(closing);
-      if (options.url.endsWith('/building-with-history')) return reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: input.rootPeriod }], 1, 5183, 5183));
+      if (options.url.endsWith('/building-with-history')) return reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-08-01' }], 1, 5183, 5183));
       const metric = options.url.split('/').at(-1) as 'sales' | 'releases' | 'stock';
       return reply(envelope(input[metric].filter(row => String(row.period) >= String(options.query?.start_period) && String(row.period) <= String(options.query?.end_period))));
     });
@@ -36,7 +52,7 @@ describe('SP — transporte curto e paginado, sem provedor real', () => {
       const report = buildSpTemporalPreview(input, '3T2026');
       expect(report.status).toBe(month === '09' ? 'quarter-closed' : 'partial');
       expect(report.monthly).toHaveLength(Number(month) - 6);
-      expect(request.mock.calls.at(-1)![0].query?.end_period).toBe(`2026-${month}-${month === '09' ? '30' : '31'}`);
+      expect(request.mock.calls.at(-1)![0].query?.end_period).toBe('2026-09-30');
     }
     expect(request).toHaveBeenCalledTimes(12);
     expect(request.mock.calls.filter(([options]) => options.url.endsWith('/building-with-history'))).toHaveLength(3);
@@ -60,12 +76,13 @@ describe('SP — transporte curto e paginado, sem provedor real', () => {
     expect(input.current.rootPeriod).toBe(input.previous?.rootPeriod);
     expect(input.previous?.windowEnd).toBe('2025-08');
   });
-  it('lote interrompe antes das séries se a primeira raiz muda e valida limites antes da rede', async () => {
-    const request = vi.fn(async () => reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-09-01' }], 1, 5183, 5183)));
+  it('lote interrompe a janela anterior quando as séries atuais perdem cobertura e valida limites antes da rede', async () => {
+    const base = recordedServer();
+    const request = vi.fn(async (options: RequestOptions) => options.url.endsWith('/sales') ? reply(envelope([])) : base(options));
     const result = await fetchSpHistoryBatch(buildSpTemporalPreview(recordedInput(), '3T2026'), { request });
-    expect(request).toHaveBeenCalledOnce(); expect(result.previous).toBeUndefined(); expect(result.current.sales).toEqual([]);
+    expect(request).toHaveBeenCalledTimes(4); expect(result.previous).toBeUndefined();
     await expect(fetchSpTemporalInput('3T2026', { request, windowEnd: '2026-12' })).rejects.toThrow('Limite');
-    expect(request).toHaveBeenCalledOnce();
+    expect(request).toHaveBeenCalledTimes(4);
   });
   it('lote respeita cancelamento antes de buscar a janela do ano anterior', async () => {
     const controller = new AbortController(), base = recordedServer();
@@ -90,27 +107,27 @@ describe('SP — transporte curto e paginado, sem provedor real', () => {
     }
     expect(result.complete).toEqual({ current: true, previous: true });
   });
-  it('histórico não busca séries se o fechamento mudou nem inicia sem baseline válido', async () => {
-    const request = vi.fn(async () => reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-09-01' }], 1, 5183, 5183)));
+  it('histórico mantém meses equivalentes mesmo com raiz defasada e exige baseline válido', async () => {
+    const request = recordedServer();
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     const input = await fetchSpLaunchHistory(report, { request });
-    expect(request).toHaveBeenCalledOnce(); expect(input.current).toEqual([]);
+    expect(request).toHaveBeenCalledTimes(3); expect(input.current).toHaveLength(14);
     await expect(fetchSpLaunchHistory({ ...report, source: 'fixture' }, { request })).rejects.toThrow('totais municipais');
-    expect(request).toHaveBeenCalledOnce();
+    expect(request).toHaveBeenCalledTimes(3);
   });
   it('usa Tipologia somente quando solicitada e preserva limites e recorte', async () => {
     const request = recordedServer();
     const input = await fetchSpTemporalInput('3T2026', { request, groupBy: 'Tipologia' });
     expect(input.groupBy).toBe('Tipologia');
     expect(request).toHaveBeenCalledTimes(4);
-    for (const [options] of request.mock.calls.slice(1)) expect(options.query).toMatchObject({ group_by: 'Tipologia', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], end_period: '2026-08-31', per_page: 100 });
+    for (const [options] of request.mock.calls.slice(1)) expect(options.query).toMatchObject({ group_by: 'Tipologia', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], end_period: '2026-09-30', per_page: 100 });
   });
   it('consulta só uma amostra e três fontes municipais até agosto, sem coletar 5183 históricos', async () => {
     const request = recordedServer();
     const data = await fetchSpTemporalInput('3T2026', { request });
     expect(request).toHaveBeenCalledTimes(4);
     expect(request.mock.calls[0][0].query).toMatchObject({ city: 'São Paulo', uf: 'SP', type: 'Vertical', per_page: 1, page: 1 });
-    for (const [options] of request.mock.calls.slice(1)) expect(options.query).toMatchObject({ city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', end_period: '2026-08-31', per_page: 100 });
+    for (const [options] of request.mock.calls.slice(1)) expect(options.query).toMatchObject({ city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', end_period: '2026-09-30', per_page: 100 });
     expect(request.mock.calls.at(-1)![0].query?.start_period).toBe('2026-06-01');
     expect(buildSpTemporalPreview(data, '3T2026').metrics).toEqual({ projects: null, launches: 24351, sales: 26824, stock: 124706 });
   });
@@ -153,12 +170,15 @@ describe('SP — transporte curto e paginado, sem provedor real', () => {
     await expect(fetchSpTemporalInput('3T2026', { request, signal: controller.signal })).rejects.toMatchObject({ name: 'AbortError' });
     expect(request).toHaveBeenCalledTimes(2);
   });
-  it('não consulta as séries quando a raiz não cobre o trimestre', async () => {
-    const request = vi.fn(async () => reply(envelope([{ period: '2026-06-01', city: 'São Paulo', state: 'SP', building_type: 'Vertical' }], 1, 5183, 5183)));
-    const data = await fetchSpTemporalInput('3T2026', { request });
-    expect(request).toHaveBeenCalledOnce(); expect(buildSpTemporalPreview(data, '3T2026').status).toBe('awaiting-closure');
+  it('consulta as séries mesmo se o período da raiz for antigo ou ausente', async () => {
+    for (const period of ['2026-06-01', null]) {
+      const base = recordedServer();
+      const request = vi.fn(async (options: RequestOptions) => options.url.endsWith('/building-with-history') ? reply(envelope([{ period, city: 'São Paulo', state: 'SP', building_type: 'Vertical' }], 1, 5183, 5183)) : base(options));
+      const data = await fetchSpTemporalInput('3T2026', { request });
+      expect(request).toHaveBeenCalledTimes(4); expect(buildSpTemporalPreview(data, '3T2026').throughMonth).toBe('2026-08');
+    }
   });
-  it('rejeita amostra sem fechamento ou de outra cidade, sem iniciar as séries', async () => {
+  it('rejeita amostra de outra cidade, sem iniciar as séries', async () => {
     const request = vi.fn(async () => reply(envelope([{ city: 'Campinas', state: 'SP', building_type: 'Vertical' }])));
     await expect(fetchSpTemporalInput('3T2026', { request })).rejects.toThrow('amostra'); expect(request).toHaveBeenCalledOnce();
   });

@@ -14,7 +14,7 @@ export interface SpInput {
   coverage: { buildings: boolean; sales: boolean; stock: boolean };
 }
 export interface SpMetrics { projects: number | null; launches: number | null; sales: number | null; stock: number | null }
-export interface SpCheck { label: string; expected: number; actual: number; delta: number }
+export interface SpCheck { label: string; expected: number; actual: number; delta: number; kind?: 'balance' }
 export interface SpDistribution {
   status: 'ready' | 'blocked';
   issues: string[];
@@ -48,6 +48,7 @@ export interface SpPreview {
   issues: string[];
   checks: SpCheck[];
   ignoredHistoryRows: number;
+  balanceByGroup?: (SpCheck & { month: string; group: string })[];
   source?: 'fixture' | 'api' | 'recorded-api';
   throughMonth?: string;
   monthly?: { month: string; launches: number; sales: number; openingStock: number; closingStock: number; delta: number }[];
@@ -64,7 +65,7 @@ export function isSpMunicipalPreview(report: SpPreview | null | undefined): repo
 export function spPeriodLabel(report: SpPreview): string {
   if (!report.throughMonth) return 'Exemplo com dados fictícios';
   const month = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${report.throughMonth}-01T12:00:00Z`));
-  return report.status === 'quarter-closed' ? `Trimestre fechado até ${month}` : `Parcial até ${month}`;
+  return report.status === 'quarter-closed' ? `Trimestre completo até ${month}` : `Parcial até ${month}`;
 }
 
 const emptyMetrics = (): SpMetrics => ({ projects: null, launches: null, sales: null, stock: null });
