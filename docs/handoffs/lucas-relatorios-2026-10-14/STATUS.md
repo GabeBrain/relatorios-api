@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 29/10/2026 — correção da demora do slide2
+
+Main limpa em5751424, único origin, fetch0/0. Usuário relatou4:24na página15/52 e autorizou corrigir. Contagem passa do histórico interno completo para cadastro GET`/public-api/building`, conforme OpenAPI local; até3páginas paralelas. Municipal aparece antes; operação Brain de contagem possui cancelamento/retry próprios e mescla resultado com tipologias/históricos. Guardas mantidas, sem mudanças nos motores Secovi/FIERGS. [Decisão vigente](../../features/relatorios-institucionais/sp/DECISOES.md), [evidências](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Ambiente Windows/PowerShell, Codex Test, sem API autenticada pelo agente. Retestar duração/cobertura da nova fonte no site; não afirmar segundos ou homologação integral.
+
 ## 29/10/2026 — implantação da contagem granular SP autorizada
 
 - **Ambiente:** Windows/PowerShell, identidade Git Codex Test, `main` limpa em `795ee04`, somente origin, fetch e 0/0 antes de alterar. Usuário autorizou implementar/publicar a adaptação do Secovi/FIERGS.

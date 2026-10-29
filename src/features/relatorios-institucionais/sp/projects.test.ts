@@ -25,16 +25,29 @@ describe('SP — coleta granular adaptada do Panorama', () => {
     expect(() => buildSpProjects([building(1), building(1, '2026-08-01')], report())).toThrow(/conflitantes/);
     for (const patch of [{ city: 'Campinas' }, { state: 'RJ' }, { building_type: 'Horizontal' }]) expect(() => buildSpProjects([{ ...building(1), ...patch }], report())).toThrow(/fora/);
   });
-  it('pagina a fonte interna sem filtro de status e mantém escopo, cancelamento e no-store', async () => {
+  it('pagina o cadastro sem histórico nem filtro de status e mantém escopo, cancelamento e no-store', async () => {
     const signal = new AbortController().signal;
     const request = vi.fn(async (options: RequestOptions) => Number(options.query?.page) === 1 ? reply([building(1), building(2)], 1, 3, 2) : reply([building(3)], 2, 3, 2));
     const result = await fetchSpProjects(report(), { request, signal });
     expect(result).toMatchObject({ total: 3, distinct: 3, received: 3 });
     expect(request).toHaveBeenCalledTimes(2);
     for (const [options] of request.mock.calls) {
-      expect(options).toMatchObject({ method: 'POST', cache: 'no-store', signal, query: { city: 'São Paulo', uf: 'SP', type: 'Vertical', per_page: 100 } });
+      expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/building', method: 'GET', cache: 'no-store', signal, query: { city: 'São Paulo', uf: 'SP', type: 'Vertical', per_page: 100 } });
       expect(options.query).not.toHaveProperty('status');
     }
+  });
+  it('busca até três páginas em paralelo e reconcilia mesmo com respostas fora de ordem', async () => {
+    let active = 0, maximum = 0;
+    const request = vi.fn(async (options: RequestOptions) => {
+      const page = Number(options.query?.page);
+      active++; maximum = Math.max(maximum, active);
+      await new Promise(resolve => setTimeout(resolve, page === 2 ? 20 : 1));
+      active--;
+      return reply([building(page)], page, 8, 8);
+    });
+    expect((await fetchSpProjects(report(), { request })).total).toBe(8);
+    expect(maximum).toBe(3);
+    expect(request).toHaveBeenCalledTimes(8);
   });
   it.each(['missing', 'changed', 'repeated', 'empty'])('recusa cobertura incompleta ou instável: %s', mode => {
     const request = vi.fn(async (options: RequestOptions) => Number(options.query?.page) === 1 ? reply([building(1)], 1, 2, 2) : reply(mode === 'empty' || mode === 'missing' ? [] : [building(mode === 'repeated' ? 1 : 2)], 2, mode === 'changed' ? 3 : 2, 2));

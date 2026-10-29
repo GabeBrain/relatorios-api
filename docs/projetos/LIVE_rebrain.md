@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-29 — SP: cadastro sem históricos e contagem sem bloquear municipal — Codex
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, desempenho da geração; identidade Codex Test. Usuário relatou4:24na página15/52 da coleta de5751424 e autorizou corrigir.
+- **Mudança:** contagem usa GET`/public-api/building`, cujo contrato local inclui ID/data/tipo/território sem históricos mensais; após primeira página, até3em paralelo. Primitivas de integridade Panorama preservadas, sem alterar seus motores. Mesmos meses municipais e contagem de IDs, sem filtros de lançamento inventados ou cache silencioso.
+- **Fluxo:** municipal aparece antes, contagem automática em BrainLoadingState`operation` com progresso/tempo real/cancelamento próprios. Retry só de empreendimentos; falha/cancelamento mantém municipal. Controle independente e atualizações funcionais evitam dados antigos ou perda de históricos/tipologias.
+- **Evidência/limites:** 138testes SP, tipos/lint/build e diagnóstico Edge local1440/390 claro/escuro aprovados, conforme [evidências](../features/relatorios-institucionais/sp/EVIDENCIAS.md). Sem consulta autenticada ou promessa de segundos; duração e cobertura do cadastro real precisam de reteste. Contrato revisto em `src/assets/openapi/api-geobrain.json`. Documentos do piloto/handoff atualizados, entrega sobre5751424, commit desta entrada.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência, sem escrita.
+- **Etapas/pendências:** espera municipal pela coleta longa removida; retestar tempo/cobertura real no site. Contrato líquido, preços/INCC, IVV, exportação/homologação seguem abertos. Supera endpoint interno pesado para contagem SP, sem transferir políticas FIERGS.
+
 ### 2026-10-29 — SP: contagem paginada de empreendimentos no slide 2 — Codex
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — coleta granular e contagem de empreendimentos lançados; autoria Codex, identidade Git Codex Test. Implementação/publicação autorizadas pelo usuário.
 - **O quê:** adapta as primitivas `readBuildingPage`/`insertBuilding` do Secovi/FIERGS à fonte interna v2, somente São Paulo/SP vertical, todas as páginas e sem excluir status. Conta IDs distintos por data de lançamento no mesmo período municipal disponível; total e evolução mensal no slide 2. Raiz não limita competência, tipologias/unidades não multiplicam empreendimentos. Sem alterar motores/políticas dos Panoramas.
@@ -658,7 +666,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **SP Institucional — validação publicada:** gerar com sessão pessoal e conferir setembro e o slide2, agora integrado à coleta interna v2 paginada. Confirmar acesso, cobertura/datas reais e contagem de IDs; testes locais usam empreendimentos sintéticos. Diferença municipal +22 é diagnóstico, causa/contrato líquido em aberto. Preços/INCC, IVV, exportação e homologação integral seguem pendentes.
+- [ ] **SP Institucional — validação publicada:** gerar com sessão pessoal e conferir setembro e o slide2, agora integrado ao cadastro leve /building paginado, sem bloquear os dados municipais. Medir o tempo e confirmar acesso, cobertura/datas reais e contagem de IDs; testes locais usam empreendimentos sintéticos. Diferença municipal +22 é diagnóstico, causa/contrato líquido em aberto. Preços/INCC, IVV, exportação e homologação integral seguem pendentes.
 
 - **Estimativas:** conferir a nova prévia de exportação em produção e aguardar comprovação do formato final de saída Nicolas/Belogic. Interface anterior aceita em28/10; revisão29/10 validada somente localmente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 

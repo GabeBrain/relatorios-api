@@ -1,5 +1,12 @@
 # Decisões e pontos abertos — SP
 
+## 29/10/2026 — cadastro leve e contagem independente
+
+- Após relato de15/52páginas em4:24, fonte da contagem passa a `GET https://geobrain.com.br/public-api/building`. Contrato local `src/assets/openapi/api-geobrain.json`: `BuildingResource` inclui `building_id`, `release_date`, `building_type`, `city`, `state`; filtros documentados de cidade/UF/tipo e paginação. Não contém `typologies_history`. Não usar filtros de lançamento não documentados, nem presumir igualdade do universo com a fonte interna antes de ensaio real. Fonte explícita `building`, sem fallback silencioso. Não se alterou a amostra municipal ou os motores Panorama.
+- Primeira página estabelece total/última página; demais lotes têm até três requisições em paralelo e são drenados antes de retornar erro. Totais/páginas estáveis, cobertura de IDs, escopo/datas e duplicatas continuam protegidos, com retry e abort. Contagem segue IDs/data original nos mesmos meses municipais; zero somente com cobertura comprovada.
+- Publica municipal antes da contagem. Controlador/versão próprios protegem a contagem; cancelamento preserva municipal, retry não repete séries. Nova geração/escopo/token/unmount invalidam respostas antigas. Atualizações funcionais preservam contagem, tipologias e históricos quando terminam em ordens diferentes. Reutiliza carregamento Brain `operation` para coleta que não bloqueia análise; overlay permanece nas operações municipais bloqueantes.
+- A redução do volume e da dependência de espera é verificável no código/testes. Tempo real da API e cobertura do cadastro no token do usuário precisam de medição autenticada; não prometer ganho numérico nem fechamento oficial.
+
 ## 29/10/2026 — empreendimentos: coletor Panorama adaptado ao SP
 
 - Fonte explícita: `POST https://app.geobrain.com.br/public-api/v2/building-with-history-internal`, `city=São Paulo`, `uf=SP`, `type=Vertical`, páginas de 100. Sem filtro de status ou fallback silencioso. Primitivas de contrato/paginação e conflito de IDs do Panorama reutilizadas, sem modificar políticas Secovi/FIERGS ou incluir horizontal.

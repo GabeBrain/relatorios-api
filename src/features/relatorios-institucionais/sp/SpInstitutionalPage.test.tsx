@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import SpInstitutionalPage from './SpInstitutionalPage';
 
-const access = vi.hoisted(() => ({ token: 'synthetic-token', error: false, loading: false, fixtureMode: 'success', apiMode: 'success', aborted: false, reload: vi.fn() }));
+const access = vi.hoisted(() => ({ token: 'synthetic-token', error: false, loading: false, fixtureMode: 'success', apiMode: 'success', aborted: false, projectsPending: false, finishProjects: null as (() => void) | null, reload: vi.fn() }));
 vi.mock('@/store/auth-store', () => ({ useAuthStore: (selector: (state: { getToken: () => string }) => unknown) => selector({ getToken: () => access.token }) }));
 vi.mock('@/features/shared/geo-api-scope-engine', () => ({
   GeoApiScopeSelector: ({ onChange }: { onChange: (geo: { uf: string; city: string }) => void }) => <div><button onClick={() => onChange({ uf: 'SP', city: 'São Paulo' })}>Escolher capital</button><button onClick={() => onChange({ uf: 'SP', city: 'Campinas' })}>Escolher Campinas</button><button onClick={() => onChange({ uf: 'RJ', city: '' })}>Trocar UF</button></div>,
@@ -36,15 +36,56 @@ vi.mock('./api', async () => {
 });
 vi.mock('./projects', async importOriginal => {
   const original = await importOriginal<typeof import('./projects')>();
-  return { ...original, fetchSpProjects: async (report: import('./model').SpPreview) => {
+  return { ...original, fetchSpProjects: async (report: import('./model').SpPreview, options: { signal: AbortSignal }) => {
     if (access.fixtureMode === 'granular-error') throw new Error('private granular diagnostic');
+    if (access.projectsPending) await new Promise<void>((resolve, reject) => { access.finishProjects = resolve; options.signal.addEventListener('abort', () => reject(new DOMException('cancelled', 'AbortError'))); });
     return original.buildSpProjects([{ building_id: 1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: '2026-07-01' }], report);
   } };
 });
-beforeEach(() => { access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.reload.mockClear(); });
+beforeEach(() => { access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.projectsPending = false; access.finishProjects = null; access.reload.mockClear(); });
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('libera municipal antes da contagem, permite cancelar e repetir somente empreendimentos', async () => {
+    access.projectsPending = true;
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText('Conferência parcial de dados da API');
+    expect(screen.queryByRole('dialog', { name: 'Consulta do relatório' })).not.toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: '26.824' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar contagem' }));
+    await screen.findByText('Contagem de empreendimentos indisponível');
+    expect(screen.getByRole('cell', { name: '26.824' })).toBeInTheDocument();
+    access.projectsPending = false;
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir empreendimentos' }));
+    await screen.findByText(/Cobertura conferida:/);
+  });
+  it('mescla contagem tardia com históricos e tipologias sem apagar nenhum resultado', async () => {
+    access.projectsPending = true;
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText('Conferência parcial de dados da API');
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir históricos' }));
+    await screen.findByText(/Três comparativos conferidos/);
+    access.finishProjects?.();
+    await screen.findByText(/Cobertura conferida:/);
+    expect(screen.getByText(/Três comparativos conferidos/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir tipologias' }));
+    await screen.findByText(/Tipologias conferidas:/);
+    expect(screen.getByText(/Cobertura conferida:/)).toBeInTheDocument();
+  });
+  it('ignora contagem antiga ao trocar o escopo', async () => {
+    access.projectsPending = true;
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText('Conferência parcial de dados da API');
+    fireEvent.click(screen.getByText('Escolher Campinas'));
+    access.finishProjects?.();
+    expect(screen.queryByRole('region', { name: 'Prévia do estudo' })).not.toBeInTheDocument();
+  });
   it('preenche slide 2 e preserva os totais municipais quando a coleta granular falha', async () => {
     render(<SpInstitutionalPage />);
     fireEvent.click(screen.getByText('Escolher capital'));

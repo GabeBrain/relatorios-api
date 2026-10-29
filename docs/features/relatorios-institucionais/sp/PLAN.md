@@ -1,5 +1,11 @@
 # SP capital — primeiro mapeamento
 
+## 29/10/2026 — correção de desempenho após ensaio real
+
+Usuário observou 4:24 na página15/52 da coleta integral de históricos. A contagem passa a usar `GET /public-api/building`, documentado no OpenAPI versionado com ID, cidade/UF, tipo e `release_date`, sem histórico mensal. Preserva paginação/cobertura e IDs distintos; após primeira página, busca até três páginas ao mesmo tempo. Sem filtros de data inventados, sem alterar o coletor Secovi/FIERGS.
+
+Dados municipais aparecem assim que sua consulta termina. Contagem automática continua com BrainLoadingState `operation`, tempo real, progresso e cancelamento próprio; completa slide2 depois. Cancelar/falhar mantém municipal; botão **Conferir empreendimentos** repete somente contagem. Troca de escopo, token ou nova geração abortam/invalidam resultados antigos. Tipologias/históricos e contagem mesclam resultados sem se apagar. Sem garantia de segundos na API real: melhoria estrutural validada localmente, nova medição autenticada pendente. Supera fonte interna pesada e overlay bloqueante das entradas anteriores.
+
 ## 29/10/2026 — coleta de empreendimentos integrada ao slide 2
 
 Autorização do usuário para implementar e publicar a adaptação do Secovi/FIERGS. A cada geração real, após descobrir os meses municipais, coleta todas as páginas da fonte interna v2 de São Paulo/SP vertical, sem excluir status. Reutiliza `readBuildingPage`/`insertBuilding` do Panorama; não altera seus motores. Conta IDs distintos pela `release_date` nos mesmos meses da parcial/trimestre completo, independentemente do `period` da raiz e das tipologias/unidades.

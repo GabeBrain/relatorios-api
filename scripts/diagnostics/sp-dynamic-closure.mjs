@@ -29,9 +29,9 @@ try {
     const url = new URL(route.request().url());
     const reply = data => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: data.length }, links: { next: null } }) });
     if (url.pathname.endsWith('/monitored-cities')) return reply([{ city: 'São Paulo', state: 'SP' }]);
-    if (url.pathname.endsWith('/building-with-history-internal')) {
+    if (url.pathname.endsWith('/building')) {
       granularCalls++;
-      assert.equal(route.request().method(), 'POST');
+      assert.equal(route.request().method(), 'GET');
       assert.equal(url.searchParams.get('type'), 'Vertical');
       assert.equal(url.searchParams.get('city'), 'São Paulo');
       if (slow) await new Promise(done => setTimeout(done, 1500));
@@ -78,6 +78,7 @@ try {
       if (month === '09') { await page.getByText(/Balanço 2026-09: diferença de 22 unidades entre estoque/).waitFor(); await page.getByRole('cell', { name: '126.307', exact: true }).first().waitFor(); }
       const heading = page.getByRole('heading', { name: /São Paulo \/ SP/ });
       assert.match(await heading.innerText(), month === '09' ? /trimestre completo até setembro/ : /parcial até/);
+      await page.getByText(/Cobertura conferida:/).waitFor();
       assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 0);
       await page.getByRole('button', { name: '2. Empreendimentos', exact: true }).click();
       assert.match(await page.getByRole('article').innerText(), /cobertura paginada conferida/);
@@ -99,15 +100,17 @@ try {
     }
     slow = true;
     await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
-    const loading = page.getByRole('dialog', { name: 'Consulta do relatório' });
-    await loading.waitFor();
-    await loading.getByText('0:01 decorridos').waitFor();
+    await page.getByText('Trimestre completo nas séries municipais da API', { exact: true }).waitFor();
+    assert.equal(await page.getByRole('dialog', { name: 'Consulta do relatório' }).count(), 0);
+    await page.getByLabel('0:01 decorridos').waitFor();
+    assert.equal(await page.getByRole('cell', { name: '126.307', exact: true }).count() > 0, true);
+    await page.locator('main').evaluate(element => { element.scrollTop = 0; });
     await page.screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-loading.png`) });
-    await page.keyboard.press('Escape');
-    await loading.waitFor({ state: 'detached' });
-    assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 0);
+    await page.getByRole('button', { name: 'Cancelar contagem', exact: true }).click();
+    await page.getByText('Contagem de empreendimentos indisponível', { exact: true }).waitFor();
+    assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 1);
     slow = false;
-    results.push({ width, dark, transitions: ['partial-1', 'partial-2', 'quarter-closed'], slowLoadingAndCancel: true });
+    results.push({ width, dark, transitions: ['partial-1', 'partial-2', 'quarter-closed'], municipalVisibleDuringSlowCountAndCancel: true });
   }
   granularFailure = true;
   await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();

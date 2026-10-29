@@ -1,5 +1,11 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 29/10/2026 — desempenho e municipal independente da contagem
+
+- **Evidência real recebida:** captura do usuário mostra15/52páginas e4:24decorridos na coleta implementada em5751424. Demora introduzida pela espera de históricos integrais sequenciais; testes anteriores não mediam latência real.
+- **Base contratual:** OpenAPI versionado, `/building` GET → `BuildingResource` com ID, data de lançamento, tipo e território, sem histórico mensal de tipologias. Nova fonte `building`, sem alterar Panorama nem presumir equivalência dos dois endpoints com dados reais. Leitura real autenticada indisponível ao agente; validação equivalente usa transporte injetado e interceptação local.
+- **Verificação:** paginação fora de ordem com limite3 e contagem íntegra; municipal visível antes da contagem; cancelamento/retry isolado, atualização tardia com históricos/tipologias e invalidação por escopo. Diagnóstico local atualizado para fonte GET e contagem lenta não bloqueante, preservando municipal após cancelamento/falha. 138testes SP/11arquivos, tipos completos do app, lint e build aprovados. Edge local1440/390 claro/escuro: municipal visível durante contagem lenta, cancelar preserva municipal, GET de cadastro, 33chamadas granulares simuladas, 19amostras, zero erros JS/chamadas reais. Capturas locais revisadas; primeira tentativa visual interrompida por recarga durante edição, repetida com sucesso após concluir as edições. Sem chamada real, ETA ou promessa de geração em segundos.
+
 ## 29/10/2026 — slide 2 com coleta granular paginada
 
 - **Ambiente:** Windows/PowerShell, Codex Test; `main` limpa em `795ee04`, único remote origin, fetch e comparação 0/0 antes de editar. Usuário autorizou implementar/publicar e confirmou Secovi/FIERGS como base. Nenhuma credencial extraída ou consulta GeoBrain autenticada feita pelo agente.
