@@ -1,5 +1,11 @@
 # SP capital — primeiro mapeamento
 
+## 29/10/2026 — quarto lote de dez: 51, 53–59, 61 e 62
+
+Preparados IVV por área, sete séries de preço/m² e dois gráficos de preço por padrão. Divisórias52/60preservadas. Uma coleta de históricos em memória atende39 e estes dez slides; invalidar a cada geração/escopo/token. Processamento local cancelável, sem reintroduzir varredura pesada na geração municipal.
+
+Preços nominais ponderados por estoque no mês, snapshots históricos reconciliados, média geral pelas unidades e recortes sem MCMV pela classificação confirmada. Tabela por área usa as14faixas originais com intervalos contínuos, snapshots de abertura/fechamento e fluxos observados, todos conferidos contra o município. [Métodos e limites](DECISOES.md), [validação](EVIDENCIAS.md). Próximo lote analítico começa em63/64 e estado atual do mercado; mapas/editorial/exportação continuam fora desta entrega. Não declarar85conteúdos concluídos.
+
 ## 29/10/2026 — terceiro lote de dez: 39–44, 46–48 e 50
 
 Implementados localmente: Top 10 bairros por vendas, cinco páginas de VGV vendido corrigido, oferta histórica com escoamento, dois comparativos anuais de oferta e IVV trimestral. Referências originais 39/40/46/47/48/50 inspecionadas. Mantém todas as 85 posições e as divisórias; não significa relatório integral pronto.

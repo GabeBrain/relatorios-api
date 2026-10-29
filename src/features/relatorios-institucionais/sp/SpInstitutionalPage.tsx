@@ -22,6 +22,7 @@ import { fetchSpTemporalInput, fetchSpLaunchSeriesRows, fetchSpSalesSeriesRows, 
 import { buildSpVglSeries, buildSpVgvSeries } from './vgl-series';
 import { buildSpStockSeries, blockedSpStockSeries } from './stock-series';
 import { buildSpSalesNeighborhoods, blockedSpSalesNeighborhoods } from './sales-neighborhoods';
+import { buildSpGranularDetailsAsync, blockedSpGranularDetails, SP_DETAIL_SLIDES } from './granular-details';
 
 const labels = { projects: 'Empreendimentos lançados', launches: 'Unidades lançadas', sales: 'Vendas líquidas', stock: 'Oferta final' } as const;
 const formatMonth = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
@@ -63,6 +64,7 @@ export default function SpInstitutionalPage() {
   const [neighborhoodsProgress, setNeighborhoodsProgress] = useState('Conferindo vendas por bairro…');
   const [neighborhoodsStartedAt, setNeighborhoodsStartedAt] = useState<number | null>(null);
   const neighborhoodsController = useRef(new AbortController()), neighborhoodsVersion = useRef(0);
+  const granularCache = useRef<{ key: string; buildings: Record<string,unknown>[]; stock: SpPreview['stockSeries'] } | null>(null);
   const version = useRef(0);
   const controller = useRef(new AbortController());
   const lastMode = useRef<'api' | 'fixture'>('api');
@@ -75,7 +77,7 @@ export default function SpInstitutionalPage() {
   const stopTypologies = useCallback(() => { typologiesController.current.abort(); typologiesVersion.current++; }, []);
   const stopStock = useCallback(() => { stockController.current.abort(); stockVersion.current++; }, []);
   const stopNeighborhoods = useCallback(() => { neighborhoodsController.current.abort(); neighborhoodsVersion.current++; }, []);
-  const invalidate = useCallback(() => { stopStock(); stopNeighborhoods(); setStockLoading(false); setNeighborhoodsLoading(false); stopSales(); stopTypologies(); setSalesLoading(false); setTypologiesLoading(false); stopSeries(); setSeriesLoading(false); stopProjects(); setProjectsLoading(false); controller.current.abort(); controller.current = new AbortController(); version.current += 1; setPreview(null); setLoading(false); setError(false); setTypologyError(false); setHistoryError(false); setStartedAt(null); }, [stopProjects, stopSeries, stopSales, stopTypologies, stopStock, stopNeighborhoods]);
+  const invalidate = useCallback(() => { granularCache.current = null; stopStock(); stopNeighborhoods(); setStockLoading(false); setNeighborhoodsLoading(false); stopSales(); stopTypologies(); setSalesLoading(false); setTypologiesLoading(false); stopSeries(); setSeriesLoading(false); stopProjects(); setProjectsLoading(false); controller.current.abort(); controller.current = new AbortController(); version.current += 1; setPreview(null); setLoading(false); setError(false); setTypologyError(false); setHistoryError(false); setStartedAt(null); }, [stopProjects, stopSeries, stopSales, stopTypologies, stopStock, stopNeighborhoods]);
   useEffect(() => { invalidate(); return () => { stopStock(); stopNeighborhoods(); stopSales(); stopTypologies(); stopSeries(); stopProjects(); controller.current.abort(); version.current += 1; }; }, [token, invalidate, stopProjects, stopSeries, stopSales, stopTypologies, stopStock, stopNeighborhoods]);
   const changeGeo = (next: GeoScope) => { invalidate(); setGeo(next); };
   const scope = useGeoApiScope({ value: geo, onChange: changeGeo });
@@ -120,6 +122,7 @@ export default function SpInstitutionalPage() {
 
   async function preparePreview(mode: 'api' | 'fixture') {
     if (!ready || loading) return;
+    granularCache.current = null;
     stopStock(); stopNeighborhoods(); setStockLoading(false); setNeighborhoodsLoading(false);
     stopSales(); stopTypologies(); setSalesLoading(false); setTypologiesLoading(false); stopSeries(); setSeriesLoading(false); stopProjects(); setProjectsLoading(false);
     controller.current.abort(); controller.current = new AbortController();
@@ -210,19 +213,30 @@ export default function SpInstitutionalPage() {
     if (report && isApi && isSpMunicipalPreview(report) && report.projects && !projectsLoading && !stockLoading && !report.stockSeries) void prepareStockSeries(report);
   }, [report, isApi, projectsLoading, stockLoading, prepareStockSeries]);
 
-  async function prepareSalesNeighborhoods(baseline: SpPreview) {
+  const prepareSalesNeighborhoods = useCallback(async (baseline: SpPreview, refresh = false) => {
     neighborhoodsController.current.abort(); neighborhoodsController.current = new AbortController();
     const signal = neighborhoodsController.current.signal, requestVersion = ++neighborhoodsVersion.current;
-    setNeighborhoodsLoading(true); setNeighborhoodsStartedAt(Date.now()); setNeighborhoodsProgress('Conferindo vendas por bairro…');
-    setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods: undefined } } : previous);
+    setNeighborhoodsLoading(true); setNeighborhoodsStartedAt(Date.now()); setNeighborhoodsProgress('Conferindo históricos detalhados…');
+    setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods: undefined, granularDetails: undefined } } : previous);
     try {
-      const buildings = await fetchSpBuildingRecords(baseline, { signal, onProgress: message => { if (requestVersion === neighborhoodsVersion.current) setNeighborhoodsProgress(message); } });
+      const options = { signal, onProgress: (message:string) => { if (requestVersion === neighborhoodsVersion.current) setNeighborhoodsProgress(message.replace('vendas por bairro','históricos detalhados')); } };
+      const buildings = !refresh && granularCache.current?.key === key ? granularCache.current.buildings : await fetchSpBuildingRecords(baseline, options);
+      if (requestVersion !== neighborhoodsVersion.current) return;
+      if (signal.aborted) throw new DOMException('Consulta cancelada.','AbortError');
+      granularCache.current = { key, buildings, stock: baseline.stockSeries };
+      const granularDetails = await buildSpGranularDetailsAsync(buildings, baseline, options);
+      if (requestVersion !== neighborhoodsVersion.current) return;
+      if (signal.aborted) throw new DOMException('Processamento cancelado.','AbortError');
       const salesNeighborhoods = buildSpSalesNeighborhoods(buildings, baseline);
-      if (requestVersion === neighborhoodsVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods } } : previous);
+      if (requestVersion === neighborhoodsVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods, granularDetails } } : previous);
     } catch {
-      if (requestVersion === neighborhoodsVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods: blockedSpSalesNeighborhoods(signal.aborted ? 'Vendas por bairro canceladas. Os demais dados foram mantidos.' : 'Não foi possível conferir os históricos completos dos bairros. Tente novamente.') } } : previous);
+      const message = signal.aborted ? 'Históricos detalhados cancelados. Os demais dados foram mantidos.' : 'Não foi possível conferir os históricos completos. Tente novamente.';
+      if (requestVersion === neighborhoodsVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods: blockedSpSalesNeighborhoods(message), granularDetails: blockedSpGranularDetails(message) } } : previous);
     } finally { if (requestVersion === neighborhoodsVersion.current) setNeighborhoodsLoading(false); }
-  }
+  }, [key]);
+  useEffect(() => {
+    if (report && isApi && !stockLoading && !neighborhoodsLoading && granularCache.current?.key === key && granularCache.current.stock !== report.stockSeries) void prepareSalesNeighborhoods(report);
+  }, [report, isApi, stockLoading, neighborhoodsLoading, key, prepareSalesNeighborhoods]);
 
   async function prepareHistories() {
     if (!ready || loading || !isApi || !isSpMunicipalPreview(report) || report.patterns?.status !== 'ready') return;
@@ -297,10 +311,12 @@ export default function SpInstitutionalPage() {
       {report.stockSeries?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Oferta histórica indisponível</AlertTitle><AlertDescription>{report.stockSeries.issues[0]}</AlertDescription></Alert>}
       {isSpMunicipalPreview(report) && !stockLoading && report.stockSeries?.status !== 'ready' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareStockSeries(report)}>Conferir oferta histórica</Button>}
       {report.stockSeries?.status === 'ready' && <p role="status" className="text-sm">Oferta histórica conferida desde janeiro de 2021. Fotografias mensais preservadas.</p>}
-      {neighborhoodsLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={neighborhoodsProgress} startedAt={neighborhoodsStartedAt} description="Conferindo a cobertura dos históricos para as vendas por bairro. Os demais slides permanecem disponíveis." /><Button variant="outline" onClick={() => neighborhoodsController.current.abort()}>Cancelar vendas por bairro</Button></div>}
+      {neighborhoodsLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={neighborhoodsProgress} startedAt={neighborhoodsStartedAt} description="Históricos compartilhados de vendas por bairro, áreas e preços. Os demais slides permanecem disponíveis." /><Button variant="outline" onClick={() => neighborhoodsController.current.abort()}>Cancelar históricos detalhados</Button></div>}
       {report.salesNeighborhoods?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Vendas por bairro indisponíveis</AlertTitle><AlertDescription>{report.salesNeighborhoods.issues[0]}</AlertDescription></Alert>}
-      {isSpMunicipalPreview(report) && !neighborhoodsLoading && report.salesNeighborhoods?.status === 'blocked' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareSalesNeighborhoods(report)}>Conferir vendas por bairro</Button>}
+      {isSpMunicipalPreview(report) && !neighborhoodsLoading && report.salesNeighborhoods?.status === 'blocked' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareSalesNeighborhoods(report,true)}>Conferir vendas por bairro</Button>}
       {report.salesNeighborhoods?.status === 'ready' && <p role="status" className="text-sm">Vendas por bairro conferidas por mês e padrão contra os totais municipais.</p>}
+      {report.granularDetails && <p role="status" className="text-sm">Históricos de áreas e preços processados. Cobertura e médias são conferidas em cada fotografia; valores ausentes ficam indicados no slide.</p>}
+      {isSpMunicipalPreview(report) && !neighborhoodsLoading && report.granularDetails && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareSalesNeighborhoods(report,true)}>Atualizar históricos de áreas e preços</Button>}
       {report.vglSeries?.status === 'ready' && <p role="status" className="text-sm">VGL corrigido pelo INCC-DI para {report.vglSeries.baseMonth}, com a mesma base no total e no MCMV. Índices: SindusconPR/FGV.</p>}
       <Table><TableCaption>{isApi ? 'Lançamentos e vendas somados somente nos meses conferidos; oferta final no último mês. Empreendimentos por ID distinto e data de lançamento, após conferir toda a paginação.' : 'Contagens do trimestre selecionado; oferta final no fechamento. Todos os valores desta prévia são fictícios.'}</TableCaption><TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead className="text-right">Quantidade</TableHead></TableRow></TableHeader><TableBody>
         {Object.entries(labels).map(([metric, label]) => <TableRow key={metric}><TableCell>{label}</TableCell><TableCell className="text-right tabular-nums">{report.metrics[metric as keyof typeof labels]?.toLocaleString('pt-BR') ?? 'Indisponível'}</TableCell></TableRow>)}
@@ -331,6 +347,6 @@ export default function SpInstitutionalPage() {
       {report.historyBatch?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Lote histórico ainda não reconciliado</AlertTitle><AlertDescription>{report.historyBatch.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
       {!!report.historyBatch?.checks.length && <details><summary className="cursor-pointer text-sm font-medium">Conferência dos balanços e da releitura</summary><ul className="mt-2 space-y-1 text-sm text-muted-foreground">{report.historyBatch.checks.map(check => <li key={check.label}>{check.label}: esperado {check.expected.toLocaleString('pt-BR')}, observado {check.actual.toLocaleString('pt-BR')}, diferença {check.delta.toLocaleString('pt-BR')}.</li>)}</ul></details>}
     </section>}
-    {report && <SpReportPages key={`${key}/${report.source}/${report.throughMonth}`} report={report} onSelectSlide={number => { if (number === 39 && isApi && !loading && !projectsLoading && !seriesLoading && !salesLoading && !stockLoading && !typologiesLoading && !neighborhoodsLoading && !report.salesNeighborhoods) void prepareSalesNeighborhoods(report); }} />}
+    {report && <SpReportPages key={`${key}/${report.source}/${report.throughMonth}`} report={report} onSelectSlide={number => { if ((number === 39 && !report.salesNeighborhoods || (SP_DETAIL_SLIDES as readonly number[]).includes(number) && !report.granularDetails) && isApi && !loading && !projectsLoading && !seriesLoading && !salesLoading && !stockLoading && !typologiesLoading && !neighborhoodsLoading) void prepareSalesNeighborhoods(report); }} />}
   </div>;
 }

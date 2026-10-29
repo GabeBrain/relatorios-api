@@ -7,6 +7,8 @@ import { SpTrendSlide } from './SpTrendSlide';
 import { SpComparisonSlide } from './SpComparisonSlide';
 import { SpNeighborhoodSlide } from './SpNeighborhoodSlide';
 import { SpMarketSlide } from './SpMarketSlide';
+import { SpDetailSlide } from './SpDetailSlide';
+import { SP_DETAIL_SLIDES } from './granular-details';
 import cover from './assets/cover.png';
 import projectsTemplate from './assets/template-13.png';
 import launchesTemplate from './assets/template-18.png';
@@ -37,18 +39,18 @@ function SlideFrame({ children }: { children: ReactNode }) {
 export function SpReportPages({ report, onSelectSlide }: { report: SpPreview; onSelectSlide?: (number: number) => void }) {
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState(false);
-  useEffect(() => { if (page === 39) onSelectSlide?.(page); }, [page, report, onSelectSlide]);
+  useEffect(() => { if (page === 39 || (SP_DETAIL_SLIDES as readonly number[]).includes(page)) onSelectSlide?.(page); }, [page, report, onSelectSlide]);
   if (!['partial', 'quarter-closed', 'ready'].includes(report.status)) return null;
   const real = report.source === 'api' || report.source === 'recorded-api';
   const period = spPeriodLabel(report);
   const definition = SP_ORIGINAL_SLIDES[page - 1];
   const slide = <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
     <img src={templates[page] ?? (page >= 32 && page <= 44 ? salesTemplate : projectsTemplate)} alt={page === 1 ? 'Capa original Brain Inteligência Estratégica' : `Layout: ${definition.title}`} className="absolute inset-0 h-full w-full" />
-    {page >= 13 && page <= 22 || page >= 26 && page <= 30 || page >= 32 && page <= 36 || page >= 40 && page <= 44 ? <SpTrendSlide key={page} report={report} number={page} /> : [23, 24, 37, 38, 47, 48].includes(page) ? <SpComparisonSlide key={page} report={report} number={page} /> : [25,39].includes(page) ? <SpNeighborhoodSlide key={page} report={report} sales={page === 39} /> : [46,50].includes(page) ? <SpMarketSlide key={page} report={report} number={page} /> : page > 1 ? <OriginalTextSlide number={page} title={definition.title} report={report} /> : null}
+    {(SP_DETAIL_SLIDES as readonly number[]).includes(page) ? <SpDetailSlide key={page} report={report} slide={page} /> : page >= 13 && page <= 22 || page >= 26 && page <= 30 || page >= 32 && page <= 36 || page >= 40 && page <= 44 ? <SpTrendSlide key={page} report={report} number={page} /> : [23, 24, 37, 38, 47, 48].includes(page) ? <SpComparisonSlide key={page} report={report} number={page} /> : [25,39].includes(page) ? <SpNeighborhoodSlide key={page} report={report} sales={page === 39} /> : [46,50].includes(page) ? <SpMarketSlide key={page} report={report} number={page} /> : page > 1 ? <OriginalTextSlide number={page} title={definition.title} report={report} /> : null}
   </article>;
   const navigation = <nav aria-label="Navegação dos slides originais" className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">{SP_ORIGINAL_SLIDES.map(item => <Button className="h-auto min-h-10 max-w-full whitespace-normal py-2 text-left" key={item.number} variant={page === item.number ? 'default' : 'outline'} aria-pressed={page === item.number} onClick={() => setPage(item.number)}>{item.number}. {item.title}</Button>)}</nav>;
   return <section aria-label="Páginas do relatório" className="space-y-4">
-    <div><h2 className="text-lg font-semibold">Montagem do relatório</h2><p className="text-sm text-muted-foreground">Ordem e numeração dos 85 slides do modelo original · {report.quarter} · {real ? period : 'Dados fictícios'}. Conteúdos ainda não implementados ficam indicados na posição original. Exportação e homologação pendentes.</p><p className="text-sm text-muted-foreground">Séries e comparativos são preenchidos automaticamente após a conferência das fontes. Rankings de bairros dependem da reconciliação com os totais municipais; vendas por bairro são coletadas ao abrir o slide 39. VGL e VGV usam INCC-DI e base única no último mês disponível do período.</p></div>
+    <div><h2 className="text-lg font-semibold">Montagem do relatório</h2><p className="text-sm text-muted-foreground">Ordem e numeração dos 85 slides do modelo original · {report.quarter} · {real ? period : 'Dados fictícios'}. Conteúdos ainda não implementados ficam indicados na posição original. Exportação e homologação pendentes.</p><p className="text-sm text-muted-foreground">Séries e comparativos são preenchidos automaticamente após a conferência das fontes. Rankings de bairros dependem da reconciliação com os totais municipais; os históricos de bairros, áreas e preços são coletados ao abrir um desses slides e reaproveitados entre eles. VGL e VGV usam INCC-DI e base única no último mês disponível do período.</p></div>
     {!expanded && navigation}
     <Button variant="outline" onClick={() => setExpanded(true)}>Ampliar slides</Button>
     {!expanded && <SlideFrame>{slide}</SlideFrame>}

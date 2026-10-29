@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 29/10/2026 — quarto lote SP: 51, 53–59, 61/62
+
+Ambiente observado: Windows/PowerShell, Git Codex Test, main limpa`671568c`, único origin0/0 após fetch. Usuário pediu próximo lote;52/60são divisórias preservadas, não faltantes. Dez conteúdos de área/preço implementados localmente. Históricos compartilhados com39, cache só em memória e descartado em nova geração/escopo/token, processamento local cancelável. Preços ponderados por oferta final e snapshots/fluxos conferidos; critérios em [DECISOES](../../features/relatorios-institucionais/sp/DECISOES.md). Nenhuma consulta de negócio autenticada; QA sintético, sem tocar Secovi/FIERGS/Corretor/Quanti.198testesSP aprovados; tipos/lint/build e navegador registrados emEVIDENCIAS. Cobertura real, método do analista, publicação observada e exportação integral ainda dependem de revisão. Próxima frente:63/64 e estado atual do mercado, preservando numeração original.
+
 ## 29/10/2026 — terceiro lote SP: 39–44, 46–48 e 50
 
 Resultado local: 186 testes SP, tipos completos do app, lint, build e QA Edge1440/390 claro/escuro aprovados. Estados lentos de bairros/oferta, cancelamento/retry, parciais, erro/vazio e sinais negativos observados em fontes interceptadas; nenhuma API real. Evidências no documento da feature.

@@ -55,11 +55,11 @@ vi.mock('./api', async () => {
 });
 vi.mock('./projects', async importOriginal => {
   const original = await importOriginal<typeof import('./projects')>();
-  const { syntheticSalesBuildings } = await import('./__tests__/sales-buildings');
+  const { syntheticGranularBuildings } = await import('./__tests__/granular-buildings');
   return { ...original, fetchSpBuildingRecords: async (_report: unknown, options: { signal: AbortSignal }) => {
     access.neighborhoodCalls++;
     if (access.neighborhoodsPending) await new Promise((_resolve, reject) => options.signal.addEventListener('abort', () => reject(new DOMException('cancelled', 'AbortError'))));
-    return syntheticSalesBuildings();
+    return syntheticGranularBuildings();
   }, fetchSpProjects: async (report: import('./model').SpPreview, options: { signal: AbortSignal }) => {
     if (access.fixtureMode === 'granular-error') throw new Error('private granular diagnostic');
     if (access.projectsPending) await new Promise<void>((resolve, reject) => { access.finishProjects = resolve; options.signal.addEventListener('abort', () => reject(new DOMException('cancelled', 'AbortError'))); });
@@ -70,6 +70,42 @@ beforeEach(() => { access.token = 'synthetic-token'; access.error = false; acces
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('compartilha uma coleta entre preços, área e bairros e invalida cache em nova geração', async () => {
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText(/Oferta histórica conferida desde janeiro/);
+    fireEvent.click(screen.getByRole('button', { name: '53. Evolução R$/m², média geral' }));
+    await screen.findByText(/Históricos de áreas e preços processados/);
+    expect(access.neighborhoodCalls).toBe(1);
+    for (const title of ['51. IVV por área útil, tabela MCMV/demais padrões','55. Evolução R$/m², 1 dormitório sem MCMV','61. Ticket médio por sete padrões e média geral','39. Top 10 bairros por vendas líquidas']) {
+      fireEvent.click(screen.getByRole('button', { name: title }));
+      expect(screen.getByRole('article')).not.toHaveTextContent('em conferência');
+    }
+    expect(access.neighborhoodCalls).toBe(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText(/Oferta histórica conferida desde janeiro/);
+    fireEvent.click(screen.getByRole('button', { name: '53. Evolução R$/m², média geral' }));
+    await screen.findByText(/Históricos de áreas e preços processados/);
+    expect(access.neighborhoodCalls).toBe(2);
+  });
+  it('recuperar oferta revalida os históricos em memória sem repetir a coleta pesada', async () => {
+    access.stockPending = true;
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByRole('button', { name: 'Cancelar oferta histórica' });
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar oferta histórica' }));
+    await screen.findByText('Oferta histórica indisponível');
+    fireEvent.click(screen.getByRole('button', { name: '51. IVV por área útil, tabela MCMV/demais padrões' }));
+    await screen.findByText(/Históricos de áreas e preços processados/);
+    expect(screen.getByRole('article')).toHaveTextContent('em conferência');
+    expect(access.neighborhoodCalls).toBe(1);
+    access.stockPending = false;
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir oferta histórica' }));
+    await waitFor(() => expect(screen.getByRole('article')).not.toHaveTextContent('em conferência'));
+    expect(access.neighborhoodCalls).toBe(1);
+  });
   it('só coleta históricos de bairros ao abrir39, mantém demais slides e permite cancelar/repetir', async () => {
     access.neighborhoodsPending = true;
     render(<SpInstitutionalPage />);
@@ -78,14 +114,14 @@ describe('Página SP institucional', () => {
     await screen.findByText(/Oferta histórica conferida desde janeiro/);
     expect(access.neighborhoodCalls).toBe(0);
     fireEvent.click(screen.getByRole('button', { name: '39. Top 10 bairros por vendas líquidas' }));
-    await screen.findByRole('button', { name: 'Cancelar vendas por bairro' });
+    await screen.findByRole('button', { name: 'Cancelar históricos detalhados' });
     expect(access.neighborhoodCalls).toBe(1);
     fireEvent.click(screen.getByRole('button', { name: '39. Top 10 bairros por vendas líquidas' }));
     expect(access.neighborhoodCalls).toBe(1);
     fireEvent.click(screen.getByRole('button', { name: '40. VGV vendido trimestral, corrigido INCC' }));
     expect(screen.queryByRole('dialog', { name: 'Consulta do relatório' })).not.toBeInTheDocument();
     expect(screen.getByRole('cell', { name: '26.824' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Cancelar vendas por bairro' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar históricos detalhados' }));
     await screen.findByText('Vendas por bairro indisponíveis');
     access.neighborhoodsPending = false;
     fireEvent.click(screen.getByRole('button', { name: 'Conferir vendas por bairro' }));
