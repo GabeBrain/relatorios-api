@@ -1,5 +1,11 @@
 # SP capital — primeiro mapeamento
 
+## 29/10/2026 — lote final: 28 posições e cobertura das85
+
+Implementados 63/64 e66–80 (17 analíticos),9–11 (3 destaques recalculados) e3–5/7/82–85 (8 artes institucionais da referência2T2026). As85 posições originais possuem renderizador; ausência de fonte continua explicitada. Mapas usam coordenadas/oferta da fotografia atual e não imagens analíticas antigas; editoriais mantêm edição identificada. Mesma coleta compartilhada em memória, sem acrescentar chamadas de negócio. Padrões reutilizados: visualizador original, tabelas/gráficos SVG, primitivas cartográficas do Panorama, GeoApiScopeEngine e BrainLoadingState `field` para tiles.
+
+**Próximas etapas:** revisão autenticada das85 posições no token do usuário, revisão do analista (MAP, capacidade/VGV, estágio e cenários de ticket), atualização editorial de pessoas/contatos/perfil territorial se necessária e implementação/validação da exportação integral. [Métodos](DECISOES.md) e [evidências](EVIDENCIAS.md). Cobertura de implementação não equivale a homologação com dados reais. Esta entrada supera contagens de slides pendentes nos checkpoints anteriores.
+
 ## 29/10/2026 — quarto lote de dez: 51, 53–59, 61 e 62
 
 Preparados IVV por área, sete séries de preço/m² e dois gráficos de preço por padrão. Divisórias52/60preservadas. Uma coleta de históricos em memória atende39 e estes dez slides; invalidar a cada geração/escopo/token. Processamento local cancelável, sem reintroduzir varredura pesada na geração municipal.

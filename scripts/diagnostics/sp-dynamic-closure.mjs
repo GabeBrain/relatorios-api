@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 import { spGranularFixture } from './sp-granular-fixture.mjs';
 
-// Own local app, synthetic authentication and mixed-date replays, all external traffic blocked.
+// Own local app, synthetic authentication and mixed-date replays, GeoBrain calls intercepted; only Mapbox basemap requests allowed.
 const output = resolve('.local-inputs/relatorios-lucas/sp/dynamic-closure');
 await mkdir(output, { recursive: true });
 const recorded = JSON.parse(await readFile('src/features/relatorios-institucionais/sp/__tests__/fixtures/sp-municipal-2026.json', 'utf8'));
@@ -15,6 +15,7 @@ const base = 'http://127.0.0.1:4176';
 const server = spawn(process.execPath, [resolve('node_modules/vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '4176', '--strictPort'], { windowsHide: true, stdio: 'ignore' });
 let browser;
 const results = [];
+const mapboxResponses=[];
 try {
   let ready = false;
   for (let i = 0; i < 60 && !ready; i++) {
@@ -26,7 +27,7 @@ try {
   browser = await chromium.launch({ headless: true, channel: 'msedge' });
   const context = await browser.newContext();
   await context.addInitScript(() => localStorage.setItem('brain-auth', JSON.stringify({ state: { token: 'synthetic-only', email: 'fixture@example.invalid', issuedAt: Date.now(), expiresAt: Date.now() + 3600000 }, version: 0 })));
-  let closing = '07', slow = false, failure = false, empty = false, granularFailure = false, slowNeighborhood = false, slowStock = false, negativeSales = false, detailsCase = 'normal', neighborhoodCalls = 0, calls = 0, granularCalls = 0;
+  let closing = '07', slow = false, failure = false, empty = false, granularFailure = false, slowNeighborhood = false, slowStock = false, negativeSales = false, detailsCase = 'normal', neighborhoodCalls = 0, calls = 0, granularCalls = 0, slowMapbox = false, mapboxFailure = false;
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
     const reply = data => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: data.length }, links: { next: null } }) });
@@ -94,6 +95,7 @@ try {
       }
       return reply(Object.entries(months).flatMap(([month, values]) => values.map((value, index) => ({ period: `${month}-01`, group: recorded.groups[index], building_type: 'Vertical', [field]: value, ...(metric === 'releases' ? { vgv_release: value * 100000.25 } : metric === 'sales' ? { vgv_liquid_sales: value * 100000.25 } : {}) }))).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period') && row.period <= `2026-${closing}-31`));
     }
+    if (url.hostname === 'api.mapbox.com') {if(slowMapbox)await new Promise(done=>setTimeout(done,1400));return mapboxFailure?route.abort():route.continue();}
     if (url.origin === base) return route.continue();
     return route.abort();
   });
@@ -103,10 +105,12 @@ try {
     const article = page.getByRole('article');
     await article.evaluate(element => element.scrollIntoView({ block:'center', inline:'nearest', behavior:'instant' }));
     await page.evaluate(() => document.fonts.ready);
+    await article.evaluate(async element=>Promise.all(Array.from(element.querySelectorAll('img')).map(img=>img.decode().catch(()=>{}))));
     await page.waitForTimeout(120);
     if (options.path.includes('original-53')) await writeFile(resolve(output,'price-header-dom.json'), JSON.stringify(await article.evaluate(el => Array.from(el.querySelectorAll('svg > text')).map(e => ({html:e.outerHTML, text:e.textContent, box:e.getBoundingClientRect().toJSON(), fill:getComputedStyle(e).fill, opacity:getComputedStyle(e).opacity}))), null,2));
     await article.screenshot(options);
   };
+  page.on('response', response=>{if(new URL(response.url()).hostname==='api.mapbox.com')mapboxResponses.push(response.status());});
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   for (const width of [1440, 390]) for (const dark of [false, true]) {
@@ -144,14 +148,16 @@ try {
         await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
         await page.getByText(/VGV vendido corrigido pelo INCC-DI/).waitFor();
         await page.getByText(/VGL corrigido pelo INCC-DI para 2026-09/).waitFor();
-        for (const slide of [13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,32,33,34,35,36,37,38,39,40,41,42,43,44,46,47,48,50,51,53,54,55,56,57,58,59,61,62]) {
+        for (const slide of Array.from({length:85},(_,i)=>i+1)) {
           await openSlide(slide);
           if (slide === 39) await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
           if (slide === 39) assert.equal(neighborhoodCalls, width === 1440 ? dark ? 2 : 1 : dark ? 4 : 3);
-          if (slide >= 51) await page.getByText(/Históricos de áreas e preços processados/).waitFor();
+          if (slide >= 51 && slide <=80) await page.getByText(/Históricos de áreas e preços processados/).waitFor();
           await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
           if (slide === 23) await writeFile(resolve(output, 'comparison-dom.json'), JSON.stringify(await page.getByRole('article').evaluate(el => Array.from(el.querySelectorAll('svg text')).slice(0, 4).map(e => ({ text: e.textContent, html: e.outerHTML, box: e.getBoundingClientRect().toJSON(), fill: getComputedStyle(e).fill }))), null, 2));
           assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em confer\u00eancia|Comparativo em confer\u00eancia|Bairros em confer\u00eancia|Ranking de bairros em confer\u00eancia|Hist\u00f3rico em confer\u00eancia|Áreas e preços em conferência/);
+          if([67,68,70,71,74,75,79,80].includes(slide))await page.getByText(/Carregando base cartogr/).waitFor({state:'hidden',timeout:30000});
+          assert.doesNotMatch(await page.getByRole('article').innerText(), /Conte.do pendente|Destaque em confer.ncia|Localiza..es em confer.ncia/);
           await captureSlide({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-original-${slide}.png`) });
         }
         await page.getByText('Diferenças de balanço por grupo', { exact: true }).click();
@@ -236,6 +242,15 @@ try {
     await openSlide(51);
     await page.getByRole('article').getByText('Até 34m² (MCMV)', { exact:true }).waitFor();
   }
+  const cdp=await context.newCDPSession(page);
+  await cdp.send('Network.clearBrowserCache');
+  slowMapbox=true;await openSlide(67);
+  await page.getByText(/Carregando base cartogr/).waitFor();
+  await captureSlide({path:resolve(output,'map-loading.png')});
+  await page.getByText(/Carregando base cartogr/).waitFor({state:'hidden'});
+  slowMapbox=false;mapboxFailure=true;await cdp.send('Network.clearBrowserCache');
+  await openSlide(68);await page.getByRole('article').getByText('Base cartogr\u00e1fica parcialmente indispon\u00edvel.',{exact:true}).waitFor();
+  await captureSlide({path:resolve(output,'map-provider-error.png')});mapboxFailure=false;
   granularFailure = true;
   await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
   await page.getByText('Contagem de empreendimentos indisponível', { exact: true }).waitFor();
@@ -249,7 +264,7 @@ try {
   await page.getByText('Não foi possível preparar a prévia', { exact: true }).waitFor();
   assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 0);
   assert.deepEqual(errors, []);
-  const result = { results, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
+  const result = { results, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, mapboxResponses: {total:mapboxResponses.length,success:mapboxResponses.filter(status=>status===200).length}, originalSlidesCovered:85, mapSlowAndProviderError:true, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
   await writeFile(resolve(output, 'result.json'), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 } finally {

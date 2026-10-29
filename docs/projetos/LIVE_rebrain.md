@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-29 — SP Institucional: lote final de28 posições — Codex
+
+- **Ambiente/funcionalidade:** Rebrain, `/rebrain/relatorios-institucionais/sp`. Codex/Codex Test a pedido do usuário, main limpa`e431fa7`, único origin0/0 após fetch. Pedido explícito de fazer os28 restantes juntos. As85 posições originais passam a ter renderizador, mantendo a ordem; dados ausentes continuam em conferência.
+- **Entrega:**17 analíticos63/64/66–80,3 destaques dinâmicos9–11 e8 institucionais3–5/7/82–85. Preços ponderados, coortes/padrões/dormitórios, matriz por área, composição por estágio e capacidade/vendas acumuladas/estoque/VGV nominal. Oito mapas amplos/aproximados usam coordenadas e oferta atuais; sem coordenadas/medição, a cobertura permanece explícita. Artes institucionais conservam edição2T2026, perfil7jun2026, identificadas na interface; não são atualização observada de equipe/contatos.
+- **Métodos/desempenho:** MAP segue recorte sem Econômico; cenário400–500mil não atesta regra legal. Estágio declarado, sem inferência pela idade. VGV da fotografia exige capacidade=vendidas+estoque e preço atual, separado dos fluxos corrigidos pelo INCC. Uma coleta privada compartilhada em memória, sem endpoint novo; BrainLoadingState `field` nos tiles Mapbox. Reutiliza primitivas cartográficas do Panorama e visualizador original, sem alterar outros motores. [Decisões](../features/relatorios-institucionais/sp/DECISOES.md).
+- **Validação/limites:**205 testes SP, tipos/lint/build aprovados; QA local e evidências em [EVIDENCIAS](../features/relatorios-institucionais/sp/EVIDENCIAS.md). Dados de negócio sintéticos/replays, sem GeoBrain autenticada; Mapbox público configurado respondeu200. Cobertura das85 é implementação, não homologação real/exportação integral. Revisão autenticada, metodologia/edição pelo analista, publicação observada e exportação seguem pendentes.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas, sem escrita.
+
 ### 2026-10-29 — SP Institucional: IVV por área e preços ponderados — Codex
 
 - **Ambiente/funcionalidade:** Rebrain, `/rebrain/relatorios-institucionais/sp`. Codex/Codex Test por solicitação do usuário; abertura em `main` limpa `671568c`, único origin em 0/0 após fetch. Implementação e evidências no commit `b8241cd`. Quarto lote: dez conteúdos nas posições 51, 53–59, 61 e 62. Divisórias 52 e 60 mantidas, sem renumeração.
@@ -662,6 +670,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**29/10 ? SP, lote final:**85 posições com renderizador, após os28 finais. Mapas/indicadores dependem de fontes conferidas; institucionais conservam a edição identificada. Próximo: validar no token real, revisar com analista/editorial e preparar exportação integral. As entradas abaixo registram checkpoints anteriores; pendências de implementação dos28 foram superadas.
+
 **29/10 — SP, quarto lote:** 51, 53–59 e 61/62 implementados localmente; 52/60 são divisórias preservadas. Preços e áreas compartilham históricos e reconciliam cobertura antes dos cálculos, com 198 testes aprovados. A próxima frente começa em63/64 e segue o estado atual do mercado. Revisão autenticada, pesos/método do analista e aceite permanecem abertos; não são 85 conteúdos concluídos.
 
 **29/10 — SP, terceiro lote:** implementados 39–44,46–48 e50, somando dez conteúdos ao lote anterior. VGV vendido usa o INCC já definido; oferta, IVV e escoamento com fórmulas explícitas e ranking sob demanda, sem prender a prévia. 186 testes locais aprovados; validação autenticada e aceite metodológico seguem abertos. Próxima frente:51 e bloco de preços, preservando posições originais.
@@ -706,6 +716,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — lote final:** validar85 posições no token real, cobertura de coordenadas/fotografias/estágio/capacidade; revisar MAP, VGV nominal e cenário400–500mil com analista. Confirmar pessoas/contatos e perfiljun2026 antes do aceite. Implementar/verificar exportação integral e observar publicação. Os28 finais já foram implementados; anotações antigas abaixo descrevem checkpoints, não lacunas atuais de renderização.
 
 - [ ] **SP — quarto lote:** validar 51, 53–59 e61/62 com token real: cobertura por fotografia, pesos de estoque, preço privativo, dormitórios, faixas e fluxos. Dado ausente fica indicado no slide; não completar amostras por estimativa. Revisar escolhas com analista. Próximos conteúdos:63/64 e tabelas/mapas do estado atual; editorial e exportação integral ainda pendentes.
 

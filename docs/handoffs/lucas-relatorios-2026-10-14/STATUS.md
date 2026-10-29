@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 29/10/2026 — lote final SP, 28 posições
+
+Windows/PowerShell, Git Codex Test/Codex, main inicialmente limpa`e431fa7`, único origin0/0 após fetch. Usuário pediu fazer os28 restantes juntos. Implementados17 analíticos63/64/66–80,3 destaques9–11 e8 institucionais3–5/7/82–85, mantendo85 posições originais. Institucionais conservam a edição identificada2T2026;7jun2026. Mapas atuais por coordenadas/oferta da fotografia, médias ponderadas, tabelas conservativas e VGV nominal com capacidade=vendidas+estoque. Mesma coleta compartilhada sem endpoint novo; primitivas cartográficas apenas reutilizadas, sem modificar Secovi/FIERGS. [Critérios](../../features/relatorios-institucionais/sp/DECISOES.md), [validação](../../features/relatorios-institucionais/sp/EVIDENCIAS.md).
+
+Cobertura de renderização das85 não comprova números reais. GeoBrain de negócio não consultada pelo agente: QA com fontes sintéticas/replays; Mapbox público configurado respondeu200, separado da fonte de negócio. Revisão no token real, método do analista, atualização editorial, publicação observada e exportação integral ainda pendentes. Não há pergunta metodológica bloqueando implementação; decisões seguem delegação do usuário. Corretor, ÁreaQuanti e outros motores preservados.
+
 ## 29/10/2026 — quarto lote SP: 51, 53–59, 61/62
 
 Ambiente observado: Windows/PowerShell, Git Codex Test, main limpa`671568c`, único origin0/0 após fetch. Usuário pediu próximo lote;52/60são divisórias preservadas, não faltantes. Dez conteúdos de área/preço implementados localmente. Históricos compartilhados com39, cache só em memória e descartado em nova geração/escopo/token, processamento local cancelável. Preços ponderados por oferta final e snapshots/fluxos conferidos; critérios em [DECISOES](../../features/relatorios-institucionais/sp/DECISOES.md). Nenhuma consulta de negócio autenticada; QA sintético, sem tocar Secovi/FIERGS/Corretor/Quanti.198testesSP aprovados; tipos/lint/build e navegador registrados emEVIDENCIAS. Cobertura real, método do analista, publicação observada e exportação integral ainda dependem de revisão. Próxima frente:63/64 e estado atual do mercado, preservando numeração original.

@@ -31,7 +31,7 @@ describe('SP — estrutura original e dez slides de lançamentos', () => {
     expect(screen.getByRole('article')).toHaveTextContent('São Paulo capital');
     open(6); expect(screen.getByRole('img', { name: 'Sumário original' })).toBeInTheDocument();
     open(12); expect(screen.getByRole('article')).toHaveTextContent('LANÇAMENTOS VERTICAIS');
-    open(85); expect(screen.getByRole('img', { name: 'Conteúdo pendente: slide 85' })).toBeInTheDocument();
+    open(85); expect(screen.getByRole('img', { name: 'Referência institucional: Encerramento e contato Brain' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Quadro de lançamentos por padrão/ })).not.toBeInTheDocument();
   });
   it('preenche exatamente os dez slides 13 a 22 e preserva a parcial', () => {

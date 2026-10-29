@@ -1,6 +1,6 @@
 import { describe,expect,it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { buildSpGranularDetails, buildSpGranularDetailsAsync, spAreaBand, SP_DETAIL_SLIDES } from './granular-details';
+import { buildSpGranularDetails, buildSpGranularDetailsAsync, spAreaBand, SP_PRICE_DETAIL_SLIDES } from './granular-details';
 import { syntheticGranularBuildings } from './__tests__/granular-buildings';
 import { recordedInput } from './__tests__/recorded';
 import { syntheticStockSeries } from './__tests__/launch-series';
@@ -15,7 +15,7 @@ describe('SP — áreas e preços nos dez originais51/53–59/61/62',()=>{
     expect(details.status).toBe('ready'); expect(details.area.status).toBe('ready');
     expect(details.area.total).toMatchObject({ openingStock:report.monthly![0].openingStock,stock:report.metrics.stock,launches:report.metrics.launches,sales:report.metrics.sales });
     expect(details.area.rows).toHaveLength(14); expect(details.prices.series[53]).toHaveLength(13);
-    for(const slide of SP_DETAIL_SLIDES) { const html=renderToStaticMarkup(<SpDetailSlide report={{...report,granularDetails:details}} slide={slide}/>); expect(html).not.toContain('em conferência'); expect(html).not.toContain('Conteúdo pendente'); }
+    for(const slide of SP_PRICE_DETAIL_SLIDES) { const html=renderToStaticMarkup(<SpDetailSlide report={{...report,granularDetails:details}} slide={slide}/>); expect(html).not.toContain('em conferência'); expect(html).not.toContain('Conteúdo pendente'); }
   });
   it('pondera por unidades em oferta e calcula geral direto das unidades, sem média de médias',()=>{
     const report=baseline(), buildings=syntheticGranularBuildings(), details=buildSpGranularDetails(buildings,report);

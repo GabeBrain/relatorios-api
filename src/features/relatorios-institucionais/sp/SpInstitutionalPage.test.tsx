@@ -78,7 +78,7 @@ describe('Página SP institucional', () => {
     fireEvent.click(screen.getByRole('button', { name: '53. Evolução R$/m², média geral' }));
     await screen.findByText(/Históricos de áreas e preços processados/);
     expect(access.neighborhoodCalls).toBe(1);
-    for (const title of ['51. IVV por área útil, tabela MCMV/demais padrões','55. Evolução R$/m², 1 dormitório sem MCMV','61. Ticket médio por sete padrões e média geral','39. Top 10 bairros por vendas líquidas']) {
+    for (const title of ['51. IVV por área útil, tabela MCMV/demais padrões','55. Evolução R$/m², 1 dormitório sem MCMV','61. Ticket médio por sete padrões e média geral','39. Top 10 bairros por vendas líquidas', '63. Ticket por dormitório, com recortes MCMV/MAP', '67. Mapa de estoque, visão ampla']) {
       fireEvent.click(screen.getByRole('button', { name: title }));
       expect(screen.getByRole('article')).not.toHaveTextContent('em conferência');
     }

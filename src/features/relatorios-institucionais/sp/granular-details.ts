@@ -4,9 +4,11 @@ import { isSpMunicipalPreview, monthOf, type SpPreview } from './model';
 import { priorMonth, quarterMonths } from './temporal';
 import { shiftSpMonth } from './project-trends';
 import { SP_API_PATTERNS } from './segments';
+import { buildSpMarketDetails, type SpMarketDetails } from './market-details';
 
 export const SP_PRICE_STANDARDS = ['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto','Luxo'] as const;
-export const SP_DETAIL_SLIDES = [51,53,54,55,56,57,58,59,61,62] as const;
+export const SP_PRICE_DETAIL_SLIDES = [51,53,54,55,56,57,58,59,61,62] as const;
+export const SP_DETAIL_SLIDES = [...SP_PRICE_DETAIL_SLIDES,63,64,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80] as const;
 export const SP_AREA_LABELS = ['Até 34m² (MCMV)', 'Até 34m² (DPA)', '35–39m² (MCMV)', '35–39m² (DPA)', '40–44m²', '45–49m²', '50–59m²', '60–69m²', '70–84m²', '85–99m²', '100–150m²', '151–200m²', '201–250m²', '251m² ou mais'] as const;
 export function spAreaBand(area: number, mcmv: boolean): number | null {
   if (!Number.isFinite(area) || area <= 0) return null;
@@ -21,9 +23,11 @@ export interface SpGranularDetails {
   status: 'ready' | 'blocked'; issues: string[];
   prices: { series: Record<number, SpPricePoint[]>; annualChanges: Record<number, number | null>; standards: (SpPriceValue & { group: string })[]; overall: SpPriceValue };
   area: { status: 'ready' | 'blocked'; issues: string[]; rows: SpAreaRow[]; total: SpAreaRow | null };
+  market?: SpMarketDetails;
 }
 export const blockedSpGranularDetails = (message: string): SpGranularDetails => ({ status: 'blocked', issues: [message], prices: { series: {}, annualChanges: {}, standards: [], overall: { units: 0, ticket: null, meter: null, issues: [message] } }, area: { status: 'blocked', issues: [message], rows: [], total: null } });
-interface Observation { project: string; month: string; standard: string; bedrooms: number | null; area: number | null; stock: number | null; sales: number | null; qty: number | null; price: number | null; meter: number | null; release: string }
+export interface SpObservation { project: string; month: string; standard: string; bedrooms: number | null; area: number | null; stock: number | null; sales: number | null; qty: number | null; price: number | null; meter: number | null; release: string; sold: number | null; stage: unknown }
+type Observation = SpObservation;
 interface Frame { rows: Observation[]; issues: Set<string> }
 const numeric = (raw: unknown, signed = false, integer = false): number | null => {
   if (typeof raw !== 'number' && (typeof raw !== 'string' || !raw.trim())) return null;
@@ -75,7 +79,7 @@ class DetailBuilder {
       seen.set(identity, fingerprint);
       const price = numeric(row.price), area = numeric(row.private_area), explicitMeter = row.price_private_area;
       const meter = area === null || area <= 0 ? null : explicitMeter === null || explicitMeter === undefined || explicitMeter === '' ? price !== null ? price / area : null : numeric(explicitMeter);
-      frame.rows.push({ project: id, month, standard, bedrooms: numeric(row.number_bedroom, false, true), area, stock: numeric(row.typology_stock, false, true), sales: numeric(row.sold_in_period, true, true), qty: numeric(row.qty, false, true), price, meter, release });
+      frame.rows.push({ project: id, month, standard, bedrooms: numeric(row.number_bedroom, false, true), area, stock: numeric(row.typology_stock, false, true), sales: numeric(row.sold_in_period, true, true), qty: numeric(row.qty, false, true), price, meter, release, sold: numeric(row.sold,false,true), stage: row.building_status });
     }
     for (const [month, frame] of this.frames) if (month >= release && !observed.has(month)) frame.issues.add('Há empreendimento sem fotografia na competência necessária.');
   }
@@ -120,7 +124,7 @@ class DetailBuilder {
       series[number] = all.slice(1).map((row,i) => ({ label: row.label, month: row.month, value: row.price.meter, variation: change(row.price.meter, all[i].price.meter), issue: row.price.meter === null ? row.price.issues[0] : undefined }));
       annualChanges[number] = change(all.at(-1)!.price.meter, value(shiftSpMonth(this.report.throughMonth!, -12)).meter);
     }
-    return { status: 'ready', issues: [], prices: { series, annualChanges, standards: SP_PRICE_STANDARDS.map(group => ({ group, ...this.price(this.report.throughMonth!, row => row.standard === group) })), overall: this.price(this.report.throughMonth!) }, area: this.area() };
+    return { status: 'ready', issues: [], prices: { series, annualChanges, standards: SP_PRICE_STANDARDS.map(group => ({ group, ...this.price(this.report.throughMonth!, row => row.standard === group) })), overall: this.price(this.report.throughMonth!) }, area: this.area(), market: buildSpMarketDetails(this.frames.get(this.report.throughMonth!)!.rows, [...this.buildings.values()], this.report, this.validate(this.report.throughMonth!)) };
   }
   area(): SpGranularDetails['area'] {
     const blocked = (message: string): SpGranularDetails['area'] => ({ status: 'blocked', issues: [message], rows: [], total: null });
