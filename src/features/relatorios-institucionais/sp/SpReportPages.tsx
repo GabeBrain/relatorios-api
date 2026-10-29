@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import type { SpPreview, SpTypologies } from './model';
+import { spPeriodLabel, type SpPreview, type SpTypologies } from './model';
 import { buildSpSegments, SP_DETAIL_PAGES, SP_PATTERN_PAGES, SP_TABLE_PAGES } from './segments';
 import { SpTableSlide } from './SpTableSlide';
 import { SpSegmentHistorySlide } from './SpSegmentHistorySlide';
@@ -40,9 +40,9 @@ function SlideFrame({ children }: { children: ReactNode }) {
 export function SpReportPages({ report }: { report: SpPreview }) {
   const [page, setPage] = useState(0);
   const [expanded, setExpanded] = useState(false);
-  if (!['partial', 'ready'].includes(report.status)) return null;
+  if (!['partial', 'quarter-closed', 'ready'].includes(report.status)) return null;
   const real = report.source === 'api' || report.source === 'recorded-api';
-  const period = report.throughMonth ? `Parcial até ${month(report.throughMonth)}` : 'Exemplo com dados fictícios';
+  const period = spPeriodLabel(report);
   const segments = buildSpSegments(report);
   const detail = page >= 14 && page < 26 ? SP_DETAIL_PAGES[page - 14] : undefined;
   const pattern = page >= 26 && page < 40 ? SP_PATTERN_PAGES[page - 26] : undefined;
@@ -56,7 +56,7 @@ export function SpReportPages({ report }: { report: SpPreview }) {
       <p className="absolute left-[62px] top-[155px] text-[18px]">{report.quarter} · {real ? period : 'Dados fictícios · exemplo de desenvolvimento'}</p>
       <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity(page >= 5 && distribution?.status !== 'ready' ? null : report.metrics[metric])}</p></div>
       {page >= 8 && report.historyBatch?.status === 'ready' && report.historyBatch.segments ? <SpSegmentHistorySlide batch={report.historyBatch} metric={metric as 'launches' | 'sales' | 'stock'} /> : page >= 5 ? <DistributionChart result={distribution} metric={metric as 'launches' | 'sales' | 'stock'} kind={page >= 8 ? 'segmento' : 'tipologia'} /> : page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}
-      <p className={`absolute left-[62px] text-[16px] ${page >= 5 ? 'top-[605px]' : 'top-[590px]'}`}>{page === 1 ? 'Sem estimativa ou preenchimento com zero.' : page >= 8 && report.historyBatch?.status === 'ready' && report.historyBatch.segments ? 'Mesmos meses nos dois anos · regra de segmentos confirmada por Lucas.' : page >= 5 ? 'Distribuição nos meses conferidos. Comparação com o ano anterior pendente.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
+      <p className={`absolute left-[62px] text-[16px] ${page >= 5 ? 'top-[605px]' : 'top-[590px]'}`}>{page === 1 ? 'Sem estimativa ou preenchimento com zero.' : page >= 8 && report.historyBatch?.status === 'ready' && report.historyBatch.segments ? 'Mesmos meses nos dois anos · regra de segmentos confirmada por Lucas.' : page >= 5 ? 'Distribuição nos meses conferidos. Comparação com o ano anterior pendente.' : report.status === 'quarter-closed' ? 'Série dos três meses conferida. Comparações históricas dependem de Conferir históricos.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
     </>}
   </article>;
   const navigation = <nav aria-label="Navegação das páginas" className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">{titles.map((title, index) => <Button key={title} variant={page === index ? 'default' : 'outline'} aria-pressed={page === index} onClick={() => setPage(index)}>{index + 1}. {title}</Button>)}</nav>;
@@ -65,7 +65,7 @@ export function SpReportPages({ report }: { report: SpPreview }) {
     {!expanded && navigation}
     <Button variant="outline" onClick={() => setExpanded(true)}>Ampliar slides</Button>
     {!expanded && <SlideFrame>{slide}</SlideFrame>}
-    <Dialog open={expanded} onOpenChange={setExpanded}><DialogContent className="max-h-[95dvh] w-[96vw] max-w-6xl overflow-auto p-4 sm:p-6"><DialogTitle>Prévia dos slides · São Paulo</DialogTitle><DialogDescription>Parcial para revisão. Em telas pequenas, gire o aparelho para ampliar.</DialogDescription>{navigation}<SlideFrame>{slide}</SlideFrame></DialogContent></Dialog>
+    <Dialog open={expanded} onOpenChange={setExpanded}><DialogContent className="max-h-[95dvh] w-[96vw] max-w-6xl overflow-auto p-4 sm:p-6"><DialogTitle>Prévia dos slides · São Paulo</DialogTitle><DialogDescription>{real ? period : 'Dados fictícios'} · Prévia para revisão. Em telas pequenas, gire o aparelho para ampliar.</DialogDescription>{navigation}<SlideFrame>{slide}</SlideFrame></DialogContent></Dialog>
   </section>;
 }
 

@@ -1,5 +1,5 @@
 import { safeNumber } from '@/features/panorama-secovi-fiergs/lib/launches';
-import { monthOf, type SpPreview, type SpLaunchHistory } from './model';
+import { isSpMunicipalPreview, monthOf, type SpPreview, type SpLaunchHistory } from './model';
 import { quarterMonths, type SpTemporalRow } from './temporal';
 
 export interface SpLaunchHistoryInput {
@@ -12,7 +12,7 @@ export interface SpLaunchHistoryInput {
 }
 
 export function matchedLaunchMonths(report: SpPreview): { current: string[]; previous: string[] } | null {
-  if (report.status !== 'partial' || !['api', 'recorded-api'].includes(report.source ?? '') || !report.throughMonth || !report.closingMonth || report.throughMonth > report.closingMonth) return null;
+  if (!isSpMunicipalPreview(report) || !['api', 'recorded-api'].includes(report.source ?? '') || !report.throughMonth || !report.closingMonth || report.throughMonth > report.closingMonth) return null;
   const current = quarterMonths(report.quarter).filter(month => month <= report.throughMonth!);
   if (!current.length || current.join('|') !== report.monthly?.map(row => row.month).join('|') || current.at(-1) !== report.throughMonth) return null;
   return { current, previous: current.map(month => `${Number(month.slice(0, 4)) - 1}${month.slice(4)}`) };

@@ -42,7 +42,7 @@ export interface SpHistoryBatch {
 export interface SpPreview {
   entity: typeof SP_INSTITUTIONAL.id;
   quarter: Quarter;
-  status: 'ready' | 'partial' | 'awaiting-closure' | 'incomplete' | 'empty' | 'invalid';
+  status: 'ready' | 'partial' | 'quarter-closed' | 'awaiting-closure' | 'incomplete' | 'empty' | 'invalid';
   closingMonth: string | null;
   metrics: SpMetrics;
   issues: string[];
@@ -56,6 +56,17 @@ export interface SpPreview {
   launchHistory?: SpLaunchHistory;
   historyBatch?: SpHistoryBatch;
 }
+/** Municipal coverage is independent of granular coverage and final report approval. */
+export function isSpMunicipalPreview(report: SpPreview | null | undefined): report is SpPreview & { status: 'partial' | 'quarter-closed' } {
+  return Boolean(report && ['api', 'recorded-api'].includes(report.source ?? '') && ['partial', 'quarter-closed'].includes(report.status));
+}
+
+export function spPeriodLabel(report: SpPreview): string {
+  if (!report.throughMonth) return 'Exemplo com dados fictícios';
+  const month = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${report.throughMonth}-01T12:00:00Z`));
+  return report.status === 'quarter-closed' ? `Trimestre fechado até ${month}` : `Parcial até ${month}`;
+}
+
 const emptyMetrics = (): SpMetrics => ({ projects: null, launches: null, sales: null, stock: null });
 const normalized = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 

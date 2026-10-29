@@ -1,4 +1,4 @@
-import type { SpDistribution, SpHistoryMetric, SpPreview } from './model';
+import { isSpMunicipalPreview, type SpDistribution, type SpHistoryMetric, type SpPreview } from './model';
 
 /** Confirmed by Lucas on 2026-10-15 for this SP institutional report only. */
 export const SP_SEGMENT_RULE = {
@@ -18,7 +18,7 @@ const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u0
 
 export function buildSpSegments(report: SpPreview): SpDistribution {
   const blocked = (message: string): SpDistribution => ({ status: 'blocked', issues: [message], rows: [], checks: [] });
-  if (report.status !== 'partial' || !['api', 'recorded-api'].includes(report.source ?? '') || report.patterns?.status !== 'ready') return blocked('Confira os dados reais para obter os padrões do período selecionado.');
+  if (!isSpMunicipalPreview(report) || !['api', 'recorded-api'].includes(report.source ?? '') || report.patterns?.status !== 'ready') return blocked('Confira os dados reais para obter os padrões do período selecionado.');
   const mapping = new Map(Object.entries(SP_SEGMENT_RULE.groups).flatMap(([segment, standards]) => standards.map(standard => [normalize(standard), segment] as const)));
   const seen = new Set<string>();
   const rows = Object.keys(SP_SEGMENT_RULE.groups).map(group => ({ group, launches: 0, sales: 0, stock: 0 }));

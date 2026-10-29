@@ -385,6 +385,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-29 — SP Institucional: fechamento dinâmico a cada geração — Codex
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — cobertura temporal da prévia municipal; autoria Codex, identidade Git `Codex Test`, solicitação do usuário nesta sessão.
+- **O quê:** releitura do fechamento sem cache HTTP em cada geração; um/dois meses consecutivos reconciliados mantêm parcial, três produzem `quarter-closed`. Rótulos da página/slides e liberação de tipologias, segmentos, quadros e históricos reconhecem ambos os estados. Nova geração retira detalhes anteriores; consultas bloqueantes usam overlay Brain com tempo real e cancelamento por botão/Escape. Nenhuma consulta agendada ou ampliação granular.
+- **Guardas:** mês ausente, grupo incompatível, duplicata, paginação incompleta ou balanço divergente impedem publicação dos indicadores. Estoque usa apenas o último mês; vendas negativas preservadas. Trimestre municipal fechado não equivale à homologação/exportação ou cobertura granular do estudo.
+- **Arquivos:** `src/features/relatorios-institucionais/sp/`, opção aditiva de cache em `src/lib/http-client.ts`, diagnóstico `scripts/diagnostics/sp-dynamic-closure.mjs` e plano/status do piloto.
+- **Commits:** commit desta entrada; base `c62e41e`.
+- **Monday:** [SP — Institucional mensal/trimestral](https://brain381753.monday.com/boards/18398638577/pulses/13149411648) — `13149411648`; somente referência, sem escrita.
+
+- **Validação 29/10:** 115 testes SP/10 arquivos, TypeScript explícito do app, lint dirigido e build final aprovados. Diagnóstico Edge headless local cobre 1440/390 px, claro/escuro, transições de um/dois/três meses, fonte vazia/erro e resposta lenta com overlay/cronômetro/cancelamento; zero erros JS e zero chamadas reais. Setembro sintético, sem alegação de disponibilidade real. Evidência local ignorada em `.local-inputs/relatorios-lucas/sp/dynamic-closure/`; reprodução por `node scripts/diagnostics/sp-dynamic-closure.mjs`.
+- **Limites:** setembro real não confirmado; controle do navegador pessoal interrompido por não determinar a URL com segurança. QA headless local usa setembro sintético. Sem push/deploy nesta entrega; etapa validada localmente, próximo publicar com autorização e conferir o retorno autenticado.
+
 ### 29/10/2026 — Estimativas: prévia da base exportável
 
 - **Entrega:** modal ampliado com até50linhas e as13colunas atuais do Excel analítico, inspirado no `BasePreviewPanel` das coletas Quanti (somente leitura). Cabeçalhos arrastáveis, alternativa Alt+setas/menu, ocultar/restaurar e restaurar padrão. Excel completo usa exatamente as colunas visíveis na ordem escolhida; prévia não limita a quantidade exportada. Pacote de evidências acompanha a configuração no CSV analítico/manifesto, preservando histórico e arquivo candidato de26colunas.
@@ -587,6 +598,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**29/10 — SP Institucional:** cobertura dinâmica parcial/fechada implementada localmente; reconsulta a cada geração sem cache HTTP. Cobertura granular, homologação integral e publicação desta revisão seguem pendentes.
+
 **29/10 — Estimativas:** Gabriel reabriu a frente para prévia configurável no modal:50linhas, ordem/ocultação aplicadas ao Excel completo. Implementada e validada localmente (122testes), publicação/aceite desta revisão pendentes. Interface anterior aceita em produção por Gabriel em28/10 após envio`9d14f2a`. Fonte/limites na seção13 do plano essencial. Contrato final de saída Nicolas/Belogic, importação e avaliação independente continuam abertos.
 
 **22/10 — Estimativas de vendas Finotti:** reprodução matemática local e acesso API somente leitura confirmados; [plano do dossiê](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md), [auditoria das exportações](../features/estimativas-vendas/AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md) e [plano da página editorial](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) definem fontes, recortes, carteira e interface. Guarapuava/Maringá conciliou 72 empreendimentos/124 tipologias horizontais e oito trimestres com a API/Série Histórica. Curitiba ampliou a evidência: 371 empreendimentos/693 tipologias horizontais, 14.154 vendas e 14.154 estoques numéricos comparáveis iguais à API em 11/2024–09/2026. A API preenche posições `-` do Excel, e um vertical exportado falta na API; completude não é idêntica. `bases.estimation` foi confirmado para a base/período por mensagem encaminhada, mas a linhagem ainda não aparece por competência na série API nem no Excel. Contrato oficial, retrospectiva observada, cauda mensal, bandas, UI e retorno continuam pendentes. A página horizontal poderá usar API direta, com auditoria de cobertura separada. Sem runtime publicado nesta etapa.
@@ -621,6 +634,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP Institucional — fechamento dinâmico:** publicar esta revisão com autorização e conferir na sessão pessoal se setembro/2026 já está disponível e reconciliado. Setembro do QA é sintético; seguir com granular, preços/INCC, IVV e exportação após os portões do piloto.
 
 - **Estimativas:** conferir a nova prévia de exportação em produção e aguardar comprovação do formato final de saída Nicolas/Belogic. Interface anterior aceita em28/10; revisão29/10 validada somente localmente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 

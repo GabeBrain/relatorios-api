@@ -1,5 +1,15 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 29/10/2026 — fechamento dinâmico por nova geração
+
+- **Validação 29/10:** 115 testes SP/10 arquivos, TypeScript explícito do app, lint dirigido e build final aprovados. Diagnóstico Edge headless local cobre 1440/390 px, claro/escuro, transições de um/dois/três meses, fonte vazia/erro e resposta lenta com overlay/cronômetro/cancelamento; zero erros JS e zero chamadas reais. Setembro sintético, sem alegação de disponibilidade real. Evidência local ignorada em `.local-inputs/relatorios-lucas/sp/dynamic-closure/`; reprodução por `node scripts/diagnostics/sp-dynamic-closure.mjs`.
+
+- Contratos: estado `quarter-closed` somente após três meses consecutivos com fontes completas, grupos equivalentes e balanços zerados. Um/dois meses permanecem parciais. Fonte inválida não vira zero nem parcial silenciosa. Testes preservam bloqueios de período alterado entre consultas, cobertura granular, exportação e homologação. A opção aditiva `cache` no cliente HTTP é usada pelo SP com `no-store`; demais consumidores mantêm o comportamento anterior.
+- Ensaio visual encontrou contêiner modal sem dimensão própria; corrigido para cobrir a viewport, mantendo foco no cancelamento e Escape. Capturas finais de série fechada/um mês e overlay revisadas. Menu móvel recolhido pelo controle existente durante o QA, sem modificar o shell.
+- Ambiente: Windows, base `c62e41e`, identidade Git `Codex Test`, main inicialmente limpa/0–0 após fetch. Vitest inicialmente bloqueado no sandbox ao ler diretório ancestral; verificações executadas com escalonamento aprovado, sem alterar controles globais.
+- Limite: controle do navegador pessoal interrompido por não reconhecer a URL com segurança. Sem leitura da sessão, API real ou produção. Em setembro do diagnóstico, cada padrão usa lançamentos10/vendas4/estoque anterior+6 somente para provar o fluxo; não representam números de mercado.
+
+
 ## Envio confirmado; runtime ainda antigo — 16/10/2026
 
 Push `07ca8bb..00b5599` confirmado pelo Git, refs 0/0 e árvore limpa. Depois do envio, a rota pública retornou HTTP 200 com `index-v7U-Wb1K.js`, sem literal da rota SP e sem chunk SpInstitutionalPage: não é publicação desta entrega. Nenhuma consulta de mercado executada. GitHub status pending/sem checks de deploy; acesso à aba específica Lovable solicitado após revisão automática bloquear inspeção de janela não relacionada. Não contornar o bloqueio nem afirmar publicação por plausibilidade.

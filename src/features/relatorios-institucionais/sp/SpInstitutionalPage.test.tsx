@@ -18,12 +18,13 @@ vi.mock('./fixture', async importOriginal => {
 });
 vi.mock('./api', async () => {
   const { recordedInput } = await import('./__tests__/recorded');
+  const { syntheticWindow } = await import('./__tests__/synthetic-window');
   const { syntheticTypologyInput } = await import('./__tests__/typology');
   const { syntheticHistoryBatch } = await import('./__tests__/history-batch');
   return { fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal; groupBy?: string }) => {
     if (access.apiMode === 'error') throw new Error('private API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
-    return { ...(options.groupBy === 'Tipologia' ? syntheticTypologyInput() : recordedInput()), origin: 'api' };
+    return { ...(access.apiMode === 'closed' ? { ...syntheticWindow('09'), groupBy: options.groupBy ?? 'Padrão' } : options.groupBy === 'Tipologia' ? syntheticTypologyInput() : recordedInput()), origin: 'api' };
   }, fetchSpHistoryBatch: async (_report: unknown, options: { signal: AbortSignal }) => {
     if (access.apiMode === 'error') throw new Error('private historical API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
@@ -36,6 +37,23 @@ beforeEach(() => { access.token = 'synthetic-token'; access.error = false; acces
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('nova geração substitui a parcial pelo trimestre fechado e mantém os detalhamentos disponíveis', async () => {
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText('Conferência parcial de dados da API');
+    access.apiMode = 'closed';
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText('Trimestre fechado nas séries municipais da API');
+    expect(screen.getByRole('heading', { name: /3T2026 · trimestre fechado até setembro/ })).toBeInTheDocument();
+    expect(screen.queryByText('Conferência parcial de dados da API')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Conferir históricos' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir tipologias' }));
+    await screen.findByText(/Tipologias conferidas:/);
+    fireEvent.click(screen.getByRole('button', { name: '41. Quadro de lançamentos por padrão' }));
+    expect(screen.getByRole('img', { name: 'Quadro reconciliado por padrão' })).toBeInTheDocument();
+    expect(screen.getAllByRole('cell', { name: 'Indisponível' })).toHaveLength(1);
+  });
   it('um balanço anterior divergente mantém os três comparativos indisponíveis', async () => {
     render(<SpInstitutionalPage />);
     fireEvent.click(screen.getByText('Escolher capital'));

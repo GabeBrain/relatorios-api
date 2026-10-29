@@ -1,4 +1,4 @@
-import type { SpHistoryMetric, SpPreview } from './model';
+import { spPeriodLabel, type SpHistoryMetric, type SpPreview } from './model';
 import { buildSpTable } from './tables';
 
 const quantity = (value: number) => value.toLocaleString('pt-BR');
@@ -8,7 +8,7 @@ export function SpTableSlide({ report, dimension, metric }: { report: SpPreview;
   if (!table) return <div className="absolute left-[90px] top-[300px] w-[1100px] text-center"><p className="text-[28px] font-bold">Quadro por {kind} indisponível</p><p className="mt-4 text-[20px]">{dimension === 'typologies' ? 'Use Conferir tipologias e confira as divergências.' : 'Confira os dados reais e seus totais antes de preencher este quadro.'}</p></div>;
   const height = Math.min(43, 320 / table.rows.length);
   return <>
-    <p className="absolute left-[62px] top-[155px] text-[20px]">{report.quarter} · parcial até {report.throughMonth}</p>
+    <p className="absolute left-[62px] top-[155px] text-[20px]">{report.quarter} · {spPeriodLabel(report)}</p>
     <p className="absolute left-[62px] top-[190px] text-[18px]">Quadro por {kind} · grupos originais da API</p>
     <p className="absolute right-[100px] top-[155px] text-[28px] font-bold text-[#5b7638]">{quantity(table.total)} unidades</p>
     <svg role="img" aria-label={`Quadro reconciliado por ${kind}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">

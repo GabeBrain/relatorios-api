@@ -82,7 +82,7 @@ export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter)
   }
   if (result.checks.some(row => row.delta !== 0)) return fail('incomplete', 'Lançamentos, vendas e estoque não reconciliam nos meses fechados.');
   return {
-    ...result, status: 'partial',
+    ...result, status: months.length === 3 ? 'quarter-closed' : 'partial',
     patterns: input.groupBy === 'Tipologia' ? undefined : summarizeSpGroups(input, months, result.throughMonth),
     metrics: { projects: null, launches: result.monthly!.reduce((sum, row) => sum + row.launches, 0), sales: result.monthly!.reduce((sum, row) => sum + row.sales, 0), stock: result.monthly!.at(-1)!.closingStock },
     issues: [

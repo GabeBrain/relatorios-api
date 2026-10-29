@@ -1,5 +1,14 @@
 # Estado do handoff
 
+## Retomada — fechamento dinâmico SP — 29/10/2026
+
+- **Ambiente da sessão:** Windows/PowerShell neste checkout, identidade Git `Codex Test` (não atribuir esta identidade a Lucas); `main`, base `c62e41e`, árvore limpa e `origin/main...main = 0/0` após `git fetch --all`, sem upstream. Nenhuma mudança de acesso/conta. Autoria Codex a pedido do usuário nesta sessão.
+- **Implementação:** cada geração relê o fechamento da API sem cache HTTP; um/dois meses reconciliados geram parcial, três fecham o trimestre municipal. Estado `quarter-closed` distinto de homologação integral, com títulos, slides, dimensões e históricos compatíveis. Nova geração invalida dados anteriores; sem coleta longa ou consulta em segundo plano. [Plano vigente](../../features/relatorios-institucionais/sp/PLAN.md).
+
+- **Validação 29/10:** 115 testes SP/10 arquivos, TypeScript explícito do app, lint dirigido e build final aprovados. Diagnóstico Edge headless local cobre 1440/390 px, claro/escuro, transições de um/dois/três meses, fonte vazia/erro e resposta lenta com overlay/cronômetro/cancelamento; zero erros JS e zero chamadas reais. Setembro sintético, sem alegação de disponibilidade real. Evidência local ignorada em `.local-inputs/relatorios-lucas/sp/dynamic-closure/`; reprodução por `node scripts/diagnostics/sp-dynamic-closure.mjs`.
+- **Limite real:** controle do navegador pessoal interrompido por não conseguir determinar a URL com segurança. Não foi confirmado se setembro já está na API real. QA equivalente executado em navegador headless local com fontes simuladas; não presume publicação, aceite ou dado real de setembro. Próximo: publicar após autorização e executar a conferência autenticada pela rota direta.
+
+
 ## Push concluído; publicação Lovable pendente — 16/10/2026
 
 `git push origin main` enviou `07ca8bb..00b5599`; comparação posterior 0/0 e árvore limpa. Build pós-merge/108 testes/check-live-docs aprovados. Sondagem pública após o push: HTTP 200, mas ainda `index-v7U-Wb1K.js`, sem rota ou chunk SP; publicação NÃO confirmada. Status GitHub pending sem contextos de deploy. Leitura da janela Opera foi bloqueada pela revisão automática por estar em conteúdo não relacionado; nenhuma leitura dessa página realizada. Solicitado a Lucas abrir/autorizar nova aba específica Lovable para concluir publicação, sem ler a aba atual. Push autorizado já executado; falta somente publicar/verificar no Lovable. Não presumir que push equivale a deploy público.

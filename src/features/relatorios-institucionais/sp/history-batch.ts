@@ -1,7 +1,7 @@
 import { buildSpSegments } from './segments';
 import { summarizeSpGroups } from './distribution';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
-import { monthOf, type SpHistoryBatch, type SpHistoryMetric, type SpLaunchHistory, type SpPreview } from './model';
+import { isSpMunicipalPreview, monthOf, type SpHistoryBatch, type SpHistoryMetric, type SpLaunchHistory, type SpPreview } from './model';
 import { matchedLaunchMonths } from './history';
 import { buildSpTemporalPreview, priorMonth, type SpTemporalInput } from './temporal';
 
@@ -30,8 +30,8 @@ export function buildSpHistoryBatch(input: SpHistoryBatchInput, municipal: SpPre
   }
   const current = buildSpTemporalPreview(input.current, municipal.quarter);
   const previous = buildSpTemporalPreview(input.previous, priorYearQuarter(municipal.quarter));
-  if (current.status !== 'partial' || current.patterns?.status !== 'ready') return { ...blocked(`A janela atual não foi conferida. ${current.issues[0] ?? 'Confira os padrões retornados.'}`), checks: current.checks };
-  if (previous.status !== 'partial' || previous.patterns?.status !== 'ready') return { ...blocked(`A janela do ano anterior não foi conferida. ${previous.issues[0] ?? 'Confira os padrões retornados.'}`), checks: [...current.checks, ...previous.checks] };
+  if (!isSpMunicipalPreview(current) || current.patterns?.status !== 'ready') return { ...blocked(`A janela atual não foi conferida. ${current.issues[0] ?? 'Confira os padrões retornados.'}`), checks: current.checks };
+  if (!isSpMunicipalPreview(previous) || previous.patterns?.status !== 'ready') return { ...blocked(`A janela do ano anterior não foi conferida. ${previous.issues[0] ?? 'Confira os padrões retornados.'}`), checks: [...current.checks, ...previous.checks] };
   if (current.monthly!.map(row => row.month).join('|') !== months.current.join('|') || previous.monthly!.map(row => row.month).join('|') !== months.previous.join('|')) return blocked('As janelas dos dois anos não cobrem os mesmos meses.');
   const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
   const groupKeys = (report: SpPreview) => report.patterns!.rows.map(row => normalize(row.group)).sort().join('|');

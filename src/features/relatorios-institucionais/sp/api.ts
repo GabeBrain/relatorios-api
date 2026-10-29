@@ -26,7 +26,7 @@ function createSpRead(options: SpReadOptions) {
     checkAbort();
     const response = await requestWithRetry(async () => {
       checkAbort();
-      const value = await request({ url: `${BASE}/${path}`, query, signal: options.signal, timeoutMs: 20_000 });
+      const value = await request({ url: `${BASE}/${path}`, query, signal: options.signal, timeoutMs: 20_000, cache: 'no-store' });
       return { ...value, retryAfterMs: Math.min(value.retryAfterMs ?? 0, 3000) || null };
     }, { signal: options.signal, attempts: 2, sleep: options.sleep });
     checkAbort();

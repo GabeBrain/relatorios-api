@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { RequestOptions } from '@/lib/http-client';
 import { fetchSpTemporalInput, fetchSpLaunchHistory, fetchSpHistoryBatch, type SpReadOptions } from './api';
 import { buildSpTemporalPreview } from './temporal';
+import { syntheticWindow } from './__tests__/synthetic-window';
 import { recordedInput } from './__tests__/recorded';
 import { syntheticLaunchHistory } from './__tests__/history';
 import { syntheticHistoryBatch } from './__tests__/history-batch';
@@ -21,6 +22,26 @@ function recordedServer() {
 const noSleep = async () => {};
 
 describe('SP — transporte curto e paginado, sem provedor real', () => {
+  it('cada geração relê a raiz e avança de um para dois e três meses sem cache de parcial', async () => {
+    let closing: '07' | '08' | '09' = '07';
+    const request = vi.fn(async (options: RequestOptions): Promise<Response> => {
+      const input = syntheticWindow(closing);
+      if (options.url.endsWith('/building-with-history')) return reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: input.rootPeriod }], 1, 5183, 5183));
+      const metric = options.url.split('/').at(-1) as 'sales' | 'releases' | 'stock';
+      return reply(envelope(input[metric].filter(row => String(row.period) >= String(options.query?.start_period) && String(row.period) <= String(options.query?.end_period))));
+    });
+    for (const month of ['07', '08', '09'] as const) {
+      closing = month;
+      const input = await fetchSpTemporalInput('3T2026', { request });
+      const report = buildSpTemporalPreview(input, '3T2026');
+      expect(report.status).toBe(month === '09' ? 'quarter-closed' : 'partial');
+      expect(report.monthly).toHaveLength(Number(month) - 6);
+      expect(request.mock.calls.at(-1)![0].query?.end_period).toBe(`2026-${month}-${month === '09' ? '30' : '31'}`);
+    }
+    expect(request).toHaveBeenCalledTimes(12);
+    expect(request.mock.calls.filter(([options]) => options.url.endsWith('/building-with-history'))).toHaveLength(3);
+    for (const [options] of request.mock.calls) expect(options.cache).toBe('no-store');
+  });
   it('lote usa oito requests curtos, duas janelas iguais e estoque inicial em cada ano', async () => {
     const fixture = syntheticHistoryBatch(), base = recordedServer();
     const request = vi.fn(async (options: RequestOptions) => {
