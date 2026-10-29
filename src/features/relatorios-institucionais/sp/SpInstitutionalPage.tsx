@@ -14,6 +14,7 @@ import { SpReportPages } from './SpReportPages';
 import { buildSpTypologies } from './typologies';
 import { buildSpSegments, SP_SEGMENT_RULE } from './segments';
 import { buildSpHistoryBatch } from './history-batch';
+import { blockedSpProjects, fetchSpProjects } from './projects';
 
 const labels = { projects: 'Empreendimentos lançados', launches: 'Unidades lançadas', sales: 'Vendas líquidas', stock: 'Oferta final' } as const;
 const formatMonth = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
@@ -57,6 +58,15 @@ export default function SpInstitutionalPage() {
         const { fetchSpTemporalInput } = await import('./api');
         const input = await fetchSpTemporalInput(quarter, { signal, onProgress: message => { if (requestVersion === version.current) setProgress(message); } });
         next = buildSpTemporalPreview(input, quarter);
+        if (isSpMunicipalPreview(next)) {
+          try {
+            const projects = await fetchSpProjects(next, { signal, onProgress: message => { if (requestVersion === version.current) setProgress(message); } });
+            next = { ...next, projects, metrics: { ...next.metrics, projects: projects.total } };
+          } catch (cause) {
+            if (signal.aborted) throw cause;
+            next = { ...next, projects: blockedSpProjects('Não foi possível confirmar toda a coleta de empreendimentos. Confira sua autenticação e gere novamente. Os totais municipais foram mantidos.') };
+          }
+        }
       } else {
         const { spFixture } = await import('./fixture');
         next = buildSpPreview(spFixture(), quarter);
@@ -116,7 +126,7 @@ export default function SpInstitutionalPage() {
       <p className="text-sm text-muted-foreground">Núcleo residencial vertical de São Paulo capital.</p>
     </header>
     <Alert><AlertTitle>{report && !isApi ? 'Prévia de desenvolvimento · dados fictícios' : 'Conferência municipal · relatório em validação'}</AlertTitle><AlertDescription>
-      {report && !isApi ? 'Os números do exemplo não representam o mercado.' : 'A consulta curta busca lançamentos, vendas e estoque do trimestre selecionado e identifica os meses disponíveis nas três fontes. A contagem de empreendimentos depende da coleta granular completa.'} Não há exportação disponível nesta etapa.
+      {report && !isApi ? 'Os números do exemplo não representam o mercado.' : 'A consulta curta busca lançamentos, vendas e estoque do trimestre selecionado e identifica os meses disponíveis nas três fontes. Em seguida, a coleta completa por empreendimento preenche a contagem de lançamentos nos mesmos meses.'} Não há exportação disponível nesta etapa.
     </AlertDescription></Alert>
     <section aria-label="Seleção do estudo" className="space-y-4 rounded-lg border border-border bg-card p-4">
       {scope.error ? <Alert variant="destructive"><AlertTitle>Não foi possível carregar as cidades autorizadas</AlertTitle><AlertDescription><p>Confira sua autenticação e tente novamente. O estudo permanece bloqueado.</p><Button className="mt-3" variant="outline" onClick={scope.reload}>Tentar carregar cidades novamente</Button></AlertDescription></Alert>
@@ -134,7 +144,7 @@ export default function SpInstitutionalPage() {
         <Button variant="outline" onClick={() => preparePreview('fixture')} disabled={!ready || loading}>Ver prévia com dados de teste</Button>
       </div>
       {!scope.error && !scope.isLoading && !ready && <p className="text-sm text-muted-foreground">Faça login e selecione um município autorizado para continuar.</p>}
-      <p className="text-xs text-muted-foreground">A cada nova geração, consultamos os meses disponíveis nas três séries municipais. Um ou dois meses geram uma parcial; três meses completam o trimestre. Diferenças de balanço ficam indicadas para conferência. Consulta curta: amostra de um empreendimento e séries municipais. A coleta de todos os históricos não é iniciada. O exemplo fictício permanece separado.</p>
+      <p className="text-xs text-muted-foreground">A cada nova geração, consultamos os meses disponíveis nas três séries municipais. Um ou dois meses geram uma parcial; três meses completam o trimestre. Diferenças de balanço ficam indicadas para conferência. A coleta paginada de empreendimentos é refeita após as séries municipais, com progresso e possibilidade de cancelar. O exemplo fictício permanece separado.</p>
     </section>
     {loading && <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Consulta do relatório" onKeyDown={event => { if (event.key === 'Escape') invalidate(); if (event.key === 'Tab') event.preventDefault(); }}><BrainLoadingState variant="overlay" title={progress} startedAt={startedAt} /><Button autoFocus className="fixed bottom-10 left-1/2 z-[51] -translate-x-1/2" variant="outline" onClick={invalidate}>Cancelar consulta</Button></div>}
     {error && <Alert variant="destructive"><AlertTitle>Não foi possível preparar a prévia</AlertTitle><AlertDescription><p>A consulta não foi concluída. Confira sua autenticação e tente novamente mantendo o recorte.</p><Button className="mt-3" variant="outline" onClick={() => preparePreview(lastMode.current)} disabled={!ready || loading}>Tentar novamente</Button></AlertDescription></Alert>}
@@ -146,7 +156,9 @@ export default function SpInstitutionalPage() {
       {isSpMunicipalPreview(report) ? <Alert><AlertTitle>{report.status === 'quarter-closed' ? 'Trimestre completo nas séries municipais da API' : 'Conferência parcial de dados da API'}</AlertTitle><AlertDescription>{report.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>
         : report.status === 'ready' ? <Alert><AlertTitle>Prévia reconciliada com dados de teste</AlertTitle><AlertDescription>As verificações do exemplo fecharam. Isso não comprova dados reais, publicação ou homologação do relatório.</AlertDescription></Alert>
         : <Alert variant={report.status === 'awaiting-closure' ? 'default' : 'destructive'}><AlertTitle>{report.status === 'awaiting-closure' ? 'Trimestre ainda não fechado' : 'Dados insuficientes para concluir o estudo'}</AlertTitle><AlertDescription>{report.issues.map(issue => <p key={issue}>{issue}</p>)}<p className="mt-2">Os indicadores permanecem indisponíveis; meses ausentes não são preenchidos com zero.</p></AlertDescription></Alert>}
-      <Table><TableCaption>{isApi ? 'Lançamentos e vendas somados somente nos meses conferidos; oferta final no último mês. Empreendimentos: coleta granular pendente.' : 'Contagens do trimestre selecionado; oferta final no fechamento. Todos os valores desta prévia são fictícios.'}</TableCaption><TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead className="text-right">Quantidade</TableHead></TableRow></TableHeader><TableBody>
+      {report.projects?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Contagem de empreendimentos indisponível</AlertTitle><AlertDescription>{report.projects.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
+      {report.projects?.status === 'ready' && <p role="status" className="text-sm">Cobertura conferida: {report.projects.distinct.toLocaleString('pt-BR')} empreendimentos verticais de São Paulo/SP. Contagem por ID distinto e data de lançamento nos meses do relatório.</p>}
+      <Table><TableCaption>{isApi ? 'Lançamentos e vendas somados somente nos meses conferidos; oferta final no último mês. Empreendimentos por ID distinto e data de lançamento, após conferir toda a paginação.' : 'Contagens do trimestre selecionado; oferta final no fechamento. Todos os valores desta prévia são fictícios.'}</TableCaption><TableHeader><TableRow><TableHead>Indicador</TableHead><TableHead className="text-right">Quantidade</TableHead></TableRow></TableHeader><TableBody>
         {Object.entries(labels).map(([metric, label]) => <TableRow key={metric}><TableCell>{label}</TableCell><TableCell className="text-right tabular-nums">{report.metrics[metric as keyof typeof labels]?.toLocaleString('pt-BR') ?? 'Indisponível'}</TableCell></TableRow>)}
       </TableBody></Table>
       {report.monthly && report.monthly.length > 0 && <div className="space-y-2"><p id="sp-monthly-label" className="text-sm text-muted-foreground">Balanço mensal: estoque anterior + lançamentos − vendas líquidas = estoque final.</p><p className="text-xs text-muted-foreground sm:hidden">Deslize a tabela para conferir estoque e diferenças.</p><Table aria-labelledby="sp-monthly-label" tabIndex={0}><TableHeader><TableRow><TableHead>Mês</TableHead><TableHead>Lançamentos</TableHead><TableHead>Vendas</TableHead><TableHead>Estoque final</TableHead><TableHead>Diferença</TableHead></TableRow></TableHeader><TableBody>{report.monthly.map(row => <TableRow key={row.month}><TableCell>{formatMonth(row.month)}</TableCell><TableCell>{row.launches.toLocaleString('pt-BR')}</TableCell><TableCell>{row.sales.toLocaleString('pt-BR')}</TableCell><TableCell>{row.closingStock.toLocaleString('pt-BR')}</TableCell><TableCell>{row.delta.toLocaleString('pt-BR')}</TableCell></TableRow>)}</TableBody></Table></div>}

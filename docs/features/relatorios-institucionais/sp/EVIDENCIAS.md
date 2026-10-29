@@ -1,5 +1,13 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 29/10/2026 — slide 2 com coleta granular paginada
+
+- **Ambiente:** Windows/PowerShell, Codex Test; `main` limpa em `795ee04`, único remote origin, fetch e comparação 0/0 antes de editar. Usuário autorizou implementar/publicar e confirmou Secovi/FIERGS como base. Nenhuma credencial extraída ou consulta GeoBrain autenticada feita pelo agente.
+- **Contrato:** `projects.ts` adapta `readBuildingPage`/`insertBuilding` do Panorama à fonte interna v2 vertical SP, sem status. Meses municipais determinam a janela; datas originais de lançamento/IDs determinam a contagem. `period` agosto não impede lançamento setembro. Coleta incompleta, vazia, instável ou com datas/IDs/recorte inválidos permanece indisponível; zero válido é diferente de fonte ausente.
+- **Testes:** 134 testes SP/11 arquivos aprovados, incluindo 13 casos novos de contagem e transporte e a integração de sucesso/falha da página. Regressões de parcial/completo, dados municipais, dimensões e históricos preservadas. Lint dirigido aprovado; tipos completos do app e build final aprovados (avisos preexistentes de Browserslist, xlsx e tamanho de chunks).
+- **Visual/headless:** `node scripts/diagnostics/sp-dynamic-closure.mjs`, Edge local, 1440/390 px claro/escuro, uma/duas/três competências; slide 2 mostra 1/2/3 empreendimentos sintéticos, com série mensal e total. 29 chamadas granulares simuladas, 19 amostras simuladas, zero erros JS e zero chamadas reais. Duas páginas, escopo/método POST conferidos, erro granular preserva totais municipais e deixa somente empreendimentos indisponíveis. Resposta granular lenta apresenta overlay Brain/tempo real e cancela por Escape. Erro/vazio da consulta municipal seguem bloqueados. Capturas `*-projects.png` revisadas em `.local-inputs/relatorios-lucas/sp/dynamic-closure/`.
+- **Limites:** contagens sintéticas não representam o mercado. Replays municipais misturam datas, conforme registro anterior. Sem sessão autenticada utilizável nesta execução, o equivalente local testa o objeto e o fluxo completo com fontes interceptadas; acesso à rota interna v2, cobertura/datas da base real e publicação efetiva ainda devem ser conferidos no site. Não afirmar homologação, exportação ou contagem real comprovada.
+
 ## 29/10/2026 — correção após respostas reais: séries determinam disponibilidade
 
 - **Respostas recebidas em29/10:** usuário executou consultas e forneceu raiz agosto e sete linhas/paginação completa por série de setembro: vendas8.912, lançamentos7.825, estoque126.307; estoque agosto127.372. Residual+22 e deltas por grupo−189/+312/+1.007/+81/−302/+119/−1.006. Causa dos resíduos e contrato exato de líquido não demonstrados. Sem consulta autenticada pelo agente.

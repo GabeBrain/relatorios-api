@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-29 — SP: contagem paginada de empreendimentos no slide 2 — Codex
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — coleta granular e contagem de empreendimentos lançados; autoria Codex, identidade Git Codex Test. Implementação/publicação autorizadas pelo usuário.
+- **O quê:** adapta as primitivas `readBuildingPage`/`insertBuilding` do Secovi/FIERGS à fonte interna v2, somente São Paulo/SP vertical, todas as páginas e sem excluir status. Conta IDs distintos por data de lançamento no mesmo período municipal disponível; total e evolução mensal no slide 2. Raiz não limita competência, tipologias/unidades não multiplicam empreendimentos. Sem alterar motores/políticas dos Panoramas.
+- **Guardas/UX:** total e paginação estáveis, IDs distintos, conflito/território/tipo/datas inválidos ou fonte vazia bloqueiam apenas a contagem. Totais municipais preservados em falha granular; nova geração refaz consulta sem cache. Reutilizados GeoApiScopeEngine, overlay Brain com tempo real/cancelamento e progresso por página, Alert/Table e gráfico mensal existente.
+- **Validação:** 134 testes SP aprovados, lint dirigido e Edge headless local1440/390 claro/escuro; duas páginas, transições de1/2/3meses, erro granular preservando municipal, lento/cancelamento e erro/vazio municipal. Zero erros JS/chamadas reais; contagens sintéticas. [Evidências](../features/relatorios-institucionais/sp/EVIDENCIAS.md); tipos completos do app e build final aprovados.
+- **Arquivos/commits:** `sp/projects.ts`, testes e página/slides SP, diagnóstico dinâmico e plano/decisões/evidências/status; entrega sobre base `795ee04`, commit desta entrada.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência, nenhuma escrita.
+- **Impacto em Etapas/Pendências:** implementação do slide2 concluída localmente; conferir acesso à fonte interna e contagem real após publicação com sessão pessoal. Preços/INCC, IVV, contrato líquido, exportação/homologação integral continuam pendentes.
+
 ### 2026-10-29 — SP: disponibilidade municipal independente da raiz e balanço diagnóstico — Codex
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — correção após o teste autenticado do usuário; autoria Codex, identidade Git `Codex Test`.
 - **Evidência recebida:** usuário consultou a API e forneceu raiz `2026-08-01`, históricos com setembro e respostas completas de `sales`, `releases` e `stock` por Padrão. Setembro: 7.825 lançamentos, 8.912 vendas líquidas e 126.307 estoque; agosto: 127.372 estoque. Balanço residual +22, com diferenças maiores por grupo; causa não demonstrada. Disponibilidade confirmada pelas respostas fornecidas, não por consulta autenticada do agente.
@@ -610,9 +619,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-**29/10 — SP, correção após teste:** setembro confirmado nas três séries por respostas do usuário, apesar da raiz de agosto. Descoberta do período agora pelas séries; diferença de balanço é diagnóstica. Implementação local validada; reteste publicado e cobertura granular pendentes. Esta entrada supera o uso da raiz como limite nas etapas anteriores.
+**29/10 — SP, correção após teste e coleta granular:** setembro confirmado nas três séries por respostas do usuário, apesar da raiz de agosto. Descoberta do período pelas séries; diferença de balanço diagnóstica. Coleta granular/slide2 implementados e validados localmente; reteste publicado e cobertura da fonte real pendentes. Supera o uso da raiz como limite nas etapas anteriores.
 
-**29/10 — SP Institucional:** cobertura dinâmica parcial/fechada implementada localmente; reconsulta a cada geração sem cache HTTP. Cobertura granular, homologação integral e publicação desta revisão seguem pendentes.
+**29/10 — SP Institucional:** cobertura dinâmica parcial/fechada e coleta granular/slide2 implementadas localmente; reconsulta a cada geração sem cache HTTP. Confirmação da cobertura real da fonte, homologação integral e publicação verificada seguem pendentes.
 
 **29/10 — Estimativas:** Gabriel reabriu a frente para prévia configurável no modal:50linhas, ordem/ocultação aplicadas ao Excel completo. Implementada e validada localmente (122testes), publicação/aceite desta revisão pendentes. Interface anterior aceita em produção por Gabriel em28/10 após envio`9d14f2a`. Fonte/limites na seção13 do plano essencial. Contrato final de saída Nicolas/Belogic, importação e avaliação independente continuam abertos.
 
@@ -649,7 +658,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **SP Institucional — descoberta municipal:** retestar a correção publicada com a sessão pessoal: setembro existe nas três séries, mas a raiz do empreendimento consultado indica agosto. Diferença +22 é diagnóstico, causa/contrato de vendas ainda em aberto. Avançar depois para contagem granular do slide 2, preços/INCC, IVV, exportação e homologação integral.
+- [ ] **SP Institucional — validação publicada:** gerar com sessão pessoal e conferir setembro e o slide2, agora integrado à coleta interna v2 paginada. Confirmar acesso, cobertura/datas reais e contagem de IDs; testes locais usam empreendimentos sintéticos. Diferença municipal +22 é diagnóstico, causa/contrato líquido em aberto. Preços/INCC, IVV, exportação e homologação integral seguem pendentes.
 
 - **Estimativas:** conferir a nova prévia de exportação em produção e aguardar comprovação do formato final de saída Nicolas/Belogic. Interface anterior aceita em28/10; revisão29/10 validada somente localmente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 

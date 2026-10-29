@@ -34,10 +34,32 @@ vi.mock('./api', async () => {
     return data;
   } };
 });
+vi.mock('./projects', async importOriginal => {
+  const original = await importOriginal<typeof import('./projects')>();
+  return { ...original, fetchSpProjects: async (report: import('./model').SpPreview) => {
+    if (access.fixtureMode === 'granular-error') throw new Error('private granular diagnostic');
+    return original.buildSpProjects([{ building_id: 1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: '2026-07-01' }], report);
+  } };
+});
 beforeEach(() => { access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.reload.mockClear(); });
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('preenche slide 2 e preserva os totais municipais quando a coleta granular falha', async () => {
+    render(<SpInstitutionalPage />);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText(/Cobertura conferida:/);
+    fireEvent.click(screen.getByRole('button', { name: '2. Empreendimentos' }));
+    expect(screen.getByRole('article')).toHaveTextContent('cobertura paginada conferida');
+    expect(screen.getByRole('article')).not.toHaveTextContent('Contagem de empreendimentos pendente');
+    access.fixtureMode = 'granular-error';
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
+    await screen.findByText('Contagem de empreendimentos indisponível');
+    expect(screen.getByText('Conferência parcial de dados da API')).toBeInTheDocument();
+    expect(screen.getAllByRole('cell', { name: 'Indisponível' })).toHaveLength(1);
+    expect(screen.queryByText('private granular diagnostic')).not.toBeInTheDocument();
+  });
   it('exibe setembro e o diagnóstico de 22 unidades sem zerar os valores da fonte', async () => {
     access.apiMode = 'user-september';
     render(<SpInstitutionalPage />);
@@ -67,7 +89,7 @@ describe('Página SP institucional', () => {
     await screen.findByText(/Tipologias conferidas:/);
     fireEvent.click(screen.getByRole('button', { name: '41. Quadro de lançamentos por padrão' }));
     expect(screen.getByRole('img', { name: 'Quadro reconciliado por padrão' })).toBeInTheDocument();
-    expect(screen.getAllByRole('cell', { name: 'Indisponível' })).toHaveLength(1);
+    expect(screen.queryAllByRole('cell', { name: 'Indisponível' })).toHaveLength(0);
   });
   it('um balanço anterior divergente não oculta comparativos presentes', async () => {
     render(<SpInstitutionalPage />);
@@ -217,14 +239,14 @@ describe('Página SP institucional', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
     expect(await screen.findByText('Trimestre ainda não fechado')).toBeInTheDocument();
   });
-  it('mostra julho/agosto como parcial, com empreendimento indisponível e sem rótulo fictício', async () => {
+  it('mostra julho/agosto como parcial, com empreendimento contado e sem rótulo fictício', async () => {
     render(<SpInstitutionalPage />);
     fireEvent.click(screen.getByText('Escolher capital'));
     fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
     expect(await screen.findByText('Conferência parcial de dados da API')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /3T2026 · parcial até agosto de 2026/ })).toBeInTheDocument();
     expect(screen.getByRole('cell', { name: '26.824' })).toBeInTheDocument();
-    expect(screen.getAllByRole('cell', { name: 'Indisponível' })).toHaveLength(1);
+    expect(screen.queryAllByRole('cell', { name: 'Indisponível' })).toHaveLength(0);
     expect(screen.queryByText('Prévia de desenvolvimento · dados fictícios')).not.toBeInTheDocument();
     expect(screen.queryByRole('cell', { name: 'setembro de 2026' })).not.toBeInTheDocument();
   });

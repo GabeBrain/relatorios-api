@@ -1,5 +1,11 @@
 # SP capital — primeiro mapeamento
 
+## 29/10/2026 — coleta de empreendimentos integrada ao slide 2
+
+Autorização do usuário para implementar e publicar a adaptação do Secovi/FIERGS. A cada geração real, após descobrir os meses municipais, coleta todas as páginas da fonte interna v2 de São Paulo/SP vertical, sem excluir status. Reutiliza `readBuildingPage`/`insertBuilding` do Panorama; não altera seus motores. Conta IDs distintos pela `release_date` nos mesmos meses da parcial/trimestre completo, independentemente do `period` da raiz e das tipologias/unidades.
+
+Slide 2 apresenta total e série mensal somente após cobertura integral. Erro, datas ausentes/inválidas, IDs conflitantes, páginas repetidas/incompletas ou total instável deixam empreendimentos indisponíveis, mantendo os indicadores municipais. Fonte integral vazia não vira zero; zero lançamentos só é válido quando a coleção coberta contém empreendimentos e nenhum foi lançado na janela. Nova geração refaz a coleta, com overlay Brain, página atual, tempo real e cancelamento. Revisão autenticada no site, preços/INCC, IVV, exportação e homologação continuam pendentes. Este registro supera a pendência de implementação granular dos checkpoints abaixo.
+
 ## 29/10/2026 — correção após respostas reais: séries determinam disponibilidade
 
 **Estado vigente:** cada geração consulta a janela trimestral completa e usa o prefixo consecutivo comum às três séries. A raiz de uma amostra não limita setembro. Um/dois meses = parcial; três = trimestre completo nas séries, sem implicar homologação ou fechamento oficial. Diferenças de balanço são diagnósticas, preservando números da API. [Contrato vigente](DECISOES.md), [evidências](EVIDENCIAS.md).

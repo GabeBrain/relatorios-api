@@ -1,5 +1,12 @@
 # Decisões e pontos abertos — SP
 
+## 29/10/2026 — empreendimentos: coletor Panorama adaptado ao SP
+
+- Fonte explícita: `POST https://app.geobrain.com.br/public-api/v2/building-with-history-internal`, `city=São Paulo`, `uf=SP`, `type=Vertical`, páginas de 100. Sem filtro de status ou fallback silencioso. Primitivas de contrato/paginação e conflito de IDs do Panorama reutilizadas, sem modificar políticas Secovi/FIERGS ou incluir horizontal.
+- A consulta completa ocorre após as séries municipais. `release_date` classifica o mês do lançamento, cada ID conta uma vez; não somar tipologias nem usar `total_units`. Data da raiz não limita lançamentos. Todos os registros precisam ter território/tipo/data válidos. Cobertura exige total estável, todas as páginas e quantidade de IDs distintos igual ao total informado. Fonte vazia ou falha não vira zero.
+- Total e mensal usam exatamente o início do trimestre até `throughMonth`. Um/dois meses continuam parcial; três, completo nas séries. Zero de lançamentos só após coleção não vazia inteiramente coberta. Erros preservam os totais municipais e deixam o slide 2 indisponível, com orientação para gerar novamente. Nova geração descarta resultado anterior; retry limitado, sem cache, progresso por página, overlay Brain com tempo real e cancelamento.
+- O período determina disponibilidade municipal; não foi introduzida reconciliação artificial entre número de empreendimentos e unidades. Regras FIERGS de vendas/estoque/capacidade não se aplicam à contagem SP. Publicação/autenticação real e homologação integral precisam de evidência própria.
+
 ## 29/10/2026 — correção após respostas reais: séries determinam disponibilidade
 
 **Estado vigente:** a geração consulta toda a janela selecionada nas três séries municipais e usa o prefixo consecutivo comum. Não limita setembro pelo `period` de uma amostra. Raiz antiga/ausente não define cobertura municipal; amostra permanece apenas para contexto territorial. Um/dois meses = parcial; três = trimestre completo nas séries, sem implicar fechamento oficial, reconciliação ou homologação. Se apenas algumas fontes avançam, a parcial explicita a diferença de cobertura. Lacunas intermediárias, fonte incompleta, valor inválido, duplicação e grupos incompatíveis continuam impeditivos.

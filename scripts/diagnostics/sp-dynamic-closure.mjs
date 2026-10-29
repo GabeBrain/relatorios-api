@@ -24,14 +24,24 @@ try {
   browser = await chromium.launch({ headless: true, channel: 'msedge' });
   const context = await browser.newContext();
   await context.addInitScript(() => localStorage.setItem('brain-auth', JSON.stringify({ state: { token: 'synthetic-only', email: 'fixture@example.invalid', issuedAt: Date.now(), expiresAt: Date.now() + 3600000 }, version: 0 })));
-  let closing = '07', slow = false, failure = false, empty = false, calls = 0;
+  let closing = '07', slow = false, failure = false, empty = false, granularFailure = false, calls = 0, granularCalls = 0;
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
     const reply = data => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: data.length }, links: { next: null } }) });
     if (url.pathname.endsWith('/monitored-cities')) return reply([{ city: 'São Paulo', state: 'SP' }]);
+    if (url.pathname.endsWith('/building-with-history-internal')) {
+      granularCalls++;
+      assert.equal(route.request().method(), 'POST');
+      assert.equal(url.searchParams.get('type'), 'Vertical');
+      assert.equal(url.searchParams.get('city'), 'São Paulo');
+      if (slow) await new Promise(done => setTimeout(done, 1500));
+      if (granularFailure) return route.fulfill({ status: 403, body: '{}' });
+      const pageNumber = Number(url.searchParams.get('page'));
+      const rows = (pageNumber === 1 ? ['2026-07-10', '2026-08-20'] : ['2026-09-15', '2026-06-01']).map((date, i) => ({ building_id: (pageNumber - 1) * 2 + i + 1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: date, period: '2026-08-01' }));
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: pageNumber, last_page: 2, total: 4 } }) });
+    }
     if (url.pathname.endsWith('/building-with-history')) {
       calls++;
-      if (slow) await new Promise(done => setTimeout(done, 1500));
       if (failure) return route.fulfill({ status: 403, body: '{}' });
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: empty ? [] : [{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-08-01' }], meta: { total: 5183 }, links: { next: null } }) });
     }
@@ -68,7 +78,11 @@ try {
       if (month === '09') { await page.getByText(/Balanço 2026-09: diferença de 22 unidades entre estoque/).waitFor(); await page.getByRole('cell', { name: '126.307', exact: true }).first().waitFor(); }
       const heading = page.getByRole('heading', { name: /São Paulo \/ SP/ });
       assert.match(await heading.innerText(), month === '09' ? /trimestre completo até setembro/ : /parcial até/);
-      assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 1);
+      assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 0);
+      await page.getByRole('button', { name: '2. Empreendimentos', exact: true }).click();
+      assert.match(await page.getByRole('article').innerText(), /cobertura paginada conferida/);
+      assert.match(await page.getByRole('article').innerText(), new RegExp(`Acumulado nos meses conferidos\\s+${Number(month) - 6}`));
+      await page.getByRole('article').screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-${month}-projects.png`) });
       await page.getByRole('button', { name: '3. Unidades lançadas', exact: true }).click();
       await page.getByRole('article').screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-${month}.png`) });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1 || document.querySelector('main').scrollWidth > document.querySelector('main').clientWidth + 1), false);
@@ -95,7 +109,12 @@ try {
     slow = false;
     results.push({ width, dark, transitions: ['partial-1', 'partial-2', 'quarter-closed'], slowLoadingAndCancel: true });
   }
-  failure = true;
+  granularFailure = true;
+  await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+  await page.getByText('Contagem de empreendimentos indisponível', { exact: true }).waitFor();
+  await page.getByText('Trimestre completo nas séries municipais da API', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 1);
+  granularFailure = false; failure = true;
   await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
   await page.getByText('Não foi possível preparar a prévia', { exact: true }).waitFor();
   failure = false; empty = true;
@@ -103,7 +122,7 @@ try {
   await page.getByText('Não foi possível preparar a prévia', { exact: true }).waitFor();
   assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 0);
   assert.deepEqual(errors, []);
-  const result = { results, errorAndEmptyBlocked: true, rootCalls: calls, pageErrors: errors, realApiCalls: 0, september: 'user-provided-2026-10-29; other months from earlier fixtures, not a quarterly baseline' };
+  const result = { results, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, pageErrors: errors, realApiCalls: 0, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
   await writeFile(resolve(output, 'result.json'), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 } finally {

@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 29/10/2026 — implantação da contagem granular SP autorizada
+
+- **Ambiente:** Windows/PowerShell, identidade Git Codex Test, `main` limpa em `795ee04`, somente origin, fetch e 0/0 antes de alterar. Usuário autorizou implementar/publicar a adaptação do Secovi/FIERGS.
+- **Entrega:** fonte interna v2, somente São Paulo/SP vertical, coleta de todas as páginas e IDs distintos por `release_date` nos meses municipais disponíveis. Total e série mensal no slide 2; falha granular preserva municipal e deixa contagem indisponível. Primitivas de contrato do Panorama reaproveitadas; seus motores e políticas não alterados. Nova geração refaz coleta; overlay Brain/páginas/tempo real/cancelamento.
+- **Evidência:** 134 testes SP e diagnóstico Edge local1440/390 claro/escuro, paginação, parcial/completo, falha e cancelamento. [Evidências e limites](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Zero chamadas reais. Revisão autenticada da fonte interna e do slide 2 publicado ainda necessária; não há aceite integral/exportação. Preços/INCC, IVV e contrato das vendas seguem abertos.
+
 ## 29/10/2026 — correção após respostas reais: séries determinam disponibilidade
 
 - **Ambiente:**Windows/PowerShell; Git Codex Test (não atribuir essa identidade a Lucas). Main inicialmente limpa, único remote origin, fetch0/0 sobre97caa21. Nenhuma credencial extraída ou permissão alterada.
