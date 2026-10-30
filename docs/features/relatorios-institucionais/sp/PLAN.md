@@ -1,5 +1,11 @@
 # SP capital — primeiro mapeamento
 
+## 30/10/2026 — refinamento e roteiro para testes práticos
+
+Varredura concluída, mantendo85 posições e sem implementar nova exportação: checklist de disponibilidade por fonte/slide, filtro/download seguro, detalhamentos solicitáveis em lote sem duplicação, avisos atualizados e edição institucional visível na ampliação.211 testes SP+359 regressões Panorama aprovados, checagem real do projeto TypeScript agora no build, lint e QA Edge1440/390 claro/escuro aprovados. [Achados e passos para o usuário](REVISAO_PARA_TESTES_2026-10-30.md), [evidências e limites](EVIDENCIAS.md).
+
+Etapa seguinte: ensaio autenticado da tela pelo usuário, registrar diferenças com trimestre/mês/slide e checklist da mesma geração, revisão metodológica/editorial. Exportação integral e índices futuros continuam pendentes. Não declarar dados reais ou deploy verificados pelo agente.
+
 ## 29/10/2026 — lote final: 28 posições e cobertura das85
 
 Implementados 63/64 e66–80 (17 analíticos),9–11 (3 destaques recalculados) e3–5/7/82–85 (8 artes institucionais da referência2T2026). As85 posições originais possuem renderizador; ausência de fonte continua explicitada. Mapas usam coordenadas/oferta da fotografia atual e não imagens analíticas antigas; editoriais mantêm edição identificada. Mesma coleta compartilhada em memória, sem acrescentar chamadas de negócio. Padrões reutilizados: visualizador original, tabelas/gráficos SVG, primitivas cartográficas do Panorama, GeoApiScopeEngine e BrainLoadingState `field` para tiles.

@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 30/10/2026 — varredura SP para testes práticos
+
+Ambiente: Windows/PowerShell, Codex Test/Codex, main limpa`ab149ef`, único origin0/0 após fetch. Usuário pediu varredura e refinamento antes dos testes práticos. As85 posições já têm renderizador; refinamento adiciona checklist por fonte/slide, coleta detalhada explícita e reutilizada, registro JSON sem credencial/histórico bruto, avisos atualizados e edição institucional também na ampliação. Corrige6 erros tipados em testes anteriores e faz typecheck/build verificarem o projeto app real. [Varredura e roteiro](../../features/relatorios-institucionais/sp/REVISAO_PARA_TESTES_2026-10-30.md). Nenhum ensaio de mercado autenticado ou alteração de motor Secovi/FIERGS, Corretor, Quanti, CID ou ADM. Homologação, atualidade editorial, índices futuros, deploy observado e exportação integral permanecem pendentes; evidências finais emEVIDENCIAS.
+
 ## 29/10/2026 — lote final SP, 28 posições
 
 Windows/PowerShell, Git Codex Test/Codex, main inicialmente limpa`e431fa7`, único origin0/0 após fetch. Usuário pediu fazer os28 restantes juntos. Implementados17 analíticos63/64/66–80,3 destaques9–11 e8 institucionais3–5/7/82–85, mantendo85 posições originais. Institucionais conservam a edição identificada2T2026;7jun2026. Mapas atuais por coordenadas/oferta da fotografia, médias ponderadas, tabelas conservativas e VGV nominal com capacidade=vendidas+estoque. Mesma coleta compartilhada sem endpoint novo; primitivas cartográficas apenas reutilizadas, sem modificar Secovi/FIERGS. [Critérios](../../features/relatorios-institucionais/sp/DECISOES.md), [validação](../../features/relatorios-institucionais/sp/EVIDENCIAS.md).

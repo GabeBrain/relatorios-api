@@ -148,6 +148,29 @@ try {
         await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
         await page.getByText(/VGV vendido corrigido pelo INCC-DI/).waitFor();
         await page.getByText(/VGL corrigido pelo INCC-DI para 2026-09/).waitFor();
+        await page.getByRole('button',{name:'Conferir detalhamentos do relat\u00f3rio',exact:true}).click();
+        await page.getByText(/Hist\u00f3ricos de \u00e1reas e pre\u00e7os processados/).waitFor();
+        const checklist=page.getByRole('region',{name:'Checklist dos 85 slides'});
+        assert.match(await checklist.innerText(),/85 posi/);
+        if(width===1440&&!dark){
+          const downloadPromise=page.waitForEvent('download');
+          await checklist.getByRole('button',{name:'Baixar checklist da confer\u00eancia'}).click();
+          const download=await downloadPromise;
+          const snapshot=JSON.parse(await readFile(await download.path(),'utf8'));
+          assert.equal(snapshot.slides.length,85);assert.equal(snapshot.exportAvailable,false);
+          assert.doesNotMatch(JSON.stringify(snapshot),/synthetic-only|typologies_history|latitude/);
+          await checklist.getByText('Ver situa\u00e7\u00e3o e pend\u00eancias por slide',{exact:true}).click();
+          await checklist.getByRole('combobox',{name:'Mostrar slides'}).click();
+          await page.getByRole('option',{name:'Refer\u00eancia editorial',exact:true}).click();
+          assert.equal(await checklist.locator('tbody tr').count(),8);
+          await checklist.getByRole('button',{name:'Abrir slide 82',exact:true}).click();
+          await page.getByRole('button',{name:'Ampliar slides',exact:true}).click();
+          assert.match(await page.getByRole('dialog').getByRole('note').innerText(),/2T2026/);
+          await page.getByRole('dialog').screenshot({path:resolve(output,'editorial-expanded.png')});
+          await page.keyboard.press('Escape');
+          await checklist.screenshot({path:resolve(output,'review-panel.png')});
+          await checklist.getByText('Ver situa\u00e7\u00e3o e pend\u00eancias por slide',{exact:true}).click();
+        }
         for (const slide of Array.from({length:85},(_,i)=>i+1)) {
           await openSlide(slide);
           if (slide === 39) await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
@@ -264,7 +287,7 @@ try {
   await page.getByText('Não foi possível preparar a prévia', { exact: true }).waitFor();
   assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 0);
   assert.deepEqual(errors, []);
-  const result = { results, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, mapboxResponses: {total:mapboxResponses.length,success:mapboxResponses.filter(status=>status===200).length}, originalSlidesCovered:85, mapSlowAndProviderError:true, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
+  const result = { results, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, mapboxResponses: {total:mapboxResponses.length,success:mapboxResponses.filter(status=>status===200).length}, originalSlidesCovered:85, mapSlowAndProviderError:true, practicalChecklistAndExplicitDetails:true, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
   await writeFile(resolve(output, 'result.json'), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 } finally {

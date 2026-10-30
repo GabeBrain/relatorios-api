@@ -44,7 +44,7 @@ describe('SP — lote final de 28 posições originais',()=>{
     expect(originals).toHaveLength(28);
     expect(Object.keys(SP_INSTITUTIONAL_ASSETS)).toHaveLength(8);
     for(const number of originals){
-      fireEvent.click(screen.getByRole('button',{name:`${number}. ${SP_ORIGINAL_SLIDES[number-1].title}`,exact:true}));
+      fireEvent.click(screen.getByRole('button',{name:`${number}. ${SP_ORIGINAL_SLIDES[number-1].title}`}));
       expect(screen.getByRole('article')).not.toHaveTextContent(/Conteúdo pendente|Dados em conferência|Destaque em conferência|Localizações em conferência/);
       expect(screen.getByRole('article').querySelector('svg,img')).not.toBeNull();
     }
@@ -64,7 +64,7 @@ describe('SP — lote final de 28 posições originais',()=>{
   });
   it('calcula MAP e MCMV por unidades, sem média de médias',()=>{
     const buildings=syntheticGranularBuildings(),market=baseline(buildings).granularDetails!.market!;
-    const rows=buildings.flatMap(building=>current(building).map(row=>({...row,standard:building.standard}))).filter(row=>Number(row.typology_stock)>0&&Number(row.number_bedroom)===1&&row.standard!=='Econômico');
+    const rows=buildings.flatMap(building=>current(building).map(row=>({...row,standard:building.standard} as Record<string,unknown>))).filter(row=>Number(row.typology_stock)>0&&Number(row.number_bedroom)===1&&row.standard!=='Econômico');
     expect(rows.length).toBeGreaterThan(0);
     const units=rows.reduce((sum,row)=>sum+Number(row.typology_stock),0);
     expect(market.prices[0].map.ticket).toBeCloseTo(rows.reduce((sum,row)=>sum+Number(row.price)*Number(row.typology_stock),0)/units);

@@ -70,6 +70,21 @@ beforeEach(() => { access.token = 'synthetic-token'; access.error = false; acces
 afterEach(cleanup);
 
 describe('Página SP institucional', () => {
+  it('permite conferir o lote detalhado explicitamente sem visitar um slide e sem duplicar a coleta',async()=>{
+    render(<SpInstitutionalPage/>);
+    fireEvent.click(screen.getByText('Escolher capital'));
+    fireEvent.click(screen.getByRole('button',{name:'Conferir dados reais'}));
+    await screen.findByText(/Oferta histórica conferida desde janeiro/);
+    expect(access.neighborhoodCalls).toBe(0);
+    const button=screen.getByRole('button',{name:'Conferir detalhamentos do relatório'});
+    await waitFor(()=>expect(button).toBeEnabled());
+    fireEvent.click(button);
+    await screen.findByText(/Históricos de áreas e preços processados/);
+    expect(access.neighborhoodCalls).toBe(1);
+    expect(screen.queryByRole('button',{name:'Conferir detalhamentos do relatório'})).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button',{name:'67. Mapa de estoque, visão ampla'}));
+    expect(access.neighborhoodCalls).toBe(1);
+  });
   it('compartilha uma coleta entre preços, área e bairros e invalida cache em nova geração', async () => {
     render(<SpInstitutionalPage />);
     fireEvent.click(screen.getByText('Escolher capital'));

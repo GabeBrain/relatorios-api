@@ -14,6 +14,8 @@ import { SP_MARKET_SLIDES } from './market-details';
 import { SpMarketStateSlide } from './SpMarketStateSlide';
 import { SpStockMapSlide } from './SpStockMapSlide';
 import { SP_INSTITUTIONAL_ASSETS } from './institutional-assets';
+import { reviewSpSlides, SP_SLIDE_STATE_LABELS } from './review';
+import { SpReviewPanel } from './SpReviewPanel';
 import cover from './assets/cover.png';
 import projectsTemplate from './assets/template-13.png';
 import launchesTemplate from './assets/template-18.png';
@@ -49,6 +51,9 @@ export function SpReportPages({ report, onSelectSlide }: { report: SpPreview; on
   const real = report.source === 'api' || report.source === 'recorded-api';
   const period = spPeriodLabel(report);
   const definition = SP_ORIGINAL_SLIDES[page - 1];
+  const reviews=reviewSpSlides(report);
+  const currentReview=reviews[page-1];
+  const referenceNote=SP_INSTITUTIONAL_ASSETS[page] ? (page===7?'Perfil territorial de junho de 2026, conforme o material de referência.':'Conteúdo institucional reproduzido da edição de referência 2T2026; nomes, contatos e números conservam essa edição.') : null;
   const slide = <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
     <img key={`template-${page}`} src={SP_INSTITUTIONAL_ASSETS[page] ?? templates[page] ?? (page >= 32 && page <= 44 ? salesTemplate : projectsTemplate)} alt={page === 1 ? 'Capa original Brain Inteligência Estratégica' : SP_INSTITUTIONAL_ASSETS[page] ? `Referência institucional: ${definition.title}` : `Layout: ${definition.title}`} className="absolute inset-0 h-full w-full" />
     {SP_INSTITUTIONAL_ASSETS[page] ? null : [9,10,11].includes(page) ? <SpHighlightsSlide key={page} report={report} slide={page}/> : [67,68,70,71,74,75,79,80].includes(page) ? <SpStockMapSlide key={page} report={report} slide={page}/> : (SP_MARKET_SLIDES as readonly number[]).includes(page) ? <SpMarketStateSlide key={page} report={report} slide={page}/> : (SP_DETAIL_SLIDES as readonly number[]).includes(page) ? <SpDetailSlide key={page} report={report} slide={page} /> : page >= 13 && page <= 22 || page >= 26 && page <= 30 || page >= 32 && page <= 36 || page >= 40 && page <= 44 ? <SpTrendSlide key={page} report={report} number={page} /> : [23, 24, 37, 38, 47, 48].includes(page) ? <SpComparisonSlide key={page} report={report} number={page} /> : [25,39].includes(page) ? <SpNeighborhoodSlide key={page} report={report} sales={page === 39} /> : [46,50].includes(page) ? <SpMarketSlide key={page} report={report} number={page} /> : page > 1 ? <OriginalTextSlide number={page} title={definition.title} report={report} /> : null}
@@ -56,11 +61,13 @@ export function SpReportPages({ report, onSelectSlide }: { report: SpPreview; on
   const navigation = <nav aria-label="Navegação dos slides originais" className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">{SP_ORIGINAL_SLIDES.map(item => <Button className="h-auto min-h-10 max-w-full whitespace-normal py-2 text-left" key={item.number} variant={page === item.number ? 'default' : 'outline'} aria-pressed={page === item.number} onClick={() => setPage(item.number)}>{item.number}. {item.title}</Button>)}</nav>;
   return <section aria-label="Páginas do relatório" className="space-y-4">
     <div><h2 className="text-lg font-semibold">Montagem do relatório</h2><p className="text-sm text-muted-foreground">Ordem e numeração dos 85 slides do modelo original · {report.quarter} · {real ? period : 'Dados fictícios'}. Os indicadores dependem da conferência de cada fonte. Exportação e homologação pendentes.</p><p className="text-sm text-muted-foreground">Séries e comparativos são preenchidos automaticamente após a conferência das fontes. Rankings de bairros dependem da reconciliação com os totais municipais; os históricos de bairros, áreas, preços e mapas são coletados ao abrir um desses slides e reaproveitados entre eles. VGL lançado e VGV vendido por período usam INCC-DI e base única no último mês disponível. Preços e VGV da fotografia atual são nominais.</p></div>
+    <SpReviewPanel report={report} slides={reviews} onOpen={setPage}/>
     {!expanded && navigation}
+    <p role="status" className="text-sm">Slide {page}: <strong>{SP_SLIDE_STATE_LABELS[currentReview.state]}</strong> · {currentReview.reason}</p>
     <Button variant="outline" onClick={() => setExpanded(true)}>Ampliar slides</Button>
     {!expanded && <SlideFrame>{slide}</SlideFrame>}
-    {SP_INSTITUTIONAL_ASSETS[page] && <p role="note" className="text-sm text-muted-foreground">{page===7?'Perfil territorial de junho de 2026, conforme o material de referência.':'Conteúdo institucional reproduzido da edição de referência 2T2026; nomes, contatos e números conservam essa edição.'}</p>}
-    <Dialog open={expanded} onOpenChange={setExpanded}><DialogContent className="max-h-[95dvh] w-[96vw] max-w-6xl overflow-auto p-4 sm:p-6"><DialogTitle>Prévia dos slides · São Paulo</DialogTitle><DialogDescription>{real ? period : 'Dados fictícios'} · Estrutura original, 85 posições. Em telas pequenas, gire o aparelho para ampliar.</DialogDescription>{navigation}<SlideFrame>{slide}</SlideFrame></DialogContent></Dialog>
+    {referenceNote && <p role="note" className="text-sm text-muted-foreground">{referenceNote}</p>}
+    <Dialog open={expanded} onOpenChange={setExpanded}><DialogContent className="max-h-[95dvh] w-[96vw] max-w-6xl overflow-auto p-4 sm:p-6"><DialogTitle>Prévia dos slides · São Paulo</DialogTitle><DialogDescription>{real ? period : 'Dados fictícios'} · Estrutura original, 85 posições. Em telas pequenas, gire o aparelho para ampliar.</DialogDescription>{navigation}<p className="text-sm">{SP_SLIDE_STATE_LABELS[currentReview.state]} · {currentReview.reason}</p><SlideFrame>{slide}</SlideFrame>{referenceNote && <p role="note" className="text-sm text-muted-foreground">{referenceNote}</p>}</DialogContent></Dialog>
   </section>;
 }
 

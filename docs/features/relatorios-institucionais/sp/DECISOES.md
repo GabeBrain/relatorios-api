@@ -1,5 +1,11 @@
 # Decisões e pontos abertos — SP
 
+## 30/10/2026 — disponibilidade por geração e preparação do ensaio
+
+O checklist das85 posições deriva do mesmo modelo usado nos slides. Seus estados são Disponível (conteúdo conferível), Com lacunas (pontos/recortes preservados com ausência explícita), Aguardando fonte (consulta ainda não realizada), Fonte indisponível (falha/validação impeditiva) e Referência editorial (oito artes com edição preservada). Não constitui aprovação do analista nem substitui conferência real. Comparativo anual tem dependência própria; ausência de INCC não bloqueia unidades. Sem chave cartográfica ou coordenadas completas, o mapa não é declarado integralmente disponível.
+
+Detalhamentos podem ser solicitados por botão após consultas leves, além da abertura do slide. Mesmos registros em memória, mesma invalidação/cancelamento e nenhum endpoint novo. Checklist JSON contém somente trimestre/mês/origem/situação dos slides e marcadores explícitos de não exportação/não homologação; nunca token ou históricos individuais. Conteúdo de revisão permanece fora das artes. Notas institucionais também aparecem dentro da ampliação. [Varredura e roteiro de teste](REVISAO_PARA_TESTES_2026-10-30.md). Exportação integral permanece etapa separada.
+
 ## 29/10/2026 — lote final de 28 posições
 
 Pedido explícito: fazer os 28 restantes de uma vez, preservando as 85 posições do original. Implementados 63/64, 66–80; destaques 9–11; institucionais 3–5/7/82–85. Referências visuais originais inspecionadas. Os critérios abaixo seguem a delegação do usuário para decidir com base no relatório anterior e revisar com o analista depois.

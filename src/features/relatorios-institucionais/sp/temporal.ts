@@ -105,12 +105,12 @@ export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter)
     patterns: input.groupBy === 'Tipologia' ? undefined : summarizeSpGroups(input, months, result.throughMonth),
     metrics: { projects: null, launches: result.monthly!.reduce((sum, row) => sum + row.launches, 0), sales: result.monthly!.reduce((sum, row) => sum + row.sales, 0), stock: result.monthly!.at(-1)!.closingStock },
     issues: [
-      `Dados municipais disponíveis até ${result.throughMonth}; a cobertura granular de empreendimentos permanece pendente.`,
+      `Dados municipais disponíveis até ${result.throughMonth}. A cobertura de empreendimentos é conferida separadamente.`,
       ...result.monthly!.filter(row => row.delta !== 0).map(row => `Balanço ${row.month}: diferença de ${row.delta.toLocaleString('pt-BR')} unidades entre estoque informado e esperado. Valores da API preservados; causa não confirmada.`),
       ...(result.balanceByGroup!.some(row => row.delta !== 0) ? ['Há diferenças no balanço por grupo. Elas não são atribuídas automaticamente a distratos ou reclassificações; confira os detalhes.'] : []),
       ...(available.some(periods => periods.size !== months.length) ? ['As séries ainda não cobrem os mesmos meses; a parcial usa apenas os meses disponíveis nas três fontes.'] : []),
       ...(result.throughMonth < quarterEndMonth(quarter) ? ['O trimestre não está completo; somente os meses disponíveis nas três séries foram incluídos.'] : []),
-      'Contagem de empreendimentos e reconciliação granular pendentes. Esta conferência municipal não libera exportação ou homologação.',
+      'A disponibilidade dos demais slides acompanha a conferência de suas fontes. Esta conferência municipal não libera exportação ou homologação.',
     ],
   };
 }

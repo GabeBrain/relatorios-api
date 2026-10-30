@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-10-30 — SP Institucional: varredura e preparo dos testes práticos — Codex
+
+- **Ambiente/objetivo:** Rebrain, rota`/rebrain/relatorios-institucionais/sp`; Codex/Codex Test a pedido do usuário. Main limpa`ab149ef`, único origin0/0 após fetch e reconferência. Revisão dos85 slides para ensaio prático, sem consultar dados de negócio reais.
+- **Entrega:** checklist por slide/fonte (disponível, lacuna, aguardando, bloqueado, referência editorial), filtro/acesso e JSON sem token/histórico individual; botão de detalhamentos explícito com a mesma coleta em memória. Corrigidos avisos de pendência/sucesso e dependência do48; edição institucional também na ampliação. Primitives Select/Table/Button/Dialog, GeoApiScopeEngine e BrainLoadingState existentes preservados; checklist fora das artes.
+- **Validação:**211 testes SP/18arquivos e359 regressões Panorama/43arquivos aprovados;85 posições nas quatro combinações1440/390 e claro/escuro, filtro/download/ampliação, lento/cancelamento/retry, erro/vazio e lacunas. QA com fontes interceptadas; única rede externa Mapbox186/186HTTP200, não prova GeoBrain. Corrigidos6 erros tipados em testes anteriores; typecheck/build agora verificam o projeto app real em vez do tsconfig raiz vazio. Build/tipos/lint aprovados.
+- **Etapas/pendências:** preparado para ensaio controlado da tela. [Inventário, achados e roteiro](../features/relatorios-institucionais/sp/REVISAO_PARA_TESTES_2026-10-30.md). Validar token/cobertura/dados reais e deploy pelo usuário, metodologia/editorial pelo analista; índices futuros e exportação integral seguem pendentes. Não houve alteração de motor Secovi/FIERGS, Corretor ou ÁreaQuanti, nem homologação por inferência.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas, sem escrita.
+
 ### 2026-10-29 — SP Institucional: lote final de28 posições — Codex
 
 - **Ambiente/funcionalidade:** Rebrain, `/rebrain/relatorios-institucionais/sp`. Codex/Codex Test a pedido do usuário, main limpa`e431fa7`, único origin0/0 após fetch. Implementação e evidências no commit `b6487b4`. Pedido explícito de fazer os28 restantes juntos. As85 posições originais passam a ter renderizador, mantendo a ordem; dados ausentes continuam em conferência.
@@ -670,6 +678,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**30/10 — SP, preparo dos testes:** checklist das85 posições e refinamentos validados localmente;211 testes SP+359 regressões Panorama, tipos reais/lint/build e navegador aprovados. Próximo ensaio autenticado da tela pelo usuário, seguido de revisão metodológica/editorial e exportação integral.
+
 **29/10 ? SP, lote final:**85 posições com renderizador, após os28 finais. Mapas/indicadores dependem de fontes conferidas; institucionais conservam a edição identificada. Próximo: validar no token real, revisar com analista/editorial e preparar exportação integral. As entradas abaixo registram checkpoints anteriores; pendências de implementação dos28 foram superadas.
 
 **29/10 — SP, quarto lote:** 51, 53–59 e 61/62 implementados localmente; 52/60 são divisórias preservadas. Preços e áreas compartilham históricos e reconciliam cobertura antes dos cálculos, com 198 testes aprovados. A próxima frente começa em63/64 e segue o estado atual do mercado. Revisão autenticada, pesos/método do analista e aceite permanecem abertos; não são 85 conteúdos concluídos.
@@ -716,6 +726,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — teste prático30/10:** seguir o roteiro da feature; registrar trimestre/mês/slide, esperado/observado e checklist da mesma geração. Conferir fontes reais, mapa/estágio/capacidade e atualidade das8 artes; observar versão publicada. Exportação integral, revisão do analista e novos índices permanecem abertos.
 
 - [ ] **SP — lote final:** validar85 posições no token real, cobertura de coordenadas/fotografias/estágio/capacidade; revisar MAP, VGV nominal e cenário400–500mil com analista. Confirmar pessoas/contatos e perfiljun2026 antes do aceite. Implementar/verificar exportação integral e observar publicação. Os28 finais já foram implementados; anotações antigas abaixo descrevem checkpoints, não lacunas atuais de renderização.
 
