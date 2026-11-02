@@ -1,5 +1,5 @@
 import { safeNumber } from '@/features/panorama-secovi-fiergs/lib/launches';
-import { monthOf, type SpPreview, type SpLaunchHistory } from './model';
+import { isSpMunicipalPreview, monthOf, type SpPreview, type SpLaunchHistory } from './model';
 import { quarterMonths, type SpTemporalRow } from './temporal';
 
 export interface SpLaunchHistoryInput {
@@ -12,7 +12,7 @@ export interface SpLaunchHistoryInput {
 }
 
 export function matchedLaunchMonths(report: SpPreview): { current: string[]; previous: string[] } | null {
-  if (report.status !== 'partial' || !['api', 'recorded-api'].includes(report.source ?? '') || !report.throughMonth || !report.closingMonth || report.throughMonth > report.closingMonth) return null;
+  if (!isSpMunicipalPreview(report) || !['api', 'recorded-api'].includes(report.source ?? '') || !report.throughMonth || !report.closingMonth || report.throughMonth > report.closingMonth) return null;
   const current = quarterMonths(report.quarter).filter(month => month <= report.throughMonth!);
   if (!current.length || current.join('|') !== report.monthly?.map(row => row.month).join('|') || current.at(-1) !== report.throughMonth) return null;
   return { current, previous: current.map(month => `${Number(month.slice(0, 4)) - 1}${month.slice(4)}`) };
@@ -22,7 +22,6 @@ export function buildSpLaunchHistory(input: SpLaunchHistoryInput, municipal: SpP
   const blocked = (message: string): SpLaunchHistory => ({ status: 'blocked', issues: [message], rows: [], totals: null, checks: [] });
   const months = matchedLaunchMonths(municipal);
   if (!months || input.city !== 'São Paulo' || input.uf !== 'SP' || municipal.patterns?.status !== 'ready') return blocked('Confira os totais municipais e seus padrões antes do histórico.');
-  if (monthOf(input.rootPeriod) !== municipal.closingMonth) return blocked('O fechamento mudou entre consultas. Confira os dados municipais novamente antes do histórico.');
   if (!input.complete.current || !input.complete.previous) return blocked('A paginação do comparativo não foi concluída.');
   const normalize = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
   const expectedGroups = municipal.patterns.rows.map(row => normalize(row.group)).sort().join('|');

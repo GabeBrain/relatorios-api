@@ -1,5 +1,72 @@
 # SP capital — primeiro mapeamento
 
+## 30/10/2026 — refinamento e roteiro para testes práticos
+
+Varredura concluída, mantendo85 posições e sem implementar nova exportação: checklist de disponibilidade por fonte/slide, filtro/download seguro, detalhamentos solicitáveis em lote sem duplicação, avisos atualizados e edição institucional visível na ampliação.211 testes SP+359 regressões Panorama aprovados, checagem real do projeto TypeScript agora no build, lint e QA Edge1440/390 claro/escuro aprovados. [Achados e passos para o usuário](REVISAO_PARA_TESTES_2026-10-30.md), [evidências e limites](EVIDENCIAS.md).
+
+Etapa seguinte: ensaio autenticado da tela pelo usuário, registrar diferenças com trimestre/mês/slide e checklist da mesma geração, revisão metodológica/editorial. Exportação integral e índices futuros continuam pendentes. Não declarar dados reais ou deploy verificados pelo agente.
+
+## 29/10/2026 — lote final: 28 posições e cobertura das85
+
+Implementados 63/64 e66–80 (17 analíticos),9–11 (3 destaques recalculados) e3–5/7/82–85 (8 artes institucionais da referência2T2026). As85 posições originais possuem renderizador; ausência de fonte continua explicitada. Mapas usam coordenadas/oferta da fotografia atual e não imagens analíticas antigas; editoriais mantêm edição identificada. Mesma coleta compartilhada em memória, sem acrescentar chamadas de negócio. Padrões reutilizados: visualizador original, tabelas/gráficos SVG, primitivas cartográficas do Panorama, GeoApiScopeEngine e BrainLoadingState `field` para tiles.
+
+**Próximas etapas:** revisão autenticada das85 posições no token do usuário, revisão do analista (MAP, capacidade/VGV, estágio e cenários de ticket), atualização editorial de pessoas/contatos/perfil territorial se necessária e implementação/validação da exportação integral. [Métodos](DECISOES.md) e [evidências](EVIDENCIAS.md). Cobertura de implementação não equivale a homologação com dados reais. Esta entrada supera contagens de slides pendentes nos checkpoints anteriores.
+
+## 29/10/2026 — quarto lote de dez: 51, 53–59, 61 e 62
+
+Preparados IVV por área, sete séries de preço/m² e dois gráficos de preço por padrão. Divisórias52/60preservadas. Uma coleta de históricos em memória atende39 e estes dez slides; invalidar a cada geração/escopo/token. Processamento local cancelável, sem reintroduzir varredura pesada na geração municipal.
+
+Preços nominais ponderados por estoque no mês, snapshots históricos reconciliados, média geral pelas unidades e recortes sem MCMV pela classificação confirmada. Tabela por área usa as14faixas originais com intervalos contínuos, snapshots de abertura/fechamento e fluxos observados, todos conferidos contra o município. [Métodos e limites](DECISOES.md), [validação](EVIDENCIAS.md). Próximo lote analítico começa em63/64 e estado atual do mercado; mapas/editorial/exportação continuam fora desta entrega. Não declarar85conteúdos concluídos.
+
+## 29/10/2026 — terceiro lote de dez: 39–44, 46–48 e 50
+
+Implementados localmente: Top 10 bairros por vendas, cinco páginas de VGV vendido corrigido, oferta histórica com escoamento, dois comparativos anuais de oferta e IVV trimestral. Referências originais 39/40/46/47/48/50 inspecionadas. Mantém todas as 85 posições e as divisórias; não significa relatório integral pronto.
+
+Reutiliza vendas/INCC e tipologias existentes; adiciona série municipal de estoque e coleta granular só ao abrir39, com cancelamento e retry independentes. Base/identidade/cobertura e fórmulas em [DECISOES](DECISOES.md). Validar no token real campos monetários, cobertura mensal de bairros, fotografias e aderência metodológica; fontes locais de QA não são gabarito de mercado. Próximo lote começa no bloco de área/preços (51 em diante), preservando a estrutura. Exportação e aceite integral seguem pendentes.
+
+## 29/10/2026 — lote de dez: originais23–25 e32–38
+
+**Ampliação autorizada após recebimento do INCC:**26–30também implementados, totalizando15conteúdos nesta entrega (23–30/32–38). Critério autorizado pelo usuário: último mês municipal disponível como base única, correção mensal antes das somas, mesma base total/MCMV/anuais. SnapshotDIjan2021–set2026obtido diretamente do SindusconPR/FGV; ausência de índice/nominal bloqueia VGL sem afetar unidades. Sem nova consulta pesada. Revisão do analista e atualização dos índices apósset2026 continuam pendentes; as notas de pendência26–30abaixo descrevem o momento anterior dessa mesma rodada.
+
+Implementados comparativos anuais por tipologia/segmento de lançamentos e vendas (23/24/37/38), ranking de bairros25 reconciliado contra toda a cidade e cinco tendências de vendas32–36. Meses equivalentes nas parciais, sinais negativos preservados e fontes independentes canceláveis sem bloquear municipal. Cadastro existente alimenta bairros; série salesjan2021…mês conferido alimenta vendas e segmentos; tipologias dos dois anos conferidas automaticamente. Estrutura85preservada. [Contrato e referência INCC](DECISOES.md), [validação](EVIDENCIAS.md).
+
+INCC-DI/fonte confirmados pelo usuário com planilha local; leitura revela bases diferentes (abr/mar2026), índices divergentes do site e uma data duplicada. Fórmula identificada, pergunta de base única set2026 pendente.26–30 continuam aguardando esse fechamento e implementação própria. Próximas pendências: validar fontes reais/meses/grupos/cadastro e metodologia com analista, demais blocos originais, exportação e aceite. Não declarar85slides concluídos.
+
+## 29/10/2026 — estrutura original de 85 slides e lote analítico 13–22
+
+Usuário pediu dez slides e corrigiu a organização: o relatório deve seguir a estrutura original. A navegação agora preserva as 85 posições/títulos do inventário, sem inserir páginas complementares em sequência própria. Posições ainda não desenvolvidas exibem pendência em seu lugar. Slide2 é apresentação do estudo; contagem de empreendimentos pertence ao13. Capa, introdução, sumário e divisórias mantêm capítulos; tipologias/segmentos ficam em23/24,37/38,47/48. Vendas32/oferta46 preservam dados mensais disponíveis, explicitando curva trimestral/escoamento pendentes. Não alegar85slides concluídos.
+
+**Lote13–22:** para empreendimentos e unidades, cinco páginas cada: série trimestral, móvel12meses, trimestralMCMV, móvelMCMV e participação anual por segmento.17trimestres terminando no selecionado,37pontos mensais móveis e participações desde2021. Trimestre/ano atual indicam parcial; comparativos usam três pares de anos consecutivos e meses equivalentes. Base anterior zero tem variação indisponível. Anual conserva totais dos quatro segmentos; nenhum padrão desconhecido é classificado automaticamente.
+
+Empreendimentos reutilizam exclusivamente a coleta `/building`, reconstituindo lançamentos pela data; segmentos usam padrão atual e exibem ressalva de vigência histórica. Unidades usam uma série municipal `/releases`, jan/2021 até o mês municipal conferido, até6páginas100, com dados válidos/sem duplicatas/todos os meses e padrões e releitura atual igual ao município. Não buscar históricos por empreendimento. Consulta automática independente, Brain`operation`/tempo/cancelamento/retry próprios; não bloqueia municipal nem empreendimentos, não apaga tipologias/históricos. Falta de cobertura deixa os cinco slides de unidades indisponíveis, sem zero inventado.
+
+Autoria Codex/Codex Test; base limpa`eb2b666`, único origin, fetch0/0. Implementação e QA locais; API histórica real/adequação do cadastro à reconstituição antiga, classificação histórica, publicação e aceite permanecem por observar. Este registro supera as contagens/posições próprias de46/56páginas dos checkpoints anteriores.
+
+## 29/10/2026 — correção de desempenho após ensaio real
+
+Usuário observou 4:24 na página15/52 da coleta integral de históricos. A contagem passa a usar `GET /public-api/building`, documentado no OpenAPI versionado com ID, cidade/UF, tipo e `release_date`, sem histórico mensal. Preserva paginação/cobertura e IDs distintos; após primeira página, busca até três páginas ao mesmo tempo. Sem filtros de data inventados, sem alterar o coletor Secovi/FIERGS.
+
+Dados municipais aparecem assim que sua consulta termina. Contagem automática continua com BrainLoadingState `operation`, tempo real, progresso e cancelamento próprio; completa slide2 depois. Cancelar/falhar mantém municipal; botão **Conferir empreendimentos** repete somente contagem. Troca de escopo, token ou nova geração abortam/invalidam resultados antigos. Tipologias/históricos e contagem mesclam resultados sem se apagar. Sem garantia de segundos na API real: melhoria estrutural validada localmente, nova medição autenticada pendente. Supera fonte interna pesada e overlay bloqueante das entradas anteriores.
+
+## 29/10/2026 — coleta de empreendimentos integrada ao slide 2
+
+Autorização do usuário para implementar e publicar a adaptação do Secovi/FIERGS. A cada geração real, após descobrir os meses municipais, coleta todas as páginas da fonte interna v2 de São Paulo/SP vertical, sem excluir status. Reutiliza `readBuildingPage`/`insertBuilding` do Panorama; não altera seus motores. Conta IDs distintos pela `release_date` nos mesmos meses da parcial/trimestre completo, independentemente do `period` da raiz e das tipologias/unidades.
+
+Slide 2 apresenta total e série mensal somente após cobertura integral. Erro, datas ausentes/inválidas, IDs conflitantes, páginas repetidas/incompletas ou total instável deixam empreendimentos indisponíveis, mantendo os indicadores municipais. Fonte integral vazia não vira zero; zero lançamentos só é válido quando a coleção coberta contém empreendimentos e nenhum foi lançado na janela. Nova geração refaz a coleta, com overlay Brain, página atual, tempo real e cancelamento. Revisão autenticada no site, preços/INCC, IVV, exportação e homologação continuam pendentes. Este registro supera a pendência de implementação granular dos checkpoints abaixo.
+
+## 29/10/2026 — correção após respostas reais: séries determinam disponibilidade
+
+**Estado vigente:** cada geração consulta a janela trimestral completa e usa o prefixo consecutivo comum às três séries. A raiz de uma amostra não limita setembro. Um/dois meses = parcial; três = trimestre completo nas séries, sem implicar homologação ou fechamento oficial. Diferenças de balanço são diagnósticas, preservando números da API. [Contrato vigente](DECISOES.md), [evidências](EVIDENCIAS.md).
+
+120 testes SP, tipos/lint/build e QA Edge local1440/390 claro/escuro aprovados. Regressão usa setembro fornecido pelo usuário, raiz agosto e residual+22. Não houve nova consulta autenticada pelo agente. Lacunas intermediárias, paginação/dados inválidos, grupos incompatíveis e divergência de releitura/dimensões continuam bloqueando. Reteste publicado e slide2/granular pendentes. Esta regra supera o limite pela raiz e o balanço zero registrados anteriormente.
+
+
+
+**29/10/2026 — fechamento dinâmico por geração (estado vigente):** a consulta relê `period` na API, sem cache HTTP, a cada clique em **Conferir dados reais**. O trimestre selecionado usa apenas os meses consecutivos até esse limite: um/dois meses = parcial; três meses completos e reconciliados = trimestre fechado nas séries municipais (`quarter-closed`). Nova geração substitui a prévia anterior e retira os detalhamentos antigos; não há consulta agendada ou em segundo plano. Meses ausentes, duplicatas, falha de paginação, grupos incompatíveis e balanços divergentes continuam bloqueando. Tipologias, segmentos, quadros e históricos aceitam ambos os estados, sempre comparando meses equivalentes. Os rótulos da página e slides acompanham a cobertura real. Fechamento trimestral municipal não comprova a contagem granular de empreendimentos nem homologa/exporta o relatório integral. As notas antigas de “sempre parcial” são superadas por esta regra.
+
+**Ambiente:** base `c62e41e`, `main` limpa e 0/0 com único remote `origin` após fetch. Identidade Git `Codex Test`; autoria desta entrega Codex a pedido do usuário. Navegador pessoal indisponível para a leitura real: controle interrompido por não identificar a URL com segurança. Setembro real não foi confirmado. Ensaio equivalente com Edge headless local e fontes simuladas; nenhuma credencial pessoal extraída ou chamada real iniciada. Publicação e revisão autenticada continuam pendentes.
+
+
 **Lote de 20 páginas e rota isolada — 16/10:** posições 27–40: lançamentos/vendas dos sete padrões originais da API; 41–43: quadros municipais de lançamentos/vendas/oferta por padrão; 44–46: mesmos quadros por tipologia. São complementos possíveis com fontes já conferidas, não vinte slides originais concluídos. Mesma janela curta, sem coleta adicional. Históricos dependem de Conferir históricos; quadros por tipologia de Conferir tipologias. Todos os totais são reconciliados, estoque somente do último mês, sinais negativos preservados e base não positiva sem porcentagem.
 
 Lucas autorizou push/publicação desta entrega e pediu acesso somente pela rota `/rebrain/relatorios-institucionais/sp`: removidos menu e busca global, rota lazy mantida. Abertura encontrou 4 commits remotos e 23 locais; decisão específica de merge solicitada conforme AGENTS, ainda pendente neste checkpoint. Implementação/testes locais concluídos antes da integração/publicação. Não afirmar deploy concluído sem observar a versão no domínio publicado. Próximo: integrar os históricos após resposta, validar build pós-merge, check-live-docs, push e conferir a rota publicada. Preservar domínios paralelos e não executar dados reais/Monday.

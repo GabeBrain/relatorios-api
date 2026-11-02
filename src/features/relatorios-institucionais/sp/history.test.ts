@@ -36,11 +36,11 @@ describe('SP — comparação de janelas equivalentes, anterior fictício', () =
       expect(buildSpLaunchHistory(input, baseline()).status).toBe('blocked');
     }
   });
-  it('bloqueia releitura atual alterada ou fechamento que mudou', () => {
+  it('bloqueia releitura atual alterada, mas não o período de uma amostra isolada', () => {
     const changed = syntheticLaunchHistory(); changed.current[0].releases_in_period = 192;
     expect(buildSpLaunchHistory(changed, baseline()).status).toBe('blocked');
     const closure = syntheticLaunchHistory(); closure.rootPeriod = '2026-09-01';
-    expect(buildSpLaunchHistory(closure, baseline()).issues[0]).toContain('fechamento mudou');
+    expect(buildSpLaunchHistory(closure, baseline()).status).toBe('ready');
   });
   it('detecta realocação entre padrões mesmo com os totais mensais iguais', () => {
     const input = syntheticLaunchHistory();

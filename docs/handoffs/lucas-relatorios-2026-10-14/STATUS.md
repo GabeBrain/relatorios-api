@@ -1,5 +1,63 @@
 # Estado do handoff
 
+## 30/10/2026 — varredura SP para testes práticos
+
+Ambiente: Windows/PowerShell, Codex Test/Codex, main limpa`ab149ef`, único origin0/0 após fetch. Usuário pediu varredura e refinamento antes dos testes práticos. As85 posições já têm renderizador; refinamento adiciona checklist por fonte/slide, coleta detalhada explícita e reutilizada, registro JSON sem credencial/histórico bruto, avisos atualizados e edição institucional também na ampliação. Corrige6 erros tipados em testes anteriores e faz typecheck/build verificarem o projeto app real. [Varredura e roteiro](../../features/relatorios-institucionais/sp/REVISAO_PARA_TESTES_2026-10-30.md). Nenhum ensaio de mercado autenticado ou alteração de motor Secovi/FIERGS, Corretor, Quanti, CID ou ADM. Homologação, atualidade editorial, índices futuros, deploy observado e exportação integral permanecem pendentes; evidências finais emEVIDENCIAS.
+
+## 29/10/2026 — lote final SP, 28 posições
+
+Windows/PowerShell, Git Codex Test/Codex, main inicialmente limpa`e431fa7`, único origin0/0 após fetch. Usuário pediu fazer os28 restantes juntos. Implementados17 analíticos63/64/66–80,3 destaques9–11 e8 institucionais3–5/7/82–85, mantendo85 posições originais. Institucionais conservam a edição identificada2T2026;7jun2026. Mapas atuais por coordenadas/oferta da fotografia, médias ponderadas, tabelas conservativas e VGV nominal com capacidade=vendidas+estoque. Mesma coleta compartilhada sem endpoint novo; primitivas cartográficas apenas reutilizadas, sem modificar Secovi/FIERGS. [Critérios](../../features/relatorios-institucionais/sp/DECISOES.md), [validação](../../features/relatorios-institucionais/sp/EVIDENCIAS.md).
+
+Cobertura de renderização das85 não comprova números reais. GeoBrain de negócio não consultada pelo agente: QA com fontes sintéticas/replays; Mapbox público configurado respondeu200, separado da fonte de negócio. Revisão no token real, método do analista, atualização editorial, publicação observada e exportação integral ainda pendentes. Não há pergunta metodológica bloqueando implementação; decisões seguem delegação do usuário. Corretor, ÁreaQuanti e outros motores preservados.
+
+## 29/10/2026 — quarto lote SP: 51, 53–59, 61/62
+
+Ambiente observado: Windows/PowerShell, Git Codex Test, main limpa`671568c`, único origin0/0 após fetch. Usuário pediu próximo lote;52/60são divisórias preservadas, não faltantes. Dez conteúdos de área/preço implementados localmente. Históricos compartilhados com39, cache só em memória e descartado em nova geração/escopo/token, processamento local cancelável. Preços ponderados por oferta final e snapshots/fluxos conferidos; critérios em [DECISOES](../../features/relatorios-institucionais/sp/DECISOES.md). Nenhuma consulta de negócio autenticada; QA sintético, sem tocar Secovi/FIERGS/Corretor/Quanti.198testesSP aprovados; tipos/lint/build e navegador registrados emEVIDENCIAS. Cobertura real, método do analista, publicação observada e exportação integral ainda dependem de revisão. Próxima frente:63/64 e estado atual do mercado, preservando numeração original.
+
+## 29/10/2026 — terceiro lote SP: 39–44, 46–48 e 50
+
+Resultado local: 186 testes SP, tipos completos do app, lint, build e QA Edge1440/390 claro/escuro aprovados. Estados lentos de bairros/oferta, cancelamento/retry, parciais, erro/vazio e sinais negativos observados em fontes interceptadas; nenhuma API real. Evidências no documento da feature.
+
+Ambiente observado: Windows/PowerShell, Git Codex Test, `main` limpa em`dbd887d`, único origin em0/0 após fetch. Usuário autorizou próximo lote; decisões coerentes com o original continuam delegadas conforme conversa. Dez conteúdos implementados localmente, mantendo85posições: bairros de vendas, VGV vendido corrigido, oferta/escoamento, comparativos e IVV. Coleta pesada só ao abrir39, com cancelamento próprio; séries municipais não bloqueiam a prévia. Critérios e limites em [DECISOES](../../features/relatorios-institucionais/sp/DECISOES.md). API autenticada e números reais não acessados nesta rodada; QA com fixtures/inventados, sem alteração Secovi/FIERGS, Corretor ou Quanti. Publicação observada, revisão do analista, áreas/preços/mapas/editorial e exportação integral continuam pendentes.
+
+## 29/10/2026 — segundo lote SP:23–25 e32–38
+
+**Atualização na mesma rodada:** usuário delegou a escolha da base após receber a explicação das diferenças da planilha.26–30também implementados: INCC-DI, último mês municipal como base única, total/MCMV/anuais na mesma base, correção mensal antes das somas. Snapshot público69mesesjan2021–set2026com proveniência/hash emDECISOES.15conteúdos nesta entrega, não85concluídos.173testes SP aprovados; tipos/lint/build e QA finais emEVIDENCIAS. Critério sujeito à revisão do analista e novos índices precisam atualizar snapshot; não há pergunta pendente impedindo implementação.
+
+Base limpa26bcfb6, originúnico/fetch0/0 na abertura, Windows/PowerShell/Codex Test. Dez posições originais implementadas: comparativos anuais tipologia/segmento23/24/37/38, Top10bairros25 e tendências de vendas32–36. Municipal liberado antes das consultas independentes, BrainLoadingState/cancelamento/retry, sem alteração Secovi/FIERGS. Fontes reais autenticadas não acessadas pelo agente; testes/Edge local interceptado e limites em [evidências](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Usuário confirmou INCC-DI e forneceu fonte/planilha; fórmula lida, bases e índices divergentes anotados emDECISOES. Pergunta de base única set2026 pendente;26–30ainda não implementados. Publicação/validação real/exportação/aceite continuam pendentes.
+
+## 29/10/2026 — estrutura original85 e dez analíticos13–22
+
+Usuário pediu10slides e corrigiu a estrutura: manter ordem do PPTX. Implementação retorna85posições originais, pendentes explícitos; contagem anteschamada2passa13,2apresentação. Lote13–22: cinco recortes de empreendimentos e cinco de unidades (trimestral,12meses,MCMV e participaçãoanual). Empreendimentos reutilizam cadastro; unidades consultam só releasesdesde2021, até6páginas e mês municipal disponível, com cobertura/releitura. Consulta longa independente e cancelável, sem bloquear municipal/contagem ou apagar outros resultados. Windows/PowerShell, Codex Test, main limpaeb2b666/origin0/0apósfetch.149testes SP na rodada, tipos/lint e comparações consecutivas conferidos; QA/build finais conforme [evidências](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Sem APIreal; retestar cobertura histórica/cadastro/classificação no site e revisar com analista. Não confundir85posições com85slides concluídos, nem implementação com homologação/exportação.
+
+## 29/10/2026 — correção da demora do slide2
+
+Main limpa em5751424, único origin, fetch0/0. Usuário relatou4:24na página15/52 e autorizou corrigir. Contagem passa do histórico interno completo para cadastro GET`/public-api/building`, conforme OpenAPI local; até3páginas paralelas. Municipal aparece antes; operação Brain de contagem possui cancelamento/retry próprios e mescla resultado com tipologias/históricos. Guardas mantidas, sem mudanças nos motores Secovi/FIERGS. [Decisão vigente](../../features/relatorios-institucionais/sp/DECISOES.md), [evidências](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Ambiente Windows/PowerShell, Codex Test, sem API autenticada pelo agente. Retestar duração/cobertura da nova fonte no site; não afirmar segundos ou homologação integral.
+
+## 29/10/2026 — implantação da contagem granular SP autorizada
+
+- **Ambiente:** Windows/PowerShell, identidade Git Codex Test, `main` limpa em `795ee04`, somente origin, fetch e 0/0 antes de alterar. Usuário autorizou implementar/publicar a adaptação do Secovi/FIERGS.
+- **Entrega:** fonte interna v2, somente São Paulo/SP vertical, coleta de todas as páginas e IDs distintos por `release_date` nos meses municipais disponíveis. Total e série mensal no slide 2; falha granular preserva municipal e deixa contagem indisponível. Primitivas de contrato do Panorama reaproveitadas; seus motores e políticas não alterados. Nova geração refaz coleta; overlay Brain/páginas/tempo real/cancelamento.
+- **Evidência:** 134 testes SP e diagnóstico Edge local1440/390 claro/escuro, paginação, parcial/completo, falha e cancelamento. [Evidências e limites](../../features/relatorios-institucionais/sp/EVIDENCIAS.md). Zero chamadas reais. Revisão autenticada da fonte interna e do slide 2 publicado ainda necessária; não há aceite integral/exportação. Preços/INCC, IVV e contrato das vendas seguem abertos.
+
+## 29/10/2026 — correção após respostas reais: séries determinam disponibilidade
+
+- **Ambiente:**Windows/PowerShell; Git Codex Test (não atribuir essa identidade a Lucas). Main inicialmente limpa, único remote origin, fetch0/0 sobre97caa21. Nenhuma credencial extraída ou permissão alterada.
+- **Evidência:** usuário forneceu raiz agosto e três séries com setembro; residual+22 sem causa comprovada. Autorizou seguir após comparação de código Secovi/FIERGS.
+- **Entrega:** disponibilidade pelo prefixo comum das séries, sem corte pela raiz; balanços total/grupo são diagnósticos. Guardas de entrada, cobertura, releitura e dimensões preservadas. [Plano](../../features/relatorios-institucionais/sp/PLAN.md), [evidências](../../features/relatorios-institucionais/sp/EVIDENCIAS.md).120testes SP, tipos/lint/build e QA Edge1440/390 claro/escuro aprovados; zero chamadas reais pelo agente.
+- **Retomar:** conferir a versão publicada com sessão pessoal; depois slide2/granular. Replay local com datas diferentes não é aceite trimestral. Contrato de líquido/causa do residual, preços/INCC, IVV e homologação/exportação integral permanecem abertos. Supera os checkpoints que limitavam os meses pela raiz.
+
+
+
+## Retomada — fechamento dinâmico SP — 29/10/2026
+
+- **Ambiente da sessão:** Windows/PowerShell neste checkout, identidade Git `Codex Test` (não atribuir esta identidade a Lucas); `main`, base `c62e41e`, árvore limpa e `origin/main...main = 0/0` após `git fetch --all`, sem upstream. Nenhuma mudança de acesso/conta. Autoria Codex a pedido do usuário nesta sessão.
+- **Implementação:** cada geração relê o fechamento da API sem cache HTTP; um/dois meses reconciliados geram parcial, três fecham o trimestre municipal. Estado `quarter-closed` distinto de homologação integral, com títulos, slides, dimensões e históricos compatíveis. Nova geração invalida dados anteriores; sem coleta longa ou consulta em segundo plano. [Plano vigente](../../features/relatorios-institucionais/sp/PLAN.md).
+
+- **Validação 29/10:** 115 testes SP/10 arquivos, TypeScript explícito do app, lint dirigido e build final aprovados. Diagnóstico Edge headless local cobre 1440/390 px, claro/escuro, transições de um/dois/três meses, fonte vazia/erro e resposta lenta com overlay/cronômetro/cancelamento; zero erros JS e zero chamadas reais. Setembro sintético, sem alegação de disponibilidade real. Evidência local ignorada em `.local-inputs/relatorios-lucas/sp/dynamic-closure/`; reprodução por `node scripts/diagnostics/sp-dynamic-closure.mjs`.
+- **Limite real:** controle do navegador pessoal interrompido por não conseguir determinar a URL com segurança. Não foi confirmado se setembro já está na API real. QA equivalente executado em navegador headless local com fontes simuladas; não presume publicação, aceite ou dado real de setembro. Próximo: publicar após autorização e executar a conferência autenticada pela rota direta.
+
+
 ## Push concluído; publicação Lovable pendente — 16/10/2026
 
 `git push origin main` enviou `07ca8bb..00b5599`; comparação posterior 0/0 e árvore limpa. Build pós-merge/108 testes/check-live-docs aprovados. Sondagem pública após o push: HTTP 200, mas ainda `index-v7U-Wb1K.js`, sem rota ou chunk SP; publicação NÃO confirmada. Status GitHub pending sem contextos de deploy. Leitura da janela Opera foi bloqueada pela revisão automática por estar em conteúdo não relacionado; nenhuma leitura dessa página realizada. Solicitado a Lucas abrir/autorizar nova aba específica Lovable para concluir publicação, sem ler a aba atual. Push autorizado já executado; falta somente publicar/verificar no Lovable. Não presumir que push equivale a deploy público.

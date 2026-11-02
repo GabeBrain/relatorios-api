@@ -1,13 +1,13 @@
-import { type SpPreview, type SpTypologies } from './model';
+import { isSpMunicipalPreview, type SpPreview, type SpTypologies } from './model';
 import { buildSpTemporalPreview, type SpTemporalInput } from './temporal';
 import { summarizeSpGroups } from './distribution';
 
 /** Compare independent dimensions before allowing the three new pages to show values. */
 export function buildSpTypologies(input: SpTemporalInput, municipal: SpPreview): SpTypologies {
   const blocked = (message: string): SpTypologies => ({ status: 'blocked', issues: [message], rows: [], checks: [] });
-  if (input.groupBy !== 'Tipologia' || municipal.status !== 'partial' || !['api', 'recorded-api'].includes(municipal.source ?? '') || !municipal.monthly?.length) return blocked('Confira primeiro os totais municipais com dados da API.');
+  if (input.groupBy !== 'Tipologia' || !isSpMunicipalPreview(municipal) || !['api', 'recorded-api'].includes(municipal.source ?? '') || !municipal.monthly?.length) return blocked('Confira primeiro os totais municipais com dados da API.');
   const preview = buildSpTemporalPreview(input, municipal.quarter);
-  if (preview.status !== 'partial') return blocked('A fonte por tipologia não comprovou meses, grupos, valores e balanços completos. Os gráficos permanecem indisponíveis.');
+  if (!isSpMunicipalPreview(preview)) return blocked('A fonte por tipologia não comprovou meses, grupos, valores e balanços completos. Os gráficos permanecem indisponíveis.');
   if (preview.closingMonth !== municipal.closingMonth || preview.throughMonth !== municipal.throughMonth) return blocked('O fechamento mudou entre as consultas. Confira os totais municipais novamente antes das tipologias.');
   const checks: SpTypologies['checks'] = [];
   const labels = { openingStock: 'Oferta inicial', launches: 'Lançamentos', sales: 'Vendas líquidas', closingStock: 'Oferta final', stock: 'Oferta final' };

@@ -26,6 +26,7 @@ export interface RequestOptions {
   includeAuth?: boolean;
   timeoutMs?: number;
   signal?: AbortSignal;
+  cache?: RequestCache;
 }
 
 function buildQueryString(query: Record<string, unknown>): string {
@@ -78,6 +79,7 @@ export async function httpRequest<T = unknown>(opts: RequestOptions): Promise<Ht
 
   try {
     const fetchOpts: RequestInit = { method, headers, signal };
+    if (opts.cache) fetchOpts.cache = opts.cache;
     if (opts.body !== undefined && opts.body !== null && !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
       fetchOpts.body = JSON.stringify(opts.body);
     }

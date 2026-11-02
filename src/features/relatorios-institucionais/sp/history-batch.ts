@@ -1,7 +1,7 @@
 import { buildSpSegments } from './segments';
 import { summarizeSpGroups } from './distribution';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
-import { monthOf, type SpHistoryBatch, type SpHistoryMetric, type SpLaunchHistory, type SpPreview } from './model';
+import { isSpMunicipalPreview, monthOf, type SpHistoryBatch, type SpHistoryMetric, type SpLaunchHistory, type SpPreview } from './model';
 import { matchedLaunchMonths } from './history';
 import { buildSpTemporalPreview, priorMonth, type SpTemporalInput } from './temporal';
 
@@ -15,9 +15,6 @@ export function buildSpHistoryBatch(input: SpHistoryBatchInput, municipal: SpPre
   const blocked = (message: string): SpHistoryBatch => ({ status: 'blocked', issues: [message], comparisons: {}, checks: [] });
   const months = matchedLaunchMonths(municipal);
   if (!months || municipal.patterns?.status !== 'ready') return blocked('Confira os totais municipais e seus padrões antes dos históricos.');
-  for (const source of [input.current, input.previous]) {
-    if (source && monthOf(source.rootPeriod) !== municipal.closingMonth) return blocked('O fechamento mudou entre consultas. Confira os dados reais novamente antes dos históricos.');
-  }
   if (!input.previous) return blocked('A janela do ano anterior não foi concluída.');
   const windows = [input.current, input.previous];
   for (let index = 0; index < windows.length; index++) {
@@ -30,8 +27,8 @@ export function buildSpHistoryBatch(input: SpHistoryBatchInput, municipal: SpPre
   }
   const current = buildSpTemporalPreview(input.current, municipal.quarter);
   const previous = buildSpTemporalPreview(input.previous, priorYearQuarter(municipal.quarter));
-  if (current.status !== 'partial' || current.patterns?.status !== 'ready') return { ...blocked(`A janela atual não foi conferida. ${current.issues[0] ?? 'Confira os padrões retornados.'}`), checks: current.checks };
-  if (previous.status !== 'partial' || previous.patterns?.status !== 'ready') return { ...blocked(`A janela do ano anterior não foi conferida. ${previous.issues[0] ?? 'Confira os padrões retornados.'}`), checks: [...current.checks, ...previous.checks] };
+  if (!isSpMunicipalPreview(current) || current.patterns?.status !== 'ready') return { ...blocked(`A janela atual não foi conferida. ${current.issues[0] ?? 'Confira os padrões retornados.'}`), checks: current.checks };
+  if (!isSpMunicipalPreview(previous) || previous.patterns?.status !== 'ready') return { ...blocked(`A janela do ano anterior não foi conferida. ${previous.issues[0] ?? 'Confira os padrões retornados.'}`), checks: [...current.checks, ...previous.checks] };
   if (current.monthly!.map(row => row.month).join('|') !== months.current.join('|') || previous.monthly!.map(row => row.month).join('|') !== months.previous.join('|')) return blocked('As janelas dos dois anos não cobrem os mesmos meses.');
   const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
   const groupKeys = (report: SpPreview) => report.patterns!.rows.map(row => normalize(row.group)).sort().join('|');
@@ -51,7 +48,7 @@ export function buildSpHistoryBatch(input: SpHistoryBatchInput, municipal: SpPre
     if (municipal.metrics[field] === null || current.metrics[field] === null || previous.metrics[field] === null) return blocked('Os totais das janelas ainda não foram comprovados.');
     checks.push({ label: `Total atual · ${labels[field]}`, expected: municipal.metrics[field]!, actual: current.metrics[field]!, delta: current.metrics[field]! - municipal.metrics[field]! });
   }
-  if (checks.some(check => check.delta !== 0 || !Number.isSafeInteger(check.actual))) return { ...blocked('A releitura diverge dos totais municipais. Confira os dados reais novamente; o lote não mistura resultados de consultas diferentes.'), checks };
+  if (checks.some(check => check.kind !== 'balance' && check.delta !== 0 || !Number.isSafeInteger(check.actual))) return { ...blocked('A releitura diverge dos totais municipais. Confira os dados reais novamente; o lote não mistura resultados de consultas diferentes.'), checks };
   const compare = (now: number, before: number) => ({ current: now, previous: before, delta: now - before, variation: before > 0 ? (now - before) / before * 100 : null });
   const comparisons: SpHistoryBatch['comparisons'] = {};
   for (const metric of metrics) {

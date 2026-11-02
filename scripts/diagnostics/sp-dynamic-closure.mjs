@@ -1,0 +1,296 @@
+import { chromium } from '@playwright/test';
+import { spawn } from 'node:child_process';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import assert from 'node:assert/strict';
+import { spGranularFixture } from './sp-granular-fixture.mjs';
+
+// Own local app, synthetic authentication and mixed-date replays, GeoBrain calls intercepted; only Mapbox basemap requests allowed.
+const output = resolve('.local-inputs/relatorios-lucas/sp/dynamic-closure');
+await mkdir(output, { recursive: true });
+const recorded = JSON.parse(await readFile('src/features/relatorios-institucionais/sp/__tests__/fixtures/sp-municipal-2026.json', 'utf8'));
+const observed = JSON.parse(await readFile('src/features/relatorios-institucionais/sp/__tests__/fixtures/sp-september-user-2026-10-29.json', 'utf8'));
+const original = JSON.parse((await readFile('src/features/relatorios-institucionais/sp/original-slides.ts', 'utf8')).split(' = ')[1].split(' as const;')[0]);
+const base = 'http://127.0.0.1:4176';
+const server = spawn(process.execPath, [resolve('node_modules/vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '4176', '--strictPort'], { windowsHide: true, stdio: 'ignore' });
+let browser;
+const results = [];
+const mapboxResponses=[];
+try {
+  let ready = false;
+  for (let i = 0; i < 60 && !ready; i++) {
+    if (server.exitCode !== null) throw new Error('Servidor local não iniciou.');
+    try { ready = (await fetch(base)).ok; } catch { /* startup */ }
+    if (!ready) await new Promise(done => setTimeout(done, 250));
+  }
+  assert.ok(ready);
+  browser = await chromium.launch({ headless: true, channel: 'msedge' });
+  const context = await browser.newContext();
+  await context.addInitScript(() => localStorage.setItem('brain-auth', JSON.stringify({ state: { token: 'synthetic-only', email: 'fixture@example.invalid', issuedAt: Date.now(), expiresAt: Date.now() + 3600000 }, version: 0 })));
+  let closing = '07', slow = false, failure = false, empty = false, granularFailure = false, slowNeighborhood = false, slowStock = false, negativeSales = false, detailsCase = 'normal', neighborhoodCalls = 0, calls = 0, granularCalls = 0, slowMapbox = false, mapboxFailure = false;
+  await context.route('**/*', async route => {
+    const url = new URL(route.request().url());
+    const reply = data => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: data.length }, links: { next: null } }) });
+    if (url.pathname.endsWith('/monitored-cities')) return reply([{ city: 'São Paulo', state: 'SP' }]);
+    if (url.pathname.endsWith('/building')) {
+      granularCalls++;
+      assert.equal(route.request().method(), 'GET');
+      assert.equal(url.searchParams.get('type'), 'Vertical');
+      assert.equal(url.searchParams.get('city'), 'São Paulo');
+      if (slow) await new Promise(done => setTimeout(done, 1500));
+      if (granularFailure) return route.fulfill({ status: 403, body: '{}' });
+      const pageNumber = Number(url.searchParams.get('page'));
+      const rows = (pageNumber === 1 ? ['2026-07-10', '2026-08-20'] : ['2026-09-15', '2026-06-01']).map((date, i) => ({ building_id: (pageNumber - 1) * 2 + i + 1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: date, neighborhood: `Bairro ${(pageNumber - 1) * 2 + i + 1}`, total_units: (() => { const month = date.slice(0, 7); const values = month === '2026-09' ? observed.septemberReleases : recorded.releases[month]; return values?.reduce((a, b) => a + b, 0) ?? 0; })(), standard: ['Compacto', 'Econ\u00f4mico', 'Standard', 'Luxo'][(pageNumber - 1) * 2 + i], period: '2026-08-01' }));
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: pageNumber, last_page: 2, total: 4 } }) });
+    }
+    if (url.pathname.endsWith('/building-with-history')) {
+      if (Number(url.searchParams.get('per_page')) === 100) {
+        neighborhoodCalls++;
+        if (slowNeighborhood) await new Promise(done => setTimeout(done, 1500));
+        const values = (metric,month,i) => {
+          if (negativeSales && metric === 'sales' && month === '2026-07' && i === 0) return -10000;
+          if (month === '2026-09') return (metric === 'stock' ? observed.septemberStock : metric === 'sales' ? observed.septemberSales : observed.septemberReleases)[i];
+          if (month === '2026-08' && metric === 'stock') return observed.augustStock[i];
+          return recorded[metric][month]?.[i] ?? (metric === 'stock' ? 1000+i*50 : 100+i*5+Number(month.slice(5)));
+        };
+        const rows = spGranularFixture(recorded.groups,values,`2026-${closing}`);
+        if (detailsCase === 'gap') rows[0].typologies_history = rows[0].typologies_history.filter(row => row.period !== '2024-09-01');
+        if (detailsCase === 'missing-area') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).private_area = null;
+        return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
+      }
+      calls++;
+      if (failure) return route.fulfill({ status: 403, body: '{}' });
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: empty ? [] : [{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-08-01' }], meta: { total: 5183 }, links: { next: null } }) });
+    }
+    if (url.pathname.includes('/temporal-analysis-city/')) {
+      if (slowStock && url.pathname.endsWith('/stock') && url.searchParams.get('start_period') === '2021-01-01') await new Promise(done => setTimeout(done, 1500));
+      const metric = url.pathname.split('/').at(-1);
+      const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
+      const months = Object.fromEntries(Object.entries(recorded[metric]).filter(([month]) => month < '2026-09').map(([month, values]) => [month, [...values]]));
+      months['2026-09'] = metric === 'stock' ? observed.septemberStock : metric === 'sales' ? observed.septemberSales : observed.septemberReleases;
+      if (negativeSales && metric === 'sales') months['2026-07'][0] = -10000;
+      if (metric === 'stock') months['2026-08'] = observed.augustStock;
+      if (url.searchParams.get('start_period') === '2021-01-01') {
+        const all = [];
+        for (let year = 2021; year <= 2026; year++) for (let m = 1; m <= 12; m++) {
+          const month = `${year}-${String(m).padStart(2, '0')}`;
+          if (month > `2026-${closing}`) continue;
+          for (const [i, group] of recorded.groups.entries()) all.push({ period: `${month}-01`, group, building_type: 'Vertical', [field]: months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m), ...(metric === 'releases' ? { vgv_release: (months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m)) * 100000.25 } : metric === 'sales' ? { vgv_liquid_sales: (months[month]?.[i] ?? 100 + i * 5 + m) * 100000.25 } : {}) });
+        }
+        const p = Number(url.searchParams.get('page')), last = Math.ceil(all.length / 100);
+        return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: all.slice((p - 1) * 100, p * 100), meta: { current_page: p, last_page: last, total: all.length }, links: { next: p < last ? `?page=${p + 1}` : null } }) });
+      }
+
+      if (url.searchParams.get('group_by') === 'Tipologia') {
+        const start = url.searchParams.get('start_period').slice(0, 7), end = url.searchParams.get('end_period').slice(0, 7);
+        const rows = [];
+        for (let year = 2025; year <= 2026; year++) for (let m = 1; m <= 12; m++) {
+          const month = `${year}-${String(m).padStart(2, '0')}`;
+          if (month < start || month > end || month > `2026-${closing}`) continue;
+          const total = months[month]?.reduce((a, b) => a + b, 0) ?? recorded.groups.reduce((sum, _, i) => sum + (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m), 0);
+          const values = [.1, .6, .2].map(share => Math.floor(total * share)); values.push(total - values.reduce((a,b) => a+b,0));
+          rows.push(...values.map((value, i) => ({ period: `${month}-01`, group: `${i+1} dormit\u00f3rio${i ? 's' : ''}`, building_type: 'Vertical', [field]: value })));
+        }
+        return reply(rows);
+      }
+      return reply(Object.entries(months).flatMap(([month, values]) => values.map((value, index) => ({ period: `${month}-01`, group: recorded.groups[index], building_type: 'Vertical', [field]: value, ...(metric === 'releases' ? { vgv_release: value * 100000.25 } : metric === 'sales' ? { vgv_liquid_sales: value * 100000.25 } : {}) }))).filter(row => row.period >= url.searchParams.get('start_period') && row.period <= url.searchParams.get('end_period') && row.period <= `2026-${closing}-31`));
+    }
+    if (url.hostname === 'api.mapbox.com') {if(slowMapbox)await new Promise(done=>setTimeout(done,1400));return mapboxFailure?route.abort():route.continue();}
+    if (url.origin === base) return route.continue();
+    return route.abort();
+  });
+  const page = await context.newPage();
+  const openSlide = number => page.getByRole('button', { name: `${number}. ${original[number - 1].title}`, exact: true }).click();
+  const captureSlide = async options => {
+    const article = page.getByRole('article');
+    await article.evaluate(element => element.scrollIntoView({ block:'center', inline:'nearest', behavior:'instant' }));
+    await page.evaluate(() => document.fonts.ready);
+    await article.evaluate(async element=>Promise.all(Array.from(element.querySelectorAll('img')).map(img=>img.decode().catch(()=>{}))));
+    await page.waitForTimeout(120);
+    if (options.path.includes('original-53')) await writeFile(resolve(output,'price-header-dom.json'), JSON.stringify(await article.evaluate(el => Array.from(el.querySelectorAll('svg > text')).map(e => ({html:e.outerHTML, text:e.textContent, box:e.getBoundingClientRect().toJSON(), fill:getComputedStyle(e).fill, opacity:getComputedStyle(e).opacity}))), null,2));
+    await article.screenshot(options);
+  };
+  page.on('response', response=>{if(new URL(response.url()).hostname==='api.mapbox.com')mapboxResponses.push(response.status());});
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  for (const width of [1440, 390]) for (const dark of [false, true]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto(`${base}/rebrain/relatorios-institucionais/sp`);
+    await page.getByRole('heading', { name: 'SP institucional', exact: true }).waitFor();
+    if (width < 640 && await page.getByRole('button', { name: 'Recolher menu', exact: true }).count()) await page.getByRole('button', { name: 'Recolher menu', exact: true }).click();
+    if (width >= 640 && await page.getByRole('button', { name: 'Expandir menu', exact: true }).count()) await page.getByRole('button', { name: 'Expandir menu', exact: true }).click();
+    await page.waitForFunction(narrow => Math.abs(document.querySelector('aside').getBoundingClientRect().width - (narrow ? 56 : 256)) < 1, width < 640);
+    await page.evaluate(value => document.documentElement.classList.toggle('dark', value), dark);
+    await page.getByRole('combobox').first().click();
+    await page.getByRole('option', { name: 'SP', exact: true }).click();
+    await page.getByText('Selecione o município', { exact: true }).click();
+    await page.getByRole('option', { name: 'São Paulo', exact: true }).click();
+    for (const month of ['07', '08', '09']) {
+      closing = month;
+      await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+      await page.getByText(month === '09' ? 'Trimestre completo nas séries municipais da API' : 'Conferência parcial de dados da API', { exact: true }).waitFor();
+      if (month === '09') { await page.getByText(/Balanço 2026-09: diferença de 22 unidades entre estoque/).waitFor(); await page.getByRole('cell', { name: '126.307', exact: true }).first().waitFor(); }
+      const heading = page.getByRole('heading', { name: /São Paulo \/ SP/ });
+      assert.match(await heading.innerText(), month === '09' ? /trimestre completo até setembro/ : /parcial até/);
+      await page.getByText(/Cobertura conferida:/).waitFor();
+      assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 0);
+      await openSlide(13);
+      assert.match(await page.getByRole('article').innerText(), /Reconstitui\u00e7\u00e3o do cadastro atual/);
+      assert.match(await page.getByRole('article').innerText(), new RegExp(`Lan\u00e7amentos no trimestre selecionado\\s+${Number(month) - 6}`));
+      await captureSlide({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-${month}-projects.png`) });
+      await page.getByText('Séries de unidades lançadas conferidas desde janeiro de 2021. Cinco páginas históricas disponíveis.', { exact: true }).waitFor();
+      await openSlide(18);
+      await captureSlide({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-${month}.png`) });
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1 || document.querySelector('main').scrollWidth > document.querySelector('main').clientWidth + 1), false);
+      if (month === '09') {
+        await page.getByText(/Séries de vendas líquidas conferidas desde janeiro/).waitFor();
+        await page.getByText(/Tipologias conferidas:/).waitFor();
+        await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+        await page.getByText(/VGV vendido corrigido pelo INCC-DI/).waitFor();
+        await page.getByText(/VGL corrigido pelo INCC-DI para 2026-09/).waitFor();
+        await page.getByRole('button',{name:'Conferir detalhamentos do relat\u00f3rio',exact:true}).click();
+        await page.getByText(/Hist\u00f3ricos de \u00e1reas e pre\u00e7os processados/).waitFor();
+        const checklist=page.getByRole('region',{name:'Checklist dos 85 slides'});
+        assert.match(await checklist.innerText(),/85 posi/);
+        if(width===1440&&!dark){
+          const downloadPromise=page.waitForEvent('download');
+          await checklist.getByRole('button',{name:'Baixar checklist da confer\u00eancia'}).click();
+          const download=await downloadPromise;
+          const snapshot=JSON.parse(await readFile(await download.path(),'utf8'));
+          assert.equal(snapshot.slides.length,85);assert.equal(snapshot.exportAvailable,false);
+          assert.doesNotMatch(JSON.stringify(snapshot),/synthetic-only|typologies_history|latitude/);
+          await checklist.getByText('Ver situa\u00e7\u00e3o e pend\u00eancias por slide',{exact:true}).click();
+          await checklist.getByRole('combobox',{name:'Mostrar slides'}).click();
+          await page.getByRole('option',{name:'Refer\u00eancia editorial',exact:true}).click();
+          assert.equal(await checklist.locator('tbody tr').count(),8);
+          await checklist.getByRole('button',{name:'Abrir slide 82',exact:true}).click();
+          await page.getByRole('button',{name:'Ampliar slides',exact:true}).click();
+          assert.match(await page.getByRole('dialog').getByRole('note').innerText(),/2T2026/);
+          await page.getByRole('dialog').screenshot({path:resolve(output,'editorial-expanded.png')});
+          await page.keyboard.press('Escape');
+          await checklist.screenshot({path:resolve(output,'review-panel.png')});
+          await checklist.getByText('Ver situa\u00e7\u00e3o e pend\u00eancias por slide',{exact:true}).click();
+        }
+        for (const slide of Array.from({length:85},(_,i)=>i+1)) {
+          await openSlide(slide);
+          if (slide === 39) await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
+          if (slide === 39) assert.equal(neighborhoodCalls, width === 1440 ? dark ? 2 : 1 : dark ? 4 : 3);
+          if (slide >= 51 && slide <=80) await page.getByText(/Históricos de áreas e preços processados/).waitFor();
+          await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+          if (slide === 23) await writeFile(resolve(output, 'comparison-dom.json'), JSON.stringify(await page.getByRole('article').evaluate(el => Array.from(el.querySelectorAll('svg text')).slice(0, 4).map(e => ({ text: e.textContent, html: e.outerHTML, box: e.getBoundingClientRect().toJSON(), fill: getComputedStyle(e).fill }))), null, 2));
+          assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em confer\u00eancia|Comparativo em confer\u00eancia|Bairros em confer\u00eancia|Ranking de bairros em confer\u00eancia|Hist\u00f3rico em confer\u00eancia|Áreas e preços em conferência/);
+          if([67,68,70,71,74,75,79,80].includes(slide))await page.getByText(/Carregando base cartogr/).waitFor({state:'hidden',timeout:30000});
+          assert.doesNotMatch(await page.getByRole('article').innerText(), /Conte.do pendente|Destaque em confer.ncia|Localiza..es em confer.ncia/);
+          await captureSlide({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-original-${slide}.png`) });
+        }
+        await page.getByText('Diferenças de balanço por grupo', { exact: true }).click();
+        await page.getByText('Diferenças de balanço por grupo', { exact: true }).scrollIntoViewIfNeeded();
+        await page.screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-balance-details.png`) });
+        await page.locator('main').evaluate(element => { element.scrollTop = 0; });
+        await page.screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-summary.png`) });
+        await openSlide(46);
+        assert.match(await page.getByRole('article').innerText(), /126.307/);
+      }
+
+    }
+    slow = true;
+    await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+    await page.getByText('Trimestre completo nas séries municipais da API', { exact: true }).waitFor();
+    assert.equal(await page.getByRole('dialog', { name: 'Consulta do relatório' }).count(), 0);
+    await page.getByLabel('0:01 decorridos').waitFor();
+    assert.equal(await page.getByRole('cell', { name: '126.307', exact: true }).count() > 0, true);
+    await page.locator('main').evaluate(element => { element.scrollTop = 0; });
+    await page.screenshot({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-loading.png`) });
+    await page.getByRole('button', { name: 'Cancelar contagem', exact: true }).click();
+    await page.getByText('Contagem de empreendimentos indisponível', { exact: true }).waitFor();
+    assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 1);
+    slow = false;
+    results.push({ width, dark, transitions: ['partial-1', 'partial-2', 'quarter-closed'], municipalVisibleDuringSlowCountAndCancel: true });
+  }
+  slowNeighborhood = true;
+  await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  const beforeNeighborhood = neighborhoodCalls;
+  await openSlide(39);
+  await page.getByRole('button', { name: 'Cancelar históricos detalhados', exact: true }).waitFor();
+  await page.getByLabel('0:01 decorridos').waitFor();
+  assert.equal(neighborhoodCalls, beforeNeighborhood + 1);
+  assert.equal(await page.getByRole('dialog', { name: 'Consulta do relatório' }).count(), 0);
+  await page.getByRole('button', { name: 'Cancelar históricos detalhados', exact: true }).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: resolve(output, 'neighborhood-loading.png') });
+  await page.getByRole('button', { name: 'Cancelar históricos detalhados', exact: true }).click();
+  await page.getByText('Vendas por bairro indisponíveis', { exact: true }).waitFor();
+  slowNeighborhood = false;
+  await page.getByRole('button', { name: 'Conferir vendas por bairro', exact: true }).click();
+  await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
+  slowStock = true;
+  await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+  await page.getByRole('button', { name: 'Cancelar oferta histórica', exact: true }).waitFor();
+  await page.getByLabel('0:01 decorridos').waitFor();
+  assert.equal(await page.getByRole('dialog', { name: 'Consulta do relatório' }).count(), 0);
+  await page.getByRole('button', { name: 'Cancelar oferta histórica', exact: true }).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: resolve(output, 'stock-loading.png') });
+  await page.getByRole('button', { name: 'Cancelar oferta histórica', exact: true }).click();
+  await page.getByText('Oferta histórica indisponível', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('cell', { name: '126.307', exact: true }).count() > 0, true);
+  slowStock = false;
+  await page.getByRole('button', { name: 'Conferir oferta histórica', exact: true }).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  negativeSales = true;
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+  await page.getByText(/VGV vendido corrigido pelo INCC-DI/).waitFor();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  for (const slide of [39,44,50,51]) {
+    await openSlide(slide);
+    if (slide === 39) await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
+    await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+    await captureSlide({ path: resolve(output, `negative-${slide}.png`) });
+    if (slide === 44) assert.match(await page.getByRole('article').innerText(), /negativas preservadas/);
+  }
+  negativeSales = false;
+  for (const dataCase of ['gap','missing-area']) {
+    detailsCase = dataCase;
+    await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+    await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+    await openSlide(dataCase === 'gap' ? 53 : 51);
+    await page.getByText(/Históricos de áreas e preços processados/).waitFor();
+    if (dataCase === 'missing-area') assert.match(await page.getByRole('article').innerText(), /em conferência/);
+    await captureSlide({ path: resolve(output, `detail-${dataCase}.png`) });
+    await openSlide(61);
+    assert.doesNotMatch(await page.getByRole('article').innerText(), /em conferência/);
+    detailsCase = 'normal';
+    await page.getByRole('button', { name: 'Atualizar históricos de áreas e preços', exact: true }).click();
+    await page.getByText(/Históricos de áreas e preços processados/).waitFor();
+    await openSlide(51);
+    await page.getByRole('article').getByText('Até 34m² (MCMV)', { exact:true }).waitFor();
+  }
+  const cdp=await context.newCDPSession(page);
+  await cdp.send('Network.clearBrowserCache');
+  slowMapbox=true;await openSlide(67);
+  await page.getByText(/Carregando base cartogr/).waitFor();
+  await captureSlide({path:resolve(output,'map-loading.png')});
+  await page.getByText(/Carregando base cartogr/).waitFor({state:'hidden'});
+  slowMapbox=false;mapboxFailure=true;await cdp.send('Network.clearBrowserCache');
+  await openSlide(68);await page.getByRole('article').getByText('Base cartogr\u00e1fica parcialmente indispon\u00edvel.',{exact:true}).waitFor();
+  await captureSlide({path:resolve(output,'map-provider-error.png')});mapboxFailure=false;
+  granularFailure = true;
+  await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+  await page.getByText('Contagem de empreendimentos indisponível', { exact: true }).waitFor();
+  await page.getByText('Trimestre completo nas séries municipais da API', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 1);
+  granularFailure = false; failure = true;
+  await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+  await page.getByText('Não foi possível preparar a prévia', { exact: true }).waitFor();
+  failure = false; empty = true;
+  await page.getByRole('button', { name: 'Tentar novamente', exact: true }).click();
+  await page.getByText('Não foi possível preparar a prévia', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 0);
+  assert.deepEqual(errors, []);
+  const result = { results, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, mapboxResponses: {total:mapboxResponses.length,success:mapboxResponses.filter(status=>status===200).length}, originalSlidesCovered:85, mapSlowAndProviderError:true, practicalChecklistAndExplicitDetails:true, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
+  await writeFile(resolve(output, 'result.json'), JSON.stringify(result, null, 2));
+  console.log(JSON.stringify(result));
+} finally {
+  await browser?.close();
+  server.kill();
+}

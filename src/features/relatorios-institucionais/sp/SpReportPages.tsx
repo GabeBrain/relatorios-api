@@ -1,11 +1,21 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import type { SpPreview, SpTypologies } from './model';
-import { buildSpSegments, SP_DETAIL_PAGES, SP_PATTERN_PAGES, SP_TABLE_PAGES } from './segments';
-import { SpTableSlide } from './SpTableSlide';
-import { SpSegmentHistorySlide } from './SpSegmentHistorySlide';
-import { SpLaunchHistorySlide } from './SpLaunchHistorySlide';
+import { spPeriodLabel, type SpPreview } from './model';
+import { SP_ORIGINAL_SLIDES } from './original-slides';
+import { SpTrendSlide } from './SpTrendSlide';
+import { SpComparisonSlide } from './SpComparisonSlide';
+import { SpNeighborhoodSlide } from './SpNeighborhoodSlide';
+import { SpMarketSlide } from './SpMarketSlide';
+import { SpDetailSlide } from './SpDetailSlide';
+import { SP_DETAIL_SLIDES } from './granular-details';
+import { SpHighlightsSlide } from './SpHighlightsSlide';
+import { SP_MARKET_SLIDES } from './market-details';
+import { SpMarketStateSlide } from './SpMarketStateSlide';
+import { SpStockMapSlide } from './SpStockMapSlide';
+import { SP_INSTITUTIONAL_ASSETS } from './institutional-assets';
+import { reviewSpSlides, SP_SLIDE_STATE_LABELS } from './review';
+import { SpReviewPanel } from './SpReviewPanel';
 import cover from './assets/cover.png';
 import projectsTemplate from './assets/template-13.png';
 import launchesTemplate from './assets/template-18.png';
@@ -18,11 +28,7 @@ import launchesSegmentTemplate from './assets/template-24.png';
 import salesSegmentTemplate from './assets/template-38.png';
 import stockSegmentTemplate from './assets/template-48.png';
 
-const quantity = (value: number | null) => value === null ? 'Indisponível' : value.toLocaleString('pt-BR');
-const month = (value: string) => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}-01T12:00:00Z`));
-const titles = ['Capa', 'Empreendimentos', 'Unidades lançadas', 'Vendas líquidas', 'Oferta final', 'Lançamentos por tipologia', 'Vendas por tipologia', 'Oferta por tipologia', 'Lançamentos por segmento', 'Vendas por segmento', 'Oferta por segmento', 'Comparativo de lançamentos', 'Comparativo de vendas', 'Comparativo de oferta', ...SP_DETAIL_PAGES.map(page => page.title), ...SP_PATTERN_PAGES.map(page => page.title), ...SP_TABLE_PAGES.map(page => page.title)];
-const metricTemplates = { launches: launchesTemplate, sales: salesTemplate, stock: stockTemplate };
-const templates = [cover, projectsTemplate, launchesTemplate, salesTemplate, stockTemplate, launchesTypologyTemplate, salesTypologyTemplate, stockTypologyTemplate, launchesSegmentTemplate, salesSegmentTemplate, stockSegmentTemplate, launchesTemplate, salesTemplate, stockTemplate, ...[...SP_DETAIL_PAGES, ...SP_PATTERN_PAGES, ...SP_TABLE_PAGES].map(page => metricTemplates[page.metric])];
+const templates: Record<number, string> = { 1: cover, 13: projectsTemplate, 14: projectsTemplate, 15: projectsTemplate, 16: projectsTemplate, 17: projectsTemplate, 18: launchesTemplate, 19: launchesTemplate, 20: launchesTemplate, 21: launchesTemplate, 22: launchesTemplate, 23: launchesTypologyTemplate, 24: launchesSegmentTemplate, 32: salesTemplate, 37: salesTypologyTemplate, 38: salesSegmentTemplate, 46: stockTemplate, 47: stockTypologyTemplate, 48: stockSegmentTemplate };
 
 function SlideFrame({ children }: { children: ReactNode }) {
   const frame = useRef<HTMLDivElement>(null);
@@ -36,59 +42,48 @@ function SlideFrame({ children }: { children: ReactNode }) {
   return <div ref={frame} className="relative aspect-video w-full overflow-hidden border border-border bg-card shadow-sm"><div style={{ width: 1280, height: 720, transform: `scale(${width / 1280})`, transformOrigin: 'top left' }}>{children}</div></div>;
 }
 
-/** Local reading layout only. It does not collect data or release an export. */
-export function SpReportPages({ report }: { report: SpPreview }) {
-  const [page, setPage] = useState(0);
+/** Original 85-slide order; pending content occupies its original position. */
+export function SpReportPages({ report, onSelectSlide }: { report: SpPreview; onSelectSlide?: (number: number) => void }) {
+  const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState(false);
-  if (!['partial', 'ready'].includes(report.status)) return null;
+  useEffect(() => { if (page === 39 || (SP_DETAIL_SLIDES as readonly number[]).includes(page)) onSelectSlide?.(page); }, [page, report, onSelectSlide]);
+  if (!['partial', 'quarter-closed', 'ready'].includes(report.status)) return null;
   const real = report.source === 'api' || report.source === 'recorded-api';
-  const period = report.throughMonth ? `Parcial até ${month(report.throughMonth)}` : 'Exemplo com dados fictícios';
-  const segments = buildSpSegments(report);
-  const detail = page >= 14 && page < 26 ? SP_DETAIL_PAGES[page - 14] : undefined;
-  const pattern = page >= 26 && page < 40 ? SP_PATTERN_PAGES[page - 26] : undefined;
-  const table = page >= 40 ? SP_TABLE_PAGES[page - 40] : undefined;
-  const distribution = page >= 8 ? segments : report.typologies;
-  const metric = page === 1 ? 'projects' : [2, 5, 8].includes(page) ? 'launches' : [3, 6, 9].includes(page) ? 'sales' : 'stock';
-  const observations = (report.monthly ?? []).map(row => ({ month: row.month, value: metric === 'stock' ? row.closingStock : metric === 'launches' ? row.launches : row.sales }));
-  const slide = <article aria-label={`Página ${page + 1}: ${titles[page]}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
-    <img src={templates[page]} alt={page === 0 ? 'Capa original Brain Inteligência Estratégica' : `Layout original: ${titles[page]}`} className="absolute inset-0 h-full w-full" />
-    {table ? <SpTableSlide report={report} {...table} /> : page >= 11 ? <SpLaunchHistorySlide report={report} segment={detail?.segment} pattern={pattern?.pattern} metric={pattern?.metric ?? detail?.metric ?? (page === 11 ? 'launches' : page === 12 ? 'sales' : 'stock')} /> : page > 0 && <>
-      <p className="absolute left-[62px] top-[155px] text-[18px]">{report.quarter} · {real ? period : 'Dados fictícios · exemplo de desenvolvimento'}</p>
-      <div className="absolute right-[100px] top-[145px] text-right"><p className="text-[16px]">{metric === 'stock' ? 'Oferta no último mês conferido' : 'Acumulado nos meses conferidos'}</p><p className="text-[32px] font-bold text-[#5b7638]">{quantity(page >= 5 && distribution?.status !== 'ready' ? null : report.metrics[metric])}</p></div>
-      {page >= 8 && report.historyBatch?.status === 'ready' && report.historyBatch.segments ? <SpSegmentHistorySlide batch={report.historyBatch} metric={metric as 'launches' | 'sales' | 'stock'} /> : page >= 5 ? <DistributionChart result={distribution} metric={metric as 'launches' | 'sales' | 'stock'} kind={page >= 8 ? 'segmento' : 'tipologia'} /> : page === 1 ? <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[30px] font-bold">Contagem de empreendimentos pendente</p><p className="mt-4 text-[20px]">A cobertura granular ainda não foi confirmada.</p></div> : <MonthlyChart observations={observations} />}
-      <p className={`absolute left-[62px] text-[16px] ${page >= 5 ? 'top-[605px]' : 'top-[590px]'}`}>{page === 1 ? 'Sem estimativa ou preenchimento com zero.' : page >= 8 && report.historyBatch?.status === 'ready' && report.historyBatch.segments ? 'Mesmos meses nos dois anos · regra de segmentos confirmada por Lucas.' : page >= 5 ? 'Distribuição nos meses conferidos. Comparação com o ano anterior pendente.' : 'Série mensal parcial. Comparações trimestrais e variações históricas pendentes.'}</p>
-    </>}
+  const period = spPeriodLabel(report);
+  const definition = SP_ORIGINAL_SLIDES[page - 1];
+  const reviews=reviewSpSlides(report);
+  const currentReview=reviews[page-1];
+  const referenceNote=SP_INSTITUTIONAL_ASSETS[page] ? (page===7?'Perfil territorial de junho de 2026, conforme o material de referência.':'Conteúdo institucional reproduzido da edição de referência 2T2026; nomes, contatos e números conservam essa edição.') : null;
+  const slide = <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
+    <img key={`template-${page}`} src={SP_INSTITUTIONAL_ASSETS[page] ?? templates[page] ?? (page >= 32 && page <= 44 ? salesTemplate : projectsTemplate)} alt={page === 1 ? 'Capa original Brain Inteligência Estratégica' : SP_INSTITUTIONAL_ASSETS[page] ? `Referência institucional: ${definition.title}` : `Layout: ${definition.title}`} className="absolute inset-0 h-full w-full" />
+    {SP_INSTITUTIONAL_ASSETS[page] ? null : [9,10,11].includes(page) ? <SpHighlightsSlide key={page} report={report} slide={page}/> : [67,68,70,71,74,75,79,80].includes(page) ? <SpStockMapSlide key={page} report={report} slide={page}/> : (SP_MARKET_SLIDES as readonly number[]).includes(page) ? <SpMarketStateSlide key={page} report={report} slide={page}/> : (SP_DETAIL_SLIDES as readonly number[]).includes(page) ? <SpDetailSlide key={page} report={report} slide={page} /> : page >= 13 && page <= 22 || page >= 26 && page <= 30 || page >= 32 && page <= 36 || page >= 40 && page <= 44 ? <SpTrendSlide key={page} report={report} number={page} /> : [23, 24, 37, 38, 47, 48].includes(page) ? <SpComparisonSlide key={page} report={report} number={page} /> : [25,39].includes(page) ? <SpNeighborhoodSlide key={page} report={report} sales={page === 39} /> : [46,50].includes(page) ? <SpMarketSlide key={page} report={report} number={page} /> : page > 1 ? <OriginalTextSlide number={page} title={definition.title} report={report} /> : null}
   </article>;
-  const navigation = <nav aria-label="Navegação das páginas" className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">{titles.map((title, index) => <Button key={title} variant={page === index ? 'default' : 'outline'} aria-pressed={page === index} onClick={() => setPage(index)}>{index + 1}. {title}</Button>)}</nav>;
+  const navigation = <nav aria-label="Navegação dos slides originais" className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">{SP_ORIGINAL_SLIDES.map(item => <Button className="h-auto min-h-10 max-w-full whitespace-normal py-2 text-left" key={item.number} variant={page === item.number ? 'default' : 'outline'} aria-pressed={page === item.number} onClick={() => setPage(item.number)}>{item.number}. {item.title}</Button>)}</nav>;
   return <section aria-label="Páginas do relatório" className="space-y-4">
-    <div><h2 className="text-lg font-semibold">Montagem do relatório</h2><p className="text-sm text-muted-foreground">Modelo original do PowerPoint · {report.quarter} · {real ? period : 'Dados fictícios'}. Exportação e homologação pendentes.</p><p className="text-sm text-muted-foreground">Páginas 15–40: detalhes complementares por segmento e padrão. Use Conferir históricos. Páginas 41–46: quadros dos dados atuais; tipologias dependem de Conferir tipologias.</p></div>
+    <div><h2 className="text-lg font-semibold">Montagem do relatório</h2><p className="text-sm text-muted-foreground">Ordem e numeração dos 85 slides do modelo original · {report.quarter} · {real ? period : 'Dados fictícios'}. Os indicadores dependem da conferência de cada fonte. Exportação e homologação pendentes.</p><p className="text-sm text-muted-foreground">Séries e comparativos são preenchidos automaticamente após a conferência das fontes. Rankings de bairros dependem da reconciliação com os totais municipais; os históricos de bairros, áreas, preços e mapas são coletados ao abrir um desses slides e reaproveitados entre eles. VGL lançado e VGV vendido por período usam INCC-DI e base única no último mês disponível. Preços e VGV da fotografia atual são nominais.</p></div>
+    <SpReviewPanel report={report} slides={reviews} onOpen={setPage}/>
     {!expanded && navigation}
+    <p role="status" className="text-sm">Slide {page}: <strong>{SP_SLIDE_STATE_LABELS[currentReview.state]}</strong> · {currentReview.reason}</p>
     <Button variant="outline" onClick={() => setExpanded(true)}>Ampliar slides</Button>
     {!expanded && <SlideFrame>{slide}</SlideFrame>}
-    <Dialog open={expanded} onOpenChange={setExpanded}><DialogContent className="max-h-[95dvh] w-[96vw] max-w-6xl overflow-auto p-4 sm:p-6"><DialogTitle>Prévia dos slides · São Paulo</DialogTitle><DialogDescription>Parcial para revisão. Em telas pequenas, gire o aparelho para ampliar.</DialogDescription>{navigation}<SlideFrame>{slide}</SlideFrame></DialogContent></Dialog>
+    {referenceNote && <p role="note" className="text-sm text-muted-foreground">{referenceNote}</p>}
+    <Dialog open={expanded} onOpenChange={setExpanded}><DialogContent className="max-h-[95dvh] w-[96vw] max-w-6xl overflow-auto p-4 sm:p-6"><DialogTitle>Prévia dos slides · São Paulo</DialogTitle><DialogDescription>{real ? period : 'Dados fictícios'} · Estrutura original, 85 posições. Em telas pequenas, gire o aparelho para ampliar.</DialogDescription>{navigation}<p className="text-sm">{SP_SLIDE_STATE_LABELS[currentReview.state]} · {currentReview.reason}</p><SlideFrame>{slide}</SlideFrame>{referenceNote && <p role="note" className="text-sm text-muted-foreground">{referenceNote}</p>}</DialogContent></Dialog>
   </section>;
 }
 
-function DistributionChart({ result, metric, kind }: { result?: SpTypologies; metric: 'launches' | 'sales' | 'stock'; kind: 'tipologia' | 'segmento' }) {
-  if (result?.status !== 'ready') return <div className="absolute left-[90px] top-[310px] w-[1100px] text-center"><p className="text-[28px] font-bold">Dados por {kind} indisponíveis</p><p className="mt-4 text-[20px]">{kind === 'segmento' ? result?.issues[0] ?? 'Confira os dados reais novamente.' : result?.status === 'blocked' ? 'Confira as divergências antes de preencher este slide.' : 'Use Conferir tipologias para consultar e reconciliar os dados.'}</p></div>;
-  const values = result.rows.map(row => row[metric]);
-  const total = values.reduce((sum, value) => sum + value, 0);
-  const minimum = Math.min(0, ...values), maximum = Math.max(0, ...values);
-  const y = (value: number) => 485 - (value - minimum) / Math.max(1, maximum - minimum) * 210;
-  const step = 1100 / result.rows.length;
-  const fontSize = result.rows.length > 6 ? 14 : 18;
-  const colors = ['#5b7638', '#83a83d', '#1d6288', '#ffcf00'];
-  return <svg role="img" aria-label={`Distribuição por ${kind} em unidades e participação percentual`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
-    <line x1="90" x2="1190" y1={y(0)} y2={y(0)} stroke="#d9d9d9" />
-    {result.rows.map((row, index) => {
-      const x = 90 + step * (index + 0.5), value = row[metric];
-      const labelY = value < 0 ? y(value) + 20 : y(value) - 28;
-      return <g key={row.group}><rect x={x - Math.min(90, step * 0.55) / 2} y={Math.min(y(0), y(value))} width={Math.min(90, step * 0.55)} height={Math.abs(y(value) - y(0))} fill={colors[index % colors.length]} />
-        <text x={x} y={labelY} textAnchor="middle" fontSize={result.rows.length > 6 ? 16 : 22} fontWeight="bold">{quantity(value)}</text>
-        {total > 0 && <text x={x} y={labelY + 19} textAnchor="middle" fontSize="16">{(value / total * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%</text>}
-        <text x={x} y="545" textAnchor="middle" fontSize={fontSize}>{wrapGroup(row.group, Math.max(8, Math.floor(step / (fontSize * .5)) - 1)).map((part, line) => <tspan key={line} x={x} dy={line ? 16 : 0}>{part}</tspan>)}</text>
-      </g>;
-    })}
+function OriginalTextSlide({ number, title, report }: { number: number; title: string; report: SpPreview }) {
+  const divider = title.startsWith('Divisória:');
+  const text = number === 2 ? [`São Paulo capital · Empreendimentos residenciais verticais`, report.quarter, spPeriodLabel(report)] : number === 6 ? SP_ORIGINAL_SLIDES.filter(item => item.title.startsWith('Divisória:')).map(item => `${item.number}. ${item.title.replace('Divisória: ', '')}`) : number >= 26 && number <= 30 ? ['Metodologia do INCC em definição', 'Aguardando série do índice, mês-base e critério de atualização.', 'Valores nominais não são exibidos como corrigidos.'] : divider ? [] : ['Conteúdo pendente', 'Esta posição segue o modelo original.', 'Os dados ou a revisão editorial ainda não foram concluídos.'];
+  const words = title.replace('Divisória: ', '').split(' '), lines = [''];
+  for (const word of words) { if (`${lines.at(-1)} ${word}`.length > 58) lines.push(''); lines[lines.length - 1] += `${lines.at(-1) ? ' ' : ''}${word}`; }
+  return <svg role="img" aria-label={divider ? title : number === 2 ? 'Sobre este relatório' : number === 6 ? 'Sumário original' : `Conteúdo pendente: slide ${number}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
+    <rect x="40" y="10" width="1000" height="130" fill="#f8f8f8" />
+    {lines.map((line, i) => <text key={i} x="62" y={62 + i * 36} fontSize="28" fontWeight="bold">{line.toLocaleUpperCase('pt-BR')}</text>)}
+    <rect x="62" y="120" width="85" height="9" rx="4" fill="#ffcf00" />
+    <text x="62" y="165" fontSize="18">{report.quarter} · {spPeriodLabel(report)}</text>
+    {text.map((line, i) => <text key={i} x={number === 6 ? 100 : 640} y={(number === 6 ? 220 : 320) + i * (number === 6 ? 33 : 45)} textAnchor={number === 6 ? 'start' : 'middle'} fontSize={number === 6 ? 22 : 26} fontWeight={i === 0 ? 'bold' : undefined}>{line}</text>)}
+    {divider && <text x="640" y="365" textAnchor="middle" fontSize="40" fill="#5b7638" fontWeight="bold">{title.replace('Divisória: ', '').toLocaleUpperCase('pt-BR')}</text>}
+    <text x="62" y="615" fontSize="15">Slide {number} de 85 · Estrutura do relatório original</text>
   </svg>;
 }
 
@@ -105,15 +100,4 @@ function wrapGroup(label: string, limit: number): string[] {
     } else lines[lines.length - 1] += `${lines.at(-1) ? ' ' : ''}${word}`;
   }
   return lines;
-}
-
-function MonthlyChart({ observations }: { observations: { month: string; value: number }[] }) {
-  if (!observations.length) return <p className="absolute left-[90px] top-[330px] text-[24px]">Série mensal indisponível neste exemplo.</p>;
-  const maximum = Math.max(1, ...observations.map(row => Math.abs(row.value)));
-  const points = observations.map((row, index) => ({ ...row, x: observations.length === 1 ? 640 : 240 + index * 800 / (observations.length - 1), y: 440 - row.value / maximum * 160 }));
-  return <svg role="img" aria-label="Evolução mensal nos meses conferidos" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
-    <line x1="90" x2="1190" y1="530" y2="530" stroke="#d9d9d9" />
-    <polyline points={points.map(point => `${point.x},${point.y}`).join(' ')} fill="none" stroke="#5b7638" strokeWidth="4" />
-    {points.map(point => <g key={point.month}><circle cx={point.x} cy={point.y} r="5" fill="#5b7638" /><rect x={point.x - 66} y={point.y - 47} width="132" height="35" fill="#5b7638" /><text x={point.x} y={point.y - 21} textAnchor="middle" fill="#fff" fontSize="25" fontWeight="bold">{quantity(point.value)}</text><text x={point.x} y="562" textAnchor="middle" fontSize="20">{month(point.month)}</text></g>)}
-  </svg>;
 }

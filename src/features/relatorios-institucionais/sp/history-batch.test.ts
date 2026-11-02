@@ -54,19 +54,19 @@ describe('SP — lote histórico com 2025 fictício, sem consultas reais', () =>
     expect(result.checks).toHaveLength(36);
     expect(result.checks.every(check => check.delta === 0)).toBe(true);
   });
-  it('mantém a raiz real da amostra sem fingir um fechamento histórico', () => {
+  it('identifica a cobertura histórica pelas próprias séries e respeita a janela', () => {
     const input = syntheticHistoryBatch();
     const previous = buildSpTemporalPreview(input.previous, '3T2025');
-    expect(previous.closingMonth).toBe('2026-08');
+    expect(previous.closingMonth).toBe('2025-08');
     expect(previous.throughMonth).toBe('2025-08');
     expect(previous.monthly).toHaveLength(2);
     input.previous.windowEnd = '2025-12';
     expect(buildSpHistoryBatch(input, baseline()).status).toBe('blocked');
   });
-  it('divergência no balanço anterior bloqueia as três páginas, inclusive lançamentos', () => {
+  it('divergência no balanço anterior fica auditada sem bloquear dados presentes', () => {
     const input = syntheticHistoryBatch(); input.previous.sales[0].liquid_sales = Number(input.previous.sales[0].liquid_sales) + 1;
     const result = buildSpHistoryBatch(input, baseline());
-    expect(result.status).toBe('blocked'); expect(result.comparisons).toEqual({});
+    expect(result.status).toBe('ready'); expect(result.checks.some(check => check.kind === 'balance' && check.delta !== 0)).toBe(true);
   });
   it('não aceita mudanças na releitura mesmo que o balanço atual continue fechando', () => {
     const input = syntheticHistoryBatch();
@@ -109,9 +109,9 @@ describe('SP — lote histórico com 2025 fictício, sem consultas reais', () =>
     const wrong = syntheticHistoryBatch(); wrong.previous.city = 'Campinas';
     expect(buildSpHistoryBatch(wrong, baseline()).status).toBe('blocked');
   });
-  it('bloqueia fechamento alterado e universo de padrões diferente entre anos', () => {
+  it('ignora raiz alterada, mas bloqueia universo de padrões diferente entre anos', () => {
     const changed = syntheticHistoryBatch(); changed.previous.rootPeriod = '2026-09-01';
-    expect(buildSpHistoryBatch(changed, baseline()).status).toBe('blocked');
+    expect(buildSpHistoryBatch(changed, baseline()).status).toBe('ready');
     const groups = syntheticHistoryBatch();
     for (const source of [groups.previous.releases, groups.previous.sales, groups.previous.stock]) for (const row of source) if (row.group === 'Alto') row.group = 'Outro';
     expect(buildSpHistoryBatch(groups, baseline()).status).toBe('blocked');

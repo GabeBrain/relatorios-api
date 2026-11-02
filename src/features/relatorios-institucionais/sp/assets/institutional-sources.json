@@ -1,0 +1,50 @@
+[
+  {
+    "slide": 3,
+    "asset": "institutional-03.png",
+    "reference": "SP 2T2026 - 13ago",
+    "sha256": "0f14defb952e3ebf82e3c9c71073a8f7b3981c3f99c8ba46b31acbbfb80a88d7"
+  },
+  {
+    "slide": 4,
+    "asset": "institutional-04.png",
+    "reference": "SP 2T2026 - 13ago",
+    "sha256": "fea7cc0542fe10af0049730c1d2d0dc4af74dcf1792c3f982fe42585ca15fd24"
+  },
+  {
+    "slide": 5,
+    "asset": "institutional-05.png",
+    "reference": "SP 2T2026 - 13ago",
+    "sha256": "506f3dc6615a41cd081cfef0def3c24725738b14e512307a0a4025d46e0b8328"
+  },
+  {
+    "slide": 7,
+    "asset": "institutional-07.png",
+    "reference": "SP 2T2026 - 13ago",
+    "sha256": "135671673463ba4fb7bed5def79c08b22793cf0992cea5e23381cb67d01889d3"
+  },
+  {
+    "slide": 82,
+    "asset": "institutional-82.png",
+    "reference": "SP 2T2026 - 13ago",
+    "sha256": "47095e79ee86ef1c131b6eb8a4ff63d5c23920b61c852558e58e9f8cd714a569"
+  },
+  {
+    "slide": 83,
+    "asset": "institutional-83.png",
+    "reference": "SP 2T2026 - 13ago",
+    "sha256": "899455a0329d10f075963b1f1dd4d09771e673c6243ab5907b3dcd2866d56b61"
+  },
+  {
+    "slide": 84,
+    "asset": "institutional-84.png",
+    "reference": "SP 2T2026 - 13ago",
+    "sha256": "ef9955ce4e9e187539e5e20fb2d51300192ae7bd323dd61dfb281106eb4e74fb"
+  },
+  {
+    "slide": 85,
+    "asset": "institutional-85.png",
+    "reference": "SP 2T2026 - 13ago",
+    "sha256": "7af21f4a9add124a09ac2374d6859420b4d10153afc8eba95e500902b8e08749"
+  }
+]

@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { RequestOptions } from '@/lib/http-client';
-import { fetchSpTemporalInput, fetchSpLaunchHistory, fetchSpHistoryBatch, type SpReadOptions } from './api';
+import { fetchSpTemporalInput, fetchSpLaunchHistory, fetchSpHistoryBatch, fetchSpLaunchSeriesRows, fetchSpSalesSeriesRows, fetchSpStockSeriesRows, type SpReadOptions } from './api';
+import { syntheticLaunchSeries, syntheticSalesSeries, syntheticStockSeries } from './__tests__/launch-series';
 import { buildSpTemporalPreview } from './temporal';
+import { userSeptemberReplay } from './__tests__/user-september';
+import { syntheticWindow } from './__tests__/synthetic-window';
 import { recordedInput } from './__tests__/recorded';
 import { syntheticLaunchHistory } from './__tests__/history';
 import { syntheticHistoryBatch } from './__tests__/history-batch';
@@ -21,6 +24,79 @@ function recordedServer() {
 const noSleep = async () => {};
 
 describe('SP — transporte curto e paginado, sem provedor real', () => {
+  it('delimita o histórico de lançamentos desde 2021 e pagina somente releases até o mês conferido', async () => {
+    const rows = syntheticLaunchSeries();
+    const request = vi.fn(async (options: RequestOptions) => {
+      const page = Number(options.query?.page), last = Math.ceil(rows.length / 100);
+      return reply(envelope(rows.slice((page - 1) * 100, page * 100), page, rows.length, last, page < last ? `?page=${page + 1}` : null));
+    });
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    expect(await fetchSpLaunchSeriesRows(report, { request })).toEqual(rows);
+    expect(request).toHaveBeenCalledTimes(5);
+    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/releases', cache: 'no-store', query: { start_period: '2021-01-01', end_period: '2026-08-31', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
+  });
+  it('delimita o histórico de vendas desde 2021 e pagina somente sales até o mês conferido', async () => {
+    const rows = syntheticSalesSeries();
+    const request = vi.fn(async (options: RequestOptions) => {
+      const page = Number(options.query?.page), last = Math.ceil(rows.length / 100);
+      return reply(envelope(rows.slice((page - 1) * 100, page * 100), page, rows.length, last, page < last ? `?page=${page + 1}` : null));
+    });
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    expect(await fetchSpSalesSeriesRows(report, { request })).toEqual(rows);
+    expect(request).toHaveBeenCalledTimes(5);
+    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/sales', cache: 'no-store', query: { start_period: '2021-01-01', end_period: '2026-08-31', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
+  });
+  it('delimita o histórico de oferta desde 2021 e pagina somente stock até o mês conferido', async () => {
+    const rows = syntheticStockSeries();
+    const request = vi.fn(async (options: RequestOptions) => {
+      const page = Number(options.query?.page), last = Math.ceil(rows.length / 100);
+      return reply(envelope(rows.slice((page - 1) * 100, page * 100), page, rows.length, last, page < last ? `?page=${page + 1}` : null));
+    });
+    const report = buildSpTemporalPreview(recordedInput(), '3T2026');
+    expect(await fetchSpStockSeriesRows(report, { request })).toEqual(rows);
+    expect(request).toHaveBeenCalledTimes(5);
+    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/stock', cache: 'no-store', query: { start_period: '2021-01-01', end_period: '2026-08-31', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
+  });
+  it('histórico longo tem teto de seis páginas sem ampliar as consultas curtas', async () => {
+    const request = vi.fn(async (options: RequestOptions) => reply(envelope(Array.from({ length: 100 }, () => ({})), Number(options.query?.page), 700, 7, '?next')));
+    await expect(fetchSpLaunchSeriesRows(buildSpTemporalPreview(recordedInput(), '3T2026'), { request })).rejects.toThrow('janela paginada');
+    expect(request).toHaveBeenCalledTimes(6);
+  });
+  it('consulta até setembro com raiz em agosto e preserva os números fornecidos pelo usuário', async () => {
+    const observed = userSeptemberReplay();
+    const request = vi.fn(async (options: RequestOptions): Promise<Response> => {
+      if (options.url.endsWith('/building-with-history')) return reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-08-01' }], 1, 5195, 5195));
+      const metric = options.url.split('/').at(-1) as 'sales' | 'releases' | 'stock';
+      return reply(envelope(observed[metric].filter(row => String(row.period) >= String(options.query?.start_period) && String(row.period) <= String(options.query?.end_period))));
+    });
+    const input = await fetchSpTemporalInput('3T2026', { request });
+    expect(input.rootPeriod).toBe('2026-08-01');
+    const report = buildSpTemporalPreview(input, '3T2026');
+    expect(report.status).toBe('quarter-closed');
+    expect(report.monthly!.at(-1)).toMatchObject({ launches: 7825, sales: 8912, closingStock: 126307, delta: 22 });
+    for (const [options] of request.mock.calls.slice(1)) expect(options.query?.end_period).toBe('2026-09-30');
+    expect(request).toHaveBeenCalledTimes(4);
+  });
+  it('cada geração relê as séries e avança de um para dois e três meses sem cache de parcial', async () => {
+    let closing: '07' | '08' | '09' = '07';
+    const request = vi.fn(async (options: RequestOptions): Promise<Response> => {
+      const input = syntheticWindow(closing);
+      if (options.url.endsWith('/building-with-history')) return reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-08-01' }], 1, 5183, 5183));
+      const metric = options.url.split('/').at(-1) as 'sales' | 'releases' | 'stock';
+      return reply(envelope(input[metric].filter(row => String(row.period) >= String(options.query?.start_period) && String(row.period) <= String(options.query?.end_period))));
+    });
+    for (const month of ['07', '08', '09'] as const) {
+      closing = month;
+      const input = await fetchSpTemporalInput('3T2026', { request });
+      const report = buildSpTemporalPreview(input, '3T2026');
+      expect(report.status).toBe(month === '09' ? 'quarter-closed' : 'partial');
+      expect(report.monthly).toHaveLength(Number(month) - 6);
+      expect(request.mock.calls.at(-1)![0].query?.end_period).toBe('2026-09-30');
+    }
+    expect(request).toHaveBeenCalledTimes(12);
+    expect(request.mock.calls.filter(([options]) => options.url.endsWith('/building-with-history'))).toHaveLength(3);
+    for (const [options] of request.mock.calls) expect(options.cache).toBe('no-store');
+  });
   it('lote usa oito requests curtos, duas janelas iguais e estoque inicial em cada ano', async () => {
     const fixture = syntheticHistoryBatch(), base = recordedServer();
     const request = vi.fn(async (options: RequestOptions) => {
@@ -39,12 +115,13 @@ describe('SP — transporte curto e paginado, sem provedor real', () => {
     expect(input.current.rootPeriod).toBe(input.previous?.rootPeriod);
     expect(input.previous?.windowEnd).toBe('2025-08');
   });
-  it('lote interrompe antes das séries se a primeira raiz muda e valida limites antes da rede', async () => {
-    const request = vi.fn(async () => reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-09-01' }], 1, 5183, 5183)));
+  it('lote interrompe a janela anterior quando as séries atuais perdem cobertura e valida limites antes da rede', async () => {
+    const base = recordedServer();
+    const request = vi.fn(async (options: RequestOptions) => options.url.endsWith('/sales') ? reply(envelope([])) : base(options));
     const result = await fetchSpHistoryBatch(buildSpTemporalPreview(recordedInput(), '3T2026'), { request });
-    expect(request).toHaveBeenCalledOnce(); expect(result.previous).toBeUndefined(); expect(result.current.sales).toEqual([]);
+    expect(request).toHaveBeenCalledTimes(4); expect(result.previous).toBeUndefined();
     await expect(fetchSpTemporalInput('3T2026', { request, windowEnd: '2026-12' })).rejects.toThrow('Limite');
-    expect(request).toHaveBeenCalledOnce();
+    expect(request).toHaveBeenCalledTimes(4);
   });
   it('lote respeita cancelamento antes de buscar a janela do ano anterior', async () => {
     const controller = new AbortController(), base = recordedServer();
@@ -69,27 +146,27 @@ describe('SP — transporte curto e paginado, sem provedor real', () => {
     }
     expect(result.complete).toEqual({ current: true, previous: true });
   });
-  it('histórico não busca séries se o fechamento mudou nem inicia sem baseline válido', async () => {
-    const request = vi.fn(async () => reply(envelope([{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-09-01' }], 1, 5183, 5183)));
+  it('histórico mantém meses equivalentes mesmo com raiz defasada e exige baseline válido', async () => {
+    const request = recordedServer();
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     const input = await fetchSpLaunchHistory(report, { request });
-    expect(request).toHaveBeenCalledOnce(); expect(input.current).toEqual([]);
+    expect(request).toHaveBeenCalledTimes(3); expect(input.current).toHaveLength(14);
     await expect(fetchSpLaunchHistory({ ...report, source: 'fixture' }, { request })).rejects.toThrow('totais municipais');
-    expect(request).toHaveBeenCalledOnce();
+    expect(request).toHaveBeenCalledTimes(3);
   });
   it('usa Tipologia somente quando solicitada e preserva limites e recorte', async () => {
     const request = recordedServer();
     const input = await fetchSpTemporalInput('3T2026', { request, groupBy: 'Tipologia' });
     expect(input.groupBy).toBe('Tipologia');
     expect(request).toHaveBeenCalledTimes(4);
-    for (const [options] of request.mock.calls.slice(1)) expect(options.query).toMatchObject({ group_by: 'Tipologia', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], end_period: '2026-08-31', per_page: 100 });
+    for (const [options] of request.mock.calls.slice(1)) expect(options.query).toMatchObject({ group_by: 'Tipologia', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], end_period: '2026-09-30', per_page: 100 });
   });
   it('consulta só uma amostra e três fontes municipais até agosto, sem coletar 5183 históricos', async () => {
     const request = recordedServer();
     const data = await fetchSpTemporalInput('3T2026', { request });
     expect(request).toHaveBeenCalledTimes(4);
     expect(request.mock.calls[0][0].query).toMatchObject({ city: 'São Paulo', uf: 'SP', type: 'Vertical', per_page: 1, page: 1 });
-    for (const [options] of request.mock.calls.slice(1)) expect(options.query).toMatchObject({ city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', end_period: '2026-08-31', per_page: 100 });
+    for (const [options] of request.mock.calls.slice(1)) expect(options.query).toMatchObject({ city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão', end_period: '2026-09-30', per_page: 100 });
     expect(request.mock.calls.at(-1)![0].query?.start_period).toBe('2026-06-01');
     expect(buildSpTemporalPreview(data, '3T2026').metrics).toEqual({ projects: null, launches: 24351, sales: 26824, stock: 124706 });
   });
@@ -132,12 +209,15 @@ describe('SP — transporte curto e paginado, sem provedor real', () => {
     await expect(fetchSpTemporalInput('3T2026', { request, signal: controller.signal })).rejects.toMatchObject({ name: 'AbortError' });
     expect(request).toHaveBeenCalledTimes(2);
   });
-  it('não consulta as séries quando a raiz não cobre o trimestre', async () => {
-    const request = vi.fn(async () => reply(envelope([{ period: '2026-06-01', city: 'São Paulo', state: 'SP', building_type: 'Vertical' }], 1, 5183, 5183)));
-    const data = await fetchSpTemporalInput('3T2026', { request });
-    expect(request).toHaveBeenCalledOnce(); expect(buildSpTemporalPreview(data, '3T2026').status).toBe('awaiting-closure');
+  it('consulta as séries mesmo se o período da raiz for antigo ou ausente', async () => {
+    for (const period of ['2026-06-01', null]) {
+      const base = recordedServer();
+      const request = vi.fn(async (options: RequestOptions) => options.url.endsWith('/building-with-history') ? reply(envelope([{ period, city: 'São Paulo', state: 'SP', building_type: 'Vertical' }], 1, 5183, 5183)) : base(options));
+      const data = await fetchSpTemporalInput('3T2026', { request });
+      expect(request).toHaveBeenCalledTimes(4); expect(buildSpTemporalPreview(data, '3T2026').throughMonth).toBe('2026-08');
+    }
   });
-  it('rejeita amostra sem fechamento ou de outra cidade, sem iniciar as séries', async () => {
+  it('rejeita amostra de outra cidade, sem iniciar as séries', async () => {
     const request = vi.fn(async () => reply(envelope([{ city: 'Campinas', state: 'SP', building_type: 'Vertical' }])));
     await expect(fetchSpTemporalInput('3T2026', { request })).rejects.toThrow('amostra'); expect(request).toHaveBeenCalledOnce();
   });

@@ -1,6 +1,13 @@
 import { isQuarter, quarterEndMonth } from '@/features/panorama-secovi-fiergs/domain/quarters';
 import { safeNumber } from '@/features/panorama-secovi-fiergs/lib/launches';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
+import type { SpProjects } from './projects';
+import type { SpLaunchSeries } from './launch-series';
+import type { SpTypologyHistory } from './typology-history';
+import type { SpVglSeries } from './vgl-series';
+import type { SpStockSeries } from './stock-series';
+import type { SpLaunchNeighborhoods } from './neighborhoods';
+import type { SpGranularDetails } from './granular-details';
 
 export const SP_INSTITUTIONAL = { id: 'sp-institucional', label: 'SP institucional', uf: 'SP', city: 'São Paulo' } as const;
 type Raw = Record<string, unknown>;
@@ -14,7 +21,7 @@ export interface SpInput {
   coverage: { buildings: boolean; sales: boolean; stock: boolean };
 }
 export interface SpMetrics { projects: number | null; launches: number | null; sales: number | null; stock: number | null }
-export interface SpCheck { label: string; expected: number; actual: number; delta: number }
+export interface SpCheck { label: string; expected: number; actual: number; delta: number; kind?: 'balance' }
 export interface SpDistribution {
   status: 'ready' | 'blocked';
   issues: string[];
@@ -42,20 +49,43 @@ export interface SpHistoryBatch {
 export interface SpPreview {
   entity: typeof SP_INSTITUTIONAL.id;
   quarter: Quarter;
-  status: 'ready' | 'partial' | 'awaiting-closure' | 'incomplete' | 'empty' | 'invalid';
+  status: 'ready' | 'partial' | 'quarter-closed' | 'awaiting-closure' | 'incomplete' | 'empty' | 'invalid';
   closingMonth: string | null;
   metrics: SpMetrics;
   issues: string[];
   checks: SpCheck[];
   ignoredHistoryRows: number;
+  balanceByGroup?: (SpCheck & { month: string; group: string })[];
   source?: 'fixture' | 'api' | 'recorded-api';
   throughMonth?: string;
   monthly?: { month: string; launches: number; sales: number; openingStock: number; closingStock: number; delta: number }[];
   typologies?: SpTypologies;
+  typologyHistory?: SpTypologyHistory;
   patterns?: SpDistribution;
+  projects?: SpProjects;
+  launchSeries?: SpLaunchSeries;
+  salesSeries?: SpLaunchSeries;
+  nominalLaunchVgv?: { month: string; group: string; value: number }[];
+  vglSeries?: SpVglSeries;
+  nominalSalesVgv?: { month: string; group: string; value: number }[];
+  vgvSeries?: SpVglSeries;
+  stockSeries?: SpStockSeries;
+  salesNeighborhoods?: SpLaunchNeighborhoods;
+  granularDetails?: SpGranularDetails;
   launchHistory?: SpLaunchHistory;
   historyBatch?: SpHistoryBatch;
 }
+/** Municipal coverage is independent of granular coverage and final report approval. */
+export function isSpMunicipalPreview(report: SpPreview | null | undefined): report is SpPreview & { status: 'partial' | 'quarter-closed' } {
+  return Boolean(report && ['api', 'recorded-api'].includes(report.source ?? '') && ['partial', 'quarter-closed'].includes(report.status));
+}
+
+export function spPeriodLabel(report: SpPreview): string {
+  if (!report.throughMonth) return 'Exemplo com dados fictícios';
+  const month = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${report.throughMonth}-01T12:00:00Z`));
+  return report.status === 'quarter-closed' ? `Trimestre completo até ${month}` : `Parcial até ${month}`;
+}
+
 const emptyMetrics = (): SpMetrics => ({ projects: null, launches: null, sales: null, stock: null });
 const normalized = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 
