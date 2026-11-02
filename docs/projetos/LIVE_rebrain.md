@@ -385,6 +385,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-02 — Estimativas: plano da jornada de entrega e Análise detalhada — Gabriel / sessão
+
+- **Ambiente/funcionalidade:** `/rebrain/estimativas-vendas` — planejamento, sem alteração runtime.
+- **Decisão:** feedback de Diego de 30/10 fornecido por Gabriel orienta território → prévia inline → Excel na principal; filtros de cidade/tipo/duração expostos; gráficos, comparação e retrospectiva em Análise detalhada com a mesma base carregada.
+- **Fonte única:** [plano essencial, seção 14](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md#14-fluxo-de-entrega-com-análise-detalhada--plano-de-02112026). Define recorte completo reference-only, independência da seleção exploratória, estado atômico/cancelamento, colunas/download, etapas G0–G6 e testes de aceite. Motores/contrato científico preservados; arquivo não homologado.
+- **Evidência/estado:** preparado documentalmente após inspeção do código c62e41e; nenhum teste de produto/API/navegador executado nesta preparação. Fetch confirmou 15 commits remotos de relatórios SP, zero locais à frente; árvore paralela suja preservada, sem integração/push/deploy. Implementação e validação permanecem pendentes.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — somente referência, sem escrita.
+- **Etapas/Pendências:** próxima execução deve seguir seção 14 e integrar a base apenas com autorização; contrato final Nicolas/Belogic continua externo.
+
+
 ### 29/10/2026 — Estimativas: prévia da base exportável
 
 - **Entrega:** modal ampliado com até50linhas e as13colunas atuais do Excel analítico, inspirado no `BasePreviewPanel` das coletas Quanti (somente leitura). Cabeçalhos arrastáveis, alternativa Alt+setas/menu, ocultar/restaurar e restaurar padrão. Excel completo usa exatamente as colunas visíveis na ordem escolhida; prévia não limita a quantidade exportada. Pacote de evidências acompanha a configuração no CSV analítico/manifesto, preservando histórico e arquivo candidato de26colunas.
@@ -587,6 +597,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**02/11 — Estimativas:** nova jornada de entrega preparada no plano essencial seção 14, ainda não implementada; análise detalhada/motores existentes preservados.
+
 **29/10 — Estimativas:** Gabriel reabriu a frente para prévia configurável no modal:50linhas, ordem/ocultação aplicadas ao Excel completo. Implementada e validada localmente (122testes), publicação/aceite desta revisão pendentes. Interface anterior aceita em produção por Gabriel em28/10 após envio`9d14f2a`. Fonte/limites na seção13 do plano essencial. Contrato final de saída Nicolas/Belogic, importação e avaliação independente continuam abertos.
 
 **22/10 — Estimativas de vendas Finotti:** reprodução matemática local e acesso API somente leitura confirmados; [plano do dossiê](../features/estimativas-vendas/PLANO_API_DOSSIE_SIMULADOR_2026-10-22.md), [auditoria das exportações](../features/estimativas-vendas/AUDITORIA_EXPORT_TEMPORAL_2026-10-22.md) e [plano da página editorial](../features/estimativas-vendas/PLANO_PAGINA_EDITORIAL_API_2026-10-22.md) definem fontes, recortes, carteira e interface. Guarapuava/Maringá conciliou 72 empreendimentos/124 tipologias horizontais e oito trimestres com a API/Série Histórica. Curitiba ampliou a evidência: 371 empreendimentos/693 tipologias horizontais, 14.154 vendas e 14.154 estoques numéricos comparáveis iguais à API em 11/2024–09/2026. A API preenche posições `-` do Excel, e um vertical exportado falta na API; completude não é idêntica. `bases.estimation` foi confirmado para a base/período por mensagem encaminhada, mas a linhagem ainda não aparece por competência na série API nem no Excel. Contrato oficial, retrospectiva observada, cauda mensal, bandas, UI e retorno continuam pendentes. A página horizontal poderá usar API direta, com auditoria de cobertura separada. Sem runtime publicado nesta etapa.
@@ -622,7 +634,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- **Estimativas:** conferir a nova prévia de exportação em produção e aguardar comprovação do formato final de saída Nicolas/Belogic. Interface anterior aceita em28/10; revisão29/10 validada somente localmente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
+- **Estimativas:** executar a seção 14 do plano essencial (prévia/Excel na principal e Análise detalhada), preparada em 02/11 a partir do feedback Diego 30/10, sem mudança runtime nesta sessão; conferir publicação após implementação e aguardar formato final Nicolas/Belogic. Interface anterior aceita em 28/10; capturas recebidas em 30/10 mostram uso da prévia, sem nova inspeção independente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 
 - [ ] **Estimativas de vendas Finotti:** concluir contrato de retorno/aceite operacional e avaliação independente. Página API, conferência opcional Excel, motores horizontal/vertical e reprodução de caudas/faixas já avançaram; estado vigente no [plano essencial](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md), sem manter o plano editorial antigo como lista de implementação pendente. Obter origem histórica por período e periodicidade real; comparações com saldos reportados não comprovam coleta observada. Regras de alternância/coleta, granularidade, preço e reconciliação continuam externas. Sem homologação de importação.
 

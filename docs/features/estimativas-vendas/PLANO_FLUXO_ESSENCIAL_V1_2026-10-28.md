@@ -1,8 +1,8 @@
 # Estimativas de vendas — plano técnico da V1 essencial
 
-Data: 28/10/2026. Responsável: Gabriel. Executor previsto: Sol light. Estado: implementado e validado localmente; ensaio autenticado com API real concluído. Objetivo: fluxo integrado preparado para testes em produção após autorização final. V1 de interface não significa importação homologada.
+Criado em 28/10/2026; direção atualizada em 02/11/2026. Responsável: Gabriel. Executor previsto: Sol light. Baseline anterior implementada e validada localmente, com ensaio autenticado de API registrado abaixo; reorganização da seção 14 apenas planejada. V1 de interface não significa importação homologada.
 
-**Direção vigente após grill de simplificação em 28/10:** a seção 9 substitui as escolhas de navegação, seleção, datas e saída das seções anteriores. A V1 anterior foi enviada em `ece2a76`; a simplificação está local e exige nova autorização de push. Regras matemáticas e limites científicos continuam válidos.
+**Direção vigente em 02/11/2026 — PLANEJADA:** implementar a seção 14, aprovada conceitualmente por Gabriel após o feedback de Diego de 30/10. Página principal orientada a território → prévia → Excel; gráficos e retrospectiva em Análise detalhada. A seção 14 substitui as decisões anteriores de navegação, posição dos filtros e composição do download principal. Seções 1–13 preservam histórico, fundamentos e evidências, não são uma lista de telas a recriar. Baseline local inspecionada: `c62e41e`; nenhuma interface alterada nesta preparação. Regras matemáticas e contrato científico continuam válidos.
 
 ## 1. Resultado e limites
 
@@ -287,3 +287,109 @@ Gabriel reabriu a interface aceita em produção para incluir uma prévia no mod
 ### Verificação
 
 Testes reabrem XLSX72linhas e comparam as primeiras50com a projeção da prévia, preservando IDcom zeros, texto iniciado por `=`, booleano `false`, nulo e precisão numérica. Pacote CSV/manifesto/integridade conferidos. Teste de componente cobre limite50, teclado e arraste. Navegador1440claro/escuro e390: arraste real em desktop e teclado em tela estreita, ocultar/restaurar e restaurar padrão, Excel completo72linhas com12colunas após ocultar cidade, correspondência célula a célula com prévia, ausência de errosJS/overflow e somente duas chamadas sintéticas iniciais. Referência de dados controlada, sem nova coleta autenticada. [Evidência agregada](EVIDENCIAS_PREVIA_EXPORTACAO_2026-10-29.json). Capturas e arquivos privados de teste em `.local-inputs/estimativas-vendas/export-preview-20261029/`, ignorados. Navegador conectado indisponível; usado Chromium headless local. Produção desta revisão ainda não conferida.
+
+
+## 14. Fluxo de entrega com Análise detalhada — plano de 02/11/2026
+
+**Estado: preparado; implementação não iniciada.** Autor: Gabriel / sessão. Fonte da decisão: conversa fornecida por Gabriel com Diego, 30/10, 16h22–16h55, e confirmação de Gabriel nesta conversa. Diego pediu busca por cidade e download na página principal, prévia no lugar dos gráficos e acesso superior a Análise detalhada; também pediu filtros mais visíveis. Não é uma nova aprovação das regras ou do formato de importação. As imagens recebidas demonstram a interface usada pelo revisor, sem comprovar hash de produção ou homologação.
+
+### 14.1 Resultado e fronteiras
+
+Entregar uma página operacionalmente simples: escolher território autorizado, conferir previsões em tabela e baixar Excel. Preservar curvas, comparação, retrospectiva, metodologia e conferência opcional por Excel em uma vista secundária da mesma ferramenta, com os mesmos dados já carregados. Não remover motores ou os módulos científicos/operacionais para simplificar a navegação.
+
+Esta entrega muda a organização da experiência e a seleção do arquivo principal; não cria lote liberado para importação. A expressão de produto `Estimativas aprovadas` continua significando referência matemática disponível. Regras de coleta/estimativa, quatro períodos, cadência, alternância, estoque, origem histórica, granularidade e preço mantêm seus estados documentados; uma regra desconhecida não recebe aprovação implícita. Histórico e exportação atual não se tornam prova de coleta real.
+
+Não incluir: novos modelos, alteração de coeficientes, edição de dados, preenchimento de preço/distratos, rateio de tipologias, novas permissões, escrita Geobrain ou criação de backend. Preservar o contrato candidato separado de 26 colunas e a proteção NÃO IMPORTAR.
+
+### 14.2 Jornada e composição da tela
+
+1. **Entrada:** título Estimativas de vendas e seletor territorial existente, sem banner ou frases promocionais. Preservar regiões, várias UFs e cidades; cidade prevalece sobre UF e UF sobre região. Catálogo autorizado do GeoApiScopeEngine continua obrigatório. A simplificação não limita o usuário a uma só cidade.
+2. **Consulta:** BrainLoadingState com etapa, progresso real e cancelamento; consultar uma vez e promover somente snapshot completo. Erro permite tentar novamente. Dados anteriores permanecem identificados, sem permitir baixar um novo território com números antigos.
+3. **Página principal carregada:** resumo curto do território e da consulta. Navegação superior com `Previsões` (ativa) e `Análise detalhada`. `Alterar local`, `Atualizar dados` e `Dados e metodologia` são ações secundárias próximas, sem uma faixa exclusiva vazia. Atualizar é a ação explícita de recarga externa.
+4. **Filtros abertos:** cidade quando houver mais de uma, tipo e `Prever por`, inicial 12 meses. Durações existentes 1/3/6/12/24/36; usar Select/combobox Brain ou seletor compacto acessível, sem calendário e sem slider. Rótulo curto persistente explica: `Os filtros definem o arquivo abaixo`. Busca opcional por nome/ID filtra o conjunto inteiro, não apenas as primeiras 50 linhas, e tem limpeza visível. Mostrar cidade como cidade/UF e usar chave estável para homônimas em estados diferentes.
+5. **Entrega:** título curto `Prévia das previsões`, quantidade de empreendimentos com previsão, total de linhas e indicação `50 de N linhas` quando aplicável. Renderizar ExportPreview inline em largura útil, sem abrir modal para chegar à tabela. Uma única ação primária, `Baixar previsões em Excel`, junto do resumo/tabela. `Baixar relatório e evidências` secundária. Manter próximo ao download: `Arquivo para revisão; formato de importação ainda não homologado`.
+6. **Não incluídos:** link com contagem abre InventoryGallery ampla e paginada com nomes, IDs e motivos. Separar esgotados, referência indisponível e falha de cálculo; não somar categorias sobrepostas como se fossem pessoas distintas. Pendências operacionais de um empreendimento presente no analítico não são exclusão automática desse analítico e ficam distinguíveis das exclusões de linhas do candidato. Não despejar listas longas na página ou em um expander pequeno.
+7. **Análise detalhada:** mapa/lista, exploração individual, comparação, métodos, dados e backtest preservados. Retorno `Previsões` recupera filtros, tabela e colunas. Não repetir consulta nem exigir refazer seleção. Gráficos não são requisito de download na página principal.
+
+O seletor de disponibilidade de métodos, apresentação mapa/lista e controles de comparação permanecem na análise detalhada. Filtros essenciais do arquivo ficam expostos na principal; não manter cópias contraditórias escondidas no painel direito. Sem grandes fundos amarelos em ações secundárias, sem toggle minúsculo para selecionar arquivo, sem nova biblioteca de UI. Respeitar tokens canônicos, temas e cantos locais já aprovados.
+
+### 14.3 Composição determinística do arquivo principal
+
+Criar uma função pura de seleção do recorte de entrega, com entrada snapshot, inventário completo, disponibilidade concluída e filtros; devolver IDs ordenados estáveis e motivos. Cidade/UF, tipo e busca filtram TODOS os empreendimentos antes do limite de prévia. Excluir estoque zero na última data válida do empreendimento e itens sem referência Finotti calculável. Não usar índices de página do mosaico, os primeiros 50 registros, disponibilidade parcialmente calculada ou a seleção do modo Comparação como entrada.
+
+O arquivo inicial inclui automaticamente todos os itens calculáveis desse recorte, sem botão Marcar todos ou seleção card a card. Cada empreendimento usa seu último mês válido, preservado na coluna `inicio`; não deslocar todos à última data global. A duração escolhida se aplica a cada início individual. Resultado mensal analítico não comprova cadência oficial mensal e não autoriza estimar períodos operacionais consecutivos.
+
+O pedido de análise principal deve solicitar somente `finotti-reference`. Não basta aplicar um rótulo à função `present`: ela hoje escolhe o primeiro método disponível e pode usar comparadores. Validar antes de publicar o plano que cada integrante incluído possui referência/versionamento corretos; jamais substituir silenciosamente por stock-trend ou constant no arquivo principal. Reutilizar buildExportPlan e adicionar a validação específica na fronteira de entrega, sem modificar comportamento legítimo dos exportadores exploratórios existentes.
+
+Conjunto vazio: indicar motivo e permitir rever local/filtros, sem Excel vazio aparentemente bem-sucedido. Se todos estiverem sem referência, contagens e galeria continuam úteis. Se um cálculo falhar, mostrar tentativa novamente e bloquear a entrega daquele pedido; não reduzir silenciosamente a seleção para produzir um arquivo parcial. Indisponibilidades esperadas classificadas entram nos motivos antes de formar o conjunto, não em catch genérico.
+
+As dimensões são separadas: referência calculável, possibilidade de backtest e elegibilidade operacional. Mostrar resumo objetivo das pendências operacionais, sem tratar `importavel=false` como erro de download analítico ou usar o nome Estimativas aprovadas para prometer aceite de importação. Não alterar limiares nem decidir granularidade externa nesta implementação.
+
+### 14.4 Estado e fronteiras dos componentes
+
+Reutilizar ExperiencePage como raiz de sessão: autenticação, UniverseSnapshot, AnalysisRuntime e ciclo de vida permanecem compartilhados. Introduzir navegação local `previsoes | analise` em vez de nova página que refaça carga. Preservar rota pública/lazy atuais. A vista principal é padrão após carga; alternar vistas mantém sessão sem duplicar workers.
+
+Separar estado em três partes: filtros de entrega (cidade/UF, tipo, busca, duração); configuração de exploração (data histórica, medida, métodos, zoom, seleção de comparação); layout da exportação (ordem/visibilidade das colunas). Inicializar a análise na primeira abertura com contexto atual da entrega; depois preservar sua exploração independentemente. Ajustes exploratórios não alteram o arquivo principal. Ao voltar, mostrar o contexto do arquivo da principal, sem copiar o início histórico escolhido no backtest. Troca de universo completo limpa seleções e pedidos das duas vistas; troca de token limpa também snapshot/cache, incluindo prévia.
+
+Refatoração proposta, adaptando nomes ao código existente sem duplicação:
+
+- `useForecastDelivery` ou equivalente: composição de IDs, spec latest/Finotti, preparação cancelável, resultado publicado, geração e layout de colunas.
+- `deliveryScope.ts`: seletor puro, chave de identidade e validações de conjunto/método; sem API e sem matemática nova.
+- `ForecastDelivery`: barra compacta de filtros, resumo, ExportPreview e ações inline.
+- `ExportContent`: extrair de ExportReview a apresentação/preparação reutilizável necessária. ExportReview permanece wrapper Dialog para exportações explícitas individuais ou de conjuntos da análise. Não copiar seu efeito de preparação integral para dois lugares ativos ao mesmo tempo.
+- `DetailedAnalysis`: composição atual de mapa/lista, ComparisonMode, ForecastExplorer e PortfolioExplorer; manter props e estado necessários fora de um componente que perde tudo ao desmontar.
+- `AnalysisFilters`: retirar da principal; manter somente configurações exploratórias na análise. Não misturar filtros do arquivo e da visualização com o mesmo nome e efeitos diferentes.
+- `exportColumns.ts`, `ExportPreview`, `forecastWorkbook`, `downloadPackage`: manter uma fonte para cabeçalhos e transformação. Reutilizar componentes/primitives existentes e CSS prefixado, sem nova dependência.
+
+Manter estado de análise/cache na raiz ou reducer ao trocar vista, mas pausar jobs de mapa/prefetch quando a análise não estiver visível. Não deixar todos os gráficos montados ocultos consumindo CPU. Tratar restauração de foco e botão Voltar do diálogo sem quebrar a navegação principal.
+
+### 14.5 Identidade, cancelamento e desempenho
+
+Chave de preparação: hash do snapshot + IDs ordenados + datas efetivas por empreendimento + duração + métodos/versões. Mudança de recorte invalida a entrega imediatamente e cancela/ignora tarefas obsoletas. Só publicar tabela, contagens, métodos e ações juntos, a partir do mesmo plano estável. Usar geração/requestId; não depender só da identidade de arrays/objetos recriados em render.
+
+Durante atualização local manter o quadro anterior identificado e opaco, BrainLoadingState compacto, sem trocar apenas o título. Download e edição de colunas bloqueados até o novo quadro válido. Permitir cancelar o cálculo; resultado anterior não se torna arquivo do novo filtro. Sem espera artificial, spinner genérico ou progresso inventado. Alterações rápidas sucessivas só publicam a última válida.
+
+API externa mantém máximo global de oito chamadas e atomicidade da carga; não adicionar um novo Promise.all ilimitado. Reutilizar worker/scheduler/cache existentes para cálculos; priorizar entrega e exploração ativa, cancelar filas obsoletas sem prejudicar outro consumidor do runtime. Após carga, filtros, duração, navegação, backtest e colunas não consultam API. Ao atualizar explicitamente, novo snapshot/hash invalida resultados antigos mesmo se os IDs forem iguais.
+
+Preparação abrange todos os IDs escolhidos, em tarefas cooperativas canceláveis. Renderizar só 50 linhas não significa calcular/exportar só 50. Não aquecer todas as datas/métodos/cidades combinadas antecipadamente. Registrar número de requisições, tempo até a prévia, cálculo quente e tamanho do recorte no ensaio; sem prometer tempo universal.
+
+### 14.6 Colunas, download e rastreabilidade
+
+Preservar as 13 colunas atuais de FORECAST_COLUMNS, seus nomes e a ordem padrão; uma linha por empreendimento/mês previsto. IDs texto, precisão, nulos, flags, versões e arredondamentos continuam iguais. A tabela é uma amostra do mesmo ExportPlan integral, sem segunda montagem independente de linhas. Não introduzir ordenação de linhas que só afete a prévia.
+
+Arrastar, ocultar, restaurar, teclado e alternativas de toque permanecem. Excel e previsoes.csv do pacote usam a mesma ordem/omissões atuais; leia_me e manifesto registram limites/layout. Histórico e candidato de 26 colunas não recebem ocultação implícita. Bloquear ocultação da última coluna. Layout persiste ao mudar duração, filtros e vista dentro do mesmo snapshot; reinicia ao carregar novo snapshot. Exportações do detalhe possuem layout próprio, sem alterar a principal.
+
+Ao clicar Baixar congelar plano, layout e identidade, desabilitar alterações conflitantes até concluir e evitar duplo download. O arquivo deve corresponder integralmente ao quadro revisado. Tratar erro com nova tentativa sem repetir API e liberar controles ao final. Evidências devem descrever exatamente esse conjunto, distinguindo ausência de backtest de teste executado, e não aproveitar métricas de outra data/modelo.
+
+Avisos ficam curtos na tela, completos no leia_me/manifesto. Nenhuma chamada de importação, nenhum dado histórico sobrescrito, nenhuma declaração de homologação. Planilha analítica com 13 colunas e candidato externo de 26 colunas continuam produtos distintos.
+
+### 14.7 Sequência de implementação e pontos de revisão
+
+- [ ] **G0 — Base e preservação.** Ler AGENTS e fontes; fetch de todos os remotos, comparar refs, inventariar alterações paralelas, registrar baseline. Em 02/11: main local c62e41e, 15 commits atrás de origin/main, zero à frente; alterações remotas de relatórios SP não tocam esta feature, mas há árvore local suja. Não integrar automaticamente: obter autorização específica de integração conforme protocolo antes do merge; sem rebase/reset. Preparação documental pode prosseguir. Após integração autorizada, ler entradas novas e repetir baseline relevante.
+- [ ] **G1 — Contrato do recorte.** Implementar seleção pura/identidade e testes antes da UI; definir diferenças entre matemática, operação e backtest. Conferir que reference-only impede fallback. Proteger datas individuais e categorias de exclusão.
+- [ ] **G2 — Preparação compartilhada.** Extrair lógica de exportação sem duplicação; estado estável/cancelamento, Brain, layout e bloqueios de download. Preservar wrapper modal utilizado pelo detalhe.
+- [ ] **G3 — Página principal.** Aplicar navegação, filtros visíveis e ExportPreview inline. Carregar automaticamente o conjunto calculável completo; remover ações de seleção/comparação e gráficos desta vista. Tratar vazio/erro/atualização e motivos.
+- [ ] **G4 — Análise detalhada.** Reposicionar experiência existente, conservar exploração/backtest/galerias/Excel de conferência, retorno e independência da seleção. Pausar cálculos não visíveis. Não apagar jornada operacional legada nem suas rotas/acessos existentes sem tarefa específica de remoção.
+- [ ] **G5 — Verificação integrada.** Executar casos de aceite abaixo, reabrir arquivos, medir requisições e testar navegador/responsividade/temas. Corrigir regressões antes de concluir.
+- [ ] **G6 — Entrega revisável.** Atualizar evidência pequena, plano, LIVE_rebrain, mapa System Design e acompanhamento Gabriel. Commit isolado com staging explícito; apresentar resultado, limites, contagens reais, estado Git e pendências. Push/deploy dependem de autorização final específica da execução. Interface pronta isoladamente não conclui o plano.
+
+### 14.8 Critérios de aceite e testes obrigatórios
+
+**Contratos puros/integrados:**
+
+1. Mais de 50 linhas: prévia contém 50; arquivo contém todas. Mais de uma página do mapa não limita o conjunto. A ordem e os valores das 50 linhas exibidas correspondem à planilha reaberta.
+2. Recorte com cidades homônimas de UFs diferentes, múltiplos tipos e busca: IDs, contagens e linhas corretos; limpar filtro recupera conjunto completo sem nova consulta. Cidade fora do catálogo nunca dispara histórico pesado.
+3. Últimos registros diferentes: inicio individual e meses previstos corretos; duração 1/12/36 preserva regras do motor. Esgotado excluído da projeção atual, mas elegível para análise de estoque passado quando domínio permitir.
+4. Referência indisponível com comparador disponível: fora do principal com motivo; jamais exportar comparador como Estimativa aprovada. Origens/cadência desconhecidas permanecem pendentes e importavel=false, sem transformar exploração em lote liberado.
+5. Race A→B→C, B lento, cancelamento, erro de um integrante, troca de token/snapshot e atualização parcial: nenhuma tabela/download rotulada com dados de outro pedido; recuperação explícita e sem arquivo parcial silencioso.
+6. Comparar itens, escolher data histórica e outro método, abrir exportação detalhada e voltar: arquivo principal intacto. Filtros de entrega alteram arquivo deliberadamente; filtros de exploração não alteram sua composição.
+7. Colunas personalizadas sobrevivem a filtros/vistas no mesmo snapshot; novo snapshot restaura padrão. XLSX/CSV/manifesto coerentes, última coluna protegida, IDs/nulos/decimais/booleanos/textos iniciados por `=` preservados e seguros. Congelamento durante geração e bloqueio de clique duplo.
+8. Motores/gabaritos científicos, limitação de treino Finotti, lacunas e ausência versus zero continuam protegidos; sem novo cálculo de confiança, cadência ou preço. Regressão da jornada operacional existente.
+
+**Navegador e evidências:** testar 1440/768/390, claro/escuro, teclado e toque, foco/retorno, redução de movimento, tabela com rolagem horizontal contida e cabeçalho legível. Nenhum overflow da página. Cenários: carga lenta Brain, erro/retry/cancelar, nenhum histórico, zero calculáveis, sucesso com mais de 50 linhas, todos excluídos por filtro, download após personalizar colunas e ida/volta à análise. Sem erro JavaScript. Gráficos/backtest continuam funcionais e só montados na análise.
+
+Instrumentar as requisições do cenário completo: máximo oito em voo na carga, zero extras ao filtrar/alternar vista/calcular/editar colunas. Fonte sintética deve ser identificada; usar replay real existente quando disponível sem publicar brutos. Uma fonte sem meses posteriores avaliáveis deve dizer Sem comparação válida, não forçar métricas.
+
+Executar `npx.cmd vitest run src/features/estimativas-vendas`, `node scripts/diagnostics/estimativas-operational.test.mjs`, `npx.cmd tsc --noEmit -p tsconfig.app.json`, lint dirigido, `npm.cmd run build`, `git diff --check` e `npm.cmd run check:live-docs -- <base> <head>`. As contagens históricas de testes são baseline, não resultado dessa execução. Adaptar diagnósticos atuais de export-preview/settings/experience, preservando casos de domínio; inspecionar capturas, não apenas gerar screenshots.
+
+Atualizar a evidência pequena existente de exportação com seção datada da nova jornada e link a este plano, sem reescrever resultados anteriores. Capturas, XLSX, logs e snapshots vão para `.local-inputs/estimativas-vendas/fluxo-entrega-20261102/`, ignorada. Registrar limites se navegador/API não estiverem disponíveis, sem declarar produção ou importação verificada.
