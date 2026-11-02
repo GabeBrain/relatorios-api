@@ -415,3 +415,9 @@ Evidência pequena na chave `deliveryFlow20261102` de [evidências de exportaç�
 ### 14.10 Envio autorizado em 02/11
 
 Após revisão de sincronização solicitada por Gabriel, fetch confirmou0atrás/3locais; gate documental/diff aprovados. Push `9b5d641..ad86e26` concluído e `ls-remote` confirmou SHA `ad86e26da8b43355d3acd3056f8a16827a671905`, igual ao HEAD;0atrás/0à frente na conferência. Alterações paralelas continuam locais, fora do envio. Não houve comando de deploy, nova consulta API de dados, novos testes de produto ou verificação da versão servida em produção nesta sincronização. Contrato Nicolas/Belogic permanece não homologado.
+
+### 14.11 Refinamento da barra de navegação — 02/11
+
+Pedido posterior de Gabriel: Alterar local, Atualizar dados e Dados e metodologia passam à direita na mesma barra de Previsões/Análise detalhada, sem moldura e no mesmo estilo tipográfico. Grupos flexíveis preservam uma linha em1440; em768/390 quebram conforme espaço disponível, mantendo as ações alinhadas à direita. Sem mudança de filtros, cálculo, exportação ou carregamento. Usados os mesmos Button/tokens, sem nova dependência.
+
+Build/typecheck e lint dirigidos aprovados; dois testes de jornada aprovados. A execução isolada inicialmente atingiu o limite padrão1s na preparação fria da referência; a espera de prontidão do teste foi ajustada para10s, sem atraso artificial no produto. Diagnóstico `ESTIMATIVAS_NAV_ONLY=1 node scripts/diagnostics/estimativas-delivery-browser.mjs`: seis combinações1440/768/390 claro/escuro, coordenadas iguais da linha desktop, cinco botões com fundo transparente/borda lateral0/font14px, ações Alterar local e metodologia funcionais, zero errosJS/overflow e duas chamadas iniciais sem extras. Captura desktop inspecionada. Resultados/capturas `navigation-result.json`/`*-nav.png` na pasta local da seção14.9. Refinamento validado localmente; envio/aceite específico pendentes.

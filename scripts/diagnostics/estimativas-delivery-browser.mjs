@@ -24,6 +24,19 @@ try {
     });
     await page.goto(url); await page.evaluate(t => document.documentElement.classList.toggle('dark', t === 'dark'), theme);
     const started = Date.now(); await load(); await page.getByText('Carregando empreendimentos', { exact: true }).waitFor(); await ready(); const firstPreviewMs = Date.now() - started;
+    if (process.env.ESTIMATIVAS_NAV_ONLY === '1') {
+      const nav = page.getByRole('navigation', { name: 'Vistas das estimativas' });
+      const view = await nav.getByRole('button', { name: 'Previsões', exact: true }).boundingBox();
+      const actions = await nav.locator('.evd-nav-actions').boundingBox();
+      assert.equal(await page.getByRole('region', { name: 'Universo carregado' }).getByRole('button').count(), 0);
+      if (width === 1440) { assert.ok(Math.abs(view.y - actions.y) < 3); assert.ok(actions.x > view.x + view.width); }
+      const styles = await nav.getByRole('button').evaluateAll(items => items.map(el => { const s = getComputedStyle(el); return { background: s.backgroundColor, border: s.borderLeftWidth, size: s.fontSize }; }));
+      assert.ok(styles.every(s => s.background === 'rgba(0, 0, 0, 0)' && s.border === '0px' && s.size === styles[0].size));
+      await nav.getByRole('button', { name: 'Dados e metodologia', exact: true }).click(); await page.getByRole('dialog').waitFor(); await page.keyboard.press('Escape');
+      await nav.getByRole('button', { name: 'Alterar local', exact: true }).click(); await page.getByRole('region', { name: 'Escolher universo' }).waitFor(); await nav.getByRole('button', { name: 'Alterar local', exact: true }).click();
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2); assert.equal(overflow, false); assert.deepEqual(errors, []); assert.equal(calls, 2);
+      await page.screenshot({ path: `${folder}/${width}-${theme}-nav.png` }); results.push({ width, theme, view, actions, styles, overflow, errors, calls, synthetic: true }); await context.close(); continue;
+    }
     assert.equal(await page.locator('.evm-map').count(), 0); assert.equal(await page.locator('.evd-delivery tbody tr').count(), 50); assert.equal(calls, 2);
     await page.getByRole('button', { name: 'Sem referência (1)', exact: true }).click(); await page.getByRole('dialog').getByText('Projeto 7', { exact: true }).waitFor(); await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Esgotados (1)', exact: true }).click(); await page.getByRole('dialog').getByText('Projeto 8', { exact: true }).waitFor(); await page.keyboard.press('Escape');
@@ -56,7 +69,7 @@ try {
     assert.equal(await page.locator('.evd-delivery tbody tr').count(), 50);
     results.push({ width, theme, synthetic: true, firstPreviewMs, previewRows: 50, workbookRows: 72, columns: columns.length, callsBeforeExplicitRefresh: 2, noFallback: true, columnsPersist: true, comparisonAndBacktestIndependent: true, partialRefreshRetainsPrevious: true, successfulRefreshResetsColumns: true, overflow, errors }); await context.close();
   }
-  for (const mode of ['empty', 'no-reference', 'cancel', 'error-retry', 'unauthorized']) {
+  if (process.env.ESTIMATIVAS_NAV_ONLY !== '1') for (const mode of ['empty', 'no-reference', 'cancel', 'error-retry', 'unauthorized']) {
     const context = await browser.newContext({ viewport: { width: 390, height: 1000 } }); page = await context.newPage(); const errors = []; let calls = 0, fail = mode === 'error-retry';
     page.on('pageerror', e => errors.push(String(e)));
     await page.addInitScript(() => { const now = Date.now(); localStorage.setItem('brain-auth', JSON.stringify({ state: { token: 'synthetic-only', issuedAt: now, expiresAt: now + 3600000 }, version: 0 })); });
@@ -82,6 +95,6 @@ try {
     }
     await page.screenshot({ path: `${folder}/state-${mode}.png` }); assert.deepEqual(errors, []); results.push({ mode, synthetic: true, noFalseExport: true, calls, errors }); await context.close();
   }
-  await writeFile(`${folder}/browser-result.json`, JSON.stringify(results, null, 2)); console.log(JSON.stringify(results));
+  await writeFile(`${folder}/${process.env.ESTIMATIVAS_NAV_ONLY === '1' ? 'navigation-result' : 'browser-result'}.json`, JSON.stringify(results, null, 2)); console.log(JSON.stringify(results));
 } catch (e) { if (page) { await page.screenshot({ path: `${folder}/failure.png` }).catch(() => {}); await writeFile(`${folder}/failure.txt`, await page.locator('body').innerText().catch(() => '') + '\n' + String(e)); } console.error(e); process.exitCode = 1; }
 finally { await browser.close(); }

@@ -27,7 +27,7 @@ beforeEach(() => { access.token = 'fixture'; access.disposed = 0; access.calls =
 describe('jornada essencial', () => {
   it('abre curvas direto, mantém seleção fora do filtro e não consulta API ao mudar views', async () => {
     render(<ExperiencePage />); fireEvent.click(screen.getByRole('button', { name: 'Carregar empreendimentos' }));
-    await screen.findByRole('region', { name: 'Prévia do Excel' });
+    await screen.findByRole('region', { name: 'Prévia do Excel' }, { timeout: 10000 });
     expect(screen.queryByRole('button', { name: 'Comparar curvas' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Análise detalhada' }));
     await screen.findByRole('button', { name: 'Explorar curva de Caso de revisão' });
@@ -54,7 +54,7 @@ describe('jornada essencial', () => {
   });
   it('falha em atualização conserva universo anterior e troca de token elimina dados/seleção', async () => {
     const view = render(<ExperiencePage />); fireEvent.click(screen.getByRole('button', { name: 'Carregar empreendimentos' }));
-    await screen.findByRole('region', { name: 'Prévia do Excel' });
+    await screen.findByRole('region', { name: 'Prévia do Excel' }, { timeout: 10000 });
     expect(screen.queryByRole('button', { name: 'Comparar curvas' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Análise detalhada' }));
     await screen.findByRole('button', { name: 'Explorar curva de Caso de revisão' });

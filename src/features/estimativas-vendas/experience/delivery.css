@@ -5,3 +5,6 @@
 .evd-nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin:0;border-bottom:1px solid hsl(var(--border))}.evd-nav button{border-radius:0;background:transparent!important;box-shadow:none;border-bottom:2px solid transparent;padding:.8rem .2rem}.evd-nav button[aria-current=page]{border-bottom-color:hsl(var(--primary));color:hsl(var(--foreground));font-weight:600}
 @media(max-width:700px){.evd-heading{align-items:flex-start;flex-direction:column}.evd-filters{gap:.8rem}.evd-filters>.evx-field:first-child{min-width:100%;flex:1}.evd-progress{flex-wrap:wrap}.evd-delivery .eve-footer .evx-actions{gap:.6rem}.evd-nav{gap:1rem}}
 @media(prefers-reduced-motion:reduce){.evd-stale{transition:none}}
+
+.evd-nav-views,.evd-nav-actions{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}.evd-nav-actions{margin-left:auto;justify-content:flex-end}.evd-nav button:hover,.evd-nav button:focus-visible{color:hsl(var(--primary))}
+@media(max-width:700px){.evd-nav-actions{flex-basis:100%;gap:1rem}.evd-nav-views{gap:1rem}}

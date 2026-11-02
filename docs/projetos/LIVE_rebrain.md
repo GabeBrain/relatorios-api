@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-02 — Estimativas: ações na linha da navegação — Gabriel / sessão
+
+- **Mudança:** Alterar local, Atualizar dados e Dados e metodologia à direita da mesma barra de Previsões/Análise detalhada, estilo textual uniforme sem moldura. Quebra responsiva por grupos; motores/filtros/arquivos intactos.
+- **Evidência/estado:** [plano seção14.11](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md#1411-refinamento-da-barra-de-navegação--0211), dois testes de jornada, tipos/build/lint e seis cenários de navegador aprovados; zero overflow/errosJS e nenhuma API extra. Fonte sintética identificada. Refinamento local, sem envio ou confirmação de produção deste ajuste.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074), somente referência.
+
+
 ### 2026-11-02 — Estimativas: envio autorizado da nova jornada — Gabriel / sessão
 
 - **Envio Git confirmado:** `aa39ce5` (plano), `706eb96` (merge remoto autorizado) e `ad86e26` (prévia/Excel principal e Análise detalhada) enviados por autorização explícita de Gabriel. Fetch prévio0atrás/3locais; ls-remote/HEAD iguais em `ad86e26da8b43355d3acd3056f8a16827a671905`,0/0 após push. Gate LIVE e diff aprovados; cinco documentos/pastaCorretor paralelos continuam fora da entrega.
