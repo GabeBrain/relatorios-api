@@ -1,8 +1,8 @@
 # Estimativas de vendas — plano técnico da V1 essencial
 
-Criado em 28/10/2026; direção atualizada em 02/11/2026. Responsável: Gabriel. Executor previsto: Sol light. Baseline anterior implementada e validada localmente, com ensaio autenticado de API registrado abaixo; reorganização da seção 14 implementada e validada localmente em 02/11, aguardando autorização final de envio/publicação. V1 de interface não significa importação homologada.
+Criado em 28/10/2026; direção atualizada em 02/11/2026. Responsável: Gabriel. Executor previsto: Sol light. Baseline anterior implementada e validada localmente, com ensaio autenticado de API registrado abaixo; reorganização da seção 14 implementada e validada localmente em 02/11, enviada a origin/main em `ad86e26` por autorização de Gabriel; publicação/aceite no site ainda não verificados. V1 de interface não significa importação homologada.
 
-**Direção vigente em 02/11/2026 — VALIDADA LOCALMENTE:** seção 14 implementada, aprovada conceitualmente por Gabriel após o feedback de Diego de 30/10. Página principal orientada a território → prévia → Excel; gráficos e retrospectiva em Análise detalhada. A seção 14 substitui as decisões anteriores de navegação, posição dos filtros e composição do download principal. Seções 1–13 preservam histórico, fundamentos e evidências, não são uma lista de telas a recriar. Baseline anterior `c62e41e`, plano `aa39ce5` e integração autorizada `706eb96`; resultado e limites na seção 14.9. Sem push/deploy desta execução. Regras matemáticas e contrato científico continuam válidos.
+**Direção vigente em 02/11/2026 — VALIDADA LOCALMENTE:** seção 14 implementada, aprovada conceitualmente por Gabriel após o feedback de Diego de 30/10. Página principal orientada a território → prévia → Excel; gráficos e retrospectiva em Análise detalhada. A seção 14 substitui as decisões anteriores de navegação, posição dos filtros e composição do download principal. Seções 1–13 preservam histórico, fundamentos e evidências, não são uma lista de telas a recriar. Baseline anterior `c62e41e`, plano `aa39ce5` e integração autorizada `706eb96`; resultado e limites na seção 14.9. Push autorizado confirmado em `ad86e26` em 02/11; nenhum comando de deploy ou verificação desta versão em produção. Regras matemáticas e contrato científico continuam válidos.
 
 ## 1. Resultado e limites
 
@@ -291,7 +291,7 @@ Testes reabrem XLSX72linhas e comparam as primeiras50com a projeção da prévia
 
 ## 14. Fluxo de entrega com Análise detalhada — plano de 02/11/2026
 
-**Estado em 02/11: implementado e validado localmente; autorização final de push/deploy pendente.** Autor: Gabriel / sessão. Fonte da decisão: conversa fornecida por Gabriel com Diego, 30/10, 16h22–16h55, e confirmação de Gabriel nesta conversa. Diego pediu busca por cidade e download na página principal, prévia no lugar dos gráficos e acesso superior a Análise detalhada; também pediu filtros mais visíveis. Não é uma nova aprovação das regras ou do formato de importação. As imagens recebidas demonstram a interface usada pelo revisor, sem comprovar hash de produção ou homologação.
+**Estado em 02/11: implementado, validado localmente e enviado a origin/main em `ad86e26`; publicação/aceite no site pendentes.** Autor: Gabriel / sessão. Fonte da decisão: conversa fornecida por Gabriel com Diego, 30/10, 16h22–16h55, e confirmação de Gabriel nesta conversa. Diego pediu busca por cidade e download na página principal, prévia no lugar dos gráficos e acesso superior a Análise detalhada; também pediu filtros mais visíveis. Não é uma nova aprovação das regras ou do formato de importação. As imagens recebidas demonstram a interface usada pelo revisor, sem comprovar hash de produção ou homologação.
 
 ### 14.1 Resultado e fronteiras
 
@@ -411,3 +411,7 @@ Navegador: seis cenários1440/768/390, claro/escuro, prévia50/Excel72linhas e12
 Replay real já preservado de Maragogi:25cadastros em1440/390;13pontos históricos de Max Tulum permanecem visíveis; carrossel, backtest e comparação aprovados. Desktop sem rolagem do detalhe, celular com rolagem vertical por legibilidade, sem overflow horizontal. Sem nova consulta autenticada; não comprova precisão ou origem observada dos dados.
 
 Evidência pequena na chave `deliveryFlow20261102` de [evidências de exportação](EVIDENCIAS_PREVIA_EXPORTACAO_2026-10-29.json); scripts reproduzíveis e saídas/capturas em `.local-inputs/estimativas-vendas/fluxo-entrega-20261102/`. Capturas principais claro/escuro e celular inspecionadas. Navegador conectado indisponível após discovery/troubleshooting; utilizado Chromium headless local. Produção e formato final de importação continuam pendentes, sem declaração de homologação. Próximo: autorização de push/publicação e aceite humano da nova jornada.
+
+### 14.10 Envio autorizado em 02/11
+
+Após revisão de sincronização solicitada por Gabriel, fetch confirmou0atrás/3locais; gate documental/diff aprovados. Push `9b5d641..ad86e26` concluído e `ls-remote` confirmou SHA `ad86e26da8b43355d3acd3056f8a16827a671905`, igual ao HEAD;0atrás/0à frente na conferência. Alterações paralelas continuam locais, fora do envio. Não houve comando de deploy, nova consulta API de dados, novos testes de produto ou verificação da versão servida em produção nesta sincronização. Contrato Nicolas/Belogic permanece não homologado.

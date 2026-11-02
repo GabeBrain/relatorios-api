@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-02 — Estimativas: envio autorizado da nova jornada — Gabriel / sessão
+
+- **Envio Git confirmado:** `aa39ce5` (plano), `706eb96` (merge remoto autorizado) e `ad86e26` (prévia/Excel principal e Análise detalhada) enviados por autorização explícita de Gabriel. Fetch prévio0atrás/3locais; ls-remote/HEAD iguais em `ad86e26da8b43355d3acd3056f8a16827a671905`,0/0 após push. Gate LIVE e diff aprovados; cinco documentos/pastaCorretor paralelos continuam fora da entrega.
+- **Estado:** publicado no Git, sem comando de deploy ou verificação da versão em produção; testes locais129+15 e evidências anteriores preservados, não reexecutados por esta sincronização documental. [Resultado e limites](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md#1410-envio-autorizado-em-0211).
+- **Próximo:** publicar/conferir no Lovable a jornada território→prévia→Excel e Análise detalhada. Arquivo segue não homologado para Geobrain; contrato final externo pendente.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074), somente referência.
+
+
 ### 2026-11-02 — Estimativas: prévia/Excel na principal e Análise detalhada — Gabriel / sessão
 
 - **Ambiente/funcionalidade:** `/rebrain/estimativas-vendas`; jornada de entrega implementada localmente após feedback Diego30/10. Principal com filtros visíveis, prévia configurável inline e Excel; gráficos/comparação/backtest na vista Análise detalhada, sem nova API na exploração.
@@ -697,7 +705,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-**02/11 — Estimativas:** seção14 implementada e validada localmente (129Vitest+15operacionais, seis telas/temas+cinco estados e replay real); prévia/Excel na principal, análise detalhada preservada. Aguardando autorização de push/publicação e aceite humano; formato Nicolas/Belogic pendente.
+**02/11 — Estimativas:** seção14 implementada e validada localmente (129Vitest+15operacionais, seis telas/temas+cinco estados e replay real); prévia/Excel na principal, análise detalhada preservada. Enviada a origin/main em `ad86e26` com autorização; publicação/aceite no site e formato Nicolas/Belogic pendentes.
 **30/10 — SP, preparo dos testes:** checklist das85 posições e refinamentos validados localmente;211 testes SP+359 regressões Panorama, tipos reais/lint/build e navegador aprovados. Próximo ensaio autenticado da tela pelo usuário, seguido de revisão metodológica/editorial e exportação integral.
 
 **29/10 ? SP, lote final:**85 posições com renderizador, após os28 finais. Mapas/indicadores dependem de fontes conferidas; institucionais conservam a edição identificada. Próximo: validar no token real, revisar com analista/editorial e preparar exportação integral. As entradas abaixo registram checkpoints anteriores; pendências de implementação dos28 foram superadas.
@@ -747,7 +755,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- **Estimativas:** autorizar envio/publicação da seção14, implementada e validada localmente em02/11 (prévia/Excel na principal e Análise detalhada); conferir a nova jornada em produção e aguardar formato final Nicolas/Belogic. Interface anterior aceita em 28/10; capturas recebidas em 30/10 mostram uso da prévia, sem nova inspeção independente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
+- **Estimativas:** conferir no site a seção14 enviada em `ad86e26` (prévia/Excel na principal e Análise detalhada), sem verificação de produção nesta sessão e aguardar formato final Nicolas/Belogic. Interface anterior aceita em 28/10; capturas recebidas em 30/10 mostram uso da prévia, sem nova inspeção independente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 - [ ] **SP — teste prático30/10:** seguir o roteiro da feature; registrar trimestre/mês/slide, esperado/observado e checklist da mesma geração. Conferir fontes reais, mapa/estágio/capacidade e atualidade das8 artes; observar versão publicada. Exportação integral, revisão do analista e novos índices permanecem abertos.
 
 - [ ] **SP — lote final:** validar85 posições no token real, cobertura de coordenadas/fotografias/estágio/capacidade; revisar MAP, VGV nominal e cenário400–500mil com analista. Confirmar pessoas/contatos e perfiljun2026 antes do aceite. Implementar/verificar exportação integral e observar publicação. Os28 finais já foram implementados; anotações antigas abaixo descrevem checkpoints, não lacunas atuais de renderização.
