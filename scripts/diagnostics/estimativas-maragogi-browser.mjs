@@ -2,8 +2,9 @@
 import { chromium } from '@playwright/test';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-const folder = '.local-inputs/estimativas-vendas/maragogi-historico-20261028'; await mkdir(folder, { recursive: true });
-const buildings = JSON.parse(await readFile(`${folder}/snapshot.json`, 'utf8'));
+const sourceFolder = '.local-inputs/estimativas-vendas/maragogi-historico-20261028';
+const folder = process.env.ESTIMATIVAS_EVIDENCE_DIR ?? sourceFolder; await mkdir(folder, { recursive: true });
+const buildings = JSON.parse(await readFile(`${sourceFolder}/snapshot.json`, 'utf8'));
 const browser = await chromium.launch({ headless: true }); let page;
 const results = [];
 try {
@@ -17,6 +18,7 @@ try {
   });
   await page.goto(process.env.ESTIMATIVAS_LOCAL_URL ?? 'http://127.0.0.1:8087/rebrain/estimativas-vendas');
   await page.getByRole('combobox', { name: 'Estados', exact: true }).click(); await page.getByRole('option', { name: 'AL', exact: true }).click(); await page.keyboard.press('Escape'); await page.getByRole('button', { name: 'Carregar empreendimentos', exact: true }).click();
+  await page.getByRole('button', { name: 'Análise detalhada', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('.evm-map')?.getAttribute('aria-busy') === 'false', { timeout: 90000 });
   await page.getByRole('button', { name: 'Ordenar por vendas previstas', exact: true }).click();
   const names = await page.locator('.evm-tile').evaluateAll(els => els.map(el => el.getAttribute('aria-label').replace('Explorar curva de ', '')));
@@ -25,7 +27,7 @@ try {
   await dialog.getByRole('button', { name: 'Próximo empreendimento', exact: true }).click();
   await page.getByRole('dialog').getByRole('heading', { name: names[1], exact: true }).waitFor(); await page.keyboard.press('Escape');
   assert.equal(await page.locator('.evx-selection').count(), 0); assert.equal(await page.locator('.evm-tile[aria-pressed]').count(), 0);
-  await page.getByPlaceholder('Nome ou ID').fill('75803'); await page.getByRole('button', { name: 'Explorar curva de Max Tulum - Bloco B', exact: true }).click(); dialog = page.getByRole('dialog');
+  await page.locator('.evs-search input').fill('75803'); await page.getByRole('button', { name: 'Explorar curva de Max Tulum - Bloco B', exact: true }).click(); dialog = page.getByRole('dialog');
   await dialog.getByText('13 registros válidos · origem de coleta não confirmada', { exact: true }).waitFor();
   await dialog.getByRole('img', { name: 'Histórico, previsão e dados posteriores' }).waitFor();
   await dialog.locator('.recharts-line-dots .recharts-dot').first().waitFor();
@@ -34,7 +36,7 @@ try {
   const overflow = await dialog.evaluate(el => ({ horizontal: el.scrollWidth > el.clientWidth + 2, vertical: el.scrollHeight > el.clientHeight + 2 })); assert.equal(overflow.horizontal, false); if (width === 1440) assert.equal(overflow.vertical, false);
   await page.screenshot({ path: `${folder}/${width}-max-tulum.png` });
   await dialog.getByRole('button', { name: 'Backtest', exact: true }).click(); await dialog.getByRole('button', { name: 'Período anterior', exact: true }).click(); await dialog.getByRole('region', { name: 'Resumo do backtest' }).waitFor();
-  await page.keyboard.press('Escape'); await page.getByPlaceholder('Nome ou ID').fill(''); await page.getByRole('button', { name: 'Comparar curvas', exact: true }).click();
+  await page.keyboard.press('Escape'); await page.locator('.evs-search input').fill(''); await page.getByRole('button', { name: 'Comparar curvas', exact: true }).click();
   await page.locator('.evm-tile').nth(0).click(); assert.equal(await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).isEnabled(), false);
   await page.locator('.evm-tile').nth(1).click(); assert.equal(await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).isEnabled(), true);
   assert.match(await page.getByRole('button', { name: /^Comparar \d+ curvas$/ }).getAttribute('class'), /evs-text-ready/);

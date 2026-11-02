@@ -111,7 +111,7 @@ export async function packageFiles(plan: ExportPlan, columns?: readonly Forecast
 export function downloadFile(bytes: BlobPart, filename: string, type: string) {
   const url = URL.createObjectURL(new Blob([bytes], { type })); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-export async function downloadPackage(plan: ExportPlan, columns?: readonly ForecastColumn[]) { const files = await packageFiles(plan, columns); downloadFile(zipSync(files) as BlobPart, `estimativas-revisao-${plan.manifest.spec.cutoff}.zip`, 'application/zip'); }
+export async function downloadPackage(plan: ExportPlan, columns?: readonly ForecastColumn[], isCurrent = () => true) { const files = await packageFiles(plan, columns); if (isCurrent()) downloadFile(zipSync(files) as BlobPart, `estimativas-revisao-${plan.manifest.spec.cutoff}.zip`, 'application/zip'); }
 export async function forecastWorkbook(plan: ExportPlan, selected: readonly ForecastColumn[] = FORECAST_COLUMNS) {
   const columns = validateForecastColumns(selected);
   const XLSX = await import('xlsx');

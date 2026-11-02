@@ -385,6 +385,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-02 — Estimativas: prévia/Excel na principal e Análise detalhada — Gabriel / sessão
+
+- **Ambiente/funcionalidade:** `/rebrain/estimativas-vendas`; jornada de entrega implementada localmente após feedback Diego30/10. Principal com filtros visíveis, prévia configurável inline e Excel; gráficos/comparação/backtest na vista Análise detalhada, sem nova API na exploração.
+- **Proteções:** arquivo principal Finotti exclusivo, datas individuais, conjunto integral antes do limite50; seleção exploratória independente; nenhum fallback, arquivo parcial silencioso ou aprovação operacional implícita. Cancelamento/retry/quadro anterior, personalização persistente e descarte de download após saída da sessão. Motores e contratos preservados.
+- **Evidência:** [plano seção14.9](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md#149-execução-local-em-0211--resultado-evidências-e-limites) e [evidências](../features/estimativas-vendas/EVIDENCIAS_PREVIA_EXPORTACAO_2026-10-29.json),129Vitest/23arquivos+15operacionais; tipos/lint/build aprovados. Seis combinações de tela/tema+cinco estados; prévia50/Excel72iguais, zero errosJS/overflow/chamadas adicionais. Replay Maragogi25cadastros/13pontos em1440/390 preservado. Fontes sintéticas/replay, sem nova API real ou validação de precisão.
+- **Git/estado:** merge autorizado `706eb96` incorporou15commits remotos SP, preservando plano `aa39ce5`; alterações paralelas reaplicadas/conferidas e fora do commit da entrega. Validado localmente, sem push/deploy; próxima autorização final e aceite no site.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — somente referência.
+- **Pendências:** contrato final Nicolas/Belogic, origem/cadência, preço/rateio/reconciliação e importação não homologados. Uso da expressão Estimativas aprovadas não altera esses limites.
+
+
 ### 2026-11-02 — Estimativas: plano da jornada de entrega e Análise detalhada — Gabriel / sessão
 
 - **Ambiente/funcionalidade:** `/rebrain/estimativas-vendas` — planejamento, sem alteração runtime.
@@ -687,7 +697,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-**02/11 — Estimativas:** nova jornada de entrega preparada no plano essencial seção 14, ainda não implementada; análise detalhada/motores existentes preservados.
+**02/11 — Estimativas:** seção14 implementada e validada localmente (129Vitest+15operacionais, seis telas/temas+cinco estados e replay real); prévia/Excel na principal, análise detalhada preservada. Aguardando autorização de push/publicação e aceite humano; formato Nicolas/Belogic pendente.
 **30/10 — SP, preparo dos testes:** checklist das85 posições e refinamentos validados localmente;211 testes SP+359 regressões Panorama, tipos reais/lint/build e navegador aprovados. Próximo ensaio autenticado da tela pelo usuário, seguido de revisão metodológica/editorial e exportação integral.
 
 **29/10 ? SP, lote final:**85 posições com renderizador, após os28 finais. Mapas/indicadores dependem de fontes conferidas; institucionais conservam a edição identificada. Próximo: validar no token real, revisar com analista/editorial e preparar exportação integral. As entradas abaixo registram checkpoints anteriores; pendências de implementação dos28 foram superadas.
@@ -737,7 +747,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- **Estimativas:** executar a seção 14 do plano essencial (prévia/Excel na principal e Análise detalhada), preparada em 02/11 a partir do feedback Diego 30/10, sem mudança runtime nesta sessão; conferir publicação após implementação e aguardar formato final Nicolas/Belogic. Interface anterior aceita em 28/10; capturas recebidas em 30/10 mostram uso da prévia, sem nova inspeção independente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
+- **Estimativas:** autorizar envio/publicação da seção14, implementada e validada localmente em02/11 (prévia/Excel na principal e Análise detalhada); conferir a nova jornada em produção e aguardar formato final Nicolas/Belogic. Interface anterior aceita em 28/10; capturas recebidas em 30/10 mostram uso da prévia, sem nova inspeção independente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 - [ ] **SP — teste prático30/10:** seguir o roteiro da feature; registrar trimestre/mês/slide, esperado/observado e checklist da mesma geração. Conferir fontes reais, mapa/estágio/capacidade e atualidade das8 artes; observar versão publicada. Exportação integral, revisão do analista e novos índices permanecem abertos.
 
 - [ ] **SP — lote final:** validar85 posições no token real, cobertura de coordenadas/fotografias/estágio/capacidade; revisar MAP, VGV nominal e cenário400–500mil com analista. Confirmar pessoas/contatos e perfiljun2026 antes do aceite. Implementar/verificar exportação integral e observar publicação. Os28 finais já foram implementados; anotações antigas abaixo descrevem checkpoints, não lacunas atuais de renderização.

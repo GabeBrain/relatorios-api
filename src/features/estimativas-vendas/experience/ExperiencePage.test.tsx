@@ -27,6 +27,9 @@ beforeEach(() => { access.token = 'fixture'; access.disposed = 0; access.calls =
 describe('jornada essencial', () => {
   it('abre curvas direto, mantém seleção fora do filtro e não consulta API ao mudar views', async () => {
     render(<ExperiencePage />); fireEvent.click(screen.getByRole('button', { name: 'Carregar empreendimentos' }));
+    await screen.findByRole('region', { name: 'Prévia do Excel' });
+    expect(screen.queryByRole('button', { name: 'Comparar curvas' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Análise detalhada' }));
     await screen.findByRole('button', { name: 'Explorar curva de Caso de revisão' });
     await screen.findByRole('img', { name: 'Curva de vendas de Caso de revisão' });
     expect(document.querySelectorAll('main.evx-page > details').length).toBe(0);
@@ -39,14 +42,21 @@ describe('jornada essencial', () => {
     expect(screen.queryByRole('button', { name: 'Selecionar Caso de revisão' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Comparar curvas' }));
     fireEvent.click(screen.getByRole('button', { name: 'Selecionar Caso de revisão' }));
-    fireEvent.change(screen.getByPlaceholderText('Nome ou ID'), { target: { value: 'ausente' } });
+    fireEvent.change(screen.getAllByPlaceholderText('Nome ou ID').find(el => !el.closest('[hidden]'))!, { target: { value: 'ausente' } });
     expect(screen.getByText('1 selecionados · 1 fora do filtro atual')).toBeTruthy();
     expect(loadUniverse).toHaveBeenCalledTimes(1);
-    fireEvent.change(screen.getByPlaceholderText('Nome ou ID'), { target: { value: '' } });
+    fireEvent.change(screen.getAllByPlaceholderText('Nome ou ID').find(el => !el.closest('[hidden]'))!, { target: { value: '' } });
     expect(screen.getByRole('button', { name: 'Explorar curva de Caso de revisão' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Previsões' }));
+    expect(screen.getByRole('region', { name: 'Prévia do Excel' })).toBeTruthy();
+    expect(screen.getAllByPlaceholderText('Nome ou ID').find(el => !el.closest('[hidden]'))).toHaveValue('');
+    expect(loadUniverse).toHaveBeenCalledTimes(1);
   });
   it('falha em atualização conserva universo anterior e troca de token elimina dados/seleção', async () => {
     const view = render(<ExperiencePage />); fireEvent.click(screen.getByRole('button', { name: 'Carregar empreendimentos' }));
+    await screen.findByRole('region', { name: 'Prévia do Excel' });
+    expect(screen.queryByRole('button', { name: 'Comparar curvas' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Análise detalhada' }));
     await screen.findByRole('button', { name: 'Explorar curva de Caso de revisão' });
     fireEvent.click(screen.getByRole('button', { name: 'Comparar curvas' }));
     fireEvent.click(screen.getByRole('button', { name: 'Selecionar Caso de revisão' }));
