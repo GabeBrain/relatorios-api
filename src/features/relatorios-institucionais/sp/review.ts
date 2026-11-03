@@ -3,6 +3,8 @@ import { SP_ORIGINAL_SLIDES } from './original-slides';
 import { SP_INSTITUTIONAL_ASSETS } from './institutional-assets';
 import { resolveSpTypologyComparison } from './typology-history';
 import { spQuarterlyIvv } from './stock-series';
+import { spMarketSlideIssue } from './market-details';
+import { SP_DETAIL_SLIDES } from './granular-details';
 
 export type SpSlideState = 'available' | 'partial' | 'pending' | 'blocked' | 'reference';
 export interface SpSlideReview { number: number; title: string; state: SpSlideState; reason: string }
@@ -47,7 +49,11 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
     }
     if([23,37,47].includes(number)){if(report.typologies?.status==='blocked')return source(report.typologies,'as tipologias');return source(resolveSpTypologyComparison(report,number===23?'launches':number===37?'sales':'stock'),'as tipologias dos dois anos');}
     if([24,38,48].includes(number)){const data=number===24?report.launchSeries:number===38?report.salesSeries:report.stockSeries;return source(data?.status==='blocked'?data:data?.comparison,'os segmentos dos dois anos');}
-    if(number===25||number===39)return source(number===25?(report.projects?.status==='blocked'?report.projects:report.projects?.neighborhoods):report.salesNeighborhoods,'os bairros e sua reconciliação municipal');
+    if(number===25||number===39){
+      const data=number===25?(report.projects?.status==='blocked'?report.projects:report.projects?.neighborhoods):report.salesNeighborhoods;
+      const result=source(data,'os bairros e sua reconciliação municipal');
+      return number===39&&result.state==='available'&&report.salesNeighborhoods?.warnings?.length ? {...result,reason:report.salesNeighborhoods.warnings.join(' ')} : result;
+    }
     if(number===46)return source(report.stockSeries,'a oferta histórica');
     if(number===50){const inputs=[report.stockSeries,report.launchSeries,report.salesSeries],failed=inputs.find(input=>input?.status==='blocked');if(failed)return source(failed,'as séries do IVV');if(inputs.some(input=>!input))return pending('O IVV aguarda as séries de oferta, lançamentos e vendas.');const result=spQuarterlyIvv(report),state=source(result,'as séries de oferta, lançamentos e vendas');return state.state==='available'&&result.rows.some(row=>row.value===null)?partial('Há trimestre sem base disponível para o IVV; não representa índice zero.'):state;}
     const details=report.granularDetails;
@@ -56,13 +62,15 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
     if(number===51)return source(details!.area,'os fluxos e estoques por área');
     if(number>=53&&number<=59){
       const points=details!.prices.series[number]??[],valid=points.filter(row=>row.value!==null).length;
-      return !valid?blocked(points.find(row=>row.issue)?.issue??'Nenhuma fotografia com preços completos.'):valid<points.length?partial(`${points.length-valid} fotografia(s) sem preço ou cobertura completa. Os demais pontos foram mantidos.`):available;
+      const gap=points.find(row=>row.value===null);
+      return !valid?blocked(gap?.issue??'Nenhuma fotografia com preços completos.'):valid<points.length?partial(`${points.length-valid} fotografia(s) sem preço ou cobertura completa. Primeira lacuna ${gap!.month}: ${gap!.issue??'medição indisponível'}. Os demais pontos foram mantidos.`):available;
     }
-    if(number===61||number===62){const field=number===61?'ticket':'meter',values=details!.prices.standards.map(row=>row[field]);return !values.some(v=>v!==null)?blocked('Sem preços completos nos padrões.'):values.some(v=>v===null)||details!.prices.overall[field]===null?partial('Há padrão ou média geral sem preço completo.'):available;}
+    if(number===61||number===62){const field=number===61?'ticket':'meter',values=details!.prices.standards.map(row=>row[field]),gap=details!.prices.standards.find(row=>row[field]===null),reason=gap?.issues[0]??details!.prices.overall.issues[0]??'Há padrão ou média geral sem cobertura, classificação ou preço completos.';return !values.some(v=>v!==null)&&details!.prices.overall[field]===null?blocked(reason):values.some(v=>v===null)||details!.prices.overall[field]===null?partial(reason):available;}
     const market=details!.market;
     const state=source(market,'a fotografia atual dos históricos');
     if(state.state!=='available')return state;
-    if(number===63||number===64){const field=number===63?'ticket':'meter',rows=market!.prices;return !rows.some(row=>row[field]!==null)?blocked('Sem oferta e preços completos nas tipologias.'):rows.some(row=>row[field]===null||row.bedroom<=2&&(row.mcmv[field]===null||row.map[field]===null))?partial('Há tipologia ou recorte MCMV/MAP sem oferta ou preço completo.'):available;}
+    const classificationIssue=spMarketSlideIssue(market,number);if(classificationIssue)return blocked(classificationIssue);
+    if(number===63||number===64){const field=number===63?'ticket':'meter',rows=market!.prices;return !rows.some(row=>row[field]!==null)?blocked('Sem oferta e preços completos nas tipologias.'):rows.some(row=>row[field]===null||row.bedroom<=2&&(row.mcmv[field]===null||row.map[field]===null))?partial(market!.classificationIssues?.mcmv??'Há tipologia ou recorte MCMV/MAP sem oferta ou preço completo.'):available;}
     if(number===73)return source(market!.matrix,'a área privativa de toda a oferta');
     if(number===76||number===77){const stages=market!.stages;return stages.launched.ready&&stages.final.ready?available:stages.launched.ready||stages.final.ready?partial('Uma das composições por estágio não foi comprovada.') :blocked(stages.final.issues[0]??'Estágio não informado.');}
     if(number===78)return market!.vgv.ready?available:blocked(market!.vgv.issues[0]??'Capacidade, vendas acumuladas e estoque não compatíveis.');
@@ -79,9 +87,13 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
     if(number===69&&market!.priceBandShare===null)return partial('Estoque por padrão disponível; cenário de ticket sem preço completo.');
     return available;
   }
-  return SP_ORIGINAL_SLIDES.map(slide=>({...slide,...check(slide.number)}));
+  return SP_ORIGINAL_SLIDES.map(slide=>{
+    const finding={...check(slide.number)};
+    if((SP_DETAIL_SLIDES as readonly number[]).includes(slide.number)&&finding.state==='available'&&report.granularDetails?.warnings?.length)finding.reason='Conteúdo disponível; há ressalvas de classificação por padrão nos históricos. Totais conferidos e recortes dependentes tratados separadamente.';
+    return {...slide,...finding};
+  });
 }
 
 export function spReviewSnapshot(report:SpPreview, slides:SpSlideReview[]) {
-  return {schema:'sp-practical-review-v1',generatedAt:new Date().toISOString(),quarter:report.quarter,throughMonth:report.throughMonth??null,source:report.source??'fixture',municipalStatus:report.status,exportAvailable:false,analystApproval:false,slides};
+  return {schema:'sp-practical-review-v1',generatedAt:new Date().toISOString(),quarter:report.quarter,throughMonth:report.throughMonth??null,source:report.source??'fixture',municipalStatus:report.status,exportAvailable:false,analystApproval:false,slides,sourceDiagnostics:report.granularDetails?.diagnostics??[]};
 }

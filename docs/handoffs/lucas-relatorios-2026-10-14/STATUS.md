@@ -1,5 +1,29 @@
 # Estado do handoff
 
+## 03/11/2026 — campos mensais e diagnóstico após checklist real
+
+Main limpaaa48b9c, origin único0/0 após fetch; Codex/Codex Test/Windows. Usuário enviou checklist2T2026 e pediu ação, com print64parcial. SP agora prioriza pattern mensal e estágio dedicado, preserva legado apenas na ausência e não oculta explícitos inválidos. Mensagens por ID/tipologia/mês e sourceDiagnostics limitado no JSON.258testes, tipos/lint/build e navegador dirigido aprovados com fontes simuladas;64MCMV e76estágio observados em cenário apropriado. Sem API de negócio nova, endpoint alterado ou preenchimento presumido. Históricos legados podem continuar sem campos; reteste autenticado e deploy observado necessários. Automação adiada e outros motores preservados.
+
+## 03/11/2026 — varredura das guardas de todos os slides SP
+
+Usuário pediu corrigir outros bloqueios semelhantes ao39. Main limpa57d70ad, origin único0/0 após fetch; Codex/Codex Test/Windows. Separadas validações de estoque total e classificação nos detalhamentos, preservando padrões/segmentos/MCMV quando usados e médias/categorias gerais conferidas. Tabela51 exige apenas recortes pertinentes. Avisos na página e checklist/JSON. [Matriz/evidências](../../features/relatorios-institucionais/sp/REVISAO_GUARDAS_DIMENSIONAIS_2026-11-03.md):251testes, tipos/lint/build e Edge dirigido aprovados, três capturas inspecionadas. Fontes simuladas, sem API GeoBrain real. Releituras da mesma fonte e outros motores preservados; reteste autenticado/deploy/homologação pendentes. Automação adiada não implementada.
+
+## 03/11/2026 — correção da guarda dimensional no ranking de bairros
+
+Main limpa8ebc9d9, origin único0/0 após fetch, Codex/Codex Test/Windows. Retorno do usuário comprova38.658vendas nas duas fontes e diferenças somente por padrão, sem mensagem de divergência mensal. Slide39 passa a exigir total trimestral e meses iguais; margens por padrão divergentes ficam em aviso e motivo do checklist/JSON, sem modificar cálculos de outros slides.244testes SP, tipos/build/lint e navegador dirigido aprovados com fontes simuladas; captura do aviso inspecionada. Nenhuma API de negócio autenticada nova. Causa cadastral não confirmada, reteste/deploy/homologação pendentes. Automação geral adiada preservada.
+
+## 03/11/2026 — diagnóstico dos valores divergentes no ranking
+
+Main limpa3315ba6, origin único0/0 após fetch; Codex/Codex Test, Windows. Usuário mostrou bloqueio de reconciliação após a guarda cadastral. Diagnóstico discrimina total trimestral, meses e padrões, soma dos históricos, municipal e diferença assinada; mesmas guardas e fórmulas. 32 testes dirigidos, tipos e lint aprovados. Sem API autenticada ou navegador real; causa numérica ainda depende dos valores do reteste. Não alterar automação adiada nem liberar ranking inconsistente.
+
+## 03/11/2026 — correção do bloqueio excessivo de bairro com vendas zero
+
+Usuário enviou histórico33693: bairro vazio e0vendas identificadas emabr/mai/jun2026. Exigência de bairro antes dos movimentos corrigida: dispensar apenas com todos os zeros/cobertura por tipologia comprovados, preservando confronto municipal. Regra geral sem IDs especiais; fluxo de automação adiado permanece intacto. Main limpaa645034/origin único0/0, Codex/Codex Test/Windows.240 testes SP, tipos/lint/build e navegador dirigido aprovados; prova mínima/proveniência versionadas. Fonte real fornecida pelo usuário, sem nova API autenticada pelo agente. Retestar coleção integral para verificar outros bloqueios; não declarar cadastro/API corrigidos ou aceite do relatório. Evidências e método na feature.
+
+## 03/11/2026 — ranking de bairros, diagnóstico por registro
+
+Após o usuário adiar a automação, novo print mostrou bloqueio de validação do39. Ajuste pontual informa ID/campo ou competências faltantes, mantendo ranking bloqueado diante de fonte incompleta. Base limpafb7fa91 atualizada por ff-only paraf5d4ba6, incorporando dois commits de grafia Finoti de Estimativas, preservados.14 testes dirigidos aprovados; evidências na feature. Nenhuma API de negócio real ou mudança de automação. Próximo identificar o registro/campo com a nova mensagem e confrontar a fonte; não afirmar o dado ausente corrigido.
+
 ## 03/11/2026 — SP em qualquer período selecionado
 
 Usuário relatou três falhas históricas no2T2026 e pediu Ano/Trimestre separados, inclusive2027. Base limpa9b5d641 atualizada por ff-only atéfec9b74 com cinco commits de Estimativas, preservados. Codex/Codex Test, Windows/PowerShell, origin único0/0. Campos separados, padrão no último trimestre concluído, calendárioSãoPaulo e descarte de resultados ao mudar período. Transporte histórico anual/paginado, janela derivada dos comparativos e estoque de abertura separado dos fluxos; erros seguros/Retry-After preservados.221 testes SP+359 regressões, tipos/lint/build e navegador dirigido aprovados; detalhes emEVIDENCIAS. Sem API real: causa do erro original não confirmada e sessão Computer Use não iniciou. Próximo reteste autenticado do2T2026; exportação/metodologia/editorial/índices futuros/deploy observado continuam pendentes. Sem alteração em motores paralelos ou Monday.

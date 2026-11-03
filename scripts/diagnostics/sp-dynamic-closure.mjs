@@ -55,6 +55,18 @@ try {
           return recorded[metric][month]?.[i] ?? (metric === 'stock' ? 1000+i*50 : 100+i*5+Number(month.slice(5)));
         };
         const rows = spGranularFixture(recorded.groups,values,`2026-${closing}`);
+        if(detailsCase==='historical-fields')for(const building of rows){
+          for(const row of building.typologies_history){row.pattern=building.standard;row.estagio_empreendimento='Pronto';row.building_status='Ativo';}
+          building.standard='Alto';
+        }
+        if (detailsCase === 'pattern-shift') for (const row of rows) {
+          if (row.standard === 'Alto') row.standard = 'Compacto';
+          else if (row.standard === 'Compacto') row.standard = 'Alto';
+        }
+        if (detailsCase === 'mcmv-shift') for (const row of rows) {
+          if (row.standard === 'Econômico') row.standard = 'Compacto';
+          else if (row.standard === 'Compacto') row.standard = 'Econômico';
+        }
         if (detailsCase === 'gap') rows[0].typologies_history = rows[0].typologies_history.filter(row => row.period !== '2024-09-01');
         if (detailsCase === 'missing-area') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).private_area = null;
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
@@ -177,6 +189,7 @@ try {
         for (const slide of (quick?[13,18,23,26,32,39,40,46,47,50,51,53,61,63,67,69,73,76,78,80,82,85]:Array.from({length:85},(_,i)=>i+1))) {
           await openSlide(slide);
           if (slide === 39) await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
+          if (slide === 39) assert.match(await page.getByRole('article').innerText(),/vendas zero comprovadas/);
           if (slide === 39) assert.equal(neighborhoodCalls, width === 1440 ? dark ? 2 : 1 : dark ? 4 : 3);
           if (slide >= 51 && slide <=80) await page.getByText(/Históricos de áreas e preços processados/).waitFor();
           await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
@@ -262,6 +275,43 @@ try {
   slowStock = false;
   await page.getByRole('button', { name: 'Conferir oferta histórica', exact: true }).click();
   await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  detailsCase = 'pattern-shift';
+  await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  await openSlide(39);
+  await page.getByText('Vendas por bairro disponíveis com ressalva de classificação', {exact:true}).waitFor();
+  assert.doesNotMatch(await page.getByRole('article').innerText(), /Ranking de bairros em conferência|meses e padrões reconciliados/);
+  await captureSlide({path:resolve(output,'neighborhood-pattern-warning.png')});
+  await page.getByText('Vendas por bairro disponíveis com ressalva de classificação', {exact:true}).scrollIntoViewIfNeeded();
+  await page.screenshot({path:resolve(output,'neighborhood-pattern-warning-panel.png')});
+  await page.getByText('Detalhamentos com ressalvas de classificação', {exact:true}).waitFor();
+  for(const slide of [51,53,54,55,56,57,58,59,63,64,66,67,68,72,73,74,75,76,79,80]){
+    await openSlide(slide);
+    assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em conferência|Áreas e preços em conferência|Localizações em conferência/);
+  }
+  for(const slide of [69,70,71,77,78]){
+    await openSlide(slide);
+    assert.match(await page.getByRole('article').innerText(), /Dados em conferência|Classificação por padrão em conferência/);
+  }
+  await openSlide(53);await captureSlide({path:resolve(output,'dimensions-general-price-available.png')});
+  await openSlide(70);await captureSlide({path:resolve(output,'dimensions-pattern-map-blocked.png')});
+  detailsCase='mcmv-shift';
+  await page.getByRole('button', {name:'Conferir dados reais',exact:true}).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  await openSlide(63);await page.getByText('Detalhamentos com ressalvas de classificação',{exact:true}).waitFor();
+  assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em conferência/);
+  assert.match(await page.getByRole('article').innerText(), /MCMV: —/);
+  await captureSlide({path:resolve(output,'dimensions-bedroom-mcmv-partial.png')});
+  await openSlide(55);assert.match(await page.getByRole('article').innerText(), /Áreas e preços em conferência/);
+  detailsCase='historical-fields';
+  await page.getByRole('button', {name:'Conferir dados reais',exact:true}).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  await openSlide(64);await page.getByText(/Históricos de áreas e preços processados/).waitFor();
+  assert.doesNotMatch(await page.getByRole('article').innerText(), /MCMV: —|MAP: —|Dados em conferência/);
+  await captureSlide({path:resolve(output,'historical-fields-64-mcmv.png')});
+  await openSlide(76);assert.doesNotMatch(await page.getByRole('article').innerText(), /Ativo\/Esgotado|Falta estágio|Dados em conferência/);
+  await captureSlide({path:resolve(output,'historical-fields-76-stage.png')});
+  detailsCase = 'normal';
   negativeSales = true;
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
@@ -330,7 +380,7 @@ try {
   await yearPage.getByRole('combobox',{name:'Trimestre do estudo'}).click();assert.equal(await yearPage.getByRole('option').count(),1);await yearPage.keyboard.press('Escape');
   await yearPage.getByRole('region',{name:'Seleção do estudo'}).screenshot({path:resolve(output,'year-2027.png')});await yearContext.close();
   assert.deepEqual(errors, []);
-  const result = { results, reducedMatrix:quick, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, mapboxResponses: {total:mapboxResponses.length,success:mapboxResponses.filter(status=>status===200).length}, originalSlidesCovered:quick?22:85, mapSlowAndProviderError:true, practicalChecklistAndExplicitDetails:true, periodsTested, year2027Verified:true, historical429AndRetry:true, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
+  const result = { results, reducedMatrix:quick, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, mapboxResponses: {total:mapboxResponses.length,success:mapboxResponses.filter(status=>status===200).length}, originalSlidesCovered:quick?22:85, mapSlowAndProviderError:true, practicalChecklistAndExplicitDetails:true, periodsTested, year2027Verified:true, historical429AndRetry:true, unlocatedZeroSalesVerified:true, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
   await writeFile(resolve(output, 'result.json'), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 } finally {

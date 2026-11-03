@@ -9,5 +9,7 @@ export function spGranularFixture(groups, values, throughMonth) {
     buildings.push({...base,building_id:i+1,release_date:'2020-01-01',typologies_history:months.flatMap(month=>rows(month,values('stock',month,i),values('sales',month,i),[100000,100000,100000,100000]))});
     current.forEach((month,index)=>buildings.push({...base,building_id:100+i*3+index,release_date:`${month}-01`,typologies_history:months.filter(value=>value>=month).flatMap(value=>rows(value,0,0,split(values('releases',month,i))))}));
   });
+  // Synthetic zero-flow project without neighborhood, proving the rule is not tied to an ID or current status.
+  buildings.push({building_id:900000,city:'São Paulo',state:'SP',building_type:'Vertical',standard:'Econômico',release_date:'2020-01-01',neighborhood:'',typologies_history:months.map(month=>({typology_id:900000,period:`${month}-01`,sold_in_period:0,typology_stock:0,qty:0,sold:0,number_bedroom:2,private_area:45,price:0,price_private_area:0}))});
   return buildings;
 }

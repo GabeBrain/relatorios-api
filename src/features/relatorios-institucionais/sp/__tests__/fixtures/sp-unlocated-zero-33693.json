@@ -1,0 +1,32 @@
+{
+  "provenance": {
+    "source": "Resposta individual fornecida pelo usuario em 2026-11-03; derivacao minima, sem nova consulta autenticada.",
+    "sha256": "59eeb323b9631f1ca93c067fc8910a737ba18eb21b0d04794c3977cadeb2a499"
+  },
+  "building": {
+    "building_id": 33693,
+    "release_date": "2018-09-01",
+    "building_type": "Vertical",
+    "neighborhood": "",
+    "city": "S\u00e3o Paulo",
+    "state": "SP",
+    "standard": "Econ\u00f4mico",
+    "typologies_history": [
+      {
+        "typology_id": 42611,
+        "period": "2026-04-01",
+        "sold_in_period": 0
+      },
+      {
+        "typology_id": 42611,
+        "period": "2026-05-01",
+        "sold_in_period": 0
+      },
+      {
+        "typology_id": 42611,
+        "period": "2026-06-01",
+        "sold_in_period": 0
+      }
+    ]
+  }
+}

@@ -392,6 +392,54 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Etapas/pendências:** implementar somente após ativação do plano; sincronização com alterações paralelas depende de autorização. Testar natividade/valores no XML e XLSX embutidos, PDF preservado e edição/salvamento reais com Gabriel/Finoti antes de declarar o novo formato aceito. Push não autorizado nesta solicitação de planejamento.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência apenas.
 
+### 2026-11-03 — SP: campos históricos e diagnóstico dos registros pendentes — Codex
+
+- **Ambiente/funcionalidade:** SP Institucional, detalhamentos/39 e checklistJSON.
+- **Origem:** checklist real2T2026 com59disponíveis/9parciais/9bloqueados/8referências e print64semMCMV/MAP. Não atribuir todas as lacunas à API por esse resumo.
+- **Correção:** preferir pattern da observação mensal ao cadastro atual; estágio dedicado estagio_empreendimento antes do legado reconhecido. Ativo/Esgotado não são estágios. Mensagens identificam ID/tipologia/competência; JSON inclui contagem e até5exemplos de lacunas/valores inválidos por competência. Padrão misto no mesmo projeto não vira cor única presumida nos mapas70/71. Sem alteração de endpoint/credencial, zero inventado ou automação.
+- **Validação:**258testes SP/22arquivos, tipos/lint/build e Edge dirigido aprovados; duas capturas inspecionadas.64MCMV/MAP e76estágio preenchidos com campos mensais corretos em fonte simulada. Zero GeoBrain real,48Mapbox200. [Evidências e limites](../features/relatorios-institucionais/sp/EVIDENCIAS.md). Implementação: `9f092ff`.
+- **Etapas/Pendências:** retestar fonte real e baixar novoJSON para verificar campos disponíveis e IDs restantes. O histórico33693 recebido antes não tem os campos dedicados; isso permanece suportado e não comprova resolução de todas as diferenças. Deploy observado/homologação pendentes; outros motores preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
+### 2026-11-03 — SP: varredura de guardas por dimensão nos85 slides — Codex
+
+- **Ambiente/funcionalidade:** SP Institucional, detalhamentos de área/preços/estoque/mapas e checklist.
+- **Causa/mudança:** igualdade por padrão embutida na validação comum de estoque bloqueava visões gerais. Separadas conferências de total, padrão, segmento e Econômico/MCMV; preservar médias gerais/categorias comprovadas e bloquear só os recortes dependentes. Tabela51 não exige outros padrões ou estoque intermediário classificado que não apresenta. Avisos por competência na página e motivo do checklist/JSON. Snapshot da mesma fonte, identidade/cobertura, valores, preços/área/capacidade e totais permanecem protegidos.
+- **Validação:**251 testes SP/21arquivos, tipos/lint/build e Edge dirigido22posições mais cenários de troca de padrão/MCMV aprovados; três capturas inspecionadas. Fontes simuladas, zero GeoBrain real,48Mapbox200. [Matriz de todos os slides e limites](../features/relatorios-institucionais/sp/REVISAO_GUARDAS_DIMENSIONAIS_2026-11-03.md). Implementação: `7bf10c2`.
+- **Etapas/Pendências:** bloqueios indevidos corrigidos localmente; reteste autenticado, deploy observado, classificação da origem e homologação permanecem pendentes. Outros motores e automação adiada preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
+### 2026-11-03 — SP: ranking de bairros com ressalva de padrão — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, slide39 e checklist de conferência.
+- **Evidência/causa:** retorno do usuário soma38.658 nas duas fontes, com diferenças só nos sete padrões; causa da classificação ainda não comprovada. Guarda do ranking era excessiva ao exigir igualdade numa dimensão que não usa.
+- **Regra:** total trimestral e cada mês permanecem impeditivos; diferenças apenas por padrão viram aviso com valores completos na página e motivo do checklist/JSON. Mesmas validações de histórico, identidade, cobertura e bairro. Outros slides conservam suas guardas; sem rateio ou alteração de fonte. Implementação: `d077ffc`.
+- **Validação:**244 testes SP, tipos/build/lint e navegador Edge dirigido22posições aprovados; cenário de padrões diferentes mantém ranking visível e aviso. Imagem inspecionada; fontes simuladas, zero chamadas GeoBrain reais. [Evidências](../features/relatorios-institucionais/sp/EVIDENCIAS.md).
+- **Etapas/Pendências:** correção preparada para reteste autenticado. Classificação da fonte, deploy observado e homologação continuam pendentes; automação adiada preservada.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
+### 2026-11-03 — SP: valores divergentes na reconciliação de bairros — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, ranking de vendas do slide39.
+- **Mudança:** mensagem discrimina total trimestral, cada mês e cada padrão divergente; mostra soma dos empreendimentos, total municipal e diferença assinada. Guardas e fórmulas preservadas. Não é cruzamento mês/padrão nem inferência de distratos. Implementação: `198e8b8`.
+- **Evidência:** print mostra bloqueio após validação cadastral, sem números para determinar causa; 32 testes dirigidos, tipos e lint aprovados. Sem API autenticada ou observação da nova mensagem em produção. [Detalhes](../features/relatorios-institucionais/sp/EVIDENCIAS.md).
+- **Etapas/Pendências:** diagnóstico preparado; reteste para identificar valores e confrontar fontes permanece necessário. Automação adiada e outros motores preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
+### 2026-11-03 — SP: bairro dispensável quando vendas zero estão comprovadas — Codex
+
+- **Origem/causa:** usuário forneceu histórico33693 com bairro vazio e0vendas emabr/mai/jun2026, tipologia42611 identificada. Bloqueio do39 era excessivo: exigia bairro antes de examinar o movimento. Codex/Codex Test, Windows/PowerShell; main limpaa645034, origin único0/0 após fetch. Implementação no commit `0d60ad1`.
+- **Regra:** validar históricos/IDs/conflitos/valores e cobertura mensal por tipologia; sem bairro, permitir somente cada venda explicitamente0. Qualquer positivo/negativo, inclusive soma0, mantém exigência de bairro. Sem inferência por status atual/estoque/acumulado e sem exceção porID. Totais municipais, mensais e por padrão preservados; nota no slide informa quantidade de cadastros com zero comprovado. Não preenche bairro na API nem altera automação adiada.
+- **Validação:**240 testes SP/20arquivos, tipos/build/lint aprovados; navegador dirigido22posições, quatro períodos/2027 e estados de falha/recuperação, projeto sem bairro/zero observado e imagem39 inspecionada. Dados de mercado do teste são simulados, salvo a prova individual fornecida pelo usuário; zero API GeoBrain pelo agente, Mapbox27HTTP200. [Método](../features/relatorios-institucionais/sp/DECISOES.md), [evidência](../features/relatorios-institucionais/sp/EVIDENCIAS.md).
+- **Pendências:** reteste da coleção completa; outros registros com bairro ausente e movimento ou histórico incompleto continuam bloqueando. Cadastro do provedor, método/editorial, deploy observado e exportação integral não homologados. Fonte/contratos de motores paralelos preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente, sem escrita.
+
+### 2026-11-03 — SP: diagnóstico identificável do ranking de bairros — Codex
+
+- **Contexto:** usuário adiou a automação e depois enviou bloqueio de bairros. Checklist anterior mostrava49 disponíveis/8 referências/28 aguardando; novo print comprova validação impeditiva após coleta, mas não o campo exato. Base limpafb7fa91 atualizada por ff-only paraf5d4ba6 com dois commits de grafia Finoti, preservados. Codex/Codex Test, Windows/PowerShell. Implementação no commit `6a039bd`.
+- **Ajuste:** mensagem do primeiro registro impeditivo informa ID e campo (bairro/padrão/histórico/formato vazio); lacuna mensal também informa competências. Não descarta registros, não preenche zeros e não muda os cálculos/reconciliações. Automação continua adiada, sem alteração de fluxo ou motores paralelos.
+- **Evidência/pendência:**14 testes dirigidos aprovados, tipos/build/lint conferidos; [evidências](../features/relatorios-institucionais/sp/EVIDENCIAS.md). Amostra antiga confirma campos no contrato, não a coleção real. Sem nova API ou observação autenticada; aguardar ID/campo atual para confrontar a origem. Falha de dados ainda não considerada resolvida.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente, sem escrita.
 
 ### 2026-11-03 — Estimativas: grafia Finoti nos textos exibidos — Gabriel / Claude
 
@@ -736,6 +784,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ## 2. Etapas
 
 - **Panorama — PPTX editável:** plano preparado em03/11, implementação pendente; [portões e critérios](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Aceite dos dados anteriores preservado.
+**03/11 — SP, campos temporais:** leitura de padrão/estágio por fotografia e diagnóstico nominal de falhas implementados;258testes e navegador dirigido aprovados, fonte real aguarda reteste.
+
+**03/11 — SP, revisão dimensional geral:**85posições revisadas; guardas de detalhamento separadas por total, padrão, segmento e Econômico/MCMV.251testes e navegador dirigido aprovados; reteste real pendente.
+
+**03/11 — SP, dimensão bairro:** total e meses iguais permitem ranking39 com ressalva explícita de padrão; guardas das outras dimensões preservadas.
+
+**03/11 — SP, reconciliação de bairros:** diagnóstico agora discrimina valores trimestrais, mensais e por padrão; diferenças reais ainda não reconciliadas.
+
+**03/11 — SP, caso33693:** prova recebida e regra excessiva corrigida para bairro ausente com vendas0 inteiramente comprovadas. Retestar coleção integral; demais problemas de fonte permanecem impeditivos.
+
+**03/11 — SP, bairros:** diagnóstico agora identifica primeiro empreendimento/campo impedido. Ranking continua aguardando integridade da fonte; coletar a nova mensagem no acesso real antes de decidir correção de dado ou contrato. Automação segue adiada.
 
 **03/11 — SP, período geral:** Ano/Trimestre e transporte histórico por janelas validados localmente, incluindo virada2027. Próximo reteste autenticado2T2026 para confirmar motivo/recuperação no acesso real; alteração no Git não prova deploy ou homologação.
 
@@ -790,6 +849,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ## 3. Pendências
 
 - **Panorama — PPTX editável:** ativar [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md); autorizar sincronização segura da base, inventariar artes nativas e executar G0–G5. Novo formato e sua edição real ainda não implementados/verificados; publicação depende de autorização.
+- [ ] **SP — novo checklist com sourceDiagnostics:** retestar64/76 e fontes históricas após leitura temporal; identificar registros/competências ainda ausentes sem presumir zero ou causa da origem. Campos dedicados podem não existir no legado.
+
+- [ ] **SP — retestar detalhamentos após revisão dimensional:** conferir fontes reais em51/53–59/61–64/66–80, distinguir classificação divergente de falta de histórico/preço/área e registrar o novo checklist. Não assumir que todos os85 slides têm fonte real completa.
+
+- [ ] **SP — retestar ranking39 com ressalva:** confirmar no acesso real o ranking por bairro após correção dimensional; investigar classificação dos padrões com a origem, sem assumir causa.
+
+- [x] **SP — obter valores da divergência de bairros:** usuário trouxe as sete diferenças por padrão, total38.658 igual e nenhuma divergência mensal indicada; correção dimensional com ressalva implementada. Causa da classificação ainda não confirmada.
+
+- [ ] **SP — reteste39 após zero comprovado:** gerar/conferir novamente com a coleção real; verificar igualdade municipal e qualquer novo ID/campo. O cadastro33693 segue sem bairro na origem, mas seu0observado não exige localização no2T2026.
+
+- [x] **SP — ranking39:** obter ID/campo ou competências do novo aviso e confrontar resposta da API. Não ignorar empreendimentos ou assumir zero para publicar Top10 parcial.
 
 - [ ] **SP — incidente2T2026:** atualizar a página, autenticar e retestar Ano2026/2º trimestre; se falhar, registrar mensagem segura/janela e checklist. Causa original ainda semHTTP real. Conferir períodos/INCC disponíveis, deploy e aceite; não preencher ausência com zero.
 

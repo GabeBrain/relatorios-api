@@ -13,6 +13,19 @@ import { fetchSpBuildingRecords } from './projects';
 const input = () => syntheticVglInput();
 const baseline = () => buildSpTemporalPreview(input(), '3T2026');
 describe('SP — terceiro lote original39–44/46–48/50', () => {
+  it.each([
+    ['neighborhood','','bairro ausente'],
+    ['standard','Desconhecido','padrão ausente'],
+    ['typologies_history',null,'históricos por tipologia ausentes'],
+    ['typologies_history',[],'históricos por tipologia sem registros'],
+  ])('identifica o primeiro empreendimento impedido pelo campo%s', (field,value,message)=>{
+    const report=baseline(),buildings:Record<string,unknown>[]=syntheticSalesBuildings();
+    buildings[0][field as string]=value;
+    const result=buildSpSalesNeighborhoods(buildings,report);
+    expect(result.status).toBe('blocked');
+    expect(result.issues[0]).toContain('Empreendimento 1:');expect(result.issues[0]).toContain(message);
+    expect(result.rows).toEqual([]);expect(result.cityTotal).toBeNull();
+  });
   it('oferta usa a fotografia do fechamento, sem somar estoques dos meses', () => {
     const report = baseline(), result = buildSpStockSeries(syntheticStockSeries(), report);
     expect(result.status).toBe('ready'); expect(result.quarterly!.at(-1)).toMatchObject({ value: report.metrics.stock, partial: true });
