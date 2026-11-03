@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — SP: identificação do78 e casos prontos para validação da fonte — Codex
+
+- **Ambiente/funcionalidade:** SP Institucional, VGV por padrão/checklist e diagnóstico de estoque.
+- **Origem/evidência:** usuário trouxe checklist apósv2 com68disponíveis/7parciais/2bloqueados/8referências e pediu ação. Resposta v2 já fornecida revela87999/jun2026 com sold−9/−11/−6 e diferença de capacidade10/11/6 igual a distractions. Não concluir causa sem contrato. [Casos e perguntas para encaminhamento humano](../features/relatorios-institucionais/sp/PENDENCIAS_FONTE_2T2026_2026-11-03.md).
+- **Mudança:** diagnóstico78 informa IDs/campos/valores/deltas e inclui ocorrências no resumoJSON. Estoque e vendido negativos são preservados como valores no diagnóstico, explicitamente rejeitados para cálculos que não os aceitam. Mesma identidade de capacidade e fórmulas; sem rateio, zero presumido, API alterada ou mensagem enviada.
+- **Validação:**267testesSP/23arquivos, tipos/lint/build e Edge dirigido22posições mais caso78/mapa79 aprovados; captura inspecionada. Prova mínima de campos reais, demais dados de teste simulados; zero consultas de negócio novas,54Mapbox200. Commit técnico registrado no fechamento.
+- **Etapas/Pendências:** material para validar estoques/lacuna e semântica de qty/sold/distratos pronto; desbloqueio real depende de contrato/dados confirmados e novo ensaio. Outros motores, automação adiada e Monday preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
 ### 2026-11-03 — SP: coleta detalhada integrada à API v2 — Codex
 
 - **Ambiente/funcionalidade:** SP Institucional, fonte compartilhada dos históricos detalhados.
@@ -785,6 +794,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**03/11 — SP, pós-v2:** checklist real confirma68disponíveis/7parciais/2bloqueados/8referências. Casos de fonte/contrato identificados e material de encaminhamento pronto; diagnóstico78 refinado e267testes aprovados.
+
 **03/11 — SP, fonte detalhada v2:** contrato da página1 observado pelo usuário, transporte adaptado/testado e preflight público confirmado. Coleta integral autenticada no site e paridade real ainda pendentes.
 
 **03/11 — SP, campos temporais:** leitura de padrão/estágio por fotografia e diagnóstico nominal de falhas implementados;258testes e navegador dirigido aprovados, fonte real aguarda reteste.
@@ -850,6 +861,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — validar contrato e casos da fonte:** esclarecer estoque−1 do26686, jun2023 ausente do64094 e sold/qty/distratos do87999. Material local pronto, sem envio externo. Não alterar identidade ou fabricar dados antes da confirmação; não declarar relatório homologado.
 
 - [ ] **SP — validar v2 integral no site:** atualizar históricos, baixarJSON e comparar26686/64094/9498 e recortesMCMV/padrão/estágio. Postman página1 e OPTIONS204 não substituem esse ensaio.
 - [ ] **SP — avaliar equivalentes municipais v2:** mapear contratos/rotas e paridade dos totais antes de propor migração das séries municipais; endpoint de histórico individual não é substituto direto.

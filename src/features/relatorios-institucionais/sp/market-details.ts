@@ -77,11 +77,22 @@ export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<stri
   if(mixed)result.classificationIssues.mapPatterns=`Empreendimento ${mixed[0]}: tipologias com padrões diferentes na mesma competência. O mapa por padrão aguarda representação por tipologia; nenhum padrão único foi presumido.`;
   for(const [id,list] of byProject){const p=price(list),building=meta.get(id)!;const stock=list.reduce((s,r)=>s+r.stock!,0),lat=number(building.latitude),lon=number(building.longitude);const geographic=Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-34&&lat<=6&&lon>=-74&&lon<=-34;result.projects.push({id,name:String(building.name??`Empreendimento ${id}`),standard:list[0].standard,latitude:geographic?lat:null,longitude:geographic?lon:null,stock,meter:p.meter,ticket:p.ticket,vgv:p.ticket===null?null:p.ticket*stock});}
   if(result.projects.every(project=>project.ticket!==null))result.priceBandShare=share(result.projects.filter(project=>project.ticket!>=400000&&project.ticket!<=500000).reduce((s,p)=>s+p.stock,0));
-  const safeCapacity=rows.every(row=>row.qty!==null&&row.sold!==null&&row.qty===row.sold+row.stock!&&Number.isSafeInteger(row.qty)&&row.qty>=0&&row.sold>=0&&(row.qty===0||row.price!==null&&row.price>0));
+  const capacityIssues=rows.flatMap(row=>{
+    const label=`Empreendimento ${row.project}, tipologia ${row.typology??'não informada'}, competência ${row.month}`;
+    const issues:string[]=[];
+    if(row.qty===null||!Number.isSafeInteger(row.qty)||row.qty<0)issues.push('capacidade qty ausente ou inválida');
+    if(row.sold===null||!Number.isSafeInteger(row.sold)||row.sold<0)issues.push(`vendido acumulado sold ${row.sold===null?'ausente ou inválido':`negativo (${row.sold})`}`);
+    if(row.qty!==null&&row.sold!==null&&row.stock!==null&&row.qty!==row.sold+row.stock)issues.push(`qty ${row.qty} ≠ sold ${row.sold} + estoque ${row.stock} (diferença ${row.qty-row.sold-row.stock})`);
+    if(row.qty!==null&&row.qty>0&&(row.price===null||row.price<=0))issues.push('preço price ausente ou inválido para capacidade positiva');
+    return issues.length?[`${label}: ${issues.join('; ')}.`]:[];
+  });
+  const safeCapacity=!capacityIssues.length;
+  if(capacityIssues.length)result.vgv.issues=capacityIssues;
   if(safeCapacity){
     const aggregate=(label:string,list:SpObservation[]):SpVgvRow=>({label,qty:list.reduce((s,r)=>s+r.qty!,0),sold:list.reduce((s,r)=>s+r.sold!,0),stock:list.reduce((s,r)=>s+r.stock!,0),ticket:price(list).ticket,offeredVgv:list.reduce((s,r)=>s+r.qty!*(r.price??0),0),soldVgv:list.reduce((s,r)=>s+r.sold!*(r.price??0),0),stockVgv:list.reduce((s,r)=>s+r.stock!*(r.price??0),0)});
     const entries=SP_MARKET_STANDARDS.map(label=>aggregate(label,rows.filter(row=>row.standard===label))), sum=aggregate('Total residenciais',rows);
     if([sum,...entries].every(row=>[row.qty,row.sold,row.stock].every(Number.isSafeInteger)&&[row.offeredVgv,row.soldVgv,row.stockVgv].every(value=>value!==null&&Number.isFinite(value)&&value<=Number.MAX_SAFE_INTEGER/100)))result.vgv={ready:true,issues:[],rows:entries,total:sum};
+    else result.vgv.issues=['As somas de capacidade ou VGV excedem a precisão numérica segura.'];
   }
   return result;
 }

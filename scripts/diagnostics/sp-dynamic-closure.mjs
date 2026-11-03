@@ -74,6 +74,7 @@ try {
         }
         if (detailsCase === 'gap') rows[0].typologies_history = rows[0].typologies_history.filter(row => row.period !== '2024-09-01');
         if (detailsCase === 'missing-area') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).private_area = null;
+        if (detailsCase === 'capacity-diagnostic') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).sold = -9;
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
       }
       calls++;
@@ -324,6 +325,14 @@ try {
   assert.match(await page.getByRole('alert').filter({hasText:'Vendas por bairro indisponíveis'}).innerText(),/API v2 não autorizou/);
   assert.equal(await page.getByRole('region',{name:'Prévia do estudo'}).count(),1);
   await page.getByRole('alert').filter({hasText:'Vendas por bairro indisponíveis'}).screenshot({path:resolve(output,'v2-denied-details.png')});
+  detailsCase='capacity-diagnostic';
+  await page.getByRole('button',{name:'Conferir dados reais',exact:true}).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  await openSlide(78);await page.getByText(/Históricos de áreas e preços processados/).waitFor();
+  assert.match(await page.getByRole('article').innerText(),/Empreendimento 1, tipologia 1/);
+  assert.match(await page.getByRole('article').innerText(),/sold negativo \(-9\)/);
+  await captureSlide({path:resolve(output,'vgv-78-capacity-diagnostic.png')});
+  await openSlide(79);assert.doesNotMatch(await page.getByRole('article').innerText(),/Dados em conferência|Localizações em conferência/);
   detailsCase = 'normal';
   negativeSales = true;
   await page.setViewportSize({ width: 1440, height: 1000 });

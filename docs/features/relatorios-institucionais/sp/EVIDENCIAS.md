@@ -1,5 +1,12 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 03/11/2026 — slide78 identificado em resposta real e material de validação da fonte
+
+- **Evidência:** checklist apósv2 contém68disponíveis/7parciais/2bloqueados/8referências. Fonte v2 já fornecida demonstra87999/jun2026, tipologias150368/150369/150370, qty120/120/96, sold−9/−11/−6, estoque119/120/96. Deltas10/11/6 coincidem com distractions10/11/6; isso não comprova causa. [Resumo e perguntas prontas](PENDENCIAS_FONTE_2T2026_2026-11-03.md). Nenhuma nova chamada autenticada ou mensagem externa.
+- **Correção:** diagnóstico78 agora nominal e numérico, inclusive no JSON; negativos preservados para diagnóstico e rejeitados explicitamente para cálculo. Guarda e fórmulas mantidas. Prova mínima/proveniência versionada, sem nomes/contatos/payload bruto.
+- **Validação:**267testes SP/23arquivos, tipos/lint/build aprovados. Três regressões novas verificam os casos reais isolados (demais preços/denominador são sintéticos), propagação para checklist/JSON e estoque−1 sem conversão/descarte. Edge1440/claro dirigido22posições mais caso78: mensagem comID/negativo e mapa79 preservado; captura inspecionada. Demais cenários de erro/vazio, períodos/2027, cancelamento/retry e fontev2 mantidos; zero erros de página, zero chamadas de negócio reais,54Mapbox200. Logs `.local-inputs/sp-vgv-diagnostics-*`, ignorados.
+- **Estado:** diagnóstico implementado, sem declarar desbloqueio real do78 ou demais fontes corrigidas. Validar semântica de qty/sold e distratos com responsável; não produzir vendido acumulado por diferença sem contrato. Prontuário local pronto para encaminhamento humano, sem tocar Monday.
+
 ## 03/11/2026 — rota v2 confirmada pelo usuário e integrada aos detalhamentos
 
 - **Fonte fornecida:** resposta da página1 do Postman,100registros/5.229totais/53páginas,1.458históricos com pattern e estágio preenchidos; sem estoque nulo/negativo nesta página. Há padrãoFuturo antes da data de lançamento, sem ocorrências observadas em/apos lançamento na amostra. Campos internos/pessoais do payload não foram copiados ao Git. SHA256 do arquivo bruto fornecido: `a52a81d25d36aa6621dd5ad23df615e41de023fe8b04b0ad07f39bb470da5635`. IDs26686/64094/9498 não presentes, logo sem prova de resolução individual.

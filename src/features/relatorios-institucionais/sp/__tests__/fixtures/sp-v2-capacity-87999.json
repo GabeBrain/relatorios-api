@@ -1,0 +1,14 @@
+{
+  "provenance": {
+    "source": "Resposta da pagina 1 da API v2 fornecida pelo usuario em 03/11/2026; somente campos minimos de tres tipologias em junho/2026",
+    "sha256": "a52a81d25d36aa6621dd5ad23df615e41de023fe8b04b0ad07f39bb470da5635",
+    "notMunicipalBaseline": true
+  },
+  "building_id": 87999,
+  "period": "2026-06-01",
+  "rows": [
+    { "typology_id": 150368, "qty": 120, "sold": -9, "typology_stock": 119 },
+    { "typology_id": 150369, "qty": 120, "sold": -11, "typology_stock": 120 },
+    { "typology_id": 150370, "qty": 96, "sold": -6, "typology_stock": 96 }
+  ]
+}

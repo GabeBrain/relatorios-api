@@ -1,5 +1,11 @@
 # Decisões e pontos abertos — SP
 
+## 03/11/2026 — diagnóstico de capacidade/VGV e preservação de valores negativos
+
+Checklist real após v2:68disponíveis/7parciais/2bloqueados/8referências. Revisão do78 confirma que a tabela usa capacidade, vendido acumulado e oferta, portanto conserva a guarda adotada qty=sold+estoque e a exigência de valores válidos. Agora mensagem identifica empreendimento/tipologia/mês, campos ausentes/negativos, diferença da identidade e falta de preço; somas inseguras têm motivo distinto. Ocorrências do fechamento entram em sourceDiagnostics, com limite de exemplos preservado. Estoque e sold negativos são mantidos na observação para diagnóstico, mas continuam explicitamente rejeitados onde inválidos; nenhuma conversão para0 ou reconstrução.
+
+Resposta v2 já fornecida contém87999/jun2026 com sold negativos nas tipologias150368/150369/150370. Diferenças10/11/6 coincidem com distractions10/11/6; sold_in_period=0 e gross_sales=distractions nessas linhas. Coincidência não confirma causa: solicitar contrato de sold/qty e tratamento de distratos antes de mudar a identidade ou declarar erro na origem. [Casos e perguntas para encaminhamento humano](PENDENCIAS_FONTE_2T2026_2026-11-03.md). Nenhuma mensagem enviada ou API alterada.
+
 ## 03/11/2026 — históricos detalhados pela API v2, sem migração municipal presumida
 
 Usuário testou no Postman `POST https://app.geobrain.com.br/public-api/v2/building-with-history-internal`, rota já usada pelo Dashboard. Primeira página recebida:100empreendimentos, total5.229/53páginas;1.458históricos com pattern/estagio_empreendimento preenchidos. Nenhum dos três IDs investigados está nessa página. Contrato confirmado para iniciar a adaptação, não prova de correção dos dados antigos ou cobertura integral real.
