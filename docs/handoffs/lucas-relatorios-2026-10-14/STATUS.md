@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 03/11/2026 — campos mensais e diagnóstico após checklist real
+
+Main limpaaa48b9c, origin único0/0 após fetch; Codex/Codex Test/Windows. Usuário enviou checklist2T2026 e pediu ação, com print64parcial. SP agora prioriza pattern mensal e estágio dedicado, preserva legado apenas na ausência e não oculta explícitos inválidos. Mensagens por ID/tipologia/mês e sourceDiagnostics limitado no JSON.258testes, tipos/lint/build e navegador dirigido aprovados com fontes simuladas;64MCMV e76estágio observados em cenário apropriado. Sem API de negócio nova, endpoint alterado ou preenchimento presumido. Históricos legados podem continuar sem campos; reteste autenticado e deploy observado necessários. Automação adiada e outros motores preservados.
+
 ## 03/11/2026 — varredura das guardas de todos os slides SP
 
 Usuário pediu corrigir outros bloqueios semelhantes ao39. Main limpa57d70ad, origin único0/0 após fetch; Codex/Codex Test/Windows. Separadas validações de estoque total e classificação nos detalhamentos, preservando padrões/segmentos/MCMV quando usados e médias/categorias gerais conferidas. Tabela51 exige apenas recortes pertinentes. Avisos na página e checklist/JSON. [Matriz/evidências](../../features/relatorios-institucionais/sp/REVISAO_GUARDAS_DIMENSIONAIS_2026-11-03.md):251testes, tipos/lint/build e Edge dirigido aprovados, três capturas inspecionadas. Fontes simuladas, sem API GeoBrain real. Releituras da mesma fonte e outros motores preservados; reteste autenticado/deploy/homologação pendentes. Automação adiada não implementada.

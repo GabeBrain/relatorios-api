@@ -11,7 +11,7 @@ export interface SpMapProject { id:string; name:string; standard:string; latitud
 export interface SpStageGroup { label:string; values:Record<typeof SP_STAGES[number],number>; total:number }
 export interface SpVgvRow { label:string; qty:number; sold:number; stock:number; ticket:number|null; offeredVgv:number|null; soldVgv:number|null; stockVgv:number|null }
 export interface SpMarketDetails {
-  classificationIssues?: { patterns?: string; mcmv?: string; segments?: string };
+  classificationIssues?: { patterns?: string; mcmv?: string; segments?: string; mapPatterns?:string };
   status:'ready'|'blocked'; issues:string[]; total:number;
   prices:(SpPriceValue&{bedroom:number; mcmv:SpPriceValue; map:SpPriceValue})[];
   cohorts:SpStockRow[]; recentShare:number|null; standards:SpStockRow[]; bedrooms:SpStockRow[];
@@ -33,8 +33,8 @@ function price(rows:SpObservation[]):SpPriceValue {
   const ticket=average('price'),meter=average('meter'); return {units,ticket,meter,issues:ticket===null||meter===null?['Sem oferta ou medição completa para esta média.']:[]};
 }
 export function spMarketSlideIssue(market:SpMarketDetails|undefined,slide:number):string|undefined {
-  if(market?.status==='blocked')return market.issues[0];
-  return [69,70,71,78].includes(slide)?market?.classificationIssues?.patterns:slide===77?market?.classificationIssues?.segments:undefined;
+  if(market?.status!=='ready')return undefined;
+  return [70,71].includes(slide)?market?.classificationIssues?.patterns??market?.classificationIssues?.mapPatterns:[69,78].includes(slide)?market?.classificationIssues?.patterns:slide===77?market?.classificationIssues?.segments:undefined;
 }
 export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<string,unknown>[],report:SpPreview,problem:string|null,classificationIssues:NonNullable<SpMarketDetails['classificationIssues']>={}):SpMarketDetails {
   const total=report.metrics.stock??0, share=(value:number)=>total>0?value/total*100:null;
@@ -59,7 +59,11 @@ export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<stri
   }
   for(const key of ['launched','final'] as const){
     const field=key==='launched'?'qty':'stock';
-    if(rows.some(row=>row[field]===null||row[field]!<0||row[field]!>0&&!stage(row.stage)))continue;
+    const missing=rows.find(row=>row[field]===null||row[field]!<0||row[field]!>0&&!stage(row.stage));
+    if(missing){
+      const issue=`Empreendimento ${missing.project}, tipologia ${missing.typology??'não informada'}, competência ${missing.month}: ${missing[field]===null||missing[field]!<0?`${field==='qty'?'quantidade (qty)':'estoque (typology_stock)'} ausente ou inválido`:`estágio construtivo ausente ou não reconhecido; valor recebido ${typeof missing.stage==='string'?JSON.stringify(missing.stage.slice(0,60)):'vazio'}`}. Ativo/Esgotado não representam Planta/Construção/Pronto.`;
+      result.stages[key]={ready:false,issues:[issue],typologies:[],segments:[]};continue;
+    }
     const selected=rows.filter(row=>row[field]!>0);
     const group=(label:string,test:(row:SpObservation)=>boolean):SpStageGroup=>{const values={Planta:0,Construção:0,Pronto:0};for(const row of selected.filter(test))values[stage(row.stage)!]+=row[field]!;return {label,values,total:Object.values(values).reduce((a,b)=>a+b,0)};};
     const stageLabels=[...new Set([...labels,...selected.map(row=>bedroom(row.bedrooms))])];
@@ -69,6 +73,8 @@ export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<stri
   }
   const meta=new Map(buildings.map(building=>[String(building.building_id??building.id),building]));
   const byProject=new Map<string,SpObservation[]>();for(const row of available){const group=byProject.get(row.project)??[];group.push(row);byProject.set(row.project,group);}
+  const mixed=[...byProject].find(([,list])=>new Set(list.map(row=>row.standard)).size>1);
+  if(mixed)result.classificationIssues.mapPatterns=`Empreendimento ${mixed[0]}: tipologias com padrões diferentes na mesma competência. O mapa por padrão aguarda representação por tipologia; nenhum padrão único foi presumido.`;
   for(const [id,list] of byProject){const p=price(list),building=meta.get(id)!;const stock=list.reduce((s,r)=>s+r.stock!,0),lat=number(building.latitude),lon=number(building.longitude);const geographic=Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-34&&lat<=6&&lon>=-74&&lon<=-34;result.projects.push({id,name:String(building.name??`Empreendimento ${id}`),standard:list[0].standard,latitude:geographic?lat:null,longitude:geographic?lon:null,stock,meter:p.meter,ticket:p.ticket,vgv:p.ticket===null?null:p.ticket*stock});}
   if(result.projects.every(project=>project.ticket!==null))result.priceBandShare=share(result.projects.filter(project=>project.ticket!>=400000&&project.ticket!<=500000).reduce((s,p)=>s+p.stock,0));
   const safeCapacity=rows.every(row=>row.qty!==null&&row.sold!==null&&row.qty===row.sold+row.stock!&&Number.isSafeInteger(row.qty)&&row.qty>=0&&row.sold>=0&&(row.qty===0||row.price!==null&&row.price>0));

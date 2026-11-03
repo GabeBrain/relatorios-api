@@ -1,5 +1,15 @@
 # Decisões e pontos abertos — SP
 
+## 03/11/2026 — padrão e estágio da fotografia histórica, diagnósticos por registro
+
+Checklist real2T2026 do usuário:59 disponíveis,9 parciais,9 bloqueados e8 referências. Slide64 mostra gerais por dormitório, mas MCMV/MAP indisponíveis. Investigação encontrou SP usando sempre `building.standard`; outros consumidores do repo já reconhecem `typologies_history[].pattern`. Agora preferir padrão da observação mensal, aceitando cadastro legado apenas quando o campo mensal não foi informado. Padrão explícito desconhecido não vira padrão cadastral. Vale para detalhamentos e controle de padrão do ranking39; não altera os endpoints ou a regra municipal de MCMV.
+
+Estágio construtivo: preferir `estagio_empreendimento` da mesma fotografia. `building_status` só serve como compatibilidade quando o campo dedicado está ausente e contém estágio reconhecível. Ativo/Esgotado não representam Planta/Construção/Pronto. Não inferir por data de entrega, estoque ou tempo de venda. Esta decisão substitui a indicação anterior de usar exclusivamente `building_status` nos76/77. Se o campo dedicado está presente mas inválido, não encobrir com o legado.
+
+Ausências continuam impeditivas: mensagens identificam empreendimento, tipologia e competência para estoque/preço/estágio; lacuna histórica identifica empreendimento/mês. Checklist parcial inclui a primeira lacuna; `sourceDiagnostics` aditivo no JSON v1 resume competências, contagem de ocorrências e até5 exemplos por mês, sem histórico bruto, nomes, coordenadas ou credenciais. Não transforma nulo em zero nem reconstrói estoque por diferença. Mapas70/71 não presumem um único padrão quando tipologias do mesmo empreendimento têm padrões distintos; isso não impede tabelas agregadas que continuam corretas por tipologia.
+
+Limite: o histórico real33693 anteriormente recebido não possui `pattern` ou `estagio_empreendimento`; a compatibilidade preserva sua leitura. Não há prova de que todas as respostas reais atuais tragam esses campos ou de que isso explique todas as divergências do usuário. Reteste necessário; não migrar de endpoint silenciosamente ou declarar fonte corrigida.
+
 ## 03/11/2026 — guardas de detalhamento limitadas à dimensão utilizada
 
 Varredura solicitada pelo usuário após39 identificou igualdade por padrão na validação comum de estoque, propagada indevidamente a médias gerais, dormitórios, coortes e mapas. Separar total/integridade de padrão, segmento e Econômico/MCMV. Preservar guardas da classificação apenas no resultado dependente; médias e categorias comprovadas permanecem disponíveis. Tabela51 exige Econômico nos fluxos e estoque de abertura/final, sem vetos por outros padrões ou por classificação do estoque intermediário não apresentado. Diferenças ficam explícitas na página e no checklist/JSON; não removem conferências entre snapshots da mesma fonte. [Matriz dos85 slides, decisões e evidências](REVISAO_GUARDAS_DIMENSIONAIS_2026-11-03.md). Esta decisão substitui a exigência genérica de todos os padrões nos detalhamentos, preservando integridade, total, cobertura e guardas específicas. Automação geral continua adiada.

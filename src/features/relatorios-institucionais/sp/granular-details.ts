@@ -5,6 +5,7 @@ import { priorMonth, quarterMonths } from './temporal';
 import { shiftSpMonth } from './project-trends';
 import { SP_API_PATTERNS, SP_SEGMENT_RULE } from './segments';
 import { buildSpMarketDetails, type SpMarketDetails } from './market-details';
+import { spHistoricalPattern, spHistoricalStage } from './history-fields';
 
 export const SP_PRICE_STANDARDS = ['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto','Luxo'] as const;
 export const SP_PRICE_DETAIL_SLIDES = [51,53,54,55,56,57,58,59,61,62] as const;
@@ -20,6 +21,7 @@ export interface SpPriceValue { units: number; ticket: number | null; meter: num
 export interface SpPricePoint { label: string; month: string; value: number | null; variation: number | null; issue?: string }
 export interface SpAreaRow { label: string; openingStock: number; stock: number; launches: number; sales: number; stockShare: number | null; launchShare: number | null; salesShare: number | null; ivv: number | null }
 export interface SpGranularDetails {
+  diagnostics?: { month:string; issueCount:number; samples:string[] }[];
   warnings?: string[];
   status: 'ready' | 'blocked'; issues: string[];
   prices: { series: Record<number, SpPricePoint[]>; annualChanges: Record<number, number | null>; standards: (SpPriceValue & { group: string })[]; overall: SpPriceValue };
@@ -27,7 +29,7 @@ export interface SpGranularDetails {
   market?: SpMarketDetails;
 }
 export const blockedSpGranularDetails = (message: string): SpGranularDetails => ({ status: 'blocked', issues: [message], prices: { series: {}, annualChanges: {}, standards: [], overall: { units: 0, ticket: null, meter: null, issues: [message] } }, area: { status: 'blocked', issues: [message], rows: [], total: null } });
-export interface SpObservation { project: string; month: string; standard: string; bedrooms: number | null; area: number | null; stock: number | null; sales: number | null; qty: number | null; price: number | null; meter: number | null; release: string; sold: number | null; stage: unknown }
+export interface SpObservation { project: string; typology?:string; month: string; standard: string; bedrooms: number | null; area: number | null; stock: number | null; sales: number | null; qty: number | null; price: number | null; meter: number | null; release: string; sold: number | null; stage: unknown }
 type Observation = SpObservation;
 interface Frame { rows: Observation[]; issues: Set<string> }
 const numeric = (raw: unknown, signed = false, integer = false): number | null => {
@@ -64,8 +66,7 @@ class DetailBuilder {
     const day = String(building.release_date ?? '').slice(0,10), release = monthOf(building.release_date);
     if (normalize(building.city) !== 'sao paulo' || normalize(building.state ?? building.uf) !== 'sp' || normalize(building.building_type) !== 'vertical' || !release || !/^\d{4}-\d{2}-\d{2}$/.test(day) || !Number.isFinite(Date.parse(day)) || new Date(day).toISOString().slice(0,10) !== day) { this.issues.add('Há empreendimento sem escopo ou data de lançamento válidos.'); return; }
     if (release > this.report.throughMonth!) return;
-    const standard = String(building.standard);
-    if (!(SP_API_PATTERNS as readonly string[]).includes(standard) || !Array.isArray(building.typologies_history)) { this.issues.add('Faltam padrão reconhecido ou históricos por tipologia.'); return; }
+    if (!Array.isArray(building.typologies_history)) { this.issues.add(`Empreendimento ${id}: históricos por tipologia ausentes ou inválidos.`); return; }
     const observed = new Set<string>(), seen = new Map<string,string>();
     for (const raw of building.typologies_history) {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw)) { this.issues.add('Há registro histórico inválido.'); continue; }
@@ -73,6 +74,8 @@ class DetailBuilder {
       if (!month) { this.issues.add('Há histórico sem competência válida.'); continue; }
       const frame = this.frames.get(month);
       if (!frame || month < release) continue;
+      const standard=spHistoricalPattern(row,building);
+      if(!standard){frame.issues.add(`Empreendimento ${id}, competência ${month}: padrão histórico não reconhecido; cadastro só é usado quando pattern não foi informado.`);continue;}
       observed.add(month);
       const typology = String(row.typology_id ?? '').trim(), identity = `${month}/${typology}`, fingerprint = historyFingerprint(row);
       if (!typology) { frame.issues.add('Há tipologia sem identidade.'); continue; }
@@ -80,9 +83,9 @@ class DetailBuilder {
       seen.set(identity, fingerprint);
       const price = numeric(row.price), area = numeric(row.private_area), explicitMeter = row.price_private_area;
       const meter = area === null || area <= 0 ? null : explicitMeter === null || explicitMeter === undefined || explicitMeter === '' ? price !== null ? price / area : null : numeric(explicitMeter);
-      frame.rows.push({ project: id, month, standard, bedrooms: numeric(row.number_bedroom, false, true), area, stock: numeric(row.typology_stock, false, true), sales: numeric(row.sold_in_period, true, true), qty: numeric(row.qty, false, true), price, meter, release, sold: numeric(row.sold,false,true), stage: row.building_status });
+      frame.rows.push({ project: id, typology, month, standard, bedrooms: numeric(row.number_bedroom, false, true), area, stock: numeric(row.typology_stock, false, true), sales: numeric(row.sold_in_period, true, true), qty: numeric(row.qty, false, true), price, meter, release, sold: numeric(row.sold,false,true), stage: spHistoricalStage(row) });
     }
-    for (const [month, frame] of this.frames) if (month >= release && !observed.has(month)) frame.issues.add('Há empreendimento sem fotografia na competência necessária.');
+    for (const [month, frame] of this.frames) if (month >= release && !observed.has(month)) frame.issues.add(`Empreendimento ${id}: sem fotografia na competência necessária ${month}. Ausência não representa estoque zero.`);
   }
   validate(month: string): string | null {
     if (this.validations.has(month)) return this.validations.get(month)!;
@@ -92,7 +95,8 @@ class DetailBuilder {
     if (this.issues.size) return [...this.issues][0];
     const frame = this.frames.get(month)!;
     if (frame.issues.size) return [...frame.issues][0];
-    if (frame.rows.some(row => row.stock === null)) return 'Há estoque ausente ou inválido na fotografia.';
+    const missingStock=frame.rows.find(row => row.stock === null);
+    if (missingStock) return `Empreendimento ${missingStock.project}, tipologia ${missingStock.typology}, competência ${month}: estoque ausente ou inválido em typology_stock.`;
     const expected = this.expected(month);
     if (expected.length !== SP_API_PATTERNS.length) return 'A série municipal de oferta não comprovou esta competência.';
     const actual = frame.rows.reduce((sum,row)=>sum+row.stock!,0), total = expected.reduce((sum,row)=>sum+row.value,0);
@@ -118,7 +122,9 @@ class DetailBuilder {
       return Number.isFinite(total) && total <= Number.MAX_SAFE_INTEGER / 100 ? total / units : null;
     };
     const ticket = weighted('price'), meter = weighted('meter');
-    return { units, ticket, meter, issues: !units ? ['Sem unidades em oferta para calcular o preço.'] : ticket === null || meter === null ? ['Há oferta sem preço ou área privativa válidos para esta média.'] : [] };
+    const missing=rows.find(row=>ticket===null&&(row.price===null||row.price<=0)||meter===null&&(row.meter===null||row.meter<=0));
+    const detail=missing?`Empreendimento ${missing.project}, tipologia ${missing.typology}, competência ${month}: ${ticket===null&&(missing.price===null||missing.price<=0)?'preço ausente ou inválido em price':'preço por m² ou área privativa ausentes ou inválidos'}.`:null;
+    return { units, ticket, meter, issues: !units ? ['Sem unidades em oferta para calcular o preço.'] : ticket === null || meter === null ? [detail??'Há oferta sem preço ou área privativa válidos para esta média.'] : [] };
   }
   finish(): SpGranularDetails {
     if (!this.buildings.size || this.issues.size) return blockedSpGranularDetails([...this.issues][0] ?? 'A coleção de empreendimentos não foi comprovada.');
@@ -155,7 +161,19 @@ class DetailBuilder {
       });
       if(differences.length)warnings.push(`${metric==='sales'?'Vendas':'Lançamentos'} do período: total reconciliado, com diferença de classificação por padrão. ${differences.join('. ')}.`);
     }
-    return { status: 'ready', issues: [], warnings, prices: { series, annualChanges, standards: SP_PRICE_STANDARDS.map(group => ({ group, ...this.price(closing, row => row.standard === group,[group]) })), overall: this.price(closing) }, area: this.area(), market: buildSpMarketDetails(this.frames.get(closing)!.rows, [...this.buildings.values()], this.report, this.validate(closing),classificationIssues) };
+    const diagnostics=[...this.frames].map(([month,frame])=>{
+      const issues=new Set(frame.issues);
+      for(const row of frame.rows){
+        const label=`Empreendimento ${row.project}, tipologia ${row.typology}, competência ${month}`;
+        if(row.stock===null)issues.add(`${label}: typology_stock ausente ou inválido.`);
+        if(row.stock!==null&&row.stock>0){
+          if(row.price===null||row.price<=0)issues.add(`${label}: price ausente ou inválido.`);
+          if(row.meter===null||row.meter<=0)issues.add(`${label}: preço por m² ou área privativa ausentes ou inválidos.`);
+        }
+      }
+      return {month,issueCount:issues.size,samples:[...issues].slice(0,5)};
+    }).filter(row=>row.issueCount>0).sort((a,b)=>a.month.localeCompare(b.month));
+    return { status: 'ready', issues: [], warnings, diagnostics, prices: { series, annualChanges, standards: SP_PRICE_STANDARDS.map(group => ({ group, ...this.price(closing, row => row.standard === group,[group]) })), overall: this.price(closing) }, area: this.area(), market: buildSpMarketDetails(this.frames.get(closing)!.rows, [...this.buildings.values()], this.report, this.validate(closing),classificationIssues) };
   }
   area(): SpGranularDetails['area'] {
     const blocked = (message: string): SpGranularDetails['area'] => ({ status: 'blocked', issues: [message], rows: [], total: null });

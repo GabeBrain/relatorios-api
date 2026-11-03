@@ -2,7 +2,7 @@ import { historyFingerprint } from '@/features/panorama-secovi-fiergs/domain/bui
 import { insertBuilding } from '@/features/panorama-secovi-fiergs/domain/building-source';
 import { isSpMunicipalPreview, monthOf, type SpPreview } from './model';
 import type { SpLaunchNeighborhoods } from './neighborhoods';
-import { SP_API_PATTERNS } from './segments';
+import { spHistoricalPattern } from './history-fields';
 
 export const blockedSpSalesNeighborhoods = (message: string): SpLaunchNeighborhoods => ({ status: 'blocked', issues: [message], rows: [], cityTotal: null, topTotal: null, topShare: null });
 const normalize = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
@@ -24,7 +24,6 @@ export function buildSpSalesNeighborhoods(buildings: Record<string, unknown>[], 
     if (!eligible.length) continue;
     const hasNeighborhood=typeof building.neighborhood==='string'&&!!building.neighborhood.trim();
     const missing:string[]=[];
-    if(!(SP_API_PATTERNS as readonly string[]).includes(String(building.standard)))missing.push('padrão ausente ou não reconhecido');
     if(!Array.isArray(building.typologies_history))missing.push('históricos por tipologia ausentes ou em formato inválido');
     else if(!building.typologies_history.length)missing.push('históricos por tipologia sem registros');
     if(missing.length)return block(`${label}: ${missing.join('; ')}. O ranking aguarda a fonte completa, sem descartar este registro.`);
@@ -36,6 +35,8 @@ export function buildSpSalesNeighborhoods(buildings: Record<string, unknown>[], 
       const row = raw as Record<string, unknown>, month = monthOf(row.period);
       if (!month) return block('Há histórico sem competência válida.');
       if (!eligible.includes(month)) continue;
+      const standard=spHistoricalPattern(row,building);
+      if(!standard)return block(`${label}: padrão ausente ou não reconhecido na competência ${month}. Confira pattern do histórico e standard do cadastro legado.`);
       const id = String(row.typology_id ?? '').trim(), identity = `${id}/${month}`, fingerprint = historyFingerprint(row);
       if (!id) return block('Há tipologia sem identidade para deduplicar as vendas.');
       if (seen.has(identity)) { if (seen.get(identity) !== fingerprint) return block('Há vendas conflitantes para a mesma tipologia e competência.'); continue; }
@@ -45,7 +46,7 @@ export function buildSpSalesNeighborhoods(buildings: Record<string, unknown>[], 
       observed.add(month); units += value;hasMovement ||= value!==0;
       const covered=typologyMonths.get(id)??new Set<string>();covered.add(month);typologyMonths.set(id,covered);
       monthly.set(month, (monthly.get(month) ?? 0) + value);
-      patterns.set(String(building.standard), (patterns.get(String(building.standard)) ?? 0) + value);
+      patterns.set(standard, (patterns.get(standard) ?? 0) + value);
     }
     if (eligible.some(month => !observed.has(month))) return block(`${label}: faltam vendas identificadas nas competências ${eligible.filter(month=>!observed.has(month)).join(', ')}. Ausência não representa zero.`);
     if(!hasNeighborhood){

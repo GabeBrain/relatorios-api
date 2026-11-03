@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — SP: campos históricos e diagnóstico dos registros pendentes — Codex
+
+- **Ambiente/funcionalidade:** SP Institucional, detalhamentos/39 e checklistJSON.
+- **Origem:** checklist real2T2026 com59disponíveis/9parciais/9bloqueados/8referências e print64semMCMV/MAP. Não atribuir todas as lacunas à API por esse resumo.
+- **Correção:** preferir pattern da observação mensal ao cadastro atual; estágio dedicado estagio_empreendimento antes do legado reconhecido. Ativo/Esgotado não são estágios. Mensagens identificam ID/tipologia/competência; JSON inclui contagem e até5exemplos de lacunas/valores inválidos por competência. Padrão misto no mesmo projeto não vira cor única presumida nos mapas70/71. Sem alteração de endpoint/credencial, zero inventado ou automação.
+- **Validação:**258testes SP/22arquivos, tipos/lint/build e Edge dirigido aprovados; duas capturas inspecionadas.64MCMV/MAP e76estágio preenchidos com campos mensais corretos em fonte simulada. Zero GeoBrain real,48Mapbox200. [Evidências e limites](../features/relatorios-institucionais/sp/EVIDENCIAS.md). Commit técnico registrado no fechamento.
+- **Etapas/Pendências:** retestar fonte real e baixar novoJSON para verificar campos disponíveis e IDs restantes. O histórico33693 recebido antes não tem os campos dedicados; isso permanece suportado e não comprova resolução de todas as diferenças. Deploy observado/homologação pendentes; outros motores preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
 ### 2026-11-03 — SP: varredura de guardas por dimensão nos85 slides — Codex
 
 - **Ambiente/funcionalidade:** SP Institucional, detalhamentos de área/preços/estoque/mapas e checklist.
@@ -767,6 +776,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**03/11 — SP, campos temporais:** leitura de padrão/estágio por fotografia e diagnóstico nominal de falhas implementados;258testes e navegador dirigido aprovados, fonte real aguarda reteste.
+
 **03/11 — SP, revisão dimensional geral:**85posições revisadas; guardas de detalhamento separadas por total, padrão, segmento e Econômico/MCMV.251testes e navegador dirigido aprovados; reteste real pendente.
 
 **03/11 — SP, dimensão bairro:** total e meses iguais permitem ranking39 com ressalva explícita de padrão; guardas das outras dimensões preservadas.
@@ -828,6 +839,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — novo checklist com sourceDiagnostics:** retestar64/76 e fontes históricas após leitura temporal; identificar registros/competências ainda ausentes sem presumir zero ou causa da origem. Campos dedicados podem não existir no legado.
 
 - [ ] **SP — retestar detalhamentos após revisão dimensional:** conferir fontes reais em51/53–59/61–64/66–80, distinguir classificação divergente de falta de histórico/preço/área e registrar o novo checklist. Não assumir que todos os85 slides têm fonte real completa.
 

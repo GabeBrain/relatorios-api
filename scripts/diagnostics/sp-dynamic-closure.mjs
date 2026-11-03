@@ -55,6 +55,10 @@ try {
           return recorded[metric][month]?.[i] ?? (metric === 'stock' ? 1000+i*50 : 100+i*5+Number(month.slice(5)));
         };
         const rows = spGranularFixture(recorded.groups,values,`2026-${closing}`);
+        if(detailsCase==='historical-fields')for(const building of rows){
+          for(const row of building.typologies_history){row.pattern=building.standard;row.estagio_empreendimento='Pronto';row.building_status='Ativo';}
+          building.standard='Alto';
+        }
         if (detailsCase === 'pattern-shift') for (const row of rows) {
           if (row.standard === 'Alto') row.standard = 'Compacto';
           else if (row.standard === 'Compacto') row.standard = 'Alto';
@@ -299,6 +303,14 @@ try {
   assert.match(await page.getByRole('article').innerText(), /MCMV: —/);
   await captureSlide({path:resolve(output,'dimensions-bedroom-mcmv-partial.png')});
   await openSlide(55);assert.match(await page.getByRole('article').innerText(), /Áreas e preços em conferência/);
+  detailsCase='historical-fields';
+  await page.getByRole('button', {name:'Conferir dados reais',exact:true}).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  await openSlide(64);await page.getByText(/Históricos de áreas e preços processados/).waitFor();
+  assert.doesNotMatch(await page.getByRole('article').innerText(), /MCMV: —|MAP: —|Dados em conferência/);
+  await captureSlide({path:resolve(output,'historical-fields-64-mcmv.png')});
+  await openSlide(76);assert.doesNotMatch(await page.getByRole('article').innerText(), /Ativo\/Esgotado|Falta estágio|Dados em conferência/);
+  await captureSlide({path:resolve(output,'historical-fields-76-stage.png')});
   detailsCase = 'normal';
   negativeSales = true;
   await page.setViewportSize({ width: 1440, height: 1000 });

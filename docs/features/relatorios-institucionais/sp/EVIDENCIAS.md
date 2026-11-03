@@ -1,5 +1,13 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 03/11/2026 — leitura temporal e diagnóstico dos bloqueios reais
+
+- **Entrada real:** checklist do usuário gerado2026-11-03T17:52:37.350Z,2T2026 fechado atéjunho:59 disponíveis,9 parciais,9 bloqueados,8 referências. Print64 com médias gerais e MCMV/MAP ausentes. Não comprova a causa dos campos faltantes.
+- **Código:** padrão da observação mensal prioritário, fallback cadastral só se ausente; estágio dedicado prioritário e legado reconhecido preservado. Diagnósticos com ID/tipologia/mês e resumo limitado por competência no JSON. Nenhuma nova coleta/API autenticada, migração de endpoint ou preenchimento presumido. Restrição por padrão misto aplicada só ao mapa que precisaria escolher uma cor única.
+- **Validação:**258 testes SP/22arquivos aprovados, incluindo7 testes novos de campos/diagnósticos; tipos completos, lint dirigido e build exit0 aprovados. Regressões demonstram cadastro atual incorreto com históricos corretos restaurando padrões/MCMV, statusAtivo com estágioPronto explícito, legado sem campos novos, explícitos inválidos sem fallback, nulo preservado, primeira lacuna e limite de exemplos/contagem. Não há dados reais novos nos testes.
+- **Navegador:** Edge1440/claro, modo dirigido22posições e casos extras. Cenário simulado com `pattern` mensal correto e cadastroAlto restaurou MCMV/MAP no64; `estagio_empreendimento=Pronto` comstatusAtivo preencheu76. Duas capturas inspecionadas (`historical-fields-64-mcmv.png`, `historical-fields-76-stage.png`). Parciais, múltiplos períodos/2027, erro/vazio, cancelamento/retry e guardas por dimensão mantidos; zero erros de página/zero chamadas GeoBrain reais,48Mapbox200. Logs `.local-inputs/sp-history-fields-*`, ignorados.
+- **Próximo:** usuário atualizar históricos e baixar novo checklist. Campos dedicados podem não existir em respostas legadas, como a33693 fornecida antes; se a fonte continuar sem eles, permanecem ressalvas/ausências explícitas. Não declarar resolução real do64/76 ou preenchimento dos12pontos históricos ausentes antes do reteste.
+
 ## 03/11/2026 — varredura dimensional dos85 slides
 
 [Matriz completa e execução](REVISAO_GUARDAS_DIMENSIONAIS_2026-11-03.md):251 testes SP/21arquivos, tipos/lint/build aprovados; Edge local dirigido22posições mais cenários de diferença por padrão e MCMV, renderizadores/checklist coerentes, três capturas inspecionadas. Nenhuma API GeoBrain autenticada; simulações, zero erros de página,48Mapbox200. Reteste real/deploy/homologação pendentes. Não declarar todas as fontes reais completas ou corrigidas.
