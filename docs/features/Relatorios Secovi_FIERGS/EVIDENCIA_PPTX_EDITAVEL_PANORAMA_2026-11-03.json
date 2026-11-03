@@ -1,0 +1,402 @@
+{
+  "purpose": "Offline evidence for native editable Panorama PPTX; no production approval",
+  "date": "2026-11-03",
+  "implementationCommit": "f1e9033",
+  "tests": {
+    "focusedTestsPassed": 39,
+    "files": 7,
+    "apiCollection": false,
+    "realStudiesGenerated": false
+  },
+  "syntheticMatrix": [
+    {
+      "entity": "fiergs-rs",
+      "endQuarter": "2T2026",
+      "pages": 58,
+      "charts": 49,
+      "workbooks": 49,
+      "numericChartAndWorkbookParity": true,
+      "rasterized": [
+        {
+          "id": "fiergs-rs:1:1",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:3:3",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:4:4",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:7:7",
+          "reason": [
+            "Mapa da Região Metropolitana de Porto Alegre"
+          ]
+        },
+        {
+          "id": "fiergs-rs:71:54",
+          "reason": [
+            "Fábio Tadeu Araújo",
+            "Marcos Kahtalian",
+            "Teresa Cristina"
+          ]
+        },
+        {
+          "id": "fiergs-rs:72:55",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:73:56",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:74:57",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:75:58",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        }
+      ]
+    },
+    {
+      "entity": "fiergs-rs",
+      "endQuarter": "4T2025",
+      "pages": 58,
+      "charts": 49,
+      "workbooks": 49,
+      "numericChartAndWorkbookParity": true,
+      "rasterized": [
+        {
+          "id": "fiergs-rs:1:1",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:3:3",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:4:4",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:7:7",
+          "reason": [
+            "Mapa da Região Metropolitana de Porto Alegre"
+          ]
+        },
+        {
+          "id": "fiergs-rs:71:54",
+          "reason": [
+            "Fábio Tadeu Araújo",
+            "Marcos Kahtalian",
+            "Teresa Cristina"
+          ]
+        },
+        {
+          "id": "fiergs-rs:72:55",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:73:56",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:74:57",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        },
+        {
+          "id": "fiergs-rs:75:58",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        }
+      ]
+    },
+    {
+      "entity": "secovi-sp",
+      "endQuarter": "2T2026",
+      "pages": 56,
+      "charts": 15,
+      "workbooks": 15,
+      "numericChartAndWorkbookParity": true,
+      "rasterized": [
+        {
+          "id": "secovi-sp:58:54",
+          "reason": [
+            "Fábio Tadeu Araújo",
+            "Marcos Kahtalian",
+            "Teresa Cristina"
+          ]
+        },
+        {
+          "id": "secovi-sp:60:56",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        }
+      ]
+    },
+    {
+      "entity": "secovi-sp",
+      "endQuarter": "4T2025",
+      "pages": 56,
+      "charts": 15,
+      "workbooks": 15,
+      "numericChartAndWorkbookParity": true,
+      "rasterized": [
+        {
+          "id": "secovi-sp:58:54",
+          "reason": [
+            "Fábio Tadeu Araújo",
+            "Marcos Kahtalian",
+            "Teresa Cristina"
+          ]
+        },
+        {
+          "id": "secovi-sp:60:56",
+          "reason": [
+            "Arte institucional integral: imagem substituível, conteúdo interno não editável."
+          ]
+        }
+      ]
+    }
+  ],
+  "frozenModelCompilation": [
+    {
+      "source": "baseline-conjunto-2T2026-report.json",
+      "pages": 69,
+      "charts": 59,
+      "tables": 15,
+      "negativeChartValues": 0,
+      "criticalChecks": 0,
+      "modelUnchanged": true,
+      "generatedRealStudy": false
+    },
+    {
+      "source": "baseline-conjunto-4T2025-report.json",
+      "pages": 69,
+      "charts": 59,
+      "tables": 15,
+      "negativeChartValues": 1,
+      "criticalChecks": 0,
+      "modelUnchanged": true,
+      "generatedRealStudy": false
+    },
+    {
+      "source": "canela-2T2026-report.json",
+      "pages": 67,
+      "charts": 56,
+      "tables": 15,
+      "negativeChartValues": 0,
+      "criticalChecks": 0,
+      "modelUnchanged": true,
+      "generatedRealStudy": false
+    },
+    {
+      "source": "canela-4T2025-report.json",
+      "pages": 67,
+      "charts": 56,
+      "tables": 15,
+      "negativeChartValues": 0,
+      "criticalChecks": 0,
+      "modelUnchanged": true,
+      "generatedRealStudy": false
+    },
+    {
+      "source": "gramado-2T2026-report.json",
+      "pages": 68,
+      "charts": 57,
+      "tables": 15,
+      "negativeChartValues": 0,
+      "criticalChecks": 0,
+      "modelUnchanged": true,
+      "generatedRealStudy": false
+    },
+    {
+      "source": "gramado-4T2025-report.json",
+      "pages": 68,
+      "charts": 57,
+      "tables": 15,
+      "negativeChartValues": 3,
+      "criticalChecks": 0,
+      "modelUnchanged": true,
+      "generatedRealStudy": false
+    },
+    {
+      "source": "gramado-canela-2T2026-report.json",
+      "pages": 69,
+      "charts": 59,
+      "tables": 15,
+      "negativeChartValues": 0,
+      "criticalChecks": 0,
+      "modelUnchanged": true,
+      "generatedRealStudy": false
+    },
+    {
+      "source": "gramado-canela-4T2025-report.json",
+      "pages": 69,
+      "charts": 59,
+      "tables": 15,
+      "negativeChartValues": 3,
+      "criticalChecks": 0,
+      "modelUnchanged": true,
+      "generatedRealStudy": false
+    },
+    {
+      "source": "porto-alegre-2T2026-report.json",
+      "pages": 68,
+      "charts": 57,
+      "tables": 15,
+      "negativeChartValues": 0,
+      "criticalChecks": 0,
+      "modelUnchanged": true,
+      "generatedRealStudy": false
+    },
+    {
+      "source": "porto-alegre-4T2025-report.json",
+      "pages": 68,
+      "charts": 57,
+      "tables": 15,
+      "negativeChartValues": 0,
+      "criticalChecks": 0,
+      "modelUnchanged": true,
+      "generatedRealStudy": false
+    }
+  ],
+  "officeOpeningAndBounds": [
+    {
+      "outOfBounds": [],
+      "file": "fiergs-rs-2T2026-SINTETICO.pptx",
+      "opened": true,
+      "slides": 58
+    },
+    {
+      "outOfBounds": [],
+      "file": "fiergs-rs-4T2025-SINTETICO.pptx",
+      "opened": true,
+      "slides": 58
+    },
+    {
+      "outOfBounds": [],
+      "file": "secovi-sp-2T2026-SINTETICO.pptx",
+      "opened": true,
+      "slides": 56
+    },
+    {
+      "outOfBounds": [],
+      "file": "secovi-sp-4T2025-SINTETICO.pptx",
+      "opened": true,
+      "slides": 56
+    },
+    {
+      "outOfBounds": [],
+      "file": "browser-download-SINTETICO.pptx",
+      "opened": true,
+      "slides": 58
+    }
+  ],
+  "officeEditing": {
+    "application": "Microsoft PowerPoint COM",
+    "synthetic": true,
+    "chartWorkbookEdited": true,
+    "chartCacheUpdated": true,
+    "refreshMethod": "SetSourceData on same native workbook range followed by Refresh",
+    "oldValue": 123.456789,
+    "newValue": 321.654987,
+    "textEdited": true,
+    "tableCellEdited": true,
+    "savedReopened": true,
+    "sourceFilesUnchanged": true
+  },
+  "browserLocal": {
+    "status": "passed",
+    "synthetic": true,
+    "apiRequests": 0,
+    "blockedExternalOrigins": [
+      "https://fonts.googleapis.com"
+    ],
+    "errors": [],
+    "downloadName": "panorama-fiergs-rs-canoas-esteio-sao-leopoldo-1T2023-2T2026-editavel.pptx",
+    "durationMs": 4520,
+    "nativeCaptureDecks": 0,
+    "viewports": [
+      1440,
+      390
+    ]
+  },
+  "artifactHashes": [
+    {
+      "name": "fiergs-rs-2T2026-SINTETICO.pptx",
+      "sha256": "0fee1f1163ba783368a886e0b098026c4145f278b9a5f5707750b1342e10658f",
+      "bytes": 24927326
+    },
+    {
+      "name": "fiergs-rs-4T2025-SINTETICO.pptx",
+      "sha256": "22bce5d7448e14924e5284e3c0d4aaabee9237a598f8379ded9179d86a4c24ea",
+      "bytes": 24925825
+    },
+    {
+      "name": "secovi-sp-2T2026-SINTETICO.pptx",
+      "sha256": "b12b610a106556fe96087bb1ce5ab9fd4d838d48baa44ce764c6dad64bfa7486",
+      "bytes": 5796724
+    },
+    {
+      "name": "secovi-sp-4T2025-SINTETICO.pptx",
+      "sha256": "17829b839695b31fb196b79905f8e889d31b433b01d975df4fd636d33c470923",
+      "bytes": 5794291
+    },
+    {
+      "name": "browser-download-SINTETICO.pptx",
+      "sha256": "c64a505d313971108e727af520d59cf4e3877383bae6130cf0ded3eda5484e2f",
+      "bytes": 24664198
+    }
+  ],
+  "institutionalSource": {
+    "sha256": "8e1e61f0dcb26b876ee846cf66c412b29e373fe7ceb2b12546cd3a4a71d77854",
+    "fullyRasterizedSourceSlide": 3
+  },
+  "limitations": {
+    "institutionalWholeImageFiergsReferences": [
+      1,
+      3,
+      4,
+      72,
+      73,
+      74,
+      75
+    ],
+    "mapsRasterBasemap": true,
+    "realFullPresetSnapshotNotReplayed": true,
+    "published": false,
+    "consumerAcceptedNewFormat": false
+  }
+}

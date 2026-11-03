@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — Panorama: PowerPoint nativo editável, validação local — Gabriel / Codex
+
+- **Mudança:** pacote de apresentação sobre o mesmo modelo/manifesto; textos/tabelas/formas e gráficos Office com XLSX embutido. Modalidade editável separada do espelho, download `-editavel.pptx`, BrainLoadingState, cancelamento/retentativa e alertas preservados. PDF/CSV e domínio numérico intactos. [Fonte única, matriz e limitações](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026).
+- **Evidência/estado:** 39 testes focados, dez modelos congelados compilados sem mutação, quatro decks sintéticos com paridade de todas as células numéricas dos gráficos/workbooks; tipos, lint dirigido e build aprovados. Office abriu as amostras, permitiu edição/salvamento de texto/tabela/dados e reabertura; Chromium local baixou o arquivo sem API externa/erro JS/deck de captura nativo. Validado localmente; não publicado.
+- **Etapas/pendências:** G0–G5 executados no escopo local, com sete artes institucionais FIERGS e bases cartográficas ainda rasterizadas, identificadas explicitamente. Conferência real no site e aceite visual/exceções por Gabriel/Finoti pendentes no G6; não anunciar arquivo inteiro 100% editável. Merge inicial autorizado `e6c8385`; commits SP que chegaram depois não integrados. Sem push, API ou estudo real nesta execução.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — somente referência.
+
+
 ### 2026-11-03 — Panorama FIERGS/Secovi: plano do PowerPoint editável — Gabriel / Codex
 
 - **Diagnóstico e proposta:** exportação atual insere um JPEG por slide. A POC consolidada no Sandbox já usa objetos Office e planilhas de gráficos; `pptxgenjs` também está instalado no Rebrain. [Plano técnico e CTA, fonte única](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md) organiza G0–G6, paridade com modelo/manifesto, famílias analíticas, capas/arte/mapas, integração e edição real no PowerPoint. Fotos/mapas e eventuais artes rasterizadas são exceções a inventariar, sem promessa de editabilidade integral não verificada.
@@ -783,7 +791,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-- **Panorama — PPTX editável:** plano preparado em03/11, implementação pendente; [portões e critérios](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Aceite dos dados anteriores preservado.
+- **Panorama — PPTX editável:** implementação validada localmente em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende de autorização/publicação/ensaio real e aceite das exceções institucionais; aceite dos dados anteriores preservado.
 **03/11 — SP, campos temporais:** leitura de padrão/estágio por fotografia e diagnóstico nominal de falhas implementados;258testes e navegador dirigido aprovados, fonte real aguarda reteste.
 
 **03/11 — SP, revisão dimensional geral:**85posições revisadas; guardas de detalhamento separadas por total, padrão, segmento e Econômico/MCMV.251testes e navegador dirigido aprovados; reteste real pendente.
@@ -848,7 +856,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- **Panorama — PPTX editável:** ativar [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md); autorizar sincronização segura da base, inventariar artes nativas e executar G0–G5. Novo formato e sua edição real ainda não implementados/verificados; publicação depende de autorização.
+- **Panorama — PPTX editável:** autorizar integração adicional e envio dos commits, publicar e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes; edição Office já verificada em cópias sintéticas.
 - [ ] **SP — novo checklist com sourceDiagnostics:** retestar64/76 e fontes históricas após leitura temporal; identificar registros/competências ainda ausentes sem presumir zero ou causa da origem. Campos dedicados podem não existir no legado.
 
 - [ ] **SP — retestar detalhamentos após revisão dimensional:** conferir fontes reais em51/53–59/61–64/66–80, distinguir classificação divergente de falta de histórico/preço/área e registrar o novo checklist. Não assumir que todos os85 slides têm fonte real completa.

@@ -1,6 +1,6 @@
 # PowerPoint editável — Panorama FIERGS e Secovi
 
-**Data:** 03/11/2026. **Estado:** plano preparado; implementação não iniciada.
+**Data:** 03/11/2026. **Estado:** implementação G0–G5 validada localmente, com exceções institucionais explícitas; sem push/publicação. G6 e aceite do novo formato permanecem pendentes, conforme seção 7.
 **Objetivo:** permitir que Finoti e demais usuários editem textos, tabelas, séries e apresentação dos estudos no PowerPoint, mantendo os dados e o conteúdo aprovados. Esta é a fonte única desta evolução; o documento vivo do Rebrain aponta para ela.
 
 ## 1. Diagnóstico confirmado
@@ -158,3 +158,53 @@ Organização sugerida dentro de `src/features/panorama-secovi-fiergs/`:
 ## 6. CTA para implementação
 
 > Execute `docs/features/Relatorios Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md` pelos portões G0–G5. Primeiro confira remotos e alterações locais; apresente a divergência e peça autorização antes de integrar mudanças com a árvore suja ou divergente. Preserve alterações paralelas e não altere SP Institucional, Dashboard, Validação, Relatório API Excel, Corretor, Sinduscon, estimador ou POC/Sandbox. Gere o PowerPoint nativo a partir do mesmo modelo e manifesto, com textos/tabelas/gráficos editáveis e dados embutidos, preservando números, zeros, nulos, negativos, alertas e o PDF atual. Inventarie artes e mapas, registre toda exceção rasterizada e não use captura de gráficos como entrega editável. Execute testes focados e regressões offline FIERGS 2T2026/4T2025, recortes livres e Secovi, registre a matriz de paridade e faça commits isolados com `git add` explícito. Não faça coletas extensas, estudos reais ou push sem autorização. Se faltar acesso ao PowerPoint, entregue o roteiro de edição ao usuário e mantenha esse aceite pendente. Ao concluir, apresente evidências, limitações e commits que seriam publicados para autorizarmos G6.
+
+## 7. Execução local e evidências — 03/11/2026
+
+### Portões e decisões
+
+- **G0 — base e inventário:** merge autorizado por Gabriel de `origin/main` (`028ee1a`) em `e6c8385`; edição local do LIVE guardada de forma restrita e reaplicada, sem conflito. Stash de segurança já reaplicado, não reaplicar novamente. FIERGS/Secovi usam o mesmo conteúdo puro do preview como seletor de textos/células e metadados tipados dos gráficos, sem DOM/OCR ou leitura de números formatados. A adaptação reduz a duplicação de seletores; componentes com hooks/estado não são aceitos pelo compilador. Novas páginas precisam de contrato compilável e ensaio nativo, não captura como fallback.
+- **G1 — pacote e prova:** `report/presentation/` compila o manifesto recebido em objetos tipados, com schema/template, data da geração original e identidade de página. `PresentationChart` é ponte sem elemento visual: mantém os mesmos filhos no preview/PDF e fornece números originais ao exportador. `lib/pptx/` gera texto, tabelas, formas e gráficos com workbooks. Notas técnicas contêm somente identidade/versão e exceções rasterizadas; sem dados brutos, tokens ou novos disclaimers visíveis.
+- **G2 — famílias:** séries Recharts de lançamentos/vendas/estoque/IVV/preços preservam seus arrays numéricos antes da renderização; distribuições, comparativos, colunas de oferta e preço usam a ponte tipada. Tabelas/coortes/maturidade/VGV/faixas mantêm os textos/células do seletor existente. Células de total e tons condicionais viram formatação nativa; as barras CSS são adaptadas a preenchimento de célula, sem promessa de recálculo automático de decoração no Office. Nenhum arquivo de domínio/cálculo/API foi alterado.
+- **G3 — composição, com exceções registradas:** capas do estudo e recortes territoriais têm texto/cidades/período editáveis e usam identidade real do recorte; listas reutilizam a distribuição de colunas existente. Sumário utiliza a sequência congelada, tabela nativa e páginas reais. Fotos/logos preservam proporção por dimensões PNG/JPEG, sem propriedade fictícia de sizing da biblioteca. Mapas mantêm tiles raster e marcadores/legendas/textos nativos; testes com cartografia sintética não comprovam disponibilidade de tiles reais. As artes institucionais integrais permanecem como imagens substituíveis — não se declara editabilidade interna ou aceite dessa exceção pelo usuário.
+- **G4 — integração:** `Baixar PPT editável` usa modalidade distinta de `PPT espelho`, chave do job e nome `-editavel.pptx`. O host não monta o deck de captura para o modo nativo; só prepara imagens necessárias. Mesmo controle de cobertura/proveniência e mesma confirmação numérica por job. BrainLoadingState comunica progresso real e serialização, permite cancelar/retentar e descarta resultado tardio. PDF e espelho mantêm os geradores atuais; CSV não é modificado.
+- **G5 — testes locais:** matriz sintética de duas entidades × 2T2026/4T2025, Piracicaba/SP 1T2026 adicional, presets/recortes livres e dez modelos congelados do incidente compilados sem mutação. Testes conferem todos os valores de cada gráfico gerado, suas caches e cada célula numérica do XLSX embutido, além de abertura/edição Office e download no navegador local. Conferência de estudo real publicado e aceite visual/comercial com Gabriel/Finoti pertencem ao G6 e não foram antecipados.
+
+### Defeitos de serialização encontrados e tratados
+
+1. A declaração TypeScript de `addChart` não representa corretamente a chamada runtime de gráficos combinados no PptxGenJS 4.0.1: o segundo argumento é o objeto de opções, não um array vazio. Corrigida a integração sem editar `node_modules`.
+2. Rótulo `outEnd` das colunas herdado pela linha de média fazia o PowerPoint recusar abrir a página. A linha agora usa posição válida própria; a abertura real no Office verificou a correção.
+3. O escritor XLSX da biblioteca usa `value || ''` em parte dos gráficos, perdendo zeros nas planilhas embora a cache do gráfico retenha zero. `workbooks.ts` escreve os valores tipados originais nas células existentes, mantendo nulo vazio, zero numérico, sinal e precisão. Usa `fflate`, já dependência direta do projeto. Não é ajuste de indicador nem deduplicação de mercado; nenhum valor é inventado ou inferido da imagem.
+4. Corrigidos concatenação de títulos, dimensão excessiva das tabelas, proporção de imagens, posicionamento de comparativos e separação dos modos no texto de progresso. Fronteira de erro por página do preview foi preservada.
+
+### Matriz de editabilidade e limites
+
+| Família | Resultado nativo | Exceção/limite |
+|---|---|---|
+| Capas, cidades, período e sumário | Caixas de texto e tabela | Não altera a identidade do preset ou os nomes de arquivo homologados do PDF/espelho |
+| Séries, colunas, distribuições e comparativos | Gráfico Office com dados embutidos | Notas/destaques externos ao gráfico são caixas editáveis; não recalculam automaticamente depois de alterações manuais |
+| Oferta, preço, coortes, matrizes, tempo médio, VGV | Células e preenchimentos nativos | Tabela não se converte em planilha de fórmulas; nenhuma promessa de recálculo geral |
+| Mapas | Textos, marcadores e legenda editáveis | Base cartográfica/tiles permanecem imagens; não redesenha o recorte ao editar dados no PPT |
+| Fotos, logotipos e mapa institucional | Imagens individuais substituíveis | Conteúdo intrínseco da imagem não é vetor/texto |
+| Artes integrais institucionais FIERGS, referências 1, 3, 4, 72–75 | Imagem substituível | Sete exceções explícitas; não apresentar todo o arquivo como “100% editável” |
+
+Fonte institucional inspecionada: `assets/Slides-Institucionais-Brain-2026.pptx`, SHA-256 `8e1e61f0dcb26b876ee846cf66c412b29e373fe7ceb2b12546cd3a4a71d77854`. Sete slides, dos quais o terceiro contém apenas uma imagem; os demais têm combinações de texto/formas/imagens. Esse inventário não prova correspondência um a um entre todas as lâminas finais e as fontes do material. As sete exceções do produto acima permanecem identificadas em `PresentationPage.rasterized` e nas notas técnicas. Reconstrução institucional mais profunda exige mapeamento/aceite específico, sem retirar a imagem de 23 anos aprovada.
+
+### Evidências e reprodução
+
+- Implementação: commit local `f1e9033`. [Resumo verificável, matriz e hashes](EVIDENCIA_PPTX_EDITAVEL_PANORAMA_2026-11-03.json), artefato pequeno versionado; os arquivos binários permanecem locais.
+
+- Insumos, PPTX sintéticos, capturas Office/Chromium, inventário e saídas brutas: `.local-inputs/panorama-pptx-editavel-2026-11-03/`, ignorada pelo Git. Não são estudos para enviar a clientes.
+- Resultado automatizado: 39 testes focados em sete arquivos aprovados, incluindo dez replays de compilação congelada sob variável explícita. Lint dirigido sem erros, oito avisos de Fast Refresh em módulos que já combinavam helpers/componentes (um export de background novo). Build completo com TypeScript/Vite conferido antes do fechamento; avisos de bundle e base Browserslist preexistentes não equivalem a falha funcional.
+- Matriz sintética: FIERGS 2T2026 e 4T2025 com 58 páginas/49 gráficos/49 workbooks por arquivo; Secovi/Piracicaba 2T2026 e 4T2025 com 56 páginas/15 gráficos/15 workbooks. Quantidades pertencem às fixtures, não aos estudos homologados reais. O caso adicional Piracicaba 1T2026 verifica contrato/política/capa em compilação.
+- Dez modelos congelados: Porto Alegre, Gramado+Canela, Gramado, Canela e conjunto Canoas/Esteio/São Leopoldo, em 2T2026 e 4T2025. Modelo e reconciliação permanecem intactos, incluindo negativos observados. Não há snapshot real do preset completo nessa matriz: ele foi exercitado sinteticamente e precisa de conferência real pelo usuário no G6.
+- Office real: apresentações sintéticas finais e download local abertos sem erro; medição dos objetos não encontrou elementos fora da área dos slides. Cópias de prova tiveram texto/tabela alterados e dados do gráfico editados no workbook, com `SetSourceData` no mesmo intervalo e `Refresh` na automação; arquivo salvo e reaberto, valor novo conferido no workbook e na cache XML. Esse ensaio não declara que qualquer edição externa de tabela recalcula indicadores ou que a automação COM reproduz todos os gestos do usuário.
+- Navegador conectado indisponível. Chromium headless local validou toolbar/progresso, download com sufixo correto, zero erros JavaScript e zero decks de captura montados no modo nativo; viewports 1440/390. Rede externa bloqueada, nenhuma API GeoBrain consultada; não é ensaio autenticado em produção. A captura de fontes externas bloqueadas não autoriza afirmar identidade de fontes em todos os computadores.
+- Comando focado de evidência: `$env:PANORAMA_PPTX_EVIDENCE='1'; $env:PANORAMA_PPTX_FROZEN='1'; npx vitest run src/features/panorama-secovi-fiergs/__tests__/editable-pptx.test.ts src/features/panorama-secovi-fiergs/__tests__/editable-host.test.tsx src/features/panorama-secovi-fiergs/__tests__/consistency-alerts.test.tsx src/features/panorama-secovi-fiergs/__tests__/pdf-export.test.ts src/features/panorama-secovi-fiergs/__tests__/export-metadata.test.ts src/features/panorama-secovi-fiergs/__tests__/export-host-run-key.test.ts src/features/panorama-secovi-fiergs/__tests__/fiergs-editorial-blocks.test.tsx`. A variável FROZEN exige os dez modelos locais; sem ela, CI usa fixtures e não precisa de insumos privados.
+
+### Pendências antes de declarar G6 concluído
+
+1. Apresentar divergência/commits e obter autorização para integração adicional/push/publicação. Novos commits SP após a integração autorizada não foram mesclados automaticamente.
+2. Conferir no site um FIERGS real (preset e recorte livre) e Secovi real, mesma geração para PDF/CSV/espelho/editável. Sem autorização, o agente não fará nova coleta nem estudo real.
+3. Gabriel/Finoti revisarem a aparência nativa e aceitarem as exceções rasterizadas institucionais. O PPTX é funcionalmente editável nas análises; não é cópia pixel a pixel do PDF nem arquivo inteiro vetorial.
+4. Manter separado o aceite Juliana dos dados anteriores do aceite deste novo formato. Alterações manuais no PPTX baixado não atualizam o site, a base, o PDF ou o CSV original.
