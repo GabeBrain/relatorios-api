@@ -16,9 +16,10 @@ import { panoramaExportMetadata } from '../lib/export-metadata';
 import { panoramaScopeIdentity } from '../scope-identity';
 import { CustomFiergsStudyCover, CustomFiergsTerritoryCover } from './CustomFiergsCovers';
 import { observedDormitoryPriceGroup } from '../report/dormitory-price-series';
+import { PresentationChart } from '../report/presentation/PresentationChart';
 import { reportConsistencyAlerts } from '../report/consistency-alerts';
 import { ReportConsistencyAlertsDialog } from './ReportConsistencyAlertsDialog';
-import type { PanoramaExportFormat } from '../export-store';
+import type { PanoramaExportFormat, PanoramaPptxMode } from '../export-store';
 
 /** Token do fundo cartográfico: define, junto das coordenadas, se a lâmina de mapa existe (JG-39). */
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
@@ -54,6 +55,9 @@ function Sheet({ def, report, children }: { def: ReportPageDefinition; report: P
   const background = fiergs ? fiergsBackground(def) : v2Background(def.referenceSlide);
   const style = { backgroundImage: background ? `url(${background})` : 'none' } as CSSProperties;
   return <section className={`panorama-report-page panorama-official-page panorama-v2-page ${fiergs ? 'panorama-fiergs-page' : ''}`} style={style} aria-label={`Página ${def.page}: ${def.title}`}><div className="panorama-page-content">{children}</div></section>;
+}
+export function panoramaPresentationBackground(def: ReportPageDefinition, report: PanoramaReportModel) {
+  return report.scope.entity === 'fiergs-rs' ? fiergsBackground(def) : v2Background(def.referenceSlide);
 }
 class ReportPageBoundary extends Component<{ page: number; fallback: ReactNode; children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -303,7 +307,7 @@ function FiergsContextComparisons({ pairs, format }: { pairs: FiergsComparisonPa
     const maximum = Math.max(Math.abs(pair.left ?? 0), Math.abs(pair.right ?? 0), 1);
     const columnHeight = (value: number | null) => `${value === null ? 0 : Math.max(22, Math.abs(value) / maximum * 100)}%`;
     const formatted = (value: number | null) => value === null ? '—' : format(value);
-    return <section key={pair.kind}><h3>{pair.title}</h3><div><span><b>{formatted(pair.left)}</b><i style={{ height: columnHeight(pair.left) }}/><small>{pair.leftLabel}</small></span><em>{pair.variation === null ? '—' : `${pair.variation >= 0 ? '+' : ''}${pct(pair.variation)}`}</em><span><b>{formatted(pair.right)}</b><i style={{ height: columnHeight(pair.right) }}/><small>{pair.rightLabel}</small></span></div>{!pair.complete && <p>Período incompleto</p>}</section>;
+    return <section key={pair.kind}><h3>{pair.title}</h3><PresentationChart spec={{ type: 'bar', annotation: pair.variation === null ? '\u2014' : `${pair.variation >= 0 ? '+' : ''}${pct(pair.variation)}`, labels: [pair.leftLabel, pair.rightLabel], series: [{ name: pair.title, values: [pair.left, pair.right], color: '4F7ABD' }] }}><div><span><b>{formatted(pair.left)}</b><i style={{ height: columnHeight(pair.left) }}/><small>{pair.leftLabel}</small></span><em>{pair.variation === null ? '—' : `${pair.variation >= 0 ? '+' : ''}${pct(pair.variation)}`}</em><span><b>{formatted(pair.right)}</b><i style={{ height: columnHeight(pair.right) }}/><small>{pair.rightLabel}</small></span></div></PresentationChart>{!pair.complete && <p>Período incompleto</p>}</section>;
   })}</aside>;
 }
 
@@ -349,7 +353,7 @@ function FiergsLaunchCitySlide({ report, cities }: { report: PanoramaReportModel
     row.projects.forEach((project) => grouped.set(project.neighborhood || 'Bairro não informado', (grouped.get(project.neighborhood || 'Bairro não informado') ?? 0) + (project.launchedUnits ?? 0)));
     return [...grouped].map(([neighborhood, units]) => ({ label: `${neighborhood} — ${row.city}`, units }));
   }).filter((row) => !cities || cities.some((city) => row.label.endsWith(`— ${city}`))).sort((a, b) => b.units - a.units).slice(0, 7);
-  const bars = (items: { label: string; units: number }[]) => <div className="panorama-fiergs-share-bars">{items.map((item) => <div key={item.label}><span>{item.label}</span><i><b style={{ width: `${total ? item.units / total * 100 : 0}%` }}/></i><strong>{total ? pct(item.units / total * 100) : '—'}</strong></div>)}</div>;
+  const bars = (items: { label: string; units: number }[]) => <PresentationChart spec={{ type: 'bar', horizontal: true, percentage: true, labels: items.map((item) => item.label), series: [{ name: 'Participa\u00e7\u00e3o (%)', values: items.map((item) => total ? item.units / total * 100 : null) }] }}><div className="panorama-fiergs-share-bars">{items.map((item) => <div key={item.label}><span>{item.label}</span><i><b style={{ width: `${total ? item.units / total * 100 : 0}%` }}/></i><strong>{total ? pct(item.units / total * 100) : '—'}</strong></div>)}</div></PresentationChart>;
   return <div className="panorama-fiergs-city-share"><h2>UNIDADES VERTICAIS LANÇADAS<span>{report.scope.cities.length === 1 ? 'POR BAIRRO' : 'POR BAIRRO E CIDADE'}</span></h2><main><section>{bars(neighborhoods)}</section>{report.scope.cities.length > 1 && <section>{bars(rows.filter((row) => !cities || cities.includes(row.city)).map((row) => ({ label: row.city, units: row.units })))}</section>}</main><footer>Total do trimestre: {n(total)} unidades · Fonte: cubo granular GeoBrain</footer></div>;
 }
 
@@ -366,8 +370,9 @@ export function fiergsDistributionData(rows: FiergsDistributionRow[], options: {
 }
 function FiergsDistributionSlide({ title, subtitle, rows, unit, className = '', includeZero = false, maxRows = 9, labels }: { title: string; subtitle: string; rows: FiergsDistributionRow[]; unit: string; className?: string; includeZero?: boolean; maxRows?: number; labels?: string[] }) {
   const { visible, shares, total, max } = fiergsDistributionData(rows, { includeZero });
+  const chartRows = visible.filter((row) => !labels || labels.includes(row.label)).slice(0, maxRows);
   return <div className={`panorama-fiergs-distribution ${className}`.trim()}><header><h2>{title}<span>{subtitle}</span></h2><strong>{n(total)}<small>{unit}</small></strong></header>
-    {visible.length ? <main>{visible.map((row, index) => ({ row, index })).filter(({ row }) => !labels || labels.includes(row.label)).slice(0, maxRows).map(({ row, index }) => <div key={row.label} className={row.value < 0 ? 'is-negative' : row.value === 0 ? 'is-zero' : undefined}><span>{row.label}</span><i><b style={{ width: `${Math.abs(row.value) / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{pct(shares[index])}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
+    {visible.length ? <PresentationChart spec={{ type: 'bar', horizontal: true, unit, labels: chartRows.map((row) => row.label), series: [{ name: unit, values: chartRows.map((row) => row.value) }] }}><main>{visible.map((row, index) => ({ row, index })).filter(({ row }) => !labels || labels.includes(row.label)).slice(0, maxRows).map(({ row, index }) => <div key={row.label} className={row.value < 0 ? 'is-negative' : row.value === 0 ? 'is-zero' : undefined}><span>{row.label}</span><i><b style={{ width: `${Math.abs(row.value) / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{pct(shares[index])}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main></PresentationChart> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
     <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer></div>;
 }
 function groupedValues(values: FiergsDistributionRow[]) { const groups = new Map<string, number>(); values.forEach(({ label, value }) => groups.set(label, (groups.get(label) ?? 0) + value)); return [...groups].map(([label, value]) => ({ label, value })); }
@@ -544,7 +549,7 @@ function CityComparisonPage({ kind, report }: { kind: NonNullable<ReportPageDefi
   }
   return <div className="panorama-table-page panorama-city-comparison"><h2>DISPONIBILIDADE RESIDENCIAL VERTICAL POR PADRÃO</h2><table><thead><tr><th>Padrão</th>{report.cityComparisons.sales.map((row) => <th key={row.city}>{row.city}</th>)}</tr></thead><tbody>{report.cityComparisons.availabilityByStandard.map((row) => <tr key={row.standard}><td>{row.standard}</td>{report.cityComparisons.sales.map(({ city }) => <td key={city}>{pct(row.values.find((value) => value.city === city)?.availability ?? null)}</td>)}</tr>)}</tbody></table></div>;
 }
-function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
+export function PanoramaPresentationContent({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.contentReferenceSlide ?? def.referenceSlide;
   const official = def.fiergsOfficialSlide;
   if (official === 2) return <FiergsStudyCover report={report}/>;
@@ -596,7 +601,7 @@ function Content({ def, report }: { def: ReportPageDefinition; report: PanoramaR
 }
 function SafeSheet({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const fallback = <Sheet def={def} report={report}><div className="panorama-page-unavailable"><h2>PÁGINA INDISPONÍVEL</h2><i/><p>Esta página não pôde ser montada. As demais páginas do relatório continuam disponíveis.</p></div></Sheet>;
-  return <ReportPageBoundary page={def.page} fallback={fallback}><Sheet def={def} report={report}><Content def={def} report={report}/></Sheet></ReportPageBoundary>;
+  return <ReportPageBoundary page={def.page} fallback={fallback}><Sheet def={def} report={report}><PanoramaPresentationContent def={def} report={report}/></Sheet></ReportPageBoundary>;
 }
 /**
  * As lâminas montadas fora da tela — é sobre elas que a rasterização acontece. Fica isolado
@@ -621,13 +626,14 @@ export function PanoramaExportDeck({ report, rootRef }: { report: PanoramaReport
 export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
   const [alertsOpen, setAlertsOpen] = useState(false);
   const alertsButtonRef = useRef<HTMLButtonElement>(null);
-  const [pendingExport, setPendingExport] = useState<{ report: PanoramaReportModel; format: PanoramaExportFormat } | null>(null);
+  const [pendingExport, setPendingExport] = useState<{ report: PanoramaReportModel; format: PanoramaExportFormat; pptxMode?: PanoramaPptxMode } | null>(null);
   const alerts = useMemo(() => reportConsistencyAlerts(report), [report]);
   useEffect(() => { setAlertsOpen(false); setPendingExport(null); }, [report]);
   const [current, setCurrent] = useState(0); const [view, setView] = useState<'page' | 'all'>('page');
   const allPagesRef = useRef<HTMLDivElement>(null);
   const exportStatus = usePanoramaExportStore((state) => state.status);
   const exportFormat = usePanoramaExportStore((state) => state.format);
+  const exportPptxMode = usePanoramaExportStore((state) => state.pptxMode);
   const exportProgress = usePanoramaExportStore((state) => state.progress);
   const exportTotal = usePanoramaExportStore((state) => state.total);
   const exporting = panoramaExportIsRunning(exportStatus);
@@ -642,18 +648,19 @@ export function ReportPaginator({ report }: { report: PanoramaReportModel }) {
     if (view === 'all') allPagesRef.current?.querySelector(`[aria-label^="Página ${number}:"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   // O trabalho pesado roda no host montado pelo shell: o usuário pode sair desta página.
-  const requestExport = (format: PanoramaExportFormat) => {
-    if (!exportBlocked && panoramaExportBlockReason(report)) { setPendingExport({ report, format }); setAlertsOpen(true); return; }
-    usePanoramaExportStore.getState().start(report, format);
+  const requestExport = (format: PanoramaExportFormat, pptxMode: PanoramaPptxMode = 'mirror') => {
+    if (!exportBlocked && panoramaExportBlockReason(report)) { setPendingExport({ report, format, pptxMode }); setAlertsOpen(true); return; }
+    usePanoramaExportStore.getState().start(report, format, { pptxMode, manifest: pages });
   };
   const exportPdf = () => requestExport('pdf');
   const exportPptx = () => requestExport('pptx');
+  const exportEditablePptx = () => requestExport('pptx', 'editable');
   const changeAlertsOpen = (open: boolean) => { setAlertsOpen(open); if (!open) setPendingExport(null); };
   const continueExport = () => {
     if (!pendingExport || pendingExport.report !== report) { changeAlertsOpen(false); return; }
-    const { format } = pendingExport;
+    const { format, pptxMode } = pendingExport;
     changeAlertsOpen(false);
-    usePanoramaExportStore.getState().start(report, format, { consistencyAcknowledged: true });
+    usePanoramaExportStore.getState().start(report, format, { consistencyAcknowledged: true, pptxMode, manifest: pages });
   };
-  return <div className="space-y-4"><ReportConsistencyAlertsDialog report={report} alerts={alerts} open={alertsOpen} onOpenChange={changeAlertsOpen} pendingFormat={pendingExport?.report === report ? pendingExport.format : undefined} onContinue={continueExport} restoreFocus={() => alertsButtonRef.current?.focus()}/><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver todas as páginas</>}</Button>{report.scope.entity === 'fiergs-rs' && <Button variant="outline" size="sm" onClick={() => downloadFiergsAudit(report)}><Download/>Auditoria CSV</Button>}{alerts.length > 0 && <Button variant="outline" size="sm" ref={alertsButtonRef} className="text-primary" onClick={() => { setPendingExport(null); setAlertsOpen(true); }}><AlertTriangle/>Alertas ({alerts.length})</Button>}<Button variant="outline" size="sm" disabled={exporting || exportBlocked} title={coverageBlockReason ?? undefined} onClick={exportPptx}><Presentation/>{exporting && exportFormat === 'pptx' && exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Baixar PPT espelho'}</Button><Button size="sm" disabled={exporting || exportBlocked} title={coverageBlockReason ?? undefined} onClick={exportPdf}>{exporting && exportFormat === 'pdf' ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting && exportFormat === 'pdf' ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exportBlocked && <p role="alert" className="text-sm text-destructive">{coverageBlockReason}</p>}{exporting && <p className="text-sm text-muted-foreground">Mantenha esta aba visível até o download; navegar dentro da plataforma é possível, mas trocar de aba pode pausar a captura.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{sections.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} pages={pages} containerRef={allPagesRef}/> : <SafeSheet def={page} report={report}/>}</div></div>;
+  return <div className="space-y-4"><ReportConsistencyAlertsDialog report={report} alerts={alerts} open={alertsOpen} onOpenChange={changeAlertsOpen} pendingFormat={pendingExport?.report === report ? pendingExport.format : undefined} pendingMode={pendingExport?.pptxMode} onContinue={continueExport} restoreFocus={() => alertsButtonRef.current?.focus()}/><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-primary"/><span className="text-sm font-medium">{view === 'all' ? `${pages.length} páginas · leitura contínua` : `Página ${page.page} de ${pages.length} · ${page.intention}`}</span></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={view === 'all' || !current} onClick={() => setCurrent((v) => v - 1)}><ChevronLeft/>Anterior</Button><Button variant="outline" size="sm" disabled={view === 'all' || current === pages.length - 1} onClick={() => setCurrent((v) => v + 1)}>Próxima<ChevronRight/></Button><Button variant="outline" size="sm" aria-pressed={view === 'all'} onClick={() => setView((v) => (v === 'all' ? 'page' : 'all'))}>{view === 'all' ? <><FileText/>Uma página por vez</> : <><ListTree/>Ver todas as páginas</>}</Button>{report.scope.entity === 'fiergs-rs' && <Button variant="outline" size="sm" onClick={() => downloadFiergsAudit(report)}><Download/>Auditoria CSV</Button>}{alerts.length > 0 && <Button variant="outline" size="sm" ref={alertsButtonRef} className="text-primary" onClick={() => { setPendingExport(null); setAlertsOpen(true); }}><AlertTriangle/>Alertas ({alerts.length})</Button>}<Button variant="outline" size="sm" disabled={exporting || exportBlocked} title={coverageBlockReason ?? undefined} onClick={exportEditablePptx}><Presentation/>Baixar PPT editável</Button><Button variant="outline" size="sm" disabled={exporting || exportBlocked} title={coverageBlockReason ?? undefined} onClick={exportPptx}><Presentation/>{exporting && exportFormat === 'pptx' && exportPptxMode === 'mirror' && exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Baixar PPT espelho'}</Button><Button size="sm" disabled={exporting || exportBlocked} title={coverageBlockReason ?? undefined} onClick={exportPdf}>{exporting && exportFormat === 'pdf' ? <LoaderCircle className="animate-spin"/> : <Download/>}{exporting && exportFormat === 'pdf' ? (exportStatus === 'capturing' ? `${exportProgress}/${exportTotal || pages.length}` : 'Preparando PDF…') : 'Baixar PDF'}</Button></div></div>{exportBlocked && <p role="alert" className="text-sm text-destructive">{coverageBlockReason}</p>}{exporting && !(exportFormat === 'pptx' && exportPptxMode === 'editable') && <p className="text-sm text-muted-foreground">Mantenha esta aba visível até o download; navegar dentro da plataforma é possível, mas trocar de aba pode pausar a captura.</p>}<div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]"><aside className="rounded-xl border bg-card p-3"><div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListTree className="h-4 w-4"/>Sumário</div>{sections.map((section) => <button key={section.id} type="button" className={`block w-full rounded-md px-2 py-2 text-left text-xs transition-colors ${page.sectionId === section.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`} onClick={() => jump(section.start)}>{section.label}<span className="ml-1 text-muted-foreground">{section.start}–{section.end}</span></button>)}</aside>{view === 'all' ? <AllPagesView report={report} pages={pages} containerRef={allPagesRef}/> : <SafeSheet def={page} report={report}/>}</div></div>;
 }

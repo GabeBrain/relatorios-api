@@ -2,12 +2,12 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { downloadFiergsAudit } from '../lib/fiergs-audit';
 import type { PanoramaReportModel } from '../types';
-import type { PanoramaExportFormat } from '../export-store';
+import type { PanoramaExportFormat, PanoramaPptxMode } from '../export-store';
 import type { ConsistencyAlert } from '../report/consistency-alerts';
 
-export function ReportConsistencyAlertsDialog({ report, alerts, open, onOpenChange, pendingFormat, onContinue, restoreFocus }: {
+export function ReportConsistencyAlertsDialog({ report, alerts, open, onOpenChange, pendingFormat, pendingMode, onContinue, restoreFocus }: {
   report: PanoramaReportModel; alerts: ConsistencyAlert[]; open: boolean; onOpenChange: (open: boolean) => void;
-  pendingFormat?: PanoramaExportFormat; onContinue?: () => void; restoreFocus?: () => void;
+  pendingFormat?: PanoramaExportFormat; pendingMode?: PanoramaPptxMode; onContinue?: () => void; restoreFocus?: () => void;
 }) {
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="flex max-h-[85vh] max-w-2xl flex-col overflow-hidden" onCloseAutoFocus={(event) => { if (restoreFocus) { event.preventDefault(); restoreFocus(); } }}>
@@ -39,7 +39,7 @@ export function ReportConsistencyAlertsDialog({ report, alerts, open, onOpenChan
       <DialogFooter className="gap-2">
         <Button variant="outline" onClick={() => downloadFiergsAudit(report)}>Auditoria CSV</Button>
         <Button variant={pendingFormat ? 'outline' : 'default'} onClick={() => onOpenChange(false)}>{pendingFormat ? 'Voltar' : 'Entendi'}</Button>
-        {pendingFormat && <Button onClick={onContinue}>Continuar e baixar {pendingFormat === 'pdf' ? 'PDF' : 'PPT espelho'}</Button>}
+        {pendingFormat && <Button onClick={onContinue}>Continuar e baixar {pendingFormat === 'pdf' ? 'PDF' : pendingMode === 'editable' ? 'PPT editável' : 'PPT espelho'}</Button>}
       </DialogFooter>
     </DialogContent>
   </Dialog>;

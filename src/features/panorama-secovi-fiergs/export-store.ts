@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { PanoramaReportModel } from './types';
+import type { ReportPageDefinition } from './report/manifest';
 
 /**
  * Estado do export do Panorama fora da árvore da rota: a rasterização das lâminas pode levar alguns minutos e
@@ -8,10 +9,14 @@ import type { PanoramaReportModel } from './types';
  */
 export type PanoramaExportStatus = 'idle' | 'preparing' | 'capturing' | 'assembling' | 'done' | 'error';
 export type PanoramaExportFormat = 'pdf' | 'pptx';
+export type PanoramaPptxMode = 'mirror' | 'editable';
 
 export interface PanoramaExportResult { url: string; name: string; pages: number }
 
 interface PanoramaExportState {
+  pptxMode: PanoramaPptxMode;
+  manifest: ReportPageDefinition[] | null;
+  startedAt: number | null;
   consistencyAcknowledged: boolean;
   status: PanoramaExportStatus;
   progress: number;
@@ -23,7 +28,7 @@ interface PanoramaExportState {
   result: PanoramaExportResult | null;
   controller: AbortController | null;
 
-  start: (report: PanoramaReportModel, format: PanoramaExportFormat, options?: { consistencyAcknowledged?: boolean }) => void;
+  start: (report: PanoramaReportModel, format: PanoramaExportFormat, options?: { consistencyAcknowledged?: boolean; pptxMode?: PanoramaPptxMode; manifest?: readonly ReportPageDefinition[] }) => void;
   markCapturing: (total: number) => void;
   reportProgress: (current: number, total: number) => void;
   markAssembling: () => void;
@@ -55,6 +60,7 @@ export function panoramaExportBlockReason(report: Pick<PanoramaReportModel, 'sco
 }
 
 export const usePanoramaExportStore = create<PanoramaExportState>()((set, get) => ({
+  pptxMode: 'mirror', manifest: null, startedAt: null,
   consistencyAcknowledged: false,
   status: 'idle',
   progress: 0,
@@ -75,24 +81,26 @@ export const usePanoramaExportStore = create<PanoramaExportState>()((set, get) =
     }
     const previous = get().result;
     if (previous) URL.revokeObjectURL(previous.url);
-    set({ status: 'preparing', progress: 0, total: 0, error: '', format, report, result: null, controller: new AbortController(), consistencyAcknowledged });
+    set({ status: 'preparing', progress: 0, total: 0, error: '', format, report, result: null, controller: new AbortController(), consistencyAcknowledged,
+      pptxMode: format === 'pptx' ? options.pptxMode ?? 'mirror' : 'mirror',
+      manifest: options.manifest?.map((page) => ({ ...page, scopeCities: page.scopeCities ? [...page.scopeCities] : undefined })) ?? null, startedAt: Date.now() });
   },
   markCapturing: (total) => set({ status: 'capturing', total }),
   reportProgress: (current, total) => set({ progress: current, total }),
   markAssembling: () => set({ status: 'assembling' }),
-  succeed: (result) => set({ status: 'done', result, report: null, controller: null, consistencyAcknowledged: false }),
-  fail: (error) => set({ status: 'error', error, report: null, controller: null, consistencyAcknowledged: false }),
+  succeed: (result) => set({ status: 'done', result, report: null, controller: null, consistencyAcknowledged: false, manifest: null, startedAt: null }),
+  fail: (error) => set({ status: 'error', error, report: null, controller: null, consistencyAcknowledged: false, manifest: null, startedAt: null }),
   cancel: () => {
     const { controller, status } = get();
     if (!isRunning(status)) return;
     controller?.abort();
-    set({ status: 'idle', progress: 0, total: 0, report: null, controller: null, consistencyAcknowledged: false });
+    set({ status: 'idle', progress: 0, total: 0, report: null, controller: null, consistencyAcknowledged: false, manifest: null, startedAt: null });
   },
   dismiss: () => {
     const { result, status } = get();
     if (isRunning(status)) return;
     if (result) URL.revokeObjectURL(result.url);
-    set({ status: 'idle', progress: 0, total: 0, error: '', result: null, consistencyAcknowledged: false });
+    set({ status: 'idle', progress: 0, total: 0, error: '', result: null, consistencyAcknowledged: false, manifest: null, startedAt: null });
   },
 }));
 

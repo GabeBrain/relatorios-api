@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { CheckCircle2, LoaderCircle, X } from 'lucide-react';
+import { CheckCircle2, X } from 'lucide-react';
+import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { Button } from '@/components/ui/button';
 import { PanoramaExportDeck } from './ReportPaginator';
 import { synchronizeOfficialCoverCity } from '../lib/official-cover';
@@ -7,13 +8,14 @@ import { buildPanoramaPdf, buildPanoramaPptx, PanoramaExportCancelled } from '..
 import { panoramaExportBlockReason, usePanoramaExportStore, type PanoramaExportFormat } from '../export-store';
 import { scopeCityLabel, scopeFileSlug, scopeExportPeriod } from '../types';
 import { panoramaExportMetadata } from '../lib/export-metadata';
+import { panoramaManifestFor } from '../report/manifest';
 
 /**
  * Executa a exportação do Panorama fora da árvore da rota: montado pelo shell, sobrevive à
  * navegação do usuário entre páginas. O deck só existe enquanto o job está ativo.
  */
 export default function PanoramaExportHost() {
-  const { status, progress, total, error, report, result, format, controller, consistencyAcknowledged } = usePanoramaExportStore();
+  const { status, progress, total, error, report, result, format, pptxMode, manifest, startedAt, controller, consistencyAcknowledged } = usePanoramaExportStore();
   const deckRef = useRef<HTMLDivElement>(null);
   const startedFor = useRef<PanoramaExportRunKey>(null);
 
@@ -26,8 +28,8 @@ export default function PanoramaExportHost() {
     // PPT logo depois do PDF do mesmo recorte reencontrava a chave anterior, o efeito retornava sem
     // nada fazer e a exportação ficava presa em "Preparando…" para sempre — que é exatamente o
     // caminho do PPT espelho pedido na homologação.
-    if (startedFor.current?.report === report && startedFor.current.format === format && startedFor.current.signal === signal) return;
-    startedFor.current = { report, format, signal };
+    if (startedFor.current?.report === report && startedFor.current.format === format && startedFor.current.mode === pptxMode && startedFor.current.signal === signal) return;
+    startedFor.current = { report, format, mode: pptxMode, signal };
     const initialBlockReason = panoramaExportBlockReason(report, { consistencyAcknowledged });
     if (initialBlockReason) { store.fail(initialBlockReason); return; }
     const cityLabel = scopeCityLabel(report.scope);
@@ -37,56 +39,70 @@ export default function PanoramaExportHost() {
     const run = async () => {
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
       if (signal?.aborted || usePanoramaExportStore.getState().controller !== controller) return;
-      const slides = [...(deckRef.current?.querySelectorAll<HTMLElement>('.panorama-report-page') ?? [])];
-      if (!slides.length) { usePanoramaExportStore.getState().fail('Não foi possível montar as páginas do relatório.'); return; }
-      usePanoramaExportStore.getState().markCapturing(slides.length);
       try {
         const blockReason = panoramaExportBlockReason(report, { consistencyAcknowledged });
         if (blockReason) { usePanoramaExportStore.getState().fail(blockReason); return; }
         const metadata = panoramaExportMetadata(report.scope, import.meta.env.VITE_BUILD_ID);
-        const builder = format === 'pptx' ? buildPanoramaPptx : buildPanoramaPdf;
-        const built = await builder(slides, metadata, ({ current, total: pages }) => {
+        const native = format === 'pptx' && pptxMode === 'editable';
+        const onProgress = ({ current, total: pages }: { current: number; total: number }) => {
+          if (signal?.aborted || usePanoramaExportStore.getState().controller !== controller) return;
           const live = usePanoramaExportStore.getState();
           live.reportProgress(current, pages);
-          if (current === pages) live.markAssembling();
-        }, signal);
-        if (signal?.aborted) return;
-        const name = `panorama-${scopeFileSlug(report.scope)}-${scopeExportPeriod(report.scope)}.${format}`;
+          if (!native && current === pages) live.markAssembling();
+        };
+        const built = await (async () => {
+          if (native) {
+            const [{ buildPanoramaPresentationPackage }, { renderPanoramaEditablePptx }] = await Promise.all([
+              import('../report/presentation/build-package'), import('../lib/pptx/render'),
+            ]);
+            if (signal?.aborted) throw new PanoramaExportCancelled();
+            const pages = manifest ?? panoramaManifestFor(report, import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '');
+            const pkg = buildPanoramaPresentationPackage(report, pages);
+            store.markCapturing(pkg.pages.length);
+            return renderPanoramaEditablePptx(pkg, metadata, { signal, onProgress, onAssembling: () => {
+              if (!signal?.aborted && usePanoramaExportStore.getState().controller === controller) store.markAssembling();
+            } });
+          }
+          const slides = [...(deckRef.current?.querySelectorAll<HTMLElement>('.panorama-report-page') ?? [])];
+          if (!slides.length) throw new Error('Não foi possível montar as páginas do relatório.');
+          store.markCapturing(slides.length);
+          return (format === 'pptx' ? buildPanoramaPptx : buildPanoramaPdf)(slides, metadata, onProgress, signal);
+        })();
+        if (signal?.aborted || usePanoramaExportStore.getState().controller !== controller) return;
+        const name = `panorama-${scopeFileSlug(report.scope)}-${scopeExportPeriod(report.scope)}${native ? '-editavel' : ''}.${format}`;
         const url = URL.createObjectURL(built.blob);
         const link = document.createElement('a');
         link.href = url; link.download = name; link.rel = 'noopener';
         document.body.append(link); link.click(); link.remove();
         usePanoramaExportStore.getState().succeed({ url, name, pages: built.pageCount });
       } catch (cause) {
-        if (cause instanceof PanoramaExportCancelled || signal?.aborted) return;
+        if (cause instanceof PanoramaExportCancelled || signal?.aborted || usePanoramaExportStore.getState().controller !== controller) return;
         console.error(`Falha ao gerar o ${format.toUpperCase()} do Panorama`, cause);
         usePanoramaExportStore.getState().fail(cause instanceof Error ? cause.message : 'Erro inesperado ao rasterizar as páginas.');
       }
     };
     void run();
-  }, [status, report, format, controller, consistencyAcknowledged]);
+  }, [status, report, format, pptxMode, manifest, controller, consistencyAcknowledged]);
 
   const running = status === 'preparing' || status === 'capturing' || status === 'assembling';
-  const formatLabel = format === 'pptx' ? 'PPT espelho' : 'PDF';
+  const formatLabel = format === 'pptx' ? pptxMode === 'editable' ? 'PPT editável' : 'PPT espelho' : 'PDF';
   if (status === 'idle') return null;
 
   return (
     <>
-      {report && <PanoramaExportDeck report={report} rootRef={deckRef} />}
+      {report && !(format === 'pptx' && pptxMode === 'editable') && <PanoramaExportDeck report={report} rootRef={deckRef} />}
       <div role="status" aria-live="polite" className="fixed bottom-4 right-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-border bg-card p-4 shadow-lg print:hidden">
         <div className="flex items-start gap-3">
-          {running && <LoaderCircle className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-primary" aria-hidden="true" />}
           {status === 'done' && <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">
-              {status === 'preparing' && `Preparando o ${formatLabel} do Panorama…`}
-              {status === 'capturing' && `Gerando o ${formatLabel} do Panorama: ${progress} de ${total} páginas`}
-              {status === 'assembling' && 'Montando o arquivo final…'}
+            {running && <BrainLoadingState variant="operation" title={`Gerando ${formatLabel}`} startedAt={startedAt}
+              description={status === 'assembling' ? 'Montando o arquivo final…' : total ? `${progress} de ${total} páginas` : 'Preparando as páginas…'}/>}
+            {!running && <p className="text-sm font-medium">
               {status === 'done' && `${formatLabel} pronto: ${result?.pages} páginas`}
               {status === 'error' && `Não foi possível gerar o ${formatLabel}`}
-            </p>
+            </p>}
             <p className="mt-1 text-xs text-muted-foreground">
-              {running && 'Mantenha esta aba visível até o download. Você pode navegar dentro da plataforma, mas trocar de aba pode pausar a captura.'}
+              {running && (format === 'pptx' && pptxMode === 'editable' ? 'Geração nativa em andamento. Você pode navegar dentro da plataforma.' : 'Mantenha esta aba visível até o download. Você pode navegar dentro da plataforma, mas trocar de aba pode pausar a captura.')}
               {status === 'done' && 'O download começou automaticamente.'}
               {status === 'error' && error}
             </p>
@@ -117,4 +133,4 @@ export default function PanoramaExportHost() {
   );
 }
 
-type PanoramaExportRunKey = { report: object; format: PanoramaExportFormat; signal?: AbortSignal } | null;
+type PanoramaExportRunKey = { report: object; format: PanoramaExportFormat; mode?: 'mirror' | 'editable'; signal?: AbortSignal } | null;
