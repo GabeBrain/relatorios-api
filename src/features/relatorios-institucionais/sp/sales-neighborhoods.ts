@@ -14,16 +14,23 @@ export function buildSpSalesNeighborhoods(buildings: Record<string, unknown>[], 
   try { for (const building of buildings) insertBuilding(byId, { ...building, __panoramaSource: building.__panoramaSource ?? { source: 'building-with-history' } }); } catch { return block('Há empreendimentos repetidos com conteúdos conflitantes ou sem identidade.'); }
   const groups = new Map<string, { neighborhood: string; units: number }>(), monthly = new Map<string, number>(), patterns = new Map<string, number>();
   for (const building of byId.values()) {
+    const label=`Empreendimento ${String(building.building_id??building.id).slice(0,40)}`;
     if (normalize(building.city) !== 'sao paulo' || normalize(building.state ?? building.uf) !== 'sp' || normalize(building.building_type) !== 'vertical') return block('A coleta de bairros contém empreendimento fora de São Paulo/SP vertical.');
     const release = monthOf(building.release_date);
     const day = String(building.release_date ?? '').slice(0,10);
     if (!release || !/^\d{4}-\d{2}-\d{2}$/.test(day) || !Number.isFinite(Date.parse(day)) || new Date(day).toISOString().slice(0,10) !== day) return block('Há empreendimento sem data de lançamento válida.');
     const eligible = report.monthly.map(row => row.month).filter(month => month >= release);
     if (!eligible.length) continue;
-    if (typeof building.neighborhood !== 'string' || !building.neighborhood.trim() || !Array.isArray(building.typologies_history) || !(SP_API_PATTERNS as readonly string[]).includes(String(building.standard))) return block('Faltam bairro, padrão ou históricos identificados. O ranking não usa somente os registros preenchidos.');
-    const neighborhood = building.neighborhood.trim().replace(/\s+/g, ' '), key = normalize(neighborhood);
+    const missing:string[]=[];
+    if(typeof building.neighborhood!=='string'||!building.neighborhood.trim())missing.push('bairro ausente ou inválido');
+    if(!(SP_API_PATTERNS as readonly string[]).includes(String(building.standard)))missing.push('padrão ausente ou não reconhecido');
+    if(!Array.isArray(building.typologies_history))missing.push('históricos por tipologia ausentes ou em formato inválido');
+    else if(!building.typologies_history.length)missing.push('históricos por tipologia sem registros');
+    if(missing.length)return block(`${label}: ${missing.join('; ')}. O ranking aguarda a fonte completa, sem descartar este registro.`);
+    const histories=building.typologies_history as unknown[];
+    const neighborhood = (building.neighborhood as string).trim().replace(/\s+/g, ' '), key = normalize(neighborhood);
     const grouped = groups.get(key) ?? { neighborhood, units: 0 }, seen = new Map<string, string>(), observed = new Set<string>();
-    for (const raw of building.typologies_history) {
+    for (const raw of histories) {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return block('Há registro histórico inválido.');
       const row = raw as Record<string, unknown>, month = monthOf(row.period);
       if (!month) return block('Há histórico sem competência válida.');
@@ -38,7 +45,7 @@ export function buildSpSalesNeighborhoods(buildings: Record<string, unknown>[], 
       monthly.set(month, (monthly.get(month) ?? 0) + value);
       patterns.set(String(building.standard), (patterns.get(String(building.standard)) ?? 0) + value);
     }
-    if (eligible.some(month => !observed.has(month))) return block('Há empreendimento sem cobertura de vendas em todos os meses elegíveis.');
+    if (eligible.some(month => !observed.has(month))) return block(`${label}: faltam vendas identificadas nas competências ${eligible.filter(month=>!observed.has(month)).join(', ')}. Ausência não representa zero.`);
     groups.set(key, grouped);
   }
   const all = [...groups.values()], cityTotal = all.reduce((sum, row) => sum + row.units, 0);

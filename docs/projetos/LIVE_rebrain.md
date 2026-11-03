@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — SP: diagnóstico identificável do ranking de bairros — Codex
+
+- **Contexto:** usuário adiou a automação e depois enviou bloqueio de bairros. Checklist anterior mostrava49 disponíveis/8 referências/28 aguardando; novo print comprova validação impeditiva após coleta, mas não o campo exato. Base limpafb7fa91 atualizada por ff-only paraf5d4ba6 com dois commits de grafia Finoti, preservados. Codex/Codex Test, Windows/PowerShell.
+- **Ajuste:** mensagem do primeiro registro impeditivo informa ID e campo (bairro/padrão/histórico/formato vazio); lacuna mensal também informa competências. Não descarta registros, não preenche zeros e não muda os cálculos/reconciliações. Automação continua adiada, sem alteração de fluxo ou motores paralelos.
+- **Evidência/pendência:**14 testes dirigidos aprovados, tipos/build/lint conferidos; [evidências](../features/relatorios-institucionais/sp/EVIDENCIAS.md). Amostra antiga confirma campos no contrato, não a coleção real. Sem nova API ou observação autenticada; aguardar ID/campo atual para confrontar a origem. Falha de dados ainda não considerada resolvida.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente, sem escrita.
+
 ### 2026-11-03 — Estimativas: grafia Finoti nos textos exibidos — Gabriel / Claude
 
 - **Solicitação:** Gabriel pediu grafar "Finoti" (um t) em tudo que aparece na tela.
@@ -727,6 +734,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**03/11 — SP, bairros:** diagnóstico agora identifica primeiro empreendimento/campo impedido. Ranking continua aguardando integridade da fonte; coletar a nova mensagem no acesso real antes de decidir correção de dado ou contrato. Automação segue adiada.
+
 **03/11 — SP, período geral:** Ano/Trimestre e transporte histórico por janelas validados localmente, incluindo virada2027. Próximo reteste autenticado2T2026 para confirmar motivo/recuperação no acesso real; alteração no Git não prova deploy ou homologação.
 
 **02/11 — Estimativas:** seção14 implementada e validada localmente (129Vitest+15operacionais, seis telas/temas+cinco estados e replay real); prévia/Excel na principal, análise detalhada preservada. Enviada a origin/main em `ad86e26` com autorização; publicação/aceite no site e formato Nicolas/Belogic pendentes.
@@ -778,6 +787,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — ranking39:** obter ID/campo ou competências do novo aviso e confrontar resposta da API. Não ignorar empreendimentos ou assumir zero para publicar Top10 parcial.
 
 - [ ] **SP — incidente2T2026:** atualizar a página, autenticar e retestar Ano2026/2º trimestre; se falhar, registrar mensagem segura/janela e checklist. Causa original ainda semHTTP real. Conferir períodos/INCC disponíveis, deploy e aceite; não preencher ausência com zero.
 

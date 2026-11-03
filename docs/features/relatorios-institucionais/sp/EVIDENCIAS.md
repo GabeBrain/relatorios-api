@@ -1,5 +1,11 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 03/11/2026 — identificação do bloqueio de bairros
+
+Usuário forneceu checklist2T2026 (49 disponíveis,8 referências,28 aguardando) e, após a coleta detalhada, print do bloqueio de bairros com mensagem que agrupava três condições. Inspeção do contrato e da amostra antiga: campos `neighborhood`, `standard` e `typologies_history` existem na API e estão preenchidos na amostra, mas isso não comprova todos os5.229 registros atuais. Não identificar causa/campo por suposição.
+
+Agora a primeira ocorrência impeditiva informa ID do empreendimento e distingue bairro ausente/inválido, padrão ausente/não reconhecido, históricos ausentes/formato inválido ou array vazio. A falta de cobertura mensal também identifica ID e competências. Mesmas validações, totais e regras conservadoras; sem excluir registros nem preencher zeros.14 testes dirigidos do terceiro lote aprovados, incluindo4 variações do novo diagnóstico e ranking reconciliado; tipos/build/lint conferidos. Sem nova coleta real ou inspeção da sessão pessoal; aguardar mensagem específica no acesso do usuário para identificar o registro atual. Automação geral segue adiada por pedido explícito, sem mudança de fluxo.
+
 ## 03/11/2026 — período geral, falhas históricas e virada2027
 
 - **Abertura:** main limpa`9b5d641`, único origin5commits à frente. Fast-forward até`fec9b74` incorporou a jornada de Estimativas de Gabriel; entradas novas lidas e escopo preservado. Base reconferida0/0 antes da entrega. Codex/Codex Test no Windows/PowerShell, solicitação do usuário após teste real do2T2026.

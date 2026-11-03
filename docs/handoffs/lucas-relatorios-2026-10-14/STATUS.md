@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 03/11/2026 — ranking de bairros, diagnóstico por registro
+
+Após o usuário adiar a automação, novo print mostrou bloqueio de validação do39. Ajuste pontual informa ID/campo ou competências faltantes, mantendo ranking bloqueado diante de fonte incompleta. Base limpafb7fa91 atualizada por ff-only paraf5d4ba6, incorporando dois commits de grafia Finoti de Estimativas, preservados.14 testes dirigidos aprovados; evidências na feature. Nenhuma API de negócio real ou mudança de automação. Próximo identificar o registro/campo com a nova mensagem e confrontar a fonte; não afirmar o dado ausente corrigido.
+
 ## 03/11/2026 — SP em qualquer período selecionado
 
 Usuário relatou três falhas históricas no2T2026 e pediu Ano/Trimestre separados, inclusive2027. Base limpa9b5d641 atualizada por ff-only atéfec9b74 com cinco commits de Estimativas, preservados. Codex/Codex Test, Windows/PowerShell, origin único0/0. Campos separados, padrão no último trimestre concluído, calendárioSãoPaulo e descarte de resultados ao mudar período. Transporte histórico anual/paginado, janela derivada dos comparativos e estoque de abertura separado dos fluxos; erros seguros/Retry-After preservados.221 testes SP+359 regressões, tipos/lint/build e navegador dirigido aprovados; detalhes emEVIDENCIAS. Sem API real: causa do erro original não confirmada e sessão Computer Use não iniciou. Próximo reteste autenticado do2T2026; exportação/metodologia/editorial/índices futuros/deploy observado continuam pendentes. Sem alteração em motores paralelos ou Monday.
