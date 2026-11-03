@@ -1,5 +1,13 @@
 # Decisões e pontos abertos — SP
 
+## 03/11/2026 — bairro condicionado ao movimento comprovado do período
+
+Resposta individual fornecida pelo usuário para33693 confirmou bairro vazio e vendas mensais explicitamente0 emabr/mai/jun2026, com tipologia42611 identificada e cobertura completa. O bloqueio anterior exigia bairro antes de examinar o movimento e era excessivo nesse caso. O status atual Esgotado, estoque0 e vendido acumulado280 não são usados para presumir ausência de venda passada.
+
+Regra geral do39: validar escopo/data/padrão, históricos, identidade, deduplicação/conflitos e valores; exigir cobertura de todos os meses elegíveis. Sem bairro, só dispensar localização se cada observação for0 e cada tipologia identificada no período cobrir todos os meses elegíveis. Valores positivos ou negativos, mesmo com soma trimestral/mensal0, continuam exigindo bairro. Histórico ausente/incompleto nunca vira0. O registro é validado e contabilizado em `verifiedZeroWithoutNeighborhood`; não cria bairro fictício nem participa de um Top10 de contribuições nulas. Totais por mês/padrão/cidade permanecem obrigatoriamente iguais ao municipal.
+
+Aplica-se a qualquer ID/trimestre, sem exceção fixa para33693. Slide informa quantos cadastros sem bairro tiveram zero comprovado; cidade inteiramente zerada pode ter ranking vazio e participação indisponível. Não altera o25 de lançamentos, as demais fórmulas ou a automação adiada. Corrige o cálculo/validação, sem preencher o bairro ausente na API.
+
 ## 03/11/2026 — ano/trimestre dinâmicos e histórico por janelas
 
 Usuário relatou falha das três séries históricas no2T2026 e pediu funcionamento geral, com Ano e Trimestre separados e virada automática para2027. O print comprova o sintoma, mas não informa HTTP/timeout/contrato; não atribuir a causa original ao limite de páginas sem evidência real.

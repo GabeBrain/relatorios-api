@@ -177,6 +177,7 @@ try {
         for (const slide of (quick?[13,18,23,26,32,39,40,46,47,50,51,53,61,63,67,69,73,76,78,80,82,85]:Array.from({length:85},(_,i)=>i+1))) {
           await openSlide(slide);
           if (slide === 39) await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
+          if (slide === 39) assert.match(await page.getByRole('article').innerText(),/vendas zero comprovadas/);
           if (slide === 39) assert.equal(neighborhoodCalls, width === 1440 ? dark ? 2 : 1 : dark ? 4 : 3);
           if (slide >= 51 && slide <=80) await page.getByText(/Históricos de áreas e preços processados/).waitFor();
           await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
@@ -330,7 +331,7 @@ try {
   await yearPage.getByRole('combobox',{name:'Trimestre do estudo'}).click();assert.equal(await yearPage.getByRole('option').count(),1);await yearPage.keyboard.press('Escape');
   await yearPage.getByRole('region',{name:'Seleção do estudo'}).screenshot({path:resolve(output,'year-2027.png')});await yearContext.close();
   assert.deepEqual(errors, []);
-  const result = { results, reducedMatrix:quick, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, mapboxResponses: {total:mapboxResponses.length,success:mapboxResponses.filter(status=>status===200).length}, originalSlidesCovered:quick?22:85, mapSlowAndProviderError:true, practicalChecklistAndExplicitDetails:true, periodsTested, year2027Verified:true, historical429AndRetry:true, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
+  const result = { results, reducedMatrix:quick, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, mapboxResponses: {total:mapboxResponses.length,success:mapboxResponses.filter(status=>status===200).length}, originalSlidesCovered:quick?22:85, mapSlowAndProviderError:true, practicalChecklistAndExplicitDetails:true, periodsTested, year2027Verified:true, historical429AndRetry:true, unlocatedZeroSalesVerified:true, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
   await writeFile(resolve(output, 'result.json'), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 } finally {

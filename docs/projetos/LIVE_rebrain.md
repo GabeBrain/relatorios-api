@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — SP: bairro dispensável quando vendas zero estão comprovadas — Codex
+
+- **Origem/causa:** usuário forneceu histórico33693 com bairro vazio e0vendas emabr/mai/jun2026, tipologia42611 identificada. Bloqueio do39 era excessivo: exigia bairro antes de examinar o movimento. Codex/Codex Test, Windows/PowerShell; main limpaa645034, origin único0/0 após fetch.
+- **Regra:** validar históricos/IDs/conflitos/valores e cobertura mensal por tipologia; sem bairro, permitir somente cada venda explicitamente0. Qualquer positivo/negativo, inclusive soma0, mantém exigência de bairro. Sem inferência por status atual/estoque/acumulado e sem exceção porID. Totais municipais, mensais e por padrão preservados; nota no slide informa quantidade de cadastros com zero comprovado. Não preenche bairro na API nem altera automação adiada.
+- **Validação:**240 testes SP/20arquivos, tipos/build/lint aprovados; navegador dirigido22posições, quatro períodos/2027 e estados de falha/recuperação, projeto sem bairro/zero observado e imagem39 inspecionada. Dados de mercado do teste são simulados, salvo a prova individual fornecida pelo usuário; zero API GeoBrain pelo agente, Mapbox27HTTP200. [Método](../features/relatorios-institucionais/sp/DECISOES.md), [evidência](../features/relatorios-institucionais/sp/EVIDENCIAS.md).
+- **Pendências:** reteste da coleção completa; outros registros com bairro ausente e movimento ou histórico incompleto continuam bloqueando. Cadastro do provedor, método/editorial, deploy observado e exportação integral não homologados. Fonte/contratos de motores paralelos preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente, sem escrita.
+
 ### 2026-11-03 — SP: diagnóstico identificável do ranking de bairros — Codex
 
 - **Contexto:** usuário adiou a automação e depois enviou bloqueio de bairros. Checklist anterior mostrava49 disponíveis/8 referências/28 aguardando; novo print comprova validação impeditiva após coleta, mas não o campo exato. Base limpafb7fa91 atualizada por ff-only paraf5d4ba6 com dois commits de grafia Finoti, preservados. Codex/Codex Test, Windows/PowerShell. Implementação no commit `6a039bd`.
@@ -734,6 +742,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**03/11 — SP, caso33693:** prova recebida e regra excessiva corrigida para bairro ausente com vendas0 inteiramente comprovadas. Retestar coleção integral; demais problemas de fonte permanecem impeditivos.
+
 **03/11 — SP, bairros:** diagnóstico agora identifica primeiro empreendimento/campo impedido. Ranking continua aguardando integridade da fonte; coletar a nova mensagem no acesso real antes de decidir correção de dado ou contrato. Automação segue adiada.
 
 **03/11 — SP, período geral:** Ano/Trimestre e transporte histórico por janelas validados localmente, incluindo virada2027. Próximo reteste autenticado2T2026 para confirmar motivo/recuperação no acesso real; alteração no Git não prova deploy ou homologação.
@@ -788,7 +798,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **SP — ranking39:** obter ID/campo ou competências do novo aviso e confrontar resposta da API. Não ignorar empreendimentos ou assumir zero para publicar Top10 parcial.
+- [ ] **SP — reteste39 após zero comprovado:** gerar/conferir novamente com a coleção real; verificar igualdade municipal e qualquer novo ID/campo. O cadastro33693 segue sem bairro na origem, mas seu0observado não exige localização no2T2026.
+
+- [x] **SP — ranking39:** obter ID/campo ou competências do novo aviso e confrontar resposta da API. Não ignorar empreendimentos ou assumir zero para publicar Top10 parcial.
 
 - [ ] **SP — incidente2T2026:** atualizar a página, autenticar e retestar Ano2026/2º trimestre; se falhar, registrar mensagem segura/janela e checklist. Causa original ainda semHTTP real. Conferir períodos/INCC disponíveis, deploy e aceite; não preencher ausência com zero.
 

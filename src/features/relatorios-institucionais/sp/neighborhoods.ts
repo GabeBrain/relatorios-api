@@ -1,6 +1,7 @@
 import type { SpPreview } from './model';
 
 export interface SpLaunchNeighborhoods {
+  verifiedZeroWithoutNeighborhood?:number;
   status: 'ready' | 'blocked'; issues: string[];
   rows: { neighborhood: string; units: number; share: number | null }[];
   cityTotal: number | null; topTotal: number | null; topShare: number | null;

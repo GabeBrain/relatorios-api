@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 03/11/2026 — correção do bloqueio excessivo de bairro com vendas zero
+
+Usuário enviou histórico33693: bairro vazio e0vendas identificadas emabr/mai/jun2026. Exigência de bairro antes dos movimentos corrigida: dispensar apenas com todos os zeros/cobertura por tipologia comprovados, preservando confronto municipal. Regra geral sem IDs especiais; fluxo de automação adiado permanece intacto. Main limpaa645034/origin único0/0, Codex/Codex Test/Windows.240 testes SP, tipos/lint/build e navegador dirigido aprovados; prova mínima/proveniência versionadas. Fonte real fornecida pelo usuário, sem nova API autenticada pelo agente. Retestar coleção integral para verificar outros bloqueios; não declarar cadastro/API corrigidos ou aceite do relatório. Evidências e método na feature.
+
 ## 03/11/2026 — ranking de bairros, diagnóstico por registro
 
 Após o usuário adiar a automação, novo print mostrou bloqueio de validação do39. Ajuste pontual informa ID/campo ou competências faltantes, mantendo ranking bloqueado diante de fonte incompleta. Base limpafb7fa91 atualizada por ff-only paraf5d4ba6, incorporando dois commits de grafia Finoti de Estimativas, preservados.14 testes dirigidos aprovados; evidências na feature. Nenhuma API de negócio real ou mudança de automação. Próximo identificar o registro/campo com a nova mensagem e confrontar a fonte; não afirmar o dado ausente corrigido.
