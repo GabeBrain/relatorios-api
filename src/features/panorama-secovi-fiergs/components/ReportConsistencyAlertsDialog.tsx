@@ -39,7 +39,7 @@ export function ReportConsistencyAlertsDialog({ report, alerts, open, onOpenChan
       <DialogFooter className="gap-2">
         <Button variant="outline" onClick={() => downloadFiergsAudit(report)}>Auditoria CSV</Button>
         <Button variant={pendingFormat ? 'outline' : 'default'} onClick={() => onOpenChange(false)}>{pendingFormat ? 'Voltar' : 'Entendi'}</Button>
-        {pendingFormat && <Button onClick={onContinue}>Continuar e baixar {pendingFormat === 'pdf' ? 'PDF' : pendingMode === 'editable' ? 'PPT editável' : 'PPT espelho'}</Button>}
+        {pendingFormat && <Button onClick={onContinue}>Continuar e baixar {pendingFormat === 'pdf' ? 'PDF' : pendingMode === 'editable' ? 'PPT editável' : 'PPT'}</Button>}
       </DialogFooter>
     </DialogContent>
   </Dialog>;

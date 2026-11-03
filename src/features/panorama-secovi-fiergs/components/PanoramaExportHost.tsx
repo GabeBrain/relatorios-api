@@ -27,7 +27,7 @@ export default function PanoramaExportHost() {
     // o commit. Ele precisa considerar **formato e relatório**: com a chave só no relatório, pedir o
     // PPT logo depois do PDF do mesmo recorte reencontrava a chave anterior, o efeito retornava sem
     // nada fazer e a exportação ficava presa em "Preparando…" para sempre — que é exatamente o
-    // caminho do PPT espelho pedido na homologação.
+    // caminho do PPT pedido na homologação.
     if (startedFor.current?.report === report && startedFor.current.format === format && startedFor.current.mode === pptxMode && startedFor.current.signal === signal) return;
     startedFor.current = { report, format, mode: pptxMode, signal };
     const initialBlockReason = panoramaExportBlockReason(report, { consistencyAcknowledged });
@@ -85,7 +85,7 @@ export default function PanoramaExportHost() {
   }, [status, report, format, pptxMode, manifest, controller, consistencyAcknowledged]);
 
   const running = status === 'preparing' || status === 'capturing' || status === 'assembling';
-  const formatLabel = format === 'pptx' ? pptxMode === 'editable' ? 'PPT editável' : 'PPT espelho' : 'PDF';
+  const formatLabel = format === 'pptx' ? pptxMode === 'editable' ? 'PPT editável' : 'PPT' : 'PDF';
   if (status === 'idle') return null;
 
   return (

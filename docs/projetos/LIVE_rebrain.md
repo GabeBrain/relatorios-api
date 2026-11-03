@@ -385,6 +385,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — Panorama: rótulo PPT e publicação autorizada — Gabriel / Codex
+
+- **Pedido/mudança:** Gabriel pediu apresentar o formato anterior apenas como `PPT`; toolbar, progresso e confirmação de alertas atualizados. `PPT editável` permanece distinto. Sem mudança em dados ou serialização.
+- **Integração:** seis commits SP integrados com autorização em `3e09422`, sem conflito; alteração local do LIVE guardada/reaplicada e materiais paralelos preservados. Publicação Git autorizada nesta sessão; deploy e ensaio real G6 continuam pendentes. [Fonte do upgrade](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md).
+
+
 ### 2026-11-03 — Panorama: PowerPoint nativo editável, validação local — Gabriel / Codex
 
 - **Mudança:** pacote de apresentação sobre o mesmo modelo/manifesto; textos/tabelas/formas e gráficos Office com XLSX embutido. Modalidade editável separada do espelho, download `-editavel.pptx`, BrainLoadingState, cancelamento/retentativa e alertas preservados. PDF/CSV e domínio numérico intactos. [Fonte única, matriz e limitações](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026).
