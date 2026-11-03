@@ -1,6 +1,6 @@
 # PowerPoint editável — Panorama FIERGS e Secovi
 
-**Data:** 03/11/2026. **Estado:** implementação G0–G5 validada localmente, com exceções institucionais explícitas; sem push/publicação. G6 e aceite do novo formato permanecem pendentes, conforme seção 7.
+**Data:** 03/11/2026. **Estado:** implementação G0–G5 validada localmente e enviada ao Git até `92eeef0`, com exceções institucionais explícitas. Publicação/conferência no site e aceite do novo formato no G6 permanecem pendentes, conforme seção 7.
 **Objetivo:** permitir que Finoti e demais usuários editem textos, tabelas, séries e apresentação dos estudos no PowerPoint, mantendo os dados e o conteúdo aprovados. Esta é a fonte única desta evolução; o documento vivo do Rebrain aponta para ela.
 
 ## 1. Diagnóstico confirmado
@@ -204,7 +204,7 @@ Fonte institucional inspecionada: `assets/Slides-Institucionais-Brain-2026.pptx`
 
 ### Pendências antes de declarar G6 concluído
 
-1. Apresentar divergência/commits e obter autorização para integração adicional/push/publicação. Novos commits SP após a integração autorizada não foram mesclados automaticamente.
+1. **Integração/envio concluídos:** Gabriel autorizou, seis commits SP foram integrados em `3e09422`, rótulo anterior reduzido a `PPT` e push confirmado até `92eeef0` em03/11 (0/0). Conferir o build/publicação do site; não presumir deploy pelo push. O resumo JSON mantém a evidência do checkpoint local anterior, sem reescrever seu histórico.
 2. Conferir no site um FIERGS real (preset e recorte livre) e Secovi real, mesma geração para PDF/CSV/espelho/editável. Sem autorização, o agente não fará nova coleta nem estudo real.
 3. Gabriel/Finoti revisarem a aparência nativa e aceitarem as exceções rasterizadas institucionais. O PPTX é funcionalmente editável nas análises; não é cópia pixel a pixel do PDF nem arquivo inteiro vetorial.
 4. Manter separado o aceite Juliana dos dados anteriores do aceite deste novo formato. Alterações manuais no PPTX baixado não atualizam o site, a base, o PDF ou o CSV original.

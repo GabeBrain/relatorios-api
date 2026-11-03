@@ -388,7 +388,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ### 2026-11-03 — Panorama: rótulo PPT e publicação autorizada — Gabriel / Codex
 
 - **Pedido/mudança:** Gabriel pediu apresentar o formato anterior apenas como `PPT`; toolbar, progresso e confirmação de alertas atualizados. `PPT editável` permanece distinto. Sem mudança em dados ou serialização.
-- **Integração:** seis commits SP integrados com autorização em `3e09422`, sem conflito; alteração local do LIVE guardada/reaplicada e materiais paralelos preservados. Publicação Git autorizada nesta sessão; deploy e ensaio real G6 continuam pendentes. [Fonte do upgrade](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md).
+- **Integração/publicação:** seis commits SP integrados com autorização em `3e09422`, sem conflito; alteração local do LIVE guardada/reaplicada e materiais paralelos preservados. Push autorizado concluído até `92eeef0`, confirmado em origin/main com0/0; 14 testes focados e tipos aprovados após integração. Publicado no Git, não verificado no site; deploy e ensaio real G6 continuam pendentes. [Fonte do upgrade](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md).
 
 
 ### 2026-11-03 — Panorama: PowerPoint nativo editável, validação local — Gabriel / Codex
@@ -823,7 +823,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
-- **Panorama — PPTX editável:** implementação validada localmente em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende de autorização/publicação/ensaio real e aceite das exceções institucionais; aceite dos dados anteriores preservado.
+- **Panorama — PPTX editável:** implementação validada localmente e enviada ao Git até `92eeef0` em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende da publicação/conferência no site e aceite das exceções institucionais; aceite dos dados anteriores preservado.
 **03/11 — SP, correção no consumidor:**51/53–59/78 tratados por regra explícita, com preservação/auditoria e parciais identificadas;271testes e navegador dirigido aprovados. Novo checklist autenticado pendente.
 
 **03/11 — SP, pós-v2:** checklist real confirma68disponíveis/7parciais/2bloqueados/8referências. Casos de fonte/contrato identificados e material de encaminhamento pronto; diagnóstico78 refinado e267testes aprovados.
@@ -894,7 +894,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- **Panorama — PPTX editável:** autorizar integração adicional e envio dos commits, publicar e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes; edição Office já verificada em cópias sintéticas.
+- **Panorama — PPTX editável:** conferir publicação no site e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Integração e envio autorizados concluídos; aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes. Edição Office já verificada em cópias sintéticas.
 - [ ] **SP — retestar tratamento aplicado:** gerar novo2T2026 com estoques assinados conciliados, preços parciais† e VGV calculado; conferir os resultados e a auditoria antes de homologar. API original e performance da coleta continuam independentes.
 
 - [ ] **SP — validar contrato e casos da fonte:** esclarecer estoque−1 do26686, jun2023 ausente do64094 e sold/qty/distratos do87999. Material local pronto, sem envio externo. Não alterar identidade ou fabricar dados antes da confirmação; não declarar relatório homologado.
