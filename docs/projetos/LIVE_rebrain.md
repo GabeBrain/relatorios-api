@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — SP: correção de cálculos e cobertura no consumidor — Codex
+
+- **Ambiente/funcionalidade:** SP Institucional,51/53–59/78, ressalvas/checklist/auditoria.
+- **Pedido e decisão:** usuário solicitou fazer a correção após o diagnóstico. [Método aplicado](../features/relatorios-institucionais/sp/TRATAMENTO_FONTE_2026-11-03.md) substitui os bloqueios anteriores pertinentes: estoque negativo informado preservado na conciliação/contagem, sem peso na média de oferta positiva; amostra histórica parcial identificada, sem variação; vendido/VGV calculados de capacidade−oferta válidas e sold original auditado. Dados ausentes/conflitos/totais de fotografia completa divergentes continuam protegidos.
+- **Interface/linhagem:** SVG mantém85posições; barra amarela† identifica amostra, nota78 declara derivação. Alert de ressalvas existente reutilizado. JSON aditivo inclui resumo de avisos e método/contagem/exemplos de vendido calculado. Sem API alterada, estimativa de registros faltantes ou mutação dos fluxos mensais.
+- **Validação:**271testes SP/24arquivos, tipos/lint/build e Edge dirigido22posições mais casos novos aprovados; três capturas inspecionadas. Refinamento textual final repetido em7testes. Prova mínima real87999 e demais dados simulados; zero API de negócio nova,54Mapbox200. Commit técnico registrado no fechamento.
+- **Etapas/Pendências:** implementação preparada para reteste autenticado, não homologação ou fonte corrigida. Revisão de contrato/origem permanece como melhoria, sem impedir a aplicação da regra solicitada. Tempo da coleta, automação adiada e outros motores fora desta alteração.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
 ### 2026-11-03 — SP: identificação do78 e casos prontos para validação da fonte — Codex
 
 - **Ambiente/funcionalidade:** SP Institucional, VGV por padrão/checklist e diagnóstico de estoque.
@@ -794,6 +803,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**03/11 — SP, correção no consumidor:**51/53–59/78 tratados por regra explícita, com preservação/auditoria e parciais identificadas;271testes e navegador dirigido aprovados. Novo checklist autenticado pendente.
+
 **03/11 — SP, pós-v2:** checklist real confirma68disponíveis/7parciais/2bloqueados/8referências. Casos de fonte/contrato identificados e material de encaminhamento pronto; diagnóstico78 refinado e267testes aprovados.
 
 **03/11 — SP, fonte detalhada v2:** contrato da página1 observado pelo usuário, transporte adaptado/testado e preflight público confirmado. Coleta integral autenticada no site e paridade real ainda pendentes.
@@ -861,6 +872,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — retestar tratamento aplicado:** gerar novo2T2026 com estoques assinados conciliados, preços parciais† e VGV calculado; conferir os resultados e a auditoria antes de homologar. API original e performance da coleta continuam independentes.
 
 - [ ] **SP — validar contrato e casos da fonte:** esclarecer estoque−1 do26686, jun2023 ausente do64094 e sold/qty/distratos do87999. Material local pronto, sem envio externo. Não alterar identidade ou fabricar dados antes da confirmação; não declarar relatório homologado.
 

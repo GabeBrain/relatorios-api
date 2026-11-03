@@ -75,6 +75,7 @@ try {
         if (detailsCase === 'gap') rows[0].typologies_history = rows[0].typologies_history.filter(row => row.period !== '2024-09-01');
         if (detailsCase === 'missing-area') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).private_area = null;
         if (detailsCase === 'capacity-diagnostic') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).sold = -9;
+        if (detailsCase === 'signed-stock') rows[0].typologies_history.find(row => row.period === '2026-06-01').typology_stock = -1;
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
       }
       calls++;
@@ -97,6 +98,7 @@ try {
           if (month > `2026-${closing}`) continue;
           for (const [i, group] of recorded.groups.entries()) all.push({ period: `${month}-01`, group, building_type: 'Vertical', [field]: months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m), ...(metric === 'releases' ? { vgv_release: (months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m)) * 100000.25 } : metric === 'sales' ? { vgv_liquid_sales: (months[month]?.[i] ?? 100 + i * 5 + m) * 100000.25 } : {}) });
         }
+        if(detailsCase==='signed-stock'&&metric==='stock')for(const row of all)if(row.period==='2026-06-01'&&row.group===recorded.groups[0])row.stock-=Math.floor(row.stock*.1)+1;
         const filtered=all.filter(row=>row.period>=url.searchParams.get('start_period')&&row.period<=url.searchParams.get('end_period'));
         const p = Number(url.searchParams.get('page')), last = Math.max(1,Math.ceil(filtered.length / 100));
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: filtered.slice((p - 1) * 100, p * 100), meta: { current_page: p, last_page: last, total: filtered.length }, links: { next: p < last ? `?page=${p + 1}` : null } }) });
@@ -290,7 +292,7 @@ try {
   await captureSlide({path:resolve(output,'neighborhood-pattern-warning.png')});
   await page.getByText('Vendas por bairro disponíveis com ressalva de classificação', {exact:true}).scrollIntoViewIfNeeded();
   await page.screenshot({path:resolve(output,'neighborhood-pattern-warning-panel.png')});
-  await page.getByText('Detalhamentos com ressalvas de classificação', {exact:true}).waitFor();
+  await page.getByText('Detalhamentos com ressalvas da fonte', {exact:true}).waitFor();
   for(const slide of [51,53,54,55,56,57,58,59,63,64,66,67,68,72,73,74,75,76,79,80]){
     await openSlide(slide);
     assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em conferência|Áreas e preços em conferência|Localizações em conferência/);
@@ -304,7 +306,7 @@ try {
   detailsCase='mcmv-shift';
   await page.getByRole('button', {name:'Conferir dados reais',exact:true}).click();
   await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
-  await openSlide(63);await page.getByText('Detalhamentos com ressalvas de classificação',{exact:true}).waitFor();
+  await openSlide(63);await page.getByText('Detalhamentos com ressalvas da fonte',{exact:true}).waitFor();
   assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em conferência/);
   assert.match(await page.getByRole('article').innerText(), /MCMV: —/);
   await captureSlide({path:resolve(output,'dimensions-bedroom-mcmv-partial.png')});
@@ -329,10 +331,16 @@ try {
   await page.getByRole('button',{name:'Conferir dados reais',exact:true}).click();
   await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
   await openSlide(78);await page.getByText(/Históricos de áreas e preços processados/).waitFor();
-  assert.match(await page.getByRole('article').innerText(),/Empreendimento 1, tipologia 1/);
-  assert.match(await page.getByRole('article').innerText(),/sold negativo \(-9\)/);
+  assert.doesNotMatch(await page.getByRole('article').innerText(),/Dados em conferência/);
+  assert.match(await page.getByRole('article').innerText(),/Vendido calculado/);
   await captureSlide({path:resolve(output,'vgv-78-capacity-diagnostic.png')});
   await openSlide(79);assert.doesNotMatch(await page.getByRole('article').innerText(),/Dados em conferência|Localizações em conferência/);
+  detailsCase='signed-stock';
+  await page.getByRole('button',{name:'Conferir dados reais',exact:true}).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  await openSlide(51);await page.getByText(/Históricos de áreas e preços processados/).waitFor();
+  assert.doesNotMatch(await page.getByRole('article').innerText(),/Áreas e preços em conferência/);
+  await captureSlide({path:resolve(output,'source-treatment-51-signed-stock.png')});
   detailsCase = 'normal';
   negativeSales = true;
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -355,6 +363,7 @@ try {
     await page.getByText(/Históricos de áreas e preços processados/).waitFor();
     if (dataCase === 'missing-area') assert.match(await page.getByRole('article').innerText(), /em conferência/);
     await captureSlide({ path: resolve(output, `detail-${dataCase}.png`) });
+    if(dataCase==='gap')assert.match(await page.getByRole('article').innerText(),/Amostra observada com cobertura parcial/);
     await openSlide(61);
     assert.doesNotMatch(await page.getByRole('article').innerText(), /em conferência/);
     detailsCase = 'normal';

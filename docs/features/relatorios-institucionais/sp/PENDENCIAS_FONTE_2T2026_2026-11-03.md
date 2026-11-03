@@ -1,5 +1,7 @@
 # SP Institucional — casos para validação da fonte
 
+> Atualização posterior no mesmo dia: o usuário solicitou a correção no relatório. O [tratamento do consumidor foi implementado](TRATAMENTO_FONTE_2026-11-03.md): estoque assinado conciliado, amostra histórica identificada e vendido calculado por capacidade−oferta. Os casos abaixo continuam relevantes para validar o contrato/origem, mas as exigências de bloqueio descritas no diagnóstico anterior foram substituídas pela política documentada. Nenhuma mensagem externa foi enviada.
+
 03/11/2026 · 2T2026 · Codex · material preparado para encaminhamento humano, sem mensagem externa enviada.
 
 ## Texto para encaminhar

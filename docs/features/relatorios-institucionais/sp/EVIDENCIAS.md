@@ -1,5 +1,9 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 03/11/2026 — correção de uso da fonte, não somente diagnóstico
+
+Pedido explícito do usuário resultou em [tratamento implementado no consumidor](TRATAMENTO_FONTE_2026-11-03.md). Estoque negativo é preservado/conciliado, médias históricas observadas são mostradas como parciais e vendido/VGV da fotografia são calculados por capacidade−oferta com auditabilidade do sold original.271testes/24arquivos, tipos/lint/build e navegador dirigido aprovados; três capturas inspecionadas (51 assinado,53 parcial,78 calculado), zero erros de página/zero API de negócio real/54Mapbox200. Refinamento final de texto repetido em7testes aprovados. Sem afirmar desbloqueio da coleção real antes de novo checklist ou correção da origem. Pendências contratuais/analíticas permanecem, sem bloquear a aplicação da regra delegada pelo usuário.
+
 ## 03/11/2026 — slide78 identificado em resposta real e material de validação da fonte
 
 - **Evidência:** checklist apósv2 contém68disponíveis/7parciais/2bloqueados/8referências. Fonte v2 já fornecida demonstra87999/jun2026, tipologias150368/150369/150370, qty120/120/96, sold−9/−11/−6, estoque119/120/96. Deltas10/11/6 coincidem com distractions10/11/6; isso não comprova causa. [Resumo e perguntas prontas](PENDENCIAS_FONTE_2T2026_2026-11-03.md). Nenhuma nova chamada autenticada ou mensagem externa.

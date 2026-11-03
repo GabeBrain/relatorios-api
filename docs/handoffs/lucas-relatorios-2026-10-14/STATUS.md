@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 03/11/2026 — correção no consumidor após solicitação explícita
+
+Main limpa79d8383, origin único0/0 após fetch; Codex/Codex Test/Windows. Usuário pediu correção, não somente encaminhamento. [Política implementada](../../features/relatorios-institucionais/sp/TRATAMENTO_FONTE_2026-11-03.md): estoque negativo assinado no controle/área, preço de oferta positiva; amostras históricas parciais identificadas e sem variações; vendido/VGV calculados de capacidade−oferta válidas, sold original auditado sem alteração de fluxo mensal.271testes, tipos/lint/build e Edge dirigido aprovados, três capturas inspecionadas; fonte simulada/prova mínima real, sem API de negócio nova. Reteste autenticado e homologação pendentes; origem não foi alterada. Logs anteriores de bloqueio substituídos por decisão posterior explícita; automação e motores paralelos preservados.
+
 ## 03/11/2026 — pendências reais após v2 e diagnóstico78
 
 Main limpa6090278, origin único0/0 após fetch; Codex/Codex Test/Windows. Checklist3 do usuário:68disponíveis/7parciais/2bloqueados/8referências. Pediu próximo passo; investigada resposta v2 já entregue, identificando87999 com sold negativos e deltas coincidentes com distractions emjun2026. Semântica da fonte ainda precisa confirmação. Diagnóstico78 nominal/numérico e JSON refinados, estoque negativo preservado no diagnóstico; mesmas guardas.267testes, tipos/lint/build e navegador dirigido aprovados com fontes simuladas/prova mínima real; captura inspecionada. [Material para validação humana](../../features/relatorios-institucionais/sp/PENDENCIAS_FONTE_2T2026_2026-11-03.md), sem envio/APIalterada. Fonte/contrato e homologação pendentes; automação adiada e motores paralelos preservados.

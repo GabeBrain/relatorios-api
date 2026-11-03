@@ -55,7 +55,7 @@ describe('SP — áreas e preços nos dez originais51/53–59/61/62',()=>{
     const buildings=syntheticGranularBuildings(); histories(buildings[0]).find(row=>row.period==='2026-08-01')!.typology_stock=null;
     const result=buildSpGranularDetails(buildings,baseline()); expect(result.area.status).toBe('blocked'); expect(result.prices.overall.meter).toBeNull();
     const missing=syntheticGranularBuildings(); missing[0].typologies_history=histories(missing[0]).filter(row=>row.period!=='2024-09-01');
-    const gap=buildSpGranularDetails(missing,baseline()); expect(gap.prices.series[53].find(row=>row.label==='3T2024')!.value).toBeNull(); expect(gap.prices.series[53].at(-1)!.value).not.toBeNull();
+    const gap=buildSpGranularDetails(missing,baseline()); expect(gap.prices.series[53].find(row=>row.label==='3T2024')!.partial).toBe(true); expect(gap.prices.series[53].find(row=>row.label==='3T2024')!.value).not.toBeNull(); expect(gap.prices.series[53].at(-1)!.value).not.toBeNull();
   });
   it('estoque zero comprovado não ganha peso por quantidade lançada nem exige preço',()=>{
     const buildings=syntheticGranularBuildings(); for(const building of buildings.filter(row=>Number(row.building_id)>=100)) for(const row of histories(building)) { row.price=null; row.price_private_area=null; }

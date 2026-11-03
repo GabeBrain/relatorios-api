@@ -1,5 +1,9 @@
 # Decisões e pontos abertos — SP
 
+## 03/11/2026 — correção no consumidor solicitada pelo usuário
+
+Usuário pediu implementar a correção, após o diagnóstico e material da fonte. Aplicar [tratamento declarado de estoque, amostra histórica e VGV](TRATAMENTO_FONTE_2026-11-03.md): preservar estoque negativo informado na conciliação/contagem, sem peso na média de oferta positiva; admitir médias históricas da amostra observada identificadas como parciais, sem variações comparativas; calcular vendido/VGV vendido da fotografia por capacidade menos oferta válidas, preservando sold original na auditoria. Não alterar fontes/fluxos mensais, preencher faltantes ou remover guardas de integridade/precisão. Esta versão substitui as proibições anteriores dessas três operações exclusivamente neste relatório. Nota dos slides, checklist e JSON declaram origem/qualidade/método; origem e homologação continuam pendentes, sem condicionar essa implementação a contato externo.
+
 ## 03/11/2026 — diagnóstico de capacidade/VGV e preservação de valores negativos
 
 Checklist real após v2:68disponíveis/7parciais/2bloqueados/8referências. Revisão do78 confirma que a tabela usa capacidade, vendido acumulado e oferta, portanto conserva a guarda adotada qty=sold+estoque e a exigência de valores válidos. Agora mensagem identifica empreendimento/tipologia/mês, campos ausentes/negativos, diferença da identidade e falta de preço; somas inseguras têm motivo distinto. Ocorrências do fechamento entram em sourceDiagnostics, com limite de exemplos preservado. Estoque e sold negativos são mantidos na observação para diagnóstico, mas continuam explicitamente rejeitados onde inválidos; nenhuma conversão para0 ou reconstrução.

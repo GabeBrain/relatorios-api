@@ -17,8 +17,8 @@ export function spAreaBand(area: number, mcmv: boolean): number | null {
   if (area < 40) return mcmv ? 2 : 3;
   return [45,50,60,70,85,100,151,201,251,Infinity].findIndex(limit => area < limit) + 4;
 }
-export interface SpPriceValue { units: number; ticket: number | null; meter: number | null; issues: string[] }
-export interface SpPricePoint { label: string; month: string; value: number | null; variation: number | null; issue?: string }
+export interface SpPriceValue { units: number; ticket: number | null; meter: number | null; issues: string[]; partial?:boolean }
+export interface SpPricePoint { label: string; month: string; value: number | null; variation: number | null; issue?: string; partial?:boolean }
 export interface SpAreaRow { label: string; openingStock: number; stock: number; launches: number; sales: number; stockShare: number | null; launchShare: number | null; salesShare: number | null; ivv: number | null }
 export interface SpGranularDetails {
   diagnostics?: { month:string; issueCount:number; samples:string[] }[];
@@ -31,7 +31,7 @@ export interface SpGranularDetails {
 export const blockedSpGranularDetails = (message: string): SpGranularDetails => ({ status: 'blocked', issues: [message], prices: { series: {}, annualChanges: {}, standards: [], overall: { units: 0, ticket: null, meter: null, issues: [message] } }, area: { status: 'blocked', issues: [message], rows: [], total: null } });
 export interface SpObservation { project: string; typology?:string; month: string; standard: string; bedrooms: number | null; area: number | null; stock: number | null; sales: number | null; qty: number | null; price: number | null; meter: number | null; release: string; sold: number | null; stage: unknown }
 type Observation = SpObservation;
-interface Frame { rows: Observation[]; issues: Set<string> }
+interface Frame { rows: Observation[]; issues: Set<string>; missing:Set<string> }
 const numeric = (raw: unknown, signed = false, integer = false): number | null => {
   if (typeof raw !== 'number' && (typeof raw !== 'string' || !raw.trim())) return null;
   const value = Number(raw);
@@ -51,7 +51,7 @@ class DetailBuilder {
       const label = shiftQuarter(report.quarter, i - 13);
       return { label, month: i === 13 ? report.throughMonth! : quarterMonths(label)[2] };
     });
-    for (const month of [...this.quarters.map(row => row.month), shiftSpMonth(report.throughMonth!, -12), priorMonth(report.monthly![0].month), ...report.monthly!.map(row => row.month)]) this.frames.set(month, { rows: [], issues: new Set() });
+    for (const month of [...this.quarters.map(row => row.month), shiftSpMonth(report.throughMonth!, -12), priorMonth(report.monthly![0].month), ...report.monthly!.map(row => row.month)]) this.frames.set(month, { rows: [], issues: new Set(), missing:new Set() });
   }
   ingest(building: Record<string, unknown>) {
     const id = String(building.building_id ?? building.id ?? '').trim();
@@ -85,7 +85,7 @@ class DetailBuilder {
       const meter = area === null || area <= 0 ? null : explicitMeter === null || explicitMeter === undefined || explicitMeter === '' ? price !== null ? price / area : null : numeric(explicitMeter);
       frame.rows.push({ project: id, typology, month, standard, bedrooms: numeric(row.number_bedroom, false, true), area, stock: numeric(row.typology_stock, true, true), sales: numeric(row.sold_in_period, true, true), qty: numeric(row.qty, false, true), price, meter, release, sold: numeric(row.sold,true,true), stage: spHistoricalStage(row) });
     }
-    for (const [month, frame] of this.frames) if (month >= release && !observed.has(month)) frame.issues.add(`Empreendimento ${id}: sem fotografia na competência necessária ${month}. Ausência não representa estoque zero.`);
+    for (const [month, frame] of this.frames) if (month >= release && !observed.has(month)) frame.missing.add(`Empreendimento ${id}: sem fotografia na competência necessária ${month}. Ausência não representa estoque zero.`);
   }
   validate(month: string): string | null {
     if (this.validations.has(month)) return this.validations.get(month)!;
@@ -95,7 +95,8 @@ class DetailBuilder {
     if (this.issues.size) return [...this.issues][0];
     const frame = this.frames.get(month)!;
     if (frame.issues.size) return [...frame.issues][0];
-    const missingStock=frame.rows.find(row => row.stock === null||row.stock<0);
+    if (frame.missing.size) return [...frame.missing][0];
+    const missingStock=frame.rows.find(row => row.stock === null);
     if (missingStock) return `Empreendimento ${missingStock.project}, tipologia ${missingStock.typology}, competência ${month}: estoque ausente ou inválido em typology_stock${missingStock.stock===null?'':` (valor ${missingStock.stock})`}.`;
     const expected = this.expected(month);
     if (expected.length !== SP_API_PATTERNS.length) return 'A série municipal de oferta não comprovou esta competência.';
@@ -114,7 +115,9 @@ class DetailBuilder {
   }
   price(month: string, filter: (row: Observation) => boolean = () => true, groups?: readonly string[]): SpPriceValue {
     const problem = groups ? this.classification(month,groups) : this.validate(month);
-    if (problem) return { units: 0, ticket: null, meter: null, issues: [problem] };
+    const frame=this.frames.get(month)!, expected=this.expected(month),observedStock=frame.rows.reduce((sum,row)=>sum+(row.stock??0),0);
+    const partial=!!problem&&month!==this.report.throughMonth&&frame.missing.size>0&&!frame.issues.size&&!this.issues.size&&frame.rows.length>0&&frame.rows.every(row=>row.stock!==null)&&expected.length===SP_API_PATTERNS.length&&Number.isSafeInteger(observedStock)&&observedStock>=0&&observedStock<=expected.reduce((sum,row)=>sum+row.value,0);
+    if (problem&&!partial) return { units: 0, ticket: null, meter: null, issues: [problem] };
     const rows = this.frames.get(month)!.rows.filter(row => row.stock! > 0 && filter(row)), units = rows.reduce((sum,row) => sum + row.stock!,0);
     const weighted = (field: 'price' | 'meter') => {
       if (!units || rows.some(row => row[field] === null || row[field]! <= 0)) return null;
@@ -124,7 +127,9 @@ class DetailBuilder {
     const ticket = weighted('price'), meter = weighted('meter');
     const missing=rows.find(row=>ticket===null&&(row.price===null||row.price<=0)||meter===null&&(row.meter===null||row.meter<=0));
     const detail=missing?`Empreendimento ${missing.project}, tipologia ${missing.typology}, competência ${month}: ${ticket===null&&(missing.price===null||missing.price<=0)?'preço ausente ou inválido em price':'preço por m² ou área privativa ausentes ou inválidos'}.`:null;
-    return { units, ticket, meter, issues: !units ? ['Sem unidades em oferta para calcular o preço.'] : ticket === null || meter === null ? [detail??'Há oferta sem preço ou área privativa válidos para esta média.'] : [] };
+    const issues=!units ? ['Sem unidades em oferta para calcular o preço.'] : ticket === null || meter === null ? [detail??'Há oferta sem preço ou área privativa válidos para esta média.'] : [];
+    if(partial)issues.push(`Amostra observada em ${month}, sem ${frame.missing.size} empreendimento(s). ${[...frame.missing][0]} Variações não calculadas sobre cobertura parcial.`);
+    return { units, ticket, meter, issues,...(partial?{partial:true}:{}) };
   }
   finish(): SpGranularDetails {
     if (!this.buildings.size || this.issues.size) return blockedSpGranularDetails([...this.issues][0] ?? 'A coleção de empreendimentos não foi comprovada.');
@@ -138,8 +143,9 @@ class DetailBuilder {
         return price;
       };
       const all = this.quarters.map(row => ({ ...row, price: value(row.month) }));
-      series[number] = all.slice(1).map((row,i) => ({ label: row.label, month: row.month, value: row.price.meter, variation: change(row.price.meter, all[i].price.meter), issue: row.price.meter === null ? row.price.issues[0] : undefined }));
-      annualChanges[number] = change(all.at(-1)!.price.meter, value(shiftSpMonth(this.report.throughMonth!, -12)).meter);
+      series[number] = all.slice(1).map((row,i) => ({ label: row.label, month: row.month, value: row.price.meter, variation: row.price.partial||all[i].price.partial?null:change(row.price.meter, all[i].price.meter), issue: row.price.meter === null||row.price.partial ? row.price.issues[0] : undefined,...(row.price.partial?{partial:true}:{}) }));
+      const annualBefore=value(shiftSpMonth(this.report.throughMonth!, -12));
+      annualChanges[number] = annualBefore.partial||all.at(-1)!.price.partial?null:change(all.at(-1)!.price.meter, annualBefore.meter);
     }
     const closing=this.report.throughMonth!;
     const classificationIssues={
@@ -151,6 +157,10 @@ class DetailBuilder {
       const differences=SP_API_PATTERNS.map(group=>this.classification(month,[group])).filter((issue):issue is string=>!!issue);
       return differences.length ? [`${month}: total de estoque reconciliado, com diferença de classificação por padrão. ${differences.join(' ')}`] : [];
     });
+    for(const [month,frame] of this.frames){
+      for(const row of frame.rows)if(row.stock!==null&&row.stock<0)warnings.push(`${month}: empreendimento ${row.project}, tipologia ${row.typology}, estoque negativo informado ${row.stock}; preservado na conciliação e nas contagens, sem peso na média de preços da oferta positiva.`);
+      if(frame.missing.size)warnings.push(`${month}: ${frame.missing.size} empreendimento(s) sem fotografia. Preços históricos da amostra observada são parciais identificadas, sem variação comparativa.`);
+    }
     for(const [metric,field] of [['sales','sales'],['launches','qty']] as const){
       const rows=this.report.monthly!.flatMap(({month})=>this.frames.get(month)!.rows.filter(row=>metric==='sales'||row.release===month));
       if(rows.some(row=>row[field]===null))continue;
@@ -161,12 +171,15 @@ class DetailBuilder {
       });
       if(differences.length)warnings.push(`${metric==='sales'?'Vendas':'Lançamentos'} do período: total reconciliado, com diferença de classificação por padrão. ${differences.join('. ')}.`);
     }
-    const market=buildSpMarketDetails(this.frames.get(closing)!.rows, [...this.buildings.values()], this.report, this.validate(closing),classificationIssues);
+    const closingRows=this.frames.get(closing)!.rows;
+    const market=buildSpMarketDetails(closingRows, [...this.buildings.values()], this.report, this.validate(closing)??(closingRows.some(row=>row.stock!==null&&row.stock<0)?'A oferta final contém estoque negativo informado. Consulte as ressalvas; mapas e composições de oferta positiva aguardam uma fotografia não negativa.':null),classificationIssues);
+    warnings.push(...(market.vgv.warnings??[]));
     const diagnostics=[...this.frames].map(([month,frame])=>{
-      const issues=new Set(frame.issues);
+      const issues=new Set([...frame.issues,...frame.missing]);
       for(const row of frame.rows){
         const label=`Empreendimento ${row.project}, tipologia ${row.typology}, competência ${month}`;
-        if(row.stock===null||row.stock<0)issues.add(`${label}: typology_stock ausente ou inválido${row.stock===null?'':` (valor ${row.stock})`}.`);
+        if(row.stock===null)issues.add(`${label}: typology_stock ausente ou inválido.`);
+        else if(row.stock<0)issues.add(`${label}: estoque negativo informado (valor ${row.stock}), preservado na conciliação.`);
         if(row.stock!==null&&row.stock>0){
           if(row.price===null||row.price<=0)issues.add(`${label}: price ausente ou inválido.`);
           if(row.meter===null||row.meter<=0)issues.add(`${label}: preço por m² ou área privativa ausentes ou inválidos.`);
@@ -209,7 +222,7 @@ class DetailBuilder {
     for (const row of rows) for (const field of ['openingStock','stock','launches','sales'] as const) total[field] += row[field];
     if (total.openingStock !== this.report.monthly![0].openingStock || total.stock !== this.report.metrics.stock || total.launches !== this.report.metrics.launches || total.sales !== this.report.metrics.sales || [total,...rows].some(row => ['openingStock','stock','launches','sales'].some(field => !Number.isSafeInteger(row[field as keyof SpAreaRow])))) return blocked('Os totais por área não reconciliaram com o município.');
     for (const row of [...rows,total]) {
-      row.stockShare = total.stock > 0 ? row.stock / total.stock * 100 : null;
+      row.stockShare = total.stock > 0&&rows.every(item=>item.stock>=0) ? row.stock / total.stock * 100 : null;
       row.launchShare = total.launches > 0 ? row.launches / total.launches * 100 : null;
       row.salesShare = total.sales > 0 && rows.every(value => value.sales >= 0) ? row.sales / total.sales * 100 : null;
       row.ivv = row.openingStock + row.launches > 0 ? row.sales / (row.openingStock + row.launches) * 100 : null;
