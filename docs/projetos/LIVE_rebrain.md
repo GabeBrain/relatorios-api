@@ -387,7 +387,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ### 2026-11-03 — SP: diagnóstico identificável do ranking de bairros — Codex
 
-- **Contexto:** usuário adiou a automação e depois enviou bloqueio de bairros. Checklist anterior mostrava49 disponíveis/8 referências/28 aguardando; novo print comprova validação impeditiva após coleta, mas não o campo exato. Base limpafb7fa91 atualizada por ff-only paraf5d4ba6 com dois commits de grafia Finoti, preservados. Codex/Codex Test, Windows/PowerShell.
+- **Contexto:** usuário adiou a automação e depois enviou bloqueio de bairros. Checklist anterior mostrava49 disponíveis/8 referências/28 aguardando; novo print comprova validação impeditiva após coleta, mas não o campo exato. Base limpafb7fa91 atualizada por ff-only paraf5d4ba6 com dois commits de grafia Finoti, preservados. Codex/Codex Test, Windows/PowerShell. Implementação no commit `6a039bd`.
 - **Ajuste:** mensagem do primeiro registro impeditivo informa ID e campo (bairro/padrão/histórico/formato vazio); lacuna mensal também informa competências. Não descarta registros, não preenche zeros e não muda os cálculos/reconciliações. Automação continua adiada, sem alteração de fluxo ou motores paralelos.
 - **Evidência/pendência:**14 testes dirigidos aprovados, tipos/build/lint conferidos; [evidências](../features/relatorios-institucionais/sp/EVIDENCIAS.md). Amostra antiga confirma campos no contrato, não a coleção real. Sem nova API ou observação autenticada; aguardar ID/campo atual para confrontar a origem. Falha de dados ainda não considerada resolvida.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente, sem escrita.
