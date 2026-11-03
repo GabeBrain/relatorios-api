@@ -1,3 +1,4 @@
+import { spHistoryStartMonth } from './periods';
 import { isSpMunicipalPreview, monthOf, type SpPreview } from './model';
 import { SP_API_PATTERNS } from './segments';
 import { buildSpProjectTrends, buildSpTrendBreakdown, shiftSpMonth, spTrendSegment, type SpProjectTrends, type SpTrendBreakdown } from './project-trends';
@@ -16,7 +17,7 @@ export function buildSpSalesSeries(rows: SpTemporalRow[], report: SpPreview): Sp
 function buildSpFlowSeries(rows: SpTemporalRow[], report: SpPreview, metric: 'launches' | 'sales'): SpLaunchSeries {
   if (!isSpMunicipalPreview(report) || !report.throughMonth || report.patterns?.status !== 'ready') return blockedSpLaunchSeries('Confira os totais municipais antes das séries de lançamentos.');
   const months: string[] = [];
-  for (let month = '2021-01'; month <= report.throughMonth; month = shiftSpMonth(month, 1)) months.push(month);
+  for (let month = spHistoryStartMonth(report); month <= report.throughMonth; month = shiftSpMonth(month, 1)) months.push(month);
   const seen = new Set<string>(), monthly = new Map<string, number>();
   const parsed: { month: string; group: string; value: number }[] = [];
   for (const row of rows) {
@@ -27,7 +28,7 @@ function buildSpFlowSeries(rows: SpTemporalRow[], report: SpPreview, metric: 'la
     seen.add(`${month}/${group}`); parsed.push({ month, group, value });
     monthly.set(month, (monthly.get(month) ?? 0) + value);
   }
-  if (months.some(month => SP_API_PATTERNS.some(group => !seen.has(`${month}/${group}`)))) return blockedSpLaunchSeries('Faltam meses ou padrões desde janeiro de 2021. A série não preenche ausências com zero.');
+  if (months.some(month => SP_API_PATTERNS.some(group => !seen.has(`${month}/${group}`)))) return blockedSpLaunchSeries('Faltam meses ou padrões na janela histórica necessária ao trimestre selecionado. A série não preenche ausências com zero.');
   if (report.monthly?.some(row => monthly.get(row.month) !== row[metric])) return blockedSpLaunchSeries('A releitura histórica diverge dos totais municipais atuais. Gere os dados municipais novamente.');
   const currentMonths = new Set(report.monthly?.map(row => row.month));
   if (report.patterns.rows.some(row => parsed.filter(item => currentMonths.has(item.month) && item.group === row.group).reduce((sum, item) => sum + item.value, 0) !== row[metric])) return blockedSpLaunchSeries('A releitura histórica diverge dos padrões municipais atuais.');

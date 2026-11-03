@@ -1,3 +1,4 @@
+import { spHistoryStartMonth } from './periods';
 import { editorialWindow, shiftQuarter } from '@/features/panorama-secovi-fiergs/domain/quarters';
 import { isSpMunicipalPreview, monthOf, type SpPreview } from './model';
 import { quarterMonths, priorMonth, type SpTemporalRow } from './temporal';
@@ -17,7 +18,7 @@ export function buildSpStockSeries(rows: SpTemporalRow[], report: SpPreview): Sp
   const block = blockedSpStockSeries;
   if (!isSpMunicipalPreview(report) || !report.throughMonth || report.patterns?.status !== 'ready') return block('Confira primeiro os totais municipais.');
   const months: string[] = [];
-  for (let m = '2021-01'; m <= report.throughMonth; m = shiftSpMonth(m, 1)) months.push(m);
+  for (let m = spHistoryStartMonth(report,true); m <= report.throughMonth; m = shiftSpMonth(m, 1)) months.push(m);
   const observations: NonNullable<SpStockSeries['observations']> = [], seen = new Set<string>();
   for (const row of rows) {
     const month = monthOf(row.period), group = String(row.group ?? ''), raw = row.stock;

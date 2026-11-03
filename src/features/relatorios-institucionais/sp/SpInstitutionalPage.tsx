@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { GeoApiScopeSelector, useGeoApiScope, type GeoScope } from '@/features/shared/geo-api-scope-engine';
-import { availableEndQuarters } from '@/features/panorama-secovi-fiergs/domain/quarters';
+import { spDefaultQuarter, spPeriodOptions, spQuarterInYear, spHistoryStartMonth } from './periods';
+import { spReadFailure } from './read-errors';
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
 import { useAuthStore } from '@/store/auth-store';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
@@ -30,7 +31,7 @@ const sameCity = (value: string) => value.normalize('NFD').replace(/[\u0300-\u03
 
 export default function SpInstitutionalPage() {
   const [geo, setGeo] = useState<GeoScope>({ uf: '', city: '' });
-  const [quarter, setQuarter] = useState<Quarter>('3T2026');
+  const [quarter, setQuarter] = useState<Quarter>(()=>spDefaultQuarter());
   const [preview, setPreview] = useState<{ key: string; report: SpPreview } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -83,6 +84,7 @@ export default function SpInstitutionalPage() {
   const scope = useGeoApiScope({ value: geo, onChange: changeGeo });
   const supported = geo.uf === 'SP' && sameCity(geo.city);
   const ready = scope.strictReady && scope.hasToken && !scope.isLoading && !scope.error && supported;
+  const periodOptions=spPeriodOptions();
   const key = `${geo.uf}/${geo.city}/${quarter}`;
   const report = ready && preview?.key === key ? preview.report : null;
   const isApi = report?.source === 'api' || report?.source === 'recorded-api';
@@ -114,8 +116,8 @@ export default function SpInstitutionalPage() {
       const launchSeries = buildSpLaunchSeries(rows, baseline);
       const vglSeries = buildSpVglSeries(rows, baseline);
       if (requestVersion === seriesVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, launchSeries, vglSeries } } : previous);
-    } catch {
-      const message = signal.aborted ? 'Série histórica cancelada. Os dados municipais foram mantidos.' : 'Não foi possível concluir a série histórica de lançamentos. Tente novamente.';
+    } catch (error) {
+      const message = signal.aborted ? 'Série histórica cancelada. Os dados municipais foram mantidos.' : spReadFailure(error,'Não foi possível concluir a série histórica de lançamentos. Tente novamente.');
       if (requestVersion === seriesVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, launchSeries: blockedSpLaunchSeries(message), vglSeries: blockedSpLaunchSeries(message) } } : previous);
     } finally { if (requestVersion === seriesVersion.current) setSeriesLoading(false); }
   }
@@ -190,8 +192,8 @@ export default function SpInstitutionalPage() {
       const salesSeries = buildSpSalesSeries(rows, baseline);
       const vgvSeries = buildSpVgvSeries(rows, baseline);
       if (requestVersion === salesVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesSeries, vgvSeries } } : previous);
-    } catch {
-      const message = signal.aborted ? 'Série de vendas cancelada. Os dados municipais foram mantidos.' : 'Não foi possível concluir a série de vendas. Tente novamente.';
+    } catch (error) {
+      const message = signal.aborted ? 'Série de vendas cancelada. Os dados municipais foram mantidos.' : spReadFailure(error,'Não foi possível concluir a série de vendas. Tente novamente.');
       if (requestVersion === salesVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesSeries: blockedSpLaunchSeries(message), vgvSeries: blockedSpLaunchSeries(message) } } : previous);
     } finally { if (requestVersion === salesVersion.current) setSalesLoading(false); }
   }
@@ -205,8 +207,8 @@ export default function SpInstitutionalPage() {
       const rows = await fetchSpStockSeriesRows(baseline, { signal, onProgress: message => { if (requestVersion === stockVersion.current) setStockProgress(message); } });
       const stockSeries = buildSpStockSeries(rows, baseline);
       if (requestVersion === stockVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, stockSeries } } : previous);
-    } catch {
-      if (requestVersion === stockVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, stockSeries: blockedSpStockSeries(signal.aborted ? 'Oferta histórica cancelada. Os demais dados foram mantidos.' : 'Não foi possível conferir a oferta histórica. Tente novamente.') } } : previous);
+    } catch (error) {
+      if (requestVersion === stockVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, stockSeries: blockedSpStockSeries(signal.aborted ? 'Oferta histórica cancelada. Os demais dados foram mantidos.' : spReadFailure(error,'Não foi possível conferir a oferta histórica. Tente novamente.')) } } : previous);
     } finally { if (requestVersion === stockVersion.current) setStockLoading(false); }
   }, [key]);
   useEffect(() => {
@@ -272,10 +274,16 @@ export default function SpInstitutionalPage() {
       {scope.isLoading && <BrainLoadingState variant="field" title="Carregando municípios autorizados…" />}
       {geo.city && !supported && <p className="text-sm text-muted-foreground">O primeiro piloto contempla somente São Paulo capital. Selecione SP e São Paulo.</p>}
       <div className="flex flex-wrap items-end gap-4">
+        <div className="w-32 space-y-1.5"><label htmlFor="sp-year" className="text-sm font-medium">Ano do estudo</label>
+          <Select value={quarter.slice(2)} onValueChange={year => { invalidate(); setQuarter(spQuarterInYear(quarter,year)); }} disabled={loading}>
+            <SelectTrigger id="sp-year"><SelectValue /></SelectTrigger>
+            <SelectContent>{periodOptions.years.map(year => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
         <div className="w-48 space-y-1.5"><label htmlFor="sp-quarter" className="text-sm font-medium">Trimestre do estudo</label>
           <Select value={quarter} onValueChange={value => { invalidate(); setQuarter(value as Quarter); }} disabled={loading}>
             <SelectTrigger id="sp-quarter"><SelectValue /></SelectTrigger>
-            <SelectContent>{availableEndQuarters('1T2026').reverse().map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}</SelectContent>
+            <SelectContent>{periodOptions.quarters.filter(value=>value.slice(2)===quarter.slice(2)).map(value => <SelectItem key={value} value={value}>{value[0]}º trimestre</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <Button onClick={() => preparePreview('api')} disabled={!ready || loading}>Conferir dados reais</Button>
@@ -301,16 +309,16 @@ export default function SpInstitutionalPage() {
       {seriesLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={seriesProgress} startedAt={seriesStartedAt} description="Os slides 18–22 de unidades lançadas serão preenchidos ao concluir a conferência." /><Button variant="outline" onClick={() => seriesController.current.abort()}>Cancelar série de lançamentos</Button></div>}
       {report.launchSeries?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Séries de lançamentos indisponíveis</AlertTitle><AlertDescription>{report.launchSeries.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
       {isSpMunicipalPreview(report) && !seriesLoading && report.launchSeries?.status !== 'ready' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareLaunchSeries(report)}>Conferir séries de lançamentos</Button>}
-      {report.launchSeries?.status === 'ready' && <p role="status" className="text-sm">Séries de unidades lançadas conferidas desde janeiro de 2021. Cinco páginas históricas disponíveis.</p>}
+      {report.launchSeries?.status === 'ready' && <p role="status" className="text-sm">Séries de unidades lançadas conferidas desde {formatMonth(spHistoryStartMonth(report))}. Cinco páginas históricas disponíveis.</p>}
       {salesLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={salesProgress} startedAt={salesStartedAt} description="Os slides 32–36 e o comparativo por segmento serão preenchidos após a conferência." /><Button variant="outline" onClick={() => salesController.current.abort()}>Cancelar série de vendas</Button></div>}
       {report.salesSeries?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Séries de vendas indisponíveis</AlertTitle><AlertDescription>{report.salesSeries.issues.map(issue => <p key={issue}>{issue}</p>)}</AlertDescription></Alert>}
       {isSpMunicipalPreview(report) && !salesLoading && report.salesSeries?.status !== 'ready' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareSalesSeries(report)}>Conferir séries de vendas</Button>}
-      {report.salesSeries?.status === 'ready' && <p role="status" className="text-sm">Séries de vendas líquidas conferidas desde janeiro de 2021, com valores negativos preservados.</p>}
+      {report.salesSeries?.status === 'ready' && <p role="status" className="text-sm">Séries de vendas líquidas conferidas desde {formatMonth(spHistoryStartMonth(report))}, com valores negativos preservados.</p>}
       {report.vgvSeries?.status === 'ready' && <p role="status" className="text-sm">VGV vendido corrigido pelo INCC-DI para {report.vgvSeries.baseMonth}, com sinais preservados e a mesma base no MCMV.</p>}
       {stockLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={stockProgress} startedAt={stockStartedAt} description="Conferindo fotografias de estoque para oferta e IVV, sem bloquear os demais slides." /><Button variant="outline" onClick={() => stockController.current.abort()}>Cancelar oferta histórica</Button></div>}
       {report.stockSeries?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Oferta histórica indisponível</AlertTitle><AlertDescription>{report.stockSeries.issues[0]}</AlertDescription></Alert>}
       {isSpMunicipalPreview(report) && !stockLoading && report.stockSeries?.status !== 'ready' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareStockSeries(report)}>Conferir oferta histórica</Button>}
-      {report.stockSeries?.status === 'ready' && <p role="status" className="text-sm">Oferta histórica conferida desde janeiro de 2021. Fotografias mensais preservadas.</p>}
+      {report.stockSeries?.status === 'ready' && <p role="status" className="text-sm">Oferta histórica conferida desde {formatMonth(spHistoryStartMonth(report,true))}. Fotografias mensais preservadas.</p>}
       {neighborhoodsLoading && <div className="space-y-2"><BrainLoadingState variant="operation" title={neighborhoodsProgress} startedAt={neighborhoodsStartedAt} description="Históricos compartilhados de vendas por bairro, áreas e preços. Os demais slides permanecem disponíveis." /><Button variant="outline" onClick={() => neighborhoodsController.current.abort()}>Cancelar históricos detalhados</Button></div>}
       {report.salesNeighborhoods?.status === 'blocked' && <Alert variant="destructive"><AlertTitle>Vendas por bairro indisponíveis</AlertTitle><AlertDescription>{report.salesNeighborhoods.issues[0]}</AlertDescription></Alert>}
       {isSpMunicipalPreview(report) && !neighborhoodsLoading && report.salesNeighborhoods?.status === 'blocked' && <Button variant="outline" disabled={!ready || loading} onClick={() => void prepareSalesNeighborhoods(report,true)}>Conferir vendas por bairro</Button>}

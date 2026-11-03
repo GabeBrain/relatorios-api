@@ -15,6 +15,7 @@ const base = 'http://127.0.0.1:4176';
 const server = spawn(process.execPath, [resolve('node_modules/vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '4176', '--strictPort'], { windowsHide: true, stdio: 'ignore' });
 let browser;
 const results = [];
+const quick=process.env.SP_DIAGNOSTIC_QUICK==='1';
 const mapboxResponses=[];
 try {
   let ready = false;
@@ -27,7 +28,7 @@ try {
   browser = await chromium.launch({ headless: true, channel: 'msedge' });
   const context = await browser.newContext();
   await context.addInitScript(() => localStorage.setItem('brain-auth', JSON.stringify({ state: { token: 'synthetic-only', email: 'fixture@example.invalid', issuedAt: Date.now(), expiresAt: Date.now() + 3600000 }, version: 0 })));
-  let closing = '07', slow = false, failure = false, empty = false, granularFailure = false, slowNeighborhood = false, slowStock = false, negativeSales = false, detailsCase = 'normal', neighborhoodCalls = 0, calls = 0, granularCalls = 0, slowMapbox = false, mapboxFailure = false;
+  let closing = '07', slow = false, failure = false, empty = false, granularFailure = false, slowNeighborhood = false, slowStock = false, negativeSales = false, detailsCase = 'normal', neighborhoodCalls = 0, calls = 0, granularCalls = 0, slowMapbox = false, mapboxFailure = false, historyFailure=false;
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
     const reply = data => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: data.length }, links: { next: null } }) });
@@ -46,7 +47,7 @@ try {
     if (url.pathname.endsWith('/building-with-history')) {
       if (Number(url.searchParams.get('per_page')) === 100) {
         neighborhoodCalls++;
-        if (slowNeighborhood) await new Promise(done => setTimeout(done, 1500));
+        if (slowNeighborhood) await new Promise(done => setTimeout(done, 5000));
         const values = (metric,month,i) => {
           if (negativeSales && metric === 'sales' && month === '2026-07' && i === 0) return -10000;
           if (month === '2026-09') return (metric === 'stock' ? observed.septemberStock : metric === 'sales' ? observed.septemberSales : observed.septemberReleases)[i];
@@ -63,28 +64,30 @@ try {
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: empty ? [] : [{ city: 'São Paulo', state: 'SP', building_type: 'Vertical', period: '2026-08-01' }], meta: { total: 5183 }, links: { next: null } }) });
     }
     if (url.pathname.includes('/temporal-analysis-city/')) {
-      if (slowStock && url.pathname.endsWith('/stock') && url.searchParams.get('start_period') === '2021-01-01') await new Promise(done => setTimeout(done, 1500));
+      if(historyFailure&&url.searchParams.get('start_period')==='2021-01-01')return route.fulfill({status:429,headers:{'Retry-After':'0'},body:'{}'});
+      if (slowStock && url.pathname.endsWith('/stock') && /-01-01$/.test(url.searchParams.get('start_period')??'')) await new Promise(done => setTimeout(done, 5000));
       const metric = url.pathname.split('/').at(-1);
       const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
       const months = Object.fromEntries(Object.entries(recorded[metric]).filter(([month]) => month < '2026-09').map(([month, values]) => [month, [...values]]));
       months['2026-09'] = metric === 'stock' ? observed.septemberStock : metric === 'sales' ? observed.septemberSales : observed.septemberReleases;
       if (negativeSales && metric === 'sales') months['2026-07'][0] = -10000;
       if (metric === 'stock') months['2026-08'] = observed.augustStock;
-      if (url.searchParams.get('start_period') === '2021-01-01') {
+      if (url.searchParams.get('group_by') !== 'Tipologia') {
         const all = [];
-        for (let year = 2021; year <= 2026; year++) for (let m = 1; m <= 12; m++) {
+        for (let year = 2017; year <= 2026; year++) for (let m = 1; m <= 12; m++) {
           const month = `${year}-${String(m).padStart(2, '0')}`;
           if (month > `2026-${closing}`) continue;
           for (const [i, group] of recorded.groups.entries()) all.push({ period: `${month}-01`, group, building_type: 'Vertical', [field]: months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m), ...(metric === 'releases' ? { vgv_release: (months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m)) * 100000.25 } : metric === 'sales' ? { vgv_liquid_sales: (months[month]?.[i] ?? 100 + i * 5 + m) * 100000.25 } : {}) });
         }
-        const p = Number(url.searchParams.get('page')), last = Math.ceil(all.length / 100);
-        return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: all.slice((p - 1) * 100, p * 100), meta: { current_page: p, last_page: last, total: all.length }, links: { next: p < last ? `?page=${p + 1}` : null } }) });
+        const filtered=all.filter(row=>row.period>=url.searchParams.get('start_period')&&row.period<=url.searchParams.get('end_period'));
+        const p = Number(url.searchParams.get('page')), last = Math.max(1,Math.ceil(filtered.length / 100));
+        return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: filtered.slice((p - 1) * 100, p * 100), meta: { current_page: p, last_page: last, total: filtered.length }, links: { next: p < last ? `?page=${p + 1}` : null } }) });
       }
 
       if (url.searchParams.get('group_by') === 'Tipologia') {
         const start = url.searchParams.get('start_period').slice(0, 7), end = url.searchParams.get('end_period').slice(0, 7);
         const rows = [];
-        for (let year = 2025; year <= 2026; year++) for (let m = 1; m <= 12; m++) {
+        for (let year = 2017; year <= 2026; year++) for (let m = 1; m <= 12; m++) {
           const month = `${year}-${String(m).padStart(2, '0')}`;
           if (month < start || month > end || month > `2026-${closing}`) continue;
           const total = months[month]?.reduce((a, b) => a + b, 0) ?? recorded.groups.reduce((sum, _, i) => sum + (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m), 0);
@@ -113,7 +116,7 @@ try {
   page.on('response', response=>{if(new URL(response.url()).hostname==='api.mapbox.com')mapboxResponses.push(response.status());});
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  for (const width of [1440, 390]) for (const dark of [false, true]) {
+  for (const width of (quick?[1440]:[1440,390])) for (const dark of (quick?[false]:[false,true])) {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto(`${base}/rebrain/relatorios-institucionais/sp`);
     await page.getByRole('heading', { name: 'SP institucional', exact: true }).waitFor();
@@ -171,7 +174,7 @@ try {
           await checklist.screenshot({path:resolve(output,'review-panel.png')});
           await checklist.getByText('Ver situa\u00e7\u00e3o e pend\u00eancias por slide',{exact:true}).click();
         }
-        for (const slide of Array.from({length:85},(_,i)=>i+1)) {
+        for (const slide of (quick?[13,18,23,26,32,39,40,46,47,50,51,53,61,63,67,69,73,76,78,80,82,85]:Array.from({length:85},(_,i)=>i+1))) {
           await openSlide(slide);
           if (slide === 39) await page.getByText(/Vendas por bairro conferidas por mês/).waitFor();
           if (slide === 39) assert.equal(neighborhoodCalls, width === 1440 ? dark ? 2 : 1 : dark ? 4 : 3);
@@ -207,6 +210,29 @@ try {
     slow = false;
     results.push({ width, dark, transitions: ['partial-1', 'partial-2', 'quarter-closed'], municipalVisibleDuringSlowCountAndCancel: true });
   }
+  const periodsTested=[];
+  for(const [year,tri,month] of [['2025','2','06'],['2025','4','12'],['2026','1','03'],['2026','2','06']]){
+    closing=month;
+    if(await page.getByRole('combobox',{name:'Ano do estudo'}).innerText()!==year){await page.getByRole('combobox',{name:'Ano do estudo'}).click();await page.getByRole('option',{name:year,exact:true}).click();}
+    await page.getByRole('combobox',{name:'Trimestre do estudo'}).click();await page.getByRole('option',{name:`${tri}\u00ba trimestre`,exact:true}).click();
+    await page.getByRole('button',{name:'Conferir dados reais',exact:true}).click();
+    await page.getByText('Trimestre completo nas s\u00e9ries municipais da API',{exact:true}).waitFor();
+    await page.getByText(/S\u00e9ries de unidades lan\u00e7adas conferidas desde/).waitFor();
+    await page.getByText(/S\u00e9ries de vendas l\u00edquidas conferidas desde/).waitFor();
+    await page.getByText(/Oferta hist\u00f3rica conferida desde/).waitFor();
+    assert.match(await page.getByRole('heading',{name:/S\u00e3o Paulo \/ SP/}).innerText(),new RegExp(`${tri}T${year}`));
+    periodsTested.push(`${tri}T${year}`);
+    await page.getByRole('region',{name:'Pr\u00e9via do estudo'}).screenshot({path:resolve(output,`period-${tri}T${year}.png`)});
+  }
+  historyFailure=true;
+  await page.getByRole('button',{name:'Conferir dados reais',exact:true}).click();
+  await page.getByText(/HTTP 429/).nth(2).waitFor();
+  await page.getByRole('region',{name:'Pr\u00e9via do estudo'}).screenshot({path:resolve(output,'historical-429-2T2026.png')});
+  assert.equal(await page.getByRole('region',{name:'Pr\u00e9via do estudo'}).count(),1);
+  historyFailure=false;
+  for(const label of ['Conferir s\u00e9ries de lan\u00e7amentos','Conferir s\u00e9ries de vendas','Conferir oferta hist\u00f3rica'])await page.getByRole('button',{name:label,exact:true}).click();
+  await page.getByText(/S\u00e9ries de unidades lan\u00e7adas conferidas desde/).waitFor();await page.getByText(/S\u00e9ries de vendas l\u00edquidas conferidas desde/).waitFor();await page.getByText(/Oferta hist\u00f3rica conferida desde/).waitFor();
+  closing='09';await page.getByRole('combobox',{name:'Trimestre do estudo'}).click();await page.getByRole('option',{name:'3\u00ba trimestre',exact:true}).click();
   slowNeighborhood = true;
   await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
   await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
@@ -286,8 +312,25 @@ try {
   await page.getByRole('button', { name: 'Tentar novamente', exact: true }).click();
   await page.getByText('Não foi possível preparar a prévia', { exact: true }).waitFor();
   assert.equal(await page.getByRole('region', { name: 'Prévia do estudo' }).count(), 0);
+  const yearContext=await browser.newContext({viewport:{width:1440,height:1000}});
+  await yearContext.addInitScript(()=>{
+    const NativeDate=Date,stamp=NativeDate.UTC(2027,0,2,12);
+    class FixedDate extends NativeDate {constructor(...args){if(args.length)super(...args);else super(stamp);}static now(){return stamp;}}
+    window.Date=FixedDate;
+    localStorage.setItem('brain-auth',JSON.stringify({state:{token:'synthetic-only',email:'fixture@example.invalid',issuedAt:stamp,expiresAt:stamp+3600000},version:0}));
+  });
+  await yearContext.route('**/*',route=>{const url=new URL(route.request().url());if(url.origin===base)return route.continue();if(url.pathname.endsWith('/monitored-cities'))return route.fulfill({contentType:'application/json',body:JSON.stringify({data:[{city:'São Paulo',state:'SP'}],meta:{current_page:1,last_page:1,total:1},links:{next:null}})});return route.abort();});
+  const yearPage=await yearContext.newPage();yearPage.on('pageerror',error=>errors.push(error.message));
+  await yearPage.goto(`${base}/rebrain/relatorios-institucionais/sp`);
+  await yearPage.getByRole('combobox',{name:'Ano do estudo'}).waitFor();
+  assert.equal(await yearPage.getByRole('combobox',{name:'Ano do estudo'}).innerText(),'2026');
+  assert.match(await yearPage.getByRole('combobox',{name:'Trimestre do estudo'}).innerText(),/4/);
+  await yearPage.getByRole('combobox',{name:'Ano do estudo'}).click();await yearPage.getByRole('option',{name:'2027',exact:true}).click();
+  assert.match(await yearPage.getByRole('combobox',{name:'Trimestre do estudo'}).innerText(),/1/);
+  await yearPage.getByRole('combobox',{name:'Trimestre do estudo'}).click();assert.equal(await yearPage.getByRole('option').count(),1);await yearPage.keyboard.press('Escape');
+  await yearPage.getByRole('region',{name:'Seleção do estudo'}).screenshot({path:resolve(output,'year-2027.png')});await yearContext.close();
   assert.deepEqual(errors, []);
-  const result = { results, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, mapboxResponses: {total:mapboxResponses.length,success:mapboxResponses.filter(status=>status===200).length}, originalSlidesCovered:85, mapSlowAndProviderError:true, practicalChecklistAndExplicitDetails:true, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
+  const result = { results, reducedMatrix:quick, errorAndEmptyBlocked: true, granularFailurePreservesMunicipal: true, rootCalls: calls, granularCalls, neighborhoodCalls, neighborhoodOnDemandAndCancel: true, stockSlowCancelAndRetry: true, negativeMonetaryAndNeighborhoodCases: true, granularSharedCacheAndIsolatedGaps: true, pageErrors: errors, realApiCalls: 0, mapboxResponses: {total:mapboxResponses.length,success:mapboxResponses.filter(status=>status===200).length}, originalSlidesCovered:quick?22:85, mapSlowAndProviderError:true, practicalChecklistAndExplicitDetails:true, periodsTested, year2027Verified:true, historical429AndRetry:true, september: 'user-provided-2026-10-29; other months from earlier fixtures, projects synthetic, not a quarterly baseline' };
   await writeFile(resolve(output, 'result.json'), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 } finally {

@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — SP Institucional: Ano/Trimestre e consultas históricas gerais — Codex
+
+- **Ambiente/solicitação:** usuário relatou municipal/contagem disponíveis, mas três séries históricas indisponíveis no2T2026; pediu período geral e seleção separada, incluindo2027. Codex/Codex Test; main limpa9b5d641 atualizada por ff-only atéfec9b74 com cinco commits de Estimativas, preservados. Origin único0/0 após fetch e reconferência.
+- **Entrega:** Ano/Trimestre, padrão no último trimestre concluído e calendárioSãoPaulo com entrada automática de ano. Mudança invalida consultas/cache e preserva município. Históricos em janelas anuais paginadas, teto por universo da janela, sem seis páginas globais. Cobertura derivada dos17trimestres/comparativos, abertura adicional apenas no estoque. Mensagem segura mantém causa/janela; Retry-After respeitado, municipal preservado e retry por fonte. Select/GeoApiScopeEngine/BrainLoadingState existentes reutilizados.
+- **Evidência:**221 testes SP+359 regressões Panorama, tipos reais/lint/build aprovados. Matriz unitária entre2025/2026/2027, parciais e paginação pequena; navegador com períodos2T2025/4T2025/1T2026/2T2026, simulação2027,429/retry/cancelamento e22 posições em rechecagem dirigida. [Métodos e limites](../features/relatorios-institucionais/sp/DECISOES.md), [evidências](../features/relatorios-institucionais/sp/EVIDENCIAS.md). API de negócio simulada, somente Mapbox externo; runtime Computer Use não iniciou.
+- **Estado/pendências:** correções estruturais validadas localmente; print não identifica causa do erro original. Retestar2T2026 com login e motivo agora visível. Confirmar deploy, cobertura/metodologia/editorial, índices além deset/2026 e exportação integral; não afirmar acesso real resolvido sem observação. Motores Secovi/FIERGS, Estimativas, Quanti e Corretor não alterados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas, sem escrita.
+
 ### 2026-11-02 — Estimativas: ações na linha da navegação — Gabriel / sessão
 
 - **Mudança:** Alterar local, Atualizar dados e Dados e metodologia à direita da mesma barra de Previsões/Análise detalhada, estilo textual uniforme sem moldura. Quebra responsiva por grupos; motores/filtros/arquivos intactos.
@@ -712,6 +720,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**03/11 — SP, período geral:** Ano/Trimestre e transporte histórico por janelas validados localmente, incluindo virada2027. Próximo reteste autenticado2T2026 para confirmar motivo/recuperação no acesso real; alteração no Git não prova deploy ou homologação.
+
 **02/11 — Estimativas:** seção14 implementada e validada localmente (129Vitest+15operacionais, seis telas/temas+cinco estados e replay real); prévia/Excel na principal, análise detalhada preservada. Enviada a origin/main em `ad86e26` com autorização; publicação/aceite no site e formato Nicolas/Belogic pendentes.
 **30/10 — SP, preparo dos testes:** checklist das85 posições e refinamentos validados localmente;211 testes SP+359 regressões Panorama, tipos reais/lint/build e navegador aprovados. Próximo ensaio autenticado da tela pelo usuário, seguido de revisão metodológica/editorial e exportação integral.
 
@@ -761,6 +771,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — incidente2T2026:** atualizar a página, autenticar e retestar Ano2026/2º trimestre; se falhar, registrar mensagem segura/janela e checklist. Causa original ainda semHTTP real. Conferir períodos/INCC disponíveis, deploy e aceite; não preencher ausência com zero.
 
 - **Estimativas:** conferir no site a seção14 enviada em `ad86e26` (prévia/Excel na principal e Análise detalhada), sem verificação de produção nesta sessão e aguardar formato final Nicolas/Belogic. Interface anterior aceita em 28/10; capturas recebidas em 30/10 mostram uso da prévia, sem nova inspeção independente. Origem/duração por período, contrato de importação, preço, rateio, reconciliação e avaliação independente permanecem abertos, sem homologação pelo aceite da página.
 - [ ] **SP — teste prático30/10:** seguir o roteiro da feature; registrar trimestre/mês/slide, esperado/observado e checklist da mesma geração. Conferir fontes reais, mapa/estágio/capacidade e atualidade das8 artes; observar versão publicada. Exportação integral, revisão do analista e novos índices permanecem abertos.

@@ -1,5 +1,9 @@
 # SP capital — primeiro mapeamento
 
+## 03/11/2026 — seleção geral de período e correção do transporte histórico
+
+Após falha das três séries no teste real2T2026, substituído início fixo3T2026 por último trimestre concluído e separados Ano/Trimestre. Calendário SãoPaulo com anos desde2021 e entrada automática de2027; consultas e comparativos seguem o período escolhido. Históricos divididos por ano e paginados sem teto global de seis páginas; mensagens preservam motivo seguro e janela.221 testes SP+359 regressões Panorama, tipos/lint/build e ensaio local dirigido aprovados, conformeEVIDENCIAS. O print não permite confirmar a causa original; retestar autenticado antes de declarar solução no acesso real. SnapshotINCC, revisão metodológica/editorial e exportação integral mantêm suas pendências.
+
 ## 30/10/2026 — refinamento e roteiro para testes práticos
 
 Varredura concluída, mantendo85 posições e sem implementar nova exportação: checklist de disponibilidade por fonte/slide, filtro/download seguro, detalhamentos solicitáveis em lote sem duplicação, avisos atualizados e edição institucional visível na ampliação.211 testes SP+359 regressões Panorama aprovados, checagem real do projeto TypeScript agora no build, lint e QA Edge1440/390 claro/escuro aprovados. [Achados e passos para o usuário](REVISAO_PARA_TESTES_2026-10-30.md), [evidências e limites](EVIDENCIAS.md).

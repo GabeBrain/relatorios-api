@@ -27,40 +27,43 @@ describe('SP — transporte curto e paginado, sem provedor real', () => {
   it('delimita o histórico de lançamentos desde 2021 e pagina somente releases até o mês conferido', async () => {
     const rows = syntheticLaunchSeries();
     const request = vi.fn(async (options: RequestOptions) => {
-      const page = Number(options.query?.page), last = Math.ceil(rows.length / 100);
-      return reply(envelope(rows.slice((page - 1) * 100, page * 100), page, rows.length, last, page < last ? `?page=${page + 1}` : null));
+      const filtered=rows.filter(row=>String(row.period)>=String(options.query?.start_period)&&String(row.period)<=String(options.query?.end_period));
+      const page = Number(options.query?.page), last = Math.ceil(filtered.length / 100);
+      return reply(envelope(filtered.slice((page - 1) * 100, page * 100), page, filtered.length, last, page < last ? `?page=${page + 1}` : null));
     });
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     expect(await fetchSpLaunchSeriesRows(report, { request })).toEqual(rows);
-    expect(request).toHaveBeenCalledTimes(5);
-    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/releases', cache: 'no-store', query: { start_period: '2021-01-01', end_period: '2026-08-31', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
+    expect(request).toHaveBeenCalledTimes(6);
+    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/releases', cache: 'no-store', query: { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
   });
   it('delimita o histórico de vendas desde 2021 e pagina somente sales até o mês conferido', async () => {
     const rows = syntheticSalesSeries();
     const request = vi.fn(async (options: RequestOptions) => {
-      const page = Number(options.query?.page), last = Math.ceil(rows.length / 100);
-      return reply(envelope(rows.slice((page - 1) * 100, page * 100), page, rows.length, last, page < last ? `?page=${page + 1}` : null));
+      const filtered=rows.filter(row=>String(row.period)>=String(options.query?.start_period)&&String(row.period)<=String(options.query?.end_period));
+      const page = Number(options.query?.page), last = Math.ceil(filtered.length / 100);
+      return reply(envelope(filtered.slice((page - 1) * 100, page * 100), page, filtered.length, last, page < last ? `?page=${page + 1}` : null));
     });
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     expect(await fetchSpSalesSeriesRows(report, { request })).toEqual(rows);
-    expect(request).toHaveBeenCalledTimes(5);
-    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/sales', cache: 'no-store', query: { start_period: '2021-01-01', end_period: '2026-08-31', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
+    expect(request).toHaveBeenCalledTimes(6);
+    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/sales', cache: 'no-store', query: { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
   });
   it('delimita o histórico de oferta desde 2021 e pagina somente stock até o mês conferido', async () => {
     const rows = syntheticStockSeries();
     const request = vi.fn(async (options: RequestOptions) => {
-      const page = Number(options.query?.page), last = Math.ceil(rows.length / 100);
-      return reply(envelope(rows.slice((page - 1) * 100, page * 100), page, rows.length, last, page < last ? `?page=${page + 1}` : null));
+      const filtered=rows.filter(row=>String(row.period)>=String(options.query?.start_period)&&String(row.period)<=String(options.query?.end_period));
+      const page = Number(options.query?.page), last = Math.ceil(filtered.length / 100);
+      return reply(envelope(filtered.slice((page - 1) * 100, page * 100), page, filtered.length, last, page < last ? `?page=${page + 1}` : null));
     });
     const report = buildSpTemporalPreview(recordedInput(), '3T2026');
     expect(await fetchSpStockSeriesRows(report, { request })).toEqual(rows);
-    expect(request).toHaveBeenCalledTimes(5);
-    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/stock', cache: 'no-store', query: { start_period: '2021-01-01', end_period: '2026-08-31', city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
-  });
-  it('histórico longo tem teto de seis páginas sem ampliar as consultas curtas', async () => {
-    const request = vi.fn(async (options: RequestOptions) => reply(envelope(Array.from({ length: 100 }, () => ({})), Number(options.query?.page), 700, 7, '?next')));
-    await expect(fetchSpLaunchSeriesRows(buildSpTemporalPreview(recordedInput(), '3T2026'), { request })).rejects.toThrow('janela paginada');
     expect(request).toHaveBeenCalledTimes(6);
+    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/temporal-analysis-city/stock', cache: 'no-store', query: { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: 'Padrão' } });
+  });
+  it('rejeita excesso de registros já na janela anual, sem ampliar a consulta curta',async()=>{
+    const request=vi.fn(async()=>reply(envelope(Array.from({length:100},()=>({})),1,700,7,'?next')));
+    await expect(fetchSpLaunchSeriesRows(buildSpTemporalPreview(recordedInput(),'3T2026'),{request})).rejects.toThrow('mais registros');
+    expect(request).toHaveBeenCalledOnce();
   });
   it('consulta até setembro com raiz em agosto e preserva os números fornecidos pelo usuário', async () => {
     const observed = userSeptemberReplay();

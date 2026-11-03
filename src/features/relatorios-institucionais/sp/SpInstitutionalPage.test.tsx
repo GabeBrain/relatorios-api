@@ -66,8 +66,8 @@ vi.mock('./projects', async importOriginal => {
     return original.buildSpProjects([{ building_id: 1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: '2026-07-01' }], report);
   } };
 });
-beforeEach(() => { access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.seriesPending = false; access.salesPending = false; access.stockPending = false; access.neighborhoodsPending = false; access.neighborhoodCalls = 0; access.typologiesPending = false; access.projectsPending = false; access.finishProjects = null; access.reload.mockClear(); });
-afterEach(cleanup);
+beforeEach(() => { vi.setSystemTime(new Date('2026-11-03T12:00:00Z')); access.token = 'synthetic-token'; access.error = false; access.loading = false; access.fixtureMode = 'success'; access.apiMode = 'success'; access.aborted = false; access.seriesPending = false; access.salesPending = false; access.stockPending = false; access.neighborhoodsPending = false; access.neighborhoodCalls = 0; access.typologiesPending = false; access.projectsPending = false; access.finishProjects = null; access.reload.mockClear(); });
+afterEach(()=>{cleanup();vi.useRealTimers();});
 
 describe('Página SP institucional', () => {
   it('permite conferir o lote detalhado explicitamente sem visitar um slide e sem duplicar a coleta',async()=>{

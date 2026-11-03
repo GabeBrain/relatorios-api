@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 03/11/2026 — SP em qualquer período selecionado
+
+Usuário relatou três falhas históricas no2T2026 e pediu Ano/Trimestre separados, inclusive2027. Base limpa9b5d641 atualizada por ff-only atéfec9b74 com cinco commits de Estimativas, preservados. Codex/Codex Test, Windows/PowerShell, origin único0/0. Campos separados, padrão no último trimestre concluído, calendárioSãoPaulo e descarte de resultados ao mudar período. Transporte histórico anual/paginado, janela derivada dos comparativos e estoque de abertura separado dos fluxos; erros seguros/Retry-After preservados.221 testes SP+359 regressões, tipos/lint/build e navegador dirigido aprovados; detalhes emEVIDENCIAS. Sem API real: causa do erro original não confirmada e sessão Computer Use não iniciou. Próximo reteste autenticado do2T2026; exportação/metodologia/editorial/índices futuros/deploy observado continuam pendentes. Sem alteração em motores paralelos ou Monday.
+
 ## 30/10/2026 — varredura SP para testes práticos
 
 Ambiente: Windows/PowerShell, Codex Test/Codex, main limpa`ab149ef`, único origin0/0 após fetch. Usuário pediu varredura e refinamento antes dos testes práticos. As85 posições já têm renderizador; refinamento adiciona checklist por fonte/slide, coleta detalhada explícita e reutilizada, registro JSON sem credencial/histórico bruto, avisos atualizados e edição institucional também na ampliação. Corrige6 erros tipados em testes anteriores e faz typecheck/build verificarem o projeto app real. [Varredura e roteiro](../../features/relatorios-institucionais/sp/REVISAO_PARA_TESTES_2026-10-30.md). Nenhum ensaio de mercado autenticado ou alteração de motor Secovi/FIERGS, Corretor, Quanti, CID ou ADM. Homologação, atualidade editorial, índices futuros, deploy observado e exportação integral permanecem pendentes; evidências finais emEVIDENCIAS.
