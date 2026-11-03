@@ -74,7 +74,7 @@ describe('SP — lote final de 28 posições originais',()=>{
     current(buildings[0])[0].building_status=null;
     let market=baseline(buildings).granularDetails!.market!;
     expect(market.stages.final.ready).toBe(false);expect(market.vgv.ready).toBe(true);expect(market.matrix.status).toBe('ready');
-    current(buildings[0])[0].sold=0;
+    current(buildings[0])[0].qty=0;
     market=baseline(buildings).granularDetails!.market!;
     expect(market.vgv.ready).toBe(false);expect(market.cohorts.reduce((s,row)=>s+row.units,0)).toBe(market.total);
   });

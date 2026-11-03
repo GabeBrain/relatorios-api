@@ -116,6 +116,6 @@ describe('SP — terceiro lote original39–44/46–48/50', () => {
     const request = vi.fn(async (options: import('@/lib/http-client').RequestOptions) => ({ ok: true, status: 200, text: null, contentType: 'application/json', latencyMs: 1, bytes: 1, error: null, requestHeaders: {}, requestQuery: options.query ?? {}, requestBody: null, url: options.url, method: 'GET', data: { data: buildings.slice((Number(options.query?.page)-1)*4,Number(options.query?.page)*4), meta: { total: 7, current_page: Number(options.query?.page), last_page: 2 } } }));
     expect(await fetchSpBuildingRecords(baseline(), { request })).toHaveLength(7);
     expect(request).toHaveBeenCalledTimes(2);
-    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://geobrain.com.br/public-api/building-with-history', query: { city: 'São Paulo', uf: 'SP', type: 'Vertical', per_page: 100 }, cache: 'no-store' });
+    for (const [options] of request.mock.calls) expect(options).toMatchObject({ url: 'https://app.geobrain.com.br/public-api/v2/building-with-history-internal', method:'POST', query: { city: 'São Paulo', type: 'Vertical', per_page: 100 }, cache: 'no-store' });
   });
 });

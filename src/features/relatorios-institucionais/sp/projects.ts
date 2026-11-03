@@ -5,6 +5,9 @@ import { isSpMunicipalPreview, type SpPreview } from './model';
 import { quarterMonths } from './temporal';
 import { buildSpProjectTrends, buildSpTrendBreakdown, type SpProjectTrends, type SpTrendBreakdown } from './project-trends';
 import { buildSpLaunchNeighborhoods, type SpLaunchNeighborhoods } from './neighborhoods';
+import { SpReadError } from './read-errors';
+
+export const SP_BUILDING_HISTORY_V2 = 'https://app.geobrain.com.br/public-api/v2/building-with-history-internal';
 
 type Building = Record<string, unknown>;
 export interface SpProjects {
@@ -71,12 +74,16 @@ export async function fetchSpBuildingRecords(report: SpPreview, options: Options
     checkAbort();
     const response = await requestWithRetry(async () => {
       checkAbort();
-      const value = await request({ method: 'GET', url: `https://geobrain.com.br/public-api/${source}`, query: { type: 'Vertical', city: 'São Paulo', uf: 'SP', per_page: 100, page }, signal: options.signal, timeoutMs: 60_000, cache: 'no-store' });
-      return { ...value, retryAfterMs: Math.min(value.retryAfterMs ?? 0, 3000) || null };
+      const detailed=source==='building-with-history';
+      const value = await request({ method: detailed?'POST':'GET', url: detailed?SP_BUILDING_HISTORY_V2:`https://geobrain.com.br/public-api/${source}`, query: { type: 'Vertical', city: 'São Paulo', ...(!detailed?{uf:'SP'}:{}), per_page: 100, page }, ...(detailed?{headers:{'Content-Type':'application/json'}}:{}), includeAuth:true, signal: options.signal, timeoutMs: 60_000, cache: 'no-store' });
+      return detailed?value:{ ...value, retryAfterMs: Math.min(value.retryAfterMs ?? 0, 3000) || null };
     }, { signal: options.signal, attempts: 2, sleep: options.sleep });
     checkAbort();
-    if (!response.ok || !response.data) throw new Error('A coleta de empreendimentos não foi concluída.');
-    const payload = readBuildingPage(response.data, { city: 'São Paulo', uf: 'SP' }, page, source);
+    if (!response.ok || !response.data) {
+      if(source==='building-with-history')throw new SpReadError(response.status===401||response.status===403?'A API v2 não autorizou a coleta detalhada. Confira o acesso GeoBrain à rota de históricos.':`A coleta detalhada na API v2 não foi concluída${response.status?` (HTTP ${response.status})`:''}. Confira conexão, disponibilidade e permissão da rota no navegador.`);
+      throw new Error('A coleta de empreendimentos não foi concluída.');
+    }
+    const payload = readBuildingPage(response.data, { city: 'São Paulo', uf: 'SP' }, page, source==='building-with-history'?'building-with-history-internal-v2':source);
     if (payload.lastPage > 100 || payload.total === null || payload.total === 0 || (expectedLast !== null && (expectedLast !== payload.lastPage || expectedTotal !== payload.total))) throw new Error('A paginação mudou ou não confirmou o total de empreendimentos.');
     expectedLast = payload.lastPage; expectedTotal = payload.total;
     if (page < expectedLast && !payload.buildings.length) throw new Error('A coleta retornou uma página intermediária vazia.');

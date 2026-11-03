@@ -62,8 +62,8 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
     if(number===51)return source(details!.area,'os fluxos e estoques por área');
     if(number>=53&&number<=59){
       const points=details!.prices.series[number]??[],valid=points.filter(row=>row.value!==null).length;
-      const gap=points.find(row=>row.value===null);
-      return !valid?blocked(gap?.issue??'Nenhuma fotografia com preços completos.'):valid<points.length?partial(`${points.length-valid} fotografia(s) sem preço ou cobertura completa. Primeira lacuna ${gap!.month}: ${gap!.issue??'medição indisponível'}. Os demais pontos foram mantidos.`):available;
+      const gap=points.find(row=>row.value===null||row.partial),incomplete=points.filter(row=>row.value===null||row.partial).length;
+      return !valid?blocked(gap?.issue??'Nenhuma fotografia com preços completos.'):incomplete?partial(`${incomplete} fotografia(s) com cobertura parcial ou medição indisponível. Primeira ocorrência ${gap!.month}: ${gap!.issue??'medição indisponível'} Os valores observados foram preservados; variações envolvendo parciais não são calculadas.`):available;
     }
     if(number===61||number===62){const field=number===61?'ticket':'meter',values=details!.prices.standards.map(row=>row[field]),gap=details!.prices.standards.find(row=>row[field]===null),reason=gap?.issues[0]??details!.prices.overall.issues[0]??'Há padrão ou média geral sem cobertura, classificação ou preço completos.';return !values.some(v=>v!==null)&&details!.prices.overall[field]===null?blocked(reason):values.some(v=>v===null)||details!.prices.overall[field]===null?partial(reason):available;}
     const market=details!.market;
@@ -73,7 +73,7 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
     if(number===63||number===64){const field=number===63?'ticket':'meter',rows=market!.prices;return !rows.some(row=>row[field]!==null)?blocked('Sem oferta e preços completos nas tipologias.'):rows.some(row=>row[field]===null||row.bedroom<=2&&(row.mcmv[field]===null||row.map[field]===null))?partial(market!.classificationIssues?.mcmv??'Há tipologia ou recorte MCMV/MAP sem oferta ou preço completo.'):available;}
     if(number===73)return source(market!.matrix,'a área privativa de toda a oferta');
     if(number===76||number===77){const stages=market!.stages;return stages.launched.ready&&stages.final.ready?available:stages.launched.ready||stages.final.ready?partial('Uma das composições por estágio não foi comprovada.') :blocked(stages.final.issues[0]??'Estágio não informado.');}
-    if(number===78)return market!.vgv.ready?available:blocked(market!.vgv.issues[0]??'Capacidade, vendas acumuladas e estoque não compatíveis.');
+    if(number===78)return market!.vgv.ready?{...available,reason:'Vendido e VGV vendido calculados por capacidade menos oferta da fotografia; campo sold original preservado na auditoria.'}:blocked(market!.vgv.issues[0]??'Capacidade, estoque ou preço não compatíveis.');
     if([67,68,70,71,74,75,79,80].includes(number)){
       if(market!.total===0)return available;
       const located=market!.projects.filter(p=>p.latitude!==null&&p.longitude!==null);
@@ -89,11 +89,12 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
   }
   return SP_ORIGINAL_SLIDES.map(slide=>{
     const finding={...check(slide.number)};
-    if((SP_DETAIL_SLIDES as readonly number[]).includes(slide.number)&&finding.state==='available'&&report.granularDetails?.warnings?.length)finding.reason='Conteúdo disponível; há ressalvas de classificação por padrão nos históricos. Totais conferidos e recortes dependentes tratados separadamente.';
+    if((SP_DETAIL_SLIDES as readonly number[]).includes(slide.number)&&finding.state==='available'&&report.granularDetails?.warnings?.length)finding.reason+=' Há ressalvas da fonte nos históricos; consulte os detalhes da conferência.';
     return {...slide,...finding};
   });
 }
 
 export function spReviewSnapshot(report:SpPreview, slides:SpSlideReview[]) {
-  return {schema:'sp-practical-review-v1',generatedAt:new Date().toISOString(),quarter:report.quarter,throughMonth:report.throughMonth??null,source:report.source??'fixture',municipalStatus:report.status,exportAvailable:false,analystApproval:false,slides,sourceDiagnostics:report.granularDetails?.diagnostics??[]};
+  const warnings=report.granularDetails?.warnings??[],vgv=report.granularDetails?.market?.vgv;
+  return {schema:'sp-practical-review-v1',generatedAt:new Date().toISOString(),quarter:report.quarter,throughMonth:report.throughMonth??null,source:report.source??'fixture',municipalStatus:report.status,exportAvailable:false,analystApproval:false,slides,sourceDiagnostics:report.granularDetails?.diagnostics??[],sourceWarnings:{count:warnings.length,examples:warnings.slice(0,50)},calculatedSalesAudit:vgv?.ready?{method:'capacity-minus-offer-v1',differenceCount:vgv.warnings?.length??0,examples:vgv.warnings?.slice(0,20)??[]}:null};
 }

@@ -1,5 +1,25 @@
 # Decisões e pontos abertos — SP
 
+## 03/11/2026 — correção no consumidor solicitada pelo usuário
+
+Usuário pediu implementar a correção, após o diagnóstico e material da fonte. Aplicar [tratamento declarado de estoque, amostra histórica e VGV](TRATAMENTO_FONTE_2026-11-03.md): preservar estoque negativo informado na conciliação/contagem, sem peso na média de oferta positiva; admitir médias históricas da amostra observada identificadas como parciais, sem variações comparativas; calcular vendido/VGV vendido da fotografia por capacidade menos oferta válidas, preservando sold original na auditoria. Não alterar fontes/fluxos mensais, preencher faltantes ou remover guardas de integridade/precisão. Esta versão substitui as proibições anteriores dessas três operações exclusivamente neste relatório. Nota dos slides, checklist e JSON declaram origem/qualidade/método; origem e homologação continuam pendentes, sem condicionar essa implementação a contato externo.
+
+## 03/11/2026 — diagnóstico de capacidade/VGV e preservação de valores negativos
+
+Checklist real após v2:68disponíveis/7parciais/2bloqueados/8referências. Revisão do78 confirma que a tabela usa capacidade, vendido acumulado e oferta, portanto conserva a guarda adotada qty=sold+estoque e a exigência de valores válidos. Agora mensagem identifica empreendimento/tipologia/mês, campos ausentes/negativos, diferença da identidade e falta de preço; somas inseguras têm motivo distinto. Ocorrências do fechamento entram em sourceDiagnostics, com limite de exemplos preservado. Estoque e sold negativos são mantidos na observação para diagnóstico, mas continuam explicitamente rejeitados onde inválidos; nenhuma conversão para0 ou reconstrução.
+
+Resposta v2 já fornecida contém87999/jun2026 com sold negativos nas tipologias150368/150369/150370. Diferenças10/11/6 coincidem com distractions10/11/6; sold_in_period=0 e gross_sales=distractions nessas linhas. Coincidência não confirma causa: solicitar contrato de sold/qty e tratamento de distratos antes de mudar a identidade ou declarar erro na origem. [Casos e perguntas para encaminhamento humano](PENDENCIAS_FONTE_2T2026_2026-11-03.md). Nenhuma mensagem enviada ou API alterada.
+
+## 03/11/2026 — históricos detalhados pela API v2, sem migração municipal presumida
+
+Usuário testou no Postman `POST https://app.geobrain.com.br/public-api/v2/building-with-history-internal`, rota já usada pelo Dashboard. Primeira página recebida:100empreendimentos, total5.229/53páginas;1.458históricos com pattern/estagio_empreendimento preenchidos. Nenhum dos três IDs investigados está nessa página. Contrato confirmado para iniciar a adaptação, não prova de correção dos dados antigos ou cobertura integral real.
+
+SP passa a usar essa rota apenas em `fetchSpBuildingRecords(...,'building-with-history')`, por POST sem corpo, filtros city/type/per_page/page na query e Bearer da sessão existente via httpRequest. Sem uf adicional não confirmado no teste; validação da resposta continua exigindo SãoPaulo/SP/Vertical. Contagem cadastral `/building` e séries municipais mantêm suas rotas atuais: o histórico individual não substitui automaticamente endpoints temporais municipais. Pergunta do usuário sobre migrar tudo resulta em pendência de mapear/validar equivalentes, sem presumir contratos v2 desconhecidos.
+
+Preservar paginação completa, total/IDs estáveis, deduplicação/conflitos, três páginas concorrentes, cancelamento, timeout60s, duas tentativas transitórias e cache privado só em memória. Retry-After da v2 não é cortado em3s. Proveniência marca `building-with-history-internal-v2`. Permissão401/403 e falha de conexão têm mensagem controlada visível; não cair silenciosamente para v1. Demais guardas e fórmulas permanecem independentes.
+
+Testes reais fornecidos antes confirmaram estoque−1 em26686/tipologia33487 atémai2026 (junho0), lacuna de64094 emjun2023 e ausência de estágio dedicado em9498. A primeira página v2 não resolve esses casos por evidência. Coleta completa autenticada no navegador e novo checklist continuam necessários.
+
 ## 03/11/2026 — padrão e estágio da fotografia histórica, diagnósticos por registro
 
 Checklist real2T2026 do usuário:59 disponíveis,9 parciais,9 bloqueados e8 referências. Slide64 mostra gerais por dormitório, mas MCMV/MAP indisponíveis. Investigação encontrou SP usando sempre `building.standard`; outros consumidores do repo já reconhecem `typologies_history[].pattern`. Agora preferir padrão da observação mensal, aceitando cadastro legado apenas quando o campo mensal não foi informado. Padrão explícito desconhecido não vira padrão cadastral. Vale para detalhamentos e controle de padrão do ranking39; não altera os endpoints ou a regra municipal de MCMV.

@@ -399,6 +399,32 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Estado/evidência:** preparado por leitura dos geradores, contratos, manifestos e testes existentes; sem mudança de produto, API, geração real ou teste Office. Aceite Juliana de28/10 preservado. Base local `f5d4ba6`, remoto `028ee1a` com12commits SP à frente e árvore suja; nenhuma integração nesta sessão.
 - **Etapas/pendências:** implementar somente após ativação do plano; sincronização com alterações paralelas depende de autorização. Testar natividade/valores no XML e XLSX embutidos, PDF preservado e edição/salvamento reais com Gabriel/Finoti antes de declarar o novo formato aceito. Push não autorizado nesta solicitação de planejamento.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência apenas.
+### 2026-11-03 — SP: correção de cálculos e cobertura no consumidor — Codex
+
+- **Ambiente/funcionalidade:** SP Institucional,51/53–59/78, ressalvas/checklist/auditoria.
+- **Pedido e decisão:** usuário solicitou fazer a correção após o diagnóstico. [Método aplicado](../features/relatorios-institucionais/sp/TRATAMENTO_FONTE_2026-11-03.md) substitui os bloqueios anteriores pertinentes: estoque negativo informado preservado na conciliação/contagem, sem peso na média de oferta positiva; amostra histórica parcial identificada, sem variação; vendido/VGV calculados de capacidade−oferta válidas e sold original auditado. Dados ausentes/conflitos/totais de fotografia completa divergentes continuam protegidos.
+- **Interface/linhagem:** SVG mantém85posições; barra amarela† identifica amostra, nota78 declara derivação. Alert de ressalvas existente reutilizado. JSON aditivo inclui resumo de avisos e método/contagem/exemplos de vendido calculado. Sem API alterada, estimativa de registros faltantes ou mutação dos fluxos mensais.
+- **Validação:**271testes SP/24arquivos, tipos/lint/build e Edge dirigido22posições mais casos novos aprovados; três capturas inspecionadas. Refinamento textual final repetido em7testes. Prova mínima real87999 e demais dados simulados; zero API de negócio nova,54Mapbox200. Implementação: `039ea0d`.
+- **Etapas/Pendências:** implementação preparada para reteste autenticado, não homologação ou fonte corrigida. Revisão de contrato/origem permanece como melhoria, sem impedir a aplicação da regra solicitada. Tempo da coleta, automação adiada e outros motores fora desta alteração.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
+### 2026-11-03 — SP: identificação do78 e casos prontos para validação da fonte — Codex
+
+- **Ambiente/funcionalidade:** SP Institucional, VGV por padrão/checklist e diagnóstico de estoque.
+- **Origem/evidência:** usuário trouxe checklist apósv2 com68disponíveis/7parciais/2bloqueados/8referências e pediu ação. Resposta v2 já fornecida revela87999/jun2026 com sold−9/−11/−6 e diferença de capacidade10/11/6 igual a distractions. Não concluir causa sem contrato. [Casos e perguntas para encaminhamento humano](../features/relatorios-institucionais/sp/PENDENCIAS_FONTE_2T2026_2026-11-03.md).
+- **Mudança:** diagnóstico78 informa IDs/campos/valores/deltas e inclui ocorrências no resumoJSON. Estoque e vendido negativos são preservados como valores no diagnóstico, explicitamente rejeitados para cálculos que não os aceitam. Mesma identidade de capacidade e fórmulas; sem rateio, zero presumido, API alterada ou mensagem enviada.
+- **Validação:**267testesSP/23arquivos, tipos/lint/build e Edge dirigido22posições mais caso78/mapa79 aprovados; captura inspecionada. Prova mínima de campos reais, demais dados de teste simulados; zero consultas de negócio novas,54Mapbox200. Implementação: `c2664b2`.
+- **Etapas/Pendências:** material para validar estoques/lacuna e semântica de qty/sold/distratos pronto; desbloqueio real depende de contrato/dados confirmados e novo ensaio. Outros motores, automação adiada e Monday preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
+### 2026-11-03 — SP: coleta detalhada integrada à API v2 — Codex
+
+- **Ambiente/funcionalidade:** SP Institucional, fonte compartilhada dos históricos detalhados.
+- **Origem:** usuário consultouPOSTv2 no Postman:100registros na página1/5.229totais/53páginas,1.458históricos com padrão e estágio. Não contém os três IDs pendentes. Resposta bruta/pessoal permanece fora do Git; [evidência e hash](../features/relatorios-institucionais/sp/EVIDENCIAS.md).
+- **Mudança:** históricos por POST sem corpo na rota interna v2 do Dashboard; Bearer da sessão, query/filtros confirmados, validaçãoSãoPaulo/SP/Vertical, todas as páginas eIDs, três concorrentes/cancelamento preservados. Retry-Afterv2 respeitado sem corte3s. Proveniência versionada e mensagem segura em acesso/conexão, sem fallbackv1. Cadastro/séries municipais e fórmulas preservados; migração integral depende de contratos equivalentes validados.
+- **Validação:**264testesSP, tipos/lint/build e Edge dirigido22posições mais casos de POSTv2/403 aprovados; captura403inspecionada. Dados de negócio simulados no navegador do agente,48Mapbox200. OPTIONSsem token confirmouCORS204/POST/authorization/content-type para origem do relatório, sem consulta autenticada de negócio. Implementação: `f7507d9`.
+- **Etapas/Pendências:** adaptação pronta para reteste no site. Verificar coleção integral e três registros antigos, baixar novo checklist e observar deploy; não declarar lacunas/estoque negativo resolvidos pela amostra. Automação adiada e outros motores preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
 
 ### 2026-11-03 — SP: campos históricos e diagnóstico dos registros pendentes — Codex
 
@@ -792,6 +818,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ## 2. Etapas
 
 - **Panorama — PPTX editável:** implementação validada localmente em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende de autorização/publicação/ensaio real e aceite das exceções institucionais; aceite dos dados anteriores preservado.
+**03/11 — SP, correção no consumidor:**51/53–59/78 tratados por regra explícita, com preservação/auditoria e parciais identificadas;271testes e navegador dirigido aprovados. Novo checklist autenticado pendente.
+
+**03/11 — SP, pós-v2:** checklist real confirma68disponíveis/7parciais/2bloqueados/8referências. Casos de fonte/contrato identificados e material de encaminhamento pronto; diagnóstico78 refinado e267testes aprovados.
+
+**03/11 — SP, fonte detalhada v2:** contrato da página1 observado pelo usuário, transporte adaptado/testado e preflight público confirmado. Coleta integral autenticada no site e paridade real ainda pendentes.
+
 **03/11 — SP, campos temporais:** leitura de padrão/estágio por fotografia e diagnóstico nominal de falhas implementados;258testes e navegador dirigido aprovados, fonte real aguarda reteste.
 
 **03/11 — SP, revisão dimensional geral:**85posições revisadas; guardas de detalhamento separadas por total, padrão, segmento e Econômico/MCMV.251testes e navegador dirigido aprovados; reteste real pendente.
@@ -857,6 +889,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ## 3. Pendências
 
 - **Panorama — PPTX editável:** autorizar integração adicional e envio dos commits, publicar e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes; edição Office já verificada em cópias sintéticas.
+- [ ] **SP — retestar tratamento aplicado:** gerar novo2T2026 com estoques assinados conciliados, preços parciais† e VGV calculado; conferir os resultados e a auditoria antes de homologar. API original e performance da coleta continuam independentes.
+
+- [ ] **SP — validar contrato e casos da fonte:** esclarecer estoque−1 do26686, jun2023 ausente do64094 e sold/qty/distratos do87999. Material local pronto, sem envio externo. Não alterar identidade ou fabricar dados antes da confirmação; não declarar relatório homologado.
+
+- [ ] **SP — validar v2 integral no site:** atualizar históricos, baixarJSON e comparar26686/64094/9498 e recortesMCMV/padrão/estágio. Postman página1 e OPTIONS204 não substituem esse ensaio.
+- [ ] **SP — avaliar equivalentes municipais v2:** mapear contratos/rotas e paridade dos totais antes de propor migração das séries municipais; endpoint de histórico individual não é substituto direto.
+
 - [ ] **SP — novo checklist com sourceDiagnostics:** retestar64/76 e fontes históricas após leitura temporal; identificar registros/competências ainda ausentes sem presumir zero ou causa da origem. Campos dedicados podem não existir no legado.
 
 - [ ] **SP — retestar detalhamentos após revisão dimensional:** conferir fontes reais em51/53–59/61–64/66–80, distinguir classificação divergente de falta de histórico/preço/área e registrar o novo checklist. Não assumir que todos os85 slides têm fonte real completa.
