@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 03/11/2026 — históricos SP pela v2 após ensaio do usuário
+
+Main limpa028ee1a, origin único0/0 após fetch; Codex/Codex Test/Windows. Usuário comprovouPOSTv2 no Postman com página1/100registros,5.229totais/53páginas e1.458históricos com padrão/estágio. Adaptada só a coleta detalhada, preservando cadastro e municipal; autenticação da sessão, cobertura integral, concorrência3, cancelamento e guardas mantidos. Sem fallbackv1, mensagem segura para403/conexão.264testes, tipos/lint/build e navegador dirigido aprovados, fonte simulada. OPTIONS público sem token confirmou preflightCORS204 para origem do relatório; não é ensaio de negócio autenticado. Os três IDs antigos não estão na amostra; reteste real/deploy/checklist necessários. Equivalentes municipaisv2 ainda não validados; automação adiada e outros motores preservados.
+
 ## 03/11/2026 — campos mensais e diagnóstico após checklist real
 
 Main limpaaa48b9c, origin único0/0 após fetch; Codex/Codex Test/Windows. Usuário enviou checklist2T2026 e pediu ação, com print64parcial. SP agora prioriza pattern mensal e estágio dedicado, preserva legado apenas na ausência e não oculta explícitos inválidos. Mensagens por ID/tipologia/mês e sourceDiagnostics limitado no JSON.258testes, tipos/lint/build e navegador dirigido aprovados com fontes simuladas;64MCMV e76estágio observados em cenário apropriado. Sem API de negócio nova, endpoint alterado ou preenchimento presumido. Históricos legados podem continuar sem campos; reteste autenticado e deploy observado necessários. Automação adiada e outros motores preservados.

@@ -1,5 +1,15 @@
 # Decisões e pontos abertos — SP
 
+## 03/11/2026 — históricos detalhados pela API v2, sem migração municipal presumida
+
+Usuário testou no Postman `POST https://app.geobrain.com.br/public-api/v2/building-with-history-internal`, rota já usada pelo Dashboard. Primeira página recebida:100empreendimentos, total5.229/53páginas;1.458históricos com pattern/estagio_empreendimento preenchidos. Nenhum dos três IDs investigados está nessa página. Contrato confirmado para iniciar a adaptação, não prova de correção dos dados antigos ou cobertura integral real.
+
+SP passa a usar essa rota apenas em `fetchSpBuildingRecords(...,'building-with-history')`, por POST sem corpo, filtros city/type/per_page/page na query e Bearer da sessão existente via httpRequest. Sem uf adicional não confirmado no teste; validação da resposta continua exigindo SãoPaulo/SP/Vertical. Contagem cadastral `/building` e séries municipais mantêm suas rotas atuais: o histórico individual não substitui automaticamente endpoints temporais municipais. Pergunta do usuário sobre migrar tudo resulta em pendência de mapear/validar equivalentes, sem presumir contratos v2 desconhecidos.
+
+Preservar paginação completa, total/IDs estáveis, deduplicação/conflitos, três páginas concorrentes, cancelamento, timeout60s, duas tentativas transitórias e cache privado só em memória. Retry-After da v2 não é cortado em3s. Proveniência marca `building-with-history-internal-v2`. Permissão401/403 e falha de conexão têm mensagem controlada visível; não cair silenciosamente para v1. Demais guardas e fórmulas permanecem independentes.
+
+Testes reais fornecidos antes confirmaram estoque−1 em26686/tipologia33487 atémai2026 (junho0), lacuna de64094 emjun2023 e ausência de estágio dedicado em9498. A primeira página v2 não resolve esses casos por evidência. Coleta completa autenticada no navegador e novo checklist continuam necessários.
+
 ## 03/11/2026 — padrão e estágio da fotografia histórica, diagnósticos por registro
 
 Checklist real2T2026 do usuário:59 disponíveis,9 parciais,9 bloqueados e8 referências. Slide64 mostra gerais por dormitório, mas MCMV/MAP indisponíveis. Investigação encontrou SP usando sempre `building.standard`; outros consumidores do repo já reconhecem `typologies_history[].pattern`. Agora preferir padrão da observação mensal, aceitando cadastro legado apenas quando o campo mensal não foi informado. Padrão explícito desconhecido não vira padrão cadastral. Vale para detalhamentos e controle de padrão do ranking39; não altera os endpoints ou a regra municipal de MCMV.

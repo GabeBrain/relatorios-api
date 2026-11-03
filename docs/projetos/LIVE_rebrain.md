@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — SP: coleta detalhada integrada à API v2 — Codex
+
+- **Ambiente/funcionalidade:** SP Institucional, fonte compartilhada dos históricos detalhados.
+- **Origem:** usuário consultouPOSTv2 no Postman:100registros na página1/5.229totais/53páginas,1.458históricos com padrão e estágio. Não contém os três IDs pendentes. Resposta bruta/pessoal permanece fora do Git; [evidência e hash](../features/relatorios-institucionais/sp/EVIDENCIAS.md).
+- **Mudança:** históricos por POST sem corpo na rota interna v2 do Dashboard; Bearer da sessão, query/filtros confirmados, validaçãoSãoPaulo/SP/Vertical, todas as páginas eIDs, três concorrentes/cancelamento preservados. Retry-Afterv2 respeitado sem corte3s. Proveniência versionada e mensagem segura em acesso/conexão, sem fallbackv1. Cadastro/séries municipais e fórmulas preservados; migração integral depende de contratos equivalentes validados.
+- **Validação:**264testesSP, tipos/lint/build e Edge dirigido22posições mais casos de POSTv2/403 aprovados; captura403inspecionada. Dados de negócio simulados no navegador do agente,48Mapbox200. OPTIONSsem token confirmouCORS204/POST/authorization/content-type para origem do relatório, sem consulta autenticada de negócio. Commit técnico registrado no fechamento.
+- **Etapas/Pendências:** adaptação pronta para reteste no site. Verificar coleção integral e três registros antigos, baixar novo checklist e observar deploy; não declarar lacunas/estoque negativo resolvidos pela amostra. Automação adiada e outros motores preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
 ### 2026-11-03 — SP: campos históricos e diagnóstico dos registros pendentes — Codex
 
 - **Ambiente/funcionalidade:** SP Institucional, detalhamentos/39 e checklistJSON.
@@ -776,6 +785,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**03/11 — SP, fonte detalhada v2:** contrato da página1 observado pelo usuário, transporte adaptado/testado e preflight público confirmado. Coleta integral autenticada no site e paridade real ainda pendentes.
+
 **03/11 — SP, campos temporais:** leitura de padrão/estágio por fotografia e diagnóstico nominal de falhas implementados;258testes e navegador dirigido aprovados, fonte real aguarda reteste.
 
 **03/11 — SP, revisão dimensional geral:**85posições revisadas; guardas de detalhamento separadas por total, padrão, segmento e Econômico/MCMV.251testes e navegador dirigido aprovados; reteste real pendente.
@@ -839,6 +850,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — validar v2 integral no site:** atualizar históricos, baixarJSON e comparar26686/64094/9498 e recortesMCMV/padrão/estágio. Postman página1 e OPTIONS204 não substituem esse ensaio.
+- [ ] **SP — avaliar equivalentes municipais v2:** mapear contratos/rotas e paridade dos totais antes de propor migração das séries municipais; endpoint de histórico individual não é substituto direto.
 
 - [ ] **SP — novo checklist com sourceDiagnostics:** retestar64/76 e fontes históricas após leitura temporal; identificar registros/competências ainda ausentes sem presumir zero ou causa da origem. Campos dedicados podem não existir no legado.
 

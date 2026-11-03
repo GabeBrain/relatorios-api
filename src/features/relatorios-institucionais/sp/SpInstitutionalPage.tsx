@@ -231,8 +231,8 @@ export default function SpInstitutionalPage() {
       if (signal.aborted) throw new DOMException('Processamento cancelado.','AbortError');
       const salesNeighborhoods = buildSpSalesNeighborhoods(buildings, baseline);
       if (requestVersion === neighborhoodsVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods, granularDetails } } : previous);
-    } catch {
-      const message = signal.aborted ? 'Históricos detalhados cancelados. Os demais dados foram mantidos.' : 'Não foi possível conferir os históricos completos. Tente novamente.';
+    } catch (error) {
+      const message = signal.aborted ? 'Históricos detalhados cancelados. Os demais dados foram mantidos.' : spReadFailure(error,'Não foi possível conferir os históricos completos. Tente novamente.');
       if (requestVersion === neighborhoodsVersion.current) setPreview(previous => previous?.key === key ? { ...previous, report: { ...previous.report, salesNeighborhoods: blockedSpSalesNeighborhoods(message), granularDetails: blockedSpGranularDetails(message) } } : previous);
     } finally { if (requestVersion === neighborhoodsVersion.current) setNeighborhoodsLoading(false); }
   }, [key]);

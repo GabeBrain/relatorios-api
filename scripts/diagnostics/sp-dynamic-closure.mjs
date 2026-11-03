@@ -44,9 +44,14 @@ try {
       const rows = (pageNumber === 1 ? ['2026-07-10', '2026-08-20'] : ['2026-09-15', '2026-06-01']).map((date, i) => ({ building_id: (pageNumber - 1) * 2 + i + 1, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: date, neighborhood: `Bairro ${(pageNumber - 1) * 2 + i + 1}`, total_units: (() => { const month = date.slice(0, 7); const values = month === '2026-09' ? observed.septemberReleases : recorded.releases[month]; return values?.reduce((a, b) => a + b, 0) ?? 0; })(), standard: ['Compacto', 'Econ\u00f4mico', 'Standard', 'Luxo'][(pageNumber - 1) * 2 + i], period: '2026-08-01' }));
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: pageNumber, last_page: 2, total: 4 } }) });
     }
-    if (url.pathname.endsWith('/building-with-history')) {
+    if (url.pathname.endsWith('/building-with-history') || url.pathname.endsWith('/building-with-history-internal')) {
       if (Number(url.searchParams.get('per_page')) === 100) {
+        assert.equal(url.origin,'https://app.geobrain.com.br');
+        assert.equal(url.pathname,'/public-api/v2/building-with-history-internal');
+        assert.equal(route.request().method(),'POST');
+        assert.equal(route.request().postData(),null);
         neighborhoodCalls++;
+        if(detailsCase==='v2-denied')return route.fulfill({status:403,body:'{}'});
         if (slowNeighborhood) await new Promise(done => setTimeout(done, 5000));
         const values = (metric,month,i) => {
           if (negativeSales && metric === 'sales' && month === '2026-07' && i === 0) return -10000;
@@ -311,6 +316,14 @@ try {
   await captureSlide({path:resolve(output,'historical-fields-64-mcmv.png')});
   await openSlide(76);assert.doesNotMatch(await page.getByRole('article').innerText(), /Ativo\/Esgotado|Falta estágio|Dados em conferência/);
   await captureSlide({path:resolve(output,'historical-fields-76-stage.png')});
+  detailsCase='v2-denied';
+  await page.getByRole('button',{name:'Conferir dados reais',exact:true}).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  await openSlide(39);
+  await page.getByText('Vendas por bairro indisponíveis',{exact:true}).waitFor();
+  assert.match(await page.getByRole('alert').filter({hasText:'Vendas por bairro indisponíveis'}).innerText(),/API v2 não autorizou/);
+  assert.equal(await page.getByRole('region',{name:'Prévia do estudo'}).count(),1);
+  await page.getByRole('alert').filter({hasText:'Vendas por bairro indisponíveis'}).screenshot({path:resolve(output,'v2-denied-details.png')});
   detailsCase = 'normal';
   negativeSales = true;
   await page.setViewportSize({ width: 1440, height: 1000 });

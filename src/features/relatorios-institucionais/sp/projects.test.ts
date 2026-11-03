@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { buildSpProjects, fetchSpProjects } from './projects';
+import { buildSpProjects, fetchSpProjects, fetchSpBuildingRecords, SP_BUILDING_HISTORY_V2 } from './projects';
 import { buildSpTemporalPreview } from './temporal';
 import { syntheticWindow } from './__tests__/synthetic-window';
 import type { HttpResponse, RequestOptions } from '@/lib/http-client';
@@ -9,6 +9,48 @@ const building = (id: number, release_date = '2026-09-01') => ({ building_id: id
 const reply = (data: unknown[], page = 1, total = data.length, last = 1) => ({ ok: true, status: 200, data: { data, meta: { current_page: page, total, last_page: last } } }) as unknown as HttpResponse<Record<string, unknown>>;
 
 describe('SP — coleta granular adaptada do Panorama', () => {
+  it('coleta históricos pela v2 com POST vazio, filtros na URL, autenticação e proveniência',async()=>{
+    const signal=new AbortController().signal;
+    const request=vi.fn(async(options:RequestOptions)=>reply([building(Number(options.query?.page))],Number(options.query?.page),3,3));
+    const rows=await fetchSpBuildingRecords(report(),{request,signal});
+    expect(rows).toHaveLength(3);expect(request).toHaveBeenCalledTimes(3);
+    for(const [options] of request.mock.calls){
+      expect(options).toMatchObject({url:SP_BUILDING_HISTORY_V2,method:'POST',headers:{'Content-Type':'application/json'},includeAuth:true,query:{city:'São Paulo',type:'Vertical',per_page:100},signal,cache:'no-store'});
+      expect(options.body).toBeUndefined();expect(options.query).not.toHaveProperty('status');expect(options.query).not.toHaveProperty('building_id');
+    }
+    expect(rows[0].__panoramaSource).toMatchObject({source:'building-with-history-internal-v2',page:1});
+  });
+  it('confere todas as53 páginas e5229IDs antes de processar a coleção v2',async()=>{
+    let active=0,maximum=0;
+    const request=vi.fn(async(options:RequestOptions)=>{
+      const page=Number(options.query?.page);active++;maximum=Math.max(maximum,active);
+      await new Promise(done=>setTimeout(done,0));active--;
+      const count=page===53?29:100;
+      return reply(Array.from({length:count},(_,i)=>building((page-1)*100+i+1)),page,5229,53);
+    });
+    const rows=await fetchSpBuildingRecords(report(),{request});
+    expect(rows).toHaveLength(5229);expect(new Set(rows.map(row=>row.building_id)).size).toBe(5229);
+    expect(request).toHaveBeenCalledTimes(53);expect(maximum).toBe(3);
+  });
+  it.each([401,403])('não faz fallback para a v1 se a v2 nega acesso HTTP%s',async(status)=>{
+    const request=vi.fn(async()=>({ok:false,status,data:null}) as HttpResponse<Record<string,unknown>>);
+    await expect(fetchSpBuildingRecords(report(),{request})).rejects.toThrow('API v2 não autorizou');
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+  it('mantém falha de conexão visível e não tenta outra fonte silenciosamente',async()=>{
+    const request=vi.fn(async()=>({ok:false,status:null,data:null}) as HttpResponse<Record<string,unknown>>);
+    await expect(fetchSpBuildingRecords(report(),{request,sleep:async()=>{}})).rejects.toThrow('permissão da rota no navegador');
+    for(const [options] of request.mock.calls as unknown as [RequestOptions][])expect(options.url).toBe(SP_BUILDING_HISTORY_V2);
+  });
+  it('preserva Retry-After da v2 acima de3segundos e cancelamento não publica coleção parcial',async()=>{
+    let attempts=0;
+    const sleep=vi.fn(async(milliseconds:number)=>{void milliseconds;}),request=vi.fn(async()=>++attempts===1?({...reply([]),ok:false,status:429,retryAfterMs:8000}):reply([building(1)]));
+    expect(await fetchSpBuildingRecords(report(),{request,sleep})).toHaveLength(1);
+    expect(sleep.mock.calls[0][0]).toBe(8000);
+    const controller=new AbortController(),cancelled=vi.fn(async()=>{controller.abort();return reply([building(1)],1,2,2);});
+    await expect(fetchSpBuildingRecords(report(),{request:cancelled,signal:controller.signal})).rejects.toMatchObject({name:'AbortError'});
+    expect(cancelled).toHaveBeenCalledTimes(1);
+  });
   it('conta IDs distintos por lançamento, sem multiplicar tipologias/unidades nem limitar pela raiz', () => {
     const rows = [building(1, '2026-07-12'), building(2, '2026-08-31'), building(3), building(3), building(4, '2026-06-30'), building(5, '2026-10-01')];
     expect(buildSpProjects(rows, report())).toMatchObject({ status: 'ready', total: 3, distinct: 5, monthly: [{ month: '2026-07', value: 1 }, { month: '2026-08', value: 1 }, { month: '2026-09', value: 1 }] });
