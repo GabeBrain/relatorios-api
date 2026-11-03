@@ -69,4 +69,39 @@ describe('SP — bairro obrigatório para movimentos, zero comprovado sem bloque
     expect(data).toMatchObject({status:'ready',rows:[],cityTotal:0,topTotal:0,topShare:null});
     expect(renderToStaticMarkup(<SpNeighborhoodSlide report={{...report,salesNeighborhoods:data}} sales/>)).toContain('Nenhuma venda líquida no período conferido.');
   });
+  it('expõe mês, padrão, valores e sinal da divergência sem liberar um ranking parcial',()=>{
+    const {report,buildings}=fixture();
+    const month=report.monthly![0],pattern=report.patterns!.rows[0];
+    const originalMonth=month.sales,originalPattern=pattern.sales,originalTotal=report.metrics.sales!;
+    const history=buildings[0].typologies_history.find(row=>String(row.period).startsWith(month.month))!;
+    history.sold_in_period=Number(history.sold_in_period)-3;
+    const result=buildSpSalesNeighborhoods(buildings,report);
+    expect(result).toMatchObject({status:'blocked',rows:[],cityTotal:null});
+    expect(result.issues[0]).toContain(`Total de 2T2026: empreendimentos ${originalTotal-3}; municipal ${originalTotal}; diferença -3`);
+    expect(result.issues[0]).toContain(`Mês ${month.month}: empreendimentos ${originalMonth-3}; municipal ${originalMonth}; diferença -3`);
+    expect(result.issues[0]).toContain(`Padrão ${pattern.group}: empreendimentos ${originalPattern-3}; municipal ${originalPattern}; diferença -3`);
+    expect(result.issues[0]).toContain('sold_in_period');expect(result.issues[0]).toContain('liquid_sales');
+    expect(report.metrics.sales).toBe(originalTotal);
+  });
+  it('mostra divergências mensais que se anulam no trimestre',()=>{
+    const {report,buildings}=fixture(),months=report.monthly!;
+    for(const [index,delta] of [[0,2],[1,-2]]){
+      const row=buildings[0].typologies_history.find(value=>String(value.period).startsWith(months[index].month))!;
+      row.sold_in_period=Number(row.sold_in_period)+delta;
+    }
+    const result=buildSpSalesNeighborhoods(buildings,report);
+    expect(result.status).toBe('blocked');expect(result.issues[0]).toContain(`Mês ${months[0].month}`);
+    expect(result.issues[0]).toContain('diferença +2');expect(result.issues[0]).toContain('diferença -2');
+    expect(result.issues[0]).not.toContain('Total de');expect(result.issues[0]).not.toContain('Padrão');
+  });
+  it('identifica padrões divergentes mesmo com totais municipais e mensais iguais',()=>{
+    const {report,buildings}=fixture(),month=report.monthly![0].month;
+    for(const [index,delta] of [[0,4],[1,-4]]){
+      const row=buildings[index].typologies_history.find(value=>String(value.period).startsWith(month))!;
+      row.sold_in_period=Number(row.sold_in_period)+delta;
+    }
+    const result=buildSpSalesNeighborhoods(buildings,report);
+    expect(result.status).toBe('blocked');expect(result.issues[0]).toContain('Padrão Alto');expect(result.issues[0]).toContain('Padrão Compacto');
+    expect(result.issues[0]).not.toContain('Mês ');expect(result.issues[0]).not.toContain('Total de');
+  });
 });

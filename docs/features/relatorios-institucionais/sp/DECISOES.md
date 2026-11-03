@@ -1,5 +1,9 @@
 # Decisões e pontos abertos — SP
 
+## 03/11/2026 — divergência do ranking identificada por comparação
+
+Após a validação dos cadastros, novo print indica bloqueio na reconciliação. O print não contém números suficientes para determinar sua causa. O diagnóstico passa a mostrar todas as divergências: total do trimestre, margem de cada mês e margem de cada padrão, com soma dos empreendimentos, total municipal e diferença assinada em unidades. Compara `sold_in_period` com `liquid_sales`; mês e padrão são margens independentes, não um cruzamento mês/padrão. Nenhuma fórmula, tolerância ou guarda alterada; não atribuir a diferença automaticamente a distratos ou à API. Ranking permanece bloqueado até reconciliação. Automação geral continua adiada.
+
 ## 03/11/2026 — bairro condicionado ao movimento comprovado do período
 
 Resposta individual fornecida pelo usuário para33693 confirmou bairro vazio e vendas mensais explicitamente0 emabr/mai/jun2026, com tipologia42611 identificada e cobertura completa. O bloqueio anterior exigia bairro antes de examinar o movimento e era excessivo nesse caso. O status atual Esgotado, estoque0 e vendido acumulado280 não são usados para presumir ausência de venda passada.

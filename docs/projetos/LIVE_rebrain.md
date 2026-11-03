@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — SP: valores divergentes na reconciliação de bairros — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, ranking de vendas do slide39.
+- **Mudança:** mensagem discrimina total trimestral, cada mês e cada padrão divergente; mostra soma dos empreendimentos, total municipal e diferença assinada. Guardas e fórmulas preservadas. Não é cruzamento mês/padrão nem inferência de distratos. Commit desta entrega: `fix(sp): detalha divergencias de vendas por bairro`.
+- **Evidência:** print mostra bloqueio após validação cadastral, sem números para determinar causa; 32 testes dirigidos, tipos e lint aprovados. Sem API autenticada ou observação da nova mensagem em produção. [Detalhes](../features/relatorios-institucionais/sp/EVIDENCIAS.md).
+- **Etapas/Pendências:** diagnóstico preparado; reteste para identificar valores e confrontar fontes permanece necessário. Automação adiada e outros motores preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
 ### 2026-11-03 — SP: bairro dispensável quando vendas zero estão comprovadas — Codex
 
 - **Origem/causa:** usuário forneceu histórico33693 com bairro vazio e0vendas emabr/mai/jun2026, tipologia42611 identificada. Bloqueio do39 era excessivo: exigia bairro antes de examinar o movimento. Codex/Codex Test, Windows/PowerShell; main limpaa645034, origin único0/0 após fetch. Implementação no commit `0d60ad1`.
@@ -742,6 +750,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**03/11 — SP, reconciliação de bairros:** diagnóstico agora discrimina valores trimestrais, mensais e por padrão; diferenças reais ainda não reconciliadas.
+
 **03/11 — SP, caso33693:** prova recebida e regra excessiva corrigida para bairro ausente com vendas0 inteiramente comprovadas. Retestar coleção integral; demais problemas de fonte permanecem impeditivos.
 
 **03/11 — SP, bairros:** diagnóstico agora identifica primeiro empreendimento/campo impedido. Ranking continua aguardando integridade da fonte; coletar a nova mensagem no acesso real antes de decidir correção de dado ou contrato. Automação segue adiada.
@@ -797,6 +807,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — obter valores da divergência de bairros:** retestar a nova mensagem e confrontar históricos com totais municipais. Não atribuir causa ou liberar ranking apenas pelo print anterior.
 
 - [ ] **SP — reteste39 após zero comprovado:** gerar/conferir novamente com a coleção real; verificar igualdade municipal e qualquer novo ID/campo. O cadastro33693 segue sem bairro na origem, mas seu0observado não exige localização no2T2026.
 

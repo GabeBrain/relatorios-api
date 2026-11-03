@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 03/11/2026 — diagnóstico dos valores divergentes no ranking
+
+Main limpa3315ba6, origin único0/0 após fetch; Codex/Codex Test, Windows. Usuário mostrou bloqueio de reconciliação após a guarda cadastral. Diagnóstico discrimina total trimestral, meses e padrões, soma dos históricos, municipal e diferença assinada; mesmas guardas e fórmulas. 32 testes dirigidos, tipos e lint aprovados. Sem API autenticada ou navegador real; causa numérica ainda depende dos valores do reteste. Não alterar automação adiada nem liberar ranking inconsistente.
+
 ## 03/11/2026 — correção do bloqueio excessivo de bairro com vendas zero
 
 Usuário enviou histórico33693: bairro vazio e0vendas identificadas emabr/mai/jun2026. Exigência de bairro antes dos movimentos corrigida: dispensar apenas com todos os zeros/cobertura por tipologia comprovados, preservando confronto municipal. Regra geral sem IDs especiais; fluxo de automação adiado permanece intacto. Main limpaa645034/origin único0/0, Codex/Codex Test/Windows.240 testes SP, tipos/lint/build e navegador dirigido aprovados; prova mínima/proveniência versionadas. Fonte real fornecida pelo usuário, sem nova API autenticada pelo agente. Retestar coleção integral para verificar outros bloqueios; não declarar cadastro/API corrigidos ou aceite do relatório. Evidências e método na feature.

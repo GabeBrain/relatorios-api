@@ -1,5 +1,9 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 03/11/2026 — valores da reconciliação de vendas por bairro
+
+Print do usuário confirma chegada à guarda municipal após a correção de bairro com zero comprovado; não identifica a causa numérica. Mensagem agora discrimina total, meses e padrões com os valores de cada fonte e delta assinado. 32 testes dirigidos aprovados (18 de bairros e 14 do terceiro lote), incluindo diferenças negativas, compensação entre meses e entre padrões com total igual; tipos completos do app e lint dirigidos aprovados. Nenhuma mudança de interface ou consulta de negócio; comportamento real desta mensagem ainda não observado no acesso autenticado. Próximo: obter os números da divergência na nova mensagem para confrontar os dois endpoints. Não representa reconciliação resolvida ou homologação.
+
 ## 03/11/2026 — zero comprovado em cadastro sem bairro, caso33693
 
 - **Fonte:** usuário consultou `/building/33693` e `/building-with-history/33693`; agente leu o JSON fornecido, sem nova chamada autenticada. ReservaRaposo–Amapá, bairro vazio,98linhas históricas, tipologia42611 com `sold_in_period:0` emabr/mai/jun2026. `sold:280` é acumulado, não venda do trimestre. Histórico completo permanece no anexo local; fixture mínima derivada sem nome/endereço/preços/coordenadas em `sp-unlocated-zero-33693.json`, com SHA256 do bruto/proveniência. Base main limpaa645034, origin único0/0 após fetch.
