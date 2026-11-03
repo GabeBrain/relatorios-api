@@ -1,5 +1,9 @@
 # Decisões e pontos abertos — SP
 
+## 03/11/2026 — guardas de detalhamento limitadas à dimensão utilizada
+
+Varredura solicitada pelo usuário após39 identificou igualdade por padrão na validação comum de estoque, propagada indevidamente a médias gerais, dormitórios, coortes e mapas. Separar total/integridade de padrão, segmento e Econômico/MCMV. Preservar guardas da classificação apenas no resultado dependente; médias e categorias comprovadas permanecem disponíveis. Tabela51 exige Econômico nos fluxos e estoque de abertura/final, sem vetos por outros padrões ou por classificação do estoque intermediário não apresentado. Diferenças ficam explícitas na página e no checklist/JSON; não removem conferências entre snapshots da mesma fonte. [Matriz dos85 slides, decisões e evidências](REVISAO_GUARDAS_DIMENSIONAIS_2026-11-03.md). Esta decisão substitui a exigência genérica de todos os padrões nos detalhamentos, preservando integridade, total, cobertura e guardas específicas. Automação geral continua adiada.
+
 ## 03/11/2026 — ranking por bairro não depende da distribuição por padrão
 
 Reteste do usuário: históricos e municipal totalizam38.658 vendas; diagnóstico não acusa diferenças mensais, somente as sete margens por padrão (+190,+409,-1626,+1,+14,-148,+1160, soma0). Isso demonstra redistribuição entre padrões nos dois conjuntos, sem comprovar causa ou reclassificação histórica. A exigência de igualdade por padrão no slide39 era excessiva: sua dimensão é bairro, com denominador municipal total.

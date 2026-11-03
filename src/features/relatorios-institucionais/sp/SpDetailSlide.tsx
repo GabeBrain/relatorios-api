@@ -33,7 +33,7 @@ function PriceHistory({ rows, annualChange }: { rows:SpPricePoint[]; annualChang
 }
 function StandardChart({ report, ticket }: { report:SpPreview; ticket:boolean }) {
   const prices = report.granularDetails!.prices, values = prices.standards.map(row => ticket ? row.ticket : row.meter), mean = ticket ? prices.overall.ticket : prices.overall.meter;
-  if (!values.some(value => value !== null)) return <Pending text={prices.overall.issues[0] ?? 'Não há preços com cobertura comprovada no mês disponível.'} />;
+  if (!values.some(value => value !== null) && mean === null) return <Pending text={prices.overall.issues[0] ?? 'Não há preços com cobertura comprovada no mês disponível.'} />;
   const max = Math.max(1,mean ?? 0,...values.flatMap(value => value === null ? [] : [value])), y = (value:number) => 520-value/max*280;
   const format = (value:number) => number(ticket ? value/1000 : value);
   return <g>{prices.standards.map((row,i) => {

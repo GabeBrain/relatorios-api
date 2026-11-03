@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 03/11/2026 — varredura das guardas de todos os slides SP
+
+Usuário pediu corrigir outros bloqueios semelhantes ao39. Main limpa57d70ad, origin único0/0 após fetch; Codex/Codex Test/Windows. Separadas validações de estoque total e classificação nos detalhamentos, preservando padrões/segmentos/MCMV quando usados e médias/categorias gerais conferidas. Tabela51 exige apenas recortes pertinentes. Avisos na página e checklist/JSON. [Matriz/evidências](../../features/relatorios-institucionais/sp/REVISAO_GUARDAS_DIMENSIONAIS_2026-11-03.md):251testes, tipos/lint/build e Edge dirigido aprovados, três capturas inspecionadas. Fontes simuladas, sem API GeoBrain real. Releituras da mesma fonte e outros motores preservados; reteste autenticado/deploy/homologação pendentes. Automação adiada não implementada.
+
 ## 03/11/2026 — correção da guarda dimensional no ranking de bairros
 
 Main limpa8ebc9d9, origin único0/0 após fetch, Codex/Codex Test/Windows. Retorno do usuário comprova38.658vendas nas duas fontes e diferenças somente por padrão, sem mensagem de divergência mensal. Slide39 passa a exigir total trimestral e meses iguais; margens por padrão divergentes ficam em aviso e motivo do checklist/JSON, sem modificar cálculos de outros slides.244testes SP, tipos/build/lint e navegador dirigido aprovados com fontes simuladas; captura do aviso inspecionada. Nenhuma API de negócio autenticada nova. Causa cadastral não confirmada, reteste/deploy/homologação pendentes. Automação geral adiada preservada.

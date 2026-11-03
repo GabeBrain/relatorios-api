@@ -3,7 +3,7 @@ import { historyFingerprint } from '@/features/panorama-secovi-fiergs/domain/bui
 import { isSpMunicipalPreview, monthOf, type SpPreview } from './model';
 import { priorMonth, quarterMonths } from './temporal';
 import { shiftSpMonth } from './project-trends';
-import { SP_API_PATTERNS } from './segments';
+import { SP_API_PATTERNS, SP_SEGMENT_RULE } from './segments';
 import { buildSpMarketDetails, type SpMarketDetails } from './market-details';
 
 export const SP_PRICE_STANDARDS = ['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto','Luxo'] as const;
@@ -20,6 +20,7 @@ export interface SpPriceValue { units: number; ticket: number | null; meter: num
 export interface SpPricePoint { label: string; month: string; value: number | null; variation: number | null; issue?: string }
 export interface SpAreaRow { label: string; openingStock: number; stock: number; launches: number; sales: number; stockShare: number | null; launchShare: number | null; salesShare: number | null; ivv: number | null }
 export interface SpGranularDetails {
+  warnings?: string[];
   status: 'ready' | 'blocked'; issues: string[];
   prices: { series: Record<number, SpPricePoint[]>; annualChanges: Record<number, number | null>; standards: (SpPriceValue & { group: string })[]; overall: SpPriceValue };
   area: { status: 'ready' | 'blocked'; issues: string[]; rows: SpAreaRow[]; total: SpAreaRow | null };
@@ -92,13 +93,23 @@ class DetailBuilder {
     const frame = this.frames.get(month)!;
     if (frame.issues.size) return [...frame.issues][0];
     if (frame.rows.some(row => row.stock === null)) return 'Há estoque ausente ou inválido na fotografia.';
-    const expected = month === this.report.throughMonth ? this.report.patterns!.rows.map(row => ({ group: row.group, value: row.stock })) : this.report.stockSeries?.status === 'ready' ? this.report.stockSeries.observations!.filter(row => row.month === month).map(row => ({ group: row.group, value: row.value })) : [];
+    const expected = this.expected(month);
     if (expected.length !== SP_API_PATTERNS.length) return 'A série municipal de oferta não comprovou esta competência.';
-    if (expected.some(row => frame.rows.filter(item => item.standard === row.group).reduce((sum,item) => sum + item.stock!,0) !== row.value)) return 'As tipologias não somam o estoque municipal por padrão nesta competência.';
+    const actual = frame.rows.reduce((sum,row)=>sum+row.stock!,0), total = expected.reduce((sum,row)=>sum+row.value,0);
+    if (!Number.isSafeInteger(actual) || !Number.isSafeInteger(total) || actual !== total) return `Estoque em ${month}: empreendimentos ${actual}; municipal ${total}. As tipologias não somam o estoque municipal nesta competência.`;
     return null;
   }
-  price(month: string, filter: (row: Observation) => boolean = () => true): SpPriceValue {
-    const problem = this.validate(month);
+  expected(month: string) {
+    return month === this.report.throughMonth ? this.report.patterns!.rows.map(row => ({ group: row.group, value: row.stock })) : this.report.stockSeries?.status === 'ready' ? this.report.stockSeries.observations?.filter(row => row.month === month).map(row => ({ group: row.group, value: row.value })) ?? [] : [];
+  }
+  classification(month: string, groups: readonly string[]): string | null {
+    const problem = this.validate(month); if (problem) return problem;
+    const actual=this.frames.get(month)!.rows.filter(row=>groups.includes(row.standard)).reduce((sum,row)=>sum+row.stock!,0);
+    const expected=this.expected(month).filter(row=>groups.includes(row.group)).reduce((sum,row)=>sum+row.value,0);
+    return actual===expected ? null : `Estoque de ${groups.join(' / ')} em ${month}: empreendimentos ${actual}; municipal ${expected}. Classificação ainda não reconciliada para este recorte.`;
+  }
+  price(month: string, filter: (row: Observation) => boolean = () => true, groups?: readonly string[]): SpPriceValue {
+    const problem = groups ? this.classification(month,groups) : this.validate(month);
     if (problem) return { units: 0, ticket: null, meter: null, issues: [problem] };
     const rows = this.frames.get(month)!.rows.filter(row => row.stock! > 0 && filter(row)), units = rows.reduce((sum,row) => sum + row.stock!,0);
     const weighted = (field: 'price' | 'meter') => {
@@ -116,7 +127,7 @@ class DetailBuilder {
       const bedroom = ({ 54:1,55:1,56:2,57:2,58:3,59:4 } as Record<number,number>)[number], excludeMcmv = number === 55 || number === 57;
       const filter = (row: Observation) => (!bedroom || row.bedrooms === bedroom) && (!excludeMcmv || row.standard !== 'Econômico');
       const value = (month: string) => {
-        const price = this.price(month, filter);
+        const price = this.price(month, filter, excludeMcmv ? ['Econômico'] : undefined);
         if (bedroom && this.frames.get(month)!.rows.some(row => row.stock! > 0 && row.bedrooms === null)) return { ...price, meter: null, issues: ['Há oferta sem número de dormitórios para validar o recorte.'] };
         return price;
       };
@@ -124,12 +135,32 @@ class DetailBuilder {
       series[number] = all.slice(1).map((row,i) => ({ label: row.label, month: row.month, value: row.price.meter, variation: change(row.price.meter, all[i].price.meter), issue: row.price.meter === null ? row.price.issues[0] : undefined }));
       annualChanges[number] = change(all.at(-1)!.price.meter, value(shiftSpMonth(this.report.throughMonth!, -12)).meter);
     }
-    return { status: 'ready', issues: [], prices: { series, annualChanges, standards: SP_PRICE_STANDARDS.map(group => ({ group, ...this.price(this.report.throughMonth!, row => row.standard === group) })), overall: this.price(this.report.throughMonth!) }, area: this.area(), market: buildSpMarketDetails(this.frames.get(this.report.throughMonth!)!.rows, [...this.buildings.values()], this.report, this.validate(this.report.throughMonth!)) };
+    const closing=this.report.throughMonth!;
+    const classificationIssues={
+      patterns:SP_API_PATTERNS.map(group=>this.classification(closing,[group])).find(Boolean)??undefined,
+      mcmv:this.classification(closing,['Econômico'])??undefined,
+      segments:Object.values(SP_SEGMENT_RULE.groups).map(groups=>this.classification(closing,groups)).find(Boolean)??undefined,
+    };
+    const warnings=[...this.frames.keys()].filter(month=>!this.validate(month)).flatMap(month=>{
+      const differences=SP_API_PATTERNS.map(group=>this.classification(month,[group])).filter((issue):issue is string=>!!issue);
+      return differences.length ? [`${month}: total de estoque reconciliado, com diferença de classificação por padrão. ${differences.join(' ')}`] : [];
+    });
+    for(const [metric,field] of [['sales','sales'],['launches','qty']] as const){
+      const rows=this.report.monthly!.flatMap(({month})=>this.frames.get(month)!.rows.filter(row=>metric==='sales'||row.release===month));
+      if(rows.some(row=>row[field]===null))continue;
+      if(rows.reduce((sum,row)=>sum+row[field]!,0)!==this.report.metrics[metric])continue;
+      const differences=this.report.patterns!.rows.flatMap(pattern=>{
+        const actual=rows.filter(row=>row.standard===pattern.group).reduce((sum,row)=>sum+row[field]!,0);
+        return actual===pattern[metric]?[]:[`${pattern.group}: empreendimentos ${actual}; municipal ${pattern[metric]}`];
+      });
+      if(differences.length)warnings.push(`${metric==='sales'?'Vendas':'Lançamentos'} do período: total reconciliado, com diferença de classificação por padrão. ${differences.join('. ')}.`);
+    }
+    return { status: 'ready', issues: [], warnings, prices: { series, annualChanges, standards: SP_PRICE_STANDARDS.map(group => ({ group, ...this.price(closing, row => row.standard === group,[group]) })), overall: this.price(closing) }, area: this.area(), market: buildSpMarketDetails(this.frames.get(closing)!.rows, [...this.buildings.values()], this.report, this.validate(closing),classificationIssues) };
   }
   area(): SpGranularDetails['area'] {
     const blocked = (message: string): SpGranularDetails['area'] => ({ status: 'blocked', issues: [message], rows: [], total: null });
     const opening = priorMonth(this.report.monthly![0].month), closing = this.report.throughMonth!;
-    for (const month of [opening, ...this.report.monthly!.map(row => row.month)]) { const issue = this.validate(month); if (issue) return blocked(issue); }
+    for (const month of [opening, ...this.report.monthly!.map(row => row.month)]) { const issue = this.validate(month) ?? (month===opening||month===closing ? this.classification(month,['Econômico']) : null); if (issue) return blocked(issue); }
     const rows: SpAreaRow[] = SP_AREA_LABELS.map(label => ({ label, openingStock:0, stock:0, launches:0, sales:0, stockShare:null, launchShare:null, salesShare:null, ivv:null }));
     const byPattern = new Map<string,{ sales:number; launches:number }>();
     for (const month of [opening, ...this.report.monthly!.map(row => row.month)]) {
@@ -152,7 +183,8 @@ class DetailBuilder {
       }
       if (month !== opening) { const expected = this.report.monthly!.find(row => row.month === month)!; if (monthlySales !== expected.sales || monthlyLaunches !== expected.launches) return blocked('As vendas ou os lançamentos por área não somam os totais municipais de cada mês.'); }
     }
-    if (this.report.patterns!.rows.some(row => (byPattern.get(row.group)?.sales ?? 0) !== row.sales || (byPattern.get(row.group)?.launches ?? 0) !== row.launches)) return blocked('Os fluxos por área divergem dos padrões municipais.');
+    const economic=this.report.patterns!.rows.find(row=>row.group==='Econômico')!;
+    if ((byPattern.get(economic.group)?.sales??0)!==economic.sales || (byPattern.get(economic.group)?.launches??0)!==economic.launches) return blocked('Os fluxos MCMV por área divergem do recorte Econômico municipal.');
     const total = { ...rows[0], label:'Total', openingStock:0, stock:0, launches:0, sales:0 };
     for (const row of rows) for (const field of ['openingStock','stock','launches','sales'] as const) total[field] += row[field];
     if (total.openingStock !== this.report.monthly![0].openingStock || total.stock !== this.report.metrics.stock || total.launches !== this.report.metrics.launches || total.sales !== this.report.metrics.sales || [total,...rows].some(row => ['openingStock','stock','launches','sales'].some(field => !Number.isSafeInteger(row[field as keyof SpAreaRow])))) return blocked('Os totais por área não reconciliaram com o município.');

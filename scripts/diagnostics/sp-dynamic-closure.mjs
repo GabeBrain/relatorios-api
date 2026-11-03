@@ -59,6 +59,10 @@ try {
           if (row.standard === 'Alto') row.standard = 'Compacto';
           else if (row.standard === 'Compacto') row.standard = 'Alto';
         }
+        if (detailsCase === 'mcmv-shift') for (const row of rows) {
+          if (row.standard === 'Econômico') row.standard = 'Compacto';
+          else if (row.standard === 'Compacto') row.standard = 'Econômico';
+        }
         if (detailsCase === 'gap') rows[0].typologies_history = rows[0].typologies_history.filter(row => row.period !== '2024-09-01');
         if (detailsCase === 'missing-area') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).private_area = null;
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
@@ -276,6 +280,25 @@ try {
   await captureSlide({path:resolve(output,'neighborhood-pattern-warning.png')});
   await page.getByText('Vendas por bairro disponíveis com ressalva de classificação', {exact:true}).scrollIntoViewIfNeeded();
   await page.screenshot({path:resolve(output,'neighborhood-pattern-warning-panel.png')});
+  await page.getByText('Detalhamentos com ressalvas de classificação', {exact:true}).waitFor();
+  for(const slide of [51,53,54,55,56,57,58,59,63,64,66,67,68,72,73,74,75,76,79,80]){
+    await openSlide(slide);
+    assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em conferência|Áreas e preços em conferência|Localizações em conferência/);
+  }
+  for(const slide of [69,70,71,77,78]){
+    await openSlide(slide);
+    assert.match(await page.getByRole('article').innerText(), /Dados em conferência|Classificação por padrão em conferência/);
+  }
+  await openSlide(53);await captureSlide({path:resolve(output,'dimensions-general-price-available.png')});
+  await openSlide(70);await captureSlide({path:resolve(output,'dimensions-pattern-map-blocked.png')});
+  detailsCase='mcmv-shift';
+  await page.getByRole('button', {name:'Conferir dados reais',exact:true}).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  await openSlide(63);await page.getByText('Detalhamentos com ressalvas de classificação',{exact:true}).waitFor();
+  assert.doesNotMatch(await page.getByRole('article').innerText(), /Dados em conferência/);
+  assert.match(await page.getByRole('article').innerText(), /MCMV: —/);
+  await captureSlide({path:resolve(output,'dimensions-bedroom-mcmv-partial.png')});
+  await openSlide(55);assert.match(await page.getByRole('article').innerText(), /Áreas e preços em conferência/);
   detailsCase = 'normal';
   negativeSales = true;
   await page.setViewportSize({ width: 1440, height: 1000 });

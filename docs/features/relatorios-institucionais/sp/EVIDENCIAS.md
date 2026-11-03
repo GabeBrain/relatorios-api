@@ -1,5 +1,9 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 03/11/2026 — varredura dimensional dos85 slides
+
+[Matriz completa e execução](REVISAO_GUARDAS_DIMENSIONAIS_2026-11-03.md):251 testes SP/21arquivos, tipos/lint/build aprovados; Edge local dirigido22posições mais cenários de diferença por padrão e MCMV, renderizadores/checklist coerentes, três capturas inspecionadas. Nenhuma API GeoBrain autenticada; simulações, zero erros de página,48Mapbox200. Reteste real/deploy/homologação pendentes. Não declarar todas as fontes reais completas ou corrigidas.
+
 ## 03/11/2026 — slide39 disponível com ressalva de padrão
 
 - **Fonte do diagnóstico:** mensagem fornecida pelo usuário, com total38.658 nas duas fontes, diferenças apenas nas sete categorias. Sem nova API autenticada pelo agente. Causa da classificação não confirmada.

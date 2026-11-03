@@ -3,6 +3,8 @@ import { SP_ORIGINAL_SLIDES } from './original-slides';
 import { SP_INSTITUTIONAL_ASSETS } from './institutional-assets';
 import { resolveSpTypologyComparison } from './typology-history';
 import { spQuarterlyIvv } from './stock-series';
+import { spMarketSlideIssue } from './market-details';
+import { SP_DETAIL_SLIDES } from './granular-details';
 
 export type SpSlideState = 'available' | 'partial' | 'pending' | 'blocked' | 'reference';
 export interface SpSlideReview { number: number; title: string; state: SpSlideState; reason: string }
@@ -62,10 +64,11 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
       const points=details!.prices.series[number]??[],valid=points.filter(row=>row.value!==null).length;
       return !valid?blocked(points.find(row=>row.issue)?.issue??'Nenhuma fotografia com preços completos.'):valid<points.length?partial(`${points.length-valid} fotografia(s) sem preço ou cobertura completa. Os demais pontos foram mantidos.`):available;
     }
-    if(number===61||number===62){const field=number===61?'ticket':'meter',values=details!.prices.standards.map(row=>row[field]);return !values.some(v=>v!==null)?blocked('Sem preços completos nos padrões.'):values.some(v=>v===null)||details!.prices.overall[field]===null?partial('Há padrão ou média geral sem preço completo.'):available;}
+    if(number===61||number===62){const field=number===61?'ticket':'meter',values=details!.prices.standards.map(row=>row[field]);return !values.some(v=>v!==null)&&details!.prices.overall[field]===null?blocked('Sem preços completos nos padrões ou na média geral.'):values.some(v=>v===null)||details!.prices.overall[field]===null?partial('Há padrão ou média geral sem cobertura, classificação ou preço completos.'):available;}
     const market=details!.market;
     const state=source(market,'a fotografia atual dos históricos');
     if(state.state!=='available')return state;
+    const classificationIssue=spMarketSlideIssue(market,number);if(classificationIssue)return blocked(classificationIssue);
     if(number===63||number===64){const field=number===63?'ticket':'meter',rows=market!.prices;return !rows.some(row=>row[field]!==null)?blocked('Sem oferta e preços completos nas tipologias.'):rows.some(row=>row[field]===null||row.bedroom<=2&&(row.mcmv[field]===null||row.map[field]===null))?partial('Há tipologia ou recorte MCMV/MAP sem oferta ou preço completo.'):available;}
     if(number===73)return source(market!.matrix,'a área privativa de toda a oferta');
     if(number===76||number===77){const stages=market!.stages;return stages.launched.ready&&stages.final.ready?available:stages.launched.ready||stages.final.ready?partial('Uma das composições por estágio não foi comprovada.') :blocked(stages.final.issues[0]??'Estágio não informado.');}
@@ -83,7 +86,11 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
     if(number===69&&market!.priceBandShare===null)return partial('Estoque por padrão disponível; cenário de ticket sem preço completo.');
     return available;
   }
-  return SP_ORIGINAL_SLIDES.map(slide=>({...slide,...check(slide.number)}));
+  return SP_ORIGINAL_SLIDES.map(slide=>{
+    const finding={...check(slide.number)};
+    if((SP_DETAIL_SLIDES as readonly number[]).includes(slide.number)&&finding.state==='available'&&report.granularDetails?.warnings?.length)finding.reason='Conteúdo disponível; há ressalvas de classificação por padrão nos históricos. Totais conferidos e recortes dependentes tratados separadamente.';
+    return {...slide,...finding};
+  });
 }
 
 export function spReviewSnapshot(report:SpPreview, slides:SpSlideReview[]) {

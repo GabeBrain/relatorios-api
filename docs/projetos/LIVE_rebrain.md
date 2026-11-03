@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — SP: varredura de guardas por dimensão nos85 slides — Codex
+
+- **Ambiente/funcionalidade:** SP Institucional, detalhamentos de área/preços/estoque/mapas e checklist.
+- **Causa/mudança:** igualdade por padrão embutida na validação comum de estoque bloqueava visões gerais. Separadas conferências de total, padrão, segmento e Econômico/MCMV; preservar médias gerais/categorias comprovadas e bloquear só os recortes dependentes. Tabela51 não exige outros padrões ou estoque intermediário classificado que não apresenta. Avisos por competência na página e motivo do checklist/JSON. Snapshot da mesma fonte, identidade/cobertura, valores, preços/área/capacidade e totais permanecem protegidos.
+- **Validação:**251 testes SP/21arquivos, tipos/lint/build e Edge dirigido22posições mais cenários de troca de padrão/MCMV aprovados; três capturas inspecionadas. Fontes simuladas, zero GeoBrain real,48Mapbox200. [Matriz de todos os slides e limites](../features/relatorios-institucionais/sp/REVISAO_GUARDAS_DIMENSIONAIS_2026-11-03.md). Commit técnico registrado no fechamento.
+- **Etapas/Pendências:** bloqueios indevidos corrigidos localmente; reteste autenticado, deploy observado, classificação da origem e homologação permanecem pendentes. Outros motores e automação adiada preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
+
 ### 2026-11-03 — SP: ranking de bairros com ressalva de padrão — Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, slide39 e checklist de conferência.
@@ -759,6 +767,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**03/11 — SP, revisão dimensional geral:**85posições revisadas; guardas de detalhamento separadas por total, padrão, segmento e Econômico/MCMV.251testes e navegador dirigido aprovados; reteste real pendente.
+
 **03/11 — SP, dimensão bairro:** total e meses iguais permitem ranking39 com ressalva explícita de padrão; guardas das outras dimensões preservadas.
 
 **03/11 — SP, reconciliação de bairros:** diagnóstico agora discrimina valores trimestrais, mensais e por padrão; diferenças reais ainda não reconciliadas.
@@ -818,6 +828,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — retestar detalhamentos após revisão dimensional:** conferir fontes reais em51/53–59/61–64/66–80, distinguir classificação divergente de falta de histórico/preço/área e registrar o novo checklist. Não assumir que todos os85 slides têm fonte real completa.
 
 - [ ] **SP — retestar ranking39 com ressalva:** confirmar no acesso real o ranking por bairro após correção dimensional; investigar classificação dos padrões com a origem, sem assumir causa.
 
