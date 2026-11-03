@@ -70,7 +70,7 @@ export function normalizeOrigin(b: Building, cutoff: string, measurement: Measur
     const ages = [...new Set(atCutoff.map(r => finite(r.time_on_sale)).filter((v): v is number => v !== null && Number.isInteger(v) && v > 0))];
     const age: number | null = releaseAge;
     if (releaseAge !== null && ages.some(a => a !== releaseAge)) {
-        warnings.push('Tempo em venda diverge do lançamento; idade usa lançamento, conforme referência Finotti.');
+        warnings.push('Tempo em venda diverge do lançamento; idade usa lançamento, conforme referência Finoti.');
     }
     if (releaseAge === null)
         warnings.push('Sem lançamento válido; não inferir idade pela primeira linha histórica.');

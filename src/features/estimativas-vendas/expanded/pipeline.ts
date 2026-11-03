@@ -14,7 +14,7 @@ export async function prepareComparison(origins: OriginResult[], horizon: number
             models.set(m.id, r.origin ? forecast(r.origin, m.id, horizon, artifacts.find(a => a.model === m.id && a.segment === r.origin?.segment)) : {id:r.id, name:r.name, forecast:null, reason:r.reason});
         }
         const reference = models.get('finotti-reference')!, recent = models.get('stock-trend')!;
-        const auto = reference.forecast ? reference : recent.forecast ? {...recent, forecast: {...recent.forecast, warnings: [...recent.forecast.warnings, `Finotti indisponível neste corte: ${reference.reason}`]}} : reference;
+        const auto = reference.forecast ? reference : recent.forecast ? {...recent, forecast: {...recent.forecast, warnings: [...recent.forecast.warnings, `Finoti indisponível neste corte: ${reference.reason}`]}} : reference;
         models.set('auto', auto);
         cache.set(r.id, models);
         if (i % 8 === 0) {progress(i + 1); await new Promise(resolve => setTimeout(resolve, 0));}

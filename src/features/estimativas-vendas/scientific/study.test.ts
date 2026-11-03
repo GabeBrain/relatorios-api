@@ -64,7 +64,7 @@ describe('condições científicas por data', () => {
 });
 
 describe('retrospectiva e alvos', () => {
-  it('compara referências simples e bloqueia treino Finotti posterior ao teste', async () => {
+  it('compara referências simples e bloqueia treino Finoti posterior ao teste', async () => {
     const d = dataset(), out = await runStudy(d, protocol(d));
     const constant = out.trials.find(t => t.method === 'constant')!;
     const recent = out.trials.find(t => t.method === 'stock-trend')!;
@@ -139,7 +139,7 @@ describe('retrospectiva e alvos', () => {
 });
 
 describe('métricas de comparação', () => {
-  it('amostra comum usa chaves iguais e não exclui baselines por Finotti indisponível', async () => {
+  it('amostra comum usa chaves iguais e não exclui baselines por Finoti indisponível', async () => {
     const b = building({ id: '2' }); b.typologies_history = b.typologies_history.filter(r => r.period !== '2026-03');
     const d = dataset([building(), b]), out = await runStudy(d, protocol(d));
     const all = groupedMetrics(out).filter(r => r.provenance === 'unknown');

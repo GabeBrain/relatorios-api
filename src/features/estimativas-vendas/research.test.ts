@@ -3,7 +3,7 @@ import { projectBuilding } from './research';
 import type { Building } from './source';
 
 const base: Building = { building_id: 7, name: 'Teste', typologies_history: Array.from({ length: 6 }, (_, i) => ({ period: `2026-${String(i + 1).padStart(2, '0')}-01`, typology_id: 4, pattern: 'Loteamento Fechado', qty: 300, typology_stock: 275 - 25 * i, sold_in_period: 25 })) };
-describe('pesquisa Finotti', () => {
+describe('pesquisa Finoti', () => {
   it('reproduz 300/150/6 e omite a cauda', () => { const p = projectBuilding(base, '2026-06').projection!; expect(p.input).toEqual({ pattern: 'fechado', launchedUnits: 300, netSoldUnits: 150, marketMonth: 6 }); expect(p.points[0].projected).toBe(150); expect(p.points[6].projected! / 300).toBeCloseTo(.6584, 3); });
   it('bloqueia duplicata e divergência entre estoque e vendas', () => { expect(projectBuilding({ ...base, typologies_history: [...base.typologies_history, base.typologies_history[0]] }, '2026-06').reason).toMatch(/duplicada/); expect(projectBuilding({ ...base, typologies_history: base.typologies_history.map((r, i) => i === 2 ? { ...r, sold_in_period: -1 } : r) }, '2026-06').reason).toMatch(/divergem/); });
   it('projeta pelo estoque conciliado com lacunas, sem inventar médias mensais', () => { const sparse = { ...base, typologies_history: [{ ...base.typologies_history[0], sold_in_period: 160 }, { ...base.typologies_history[5], sold_in_period: -10 }] }; const result = projectBuilding(sparse, '2026-06'); expect(result.projection?.input.netSoldUnits).toBe(150); expect(result.projection?.points[0].projected).toBe(150); expect(result.projection?.points[1].last3).toBeNull(); expect(result.reason).toMatch(/médias omitidas/); });

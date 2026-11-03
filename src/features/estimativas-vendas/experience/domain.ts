@@ -48,7 +48,7 @@ export function present(analysis: CaseAnalysis): Presentation {
   const item = analysis.stock.cases[0];
   const method = ALL_METHODS.find(m => item.methods[m].forecast) ?? null;
   const row = item.inventory;
-  return { row, method, status: row.stock === 0 ? 'Esgotado na data' : method === 'finotti-reference' ? 'Referência Finotti disponível' : method ? 'Método exploratório' : 'Sem previsão disponível',
+  return { row, method, status: row.stock === 0 ? 'Esgotado na data' : method === 'finotti-reference' ? 'Referência Finoti disponível' : method ? 'Método exploratório' : 'Sem previsão disponível',
     reason: method === 'finotti-reference' ? 'Disponibilidade matemática; elegibilidade operacional é conferida separadamente.' : cleanReason(item.methods['finotti-reference'].reason) };
 }
 export function operationStatus(universe: Universe, analysis: CaseAnalysis) {

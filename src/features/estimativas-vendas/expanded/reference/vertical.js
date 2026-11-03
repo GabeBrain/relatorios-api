@@ -1,4 +1,4 @@
-// Finotti reference adapter; provenance: REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md
+// Finoti reference adapter; provenance: REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md
 // Simulador de absorção v3 — empreendimentos comparáveis com dados censurados (esgotados + ativos)
 // Vizinhos ainda em venda são completados com o próprio ritmo recente; percentis sobre os 30 vizinhos completos.
 // D.pools[chave] = [[id, [A(1..H) em milésimos, -1 = não observado]], ...]

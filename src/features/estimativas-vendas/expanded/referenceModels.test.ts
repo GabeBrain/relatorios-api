@@ -11,7 +11,7 @@ import {normalizeOrigin, type Origin} from './contract';
 import {retrospective} from './evaluation';
 import type {Building} from '../source';
 
-describe('referência Finotti recebida pelo Drive', () => {
+describe('referência Finoti recebida pelo Drive', () => {
     for (const c of horizontalCases) it(`horizontal: ${JSON.stringify(c.entrada)}`, () => {
         const e = c.entrada, expected = c.esperado;
         const result = projetar(parameters, e.padrao, e.unidades, e.meses, e.vendidas);

@@ -4,7 +4,7 @@ import { evaluateRetrospectiveCase } from './retrospective';
 
 const closedExample = { pattern: 'fechado' as const, launchedUnits: 300, netSoldUnits: 150, marketMonth: 6 };
 
-describe('modelo horizontal Finotti do PPT', () => {
+describe('modelo horizontal Finoti do PPT', () => {
   it('reproduz os números publicados do caso 300/150/6 sem ajustar coeficientes', () => {
     const shape = calculateHorizontalShape(closedExample);
     expect(shape.k).toBeCloseTo(0.632035346, 8);

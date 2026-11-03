@@ -8,7 +8,7 @@ export type ReviewStatus = 'COLETA' | 'PENDENTE' | 'SEM_MODELO' | 'CANDIDATO';
 export type ReviewItem = LocatedBuilding & { id: string; name: string; normalized: OriginResult;
   status: ReviewStatus; reasons: string[]; methods: Map<ModelId, ForecastResult>; situation: string };
 export const REVIEW_MODELS: {id: ModelId; label: string}[] = [
-  {id:'finotti-reference',label:'Referência Finotti'}, {id:'stock-trend',label:'Ritmo recente de estoque'}, {id:'constant',label:'Estoque constante'},
+  {id:'finotti-reference',label:'Referência Finoti'}, {id:'stock-trend',label:'Ritmo recente de estoque'}, {id:'constant',label:'Estoque constante'},
 ];
 export function classify(item: LocatedBuilding, cutoff: string, methods: Map<ModelId, ForecastResult>): ReviewItem {
   const b = item.building, normalized = normalizeOrigin(b,cutoff), o = normalized.origin;

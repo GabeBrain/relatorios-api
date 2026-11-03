@@ -6,8 +6,8 @@ import { quantile } from '../expanded/evaluation';
 
 export const STUDIES = [
   { id: 'all', title: 'Panorama de Curitiba', question: 'O que conseguimos avaliar neste mercado?', condition: 'Todos os empreendimentos; condições recalculadas em cada data.' },
-  { id: 'finotti-horizontal', title: 'Finotti · horizontal', question: 'Onde a referência horizontal pode ser aplicada?', condition: 'Padrão documentado, pelo menos 10 unidades, lançamento desde 2020, estoque positivo e idade 1–48; extensão 49–60 identificada. Suspensos são separados.' },
-  { id: 'finotti-vertical', title: 'Finotti · vertical', question: 'Como investigar a referência de comparáveis?', condition: 'Vertical com pelo menos 10 unidades, lançamento desde 2020, estoque positivo e idade 1–36; comparáveis ainda precisam estar disponíveis. Suspensos são separados.' },
+  { id: 'finotti-horizontal', title: 'Finoti · horizontal', question: 'Onde a referência horizontal pode ser aplicada?', condition: 'Padrão documentado, pelo menos 10 unidades, lançamento desde 2020, estoque positivo e idade 1–48; extensão 49–60 identificada. Suspensos são separados.' },
+  { id: 'finotti-vertical', title: 'Finoti · vertical', question: 'Como investigar a referência de comparáveis?', condition: 'Vertical com pelo menos 10 unidades, lançamento desde 2020, estoque positivo e idade 1–36; comparáveis ainda precisam estar disponíveis. Suspensos são separados.' },
   { id: 'old-stock', title: 'Estoque antigo', question: 'Como o estoque restante evolui nos empreendimentos antigos?', condition: 'Estoque positivo; horizontal acima de 60 meses ou vertical acima de 36.' },
   { id: 'short-history', title: 'Histórico curto', question: 'O que podemos aprender com poucas coletas?', condition: 'Menos de quatro datas reportadas até a data analisada.' },
   { id: 'other-pattern', title: 'Outras condições', question: 'Quais situações precisam de outro modelo?', condition: 'Padrão/tipo sem correspondência ou porte/status fora da seleção documentada da referência.' },
@@ -18,7 +18,7 @@ export type StudyId = typeof STUDIES[number]['id'];
 export const METHODS = [
   { id: 'constant', label: 'Estoque constante', version: 'constant-v1', explanation: 'Mantém o estoque conhecido na data da previsão. É a referência de ausência de redução futura.' },
   { id: 'stock-trend', label: 'Ritmo recente de estoque', version: 'stock-trend-v1', explanation: 'Prolonga a variação do estoque em três meses, com oferta e tipologias estáveis. A variação de estoque não comprova vendas quando há revisões.' },
-  { id: 'finotti-reference', label: 'Referência Finotti', version: 'finotti-drive-2026-10-22', explanation: 'Horizontal: A(t) = 1 − (1 − Aₙ)^((t/n)^k), seguida da cauda documentada. Vertical: trajetória dos comparáveis. Treino até setembro de 2026; datas anteriores ficam bloqueadas na retrospectiva.' },
+  { id: 'finotti-reference', label: 'Referência Finoti', version: 'finotti-drive-2026-10-22', explanation: 'Horizontal: A(t) = 1 − (1 − Aₙ)^((t/n)^k), seguida da cauda documentada. Vertical: trajetória dos comparáveis. Treino até setembro de 2026; datas anteriores ficam bloqueadas na retrospectiva.' },
 ] as const;
 export type StudyMethod = typeof METHODS[number]['id'];
 export type Target = 'stock' | 'net';
@@ -127,11 +127,11 @@ export function describeBuilding(b: Building, cutoff: string): InventoryRow {
   if (invalidDate) reasons.push('Há datas inválidas na fonte; não foram usadas no estudo.');
   if (extension) reasons.push('Idade de 49–60 meses: extensão da referência horizontal, além do ajuste original 1–48.');
   if (stock === 0) reasons.push('Estoque já zerado: não entra nas métricas principais de previsão.');
-  if (o && o.units < 10) reasons.push('Menos de 10 unidades: fora do porte usado na seleção documentada do Finotti.');
+  if (o && o.units < 10) reasons.push('Menos de 10 unidades: fora do porte usado na seleção documentada do Finoti.');
   if (suspended) reasons.push('Status Suspenso reportado nesta data: fora da seleção da referência.');
   if (atDate.some(r => !r.building_status)) reasons.push('Status histórico ausente: equivalência à seleção da referência permanece limitada.');
   if (atDate.length > 1) reasons.push('Curva agregada do empreendimento; sem distribuição estimada por tipologia.');
-  if (patterns.length > 1) reasons.push('Há vários padrões na mesma data; o adaptador Finotti usa o padrão com mais unidades, conforme implementação auditada.');
+  if (patterns.length > 1) reasons.push('Há vários padrões na mesma data; o adaptador Finoti usa o padrão com mais unidades, conforme implementação auditada.');
   return { id: buildingId(b), name: buildingName(b), type: b.sourceType ?? 'Não identificado', cutoff, tags, age,
     pattern: o?.pattern ?? null, units: o?.units ?? null, stock, sold: o?.sold ?? null,
     typologies: atDate.length, reportedDates: dates.length, gaps, cadence, origin: o, reasons, extension };
@@ -168,7 +168,7 @@ export function predictCase(b: Building, cutoff: string, horizons: number[], met
     else if (!origin) results[method] = fail(item.reasons.at(2) ?? 'Dados insuficientes na data escolhida.');
     else if (origin.stock === 0) results[method] = fail('Já esgotado na data da previsão; separado da avaliação principal.');
     else if (method === 'stock-trend' && !stableHistory(past, origin, shiftMonth(cutoff, -3))) results[method] = fail('Ritmo recente exige oferta, tipologias e estoque válidos na janela de três meses.');
-    else if (method === 'finotti-reference' && !item.tags.some(t => t === 'finotti-horizontal' || t === 'finotti-vertical')) results[method] = fail('Fora das condições documentadas da referência Finotti.');
+    else if (method === 'finotti-reference' && !item.tags.some(t => t === 'finotti-horizontal' || t === 'finotti-vertical')) results[method] = fail('Fora das condições documentadas da referência Finoti.');
     else results[method] = forecast(origin, method, Math.max(...horizons));
     results[method].reason = readable(results[method].reason);
   }
@@ -278,7 +278,7 @@ export function summarizeStudy(dataset: StudyDataset, rows: InventoryRow[], resu
     protocol: result.protocol,
     partition: { fitting: false, trainingIds: [], calibrationIds: [], finalTestIds: [],
       exploratoryEvaluationIds: [...new Set(result.cases.map(c => c.id))],
-      referenceTraining: 'Artefato Finotti congelado, finotti-drive-2026-10-22; IDs originais não reconstruídos como partição independente desta consulta.' },
+      referenceTraining: 'Artefato Finoti congelado, finotti-drive-2026-10-22; IDs originais não reconstruídos como partição independente desta consulta.' },
     evaluations: groupedMetrics(result), pairedEvaluations: groupedMetrics(result, true),
-    limitations: ['Origem por período e duração oficial dos fluxos não confirmadas na API.', 'Snapshot atual pode conter revisões de dados históricos.', 'Universo consultado hoje; não comprova cobertura integral do mercado que existia em cada data passada.', 'Finotti congelado treinado até setembro/2026; retrospectivas anteriores bloqueadas.', 'Estudo exploratório sem ajuste, calibração ou seleção de vencedor no teste final.', 'Cartões se sobrepõem; estoques já zerados separados da avaliação principal.'] };
+    limitations: ['Origem por período e duração oficial dos fluxos não confirmadas na API.', 'Snapshot atual pode conter revisões de dados históricos.', 'Universo consultado hoje; não comprova cobertura integral do mercado que existia em cada data passada.', 'Finoti congelado treinado até setembro/2026; retrospectivas anteriores bloqueadas.', 'Estudo exploratório sem ajuste, calibração ou seleção de vencedor no teste final.', 'Cartões se sobrepõem; estoques já zerados separados da avaliação principal.'] };
 }

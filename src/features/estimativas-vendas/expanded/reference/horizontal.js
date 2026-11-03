@@ -1,4 +1,4 @@
-// Finotti reference adapter; provenance: REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md
+// Finoti reference adapter; provenance: REFERENCIAS_FINOTTI_DRIVE_2026-10-22.md
 // Núcleo de cálculo do simulador on-line (mesma lógica da página publicada).
 // Uso no Node: const S = require('./sim.js'); S.projetar(P, 'Loteamento Fechado', 300, 6, 150)
 // P = conteúdo de parametros.json. Especificação: docs/04_aplicacao_simulador.md.

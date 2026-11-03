@@ -1,4 +1,4 @@
-/** Coeficientes arredondados publicados no slide 7 do PPTX Finotti, 21/10/2026. */
+/** Coeficientes arredondados publicados no slide 7 do PPTX Finoti, 21/10/2026. */
 export const HORIZONTAL_PARAMETERS = {
   version: 'finotti-horizontal-ppt-2026-10-21',
   source: 'docs/features/estimativas-vendas/fontes/EXTRACAO_PPTX_2026-10-21.md#slide-7',

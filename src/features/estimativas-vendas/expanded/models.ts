@@ -4,14 +4,14 @@ import { calculateHorizontalShape } from '../horizontal';
 import { monthlyWindow, shiftMonth, type Origin, type Segment } from './contract';
 export const MODELS = [
     { id: 'auto', label: 'Leitura automática', version: 'auto-reference-stock-v1' },
-    { id: 'finotti-reference', label: 'Finotti por tipo · referência completa', version: 'finotti-drive-2026-10-22' },
+    { id: 'finotti-reference', label: 'Finoti por tipo · referência completa', version: 'finotti-drive-2026-10-22' },
     { id: 'stock-trend', label: 'Ritmo recente de estoque', version: 'stock-trend-v1' },
     { id: 'constant', label: 'Estoque constante', version: 'constant-v1' },
     { id: 'last', label: 'Último mês', version: 'last-month-v1' },
     { id: 'mean3', label: 'Média de 3 meses', version: 'mean3-v1' },
     { id: 'mean12', label: 'Média de 12 meses', version: 'mean12-v1' },
-    { id: 'finotti', label: 'Finotti original', version: HORIZONTAL_PARAMETERS.version },
-    { id: 'finotti-extra', label: 'Finotti extrapolado', version: 'finotti-extrapolation-v1' },
+    { id: 'finotti', label: 'Finoti original', version: HORIZONTAL_PARAMETERS.version },
+    { id: 'finotti-extra', label: 'Finoti extrapolado', version: 'finotti-extrapolation-v1' },
     { id: 'absorption', label: 'Absorção recalibrada', version: 'absorption-fit-v1' },
     { id: 'flows', label: 'Vendas e distratos', version: 'flows-exposure-v1' },
     { id: 'cohort', label: 'Pares do treino', version: 'cohort-rate-v1' },
@@ -65,7 +65,7 @@ export function forecast(o: Origin, model: ModelId, horizon = 24, artifact?: Fit
         if (reference.forecast) return reference;
         const recent = forecast(o, 'stock-trend', horizon);
         if (recent.forecast) {
-            recent.forecast.warnings.push(`Referência Finotti indisponível: ${reference.reason}`);
+            recent.forecast.warnings.push(`Referência Finoti indisponível: ${reference.reason}`);
             return recent;
         }
         return {id: o.id, name: o.name, forecast: null, reason: `${reference.reason} ${recent.reason}`};
@@ -86,13 +86,13 @@ export function forecast(o: Origin, model: ModelId, horizon = 24, artifact?: Fit
         }
         else {
             if (o.segment !== 'aberto' && o.segment !== 'fechado')
-                return fail('Coeficientes Finotti disponíveis apenas para loteamentos abertos ou fechados.');
+                return fail('Coeficientes Finoti disponíveis apenas para loteamentos abertos ou fechados.');
             if (model === 'finotti') {
                 try {
                     k = calculateHorizontalShape({ pattern: o.segment, launchedUnits: o.units, netSoldUnits: o.sold, marketMonth: o.age }).k;
                 }
                 catch (e) {
-                    return fail(e instanceof Error ? e.message : 'Fora do domínio Finotti.');
+                    return fail(e instanceof Error ? e.message : 'Fora do domínio Finoti.');
                 }
             }
             else {

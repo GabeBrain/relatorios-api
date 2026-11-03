@@ -14,9 +14,9 @@ export function referenceForecast(o: Origin, horizon: number): ForecastResult {
     if (o.age === null || o.age < 1) return fail('Lançamento ausente: histórico disponível, previsão sem idade de origem.');
     const vertical = o.segment === 'vertical';
     const maxAge = vertical ? 36 : 60;
-    if (o.age > maxAge) return fail(`Método Finotti ${vertical ? 'vertical' : 'horizontal'} disponível até o mês ${maxAge}. Histórico preservado.`);
+    if (o.age > maxAge) return fail(`Método Finoti ${vertical ? 'vertical' : 'horizontal'} disponível até o mês ${maxAge}. Histórico preservado.`);
     const points: ForecastPoint[] = [{period: o.cutoff, offset: 0, age: o.age, predicted: o.sold, stock: o.stock, boundary: false}];
-    const warnings = [...o.warnings, 'Referência Finotti treinada até setembro/2026; não comprova precisão fora dessa base.'];
+    const warnings = [...o.warnings, 'Referência Finoti treinada até setembro/2026; não comprova precisão fora dessa base.'];
     const parameters: Record<string, string | number> = {trainedThrough: '2026-09', pattern: o.pattern ?? 'Não informado'};
     if (!o.stock) {
         for (let h = 1; h <= horizon; h++) points.push({period: shiftMonth(o.cutoff, h), offset: h, age: o.age + h, predicted: o.units, stock: 0, boundary: false});
@@ -26,7 +26,7 @@ export function referenceForecast(o: Origin, horizon: number): ForecastResult {
         if (!output.neighbors) return fail('Sem comparáveis na referência para este estágio.');
         parameters.peers = output.neighbors;
         parameters.pool = poolKey(o.pattern ?? '');
-        if (parameters.pool === 'g3:Médio+') warnings.push('Padrão sem grupo específico; referência utiliza o grupo agregado Médio+, conforme Finotti.');
+        if (parameters.pool === 'g3:Médio+') warnings.push('Padrão sem grupo específico; referência utiliza o grupo agregado Médio+, conforme Finoti.');
         for (let h = 1; h <= horizon; h++) {
             const value = (key: 'central' | 'conservador' | 'otimista') => output[key][h - 1]?.cum ?? output[key].at(-1)?.cum ?? o.sold;
             const predicted = value('central');
@@ -47,5 +47,5 @@ export function referenceForecast(o: Origin, horizon: number): ForecastResult {
         }
         warnings.push('Sombras P25–P75 e P5–P95 da referência. Cobertura relatada na fonte: 53% e 80%; não aferida neste recorte.');
     }
-    return {id: o.id, name: o.name, reason: 'Referência Finotti por tipo', forecast: {origin: o, model: 'finotti-reference', version: 'finotti-drive-2026-10-22', points, reason: 'Faixas da referência, sem recalibração local', parameters, warnings}};
+    return {id: o.id, name: o.name, reason: 'Referência Finoti por tipo', forecast: {origin: o, model: 'finotti-reference', version: 'finotti-drive-2026-10-22', points, reason: 'Faixas da referência, sem recalibração local', parameters, warnings}};
 }

@@ -14,7 +14,7 @@ describe('resumos do mosaico', () => {
     expect(tile.sales).toBe(130 - forecast.points.at(-1)!.stock!);
     expect(tile.forecast.at(-1)!.percent).toBe(100 * forecast.points.at(-1)!.predicted! / 300);
   });
-  it('não transforma lacunas em linha observada ou inventa curva sem Finotti', async () => {
+  it('não transforma lacunas em linha observada ou inventa curva sem Finoti', async () => {
     expect(tilePath([{ offset: -3, percent: 20 }, { offset: -1, percent: 30 }, { offset: 0, percent: 35 }], -3, 12).match(/M/g)).toHaveLength(2);
     const data = fixture(); data.buildings[0].typologies_history.forEach(r => { r.pattern = 'Standard'; });
     const [tile] = await buildTiles(data, ['1'], { cutoff: 'latest', duration: 12, methods: ALL_METHODS });

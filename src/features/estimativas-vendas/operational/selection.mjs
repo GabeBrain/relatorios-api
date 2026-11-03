@@ -91,5 +91,5 @@ export function candidateOutput(selection, cumulative, method) {
     estimatedGross: null, intendedEstimation: true, ivvBatchId: null,
     method, status: 'CANDIDATO_NAO_IMPORTAR', importable: false,
     sourceRows: selection.sourceRows, blockers: selection.blockers,
-    rounding: 'Motor Finotti: acumulado inteiro; fluxo = acumulado final - inicial' };
+    rounding: 'Motor Finoti: acumulado inteiro; fluxo = acumulado final - inicial' };
 }
