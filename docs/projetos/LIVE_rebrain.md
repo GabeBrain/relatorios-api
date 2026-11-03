@@ -388,7 +388,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ### 2026-11-03 — SP: valores divergentes na reconciliação de bairros — Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, ranking de vendas do slide39.
-- **Mudança:** mensagem discrimina total trimestral, cada mês e cada padrão divergente; mostra soma dos empreendimentos, total municipal e diferença assinada. Guardas e fórmulas preservadas. Não é cruzamento mês/padrão nem inferência de distratos. Commit desta entrega: `fix(sp): detalha divergencias de vendas por bairro`.
+- **Mudança:** mensagem discrimina total trimestral, cada mês e cada padrão divergente; mostra soma dos empreendimentos, total municipal e diferença assinada. Guardas e fórmulas preservadas. Não é cruzamento mês/padrão nem inferência de distratos. Implementação: `198e8b8`.
 - **Evidência:** print mostra bloqueio após validação cadastral, sem números para determinar causa; 32 testes dirigidos, tipos e lint aprovados. Sem API autenticada ou observação da nova mensagem em produção. [Detalhes](../features/relatorios-institucionais/sp/EVIDENCIAS.md).
 - **Etapas/Pendências:** diagnóstico preparado; reteste para identificar valores e confrontar fontes permanece necessário. Automação adiada e outros motores preservados.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência somente.
