@@ -6,6 +6,7 @@ import { panoramaExportBlockReason, usePanoramaExportStore } from '../export-sto
 import type { PanoramaReportModel } from '../types';
 import { ReportPaginator } from '../components/ReportPaginator';
 import { buildPanoramaReportModel } from '../report/model';
+import { editableScopeReport } from './editable-pptx.fixture';
 
 const report = () => ({
   scope: { entity: 'fiergs-rs', uf: 'RS', cities: ['Porto Alegre'], endQuarter: '2T2026' },
@@ -19,6 +20,16 @@ const report = () => ({
 
 afterEach(() => { cleanup(); usePanoramaExportStore.setState({ status: 'idle', report: null, consistencyAcknowledged: false, controller: null }); });
 describe('Alertas de consistência e exportação', () => {
+  it('offers one PPT button and routes it to native editable export', () => {
+    const r = editableScopeReport({ entity: 'fiergs-rs', uf: 'RS', cities: ['Canela'], endQuarter: '2T2026' });
+    r.reconciliation = { homologable: true, rows: [] };
+    render(<ReportPaginator report={r}/>);
+    const buttons = screen.getAllByRole('button', { name: /^Baixar PPT$/ });
+    expect(buttons).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: /Baixar PPT editável|Baixar PPT espelho/ })).not.toBeInTheDocument();
+    fireEvent.click(buttons[0]);
+    expect(usePanoramaExportStore.getState()).toMatchObject({ status: 'preparing', format: 'pptx', pptxMode: 'editable', report: r });
+  });
   it('groups registry controls by type, keeping every detail and original audit data', () => {
     const r = report(); r.cube.projects = [];
     r.notices = Array.from({ length: 18 }, (_, i) => ({ code: 'RECONCILIATION_DIFFERENCE', severity: 'warning',

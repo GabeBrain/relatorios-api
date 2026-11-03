@@ -5,7 +5,7 @@ import type { PanoramaReportModel } from '../types';
 import type { PanoramaExportFormat, PanoramaPptxMode } from '../export-store';
 import type { ConsistencyAlert } from '../report/consistency-alerts';
 
-export function ReportConsistencyAlertsDialog({ report, alerts, open, onOpenChange, pendingFormat, pendingMode, onContinue, restoreFocus }: {
+export function ReportConsistencyAlertsDialog({ report, alerts, open, onOpenChange, pendingFormat, onContinue, restoreFocus }: {
   report: PanoramaReportModel; alerts: ConsistencyAlert[]; open: boolean; onOpenChange: (open: boolean) => void;
   pendingFormat?: PanoramaExportFormat; pendingMode?: PanoramaPptxMode; onContinue?: () => void; restoreFocus?: () => void;
 }) {
@@ -39,7 +39,7 @@ export function ReportConsistencyAlertsDialog({ report, alerts, open, onOpenChan
       <DialogFooter className="gap-2">
         <Button variant="outline" onClick={() => downloadFiergsAudit(report)}>Auditoria CSV</Button>
         <Button variant={pendingFormat ? 'outline' : 'default'} onClick={() => onOpenChange(false)}>{pendingFormat ? 'Voltar' : 'Entendi'}</Button>
-        {pendingFormat && <Button onClick={onContinue}>Continuar e baixar {pendingFormat === 'pdf' ? 'PDF' : pendingMode === 'editable' ? 'PPT editável' : 'PPT'}</Button>}
+        {pendingFormat && <Button onClick={onContinue}>Continuar e baixar {pendingFormat === 'pdf' ? 'PDF' : 'PPT'}</Button>}
       </DialogFooter>
     </DialogContent>
   </Dialog>;

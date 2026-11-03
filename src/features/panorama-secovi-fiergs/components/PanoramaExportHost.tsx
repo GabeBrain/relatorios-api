@@ -85,7 +85,7 @@ export default function PanoramaExportHost() {
   }, [status, report, format, pptxMode, manifest, controller, consistencyAcknowledged]);
 
   const running = status === 'preparing' || status === 'capturing' || status === 'assembling';
-  const formatLabel = format === 'pptx' ? pptxMode === 'editable' ? 'PPT editável' : 'PPT' : 'PDF';
+  const formatLabel = format === 'pptx' ? 'PPT' : 'PDF';
   if (status === 'idle') return null;
 
   return (

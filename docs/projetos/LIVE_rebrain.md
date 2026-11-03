@@ -385,6 +385,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — Panorama: um único PPT público — Gabriel / Codex
+
+- **Decisão posterior:** Gabriel pediu remover a opção em imagens e mostrar somente `Baixar PPT`, direcionado ao gerador nativo editável. Progresso e confirmação também usam `PPT`. PDF, dados e alertas preservados; caminho raster legado mantido somente como compatibilidade interna, sem botão público.
+- **Validação/próximo:** teste do botão real verifica ação única e `pptxMode: editable`; testes focados do host/alertas e tipos antes do envio autorizado. Próximo conferir no site após publicação, sem novo estudo real pelo agente. [Contrato vigente](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md).
+
+
 ### 2026-11-03 — Panorama: rótulo PPT e publicação autorizada — Gabriel / Codex
 
 - **Pedido/mudança:** Gabriel pediu apresentar o formato anterior apenas como `PPT`; toolbar, progresso e confirmação de alertas atualizados. `PPT editável` permanece distinto. Sem mudança em dados ou serialização.
