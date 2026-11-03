@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — Panorama FIERGS/Secovi: plano do PowerPoint editável — Gabriel / Codex
+
+- **Diagnóstico e proposta:** exportação atual insere um JPEG por slide. A POC consolidada no Sandbox já usa objetos Office e planilhas de gráficos; `pptxgenjs` também está instalado no Rebrain. [Plano técnico e CTA, fonte única](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md) organiza G0–G6, paridade com modelo/manifesto, famílias analíticas, capas/arte/mapas, integração e edição real no PowerPoint. Fotos/mapas e eventuais artes rasterizadas são exceções a inventariar, sem promessa de editabilidade integral não verificada.
+- **Estado/evidência:** preparado por leitura dos geradores, contratos, manifestos e testes existentes; sem mudança de produto, API, geração real ou teste Office. Aceite Juliana de28/10 preservado. Base local `f5d4ba6`, remoto `028ee1a` com12commits SP à frente e árvore suja; nenhuma integração nesta sessão.
+- **Etapas/pendências:** implementar somente após ativação do plano; sincronização com alterações paralelas depende de autorização. Testar natividade/valores no XML e XLSX embutidos, PDF preservado e edição/salvamento reais com Gabriel/Finoti antes de declarar o novo formato aceito. Push não autorizado nesta solicitação de planejamento.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência apenas.
+
+
 ### 2026-11-03 — Estimativas: grafia Finoti nos textos exibidos — Gabriel / Claude
 
 - **Solicitação:** Gabriel pediu grafar "Finoti" (um t) em tudo que aparece na tela.
@@ -727,6 +735,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+- **Panorama — PPTX editável:** plano preparado em03/11, implementação pendente; [portões e critérios](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Aceite dos dados anteriores preservado.
+
 **03/11 — SP, período geral:** Ano/Trimestre e transporte histórico por janelas validados localmente, incluindo virada2027. Próximo reteste autenticado2T2026 para confirmar motivo/recuperação no acesso real; alteração no Git não prova deploy ou homologação.
 
 **02/11 — Estimativas:** seção14 implementada e validada localmente (129Vitest+15operacionais, seis telas/temas+cinco estados e replay real); prévia/Excel na principal, análise detalhada preservada. Enviada a origin/main em `ad86e26` com autorização; publicação/aceite no site e formato Nicolas/Belogic pendentes.
@@ -778,6 +788,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- **Panorama — PPTX editável:** ativar [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md); autorizar sincronização segura da base, inventariar artes nativas e executar G0–G5. Novo formato e sua edição real ainda não implementados/verificados; publicação depende de autorização.
 
 - [ ] **SP — incidente2T2026:** atualizar a página, autenticar e retestar Ano2026/2º trimestre; se falhar, registrar mensagem segura/janela e checklist. Causa original ainda semHTTP real. Conferir períodos/INCC disponíveis, deploy e aceite; não preencher ausência com zero.
 
