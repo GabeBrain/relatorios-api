@@ -1,5 +1,11 @@
 # Decisões e pontos abertos — SP
 
+## 03/11/2026 — ranking por bairro não depende da distribuição por padrão
+
+Reteste do usuário: históricos e municipal totalizam38.658 vendas; diagnóstico não acusa diferenças mensais, somente as sete margens por padrão (+190,+409,-1626,+1,+14,-148,+1160, soma0). Isso demonstra redistribuição entre padrões nos dois conjuntos, sem comprovar causa ou reclassificação histórica. A exigência de igualdade por padrão no slide39 era excessiva: sua dimensão é bairro, com denominador municipal total.
+
+Manter bloqueios de identidade, conflito, valores, escopo, localização dos movimentos, cobertura e igualdade do total trimestral e de cada mês. Diferenças somente por padrão tornam-se ressalva explícita na página e no motivo do checklist/JSON do39, mantendo os valores completos e assinados. Ranking segue disponível; não há rateio, normalização de vendas ou alteração da fonte. Nota do slide declara apenas total e meses reconciliados. Outros slides e suas guardas por padrão permanecem independentes. Esta decisão substitui a exigência anterior de igualdade por padrão exclusivamente no ranking de bairros; automação geral continua adiada.
+
 ## 03/11/2026 — divergência do ranking identificada por comparação
 
 Após a validação dos cadastros, novo print indica bloqueio na reconciliação. O print não contém números suficientes para determinar sua causa. O diagnóstico passa a mostrar todas as divergências: total do trimestre, margem de cada mês e margem de cada padrão, com soma dos empreendimentos, total municipal e diferença assinada em unidades. Compara `sold_in_period` com `liquid_sales`; mês e padrão são margens independentes, não um cruzamento mês/padrão. Nenhuma fórmula, tolerância ou guarda alterada; não atribuir a diferença automaticamente a distratos ou à API. Ranking permanece bloqueado até reconciliação. Automação geral continua adiada.

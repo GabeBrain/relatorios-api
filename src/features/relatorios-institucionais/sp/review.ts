@@ -47,7 +47,11 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
     }
     if([23,37,47].includes(number)){if(report.typologies?.status==='blocked')return source(report.typologies,'as tipologias');return source(resolveSpTypologyComparison(report,number===23?'launches':number===37?'sales':'stock'),'as tipologias dos dois anos');}
     if([24,38,48].includes(number)){const data=number===24?report.launchSeries:number===38?report.salesSeries:report.stockSeries;return source(data?.status==='blocked'?data:data?.comparison,'os segmentos dos dois anos');}
-    if(number===25||number===39)return source(number===25?(report.projects?.status==='blocked'?report.projects:report.projects?.neighborhoods):report.salesNeighborhoods,'os bairros e sua reconciliação municipal');
+    if(number===25||number===39){
+      const data=number===25?(report.projects?.status==='blocked'?report.projects:report.projects?.neighborhoods):report.salesNeighborhoods;
+      const result=source(data,'os bairros e sua reconciliação municipal');
+      return number===39&&result.state==='available'&&report.salesNeighborhoods?.warnings?.length ? {...result,reason:report.salesNeighborhoods.warnings.join(' ')} : result;
+    }
     if(number===46)return source(report.stockSeries,'a oferta histórica');
     if(number===50){const inputs=[report.stockSeries,report.launchSeries,report.salesSeries],failed=inputs.find(input=>input?.status==='blocked');if(failed)return source(failed,'as séries do IVV');if(inputs.some(input=>!input))return pending('O IVV aguarda as séries de oferta, lançamentos e vendas.');const result=spQuarterlyIvv(report),state=source(result,'as séries de oferta, lançamentos e vendas');return state.state==='available'&&result.rows.some(row=>row.value===null)?partial('Há trimestre sem base disponível para o IVV; não representa índice zero.'):state;}
     const details=report.granularDetails;

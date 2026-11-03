@@ -61,18 +61,20 @@ export function buildSpSalesNeighborhoods(buildings: Record<string, unknown>[], 
   const all = [...groups.values()], cityTotal = all.reduce((sum, row) => sum + row.units, 0);
   if ((!all.length&&!verifiedZeroWithoutNeighborhood) || !Number.isSafeInteger(cityTotal) || all.some(row => !Number.isSafeInteger(row.units))) return block('Não foi possível apurar um total válido de vendas por bairro. O ranking aguarda a fonte completa.');
   // Report each independent comparison: monthly and pattern margins are not a month/pattern cross-tab.
-  const differences: string[] = [];
-  const compare = (label: string, actual: number, expected: number) => {
+  const differences: string[] = [], patternDifferences: string[] = [];
+  const compare = (target: string[], label: string, actual: number, expected: number) => {
     if (actual === expected) return;
     const delta = actual - expected;
-    differences.push(`${label}: empreendimentos ${actual}; municipal ${expected}; diferença ${delta > 0 ? '+' : ''}${delta} unidade(s)`);
+    target.push(`${label}: empreendimentos ${actual}; municipal ${expected}; diferença ${delta > 0 ? '+' : ''}${delta} unidade(s)`);
   };
-  compare(`Total de ${report.quarter}`, cityTotal, report.metrics.sales!);
-  for (const row of report.monthly) compare(`Mês ${row.month}`, monthly.get(row.month) ?? 0, row.sales);
-  for (const row of report.patterns.rows) compare(`Padrão ${row.group}`, patterns.get(row.group) ?? 0, row.sales);
-  if (differences.length) return block(`As vendas por bairro não coincidem com os totais municipais. ${differences.join('. ')}. Comparação de sold_in_period dos históricos com liquid_sales municipal, no período selecionado. O ranking aguarda reconciliação; nenhuma diferença foi atribuída automaticamente a distratos.`);
+  compare(differences, `Total de ${report.quarter}`, cityTotal, report.metrics.sales!);
+  for (const row of report.monthly) compare(differences, `Mês ${row.month}`, monthly.get(row.month) ?? 0, row.sales);
+  for (const row of report.patterns.rows) compare(patternDifferences, `Padrão ${row.group}`, patterns.get(row.group) ?? 0, row.sales);
+  if (differences.length) return block(`As vendas por bairro não coincidem com os totais municipais. ${[...differences,...patternDifferences].join('. ')}. Comparação de sold_in_period dos históricos com liquid_sales municipal, no período selecionado. O ranking aguarda reconciliação; nenhuma diferença foi atribuída automaticamente a distratos.`);
   const shares = cityTotal > 0 && all.every(row => row.units >= 0);
   const rows = all.sort((a,b) => b.units - a.units || a.neighborhood.localeCompare(b.neighborhood, 'pt-BR')).slice(0,10).map(row => ({ ...row, share: shares ? row.units / cityTotal * 100 : null }));
   const topTotal = rows.reduce((sum,row) => sum + row.units, 0);
-  return { status: 'ready', issues: [], rows, cityTotal, topTotal, topShare: shares ? topTotal / cityTotal * 100 : null,verifiedZeroWithoutNeighborhood };
+  // Pattern classification is not a dimension of this neighborhood ranking.
+  const warnings = patternDifferences.length ? [`A distribuição por padrão difere entre os históricos dos empreendimentos e a série municipal. ${patternDifferences.join('. ')}. O ranking por bairro usa os históricos identificados, com total do trimestre e de cada mês reconciliados; a causa da diferença de classificação não foi confirmada.`] : [];
+  return { status: 'ready', issues: [], warnings, rows, cityTotal, topTotal, topShare: shares ? topTotal / cityTotal * 100 : null,verifiedZeroWithoutNeighborhood };
 }

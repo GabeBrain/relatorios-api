@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 03/11/2026 — correção da guarda dimensional no ranking de bairros
+
+Main limpa8ebc9d9, origin único0/0 após fetch, Codex/Codex Test/Windows. Retorno do usuário comprova38.658vendas nas duas fontes e diferenças somente por padrão, sem mensagem de divergência mensal. Slide39 passa a exigir total trimestral e meses iguais; margens por padrão divergentes ficam em aviso e motivo do checklist/JSON, sem modificar cálculos de outros slides.244testes SP, tipos/build/lint e navegador dirigido aprovados com fontes simuladas; captura do aviso inspecionada. Nenhuma API de negócio autenticada nova. Causa cadastral não confirmada, reteste/deploy/homologação pendentes. Automação geral adiada preservada.
+
 ## 03/11/2026 — diagnóstico dos valores divergentes no ranking
 
 Main limpa3315ba6, origin único0/0 após fetch; Codex/Codex Test, Windows. Usuário mostrou bloqueio de reconciliação após a guarda cadastral. Diagnóstico discrimina total trimestral, meses e padrões, soma dos históricos, municipal e diferença assinada; mesmas guardas e fórmulas. 32 testes dirigidos, tipos e lint aprovados. Sem API autenticada ou navegador real; causa numérica ainda depende dos valores do reteste. Não alterar automação adiada nem liberar ranking inconsistente.

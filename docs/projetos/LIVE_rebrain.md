@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — SP: ranking de bairros com ressalva de padrão — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, slide39 e checklist de conferência.
+- **Evidência/causa:** retorno do usuário soma38.658 nas duas fontes, com diferenças só nos sete padrões; causa da classificação ainda não comprovada. Guarda do ranking era excessiva ao exigir igualdade numa dimensão que não usa.
+- **Regra:** total trimestral e cada mês permanecem impeditivos; diferenças apenas por padrão viram aviso com valores completos na página e motivo do checklist/JSON. Mesmas validações de histórico, identidade, cobertura e bairro. Outros slides conservam suas guardas; sem rateio ou alteração de fonte. Commit técnico registrado no fechamento desta entrega.
+- **Validação:**244 testes SP, tipos/build/lint e navegador Edge dirigido22posições aprovados; cenário de padrões diferentes mantém ranking visível e aviso. Imagem inspecionada; fontes simuladas, zero chamadas GeoBrain reais. [Evidências](../features/relatorios-institucionais/sp/EVIDENCIAS.md).
+- **Etapas/Pendências:** correção preparada para reteste autenticado. Classificação da fonte, deploy observado e homologação continuam pendentes; automação adiada preservada.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
 ### 2026-11-03 — SP: valores divergentes na reconciliação de bairros — Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, ranking de vendas do slide39.
@@ -750,6 +759,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**03/11 — SP, dimensão bairro:** total e meses iguais permitem ranking39 com ressalva explícita de padrão; guardas das outras dimensões preservadas.
+
 **03/11 — SP, reconciliação de bairros:** diagnóstico agora discrimina valores trimestrais, mensais e por padrão; diferenças reais ainda não reconciliadas.
 
 **03/11 — SP, caso33693:** prova recebida e regra excessiva corrigida para bairro ausente com vendas0 inteiramente comprovadas. Retestar coleção integral; demais problemas de fonte permanecem impeditivos.
@@ -808,7 +819,9 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **SP — obter valores da divergência de bairros:** retestar a nova mensagem e confrontar históricos com totais municipais. Não atribuir causa ou liberar ranking apenas pelo print anterior.
+- [ ] **SP — retestar ranking39 com ressalva:** confirmar no acesso real o ranking por bairro após correção dimensional; investigar classificação dos padrões com a origem, sem assumir causa.
+
+- [x] **SP — obter valores da divergência de bairros:** usuário trouxe as sete diferenças por padrão, total38.658 igual e nenhuma divergência mensal indicada; correção dimensional com ressalva implementada. Causa da classificação ainda não confirmada.
 
 - [ ] **SP — reteste39 após zero comprovado:** gerar/conferir novamente com a coleção real; verificar igualdade municipal e qualquer novo ID/campo. O cadastro33693 segue sem bairro na origem, mas seu0observado não exige localização no2T2026.
 

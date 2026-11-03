@@ -1,5 +1,13 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 03/11/2026 — slide39 disponível com ressalva de padrão
+
+- **Fonte do diagnóstico:** mensagem fornecida pelo usuário, com total38.658 nas duas fontes, diferenças apenas nas sete categorias. Sem nova API autenticada pelo agente. Causa da classificação não confirmada.
+- **Regressão:**244 testes SP/20arquivos aprovados. Teste reproduz os sete totais informados, com alocação mensal sintética explicitamente identificada; ranking/totais preservados e checklist disponível com motivo contendo a ressalva. Deslocamento entre meses mesmo com trimestre igual permanece bloqueado; identificação, bairro ausente com movimento e conflitos continuam protegidos.
+- **Checagens:** tipos completos/build aprovados; lint dirigido aprovado. Primeira suíte concorrente teve timeout do teste de renderização de28slides e seletor antigo; texto de sucesso compatível atualizado e suíte completa repetida com dois workers, sem falhas.
+- **Navegador:** Edge local1440/claro, modo dirigido22posições, fontes GeoBrain interceptadas. Cenário adicional troca padrões entre cadastros: ranking39 disponível e aviso explícito observado, imagem do painel inspecionada. Demais cenários de parciais/fechamento, períodos, cancelamento/retry, falhas/ausências e mapas aprovados; zero erros de página/zero chamadas GeoBrain reais,27Mapbox200. Capturas `neighborhood-pattern-warning*.png` e log `.local-inputs/sp-pattern-warning-browser.log`, não versionados.
+- **Padrão/limites:** reutilizados Alert/AlertTitle/AlertDescription, texto de estado e renderizador SVG existentes; sem mudança de carregamento. Reteste autenticado, deploy observado e homologação ainda pendentes. Não declara as categorias reconciliadas ou libera outras dimensões divergentes.
+
 ## 03/11/2026 — valores da reconciliação de vendas por bairro
 
 Print do usuário confirma chegada à guarda municipal após a correção de bairro com zero comprovado; não identifica a causa numérica. Mensagem agora discrimina total, meses e padrões com os valores de cada fonte e delta assinado. 32 testes dirigidos aprovados (18 de bairros e 14 do terceiro lote), incluindo diferenças negativas, compensação entre meses e entre padrões com total igual; tipos completos do app e lint dirigidos aprovados. Nenhuma mudança de interface ou consulta de negócio; comportamento real desta mensagem ainda não observado no acesso autenticado. Próximo: obter os números da divergência na nova mensagem para confrontar os dois endpoints. Não representa reconciliação resolvida ou homologação.

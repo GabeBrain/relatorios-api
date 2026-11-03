@@ -9,6 +9,7 @@ import { syntheticWindow } from './__tests__/synthetic-window';
 import { syntheticSalesBuildings } from './__tests__/sales-buildings';
 import proof from './__tests__/fixtures/sp-unlocated-zero-33693.json';
 import { SpNeighborhoodSlide } from './SpNeighborhoodSlide';
+import { reviewSpSlides } from './review';
 
 function fixture(quarter:Quarter='2T2026'){
   const input=syntheticWindow('09'),offset=(quarterIndex(quarter)-quarterIndex('3T2026'))*3;
@@ -101,7 +102,29 @@ describe('SP — bairro obrigatório para movimentos, zero comprovado sem bloque
       row.sold_in_period=Number(row.sold_in_period)+delta;
     }
     const result=buildSpSalesNeighborhoods(buildings,report);
-    expect(result.status).toBe('blocked');expect(result.issues[0]).toContain('Padrão Alto');expect(result.issues[0]).toContain('Padrão Compacto');
-    expect(result.issues[0]).not.toContain('Mês ');expect(result.issues[0]).not.toContain('Total de');
+    expect(result.status).toBe('ready');expect(result.issues).toEqual([]);
+    expect(result.warnings![0]).toContain('Padrão Alto');expect(result.warnings![0]).toContain('Padrão Compacto');
+    expect(result.warnings![0]).not.toContain('Mês ');expect(result.warnings![0]).not.toContain('Total de');
+  });
+  it('reproduz os totais informados pelo usuário sem bloquear a dimensão bairro por diferenças de padrão',()=>{
+    const {report,buildings}=fixture();
+    // Aggregate values supplied by the user; monthly allocation below is synthetic.
+    const actual=[348,6067,24817,385,1624,367,5050],municipal=[158,5658,26443,384,1610,515,3890];
+    report.metrics.sales=38658;
+    report.monthly!.forEach((row,index)=>{row.sales=index===0?38658:0;});
+    report.patterns!.rows.forEach((row,index)=>{row.sales=municipal[index];});
+    buildings.forEach((building,index)=>{for(const row of building.typologies_history){
+      row.sold_in_period=String(row.period).startsWith(report.monthly![0].month)?actual[index]:0;
+    }});
+    const data=buildSpSalesNeighborhoods(buildings,report);
+    expect(data).toMatchObject({status:'ready',cityTotal:38658,topTotal:38658,topShare:100});
+    expect(data.rows.map(row=>row.units)).toEqual([...actual].sort((a,b)=>b-a));
+    for(const delta of ['+190','+409','-1626','+1','+14','-148','+1160'])expect(data.warnings![0]).toContain(`diferença ${delta} unidade(s)`);
+    const preview={...report,salesNeighborhoods:data};
+    expect(reviewSpSlides(preview).find(row=>row.number===39)).toMatchObject({state:'available',reason:data.warnings![0]});
+    const svg=renderToStaticMarkup(<SpNeighborhoodSlide report={preview} sales/>);
+    expect(svg).toContain('total e meses reconciliados');expect(svg).not.toContain('meses e padrões reconciliados');
+    report.monthly![0].sales--;report.monthly![1].sales++;
+    expect(buildSpSalesNeighborhoods(buildings,report).status).toBe('blocked');
   });
 });
