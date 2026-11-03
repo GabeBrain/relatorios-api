@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — Estimativas: grafia Finoti nos textos exibidos — Gabriel / Claude
+
+- **Solicitação:** Gabriel pediu grafar "Finoti" (um t) em tudo que aparece na tela.
+- **Entrega:** rótulos, avisos, painéis e textos exportados corrigidos em `src/features/estimativas-vendas/`; identificadores internos (`finotti-reference`, versões e tags) mantidos para preservar contratos e arquivos exportados. Commit `3fd16cc`.
+- **Evidência:** 129 testes Vitest da feature e typecheck aprovados localmente.
+- **Estado/pendências:** enviado à `main`; conferir a tela no Lovable após o deploy. Documentação histórica e nomes de arquivo `FINOTTI` não foram alterados.
+
 ### 2026-11-03 — SP Institucional: Ano/Trimestre e consultas históricas gerais — Codex
 
 - **Ambiente/solicitação:** usuário relatou municipal/contagem disponíveis, mas três séries históricas indisponíveis no2T2026; pediu período geral e seleção separada, incluindo2027. Codex/Codex Test; main limpa9b5d641 atualizada por ff-only atéfec9b74 com cinco commits de Estimativas, preservados. Origin único0/0 após fetch e reconferência. Implementação e evidências no commit `b7c25b9`.
