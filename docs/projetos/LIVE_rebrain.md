@@ -389,7 +389,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`, slide39 e checklist de conferência.
 - **Evidência/causa:** retorno do usuário soma38.658 nas duas fontes, com diferenças só nos sete padrões; causa da classificação ainda não comprovada. Guarda do ranking era excessiva ao exigir igualdade numa dimensão que não usa.
-- **Regra:** total trimestral e cada mês permanecem impeditivos; diferenças apenas por padrão viram aviso com valores completos na página e motivo do checklist/JSON. Mesmas validações de histórico, identidade, cobertura e bairro. Outros slides conservam suas guardas; sem rateio ou alteração de fonte. Commit técnico registrado no fechamento desta entrega.
+- **Regra:** total trimestral e cada mês permanecem impeditivos; diferenças apenas por padrão viram aviso com valores completos na página e motivo do checklist/JSON. Mesmas validações de histórico, identidade, cobertura e bairro. Outros slides conservam suas guardas; sem rateio ou alteração de fonte. Implementação: `d077ffc`.
 - **Validação:**244 testes SP, tipos/build/lint e navegador Edge dirigido22posições aprovados; cenário de padrões diferentes mantém ranking visível e aviso. Imagem inspecionada; fontes simuladas, zero chamadas GeoBrain reais. [Evidências](../features/relatorios-institucionais/sp/EVIDENCIAS.md).
 - **Etapas/Pendências:** correção preparada para reteste autenticado. Classificação da fonte, deploy observado e homologação continuam pendentes; automação adiada preservada.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
