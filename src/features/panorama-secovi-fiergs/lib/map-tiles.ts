@@ -25,8 +25,11 @@ const isMappable = (point: GeographicPoint) => Number.isFinite(point.latitude) &
  * Pequeno mosaico CARTO/OSM, sem chave, apenas para dar referência geográfica ao slide 56.
  * O zoom diminui até o recorte inteiro caber em no máximo 5 × 4 tiles.
  */
-export function buildMapTilePlan(points: GeographicPoint[], mapboxAccessToken: string): MapTilePlan | null {
-  const validPoints = points.filter(isMappable);
+export function buildMapTilePlan(points: GeographicPoint[], mapboxAccessToken: string, extent?: MapTilePlan['bounds']): MapTilePlan | null {
+  const validPoints = extent ? [
+    { latitude: extent.minLatitude, longitude: extent.minLongitude },
+    { latitude: extent.maxLatitude, longitude: extent.maxLongitude },
+  ].filter(isMappable) : points.filter(isMappable);
   if (!validPoints.length || !mapboxAccessToken.trim()) return null;
   let zoom = validPoints.length === 1 ? 14 : 12;
   let minX = 0; let maxX = 0; let minY = 0; let maxY = 0;

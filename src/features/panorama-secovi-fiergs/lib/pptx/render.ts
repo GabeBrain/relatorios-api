@@ -47,17 +47,19 @@ function chart(slide: PptxGenJS.Slide, pptx: PptxGenJS, data: PresentationChart,
     && Math.max(...observed) - Math.min(...observed) < 10;
   const options: PptxGenJS.IChartOpts = { x, y, w, h, showTitle: false, showLegend: data.series.length > 1, legendPos: 'b',
     legendFontFace: 'Montserrat', legendFontSize: 9, chartColors: data.series.map((s, i) => hex(s.color ?? palette[i % palette.length])),
+    invertedColors: data.series.map(() => 'C62026'),
     showValue: true, catAxisLabelFontFace: 'Montserrat', catAxisLabelFontSize: w < 5 ? 8 : 10,
     valAxisLabelFontFace: 'Montserrat', valAxisLabelFontSize: 9, catAxisLabelColor: INK, valAxisLabelColor: MUTED,
     showCatAxisTitle: false, showValAxisTitle: Boolean(data.unit), valAxisTitle: data.unit,
-    barDir: data.horizontal ? 'bar' : 'col', barGrouping: 'clustered',
+    barDir: data.horizontal ? 'bar' : 'col', barGrouping: 'clustered', catAxisLabelPos: data.horizontal ? 'low' : 'nextTo',
     dataLabelFormatCode: data.percentage ? '0.0"%"' : data.unit?.includes('R$') ? '#,##0.00' : '#,##0', valAxisLabelFormatCode: data.percentage ? '0.0"%"' : '#,##0',
     ...(smallIntegerRange ? { valAxisMajorUnit: 1 } : {}),
     displayBlanksAs: 'gap', lineDataSymbol: 'none', lineSize: 2, dataLabelPosition: data.type === 'line' ? 't' : 'outEnd', dataLabelColor: INK, dataLabelFontSize: 9,
     valGridLine: { color: 'E5E8E0', size: .5 },
     chartArea: { fill: { color: 'FFFFFF', transparency: 100 } }, plotArea: { fill: { color: 'FFFFFF', transparency: 100 } },
   };
-  const series = data.series.map((s) => ({ name: s.name, labels: [...data.labels], values: [...s.values] as number[] }));
+  const series = data.series.map((s) => ({ name: s.name, labels: [...data.labels], values: [...s.values] as number[],
+    ...(s.values.some((n) => n !== null && n < 0) ? { invertedColors: 'C62026' } : {}) }));
   const kinds = new Set(data.series.map((s) => s.type ?? data.type));
   if (kinds.size > 1) {
     // Runtime API for combo charts uses the second argument as options (the v4
@@ -111,20 +113,23 @@ async function renderPage(slide: PptxGenJS.Slide, pptx: PptxGenJS, page: Present
   const heading = title?.kind === 'text' ? title.text : def.title;
   addText(slide, heading, .55, .38, 12.1, 1.05, heading.length > 95 ? 20 : 23, INK, true);
   slide.addShape(pptx.ShapeType.line, { x: .55, y: 1.5, w: 12.1, h: 0, line: { color: OLIVE, width: 1 } });
+  const context = blocks.find((b) => b.kind === 'text' && b.role === 'context');
+  if (context?.kind === 'text') addText(slide, context.text, .55, 1.57, 12.1, .24, 10, OLIVE);
   const tables = blocks.filter((b) => b.kind === 'table');
   const charts = blocks.filter((b) => b.kind === 'chart');
   const maps = blocks.filter((b) => b.kind === 'map');
-  const body = blocks.filter((b) => b.kind === 'text' && b !== title && b.role !== 'footer');
+  const body = blocks.filter((b) => b.kind === 'text' && b !== title && b.role !== 'footer' && b.role !== 'context');
   const images = blocks.filter((b) => b.kind === 'image');
   if (tables.length) {
     const perHeight = 4.9 / tables.length;
     for (const [index, table] of tables.entries()) {
       const columns = Math.max(...table.rows.map((row) => row.reduce((sum, cell) => sum + (cell.colspan ?? 1), 0)));
-      const fontSize = Math.min(12, Math.max(8, 95 / Math.max(columns, 1)), perHeight * 58 / Math.max(table.rows.length, 1));
-      if (fontSize < 8) throw new Error(`Página ${def.page}: tabela densa exige revisão de paginação, sem truncar dados.`);
+      const fontSize = Math.min(16, Math.max(8, 120 / Math.max(columns, 1)), perHeight * 60 / Math.max(table.rows.length, 1));
+      // D08: keep the dense table editable on one slide for analyst finishing;
+      // layout alone must not block the file or silently paginate/drop cells.
       slide.addTable(table.rows.map((row) => row.map((cell) => ({ text: cell.text, options: { bold: cell.header || cell.total, colspan: cell.colspan,
         rowspan: cell.rowspan, fill: { color: cell.fill ?? (cell.header ? 'E7EBE0' : 'FFFFFF') }, color: INK } }))), {
-        x: .55, y: 1.75 + index * perHeight, w: 12.1, rowH: Math.min(.42, (perHeight - .2) / table.rows.length), fontFace: 'Montserrat', fontSize,
+        x: .55, y: 1.95 + index * perHeight, w: 12.1, rowH: Math.min(.42, (perHeight - .2) / table.rows.length), fontFace: 'Montserrat', fontSize,
         margin: 3, border: { color: 'D5D8CF', pt: .4 }, autoPage: false, valign: 'middle',
       });
     }

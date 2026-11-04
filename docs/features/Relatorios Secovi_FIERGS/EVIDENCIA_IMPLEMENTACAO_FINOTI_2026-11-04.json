@@ -1,0 +1,673 @@
+{
+  "base": "f1acc48",
+  "date": "2026-11-04",
+  "state": "validated_locally_not_published",
+  "contracts": {
+    "D01": "validated_locally",
+    "D02": "validated_locally",
+    "D03": "validated_locally",
+    "D04": "validated_locally",
+    "D05": "automatic_layout_and_analyst_relevance",
+    "D06": "validated_locally",
+    "D07": "validated_locally",
+    "D08": "single_slide_and_analyst_finish",
+    "D09": "validated_locally",
+    "D10": "validated_locally",
+    "D11": "current_stock_universe_no_area_or_price_floor",
+    "D12": "aggregate_cancellation_bug_fixed_no_outlier_filter",
+    "D13": "validated_locally",
+    "D14": "validated_locally"
+  },
+  "annotationCoverage": [
+    {
+      "id": "F01",
+      "slide": 5,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F02",
+      "slide": 5,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F03",
+      "slide": 9,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F04",
+      "slide": 9,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F05",
+      "slide": 10,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F06",
+      "slide": 11,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F07",
+      "slide": 11,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F08",
+      "slide": 13,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F09",
+      "slide": 16,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F10",
+      "slide": 17,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F11",
+      "slide": 18,
+      "status": "analyst_relevance"
+    },
+    {
+      "id": "F12",
+      "slide": 19,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F13",
+      "slide": 20,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F14",
+      "slide": 20,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F15",
+      "slide": 21,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F16",
+      "slide": 24,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F17",
+      "slide": 24,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F18",
+      "slide": 27,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F19",
+      "slide": 28,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F20",
+      "slide": 29,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F21",
+      "slide": 30,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F22",
+      "slide": 31,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F23",
+      "slide": 34,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F24",
+      "slide": 34,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F25",
+      "slide": 34,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F26",
+      "slide": 35,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F27",
+      "slide": 38,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F28",
+      "slide": 51,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F29",
+      "slide": 51,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F30",
+      "slide": 52,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F31",
+      "slide": 52,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F32",
+      "slide": 53,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F33",
+      "slide": 53,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F34",
+      "slide": 54,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F35",
+      "slide": 54,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F36",
+      "slide": 55,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F37",
+      "slide": 55,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F38",
+      "slide": 57,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F39",
+      "slide": 58,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F40",
+      "slide": 58,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F41",
+      "slide": 59,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F42",
+      "slide": 60,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F43",
+      "slide": 61,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F44",
+      "slide": 62,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F45",
+      "slide": 63,
+      "status": "validated_locally"
+    },
+    {
+      "id": "F46",
+      "slide": 68,
+      "status": "validated_locally"
+    }
+  ],
+  "models": [
+    {
+      "source": "baseline-conjunto-2T2026-report.json",
+      "inputMode": "frozen-offline",
+      "projects": 266,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 14.23169474046064,
+      "ivvAfter": 14.23169474046064,
+      "sha256": "3bf09a85d5131a118a5d8bafc0d00fd8df34d024bb724c007722c0e7902e6687"
+    },
+    {
+      "source": "baseline-conjunto-4T2025-report.json",
+      "inputMode": "frozen-offline",
+      "projects": 263,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 19.242902208201894,
+      "ivvAfter": 18.289983397897068,
+      "sha256": "1f096f26b0d156133a0148903cc74ed1b47b9ebfcf22c3fe09d894bc04051802"
+    },
+    {
+      "source": "canela-2T2026-report.json",
+      "inputMode": "frozen-offline",
+      "projects": 102,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 13.221153846153847,
+      "ivvAfter": 13.221153846153847,
+      "sha256": "e6e8dba05802ee77b57df63e1c6fbf1f21f3f44ec65b151bc78138c894e1a27b"
+    },
+    {
+      "source": "canela-4T2025-report.json",
+      "inputMode": "frozen-offline",
+      "projects": 98,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 27.692307692307693,
+      "ivvAfter": 27.692307692307693,
+      "sha256": "7efd77d5188497c2017eb3ab3d8a1d47b97077e53e89cf535b118321990b63be"
+    },
+    {
+      "source": "gramado-2T2026-report.json",
+      "inputMode": "frozen-offline",
+      "projects": 226,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 10.272536687631026,
+      "ivvAfter": 10.272536687631026,
+      "sha256": "2ca5ec7eb7fd666d9762d344e7c25e60a7491f14f4920f311a3a3df05bbfb7ca"
+    },
+    {
+      "source": "gramado-4T2025-report.json",
+      "inputMode": "frozen-offline",
+      "projects": 219,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 17.592014971927636,
+      "ivvAfter": 16.36904761904762,
+      "sha256": "df254e6a4a2efdd5985a2dd06f2904e2880ab822695b68b9f510d7051e1da980"
+    },
+    {
+      "source": "gramado-canela-2T2026-report.json",
+      "inputMode": "frozen-offline",
+      "projects": 328,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 10.936654033567947,
+      "ivvAfter": 10.936654033567947,
+      "sha256": "e61f6195ffaf3072e605db205986346d964b8c0f896dc839922c9c11e1f47cd2"
+    },
+    {
+      "source": "gramado-canela-3T2026-report.json",
+      "inputMode": "single-capture-exact",
+      "projects": 329,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 9.456118665018542,
+      "ivvAfter": 8.50320326150262,
+      "sha256": "5fcca0edc7d3632a0db67e3600cae176105d244bc368b28062efe6f41013bfd2"
+    },
+    {
+      "source": "gramado-canela-4T2025-report.json",
+      "inputMode": "frozen-offline",
+      "projects": 317,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 20.505992010652463,
+      "ivvAfter": 19.527896995708154,
+      "sha256": "45700a6a043b6c3fda6bcc21d952398d0d9d6b8b0a77ce738d3c74aece828179"
+    },
+    {
+      "source": "porto-alegre-2T2026-report.json",
+      "inputMode": "frozen-offline",
+      "projects": 1204,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 9.818731117824774,
+      "ivvAfter": 9.818731117824774,
+      "sha256": "702483d12a64f2f0ba2cc5b7292aeb0c1ee3428cf5f00aa70132a84c107ba135"
+    },
+    {
+      "source": "porto-alegre-4T2025-report.json",
+      "inputMode": "frozen-offline",
+      "projects": 1163,
+      "canonicalFieldsUnchanged": [
+        "launchedUnits",
+        "finalUnits",
+        "soldUnits",
+        "averageTicket",
+        "averageArea",
+        "averagePricePerMeter",
+        "launchedVgvMillions",
+        "finalVgvMillions"
+      ],
+      "criticalMismatches": 0,
+      "ivvBefore": 9.508571428571429,
+      "ivvAfter": 9.508571428571429,
+      "sha256": "4c9b180e1e273c21fbd473ef23ea65bb384e8c760158c86ef3672c9d68e7a0c8"
+    }
+  ],
+  "ivv": {
+    "sales": 146,
+    "stock": 1571,
+    "excludedCategoryBefore": {
+      "standard": "Alto",
+      "sales": -7,
+      "stock": 106
+    },
+    "before": 9.456118665018542,
+    "after": 8.50320326150262,
+    "areaTable": 8.50320326150262,
+    "earlyPointsPreserved": [
+      {
+        "quarter": "1T2023",
+        "before": 1.1560693641618498,
+        "after": 1.1560693641618496
+      },
+      {
+        "quarter": "2T2023",
+        "before": 56.85606060606061,
+        "after": 56.85606060606061
+      }
+    ]
+  },
+  "prices": [
+    {
+      "typology": "1 Dormitório",
+      "before": {
+        "project": "RS/Gramado#22204",
+        "price": 4726.59,
+        "stock": 0
+      },
+      "after": {
+        "project": "RS/Canela#83915",
+        "price": 9677.42,
+        "stock": 2
+      }
+    },
+    {
+      "typology": "2 Dormitórios",
+      "before": {
+        "project": "RS/Canela#22198",
+        "price": 4424.53,
+        "stock": 0
+      },
+      "after": {
+        "project": "RS/Gramado#86078",
+        "price": 8037.25,
+        "stock": 1
+      }
+    },
+    {
+      "typology": "3 Dormitórios",
+      "before": {
+        "project": "RS/Canela#22201",
+        "price": 4148.99,
+        "stock": 0
+      },
+      "after": {
+        "project": "RS/Gramado#80723",
+        "price": 6757.15,
+        "stock": 3
+      }
+    },
+    {
+      "typology": "4 ou + Dormitórios",
+      "before": {
+        "project": "RS/Gramado#22230",
+        "price": 9239.48,
+        "stock": 0
+      },
+      "after": {
+        "project": "RS/Gramado#63276",
+        "price": 17096.82,
+        "stock": 2
+      }
+    }
+  ],
+  "means": {
+    "offerByStandard": {
+      "mean": 19.034049167838255,
+      "categories": 6,
+      "observedZeroCount": 0
+    },
+    "offerByTypology": {
+      "mean": 17.794258033171843,
+      "categories": 4,
+      "observedZeroCount": 0
+    },
+    "cohortsHorizontal": {
+      "mean": 10.15786296822163,
+      "categories": 3,
+      "observedZeroCount": 1
+    }
+  },
+  "cartography": {
+    "source": "IBGE API de Malhas v3 · qualidade mínima · enquadramento retangular",
+    "browserCorsVerified": true,
+    "frame": {
+      "minLatitude": -29.5002,
+      "maxLatitude": -29.2476,
+      "minLongitude": -50.9854,
+      "maxLongitude": -50.6446
+    },
+    "outside": [
+      {
+        "projectKey": "RS/Canela#63128",
+        "name": "Winkel Haus",
+        "segment": "Vertical",
+        "city": "Canela",
+        "neighborhood": "Centro",
+        "latitude": -29.02862,
+        "longitude": -51.18271,
+        "standard": "Médio",
+        "finalUnits": 7,
+        "averagePricePerMeter": 11670.59
+      }
+    ],
+    "visible": 328,
+    "analyticalLocations": 329
+  },
+  "tests": {
+    "passed": 102,
+    "failed": 0,
+    "files": 12,
+    "additionalCompleteManifestModels": 11
+  },
+  "artifacts": [
+    {
+      "name": "R1",
+      "pages": 12,
+      "fullManifestPages": 62,
+      "charts": 4,
+      "embeddedWorkbooks": 4,
+      "files": [
+        {
+          "file": "R1-EXTRATO-VALIDACAO.pdf",
+          "sha256": "d82cadcc60a4ae29ad1587b022b5c9563091e4a2230828649165e611f4ddf92f",
+          "bytes": 1482884
+        },
+        {
+          "file": "R1-EXTRATO-VALIDACAO.pptx",
+          "sha256": "6eafa549090f1d244344628eab36288e74fc277ec24155e90b437897e1b01640",
+          "bytes": 341324
+        },
+        {
+          "file": "R1-EXTRATO-VALIDACAO.csv",
+          "sha256": "026631373fcf96e359933cb022273188fc9cfdac222477a7abb02cd8c08bde25",
+          "bytes": 136559
+        }
+      ]
+    },
+    {
+      "name": "R2",
+      "pages": 8,
+      "fullManifestPages": 64,
+      "charts": 4,
+      "embeddedWorkbooks": 4,
+      "files": [
+        {
+          "file": "R2-EXTRATO-VALIDACAO.pdf",
+          "sha256": "1b5b95883a58e209e104a3f512c50aff721e5101f80121566b7c6810a322c7c6",
+          "bytes": 1377051
+        },
+        {
+          "file": "R2-EXTRATO-VALIDACAO.pptx",
+          "sha256": "c1afdf3b46ba8ee3241be44222a01a9aa8ef6e7c5a8939f5bdbd9eb54821b3ff",
+          "bytes": 1485353
+        },
+        {
+          "file": "R2-EXTRATO-VALIDACAO.csv",
+          "sha256": "6fd24322852d17bb6db9a8740e725dbbc8198bd06d869b6b896c5a5b1357ea58",
+          "bytes": 253361
+        }
+      ]
+    }
+  ],
+  "office": {
+    "editProof": {
+      "savedAndReopened": true,
+      "table": true,
+      "chartWorkbook": true,
+      "file": "R1-EDIT-PROOF.pptx",
+      "text": true
+    },
+    "decks": [
+      {
+        "outside": [],
+        "opened": true,
+        "name": "R1",
+        "slides": 12
+      },
+      {
+        "outside": [],
+        "opened": true,
+        "name": "R2",
+        "slides": 8
+      }
+    ],
+    "chartCacheEdit": {
+      "before": 2.0,
+      "after": 3.0
+    }
+  },
+  "pending": [
+    "Publicação e conferência no site dependem de autorização.",
+    "Origem cadastral da coordenada de Winkel Haus precisa de apuração na API/base.",
+    "Acabamentos específicos e relevância de páginas permanecem a cargo do analista."
+  ]
+}

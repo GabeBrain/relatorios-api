@@ -34,7 +34,7 @@ export interface PanoramaExportMetadata {
   keywords?: string[];
 }
 
-async function waitForSlide(slide: HTMLElement) {
+export async function waitForSlide(slide: HTMLElement) {
   await document.fonts?.ready;
   const images = [...slide.querySelectorAll('img')];
   await Promise.all(images.map(async (image) => {

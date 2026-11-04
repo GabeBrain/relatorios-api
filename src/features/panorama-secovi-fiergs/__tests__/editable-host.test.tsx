@@ -9,7 +9,7 @@ vi.mock('../components/ReportPaginator', () => ({ PanoramaExportDeck: (props: { 
   mocks.deck(); return <div ref={props.rootRef}><section className="panorama-report-page"/></div>;
 } }));
 vi.mock('../report/presentation/build-package', () => ({ buildPanoramaPresentationPackage: mocks.build }));
-vi.mock('../lib/pptx/render', () => ({ renderPanoramaEditablePptx: mocks.native }));
+vi.mock('../lib/pptx/approved-layout', () => ({ buildPanoramaApprovedPptx: mocks.native }));
 vi.mock('../lib/pdf-export', () => ({ buildPanoramaPdf: mocks.pdf, buildPanoramaPptx: mocks.mirror, PanoramaExportCancelled: class extends Error {} }));
 const report = { scope: { entity: 'fiergs-rs', uf: 'RS', cities: ['Canela'], startQuarter: '1T2021', endQuarter: '2T2026' },
   provenance: { requestedCities: ['Canela'], completedCities: ['Canela'], failedCities: [] }, reconciliation: { homologable: true, rows: [] } } as unknown as PanoramaReportModel;
@@ -23,7 +23,7 @@ beforeEach(() => {
 });
 afterEach(() => { usePanoramaExportStore.getState().cancel(); cleanup(); vi.restoreAllMocks(); });
 describe('Host real · modalidade nativa', () => {
-  it('runs PDF, editable PPT and mirror for the same report; native does not mount the capture deck', async () => {
+  it('runs PDF, editable PPT and mirror for the same report; approved-layout PPT mounts the original capture deck', async () => {
     render(<Host/>);
     act(() => usePanoramaExportStore.getState().start(report, 'pdf'));
     await waitFor(() => expect(usePanoramaExportStore.getState().status).toBe('done'));
@@ -31,7 +31,7 @@ describe('Host real · modalidade nativa', () => {
     mocks.deck.mockClear();
     act(() => usePanoramaExportStore.getState().start(report, 'pptx', { pptxMode: 'editable', manifest: [] }));
     await waitFor(() => expect(usePanoramaExportStore.getState().status).toBe('done'));
-    expect(mocks.native).toHaveBeenCalledOnce(); expect(mocks.deck).not.toHaveBeenCalled();
+    expect(mocks.native).toHaveBeenCalledOnce(); expect(mocks.deck).toHaveBeenCalled();
     expect(usePanoramaExportStore.getState().result?.name).toMatch(/-editavel\.pptx$/);
     act(() => usePanoramaExportStore.getState().start(report, 'pptx', { pptxMode: 'mirror' }));
     await waitFor(() => expect(usePanoramaExportStore.getState().status).toBe('done'));

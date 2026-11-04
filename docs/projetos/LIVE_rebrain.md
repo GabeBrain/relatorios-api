@@ -392,11 +392,69 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Evidência:** checklist real68disponíveis/7parciais/2bloqueados/8referências; controles124044×124045 e preço54845/73369/junho.274 testes SP/25arquivos, tipos/lint/build e Edge dirigido aprovados na base92eeef0; capturas51/78 inspecionadas, sem nova API autenticada. Reutilizados renderizadores e estados existentes.
 - **Estado:** implementação local; integração dos14commits novos encontrada em04/11 aguarda confirmação por árvore suja. Jun2023/64094 e artes editoriais continuam pendências de fonte/revisão. Não declarar homologação ou deploy observado.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência, sem escrita.
+### 2026-11-04 - Panorama: conferencia integral pre-push e cobertura de preco - Gabriel / Codex
+
+- **Pedido:** Gabriel autorizou push e exigiu gerar/revisar o estudo local antes. Primeira saida64paginas aprovada noOffice; revisao identificou zero artificial de4dormitorios em1T2023: nenhuma linha desse grupo nas tres respostas paginadas da fonte; consumidor preenchia a chave ausente com0.
+- **Correcao:** metadado de observacao por trimestre/segmento distingue ausencia de zero retornado. Grafico por dormitorio usa lacuna/null sem conectar pontos ausentes; zero observado preservado. Aviso eCSV registram a lacuna. Manifesto e cache ajustados; nenhum numero canonico alterado, sem excecao por municipio/periodo.
+- **Evidencia:**27testes focados e11replays offline aprovados, tipos/build/lint aprovados. Segunda geracao integral finalPDF/PPT/CSV64paginas no cache exato: nenhum texto oculto/grafia antiga, nenhum objeto fora do slide, nenhuma divergencia critica;1578textos/123imagens noPPT. Edicao de titulo/celula salva e reaberta noOffice. Arquivos e checks em `.local-inputs/panorama-prepush-final-2026-11-04/`; [resultado/hashes e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#conferencia-integral-antes-do-push-autorizado---04112026).
+- **Estado:** validado localmente; envio autorizado nesta rodada junto de4e773a8. Lovable/site e aceite externo ainda pendentes; picoIVV e coordenada deWinkelHaus continuam separados da correcao de cobertura. Alteracoes paralelas preservadas.
+- **Retorno visual posterior:** usuario apontou quadro anual/setas ainda desalinhados. Causa local da exportacao hibrida, nao diferenca comprovada de ambiente. Reparo dirigido: painel anual em imagem unica; setas em runs nativos coloridos junto do numero, sem fundo duplicado. Prova4paginas Office salva/reaberta e close-ups conferidos;10testes/tipos/lint aprovados. Fonte no planoPPTX03/11, secao camadas04/11. Sem nova coleta/push; revisao integral depois do reparo ainda pendente.
+
+
+### 2026-11-04 - Panorama: revisao do PPT integral e tabelas - Gabriel / Codex
+
+- **Diagnostico:** arquivo editavel(1) de 64 paginas revelou 84 caixas de texto de leitores de tela em sete tabelas (saida30,31,34,42,44,54,55). A amostra anterior nao cobriu esses estados. O exportador agora exclui spans sr-only/hidden/recortados sem remover acessibilidade do HTML; uma caixa editavel por celula e decoracao de tabela isolada corrigem o alinhamento no Office. Geobrain padronizado nos textos gerados.
+- **IVV:** fechamento8,5032% preservado e reconciliado com a tabela. Retirado painel9meses que repetia fotografia trimestral; variacoes anuais agora comparam o mesmo trimestre, sem somar taxas. Estoque tambem deixa de repetir fotografia como acumulado. Pico56,856% permanece por contratoD12; origem ainda por apurar.
+- **Validacao:**15 testes focados, tipos/build e lint0erros aprovados. Geracao integral offline64paginas sem texto oculto/grafia antiga, seguida de prova final9paginas apos centralizacao/isolamento de tabelas:371textos/18imagens, edicao de titulo e celula salva/reaberta noOffice. Sem API nova. Arquivos em `.local-inputs/panorama-review-2026-11-04/`; [fonte e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#conferencia-da-geracao-integral-recebida---04112026).
+- **Estado:** validado localmente; commit isolado para revisao, sem push nesta rodada. Proximo autorizacao de envio e nova conferencia no site. Alteracoes paralelas preservadas; sem aceite externo.
+
+### 2026-11-04 - Panorama: aparencia aprovada com textos editaveis - Gabriel / Codex
+
+- **Decisao:** apos revisar o PPT integral de 64 paginas/47 graficos, Gabriel pediu voltar ao desenho aprovado, preservando textos editaveis e motor nativo para outros relat?rios. Botao PPT usa o mesmo DOM do PDF; graficos sao imagens individuais, textos/celulas sao caixas nativas, decoracao de tabelas e mapas rasterizada. Dados e contratos Finoti nao revertidos.
+- **Evidencia:** extrato exato de oito paginas aberto no Office, 621 textos/12 imagens/zero graficos nativos; titulo e texto de celula editados, salvos e reabertos. Primeira prova revelou quebras extras, corrigidas antes do envio. Build/tipos e lint aprovados; 36 testes distintos aprovados; testes e renders em `.local-inputs/panorama-approved-ppt-2026-11-04/`. Guia/snapshot reutilizavel em `SE/System Design/ativos/pptx-nativo-panorama-2026-11-04/`. [Decisao e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#revisao-de-decisao-visual--04112026).
+- **Estado:** validado localmente, envio autorizado pelo pedido; conferencia integral no site e aceite visual externo pendentes. Captura volta a depender de aba visivel. Sem alteracao nos projetos paralelos.
+
+### 2026-11-04 — Panorama: contratos Finoti implementados e extratos conferidos — Gabriel / Codex
+
+- **Resultado local:** [G0–G6, reconciliações, R1/R2 e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_IMPLEMENTACAO_REVISAO_FINOTI_PANORAMA_2026-11-04.md#execução-autorizada-em-0411--resultado-curto). Corrigida exclusão indevida da categoria com distratos no IVV consolidado vertical; preço atual considera estoque positivo; média simples identificada; contexto e nomenclatura nos slides; fontes, negativos, omissões e mapa territorial implementados. Totais canônicos dos empreendimentos preservados.
+- **Evidência:**102 testes distintos e11replays locais, tipos/build e lint0erros/8avisos; PDF12/8páginas ePPT nativo com edição real de texto/tabela/workbook, salvamento e reabertura Office. Cartografia comCORS conferida no navegador. Uma coleta autorizada da dupla3T2026; restantecache-only. [Matriz e hashes](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_IMPLEMENTACAO_FINOTI_2026-11-04.json).
+- **Estado/próximo:** validado localmente, não publicado/homologado externamente. Origem da coordenada deWinkelHaus precisa de apuração; indicadores não foram excluídos com o ponto fora do enquadramento. Relevância de páginas e acabamento específico das tabelas ficam com o analista. Apresentar divergência/commits e obter autorização antes de push/sincronização da árvore suja; conferir site/material integral após publicação. Domínios paralelos preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+- **Publicacao autorizada:** Push autorizado e realizado em 04/11: sete commits ate `5b3c50b`, incluindo `46f72bd`. Origin/main e main em 0/0 apos envio; nenhuma integracao da arvore suja. Publicado no Git, ainda sem conferencia no site ou aceite externo. Proximo: publicar/conferir no Lovable e gerar Canela + Gramado, 1T2023-3T2026, com PDF/PPT/CSV integrais.
+
+### 2026-11-04 — Panorama: plano de execução Finoti e validação curta — Gabriel / Codex
+
+- **Entrega preparada:** [plano técnico G0–G6, estratégia R1/R2, evidências e CTA](../features/Relatorios%20Secovi_FIERGS/PLAN_IMPLEMENTACAO_REVISAO_FINOTI_PANORAMA_2026-11-04.md), seguindo o contrato fechado sem redefinir escolhas. R1: Canela4T2025, menor volume entre os modelos locais empatados em67páginas, extrato interno até12páginas. R2: até8páginas apenas para lacunas, priorizando o recorte Finoti1T2023–3T2026; sem reduzir manifesto comercial.
+- **Limites:** insumos congelados encontrados cobrem2T2026/4T2025; replay antigo redireciona chave temporal parajunho2026 e não comprova3T2026. Regressões offline recalculam código atual; renderizar JSON salvo não valida novo cálculo. Coleta delimitada opcional só será autorizada se Gabriel ativar o CTA com essa cláusula.
+- **Estado/próximo:** planejamento/documentação, sem implementação, coleta, teste funcional ou caderno gerado. Ativar plano, preservar árvore paralela, executar testes/edição Office e apresentar commits/divergência antes de sincronização de árvore suja/push. Estado anterior de aceite preservado; revisão nova não homologada por inferência.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
+### 2026-11-04 — Panorama: contrato da revisão Finoti fechado com Gabriel — Gabriel / Codex
+
+- **Decisões:** respostas individuais D01–D14 consolidadas no [contrato, fonte única](../features/Relatorios%20Secovi_FIERGS/REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#contrato-de-ajustes--decisões-consolidadas). Substituem a leitura equivocada de aprovação geral da mensagem isolada sobre D06. Sigla e extenso juntos; média simples das taxas; tabelas em um slide; exclusão por pouca relevância com o analista; cabeçalho sem “histórica”, sem trocar denominador; mapas com foco no território selecionado, preservando cubo/indicadores.
+- **Estado:** contrato preparado, sem implementação, teste funcional, coleta ou publicação. Área50m² sem regra especial; preços baixos após D10 continuam observados se válidos. IVV só recebe tratamento existente aplicável e comprovado, sem novo filtro de outliers. Fonte inclui acabamentos do analista e dependências técnicas reais; aceiteJuliana anterior preservado.
+- **Próximo:** plano técnico conforme contrato; verificar referência territorial e tratamentos históricos aplicáveis, sem pressupor erro/correção da API. Não houve autorização de push ou de ensaio real nesta resposta.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
+
+### 2026-11-03 — Panorama: levantamento visual da revisão Finoti — Gabriel / Codex
+
+- **Resultado:** 46 caixas amarelas em 33 slides e 11 marcações auxiliares mapeadas por posição/alvo; 69 slides renderizados no PowerPoint em leitura. [Fonte única, inventário espacial, evidências e nove decisões abertas](../features/Relatorios%20Secovi_FIERGS/REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md).
+- **Estado:** diagnóstico documental preparado, sem mudança de produto, API, estudo real ou teste funcional. IVV9,5%×8,5%, extremos de preço e marcador distante requerem investigação; porcentagem de empreendimentos usando unidades lançadas confirmada no código como achado adicional. Alterações paralelas e aceiteJuliana anterior preservados; novo PPT nativo não validado por este arquivo raster anotado.
+- **Próximo:** incorporar respostas de Gabriel às perguntas e então planejar implementação automática/editorial e reconciliações. Insumo/cópia/renders em `.local-inputs/fiergs-finoti-revisao-2026-11-03/`; original intocado. Sem push autorizado nesta revisão.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
+
+### 2026-11-03 — Panorama: um único PPT público — Gabriel / Codex
+
+- **Decisão posterior:** Gabriel pediu remover a opção em imagens e mostrar somente `Baixar PPT`, direcionado ao gerador nativo editável. Progresso e confirmação também usam `PPT`. PDF, dados e alertas preservados; caminho raster legado mantido somente como compatibilidade interna, sem botão público.
+- **Validação/próximo:** teste do botão real verifica ação única e `pptxMode: editable`; testes focados do host/alertas e tipos antes do envio autorizado. Próximo conferir no site após publicação, sem novo estudo real pelo agente. [Contrato vigente](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md).
+
 
 ### 2026-11-03 — Panorama: rótulo PPT e publicação autorizada — Gabriel / Codex
 
 - **Pedido/mudança:** Gabriel pediu apresentar o formato anterior apenas como `PPT`; toolbar, progresso e confirmação de alertas atualizados. `PPT editável` permanece distinto. Sem mudança em dados ou serialização.
-- **Integração:** seis commits SP integrados com autorização em `3e09422`, sem conflito; alteração local do LIVE guardada/reaplicada e materiais paralelos preservados. Publicação Git autorizada nesta sessão; deploy e ensaio real G6 continuam pendentes. [Fonte do upgrade](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md).
+- **Integração/publicação:** seis commits SP integrados com autorização em `3e09422`, sem conflito; alteração local do LIVE guardada/reaplicada e materiais paralelos preservados. Push autorizado concluído até `92eeef0`, confirmado em origin/main com0/0; 14 testes focados e tipos aprovados após integração. Publicado no Git, não verificado no site; deploy e ensaio real G6 continuam pendentes. [Fonte do upgrade](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md).
 
 
 ### 2026-11-03 — Panorama: PowerPoint nativo editável, validação local — Gabriel / Codex
@@ -834,6 +892,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 **04/11 — SP, checklist (4):** ajustes51/53–59/78 validados localmente com274 testes, tipos/lint/build e navegador dirigido. Quantidades do78 preservadas com preço incompleto explicitado; controle de estoque aceita apenas soma municipal exata. Integração/publicação e novo ensaio autenticado pendentes, sem homologação automática.
 
 - **Panorama — PPTX editável:** implementação validada localmente em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende de autorização/publicação/ensaio real e aceite das exceções institucionais; aceite dos dados anteriores preservado.
+- **Panorama — PPTX editável:** implementação validada localmente e enviada ao Git até `92eeef0` em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende da publicação/conferência no site e aceite das exceções institucionais; aceite dos dados anteriores preservado.
 **03/11 — SP, correção no consumidor:**51/53–59/78 tratados por regra explícita, com preservação/auditoria e parciais identificadas;271testes e navegador dirigido aprovados. Novo checklist autenticado pendente.
 
 **03/11 — SP, pós-v2:** checklist real confirma68disponíveis/7parciais/2bloqueados/8referências. Casos de fonte/contrato identificados e material de encaminhamento pronto; diagnóstico78 refinado e267testes aprovados.
@@ -907,6 +966,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - [ ] **SP — reteste do checklist (4):** integrar a base remota mediante confirmação, publicar correções e gerar novo checklist2T2026. Conferir51, pontos recuperados53–59 e tabela parcial78. Jun2023/64094 permanece fotografia ausente; preço54845/73369 deve vir da fonte para completar os valores monetários. Revisar oito artes editoriais. Não converter parciais em disponíveis apenas para fechar contagem.
 
 - **Panorama — PPTX editável:** autorizar integração adicional e envio dos commits, publicar e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes; edição Office já verificada em cópias sintéticas.
+- **Panorama — PPTX editável:** conferir publicação no site e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Integração e envio autorizados concluídos; aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes. Edição Office já verificada em cópias sintéticas.
 - [ ] **SP — retestar tratamento aplicado:** gerar novo2T2026 com estoques assinados conciliados, preços parciais† e VGV calculado; conferir os resultados e a auditoria antes de homologar. API original e performance da coleta continuam independentes.
 
 - [ ] **SP — validar contrato e casos da fonte:** esclarecer estoque−1 do26686, jun2023 ausente do64094 e sold/qty/distratos do87999. Material local pronto, sem envio externo. Não alterar identidade ou fabricar dados antes da confirmação; não declarar relatório homologado.
