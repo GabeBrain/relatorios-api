@@ -1,7 +1,7 @@
 # Revisão Finoti — Gramado e Canela — 03/11/2026
 
 **Propósito:** fonte única do levantamento visual dos pedidos do consultor; separar regras do gerador, investigação numérica e escolhas editoriais antes do plano de implementação.
-**Estado:** levantamento realizado; nove perguntas enviadas a Gabriel, aguardando resposta. Nenhuma correção de produto executada ou homologação nova declarada. O aceite anterior de Juliana permanece restrito ao seu escopo.
+**Estado:** levantamento realizado; Gabriel confirmou a omissão com cobertura completa/atividade zerada, a retirada apenas de séries inteiramente zeradas quando houver atividade e a omissão somente de comparativos sem atividade ou sem cobertura suficiente. As outras oito escolhas originais continuam abertas. Nenhuma correção de produto executada ou homologação nova declarada. O aceite anterior de Juliana permanece restrito ao seu escopo.
 
 ## Origem e método
 
@@ -38,7 +38,9 @@
 
 **Slides 16 e 27:** caixas centrais cobrem gráficos MCMV acumulados em 12 meses. Textos: “Se nunca lançou MCMV, não precisa acumular em 12 meses” e “Se não tem lançamentos MCMV, não vai ter vendas e não precisa acumular vendas”. No material, a série MCMV fica em zero, mas há uma série cinza dos demais padrões, com valores.
 
-**Recomendação, pendente:** omitir a página focada em MCMV quando houver cobertura completa e ausência de atividade MCMV em toda a série e nas comparações usadas pela página; registrar omissão nos avisos/manifesto. Não inferir ausência de vendas a partir de ausência de lançamentos: estoque antigo pode vender. Não confundir dado ausente com zero, nem ocultar vendas negativas. A permanência da série dos demais padrões não obriga manter uma página cujo assunto é MCMV.
+**Decisão de Gabriel em 03/11:** omitir quando houver cobertura completa e a atividade pertinente à página estiver inteiramente zerada. Quando houver atividade, retirar do gráfico apenas séries/categorias comprovadamente zeradas em todo o trecho pertinente; preservar zeros pontuais dentro de séries com atividade. Registrar omissões nos avisos/manifesto, preservando os dados e a auditoria. Não inferir ausência de vendas a partir de ausência de lançamentos: estoque antigo pode vender. Não confundir dado ausente com zero, nem ocultar vendas negativas. A permanência da série dos demais padrões não obriga manter uma página cujo assunto é MCMV.
+
+**Esclarecimento confirmado por Gabriel em 03/11:** retirar apenas comparações sem atividade: omitir quando ambos os lados forem zero ou faltar cobertura; manter comparações válidas. A regra vale para os comparativos do modelo, sem remoção geral das comparações anuais. Um lado zero e outro com atividade não equivale a comparação toda zerada; preservar valores/sinal, sem fabricar variação percentual quando a base zero a torna indefinida. Ausência de cobertura não vira zero. Omissões continuam rastreáveis nos avisos/auditoria.
 
 ### 4. Distribuição geográfica pouco informativa — decisão editorial
 
@@ -116,7 +118,7 @@ Nove perguntas enviadas pelo formulário do chat; as recomendações abaixo são
 2. Slide 18: omitir por único empreendimento, por única categoria geográfica ativa ou deixar ao analista?
 3. Slide 52: investigar também área mínima de 50 m², além dos preços?
 4. Slides 34/35/58: “média” significa disponibilidade global com bases compatíveis ou média simples?
-5. Slides 16/27: omitir página MCMV somente com atividade toda zerada e cobertura completa, ou retirar apenas série/deixar ao analista?
+5. **Respondida:** omitir página com cobertura completa/atividade inteiramente zerada; se houver atividade, retirar somente séries/categorias inteiramente zeradas, preservando zeros pontuais e negativos. Comparativos: omitir somente se ambos os lados forem zero ou faltar cobertura; manter os demais comparativos válidos, sem divisão por base zero.
 6. Slides 19–21/30–31/55: adotar VGL lançado e VGV vendido nas gerações ou nomes por extenso/ajuste pontual?
 7. Slide 37: marcação nos dois pontos iniciais pede investigação ou encurtamento da série?
 8. Slides 61–63: investigar marcador e separar eventual correção cartográfica dos indicadores?
