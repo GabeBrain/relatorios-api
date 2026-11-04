@@ -111,7 +111,7 @@ function reportSeries(periods: Quarter[], target: Map<string, Accumulator>, mode
     const vertical = result(target, `${quarter}:Vertical`, mode);
     const horizontal = result(target, `${quarter}:Horizontal`, mode);
     const total = mode === 'average' || mode === 'weighted_average' ? result(target, `${quarter}:Total`, mode) : vertical + horizontal;
-    return { quarter, vertical, horizontal, total, methodStatus: 'open_method' as MethodStatus, dataStatus: status, source };
+    return { quarter, vertical, horizontal, total, observed: { vertical: target.has(`${quarter}:Vertical`), horizontal: target.has(`${quarter}:Horizontal`) }, methodStatus: 'open_method' as MethodStatus, dataStatus: status, source };
   });
 }
 

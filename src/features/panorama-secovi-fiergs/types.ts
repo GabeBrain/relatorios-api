@@ -136,7 +136,7 @@ export interface PanoramaReference {
 
 /** Fonte única do livro editorial; páginas sem contrato homologado não recebem números de referência. */
 export type ReportDataState = 'ready' | 'partial' | 'unavailable' | 'not_applicable';
-export interface ReportSeries extends LaunchSeries { methodStatus: MethodStatus; dataStatus: ReportDataState; source: string; }
+export interface ReportSeries extends LaunchSeries { methodStatus: MethodStatus; dataStatus: ReportDataState; source: string; observed?: { vertical: boolean; horizontal: boolean }; }
 export interface ReportGroupSeries { label: string; series: ReportSeries[]; }
 export interface ReportMarketBlock {
   series: ReportSeries[];

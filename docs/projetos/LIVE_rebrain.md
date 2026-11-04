@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-04 - Panorama: conferencia integral pre-push e cobertura de preco - Gabriel / Codex
+
+- **Pedido:** Gabriel autorizou push e exigiu gerar/revisar o estudo local antes. Primeira saida64paginas aprovada noOffice; revisao identificou zero artificial de4dormitorios em1T2023: nenhuma linha desse grupo nas tres respostas paginadas da fonte; consumidor preenchia a chave ausente com0.
+- **Correcao:** metadado de observacao por trimestre/segmento distingue ausencia de zero retornado. Grafico por dormitorio usa lacuna/null sem conectar pontos ausentes; zero observado preservado. Aviso eCSV registram a lacuna. Manifesto e cache ajustados; nenhum numero canonico alterado, sem excecao por municipio/periodo.
+- **Evidencia:**27testes focados e11replays offline aprovados, tipos/build/lint aprovados. Segunda geracao integral finalPDF/PPT/CSV64paginas no cache exato: nenhum texto oculto/grafia antiga, nenhum objeto fora do slide, nenhuma divergencia critica;1578textos/123imagens noPPT. Edicao de titulo/celula salva e reaberta noOffice. Arquivos e checks em `.local-inputs/panorama-prepush-final-2026-11-04/`; [resultado/hashes e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#conferencia-integral-antes-do-push-autorizado---04112026).
+- **Estado:** validado localmente; envio autorizado nesta rodada junto de4e773a8. Lovable/site e aceite externo ainda pendentes; picoIVV e coordenada deWinkelHaus continuam separados da correcao de cobertura. Alteracoes paralelas preservadas.
+
 ### 2026-11-04 - Panorama: revisao do PPT integral e tabelas - Gabriel / Codex
 
 - **Diagnostico:** arquivo editavel(1) de 64 paginas revelou 84 caixas de texto de leitores de tela em sete tabelas (saida30,31,34,42,44,54,55). A amostra anterior nao cobriu esses estados. O exportador agora exclui spans sr-only/hidden/recortados sem remover acessibilidade do HTML; uma caixa editavel por celula e decoracao de tabela isolada corrigem o alinhamento no Office. Geobrain padronizado nos textos gerados.

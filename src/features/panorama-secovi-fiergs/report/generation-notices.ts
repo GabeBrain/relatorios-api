@@ -143,7 +143,14 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
   }
   if (report.scope.entity === 'fiergs-rs' && report.prices.meterByTypology.dataStatus !== 'unavailable') {
     for (const bedroom of [1, 2, 3, 4]) {
-      if (observedDormitoryPriceGroup(report.prices.meterByTypology, bedroom)) continue;
+      const group = observedDormitoryPriceGroup(report.prices.meterByTypology, bedroom);
+      if (group) {
+        const missing = group.series.filter(row => row.observed?.vertical === false);
+        if (missing.length) add({ code: `DORMITORY_PRICE_GAPS_${bedroom}`, severity: 'info', indicator: `R$/m² · ${bedroom} dormitórios`,
+          reason: `${missing.length} trimestre(s) sem observação vertical da própria tipologia: ${missing.map(row => row.quarter).join(', ')}.`,
+          source: report.prices.meterByTypology.source, displayDecision: 'Lacunas mantidas no gráfico; ausência não é desenhada como preço zero e não conecta períodos sem observação.', officialSlides: [43 + bedroom] });
+        continue;
+      }
       add({ code: 'DORMITORY_PRICE_SERIES_PAGE_OMITTED', severity: 'info', indicator: `R$/m² · ${bedroom === 4 ? '4 ou mais' : bedroom} dormitórios`,
         reason: 'Não há observações finitas da própria tipologia na série do intervalo selecionado.', source: report.prices.meterByTypology.source,
         displayDecision: 'A página sem série foi omitida; não usa dados de outra tipologia nem imprime placeholder no estudo.', officialSlides: [43 + bedroom] });
