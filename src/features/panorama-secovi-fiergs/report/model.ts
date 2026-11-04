@@ -171,7 +171,7 @@ function withClosingStockWeight(metric: SourceResult, stock: SourceResult): Sour
 }
 
 /**
- * Replica a identidade usada pelo Dashboard GeoBrain do Edgar: IVV = vendas líquidas ÷
+ * Replica a identidade usada pelo Dashboard Geobrain do Edgar: IVV = vendas líquidas ÷
  * (estoque final + vendas líquidas). A identidade equivale a vendas ÷ (oferta anterior +
  * lançamentos) quando o balanço do período fecha, mas evita consolidar percentuais municipais
  * prontos — inclusive valores anômalos do endpoint — antes de somar numerador e denominador.
@@ -202,7 +202,7 @@ function ivvFromSalesAndStock(sales: SourceResult, stock: SourceResult): SourceR
   return {
     rows,
     available: sales.available && stock.available,
-    source: 'cálculo Rebrain/Dashboard GeoBrain · vendas líquidas ÷ (estoque final + vendas líquidas)',
+    source: 'cálculo Rebrain/Dashboard Geobrain · vendas líquidas ÷ (estoque final + vendas líquidas)',
   };
 }
 
@@ -598,7 +598,7 @@ export function buildPanoramaReportModel(
     scope, generatedAt: new Date().toISOString(), launches, horizontalSeries,
     sales,
     stock,
-    ivv: guard(marketBlock(scope, ivvSource, 'ivv', 'percent', entity === 'fiergs-rs' ? 'IVV consolidado pela identidade do Dashboard GeoBrain: soma das vendas líquidas ÷ soma de (estoque final + vendas líquidas).' : 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
+    ivv: guard(marketBlock(scope, ivvSource, 'ivv', 'percent', entity === 'fiergs-rs' ? 'IVV consolidado pela identidade do Dashboard Geobrain: soma das vendas líquidas ÷ soma de (estoque final + vendas líquidas).' : 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
     ivvByTypology: guard(marketBlock(scope, withClosingStockWeight(temporal.ivvTypology, temporal.stockTypology), 'ivv', 'percent', 'Média ponderada do IVV municipal pelo estoque final de unidades na mesma cidade, segmento e tipologia.', 'weighted_average')),
     prices: {
       ticket: guard(marketBlock(scope, withClosingStockWeight(temporal.ticket, temporal.stock), 'average_price', 'brl_millions', 'Média ponderada do preço municipal pelo estoque final de unidades na mesma cidade, segmento e padrão.', 'weighted_average')),
@@ -619,7 +619,7 @@ export function buildPanoramaReportModel(
     },
     // Uma chave canônica produz no máximo um marcador, compartilhado pelos três mapas.
     locations,
-    source: 'GeoBrain API',
+    source: 'Geobrain API',
     // Falha parcial de cidade nunca vira consolidado silencioso: o estado cai para `partial`.
     dataState: !records.length && !cube.projects.length ? 'unavailable'
       : failedCities || launches.warnings.length ? 'partial'

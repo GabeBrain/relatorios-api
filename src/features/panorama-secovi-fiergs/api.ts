@@ -100,7 +100,7 @@ async function fetchBuildingsInternalV2(scope: CityScope, signal?: AbortSignal, 
     let expectedLast: number | null = null; let total: number | null = null; let received = 0;
     do {
       const response = await gate(() => requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_INTERNAL_V2_BASE_URL}/building-with-history-internal`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal }));
-      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain interna v2 em ${scope.city} (${response.status ?? 'rede'}).`);
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API Geobrain interna v2 em ${scope.city} (${response.status ?? 'rede'}).`);
       const payload = readBuildingPage(response.data, scope, page, 'internal-v2');
       if (expectedLast !== null && (payload.lastPage !== expectedLast || payload.total !== total))
         throw new BuildingSourceContractError(`Paginação mudou durante a coleta de ${scope.city}/${type}.`);
@@ -128,7 +128,7 @@ async function fetchBuildingsPublicV2(scope: CityScope, signal?: AbortSignal, ga
     let expectedLast: number | null = null; let total: number | null = null; let received = 0;
     do {
       const response = await gate(() => requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_V2_BASE_URL}/building-with-history`, query: { type, status, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal }));
-      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain v2 em ${scope.city} (${response.status ?? 'rede'}).`);
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API Geobrain v2 em ${scope.city} (${response.status ?? 'rede'}).`);
       const payload = readBuildingPage(response.data, scope, page, 'public-v2');
       if (expectedLast !== null && (payload.lastPage !== expectedLast || payload.total !== total))
         throw new BuildingSourceContractError(`Paginação mudou durante a coleta de ${scope.city}/${type}.`);
@@ -153,7 +153,7 @@ async function fetchBuildingsLegacy(scope: CityScope, signal?: AbortSignal): Pro
     let page = 1; let lastPage = 1;
     do {
       const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
-      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain legada em ${scope.city} (${response.status ?? 'rede'}).`);
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API Geobrain legada em ${scope.city} (${response.status ?? 'rede'}).`);
       raw.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
       lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
       page += 1;
@@ -324,18 +324,18 @@ export function describeTemporalFailure(city: string, issues: TemporalIssue[]): 
   const metrics = [...new Set(issues.map((issue) => temporalMetricLabel[issue.endpoint]))].join(', ');
   const statuses = issues.map((issue) => issue.status);
   if (statuses.every((status) => status === 401 || status === 403)) {
-    return `Não foi possível consultar ${metrics} em ${city} porque a sessão de acesso à GeoBrain expirou ou não tem permissão. É uma questão de acesso ao provedor de dados, não do seu filtro nem dos números do relatório. Entre novamente e tente gerar o relatório.`;
+    return `Não foi possível consultar ${metrics} em ${city} porque a sessão de acesso à Geobrain expirou ou não tem permissão. É uma questão de acesso ao provedor de dados, não do seu filtro nem dos números do relatório. Entre novamente e tente gerar o relatório.`;
   }
   if (statuses.every((status) => status === null || status === 408 || status === 429 || (status !== null && status >= 500))) {
-    return `A GeoBrain está indisponível para consultar ${metrics} em ${city}. É uma instabilidade do provedor de dados; o relatório não foi gerado para evitar exibir zeros como se fossem dados reais. Tente novamente em alguns minutos.`;
+    return `A Geobrain está indisponível para consultar ${metrics} em ${city}. É uma instabilidade do provedor de dados; o relatório não foi gerado para evitar exibir zeros como se fossem dados reais. Tente novamente em alguns minutos.`;
   }
   if (statuses.every((status) => status === 400 || status === 404 || status === 405 || status === 422)) {
-    return `A GeoBrain recusou a consulta de ${metrics} em ${city}. Isso indica um ajuste necessário na integração do nosso relatório com a API; você não precisa mudar o filtro. O time técnico deve corrigir a consulta antes de gerar este panorama.`;
+    return `A Geobrain recusou a consulta de ${metrics} em ${city}. Isso indica um ajuste necessário na integração do nosso relatório com a API; você não precisa mudar o filtro. O time técnico deve corrigir a consulta antes de gerar este panorama.`;
   }
   if (issues.every((issue) => issue.empty)) {
-    return `A GeoBrain respondeu à consulta, mas não disponibilizou dados de ${metrics} para ${city} no período selecionado. Não é falha do seu computador nem do layout; o relatório foi interrompido para não apresentar zeros como se fossem informações observadas.`;
+    return `A Geobrain respondeu à consulta, mas não disponibilizou dados de ${metrics} para ${city} no período selecionado. Não é falha do seu computador nem do layout; o relatório foi interrompido para não apresentar zeros como se fossem informações observadas.`;
   }
-  return `Não foi possível consultar ${metrics} em ${city}: a GeoBrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
+  return `Não foi possível consultar ${metrics} em ${city}: a Geobrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
 }
 
 async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3' | 'v4', circuit: PanoramaTemporalCircuit, gate: PanoramaRequestGate, signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {

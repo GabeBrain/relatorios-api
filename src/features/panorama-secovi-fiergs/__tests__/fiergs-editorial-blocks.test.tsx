@@ -65,7 +65,8 @@ describe('FIERGS · blocos editoriais próprios', () => {
     }
     for (const page of [35, 39]) {
       const text = officialPage(page)?.textContent ?? '';
-      expect(text).toContain('COMPARATIVO ANUAL');
+      expect(text).toContain('COMPARATIVO 4');
+      expect(text).not.toContain('COMPARATIVO ANUAL');
       expect(text).toContain('2024');
       expect(text).toContain('2025');
       expect(text).not.toContain('COMPARATIVO 1º SEMESTRE');

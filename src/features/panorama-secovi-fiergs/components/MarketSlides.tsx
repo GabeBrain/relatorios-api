@@ -434,7 +434,7 @@ export function VgvSlide({ report }: { report: PanoramaReportModel }) {
 /**
  * Slides 53/54 — JG-36, JG-37 e JG-38.
  *
- * - JG-36: o texto perde a menção a loteamentos e à "API GeoBrain". O horizontal do Panorama
+ * - JG-36: o texto perde a menção a loteamentos e à "API Geobrain". O horizontal do Panorama
  *   Secovi é Condomínio de Casas e nada mais; a rastreabilidade da fonte continua no dossiê
  *   técnico, que é onde ela pertence — não na narrativa entregue ao cliente.
  * - JG-37: nenhum rótulo numérico solto; tipologia é lida por extenso.

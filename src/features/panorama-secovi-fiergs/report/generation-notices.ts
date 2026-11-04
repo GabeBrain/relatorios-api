@@ -94,13 +94,13 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
   if (report.provenance.failedCities.length) {
     add({ code: 'CITY_COLLECTION_PARTIAL', severity: 'warning', indicator: 'Cobertura municipal',
       reason: `Não foi possível concluir a coleta em: ${report.provenance.failedCities.map((item) => item.city).join(', ')}.`,
-      source: 'Proveniência da coleta GeoBrain', displayDecision: 'O relatório permanece parcial; os municípios não concluídos não são preenchidos por estimativa.' });
+      source: 'Proveniência da coleta Geobrain', displayDecision: 'O relatório permanece parcial; os municípios não concluídos não são preenchidos por estimativa.' });
   }
   const recoveredCities = report.provenance.cityCollectionAttempts?.filter((item) => item.recovered) ?? [];
   if (recoveredCities.length) {
     add({ code: 'CITY_COLLECTION_RECOVERED', severity: 'info', indicator: 'Recuperação da coleta',
       reason: `A coleta foi recuperada após nova tentativa em: ${recoveredCities.map(({ city, attempts }) => `${city} (${attempts} tentativas)`).join(', ')}.`,
-      source: 'Proveniência das chamadas GeoBrain', displayDecision: 'O município recuperado integra o recorte completo uma única vez.' });
+      source: 'Proveniência das chamadas Geobrain', displayDecision: 'O município recuperado integra o recorte completo uma única vez.' });
   }
   for (const warning of report.launches.warnings) {
     add({ code: 'LAUNCH_SOURCE_WARNING', severity: 'warning', indicator: 'Lançamentos', reason: warning,
@@ -118,13 +118,13 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     const missingUnits = vgvMissingLaunch.reduce((sum, project) => sum + (project.launchedUnits ?? 0), 0);
     add({ code: 'VGV_COVERAGE_PARTIAL', severity: 'warning', indicator: 'VGV lançado, final e vendido',
       reason: `Campos de VGV não observados: lançamento em ${vgvMissingLaunch.length} empreendimento(s) (${missingUnits.toLocaleString('pt-BR')} unidades associadas) e fechamento em ${vgvMissingFinal.length}.`,
-      source: 'Cubo GeoBrain por empreendimento; campos monetários de origem',
+      source: 'Cubo Geobrain por empreendimento; campos monetários de origem',
       displayDecision: 'Valores ausentes não são imputados; subtotais representam somente valores observados.' , officialSlides: [61] });
   }
   if (!report.granular.valueRangeAvailable) {
     add({ code: 'VALUE_RANGE_COLUMN_OMITTED', severity: 'info', indicator: 'Faixa de valor',
       reason: 'A fonte consultada não fornece campo nem regra autoritativa para classificar a faixa de valor.',
-      source: 'Cubo GeoBrain e contrato de dados', displayDecision: 'A coluna sem valores é omitida; nenhuma categoria é inferida.' });
+      source: 'Cubo Geobrain e contrato de dados', displayDecision: 'A coluna sem valores é omitida; nenhuma categoria é inferida.' });
   }
   if (report.sales.units.dataStatus === 'unavailable') {
     add({ code: 'SALES_PAGES_OMITTED', severity: 'warning', indicator: 'Séries de vendas',
@@ -156,21 +156,21 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     if (!omittedLabels.length) continue;
     add({ code: 'PRICE_CHART_GROUPS_OMITTED', severity: 'info', indicator: dimension === 'pattern' ? 'Preço por padrão' : 'Preço por tipologia',
       reason: `Sem R$/m² observado para: ${omittedLabels.join(', ')}.`,
-      source: dimension === 'typology' && report.scope.entity === 'fiergs-rs' ? 'Série temporal GeoBrain por tipologia' : 'Cubo granular GeoBrain',
+      source: dimension === 'typology' && report.scope.entity === 'fiergs-rs' ? 'Série temporal Geobrain por tipologia' : 'Cubo granular Geobrain',
       displayDecision: 'Somente essas categorias são omitidas do gráfico; zeros observados e outros indicadores disponíveis na tabela permanecem.',
       officialSlides: report.scope.entity === 'fiergs-rs' ? [dimension === 'pattern' ? 50 : 52] : [] });
   }
   if (!report.locations.length) {
     add({ code: 'MAP_PAGES_OMITTED', severity: 'warning', indicator: 'Mapas de localização',
       reason: 'Nenhum empreendimento do recorte tem coordenadas utilizáveis para representar no mapa.',
-      source: 'Cubo GeoBrain; latitude e longitude', displayDecision: 'As páginas de mapa sem marcadores foram retiradas.', officialSlides: [67, 68, 69] });
+      source: 'Cubo Geobrain; latitude e longitude', displayDecision: 'As páginas de mapa sem marcadores foram retiradas.', officialSlides: [67, 68, 69] });
   }
 
   for (const residual of dimensionalResiduals(report)) {
     const delta = residual.projects.reduce((sum, project) => sum + project.delta, 0);
     add({ code: 'DIMENSION_RESIDUAL', severity: 'warning', indicator: residual.label,
       reason: `O total por empreendimento difere da soma das tipologias em ${residual.projects.length} empreendimento(s), nas cidades ${[...new Set(residual.projects.map((item) => item.city))].join(', ')}; saldo não classificado: ${delta.toLocaleString('pt-BR')} unidade(s).`,
-      source: 'Cubo granular GeoBrain comparado às tipologias do mesmo empreendimento',
+      source: 'Cubo granular Geobrain comparado às tipologias do mesmo empreendimento',
       displayDecision: 'O resíduo não é redistribuído entre tipologias; totais e subtotais permanecem identificáveis.', officialSlides: [35, 36, 37] });
   }
   const atypicalAvailability = [...report.granular.offerByStandard, ...report.granular.offerByTypology]
@@ -186,7 +186,7 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
   if (negativeProjects.length) {
     add({ code: 'NEGATIVE_NET_SALES_OBSERVED', severity: 'info', indicator: 'Vendas líquidas',
       reason: `Há valor(es) líquido(s) negativo(s) em ${negativeProjects.length} empreendimento(s); o sinal foi mantido conforme observado.`,
-      source: 'Fotografia granular GeoBrain por empreendimento/tipologia',
+      source: 'Fotografia granular Geobrain por empreendimento/tipologia',
       displayDecision: 'Valores negativos são exibidos e participam dos totais; nenhuma causa transacional é inferida.' });
   }
 
@@ -232,17 +232,17 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
       }
       if (missingSlides.length) add({ code: 'LAUNCH_DIMENSION_PAGES_OMITTED', severity: 'warning', indicator: 'Distribuições de lançamentos',
         reason: `Sem linhas dimensionais observáveis para as lâminas oficiais ${missingSlides.join(', ')} no trimestre final do recorte.`,
-        source: 'Cubo granular GeoBrain e proveniência municipal',
+        source: 'Cubo granular Geobrain e proveniência municipal',
         displayDecision: 'As páginas de distribuição sem linhas são omitidas; a série trimestral agregada permanece e zero observado não é removido.', officialSlides: missingSlides });
     }
     if (!report.granular.offerByTypology.some((row) => row.launchedUnits !== null || row.finalUnits !== null || row.soldUnits !== null)) add({ code: 'TYPOLOGY_OFFER_PAGES_OMITTED', severity: 'warning', indicator: 'Oferta por tipologia',
-      reason: 'O cubo do recorte não contém linhas tipológicas publicáveis para oferta.', source: 'Cubo granular GeoBrain',
+      reason: 'O cubo do recorte não contém linhas tipológicas publicáveis para oferta.', source: 'Cubo granular Geobrain',
       displayDecision: 'As páginas sem valores observáveis são omitidas; nenhum zero é inferido.', officialSlides: [36, 57] });
     if (!report.granular.pricesByTypology.some((row) => [row.averageTicket, row.averageArea, row.averagePricePerMeter].some((value) => value !== null))) add({ code: 'TYPOLOGY_PRICE_RANGE_PAGE_OMITTED', severity: 'warning', indicator: 'Faixa de preços por tipologia',
-      reason: 'O cubo do recorte não contém linhas tipológicas com valores para compor esta página.', source: 'Cubo granular GeoBrain',
+      reason: 'O cubo do recorte não contém linhas tipológicas com valores para compor esta página.', source: 'Cubo granular Geobrain',
       displayDecision: 'A página sem valores observáveis é omitida.', officialSlides: [58] });
     if (!report.granular.vgv.some((row) => [row.launchedUnits, row.finalUnits, row.soldUnits, row.launchedVgvMillions, row.finalVgvMillions, row.soldVgvMillions].some((value) => value !== null))) add({ code: 'VGV_PAGE_OMITTED', severity: 'warning', indicator: 'VGV por padrão',
-      reason: 'O cubo do recorte não contém linhas agregadas para compor o quadro de VGV.', source: 'Cubo granular GeoBrain',
+      reason: 'O cubo do recorte não contém linhas agregadas para compor o quadro de VGV.', source: 'Cubo granular Geobrain',
       displayDecision: 'A página sem estrutura de dados é omitida.', officialSlides: [61] });
     const annualRows = report.annualAreaIvv ?? [];
     const annualReady = annualRows.some((row) => row.kind === 'row') && annualRows.some((row) => row.kind === 'total')

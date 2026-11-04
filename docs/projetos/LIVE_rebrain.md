@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-04 - Panorama: revisao do PPT integral e tabelas - Gabriel / Codex
+
+- **Diagnostico:** arquivo editavel(1) de 64 paginas revelou 84 caixas de texto de leitores de tela em sete tabelas (saida30,31,34,42,44,54,55). A amostra anterior nao cobriu esses estados. O exportador agora exclui spans sr-only/hidden/recortados sem remover acessibilidade do HTML; uma caixa editavel por celula e decoracao de tabela isolada corrigem o alinhamento no Office. Geobrain padronizado nos textos gerados.
+- **IVV:** fechamento8,5032% preservado e reconciliado com a tabela. Retirado painel9meses que repetia fotografia trimestral; variacoes anuais agora comparam o mesmo trimestre, sem somar taxas. Estoque tambem deixa de repetir fotografia como acumulado. Pico56,856% permanece por contratoD12; origem ainda por apurar.
+- **Validacao:**15 testes focados, tipos/build e lint0erros aprovados. Geracao integral offline64paginas sem texto oculto/grafia antiga, seguida de prova final9paginas apos centralizacao/isolamento de tabelas:371textos/18imagens, edicao de titulo e celula salva/reaberta noOffice. Sem API nova. Arquivos em `.local-inputs/panorama-review-2026-11-04/`; [fonte e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#conferencia-da-geracao-integral-recebida---04112026).
+- **Estado:** validado localmente; commit isolado para revisao, sem push nesta rodada. Proximo autorizacao de envio e nova conferencia no site. Alteracoes paralelas preservadas; sem aceite externo.
+
 ### 2026-11-04 - Panorama: aparencia aprovada com textos editaveis - Gabriel / Codex
 
 - **Decisao:** apos revisar o PPT integral de 64 paginas/47 graficos, Gabriel pediu voltar ao desenho aprovado, preservando textos editaveis e motor nativo para outros relat?rios. Botao PPT usa o mesmo DOM do PDF; graficos sao imagens individuais, textos/celulas sao caixas nativas, decoracao de tabelas e mapas rasterizada. Dados e contratos Finoti nao revertidos.

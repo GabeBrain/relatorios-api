@@ -4,11 +4,14 @@ import { PanoramaExportCancelled, waitForSlide, type PanoramaExportMetadata, typ
 /** Visual fidelity is independent of the reusable native-chart renderer in render.ts. */
 const GRAPHICS = '[data-panorama-chart],.recharts-responsive-container,.panorama-fiergs-share-bars';
 const W = 13.333333, H = 7.5;
-export interface LayoutText { text: string; x: number; y: number; w: number; h: number; size: number; face: string; color: string; bold: boolean; italic: boolean; spacing: number; }
+export interface LayoutText { text: string; x: number; y: number; w: number; h: number; size: number; face: string; color: string; bold: boolean; italic: boolean; spacing: number; cell?: boolean; }
 function check(signal?: AbortSignal) { if (signal?.aborted) throw new PanoramaExportCancelled(); }
 function visible(element: Element, root: HTMLElement): boolean {
   for (let e: Element | null = element; e; e = e.parentElement) {
     const s = getComputedStyle(e);
+    // Screen-reader-only text has a real Range box despite being visually clipped.
+    // It must stay available in HTML, but never become a visible PowerPoint shape.
+    if (e.matches('.panorama-sr-only,.sr-only,[hidden]') || s.clipPath === 'inset(50%)' || s.clip === 'rect(0px, 0px, 0px, 0px)') return false;
     if (s.display === 'none' || s.visibility === 'hidden' || s.opacity === '0' || e.getAttribute('aria-hidden') === 'true') return false;
     if (e === root) break;
   }
@@ -19,6 +22,7 @@ export function approvedLayoutText(root: HTMLElement): { texts: LayoutText[]; pa
   const frame = root.getBoundingClientRect(), sx = W / frame.width, sy = H / frame.height;
   if (!frame.width || !frame.height) throw new Error('Página sem dimensões para exportar.');
   const texts: LayoutText[] = [], parents = new Set<HTMLElement>();
+  const cells = new Map<HTMLElement, LayoutText[]>();
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     const parent = node.parentElement, value = node.textContent ?? '';
@@ -39,12 +43,24 @@ export function approvedLayoutText(root: HTMLElement): { texts: LayoutText[]; pa
     const rgb = style.color.match(/[\d.]+/g)?.slice(0, 3).map(n => Math.round(Number(n)).toString(16).padStart(2, '0')).join('') ?? '20231d';
     for (const line of lines) if (line.text.trim()) {
       const text = style.textTransform === 'uppercase' ? line.text.toLocaleUpperCase('pt-BR') : style.textTransform === 'lowercase' ? line.text.toLocaleLowerCase('pt-BR') : line.text;
-      texts.push({ text, x: (line.left - frame.left) * sx, y: (line.top - frame.top) * sy, w: (line.right - line.left + 2) * sx,
+      const item: LayoutText = { text, x: (line.left - frame.left) * sx, y: (line.top - frame.top) * sy, w: (line.right - line.left + 2) * sx,
         h: (line.bottom - line.top + 2) * sy, size: parseFloat(style.fontSize) * sx * 72,
         face: style.fontFamily.split(',')[0].replace(/["']/g, '').trim(), color: rgb,
         bold: Number(style.fontWeight) >= 600 || style.fontWeight === 'bold', italic: style.fontStyle === 'italic',
-        spacing: (parseFloat(style.letterSpacing) || 0) * sx * 72 });
+        spacing: (parseFloat(style.letterSpacing) || 0) * sx * 72 };
+      const cell = parent.closest<HTMLElement>('td,th');
+      if (cell) { if (!cells.has(cell)) cells.set(cell, []); cells.get(cell)!.push(item); }
+      else texts.push(item);
     }
+  }
+  // Cell geometry is the common alignment reference; browser glyph baselines differ
+  // between fonts and PowerPoint. One editable box per cell also keeps headers intact.
+  for (const [cell, items] of cells) {
+    const r = cell.getBoundingClientRect();
+    const ordered = [...items].sort((a, b) => a.y - b.y || a.x - b.x);
+    const text = ordered.map((item, i) => (i ? Math.abs(item.y - ordered[i - 1].y) > .03 ? '\n' : ' ' : '') + item.text.trim()).join('');
+    texts.push({ ...items[0], text, cell: true, x: (r.left - frame.left + 3) * sx, y: (r.top - frame.top) * sy,
+      w: Math.max(1, r.width - 6) * sx, h: r.height * sy });
   }
   return { texts, parents };
 }
@@ -77,13 +93,22 @@ export async function buildPanoramaApprovedPptx(slides: HTMLElement[], metadata:
       }
       // Text fill does not alter layout, table bars, borders or currentColor decorations.
       parents.forEach(e => e.style.setProperty('-webkit-text-fill-color', 'transparent', 'important'));
+      // Isolate table decoration at its measured box: foreignObject font layout in
+      // the full-page capture can otherwise shift the grid beneath native cell text.
+      for (const table of clone.querySelectorAll<HTMLElement>('table')) {
+        const r = table.getBoundingClientRect();
+        if (!r.width || !r.height || !visible(table, clone)) continue;
+        images.push({ data: await toPng(table, { ...snapshot, width: r.width, height: r.height, style: { margin: '0' } }),
+          x: (r.left - frame.left) * scaleX, y: (r.top - frame.top) * scaleY, w: r.width * scaleX, h: r.height * scaleY });
+        check(signal); table.style.opacity = '0';
+      }
       const background = await toPng(clone, snapshot); check(signal);
       const slide = pptx.addSlide();
       slide.addImage({ data: background, x: 0, y: 0, w: W, h: H, objectName: 'Arte e decoração do layout aprovado' });
       for (const image of images) slide.addImage({ ...image, objectName: 'Gráfico: aparência aprovada' });
       for (const t of texts) slide.addText(t.text, { x: t.x, y: t.y, w: t.w, h: t.h, fontSize: t.size, fontFace: t.face,
         color: t.color, bold: t.bold, italic: t.italic, charSpacing: t.spacing, margin: 0, breakLine: false,
-        valign: 'middle', fit: 'shrink', wrap: false, objectName: `Texto editável: ${t.text.slice(0, 45)}` } as PptxGenJS.TextPropsOptions);
+        valign: 'middle', align: t.cell ? 'center' : 'left', fit: 'shrink', wrap: Boolean(t.cell), objectName: `Texto editável: ${t.text.slice(0, 45)}` } as PptxGenJS.TextPropsOptions);
       slide.addNotes('panorama-approved-layout-v1: gráficos como imagens individuais; títulos, subtítulos, fontes e textos/células editáveis. Bordas, barras condicionais, artes e base cartográfica são decoração rasterizada. Motor nativo preservado separadamente.');
       onProgress({ current: index + 1, total: slides.length });
     } finally { clone.remove(); }
