@@ -40,4 +40,20 @@ describe('PPT com layout aprovado', () => {
     const c = new AbortController(); c.abort();
     await expect(buildPanoramaApprovedPptx([page()], metadata, () => {}, c.signal)).rejects.toThrow('cancelada');
   });
+  it('keeps conditional arrows with their number in one editable flow and removes them from the raster layer', () => {
+    const root = page();
+    root.querySelectorAll('td')[1].innerHTML = '<span class="panorama-cf"><b>-7</b><em aria-hidden="true" style="color:rgb(198,32,38)">▼</em></span>';
+    const { texts, parents } = approvedLayoutText(root);
+    const cell = texts.find(t => t.text === '-7')!;
+    expect(cell.runs).toEqual([{ text: '-7' }, { text: '\u00a0 ▼', options: { color: 'c62026' } }]);
+    expect(parents.has(root.querySelector('em')!)).toBe(true);
+  });
+  it('captures the annual variation panel as one graphical block rather than detached text overlays', () => {
+    const root = page();
+    root.insertAdjacentHTML('beforeend', '<div class="panorama-fiergs-quarterly"><header><h2>Título</h2><div><b>VARIAÇÕES ANUAIS</b><section>2023 × 2024<strong>+61,4%</strong></section></div></header></div>');
+    const { texts } = approvedLayoutText(root);
+    expect(texts.map(t => t.text)).toContain('Título');
+    expect(texts.map(t => t.text).join(' ')).not.toContain('VARIAÇÕES ANUAIS');
+    expect(texts.map(t => t.text).join(' ')).not.toContain('+61,4%');
+  });
 });

@@ -2,9 +2,10 @@ import type PptxGenJS from 'pptxgenjs';
 import { PanoramaExportCancelled, waitForSlide, type PanoramaExportMetadata, type PanoramaPdfProgress, type PanoramaPptxResult } from '../pdf-export';
 
 /** Visual fidelity is independent of the reusable native-chart renderer in render.ts. */
-const GRAPHICS = '[data-panorama-chart],.recharts-responsive-container,.panorama-fiergs-share-bars';
+const GRAPHICS = '[data-panorama-chart],.recharts-responsive-container,.panorama-fiergs-share-bars,.panorama-fiergs-quarterly > header > div,.panorama-variation';
 const W = 13.333333, H = 7.5;
-export interface LayoutText { text: string; x: number; y: number; w: number; h: number; size: number; face: string; color: string; bold: boolean; italic: boolean; spacing: number; cell?: boolean; }
+export interface LayoutText { text: string; x: number; y: number; w: number; h: number; size: number; face: string; color: string; bold: boolean; italic: boolean; spacing: number; cell?: boolean; runs?: { text: string; options?: { color?: string } }[]; }
+const textColor = (style: CSSStyleDeclaration) => style.color.match(/[\d.]+/g)?.slice(0, 3).map(n => Math.round(Number(n)).toString(16).padStart(2, '0')).join('') ?? '20231d';
 function check(signal?: AbortSignal) { if (signal?.aborted) throw new PanoramaExportCancelled(); }
 function visible(element: Element, root: HTMLElement): boolean {
   for (let e: Element | null = element; e; e = e.parentElement) {
@@ -40,7 +41,7 @@ export function approvedLayoutText(root: HTMLElement): { texts: LayoutText[]; pa
     }
     if (!lines.length) continue;
     parents.add(parent);
-    const rgb = style.color.match(/[\d.]+/g)?.slice(0, 3).map(n => Math.round(Number(n)).toString(16).padStart(2, '0')).join('') ?? '20231d';
+    const rgb = textColor(style);
     for (const line of lines) if (line.text.trim()) {
       const text = style.textTransform === 'uppercase' ? line.text.toLocaleUpperCase('pt-BR') : style.textTransform === 'lowercase' ? line.text.toLocaleLowerCase('pt-BR') : line.text;
       const item: LayoutText = { text, x: (line.left - frame.left) * sx, y: (line.top - frame.top) * sy, w: (line.right - line.left + 2) * sx,
@@ -59,8 +60,14 @@ export function approvedLayoutText(root: HTMLElement): { texts: LayoutText[]; pa
     const r = cell.getBoundingClientRect();
     const ordered = [...items].sort((a, b) => a.y - b.y || a.x - b.x);
     const text = ordered.map((item, i) => (i ? Math.abs(item.y - ordered[i - 1].y) > .03 ? '\n' : ' ' : '') + item.text.trim()).join('');
+    const symbols = [...cell.querySelectorAll<HTMLElement>('.panorama-cf > em[aria-hidden="true"]')]
+      .filter(symbol => /^[▲▼]$/.test(symbol.textContent?.trim() ?? ''));
+    // Symbol and number share one native text flow. Leaving a raster arrow under
+    // editable text makes the two overlap when Office uses different glyph metrics.
+    symbols.forEach(symbol => parents.add(symbol));
+    const runs = symbols.length ? [{ text }, ...symbols.map(symbol => ({ text: `\u00a0 ${symbol.textContent!.trim()}`, options: { color: textColor(getComputedStyle(symbol)) } }))] : undefined;
     texts.push({ ...items[0], text, cell: true, x: (r.left - frame.left + 3) * sx, y: (r.top - frame.top) * sy,
-      w: Math.max(1, r.width - 6) * sx, h: r.height * sy });
+      w: Math.max(1, r.width - 6) * sx, h: r.height * sy, runs });
   }
   return { texts, parents };
 }
@@ -106,7 +113,7 @@ export async function buildPanoramaApprovedPptx(slides: HTMLElement[], metadata:
       const slide = pptx.addSlide();
       slide.addImage({ data: background, x: 0, y: 0, w: W, h: H, objectName: 'Arte e decoração do layout aprovado' });
       for (const image of images) slide.addImage({ ...image, objectName: 'Gráfico: aparência aprovada' });
-      for (const t of texts) slide.addText(t.text, { x: t.x, y: t.y, w: t.w, h: t.h, fontSize: t.size, fontFace: t.face,
+      for (const t of texts) slide.addText(t.runs ?? t.text, { x: t.x, y: t.y, w: t.w, h: t.h, fontSize: t.size, fontFace: t.face,
         color: t.color, bold: t.bold, italic: t.italic, charSpacing: t.spacing, margin: 0, breakLine: false,
         valign: 'middle', align: t.cell ? 'center' : 'left', fit: 'shrink', wrap: Boolean(t.cell), objectName: `Texto editável: ${t.text.slice(0, 45)}` } as PptxGenJS.TextPropsOptions);
       slide.addNotes('panorama-approved-layout-v1: gráficos como imagens individuais; títulos, subtítulos, fontes e textos/células editáveis. Bordas, barras condicionais, artes e base cartográfica são decoração rasterizada. Motor nativo preservado separadamente.');

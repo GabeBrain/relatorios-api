@@ -247,3 +247,11 @@ Hashes dos arquivos finais (SHA256):
 - `panorama-fiergs-canela-gramado-1T2023-3T2026-conferencia.pptx`: `7d87f92f2b467dc2ba485bbf7767d9dc2962250a0c7e71182ad131af70d7aca1` (35889268bytes).
 - `panorama-fiergs-canela-gramado-1T2023-3T2026-conferencia.pdf`: `9bac75b776f5e3f7f222c473f72cb8e61f2f063aa9fe9c80d5b8b36d8ced08e8` (10927088bytes).
 - `panorama-fiergs-canela-gramado-1T2023-3T2026-conferencia.csv`: `51493eba0b0c67dab545ae395f309ac14a5291ca4bdab36863ac28e3f05eef2c` (253851bytes).
+
+### Retorno posterior: camadas do quadro anual e setas - 04/11/2026
+
+Gabriel trouxe capturas com percentuais anuais deslocados e setas coladas nos numeros. Nao foi comprovada diferenca entre site e bancada como causa: o mesmo exportador separava textos nativos da decoracao rasterizada. A conferencia anterior nao detectou essas duas falhas; nao equivale a aceitacao visual integral.
+
+Reparo local pontual: quadro VARIACOES ANUAIS faz parte do bloco grafico e passa a ser imagem unica, inclusive rotulos e valores, assim como os graficos ja autorizados. Titulo/subtitulo principal continuam editaveis. Nas tabelas, setas condicionais deixam a imagem de fundo e entram como runs coloridos na mesma caixa de texto do numero, com espaco inseparavel; a celula permanece editavel e o simbolo acompanha a edicao/movimento. Nao altera dados, sinais ou metodos. HTML e PDF mantidos.
+
+Prova curta com oficiais20,39,49,51 (saida17,33,42,44 do estudo): quatro paginas abertas/renderizadas emOffice; titulo e celula editados, salvos e reabertos. Inspecao ampliada das capturas confirma percentuais centralizados e espaco entre simbolo e numero.10testes dirigidos, tipos e lint aprovados. Artefatos/renders: `.local-inputs/panorama-overlay-2026-11-04/`. Este ensaio e dirigido aos dois defeitos, nao uma nova revisao integral64paginas. Nao houve push nesta rodada nem nova coleta; confirmar publicacao e nova prova integral antes de prometer aparencia encerrada.
