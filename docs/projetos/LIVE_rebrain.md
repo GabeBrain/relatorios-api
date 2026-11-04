@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-03 — Panorama: levantamento visual da revisão Finoti — Gabriel / Codex
+
+- **Resultado:** 46 caixas amarelas em 33 slides e 11 marcações auxiliares mapeadas por posição/alvo; 69 slides renderizados no PowerPoint em leitura. [Fonte única, inventário espacial, evidências e nove decisões abertas](../features/Relatorios%20Secovi_FIERGS/REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md).
+- **Estado:** diagnóstico documental preparado, sem mudança de produto, API, estudo real ou teste funcional. IVV9,5%×8,5%, extremos de preço e marcador distante requerem investigação; porcentagem de empreendimentos usando unidades lançadas confirmada no código como achado adicional. Alterações paralelas e aceiteJuliana anterior preservados; novo PPT nativo não validado por este arquivo raster anotado.
+- **Próximo:** incorporar respostas de Gabriel às perguntas e então planejar implementação automática/editorial e reconciliações. Insumo/cópia/renders em `.local-inputs/fiergs-finoti-revisao-2026-11-03/`; original intocado. Sem push autorizado nesta revisão.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
+
 ### 2026-11-03 — Panorama: um único PPT público — Gabriel / Codex
 
 - **Decisão posterior:** Gabriel pediu remover a opção em imagens e mostrar somente `Baixar PPT`, direcionado ao gerador nativo editável. Progresso e confirmação também usam `PPT`. PDF, dados e alertas preservados; caminho raster legado mantido somente como compatibilidade interna, sem botão público.
