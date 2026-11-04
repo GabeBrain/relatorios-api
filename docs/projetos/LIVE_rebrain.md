@@ -387,6 +387,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ### 2026-11-04 — SP: correções remanescentes do checklist (4) — usuário / Codex
 
+- **Commit técnico:** `951c79d` (04/11/2026); sete testes dirigidos repetidos na retomada, aprovados. Registro local, ainda sem integração/publicação.
 - **Mudança:**51 e históricos53–59 admitem oferta não negativa somente com soma exatamente conciliada ao municipal; payload assinado preservado.78 mantém quantidades e células monetárias completas quando falta preço, com — nos valores dependentes e totais, marcado parcial. [Regra atualizada](../features/relatorios-institucionais/sp/TRATAMENTO_FONTE_2026-11-03.md). Sem tolerância residual, interpolação ou preço presumido.
 - **Evidência:** checklist real68disponíveis/7parciais/2bloqueados/8referências; controles124044×124045 e preço54845/73369/junho.274 testes SP/25arquivos, tipos/lint/build e Edge dirigido aprovados na base92eeef0; capturas51/78 inspecionadas, sem nova API autenticada. Reutilizados renderizadores e estados existentes.
 - **Estado:** implementação local; integração dos14commits novos encontrada em04/11 aguarda confirmação por árvore suja. Jun2023/64094 e artes editoriais continuam pendências de fonte/revisão. Não declarar homologação ou deploy observado.
