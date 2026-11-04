@@ -1,7 +1,7 @@
 # Revisão Finoti — Gramado e Canela — 03/11/2026
 
 **Propósito:** fonte única do levantamento visual dos pedidos do consultor; separar regras do gerador, investigação numérica e escolhas editoriais antes do plano de implementação.
-**Estado em 04/11/2026:** contrato D01–D14 fechado; implementação e validação locais concluídas no [plano e registro de execução](PLAN_IMPLEMENTACAO_REVISAO_FINOTI_PANORAMA_2026-11-04.md#execução-autorizada-em-0411--resultado-curto). Diagnóstico de IVV e universo dos preços comprovados; origem cadastral da coordenada distante permanece pendente. Publicação, conferência no site e novo aceite externo não foram antecipados. O aceite anterior de Juliana permanece restrito ao seu escopo. As observações de código abaixo descrevem a baseline analisada; o estado implementado/evidências pertence ao plano.
+**Estado em 04/11/2026:** contrato D01-D14 fechado e implementacao publicada ate907d4aa. PPT recebido(2) conferido emPowerPoint; [matriz dos46comentarios, parecer e ressalvas](PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#conferencia-do-ppt-recebido-2-e-situacao-dos46comentarios---04112026). Pronto para nova avaliacao do consultor, sem aceite externo presumido: escolhas do analista, origem e pequeno residuo editorial separados das correcoes. As observacoes de codigo abaixo descrevem a baseline original; nao sao afirmacoes sobre defeitos ainda ativos.
 
 ## Origem e método
 

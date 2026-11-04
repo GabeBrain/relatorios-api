@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-04 - Panorama: PPT(2) confrontado com46comentarios Finoti - Gabriel / Codex
+
+- **Pedido/parecer:** usuario trouxe nova saida64paginas e pediu situacao de cada comentario antes da homologacao. Arquivo apto a nova avaliacao/aceite do consultor; nao registrar homologacao externa ou dizer46pedidos literalmente corrigidos.
+- **Evidencia:**PPT(2)SHA425e4ef60ca39a0c39723148bbac4006c40d5c5e4cd05da5c949ee7e8b5a522d,64slides renderizados Office;0frases ocultas/grafia antiga/formas fora;21runs de seta. Textos iguais areferencia907d4aa salvo ordem de cidades nas tres legendas de mapa. Planilhas nao nativas por decisao anterior; sem regressao visual nos quadros anuais/setas inspecionados.
+- **Ressalvas reais:**pagina16 ainda diz Fonte:cubo granular Geobrain; eliminar jargao recomendado. Pouco lancamento/legibilidade final das matrizes com analista; nomes estao no subtitulo mas legenda inferior ainda compacta. PicoIVV/posicaoWinkelHaus e eventual aceite de Media das taxas continuam separados. Nao inferir auditoriaCSV nova pelo arquivoPPT.
+- **Fonte unica:**[matriz completaF01-F46 e onze marcacoes](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#conferencia-do-ppt-recebido-2-e-situacao-dos46comentarios---04112026). Insumos/renders em `.local-inputs/panorama-acceptance-2026-11-04/`. Estado:diagnostico/documentacao preparados; nenhum codigo/API/teste runtime novo, nem push ou aceite externo.
+
 ### 2026-11-04 - Panorama: conferencia integral pre-push e cobertura de preco - Gabriel / Codex
 
 - **Pedido:** Gabriel autorizou push e exigiu gerar/revisar o estudo local antes. Primeira saida64paginas aprovada noOffice; revisao identificou zero artificial de4dormitorios em1T2023: nenhuma linha desse grupo nas tres respostas paginadas da fonte; consumidor preenchia a chave ausente com0.
