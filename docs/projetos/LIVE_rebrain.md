@@ -391,6 +391,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Evidencia:**PPT(2)SHA425e4ef60ca39a0c39723148bbac4006c40d5c5e4cd05da5c949ee7e8b5a522d,64slides renderizados Office;0frases ocultas/grafia antiga/formas fora;21runs de seta. Textos iguais areferencia907d4aa salvo ordem de cidades nas tres legendas de mapa. Planilhas nao nativas por decisao anterior; sem regressao visual nos quadros anuais/setas inspecionados.
 - **Ressalvas reais:**pagina16 ainda diz Fonte:cubo granular Geobrain; eliminar jargao recomendado. Pouco lancamento/legibilidade final das matrizes com analista; nomes estao no subtitulo mas legenda inferior ainda compacta. PicoIVV/posicaoWinkelHaus e eventual aceite de Media das taxas continuam separados. Nao inferir auditoriaCSV nova pelo arquivoPPT.
 - **Fonte unica:**[matriz completaF01-F46 e onze marcacoes](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#conferencia-do-ppt-recebido-2-e-situacao-dos46comentarios---04112026). Insumos/renders em `.local-inputs/panorama-acceptance-2026-11-04/`. Estado:diagnostico/documentacao preparados; nenhum codigo/API/teste runtime novo, nem push ou aceite externo.
+- **Resumo e resposta preparados:** adicionada leitura rapida agrupada no mesmo plano, mantendo matriz como fonte detalhada. E-mailTeresa03/11 esclarece que os apontamentos de vendas foram retirados por inicio do monitoramento posterior, nao erro confirmado. Nao estender isso automaticamente ao picoIVV. Rascunho de resposta para envio porGabriel, sem envio do agente ou aceite externo.
+
 
 ### 2026-11-04 - Panorama: conferencia integral pre-push e cobertura de preco - Gabriel / Codex
 

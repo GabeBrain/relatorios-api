@@ -264,6 +264,29 @@ Arquivo recebido: `panorama-fiergs-rs-canela-gramado-1T2023-3T2026-editavel (2).
 
 Fontes dos pedidos e coordenadas: [inventario originalF01-F46](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#invent?rio-espacial-completo). A tabela seguinte e a fonte dos estados desta conferencia; nao substitui as decisoesD01-D14. Numeros de origem sao os slides do arquivo comentado69paginas; numeros novos referem-se aoPPT(2)64paginas.
 
+### Resumo rapido para leitura e resposta
+
+**Parecer:** pronto para voltar ao consultor para aceite deste recorte; nao equivale a homologacao externa nem a atendimento literal de todos os pedidos. A matriz abaixo detalha cada um dos46comentarios e as onze marcacoes.
+
+- **Cidades e periodos:** incluidos nos subtitulos das analises. As legendas inferiores ainda usam identificacao compacta; o pedido foi atendido em outra posicao.
+- **Abertura:** card de paginas substituido pelo periodo selecionado; retirado o rodape tecnico sobre cubo/auditoria.
+- **Fontes:** simplificadas nos alvos comentados. Ainda resta `Fonte: cubo granular Geobrain` na pagina16; recomenda-se simplificar esse texto antes de chamar a revisao de100%encerrada.
+- **MCMV sem atividade:** paginas omitidas conforme cobertura e atividade, sem inferir vendas a partir de lancamentos.
+- **Pagina com poucos lancamentos:** mantida por decisaoD05; excluir ou recompor continua sendo escolha do analista.
+- **VGL/VGV:** sigla e extenso corrigidos nos titulos e cabecalhos.
+- **Vendas negativas:** valores preservados; barra negativa vermelha e a esquerda do zero.
+- **Disponibilidade:** cabecalho padronizado e agregado identificado como Media das taxas, conformeD09.
+- **Participacao de empreendimentos:** denominador corrigido para contagem de empreendimentos, sem usar unidades lancadas nessa coluna.
+- **IVV:** fechamento reconciliado em8,5%; comparacoes entre o mesmo trimestre, sem somar taxas nem anunciar fotografia como acumulado9meses.
+- **Tabelas e fontes:** ajustes aplicados em uma pagina por tabela; leitura final das matrizes e acabamento seguem com o analistaD08.
+- **Precos minimos:** universo corrigido para estoque final positivo, sem piso artificial ou regra especial para50m2. Valores baixos ainda validos permanecem.
+- **Mapas:** enquadramento visual corrigido; coordenada deWinkelHaus ainda depende de apuracao na origem. Seus dados nao foram excluidos dos indicadores.
+- **Documentario:** retirado do manifesto ativo.
+- **Exportacao:** Geobrain padronizado, sem frases de acessibilidade visiveis, tabelas alinhadas, setas com espaco e painel anual unificado. Textos e conteudo das celulas editaveis; graficos/quadros graficos e decoracao permanecem imagens, conforme a decisao visual.
+- **Inicio da serie:** picoIVV56,9% preservado porD12, sem filtro de aparencia. A ausencia de preco4dorm1T2023 foi distinguida do zero observado e aparece como lacuna.
+
+**Contexto do e-mail recebido em03/11:** Teresa informa que nao havia apontamentos de dados e que retirou os apontamentos de vendas porque o monitoramento comecou depois da data selecionada. Finoti havia destacado titulos e o comportamento de1T/2T2023. Registrar essa explicacao humana como contexto de cobertura das vendas; nao atribuir automaticamente a ela a causa do picoIVV nem apresentar toda a revisao como correcao de dados errados. A resposta deve comunicar ajustes de identificacao/apresentacao, disponibilidade do PPT para acabamento e solicitar conferencia final. Nao enviar e-mail pelo agente nem antecipar aceite.
+
 ### Matriz dos46comentarios
 
 | ID | Slide original | Pagina nova | Situacao | Resultado / limite |
