@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 04/11/2026 — integração confirmada pelo usuário
+
+Merge7e699fc integra14commits de origin907d4aa com951c79d/851776e, sem conflito ou reescrita. SP preservado byte a byte; novas linhas do LIVE dos dois lados comprovadamente mantidas.274 testes SP/25arquivos aprovados na base combinada com dois workers, após uma primeira execução ter timeout em um render sob concorrência com build. Não se alterou limite/assertiva/código para aprovar. Integração concluída, superando o bloqueio da entrada anterior; reteste autenticado/fonte/editorial e homologação continuam pendentes.
+
 ## 04/11/2026 — retomada das correções do checklist (4)
 
 Codex/Codex Test/Windows, main92eeef0, origin único. Correções locais anteriores preservadas. Fetch04/11 encontrou14 commits novos do Panorama; não aplicado pull em árvore suja, confirmação solicitada. SP51 e53–59 passam a admitir projeção de oferta não negativa exclusivamente com controle municipal exato. SP78 preserva contagens quando falta preço, indisponibiliza valores monetários dependentes/totais e fica parcial. Fonte original preservada.274 testes/25arquivos, tipos/lint/build e Edge dirigido aprovados antes dessa integração; duas capturas inspecionadas, sem API autenticada. Documentação e entrega em fechamento; reteste real, fotografia jun2023/64094, editorial e homologação continuam pendentes. Sem alterar automação geral adiada ou motores paralelos.

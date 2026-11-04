@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-04 — SP: integração autorizada preservando os dois trabalhos — usuário / Codex
+
+- **Build integrado:** tipos completos e build exit0, Vite29,63s; avisos existentes de Browserslist/chunks. Gate documental aprovado, com avisos de tamanho dos documentos vivos. Evidência em `.local-inputs/sp-integrated-build-final.log`.
+
+- **Integração:** usuário confirmou integrar os14commits remotos preservando as correções. Merge `7e699fc` combina origin `907d4aa` com os commits SP `951c79d`/`851776e`, sem conflito e sem reescrita. Arquivos SP idênticos ao lado local; conferência automatizada comprova que todas as linhas novas do LIVE dos dois lados foram preservadas, sem somar novamente a base comum. Entradas remotas de Panorama/Finoti/PPT lidas e preservadas.
+- **Verificação integrada:**274 testes SP/25arquivos aprovados com dois workers. Primeira execução simultânea ao build teve273 aprovações e um timeout de renderização; repetição sem mudar código, assertivas ou limite de tempo passou. Logs `.local-inputs/sp-integrated-*`, ignorados. Gate documental aprovado. Ensaio autenticado/deploy e revisão das fontes ainda pendentes; não declarar homologação.
+- **Estado:** integração concluída; confirmação anterior de espera fica superada por esta entrada. Envio das correções mantém autorização anterior do usuário; não houve mensagem externa ou alteração no Monday.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
 ### 2026-11-04 — SP: correções remanescentes do checklist (4) — usuário / Codex
 
 - **Commit técnico:** `951c79d` (04/11/2026); sete testes dirigidos repetidos na retomada, aprovados. Registro local, ainda sem integração/publicação.
@@ -891,6 +900,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 **04/11 — SP, checklist (4):** ajustes51/53–59/78 validados localmente com274 testes, tipos/lint/build e navegador dirigido. Quantidades do78 preservadas com preço incompleto explicitado; controle de estoque aceita apenas soma municipal exata. Integração/publicação e novo ensaio autenticado pendentes, sem homologação automática.
 
+**04/11 — SP, integração posterior:** merge7e699fc autorizado e concluído, preservação verificada e274 regressões aprovadas na base combinada. Integração deixou de ser pendência; ensaio real, fonte e editorial permanecem abertos.
+
 - **Panorama — PPTX editável:** implementação validada localmente em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende de autorização/publicação/ensaio real e aceite das exceções institucionais; aceite dos dados anteriores preservado.
 - **Panorama — PPTX editável:** implementação validada localmente e enviada ao Git até `92eeef0` em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende da publicação/conferência no site e aceite das exceções institucionais; aceite dos dados anteriores preservado.
 **03/11 — SP, correção no consumidor:**51/53–59/78 tratados por regra explícita, com preservação/auditoria e parciais identificadas;271testes e navegador dirigido aprovados. Novo checklist autenticado pendente.
@@ -963,7 +974,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
-- [ ] **SP — reteste do checklist (4):** integrar a base remota mediante confirmação, publicar correções e gerar novo checklist2T2026. Conferir51, pontos recuperados53–59 e tabela parcial78. Jun2023/64094 permanece fotografia ausente; preço54845/73369 deve vir da fonte para completar os valores monetários. Revisar oito artes editoriais. Não converter parciais em disponíveis apenas para fechar contagem.
+- [ ] **SP — reteste do checklist (4):** integração autorizada concluída em7e699fc; publicar correções e gerar novo checklist2T2026. Conferir51, pontos recuperados53–59 e tabela parcial78. Jun2023/64094 permanece fotografia ausente; preço54845/73369 deve vir da fonte para completar os valores monetários. Revisar oito artes editoriais. Não converter parciais em disponíveis apenas para fechar contagem.
 
 - **Panorama — PPTX editável:** autorizar integração adicional e envio dos commits, publicar e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes; edição Office já verificada em cópias sintéticas.
 - **Panorama — PPTX editável:** conferir publicação no site e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Integração e envio autorizados concluídos; aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes. Edição Office já verificada em cópias sintéticas.

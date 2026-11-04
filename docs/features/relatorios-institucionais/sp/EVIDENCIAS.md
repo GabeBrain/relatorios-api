@@ -1,5 +1,11 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 04/11/2026 — regressão após integração autorizada
+
+Tipos completos e build integrados aprovados, exit0, Vite29,63s; avisos existentes de Browserslist/chunks. Log `.local-inputs/sp-integrated-build-final.log`. Primeira captura via PowerShell tratou stderr como erro; repetição com captura nativa confirmou exit0. Gate check:live-docs aprovado, com avisos de tamanho documental anteriores.
+
+Merge7e699fc combina907d4aa e851776e. Comparação Git confirma arquivos SP e diagnóstico iguais ao lado local; comparação das adições do LIVE contra base92eeef0 confirma preservação de ambos os lados.274 testes/25arquivos aprovados com maxWorkers=2, sem alterar limites ou assertivas. A primeira execução sob concorrência teve273 aprovações e timeout de5s no render dos28slides; repetição aprovada. Logs `.local-inputs/sp-integrated-tests*.log`. Nenhum ensaio autenticado ou novo aceite editorial; referências a integração aguardando confirmação abaixo são históricas.
+
 ## 04/11/2026 — conferência do checklist (4) e bloqueios remanescentes
 
 - **Evidência real fornecida:** checklist2T2026 de03/11/2026 20:05:48Z,68 disponíveis/7parciais/2bloqueados/8referências. Slide51:124044×124045 em março/2026. Slide78: preço ausente54845/73369/junho. Não houve nova consulta autenticada.
