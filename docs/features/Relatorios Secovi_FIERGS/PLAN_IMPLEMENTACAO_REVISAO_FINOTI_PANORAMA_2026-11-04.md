@@ -1,6 +1,6 @@
 # Implementação da revisão Finoti — Panorama FIERGS/Secovi — 04/11/2026
 
-**Estado:** plano preparado; implementação e gerações ainda não executadas.
+**Estado em 04/11:** G0–G6 implementados e verificados localmente; extratos R1/R2 gerados, publicação e conferência no site pendentes de autorização. Evidência estruturada: [matriz, hashes e verificações](EVIDENCIA_IMPLEMENTACAO_FINOTI_2026-11-04.json).
 **Objetivo:** aplicar os contratos aprovados, revisar toda a apresentação e os cálculos afetados e produzir uma referência curta para conferência, com um segundo caderno somente para lacunas de cobertura do primeiro.
 **Fonte de decisões:** [contrato D01–D14, anotações e inventário espacial](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#contrato-de-ajustes--decisões-consolidadas). Este plano descreve execução/aceite; não redefine as escolhas de Gabriel.
 **Referência do formato nativo:** [PowerPoint editável](PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md).
@@ -172,7 +172,7 @@ Executar também os testes de história/capacidade, coortes, preços e guardas q
 - Atualizar estado da revisão por referência a este plano, LIVE_rebrain, diário semanal e linha do AGORA/plano semanal. Sem atribuir horas medidas ou compromisso a terceiros.
 - Consolidar lista do analista: avaliar/excluir páginas de relevância específica; ajustar fontes/larguras/composição em um slide quando necessário; narrativa do projeto. Não sugerir editar números para esconder divergências da fonte.
 - Commits locais separados por entrega concreta, com `git add` explícito: lógica/contratos, apresentação/PPT, mapas e testes/evidências quando essa separação for útil. Não criar commit só para cada pergunta; testes e docs acompanham a mudança correspondente.
-- Conferir divergência de todos os remotos e listar exatamente os commits a publicar, incluindo os quatro documentais locais anteriores se continuarem exclusivos. Sem incluir materiais brutos ou alterações paralelas.
+- Conferir divergência de todos os remotos e listar exatamente os commits a publicar, incluindo os documentais locais anteriores se continuarem exclusivos. Sem incluir materiais brutos ou alterações paralelas.
 - Apresentar resultado e pedir autorização **antes de qualquer push/publicação**; sincronização de árvore suja/divergente também exige autorização. Não enviar mensagem a Finoti/Juliana/Edgar por ferramenta.
 - Ensaio no site publicado e aceite externo permanecem etapa posterior, conduzida com Gabriel. Preservar aceite antigo da Juliana no escopo original; não anunciar nova revisão homologada sem retorno correspondente.
 
@@ -191,3 +191,33 @@ Critério final local: cumprir D01–D14 e os requisitos claros sem violar dados
 ## 12. Registro de execução
 
 - **04/11 — preparação:** plano criado a partir das respostas individuais aprovadas; inspeção do motor, manifesto, exportação nativa, replay/cache e inventário local. Menor conjunto de páginas registrado é Canela67; R1 escolhido4T2025 por menor volume de empreendimentos entre os empatados. Nenhum código de produto alterado, teste funcional, coleta GeoBrain ou relatório gerado durante o planejamento. G0–G6 ainda não executados.
+
+### Execução autorizada em 04/11 — resultado curto
+
+- **G0:** `fetch --all` confirmou inicialmente0remotos/5locais, somenteorigin, main. Árvore paralela preservada. Antes recalculado de dez casos2T2026/4T2025, sem API; hashes em `.local-inputs/panorama-finoti-2026-11-04/`. A geração de3T2026 tinha lacunas reais de insumo, justificando R2.
+- **G1:** realizada a única coleta autorizada Canela+Gramado1T2023–3T2026 pelo próprio `fetchPanoramaReportModel`:34respostas de dados GeoBrain e3cartográficas IBGE, todas200, autenticação separada sem credenciais nas evidências.329empreendimentos aceitos, controle de competência e histórico preservados. Demais execuções foram cache-only.
+- **Causa do IVV comprovada:** o consolidado vertical descartava o padrãoAlto por vendas negativas antes da agregação. Excluir−7vendas/106estoques produzia153÷1.618=9,456%; com todo o universo,146÷(1.571+146)=8,503%. Corrigida a ordem de agregação usando a identidade existente, sem alterar vendas/estoque nem as políticas de IVV horizontal/total. Série e tabela por área fecham em8,503%. Pontos iniciais1,156%/56,856% permanecem; nenhum filtro de outliers foi criado.
+- **Preço antes/depois no recorte exato:** mínimos históricos/sem estoque1dorm.R$4.726,59→oferta atualR$9.677,42;2dorm.R$4.424,53→R$8.037,25;3dorm.R$4.148,99→R$6.757,15/m². Trata-se de filtro de universo com estoque positivo, não edição de preço ou garantia de que todo valor baixo sumiu. Registros históricos permanecem.50m² não recebe regra especial.
+- **G2:** média simples identificada, com zeros observados e sem total/subtotal duplicados; percentual de empreendimentos usa IDs/contagens em vez de unidades. Comparativos sem atividade/cobertura omitidos; base não positiva usa diferença absoluta. MCMV exige classificação observável para tratar a série como zerada. Avisos e CSV preservam decisões; guardas não foram desativadas.
+- **G3:** contexto territorial/temporal inserido no fluxo do cabeçalho, evitando sobreposição em títulos longos; nomes, sigla+extenso, card de período e cabeçalho sem“histórica” implementados. Tabelas mantidas em um slide, com fontes ampliadas e PPT nativo editável. Negativo à esquerda/vermelho. Documentário removido pela referência oficial74, não pela posição68 do arquivo recebido. Decisão editorial de excluir página pouco útil continua com o analista.
+- **G4:** referência territorial dinâmica porUF/nome de município viaIBGE, independente da lista de cidades autorizadas. Enquadramento retangular municipal, sem alegar máscara exata de limites. WinkelHaus (`RS/Canela#63128`,−29,02862/−51,18271) fica fora do enquadramento;328dos329marcadores visíveis nos mapas da dupla, preservando as7unidades finais desse empreendimento e todos os indicadores. Identidade/causa cadastral da coordenada segue para investigação da origem.
+- **G5:** onze modelos recalculados com conservação/cobertura aprovadas e sem mudança nos campos canônicos de lançamento/estoque/vendas/preços/VGV dos empreendimentos. Manifestos completos compilados sem mutação, sem gerar onze estudos.99testes focados aprovados, mais a guarda de classificação e o teste que compila os11manifestos; tipos/build aprovados e lint0erros/8avisos deFastRefresh. Recharts em jsdom e bundle/Browserslist têm avisos de ambiente/preexistentes, sem erro no navegador real.
+- **R1:** Canela1T2021–4T2025,12páginas de conferência emPDF/PPT+CSV; manifesto comercial efetivo62páginas após omissões justificadas e retirada institucional. **R2:** Canela+Gramado1T2023–3T2026,8páginas apenas para duas cidades, negativos, IVV/preço e3mapas; manifesto efetivo64. Nenhum modo curto foi adicionado ao produto.
+- **Conferência física:** PDF16:9,960×540,12/8páginas, render final inspecionado. Harness foi ajustado ao canvas1920×1080 usado pelo exportador real, sem mudar o motorPDF. PPT abriu noPowerPoint, sem formas fora do slide; edição real de texto/tabela/workbook do gráfico salva e reaberta em cópia de ensaio. Cache do primeiro gráfico mudou2→3, confirmando edição dos dados, não só abertura. Quatro gráficos e quatro workbooks em cada caderno; original de conferência preservado. Renders e provas em pasta ignorada.
+- **G6:** contrato/LIVE/diário/planejamento/mapa de design atualizados. Acabamentos do analista: avaliar relevância e excluir páginas específicas; ajustar fontes/larguras/composição noPPT quando o resultado automático de uma página não atender ao projeto. Não editar números para esconder divergências da origem. Estado local, não homologação ou publicação.
+
+### Arquivos para conferência local
+
+Todos são extratos técnicos internos; não equivalem ao estudo completo para cliente:
+
+- `.local-inputs/panorama-finoti-2026-11-04/R1-EXTRATO-VALIDACAO.pdf`, `.pptx` e `.csv`.
+- `.local-inputs/panorama-finoti-2026-11-04/R2-EXTRATO-VALIDACAO.pdf`, `.pptx` e `.csv`.
+- `R1-EDIT-PROOF.pptx` é exclusivamente a cópia modificada pelo ensaio Office, não material a enviar.
+- Runner reproduzível: `scripts/diagnostics/panorama-finoti-validation.ts`; entradas HTTP permanecem ignoradas. O modo exato não usa uma resposta temporal2T2026 como substituto3T2026.
+
+### Limites restantes
+
+1. Apurar na origem o vínculo/posição doWinkelHaus; o enquadramento visual não é correção de cadastro.
+2. Não alterar por aparência os picos históricos do IVV nem os preços baixos ainda válidos na oferta atual. A diferença de fechamento foi resolvida na agregação do consumidor, não na API.
+3. Publicar somente após autorização e conferir fluxo real no site, material integral e aceite visual do consultor. Os extratos e replays locais não antecipam esse aceite.
+4. Artes institucionais e base cartográfica continuam exceções rasterizadas previamente registradas; tabelas, textos, marcadores e gráficos analíticos permanecem nativos/editáveis.

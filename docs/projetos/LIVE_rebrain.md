@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-04 — Panorama: contratos Finoti implementados e extratos conferidos — Gabriel / Codex
+
+- **Resultado local:** [G0–G6, reconciliações, R1/R2 e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_IMPLEMENTACAO_REVISAO_FINOTI_PANORAMA_2026-11-04.md#execução-autorizada-em-0411--resultado-curto). Corrigida exclusão indevida da categoria com distratos no IVV consolidado vertical; preço atual considera estoque positivo; média simples identificada; contexto e nomenclatura nos slides; fontes, negativos, omissões e mapa territorial implementados. Totais canônicos dos empreendimentos preservados.
+- **Evidência:**102 testes distintos e11replays locais, tipos/build e lint0erros/8avisos; PDF12/8páginas ePPT nativo com edição real de texto/tabela/workbook, salvamento e reabertura Office. Cartografia comCORS conferida no navegador. Uma coleta autorizada da dupla3T2026; restantecache-only. [Matriz e hashes](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_IMPLEMENTACAO_FINOTI_2026-11-04.json).
+- **Estado/próximo:** validado localmente, não publicado/homologado externamente. Origem da coordenada deWinkelHaus precisa de apuração; indicadores não foram excluídos com o ponto fora do enquadramento. Relevância de páginas e acabamento específico das tabelas ficam com o analista. Apresentar divergência/commits e obter autorização antes de push/sincronização da árvore suja; conferir site/material integral após publicação. Domínios paralelos preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
 ### 2026-11-04 — Panorama: plano de execução Finoti e validação curta — Gabriel / Codex
 
 - **Entrega preparada:** [plano técnico G0–G6, estratégia R1/R2, evidências e CTA](../features/Relatorios%20Secovi_FIERGS/PLAN_IMPLEMENTACAO_REVISAO_FINOTI_PANORAMA_2026-11-04.md), seguindo o contrato fechado sem redefinir escolhas. R1: Canela4T2025, menor volume entre os modelos locais empatados em67páginas, extrato interno até12páginas. R2: até8páginas apenas para lacunas, priorizando o recorte Finoti1T2023–3T2026; sem reduzir manifesto comercial.

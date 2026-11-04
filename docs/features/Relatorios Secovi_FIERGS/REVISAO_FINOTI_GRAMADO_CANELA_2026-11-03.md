@@ -1,7 +1,7 @@
 # Revisão Finoti — Gramado e Canela — 03/11/2026
 
 **Propósito:** fonte única do levantamento visual dos pedidos do consultor; separar regras do gerador, investigação numérica e escolhas editoriais antes do plano de implementação.
-**Estado em 04/11/2026:** contrato editorial/metodológico D01–D14 fechado pelas respostas explícitas de Gabriel no formulário, com escolhas específicas diferentes das recomendações iniciais. Preferências não estão mais pendentes; diagnóstico técnico de IVV, preços e origem geográfica permanece sujeito a evidências. Nenhuma correção de produto executada ou homologação nova declarada. O aceite anterior de Juliana permanece restrito ao seu escopo.
+**Estado em 04/11/2026:** contrato D01–D14 fechado; implementação e validação locais concluídas no [plano e registro de execução](PLAN_IMPLEMENTACAO_REVISAO_FINOTI_PANORAMA_2026-11-04.md#execução-autorizada-em-0411--resultado-curto). Diagnóstico de IVV e universo dos preços comprovados; origem cadastral da coordenada distante permanece pendente. Publicação, conferência no site e novo aceite externo não foram antecipados. O aceite anterior de Juliana permanece restrito ao seu escopo. As observações de código abaixo descrevem a baseline analisada; o estado implementado/evidências pertence ao plano.
 
 ## Origem e método
 
@@ -158,7 +158,7 @@ Esta lista será reunida no handoff de uso do relatório. Divergências de IVV/p
 
 ## Próximo passo e limites
 
-Contrato fechado pelas respostas de04/11. **[Plano técnico de implementação, testes rápidos e CTA](PLAN_IMPLEMENTACAO_REVISAO_FINOTI_PANORAMA_2026-11-04.md)** preparado, com G0–G6, R1 curto e R2 somente para lacunas; ainda não executado. Este documento continua sendo a fonte das decisões; execução/evidências futuras ficam no plano. A disponibilidade de referência territorial municipal e a aplicabilidade dos contratos históricos são dependências técnicas a verificar, não novas preferências pendentes. Não iniciar coleta extensa nem gerar estudo real sem autorização; o CTA do plano delimita a autorização proposta para a execução futura. Não aplicar cortes numéricos por período/cidade, nem trocar dados para concordar com um comentário.
+Contrato fechado pelas respostas de04/11. **[Execução G0–G6, R1/R2 e evidências](PLAN_IMPLEMENTACAO_REVISAO_FINOTI_PANORAMA_2026-11-04.md#execução-autorizada-em-0411--resultado-curto)** concluída localmente após ativação doCTA. Este documento continua sendo a fonte das decisões; resultados e pendências ficam no plano. Próximo: autorização de publicação e conferência no site, sem nova coleta extensa nem antecipação de homologação. Origem cadastral deWinkelHaus permanece para investigação; não aplicar cortes numéricos por período/cidade ou editar números para concordar com comentário.
 
 Validação desta etapa é documental: leitura estrutural do PPT, renderização Office, comparação visual e inspeção dirigida do código. Não foram executados testes de produto porque nenhum comportamento foi alterado. Novo PPT editável requer ensaio próprio; o material comentado em imagens não é evidência desse ensaio. Sem push/publicação nesta revisão.
 
