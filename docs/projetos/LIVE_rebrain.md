@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-04 — Panorama: plano de execução Finoti e validação curta — Gabriel / Codex
+
+- **Entrega preparada:** [plano técnico G0–G6, estratégia R1/R2, evidências e CTA](../features/Relatorios%20Secovi_FIERGS/PLAN_IMPLEMENTACAO_REVISAO_FINOTI_PANORAMA_2026-11-04.md), seguindo o contrato fechado sem redefinir escolhas. R1: Canela4T2025, menor volume entre os modelos locais empatados em67páginas, extrato interno até12páginas. R2: até8páginas apenas para lacunas, priorizando o recorte Finoti1T2023–3T2026; sem reduzir manifesto comercial.
+- **Limites:** insumos congelados encontrados cobrem2T2026/4T2025; replay antigo redireciona chave temporal parajunho2026 e não comprova3T2026. Regressões offline recalculam código atual; renderizar JSON salvo não valida novo cálculo. Coleta delimitada opcional só será autorizada se Gabriel ativar o CTA com essa cláusula.
+- **Estado/próximo:** planejamento/documentação, sem implementação, coleta, teste funcional ou caderno gerado. Ativar plano, preservar árvore paralela, executar testes/edição Office e apresentar commits/divergência antes de sincronização de árvore suja/push. Estado anterior de aceite preservado; revisão nova não homologada por inferência.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
 ### 2026-11-04 — Panorama: contrato da revisão Finoti fechado com Gabriel — Gabriel / Codex
 
 - **Decisões:** respostas individuais D01–D14 consolidadas no [contrato, fonte única](../features/Relatorios%20Secovi_FIERGS/REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#contrato-de-ajustes--decisões-consolidadas). Substituem a leitura equivocada de aprovação geral da mensagem isolada sobre D06. Sigla e extenso juntos; média simples das taxas; tabelas em um slide; exclusão por pouca relevância com o analista; cabeçalho sem “histórica”, sem trocar denominador; mapas com foco no território selecionado, preservando cubo/indicadores.
