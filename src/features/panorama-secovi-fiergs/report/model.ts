@@ -1,4 +1,5 @@
 import { buildLaunchModel, periodToQuarter, safeNumber } from '../lib/launches';
+import { reconcileAggregateIvv } from './editorial-contracts';
 import type { HorizontalSeriesPolicy, LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaClosingFacts, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
 import { editorialWindow, quarterIndex, quarterRange } from '../domain/quarters';
 import { horizontalProjects, mergeCubes, type MarketCube } from '../domain/cube';
@@ -636,6 +637,7 @@ export function buildPanoramaReportModel(
     reconciliation: reconcilePanoramaReport({ scope, cube, sales, stock, granular, cityComparisons, locations }),
     notices: [],
   };
+  if (entity === 'fiergs-rs') report.ivv = reconcileAggregateIvv(report.ivv, report.sales.units, report.stock.units);
   report.notices = buildGenerationNotices(report);
   return report;
 }

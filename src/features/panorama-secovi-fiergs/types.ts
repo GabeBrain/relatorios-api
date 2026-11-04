@@ -250,6 +250,7 @@ export interface PanoramaReportModel {
   ivvByTypology: ReportMarketBlock;
   prices: { ticket: ReportMarketBlock; meter: ReportMarketBlock; ticketByTypology: ReportMarketBlock; meterByTypology: ReportMarketBlock };
   market: { cohorts: ReportMarketBlock; cohortMatrix: { year: string; standard: string; vertical: number; horizontal: number; total: number }[] };
+  municipalTerritory?: import('./lib/municipal-territory').MunicipalTerritory;
   locations: { projectKey?: string; name: string; segment: Segment; city?: string; neighborhood?: string | null; latitude: number; longitude: number; standard?: string; finalUnits?: number | null; averagePricePerMeter?: number | null }[];
   source: 'GeoBrain API';
   dataState: ReportDataState;

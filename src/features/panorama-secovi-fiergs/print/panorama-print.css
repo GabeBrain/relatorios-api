@@ -338,3 +338,21 @@
    um grid de duas colunas; sem o primeiro filho, a cópia escorregaria para a coluna da esquerda e
    perderia o alinhamento da referência. A coluna vazia é suprimida e a cópia permanece à direita. */
 .panorama-v2-consultant.is-photoless { grid-template-columns:1fr; padding-left:20cqw; }
+/* Finoti D02/D08: shared context, one-slide tables, no data removed to fit. */
+.panorama-analytic-page { position:relative; height:100%; }
+.panorama-analytic-page>div { height:100%; }
+.panorama-analytic-context { position:absolute; top:8.6cqw; left:4cqw; right:4cqw; margin:0; max-height:3cqw; color:#5d7737; font-size:1.08cqw; font-weight:600; line-height:1.15; pointer-events:none; }
+.panorama-analytic-page .panorama-market-slide header { margin-bottom:2.3cqw; }
+.panorama-analytic-page .panorama-reference-table { font-size:1.05cqw; }
+.panorama-analytic-page .panorama-fiergs-area-matrix .panorama-reference-table { font-size:.98cqw; }
+.panorama-analytic-page .panorama-maturity-slide .panorama-reference-table { font-size:1.02cqw; }
+.panorama-analytic-page .panorama-price-range-slide .panorama-reference-table { font-size:1.12cqw; }
+.panorama-study-window { font-size:2.3cqw!important; line-height:1.2!important; }
+.panorama-fiergs-distribution main>div>i { position:relative; }
+.panorama-fiergs-distribution main>div>i>b { position:absolute; }
+.panorama-fiergs-distribution main>div>i.has-negative:after { content:''; position:absolute; left:50%; top:0; bottom:0; width:1px; background:#555; }
+.panorama-fiergs-context-comparisons i.is-negative { transform:translateY(100%); }
+/* Context follows the actual title height, never an absolute overlay. */
+.panorama-analytic-context { position:static; grid-column:1/-1; margin:.6cqw 0 0; max-height:none; font-size:1.12cqw; line-height:1.2; }
+.panorama-analytic-page header>.panorama-analytic-context { align-self:start; }
+.panorama-report-page .panorama-coverage-caption,.panorama-report-page .panorama-chart-note { display:none!important; }

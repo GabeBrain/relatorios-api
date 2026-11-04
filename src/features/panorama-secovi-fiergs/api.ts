@@ -2,6 +2,8 @@ import { httpRequest } from '@/lib/http-client';
 import { periodToQuarter, quarterKey, safeNumber } from './lib/launches';
 import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrationCell, MarketCohortRow, PanoramaReference, PanoramaReportModel, PanoramaScope, Quarter, Segment } from './types';
 import { buildPanoramaReportModel } from './report/model';
+import { loadMunicipalTerritory } from './lib/municipal-territory';
+import { buildGenerationNotices } from './report/generation-notices';
 import { aggregateTemporal, buildMarketCells } from './lib/market-calibration';
 import { PIRACICABA_1T26_MARKET_REFERENCE } from './reference/piracicaba-1t26-market';
 import { editorialWindow, quarterEndDate, quarterStartDate } from './domain/quarters';
@@ -461,6 +463,8 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
       cityTemporalSources,
     },
   );
+  model.municipalTerritory = await loadMunicipalTerritory(scope, signal);
+  model.notices = buildGenerationNotices(model);
   progress.prepare();
   return model;
 }

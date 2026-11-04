@@ -116,7 +116,7 @@ function collect(nodes: (View | string)[], blocks: PresentationBlock[]) {
     }
     if (/^h[123]$/.test(node.tag) || ['p', 'li', 'footer'].includes(node.tag)) {
       const value = text(node).trim();
-      if (value) blocks.push({ kind: 'text', role: /^h[12]$/.test(node.tag) ? 'title' : node.tag === 'h3' ? 'subtitle' : node.tag === 'footer' ? 'footer' : 'body', text: value });
+      if (value) blocks.push({ kind: 'text', role: node.props.className === 'panorama-analytic-context' ? 'context' : /^h[12]$/.test(node.tag) ? 'title' : node.tag === 'h3' ? 'subtitle' : node.tag === 'footer' ? 'footer' : 'body', text: value });
       continue;
     }
     if (node.children.length && node.children.every((child) => typeof child === 'string' || ['span', 'b', 'strong', 'small', 'i', 'em', 'br'].includes(child.tag))) {

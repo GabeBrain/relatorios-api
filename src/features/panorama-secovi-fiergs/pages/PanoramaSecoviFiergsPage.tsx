@@ -43,7 +43,7 @@ export default function PanoramaSecoviFiergsPage() {
   const quarters = useMemo(() => availableEndQuarters('1T2019'), []);
   const queryScope = submitted ? { ...submitted, cities: [...submitted.cities].sort((a, b) => a.localeCompare(b, 'pt-BR')) } : null;
   const report = useQuery({
-    queryKey: ['panorama-report', HISTORY_CONTRACT_KEY, generationId, queryScope?.uf, queryScope?.cities, queryScope?.startQuarter, queryScope?.endQuarter, queryScope?.entity, queryScope?.engineVersion],
+    queryKey: ['panorama-report', HISTORY_CONTRACT_KEY, 'finoti-editorial-v1', generationId, queryScope?.uf, queryScope?.cities, queryScope?.startQuarter, queryScope?.endQuarter, queryScope?.entity, queryScope?.engineVersion],
     // O recorte só muda por uma nova geração (o botão fica bloqueado durante a coleta).
     // Não repassamos o sinal efêmero do React Query: ele vinha cancelando o fallback legado de
     // todas as cidades quando uma das requisições paralelas era descartada pelo navegador.

@@ -1,3 +1,5 @@
+import { analyticContext, observedComparison, monetaryTitle } from '../report/editorial-contracts';
+import { Children, cloneElement, isValidElement } from 'react';
 import { Component, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { AlertTriangle, ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle, Presentation } from 'lucide-react';
 import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
@@ -70,7 +72,7 @@ function Corporate({ page, report }: { page: number; report: PanoramaReportModel
   const territory = panoramaScopeIdentity(report.scope);
   if (report.scope.entity === 'fiergs-rs') {
     if ([3, 7].includes(page)) return <div aria-hidden="true"/>;
-    if (page === 8) return <div className="panorama-fiergs-about"><header><p>PANORAMA DO MERCADO IMOBILIÁRIO</p><h2>Sobre o estudo FIERGS</h2><i/></header><main><section><strong>{territory.cities.length}</strong><span>{territory.cities.length === 1 ? 'município analisado' : 'municípios analisados'}</span><small>{territory.official ? territory.territoryDescription : `Recorte selecionado · ${territory.uf}`}</small></section><section><strong>{new Set(report.cube.projects.map((project) => project.segment)).size}</strong><span>segmentos observados</span><small>Modelo: mercado vertical, casas em condomínio e loteamentos abertos e fechados.</small></section><section><strong>{panoramaManifestFor(report, MAPBOX_TOKEN).length}</strong><span>páginas neste relatório</span><small>Séries históricas, fechamento, preços, oferta, vendas e localização.</small></section></main><footer>Dados GeoBrain · regras e rastreabilidade preservadas no cubo granular e na auditoria CSV.</footer></div>;
+    if (page === 8) return <div className="panorama-fiergs-about"><header><p>PANORAMA DO MERCADO IMOBILIÁRIO</p><h2>Sobre o estudo FIERGS</h2><i/></header><main><section><strong>{territory.cities.length}</strong><span>{territory.cities.length === 1 ? 'município analisado' : 'municípios analisados'}</span><small>{territory.official ? territory.territoryDescription : `Recorte selecionado · ${territory.uf}`}</small></section><section><strong>{new Set(report.cube.projects.map((project) => project.segment)).size}</strong><span>segmentos observados</span><small>Modelo: mercado vertical, casas em condomínio e loteamentos abertos e fechados.</small></section><section><strong className="panorama-study-window">{quarterLabel(report.scope.startQuarter ?? report.scope.endQuarter)} – {quarterLabel(report.scope.endQuarter)}</strong><span>período do estudo</span><small>Séries históricas, fechamento, preços, oferta, vendas e localização.</small></section></main><footer>Fonte: Brain Inteligência Estratégica · GeoBrain</footer></div>;
   }
   if (page === 3) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><h3>Nossa visão</h3><p>Ser reconhecido pela sociedade como a entidade mais importante na realização do maior sonho do brasileiro: a casa própria.</p><h3>Nossa missão</h3><p>Desenvolver, representar, promover e defender a atividade imobiliária em seus segmentos, dentro de padrões reconhecidamente éticos e comprometidos com os anseios da coletividade.</p><h3>Nossos valores</h3><ul>{['Presteza','Confiabilidade','Ética','Transparência','Profissionalismo','Eficácia','Inovação','Espírito de equipe'].map((x) => <li key={x}>✓ {x}</li>)}</ul></div>;
   if (page === 7) return <div className="panorama-corporate"><h2>Sobre o SECOVI-SP</h2><p>O Secovi-SP faz história desde 1946 e cumpre seu compromisso com o Estado de São Paulo por meio do desenvolvimento do setor urbano ao lado de parceiros públicos, corporativos e da grande mídia.</p><p>Seu trabalho representa empresas, viabiliza negócios, incentiva inovação e contribui para a oferta de habitação e o desenvolvimento das cidades.</p><p>O Sindicato mantém diálogo permanente com autoridades e associados, criando propostas e serviços que favorecem a urbanização, a geração de empregos e a segurança nas relações imobiliárias.</p></div>;
@@ -160,7 +162,7 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
   // demais horizontais. A segunda linha desaparece — publicar a série agregada sob o rótulo
   // `Cond. de Casas` seria atribuir venda de loteamento ao universo Secovi.
   const salesPage = [23, 24, 25, 26].includes(page);
-  const hideCompanion = salesPage && !series.pattern && !report.horizontalSeries.attributable;
+  const hideCompanion = (salesPage && !series.pattern && !report.horizontalSeries.attributable) || (report.provenance.completedCities.length === report.scope.cities.length && data.every((r) => r.horizontal === 0));
   const referenceQuarter = report.scope.endQuarter[0];
   // Preço por m² é a única série em barras e tem no máximo uma leitura trimestral por coluna.
   // O valor e a variação são parte da informação solicitada, portanto nenhuma barra pode parecer
@@ -222,7 +224,7 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
   const unitLabel = series.unit === 'count' ? ([14, 15].includes(page) ? 'empreendimentos' : 'unidades') : series.unit === 'mi' ? 'milhões' : 'R$/m²';
   return <div className={`panorama-chart ${series.pattern ? 'panorama-pattern-chart' : ''} ${series.single ? 'panorama-single-chart' : ''}`}>
     <div className="panorama-chart-head">
-      <div><h2>{series.title}</h2><i/></div>
+      <div><h2>{monetaryTitle(series.title)}</h2><i/></div>
       <div className="panorama-variation">
         <b>VARIAÇÕES | {series.metric}</b>
         <div className="panorama-variation-grid">
@@ -303,11 +305,13 @@ export function FiergsPointValue({ x, y, value, index, data, format, referenceQu
 }
 
 function FiergsContextComparisons({ pairs, format }: { pairs: FiergsComparisonPair[]; format: (value: number) => string }) {
-  return <aside className="panorama-fiergs-context-comparisons">{pairs.map((pair) => {
+  return <aside className="panorama-fiergs-context-comparisons">{pairs.filter((p) => observedComparison(p.left, p.right, p.complete).visible).map((pair) => {
+    const comparison = observedComparison(pair.left, pair.right, pair.complete);
+    const annotation = comparison.percentage !== null ? `${comparison.percentage >= 0 ? "+" : ""}${pct(comparison.percentage)}` : `${comparison.difference! >= 0 ? "+" : ""}${format(comparison.difference!)}`;
     const maximum = Math.max(Math.abs(pair.left ?? 0), Math.abs(pair.right ?? 0), 1);
     const columnHeight = (value: number | null) => `${value === null ? 0 : Math.max(22, Math.abs(value) / maximum * 100)}%`;
     const formatted = (value: number | null) => value === null ? '—' : format(value);
-    return <section key={pair.kind}><h3>{pair.title}</h3><PresentationChart spec={{ type: 'bar', annotation: pair.variation === null ? '\u2014' : `${pair.variation >= 0 ? '+' : ''}${pct(pair.variation)}`, labels: [pair.leftLabel, pair.rightLabel], series: [{ name: pair.title, values: [pair.left, pair.right], color: '4F7ABD' }] }}><div><span><b>{formatted(pair.left)}</b><i style={{ height: columnHeight(pair.left) }}/><small>{pair.leftLabel}</small></span><em>{pair.variation === null ? '—' : `${pair.variation >= 0 ? '+' : ''}${pct(pair.variation)}`}</em><span><b>{formatted(pair.right)}</b><i style={{ height: columnHeight(pair.right) }}/><small>{pair.rightLabel}</small></span></div></PresentationChart>{!pair.complete && <p>Período incompleto</p>}</section>;
+    return <section key={pair.kind}><h3>{pair.title}</h3><PresentationChart spec={{ type: 'bar', annotation: annotation, labels: [pair.leftLabel, pair.rightLabel], series: [{ name: pair.title, values: [pair.left, pair.right], color: '4F7ABD' }] }}><div><span><b>{formatted(pair.left)}</b><i className={pair.left !== null && pair.left < 0 ? "is-negative" : undefined} style={{ height: columnHeight(pair.left), background: pair.left !== null && pair.left < 0 ? "#c62026" : undefined }}/><small>{pair.leftLabel}</small></span><em>{annotation}</em><span><b>{formatted(pair.right)}</b><i className={pair.right !== null && pair.right < 0 ? "is-negative" : undefined} style={{ height: columnHeight(pair.right), background: pair.right !== null && pair.right < 0 ? "#c62026" : undefined }}/><small>{pair.rightLabel}</small></span></div></PresentationChart>{!pair.complete && <p>Período incompleto</p>}</section>;
   })}</aside>;
 }
 
@@ -320,7 +324,7 @@ function FiergsQuarterlySlide({ report, officialSlide }: { report: PanoramaRepor
   const config = [9, 11].includes(officialSlide)
     ? { title: 'EMPREENDIMENTOS VERTICAIS LANÇADOS', data: rolling ? rollingData : base, unit: 'empreendimentos' }
     : [20, 22].includes(officialSlide)
-      ? { title: 'VGV LANÇADO VERTICAL', data: rolling ? rollingData : base, unit: 'R$ milhões' }
+      ? { title: 'VGL — VALOR GERAL LANÇADO', data: rolling ? rollingData : base, unit: 'R$ milhões' }
       : { title: 'UNIDADES VERTICAIS LANÇADAS', data: rolling ? rollingData : base, unit: 'unidades' };
   const data = config.data;
   const annual = (rolling
@@ -338,7 +342,7 @@ function FiergsQuarterlySlide({ report, officialSlide }: { report: PanoramaRepor
   return <div className="panorama-fiergs-quarterly">
     <header><h2>{config.title}<span>{rolling ? 'ACUMULADO 12 MESES' : 'POR TRIMESTRE'}</span></h2><div><b>VARIAÇÕES ANUAIS</b><section>{annualComparisons.map(({ from, to, delta }) => <span key={to.year}><small>{from.year} × {to.year}</small><strong>{delta === null ? '—' : `${delta >= 0 ? '+' : ''}${pct(delta)}`}</strong></span>)}</section></div></header>
     <main><div className="panorama-fiergs-quarterly-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 24, right: 28, top: 42, bottom: 24 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => visibleTicks.has(index) ? compactQuarterLabel(String(value)) : ''} tickLine={false} tickMargin={9} axisLine={{ stroke: '#b8b8b8' }} interval={0} minTickGap={0}/><Tooltip formatter={(value) => format(Number(value))} labelFormatter={(value) => quarterLabel(String(value) as LaunchSeries['quarter'])}/><Line type="monotone" dataKey="vertical" name={panoramaScopeIdentity(report.scope).shortLabel} stroke="#5d7737" strokeWidth={4} dot={{ r: 2.5, fill: '#5d7737' }} isAnimationActive={false} label={(props) => visibleLabels.has(Number(props.index)) ? <FiergsPointValue {...props} data={data} format={format} referenceQuarter={report.scope.endQuarter[0]}/> : null}/></LineChart></ResponsiveContainer><p>{panoramaScopeIdentity(report.scope).shortLabel} · {config.unit}</p></div><FiergsContextComparisons pairs={comparisons} format={format}/></main>
-    <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer>
+    <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · GeoBrain</footer>
   </div>;
 }
 
@@ -372,8 +376,8 @@ function FiergsDistributionSlide({ title, subtitle, rows, unit, className = '', 
   const { visible, shares, total, max } = fiergsDistributionData(rows, { includeZero });
   const chartRows = visible.filter((row) => !labels || labels.includes(row.label)).slice(0, maxRows);
   return <div className={`panorama-fiergs-distribution ${className}`.trim()}><header><h2>{title}<span>{subtitle}</span></h2><strong>{n(total)}<small>{unit}</small></strong></header>
-    {visible.length ? <PresentationChart spec={{ type: 'bar', horizontal: true, unit, labels: chartRows.map((row) => row.label), series: [{ name: unit, values: chartRows.map((row) => row.value) }] }}><main>{visible.map((row, index) => ({ row, index })).filter(({ row }) => !labels || labels.includes(row.label)).slice(0, maxRows).map(({ row, index }) => <div key={row.label} className={row.value < 0 ? 'is-negative' : row.value === 0 ? 'is-zero' : undefined}><span>{row.label}</span><i><b style={{ width: `${Math.abs(row.value) / max * 100}%` }}/></i><strong>{n(row.value)}</strong><small>{pct(shares[index])}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main></PresentationChart> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
-    <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain</footer></div>;
+    {visible.length ? <PresentationChart spec={{ type: 'bar', horizontal: true, unit, labels: chartRows.map((row) => row.label), series: [{ name: unit, values: chartRows.map((row) => row.value) }] }}><main>{visible.map((row, index) => ({ row, index })).filter(({ row }) => !labels || labels.includes(row.label)).slice(0, maxRows).map(({ row, index }) => <div key={row.label} className={row.value < 0 ? 'is-negative' : row.value === 0 ? 'is-zero' : undefined}><span>{row.label}</span><i className={visible.some((r) => r.value < 0) ? "has-negative" : undefined}><b style={{ width: `${Math.abs(row.value) / max * (visible.some((r) => r.value < 0) ? 50 : 100)}%`, left: visible.some((r) => r.value < 0) ? `${row.value < 0 ? 50 - Math.abs(row.value) / max * 50 : 50}%` : 0, background: row.value < 0 ? "#c62026" : undefined }}/></i><strong>{n(row.value)}</strong><small>{pct(shares[index])}</small>{index < 3 && row.value > 0 && <em>{index + 1}º</em>}</div>)}</main></PresentationChart> : <div className="panorama-coverage-notice"><strong>Dimensão sem observações</strong><p>A fonte correta foi consultada, mas não retornou valores para esta distribuição no período.</p></div>}
+    <footer>FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · GeoBrain</footer></div>;
 }
 function groupedValues(values: FiergsDistributionRow[]) { const groups = new Map<string, number>(); values.forEach(({ label, value }) => groups.set(label, (groups.get(label) ?? 0) + value)); return [...groups].map(([label, value]) => ({ label, value })); }
 function launchDistribution(report: PanoramaReportModel, dimension: 'standard-projects' | 'standard-units' | 'typology-units' | 'standard-vgv'): FiergsDistributionRow[] {
@@ -405,7 +409,7 @@ function FiergsPatternTemporalSlide({ report, kind, rolling = false }: { report:
     return <text x={props.x} y={props.y + dy} textAnchor="middle" className={`panorama-fiergs-pattern-point ${equivalent ? 'is-reference' : ''}`} strokeWidth={equivalent ? 8 : 3} paintOrder="stroke" style={{ fill: equivalent ? '#fff' : color, stroke: equivalent ? color : '#fff', fontFamily: 'Montserrat, Arial, sans-serif', fontSize: '1cqw', fontWeight: 700 }}>{label}</text>;
   };
   return <div className="panorama-fiergs-pattern"><header><h2>UNIDADES VERTICAIS {kind === 'launches' ? 'LANÇADAS' : 'VENDIDAS'}<span>{rolling ? 'MCMV · ACUMULADO 12 MESES' : 'MCMV · POR TRIMESTRE'}</span></h2><div>{share.map((item) => <span key={item.year}><small>{item.year}</small><strong>{pct(item.value)}</strong></span>)}</div></header>
-    <main><div className="panorama-fiergs-pattern-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 28, right: 28, top: 42, bottom: 26 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => ticks.has(index) ? compactQuarterLabel(String(value)) : ''} interval={0} tickLine={false}/><Tooltip/><Legend/><Line type="monotone" dataKey="vertical" name="MCMV / Econômico" stroke="#c62026" strokeWidth={3.5} dot={{ r: 2.5 }} isAnimationActive={false} label={point('vertical', '#a50f16', -12)}/><Line type="monotone" dataKey="horizontal" name="Demais padrões" stroke="#7b8178" strokeWidth={3.5} dot={{ r: 2.5 }} isAnimationActive={false} label={point('horizontal', '#555b53', 20)}/></LineChart></ResponsiveContainer></div><FiergsContextComparisons pairs={comparisons} format={n}/></main>
+    <main><div className="panorama-fiergs-pattern-series"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ left: 28, right: 28, top: 42, bottom: 26 }}><XAxis dataKey="quarter" tickFormatter={(value, index) => ticks.has(index) ? compactQuarterLabel(String(value)) : ''} interval={0} tickLine={false}/><Tooltip/><Legend/><Line type="monotone" dataKey="vertical" name="MCMV / Econômico" stroke="#c62026" strokeWidth={3.5} dot={{ r: 2.5 }} isAnimationActive={false} label={point('vertical', '#a50f16', -12)}/>{data.some((r) => r.horizontal !== 0) && <Line type="monotone" dataKey="horizontal" name="Demais padrões" stroke="#7b8178" strokeWidth={3.5} dot={{ r: 2.5 }} isAnimationActive={false} label={point('horizontal', '#555b53', 20)}/>}</LineChart></ResponsiveContainer></div><FiergsContextComparisons pairs={comparisons} format={n}/></main>
     <footer>Participação MCMV destacada nos trimestres equivalentes · Fonte: GeoBrain</footer></div>;
 }
 
@@ -424,7 +428,7 @@ function FiergsDormitoryPriceSlide({ report, bedroom }: { report: PanoramaReport
 function FiergsMarketQuarterlySlide({ report, officialSlide }: { report: PanoramaReportModel; officialSlide: number }) {
   const rolling = [26, 28, 33].includes(officialSlide); const stock = officialSlide === 35; const vgv = [32, 33].includes(officialSlide); const ivv = officialSlide === 39;
   const block = ivv ? report.ivv : stock ? report.stock.units : vgv ? report.sales.vgv : report.sales.units;
-  if (block.dataStatus === 'unavailable') return <CoveragePage title={stock ? 'OFERTA FINAL VERTICAL POR TRIMESTRE' : vgv ? 'VGV VENDIDO VERTICAL' : 'UNIDADES VERTICAIS VENDIDAS'} detail="A API não disponibilizou a série temporal correta para este recorte; a página não foi preenchida com zeros nem com outra métrica."/>;
+  if (block.dataStatus === 'unavailable') return <CoveragePage title={stock ? 'OFERTA FINAL VERTICAL POR TRIMESTRE' : vgv ? 'VGV — VALOR GERAL VENDIDO' : 'UNIDADES VERTICAIS VENDIDAS'} detail="A API não disponibilizou a série temporal correta para este recorte; a página não foi preenchida com zeros nem com outra métrica."/>;
   const base = block.series.map((row) => ({ ...row, horizontal: 0, total: row.vertical }));
   const data = rolling ? base.map((row, index) => ({ ...row, vertical: base.slice(Math.max(0, index - 3), index + 1).reduce((sum, item) => sum + item.vertical, 0) })).filter((_, index) => index >= 3) : base;
   const annual = (rolling || stock
@@ -434,7 +438,7 @@ function FiergsMarketQuarterlySlide({ report, officialSlide }: { report: Panoram
   const completeAnnual = annual.filter((row) => row.year < closingYear || report.scope.endQuarter.startsWith('4T'));
   const annualComparisons = completeAnnual.slice(1).map((current, index) => ({ from: completeAnnual[index], to: current, delta: variation(current.vertical, completeAnnual[index].vertical) }));
   const visibleTicks = visibleQuarterTickIndexes(data); const visibleLabels = visiblePointLabelIndexes(data);
-  const format = ivv ? (value: number) => pct(value) : vgv ? decimal : n; const title = ivv ? 'IVV VERTICAL' : stock ? 'OFERTA FINAL VERTICAL' : vgv ? 'VGV VENDIDO VERTICAL' : 'UNIDADES VERTICAIS VENDIDAS';
+  const format = ivv ? (value: number) => pct(value) : vgv ? decimal : n; const title = ivv ? 'IVV VERTICAL' : stock ? 'OFERTA FINAL VERTICAL' : vgv ? 'VGV — VALOR GERAL VENDIDO' : 'UNIDADES VERTICAIS VENDIDAS';
   const comparisons: FiergsComparisonPair[] = rolling
     ? fiergsPeriodComparisons(data, report.scope.endQuarter, { rolling12Months: true })
     : fiergsPeriodComparisons(base, report.scope.endQuarter, { quarter: true, contextual: true, snapshot: stock || ivv });
@@ -493,7 +497,9 @@ function ComparisonTable({ report, sales = false, annual = false }: { report: Pa
           {values.map((value, index) => <td key={index}>{suppressed ? '—' : row.money ? decimal(value) : n(value)}</td>)}
           {comparisonPairs.map(([from, to]) => {
             if (!from || !to) return null;
-            const delta = suppressed ? null : variation(get(row, to, type), get(row, from, type));
+            const pair = observedComparison(get(row, from, type), get(row, to, type), !suppressed);
+            const delta = pair.percentage;
+            const deltaText = !pair.visible ? '?' : pair.percentage !== null ? `${pair.percentage >= 0 ? '+' : ''}${pct(pair.percentage)}` : `${pair.difference! >= 0 ? '+' : ''}${row.money ? decimal(pair.difference!) : n(pair.difference!)}`;
             // JG-05: colunas de variação usam a mesma regra semântica das demais formatações
             // condicionais do relatório — sinal e símbolo, não só cor.
             const verdict = conditionalFormat('variation', { value: delta, max: 100, unavailable: suppressed });
@@ -549,7 +555,7 @@ function CityComparisonPage({ kind, report }: { kind: NonNullable<ReportPageDefi
   }
   return <div className="panorama-table-page panorama-city-comparison"><h2>DISPONIBILIDADE RESIDENCIAL VERTICAL POR PADRÃO</h2><table><thead><tr><th>Padrão</th>{report.cityComparisons.sales.map((row) => <th key={row.city}>{row.city}</th>)}</tr></thead><tbody>{report.cityComparisons.availabilityByStandard.map((row) => <tr key={row.standard}><td>{row.standard}</td>{report.cityComparisons.sales.map(({ city }) => <td key={city}>{pct(row.values.find((value) => value.city === city)?.availability ?? null)}</td>)}</tr>)}</tbody></table></div>;
 }
-export function PanoramaPresentationContent({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
+function PresentationContentBody({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.contentReferenceSlide ?? def.referenceSlide;
   const official = def.fiergsOfficialSlide;
   if (official === 2) return <FiergsStudyCover report={report}/>;
@@ -563,7 +569,7 @@ export function PanoramaPresentationContent({ def, report }: { def: ReportPageDe
   if (official === 16) return <FiergsPatternTemporalSlide report={report} kind="launches" rolling/>;
   if (official === 17) return <FiergsDistributionSlide title="UNIDADES VERTICAIS LANÇADAS" subtitle="POR TIPOLOGIA" rows={launchDistribution(report, 'typology-units')} unit="unidades"/>;
   if (official === 19) return <FiergsLaunchCitySlide report={report} cities={def.scopeCities}/>;
-  if (official === 21) return <FiergsDistributionSlide title="VGV LANÇADO VERTICAL" subtitle="POR PADRÃO" rows={launchDistribution(report, 'standard-vgv')} unit="R$ milhões"/>;
+  if (official === 21) return <FiergsDistributionSlide title="VGL — VALOR GERAL LANÇADO" subtitle="POR PADRÃO" rows={launchDistribution(report, 'standard-vgv')} unit="R$ milhões"/>;
   if (official && [24, 26, 32, 33, 35, 39].includes(official)) return <FiergsMarketQuarterlySlide report={report} officialSlide={official}/>;
   if (official === 27) return <FiergsPatternTemporalSlide report={report} kind="sales"/>;
   if (official === 28) return <FiergsPatternTemporalSlide report={report} kind="sales" rolling/>;
@@ -598,6 +604,29 @@ export function PanoramaPresentationContent({ def, report }: { def: ReportPageDe
   if ([3,7,8,10].includes(p)) return <Corporate page={p} report={report}/>;
   if (p === 53 || p === 54) return <NarrativeSlide report={report} continuation={p === 54}/>;
   return dataPage(p, report) ?? <CoveragePage title={title.toUpperCase()} detail="A posição editorial está preservada no livro FIERGS. O componente específico será concluído sem reutilizar uma métrica incompatível do modelo Secovi."/>;
+}
+/** Shared context is presentation only: it never changes the numeric universe. */
+export function PanoramaPresentationContent({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
+  let content: ReactNode = PresentationContentBody({ def, report });
+  if (['cover', 'static', 'divider', 'summary', 'closing'].includes(def.visualFamily)) return content;
+  const temporal = def.fiergsOfficialSlide
+    ? [9,11,12,14,15,16,20,22,24,26,27,28,32,33,35,39,43,44,45,46,47].includes(def.fiergsOfficialSlide)
+    : /por trimestre|acumulado|evolução|ao longo do tempo/i.test(def.title);
+  const rolling = /12 meses/i.test(def.title);
+  // Only resolve the documented pure page roots; never descend into Recharts/hooks.
+  for (let depth = 0; depth < 6 && isValidElement(content) && typeof content.type === 'function'; depth++) {
+    content = (content.type as (props: unknown) => ReactNode)(content.props);
+  }
+  const context = <p className="panorama-analytic-context">{analyticContext(report, temporal, rolling)}</p>;
+  if (!isValidElement<{ children?: ReactNode }>(content)) return content;
+  let inserted = false;
+  const children = Children.toArray(content.props.children).flatMap<ReactNode>((child) => {
+    if (!isValidElement<{ children?: ReactNode }>(child)) return [child];
+    if (child.type === 'header') { inserted = true; return [cloneElement(child, {}, child.props.children, context)]; }
+    if (child.type === 'h2' && !inserted) { inserted = true; return [child, context]; }
+    return [child];
+  });
+  return <div className="panorama-analytic-page">{cloneElement(content, {}, ...children)}</div>;
 }
 function SafeSheet({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
   const fallback = <Sheet def={def} report={report}><div className="panorama-page-unavailable"><h2>PÁGINA INDISPONÍVEL</h2><i/><p>Esta página não pôde ser montada. As demais páginas do relatório continuam disponíveis.</p></div></Sheet>;

@@ -6,7 +6,7 @@ export interface PresentationChart {
 }
 export interface PresentationCell { text: string; colspan?: number; rowspan?: number; header?: boolean; total?: boolean; fill?: string; }
 export type PresentationBlock =
-  | { kind: 'text'; text: string; role: 'title' | 'subtitle' | 'body' | 'footer' }
+  | { kind: 'text'; text: string; role: 'title' | 'subtitle' | 'context' | 'body' | 'footer' }
   | { kind: 'table'; rows: PresentationCell[][] }
   | { kind: 'chart'; chart: PresentationChart }
   | { kind: 'map'; columns: number; rows: number; tiles: string[]; markers: { x: number; y: number; color: string; label: string; size: number }[] }

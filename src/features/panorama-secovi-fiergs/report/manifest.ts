@@ -4,6 +4,8 @@ import { FIERGS_4T25_SLIDE_MANIFEST } from './fiergs-manifest';
 import { panoramaScopeIdentity } from '../scope-identity';
 import { customTerritoryPages } from './custom-cover-layout';
 import { observedDormitoryPriceGroup, type DormitoryPriceGroup } from './dormitory-price-series';
+import { mcmvActivity } from './editorial-contracts';
+import type { PanoramaReportModel } from '../types';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
 export type CityComparisonKind = 'sales' | 'market' | 'availability';
@@ -129,6 +131,13 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
     const annualReady = annualRows.some((row) => row.kind === 'row') && annualRows.some((row) => row.kind === 'total')
       && annualRows.every((row) => [row.previousUnits, row.finalUnits, row.launchedUnits, row.soldUnits, row.ivv].every((value) => value !== null && Number.isFinite(value)));
     const omitted = new Set<number>();
+    // Remove the retired documentary by stable official identity, not the output index.
+    omitted.add(74);
+    if ('launches' in report && report.scope?.cities?.length === report.provenance.completedCities?.length) {
+      const complete = report as PanoramaReportModel;
+      if (mcmvActivity(complete, 'launches').known && !mcmvActivity(complete, 'launches').active) [15, 16].forEach((s) => omitted.add(s));
+      if (mcmvActivity(complete, 'sales').known && !mcmvActivity(complete, 'sales').active) [27, 28].forEach((s) => omitted.add(s));
+    }
     if (report.sales?.units.dataStatus === 'unavailable') [24, 26, 27, 28, 29, 31, 32, 33].forEach((slide) => omitted.add(slide));
     if (report.prices?.meter.dataStatus === 'unavailable') omitted.add(43);
     if (report.prices?.meterByTypology.dataStatus === 'unavailable') [44, 45, 46, 47].forEach((slide) => omitted.add(slide));

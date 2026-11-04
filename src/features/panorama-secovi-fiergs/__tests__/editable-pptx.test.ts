@@ -16,6 +16,15 @@ const bytes = (blob: Blob) => new Promise<ArrayBuffer>((resolve, reject) => {
   const reader = new FileReader(); reader.onload = () => resolve(reader.result as ArrayBuffer); reader.onerror = reject; reader.readAsArrayBuffer(blob);
 });
 describe('PowerPoint editável do Panorama', () => {
+  it('keeps an exceptionally dense table editable on one slide for analyst finishing', async () => {
+    const report=freeScopeReport({entity:'fiergs-rs',uf:'RS',cities:['Canela'],endQuarter:'2T2026'});
+    const definition={...panoramaManifestFor(report)[0],visualFamily:'market-table' as const};
+    const built=await renderPanoramaEditablePptx({schemaVersion:'panorama-presentation-v1',pages:[{id:'dense-qa',definition,rasterized:[],blocks:[{kind:'table',rows:Array.from({length:60},(_,i)=>[{text:`QA-${i}`}])}]}]},metadata,{imageData:async()=>pixel});
+    const zip=await JSZip.loadAsync(await bytes(built.blob));
+    const slide=await zip.file('ppt/slides/slide1.xml')!.async('string');
+    expect(slide).toContain('<a:tbl>');expect(slide).toContain('QA-59');
+    expect(Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n))).toHaveLength(1);
+  });
   for (const endQuarter of ['2T2026', '4T2025'] as const) {
     for (const entity of ['fiergs-rs', 'secovi-sp'] as const) {
       it(`compiles all active page families without DOM/mutation: ${entity} ${endQuarter}`, () => {

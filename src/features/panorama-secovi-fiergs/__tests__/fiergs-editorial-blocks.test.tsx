@@ -34,7 +34,9 @@ describe('FIERGS · blocos editoriais próprios', () => {
     expect(container.querySelectorAll('.panorama-fiergs-quarterly').length).toBeGreaterThanOrEqual(10);
     const patternComparisons = container.querySelector('.panorama-fiergs-pattern .panorama-fiergs-context-comparisons');
     expect(patternComparisons).not.toBeNull();
-    const comparisonColumns = [...(patternComparisons?.querySelectorAll('section span i') ?? [])] as HTMLElement[];
+    // No MCMV activity in this fixture: zero/zero panels are no longer published.
+    expect(patternComparisons?.querySelectorAll('section')).toHaveLength(0);
+    const comparisonColumns = [...container.querySelectorAll('.panorama-fiergs-quarterly .panorama-fiergs-context-comparisons section span i')] as HTMLElement[];
     expect(comparisonColumns.length).toBeGreaterThan(0);
     expect(comparisonColumns.every((column) => column.style.height.endsWith('%'))).toBe(true);
     expect(container.querySelectorAll('.panorama-location-slide')).toHaveLength(3);
@@ -53,12 +55,15 @@ describe('FIERGS · blocos editoriais próprios', () => {
     expect(container.textContent).toContain('Legenda por padrão');
     expect(container.textContent).toContain('Menor estoque');
     expect(container.textContent).toContain('Menor R$/m²');
-    for (const page of [11, 14, 22, 26, 33]) {
+    for (const page of [26, 33]) {
       const text = officialPage(page)?.textContent ?? '';
       expect(text).toContain('COMPARATIVO ACUMULADO 12 MESES');
       expect(text).not.toContain('COMPARATIVO 1º SEMESTRE');
     }
-    for (const page of [15, 16, 27, 28, 35, 39]) {
+    for (const page of [11, 14, 22]) {
+      expect(officialPage(page)?.querySelectorAll('.panorama-fiergs-context-comparisons section')).toHaveLength(0);
+    }
+    for (const page of [35, 39]) {
       const text = officialPage(page)?.textContent ?? '';
       expect(text).toContain('COMPARATIVO ANUAL');
       expect(text).toContain('2024');

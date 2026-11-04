@@ -1,4 +1,6 @@
 import type { PanoramaReportModel, ReportGenerationNotice } from '../types';
+import { pointInsideTerritory } from '../lib/municipal-territory';
+import { mcmvActivity } from './editorial-contracts';
 import { createFiergsReportManifest, FIERGS_REDUNDANT_OFFICIAL_SLIDES, panoramaManifestFor } from './manifest';
 import { granularPriceChartRows } from './price-chart';
 import { observedDormitoryPriceGroup } from './dormitory-price-series';
@@ -41,6 +43,28 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
   const period = `${report.scope.startQuarter ?? 'histórico'}–${report.scope.endQuarter}`;
   const noticeInputs: NoticeInput[] = [];
   const add = (notice: NoticeInput) => noticeInputs.push(notice);
+  if (report.scope.entity === 'fiergs-rs' && report.provenance.completedCities.length === report.scope.cities.length) {
+    const slides = (['launches', 'sales'] as const).flatMap((kind) => {
+      const activity = mcmvActivity(report, kind);
+      return activity.known && !activity.active ? kind === 'launches' ? [15,16] : [27,28] : [];
+    });
+    if (slides.length) add({ code: 'MCMV_ZERO_ACTIVITY_OMITTED', severity: 'info', indicator: 'Páginas MCMV',
+      reason: 'Séries MCMV integralmente zeradas no recorte com cobertura disponível.', source: 'Séries classificadas de lançamentos/vendas',
+      displayDecision: 'Páginas focadas em MCMV omitidas; zeros pontuais e vendas negativas são preservados.', officialSlides: slides });
+  }
+  const withoutStock = report.cube.projects.filter((p) => p.segment === 'Vertical').flatMap((p) => p.typologies)
+    .filter((t) => (t.finalUnits ?? 0) <= 0 && t.averagePricePerMeter !== null && t.averagePricePerMeter > 0).length;
+  if (withoutStock) add({ code: 'PRICE_RANGE_CLOSING_UNIVERSE', severity: 'info', indicator: 'Extremos de preço da oferta atual',
+    reason: `${withoutStock} tipologia(s) com preço, sem estoque positivo, não participam dos extremos da oferta atual.`,
+    source: 'Fotografia tipológica do fechamento · contrato D10', displayDecision: 'Histórico e outros indicadores permanecem intactos; não há piso de preço nem filtro especial de área.' });
+  const outside = report.locations.filter((p) => !pointInsideTerritory(p, report.municipalTerritory));
+  if (report.locations.length && !report.municipalTerritory) add({ code: 'MUNICIPAL_TERRITORY_UNAVAILABLE', severity: 'warning', indicator: 'Enquadramento municipal',
+    reason: 'A referência territorial dos municípios não está disponível nesta geração.', source: 'Cartografia municipal IBGE', displayDecision: 'Coordenadas e indicadores são preservados; o mapa não é reenquadrado por pontos distantes.' });
+  else if (outside.length) add({ code: 'MAP_POINTS_OUTSIDE_FRAME', severity: 'info', indicator: 'Enquadramento municipal',
+    reason: `${outside.length} ponto(s) fora do enquadramento: ${outside.map((p) => `${p.name} (${p.projectKey ?? p.city ?? ''})`).join('; ')}.`,
+    source: report.municipalTerritory!.source, displayDecision: 'Apenas a exibição no mapa é recortada; nenhum empreendimento é excluído dos indicadores.' });
+  add({ code: 'CATEGORY_RATE_MEAN', severity: 'info', indicator: 'Média das taxas', reason: 'O agregado de disponibilidade é a média simples das categorias com taxa calculável; zeros observados entram, totais/subtotais e ausências não entram.',
+    source: 'Contrato Finoti D09', displayDecision: 'Identificado como Média das taxas, sem alterar o denominador histórico das linhas.' });
 
   const identified = report.cube.projects.filter((p) => p.historyAudit?.identityMode === 'identified');
   const removed = identified.reduce((sum, p) => sum + p.historyAudit!.duplicates.reduce((n, d) => n + d.removed, 0), 0);
