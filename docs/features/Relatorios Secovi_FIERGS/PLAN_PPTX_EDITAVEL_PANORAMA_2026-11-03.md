@@ -361,3 +361,27 @@ Fontes dos pedidos e coordenadas: [inventario originalF01-F46](REVISAO_FINOTI_GR
 Confirmados na versao2: grafiaGeobrain; sem textos sr-only expostos; tabelas/triangulos com caixas coordenadas; painel anual em imagem unica; comparacaoIVV entre mesmos trimestres sem soma de taxas; fotografiaIVV/estoque sem falso acumulado9meses; ausencia de preco4dorm1T2023 mostrada como lacuna, nao zero; PPT com textos/celulas editaveis e graficos em imagem, conforme solicitacao. O arquivo isolado nao demonstra os avisosCSV da geracao; essa prova continua sendo o ensaio/cache anterior, sem substituir uma eventual auditoria nova trazida pelo usuario.
 
 Brutos, inventario, comparacao com907d4aa, matriz derivada e renders: `.local-inputs/panorama-acceptance-2026-11-04/`. Leitura e revisao documental, sem API, testes de runtime novos, commit ou push automaticos.
+
+## Material de apoio e roteiro recorrente do analista - 04/11/2026
+
+A pedido deGabriel, geradoPDF derivado da matriz deste documento, com7paginas: contexto da versaoPPT(2), os46comentarios individualizados com pagina antiga/nova e tratamento/verificacao, onze marcacoes vermelhas, ajustes posteriores e checklist em uma pagina final. Referencia e a ultima saida trazida do site, arquivoeditavel(2), nao um aceite externo. Sem alteracao no gerador ou criacao automatica de etapa na interface; o roteiro e para revisao humana apos cada geracao.
+
+Arquivo: `FIERGS_Gramado_Canela_Retorno_Finoti_Checklist_2026-11-04.pdf`, em `.local-inputs/panorama-review-support-2026-11-04/` e copia na pasta de revisao do usuario. PDF e snapshot derivado, nao segunda fonte de regras. Script e renderizacoes locais preservados junto do arquivo; todos46IDs conferidos na extracao de texto e paginas revisadas visualmente. A depend?nciaReportLab foi instalada somente emdeps local ignorada, sem alterar dependencias do produto.
+
+### Roteiro de revisao apos cada geracao
+
+1. Conferir cidades, UF, janela e fechamento em selecao, capa e subtitulos; distinguir trimestre, fotografia e acumulados.
+2. Conferir correspondencia da capa e institucionais ao recorte; nao usar identidade do preset oficial em conjunto diferente.
+3. AbrirAvisos eAuditoriaCSV da mesma geracao; apurar cobertura e divergencias antes de interpretar ou alterar um numero.
+4. Conferir controles de oferta/vendas/IVV e universos de preco; preservar zeros observados, nulos e sinais negativos.
+5. Avaliar inicio do monitoramento, picos e coordenadas isoladas sem suavizar ou excluir dados por aparencia.
+6. Decidir relevancia de paginas pouco informativas como acabamento editorial; registrar supressoes manuais, sem atribui-las a erro numerico.
+7. Ler matrizes/graficos no tamanho de apresentacao; conferir fontes, cabecalhos, rotulos, percentuais, setas e limites.
+8. Rever fontes e nomenclaturas. Neste arquivo ainda e recomendado simplificar a expressao cubo granular da pagina16.
+9. Guardar original e editar copia com versao/data/responsavel; registrar mudancas e paginas excluidas.
+10. Textos e conteudo das celulas editaveis; graficos/quadros anuais e decoracao em imagem. Editar o texto nao recalcula totais, cores, graficos ouCSV; corrigir origem/gerador quando houver problema de dados.
+11. Apos excluir/reordenar, atualizar sumario/referencias; salvar, fechar e reabrir oPPT para conferirposicoes/fontes.
+12. Se editar oPPT, gerar oPDF da propria copia final; oPDF do site nao incorpora mudancas locais.
+13. Enviar versao e ressalvas para aceite do consultor naquele recorte; nao presumir extensao a outros estudos.
+
+Resposta de e-mail sugerida deve apresentar o estudo e este PDF como materiais separados, explicar o alcance doPPT editavel e orientar a revisao humana; envio porGabriel, sem envio automatico pelo agente. O residuo editorial e as pendencias de origem continuam visiveis no anexo, sem alegar que todos os pedidos foram literalmente encerrados.
