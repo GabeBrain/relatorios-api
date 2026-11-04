@@ -208,3 +208,11 @@ Fonte institucional inspecionada: `assets/Slides-Institucionais-Brain-2026.pptx`
 2. Conferir no site um FIERGS real (preset e recorte livre) e Secovi real, mesma geração para PDF/CSV/espelho/editável. Sem autorização, o agente não fará nova coleta nem estudo real.
 3. Gabriel/Finoti revisarem a aparência nativa e aceitarem as exceções rasterizadas institucionais. O PPTX é funcionalmente editável nas análises; não é cópia pixel a pixel do PDF nem arquivo inteiro vetorial.
 4. Manter separado o aceite Juliana dos dados anteriores do aceite deste novo formato. Alterações manuais no PPTX baixado não atualizam o site, a base, o PDF ou o CSV original.
+
+## Revisao de decisao visual ? 04/11/2026
+
+Gabriel conferiu o arquivo integral `panorama-fiergs-rs-canela-gramado-1T2023-3T2026-editavel.pptx` (64 paginas, 47 graficos nativos) e solicitou preservar a aparencia anteriormente aprovada. O botao PPT passa para `lib/pptx/approved-layout.ts`: graficos em imagens individuais da composicao original; titulos, subtitulos, fontes, textos e celulas editaveis em caixas de texto posicionadas pelo navegador. Bordas e barras condicionais das tabelas, artes e cartografia ficam rasterizadas. N?o se promete tabela nativa com linhas/colunas reestruturaveis nem atualizacao de indicadores apos edicao manual.
+
+O motor nativo `lib/pptx/render.ts`, seu compilador e testes continuam no repo, sem uso pelo botao. Snapshot e guia de reutilizacao na raiz SE: `System Design/ativos/pptx-nativo-panorama-2026-11-04/README.md`. N?o houve reversao dos contratos D01?D14, ajustes numericos ou PDF. Captura volta a depender de DOM/aba visivel; aviso do host corrigido.
+
+Evidencias locais: `.local-inputs/panorama-approved-ppt-2026-11-04/`, extrato R2 de oito paginas, 621 caixas de texto e 12 imagens, zero graficos nativos, edicao real de titulo e texto de celula salva/reaberta no Office. Quebra extra de linha identificada na primeira prova e corrigida com linha unica e shrink. 36 testes distintos aprovados, incluindo a preservacao do motor nativo e alertas; uma compilacao opcional ignorada por configuracao. Produ??o e aceite visual integral ainda precisam de ensaio apos publicacao.

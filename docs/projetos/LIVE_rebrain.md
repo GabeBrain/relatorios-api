@@ -385,6 +385,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-04 - Panorama: aparencia aprovada com textos editaveis - Gabriel / Codex
+
+- **Decisao:** apos revisar o PPT integral de 64 paginas/47 graficos, Gabriel pediu voltar ao desenho aprovado, preservando textos editaveis e motor nativo para outros relat?rios. Botao PPT usa o mesmo DOM do PDF; graficos sao imagens individuais, textos/celulas sao caixas nativas, decoracao de tabelas e mapas rasterizada. Dados e contratos Finoti nao revertidos.
+- **Evidencia:** extrato exato de oito paginas aberto no Office, 621 textos/12 imagens/zero graficos nativos; titulo e texto de celula editados, salvos e reabertos. Primeira prova revelou quebras extras, corrigidas antes do envio. Build/tipos e lint aprovados; 36 testes distintos aprovados; testes e renders em `.local-inputs/panorama-approved-ppt-2026-11-04/`. Guia/snapshot reutilizavel em `SE/System Design/ativos/pptx-nativo-panorama-2026-11-04/`. [Decisao e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#revisao-de-decisao-visual--04112026).
+- **Estado:** validado localmente, envio autorizado pelo pedido; conferencia integral no site e aceite visual externo pendentes. Captura volta a depender de aba visivel. Sem alteracao nos projetos paralelos.
+
 ### 2026-11-04 — Panorama: contratos Finoti implementados e extratos conferidos — Gabriel / Codex
 
 - **Resultado local:** [G0–G6, reconciliações, R1/R2 e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_IMPLEMENTACAO_REVISAO_FINOTI_PANORAMA_2026-11-04.md#execução-autorizada-em-0411--resultado-curto). Corrigida exclusão indevida da categoria com distratos no IVV consolidado vertical; preço atual considera estoque positivo; média simples identificada; contexto e nomenclatura nos slides; fontes, negativos, omissões e mapa territorial implementados. Totais canônicos dos empreendimentos preservados.

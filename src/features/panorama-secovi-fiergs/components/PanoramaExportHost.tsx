@@ -8,7 +8,7 @@ import { buildPanoramaPdf, buildPanoramaPptx, PanoramaExportCancelled } from '..
 import { panoramaExportBlockReason, usePanoramaExportStore, type PanoramaExportFormat } from '../export-store';
 import { scopeCityLabel, scopeFileSlug, scopeExportPeriod } from '../types';
 import { panoramaExportMetadata } from '../lib/export-metadata';
-import { panoramaManifestFor } from '../report/manifest';
+import { buildPanoramaApprovedPptx } from '../lib/pptx/approved-layout';
 
 /**
  * Executa a exportação do Panorama fora da árvore da rota: montado pelo shell, sobrevive à
@@ -48,25 +48,13 @@ export default function PanoramaExportHost() {
           if (signal?.aborted || usePanoramaExportStore.getState().controller !== controller) return;
           const live = usePanoramaExportStore.getState();
           live.reportProgress(current, pages);
-          if (!native && current === pages) live.markAssembling();
+          if (current === pages) live.markAssembling();
         };
         const built = await (async () => {
-          if (native) {
-            const [{ buildPanoramaPresentationPackage }, { renderPanoramaEditablePptx }] = await Promise.all([
-              import('../report/presentation/build-package'), import('../lib/pptx/render'),
-            ]);
-            if (signal?.aborted) throw new PanoramaExportCancelled();
-            const pages = manifest ?? panoramaManifestFor(report, import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '');
-            const pkg = buildPanoramaPresentationPackage(report, pages);
-            store.markCapturing(pkg.pages.length);
-            return renderPanoramaEditablePptx(pkg, metadata, { signal, onProgress, onAssembling: () => {
-              if (!signal?.aborted && usePanoramaExportStore.getState().controller === controller) store.markAssembling();
-            } });
-          }
           const slides = [...(deckRef.current?.querySelectorAll<HTMLElement>('.panorama-report-page') ?? [])];
           if (!slides.length) throw new Error('Não foi possível montar as páginas do relatório.');
           store.markCapturing(slides.length);
-          return (format === 'pptx' ? buildPanoramaPptx : buildPanoramaPdf)(slides, metadata, onProgress, signal);
+          return (native ? buildPanoramaApprovedPptx : format === 'pptx' ? buildPanoramaPptx : buildPanoramaPdf)(slides, metadata, onProgress, signal);
         })();
         if (signal?.aborted || usePanoramaExportStore.getState().controller !== controller) return;
         const name = `panorama-${scopeFileSlug(report.scope)}-${scopeExportPeriod(report.scope)}${native ? '-editavel' : ''}.${format}`;
@@ -90,7 +78,7 @@ export default function PanoramaExportHost() {
 
   return (
     <>
-      {report && !(format === 'pptx' && pptxMode === 'editable') && <PanoramaExportDeck report={report} rootRef={deckRef} />}
+      {report && <PanoramaExportDeck report={report} rootRef={deckRef} />}
       <div role="status" aria-live="polite" className="fixed bottom-4 right-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-border bg-card p-4 shadow-lg print:hidden">
         <div className="flex items-start gap-3">
           {status === 'done' && <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
@@ -102,7 +90,7 @@ export default function PanoramaExportHost() {
               {status === 'error' && `Não foi possível gerar o ${formatLabel}`}
             </p>}
             <p className="mt-1 text-xs text-muted-foreground">
-              {running && (format === 'pptx' && pptxMode === 'editable' ? 'Geração nativa em andamento. Você pode navegar dentro da plataforma.' : 'Mantenha esta aba visível até o download. Você pode navegar dentro da plataforma, mas trocar de aba pode pausar a captura.')}
+              {running && ('Mantenha esta aba visível até o download. Você pode navegar dentro da plataforma, mas trocar de aba pode pausar a captura.')}
               {status === 'done' && 'O download começou automaticamente.'}
               {status === 'error' && error}
             </p>
