@@ -221,3 +221,9 @@ Todos são extratos técnicos internos; não equivalem ao estudo completo para c
 2. Não alterar por aparência os picos históricos do IVV nem os preços baixos ainda válidos na oferta atual. A diferença de fechamento foi resolvida na agregação do consumidor, não na API.
 3. Publicar somente após autorização e conferir fluxo real no site, material integral e aceite visual do consultor. Os extratos e replays locais não antecipam esse aceite.
 4. Artes institucionais e base cartográfica continuam exceções rasterizadas previamente registradas; tabelas, textos, marcadores e gráficos analíticos permanecem nativos/editáveis.
+
+### Publicacao autorizada em 04/11
+
+Push autorizado e realizado em 04/11: sete commits ate `5b3c50b`, incluindo `46f72bd`. Origin/main e main em 0/0 apos envio; nenhuma integracao da arvore suja. Publicado no Git, ainda sem conferencia no site ou aceite externo. Proximo: publicar/conferir no Lovable e gerar Canela + Gramado, 1T2023-3T2026, com PDF/PPT/CSV integrais.
+
+Contagem consolidada: 102 testes distintos aprovados; inclui o teste posterior de tabela densa em uma unica pagina. Matriz JSON registra a uniao dos testes.

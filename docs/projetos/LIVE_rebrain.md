@@ -391,6 +391,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Evidência:**102 testes distintos e11replays locais, tipos/build e lint0erros/8avisos; PDF12/8páginas ePPT nativo com edição real de texto/tabela/workbook, salvamento e reabertura Office. Cartografia comCORS conferida no navegador. Uma coleta autorizada da dupla3T2026; restantecache-only. [Matriz e hashes](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_IMPLEMENTACAO_FINOTI_2026-11-04.json).
 - **Estado/próximo:** validado localmente, não publicado/homologado externamente. Origem da coordenada deWinkelHaus precisa de apuração; indicadores não foram excluídos com o ponto fora do enquadramento. Relevância de páginas e acabamento específico das tabelas ficam com o analista. Apresentar divergência/commits e obter autorização antes de push/sincronização da árvore suja; conferir site/material integral após publicação. Domínios paralelos preservados.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+- **Publicacao autorizada:** Push autorizado e realizado em 04/11: sete commits ate `5b3c50b`, incluindo `46f72bd`. Origin/main e main em 0/0 apos envio; nenhuma integracao da arvore suja. Publicado no Git, ainda sem conferencia no site ou aceite externo. Proximo: publicar/conferir no Lovable e gerar Canela + Gramado, 1T2023-3T2026, com PDF/PPT/CSV integrais.
 
 ### 2026-11-04 — Panorama: plano de execução Finoti e validação curta — Gabriel / Codex
 
