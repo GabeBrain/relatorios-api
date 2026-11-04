@@ -76,6 +76,7 @@ try {
         if (detailsCase === 'missing-area') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).private_area = null;
         if (detailsCase === 'capacity-diagnostic') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).sold = -9;
         if (detailsCase === 'signed-stock') rows[0].typologies_history.find(row => row.period === '2026-06-01').typology_stock = -1;
+        if (detailsCase === 'missing-price-sold-out') rows.filter(building=>building.building_id>=100).flatMap(building=>building.typologies_history).find(row=>row.period===`2026-${closing}-01`&&row.qty>0&&row.typology_stock===0).price=null;
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
       }
       calls++;
@@ -98,7 +99,7 @@ try {
           if (month > `2026-${closing}`) continue;
           for (const [i, group] of recorded.groups.entries()) all.push({ period: `${month}-01`, group, building_type: 'Vertical', [field]: months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m), ...(metric === 'releases' ? { vgv_release: (months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m)) * 100000.25 } : metric === 'sales' ? { vgv_liquid_sales: (months[month]?.[i] ?? 100 + i * 5 + m) * 100000.25 } : {}) });
         }
-        if(detailsCase==='signed-stock'&&metric==='stock')for(const row of all)if(row.period==='2026-06-01'&&row.group===recorded.groups[0])row.stock-=Math.floor(row.stock*.1)+1;
+        if(detailsCase==='signed-stock'&&metric==='stock')for(const row of all)if(row.period==='2026-06-01'&&row.group===recorded.groups[0])row.stock-=Math.floor(row.stock*.1);
         const filtered=all.filter(row=>row.period>=url.searchParams.get('start_period')&&row.period<=url.searchParams.get('end_period'));
         const p = Number(url.searchParams.get('page')), last = Math.max(1,Math.ceil(filtered.length / 100));
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: filtered.slice((p - 1) * 100, p * 100), meta: { current_page: p, last_page: last, total: filtered.length }, links: { next: p < last ? `?page=${p + 1}` : null } }) });
@@ -341,6 +342,13 @@ try {
   await openSlide(51);await page.getByText(/Históricos de áreas e preços processados/).waitFor();
   assert.doesNotMatch(await page.getByRole('article').innerText(),/Áreas e preços em conferência/);
   await captureSlide({path:resolve(output,'source-treatment-51-signed-stock.png')});
+  detailsCase='missing-price-sold-out';
+  await page.getByRole('button',{name:'Conferir dados reais',exact:true}).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  await openSlide(78);await page.getByText(/Históricos de áreas e preços processados/).waitFor();
+  assert.doesNotMatch(await page.getByRole('article').innerText(),/Dados em conferência/);
+  assert.match(await page.getByRole('article').innerText(),/preço incompleto/);
+  await captureSlide({path:resolve(output,'source-treatment-78-partial-price.png')});
   detailsCase = 'normal';
   negativeSales = true;
   await page.setViewportSize({ width: 1440, height: 1000 });

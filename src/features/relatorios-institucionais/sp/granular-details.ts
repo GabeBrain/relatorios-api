@@ -45,6 +45,7 @@ class DetailBuilder {
   buildings = new Map<string, Record<string, unknown>>();
   issues = new Set<string>();
   validations = new Map<string,string|null>();
+  stockProjection = new Set<string>();
   quarters: { label: SpPreview['quarter']; month: string }[];
   constructor(readonly report: SpPreview) {
     this.quarters = Array.from({ length: 14 }, (_, i) => {
@@ -101,15 +102,20 @@ class DetailBuilder {
     const expected = this.expected(month);
     if (expected.length !== SP_API_PATTERNS.length) return 'A série municipal de oferta não comprovou esta competência.';
     const actual = frame.rows.reduce((sum,row)=>sum+row.stock!,0), total = expected.reduce((sum,row)=>sum+row.value,0);
-    if (!Number.isSafeInteger(actual) || !Number.isSafeInteger(total) || actual !== total) return `Estoque em ${month}: empreendimentos ${actual}; municipal ${total}. As tipologias não somam o estoque municipal nesta competência.`;
+    const positive=frame.rows.reduce((sum,row)=>sum+Math.max(0,row.stock!),0);
+    if(actual!==total&&Number.isSafeInteger(positive)&&positive===total&&frame.rows.some(row=>row.stock!<0))this.stockProjection.add(month);
+    if (!Number.isSafeInteger(actual) || !Number.isSafeInteger(total) || actual !== total&&!this.stockProjection.has(month)) return `Estoque em ${month}: empreendimentos ${actual}; municipal ${total}. As tipologias não somam o estoque municipal nesta competência.`;
     return null;
+  }
+  stock(month:string,row:Observation):number {
+    return this.stockProjection.has(month)?Math.max(0,row.stock!):row.stock!;
   }
   expected(month: string) {
     return month === this.report.throughMonth ? this.report.patterns!.rows.map(row => ({ group: row.group, value: row.stock })) : this.report.stockSeries?.status === 'ready' ? this.report.stockSeries.observations?.filter(row => row.month === month).map(row => ({ group: row.group, value: row.value })) ?? [] : [];
   }
   classification(month: string, groups: readonly string[]): string | null {
     const problem = this.validate(month); if (problem) return problem;
-    const actual=this.frames.get(month)!.rows.filter(row=>groups.includes(row.standard)).reduce((sum,row)=>sum+row.stock!,0);
+    const actual=this.frames.get(month)!.rows.filter(row=>groups.includes(row.standard)).reduce((sum,row)=>sum+this.stock(month,row),0);
     const expected=this.expected(month).filter(row=>groups.includes(row.group)).reduce((sum,row)=>sum+row.value,0);
     return actual===expected ? null : `Estoque de ${groups.join(' / ')} em ${month}: empreendimentos ${actual}; municipal ${expected}. Classificação ainda não reconciliada para este recorte.`;
   }
@@ -158,7 +164,7 @@ class DetailBuilder {
       return differences.length ? [`${month}: total de estoque reconciliado, com diferença de classificação por padrão. ${differences.join(' ')}`] : [];
     });
     for(const [month,frame] of this.frames){
-      for(const row of frame.rows)if(row.stock!==null&&row.stock<0)warnings.push(`${month}: empreendimento ${row.project}, tipologia ${row.typology}, estoque negativo informado ${row.stock}; preservado na conciliação e nas contagens, sem peso na média de preços da oferta positiva.`);
+      for(const row of frame.rows)if(row.stock!==null&&row.stock<0)warnings.push(`${month}: empreendimento ${row.project}, tipologia ${row.typology}, estoque negativo informado ${row.stock}; original preservado. ${this.stockProjection.has(month)?'Oferta projetada com zero somente para negativos, pois a soma não negativa coincide exatamente com o municipal.':'Valor assinado preservado no controle e nas contagens.'} Sem peso na média de preços da oferta positiva.`);
       if(frame.missing.size)warnings.push(`${month}: ${frame.missing.size} empreendimento(s) sem fotografia. Preços históricos da amostra observada são parciais identificadas, sem variação comparativa.`);
     }
     for(const [metric,field] of [['sales','sales'],['launches','qty']] as const){
@@ -171,7 +177,7 @@ class DetailBuilder {
       });
       if(differences.length)warnings.push(`${metric==='sales'?'Vendas':'Lançamentos'} do período: total reconciliado, com diferença de classificação por padrão. ${differences.join('. ')}.`);
     }
-    const closingRows=this.frames.get(closing)!.rows;
+    const closingRows=this.frames.get(closing)!.rows.map(row=>({...row,stock:row.stock===null?null:this.stock(closing,row)}));
     const market=buildSpMarketDetails(closingRows, [...this.buildings.values()], this.report, this.validate(closing)??(closingRows.some(row=>row.stock!==null&&row.stock<0)?'A oferta final contém estoque negativo informado. Consulte as ressalvas; mapas e composições de oferta positiva aguardam uma fotografia não negativa.':null),classificationIssues);
     warnings.push(...(market.vgv.warnings??[]));
     const diagnostics=[...this.frames].map(([month,frame])=>{
@@ -201,12 +207,12 @@ class DetailBuilder {
       for (const item of this.frames.get(month)!.rows) {
         const launch = month !== opening && item.release === month;
         if (month !== opening && (item.sales === null || launch && item.qty === null)) return blocked('Faltam vendas mensais ou quantidades no mês de lançamento.');
-        const needsArea = (month === opening || month === closing) && item.stock! !== 0 || month !== opening && item.sales !== 0 || launch && item.qty !== 0;
+        const needsArea = (month === opening || month === closing) && this.stock(month,item) !== 0 || month !== opening && item.sales !== 0 || launch && item.qty !== 0;
         const band = item.area !== null ? spAreaBand(item.area, item.standard === 'Econômico') : null;
         if (needsArea && band === null) return blocked('Há unidades ou vendas sem área privativa válida. Nenhuma faixa é presumida.');
         if (band === null) continue;
-        if (month === opening) rows[band].openingStock += item.stock!;
-        if (month === closing) rows[band].stock += item.stock!;
+        if (month === opening) rows[band].openingStock += this.stock(month,item);
+        if (month === closing) rows[band].stock += this.stock(month,item);
         if (month !== opening) {
           rows[band].sales += item.sales!; monthlySales += item.sales!;
           const pattern = byPattern.get(item.standard) ?? { sales:0, launches:0 }; pattern.sales += item.sales!;

@@ -1,5 +1,9 @@
 # Decisões e pontos abertos — SP
 
+## 04/11/2026 — fechamento dos bloqueios do checklist (4)
+
+Usuário pediu corrigir todos os slides pendentes. O checklist real de03/11 registra51 bloqueado por124044×124045 em março/2026,78 por preço ausente54845/73369/junho e53–59 parciais. Aplicar [política atualizada](TRATAMENTO_FONTE_2026-11-03.md): tentar soma assinada e, apenas com conciliação municipal exata, projetar oferta não negativa no modelo derivado; manter valores originais auditáveis. Em78, capacidade/oferta válidas permitem contagens; preço ausente torna somente valores monetários dependentes e seus totais indisponíveis, com checklist parcial. Não preencher preço zero nem usar total monetário subestimado. Jun2023/64094 continua lacuna real; artes institucionais continuam referências editoriais. Implementação local validada, não aceite da fonte ou publicação observada.
+
 ## 03/11/2026 — correção no consumidor solicitada pelo usuário
 
 Usuário pediu implementar a correção, após o diagnóstico e material da fonte. Aplicar [tratamento declarado de estoque, amostra histórica e VGV](TRATAMENTO_FONTE_2026-11-03.md): preservar estoque negativo informado na conciliação/contagem, sem peso na média de oferta positiva; admitir médias históricas da amostra observada identificadas como parciais, sem variações comparativas; calcular vendido/VGV vendido da fotografia por capacidade menos oferta válidas, preservando sold original na auditoria. Não alterar fontes/fluxos mensais, preencher faltantes ou remover guardas de integridade/precisão. Esta versão substitui as proibições anteriores dessas três operações exclusivamente neste relatório. Nota dos slides, checklist e JSON declaram origem/qualidade/método; origem e homologação continuam pendentes, sem condicionar essa implementação a contato externo.

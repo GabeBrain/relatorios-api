@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-04 — SP: correções remanescentes do checklist (4) — usuário / Codex
+
+- **Mudança:**51 e históricos53–59 admitem oferta não negativa somente com soma exatamente conciliada ao municipal; payload assinado preservado.78 mantém quantidades e células monetárias completas quando falta preço, com — nos valores dependentes e totais, marcado parcial. [Regra atualizada](../features/relatorios-institucionais/sp/TRATAMENTO_FONTE_2026-11-03.md). Sem tolerância residual, interpolação ou preço presumido.
+- **Evidência:** checklist real68disponíveis/7parciais/2bloqueados/8referências; controles124044×124045 e preço54845/73369/junho.274 testes SP/25arquivos, tipos/lint/build e Edge dirigido aprovados na base92eeef0; capturas51/78 inspecionadas, sem nova API autenticada. Reutilizados renderizadores e estados existentes.
+- **Estado:** implementação local; integração dos14commits novos encontrada em04/11 aguarda confirmação por árvore suja. Jun2023/64094 e artes editoriais continuam pendências de fonte/revisão. Não declarar homologação ou deploy observado.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência, sem escrita.
+
 ### 2026-11-03 — Panorama: rótulo PPT e publicação autorizada — Gabriel / Codex
 
 - **Pedido/mudança:** Gabriel pediu apresentar o formato anterior apenas como `PPT`; toolbar, progresso e confirmação de alertas atualizados. `PPT editável` permanece distinto. Sem mudança em dados ou serialização.
@@ -823,6 +830,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**04/11 — SP, checklist (4):** ajustes51/53–59/78 validados localmente com274 testes, tipos/lint/build e navegador dirigido. Quantidades do78 preservadas com preço incompleto explicitado; controle de estoque aceita apenas soma municipal exata. Integração/publicação e novo ensaio autenticado pendentes, sem homologação automática.
+
 - **Panorama — PPTX editável:** implementação validada localmente em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende de autorização/publicação/ensaio real e aceite das exceções institucionais; aceite dos dados anteriores preservado.
 **03/11 — SP, correção no consumidor:**51/53–59/78 tratados por regra explícita, com preservação/auditoria e parciais identificadas;271testes e navegador dirigido aprovados. Novo checklist autenticado pendente.
 
@@ -893,6 +902,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — reteste do checklist (4):** integrar a base remota mediante confirmação, publicar correções e gerar novo checklist2T2026. Conferir51, pontos recuperados53–59 e tabela parcial78. Jun2023/64094 permanece fotografia ausente; preço54845/73369 deve vir da fonte para completar os valores monetários. Revisar oito artes editoriais. Não converter parciais em disponíveis apenas para fechar contagem.
 
 - **Panorama — PPTX editável:** autorizar integração adicional e envio dos commits, publicar e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes; edição Office já verificada em cópias sintéticas.
 - [ ] **SP — retestar tratamento aplicado:** gerar novo2T2026 com estoques assinados conciliados, preços parciais† e VGV calculado; conferir os resultados e a auditoria antes de homologar. API original e performance da coleta continuam independentes.

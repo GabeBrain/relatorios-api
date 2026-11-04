@@ -8,7 +8,7 @@ Corrigir o consumidor com dados calculados e coberturas explícitas, preservando
 
 ### Estoque informado e IVV por área — 51
 
-Estoque inteiro negativo é um valor informado, distinto de nulo. Mantê-lo assinado nas somas de controle e nas contagens por faixa; exigir conciliação exata do total municipal e do recorte Econômico pertinente, além de cobertura/área/fluxos válidos. A regra não transforma −1 em zero e não altera a API. Registrar ocorrência por ID/tipologia/mês no diagnóstico e nas ressalvas.
+Estoque inteiro negativo é um valor informado, distinto de nulo. Primeiro conferir a soma assinada com o município. Se ela divergir, admitir uma projeção de oferta não negativa exclusivamente quando a soma de max(0, estoque) coincidir exatamente com o total municipal da mesma competência, com cobertura completa e medidas válidas. Não há tolerância de uma unidade nem ajuste residual. Na projeção, usar zero para negativos somente no modelo derivado; preservar o payload original e registrar ID/tipologia/mês/valor e motivo nas ressalvas. Os controles do recorte Econômico continuam independentes. Quando nenhuma das duas somas conciliar, manter o bloqueio.
 
 Média de preço usa somente oferta positiva, como já previa o universo da média; estoque negativo não tem peso de unidade à venda. Participações de oferta são omitidas se houver faixa final negativa. IVV só é calculado com denominador positivo. Uma fotografia atual com estoque negativo não é usada para mapas e composições de oferta positiva sem tratamento específico; essa proteção permanece. A correção dos exemplos históricos não autoriza mapas de unidades negativas.
 
@@ -36,7 +36,7 @@ VGV vendido calculado = vendido calculado × preço da tipologia
 VGV final = oferta final × preço da tipologia
 ```
 
-Exigir capacidade e oferta presentes, inteiras seguras, não negativas, com oferta ≤ capacidade; preço positivo para capacidade positiva e somas monetárias seguras. Não reconstruir capacidade ou estoque faltantes. O resultado satisfaz capacidade=vendido calculado+oferta e conserva VGV lançado=VGV vendido calculado+VGV final, respeitada precisão numérica.
+Exigir capacidade e oferta presentes, inteiras seguras, não negativas, com oferta ≤ capacidade. Não reconstruir capacidade ou estoque faltantes. Se faltar preço positivo em uma tipologia com capacidade, preservar todas as contagens e mostrar — nas células monetárias dependentes, inclusive nos totais afetados; não apresentar a soma apenas dos registros precificados como total completo. Cada VGV considera seus próprios contribuintes positivos: uma tipologia esgotada sem preço não impede o VGV da oferta final. O checklist identifica a tabela como parcial e quantifica os preços ausentes. Quando completos, os valores conservam VGV lançado=VGV vendido calculado+VGV final, respeitada precisão numérica e as guardas de somas seguras.
 
 O sold original permanece na coleção privada e é comparado ao calculado: valores, diferenças e IDs ficam nas ressalvas e na auditoria JSON. Não somar distratos novamente nem substituir sold no payload. Vendas líquidas mensais e séries municipais permanecem independentes e inalteradas. A nota do slide declara a fórmula; não apresentar o derivado como sold observado da API.
 
@@ -47,6 +47,8 @@ Nas três tipologias reais do87999 recebidas anteriormente, os vendidos calculad
 Reutilizados Alert, detalhes recolhidos e renderizadores SVG existentes. Avisos agora abrangem ressalvas da fonte, não apenas classificação. JSON v1 recebe campos aditivos: resumo limitado de sourceWarnings e calculatedSalesAudit com método capacity-minus-offer-v1, quantidade de diferenças e até20 exemplos. Sem token, coordenadas, nomes ou histórico bruto. Diagnósticos distinguem estoque negativo informado de estoque ausente.
 
 ## Validação e limites
+
+Complemento de 04/11/2026, após checklist (4): controles de março/2026 124.044 versus 124.045 e preço ausente 54845/73369/junho motivaram as regras acima. 274 testes em 25 arquivos, tipos, lint e build aprovados na base 92eeef0. Edge local dirigido confirmou slide51 projetado e slide78 parcial; capturas inspecionadas, sem consulta GeoBrain autenticada. A fotografia de junho/2023 do64094 continua ausente: séries53–59 preservam identificação parcial e não inventam esse ponto. Evidência detalhada no EVIDENCIAS.md. Reteste real ainda necessário; os resultados anteriores abaixo são históricos da primeira correção.
 
 271 testes SP/24 arquivos aprovados; tipos, lint e build aprovados. Testes anteriores de bloqueio foram ajustados para a política nova, preservando verificações de estoque nulo, conflito, total divergente, capacidade/estoque inválidos e preço ausente. Quatro regressões adicionais comprovam estoque negativo conciliado na abertura, média parcial calculada diretamente dos registros observados, supressão de variações e cálculo/auditoria de vendido sem mutar sold ou fluxo mensal. Prova mínima real do87999 reutilizada; demais denominadores e valores de teste são sintéticos. Último refinamento textual de diagnóstico repetido em7testes dirigidos, aprovados.
 

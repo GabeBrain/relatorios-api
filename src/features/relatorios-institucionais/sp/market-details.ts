@@ -17,7 +17,7 @@ export interface SpMarketDetails {
   cohorts:SpStockRow[]; recentShare:number|null; standards:SpStockRow[]; bedrooms:SpStockRow[];
   matrix:{status:'ready'|'blocked';issues:string[];columns:string[];rows:{label:string;values:number[];total:number}[];totals:number[]}; smallAreaShare:number|null;
   stages:{launched:{ready:boolean;issues:string[];typologies:SpStageGroup[];segments:SpStageGroup[]}; final:{ready:boolean;issues:string[];typologies:SpStageGroup[];segments:SpStageGroup[]}};
-  vgv:{ready:boolean;issues:string[];warnings?:string[];rows:SpVgvRow[];total:SpVgvRow|null}; projects:SpMapProject[]; priceBandShare:number|null;
+  vgv:{ready:boolean;issues:string[];warnings?:string[];partial?:boolean;priceMissingCount?:number;calculatedDifferenceCount?:number;rows:SpVgvRow[];total:SpVgvRow|null}; projects:SpMapProject[]; priceBandShare:number|null;
 }
 const norm=(value:unknown)=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
 const number=(value:unknown)=>typeof value==='number'||typeof value==='string'&&value.trim()?Number(value):NaN;
@@ -84,7 +84,6 @@ export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<stri
     if(row.qty===null||!Number.isSafeInteger(row.qty)||row.qty<0)issues.push('capacidade qty ausente ou inválida');
     if(row.stock===null||!Number.isSafeInteger(row.stock)||row.stock<0)issues.push('estoque da fotografia ausente, negativo ou inválido');
     if(row.qty!==null&&row.stock!==null&&row.stock>row.qty)issues.push(`estoque ${row.stock} superior à capacidade qty ${row.qty}`);
-    if(row.qty!==null&&row.qty>0&&(row.price===null||row.price<=0))issues.push('preço price ausente ou inválido para capacidade positiva');
     if(!issues.length&&row.sold!==row.qty!-row.stock!)capacityWarnings.push(`${label}: vendido calculado ${row.qty!-row.stock!} = capacidade ${row.qty} − oferta ${row.stock}; sold original ${row.sold??'ausente'}${row.sold===null?'':` (diferença ${row.qty!-row.stock!-row.sold})`}, preservado para auditoria. Não altera vendas líquidas mensais.`);
     return issues.length?[`${label}: ${issues.join('; ')}.`]:[];
   });
@@ -92,9 +91,17 @@ export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<stri
   if(capacityIssues.length)result.vgv.issues=capacityIssues;
   if(safeCapacity){
     const calculated=rows.map(row=>({...row,sold:row.qty!-row.stock!}));
-    const aggregate=(label:string,list:SpObservation[]):SpVgvRow=>({label,qty:list.reduce((s,r)=>s+r.qty!,0),sold:list.reduce((s,r)=>s+r.sold!,0),stock:list.reduce((s,r)=>s+r.stock!,0),ticket:price(list).ticket,offeredVgv:list.reduce((s,r)=>s+r.qty!*(r.price??0),0),soldVgv:list.reduce((s,r)=>s+r.sold!*(r.price??0),0),stockVgv:list.reduce((s,r)=>s+r.stock!*(r.price??0),0)});
+    const unpriced=calculated.filter(row=>row.qty!>0&&(row.price===null||row.price<=0));
+    const priceWarnings=unpriced.map(row=>`Empreendimento ${row.project}, tipologia ${row.typology??'não informada'}, competência ${row.month}: preço price ausente ou inválido; contagens preservadas e valores monetários dependentes indisponíveis (—), inclusive nos totais. Nenhum preço zero foi presumido.`);
+    const aggregate=(label:string,list:SpObservation[]):SpVgvRow=>{
+      const money=(field:'qty'|'sold'|'stock')=>{
+        const contributing=list.filter(row=>row[field]!>0);
+        return contributing.some(row=>row.price===null||row.price<=0)?null:contributing.reduce((sum,row)=>sum+row[field]!*row.price!,0);
+      };
+      return {label,qty:list.reduce((s,r)=>s+r.qty!,0),sold:list.reduce((s,r)=>s+r.sold!,0),stock:list.reduce((s,r)=>s+r.stock!,0),ticket:price(list).ticket,offeredVgv:money('qty'),soldVgv:money('sold'),stockVgv:money('stock')};
+    };
     const entries=SP_MARKET_STANDARDS.map(label=>aggregate(label,calculated.filter(row=>row.standard===label))), sum=aggregate('Total residenciais',calculated);
-    if([sum,...entries].every(row=>[row.qty,row.sold,row.stock].every(Number.isSafeInteger)&&[row.offeredVgv,row.soldVgv,row.stockVgv].every(value=>value!==null&&Number.isFinite(value)&&value<=Number.MAX_SAFE_INTEGER/100)))result.vgv={ready:true,issues:[],warnings:capacityWarnings,rows:entries,total:sum};
+    if([sum,...entries].every(row=>[row.qty,row.sold,row.stock].every(Number.isSafeInteger)&&[row.offeredVgv,row.soldVgv,row.stockVgv].every(value=>value===null||Number.isFinite(value)&&value<=Number.MAX_SAFE_INTEGER/100)))result.vgv={ready:true,issues:[],warnings:[...capacityWarnings,...priceWarnings],partial:unpriced.length>0,priceMissingCount:unpriced.length,calculatedDifferenceCount:capacityWarnings.length,rows:entries,total:sum};
     else result.vgv.issues=['As somas de capacidade ou VGV excedem a precisão numérica segura.'];
   }
   return result;

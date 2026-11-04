@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 04/11/2026 — retomada das correções do checklist (4)
+
+Codex/Codex Test/Windows, main92eeef0, origin único. Correções locais anteriores preservadas. Fetch04/11 encontrou14 commits novos do Panorama; não aplicado pull em árvore suja, confirmação solicitada. SP51 e53–59 passam a admitir projeção de oferta não negativa exclusivamente com controle municipal exato. SP78 preserva contagens quando falta preço, indisponibiliza valores monetários dependentes/totais e fica parcial. Fonte original preservada.274 testes/25arquivos, tipos/lint/build e Edge dirigido aprovados antes dessa integração; duas capturas inspecionadas, sem API autenticada. Documentação e entrega em fechamento; reteste real, fotografia jun2023/64094, editorial e homologação continuam pendentes. Sem alterar automação geral adiada ou motores paralelos.
+
 ## 03/11/2026 — correção no consumidor após solicitação explícita
 
 Main limpa79d8383, origin único0/0 após fetch; Codex/Codex Test/Windows. Usuário pediu correção, não somente encaminhamento. [Política implementada](../../features/relatorios-institucionais/sp/TRATAMENTO_FONTE_2026-11-03.md): estoque negativo assinado no controle/área, preço de oferta positiva; amostras históricas parciais identificadas e sem variações; vendido/VGV calculados de capacidade−oferta válidas, sold original auditado sem alteração de fluxo mensal.271testes, tipos/lint/build e Edge dirigido aprovados, três capturas inspecionadas; fonte simulada/prova mínima real, sem API de negócio nova. Reteste autenticado e homologação pendentes; origem não foi alterada. Logs anteriores de bloqueio substituídos por decisão posterior explícita; automação e motores paralelos preservados.

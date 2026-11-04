@@ -55,7 +55,7 @@ describe('SP — tratamento explícito dos dados fornecidos, sem alterar a fonte
     const snapshot=spReviewSnapshot({...report,granularDetails:data},reviewSpSlides({...report,granularDetails:data}));
     expect(snapshot.calculatedSalesAudit!.method).toBe('capacity-minus-offer-v1');expect(snapshot.calculatedSalesAudit!.examples.join(' ')).toContain('sold original -9');
     const original={qty:row.qty,price:row.price};
-    for(const patch of [{qty:null},{qty:0},{price:null}]){
+    for(const patch of [{qty:null},{qty:0}]){
       Object.assign(row,original,patch);expect(buildSpGranularDetails(buildings,report).market!.vgv.ready).toBe(false);
     }
   });

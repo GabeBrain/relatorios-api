@@ -1,5 +1,12 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 04/11/2026 — conferência do checklist (4) e bloqueios remanescentes
+
+- **Evidência real fornecida:** checklist2T2026 de03/11/2026 20:05:48Z,68 disponíveis/7parciais/2bloqueados/8referências. Slide51:124044×124045 em março/2026. Slide78: preço ausente54845/73369/junho. Não houve nova consulta autenticada.
+- **Correção:** projeção não negativa somente se conciliar exatamente com municipal, preservando fonte assinada; recuperação dos pontos53–59 afetados por esse mesmo controle. Slide78 mantém quantidades e valores completos, com — nos valores monetários e totais dependentes de preço ausente. Fotografias realmente ausentes continuam parciais, sem interpolação. Checklist/JSON e notas refletem os métodos.
+- **Verificação local na base92eeef0:**274 testes SP/25arquivos aprovados, tipos/lint/build aprovados. Edge1440/claro dirigido22posições, períodos2T2025/4T2025/1T2026/2T2026/2027, parciais, erro/vazio, cancelamento/retry, v2/403 e mapas: zero erros de página, zero chamadas GeoBrain reais e54 respostas Mapbox200. Capturas source-treatment-51-signed-stock.png e source-treatment-78-partial-price.png inspecionadas. Logs .local-inputs/sp-remaining-source-*, fora do Git. Reutilizados renderizadores SVG e estados existentes; não foi alterado o fluxo de carregamento.
+- **Limites:** não há checklist real posterior à correção. Jun2023/64094 permanece ausência de fonte; oito artes dependem de revisão editorial. Na retomada04/11, fetch encontrou14 commits remotos novos sobre base com alterações locais: integração aguarda confirmação exigida pelo AGENTS.md. Testes anteriores não provam a base integrada ou deploy atualizado.
+
 ## 03/11/2026 — correção de uso da fonte, não somente diagnóstico
 
 Pedido explícito do usuário resultou em [tratamento implementado no consumidor](TRATAMENTO_FONTE_2026-11-03.md). Estoque negativo é preservado/conciliado, médias históricas observadas são mostradas como parciais e vendido/VGV da fotografia são calculados por capacidade−oferta com auditabilidade do sold original.271testes/24arquivos, tipos/lint/build e navegador dirigido aprovados; três capturas inspecionadas (51 assinado,53 parcial,78 calculado), zero erros de página/zero API de negócio real/54Mapbox200. Refinamento final de texto repetido em7testes aprovados. Sem afirmar desbloqueio da coleção real antes de novo checklist ou correção da origem. Pendências contratuais/analíticas permanecem, sem bloquear a aplicação da regra delegada pelo usuário.
