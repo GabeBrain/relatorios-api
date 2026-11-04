@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-04 — Panorama: contrato da revisão Finoti fechado com Gabriel — Gabriel / Codex
+
+- **Decisões:** respostas individuais D01–D14 consolidadas no [contrato, fonte única](../features/Relatorios%20Secovi_FIERGS/REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#contrato-de-ajustes--decisões-consolidadas). Substituem a leitura equivocada de aprovação geral da mensagem isolada sobre D06. Sigla e extenso juntos; média simples das taxas; tabelas em um slide; exclusão por pouca relevância com o analista; cabeçalho sem “histórica”, sem trocar denominador; mapas com foco no território selecionado, preservando cubo/indicadores.
+- **Estado:** contrato preparado, sem implementação, teste funcional, coleta ou publicação. Área50m² sem regra especial; preços baixos após D10 continuam observados se válidos. IVV só recebe tratamento existente aplicável e comprovado, sem novo filtro de outliers. Fonte inclui acabamentos do analista e dependências técnicas reais; aceiteJuliana anterior preservado.
+- **Próximo:** plano técnico conforme contrato; verificar referência territorial e tratamentos históricos aplicáveis, sem pressupor erro/correção da API. Não houve autorização de push ou de ensaio real nesta resposta.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
+
 ### 2026-11-03 — Panorama: levantamento visual da revisão Finoti — Gabriel / Codex
 
 - **Resultado:** 46 caixas amarelas em 33 slides e 11 marcações auxiliares mapeadas por posição/alvo; 69 slides renderizados no PowerPoint em leitura. [Fonte única, inventário espacial, evidências e nove decisões abertas](../features/Relatorios%20Secovi_FIERGS/REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md).

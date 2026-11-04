@@ -1,7 +1,7 @@
 # Revisão Finoti — Gramado e Canela — 03/11/2026
 
 **Propósito:** fonte única do levantamento visual dos pedidos do consultor; separar regras do gerador, investigação numérica e escolhas editoriais antes do plano de implementação.
-**Estado:** levantamento realizado; Gabriel confirmou a omissão com cobertura completa/atividade zerada, a retirada apenas de séries inteiramente zeradas quando houver atividade e a omissão somente de comparativos sem atividade ou sem cobertura suficiente. A pedido de Gabriel, as oito escolhas originais restantes e seis dependências foram consolidadas no questionário D01–D14 abaixo; respostas pendentes. Nenhuma correção de produto executada ou homologação nova declarada. O aceite anterior de Juliana permanece restrito ao seu escopo.
+**Estado em 04/11/2026:** contrato editorial/metodológico D01–D14 fechado pelas respostas explícitas de Gabriel no formulário, com escolhas específicas diferentes das recomendações iniciais. Preferências não estão mais pendentes; diagnóstico técnico de IVV, preços e origem geográfica permanece sujeito a evidências. Nenhuma correção de produto executada ou homologação nova declarada. O aceite anterior de Juliana permanece restrito ao seu escopo.
 
 ## Origem e método
 
@@ -32,7 +32,7 @@
 
 **Slide 9:** a seta amarela grande, à direita e apontada para baixo, termina sobre a fonte `FONTE: BRAIN INTELIGÊNCIA ESTRATÉGICA · fotografia atual da API GeoBrain`. O alvo não é o título `Comparativo 9 meses` que fica parcialmente encoberto pela seta. Texto: “Será que deixar essa frase não fica muito na cara que o relatório é automático?”.
 
-**Recomendação, pendente de Gabriel:** retirar contagem de páginas e jargão de implementação do material; preservar fonte discreta e informações necessárias de universo/competência. Regras, cobertura e rastreabilidade ficam em Metodologia, Avisos e Auditoria. Retirar um card exige reequilibrar a composição, sem deixar um vazio no slide.
+**Decisão D04, confirmada em 04/11:** substituir a contagem de páginas pelo período selecionado do estudo, mantendo três cards. Retirar jargão de implementação, preservar fonte discreta e informações necessárias de universo/competência. Regras, cobertura e rastreabilidade ficam em Metodologia, Avisos e Auditoria.
 
 ### 3. Páginas de MCMV sem atividade — decisão editorial com guarda de cobertura
 
@@ -46,7 +46,7 @@
 
 **Slide 18:** caixa central sobre `UNIDADES VERTICAIS LANÇADAS POR BAIRRO E CIDADE`: “Como tem pouco lançamento, não precisa desse slide”. O exemplo mostra Floresta–Gramado com 100% e Gramado com 100%, Canela com 0%. Slide 10 informa um empreendimento lançado.
 
-**Pendente:** decidir entre omissão por único empreendimento lançado, por única categoria geográfica ativa, ou ajuste manual do analista. “Pouco lançamento” não define um limite universal em unidades. Não inventar um corte como 100 unidades ou três empreendimentos. Se automatizada, a regra usa todo o universo pertinente, não o número de barras após truncamento.
+**Decisão D05, confirmada em 04/11:** não criar omissão por pouco lançamento, único empreendimento ou baixa diversidade geográfica. Melhorar o tamanho/aproveitamento dos gráficos; o analista avalia a utilidade da página e pode editá-la ou excluí-la no PPT. A relevância editorial depende do projeto e não deve causar perdas automáticas em outros recortes que usam o mesmo motor. Esta escolha se refere à heurística de pouco lançamento; não revoga as omissões por atividade inteiramente zerada/cobertura já aprovadas acima.
 
 ### 5. VGL e VGV — nomenclatura, sem alteração numérica automática
 
@@ -54,7 +54,7 @@
 **Slides 30–31:** mesma posição: `VGV – Valor Geral Vendido`.
 **Slide 55:** caixas separadas sobre os cabeçalhos monetários de lançamento e vendido, à direita: `VGL` e `VGV`. A coluna intermediária do valor da oferta final não recebe caixa.
 
-**Recomendação, pendente:** nomenclatura uniforme VGL para lançado, VGV para vendido, nome explícito para valor da oferta final. Auditar a base de cada coluna antes de apenas trocar sigla, especialmente o caráter histórico, da janela ou do fechamento; nome não valida fórmula. Glossário/Fórmulas devem acompanhar a decisão.
+**Decisão D06, confirmada em 04/11:** apresentar sigla e extenso juntos: **VGL — Valor Geral Lançado** e **VGV — Valor Geral Vendido**; nome explícito para valor da oferta final. Auditar a base de cada coluna antes de apenas trocar sigla, especialmente o caráter histórico, da janela ou do fechamento; nome não valida fórmula. Glossário/Fórmulas acompanham a decisão. A mensagem isolada anterior sobre “recomendação” se referia a D06; não aprovava todas as recomendações D01–D14.
 
 ### 6. Barra de venda negativa — correção objetiva
 
@@ -70,7 +70,7 @@
 
 **Confirmado no código:** `OfferTableSlide` omite esse total quando há janela; linhas usam oferta histórica, enquanto oferta lançada exibida usa a janela. `CohortTableSlide` também omite o total por misturar coortes da janela e estoque antigo. No slide 58, até 2022 há 91 unidades finais e zero lançamento na janela: dividir 174 por 414 automaticamente não resolve o universo dessa linha.
 
-**Recomendação, pendente:** disponibilidade global = soma da oferta final ÷ soma da oferta histórica compatível; conferir completude dimensional e explicitar o denominador na metodologia. Não usar média aritmética de percentuais, nem dividir estoque histórico por lançamentos da janela para preencher o traço. Confirmar intenção com Gabriel e reconciliar antes de implementar. Padronizar cabeçalho não significa suprimir a distinção histórica.
+**Decisões D07/D09, confirmadas em 04/11:** o cabeçalho visível fica **Disponibilidade s/ O.L.**, retirando “histórica”; a base histórica das taxas não muda e segue explicada em Metodologia/Fórmulas. O agregado pedido será a **média aritmética simples das taxas das categorias**, nomeada **Média das taxas**, e não disponibilidade global ou razão de totais. Não dividir estoque histórico por lançamentos da janela para produzir taxas por categoria. A escolha não autoriza padronização geral de todas as tabelas além dos ajustes explicitamente aprovados.
 
 ### 8. IVV divergente e início da série — investigação numérica
 
@@ -80,13 +80,13 @@
 
 **Código:** série temporal deriva IVV de vendas/estoque por dimensão em `report/model.ts`; tabela por área usa tipologias do cubo em `domain/aggregations.ts`. Ambas têm identidades de base, mas origens/abrangências diferentes. Precisamos reconciliar por empreendimento, competência, classificação e cobertura. Não forçar igualdade, tirar média entre taxas ou fixar 8,5%.
 
-**Slide 37:** retângulo vermelho sem texto cobre os primeiros dois pontos, 1,2% e 56,9%, de 1T/2T2023. Intenção não é inequívoca: pode ser questionamento dos valores ou início da série. Pergunta enviada; recomendação investigar antes de recortar dados.
+**Slide 37:** retângulo vermelho sem texto cobre os primeiros dois pontos, 1,2% e 56,9%, de 1T/2T2023. **D12, confirmada em 04/11:** recuperar os tratamentos históricos já fundamentados no motor e verificar se algum se aplica; sem contrato consistente/reutilizável comprovado, manter a série como está e encaminhar a investigação à base que alimenta a API. Não criar filtro novo de outliers, suavizar picos ou cortar o período por aparência. A atribuição do problema à origem é uma hipótese de investigação, não causa técnica já demonstrada.
 
 ### 9. Fonte pequena nas tabelas — automatizar layout
 
 **Slides 51, 53 e 54:** caixas no centro das tabelas: “Aumentar a fonte da tabela de dados”. Referem-se à matriz de metragem × tipologia e às duas matrizes de maturidade por tipologia/padrão. Não é fonte do título ou do rodapé.
 
-Propor tamanho mínimo legível, redução de espaços desnecessários e melhor uso da área útil; quebrar tabela em páginas com cabeçalhos repetidos quando necessário. Não encolher fonte indefinidamente para manter uma página, não cortar células/zeros e não inserir números ou colunas artificiais. Validar PDF e objetos nativos do PPT separadamente.
+**D08, confirmada em 04/11:** manter uma página por tabela, com a maior fonte possível que caiba com o conteúdo inteiro, melhor uso da área útil e ajuste dinâmico de espaçamento. **Não criar continuação automática em outro slide.** Quando a automação não entregar boa leitura, registrar como acabamento do analista no PPT editável; não cortar células/zeros nem inserir números/colunas artificiais. Validar PDF e objetos nativos do PPT separadamente.
 
 ### 10. Preços e área mínima suspeitos — investigar, sem corte arbitrário
 
@@ -94,13 +94,13 @@ Propor tamanho mínimo legível, redução de espaços desnecessários e melhor 
 
 **Confirmado no código:** `FiergsTypologyPriceRangeSlide` percorre todas as tipologias verticais com preço/m² positivo; peso do estoque é usado nas médias, mas mínimo/máximo incluem entradas com oferta final nula/zero. Uma tipologia sem estoque pode determinar o extremo de uma tabela apresentada como fotografia da oferta final.
 
-**Hipótese a testar:** mínimos baixos podem vir de tipologias sem estoque, de competência antiga ou de registros atuais realmente observados. O PPT não identifica as linhas responsáveis; não foi feita chamada API. Não afirmar erro do GeoBrain, do preço ou da classificação sem rastrear a linha. Não filtrar automaticamente um valor porque parece econômico. A marcação de 50 m² foi incluída nas perguntas para confirmar se é também alvo da investigação.
+**D10/D11, confirmadas em 04/11:** a tabela deve usar a oferta final disponível: tipologias com estoque positivo e métricas válidas da fotografia do fechamento; médias ponderadas pelo estoque e extremos do mesmo universo. Gabriel espera que esse recorte resolva os preços baixos; isso permanece uma hipótese até a comparação antes/depois, não resultado garantido. Se mínimos baixos continuarem válidos no universo correto, preservá-los, sem filtro por aparência econômica. Os **50m²** foram tratados por Gabriel como peculiaridade dos registros da cidade: não criar regra de correção/exclusão para essa metragem nem investigação especial por esse valor. Não afirmar erro de origem antes de rastrear os registros relevantes ao ajuste de universo.
 
 ### 11. Empreendimento isolado nos mapas — investigar cadastro/geometria
 
 **Slides 61–63:** a mesma seta aponta para o marcador isolado ao noroeste, longe do aglomerado de Canela/Gramado, perto da região de Caxias do Sul. São mapas por padrão, estoque e R$/m², cada um com 329 empreendimentos georreferenciados. Não se refere à legenda nem a um ponto aleatório no aglomerado.
 
-Precisamos identificar o ID por coordenada/projeção e conferir município/endereço, latitude/longitude, competência e inclusão no recorte. Possíveis causas ainda não comprovadas: cadastro geográfico incorreto, inversão/conversão de coordenadas, referência municipal ou posição legítima distante. Não excluir empreendimento dos indicadores por distância, nem inventar um raio municipal. Uma eventual decisão de não exibir marcador inválido deve preservar indicadores e deixar rastro nos avisos/auditoria. Proposta enviada a Gabriel.
+**D13, confirmada em 04/11:** enquadrar os mapas pelo território das cidades selecionadas, melhorando o foco do mapa e deixando coordenadas distantes fora da apresentação. É uma restrição visual, sem excluir empreendimento dos indicadores ou alterar seu município. Identificar o registro e encaminhar a apuração da origem geográfica à API/base; um recorte visual não comprova nem corrige o cadastro. Possíveis causas continuam sem prova: cadastro geográfico incorreto, inversão/conversão de coordenadas, referência municipal ou posição legítima distante. Não inventar raio ou lista de exceções; a fonte de limites municipais é dependência técnica do plano. O ponto fora do enquadramento não pode ser artificialmente recolocado na borda pelo clamp de coordenadas. Ausências visuais e quantidades permanecem rastreáveis nos avisos/auditoria; contagem de marcadores exibidos precisa corresponder ao mapa, sem mudar totais analíticos.
 
 ### 12. Documentário institucional — alteração editorial explícita
 
@@ -119,26 +119,31 @@ Precisamos identificar o ID por coordenada/projeção e conferir município/ende
 - Omitir comparativos quando ambos os lados forem zero ou faltar cobertura. Manter comparações válidas, incluindo um lado zero e outro com atividade; percentual sobre base zero não é calculado.
 - Omissões ficam rastreáveis nos avisos/manifesto/auditoria; notas técnicas não migram para o PDF/PPT.
 
-### Questionário completo D01–D14 — aguardando respostas
+### D01–D14 — decisões de Gabriel em 04/11/2026
 
-Gabriel pediu esgotar as dúvidas antes de fechar o contrato. Estas 14 escolhas consolidam as oito perguntas anteriores ainda sem resposta e seis dependências editoriais/metodológicas. As recomendações **não estão aprovadas** por ausência de resposta. Formulário do chat oferece alternativas e resposta livre; respostas posteriores serão registradas aqui pelos IDs, sem manter duas versões vivas do contrato.
+As respostas individuais do formulário são a autoridade desta consolidação; substituem a leitura equivocada de aprovação geral a partir da mensagem isolada sobre D06. Não há perguntas editoriais D01–D14 pendentes.
 
-- **D01 — alcance:** regras comuns no FIERGS e Secovi, preservando políticas específicas (**recomendado**), ou apenas no FIERGS. Não inclui Corretor, Sinduscon, outros relatórios ou uniformização automática de fórmulas diferentes entre produtos.
-- **D02 — identificação:** território e período corretos em toda página analítica, fora das artes institucionais (**recomendado**), ou apenas nas famílias de páginas apontadas. Fotografia, trimestre, janela e acumulado precisam de rótulos semanticamente corretos.
-- **D03 — conjuntos extensos:** nomes por extenso quando couberem em até duas linhas, identificação compacta para conjuntos maiores com lista completa na página de cidades e identidade preservada do preset (**recomendado**); alternativa de listar todos sempre ou usar sempre contagem/UF nas análises. Não truncar nomes silenciosamente.
-- **D04 — abertura e fonte:** trocar card de número de páginas por período, retirar jargão e manter fonte discreta (**recomendado**); alternativas de retirar o card e reequilibrar os dois restantes, ou preservar a contagem sem jargão. O período é a janela do estudo, não automaticamente só o fechamento.
-- **D05 — relevância geográfica, slide18:** omitir apenas se não houver diversidade geográfica (um bairro e uma cidade com atividade), preservando a dimensão útil quando a outra não variar (**recomendado**); alternativas de omitir por único empreendimento lançado ou deixar ao analista. Qualquer omissão requer cobertura suficiente para não confundir classificação/geografia ausente com concentração real.
-- **D06 — nomes monetários, slides19–21/30–31/55:** VGL lançado, VGV vendido e nome explícito para valor da oferta final (**recomendado**); alternativas de nomes por extenso ou padronização somente no FIERGS. Bases históricas, da janela e do fechamento exigem auditoria independente da sigla escolhida.
-- **D07 — padronização, slide34:** tabelas analíticas com fontes, cabeçalhos, alinhamentos e casas decimais consistentes, preservando unidades e significados (**recomendado**); alternativas de apenas disponibilidade ou apenas cabeçalho explícito, consultando Finoti sobre o restante.
-- **D08 — legibilidade, slides51/53/54:** aproveitar área e permitir continuação com título/cabeçalhos repetidos, sem duplicar totais (**recomendado**), ou manter uma página e deixar casos que não couberem para o analista. Não esconder dados nem reduzir fonte indefinidamente.
-- **D09 — disponibilidade total, slides34/35/58:** razão entre estoque final e oferta histórica do mesmo universo, com cobertura reconciliada (**recomendado**); alternativas de média simples nomeada como “Média das taxas”, ou não preencher automaticamente até definição do consultor. Nunca apresentar média simples como se fosse razão dos totais nem usar lançamentos da janela como denominador do estoque histórico.
-- **D10 — universo de extremos, slide52:** oferta final com estoque positivo, preço/área válidos no fechamento, médias ponderadas pelo estoque e extremos do mesmo universo (**recomendado**), ou manter universo histórico e renomear a análise. Cobertura é conferida por métrica: um campo ausente não vira zero nem autoriza inventar valores de outro campo.
-- **D11 — rastreamento, slide52:** investigar preços e área mínima de50m² (**recomendado**); alternativas de preços apenas ou preços com pergunta específica ao Finoti sobre área. Não excluir por aparência econômica nem inventar corte de preço.
-- **D12 — início da sérieIVV, slide37:** investigar mantendo janela escolhida, valores confirmados e lacunas explícitas (**recomendado**); alternativas de começar no primeiro trimestre com cobertura completa se início comprovadamente incompleto, ou esclarecer intenção editorial com Finoti. A diferença9,5%×8,5% é investigada em todos os casos, sem escolher resultado por opinião.
-- **D13 — coordenadas, slides61–63:** retirar apenas marcador comprovadamente inválido, com aviso e dados dos indicadores preservados; suspeitas permanecem registradas sem exclusão por distância (**recomendado**). Alternativas de preservar todos os marcadores para revisão manual, ou consultar Finoti antes de qualquer retirada. Sempre identificar o registro e concluir diagnóstico; não é autorização para excluir empreendimento ou alterar sua cidade.
-- **D14 — variação sobre base zero/negativa:** manter os dois valores e mostrar diferença em unidades/reais, sem percentual sobre base zero ou negativa (**recomendado**), ou mostrar apenas os dois valores sem indicador de variação nesses casos. Bases positivas válidas mantêm percentuais; falta de cobertura segue a regra de omissão já aprovada. Restrição adicional de percentual sobre base negativa é proposta, não decisão anterior de Gabriel.
+- **D01 — alcance aprovado:** FIERGS e Secovi, no motor compartilhado, preservando regras numéricas e materiais próprios de cada produto. Corretor, Sinduscon e outros relatórios ficam fora do escopo.
+- **D02 — identificação aprovada:** território e período em toda página analítica, em posição consistente; não adicionar às artes institucionais. Rótulo conforme trimestre, janela ou acumulado efetivamente calculado.
+- **D03 — conjuntos extensos aprovado:** nomes quando couberem em até duas linhas; identificação compacta para conjuntos maiores, lista completa na página de cidades e nome do preset oficial preservado.
+- **D04 — abertura/fonte aprovado:** substituir card de páginas pelo período do estudo; manter três cards úteis, fonte discreta e jargão técnico fora do material.
+- **D05 — relevância editorial decidida pelo analista:** não automatizar exclusão por pouco lançamento ou concentração geográfica. Aumentar os gráficos/aproveitar espaço; analista edita ou exclui a página no PPT quando não agregar ao projeto. Omissões por atividade inteiramente zerada continuam conforme decisão anterior.
+- **D06 — sigla e extenso aprovados juntos:** **VGL — Valor Geral Lançado** e **VGV — Valor Geral Vendido**; valor da oferta final com nome próprio. Garantir ambos na apresentação pertinente, sem reduzir para sigla isolada ou alterar cálculo para caber no rótulo.
+- **D07 — cabeçalho aprovado:** retirar apenas “histórica” do rótulo, ficando **Disponibilidade s/ O.L.**. Denominador não muda por troca de nome; explicação da base histórica fica em Metodologia/Fórmulas. Não foi aprovada a proposta mais ampla de redesenhar todas as tabelas.
+- **D08 — tabela única aprovada:** maior fonte que caiba em um slide com conteúdo inteiro; ajuste dinâmico de espaço, sem gerar dois slides/continuação automática. Acabamento que não puder ser resolvido adequadamente fica na lista do analista, com edição nativa no PPT.
+- **D09 — média simples aprovada:** calcular média aritmética das taxas das categorias e rotular **Média das taxas**. Não apresentar como disponibilidade global nem substituir por razão dos totais. Categorias de dados válidas, sem total/subtotal em duplicidade; zeros observados entram, ausências e bases não calculáveis não viram zero. Base e cobertura documentadas nas abas de apoio/auditoria, sem nota técnica no slide.
+- **D10 — universo atual aprovado:** tabela de mínimos/médias/máximos usa oferta final disponível, com estoque positivo e métricas válidas na competência do fechamento; médias ponderadas pelo estoque e extremos no mesmo universo. Cobertura avaliada por métrica, preservando dados ausentes sem imputação.
+- **D11 — sem regra de corte/área:** aplicar D10 e verificar seu efeito real nos preços. Não criar tratamento para50m² nem piso de preço ou padrão presumido. Se preço baixo válido permanecer no universo correto, mantê-lo. A expectativa de que D10 elimine os mínimos baixos não substitui a evidência antes/depois.
+- **D12 — reaproveitar apenas tratamento fundamentado:** examinar contratos históricos existentes e se há correção consistente aplicável aos picos. Sem isso, manter valores/janela e encaminhar investigação da base/API; não criar filtro de outliers ou suavização. Divergência9,5%×8,5% continua exigindo confronto das bases antes de qualquer correção numérica.
+- **D13 — foco territorial aprovado:** restringir visualmente o mapa aos municípios selecionados; marcadores distantes não ampliam a imagem e ficam fora da exibição. Nenhuma exclusão do cubo/indicadores ou alteração cadastral. Investigar localização na origem separadamente; recorte visual é apresentação, não prova de erro da API. Usar referência territorial verificável, nunca raio/cidade/empreendimento fixado como exceção.
+- **D14 — diferença absoluta aprovada:** para base zero ou negativa, mostrar os dois valores e a diferença em unidades/reais, sem percentual. Para bases positivas válidas, manter percentual; falta de cobertura e ambos os lados zerados seguem as omissões já aprovadas.
 
-As recomendações D04 e D05 refinam as alternativas anteriores: para preservar uma abertura útil, propõe-se substituir páginas por período; para não inventar limite de volume, propõe-se testar diversidade geográfica em vez de um corte arbitrário de unidades. Nenhuma dessas propostas foi tratada como aceite.
+### Acabamentos reservados ao analista — lista inicial
+
+1. **Relevância da página:** decidir se uma distribuição geográfica com pouco conteúdo deve ser mantida, ajustada ou excluída; nenhuma heurística de volume/densidade apaga essa análise automaticamente.
+2. **Leitura da tabela:** quando o ajuste automático em um slide não entregar o acabamento desejado, editar fontes, larguras, posições e composição no PPT nativo, sem alteração automática dos dados.
+
+Esta lista será reunida no handoff de uso do relatório. Divergências de IVV/preço/cadastro não são autorização para corrigir números manualmente no PPT; ficam como investigação da origem e dos contratos de cálculo.
 
 ### Requisitos claros e limites de implementação
 
@@ -147,13 +152,13 @@ As recomendações D04 e D05 refinam as alternativas anteriores: para preservar 
 - Os mesmos dados, unidades, rótulos e regras editoriais aprovados devem orientar tela/PDF/PPT; implementações gráficas diferentes precisam de conferência própria. Arquivo raster anotado não valida edição/aparência do novo PPT nativo.
 - Preservar exportação, alertas, contratos de histórico/capacidade, zeros/nulos/negativos e políticas específicas dos produtos. Não reabrir como nova decisão a política de alertas já acordada nem afrouxar cobertura/proveniência.
 - Sem revisão automática de cadastro na origem, cortes por município/período ou textos analíticos inventados para substituir o consultor. Revisões narrativas e específicas do projeto permanecem editáveis pelo analista no PPT.
-- Reconciliar IVV, oferta histórica e preços antes de alterar indicadores. Identificar registro do mapa antes de tratar sua coordenada. Resolver causa comprovada; lacunas de evidência são investigação, não preferências a decidir por votação.
+- Reconciliar IVV, oferta histórica e preços antes de alterar indicadores. O mapa pode receber o enquadramento territorial aprovado sem presumir correção cadastral; identificar o registro antes de atribuir causa/alterar sua coordenada. Resolver causa comprovada; lacunas de evidência são investigação, não preferências a decidir por votação.
 
-**Não dependem de opinião:** recuperar nomes das cidades e competência correta; legibilidade; representação do negativo; diferença de IVV exige diagnóstico; percentuais de empreendimentos exigem denominador coerente. **Não comprovados pelo arquivo:** causa do IVV, identidade/erro do marcador distante, origem dos preços mínimos e eventual erro cadastral na área.
+**Não dependem de opinião:** recuperar nomes das cidades e competência correta; legibilidade; representação do negativo; diferença de IVV exige diagnóstico; percentuais de empreendimentos exigem denominador coerente. **Não comprovados pelo arquivo:** causa do IVV, identidade/erro do marcador distante e origem dos preços mínimos. A área50m² não recebe tratamento especial por decisão D11.
 
 ## Próximo passo e limites
 
-Incorporar respostas neste documento, fechando cada decisão antes do plano técnico. Separar implementação automática comum (identidade, layout, sinal, nomenclatura, critérios editoriais explícitos) de investigação (IVV, preço, localização, completude) e edição específica do consultor. Não iniciar coleta extensa nem gerar estudo real sem autorização. Não aplicar cortes numéricos por período/cidade, nem trocar dados para concordar com um comentário.
+Contrato fechado pelas respostas de04/11. Próximo: elaborar o plano técnico sobre estas decisões, separando implementação automática comum (identidade, layout, sinal, nomenclatura, média simples, universo de preços e enquadramento territorial) de investigação (IVV, origem dos preços/localização, completude) e acabamento do analista. A disponibilidade de referência territorial municipal e a aplicabilidade dos contratos históricos são dependências técnicas a verificar, não novas preferências pendentes. Não iniciar coleta extensa nem gerar estudo real sem autorização. Não aplicar cortes numéricos por período/cidade, nem trocar dados para concordar com um comentário.
 
 Validação desta etapa é documental: leitura estrutural do PPT, renderização Office, comparação visual e inspeção dirigida do código. Não foram executados testes de produto porque nenhum comportamento foi alterado. Novo PPT editável requer ensaio próprio; o material comentado em imagens não é evidência desse ensaio. Sem push/publicação nesta revisão.
 
