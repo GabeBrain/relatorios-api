@@ -1,7 +1,7 @@
 # Revisão Finoti — Gramado e Canela — 03/11/2026
 
 **Propósito:** fonte única do levantamento visual dos pedidos do consultor; separar regras do gerador, investigação numérica e escolhas editoriais antes do plano de implementação.
-**Estado:** levantamento realizado; Gabriel confirmou a omissão com cobertura completa/atividade zerada, a retirada apenas de séries inteiramente zeradas quando houver atividade e a omissão somente de comparativos sem atividade ou sem cobertura suficiente. As outras oito escolhas originais continuam abertas. Nenhuma correção de produto executada ou homologação nova declarada. O aceite anterior de Juliana permanece restrito ao seu escopo.
+**Estado:** levantamento realizado; Gabriel confirmou a omissão com cobertura completa/atividade zerada, a retirada apenas de séries inteiramente zeradas quando houver atividade e a omissão somente de comparativos sem atividade ou sem cobertura suficiente. A pedido de Gabriel, as oito escolhas originais restantes e seis dependências foram consolidadas no questionário D01–D14 abaixo; respostas pendentes. Nenhuma correção de produto executada ou homologação nova declarada. O aceite anterior de Juliana permanece restrito ao seu escopo.
 
 ## Origem e método
 
@@ -110,19 +110,44 @@ Precisamos identificar o ID por coordenada/projeção e conferir município/ende
 
 **Slide 35, coluna de percentual após Nº de Empreendimentos:** 23 empreendimentos Compacto em um total de 148 correspondem a 15,5%, mas a tabela mostra 18,2%, valor de `770 ÷ 4.237` unidades lançadas. O JSX confirma que essa célula usa `row.launched / launchedTotal` em vez de participação dos empreendimentos. Trata-se de correção objetiva de denominador e semântica do cabeçalho. Antes de alterar, conferir se a contagem por padrão tem exclusividade/reconcilia com o total; preservar contratos da janela e não contar empreendimento repetido por tipologia.
 
-## Decisões e perguntas abertas
+## Contrato de ajustes — decisões consolidadas
 
-Nove perguntas enviadas pelo formulário do chat; as recomendações abaixo são propostas, não respostas de Gabriel:
+### Confirmado por Gabriel
 
-1. Slides 5/9: retirar card de páginas e jargão, mantendo fonte discreta?
-2. Slide 18: omitir por único empreendimento, por única categoria geográfica ativa ou deixar ao analista?
-3. Slide 52: investigar também área mínima de 50 m², além dos preços?
-4. Slides 34/35/58: “média” significa disponibilidade global com bases compatíveis ou média simples?
-5. **Respondida:** omitir página com cobertura completa/atividade inteiramente zerada; se houver atividade, retirar somente séries/categorias inteiramente zeradas, preservando zeros pontuais e negativos. Comparativos: omitir somente se ambos os lados forem zero ou faltar cobertura; manter os demais comparativos válidos, sem divisão por base zero.
-6. Slides 19–21/30–31/55: adotar VGL lançado e VGV vendido nas gerações ou nomes por extenso/ajuste pontual?
-7. Slide 37: marcação nos dois pontos iniciais pede investigação ou encurtamento da série?
-8. Slides 61–63: investigar marcador e separar eventual correção cartográfica dos indicadores?
-9. Slide 34: “Padronizar” refere-se à última coluna ou à tabela inteira? A caixa está próxima do cabeçalho, mas não tem seta; o alcance permanece por confirmar.
+- Omitir página com cobertura completa e atividade pertinente inteiramente zerada; cobertura incompleta não pode ser interpretada como ausência de atividade.
+- Se houver atividade, retirar somente séries/categorias inteiramente zeradas no trecho pertinente, preservando zeros pontuais e vendas negativas. A regra remove apresentação redundante, não dados da base.
+- Omitir comparativos quando ambos os lados forem zero ou faltar cobertura. Manter comparações válidas, incluindo um lado zero e outro com atividade; percentual sobre base zero não é calculado.
+- Omissões ficam rastreáveis nos avisos/manifesto/auditoria; notas técnicas não migram para o PDF/PPT.
+
+### Questionário completo D01–D14 — aguardando respostas
+
+Gabriel pediu esgotar as dúvidas antes de fechar o contrato. Estas 14 escolhas consolidam as oito perguntas anteriores ainda sem resposta e seis dependências editoriais/metodológicas. As recomendações **não estão aprovadas** por ausência de resposta. Formulário do chat oferece alternativas e resposta livre; respostas posteriores serão registradas aqui pelos IDs, sem manter duas versões vivas do contrato.
+
+- **D01 — alcance:** regras comuns no FIERGS e Secovi, preservando políticas específicas (**recomendado**), ou apenas no FIERGS. Não inclui Corretor, Sinduscon, outros relatórios ou uniformização automática de fórmulas diferentes entre produtos.
+- **D02 — identificação:** território e período corretos em toda página analítica, fora das artes institucionais (**recomendado**), ou apenas nas famílias de páginas apontadas. Fotografia, trimestre, janela e acumulado precisam de rótulos semanticamente corretos.
+- **D03 — conjuntos extensos:** nomes por extenso quando couberem em até duas linhas, identificação compacta para conjuntos maiores com lista completa na página de cidades e identidade preservada do preset (**recomendado**); alternativa de listar todos sempre ou usar sempre contagem/UF nas análises. Não truncar nomes silenciosamente.
+- **D04 — abertura e fonte:** trocar card de número de páginas por período, retirar jargão e manter fonte discreta (**recomendado**); alternativas de retirar o card e reequilibrar os dois restantes, ou preservar a contagem sem jargão. O período é a janela do estudo, não automaticamente só o fechamento.
+- **D05 — relevância geográfica, slide18:** omitir apenas se não houver diversidade geográfica (um bairro e uma cidade com atividade), preservando a dimensão útil quando a outra não variar (**recomendado**); alternativas de omitir por único empreendimento lançado ou deixar ao analista. Qualquer omissão requer cobertura suficiente para não confundir classificação/geografia ausente com concentração real.
+- **D06 — nomes monetários, slides19–21/30–31/55:** VGL lançado, VGV vendido e nome explícito para valor da oferta final (**recomendado**); alternativas de nomes por extenso ou padronização somente no FIERGS. Bases históricas, da janela e do fechamento exigem auditoria independente da sigla escolhida.
+- **D07 — padronização, slide34:** tabelas analíticas com fontes, cabeçalhos, alinhamentos e casas decimais consistentes, preservando unidades e significados (**recomendado**); alternativas de apenas disponibilidade ou apenas cabeçalho explícito, consultando Finoti sobre o restante.
+- **D08 — legibilidade, slides51/53/54:** aproveitar área e permitir continuação com título/cabeçalhos repetidos, sem duplicar totais (**recomendado**), ou manter uma página e deixar casos que não couberem para o analista. Não esconder dados nem reduzir fonte indefinidamente.
+- **D09 — disponibilidade total, slides34/35/58:** razão entre estoque final e oferta histórica do mesmo universo, com cobertura reconciliada (**recomendado**); alternativas de média simples nomeada como “Média das taxas”, ou não preencher automaticamente até definição do consultor. Nunca apresentar média simples como se fosse razão dos totais nem usar lançamentos da janela como denominador do estoque histórico.
+- **D10 — universo de extremos, slide52:** oferta final com estoque positivo, preço/área válidos no fechamento, médias ponderadas pelo estoque e extremos do mesmo universo (**recomendado**), ou manter universo histórico e renomear a análise. Cobertura é conferida por métrica: um campo ausente não vira zero nem autoriza inventar valores de outro campo.
+- **D11 — rastreamento, slide52:** investigar preços e área mínima de50m² (**recomendado**); alternativas de preços apenas ou preços com pergunta específica ao Finoti sobre área. Não excluir por aparência econômica nem inventar corte de preço.
+- **D12 — início da sérieIVV, slide37:** investigar mantendo janela escolhida, valores confirmados e lacunas explícitas (**recomendado**); alternativas de começar no primeiro trimestre com cobertura completa se início comprovadamente incompleto, ou esclarecer intenção editorial com Finoti. A diferença9,5%×8,5% é investigada em todos os casos, sem escolher resultado por opinião.
+- **D13 — coordenadas, slides61–63:** retirar apenas marcador comprovadamente inválido, com aviso e dados dos indicadores preservados; suspeitas permanecem registradas sem exclusão por distância (**recomendado**). Alternativas de preservar todos os marcadores para revisão manual, ou consultar Finoti antes de qualquer retirada. Sempre identificar o registro e concluir diagnóstico; não é autorização para excluir empreendimento ou alterar sua cidade.
+- **D14 — variação sobre base zero/negativa:** manter os dois valores e mostrar diferença em unidades/reais, sem percentual sobre base zero ou negativa (**recomendado**), ou mostrar apenas os dois valores sem indicador de variação nesses casos. Bases positivas válidas mantêm percentuais; falta de cobertura segue a regra de omissão já aprovada. Restrição adicional de percentual sobre base negativa é proposta, não decisão anterior de Gabriel.
+
+As recomendações D04 e D05 refinam as alternativas anteriores: para preservar uma abertura útil, propõe-se substituir páginas por período; para não inventar limite de volume, propõe-se testar diversidade geográfica em vez de um corte arbitrário de unidades. Nenhuma dessas propostas foi tratada como aceite.
+
+### Requisitos claros e limites de implementação
+
+- Identificar recorte/competência, tornar tabelas legíveis e representar negativos à esquerda/vermelho são pedidos expressos. O contrato detalha alcance e apresentação, não pergunta se dados negativos podem ser descartados.
+- Corrigir percentual de empreendimentos exige numerador/denominador de empreendimentos reconciliados. Retirar documentário68 do manifesto FIERGS é pedido editorial explícito; não significa remover outros institucionais nem alterar outros produtos sem examinar a arte correspondente.
+- Os mesmos dados, unidades, rótulos e regras editoriais aprovados devem orientar tela/PDF/PPT; implementações gráficas diferentes precisam de conferência própria. Arquivo raster anotado não valida edição/aparência do novo PPT nativo.
+- Preservar exportação, alertas, contratos de histórico/capacidade, zeros/nulos/negativos e políticas específicas dos produtos. Não reabrir como nova decisão a política de alertas já acordada nem afrouxar cobertura/proveniência.
+- Sem revisão automática de cadastro na origem, cortes por município/período ou textos analíticos inventados para substituir o consultor. Revisões narrativas e específicas do projeto permanecem editáveis pelo analista no PPT.
+- Reconciliar IVV, oferta histórica e preços antes de alterar indicadores. Identificar registro do mapa antes de tratar sua coordenada. Resolver causa comprovada; lacunas de evidência são investigação, não preferências a decidir por votação.
 
 **Não dependem de opinião:** recuperar nomes das cidades e competência correta; legibilidade; representação do negativo; diferença de IVV exige diagnóstico; percentuais de empreendimentos exigem denominador coerente. **Não comprovados pelo arquivo:** causa do IVV, identidade/erro do marcador distante, origem dos preços mínimos e eventual erro cadastral na área.
 
