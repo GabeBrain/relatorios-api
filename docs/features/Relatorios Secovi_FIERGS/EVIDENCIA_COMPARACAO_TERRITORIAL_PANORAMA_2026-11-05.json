@@ -75,8 +75,8 @@
       "different": 0,
       "hashes": {
         ".csv": "a3023538e0215b15a45b52b86ec5fa9523cf49b63da85b1988a75ed2269acff3",
-        ".pdf": "6ba4b1792fd1f024366d23ca2034fb58ab752d04bd17a4a8c60b1a73f2be4f34",
-        ".pptx": "7dbe130b3c920e52ce3b8caca1011805b8cba7ae4658c74638d6019577a959e5"
+        ".pdf": "6ec51ca8e7a42cf132ea697971557c8477006debde824d5e87c764b4b098af29",
+        ".pptx": "83f3c8f99bf37b1719569791c93cd4fbe8ee36001972495c054480f04e2e1251"
       }
     },
     {
@@ -88,8 +88,8 @@
       "different": 0,
       "hashes": {
         ".csv": "3ecd234b28af122ceb15c6e28ef0d12026971b442100c610e1fd4e3610fba3af",
-        ".pdf": "0da5679f267a68de427e615f15d2ae78511e9a9bb5bd51cefdfda2559f3aad1d",
-        ".pptx": "c7e028a922ba6f511617f22c09fec0d0d900508273dba1b3b56fc9f8b9d10abf"
+        ".pdf": "1e88a65ac0dc12c7986b5925efd11d1cf2e396e82be7859cfe8cf942150fb595",
+        ".pptx": "02c48e8c0dd253a7df67659dc84fa669bd8097709f79b2db5882245bfa89e1ac"
       }
     }
   ],
@@ -107,14 +107,14 @@
         "outside": [],
         "name": "R1",
         "slides": 12,
-        "textObjects": 432
+        "textObjects": 348
       },
       {
         "nativeCharts": 0,
         "outside": [],
         "name": "R2",
         "slides": 8,
-        "textObjects": 163
+        "textObjects": 125
       }
     ]
   },
@@ -128,7 +128,22 @@
   ],
   "git": {
     "authorizedMerge": "8d3eaec",
-    "newRemoteNotIntegrated": "4aed591",
+    "newRemoteNotIntegrated": "219ed1c",
     "push": false
+  },
+  "visualRevision": {
+    "trigger": "Gabriel compared the new PPT with the approved study layout on 2026-11-05; first territorial composition rejected",
+    "scope": "Approved quarterly layout reused: stacked black/green title, annual table top-right, paired blue comparison bars right, series colors and reference-quarter highlights; offer/price/annual heading hierarchy aligned",
+    "dataChanged": false,
+    "csvIdenticalToBefore": true,
+    "testsPassed": 15,
+    "testsFailed": 0,
+    "browserCases": [
+      "R1",
+      "R2"
+    ],
+    "pdfPages": 20,
+    "officePages": 20,
+    "externalAcceptance": false
   }
 }

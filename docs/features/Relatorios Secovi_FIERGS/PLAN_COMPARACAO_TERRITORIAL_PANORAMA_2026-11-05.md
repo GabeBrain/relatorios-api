@@ -1,6 +1,6 @@
 # Plano técnico — Comparações territoriais e composição anual do Panorama
 
-Data: 05/11/2026. Estado: **G0–G6 implementados e validados localmente; G7 pendente de integração final/publicação autorizada e ensaio no site**. Propósito: ampliar FIERGS/Secovi para comparar até três cidades ou grupos explícitos, preservar o consolidado aceito e incorporar a composição anual dos lançamentos. Esta é a fonte de execução desta ampliação; o inventário de referências e o contrato D01–D14 permanecem na [revisão Finoti](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
+Data: 05/11/2026. Estado: **G0–G6 implementados e verificados localmente; composição visual revista após retorno de Gabriel, aguardando sua conferência; G7 pendente de integração final/publicação autorizada e ensaio no site**. Propósito: ampliar FIERGS/Secovi para comparar até três cidades ou grupos explícitos, preservar o consolidado aceito e incorporar a composição anual dos lançamentos. Esta é a fonte de execução desta ampliação; o inventário de referências e o contrato D01–D14 permanecem na [revisão Finoti](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
 
 ## 1. Origem, baseline e limites de autorização
 
@@ -263,3 +263,14 @@ Composição anual de empreendimentos/unidades/VGL usa categoria histórica do l
 3. Gerar consolidado regional completo em2T2026ou4T2025, confirmando identidade oficial e regras anteriores; não exigir comparação quando não desejada.
 4. Selecionar conjunto maior e definir cidade versus grupo (ou3grupos): cada município deve estar atribuído uma vez. Conferir preços ponderados, percentuais próprios, páginas horizontais e composição anual consolidada.
 5. Devolver arquivos para conferência; só depois preparar resposta externa e registrar aceite. Notas de relevância textual e eventual exclusão de página pelo analista continuam noPPT editável, sem editar números para concordar com imagens antigas.
+
+
+## Revisão visual após conferência de Gabriel — 05/11/2026
+
+O primeiro PPT territorial alterou indevidamente a composição aprovada: título corrido, quadro anual no rodapé e comparativos textuais. O retorno reabriu a conferência visual de G3/G6; a reconciliação numérica G1 permanece válida. Corrigido no próprio template compartilhado, sem recuar a separação por cidades/grupos.
+
+- Séries temporais reutilizam `panorama-fiergs-quarterly`: título preto em blocos, qualificador verde, quadro anual no alto à direita, série à esquerda e comparativos em barras azuis à direita. Quadro anual mantém uma linha colorida por unidade. Destaques dos trimestres equivalentes acompanham a cor da série; texto preto no amarelo.
+- O marcador `FiergsPointValue` foi extraído e reutilizado pelo consolidado e pelo comparativo; não há importação circular. Consolidado mantém valores e aparência anteriores. As demais famílias novas usam a mesma hierarquia de título e margens, preservando tabelas/textos editáveis e gráficos em imagem no PPT híbrido.
+- R1 atualizado:12páginas, Canela+Gramado1T2023–3T2026, insumos locais exatos. R2:8páginas sintéticas para três unidades e nomes longos. Vinte páginas PDF e PowerPoint renderizadas; arquivos abrem, texto/célula editados em cópia e persistidos ao salvar/reabrir, sem objetos fora. Capturas e saídas substituídas na mesma pasta local, hashes atualizados na evidência JSON vinculada.
+- CSV dos dois extratos idêntico byte a byte à rodada anterior; nenhum cálculo, coleta, cidade ou grupo alterado. Quinze testes focados passaram; tipos/lint conferidos. Comparações sem cobertura/atividade continuam omitidas, sem gerar percentuais inválidos ou inventar barras de zero.
+- Estado: correção visual validada localmente, pendente da conferência de Gabriel e ensaio publicado. Sem nova coleta, integração, push ou aceite externo. Fetch:origin/main219ed1c com dois commits SP não integrados; preservar árvore paralela.

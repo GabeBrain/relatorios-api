@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 05/11/2026 — Panorama: composição territorial alinhada à aparência aprovada — Gabriel / Codex
+
+- **Problema/decisão:** Gabriel comparou o primeiro PPT territorial ao estudo aprovado e rejeitou a nova composição. Restaurada a estrutura trimestral existente (título preto/verde em blocos, quadro anual superior, gráfico à esquerda e barras comparativas à direita), mantendo separação por cidades/grupos e os dados conciliados. Cabeçalhos de oferta/preços/anuais alinhados; marcador compartilhado preserva cor dos trimestres equivalentes. PPT híbrido continua com textos/células editáveis e gráficos em imagem.
+- **Evidências:** [revisão visual na fonte de execução](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#revisão-visual-após-conferência-de-gabriel--05112026), JSON de evidência atualizado, R1/R2offline12/8páginas PDF/PPT/CSV. CSV idêntico byte a byte;15testes focados, tipos/lint; PowerPoint renderizou20páginas sem objetos fora e persistiu edição de texto/célula após reabrir.
+- **Estado/pendências:** validado localmente, conferência visual de Gabriel pendente; G7 exige integração/publicação autorizada e ensaio no site. Sem nova API/coleta, merge ou push. Dois commits remotos SP até219ed1c não integrados; alterações paralelas preservadas. Não antecipar aceite da ampliação.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
 ### 2026-11-05 — Panorama: comparação territorial G0–G6 validada localmente — Gabriel / Codex
 
 - **Mudança:** consolidado ou até3unidades cidade/grupo, partição explícita, coleta reutilizada; curvas/variações, tabelas comparativas, páginas específicas densas/horizontais e três composições anuais. Capas, metodologia, nomes/CSV/avisos rastreiam membros. Zeros/negativos e contratos homologados preservados; classificação de lançamento não é inferida pela classe atual/preço. Gráficos continuam imagens noPPT híbrido.

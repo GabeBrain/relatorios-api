@@ -50,4 +50,19 @@ describe('apresentação territorial', () => {
     unit.data.granular.pricesByStandard[0].averagePricePerMeter=0;
     expect(territorialPriceRows(r,'meter-standard').rows[0].v0).toBe(0);
   });
+  it('amplia a composição aprovada: título em blocos, quadro anual no cabeçalho e comparativos gráficos laterais', () => {
+    const r=report(),pages=panoramaManifestFor(r);
+    // Ensure this fixture has a valid year-over-year comparison to render.
+    for (const unit of r.territorial!.units) for (const row of unit.data.launches.projects) {
+      row.vertical=1;
+    }
+    const html=renderToStaticMarkup(<PanoramaPresentationContent report={r} def={pages.find((p)=>p.fiergsOfficialSlide===9)!}/>);
+    const dom=new DOMParser().parseFromString(html,'text/html');
+    expect(dom.querySelector('.panorama-fiergs-quarterly header h2 span')?.textContent?.toLowerCase()).toBe('por trimestre');
+    expect(dom.querySelector('header .panorama-territorial-annual-box')).not.toBeNull();
+    expect(dom.querySelector('main .panorama-fiergs-quarterly-series')).not.toBeNull();
+    expect(dom.querySelector('main aside section [data-panorama-chart]')).not.toBeNull();
+    expect(dom.querySelector('.panorama-territorial-main')).toBeNull();
+    expect(dom.querySelector('main table')).toBeNull();
+  });
 });

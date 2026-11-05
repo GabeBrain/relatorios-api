@@ -1,3 +1,5 @@
+import { FiergsPointValue } from './FiergsPointValue';
+export { FiergsPointValue } from './FiergsPointValue';
 import { AnnualCompositionSlide } from './AnnualCompositionSlide';
 import { TerritorialComparisonSlide } from './TerritorialComparisonSlides';
 import { territorialReportView } from '../report/territorial-projections';
@@ -294,18 +296,6 @@ export function annualizeSeries(series: LaunchSeries[]) {
   return [...annual.values()].sort((a, b) => a.year - b.year);
 }
 
-export function FiergsPointValue({ x, y, value, index, data, format, referenceQuarter }: { x?: number; y?: number; value?: number; index?: number; data: LaunchSeries[]; format: (value: number) => string; referenceQuarter: string }) {
-  if (x === undefined || y === undefined || value === undefined || index === undefined) return null;
-  const label = format(Number(value)); const equivalent = data[index]?.quarter[0] === referenceQuarter;
-  // Os atributos visuais essenciais ficam inline de propósito. O preview aplica normalmente as
-  // classes CSS ao SVG do Recharts, mas o `html-to-image` serializa os nós customizados em outro
-  // SVG: nesse caminho o `<rect>` voltava ao fill preto padrão e o texto branco também perdia o
-  // fill, ficando invisível no PDF/PPT. Inline mantém preview e arquivos espelho idênticos.
-  const textStyle = { fontFamily: 'Montserrat, Arial, sans-serif', fontSize: '1.12cqw', fontWeight: 700 } as const;
-  if (!equivalent) return <text x={x} y={y - 12} textAnchor="middle" className="panorama-fiergs-point" fill="#20231d" stroke="#ffffff" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round" style={textStyle}>{label}</text>;
-  const width = Math.max(36, label.length * 8 + 14);
-  return <g className="panorama-fiergs-point-highlight"><rect x={x - width / 2} y={y - 29} width={width} height={22} rx={2} fill="#5d7737"/><text x={x} y={y - 18} textAnchor="middle" fill="#ffffff" dominantBaseline="middle" style={textStyle}>{label}</text></g>;
-}
 
 function FiergsContextComparisons({ pairs, format }: { pairs: FiergsComparisonPair[]; format: (value: number) => string }) {
   return <aside className="panorama-fiergs-context-comparisons">{pairs.filter((p) => observedComparison(p.left, p.right, p.complete).visible).map((pair) => {
