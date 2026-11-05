@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 05/11/2026 — Panorama: revisão final e plano de incorporação à versão publicada — Gabriel / Codex
+
+- **Diagnóstico:**17referências relistadas noDrive;15imagens e147páginas dos panoramas revisitadas em pranchas versusR1/R2. Candidata local atende ao pedido central deFinoti/Teresa, sem novo aceite externo. Restam médias visuais, tratamento do quadro anual sem comparação/ano único, janela anual e prova com três unidades ativas.
+- **Planejamento:** [matriz de aderência e portõesI0–I6 na fonte existente](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#incorporação-ao-relatório-publicado--revisão-final-e-plano-i0i6-05112026). Código já conectado à rota/manifesto/exportação local; fechar acabamentos e validar integração real antes de publicar. Sem novo plano paralelo.
+- **Estado/limites:** preparado; somente revisão/documentação nesta rodada, sem código de produto, teste novo, APIreal, merge oupush. Git11locais/2remotosSP na abertura, árvore paralela preservada. PróximoI0–I4;I5exige autorização de integração/push, I6gerações humanas no site.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
 ### 05/11/2026 — Panorama: composição anual em áreas contínuas — Gabriel / Codex
 
 - **Ajuste:** conforme retorno de Gabriel, composição anual usa áreas empilhadas lineares no lugar de colunas separadas, preservando categorias, percentuais, cores, legenda e ano parcial. Anos sem observação continuam como lacunas. Aplica-se às três métricas, sem mudar cálculos.

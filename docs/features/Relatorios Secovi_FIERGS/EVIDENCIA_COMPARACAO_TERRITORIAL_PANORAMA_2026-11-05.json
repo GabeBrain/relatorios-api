@@ -161,5 +161,25 @@
     "lint": "passed",
     "office": "12-slide copy opened; annual area slide rendered in PowerPoint",
     "published": false
+  },
+  "finalReferenceReview": {
+    "date": "2026-11-05",
+    "candidate": "3cee42b",
+    "driveFilesRelisted": 17,
+    "pngReferencesReviewed": 15,
+    "pdfReferencePagesReviewedInContactSheets": 147,
+    "localFileHashesVerified": 17,
+    "freshRemoteContentHashes": false,
+    "centralTerritorialRequest": "addressed in local candidate, not externally accepted",
+    "remainingBeforePublication": [
+      "visual mean reference lines",
+      "annual panel with no valid comparisons",
+      "single-year annual area fallback",
+      "explicit annual window subtitle",
+      "three active territories / six side comparisons and representative families on real route"
+    ],
+    "executionPlan": "PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md / I0-I6",
+    "implementationThisReview": false,
+    "push": false
   }
 }

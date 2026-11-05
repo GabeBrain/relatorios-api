@@ -1,6 +1,6 @@
 # Plano técnico — Comparações territoriais e composição anual do Panorama
 
-Data: 05/11/2026. Estado: **G0–G6 implementados e verificados localmente; composição visual revista após retorno de Gabriel, aguardando sua conferência; G7 pendente de integração final/publicação autorizada e ensaio no site**. Propósito: ampliar FIERGS/Secovi para comparar até três cidades ou grupos explícitos, preservar o consolidado aceito e incorporar a composição anual dos lançamentos. Esta é a fonte de execução desta ampliação; o inventário de referências e o contrato D01–D14 permanecem na [revisão Finoti](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
+Data: 05/11/2026. Estado: **G0–G6 implementados e verificados localmente; revisão final das referências concluída; incorporação à versão publicada planejada nos portões I0–I6 abaixo, ainda não executados; G7/publicação e aceite externo pendentes**. Propósito: ampliar FIERGS/Secovi para comparar até três cidades ou grupos explícitos, preservar o consolidado aceito e incorporar a composição anual dos lançamentos. Esta é a fonte de execução desta ampliação; o inventário de referências e o contrato D01–D14 permanecem na [revisão Finoti](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
 
 ## 1. Origem, baseline e limites de autorização
 
@@ -211,7 +211,9 @@ Unidades sugeridas de commit: contratos/projeções; editor/cache; gráficos/tab
 
 Encerramento exige: recorte sem cidades pré-selecionadas; grupos cobrem a seleção exatamente; dados municipais/grupos/consolidado reconciliam; três famílias anuais publicam somente com universo suficiente; relatório não é replicado integralmente; PDF/PPT mantêm aparência e identificação corretas; auditoria rastreia membros/fontes; regressões locais passam; comportamento do site é observado após publicação; aceite externo registrado separadamente. Pendências de origem ou de acabamento do analista não viram alterações silenciosas de regra.
 
-## 6. CTA de execução
+## 6. CTA original de execução (G0–G6, histórico)
+
+Para a próxima rodada, usar o CTA dos portõesI0–I4 no final deste documento, sem refazer a implementação já concluída.
 
 Execute `docs/features/Relatorios Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md` pelos portões G0–G6, respeitando T01–T07 e D01–D14. Implemente consolidado ou comparação de até três cidades/grupos explícitos, reutilizando a mesma coleta, incluindo as famílias horizontais e as três composições anuais previstas. Preserve dados, alertas, contratos de cálculo, aparência aprovada do PPT híbrido e alterações paralelas; não modifique Corretor, Sinduscon ou outras features. Demonstre cidade → grupo → consolidado antes dos ajustes visuais. Execute testes focados/regressões offline2T2026/4T2025, gere primeiro R1 curto da dupla1T2023–3T2026 com insumos exatos locais e R2 somente para lacunas comprovadas; verifique PDF/CSV e edição real no PowerPoint. Não faça coletas reais/estudos reais, integre árvore suja ou faça push sem autorização. Registre evidências/decisões, crie commits isolados e apresente divergência, resultados e pendências para autorizar G7. Não antecipe homologação externa.
 
@@ -278,3 +280,136 @@ O primeiro PPT territorial alterou indevidamente a composição aprovada: títul
 ### Composição anual contínua — retorno de Gabriel em 05/11
 
 Substituídas somente as colunas empilhadas por áreas empilhadas lineares, como na referência Finoti. Categorias, percentuais, cores, legenda e indicação de ano parcial preservados; anos sem composição publicável mantidos como lacunas, sem interpolação entre observações ausentes. Rótulos percentuais centralizados nas respectivas faixas; ajuste de alinhamento do último ano impede corte da competência parcial. Aplica-se às três métricas da composição anual. ExtratoR1 atualizado offline, sem API/integração/publicação; demais lâminas preservadas. Gabriel continuará os testes antes de decidir incorporação ao relatório publicado.
+
+
+## Incorporação ao relatório publicado — revisão final e plano I0–I6 (05/11/2026)
+
+### Resultado da revisão final
+
+**Parecer:** a solução atual atende ao pedido central de Finoti de distinguir cidades em gráficos e algumas tabelas e à orientação de Teresa de tratar regiões agrupadas. Está suficientemente próxima das referências para avançar à incorporação, com os acabamentos e verificações abaixo. Isso é avaliação técnica da sessão, não previsão de aceite nem nova homologação externa. A aparência trimestral foi corrigida em `91e3194`; a composição anual contínua, em `3cee42b`. Gabriel considerou que a primeira melhorou e corrigiu o formato da segunda; não houve aceite de produção da ampliação.
+
+ConectorDrive relistado nesta revisão: mesmos17IDs/nomes/tamanhos, 15PNG e doisPDFs;17hashes locais conferidos contra o manifesto original. Isso confirma o conjunto de referências preservado, não um novo download/hash dos bytes remotos. Os15PNG e as147páginas dos dois panoramas foram revisitados em pranchas; R1/R2 atuais também. A prancha finalR1 usa a página anual em áreas. Metadados da releitura e pranchas em `.local-inputs/finoti-comparativos-2026-11-05/final-review-drive-list.json` e `.local-inputs/panorama-territorial-2026-11-05/renders/*review-final-grid.jpg`.
+
+**Fato importante:** a ampliação já está conectada à página real no código local: `PanoramaSecoviFiergsPage` usa o editor e recompõe o modelo; `panoramaManifestFor` aplica as transformações territoriais e anuais; `ReportPaginator` seleciona os componentes; os exportadores híbrido/PDF usam esse mesmo conteúdo. Não se trata de copiar slides de uma bancada isolada para outro motor. A incorporação exige encerrar os acabamentos, conferir a rota completa, integrar o remoto autorizado e publicar; não reconstruir a feature nem repetir sua coleta.
+
+### Matriz de aderência às referências
+
+As referências e números são de4T2025; R1 é de1T2023–3T2026. Comparar estrutura, identidade e bases, nunca obrigar os valores atuais a repetir imagens antigas. Índices abaixo apontam para os arquivos/páginas da fonte, não são números estáveis de slides futuros.
+
+| Pedido/referência | Resultado atual | Tratativa para incorporar |
+|---|---|---|
+| E-mailFinoti: cidades separadas; image.png e image(2)/(4) | Curvas por cidade e variações próprias, sem somar curvas para esconder a cidade | Manter duas/três unidades explícitas e identidade consistente entre tela/PDF/PPT/CSV |
+| image(1)/(3)/image[53]:12meses | Curvas e comparativos12meses por unidade | Verificar vendas e VGL/VGV além do exemplo de empreendimentos doR1 |
+| Teresa: poucas cidades separadas; Lajeadop2 versus RMp2/7 | Consolidado ou2/3cidades/grupos; nomes/membros explícitos | Testar rota com uma cidade, dupla, três cidades, cidade versus grupo e região consolidada |
+| Comparativo semestral nas imagens | Comparativo de trimestre e acumulado equivalente da janela/fechamento, por unidade | Manter regra contextual: em3T o acumulado é9meses; não fixar semestre por causa da referência4T2025 |
+| image(5):estoque temporal | Fonte e seleção territorial implementadas como fotografia | Inspecionar esta família em extrato curto complementar; estoque não soma meses/anos |
+| image(6)/image[51]; Lajeadop50–52 | Tabela única com oferta e participação dentro de cada unidade | Confirmar padrão/coorte, além da tipologia já vista; zero observado preservado |
+| image(7)/image[67]; Lajeadop44/46/48 | Barras por território e médias próprias no texto | **Parcial visual:** acrescentar linhas de média por território, se observadas, com rótulo e mesma cor; preservar ponderação já conciliada |
+| image(8)/(9); Lajeadop53–56 | Matrizes/extremos específicos por unidade | Manter páginas próprias apenas nas famílias densas, sem multiplicar o estudo inteiro |
+| image(10)/image[27]:VGV por cidade | Quadros específicos por unidade, com fonte/cubo filtrados | Conferir as duas unidades, títulos e unidades monetárias no fluxo real |
+| Lajeadop62–67:horizontal separado; RMp63–66:regional | Famílias horizontais desdobradas no comparativo; consolidado preservado | Manter condomínio de casas dentro de horizontal; testar grupo com/sem produtos, sem página vazia |
+| Lajeadop15/20/26; RMp10/13/21:composição anual | Áreas100% contínuas consolidadas para empreendimentos/unidades/VGL | Conferir as três métricas, lacunas e ano único; janela anual explícita no subtítulo |
+| RMp25:composição de vendas | Não implementada | Fora desta entrega: percentuais100% de vendas líquidas podem ter negativos; exige contrato próprio, não copiar gráfico antigo |
+| Categorias históricas e faixas monetárias nas referências | Taxonomia autoritativa atual/histórica preservada | Não inferir MCMV pelo preço nem fundir padrões para imitar legenda antiga |
+| Comentários narrativos das referências | Não gerados automaticamente | Continuam acabamento do analista noPPT, assim como remover slide pouco relevante; não inventar interpretações |
+| RM mapas/maturidade/institucional | Consolidados, identidade territorial explícita e artes atuais | Manter23anos/sem documentário removido; não retornar às artes22anos dos exemplos |
+| Quadro anual doR2 sem comparações válidas | Aparece com cabeçalhos e apenas traços em parte das famílias | **Correção objetiva:** não renderizar esse quadro quando não houver comparação válida; não omitir zeros da série nem a página inteira |
+
+O limite de três unidades, barras laterais azuis por cidade e categorias canônicas são adaptações de automação/legibilidade acordadas com Gabriel, não cópia literal das imagens. Composições anuais, mapas e maturidade permanecem consolidados e identificados assim. Caso Finoti peça depois desdobrar também essas famílias, é ampliação de contrato; não presumir que toda página precisa virar comparação.
+
+### I0 — Congelar a candidata e a fronteira com a versão live
+
+**Estado: planejado.**
+
+1. RelerAGENTS, AGORA e esta seção; confirmar `main`, todos os remotos, `git fetch --all`, divergência e árvore. Baseline desta revisão:HEAD`3cee42b`, origin`219ed1c`,11commits locais/2remotosSP não integrados. Registrar a lista efetiva no início da execução, sem depender destes contadores históricos.
+2. Preservar edições paralelas dos documentosFIERGS, Estimativas, LIVE e insumos não rastreados, incluindo Corretor; não alterar códigoSP/Sinduscon/Corretor/Dashboard/Validação/ExcelAPI. Não rebase/reset, descarte ou stash amplo da árvore.
+3. Congelar hashes deR1/R2/CSV e os campos canônicos dos11replays já disponíveis. Usar a evidência JSON existente, sem novo relatório de diagnóstico paralelo. Registrar os commits da candidata e mudanças remotas; integração fica emI5, após autorização explícita.
+4. Conferir o que está efetivamente publicado pela identificação da versão/commit e pelo comportamento da rota autenticada. Se o ambiente não for acessível, registrar “não verificado em produção”; origin não prova versão noLovable. Não gerar estudo real por iniciativa do agente.
+5. Manter arquivos de insumo/saída em `.local-inputs/`, código/evidência pequena/plano noGit. Preservar stash de segurança da integração anterior até confirmar seu conteúdo reaplicado.
+
+**Saída/portão:** inventário candidato versus remotos/ambiente e insumos reproduzíveis; nenhuma integração ou publicação presumida. Este passo não refaz G1 nem exige API.
+
+### I1 — Fechar os acabamentos identificados na revisão
+
+**Estado: planejado; precisa de código focado.**
+
+1. **Médias visuais de preço:** em `TerritorialComparisonSlides.tsx`, usar as médias já fornecidas por `territorialPriceRows`. Inserir referência horizontal tracejada por unidade com nome/valor/unidade e cor da curva/barra. Com2/3linhas iguais/próximas, evitar rótulos sobrepostos (deslocar rótulos ou reunir nomes no mesmo nível); conservar resumo textual acessível. Média indisponível não vira zero/linha. Não recalcular por média simples das médias municipais. Garantir domínio do gráfico comportando referência válida; revisar ticket eR$/m² por padrão e tipologia e respectivas regras temporais aprovadas. Manter o mesmo gráfico em imagem noPPT híbrido.
+2. **Quadro anual sem comparação:** calcular primeiro os pares anuais realmente publicáveis, com `observedComparison` e cobertura compatível. Retirar colunas de anos sem comparação para nenhuma unidade; se não restar nenhuma célula comparável, retirar apenas o quadro anual e preservar o espaço/hierarquia do cabeçalho. Não retirar valor0observado da série, esconder negativo ou gerar percentual sobre base0/negativa. Registrar a não aplicabilidade no mecanismo existente de avisos/auditoria por tipo, sem notas noPDF/PPT.
+3. **Ano único na composição:** `annualCompositionPublishable` hoje aceita um único ano pronto. Área com um único ponto não representa uma faixa visível adequada. Para exatamente um ano publicável, usar uma única faixa horizontal100% por categoria, com ano/percentuais explícitos, preservando a informação e sem inventar um segundo ano. Para dois ou mais anos, manter área empilhada linear e lacunas. A ligação entre os pontos é visual: não representa observações intermediárias nem uma série mensal estimada. Se o espaço temporal tiver anos inválidos entre válidos, não conectar as áreas através deles nem normalizar ausência como0; testar DOM/SVG e exportação, não apenas o cálculo.
+4. **Identificação anual:** subtítulo das três composições deve explicitar a janela efetivamente analisada e o consolidado; o gráfico já marca o ano parcial. Ajustar `ReportPaginator`/`analyticContext` pela propriedade `annualCompositionMetric`, evitando depender só de regex em título. Exemplo desta bancada:consolidadoGramado+Canela,1T2023–3T2026; não identificar a série anual apenas como3T2026.
+5. **Densidade real:** conferir três unidades com seis comparativos válidos, nomes longos e rótulos próximos. O R2anterior não prova isso: vários comparativos foram corretamente omitidos por falta de atividade/cobertura. Corrigir apenas espaçamento/tamanho/alinhamento se houver sobreposição; não criar nova página automática nem redesenhar o template aprovado. Se uma página tiver só uma categoria, largura de barras legível, não barra gigante ocupando o quadro inteiro.
+6. Preservar título preto/verde, quadro anual superior, barras laterais, cores estáveis por unidade, destaque de trimestre equivalente e fonteGeobrain. Respeitar SystemDesign existente, sem tokens novos. Manter textos/tabelas editáveis, sem reativar gráficos nativos no produto.
+
+**Arquivos-alvo:** `components/TerritorialComparisonSlides.tsx`, `AnnualCompositionSlide.tsx`, `ReportPaginator.tsx`, `report/territorial-selectors.ts` somente se faltar metadado visual, `generation-notices.ts`, `editorial-contracts.ts` e `print/territorial-comparison.css`; testes focados existentes. Não modificar números do modelo para ajustar apresentação.
+
+**Aceite:** médias visuais identificadas, quadros anuais vazios ausentes com aviso rastreável, ano único visível, lacunas não ligadas, janela correta e seis painéis sem corte. CSV/campos canônicos idênticos ao congelado, salvo metadado de aviso explicitamente esperado. Commit isolado de acabamento com evidências.
+
+### I2 — Validar a integração da rota, do manifesto e das saídas
+
+**Estado: planejado; reutilizar a integração já existente.**
+
+1. Executar a rota real doPanorama com respostas locais/mocks: seleção inicialmente vazia, UF obrigatória, cidades monitoradas, carregamentoBrain e estados vazio/erro. Confirmar que os novos componentes não dependem doHTML de bancada.
+2. Preservar contrato atual de apresentação:uma cidade=municipal;2/3=sugestão de comparação individual com opção consolidado;maisde3=consolidado padrão, comparação somente após2/3grupos explícitos e válidos. Não criar limite de coleta3nem agrupamento geográfico automático. Município pertence a exatamente um grupo; nomes não definem membros.
+3. Identidade física da coleta separada da editorial. Renomear/reagrupar altera resultado/identidade do arquivo e recompõe sem rede; escopo/período/token diferentes não podem reutilizar resultado inadequado. Campos de grupo desabilitados durante coleta, resultado anterior invalidado ao editar. Verificar uma coleta e múltiplas recomposições, sem buscar novamente por slide.
+4. Percorrer `panoramaManifestFor` completo e a seleção usada por preview, auditoria e downloads. UsarIDs estáveis de família+unidade, nunca número fixo de página. Confirmar ordem de lançamentos/anuais/vendas/oferta/preços/horizontal/mapas, sumário contínuo, sem repetir páginas equivalentes ou deixar divisor órfão. A inserção das três composições consolidadas é intencional mesmo no modo consolidado quando houver dados publicáveis; não é regressão por aumentar3páginas. Se uma métrica não for publicável, explicar no aviso, sem espaço vazio.
+5. Consolidado regional mantém indicadores, universo horizontal e artes homologadas; comparação desdobra somente famílias previstas na matriz. Não replicar o estudo inteiro por unidade. Arquivo/capa/cidades/metodologia/avisos/CSV precisam refletir o recorte gerado e seus grupos, não o preset antigo.
+6. Checar FIERGS eSecovi, conformeD01, inclusive ausência deescopo.presentation em snapshots antigos. Sem migração de banco ou endpoint novo. Caso formatos locais persistidos existam, testar compatibilidade e invalidar apenas cache que comprovadamente perdeu contexto; não limpar sessão/dados sem necessidade.
+
+**Aceite:** teste offline da página real confirma editor→coleta única→recomposição→manifesto→export com o mesmo contexto; nenhuma dependência exclusiva da bancada. Corrigir lacunas reais em commit próprio, sem reescrever integração funcional.
+
+### I3 — Regressão proporcional e reconciliação final
+
+**Estado: planejado.**
+
+1. Testes focados de partição/cache/recomposição, projeções e selectors, comparativos, composição anual, avisos/manifesto e exportação híbrida. Cobrir:1/2/3unidades, município versus grupo com pesos diferentes, inválido/duplicado/semcidade,0/nulo/negativo, basepercentualnão positiva, fechamento incompleto, um ano, lacuna anual e três médias próximas.
+2. Reaproveitar os11replays locais e seus insumos, obrigatoriamenteFIERGS2T2026/4T2025 e a dupla exata1T2023–3T2026. Reexecutar uma vez após os acabamentos/integração que os afetarem; não coletar novamente para repetir uma regressão. Matriz cidade→grupo→consolidado:quantidades/valores compatíveis conservados, estoque por competência, preços/IVV ponderados ou recalculados corretamente. Ausência não é igualdade nem0. Divergência crítica nova/inexplicada interrompe o portão, sem afrouxar guardas nem fixar números.
+3. Comparar campos canônicos antes/depois e hashesCSV; novos avisos/metadados ou número de páginas terão diferença intencional descrita separadamente. Não comparar médias por soma de territórios. As referências4T2025 não substituem a baseline atual3T2026.
+4. `npx tsc --noEmit -p tsconfig.app.json`, lint nos arquivos tocados e build de produção; um build final após as alterações/integração relevante, sem repetir build longo a cada ajusteCSS. Registrar avisos já existentes separadamente de erro novo. Testes amplos repetidos apenas se houver falha/alteração que justifique.
+
+**Aceite:** nenhuma divergência numérica nova; testes proporcionais/tipos/build sem erro novo. Guardas e política de alertas mantidas. Registrar na evidência JSON existente testes efetivamente executados, contadores e limites; não reciclar resultado antigo como novo.
+
+### I4 — Prova visual curta e edição real
+
+**Estado: planejado.**
+
+1. ReutilizarR1exato; extrato complementar apenas para lacunas demonstradas:ticket eR$/m² com médias, estoque/IVV por cidade, vendas/VGL/VGV12meses, oferta por padrão/coorte, composição de empreendimentos/VGL e subtítulo anual. Não exportar todo o estudo real para verificar um detalhe. Selecionar o menor conjunto que cubra todos os componentes distintos.
+2. AmpliarR2sintético apenas com páginas de três unidades ativas/seis painéis, médias iguais/próximas, ano único e lacuna anual. Dados sintéticos ficam identificados nos insumos/evidência e jamais aparecem como estudo realLajeado. Não modificar snapshots reais para simular uma concordância com oFinoti.
+3. Conferir no navegador e nos arquivosPDF/PPT:hierarquia, nomes, cores, competência, sinais, textos, quadros, fonte e margens; verificar versão1920×1080doexportador e não apenas preview960px. Capturas de cada família e verificação de objetos fora noOffice.
+4. Abrir oPPT noPowerPoint, renderizar páginas alteradas, editar texto e célula em cópia, salvar/reabrir e confirmar persistência. Gráficos em imagem e tabelas em caixas editáveis permanecem contrato; não afirmar edição nativa de gráficos/fórmulas.
+5. AtualizarR1/R2 e hashes no mesmo diretório local/evidência JSON, sem proliferar documentos/ativosprodutivos. Só regenerarR2se alterado ou necessário; CSV confirma o mesmo cálculo. Documentar diferença intencional de manifestação/aviso.
+
+**Aceite:** artefatos curtos finais conferidos, nenhum corte/sobreposição nas famílias alteradas, edição real verificada e lacunas explicitadas. Parecer visual positivo local não é aceiteFinoti/Teresa.
+
+### I5 — Integração e publicação com autorização
+
+**Estado: aguardará autorização após I1–I4.**
+
+1. Apresentar o que está pronto, pendências, commits próprios e divergência atualizada. `4aed591` e`219ed1c` são SPparalelo; novos commits remotos podem ter chegado. Conferir cada remoto, preservar trabalhos locais, pedir autorização antes de sincronizar árvore suja; a autorização antiga refere-se ao merge`8d3eaec`, já realizado, não a qualquer futuro merge.
+2. Após autorização, integrar de forma não destrutiva, guardando/reaplicando somente os caminhos necessários. Resolver LIVE de forma somativa e conferir que as edições paralelas não foram incluídas indevidamente nos commits desta entrega. Não alterar regras/código deSP para acomodarPanorama. Em conflito funcional ou mudança de contrato, parar no ponto afetado e apresentar a decisão.
+3. Reexecutar somente checks afetados e o build final se a base mudou; `npm run check:live-docs -- <base> <head>`. Registrar evidência emLIVE/plano/diário. Stash de segurança só pode ser removido após comprovar restauração, não como limpeza automática.
+4. Apresentar SHAs finais a publicar e pedir autorização de push. Commit não comprova deploy. Push autorizado, conferir remoto/CI; Gabriel publica noLovable, ou autoriza ação equivalente específica. Identificar a versão publicada antes de chamar o comportamento de disponível.
+5. Reversão se houver regressão:novo commit que retorna a seleção/componente/manifesto afetado à baseline identificada, preservando correções numéricas anteriores e dados coletados. Não reset/rebase de histórico publicado, não desativar invariantes para contornar falha. Caso o código esteja publicado mas ainda não conferido, registrar exatamente esse estado.
+
+**Aceite:** SHA enviado e versão publicada identificados, sem alterações paralelas perdidas; ensaio de uso ainda separado emI6.
+
+### I6 — Ensaio publicado de Gabriel e retorno externo
+
+**Estado: pendente de publicação e geração humana; corresponde ao encerramento de G7.**
+
+1. Gabriel geraGramado+Canela1T2023–3T2026 no site; confirma ausência de cidades pré-selecionadas, modo comparativo, todos os membros/cores, subtítulos e composições; entregaPDF/PPT/CSV para a sessão conferir. Não validar3T2026com outro fechamento. Uma chamada atual pode trazer atualização legítima de base: registrar competência/hash e investigar diferença, sem tentar repetir números antigos manualmente.
+2. Gabriel valida um consolidado homologado2T2026ou4T2025 e, para a comparação regional, um recorte cidade versus grupo explicitamente escolhido. Secovi tem ao menos um ensaio representativo antes de anunciar suporte compartilhado em produção. Demais casos podem continuar cobertos offline; não exigir gerar todos os recortes enormes para cada edição visual.
+3. Renomear/reagrupar no mesmo recorte deve recompor sem repetir coleta; mudar recorte/período refaz somente o necessário. Exportações precisam corresponder ao resultado atual. Conferir avisos/consistência sem notas técnicas dentro do material e sem divergência nova silenciosa.
+4. Se o publicado divergir do local, registrar erro e evidência, corrigir/retestar a família afetada antes de anunciar a entrega; não antecipar “homologado”. Se ensaio for bloqueado por origem/cobertura, classificar a causa e não inventar valor/abrandar guarda.
+5. Preparar resposta curta paraTeresa/Finoti:agora é possível separar cidades e comparar grupos nomeados; ajustes gerais automatizados ePPTeditável para acabamentos. Não dizer que todos os gráficos são editáveis ou que toda análise está desdobrada. Envio somente porGabriel. Registrar aceite explícito desta ampliação quando recebido; o aceite anterior permanece histórico.
+
+**Aceite:** saídas autenticadas conferidas, versão e casos efetivamente testados registrados. Estado “verificado em produção” depende dessa evidência; “aceito externamente” depende do retorno humano. Nenhum horário/aceite presumido.
+
+### Ordem, commits e limites de execução
+
+ExecutarI0→I1→I2→I3→I4; consolidar correções e evidências antes da autorizaçãoI5. Integrar/publicar só após autorização e repetir apenas o necessário quando a base mudar. I6é acompanhado com as gerações humanas. Sugestão de commits isolados:acabamentos visuais/estados anuais; eventual ajuste de integração real; evidência/checkpointdepublicação. Não criar commit vazio para satisfazer portão. Atualizar esta seção com estado, SHA e evidência em vez de criar outro plano para o mesmo assunto.
+
+Fora do escopo:novo motor, novas coletas reais pelo agente, reclassificaçãoMCMV, composição anual de vendas, texto interpretativo automático, reformulação institucional, gráficos nativos doPPT, UI dos demais relatórios e eliminação de trabalho editorial do analista. Se surgir necessidade real fora disso, apresentar evidência e proposta antes de ampliar.
+
+### CTA — incorporar a candidata ao relatório live
+
+Execute os portões I0–I4 da seção “Incorporação ao relatório publicado” de `docs/features/Relatorios Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md`, preservando T01–T07, D01–D14 e as correções visuais `91e3194`/`3cee42b`. Reutilize a implementação já conectada ao gerador; feche médias visuais, quadros anuais sem comparação, composição de ano único, janela anual e densidade de três unidades. Preserve dados/guardas, PPT híbrido e trabalhos paralelos. Valide a rota real offline, regressões2T2026/4T2025 e a dupla exata1T2023–3T2026, com extratos curtos apenas para lacunas comprovadas, PDF/CSV e edição real noPowerPoint. Não faça coletas reais nem estudos completos por conta própria. Registre evidências e commits isolados, apresente divergência/commits e peça autorização antes de integrar árvore suja ou fazer push noI5. Gabriel fará as gerações publicadas doI6; não antecipe homologação externa.
