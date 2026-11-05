@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 05/11/2026 — personalização de equipe e consultoria
+
+Usuário pediu nomes/cargos/fotos alteráveis e, durante a tarefa, solicitou enviar primeiro o menu.219ed1c publicado; esta implementação segue separada. Editor local de5/15posições e retratos nativos noPPTX, sem persistir fotos fora da memória da página.301testesSP/34arquivos, tipos/build/lint, Edge e Office; vinte fotos verificadas, dois nomes e uma foto alterados/salvos/reabertos. SemAPIrealnova; publicação e ensaio do site pendentes. [Contrato](../../features/relatorios-institucionais/sp/PERSONALIZACAO_EQUIPE_2026-11-05.md).
+
 ## 05/11/2026 — textos editáveis nos slides institucionais5/7
 
 Base `eb931d5`, main/origin0/0 apósfetch. Usuário identificou junho em geração3T2026 e pediu edição de percentuais/cartões GeoBrain. CamadaSVG nativa usa competência conferida no7 e expõe seis cartões do5 ao exportador editável. Números editoriais preservados com referência explícita, sem inferência pela API municipal.296testesSP/33arquivos, tipos/build/lint, Edge e edição/salvamento/reabertura de três textos noOffice. SemAPIrealnova; publicação/ensaio autenticado pendentes. [Contrato](../../features/relatorios-institucionais/sp/TEXTOS_INSTITUCIONAIS_EDITAVEIS_2026-11-05.md).

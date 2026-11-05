@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — SP: personalização de equipe técnica e consultoria — usuário / Codex
+
+- **Entrega:** editor local para nomes, cargos, fotos, visibilidade e restauração das cinco posições do82 e quinze do83. Prévia e PPTX usam a mesma configuração; fotos ficam em memória, sem servidor/localStorage. Nova geração restaura a referência, conforme texto da interface.
+- **Exportação:** vinte retratos passam a imagens PowerPoint separadas da arte e textos a caixas nativas. Recorte normaliza inset físico/lógico; diagnóstico verifica pixels, não só quantidade de imagens. Guarda contra resposta tardia de upload e formulário montado somente quando aberto. GeoApiScopeEngine e cálculos intactos.
+- **Validação:**301testesSP/34arquivos, tipos/build/lint e Edge desktop/celular claro/escuro com fontes sintéticas. Office reconheceu20retratos; dois nomes e uma foto alterados, salvos/reabertos e renderizados com sucesso. [Uso, escopo e limites](../features/relatorios-institucionais/sp/PERSONALIZACAO_EQUIPE_2026-11-05.md).
+- **Etapas/Pendências:** implementação local pronta para publicação; conferência no site e homologação pertencem à equipe. Menu `219ed1c` foi enviado primeiro por pedido explícito, independentemente desta entrega posterior. Sem consulta autenticada nova ou escrita no Monday.
+- **Monday:** [Relatório SP Institucional](https://brain381753.monday.com/boards/18398428946/pulses/13452140276) — `13452140276`.
+
 ### 2026-11-05 — SP Institucional: acesso pela navegação de relatórios — usuário / Codex
 
 - **Mudança:** entrada ativa SP Institucional em Relatórios Automatizados, busca rápida e jornada de relatórios da página inicial, apontando para a rota lazy existente `/rebrain/relatorios-institucionais/sp`. Sem alterar autenticação, catálogo de municípios ou guardas da geração.
@@ -1024,6 +1032,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**05/11 — SP, equipe/consultoria:** cinco e quinze posições personalizáveis na prévia, com nomes/cargos e retratos separados no PPTX. Validado localmente com Edge/Office; publicar e conferir no site. Navegação do menu já publicada em219ed1c.
+
 **05/11 — SP, textos institucionais5/7:** competência do perfil acompanha a geração; títulos/percentuais e seis cartões GeoBrain exportam como caixas editáveis. Validados localmente com Edge/Office; fonte editorial continua identificada, publicação/ensaio real pendentes.
 
 **05/11 — SP, geração automática:** fluxo visual em oito etapas substitui os botões de coleta; cancelamento/retomada e insights do analista implementados e validados localmente. Publicação autorizada; teste autenticado e aceite permanecem distintos da implementação.
@@ -1107,6 +1117,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — ensaiar personalização no site:** atualizar responsáveis e fotos nos slides82/83, exportar e conferir a cópia. Configuração vale para a prévia atual, sem persistência entre gerações; padrões ainda vêm da referência2T2026. [Contrato](../features/relatorios-institucionais/sp/PERSONALIZACAO_EQUIPE_2026-11-05.md).
 
 - [ ] **SP — revisar números editoriais dos slides5/7:** atualizar percentuais e indicadores institucionais com fonte aprovada quando necessário. Textos agora editáveis no PPTX; a API municipal não fornece esses números. Data da geração é dinâmica e não significa atualização automática desses indicadores.
 

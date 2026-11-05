@@ -35,13 +35,20 @@ export async function buildSpEditablePptx(slides:HTMLElement[],quarter:string,si
     if([...original.querySelectorAll('img')].some(image=>!image.complete||!image.naturalWidth))throw new Error(`A arte do slide ${index+1} não foi carregada. Tente novamente.`);
     const clone=original.cloneNode(true) as HTMLElement;original.parentElement!.append(clone);
     try {
+      const frame=clone.getBoundingClientRect();
+      const photos:{data:string;x:number;y:number;w:number;h:number;name:string}[]=[];
+      for(const photo of clone.querySelectorAll<HTMLElement>('[data-sp-editable-photo]')){
+        check(signal);const r=photo.getBoundingClientRect();
+        if(!r.width||!r.height)continue;
+        photos.push({data:await toPng(photo,{fontEmbedCSS,pixelRatio:1,cacheBust:false,width:r.width,height:r.height,style:{position:'relative',inset:'0',insetInline:'0',insetBlock:'0',insetInlineStart:'0',insetInlineEnd:'auto',insetBlockStart:'0',insetBlockEnd:'auto',left:'0',top:'0',right:'auto',bottom:'auto',margin:'0',transform:'none'}}),x:(r.left-frame.left)*W/frame.width,y:(r.top-frame.top)*H/frame.height,w:r.width*W/frame.width,h:r.height*H/frame.height,name:photo.dataset.spEditablePhoto??''});
+      }
       const html=approvedLayoutText(clone),texts=[...html.texts,...spSvgTexts(clone)];
       html.parents.forEach(parent=>parent.style.setProperty('-webkit-text-fill-color','transparent','important'));
       clone.querySelectorAll<SVGTextElement>('svg text,svg tspan').forEach(text=>text.style.setProperty('fill','transparent','important'));
-      const image=await toPng(clone,{fontEmbedCSS,pixelRatio:1,cacheBust:false,width:1280,height:720,filter:node=>!(node instanceof SVGImageElement&&getComputedStyle(node).visibility==='hidden')});check(signal);
+      const image=await toPng(clone,{fontEmbedCSS,pixelRatio:1,cacheBust:false,width:1280,height:720,filter:node=>!(node instanceof Element&&node.hasAttribute('data-sp-editable-photo'))&&!(node instanceof SVGImageElement&&getComputedStyle(node).visibility==='hidden')});check(signal);
       const page=pptx.addSlide();page.addImage({data:image,x:0,y:0,w:W,h:H,objectName:`Arte e gráfico do slide ${index+1}`});
+      for(const photo of photos){const {name,...image}=photo;page.addImage({...image,objectName:`Foto editável: ${name}`});}
       for(const t of texts)page.addText(t.text,{x:t.x,y:t.y,w:t.w,h:t.h,fontSize:t.size,fontFace:t.face,color:t.color,bold:t.bold,italic:t.italic,margin:0,breakLine:false,valign:'middle',fit:'shrink',wrap:false,objectName:`Texto editável: ${t.text.slice(0,50)}`} as PptxGenJS.TextPropsOptions);
-      const frame=clone.getBoundingClientRect();
       for(const link of clone.querySelectorAll<HTMLElement>('[data-sp-target-slide]')){
         const target=Number(link.dataset.spTargetSlide),r=link.getBoundingClientRect();
         if(Number.isInteger(target)&&target>=1&&target<=85&&r.width&&r.height)page.addShape(pptx.ShapeType.rect,{x:(r.left-frame.left)*W/frame.width,y:(r.top-frame.top)*H/frame.height,w:r.width*W/frame.width,h:r.height*H/frame.height,line:{transparency:100},fill:{color:'FFFFFF',transparency:100},hyperlink:{slide:target,tooltip:`Ir ao slide ${target}`},objectName:`Navegação: slide ${target}`});
