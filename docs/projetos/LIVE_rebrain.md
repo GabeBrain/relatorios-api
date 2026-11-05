@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — Validação do Fechamento: Preço médio pela última posição no Resumo email — Edgar / Codex
+
+- **Mudança exclusiva:** Preço médio do Resumo email usa a última posição observada por empreendimento/tipologia dentro de cada intervalo, incluindo os acumulados. Depois de escolher a posição, mantém filtros Padrão, estoque diferente de zero e preço informado; ponderação permanece Σ(qty × price)/Σ(qty). Não busca um registro antigo elegível quando o último está esgotado ou sem preço. Preço/m², demais métricas, recortes temporais e abas Resumo/Resumo por cidade preservados.
+- **Evidência:** execução offline da base Teresina/PI Vertical (157 empreendimentos, 283 tipologias, 6.076 históricos): 3T/2026 Preço médio R$ 489.689,35; Preço/m² permanece R$ 7.725,30; unidades lançadas permanecem 1.368. Anual e acumulado jan–set/2026 também usam última posição no Preço médio, mantendo os respectivos cálculos originais de preço/m². Testes novos cobrem ponderação, históricos fora de ordem, tipologia sem posição no último mês comum, estoque zero e preço ausente na última posição, e preservação do cálculo das demais abas.
+- **Etapas/Pendências:** implementação local; sem nova consulta autenticada ou ensaio visual. Aceite e publicação pendentes. Nenhuma mudança nas demais questões identificadas na análise temporal.
+- **Monday:** —
+
 ### 2026-11-05 — Validação do Fechamento: unidades lançadas sem repetição no Resumo email — Edgar / Codex
 
 - **Mudança exclusiva:** nas três colunas de períodos do Resumo email, em visualização trimestral/anual, unidades lançadas passam a somar qty somente dos registros do mês de lançamento, evitando repetir a quantidade nos históricos posteriores do mesmo intervalo. A variação anual dessa linha acompanha os valores corrigidos. Mensal, acumulados, demais indicadores, filtros temporais, Resumo/Resumo por cidade e motor compartilhado `computeResumo` preservados.

@@ -16,6 +16,35 @@ function row(periodKey: string, sold: number, status = 'Ativo', releaseQty = 1):
 }
 
 describe('computeResumoEmail', () => {
+  it('preço médio usa última posição ponderada por qty; preço/m² e demais abas mantêm o intervalo inteiro', () => {
+    const august = { ...row('2026-08', 5), typology_id: 'a', qty: 1, price: 100000 };
+    const september = { ...august, period: '2026-09-01', periodKey: '2026-09', bucketMonth: 'set/26', price: 300000 };
+    const other = { ...august, typology_id: 'b', qty: 3 };
+    const data = [september, other, august]; // fora de ordem e tipologia b sem setembro
+    for (const granularity of ['quarter', 'year'] as const) {
+      const result = computeResumoEmail([september], data, granularity)!;
+      expect(result.displayPeriods.selected.preco_medio).toBe(150000);
+      expect(result.displayPeriods.selected.preco_m2).toBe(2800);
+      expect(result.selectedAccum.preco_medio).toBe(150000);
+      expect(result.selectedAccum.preco_m2).toBe(2800);
+      const original = computeResumo(data, data, granularity).buckets.find((b) => b.key === result.displayPeriods.selectedLabel)!.metrics;
+      expect(original.preco_medio).toBe(140000);
+      expect(original.preco_m2).toBe(result.displayPeriods.selected.preco_m2);
+    }
+    expect(computeResumoEmail([september], data, 'month')!.displayPeriods.selected.preco_medio).toBe(300000);
+  });
+
+  it('seleciona a última posição antes de excluir tipologia esgotada ou preço ausente', () => {
+    const august = { ...row('2026-08', 5), typology_id: 'a', price: 100000 };
+    for (const changes of [{ typology_stock: 0 }, { price: null }]) {
+      const september = { ...august, period: '2026-09-01', periodKey: '2026-09', bucketMonth: 'set/26', ...changes };
+      const result = computeResumoEmail([september], [august, september], 'quarter')!;
+      expect(result.displayPeriods.selected.preco_medio).toBeNull();
+      expect(result.selectedAccum.preco_medio).toBeNull();
+      expect(result.displayPeriods.selected.preco_m2).toBe(2000);
+    }
+  });
+
   it('não repete unidades lançadas nos históricos posteriores do trimestre/ano, sem alterar outros indicadores ou abas', () => {
     const release = row('2026-08', 10);
     release.qty = 800;
