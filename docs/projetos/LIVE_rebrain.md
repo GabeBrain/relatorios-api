@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — Validação do Fechamento: ajuda do Resumo email alinhada às regras vigentes — Edgar / Codex
+
+- **Mudança exclusiva:** textos dos oito indicadores e quatro colunas calculadas do Resumo email isolados em `resumo-email-help.ts`, sem alterar METRICS compartilhado ou a ajuda das outras abas. Dicas explicam lançamentos somente no mês de lançamento, Preço médio pela última posição ponderada, Preço/m² com todos os históricos elegíveis, estoques por última posição, oferta ativa com status cadastral atual, representatividade do fechamento e vendas por soma dos históricos disponíveis. Acumulados explicitam corte mensal; variações descrevem fórmula e tratamento de base zero, sem prometer corte mensal para os buckets trimestrais/anuais.
+- **Padrão/validação:** ajuste editorial reutiliza Help/Popover Brain existentes, sem mudança de layout ou cálculos. Nove testes de componente cobrem variações e abertura/conteúdo das dicas, foco e Escape. Sem ensaio visual desktop/mobile ou temas nesta sessão; equivalente headless executado. Estados de carregamento, vazio e erro não alterados.
+- **Etapas/Pendências:** textos implementados localmente; conferência visual e publicação pendentes. Nenhuma mudança de API ou em outros projetos.
+- **Monday:** —
+
 ### 2026-11-05 — Validação do Fechamento: Preço médio pela última posição no Resumo email — Edgar / Codex
 
 - **Mudança exclusiva:** Preço médio do Resumo email usa a última posição observada por empreendimento/tipologia dentro de cada intervalo, incluindo os acumulados. Depois de escolher a posição, mantém filtros Padrão, estoque diferente de zero e preço informado; ponderação permanece Σ(qty × price)/Σ(qty). Não busca um registro antigo elegível quando o último está esgotado ou sem preço. Preço/m², demais métricas, recortes temporais e abas Resumo/Resumo por cidade preservados.
