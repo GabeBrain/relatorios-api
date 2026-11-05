@@ -385,6 +385,18 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — SP: comparação dos 85 pares e correções de cálculo/exportação — usuário / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — relatório automatizado e PowerPoint de conferência.
+- **Origem:** usuário forneceu original e gerado2T2026, confirmou segmentos, pediu MD, excluiu erros manuais do original da fila e autorizou continuar correções. [Plano e inventário dos85slides](../features/relatorios-institucionais/sp/PLANO_CONTENCAO_COMPARACAO_2T2026_2026-11-05.md).
+- **Diagnóstico:**170renders inspecionados,1.021conferências numéricas em55posições; diferenças de extração não foram todas classificadas como defeitos. Original contém contradições de texto/série e totais não aditivos, mantidas somente como observações. Nenhuma nova consulta autenticada ou constante para copiar resultados antigos.
+- **Mudanças:** cenário69restrito aoStandard e destaque de três padrões; capacidade76–78restrita aos empreendimentos emoferta, incluindo tipologias esgotadas desses projetos, com universo explícito na auditoria. Mapas com quatro segmentos e densidade relativa porVGV. PPTXpreserva trimestres/espaços e18links; slide2usa arte original e período dinâmico. VGVpor tipologia e guardas monetárias mantidos, fonte original preservada.
+- **Validação:**300testes/30arquivos, tipos/lint/build, Edge e Office aprovados.85slides,18links,17rótulos trimestrais nos46/50; edição salva/reaberta e auditoria exata. Nove páginas renderizadas,46/69/79inspecionadas. Ensaios sintéticos/replay, semAPIrealnova. BrainLoadingState e componentes existentes reutilizados; estados lento/cancelamento/retry/erro/vazio e sucesso cobertos.
+- **Arquivos:** móduloSPde mercado/mapas/apresentação/exportação, diagnóstico e testes; arte2com proveniência; plano/evidências/handoff.
+- **Commits:** `785cae6` — correções SP; documentação neste fechamento.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`, referência sem escrita.
+- **Impacto em Etapas/Pendências:** correções locais prontas para publicação; nova geração real e verificação prática pendentes. Fontes ausentes, ponderação do original, IDs de contagem e base antigaINCC não foram inferidos. Secovi/FIERGS e demais motores preservados.
+
 ### 2026-11-05 — SP: compatibilidade do PowerPoint real — usuário / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — exportação editável de conferência.

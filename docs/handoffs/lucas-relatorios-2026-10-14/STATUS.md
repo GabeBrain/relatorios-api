@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 05/11/2026 — comparação completa e contenção executada localmente
+
+Base81ad236/main/origin0/0 apósfetch; CodexTest/Windows. Usuário forneceu original e gerado, confirmou segmentos, pediu MD, descartou erros manuais da fila e autorizou correções.170renders/85pares inspecionados;1.021comparações em55slides, sem presumir causa de deltas. [Plano, andamento e inventário](../../features/relatorios-institucionais/sp/PLANO_CONTENCAO_COMPARACAO_2T2026_2026-11-05.md). Implementados denominadorStandard/destaque69, universo comum de empreendimentos emoferta76–78, mapas4segmentos/calorVGV, eixos/navegaçãoPPTX, slide2dinâmico e acabamento.300testes/30arquivos, tipos/lint/build/Edge/Office aprovados; novoPPTX85slides/18links, edição salva/reaberta e auditoria preservada. SemAPIrealnova; pesos/fontes históricas/IDs/baseINCC original continuam observações a reconciliar, não valores a copiar. Publicação/nova geração real pendentes; nenhumMondayalterado.
+
 ## 05/11/2026 — compatibilidade do PPTX real
 
 Usuário relata crash ao abrir a exportação 2T2026. Main626f86b/origin0/0 após fetch, Codex Test/Windows. Arquivo real íntegro contém326.127caracteres em uma sequência de notas, contra67.588no sintético anterior. Auditoria movida a Custom XML; comparador lê namespace também após Office salvar/renomear. Cópia real reparada preserva slides/imagens byte a byte e auditoria exata; abriu85slides em0,7s, salvou/reabriu e manteve auditoria.293testes/29arquivos, tipos/lint aprovados; publicação/reteste habitual pendentes. [Diagnóstico e limites](../../features/relatorios-institucionais/sp/CORRECAO_ABERTURA_PPTX_2026-11-05.md). Sem API nova, alteração numérica ou homologaçao presumida.
