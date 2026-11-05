@@ -522,13 +522,31 @@ export function computeResumo(rows: ClosureRow[], allRowsUnfiltered: ClosureRow[
   return { buckets, yearAgo, prevBucket };
 }
 
+/** Exclusivo do Resumo email: seleciona a última posição antes dos filtros de preço. */
+function emailLatestAveragePrice(rows: ClosureRow[]): number | null {
+  const latest = new Map<string, ClosureRow>();
+  for (const row of rows) {
+    const key = JSON.stringify([row.building_id, row.typology_id]);
+    const previous = latest.get(key);
+    if (!previous || row.period > previous.period) latest.set(key, row);
+  }
+  let totalPrice = 0;
+  let totalQty = 0;
+  for (const row of latest.values()) {
+    if (row.type_of_typology !== 'Padrão' || row.typology_stock === 0 || row.price == null) continue;
+    totalPrice += row.qty * row.price;
+    totalQty += row.qty;
+  }
+  return totalQty > 0 ? totalPrice / totalQty : null;
+}
+
 function metricsForRows(rows: ClosureRow[], dimensionRows: ClosureRow[], maxPeriodKey: string): Record<MetricKey, number | null> {
   const agg = newAgg();
   for (const row of rows) {
     const bucketKey = bucketKeyOfRow(row, 'month');
     accumulate(agg, row, bucketKey, releaseBucketKeyOfRow(row, 'month'));
   }
-  return metricsWithOfertaAtiva(agg, dimensionRows, maxPeriodKey);
+  return { ...metricsWithOfertaAtiva(agg, dimensionRows, maxPeriodKey), preco_medio: emailLatestAveragePrice(rows) };
 }
 
 function shiftMonth(periodKey: string, months: number): string {
@@ -561,7 +579,23 @@ export function computeResumoEmail(selectedRows: ClosureRow[], dimensionRows: Cl
   const displayPriorYearKey = bucketOfStr(previousYearKey, granularity);
   const displayPriorKey = bucketOfStr(shiftMonth(selectedKey, granularity === 'year' ? -12 : granularity === 'quarter' ? -3 : -1), granularity);
   const grouped = granularity === 'month' ? null : computeResumo(dimensionRows, dimensionRows, granularity);
-  const groupedMetrics = (key: string) => grouped?.buckets.find((bucket) => bucket.key === key)?.metrics ?? metricsWithOfertaAtiva(undefined, dimensionRows, '');
+  // Exclusivo do Resumo email: qty entra no trimestre/ano somente no mês de
+  // lançamento, como já ocorre na visão mensal e nos acumulados. Não repetir
+  // a mesma quantidade nos históricos posteriores do intervalo.
+  const launchesByBucket = new Map<string, number>();
+  if (granularity !== 'month') {
+    for (const row of dimensionRows) {
+      if (!row.periodKey || row.periodKey !== row.release_period_key) continue;
+      const key = bucketKeyOfRow(row, granularity);
+      launchesByBucket.set(key, (launchesByBucket.get(key) ?? 0) + row.qty);
+    }
+  }
+  const groupedMetrics = (key: string) => {
+    const metrics = grouped?.buckets.find((bucket) => bucket.key === key)?.metrics;
+    return metrics
+      ? { ...metrics, unidades_lancadas: launchesByBucket.get(key) ?? 0, preco_medio: emailLatestAveragePrice(dimensionRows.filter((row) => bucketKeyOfRow(row, granularity) === key)) }
+      : metricsWithOfertaAtiva(undefined, dimensionRows, '');
+  };
 
   return {
     displayPeriods: {

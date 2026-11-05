@@ -76,6 +76,7 @@ try {
         if (detailsCase === 'missing-area') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).private_area = null;
         if (detailsCase === 'capacity-diagnostic') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).sold = -9;
         if (detailsCase === 'signed-stock') rows[0].typologies_history.find(row => row.period === '2026-06-01').typology_stock = -1;
+        if (detailsCase === 'missing-price-sold-out') rows.filter(building=>building.building_id>=100).flatMap(building=>building.typologies_history).find(row=>row.period===`2026-${closing}-01`&&row.qty>0&&row.typology_stock===0).price=null;
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
       }
       calls++;
@@ -98,7 +99,7 @@ try {
           if (month > `2026-${closing}`) continue;
           for (const [i, group] of recorded.groups.entries()) all.push({ period: `${month}-01`, group, building_type: 'Vertical', [field]: months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m), ...(metric === 'releases' ? { vgv_release: (months[month]?.[i] ?? (metric === 'stock' ? 1000 + i * 50 : 100 + i * 5 + m)) * 100000.25 } : metric === 'sales' ? { vgv_liquid_sales: (months[month]?.[i] ?? 100 + i * 5 + m) * 100000.25 } : {}) });
         }
-        if(detailsCase==='signed-stock'&&metric==='stock')for(const row of all)if(row.period==='2026-06-01'&&row.group===recorded.groups[0])row.stock-=Math.floor(row.stock*.1)+1;
+        if(detailsCase==='signed-stock'&&metric==='stock')for(const row of all)if(row.period==='2026-06-01'&&row.group===recorded.groups[0])row.stock-=Math.floor(row.stock*.1);
         const filtered=all.filter(row=>row.period>=url.searchParams.get('start_period')&&row.period<=url.searchParams.get('end_period'));
         const p = Number(url.searchParams.get('page')), last = Math.max(1,Math.ceil(filtered.length / 100));
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: filtered.slice((p - 1) * 100, p * 100), meta: { current_page: p, last_page: last, total: filtered.length }, links: { next: p < last ? `?page=${p + 1}` : null } }) });
@@ -158,7 +159,7 @@ try {
       await page.getByText(/Cobertura conferida:/).waitFor();
       assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 0);
       await openSlide(13);
-      assert.match(await page.getByRole('article').innerText(), /Reconstitui\u00e7\u00e3o do cadastro atual/);
+      assert.match(await page.getByRole('article').innerText(), /EMPREENDIMENTOS VERTICAIS LAN\u00c7ADOS/);
       assert.match(await page.getByRole('article').innerText(), new RegExp(`Lan\u00e7amentos no trimestre selecionado\\s+${Number(month) - 6}`));
       await captureSlide({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-${month}-projects.png`) });
       await page.getByText('Séries de unidades lançadas conferidas desde janeiro de 2021. Cinco páginas históricas disponíveis.', { exact: true }).waitFor();
@@ -180,7 +181,7 @@ try {
           await checklist.getByRole('button',{name:'Baixar checklist da confer\u00eancia'}).click();
           const download=await downloadPromise;
           const snapshot=JSON.parse(await readFile(await download.path(),'utf8'));
-          assert.equal(snapshot.slides.length,85);assert.equal(snapshot.exportAvailable,false);
+          assert.equal(snapshot.slides.length,85);assert.equal(snapshot.exportAvailable,true);assert.equal(snapshot.numericAudit.schema,'sp-numeric-audit-v1');
           assert.doesNotMatch(JSON.stringify(snapshot),/synthetic-only|typologies_history|latitude/);
           await checklist.getByText('Ver situa\u00e7\u00e3o e pend\u00eancias por slide',{exact:true}).click();
           await checklist.getByRole('combobox',{name:'Mostrar slides'}).click();
@@ -341,6 +342,13 @@ try {
   await openSlide(51);await page.getByText(/Históricos de áreas e preços processados/).waitFor();
   assert.doesNotMatch(await page.getByRole('article').innerText(),/Áreas e preços em conferência/);
   await captureSlide({path:resolve(output,'source-treatment-51-signed-stock.png')});
+  detailsCase='missing-price-sold-out';
+  await page.getByRole('button',{name:'Conferir dados reais',exact:true}).click();
+  await page.getByText(/Oferta histórica conferida desde janeiro/).waitFor();
+  await openSlide(78);await page.getByText(/Históricos de áreas e preços processados/).waitFor();
+  assert.doesNotMatch(await page.getByRole('article').innerText(),/Dados em conferência/);
+  assert.match(await page.getByRole('article').innerText(),/preço incompleto/);
+  await captureSlide({path:resolve(output,'source-treatment-78-partial-price.png')});
   detailsCase = 'normal';
   negativeSales = true;
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -381,6 +389,24 @@ try {
   slowMapbox=false;mapboxFailure=true;await cdp.send('Network.clearBrowserCache');
   await openSlide(68);await page.getByRole('article').getByText('Base cartogr\u00e1fica parcialmente indispon\u00edvel.',{exact:true}).waitFor();
   await captureSlide({path:resolve(output,'map-provider-error.png')});mapboxFailure=false;
+  if(process.env.SP_DIAGNOSTIC_EXPORT==='1'){
+    for(const slide of [9,10,11,12,13,31,45,49,52,60,65,81]){
+      await openSlide(slide);await captureSlide({path:resolve(output,`review-final-${slide}.png`)});
+    }
+    const before={calls,granularCalls,neighborhoodCalls};
+    await page.getByRole('button',{name:'Baixar PPTX editável',exact:true}).click();
+    await page.getByRole('button',{name:'Cancelar exportação',exact:true}).click();
+    await page.getByText('Exportação cancelada.',{exact:true}).waitFor();
+    const downloadPromise=page.waitForEvent('download',{timeout:240000});
+    await page.getByRole('button',{name:'Baixar PPTX editável',exact:true}).click();
+    await page.getByRole('button',{name:'Cancelar exportação',exact:true}).waitFor();
+    await page.getByRole('region',{name:'Exportação PowerPoint'}).screenshot({path:resolve(output,'pptx-loading.png')});
+    const download=await downloadPromise;
+    await download.saveAs(resolve(output,'sp-editable-synthetic.pptx'));
+    await page.getByText('PPTX gerado com 85 slides. Download iniciado.',{exact:true}).waitFor();
+    assert.deepEqual({calls,granularCalls,neighborhoodCalls},before);
+    console.log(JSON.stringify({editablePptx:true,pages:85,noAdditionalBusinessCalls:true}));
+  }
   granularFailure = true;
   await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
   await page.getByText('Contagem de empreendimentos indisponível', { exact: true }).waitFor();

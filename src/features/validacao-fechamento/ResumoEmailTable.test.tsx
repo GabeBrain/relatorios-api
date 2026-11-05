@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { bucketMonthFromStr, bucketQuarterFromStr, computeResumoEmail, type ClosureRow, type Granularity } from './aggregate';
 import { ResumoEmailTable } from './ResumoEmailTable';
@@ -18,6 +18,27 @@ function row(periodKey: string, sold: number): ClosureRow {
 }
 
 describe('variação anual do Resumo email', () => {
+  it.each([
+    ['Unidades lançadas', 'sem repetir a quantidade nos históricos posteriores'],
+    ['Preço médio', 'Usa a última posição por empreendimento/tipologia'],
+    ['Preço M²', 'Mantém todos os registros históricos elegíveis do intervalo'],
+    ['Acumulado do ano atual', 'O corte permanece mensal em qualquer Visualização'],
+    ['Variação anual', 'sem o corte mensal dos acumulados'],
+    ['Variação acumulada', 'Se a base anterior for zero e o atual positivo, exibe 100%'],
+  ])('a ajuda de %s descreve a regra vigente', async (label, text) => {
+    const data = [row('2026-08', 80)];
+    render(<ResumoEmailTable resumo={computeResumoEmail(data, data, 'quarter')} />);
+    const trigger = screen.getByRole('button', { name: `Regra de cálculo — ${label}` });
+    trigger.focus();
+    expect(trigger).toHaveFocus();
+    fireEvent.click(trigger);
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog.textContent).toContain(text);
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
   it.each<[Granularity, string, string]>([
     ['month', 'Var. ago/25 x ago/26', '100%'],
     ['quarter', 'Var. 03T/25 x 03T/26', '114,3%'],

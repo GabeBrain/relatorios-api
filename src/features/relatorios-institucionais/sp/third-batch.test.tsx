@@ -65,7 +65,7 @@ describe('SP — terceiro lote original39–44/46–48/50', () => {
     expect(result.status).toBe('ready'); expect(result.breakdown!.annual!.at(-1)!.segments.some(row => row.value < 0)).toBe(true);
     for (const number of [40,41,42,43,44]) {
       const html = renderToStaticMarkup(<SpTrendSlide report={{ ...report, vgvSeries: result }} number={number} />);
-      expect(html).toContain('VGV VENDIDO'); expect(html).toContain('Base única: 2026-08'); expect(html).not.toContain('Dados em conferência');
+      expect(html).toContain('VGV VENDIDO'); expect(html).toContain('INCC-DI para 2026-08'); expect(html).not.toContain('Dados em conferência');
     }
     const annual = renderToStaticMarkup(<SpTrendSlide report={{ ...report, vgvSeries: result }} number={44} />);
     expect(annual).toContain('negativas preservadas'); expect(annual).not.toContain('1.000.000.000.000');

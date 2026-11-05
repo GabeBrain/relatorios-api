@@ -6,7 +6,21 @@ import { compareSpGroups, type SpGroupComparison } from './comparisons';
 import { quarterMonths } from './temporal';
 import type { SpTemporalRow } from './temporal';
 
-export interface SpLaunchSeries { status: 'ready' | 'blocked'; issues: string[]; trends?: SpProjectTrends; breakdown?: SpTrendBreakdown; comparison?: SpGroupComparison }
+export interface SpFlowMonth { month:string; total:number; mcmv:number }
+export interface SpLaunchSeries { status: 'ready' | 'blocked'; issues: string[]; trends?: SpProjectTrends; breakdown?: SpTrendBreakdown; comparison?: SpGroupComparison; monthly?:SpFlowMonth[] }
+/** Explicit, complete monthly window for highlight text and its downloadable audit. */
+export function spFlowWindow(series:SpLaunchSeries|undefined,start:string,end:string) {
+  if(series?.status!=='ready'||!series.monthly||start>end)return null;
+  const months:SpFlowMonth[]=[];
+  for(let month=start;month<=end;month=shiftSpMonth(month,1)){
+    const matches=series.monthly.filter(row=>row.month===month);
+    if(matches.length!==1||![matches[0].total,matches[0].mcmv].every(Number.isSafeInteger))return null;
+    months.push(matches[0]);
+  }
+  const total=months.reduce((sum,row)=>sum+row.total,0),mcmv=months.reduce((sum,row)=>sum+row.mcmv,0),others=total-mcmv;
+  if(![total,mcmv,others].every(Number.isSafeInteger))return null;
+  return {start,end,total,mcmv,others,share:total>0&&mcmv>=0&&others>=0?mcmv/total*100:null,months};
+}
 export const blockedSpLaunchSeries = (message: string): SpLaunchSeries => ({ status: 'blocked', issues: [message] });
 export function buildSpLaunchSeries(rows: SpTemporalRow[], report: SpPreview): SpLaunchSeries {
   return buildSpFlowSeries(rows, report, 'launches');
@@ -36,5 +50,5 @@ function buildSpFlowSeries(rows: SpTemporalRow[], report: SpPreview, metric: 'la
   const beforeQuarter = `${report.quarter.slice(0, 2)}${Number(report.quarter.slice(2)) - 1}` as SpPreview['quarter'];
   const previousMonths = new Set(quarterMonths(beforeQuarter).slice(0, currentMonths.size));
   const segments = (window: Set<string>) => ['Compactos', 'MCMV', 'Médio Padrão', 'Luxo'].map(group => ({ group, value: parsed.filter(row => window.has(row.month) && spTrendSegment(row.group) === group).reduce((sum, row) => sum + row.value, 0) }));
-  return { status: 'ready', issues: [], trends: buildSpProjectTrends(monthly, report.quarter, report.throughMonth), breakdown: buildSpTrendBreakdown(parsed, report.quarter, report.throughMonth), comparison: compareSpGroups(segments(currentMonths), segments(previousMonths)) };
+  return { status: 'ready', issues: [], monthly:months.map(month=>({month,total:monthly.get(month)!,mcmv:parsed.filter(row=>row.month===month&&spTrendSegment(row.group)==='MCMV').reduce((sum,row)=>sum+row.value,0)})), trends: buildSpProjectTrends(monthly, report.quarter, report.throughMonth), breakdown: buildSpTrendBreakdown(parsed, report.quarter, report.throughMonth), comparison: compareSpGroups(segments(currentMonths), segments(previousMonths)) };
 }

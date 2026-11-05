@@ -16,7 +16,7 @@ export function SpStockMapSlide({report,slide,token=import.meta.env.VITE_MAPBOX_
   const done=(key:string,error=false)=>{setFinished(prev=>new Set([...prev,key]));if(error){setFailed(true);setFailedTiles(prev=>new Set([...prev,key]));}};
   const titles={stock:'ESTOQUE',standard:'PADRÃO',meter:'R$/m²',vgv:'VGV DA OFERTA FINAL'};
   const labels=mode==='standard'?map.standards:map.limits.map((limit,i)=>limit===Infinity?i===0?'Sem escala disponível':`Acima de ${compact(map.limits[i-1])}`:i===0?`Até ${compact(limit)}`:`>${compact(map.limits[i-1])} a ${compact(limit)}`);
-  return <div className="absolute inset-0" aria-label={`Mapa ${titles[mode]} · ${close?'aproximação':'visão ampla'}`}>
+  return <div className="absolute inset-0" data-sp-map-loading={loading?'true':'false'} aria-label={`Mapa ${titles[mode]} · ${close?'aproximação':'visão ampla'}`}>
     <svg role="img" aria-label={`Mapa atualizado ${slide}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
       <rect width="1280" height="720" fill="#f8f8f8"/><rect x="1069" width="211" height="55" fill="#5b7638"/><text x="1175" y="34" fill="white" textAnchor="middle" fontSize="18" fontWeight="bold">SÃO PAULO</text>
       <text x="40" y="55" fontSize="28" fontWeight="bold">LOCALIZAÇÃO DOS EMPREENDIMENTOS · {titles[mode]}</text><rect x="40" y="77" width="90" height="9" rx="5" fill="#ffcf00"/><text x="40" y="120" fontSize="17">{report.quarter} · {spPeriodLabel(report)} · {close?'Aproximação central':'Visão ampla'}</text>

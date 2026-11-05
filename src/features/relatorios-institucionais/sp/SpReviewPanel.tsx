@@ -19,7 +19,7 @@ export function SpReviewPanel({report,slides,onOpen}:{report:SpPreview;slides:Sp
     <h3 className="font-semibold">Conferência para testes práticos</h3>
     <p className="text-sm text-muted-foreground">85 posições implementadas. Disponível significa que a fonte necessária foi conferida nesta geração; a aprovação dos números e da metodologia será feita nos testes práticos.</p>
     <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm" aria-label="Resumo da disponibilidade">{Object.entries(SP_SLIDE_STATE_LABELS).map(([state,label])=><li key={state}><strong>{counts[state]}</strong> {label}</li>)}</ul>
-    <p className="text-sm text-muted-foreground">{report.source==='fixture'?'Este checklist usa dados fictícios e não comprova cobertura real. ':''}{report.status==='partial'?'O trimestre está parcial; os slides usam somente os meses disponíveis. ':''}Páginas institucionais conservam a edição identificada. Exportação integral e revisão do analista continuam pendentes.</p>
+    <p className="text-sm text-muted-foreground">{report.source==='fixture'?'Este checklist usa dados fictícios e não comprova cobertura real. ':''}{report.status==='partial'?'O trimestre está parcial; os slides usam somente os meses disponíveis. ':''}Páginas institucionais conservam a edição identificada. PowerPoint disponível para conferência; revisão do analista pendente.</p>
     <details onToggle={event=>setExpanded(event.currentTarget.open)}>
       <summary className="cursor-pointer text-sm font-medium">Ver situação e pendências por slide</summary>
       {expanded && <div className="mt-3 space-y-3">
@@ -28,6 +28,6 @@ export function SpReviewPanel({report,slides,onOpen}:{report:SpPreview;slides:Sp
       </div>}
     </details>
     <Button variant="outline" onClick={download}>Baixar checklist da conferência</Button>
-    <p className="text-xs text-muted-foreground">O checklist registra trimestre, mês e situação dos slides. Não inclui token nem históricos individuais e não substitui o relatório.</p>
+    <p className="text-xs text-muted-foreground">O checklist registra trimestre, mês, situação e dados agregados dos slides. Não inclui token nem históricos individuais e não substitui o relatório.</p>
   </section>;
 }

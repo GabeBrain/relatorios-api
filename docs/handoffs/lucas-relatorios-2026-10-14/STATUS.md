@@ -1,5 +1,29 @@
 # Estado do handoff
 
+## 05/11/2026 — compatibilidade do PPTX real
+
+Usuário relata crash ao abrir a exportação 2T2026. Main626f86b/origin0/0 após fetch, Codex Test/Windows. Arquivo real íntegro contém326.127caracteres em uma sequência de notas, contra67.588no sintético anterior. Auditoria movida a Custom XML; comparador lê namespace também após Office salvar/renomear. Cópia real reparada preserva slides/imagens byte a byte e auditoria exata; abriu85slides em0,7s, salvou/reabriu e manteve auditoria.293testes/29arquivos, tipos/lint aprovados; publicação/reteste habitual pendentes. [Diagnóstico e limites](../../features/relatorios-institucionais/sp/CORRECAO_ABERTURA_PPTX_2026-11-05.md). Sem API nova, alteração numérica ou homologaçao presumida.
+
+## 05/11/2026 — revisão dos destaques e exportação solicitada
+
+Rodada final292testes/28arquivos, tipos/lint/build e Edge completo/exportação aprovados. Arquivo final85slides/2.354textos nativos/24.565.707bytes aberto noOffice;7páginas renderizadas. Comparador extrai auditoria doPPTX. Publicação autorizada em fechamento, sem resolver por dedução diferenças reais de base.
+
+Usuário autorizou publicar otimização da coleta e correções juntos, pediu coerência numérica/original×JSON, divisórias e PPTX editável. Implementados acumulado anual no9, separação de métricas no10, limpeza editorial9–11, comparativos destacados e nove artes originais. PPTX85posições preserva geração/fonte/pendências, sem coleta nova; textos/células nativos, mapas/gráficos/arte emimagem. Auditoria agregada nas notas e comparador offline.289 testes/27arquivos e navegador/Office aprovados na primeira validação; título/valor editados e persistidos em cópia. [Contrato e divergências reais não resolvidas](../../features/relatorios-institucionais/sp/REVISAO_DESTAQUES_EXPORTACAO_2026-11-05.md). Arquivo da geração real necessário para reconciliação, sem inventar causa da diferença. Origem13ago contém texto127.778×gráfico127.788. Sem homologação, nova API ou escrita noMonday. Publicação conjunta autorizada; preservar092996e/b8eb808 e motores paralelos.
+
+## 05/11/2026 — eficiência da conferência detalhada SP
+
+Fechamento local: tipos/build exit0, lint e Edge dirigido aprovados; captura do carregamento inspecionada, zero erros de página e zero chamadas de negócio reais. Estado pronto para publicação/reteste, sem deploy observado.
+
+Codex/Codex Test/Windows, main limpa após fetch e fast-forward de três commits até5e883a8; origin único. Usuário relata7–10min em53páginas. Substituída barreira por lote por fila contínua com três trabalhadores, preservando fonte, escopo, cobertura/IDs, retries/Retry-After e cancelamento.278 testes/25arquivos e lint dirigido aprovados; simulação53páginas/5.229IDs:9min01s para3min15s, não medição de produção. [Contrato e limites](../../features/relatorios-institucionais/sp/PERFORMANCE_COLETA_2026-11-05.md). Sem API real; demais motores e automação geral adiada preservados. Reteste autenticado do tempo e homologação continuam necessários.
+
+## 04/11/2026 — integração confirmada pelo usuário
+
+Merge7e699fc integra14commits de origin907d4aa com951c79d/851776e, sem conflito ou reescrita. SP preservado byte a byte; novas linhas do LIVE dos dois lados comprovadamente mantidas.274 testes SP/25arquivos aprovados na base combinada com dois workers, após uma primeira execução ter timeout em um render sob concorrência com build. Não se alterou limite/assertiva/código para aprovar. Integração concluída, superando o bloqueio da entrada anterior; reteste autenticado/fonte/editorial e homologação continuam pendentes.
+
+## 04/11/2026 — retomada das correções do checklist (4)
+
+Codex/Codex Test/Windows, main92eeef0, origin único. Correções locais anteriores preservadas. Fetch04/11 encontrou14 commits novos do Panorama; não aplicado pull em árvore suja, confirmação solicitada. SP51 e53–59 passam a admitir projeção de oferta não negativa exclusivamente com controle municipal exato. SP78 preserva contagens quando falta preço, indisponibiliza valores monetários dependentes/totais e fica parcial. Fonte original preservada.274 testes/25arquivos, tipos/lint/build e Edge dirigido aprovados antes dessa integração; duas capturas inspecionadas, sem API autenticada. Documentação e entrega em fechamento; reteste real, fotografia jun2023/64094, editorial e homologação continuam pendentes. Sem alterar automação geral adiada ou motores paralelos.
+
 ## 03/11/2026 — correção no consumidor após solicitação explícita
 
 Main limpa79d8383, origin único0/0 após fetch; Codex/Codex Test/Windows. Usuário pediu correção, não somente encaminhamento. [Política implementada](../../features/relatorios-institucionais/sp/TRATAMENTO_FONTE_2026-11-03.md): estoque negativo assinado no controle/área, preço de oferta positiva; amostras históricas parciais identificadas e sem variações; vendido/VGV calculados de capacidade−oferta válidas, sold original auditado sem alteração de fluxo mensal.271testes, tipos/lint/build e Edge dirigido aprovados, três capturas inspecionadas; fonte simulada/prova mínima real, sem API de negócio nova. Reteste autenticado e homologação pendentes; origem não foi alterada. Logs anteriores de bloqueio substituídos por decisão posterior explícita; automação e motores paralelos preservados.

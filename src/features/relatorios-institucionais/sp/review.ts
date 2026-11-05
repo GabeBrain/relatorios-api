@@ -5,6 +5,11 @@ import { resolveSpTypologyComparison } from './typology-history';
 import { spQuarterlyIvv } from './stock-series';
 import { spMarketSlideIssue } from './market-details';
 import { SP_DETAIL_SLIDES } from './granular-details';
+import { spFlowWindow, type SpLaunchSeries } from './launch-series';
+import { shiftSpMonth } from './project-trends';
+import { quarterMonths } from './temporal';
+import { SP_SEGMENT_RULE } from './segments';
+import { spNumericAudit } from './numeric-audit';
 
 export type SpSlideState = 'available' | 'partial' | 'pending' | 'blocked' | 'reference';
 export interface SpSlideReview { number: number; title: string; state: SpSlideState; reason: string }
@@ -45,6 +50,7 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
       const state=source(data,'as séries de lançamentos/vendas');
       if(state.state!=='available')return state;
       if(number!==11){const group=source(data!.breakdown,'o recorte MCMV');if(group.state!=='available')return group;if(!data!.breakdown?.mcmv)return pending('Recorte MCMV ainda não disponível.');}
+      if(number===9&&!spFlowWindow(data,`${report.throughMonth?.slice(0,4)}-01`,report.throughMonth!))return pending('Confira os meses de janeiro até o fechamento para a participação acumulada do ano.');
       return number===11&&report.projects?.status!=='ready'?partial('Destaque de unidades disponível; contagem de empreendimentos ainda não conferida.'):available;
     }
     if([23,37,47].includes(number)){if(report.typologies?.status==='blocked')return source(report.typologies,'as tipologias');return source(resolveSpTypologyComparison(report,number===23?'launches':number===37?'sales':'stock'),'as tipologias dos dois anos');}
@@ -73,7 +79,7 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
     if(number===63||number===64){const field=number===63?'ticket':'meter',rows=market!.prices;return !rows.some(row=>row[field]!==null)?blocked('Sem oferta e preços completos nas tipologias.'):rows.some(row=>row[field]===null||row.bedroom<=2&&(row.mcmv[field]===null||row.map[field]===null))?partial(market!.classificationIssues?.mcmv??'Há tipologia ou recorte MCMV/MAP sem oferta ou preço completo.'):available;}
     if(number===73)return source(market!.matrix,'a área privativa de toda a oferta');
     if(number===76||number===77){const stages=market!.stages;return stages.launched.ready&&stages.final.ready?available:stages.launched.ready||stages.final.ready?partial('Uma das composições por estágio não foi comprovada.') :blocked(stages.final.issues[0]??'Estágio não informado.');}
-    if(number===78)return market!.vgv.ready?{...available,reason:'Vendido e VGV vendido calculados por capacidade menos oferta da fotografia; campo sold original preservado na auditoria.'}:blocked(market!.vgv.issues[0]??'Capacidade, estoque ou preço não compatíveis.');
+    if(number===78)return market!.vgv.ready?market!.vgv.partial?partial(`${market!.vgv.priceMissingCount} tipologia(s) sem preço válido. Contagens e valores completos preservados; valores monetários dependentes e seus totais aparecem como —. Vendido calculado por capacidade menos oferta; sold original auditado.`):{...available,reason:'Vendido e VGV vendido calculados por capacidade menos oferta da fotografia; campo sold original preservado na auditoria.'}:blocked(market!.vgv.issues[0]??'Capacidade ou estoque não compatíveis.');
     if([67,68,70,71,74,75,79,80].includes(number)){
       if(market!.total===0)return available;
       const located=market!.projects.filter(p=>p.latitude!==null&&p.longitude!==null);
@@ -96,5 +102,8 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
 
 export function spReviewSnapshot(report:SpPreview, slides:SpSlideReview[]) {
   const warnings=report.granularDetails?.warnings??[],vgv=report.granularDetails?.market?.vgv;
-  return {schema:'sp-practical-review-v1',generatedAt:new Date().toISOString(),quarter:report.quarter,throughMonth:report.throughMonth??null,source:report.source??'fixture',municipalStatus:report.status,exportAvailable:false,analystApproval:false,slides,sourceDiagnostics:report.granularDetails?.diagnostics??[],sourceWarnings:{count:warnings.length,examples:warnings.slice(0,50)},calculatedSalesAudit:vgv?.ready?{method:'capacity-minus-offer-v1',differenceCount:vgv.warnings?.length??0,examples:vgv.warnings?.slice(0,20)??[]}:null};
+  const end=report.throughMonth,start=quarterMonths(report.quarter)[0];
+  const windows=(series:SpLaunchSeries|undefined)=>!end?null:({yearToDate:spFlowWindow(series,`${end.slice(0,4)}-01`,end),quarter:spFlowWindow(series,start,end),previousYearQuarter:spFlowWindow(series,shiftSpMonth(start,-12),shiftSpMonth(end,-12)),last12Months:spFlowWindow(series,shiftSpMonth(end,-11),end)});
+  const highlightAudit={classification:SP_SEGMENT_RULE.id,launches:{metric:'releases_in_period',...windows(report.launchSeries)},sales:{metric:'liquid_sales',...windows(report.salesSeries)},projectsLast12Months:report.projects?.status==='ready'?report.projects.trends?.rolling.at(-1)??null:null};
+  return {schema:'sp-practical-review-v1',generatedAt:new Date().toISOString(),quarter:report.quarter,throughMonth:report.throughMonth??null,source:report.source??'fixture',municipalStatus:report.status,exportAvailable:true,exportFormat:'pptx-review-editable-text',analystApproval:false,highlightAudit,numericAudit:spNumericAudit(report),slides,sourceDiagnostics:report.granularDetails?.diagnostics??[],sourceWarnings:{count:warnings.length,examples:warnings.slice(0,50)},calculatedSalesAudit:vgv?.ready?{method:'capacity-minus-offer-v1',differenceCount:vgv.calculatedDifferenceCount??vgv.warnings?.length??0,priceMissingCount:vgv.priceMissingCount??0,examples:vgv.warnings?.slice(0,20)??[]}:null};
 }

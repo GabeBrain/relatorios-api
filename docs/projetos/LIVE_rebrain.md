@@ -403,6 +403,78 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Apoio de revisao preparado:**PDF7paginas com46comentarios, tratamento/oqueconferir e checklist humano aposcada geracao na paginafinal. ReferenciaPPT(2), semaceiteexterno. PDFderivado/checklist fonte no planoPPTX; insumos/renderQA em panorama-review-support-2026-11-04,46IDs conferidos. Rascunhoemail orienta editar copiaPPT e gerarPDF a partirda propria versao editada;graficos continuamimagens. Semnovo recursoautomaticonoapp ou emailenviado.
 
 
+### 2026-11-05 — SP: compatibilidade do PowerPoint real — usuário / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — exportação editável de conferência.
+- **O quê:** auditoria agregada sai do texto das notas para parte Custom XML vinculada à apresentação. Comparador aceita o formato antigo e identifica o novo pelo namespace, inclusive após salvamento no Office.
+- **Por quê:** usuário relata crash na abertura; arquivo real tem326.127caracteres em uma sequência das notas, maior que o sintético anteriormente testado. Causa exclusiva não afirmada sem reproduzir o crash na interface habitual.
+- **Evidência:** cópia real reparada preserva todos os slides/imagens byte a byte e JSON exato; abriu85slides em0,7s, salvou/reabriu no PowerPoint e manteve auditoria.293testes/29arquivos, tipos/lint aprovados; [diagnóstico](../features/relatorios-institucionais/sp/CORRECAO_ABERTURA_PPTX_2026-11-05.md).
+- **Arquivos:** `sp/pptx-export.ts`, `sp/pptx-audit.ts`, testes, `scripts/diagnostics/sp-reference-audit.py`, evidências/handoff.
+- **Commits:** `0965ba3` — correção do pacote PPTX e comparador; documentação neste fechamento.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203` (referência, sem escrita).
+- **Impacto em Etapas/Pendências:** correção local e arquivo reparado disponíveis; publicação e reteste do usuário pendentes. Exportação disponível para conferência não significa homologação. Reconciliação numérica permanece separada, sem nova API ou mudança dos demais motores.
+
+### 2026-11-05 — SP: destaques coerentes, divisórias originais e PPTX de conferência — usuário / Codex
+
+- **Commits da entrega autorizada:**`bf8c362` implementa revisão/exportação; fila contínua em`092996e` e registro`b8eb808`. Usuário pediu push conjunto. Pronto para envio após gate documental; conferência do deploy e geração real2T2026 permanecem pendentes.
+
+- **Validação final:**292 testes/28arquivos, tipos/lint/build aprovados;PPTX final85slides/2.354textos nativos aberto noOffice, sete páginas renderizadas e comparativos finais inspecionados. Exportação final noEdge preservou cobertura e não chamou GeoBrain; falhas de expectativa editorial antiga corrigidas sem alterar cálculos. Ainda não é reconciliação da fonte real.
+
+- **Pedido/escopo:** usuário pediu coerência numérica sem copiar a redação, comparação original×JSON, restauração das capas de tema e exportação PPTX editável; autorizou enviar junto da otimização da coleta. Primeiro par de commits locais092996e/b8eb808 preservado.
+- **Mudança:**9 usa janeiro-fechamento;10 separa trimestre MCMV, comparação anual, mercado e MCMV12meses;9–11 sem comentários de implementação. Trimestres equivalentes destacados e tabela com dois comparativos recentes. Nove divisórias reaproveitadas do original,45 sem mês fixo. Diagnóstico inclui dados agregados/períodos e comparador offline; não troca valores para coincidir com narrativa antiga.
+- **PPTX:** botão de conferência monta85posições da geração fixa, sem nova coleta GeoBrain. Textos/células dinâmicos nativos; desenhos dos gráficos, mapas e artes estáticas em imagem. BrainLoadingState, cancelamento, erro/retry e auditoria JSON nas notas. Não é homologação ou promessa de gráfico nativo editável. [Contrato, divergências e limites](../features/relatorios-institucionais/sp/REVISAO_DESTAQUES_EXPORTACAO_2026-11-05.md).
+- **Evidência:**289 testes SP/27arquivos, lint e build aprovados na primeira verificação; rodada final documentada no EVIDENCIAS. Edge gerou85slides/2.404textos nativos sem GeoBrain adicional; cancelamento/sucesso observados. Arquivo aberto noPowerPoint: título e valor editados, salvos/reabertos em cópia, sete páginas renderizadas e capturas inspecionadas. Dados sintéticos, não ensaio de negócio. Comparador leu auditoria embutida e percorreu85posições/25tendências; demais posições não são aprovadas automaticamente.
+- **Estado:** fonte original tem divergências internas (127.778 no texto×127.788 no gráfico, entre outras); diferenças atuais não atribuídas automaticamente a atualização/distratos/filtros. Aguardar PPTX2T2026 da geração real para reconciliação; fonte/editorial/homologação continuam abertos. Domínios paralelos preservados e Monday não alterado.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
+### 2026-11-05 — SP: coleta detalhada com vagas continuamente ocupadas — usuário / Codex
+
+- **Commit técnico:** `092996e` (05/11/2026), entrega validada localmente. Publicação desta otimização ainda pendente; não confundir com as correções SP já enviadas em04/11.
+
+- **Validação final:** tipos/build exit0 e lint aprovados; Edge local dirigido22posições, lento/cancelamento/retry/erro/vazio e múltiplos períodos/2027 aprovados. Loading Brain existente preservado e captura inspecionada; zero erros de página/zero GeoBrain real/54Mapbox200. Caso53páginas é teste de transporte, sem promessa de duração real.
+
+- **Problema/mudança:** usuário observa7–10min para53páginas. Consumidor aguardava a mais lenta de cada lote de três antes de continuar. Fila contínua inicia a próxima assim que uma vaga libera; mantém três requisições, fonte/filtros/100por página/timeout/retry/Retry-After e todas as guardas. Falha interrompe fila e aguarda iniciadas; cancelamento não publica parcial. Cache/BrainLoadingState existentes preservados, sem fluxo visual novo.
+- **Evidência:**278 testes SP/25arquivos e lint dirigido aprovados; quatro regressões novas. Relógio virtual com53páginas/5.229IDs e latências desiguais:541s antes/195s depois (~64% de redução), sem medir/prometê-lo na API real. [Regra e limites](../features/relatorios-institucionais/sp/PERFORMANCE_COLETA_2026-11-05.md).
+- **Integração/estado:** base5e883a8 após fast-forward de três commits da Validação de Fechamento, preservados. Implementação local em validação final; reteste autenticado de duração e homologação permanecem pendentes. Não houve coleta de negócio nova ou alteração de outros motores.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
+### 2026-11-05 — Validação do Fechamento: ajuda do Resumo email alinhada às regras vigentes — Edgar / Codex
+
+- **Mudança exclusiva:** textos dos oito indicadores e quatro colunas calculadas do Resumo email isolados em `resumo-email-help.ts`, sem alterar METRICS compartilhado ou a ajuda das outras abas. Dicas explicam lançamentos somente no mês de lançamento, Preço médio pela última posição ponderada, Preço/m² com todos os históricos elegíveis, estoques por última posição, oferta ativa com status cadastral atual, representatividade do fechamento e vendas por soma dos históricos disponíveis. Acumulados explicitam corte mensal; variações descrevem fórmula e tratamento de base zero, sem prometer corte mensal para os buckets trimestrais/anuais.
+- **Padrão/validação:** ajuste editorial reutiliza Help/Popover Brain existentes, sem mudança de layout ou cálculos. Nove testes de componente cobrem variações e abertura/conteúdo das dicas, foco e Escape. Sem ensaio visual desktop/mobile ou temas nesta sessão; equivalente headless executado. Estados de carregamento, vazio e erro não alterados.
+- **Etapas/Pendências:** textos implementados localmente; conferência visual e publicação pendentes. Nenhuma mudança de API ou em outros projetos.
+- **Monday:** —
+
+### 2026-11-05 — Validação do Fechamento: Preço médio pela última posição no Resumo email — Edgar / Codex
+
+- **Mudança exclusiva:** Preço médio do Resumo email usa a última posição observada por empreendimento/tipologia dentro de cada intervalo, incluindo os acumulados. Depois de escolher a posição, mantém filtros Padrão, estoque diferente de zero e preço informado; ponderação permanece Σ(qty × price)/Σ(qty). Não busca um registro antigo elegível quando o último está esgotado ou sem preço. Preço/m², demais métricas, recortes temporais e abas Resumo/Resumo por cidade preservados.
+- **Evidência:** execução offline da base Teresina/PI Vertical (157 empreendimentos, 283 tipologias, 6.076 históricos): 3T/2026 Preço médio R$ 489.689,35; Preço/m² permanece R$ 7.725,30; unidades lançadas permanecem 1.368. Anual e acumulado jan–set/2026 também usam última posição no Preço médio, mantendo os respectivos cálculos originais de preço/m². Testes novos cobrem ponderação, históricos fora de ordem, tipologia sem posição no último mês comum, estoque zero e preço ausente na última posição, e preservação do cálculo das demais abas.
+- **Etapas/Pendências:** implementação local; sem nova consulta autenticada ou ensaio visual. Aceite e publicação pendentes. Nenhuma mudança nas demais questões identificadas na análise temporal.
+- **Monday:** —
+
+### 2026-11-05 — Validação do Fechamento: unidades lançadas sem repetição no Resumo email — Edgar / Codex
+
+- **Mudança exclusiva:** nas três colunas de períodos do Resumo email, em visualização trimestral/anual, unidades lançadas passam a somar qty somente dos registros do mês de lançamento, evitando repetir a quantidade nos históricos posteriores do mesmo intervalo. A variação anual dessa linha acompanha os valores corrigidos. Mensal, acumulados, demais indicadores, filtros temporais, Resumo/Resumo por cidade e motor compartilhado `computeResumo` preservados.
+- **Evidência:** execução offline com normalização real da base local PI atualizada em 04/11, recorte Teresina/PI Vertical (157 empreendimentos, 283 tipologias, 6.076 históricos, último período set/2026). 3T/2026 corrigido de 2.168 para 1.368; 2T/2026 de 334 para 214; 3T/2025 de 598 para 539; anual/2026 de 6.250 para 2.536. Demais métricas comparadas sem alteração. Exemplo: 800 unidades do empreendimento 89698/tipologia 155858 deixam de repetir em setembro após lançamento em agosto.
+- **Etapas/Pendências:** testes de regressão adicionados para trimestre/ano, colunas comparativas, variação anual, mensal, acumulados e preservação dos demais indicadores/abas. Sem nova consulta autenticada ou ensaio visual; aceite e publicação pendentes. As questões de preços e de corte temporal permanecem deliberadamente sem alteração, conforme escopo solicitado.
+- **Monday:** —
+
+### 2026-11-04 — SP: integração autorizada preservando os dois trabalhos — usuário / Codex
+
+- **Build integrado:** tipos completos e build exit0, Vite29,63s; avisos existentes de Browserslist/chunks. Gate documental aprovado, com avisos de tamanho dos documentos vivos. Evidência em `.local-inputs/sp-integrated-build-final.log`.
+
+- **Integração:** usuário confirmou integrar os14commits remotos preservando as correções. Merge `7e699fc` combina origin `907d4aa` com os commits SP `951c79d`/`851776e`, sem conflito e sem reescrita. Arquivos SP idênticos ao lado local; conferência automatizada comprova que todas as linhas novas do LIVE dos dois lados foram preservadas, sem somar novamente a base comum. Entradas remotas de Panorama/Finoti/PPT lidas e preservadas.
+- **Verificação integrada:**274 testes SP/25arquivos aprovados com dois workers. Primeira execução simultânea ao build teve273 aprovações e um timeout de renderização; repetição sem mudar código, assertivas ou limite de tempo passou. Logs `.local-inputs/sp-integrated-*`, ignorados. Gate documental aprovado. Ensaio autenticado/deploy e revisão das fontes ainda pendentes; não declarar homologação.
+- **Estado:** integração concluída; confirmação anterior de espera fica superada por esta entrada. Envio das correções mantém autorização anterior do usuário; não houve mensagem externa ou alteração no Monday.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
+### 2026-11-04 — SP: correções remanescentes do checklist (4) — usuário / Codex
+
+- **Commit técnico:** `951c79d` (04/11/2026); sete testes dirigidos repetidos na retomada, aprovados. Registro local, ainda sem integração/publicação.
+- **Mudança:**51 e históricos53–59 admitem oferta não negativa somente com soma exatamente conciliada ao municipal; payload assinado preservado.78 mantém quantidades e células monetárias completas quando falta preço, com — nos valores dependentes e totais, marcado parcial. [Regra atualizada](../features/relatorios-institucionais/sp/TRATAMENTO_FONTE_2026-11-03.md). Sem tolerância residual, interpolação ou preço presumido.
+- **Evidência:** checklist real68disponíveis/7parciais/2bloqueados/8referências; controles124044×124045 e preço54845/73369/junho.274 testes SP/25arquivos, tipos/lint/build e Edge dirigido aprovados na base92eeef0; capturas51/78 inspecionadas, sem nova API autenticada. Reutilizados renderizadores e estados existentes.
+- **Estado:** implementação local; integração dos14commits novos encontrada em04/11 aguarda confirmação por árvore suja. Jun2023/64094 e artes editoriais continuam pendências de fonte/revisão. Não declarar homologação ou deploy observado.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência, sem escrita.
 ### 2026-11-04 - Panorama: conferencia integral pre-push e cobertura de preco - Gabriel / Codex
 
 - **Pedido:** Gabriel autorizou push e exigiu gerar/revisar o estudo local antes. Primeira saida64paginas aprovada noOffice; revisao identificou zero artificial de4dormitorios em1T2023: nenhuma linha desse grupo nas tres respostas paginadas da fonte; consumidor preenchia a chave ausente com0.
@@ -900,6 +972,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**05/11 — SP, relatório para conferência integral:** destaques com janelas explícitas, nove divisórias e comparativos destacados; exportador85posições com textos/células editáveis e auditoria embutida validado com fonte sintética/Office. Exportação de conferência implementada; exportações comerciais adicionais e homologação não estão concluídas.
+
+**05/11 — SP, eficiência da coleta:** fila contínua com três vagas substitui lotes;278 regressões e lint aprovados. Ganho demonstrado em latências simuladas, duração real pós-publicação ainda por medir. Critérios de fonte e aprovação dos slides preservados.
+
+**04/11 — SP, checklist (4):** ajustes51/53–59/78 validados localmente com274 testes, tipos/lint/build e navegador dirigido. Quantidades do78 preservadas com preço incompleto explicitado; controle de estoque aceita apenas soma municipal exata. Integração/publicação e novo ensaio autenticado pendentes, sem homologação automática.
+
+**04/11 — SP, integração posterior:** merge7e699fc autorizado e concluído, preservação verificada e274 regressões aprovadas na base combinada. Integração deixou de ser pendência; ensaio real, fonte e editorial permanecem abertos.
+
+- **Panorama — PPTX editável:** implementação validada localmente em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende de autorização/publicação/ensaio real e aceite das exceções institucionais; aceite dos dados anteriores preservado.
 - **Panorama — PPTX editável:** implementação validada localmente e enviada ao Git até `92eeef0` em03/11; [portões, evidência e limites](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#7-execução-local-e-evidências--03112026). G6 depende da publicação/conferência no site e aceite das exceções institucionais; aceite dos dados anteriores preservado.
 **03/11 — SP, correção no consumidor:**51/53–59/78 tratados por regra explícita, com preservação/auditoria e parciais identificadas;271testes e navegador dirigido aprovados. Novo checklist autenticado pendente.
 
@@ -971,6 +1052,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 3. Pendências
 
+- [ ] **SP — reconciliar edição2T2026 com a geração real:** usuário enviar novoPPTX ou JSON numérico. Confrontar as25séries automaticamente e revisar restantes com inventário/dados agregados; distinguir período, indicador e revisões da origem. Não forçar127.778,29.065 ou560 no código. Original também tem contradições internas, registradas na revisão05/11. Confirmar valores e metodologia com analista; não declarar coincidência integral antes da comparação.
+
+- [ ] **SP — medir fila contínua na API real:** após publicação, comparar duração da conferência detalhada no mesmo recorte; se ainda lenta, registrar latências/tamanhos/retries das páginas, sem expor token. Resultado sintético9min01s→3min15s não é SLA. Cobertura integral, lacunas reais e revisão editorial continuam independentes dessa otimização.
+
+- [ ] **SP — reteste do checklist (4):** integração autorizada concluída em7e699fc; publicar correções e gerar novo checklist2T2026. Conferir51, pontos recuperados53–59 e tabela parcial78. Jun2023/64094 permanece fotografia ausente; preço54845/73369 deve vir da fonte para completar os valores monetários. Revisar oito artes editoriais. Não converter parciais em disponíveis apenas para fechar contagem.
+
+- **Panorama — PPTX editável:** autorizar integração adicional e envio dos commits, publicar e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes; edição Office já verificada em cópias sintéticas.
 - **Panorama — PPTX editável:** conferir publicação no site e executar o roteiro real G6 do [plano03/11](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md). Integração e envio autorizados concluídos; aceite visual/comercial das exceções rasterizadas e teste no site ainda pendentes. Edição Office já verificada em cópias sintéticas.
 - [ ] **SP — retestar tratamento aplicado:** gerar novo2T2026 com estoques assinados conciliados, preços parciais† e VGV calculado; conferir os resultados e a auditoria antes de homologar. API original e performance da coleta continuam independentes.
 

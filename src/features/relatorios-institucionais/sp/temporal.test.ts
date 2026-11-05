@@ -62,7 +62,7 @@ describe('Conferência municipal SP — respostas reais registradas, sem chamada
     expect(batch.status).toBe('ready');
     expect(batch.comparisons.sales?.rows).toHaveLength(3);
     expect(batch.comparisons.sales?.totals?.delta).toBe(0);
-    expect(report.issues.join(' ')).toContain('não libera exportação ou homologação');
+    expect(report.issues.join(' ')).toContain('não substitui a revisão dos demais slides ou a homologação');
     input.rootPeriod = '2026-10-01';
     expect(buildSpTemporalPreview(input, '3T2026').throughMonth).toBe('2026-09');
   });

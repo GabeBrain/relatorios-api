@@ -242,7 +242,7 @@ describe('Página SP institucional', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));
     await screen.findByText(/Cobertura conferida:/);
     fireEvent.click(screen.getByRole('button', { name: '13. Empreendimentos lançados, série trimestral' }));
-    expect(screen.getByRole('article')).toHaveTextContent('Reconstituição do cadastro atual');
+    expect(screen.getByRole('article')).toHaveTextContent('EMPREENDIMENTOS VERTICAIS LANÇADOS');
     expect(screen.getByRole('article')).not.toHaveTextContent('Contagem de empreendimentos pendente');
     access.fixtureMode = 'granular-error';
     fireEvent.click(screen.getByRole('button', { name: 'Conferir dados reais' }));

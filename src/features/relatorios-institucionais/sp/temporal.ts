@@ -110,7 +110,7 @@ export function buildSpTemporalPreview(input: SpTemporalInput, quarter: Quarter)
       ...(result.balanceByGroup!.some(row => row.delta !== 0) ? ['Há diferenças no balanço por grupo. Elas não são atribuídas automaticamente a distratos ou reclassificações; confira os detalhes.'] : []),
       ...(available.some(periods => periods.size !== months.length) ? ['As séries ainda não cobrem os mesmos meses; a parcial usa apenas os meses disponíveis nas três fontes.'] : []),
       ...(result.throughMonth < quarterEndMonth(quarter) ? ['O trimestre não está completo; somente os meses disponíveis nas três séries foram incluídos.'] : []),
-      'A disponibilidade dos demais slides acompanha a conferência de suas fontes. Esta conferência municipal não libera exportação ou homologação.',
+      'A disponibilidade dos demais slides acompanha a conferência de suas fontes. Esta conferência municipal não substitui a revisão dos demais slides ou a homologação.',
     ],
   };
 }

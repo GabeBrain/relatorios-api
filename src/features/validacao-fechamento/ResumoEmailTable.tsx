@@ -3,6 +3,7 @@ import { Check, ImageDown, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { intFmt } from '@/lib/format';
 import { METRICS, type MetricDef, type MetricKey, type ResumoEmailResult, varPct } from './aggregate';
+import { EMAIL_COLUMN_HELP, EMAIL_METRIC_HELP } from './resumo-email-help';
 
 interface Props {
   resumo: ResumoEmailResult | null;
@@ -58,7 +59,7 @@ function MetricRow({ metric, resumo }: { metric: MetricDef; resumo: ResumoEmailR
       <td className="vf-label">
         <span className="inline-flex items-center gap-1">
           {metric.label}
-          <Help label={metric.label} text={metric.info} />
+          <Help label={metric.label} text={EMAIL_METRIC_HELP[key]} />
         </span>
       </td>
       <td>{formatValue(resumo.displayPeriods.previousYear[key], metric.format)}</td>
@@ -141,11 +142,11 @@ export function ResumoEmailTable({ resumo }: Props) {
             <th>{resumo.displayPeriods.previousLabel}</th>
             <th>{resumo.displayPeriods.selectedLabel}</th>
             <th>
-              <span className="inline-flex items-center justify-center gap-1">Var. {resumo.displayPeriods.previousYearLabel} x {resumo.displayPeriods.selectedLabel}<Help label="Variação anual" text="(último período selecionado ÷ mesmo período do ano anterior) − 1, conforme a Visualização: ano, trimestre ou mês/ano." /></span>
+              <span className="inline-flex items-center justify-center gap-1">Var. {resumo.displayPeriods.previousYearLabel} x {resumo.displayPeriods.selectedLabel}<Help label="Variação anual" text={EMAIL_COLUMN_HELP.annual} /></span>
             </th>
-            <th><span className="inline-flex items-center justify-center gap-1">{resumo.previousYearAccumLabel}<Help label="Acumulado do ano anterior" text="Recalcula o indicador de janeiro até o mesmo mês do ano anterior, respeitando os filtros de cidade e dimensões." /></span></th>
-            <th><span className="inline-flex items-center justify-center gap-1">{resumo.selectedAccumLabel}<Help label="Acumulado do ano atual" text="Recalcula o indicador de janeiro até o último período selecionado, respeitando os filtros de cidade e dimensões." /></span></th>
-            <th><span className="inline-flex items-center justify-center gap-1">Var. Acumulado<Help label="Variação acumulada" text="(acumulado do ano atual ÷ acumulado do ano anterior) − 1." /></span></th>
+            <th><span className="inline-flex items-center justify-center gap-1">{resumo.previousYearAccumLabel}<Help label="Acumulado do ano anterior" text={EMAIL_COLUMN_HELP.previousAccum} /></span></th>
+            <th><span className="inline-flex items-center justify-center gap-1">{resumo.selectedAccumLabel}<Help label="Acumulado do ano atual" text={EMAIL_COLUMN_HELP.currentAccum} /></span></th>
+            <th><span className="inline-flex items-center justify-center gap-1">Var. Acumulado<Help label="Variação acumulada" text={EMAIL_COLUMN_HELP.accumVariation} /></span></th>
           </tr>
         </thead>
         <tbody>{METRICS.map((metric) => <MetricRow key={metric.key} metric={metric} resumo={resumo} />)}</tbody>

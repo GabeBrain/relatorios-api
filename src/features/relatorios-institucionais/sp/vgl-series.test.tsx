@@ -21,7 +21,7 @@ describe('SP — VGL corrigido pelo INCC-DI', () => {
     expect(result.breakdown!.annual!.at(-1)!.segments.reduce((sum, row) => sum + row.value, 0)).toBeCloseTo(result.breakdown!.annual!.at(-1)!.total, 5);
     for (const number of [26,27,28,29,30]) {
       const html = renderToStaticMarkup(<SpTrendSlide report={{ ...report, vglSeries: result }} number={number} />);
-      expect(html).toContain('INCC-DI'); expect(html).toContain('Base única: 2026-08'); expect(html).not.toContain('Dados em conferência');
+      expect(html).toContain('INCC-DI'); expect(html).toContain('INCC-DI para 2026-08'); expect(html).not.toContain('Dados em conferência');
     }
   });
   it.each([null, '', false, -1, 'NaN', Number.POSITIVE_INFINITY])('VGL inválido bloqueia só dinheiro, não unidades: %s', value => {

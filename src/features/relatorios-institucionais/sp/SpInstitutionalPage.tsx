@@ -266,7 +266,7 @@ export default function SpInstitutionalPage() {
       <p className="text-sm text-muted-foreground">Núcleo residencial vertical de São Paulo capital.</p>
     </header>
     <Alert><AlertTitle>{report && !isApi ? 'Prévia de desenvolvimento · dados fictícios' : 'Conferência municipal · relatório em validação'}</AlertTitle><AlertDescription>
-      {report && !isApi ? 'Os números do exemplo não representam o mercado.' : 'A consulta curta busca lançamentos, vendas e estoque do trimestre selecionado e identifica os meses disponíveis nas três fontes. A contagem de empreendimentos continua em paralelo e preenche os slides 13–17 quando terminar.'} Não há exportação disponível nesta etapa.
+      {report && !isApi ? 'Os números do exemplo não representam o mercado.' : 'A consulta curta busca lançamentos, vendas e estoque do trimestre selecionado e identifica os meses disponíveis nas três fontes. A contagem de empreendimentos continua em paralelo e preenche os slides 13–17 quando terminar.'} A prévia permite exportar um PowerPoint para conferência.
     </AlertDescription></Alert>
     <section aria-label="Seleção do estudo" className="space-y-4 rounded-lg border border-border bg-card p-4">
       {scope.error ? <Alert variant="destructive"><AlertTitle>Não foi possível carregar as cidades autorizadas</AlertTitle><AlertDescription><p>Confira sua autenticação e tente novamente. O estudo permanece bloqueado.</p><Button className="mt-3" variant="outline" onClick={scope.reload}>Tentar carregar cidades novamente</Button></AlertDescription></Alert>

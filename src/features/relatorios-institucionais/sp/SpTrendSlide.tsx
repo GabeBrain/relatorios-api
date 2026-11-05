@@ -23,6 +23,7 @@ export function SpTrendSlide({ report, number }: { report: SpPreview; number: nu
   const minimum = Math.min(0, ...points.map(row => row.value)), maximum = Math.max(1, ...points.map(row => row.value));
   const y = (value: number) => 505 - (value - minimum) / (maximum - minimum) * 195;
   const plotted = points.map((row, i) => ({ ...row, x: 90 + i * 1100 / Math.max(1, points.length - 1), y: y(row.value) }));
+  const highlighted=(i:number)=>rolling?i%12===0||i===points.length-1:trends?.quarterly[i]?.label.slice(0,2)===report.quarter.slice(0,2);
   const message = source?.status === 'blocked' ? source.issues[0] : (annual || mcmv) && source?.breakdown?.status === 'blocked' ? source.breakdown.issues[0] : projects ? 'A contagem de empreendimentos preencherá este slide ao terminar.' : `A conferência das séries de ${sales ? 'vendas' : monetary ? 'VGL e INCC-DI' : 'lançamentos'} preencherá este slide ao terminar.`;
   return <svg role="img" aria-label={`${metric} · ${subtitle}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
     <rect x="40" y="10" width="1000" height="140" fill="#f8f8f8" />
@@ -33,26 +34,27 @@ export function SpTrendSlide({ report, number }: { report: SpPreview; number: nu
     {!ready ? <><text x="640" y="335" textAnchor="middle" fontSize="28" fontWeight="bold">Dados em conferência</text>{wrap(message, 88).map((line, i) => <text key={i} x="640" y={380 + i * 28} textAnchor="middle" fontSize="19">{line}</text>)}</> : annual ? <AnnualChart rows={source!.breakdown!.annual!} throughMonth={report.throughMonth!} format={format} /> : <>
       <text x="90" y="202" fontSize="16">{rolling ? 'Acumulado nos últimos 12 meses' : `${sales ? 'Vendas líquidas' : vgv ? 'VGV vendido corrigido' : monetary ? 'VGL corrigido' : 'Lançamentos'} no trimestre selecionado`}</text>
       <text x="90" y="240" fontSize="32" fontWeight="bold" fill="#5b7638">{format(points.at(-1)!.value)}{!rolling && points.at(-1)!.partial ? '*' : ''}</text>
-      <ComparisonTable rows={comparisons} />
+      <ComparisonTable rows={rolling?comparisons:comparisons.slice(-2)} />
       <line x1="75" x2="1205" y1="530" y2="530" stroke="#d9d9d9" />
       {minimum < 0 && <line x1="75" x2="1205" y1={y(0)} y2={y(0)} stroke="#aaa" strokeDasharray="5 4" />}
       <polyline points={plotted.map(row => `${row.x},${row.y}`).join(' ')} fill="none" stroke="#5b7638" strokeWidth="3" />
       {plotted.map((row, i) => <g key={i}>
-        {(!rolling || i % 12 === 0 || i === points.length - 1) && <><circle cx={row.x} cy={row.y} r="4" fill="#5b7638" /><text x={row.x} y={row.value < 0 ? row.y + 18 : row.y - 16} textAnchor="middle" fontSize={rolling ? 21 : 16} fontWeight="bold" fill="#4f6529">{format(row.value)}</text></>}
+        {highlighted(i)&&<rect data-comparable-quarter="true" x={row.x-Math.max(64,format(row.value).length*14+12)/2} y={row.y-48} width={Math.max(64,format(row.value).length*14+12)} height="33" fill="#5b7638"/>}
+        {(!rolling || highlighted(i)) && <><circle cx={row.x} cy={row.y} r="4" fill="#5b7638" /><text x={row.x} y={highlighted(i)?row.y-23:row.value < 0 ? row.y + 18 : row.y - 16} textAnchor="middle" fontSize={highlighted(i)?23:16} fontWeight={highlighted(i)?'bold':'normal'} fill={highlighted(i)?'#fff':'#aaa'}>{format(row.value)}</text></>}
         {(!rolling || i % 4 === 0 || i === points.length - 1) && <text x={row.x} y="552" textAnchor="middle" fontSize={rolling ? 16 : 14}>{row.label.split(' ').map((part, j) => <tspan key={j} x={row.x} dy={j ? 18 : 0}>{part}</tspan>)}</text>}
       </g>)}
       <text x="62" y="588" fontSize="14">{rolling ? 'Cada ponto reúne 12 meses completos, incluindo o mês indicado.' : '* Trimestre atual parcial quando indicado; comparações anuais usam os mesmos meses.'} Base anterior zero: variação —.</text>
     </>}
-    <text x="62" y="606" fontSize="12">{monetary ? `${vgv ? 'VGV vendido' : 'VGL'} mensal × INCC-DI da base / INCC-DI do mês. Base única: ${report.throughMonth}. Fonte: SindusconPR/FGV.` : projects ? 'Reconstituição do cadastro atual pela data de lançamento; cobertura histórica sujeita à revisão.' : `Fonte: séries municipais de ${sales ? 'vendas líquidas, com sinais preservados' : 'lançamentos'} · releitura do período atual conferida.`}</text>
-    {(annual || mcmv) && <text x="62" y="621" fontSize="12">{projects ? 'Segmentos pela classificação atual do cadastro; vigência histórica em revisão.' : 'Segmentos pela regra SP: MCMV = Econômico. Vigência histórica em revisão.'}</text>}
+    {monetary&&<text x="62" y="606" fontSize="12">Valores corrigidos pelo INCC-DI para {report.throughMonth}. Fonte do índice: SindusconPR/FGV.</text>}
   </svg>;
 }
 
 function ComparisonTable({ rows }: { rows: SpProjectComparison[] }) {
-  return <g><rect x="640" y="176" width="560" height="72" fill="#eee" stroke="#262626" />{rows.map((row, i) => <g key={row.label}>
-    <line x1={640 + i * 560 / 3} x2={640 + i * 560 / 3} y1="176" y2="248" stroke="#262626" />
-    <text x={640 + (i + .5) * 560 / 3} y="198" textAnchor="middle" fontSize="12">{row.label}</text>
-    <text x={640 + (i + .5) * 560 / 3} y="232" textAnchor="middle" fontSize="19" fontWeight="bold" fill="#4f6529">{percentage(row.variation)}</text>
+  const columns=Math.max(1,rows.length);
+  return <g><rect x="640" y="176" width="560" height="80" fill="#b8b8b8"/><rect x="640" y="214" width="560" height="42" fill="#5b7638"/>{rows.map((row, i) => <g key={row.label}>
+    <line x1={640 + i * 560 / columns} x2={640 + i * 560 / columns} y1="176" y2="256" stroke="#fff" />
+    <text x={640 + (i + .5) * 560 / columns} y="201" textAnchor="middle" fontSize={columns===2?16:12}>{row.label}</text>
+    <text x={640 + (i + .5) * 560 / columns} y="242" textAnchor="middle" fontSize="23" fontWeight="bold" fill={row.variation!==null&&row.variation<0?'#ffcf00':'#fff'}>{percentage(row.variation)}</text>
   </g>)}</g>;
 }
 
