@@ -1,5 +1,6 @@
 import { buildMapTilePlan, positionMapPoints, type MapTilePlan } from '@/features/panorama-secovi-fiergs/lib/map-tiles';
 import type { SpMapProject } from './market-details';
+import { SP_SEGMENT_RULE } from './segments';
 export type SpMapMode='stock'|'standard'|'meter'|'vgv';
 const stockColors=['#1254d4','#478cc6','#74a82c','#edc500','#ed4e31','#ac1d5d','#284e72','#727272'];
 export function spMapPlan(projects:SpMapProject[],mode:SpMapMode,close:boolean,token:string){
@@ -14,8 +15,9 @@ export function spMapPlan(projects:SpMapProject[],mode:SpMapMode,close:boolean,t
   const value=(p:SpMapProject)=>mode==='stock'?p.stock:mode==='meter'?p.meter:mode==='vgv'?p.vgv:null;
   const values=all.flatMap(p=>value(p)===null?[]:[value(p)!]).sort((a,b)=>a-b);
   const limits=mode==='stock'?[20,50,100,200,2000,Infinity]:mode==='meter'?[8000,10000,15000,25000,100000,Infinity]:[...new Set(Array.from({length:7},(_,i)=>values[Math.floor((i+1)*values.length/8)]).filter((v):v is number=>v!==undefined)),Infinity];
-  const standards=['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto','Luxo'];
-  const palette=(p:SpMapProject)=>mode==='standard'?colors[standards.indexOf(p.standard)%colors.length]??'#727272':value(p)===null?'#727272':colors[limits.findIndex(limit=>value(p)!<=limit)%colors.length];
+  const standards=Object.keys(SP_SEGMENT_RULE.groups);
+  const segment=(p:SpMapProject)=>Object.entries(SP_SEGMENT_RULE.groups).find(([,patterns])=>(patterns as readonly string[]).includes(p.standard))?.[0];
+  const palette=(p:SpMapProject)=>mode==='standard'?colors[standards.indexOf(segment(p)??'')%colors.length]??'#727272':value(p)===null?'#727272':colors[limits.findIndex(limit=>value(p)!<=limit)%colors.length];
   const within=plan?all.filter(p=>{const pos=plan!.positionOf(p);return pos.left>=0&&pos.left<=100&&pos.top>=0&&pos.top<=100;}):[];
   const positioned=plan?positionMapPoints(within,plan as MapTilePlan):[];
   return {plan,positioned,palette,value,limits,standards,colors,all,visible:within.length,total:projects.length,mappedUnits:all.reduce((s,p)=>s+p.stock,0),totalUnits:projects.reduce((s,p)=>s+p.stock,0),missingValues:mode==='standard'?0:all.filter(p=>value(p)===null).length};

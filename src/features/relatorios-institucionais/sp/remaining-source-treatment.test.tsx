@@ -28,8 +28,11 @@ describe('SP — projeção de oferta comprovada e VGV monetário parcial',()=>{
     expect(mismatch.area.status).toBe('blocked');expect(mismatch.prices.series[53].find(row=>row.month==='2026-06')!.value).toBeNull();
   });
   it('mantém quantidades e VGV final quando falta preço apenas em tipologia esgotada',()=>{
-    const {report,buildings}=setup(),before=buildSpGranularDetails(buildings,report);
-    const candidate=buildings.filter(building=>Number(building.building_id)>=100).flatMap(building=>histories(building).filter(row=>row.period==='2026-08-01'&&Number(row.qty)>0).map(row=>({row,group:building.standard}))).find(item=>item.row.typology_stock===0)!;
+    const {report,buildings}=setup();
+    // A sold-out typology remains in the capacity of an enterprise still in offer.
+    const active=buildings[0],row={...histories(active).find(row=>row.period==='2026-08-01')!,typology_id:999999,typology_stock:0,qty:100,sold:100,sold_in_period:0};
+    histories(active).push(row);
+    const before=buildSpGranularDetails(buildings,report),candidate={row:row as Record<string,unknown>,group:active.standard};
     candidate.row.price=null;
     const data=buildSpGranularDetails(buildings,report),vgv=data.market!.vgv,original=before.market!.vgv;
     expect(vgv.ready).toBe(true);expect(vgv.partial).toBe(true);expect(vgv.priceMissingCount).toBe(1);

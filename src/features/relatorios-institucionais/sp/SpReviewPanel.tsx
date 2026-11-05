@@ -16,8 +16,8 @@ export function SpReviewPanel({report,slides,onOpen}:{report:SpPreview;slides:Sp
     window.setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   return <section aria-label="Checklist dos 85 slides" className="space-y-3 rounded-lg border border-border bg-card p-4">
-    <h3 className="font-semibold">Conferência para testes práticos</h3>
-    <p className="text-sm text-muted-foreground">85 posições implementadas. Disponível significa que a fonte necessária foi conferida nesta geração; a aprovação dos números e da metodologia será feita nos testes práticos.</p>
+    <h3 className="font-semibold">Disponibilidade dos slides</h3>
+    <p className="text-sm text-muted-foreground">85 slides organizados. Disponível significa que a fonte necessária foi conferida nesta geração; os números e a metodologia permanecem sujeitos à revisão do analista.</p>
     <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm" aria-label="Resumo da disponibilidade">{Object.entries(SP_SLIDE_STATE_LABELS).map(([state,label])=><li key={state}><strong>{counts[state]}</strong> {label}</li>)}</ul>
     <p className="text-sm text-muted-foreground">{report.source==='fixture'?'Este checklist usa dados fictícios e não comprova cobertura real. ':''}{report.status==='partial'?'O trimestre está parcial; os slides usam somente os meses disponíveis. ':''}Páginas institucionais conservam a edição identificada. PowerPoint disponível para conferência; revisão do analista pendente.</p>
     <details onToggle={event=>setExpanded(event.currentTarget.open)}>

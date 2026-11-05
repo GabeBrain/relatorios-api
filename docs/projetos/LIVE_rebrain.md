@@ -399,6 +399,35 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Evidência/estado:** brutos/hashes/pranchas em `.local-inputs/finoti-comparativos-2026-11-05/`; análise preparada, sem alteração de produto/API/testes/estudo real/push. Fetch:cinco commits remotos novos, sem integração da árvore suja. Próximo fechar contrato e plano antes da implementação; limite de séries não reduz por si as chamadas por cidade.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
 
+### 2026-11-05 — SP: carregamento limitado à área do relatório — usuário / Codex
+
+- **Mudança:** removido o Dialog global da primeira etapa. BrainLoadingState overlay fica em cartão relativo, sem portal, bloqueio do menu ou retenção de foco. Progresso e cancelamento preservados; demais etapas seguem no painel automático. Nenhuma regra ou chamada alterada.
+- **Validação/estado:** testes da página, tipagem e ensaio Edge com resposta lenta em desktop/celular claro/escuro; diagnóstico verifica overlay absoluto contido, ausência de modal e acionamento do menu durante a consulta. Padrão Brain existente reutilizado. Ensaio com fonte sintética; API autenticada e deploy não verificados nesta rodada.
+- **Etapas/Pendências:** ajuste local para revisão; testar no site após publicação. [Contrato atualizado](../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md). Demais pendências numéricas permanecem.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; sem escrita.
+
+### 2026-11-05 — SP: geração automática em oito etapas e insights — usuário / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`. Usuário autorizou substituir os acionamentos manuais por um fluxo visual e, nesta entrega, finalizar/commitar/publicar.
+- **Mudanças:** uma ação Gerar relatório prepara municipal, empreendimentos, lançamentos, vendas, oferta/IVV, tipologias, detalhamentos compartilhados e 85 slides. Progresso por fontes/janelas/páginas/empreendimentos/slides efetivamente concluídos, marca Brain e tempo real. Cancelamento e retomada preservam resultados; falhas independentes não interrompem as demais fontes. Repetição recupera etapas pendentes e dependências locais sem repetir coleta v2 completa já preservada.
+- **Insights:** memória de cálculo, conciliação mensal, diferenças por grupo, acumulados, cobertura e diagnóstico técnico mantidos em aba própria. Sem inferir distratos/reclassificações; avisos extensos carregam sob demanda. Abrir slides deixa de iniciar coleta. Fonte, fórmulas e guardas existentes preservadas.
+- **Padrão/validação:** GeoApiScopeEngine, shadcn e BrainLoadingState overlay/operation reutilizados; regressão SP, testes de sessão/callback tardio, tipos/build/lint e ensaio Edge desktop/celular claro/escuro com fontes sintéticas. [Contrato, reprodução e limites](../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md). Fonte real/deploy não observados nesta rodada; nenhum acesso autenticado novo.
+- **Etapas/Pendências:** implementação e validação local do novo fluxo concluídas; publicação autorizada nesta sessão. Permanecem geração real do analista, conferência do site e reconciliação numérica com a edição original; duração real do provedor não foi prometida. Motores Secovi/FIERGS e demais domínios preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência sem escrita.
+
+### 2026-11-05 — SP: comparação dos 85 pares e correções de cálculo/exportação — usuário / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — relatório automatizado e PowerPoint de conferência.
+- **Origem:** usuário forneceu original e gerado2T2026, confirmou segmentos, pediu MD, excluiu erros manuais do original da fila e autorizou continuar correções. [Plano e inventário dos85slides](../features/relatorios-institucionais/sp/PLANO_CONTENCAO_COMPARACAO_2T2026_2026-11-05.md).
+- **Diagnóstico:**170renders inspecionados,1.021conferências numéricas em55posições; diferenças de extração não foram todas classificadas como defeitos. Original contém contradições de texto/série e totais não aditivos, mantidas somente como observações. Nenhuma nova consulta autenticada ou constante para copiar resultados antigos.
+- **Mudanças:** cenário69restrito aoStandard e destaque de três padrões; capacidade76–78restrita aos empreendimentos emoferta, incluindo tipologias esgotadas desses projetos, com universo explícito na auditoria. Mapas com quatro segmentos e densidade relativa porVGV. PPTXpreserva trimestres/espaços e18links; slide2usa arte original e período dinâmico. VGVpor tipologia e guardas monetárias mantidos, fonte original preservada.
+- **Validação:**300testes/30arquivos, tipos/lint/build, Edge e Office aprovados.85slides,18links,17rótulos trimestrais nos46/50; edição salva/reaberta e auditoria exata. Nove páginas renderizadas,46/69/79inspecionadas. Ensaios sintéticos/replay, semAPIrealnova. BrainLoadingState e componentes existentes reutilizados; estados lento/cancelamento/retry/erro/vazio e sucesso cobertos.
+- **Arquivos:** móduloSPde mercado/mapas/apresentação/exportação, diagnóstico e testes; arte2com proveniência; plano/evidências/handoff.
+- **Commits:** `785cae6` — correções SP; documentação neste fechamento.
+- **Integração:** usuário autorizou preservar ambos os trabalhos; merge `2d6c018` reúne correções/documentação `785cae6`/`9f0ab00` e seis commits remotos até `e5bc2c2`. Sem conflito;126arquivos SP idênticos byte a byte e LIVE preservado conforme base+(local−base)+(remoto−base), ignorando somente separadores vazios. Alterações FIERGS/Finoti/menu escuro preservadas; nova publicação ainda não executada.
+- **Regressão integrada:**302testes/31arquivos aprovados (300SPe2FIERGS), sem relaxar timeout ou guardas.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`, referência sem escrita.
+- **Impacto em Etapas/Pendências:** correções locais prontas para publicação; nova geração real e verificação prática pendentes. Fontes ausentes, ponderação do original, IDs de contagem e base antigaINCC não foram inferidos. Secovi/FIERGS e demais motores preservados.
 ### 2026-11-05 — Rebrain: barra do menu no tema escuro e publicação FIERGS — Gabriel / Codex
 
 - **Mudança:** barra de rolagem da navegação usa `color-scheme: dark` e cores existentes de fundo/sidebar e texto secundário; regra limitada ao modo escuro do menu, sem novos tokens ou alteração do tema claro. Seleção manual FIERGS incluída em `c8d2abb`.
@@ -993,6 +1022,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**05/11 — SP, geração automática:** fluxo visual em oito etapas substitui os botões de coleta; cancelamento/retomada e insights do analista implementados e validados localmente. Publicação autorizada; teste autenticado e aceite permanecem distintos da implementação.
+
 **05/11 — SP, relatório para conferência integral:** destaques com janelas explícitas, nove divisórias e comparativos destacados; exportador85posições com textos/células editáveis e auditoria embutida validado com fonte sintética/Office. Exportação de conferência implementada; exportações comerciais adicionais e homologação não estão concluídas.
 
 **05/11 — SP, eficiência da coleta:** fila contínua com três vagas substitui lotes;278 regressões e lint aprovados. Ganho demonstrado em latências simuladas, duração real pós-publicação ainda por medir. Critérios de fonte e aprovação dos slides preservados.
@@ -1072,6 +1103,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — ensaio real do fluxo automático:** após o deploy, selecionar ano/trimestre e Gerar relatório; conferir progresso, cancelamento/retomada, fontes parciais e memória de cálculo nos insights. Fontes reais e latência do provedor não foram exercitadas nesta rodada. [Contrato](../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).
 
 - [ ] **SP — reconciliar edição2T2026 com a geração real:** usuário enviar novoPPTX ou JSON numérico. Confrontar as25séries automaticamente e revisar restantes com inventário/dados agregados; distinguir período, indicador e revisões da origem. Não forçar127.778,29.065 ou560 no código. Original também tem contradições internas, registradas na revisão05/11. Confirmar valores e metodologia com analista; não declarar coincidência integral antes da comparação.
 

@@ -1,5 +1,23 @@
 # Estado do handoff
 
+## 05/11/2026 — carregamento inicial restrito ao relatório
+
+Base `1b19e84`, main/origin 0/0 após fetch. Usuário pediu manter a tela de carregamento somente no relatório. Modal global substituído por cartão relativo com BrainLoadingState overlay absoluto; menu e navegação continuam utilizáveis. Sete testes da página, tipagem/lint e diagnóstico Edge com respostas sintéticas lentas cobrem o ajuste; consultas, cancelamento, retomada e fórmulas preservados. Sem ensaio autenticado novo. [Contrato](../../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).
+
+## 05/11/2026 — fluxo automático SP e insights do analista
+
+Base `93f9bce`, main, único remoto origin, fetch atualizado e 0/0 antes das alterações; Windows/Codex Test. Usuário autorizou implementar e finalizar com commit/push. Uma ação executa oito etapas com progresso real, cancelamento, retomada e coleta detalhada compartilhada. Insights preservam memória de cálculo e conciliações sem atribuir causas. GeoApiScopeEngine, BrainLoadingState e shadcn mantidos; nenhum motor paralelo alterado. [Contrato, ensaios e limites](../../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).
+
+Regressão SP, sessão/callback tardio, tipos/build/lint e navegador Edge com respostas sintéticas lentas, desktop/celular e temas claro/escuro. Nova geração autenticada, deploy observado e aceite do analista não foram realizados nesta rodada. A publicação Git de `93f9bce` já ocorreu na entrega anterior; as afirmações históricas abaixo de publicação pendente descrevem o momento dos respectivos registros. Nenhuma escrita no Monday.
+
+## 05/11/2026 — comparação completa e contenção executada localmente
+
+Integração confirmada pelo usuário e concluída em `2d6c018`, preservando correções `785cae6`/`9f0ab00` e seis commits do time até `e5bc2c2`.126arquivos SP idênticos; registro vivo de ambos os lados comprovadamente preservado por três pontos, desconsiderando somente separadores vazios. Publicação ainda não realizada; não confundir merge autorizado com push.
+
+Regressão na base integrada:302testes/31arquivos aprovados, incluindo seleçãoFIERGS do remoto. Sem alteração de timeout/guardas.
+
+Base81ad236/main/origin0/0 apósfetch; CodexTest/Windows. Usuário forneceu original e gerado, confirmou segmentos, pediu MD, descartou erros manuais da fila e autorizou correções.170renders/85pares inspecionados;1.021comparações em55slides, sem presumir causa de deltas. [Plano, andamento e inventário](../../features/relatorios-institucionais/sp/PLANO_CONTENCAO_COMPARACAO_2T2026_2026-11-05.md). Implementados denominadorStandard/destaque69, universo comum de empreendimentos emoferta76–78, mapas4segmentos/calorVGV, eixos/navegaçãoPPTX, slide2dinâmico e acabamento.300testes/30arquivos, tipos/lint/build/Edge/Office aprovados; novoPPTX85slides/18links, edição salva/reaberta e auditoria preservada. SemAPIrealnova; pesos/fontes históricas/IDs/baseINCC original continuam observações a reconciliar, não valores a copiar. Publicação/nova geração real pendentes; nenhumMondayalterado.
+
 ## 05/11/2026 — compatibilidade do PPTX real
 
 Usuário relata crash ao abrir a exportação 2T2026. Main626f86b/origin0/0 após fetch, Codex Test/Windows. Arquivo real íntegro contém326.127caracteres em uma sequência de notas, contra67.588no sintético anterior. Auditoria movida a Custom XML; comparador lê namespace também após Office salvar/renomear. Cópia real reparada preserva slides/imagens byte a byte e auditoria exata; abriu85slides em0,7s, salvou/reabriu e manteve auditoria.293testes/29arquivos, tipos/lint aprovados; publicação/reteste habitual pendentes. [Diagnóstico e limites](../../features/relatorios-institucionais/sp/CORRECAO_ABERTURA_PPTX_2026-11-05.md). Sem API nova, alteração numérica ou homologaçao presumida.

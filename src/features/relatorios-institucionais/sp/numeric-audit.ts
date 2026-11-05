@@ -14,5 +14,5 @@ export function spNumericAudit(report:SpPreview) {
   return {schema:'sp-numeric-audit-v1',quarter:report.quarter,throughMonth:report.throughMonth,trendSlides,
     municipal:{metrics:report.metrics,monthly:report.monthly,patterns:report.patterns,typologies:report.typologies},
     comparisons:{launches:report.launchSeries?.comparison,sales:report.salesSeries?.comparison,stock:report.stockSeries?.comparison},
-    details:{area:report.granularDetails?.area,prices:report.granularDetails?.prices,market:market?{status:market.status,total:market.total,prices:market.prices,cohorts:market.cohorts,standards:market.standards,bedrooms:market.bedrooms,matrix:market.matrix,stages:market.stages,vgv:market.vgv}:null}};
+    details:{area:report.granularDetails?.area,prices:report.granularDetails?.prices,market:market?{status:market.status,total:market.total,prices:market.prices,cohorts:market.cohorts,standards:market.standards,bedrooms:market.bedrooms,matrix:market.matrix,stages:market.stages,vgv:market.vgv,priceBand:market.priceBand,priceBandShare:market.priceBandShare,capacityUniverse:market.capacityUniverse}:null}};
 }

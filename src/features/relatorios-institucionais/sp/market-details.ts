@@ -18,6 +18,8 @@ export interface SpMarketDetails {
   matrix:{status:'ready'|'blocked';issues:string[];columns:string[];rows:{label:string;values:number[];total:number}[];totals:number[]}; smallAreaShare:number|null;
   stages:{launched:{ready:boolean;issues:string[];typologies:SpStageGroup[];segments:SpStageGroup[]}; final:{ready:boolean;issues:string[];typologies:SpStageGroup[];segments:SpStageGroup[]}};
   vgv:{ready:boolean;issues:string[];warnings?:string[];partial?:boolean;priceMissingCount?:number;calculatedDifferenceCount?:number;rows:SpVgvRow[];total:SpVgvRow|null}; projects:SpMapProject[]; priceBandShare:number|null;
+  priceBand?:{numerator:number|null;denominator:number;minimum:number;maximum:number;selection:'standard-project-ticket-v1'};
+  capacityUniverse?:{selection:'projects-with-positive-stock';includedProjects:number;excludedProjects:number};
 }
 const norm=(value:unknown)=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
 const number=(value:unknown)=>typeof value==='number'||typeof value==='string'&&value.trim()?Number(value):NaN;
@@ -43,6 +45,11 @@ export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<stri
   result.classificationIssues=classificationIssues;
   if(problem)return result;
   const available=rows.filter(row=>row.stock!>0), year=Number(report.throughMonth!.slice(0,4));
+  // Capacity belongs to the enterprises represented in the current offer, including
+  // their sold-out typologies. Fully sold-out enterprises are outside this universe.
+  const activeProjects=new Set(available.map(row=>row.project));
+  const capacityRows=rows.filter(row=>activeProjects.has(row.project));
+  result.capacityUniverse={selection:'projects-with-positive-stock',includedProjects:activeProjects.size,excludedProjects:new Set(rows.filter(row=>!activeProjects.has(row.project)).map(row=>row.project)).size};
   result.prices=[1,2,3,4].map(value=>({bedroom:value,...price(rows.filter(row=>row.bedrooms===value)),mcmv:price(rows.filter(row=>row.bedrooms===value&&row.standard==='Econômico')),map:price(rows.filter(row=>row.bedrooms===value&&row.standard!=='Econômico'))}));
   if(classificationIssues.mcmv)for(const item of result.prices)for(const key of ['mcmv','map'] as const){item[key].ticket=null;item[key].meter=null;item[key].issues=[classificationIssues.mcmv];}
   if(available.some(row=>row.bedrooms===null))for(const item of result.prices){item.ticket=null;item.meter=null;item.mcmv.ticket=null;item.mcmv.meter=null;item.map.ticket=null;item.map.meter=null;}
@@ -59,12 +66,12 @@ export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<stri
   }
   for(const key of ['launched','final'] as const){
     const field=key==='launched'?'qty':'stock';
-    const missing=rows.find(row=>row[field]===null||row[field]!<0||row[field]!>0&&!stage(row.stage));
+    const missing=capacityRows.find(row=>row[field]===null||row[field]!<0||row[field]!>0&&!stage(row.stage));
     if(missing){
       const issue=`Empreendimento ${missing.project}, tipologia ${missing.typology??'não informada'}, competência ${missing.month}: ${missing[field]===null||missing[field]!<0?`${field==='qty'?'quantidade (qty)':'estoque (typology_stock)'} ausente ou inválido`:`estágio construtivo ausente ou não reconhecido; valor recebido ${typeof missing.stage==='string'?JSON.stringify(missing.stage.slice(0,60)):'vazio'}`}. Ativo/Esgotado não representam Planta/Construção/Pronto.`;
       result.stages[key]={ready:false,issues:[issue],typologies:[],segments:[]};continue;
     }
-    const selected=rows.filter(row=>row[field]!>0);
+    const selected=capacityRows.filter(row=>row[field]!>0);
     const group=(label:string,test:(row:SpObservation)=>boolean):SpStageGroup=>{const values={Planta:0,Construção:0,Pronto:0};for(const row of selected.filter(test))values[stage(row.stage)!]+=row[field]!;return {label,values,total:Object.values(values).reduce((a,b)=>a+b,0)};};
     const stageLabels=[...new Set([...labels,...selected.map(row=>bedroom(row.bedrooms))])];
     const typologies=stageLabels.map(label=>group(label,row=>bedroom(row.bedrooms)===label)),segments=Object.entries(SP_SEGMENT_RULE.groups).map(([label,standards])=>group(label,row=>(standards as readonly string[]).includes(row.standard)));
@@ -73,12 +80,17 @@ export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<stri
   }
   const meta=new Map(buildings.map(building=>[String(building.building_id??building.id),building]));
   const byProject=new Map<string,SpObservation[]>();for(const row of available){const group=byProject.get(row.project)??[];group.push(row);byProject.set(row.project,group);}
-  const mixed=[...byProject].find(([,list])=>new Set(list.map(row=>row.standard)).size>1);
-  if(mixed)result.classificationIssues.mapPatterns=`Empreendimento ${mixed[0]}: tipologias com padrões diferentes na mesma competência. O mapa por padrão aguarda representação por tipologia; nenhum padrão único foi presumido.`;
+  const segmentOf=(standard:string)=>Object.entries(SP_SEGMENT_RULE.groups).find(([,patterns])=>(patterns as readonly string[]).includes(standard))?.[0];
+  const mixed=[...byProject].find(([,list])=>new Set(list.map(row=>segmentOf(row.standard))).size>1);
+  if(mixed)result.classificationIssues.mapPatterns=`Empreendimento ${mixed[0]}: tipologias em segmentos diferentes na mesma competência. O mapa aguarda representação por tipologia; nenhum segmento único foi presumido.`;
   for(const [id,list] of byProject){const p=price(list),building=meta.get(id)!;const stock=list.reduce((s,r)=>s+r.stock!,0),lat=number(building.latitude),lon=number(building.longitude);const geographic=Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-34&&lat<=6&&lon>=-74&&lon<=-34;result.projects.push({id,name:String(building.name??`Empreendimento ${id}`),standard:list[0].standard,latitude:geographic?lat:null,longitude:geographic?lon:null,stock,meter:p.meter,ticket:p.ticket,vgv:p.ticket===null?null:p.ticket*stock});}
-  if(result.projects.every(project=>project.ticket!==null))result.priceBandShare=share(result.projects.filter(project=>project.ticket!>=400000&&project.ticket!<=500000).reduce((s,p)=>s+p.stock,0));
+  const standardProjects=[...byProject.values()].map(list=>price(list.filter(row=>row.standard==='Standard'))).filter(item=>item.units>0);
+  const denominator=standardProjects.reduce((sum,item)=>sum+item.units,0);
+  const numerator=standardProjects.some(item=>item.ticket===null)?null:standardProjects.filter(item=>item.ticket!>=400000&&item.ticket!<=500000).reduce((sum,item)=>sum+item.units,0);
+  result.priceBand={numerator,denominator,minimum:400000,maximum:500000,selection:'standard-project-ticket-v1'};
+  result.priceBandShare=denominator>0&&numerator!==null?numerator/denominator*100:null;
   const capacityWarnings:string[]=[];
-  const capacityIssues=rows.flatMap(row=>{
+  const capacityIssues=capacityRows.flatMap(row=>{
     const label=`Empreendimento ${row.project}, tipologia ${row.typology??'não informada'}, competência ${row.month}`;
     const issues:string[]=[];
     if(row.qty===null||!Number.isSafeInteger(row.qty)||row.qty<0)issues.push('capacidade qty ausente ou inválida');
@@ -90,7 +102,7 @@ export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<stri
   const safeCapacity=!capacityIssues.length;
   if(capacityIssues.length)result.vgv.issues=capacityIssues;
   if(safeCapacity){
-    const calculated=rows.map(row=>({...row,sold:row.qty!-row.stock!}));
+    const calculated=capacityRows.map(row=>({...row,sold:row.qty!-row.stock!}));
     const unpriced=calculated.filter(row=>row.qty!>0&&(row.price===null||row.price<=0));
     const priceWarnings=unpriced.map(row=>`Empreendimento ${row.project}, tipologia ${row.typology??'não informada'}, competência ${row.month}: preço price ausente ou inválido; contagens preservadas e valores monetários dependentes indisponíveis (—), inclusive nos totais. Nenhum preço zero foi presumido.`);
     const aggregate=(label:string,list:SpObservation[]):SpVgvRow=>{

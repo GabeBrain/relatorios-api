@@ -2,9 +2,10 @@ import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 import {buildSpEditablePptx} from './pptx-export';
 import {embedSpPptxAudit} from './pptx-audit';
 vi.mock('./pptx-audit',()=>({embedSpPptxAudit:vi.fn(()=>new Uint8Array([1,2,3]))}));
-const captured=vi.hoisted(()=>({slides:[] as {texts:string[];notes:string[];images:number}[],writes:0}));
+const captured=vi.hoisted(()=>({slides:[] as {texts:string[];notes:string[];images:number;targets:number[]}[],writes:0}));
 vi.mock('pptxgenjs',()=>({default:class {
-  addSlide(){const slide={texts:[] as string[],notes:[] as string[],images:0};captured.slides.push(slide);return {addImage:()=>slide.images++,addText:(value:string)=>slide.texts.push(value),addNotes:(value:string)=>slide.notes.push(value)};}
+  ShapeType={rect:'rect'};
+  addSlide(){const slide={texts:[] as string[],notes:[] as string[],images:0,targets:[] as number[]};captured.slides.push(slide);return {addImage:()=>slide.images++,addText:(value:string)=>slide.texts.push(value),addNotes:(value:string)=>slide.notes.push(value),addShape:(_type:string,options:{hyperlink:{slide:number}})=>slide.targets.push(options.hyperlink.slide)};}
   async write(){captured.writes++;return Object.assign(new Blob(['test-pptx']),{arrayBuffer:async()=>new ArrayBuffer(1)});}
 }}));
 vi.mock('html-to-image',()=>({getFontEmbedCSS:async()=>'',toPng:async(node:HTMLElement)=>{
@@ -35,6 +36,11 @@ describe('SP — PowerPoint para conferência',()=>{
     const source=slides(),controller=new AbortController();
     await expect(buildSpEditablePptx(source,'2T2026',controller.signal,current=>{if(current===3)controller.abort();})).rejects.toMatchObject({name:'PanoramaExportCancelled'});
     expect(captured.slides).toHaveLength(3);expect(captured.writes).toBe(0);expect(deck.children).toHaveLength(85);
+  });
+  it('grava destinos internos medidos sem executar navegação ou coletar dados',async()=>{
+    const source=slides(),link=document.createElement('button');link.dataset.spTargetSlide='12';source[5].append(link);
+    await buildSpEditablePptx(source,'2T2026',new AbortController().signal,()=>{});
+    expect(captured.slides[5].targets).toEqual([12]);expect(source[5].contains(link)).toBe(true);
   });
   it('recusa um deck incompleto em vez de omitir posições silenciosamente',async()=>{
     await expect(buildSpEditablePptx([],'2T2026',new AbortController().signal,()=>{})).rejects.toThrow('85 posições');expect(captured.writes).toBe(0);

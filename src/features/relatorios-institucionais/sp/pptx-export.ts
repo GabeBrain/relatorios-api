@@ -10,12 +10,14 @@ export function spSvgTexts(root:HTMLElement):LayoutText[] {
   const frame=root.getBoundingClientRect(),sx=W/frame.width,sy=H/frame.height;
   if(!frame.width||!frame.height)throw new Error('Slide sem dimensões para exportar.');
   return [...root.querySelectorAll<SVGTextElement>('svg text')].flatMap(text=>{
-    const spans=[...text.querySelectorAll<SVGTSpanElement>('tspan')];
-    return (spans.length?spans:[text]).flatMap(element=>{
-      const style=getComputedStyle(element),r=element.getBoundingClientRect();
+    const nodes:Text[]=[];const walker=document.createTreeWalker(text,NodeFilter.SHOW_TEXT);
+    for(let node=walker.nextNode();node;node=walker.nextNode())if(node.textContent?.trim()&&!node.parentElement?.closest('title,desc'))nodes.push(node as Text);
+    return nodes.flatMap(node=>{
+      const element=node.parentElement!;
+      const style=getComputedStyle(element),range=document.createRange();range.selectNodeContents(node);
+      const r=typeof range.getBoundingClientRect==='function'?range.getBoundingClientRect():element.getBoundingClientRect();
       if(style.display==='none'||style.visibility==='hidden'||style.opacity==='0'||!r.width||!r.height)return [];
-      const copy=element.cloneNode(true) as Element;copy.querySelectorAll('title,desc').forEach(node=>node.remove());
-      const value=copy.textContent?.trim();if(!value)return [];
+      const value=node.textContent!;
       const color=style.fill.match(/[\d.]+/g)?.slice(0,3).map(n=>Math.round(Number(n)).toString(16).padStart(2,'0')).join('')??'262626';
       return [{text:value,x:(r.left-frame.left)*sx,y:(r.top-frame.top)*sy,w:(r.width+3)*sx,h:(r.height+2)*sy,size:parseFloat(style.fontSize)*sx*72,face:style.fontFamily.split(',')[0].replace(/["']/g,'').trim(),color,bold:Number(style.fontWeight)>=600||style.fontWeight==='bold',italic:style.fontStyle==='italic',spacing:0}];
     });
@@ -39,6 +41,11 @@ export async function buildSpEditablePptx(slides:HTMLElement[],quarter:string,si
       const image=await toPng(clone,{fontEmbedCSS,pixelRatio:1,cacheBust:false,width:1280,height:720,filter:node=>!(node instanceof SVGImageElement&&getComputedStyle(node).visibility==='hidden')});check(signal);
       const page=pptx.addSlide();page.addImage({data:image,x:0,y:0,w:W,h:H,objectName:`Arte e gráfico do slide ${index+1}`});
       for(const t of texts)page.addText(t.text,{x:t.x,y:t.y,w:t.w,h:t.h,fontSize:t.size,fontFace:t.face,color:t.color,bold:t.bold,italic:t.italic,margin:0,breakLine:false,valign:'middle',fit:'shrink',wrap:false,objectName:`Texto editável: ${t.text.slice(0,50)}`} as PptxGenJS.TextPropsOptions);
+      const frame=clone.getBoundingClientRect();
+      for(const link of clone.querySelectorAll<HTMLElement>('[data-sp-target-slide]')){
+        const target=Number(link.dataset.spTargetSlide),r=link.getBoundingClientRect();
+        if(Number.isInteger(target)&&target>=1&&target<=85&&r.width&&r.height)page.addShape(pptx.ShapeType.rect,{x:(r.left-frame.left)*W/frame.width,y:(r.top-frame.top)*H/frame.height,w:r.width*W/frame.width,h:r.height*H/frame.height,line:{transparency:100},fill:{color:'FFFFFF',transparency:100},hyperlink:{slide:target,tooltip:`Ir ao slide ${target}`},objectName:`Navegação: slide ${target}`});
+      }
       page.addNotes(`SP ${quarter}; posição original ${index+1}/85. Versão para conferência. Textos/células dinâmicos editáveis; desenho dos gráficos, mapas e artes estáticas em imagem. Sem homologação automática.`);
       onProgress(index+1,slides.length);
     } finally {clone.remove();}
