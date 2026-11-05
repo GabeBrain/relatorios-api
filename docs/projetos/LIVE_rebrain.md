@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — Panorama: novas referências territoriais Finoti/Teresa — Gabriel / Codex
+
+- **Diagnóstico:**15imagens e PDFs Lajeado/Vale72páginas eRM75páginas lidos/visualizados. Referências combinam séries/colunas comparativas e páginas específicas; Vale agrupa quatro municípios contra Lajeado. Três e-mails compartilhados confirmam separar poucas cidades e agruparRM. Aceite Finoti da revisão anterior preservado; esta ampliação ainda não implementada.
+- **Proposta:** consolidado disponível para qualquer recorte; até três unidades comparativas, cada uma cidade ou grupo explícito, sem sobreposição/omissão. Reutilizar coleta municipal e recalcular taxas/preços; novas composições anuais mapeadas, sem copiar inconsistências dos exemplos. [Fonte única, inventário e estratégia](../features/Relatorios%20Secovi_FIERGS/REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
+- **Evidência/estado:** brutos/hashes/pranchas em `.local-inputs/finoti-comparativos-2026-11-05/`; análise preparada, sem alteração de produto/API/testes/estudo real/push. Fetch:cinco commits remotos novos, sem integração da árvore suja. Próximo fechar contrato e plano antes da implementação; limite de séries não reduz por si as chamadas por cidade.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
+
 ### 2026-11-05 — Rebrain: barra do menu no tema escuro e publicação FIERGS — Gabriel / Codex
 
 - **Mudança:** barra de rolagem da navegação usa `color-scheme: dark` e cores existentes de fundo/sidebar e texto secundário; regra limitada ao modo escuro do menu, sem novos tokens ou alteração do tema claro. Seleção manual FIERGS incluída em `c8d2abb`.
