@@ -1,5 +1,11 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 05/11/2026 — correção de compatibilidade do PPTX real
+
+- Usuário relata crash na abertura. Arquivo real com326.127caracteres no texto de notas; auditoria movida para Custom XML, preservando JSON e todos os slides/imagens byte a byte na cópia reparada. Original preservado. [Diagnóstico e limites](CORRECAO_ABERTURA_PPTX_2026-11-05.md).
+- Cópia real corrigida abriu85slides no PowerPoint em0,7s, salvou/reabriu e preservou auditoria após renomeação da parte pelo Office. Cinco slides renderizados,64inspecionado. Novo exportador gerou85slides no navegador e abriu noOffice; comparador lê auditoria nova e antiga. Não foi provocado novamente o crash na interface do usuário; causa exclusiva permanece sem prova.
+-293testes/29arquivos, tipos/lint/build aprovados; teste com auditoria maior que a real usa PptxGenJS verdadeiro. Edge dirigido sem erros de página ou API de negócio real/adicional,111Mapbox200; cancelamento/retry/períodos/2027 preservados. Logs e arquivos reais ignorados em `.local-inputs/sp-pptx-crash-*`. Publicação/reteste habitual e reconciliação numérica continuam separados.
+
 ## 05/11/2026 — destaques, divisórias e PowerPoint editável de conferência
 
 - **Rodada final:**292 testes SP/28arquivos aprovados (incluindo erro/retry, progresso sem remontar o deck, prevenção de duplicação e cancelamento por nova geração), tipos completos e lint aprovados, build exit0/Vite23,84s. Repetição final do Edge gerou85slides,2.354textos nativos,24.565.707bytes e auditoria extraível;117Mapbox200, nenhum GeoBrain adicional/real e zero erros de página. Final aberto noOffice e sete páginas renderizadas;13 e64 finais inspecionadas. Primeiro ciclo final acusou três expectativas de textos operacionais removidos; substituídas por verificações da redação e mês-base equivalentes, sem mudar fórmulas/valores, seguido da suíte completa aprovada. Logs finais `.local-inputs/sp-review-export-*-final.log`. Métricas de2.404textos/24.617.576bytes abaixo identificam a primeira versão visual, não o arquivo final.

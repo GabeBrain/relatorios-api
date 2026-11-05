@@ -385,6 +385,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — SP: compatibilidade do PowerPoint real — usuário / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp` — exportação editável de conferência.
+- **O quê:** auditoria agregada sai do texto das notas para parte Custom XML vinculada à apresentação. Comparador aceita o formato antigo e identifica o novo pelo namespace, inclusive após salvamento no Office.
+- **Por quê:** usuário relata crash na abertura; arquivo real tem326.127caracteres em uma sequência das notas, maior que o sintético anteriormente testado. Causa exclusiva não afirmada sem reproduzir o crash na interface habitual.
+- **Evidência:** cópia real reparada preserva todos os slides/imagens byte a byte e JSON exato; abriu85slides em0,7s, salvou/reabriu no PowerPoint e manteve auditoria.293testes/29arquivos, tipos/lint aprovados; [diagnóstico](../features/relatorios-institucionais/sp/CORRECAO_ABERTURA_PPTX_2026-11-05.md).
+- **Arquivos:** `sp/pptx-export.ts`, `sp/pptx-audit.ts`, testes, `scripts/diagnostics/sp-reference-audit.py`, evidências/handoff.
+- **Commits:** `0965ba3` — correção do pacote PPTX e comparador; documentação neste fechamento.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203` (referência, sem escrita).
+- **Impacto em Etapas/Pendências:** correção local e arquivo reparado disponíveis; publicação e reteste do usuário pendentes. Exportação disponível para conferência não significa homologação. Reconciliação numérica permanece separada, sem nova API ou mudança dos demais motores.
+
 ### 2026-11-05 — SP: destaques coerentes, divisórias originais e PPTX de conferência — usuário / Codex
 
 - **Commits da entrega autorizada:**`bf8c362` implementa revisão/exportação; fila contínua em`092996e` e registro`b8eb808`. Usuário pediu push conjunto. Pronto para envio após gate documental; conferência do deploy e geração real2T2026 permanecem pendentes.

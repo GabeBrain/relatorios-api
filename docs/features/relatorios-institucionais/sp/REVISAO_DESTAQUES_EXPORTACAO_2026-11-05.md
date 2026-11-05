@@ -43,6 +43,8 @@ python scripts/diagnostics/sp-reference-audit.py --reference <original.pptx> --g
 
 ## Exportação de conferência
 
+**Atualização de compatibilidade, 05/11:** a auditoria agora é armazenada em uma parte Custom XML vinculada à apresentação, fora das notas visíveis. O formato anterior abaixo descreve o histórico da primeira entrega. O comparador continua lendo notas antigas e encontra a nova parte pelo namespace, inclusive depois que o Office renomeia o arquivo interno ao salvar. Ver [correção de abertura](CORRECAO_ABERTURA_PPTX_2026-11-05.md).
+
 Botão **Baixar PPTX editável**, com85posições na ordem original, a partir de uma cópia fixa da geração atual. Não dispara coleta GeoBrain nem tenta preencher slides pendentes. Estado disponível/parcial/pendente, textos e valores continuam os da geração. Alteração do relatório ou saída da página cancela o trabalho; não baixa arquivo parcial. BrainLoadingState com etapa/contador real, erro recuperável e cancelamento. A árvore de captura é reutilizada durante o progresso.
 
 Motor PptxGenJS/html-to-image já usado no Panorama; extrator adaptado aos textos SVG do SP. Títulos, rótulos, valores e células dinâmicos são caixas de texto nativas. Artes estáticas, mapas e desenho dos gráficos são imagens; não se promete gráfico nativo com workbook editável. Notas da primeira página incluem SP_AUDIT_JSON com a mesma auditoria numérica do checklist. Assim o arquivo enviado pelo usuário carrega os dados agregados necessários, sem depender de transcrever prints.

@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 05/11/2026 — compatibilidade do PPTX real
+
+Usuário relata crash ao abrir a exportação 2T2026. Main626f86b/origin0/0 após fetch, Codex Test/Windows. Arquivo real íntegro contém326.127caracteres em uma sequência de notas, contra67.588no sintético anterior. Auditoria movida a Custom XML; comparador lê namespace também após Office salvar/renomear. Cópia real reparada preserva slides/imagens byte a byte e auditoria exata; abriu85slides em0,7s, salvou/reabriu e manteve auditoria.293testes/29arquivos, tipos/lint aprovados; publicação/reteste habitual pendentes. [Diagnóstico e limites](../../features/relatorios-institucionais/sp/CORRECAO_ABERTURA_PPTX_2026-11-05.md). Sem API nova, alteração numérica ou homologaçao presumida.
+
 ## 05/11/2026 — revisão dos destaques e exportação solicitada
 
 Rodada final292testes/28arquivos, tipos/lint/build e Edge completo/exportação aprovados. Arquivo final85slides/2.354textos nativos/24.565.707bytes aberto noOffice;7páginas renderizadas. Comparador extrai auditoria doPPTX. Publicação autorizada em fechamento, sem resolver por dedução diferenças reais de base.
