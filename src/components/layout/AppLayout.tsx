@@ -353,7 +353,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+        <nav className="rebrain-sidebar-scroll flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
           {TOP_ITEMS.map(renderNavItem)}
 
           {NAV_GROUPS.map((group) => {

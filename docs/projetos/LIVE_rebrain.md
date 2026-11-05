@@ -396,6 +396,30 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Commits:** `785cae6` — correções SP; documentação neste fechamento.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`, referência sem escrita.
 - **Impacto em Etapas/Pendências:** correções locais prontas para publicação; nova geração real e verificação prática pendentes. Fontes ausentes, ponderação do original, IDs de contagem e base antigaINCC não foram inferidos. Secovi/FIERGS e demais motores preservados.
+### 2026-11-05 — Rebrain: barra do menu no tema escuro e publicação FIERGS — Gabriel / Codex
+
+- **Mudança:** barra de rolagem da navegação usa `color-scheme: dark` e cores existentes de fundo/sidebar e texto secundário; regra limitada ao modo escuro do menu, sem novos tokens ou alteração do tema claro. Seleção manual FIERGS incluída em `c8d2abb`.
+- **Integração:** autorizada por Gabriel nesta sessão; merge `4f24191` incorporou13 commits remotos de SP/Validação sem conflito. Seis documentos locais guardados e reaplicados; insumos e Corretor preservados, stash de segurança mantido. Sem alterações próprias nessas features paralelas.
+- **Validação:** Chromium isolado confirma barra cinza translúcida sobre fundo rgb20/23/31, esquema escuro, rolagem ativa; modo claro permanece auto. Captura e JSON em `.local-inputs/sidebar-scrollbar-2026-11-05/`. Dez testes focados de seleção/identidade/metodologia reaprovados após merge. Publicação Git autorizada; conferência da aplicação no Lovable ainda necessária.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
+
+### 2026-11-05 — Panorama FIERGS: seleção manual de cidades — Gabriel / Codex
+
+- **Mudança:** pedido de Teresa autorizado por Gabriel: início sem cidades; UF RS/FIERGS e SP/Secovi alterável; entidade/UF limpam recorte e resultado. Removidos atalho e menções ao preset na seleção/metodologia. Identidade interna do conjunto homologado, fórmulas e guardas preservadas.
+- **Evidência/estado:** 10 testes focados aprovados, sem API/estudo real. Validado localmente; publicação e conferência no site pendentes. [Fonte única](../features/Relatorios%20Secovi_FIERGS/PLAN_FIERGS_RECORTES_LIVRES_2026-10-13.md#05112026--seleção-manual-solicitada-por-teresa).
+- **Retorno externo:** Finoti informou “Os ajustes estão OK” (04/11). Comparação por cidade é novo pedido; Gabriel solicitou exemplos e aguarda resposta. Sem presumir aceite dessa ampliação.
+- **Git:** fetch05/11: 3 commits documentais locais e13 remotos paralelos antes desta entrega; árvore suja preservada, sem integração/push.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
+
+### 2026-11-04 - Panorama: PPT(2) confrontado com46comentarios Finoti - Gabriel / Codex
+
+- **Pedido/parecer:** usuario trouxe nova saida64paginas e pediu situacao de cada comentario antes da homologacao. Arquivo apto a nova avaliacao/aceite do consultor; nao registrar homologacao externa ou dizer46pedidos literalmente corrigidos.
+- **Evidencia:**PPT(2)SHA425e4ef60ca39a0c39723148bbac4006c40d5c5e4cd05da5c949ee7e8b5a522d,64slides renderizados Office;0frases ocultas/grafia antiga/formas fora;21runs de seta. Textos iguais areferencia907d4aa salvo ordem de cidades nas tres legendas de mapa. Planilhas nao nativas por decisao anterior; sem regressao visual nos quadros anuais/setas inspecionados.
+- **Ressalvas reais:**pagina16 ainda diz Fonte:cubo granular Geobrain; eliminar jargao recomendado. Pouco lancamento/legibilidade final das matrizes com analista; nomes estao no subtitulo mas legenda inferior ainda compacta. PicoIVV/posicaoWinkelHaus e eventual aceite de Media das taxas continuam separados. Nao inferir auditoriaCSV nova pelo arquivoPPT.
+- **Fonte unica:**[matriz completaF01-F46 e onze marcacoes](../features/Relatorios%20Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md#conferencia-do-ppt-recebido-2-e-situacao-dos46comentarios---04112026). Insumos/renders em `.local-inputs/panorama-acceptance-2026-11-04/`. Estado:diagnostico/documentacao preparados; nenhum codigo/API/teste runtime novo, nem push ou aceite externo.
+- **Resumo e resposta preparados:** adicionada leitura rapida agrupada no mesmo plano, mantendo matriz como fonte detalhada. E-mailTeresa03/11 esclarece que os apontamentos de vendas foram retirados por inicio do monitoramento posterior, nao erro confirmado. Nao estender isso automaticamente ao picoIVV. Rascunho de resposta para envio porGabriel, sem envio do agente ou aceite externo.
+- **Apoio de revisao preparado:**PDF7paginas com46comentarios, tratamento/oqueconferir e checklist humano aposcada geracao na paginafinal. ReferenciaPPT(2), semaceiteexterno. PDFderivado/checklist fonte no planoPPTX; insumos/renderQA em panorama-review-support-2026-11-04,46IDs conferidos. Rascunhoemail orienta editar copiaPPT e gerarPDF a partirda propria versao editada;graficos continuamimagens. Semnovo recursoautomaticonoapp ou emailenviado.
+
 
 ### 2026-11-05 — SP: compatibilidade do PowerPoint real — usuário / Codex
 

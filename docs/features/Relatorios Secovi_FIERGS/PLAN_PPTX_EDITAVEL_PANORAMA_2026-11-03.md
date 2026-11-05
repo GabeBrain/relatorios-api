@@ -255,3 +255,133 @@ Gabriel trouxe capturas com percentuais anuais deslocados e setas coladas nos nu
 Reparo local pontual: quadro VARIACOES ANUAIS faz parte do bloco grafico e passa a ser imagem unica, inclusive rotulos e valores, assim como os graficos ja autorizados. Titulo/subtitulo principal continuam editaveis. Nas tabelas, setas condicionais deixam a imagem de fundo e entram como runs coloridos na mesma caixa de texto do numero, com espaco inseparavel; a celula permanece editavel e o simbolo acompanha a edicao/movimento. Nao altera dados, sinais ou metodos. HTML e PDF mantidos.
 
 Prova curta com oficiais20,39,49,51 (saida17,33,42,44 do estudo): quatro paginas abertas/renderizadas emOffice; titulo e celula editados, salvos e reabertos. Inspecao ampliada das capturas confirma percentuais centralizados e espaco entre simbolo e numero.10testes dirigidos, tipos e lint aprovados. Artefatos/renders: `.local-inputs/panorama-overlay-2026-11-04/`. Este ensaio e dirigido aos dois defeitos, nao uma nova revisao integral64paginas. Nao houve push nesta rodada nem nova coleta; confirmar publicacao e nova prova integral antes de prometer aparencia encerrada.
+
+## Conferencia do PPT recebido (2) e situacao dos46comentarios - 04/11/2026
+
+**Parecer:** material apto a voltar ao consultor para aceite deste recorte. Nao registrar homologacao externa sem resposta doFinoti/Juliana. Nao dizer que46pedidos foram todos corrigidos literalmente: ha decisoes do analista, escolhas metodologicas deGabriel e pendencias de origem. Nenhuma alteracao de codigo nesta conferencia.
+
+Arquivo recebido: `panorama-fiergs-rs-canela-gramado-1T2023-3T2026-editavel (2).pptx`; SHA256 `425e4ef60ca39a0c39723148bbac4006c40d5c5e4cd05da5c949ee7e8b5a522d`.64slides renderizados emPowerPoint, sem graficos nativos (decisao visual vigente),21runs de seta, nenhum texto de acessibilidade exposto, grafia antiga ou objeto fora do slide. Textos coincidem com a referencia907d4aa, salvo ordem dos nomes nas legendas dos tres mapas (Canela eGramado em vez deGramado eCanela); sem diferenca numerica nos textos. Imagens graficas de17/33, tabelas42/48 e distribuicao16 inspecionadas ampliadas. Isto confirma o arquivo entregue, sem inventar rastreio autenticado do fluxo de geracao no site ou nova auditoria numerica integral a partir dePPT.
+
+Fontes dos pedidos e coordenadas: [inventario originalF01-F46](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#invent?rio-espacial-completo). A tabela seguinte e a fonte dos estados desta conferencia; nao substitui as decisoesD01-D14. Numeros de origem sao os slides do arquivo comentado69paginas; numeros novos referem-se aoPPT(2)64paginas.
+
+### Resumo rapido para leitura e resposta
+
+**Parecer:** pronto para voltar ao consultor para aceite deste recorte; nao equivale a homologacao externa nem a atendimento literal de todos os pedidos. A matriz abaixo detalha cada um dos46comentarios e as onze marcacoes.
+
+- **Cidades e periodos:** incluidos nos subtitulos das analises. As legendas inferiores ainda usam identificacao compacta; o pedido foi atendido em outra posicao.
+- **Abertura:** card de paginas substituido pelo periodo selecionado; retirado o rodape tecnico sobre cubo/auditoria.
+- **Fontes:** simplificadas nos alvos comentados. Ainda resta `Fonte: cubo granular Geobrain` na pagina16; recomenda-se simplificar esse texto antes de chamar a revisao de100%encerrada.
+- **MCMV sem atividade:** paginas omitidas conforme cobertura e atividade, sem inferir vendas a partir de lancamentos.
+- **Pagina com poucos lancamentos:** mantida por decisaoD05; excluir ou recompor continua sendo escolha do analista.
+- **VGL/VGV:** sigla e extenso corrigidos nos titulos e cabecalhos.
+- **Vendas negativas:** valores preservados; barra negativa vermelha e a esquerda do zero.
+- **Disponibilidade:** cabecalho padronizado e agregado identificado como Media das taxas, conformeD09.
+- **Participacao de empreendimentos:** denominador corrigido para contagem de empreendimentos, sem usar unidades lancadas nessa coluna.
+- **IVV:** fechamento reconciliado em8,5%; comparacoes entre o mesmo trimestre, sem somar taxas nem anunciar fotografia como acumulado9meses.
+- **Tabelas e fontes:** ajustes aplicados em uma pagina por tabela; leitura final das matrizes e acabamento seguem com o analistaD08.
+- **Precos minimos:** universo corrigido para estoque final positivo, sem piso artificial ou regra especial para50m2. Valores baixos ainda validos permanecem.
+- **Mapas:** enquadramento visual corrigido; coordenada deWinkelHaus ainda depende de apuracao na origem. Seus dados nao foram excluidos dos indicadores.
+- **Documentario:** retirado do manifesto ativo.
+- **Exportacao:** Geobrain padronizado, sem frases de acessibilidade visiveis, tabelas alinhadas, setas com espaco e painel anual unificado. Textos e conteudo das celulas editaveis; graficos/quadros graficos e decoracao permanecem imagens, conforme a decisao visual.
+- **Inicio da serie:** picoIVV56,9% preservado porD12, sem filtro de aparencia. A ausencia de preco4dorm1T2023 foi distinguida do zero observado e aparece como lacuna.
+
+**Contexto do e-mail recebido em03/11:** Teresa informa que nao havia apontamentos de dados e que retirou os apontamentos de vendas porque o monitoramento comecou depois da data selecionada. Finoti havia destacado titulos e o comportamento de1T/2T2023. Registrar essa explicacao humana como contexto de cobertura das vendas; nao atribuir automaticamente a ela a causa do picoIVV nem apresentar toda a revisao como correcao de dados errados. A resposta deve comunicar ajustes de identificacao/apresentacao, disponibilidade do PPT para acabamento e solicitar conferencia final. Nao enviar e-mail pelo agente nem antecipar aceite.
+
+### Matriz dos46comentarios
+
+| ID | Slide original | Pagina nova | Situacao | Resultado / limite |
+|---|---:|---:|---|---|
+| F01 | 5 | 5 | Corrigido | Card de contagem substituido pelo periodo1T2023-3T2026. |
+| F02 | 5 | 5 | Corrigido | Retirado rodape sobre cubo/auditoria da abertura. |
+| F03 | 9 | 9 | Corrigido no alvo | Fonte da pagina9 sem fotografia daAPI. Residuo semelhante aparece na pagina16; ver ressalvas. |
+| F04 | 9 | 9 | Atendido no subtitulo | Canela eGramado abaixo do titulo. Legenda inferior ainda2municipios; nao houve substituicao literal do rodape. |
+| F05 | 10 | 10 | Corrigido | Competencia3T2026 explicita no subtitulo. |
+| F06 | 11 | 11 | Atendido no subtitulo | Canela eGramado e periodo12meses explicitos; legenda inferior continua compacta. |
+| F07 | 11 | 11 | Corrigido no recorte | Contexto territorial e temporal nas paginas analiticas. Nao valida automaticamente outros recortes. |
+| F08 | 13 | 13 | Corrigido | Distribuicao identifica3T2026. |
+| F09 | 16 | Omitida | Omitido com guarda | Paginas MCMV inativas retiradas; decisao depende de atividade e cobertura, nao so da legenda. |
+| F10 | 17 | 15 | Corrigido | Distribuicao por tipologia identifica3T2026. |
+| F11 | 18 | 16 | Decisao do analista | Pagina permanece porD05; nao acatada exclusao automatica por pouco lancamento. Analista decide excluir/editar. |
+| F12 | 19 | 17 | Corrigido | VGL - Valor Geral Lancado no titulo. |
+| F13 | 20 | 18 | Corrigido | Competencia3T2026 na distribuicao de valor lancado. |
+| F14 | 20 | 18 | Corrigido | VGL com sigla e extenso. |
+| F15 | 21 | 19 | Corrigido | VGL com sigla e extenso; acumulado12meses identificado. |
+| F16 | 24 | 22 | Corrigido | Distribuicao de vendas com3T2026. |
+| F17 | 24 | 22 | Corrigido | Alto -7/-4,8% preservado; barra vermelha a esquerda do zero. |
+| F18 | 27 | Omitida | Omitido com guarda | Pagina MCMV de vendas inativa retirada sem inferir vendas a partir dos lancamentos. |
+| F19 | 28 | 24 | Corrigido | Vendas por tipologia com3T2026. |
+| F20 | 29 | 25 | Corrigido | Exemplo de cidade/trimestre generalizado nos subtitulos analiticos. |
+| F21 | 30 | 26 | Corrigido | VGV - Valor Geral Vendido no titulo. |
+| F22 | 31 | 27 | Corrigido | VGV com extenso; acumulado12meses identificado. |
+| F23 | 34 | 30 | Corrigido pelo contratoD09 | Total mostra Media das taxas17,8%, media simples; nao razao de universos distintos. |
+| F24 | 34 | 30 | Corrigido pelo contratoD07 | Padronizacao interpretada como cabecalho Disponibilidade s/O.L.; nao redesenho geral. |
+| F25 | 34 | 30 | Corrigido | Cabecalho sem historica; denominador historico preservado e explicado na metodologia. |
+| F26 | 35 | 31 | Corrigido pelo contratoD09 | Total por padrao com Media das taxas19,0%. |
+| F27 | 38 | 34 | Corrigido | Serie e tabela mostram8,5%; causa da exclusao da categoria com vendas negativas corrigida, sem constante. |
+| F28 | 51 | 47 | Ajuste aplicado; acabamento | Matriz ampliada e editavel em uma pagina. Legibilidade final em apresentacao continua sujeita ao analistaD08. |
+| F29 | 51 | 47 | Corrigido | Subtitulo Canela eGramado/RS/3T2026 na matriz. |
+| F30 | 52 | 48 | Corrigido | Subtitulo Canela eGramado/RS/3T2026 na tabela de extremos. |
+| F31 | 52 | 48 | Universo corrigido | Extremos usam estoque positivo e valores validos. Minimos9677/8037/6757 por m2; sem piso artificial nem regra especial50m2. |
+| F32 | 53 | 49 | Corrigido | Subtitulo na maturidade por tipologia. |
+| F33 | 53 | 49 | Ajuste aplicado; acabamento | Tabela mantida inteira em um slide e textos editaveis. Aumentos finais de fonte/largura ficam com analistaD08. |
+| F34 | 54 | 50 | Corrigido | Subtitulo na maturidade por padrao. |
+| F35 | 54 | 50 | Ajuste aplicado; acabamento | Mesma regraD08: sem continuacao automatica, sem cortar celulas; acabamento final do analista. |
+| F36 | 55 | 51 | Corrigido | Cabecalho VGL - Valor Geral Lancado. |
+| F37 | 55 | 51 | Corrigido | Cabecalho VGV - Valor Geral Vendido. |
+| F38 | 57 | 53 | Corrigido | Consolidado horizontal com cidades e3T2026. |
+| F39 | 58 | 54 | Corrigido | Coortes horizontais com cidades e3T2026. |
+| F40 | 58 | 54 | Corrigido pelo contratoD09 | Coortes: Media das taxas10,2%, com zeros observados e sem subtotal duplicado. |
+| F41 | 59 | 55 | Corrigido | Preco horizontal com cidades e3T2026. |
+| F42 | 60 | 56 | Corrigido | Minimo/media/maximo horizontal com cidades e3T2026. |
+| F43 | 61 | 57 | Visual atendido; origem pendente | Mapa enquadrado no territorio;328marcadores de329. WinkelHaus fora do quadro, preservado nos indicadores. |
+| F44 | 62 | 58 | Visual atendido; origem pendente | Mesmo enquadramento por territorio no mapa de estoque; cadastro/posicao ainda sem correcao comprovada na origem. |
+| F45 | 63 | 59 | Visual atendido; origem pendente | Mesmo enquadramento no mapa de preco; nao houve remocao analitica das7unidades deWinkelHaus. |
+| F46 | 68 | Omitida | Retirado | Documentario fora do manifesto; nao confundido com o institucional23anos, que permanece. |
+
+### Onze marcacoes vermelhas sem texto
+
+- Original5: rodape tecnico, corrigido na abertura (novo5).
+- Originais9/11: identidade geografica, atendida nos subtitulos (novos9/11); legenda inferior ainda compacta.
+- Original24: venda negativa, barra vermelha/divergente (novo22).
+- Originais34/35/58: totais de disponibilidade, substituidos por Media das taxas conformeD09 (novos30/31/54).
+- Original37: primeiros pontosIVV1,2%/56,9%, mantidos porD12. Nao foi criado filtro de outlier; investigacao da base ainda aberta (novo33).
+- Original38: totalIVV8,5%, reconciliado com a serie (novo34).
+- Original52: duas marcacoes, area50m2 e minimos de preco. Universo atual corrigido; nenhuma regra por valor/area. A tabela nova observa51m2 de minimo para2dormitorios, sem que isso signifique correcao manual dos50m2 (novo48).
+
+### Ressalvas antes de dizer100%encerrado
+
+1. **Residuo editorial real, pagina16:** rodape ainda traz `Fonte: cubo granular Geobrain`. Contraria a orientacao geralD04 de retirar jargao de implementacao. Troca simples recomendada para `Fonte: Brain Inteligencia Estrategica - Geobrain`; nao foi alterado o codigo neste pedido de avaliacao.
+2. **Analista:** decidir manter/excluir a pagina16 com pouca diversidade; revisar leitura das matrizes47/49/50 no contexto da apresentacao. O gerador mantem uma pagina e textos editaveis, nao promete eliminar todo acabamento humano.
+3. **Identificacao:** cidades/periodos estao nos subtitulos; rodapes de series ainda usam2municipios. Atende a identidade geral, mas nao e troca literal da legenda marcada porFinoti. Se exigida, tratar como refinamento editorial.
+4. **Origem:** picoIVV2T2023 e coordenada deWinkelHaus nao declarados corrigidos. Mapas foram mitigados visualmente, preservando indicadores. MinimoR$6757/m2 ainda existe porque foi observado no universo de estoque positivo, nao por falha comprovada.
+5. **Escopo de aceite:** este arquivo cobre Canela+Gramado1T2023-3T2026. Nao homologa automaticamente Secovi, outras cidades, periodos ou o novo formato perante os consultores.
+
+### Ajustes adicionais posteriores aos comentarios
+
+Confirmados na versao2: grafiaGeobrain; sem textos sr-only expostos; tabelas/triangulos com caixas coordenadas; painel anual em imagem unica; comparacaoIVV entre mesmos trimestres sem soma de taxas; fotografiaIVV/estoque sem falso acumulado9meses; ausencia de preco4dorm1T2023 mostrada como lacuna, nao zero; PPT com textos/celulas editaveis e graficos em imagem, conforme solicitacao. O arquivo isolado nao demonstra os avisosCSV da geracao; essa prova continua sendo o ensaio/cache anterior, sem substituir uma eventual auditoria nova trazida pelo usuario.
+
+Brutos, inventario, comparacao com907d4aa, matriz derivada e renders: `.local-inputs/panorama-acceptance-2026-11-04/`. Leitura e revisao documental, sem API, testes de runtime novos, commit ou push automaticos.
+
+## Material de apoio e roteiro recorrente do analista - 04/11/2026
+
+A pedido deGabriel, geradoPDF derivado da matriz deste documento, com7paginas: contexto da versaoPPT(2), os46comentarios individualizados com pagina antiga/nova e tratamento/verificacao, onze marcacoes vermelhas, ajustes posteriores e checklist em uma pagina final. Referencia e a ultima saida trazida do site, arquivoeditavel(2), nao um aceite externo. Sem alteracao no gerador ou criacao automatica de etapa na interface; o roteiro e para revisao humana apos cada geracao.
+
+Arquivo: `FIERGS_Gramado_Canela_Retorno_Finoti_Checklist_2026-11-04.pdf`, em `.local-inputs/panorama-review-support-2026-11-04/` e copia na pasta de revisao do usuario. PDF e snapshot derivado, nao segunda fonte de regras. Script e renderizacoes locais preservados junto do arquivo; todos46IDs conferidos na extracao de texto e paginas revisadas visualmente. A depend?nciaReportLab foi instalada somente emdeps local ignorada, sem alterar dependencias do produto.
+
+### Roteiro de revisao apos cada geracao
+
+1. Conferir cidades, UF, janela e fechamento em selecao, capa e subtitulos; distinguir trimestre, fotografia e acumulados.
+2. Conferir correspondencia da capa e institucionais ao recorte; nao usar identidade do preset oficial em conjunto diferente.
+3. AbrirAvisos eAuditoriaCSV da mesma geracao; apurar cobertura e divergencias antes de interpretar ou alterar um numero.
+4. Conferir controles de oferta/vendas/IVV e universos de preco; preservar zeros observados, nulos e sinais negativos.
+5. Avaliar inicio do monitoramento, picos e coordenadas isoladas sem suavizar ou excluir dados por aparencia.
+6. Decidir relevancia de paginas pouco informativas como acabamento editorial; registrar supressoes manuais, sem atribui-las a erro numerico.
+7. Ler matrizes/graficos no tamanho de apresentacao; conferir fontes, cabecalhos, rotulos, percentuais, setas e limites.
+8. Rever fontes e nomenclaturas. Neste arquivo ainda e recomendado simplificar a expressao cubo granular da pagina16.
+9. Guardar original e editar copia com versao/data/responsavel; registrar mudancas e paginas excluidas.
+10. Textos e conteudo das celulas editaveis; graficos/quadros anuais e decoracao em imagem. Editar o texto nao recalcula totais, cores, graficos ouCSV; corrigir origem/gerador quando houver problema de dados.
+11. Apos excluir/reordenar, atualizar sumario/referencias; salvar, fechar e reabrir oPPT para conferirposicoes/fontes.
+12. Se editar oPPT, gerar oPDF da propria copia final; oPDF do site nao incorpora mudancas locais.
+13. Enviar versao e ressalvas para aceite do consultor naquele recorte; nao presumir extensao a outros estudos.
+
+Resposta de e-mail sugerida deve apresentar o estudo e este PDF como materiais separados, explicar o alcance doPPT editavel e orientar a revisao humana; envio porGabriel, sem envio automatico pelo agente. O residuo editorial e as pendencias de origem continuam visiveis no anexo, sem alegar que todos os pedidos foram literalmente encerrados.

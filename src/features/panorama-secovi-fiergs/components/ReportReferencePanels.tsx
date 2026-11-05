@@ -5,7 +5,7 @@ import { panoramaScopeIdentity } from '../scope-identity';
 
 const methodology = {
   'fiergs-rs': [
-    ['Território', 'Municípios monitorados selecionados em uma única UF. O preset regional é um atalho; a composição efetiva é a do recorte gerado.'],
+    ['Território', 'Municípios monitorados escolhidos pelo usuário em uma única UF. A composição efetiva é a do recorte gerado.'],
     ['Período', 'O intervalo selecionado delimita os fluxos de lançamentos e vendas. Estoque e oferta final são fotografias no fechamento.'],
     ['Elegibilidade', 'O universo segue a política de entidade e os filtros do cubo granular. Empreendimentos recusados permanecem identificados na auditoria.'],
     ['Chave e deduplicação', 'Empreendimentos são consolidados pela chave estável que combina identificador e município; contagens usam IDs distintos.'],
