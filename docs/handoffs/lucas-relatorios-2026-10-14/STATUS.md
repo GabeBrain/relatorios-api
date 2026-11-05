@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 05/11/2026 — carregamento inicial restrito ao relatório
+
+Base `1b19e84`, main/origin 0/0 após fetch. Usuário pediu manter a tela de carregamento somente no relatório. Modal global substituído por cartão relativo com BrainLoadingState overlay absoluto; menu e navegação continuam utilizáveis. Sete testes da página, tipagem/lint e diagnóstico Edge com respostas sintéticas lentas cobrem o ajuste; consultas, cancelamento, retomada e fórmulas preservados. Sem ensaio autenticado novo. [Contrato](../../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).
+
 ## 05/11/2026 — fluxo automático SP e insights do analista
 
 Base `93f9bce`, main, único remoto origin, fetch atualizado e 0/0 antes das alterações; Windows/Codex Test. Usuário autorizou implementar e finalizar com commit/push. Uma ação executa oito etapas com progresso real, cancelamento, retomada e coleta detalhada compartilhada. Insights preservam memória de cálculo e conciliações sem atribuir causas. GeoApiScopeEngine, BrainLoadingState e shadcn mantidos; nenhum motor paralelo alterado. [Contrato, ensaios e limites](../../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).

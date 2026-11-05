@@ -145,9 +145,13 @@ try {
   for(const width of [1440,390])for(const dark of [false,true]){
     closing='09';slow=true;slowNeighborhood=true;
     await setup(width,dark);await generate();
-    await page.getByRole('dialog',{name:'Geração automática do relatório'}).waitFor();
+    const loading=page.getByRole('region',{name:'Carregamento do relatório'});
+    await loading.waitFor();
     await page.waitForTimeout(250);
-    assert.equal(await page.getByRole('dialog').evaluate(element=>Math.round(element.getBoundingClientRect().width)),width);
+    assert.equal(await page.getByRole('dialog').count(),0);
+    assert.ok(await loading.evaluate(element=>element.getBoundingClientRect().width)<width);
+    assert.equal(await loading.getByRole('status').evaluate(element=>getComputedStyle(element).position),'absolute');
+    await page.getByRole('button',{name:/Recolher menu|Expandir menu/}).first().click({trial:true});
     await page.screenshot({path:resolve(output,`${width}-${dark}-initial.png`)});
     await page.locator('[data-step="details"][data-status="running"]').waitFor({timeout:60000});
     await page.getByRole('heading',{name:'Gerando seu relatório'}).scrollIntoViewIfNeeded();

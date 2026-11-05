@@ -10,6 +10,8 @@ Cada etapa mostra situação, mensagem e trabalho efetivamente concluído: fonte
 
 O fluxo reaproveita `GeoApiScopeSelector/useGeoApiScope`, componentes shadcn e `BrainLoadingState`: overlay na consulta municipal inicial e operation nas etapas seguintes, com marca Brain, tempo decorrido e cancelamento. Os dados municipais já ficam acessíveis nos insights durante as demais etapas. A montagem/exportação aparece após o término ou interrupção, com as pendências da geração identificadas; disponibilidade não representa homologação.
 
+**Refinamento visual posterior, 05/11:** a pedido do usuário, o overlay inicial fica contido em um cartão relativo na área do relatório (`position: absolute`). O modal/portal global foi removido: menu e navegação permanecem acessíveis, sem prender foco ou bloquear a tela inteira. Marca Brain, progresso e botão de cancelamento são preservados; consultas e regras não mudam.
+
 ## Falhas, cancelamento e retomada
 
 - Falha ou cobertura municipal inválida impede iniciar fontes pesadas.

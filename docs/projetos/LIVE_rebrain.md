@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — SP: carregamento limitado à área do relatório — usuário / Codex
+
+- **Mudança:** removido o Dialog global da primeira etapa. BrainLoadingState overlay fica em cartão relativo, sem portal, bloqueio do menu ou retenção de foco. Progresso e cancelamento preservados; demais etapas seguem no painel automático. Nenhuma regra ou chamada alterada.
+- **Validação/estado:** testes da página, tipagem e ensaio Edge com resposta lenta em desktop/celular claro/escuro; diagnóstico verifica overlay absoluto contido, ausência de modal e acionamento do menu durante a consulta. Padrão Brain existente reutilizado. Ensaio com fonte sintética; API autenticada e deploy não verificados nesta rodada.
+- **Etapas/Pendências:** ajuste local para revisão; testar no site após publicação. [Contrato atualizado](../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md). Demais pendências numéricas permanecem.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; sem escrita.
+
 ### 2026-11-05 — SP: geração automática em oito etapas e insights — usuário / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/sp`. Usuário autorizou substituir os acionamentos manuais por um fluxo visual e, nesta entrega, finalizar/commitar/publicar.
