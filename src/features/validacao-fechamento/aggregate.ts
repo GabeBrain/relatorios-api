@@ -561,7 +561,23 @@ export function computeResumoEmail(selectedRows: ClosureRow[], dimensionRows: Cl
   const displayPriorYearKey = bucketOfStr(previousYearKey, granularity);
   const displayPriorKey = bucketOfStr(shiftMonth(selectedKey, granularity === 'year' ? -12 : granularity === 'quarter' ? -3 : -1), granularity);
   const grouped = granularity === 'month' ? null : computeResumo(dimensionRows, dimensionRows, granularity);
-  const groupedMetrics = (key: string) => grouped?.buckets.find((bucket) => bucket.key === key)?.metrics ?? metricsWithOfertaAtiva(undefined, dimensionRows, '');
+  // Exclusivo do Resumo email: qty entra no trimestre/ano somente no mês de
+  // lançamento, como já ocorre na visão mensal e nos acumulados. Não repetir
+  // a mesma quantidade nos históricos posteriores do intervalo.
+  const launchesByBucket = new Map<string, number>();
+  if (granularity !== 'month') {
+    for (const row of dimensionRows) {
+      if (!row.periodKey || row.periodKey !== row.release_period_key) continue;
+      const key = bucketKeyOfRow(row, granularity);
+      launchesByBucket.set(key, (launchesByBucket.get(key) ?? 0) + row.qty);
+    }
+  }
+  const groupedMetrics = (key: string) => {
+    const metrics = grouped?.buckets.find((bucket) => bucket.key === key)?.metrics;
+    return metrics
+      ? { ...metrics, unidades_lancadas: launchesByBucket.get(key) ?? 0 }
+      : metricsWithOfertaAtiva(undefined, dimensionRows, '');
+  };
 
   return {
     displayPeriods: {

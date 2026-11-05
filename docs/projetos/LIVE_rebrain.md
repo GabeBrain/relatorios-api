@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — Validação do Fechamento: unidades lançadas sem repetição no Resumo email — Edgar / Codex
+
+- **Mudança exclusiva:** nas três colunas de períodos do Resumo email, em visualização trimestral/anual, unidades lançadas passam a somar qty somente dos registros do mês de lançamento, evitando repetir a quantidade nos históricos posteriores do mesmo intervalo. A variação anual dessa linha acompanha os valores corrigidos. Mensal, acumulados, demais indicadores, filtros temporais, Resumo/Resumo por cidade e motor compartilhado `computeResumo` preservados.
+- **Evidência:** execução offline com normalização real da base local PI atualizada em 04/11, recorte Teresina/PI Vertical (157 empreendimentos, 283 tipologias, 6.076 históricos, último período set/2026). 3T/2026 corrigido de 2.168 para 1.368; 2T/2026 de 334 para 214; 3T/2025 de 598 para 539; anual/2026 de 6.250 para 2.536. Demais métricas comparadas sem alteração. Exemplo: 800 unidades do empreendimento 89698/tipologia 155858 deixam de repetir em setembro após lançamento em agosto.
+- **Etapas/Pendências:** testes de regressão adicionados para trimestre/ano, colunas comparativas, variação anual, mensal, acumulados e preservação dos demais indicadores/abas. Sem nova consulta autenticada ou ensaio visual; aceite e publicação pendentes. As questões de preços e de corte temporal permanecem deliberadamente sem alteração, conforme escopo solicitado.
+- **Monday:** —
+
 ### 2026-11-04 — SP: integração autorizada preservando os dois trabalhos — usuário / Codex
 
 - **Build integrado:** tipos completos e build exit0, Vite29,63s; avisos existentes de Browserslist/chunks. Gate documental aprovado, com avisos de tamanho dos documentos vivos. Evidência em `.local-inputs/sp-integrated-build-final.log`.
