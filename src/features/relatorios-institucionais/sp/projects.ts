@@ -63,7 +63,7 @@ export async function fetchSpProjects(report: SpPreview, options: Options = {}):
   return buildSpProjects(buildings, report, buildings.length);
 }
 
-/** Complete source collection, reused only when opening the sales-by-neighborhood slide. */
+/** Complete collection shared by neighborhood, area, price and stock detail slides. */
 export async function fetchSpBuildingRecords(report: SpPreview, options: Options = {}, source: 'building' | 'building-with-history' = 'building-with-history'): Promise<Building[]> {
   if (!isSpMunicipalPreview(report)) throw new Error('Período municipal indisponível.');
   const request = options.request ?? (value => httpRequest<Record<string, unknown>>(value));
@@ -94,13 +94,19 @@ export async function fetchSpBuildingRecords(report: SpPreview, options: Options
     options.onProgress?.(`Conferindo ${source === 'building' ? 'empreendimentos' : 'vendas por bairro'}: ${completed} de ${expectedLast} páginas concluídas…`);
   }
   await readPage(1);
-  // At most three requests in flight; drain a failed batch before leaving the collector.
-  for (let first = 2; first <= expectedLast!; first += 3) {
-    checkAbort();
-    const results = await Promise.allSettled(Array.from({ length: Math.min(3, expectedLast! - first + 1) }, (_, index) => readPage(first + index)));
-    const failed = results.find(result => result.status === 'rejected');
-    if (failed?.status === 'rejected') throw failed.reason;
+  // Refill each free slot immediately instead of waiting for the slowest page in a batch.
+  // A retry/backoff keeps its slot. Stop scheduling on failure and drain in-flight work.
+  let nextPage = 2;
+  let failure: { reason: unknown } | undefined;
+  async function worker() {
+    while (!failure && nextPage <= expectedLast!) {
+      const page = nextPage++;
+      try { await readPage(page); }
+      catch (reason) { failure ??= { reason }; }
+    }
   }
+  await Promise.all(Array.from({ length: Math.min(3, expectedLast! - 1) }, () => worker()));
+  if (failure) throw failure.reason;
   checkAbort();
   if (received !== expectedTotal || byId.size !== expectedTotal) throw new Error('A coleta não comprovou a cobertura de IDs distintos; recomece a consulta.');
   return [...byId.values()];

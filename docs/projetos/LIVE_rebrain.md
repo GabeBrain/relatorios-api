@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — SP: coleta detalhada com vagas continuamente ocupadas — usuário / Codex
+
+- **Validação final:** tipos/build exit0 e lint aprovados; Edge local dirigido22posições, lento/cancelamento/retry/erro/vazio e múltiplos períodos/2027 aprovados. Loading Brain existente preservado e captura inspecionada; zero erros de página/zero GeoBrain real/54Mapbox200. Caso53páginas é teste de transporte, sem promessa de duração real.
+
+- **Problema/mudança:** usuário observa7–10min para53páginas. Consumidor aguardava a mais lenta de cada lote de três antes de continuar. Fila contínua inicia a próxima assim que uma vaga libera; mantém três requisições, fonte/filtros/100por página/timeout/retry/Retry-After e todas as guardas. Falha interrompe fila e aguarda iniciadas; cancelamento não publica parcial. Cache/BrainLoadingState existentes preservados, sem fluxo visual novo.
+- **Evidência:**278 testes SP/25arquivos e lint dirigido aprovados; quatro regressões novas. Relógio virtual com53páginas/5.229IDs e latências desiguais:541s antes/195s depois (~64% de redução), sem medir/prometê-lo na API real. [Regra e limites](../features/relatorios-institucionais/sp/PERFORMANCE_COLETA_2026-11-05.md).
+- **Integração/estado:** base5e883a8 após fast-forward de três commits da Validação de Fechamento, preservados. Implementação local em validação final; reteste autenticado de duração e homologação permanecem pendentes. Não houve coleta de negócio nova ou alteração de outros motores.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
 ### 2026-11-05 — Validação do Fechamento: ajuda do Resumo email alinhada às regras vigentes — Edgar / Codex
 
 - **Mudança exclusiva:** textos dos oito indicadores e quatro colunas calculadas do Resumo email isolados em `resumo-email-help.ts`, sem alterar METRICS compartilhado ou a ajuda das outras abas. Dicas explicam lançamentos somente no mês de lançamento, Preço médio pela última posição ponderada, Preço/m² com todos os históricos elegíveis, estoques por última posição, oferta ativa com status cadastral atual, representatividade do fechamento e vendas por soma dos históricos disponíveis. Acumulados explicitam corte mensal; variações descrevem fórmula e tratamento de base zero, sem prometer corte mensal para os buckets trimestrais/anuais.
@@ -919,6 +928,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**05/11 — SP, eficiência da coleta:** fila contínua com três vagas substitui lotes;278 regressões e lint aprovados. Ganho demonstrado em latências simuladas, duração real pós-publicação ainda por medir. Critérios de fonte e aprovação dos slides preservados.
+
 **04/11 — SP, checklist (4):** ajustes51/53–59/78 validados localmente com274 testes, tipos/lint/build e navegador dirigido. Quantidades do78 preservadas com preço incompleto explicitado; controle de estoque aceita apenas soma municipal exata. Integração/publicação e novo ensaio autenticado pendentes, sem homologação automática.
 
 **04/11 — SP, integração posterior:** merge7e699fc autorizado e concluído, preservação verificada e274 regressões aprovadas na base combinada. Integração deixou de ser pendência; ensaio real, fonte e editorial permanecem abertos.
@@ -994,6 +1005,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — medir fila contínua na API real:** após publicação, comparar duração da conferência detalhada no mesmo recorte; se ainda lenta, registrar latências/tamanhos/retries das páginas, sem expor token. Resultado sintético9min01s→3min15s não é SLA. Cobertura integral, lacunas reais e revisão editorial continuam independentes dessa otimização.
 
 - [ ] **SP — reteste do checklist (4):** integração autorizada concluída em7e699fc; publicar correções e gerar novo checklist2T2026. Conferir51, pontos recuperados53–59 e tabela parcial78. Jun2023/64094 permanece fotografia ausente; preço54845/73369 deve vir da fonte para completar os valores monetários. Revisar oito artes editoriais. Não converter parciais em disponíveis apenas para fechar contagem.
 

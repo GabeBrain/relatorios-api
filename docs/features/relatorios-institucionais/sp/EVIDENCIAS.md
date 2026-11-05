@@ -1,5 +1,14 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 05/11/2026 — coleta detalhada com fila contínua limitada
+
+- **Validação final:** tipos completos/build exit0 (Vite43,51s) e lint dirigido aprovados, avisos existentes de Browserslist/chunks. Edge local1440/claro, modo dirigido22posições mais cenários de fonte lenta, cancelamento/retry, erro/vazio, v2/403, mapas, períodos2T2025/4T2025/1T2026/2T2026 e2027: zero erros de página, zero consultas de negócio GeoBrain reais,54respostas Mapbox200. Captura neighborhood-loading.png inspecionada: BrainLoadingState com etapa/cronômetro e cancelamento, prévia municipal preservada. Logs `.local-inputs/sp-continuous-queue-build.log` e `sp-continuous-queue-browser.log`, ignorados. Este ensaio visual usa páginas sintéticas pequenas; o caso53páginas/5.229IDs é coberto pela regressão de transporte com relógio virtual, não por benchmark real no navegador.
+
+- **Solicitação:** usuário observou52/53páginas em7min37s, podendo chegar perto de10min. Espera entre lotes de três identificada no consumidor; latência real individual da API não medida nesta sessão.
+- **Implementação:** vagas repostas imediatamente, mantendo três requisições simultâneas, rota/filtros/paginação/timeout/retry/Retry-After/cache e guardas. Falha para agendamento e drena trabalho em andamento; cancelamento não publica parcial. [Método, simulação e limites](PERFORMANCE_COLETA_2026-11-05.md).
+- **Regressão:**278 testes SP/25arquivos aprovados com dois workers; lint dos arquivos alterados aprovado. Quatro testes novos verificam aproveitamento das vagas,53páginas/5.229IDs, falha/drenagem e cancelamento durante a fila. Teste com relógio virtual mediu541.000ms no agendamento anterior versus195.000ms na fila contínua; ganho sintético de64%, sem alegar tempo real ou aumento de concorrência. Log `.local-inputs/sp-continuous-queue-tests.log`, ignorado.
+- **Ambiente:** main limpa5e883a8 após fetch e pull--ff-only de três commits da Validação de Fechamento, lidos e preservados; origin único, Codex Test/Windows. Nenhuma nova coleta GeoBrain autenticada; reteste de duração real após publicação necessário.
+
 ## 04/11/2026 — regressão após integração autorizada
 
 Tipos completos e build integrados aprovados, exit0, Vite29,63s; avisos existentes de Browserslist/chunks. Log `.local-inputs/sp-integrated-build-final.log`. Primeira captura via PowerShell tratou stderr como erro; repetição com captura nativa confirmou exit0. Gate check:live-docs aprovado, com avisos de tamanho documental anteriores.

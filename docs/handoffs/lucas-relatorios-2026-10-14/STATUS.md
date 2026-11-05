@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 05/11/2026 — eficiência da conferência detalhada SP
+
+Fechamento local: tipos/build exit0, lint e Edge dirigido aprovados; captura do carregamento inspecionada, zero erros de página e zero chamadas de negócio reais. Estado pronto para publicação/reteste, sem deploy observado.
+
+Codex/Codex Test/Windows, main limpa após fetch e fast-forward de três commits até5e883a8; origin único. Usuário relata7–10min em53páginas. Substituída barreira por lote por fila contínua com três trabalhadores, preservando fonte, escopo, cobertura/IDs, retries/Retry-After e cancelamento.278 testes/25arquivos e lint dirigido aprovados; simulação53páginas/5.229IDs:9min01s para3min15s, não medição de produção. [Contrato e limites](../../features/relatorios-institucionais/sp/PERFORMANCE_COLETA_2026-11-05.md). Sem API real; demais motores e automação geral adiada preservados. Reteste autenticado do tempo e homologação continuam necessários.
+
 ## 04/11/2026 — integração confirmada pelo usuário
 
 Merge7e699fc integra14commits de origin907d4aa com951c79d/851776e, sem conflito ou reescrita. SP preservado byte a byte; novas linhas do LIVE dos dois lados comprovadamente mantidas.274 testes SP/25arquivos aprovados na base combinada com dois workers, após uma primeira execução ter timeout em um render sob concorrência com build. Não se alterou limite/assertiva/código para aprovar. Integração concluída, superando o bloqueio da entrada anterior; reteste autenticado/fonte/editorial e homologação continuam pendentes.

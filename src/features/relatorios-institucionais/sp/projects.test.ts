@@ -9,6 +9,76 @@ const building = (id: number, release_date = '2026-09-01') => ({ building_id: id
 const reply = (data: unknown[], page = 1, total = data.length, last = 1) => ({ ok: true, status: 200, data: { data, meta: { current_page: page, total, last_page: last } } }) as unknown as HttpResponse<Record<string, unknown>>;
 
 describe('SP — coleta granular adaptada do Panorama', () => {
+  it('ocupa a vaga livre antes da página lenta terminar, sem aumentar as três requisições', async () => {
+    vi.useFakeTimers();
+    try {
+      let active=0,maximum=0;
+      const started:number[]=[],finished:number[]=[];
+      const request=vi.fn(async(options:RequestOptions)=>{
+        const page=Number(options.query?.page);started.push(page);maximum=Math.max(maximum,++active);
+        await new Promise(done=>setTimeout(done,page===2?1000:10));
+        active--;finished.push(page);return reply([building(page)],page,8,8);
+      });
+      const collection=fetchSpBuildingRecords(report(),{request});
+      await vi.advanceTimersByTimeAsync(40);
+      expect(started).toContain(5);expect(finished).not.toContain(2);expect(maximum).toBe(3);
+      await vi.runAllTimersAsync();
+      const rows=await collection;
+      expect(rows).toHaveLength(8);expect(new Set(rows.map(row=>row.building_id)).size).toBe(8);
+      expect(started.slice().sort((a,b)=>a-b)).toEqual([1,2,3,4,5,6,7,8]);
+    } finally { vi.useRealTimers(); }
+  });
+  it('reduz o tempo simulado de53páginas desiguais preservando a cobertura e o limite', async () => {
+    vi.useFakeTimers();
+    try {
+      const latency=(page:number)=>page>1&&page%3===2?30_000:1000;
+      const start=Date.now(),progress:number[]=[];
+      const request=vi.fn(async(options:RequestOptions)=>{
+        const page=Number(options.query?.page);
+        await new Promise(done=>setTimeout(done,latency(page)));
+        return reply(Array.from({length:page===53?29:100},(_,i)=>building((page-1)*100+i+1)),page,5229,53);
+      });
+      const collection=fetchSpBuildingRecords(report(),{request,onProgress:()=>progress.push(Date.now()-start)});
+      await vi.runAllTimersAsync();
+      const rows=await collection,elapsed=Date.now()-start;
+      let batched=latency(1);
+      for(let page=2;page<=53;page+=3)batched+=Math.max(...Array.from({length:Math.min(3,54-page)},(_,i)=>latency(page+i)));
+      expect(rows).toHaveLength(5229);expect(request).toHaveBeenCalledTimes(53);expect(progress).toHaveLength(53);
+      expect(elapsed).toBeLessThan(batched);
+      console.info('SP synthetic pagination timing',JSON.stringify({pages:53,buildings:rows.length,batchedMs:batched,continuousMs:elapsed}));
+    } finally { vi.useRealTimers(); }
+  });
+  it('interrompe a fila na falha e aguarda as páginas em andamento antes de rejeitar', async () => {
+    vi.useFakeTimers();
+    try {
+      const started:number[]=[];let settled=false;
+      const request=vi.fn(async(options:RequestOptions)=>{
+        const page=Number(options.query?.page);started.push(page);
+        await new Promise(done=>setTimeout(done,page===1?1:page===2?10:100));
+        return page===2?{...reply([]),ok:false,status:403}:reply([building(page)],page,8,8);
+      });
+      const outcome=fetchSpBuildingRecords(report(),{request}).then(()=>null,error=>error).finally(()=>{settled=true;});
+      await vi.advanceTimersByTimeAsync(20);
+      expect(started).toEqual([1,2,3,4]);expect(settled).toBe(false);
+      await vi.runAllTimersAsync();
+      expect(await outcome).toMatchObject({message:expect.stringContaining('API v2 não autorizou')});
+      expect(started).toEqual([1,2,3,4]);expect(settled).toBe(true);
+    } finally { vi.useRealTimers(); }
+  });
+  it('cancelamento durante a fila não agenda mais páginas nem entrega resultado parcial', async () => {
+    vi.useFakeTimers();
+    try {
+      const controller=new AbortController(),started:number[]=[];
+      const request=vi.fn(async(options:RequestOptions)=>{
+        const page=Number(options.query?.page);started.push(page);
+        await new Promise(done=>setTimeout(done,page===1?1:100));
+        return reply([building(page)],page,8,8);
+      });
+      const outcome=fetchSpBuildingRecords(report(),{request,signal:controller.signal}).then(()=>null,error=>error);
+      await vi.advanceTimersByTimeAsync(20);controller.abort();await vi.runAllTimersAsync();
+      expect(await outcome).toMatchObject({name:'AbortError'});expect(started).toEqual([1,2,3,4]);
+    } finally { vi.useRealTimers(); }
+  });
   it('coleta históricos pela v2 com POST vazio, filtros na URL, autenticação e proveniência',async()=>{
     const signal=new AbortController().signal;
     const request=vi.fn(async(options:RequestOptions)=>reply([building(Number(options.query?.page))],Number(options.query?.page),3,3));
