@@ -8,6 +8,7 @@ import { priorYearQuarter, type SpHistoryBatchInput } from './history-batch';
 
 import { spHistoryWindows } from './periods';
 import { SpReadError } from './read-errors';
+import type { SpWorkProgress } from './work-progress';
 
 const BASE = 'https://geobrain.com.br/public-api';
 interface Envelope { data?: SpTemporalRow[]; meta?: { current_page?: number; last_page?: number; total?: number }; links?: { next?: string | null } }
@@ -17,6 +18,7 @@ export interface SpReadOptions {
   groupBy?: 'Padrão' | 'Tipologia';
   signal?: AbortSignal;
   onProgress?: (label: string) => void;
+  onWorkProgress?: (progress:SpWorkProgress) => void;
   request?: Request;
   sleep?: (ms: number, signal?: AbortSignal) => Promise<void>;
 }
@@ -95,12 +97,15 @@ async function fetchSpHistoricalSeries(report:SpPreview,metric:'releases'|'sales
   if(!isSpMunicipalPreview(report)||!report.throughMonth)throw new SpReadError('Confira os meses municipais antes das séries históricas.');
   const read=createSpRead(options,40_000),rows:SpTemporalRow[]=[];
   const label=metric==='releases'?'lançamentos':metric==='sales'?'vendas':'oferta';
-  for(const window of spHistoryWindows(report,metric==='stock')){
+  const windows=spHistoryWindows(report,metric==='stock');let completed=0;
+  options.onWorkProgress?.({completed,total:windows.length,unit:'janelas'});
+  for(const window of windows){
     const months=Number(window.end.slice(5))-Number(window.start.slice(5))+1,maxRows=months*7;
     try{
       const batch=await readSpSeries(read,metric,{city:'São Paulo',uf:'SP','type[]':['Vertical'],group_by:'Padrão',start_period:`${window.start}-01`,end_period:monthEnd(window.end)},maxRows,page=>options.onProgress?.(`Conferindo ${label}: ${window.start} a ${window.end}, página ${page}…`),maxRows);
       if(batch.some(row=>typeof row.period!=='string'||row.period.slice(0,7)<window.start||row.period.slice(0,7)>window.end))throw new SpReadError('A fonte retornou competência fora da janela solicitada.');
       rows.push(...batch);
+      options.onWorkProgress?.({completed:++completed,total:windows.length,unit:'janelas'});
     }catch(error){if(error instanceof SpReadError)throw new SpReadError(`${label[0].toUpperCase()+label.slice(1)} de ${window.start} a ${window.end}: ${error.message}`,error.code);throw error;}
   }
   return rows;
@@ -112,7 +117,9 @@ export async function fetchSpTemporalInput(quarter: Quarter, options: SpReadOpti
   if (!months.length) throw new SpReadError('Trimestre inválido.');
   if (options.windowEnd !== undefined && !months.includes(options.windowEnd)) throw new SpReadError('Limite da janela inválido.');
   const read = createSpRead(options);
+  let completed=0;options.onWorkProgress?.({completed,total:4,unit:'fontes'});
   const { rootPeriod, total } = await readSpSample(read, options);
+  options.onWorkProgress?.({completed:++completed,total:4,unit:'fontes'});
   const requestedEnd = options.windowEnd ?? months[2];
   const end = requestedEnd;
   const result: SpTemporalInput = { origin: 'api', windowEnd: options.windowEnd, groupBy: options.groupBy ?? 'Padrão', uf: 'SP', city: 'São Paulo', rootPeriod, sampledBuildings: 1, totalBuildings: total, sales: [], releases: [], stock: [], complete: { sales: true, releases: true, stock: true } };
@@ -120,6 +127,7 @@ export async function fetchSpTemporalInput(quarter: Quarter, options: SpReadOpti
   for (const metric of ['sales', 'releases', 'stock'] as const) {
     options.onProgress?.({ sales: 'Consultando vendas dos meses disponíveis…', releases: 'Consultando lançamentos dos meses disponíveis…', stock: 'Consultando estoque e conferindo a paginação…' }[metric]);
     result[metric] = await readSpSeries(read, metric, { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'], group_by: options.groupBy ?? 'Padrão', start_period: `${metric === 'stock' ? priorMonth(months[0]) : months[0]}-01`, end_period: monthEnd(end) });
+    options.onWorkProgress?.({completed:++completed,total:4,unit:'fontes'});
   }
   return result;
 }

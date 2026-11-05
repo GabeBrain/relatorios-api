@@ -243,13 +243,15 @@ export function buildSpGranularDetails(buildings: Record<string,unknown>[], repo
   const builder = create(report); if (!builder) return blockedSpGranularDetails('Confira primeiro o período e os padrões municipais.');
   buildings.forEach(building => builder.ingest(building)); return builder.finish();
 }
-export async function buildSpGranularDetailsAsync(buildings: Record<string,unknown>[], report: SpPreview, options: { signal: AbortSignal; onProgress?: (message:string) => void }): Promise<SpGranularDetails> {
+export async function buildSpGranularDetailsAsync(buildings: Record<string,unknown>[], report: SpPreview, options: { signal: AbortSignal; onProgress?: (message:string) => void;onWorkProgress?:(progress:import('./work-progress').SpWorkProgress)=>void }): Promise<SpGranularDetails> {
   const builder = create(report); if (!builder) return blockedSpGranularDetails('Confira primeiro o período e os padrões municipais.');
+  options.onWorkProgress?.({completed:0,total:buildings.length,unit:'empreendimentos'});
   for (let i=0;i<buildings.length;i++) {
     if (options.signal.aborted) throw new DOMException('Processamento cancelado.','AbortError');
     builder.ingest(buildings[i]);
-    if (i % 20 === 0) { options.onProgress?.(`Conferindo áreas e preços: ${i+1} de ${buildings.length} empreendimentos…`); await new Promise(done => setTimeout(done,0)); }
+    if (i % 20 === 0) { options.onProgress?.(`Conferindo áreas e preços: ${i+1} de ${buildings.length} empreendimentos…`);options.onWorkProgress?.({completed:i+1,total:buildings.length,unit:'empreendimentos'}); await new Promise(done => setTimeout(done,0)); }
   }
   if (options.signal.aborted) throw new DOMException('Processamento cancelado.','AbortError');
+  options.onWorkProgress?.({completed:buildings.length,total:buildings.length,unit:'empreendimentos'});
   return builder.finish();
 }

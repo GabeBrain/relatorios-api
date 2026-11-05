@@ -6,6 +6,7 @@ import { quarterMonths } from './temporal';
 import { buildSpProjectTrends, buildSpTrendBreakdown, type SpProjectTrends, type SpTrendBreakdown } from './project-trends';
 import { buildSpLaunchNeighborhoods, type SpLaunchNeighborhoods } from './neighborhoods';
 import { SpReadError } from './read-errors';
+import type { SpWorkProgress } from './work-progress';
 
 export const SP_BUILDING_HISTORY_V2 = 'https://app.geobrain.com.br/public-api/v2/building-with-history-internal';
 
@@ -53,6 +54,7 @@ export function buildSpProjects(buildings: Building[], report: SpPreview, receiv
 interface Options {
   signal?: AbortSignal;
   onProgress?: (message: string) => void;
+  onWorkProgress?: (progress:SpWorkProgress) => void;
   request?: (options: RequestOptions) => Promise<HttpResponse<Record<string, unknown>>>;
   sleep?: (ms: number, signal?: AbortSignal) => Promise<void>;
 }
@@ -91,6 +93,7 @@ export async function fetchSpBuildingRecords(report: SpPreview, options: Options
     if (received > expectedTotal) throw new Error('A coleta excedeu o total informado pela fonte.');
     for (const building of payload.buildings) insertBuilding(byId, building);
     completed++;
+    options.onWorkProgress?.({completed,total:expectedLast!,unit:'páginas'});
     options.onProgress?.(`Conferindo ${source === 'building' ? 'empreendimentos' : 'vendas por bairro'}: ${completed} de ${expectedLast} páginas concluídas…`);
   }
   await readPage(1);

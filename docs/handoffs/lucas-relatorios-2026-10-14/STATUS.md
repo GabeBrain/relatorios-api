@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 05/11/2026 — fluxo automático SP e insights do analista
+
+Base `93f9bce`, main, único remoto origin, fetch atualizado e 0/0 antes das alterações; Windows/Codex Test. Usuário autorizou implementar e finalizar com commit/push. Uma ação executa oito etapas com progresso real, cancelamento, retomada e coleta detalhada compartilhada. Insights preservam memória de cálculo e conciliações sem atribuir causas. GeoApiScopeEngine, BrainLoadingState e shadcn mantidos; nenhum motor paralelo alterado. [Contrato, ensaios e limites](../../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).
+
+Regressão SP, sessão/callback tardio, tipos/build/lint e navegador Edge com respostas sintéticas lentas, desktop/celular e temas claro/escuro. Nova geração autenticada, deploy observado e aceite do analista não foram realizados nesta rodada. A publicação Git de `93f9bce` já ocorreu na entrega anterior; as afirmações históricas abaixo de publicação pendente descrevem o momento dos respectivos registros. Nenhuma escrita no Monday.
+
 ## 05/11/2026 — comparação completa e contenção executada localmente
 
 Integração confirmada pelo usuário e concluída em `2d6c018`, preservando correções `785cae6`/`9f0ab00` e seis commits do time até `e5bc2c2`.126arquivos SP idênticos; registro vivo de ambos os lados comprovadamente preservado por três pontos, desconsiderando somente separadores vazios. Publicação ainda não realizada; não confundir merge autorizado com push.
