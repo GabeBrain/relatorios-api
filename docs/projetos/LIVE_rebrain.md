@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — Rebrain: barra do menu no tema escuro e publicação FIERGS — Gabriel / Codex
+
+- **Mudança:** barra de rolagem da navegação usa `color-scheme: dark` e cores existentes de fundo/sidebar e texto secundário; regra limitada ao modo escuro do menu, sem novos tokens ou alteração do tema claro. Seleção manual FIERGS incluída em `c8d2abb`.
+- **Integração:** autorizada por Gabriel nesta sessão; merge `4f24191` incorporou13 commits remotos de SP/Validação sem conflito. Seis documentos locais guardados e reaplicados; insumos e Corretor preservados, stash de segurança mantido. Sem alterações próprias nessas features paralelas.
+- **Validação:** Chromium isolado confirma barra cinza translúcida sobre fundo rgb20/23/31, esquema escuro, rolagem ativa; modo claro permanece auto. Captura e JSON em `.local-inputs/sidebar-scrollbar-2026-11-05/`. Dez testes focados de seleção/identidade/metodologia reaprovados após merge. Publicação Git autorizada; conferência da aplicação no Lovable ainda necessária.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
+
 ### 2026-11-05 — Panorama FIERGS: seleção manual de cidades — Gabriel / Codex
 
 - **Mudança:** pedido de Teresa autorizado por Gabriel: início sem cidades; UF RS/FIERGS e SP/Secovi alterável; entidade/UF limpam recorte e resultado. Removidos atalho e menções ao preset na seleção/metodologia. Identidade interna do conjunto homologado, fórmulas e guardas preservadas.
