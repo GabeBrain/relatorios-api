@@ -6,7 +6,7 @@ Continuação: publicação dos oito commits autorizada por Gabriel; código da 
 
 ## Objetivo e baseline
 
-Permitir aplicar o modelo FIERGS a uma cidade ou qualquer conjunto de cidades monitoradas e autorizadas, dentro de uma única UF por estudo. Manter o preset das dez cidades do RS como atalho e preservar o material aceito pela Juliana. A expansão é uma entrega nova; o aceite anterior permanece encerrado.
+Permitir aplicar o modelo FIERGS a uma cidade ou qualquer conjunto de cidades monitoradas e autorizadas, dentro de uma única UF por estudo. Preservar a identidade do conjunto homologado quando selecionado manualmente; desde 05/11/2026, n?o h? atalho nem sele??o autom?tica de cidades na interface. A expansão é uma entrega nova; o aceite anterior permanece encerrado.
 
 Fonte: [mapeamento técnico e editorial](MAPEAMENTO_FIERGS_RECORTES_LIVRES_2026-10-13.md). A baseline consultada foi `74cc572`; antes de executar, conferir novamente árvore, histórico e remotos. Na preparação, origin/main está zero atrás e três commits à frente, todos preexistentes do Corretor. Não publicar esses commits por consequência desta entrega sem autorização sobre o histórico a enviar.
 
@@ -113,3 +113,11 @@ Registrar estado, SHA/base, arquivos afetados, decisão metodológica/editorial,
 ## CTA de execução
 
 Execute `docs/features/Relatorios Secovi_FIERGS/PLAN_FIERGS_RECORTES_LIVRES_2026-10-13.md` pelos portões G0–G4. Habilite uma cidade ou conjunto de cidades monitoradas em uma única UF, preserve o preset homologado e use capas, legendas, metodologia e arquivos adequados ao recorte real. Corrija a reconciliação de cidade única sem afrouxar guardas nem transformar falhas em zeros; trate universos vazios com evidência. Preserve alterações paralelas e não modifique Corretor ou Sinduscon. Faça testes focados, mantenha as regressões locais 2T2026 e 4T2025, registre evidências e crie commits isolados com git add explícito. Não faça ensaios longos com API nem gere estudos reais por conta própria. Ao concluir, confira a divergência e apresente os commits que seriam enviados, pedindo minha autorização antes do push. Depois da publicação autorizada, eu gero cidade isolada, conjunto e preset no site para G5; só após verificar esses resultados prepare o e-mail à Juliana no G6.
+
+## 05/11/2026 — Seleção manual solicitada por Teresa
+
+Decisão de Gabriel: FIERGS inicia sem municípios selecionados, como Secovi. Trocar entidade define UF inicial RS/FIERGS ou SP/Secovi, ambas alteráveis, e limpa municípios/resultado. Removidos botão de preset e menções ao atalho na seleção/metodologia. O reconhecimento interno do conjunto oficial preserva capas/nomes homologados quando selecionado manualmente. Fórmulas, autorização e guardas intactas.
+
+Evidência: seleção, identidade e metodologia — 10 testes aprovados em 05/11. Início vazio, ausência de atalho/coleta sem cidades, cidade única/conjunto, invalidação de resultado, troca de entidade/UF. Sem API/estudo real; validado localmente, publicação e conferência no site pendentes.
+
+Finoti escreveu em 04/11 “Os ajustes estão OK”, conforme e-mail compartilhado por Gabriel. O novo pedido de cidades separadas em gráficos/tabelas é ampliação: exemplos solicitados por Gabriel, aguardando resposta. Sem implementação indiscriminada ou aceite presumido dessa ampliação.

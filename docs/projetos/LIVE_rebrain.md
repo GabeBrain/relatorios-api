@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — Panorama FIERGS: seleção manual de cidades — Gabriel / Codex
+
+- **Mudança:** pedido de Teresa autorizado por Gabriel: início sem cidades; UF RS/FIERGS e SP/Secovi alterável; entidade/UF limpam recorte e resultado. Removidos atalho e menções ao preset na seleção/metodologia. Identidade interna do conjunto homologado, fórmulas e guardas preservadas.
+- **Evidência/estado:** 10 testes focados aprovados, sem API/estudo real. Validado localmente; publicação e conferência no site pendentes. [Fonte única](../features/Relatorios%20Secovi_FIERGS/PLAN_FIERGS_RECORTES_LIVRES_2026-10-13.md#05112026--seleção-manual-solicitada-por-teresa).
+- **Retorno externo:** Finoti informou “Os ajustes estão OK” (04/11). Comparação por cidade é novo pedido; Gabriel solicitou exemplos e aguarda resposta. Sem presumir aceite dessa ampliação.
+- **Git:** fetch05/11: 3 commits documentais locais e13 remotos paralelos antes desta entrega; árvore suja preservada, sem integração/push.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
+
 ### 2026-11-04 - Panorama: PPT(2) confrontado com46comentarios Finoti - Gabriel / Codex
 
 - **Pedido/parecer:** usuario trouxe nova saida64paginas e pediu situacao de cada comentario antes da homologacao. Arquivo apto a nova avaliacao/aceite do consultor; nao registrar homologacao externa ou dizer46pedidos literalmente corrigidos.

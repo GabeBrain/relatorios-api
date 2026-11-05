@@ -36,9 +36,12 @@ describe('seleção FIERGS e invalidação de resultado', () => {
     render(<QueryClientProvider client={client}><PanoramaSecoviFiergsPage/></QueryClientProvider>);
     fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: 'fiergs-rs' } });
   }
-  it('aplica preset, permite cidade única e remove resultado ao trocar para conjunto', async () => {
+  it('inicia sem cidades, permite cidade única e remove resultado ao trocar para conjunto', async () => {
     setup();
-    expect(screen.getByTestId('selected-cities').textContent).toContain('Viamão');
+    expect(screen.getByTestId('selected-cities').textContent).toBe('');
+    expect(screen.queryByText(/preset/i)).toBeNull();
+    expect(screen.getByRole('button', { name: 'Gerar relatório' })).toBeDisabled();
+    expect(mocks.fetch).not.toHaveBeenCalled();
     fireEvent.click(screen.getByText('Uma cidade'));
     fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
     await waitFor(() => expect(screen.getByTestId('report-scope').textContent).toBe('Alvorada/RS'));
@@ -49,9 +52,14 @@ describe('seleção FIERGS e invalidação de resultado', () => {
     expect(mocks.session.mock.calls.length).toBeGreaterThan(sessions);
     fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
     await waitFor(() => expect(screen.getByTestId('report-scope').textContent).toBe('Alvorada, Cachoeirinha/RS'));
-    fireEvent.click(screen.getByRole('button', { name: 'Aplicar preset FIERGS RS' }));
+    fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: 'secovi-sp' } });
     expect(screen.queryByTestId('report-scope')).toBeNull();
-    expect(screen.getByTestId('selected-cities').textContent).toContain('Viamão');
+    expect(screen.getByTestId('selected-cities').textContent).toBe('');
+    expect(screen.getAllByRole('combobox')[1]).toHaveValue('SP');
+    fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: 'fiergs-rs' } });
+    expect(screen.getAllByRole('combobox')[1]).toHaveValue('RS');
+    expect(screen.getByTestId('selected-cities').textContent).toBe('');
+    expect(screen.getByRole('button', { name: 'Gerar relatório' })).toBeDisabled();
   });
   it('trocar UF limpa cidades e rejeita seleção parcialmente não autorizada', async () => {
     setup();

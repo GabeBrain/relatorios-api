@@ -16,7 +16,6 @@ import { PanoramaQuarterRangePicker } from '../components/PanoramaQuarterRangePi
 import { PanoramaLoadingState } from '../components/PanoramaLoadingState';
 import { availableEndQuarters } from '../domain/quarters';
 import { type PanoramaGenerationProgress } from '../domain/generation-progress';
-import { FIERGS_RM_PORTO_ALEGRE_PRESET } from '../presets';
 import { downloadCollectionFailureCsv } from '../lib/collection-failure-audit';
 import type { EntityId, PanoramaScope, Quarter } from '../types';
 import { panoramaCitiesAuthorized } from '../scope-identity';
@@ -53,24 +52,13 @@ export default function PanoramaSecoviFiergsPage() {
   const ready = Boolean(geoApi.strictReady && panoramaCitiesAuthorized(cities, geoApi.availableCities) && scope.startQuarter && scope.endQuarter);
   const updateCities = (next: string[]) => { resetCollectionSession(); setCities(next); setGeo((current) => ({ ...current, city: next[0] ?? '' })); setScope((current) => ({ ...current, cities: next })); setSubmitted(null); };
   const updateRange = (startQuarter: Quarter, endQuarter: Quarter) => { resetCollectionSession(); setScope((current) => ({ ...current, startQuarter, endQuarter })); setSubmitted(null); };
-  const applyFiergsPreset = () => {
-    resetCollectionSession();
-    setSubmitted(null);
-    const presetCities = [...FIERGS_RM_PORTO_ALEGRE_PRESET.scope.cities];
-    setGeo({ uf: 'RS', city: presetCities[0] });
-    setCities(presetCities);
-    setScope((current) => ({ ...current, ...FIERGS_RM_PORTO_ALEGRE_PRESET.scope, cities: presetCities }));
-  };
   const updateEntity = (entity: EntityId) => {
     resetCollectionSession();
     setSubmitted(null);
-    if (entity === 'fiergs-rs') {
-      applyFiergsPreset();
-      return;
-    }
-    setGeo({ uf: 'SP', city: '' });
+    const uf = entity === 'fiergs-rs' ? 'RS' : 'SP';
+    setGeo({ uf, city: '' });
     setCities([]);
-    setScope((current) => ({ ...current, uf: 'SP', cities: [], entity: 'secovi-sp', engineVersion: 'v4' }));
+    setScope((current) => ({ ...current, uf, cities: [], entity, engineVersion: 'v4' }));
   };
   const generate = () => { if (!ready || !scope.startQuarter) return; const next = { ...scope, uf: geo.uf, cities: [...cities].sort((a, b) => a.localeCompare(b, 'pt-BR')) }; resetCollectionSession(); setGenerationId((id) => id + 1); setGenerationProgress(null); setScope(next); setSubmitted(next); };
   return <div className="panorama-scope-page mx-auto max-w-[1440px] space-y-5 p-4 sm:p-6 animate-fade-in">
@@ -83,8 +71,8 @@ export default function PanoramaSecoviFiergsPage() {
       </>}
       <PanoramaQuarterRangePicker start={scope.startQuarter} end={scope.endQuarter} options={quarters} onChange={updateRange} />
       <div className="min-w-[176px] pt-[30px]"><Button className="h-9 w-full justify-center whitespace-nowrap" onClick={generate} disabled={!ready || report.isFetching}><BarChart3 className="shrink-0"/>{report.isFetching ? 'Consultando APIs…' : 'Gerar relatório'}</Button></div>
-    </div>{scope.entity === 'fiergs-rs' && <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><Button type="button" variant="outline" size="sm" onClick={applyFiergsPreset} disabled={report.isFetching || geoApi.isLoading}>Aplicar preset FIERGS RS</Button><span>Dez municípios do entorno de Porto Alegre. Você também pode escolher outro recorte.</span></div>}</section>
-    {!submitted && <Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Defina o recorte</AlertTitle><AlertDescription>Escolha a UF, um ou mais municípios monitorados e o período; nenhuma chamada pesada é feita antes de um escopo válido. {scope.entity === 'fiergs-rs' && 'O preset FIERGS RS é um atalho para o conjunto regional homologado.'}</AlertDescription></Alert>}
+    </div></section>
+    {!submitted && <Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Defina o recorte</AlertTitle><AlertDescription>Escolha a UF, um ou mais municípios monitorados e o período; nenhuma chamada pesada é feita antes de um escopo válido.</AlertDescription></Alert>}
     {report.isPending && submitted && <PanoramaLoadingState label="Consultando APIs e montando o relatório…" progress={generationProgress} />}
     {report.data && report.isFetching && <PanoramaLoadingState compact label="Atualizando relatório…" progress={generationProgress} />}
     {report.isError && <Alert variant="destructive"><AlertCircle className="h-4 w-4"/><AlertTitle>Não foi possível concluir a coleta</AlertTitle><AlertDescription><p className="mt-1 break-words">{report.error instanceof Error ? report.error.message : 'A API não retornou um recorte completo.'}</p><p className="mt-2 text-xs">Nenhum relatório parcial foi montado ou liberado para exportação. As cidades concluídas ficam preservadas apenas nesta tentativa.</p><div className="mt-3 flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={report.isFetching || !(report.error instanceof PanoramaCollectionError && report.error.retryable)} onClick={() => report.refetch()}><RefreshCw/>Tentar cidades faltantes</Button><Button variant="outline" size="sm" onClick={() => report.error instanceof PanoramaCollectionError && downloadCollectionFailureCsv(report.error.failures)}>Baixar diagnóstico CSV</Button><Button variant="ghost" size="sm" disabled={report.isFetching} onClick={generate}>Recomeçar coleta</Button></div></AlertDescription></Alert>}
