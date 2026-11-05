@@ -76,7 +76,10 @@ try {
         if (detailsCase === 'missing-area') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).private_area = null;
         if (detailsCase === 'capacity-diagnostic') rows[0].typologies_history.find(row => row.period === `2026-${closing}-01`).sold = -9;
         if (detailsCase === 'signed-stock') rows[0].typologies_history.find(row => row.period === '2026-06-01').typology_stock = -1;
-        if (detailsCase === 'missing-price-sold-out') rows.filter(building=>building.building_id>=100).flatMap(building=>building.typologies_history).find(row=>row.period===`2026-${closing}-01`&&row.qty>0&&row.typology_stock===0).price=null;
+        if (detailsCase === 'missing-price-sold-out') {
+          const active=rows[0],sample=active.typologies_history.find(row=>row.period===`2026-${closing}-01`&&row.typology_stock>0);
+          active.typologies_history.push({...sample,typology_id:999999,typology_stock:0,qty:100,sold:100,sold_in_period:0,price:null});
+        }
         return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: rows, meta: { current_page: 1, last_page: 1, total: rows.length }, links: { next: null } }) });
       }
       calls++;
@@ -390,9 +393,19 @@ try {
   await openSlide(68);await page.getByRole('article').getByText('Base cartogr\u00e1fica parcialmente indispon\u00edvel.',{exact:true}).waitFor();
   await captureSlide({path:resolve(output,'map-provider-error.png')});mapboxFailure=false;
   if(process.env.SP_DIAGNOSTIC_EXPORT==='1'){
-    for(const slide of [9,10,11,12,13,31,45,49,52,60,65,81]){
+    for(const slide of [2,6,9,10,11,12,13,31,45,49,52,60,65,69,70,76,77,78,79,80,81]){
       await openSlide(slide);await captureSlide({path:resolve(output,`review-final-${slide}.png`)});
+      if([79,80].includes(slide))assert.equal(await page.locator('[data-sp-vgv-heat="true"]').count(),1);
+      if(slide===69)assert.match(await page.getByRole('article').innerText(),/da oferta Standard/);
     }
+    await openSlide(6);await page.getByRole('article').getByRole('button',{name:'Ir para 12. lançamentos verticais'}).click();
+    assert.match(await page.getByRole('article').getAttribute('aria-label'),/^Slide 12:/);
+    await page.getByRole('button',{name:'Voltar ao sumário'}).click();assert.match(await page.getByRole('article').getAttribute('aria-label'),/^Slide 6:/);
+    await page.getByRole('article').getByRole('button',{name:'Ir para 31. vendas verticais'}).focus();await page.keyboard.press('Enter');
+    assert.match(await page.getByRole('article').getAttribute('aria-label'),/^Slide 31:/);
+    await page.setViewportSize({width:390,height:1000});await page.evaluate(()=>document.documentElement.classList.add('dark'));
+    await openSlide(69);await captureSlide({path:resolve(output,'corrections-mobile-dark-69.png')});
+    await page.setViewportSize({width:1440,height:1000});await page.evaluate(()=>document.documentElement.classList.remove('dark'));
     const before={calls,granularCalls,neighborhoodCalls};
     await page.getByRole('button',{name:'Baixar PPTX editável',exact:true}).click();
     await page.getByRole('button',{name:'Cancelar exportação',exact:true}).click();

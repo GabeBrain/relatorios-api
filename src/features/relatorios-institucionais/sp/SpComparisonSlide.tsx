@@ -16,7 +16,7 @@ export function SpComparisonSlide({ report, number }: { report: SpPreview; numbe
     <rect x="62" y="117" width="85" height="9" rx="4" fill="#ffcf00" />
     <text x="62" y="158" fontSize="17">{report.quarter} · {spPeriodLabel(report)}</text>
     {result?.status === 'ready' ? <ComparisonChart result={result} report={report} /> : <><text x="640" y="335" textAnchor="middle" fontSize="28" fontWeight="bold">Comparativo em conferência</text><text x="640" y="380" textAnchor="middle" fontSize="18">{result?.issues[0] ?? (typology ? 'A conferência das tipologias nos dois anos preencherá este slide.' : 'A série municipal dos dois anos preencherá este slide.')}</text></>}
-    <text x="62" y="621" fontSize="13">{stock ? 'Fotografia do último mês disponível nos dois anos. Estoques mensais não são somados.' : 'Mesmos meses nos dois anos. Vendas negativas preservadas; base anterior não positiva sem variação percentual.'}</text>
+    <text x="62" y="621" fontSize="13">{stock ? 'Fotografia do último mês disponível nos dois anos. Estoques mensais não são somados.' : 'Mesmos meses nos dois anos. Participações calculadas sobre a mesma janela de meses.'}</text>
   </svg>;
 }
 function ComparisonChart({ result, report }: { result: SpGroupComparison; report: SpPreview }) {
@@ -36,7 +36,7 @@ function ComparisonChart({ result, report }: { result: SpGroupComparison; report
       <line x1={90 + year * 600} x2={590 + year * 600} y1={y(0)} y2={y(0)} stroke="#d9d9d9" />
       <text x={340 + year * 600} y="542" textAnchor="middle" fontSize="23" fontWeight="bold">{report.quarter.slice(0, 2)} {years[year]}{report.monthly!.length < 3 ? '*' : ''}</text>
     </g>)}
-    {result.rows.map((row, i) => <g key={row.group}><rect x={90 + i % 4 * 275} y={560 + Math.floor(i / 4) * 22} width="14" height="14" fill={colors[i % colors.length]} /><text x={112 + i % 4 * 275} y={573 + Math.floor(i / 4) * 22} fontSize="16">{row.group}</text></g>)}
+    {result.rows.map((row, i) => <g key={row.group}><rect x={90 + i % 4 * 275} y={560 + Math.floor(i / 4) * 22} width="14" height="14" fill={colors[i % colors.length]} /><text x={112 + i % 4 * 275} y={573 + Math.floor(i / 4) * 22} fontSize="16">{/^[1-4]$/.test(row.group)?`${row.group}${row.group==='4'?'+':''} dorm.`:row.group}</text></g>)}
     <text x="62" y="607" fontSize="13">{shares ? 'Participação sobre o total municipal de cada ano.' : 'Quantidades líquidas; percentuais indisponíveis com base não positiva ou grupo negativo.'}{report.monthly!.length < 3 ? ' * Janela parcial equivalente.' : ''}</text>
   </g>;
 }
