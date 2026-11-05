@@ -387,6 +387,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ### 2026-11-05 — SP: destaques coerentes, divisórias originais e PPTX de conferência — usuário / Codex
 
+- **Commits da entrega autorizada:**`bf8c362` implementa revisão/exportação; fila contínua em`092996e` e registro`b8eb808`. Usuário pediu push conjunto. Pronto para envio após gate documental; conferência do deploy e geração real2T2026 permanecem pendentes.
+
 - **Validação final:**292 testes/28arquivos, tipos/lint/build aprovados;PPTX final85slides/2.354textos nativos aberto noOffice, sete páginas renderizadas e comparativos finais inspecionados. Exportação final noEdge preservou cobertura e não chamou GeoBrain; falhas de expectativa editorial antiga corrigidas sem alterar cálculos. Ainda não é reconciliação da fonte real.
 
 - **Pedido/escopo:** usuário pediu coerência numérica sem copiar a redação, comparação original×JSON, restauração das capas de tema e exportação PPTX editável; autorizou enviar junto da otimização da coleta. Primeiro par de commits locais092996e/b8eb808 preservado.
