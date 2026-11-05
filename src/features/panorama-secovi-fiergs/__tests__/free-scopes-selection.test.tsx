@@ -4,7 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES } from '../presets';
 import PanoramaSecoviFiergsPage from '../pages/PanoramaSecoviFiergsPage';
 
-const mocks = vi.hoisted(() => ({ fetch: vi.fn(async (scope) => ({ scope })), session: vi.fn(() => ({})) }));
+const mocks = vi.hoisted(() => ({ fetch: vi.fn(async (scope) => ({ scope })), session: vi.fn(() => ({})), reproject: vi.fn((report, scope) => ({ ...report, scope })) }));
+vi.mock('../report/model', () => ({ reprojectPanoramaReport: mocks.reproject }));
 vi.mock('../api', () => ({ fetchPanoramaReportModel: mocks.fetch, createPanoramaCollectionSession: mocks.session, PanoramaCollectionError: class extends Error {} }));
 vi.mock('@/features/shared/geo-api-scope-engine', () => ({ useGeoApiScope: ({ value, onChange }) => {
   const citiesByUf = { RS: [...FIERGS_RM_PORTO_ALEGRE_STUDY_CITIES, 'Porto Alegre'], SP: ['Jundiaí'], PR: ['Curitiba'] };
@@ -28,7 +29,7 @@ vi.mock('@/components/ui/select', () => ({
   SelectTrigger: () => null, SelectValue: () => null, SelectContent: ({ children }) => <>{children}</>,
   SelectItem: ({ children, value }) => <option value={value}>{children}</option>,
 }));
-afterEach(() => { cleanup(); mocks.fetch.mockClear(); mocks.session.mockClear(); });
+afterEach(() => { cleanup(); mocks.fetch.mockClear(); mocks.session.mockClear(); mocks.reproject.mockClear(); });
 
 describe('seleção FIERGS e invalidação de resultado', () => {
   function setup() {
@@ -72,5 +73,21 @@ describe('seleção FIERGS e invalidação de resultado', () => {
     fireEvent.click(screen.getByText('Uma cidade'));
     fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
     await waitFor(() => expect(screen.getByTestId('report-scope').textContent).toBe('Curitiba/PR'));
+  });
+  it('renomeia territórios sem repetir a coleta e permite voltar ao consolidado', async () => {
+    setup();
+    fireEvent.click(screen.getByText('Duas cidades'));
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
+    await waitFor(() => expect(screen.getByTestId('report-scope')).toBeInTheDocument());
+    fireEvent.change(screen.getByLabelText('Nome do território 1'), { target: { value: 'Território editado' } });
+    expect(screen.queryByTestId('report-scope')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
+    await waitFor(() => expect(mocks.reproject).toHaveBeenCalledTimes(1));
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    const selectors = screen.getAllByRole('combobox');
+    fireEvent.change(selectors[2], { target: { value: 'consolidated' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
+    await waitFor(() => expect(mocks.reproject).toHaveBeenCalledTimes(2));
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
   });
 });
