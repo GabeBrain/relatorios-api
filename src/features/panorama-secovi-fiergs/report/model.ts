@@ -1,3 +1,4 @@
+import { buildAnnualCompositions, type AnnualLaunchFact } from './annual-composition';
 import { territorialPresentationErrors } from '../domain/territorial-presentation';
 import { buildTerritorialComparison } from './territorial-projections';
 import { buildLaunchModel, periodToQuarter, safeNumber, launchRecordsFromCube } from '../lib/launches';
@@ -541,7 +542,7 @@ function buildNumericalReport(
     meter: SourceResult; meterTypology: SourceResult;
   },
   cohorts: MarketCohortRow[] = [],
-  options: { cubes?: MarketCube[]; provenance?: Partial<PanoramaProvenance>; cityLaunchRecords?: { city: string; records: LaunchRecord[] }[]; citySalesSources?: CitySalesSource[]; cityTemporalSources?: CityTemporalSources[]; presentation?: PanoramaPresentationCredits } = {},
+  options: { annualLaunchFacts?: AnnualLaunchFact[]; cubes?: MarketCube[]; provenance?: Partial<PanoramaProvenance>; cityLaunchRecords?: { city: string; records: LaunchRecord[] }[]; citySalesSources?: CitySalesSource[]; cityTemporalSources?: CityTemporalSources[]; presentation?: PanoramaPresentationCredits } = {},
 ): PanoramaReportModel {
   const entity = scope.entity ?? 'secovi-sp';
   const launches = buildLaunchModel(records, canonical(scope));
@@ -673,7 +674,14 @@ export function buildPanoramaReportModel(...input: NumericalInput): PanoramaRepo
         provenance: { ...options.provenance, requestedCities: selected,
           completedCities: report.provenance.completedCities.filter(belongs), failedCities: report.provenance.failedCities.filter((c) => belongs(c.city)) } });
   });
-  if (comparison) report.territorial = comparison;
+  if (comparison) {
+    report.territorial = comparison;
+    const differences=comparison.checks.filter((c)=>c.status==='different');
+    report.reconciliation.rows.push(...differences.map((c)=>({metricId:`territorial.${c.metric}.${c.dimension}`,checkKind:'dimensional_conservation' as const,source:c.source,formula:'Soma das cidades e dos grupos no mesmo universo/competência',universe:c.dimension,period:c.period as Quarter,canonicalTotal:c.canonical,dimensionalTotal:c.grouped,delta:c.delta,tolerance:1e-6,status:'different' as const,critical:true})));
+    if(differences.length)report.reconciliation.homologable=false;
+  }
+  if (options.annualLaunchFacts) report.annualCompositions = buildAnnualCompositions(options.annualLaunchFacts, scope);
+  report.notices = buildGenerationNotices(report);
   numericalInputs.set(report, input);
   return report;
 }

@@ -35,8 +35,21 @@ export function buildTerritorialComparison(scope: PanoramaScope, consolidated: P
   if (scope.presentation?.mode !== 'comparison') return undefined;
   const requested = scope.presentation.units ?? [];
   const municipal = new Map(scope.cities.map((city) => [normalizeText(city), projection(build([city]))]));
-  const units = requested.map((unit) => ({ unit, data: unit.cities.length === 1
-    ? municipal.get(normalizeText(unit.cities[0]))! : projection(build(unit.cities)) }));
+  const units = requested.map((unit) => {
+    const data = unit.cities.length === 1 ? municipal.get(normalizeText(unit.cities[0]))! : projection(build(unit.cities));
+    const members = unit.cities.map((c) => municipal.get(normalizeText(c))!);
+    const covered = (block: import('../types').ReportMarketBlock, sources: import('../types').ReportMarketBlock[]) => ({ ...block,
+      series: block.series.map((row) => ({ ...row, observed: {
+        vertical: sources.every((s) => s.series.find((r) => r.quarter === row.quarter)?.observed?.vertical !== false && s.series.some((r) => r.quarter === row.quarter)),
+        horizontal: sources.every((s) => s.series.find((r) => r.quarter === row.quarter)?.observed?.horizontal !== false && s.series.some((r) => r.quarter === row.quarter)),
+      } })) });
+    return { unit, data: { ...data,
+      sales: Object.fromEntries(Object.entries(data.sales).map(([key,b])=>[key,covered(b,members.map((m)=>m.sales[key as keyof typeof m.sales]))])) as typeof data.sales,
+      stock: Object.fromEntries(Object.entries(data.stock).map(([key,b])=>[key,covered(b,members.map((m)=>m.stock[key as keyof typeof m.stock]))])) as typeof data.stock,
+      prices: Object.fromEntries(Object.entries(data.prices).map(([key,b])=>[key,covered(b,members.map((m)=>m.prices[key as keyof typeof m.prices]))])) as typeof data.prices,
+      ivv: covered(data.ivv,members.map((m)=>m.ivv)),
+    } };
+  });
   const baseline = metrics(consolidated); const cityMetrics = [...municipal].map(([city, data]) => ({ city, metrics: metrics(data) }));
   const unitMetrics = units.map(({ unit, data }) => ({ unit, metrics: metrics(data) }));
   const checks = [...baseline].map(([key, r]) => {
@@ -65,7 +78,7 @@ export function territorialReportView(report: PanoramaReportModel, unitId: strin
   const item = report.territorial?.units.find(({ unit }) => unit.id === unitId);
   if (!item) throw new Error(`Território ausente: ${unitId}`);
   const belongs = (city: string) => item.unit.cities.some((c) => normalizeText(c) === normalizeText(city));
-  return { ...report, ...item.data, scope: { ...item.data.scope, presentation: { mode: 'consolidated' } }, territorial: undefined,
+  return { ...report, ...item.data, territorialLabel: item.unit.label, scope: { ...item.data.scope, presentation: { mode: 'consolidated' } }, territorial: undefined,
     cube: { ...report.cube, projects: report.cube.projects.filter((p) => belongs(p.city)), rejections: report.cube.rejections.filter((p) => belongs(p.city)), cities: item.unit.cities },
     locations: report.locations.filter((p) => belongs(p.city)),
     cityComparisons: { enabled: false, sales: [], market: [], availabilityByStandard: [] } };

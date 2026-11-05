@@ -1,3 +1,4 @@
+import { annualCompositionPublishable } from './annual-composition';
 import type { PanoramaReportModel, ReportGenerationNotice } from '../types';
 import { pointInsideTerritory } from '../lib/municipal-territory';
 import { mcmvActivity } from './editorial-contracts';
@@ -51,6 +52,18 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     if (slides.length) add({ code: 'MCMV_ZERO_ACTIVITY_OMITTED', severity: 'info', indicator: 'Páginas MCMV',
       reason: 'Séries MCMV integralmente zeradas no recorte com cobertura disponível.', source: 'Séries classificadas de lançamentos/vendas',
       displayDecision: 'Páginas focadas em MCMV omitidas; zeros pontuais e vendas negativas são preservados.', officialSlides: slides });
+  }
+  if (report.territorial) {
+    const missing = report.territorial.checks.filter((r)=>r.status==='unavailable');
+    const differences = report.territorial.checks.filter((r)=>r.status==='different');
+    add({code:'TERRITORIAL_COMPOSITION',severity:'info',indicator:'Territórios comparados',reason:report.territorial.units.map(({unit})=>`${unit.label}: ${unit.cities.join(', ')}`).join('; '),source:'Seleção explícita do estudo',displayDecision:'Até três séries ou blocos; matrizes densas em páginas específicas. Mapas, maturidade e composição anual permanecem consolidados.'});
+    if(missing.length)add({code:'TERRITORIAL_COVERAGE',severity:'info',indicator:'Cobertura dos comparativos',reason:`${missing.length} conferência(s) sem contraparte dimensional ou observação completa; a ausência não foi convertida em zero.`,source:'Matriz cidade → grupo → consolidado',displayDecision:'Lacunas preservadas nos gráficos e na auditoria; não representam igualdade comprovada.'});
+    if(differences.length)add({code:'TERRITORIAL_DIFFERENCES',severity:'warning',indicator:'Reconciliação territorial',reason:`${differences.length} divergência(s) registrada(s) na matriz territorial.`,source:'Matriz de reconciliação',displayDecision:'Dados e divergências preservados na auditoria e nos alertas de consistência.'});
+  }
+  for(const block of report.annualCompositions??[]) {
+    const omitted=block.years.filter((y)=>y.status!=='ready');
+    if(omitted.length||block.unclassified||!annualCompositionPublishable(block))add({code:`ANNUAL_COMPOSITION_${block.metric.toUpperCase()}`,severity:'info',indicator:block.title,
+      reason:`${block.unclassified} empreendimento(s) sem classificação observada no lançamento; anos não exibidos: ${omitted.map((y)=>`${y.year} (${y.status})`).join(', ')||'nenhum'}.`,source:'Padrão na competência do lançamento; quantidades e VGL do contrato homologado',displayDecision:annualCompositionPublishable(block)?'Categoria Não classificado preservada; anos sem base positiva e completa não são normalizados para100%.':'Família omitida por falta de classificação ou universo suficiente; dados brutos permanecem na auditoria.'});
   }
   const withoutStock = report.cube.projects.filter((p) => p.segment === 'Vertical').flatMap((p) => p.typologies)
     .filter((t) => (t.finalUnits ?? 0) <= 0 && t.averagePricePerMeter !== null && t.averagePricePerMeter > 0).length;

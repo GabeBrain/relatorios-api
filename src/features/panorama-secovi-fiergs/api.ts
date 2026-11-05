@@ -1,3 +1,4 @@
+import { annualLaunchFacts, type AnnualLaunchFact } from './report/annual-composition';
 import { httpRequest } from '@/lib/http-client';
 import { periodToQuarter, quarterKey, safeNumber, launchRecordsFromCube } from './lib/launches';
 import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrationCell, MarketCohortRow, PanoramaReference, PanoramaReportModel, PanoramaScope, Quarter, Segment } from './types';
@@ -221,6 +222,7 @@ export function launchRecordsFrom(data: Record<string, unknown>[], scope: CitySc
 
 /** Tudo o que uma cidade contribui para o consolidado. */
 interface CityHarvest {
+  annualLaunchFacts: AnnualLaunchFact[];
   city: string;
   records: LaunchRecord[];
   cube: MarketCube;
@@ -358,6 +360,7 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
   const cube = buildCityCube(buildings, { city: scope.city, uf: scope.uf, endQuarter: scope.endQuarter, entity, engineVersion });
   return {
     city: scope.city,
+    annualLaunchFacts: annualLaunchFacts(buildings, cube),
     records: engineVersion !== 'v2' ? launchRecordsFromCube(cube) : launchRecordsFrom(buildings, scope),
     cube,
     cohorts: engineVersion !== 'v2' ? cube.projects.map((project) => ({ segment: project.segment, releaseYear: String(project.releaseYear), standard: project.standard, stock: project.finalUnits ?? 0 })).filter((row) => row.stock > 0) : cohortRowsFrom(buildings, scope),
@@ -449,6 +452,7 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
         cityCollectionAttempts: scopes.map(({ city }) => ({ city, attempts: session.attempts.get(city) ?? 1, recovered: (session.attempts.get(city) ?? 1) > 1 })),
         cityCollectionMetrics: harvests.flatMap(({ city, sources }) => Object.entries(sources).map(([operation, source]) => ({ city, operation, requests: source.requestCount ?? 0, durationMs: source.durationMs ?? 0 }))),
       },
+      annualLaunchFacts: harvests.flatMap((h) => h.annualLaunchFacts),
       cityLaunchRecords: harvests.map(({ city, records }) => ({ city, records })),
       citySalesSources: harvests.map((harvest) => ({ city: harvest.city, rows: harvest.sources.sales.rows })),
       cityTemporalSources,

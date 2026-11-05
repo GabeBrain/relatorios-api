@@ -61,7 +61,8 @@ export function scopeCitySlug(scope: Pick<PanoramaScope, 'cities'>): string {
 }
 
 /** Identifica presets institucionais no arquivo exportado; recortes livres mantêm o slug municipal. */
-export function scopeFileSlug(scope: Pick<PanoramaScope, 'cities' | 'entity'> & Partial<Pick<PanoramaScope, 'uf'>>): string {
+export function scopeFileSlug(scope: Pick<PanoramaScope, 'cities' | 'entity'> & Partial<Pick<PanoramaScope, 'uf' | 'presentation'>>): string {
+  if (scope.presentation?.mode === 'comparison') return `${scope.entity === 'fiergs-rs' ? `fiergs-${scope.uf?.toLowerCase()}` : 'secovi-sp'}-comparativo-${scopeCitySlug(scope)}`;
   if (scope.entity === 'secovi-sp') return 'secovi-sp';
   if (scope.entity === 'fiergs-rs') return panoramaScopeIdentity({ ...scope, uf: scope.uf ?? '' }).fileSlug;
   return scopeCitySlug(scope);
@@ -69,7 +70,7 @@ export function scopeFileSlug(scope: Pick<PanoramaScope, 'cities' | 'entity'> & 
 
 /** Nome aprovado do preset permanece; recortes personalizados identificam a janela completa. */
 export function scopeExportPeriod(scope: PanoramaScope): string {
-  return scope.entity === 'fiergs-rs' && !panoramaScopeIdentity(scope).official && scope.startQuarter && scope.startQuarter !== scope.endQuarter
+  return (scope.presentation?.mode === 'comparison' || scope.entity === 'fiergs-rs' && !panoramaScopeIdentity(scope).official) && scope.startQuarter && scope.startQuarter !== scope.endQuarter
     ? `${scope.startQuarter}-${scope.endQuarter}` : scope.endQuarter;
 }
 
@@ -256,7 +257,9 @@ export interface HorizontalSeriesPolicy {
 }
 
 export interface PanoramaReportModel {
+  annualCompositions?: import('./report/annual-composition').AnnualComposition[];
   territorial?: TerritorialComparison;
+  territorialLabel?: string;
   scope: PanoramaScope;
   generatedAt: string;
   launches: LaunchModel;

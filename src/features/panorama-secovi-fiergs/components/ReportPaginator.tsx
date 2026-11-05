@@ -1,3 +1,6 @@
+import { AnnualCompositionSlide } from './AnnualCompositionSlide';
+import { TerritorialComparisonSlide } from './TerritorialComparisonSlides';
+import { territorialReportView } from '../report/territorial-projections';
 import { analyticContext, observedComparison, monetaryTitle } from '../report/editorial-contracts';
 import { Children, cloneElement, isValidElement } from 'react';
 import { Component, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
@@ -86,11 +89,11 @@ function FiergsCityScope({ report, cities }: { report: PanoramaReportModel; citi
   return <div className="panorama-fiergs-city-scope"><p>RECORTE DO ESTUDO · {territory.uf}</p><h2>{territory.cities.length === 1 ? 'CIDADE ANALISADA' : 'CIDADES ANALISADAS'}</h2><div>{(cities ?? territory.cities).map((city) => <span key={city}>{city}</span>)}</div><small>{territory.cities.length} município(s) no recorte · {quarterLabel(report.scope.endQuarter)}{territory.official ? ' · Região Metropolitana de Porto Alegre, sem Porto Alegre no universo analisado' : ''}</small></div>;
 }
 function FiergsTerritorialCover({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
-  if (!panoramaScopeIdentity(report.scope).official) return <FiergsCityScope report={report} cities={cities}/>;
+  if (report.territorial || !panoramaScopeIdentity(report.scope).official) return <FiergsCityScope report={report} cities={cities}/>;
   return <div className="panorama-fiergs-territorial"><img src={FIERGS_REGION_MAP} alt="Mapa da Região Metropolitana de Porto Alegre"/><div><p>RECORTE FIERGS</p><h1>REGIÃO<br/>METROPOLITANA<br/>DE PORTO ALEGRE</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong><small>10 municípios analisados · Porto Alegre exibida somente como referência geográfica</small></div></div>;
 }
 function FiergsStudyCover({ report }: { report: PanoramaReportModel }) {
-  if (!panoramaScopeIdentity(report.scope).official) return <CustomFiergsStudyCover scope={report.scope}/>;
+  if (report.territorial || !panoramaScopeIdentity(report.scope).official) return <CustomFiergsStudyCover scope={report.scope}/>;
   return <div className="panorama-fiergs-study-cover"><p>PANORAMA DO MERCADO IMOBILIÁRIO · FIERGS</p><h1>{panoramaScopeIdentity(report.scope).coverTitle}</h1><i/><strong>{quarterLabel(report.scope.endQuarter)}</strong></div>;
 }
 function CityCover({ report }: { report: PanoramaReportModel }) {
@@ -556,6 +559,8 @@ function CityComparisonPage({ kind, report }: { kind: NonNullable<ReportPageDefi
   return <div className="panorama-table-page panorama-city-comparison"><h2>DISPONIBILIDADE RESIDENCIAL VERTICAL POR PADRÃO</h2><table><thead><tr><th>Padrão</th>{report.cityComparisons.sales.map((row) => <th key={row.city}>{row.city}</th>)}</tr></thead><tbody>{report.cityComparisons.availabilityByStandard.map((row) => <tr key={row.standard}><td>{row.standard}</td>{report.cityComparisons.sales.map(({ city }) => <td key={city}>{pct(row.values.find((value) => value.city === city)?.availability ?? null)}</td>)}</tr>)}</tbody></table></div>;
 }
 function PresentationContentBody({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
+  if (def.annualCompositionMetric) { const block=report.annualCompositions?.find((b)=>b.metric===def.annualCompositionMetric); return block ? <AnnualCompositionSlide block={block}/> : null; }
+  if (def.territorialKind) return <TerritorialComparisonSlide report={report} def={def}/>;
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.contentReferenceSlide ?? def.referenceSlide;
   const official = def.fiergsOfficialSlide;
   if (official === 2) return <FiergsStudyCover report={report}/>;
@@ -607,6 +612,7 @@ function PresentationContentBody({ def, report }: { def: ReportPageDefinition; r
 }
 /** Shared context is presentation only: it never changes the numeric universe. */
 export function PanoramaPresentationContent({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
+  if (def.territorialUnitId) report = territorialReportView(report, def.territorialUnitId);
   let content: ReactNode = PresentationContentBody({ def, report });
   if (['cover', 'static', 'divider', 'summary', 'closing'].includes(def.visualFamily)) return content;
   const temporal = def.fiergsOfficialSlide

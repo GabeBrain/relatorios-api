@@ -1,3 +1,4 @@
+import { annualCompositionManifest, territorialManifest } from './territorial-manifest';
 import type { MethodStatus } from '../types';
 import { buildMapTilePlan, type GeographicPoint } from '../lib/map-tiles';
 import { FIERGS_4T25_SLIDE_MANIFEST } from './fiergs-manifest';
@@ -9,7 +10,7 @@ import type { PanoramaReportModel } from '../types';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
 export type CityComparisonKind = 'sales' | 'market' | 'availability';
-export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'city-scope' | 'horizontal-offer-products' | 'horizontal-price-range'; fiergsOfficialSlide?: number; contentReferenceSlide?: number; mapMode?: 'standard' | 'stock' | 'price'; scopeCities?: string[]; }
+export interface ReportPageDefinition { id?: string; annualCompositionMetric?: 'projects' | 'units' | 'vgl'; territorialKind?: string; territorialUnitId?: string; page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'city-scope' | 'horizontal-offer-products' | 'horizontal-price-range'; fiergsOfficialSlide?: number; contentReferenceSlide?: number; mapMode?: 'standard' | 'stock' | 'price'; scopeCities?: string[]; }
 export interface PanoramaSection { id: string; label: string; start: number; end: number; }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -90,7 +91,9 @@ export const PANORAMA_SECTIONS = createPanoramaSections(PANORAMA_REPORT_MANIFEST
 /* -------------------------------------------------------------------------- */
 
 export interface ManifestSubject {
-  scope?: { entity?: 'secovi-sp' | 'fiergs-rs'; endQuarter?: string; uf?: string; cities?: string[] };
+  annualCompositions?: PanoramaReportModel['annualCompositions'];
+  territorial?: PanoramaReportModel['territorial'];
+  scope?: { presentation?: PanoramaReportModel['scope']['presentation']; entity?: 'secovi-sp' | 'fiergs-rs'; endQuarter?: string; uf?: string; cities?: string[] };
   annualAreaIvv?: { kind: string; previousUnits: number | null; finalUnits: number | null; launchedUnits: number | null; soldUnits: number | null; ivv: number | null }[];
   provenance: { engineVersion?: 'v2' | 'v3' | 'v4'; completedCities?: string[] };
   cube: { projects: { segment: string; finalUnits: number | null; releaseQuarter?: string; launchedUnits?: number | null; launchedVgvMillions?: number | null; typologies?: { launchedUnits: number | null }[] }[] };
@@ -187,9 +190,9 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
     });
     const withoutOrphanDividers = pages.filter((page) => !FIERGS_DIVIDERS.has(page.fiergsOfficialSlide ?? -1)
       || pages.some((other) => other.sectionId === page.sectionId && other.visualFamily !== 'divider'));
-    return withoutOrphanDividers.map((page, index) => ({ ...page, page: index + 1 }));
+    return annualCompositionManifest(territorialManifest(withoutOrphanDividers.map((page, index) => ({ ...page, page: index + 1 })), report), report.annualCompositions);
   }
-  return createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
+  return annualCompositionManifest(territorialManifest(createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken)), report), report.annualCompositions);
 }
 
 const FIERGS_DIVIDERS = new Set([8, 23, 34, 38, 42, 48, 53, 62, 70]);
