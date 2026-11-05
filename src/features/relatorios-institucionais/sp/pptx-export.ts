@@ -1,6 +1,7 @@
 import type PptxGenJS from 'pptxgenjs';
 import { approvedLayoutText, type LayoutText } from '@/features/panorama-secovi-fiergs/lib/pptx/approved-layout';
 import { PanoramaExportCancelled, waitForSlide } from '@/features/panorama-secovi-fiergs/lib/pdf-export';
+import { embedSpPptxAudit } from './pptx-audit';
 
 const W=13.333333,H=7.5;
 const check=(signal:AbortSignal)=>{if(signal.aborted)throw new PanoramaExportCancelled();};
@@ -39,9 +40,11 @@ export async function buildSpEditablePptx(slides:HTMLElement[],quarter:string,si
       const page=pptx.addSlide();page.addImage({data:image,x:0,y:0,w:W,h:H,objectName:`Arte e gráfico do slide ${index+1}`});
       for(const t of texts)page.addText(t.text,{x:t.x,y:t.y,w:t.w,h:t.h,fontSize:t.size,fontFace:t.face,color:t.color,bold:t.bold,italic:t.italic,margin:0,breakLine:false,valign:'middle',fit:'shrink',wrap:false,objectName:`Texto editável: ${t.text.slice(0,50)}`} as PptxGenJS.TextPropsOptions);
       page.addNotes(`SP ${quarter}; posição original ${index+1}/85. Versão para conferência. Textos/células dinâmicos editáveis; desenho dos gráficos, mapas e artes estáticas em imagem. Sem homologação automática.`);
-      if(index===0&&audit)page.addNotes(`SP_AUDIT_JSON\n${JSON.stringify(audit)}`);
       onProgress(index+1,slides.length);
     } finally {clone.remove();}
   }
-  check(signal);const blob=await pptx.write({outputType:'blob',compression:true}) as Blob;check(signal);return blob;
+  check(signal);const blob=await pptx.write({outputType:'blob',compression:true}) as Blob;check(signal);
+  if(!audit)return blob;
+  const bytes=embedSpPptxAudit(new Uint8Array(await blob.arrayBuffer()),audit);check(signal);
+  return new Blob([bytes as BlobPart],{type:'application/vnd.openxmlformats-officedocument.presentationml.presentation'});
 }

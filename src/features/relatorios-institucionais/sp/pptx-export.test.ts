@@ -1,9 +1,11 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 import {buildSpEditablePptx} from './pptx-export';
+import {embedSpPptxAudit} from './pptx-audit';
+vi.mock('./pptx-audit',()=>({embedSpPptxAudit:vi.fn(()=>new Uint8Array([1,2,3]))}));
 const captured=vi.hoisted(()=>({slides:[] as {texts:string[];notes:string[];images:number}[],writes:0}));
 vi.mock('pptxgenjs',()=>({default:class {
   addSlide(){const slide={texts:[] as string[],notes:[] as string[],images:0};captured.slides.push(slide);return {addImage:()=>slide.images++,addText:(value:string)=>slide.texts.push(value),addNotes:(value:string)=>slide.notes.push(value)};}
-  async write(){captured.writes++;return new Blob(['test-pptx']);}
+  async write(){captured.writes++;return Object.assign(new Blob(['test-pptx']),{arrayBuffer:async()=>new ArrayBuffer(1)});}
 }}));
 vi.mock('html-to-image',()=>({getFontEmbedCSS:async()=>'',toPng:async(node:HTMLElement)=>{
   expect(node.querySelector('text')!.style.fill).toBe('transparent');
@@ -25,7 +27,8 @@ describe('SP — PowerPoint para conferência',()=>{
     const result=await buildSpEditablePptx(source,'2T2026',new AbortController().signal,progress,{quarter:'2T2026',numericAudit:{schema:'sp-numeric-audit-v1'}});
     expect(result).toBeInstanceOf(Blob);expect(captured.slides).toHaveLength(85);expect(progress).toHaveBeenLastCalledWith(85,85);
     expect(captured.slides.every(slide=>slide.texts.join(' ')==='42.453'&&slide.images===1)).toBe(true);
-    expect(captured.slides[0].notes.join(' ')).toContain('SP_AUDIT_JSON');
+    expect(captured.slides.flatMap(slide=>slide.notes).join(' ')).not.toContain('SP_AUDIT_JSON');
+    expect(embedSpPptxAudit).toHaveBeenCalledWith(expect.any(Uint8Array),{quarter:'2T2026',numericAudit:{schema:'sp-numeric-audit-v1'}});
     expect(source[0].querySelector('text')!.style.fill).toBe('rgb(38,38,38)');expect(deck.children).toHaveLength(85);expect(captured.writes).toBe(1);
   });
   it('cancelamento não grava arquivo parcial e limpa a cópia de captura',async()=>{

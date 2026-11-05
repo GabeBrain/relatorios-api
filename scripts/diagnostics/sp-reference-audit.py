@@ -56,6 +56,12 @@ def generated(path):
     if path.suffix.lower() == '.json':
         return json.loads(path.read_text(encoding='utf-8-sig'))
     with ZipFile(path) as archive:
+        # Office renames custom XML parts on save; identify by namespace, not path.
+        for name in archive.namelist():
+            if name.startswith('customXml/') and name.endswith('.xml'):
+                root = ET.fromstring(archive.read(name))
+                if root.tag == '{urn:brain:sp-institutional:audit:v1}audit':
+                    return json.loads(root.text or '')
         for name in archive.namelist():
             if re.fullmatch(r'ppt/notesSlides/notesSlide\d+\.xml', name):
                 notes = '\n'.join(text(ET.fromstring(archive.read(name))))
