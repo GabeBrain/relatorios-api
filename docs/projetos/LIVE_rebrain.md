@@ -387,6 +387,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ### 2026-11-05 — SP: coleta detalhada com vagas continuamente ocupadas — usuário / Codex
 
+- **Commit técnico:** `092996e` (05/11/2026), entrega validada localmente. Publicação desta otimização ainda pendente; não confundir com as correções SP já enviadas em04/11.
+
 - **Validação final:** tipos/build exit0 e lint aprovados; Edge local dirigido22posições, lento/cancelamento/retry/erro/vazio e múltiplos períodos/2027 aprovados. Loading Brain existente preservado e captura inspecionada; zero erros de página/zero GeoBrain real/54Mapbox200. Caso53páginas é teste de transporte, sem promessa de duração real.
 
 - **Problema/mudança:** usuário observa7–10min para53páginas. Consumidor aguardava a mais lenta de cada lote de três antes de continuar. Fila contínua inicia a próxima assim que uma vaga libera; mantém três requisições, fonte/filtros/100por página/timeout/retry/Retry-After e todas as guardas. Falha interrompe fila e aguarda iniciadas; cancelamento não publica parcial. Cache/BrainLoadingState existentes preservados, sem fluxo visual novo.
