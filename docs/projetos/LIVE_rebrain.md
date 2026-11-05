@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — SP Institucional: acesso pela navegação de relatórios — usuário / Codex
+
+- **Mudança:** entrada ativa SP Institucional em Relatórios Automatizados, busca rápida e jornada de relatórios da página inicial, apontando para a rota lazy existente `/rebrain/relatorios-institucionais/sp`. Sem alterar autenticação, catálogo de municípios ou guardas da geração.
+- **Padrão/validação:** reutiliza NavLink/pasta lateral, CommandPalette e cartão Home existentes. Testes AppLayout, tipagem e lint dirigidos; Edge desktop/celular claro/escuro verifica menu, página inicial, busca e geração bloqueada sem login. Nenhuma consulta autenticada real.
+- **Etapas/Pendências:** navegação implementada localmente; publicar e conferir no site. A disponibilização para testes não significa homologação numérica/metodológica, que cabe à equipe responsável.
+- **Monday:** [Relatório SP Institucional](https://brain381753.monday.com/boards/18398428946/pulses/13452140276) — `13452140276`; somente referência nesta alteração.
+
 ### 2026-11-05 — SP: data correta no perfil e indicadores institucionais editáveis — usuário / Codex
 
 - **Problema:** artes integrais dos slides5/7 conservavam junho/2026 e impediam editar números no PPTX. Usuário identificou o período antigo em geração3T2026 e pediu edição de percentuais e cartões GeoBrain.

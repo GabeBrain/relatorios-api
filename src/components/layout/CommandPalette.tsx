@@ -32,6 +32,7 @@ const PAGES: Destination[] = [
   { label: 'Relatórios Automatizados — AELO', path: '/rebrain/aelo', icon: <Building2 className="h-4 w-4" />, keywords: 'rebrain aelo excel mercado relatorio' },
   { label: 'Relatórios Automatizados — Relatório API Excel', path: '/rebrain/relatorio-api-excel', icon: <Building2 className="h-4 w-4" />, keywords: 'rebrain api excel mercado relatorio mensal trimestral tabular' },
   { label: 'Relatórios Automatizados — Panorama de Mercado', path: '/rebrain/panorama-secovi-fiergs', icon: <BarChart2 className="h-4 w-4" />, keywords: 'rebrain panorama secovi fiergs piracicaba jundiai lancamentos pdf comparacao' },
+  { label: 'Relatórios Automatizados — SP Institucional', path: '/rebrain/relatorios-institucionais/sp', icon: <BarChart2 className="h-4 w-4" />, keywords: 'rebrain sao paulo capital institucional trimestre panorama powerpoint pptx' },
   { label: 'Rebrain — Assistente de Projetos', path: '/auditoria', icon: <ClipboardList className="h-4 w-4" />, keywords: 'assistente de projetos corretor vocacional slides auditoria' },
   { label: 'Rebrain — Empresas e Empregados', path: '/rebrain/empresas-empregados', icon: <Building2 className="h-4 w-4" />, keywords: 'rais empregados emprego formal empresas cnpj municipio cbo' },
   { label: 'Rebrain — Atualizador VGV', path: '/atualizador-vgv', icon: <TrendingUp className="h-4 w-4" />, keywords: 'vgv empreendimento excel incc ipca igp-di mapa' },
