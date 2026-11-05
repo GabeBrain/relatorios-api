@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — SP: data correta no perfil e indicadores institucionais editáveis — usuário / Codex
+
+- **Problema:** artes integrais dos slides5/7 conservavam junho/2026 e impediam editar números no PPTX. Usuário identificou o período antigo em geração3T2026 e pediu edição de percentuais e cartões GeoBrain.
+- **Correção:** camada SVG nativa substitui título/data/textos/percentuais do7 e seis valores/legendas do5. Data usa o mês efetivamente conferido, inclusive parcial e virada de ano. Exportador existente gera caixas de texto editáveis. Artes, mapas, logos/QR preservados; demais slides institucionais seguem como referência.
+- **Fonte:** percentuais e indicadores institucionais continuam provenientes da edição original2T2026; não foram recalculados pela API municipal. Nota discreta no7 e explicação no checklist/interface evitam apresentar números editoriais como observação atual. Edição no PowerPoint altera a cópia baixada, não a base.
+- **Validação:**296testes/33arquivos, tipos/build/lint, Edge desktop/celular claro/escuro e PPTX85slides sem nova coleta. PowerPoint editou data/percentual/indicador, salvou e reabriu preservando as três alterações. [Contrato, escopo e evidências](../features/relatorios-institucionais/sp/TEXTOS_INSTITUCIONAIS_EDITAVEIS_2026-11-05.md).
+- **Etapas/Pendências:** implementação local concluída; publicação e nova exportação real pendentes. Sem nova API autenticada ou alteração numérica dos demais indicadores; Secovi/FIERGS preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência sem escrita.
+
 ### 2026-11-05 — SP: carregamento limitado à área do relatório — usuário / Codex
 
 - **Mudança:** removido o Dialog global da primeira etapa. BrainLoadingState overlay fica em cartão relativo, sem portal, bloqueio do menu ou retenção de foco. Progresso e cancelamento preservados; demais etapas seguem no painel automático. Nenhuma regra ou chamada alterada.
@@ -1008,6 +1017,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**05/11 — SP, textos institucionais5/7:** competência do perfil acompanha a geração; títulos/percentuais e seis cartões GeoBrain exportam como caixas editáveis. Validados localmente com Edge/Office; fonte editorial continua identificada, publicação/ensaio real pendentes.
+
 **05/11 — SP, geração automática:** fluxo visual em oito etapas substitui os botões de coleta; cancelamento/retomada e insights do analista implementados e validados localmente. Publicação autorizada; teste autenticado e aceite permanecem distintos da implementação.
 
 **05/11 — SP, relatório para conferência integral:** destaques com janelas explícitas, nove divisórias e comparativos destacados; exportador85posições com textos/células editáveis e auditoria embutida validado com fonte sintética/Office. Exportação de conferência implementada; exportações comerciais adicionais e homologação não estão concluídas.
@@ -1089,6 +1100,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — revisar números editoriais dos slides5/7:** atualizar percentuais e indicadores institucionais com fonte aprovada quando necessário. Textos agora editáveis no PPTX; a API municipal não fornece esses números. Data da geração é dinâmica e não significa atualização automática desses indicadores.
 
 - [ ] **SP — ensaio real do fluxo automático:** após o deploy, selecionar ano/trimestre e Gerar relatório; conferir progresso, cancelamento/retomada, fontes parciais e memória de cálculo nos insights. Fontes reais e latência do provedor não foram exercitadas nesta rodada. [Contrato](../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).
 

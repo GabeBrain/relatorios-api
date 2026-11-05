@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 05/11/2026 — textos editáveis nos slides institucionais5/7
+
+Base `eb931d5`, main/origin0/0 apósfetch. Usuário identificou junho em geração3T2026 e pediu edição de percentuais/cartões GeoBrain. CamadaSVG nativa usa competência conferida no7 e expõe seis cartões do5 ao exportador editável. Números editoriais preservados com referência explícita, sem inferência pela API municipal.296testesSP/33arquivos, tipos/build/lint, Edge e edição/salvamento/reabertura de três textos noOffice. SemAPIrealnova; publicação/ensaio autenticado pendentes. [Contrato](../../features/relatorios-institucionais/sp/TEXTOS_INSTITUCIONAIS_EDITAVEIS_2026-11-05.md).
+
 ## 05/11/2026 — carregamento inicial restrito ao relatório
 
 Base `1b19e84`, main/origin 0/0 após fetch. Usuário pediu manter a tela de carregamento somente no relatório. Modal global substituído por cartão relativo com BrainLoadingState overlay absoluto; menu e navegação continuam utilizáveis. Sete testes da página, tipagem/lint e diagnóstico Edge com respostas sintéticas lentas cobrem o ajuste; consultas, cancelamento, retomada e fórmulas preservados. Sem ensaio autenticado novo. [Contrato](../../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).
