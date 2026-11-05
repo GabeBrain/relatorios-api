@@ -5,6 +5,7 @@ import { fiergsPeriodComparisons } from '../domain/period-comparisons';
 import { observedComparison } from './editorial-contracts';
 import { granularPriceChartRows, fiergsTemporalTypologyTotal } from './price-chart';
 import { territorialReportView } from './territorial-projections';
+import { STANDARD_ORDER, TYPOLOGY_ORDER } from '../domain/taxonomy';
 
 export const TERRITORIAL_COLORS = ['#5d7737', '#ffc000', '#4472c4'];
 export function territorialTrendDefinition(def: ReportPageDefinition) {
@@ -61,7 +62,11 @@ export function territorialTrend(report: PanoramaReportModel, def: ReportPageDef
 export function territorialOfferRows(report: PanoramaReportModel, kind: string) {
   const units = report.territorial?.units ?? [];
   const rows = (data: TerritorialProjection) => kind === 'offer-standard' ? data.granular.offerByStandard : kind === 'offer-typology' ? data.granular.offerByTypology : data.granular.cohortsVertical;
-  const labels = [...new Set(units.flatMap(({data}) => rows(data).filter((r) => r.kind !== 'subtotal').map((r) => r.label)))];
+  const labels = [...new Set(units.flatMap(({data}) => rows(data).filter((r) => r.kind !== 'subtotal').map((r) => r.label)))].sort((a,b)=>{
+    const rank=(label:string)=>/total/i.test(label)?10000:kind==='offer-cohort'?(/até/i.test(label)?0:Number(label.match(/\d{4}/)?.[0]??9999))
+      :Math.max(0,(kind==='offer-standard'?STANDARD_ORDER:TYPOLOGY_ORDER as readonly string[]).indexOf(label));
+    return rank(a)-rank(b);
+  });
   return labels.map((label) => ({ label, values: units.map(({ data }) => {
     const all = rows(data); const item = all.find((r) => r.label === label); const total = all.find((r) => r.kind === 'total')?.finalUnits;
     const value = item?.finalUnits ?? null;
@@ -76,6 +81,8 @@ export function territorialPriceRows(report: PanoramaReportModel, kind: string) 
   const temporal = kind === 'meter-typology' && report.scope.entity === 'fiergs-rs';
   const values = units.map(({unit,data}) => temporal ? granularPriceChartRows(territorialReportView(report,unit.id),'typology').rows.map((r)=>({label:r.label,value:r.value}))
     : rows(data).map((r)=>({label:r.label,value:r[field]})));
-  return { rows: labels.map((label) => Object.fromEntries([['label',label],...units.map((_,i) => [`v${i}`,values[i].find((r)=>r.label===label)?.value??null])])),
+  const observed = labels.filter((label)=>values.some((rows)=>rows.some((r)=>r.label===label&&r.value!==null)));
+  return { rows: observed.map((label) => Object.fromEntries([['label',label],...units.map((_,i) => [`v${i}`,values[i].find((r)=>r.label===label)?.value??null])])),
+    omittedLabels:labels.filter((label)=>!observed.includes(label)),
     averages: units.map(({unit,data}) => ({ unit, value: temporal ? fiergsTemporalTypologyTotal(territorialReportView(report,unit.id)) : rows(data).find((r) => r.kind === 'total')?.[field] ?? null })) };
 }

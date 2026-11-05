@@ -10,10 +10,10 @@ export function panoramaExportMetadata(scope: PanoramaScope, buildId?: string): 
   const preset = scope.entity === 'fiergs-rs' ? `FIERGS/${identity.uf}` : scope.entity === 'secovi-sp' ? 'Secovi-SP' : territory;
   const cleanBuild = buildId?.trim() || undefined;
   return {
-    title: scope.entity === 'fiergs-rs' && !identity.official ? `Panorama ${preset} — ${identity.shortLabel} — ${period}`
+    title: scope.presentation?.mode === 'comparison' ? `Panorama ${preset} — ${scope.presentation.units?.map((u)=>u.label).join(' × ')} — ${period}` : scope.entity === 'fiergs-rs' && !identity.official ? `Panorama ${preset} — ${identity.shortLabel} — ${period}`
       : scope.entity ? `Panorama ${preset} — ${period}` : `Panorama imobiliário de ${territory} — ${period}`,
     author: 'Brain Inteligência Estratégica',
-    subject: `${territory} · ${period} · motor ${engine}${cleanBuild ? ` · build ${cleanBuild}` : ''}`,
+    subject: `${scope.presentation?.mode === 'comparison' ? scope.presentation.units?.map((u)=>`${u.label}: ${u.cities.join(', ')}`).join(' | ')+' · ' : ''}${territory} · ${period} · motor ${engine}${cleanBuild ? ` · build ${cleanBuild}` : ''}`,
     keywords: ['Panorama imobiliário', preset, scope.uf, ...scope.cities, period, `motor ${engine}`, ...(cleanBuild ? [`build ${cleanBuild}`] : [])],
   };
 }

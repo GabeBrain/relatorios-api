@@ -5,6 +5,7 @@ import { defaultTerritorialPresentation } from '../domain/territorial-presentati
 import { panoramaManifestFor } from '../report/manifest';
 import { territorialTrend } from '../report/territorial-selectors';
 import { PanoramaPresentationContent } from '../components/ReportPaginator';
+import { territorialPriceRows } from '../report/territorial-selectors';
 
 function report() {
   return freeScopeReport({ entity:'fiergs-rs',uf:'RS', cities:['Canela','Gramado','Canoas'],startQuarter:'1T2023',endQuarter:'2T2026',engineVersion:'v4',
@@ -38,5 +39,15 @@ describe('apresentação territorial', () => {
     const range=renderToStaticMarkup(<PanoramaPresentationContent report={r} def={pages.find((p)=>p.fiergsOfficialSlide===58)!}/>);
     expect(range).toContain('Canela');
     expect(range).not.toContain('Canoas');
+  });
+  it('oculta percentual sem denominador e preço sem observação, preservando zero observado',()=>{
+    const r=report(),pages=panoramaManifestFor(r);const unit=r.territorial!.units[0];
+    unit.data.granular.offerByTypology=unit.data.granular.offerByTypology.map((row)=>({...row,finalUnits:0}));
+    const html=renderToStaticMarkup(<PanoramaPresentationContent report={r} def={pages.find((p)=>p.fiergsOfficialSlide===36)!}/>);
+    expect(html.match(/<th>%<\/th>/g)).toHaveLength(2);expect(html).toContain('<td>0</td>');
+    for(const u of r.territorial!.units)for(const row of u.data.granular.pricesByStandard)row.averagePricePerMeter=null;
+    expect(territorialPriceRows(r,'meter-standard').rows).toEqual([]);
+    unit.data.granular.pricesByStandard[0].averagePricePerMeter=0;
+    expect(territorialPriceRows(r,'meter-standard').rows[0].v0).toBe(0);
   });
 });

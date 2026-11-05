@@ -1,5 +1,5 @@
 import { buildAnnualCompositions, type AnnualLaunchFact } from './annual-composition';
-import { territorialPresentationErrors } from '../domain/territorial-presentation';
+import { panoramaCollectionKey, territorialPresentationErrors } from '../domain/territorial-presentation';
 import { buildTerritorialComparison } from './territorial-projections';
 import { buildLaunchModel, periodToQuarter, safeNumber, launchRecordsFromCube } from '../lib/launches';
 import { reconcileAggregateIvv } from './editorial-contracts';
@@ -690,9 +690,8 @@ export function reprojectPanoramaReport(report: PanoramaReportModel, scope: Pano
   const input = numericalInputs.get(report);
   if (!input) throw new Error('Os dados desta geração não estão mais disponíveis na sessão. Gere o recorte novamente.');
   // Only presentation may change: this operation must never carry a different physical scope.
-  const original = { ...input[0], presentation: undefined }; const requested = { ...scope, presentation: undefined };
-  if (JSON.stringify(original) !== JSON.stringify(requested)) throw new Error('Recorte de coleta diferente.');
-  const projected = buildPanoramaReportModel(scope, ...input.slice(1) as Tail<NumericalInput>);
+  if (panoramaCollectionKey(input[0]) !== panoramaCollectionKey(scope)) throw new Error('Recorte de coleta diferente.');
+  const projected = buildPanoramaReportModel({ ...input[0], presentation: scope.presentation }, ...input.slice(1) as Tail<NumericalInput>);
   projected.generatedAt = report.generatedAt; projected.municipalTerritory = report.municipalTerritory;
   return projected;
 }

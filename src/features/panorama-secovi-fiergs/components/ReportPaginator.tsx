@@ -97,7 +97,7 @@ function FiergsStudyCover({ report }: { report: PanoramaReportModel }) {
   return <div className="panorama-fiergs-study-cover"><p>PANORAMA DO MERCADO IMOBILIÁRIO · FIERGS</p><h1>{panoramaScopeIdentity(report.scope).coverTitle}</h1><i/><strong>{quarterLabel(report.scope.endQuarter)}</strong></div>;
 }
 function CityCover({ report }: { report: PanoramaReportModel }) {
-  const cities = report.scope.cities.filter(Boolean);
+  const cities = report.scope.presentation?.mode === 'comparison' ? (report.scope.presentation.units ?? []).map((u)=>u.label) : report.scope.cities.filter(Boolean);
   if (report.scope.entity === 'fiergs-rs') return <div aria-label="Capa institucional FIERGS"/>;
   return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DE</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
@@ -623,7 +623,7 @@ export function PanoramaPresentationContent({ def, report }: { def: ReportPageDe
   for (let depth = 0; depth < 6 && isValidElement(content) && typeof content.type === 'function'; depth++) {
     content = (content.type as (props: unknown) => ReactNode)(content.props);
   }
-  const context = <p className="panorama-analytic-context">{analyticContext(report, temporal, rolling)}</p>;
+  const context = <p className="panorama-analytic-context">{report.territorial && !def.territorialKind ? 'Consolidado · ' : ''}{analyticContext(report, temporal, rolling)}</p>;
   if (!isValidElement<{ children?: ReactNode }>(content)) return content;
   let inserted = false;
   const children = Children.toArray(content.props.children).flatMap<ReactNode>((child) => {

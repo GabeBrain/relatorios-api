@@ -7,6 +7,6 @@ export function AnnualCompositionSlide({block}:{block:AnnualComposition}) {
     ...Object.fromEntries(y.values.map((v,i)=>[`c${i}`,v.share]))}));
   return <div className="panorama-territorial-slide"><header><h2>{block.title}</h2><i/></header><div className="panorama-territorial-price-plot"><ResponsiveContainer width="100%" height="100%"><BarChart data={rows} margin={{top:25,left:0,right:15,bottom:10}}>
     <XAxis dataKey="year" tickLine={false} interval={0}/><YAxis domain={[0,100]} tickFormatter={(v)=>`${v}%`}/><Tooltip formatter={(v)=>`${Number(v).toLocaleString('pt-BR',{maximumFractionDigits:1})}%`}/><Legend/>
-    {block.categories.map((label,i)=><Bar key={label} dataKey={`c${i}`} name={label} stackId="annual" fill={COLORS[i%COLORS.length]} isAnimationActive={false}><LabelList dataKey={`c${i}`} position="center" fontSize={12} fill={i%3===1?'#20231d':'#fff'} formatter={(v:number)=>v>4?`${Math.round(v)}%`:''}/></Bar>)}
+    {block.categories.map((label,i)=><Bar key={label} dataKey={`c${i}`} name={label} stackId="annual" fill={COLORS[i%COLORS.length]} isAnimationActive={false}><LabelList dataKey={`c${i}`} position="center" fontSize="1.1cqw" fill={[1,3,4,6].includes(i%COLORS.length)?'#20231d':'#fff'} formatter={(v:number)=>v>4?`${Math.round(v)}%`:''}/></Bar>)}
   </BarChart></ResponsiveContainer></div><footer>Fonte: Brain Inteligência Estratégica · Geobrain · Participação no total observado de cada ano</footer></div>;
 }

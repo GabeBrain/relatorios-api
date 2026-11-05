@@ -40,7 +40,10 @@ export function reconcileAggregateIvv(block: ReportMarketBlock, sales: ReportMar
 export function analyticContext(report: PanoramaReportModel, temporal = false, rolling = false): string {
   const identity = panoramaScopeIdentity(report.scope);
   const list = identity.cities.join(' e ');
-  const territory = report.territorialLabel ?? (identity.official ? identity.shortLabel : list.length <= 105 ? `${list} · ${identity.uf}` : identity.shortLabel);
+  const comparison = report.territorial?.units.map(({unit})=>unit.label).join(' × ');
+  const territory = report.territorialLabel ?? (comparison
+    ? `${comparison.length<=105?comparison:`Comparação de ${report.territorial!.units.length} territórios`} · ${identity.uf}`
+    : identity.official ? identity.shortLabel : list.length <= 105 ? `${list} · ${identity.uf}` : identity.shortLabel);
   const closing = quarterLabel(report.scope.endQuarter);
   const period = rolling ? `12 meses até ${closing}` : temporal
     ? `${quarterLabel(report.scope.startQuarter ?? report.scope.endQuarter)} – ${closing}` : closing;

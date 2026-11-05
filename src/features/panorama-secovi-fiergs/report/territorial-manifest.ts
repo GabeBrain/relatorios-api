@@ -1,6 +1,9 @@
 import { annualCompositionPublishable } from './annual-composition';
 import type { ReportPageDefinition } from './manifest';
 import type { PanoramaReportModel } from '../types';
+import { territorialPriceRows } from './territorial-selectors';
+import { territorialReportView } from './territorial-projections';
+import { closingTypologyPriceRanges } from './editorial-contracts';
 
 export function territorialManifest(pages: ReportPageDefinition[], report: { scope?: { entity?: string; presentation?: PanoramaReportModel['scope']['presentation'] }; territorial?: PanoramaReportModel['territorial'] }): ReportPageDefinition[] {
   if (!report.territorial?.units.length || report.scope?.presentation?.mode !== 'comparison') return pages;
@@ -9,7 +12,12 @@ export function territorialManifest(pages: ReportPageDefinition[], report: { sco
     const official = page.fiergsOfficialSlide; const ref = page.contentReferenceSlide ?? page.referenceSlide;
     const id = `territorial-${official ?? ref}-${page.fiergsSlide ?? page.visualFamily}`;
     const dense = official !== undefined ? [57,58,61,63,64,65,66].includes(official) : [48,49,51].includes(ref);
-    if (dense) return units.filter(({data}) => page.sectionId !== 'horizontal' || data.closingFacts.horizontal.projects > 0).map(({unit}) => ({ ...page,
+    if (dense) return units.filter(({unit,data}) => {
+      if(page.sectionId==='horizontal'&&data.closingFacts.horizontal.projects===0)return false;
+      if(official===57&&!data.granular.offerByTypology.some((r)=>(r.finalUnits??0)>0))return false;
+      if(official===58&&!closingTypologyPriceRanges(territorialReportView(report as PanoramaReportModel,unit.id)).length)return false;
+      return true;
+    }).map(({unit}) => ({ ...page,
       id: `${id}-${unit.id}`, territorialUnitId: unit.id, title: `${page.title} · ${unit.label}` }));
     const trend = official !== undefined ? [9,11,12,14,20,22,24,26,32,33,35,39,43,44,45,46,47].includes(official) : [14,16,18,23,24,40].includes(ref);
     if (trend) return [{ ...page, id, territorialKind: 'trend' }];
@@ -18,7 +26,8 @@ export function territorialManifest(pages: ReportPageDefinition[], report: { sco
     if (official !== undefined && [49,50,51,52].includes(official) || official === undefined && [36,37,38,39].includes(ref)) {
       const standard = official !== undefined ? [49,50].includes(official) : [38,39].includes(ref);
       const ticket = official !== undefined ? [49,51].includes(official) : [36,38].includes(ref);
-      return [{...page,id,territorialKind:`${ticket?'ticket':'meter'}-${standard?'standard':'typology'}`}];
+      const kind=`${ticket?'ticket':'meter'}-${standard?'standard':'typology'}`;
+      return territorialPriceRows(report as PanoramaReportModel,kind).rows.length ? [{...page,id,territorialKind:kind}] : [];
     }
     if (!official && page.cityComparison) return [];
     return [page];
