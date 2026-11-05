@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — Panorama: plano de comparação territorial e composições anuais — Gabriel / Codex
+
+- **Plano:** alinhamento de Gabriel convertido em [fonte técnica de execução](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), T01–T07/G0–G7: seleção livre, consolidado ou até três unidades cidade/grupo, partição completa sem sobreposição, projeções com controles independentes e coleta reutilizada. Referências/pedidos permanecem na revisãoFinoti03/11.
+- **Escopo:** curvas/variações e tabelas comparativas, páginas específicas somente nas famílias densas, horizontal incluído e composições anuais de empreendimentos/unidades/VGL. Colunas100% por ano com padrões autoritativos; não equiparar Econômico a MCMV. Vendas anuais e duplicação de maturidade/mapas ficam fora desta rodada. PPT híbrido/aparência e políticas numéricas preservadas.
+- **Validação planejada:** matrizes antes do layout, regressões offline2T2026/4T2025, R1 curto da dupla3T2026 com insumos exatos eR2 somente para lacunas, PDF/CSV/ediçãoOffice; sem coleta real autorizada. Estado: preparado, não executado. G7 depende de publicação autorizada, ensaio no site e aceite externo; sem integração/push nesta preparação.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
+
 ### 2026-11-05 — Panorama: novas referências territoriais Finoti/Teresa — Gabriel / Codex
 
 - **Diagnóstico:**15imagens e PDFs Lajeado/Vale72páginas eRM75páginas lidos/visualizados. Referências combinam séries/colunas comparativas e páginas específicas; Vale agrupa quatro municípios contra Lajeado. Três e-mails compartilhados confirmam separar poucas cidades e agruparRM. Aceite Finoti da revisão anterior preservado; esta ampliação ainda não implementada.

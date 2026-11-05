@@ -221,6 +221,8 @@ A seção abaixo é gerada do inventário da cópia de origem e associa cada cai
 
 ## Referências territoriais recebidas em 05/11/2026
 
+**Continuação após alinhamento de Gabriel:** [plano técnico de comparação territorial](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), com T01–T07, G0–G7, matriz por família e CTA. Este inventário permanece a fonte dos materiais/pedidos; o plano é a fonte da execução. Estado: plano preparado, sem implementação desta ampliação.
+
 ### Proveniência e limites
 
 [Pasta enviada por Gabriel](https://drive.google.com/drive/folders/1PKZkDP2NeXGNbqXjxYlbZe9g2RB8QZyp): 17 arquivos diretos, todos baixados e conferidos: 15 PNG e dois PDFs, Lajeado/Vale do Taquari (72 páginas) e RM de Porto Alegre (75 páginas), ambos4T2025. Originais, hashes, inventário, textos por página e pranchas de todas as páginas em `.local-inputs/finoti-comparativos-2026-11-05/manifest.json` e pasta correspondente. Numeração abaixo é a página física do PDF recebido; nomes PNG não são números garantidos do manifesto atual. Inspeção visual de todas as imagens e de todas as páginas em pranchas; não é auditoria numérica da origem nem validação do recorte3T2026.
