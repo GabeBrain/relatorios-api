@@ -1,0 +1,134 @@
+{
+  "date": "2026-11-05",
+  "status": "validated locally; no push; G7 pending",
+  "inputs": {
+    "referenceManifest": ".local-inputs/finoti-comparativos-2026-11-05/manifest.json",
+    "exactResponses": 37,
+    "newApiCollection": false,
+    "baselineDirectory": ".local-inputs/panorama-territorial-2026-11-05/before"
+  },
+  "regression": {
+    "offlineModels": 11,
+    "canonicalFieldsUnchanged": true,
+    "matrixRows": 30218,
+    "matched": 14844,
+    "different": 0,
+    "unavailable": 15374,
+    "newSourceReadsOnReprojection": 0,
+    "reprojectionMs": {
+      "min": 19.362499999995634,
+      "max": 154.79609999999957
+    },
+    "summaryPath": ".local-inputs/panorama-territorial-2026-11-05/after/summary.json"
+  },
+  "tests": {
+    "passed": 78,
+    "failed": 0,
+    "optionalSkipped": 1,
+    "lastTargetedPassed": 13,
+    "typecheck": "passed",
+    "build": "passed",
+    "lintErrors": 0,
+    "existingLintWarnings": 4
+  },
+  "ui": [
+    {
+      "width": 1440,
+      "dark": false,
+      "valid": true,
+      "overflow": false,
+      "disabled": true,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "dark": true,
+      "valid": true,
+      "overflow": false,
+      "disabled": true,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "dark": false,
+      "valid": true,
+      "overflow": false,
+      "disabled": true,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "dark": true,
+      "valid": true,
+      "overflow": false,
+      "disabled": true,
+      "errors": []
+    }
+  ],
+  "exports": [
+    {
+      "case": "R1",
+      "pages": 12,
+      "synthetic": false,
+      "csvRows": 5865,
+      "checks": 5018,
+      "different": 0,
+      "hashes": {
+        ".csv": "a3023538e0215b15a45b52b86ec5fa9523cf49b63da85b1988a75ed2269acff3",
+        ".pdf": "6ba4b1792fd1f024366d23ca2034fb58ab752d04bd17a4a8c60b1a73f2be4f34",
+        ".pptx": "7dbe130b3c920e52ce3b8caca1011805b8cba7ae4658c74638d6019577a959e5"
+      }
+    },
+    {
+      "case": "R2",
+      "pages": 8,
+      "synthetic": true,
+      "csvRows": 1655,
+      "checks": 1584,
+      "different": 0,
+      "hashes": {
+        ".csv": "3ecd234b28af122ceb15c6e28ef0d12026971b442100c610e1fd4e3610fba3af",
+        ".pdf": "0da5679f267a68de427e615f15d2ae78511e9a9bb5bd51cefdfda2559f3aad1d",
+        ".pptx": "c7e028a922ba6f511617f22c09fec0d0d900508273dba1b3b56fc9f8b9d10abf"
+      }
+    }
+  ],
+  "office": {
+    "edit": {
+      "valuePersisted": true,
+      "reopened": true,
+      "textPersisted": true,
+      "text": true,
+      "cellValue": true
+    },
+    "decks": [
+      {
+        "nativeCharts": 0,
+        "outside": [],
+        "name": "R1",
+        "slides": 12,
+        "textObjects": 432
+      },
+      {
+        "nativeCharts": 0,
+        "outside": [],
+        "name": "R2",
+        "slides": 8,
+        "textObjects": 163
+      }
+    ]
+  },
+  "limits": [
+    "Local component/browser checks, not authenticated production verification",
+    "R2 is synthetic, not a Lajeado numerical study",
+    "Full official preset uses existing synthetic 2T2026/4T2025 regression, not a newly collected full study",
+    "Canonical seven categories preserved, not a new Economic-to-MCMV mapping",
+    "Current raw data does not prove the original API coordinate anomaly corrected",
+    "No new real collection or external acceptance"
+  ],
+  "git": {
+    "authorizedMerge": "8d3eaec",
+    "newRemoteNotIntegrated": "4aed591",
+    "push": false
+  }
+}

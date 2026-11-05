@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — Panorama: comparação territorial G0–G6 validada localmente — Gabriel / Codex
+
+- **Mudança:** consolidado ou até3unidades cidade/grupo, partição explícita, coleta reutilizada; curvas/variações, tabelas comparativas, páginas específicas densas/horizontais e três composições anuais. Capas, metodologia, nomes/CSV/avisos rastreiam membros. Zeros/negativos e contratos homologados preservados; classificação de lançamento não é inferida pela classe atual/preço. Gráficos continuam imagens noPPT híbrido.
+- **Evidência:** [plano/execução e roteiroG7](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#g6--evidência-final-local-e-limites-de-g7) e [resumo verificável](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.json).78testes aprovados/0falhas/1opcional ignorado;11replaysoffline,30218conferências/0diferenças, campos canônicos intactos;ausências explicitadas. Tipos/build aprovados, lint0erros/4avisos anteriores.0leituras extras ao reagrupar;19–155ms de recomposição local, sem promessa sobreAPI/produção.
+- **Provas locais:** R1exato1T2023–3T2026,12páginas;R2sintético3unidades,8páginas, somente para lacunas. PDF/PPT/CSV conferidos;PowerPoint abriu, editou texto/célula e salvou/reabriu cópia.20páginas sem objetos fora;editor1440/390claro/escuro semoverflow/erro. Brutos em `.local-inputs/panorama-territorial-2026-11-05/`. Não houve coleta real nem estudo real novo.
+- **Integração/limites:** merge autorizado `8d3eaec` trouxe seis commitsSP; documentos paralelos reaplicados e stash mantido. Novo remoto `4aed591` não integrado. Sem push; estado **validado localmente**, G7aguarda autorização, publicaçãoLovable, ensaio autenticado e aceite desta ampliação. A falha de aprovação por créditos na atualização de extratos impediu só aquela tentativa; continuação solicitada foi executada após aprovação normal, sem contorno.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
+
 ### 2026-11-05 — Panorama: plano de comparação territorial e composições anuais — Gabriel / Codex
 
 - **Plano:** alinhamento de Gabriel convertido em [fonte técnica de execução](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), T01–T07/G0–G7: seleção livre, consolidado ou até três unidades cidade/grupo, partição completa sem sobreposição, projeções com controles independentes e coleta reutilizada. Referências/pedidos permanecem na revisãoFinoti03/11.
@@ -1022,6 +1030,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**05/11 — Panorama territorial:** G0–G6validados localmente, sem push; [execução/roteiroG7](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Aceite anterior permanece, ampliação nova aguarda ensaio/aceite.
+
 **05/11 — SP, geração automática:** fluxo visual em oito etapas substitui os botões de coleta; cancelamento/retomada e insights do analista implementados e validados localmente. Publicação autorizada; teste autenticado e aceite permanecem distintos da implementação.
 
 **05/11 — SP, relatório para conferência integral:** destaques com janelas explícitas, nove divisórias e comparativos destacados; exportador85posições com textos/células editáveis e auditoria embutida validado com fonte sintética/Office. Exportação de conferência implementada; exportações comerciais adicionais e homologação não estão concluídas.
@@ -1103,6 +1113,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+**05/11 — Panorama territorial:** autorizar integração do novoSP `4aed591` e publicação; conferir noLovable dupla comparada, consolidado regional e cidade versus grupo, retornandoPDF/PPT/CSV. Não homologado externamente nesta entrega.
 
 - [ ] **SP — ensaio real do fluxo automático:** após o deploy, selecionar ano/trimestre e Gerar relatório; conferir progresso, cancelamento/retomada, fontes parciais e memória de cálculo nos insights. Fontes reais e latência do provedor não foram exercitadas nesta rodada. [Contrato](../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).
 

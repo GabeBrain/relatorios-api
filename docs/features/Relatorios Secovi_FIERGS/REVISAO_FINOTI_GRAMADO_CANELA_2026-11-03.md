@@ -221,7 +221,7 @@ A seção abaixo é gerada do inventário da cópia de origem e associa cada cai
 
 ## Referências territoriais recebidas em 05/11/2026
 
-**Continuação após alinhamento de Gabriel:** [plano técnico de comparação territorial](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), com T01–T07, G0–G7, matriz por família e CTA. Este inventário permanece a fonte dos materiais/pedidos; o plano é a fonte da execução. Estado: plano preparado, sem implementação desta ampliação.
+**Continuação após alinhamento de Gabriel:** [plano técnico de comparação territorial](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), com T01–T07, G0–G7, matriz por família e CTA. Este inventário permanece a fonte dos materiais/pedidos; o plano é a fonte da execução. Estado: G0–G6 implementados e validados localmente; evidências e pendências G7 no plano, sem publicação ou aceite externo desta ampliação.
 
 ### Proveniência e limites
 
