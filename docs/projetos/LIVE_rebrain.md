@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 05/11/2026 — Panorama: composição anual em áreas contínuas — Gabriel / Codex
+
+- **Ajuste:** conforme retorno de Gabriel, composição anual usa áreas empilhadas lineares no lugar de colunas separadas, preservando categorias, percentuais, cores, legenda e ano parcial. Anos sem observação continuam como lacunas. Aplica-se às três métricas, sem mudar cálculos.
+- **Validação/estado:**3testes focados, tipos/lint aprovados; R1PDF/PPT/CSVoffline atualizado, gráfico inspecionado no navegador e renderizado noPowerPoint. [Fonte técnica](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#composição-anual-contínua--retorno-de-gabriel-em-0511). Sem API, merge ou push; Gabriel continua os testes antes de decidir incorporação à versão live.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
 ### 05/11/2026 — Panorama: composição territorial alinhada à aparência aprovada — Gabriel / Codex
 
 - **Problema/decisão:** Gabriel comparou o primeiro PPT territorial ao estudo aprovado e rejeitou a nova composição. Restaurada a estrutura trimestral existente (título preto/verde em blocos, quadro anual superior, gráfico à esquerda e barras comparativas à direita), mantendo separação por cidades/grupos e os dados conciliados. Cabeçalhos de oferta/preços/anuais alinhados; marcador compartilhado preserva cor dos trimestres equivalentes. PPT híbrido continua com textos/células editáveis e gráficos em imagem.

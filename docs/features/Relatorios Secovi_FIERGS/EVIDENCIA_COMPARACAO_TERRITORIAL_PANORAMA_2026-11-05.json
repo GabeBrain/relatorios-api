@@ -75,8 +75,8 @@
       "different": 0,
       "hashes": {
         ".csv": "a3023538e0215b15a45b52b86ec5fa9523cf49b63da85b1988a75ed2269acff3",
-        ".pdf": "6ec51ca8e7a42cf132ea697971557c8477006debde824d5e87c764b4b098af29",
-        ".pptx": "83f3c8f99bf37b1719569791c93cd4fbe8ee36001972495c054480f04e2e1251"
+        ".pdf": "9b896569623c0d396f002e12332a28c607af2426ad23e34419302b0dd4d11c1a",
+        ".pptx": "52898f9b2b744bb47ccf495d152c74e7e8e95bd05e8d4bb492df4a71b67de5fc"
       }
     },
     {
@@ -145,5 +145,21 @@
     "pdfPages": 20,
     "officePages": 20,
     "externalAcceptance": false
+  },
+  "annualAreaRevision": {
+    "request": "Continuous stacked area instead of separated stacked columns, as Finoti reference",
+    "metrics": [
+      "projects",
+      "units",
+      "vgl"
+    ],
+    "interpolation": "linear",
+    "missingYears": "gaps; no connection over missing observations",
+    "valuesChanged": false,
+    "testsPassed": 3,
+    "typecheck": "passed",
+    "lint": "passed",
+    "office": "12-slide copy opened; annual area slide rendered in PowerPoint",
+    "published": false
   }
 }
