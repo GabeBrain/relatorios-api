@@ -24,6 +24,23 @@ export interface PanoramaScope {
   entity?: EntityId;
   /** V4 é a versão de teste atual e usa o universo granular oficial. */
   engineVersion?: PanoramaEngineVersion;
+  /** Absent in older snapshots: retains their consolidated presentation. */
+  presentation?: TerritorialPresentation;
+}
+
+export interface TerritorialUnit { id: string; label: string; cities: string[]; }
+export interface TerritorialPresentation { mode: 'consolidated' | 'comparison'; units?: TerritorialUnit[]; }
+export type TerritorialProjection = Pick<PanoramaReportModel, 'scope' | 'launches' | 'sales' | 'stock' | 'ivv' | 'prices' | 'granular' | 'closingFacts' | 'dataState'>;
+export interface TerritorialCheck {
+  metric: string; period: string; dimension: string; source: string;
+  canonical: number | null; grouped: number | null; delta: number | null;
+  status: 'match' | 'different' | 'unavailable';
+  cities: { label: string; value: number | null }[];
+  units: { id: string; label: string; value: number | null }[];
+}
+export interface TerritorialComparison {
+  units: { unit: TerritorialUnit; data: TerritorialProjection }[];
+  checks: TerritorialCheck[];
 }
 
 /** Rótulo determinístico do recorte para capa, título e nome de arquivo, com uma ou várias cidades. */
@@ -239,6 +256,7 @@ export interface HorizontalSeriesPolicy {
 }
 
 export interface PanoramaReportModel {
+  territorial?: TerritorialComparison;
   scope: PanoramaScope;
   generatedAt: string;
   launches: LaunchModel;

@@ -1,4 +1,16 @@
 import type { LaunchModel, LaunchRecord, LaunchSeries, Quarter } from '../types';
+import type { MarketCube } from '../domain/cube';
+
+/** Same launch facts used by the API and territorial projections; no presentation-specific formulas. */
+export function launchRecordsFromCube(cube: MarketCube): LaunchRecord[] {
+  return cube.projects.map((project) => {
+    const economic = project.standard.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes('econom');
+    return { quarter: project.releaseQuarter, segment: project.segment, projects: 1, units: project.launchedUnits ?? 0, vgvMillions: project.launchedVgvMillions,
+      economicProjects: economic ? 1 : 0, otherProjects: economic ? 0 : 1, economicUnits: economic ? (project.launchedUnits ?? 0) : 0, otherUnits: economic ? 0 : (project.launchedUnits ?? 0),
+      economicVgvMillions: economic ? project.launchedVgvMillions : 0, otherVgvMillions: economic ? 0 : project.launchedVgvMillions,
+      name: project.name, latitude: project.latitude, longitude: project.longitude };
+  });
+}
 
 export function quarterKey(quarter: Quarter): number { return Number(quarter.slice(2)) * 4 + Number(quarter[0]); }
 export function quarterLabel(quarter: Quarter): string { return `${quarter.slice(0, 2)} ${quarter.slice(2)}`; }

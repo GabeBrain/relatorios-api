@@ -1,4 +1,6 @@
-import { buildLaunchModel, periodToQuarter, safeNumber } from '../lib/launches';
+import { territorialPresentationErrors } from '../domain/territorial-presentation';
+import { buildTerritorialComparison } from './territorial-projections';
+import { buildLaunchModel, periodToQuarter, safeNumber, launchRecordsFromCube } from '../lib/launches';
 import { reconcileAggregateIvv } from './editorial-contracts';
 import type { HorizontalSeriesPolicy, LaunchRecord, MarketCohortRow, MethodStatus, PanoramaCityComparisons, PanoramaClosingFacts, PanoramaGranularBlocks, PanoramaPresentationCredits, PanoramaProvenance, PanoramaReportModel, PanoramaScope, Quarter, ReportDataState, ReportMarketBlock, ReportSeries, Segment } from '../types';
 import { editorialWindow, quarterIndex, quarterRange } from '../domain/quarters';
@@ -530,7 +532,7 @@ function buildCityComparisons(scope: PanoramaScope, cube: MarketCube, provenance
   return { enabled: selected.length >= 2, ...(selected.length < 2 ? { suppressionReason: 'O comparativo é exibido somente para recortes com duas ou mais cidades; os totais municipais permanecem na auditoria.' } : {}), sales, market, availabilityByStandard };
 }
 
-export function buildPanoramaReportModel(
+function buildNumericalReport(
   scope: PanoramaScope,
   records: LaunchRecord[],
   sources: {
@@ -539,7 +541,7 @@ export function buildPanoramaReportModel(
     meter: SourceResult; meterTypology: SourceResult;
   },
   cohorts: MarketCohortRow[] = [],
-  options: { cubes?: MarketCube[]; provenance?: Partial<PanoramaProvenance>; citySalesSources?: CitySalesSource[]; cityTemporalSources?: CityTemporalSources[]; presentation?: PanoramaPresentationCredits } = {},
+  options: { cubes?: MarketCube[]; provenance?: Partial<PanoramaProvenance>; cityLaunchRecords?: { city: string; records: LaunchRecord[] }[]; citySalesSources?: CitySalesSource[]; cityTemporalSources?: CityTemporalSources[]; presentation?: PanoramaPresentationCredits } = {},
 ): PanoramaReportModel {
   const entity = scope.entity ?? 'secovi-sp';
   const launches = buildLaunchModel(records, canonical(scope));
@@ -641,3 +643,49 @@ export function buildPanoramaReportModel(
   report.notices = buildGenerationNotices(report);
   return report;
 }
+
+// Private in-memory inputs, never serialized into exports; presentation changes do not fetch again.
+type NumericalInput = Parameters<typeof buildNumericalReport>;
+const numericalInputs = new WeakMap<PanoramaReportModel, NumericalInput>();
+export function buildPanoramaReportModel(...input: NumericalInput): PanoramaReportModel {
+  const [scope, records, sources, cohorts = [], options = {}] = input;
+  const errors = territorialPresentationErrors(scope);
+  if (errors.length) throw new Error(errors.join(' '));
+  const report = buildNumericalReport(...input);
+  const comparison = buildTerritorialComparison(scope, report, (members) => {
+    const selected = scope.cities.filter((city) => members.some((m) => normalizeText(m) === normalizeText(city)));
+    const belongs = (city: string) => selected.some((c) => normalizeText(c) === normalizeText(city));
+    if (!options.cityTemporalSources?.length && Object.values(sources).some((s) => s.rows.length))
+      throw new Error('Comparação indisponível: fontes temporais sem identificação municipal.');
+    const cubes = options.cubes?.map((cube) => ({ ...cube, projects: cube.projects.filter((p) => belongs(p.city)),
+      rejections: cube.rejections.filter((p) => belongs(p.city)), cities: cube.cities.filter(belongs) })).filter((cube) => cube.cities.length);
+    const localRecords = options.cityLaunchRecords?.filter((c) => belongs(c.city)).flatMap((c) => c.records)
+      ?? (cubes?.length ? cubes.flatMap(launchRecordsFromCube) : selected.length === scope.cities.length ? records : []);
+    const citySources = options.cityTemporalSources?.filter((c) => belongs(c.city));
+    const localSources = citySources?.length ? Object.fromEntries(Object.keys(sources).map((key) => [key, {
+      rows: citySources.flatMap((c) => c.sources[key as TemporalKey].rows),
+      available: citySources.every((c) => c.sources[key as TemporalKey].available), source: sources[key as TemporalKey].source,
+    }])) as typeof sources : sources;
+    return buildNumericalReport({ ...scope, cities: selected, presentation: { mode: 'consolidated' } }, localRecords, localSources,
+      cubes?.flatMap((cube) => cube.projects.map((p) => ({ segment: p.segment, releaseYear: String(p.releaseYear), standard: p.standard, stock: p.finalUnits ?? 0 }))).filter((r) => r.stock > 0) ?? cohorts,
+      { ...options, cubes, cityTemporalSources: citySources,
+        citySalesSources: options.citySalesSources?.filter((c) => belongs(c.city)),
+        provenance: { ...options.provenance, requestedCities: selected,
+          completedCities: report.provenance.completedCities.filter(belongs), failedCities: report.provenance.failedCities.filter((c) => belongs(c.city)) } });
+  });
+  if (comparison) report.territorial = comparison;
+  numericalInputs.set(report, input);
+  return report;
+}
+
+export function reprojectPanoramaReport(report: PanoramaReportModel, scope: PanoramaScope): PanoramaReportModel {
+  const input = numericalInputs.get(report);
+  if (!input) throw new Error('Os dados desta geração não estão mais disponíveis na sessão. Gere o recorte novamente.');
+  // Only presentation may change: this operation must never carry a different physical scope.
+  const original = { ...input[0], presentation: undefined }; const requested = { ...scope, presentation: undefined };
+  if (JSON.stringify(original) !== JSON.stringify(requested)) throw new Error('Recorte de coleta diferente.');
+  const projected = buildPanoramaReportModel(scope, ...input.slice(1) as Tail<NumericalInput>);
+  projected.generatedAt = report.generatedAt; projected.municipalTerritory = report.municipalTerritory;
+  return projected;
+}
+type Tail<T extends unknown[]> = T extends [unknown, ...infer Rest] ? Rest : never;

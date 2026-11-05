@@ -1,5 +1,5 @@
 import { httpRequest } from '@/lib/http-client';
-import { periodToQuarter, quarterKey, safeNumber } from './lib/launches';
+import { periodToQuarter, quarterKey, safeNumber, launchRecordsFromCube } from './lib/launches';
 import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrationCell, MarketCohortRow, PanoramaReference, PanoramaReportModel, PanoramaScope, Quarter, Segment } from './types';
 import { buildPanoramaReportModel } from './report/model';
 import { loadMunicipalTerritory } from './lib/municipal-territory';
@@ -199,16 +199,6 @@ function segmentOf(value: unknown): Segment | null {
   return null;
 }
 function standardOf(value: unknown): string { return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
-
-/** Firewall V3: números horizontais só atravessam se o cubo oficial os aceitou. */
-function launchRecordsFromCube(cube: MarketCube): LaunchRecord[] {
-  return cube.projects.map((project) => {
-    const economic = standardOf(project.standard).includes('econom');
-    return { quarter: project.releaseQuarter, segment: project.segment, projects: 1, units: project.launchedUnits ?? 0, vgvMillions: project.launchedVgvMillions,
-      economicProjects: economic ? 1 : 0, otherProjects: economic ? 0 : 1, economicUnits: economic ? (project.launchedUnits ?? 0) : 0, otherUnits: economic ? 0 : (project.launchedUnits ?? 0),
-      economicVgvMillions: economic ? project.launchedVgvMillions : 0, otherVgvMillions: economic ? 0 : project.launchedVgvMillions, name: project.name, latitude: project.latitude, longitude: project.longitude };
-  });
-}
 
 /** Promoted launch contract: a release is one building on its release_date, never every history snapshot. */
 export function launchRecordsFrom(data: Record<string, unknown>[], scope: CityScope): LaunchRecord[] {
@@ -459,6 +449,7 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
         cityCollectionAttempts: scopes.map(({ city }) => ({ city, attempts: session.attempts.get(city) ?? 1, recovered: (session.attempts.get(city) ?? 1) > 1 })),
         cityCollectionMetrics: harvests.flatMap(({ city, sources }) => Object.entries(sources).map(([operation, source]) => ({ city, operation, requests: source.requestCount ?? 0, durationMs: source.durationMs ?? 0 }))),
       },
+      cityLaunchRecords: harvests.map(({ city, records }) => ({ city, records })),
       citySalesSources: harvests.map((harvest) => ({ city: harvest.city, rows: harvest.sources.sales.rows })),
       cityTemporalSources,
     },
