@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 05/11/2026 — revisão dos destaques e exportação solicitada
+
+Rodada final292testes/28arquivos, tipos/lint/build e Edge completo/exportação aprovados. Arquivo final85slides/2.354textos nativos/24.565.707bytes aberto noOffice;7páginas renderizadas. Comparador extrai auditoria doPPTX. Publicação autorizada em fechamento, sem resolver por dedução diferenças reais de base.
+
+Usuário autorizou publicar otimização da coleta e correções juntos, pediu coerência numérica/original×JSON, divisórias e PPTX editável. Implementados acumulado anual no9, separação de métricas no10, limpeza editorial9–11, comparativos destacados e nove artes originais. PPTX85posições preserva geração/fonte/pendências, sem coleta nova; textos/células nativos, mapas/gráficos/arte emimagem. Auditoria agregada nas notas e comparador offline.289 testes/27arquivos e navegador/Office aprovados na primeira validação; título/valor editados e persistidos em cópia. [Contrato e divergências reais não resolvidas](../../features/relatorios-institucionais/sp/REVISAO_DESTAQUES_EXPORTACAO_2026-11-05.md). Arquivo da geração real necessário para reconciliação, sem inventar causa da diferença. Origem13ago contém texto127.778×gráfico127.788. Sem homologação, nova API ou escrita noMonday. Publicação conjunta autorizada; preservar092996e/b8eb808 e motores paralelos.
+
 ## 05/11/2026 — eficiência da conferência detalhada SP
 
 Fechamento local: tipos/build exit0, lint e Edge dirigido aprovados; captura do carregamento inspecionada, zero erros de página e zero chamadas de negócio reais. Estado pronto para publicação/reteste, sem deploy observado.

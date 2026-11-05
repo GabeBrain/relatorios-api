@@ -159,7 +159,7 @@ try {
       await page.getByText(/Cobertura conferida:/).waitFor();
       assert.equal(await page.getByRole('cell', { name: 'Indisponível', exact: true }).count(), 0);
       await openSlide(13);
-      assert.match(await page.getByRole('article').innerText(), /Reconstitui\u00e7\u00e3o do cadastro atual/);
+      assert.match(await page.getByRole('article').innerText(), /EMPREENDIMENTOS VERTICAIS LAN\u00c7ADOS/);
       assert.match(await page.getByRole('article').innerText(), new RegExp(`Lan\u00e7amentos no trimestre selecionado\\s+${Number(month) - 6}`));
       await captureSlide({ path: resolve(output, `${width}-${dark ? 'dark' : 'light'}-${month}-projects.png`) });
       await page.getByText('Séries de unidades lançadas conferidas desde janeiro de 2021. Cinco páginas históricas disponíveis.', { exact: true }).waitFor();
@@ -181,7 +181,7 @@ try {
           await checklist.getByRole('button',{name:'Baixar checklist da confer\u00eancia'}).click();
           const download=await downloadPromise;
           const snapshot=JSON.parse(await readFile(await download.path(),'utf8'));
-          assert.equal(snapshot.slides.length,85);assert.equal(snapshot.exportAvailable,false);
+          assert.equal(snapshot.slides.length,85);assert.equal(snapshot.exportAvailable,true);assert.equal(snapshot.numericAudit.schema,'sp-numeric-audit-v1');
           assert.doesNotMatch(JSON.stringify(snapshot),/synthetic-only|typologies_history|latitude/);
           await checklist.getByText('Ver situa\u00e7\u00e3o e pend\u00eancias por slide',{exact:true}).click();
           await checklist.getByRole('combobox',{name:'Mostrar slides'}).click();
@@ -389,6 +389,24 @@ try {
   slowMapbox=false;mapboxFailure=true;await cdp.send('Network.clearBrowserCache');
   await openSlide(68);await page.getByRole('article').getByText('Base cartogr\u00e1fica parcialmente indispon\u00edvel.',{exact:true}).waitFor();
   await captureSlide({path:resolve(output,'map-provider-error.png')});mapboxFailure=false;
+  if(process.env.SP_DIAGNOSTIC_EXPORT==='1'){
+    for(const slide of [9,10,11,12,13,31,45,49,52,60,65,81]){
+      await openSlide(slide);await captureSlide({path:resolve(output,`review-final-${slide}.png`)});
+    }
+    const before={calls,granularCalls,neighborhoodCalls};
+    await page.getByRole('button',{name:'Baixar PPTX editável',exact:true}).click();
+    await page.getByRole('button',{name:'Cancelar exportação',exact:true}).click();
+    await page.getByText('Exportação cancelada.',{exact:true}).waitFor();
+    const downloadPromise=page.waitForEvent('download',{timeout:240000});
+    await page.getByRole('button',{name:'Baixar PPTX editável',exact:true}).click();
+    await page.getByRole('button',{name:'Cancelar exportação',exact:true}).waitFor();
+    await page.getByRole('region',{name:'Exportação PowerPoint'}).screenshot({path:resolve(output,'pptx-loading.png')});
+    const download=await downloadPromise;
+    await download.saveAs(resolve(output,'sp-editable-synthetic.pptx'));
+    await page.getByText('PPTX gerado com 85 slides. Download iniciado.',{exact:true}).waitFor();
+    assert.deepEqual({calls,granularCalls,neighborhoodCalls},before);
+    console.log(JSON.stringify({editablePptx:true,pages:85,noAdditionalBusinessCalls:true}));
+  }
   granularFailure = true;
   await page.getByRole('button', { name: 'Conferir dados reais', exact: true }).click();
   await page.getByText('Contagem de empreendimentos indisponível', { exact: true }).waitFor();

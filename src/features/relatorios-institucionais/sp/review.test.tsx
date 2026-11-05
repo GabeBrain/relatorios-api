@@ -54,7 +54,7 @@ describe('SP — revisão para testes práticos',()=>{
     expect(reviewSpSlides(report,'')[66].state).toBe('partial');
     const json=JSON.stringify(spReviewSnapshot(report,reviewSpSlides(report,'secret-marker')));
     expect(json).not.toContain('secret-marker');expect(json).not.toMatch(/typologies_history|latitude|Empreendimento simulado/);
-    expect(JSON.parse(json)).toMatchObject({exportAvailable:false,analystApproval:false,quarter:'3T2026'});
+    expect(JSON.parse(json)).toMatchObject({exportAvailable:true,analystApproval:false,quarter:'3T2026'});
   });
   it('mantém o checklist separado do slide e a edição visível dentro da ampliação',()=>{
     vi.stubEnv('VITE_MAPBOX_ACCESS_TOKEN','');

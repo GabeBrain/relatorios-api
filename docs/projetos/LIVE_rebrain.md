@@ -385,6 +385,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-05 — SP: destaques coerentes, divisórias originais e PPTX de conferência — usuário / Codex
+
+- **Validação final:**292 testes/28arquivos, tipos/lint/build aprovados;PPTX final85slides/2.354textos nativos aberto noOffice, sete páginas renderizadas e comparativos finais inspecionados. Exportação final noEdge preservou cobertura e não chamou GeoBrain; falhas de expectativa editorial antiga corrigidas sem alterar cálculos. Ainda não é reconciliação da fonte real.
+
+- **Pedido/escopo:** usuário pediu coerência numérica sem copiar a redação, comparação original×JSON, restauração das capas de tema e exportação PPTX editável; autorizou enviar junto da otimização da coleta. Primeiro par de commits locais092996e/b8eb808 preservado.
+- **Mudança:**9 usa janeiro-fechamento;10 separa trimestre MCMV, comparação anual, mercado e MCMV12meses;9–11 sem comentários de implementação. Trimestres equivalentes destacados e tabela com dois comparativos recentes. Nove divisórias reaproveitadas do original,45 sem mês fixo. Diagnóstico inclui dados agregados/períodos e comparador offline; não troca valores para coincidir com narrativa antiga.
+- **PPTX:** botão de conferência monta85posições da geração fixa, sem nova coleta GeoBrain. Textos/células dinâmicos nativos; desenhos dos gráficos, mapas e artes estáticas em imagem. BrainLoadingState, cancelamento, erro/retry e auditoria JSON nas notas. Não é homologação ou promessa de gráfico nativo editável. [Contrato, divergências e limites](../features/relatorios-institucionais/sp/REVISAO_DESTAQUES_EXPORTACAO_2026-11-05.md).
+- **Evidência:**289 testes SP/27arquivos, lint e build aprovados na primeira verificação; rodada final documentada no EVIDENCIAS. Edge gerou85slides/2.404textos nativos sem GeoBrain adicional; cancelamento/sucesso observados. Arquivo aberto noPowerPoint: título e valor editados, salvos/reabertos em cópia, sete páginas renderizadas e capturas inspecionadas. Dados sintéticos, não ensaio de negócio. Comparador leu auditoria embutida e percorreu85posições/25tendências; demais posições não são aprovadas automaticamente.
+- **Estado:** fonte original tem divergências internas (127.778 no texto×127.788 no gráfico, entre outras); diferenças atuais não atribuídas automaticamente a atualização/distratos/filtros. Aguardar PPTX2T2026 da geração real para reconciliação; fonte/editorial/homologação continuam abertos. Domínios paralelos preservados e Monday não alterado.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência apenas.
+
 ### 2026-11-05 — SP: coleta detalhada com vagas continuamente ocupadas — usuário / Codex
 
 - **Commit técnico:** `092996e` (05/11/2026), entrega validada localmente. Publicação desta otimização ainda pendente; não confundir com as correções SP já enviadas em04/11.
@@ -930,6 +941,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 2. Etapas
 
+**05/11 — SP, relatório para conferência integral:** destaques com janelas explícitas, nove divisórias e comparativos destacados; exportador85posições com textos/células editáveis e auditoria embutida validado com fonte sintética/Office. Exportação de conferência implementada; exportações comerciais adicionais e homologação não estão concluídas.
+
 **05/11 — SP, eficiência da coleta:** fila contínua com três vagas substitui lotes;278 regressões e lint aprovados. Ganho demonstrado em latências simuladas, duração real pós-publicação ainda por medir. Critérios de fonte e aprovação dos slides preservados.
 
 **04/11 — SP, checklist (4):** ajustes51/53–59/78 validados localmente com274 testes, tipos/lint/build e navegador dirigido. Quantidades do78 preservadas com preço incompleto explicitado; controle de estoque aceita apenas soma municipal exata. Integração/publicação e novo ensaio autenticado pendentes, sem homologação automática.
@@ -1007,6 +1020,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 3. Pendências
+
+- [ ] **SP — reconciliar edição2T2026 com a geração real:** usuário enviar novoPPTX ou JSON numérico. Confrontar as25séries automaticamente e revisar restantes com inventário/dados agregados; distinguir período, indicador e revisões da origem. Não forçar127.778,29.065 ou560 no código. Original também tem contradições internas, registradas na revisão05/11. Confirmar valores e metodologia com analista; não declarar coincidência integral antes da comparação.
 
 - [ ] **SP — medir fila contínua na API real:** após publicação, comparar duração da conferência detalhada no mesmo recorte; se ainda lenta, registrar latências/tamanhos/retries das páginas, sem expor token. Resultado sintético9min01s→3min15s não é SLA. Cobertura integral, lacunas reais e revisão editorial continuam independentes dessa otimização.
 

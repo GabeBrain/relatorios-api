@@ -14,8 +14,10 @@ import { SP_MARKET_SLIDES } from './market-details';
 import { SpMarketStateSlide } from './SpMarketStateSlide';
 import { SpStockMapSlide } from './SpStockMapSlide';
 import { SP_INSTITUTIONAL_ASSETS } from './institutional-assets';
+import { SP_DIVIDER_ASSETS } from './divider-assets';
 import { reviewSpSlides, SP_SLIDE_STATE_LABELS } from './review';
 import { SpReviewPanel } from './SpReviewPanel';
+import { SpPptxExport } from './SpPptxExport';
 import cover from './assets/cover.png';
 import projectsTemplate from './assets/template-13.png';
 import launchesTemplate from './assets/template-18.png';
@@ -29,6 +31,15 @@ import salesSegmentTemplate from './assets/template-38.png';
 import stockSegmentTemplate from './assets/template-48.png';
 
 const templates: Record<number, string> = { 1: cover, 13: projectsTemplate, 14: projectsTemplate, 15: projectsTemplate, 16: projectsTemplate, 17: projectsTemplate, 18: launchesTemplate, 19: launchesTemplate, 20: launchesTemplate, 21: launchesTemplate, 22: launchesTemplate, 23: launchesTypologyTemplate, 24: launchesSegmentTemplate, 32: salesTemplate, 37: salesTypologyTemplate, 38: salesSegmentTemplate, 46: stockTemplate, 47: stockTypologyTemplate, 48: stockSegmentTemplate };
+
+export function SpSlideContent({report,page}:{report:SpPreview;page:number}) {
+  const definition=SP_ORIGINAL_SLIDES[page-1];
+  return <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
+    <img key={`template-${page}`} src={SP_DIVIDER_ASSETS[page] ?? SP_INSTITUTIONAL_ASSETS[page] ?? templates[page] ?? (page >= 32 && page <= 44 ? salesTemplate : projectsTemplate)} alt={page === 1 ? 'Capa original Brain Inteligência Estratégica' : SP_DIVIDER_ASSETS[page] ? definition.title : SP_INSTITUTIONAL_ASSETS[page] ? `Referência institucional: ${definition.title}` : `Layout: ${definition.title}`} className="absolute inset-0 h-full w-full" />
+    {SP_DIVIDER_ASSETS[page] && <span className="sr-only">{definition.title.toLocaleUpperCase('pt-BR')}</span>}
+    {SP_INSTITUTIONAL_ASSETS[page] || SP_DIVIDER_ASSETS[page] ? null : [9,10,11].includes(page) ? <SpHighlightsSlide key={page} report={report} slide={page}/> : [67,68,70,71,74,75,79,80].includes(page) ? <SpStockMapSlide key={page} report={report} slide={page}/> : (SP_MARKET_SLIDES as readonly number[]).includes(page) ? <SpMarketStateSlide key={page} report={report} slide={page}/> : (SP_DETAIL_SLIDES as readonly number[]).includes(page) ? <SpDetailSlide key={page} report={report} slide={page} /> : page >= 13 && page <= 22 || page >= 26 && page <= 30 || page >= 32 && page <= 36 || page >= 40 && page <= 44 ? <SpTrendSlide key={page} report={report} number={page} /> : [23, 24, 37, 38, 47, 48].includes(page) ? <SpComparisonSlide key={page} report={report} number={page} /> : [25,39].includes(page) ? <SpNeighborhoodSlide key={page} report={report} sales={page === 39} /> : [46,50].includes(page) ? <SpMarketSlide key={page} report={report} number={page} /> : page > 1 ? <OriginalTextSlide number={page} title={definition.title} report={report} /> : null}
+  </article>;
+}
 
 function SlideFrame({ children }: { children: ReactNode }) {
   const frame = useRef<HTMLDivElement>(null);
@@ -50,17 +61,14 @@ export function SpReportPages({ report, onSelectSlide }: { report: SpPreview; on
   if (!['partial', 'quarter-closed', 'ready'].includes(report.status)) return null;
   const real = report.source === 'api' || report.source === 'recorded-api';
   const period = spPeriodLabel(report);
-  const definition = SP_ORIGINAL_SLIDES[page - 1];
   const reviews=reviewSpSlides(report);
   const currentReview=reviews[page-1];
   const referenceNote=SP_INSTITUTIONAL_ASSETS[page] ? (page===7?'Perfil territorial de junho de 2026, conforme o material de referência.':'Conteúdo institucional reproduzido da edição de referência 2T2026; nomes, contatos e números conservam essa edição.') : null;
-  const slide = <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
-    <img key={`template-${page}`} src={SP_INSTITUTIONAL_ASSETS[page] ?? templates[page] ?? (page >= 32 && page <= 44 ? salesTemplate : projectsTemplate)} alt={page === 1 ? 'Capa original Brain Inteligência Estratégica' : SP_INSTITUTIONAL_ASSETS[page] ? `Referência institucional: ${definition.title}` : `Layout: ${definition.title}`} className="absolute inset-0 h-full w-full" />
-    {SP_INSTITUTIONAL_ASSETS[page] ? null : [9,10,11].includes(page) ? <SpHighlightsSlide key={page} report={report} slide={page}/> : [67,68,70,71,74,75,79,80].includes(page) ? <SpStockMapSlide key={page} report={report} slide={page}/> : (SP_MARKET_SLIDES as readonly number[]).includes(page) ? <SpMarketStateSlide key={page} report={report} slide={page}/> : (SP_DETAIL_SLIDES as readonly number[]).includes(page) ? <SpDetailSlide key={page} report={report} slide={page} /> : page >= 13 && page <= 22 || page >= 26 && page <= 30 || page >= 32 && page <= 36 || page >= 40 && page <= 44 ? <SpTrendSlide key={page} report={report} number={page} /> : [23, 24, 37, 38, 47, 48].includes(page) ? <SpComparisonSlide key={page} report={report} number={page} /> : [25,39].includes(page) ? <SpNeighborhoodSlide key={page} report={report} sales={page === 39} /> : [46,50].includes(page) ? <SpMarketSlide key={page} report={report} number={page} /> : page > 1 ? <OriginalTextSlide number={page} title={definition.title} report={report} /> : null}
-  </article>;
+  const slide = <SpSlideContent report={report} page={page}/>;
   const navigation = <nav aria-label="Navegação dos slides originais" className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">{SP_ORIGINAL_SLIDES.map(item => <Button className="h-auto min-h-10 max-w-full whitespace-normal py-2 text-left" key={item.number} variant={page === item.number ? 'default' : 'outline'} aria-pressed={page === item.number} onClick={() => setPage(item.number)}>{item.number}. {item.title}</Button>)}</nav>;
   return <section aria-label="Páginas do relatório" className="space-y-4">
-    <div><h2 className="text-lg font-semibold">Montagem do relatório</h2><p className="text-sm text-muted-foreground">Ordem e numeração dos 85 slides do modelo original · {report.quarter} · {real ? period : 'Dados fictícios'}. Os indicadores dependem da conferência de cada fonte. Exportação e homologação pendentes.</p><p className="text-sm text-muted-foreground">Séries e comparativos são preenchidos automaticamente após a conferência das fontes. Rankings de bairros dependem da reconciliação com os totais municipais; os históricos de bairros, áreas, preços e mapas são coletados ao abrir um desses slides e reaproveitados entre eles. VGL lançado e VGV vendido por período usam INCC-DI e base única no último mês disponível. Preços e VGV da fotografia atual são nominais.</p></div>
+    <div><h2 className="text-lg font-semibold">Montagem do relatório</h2><p className="text-sm text-muted-foreground">Ordem e numeração dos 85 slides do modelo original · {report.quarter} · {real ? period : 'Dados fictícios'}. Os indicadores dependem da conferência de cada fonte. PowerPoint disponível para conferência; homologação pendente.</p><p className="text-sm text-muted-foreground">Séries e comparativos são preenchidos automaticamente após a conferência das fontes. Rankings de bairros dependem da reconciliação com os totais municipais; os históricos de bairros, áreas, preços e mapas são coletados ao abrir um desses slides e reaproveitados entre eles. VGL lançado e VGV vendido por período usam INCC-DI e base única no último mês disponível. Preços e VGV da fotografia atual são nominais.</p></div>
+    <SpPptxExport report={report} renderSlide={number=><SpSlideContent report={report} page={number}/>}/>
     <SpReviewPanel report={report} slides={reviews} onOpen={setPage}/>
     {!expanded && navigation}
     <p role="status" className="text-sm">Slide {page}: <strong>{SP_SLIDE_STATE_LABELS[currentReview.state]}</strong> · {currentReview.reason}</p>
