@@ -2,6 +2,10 @@
 
 ## 05/11/2026 — comparação completa e contenção executada localmente
 
+Integração confirmada pelo usuário e concluída em `2d6c018`, preservando correções `785cae6`/`9f0ab00` e seis commits do time até `e5bc2c2`.126arquivos SP idênticos; registro vivo de ambos os lados comprovadamente preservado por três pontos, desconsiderando somente separadores vazios. Publicação ainda não realizada; não confundir merge autorizado com push.
+
+Regressão na base integrada:302testes/31arquivos aprovados, incluindo seleçãoFIERGS do remoto. Sem alteração de timeout/guardas.
+
 Base81ad236/main/origin0/0 apósfetch; CodexTest/Windows. Usuário forneceu original e gerado, confirmou segmentos, pediu MD, descartou erros manuais da fila e autorizou correções.170renders/85pares inspecionados;1.021comparações em55slides, sem presumir causa de deltas. [Plano, andamento e inventário](../../features/relatorios-institucionais/sp/PLANO_CONTENCAO_COMPARACAO_2T2026_2026-11-05.md). Implementados denominadorStandard/destaque69, universo comum de empreendimentos emoferta76–78, mapas4segmentos/calorVGV, eixos/navegaçãoPPTX, slide2dinâmico e acabamento.300testes/30arquivos, tipos/lint/build/Edge/Office aprovados; novoPPTX85slides/18links, edição salva/reaberta e auditoria preservada. SemAPIrealnova; pesos/fontes históricas/IDs/baseINCC original continuam observações a reconciliar, não valores a copiar. Publicação/nova geração real pendentes; nenhumMondayalterado.
 
 ## 05/11/2026 — compatibilidade do PPTX real

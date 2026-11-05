@@ -394,6 +394,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Validação:**300testes/30arquivos, tipos/lint/build, Edge e Office aprovados.85slides,18links,17rótulos trimestrais nos46/50; edição salva/reaberta e auditoria exata. Nove páginas renderizadas,46/69/79inspecionadas. Ensaios sintéticos/replay, semAPIrealnova. BrainLoadingState e componentes existentes reutilizados; estados lento/cancelamento/retry/erro/vazio e sucesso cobertos.
 - **Arquivos:** móduloSPde mercado/mapas/apresentação/exportação, diagnóstico e testes; arte2com proveniência; plano/evidências/handoff.
 - **Commits:** `785cae6` — correções SP; documentação neste fechamento.
+- **Integração:** usuário autorizou preservar ambos os trabalhos; merge `2d6c018` reúne correções/documentação `785cae6`/`9f0ab00` e seis commits remotos até `e5bc2c2`. Sem conflito;126arquivos SP idênticos byte a byte e LIVE preservado conforme base+(local−base)+(remoto−base), ignorando somente separadores vazios. Alterações FIERGS/Finoti/menu escuro preservadas; nova publicação ainda não executada.
+- **Regressão integrada:**302testes/31arquivos aprovados (300SPe2FIERGS), sem relaxar timeout ou guardas.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`, referência sem escrita.
 - **Impacto em Etapas/Pendências:** correções locais prontas para publicação; nova geração real e verificação prática pendentes. Fontes ausentes, ponderação do original, IDs de contagem e base antigaINCC não foram inferidos. Secovi/FIERGS e demais motores preservados.
 ### 2026-11-05 — Rebrain: barra do menu no tema escuro e publicação FIERGS — Gabriel / Codex

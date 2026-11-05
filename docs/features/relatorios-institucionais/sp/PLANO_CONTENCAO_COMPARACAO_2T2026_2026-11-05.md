@@ -44,7 +44,9 @@ A investigação não depende de redefinir MCMV. A classificação está confirm
 
 **Validação local:** 300 testes SP / 30 arquivos aprovados; tipos, lint e build aprovados. Edge gerou os 85 slides sem novas chamadas de negócio durante a exportação. PowerPoint abriu, editou, salvou e reabriu a cópia sintética; nove páginas corrigidas foram renderizadas e as páginas 46/69/79 inspecionadas. Auditoria agregada permanece idêntica após salvamento pelo Office. Esses ensaios não são uma nova geração autenticada do relatório real do usuário.
 
-**Fechamento técnico:** código salvo em `785cae6`. A conferência final encontrou seis commits remotos novos sobre FIERGS, documentação e menu escuro, sem alterações nos arquivos SP corrigidos. Integração foi solicitada conforme AGENTS.md; não foi executada sem confirmação. Publicação desta rodada ainda não realizada.
+**Fechamento técnico:** código salvo em `785cae6`, diagnóstico/documentação em `9f0ab00`. Usuário autorizou integrar os seis commits remotos sobre FIERGS, documentação e menu escuro; merge `2d6c018` concluído sem conflito. Os 126 arquivos do módulo SP permaneceram idênticos byte a byte. A conferência do documento vivo preserva a identidade de três pontos, desconsiderando somente linhas separadoras vazias. Publicação desta rodada ainda não realizada.
+
+Após o merge, a regressão combinada passou em **302 testes / 31 arquivos**: 300 do SP e 2 da seleção FIERGS alterada pelo time. Tipos e build da base integrada também aprovados. Na última conferência do Edge, navegação por teclado e captura mobile/tema escuro incluídas; nenhuma API de negócio real consultada.
 
 ## Plano por problema
 
