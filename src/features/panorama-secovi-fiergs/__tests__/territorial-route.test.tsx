@@ -65,7 +65,7 @@ describe('rota real Panorama → projeção → manifesto → exportação',()=>
   it('preserva carregamento Brain e erro sem montar relatório parcial',async()=>{
     setup();mocks.mode='loading';fireEvent.click(screen.getByText('Selecionar 1'));fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));
     await waitFor(()=>expect(mocks.resolve).toBeDefined());
-    expect(screen.getByText('Consultando APIs e montando o relatório…')).toBeInTheDocument();expect(document.querySelector('img.panorama-loading-logo')).not.toBeNull();
+    expect(screen.getByText('Consultando APIs e montando o relatório…')).toBeInTheDocument();expect(document.querySelector('[role="status"][aria-busy="true"] img')).not.toBeNull();
     expect(screen.queryByRole('button',{name:'Baixar PPT'})).toBeNull();mocks.resolve?.(null);
     await screen.findByRole('button',{name:'Baixar PPT'});
   });

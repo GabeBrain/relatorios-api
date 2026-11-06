@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import brainLogo from '../../../assets/logoBrain.png';
 import { cn } from '@/lib/utils';
@@ -11,6 +11,7 @@ interface BrainLoadingStateProps {
   startedAt?: number | null;
   variant?: BrainLoadingVariant;
   className?: string;
+  children?: ReactNode;
 }
 
 function elapsedLabel(startedAt: number | null | undefined, now: number) {
@@ -22,7 +23,7 @@ function elapsedLabel(startedAt: number | null | undefined, now: number) {
 }
 
 /** Estado de progresso Brain: comunica etapa e tempo real, sem prometer ETA. */
-export function BrainLoadingState({ title, description, startedAt, variant = 'operation', className }: BrainLoadingStateProps) {
+export function BrainLoadingState({ title, description, startedAt, variant = 'operation', className, children }: BrainLoadingStateProps) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -45,6 +46,7 @@ export function BrainLoadingState({ title, description, startedAt, variant = 'op
       </div>
       <div className="mt-6 flex items-center gap-2 text-sm font-medium text-foreground"><Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />{title}</div>
       {description && <p className="mt-2 text-center text-sm text-muted-foreground">{description}</p>}
+      {children}
       {elapsed && <p className="mt-3 font-mono text-xs tabular-nums text-muted-foreground">{elapsed} decorridos</p>}
     </div>;
   }

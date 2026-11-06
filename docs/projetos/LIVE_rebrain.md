@@ -385,6 +385,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama: recuperação de falhas mistas e progresso
+
+Retorno de Gabriel no recorte Lajeado/Vale 1T2023–2T2026: timeout misturado com HTTP200 vazio em Bom Retiro do Sul era classificado como vazio e impedia retry automático/manual. Corrigida precedência dos erros agregados sem afrouxar completude. Contagem deduplica operação por cidade, dez operações reais, reserva consolidação/preparo; BrainLoadingState overlay/tempo real. 42 testes offline, tipos/lint e tela lenta desktop/celular aprovados. Ainda não enviado; timeout de origem não diagnosticado pelas capturas. Fonte, evidências e próximo passo no [plano de recuperação](../features/Relatorios%20Secovi_FIERGS/PLAN_RECUPERACAO_COLETA_MULTICIDADES_PANORAMA_2026-10-06.md). Próximo autorizar push/publicar e repetir recorte real; sem API nesta sessão ou alteração paralela.
+
+
 ### 06/11/2026 — Panorama: relatório único enviado e prévia Lajeado/Vale
 
 Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 após envio. Publicação no Lovable ainda não verificada. Prévia local do componente real confirmou Lajeado individual e Vale do Taquari (Bom Retiro do Sul, Estrela, Taquari e Teutônia), sem perda de membros. Navegadores conectados indisponíveis; captura headless não é estudo numérico nem ensaio de produção, sem API. Fonte/artefatos e próximo passo na seção final do [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Alterações paralelas preservadas.

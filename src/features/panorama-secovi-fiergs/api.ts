@@ -265,14 +265,15 @@ export class PanoramaCollectionError extends Error {
   }
 }
 
-function collectionFailureRow(city: string, error: string, attempts: number, durationMs: number): CollectionFailureAuditRow {
-  const statusMatch = error.match(/\bHTTP\s+(\d{3})\b/i);
-  const statusCode = statusMatch ? Number(statusMatch[1]) : null;
-  const failureClass: CollectionFailureAuditRow['failureClass'] = /sem (linhas|dados)|vazio/i.test(error) || statusCode === 200
-    ? 'empty'
-    : statusCode === 401 || statusCode === 403 ? 'auth'
-      : /Contrato da fonte:/.test(error) || statusCode === 400 || statusCode === 404 || statusCode === 405 || statusCode === 422 ? 'contract'
-        : 'transient';
+export function collectionFailureRow(city: string, error: string, attempts: number, durationMs: number): CollectionFailureAuditRow {
+  const statuses = [...error.matchAll(/\bHTTP\s+(\d{3})\b/gi)].map((match) => Number(match[1]));
+  const statusCode = statuses.find((status) => status === 401 || status === 403)
+    ?? statuses.find((status) => status >= 400 && status < 500 && status !== 408 && status !== 429)
+    ?? statuses.find((status) => status === 408 || status === 429 || status >= 500)
+    ?? (/HTTP\s+rede\/timeout/i.test(error) ? null : statuses[0] ?? null);
+  const failureClass: CollectionFailureAuditRow['failureClass'] = statusCode === 401 || statusCode === 403 ? 'auth'
+    : /Contrato da fonte:/.test(error) || (statusCode !== null && statusCode >= 400 && statusCode < 500 && statusCode !== 408 && statusCode !== 429) ? 'contract'
+      : isTransientCityFailure(new Error(error)) ? 'transient' : 'empty';
   const operation = error.match(/^(sales|stock|ivv|medium-prices-meter|medium-prices)\b/i)?.[1]
     ?? (error.includes('temporal-analysis-city/') ? error.match(/temporal-analysis-city\/([a-z-]+)/)?.[1] : null)
     ?? 'empreendimentos/histórico';
