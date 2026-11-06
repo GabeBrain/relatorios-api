@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama I5: integração e envio autorizados — Gabriel / Codex
+
+- **Integração:** aprovação explícita deGabriel; merge f9810a0 incorporouSP4aed591/219ed1c sem conflito. Apenas edição paralela doLIVE foi guardada/reaplicada; cinco demais documentos locais mantêm hash e delta doLIVE foi conferido, assim como a união do histórico. Alterações paralelas continuam fora do lote; stash de segurança preservado.
+- **Validação:** build pós-merge aprovado27,72s e17testes afetadosSP/Panorama semfalhas. [I5 e evidência](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#i5--integração-e-publicação-com-autorização). Candidata pronta para push já autorizado; confirmação remota guardada na evidência localI5-push.json.
+- **Próximo:** Gabriel publica/confere noLovable egera os arquivosI6. Somente após conferirPDF/PPT/CSV preparar resposta aTeresa/Finoti; aceite desta ampliação depende do retorno deles. Produção ainda não verificada; semAPIreal/estudoreal/envio deemail pela sessão.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
 ### 06/11/2026 — Panorama I3–I4: reconciliação e saídas finais — Gabriel / Codex
 
 - **Resultado:** I0–I4concluídos localmente.79testes/0falhas, tipos/lint/build final aprovados.11replays com9blocos canônicos idênticos;11CSVs equivalentes à candidataGit c547ab7, ignorando apenas a data de geração. Baseline recompilada por overlay de blobs, sem alterar árvore. Expectativa antiga de testeGeoBrain corrigida paraGeobrain; IVV preservado.

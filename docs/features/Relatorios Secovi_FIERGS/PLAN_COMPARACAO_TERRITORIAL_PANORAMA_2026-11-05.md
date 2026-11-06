@@ -1,6 +1,6 @@
 # Plano técnico — Comparações territoriais e composição anual do Panorama
 
-Data: 05/11/2026. Estado: **G0–G6 implementados e verificados localmente; revisão final das referências concluída; portões I0–I4 concluídos localmente em06/11, I5aguarda autorização de integração/push e I6gerações humanas; G7/publicação e aceite externo pendentes**. Propósito: ampliar FIERGS/Secovi para comparar até três cidades ou grupos explícitos, preservar o consolidado aceito e incorporar a composição anual dos lançamentos. Esta é a fonte de execução desta ampliação; o inventário de referências e o contrato D01–D14 permanecem na [revisão Finoti](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
+Data: 05/11/2026. Estado: **G0–G6 implementados e verificados localmente; revisão final das referências concluída; portões I0–I4 concluídos localmente em06/11, I5integrado/validado com envio autorizado em06/11, I6aguarda publicação e gerações humanas; G7/publicação e aceite externo pendentes**. Propósito: ampliar FIERGS/Secovi para comparar até três cidades ou grupos explícitos, preservar o consolidado aceito e incorporar a composição anual dos lançamentos. Esta é a fonte de execução desta ampliação; o inventário de referências e o contrato D01–D14 permanecem na [revisão Finoti](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
 
 ## 1. Origem, baseline e limites de autorização
 
@@ -398,7 +398,11 @@ Limites: a bancada exporta os componentes reais; teste de rotaI2confirma o camin
 
 ### I5 — Integração e publicação com autorização
 
-**Estado: aguardará autorização após I1–I4.**
+**Estado: integração e validação concluídas em06/11/2026, push autorizado por Gabriel para esta candidata.**
+
+Aprovação explícita nesta conversa para integrar os dois commitsSP e fazerpush após os checks. Fetch confirmou origin219ed1c e15locais/2remotos. Merge não destrutivo `f9810a0` incorporou4aed591/219ed1c sem conflito; guardada/reaplicada somente a edição paralela doLIVE. Cinco demais arquivos modificados mantêm seus hashes; delta paralelo doLIVE idêntico e união do conteúdo commitado conferida por comparação de multiconjuntos dos dois históricos menos abase. Stash de segurança mantido, sem apagar materiais.
+
+Pós-merge:build completo aprovado27,72s, 17testes afetadosSP/Panorama aprovados,0falhas. Sem alteração adicional no códigoSP/Panorama para integrar. Avisos de build anteriores mantidos. Candidata pronta para envio autorizado; confirmação doSHA remoto será guardada em `incorporation-2026-11-06/I5-push.json`. Push não representa publicação/conferência doLovable. I6e aceite externo continuam pendentes.
 
 1. Apresentar o que está pronto, pendências, commits próprios e divergência atualizada. `4aed591` e`219ed1c` são SPparalelo; novos commits remotos podem ter chegado. Conferir cada remoto, preservar trabalhos locais, pedir autorização antes de sincronizar árvore suja; a autorização antiga refere-se ao merge`8d3eaec`, já realizado, não a qualquer futuro merge.
 2. Após autorização, integrar de forma não destrutiva, guardando/reaplicando somente os caminhos necessários. Resolver LIVE de forma somativa e conferir que as edições paralelas não foram incluídas indevidamente nos commits desta entrega. Não alterar regras/código deSP para acomodarPanorama. Em conflito funcional ou mudança de contrato, parar no ponto afetado e apresentar a decisão.

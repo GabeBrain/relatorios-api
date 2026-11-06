@@ -190,7 +190,7 @@
       "I2": "completed locally, commit c32953a",
       "I3": "completed locally",
       "I4": "completed locally",
-      "I5": "authorization pending",
+      "I5": "authorized merge completed and checks passed; push authorized",
       "I6": "human published generation pending"
     },
     "baselineHead": "c547ab7",
@@ -617,6 +617,31 @@
       "PDF/PPT are short extracts, not full real studies",
       "No integration, push, deployment or new external acceptance",
       "Previous build warnings for chunks, xlsx import modes and Browserslist retained"
-    ]
+    ],
+    "integration": {
+      "authorization": "Gabriel 2026-11-06, merge and push after affected checks",
+      "merge": "f9810a0",
+      "remoteIntegrated": [
+        "4aed591",
+        "219ed1c"
+      ],
+      "preservation": {
+        "unchangedDirtyFiles": [
+          "docs/features/Relatorios Secovi_FIERGS/EVIDENCIAS_FIERGS_RECORTES_LIVRES_2026-10-13.md",
+          "docs/features/Relatorios Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md",
+          "docs/features/Relatorios Secovi_FIERGS/PLAN_REFINAMENTO_CAPAS_CUSTOMIZADAS_FIERGS_2026-10-13.md",
+          "docs/features/estimativas-vendas/FONTES_E_DECISOES.md",
+          "docs/features/estimativas-vendas/README.md"
+        ],
+        "parallelLiveDeltaIdentical": true,
+        "committedLiveUnionVerified": true,
+        "merge": "f9810a0973baf89ad9c4433f8786a366900c072f"
+      },
+      "affectedTestsPassed": 17,
+      "failed": 0,
+      "build": "passed in27.72s",
+      "pushConfirmationPath": ".local-inputs/panorama-territorial-2026-11-05/incorporation-2026-11-06/I5-push.json",
+      "productionVerified": false
+    }
   }
 }
