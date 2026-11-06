@@ -767,5 +767,45 @@
     "rawDirectory": ".local-inputs/panorama-territorial-2026-11-05/integrated-2026-11-06",
     "published": false,
     "externalAcceptance": false
+  },
+  "integrated_push_and_teresa_preview_2026_11_06": {
+    "pushed_commit": "0a8a672a5f72b7bb8d6329db1a5684a399938560",
+    "remote_verified": true,
+    "divergence_after_push": [
+      0,
+      0
+    ],
+    "deployed_verified": false,
+    "preview": {
+      "kind": "actual-component-offline-preview",
+      "realStudyGenerated": false,
+      "apiRequests": 0,
+      "result": {
+        "mode": "comparison",
+        "layout": "integrated",
+        "units": [
+          {
+            "id": "group-1",
+            "label": "Lajeado",
+            "cities": [
+              "Lajeado"
+            ]
+          },
+          {
+            "id": "group-2",
+            "label": "Vale do Taquari",
+            "cities": [
+              "Bom Retiro do Sul",
+              "Estrela",
+              "Taquari",
+              "Teutônia"
+            ]
+          }
+        ]
+      },
+      "errors": []
+    },
+    "screenshot": ".local-inputs\\panorama-territorial-2026-11-05\\integrated-2026-11-06\\TERESA-LAJEADO-VALE-INTERFACE.png",
+    "browser_limit": "No connected browsers available; headless actual component preview only."
   }
 }

@@ -385,6 +385,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama: relatório único enviado e prévia Lajeado/Vale
+
+Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 após envio. Publicação no Lovable ainda não verificada. Prévia local do componente real confirmou Lajeado individual e Vale do Taquari (Bom Retiro do Sul, Estrela, Taquari e Teutônia), sem perda de membros. Navegadores conectados indisponíveis; captura headless não é estudo numérico nem ensaio de produção, sem API. Fonte/artefatos e próximo passo na seção final do [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Alterações paralelas preservadas.
+
+
 ### 06/11/2026 — Panorama: relatório único e modal de grupos — Gabriel / Codex
 
 - **Contrato corrigido porGabriel:** o consolidado permanece no livro; cada visão territorial vem logo após seu análogo, na mesma seção. Retirado seletor de modos/editor permanente.1cidade municipal,2/3automáticas;4+abrem modal aoGerar para2/3grupos. Nomes individuais automáticos, nome apenas para conjunto, validação de atribuição completa/única e cancelar semcoleta. Coletores/matemática preservados.
