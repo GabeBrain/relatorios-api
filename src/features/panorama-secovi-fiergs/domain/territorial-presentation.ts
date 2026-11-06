@@ -2,9 +2,9 @@ import type { PanoramaScope, TerritorialPresentation } from '../types';
 import { normalizeText } from './taxonomy';
 
 export function defaultTerritorialPresentation(cities: string[]): TerritorialPresentation {
-  return cities.length >= 2 && cities.length <= 3 ? { mode: 'comparison', units: cities.map((city) => ({
+  return cities.length >= 2 && cities.length <= 3 ? { mode: 'comparison', layout: 'integrated', units: cities.map((city) => ({
     id: `city-${normalizeText(city).replace(/[^a-z0-9]+/g, '-')}`, label: city, cities: [city],
-  })) } : { mode: 'consolidated' };
+  })) } : { mode: 'consolidated', layout: 'integrated' };
 }
 
 /** Pure validation: a label is never an instruction to infer a regional membership. */
@@ -37,11 +37,24 @@ export function territorialPresentationErrors(scope: Pick<PanoramaScope, 'cities
 
 export function territorialPresentationKey(presentation?: TerritorialPresentation): string {
   return JSON.stringify(!presentation || presentation.mode === 'consolidated' ? ['consolidated'] :
-    ['comparison', ...(presentation.units ?? []).map((u) => [u.id, u.label.trim(), u.cities.map(normalizeText).sort()])]);
+    [presentation.layout === 'integrated' ? 'integrated' : 'comparison', ...(presentation.units ?? []).map((u) => [u.id, u.label.trim(), u.cities.map(normalizeText).sort()])]);
 }
 
 /** Shared by the query/session callers; editorial names/memberships never change collection identity. */
 export function panoramaCollectionKey(scope: PanoramaScope): string {
   return JSON.stringify([scope.entity ?? 'secovi-sp', scope.engineVersion ?? 'v4', scope.uf,
     scope.cities.map(normalizeText).sort(), scope.startQuarter, scope.endQuarter]);
+}
+
+/** Singleton labels are always the city name; only composite groups have editorial names. */
+export function normalizeTerritorialGroups(units: NonNullable<TerritorialPresentation['units']>): TerritorialPresentation {
+  return { mode:'comparison', layout:'integrated', units:units.map(u=>({...u,label:u.cities.length===1?u.cities[0]:u.label,cities:[...u.cities]})) };
+}
+export function initialTerritorialGroups(cities: string[], previous?: TerritorialPresentation): TerritorialPresentation {
+  if(previous?.mode==='comparison'&&previous.layout==='integrated'&&previous.units?.some(u=>u.cities.some(c=>cities.includes(c))))return normalizeTerritorialGroups((previous.units??[]).map(u=>({...u,cities:u.cities.filter(c=>cities.includes(c))})));
+  return normalizeTerritorialGroups([{id:'group-1',label:cities[0]??'',cities:cities.slice(0,1)},{id:'group-2',label:'',cities:cities.slice(1)}]);
+}
+export function territorialMembershipSummary(presentation?: TerritorialPresentation): string {
+  if(presentation?.layout!=='integrated')return '';
+  return (presentation.units??[]).filter(u=>u.cities.length>1&&u.cities.length<=3).map(u=>`${u.label}: ${u.cities.join(', ')}`).join(' · ');
 }

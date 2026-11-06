@@ -11,7 +11,7 @@ function StudyPeriod({ scope }: { scope: PanoramaScope }) {
 
 export function CustomFiergsStudyCover({ scope }: { scope: PanoramaScope }) {
   const layout = customCoverLayout(scope);
-  const units = scope.presentation?.mode === 'comparison' ? scope.presentation.units : undefined;
+  const units = scope.presentation?.mode === 'comparison' && scope.presentation.layout !== 'integrated' ? scope.presentation.units : undefined;
   return <div className="panorama-custom-cover" data-cover-size={layout.titleSize}>
     <header><span>Brain · Inteligência Estratégica</span><strong>FIERGS <i aria-hidden="true">/</i> {layout.uf}</strong></header>
     <main>
@@ -33,9 +33,9 @@ export function CustomFiergsTerritoryCover({ scope, cities }: { scope: PanoramaS
   const pages = customTerritoryPages(identity);
   const pageIndex = Math.max(0, pages.findIndex((page) => page[0] === names[0]));
   return <div className="panorama-custom-territory" data-density={layout.dense ? 'dense' : 'regular'} data-long-names={layout.longNames}>
-    <header><p className="panorama-custom-eyebrow">FIERGS · {identity.uf}</p><h2>{scope.presentation?.mode === 'comparison' ? 'Territórios comparados' : 'Recorte territorial'}</h2><p>{identity.cityCountLabel} {identity.cities.length === 1 ? 'analisado' : 'analisados'}</p></header>
+    <header><p className="panorama-custom-eyebrow">FIERGS · {identity.uf}</p><h2>{scope.presentation?.layout === 'integrated' && scope.presentation.units?.some(u=>u.cities.length>1) ? 'Cidades e grupos do estudo' : scope.presentation?.mode === 'comparison' && scope.presentation.layout !== 'integrated' ? 'Territórios comparados' : 'Recorte territorial'}</h2><p>{identity.cityCountLabel} {identity.cities.length === 1 ? 'analisado' : 'analisados'}</p></header>
     <main><ul style={{ '--territory-columns': layout.columns } as CSSProperties}>{names.map((city) => <li key={city}>
-      <span className="panorama-custom-city-index">{String(identity.cities.indexOf(city) + 1).padStart(2, '0')}</span><strong>{city}{scope.presentation?.mode==='comparison' && <small style={{display:'block',fontSize:'.75em',fontWeight:400}}>{scope.presentation.units?.find((u)=>u.cities.includes(city))?.label}</small>}</strong>
+      <span className="panorama-custom-city-index">{String(identity.cities.indexOf(city) + 1).padStart(2, '0')}</span><strong>{city}{scope.presentation?.mode==='comparison' && scope.presentation.units?.some(u=>u.cities.length>1) && <small style={{display:'block',fontSize:'.75em',fontWeight:400}}>{scope.presentation.units?.find((u)=>u.cities.includes(city))?.label}</small>}</strong>
     </li>)}</ul></main>
     <footer><span>Janela do estudo <StudyPeriod scope={scope}/></span><span>{pages.length > 1 ? `Municípios · ${pageIndex + 1} de ${pages.length}` : `Fechamento · ${quarterLabel(scope.endQuarter)}`}</span></footer>
   </div>;

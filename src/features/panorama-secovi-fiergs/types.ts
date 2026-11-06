@@ -29,7 +29,7 @@ export interface PanoramaScope {
 }
 
 export interface TerritorialUnit { id: string; label: string; cities: string[]; }
-export interface TerritorialPresentation { mode: 'consolidated' | 'comparison'; units?: TerritorialUnit[]; }
+export interface TerritorialPresentation { mode: 'consolidated' | 'comparison'; layout?: 'integrated'; units?: TerritorialUnit[]; }
 export type TerritorialProjection = Pick<PanoramaReportModel, 'scope' | 'launches' | 'sales' | 'stock' | 'ivv' | 'prices' | 'granular' | 'closingFacts' | 'dataState'>;
 export interface TerritorialCheck {
   metric: string; period: string; dimension: string; source: string;
@@ -62,7 +62,7 @@ export function scopeCitySlug(scope: Pick<PanoramaScope, 'cities'>): string {
 
 /** Identifica presets institucionais no arquivo exportado; recortes livres mantêm o slug municipal. */
 export function scopeFileSlug(scope: Pick<PanoramaScope, 'cities' | 'entity'> & Partial<Pick<PanoramaScope, 'uf' | 'presentation'>>): string {
-  if (scope.presentation?.mode === 'comparison') return `${scope.entity === 'fiergs-rs' ? `fiergs-${scope.uf?.toLowerCase()}` : 'secovi-sp'}-comparativo-${scopeCitySlug(scope)}`;
+  if (scope.presentation?.mode === 'comparison' && scope.presentation.layout !== 'integrated') return `${scope.entity === 'fiergs-rs' ? `fiergs-${scope.uf?.toLowerCase()}` : 'secovi-sp'}-comparativo-${scopeCitySlug(scope)}`;
   if (scope.entity === 'secovi-sp') return 'secovi-sp';
   if (scope.entity === 'fiergs-rs') return panoramaScopeIdentity({ ...scope, uf: scope.uf ?? '' }).fileSlug;
   return scopeCitySlug(scope);

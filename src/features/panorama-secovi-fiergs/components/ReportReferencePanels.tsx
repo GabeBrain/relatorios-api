@@ -76,7 +76,7 @@ export function MethodologyReference({ entity, scope }: { entity: EntityId; scop
   const territory = scope ? panoramaScopeIdentity(scope) : null;
   const rows = methodology[entity].map(([term, definition]) => [term, term === 'Território' && territory
     ? `${territory.cityList} · ${territory.uf}. ${territory.official ? 'Conjunto regional do entorno metropolitano; Porto Alegre não integra o recorte.' : 'Recorte personalizado de municípios monitorados; não há exclusão territorial automática pelo modelo.'}` : definition]);
-  if(scope?.presentation?.mode==='comparison') rows.push(['Territórios desta geração',scope.presentation.units?.map((u)=>`${u.label}: ${u.cities.join(', ')}`).join('; ')??'']);
+  if(scope?.presentation?.mode==='comparison') rows.push([scope.presentation.layout==='integrated'?'Grupos desta geração':'Territórios desta geração',scope.presentation.units?.map((u)=>`${u.label}: ${u.cities.join(', ')}`).join('; ')??'']);
   return <ReferenceCard icon={<CircleHelp className="h-4 w-4"/>} title={`Regras aplicadas · ${entity === 'fiergs-rs' ? 'FIERGS' : 'Secovi-SP'}`}>
     <dl className="grid gap-4 sm:grid-cols-2">{rows.map(([term, definition]) => <div key={term}><dt className="text-sm font-semibold">{term}</dt><dd className="mt-1 text-sm leading-6 text-muted-foreground">{definition}</dd></div>)}</dl>
   </ReferenceCard>;

@@ -74,4 +74,14 @@ describe('contrato territorial', () => {
     expect(report.territorial?.units.every((u)=>u.data.closingFacts.horizontal.projects===1)).toBe(true);
     expect(report.territorial?.checks.some((r)=>r.status==='different')).toBe(false);
   });
+  it('o livro integrado conserva os mesmos indicadores do modelo territorial e consolidado',()=>{
+    const original=fixture(scope);
+    const integrated=reprojectPanoramaReport(original,{...scope,presentation:{...scope.presentation!,layout:'integrated'}});
+    const consolidated=reprojectPanoramaReport(original,{...scope,presentation:{mode:'consolidated'}});
+    for(const key of ['launches','sales','stock','ivv','prices','granular','closingFacts','reconciliation'] as const){
+      expect(integrated[key]).toEqual(consolidated[key]);expect(integrated[key]).toEqual(original[key]);
+    }
+    expect(integrated.territorial?.checks.filter(r=>r.status==='different')).toEqual([]);
+  });
+
 });

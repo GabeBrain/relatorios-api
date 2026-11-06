@@ -15,11 +15,14 @@ type NoticeInput = Omit<ReportGenerationNotice, 'entity' | 'period' | 'affectedP
 
 function outputPages(report: PanoramaReportModel, officialSlides: number[] = []): number[] {
   if (report.scope.entity !== 'fiergs-rs' || !officialSlides.length) return [];
-  const active = new Map(panoramaManifestFor(report).map((page) => [page.fiergsOfficialSlide, page.page]));
+  const active = new Map<number,number[]>();
+  for(const page of panoramaManifestFor(report))if(page.fiergsOfficialSlide!==undefined)active.set(page.fiergsOfficialSlide,[...(active.get(page.fiergsOfficialSlide)??[]),page.page]);
   const complete = new Map(createFiergsReportManifest(true).map((page) => [page.fiergsOfficialSlide, page.page]));
   return officialSlides.flatMap((slide) => {
-    const page = active.get(slide) ?? complete.get(slide);
-    return page === undefined ? [] : [page];
+    const pages=active.get(slide);
+    if(pages)return pages;
+    const page=complete.get(slide);
+    return page===undefined?[]:[page];
   });
 }
 
@@ -76,7 +79,7 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     if(annualOmissions.length)add({code:'TERRITORIAL_ANNUAL_COMPARISONS_OMITTED',severity:'info',indicator:'Comparativos anuais territoriais',reason:annualOmissions.join('; '),source:'Cobertura anual por território e regra de comparação observada',displayDecision:'Colunas sem comparação válida e quadros integralmente sem comparação omitidos; séries, zeros observados e negativos preservados na auditoria.'});
     const missing = report.territorial.checks.filter((r)=>r.status==='unavailable');
     const differences = report.territorial.checks.filter((r)=>r.status==='different');
-    add({code:'TERRITORIAL_COMPOSITION',severity:'info',indicator:'Territórios comparados',reason:report.territorial.units.map(({unit})=>`${unit.label}: ${unit.cities.join(', ')}`).join('; '),source:'Seleção explícita do estudo',displayDecision:'Até três séries ou blocos; matrizes densas em páginas específicas. Mapas, maturidade e composição anual permanecem consolidados.'});
+    add({code:'TERRITORIAL_COMPOSITION',severity:'info',indicator:'Territórios comparados',reason:report.territorial.units.map(({unit})=>`${unit.label}: ${unit.cities.join(', ')}`).join('; '),source:'Seleção explícita do estudo',displayDecision:report.scope.presentation?.layout==='integrated'?'Relatório único: consolidado seguido de suas visões por cidade/grupo; membros completos na página de cidades. Mapas, maturidade e composição anual permanecem consolidados.':'Até três séries ou blocos; matrizes densas em páginas específicas. Mapas, maturidade e composição anual permanecem consolidados.'});
     if(missing.length)add({code:'TERRITORIAL_COVERAGE',severity:'info',indicator:'Cobertura dos comparativos',reason:`${missing.length} conferência(s) sem contraparte dimensional ou observação completa; a ausência não foi convertida em zero.`,source:'Matriz cidade → grupo → consolidado',displayDecision:'Lacunas preservadas nos gráficos e na auditoria; não representam igualdade comprovada.'});
     if(differences.length)add({code:'TERRITORIAL_DIFFERENCES',severity:'warning',indicator:'Reconciliação territorial',reason:`${differences.length} divergência(s) registrada(s) na matriz territorial.`,source:'Matriz de reconciliação',displayDecision:'Dados e divergências preservados na auditoria e nos alertas de consistência.'});
   }

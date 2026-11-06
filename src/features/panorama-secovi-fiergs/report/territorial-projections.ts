@@ -78,7 +78,7 @@ export function territorialReportView(report: PanoramaReportModel, unitId: strin
   const item = report.territorial?.units.find(({ unit }) => unit.id === unitId);
   if (!item) throw new Error(`Território ausente: ${unitId}`);
   const belongs = (city: string) => item.unit.cities.some((c) => normalizeText(c) === normalizeText(city));
-  return { ...report, ...item.data, territorialLabel: item.unit.label, scope: { ...item.data.scope, presentation: { mode: 'consolidated' } }, territorial: undefined,
+  return { ...report, ...item.data, territorialLabel: `${item.unit.label}${report.scope.presentation?.layout==='integrated'&&item.unit.cities.length>1&&item.unit.cities.length<=3?' ('+item.unit.cities.join(', ')+')':''} · ${report.scope.uf}`, scope: { ...item.data.scope, presentation: { mode: 'consolidated' } }, territorial: undefined,
     cube: { ...report.cube, projects: report.cube.projects.filter((p) => belongs(p.city)), rejections: report.cube.rejections.filter((p) => belongs(p.city)), cities: item.unit.cities },
     locations: report.locations.filter((p) => belongs(p.city)),
     cityComparisons: { enabled: false, sales: [], market: [], availabilityByStandard: [] } };

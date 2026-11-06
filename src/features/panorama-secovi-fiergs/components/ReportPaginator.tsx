@@ -1,3 +1,4 @@
+import { territorialMembershipSummary } from '../domain/territorial-presentation';
 import { FiergsPointValue } from './FiergsPointValue';
 export { FiergsPointValue } from './FiergsPointValue';
 import { AnnualCompositionSlide } from './AnnualCompositionSlide';
@@ -87,19 +88,19 @@ function Corporate({ page, report }: { page: number; report: PanoramaReportModel
 function V2Divider({ title }: { title: string }) { return <div className="panorama-v2-divider"><h2>{title}</h2></div>; }
 function FiergsCityScope({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
   const territory = panoramaScopeIdentity(report.scope);
-  if (!territory.official) return <CustomFiergsTerritoryCover scope={report.scope} cities={cities}/>;
+  if (!territory.official || report.scope.presentation?.layout==='integrated'&&report.scope.presentation.units?.some(u=>u.cities.length>1)) return <CustomFiergsTerritoryCover scope={report.scope} cities={cities}/>;
   return <div className="panorama-fiergs-city-scope"><p>RECORTE DO ESTUDO · {territory.uf}</p><h2>{territory.cities.length === 1 ? 'CIDADE ANALISADA' : 'CIDADES ANALISADAS'}</h2><div>{(cities ?? territory.cities).map((city) => <span key={city}>{city}</span>)}</div><small>{territory.cities.length} município(s) no recorte · {quarterLabel(report.scope.endQuarter)}{territory.official ? ' · Região Metropolitana de Porto Alegre, sem Porto Alegre no universo analisado' : ''}</small></div>;
 }
 function FiergsTerritorialCover({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
-  if (report.territorial || !panoramaScopeIdentity(report.scope).official) return <FiergsCityScope report={report} cities={cities}/>;
+  if (report.territorial && report.scope.presentation?.layout!=='integrated' || !panoramaScopeIdentity(report.scope).official) return <FiergsCityScope report={report} cities={cities}/>;
   return <div className="panorama-fiergs-territorial"><img src={FIERGS_REGION_MAP} alt="Mapa da Região Metropolitana de Porto Alegre"/><div><p>RECORTE FIERGS</p><h1>REGIÃO<br/>METROPOLITANA<br/>DE PORTO ALEGRE</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong><small>10 municípios analisados · Porto Alegre exibida somente como referência geográfica</small></div></div>;
 }
 function FiergsStudyCover({ report }: { report: PanoramaReportModel }) {
-  if (report.territorial || !panoramaScopeIdentity(report.scope).official) return <CustomFiergsStudyCover scope={report.scope}/>;
+  if (report.territorial && report.scope.presentation?.layout!=='integrated' || !panoramaScopeIdentity(report.scope).official) return <CustomFiergsStudyCover scope={report.scope}/>;
   return <div className="panorama-fiergs-study-cover"><p>PANORAMA DO MERCADO IMOBILIÁRIO · FIERGS</p><h1>{panoramaScopeIdentity(report.scope).coverTitle}</h1><i/><strong>{quarterLabel(report.scope.endQuarter)}</strong></div>;
 }
 function CityCover({ report }: { report: PanoramaReportModel }) {
-  const cities = report.scope.presentation?.mode === 'comparison' ? (report.scope.presentation.units ?? []).map((u)=>u.label) : report.scope.cities.filter(Boolean);
+  const cities = report.scope.presentation?.mode === 'comparison' && report.scope.presentation.layout !== 'integrated' ? (report.scope.presentation.units ?? []).map((u)=>u.label) : report.scope.cities.filter(Boolean);
   if (report.scope.entity === 'fiergs-rs') return <div aria-label="Capa institucional FIERGS"/>;
   return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DE</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
@@ -613,7 +614,11 @@ export function PanoramaPresentationContent({ def, report }: { def: ReportPageDe
   for (let depth = 0; depth < 6 && isValidElement(content) && typeof content.type === 'function'; depth++) {
     content = (content.type as (props: unknown) => ReactNode)(content.props);
   }
-  const context = <p className="panorama-analytic-context">{report.territorial && !def.territorialKind ? 'Consolidado · ' : ''}{analyticContext(report, temporal, rolling)}</p>;
+  const consolidated=Boolean(report.territorial&&!def.territorialKind&&!def.territorialUnitId);
+  const contextReport=consolidated&&report.scope.presentation?.layout==='integrated'?{...report,territorial:undefined}:report;
+  const membership=def.territorialKind?territorialMembershipSummary(report.scope.presentation):'';
+  const context = <p className="panorama-analytic-context">{consolidated?'Consolidado · ':def.territorialKind&&report.scope.presentation?.layout==='integrated'?'Por cidade/grupo · ':''}{analyticContext(contextReport,temporal,rolling)}{membership&&membership.length<=180&&<small style={{display:'block',marginTop:'.25cqw',fontSize:'.85em',fontWeight:400}}>{membership}</small>}</p>;
+
   if (!isValidElement<{ children?: ReactNode }>(content)) return content;
   let inserted = false;
   const children = Children.toArray(content.props.children).flatMap<ReactNode>((child) => {

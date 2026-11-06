@@ -221,6 +221,9 @@ A seção abaixo é gerada do inventário da cópia de origem e associa cada cai
 
 ## Referências territoriais recebidas em 05/11/2026
 
+**Orientação vigente deGabriel06/11:** o detalhamento territorial integra o consolidado, sempre depois de seu análogo; não há opção entre dois estudos.1cidade municipal,2/3automáticas,4+modal de2/3grupos. Primeira implementação local e evidências no [contratoT01/T02/T05 e revisão do relatório único](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#relatório-único-e-modal-de-grupos--primeira-versão-em06112026). Interpretações anteriores de substituição das páginas permanecem apenas como histórico.
+
+
 **Execução06/11:** acabamentos e integração localI0–I4concluídos, com79testes/11replays/34páginas de extratos conferidos. [Estado e evidências na fonte de execução](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#checkpoint-de-incorporação--06112026). I5/I6pendentes, sem novo aceite externo.
 
 

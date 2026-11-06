@@ -1,6 +1,6 @@
 # Plano técnico — Comparações territoriais e composição anual do Panorama
 
-Data: 05/11/2026. Estado: **G0–G6 implementados e verificados localmente; revisão final das referências concluída; portões I0–I4 concluídos localmente em06/11, I5integrado/validado com envio autorizado em06/11, I6aguarda publicação e gerações humanas; G7/publicação e aceite externo pendentes**. Propósito: ampliar FIERGS/Secovi para comparar até três cidades ou grupos explícitos, preservar o consolidado aceito e incorporar a composição anual dos lançamentos. Esta é a fonte de execução desta ampliação; o inventário de referências e o contrato D01–D14 permanecem na [revisão Finoti](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
+Data: 05/11/2026. Estado: **rodada anterior publicada em88425c4; nova orientação06/11implementada localmente: relatório único com detalhamento e modal de grupos. Revisão/publicação desta primeira tentativa pendentes**. Propósito: ampliar FIERGS/Secovi para comparar até três cidades ou grupos explícitos, preservar o consolidado aceito e incorporar a composição anual dos lançamentos. Esta é a fonte de execução desta ampliação; o inventário de referências e o contrato D01–D14 permanecem na [revisão Finoti](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
 
 ## 1. Origem, baseline e limites de autorização
 
@@ -15,28 +15,31 @@ Gabriel confirmou alinhamento com a estratégia após analisar 15 imagens de Fin
 
 ## 2. Resultado e contrato funcional
 
-### T01 — Recorte e modo de apresentação
+### T01 — Relatório único: consolidado e detalhamento integrado
 
-`scope.cities` continua representando todos os municípios coletados, em uma única UF e disponíveis ao token. Não limitar coleta a três cidades. Separar apresentação em `consolidated` e `comparison`; uma unidade comparativa pode conter uma cidade ou várias.
+**Contrato atualizado por Gabriel em06/11/2026 após conferir a interface publicada.** O relatório é único: conserva as análises consolidadas e insere a visão por cidades/grupos imediatamente após a análise consolidada correspondente, na mesma seção. O seletor “Consolidado versus comparação” e o editor permanente de territórios saem da interface. Não substituir páginas consolidadas nem tratar o detalhamento como outro estudo.
 
-| Seleção | Sugestão inicial | Alternativa |
-|---|---|---|
-| Uma cidade | Relatório municipal, sem controles de comparação inúteis | Mantém o fluxo atual |
-| Duas/três cidades | Comparar por cidade, uma unidade para cada | Consolidado ou composição manual em dois/três grupos |
-| Mais de três cidades | Consolidado | Comparar em dois/três grupos nomeados |
+`scope.cities` mantém todos os municípios selecionados, em umaUF e autorizados ao token; o limite de três é visual, não de coleta.
 
-FIERGS continua entrando sem cidades e sem botão de preset. Secovi usa o mesmo contrato de apresentação, preservando suas políticas numéricas. O conjunto regional completo selecionado manualmente mantém a identificação institucional já aprovada no consolidado. No modo comparação, capa/contexto precisam deixar explícitos os territórios efetivamente comparados; não reutilizar uma arte regional como identificação de um grupo diferente.
+| Cidades | Dinâmica |
+|---|---|
+| Uma | Estudo municipal, sem modal de grupos ou comparação fictícia |
+| Duas/três | Consolidado com visões das cidades automaticamente, uma unidade por cidade |
+| Quatro ou mais | Ao clicarGerar, abrir modal para distribuir TODAS as cidades em2ou3grupos; coletar somente após confirmar partição válida |
 
-### T02 — Partição explícita e estável
+O modal propõe uma cidade individual e as demais emum conjunto. Botões2/3grupos e uma linha por cidade com seleção exclusiva1/2/3; campos de nome apenas nos conjuntos com duas ou mais cidades. Conjuntos individuais recebem obrigatoriamente o nome da própria cidade. Não inferir regiões administrativas ou excluir cidades. A proposta é visível/editável e nunca dispara consulta sem confirmação.
 
-Contrato sugerido, aditivo e compatível com scopes antigos: `presentation?: { mode: 'consolidated' | 'comparison'; units?: { id: string; label: string; cities: string[] }[] }`. Ausência do campo significa consolidado nos modelos persistidos/fixtures anteriores. A sugestão inicial da tela é um comportamento novo, separado dessa compatibilidade.
+FIERGS/Secovi usam o mesmo fluxo, com suas regras numéricas preservadas. Capas continuam identificando o recorte consolidado completo. Nomes dos grupos aparecem nos gráficos/tabelas/subtítulos do detalhamento; membros de grupos com2/3cidades podem aparecer no contexto quando couberem. A página inicial de cidades e aMetodologia preservam todos os membros e associações, inclusive em grupos maiores; não repetir listas enormes em todos os slides.
 
-- Comparação exige dois/três grupos não vazios. Cidade única não cria uma comparação fictícia.
-- IDs estáveis, distintos e independentes do nome; rótulos não vazios/distintos após trim/normalização e limite editorial documentado, com validação amigável. Nomes longos cabem em até duas linhas; impedir entrada incompatível em vez de cortar silenciosamente.
-- A união das cidades dos grupos deve ser exatamente a seleção; interseções vazias. Cada cidade pertence uma vez. Mesmo município com grafias equivalentes não pode duplicar uma associação.
-- Cidades e UF validadas pelo mecanismo monitorado existente. Nome de grupo não define municípios automaticamente; sem composição presumida de RM, região ou Vale.
-- No modo manual, manter grupos existentes quando compatíveis. Cidade nova fica identificada como não atribuída até escolha; cidade removida sai do grupo, deixando vazio explícito se necessário. Trocar UF/produto limpa grupos e resultado. Não redistribuir cidades silenciosamente.
-- Renomear/reordenar/reagrupar invalida a apresentação anterior, mas preserva coletas ainda válidas. A ordem visual pertence às unidades; não muda a identidade física da coleta.
+### T02 — Partição e compatibilidade
+
+O código conserva o contrato numérico aditivo `presentation?: {mode:'consolidated'|'comparison';layout?:'integrated';units?:{id:string;label:string;cities:string[]}[]}`. `layout:'integrated'` ativa o livro único. Os valores antigos de`mode` permanecem internos para compatibilidade com snapshots/exportações anteriores; não são opções oferecidas na interface nova. Nenhuma migração de banco.
+
+- IDs de grupos estáveis e independentes do nome;2/3unidades não vazias para o detalhamento. Nomes distintos,1–60caracteres, com nome municipal automático quando houver só uma cidade.
+- União das cidades dos grupos igual à seleção, sem interseção nem omissão; validação municipal/UF segue o catálogo monitorado. Nome de grupo não determina composição geográfica.
+- Cidades novas ficam sem atribuição quando uma partição confirmada anterior for reutilizada; se não houver interseção com a seleção antiga, propor nova composição. Cidades removidas saem; grupo vazio precisa ser preenchido. TrocaUF/produto limpa partição e resultado.
+- Cancelar/fechar o modal não coleta dados nem confirma o rascunho. Seleções de até três cidades sempre são automáticas, evitando o erro anterior de uma terceira cidade ficar sem território após edição manual.
+- Reagrupar/renomear invalida resultado editorial, reutilizando a coleta válida do mesmo recorte/token; nova chave editorial inclui`integrated`. Sem nova chamada por slide/grupo.
 
 ### T03 — Base, cobertura e reconciliação
 
@@ -56,7 +59,7 @@ Cobertura é por cidade, indicador, dimensão e competência. Uma unidade compos
 
 ### T05 — Apresentação e escopo por família
 
-Sem replicar o relatório inteiro por unidade. No modo comparação, substituir a visão consolidada das famílias abaixo pela comparação equivalente, mantendo o consolidado no modelo/auditoria. O total não entra como uma quarta curva sobre os próprios componentes.
+Preservar cada lâmina consolidada aplicável. Seu detalhamento entra imediatamente depois, com vínculo estável `territorialParentId`, na mesma seção: tabela/gráfico de até três unidades ou páginas específicas para as famílias densas. O total não entra como quarta curva na lâmina detalhada. Não replicar o livro inteiro por unidade. Famílias sem análogo consolidado ativo podem aparecer no lugar editorial já previsto, sem reativar lâminas redundantes removidas. As composições anuais consolidadas entram junto da respectiva família de lançamentos, após o par consolidado/detalhamento; não são um segundo relatório.
 
 | Família | Comportamento de comparação | Controle de tamanho |
 |---|---|---|
@@ -284,6 +287,8 @@ Substituídas somente as colunas empilhadas por áreas empilhadas lineares, como
 
 ## Incorporação ao relatório publicado — revisão final e plano I0–I6 (05/11/2026)
 
+> **Registro da rodada anterior:** os portõesI0–I5 abaixo documentam a implementação publicada em88425c4. A orientação de06/11substituiu a alternativa de modos pelo contrato vigenteT01/T02/T05. O ensaioI6foi interrompido para esta revisão conceitual; estado atual na seção “Relatório único e modal de grupos”, ao final. Não reaplicar os comportamentos antigos de seleção como regra viva.
+
 ### Resultado da revisão final
 
 **Parecer:** a solução atual atende ao pedido central de Finoti de distinguir cidades em gráficos e algumas tabelas e à orientação de Teresa de tratar regiões agrupadas. Está suficientemente próxima das referências para avançar à incorporação, com os acabamentos e verificações abaixo. Isso é avaliação técnica da sessão, não previsão de aceite nem nova homologação externa. A aparência trimestral foi corrigida em `91e3194`; a composição anual contínua, em `3cee42b`. Gabriel considerou que a primeira melhorou e corrigiu o formato da segunda; não houve aceite de produção da ampliação.
@@ -438,3 +443,18 @@ Execute os portões I0–I4 da seção “Incorporação ao relatório publicado
 ### Checkpoint de incorporação — 06/11/2026
 
 I0–I4encerrados localmente; acabamento8058949 e prova de rota c32953a, evidências finais noJSON existente. Dados aprovados, contratos e arquivos paralelos preservados. Não houvemerge/push/publicação. I5deve apresentar lista/divergência atualizadas antes de solicitar autorização; I6mantém ensaios deGabriel e aceite externo separado. O aceite anterior deJuliana/Finoti não é homologação desta ampliação.
+
+
+## Relatório único e modal de grupos — primeira versão em06/11/2026
+
+**Origem:** Gabriel, após observar o site, esclareceu que Finoti pediu detalhamento territorial dentro do consolidado, não substituição do consolidado nem outro modo de estudo. Esta orientação substitui a interpretação anterior deT01/T02/T05. Sem alterar a matemática aprovada.
+
+**Implementado localmente:** formulário apenas com filtros;1cidade municipal;2/3automáticas;4+abrem `TerritorialGroupsDialog` somente ao clicarGerar. ModalRadix/tokens existentes, escolha2/3grupos e seleção exclusiva por cidade; primeiro individual e restante no segundo grupo como proposta editável. Campo de nome apenas para grupos compostos, nomes automáticos para individuais, validação impede vazio/omissão/nomes repetidos. Cancelamento sem coleta; reabrir permite revisar grupos e reutiliza dados quando recorte/token forem os mesmos. Rascunho não vira relatório sem confirmação.
+
+`territorialManifest` mantém os originais e insere seus detalhamentos em seguida com IDs/vínculo estáveis; matrizes densas preservam o consolidado e depois unidades. `annualCompositionManifest` posiciona anuais junto da métrica no livro integrado, preservando o comportamento de payloads antigos semlayout. Capas/arquivos identificam o recorte completo; nomes e membros aparecem no detalhamento, página de cidades e metodologia. Avisos passam a apontar todas as páginas da família, não só a última quando uma referência oficial aparece várias vezes.
+
+**Provas:**62testes dirigidos aprovados, incluindo2T2026/4T2025 das projeções, três testes do modal e ordem de famílias. Interface real mantém geração sem pré-seleção; seleção3depois4 confirma que não há coleta antes do modal e renomear grupos reaproveita coleta. Chromium1440/390px, claro/escuro,4/8/15cidades:semoverflow, partição2→3confirmada. Desktop672pxde modal; celular358px, lista rolável e footeracessível. Artefatos em `.local-inputs/panorama-territorial-2026-11-05/integrated-2026-11-06/`.
+
+Extrato local6páginas da dupla exata1T2023–3T2026:capas/cidades, empreendimentos consolidado→cidades e preço consolidado→cidades; PDF/PPT/CSV gerados do mesmo modelo. PowerPoint abriu/renderizou6páginas. Manifesto completo passou a105páginas na dupla, sem exportar estudo real completo: aumento esperado ao preservar o consolidado, antes substituído. Conferência do novo contrato não é aceite externo; números de2T/4Tnão foram usados como validação da janela3T2026.
+
+**Estado:** primeira implementação local para revisão deGabriel; commit/push desta rodada separados. Não houve nova API/coleta real, alteraçãoCorretor/Sinduscon/SP, sincronização ou publicação. Próximo conferir modal e sequência, autorizar publicação da revisão quando satisfatória e retomar gerações humanas antes doemail. O pushanterior88425c4 não contém esta revisão.

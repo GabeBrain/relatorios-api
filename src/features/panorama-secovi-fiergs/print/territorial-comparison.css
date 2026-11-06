@@ -46,3 +46,8 @@
 .panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section{display:flex;flex-direction:column;min-height:0}
 .panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section>div{flex:1;min-height:0}
 .panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section span{height:100%;min-height:0;grid-template-rows:1.1cqw minmax(0,1fr) 1cqw}
+
+.panorama-territorial-quarterly .panorama-territorial-comparisons.is-dense{display:grid;grid-template-rows:repeat(var(--comparison-count),minmax(0,1fr));min-height:0;gap:.4cqw;padding:.5cqw 0}
+.panorama-territorial-quarterly .panorama-territorial-comparisons.is-dense section{display:flex;flex-direction:column;min-height:0}
+.panorama-territorial-quarterly .panorama-territorial-comparisons.is-dense section>div{flex:1;min-height:0}
+.panorama-territorial-quarterly .panorama-territorial-comparisons.is-dense section span{height:100%;min-height:0}

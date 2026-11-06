@@ -28,32 +28,39 @@ function setup(entity='fiergs-rs'){
 }
 async function generate(){fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));await screen.findByRole('button',{name:'Baixar PPT'});}
 describe('rota real Panorama → projeção → manifesto → exportação',()=>{
-  it('mantém seleção vazia, coleta uma vez, recompõe o nome e entrega o mesmo manifesto ao PPT',async()=>{
+  it('mantém seleção vazia, gera o relatório integrado e entrega o mesmo manifesto ao PPT',async()=>{
     setup();expect(screen.getByRole('button',{name:'Gerar relatório'})).toBeDisabled();expect(mocks.fetch).not.toHaveBeenCalled();
     fireEvent.click(screen.getByText('Selecionar 2'));await generate();
     expect(mocks.fetch).toHaveBeenCalledTimes(1);
-    fireEvent.change(screen.getByLabelText('Nome do território 1'),{target:{value:'Canela revisada'}});
-    expect(screen.queryByRole('button',{name:'Baixar PPT'})).toBeNull();
-    await generate();expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    expect(screen.queryByLabelText('Nome do território 1')).toBeNull();
     const start=vi.fn();usePanoramaExportStore.setState({start});
     fireEvent.click(screen.getByRole('button',{name:'Baixar PPT'}));
     const continueButton=screen.queryByRole('button',{name:'Continuar e baixar PPT'});if(continueButton)fireEvent.click(continueButton);
     await waitFor(()=>expect(start).toHaveBeenCalledTimes(1));
     const [report,format,options]=start.mock.calls[0];
-    expect(format).toBe('pptx');expect(report.territorial.units[0].unit.label).toBe('Canela revisada');
+    expect(format).toBe('pptx');expect(report.scope.presentation.layout).toBe('integrated');expect(report.territorial.units[0].unit.label).toBe('Canela');
     expect(options.manifest.map(p=>p.id)).toEqual(panoramaManifestFor(report).map(p=>p.id));
-    expect(buildFiergsAuditCsv(report)).toContain('Canela revisada');
+    expect(buildFiergsAuditCsv(report)).toContain('integrated');
+    const pair=options.manifest.filter(p=>p.fiergsOfficialSlide===9);expect(pair).toHaveLength(2);expect(pair[1].territorialParentId).toBe(pair[0].id);
     expect(document.querySelector('.panorama-report-page')).not.toBeNull();
   });
   it('cobre três cidades, consolidado maior e cidade versus grupo sem nova coleta editorial',async()=>{
-    setup();fireEvent.click(screen.getByText('Selecionar 3'));expect(screen.getByLabelText('Nome do território 3')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Selecionar 4'));expect(screen.queryByLabelText('Nome do território 1')).toBeNull();
-    fireEvent.change(screen.getAllByRole('combobox')[2],{target:{value:'comparison'}});
-    const assignment=screen.getAllByRole('combobox').slice(3);const ids=[...assignment[0].querySelectorAll('option')].map(o=>o.value).filter(v=>v!=='unassigned');
-    expect(screen.getByRole('button',{name:'Gerar relatório'})).toBeDisabled();
-    assignment.forEach((select,i)=>fireEvent.change(select,{target:{value:ids[i===0?0:1]}}));
-    await generate();expect(mocks.fetch).toHaveBeenCalledTimes(1);
-    expect(mocks.fetch.mock.calls[0][0].presentation.units.map(u=>u.cities.length)).toEqual([1,3]);
+    setup();fireEvent.click(screen.getByText('Selecionar 3'));await generate();
+    expect(mocks.fetch.mock.calls[0][0].presentation.units).toHaveLength(3);
+    fireEvent.click(screen.getByText('Selecionar 4'));
+    fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    fireEvent.change(screen.getByLabelText('Nome do grupo 2'),{target:{value:'Região do entorno'}});
+    fireEvent.click(screen.getByRole('button',{name:'Gerar relatório com grupos'}));
+    await screen.findByRole('button',{name:'Baixar PPT'});
+    expect(mocks.fetch.mock.calls.at(-1)[0].presentation.units.map(u=>u.cities.length)).toEqual([1,3]);
+    const count=mocks.fetch.mock.calls.length;
+    fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));
+    fireEvent.change(screen.getByLabelText('Nome do grupo 2'),{target:{value:'Novo nome do entorno'}});
+    fireEvent.click(screen.getByRole('button',{name:'Gerar relatório com grupos'}));
+    await screen.findByRole('button',{name:'Baixar PPT'});
+    expect(mocks.fetch).toHaveBeenCalledTimes(count);
   });
   it('preserva carregamento Brain e erro sem montar relatório parcial',async()=>{
     setup();mocks.mode='loading';fireEvent.click(screen.getByText('Selecionar 1'));fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));

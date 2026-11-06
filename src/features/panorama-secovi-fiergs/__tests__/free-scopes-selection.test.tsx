@@ -74,20 +74,13 @@ describe('seleção FIERGS e invalidação de resultado', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
     await waitFor(() => expect(screen.getByTestId('report-scope').textContent).toBe('Curitiba/PR'));
   });
-  it('renomeia territórios sem repetir a coleta e permite voltar ao consolidado', async () => {
-    setup();
-    fireEvent.click(screen.getByText('Duas cidades'));
-    fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
-    await waitFor(() => expect(screen.getByTestId('report-scope')).toBeInTheDocument());
-    fireEvent.change(screen.getByLabelText('Nome do território 1'), { target: { value: 'Território editado' } });
-    expect(screen.queryByTestId('report-scope')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
-    await waitFor(() => expect(mocks.reproject).toHaveBeenCalledTimes(1));
-    expect(mocks.fetch).toHaveBeenCalledTimes(1);
-    const selectors = screen.getAllByRole('combobox');
-    fireEvent.change(selectors[2], { target: { value: 'consolidated' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
-    await waitFor(() => expect(mocks.reproject).toHaveBeenCalledTimes(2));
-    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+  it('duas cidades geram consolidado com detalhamento automático, sem editor de modos', async () => {
+    setup();fireEvent.click(screen.getByText('Duas cidades'));
+    expect(screen.queryByText('Apresentação dos territórios')).toBeNull();
+    expect(screen.queryByLabelText('Nome do território 1')).toBeNull();
+    fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));
+    await waitFor(()=>expect(screen.getByTestId('report-scope')).toBeInTheDocument());
+    expect(mocks.fetch.mock.calls[0][0].presentation.layout).toBe('integrated');
+    expect(mocks.fetch.mock.calls[0][0].presentation.units.map(u=>u.cities.length)).toEqual([1,1]);
   });
 });

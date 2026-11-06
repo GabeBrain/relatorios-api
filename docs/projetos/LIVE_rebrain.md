@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama: relatório único e modal de grupos — Gabriel / Codex
+
+- **Contrato corrigido porGabriel:** o consolidado permanece no livro; cada visão territorial vem logo após seu análogo, na mesma seção. Retirado seletor de modos/editor permanente.1cidade municipal,2/3automáticas;4+abrem modal aoGerar para2/3grupos. Nomes individuais automáticos, nome apenas para conjunto, validação de atribuição completa/única e cancelar semcoleta. Coletores/matemática preservados.
+- **Produto:** Dialog/Input/Button existentes e tokens, lista compacta de cidades com seleção1/2/3; reabertura e nomes respeitam grupos confirmados e reaproveitam coleta. Manifesto mantém pais/filhos com vínculo estável, anuais junto da métrica; grupos/membros em subtítulos curtos/página de cidades/metodologia. Capas identificam o consolidado real. Avisos apontam todas as páginas aplicáveis.
+- **Validação:**62testes, incluindo conservação dos indicadores e regressões2T2026/4T2025 das projeções; build/tipos/lint. Chromium1440/390claro/escuro4/8/15cidades semoverflow; extrato6páginas da dupla exata1T2023–3T2026 PDF/PPT/CSV, aberto/renderizado noOffice. [Contrato vigente e evidências](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#relatório-único-e-modal-de-grupos--primeira-versão-em06112026).
+- **Estado:** primeira versão validada localmente, sempush/APIreal/estudocompleto;88425c4publicado anteriormente não contém esta revisão. Próximo revisãoGabriel e autorização de publicação; aceite externo/email aguardam nova conferência. Arquivos paralelos preservados, sem alteraçãoSP/Sinduscon/Corretor.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
 ### 06/11/2026 — Panorama I5: integração e envio autorizados — Gabriel / Codex
 
 - **Integração:** aprovação explícita deGabriel; merge f9810a0 incorporouSP4aed591/219ed1c sem conflito. Apenas edição paralela doLIVE foi guardada/reaplicada; cinco demais documentos locais mantêm hash e delta doLIVE foi conferido, assim como a união do histórico. Alterações paralelas continuam fora do lote; stash de segurança preservado.

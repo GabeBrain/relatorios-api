@@ -643,5 +643,129 @@
       "pushConfirmationPath": ".local-inputs/panorama-territorial-2026-11-05/incorporation-2026-11-06/I5-push.json",
       "productionVerified": false
     }
+  },
+  "unifiedReportRevision": {
+    "date": "2026-11-06",
+    "trigger": "Gabriel clarified: preserve consolidated slides and insert grouped detail immediately after each analogue; remove consolidated/comparison mode UI",
+    "scope": "shared FIERGS/Secovi; one city municipal, 2-3 individual units automatic, 4+ explicit 2-3 group modal on Generate",
+    "numericalContract": "unchanged; tests assert equal canonical blocks across consolidated/territorial/integrated views",
+    "testsPassed": 62,
+    "testsFailed": 0,
+    "modal": [
+      {
+        "width": 1440,
+        "n": 4,
+        "bounds": {
+          "x": 384,
+          "y": 208,
+          "width": 672,
+          "height": 584
+        },
+        "noOverflow": true,
+        "value": {
+          "mode": "comparison",
+          "layout": "integrated",
+          "units": [
+            {
+              "id": "group-1",
+              "label": "Canela",
+              "cities": [
+                "Canela"
+              ]
+            },
+            {
+              "id": "group-2",
+              "label": "Entorno",
+              "cities": [
+                "Gramado",
+                "Bom Retiro do Sul"
+              ]
+            },
+            {
+              "id": "group-3",
+              "label": "Canoas",
+              "cities": [
+                "Canoas"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "width": 390,
+        "n": 4,
+        "bounds": {
+          "x": 16,
+          "y": 100,
+          "width": 358,
+          "height": 644
+        },
+        "noOverflow": true,
+        "value": {
+          "mode": "comparison",
+          "layout": "integrated",
+          "units": [
+            {
+              "id": "group-1",
+              "label": "Canela",
+              "cities": [
+                "Canela"
+              ]
+            },
+            {
+              "id": "group-2",
+              "label": "Entorno",
+              "cities": [
+                "Gramado",
+                "Bom Retiro do Sul"
+              ]
+            },
+            {
+              "id": "group-3",
+              "label": "Canoas",
+              "cities": [
+                "Canoas"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "width": 390,
+        "n": 15,
+        "bounds": {
+          "x": 16,
+          "y": 55,
+          "width": 358,
+          "height": 734
+        },
+        "noOverflow": true
+      },
+      {
+        "width": 1440,
+        "n": 8,
+        "bounds": {
+          "x": 384,
+          "y": 163,
+          "width": 672,
+          "height": 674
+        },
+        "noOverflow": true
+      }
+    ],
+    "shortExtract": {
+      "source": "exact local Gramado+Canela 1T2023-3T2026, only layout metadata changed for rendering",
+      "pages": 6,
+      "fullManifestPages": 105,
+      "officeOpenedAndRendered": true,
+      "hashes": {
+        ".pdf": "25ec11db213072ee20809bf07164dc992a471a8604515a940c4ff2dc62405941",
+        ".pptx": "b465b2a60e2ebea6b664dc04a532aa8f514fef2192663fafd0156bfdd08550ce",
+        ".csv": "85abcacad200a1f2874e512bb50847a0dc2d4aae614c8e1424a4aceed2e9dace"
+      }
+    },
+    "rawDirectory": ".local-inputs/panorama-territorial-2026-11-05/integrated-2026-11-06",
+    "published": false,
+    "externalAcceptance": false
   }
 }

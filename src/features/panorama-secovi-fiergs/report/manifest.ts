@@ -10,7 +10,7 @@ import type { PanoramaReportModel } from '../types';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
 export type CityComparisonKind = 'sales' | 'market' | 'availability';
-export interface ReportPageDefinition { id?: string; annualCompositionMetric?: 'projects' | 'units' | 'vgl'; territorialKind?: string; territorialUnitId?: string; page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'city-scope' | 'horizontal-offer-products' | 'horizontal-price-range'; fiergsOfficialSlide?: number; contentReferenceSlide?: number; mapMode?: 'standard' | 'stock' | 'price'; scopeCities?: string[]; }
+export interface ReportPageDefinition { id?: string; territorialParentId?: string; annualCompositionMetric?: 'projects' | 'units' | 'vgl'; territorialKind?: string; territorialUnitId?: string; page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'city-scope' | 'horizontal-offer-products' | 'horizontal-price-range'; fiergsOfficialSlide?: number; contentReferenceSlide?: number; mapMode?: 'standard' | 'stock' | 'price'; scopeCities?: string[]; }
 export interface PanoramaSection { id: string; label: string; start: number; end: number; }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -190,9 +190,9 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
     });
     const withoutOrphanDividers = pages.filter((page) => !FIERGS_DIVIDERS.has(page.fiergsOfficialSlide ?? -1)
       || pages.some((other) => other.sectionId === page.sectionId && other.visualFamily !== 'divider'));
-    return annualCompositionManifest(territorialManifest(withoutOrphanDividers.map((page, index) => ({ ...page, page: index + 1 })), report), report.annualCompositions);
+    return annualCompositionManifest(territorialManifest(withoutOrphanDividers.map((page, index) => ({ ...page, page: index + 1 })), report), report.annualCompositions, report.scope?.presentation?.layout==='integrated');
   }
-  return annualCompositionManifest(territorialManifest(createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken)), report), report.annualCompositions);
+  return annualCompositionManifest(territorialManifest(createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken)), report), report.annualCompositions, report.scope?.presentation?.layout==='integrated');
 }
 
 const FIERGS_DIVIDERS = new Set([8, 23, 34, 38, 42, 48, 53, 62, 70]);

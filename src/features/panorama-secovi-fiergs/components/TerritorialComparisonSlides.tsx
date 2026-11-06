@@ -44,7 +44,7 @@ export function TerritorialComparisonSlide({ report, def }: { report: PanoramaRe
           }}/>
         </Line>)}
       </LineChart></ResponsiveContainer></div><Legend report={report}/></div>
-      <aside className="panorama-fiergs-context-comparisons panorama-territorial-comparisons" style={{'--comparison-count':pairs.length} as CSSProperties}>
+      <aside className={`panorama-fiergs-context-comparisons panorama-territorial-comparisons ${pairs.length>2?'is-dense':''}`} style={{'--comparison-count':pairs.length} as CSSProperties}>
         {pairs.map((p) => {
           const maximum=Math.max(Math.abs(p.left??0),Math.abs(p.right??0),1);
           const height=(v:number|null)=>`${v==null?0:Math.abs(v)/maximum*100}%`;
