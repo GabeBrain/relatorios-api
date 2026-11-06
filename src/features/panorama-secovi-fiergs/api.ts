@@ -331,6 +331,19 @@ export function describeTemporalFailure(city: string, issues: TemporalIssue[]): 
   return `Não foi possível consultar ${metrics} em ${city}: a Geobrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
 }
 
+/** Tipologia de dormitórios não se aplica a uma base comprovadamente só horizontal.
+ * Só aceita ausência explícita HTTP 200; falha de transporte/acesso continua impeditiva. */
+export function unavailableRequiredCitySources(buildings: Record<string, unknown>[], sources: Pick<Record<TemporalKey, SourceResult>, 'sales' | 'stock' | 'salesTypology' | 'stockTypology'>): SourceResult[] {
+  const standards = [sources.sales, sources.stock];
+  const horizontalOnly = buildings.length > 0
+    && buildings.every((building) => segmentOf(building.building_type ?? building.type) === 'Horizontal')
+    && standards.every((source) => source.available && source.rows.length > 0
+      && source.rows.every((row) => segmentOf(row.building_type ?? row.type) === 'Horizontal'));
+  const requiredTypology = [sources.salesTypology, sources.stockTypology].filter((source) =>
+    !(horizontalOnly && source.issue?.empty === true && source.issue.status === 200));
+  return [...standards, ...requiredTypology].filter((source) => !source.available);
+}
+
 async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3' | 'v4', circuit: PanoramaTemporalCircuit, gate: PanoramaRequestGate, signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
   const track = <T,>(operation: string, request: () => Promise<T>) => gate(request).finally(() => onUnit?.(scope.city, operation));
   const [buildings, sales, salesTypology, stock, stockTypology, ivv, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
@@ -345,8 +358,7 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
   // pelo cubo granular, que contém estoque, vendas e lançamentos por tipologia.
   const ivvTypology: SourceResult = { rows: [], available: false, source: 'IVV por tipologia calculado pelo histórico granular do recorte' };
   const sources = { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology };
-  const mandatory = [sales, salesTypology, stock, stockTypology];
-  const unavailableMandatory = mandatory.filter((source) => !source.available);
+  const unavailableMandatory = unavailableRequiredCitySources(buildings, sources);
   if (unavailableMandatory.length) {
     const issues = unavailableMandatory.flatMap((source) => source.issue ? [source.issue] : []);
     const details = issues.map(failureLabel);

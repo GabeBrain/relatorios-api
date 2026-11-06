@@ -385,6 +385,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama: completude aplicável ao universo horizontal e cronômetro
+
+CSV de Gabriel semtimeout motivou diagnóstico delimitado autorizado: Bom Retiro do Sul tem um Horizontal/nenhum Vertical, padrão com dados e tipologia HTTP200 vazia. Corrigida exigência da dimensão apenas com cadastro e duas fontes padrão comprovadamente horizontais, sem exceção municipal, síntese de zero ou dispensa de erro HTTP. 50 testes/tipos/lint aprovados; replay offline dos seis retornos com44reconciliações críticas match, sem bloqueio; preços/IVV não validados, sem estudo completo. Cronômetro Panorama sóMM:SS/pulso discreto com movimento reduzido. Fonte/evidências no [plano de recuperação](../features/Relatorios%20Secovi_FIERGS/PLAN_RECUPERACAO_COLETA_MULTICIDADES_PANORAMA_2026-10-06.md). Estado local, publicação e reteste real pendentes; paralelos preservados.
+
+
 ### 06/11/2026 — Panorama: recuperação de falhas mistas e progresso
 
 Retorno de Gabriel no recorte Lajeado/Vale 1T2023–2T2026: timeout misturado com HTTP200 vazio em Bom Retiro do Sul era classificado como vazio e impedia retry automático/manual. Corrigida precedência dos erros agregados sem afrouxar completude. Contagem deduplica operação por cidade, dez operações reais, reserva consolidação/preparo; BrainLoadingState overlay/tempo real. 42 testes offline, tipos/lint e tela lenta desktop/celular aprovados. Ainda não enviado; timeout de origem não diagnosticado pelas capturas. Fonte, evidências e próximo passo no [plano de recuperação](../features/Relatorios%20Secovi_FIERGS/PLAN_RECUPERACAO_COLETA_MULTICIDADES_PANORAMA_2026-10-06.md). Próximo autorizar push/publicar e repetir recorte real; sem API nesta sessão ou alteração paralela.

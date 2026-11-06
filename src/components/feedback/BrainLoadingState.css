@@ -1,0 +1,14 @@
+/* Pulso reiniciado pelo tick real do cronômetro; sem alterar geometria ou cores. */
+.brain-loading-clock {
+  display: inline-block;
+  animation: brain-loading-clock-tick 650ms ease-out;
+}
+
+@keyframes brain-loading-clock-tick {
+  from { opacity: 0.72; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brain-loading-clock { animation: none; }
+}
