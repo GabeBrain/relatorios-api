@@ -892,5 +892,215 @@
     "realFiveCityReplay": false,
     "apiRequests": 0,
     "remaining": "Authorized publication and real site CSV/PPT verification."
+  },
+  "drag_and_batch_2026_11_06": {
+    "state": "validated-locally-push-authorized",
+    "testsPassed": 23,
+    "types": "pass",
+    "lint": "pass",
+    "buildSeconds": 37.16,
+    "browser": {
+      "apiRequests": 0,
+      "results": [
+        {
+          "case": "desktop-bulk-and-native-drag",
+          "value": {
+            "mode": "comparison",
+            "layout": "integrated",
+            "units": [
+              {
+                "id": "group-1",
+                "label": "Lajeado",
+                "cities": [
+                  "Lajeado"
+                ]
+              },
+              {
+                "id": "group-2",
+                "label": "Vale do Taquari",
+                "cities": [
+                  "Estrela",
+                  "Taquari",
+                  "Teutônia",
+                  "Bom Retiro do Sul"
+                ]
+              }
+            ]
+          },
+          "errors": []
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "n": 5,
+          "dark": false,
+          "bounds": {
+            "x": 16,
+            "y": 28.4453125,
+            "width": 358,
+            "height": 787.109375
+          },
+          "overflow": false,
+          "errors": [],
+          "value": {
+            "mode": "comparison",
+            "layout": "integrated",
+            "units": [
+              {
+                "id": "group-1",
+                "label": "Grupo A",
+                "cities": [
+                  "Bom Retiro do Sul",
+                  "Estrela"
+                ]
+              },
+              {
+                "id": "group-2",
+                "label": "Grupo B",
+                "cities": [
+                  "Lajeado",
+                  "Taquari",
+                  "Teutônia"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "n": 15,
+          "dark": true,
+          "bounds": {
+            "x": 16,
+            "y": 28.4453125,
+            "width": 358,
+            "height": 787.109375
+          },
+          "overflow": false,
+          "errors": [],
+          "value": {
+            "mode": "comparison",
+            "layout": "integrated",
+            "units": [
+              {
+                "id": "group-1",
+                "label": "Grupo A",
+                "cities": [
+                  "Bom Retiro do Sul",
+                  "Estrela"
+                ]
+              },
+              {
+                "id": "group-2",
+                "label": "Grupo B",
+                "cities": [
+                  "Lajeado",
+                  "Taquari",
+                  "Teutônia",
+                  "Canela",
+                  "Gramado",
+                  "Canoas",
+                  "Esteio",
+                  "São Leopoldo",
+                  "Novo Hamburgo",
+                  "Sapucaia do Sul",
+                  "Alvorada",
+                  "Cachoeirinha",
+                  "Viamão"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "width": 1440,
+          "height": 900,
+          "n": 15,
+          "dark": true,
+          "bounds": {
+            "x": 384,
+            "y": 87,
+            "width": 672,
+            "height": 726
+          },
+          "overflow": false,
+          "errors": [],
+          "value": {
+            "mode": "comparison",
+            "layout": "integrated",
+            "units": [
+              {
+                "id": "group-1",
+                "label": "Grupo A",
+                "cities": [
+                  "Bom Retiro do Sul",
+                  "Estrela"
+                ]
+              },
+              {
+                "id": "group-2",
+                "label": "Grupo B",
+                "cities": [
+                  "Lajeado",
+                  "Taquari",
+                  "Teutônia",
+                  "Canela",
+                  "Gramado",
+                  "Canoas",
+                  "Esteio",
+                  "São Leopoldo",
+                  "Novo Hamburgo",
+                  "Sapucaia do Sul",
+                  "Alvorada",
+                  "Cachoeirinha",
+                  "Viamão"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "width": 390,
+          "height": 667,
+          "n": 5,
+          "dark": false,
+          "bounds": {
+            "x": 16,
+            "y": 16,
+            "width": 358,
+            "height": 635
+          },
+          "overflow": false,
+          "errors": [],
+          "value": {
+            "mode": "comparison",
+            "layout": "integrated",
+            "units": [
+              {
+                "id": "group-1",
+                "label": "Grupo A",
+                "cities": [
+                  "Bom Retiro do Sul",
+                  "Estrela"
+                ]
+              },
+              {
+                "id": "group-2",
+                "label": "Grupo B",
+                "cities": [
+                  "Lajeado",
+                  "Taquari",
+                  "Teutônia"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "scope": "UIonly; no numerical/source changes",
+    "mechanism": "nativeHTMLDragAndDrop + click/tap/keyboard destination; exact authorized catalog matching",
+    "externalAcceptance": false
   }
 }

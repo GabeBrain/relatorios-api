@@ -385,6 +385,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama: arrastar cidades e selecionar lista colada
+
+Gabriel autorizouenvio dascorreçõesanteriores epediu facilidadesnesta rodada. Modal comcartões arrastáveis2/3grupos, nomecompostoobrigatório ealternativatoque/clique/teclado; preservapartição/cancelamentosemcoleta. Buscacomlista(vírgula/e/linhas), matchingexato sócatálogoUF, avisodeausentes euniãocomseleçãoanterior.23testes/tipos/lint/buildaprovados,5cenáriosbrowserclaro/escuro390–1440pxcomdragreal/5–15cidades,semoverflow/erro. Fontetécnica/evidência no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), seleçãosimplificada06/11. SemAPI/mudançanumérica; aguardapushautorizado/republicação eensaioI6comCSV/PPT. Alteraçõesparalelaspreservadas; semaceiteexterno presumido.
+
+
 ### 06/11/2026 — Panorama: correções dirigidas após PPT real
 
 AutorizaçãoGabriel: cobertura distingue segmento municipal inexistente (cadastroconcluído/nãovazio/semrejeições+semevidênciatemporal), preservandovalores deoutrosmembros; preçoausente dispensadoapenascomestoquezeroobservado. Pontes tracejadas entreobservações, seminterpolar números/cobertura/comparativos; doisavisosdinâmicosnovos. Ajustados folga detítuloPPT (VENDIDO), omissão daoficial19totalmentesematividade epercentualtotalcomdenominadorzero.11replayssemrede/indicadoresconservados,40testes+1opcionalignorado, tipos/lint/buildaprovados, extrato3páginasOffice/Chromiumconferido. Fonte [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), correçõesI6. Semcoleta/push; aguardapublicação autorizada eregeraçãorealLajeado/Vale comCSV. Nenhumaceiteexternopresumido; paralelospreservados.

@@ -16,7 +16,8 @@ describe('grupos no relatório único',()=>{
  });
  it('cada cidade fica em um grupo; grupos vazios impedem confirmar e cancelar não gera',()=>{
   const confirm=vi.fn(),close=vi.fn();render(<TerritorialGroupsDialog open onOpenChange={close} cities={cities} onConfirm={confirm}/>);
-  fireEvent.click(screen.getByRole('radio',{name:'Canela no grupo 2'}));
+  fireEvent.click(screen.getByRole('button',{name:'Mover Canela'}));
+  fireEvent.click(screen.getByRole('button',{name:'Mover para grupo 2'}));
   expect(screen.getByRole('button',{name:'Gerar relatório com grupos'})).toBeDisabled();
   expect(screen.getByText('Cada grupo precisa de ao menos uma cidade.')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button',{name:'Cancelar'}));expect(close).toHaveBeenCalledWith(false);expect(confirm).not.toHaveBeenCalled();
@@ -29,4 +30,24 @@ describe('grupos no relatório único',()=>{
   const result=confirm.mock.calls[0][0];expect(result.units).toHaveLength(3);expect(new Set(result.units.flatMap(u=>u.cities)).size).toBe(4);
   for(const u of result.units)if(u.cities.length===1)expect(u.label).toBe(u.cities[0]);
  });
+ it('arrasta entre grupos sem duplicar cidades e exige nome se o destino vira conjunto',()=>{
+  const confirm=vi.fn();render(<TerritorialGroupsDialog open onOpenChange={()=>{}} cities={cities} onConfirm={confirm}/>);
+  const data=new Map();const dataTransfer={setData:(key,value)=>data.set(key,value),getData:key=>data.get(key),effectAllowed:'',dropEffect:''};
+  fireEvent.dragStart(screen.getByRole('button',{name:'Mover Gramado'}),{dataTransfer});
+  fireEvent.dragOver(screen.getByRole('region',{name:'Grupo 1'}),{dataTransfer});
+  fireEvent.drop(screen.getByRole('region',{name:'Grupo 1'}),{dataTransfer});
+  expect(screen.getByLabelText('Nome do grupo 1')).toHaveValue('');
+  expect(screen.getAllByRole('button',{name:'Mover Gramado'})).toHaveLength(1);
+  expect(screen.getByRole('button',{name:'Gerar relatório com grupos'})).toBeDisabled();
+  fireEvent.change(screen.getByLabelText('Nome do grupo 1'),{target:{value:'Serra'}});
+  fireEvent.change(screen.getByLabelText('Nome do grupo 2'),{target:{value:'Metropolitana'}});
+  fireEvent.click(screen.getByRole('button',{name:'Gerar relatório com grupos'}));
+  expect(confirm.mock.calls[0][0].units[0]).toMatchObject({label:'Serra',cities:['Canela','Gramado']});
+ });
+ it('não aceita cidade desconhecida no drop',()=>{
+  render(<TerritorialGroupsDialog open onOpenChange={()=>{}} cities={cities} onConfirm={()=>{}}/>);
+  fireEvent.drop(screen.getByRole('region',{name:'Grupo 1'}),{dataTransfer:{getData:()=> 'Outra cidade'}});
+  expect(screen.queryByText('Outra cidade')).toBeNull();
+ });
+
 });
