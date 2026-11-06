@@ -385,6 +385,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama: revisão da segunda saída real e cartões sem ícone
+
+PPT real `(1)` deGabriel:104slides Office/read-only,0formasfora, todaspáginas conferidas. Vale8+Lajeado20=28vendasfechamento eVale69+Lajeado741=810em12meses; tracejados, VENDIDOinteiro, omissãovazia e0sem100%confirmados. Falta pontoVGVVale3T2026 naspáginas37/39: pendenteCSVdamesmageração, semextrapolar/numerosmanuais. Fonte ehash no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), I6nova saída. Removidoíconedos6pontos emcartões, instruçãoexplícita/arraste/cliquepreservados,5testesaprovados; separadortextualVGVcorrigido. Código local,semAPI/push/aceiteexterno; paralelos preservados.
+
+
 ### 06/11/2026 — Panorama: envio autorizado das correções I6 e seleção
 
 `0e95c5d`/`dfe2fa4`/`36d0fc3` enviados aorigin/main por autorização explícita, SHA36d0fc34b417cf01e9a73c96b1869413fa747157 confirmado,0/0. Semmerge, ediçõesparalelas preservadas. Gate documentalaprovado; origem dasmudanças e testes na entrada anterior e no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Publicado noGit não é conferênciaLovable: próximoGabrielpublicar, testarlista/drag eregerar5cidadescomCSV/PPT paraI6. Semnovoaceiteexterno.

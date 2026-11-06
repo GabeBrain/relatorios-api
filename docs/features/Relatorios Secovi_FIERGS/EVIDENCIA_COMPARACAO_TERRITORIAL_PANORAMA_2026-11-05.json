@@ -1102,5 +1102,45 @@
     "scope": "UIonly; no numerical/source changes",
     "mechanism": "nativeHTMLDragAndDrop + click/tap/keyboard destination; exact authorized catalog matching",
     "externalAcceptance": false
+  },
+  "site_ppt_v2_review_2026_11_06": {
+    "source": ".local-inputs\\panorama-territorial-2026-11-05\\panorama-fiergs-rs-bom-retiro-do-sul-estrela-e-mais-3-c3872334-1T2023-3T2026-editavel (1).pptx",
+    "sha256": "340294f7d1001015af3f34052429a6661d21452e4fe23b911c5bc87f1300165d",
+    "slides": 104,
+    "allSlidesVisuallyReviewed": true,
+    "office": {
+      "originalModified": false,
+      "opened": true,
+      "outside": [],
+      "slides": 104
+    },
+    "confirmed": [
+      "Vale quarterly sales8 + Lajeado20 = consolidated28 at3T2026 (pages27/28/35)",
+      "Vale12month sales69 + Lajeado741 = consolidated810 (pages30/31)",
+      "Visible dashed bridges preserve historical gaps (pages28/31/37/39)",
+      "VENDIDO renders fully; crop37 confirmed unlike apparent degradation in scaled screenshot",
+      "Empty launch distribution removed;105to104pages",
+      "Page50launches total0 and share unavailable, not100%",
+      "Price meter mean Vale6550 and stock104 now plotted"
+    ],
+    "remaining": [
+      {
+        "pages": [
+          37,
+          39
+        ],
+        "issue": "ValeVGV last3T2026 point absent; no extrapolation at end. Last quarterly source observation shown2T2026. Cannot distinguish source coverage vs group mask fromPPT alone."
+      },
+      {
+        "pages": [
+          83
+        ],
+        "issue": "VGV caption shows question mark instead of separator; fixed code text locally, not in receivedPPT"
+      }
+    ],
+    "numericAuditReceived": false,
+    "externalAccepted": false,
+    "uiChange": "Remove grip icon, retain explicit drag/click instruction;5existingdialogtests passed",
+    "needs": "AuditCSV fromsamecompletedgeneration for VGVcoverage; no realAPI authorized now"
   }
 }

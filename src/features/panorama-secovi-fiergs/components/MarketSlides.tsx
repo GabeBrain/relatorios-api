@@ -422,7 +422,7 @@ export function VgvSlide({ report }: { report: PanoramaReportModel }) {
       { key: 'soldUnits', label: 'Vendas líquidas', value: (row) => row.soldUnits, format: integer },
       { key: 'launchedVgvMillions', label: 'VGL — Valor Geral Lançado (R$ mi)', value: (row) => row.launchedVgvMillions, format: decimal },
       { key: 'finalVgvMillions', label: 'Final (R$ mi)', value: (row) => row.finalVgvMillions, format: decimal },
-      { key: 'soldVgvMillions', label: 'VGV ? Valor Geral Vendido (R$ mi)', value: (row) => row.soldVgvMillions, format: decimal },
+      { key: 'soldVgvMillions', label: 'VGV — Valor Geral Vendido (R$ mi)', value: (row) => row.soldVgvMillions, format: decimal },
     ].filter((column) => column.key === 'projects' || report.granular.vgv.some((row) => column.value(row) !== null));
     return <Slide title="VGV OFERTADO E DISPONÍVEL DO MERCADO TOTAL" className="panorama-vgv-slide"><table className="panorama-reference-table"><thead><tr><th scope="col">{report.scope.entity === 'fiergs-rs' ? 'Padrão / produto' : 'Padrão'}</th>{columns.map((column) => <th scope="col" key={column.key}>{column.label}</th>)}</tr></thead><tbody>{report.granular.vgv.map((row) => <tr key={`${row.segment}-${row.label}`} className={rowClassOf(row.kind)}><th scope="row">{row.label}</th>{columns.map((column) => <td key={column.key}>{column.format(column.value(row))}</td>)}</tr>)}</tbody></table></Slide>;
   }

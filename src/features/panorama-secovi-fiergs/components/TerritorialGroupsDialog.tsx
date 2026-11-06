@@ -1,5 +1,4 @@
 import { useEffect, useId, useState } from 'react';
-import { GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -43,13 +42,13 @@ export function TerritorialGroupsDialog({open,onOpenChange,cities,value,onConfir
       onDragEnd={()=>{setDraggedCity(null);setDropTarget(null);}}
       onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();setSelectedCity(null);}}}
       className={cn('flex w-full cursor-grab items-center gap-2 rounded-md border border-border bg-background px-2.5 py-2 text-left text-sm shadow-sm outline-none transition-[box-shadow,opacity] hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing',selectedCity===city&&'border-primary ring-2 ring-primary/30',draggedCity===city&&'opacity-50')}>
-      <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true"/><span className="min-w-0 break-words">{city}</span>
+      <span className="min-w-0 break-words">{city}</span>
     </button>;
   }
   return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="w-[calc(100%_-_2rem)] max-w-2xl max-h-[calc(100dvh_-_2rem)] overflow-y-auto gap-4 rounded-xl" data-territorial-groups-dialog="">
     <DialogHeader><DialogTitle>Organizar cidades</DialogTitle><DialogDescription>O relatório mantém o consolidado e inclui as visões por cidade ou grupo. Distribua as {cities.length} cidades em dois ou três grupos.</DialogDescription></DialogHeader>
     <div className="flex items-center justify-between gap-3"><span className="text-sm font-medium">Quantos grupos?</span><div className="flex gap-1 rounded-lg bg-muted p-1">{[2,3].map(n=><Button key={n} type="button" variant={units.length===n?'default':'ghost'} size="sm" className="h-8 px-3" aria-pressed={units.length===n} onClick={()=>resize(n)}>{n} grupos</Button>)}</div></div>
-    <p id={`${id}-move-hint`} className="text-xs text-muted-foreground">Arraste as cidades entre os grupos ou toque em uma cidade e escolha o destino.</p>
+    <p id={`${id}-move-hint`} className="text-xs text-muted-foreground">Arraste os cartões de cidade para outro grupo. Você também pode tocar em uma cidade e escolher o destino.</p>
     <div className={cn('grid max-h-[min(48vh,420px)] gap-3 overflow-y-auto p-1',units.length===3?'sm:grid-cols-3':'sm:grid-cols-2')}>
       {units.map((unit,index)=><section key={unit.id} role="region" aria-label={`Grupo ${index+1}`} data-territorial-drop={unit.id}
         onDragOver={e=>{if(draggedCity){e.preventDefault();e.dataTransfer.dropEffect='move';setDropTarget(unit.id);}}}
