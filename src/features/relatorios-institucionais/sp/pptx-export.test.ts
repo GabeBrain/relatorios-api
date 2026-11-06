@@ -1,6 +1,11 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 import {buildSpEditablePptx} from './pptx-export';
 import {embedSpPptxAudit} from './pptx-audit';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {SpInstitutionalText} from './SpInstitutionalText';
+import {buildSpTemporalPreview} from './temporal';
+import {recordedInput} from './__tests__/recorded';
 vi.mock('./pptx-audit',()=>({embedSpPptxAudit:vi.fn(()=>new Uint8Array([1,2,3]))}));
 const captured=vi.hoisted(()=>({slides:[] as {texts:string[];notes:string[];images:number;targets:number[]}[],writes:0}));
 vi.mock('pptxgenjs',()=>({default:class {
@@ -23,6 +28,16 @@ function slides(){return Array.from({length:85},()=>{
   const article=document.createElement('article');article.innerHTML='<span class="sr-only">Não exportar</span><svg><text style="font-size:24px;font-family:Tahoma;fill:rgb(38,38,38)">42.453</text></svg>';deck.append(article);return article;
 });}
 describe('SP — PowerPoint para conferência',()=>{
+  it('exporta a data atual, percentuais e cartões institucionais como caixas de texto nativas',async()=>{
+    const source=slides(),report={...buildSpTemporalPreview(recordedInput(),'3T2026'),throughMonth:'2026-09'};
+    for(const page of [5,7])source[page-1].innerHTML=renderToStaticMarkup(createElement(SpInstitutionalText,{page,report}));
+    await buildSpEditablePptx(source,'3T2026',new AbortController().signal,()=>{});
+    expect(captured.slides[4].texts).toContain('+12.500');expect(captured.slides[4].texts).toContain('R$ 434 Bi');
+    expect(captured.slides[4].texts).toHaveLength(18);
+    expect(captured.slides[6].texts).toContain('SETEMBRO DE 2026');
+    expect(captured.slides[6].texts.join(' ')).toContain('25,6% da população do estado');
+    expect(captured.slides[6].texts).not.toContain('JUNHO DE 2026');
+  });
   it('preserva85posições, textos nativos e auditoria sem duplicar os textos na imagem',async()=>{
     const source=slides(),progress=vi.fn();
     const result=await buildSpEditablePptx(source,'2T2026',new AbortController().signal,progress,{quarter:'2T2026',numericAudit:{schema:'sp-numeric-audit-v1'}});

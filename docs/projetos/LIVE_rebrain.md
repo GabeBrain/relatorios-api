@@ -452,6 +452,21 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Proposta:** consolidado disponível para qualquer recorte; até três unidades comparativas, cada uma cidade ou grupo explícito, sem sobreposição/omissão. Reutilizar coleta municipal e recalcular taxas/preços; novas composições anuais mapeadas, sem copiar inconsistências dos exemplos. [Fonte única, inventário e estratégia](../features/Relatorios%20Secovi_FIERGS/REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
 - **Evidência/estado:** brutos/hashes/pranchas em `.local-inputs/finoti-comparativos-2026-11-05/`; análise preparada, sem alteração de produto/API/testes/estudo real/push. Fetch:cinco commits remotos novos, sem integração da árvore suja. Próximo fechar contrato e plano antes da implementação; limite de séries não reduz por si as chamadas por cidade.
 - **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
+### 2026-11-05 — SP Institucional: acesso pela navegação de relatórios — usuário / Codex
+
+- **Mudança:** entrada ativa SP Institucional em Relatórios Automatizados, busca rápida e jornada de relatórios da página inicial, apontando para a rota lazy existente `/rebrain/relatorios-institucionais/sp`. Sem alterar autenticação, catálogo de municípios ou guardas da geração.
+- **Padrão/validação:** reutiliza NavLink/pasta lateral, CommandPalette e cartão Home existentes. Testes AppLayout, tipagem e lint dirigidos; Edge desktop/celular claro/escuro verifica menu, página inicial, busca e geração bloqueada sem login. Nenhuma consulta autenticada real.
+- **Etapas/Pendências:** navegação implementada localmente; publicar e conferir no site. A disponibilização para testes não significa homologação numérica/metodológica, que cabe à equipe responsável.
+- **Monday:** [Relatório SP Institucional](https://brain381753.monday.com/boards/18398428946/pulses/13452140276) — `13452140276`; somente referência nesta alteração.
+
+### 2026-11-05 — SP: data correta no perfil e indicadores institucionais editáveis — usuário / Codex
+
+- **Problema:** artes integrais dos slides5/7 conservavam junho/2026 e impediam editar números no PPTX. Usuário identificou o período antigo em geração3T2026 e pediu edição de percentuais e cartões GeoBrain.
+- **Correção:** camada SVG nativa substitui título/data/textos/percentuais do7 e seis valores/legendas do5. Data usa o mês efetivamente conferido, inclusive parcial e virada de ano. Exportador existente gera caixas de texto editáveis. Artes, mapas, logos/QR preservados; demais slides institucionais seguem como referência.
+- **Fonte:** percentuais e indicadores institucionais continuam provenientes da edição original2T2026; não foram recalculados pela API municipal. Nota discreta no7 e explicação no checklist/interface evitam apresentar números editoriais como observação atual. Edição no PowerPoint altera a cópia baixada, não a base.
+- **Validação:**296testes/33arquivos, tipos/build/lint, Edge desktop/celular claro/escuro e PPTX85slides sem nova coleta. PowerPoint editou data/percentual/indicador, salvou e reabriu preservando as três alterações. [Contrato, escopo e evidências](../features/relatorios-institucionais/sp/TEXTOS_INSTITUCIONAIS_EDITAVEIS_2026-11-05.md).
+- **Etapas/Pendências:** implementação local concluída; publicação e nova exportação real pendentes. Sem nova API autenticada ou alteração numérica dos demais indicadores; Secovi/FIERGS preservados.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; referência sem escrita.
 
 ### 2026-11-05 — SP: carregamento limitado à área do relatório — usuário / Codex
 
@@ -1077,6 +1092,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ## 2. Etapas
 
 **05/11 — Panorama territorial:** G0–G6validados localmente, sem push; [execução/roteiroG7](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Aceite anterior permanece, ampliação nova aguarda ensaio/aceite.
+**05/11 — SP, textos institucionais5/7:** competência do perfil acompanha a geração; títulos/percentuais e seis cartões GeoBrain exportam como caixas editáveis. Validados localmente com Edge/Office; fonte editorial continua identificada, publicação/ensaio real pendentes.
 
 **05/11 — SP, geração automática:** fluxo visual em oito etapas substitui os botões de coleta; cancelamento/retomada e insights do analista implementados e validados localmente. Publicação autorizada; teste autenticado e aceite permanecem distintos da implementação.
 
@@ -1161,6 +1177,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ## 3. Pendências
 
 **05/11 — Panorama territorial:** autorizar integração do novoSP `4aed591` e publicação; conferir noLovable dupla comparada, consolidado regional e cidade versus grupo, retornandoPDF/PPT/CSV. Não homologado externamente nesta entrega.
+- [ ] **SP — revisar números editoriais dos slides5/7:** atualizar percentuais e indicadores institucionais com fonte aprovada quando necessário. Textos agora editáveis no PPTX; a API municipal não fornece esses números. Data da geração é dinâmica e não significa atualização automática desses indicadores.
 
 - [ ] **SP — ensaio real do fluxo automático:** após o deploy, selecionar ano/trimestre e Gerar relatório; conferir progresso, cancelamento/retomada, fontes parciais e memória de cálculo nos insights. Fontes reais e latência do provedor não foram exercitadas nesta rodada. [Contrato](../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).
 

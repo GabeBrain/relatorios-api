@@ -14,6 +14,7 @@ import { SP_MARKET_SLIDES } from './market-details';
 import { SpMarketStateSlide } from './SpMarketStateSlide';
 import { SpStockMapSlide } from './SpStockMapSlide';
 import { SP_INSTITUTIONAL_ASSETS } from './institutional-assets';
+import { SpInstitutionalText } from './SpInstitutionalText';
 import { SP_DIVIDER_ASSETS } from './divider-assets';
 import { reviewSpSlides, SP_SLIDE_STATE_LABELS } from './review';
 import { SpReviewPanel } from './SpReviewPanel';
@@ -38,6 +39,7 @@ export function SpSlideContent({report,page,onNavigate}:{report:SpPreview;page:n
   return <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
     <img key={`template-${page}`} src={SP_DIVIDER_ASSETS[page] ?? SP_INSTITUTIONAL_ASSETS[page] ?? templates[page] ?? (page >= 32 && page <= 44 ? salesTemplate : projectsTemplate)} alt={page === 1 ? 'Capa original Brain Inteligência Estratégica' : SP_DIVIDER_ASSETS[page] ? definition.title : SP_INSTITUTIONAL_ASSETS[page] ? `Referência institucional: ${definition.title}` : `Layout: ${definition.title}`} className="absolute inset-0 h-full w-full" />
     {SP_DIVIDER_ASSETS[page] && <span className="sr-only">{definition.title.toLocaleUpperCase('pt-BR')}</span>}
+    {SP_INSTITUTIONAL_ASSETS[page] && <SpInstitutionalText page={page} report={report}/>}
     {SP_DIVIDER_ASSETS[page] && <button type="button" data-sp-target-slide={6} onClick={()=>onNavigate?.(6)} aria-label="Voltar ao sumário" className="absolute right-0 top-0 z-10 h-[65px] w-[65px] bg-transparent"><span className="sr-only">Voltar ao sumário</span></button>}
     {SP_INSTITUTIONAL_ASSETS[page] || SP_DIVIDER_ASSETS[page] ? null : [9,10,11].includes(page) ? <SpHighlightsSlide key={page} report={report} slide={page}/> : [67,68,70,71,74,75,79,80].includes(page) ? <SpStockMapSlide key={page} report={report} slide={page}/> : (SP_MARKET_SLIDES as readonly number[]).includes(page) ? <SpMarketStateSlide key={page} report={report} slide={page}/> : (SP_DETAIL_SLIDES as readonly number[]).includes(page) ? <SpDetailSlide key={page} report={report} slide={page} /> : page >= 13 && page <= 22 || page >= 26 && page <= 30 || page >= 32 && page <= 36 || page >= 40 && page <= 44 ? <SpTrendSlide key={page} report={report} number={page} /> : [23, 24, 37, 38, 47, 48].includes(page) ? <SpComparisonSlide key={page} report={report} number={page} /> : [25,39].includes(page) ? <SpNeighborhoodSlide key={page} report={report} sales={page === 39} /> : [46,50].includes(page) ? <SpMarketSlide key={page} report={report} number={page} /> : page > 1 ? <OriginalTextSlide number={page} title={definition.title} report={report} onNavigate={onNavigate} /> : null}
   </article>;
@@ -65,7 +67,7 @@ export function SpReportPages({ report, onSelectSlide }: { report: SpPreview; on
   const period = spPeriodLabel(report);
   const reviews=reviewSpSlides(report);
   const currentReview=reviews[page-1];
-  const referenceNote=SP_INSTITUTIONAL_ASSETS[page] ? (page===7?'Perfil territorial de junho de 2026, conforme o material de referência.':'Conteúdo institucional reproduzido da edição de referência 2T2026; nomes, contatos e números conservam essa edição.') : null;
+  const referenceNote=SP_INSTITUTIONAL_ASSETS[page] ? (page===7?'O mês e o ano acompanham o período conferido. Percentuais preservados da referência de junho/2026, editáveis no PowerPoint; não foram recalculados pela API.':page===5?'Indicadores institucionais da edição de referência 2T2026. Números e legendas dos seis cartões são editáveis no PowerPoint; não são atualizados pela API municipal.':'Conteúdo institucional reproduzido da edição de referência 2T2026; nomes, contatos e números conservam essa edição.') : null;
   const slide = <SpSlideContent report={report} page={page} onNavigate={setPage}/>;
   const navigation = <nav aria-label="Navegação dos slides originais" className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">{SP_ORIGINAL_SLIDES.map(item => <Button className="h-auto min-h-10 max-w-full whitespace-normal py-2 text-left" key={item.number} variant={page === item.number ? 'default' : 'outline'} aria-pressed={page === item.number} onClick={() => setPage(item.number)}>{item.number}. {item.title}</Button>)}</nav>;
   return <section aria-label="Páginas do relatório" className="space-y-4">
