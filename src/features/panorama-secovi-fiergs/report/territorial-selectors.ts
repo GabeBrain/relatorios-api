@@ -92,3 +92,16 @@ export function territorialAnnualColumns(annual: ReturnType<typeof territorialTr
   return (annual[0]?.values.slice(1) ?? []).flatMap((_, index) =>
     annual.some(({values}) => observedComparison(values[index]?.value ?? null, values[index+1]?.value ?? null).visible) ? [index+1] : []);
 }
+
+
+/** Ponte visual apenas entre duas observações: não cria valores, cobertura ou comparativos. */
+export function temporalGapBridges(points: {quarter: string; value: number | null}[]) {
+  const result: {from:{quarter:string;value:number};to:{quarter:string;value:number}}[]=[];
+  let previous: number | null = null;
+  points.forEach((point,index)=>{
+    if(point.value===null || !Number.isFinite(point.value)) return;
+    if(previous!==null && index>previous+1) result.push({from:{quarter:points[previous].quarter,value:points[previous].value!},to:{quarter:point.quarter,value:point.value}});
+    previous=index;
+  });
+  return result;
+}

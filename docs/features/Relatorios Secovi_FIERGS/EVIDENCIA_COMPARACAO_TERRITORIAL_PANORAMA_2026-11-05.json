@@ -858,5 +858,39 @@
       }
     ],
     "assessment": "Not final for external review until territorial detail omission is resolved. No external acceptance inferred."
+  },
+  "targeted_I6_fixes_2026_11_06": {
+    "state": "validated-locally-awaiting-push-and-real-five-city-regeneration",
+    "contracts": [
+      "non-applicable segment requires complete nonempty clean municipal cube and no temporal segment evidence",
+      "price absence exempt only with observed zero stock same period",
+      "dashed gap bridge visual only; no interpolation/coverage/compare changes",
+      "official19 omitted only no observed launch activity",
+      "zero denominator total share unavailable; observedzero remains"
+    ],
+    "offlineModels": 11,
+    "tests": {
+      "passed": 40,
+      "skippedExistingOptional": 1
+    },
+    "types": "pass",
+    "lint": "0errors4existingwarnings",
+    "buildSeconds": 39.64,
+    "browser": {
+      "pages": 3,
+      "bridges": 2,
+      "errors": [],
+      "syntheticGapControl": true,
+      "realStudy": false,
+      "apiRequests": 0
+    },
+    "office": {
+      "readOnly": true,
+      "outside": [],
+      "slides": 3
+    },
+    "realFiveCityReplay": false,
+    "apiRequests": 0,
+    "remaining": "Authorized publication and real site CSV/PPT verification."
   }
 }

@@ -35,18 +35,40 @@ export function buildTerritorialComparison(scope: PanoramaScope, consolidated: P
   if (scope.presentation?.mode !== 'comparison') return undefined;
   const requested = scope.presentation.units ?? [];
   const municipal = new Map(scope.cities.map((city) => [normalizeText(city), projection(build([city]))]));
+  // Não exigir observação de uma dimensão inexistente no universo municipal completo.
+  // Cadastro vazio, rejeições ou qualquer evidência temporal do segmento mantêm a exigência.
+  const nonApplicableSegments = scope.cities.flatMap((city) => {
+    const normalized = normalizeText(city), data = municipal.get(normalized)!;
+    const projects = consolidated.cube.projects.filter((p) => normalizeText(p.city) === normalized);
+    const complete = consolidated.provenance.completedCities?.some((c) => normalizeText(c) === normalized);
+    if (!complete || !projects.length || consolidated.cube.rejections.some((r) => normalizeText(r.city) === normalized)) return [];
+    const blocks = [...Object.values(data.sales), ...Object.values(data.stock), ...Object.values(data.prices), data.ivv];
+    return (['vertical','horizontal'] as const).flatMap((segment) => {
+      const exists = projects.some((p) => p.segment.toLowerCase() === segment)
+        || blocks.some((b) => b.series.some((r) => r.observed?.[segment] === true));
+      return exists ? [] : [{city,segment}];
+    });
+  });
+  const applies = (city:string, segment:'vertical'|'horizontal') => !nonApplicableSegments.some((item) => normalizeText(item.city) === normalizeText(city) && item.segment === segment);
   const units = requested.map((unit) => {
     const data = unit.cities.length === 1 ? municipal.get(normalizeText(unit.cities[0]))! : projection(build(unit.cities));
     const members = unit.cities.map((c) => municipal.get(normalizeText(c))!);
-    const covered = (block: import('../types').ReportMarketBlock, sources: import('../types').ReportMarketBlock[]) => ({ ...block,
-      series: block.series.map((row) => ({ ...row, observed: {
-        vertical: sources.every((s) => s.series.find((r) => r.quarter === row.quarter)?.observed?.vertical !== false && s.series.some((r) => r.quarter === row.quarter)),
-        horizontal: sources.every((s) => s.series.find((r) => r.quarter === row.quarter)?.observed?.horizontal !== false && s.series.some((r) => r.quarter === row.quarter)),
-      } })) });
+    const covered = (block: ReportMarketBlock, sources: ReportMarketBlock[], price = false): ReportMarketBlock => {
+      const memberCovered = (source: ReportMarketBlock, index: number, quarter: string, segment: 'vertical' | 'horizontal') => {
+        if (!applies(unit.cities[index], segment)) return true;
+        // Preço inexiste legitimamente quando há estoque zero observado na competência.
+        if (price && members[index].stock.units.series.some((r) => r.quarter === quarter && r.observed?.[segment] === true && r[segment] === 0)) return true;
+        return source.series.some((r) => r.quarter === quarter && r.observed?.[segment] !== false);
+      };
+      return { ...block, series: block.series.map((row) => ({ ...row, observed: {
+        vertical: row.observed?.vertical !== false && sources.every((source, index) => memberCovered(source, index, row.quarter, 'vertical')),
+        horizontal: row.observed?.horizontal !== false && sources.every((source, index) => memberCovered(source, index, row.quarter, 'horizontal')),
+      } })) };
+    };
     return { unit, data: { ...data,
       sales: Object.fromEntries(Object.entries(data.sales).map(([key,b])=>[key,covered(b,members.map((m)=>m.sales[key as keyof typeof m.sales]))])) as typeof data.sales,
       stock: Object.fromEntries(Object.entries(data.stock).map(([key,b])=>[key,covered(b,members.map((m)=>m.stock[key as keyof typeof m.stock]))])) as typeof data.stock,
-      prices: Object.fromEntries(Object.entries(data.prices).map(([key,b])=>[key,covered(b,members.map((m)=>m.prices[key as keyof typeof m.prices]))])) as typeof data.prices,
+      prices: Object.fromEntries(Object.entries(data.prices).map(([key,b])=>[key,covered(b,members.map((m)=>m.prices[key as keyof typeof m.prices]),true)])) as typeof data.prices,
       ivv: covered(data.ivv,members.map((m)=>m.ivv)),
     } };
   });
@@ -70,7 +92,7 @@ export function buildTerritorialComparison(scope: PanoramaScope, consolidated: P
       canonical: sum, grouped: r.value, delta, cities, units: [{ id: unit.id, label: unit.label, value: r.value }],
       status: delta === null ? 'unavailable' : Math.abs(delta) <= 1e-6 ? 'match' : 'different' });
   }
-  return { units, checks };
+  return { units, checks, nonApplicableSegments };
 }
 
 /** Lightweight view for existing page renderers, with a genuinely filtered cube, not just a changed label. */

@@ -385,6 +385,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama: correções dirigidas após PPT real
+
+AutorizaçãoGabriel: cobertura distingue segmento municipal inexistente (cadastroconcluído/nãovazio/semrejeições+semevidênciatemporal), preservandovalores deoutrosmembros; preçoausente dispensadoapenascomestoquezeroobservado. Pontes tracejadas entreobservações, seminterpolar números/cobertura/comparativos; doisavisosdinâmicosnovos. Ajustados folga detítuloPPT (VENDIDO), omissão daoficial19totalmentesematividade epercentualtotalcomdenominadorzero.11replayssemrede/indicadoresconservados,40testes+1opcionalignorado, tipos/lint/buildaprovados, extrato3páginasOffice/Chromiumconferido. Fonte [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), correçõesI6. Semcoleta/push; aguardapublicação autorizada eregeraçãorealLajeado/Vale comCSV. Nenhumaceiteexternopresumido; paralelospreservados.
+
+
 ### 06/11/2026 — Panorama: revisão do PPT real Lajeado/Vale e espera ao trocar de aba
 
 PPT real deGabriel1T2023–3T2026 aberto/renderizado noOffice105slides, semformasfora, originalpreservado. Estrutura consolidado→territórios egrupos corretos; I6não encerra: Vale ausente em séries apesar deTeutônia8vendas nofechamento, títuloVENDIDO truncado37, vazio21 epercentual100%comtotal0em51. Hipótese de cobertura porsegmento precisa entradas/CSV, nenhuma alteraçãonumérica feita. Fonte/evidência epróximospassos no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), seçãoI6da saída real. Corrigida apenas espera deexportação autorizada: visibilidade/fallback/limpeza,12testes/tipos/lint aprovados; semAPIreal/push/aceiteexterno.

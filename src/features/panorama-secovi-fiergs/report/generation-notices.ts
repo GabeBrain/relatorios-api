@@ -1,6 +1,6 @@
 import { closingTypologyPriceRanges } from './editorial-contracts';
 import { territorialReportView } from './territorial-projections';
-import { territorialPriceRows, territorialTrend, territorialAnnualColumns } from './territorial-selectors';
+import { territorialPriceRows, territorialTrend, territorialAnnualColumns, temporalGapBridges } from './territorial-selectors';
 import { annualCompositionPublishable } from './annual-composition';
 import type { PanoramaReportModel, ReportGenerationNotice } from '../types';
 import { pointInsideTerritory } from '../lib/municipal-territory';
@@ -68,6 +68,10 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
       return omitted.length?[`${unit.label}: ${omitted.join(', ')}`]:[];
     });
     if(omittedStructures.length)add({code:'TERRITORIAL_STRUCTURES_OMITTED',severity:'info',indicator:'Páginas específicas dos territórios',reason:omittedStructures.join('; '),source:'Estrutura publicável por unidade territorial',displayDecision:'Famílias sem estrutura/atividade aplicável não geram páginas vazias; membros e fatos continuam na auditoria.'});
+    const notApplicable=report.territorial.nonApplicableSegments??[];
+    if(notApplicable.length)add({code:'TERRITORIAL_SEGMENT_NOT_APPLICABLE',severity:'info',indicator:'Aplicabilidade territorial por segmento',reason:notApplicable.map(({city,segment})=>`${city}: sem universo ${segment==='vertical'?'vertical':'horizontal'} no cadastro completo e sem observações temporais desse segmento`).join('; '),source:'Cubo municipal completo, rejeições e séries observadas',displayDecision:'O segmento inexistente não invalida as observações dos outros membros do grupo. Nenhum valor ausente é preenchido com zero; as reconciliações mantêm seus estados.'});
+    const bridged=panoramaManifestFor(report).filter(p=>p.territorialKind==='trend').flatMap(p=>territorialTrend(report,p).series.flatMap(s=>temporalGapBridges(s.plotted).map(g=>`${p.title} / ${s.unit.label}: ${g.from.quarter}–${g.to.quarter}`)));
+    if(bridged.length)add({code:'TERRITORIAL_GAP_BRIDGES',severity:'info',indicator:'Intervalos sem observação nas séries',reason:bridged.join('; '),source:'Pontos realmente observados das séries territoriais',displayDecision:'Trecho tracejado liga observações separadas por lacuna. Sem interpolação de números, pontos novos, alteração de cobertura ou uso da ponte no cálculo de comparativos.'});
     const noShares=report.territorial.units.filter(({data})=>!data.closingFacts.vertical.finalUnits);
     if(noShares.length)add({code:'TERRITORIAL_EMPTY_PERCENTAGES',severity:'info',indicator:'Colunas percentuais territoriais',reason:noShares.map(({unit})=>unit.label).join(', '),source:'Oferta final da unidade territorial',displayDecision:'Colunas sem denominador positivo omitidas nas tabelas comparativas; quantidades e zeros preservados.'});
     const emptyPrices=[...new Set(['meter-standard','meter-typology','ticket-standard','ticket-typology'].flatMap((kind)=>territorialPriceRows(report,kind).omittedLabels))];
@@ -273,6 +277,7 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
         if (!quarterProjects.some((project) => project.typologies.some((row) => row.launchedUnits !== null))) missingSlides.push(17);
         if (!quarterProjects.some((project) => project.launchedVgvMillions !== null)) missingSlides.push(21);
       }
+      if(!quarterProjects.length || quarterProjects.every(p=>p.launchedUnits===0)) missingSlides.push(19);
       if (missingSlides.length) add({ code: 'LAUNCH_DIMENSION_PAGES_OMITTED', severity: 'warning', indicator: 'Distribuições de lançamentos',
         reason: `Sem linhas dimensionais observáveis para as lâminas oficiais ${missingSlides.join(', ')} no trimestre final do recorte.`,
         source: 'Cubo granular Geobrain e proveniência municipal',

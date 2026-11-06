@@ -2,7 +2,7 @@ import { Fragment, type CSSProperties } from 'react';
 import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, LabelList, ReferenceLine, Customized } from 'recharts';
 import type { PanoramaReportModel } from '../types';
 import type { ReportPageDefinition } from '../report/manifest';
-import { territorialOfferRows, territorialPriceRows, territorialTrend, territorialAnnualColumns, TERRITORIAL_COLORS } from '../report/territorial-selectors';
+import { territorialOfferRows, territorialPriceRows, territorialTrend, territorialAnnualColumns, temporalGapBridges, TERRITORIAL_COLORS } from '../report/territorial-selectors';
 import { observedComparison, monetaryTitle, territorialHeading } from '../report/editorial-contracts';
 import { quarterLabel } from '../lib/launches';
 import '../print/territorial-comparison.css';
@@ -32,6 +32,7 @@ export function TerritorialComparisonSlide({ report, def }: { report: PanoramaRe
       </div></header>
       <main><div className="panorama-fiergs-quarterly-series"><div className="panorama-territorial-series-chart"><ResponsiveContainer width="100%" height="100%"><LineChart data={model.rows} margin={{top:42,right:28,bottom:24,left:24}}>
         <XAxis dataKey="quarter" tickFormatter={(q) => compactQuarterLabel(String(q))} tickLine={false} tickMargin={9} axisLine={{stroke:'#b8b8b8'}} interval={0} minTickGap={0}/><Tooltip formatter={(v) => format(Number(v))}/>
+        {model.series.flatMap((s)=>temporalGapBridges(s.plotted).map((gap)=><ReferenceLine key={`${s.unit.id}-${gap.from.quarter}-${gap.to.quarter}`} segment={[{x:gap.from.quarter,y:gap.from.value},{x:gap.to.quarter,y:gap.to.value}]} stroke={s.color} strokeWidth={2} strokeDasharray="6 5" ifOverflow="hidden"/>))}
         {model.series.map((s,i) => <Line key={s.unit.id} dataKey={`v${i}`} name={s.unit.label} stroke={s.color} strokeWidth={4} type="monotone" connectNulls={false} dot={{r:2.5,fill:s.color}} isAnimationActive={false}>
           <LabelList dataKey={`v${i}`} content={(props) => {
             const value=props.value; const x=Number(props.x),y=Number(props.y),index=Number(props.index);

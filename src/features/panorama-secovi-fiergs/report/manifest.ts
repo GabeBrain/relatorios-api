@@ -154,11 +154,12 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
     const launchCoverageKnown = report.cube.projects.some((project) => project.releaseQuarter !== undefined) || (report.provenance.completedCities?.length ?? 0) > 0;
     if (launchCoverageKnown) {
       const quarterProjects = report.cube.projects.filter((project) => project.segment === 'Vertical' && project.releaseQuarter === report.scope?.endQuarter);
-      if (!quarterProjects.length) [10, 13, 17].forEach((slide) => omitted.add(slide));
+      if (!quarterProjects.length) [10, 13, 17, 19].forEach((slide) => omitted.add(slide));
       else {
         if (!quarterProjects.some((project) => project.launchedUnits !== null && project.launchedUnits !== undefined)) [13, 17].forEach((slide) => omitted.add(slide));
         if (!quarterProjects.some((project) => project.typologies?.some((row) => row.launchedUnits !== null))) omitted.add(17);
       }
+      if (quarterProjects.length && quarterProjects.every((p) => p.launchedUnits === 0)) omitted.add(19);
       if (!quarterProjects.some((project) => project.launchedVgvMillions !== null && project.launchedVgvMillions !== undefined)) omitted.add(21);
     }
     const scope = report.scope;

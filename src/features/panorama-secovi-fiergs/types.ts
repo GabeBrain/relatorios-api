@@ -39,6 +39,7 @@ export interface TerritorialCheck {
   units: { id: string; label: string; value: number | null }[];
 }
 export interface TerritorialComparison {
+  nonApplicableSegments?: { city: string; segment: 'vertical' | 'horizontal' }[];
   units: { unit: TerritorialUnit; data: TerritorialProjection }[];
   checks: TerritorialCheck[];
 }
