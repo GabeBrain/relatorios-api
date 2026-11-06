@@ -350,7 +350,9 @@ Médias já ponderadas recebem linhas tracejadas e rótulos distribuídos para e
 
 ### I2 — Validar a integração da rota, do manifesto e das saídas
 
-**Estado: planejado; reutilizar a integração já existente.**
+**Estado: concluído localmente em 06/11/2026.**
+
+Quatro testes novos em `territorial-route.test.tsx` montam a página real, projeção real, paginator/manifesto/avisos reais e coletor simulado. Cobrem seleção inicial vazia,1/2/3cidades, conjunto maior e cidade versus grupo(1+3), partição inválida, carregamentoBrain, falha sem relatório parcial, Secovi municipal e passagem do mesmo modelo/manifesto aoPPT. Renomeação recompõe com uma única coleta, mantendo o contexto também noCSV. A integração local existente estava correta; nenhuma alteração adicional da rota/coletor foi necessária. Evidência `incorporation-2026-11-06/I2-route-tests.json`; jsdom usa entradas geográficas/Select simplificadas, sem autenticação de produção.
 
 1. Executar a rota real doPanorama com respostas locais/mocks: seleção inicialmente vazia, UF obrigatória, cidades monitoradas, carregamentoBrain e estados vazio/erro. Confirmar que os novos componentes não dependem doHTML de bancada.
 2. Preservar contrato atual de apresentação:uma cidade=municipal;2/3=sugestão de comparação individual com opção consolidado;maisde3=consolidado padrão, comparação somente após2/3grupos explícitos e válidos. Não criar limite de coleta3nem agrupamento geográfico automático. Município pertence a exatamente um grupo; nomes não definem membros.

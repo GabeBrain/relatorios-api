@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama I2: integração da rota e exportação — Gabriel / Codex
+
+- **Validação:**4testes novos da página real, com projeção/paginator/manifesto/avisos reais e coleta simulada: seleção vazia/1/2/3cidades, grupos1+3, carregamentoBrain, erro sem parcial, Secovi e envio do mesmo contexto aoPPT/CSV. Renomear mantém uma única coleta. Nenhum código adicional de integração foi necessário.
+- **Evidência/estado:** [I2 no plano](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#i2--validar-a-integração-da-rota-do-manifesto-e-das-saídas), `territorial-route.test.tsx` e JSONlocal. Validado localmente com entradas geográficas simuladas; não é ensaio autenticado no site. Código de acabamentoI1 em8058949. SemAPIreal, merge oupush; I3/I4registram prova final.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
 ### 06/11/2026 — Panorama I0–I1: médias visuais e estados anuais — Gabriel / Codex
 
 - **Mudança:** candidata congelada sem merge; médias ponderadas identificadas por linhas tracejadas, quadros anuais sem comparação retirados com aviso/auditoria, composição de ano único em faixa100%, lacunas preservadas e janela anual explícita. Altura dos seis painéis laterais ajustada após prova com três grupos ativos; título preto/verde ePPT híbrido preservados.
