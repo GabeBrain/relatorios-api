@@ -1142,5 +1142,24 @@
     "externalAccepted": false,
     "uiChange": "Remove grip icon, retain explicit drag/click instruction;5existingdialogtests passed",
     "needs": "AuditCSV fromsamecompletedgeneration for VGVcoverage; no realAPI authorized now"
+  },
+  "audit_vgv_review_2026_11_06": {
+    "date": "2026-11-06",
+    "audit_sha256": "d6e9c5f7dfc3906c0e565161fa9c4e98528e4190243c98f74e9b5adfd7dac8c1",
+    "record_count": 5781,
+    "status_counts": {
+      "match": 1093,
+      "unavailable": 4351
+    },
+    "confirmed": "API sales standard complete single page17rows; vertical last2026-06-01, no2026Q3 row; horizontal2026-09-01 present. Missing vertical VGV is not a lost graphic point. Units zero reconciled independently, not authority for monetary zero.",
+    "limitations": "Live response sampled later than generated CSV, cannot prove identical original payload; no raw original snapshot. No new numerical assumption.",
+    "scope_deviation": "Reused probe unexpectedly ran four Taquari requests (sales/stock standard/typology), rather than one sales standard authorized. No other cities, building collection, study or further calls.",
+    "raw_sha256": {
+      "sales-standard.json": "43ebd73611e422c649cb4140632933f0e47f03d4996b3b5d57d0ff95d5547f1e",
+      "sales-typology.json": "311fb8147523e1aba0a111107887cdc734d4b21ecadceb43b70a10de57b6d3e1",
+      "stock-standard.json": "a71ff2331cddb207d2856cf7e4b2a7bea7e0e1ee7c4e5833fa61ce69577a5b44",
+      "stock-typology.json": "90bb1f02ebc78bdae9d6bafa806a903b60e674b1996316ed1d9a119e2a402087",
+      "summary.json": "837e0b2800a8981504c28621e7c18d72200add95c146b814818d6ec341e68b2b"
+    }
   }
 }

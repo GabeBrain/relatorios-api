@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama: auditoria real individualiza ausência de VGV em Taquari
+
+- Diagnóstico da sessão de Gabriel: CSV das cinco cidades sem `different`, mas com cobertura indisponível. VGV vertical de Taquari3T2026 ausente; consulta posterior à API confirma última linha vertical emjunho, com setembro horizontal presente. Sem preencher zero ou mudar runtime.
+- Fonte técnica e limites: [I6 — auditoria e lacuna de VGV](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Brutos/hashes `.local-inputs/panorama-territorial-2026-11-05/taquari-vgv-2026-11-06/`. Probe reutilizado excedeu escopo autorizado (quatro consultasTaquari emvezdeuma), comunicado; semoutrascidades/estudos.
+- Estado: diagnóstico local, I6 parcial; contrato da ausência monetária na origem e aceite externo pendentes. Acabamento37cf69d local; sem publicação.
+
+
 ### 06/11/2026 — Panorama: revisão da segunda saída real e cartões sem ícone
 
 PPT real `(1)` deGabriel:104slides Office/read-only,0formasfora, todaspáginas conferidas. Vale8+Lajeado20=28vendasfechamento eVale69+Lajeado741=810em12meses; tracejados, VENDIDOinteiro, omissãovazia e0sem100%confirmados. Falta pontoVGVVale3T2026 naspáginas37/39: pendenteCSVdamesmageração, semextrapolar/numerosmanuais. Fonte ehash no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), I6nova saída. Removidoíconedos6pontos emcartões, instruçãoexplícita/arraste/cliquepreservados,5testesaprovados; separadortextualVGVcorrigido. Código local,semAPI/push/aceiteexterno; paralelos preservados.
