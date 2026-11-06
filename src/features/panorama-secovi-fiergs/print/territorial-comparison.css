@@ -33,3 +33,16 @@
 .panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section span b{font-size:.95cqw}
 
 .panorama-territorial-quarterly header h2,.panorama-territorial-slide header h2{font-weight:700}
+
+.panorama-annual-single{height:100%;display:flex;flex-direction:column;justify-content:center;gap:2cqw}
+.panorama-annual-single h3{text-align:center;font-size:2cqw;font-weight:700}
+.panorama-annual-single-band{display:flex;width:100%;height:10cqw}
+.panorama-annual-single-band>div{display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.6cqw;font-weight:700}
+.panorama-annual-single-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:1cqw 2cqw;font-size:1.2cqw}
+.panorama-annual-single-legend i{display:inline-block;width:1cqw;height:1cqw;margin-right:.4cqw}
+
+/* Six active comparisons must share the available height, including wrapped group names. */
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons{display:grid;grid-template-rows:repeat(var(--comparison-count),minmax(0,1fr));min-height:0;gap:.4cqw;padding:.5cqw 0}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section{display:flex;flex-direction:column;min-height:0}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section>div{flex:1;min-height:0}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section span{height:100%;min-height:0;grid-template-rows:1.1cqw minmax(0,1fr) 1cqw}

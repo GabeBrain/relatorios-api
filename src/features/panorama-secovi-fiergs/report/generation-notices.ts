@@ -1,6 +1,6 @@
 import { closingTypologyPriceRanges } from './editorial-contracts';
 import { territorialReportView } from './territorial-projections';
-import { territorialPriceRows } from './territorial-selectors';
+import { territorialPriceRows, territorialTrend, territorialAnnualColumns } from './territorial-selectors';
 import { annualCompositionPublishable } from './annual-composition';
 import type { PanoramaReportModel, ReportGenerationNotice } from '../types';
 import { pointInsideTerritory } from '../lib/municipal-territory';
@@ -69,6 +69,11 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     if(noShares.length)add({code:'TERRITORIAL_EMPTY_PERCENTAGES',severity:'info',indicator:'Colunas percentuais territoriais',reason:noShares.map(({unit})=>unit.label).join(', '),source:'Oferta final da unidade territorial',displayDecision:'Colunas sem denominador positivo omitidas nas tabelas comparativas; quantidades e zeros preservados.'});
     const emptyPrices=[...new Set(['meter-standard','meter-typology','ticket-standard','ticket-typology'].flatMap((kind)=>territorialPriceRows(report,kind).omittedLabels))];
     if(emptyPrices.length)add({code:'TERRITORIAL_EMPTY_PRICE_CATEGORIES',severity:'info',indicator:'Categorias de preço nos comparativos',reason:emptyPrices.join(', '),source:'Indicadores observados por unidade territorial',displayDecision:'Categorias sem observação em todas as unidades não aparecem no gráfico; zeros observados não são removidos.'});
+    const annualOmissions=panoramaManifestFor(report).filter((p)=>p.territorialKind==='trend').flatMap((p)=>{
+      const model=territorialTrend(report,p);const total=Math.max(0,(model.annual[0]?.values.length??0)-1);const visible=territorialAnnualColumns(model.annual).length;
+      return total>visible?[`${p.title}: ${total-visible} comparação(ões) anual(is) sem base observada/atividade compatível`]:[];
+    });
+    if(annualOmissions.length)add({code:'TERRITORIAL_ANNUAL_COMPARISONS_OMITTED',severity:'info',indicator:'Comparativos anuais territoriais',reason:annualOmissions.join('; '),source:'Cobertura anual por território e regra de comparação observada',displayDecision:'Colunas sem comparação válida e quadros integralmente sem comparação omitidos; séries, zeros observados e negativos preservados na auditoria.'});
     const missing = report.territorial.checks.filter((r)=>r.status==='unavailable');
     const differences = report.territorial.checks.filter((r)=>r.status==='different');
     add({code:'TERRITORIAL_COMPOSITION',severity:'info',indicator:'Territórios comparados',reason:report.territorial.units.map(({unit})=>`${unit.label}: ${unit.cities.join(', ')}`).join('; '),source:'Seleção explícita do estudo',displayDecision:'Até três séries ou blocos; matrizes densas em páginas específicas. Mapas, maturidade e composição anual permanecem consolidados.'});

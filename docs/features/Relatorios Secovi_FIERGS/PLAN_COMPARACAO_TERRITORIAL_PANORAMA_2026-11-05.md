@@ -319,7 +319,9 @@ O limite de três unidades, barras laterais azuis por cidade e categorias canôn
 
 ### I0 — Congelar a candidata e a fronteira com a versão live
 
-**Estado: planejado.**
+**Estado: concluído localmente em 06/11/2026.**
+
+AberturaHEAD`c547ab7`, origin`219ed1c`, main12locais/2remotosSP; árvore paralela preservada, sem merge. Congelados hashes dos extratos e campos canônicos de11modelos em `.local-inputs/panorama-territorial-2026-11-05/incorporation-2026-11-06/I0.json`. Versão/rota autenticada publicada não verificada nesta sessão; ensaio humano continua noI6.
 
 1. RelerAGENTS, AGORA e esta seção; confirmar `main`, todos os remotos, `git fetch --all`, divergência e árvore. Baseline desta revisão:HEAD`3cee42b`, origin`219ed1c`,11commits locais/2remotosSP não integrados. Registrar a lista efetiva no início da execução, sem depender destes contadores históricos.
 2. Preservar edições paralelas dos documentosFIERGS, Estimativas, LIVE e insumos não rastreados, incluindo Corretor; não alterar códigoSP/Sinduscon/Corretor/Dashboard/Validação/ExcelAPI. Não rebase/reset, descarte ou stash amplo da árvore.
@@ -331,7 +333,9 @@ O limite de três unidades, barras laterais azuis por cidade e categorias canôn
 
 ### I1 — Fechar os acabamentos identificados na revisão
 
-**Estado: planejado; precisa de código focado.**
+**Estado: implementado e validado localmente em 06/11/2026.**
+
+Médias já ponderadas recebem linhas tracejadas e rótulos distribuídos para evitar colisão, inclusive quando próximas; barras têm largura máxima. Quadros/colunas anuais sem comparação válida foram filtrados por seletor único, com aviso agrupado `TERRITORIAL_ANNUAL_COMPARISONS_OMITTED`, também noCSV. Ano único usa faixa horizontal100%; áreas não conectam lacunas e observações anuais isoladas recebem faixa estreita/rótulo legível. Composição anual informa a janela completa. Teste com3unidades/seispainéis revelou corte, corrigido dividindo a altura disponível; hierarquia de títulos de preço preservada. Dados não foram alterados. Treze testesI1/seleção passaram, tipos/lint e navegador offline; prova de arquivos e regressão final emI3/I4.
 
 1. **Médias visuais de preço:** em `TerritorialComparisonSlides.tsx`, usar as médias já fornecidas por `territorialPriceRows`. Inserir referência horizontal tracejada por unidade com nome/valor/unidade e cor da curva/barra. Com2/3linhas iguais/próximas, evitar rótulos sobrepostos (deslocar rótulos ou reunir nomes no mesmo nível); conservar resumo textual acessível. Média indisponível não vira zero/linha. Não recalcular por média simples das médias municipais. Garantir domínio do gráfico comportando referência válida; revisar ticket eR$/m² por padrão e tipologia e respectivas regras temporais aprovadas. Manter o mesmo gráfico em imagem noPPT híbrido.
 2. **Quadro anual sem comparação:** calcular primeiro os pares anuais realmente publicáveis, com `observedComparison` e cobertura compatível. Retirar colunas de anos sem comparação para nenhuma unidade; se não restar nenhuma célula comparável, retirar apenas o quadro anual e preservar o espaço/hierarquia do cabeçalho. Não retirar valor0observado da série, esconder negativo ou gerar percentual sobre base0/negativa. Registrar a não aplicabilidade no mecanismo existente de avisos/auditoria por tipo, sem notas noPDF/PPT.

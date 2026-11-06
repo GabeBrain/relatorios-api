@@ -605,7 +605,7 @@ export function PanoramaPresentationContent({ def, report }: { def: ReportPageDe
   if (def.territorialUnitId) report = territorialReportView(report, def.territorialUnitId);
   let content: ReactNode = PresentationContentBody({ def, report });
   if (['cover', 'static', 'divider', 'summary', 'closing'].includes(def.visualFamily)) return content;
-  const temporal = def.fiergsOfficialSlide
+  const temporal = def.annualCompositionMetric ? true : def.fiergsOfficialSlide
     ? [9,11,12,14,15,16,20,22,24,26,27,28,32,33,35,39,43,44,45,46,47].includes(def.fiergsOfficialSlide)
     : /por trimestre|acumulado|evolução|ao longo do tempo/i.test(def.title);
   const rolling = /12 meses/i.test(def.title);

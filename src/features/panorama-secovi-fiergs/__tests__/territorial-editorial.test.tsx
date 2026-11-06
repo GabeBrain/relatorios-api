@@ -5,7 +5,7 @@ import { defaultTerritorialPresentation } from '../domain/territorial-presentati
 import { panoramaManifestFor } from '../report/manifest';
 import { territorialTrend } from '../report/territorial-selectors';
 import { PanoramaPresentationContent } from '../components/ReportPaginator';
-import { territorialPriceRows } from '../report/territorial-selectors';
+import { territorialPriceRows, territorialAnnualColumns } from '../report/territorial-selectors';
 
 function report() {
   return freeScopeReport({ entity:'fiergs-rs',uf:'RS', cities:['Canela','Gramado','Canoas'],startQuarter:'1T2023',endQuarter:'2T2026',engineVersion:'v4',
@@ -65,4 +65,24 @@ describe('apresentação territorial', () => {
     expect(dom.querySelector('.panorama-territorial-main')).toBeNull();
     expect(dom.querySelector('main table')).toBeNull();
   });
+  it('não publica quadros anuais sem atividade e conserva comparações válidas sobre zero/negativo', () => {
+    const annual=[{unit:{id:'a',label:'A',cities:['A']},values:[{year:'2023',value:0},{year:'2024',value:0},{year:'2025',value:4}]}];
+    expect(territorialAnnualColumns(annual)).toEqual([2]);
+    annual[0].values[1].value=-2;
+    expect(territorialAnnualColumns(annual)).toEqual([1,2]);
+    const r=report();for(const u of r.territorial!.units)for(const row of u.data.launches.projects)row.vertical=0;
+    const def=panoramaManifestFor(r).find((p)=>p.fiergsOfficialSlide===9)!;
+    const dom=new DOMParser().parseFromString(renderToStaticMarkup(<PanoramaPresentationContent report={r} def={def}/>),'text/html');
+    expect(dom.querySelector('.panorama-territorial-annual-box table')).toBeNull();
+    expect(dom.querySelector('.panorama-territorial-series-chart')).not.toBeNull();
+  });
+  it('identifica a janela na composição anual, não somente o fechamento', () => {
+    const r=report();r.annualCompositions=[{metric:'units',title:'Unidades por padrão',categories:['Médio'],unclassified:0,years:[{year:2025,from:'1T2025',through:'4T2025',total:10,status:'ready',values:[{label:'Médio',value:10,share:100}]}]}];
+    const def=panoramaManifestFor(r).find((p)=>p.annualCompositionMetric==='units')!;
+    const dom=new DOMParser().parseFromString(renderToStaticMarkup(<PanoramaPresentationContent report={r} def={def}/>),'text/html');
+    expect(dom.querySelector('.panorama-analytic-context')?.textContent).toContain('1T 2023');
+    expect(dom.querySelector('.panorama-analytic-context')?.textContent).toContain('2T 2026');
+    expect(dom.querySelector('[data-annual-single-year="2025"]')?.textContent).toContain('100%');
+  });
+
 });

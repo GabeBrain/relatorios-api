@@ -1,8 +1,8 @@
 import { Fragment, type CSSProperties } from 'react';
-import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, Tooltip, LabelList } from 'recharts';
+import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, LabelList, ReferenceLine, Customized } from 'recharts';
 import type { PanoramaReportModel } from '../types';
 import type { ReportPageDefinition } from '../report/manifest';
-import { territorialOfferRows, territorialPriceRows, territorialTrend, TERRITORIAL_COLORS } from '../report/territorial-selectors';
+import { territorialOfferRows, territorialPriceRows, territorialTrend, territorialAnnualColumns, TERRITORIAL_COLORS } from '../report/territorial-selectors';
 import { observedComparison, monetaryTitle, territorialHeading } from '../report/editorial-contracts';
 import { quarterLabel } from '../lib/launches';
 import '../print/territorial-comparison.css';
@@ -20,6 +20,7 @@ export function TerritorialComparisonSlide({ report, def }: { report: PanoramaRe
   if (kind === 'trend') {
     const model = territorialTrend(report, def); const format = (n: number | null) => number(n, model.percent || model.monetary ? 1 : 0);
     const heading = territorialHeading(title);
+    const annualColumns = territorialAnnualColumns(model.annual);
     const annotation = (left: number | null, right: number | null) => {
       const c = observedComparison(left, right);
       return !c.visible ? '—' : c.percentage === null ? `Δ ${format(c.difference)}` : `${c.percentage >= 0 ? '+' : ''}${number(c.percentage, 1)}%`;
@@ -27,7 +28,7 @@ export function TerritorialComparisonSlide({ report, def }: { report: PanoramaRe
     const pairs = model.series.flatMap((s) => s.comparisons.map((pair) => ({ ...pair, unit: s.unit, color: s.color })));
     return <div className={`panorama-fiergs-quarterly panorama-territorial-quarterly units-${units.length}`}>
       <header><h2>{heading.title}<span>{heading.subtitle}</span></h2><div className="panorama-territorial-annual-box">
-        {model.annual[0]?.values.length > 1 && <><b>VARIAÇÕES ANUAIS</b><table><thead><tr><th/>{model.annual[0].values.slice(1).map((p,i) => <th key={p.year}>{model.annual[0].values[i].year} × {p.year}</th>)}</tr></thead><tbody>{model.annual.map(({unit,values},i) => <tr key={unit.id} style={{background:TERRITORIAL_COLORS[i],color:i===1?'#20231d':'#fff'}}><th>{unit.label}</th>{values.slice(1).map((p,j) => <td key={p.year}>{annotation(values[j].value,p.value)}</td>)}</tr>)}</tbody></table></>}
+        {annualColumns.length > 0 && <><b>VARIAÇÕES ANUAIS</b><table><thead><tr><th/>{annualColumns.map((i) => <th key={i}>{model.annual[0].values[i-1].year} × {model.annual[0].values[i].year}</th>)}</tr></thead><tbody>{model.annual.map(({unit,values},i) => <tr key={unit.id} style={{background:TERRITORIAL_COLORS[i],color:i===1?'#20231d':'#fff'}}><th>{unit.label}</th>{annualColumns.map((j) => <td key={j}>{annotation(values[j-1]?.value ?? null,values[j]?.value ?? null)}</td>)}</tr>)}</tbody></table></>}
       </div></header>
       <main><div className="panorama-fiergs-quarterly-series"><div className="panorama-territorial-series-chart"><ResponsiveContainer width="100%" height="100%"><LineChart data={model.rows} margin={{top:42,right:28,bottom:24,left:24}}>
         <XAxis dataKey="quarter" tickFormatter={(q) => compactQuarterLabel(String(q))} tickLine={false} tickMargin={9} axisLine={{stroke:'#b8b8b8'}} interval={0} minTickGap={0}/><Tooltip formatter={(v) => format(Number(v))}/>
@@ -63,7 +64,22 @@ export function TerritorialComparisonSlide({ report, def }: { report: PanoramaRe
       <tbody>{rows.map((row) => <tr key={row.label}><th>{row.label}</th>{row.values.map((v,i) => <Fragment key={units[i].unit.id}><td>{number(v.value)}</td>{shares[i]&&<td>{v.percentage === null ? '—' : `${number(v.percentage,1)}%`}</td>}</Fragment>)}</tr>)}</tbody></table><footer>Fonte: Brain Inteligência Estratégica · Geobrain</footer></div>;
   }
   const model = territorialPriceRows(report,kind ?? 'meter-standard');
+  const means=model.averages.flatMap(({unit,value},i)=>value===null?[]:[{unit,value,color:TERRITORIAL_COLORS[i]}]);
+  const observed=model.rows.flatMap((row)=>units.flatMap((_,i)=>typeof row[`v${i}`]==='number'?[Number(row[`v${i}`])]:[]));
+  const maximum=Math.max(1,...observed,...means.map((m)=>m.value));
+  const minimum=Math.min(0,...observed,...means.map((m)=>m.value));
+  const unitLabel=kind?.includes('ticket')?'R$':'R$/m²';
+  const meanLabels=({yAxisMap,offset,width}: {yAxisMap?:Record<string,{scale:(v:number)=>number}>;offset?:{left:number;top:number;width:number;height:number};width?:number})=>{
+    if(!offset||!yAxisMap?.[0])return null;
+    const gap=(width??960)*.017;
+    let previous=offset.top-gap;
+    return <g data-price-mean-labels="">{[...means].sort((a,b)=>b.value-a.value).map((mean)=>{
+      const y=Math.min(offset.top+offset.height-4,Math.max(yAxisMap[0].scale(mean.value)-8,previous+gap));previous=y;
+      return <text key={mean.unit.id} x={offset.left+offset.width-4} y={y} textAnchor="end" fill="#20231d" stroke="#fff" strokeWidth={3} paintOrder="stroke" style={{fontSize:'1cqw',fontWeight:700}}><tspan fill={mean.color}>━ </tspan>Média {mean.unit.label}: {unitLabel} {number(mean.value)}</text>;
+    })}</g>;
+  };
   return <div className="panorama-territorial-slide"><header><h2>{territorialHeading(title).title}<span>{territorialHeading(title).subtitle}</span></h2></header><div className="panorama-territorial-price-plot"><ResponsiveContainer width="100%" height="100%"><BarChart data={model.rows} margin={{top:35,left:25,right:25,bottom:20}}>
-    <XAxis dataKey="label" tickLine={false} interval={0}/><Tooltip formatter={(v) => number(Number(v))}/>{units.map(({unit},i) => <Bar key={unit.id} dataKey={`v${i}`} name={unit.label} fill={TERRITORIAL_COLORS[i]} isAnimationActive={false}><LabelList dataKey={`v${i}`} position="top" fontSize="1cqw" formatter={(v:number) => Number.isFinite(v)?number(v):''}/></Bar>)}
+    <YAxis hide domain={[minimum,maximum*1.14]}/><XAxis dataKey="label" tickLine={false} interval={0}/><Tooltip formatter={(v) => number(Number(v))}/>{units.map(({unit},i) => <Bar key={unit.id} dataKey={`v${i}`} name={unit.label} fill={TERRITORIAL_COLORS[i]} maxBarSize={64} isAnimationActive={false}><LabelList dataKey={`v${i}`} position="top" fontSize="1cqw" formatter={(v:number) => Number.isFinite(v)?number(v):''}/></Bar>)}
+    {means.map((m)=><ReferenceLine key={m.unit.id} y={m.value} stroke={m.color} strokeDasharray="7 4" strokeWidth={2}/>)}<Customized component={meanLabels}/>
   </BarChart></ResponsiveContainer></div><Legend report={report}/><p className="panorama-territorial-averages">{model.averages.map(({unit,value}) => <span key={unit.id}>Média {unit.label}: {number(value)}</span>)}</p><footer>Fonte: Brain Inteligência Estratégica · Geobrain · {quarterLabel(report.scope.endQuarter)}</footer></div>;
 }

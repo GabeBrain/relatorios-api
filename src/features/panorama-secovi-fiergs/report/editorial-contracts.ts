@@ -91,6 +91,6 @@ export function closingTypologyPriceRanges(report: PanoramaReportModel) {
 
 /** Keep the approved black heading / green analytical qualifier for every new family. */
 export function territorialHeading(title: string) {
-  const match = title.match(/^(.*?)\s+(POR TRIMESTRE|ACUMULADO 12 MESES|POR PADRÃO|POR TIPOLOGIA|POR ANO DE LANÇAMENTO|POR ANO|POR FAIXA.*|EVOLUÇÃO.*)$/i);
+  const match = title.match(/^(.*?)\s+(POR TRIMESTRE|ACUMULADO 12 MESES|POR PADRÃO(?: RESIDENCIAL)?|POR TIPOLOGIA(?: RESIDENCIAL)?|POR ANO DE LANÇAMENTO|POR ANO|POR FAIXA.*|EVOLUÇÃO.*)$/i);
   return { title: (match?.[1] ?? title).replace(/\s*·\s*$/, ''), subtitle: match?.[2] ?? '' };
 }

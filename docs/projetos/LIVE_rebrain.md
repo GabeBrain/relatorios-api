@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama I0–I1: médias visuais e estados anuais — Gabriel / Codex
+
+- **Mudança:** candidata congelada sem merge; médias ponderadas identificadas por linhas tracejadas, quadros anuais sem comparação retirados com aviso/auditoria, composição de ano único em faixa100%, lacunas preservadas e janela anual explícita. Altura dos seis painéis laterais ajustada após prova com três grupos ativos; título preto/verde ePPT híbrido preservados.
+- **Validação:**13testes focados/seleção, tipos/lint e conferência em navegador offline; sem mudança dos dados. [Portões e evidências](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#i1--fechar-os-acabamentos-identificados-na-revisão). Regressão e arquivos finais serão registrados nosI3/I4.
+- **Estado:** validado localmente; árvore paralela preservada, semAPIreal, integração oupush. Publicação/gerações humanas seguemI5/I6, sem novo aceite externo.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
 ### 05/11/2026 — Panorama: revisão final e plano de incorporação à versão publicada — Gabriel / Codex
 
 - **Diagnóstico:**17referências relistadas noDrive;15imagens e147páginas dos panoramas revisitadas em pranchas versusR1/R2. Candidata local atende ao pedido central deFinoti/Teresa, sem novo aceite externo. Restam médias visuais, tratamento do quadro anual sem comparação/ano único, janela anual e prova com três unidades ativas.

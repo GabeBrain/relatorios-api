@@ -86,3 +86,9 @@ export function territorialPriceRows(report: PanoramaReportModel, kind: string) 
     omittedLabels:labels.filter((label)=>!observed.includes(label)),
     averages: units.map(({unit,data}) => ({ unit, value: temporal ? fiergsTemporalTypologyTotal(territorialReportView(report,unit.id)) : rows(data).find((r) => r.kind === 'total')?.[field] ?? null })) };
 }
+
+/** Only show annual columns with at least one observed, active comparison. */
+export function territorialAnnualColumns(annual: ReturnType<typeof territorialTrend>['annual']): number[] {
+  return (annual[0]?.values.slice(1) ?? []).flatMap((_, index) =>
+    annual.some(({values}) => observedComparison(values[index]?.value ?? null, values[index+1]?.value ?? null).visible) ? [index+1] : []);
+}
