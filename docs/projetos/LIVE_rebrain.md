@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama I3–I4: reconciliação e saídas finais — Gabriel / Codex
+
+- **Resultado:** I0–I4concluídos localmente.79testes/0falhas, tipos/lint/build final aprovados.11replays com9blocos canônicos idênticos;11CSVs equivalentes à candidataGit c547ab7, ignorando apenas a data de geração. Baseline recompilada por overlay de blobs, sem alterar árvore. Expectativa antiga de testeGeoBrain corrigida paraGeobrain; IVV preservado.
+- **Saídas:** R1exato12páginas, complemento12famílias faltantes, R2sintético8com seis painéis/médias próximas e dois estados anuais1+1;34páginasPDF/PPT renderizadas,0objetosfora noOffice, edição de texto/célula persistida emcópia. Gráficos em imagem ePPT híbrido preservados. [Fonte técnica e hashes](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#checkpoint-de-incorporação--06112026).
+- **Estado/pendências:** validado localmente, não publicado; I1em8058949, I2emc32953a. SemAPIreal, estudos completos, merge oupush. I5exige autorização após apresentar divergência; I6gerações humanas/publicação/aceite. Artefatos brutos permanecem na pasta local da frente; árvore paralela preservada.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
 ### 06/11/2026 — Panorama I2: integração da rota e exportação — Gabriel / Codex
 
 - **Validação:**4testes novos da página real, com projeção/paginator/manifesto/avisos reais e coleta simulada: seleção vazia/1/2/3cidades, grupos1+3, carregamentoBrain, erro sem parcial, Secovi e envio do mesmo contexto aoPPT/CSV. Renomear mantém uma única coleta. Nenhum código adicional de integração foi necessário.

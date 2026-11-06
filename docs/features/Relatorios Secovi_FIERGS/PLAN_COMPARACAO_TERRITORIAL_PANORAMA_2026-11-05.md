@@ -1,6 +1,6 @@
 # Plano técnico — Comparações territoriais e composição anual do Panorama
 
-Data: 05/11/2026. Estado: **G0–G6 implementados e verificados localmente; revisão final das referências concluída; incorporação à versão publicada planejada nos portões I0–I6 abaixo, ainda não executados; G7/publicação e aceite externo pendentes**. Propósito: ampliar FIERGS/Secovi para comparar até três cidades ou grupos explícitos, preservar o consolidado aceito e incorporar a composição anual dos lançamentos. Esta é a fonte de execução desta ampliação; o inventário de referências e o contrato D01–D14 permanecem na [revisão Finoti](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
+Data: 05/11/2026. Estado: **G0–G6 implementados e verificados localmente; revisão final das referências concluída; portões I0–I4 concluídos localmente em06/11, I5aguarda autorização de integração/push e I6gerações humanas; G7/publicação e aceite externo pendentes**. Propósito: ampliar FIERGS/Secovi para comparar até três cidades ou grupos explícitos, preservar o consolidado aceito e incorporar a composição anual dos lançamentos. Esta é a fonte de execução desta ampliação; o inventário de referências e o contrato D01–D14 permanecem na [revisão Finoti](REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
 
 ## 1. Origem, baseline e limites de autorização
 
@@ -365,7 +365,11 @@ Quatro testes novos em `territorial-route.test.tsx` montam a página real, proje
 
 ### I3 — Regressão proporcional e reconciliação final
 
-**Estado: planejado.**
+**Estado: concluído localmente em 06/11/2026.**
+
+79testes aprovados/0falhas/0ignorados em11arquivos, incluindo os4novos da rota; tipos, lint dirigido e build final de produção aprovados. Uma expectativa textual antiga diziaGeoBrain, corrigida para a grafiaGeobrain já usada/aprovada no produto; cálculo doIVV não mudou. Avisos anteriores deBrowserslist/chunks/importxlsx mantidos. Primeirobuild passou em33,97s; repetido uma vez após dois acabamentos visuais efetivamente encontrados nos extratos, final24,77s.
+
+Onze replays exclusivamente offline, incluindoFIERGS2T2026/4T2025 e dupla exata1T2023–3T2026:9blocos canônicos por modelo idênticos ao congelado. Confirmada ausência de nova chamada de fonte na recomposição. Para conferirCSV sem confundir o formato antigo deG1(67colunas) com o já vigente(69), recompilada a candidata `c547ab7` viaoverlay de leitura dos blobsGit, sem checkout/merge/alteração da árvore; mesmos11insumos. Resultado:11CSVs semanticamente iguais, ignorando somente `gerado_em`;0linhas numéricas/removidas/alteradas e0avisos adicionais nesses recortes. O novo aviso de quadro anual omitido foi exercitado pela fixtureR2, sem adulterar dados reais. Evidências locais:I3-tests.json, I3-canonical-comparison.json, baseline-head/ e replayed/.
 
 1. Testes focados de partição/cache/recomposição, projeções e selectors, comparativos, composição anual, avisos/manifesto e exportação híbrida. Cobrir:1/2/3unidades, município versus grupo com pesos diferentes, inválido/duplicado/semcidade,0/nulo/negativo, basepercentualnão positiva, fechamento incompleto, um ano, lacuna anual e três médias próximas.
 2. Reaproveitar os11replays locais e seus insumos, obrigatoriamenteFIERGS2T2026/4T2025 e a dupla exata1T2023–3T2026. Reexecutar uma vez após os acabamentos/integração que os afetarem; não coletar novamente para repetir uma regressão. Matriz cidade→grupo→consolidado:quantidades/valores compatíveis conservados, estoque por competência, preços/IVV ponderados ou recalculados corretamente. Ausência não é igualdade nem0. Divergência crítica nova/inexplicada interrompe o portão, sem afrouxar guardas nem fixar números.
@@ -376,7 +380,13 @@ Quatro testes novos em `territorial-route.test.tsx` montam a página real, proje
 
 ### I4 — Prova visual curta e edição real
 
-**Estado: planejado.**
+**Estado: concluído localmente em 06/11/2026.**
+
+Cinco extratos curtos,34páginas no total: R1exato12; R1extra12apenas das famílias antes não renderizadas; R2sintético8com3unidades ativas/seispainéis e médias próximas; anoúnico1; lacunaanual1. ArquivosPDF/PPT/CSV nos mesmos diretórios locais; nomes ehashes em `incorporation-2026-11-06/I4-exports.json` e evidênciaJSON versionada. Complemento cobre12meses de vendas/VGL/VGV, estoque/IVV, oferta por padrão/coorte, ticket/preço por tipologia e empreendimentos/VGL anuais. Não houve estudo real completo nem API.
+
+Todos os extratos sem páginas ausentes/erroJS/overflow de tabela/cabeçalho no navegador. PDFs renderizados, PPTXML parseado e34páginas renderizadas noPowerPoint;0objetos fora,0gráficos nativos. Texto e valor de célula editados somente em cópia, salvos/reabertos com persistência. Inspeção individual final confirmou bordas dos rótulos na lacuna e título preto/verde nos tickets; apenas esses13slides foram reexportados/reconferidos após o ajuste final. Ano2024incompleto permanece branco no centro da lacuna, com teste de pixel; observação isolada2023 mantém sua faixa/rótulo, sem ligação ao dado2025. Dados deR2/estados anuais são sintéticos e não validam numericamenteLajeado.
+
+Limites: a bancada exporta os componentes reais; teste de rotaI2confirma o caminho de integração com entradas simuladas. Autenticação/publicação/gerações reais são doI5/I6. A edição doPPT se limita a textos/células; gráficos continuam imagens, conforme contrato híbrido.
 
 1. ReutilizarR1exato; extrato complementar apenas para lacunas demonstradas:ticket eR$/m² com médias, estoque/IVV por cidade, vendas/VGL/VGV12meses, oferta por padrão/coorte, composição de empreendimentos/VGL e subtítulo anual. Não exportar todo o estudo real para verificar um detalhe. Selecionar o menor conjunto que cubra todos os componentes distintos.
 2. AmpliarR2sintético apenas com páginas de três unidades ativas/seis painéis, médias iguais/próximas, ano único e lacuna anual. Dados sintéticos ficam identificados nos insumos/evidência e jamais aparecem como estudo realLajeado. Não modificar snapshots reais para simular uma concordância com oFinoti.
@@ -419,3 +429,8 @@ Fora do escopo:novo motor, novas coletas reais pelo agente, reclassificaçãoMCM
 ### CTA — incorporar a candidata ao relatório live
 
 Execute os portões I0–I4 da seção “Incorporação ao relatório publicado” de `docs/features/Relatorios Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md`, preservando T01–T07, D01–D14 e as correções visuais `91e3194`/`3cee42b`. Reutilize a implementação já conectada ao gerador; feche médias visuais, quadros anuais sem comparação, composição de ano único, janela anual e densidade de três unidades. Preserve dados/guardas, PPT híbrido e trabalhos paralelos. Valide a rota real offline, regressões2T2026/4T2025 e a dupla exata1T2023–3T2026, com extratos curtos apenas para lacunas comprovadas, PDF/CSV e edição real noPowerPoint. Não faça coletas reais nem estudos completos por conta própria. Registre evidências e commits isolados, apresente divergência/commits e peça autorização antes de integrar árvore suja ou fazer push noI5. Gabriel fará as gerações publicadas doI6; não antecipe homologação externa.
+
+
+### Checkpoint de incorporação — 06/11/2026
+
+I0–I4encerrados localmente; acabamento8058949 e prova de rota c32953a, evidências finais noJSON existente. Dados aprovados, contratos e arquivos paralelos preservados. Não houvemerge/push/publicação. I5deve apresentar lista/divergência atualizadas antes de solicitar autorização; I6mantém ensaios deGabriel e aceite externo separado. O aceite anterior deJuliana/Finoti não é homologação desta ampliação.

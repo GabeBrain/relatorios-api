@@ -181,5 +181,442 @@
     "executionPlan": "PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md / I0-I6",
     "implementationThisReview": false,
     "push": false
+  },
+  "incorporation": {
+    "date": "2026-11-06",
+    "gates": {
+      "I0": "completed locally",
+      "I1": "completed locally, commit 8058949",
+      "I2": "completed locally, commit c32953a",
+      "I3": "completed locally",
+      "I4": "completed locally",
+      "I5": "authorization pending",
+      "I6": "human published generation pending"
+    },
+    "baselineHead": "c547ab7",
+    "remoteAtOpening": "219ed1c",
+    "numericModels": 11,
+    "canonicalDifferences": 0,
+    "csvComparison": {
+      "models": 11,
+      "canonicalDifferences": [],
+      "csvComparisons": [
+        {
+          "case": "canela-2T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "canela-4T2025-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "canoas-esteio-sao-leopoldo-2T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "canoas-esteio-sao-leopoldo-4T2025-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "gramado-2T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "gramado-4T2025-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "gramado-canela-2T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "gramado-canela-3T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "gramado-canela-4T2025-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "porto-alegre-2T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "porto-alegre-4T2025-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        }
+      ],
+      "method": "Previous candidate c547ab7 rebuilt through esbuild Git-blob overlay, without touching worktree. Same offline inputs. Only generated timestamp ignored for CSV comparison."
+    },
+    "tests": {
+      "passed": 79,
+      "failed": 0,
+      "skipped": 0,
+      "files": 11,
+      "oldExpectationFixed": "Only test source spelling GeoBrain→Geobrain, established product spelling; no IVV runtime change"
+    },
+    "typecheck": "passed",
+    "build": "npm run build passed, final Vite output 24.77s",
+    "lint": "0 errors/warnings in changed components/helpers/tests; pre-existing ReportPaginator export warning not in targeted lint",
+    "exports": [
+      {
+        "case": "R1",
+        "pages": 12,
+        "synthetic": false,
+        "hashes": {
+          ".pdf": "f361cbc1713156f4c136ca75e901a434d37acabc2140e0c5fcc0bc9b09b9d193",
+          ".pptx": "e4a024d1d86b60ce97ac4b3ff721722b289e24bd49c0caa9f36eed5bf4ada346",
+          ".csv": "8d07e4cab4c9310d1bc314cf6c2bd36dcd8ecf4d8f1a6687a2579f0ec572a4ec"
+        },
+        "browser": {
+          "pages": [
+            {
+              "page": 2,
+              "official": 2,
+              "title": "2 municípios · RS · Mercado Imobiliário · 3T2026"
+            },
+            {
+              "page": 7,
+              "official": 7,
+              "title": "Recorte do estudo · 2 municípios · RS"
+            },
+            {
+              "page": 9,
+              "id": "territorial-9-trend-chart",
+              "official": 9,
+              "title": "Empreendimentos verticais lançados por trimestre"
+            },
+            {
+              "page": 11,
+              "id": "territorial-11-trend-chart",
+              "official": 11,
+              "title": "Empreendimentos verticais lançados · acumulado 12 meses"
+            },
+            {
+              "page": 24,
+              "id": "territorial-24-trend-chart",
+              "official": 24,
+              "title": "Unidades verticais vendidas por trimestre"
+            },
+            {
+              "page": 33,
+              "id": "territorial-36-trend-chart",
+              "official": 36,
+              "title": "Oferta final por tipologia"
+            },
+            {
+              "page": 46,
+              "id": "territorial-50-trend-chart",
+              "official": 50,
+              "title": "Preço médio m²/privativo por padrão"
+            },
+            {
+              "page": 53,
+              "id": "territorial-58-trend-chart-city-gramado",
+              "official": 58,
+              "unit": "city-gramado",
+              "title": "Mínimo, média e máximo do preço por tipologia · Gramado"
+            },
+            {
+              "page": 54,
+              "id": "territorial-58-trend-chart-city-canela",
+              "official": 58,
+              "unit": "city-canela",
+              "title": "Mínimo, média e máximo do preço por tipologia · Canela"
+            },
+            {
+              "page": 57,
+              "id": "territorial-61-market-table-city-gramado",
+              "official": 61,
+              "unit": "city-gramado",
+              "title": "VGV ofertado, disponível e vendido por padrão · Gramado"
+            },
+            {
+              "page": 60,
+              "id": "territorial-63-horizontal-offer-products-city-gramado",
+              "official": 63,
+              "unit": "city-gramado",
+              "title": "Oferta lançada e final por tipo · Gramado"
+            },
+            {
+              "page": 21,
+              "id": "annual-composition-units",
+              "title": "Unidades lançadas por padrão · composição anual"
+            }
+          ],
+          "fullPages": 75,
+          "missing": [],
+          "errors": [],
+          "violations": [],
+          "blockedDataRequests": []
+        }
+      },
+      {
+        "case": "R1extra",
+        "pages": 12,
+        "synthetic": false,
+        "hashes": {
+          ".pdf": "b561fd0a96cd2a39868db47137440fdb23a8d430d610f3f6a9cfea6f6569206f",
+          ".pptx": "51a49fbdb1fd36e3d54b8daf2a96d06fe1f1a30dfe8030ed99e796d223f82d0b",
+          ".csv": "8d07e4cab4c9310d1bc314cf6c2bd36dcd8ecf4d8f1a6687a2579f0ec572a4ec"
+        },
+        "browser": {
+          "pages": [
+            {
+              "page": 26,
+              "id": "territorial-26-trend-chart",
+              "official": 26,
+              "title": "Unidades verticais vendidas · acumulado 12 meses"
+            },
+            {
+              "page": 19,
+              "id": "territorial-22-trend-chart",
+              "official": 22,
+              "title": "VGV lançado vertical · acumulado 12 meses"
+            },
+            {
+              "page": 30,
+              "id": "territorial-33-trend-chart",
+              "official": 33,
+              "title": "VGV vendido vertical · acumulado 12 meses"
+            },
+            {
+              "page": 32,
+              "id": "territorial-35-trend-chart",
+              "official": 35,
+              "title": "Oferta final vertical por trimestre"
+            },
+            {
+              "page": 36,
+              "id": "territorial-39-trend-chart",
+              "official": 39,
+              "title": "IVV por trimestre"
+            },
+            {
+              "page": 34,
+              "id": "territorial-37-trend-chart",
+              "official": 37,
+              "title": "Oferta final por padrão"
+            },
+            {
+              "page": 45,
+              "id": "territorial-49-trend-chart",
+              "official": 49,
+              "title": "Ticket médio por padrão residencial"
+            },
+            {
+              "page": 47,
+              "id": "territorial-51-trend-chart",
+              "official": 51,
+              "title": "Ticket médio por tipologia residencial"
+            },
+            {
+              "page": 48,
+              "id": "territorial-52-trend-chart",
+              "official": 52,
+              "title": "Preço médio m²/privativo por tipologia"
+            },
+            {
+              "page": 50,
+              "id": "territorial-offer-cohort",
+              "title": "Oferta final por ano de lançamento"
+            },
+            {
+              "page": 20,
+              "id": "annual-composition-projects",
+              "title": "Empreendimentos lançados por padrão · composição anual"
+            },
+            {
+              "page": 22,
+              "id": "annual-composition-vgl",
+              "title": "VGL — Valor Geral Lançado por padrão · composição anual"
+            }
+          ],
+          "fullPages": 75,
+          "missing": [],
+          "errors": [],
+          "violations": [],
+          "blockedDataRequests": []
+        }
+      },
+      {
+        "case": "R2",
+        "pages": 8,
+        "synthetic": true,
+        "hashes": {
+          ".pdf": "f799cb010c1dae63c2963fe0dc7509b57c3fd2a486a07ef8c6fc38269456f299",
+          ".pptx": "130a5b5bd9999bfc3c3b45d010061b03f836e69edea987bcb7da2c491b288763",
+          ".csv": "8f69f8da52c0befcee990d60e4cca184805eac06c373c2677d6a939b4f35a384"
+        },
+        "browser": {
+          "pages": [
+            {
+              "page": 2,
+              "official": 2,
+              "title": "5 municípios · RS · Mercado Imobiliário · 2T2026"
+            },
+            {
+              "page": 7,
+              "official": 7,
+              "title": "Recorte do estudo · 5 municípios · RS"
+            },
+            {
+              "page": 9,
+              "id": "territorial-9-trend-chart",
+              "official": 9,
+              "title": "Empreendimentos verticais lançados por trimestre"
+            },
+            {
+              "page": 24,
+              "id": "territorial-24-trend-chart",
+              "official": 24,
+              "title": "Unidades verticais vendidas por trimestre"
+            },
+            {
+              "page": 32,
+              "id": "territorial-35-trend-chart",
+              "official": 35,
+              "title": "Oferta final vertical por trimestre"
+            },
+            {
+              "page": 33,
+              "id": "territorial-36-trend-chart",
+              "official": 36,
+              "title": "Oferta final por tipologia"
+            },
+            {
+              "page": 42,
+              "id": "territorial-50-trend-chart",
+              "official": 50,
+              "title": "Preço médio m²/privativo por padrão"
+            },
+            {
+              "page": 20,
+              "id": "annual-composition-projects",
+              "title": "Empreendimentos lançados por padrão · composição anual"
+            }
+          ],
+          "fullPages": 61,
+          "missing": [],
+          "errors": [],
+          "violations": [],
+          "blockedDataRequests": []
+        }
+      },
+      {
+        "case": "single",
+        "pages": 1,
+        "synthetic": true,
+        "hashes": {
+          ".pdf": "fee0be792e1e3f2a517d5e823dd986e551e43b4024d35baecfba99e4f7b5509b",
+          ".pptx": "c96637f43bcf73f81ca2c11d516e26e2cf0741acbf37d35d770b4ed734f7bdc5",
+          ".csv": "d04d192e3e4728a69e36eb784cc9287c07976a117579a5dc36347d71d35523b1"
+        },
+        "browser": {
+          "pages": [
+            {
+              "page": 20,
+              "id": "annual-composition-units",
+              "title": "Unidades lançadas por padrão · composição anual"
+            }
+          ],
+          "fullPages": 59,
+          "missing": [],
+          "errors": [],
+          "violations": [],
+          "blockedDataRequests": []
+        }
+      },
+      {
+        "case": "gap",
+        "pages": 1,
+        "synthetic": true,
+        "hashes": {
+          ".pdf": "2f2248af485b860bbd19f0734b73ce88cd1b22eb3f02cd841c219fdc9e856d79",
+          ".pptx": "7e49a362c4730595a0bb9b6574ca93d11a72fb76e10aed338d9954069d487598",
+          ".csv": "3fb73d1cce61ac9db1e9168371190c1d908257290c899006dc9994875d2e725c"
+        },
+        "browser": {
+          "pages": [
+            {
+              "page": 20,
+              "id": "annual-composition-units",
+              "title": "Unidades lançadas por padrão · composição anual"
+            }
+          ],
+          "fullPages": 59,
+          "missing": [],
+          "errors": [],
+          "violations": [],
+          "blockedDataRequests": []
+        }
+      }
+    ],
+    "office": {
+      "edit": {
+        "valuePersisted": true,
+        "textPersisted": true,
+        "text": true,
+        "cellValue": true
+      },
+      "decks": [
+        {
+          "nativeCharts": 0,
+          "outside": [],
+          "name": "R1",
+          "slides": 12,
+          "textObjects": 348
+        },
+        {
+          "nativeCharts": 0,
+          "outside": [],
+          "name": "R1extra",
+          "slides": 12,
+          "textObjects": 208
+        },
+        {
+          "nativeCharts": 0,
+          "outside": [],
+          "name": "R2",
+          "slides": 8,
+          "textObjects": 133
+        },
+        {
+          "nativeCharts": 0,
+          "outside": [],
+          "name": "single",
+          "slides": 1,
+          "textObjects": 11
+        },
+        {
+          "nativeCharts": 0,
+          "outside": [],
+          "name": "gap",
+          "slides": 1,
+          "textObjects": 5
+        }
+      ]
+    },
+    "rawDirectory": ".local-inputs/panorama-territorial-2026-11-05/incorporation-2026-11-06",
+    "apiCallsReal": 0,
+    "production": "not verified in this session",
+    "limitations": [
+      "jsdom geographical inputs and Select primitives simplified; real page/model/paginator/manifest/export handoff tested",
+      "R2 and annual edge fixtures are synthetic, not real Lajeado studies",
+      "PDF/PPT are short extracts, not full real studies",
+      "No integration, push, deployment or new external acceptance",
+      "Previous build warnings for chunks, xlsx import modes and Browserslist retained"
+    ]
   }
 }

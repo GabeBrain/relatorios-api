@@ -84,6 +84,6 @@ describe('Panorama Secovi/FIERGS — integração de frequência temporal', () =
 
     // Soma primeiro os fatos das cidades: (20 + 30) / ((80 + 20) + (70 + 30)) = 25%.
     expect(model.ivv.series[0]?.vertical).toBe(25);
-    expect(model.ivv.source).toContain('Dashboard GeoBrain');
+    expect(model.ivv.source).toContain('Dashboard Geobrain');
   });
 });

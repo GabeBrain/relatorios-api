@@ -221,6 +221,9 @@ A seção abaixo é gerada do inventário da cópia de origem e associa cada cai
 
 ## Referências territoriais recebidas em 05/11/2026
 
+**Execução06/11:** acabamentos e integração localI0–I4concluídos, com79testes/11replays/34páginas de extratos conferidos. [Estado e evidências na fonte de execução](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#checkpoint-de-incorporação--06112026). I5/I6pendentes, sem novo aceite externo.
+
+
 **Revisão final05/11 após os extratos:**17arquivos relistados noDrive e referências revisitadas. Pedido central atendido pela candidata local; médias visuais, estado de ano único, quadros sem comparação válida e ensaio de três unidades ativas precisam fechar antes da publicação. [Parecer, matriz de aderência e plano I0–I6](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#incorporação-ao-relatório-publicado--revisão-final-e-plano-i0i6-05112026) são a fonte atual de execução. Trechos de diagnóstico/proposta abaixo retratam a preparação anterior, não ausência de implementação atual. Sem novo aceite externo.
 
 
