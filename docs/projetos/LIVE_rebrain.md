@@ -385,6 +385,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama: envio autorizado das correções I6 e seleção
+
+`0e95c5d`/`dfe2fa4`/`36d0fc3` enviados aorigin/main por autorização explícita, SHA36d0fc34b417cf01e9a73c96b1869413fa747157 confirmado,0/0. Semmerge, ediçõesparalelas preservadas. Gate documentalaprovado; origem dasmudanças e testes na entrada anterior e no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Publicado noGit não é conferênciaLovable: próximoGabrielpublicar, testarlista/drag eregerar5cidadescomCSV/PPT paraI6. Semnovoaceiteexterno.
+
+
 ### 06/11/2026 — Panorama: arrastar cidades e selecionar lista colada
 
 Gabriel autorizouenvio dascorreçõesanteriores epediu facilidadesnesta rodada. Modal comcartões arrastáveis2/3grupos, nomecompostoobrigatório ealternativatoque/clique/teclado; preservapartição/cancelamentosemcoleta. Buscacomlista(vírgula/e/linhas), matchingexato sócatálogoUF, avisodeausentes euniãocomseleçãoanterior.23testes/tipos/lint/buildaprovados,5cenáriosbrowserclaro/escuro390–1440pxcomdragreal/5–15cidades,semoverflow/erro. Fontetécnica/evidência no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), seleçãosimplificada06/11. SemAPI/mudançanumérica; aguardapushautorizado/republicação eensaioI6comCSV/PPT. Alteraçõesparalelaspreservadas; semaceiteexterno presumido.
