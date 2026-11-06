@@ -385,6 +385,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 06/11/2026 — Panorama: revisão do PPT real Lajeado/Vale e espera ao trocar de aba
+
+PPT real deGabriel1T2023–3T2026 aberto/renderizado noOffice105slides, semformasfora, originalpreservado. Estrutura consolidado→territórios egrupos corretos; I6não encerra: Vale ausente em séries apesar deTeutônia8vendas nofechamento, títuloVENDIDO truncado37, vazio21 epercentual100%comtotal0em51. Hipótese de cobertura porsegmento precisa entradas/CSV, nenhuma alteraçãonumérica feita. Fonte/evidência epróximospassos no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), seçãoI6da saída real. Corrigida apenas espera deexportação autorizada: visibilidade/fallback/limpeza,12testes/tipos/lint aprovados; semAPIreal/push/aceiteexterno.
+
+
 ### 06/11/2026 — Panorama: completude aplicável ao universo horizontal e cronômetro
 
 CSV de Gabriel semtimeout motivou diagnóstico delimitado autorizado: Bom Retiro do Sul tem um Horizontal/nenhum Vertical, padrão com dados e tipologia HTTP200 vazia. Corrigida exigência da dimensão apenas com cadastro e duas fontes padrão comprovadamente horizontais, sem exceção municipal, síntese de zero ou dispensa de erro HTTP. 50 testes/tipos/lint aprovados; replay offline dos seis retornos com44reconciliações críticas match, sem bloqueio; preços/IVV não validados, sem estudo completo. Cronômetro Panorama sóMM:SS/pulso discreto com movimento reduzido. Fonte/evidências no [plano de recuperação](../features/Relatorios%20Secovi_FIERGS/PLAN_RECUPERACAO_COLETA_MULTICIDADES_PANORAMA_2026-10-06.md). Estado local, publicação e reteste real pendentes; paralelos preservados.

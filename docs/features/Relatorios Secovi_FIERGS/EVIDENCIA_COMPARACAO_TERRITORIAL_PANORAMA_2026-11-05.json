@@ -807,5 +807,56 @@
     },
     "screenshot": ".local-inputs\\panorama-territorial-2026-11-05\\integrated-2026-11-06\\TERESA-LAJEADO-VALE-INTERFACE.png",
     "browser_limit": "No connected browsers available; headless actual component preview only."
+  },
+  "published_ppt_review_2026_11_06": {
+    "source": ".local-inputs\\panorama-territorial-2026-11-05\\panorama-fiergs-rs-bom-retiro-do-sul-estrela-e-mais-3-c3872334-1T2023-3T2026-editavel.pptx",
+    "sha256": "5e9a19a326e4988f1ba7e83f297db0b6c0db17df8f629e736660ec2ec59804e4",
+    "period": "1T2023–3T2026",
+    "slides": 105,
+    "reviewMethod": "All slides rendered by PowerPoint read-only and reviewed in seven grids; selected pages inspected full-size. No CSV of this completed generation received.",
+    "positives": [
+      "Group assignment matches Teresa: Lajeado vs four-city Vale do Taquari",
+      "Consolidated-to-territorial sequences present",
+      "23-year institutional art present",
+      "Tables and native text readable; chart images preserved",
+      "Original unchanged; no objects outside slide"
+    ],
+    "openIssues": [
+      {
+        "slides": [
+          29,
+          32,
+          38,
+          40,
+          50,
+          54
+        ],
+        "kind": "territorial-series-coverage",
+        "confirmed": "Vale do Taquari legend but series/comparison absent in several families. Slide36 has20Lajeado+8Teutônia=28; slide29 does not display Vale, including those8.",
+        "hypothesis": "Strict every-member observed mask in territorial-projections may treat an inapplicable segment in a member as missing group coverage. Needs frozen city-level inputs/CSV before numerical change."
+      },
+      {
+        "slides": [
+          37
+        ],
+        "kind": "ppt-text-layout",
+        "confirmed": "Native editable text VENDIDO exists in XML, but PowerPoint rendering visibly shows only VO. Cause not proven."
+      },
+      {
+        "slides": [
+          21
+        ],
+        "kind": "editorial",
+        "confirmed": "No launches in closing quarter, empty neighborhood plot and five gray city rows. Recommend analyst omission or explicitly designed empty state, not suppressing low nonzero activity."
+      },
+      {
+        "slides": [
+          51
+        ],
+        "kind": "zero-denominator-presentation",
+        "confirmed": "Launches total0, percentage cells unavailable but total100%. Needs denominator-aware total formatting; keep observed zeros and negatives."
+      }
+    ],
+    "assessment": "Not final for external review until territorial detail omission is resolved. No external acceptance inferred."
   }
 }
