@@ -385,6 +385,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 09/11/2026 — Fortaleza: núcleo vertical, referência de período e prévia por etapas — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, sem item em painel/menu/busca.
+- **Pedido/entrega:** Lucas autorizou integrar fontes e pediu sequência automática inspirada no SP, com Mensal/Trimestral e mês/trimestre/ano de referência. Uma ação valida recorte, consulta fontes municipais, confere balanços e organiza a prévia; BrainLoadingState com etapa/tempo real/cancelamento e estados de conferência. Alternância preserva ano/período de fechamento e invalida dados anteriores.
+- **Dados:** launches/releases_in_period, sales/liquid_sales e stock por cidade/padrão/mês, apenas vertical; amostra confirma recorte, paginação/janelas limitadas, retries transitórios e recuperação só das cidades faltantes. Sem meses/cidades/grupos completos não há consolidado. Estoque final não é soma trimestral; negativos, ausentes e diferenças compensadas permanecem visíveis. [Contrato e limites](../features/relatorios-institucionais/fortaleza/NUCLEO_VERTICAL_2026-11-09.md).
+- **Padrões/arquivos:** API/modelo/hook/painéis/testes específicos Fortaleza, seletores/tokens/GeoApiScopeEngine existentes, requestWithRetry/collectByCity Panorama reutilizados sem alteração. Matriz/PLAN/DECISOES/EVIDENCIAS e STATUS atualizados. Fonte do núcleo é municipal; método granular e indicadores restantes continuam pendentes. Manifesto60/89 não equivale a todos os slides gerados.
+- **Validação/limites:**49testes Fortaleza aprovados; regressão ampla807aprovados/1falha existente firewall-fontes Panorama/2ignorados, mais2casos de etapas no foco final49. SP/Panorama sem alterações; falha alheia não foi corrigida nesta frente. Build/tipos/lint e Edge1440/390claro/escuro com transporte sintético; ensaio autenticado com token pessoal ainda pendente. Sem coleta/API real, exportação/estudo real, homologação, push/deploy ou escrita Monday. [Evidências](../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md).
+- **Commits/etapas:** base574087e, dois commits locais anteriores preservados; commit isolado `feat(relatorios): integrate Fortaleza vertical preview pipeline`, hash no fechamento. Núcleo implementado localmente; próximo é ensaio autenticado delimitado e reconciliação granular, antes de ampliar segmentos/preços/histórico/exportação.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+
 ### 09/11/2026 — Fortaleza/SINDUSCON: base navegável apenas por rota — Lucas / Codex
 
 - **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, base estrutural em implementação.
@@ -1175,6 +1185,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza — núcleo vertical09/11:** consulta municipal e prévia em4etapas implementadas/testadas localmente, referência mensal/trimestral explícita. Contrato granular, ensaio real e relatório completo ainda pendentes. [Contrato](../features/relatorios-institucionais/fortaleza/NUCLEO_VERTICAL_2026-11-09.md).
+
 - 🟡 **Fortaleza/SINDUSCON — base09/11:** rota oculta e composição estrutural verificadas localmente, 89/60páginas reais inventariadas; sem indicadores/exportação integrados. [Estado atual](../features/relatorios-institucionais/fortaleza/PLAN.md).
 
 - 🟡 **Fortaleza/SINDUSCON — 09/11:** G1 iniciado, dois modelos legíveis e matriz inicial documentados; sem implementação nova. [Plano](../features/relatorios-institucionais/fortaleza/PLAN.md).
@@ -1263,6 +1275,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza — núcleo vertical09/11:** ensaio autenticado delimitado, fotografias pareadas e reconciliação de fluxos/data de início de vendas/cobertura. Demais segmentos, preços, INCC, MCMV, histórico completo e exportação pendentes. Preservar rota sem painel e não confundir etapas concluídas com aceite do estudo. Falha existente Panorama/firewall-fontes registrada separadamente.
 
 - **Fortaleza/SINDUSCON — base09/11:** comprovar fonte mensal vertical capital/cobertura antes de integrar lançamentos/vendas/oferta; ponderação/INCC/MCMV e desenho final por modelo ainda abertos. Uma falha no teste existente Panorama/firewall-fontes fica registrada separadamente, sem alteração de regras nesta frente. Sem ensaio real/publicação autorizados.
 

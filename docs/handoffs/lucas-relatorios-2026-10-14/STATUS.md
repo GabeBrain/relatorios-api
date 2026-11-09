@@ -1,5 +1,15 @@
 # Estado do handoff
 
+## 09/11/2026 — Fortaleza: núcleo vertical e prévia automática
+
+Lucas autorizou iniciar integração e reforçou os padrões SP/FIERGS, progresso automático e referência Mensal/Trimestral. [Contrato/estado atual](../../features/relatorios-institucionais/fortaleza/NUCLEO_VERTICAL_2026-11-09.md). Uma ação valida recorte, consulta fontes municipais, confere balanços e organiza a prévia; etapas com atenção não são marcadas como sucesso. Campos mostram mês/ano ou trimestre/ano de referência e preservam a correspondência de fechamento ao alternar. Mudanças invalidam resultados e cancelam operação anterior.
+
+Implementadas fontes de lançamentos/vendas líquidas/estoque vertical, consulta serial limitada e recuperação das cidades faltantes no mesmo recorte/sessão. Sem consolidado quando falta cidade, mês, grupo ou fonte. Fluxos somados, estoque só no fechamento, negativos/diferenças preservados por padrão. Contagem de projetos, datas granulares, demais segmentos, preços/INCC/MCMV e exportação permanecem pendentes. Estrutura60/89 não significa conteúdo completo dos slides.
+
+Base574087e, main limpa antes das edições; fetch0/2 na abertura/retomada, dois commits de Fortaleza anteriores preservados. 49testes Fortaleza aprovados; regressão ampla807aprovados/1falha existente Panorama/firewall-fontes/2ignorados, depois2casos novos de etapas validados no foco49. Tipos/build/lint e Edge local com fontes sintéticas1440/390claro/escuro no fechamento. A janela foi fechada acidentalmente; edições/testes salvos conferidos e servidor local reiniciado. Sem dados pessoais/credenciais lidos, API real, coleta longa, estudo/exportação real ou publicação. Equivalente headless não comprova indicadores com token pessoal. Sem alterações nos motores SP/Panorama ou frentes paralelas; próximo é ensaio autenticado delimitado e reconciliação granular.
+
+Commit isolado `feat(relatorios): integrate Fortaleza vertical preview pipeline`, hash/contadores no fechamento. Acesso continua somente `/rebrain/relatorios-institucionais/fortaleza`, sem item no painel/menu/busca. Push continua não autorizado; nenhuma escrita Monday.
+
 ## 09/11/2026 — Fortaleza: base preparada, somente rota
 
 Pedido posterior de Lucas autoriza revisar material/preparar base usando FIERGS/SP, sem entrada no painel e sem push. Base inicial `c78a7c1` sobre `ecbc34f`, fetch0/1 e árvore limpa; os três commits antigos foram retirados da main por pedido dele antes desta rodada, Fortaleza preservada. [Plano atual](../../features/relatorios-institucionais/fortaleza/PLAN.md), [originais/limites](../../features/relatorios-institucionais/fortaleza/REVISAO_REFERENCIAS_2026-11-09.md) e [validações](../../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md).

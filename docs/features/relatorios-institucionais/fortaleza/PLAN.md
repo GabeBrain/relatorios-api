@@ -1,5 +1,13 @@
 # Fortaleza / SINDUSCON-CE — plano inicial
 
+## 09/11 — núcleo vertical integrado localmente e prévia em etapas
+
+Autorização posterior de Lucas: iniciar integração GeoBrain, usar SP/FIERGS como referências, executar etapas automaticamente mostrando progresso e explicitar Mensal/Trimestral com referência mês/trimestre/ano. [Contrato, código e limites](NUCLEO_VERTICAL_2026-11-09.md). Uma ação valida escopo, consulta fontes, confere balanços e organiza a prévia, com cancelamento e estados de conferência. Mensal/Trimestral preservam ano e correspondência de fechamento, e mudanças invalidam dados/cache.
+
+Implementado núcleo municipal residencial vertical para município ou cinco cidades autorizadas: lançamentos/vendas líquidas por mês e estoque no fechamento, cobertura/paginação obrigatórias, negativos e diferenças preservados. Fonte municipal é candidata à equivalência metodológica do estudo, ainda sem prova com token real/granular. Meses faltantes não geram total nem parcial silenciosa; dados incompletos deixam etapa final aguardando.
+
+Próximo: ensaio autenticado delimitado e reconciliação granular antes de ampliar indicadores/segmentos/histórico. Os 60/89 títulos organizados não são conteúdos completos do relatório. Sem publicação, escrita Monday ou coleta real pelo agente. Rota permanece fora de painel/menu. Entradas anteriores abaixo preservam a evolução do escopo.
+
 ## 09/11 — base navegável autorizada, acesso somente por rota
 
 Pedido posterior de Lucas autoriza verificar originais e preparar a base usando FIERGS/SP como referências, sem publicar. Implementada **somente composição estrutural**, sem indicadores/coletores/exportador: `/rebrain/relatorios-institucionais/fortaleza`. Ausente do painel, menu e busca de ferramentas; rota lazy no shell atual. Tela configura município ou conjunto completo autorizado, mensal/trimestral e período; prepara 60/89 posições reais do modelo, mantendo fontes/editoriais pendentes e distinguindo competência escolhida de referência histórica. Não representa estudo gerado.

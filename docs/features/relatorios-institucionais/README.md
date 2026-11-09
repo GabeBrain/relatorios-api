@@ -4,6 +4,8 @@
 
 ## Onde trabalhar
 
+**Fortaleza — núcleo municipal vertical:** [fluxo automático e limites](fortaleza/NUCLEO_VERTICAL_2026-11-09.md), com seletor Mensal/Trimestral e referência mês/trimestre/ano. Integração local das fontes de lançamentos/vendas/oferta, ainda sem ensaio autenticado ou relatório completo. Acesso somente por rota; sem publicação.
+
 **Fortaleza/SINDUSCON-CE — 09/11/2026:** [plano e estado da base](fortaleza/PLAN.md), [revisão dos originais](fortaleza/REVISAO_REFERENCIAS_2026-11-09.md). Base estrutural acessível somente em `/rebrain/relatorios-institucionais/fortaleza`, sem item no painel/menu. Ainda sem integração de indicadores, estudo real ou exportação.
 
 Abrir **a raiz do checkout `relatorios-api`** no Codex/editor; comandos Git/npm partem da raiz, não da pasta de documentos. A documentação dos próximos modelos fica aqui. Criar `sp/`, `fortaleza/`, `maceio/` e `recife/` conforme cada modelo começar, sem antecipar pastas vazias como avanço.

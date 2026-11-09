@@ -1,5 +1,14 @@
 # Fortaleza — evidências da abertura
 
+## 09/11/2026 — núcleo municipal e sequência automática
+
+- **Pedido/escopo:** Lucas autorizou iniciar dados, reforçou SP/FIERGS como referências e pediu seleção Mensal/Trimestral com referência própria e progresso automático. Implementado localmente em `api.ts`, `market.ts`, `useFortalezaMarket.ts`, painéis de etapas/dados e página existente; [contrato completo](NUCLEO_VERTICAL_2026-11-09.md).
+- **Git:** base `574087e`, main limpa na abertura; fetch atualizado 0/2 antes desta entrega, dois commits anteriores desde 09/11 14h41 preservados. Retomada após fechamento acidental confirmou edições/testes salvos e novo fetch 0/2; nenhum merge/reset/push.
+- **Fonte:** integração de consulta sob ação explícita, sem coleta de mercado no carregamento; usa contrato municipal já presente em SP e auxiliares de retry/coleção do Panorama. Nenhuma leitura de token pessoal, API real ou estudo real nesta rodada. Sanitização/proveniência sem credenciais.
+- **Validação:** 49 testes Fortaleza aprovados, incluindo paginação, recorte, grupos, fluxos/estoque, negativos, missing/zero, cancelamento, reuso só do mesmo recorte, invalidação por sessão e conclusão honesta das etapas. Regressão ampla anterior ao último refinamento:807aprovados/1falha existente firewall-fontes/Panorama/2ignorados; 2 testes adicionais do hook validados no foco de49. Falha alheia registrada, sem editar código/fixtures de SP/Panorama.
+- **Visual:** diagnóstico `scripts/diagnostics/fortaleza-market-visual.mjs` usa somente localhost e respostas sintéticas; lento, sucesso, vazio, ausência, erro, diferenças compensadas, cancelamento e recuperação de Aquiraz sem recolher quatro cidades. Validação mensal/trimestral/ano e etapas sem novo clique. Capturas locais1440/390 claro/escuro com rolagem local das tabelas. Diagnóstico da base mantém ausência em menu/painel. Servidor local encerrado com janela foi reiniciado; não foi falha do app/API.
+- **Entrega:** build/tipos/lint e documentação viva no fechamento, commit isolado `feat(relatorios): integrate Fortaleza vertical preview pipeline`; hash final reportado. Rota sem entrada no painel/menu preservada. Sem exportação, deploy, Monday, homologação ou relatório completo presumidos. Próximo: validação autenticada e reconciliação com a origem/granular.
+
 ## 09/11/2026 — revisão dos originais e base somente por rota
 
 - **Autorização:** Lucas pediu conferir referências/preparar base, podendo usar FIERGS/SP, com acesso somente por rota e sem painel. Push recusado nesta sessão; nenhuma publicação realizada.

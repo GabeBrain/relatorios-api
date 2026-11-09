@@ -1,5 +1,13 @@
 # Fortaleza — fatos, propostas e pendências
 
+## Complemento — núcleo vertical e referência de período
+
+Integração local autorizada por Lucas após a base, com progresso automático inspirado no SP e coleta/completude do Panorama. [Contrato e limites](NUCLEO_VERTICAL_2026-11-09.md): endpoint municipal por padrão para lançamentos, vendas líquidas e estoque; apenas vertical, sem herdar política de horizontal/INCC/MCMV. Soma de fluxos e fotografia final conferidas por cidade/mês/padrão, mantendo ausentes/negativos/diferenças.
+
+Tipo Mensal mostra mês/ano; Trimestral, trimestre/ano. Conversão ao alternar usa fechamento do trimestre ou trimestre do mês, mantendo ano (2T↔junho; julho→3T). É uma decisão de navegação, não aproximação de dados. Referência selecionada fica visível; os originais junho/julho definem apenas o manifesto editorial de cada tipo.
+
+Prévia exige meses completos no período escolhido e abertura. Não adotar a parcial automática de SP sem explicitar regra própria. Fontes incompletas não liberam consolidado ou conclusão da etapa de organização. Diferenças de balanço mantêm valores observados com “Conferir”, sem afirmar causa ou aceite; exportação segue ausente. Contrato granular e validação autenticada continuam pendentes.
+
 ## Complemento — base autorizada e revisão dos originais em 09/11
 
 Pedido posterior de Lucas autoriza a base estrutural usando FIERGS/SP como referências, com acesso **somente pela rota** `/rebrain/relatorios-institucionais/fortaleza`, sem adicionar item no painel/menu e sem push. Implementação de dados/ensaios reais continua fora desta rodada. [Revisão binária/visual amostral](REVISAO_REFERENCIAS_2026-11-09.md) supera apenas as lacunas de download/hash/contagem do registro inicial abaixo; ponderação e contratos de mercado seguem pendentes.
