@@ -1,5 +1,11 @@
 # Fortaleza — fatos, propostas e pendências
 
+## Complemento — slides 1–10
+
+Lucas autorizou envio da base e pediu dez slides iniciais seguindo integralmente o original. Base enviada até `5439ffe`; novo lote compõe slides mensais/trimestrais com arte nativa extraída, geometria medida e fonte local. [Contrato/limites](SLIDES_01_10_2026-11-09.md). O raster ainda registra diferenças em textos/gráficos: fidelidade de 100% não homologada.
+
+Listas usam cadastro atual completo por município/segmento e janela acumulada; gráficos contam empreendimentos com classificação própria do bloco. Isso não comprova fotografia histórica, fases ou início das vendas. Amostra/empresas pesquisadas exigem fonte própria; não inferir do catálogo atual. Falha/paginação fora do limite impede parcial; horizontal desconhecido impede gráfico. Avisos ficam fora da lâmina e excesso de linhas exige continuação. Sem exportador, API real ou escrita Monday nesta entrega.
+
 ## Complemento — núcleo vertical e referência de período
 
 Integração local autorizada por Lucas após a base, com progresso automático inspirado no SP e coleta/completude do Panorama. [Contrato e limites](NUCLEO_VERTICAL_2026-11-09.md): endpoint municipal por padrão para lançamentos, vendas líquidas e estoque; apenas vertical, sem herdar política de horizontal/INCC/MCMV. Soma de fluxos e fotografia final conferidas por cidade/mês/padrão, mantendo ausentes/negativos/diferenças.

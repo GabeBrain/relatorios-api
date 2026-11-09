@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 09/11/2026 — base enviada e primeiros dez slides locais
+
+Lucas autorizou push: `c78a7c1`, `574087e` e `5439ffe` enviados a `origin/main`; fetch posterior 0/0. Base e núcleo anteriores estão no remoto; deploy não observado. Em seguida pediu os dez primeiros slides com aparência original. Prévia mensal/trimestral implementada na mesma rota oculta, com navegação/ampliação, arte nativa, geometria medida, fonte local, listas e gráfico sob cobertura/classificação explícitas. [Entrega, fontes, diferenças visuais e retomada](../../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md). Novo commit permanece local, sem novo envio nesta rodada.
+
+Ambiente: main `5439ffe`, único remoto origin, árvore limpa antes do lote; edições desta entrega preservadas. PowerPoint disponível e usado somente para leitura/exportação local das referências. 63 testes Fortaleza, tipos/lint/build aprovados; Edge com rede externa bloqueada e dados sintéticos em 1440/390 claro/escuro, vinte composições e sete grupos de cenários. Slide 8 idêntico; diferenças em texto/gráfico dos demais impedem afirmar 100% visual. Amostra/empresas pesquisadas não são inferidas do catálogo; dados reais, aceite e exportador pendentes.
+
+Retomar pelo documento acima: refinar renderização dinâmica, comprovar amostra/data de vendas/fases/cobertura e planejar ensaio autenticado delimitado. Nenhuma API/estudo real, coleta longa ou escrita Monday. SP/Secovi/FIERGS e alterações paralelas intactos; Corretor V3 e Quanti 2026 seguem Gabriel. Férias desde19/10 são registro histórico, sem pressupor execução durante férias ou disponibilidade atual.
+
 ## 09/11/2026 — Fortaleza: núcleo vertical e prévia automática
 
 Lucas autorizou iniciar integração e reforçou os padrões SP/FIERGS, progresso automático e referência Mensal/Trimestral. [Contrato/estado atual](../../features/relatorios-institucionais/fortaleza/NUCLEO_VERTICAL_2026-11-09.md). Uma ação valida recorte, consulta fontes municipais, confere balanços e organiza a prévia; etapas com atenção não são marcadas como sucesso. Campos mostram mês/ano ou trimestre/ano de referência e preservam a correspondência de fechamento ao alternar. Mudanças invalidam resultados e cancelam operação anterior.

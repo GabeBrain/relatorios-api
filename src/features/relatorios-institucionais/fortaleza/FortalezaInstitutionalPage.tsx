@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { FileChartColumn, Layers } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,7 @@ import { FORTALEZA_CITIES, FORTALEZA_REFERENCES, fortalezaPeriod, fortalezaScope
 import { useFortalezaMarket } from './useFortalezaMarket';
 import { FortalezaMarketPanel } from './FortalezaMarketPanel';
 import { FortalezaGenerationPanel } from './FortalezaGenerationPanel';
+const FortalezaIntroSlides = lazy(() => import('./FortalezaIntroSlides'));
 
 export default function FortalezaInstitutionalPage() {
   const [geo, setGeo] = useState<GeoScope>({ uf: '', city: '' });
@@ -89,8 +90,9 @@ export default function FortalezaInstitutionalPage() {
     {market.state?.phase === 'error' && <Alert variant="destructive"><AlertTitle>Consulta não concluída</AlertTitle><AlertDescription>{market.state.message}<Button className="mt-3 block" variant="outline" disabled={!ready || busy} onClick={() => { void market.consult(); }}>Tentar consultar novamente</Button></AlertDescription></Alert>}
     {market.state?.report && <FortalezaMarketPanel report={market.state.report} />}
     {market.state?.hasFailedCities && <Button variant="outline" disabled={!ready || busy} onClick={() => { void market.consult(true); }}>Tentar cidades faltantes</Button>}
-    <Tabs defaultValue="structure">
-      <TabsList className="max-w-full"><TabsTrigger value="structure">Estrutura</TabsTrigger><TabsTrigger value="references">Referências</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger></TabsList>
+    <Tabs defaultValue="slides">
+      <TabsList className="flex h-auto max-w-full flex-wrap justify-start"><TabsTrigger value="slides">Slides 1–10</TabsTrigger><TabsTrigger value="structure">Estrutura</TabsTrigger><TabsTrigger value="references">Referências</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger></TabsList>
+      <TabsContent value="slides" className="mt-4"><Suspense fallback={<BrainLoadingState variant="page" title="Carregando os slides iniciais de Fortaleza" />}><FortalezaIntroSlides key={`${periodicity}/${year}/${position}`} selection={selection} cities={ready ? coverage.cities : []} data={market.state?.intro ?? null} /></Suspense></TabsContent>
       <TabsContent value="structure" className="mt-4 space-y-4">
         {visibleBlueprint ? <>
           <section className="rounded-xl border bg-card p-5" aria-label="Estrutura preparada"><h2 className="font-semibold">Estrutura preparada · {visibleBlueprint.period.label}</h2><p className="mt-1 text-sm text-muted-foreground">{visibleBlueprint.cities.join(', ')} / CE</p><p className="mt-2 text-sm">{visibleBlueprint.pages.length} posições editoriais organizadas. O núcleo vertical é apresentado acima; o conteúdo completo das páginas ainda está em preparação.</p><p className="mt-1 text-xs text-muted-foreground">Modelo de referência: {visibleBlueprint.reference.label}. O período de referência não é uma coleta do recorte escolhido.</p></section>

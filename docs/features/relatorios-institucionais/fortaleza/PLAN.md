@@ -1,5 +1,11 @@
 # Fortaleza / SINDUSCON-CE — plano inicial
 
+## 09/11 — push da base e dez slides iniciais
+
+Push explicitamente autorizado e concluído para `c78a7c1`, `574087e` e `5439ffe`; origem confirmada em 0/0 depois do fetch, sem deploy observado. Pedido seguinte implementa prévia dos slides 1–10 mensal/trimestral com arte original e campos variáveis, preservando rota oculta e sequência automática. [Contrato, reprodução, validações e diferenças visuais restantes](SLIDES_01_10_2026-11-09.md). Novo lote local, sem exportador/estudo real.
+
+Próximo: refinar diferenças de renderização dos campos dinâmicos para aceite visual; comprovar amostra e datas/fases/cobertura histórica antes de homologar os gráficos/listas. Conteúdo indisponível não recebe valores antigos. Retomada documentada sem presumir disponibilidade durante férias. Estados anteriores abaixo são históricos.
+
 ## 09/11 — núcleo vertical integrado localmente e prévia em etapas
 
 Autorização posterior de Lucas: iniciar integração GeoBrain, usar SP/FIERGS como referências, executar etapas automaticamente mostrando progresso e explicitar Mensal/Trimestral com referência mês/trimestre/ano. [Contrato, código e limites](NUCLEO_VERTICAL_2026-11-09.md). Uma ação valida escopo, consulta fontes, confere balanços e organiza a prévia, com cancelamento e estados de conferência. Mensal/Trimestral preservam ano e correspondência de fechamento, e mudanças invalidam dados/cache.

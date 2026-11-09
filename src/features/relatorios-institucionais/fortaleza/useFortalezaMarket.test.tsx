@@ -4,8 +4,10 @@ import { collectFortalezaMarket } from './api';
 import { buildFortalezaMarket } from './market';
 import { useFortalezaMarket } from './useFortalezaMarket';
 import { marketFixture, monthlySelection } from './__tests__/market-fixture';
+import { fetchFortalezaIntro } from './intro-data';
 
 vi.mock('./api', () => ({ collectFortalezaMarket: vi.fn() }));
+vi.mock('./intro-data', () => ({ fetchFortalezaIntro: vi.fn() }));
 const collect = vi.mocked(collectFortalezaMarket);
 type Payload = Awaited<ReturnType<typeof collectFortalezaMarket>>;
 function payload(failed = false): Payload {
@@ -21,7 +23,7 @@ function deferred() {
   const promise = new Promise<Payload>(done => { resolve = done; });
   return { promise, resolve };
 }
-beforeEach(() => { collect.mockReset(); });
+beforeEach(() => { collect.mockReset(); vi.mocked(fetchFortalezaIntro).mockResolvedValue({ status: 'ready', projects: [], issues: [], requests: 0, startedAt: '', finishedAt: '' }); });
 afterEach(cleanup);
 
 describe('Fortaleza — sessão e ciclo da consulta', () => {

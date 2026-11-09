@@ -31,6 +31,11 @@ async function scenario({ mode = 'success', slow = false } = {}) {
       calls.push({ city, metric });
       if (state.mode === 'forbidden' || state.mode === 'city-failure' && city === 'Aquiraz' && metric === 'sales') return request.fulfill({ status: 403, contentType: 'application/json', body: '{}' });
       if (metric === 'building-with-history') return request.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [{ city, state: 'CE', building_type: 'Vertical', period: '2026-10-01' }], meta: { total: 20 } }) });
+      if (metric === 'building') {
+        const type = url.searchParams.get('type');
+        const data = [{ building_id: `${city}-${type}`, name: 'Empreendimento sintético', city, state: 'CE', building_type: type, release_date: '2026-06-01', neighborhood: 'Centro', standard: type === 'Horizontal' ? 'Condomínio de Casas' : 'Standard', incorporators: [{ id: 1, name: 'Incorporadora sintética' }] }];
+        return request.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: 1 } }) });
+      }
       assert.ok(['releases', 'sales', 'stock'].includes(metric));
       assert.deepEqual(url.searchParams.getAll('type[]'), ['Vertical']);
       assert.equal(url.searchParams.get('uf'), 'CE');
@@ -57,6 +62,24 @@ async function consult(page) {
   await page.getByRole('button', { name: 'Gerar prévia vertical', exact: true }).click();
   await page.getByRole('region', { name: 'Dados verticais consultados' }).waitFor();
 }
+async function inspectSlides(page, label) {
+  await page.getByRole('tab', { name: 'Slides 1\u201310', exact: true }).click();
+  const region = page.getByRole('region', { name: 'Primeiros dez slides Fortaleza', exact: true });
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1100 });
+    for (const dark of [false, true]) {
+      await page.evaluate(value => document.documentElement.classList.toggle('dark', value), dark);
+      for (let number = 1; number <= 10; number++) {
+        await region.getByRole('navigation', { name: 'Primeiros dez slides', exact: true }).getByRole('button', { name: String(number), exact: true }).click();
+        await region.getByRole('img', { name: `Fortaleza \u00b7 slide ${number}`, exact: true }).waitFor();
+        await page.evaluate(() => document.fonts.ready);
+        assert.equal(await page.locator('main').evaluate(main => main.scrollWidth > main.clientWidth), false);
+      }
+      await region.scrollIntoViewIfNeeded();
+      await page.screenshot({ path: resolve(folder, `slides-${label}-${width}-${dark ? 'dark' : 'light'}.png`) });
+    }
+  }
+}
 try {
   const success = await scenario({ slow: true });
   await success.page.getByRole('button', { name: 'Gerar prévia vertical', exact: true }).click();
@@ -66,8 +89,10 @@ try {
   await success.page.getByRole('region', { name: 'Dados verticais consultados' }).waitFor();
   const panel = success.page.getByRole('region', { name: 'Dados verticais consultados' });
   await panel.getByRole('heading', { name: 'Unidades lançadas na janela' }).waitFor();
-  assert.equal(success.calls.length, 4);
+  assert.equal(success.calls.length, 7);
   assert.equal(await success.page.getByRole('region', { name: 'Etapas da prévia vertical' }).getByText('Concluída', { exact: true }).count(), 4);
+  await inspectSlides(success.page, 'quarterly');
+  await success.page.getByRole('tab', { name: 'Estrutura', exact: true }).click();
   await success.page.getByRole('region', { name: 'Estrutura preparada', exact: true }).waitFor();
   await panel.getByText('Conferir padrões informados pela API', { exact: true }).click();
   assert.ok((await panel.getByRole('table', { name: 'Balanço vertical por padrão' }).innerText()).includes('-1'));
@@ -91,6 +116,7 @@ try {
   await consult(success.page);
   await success.page.getByRole('heading', { name: 'Residencial vertical · 07/2026', exact: true }).waitFor();
   assert.equal(await success.page.getByRole('list', { name: 'Páginas do relatório' }).locator('li').count(), 60);
+  await inspectSlides(success.page, 'monthly');
   const completedCalls = success.calls.length;
   await success.page.getByLabel('Ano de referência', { exact: true }).click();
   await success.page.getByRole('option', { name: '2025', exact: true }).click();
@@ -109,11 +135,12 @@ try {
   const recovery = await scenario({ mode: 'city-failure' });
   await recovery.page.locator('#fortaleza-territory').click(); await recovery.page.getByRole('option', { name: 'Fortaleza e RM · 5 municípios', exact: true }).click();
   await consult(recovery.page);
-  assert.equal(recovery.calls.filter(call => call.city === 'Fortaleza').length, 4);
+  assert.equal(recovery.calls.filter(call => call.city === 'Fortaleza' && call.metric !== 'building').length, 4);
   recovery.state.mode = 'success'; await recovery.page.getByRole('button', { name: 'Tentar cidades faltantes', exact: true }).click();
   await recovery.page.getByRole('table', { name: 'Balanço consolidado vertical' }).waitFor();
-  assert.equal(recovery.calls.filter(call => call.city === 'Fortaleza').length, 4);
-  assert.equal(recovery.calls.filter(call => call.city === 'Aquiraz').length, 7);
+  assert.equal(recovery.calls.filter(call => call.city === 'Fortaleza' && call.metric !== 'building').length, 4);
+  assert.equal(recovery.calls.filter(call => call.city === 'Aquiraz' && call.metric !== 'building').length, 7);
+  await inspectSlides(recovery.page, 'five-cities');
   results.push('Recuperação de Aquiraz preserva as quatro cidades concluídas e só depois consolida o conjunto.');
   await recovery.context.close();
 

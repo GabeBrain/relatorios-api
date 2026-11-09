@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 09/11/2026 — Fortaleza: envio da base e dez slides iniciais — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, acesso somente por rota.
+- **Pedido/entrega:** Lucas autorizou o push de `c78a7c1`/`574087e`/`5439ffe`, concluído e confirmado 0/0 após fetch; deploy não observado. Depois pediu os dez primeiros slides seguindo o original. Prévia mensal/trimestral com navegação/ampliação, arte nativa, posições/tabelas medidas e fontes locais; integração na sequência automática existente. Novo lote local sobre `5439ffe`.
+- **Dados/limites:** cadastro por município/segmento, paginação/IDs/cobertura conferidos, listas acumuladas e contagem de empreendimentos com classificação explícita. Fotografia atual não prova histórico; amostra/empresas pesquisadas aguardam fonte própria. Falhas não produzem parcial e valores antigos não preenchem novo estudo. [Contrato e retomada](../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md).
+- **Validação:**63testes Fortaleza, tipos/lint/build, Edge1440/390 claro/escuro e vinte controles contra Office. Arte preservada e nenhum corte nos controles; diferenças dinâmicas ainda impedem afirmar 100% visual. BrainLoadingState/GeoApiScopeEngine/Button/Tabs/Dialog reutilizados, sem novo primitive global. Sem API real, estudo/exportação real ou Monday; motores SP/Panorama e frentes paralelas sem edição.
+- **Arquivos/commits:** componentes/fontes/arte/layout e contrato de dados em Fortaleza; diagnósticos e documentação. Commit isolado `feat(relatorios): add first ten Fortaleza slides`, hash no fechamento. Próximo: refinamento visual e fonte de amostra/data/fases/cobertura, ensaio autenticado delimitado e exportador posterior.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+
 ### 09/11/2026 — Fortaleza: núcleo vertical, referência de período e prévia por etapas — Lucas / Codex
 
 - **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, sem item em painel/menu/busca.
@@ -1185,6 +1194,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza — slides1–10 09/11:** prévia mensal/trimestral implementada/testada localmente; arte original preservada, renderização dinâmica ainda sem aceite de100%. Base anterior enviada até5439ffe; lote novo local. [Estado](../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md).
+
 - 🟡 **Fortaleza — núcleo vertical09/11:** consulta municipal e prévia em4etapas implementadas/testadas localmente, referência mensal/trimestral explícita. Contrato granular, ensaio real e relatório completo ainda pendentes. [Contrato](../features/relatorios-institucionais/fortaleza/NUCLEO_VERTICAL_2026-11-09.md).
 
 - 🟡 **Fortaleza/SINDUSCON — base09/11:** rota oculta e composição estrutural verificadas localmente, 89/60páginas reais inventariadas; sem indicadores/exportação integrados. [Estado atual](../features/relatorios-institucionais/fortaleza/PLAN.md).
@@ -1275,6 +1286,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza — slides1–10 09/11:** refinar diferenças visuais dinâmicas, fonte da amostra/empresas e reconciliação de início de vendas/fases/exclusões históricas; ensaio autenticado delimitado e exportador posteriores. Publicação deste lote ainda pendente; base anterior enviada. Sem acesso via painel. CorretorV3/Quanti2026 seguem Gabriel.
 
 - **Fortaleza — núcleo vertical09/11:** ensaio autenticado delimitado, fotografias pareadas e reconciliação de fluxos/data de início de vendas/cobertura. Demais segmentos, preços, INCC, MCMV, histórico completo e exportação pendentes. Preservar rota sem painel e não confundir etapas concluídas com aceite do estudo. Falha existente Panorama/firewall-fontes registrada separadamente.
 

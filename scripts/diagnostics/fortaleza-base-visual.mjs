@@ -57,6 +57,7 @@ try {
   await loaded.page.getByText('Conferindo municípios autorizados', { exact: true }).waitFor({ state: 'hidden' });
   await chooseCity(loaded.page);
   await loaded.page.getByRole('button', { name: 'Preparar estrutura', exact: true }).click();
+  await loaded.page.getByRole('tab', { name: 'Estrutura', exact: true }).click();
   await loaded.page.getByRole('region', { name: 'Estrutura preparada', exact: true }).waitFor();
   assert.equal(await loaded.page.getByRole('list', { name: 'Páginas do relatório' }).locator('li').count(), 89);
   results.push('catálogo lento com identidade Brain; trimestre prepara 89 páginas sem API de mercado');

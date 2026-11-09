@@ -1,5 +1,13 @@
 # Fortaleza — evidências da abertura
 
+## 09/11/2026 — envio da base e slides iniciais
+
+`git push origin main` autorizado por Lucas enviou `c78a7c1`/`574087e`/`5439ffe`; fetch confirmou 0/0. Não houve observação do deploy. Na sequência, composição dos dez slides iniciais em ambos os modelos, detalhada em [SLIDES_01_10](SLIDES_01_10_2026-11-09.md). PowerPoint leu os originais sem salvar; vinte fundos nativos e posições medidas, conteúdos variáveis removidos dos fundos.
+
+63 testes Fortaleza, tipos completos e lint dirigido aprovados; build concluído. Edge local/rede externa bloqueada cobre sete grupos de cenários municipais, navegação dos dez slides mensal/trimestral e uma/cinco cidades, 1440/390 e claro/escuro. Comparação contra vinte renders PowerPoint: nenhum corte nos controles, slide 8 idêntico, diferenças remanescentes em textos/gráficos dinâmicos de 0,45–6,48% dos pixels com delta de canal >20. Não significa 100% nem aceite visual. Capturas/controles com cifras antigas ficam apenas em `.local-inputs/relatorios-lucas/fortaleza/`, ignorado.
+
+Nenhuma chamada real GeoBrain, coleta longa, geração/exportação real ou escrita Monday. Novo lote ainda local; roteiro de retomada e fontes pendentes no contrato. SP/FIERGS e domínios paralelos sem edições.
+
 ## 09/11/2026 — núcleo municipal e sequência automática
 
 - **Pedido/escopo:** Lucas autorizou iniciar dados, reforçou SP/FIERGS como referências e pediu seleção Mensal/Trimestral com referência própria e progresso automático. Implementado localmente em `api.ts`, `market.ts`, `useFortalezaMarket.ts`, painéis de etapas/dados e página existente; [contrato completo](NUCLEO_VERTICAL_2026-11-09.md).
