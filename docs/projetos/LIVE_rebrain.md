@@ -385,6 +385,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 09/11/2026 — Fortaleza/SINDUSCON: base navegável apenas por rota — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, base estrutural em implementação.
+- **O quê:** Lucas autorizou conferir originais e preparar base usando FIERGS/SP como referências, sem item no painel. Dois PPTX/hashes/89 e60slides reais/49 e47gráficos conferidos; Office renderizou12amostras, seis inspecionadas. [Revisão dos materiais](../features/relatorios-institucionais/fortaleza/REVISAO_REFERENCIAS_2026-11-09.md).
+- **Runtime:** rota lazy, configuração autorizada de município/conjunto completo e mês/trimestre, composição local das posições do estudo, abas de estrutura/referência/metodologia. Sem dados fictícios ou exportação; contratos de fonte permanecem pendentes. GeoApiScopeEngine/BrainLoadingState/Select/Tabs/Alert existentes; mobile usa padrão compacto já existente. Home/menu/busca sem item novo, motores SP/FIERGS e demais domínios intactos.
+- **Arquivos/commit:** `src/features/relatorios-institucionais/fortaleza/`, registro em `App.tsx`, condição mobile em `AppLayout.tsx`, diagnóstico visual, docs Fortaleza/STATUS e este LIVE. Commit isolado `feat(relatorios): prepare Fortaleza route-only foundation`, hash reportado no fechamento; publicação recusada por Lucas nesta rodada.
+- **Validação:** 11testes Fortaleza aprovados; total conjunto771aprovados/1falha/2ignorados (296SP,463Panorama,1scope,11Fortaleza). Falha isolada no teste existente firewall-fontes/loteamento; código/fixtures Panorama sem mudança. Tipos/lint/build aprovados, AppLayout focado aprovado, sete grupos de cenários Edge1440/390 claro/escuro/catálogo lento/erro/vazio/sucesso com rede externa interceptada e zero chamadas de mercado. [Evidências/limites](../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md).
+- **Impacto em Etapas/Pendências:** base de navegação/manifesto pronta localmente; contratos mensais, classificação/preços/INCC/MCMV, cálculo, desenho final e exportação ainda pendentes. Sem coleta, geração real, push/deploy ou homologação. Brutos/capturas ignorados, dependências alinhadas sem alterar package/lock.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência, nenhuma escrita.
+
 ### 09/11/2026 — Fortaleza/SINDUSCON: início do mapa de fontes e indicadores — Lucas / Codex
 
 - **Ambiente/funcionalidade:** Rebrain — relatórios institucionais, Fortaleza/SINDUSCON-CE (`PLANEJADA`, sem runtime novo).
@@ -1165,6 +1175,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza/SINDUSCON — base09/11:** rota oculta e composição estrutural verificadas localmente, 89/60páginas reais inventariadas; sem indicadores/exportação integrados. [Estado atual](../features/relatorios-institucionais/fortaleza/PLAN.md).
+
 - 🟡 **Fortaleza/SINDUSCON — 09/11:** G1 iniciado, dois modelos legíveis e matriz inicial documentados; sem implementação nova. [Plano](../features/relatorios-institucionais/fortaleza/PLAN.md).
 
 **05/11 — Panorama territorial:** G0–G6validados localmente, sem push; [execução/roteiroG7](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Aceite anterior permanece, ampliação nova aguarda ensaio/aceite.
@@ -1251,6 +1263,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza/SINDUSCON — base09/11:** comprovar fonte mensal vertical capital/cobertura antes de integrar lançamentos/vendas/oferta; ponderação/INCC/MCMV e desenho final por modelo ainda abertos. Uma falha no teste existente Panorama/firewall-fontes fica registrada separadamente, sem alteração de regras nesta frente. Sem ensaio real/publicação autorizados.
 
 - **Fortaleza/SINDUSCON — 09/11:** obter/revisar PPTX bruto e hashes/caches, comprovar fonte mensal/unidade e universo por bloco, ponderação/INCC/MCMV e diferenças de fotografia; depois confirmar fatia G2. [Decisões e lacunas](../features/relatorios-institucionais/fortaleza/DECISOES.md). Sem coleta real/publicação autorizadas nesta rodada.
 

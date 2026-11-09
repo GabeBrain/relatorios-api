@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 09/11/2026 — Fortaleza: base preparada, somente rota
+
+Pedido posterior de Lucas autoriza revisar material/preparar base usando FIERGS/SP, sem entrada no painel e sem push. Base inicial `c78a7c1` sobre `ecbc34f`, fetch0/1 e árvore limpa; os três commits antigos foram retirados da main por pedido dele antes desta rodada, Fortaleza preservada. [Plano atual](../../features/relatorios-institucionais/fortaleza/PLAN.md), [originais/limites](../../features/relatorios-institucionais/fortaleza/REVISAO_REFERENCIAS_2026-11-09.md) e [validações](../../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md).
+
+Dois PPTX brutos/hashes/ordem e 89/60slides reais conferidos, renderização Office amostral. Implementada rota lazy `/rebrain/relatorios-institucionais/fortaleza` com seleção autorizada, período mensal/trimestral, estrutura local e referências; sem item Home/menu/busca. Sem indicadores, fontes de mercado ou exportação integrados. Preservados motores FIERGS/SP e demais domínios; AppLayout só recebeu comportamento compacto mobile para esta rota.
+
+11testes Fortaleza aprovados; regressão conjunta771aprovados/1falha existente Panorama/2ignorados. Falha isolada em firewall-fontes (rótulo loteamento), arquivos Panorama idênticos ao remoto; não corrigida nesta frente. AppLayout focado aprovado, tipos/lint/build aprovados. Edge1440/390 claro/escuro e catálogo lento/erro/vazio/sucesso comprovados com fixtures/rede externa bloqueada, zero API de mercado. Dependências alinhadas pelo lockfile, sem alteração package/lock. Sem acesso pessoal/produção ou aceite inferidos. Próximo: contrato de dados mensal vertical capital antes de conectar coleta/indicadores. Commit isolado `feat(relatorios): prepare Fortaleza route-only foundation`, hash no fechamento; sem push/publicação/Monday.
+
 ## 09/11/2026 — Fortaleza iniciada: referências e contratos
 
 Lucas informou SP institucional concluído e autorizou começar o levantamento de Fortaleza/SINDUSCON. Plano, decisões, evidências, matriz de 22 indicadores/contratos iniciais e inventário textual em [Fortaleza/PLAN](../../features/relatorios-institucionais/fortaleza/PLAN.md). Nenhuma nova homologação do SP feita pelo agente.

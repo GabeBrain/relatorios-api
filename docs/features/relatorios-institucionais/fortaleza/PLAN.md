@@ -1,5 +1,15 @@
 # Fortaleza / SINDUSCON-CE — plano inicial
 
+## 09/11 — base navegável autorizada, acesso somente por rota
+
+Pedido posterior de Lucas autoriza verificar originais e preparar a base usando FIERGS/SP como referências, sem publicar. Implementada **somente composição estrutural**, sem indicadores/coletores/exportador: `/rebrain/relatorios-institucionais/fortaleza`. Ausente do painel, menu e busca de ferramentas; rota lazy no shell atual. Tela configura município ou conjunto completo autorizado, mensal/trimestral e período; prepara 60/89 posições reais do modelo, mantendo fontes/editoriais pendentes e distinguindo competência escolhida de referência histórica. Não representa estudo gerado.
+
+Originais baixados e hash/ordem real conferidos, com renderização Office e inspeção visual amostral conforme [revisão](REVISAO_REFERENCIAS_2026-11-09.md). G1 estrutural avança; contrato de dados/ponderação/MCMV/INCC permanece aberto. O pedido autoriza esta base G2, sem pressupor autorização para coleta real ou implementação de regras metodológicas não demonstradas.
+
+Padrões reutilizados: página de SP, seleção GeoApiScopeEngine e progresso Brain; separação seleção/modelo/manifesto de Panorama. Nenhum motor foi copiado ou alterado, nem usada entidade FIERGS como Fortaleza. Mobile desta rota usa o comportamento compacto já existente em Estimativas/Corretor. [Evidências](EVIDENCIAS.md) incluem teste lento, claro/escuro e 1440/390.
+
+Próximo: comprovar contrato mensal para vertical capital (abertura maio/fechamento junho), mapa de campos/cobertura e fixtures auditáveis antes de conectar dados. RM/casas/lotes/comercial exigem seus contratos; cifras dos originais nunca preenchem resultado do novo recorte. Ensaio real e publicação continuam separados. O roteiro inicial abaixo é histórico e não limita o pedido posterior de base navegável.
+
 09/11/2026 · Lucas / Codex · base `ad5f7e2`, main.
 
 ## Escopo autorizado e estado

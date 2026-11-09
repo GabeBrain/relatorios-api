@@ -4,6 +4,8 @@
 
 ## Onde trabalhar
 
+**Fortaleza/SINDUSCON-CE — 09/11/2026:** [plano e estado da base](fortaleza/PLAN.md), [revisão dos originais](fortaleza/REVISAO_REFERENCIAS_2026-11-09.md). Base estrutural acessível somente em `/rebrain/relatorios-institucionais/fortaleza`, sem item no painel/menu. Ainda sem integração de indicadores, estudo real ou exportação.
+
 Abrir **a raiz do checkout `relatorios-api`** no Codex/editor; comandos Git/npm partem da raiz, não da pasta de documentos. A documentação dos próximos modelos fica aqui. Criar `sp/`, `fortaleza/`, `maceio/` e `recife/` conforme cada modelo começar, sem antecipar pastas vazias como avanço.
 
 Em cada modelo: `PLAN.md` (fatia/portões), `MATRIZ_INDICADORES.csv` (contrato/gabarito/deltas), `DECISOES.md` (fatos/hipóteses/decisões), `EVIDENCIAS.md` (comandos/versões/resultado/aceite). O catálogo inicial é [modelos.json](../../handoffs/lucas-relatorios-2026-10-14/fontes/modelos.json); acrescentar versões/fonte/hashes, sem criar cópias contraditórias do mesmo catálogo. Fichas só aparecem como prontas depois de executadas.

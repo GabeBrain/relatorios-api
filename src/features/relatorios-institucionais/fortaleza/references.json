@@ -1,0 +1,1222 @@
+[
+  {
+    "id": "junho-2t2026",
+    "label": "Junho / 2T2026",
+    "file": "BRAIN_PANORAMA_FORTALEZA_E_RM_JUNHO_V28jul_11h35.pptx",
+    "sourceId": "1R9U4ZrrfYLoDHo47C3J0FO5fT6SNxtX0",
+    "sha256": "9627305db0022997961cd8feb37523cca49111ee8277947a0e4544b5bc66a78a",
+    "bytes": 20323736,
+    "slideCount": 89,
+    "chartCount": 49,
+    "widthEmu": "12192000",
+    "heightEmu": "6858000",
+    "slides": [
+      {
+        "number": 1,
+        "title": "Reunião da comissão",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 2,
+        "title": "Mercado Imobiliário – Junho | 2026",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 3,
+        "title": "LANÇAMENTOS | 2026 - Fortaleza",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 4,
+        "title": "LANÇAMENTOS | 2026 - Fortaleza",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 5,
+        "title": "LANÇAMENTOS | 2026 – Região Metropolitana",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 6,
+        "title": "LANÇAMENTOS | 2026 – Região Metropolitana",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 7,
+        "title": "LANÇAMENTOS | 2026 – Região Metropolitana",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 8,
+        "title": "O que veremos:",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 9,
+        "title": "LANÇAMENTOS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 10,
+        "title": "EMPREENDIMENTOS LANÇADOS POR TRIMESTRE",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 11,
+        "title": "EMPREENDIMENTOS LANÇADOS POR TRIMESTRE",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 12,
+        "title": "UNIDADES LANÇADAS POR TRIMESTRE",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 13,
+        "title": "UNIDADES LANÇADAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 14,
+        "title": "UNIDADES LANÇADAS POR TRIMESTRE",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 15,
+        "title": "UNIDADES LANÇADAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 16,
+        "title": "Padrão",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 17,
+        "title": "VGV LANÇADO POR TRIMESTRE (EM MILHÕES)",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 18,
+        "title": "VGV LANÇADO POR PADRÃO (EM MILHÕES)",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 19,
+        "title": "VGV UNIDADES LANÇADAS POR MUNICÍPIO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 20,
+        "title": "LANÇAMENTOS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 21,
+        "title": "UNIDADES LANÇADAS POR TRIMESTRE",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 22,
+        "title": "VGV LANÇADO POR TRIMESTRE (EM MILHÕES) - LOTEAMENTOS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 23,
+        "title": "VENDAS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 24,
+        "title": "UNIDADES VENDIDAS POR TRIMESTRE",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 25,
+        "title": "UNIDADES VENDIDAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 26,
+        "title": "VENDAS LÍQUIDAS E LANÇAMENTOS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 27,
+        "title": "UNIDADES VENDIDAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 28,
+        "title": "VENDAS LÍQUIDAS E LANÇAMENTOS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 29,
+        "title": "VGV VENDIDO POR TRIMESTRE (EM MILHÕES)",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 30,
+        "title": "VGV VENDIDO POR PADRÃO (EM MILHÕES)",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 31,
+        "title": "Padrão",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 32,
+        "title": "VGV UNIDADES VENDIDAS POR MUNICÍPIO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 33,
+        "title": "VENDAS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 34,
+        "title": "UNIDADES VENDIDAS POR TRIMESTRE - LOTEAMENTOS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 35,
+        "title": "VGV VENDIDO POR TRIMESTRE (EM MILHÕES) – LOTEAMENTOS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 36,
+        "title": "OFERTA FINAL",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 37,
+        "title": "OFERTA FINAL POR TRIMESTRE",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 38,
+        "title": "OFERTA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 39,
+        "title": "OFERTA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 40,
+        "title": "OFERTA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 41,
+        "title": "PREÇOS",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 42,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 43,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 44,
+        "title": "PREÇOS",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 45,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 46,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 47,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 48,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 49,
+        "title": "Localização dos Empreendimentos Verticais  -  Fortaleza",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 3
+      },
+      {
+        "number": 50,
+        "title": "Empreendimentos Verticais / Preço por m²",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 51,
+        "title": "Empreendimentos Verticais / Preço por m²",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 52,
+        "title": "Empreendimentos Verticais / Preço por m²",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 53,
+        "title": "Empreendimentos Verticais / Preço por m²",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 54,
+        "title": "ÍNDICE DE VELOCIDADE DE VENDAS LÍQUIDAS (IVV)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 55,
+        "title": "OFERTA FINAL TOTAL E IVV - POR BAIRRO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 56,
+        "title": "OFERTA FINAL TOTAL E IVV - POR BAIRRO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 57,
+        "title": "OFERTA FINAL TOTAL E IVV - POR BAIRRO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 58,
+        "title": "OFERTA FINAL TOTAL E IVV - POR BAIRRO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 59,
+        "title": "OFERTA LANÇADA E FINAL POR TIPOLOGIA –",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 60,
+        "title": "OFERTA LANÇADA E FINAL POR TIPOLOGIA –",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 61,
+        "title": "OFERTA LANÇADA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 62,
+        "title": "OFERTA LANÇADA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 63,
+        "title": "TEMPO MÉDIO DA OFERTA LANÇADA E FINAL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 64,
+        "title": "PART. DO TEMPO MÉDIO DA OFERTA LANÇADA E FINAL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 65,
+        "title": "ANÁLISE GERAL",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 66,
+        "title": "OFERTA LANÇADA E FINAL POR TIPO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 67,
+        "title": "OFERTA LANÇADA E FINAL POR ANO DE LANÇAMENTO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 68,
+        "title": "PREÇO MÉDIO DO M² PRIVATIVO POR",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 69,
+        "title": "MÍNIMO, MÉDIA E MÁXIMA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 70,
+        "title": "ANÁLISE GERAL",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 71,
+        "title": "Localização dos Empreendimentos Verticais  -",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 3
+      },
+      {
+        "number": 72,
+        "title": "ÍNDICE DE VELOCIDADE DE VENDAS LÍQUIDAS (IVV)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 73,
+        "title": "OFERTA FINAL TOTAL E IVV POR MUNICÍPIO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 74,
+        "title": "OFERTA LANÇADA E FINAL POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 75,
+        "title": "OFERTA LANÇADA E FINAL POR TIPOLOGIA – RESIDENCIAL VERTICAL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 76,
+        "title": "OFERTA LANÇADA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 77,
+        "title": "PART. DO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 78,
+        "title": "TEMPO MÉDIO DA OFERTA LANÇADA E FINAL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 79,
+        "title": "PART. DO TEMPO MÉDIO DA OFERTA LANÇADA E FINAL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 80,
+        "title": "ANÁLISE GERAL",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 81,
+        "title": "OFERTA LANÇADA E FINAL POR TIPO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 82,
+        "title": "OFERTA LANÇADA E FINAL POR ANO DE LANÇAMENTO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 83,
+        "title": "PREÇO MÉDIO DO M² PRIVATIVO POR TIPOLOGIA (R$/m²)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 84,
+        "title": "MÍNIMO, MÉDIA E MÁXIMA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 85,
+        "title": "CONSULTORES",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 86,
+        "title": "EQUIPE TÉCNICA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 87,
+        "title": "EQUIPE TÉCNICA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 3
+      },
+      {
+        "number": 88,
+        "title": "EQUIPE TÉCNICA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 89,
+        "title": "OBRIGADO",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 4
+      }
+    ]
+  },
+  {
+    "id": "julho-2026",
+    "label": "Julho / 2026",
+    "file": "BRAIN_PANORAMA_FORTALEZA_E_RM_JULHO_VAP_26ago_9h31.pptx",
+    "sourceId": "10-lrnOUhSIN0Yju2fqA88F3uLmp4TT8a",
+    "sha256": "296fe59a14cb914e84c070700a177fe999950aab54468ea261ade2167fa245a8",
+    "bytes": 10025584,
+    "slideCount": 60,
+    "chartCount": 47,
+    "widthEmu": "12192000",
+    "heightEmu": "6858000",
+    "slides": [
+      {
+        "number": 1,
+        "title": "Reunião da comissão",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 2,
+        "title": "Mercado Imobiliário – Julho | 2026",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 3,
+        "title": "LANÇAMENTOS | 2026 - Fortaleza",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 4,
+        "title": "LANÇAMENTOS | 2026 - Fortaleza",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 5,
+        "title": "LANÇAMENTOS | 2026 – Região Metropolitana",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 6,
+        "title": "LANÇAMENTOS | 2026 – Região Metropolitana",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 7,
+        "title": "LANÇAMENTOS | 2026 – Região Metropolitana",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 8,
+        "title": "O que veremos:",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 9,
+        "title": "LANÇAMENTOS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 10,
+        "title": "EMPREENDIMENTOS LANÇADOS POR MÊS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 11,
+        "title": "EMPREENDIMENTOS LANÇADOS POR MÊS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 12,
+        "title": "UNIDADES LANÇADAS POR MÊS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 13,
+        "title": "UNIDADES LANÇADAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 14,
+        "title": "UNIDADES LANÇADAS POR MÊS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 15,
+        "title": "UNIDADES LANÇADAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 16,
+        "title": "VGL POR MÊS (EM MILHÕES)",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 17,
+        "title": "VGL POR PADRÃO (EM MILHÕES)",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 18,
+        "title": "LANÇAMENTOS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 19,
+        "title": "UNIDADES LANÇADAS POR MÊS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 20,
+        "title": "VGL POR MÊS (EM MILHÕES) - LOTEAMENTOS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 21,
+        "title": "VENDAS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 22,
+        "title": "UNIDADES VENDIDAS POR MÊS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 23,
+        "title": "UNIDADES VENDIDAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 24,
+        "title": "VENDAS LÍQUIDAS E LANÇAMENTOS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 25,
+        "title": "UNIDADES VENDIDAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 26,
+        "title": "VENDAS LÍQUIDAS E LANÇAMENTOS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 27,
+        "title": "VGV POR MÊS (EM MILHÕES)",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 28,
+        "title": "VGV POR PADRÃO (EM MILHÕES)",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 29,
+        "title": "VENDAS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 30,
+        "title": "UNIDADES VENDIDAS POR MÊS - LOTEAMENTOS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 31,
+        "title": "VGV POR MÊS (EM MILHÕES) – LOTEAMENTOS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 32,
+        "title": "OFERTA FINAL",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 33,
+        "title": "OFERTA FINAL POR MÊS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 34,
+        "title": "OFERTA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 35,
+        "title": "OFERTA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 36,
+        "title": "PREÇOS",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 37,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 38,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 39,
+        "title": "PREÇOS",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 40,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 41,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 42,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 43,
+        "title": "PREÇO MÉDIO/M²",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 44,
+        "title": "ANÁLISE GERAL",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 45,
+        "title": "ÍNDICE DE VELOCIDADE DE VENDAS LÍQUIDAS (IVV)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 46,
+        "title": "ÍNDICE DE VELOCIDADE DE VENDAS LÍQUIDAS (IVV)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 47,
+        "title": "OFERTA FINAL TOTAL E IVV POR MUNICÍPIO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 48,
+        "title": "OFERTA FINAL TOTAL E IVV POR TIPO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 49,
+        "title": "OFERTA FINAL TOTAL E IVV POR TIPO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 50,
+        "title": "OFERTA LANÇADA E FINAL POR TIPO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 51,
+        "title": "OFERTA LANÇADA E FINAL POR TIPO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 52,
+        "title": "OFERTA FINAL TOTAL E IVV - POR BAIRRO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 53,
+        "title": "OFERTA FINAL TOTAL E IVV - POR BAIRRO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 54,
+        "title": "OFERTA FINAL TOTAL E IVV - POR BAIRRO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 55,
+        "title": "OFERTA FINAL TOTAL E IVV - POR BAIRRO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 0
+      },
+      {
+        "number": 56,
+        "title": "CONSULTORES",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 0
+      },
+      {
+        "number": 57,
+        "title": "EQUIPE TÉCNICA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 58,
+        "title": "EQUIPE TÉCNICA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 3
+      },
+      {
+        "number": 59,
+        "title": "EQUIPE TÉCNICA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 60,
+        "title": "OBRIGADO",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 4
+      }
+    ]
+  }
+]

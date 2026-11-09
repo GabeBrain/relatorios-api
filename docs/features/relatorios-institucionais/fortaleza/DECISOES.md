@@ -1,5 +1,13 @@
 # Fortaleza — fatos, propostas e pendências
 
+## Complemento — base autorizada e revisão dos originais em 09/11
+
+Pedido posterior de Lucas autoriza a base estrutural usando FIERGS/SP como referências, com acesso **somente pela rota** `/rebrain/relatorios-institucionais/fortaleza`, sem adicionar item no painel/menu e sem push. Implementação de dados/ensaios reais continua fora desta rodada. [Revisão binária/visual amostral](REVISAO_REFERENCIAS_2026-11-09.md) supera apenas as lacunas de download/hash/contagem do registro inicial abaixo; ponderação e contratos de mercado seguem pendentes.
+
+Contagens reais confirmadas: 89 slides/49 gráficos em junho e 60/47 em julho, ambos 16:9. A estrutura mensal usa o manifesto julho; a trimestral usa junho. Isso seleciona sequência editorial, não prova fonte granular para qualquer período escolhido. Não usar o número de slides de SP ou política FIERGS como contrato de Fortaleza.
+
+Classificação inicial do manifesto distingue páginas com gráficos/tabelas/mapas de conteúdo editorial; é um inventário estrutural, não prova de automatização. Tela sempre identifica fontes/editoriais pendentes. Universo, períodos, cálculos e retrabalho das divergências permanecem explícitos em vez de renderizar valores históricos como estudo novo.
+
 09/11/2026 · evidência: leitura textual dos dois PPTX no Drive; localização em [MAPA_BLOCOS](MAPA_BLOCOS.md). Não representa validação visual, base granular ou método homologado.
 
 ## Fatos documentais
