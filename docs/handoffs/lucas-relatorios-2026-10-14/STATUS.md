@@ -1,5 +1,15 @@
 # Estado do handoff
 
+## 09/11/2026 — Fortaleza iniciada: referências e contratos
+
+Lucas informou SP institucional concluído e autorizou começar o levantamento de Fortaleza/SINDUSCON. Plano, decisões, evidências, matriz de 22 indicadores/contratos iniciais e inventário textual em [Fortaleza/PLAN](../../features/relatorios-institucionais/fortaleza/PLAN.md). Nenhuma nova homologação do SP feita pelo agente.
+
+Ambiente desta sessão: main `ad5f7e2`, somente origin correto; fetch atualizado, árvore inicialmente limpa, 0 atrás/3 commits locais à frente (14/10, 04/11 e 09/11), preservados sem push. Git config lucas/lucas@example.com. Node v24.19.0/npm 11.17.0, dependências e lockfile presentes; preflight offline executado, Git via Node indisponível no sandbox e comandos diretos conferidos. Sem leitura de valores env. Drive legível comprovado pelo conector nos dois IDs Fortaleza do catálogo, ambos PPTX no parent esperado; login pessoal/publicação não inferidos. GeoBrain/Rebrain/Lovable/Mapbox não testados nesta rodada.
+
+Junho/2T2026 proposto como referência principal, julho mensal como complemento. 89/60 blocos de extração inventariados sem presumir contagem real de slides. Próximo: PPTX bruto/hash, leitura visual/caches, contrato de fontes mensais/unidades, ponderação/INCC/MCMV e revisão das inconsistências textuais. G1 iniciado, não encerrado como método aprovado. Fatia G2 candidata: vertical capital junho/2026, lançamentos/vendas/oferta; implementação depende de contrato e confirmação própria. Nenhuma API GeoBrain, geração real, implementação runtime, publicação ou escrita Monday. Escopos paralelos intactos. Datas de férias de outubro permanecem históricas, sem assumir restrição de disponibilidade ou prazo em novembro.
+
+Entrega documental em commit isolado `docs(relatorios): map Fortaleza sources and initial contracts`; contadores/hash finais reportados no fechamento. Retomar pelo PLAN de Fortaleza e comparar todos os remotes antes de editar.
+
 ## 05/11/2026 — textos editáveis nos slides institucionais5/7
 
 Base `eb931d5`, main/origin0/0 apósfetch. Usuário identificou junho em geração3T2026 e pediu edição de percentuais/cartões GeoBrain. CamadaSVG nativa usa competência conferida no7 e expõe seis cartões do5 ao exportador editável. Números editoriais preservados com referência explícita, sem inferência pela API municipal.296testesSP/33arquivos, tipos/build/lint, Edge e edição/salvamento/reabertura de três textos noOffice. SemAPIrealnova; publicação/ensaio autenticado pendentes. [Contrato](../../features/relatorios-institucionais/sp/TEXTOS_INSTITUCIONAIS_EDITAVEIS_2026-11-05.md).

@@ -385,6 +385,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 09/11/2026 — Fortaleza/SINDUSCON: início do mapa de fontes e indicadores — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — relatórios institucionais, Fortaleza/SINDUSCON-CE (`PLANEJADA`, sem runtime novo).
+- **O quê/por quê:** após Lucas informar conclusão do SP e autorizar próximo levantamento, consultados os dois modelos Fortaleza no Drive. Junho/2T2026 principal proposto e julho mensal complementar, 22 contratos iniciais e 89/60 blocos textuais inventariados, sem assumir número real de slides. [Plano e portões](../features/relatorios-institucionais/fortaleza/PLAN.md).
+- **Decisões/lacunas:** separar capital/RM e universos por bloco, mês/trimestre/12 meses, preços por unidade e exclusões explícitas; preservar negativos. MCMV por data/recorte, INCC/ponderação, totais aparentes e revisões entre fotografias precisam de prova. G2 candidato vertical capital junho/2026 depende de contrato e confirmação; sem copiar política SP/FIERGS.
+- **Arquivos/commits:** `docs/features/relatorios-institucionais/fortaleza/{PLAN.md,DECISOES.md,EVIDENCIAS.md,MATRIZ_INDICADORES.csv,MAPA_BLOCOS.md}`, STATUS do handoff e este LIVE. Commit isolado `docs(relatorios): map Fortaleza sources and initial contracts`, hash no fechamento.
+- **Validação/limites:** leitura conector comprovada, fonte PPTX/parent e datas identificados; bruto/hash/visual/caches e API granular ainda pendentes. Preflight offline, validação estrutural de matriz/links e documentação no fechamento. Sem geração/API GeoBrain/publicação/Monday, sem mudar SP/Secovi/FIERGS ou demais domínios. Três commits locais anteriores preservados.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+- **Impacto em Etapas/Pendências:** G1 iniciado com documentação própria; falta prova visual/mensal/metodológica para encerrar contrato e delimitar G2. Declaração de SP concluído vem de Lucas, sem nova homologação pelo agente.
+
 ### 06/11/2026 — Panorama: auditoria real individualiza ausência de VGV em Taquari
 
 - Diagnóstico da sessão de Gabriel: CSV das cinco cidades sem `different`, mas com cobertura indisponível. VGV vertical de Taquari3T2026 ausente; consulta posterior à API confirma última linha vertical emjunho, com setembro horizontal presente. Sem preencher zero ou mudar runtime.
@@ -1155,6 +1165,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza/SINDUSCON — 09/11:** G1 iniciado, dois modelos legíveis e matriz inicial documentados; sem implementação nova. [Plano](../features/relatorios-institucionais/fortaleza/PLAN.md).
+
 **05/11 — Panorama territorial:** G0–G6validados localmente, sem push; [execução/roteiroG7](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Aceite anterior permanece, ampliação nova aguarda ensaio/aceite.
 **05/11 — SP, textos institucionais5/7:** competência do perfil acompanha a geração; títulos/percentuais e seis cartões GeoBrain exportam como caixas editáveis. Validados localmente com Edge/Office; fonte editorial continua identificada, publicação/ensaio real pendentes.
 
@@ -1239,6 +1251,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza/SINDUSCON — 09/11:** obter/revisar PPTX bruto e hashes/caches, comprovar fonte mensal/unidade e universo por bloco, ponderação/INCC/MCMV e diferenças de fotografia; depois confirmar fatia G2. [Decisões e lacunas](../features/relatorios-institucionais/fortaleza/DECISOES.md). Sem coleta real/publicação autorizadas nesta rodada.
 
 **05/11 — Panorama territorial:** autorizar integração do novoSP `4aed591` e publicação; conferir noLovable dupla comparada, consolidado regional e cidade versus grupo, retornandoPDF/PPT/CSV. Não homologado externamente nesta entrega.
 - [ ] **SP — revisar números editoriais dos slides5/7:** atualizar percentuais e indicadores institucionais com fonte aprovada quando necessário. Textos agora editáveis no PPTX; a API municipal não fornece esses números. Data da geração é dinâmica e não significa atualização automática desses indicadores.

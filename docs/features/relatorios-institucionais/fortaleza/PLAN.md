@@ -1,0 +1,30 @@
+# Fortaleza / SINDUSCON-CE — plano inicial
+
+09/11/2026 · Lucas / Codex · base `ad5f7e2`, main.
+
+## Escopo autorizado e estado
+
+Lucas informou SP institucional concluído e autorizou começar o próximo item após a proposta de escolher referência e mapear indicadores/fontes. Esta rodada entrega G1 de levantamento documental, sem implementação runtime, coleta GeoBrain, geração real ou publicação. A declaração de conclusão de SP é do usuário; não foi feita nova homologação do SP nem reaberta sua fila.
+
+Referência principal proposta: **junho/2T2026**, preservando tabelas mensais de junho e séries trimestrais como janelas diferentes. **Julho/2026** é referência mensal complementar e controle de evolução, sem misturar fotografias. Fontes/IDs originais: [catálogo único](../../../handoffs/lucas-relatorios-2026-10-14/fontes/modelos.json). [Inventário textual](MAPA_BLOCOS.md), [contratos iniciais](MATRIZ_INDICADORES.csv), [decisões/lacunas](DECISOES.md), [evidências](EVIDENCIAS.md).
+
+## Portões
+
+1. **G1 iniciado nesta entrega:** texto dos dois PPTX acessível, blocos inventariados, indicadores e dependências mapeados. Falta leitura do PPTX bruto/visual, hashes e caches/planilhas embutidas para gabarito de gráficos que o texto não revela. Não tratar blocos extraídos como slides comprovados.
+2. **Concluir contrato antes de G2:** validar identidade/fases dos empreendimentos, data de início das vendas, separação vertical/casas/lotes/comercial, fonte mensal e comparabilidade das fotografias. Provar campos de distratos, preço vigente por unidade, ponderação e histórico INCC. Matriz mantém cálculo/delta vazios até execução.
+3. **Menor fatia de G2 proposta:** vertical, Fortaleza capital, lançamentos/vendas líquidas/oferta de junho/2026, com abertura maio e reconciliação por município/padrão; pode compor o trimestre somente com abril–junho comprovados. Mostrar escopo/competência/cobertura, ausente versus zero e negativos. Sem declarar relatório completo. RM e demais segmentos permanecem no mapa do produto e entram após comprovar o mesmo contrato por cidade/segmento.
+4. **G2 exige confirmação própria:** identidade Fortaleza e rota lazy no shell; GeoApiScopeEngine limita cidades ao catálogo pessoal, UF antes da cidade e sem fallback IBGE. BrainLoadingState com etapa/tempo real/cancelamento e verificação lenta no navegador. Não copiar API/modelo SP com cidade fixa nem usar ID FIERGS.
+5. **G3:** fixtures positivas/negativas de zero, ausente, venda negativa, cidade incompleta, revisão de estoque, mês/trimestre; regressões Secovi/FIERGS 2T2026/4T2025 e consumidores de qualquer mudança transversal; tipos/lint/build proporcionais. Validar carregando/sucesso/vazio/erro no navegador.
+6. **Ensaio real/publicação/aceite separados:** autorização de coleta delimitada, PDF/PPT/CSV pareados da mesma geração e aprovador identificado. Nenhum aceite FIERGS/SP se transfere automaticamente.
+
+## Arquitetura a reaproveitar, sem alterar nesta rodada
+
+- `src/features/shared/geo-api-scope-engine/`: catálogo e seleção autorizada.
+- `src/features/panorama-secovi-fiergs/domain/collection.ts` e `lib/request-with-retry.ts`: recuperação/completude e transporte.
+- `src/features/relatorios-institucionais/sp/api.ts`, `generation.ts`, `temporal.ts`, `projects.ts`: padrões de consulta por janela, progresso e modelo auditável. API atual fixa São Paulo/SP/Vertical e limites por padrões: não é contrato genérico de Fortaleza.
+- Políticas/cubo/reconciliação/manifestos Panorama: revisar consumidores e versões atuais antes de qualquer extensão; histórico antigo de guardas não substitui comportamento do checkout atual.
+- Exportação/auditoria SP: referência de proveniência e pareamento, sem acoplar Fortaleza aos 85 slides SP.
+
+## Retomada
+
+Ler estes documentos e STATUS, fazer fetch/comparar todos os remotes, preservar commits locais e mudanças paralelas. Próxima ação independente: baixar originais pelo Drive para `.local-inputs/relatorios-lucas/fortaleza/`, registrar hash e revisar visual/cache. Só depois fechar contrato/G2. Nenhuma data antiga de férias define disponibilidade ou prazo em novembro.
