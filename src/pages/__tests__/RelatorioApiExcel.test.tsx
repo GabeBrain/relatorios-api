@@ -85,6 +85,7 @@ describe('Relatório API Excel — geração explícita', () => {
     for (const field of ['ID Tipologia', 'Garagem', 'Unidades por Tipologia']) expect(within(columns).queryByText(field, { exact: true })).not.toBeInTheDocument();
     expect(within(columns).getByText('Vendas Brutas', { exact: true })).toBeVisible();
     expect(within(columns).getByText('VGV Estoque', { exact: true })).toBeVisible();
+    expect(within(columns).getByText('VGV Lançado', { exact: true })).toBeVisible();
     expect(within(columns).getByText('Faixa MCMV', { exact: true })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Baixar Excel' })).toBeDisabled();
     expect(engine.buildReport).toHaveBeenCalledTimes(1);

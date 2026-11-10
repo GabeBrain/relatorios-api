@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 10/11/2026 — Relatório API Excel: VGV Lançado por empreendimento — Edgar / Codex
+
+- **Correção exclusiva:** VGV Lançado estava fora de BUILDING_TOTALS e não aparecia no nível Por empreendimento. Incluído na seleção e soma por empreendimento/período, nos dois layouts. Preserva qty/preço de cada tipologia e modo monetário; trimestre usa último fechamento, sem somar oferta mensal. Ausências e escala mantêm regras existentes. Sem mudança no nível Por tipologia, coletor, MCMV, AELO ou Dashboard.
+- **Validação:** testes de disponibilidade na interface, valores mensais25000/40000 nos modos período/atual, trimestre40000 sem somar meses e leitura de retorno XLSX com escala25/40. Tipos/lint e regressões da feature no fechamento. Sem consulta autenticada ou nova conferência visual de produção.
+- **Etapas/Pendências:** correção local, publicação aguarda autorização. Base atualizada por fast-forward d9b2448→fbe9742 (12 commits de Fortaleza/Panorama); entradas recebidas conferidas. Arquivo de auditoria local preservado. Sem push/Monday.
+- **Monday:** —
+
 ### 10/11/2026 — Panorama: somente consolidado e ressalvas acessíveis — Gabriel / Codex
 
 - **Mudança:** seleção com2+cidades permite Somente consolidado, semnomesougruposobrigatórios; opções2/3grupos preservadas. O manifesto compartilhado omite comparativosmunicipais/territoriais, incluindo antigosSecovi eFIERGS31, mantendo todascidades e análisesconsolidadas. Cidadeúnica continua direta. Novidadesnãoalteramcálculos ouguardas.

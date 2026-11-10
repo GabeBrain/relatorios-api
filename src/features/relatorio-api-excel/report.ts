@@ -325,7 +325,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
 
 /** Expande nomes de campos somente na geração, preservando a ordem das métricas. */
 export const BUILDING_TOTALS = ['Vendas Brutas', 'Distratos', 'Vendas Líquidas', 'Estoque',
-  'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'] as const;
+  'VGV Lançado', 'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'] as const;
 const totalMeasure = (column: string) => BUILDING_TOTALS.find((field) => column === field || column.startsWith(`${field} `));
 const BUILDING_FIELDS = new Set<string>([
   ...BUILDING_TOTALS,

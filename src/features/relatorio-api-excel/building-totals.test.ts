@@ -21,12 +21,15 @@ it.each(['period', 'current'] as const)('soma todas as tipologias por mês, cons
     expect(cell('VGV Vendas Líquidas')).toBe(priceMode === 'period' ? 1700 : 2800);
     expect(cell('VGV Estoque')).toBe(priceMode === 'period' ? 23100 : 36800);
     expect(cell('Estoque', 'fev/2026')).toBe(118);
+    expect(cell('VGV Lançado')).toBe(priceMode === 'period' ? 25000 : 40000);
+    expect(cell('VGV Lançado', 'fev/2026')).toBe(40000);
     expect(report.rows[0]['Unidades Totais do Empreendimento']).toBe(150);
     const selected = selectReportFields(report, [...BUILDING_TOTALS]);
     const wb = await createWorkbook(selected);
     const reread = read(write(wb, { type: 'array', bookType: 'xlsx' }), { type: 'array' });
     const rows = utils.sheet_to_json<Record<string, number>>(reread.Sheets[reread.SheetNames[0]]);
     expect(rows[0][layout === 'rows' ? 'VGV Vendas Brutas' : 'VGV Vendas Brutas jan/2026']).toBe(priceMode === 'period' ? 2.2 : 3.6);
+    expect(rows[0][layout === 'rows' ? 'VGV Lançado' : 'VGV Lançado jan/2026']).toBe(priceMode === 'period' ? 25 : 40);
   }
 });
 it.each(['period', 'current'] as const)('soma fluxos no trimestre e usa último estoque por tipologia, VGV %s', (priceMode) => {
@@ -36,6 +39,7 @@ it.each(['period', 'current'] as const)('soma fluxos no trimestre e usa último 
   expect(row['VGV Distratos']).toBe(priceMode === 'period' ? 2300 : 2600);
   expect(row['VGV Vendas Líquidas']).toBe(priceMode === 'period' ? 6300 : 7400);
   expect(row['VGV Estoque']).toBe(32200);
+  expect(row['VGV Lançado']).toBe(40000);
 });
 it('não publica totais parciais quando um fechamento tem campo ausente; preserva zero/negativo', () => {
   const missing = { ...building, typologies_history: history.map((r, i) => i === 2 ? { ...r, gross_sales: null } : r) };
