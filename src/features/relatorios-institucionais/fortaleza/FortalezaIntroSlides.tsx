@@ -29,9 +29,9 @@ export default function FortalezaIntroSlides({ selection, cities, data, monthlyL
   const model = selection.periodicity === 'monthly' ? 'julho' : 'junho';
   const view = buildIntroView(selection, cities.length ? cities : [...FORTALEZA_CITIES], data);
   const source = FORTALEZA_REFERENCES[model === 'junho' ? 0 : 1];
-  const pages = Array.from({ length: model === 'julho' ? 25 : 10 }, (_, index) => index + 1);
+  const pages = Array.from({ length: model === 'julho' ? 35 : 10 }, (_, index) => index + 1);
   const extended = model === 'julho' && (page === 12 || page === 14 || page >= 16);
-  const monthlyData = extended && page !== 18 && page !== 21 ? buildMonthlySlide(page,monthlyLaunches?.market ?? null,selection,cities) : null;
+  const monthlyData = extended && ![18,21,29,32].includes(page) ? buildMonthlySlide(page,monthlyLaunches?.market ?? null,selection,cities) : null;
   const series = page === 11 ? monthlyProjectLaunches(data, selection, cities) : page === 13 || page === 15 ? monthlyUnitLaunches(monthlyLaunches, selection, cities, page === 13 ? 'capital' : 'rm') : null;
   const capacity = (start: number, end: number) => INTRO_LAYOUTS[model].slice(start - 1, end).reduce((sum, layout) => sum + (layout.shapes.find(shape => shape.slot === 'table')?.rows ?? 1) - 1, 0);
   const overflow = Math.max(0, (view.capital?.length ?? 0) - capacity(3, 4)) + Math.max(0, (view.rm?.length ?? 0) - capacity(5, 7));

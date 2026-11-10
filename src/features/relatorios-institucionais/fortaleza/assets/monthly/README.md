@@ -1,5 +1,9 @@
 # Arte mensal — lançamentos verticais
 
+## Lote26–35
+
+Extração agora cobre11–35do mesmo original/hash.29/32são divisórias com escopo/competência variáveis;33–35preservam a faixa comparativa cinza, sem gráficos/percentuais históricos, e recebem fotografias dinâmicas. Original26–35e todos os renders novos foram inspecionados. Nenhum valor antigo é usado na produção. Notas dos lotes abaixo são históricas.
+
 ## Lote12/14e16–25
 
 Atualização10/11: extração cobre11–25do mesmo original/hash.12/14agora têm renderer analítico segmentado, não placeholders;18/21têm arte nativa com municípios/período variáveis. Gráficos e notas antigas removidos também em16–25; “Atualizado pelo INCC” é substituído por identificação dinâmica do índice/base efetivamente calculados. Composição não afirma equivalência pixel a pixel. Referência anterior abaixo preservada como histórico.

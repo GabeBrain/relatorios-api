@@ -1,5 +1,9 @@
 # Fortaleza — evidências da abertura
 
+## 10/11/2026 — slides26–35
+
+[Evidências e regras do lote](MENSAL_SLIDES_26_35_2026-11-10.md). Base3a846f0main/origin0–0, árvore limpa antes da edição.148testes Fortaleza/13arquivos +16regressões selecionadas Secovi/FIERGS aprovados; tipos/build/lint e Edge1440/390claro/escuro com provedores interceptados,25composições11–35, carregamento local e estados lento/vazio/incompleto/cancelado. Originais Office em leitura e dez renders novos inspecionados. Estoque não acumulado, VGV vendido assinado e comparativos anuais conferidos. Fonte real/INCC/homologação/exportação pendentes; novo lote local, sem push/Monday.
+
 ## 10/11/2026 — carregamento restrito ao relatório
 
 Após push autorizado de d9b2448, usuário pediu remover o carregamento de tela inteira. Base main/origin0–0, árvore inicialmente limpa. Página usa cartão relativo depois da configuração, BrainLoadingState overlay absoluto com rolagem local e etapas/tempo/cancelamento preservados; catálogo, preparação e consulta seguem o mesmo contêiner. Reutiliza padrão do SP, sem alterar componente compartilhado, fontes ou cálculos.

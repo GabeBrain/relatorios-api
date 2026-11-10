@@ -7,7 +7,7 @@ $fortMonthlyRecords = @()
 try {
   $deck = $fortMonthlyOffice.Presentations.Open((Join-Path $fortMonthlyRoot 'fortaleza-julho-2026.pptx'), -1, 0, 0)
   try {
-    foreach ($number in 11..25) {
+    foreach ($number in 11..35) {
       $slide = $deck.Slides.Item($number)
       $slide.Export((Join-Path $fortMonthlyRoot "monthly-original-$number.png"), 'PNG', 1280, 720)
       $charts = @(); $texts = @(); $changes = 0; $scopeSlot = $null
@@ -17,7 +17,7 @@ try {
           $shape.Delete()
         } elseif ($shape.HasTextFrame -eq -1 -and $shape.TextFrame.HasText -eq -1) {
           $content = [string]$shape.TextFrame.TextRange.Text
-          if ($number -in @(18,21) -and $content.Contains('Fortaleza,')) {
+          if ($number -in @(18,21,29,32) -and $content.Contains('Fortaleza,')) {
             $scopeSlot = @{x=[double]$shape.Left*4/3;y=[double]$shape.Top*4/3;width=[double]$shape.Width*4/3;height=[double]$shape.Height*4/3}
             $shape.TextFrame2.TextRange.Font.Fill.Transparency = 1; continue
           }

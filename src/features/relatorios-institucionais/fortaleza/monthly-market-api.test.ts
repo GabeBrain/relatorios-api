@@ -10,7 +10,7 @@ function transport(mode = 'success') {
   const request = vi.fn<FortalezaRequest>(async options => {
     active++; maximum = Math.max(maximum,active); await Promise.resolve();
     try {
-      const city = String(options.query.city), segment = String((options.query['type[]'] as string[])[0]), metric = options.url.endsWith('releases') ? 'releases' : 'sales';
+      const city = String(options.query.city), segment = String((options.query['type[]'] as string[])[0]), metric = options.url.split('/').at(-1);
       const source = fixture.sources.find(source => source.city === city && source.segment === segment && source.metric === metric)!;
       const rows = source.rows.map(row => ({ ...row })), page = Number(options.query.page), last = Math.ceil(rows.length / 100);
       if (mode === 'unknown' && segment === 'Horizontal') rows[0].group = 'Não mapeado';
@@ -23,7 +23,7 @@ describe('Fortaleza — coleta compartilhada 12/14 e16–25', () => {
   it('consulta cada cidade/segmento/fonte uma vez, pagina preservando escopo e limita concorrência a2', async () => {
     const { request,maximum } = transport();
     const result = await fetchMonthlyMarket(selection,[...FORTALEZA_CITIES],{ token:'synthetic',request });
-    expect(result.sources).toHaveLength(30); expect(result.issues).toEqual([]);
+    expect(result.sources).toHaveLength(40); expect(result.issues).toEqual([]);
     expect(result.sources.every(source => source.complete)).toBe(true); expect(maximum()).toBeLessThanOrEqual(2);
     for (const [options] of request.mock.calls) {
       expect(options.query).toMatchObject({ uf:'CE',start_period:'2024-07-01',end_period:'2026-07-31',per_page:100 });
@@ -43,7 +43,7 @@ describe('Fortaleza — coleta compartilhada 12/14 e16–25', () => {
   it('adapta a coleta compartilhada para13/15 sem nova consulta vertical', async () => {
     const { request } = transport();
     const result = await fetchMonthlyLaunches({ ...selection,territory:'city' },['Fortaleza'],{ token:'synthetic',request,includeMonthlyReport:true });
-    expect(result.market.sources).toHaveLength(6); expect(result.sources).toHaveLength(1); expect(result.sources[0].rows).toHaveLength(175);
+    expect(result.market.sources).toHaveLength(8); expect(result.sources).toHaveLength(1); expect(result.sources[0].rows).toHaveLength(175);
     const verticalReleaseCalls = request.mock.calls.filter(([options]) => options.url.endsWith('releases') && (options.query['type[]'] as string[])[0] === 'Vertical');
     expect(verticalReleaseCalls).toHaveLength(2);
   });

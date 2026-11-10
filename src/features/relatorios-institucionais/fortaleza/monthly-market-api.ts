@@ -8,10 +8,10 @@ import type { FortalezaEnvelope, FortalezaReadOptions } from './api';
 export async function fetchMonthlyMarket(selection: FortalezaSelection, authorizedCities: string[], options: FortalezaReadOptions, previous?: MonthlyMarketData): Promise<MonthlyMarketData> {
   const scope = fortalezaScope(selection, authorizedCities), months = monthlyMarketMonths(selection), period = fortalezaPeriod(selection);
   if (!scope.valid || !options.token) throw new Error('Confirme o recorte autorizado antes do histórico mensal.');
-  const scopeKey = JSON.stringify([scope.cities,months,'fortaleza-monthly-v2']);
+  const scopeKey = JSON.stringify([scope.cities,months,'fortaleza-monthly-v3']);
   const output: MonthlyMarketData = { scopeKey, months, sources: [], issues: [] };
   const check = () => { if (options.signal?.aborted) throw new DOMException('Consulta cancelada.', 'AbortError'); };
-  const tasks = scope.cities.flatMap(city => (['Vertical','Horizontal','Comercial'] as MonthlySegment[]).flatMap(segment => (['releases','sales'] as MonthlyMetric[]).map(metric => ({ city, segment, metric }))));
+  const tasks = scope.cities.flatMap(city => (['Vertical','Horizontal','Comercial'] as MonthlySegment[]).flatMap(segment => (segment === 'Comercial' ? ['releases','sales'] : ['releases','sales','stock'] as MonthlyMetric[]).map(metric => ({ city, segment, metric:metric as MonthlyMetric }))));
   const completed = new Map<number, MonthlyMarketSource>(); let nextTask = 0;
   async function worker() {
     while (nextTask < tasks.length) {
@@ -22,7 +22,7 @@ export async function fetchMonthlyMarket(selection: FortalezaSelection, authoriz
       try {
         let total: number | undefined, last: number | undefined;
         for (let page = 1; page <= 8; page++) {
-          check(); options.onProgress?.(`${completed.size} de ${tasks.length} fontes mensais concluídas · ${task.city} · ${task.segment} · ${task.metric === 'releases' ? 'lançamentos' : 'vendas'} · página ${page}${last ? ` de ${last}` : ''}`);
+          check(); options.onProgress?.(`${completed.size} de ${tasks.length} fontes mensais concluídas · ${task.city} · ${task.segment} · ${{ releases:'lançamentos',sales:'vendas',stock:'oferta final' }[task.metric]} · página ${page}${last ? ` de ${last}` : ''}`);
           const response = await requestWithRetry(async () => {
             check(); source.requests++;
             return (options.request ?? (value => httpRequest<FortalezaEnvelope>(value)))({ url: `https://geobrain.com.br/public-api/temporal-analysis-city/${task.metric}`, query: { city: task.city, uf:'CE', 'type[]':[task.segment], group_by:'Padrão', start_period:`${months[0]}-01`, end_period:period.end, per_page:100, page }, headers: { Authorization:`Bearer ${options.token}` }, includeAuth:false, signal:options.signal, timeoutMs:20_000, cache:'no-store' });

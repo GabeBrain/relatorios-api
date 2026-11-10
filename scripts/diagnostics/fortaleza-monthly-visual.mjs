@@ -36,7 +36,7 @@ try {
       for (let date = new Date(`${start.slice(0, 7)}-01T00:00:00Z`); date.toISOString().slice(0, 7) <= end.slice(0, 7); date.setUTCMonth(date.getUTCMonth() + 1)) months.push(date.toISOString().slice(0, 7));
       const historical = months.length === 25, segment = url.searchParams.getAll('type[]')[0] || 'Vertical';
       const groups = segment === 'Horizontal' ? ['Condomínio de Casas/Sobrados','Loteamento Aberto','Loteamento Fechado','Condomínio de Chácaras'] : standards;
-      let data = mode === 'empty' && historical ? [] : months.flatMap((month, index) => groups.map((group, groupIndex) => ({ city, state: 'CE', building_type: segment, period: `${month}-01`, group, vgv_release:(groupIndex === 0 ? 10 + index : 2)*500000, [metric === 'releases' ? 'releases_in_period' : metric === 'sales' ? 'liquid_sales' : 'stock']: metric === 'stock' ? 100 : metric === 'sales' && groupIndex === 1 ? -2 : groupIndex === 0 ? 10 + index : 2 })));
+      let data = mode === 'empty' && historical ? [] : months.flatMap((month, index) => groups.map((group, groupIndex) => ({ city, state: 'CE', building_type: segment, period: `${month}-01`, group, vgv_release:(groupIndex === 0 ? 10 + index : 2)*500000, vgv_liquid_sales:(groupIndex === 1 ? -2 : groupIndex === 0 ? 10 + index : 2)*500000, [metric === 'releases' ? 'releases_in_period' : metric === 'sales' ? 'liquid_sales' : 'stock']: metric === 'stock' ? 100 : metric === 'sales' && groupIndex === 1 ? -2 : groupIndex === 0 ? 10 + index : 2 })));
       if (mode === 'missing' && historical) data.pop();
       if (mode === 'slow' && historical && city === 'Fortaleza' && segment === 'Horizontal' && metric === 'releases') await new Promise(done => setTimeout(done, 1200));
       const page = Number(url.searchParams.get('page') || 1), total = data.length, last = Math.max(1, Math.ceil(total / 100));
@@ -73,7 +73,7 @@ try {
     await page.waitForFunction(() => !document.querySelector('button') || ![...document.querySelectorAll('button')].find(button => button.textContent === 'Gerar prévia mensal')?.disabled);
     mode = 'success';
     const count = calls.length;
-    for (const number of [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]) {
+    for (const number of Array.from({ length:25 },(_,index) => index+11)) {
       await page.getByRole('navigation', { name: 'Slides implementados', exact: true }).getByRole('button', { name: String(number), exact: true }).click();
       await page.evaluate(() => document.fonts.ready);
       const slide = page.getByRole('img', { name: `Fortaleza · slide ${number}`, exact: true });
@@ -84,7 +84,7 @@ try {
     }
     assert.equal(calls.length, count, 'Slide navigation must not issue queries.');
     await page.getByRole('navigation', { name: 'Slides implementados', exact: true }).getByRole('button', { name: '11', exact: true }).click();
-    for (let number = 12;number <= 25;number++) {
+    for (let number = 12;number <= 35;number++) {
       await page.getByRole('navigation', { name: 'Slides implementados', exact: true }).getByRole('button', { name: 'Próximo', exact: true }).click();
       await page.getByRole('img', { name: `Fortaleza · slide ${number}`, exact: true }).waitFor();
       if (number === 12 || number === 14) {
@@ -104,7 +104,7 @@ try {
       await page.getByRole('button', { name: 'Cancelar consulta', exact: true }).click();
       await page.getByText('Prévia cancelada', { exact: true }).waitFor();
     }
-    results.push({ width, dark, calls: calls.length, slides: Array.from({ length:15 },(_,index) => index+11), officialSequence: '11–25 sem saltos', offline: true });
+    results.push({ width, dark, calls: calls.length, slides: Array.from({ length:25 },(_,index) => index+11), officialSequence: '11–35 sem saltos', offline: true });
     await context.close();
   }
 } finally { await browser.close(); }

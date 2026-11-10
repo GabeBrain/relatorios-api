@@ -1,5 +1,9 @@
 # Fortaleza / SINDUSCON-CE — plano inicial
 
+## 10/11 — lote mensal26–35
+
+[Entrega e contrato26–35](MENSAL_SLIDES_26_35_2026-11-10.md): prévia1–35dos60slides originais, RM móvel, VGV vendido, lotes e oferta em fotografias mensais.148testes Fortaleza +16regressões, build/tipos/lint e Edge sintético1440/390claro/escuro; carregamento local preservado. Restam36–60, amostra/metodologia/fontes reais/homologação e exportação. Próximo36–45. Base3a846f0publicada; este lote permanece local até autorização própria de envio. Registros anteriores abaixo são históricos.
+
 ## 10/11 — carregamento local
 
 Lote d9b2448 enviado com autorização. Ajuste posterior solicitado: carregamento somente no cartão do relatório, deixando shell/menu acessíveis. BrainLoadingState local reutilizado do padrão SP; etapas/cancelamento/cronômetro preservados. Build/tipos/lint e Edge lento1440/390claro/escuro, sucesso/vazio/incompleto/cancelamento aprovados. [Evidência](EVIDENCIAS.md). Sem mudança nos números ou no próximo lote26–35; ajuste local até novo envio autorizado.
