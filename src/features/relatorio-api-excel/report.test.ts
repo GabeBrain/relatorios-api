@@ -7,6 +7,7 @@ const building: RawBuilding = {
   building_id: 10, city: 'Cidade fora do catálogo AELO', state: 'MT', name: 'Teste', status: 'Ativo',
   standard: 'Alto', building_type: 'Vertical', release_date: '2026-01-01', down_payment_percentage: 8.5,
   typologies_history: [
+    { typology_id: 20, period: '2026-01-01', qty: 100, price: 90_000, gross_sales: 0, distractions: 0, sold_in_period: 0, typology_stock: 100 },
     { typology_id: 20, period: '2026-01-10', qty: 100, price: 100_000, gross_sales: 2, distractions: 0, sold_in_period: 999, typology_stock: 98 },
     { typology_id: 20, period: '2026-01-31', qty: 100, price: 110_000, gross_sales: 3, distractions: 0, sold_in_period: 999, typology_stock: 95 },
     { typology_id: 20, period: '2026-02-28', qty: 120, price: 120_000, gross_sales: 4, distractions: 0, sold_in_period: 999, typology_stock: 91 },
@@ -72,10 +73,10 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     expect(report().rows[0]['Preço Atual mar/2026']).toBe(150_000);
     expect(report({ to: '2026-02-28' }).rows[0]['VGV Vendas Brutas jan/2026']).toBe(600_000);
   });
-  it('calcula VGL com oferta do período e preço atual independente do cálculo monetário', () => {
+  it('calcula VGL com quantidade fixa do lançamento e preço atual independente do cálculo monetário', () => {
     const row = report({ priceMode: 'period' }).rows[0];
     expect(row['VGL jan/2026']).toBe(15_000_000);
-    expect(row['VGL fev/2026']).toBe(18_000_000);
+    expect(row['VGL fev/2026']).toBe(15_000_000);
     expect(row['VGV Estoque jan/2026']).toBe(10_450_000);
     expect(row['VGV Vendas Brutas jan/2026']).toBe(530_000);
   });
@@ -83,7 +84,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     const row = report({ priceMode: 'period', granularity: 'quarter' }).rows[0];
     expect(row['Vendas Líquidas 1T/2026']).toBe(9);
     expect(row['Estoque 1T/2026']).toBe(91);
-    expect(row['VGL 1T/2026']).toBe(18_000_000);
+    expect(row['VGL 1T/2026']).toBe(15_000_000);
     expect(row['VGV Estoque 1T/2026']).toBe(13_650_000);
     expect(row['VGV Vendas Brutas 1T/2026']).toBe(1_010_000);
   });
@@ -128,7 +129,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
   });
   it('aplica status localmente e identifica os limites do histórico bruto', () => {
     expect(report({ statuses: ['Esgotado'] }).rows).toEqual([]);
-    expect(dateBounds([building])).toEqual({ from: '2026-01-10', to: '2026-04-30' });
+    expect(dateBounds([building])).toEqual({ from: '2026-01-01', to: '2026-04-30' });
     expect(isoDate('31/01/2026')).toBe('2026-01-31');
     expect(isoDate('02/2026')).toBe('2026-02-01');
     expect(isoDate('2026-02-30')).toBeNull();
@@ -151,8 +152,8 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
   });
 
   it.each(['current', 'period'] as const)('usa vendas/distratos reais e preserva saldo negativo no modo %s', (priceMode) => {
-    const data = [{ ...building, typologies_history: (building.typologies_history as RawBuilding[]).map((entry, index) => ({
-      ...entry, distractions: index === 0 ? 1 : index === 1 ? 6 : 0,
+    const data = [{ ...building, typologies_history: (building.typologies_history as RawBuilding[]).map((entry) => ({
+      ...entry, distractions: entry.period === '2026-01-10' ? 1 : entry.period === '2026-01-31' ? 6 : 0,
     })) }];
     const row = report({ priceMode }, data).rows[0];
     expect(row['Vendas Brutas jan/2026']).toBe(5);

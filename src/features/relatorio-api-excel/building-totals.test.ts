@@ -7,7 +7,7 @@ const history = [
   { typology_id: 2, type_of_typology: 'Garden', period: '2026-01-31', price: 300, gross_sales: 4, distractions: 1, typology_stock: 47, qty: 50 },
   { typology_id: 2, type_of_typology: 'Garden', period: '2026-02-28', price: 400, gross_sales: 6, distractions: 2, typology_stock: 43, qty: 50 },
 ];
-const building = { building_id: 1, name: 'Teste', status: 'Ativo', building_type: 'Vertical', standard: 'Econômico', city: 'Sinop', state: 'MT', release_date: '2026-01-01', total_units: 150, typologies_history: history };
+const building = { building_id: 1, name: 'Teste', status: 'Ativo', building_type: 'Vertical', standard: 'Econômico', city: 'Sinop', state: 'MT', release_date: '2026-01-31', total_units: 150, typologies_history: history };
 const options: ReportOptions = { level: 'building', layout: 'rows', granularity: 'month', priceMode: 'period', buildingAverageMode: 'quantity-standard', from: '2026-01-01', to: '2026-02-28', statuses: ['Ativo'], vgvScale: 'thousand' };
 
 it.each(['period', 'current'] as const)('soma todas as tipologias por mês, conservando regras VGV %s e estoque sem somar meses', async (priceMode) => {

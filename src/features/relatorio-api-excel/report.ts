@@ -270,6 +270,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       fixed['Faixa MCMV'] = mcmv;
       fixed['Preço Médio para Faixa MCMV'] = mcmvAverage;
       const vglPrice = options.vglPriceMode === 'launch' ? numeric(fixed['Preço de Lançamento']) : currentPrice;
+      const launchQty = release ? numeric(history.find(({ date }) => date === release)?.entry.qty) : null;
       const wide: Row = { ...fixed };
       observations.set(wide, new Set(inRange.map(({ date }) => periodOf(date, options.granularity).label)));
       for (const [index, period] of periods.entries()) {
@@ -283,7 +284,6 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
         const net = gross === null || cancellations === null ? null : gross - cancellations;
         const stock = numeric(last?.typology_stock);
         const price = options.priceMode === 'current' ? currentPrice : numeric(last?.price);
-        const qty = numeric(last?.qty);
         const grossVgv = flowVgv(entries, 'gross_sales', options.priceMode, currentPrice);
         const cancellationsVgv = flowVgv(entries, 'distractions', options.priceMode, currentPrice);
         const values: Row = {
@@ -291,7 +291,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
           'Estoque': stock, 'Preço Atual': numeric(last?.price),
           'Preço Médio Empreendimento': last ? averages[index] : null,
           'Preço m²': numeric(last?.price_private_area),
-          'VGL': product(qty, vglPrice), 'VGV Vendas Brutas': grossVgv,
+          'VGL': last ? product(launchQty, vglPrice) : null, 'VGV Vendas Brutas': grossVgv,
           'VGV Distratos': cancellationsVgv,
           'VGV Vendas Líquidas': grossVgv === null || cancellationsVgv === null ? null : rounded(grossVgv - cancellationsVgv),
           'VGV Estoque': product(stock, price),

@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 10/11/2026 — Relatório API Excel: quantidade lançada fixa no VGL — Edgar / Codex
+
+- **Regra confirmada:** quantidade lançada por tipologia = qty onde period = release_date exato; soma teoricamente igual a total_units. VGL passa a usar essa quantidade fixa em ambos modos de preço/níveis/layouts/visões, sem usar qty posterior. Mantém preço de lançamento ou atual conforme combobox. Sem correspondência/qty, valor vazio inclusive em preço atual; total por empreendimento não publica soma parcial. Tipologia criada depois sem registro de lançamento não recebe fallback ou retroação. Cadastro total_units não é corrigido/rateado nem tratado como automaticamente errado em divergência.
+- **Escopo:** fórmula/tooltip/descrição VGL e testes; preservados Unidades por Tipologia cadastral, MCMV, demais VGVs, coletor, AELO e Dashboard. Valores seguem processamento somente em Gerar relatório após coleta completa.
+- **Validação:**89 testes em sete arquivos aprovados: qty posterior diferente, preço independente, data exata/fora do filtro, qty ausente/zero, tipologia posterior, total_units divergente e Excel reaberto. Tipos/lint/build aprovados. Navegador1440/390 claro/escuro com API simulada: lançamento10+20 versus qty posterior100+200; VGL atual12milhões e lançamento7milhões, estoque10,4milhões preservado, tooltip e quatro chamadas sem erro de página. Evidência local ignorada verify-launch-qty.cjs. API autenticada não consultada.
+- **Etapas/Pendências:** correção local; usuário escolheu não integrar upstream agora. Referências no fetch: origin alinhado ao snapshot antigo (14 commits locais à frente); upstream divergiu14 remotos/2 locais antes desta entrega. Nenhum merge/push. Base3e36477b; commit desta entrada. Publicação/aceite real pendentes.
+- **Monday:** —
+
 ### 10/11/2026 — Relatório API Excel: VGL e preço independente — Edgar / Codex
 
 - **Mudança exclusiva:** VGV Lançado renomeado VGL em seleção, tabela, série, totais e Excel. Novo Select Brain Cálculo VGL com tooltip dinâmico: Pelo preço de lançamento / Pelo preço atual (padrão). Preço de lançamento usa mesmo registro da coluna existente: price onde period = release_date exato, inclusive antes do filtro inicial; ausência fica vazia sem fallback. Preço atual usa último fechamento até o mês final. Ambos multiplicam qty do período, sem acumular oferta mensal no trimestre. Por empreendimento soma as tipologias. Cálculo monetário dos demais VGVs independente; MCMV/AELO/Dashboard intactos.

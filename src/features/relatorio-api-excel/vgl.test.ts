@@ -17,8 +17,7 @@ it.each(['launch', 'current'] as const)('VGL %s é independente de VGV nos dois 
     const result = buildReport([building], { ...options, level, layout, granularity, vglPriceMode });
     const label = granularity === 'month' ? 'jan/2026' : '1T/2026';
     const col = layout === 'rows' ? 'VGL' : `VGL ${label}`;
-    const expected = granularity === 'month' ? level === 'building' ? vglPriceMode === 'launch' ? 2500 : 4000 : vglPriceMode === 'launch' ? 1000 : 2000
-      : level === 'building' ? vglPriceMode === 'launch' ? 3500 : 6000 : vglPriceMode === 'launch' ? 2000 : 4000;
+    const expected = level === 'building' ? vglPriceMode === 'launch' ? 2500 : 4000 : vglPriceMode === 'launch' ? 1000 : 2000;
     expect(result.rows[0][col]).toBe(expected);
     const other = buildReport([building], { ...options, level, layout, granularity, vglPriceMode, priceMode: 'current' });
     expect(other.rows[0][col]).toBe(expected);
@@ -33,10 +32,10 @@ it.each(['launch', 'current'] as const)('VGL %s é independente de VGV nos dois 
 });
 it('lançamento exige data exata sem fallback; preço pode estar antes do início do filtro', () => {
   const result = buildReport([building], { ...options, from: '2026-02-01', vglPriceMode: 'launch' });
-  expect(result.rows[0].VGL).toBe(2000);
+  expect(result.rows[0].VGL).toBe(1000);
   const absent = { ...building, release_date: '2026-01-16' };
   expect(buildReport([absent], { ...options, vglPriceMode: 'launch' }).rows[0].VGL).toBeNull();
-  expect(buildReport([absent], { ...options, vglPriceMode: 'current' }).rows[0].VGL).toBe(2000);
+  expect(buildReport([absent], { ...options, vglPriceMode: 'current' }).rows[0].VGL).toBeNull();
   const partial = { ...building, typologies_history: building.typologies_history.filter((r) => !(r.typology_id === 2 && r.period === '2026-01-15')) };
   expect(buildReport([partial], { ...options, level: 'building', vglPriceMode: 'launch' }).rows[0].VGL).toBeNull();
 });
@@ -47,4 +46,25 @@ it('trocar cálculo VGL não altera VGV Estoque ou a quantidade lançada; padrã
   expect(launch.rows[0].VGL).toBe(1000);
   expect(launch.rows[0]['VGV Estoque']).toBe(current.rows[0]['VGV Estoque']);
   expect(launch.rows[0]['Unidades por Tipologia']).toBe(current.rows[0]['Unidades por Tipologia']);
+});
+it('fixa qty do lançamento mesmo quando qty muda depois; não usa total_units para corrigir divergência', () => {
+  const data = { ...building, total_units: 999 };
+  const rows = buildReport([data], { ...options, level: 'building', vglPriceMode: 'current' }).rows;
+  expect(rows.map((r) => r.VGL)).toEqual([4000, 4000]);
+  expect(rows[0]['Unidades Totais do Empreendimento']).toBe(999);
+  // Quantidades lançadas 10 + 5, diferentes do qty posterior 20 + 5 e do cadastro 999.
+  expect(rows[1].VGL).toBe(10 * 200 + 5 * 400);
+});
+it('quantidade ausente ou tipologia criada depois do lançamento não recebe fallback', () => {
+  const missing = { ...building, typologies_history: building.typologies_history.map((r) => r.typology_id === 2 && r.period === '2026-01-15' ? { ...r, qty: null } : r) };
+  expect(buildReport([missing], { ...options, level: 'building' }).rows[0].VGL).toBeNull();
+  const newTypology = { ...building, typologies_history: [...building.typologies_history, { typology_id: 3, period: '2026-02-28', qty: 3, price: 1000, typology_stock: 3 }] };
+  const rows = buildReport([newTypology], { ...options, level: 'building' }).rows;
+  expect(rows[0].VGL).toBe(4000); expect(rows[1].VGL).toBeNull();
+});
+it('zero explícito no lançamento é preservado e a soma reconciliada não soma meses', () => {
+  const data = { ...building, total_units: 15 };
+  expect(buildReport([data], { ...options, level: 'building', granularity: 'quarter' }).rows[0].VGL).toBe(4000);
+  const zero = { ...building, typologies_history: building.typologies_history.map((r) => r.period === '2026-01-15' ? { ...r, qty: 0 } : r) };
+  expect(buildReport([zero], { ...options, level: 'building' }).rows[0].VGL).toBe(0);
 });

@@ -29,7 +29,7 @@ export function monetaryHelp(mode: PriceMode): string {
 export function vglHelp(mode: VglPriceMode): string {
   const price = mode === 'launch' ? 'Pelo preço de lançamento: usa o price da própria tipologia cuja data de period coincide exatamente com release_date, igual à coluna Preço de Lançamento. Sem correspondência ou preço, fica vazio, sem fallback.'
     : 'Pelo preço atual: usa o último preço da própria tipologia disponível até o mês final, aplicado à série histórica.';
-  return `${price} VGL = qty do último fechamento de cada mês/trimestre × preço escolhido. Por empreendimento, soma os VGLs das tipologias; no trimestre não soma as ofertas mensais. Independente do Cálculo monetário dos VGVs. Mantém a escala de visualização VGV/VGL. Representa a oferta total do fechamento, não o fluxo de novos lançamentos.`;
+  return `${price} VGL = quantidade lançada da tipologia × preço escolhido. Quantidade lançada é qty no registro cuja data de period é exatamente igual a release_date do empreendimento, mantida fixa no histórico. Sem esse registro/quantidade, o valor fica vazio, inclusive no preço atual. Por empreendimento, soma os VGLs das tipologias, sem usar total_units como substituição nem multiplicar pela média do empreendimento. Não soma VGLs mensais no trimestre. Independente do Cálculo monetário dos VGVs. Mantém a escala de visualização VGV/VGL; não representa o fluxo de novos lançamentos do período.`;
 }
 
 export function scaleHelp(scale: VgvScale): string {
