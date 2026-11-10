@@ -4,6 +4,14 @@
 
 ## Onde trabalhar
 
+**Fortaleza — mensal12/14e16–25,10/11:** [estado atual](fortaleza/MENSAL_SLIDES_12_25_2026-11-10.md). Prévia1–25na ordem oficial, fontes segmentadas compartilhadas, VGL, loteamentos e início de vendas. Homologação/INCC provisório/fontes reais e26–60/exportação pendentes.1e1767epublicado; este novo lote local. Registros anteriores abaixo são históricos.
+
+**Fortaleza — prioridade mensal,10/11:** [estado atual e próximos blocos](fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md). Treze composições mensais:1–10 e11/13/15; histórico vertical25meses automático e insights.12/14 e16–60 pendentes; mensal completo/exportação/ensaio real ainda não concluídos. Rota oculta preservada. Descrições datadas abaixo são estados anteriores.
+
+**Fortaleza — núcleo municipal vertical:** [fluxo automático e limites](fortaleza/NUCLEO_VERTICAL_2026-11-09.md), com seletor Mensal/Trimestral e referência mês/trimestre/ano. Integração local das fontes de lançamentos/vendas/oferta, ainda sem ensaio autenticado ou relatório completo. Acesso somente por rota; sem publicação.
+
+**Fortaleza/SINDUSCON-CE — 09/11/2026:** [plano e estado da base](fortaleza/PLAN.md), [revisão dos originais](fortaleza/REVISAO_REFERENCIAS_2026-11-09.md). Base estrutural acessível somente em `/rebrain/relatorios-institucionais/fortaleza`, sem item no painel/menu. Ainda sem integração de indicadores, estudo real ou exportação.
+
 Abrir **a raiz do checkout `relatorios-api`** no Codex/editor; comandos Git/npm partem da raiz, não da pasta de documentos. A documentação dos próximos modelos fica aqui. Criar `sp/`, `fortaleza/`, `maceio/` e `recife/` conforme cada modelo começar, sem antecipar pastas vazias como avanço.
 
 Em cada modelo: `PLAN.md` (fatia/portões), `MATRIZ_INDICADORES.csv` (contrato/gabarito/deltas), `DECISOES.md` (fatos/hipóteses/decisões), `EVIDENCIAS.md` (comandos/versões/resultado/aceite). O catálogo inicial é [modelos.json](../../handoffs/lucas-relatorios-2026-10-14/fontes/modelos.json); acrescentar versões/fonte/hashes, sem criar cópias contraditórias do mesmo catálogo. Fichas só aparecem como prontas depois de executadas.

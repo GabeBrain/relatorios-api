@@ -1,3 +1,7 @@
+## 09/11/2026 — Fortaleza: composição editorial fiel ao original
+
+Slides1–10 ficam em módulo lazy dentro da rota existente; fallback BrainLoadingState, navegação Button/Tabs e ampliação Dialog. O conteúdo editorial preserva cores, fonte Montserrat local e canvas16:9 dos originais, isolado por classes `fortaleza-intro-*`; esses valores pertencem ao relatório e não alteram tokens/tema da aplicação. Arte nativa extraída em leitura, campos variáveis nas medidas do Office e avisos de fonte/capacidade fora da lâmina. Sem novo primitive global; [contrato e limitações de fidelidade](../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md).
+
 ## 29/10/2026 — Estimativas: prévia de exportação configurável
 
 Modal ampliado com tabela compacta de50linhas, cabeçalhos fixos e colunas ocultáveis/restauráveis, inspirado no BasePreviewPanel das coletas Quanti (somente leitura). Arraste nos cabeçalhos e alternativas por teclado/menu, com semântica de tabela HTML e anúncio de mudanças. Estado de colunas compartilhado pela prévia e exportador; Excel completo e CSV analítico seguem a ordem/omissões, sem mudar valores/linhas. Contrato estrutural candidato permanece intacto. Primitives Button/Dialog/DropdownMenu e tokens SE existentes; sem biblioteca nova. Fonte: seção13 do plano essencial e evidência de29/10. Nenhuma mudança do aceite anterior implica aprovação deste novo formato.

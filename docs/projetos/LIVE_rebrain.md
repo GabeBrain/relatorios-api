@@ -391,6 +391,92 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Fonte:** [mapeamento e lacunas](../features/Relatorios%20Secovi_FIERGS/EVIDENCIAS_CONTRATOS_HISTORICO_FIERGS_2026-10-27.md#10112026--são-leopoldo-reabertura-da-paridade-com-o-geobrain), com matriz versionada e insumos `.local-inputs/fiergs-sao-leopoldo-2026-11-10/`. Oito consultas delimitadas,81asserçõesoffline aprovadas, semestudo completo.
 - **Estado:** diagnóstico local; nenhuma mudança de runtime ou publicação. Total do preço/área e classificações horizontais semcampo autoritativo permanecem pendentes de contrato/snapshot daorigem. Não antecipar correção/aceite. Gabriel determinou aguardar resolução antes de responderoemail. Fetch:9remotosSP/Fortaleza,0locais antesdesteregistro, códigoPanorama semdiferença; árvoreparalela não integrada.
 
+### 2026-11-10 — Fortaleza: carregamento local, menu acessível — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`.
+- **O quê/por quê:** após envio autorizado de d9b2448, usuário pediu espera sem cobrir o sistema inteiro. Catálogo, preparação e consulta agora usam BrainLoadingState absoluto dentro de cartão relativo da página, com rolagem local; configuração/menu ficam fora do véu. Etapas, cronômetro e cancelar preservados.
+- **Padrão/arquivos:** padrão local já usado no SP; somente página Fortaleza e diagnóstico mensal alterados, sem novo primitive nem mudança no BrainLoadingState compartilhado ou em fontes/fórmulas.
+- **Validação:** build/tipos/lint; Edge com fontes sintéticas lentas1440/390claro/escuro, contenção geométrica e menu acessível por hit-test. Sucesso/vazio/incompleto/cancelamento e navegação11–25mantidos. [Evidências](../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md). Sem API real/deploy observado/Monday.
+- **Commits:** commit isolado `fix(relatorios): contain Fortaleza loading within report`, base d9b2448; local até autorização própria de envio.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** ajuste de carregamento validado localmente; próximo lote26–35e homologação mantidos.
+
+### 2026-11-10 — Fortaleza:12/14 e lote mensal16–25 — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, somente rota.
+- **O quê:** push autorizado anterior1e1767econcluído; nova implementação fecha12/14eacrescenta16–25sem saltos: VGL, loteamentos, divisórias, vendas e13pontos móveis de12meses. Coleta compartilhada por segmento/cidade/fonte, concorrência2, cache/retry/abort por sessão.13/15reutilizam a mesma fonte vertical; navegar não consulta.
+- **Contrato/limites:** [mensal12–25](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_12_25_2026-11-10.md). Casas versus lotes/comercial explícitos; desconhecido/incompleto não vira zero. INCC-DI/base selecionada provisórios e identificados nos insights; validar VGL nominal e metodologia com fonte real. Sem afirmar aceite ou relatório completo.
+- **Validação/padrões:**127testes Fortaleza +16regressões selecionadas Secovi/FIERGS, build/tipos/lint, Edge1440/390claro/escuro/estados lento/vazio/incompleto/cancelado, ordem11–25. Arte original Office em leitura, SVG dinâmico, GeoApiScopeEngine/BrainLoadingState/shadcn. Sem GeoBrain real, novo exportador, deploy observado ou Monday.
+- **Arquivos/commits:** módulo Fortaleza, artes sanitizadas11–25, diagnósticos e documentos; commit isolado `feat(relatorios): complete Fortaleza monthly slides 12 through 25`, base1e1767e. Nova fatia local até autorização própria de envio; sem mudanças SP ou política compartilhada.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** prévia mensal1–25implementada condicional às fontes; próximo lote26–35. Fontes reais/INCC/homologação, amostra institucional e exportação seguem pendentes.
+
+### 2026-11-10 — Fortaleza: prioridade mensal e lançamentos verticais — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, somente rota, sem menu/painel.
+- **O quê:** mensal como padrão, competência inicial pelo calendário;11/13/15 com25meses e comparativos mês/ano/acumulado, fontes automáticas na mesma geração e insights de cálculo/proveniência.13composições mensais, sem renumerar nem preencher12/14com universo vertical incompleto.
+- **Contrato/evidência:** [mensal Fortaleza](../features/relatorios-institucionais/fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md). Cadastro por ID no11; releases_in_period municipal nos13/15; sete padrões explícitos/mês/cidade, falta não vira zero. Histórico limitado, cancelamento e retry por sessão/janela. Arte original sem cifras antigas; fonte mensal recuperada/Office leitura. Sem API real ou aceite.
+- **Validação:**105casos distintos Fortaleza/Secovi/FIERGS aprovados após rechecagem de asserção de mensagem duplicada; tipos/build/lint, Edge1440/390claro/escuro lento/vazio/incompleto/cancelamento. Padrões BrainLoadingState/GeoApiScopeEngine e primitives existentes. SP/motores compartilhados intactos.
+- **Arquivos/commits:** módulo Fortaleza, scripts diagnósticos e documentos; commit isolado `feat(relatorios): extend Fortaleza monthly launch analysis`, base03d3301. Local até autorização própria de push.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+- **Impacto em Etapas/Pendências:** mensal em andamento; próximos12/14/segmentos e16–60, INCC/preços/IVV/exportação, ensaio autenticado/homologação. Base anterior publicada em03d3301; nenhuma publicação desta fatia.
+- **Ordem oficial:** reforço posterior do Lucas aplicado à navegação1–15sem saltos.12/14mantêm posições/arte com fonte em preparação. Prioridade de conclusão dessas lacunas antes de avançar ao próximo bloco.
+
+### 2026-11-10 — integração autorizada de SP, Panorama e Fortaleza — usuário / Codex
+
+- **Pedido/estado:** usuário autorizou push/sincronização e confirmou a resolução da divergência. Checkout encontrado com merge já iniciado: local `1d601d0`, entrada `6ffb91d` (31 commits remotos), conflito somente no STATUS do handoff. Nenhum histórico publicado reescrito.
+- **Preservação:** STATUS resolvido somando as novas entradas dos dois lados, com novembro09 antes de novembro05. STATUS e LIVE comprovados por contagem de linhas não vazias conforme base+(local−base)+(remoto−base), antes desta nova entrada. Código SP idêntico ao commit local; App/BrainLoadingState/Panorama/Fortaleza idênticos ao remoto. Documentos/escopos paralelos mantidos.
+- **Escopo:** publicação conjunta da personalização da equipe SP e do trabalho remoto já existente, sem nova regra de negócio, consulta autenticada ou homologação. Fortaleza continua somente por rota; não foi acrescentado ao menu. Validações da base integrada registradas no fechamento do handoff.
+- **Validação integrada:** build/tipos aprovados;833casos/100arquivos,829aprovados/2falhas/2ignorados na rodada conjunta. Um timeout SP passou na repetição isolada7/7 sem alterar limite. Falha funcional remanescente de Panorama/firewall-fontes já documentada no remoto; código idêntico, preservado sem ajuste alheio. Suíte não declarada integralmente verde; sem novo ensaio autenticado/deploy.
+- **Etapas/Pendências:** concluir merge, pull com fast-forward e push autorizados. Deploy observado e testes reais da equipe continuam distintos da sincronização Git. Sem escrita no Monday.
+- **Monday:** [Relatório SP Institucional](https://brain381753.monday.com/boards/18398428946/pulses/13452140276) — `13452140276`; referência.
+
+### 2026-11-05 — SP: personalização de equipe técnica e consultoria — usuário / Codex
+
+- **Entrega:** editor local para nomes, cargos, fotos, visibilidade e restauração das cinco posições do82 e quinze do83. Prévia e PPTX usam a mesma configuração; fotos ficam em memória, sem servidor/localStorage. Nova geração restaura a referência, conforme texto da interface.
+- **Exportação:** vinte retratos passam a imagens PowerPoint separadas da arte e textos a caixas nativas. Recorte normaliza inset físico/lógico; diagnóstico verifica pixels, não só quantidade de imagens. Guarda contra resposta tardia de upload e formulário montado somente quando aberto. GeoApiScopeEngine e cálculos intactos.
+- **Validação:**301testesSP/34arquivos, tipos/build/lint e Edge desktop/celular claro/escuro com fontes sintéticas. Office reconheceu20retratos; dois nomes e uma foto alterados, salvos/reabertos e renderizados com sucesso. [Uso, escopo e limites](../features/relatorios-institucionais/sp/PERSONALIZACAO_EQUIPE_2026-11-05.md).
+- **Etapas/Pendências:** implementação local pronta para publicação; conferência no site e homologação pertencem à equipe. Menu `219ed1c` foi enviado primeiro por pedido explícito, independentemente desta entrega posterior. Sem consulta autenticada nova ou escrita no Monday.
+- **Monday:** [Relatório SP Institucional](https://brain381753.monday.com/boards/18398428946/pulses/13452140276) — `13452140276`.
+
+### 09/11/2026 — Fortaleza: envio da base e dez slides iniciais — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, acesso somente por rota.
+- **Pedido/entrega:** Lucas autorizou o push de `c78a7c1`/`574087e`/`5439ffe`, concluído e confirmado 0/0 após fetch; deploy não observado. Depois pediu os dez primeiros slides seguindo o original. Prévia mensal/trimestral com navegação/ampliação, arte nativa, posições/tabelas medidas e fontes locais; integração na sequência automática existente. Novo lote local sobre `5439ffe`.
+- **Dados/limites:** cadastro por município/segmento, paginação/IDs/cobertura conferidos, listas acumuladas e contagem de empreendimentos com classificação explícita. Fotografia atual não prova histórico; amostra/empresas pesquisadas aguardam fonte própria. Falhas não produzem parcial e valores antigos não preenchem novo estudo. [Contrato e retomada](../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md).
+- **Validação:**63testes Fortaleza, tipos/lint/build, Edge1440/390 claro/escuro e vinte controles contra Office. Arte preservada e nenhum corte nos controles; diferenças dinâmicas ainda impedem afirmar 100% visual. BrainLoadingState/GeoApiScopeEngine/Button/Tabs/Dialog reutilizados, sem novo primitive global. Sem API real, estudo/exportação real ou Monday; motores SP/Panorama e frentes paralelas sem edição.
+- **Arquivos/commits:** componentes/fontes/arte/layout e contrato de dados em Fortaleza; diagnósticos e documentação. Commit isolado `feat(relatorios): add first ten Fortaleza slides`, hash no fechamento. Próximo: refinamento visual e fonte de amostra/data/fases/cobertura, ensaio autenticado delimitado e exportador posterior.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+
+### 09/11/2026 — Fortaleza: núcleo vertical, referência de período e prévia por etapas — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, sem item em painel/menu/busca.
+- **Pedido/entrega:** Lucas autorizou integrar fontes e pediu sequência automática inspirada no SP, com Mensal/Trimestral e mês/trimestre/ano de referência. Uma ação valida recorte, consulta fontes municipais, confere balanços e organiza a prévia; BrainLoadingState com etapa/tempo real/cancelamento e estados de conferência. Alternância preserva ano/período de fechamento e invalida dados anteriores.
+- **Dados:** launches/releases_in_period, sales/liquid_sales e stock por cidade/padrão/mês, apenas vertical; amostra confirma recorte, paginação/janelas limitadas, retries transitórios e recuperação só das cidades faltantes. Sem meses/cidades/grupos completos não há consolidado. Estoque final não é soma trimestral; negativos, ausentes e diferenças compensadas permanecem visíveis. [Contrato e limites](../features/relatorios-institucionais/fortaleza/NUCLEO_VERTICAL_2026-11-09.md).
+- **Padrões/arquivos:** API/modelo/hook/painéis/testes específicos Fortaleza, seletores/tokens/GeoApiScopeEngine existentes, requestWithRetry/collectByCity Panorama reutilizados sem alteração. Matriz/PLAN/DECISOES/EVIDENCIAS e STATUS atualizados. Fonte do núcleo é municipal; método granular e indicadores restantes continuam pendentes. Manifesto60/89 não equivale a todos os slides gerados.
+- **Validação/limites:**49testes Fortaleza aprovados; regressão ampla807aprovados/1falha existente firewall-fontes Panorama/2ignorados, mais2casos de etapas no foco final49. SP/Panorama sem alterações; falha alheia não foi corrigida nesta frente. Build/tipos/lint e Edge1440/390claro/escuro com transporte sintético; ensaio autenticado com token pessoal ainda pendente. Sem coleta/API real, exportação/estudo real, homologação, push/deploy ou escrita Monday. [Evidências](../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md).
+- **Commits/etapas:** base574087e, dois commits locais anteriores preservados; commit isolado `feat(relatorios): integrate Fortaleza vertical preview pipeline`, hash no fechamento. Núcleo implementado localmente; próximo é ensaio autenticado delimitado e reconciliação granular, antes de ampliar segmentos/preços/histórico/exportação.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+
+### 09/11/2026 — Fortaleza/SINDUSCON: base navegável apenas por rota — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, base estrutural em implementação.
+- **O quê:** Lucas autorizou conferir originais e preparar base usando FIERGS/SP como referências, sem item no painel. Dois PPTX/hashes/89 e60slides reais/49 e47gráficos conferidos; Office renderizou12amostras, seis inspecionadas. [Revisão dos materiais](../features/relatorios-institucionais/fortaleza/REVISAO_REFERENCIAS_2026-11-09.md).
+- **Runtime:** rota lazy, configuração autorizada de município/conjunto completo e mês/trimestre, composição local das posições do estudo, abas de estrutura/referência/metodologia. Sem dados fictícios ou exportação; contratos de fonte permanecem pendentes. GeoApiScopeEngine/BrainLoadingState/Select/Tabs/Alert existentes; mobile usa padrão compacto já existente. Home/menu/busca sem item novo, motores SP/FIERGS e demais domínios intactos.
+- **Arquivos/commit:** `src/features/relatorios-institucionais/fortaleza/`, registro em `App.tsx`, condição mobile em `AppLayout.tsx`, diagnóstico visual, docs Fortaleza/STATUS e este LIVE. Commit isolado `feat(relatorios): prepare Fortaleza route-only foundation`, hash reportado no fechamento; publicação recusada por Lucas nesta rodada.
+- **Validação:** 11testes Fortaleza aprovados; total conjunto771aprovados/1falha/2ignorados (296SP,463Panorama,1scope,11Fortaleza). Falha isolada no teste existente firewall-fontes/loteamento; código/fixtures Panorama sem mudança. Tipos/lint/build aprovados, AppLayout focado aprovado, sete grupos de cenários Edge1440/390 claro/escuro/catálogo lento/erro/vazio/sucesso com rede externa interceptada e zero chamadas de mercado. [Evidências/limites](../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md).
+- **Impacto em Etapas/Pendências:** base de navegação/manifesto pronta localmente; contratos mensais, classificação/preços/INCC/MCMV, cálculo, desenho final e exportação ainda pendentes. Sem coleta, geração real, push/deploy ou homologação. Brutos/capturas ignorados, dependências alinhadas sem alterar package/lock.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência, nenhuma escrita.
+
+### 09/11/2026 — Fortaleza/SINDUSCON: início do mapa de fontes e indicadores — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — relatórios institucionais, Fortaleza/SINDUSCON-CE (`PLANEJADA`, sem runtime novo).
+- **O quê/por quê:** após Lucas informar conclusão do SP e autorizar próximo levantamento, consultados os dois modelos Fortaleza no Drive. Junho/2T2026 principal proposto e julho mensal complementar, 22 contratos iniciais e 89/60 blocos textuais inventariados, sem assumir número real de slides. [Plano e portões](../features/relatorios-institucionais/fortaleza/PLAN.md).
+- **Decisões/lacunas:** separar capital/RM e universos por bloco, mês/trimestre/12 meses, preços por unidade e exclusões explícitas; preservar negativos. MCMV por data/recorte, INCC/ponderação, totais aparentes e revisões entre fotografias precisam de prova. G2 candidato vertical capital junho/2026 depende de contrato e confirmação; sem copiar política SP/FIERGS.
+- **Arquivos/commits:** `docs/features/relatorios-institucionais/fortaleza/{PLAN.md,DECISOES.md,EVIDENCIAS.md,MATRIZ_INDICADORES.csv,MAPA_BLOCOS.md}`, STATUS do handoff e este LIVE. Commit isolado `docs(relatorios): map Fortaleza sources and initial contracts`, hash no fechamento.
+- **Validação/limites:** leitura conector comprovada, fonte PPTX/parent e datas identificados; bruto/hash/visual/caches e API granular ainda pendentes. Preflight offline, validação estrutural de matriz/links e documentação no fechamento. Sem geração/API GeoBrain/publicação/Monday, sem mudar SP/Secovi/FIERGS ou demais domínios. Três commits locais anteriores preservados.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+- **Impacto em Etapas/Pendências:** G1 iniciado com documentação própria; falta prova visual/mensal/metodológica para encerrar contrato e delimitar G2. Declaração de SP concluído vem de Lucas, sem nova homologação pelo agente.
 
 ### 06/11/2026 — Panorama: auditoria real individualiza ausência de VGV em Taquari
 
@@ -1162,6 +1248,20 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza mensal — lote12/14+16–25,10/11:** prévia1–25na ordem original, fontes segmentadas e cálculo/render dos doze novos slides. Validado localmente; método INCC e fontes reais aguardam homologação. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_12_25_2026-11-10.md).1e1767epublicado; novo lote local.
+
+- 🟡 **Fortaleza mensal —10/11:**1–10e11/13/15 implementados localmente, histórico vertical automático25meses e insights;13composições, restante ainda pendente. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md), que atualiza os registros históricos de09/11 abaixo.
+
+**05/11 — SP, equipe/consultoria:** cinco e quinze posições personalizáveis na prévia, com nomes/cargos e retratos separados no PPTX. Validado localmente com Edge/Office; publicar e conferir no site. Navegação do menu já publicada em219ed1c.
+
+- 🟡 **Fortaleza — slides1–10 09/11:** prévia mensal/trimestral implementada/testada localmente; arte original preservada, renderização dinâmica ainda sem aceite de100%. Base anterior enviada até5439ffe; lote novo local. [Estado](../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md).
+
+- 🟡 **Fortaleza — núcleo vertical09/11:** consulta municipal e prévia em4etapas implementadas/testadas localmente, referência mensal/trimestral explícita. Contrato granular, ensaio real e relatório completo ainda pendentes. [Contrato](../features/relatorios-institucionais/fortaleza/NUCLEO_VERTICAL_2026-11-09.md).
+
+- 🟡 **Fortaleza/SINDUSCON — base09/11:** rota oculta e composição estrutural verificadas localmente, 89/60páginas reais inventariadas; sem indicadores/exportação integrados. [Estado atual](../features/relatorios-institucionais/fortaleza/PLAN.md).
+
+- 🟡 **Fortaleza/SINDUSCON — 09/11:** G1 iniciado, dois modelos legíveis e matriz inicial documentados; sem implementação nova. [Plano](../features/relatorios-institucionais/fortaleza/PLAN.md).
+
 **05/11 — Panorama territorial:** G0–G6validados localmente, sem push; [execução/roteiroG7](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Aceite anterior permanece, ampliação nova aguarda ensaio/aceite.
 **05/11 — SP, textos institucionais5/7:** competência do perfil acompanha a geração; títulos/percentuais e seis cartões GeoBrain exportam como caixas editáveis. Validados localmente com Edge/Office; fonte editorial continua identificada, publicação/ensaio real pendentes.
 
@@ -1246,6 +1346,20 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza mensal — continuação10/11:** próximo26–35; depois36–60/exportação. Homologar produtos horizontais/comercial, VGL nominal, INCC-DI/base provisórios e fotografias reais pareadas. Amostra/empresas do2ainda sem fonte própria.12/14não são mais pendências de implementação; estados anteriores abaixo são históricos.
+
+- **Fortaleza mensal —10/11:** priorizar12/14com casas/comercial/loteamentos e valores/INCC; depois vendas/oferta/preços/IVV/tabelas e exportação. Fonte da amostra, ensaio real e homologação continuam pendentes. Fatia11/13/15local; publicação exige autorização. Estados09/11abaixo preservados como histórico; base anterior já enviada em03d3301.
+
+- [ ] **SP — ensaiar personalização no site:** atualizar responsáveis e fotos nos slides82/83, exportar e conferir a cópia. Configuração vale para a prévia atual, sem persistência entre gerações; padrões ainda vêm da referência2T2026. [Contrato](../features/relatorios-institucionais/sp/PERSONALIZACAO_EQUIPE_2026-11-05.md).
+
+- **Fortaleza — slides1–10 09/11:** refinar diferenças visuais dinâmicas, fonte da amostra/empresas e reconciliação de início de vendas/fases/exclusões históricas; ensaio autenticado delimitado e exportador posteriores. Publicação deste lote ainda pendente; base anterior enviada. Sem acesso via painel. CorretorV3/Quanti2026 seguem Gabriel.
+
+- **Fortaleza — núcleo vertical09/11:** ensaio autenticado delimitado, fotografias pareadas e reconciliação de fluxos/data de início de vendas/cobertura. Demais segmentos, preços, INCC, MCMV, histórico completo e exportação pendentes. Preservar rota sem painel e não confundir etapas concluídas com aceite do estudo. Falha existente Panorama/firewall-fontes registrada separadamente.
+
+- **Fortaleza/SINDUSCON — base09/11:** comprovar fonte mensal vertical capital/cobertura antes de integrar lançamentos/vendas/oferta; ponderação/INCC/MCMV e desenho final por modelo ainda abertos. Uma falha no teste existente Panorama/firewall-fontes fica registrada separadamente, sem alteração de regras nesta frente. Sem ensaio real/publicação autorizados.
+
+- **Fortaleza/SINDUSCON — 09/11:** obter/revisar PPTX bruto e hashes/caches, comprovar fonte mensal/unidade e universo por bloco, ponderação/INCC/MCMV e diferenças de fotografia; depois confirmar fatia G2. [Decisões e lacunas](../features/relatorios-institucionais/fortaleza/DECISOES.md). Sem coleta real/publicação autorizadas nesta rodada.
 
 **05/11 — Panorama territorial:** autorizar integração do novoSP `4aed591` e publicação; conferir noLovable dupla comparada, consolidado regional e cidade versus grupo, retornandoPDF/PPT/CSV. Não homologado externamente nesta entrega.
 - [ ] **SP — revisar números editoriais dos slides5/7:** atualizar percentuais e indicadores institucionais com fonte aprovada quando necessário. Textos agora editáveis no PPTX; a API municipal não fornece esses números. Data da geração é dinâmica e não significa atualização automática desses indicadores.

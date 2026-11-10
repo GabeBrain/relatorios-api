@@ -1,0 +1,18 @@
+import type { MonthlyMarketData, MonthlySlideData } from './monthly-market';
+import { monthlySourceKey } from './monthly-market';
+import { Table,TableBody,TableCell,TableHead,TableHeader,TableRow } from '@/components/ui/table';
+export function FortalezaMonthlyInsights({ page,data,market }: { page:number; data:MonthlySlideData | null; market:MonthlyMarketData | null }) {
+  if (!data) return null;
+  const selected = market?.sources.filter(source => data.sourceKeys.includes(monthlySourceKey(source))) ?? [];
+  const count = (value:number) => value.toLocaleString('pt-BR',{ maximumFractionDigits:data.unit === 'milhões' ? 6 : 0 });
+  return <details className="rounded-lg border p-3 text-sm"><summary className="cursor-pointer font-medium">Origem e cálculo deste slide</summary><div className="mt-3 space-y-3 text-muted-foreground">
+    <p>Slide {page}. Fontes municipais por cidade, segmento, mês e padrão. Lançamentos usam releases_in_period; vendas usam liquid_sales, inclusive valores negativos. Um recorte incompleto permanece indisponível.</p>
+    <p>{page === 24 ? 'Cada ponto reúne 12 meses completos, incluindo o mês indicado. São 13 pontos móveis; estoques não são somados nem usados para inferir vendas.' : 'Histórico de 25 meses e acumulados de janeiro até o mês selecionado. A variação do total compara o mês com o mesmo mês do ano anterior; as duas variações do acumulado usam janelas equivalentes.'}</p>
+    <p>Capital e RM são separadas. RM compreende Aquiraz, Caucaia, Eusébio e Maracanaú. Loteamentos abertos/fechados têm séries próprias; condomínios de chácaras, terrenos e loteamentos comerciais ficam fora deste bloco. Rótulos socioeconômicos no segmento Horizontal são tratados como casas/sobrados; rótulos desconhecidos bloqueiam a fonte e exigem conferência.</p>
+    {data.unit === 'milhões' && <p>Critério de correção para homologação: INCC-DI, base {data.baseMonth ?? 'pendente'}. Valor mensal nominal × índice da base ÷ índice do mês, antes de somar ou converter para milhões. A referência de Fortaleza informa INCC sem discriminar a modalidade; esta escolha precisa de validação do analista. Fonte: <a href="https://sindusconpr.com.br/economia/indices-economicos/incc-di-fgv/" target="_blank" rel="noreferrer" className="underline">SindusconPR/FGV</a>.</p>}
+    {data.issue && <p role="status">{data.issue}</p>}
+    {data.warnings.map(issue => <p key={issue}>{issue}</p>)}
+    {data.status === 'ready' && <div className="overflow-x-auto"><Table className="w-full text-left tabular-nums" aria-label={`Memória de cálculo do slide ${page}`}><TableHeader><TableRow><TableHead className="p-2">Mês</TableHead><TableHead className="p-2">{page === 24 ? 'Lançamentos · 12 meses' : data.labels[0]}</TableHead><TableHead className="p-2">{page === 24 ? 'Vendas · 12 meses' : data.labels[1]}</TableHead>{page !== 24 && <TableHead className="p-2">Total ({data.unit})</TableHead>}</TableRow></TableHeader><TableBody>{page === 24 ? data.rolling?.map(row => <TableRow key={row.month}><TableCell className="p-2">{row.month}</TableCell><TableCell className="p-2">{count(row.launches)}</TableCell><TableCell className="p-2">{count(row.sales)}</TableCell></TableRow>) : data.history.map(row => <TableRow key={row.month}><TableCell className="p-2">{row.month}</TableCell><TableCell className="p-2">{count(row.first)}</TableCell><TableCell className="p-2">{count(row.second)}</TableCell><TableCell className="p-2">{count(row.total)}</TableCell></TableRow>)}</TableBody></Table></div>}
+    {selected.map(source => <p key={monthlySourceKey(source)}>{monthlySourceKey(source)}: {source.rows.length} linhas · {source.requests} requisições · {source.finishedAt}</p>)}
+  </div></details>;
+}

@@ -6,6 +6,8 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {SpInstitutionalText} from './SpInstitutionalText';
 import {buildSpTemporalPreview} from './temporal';
 import {recordedInput} from './__tests__/recorded';
+import {SpPeopleSlide} from './SpPeopleSlide';
+import {createSpPeople} from './people';
 vi.mock('./pptx-audit',()=>({embedSpPptxAudit:vi.fn(()=>new Uint8Array([1,2,3]))}));
 const captured=vi.hoisted(()=>({slides:[] as {texts:string[];notes:string[];images:number;targets:number[]}[],writes:0}));
 vi.mock('pptxgenjs',()=>({default:class {
@@ -14,7 +16,7 @@ vi.mock('pptxgenjs',()=>({default:class {
   async write(){captured.writes++;return Object.assign(new Blob(['test-pptx']),{arrayBuffer:async()=>new ArrayBuffer(1)});}
 }}));
 vi.mock('html-to-image',()=>({getFontEmbedCSS:async()=>'',toPng:async(node:HTMLElement)=>{
-  expect(node.querySelector('text')!.style.fill).toBe('transparent');
+  if(!node.hasAttribute('data-sp-editable-photo'))expect(node.querySelector('text')!.style.fill).toBe('transparent');
   return 'data:image/png;base64,iVBORw0KGgo=';
 }}));
 vi.mock('@/features/panorama-secovi-fiergs/lib/pdf-export',()=>({waitForSlide:async()=>{},PanoramaExportCancelled:class extends Error{constructor(){super('Cancelado');this.name='PanoramaExportCancelled';}}}));
@@ -28,6 +30,13 @@ function slides(){return Array.from({length:85},()=>{
   const article=document.createElement('article');article.innerHTML='<span class="sr-only">Não exportar</span><svg><text style="font-size:24px;font-family:Tahoma;fill:rgb(38,38,38)">42.453</text></svg>';deck.append(article);return article;
 });}
 describe('SP — PowerPoint para conferência',()=>{
+  it('separa retratos da arte e preserva nomes personalizados como texto nativo',async()=>{
+    const source=slides(),people=createSpPeople();people.team[0].name='Analista de teste';people.consulting[0].name='Consultor de teste';
+    for(const page of [82,83] as const){source[page-1].innerHTML=renderToStaticMarkup(createElement(SpPeopleSlide,{page,people}));source[page-1].querySelectorAll('img').forEach(image=>image.remove());}
+    await buildSpEditablePptx(source,'3T2026',new AbortController().signal,()=>{});
+    expect(captured.slides[81].images).toBe(6);expect(captured.slides[82].images).toBe(16);
+    expect(captured.slides[81].texts).toContain('Analista de teste');expect(captured.slides[82].texts).toContain('Consultor de teste');
+  });
   it('exporta a data atual, percentuais e cartões institucionais como caixas de texto nativas',async()=>{
     const source=slides(),report={...buildSpTemporalPreview(recordedInput(),'3T2026'),throughMonth:'2026-09'};
     for(const page of [5,7])source[page-1].innerHTML=renderToStaticMarkup(createElement(SpInstitutionalText,{page,report}));

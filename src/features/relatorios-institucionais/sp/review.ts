@@ -42,6 +42,7 @@ function trend(report:SpPreview, number:number):Finding {
 /** Availability of the current generation, never a claim of market validation or analyst approval. */
 export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_MAPBOX_ACCESS_TOKEN??''):SpSlideReview[] {
   function check(number:number):Finding {
+    if(number===82||number===83)return {state:'reference',reason:'Equipe inicial da edição de referência 2T2026. Personalize nomes, cargos e fotos na prévia e revise os responsáveis antes de exportar.'};
     if(SP_INSTITUTIONAL_ASSETS[number])return {state:'reference',reason:number===7?'Data acompanha o período conferido; percentuais preservados de junho/2026 e editáveis no PowerPoint. Confirmar a atualização com o responsável editorial.':number===5?'Seis indicadores e legendas editáveis no PowerPoint; valores institucionais preservados da edição 2T2026, sem atualização pela API municipal.':'Arte da edição 2T2026. Confirmar pessoas, contatos e números institucionais.'};
     if([1,2,6,8,12,31,45,49,52,60,65,81].includes(number))return available;
     if(number>=13&&number<=22||number>=26&&number<=30||number>=32&&number<=36||number>=40&&number<=44)return trend(report,number);

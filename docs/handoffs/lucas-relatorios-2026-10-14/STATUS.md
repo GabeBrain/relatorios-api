@@ -1,5 +1,65 @@
 # Estado do handoff
 
+## 10/11/2026 — Fortaleza: carregamento somente no relatório
+
+d9b2448publicado com autorização; main/origin0–0eárvore limpa antes do ajuste. Usuário pediu que a espera não ocupe o sistema inteiro. Cartão relativo na área do relatório com BrainLoadingState absoluto substitui overlay global para catálogo/preparação/consulta; menu continua acessível, etapas/tempo/cancelamento preservados. Build/tipos/lint e Edge1440/390claro/escuro com fontes lentas sintéticas e asserções de geometria/hit-test aprovados, assim como sucesso/vazio/incompleto/cancelamento. [Evidências](../../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md). Nenhuma API real, fórmula alterada, deploy observado ou Monday. Novo commit local, push depende de autorização desta fatia.
+
+## 10/11/2026 — Fortaleza12/14 antes do lote16–25
+
+Usuário autorizou push anterior e continuação de12/14+dez.1e1767eenviado; base main/origin0–0, único remoto, Windows/Codex Test. [Entrega/retomada](../../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_12_25_2026-11-10.md): mensal1–25na ordem original, fonte temporal segmentada compartilhada, VGL/lotes/vendas e13pontos móveis de12meses.127testes Fortaleza +16regressões, tipos/build/lint e Edge1440/390claro/escuro com todos os provedores interceptados. Office somente leitura dos originais; nenhuma GeoBrain real/exportação/homologação. INCC-DI/base selecionada provisórios explícitos nos insights; validar com analista. Próximo26–35. Sem Monday e sem alteração de motores/escopos paralelos. Nova fatia em commit local isolado, publicação exige autorização própria.
+
+## 10/11/2026 — Fortaleza retomada com prioridade mensal
+
+Lucas pediu continuação priorizando mensal. Main03d3301/origin, fetch atualizado,0–0 e árvore limpa antes das edições; Windows/Codex Test. [Fatia e retomada](../../features/relatorios-institucionais/fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md): mensal padrão,11/13/15 integrados,25meses de lançamentos verticais automáticos, insights.13composições mensais, não relatório completo.12/14casas/comercial e demais conteúdos/INCC/exportação pendentes. Original Drive baixado/hash conferido/Office leitura; GeoBrain real não consultado.105testes distintos incluindo regressões2T2026/4T2025 aprovados após rechecagem de uma asserção; tipos/build/lint e Edge sintético1440/390claro/escuro. SP e motores paralelos sem mudanças. Sem Monday, homologação ou push desta fatia; commit local isolado e contadores no fechamento.
+
+## 10/11/2026 — integração autorizada para sincronização e publicação
+
+Usuário autorizou resolver a divergência e enviar. Checkout continha merge em curso entre local `1d601d0` e remoto `6ffb91d` (31 commits), com conflito somente neste STATUS. Registros de ambos os lados preservados integralmente e em ordem09/11 antes05/11; conferência aditiva de três pontos comprovou STATUS e LIVE antes desta nova entrada. SP permanece byte a byte no estado local; App/BrainLoadingState/Panorama/Fortaleza preservam o remoto. Main, único origin; Codex Test/Windows. Sem nova API autenticada ou escrita no Monday. Validação integrada e publicação registradas no fechamento desta seção; deploy não observado.
+
+Build/tipagem integrados aprovados. Regressão conjunta inclui SP, Fortaleza, Panorama e AppLayout. Um teste SP de montagem atingiu5s durante execução paralela com build; os sete casos do arquivo passaram isoladamente com o mesmo timeout (caso lento4,29s). A falha de Panorama `firewall-fontes` / rótulo de loteamento já consta nas evidências Fortaleza de09/11 e reapareceu: arquivo e motor são idênticos ao remoto, sem mudança de política nesta integração. Sem correção alheia para ocultar falha conhecida. Comportamento autenticado/site não exercitado nesta rodada; ensaios anteriores não foram apresentados como novo aceite.
+
+Resultado conjunto:100arquivos/833casos,829aprovados/2falhas/2ignorados. Rechecagem isolada SP:7/7aprovados, incluindo o timeout anterior; resta uma falha funcional já conhecida de Panorama. Não reportar suíte integral verde. Gate de documentos vivos e diff sem erros aplicados no fechamento; pull/push autorizados, sem rebase/reset/force.
+
+## 09/11/2026 — base enviada e primeiros dez slides locais
+
+Lucas autorizou push: `c78a7c1`, `574087e` e `5439ffe` enviados a `origin/main`; fetch posterior 0/0. Base e núcleo anteriores estão no remoto; deploy não observado. Em seguida pediu os dez primeiros slides com aparência original. Prévia mensal/trimestral implementada na mesma rota oculta, com navegação/ampliação, arte nativa, geometria medida, fonte local, listas e gráfico sob cobertura/classificação explícitas. [Entrega, fontes, diferenças visuais e retomada](../../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md). Novo commit permanece local, sem novo envio nesta rodada.
+
+Ambiente: main `5439ffe`, único remoto origin, árvore limpa antes do lote; edições desta entrega preservadas. PowerPoint disponível e usado somente para leitura/exportação local das referências. 63 testes Fortaleza, tipos/lint/build aprovados; Edge com rede externa bloqueada e dados sintéticos em 1440/390 claro/escuro, vinte composições e sete grupos de cenários. Slide 8 idêntico; diferenças em texto/gráfico dos demais impedem afirmar 100% visual. Amostra/empresas pesquisadas não são inferidas do catálogo; dados reais, aceite e exportador pendentes.
+
+Retomar pelo documento acima: refinar renderização dinâmica, comprovar amostra/data de vendas/fases/cobertura e planejar ensaio autenticado delimitado. Nenhuma API/estudo real, coleta longa ou escrita Monday. SP/Secovi/FIERGS e alterações paralelas intactos; Corretor V3 e Quanti 2026 seguem Gabriel. Férias desde19/10 são registro histórico, sem pressupor execução durante férias ou disponibilidade atual.
+
+## 09/11/2026 — Fortaleza: núcleo vertical e prévia automática
+
+Lucas autorizou iniciar integração e reforçou os padrões SP/FIERGS, progresso automático e referência Mensal/Trimestral. [Contrato/estado atual](../../features/relatorios-institucionais/fortaleza/NUCLEO_VERTICAL_2026-11-09.md). Uma ação valida recorte, consulta fontes municipais, confere balanços e organiza a prévia; etapas com atenção não são marcadas como sucesso. Campos mostram mês/ano ou trimestre/ano de referência e preservam a correspondência de fechamento ao alternar. Mudanças invalidam resultados e cancelam operação anterior.
+
+Implementadas fontes de lançamentos/vendas líquidas/estoque vertical, consulta serial limitada e recuperação das cidades faltantes no mesmo recorte/sessão. Sem consolidado quando falta cidade, mês, grupo ou fonte. Fluxos somados, estoque só no fechamento, negativos/diferenças preservados por padrão. Contagem de projetos, datas granulares, demais segmentos, preços/INCC/MCMV e exportação permanecem pendentes. Estrutura60/89 não significa conteúdo completo dos slides.
+
+Base574087e, main limpa antes das edições; fetch0/2 na abertura/retomada, dois commits de Fortaleza anteriores preservados. 49testes Fortaleza aprovados; regressão ampla807aprovados/1falha existente Panorama/firewall-fontes/2ignorados, depois2casos novos de etapas validados no foco49. Tipos/build/lint e Edge local com fontes sintéticas1440/390claro/escuro no fechamento. A janela foi fechada acidentalmente; edições/testes salvos conferidos e servidor local reiniciado. Sem dados pessoais/credenciais lidos, API real, coleta longa, estudo/exportação real ou publicação. Equivalente headless não comprova indicadores com token pessoal. Sem alterações nos motores SP/Panorama ou frentes paralelas; próximo é ensaio autenticado delimitado e reconciliação granular.
+
+Commit isolado `feat(relatorios): integrate Fortaleza vertical preview pipeline`, hash/contadores no fechamento. Acesso continua somente `/rebrain/relatorios-institucionais/fortaleza`, sem item no painel/menu/busca. Push continua não autorizado; nenhuma escrita Monday.
+
+## 09/11/2026 — Fortaleza: base preparada, somente rota
+
+Pedido posterior de Lucas autoriza revisar material/preparar base usando FIERGS/SP, sem entrada no painel e sem push. Base inicial `c78a7c1` sobre `ecbc34f`, fetch0/1 e árvore limpa; os três commits antigos foram retirados da main por pedido dele antes desta rodada, Fortaleza preservada. [Plano atual](../../features/relatorios-institucionais/fortaleza/PLAN.md), [originais/limites](../../features/relatorios-institucionais/fortaleza/REVISAO_REFERENCIAS_2026-11-09.md) e [validações](../../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md).
+
+Dois PPTX brutos/hashes/ordem e 89/60slides reais conferidos, renderização Office amostral. Implementada rota lazy `/rebrain/relatorios-institucionais/fortaleza` com seleção autorizada, período mensal/trimestral, estrutura local e referências; sem item Home/menu/busca. Sem indicadores, fontes de mercado ou exportação integrados. Preservados motores FIERGS/SP e demais domínios; AppLayout só recebeu comportamento compacto mobile para esta rota.
+
+11testes Fortaleza aprovados; regressão conjunta771aprovados/1falha existente Panorama/2ignorados. Falha isolada em firewall-fontes (rótulo loteamento), arquivos Panorama idênticos ao remoto; não corrigida nesta frente. AppLayout focado aprovado, tipos/lint/build aprovados. Edge1440/390 claro/escuro e catálogo lento/erro/vazio/sucesso comprovados com fixtures/rede externa bloqueada, zero API de mercado. Dependências alinhadas pelo lockfile, sem alteração package/lock. Sem acesso pessoal/produção ou aceite inferidos. Próximo: contrato de dados mensal vertical capital antes de conectar coleta/indicadores. Commit isolado `feat(relatorios): prepare Fortaleza route-only foundation`, hash no fechamento; sem push/publicação/Monday.
+
+## 09/11/2026 — Fortaleza iniciada: referências e contratos
+
+Lucas informou SP institucional concluído e autorizou começar o levantamento de Fortaleza/SINDUSCON. Plano, decisões, evidências, matriz de 22 indicadores/contratos iniciais e inventário textual em [Fortaleza/PLAN](../../features/relatorios-institucionais/fortaleza/PLAN.md). Nenhuma nova homologação do SP feita pelo agente.
+
+Ambiente desta sessão: main `ad5f7e2`, somente origin correto; fetch atualizado, árvore inicialmente limpa, 0 atrás/3 commits locais à frente (14/10, 04/11 e 09/11), preservados sem push. Git config lucas/lucas@example.com. Node v24.19.0/npm 11.17.0, dependências e lockfile presentes; preflight offline executado, Git via Node indisponível no sandbox e comandos diretos conferidos. Sem leitura de valores env. Drive legível comprovado pelo conector nos dois IDs Fortaleza do catálogo, ambos PPTX no parent esperado; login pessoal/publicação não inferidos. GeoBrain/Rebrain/Lovable/Mapbox não testados nesta rodada.
+
+Junho/2T2026 proposto como referência principal, julho mensal como complemento. 89/60 blocos de extração inventariados sem presumir contagem real de slides. Próximo: PPTX bruto/hash, leitura visual/caches, contrato de fontes mensais/unidades, ponderação/INCC/MCMV e revisão das inconsistências textuais. G1 iniciado, não encerrado como método aprovado. Fatia G2 candidata: vertical capital junho/2026, lançamentos/vendas/oferta; implementação depende de contrato e confirmação própria. Nenhuma API GeoBrain, geração real, implementação runtime, publicação ou escrita Monday. Escopos paralelos intactos. Datas de férias de outubro permanecem históricas, sem assumir restrição de disponibilidade ou prazo em novembro.
+
+Entrega documental em commit isolado `docs(relatorios): map Fortaleza sources and initial contracts`; contadores/hash finais reportados no fechamento. Retomar pelo PLAN de Fortaleza e comparar todos os remotes antes de editar.
+
+## 05/11/2026 — personalização de equipe e consultoria
+
+Usuário pediu nomes/cargos/fotos alteráveis e, durante a tarefa, solicitou enviar primeiro o menu.219ed1c publicado; esta implementação segue separada. Editor local de5/15posições e retratos nativos noPPTX, sem persistir fotos fora da memória da página.301testesSP/34arquivos, tipos/build/lint, Edge e Office; vinte fotos verificadas, dois nomes e uma foto alterados/salvos/reabertos. SemAPIrealnova; publicação e ensaio do site pendentes. [Contrato](../../features/relatorios-institucionais/sp/PERSONALIZACAO_EQUIPE_2026-11-05.md).
+
 ## 05/11/2026 — textos editáveis nos slides institucionais5/7
 
 Base `eb931d5`, main/origin0/0 apósfetch. Usuário identificou junho em geração3T2026 e pediu edição de percentuais/cartões GeoBrain. CamadaSVG nativa usa competência conferida no7 e expõe seis cartões do5 ao exportador editável. Números editoriais preservados com referência explícita, sem inferência pela API municipal.296testesSP/33arquivos, tipos/build/lint, Edge e edição/salvamento/reabertura de três textos noOffice. SemAPIrealnova; publicação/ensaio autenticado pendentes. [Contrato](../../features/relatorios-institucionais/sp/TEXTOS_INSTITUCIONAIS_EDITAVEIS_2026-11-05.md).
