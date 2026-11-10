@@ -1,4 +1,4 @@
-import type { BuildingAverageMode, PriceMode, VgvScale } from './report';
+import type { BuildingAverageMode, PriceMode, VglPriceMode, VgvScale } from './report';
 
 export const FIELD_HELP = {
   municipality: 'Selecione um ou mais municípios dos dados carregados. Os escolhidos são combinados: basta o empreendimento pertencer a um deles. Limpar deixa a seleção vazia; Selecionar todos inclui todos os municípios disponíveis.',
@@ -22,12 +22,18 @@ export function averageHelp(mode: BuildingAverageMode): string {
 
 export function monetaryHelp(mode: PriceMode): string {
   return mode === 'current'
-    ? 'Valor atual: usa o último preço disponível da tipologia até o mês final para calcular os VGV de todos os períodos. VGV Lançado = quantidade × preço; VGV Estoque = estoque × preço. Vendas e distratos do período usam esse mesmo preço.'
-    : 'Valor do período: VGV Lançado e VGV Estoque usam quantidade/estoque e preço do último fechamento de cada mês/trimestre. VGV Vendas Brutas e VGV Distratos somam unidades × preço de cada fechamento. VGV líquido é a diferença entre os dois.';
+    ? 'Valor atual: usa o último preço disponível da tipologia até o mês final para calcular os VGV de todos os períodos. VGV Estoque = estoque × preço. Vendas e distratos do período usam esse mesmo preço. VGL tem configuração de preço independente em Cálculo VGL.'
+    : 'Valor do período: VGV Estoque usa estoque e preço do último fechamento de cada mês/trimestre. VGV Vendas Brutas e VGV Distratos somam unidades × preço de cada fechamento. VGV líquido é a diferença entre os dois. VGL tem configuração de preço independente em Cálculo VGL.';
+}
+
+export function vglHelp(mode: VglPriceMode): string {
+  const price = mode === 'launch' ? 'Pelo preço de lançamento: usa o price da própria tipologia cuja data de period coincide exatamente com release_date, igual à coluna Preço de Lançamento. Sem correspondência ou preço, fica vazio, sem fallback.'
+    : 'Pelo preço atual: usa o último preço da própria tipologia disponível até o mês final, aplicado à série histórica.';
+  return `${price} VGL = qty do último fechamento de cada mês/trimestre × preço escolhido. Por empreendimento, soma os VGLs das tipologias; no trimestre não soma as ofertas mensais. Independente do Cálculo monetário dos VGVs. Mantém a escala de visualização VGV/VGL. Representa a oferta total do fechamento, não o fluxo de novos lançamentos.`;
 }
 
 export function scaleHelp(scale: VgvScale): string {
   const calculation = scale === 'standard' ? 'Padrão: mantém o valor calculado, sem divisão.'
     : scale === 'thousand' ? 'Milhar: divide o VGV calculado por 1.000.' : 'Milhão: divide o VGV calculado por 1.000.000.';
-  return `${calculation} Aplica a mesma escala à prévia, aos gráficos e ao Excel, sem alterar preços, áreas ou quantidades. Após mudar qualquer configuração, clique em Gerar relatório para atualizar o resultado.`;
+  return `${calculation} A mesma divisão também é aplicada ao VGL, na prévia, nos gráficos e no Excel, sem alterar preços, áreas ou quantidades. Após mudar qualquer configuração, clique em Gerar relatório para atualizar o resultado.`;
 }

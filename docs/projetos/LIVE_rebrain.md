@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 10/11/2026 — Relatório API Excel: VGL e preço independente — Edgar / Codex
+
+- **Mudança exclusiva:** VGV Lançado renomeado VGL em seleção, tabela, série, totais e Excel. Novo Select Brain Cálculo VGL com tooltip dinâmico: Pelo preço de lançamento / Pelo preço atual (padrão). Preço de lançamento usa mesmo registro da coluna existente: price onde period = release_date exato, inclusive antes do filtro inicial; ausência fica vazia sem fallback. Preço atual usa último fechamento até o mês final. Ambos multiplicam qty do período, sem acumular oferta mensal no trimestre. Por empreendimento soma as tipologias. Cálculo monetário dos demais VGVs independente; MCMV/AELO/Dashboard intactos.
+- **Escala/fluxo:** helper monetário inclui VGL na escala e formato de duas casas em prévia/gráfico/XLSX. Troca do combobox só invalida a geração/download, sem cálculo automático ou nova API. Descrições corrigidas para não vincular VGL ao preço do período; cálculo histórico continua oferta total, não fluxo de lançamentos.
+- **Validação:**86 testes em sete arquivos aprovados, cobrindo preços atuais/lançamento, ausência/data exata/fora do filtro, independência dos VGVs, ambos níveis/visões/layouts, seleção/escala/XLSX reaberto. Navegador1440/390 claro/escuro com API simulada: VGL atual12milhões, modo lançamento vazio por ausência de data exata, estoque inalterado10,4milhões, download invalidado/regerado, tooltip e quatro chamadas sem erro de página. Evidência local ignorada verify-vgl.cjs. Tipos/lint/build aprovados. Sem API autenticada ou validação de produção.
+- **Etapas/Pendências:** implementação local, publicação/aceite pendentes. Base408711c; commit desta entrada. Sem push/Monday. Identidade Brain reutilizada via Select/ReportFieldLabel; não altera carregamento.
+- **Monday:** —
+
 ### 10/11/2026 — Relatório API Excel: VGV Lançado por empreendimento — Edgar / Codex
 
 - **Correção exclusiva:** VGV Lançado estava fora de BUILDING_TOTALS e não aparecia no nível Por empreendimento. Incluído na seleção e soma por empreendimento/período, nos dois layouts. Preserva qty/preço de cada tipologia e modo monetário; trimestre usa último fechamento, sem somar oferta mensal. Ausências e escala mantêm regras existentes. Sem mudança no nível Por tipologia, coletor, MCMV, AELO ou Dashboard.

@@ -5,6 +5,7 @@ export type Cell = string | number | null;
 export type Row = Record<string, Cell>;
 export type Granularity = 'month' | 'quarter';
 export type PriceMode = 'current' | 'period';
+export type VglPriceMode = 'launch' | 'current';
 export type BuildingAverageMode = 'simple' | 'quantity' | 'stock' | 'simple-standard' | 'quantity-standard' | 'stock-standard';
 export const BUILDING_AVERAGE_OPTIONS: { value: BuildingAverageMode; label: string }[] = [
   { value: 'simple', label: 'Média simples' },
@@ -19,6 +20,7 @@ export type ReportLevel = 'building' | 'typology';
 export type VgvScale = 'standard' | 'thousand' | 'million';
 export const VGV_UNITS: Record<VgvScale, string> = { standard: 'R$', thousand: 'R$ mil', million: 'R$ milhões' };
 export interface ReportOptions {
+  vglPriceMode?: VglPriceMode;
   level?: ReportLevel;
   granularity: Granularity;
   priceMode: PriceMode;
@@ -43,7 +45,7 @@ export const FIXED_COLUMNS = [
 ];
 export const MEASURES = [
   'Vendas Brutas', 'Distratos', 'Vendas Líquidas', 'Estoque', 'Preço Atual',
-  'Preço Médio Empreendimento', 'Preço m²', 'VGV Lançado', 'VGV Vendas Brutas',
+  'Preço Médio Empreendimento', 'Preço m²', 'VGL', 'VGV Vendas Brutas',
   'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque',
 ] as const;
 export const PRICE_MEASURES = new Set(['Preço Atual', 'Preço Médio Empreendimento', 'Preço m²']);
@@ -267,6 +269,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
       const fixed = fixedRow(building, id, history);
       fixed['Faixa MCMV'] = mcmv;
       fixed['Preço Médio para Faixa MCMV'] = mcmvAverage;
+      const vglPrice = options.vglPriceMode === 'launch' ? numeric(fixed['Preço de Lançamento']) : currentPrice;
       const wide: Row = { ...fixed };
       observations.set(wide, new Set(inRange.map(({ date }) => periodOf(date, options.granularity).label)));
       for (const [index, period] of periods.entries()) {
@@ -288,7 +291,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
           'Estoque': stock, 'Preço Atual': numeric(last?.price),
           'Preço Médio Empreendimento': last ? averages[index] : null,
           'Preço m²': numeric(last?.price_private_area),
-          'VGV Lançado': product(qty, price), 'VGV Vendas Brutas': grossVgv,
+          'VGL': product(qty, vglPrice), 'VGV Vendas Brutas': grossVgv,
           'VGV Distratos': cancellationsVgv,
           'VGV Vendas Líquidas': grossVgv === null || cancellationsVgv === null ? null : rounded(grossVgv - cancellationsVgv),
           'VGV Estoque': product(stock, price),
@@ -325,7 +328,7 @@ export function buildReport(buildings: RawBuilding[], options: ReportOptions): R
 
 /** Expande nomes de campos somente na geração, preservando a ordem das métricas. */
 export const BUILDING_TOTALS = ['Vendas Brutas', 'Distratos', 'Vendas Líquidas', 'Estoque',
-  'VGV Lançado', 'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'] as const;
+  'VGL', 'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'] as const;
 const totalMeasure = (column: string) => BUILDING_TOTALS.find((field) => column === field || column.startsWith(`${field} `));
 const BUILDING_FIELDS = new Set<string>([
   ...BUILDING_TOTALS,
@@ -399,9 +402,10 @@ export function selectedReport(report: Report, selected: string[] | null): Repor
 }
 
 /** Escala só na apresentação/serialização; o motor conserva os valores monetários calculados. */
+export const isScaledMonetary = (column: string) => column.startsWith('VGV') || column === 'VGL' || column.startsWith('VGL ');
 export function exportValue(column: string, value: Cell, scale: VgvScale = 'standard'): Cell {
   if (value === null || value === undefined || value === '') return null;
-  if (column.startsWith('VGV')) return numeric(value) === null ? null : Number(value) / (scale === 'thousand' ? 1_000 : scale === 'million' ? 1_000_000 : 1);
+  if (isScaledMonetary(column)) return numeric(value) === null ? null : Number(value) / (scale === 'thousand' ? 1_000 : scale === 'million' ? 1_000_000 : 1);
   if (PERCENT_COLUMNS.has(column)) return numeric(value) === null ? null : Number(value) / 100;
   if (column === 'Data de Lançamento' || column === 'Data de Entrega') {
     const date = isoDate(value);
@@ -416,7 +420,7 @@ export async function createWorkbook(report: Report) {
   const { utils } = await import('xlsx');
   const worksheet = utils.aoa_to_sheet([report.columns, ...report.rows.map((row) => report.columns.map((column) => exportValue(column, row[column], report.vgvScale)))]);
   for (const [index, column] of report.columns.entries()) {
-    const z = PERCENT_COLUMNS.has(column) ? '0.00%' : column.startsWith('VGV') || column.startsWith('Preço Médio para Faixa MCMV') ? '0.00' : undefined;
+    const z = PERCENT_COLUMNS.has(column) ? '0.00%' : isScaledMonetary(column) || column.startsWith('Preço Médio para Faixa MCMV') ? '0.00' : undefined;
     if (!z) continue;
     for (let row = 1; row <= report.rows.length; row++) {
       const cell = worksheet[utils.encode_cell({ r: row, c: index })];

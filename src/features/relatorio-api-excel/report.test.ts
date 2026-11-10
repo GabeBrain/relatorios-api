@@ -65,17 +65,17 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     expect(result.periods.map((period) => period.label)).toEqual(['jan/2026', 'fev/2026', 'mar/2026']);
     expect(result.rows[0]['Vendas Líquidas jan/2026']).toBe(5);
     expect(result.rows[0]['Estoque jan/2026']).toBe(95);
-    expect(result.rows[0]['VGV Lançado jan/2026']).toBe(15_000_000);
+    expect(result.rows[0]['VGL jan/2026']).toBe(15_000_000);
     expect(result.rows[0]['VGV Vendas Brutas jan/2026']).toBe(750_000);
   });
   it('usa preço atual até o fim selecionado, sem vazar o fechamento de abril', () => {
     expect(report().rows[0]['Preço Atual mar/2026']).toBe(150_000);
     expect(report({ to: '2026-02-28' }).rows[0]['VGV Vendas Brutas jan/2026']).toBe(600_000);
   });
-  it('gera VGV lançado histórico com quantidade e preço próprios do mês', () => {
+  it('calcula VGL com oferta do período e preço atual independente do cálculo monetário', () => {
     const row = report({ priceMode: 'period' }).rows[0];
-    expect(row['VGV Lançado jan/2026']).toBe(11_000_000);
-    expect(row['VGV Lançado fev/2026']).toBe(14_400_000);
+    expect(row['VGL jan/2026']).toBe(15_000_000);
+    expect(row['VGL fev/2026']).toBe(18_000_000);
     expect(row['VGV Estoque jan/2026']).toBe(10_450_000);
     expect(row['VGV Vendas Brutas jan/2026']).toBe(530_000);
   });
@@ -83,7 +83,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     const row = report({ priceMode: 'period', granularity: 'quarter' }).rows[0];
     expect(row['Vendas Líquidas 1T/2026']).toBe(9);
     expect(row['Estoque 1T/2026']).toBe(91);
-    expect(row['VGV Lançado 1T/2026']).toBe(18_000_000);
+    expect(row['VGL 1T/2026']).toBe(18_000_000);
     expect(row['VGV Estoque 1T/2026']).toBe(13_650_000);
     expect(row['VGV Vendas Brutas 1T/2026']).toBe(1_010_000);
   });
@@ -99,10 +99,10 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     const tabular = report({ priceMode: 'period', layout: 'rows' });
     expect(tabular.rows).toHaveLength(3);
     for (const row of tabular.rows) {
-      expect(row['VGV Lançado']).toBe(wide.rows[0][`VGV Lançado ${row['Período']}`]);
+      expect(row['VGL']).toBe(wide.rows[0][`VGL ${row['Período']}`]);
     }
-    const selected = selectedReport(tabular, ['ID Empreendimento', 'Período', 'VGV Lançado']);
-    expect(selected.columns).toEqual(['ID Empreendimento', 'Período', 'VGV Lançado']);
+    const selected = selectedReport(tabular, ['ID Empreendimento', 'Período', 'VGL']);
+    expect(selected.columns).toEqual(['ID Empreendimento', 'Período', 'VGL']);
     expect(Object.keys(selected.rows[0])).toEqual(selected.columns);
     expect(selectedReport(wide, []).columns).toEqual([]);
   });
@@ -113,7 +113,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     const row = report({ priceMode: 'period' }, data).rows[0];
     expect(row['VGV Vendas Brutas jan/2026']).toBeNull();
     expect(row['VGV Estoque jan/2026']).toBeNull();
-    expect(row['VGV Lançado jan/2026']).toBeNull();
+    expect(row['VGL jan/2026']).toBeNull();
     expect(row['Vendas Líquidas jan/2026']).toBeNull();
     expect(row['Estoque jan/2026']).toBeNull();
   });
@@ -122,7 +122,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
       { typology_id: 30, period: '2026-02-28', qty: 50, price: 100, gross_sales: 2, distractions: 0, sold_in_period: 999, typology_stock: 48 },
     ] }];
     const row = report({}, data).rows.find((item) => item['ID Empreendimento'] === '11')!;
-    expect(row['VGV Lançado jan/2026']).toBeNull();
+    expect(row['VGL jan/2026']).toBeNull();
     expect(row['VGV Vendas Brutas jan/2026']).toBeNull();
     expect(row['Estoque mar/2026']).toBeNull();
   });
@@ -134,7 +134,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     expect(isoDate('2026-02-30')).toBeNull();
   });
   it.each(['columns', 'rows'] as const)('grava e reabre Excel %s com somente colunas escolhidas, números e formatos', async (layout) => {
-    const name = layout === 'rows' ? 'VGV Lançado' : 'VGV Lançado jan/2026';
+    const name = layout === 'rows' ? 'VGL' : 'VGL jan/2026';
     const selected = selectedReport(report({ layout, priceMode: 'period' }), ['Entrada', name]);
     const workbook = await createWorkbook(selected);
     const reopened = read(write(workbook, { bookType: 'xlsx', type: 'array' }), { type: 'array', cellNF: true });
@@ -142,7 +142,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     expect(utils.sheet_to_json(sheet, { header: 1 })[0]).toEqual(['Entrada', name]);
     expect(sheet.A2.v).toBe(0.085);
     expect(sheet.A2.z).toBe('0.00%');
-    expect(sheet.B2.v).toBe(11);
+    expect(sheet.B2.v).toBe(15);
     expect(sheet.B2.z).toBe('0.00');
   });
   it('bloqueia exportação sem dados ou sem colunas', async () => {
@@ -181,13 +181,13 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
 
   it.each(['month', 'quarter'] as const)('preserva exatamente a ordem das 12 métricas na visão %s e nos dois layouts', (granularity) => {
     const expected = ['Vendas Brutas', 'Distratos', 'Vendas Líquidas', 'Estoque', 'Preço Atual',
-      'Preço Médio Empreendimento', 'Preço m²', 'VGV Lançado', 'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'];
+      'Preço Médio Empreendimento', 'Preço m²', 'VGL', 'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'];
     expect([...MEASURES]).toEqual(expected);
     const wide = report({ granularity });
     expect(wide.columns.slice(FIXED_COLUMNS.length + 2 * wide.periods.length)).toEqual(expected.flatMap((metric) => wide.periods.map(({ label }) => `${metric} ${label}`)));
     const tabular = report({ granularity, layout: 'rows' });
     expect(tabular.columns.slice(FIXED_COLUMNS.length)).toEqual(['Período', ...expected]);
-    expect(FIXED_COLUMNS).not.toContain('VGV Lançado');
+    expect(FIXED_COLUMNS).not.toContain('VGL');
     for (const row of tabular.rows) for (const metric of expected) {
       expect(row[metric]).toBe(wide.rows[0][`${metric} ${row['Período']}`]);
     }
@@ -405,18 +405,18 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
   ] as const)('aplica escala %s só ao VGV na prévia e no Excel, mantendo os cálculos originais', async (vgvScale, divisor) => {
     for (const layout of ['columns', 'rows'] as const) {
       const complete = report({ vgvScale, layout, priceMode: 'period' });
-      const column = layout === 'columns' ? 'VGV Lançado jan/2026' : 'VGV Lançado';
+      const column = layout === 'columns' ? 'VGL jan/2026' : 'VGL';
       const price = layout === 'columns' ? 'Preço Atual jan/2026' : 'Preço Atual';
-      expect(complete.rows[0][column]).toBe(11_000_000);
-      expect(exportValue(column, complete.rows[0][column], vgvScale)).toBe(11_000_000 / divisor);
+      expect(complete.rows[0][column]).toBe(15_000_000);
+      expect(exportValue(column, complete.rows[0][column], vgvScale)).toBe(15_000_000 / divisor);
       expect(exportValue(price, 110_000, vgvScale)).toBe(110_000);
       expect(exportValue(column, null, vgvScale)).toBeNull();
       expect(exportValue(column, -1_234_567.89, vgvScale)).toBe(-1_234_567.89 / divisor);
       const workbook = await createWorkbook(selectedReport(complete, [column]));
       const reopened = read(write(workbook, { bookType: 'xlsx', type: 'array' }), { type: 'array' });
       const sheet = reopened.Sheets[reopened.SheetNames[0]];
-      expect(sheet.A2.v).toBe(11_000_000 / divisor);
-      expect(complete.rows[0][column]).toBe(11_000_000);
+      expect(sheet.A2.v).toBe(15_000_000 / divisor);
+      expect(complete.rows[0][column]).toBe(15_000_000);
     }
   });
 });

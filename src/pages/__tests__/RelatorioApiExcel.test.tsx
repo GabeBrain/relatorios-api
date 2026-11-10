@@ -85,7 +85,7 @@ describe('Relatório API Excel — geração explícita', () => {
     for (const field of ['ID Tipologia', 'Garagem', 'Unidades por Tipologia']) expect(within(columns).queryByText(field, { exact: true })).not.toBeInTheDocument();
     expect(within(columns).getByText('Vendas Brutas', { exact: true })).toBeVisible();
     expect(within(columns).getByText('VGV Estoque', { exact: true })).toBeVisible();
-    expect(within(columns).getByText('VGV Lançado', { exact: true })).toBeVisible();
+    expect(within(columns).getByText('VGL', { exact: true })).toBeVisible();
     expect(within(columns).getByText('Faixa MCMV', { exact: true })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Baixar Excel' })).toBeDisabled();
     expect(engine.buildReport).toHaveBeenCalledTimes(1);
@@ -95,6 +95,26 @@ describe('Relatório API Excel — geração explícita', () => {
     await waitFor(() => expect(engine.buildReport).toHaveBeenCalledTimes(2));
     expect(vi.mocked(engine.buildReport).mock.calls[1][1].level).toBe('building');
     expect(screen.getAllByRole('columnheader').map((node) => node.textContent)).toEqual(['Empreendimentos']);
+    expect(fetchBuildings).toHaveBeenCalledTimes(1);
+  });
+
+  it('altera Cálculo VGL apenas ao gerar e invalida download sem nova coleta', async () => {
+    render(<RelatorioApiExcel />);
+    fireEvent.click(screen.getByRole('button', { name: 'Carregar' }));
+    const control = await screen.findByLabelText('Cálculo VGL');
+    expect(control).toHaveTextContent('Pelo preço atual');
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
+    const download = screen.getByRole('button', { name: 'Baixar Excel' });
+    await waitFor(() => expect(download).toBeEnabled());
+    expect(screen.getByRole('columnheader', { name: 'VGL jan/2026' })).toBeVisible();
+    expect(screen.queryByText('VGV Lançado', { exact: true })).not.toBeInTheDocument();
+    fireEvent.click(control);
+    fireEvent.click(screen.getByRole('option', { name: 'Pelo preço de lançamento' }));
+    expect(download).toBeDisabled();
+    expect(engine.buildReport).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar relatório' }));
+    await waitFor(() => expect(download).toBeEnabled());
+    expect(vi.mocked(engine.buildReport).mock.calls[1][1]).toMatchObject({ vglPriceMode: 'launch', priceMode: 'current' });
     expect(fetchBuildings).toHaveBeenCalledTimes(1);
   });
 
