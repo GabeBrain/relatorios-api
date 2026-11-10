@@ -6,7 +6,7 @@ import incc from './incc-di.json';
 
 export type MonthlySegment = 'Vertical' | 'Horizontal' | 'Comercial';
 export type MonthlyMetric = 'releases' | 'sales' | 'stock';
-export interface MonthlyMarketSource { city: string; segment: MonthlySegment; metric: MonthlyMetric; complete: boolean; rows: MarketRow[]; issue: string | null; requests: number; startedAt: string; finishedAt: string }
+export interface MonthlyMarketSource { city: string; segment: MonthlySegment; metric: MonthlyMetric; complete: boolean; rows: MarketRow[]; issue: string | null; requests: number; startedAt: string; finishedAt: string; openingIncluded?:boolean }
 export interface MonthlyMarketData { scopeKey: string; months: string[]; sources: MonthlyMarketSource[]; issues: string[] }
 export interface MonthlyBin { month: string; label: string; first: number; second: number; total: number }
 export interface MonthlySlideData {
@@ -19,6 +19,10 @@ export interface MonthlySlideData {
 }
 export function monthlyMarketMonths(selection: FortalezaSelection) {
   return monthlyLaunchMonths(selection);
+}
+export function monthlyStockMonths(months:string[]) {
+  const [year,month] = months[0].split('-').map(Number);
+  return [new Date(Date.UTC(year,month-2,1)).toISOString().slice(0,7),...months];
 }
 const socioeconomic = new Set(FORTALEZA_STANDARDS.map(normalizeMarketText));
 const houseLabels = new Set(['condominio de casas/sobrados', 'condominio de casas e sobrados', 'condominio de casas', 'casas em condominio', 'casas em condominio fechado']);
@@ -35,6 +39,7 @@ export function monthlyProduct(segment: MonthlySegment, group: unknown): Monthly
   return 'unknown';
 }
 export function monthlyMarketSourceIssue(source: MonthlyMarketSource, months: string[]): string | null {
+  if (source.metric === 'stock' && source.openingIncluded) months = monthlyStockMonths(months);
   if (!source.complete) return source.issue || 'Coleta não concluída.';
   if (!source.rows.length) return 'A fonte não retornou observações. Ausência não representa zero.';
   const seen = new Set<string>(), groups = new Set<string>(), observed = new Set<string>();
@@ -90,7 +95,8 @@ export function buildMonthlySlide(page: number, data: MonthlyMarketData | null, 
       const product = monthlyProduct(segment, row.group);
       if (product === 'excluded') { warnings.add(`${city}: produtos fora do universo do bloco foram preservados na auditoria e excluídos do cálculo.`); continue; }
       if (lots ? product !== 'lots' : product === 'lots') continue;
-      const month = marketMonth(row.period)!, bin = bins.get(month)!;
+      const month = marketMonth(row.period)!, bin = bins.get(month);
+      if (!bin) continue; // Opening snapshot belongs to IVV, not to the 25 plotted closes.
       let value = readMonthlyNumber(row[{ releases:'releases_in_period',sales:'liquid_sales',stock:'stock' }[metric]], metric === 'sales', true)!;
       if (money) {
         const nominal = readMonthlyNumber(row[metric === 'sales' ? 'vgv_liquid_sales' : 'vgv_release'],metric === 'sales');

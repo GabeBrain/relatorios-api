@@ -4,13 +4,15 @@ import { fortalezaPeriod, fortalezaScope, type FortalezaSelection } from './mode
 import { monthlyLaunchMonths, monthlyLaunchSourceIssue, type MonthlyLaunchData, type MonthlyLaunchSource } from './monthly-launches';
 import type { FortalezaReadOptions, FortalezaEnvelope } from './api';
 import { fetchMonthlyMarket } from './monthly-market-api';
+import { fetchMonthlyPrices } from './monthly-prices-api';
 
 /** A bounded 25-month vertical window, at most three pages per authorized city. */
 export async function fetchMonthlyLaunches(selection: FortalezaSelection, authorized: string[], options: FortalezaReadOptions & { includeMonthlyReport?: boolean }, previous?: MonthlyLaunchData | null): Promise<MonthlyLaunchData> {
   if (options.includeMonthlyReport) {
     const market = await fetchMonthlyMarket(selection, authorized, options, previous?.market);
+    const prices = await fetchMonthlyPrices(selection, authorized, options, previous?.prices);
     const firstMonth = monthlyLaunchMonths(selection)[0];
-    return { scopeKey: market.scopeKey, market, issues: market.issues, sources: market.sources.filter(source => source.segment === 'Vertical' && source.metric === 'releases').map(source => ({ city:source.city, complete:source.complete, rows:source.rows.filter(row => String(row.period).slice(0,7) >= firstMonth), requests:source.requests, startedAt:source.startedAt, finishedAt:source.finishedAt })) };
+    return { scopeKey: market.scopeKey, market, prices, issues: [...market.issues,...prices.issues], sources: market.sources.filter(source => source.segment === 'Vertical' && source.metric === 'releases').map(source => ({ city:source.city, complete:source.complete, rows:source.rows.filter(row => String(row.period).slice(0,7) >= firstMonth), requests:source.requests, startedAt:source.startedAt, finishedAt:source.finishedAt })) };
   }
   const scope = fortalezaScope(selection, authorized), period = fortalezaPeriod(selection);
   const months = monthlyLaunchMonths(selection);

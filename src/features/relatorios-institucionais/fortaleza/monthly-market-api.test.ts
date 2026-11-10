@@ -26,7 +26,7 @@ describe('Fortaleza — coleta compartilhada 12/14 e16–25', () => {
     expect(result.sources).toHaveLength(40); expect(result.issues).toEqual([]);
     expect(result.sources.every(source => source.complete)).toBe(true); expect(maximum()).toBeLessThanOrEqual(2);
     for (const [options] of request.mock.calls) {
-      expect(options.query).toMatchObject({ uf:'CE',start_period:'2024-07-01',end_period:'2026-07-31',per_page:100 });
+      expect(options.query).toMatchObject({ uf:'CE',start_period:options.url.endsWith('stock') ? '2024-06-01' : '2024-07-01',end_period:'2026-07-31',per_page:100 });
       expect(options.url).not.toContain('untrusted.invalid'); expect(options.includeAuth).toBe(false);
     }
     const count = request.mock.calls.length;

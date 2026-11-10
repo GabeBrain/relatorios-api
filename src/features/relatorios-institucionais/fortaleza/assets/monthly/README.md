@@ -1,5 +1,9 @@
 # Arte mensal — lançamentos verticais
 
+## Lote36–45
+
+Extração cobre11–45do mesmo original/hash, Office somente leitura.36/39/44preservam divisórias, mês/ano novos.37/38/40–43/45recebem preços ou IVV dinâmicos, sem dados antigos. Título datado40–43substituído em SVG.
+
 ## Lote26–35
 
 Extração agora cobre11–35do mesmo original/hash.29/32são divisórias com escopo/competência variáveis;33–35preservam a faixa comparativa cinza, sem gráficos/percentuais históricos, e recebem fotografias dinâmicas. Original26–35e todos os renders novos foram inspecionados. Nenhum valor antigo é usado na produção. Notas dos lotes abaixo são históricas.

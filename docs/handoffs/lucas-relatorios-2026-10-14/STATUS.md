@@ -1,5 +1,10 @@
 # Estado do handoff
 
+## 10/11/2026 — mensal36–45
+
+[Entrega e contratos](../../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_36_45_2026-11-10.md): prévia1–45dos60originais, preços históricos v2 e IVV com abertura observada.170testes Fortaleza +16regressões, build/tipos/lint e Edge sintético1440/390claro/escuro. Ponderação/área de lotes e IVV candidatos, homologação pendente; nenhuma API real.9fa553epublicado com autorização; novo lote local até envio autorizado. Próximo46–55, depois56–60/exportação. Registros anteriores são históricos.
+
+
 ## 10/11/2026 — Fortaleza mensal26–35
 
 Usuário pediu mais dez e total mensal: original60slides, nova prévia1–35emordem. Base3a846f0main/origin0–0, árvore limpa, Windows/Codex Test. [Lote e retomada](../../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_26_35_2026-11-10.md): VGV vendido assinado, RM móvel, vendas de lotes e oferta como fotografia; stock V/H amplia para40fontes, sem acumulados de estoque.148testes +16regressões, tipos/build/lint, Edge sintético1440/390claro/escuro e carregamento local preservado. Originais lidos noOffice e renders inspecionados; nenhuma API real, homologação, exportador ou Monday. Restam36–60/pendências de fonte; próximo36–45. Novo commit local isolado, push depende de autorização desta fatia.

@@ -1,3 +1,4 @@
+import type { PriceCollection } from './monthly-prices';
 import { fortalezaPeriod, type FortalezaSelection } from './model';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 import type { IntroData } from './intro-data';
@@ -14,7 +15,7 @@ export interface LaunchSeries {
 export interface MonthlyLaunchSource {
   city: string; rows: MarketRow[]; complete: boolean; requests: number; startedAt: string; finishedAt: string;
 }
-export interface MonthlyLaunchData { scopeKey?: string; sources: MonthlyLaunchSource[]; issues: string[]; market?: MonthlyMarketData }
+export interface MonthlyLaunchData { scopeKey?: string; sources: MonthlyLaunchSource[]; issues: string[]; market?: MonthlyMarketData; prices?: PriceCollection }
 export function monthlyLaunchMonths(selection: FortalezaSelection) {
   if (selection.periodicity !== 'monthly') throw new Error('O histórico mensal exige uma referência mensal.');
   fortalezaPeriod(selection);

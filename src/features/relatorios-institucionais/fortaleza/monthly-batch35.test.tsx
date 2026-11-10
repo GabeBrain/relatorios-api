@@ -63,6 +63,6 @@ describe('Fortaleza mensal —26–35', () => {
     render(<FortalezaIntroSlides selection={selection} cities={cities} data={null} monthlyLaunches={{ sources:[],issues:[],market:monthlyMarketFixture() }} />);
     fireEvent.click(screen.getByRole('button',{ name:'25' }));
     for (let page=26;page<=35;page++) { fireEvent.click(screen.getByRole('button',{ name:'Próximo' })); expect(screen.getByRole('img',{ name:`Fortaleza · slide ${page}` })).toBeTruthy(); }
-    expect((screen.getByRole('button',{ name:'Próximo' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button',{ name:'Próximo' }) as HTMLButtonElement).disabled).toBe(false);
   });
 });

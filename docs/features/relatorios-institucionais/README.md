@@ -4,6 +4,9 @@
 
 ## Onde trabalhar
 
+**Fortaleza mensal36–45:** [estado atual](fortaleza/MENSAL_SLIDES_36_45_2026-11-10.md). Prévia1–45dos60slides; preços/IVV candidatos e insights, carregamento local. Próximo46–55; homologação/API real/exportação pendentes. Novo lote local.
+
+
 **Fortaleza mensal —26–35,10/11:** [estado atual](fortaleza/MENSAL_SLIDES_26_35_2026-11-10.md). Prévia1–35na ordem dos60slides originais; VGV vendido, loteamentos e fotografias de oferta. Restam36–60/exportação e fontes/homologação pendentes. Carregamento local preservado; lote atual somente local até autorização de envio. Registros abaixo são históricos.
 
 **Fortaleza — mensal12/14e16–25,10/11:** [estado atual](fortaleza/MENSAL_SLIDES_12_25_2026-11-10.md). Prévia1–25na ordem oficial, fontes segmentadas compartilhadas, VGL, loteamentos e início de vendas. Homologação/INCC provisório/fontes reais e26–60/exportação pendentes.1e1767epublicado; este novo lote local. Registros anteriores abaixo são históricos.
